@@ -17,222 +17,228 @@ type SymbolTableStructure() =
         match nodeType with
         | "FplArgInferenceAssume" ->
             let x = new FplArgInferenceAssume(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplArgInferenceDerived" ->
             let x = new FplArgInferenceDerived(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplArgInferenceRevoke" ->
             let x = new FplArgInferenceRevoke(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplArgInferenceTrivial" ->
             let x = new FplArgInferenceTrivial(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplArgument" ->
             let x = new FplArgument(positions, parent, 0)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplAssertion" ->
             let x = new FplAssertion(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplAssignment" ->
             let x = new FplAssignment(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplAxiom" ->
             let x = new FplAxiom(positions, parent, 0)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplCases" ->
             let x = new FplCases(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplCaseElse" ->
             let x = new FplCaseElse(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplCaseSingle" ->
             let x = new FplCaseSingle(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplClass" ->
             let x = new FplClass(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplConjecture" ->
             let x = new FplConjecture(positions, parent, 0)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplConjunction" ->
             let x = new FplConjunction(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplConstructor" ->
             let x = new FplConstructor(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplCorollary" ->
             let x = new FplCorollary(positions, parent, 0)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplDecrement" ->
             let x = new FplDecrement(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplDisjunction" ->
             let x = new FplDisjunction(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplEquality" ->
             let x = new FplEquality(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplEquivalence" ->
             let x = new FplEquivalence(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplExclusiveOr" ->
             let x = new FplExclusiveOr(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplExtension" ->
             let x = new FplExtension(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplExtensionObj" ->
             let x = new FplExtensionObj(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplForInStmt" ->
             let x = new FplForInStmt(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplForInStmtDomain" ->
             let x = new FplForInStmtDomain(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplForInStmtEntity" ->
             let x = new FplForInStmtEntity(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplFunctionalTerm" ->
             let x = new FplFunctionalTerm(positions, parent, 0)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplImplication" ->
             let x = new FplImplication(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplInstance" ->
             let x = new FplInstance(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplIntrinsicFunc" ->
             let x = new FplIntrinsicFunc(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplIntrinsicInd" ->
             let x = new FplIntrinsicInd(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplIntrinsicObj" ->
             let x = new FplIntrinsicObj(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplIntrinsicPred" ->
             let x = new FplIntrinsicPred(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplIntrinsicTpl" ->
             let x = new FplIntrinsicTpl(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplIntrinsicUndef" ->
             let x = new FplIntrinsicUndef(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplIsOperator" ->
             let x = new FplIsOperator(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplJustification" ->
             let x = new FplJustification(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplJustificationItemByAx" ->
-            let x = new FplJustificationItemByAx(positions, parent, 0)
-            x.Name
+            let x = new FplJustificationItemByAx(positions, parent)
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplJustificationItemByCor" ->
-            let x = new FplJustificationItemByCor(positions, parent, 0)
-            x.Name
+            let x = new FplJustificationItemByCor(positions, parent)
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplJustificationItemByDef" ->
-            let x = new FplJustificationItemByDef(positions, parent, 0)
-            x.Name
+            let x = new FplJustificationItemByDef(positions, parent)
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
+        | "FplJustificationItemByDefVar" ->
+            let x = new FplJustificationItemByDefVar(positions, parent)
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplJustificationItemByInf" ->
-            let x = new FplJustificationItemByInf(positions, parent, 0)
-            x.Name
+            let x = new FplJustificationItemByInf(positions, parent)
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplJustificationItemByProofArgument" ->
-            let x = new FplJustificationItemByProofArgument(positions, parent, 0)
-            x.Name
+            let x = new FplJustificationItemByProofArgument(positions, parent)
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
+        | "FplJustificationItemByRefArgument" ->
+            let x = new FplJustificationItemByRefArgument(positions, parent)
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplJustificationItemByTheoremLikeStmt" ->
-            let x = new FplJustificationItemByTheoremLikeStmt(positions, parent, 0)
-            x.Name
+            let x = new FplJustificationItemByTheoremLikeStmt(positions, parent)
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplLanguage" ->
             let x = new FplLanguage(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplLemma" ->
             let x = new FplLemma(positions, parent, 0)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplLocalization" ->
             let x = new FplLocalization(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplMandatoryFunctionalTerm" ->
             let x = new FplMandatoryFunctionalTerm(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplMandatoryPredicate" ->
             let x = new FplMandatoryPredicate(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplMapCaseElse" ->
             let x = new FplMapCaseElse(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplMapCaseSingle" ->
             let x = new FplMapCaseSingle(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplMapCases" ->
             let x = new FplMapCases(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplMapping" ->
             let x = new FplMapping(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplNegation" ->
             let x = new FplNegation(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplOptionalFunctionalTerm" ->
             let x = new FplOptionalFunctionalTerm(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplOptionalPredicate" ->
             let x = new FplOptionalPredicate(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplPredicate" ->
             let x = new FplPredicate(positions, parent, 0)
-            x.Name
-        | "FplPremiseList" ->
-            let x = new FplPremiseList(positions, parent, 0)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
+        | "FplPredicateList" ->
+            let x = new FplPredicateList(positions, parent, 0)
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplProof" ->
             let x = new FplProof(positions, parent, 0)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplProposition" ->
             let x = new FplProposition(positions, parent, 0)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplQuantorAll" ->
             let x = new FplQuantorAll(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplQuantorExists" ->
             let x = new FplQuantorExists(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplQuantorExistsN" ->
             let x = new FplQuantorExistsN(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplReference" ->
             let x = new FplReference(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplReturn" ->
             let x = new FplReturn(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplRoot" ->
             let x = new FplRoot()
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplRuleOfInference" ->
             let x = new FplRuleOfInference(positions, parent, 0)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplTheorem" ->
             let x = new FplTheorem(positions, parent, 0)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplTheory" ->
             let x = new FplTheory(positions, parent, "", 0)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplTranslation" ->
             let x = new FplTranslation(positions, parent)
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplVariable" -> 
             let x = new FplVariable(positions, parent) 
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplVariadicVariableMany" ->
             let x = new FplVariable(positions, parent)
             x.SetToMany() |> ignore
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplVariadicVariableMany1" ->
             let x = new FplVariable(positions, parent)
             x.SetToMany1() |> ignore
-            x.Name
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | _ -> 
             failwith $"Unknown node type {nodeType}"
 
@@ -277,8 +283,10 @@ type SymbolTableStructure() =
     [<DataRow("FplJustificationItemByAx")>]
     [<DataRow("FplJustificationItemByCor")>]
     [<DataRow("FplJustificationItemByDef")>]
+    [<DataRow("FplJustificationItemByDefVar")>]
     [<DataRow("FplJustificationItemByInf")>]
     [<DataRow("FplJustificationItemByProofArgument")>]
+    [<DataRow("FplJustificationItemByRefArgument")>]
     [<DataRow("FplJustificationItemByTheoremLikeStmt")>]
     [<DataRow("FplLanguage")>]
     [<DataRow("FplLemma")>]
@@ -293,7 +301,7 @@ type SymbolTableStructure() =
     [<DataRow("FplOptionalFunctionalTerm")>]
     [<DataRow("FplOptionalPredicate")>]
     [<DataRow("FplPredicate")>]
-    [<DataRow("FplPremiseList")>]
+    [<DataRow("FplPredicateList")>]
     [<DataRow("FplProof")>]
     [<DataRow("FplProposition")>]
     [<DataRow("FplQuantorAll")>]
@@ -311,151 +319,156 @@ type SymbolTableStructure() =
     [<DataRow("FplVariadicVariableMany1")>]
     [<TestMethod>]
     member this.TestBlockTypeName(var) =
+        let index = 0 // name 
         match var with
         | "FplArgInferenceAssume" ->
-            Assert.AreEqual<string>(PrimArgInfAssume, getName var)
+            Assert.AreEqual<string>(PrimArgInfAssume, (getName var).[index])
         | "FplArgInferenceDerived" ->
-            Assert.AreEqual<string>(PrimArgInfDerive, getName var)
+            Assert.AreEqual<string>(PrimArgInfDerive, (getName var).[index])
         | "FplArgInferenceRevoke" ->
-            Assert.AreEqual<string>(PrimArgInfRevoke, getName var)
+            Assert.AreEqual<string>(PrimArgInfRevoke, (getName var).[index])
         | "FplArgInferenceTrivial" ->
-            Assert.AreEqual<string>(PrimArgInfTrivial, getName var)
+            Assert.AreEqual<string>(PrimArgInfTrivial, (getName var).[index])
         | "FplArgument" ->
-            Assert.AreEqual<string>(PrimArgL, getName var)
+            Assert.AreEqual<string>(PrimArgL, (getName var).[index])
         | "FplAssertion" ->
-            Assert.AreEqual<string>(PrimAssertion, getName var)
+            Assert.AreEqual<string>(PrimAssertion, (getName var).[index])
         | "FplAssignment" ->
-            Assert.AreEqual<string>(PrimAssignment, getName var)
+            Assert.AreEqual<string>(PrimAssignment, (getName var).[index])
         | "FplAxiom" ->
-            Assert.AreEqual<string>(literalAxL, getName var)
+            Assert.AreEqual<string>(literalAxL, (getName var).[index])
         | "FplCases" ->
-            Assert.AreEqual<string>(PrimCases, getName var)
+            Assert.AreEqual<string>(PrimCases, (getName var).[index])
         | "FplCaseElse" ->
-            Assert.AreEqual<string>(PrimCaseElse, getName var)
+            Assert.AreEqual<string>(PrimCaseElse, (getName var).[index])
         | "FplCaseSingle" ->
-            Assert.AreEqual<string>(PrimCaseSingle, getName var)
+            Assert.AreEqual<string>(PrimCaseSingle, (getName var).[index])
         | "FplClass" ->
-            Assert.AreEqual<string>(PrimClassL, getName var)
+            Assert.AreEqual<string>(PrimClassL, (getName var).[index])
         | "FplConjecture" ->
-            Assert.AreEqual<string>(literalConjL, getName var)
+            Assert.AreEqual<string>(literalConjL, (getName var).[index])
         | "FplConjunction" ->
-            Assert.AreEqual<string>(PrimConjunction, getName var)        
+            Assert.AreEqual<string>(PrimConjunction, (getName var).[index])        
         | "FplConstructor" ->
-            Assert.AreEqual<string>(literalCtorL, getName var)
+            Assert.AreEqual<string>(literalCtorL, (getName var).[index])
         | "FplCorollary" ->
-            Assert.AreEqual<string>(literalCorL, getName var)
+            Assert.AreEqual<string>(literalCorL, (getName var).[index])
         | "FplDecrement" ->
-            Assert.AreEqual<string>(PrimDecrementL, getName var)        
+            Assert.AreEqual<string>(PrimDecrementL, (getName var).[index])        
         | "FplDisjunction" ->
-            Assert.AreEqual<string>(PrimDisjunction, getName var)        
+            Assert.AreEqual<string>(PrimDisjunction, (getName var).[index])        
         | "FplEquality" ->
-            Assert.AreEqual<string>(PrimEqualityL, getName var)        
+            Assert.AreEqual<string>(PrimEqualityL, (getName var).[index])        
         | "FplEquivalence" ->
-            Assert.AreEqual<string>(PrimEquivalence, getName var)        
+            Assert.AreEqual<string>(PrimEquivalence, (getName var).[index])        
         | "FplExclusiveOr" ->
-            Assert.AreEqual<string>(PrimExclusiveOr, getName var)        
+            Assert.AreEqual<string>(PrimExclusiveOr, (getName var).[index])        
         | "FplExtension" ->
-            Assert.AreEqual<string>(PrimExtensionL, getName var)
+            Assert.AreEqual<string>(PrimExtensionL, (getName var).[index])
         | "FplExtensionObj" ->
-            Assert.AreEqual<string>(PrimExtensionObj, getName var)
+            Assert.AreEqual<string>(PrimExtensionObj, (getName var).[index])
         | "FplForInStmt" ->
-            Assert.AreEqual<string>(PrimForInStmt, getName var)
+            Assert.AreEqual<string>(PrimForInStmt, (getName var).[index])
         | "FplForInStmtDomain" ->
-            Assert.AreEqual<string>(PrimForInStmtDomain, getName var)
+            Assert.AreEqual<string>(PrimForInStmtDomain, (getName var).[index])
         | "FplForInStmtEntity" ->
-            Assert.AreEqual<string>(PrimForInStmtEntity, getName var)
+            Assert.AreEqual<string>(PrimForInStmtEntity, (getName var).[index])
         | "FplFunctionalTerm" ->
-            Assert.AreEqual<string>(PrimFuncionalTermL, getName var)
+            Assert.AreEqual<string>(PrimFuncionalTermL, (getName var).[index])
         | "FplImplication" ->
-            Assert.AreEqual<string>(PrimImplication, getName var)        
+            Assert.AreEqual<string>(PrimImplication, (getName var).[index])        
         | "FplInstance" ->
-            Assert.AreEqual<string>(PrimInstanceL, getName var)
+            Assert.AreEqual<string>(PrimInstanceL, (getName var).[index])
         | "FplIntrinsicFunc" ->
-            Assert.AreEqual<string>(PrimIntrinsicFunc, getName var)
+            Assert.AreEqual<string>(PrimIntrinsicFunc, (getName var).[index])
         | "FplIntrinsicInd" ->
-            Assert.AreEqual<string>(PrimIntrinsicInd, getName var)
+            Assert.AreEqual<string>(PrimIntrinsicInd, (getName var).[index])
         | "FplIntrinsicObj" ->
-            Assert.AreEqual<string>(PrimIntrinsicObj, getName var)
+            Assert.AreEqual<string>(PrimIntrinsicObj, (getName var).[index])
         | "FplIntrinsicPred" ->
-            Assert.AreEqual<string>(PrimIntrinsicPred, getName var)
+            Assert.AreEqual<string>(PrimIntrinsicPred, (getName var).[index])
         | "FplIntrinsicTpl" ->
-            Assert.AreEqual<string>(PrimIntrinsicTpl, getName var)
+            Assert.AreEqual<string>(PrimIntrinsicTpl, (getName var).[index])
         | "FplIntrinsicUndef" ->
-            Assert.AreEqual<string>(PrimIntrinsicUndef, getName var)
+            Assert.AreEqual<string>(PrimIntrinsicUndef, (getName var).[index])
         | "FplIsOperator" ->
-            Assert.AreEqual<string>(PrimIsOperator, getName var)        
+            Assert.AreEqual<string>(PrimIsOperator, (getName var).[index])        
         | "FplJustification" ->
-            Assert.AreEqual<string>(PrimJustificationL, getName var)
+            Assert.AreEqual<string>(PrimJustificationL, (getName var).[index])
         | "FplJustificationItemByAx" ->
-            Assert.AreEqual<string>(PrimJIByAx, getName var)
+            Assert.AreEqual<string>(PrimJIByAx, (getName var).[index])
         | "FplJustificationItemByCor" ->
-            Assert.AreEqual<string>(PrimJIByCor, getName var)
+            Assert.AreEqual<string>(PrimJIByCor, (getName var).[index])
         | "FplJustificationItemByDef" ->
-            Assert.AreEqual<string>(PrimJIByDef, getName var)
+            Assert.AreEqual<string>(PrimJIByDef, (getName var).[index])
+        | "FplJustificationItemByDefVar" ->
+            Assert.AreEqual<string>(PrimJIByDefVar, (getName var).[index])
         | "FplJustificationItemByInf" ->
-            Assert.AreEqual<string>(PrimJIByInf, getName var)
+            Assert.AreEqual<string>(PrimJIByInf, (getName var).[index])
         | "FplJustificationItemByProofArgument" ->
-            Assert.AreEqual<string>(PrimJIByProofArgument, getName var)
+            Assert.AreEqual<string>(PrimJIByProofArgument, (getName var).[index])
+        | "FplJustificationItemByRefArgument" ->
+            Assert.AreEqual<string>(PrimJIByRefArgument, (getName var).[index])
         | "FplJustificationItemByTheoremLikeStmt" ->
-            Assert.AreEqual<string>(PrimJIByTheoremLikeStmt, getName var)
+            Assert.AreEqual<string>(PrimJIByTheoremLikeStmt, (getName var).[index])
         | "FplLanguage" ->
-            Assert.AreEqual<string>(PrimLanguageL, getName var)        
+            Assert.AreEqual<string>(PrimLanguageL, (getName var).[index])        
         | "FplLemma" ->
-            Assert.AreEqual<string>(literalLemL, getName var)
+            Assert.AreEqual<string>(literalLemL, (getName var).[index])
         | "FplLocalization" ->
-            Assert.AreEqual<string>(literalLocL, getName var)
+            Assert.AreEqual<string>(literalLocL, (getName var).[index])
         | "FplMandatoryFunctionalTerm" ->
-            Assert.AreEqual<string>(PrimMandatoryFunctionalTermL, getName var)
+            Assert.AreEqual<string>(PrimMandatoryFunctionalTermL, (getName var).[index])
         | "FplMandatoryPredicate" ->
-            Assert.AreEqual<string>(PrimMandatoryPredicateL, getName var)        
+            Assert.AreEqual<string>(PrimMandatoryPredicateL, (getName var).[index])        
         | "FplMapCaseElse" ->
-            Assert.AreEqual<string>(PrimMapCaseElse, getName var)        
+            Assert.AreEqual<string>(PrimMapCaseElse, (getName var).[index])        
         | "FplMapCaseSingle" ->
-            Assert.AreEqual<string>(PrimMapCaseSingle, getName var)
+            Assert.AreEqual<string>(PrimMapCaseSingle, (getName var).[index])
         | "FplMapCases" ->
-            Assert.AreEqual<string>(PrimMapCases, getName var)        
+            Assert.AreEqual<string>(PrimMapCases, (getName var).[index])        
         | "FplMapping" ->
-            Assert.AreEqual<string>(PrimMappingL, getName var)
+            Assert.AreEqual<string>(PrimMappingL, (getName var).[index])
         | "FplNegation" ->
-            Assert.AreEqual<string>(PrimNegation, getName var)        
+            Assert.AreEqual<string>(PrimNegation, (getName var).[index])        
         | "FplOptionalFunctionalTerm" ->
-            Assert.AreEqual<string>(PrimOptionalFunctionalTermL, getName var)
+            Assert.AreEqual<string>(PrimOptionalFunctionalTermL, (getName var).[index])
         | "FplOptionalPredicate" ->
-            Assert.AreEqual<string>(PrimOptionalPredicateL, getName var)
+            Assert.AreEqual<string>(PrimOptionalPredicateL, (getName var).[index])
         | "FplPredicate" ->
-            Assert.AreEqual<string>(PrimPredicateL, getName var)
-        | "FplPremiseList" ->
-            Assert.AreEqual<string>(literalPreL, getName var)
+            Assert.AreEqual<string>(PrimPredicateL, (getName var).[index])
+        | "FplPredicateList" ->
+            Assert.AreEqual<string>(literalPreL, (getName var).[index])
         | "FplProof" ->
-            Assert.AreEqual<string>(literalPrfL, getName var)
+            Assert.AreEqual<string>(literalPrfL, (getName var).[index])
         | "FplProposition" ->
-            Assert.AreEqual<string>(literalPropL, getName var)
+            Assert.AreEqual<string>(literalPropL, (getName var).[index])
         | "FplQuantorAll" ->
-            Assert.AreEqual<string>(PrimQuantorAll, getName var)
+            Assert.AreEqual<string>(PrimQuantorAll, (getName var).[index])
         | "FplQuantorExists" ->
-            Assert.AreEqual<string>(PrimQuantorExists, getName var)
+            Assert.AreEqual<string>(PrimQuantorExists, (getName var).[index])
         | "FplQuantorExistsN" ->
-            Assert.AreEqual<string>(PrimQuantorExistsN, getName var)
+            Assert.AreEqual<string>(PrimQuantorExistsN, (getName var).[index])
         | "FplReference" ->
-            Assert.AreEqual<string>(PrimRefL, getName var)
+            Assert.AreEqual<string>(PrimRefL, (getName var).[index])
         | "FplReturn" ->
-            Assert.AreEqual<string>(PrimReturn, getName var)
+            Assert.AreEqual<string>(PrimReturn, (getName var).[index])
         | "FplRoot" ->
-            Assert.AreEqual<string>(PrimRoot, getName var)
+            Assert.AreEqual<string>(PrimRoot, (getName var).[index])
         | "FplRuleOfInference" ->
-            Assert.AreEqual<string>(PrimRuleOfInference, getName var)
+            Assert.AreEqual<string>(PrimRuleOfInference, (getName var).[index])
         | "FplTheorem" ->
-            Assert.AreEqual<string>(literalThmL, getName var)
+            Assert.AreEqual<string>(literalThmL, (getName var).[index])
         | "FplTheory" ->
-            Assert.AreEqual<string>(PrimTheoryL, getName var)
+            Assert.AreEqual<string>(PrimTheoryL, (getName var).[index])
         | "FplTranslation" ->
-            Assert.AreEqual<string>(PrimTranslationL, getName var)
+            Assert.AreEqual<string>(PrimTranslationL, (getName var).[index])
         | "FplVariable" -> 
-            Assert.AreEqual<string>(PrimVariableL, getName var)
+            Assert.AreEqual<string>(PrimVariableL, (getName var).[index])
         | "FplVariadicVariableMany" ->
-            Assert.AreEqual<string>(PrimVariableManyL, getName var)
+            Assert.AreEqual<string>(PrimVariableManyL, (getName var).[index])
         | "FplVariadicVariableMany1" ->
-            Assert.AreEqual<string>(PrimVariableMany1L, getName var)
+            Assert.AreEqual<string>(PrimVariableMany1L, (getName var).[index])
         | _ -> 
             Assert.IsTrue(false)
 
@@ -499,8 +512,10 @@ type SymbolTableStructure() =
     [<DataRow("FplJustificationItemByAx")>]
     [<DataRow("FplJustificationItemByCor")>]
     [<DataRow("FplJustificationItemByDef")>]
+    [<DataRow("FplJustificationItemByDefVar")>]
     [<DataRow("FplJustificationItemByInf")>]
     [<DataRow("FplJustificationItemByProofArgument")>]
+    [<DataRow("FplJustificationItemByRefArgument")>]
     [<DataRow("FplJustificationItemByTheoremLikeStmt")>]
     [<DataRow("FplLanguage")>]
     [<DataRow("FplLemma")>]
@@ -516,7 +531,7 @@ type SymbolTableStructure() =
     [<DataRow("FplOptionalFunctionalTerm")>]
     [<DataRow("FplOptionalPredicate")>]
     [<DataRow("FplPredicate")>]
-    [<DataRow("FplPremiseList")>]
+    [<DataRow("FplPredicateList")>]
     [<DataRow("FplProof")>]
     [<DataRow("FplProposition")>]
     [<DataRow("FplQuantorAll")>]
@@ -535,225 +550,156 @@ type SymbolTableStructure() =
     [<DataRow("FplVariadicVariableMany1")>]
     [<TestMethod>]
     member this.TestFplBlockTypeShortName(var) =
+        let index = 1 // short name 
         match var with
         | "FplArgInferenceAssume" ->
-            let x = new FplArgInferenceAssume(positions, parent)
-            Assert.AreEqual<string>(PrimArgInf, x.ShortName)
+            Assert.AreEqual<string>(PrimArgInf, (getName var).[index])
         | "FplArgInferenceDerived" ->
-            let x = new FplArgInferenceDerived(positions, parent)
-            Assert.AreEqual<string>(PrimArgInf, x.ShortName)
+            Assert.AreEqual<string>(PrimArgInf, (getName var).[index])
         | "FplArgInferenceRevoke" ->
-            let x = new FplArgInferenceRevoke(positions, parent)
-            Assert.AreEqual<string>(PrimArgInf, x.ShortName)
+            Assert.AreEqual<string>(PrimArgInf, (getName var).[index])
         | "FplArgInferenceTrivial" ->
-            let x = new FplArgInferenceTrivial(positions, parent)
-            Assert.AreEqual<string>(PrimArgInf, x.ShortName)
+            Assert.AreEqual<string>(PrimArgInf, (getName var).[index])
         | "FplArgument" ->
-            let x = new FplArgument(positions, parent, 0)
-            Assert.AreEqual<string>(PrimArg, x.ShortName)
+            Assert.AreEqual<string>(PrimArg, (getName var).[index])
         | "FplAssertion" ->
-            let x = new FplAssertion(positions, parent)
-            Assert.AreEqual<string>(literalAss, x.ShortName)
+            Assert.AreEqual<string>(literalAss, (getName var).[index])
         | "FplAssignment" ->
-            let x = new FplAssignment(positions, parent)
-            Assert.AreEqual<string>(PrimStmt, x.ShortName)
+            Assert.AreEqual<string>(PrimStmt, (getName var).[index])
         | "FplAxiom" ->
-            let x = new FplAxiom(positions, parent, 0)
-            Assert.AreEqual<string>(literalAx, x.ShortName)
+            Assert.AreEqual<string>(literalAx, (getName var).[index])
         | "FplCases" ->
-            let x = new FplCases(positions, parent)
-            Assert.AreEqual<string>(PrimStmt, x.ShortName)
+            Assert.AreEqual<string>(PrimStmt, (getName var).[index])
         | "FplCaseElse" ->
-            let x = new FplCaseElse(positions, parent)
-            Assert.AreEqual<string>(PrimStmt, x.ShortName)
+            Assert.AreEqual<string>(PrimStmt, (getName var).[index])
         | "FplCaseSingle" ->
-            let x = new FplCaseSingle(positions, parent)
-            Assert.AreEqual<string>(PrimStmt, x.ShortName)
+            Assert.AreEqual<string>(PrimStmt, (getName var).[index])
         | "FplClass" ->
-            let x = new FplClass(positions, parent)
-            Assert.AreEqual<string>(PrimClass, x.ShortName)
+            Assert.AreEqual<string>(PrimClass, (getName var).[index])
         | "FplConjecture" ->
-            let x = new FplConjecture(positions, parent, 0)
-            Assert.AreEqual<string>(literalConj, x.ShortName)
+            Assert.AreEqual<string>(literalConj, (getName var).[index])
         | "FplConjunction" ->
-            let x = new FplConjunction(positions, parent)
-            Assert.AreEqual<string>(literalAnd, x.ShortName)        
+            Assert.AreEqual<string>(literalAnd, (getName var).[index])        
         | "FplConstructor" ->
-            let x = new FplConstructor(positions, parent)
-            Assert.AreEqual<string>(literalCtor, x.ShortName)
+            Assert.AreEqual<string>(literalCtor, (getName var).[index])
         | "FplCorollary" ->
-            let x = new FplCorollary(positions, parent, 0)
-            Assert.AreEqual<string>(literalCor, x.ShortName)
+            Assert.AreEqual<string>(literalCor, (getName var).[index])
         | "FplDecrement" ->
-            let x = new FplDecrement(positions, parent)
-            Assert.AreEqual<string>(PrimDecrement, x.ShortName)        
+            Assert.AreEqual<string>(PrimDecrement, (getName var).[index])        
         | "FplDisjunction" ->
-            let x = new FplDisjunction(positions, parent)
-            Assert.AreEqual<string>(literalOr, x.ShortName)        
+            Assert.AreEqual<string>(literalOr, (getName var).[index])        
         | "FplEquality" ->
-            let x = new FplEquality(positions, parent)
-            Assert.AreEqual<string>(PrimEquality, x.ShortName)        
+            Assert.AreEqual<string>(PrimEquality, (getName var).[index])        
         | "FplEquivalence" ->
-            let x = new FplEquivalence(positions, parent)
-            Assert.AreEqual<string>(literalIif, x.ShortName)        
+            Assert.AreEqual<string>(literalIif, (getName var).[index])        
         | "FplExclusiveOr" ->
-            let x = new FplExclusiveOr(positions, parent)
-            Assert.AreEqual<string>(literalXor, x.ShortName)        
+            Assert.AreEqual<string>(literalXor, (getName var).[index])        
         | "FplExtension" ->
-            let x = new FplExtension(positions, parent)
-            Assert.AreEqual<string>(PrimExtension, x.ShortName)
+            Assert.AreEqual<string>(PrimExtension, (getName var).[index])
         | "FplExtensionObj" ->
-            let x = new FplExtensionObj(positions, parent)
-            Assert.AreEqual<string>(literalObj, x.ShortName)
+            Assert.AreEqual<string>(literalObj, (getName var).[index])
         | "FplForInStmt" ->
-            let x = new FplForInStmt(positions, parent)
-            Assert.AreEqual<string>(PrimStmt, x.ShortName)
+            Assert.AreEqual<string>(PrimStmt, (getName var).[index])
         | "FplForInStmtDomain" ->
-            let x = new FplForInStmtDomain(positions, parent)
-            Assert.AreEqual<string>(PrimStmt, x.ShortName)
+            Assert.AreEqual<string>(PrimStmt, (getName var).[index])
         | "FplForInStmtEntity" ->
-            let x = new FplForInStmtEntity(positions, parent)
-            Assert.AreEqual<string>(PrimStmt, x.ShortName)
+            Assert.AreEqual<string>(PrimStmt, (getName var).[index])
         | "FplFunctionalTerm" ->
-            let x = new FplFunctionalTerm(positions, parent, 0)
-            Assert.AreEqual<string>(PrimFuncionalTerm, x.ShortName)
+            Assert.AreEqual<string>(PrimFuncionalTerm, (getName var).[index])
         | "FplImplication" ->
-            let x = new FplImplication(positions, parent)
-            Assert.AreEqual<string>(literalImpl, x.ShortName)        
+            Assert.AreEqual<string>(literalImpl, (getName var).[index])        
         | "FplInstance" ->
-            let x = new FplInstance(positions, parent)
-            Assert.AreEqual<string>(PrimInstance, x.ShortName)
+            Assert.AreEqual<string>(PrimInstance, (getName var).[index])
         | "FplIntrinsicFunc" ->
-            let x = new FplIntrinsicFunc(positions, parent)
-            Assert.AreEqual<string>(literalFunc, x.ShortName)
+            Assert.AreEqual<string>(literalFunc, (getName var).[index])
         | "FplIntrinsicInd" ->
-            let x = new FplIntrinsicInd(positions, parent)
-            Assert.AreEqual<string>(literalInd, x.ShortName)
+            Assert.AreEqual<string>(literalInd, (getName var).[index])
         | "FplIntrinsicObj" ->
-            let x = new FplIntrinsicObj(positions, parent)
-            Assert.AreEqual<string>(literalObj, x.ShortName)
+            Assert.AreEqual<string>(literalObj, (getName var).[index])
         | "FplIntrinsicPred" ->
-            let x = new FplIntrinsicPred(positions, parent)
-            Assert.AreEqual<string>(literalPred, x.ShortName)
+            Assert.AreEqual<string>(literalPred, (getName var).[index])
         | "FplIntrinsicTpl" ->
-            let x = new FplIntrinsicTpl(positions, parent)
-            Assert.AreEqual<string>(literalTpl, x.ShortName)
+            Assert.AreEqual<string>(literalTpl, (getName var).[index])
         | "FplIntrinsicUndef" ->
-            let x = new FplIntrinsicUndef(positions, parent)
-            Assert.AreEqual<string>(literalUndef, x.ShortName)
+            Assert.AreEqual<string>(literalUndef, (getName var).[index])
         | "FplIsOperator" ->
-            let x = new FplIsOperator(positions, parent)
-            Assert.AreEqual<string>(literalIs, x.ShortName)        
+            Assert.AreEqual<string>(literalIs, (getName var).[index])        
         | "FplJustification" ->
-            let x = new FplJustification(positions, parent)
-            Assert.AreEqual<string>(PrimJustification, x.ShortName)
+            Assert.AreEqual<string>(PrimJustification, (getName var).[index])
         | "FplJustificationItemByAx" ->
-            let x = new FplJustificationItemByAx(positions, parent, 0)
-            Assert.AreEqual<string>(PrimJustification, x.ShortName)
+            Assert.AreEqual<string>(PrimJustification, (getName var).[index])
         | "FplJustificationItemByCor" ->
-            let x = new FplJustificationItemByCor(positions, parent, 0)
-            Assert.AreEqual<string>(PrimJustification, x.ShortName)
+            Assert.AreEqual<string>(PrimJustification, (getName var).[index])
         | "FplJustificationItemByDef" ->
-            let x = new FplJustificationItemByDef(positions, parent, 0)
-            Assert.AreEqual<string>(PrimJustification, x.ShortName)
+            Assert.AreEqual<string>(PrimJustification, (getName var).[index])
+        | "FplJustificationItemByDefVar" ->
+            Assert.AreEqual<string>(PrimJustification, (getName var).[index])
         | "FplJustificationItemByInf" ->
-            let x = new FplJustificationItemByInf(positions, parent, 0)
-            Assert.AreEqual<string>(PrimJustification, x.ShortName)
+            Assert.AreEqual<string>(PrimJustification, (getName var).[index])
         | "FplJustificationItemByProofArgument" ->
-            let x = new FplJustificationItemByProofArgument(positions, parent, 0)
-            Assert.AreEqual<string>(PrimJustification, x.ShortName)
+            Assert.AreEqual<string>(PrimJustification, (getName var).[index])
+        | "FplJustificationItemByRefArgument" ->
+            Assert.AreEqual<string>(PrimJustification, (getName var).[index])
         | "FplJustificationItemByTheoremLikeStmt" ->
-            let x = new FplJustificationItemByTheoremLikeStmt(positions, parent, 0)
-            Assert.AreEqual<string>(PrimJustification, x.ShortName)
+            Assert.AreEqual<string>(PrimJustification, (getName var).[index])
         | "FplLanguage" ->
-            let x = new FplLanguage(positions, parent)
-            Assert.AreEqual<string>(PrimLanguage, x.ShortName)
+            Assert.AreEqual<string>(PrimLanguage, (getName var).[index])
         | "FplLemma" ->
-            let x = new FplLemma(positions, parent, 0)
-            Assert.AreEqual<string>(literalLem, x.ShortName)
+            Assert.AreEqual<string>(literalLem, (getName var).[index])
         | "FplLocalization" ->
-            let x = new FplLocalization(positions, parent)
-            Assert.AreEqual<string>(literalLoc, x.ShortName)
+            Assert.AreEqual<string>(literalLoc, (getName var).[index])
         | "FplMandatoryFunctionalTerm" ->
-            let x = new FplMandatoryFunctionalTerm(positions, parent)
-            Assert.AreEqual<string>(PrimMandatoryFunctionalTerm, x.ShortName)
+            Assert.AreEqual<string>(PrimMandatoryFunctionalTerm, (getName var).[index])
         | "FplMandatoryPredicate" ->
-            let x = new FplMandatoryPredicate(positions, parent)
-            Assert.AreEqual<string>(PrimMandatoryPredicate, x.ShortName)
+            Assert.AreEqual<string>(PrimMandatoryPredicate, (getName var).[index])
         | "FplMapCaseElse" ->
-            let x = new FplMapCaseElse(positions, parent)
-            Assert.AreEqual<string>(PrimStmt, x.ShortName)        
+            Assert.AreEqual<string>(PrimStmt, (getName var).[index])        
         | "FplMapCaseSingle" ->
-            let x = new FplMapCaseSingle(positions, parent)
-            Assert.AreEqual<string>(PrimStmt, x.ShortName)        
+            Assert.AreEqual<string>(PrimStmt, (getName var).[index])        
         | "FplMapCases" ->
-            let x = new FplMapCases(positions, parent)
-            Assert.AreEqual<string>(PrimStmt, x.ShortName)        
+            Assert.AreEqual<string>(PrimStmt, (getName var).[index])        
         | "FplMapping" ->
-            let x = new FplMapping(positions, parent)
-            Assert.AreEqual<string>(PrimMapping, x.ShortName)
+            Assert.AreEqual<string>(PrimMapping, (getName var).[index])
         | "FplNegation" ->
-            let x = new FplNegation(positions, parent)
-            Assert.AreEqual<string>(literalNot, x.ShortName)
+            Assert.AreEqual<string>(literalNot, (getName var).[index])
         | "FplOptionalFunctionalTerm" ->
-            let x = new FplOptionalFunctionalTerm(positions, parent)
-            Assert.AreEqual<string>(PrimOptionalFunctionalTerm, x.ShortName)
+            Assert.AreEqual<string>(PrimOptionalFunctionalTerm, (getName var).[index])
         | "FplOptionalPredicate" ->
-            let x = new FplOptionalPredicate(positions, parent)
-            Assert.AreEqual<string>(PrimOptionalPredicate, x.ShortName)
+            Assert.AreEqual<string>(PrimOptionalPredicate, (getName var).[index])
         | "FplPredicate" ->
-            let x = new FplPredicate(positions, parent, 0)
-            Assert.AreEqual<string>(PrimPredicate, x.ShortName)
-        | "FplPremiseList" ->
-            let x = new FplPremiseList(positions, parent, 0)
-            Assert.AreEqual<string>(literalInf, x.ShortName)
+            Assert.AreEqual<string>(PrimPredicate, (getName var).[index])
+        | "FplPredicateList" ->
+            Assert.AreEqual<string>(literalInf, (getName var).[index])
         | "FplProof" ->
-            let x = new FplProof(positions, parent, 0)
-            Assert.AreEqual<string>(literalPrf, x.ShortName)
+            Assert.AreEqual<string>(literalPrf, (getName var).[index])
         | "FplProposition" ->
-            let x = new FplProposition(positions, parent, 0)
-            Assert.AreEqual<string>(literalProp, x.ShortName)
+            Assert.AreEqual<string>(literalProp, (getName var).[index])
         | "FplQuantorAll" ->
-            let x = new FplQuantorAll(positions, parent)
-            Assert.AreEqual<string>(PrimQuantor, x.ShortName)
+            Assert.AreEqual<string>(PrimQuantor, (getName var).[index])
         | "FplQuantorExists" ->
-            let x = new FplQuantorExists(positions, parent)
-            Assert.AreEqual<string>(PrimQuantor, x.ShortName)
+            Assert.AreEqual<string>(PrimQuantor, (getName var).[index])
         | "FplQuantorExistsN" ->
-            let x = new FplQuantorExistsN(positions, parent)
-            Assert.AreEqual<string>(PrimQuantor, x.ShortName)
+            Assert.AreEqual<string>(PrimQuantor, (getName var).[index])
         | "FplReference" ->
-            let x = new FplReference(positions, parent)
-            Assert.AreEqual<string>(PrimRef, x.ShortName)
+            Assert.AreEqual<string>(PrimRef, (getName var).[index])
         | "FplReturn" ->
-            let x = new FplReturn(positions, parent)
-            Assert.AreEqual<string>(PrimStmt, x.ShortName)
+            Assert.AreEqual<string>(PrimStmt, (getName var).[index])
         | "FplRoot" ->
-            let x = new FplRoot()
-            Assert.AreEqual<string>(PrimRoot, x.ShortName)
+            Assert.AreEqual<string>(PrimRoot, (getName var).[index])
         | "FplRuleOfInference" ->
-            let x = new FplRuleOfInference(positions, parent, 0)
-            Assert.AreEqual<string>(literalInf, x.ShortName)
+            Assert.AreEqual<string>(literalInf, (getName var).[index])
         | "FplTheorem" ->
-            let x = new FplTheorem(positions, parent, 0)
-            Assert.AreEqual<string>(literalThm, x.ShortName)
+            Assert.AreEqual<string>(literalThm, (getName var).[index])
         | "FplTheory" ->
-            let x = new FplTheory(positions, parent, "", 0)
-            Assert.AreEqual<string>(PrimTheory, x.ShortName)
+            Assert.AreEqual<string>(PrimTheory, (getName var).[index])
         | "FplTranslation" ->
-            let x = new FplTranslation(positions, parent)
-            Assert.AreEqual<string>(PrimTranslation, x.ShortName)
+            Assert.AreEqual<string>(PrimTranslation, (getName var).[index])
         | "FplVariable" ->
-            let x = new FplVariable(positions, parent)
-            Assert.AreEqual<string>(PrimVariable, x.ShortName)
+            Assert.AreEqual<string>(PrimVariable, (getName var).[index])
         | "FplVariadicVariableMany" ->
-            let x = new FplVariable(positions, parent)
-            x.SetToMany() |> ignore
-            Assert.AreEqual<string>(PrimVariableMany, x.ShortName)
+            Assert.AreEqual<string>(PrimVariableMany, (getName var).[index])
         | "FplVariadicVariableMany1" ->
-            let x = new FplVariable(positions, parent)
-            x.SetToMany1() |> ignore
-            Assert.AreEqual<string>(PrimVariableMany1, x.ShortName)
+            Assert.AreEqual<string>(PrimVariableMany1, (getName var).[index])
         | _ -> 
             Assert.IsTrue(false, var)
 
@@ -797,8 +743,10 @@ type SymbolTableStructure() =
     [<DataRow("FplJustificationItemByAx")>]
     [<DataRow("FplJustificationItemByCor")>]
     [<DataRow("FplJustificationItemByDef")>]
+    [<DataRow("FplJustificationItemByDefVar")>]
     [<DataRow("FplJustificationItemByInf")>]
     [<DataRow("FplJustificationItemByProofArgument")>]
+    [<DataRow("FplJustificationItemByRefArgument")>]
     [<DataRow("FplJustificationItemByTheoremLikeStmt")>]
     [<DataRow("FplLanguage")>]
     [<DataRow("FplLemma")>]
@@ -813,7 +761,7 @@ type SymbolTableStructure() =
     [<DataRow("FplOptionalFunctionalTerm")>]
     [<DataRow("FplOptionalPredicate")>]
     [<DataRow("FplPredicate")>]
-    [<DataRow("FplPremiseList")>]
+    [<DataRow("FplPredicateList")>]
     [<DataRow("FplProof")>]
     [<DataRow("FplProposition")>]
     [<DataRow("FplQuantorAll")>]
@@ -832,225 +780,387 @@ type SymbolTableStructure() =
     [<DataRow("FplVariadicVariableMany1")>]
     [<TestMethod>]
     member this.TestFplBlockTypeFplId(var) =
+        let index = 2 // FplId
         match var with
         | "FplArgInferenceAssume" ->
-            let x = new FplArgInferenceAssume(positions, parent)
-            Assert.AreEqual<string>(literalUndetermined, x.FplId)
+            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
         | "FplArgInferenceDerived" ->
-            let x = new FplArgInferenceDerived(positions, parent)
-            Assert.AreEqual<string>(literalUndetermined, x.FplId)
+            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
         | "FplArgInferenceRevoke" ->
-            let x = new FplArgInferenceRevoke(positions, parent)
-            Assert.AreEqual<string>(literalUndetermined, x.FplId)
+            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
         | "FplArgInferenceTrivial" ->
-            let x = new FplArgInferenceTrivial(positions, parent)
-            Assert.AreEqual<string>(literalUndetermined, x.FplId)
+            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
         | "FplArgument" ->
-            let x = new FplArgument(positions, parent, 0)
-            Assert.AreEqual<string>(literalUndetermined, x.FplId)
+            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
         | "FplAssertion" ->
-            let x = new FplAssertion(positions, parent)
-            Assert.AreEqual<string>("", x.FplId)
+            Assert.AreEqual<string>("", (getName var).[index])
         | "FplAssignment" ->
-            let x = new FplAssignment(positions, parent)
-            Assert.AreEqual<string>("assign (ln 0)", x.FplId)
+            Assert.AreEqual<string>("assign (ln 0)", (getName var).[index])
         | "FplAxiom" ->
-            let x = new FplAxiom(positions, parent, 0)
-            Assert.AreEqual<string>(literalUndetermined, x.FplId)
+            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
         | "FplCases" ->
-            let x = new FplCases(positions, parent)
-            Assert.AreEqual<string>("", x.FplId)
+            Assert.AreEqual<string>("", (getName var).[index])
         | "FplCaseElse" ->
-            let x = new FplCaseElse(positions, parent)
-            Assert.AreEqual<string>("", x.FplId)
+            Assert.AreEqual<string>("", (getName var).[index])
         | "FplCaseSingle" ->
-            let x = new FplCaseSingle(positions, parent)
-            Assert.AreEqual<string>("", x.FplId)
+            Assert.AreEqual<string>("", (getName var).[index])
         | "FplClass" ->
-            let x = new FplClass(positions, parent)
-            Assert.AreEqual<string>(literalObj, x.FplId)
+            Assert.AreEqual<string>(literalObj, (getName var).[index])
         | "FplConjecture" ->
-            let x = new FplConjecture(positions, parent, 0)
-            Assert.AreEqual<string>(literalUndetermined, x.FplId)
+            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
         | "FplConjunction" ->
-            let x = new FplConjunction(positions, parent)
-            Assert.AreEqual<string>("and", x.FplId)        
+            Assert.AreEqual<string>(literalAnd, (getName var).[index])        
         | "FplConstructor" ->
-            let x = new FplConstructor(positions, parent)
-            Assert.AreEqual<string>(literalObj, x.FplId)
+            Assert.AreEqual<string>(literalObj, (getName var).[index])
         | "FplCorollary" ->
-            let x = new FplCorollary(positions, parent, 0)
-            Assert.AreEqual<string>(literalUndetermined, x.FplId)
+            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
         | "FplDecrement" ->
-            let x = new FplDecrement(positions, parent)
-            Assert.AreEqual<string>("del.", x.FplId)        
+            Assert.AreEqual<string>("del.", (getName var).[index])        
         | "FplDisjunction" ->
-            let x = new FplDisjunction(positions, parent)
-            Assert.AreEqual<string>(literalOr, x.FplId)        
+            Assert.AreEqual<string>(literalOr, (getName var).[index])        
         | "FplEquality" ->
-            let x = new FplEquality(positions, parent)
-            Assert.AreEqual<string>("del.", x.FplId)        
+            Assert.AreEqual<string>("del.", (getName var).[index])        
         | "FplEquivalence" ->
-            let x = new FplEquivalence(positions, parent)
-            Assert.AreEqual<string>("iif", x.FplId)        
+            Assert.AreEqual<string>(literalIif, (getName var).[index])        
         | "FplExclusiveOr" ->
-            let x = new FplExclusiveOr(positions, parent)
-            Assert.AreEqual<string>(literalXor, x.FplId)        
+            Assert.AreEqual<string>(literalXor, (getName var).[index])        
         | "FplExtension" ->
-            let x = new FplExtension(positions, parent)
-            Assert.AreEqual<string>("", x.FplId)
+            Assert.AreEqual<string>("", (getName var).[index])
         | "FplExtensionObj" ->
-            let x = new FplExtensionObj(positions, parent)
-            Assert.AreEqual<string>("", x.FplId)
+            Assert.AreEqual<string>("", (getName var).[index])
         | "FplForInStmt" ->
-            let x = new FplForInStmt(positions, parent)
-            Assert.AreEqual<string>("", x.FplId)
+            Assert.AreEqual<string>("", (getName var).[index])
         | "FplForInStmtDomain" ->
-            let x = new FplForInStmtDomain(positions, parent)
-            Assert.AreEqual<string>("", x.FplId)
+            Assert.AreEqual<string>("", (getName var).[index])
         | "FplForInStmtEntity" ->
-            let x = new FplForInStmtEntity(positions, parent)
-            Assert.AreEqual<string>("", x.FplId)
+            Assert.AreEqual<string>("", (getName var).[index])
         | "FplFunctionalTerm" ->
-            let x = new FplFunctionalTerm(positions, parent, 0)
-            Assert.AreEqual<string>("", x.FplId)
+            Assert.AreEqual<string>("", (getName var).[index])
         | "FplImplication" ->
-            let x = new FplImplication(positions, parent)
-            Assert.AreEqual<string>(literalImpl, x.FplId)        
+            Assert.AreEqual<string>(literalImpl, (getName var).[index])        
         | "FplInstance" ->
-            let x = new FplInstance(positions, parent)
-            Assert.AreEqual<string>(literalObj, x.FplId)
+            Assert.AreEqual<string>(literalObj, (getName var).[index])
         | "FplIntrinsicFunc" ->
-            let x = new FplIntrinsicFunc(positions, parent)
-            Assert.AreEqual<string>(literalFunc, x.FplId)
+            Assert.AreEqual<string>(literalFunc, (getName var).[index])
         | "FplIntrinsicInd" ->
-            let x = new FplIntrinsicInd(positions, parent)
-            Assert.AreEqual<string>(literalInd, x.FplId)
+            Assert.AreEqual<string>(literalInd, (getName var).[index])
         | "FplIntrinsicObj" ->
-            let x = new FplIntrinsicObj(positions, parent)
-            Assert.AreEqual<string>(literalObj, x.FplId)
+            Assert.AreEqual<string>(literalObj, (getName var).[index])
         | "FplIntrinsicPred" ->
-            let x = new FplIntrinsicPred(positions, parent)
-            Assert.AreEqual<string>(literalUndetermined, x.FplId)
+            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
         | "FplIntrinsicTpl" ->
-            let x = new FplIntrinsicTpl(positions, parent)
-            Assert.AreEqual<string>(literalTpl, x.FplId)
+            Assert.AreEqual<string>(literalTpl, (getName var).[index])
         | "FplIntrinsicUndef" ->
-            let x = new FplIntrinsicUndef(positions, parent)
-            Assert.AreEqual<string>(literalUndef, x.FplId)
+            Assert.AreEqual<string>(literalUndef, (getName var).[index])
         | "FplIsOperator" ->
-            let x = new FplIsOperator(positions, parent)
-            Assert.AreEqual<string>(literalIs, x.FplId)        
+            Assert.AreEqual<string>(literalIs, (getName var).[index])        
         | "FplJustification" ->
-            let x = new FplJustification(positions, parent)
-            Assert.AreEqual<string>(literalUndetermined, x.FplId)
+            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
         | "FplJustificationItemByAx" ->
-            let x = new FplJustificationItemByAx(positions, parent, 0)
-            Assert.AreEqual<string>("", x.FplId)
+            Assert.AreEqual<string>("", (getName var).[index])
         | "FplJustificationItemByCor" ->
-            let x = new FplJustificationItemByCor(positions, parent, 0)
-            Assert.AreEqual<string>("", x.FplId)
+            Assert.AreEqual<string>("", (getName var).[index])
         | "FplJustificationItemByDef" ->
-            let x = new FplJustificationItemByDef(positions, parent, 0)
-            Assert.AreEqual<string>("", x.FplId)
+            Assert.AreEqual<string>("", (getName var).[index])
+        | "FplJustificationItemByDefVar" ->
+            Assert.AreEqual<string>("", (getName var).[index])
         | "FplJustificationItemByInf" ->
-            let x = new FplJustificationItemByInf(positions, parent, 0)
-            Assert.AreEqual<string>("", x.FplId)
+            Assert.AreEqual<string>("", (getName var).[index])
         | "FplJustificationItemByProofArgument" ->
-            let x = new FplJustificationItemByProofArgument(positions, parent, 0)
-            Assert.AreEqual<string>("", x.FplId)
+            Assert.AreEqual<string>("", (getName var).[index])
+        | "FplJustificationItemByRefArgument" ->
+            Assert.AreEqual<string>("", (getName var).[index])
         | "FplJustificationItemByTheoremLikeStmt" ->
-            let x = new FplJustificationItemByTheoremLikeStmt(positions, parent, 0)
-            Assert.AreEqual<string>("", x.FplId)
+            Assert.AreEqual<string>("", (getName var).[index])
         | "FplLanguage" ->
-            let x = new FplLanguage(positions, parent)
-            Assert.AreEqual<string>("", x.FplId)
+            Assert.AreEqual<string>("", (getName var).[index])
         | "FplLemma" ->
-            let x = new FplLemma(positions, parent, 0)
-            Assert.AreEqual<string>(literalUndetermined, x.FplId)
+            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
         | "FplLocalization" ->
-            let x = new FplLocalization(positions, parent)
-            Assert.AreEqual<string>("", x.FplId)
+            Assert.AreEqual<string>("", (getName var).[index])
         | "FplMandatoryFunctionalTerm" ->
-            let x = new FplMandatoryFunctionalTerm(positions, parent)
-            Assert.AreEqual<string>("", x.FplId)
+            Assert.AreEqual<string>("", (getName var).[index])
         | "FplMandatoryPredicate" ->
-            let x = new FplMandatoryPredicate(positions, parent)
-            Assert.AreEqual<string>(literalUndetermined, x.FplId)
+            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
         | "FplMapCaseElse" ->
-            let x = new FplMapCaseElse(positions, parent)
-            Assert.AreEqual<string>("", x.FplId)
+            Assert.AreEqual<string>("", (getName var).[index])
         | "FplMapCaseSingle" ->
-            let x = new FplMapCaseSingle(positions, parent)
-            Assert.AreEqual<string>("", x.FplId)
+            Assert.AreEqual<string>("", (getName var).[index])
         | "FplMapCases" ->
-            let x = new FplMapCases(positions, parent)
-            Assert.AreEqual<string>("", x.FplId)        
+            Assert.AreEqual<string>("", (getName var).[index])        
         | "FplMapping" ->
-            let x = new FplMapping(positions, parent)
-            Assert.AreEqual<string>("", x.FplId)
+            Assert.AreEqual<string>("", (getName var).[index])
         | "FplNegation" ->
-            let x = new FplNegation(positions, parent)
-            Assert.AreEqual<string>(literalNot, x.FplId)
+            Assert.AreEqual<string>(literalNot, (getName var).[index])
         | "FplOptionalFunctionalTerm" ->
-            let x = new FplOptionalFunctionalTerm(positions, parent)
-            Assert.AreEqual<string>("", x.FplId)
+            Assert.AreEqual<string>("", (getName var).[index])
         | "FplOptionalPredicate" ->
-            let x = new FplOptionalPredicate(positions, parent)
-            Assert.AreEqual<string>(literalUndetermined, x.FplId)
+            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
         | "FplPredicate" ->
-            let x = new FplPredicate(positions, parent, 0)
-            Assert.AreEqual<string>(literalUndetermined, x.FplId)
-        | "FplPremiseList" ->
-            let x = new FplPremiseList(positions, parent, 0)
-            Assert.AreEqual<string>("", x.FplId)
+            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
+        | "FplPredicateList" ->
+            Assert.AreEqual<string>("", (getName var).[index])
         | "FplProof" ->
-            let x = new FplProof(positions, parent, 0)
-            Assert.AreEqual<string>(literalUndetermined, x.FplId)
+            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
         | "FplProposition" ->
-            let x = new FplProposition(positions, parent, 0)
-            Assert.AreEqual<string>(literalUndetermined, x.FplId)
+            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
         | "FplQuantorAll" ->
-            let x = new FplQuantorAll(positions, parent)
-            Assert.AreEqual<string>(literalUndetermined, x.FplId)
+            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
         | "FplQuantorExists" ->
-            let x = new FplQuantorExists(positions, parent)
-            Assert.AreEqual<string>(literalUndetermined, x.FplId)
+            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
         | "FplQuantorExistsN" ->
-            let x = new FplQuantorExistsN(positions, parent)
-            Assert.AreEqual<string>(literalUndetermined, x.FplId)
+            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
         | "FplReference" ->
-            let x = new FplReference(positions, parent)
-            Assert.AreEqual<string>("", x.FplId)
+            Assert.AreEqual<string>("", (getName var).[index])
         | "FplReturn" ->
-            let x = new FplReturn(positions, parent)
-            Assert.AreEqual<string>(literalRet, x.FplId)
+            Assert.AreEqual<string>(literalRet, (getName var).[index])
         | "FplRoot" ->
-            let x = new FplRoot()
-            Assert.AreEqual<string>("", x.FplId)
+            Assert.AreEqual<string>("", (getName var).[index])
         | "FplRuleOfInference" ->
-            let x = new FplRuleOfInference(positions, parent, 0)
-            Assert.AreEqual<string>(literalUndetermined, x.FplId)
+            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
         | "FplTheorem" ->
-            let x = new FplTheorem(positions, parent, 0)
-            Assert.AreEqual<string>(literalUndetermined, x.FplId)
+            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
         | "FplTheory" ->
-            let x = new FplTheory(positions, parent, "", 0)
-            Assert.AreEqual<string>("", x.FplId)
+            Assert.AreEqual<string>("", (getName var).[index])
         | "FplTranslation" ->
-            let x = new FplTranslation(positions, parent)
-            Assert.AreEqual<string>("", x.FplId)
+            Assert.AreEqual<string>("", (getName var).[index])
         | "FplVariable" ->
-            let x = new FplVariable(positions, parent)
-            Assert.AreEqual<string>("", x.FplId)
+            Assert.AreEqual<string>("", (getName var).[index])
         | "FplVariadicVariableMany" ->
-            let x = new FplVariable(positions, parent)
-            x.SetToMany() |> ignore
-            Assert.AreEqual<string>("", x.FplId)
+            Assert.AreEqual<string>("", (getName var).[index])
         | "FplVariadicVariableMany1" ->
-            let x = new FplVariable(positions, parent)
-            x.SetToMany1() |> ignore
-            Assert.AreEqual<string>("", x.FplId)
+            Assert.AreEqual<string>("", (getName var).[index])
+        | _ -> 
+            Assert.IsTrue(false, var)
+
+
+    [<DataRow("FplArgInferenceAssume")>]
+    [<DataRow("FplArgInferenceDerived")>]
+    [<DataRow("FplArgInferenceRevoke")>]
+    [<DataRow("FplArgInferenceTrivial")>]
+    [<DataRow("FplArgument")>]
+    [<DataRow("FplAssertion")>]
+    [<DataRow("FplAssignment")>]
+    [<DataRow("FplAxiom")>]
+    [<DataRow("FplCases")>]
+    [<DataRow("FplCaseElse")>]
+    [<DataRow("FplCaseSingle")>]
+    [<DataRow("FplClass")>]
+    [<DataRow("FplConjecture")>]
+    [<DataRow("FplConjunction")>]
+    [<DataRow("FplConstructor")>]
+    [<DataRow("FplCorollary")>]
+    [<DataRow("FplDecrement")>]
+    [<DataRow("FplDisjunction")>]
+    [<DataRow("FplEquality")>]
+    [<DataRow("FplEquivalence")>]
+    [<DataRow("FplExclusiveOr")>]
+    [<DataRow("FplExtension")>]
+    [<DataRow("FplExtensionObj")>]
+    [<DataRow("FplForInStmt")>]
+    [<DataRow("FplForInStmtDomain")>]
+    [<DataRow("FplForInStmtEntity")>]
+    [<DataRow("FplFunctionalTerm")>]
+    [<DataRow("FplImplication")>]
+    [<DataRow("FplInstance")>]
+    [<DataRow("FplIntrinsicFunc")>]
+    [<DataRow("FplIntrinsicInd")>]
+    [<DataRow("FplIntrinsicObj")>]
+    [<DataRow("FplIntrinsicPred")>]
+    [<DataRow("FplIntrinsicTpl")>]
+    [<DataRow("FplIntrinsicUndef")>]
+    [<DataRow("FplIsOperator")>]
+    [<DataRow("FplJustification")>]
+    [<DataRow("FplJustificationItemByAx")>]
+    [<DataRow("FplJustificationItemByCor")>]
+    [<DataRow("FplJustificationItemByDef")>]
+    [<DataRow("FplJustificationItemByDefVar")>]
+    [<DataRow("FplJustificationItemByInf")>]
+    [<DataRow("FplJustificationItemByProofArgument")>]
+    [<DataRow("FplJustificationItemByRefArgument")>]
+    [<DataRow("FplJustificationItemByTheoremLikeStmt")>]
+    [<DataRow("FplLanguage")>]
+    [<DataRow("FplLemma")>]
+    [<DataRow("FplLocalization")>]
+    [<DataRow("FplMandatoryFunctionalTerm")>]
+    [<DataRow("FplMandatoryPredicate")>]
+    [<DataRow("FplMapCases")>]
+    [<DataRow("FplMapCaseElse")>]
+    [<DataRow("FplMapCaseSingle")>]
+    [<DataRow("FplMapping")>]
+    [<DataRow("FplNegation")>]
+    [<DataRow("FplOptionalFunctionalTerm")>]
+    [<DataRow("FplOptionalPredicate")>]
+    [<DataRow("FplPredicate")>]
+    [<DataRow("FplPredicateList")>]
+    [<DataRow("FplProof")>]
+    [<DataRow("FplProposition")>]
+    [<DataRow("FplQuantorAll")>]
+    [<DataRow("FplQuantorExists")>]
+    [<DataRow("FplQuantorExistsN")>]
+    [<DataRow("FplReference")>]
+    [<DataRow("FplReturn")>]
+    [<DataRow("FplRoot")>]
+    [<DataRow("FplRuleOfInference")>]
+    [<DataRow("FplTheorem")>]
+    [<DataRow("FplTheory")>]
+    [<DataRow("FplTranslation")>]
+    [<DataRow("FplVariable")>]
+    [<DataRow("FplVariable")>]
+    [<DataRow("FplVariadicVariableMany")>]
+    [<DataRow("FplVariadicVariableMany1")>]
+    [<TestMethod>]
+    member this.TestFplBlockTypeId(var) =
+        let index = 3 // TypeId
+        match var with
+        | "FplArgInferenceAssume" ->
+            Assert.AreEqual<string>(literalPred, (getName var).[index])
+        | "FplArgInferenceDerived" ->
+            Assert.AreEqual<string>(literalPred, (getName var).[index])
+        | "FplArgInferenceRevoke" ->
+            Assert.AreEqual<string>(literalPred, (getName var).[index])
+        | "FplArgInferenceTrivial" ->
+            Assert.AreEqual<string>(literalPred, (getName var).[index])
+        | "FplArgument" ->
+            Assert.AreEqual<string>(literalPred, (getName var).[index])
+        | "FplAssertion" ->
+            Assert.AreEqual<string>("", (getName var).[index])
+        | "FplAssignment" ->
+            Assert.AreEqual<string>(literalUndef, (getName var).[index])
+        | "FplAxiom" ->
+            Assert.AreEqual<string>(literalPred, (getName var).[index])
+        | "FplCases" ->
+            Assert.AreEqual<string>("", (getName var).[index])
+        | "FplCaseElse" ->
+            Assert.AreEqual<string>("", (getName var).[index])
+        | "FplCaseSingle" ->
+            Assert.AreEqual<string>("", (getName var).[index])
+        | "FplClass" ->
+            Assert.AreEqual<string>(literalObj, (getName var).[index])
+        | "FplConjecture" ->
+            Assert.AreEqual<string>(literalPred, (getName var).[index])
+        | "FplConjunction" ->
+            Assert.AreEqual<string>(literalPred, (getName var).[index])        
+        | "FplConstructor" ->
+            Assert.AreEqual<string>(literalObj, (getName var).[index])
+        | "FplCorollary" ->
+            Assert.AreEqual<string>(literalPred, (getName var).[index])
+        | "FplDecrement" ->
+            Assert.AreEqual<string>("del.", (getName var).[index])        
+        | "FplDisjunction" ->
+            Assert.AreEqual<string>(literalPred, (getName var).[index])        
+        | "FplEquality" ->
+            Assert.AreEqual<string>("del.", (getName var).[index])        
+        | "FplEquivalence" ->
+            Assert.AreEqual<string>(literalPred, (getName var).[index])        
+        | "FplExclusiveOr" ->
+            Assert.AreEqual<string>(literalPred, (getName var).[index])        
+        | "FplExtension" ->
+            Assert.AreEqual<string>("", (getName var).[index])
+        | "FplExtensionObj" ->
+            Assert.AreEqual<string>("", (getName var).[index])
+        | "FplForInStmt" ->
+            Assert.AreEqual<string>("", (getName var).[index])
+        | "FplForInStmtDomain" ->
+            Assert.AreEqual<string>("", (getName var).[index])
+        | "FplForInStmtEntity" ->
+            Assert.AreEqual<string>("", (getName var).[index])
+        | "FplFunctionalTerm" ->
+            Assert.AreEqual<string>("", (getName var).[index])
+        | "FplImplication" ->
+            Assert.AreEqual<string>(literalPred, (getName var).[index])        
+        | "FplInstance" ->
+            Assert.AreEqual<string>(literalObj, (getName var).[index])
+        | "FplIntrinsicFunc" ->
+            Assert.AreEqual<string>(literalFunc, (getName var).[index])
+        | "FplIntrinsicInd" ->
+            Assert.AreEqual<string>(literalInd, (getName var).[index])
+        | "FplIntrinsicObj" ->
+            Assert.AreEqual<string>(literalObj, (getName var).[index])
+        | "FplIntrinsicPred" ->
+            Assert.AreEqual<string>(literalPred, (getName var).[index])
+        | "FplIntrinsicTpl" ->
+            Assert.AreEqual<string>(literalTpl, (getName var).[index])
+        | "FplIntrinsicUndef" ->
+            Assert.AreEqual<string>(literalUndef, (getName var).[index])
+        | "FplIsOperator" ->
+            Assert.AreEqual<string>(literalPred, (getName var).[index])        
+        | "FplJustification" ->
+            Assert.AreEqual<string>(literalPred, (getName var).[index])
+        | "FplJustificationItemByAx" ->
+            Assert.AreEqual<string>("", (getName var).[index])
+        | "FplJustificationItemByCor" ->
+            Assert.AreEqual<string>("", (getName var).[index])
+        | "FplJustificationItemByDef" ->
+            Assert.AreEqual<string>("", (getName var).[index])
+        | "FplJustificationItemByDefVar" ->
+            Assert.AreEqual<string>("", (getName var).[index])
+        | "FplJustificationItemByInf" ->
+            Assert.AreEqual<string>("", (getName var).[index])
+        | "FplJustificationItemByProofArgument" ->
+            Assert.AreEqual<string>("", (getName var).[index])
+        | "FplJustificationItemByRefArgument" ->
+            Assert.AreEqual<string>("", (getName var).[index])
+        | "FplJustificationItemByTheoremLikeStmt" ->
+            Assert.AreEqual<string>("", (getName var).[index])
+        | "FplLanguage" ->
+            Assert.AreEqual<string>("", (getName var).[index])
+        | "FplLemma" ->
+            Assert.AreEqual<string>(literalPred, (getName var).[index])
+        | "FplLocalization" ->
+            Assert.AreEqual<string>("", (getName var).[index])
+        | "FplMandatoryFunctionalTerm" ->
+            Assert.AreEqual<string>("", (getName var).[index])
+        | "FplMandatoryPredicate" ->
+            Assert.AreEqual<string>(literalPred, (getName var).[index])
+        | "FplMapCaseElse" ->
+            Assert.AreEqual<string>("", (getName var).[index])
+        | "FplMapCaseSingle" ->
+            Assert.AreEqual<string>("", (getName var).[index])
+        | "FplMapCases" ->
+            Assert.AreEqual<string>("", (getName var).[index])        
+        | "FplMapping" ->
+            Assert.AreEqual<string>("", (getName var).[index])
+        | "FplNegation" ->
+            Assert.AreEqual<string>(literalPred, (getName var).[index])
+        | "FplOptionalFunctionalTerm" ->
+            Assert.AreEqual<string>("", (getName var).[index])
+        | "FplOptionalPredicate" ->
+            Assert.AreEqual<string>(literalPred, (getName var).[index])
+        | "FplPredicate" ->
+            Assert.AreEqual<string>(literalPred, (getName var).[index])
+        | "FplPredicateList" ->
+            Assert.AreEqual<string>("", (getName var).[index])
+        | "FplProof" ->
+            Assert.AreEqual<string>(literalPred, (getName var).[index])
+        | "FplProposition" ->
+            Assert.AreEqual<string>(literalPred, (getName var).[index])
+        | "FplQuantorAll" ->
+            Assert.AreEqual<string>(literalPred, (getName var).[index])
+        | "FplQuantorExists" ->
+            Assert.AreEqual<string>(literalPred, (getName var).[index])
+        | "FplQuantorExistsN" ->
+            Assert.AreEqual<string>(literalPred, (getName var).[index])
+        | "FplReference" ->
+            Assert.AreEqual<string>("", (getName var).[index])
+        | "FplReturn" ->
+            Assert.AreEqual<string>(literalUndef, (getName var).[index])
+        | "FplRoot" ->
+            Assert.AreEqual<string>("", (getName var).[index])
+        | "FplRuleOfInference" ->
+            Assert.AreEqual<string>(literalPred, (getName var).[index])
+        | "FplTheorem" ->
+            Assert.AreEqual<string>(literalPred, (getName var).[index])
+        | "FplTheory" ->
+            Assert.AreEqual<string>("", (getName var).[index])
+        | "FplTranslation" ->
+            Assert.AreEqual<string>("", (getName var).[index])
+        | "FplVariable" ->
+            Assert.AreEqual<string>("", (getName var).[index])
+        | "FplVariadicVariableMany" ->
+            Assert.AreEqual<string>("", (getName var).[index])
+        | "FplVariadicVariableMany1" ->
+            Assert.AreEqual<string>("", (getName var).[index])
         | _ -> 
             Assert.IsTrue(false, var)
 
@@ -1094,8 +1204,10 @@ type SymbolTableStructure() =
     [<DataRow("FplJustificationItemByAx")>]
     [<DataRow("FplJustificationItemByCor")>]
     [<DataRow("FplJustificationItemByDef")>]
+    [<DataRow("FplJustificationItemByDefVar")>]
     [<DataRow("FplJustificationItemByInf")>]
     [<DataRow("FplJustificationItemByProofArgument")>]
+    [<DataRow("FplJustificationItemByRefArgument")>]
     [<DataRow("FplJustificationItemByTheoremLikeStmt")>]
     [<DataRow("FplLanguage")>]
     [<DataRow("FplLemma")>]
@@ -1110,7 +1222,7 @@ type SymbolTableStructure() =
     [<DataRow("FplOptionalFunctionalTerm")>]
     [<DataRow("FplOptionalPredicate")>]
     [<DataRow("FplPredicate")>]
-    [<DataRow("FplPremiseList")>]
+    [<DataRow("FplPredicateList")>]
     [<DataRow("FplProof")>]
     [<DataRow("FplProposition")>]
     [<DataRow("FplQuantorAll")>]
@@ -1129,529 +1241,158 @@ type SymbolTableStructure() =
     [<DataRow("FplVariadicVariableMany1")>]
     [<TestMethod>]
     member this.TestFplBlockTypeRunOrder(var) =
+        let index = 4 // RunOrder
         match var with
         | "FplArgInferenceAssume" ->
-            let x = new FplArgInferenceAssume(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplArgInferenceDerived" ->
-            let x = new FplArgInferenceDerived(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplArgInferenceRevoke" ->
-            let x = new FplArgInferenceRevoke(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplArgInferenceTrivial" ->
-            let x = new FplArgInferenceTrivial(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplArgument" ->
-            let x = new FplArgument(positions, parent, 0)
-            Assert.IsTrue(x.RunOrder.IsSome)
+            Assert.AreEqual<string>("Some", (getName var).[index])
         | "FplAssertion" ->
-            let x = new FplAssertion(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplAssignment" ->
-            let x = new FplAssignment(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplAxiom" ->
-            let x = new FplAxiom(positions, parent, 0)
-            Assert.IsTrue(x.RunOrder.IsSome)
+            Assert.AreEqual<string>("Some", (getName var).[index])
         | "FplCases" ->
-            let x = new FplCases(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplCaseElse" ->
-            let x = new FplCaseElse(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplCaseSingle" ->
-            let x = new FplCaseSingle(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplClass" ->
-            let x = new FplClass(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplConjecture" ->
-            let x = new FplConjecture(positions, parent, 0)
-            Assert.IsTrue(x.RunOrder.IsSome)
+            Assert.AreEqual<string>("Some", (getName var).[index])
         | "FplConjunction" ->
-            let x = new FplConjunction(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplConstructor" ->
-            let x = new FplConstructor(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplCorollary" ->
-            let x = new FplCorollary(positions, parent, 0)
-            Assert.IsTrue(x.RunOrder.IsSome)
+            Assert.AreEqual<string>("Some", (getName var).[index])
         | "FplDecrement" ->
-            let x = new FplDecrement(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplDisjunction" ->
-            let x = new FplDisjunction(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplEquality" ->
-            let x = new FplEquality(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplEquivalence" ->
-            let x = new FplEquivalence(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplExclusiveOr" ->
-            let x = new FplExclusiveOr(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplExtension" ->
-            let x = new FplExtension(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplExtensionObj" ->
-            let x = new FplExtensionObj(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplForInStmt" ->
-            let x = new FplForInStmt(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplForInStmtDomain" ->
-            let x = new FplForInStmtDomain(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplForInStmtEntity" ->
-            let x = new FplForInStmtEntity(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplFunctionalTerm" ->
-            let x = new FplFunctionalTerm(positions, parent, 0)
-            Assert.IsTrue(x.RunOrder.IsSome)
+            Assert.AreEqual<string>("Some", (getName var).[index])
         | "FplImplication" ->
-            let x = new FplImplication(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplInstance" ->
-            let x = new FplInstance(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplIntrinsicFunc" ->
-            let x = new FplIntrinsicFunc(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplIntrinsicInd" ->
-            let x = new FplIntrinsicInd(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplIntrinsicObj" ->
-            let x = new FplIntrinsicObj(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplIntrinsicPred" ->
-            let x = new FplIntrinsicPred(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplIntrinsicTpl" ->
-            let x = new FplIntrinsicTpl(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplIntrinsicUndef" ->
-            let x = new FplIntrinsicUndef(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplIsOperator" ->
-            let x = new FplIsOperator(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplJustification" ->
-            let x = new FplJustification(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplJustificationItemByAx" ->
-            let x = new FplJustificationItemByAx(positions, parent, 0)
-            Assert.IsTrue(x.RunOrder.IsSome)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplJustificationItemByCor" ->
-            let x = new FplJustificationItemByCor(positions, parent, 0)
-            Assert.IsTrue(x.RunOrder.IsSome)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplJustificationItemByDef" ->
-            let x = new FplJustificationItemByDef(positions, parent, 0)
-            Assert.IsTrue(x.RunOrder.IsSome)
+            Assert.AreEqual<string>("None", (getName var).[index])
+        | "FplJustificationItemByDefVar" ->
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplJustificationItemByInf" ->
-            let x = new FplJustificationItemByInf(positions, parent, 0)
-            Assert.IsTrue(x.RunOrder.IsSome)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplJustificationItemByProofArgument" ->
-            let x = new FplJustificationItemByProofArgument(positions, parent, 0)
-            Assert.IsTrue(x.RunOrder.IsSome)
+            Assert.AreEqual<string>("None", (getName var).[index])
+        | "FplJustificationItemByRefArgument" ->
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplJustificationItemByTheoremLikeStmt" ->
-            let x = new FplJustificationItemByTheoremLikeStmt(positions, parent, 0)
-            Assert.IsTrue(x.RunOrder.IsSome)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplLanguage" ->
-            let x = new FplLanguage(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplLemma" ->
-            let x = new FplLemma(positions, parent, 0)
-            Assert.IsTrue(x.RunOrder.IsSome)
+            Assert.AreEqual<string>("Some", (getName var).[index])
         | "FplLocalization" ->
-            let x = new FplLocalization(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplMandatoryFunctionalTerm" ->
-            let x = new FplMandatoryFunctionalTerm(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplMandatoryPredicate" ->
-            let x = new FplMandatoryPredicate(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplMapCaseElse" ->
-            let x = new FplMapCaseElse(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplMapCaseSingle" ->
-            let x = new FplMapCaseSingle(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplMapCases" ->
-            let x = new FplMapCases(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplMapping" ->
-            let x = new FplMapping(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplNegation" ->
-            let x = new FplNegation(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplOptionalFunctionalTerm" ->
-            let x = new FplOptionalFunctionalTerm(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplOptionalPredicate" ->
-            let x = new FplOptionalPredicate(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplPredicate" ->
-            let x = new FplPredicate(positions, parent, 0)
-            Assert.IsTrue(x.RunOrder.IsSome)
-        | "FplPremiseList" ->
-            let x = new FplPremiseList(positions, parent, 0)
-            Assert.IsTrue(x.RunOrder.IsSome)
+            Assert.AreEqual<string>("Some", (getName var).[index])
+        | "FplPredicateList" ->
+            Assert.AreEqual<string>("Some", (getName var).[index])
         | "FplProof" ->
-            let x = new FplProof(positions, parent, 0)
-            Assert.IsTrue(x.RunOrder.IsSome)
+            Assert.AreEqual<string>("Some", (getName var).[index])
         | "FplProposition" ->
-            let x = new FplProposition(positions, parent, 0)
-            Assert.IsTrue(x.RunOrder.IsSome)
+            Assert.AreEqual<string>("Some", (getName var).[index])
         | "FplQuantorAll" ->
-            let x = new FplQuantorAll(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplQuantorExists" ->
-            let x = new FplQuantorExists(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplQuantorExistsN" ->
-            let x = new FplQuantorExistsN(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplReference" ->
-            let x = new FplReference(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplReturn" ->
-            let x = new FplReturn(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplRoot" ->
-            let x = new FplRoot()
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplRuleOfInference" ->
-            let x = new FplRuleOfInference(positions, parent, 0)
-            Assert.IsTrue(x.RunOrder.IsSome)
+            Assert.AreEqual<string>("Some", (getName var).[index])
         | "FplTheorem" ->
-            let x = new FplTheorem(positions, parent, 0)
-            Assert.IsTrue(x.RunOrder.IsSome)
+            Assert.AreEqual<string>("Some", (getName var).[index])
         | "FplTheory" ->
-            let x = new FplTheory(positions, parent, "", 0)
-            Assert.IsTrue(x.RunOrder.IsSome)
+            Assert.AreEqual<string>("Some", (getName var).[index])
         | "FplTranslation" ->
-            let x = new FplTranslation(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplVariable" ->
-            let x = new FplVariable(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplVariadicVariableMany" ->
-            let x = new FplVariable(positions, parent)
-            x.SetToMany() |> ignore
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplVariadicVariableMany1" ->
-            let x = new FplVariable(positions, parent)
-            x.SetToMany1() |> ignore
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.AreEqual<string>("None", (getName var).[index])
         | _ -> 
             Assert.IsTrue(false, var)
-
-    [<DataRow("FplArgInferenceAssume")>]
-    [<DataRow("FplArgInferenceDerived")>]
-    [<DataRow("FplArgInferenceRevoke")>]
-    [<DataRow("FplArgInferenceTrivial")>]
-    [<DataRow("FplArgument")>]
-    [<DataRow("FplAssertion")>]
-    [<DataRow("FplAssignment")>]
-    [<DataRow("FplAxiom")>]
-    [<DataRow("FplCases")>]
-    [<DataRow("FplCaseElse")>]
-    [<DataRow("FplCaseSingle")>]
-    [<DataRow("FplClass")>]
-    [<DataRow("FplConjecture")>]
-    [<DataRow("FplConjunction")>]
-    [<DataRow("FplConstructor")>]
-    [<DataRow("FplCorollary")>]
-    [<DataRow("FplDecrement")>]
-    [<DataRow("FplDisjunction")>]
-    [<DataRow("FplEquality")>]
-    [<DataRow("FplEquivalence")>]
-    [<DataRow("FplExclusiveOr")>]
-    [<DataRow("FplExtension")>]
-    [<DataRow("FplExtensionObj")>]
-    [<DataRow("FplForInStmt")>]
-    [<DataRow("FplForInStmtDomain")>]
-    [<DataRow("FplForInStmtEntity")>]
-    [<DataRow("FplFunctionalTerm")>]
-    [<DataRow("FplImplication")>]
-    [<DataRow("FplInstance")>]
-    [<DataRow("FplIntrinsicFunc")>]
-    [<DataRow("FplIntrinsicInd")>]
-    [<DataRow("FplIntrinsicObj")>]
-    [<DataRow("FplIntrinsicPred")>]
-    [<DataRow("FplIntrinsicTpl")>]
-    [<DataRow("FplIntrinsicUndef")>]
-    [<DataRow("FplIsOperator")>]
-    [<DataRow("FplJustification")>]
-    [<DataRow("FplJustificationItemByAx")>]
-    [<DataRow("FplJustificationItemByCor")>]
-    [<DataRow("FplJustificationItemByDef")>]
-    [<DataRow("FplJustificationItemByInf")>]
-    [<DataRow("FplJustificationItemByProofArgument")>]
-    [<DataRow("FplJustificationItemByTheoremLikeStmt")>]
-    [<DataRow("FplLanguage")>]
-    [<DataRow("FplLemma")>]
-    [<DataRow("FplLocalization")>]
-    [<DataRow("FplMandatoryFunctionalTerm")>]
-    [<DataRow("FplMandatoryPredicate")>]
-    [<DataRow("FplMapCases")>]
-    [<DataRow("FplMapCaseElse")>]
-    [<DataRow("FplMapCaseSingle")>]
-    [<DataRow("FplMapping")>]
-    [<DataRow("FplNegation")>]
-    [<DataRow("FplOptionalFunctionalTerm")>]
-    [<DataRow("FplOptionalPredicate")>]
-    [<DataRow("FplPredicate")>]
-    [<DataRow("FplPremiseList")>]
-    [<DataRow("FplProof")>]
-    [<DataRow("FplProposition")>]
-    [<DataRow("FplQuantorAll")>]
-    [<DataRow("FplQuantorExists")>]
-    [<DataRow("FplQuantorExistsN")>]
-    [<DataRow("FplReference")>]
-    [<DataRow("FplReturn")>]
-    [<DataRow("FplRoot")>]
-    [<DataRow("FplRuleOfInference")>]
-    [<DataRow("FplTheorem")>]
-    [<DataRow("FplTheory")>]
-    [<DataRow("FplTranslation")>]
-    [<DataRow("FplVariable")>]
-    [<DataRow("FplVariable")>]
-    [<DataRow("FplVariadicVariableMany")>]
-    [<DataRow("FplVariadicVariableMany1")>]
-    [<TestMethod>]
-    member this.TestFplBlockTypeRunIsImplemented(var) =
-        try 
-            let variableStack = new FplVariableStack()
-            match var with
-            | "FplArgInferenceAssume" ->
-                let x = new FplArgInferenceAssume(positions, parent)
-                x.Run variableStack 
-            | "FplArgInferenceDerived" ->
-                let x = new FplArgInferenceDerived(positions, parent)
-                x.Run variableStack 
-            | "FplArgInferenceRevoke" ->
-                let x = new FplArgInferenceRevoke(positions, parent)
-                x.Run variableStack 
-            | "FplArgInferenceTrivial" ->
-                let x = new FplArgInferenceTrivial(positions, parent)
-                x.Run variableStack 
-            | "FplArgument" ->
-                let x = new FplArgument(positions, parent, 0)
-                x.Run variableStack 
-            | "FplAssertion" ->
-                let x = new FplAssertion(positions, parent)
-                x.Run variableStack 
-            | "FplAssignment" ->
-                let x = new FplAssignment(positions, parent)
-                x.Run variableStack 
-            | "FplAxiom" ->
-                let x = new FplAxiom(positions, parent, 0)
-                x.Run variableStack 
-            | "FplCases" ->
-                let x = new FplCases(positions, parent)
-                x.Run variableStack 
-            | "FplCaseElse" ->
-                let x = new FplCaseElse(positions, parent)
-                x.Run variableStack 
-            | "FplCaseSingle" ->
-                let x = new FplCaseSingle(positions, parent)
-                x.Run variableStack 
-            | "FplClass" ->
-                let x = new FplClass(positions, parent)
-                x.Run variableStack 
-            | "FplConjecture" ->
-                let x = new FplConjecture(positions, parent, 0)
-                x.Run variableStack 
-            | "FplConjunction" ->
-                let x = new FplConjunction(positions, parent)
-                x.Run variableStack 
-            | "FplConstructor" ->
-                let x = new FplConstructor(positions, parent)
-                x.Run variableStack 
-            | "FplCorollary" ->
-                let x = new FplCorollary(positions, parent, 0)
-                x.Run variableStack 
-            | "FplDecrement" ->
-                let x = new FplDecrement(positions, parent)
-                x.Run variableStack 
-            | "FplDisjunction" ->
-                let x = new FplDisjunction(positions, parent)
-                x.Run variableStack 
-            | "FplEquality" ->
-                let x = new FplEquality(positions, parent)
-                x.Run variableStack 
-            | "FplEquivalence" ->
-                let x = new FplEquivalence(positions, parent)
-                x.Run variableStack 
-            | "FplExclusiveOr" ->
-                let x = new FplExclusiveOr(positions, parent)
-                x.Run variableStack 
-            | "FplExtension" ->
-                let x = new FplExtension(positions, parent)
-                x.Run variableStack 
-            | "FplExtensionObj" ->
-                let x = new FplExtensionObj(positions, parent)
-                x.Run variableStack 
-            | "FplForInStmt" ->
-                let x = new FplForInStmt(positions, parent)
-                x.Run variableStack 
-            | "FplForInStmtDomain" ->
-                let x = new FplForInStmtDomain(positions, parent)
-                x.Run variableStack 
-            | "FplForInStmtEntity" ->
-                let x = new FplForInStmtEntity(positions, parent)
-                x.Run variableStack 
-            | "FplFunctionalTerm" ->
-                let x = new FplFunctionalTerm(positions, parent, 0)
-                x.Run variableStack 
-            | "FplImplication" ->
-                let x = new FplImplication(positions, parent)
-                x.Run variableStack 
-            | "FplInstance" ->
-                let x = new FplInstance(positions, parent)
-                x.Run variableStack 
-            | "FplIntrinsicFunc" ->
-                let x = new FplIntrinsicFunc(positions, parent)
-                x.Run variableStack 
-            | "FplIntrinsicInd" ->
-                let x = new FplIntrinsicInd(positions, parent)
-                x.Run variableStack 
-            | "FplIntrinsicObj" ->
-                let x = new FplIntrinsicObj(positions, parent)
-                x.Run variableStack 
-            | "FplIntrinsicPred" ->
-                let x = new FplIntrinsicPred(positions, parent)
-                x.Run variableStack 
-            | "FplIntrinsicTpl" ->
-                let x = new FplIntrinsicTpl(positions, parent)
-                x.Run variableStack 
-            | "FplIntrinsicUndef" ->
-                let x = new FplIntrinsicUndef(positions, parent)
-                x.Run variableStack 
-            | "FplIsOperator" ->
-                let x = new FplIsOperator(positions, parent)
-                x.Run variableStack 
-            | "FplJustification" ->
-                let x = new FplJustification(positions, parent)
-                x.Run variableStack 
-            | "FplJustificationItemByAx" ->
-                let x = new FplJustificationItemByAx(positions, parent, 0)
-                x.Run variableStack 
-            | "FplJustificationItemByCor" ->
-                let x = new FplJustificationItemByCor(positions, parent, 0)
-                x.Run variableStack 
-            | "FplJustificationItemByDef" ->
-                let x = new FplJustificationItemByDef(positions, parent, 0)
-                x.Run variableStack 
-            | "FplJustificationItemByInf" ->
-                let x = new FplJustificationItemByInf(positions, parent, 0)
-                x.Run variableStack 
-            | "FplJustificationItemByProofArgument" ->
-                let x = new FplJustificationItemByProofArgument(positions, parent, 0)
-                x.Run variableStack 
-            | "FplJustificationItemByTheoremLikeStmt" ->
-                let x = new FplJustificationItemByTheoremLikeStmt(positions, parent, 0)
-                x.Run variableStack 
-            | "FplLanguage" ->
-                let x = new FplLanguage(positions, parent)
-                x.Run variableStack 
-            | "FplLemma" ->
-                let x = new FplLemma(positions, parent, 0)
-                x.Run variableStack 
-            | "FplLocalization" ->
-                let x = new FplLocalization(positions, parent)
-                x.Run variableStack 
-            | "FplMandatoryFunctionalTerm" ->
-                let x = new FplMandatoryFunctionalTerm(positions, parent)
-                x.Run variableStack 
-            | "FplMandatoryPredicate" ->
-                let x = new FplMandatoryPredicate(positions, parent)
-                x.Run variableStack 
-            | "FplMapCaseElse" ->
-                let x = new FplMapCaseElse(positions, parent)
-                x.Run variableStack 
-            | "FplMapCaseSingle" ->
-                let x = new FplMapCaseSingle(positions, parent)
-                x.Run variableStack 
-            | "FplMapCases" ->
-                let x = new FplMapCases(positions, parent)
-                x.Run variableStack 
-            | "FplMapping" ->
-                let x = new FplMapping(positions, parent)
-                x.Run variableStack 
-            | "FplNegation" ->
-                let x = new FplNegation(positions, parent)
-                x.Run variableStack 
-            | "FplOptionalFunctionalTerm" ->
-                let x = new FplOptionalFunctionalTerm(positions, parent)
-                x.Run variableStack 
-            | "FplOptionalPredicate" ->
-                let x = new FplOptionalPredicate(positions, parent)
-                x.Run variableStack 
-            | "FplPredicate" ->
-                let x = new FplPredicate(positions, parent, 0)
-                x.Run variableStack
-            | "FplPremiseList" ->
-                let x = new FplPremiseList(positions, parent, 0)
-                x.Run variableStack
-            | "FplProof" ->
-                let x = new FplProof(positions, parent, 0)
-                x.Run variableStack 
-            | "FplProposition" ->
-                let x = new FplProposition(positions, parent, 0)
-                x.Run variableStack 
-            | "FplQuantorAll" ->
-                let x = new FplQuantorAll(positions, parent)
-                x.Run variableStack 
-            | "FplQuantorExists" ->
-                let x = new FplQuantorExists(positions, parent)
-                x.Run variableStack 
-            | "FplQuantorExistsN" ->
-                let x = new FplQuantorExistsN(positions, parent)
-                x.Run variableStack 
-            | "FplReference" ->
-                let x = new FplReference(positions, parent)
-                x.Run variableStack 
-            | "FplReturn" ->
-                let x = new FplReturn(positions, parent)
-                x.Run variableStack 
-            | "FplRoot" ->
-                let x = new FplRoot()
-                x.Run variableStack 
-            | "FplRuleOfInference" ->
-                let x = new FplRuleOfInference(positions, parent, 0)
-                x.Run variableStack 
-            | "FplTheorem" ->
-                let x = new FplTheorem(positions, parent, 0)
-                x.Run variableStack 
-            | "FplTheory" ->
-                let x = new FplTheory(positions, parent, "", 0)
-                x.Run variableStack 
-            | "FplTranslation" ->
-                let x = new FplTranslation(positions, parent)
-                x.Run variableStack 
-            | "FplVariable" ->
-                let x = new FplVariable(positions, parent)
-                x.Run variableStack 
-            | "FplVariadicVariableMany" ->
-                let x = new FplVariable(positions, parent)
-                x.SetToMany() |> ignore
-                x.Run variableStack 
-            | "FplVariadicVariableMany1" ->
-                let x = new FplVariable(positions, parent)
-                x.SetToMany1() |> ignore
-                x.Run variableStack 
-            | _ -> 
-                Assert.IsTrue(false, var)
-        with
-        | :? System.NotImplementedException -> Assert.Fail("Run method not implmented")
-        | _ -> ()
 
     // todo: issue diagnostics if assuming referenced arguments
     // todo: issue diagnostics restricting assumtions only to non-compound predicates and to references to definitions of predicates
@@ -1740,13 +1481,51 @@ type SymbolTableStructure() =
     [<DataRow("FplIntrinsicTpl", "00", """;""", "")>]
     [<DataRow("FplIntrinsicUndef", "00", """;""", "")>]
     [<DataRow("FplIsOperator", "00", """;""", "")>]
-    [<DataRow("FplJustification", "00", """;""", "")>]
-    [<DataRow("FplJustificationItemByAx", "00", """;""", "")>]
+
+    // no justification    
+    [<DataRow("FplJustification", "00", """proof T$1 {1. |- trivial};""", "")>]
+    // justification by theorem-like stmt  
+    [<DataRow("FplJustification", "01", """proof T$1 {1. A |- trivial};""", "")>]
+    // justification byax   
+    [<DataRow("FplJustification", "02", """proof T$1 {1. byax A |- trivial};""", "")>]
+    // justification bycor   
+    [<DataRow("FplJustification", "03", """proof T$1 {1. bycor A$1 |- trivial};""", "")>]
+    // justification bydef   
+    [<DataRow("FplJustification", "04", """proof T$1 {1. bydef A |- trivial};""", "")>]
+    // justificattion by proof argument (other proof)
+    [<DataRow("FplJustification", "05", """proof T$1 {1. A$1:2 |- trivial};""", "")>]
+    // justificattion byinf
+    [<DataRow("FplJustification", "06", """proof T$1 {1. byinf A |- trivial};""", "")>]
+    // justificattion by proof argument (this proof)
+    [<DataRow("FplJustification", "07", """proof T$1 {1. 2 |- trivial};""", "")>]
+    // justification bydef var  
+    [<DataRow("FplJustification", "08", """proof T$1 {1. bydef x |- trivial};""", "")>]
+    // all kinds
+    [<DataRow("FplJustification", "09", """proof T$1 {1.  A, byax B, bycor C$1, bydef D, E$1:2, byinf F, 2, bydef x |- trivial};""", "")>]
+
+    // byax without reference
+    [<DataRow("FplJustificationItemByAx", "00", """proof T$1 {1. byax A |- trivial};""", "")>]
+    // byax with reference to an axiom
+    [<DataRow("FplJustificationItemByAx", "00a", """ax A() {true} proof T$1 {1. byax A |- trivial};""", "")>]
+    // byax with reference to a non-axiom
+    [<DataRow("FplJustificationItemByAx", "00b", """inf A() {pre:true con:true} proof T$1 {1. byax A |- trivial};""", "")>]
+    [<DataRow("FplJustificationItemByAx", "00b", """thm A() {true} proof T$1 {1. byax A |- trivial};""", "")>]
+    [<DataRow("FplJustificationItemByAx", "00c", """prop A() {true} proof T$1 {1. byax A |- trivial};""", "")>]
+    [<DataRow("FplJustificationItemByAx", "00d", """lem A() {true} proof T$1 {1. byax A |- trivial};""", "")>]
+    [<DataRow("FplJustificationItemByAx", "00e", """conj A() {true} proof T$1 {1. byax A |- trivial};""", "")>]
+    [<DataRow("FplJustificationItemByAx", "00f", """def pred A() {true} proof T$1 {1. byax A |- trivial};""", "")>]
+    [<DataRow("FplJustificationItemByAx", "00g", """def func A()->pred {intr} proof T$1 {1. byax A |- trivial};""", "")>]
+    [<DataRow("FplJustificationItemByAx", "00h", """def cl A:obj {intr} proof T$1 {1. byax A |- trivial};""", "")>]
+
     [<DataRow("FplJustificationItemByCor", "00", """;""", "")>]
     [<DataRow("FplJustificationItemByDef", "00", """;""", "")>]
+    [<DataRow("FplJustificationItemByDefVar", "00", """;""", "")>]
     [<DataRow("FplJustificationItemByInf", "00", """inf ExistsByExample() {pre:true con:true} T$1 { 100. ExistsByExample, 1 |- false };""", "")>]
     [<DataRow("FplJustificationItemByProofArgument", "00", """;""", "")>]
+    [<DataRow("FplJustificationItemByRefArgument", "00", """;""", "")>]
     [<DataRow("FplJustificationItemByTheoremLikeStmt", "00", """;""", "")>]
+
+
     [<DataRow("FplLanguage", "00", """;""", "")>]
 
     // lemma 
@@ -1849,7 +1628,7 @@ type SymbolTableStructure() =
     // non-intrinsic predicate with some statements 
     [<DataRow("FplPredicate", "04", """def pred T(x,y:obj) {dec ~z:obj z:=x y:=z; false };""", "")>]
 
-    [<DataRow("FplPremiseList", "00", """;""", "")>]
+    [<DataRow("FplPredicateList", "00", """;""", "")>]
 
     // proof 
     [<DataRow("FplProof", "00", """proof T$1 {1. |- trivial};""", "")>]
@@ -1879,7 +1658,11 @@ type SymbolTableStructure() =
     [<DataRow("FplReference", "00", """;""", "")>]
     [<DataRow("FplReturn", "00", """;""", "")>]
     [<DataRow("FplRoot", "00", """;""", "")>]
-    [<DataRow("FplRuleOfInference", "00", """;""", "")>]
+
+    // rule of inference with one premise
+    [<DataRow("FplRuleOfInference", "00", """inf T() {pre:true con:false};""", "")>]
+    // rule of inference with three premises
+    [<DataRow("FplRuleOfInference", "01", """inf T() {pre:true, true, true con:false};""", "")>]
 
     // theorem
     [<DataRow("FplTheorem", "00", """thm T() {true};""", "")>]
@@ -1918,7 +1701,7 @@ type SymbolTableStructure() =
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
         | Some st -> 
-            let nodeName = (getName nodeType)
+            let nodeName = (getName nodeType).[0]
             let infiniteLoop = new HashSet<obj>()
             let testNodeOpt = findNamedItem nodeName identifier infiniteLoop st.Root
             match testNodeOpt with 
@@ -2099,6 +1882,66 @@ type SymbolTableStructure() =
                     Assert.IsInstanceOfType<FplFunctionalTerm>(node)
                     Assert.AreEqual<int>(4, node.ArgList.Count) // non-intrinsic with mapping, 2 statements, and return statement
                     Assert.AreEqual<int>(3, node.Scope.Count) // 3 variables
+                
+                | "FplJustification", "00" ->
+                    Assert.IsInstanceOfType<FplArgument>(parent)
+                    Assert.AreEqual<int>(2, parent.ArgList.Count) 
+                    Assert.AreEqual<int>(0, parent.Scope.Count)
+                    Assert.IsInstanceOfType<FplJustification>(node)
+                    Assert.AreEqual<int>(0, node.ArgList.Count) // no justification 
+                    Assert.AreEqual<int>(0, node.Scope.Count)
+                | "FplJustification", "01" 
+                | "FplJustification", "02" 
+                | "FplJustification", "03" 
+                | "FplJustification", "04" 
+                | "FplJustification", "05" 
+                | "FplJustification", "06" 
+                | "FplJustification", "07" 
+                | "FplJustification", "08" ->
+                    Assert.IsInstanceOfType<FplArgument>(parent)
+                    Assert.AreEqual<int>(2, parent.ArgList.Count) 
+                    Assert.AreEqual<int>(0, parent.Scope.Count)
+                    Assert.IsInstanceOfType<FplJustification>(node)
+                    Assert.AreEqual<int>(0, node.ArgList.Count)  
+                    Assert.AreEqual<int>(1, node.Scope.Count) // contains only a single type of FplJustificationItem
+                | "FplJustification", "09" ->
+                    Assert.IsInstanceOfType<FplArgument>(parent)
+                    Assert.AreEqual<int>(2, parent.ArgList.Count) 
+                    Assert.AreEqual<int>(0, parent.Scope.Count)
+                    Assert.IsInstanceOfType<FplJustification>(node)
+                    Assert.AreEqual<int>(0, node.ArgList.Count)  
+                    Assert.AreEqual<int>(8, node.Scope.Count) // contains all possible types of FplJustificationItem
+                
+
+                | "FplJustificationItemByAx", "00" ->
+                    Assert.IsInstanceOfType<FplJustification>(parent)
+                    Assert.AreEqual<int>(1, parent.ArgList.Count) 
+                    Assert.AreEqual<int>(0, parent.Scope.Count)
+                    Assert.IsInstanceOfType<FplJustificationItemByAx>(node)
+                    Assert.AreEqual<int>(0, node.ArgList.Count)  
+                    Assert.AreEqual<int>(0, node.Scope.Count)
+                | "FplJustificationItemByAx", "00a" ->
+                    Assert.IsInstanceOfType<FplJustification>(parent)
+                    Assert.AreEqual<int>(1, parent.ArgList.Count) 
+                    Assert.AreEqual<int>(0, parent.Scope.Count)
+                    Assert.IsInstanceOfType<FplJustificationItemByAx>(node)
+                    Assert.AreEqual<int>(0, node.ArgList.Count)  
+                    Assert.AreEqual<int>(1, node.Scope.Count) // referenced axiom
+                | "FplJustificationItemByAx", "00b" 
+                | "FplJustificationItemByAx", "00c" 
+                | "FplJustificationItemByAx", "00d" 
+                | "FplJustificationItemByAx", "00e" 
+                | "FplJustificationItemByAx", "00f" 
+                | "FplJustificationItemByAx", "00g" 
+                | "FplJustificationItemByAx", "00h" ->
+                    Assert.IsInstanceOfType<FplJustification>(parent)
+                    Assert.AreEqual<int>(1, parent.ArgList.Count) 
+                    Assert.AreEqual<int>(0, parent.Scope.Count)
+                    Assert.IsInstanceOfType<FplJustificationItemByAx>(node)
+                    Assert.AreEqual<int>(0, node.ArgList.Count) 
+                    Assert.AreEqual<int>(0, node.Scope.Count) // referenced to a wrong block with matching name
+                    
+                
                 | "FplLemma", "00" -> 
                     Assert.IsInstanceOfType<FplTheory>(parent)
                     Assert.AreEqual<int>(0, parent.ArgList.Count)
@@ -2470,6 +2313,23 @@ type SymbolTableStructure() =
                     Assert.IsInstanceOfType<FplProposition>(node)
                     Assert.AreEqual<int>(1, node.ArgList.Count)
                     Assert.AreEqual<int>(0, node.Scope.Count)
+
+                | "FplRuleOfInference", "00" -> 
+                    Assert.IsInstanceOfType<FplTheory>(parent)
+                    Assert.AreEqual<int>(0, parent.ArgList.Count)
+                    Assert.AreEqual<int>(1, parent.Scope.Count)
+                    Assert.IsInstanceOfType<FplRuleOfInference>(node)
+                    Assert.AreEqual<int>(2, node.ArgList.Count)
+                    Assert.AreEqual<int>(0, node.Scope.Count)
+                | "FplRuleOfInference", "01" -> 
+                    Assert.IsInstanceOfType<FplTheory>(parent)
+                    Assert.AreEqual<int>(0, parent.ArgList.Count)
+                    Assert.AreEqual<int>(1, parent.Scope.Count)
+                    Assert.IsInstanceOfType<FplRuleOfInference>(node)
+                    Assert.AreEqual<int>(2, node.ArgList.Count) // still 2, because we have FplPremiseList object 
+                    Assert.AreEqual<int>(0, node.Scope.Count)
+
+
                 | "FplTheorem", "00" -> 
                     Assert.IsInstanceOfType<FplTheory>(parent)
                     Assert.AreEqual<int>(0, parent.ArgList.Count)
@@ -2477,6 +2337,8 @@ type SymbolTableStructure() =
                     Assert.IsInstanceOfType<FplTheorem>(node)
                     Assert.AreEqual<int>(1, node.ArgList.Count)
                     Assert.AreEqual<int>(0, node.Scope.Count)
+
+
                 | "FplTheory", "00" ->
                     Assert.IsInstanceOfType<FplRoot>(parent)
                     Assert.AreEqual<int>(0, parent.ArgList.Count)
