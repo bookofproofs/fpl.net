@@ -12,7 +12,7 @@ type TestFplValueNesting() =
 
 
 
-    [<DataRow("axiom X() { true };")>]
+    [<DataRow("axiom X { true };")>]
     [<TestMethod>]
     member this.TestAxiomHasValue(varVal) =
         ad.Clear()

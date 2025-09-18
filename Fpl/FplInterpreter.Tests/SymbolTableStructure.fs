@@ -1414,7 +1414,7 @@ type SymbolTableStructure() =
     [<DataRow("FplArgument", "00", """;""", "")>]
     [<DataRow("FplAssertion", "00", """;""", "")>]
     [<DataRow("FplAssignment", "00", """def pred T() {dec ~x:pred x:=false; true};""", "")>]
-    [<DataRow("FplAxiom", "00", """ax T() {true};""", "")>]
+    [<DataRow("FplAxiom", "00", """ax T {true};""", "")>]
     [<DataRow("FplCases", "00", """;""", "")>]
     [<DataRow("FplCaseElse", "00", """;""", "")>]
     [<DataRow("FplCaseSingle", "00", """;""", "")>]
@@ -1436,7 +1436,7 @@ type SymbolTableStructure() =
     [<DataRow("FplClass", "05", """def cl A:obj { dec ~x,y:obj; ctor A() {} prty func MandF()->obj {intr} prty func opt OptF()->obj {intr} prty pred MandP() {true} prty pred opt OptP() {true} };""", "")>]
     
     // conjecture
-    [<DataRow("FplConjecture", "00", """conj T() {true};""", "")>]
+    [<DataRow("FplConjecture", "00", """conj T {true};""", "")>]
 
     [<DataRow("FplConjunction", "00", """;""", "")>]
 
@@ -1520,7 +1520,7 @@ type SymbolTableStructure() =
     [<DataRow("FplJustificationItemByCor", "00", """;""", "")>]
     [<DataRow("FplJustificationItemByDef", "00", """;""", "")>]
     [<DataRow("FplJustificationItemByDefVar", "00", """;""", "")>]
-    [<DataRow("FplJustificationItemByInf", "00", """inf ExistsByExample() {pre:true con:true} proof T$1 { 100. ExistsByExample, 1 |- false };""", "")>]
+    [<DataRow("FplJustificationItemByInf", "00", """inf ExistsByExample {pre:true con:true} proof T$1 { 100. ExistsByExample, 1 |- false };""", "")>]
     [<DataRow("FplJustificationItemByProofArgument", "00", """;""", "")>]
     [<DataRow("FplJustificationItemByRefArgument", "00", """;""", "")>]
     [<DataRow("FplJustificationItemByTheoremLikeStmt", "00", """;""", "")>]
@@ -1645,12 +1645,12 @@ type SymbolTableStructure() =
     // proof with conjecture
     [<DataRow("FplProof", "01c", """prop T {true} proof T$1 {1. |- trivial};""", "")>]
     // proof with corollary
-    [<DataRow("FplProof", "02", """thm T {true} cor T$1() {true} proof T$1$1 {1. |- trivial};""", "")>]
+    [<DataRow("FplProof", "02", """thm T {true} cor T$1 {true} proof T$1$1 {1. |- trivial};""", "")>]
     // proof with two arguments
     [<DataRow("FplProof", "03", """proof T$1$1 {1. byax A |- trivial 2. |- trivial};""", "")>]
 
     // proposition
-    [<DataRow("FplProposition", "00", """prop T() {true};""", "")>]
+    [<DataRow("FplProposition", "00", """prop T {true};""", "")>]
 
     [<DataRow("FplQuantorAll", "00", """;""", "")>]
     [<DataRow("FplQuantorExists", "00", """;""", "")>]
@@ -1660,9 +1660,9 @@ type SymbolTableStructure() =
     [<DataRow("FplRoot", "00", """;""", "")>]
 
     // rule of inference with one premise
-    [<DataRow("FplRuleOfInference", "00", """inf T() {pre:true con:false};""", "")>]
+    [<DataRow("FplRuleOfInference", "00", """inf T {pre:true con:false};""", "")>]
     // rule of inference with three premises
-    [<DataRow("FplRuleOfInference", "01", """inf T() {pre:true, true, true con:false};""", "")>]
+    [<DataRow("FplRuleOfInference", "01", """inf T {pre:true, true, true con:false};""", "")>]
 
     // theorem
     [<DataRow("FplTheorem", "00", """thm T {true};""", "")>]

@@ -292,22 +292,22 @@ type CommonFplValueTestCases =
     static member ScopeBlocks(subtype) =
         ad.Clear()
         let fplCode = """
-            inf SomeInference1() {pre:true con:true}
-            inf SomeInference2() {pre:true con:true}
-            axiom SomeAxiom1() {true}
-            axiom SomeAxiom2() {true}
-            postulate SomePostulate1() {true}
-            postulate SomePostulate2() {true}
-            theorem SomeTheorem1() {true}
-            theorem SomeTheorem2() {true}
-            proposition SomeProposition1() {true}
-            proposition SomeProposition2() {true}
-            lemma SomeLemma1() {true}
-            lemma SomeLemma2() {true}
-            corollary SomeLemma1$1() {true}
-            corollary SomeLemma2$1() {true}
-            conjecture SomeConjecture1() {true}
-            conjecture SomeConjecture2() {true}
+            inf SomeInference1 {pre:true con:true}
+            inf SomeInference2 {pre:true con:true}
+            axiom SomeAxiom1 {true}
+            axiom SomeAxiom2 {true}
+            postulate SomePostulate1 {true}
+            postulate SomePostulate2 {true}
+            theorem SomeTheorem1 {true}
+            theorem SomeTheorem2 {true}
+            proposition SomeProposition1 {true}
+            proposition SomeProposition2 {true}
+            lemma SomeLemma1 {true}
+            lemma SomeLemma2 {true}
+            corollary SomeLemma1$1 {true}
+            corollary SomeLemma2$1 {true}
+            conjecture SomeConjecture1 {true}
+            conjecture SomeConjecture2 {true}
             def cl SomeClass1:obj {intr}
             def cl SomeClass2:obj {intr}
             def pred SomePredicate1() {true}
@@ -334,22 +334,22 @@ type CommonFplValueTestCases =
                         | Some st -> 
                             let r = st.Root
                             let theory = CommonFplValueTestCases.getScopedElement r filename subtype
-                            let inf1 = CommonFplValueTestCases.getScopedElement theory "SomeInference1()" subtype
-                            let inf2 = CommonFplValueTestCases.getScopedElement theory "SomeInference2()" subtype
-                            let axi1 = CommonFplValueTestCases.getScopedElement theory "SomeAxiom1()" subtype
-                            let axi2 = CommonFplValueTestCases.getScopedElement theory "SomeAxiom2()" subtype
-                            let pst1 = CommonFplValueTestCases.getScopedElement theory "SomePostulate1()" subtype
-                            let pst2 = CommonFplValueTestCases.getScopedElement theory "SomePostulate2()" subtype
-                            let thm1 = CommonFplValueTestCases.getScopedElement theory "SomeTheorem1()" subtype
-                            let thm2 = CommonFplValueTestCases.getScopedElement theory "SomeTheorem2()" subtype
-                            let pro1 = CommonFplValueTestCases.getScopedElement theory "SomeProposition1()" subtype
-                            let pro2 = CommonFplValueTestCases.getScopedElement theory "SomeProposition2()" subtype
-                            let lem1 = CommonFplValueTestCases.getScopedElement theory "SomeLemma1()" subtype
-                            let lem2 = CommonFplValueTestCases.getScopedElement theory "SomeLemma2()" subtype
-                            let cor1 = CommonFplValueTestCases.getScopedElement lem1 "SomeLemma1$1()" subtype
-                            let cor2 = CommonFplValueTestCases.getScopedElement lem2 "SomeLemma2$1()" subtype
-                            let con1 = CommonFplValueTestCases.getScopedElement theory "SomeConjecture1()" subtype
-                            let con2 = CommonFplValueTestCases.getScopedElement theory "SomeConjecture2()" subtype
+                            let inf1 = CommonFplValueTestCases.getScopedElement theory "SomeInference1" subtype
+                            let inf2 = CommonFplValueTestCases.getScopedElement theory "SomeInference2" subtype
+                            let axi1 = CommonFplValueTestCases.getScopedElement theory "SomeAxiom1" subtype
+                            let axi2 = CommonFplValueTestCases.getScopedElement theory "SomeAxiom2" subtype
+                            let pst1 = CommonFplValueTestCases.getScopedElement theory "SomePostulate1" subtype
+                            let pst2 = CommonFplValueTestCases.getScopedElement theory "SomePostulate2" subtype
+                            let thm1 = CommonFplValueTestCases.getScopedElement theory "SomeTheorem1" subtype
+                            let thm2 = CommonFplValueTestCases.getScopedElement theory "SomeTheorem2" subtype
+                            let pro1 = CommonFplValueTestCases.getScopedElement theory "SomeProposition1" subtype
+                            let pro2 = CommonFplValueTestCases.getScopedElement theory "SomeProposition2" subtype
+                            let lem1 = CommonFplValueTestCases.getScopedElement theory "SomeLemma1" subtype
+                            let lem2 = CommonFplValueTestCases.getScopedElement theory "SomeLemma2" subtype
+                            let cor1 = CommonFplValueTestCases.getScopedElement lem1 "SomeLemma1$1" subtype
+                            let cor2 = CommonFplValueTestCases.getScopedElement lem2 "SomeLemma2$1" subtype
+                            let con1 = CommonFplValueTestCases.getScopedElement theory "SomeConjecture1" subtype
+                            let con2 = CommonFplValueTestCases.getScopedElement theory "SomeConjecture2" subtype
                             let cla1 = CommonFplValueTestCases.getScopedElement theory "SomeClass1" subtype
                             let cla2 = CommonFplValueTestCases.getScopedElement theory "SomeClass2" subtype
                             let pre1 = CommonFplValueTestCases.getScopedElement theory "SomePredicate1()" subtype
@@ -376,35 +376,35 @@ type CommonFplValueTestCases =
         ad.Clear()
         let fplCode = """
 
-            theorem TestTheorem1() {true} 
+            theorem TestTheorem1 {true} 
             proof TestTheorem1$1 {1. |- trivial} 
             
-            lemma TestLemma1() {true} 
+            lemma TestLemma1 {true} 
             proof TestLemma1$1 {1. |- trivial} 
             
-            proposition TestProposition1() {true} 
+            proposition TestProposition1 {true} 
             proof TestProposition1$1 {1. |- trivial} 
             
-            corollary TestCorollary1$2() {true} 
+            corollary TestCorollary1$2 {true} 
             proof TestCorollary1$2$1 {1. |- trivial} 
 
-            theorem TestTheorem2() {true} 
-            corollary TestTheorem2$1() {true}  
+            theorem TestTheorem2 {true} 
+            corollary TestTheorem2$1 {true}  
             
-            lemma TestLemma2() {true} 
-            corollary TestLemma2$1() {true}  
+            lemma TestLemma2 {true} 
+            corollary TestLemma2$1 {true}  
             
-            proposition TestProposition2() {true} 
-            corollary TestProposition2$1() {true}  
+            proposition TestProposition2 {true} 
+            corollary TestProposition2$1 {true}  
 
-            corollary TestCorollary2$2() {true} 
-            corollary TestCorollary2$2$1() {true}  
+            corollary TestCorollary2$2 {true} 
+            corollary TestCorollary2$2$1 {true}  
 
-            conjecture TestConjecture() {true} 
-            corollary TestConjecture$1() {true}  
+            conjecture TestConjecture {true} 
+            corollary TestConjecture$1 {true}  
 
-            axiom TestAxiom() {true} 
-            corollary TestAxiom$1() {true}  
+            axiom TestAxiom {true} 
+            corollary TestAxiom$1 {true}  
         ;
         """
         let filename = "TestScopeProofsAndCorollaries" + subtype
