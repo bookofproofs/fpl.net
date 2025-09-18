@@ -10,7 +10,7 @@ open CommonTestHelpers
 open TestSharedConfig
 
 [<TestClass>]
-type UpdatingSymbolTableNavigation() =
+type SymbolTableNavigation() =
 
     [<TestMethod>]
     member this.UsesClauseCausesDownloads() =

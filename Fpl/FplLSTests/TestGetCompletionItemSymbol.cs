@@ -1,5 +1,5 @@
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
-using static FplGrammarCommons;
+using static FplPrimitives;
 
 namespace FplLSTests
 {
@@ -22,7 +22,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesSymbol(choice, declarative).GetChoices(detailCi);
             var counter = 0;
 
-            foreach (KeyValuePair<char, System.Tuple<int, string, string>> item in FplGrammarCommons.mathSymbols)
+            foreach (KeyValuePair<char, System.Tuple<int, string, string>> item in FplPrimitives.mathSymbols)
             {
                 if ((item.Value.Item1 & bitMask) == bitMask)
                 {

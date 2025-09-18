@@ -16,7 +16,7 @@ type TestConstructors () =
             }"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:"))
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestConstructor00a () =
@@ -40,7 +40,7 @@ type TestConstructors () =
             }"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:"))
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestConstructor01 () =
@@ -97,11 +97,10 @@ type TestConstructors () =
     member this.TestConstructor02 () =
         // constructors must contain the call(s) of the parent constructors
         // of all parent classes of the class; the call's syntax starts
-        // with self followed by an exclamation mark and name of the classes constructor
+       
         let result = run (constructor .>> eof) """ctor Magma(x: tplSet, op: BinOp)
             {
                 dec ~a:obj  base.AlgebraicStructure(x,op);
-                self
             }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -111,13 +110,13 @@ type TestConstructors () =
     member this.TestConstructor03 () =
         // constructors must contain the call(s) of the parent constructors
         // of all parent classes of the class; the call's syntax starts
-        // with self followed by an exclamation mark and name of the classes constructor
+       
         let result = run (constructor .>> eof) """constructor Magma(x: tplSet, op: BinOp)
             {
                 dec ~a:obj
                     base.AlgebraicStructure(x,op)
                 ;
-                self
+                
             }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -128,7 +127,7 @@ type TestConstructors () =
         let result = run (constructor .>> eof) """ctor Magma(x: tplSet, op: BinOp)
             {
                 dec ~a:obj ;
-                self 
+            
             }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -159,7 +158,7 @@ type TestConstructors () =
             }"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:"))
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestConstructor05 () =
@@ -193,10 +192,9 @@ type TestConstructors () =
                     addInField := myField.AddOp()
                     mulInField := myField.MulOp()
                     assert NotEqual(n, Zero())
-    				base.obj()
-                    self:=SetBuilder( myField[@1 , n], true)
+    				base.SetBuilder( myField[@1 , n], true) 
                 ;
-                self
+                
             }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -215,7 +213,7 @@ type TestConstructors () =
                     base.D(self,b,c)
                     base.E(true, undef)
                     ;
-                    self
+                    
                 }"""
         let actual = sprintf "%O" result
         printf "%O" actual

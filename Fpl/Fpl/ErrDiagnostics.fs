@@ -6,7 +6,7 @@ open System.Collections.Generic
 open System.Security.Cryptography
 open System.Text
 open FParsec
-open FplGrammarCommons
+open FplPrimitives
 open FplGrammarTypes
 
 
@@ -100,7 +100,6 @@ type DiagnosticCode =
     | NSP04 of string 
     | NSP05 of string list * string * string
     // identifier-related error codes
-    | ID000 of string
     | ID001 of string * string
     | ID002 of string * string
     | ID003 of string
@@ -122,7 +121,6 @@ type DiagnosticCode =
     | ID019 of string 
     | ID020 of string 
     | ID021 of string 
-    | ID022 of string * bool
     | ID023 of string 
     // logic-related error codes
     | LG000 of string * string 
@@ -133,14 +131,20 @@ type DiagnosticCode =
     | LG005 of string
     // proof-related error codes
     | PR000 of string 
-    | PR001 
-    | PR002 
+    | PR001 of string
+    | PR002 of string
     | PR003 of string * string
     | PR004 of string * string
     | PR005 of string
-    | PR006 
+    | PR006 of string * string
     | PR007 of string * string
     | PR008 of string * string * string
+    | PR009 
+    | PR010 of string * string 
+    | PR011 of string * string
+    | PR012 
+    | PR013
+    | PR014
     // signature-related error codes
     | SIG00 of string * int
     | SIG01 of string 
@@ -194,7 +198,6 @@ type DiagnosticCode =
             | NSP04 _ -> "NSP04"
             | NSP05 _ -> "NSP05"
             // identifier-related error codes 
-            | ID000 _ -> "ID000"
             | ID001 _ -> "ID001"
             | ID002 _ -> "ID002"
             | ID003 _ -> "ID003"
@@ -216,7 +219,6 @@ type DiagnosticCode =
             | ID019 _ -> "ID019"
             | ID020 _ -> "ID020"
             | ID021 _ -> "ID021"
-            | ID022 _ -> "ID022"
             | ID023 _ -> "ID023"
             // logic-related error codes
             | LG000 _ -> "LG000"
@@ -227,14 +229,20 @@ type DiagnosticCode =
             | LG005 _ -> "LG005"
             // proof-related error codes
             | PR000 _ -> "PR000"
-            | PR001 -> "PR001"
-            | PR002 -> "PR002"
+            | PR001 _ -> "PR001"
+            | PR002 _ -> "PR002"
             | PR003 _ -> "PR003"
             | PR004 _ -> "PR004"
             | PR005 _ -> "PR005"
-            | PR006 -> "PR006"
+            | PR006 _ -> "PR006"
             | PR007 _ -> "PR007"
             | PR008 _ -> "PR008"
+            | PR009 -> "PR009"
+            | PR010 _ -> "PR010"
+            | PR011 _ -> "PR011"
+            | PR012 -> "PR012"
+            | PR013 -> "PR013"
+            | PR014 -> "PR014"
             // signature-related error codes
             | SIG00 _ -> "SIG00"
             | SIG01 _ -> "SIG01"
@@ -288,7 +296,6 @@ type DiagnosticCode =
             | NSP04 path -> sprintf "Circular theory reference detected: `%s`" path
             | NSP05 (pathTypes, theory, chosenSource) -> sprintf "Multiple sources %A for theory %s detected (%s was chosen)." pathTypes theory chosenSource
             // identifier-related error codes 
-            | ID000 identifier -> sprintf "Handling ast type `%s` not yet implemented." identifier
             | ID001 (signature, conflict) -> sprintf "Signature `%s` was already declared at %s." signature conflict
             | ID002 (signature, incorrectBlockType) -> sprintf "Cannot find a block to be associated with the proof %s, found only %s." signature incorrectBlockType
             | ID003 signature -> sprintf "The proof `%s` is missing a block to be associated with." signature 
@@ -318,11 +325,6 @@ type DiagnosticCode =
             | ID019 name -> sprintf "The extension `%s` could not be found. Are you missing a uses clause?" name
             | ID020 name -> sprintf "Missing call of base constructor `%s`." name
             | ID021 name -> sprintf "Duplicate call of base constructor `%s`." name
-            | ID022 (incorrectBlockType, isByDef) -> 
-                if isByDef then 
-                    $"Cannot find a justifying `by definition`, found only {incorrectBlockType}." 
-                else
-                    $"Cannot find a justifying theorem-like statement, found only {incorrectBlockType}." 
             | ID023 candidates  -> $"Cannot associate a justification with a single block. Found more candidates: {candidates}." 
             // logic-related error codes
             | LG000 (typeOfPredicate,argument) -> $"Cannot evaluate `{typeOfPredicate}`; its argument `{argument}` is a predicate but couldn't be determined."
@@ -332,15 +334,21 @@ type DiagnosticCode =
             | LG004 nodeType -> $"`Parameters not allowed for {nodeType}."
             | LG005 name -> $"`Unnecessary assignment of `{name}` detected (will be implicitely ignored)."
             // proof-related error codes
-            | PR000 name -> sprintf "Cannot refer to an argument identifier like `%s` outside a proof." name
-            | PR001 -> $"Cannot refer to a definition outside a proof."
-            | PR002 -> $"Avoid referencing to proofs directly."
+            | PR000 incorrectBlockType -> $"Cannot find a justifying `by definition`, found {incorrectBlockType} instead."
+            | PR001 incorrectBlockType -> $"Cannot find a justifying `other proof argument`, found {incorrectBlockType} instead."
+            | PR002 incorrectBlockType -> $"Cannot find a justifying theorem-like statement or rule of inference, found {incorrectBlockType} instead." 
             | PR003 (name, conflict) -> sprintf "Argument identifier `%s` was already declared at %s." name conflict
             | PR004 (name, conflict)  -> sprintf "Justification `%s` was already declared at %s." name conflict
-            | PR005 name ->  $"Argument identifier `{name}` not declared in this scope."
-            | PR006 -> "Not all arguments of the proof could be verified."
+            | PR005 name ->  $"Argument identifier `{name}` not declared in this proof."
+            | PR006 (proofName, argumentName)->  $"A proof {proofName} was found, but there ít has no argument with the name `{argumentName}`."
             | PR007 (nodeTypeName, nodeName) ->  $"{nodeTypeName} is {nodeName} and is missing a proof."
             | PR008 (nodeName, expectedInputArgInference, actualInputArgInference) ->  $"This {nodeName} expects `{expectedInputArgInference}` and could not be applied to the proceeding argument inference which was `{actualInputArgInference}`."
+            | PR009 -> "Not all arguments of the proof could be verified."
+            | PR010 (keyword, expectedRef) -> $"Justification `{keyword}` expects a reference to {expected}, not to a proof or corollary."
+            | PR011 (keyword, expectedRef) -> $"Justification `{keyword}` expects a reference to {expected}, not to an argument in some proof."
+            | PR012 -> $"Justification `{literalByCor}` expects a reference to a corollary."
+            | PR013 -> $"Add the keyword `{literalByCor}` when referencing to corollaries to increase readability."
+            | PR014 -> $"Justification expects a reference to a theorem-like statement without any more specific references."
             // signature-related error codes
             | SIG00 (fixType, arity) -> sprintf $"Illegal arity `{arity}` using `{fixType}` notation."
             | SIG01 symbol -> $"The symbol `{symbol}` was not declared." 

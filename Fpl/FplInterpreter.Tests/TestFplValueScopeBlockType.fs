@@ -1,7 +1,7 @@
 ﻿namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
-open FplGrammarCommons
+open FplPrimitives
 open FplInterpreterTypes
 open CommonTestHelpers
 
@@ -10,7 +10,7 @@ open CommonTestHelpers
 type TestFplValueScopeBlockType() =
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("inf1")>]
     [<DataRow("inf2")>]
     [<DataRow("axi1")>]
@@ -51,7 +51,7 @@ type TestFplValueScopeBlockType() =
         | Some (r:FplRoot,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,fun3:FplValue,fun4:FplValue,fun5:FplValue,fun6:FplValue,fun7:FplValue,fun8:FplValue,fun9:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
             match var with 
             | "r" -> Assert.IsInstanceOfType<FplRoot>(r)
-            | "theory" -> Assert.IsInstanceOfType<FplTheory>(theory)
+            | PrimTheoryL -> Assert.IsInstanceOfType<FplTheory>(theory)
             | "inf1" -> Assert.IsInstanceOfType<FplRuleOfInference>(inf1)
             | "inf2" -> Assert.IsInstanceOfType<FplRuleOfInference>(inf2)
             | "axi1" -> Assert.IsInstanceOfType<FplAxiom>(axi1)
@@ -91,7 +91,7 @@ type TestFplValueScopeBlockType() =
 
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("t1")>]
     [<DataRow("t2")>]
@@ -104,7 +104,7 @@ type TestFplValueScopeBlockType() =
         | Some (r,theory,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
             match var with 
             | "r" -> Assert.IsInstanceOfType<FplRoot>(r)
-            | "theory" -> Assert.IsInstanceOfType<FplTheory>(theory)
+            | PrimTheoryL -> Assert.IsInstanceOfType<FplTheory>(theory)
             | "block" -> Assert.IsInstanceOfType<FplClass>(block)
             | "t1" -> Assert.IsInstanceOfType<FplConstructor>(t1)
             | "t2" -> Assert.IsInstanceOfType<FplConstructor>(t2)
@@ -115,7 +115,7 @@ type TestFplValueScopeBlockType() =
             Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("thm1")>]
     [<DataRow("proofThm1")>]
     [<DataRow("lem1")>]
@@ -145,7 +145,7 @@ type TestFplValueScopeBlockType() =
                                 axi1,corAxi1) -> 
                 match var with
                 | "r" -> Assert.IsInstanceOfType<FplRoot>(r)
-                | "theory" -> Assert.IsInstanceOfType<FplTheory>(theory)
+                | PrimTheoryL -> Assert.IsInstanceOfType<FplTheory>(theory)
                 | "thm1" -> Assert.IsInstanceOfType<FplTheorem>(thm1)
                 | "proofThm1" -> Assert.IsInstanceOfType<FplProof>(proofThm1)
                 | "thm2" -> Assert.IsInstanceOfType<FplTheorem>(thm2)
@@ -172,7 +172,7 @@ type TestFplValueScopeBlockType() =
 
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("t1")>]
     [<DataRow("t2")>]
@@ -196,7 +196,7 @@ type TestFplValueScopeBlockType() =
             t13:FplValue,t14:FplValue) -> 
             match var with 
             | "r" -> Assert.IsInstanceOfType<FplRoot>(r)
-            | "theory" -> Assert.IsInstanceOfType<FplTheory>(theory)
+            | PrimTheoryL -> Assert.IsInstanceOfType<FplTheory>(theory)
             | "block" -> Assert.IsInstanceOfType<FplPredicate>(block)
             | "t1" -> Assert.IsInstanceOfType<FplMandatoryPredicate>(t1)
             | "t2" -> Assert.IsInstanceOfType<FplOptionalPredicate>(t2)
@@ -217,7 +217,7 @@ type TestFplValueScopeBlockType() =
             Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("s")>]
     [<DataRow("x")>]
@@ -254,7 +254,7 @@ type TestFplValueScopeBlockType() =
         | Some (r,theory,block,x,y,s,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.IsInstanceOfType<FplRoot>(r)
-            | "theory" -> Assert.IsInstanceOfType<FplTheory>(theory)
+            | PrimTheoryL -> Assert.IsInstanceOfType<FplTheory>(theory)
             | "block" -> Assert.IsInstanceOfType<FplPredicate>(block)
             | "s" -> Assert.IsTrue(s.IsVariable() && not (s.IsVariadic()))
             | "x" -> Assert.IsTrue(x.IsVariable() && not (x.IsVariadic()))
@@ -288,7 +288,7 @@ type TestFplValueScopeBlockType() =
             Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
@@ -323,7 +323,7 @@ type TestFplValueScopeBlockType() =
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.IsInstanceOfType<FplRoot>(r)
-            | "theory" -> Assert.IsInstanceOfType<FplTheory>(theory)
+            | PrimTheoryL -> Assert.IsInstanceOfType<FplTheory>(theory)
             | "block" -> Assert.IsInstanceOfType<FplPredicate>(block)
             | "x" -> Assert.IsTrue(x.IsVariable() && (x :?> FplVariable).IsMany1)
             | "y" -> Assert.IsTrue(y.IsVariable() && (y :?> FplVariable).IsMany1)
@@ -357,7 +357,7 @@ type TestFplValueScopeBlockType() =
 
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
@@ -392,7 +392,7 @@ type TestFplValueScopeBlockType() =
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.IsInstanceOfType<FplRoot>(r)
-            | "theory" -> Assert.IsInstanceOfType<FplTheory>(theory)
+            | PrimTheoryL -> Assert.IsInstanceOfType<FplTheory>(theory)
             | "block" -> Assert.IsInstanceOfType<FplPredicate>(block)
             | "x" -> Assert.IsTrue(x.IsVariable() && not (x.IsVariadic()))
             | "y" -> Assert.IsTrue(y.IsVariable() && not (y.IsVariadic()))
@@ -425,7 +425,7 @@ type TestFplValueScopeBlockType() =
             Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
@@ -460,7 +460,7 @@ type TestFplValueScopeBlockType() =
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.IsInstanceOfType<FplRoot>(r)
-            | "theory" -> Assert.IsInstanceOfType<FplTheory>(theory)
+            | PrimTheoryL -> Assert.IsInstanceOfType<FplTheory>(theory)
             | "block" -> Assert.IsInstanceOfType<FplPredicate>(block)
             | "x" -> Assert.IsTrue(x.IsVariable() && (x :?> FplVariable).IsMany1)
             | "y" -> Assert.IsTrue(y.IsVariable() && (y :?> FplVariable).IsMany1)
@@ -609,9 +609,9 @@ type TestFplValueScopeBlockType() =
             | "base15b" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base16" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base17" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base18" -> Assert.IsInstanceOfType<FplQuantor>(base1) 
-            | "base19" -> Assert.IsInstanceOfType<FplQuantor>(base1)  
-            | "base20" -> Assert.IsInstanceOfType<FplQuantor>(base1) 
+            | "base18" -> Assert.IsInstanceOfType<FplGenericQuantor>(base1) 
+            | "base19" -> Assert.IsInstanceOfType<FplGenericQuantor>(base1)  
+            | "base20" -> Assert.IsInstanceOfType<FplGenericQuantor>(base1) 
             | "base21" -> Assert.IsInstanceOfType<FplConjunction>(base1)
             | "base21a" -> Assert.IsInstanceOfType<FplNegation>(base1)
             | "base21b" -> Assert.IsInstanceOfType<FplNegation>(base1)
@@ -653,7 +653,7 @@ type TestFplValueScopeBlockType() =
                                 dec
                                     %s
                                 ;
-                                self
+                                
                             }
                         }
                         ;""" varVal
@@ -802,7 +802,31 @@ type TestFplValueScopeBlockType() =
     [<DataRow("base4", """100. 2, 3, 5 |- iif (a,b)""", 3)>]
     [<DataRow("base5", """100. |- revoke 3""", 0)>]
     [<TestMethod>]
-    member this.TestArgument(var, argExpression, expNumber:int) =
+    member this.TestArgumentNumberOfJustifications(var, argExpression, expNumber:int) =
+        ad.Clear()
+        let fplCode = sprintf """proof T$1 { %s };""" argExpression
+        let filename = "TestArgumentNumberOfJustifications"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let proof = theory.Scope["T$1"]
+            let arg = proof.Scope["100."]
+            let just = arg.ArgList[0]
+            let numbOfJustifications = just.Scope.Count
+            Assert.AreEqual<int>(expNumber, numbOfJustifications)
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("base1", """100. |- trivial""", 0)>]
+    [<DataRow("base2", """100. ExistsByExample, 1 |- false""", 2)>]
+    [<DataRow("base3", """100. T1 |- assume not somePremise """, 1)>]
+    [<DataRow("base4", """100. 2, 3, 5 |- iif (a,b)""", 3)>]
+    [<DataRow("base5", """100. |- revoke 3""", 0)>]
+    [<TestMethod>]
+    member this.TestArgumentBlockType(var, argExpression, expNumber:int) =
         ad.Clear()
         let fplCode = sprintf """proof T$1 { %s };""" argExpression
         let filename = "TestArgumentBlockType"
@@ -815,11 +839,6 @@ type TestFplValueScopeBlockType() =
             let proof = theory.Scope["T$1"]
             let arg = proof.Scope["100."]
             let just = arg.ArgList[0]
-            let ainf = arg.ArgList[1]
-            let numbOfJustifications = just.Scope.Count
- 
-            Assert.AreEqual<int>(expNumber, numbOfJustifications)
-
             match var with
             | "base1" -> Assert.IsInstanceOfType<FplArgument>(arg)
             | "base2" -> Assert.IsInstanceOfType<FplArgument>(arg)
@@ -1051,11 +1070,11 @@ type TestFplValueScopeBlockType() =
             let cr = res.ArgList[0]
  
             match var with
-            | "base1" -> Assert.IsInstanceOfType<FplConditionResult>(cr)
-            | "base2" -> Assert.IsInstanceOfType<FplConditionResult>(cr)
-            | "base3" -> Assert.IsInstanceOfType<FplConditionResult>(cr)
-            | "base4" -> Assert.IsInstanceOfType<FplConditionResult>(cr)
-            | "base5" -> Assert.IsInstanceOfType<FplConditionResult>(cr)
+            | "base1" -> Assert.IsInstanceOfType<FplMapCaseSingle>(cr)
+            | "base2" -> Assert.IsInstanceOfType<FplMapCaseSingle>(cr)
+            | "base3" -> Assert.IsInstanceOfType<FplMapCaseSingle>(cr)
+            | "base4" -> Assert.IsInstanceOfType<FplMapCaseSingle>(cr)
+            | "base5" -> Assert.IsInstanceOfType<FplMapCaseSingle>(cr)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
@@ -1095,11 +1114,11 @@ type TestFplValueScopeBlockType() =
             let cases = pred.ArgList[0]
  
             match var with
-            | "base1" -> Assert.IsInstanceOfType<FplStmt>(cases)
-            | "base2" -> Assert.IsInstanceOfType<FplStmt>(cases)
-            | "base3" -> Assert.IsInstanceOfType<FplStmt>(cases)
-            | "base4" -> Assert.IsInstanceOfType<FplStmt>(cases)
-            | "base5" -> Assert.IsInstanceOfType<FplStmt>(cases)
+            | "base1" -> Assert.IsInstanceOfType<FplGenericStmt>(cases)
+            | "base2" -> Assert.IsInstanceOfType<FplGenericStmt>(cases)
+            | "base3" -> Assert.IsInstanceOfType<FplGenericStmt>(cases)
+            | "base4" -> Assert.IsInstanceOfType<FplGenericStmt>(cases)
+            | "base5" -> Assert.IsInstanceOfType<FplGenericStmt>(cases)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

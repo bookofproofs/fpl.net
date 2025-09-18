@@ -220,7 +220,6 @@ type TestInterpreterErrors() =
         Assert.AreEqual<int>(0, ad.CountDiagnostics)
         this.PrepareTestNSP05CrossCheck(true) |> ignore
 
-
     [<DataRow("theorem SomeTheorem() {true} theorem SomeTheorem() {true} ;", 1)>]
     [<DataRow("theorem SomeTheorem() {true} ;", 0)>]
 
@@ -281,7 +280,7 @@ type TestInterpreterErrors() =
     [<DataRow(@"ext Digits x@/\d+/ -> X {ret x} def pred T(x:@Typo) {true};", 0)>]
 
     [<DataRow("def func Sum(list:* Nat)->Nat {dec ~result: Nat; return result} def func Sum2(list:* Nat)->Nat {dec ~result: Nat; return result};", 0)>]
-    [<DataRow("""def cl B:obj {intr} def cl A:obj {dec ~x:obj; ctor A(y:B[x:obj]) {self} };""", 0)>]
+    [<DataRow("""def cl B:obj {intr} def cl A:obj {dec ~x:obj; ctor A(y:B[x:obj]) {} };""", 0)>]
     [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID001(fplCode:string, expected:int) =
@@ -302,11 +301,11 @@ type TestInterpreterErrors() =
             let code = ID014 ("", "")
             runTestHelper "TestID014.fpl" fplCode code expected
 
-    [<DataRow("00", """def cl A:obj {ctor A() {self}};""", 0)>]
+    [<DataRow("00", """def cl A:obj {ctor A() {}};""", 0)>]
     [<DataRow("00a", """def cl A:obj {intr property pred T() { is(parent,A) } };""", 0)>]
     [<DataRow("00b", """def cl A:obj {intr property pred T() { is(self,A) } };""", 0)>]
-    [<DataRow("00c", """def cl A:obj {ctor A() {self}};""", 0)>]
-    [<DataRow("01", """def cl A:obj {dec assert is(parent,A); ctor A() {self}};""", 1)>]
+    [<DataRow("00c", """def cl A:obj {ctor A() {}};""", 0)>]
+    [<DataRow("01", """def cl A:obj {dec assert is(parent,A); ctor A() {}};""", 1)>]
     [<DataRow("02", """def cl A:obj {intr property pred T() { is(parent,A) } };""", 0)>]
     [<DataRow("03", """def cl A:obj {intr property pred T() { is(self,A) } };""", 0)>]
     [<DataRow("04", """def pred A() {intr property pred T() { is(parent,A) } };""", 0)>]
@@ -346,8 +345,8 @@ type TestInterpreterErrors() =
             let code = ID015 ""
             runTestHelper "TestID015.fpl" fplCode code expected
 
-    [<DataRow("00", """def cl A:obj {ctor A() {self}};""", 0)>]
-    [<DataRow("01", """def cl A:obj {dec assert is(parent,A); ctor A() {self}};""", 0)>]
+    [<DataRow("00", """def cl A:obj {ctor A() {}};""", 0)>]
+    [<DataRow("01", """def cl A:obj {dec assert is(parent,A); ctor A() {}};""", 0)>]
     [<DataRow("02", """def cl A:obj {intr property pred T() { is(parent,A) } };""", 0)>]
     [<DataRow("03", """def cl A:obj {intr property pred T() { is(self,A) } };""", 0)>]
     [<DataRow("04", """def pred A() {intr property pred T() { is(parent,A) } };""", 0)>]
@@ -386,47 +385,6 @@ type TestInterpreterErrors() =
         else
             let code = ID016 ""
             runTestHelper "TestID016.fpl" fplCode code expected
-
-    [<DataRow("""proof T$1 { 100. |- assume somePremise 300. |- trivial 100. |- trivial qed};""", 1)>]
-    [<DataRow("""proof T$1 { 1. |- trivial 1. |- trivial qed};""", 1)>]
-    [<DataRow("""proof T$1 { 1. |- trivial 2. |- trivial qed};""", 0)>]
-    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
-    [<TestMethod>]
-    member this.TestPR003(fplCode:string, expected:int) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
-            ()
-        else
-            let code = PR003 ("", "")
-            runTestHelper "TestPR003.fpl" fplCode code expected
-
-    [<DataRow("""proof T$1 { 1. |- trivial qed};""", 0)>]
-    [<DataRow("""proof T$1 { 1. 2, 3 |- trivial qed};""", 0)>]
-    [<DataRow("""proof T$1 { 1. 1, 1 |- trivial qed};""", 1)>]
-    [<DataRow("""proof T$1 { 1. 1, 1, 1 |- trivial qed};""", 2)>]
-    [<DataRow("""proof T$1 { 1. 1, 2, 1 |- trivial qed};""", 1)>]
-    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
-    [<TestMethod>]
-    member this.TestPR004(fplCode:string, expected:int) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
-            ()
-        else
-            let code = PR004 ("", "")
-            runTestHelper "TestPR004.fpl" fplCode code expected
-
-
-    [<DataRow("""proof T$1 { 1. |- trivial qed};""", 0)>]
-    [<DataRow("""proof T$1 { 1. 2, 3 |- trivial qed};""", 2)>]
-    [<DataRow("""proof T$1 { 1. |- trivial 2. 1 |- trivial qed};""", 0)>]
-    [<DataRow("""proof T$1 { 1. |- trivial 2. 1, 1a |- trivial qed};""", 1)>]
-    [<DataRow("""proof T$1 { 1. 1, 1, 1 |- trivial qed};""", 3)>]
-    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
-    [<TestMethod>]
-    member this.TestPR005(fplCode:string, expected:int) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
-            ()
-        else
-            let code = PR005 ""
-            runTestHelper "TestPR005.fpl" fplCode code expected
 
     [<DataRow("""def pred Equal infix "=" 50 (x,y: tpl) {intr} ;""", 0)>]
     [<DataRow("uses Fpl.Commons inf ModusPonens() {pre:true con:true} ;", 1)>]
@@ -471,7 +429,7 @@ type TestInterpreterErrors() =
     [<DataRow("11", "axiom A(arr: tpl[x:pred]) { x };", 0)>]
     [<DataRow("12", "prop A(d:pred) {true} proof A$1 {1. |- d qed};", 0)>]
     [<DataRow("13", "prop A(d:pred) {true} cor A$1() { d };", 0)>]
-    [<DataRow("14", "def class A: obj {ctor A(x: obj, p:obj(u: pred)) {dec assert u; self }};", 0)>]
+    [<DataRow("14", "def class A: obj {ctor A(x: obj, p:obj(u: pred)) {dec assert u;  }};", 0)>]
     [<DataRow("15", "ext D x@/\d+/ -> pred { ret (x = @1) };", 0)>]
     [<DataRow("16", "ext D x@/\d+/ -> pred { dec ~y:obj; ret (x = y) };", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
@@ -495,57 +453,57 @@ type TestInterpreterErrors() =
     [<DataRow("02b", "def func T(x:obj)->obj {return x};", 0)>]
     [<DataRow("02c", "def func T()->obj {dec ~x:obj; return xy};", 1)>]
     [<DataRow("02d", "def func T()->obj {dec ~x:obj; return x};", 0)>]
-    [<DataRow("03", "def cl T:obj {dec ~x:obj; ctor T() {self}};", 1)>]
-    [<DataRow("03a", "def cl T:obj {dec ~x:obj; ctor T() {dec x:=x; self}};", 0)>]
-    [<DataRow("03b", "def cl T:obj {dec ~x:obj; ctor T() {dec y:=y; self}};", 1)>]
-    [<DataRow("04", "thm T() {dec ~x:obj; true};", 1)>]
-    [<DataRow("04a", "thm T() {dec ~x:obj; true} prf T$1 {1. |- x qed};", 1)>]
-    [<DataRow("04b", "thm T() {dec ~x:obj; true} prf T$1 {1. |- trivial qed};", 1)>]
-    [<DataRow("04c", "thm T() {dec ~x:obj; x};", 0)>]
-    [<DataRow("04d", "thm T(x:pred) {x};", 0)>]
-    [<DataRow("04e", "thm T() {dec ~x:obj; y};", 1)>]
-    [<DataRow("04f", "thm T(x:pred) {y};", 1)>]
-    [<DataRow("05", "prop T() {dec ~x:obj; true};", 1)>]
-    [<DataRow("05a", "prop T() {dec ~x:obj; true} prf T$1 {1. |- x qed};", 1)>]
-    [<DataRow("05b", "prop T() {dec ~x:obj; true} prf T$1 {1. |- trivial qed};", 1)>]
-    [<DataRow("05c", "prop T() {dec ~x:obj; x};", 0)>]
-    [<DataRow("05d", "prop T(x:pred) {x};", 0)>]
-    [<DataRow("05e", "prop T() {dec ~x:obj; y};", 1)>]
-    [<DataRow("05f", "prop T(x:pred) {y};", 1)>]
-    [<DataRow("06", "lem T() {dec ~x:obj; true};", 1)>]
-    [<DataRow("06a", "lem T() {dec ~x:obj; true} prf T$1 {1. |- x qed};", 1)>]
-    [<DataRow("06b", "lem T() {dec ~x:obj; true} prf T$1 {1. |- trivial qed};", 1)>]
-    [<DataRow("06c", "lem T() {dec ~x:obj; x};", 0)>]
-    [<DataRow("06d", "lem T(x:pred) {x};", 0)>]
-    [<DataRow("06e", "lem T() {dec ~x:obj; y};", 1)>]
-    [<DataRow("06f", "lem T(x:pred) {y};", 1)>]
-    [<DataRow("06", "ax T() {dec ~x:obj; true};", 1)>]
-    [<DataRow("06a", "ax T() {dec ~x:obj; x};", 0)>]
-    [<DataRow("06b", "ax T(x:pred) {x};", 0)>]
-    [<DataRow("06c", "ax T() {dec ~x:obj; y};", 1)>]
-    [<DataRow("06d", "ax T(x:pred) {y};", 1)>]
-    [<DataRow("07", "conj T() {dec ~x:obj; true};", 1)>]
-    [<DataRow("07a", "conj T() {dec ~x:obj; x};", 0)>]
-    [<DataRow("07b", "conj T(x:pred) {x};", 0)>]
-    [<DataRow("07c", "conj T() {dec ~x:obj; y};", 1)>]
-    [<DataRow("07d", "conj T(x:pred) {y};", 1)>]
-    [<DataRow("08", "cor T$1() {dec ~x:obj; true};", 1)>]
-    [<DataRow("08a", "cor T$1() {dec ~x:obj; true} prf T$1 {1. |- x qed};", 1)>]
-    [<DataRow("08b", "cor T$1() {dec ~x:obj; true} prf T$1 {1. |- trivial qed};", 1)>]
-    [<DataRow("08c", "cor T$1() {dec ~x:obj; x};", 0)>]
-    [<DataRow("08d", "cor T$1(x:pred) {x};", 0)>]
-    [<DataRow("08e", "cor T$1() {dec ~x:obj; y};", 1)>]
-    [<DataRow("08f", "cor T$1(x:pred) {y};", 1)>]
-    [<DataRow("09", "inf T(x:pred) {pre: true con:true};", 1)>]
-    [<DataRow("09a", "inf T(x:pred) {pre: true con:x};", 0)>]
-    [<DataRow("09b", "inf T(x:pred) {pre: x con:true};", 0)>]
-    [<DataRow("09c", "inf T(x:pred) {pre: true con:y};", 1)>]
-    [<DataRow("09d", "inf T(x:pred) {pre: y con:true};", 1)>]
-    [<DataRow("09e", "inf T() {dec ~x:pred; pre: true con:true};", 1)>]
-    [<DataRow("09f", "inf T() {dec ~x:pred; pre: true con:x};", 0)>]
-    [<DataRow("09g", "inf T() {dec ~x:pred; pre: x con:true};", 0)>]
-    [<DataRow("09h", "inf T() {dec ~x:pred; pre: true con:y};", 1)>]
-    [<DataRow("09i", "inf T() {dec ~x:pred; pre: y con:true};", 1)>]
+    [<DataRow("03", "def cl T:obj {dec ~x:obj; ctor T() {}};", 1)>]
+    [<DataRow("03a", "def cl T:obj {dec ~x:obj; ctor T() {dec x:=x; }};", 0)>]
+    [<DataRow("03b", "def cl T:obj {dec ~x:obj; ctor T() {dec y:=y; }};", 1)>]
+    [<DataRow("04", "thm T {dec ~x:obj; true};", 1)>]
+    [<DataRow("04a", "thm T {dec ~x:obj; true} prf T$1 {1. |- x qed};", 1)>]
+    [<DataRow("04b", "thm T {dec ~x:obj; true} prf T$1 {1. |- trivial qed};", 1)>]
+    [<DataRow("04c", "thm T {dec ~x:obj; x};", 0)>]
+    [<DataRow("04d", "thm T {dec ~x:pred; x};", 0)>]
+    [<DataRow("04e", "thm T {dec ~x:obj; y};", 1)>]
+    [<DataRow("04f", "thm T {dec ~x:pred; y};", 1)>]
+    [<DataRow("05", "prop T {dec ~x:obj; true};", 1)>]
+    [<DataRow("05a", "prop T {dec ~x:obj; true} prf T$1 {1. |- x qed};", 1)>]
+    [<DataRow("05b", "prop T {dec ~x:obj; true} prf T$1 {1. |- trivial qed};", 1)>]
+    [<DataRow("05c", "prop T {dec ~x:obj; x};", 0)>]
+    [<DataRow("05d", "prop T {dec ~x:pred; x};", 0)>]
+    [<DataRow("05e", "prop T {dec ~x:obj; y};", 1)>]
+    [<DataRow("05f", "prop T {dec ~x:pred; y};", 1)>]
+    [<DataRow("06", "lem T {dec ~x:obj; true};", 1)>]
+    [<DataRow("06a", "lem T {dec ~x:obj; true} prf T$1 {1. |- x qed};", 1)>]
+    [<DataRow("06b", "lem T {dec ~x:obj; true} prf T$1 {1. |- trivial qed};", 1)>]
+    [<DataRow("06c", "lem T {dec ~x:obj; x};", 0)>]
+    [<DataRow("06d", "lem T {dec ~x:pred; x};", 0)>]
+    [<DataRow("06e", "lem T {dec ~x:obj; y};", 1)>]
+    [<DataRow("06f", "lem T {dec ~x:pred; y};", 1)>]
+    [<DataRow("06", "ax T {dec ~x:obj; true};", 1)>]
+    [<DataRow("06a", "ax T {dec ~x:obj; x};", 0)>]
+    [<DataRow("06b", "ax T {dec ~x:pred; x};", 0)>]
+    [<DataRow("06c", "ax T {dec ~x:obj; y};", 1)>]
+    [<DataRow("06d", "ax T {dec ~x:pred; y};", 1)>]
+    [<DataRow("07", "conj T {dec ~x:obj; true};", 1)>]
+    [<DataRow("07a", "conj T {dec ~x:obj; x};", 0)>]
+    [<DataRow("07b", "conj T {dec ~x:pred; x};", 0)>]
+    [<DataRow("07c", "conj T {dec ~x:obj; y};", 1)>]
+    [<DataRow("07d", "conj T {dec ~x:pred; y};", 1)>]
+    [<DataRow("08", "cor T$1 {dec ~x:obj; true};", 1)>]
+    [<DataRow("08a", "cor T$1 {dec ~x:obj; true} prf T$1 {1. |- x qed};", 1)>]
+    [<DataRow("08b", "cor T$1 {dec ~x:obj; true} prf T$1 {1. |- trivial qed};", 1)>]
+    [<DataRow("08c", "cor T$1 {dec ~x:obj; x};", 0)>]
+    [<DataRow("08d", "cor T$1 {dec ~x:pred; x};", 0)>]
+    [<DataRow("08e", "cor T$1 {dec ~x:obj; y};", 1)>]
+    [<DataRow("08f", "cor T$1 {dec ~x:pred; y};", 1)>]
+    [<DataRow("09", "inf T {dec ~x:pred; pre: true con:true};", 1)>]
+    [<DataRow("09a", "inf T {dec ~x:pred; pre: true con:x};", 0)>]
+    [<DataRow("09b", "inf T {dec ~x:pred; pre: x con:true};", 0)>]
+    [<DataRow("09c", "inf T {dec ~x:pred; pre: true con:y};", 1)>]
+    [<DataRow("09d", "inf T {dec ~x:pred; pre: y con:true};", 1)>]
+    [<DataRow("09e", "inf T {dec ~x:pred; pre: true con:true};", 1)>]
+    [<DataRow("09f", "inf T {dec ~x:pred; pre: true con:x};", 0)>]
+    [<DataRow("09g", "inf T {dec ~x:pred; pre: x con:true};", 0)>]
+    [<DataRow("09h", "inf T {dec ~x:pred; pre: true con:y};", 1)>]
+    [<DataRow("09i", "inf T {dec ~x:pred; pre: y con:true};", 1)>]
     [<DataRow("19", """loc iif(x, y) := !tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;;""", 0)>]
     [<DataRow("19a", """loc iif(x, y) := !tex: x "\Leftrightarrow" !eng: x " if and only if " !ger: x " dann und nur dann wenn ";;""", 3)>]
     [<DataRow("19b", """loc iif(x, y) := !tex: "\Leftrightarrow" !eng: " if and only if " !ger: " dann und nur dann wenn ";;""", 6)>]
@@ -560,8 +518,8 @@ type TestInterpreterErrors() =
     [<DataRow("21b", "def pred S() {intr prty func T(x:obj)->obj {return x}};", 0)>]
     [<DataRow("21c", "def pred S() {intr prty func T()->obj {dec ~x:obj; return xy}};", 1)>]
     [<DataRow("21d", "def pred S() {intr prty func T()->obj {dec ~x:obj; return x}};", 0)>]
-    [<DataRow("22", "axiom T(p:pred(n:obj)) {all n:Nat{p(n)} };", 0)>]
-    [<DataRow("23", "axiom T(p:pred(n:obj)) {p(@0)};", 0)>]
+    [<DataRow("22", "axiom T {dec ~p:pred(n:obj); all n:Nat{p(n)} };", 0)>]
+    [<DataRow("23", "axiom T {dec ~p:pred(n:obj); p(@0)};", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestVAR04(no:string, fplCode:string, expected) =
@@ -586,9 +544,9 @@ type TestInterpreterErrors() =
             let code = VAR05 ""
             runTestHelper "TestVAR05.fpl" fplCode code expected
 
-    [<DataRow("00", "def cl T:obj { dec ~x:obj; ctor T() { dec base.obj() ; self}} def cl S:T { dec ~x:obj; ctor S() { dec base.T() ; self}} ;", 1)>]
-    [<DataRow("01", "def cl T:obj { dec ~x:obj; ctor T() { dec base.obj() ; self}} def cl S:T { dec ~y:obj; ctor S() { dec base.T() ; self}} ;", 0)>]
-    [<DataRow("02", "def cl T:Stypo { dec ~x:obj; ctor T() { dec base.Stypo() ; self}} ;", 0)>]
+    [<DataRow("00", "def cl T:obj { dec ~x:obj; ctor T() { dec base.obj() ; }} def cl S:T { dec ~x:obj; ctor S() { dec base.T() ; }} ;", 1)>]
+    [<DataRow("01", "def cl T:obj { dec ~x:obj; ctor T() { dec base.obj() ; }} def cl S:T { dec ~y:obj; ctor S() { dec base.T() ; }} ;", 0)>]
+    [<DataRow("02", "def cl T:Stypo { dec ~x:obj; ctor T() { dec base.Stypo() ; }} ;", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestVAR06(no:string, fplCode:string, expected) =
@@ -645,21 +603,21 @@ type TestInterpreterErrors() =
     [<DataRow("09i", "def pred Test(x: ind) {true prty func X()->obj {dec ~x: obj; return x} };", 1)>]
     [<DataRow("09j", "def pred Test(x: ind) {true prty func X()->obj {dec ~x:* obj; return x} };", 1)>]
     [<DataRow("09k", "def pred Test(x: ind) {true prty func X()->obj {dec ~x:+ obj; return x} };", 1)>]
-    [<DataRow("10", "def cl Test:obj {dec ~x:ind; ctor Test(x: pred) {self} };", 1)>]
-    [<DataRow("10a", "def cl Test:obj {dec ~x:ind; ctor Test(x:* pred) {self} };", 1)>]
-    [<DataRow("10b", "def cl Test:obj {dec ~x:ind; ctor Test(x:+ pred) {self} };", 1)>]
-    [<DataRow("10c", "def cl Test:obj {dec ~x:ind; ctor Test() {dec ~x: obj; self} };", 1)>]
-    [<DataRow("10d", "def cl Test:obj {dec ~x:ind; ctor Test() {dec ~x:* obj; self} };", 1)>]
-    [<DataRow("10e", "def cl Test:obj {dec ~x:ind; ctor Test() {dec ~x:+ obj; self} };", 1)>]
-    [<DataRow("11", "def cl Test:obj {dec ~x:obj; constructor Test() {self} prty func X(x: pred)->obj {intr} };", 1)>]
-    [<DataRow("11a", "def cl Test:obj {dec ~x:obj; constructor Test(x: pred) {self} prty func X()->obj {intr} };", 1)>]
-    [<DataRow("11b", "def cl Test:obj {dec ~x:obj; constructor Test() {dec ~x: pred; self} prty func X()->obj {intr} };", 1)>]
-    [<DataRow("11c", "def cl Test:obj {dec ~x:obj; constructor Test() {self} prty func X()->obj {dec ~x: pred; return x} };", 1)>]
+    [<DataRow("10", "def cl Test:obj {dec ~x:ind; ctor Test(x: pred) {} };", 1)>]
+    [<DataRow("10a", "def cl Test:obj {dec ~x:ind; ctor Test(x:* pred) {} };", 1)>]
+    [<DataRow("10b", "def cl Test:obj {dec ~x:ind; ctor Test(x:+ pred) {} };", 1)>]
+    [<DataRow("10c", "def cl Test:obj {dec ~x:ind; ctor Test() {dec ~x: obj; } };", 1)>]
+    [<DataRow("10d", "def cl Test:obj {dec ~x:ind; ctor Test() {dec ~x:* obj; } };", 1)>]
+    [<DataRow("10e", "def cl Test:obj {dec ~x:ind; ctor Test() {dec ~x:+ obj; } };", 1)>]
+    [<DataRow("11", "def cl Test:obj {dec ~x:obj; constructor Test() {} prty func X(x: pred)->obj {intr} };", 1)>]
+    [<DataRow("11a", "def cl Test:obj {dec ~x:obj; constructor Test(x: pred) {} prty func X()->obj {intr} };", 1)>]
+    [<DataRow("11b", "def cl Test:obj {dec ~x:obj; constructor Test() {dec ~x: pred; } prty func X()->obj {intr} };", 1)>]
+    [<DataRow("11c", "def cl Test:obj {dec ~x:obj; constructor Test() {} prty func X()->obj {dec ~x: pred; return x} };", 1)>]
     [<DataRow("12", "inf ExistsByExample(p: pred(c: obj)) {dec ~x: obj; pre: p(c) con: ex x:obj {p(x)}};", 1)>]
     [<DataRow("12a", "inf ExistsByExample(p: pred(c: obj)) {pre: p(c) con: ex x:obj {p(x)}};", 0)>]
     [<DataRow("12b", "inf ExistsByExample(p: pred(c: obj)) {dec ~c: obj; pre: true con: true};", 1)>]
     [<DataRow("13", """loc and(p,q) := !tex: p "\wedge" q;;""", 0)>]
-    [<DataRow("14", """def cl B:obj {intr} def cl A:obj {dec ~x:obj; ctor A(y:B[x:obj]) {self} };""", 1)>]
+    [<DataRow("14", """def cl B:obj {intr} def cl A:obj {dec ~x:obj; ctor A(y:B[x:obj]) {} };""", 1)>]
     [<DataRow("15", "axiom T(p:pred(n:obj)) {all n:Nat{p(n)} };", 1)>]
     [<DataRow("15a", "axiom T(p:pred(n:obj)) {all n1:Nat{p(n1)} };", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
@@ -760,10 +718,10 @@ type TestInterpreterErrors() =
             let code = ID007 ("", "") 
             runTestHelper "TestID007.fpl" fplCode code expected
 
-    [<DataRow("def cl Test:obj {ctor TestTypo(x:Nat) {self}};", 1)>]
-    [<DataRow("def cl Test:obj {ctor TestTypo1() {self}};", 1)>]
-    [<DataRow("def cl Test:obj {ctor Test() {self}};", 0)>]
-    [<DataRow("def cl Test:obj {dec ~x:obj x := 0; ctor Test() {dec base.obj(); self}};", 0)>]
+    [<DataRow("def cl Test:obj {ctor TestTypo(x:Nat) {}};", 1)>]
+    [<DataRow("def cl Test:obj {ctor TestTypo1() {}};", 1)>]
+    [<DataRow("def cl Test:obj {ctor Test() {}};", 0)>]
+    [<DataRow("def cl Test:obj {dec ~x:obj x := 0; ctor Test() {dec base.obj(); }};", 0)>]
     [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID008(fplCode:string, expected) =
@@ -794,10 +752,10 @@ type TestInterpreterErrors() =
     [<DataRow("def cl Set:obj {intr} def pred Test() {dec ~x:Set; true};", 0)>]
     [<DataRow("def cl Set:obj {intr} def pred Test() {dec ~x:object; is(x,Set)};", 0)>]
 
-    [<DataRow("def cl A:obj {intr} thm T() {true} proof T$1 {1. bydef A |- trivial };", 0)>]
-    [<DataRow("def cl A:obj {intr} thm T() {true} proof T$1 {1. bydef B |- trivial };", 1)>]
-    [<DataRow("thm A() {true} thm T() {true} proof T$1 {1. A |- trivial };", 0)>]
-    [<DataRow("thm B() {true} thm T() {true} proof T$1 {1. A |- trivial };", 1)>]
+    [<DataRow("def cl A:obj {intr} thm T {true} proof T$1 {1. bydef A |- trivial };", 0)>]
+    [<DataRow("def cl A:obj {intr} thm T {true} proof T$1 {1. bydef B |- trivial };", 1)>]
+    [<DataRow("thm A() {true} thm T {true} proof T$1 {1. A |- trivial };", 0)>]
+    [<DataRow("thm B() {true} thm T {true} proof T$1 {1. A |- trivial };", 1)>]
 
     // the following examples should not emit ID010 because this context is covered by the SIG04 diagnostics
     [<DataRow("def pred Test(x:Set) {intr};", 0)>]
@@ -836,14 +794,14 @@ type TestInterpreterErrors() =
             let code = ID011 ("","")
             runTestHelper "TestID011.fpl" fplCode code expected
 
-    [<DataRow("def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C,E {ctor D() {dec base.A() base.B() base.C() base.F(); self} };", 1)>]
-    [<DataRow("def cl A:obj {intr} def cl B:A {ctor B() {dec base.A(); self} };", 0)>]
-    [<DataRow("def cl A:obj {intr} def cl B:A {ctor B() {dec base.C(); self} };", 1)>]
-    [<DataRow("def cl A:obj { ctor A() {dec base.obj(); self} };", 0)>]
-    [<DataRow("def cl A:obj { ctor A() {dec base.B(); self} };", 1)>]
-    [<DataRow("def cl A:C { ctor A() {dec base.obj(); self} };", 1)>]
-    [<DataRow("uses Fpl.SetTheory def cl Test:Set {ctor Test() {dec base.obj(); self} };", 1)>]
-    [<DataRow("uses Fpl.SetTheory def cl Test:Set {ctor Test() {dec base.Set(); self} };", 0)>]
+    [<DataRow("def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C,E {ctor D() {dec base.A() base.B() base.C() base.F(); } };", 1)>]
+    [<DataRow("def cl A:obj {intr} def cl B:A {ctor B() {dec base.A(); } };", 0)>]
+    [<DataRow("def cl A:obj {intr} def cl B:A {ctor B() {dec base.C(); } };", 1)>]
+    [<DataRow("def cl A:obj { ctor A() {dec base.obj(); } };", 0)>]
+    [<DataRow("def cl A:obj { ctor A() {dec base.B(); } };", 1)>]
+    [<DataRow("def cl A:C { ctor A() {dec base.obj(); } };", 1)>]
+    [<DataRow("uses Fpl.SetTheory def cl Test:Set {ctor Test() {dec base.obj(); } };", 1)>]
+    [<DataRow("uses Fpl.SetTheory def cl Test:Set {ctor Test() {dec base.Set(); } };", 0)>]
     [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID012(fplCode:string, expected) =
@@ -927,22 +885,22 @@ type TestInterpreterErrors() =
             runTestHelper "TestID019.fpl" fplCode code expected
 
 
-    [<DataRow("00", "def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C {ctor D() {dec base.A(); self} };", 2)>]
-    [<DataRow("00a", "def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C {ctor D() {dec base.B(); self} };", 2)>]
-    [<DataRow("00b", "def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C {ctor D() {dec base.C(); self} };", 2)>]
-    [<DataRow("00c", "def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C {ctor D() {dec base.A() base.B(); self} };", 1)>]
-    [<DataRow("00d", "def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C {ctor D() {dec base.A() base.C(); self} };", 1)>]
-    [<DataRow("00e", "def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C {ctor D() {dec base.B() base.C(); self} };", 1)>]
-    [<DataRow("00f", "def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C {ctor D() {dec base.A() base.B() base.C(); self} };", 0)>]
-    [<DataRow("01", "def cl A:obj {intr} def cl B:A {ctor B() {dec base.A(); self} };", 0)>]
-    [<DataRow("01a", "def cl A:obj {intr} def cl B:A {ctor B() {self} };", 1)>]
-    [<DataRow("02", "def cl A:obj { ctor A() {dec base.obj(); self} };", 0)>]
-    [<DataRow("02a", "def cl A:obj { ctor A() {self} };", 1)>]
-    [<DataRow("03", "def cl A:obj { ctor A() {dec base.obj(); self} };", 0)>]
-    [<DataRow("03a", "def cl A:C { ctor A() {dec base.obj(); self} };", 1)>]
-    [<DataRow("03b", "def cl A:obj {intr} def cl B:A {intr} def cl C:B { ctor C() {dec base.obj(); self} };", 1)>]
-    [<DataRow("04", "uses Fpl.SetTheory def cl Test:Set {ctor Test() {dec base.obj(); self} };", 1)>]
-    [<DataRow("04a", "uses Fpl.SetTheory def cl Test:Set {ctor Test() {dec base.Set(); self} };", 0)>]
+    [<DataRow("00", "def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C {ctor D() {dec base.A(); } };", 2)>]
+    [<DataRow("00a", "def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C {ctor D() {dec base.B(); } };", 2)>]
+    [<DataRow("00b", "def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C {ctor D() {dec base.C(); } };", 2)>]
+    [<DataRow("00c", "def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C {ctor D() {dec base.A() base.B(); } };", 1)>]
+    [<DataRow("00d", "def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C {ctor D() {dec base.A() base.C(); } };", 1)>]
+    [<DataRow("00e", "def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C {ctor D() {dec base.B() base.C(); } };", 1)>]
+    [<DataRow("00f", "def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C {ctor D() {dec base.A() base.B() base.C(); } };", 0)>]
+    [<DataRow("01", "def cl A:obj {intr} def cl B:A {ctor B() {dec base.A(); } };", 0)>]
+    [<DataRow("01a", "def cl A:obj {intr} def cl B:A {ctor B() {} };", 1)>]
+    [<DataRow("02", "def cl A:obj { ctor A() {dec base.obj(); } };", 0)>]
+    [<DataRow("02a", "def cl A:obj { ctor A() {} };", 1)>]
+    [<DataRow("03", "def cl A:obj { ctor A() {dec base.obj(); } };", 0)>]
+    [<DataRow("03a", "def cl A:C { ctor A() {dec base.obj(); } };", 1)>]
+    [<DataRow("03b", "def cl A:obj {intr} def cl B:A {intr} def cl C:B { ctor C() {dec base.obj(); } };", 1)>]
+    [<DataRow("04", "uses Fpl.SetTheory def cl Test:Set {ctor Test() {dec base.obj(); } };", 1)>]
+    [<DataRow("04a", "uses Fpl.SetTheory def cl Test:Set {ctor Test() {dec base.Set(); } };", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID020(no:string, fplCode:string, expected) =
@@ -952,10 +910,10 @@ type TestInterpreterErrors() =
             let code = ID020 ""
             runTestHelper "TestID020.fpl" fplCode code expected
 
-    [<DataRow("01", "def cl A:obj {intr} def cl B:A {ctor B() {dec base.A(); self} };", 0)>]
-    [<DataRow("01a", "def cl A:obj {intr} def cl B:A {ctor B() {dec base.A() base.A(); self} };", 1)>]
-    [<DataRow("02", "def cl A:obj { ctor A() {dec base.obj(); self} };", 0)>]
-    [<DataRow("02a", "def cl A:obj { ctor A() {dec base.obj() base.obj(); self} };", 1)>]
+    [<DataRow("01", "def cl A:obj {intr} def cl B:A {ctor B() {dec base.A(); } };", 0)>]
+    [<DataRow("01a", "def cl A:obj {intr} def cl B:A {ctor B() {dec base.A() base.A(); } };", 1)>]
+    [<DataRow("02", "def cl A:obj { ctor A() {dec base.obj(); } };", 0)>]
+    [<DataRow("02a", "def cl A:obj { ctor A() {dec base.obj() base.obj(); } };", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID021(no:string, fplCode:string, expected) =
@@ -965,45 +923,12 @@ type TestInterpreterErrors() =
             let code = ID021 ""
             runTestHelper "TestID021.fpl" fplCode code expected
 
-
-    [<DataRow("00a", "def cl A:obj {intr} thm T() {true} proof T$1 {1. bydef A |- trivial };", true, 0)>]
-    [<DataRow("00b", "def pred A() {intr} thm T() {true} proof T$1 {1. bydef A |- trivial };", true, 0)>]
-    [<DataRow("00c", "def func A()->obj {intr} thm T() {true} proof T$1 {1. bydef A |- trivial };", true, 0)>]
-    [<DataRow("01a", "ax A() {true} thm T() {true} proof T$1 {1. bydef A |- trivial };", true, 1)>]
-    [<DataRow("01b", "conj A() {true} thm T() {true} proof T$1 {1. bydef A |- trivial };", true, 1)>]
-    [<DataRow("01c", "thm A() {true} thm T() {true} proof T$1 {1. bydef A |- trivial };", true, 1)>]
-    [<DataRow("01d", "lem A() {true} thm T() {true} proof T$1 {1. bydef A |- trivial };", true, 1)>]
-    [<DataRow("01e", "prop A() {true} thm T() {true} proof T$1 {1. bydef A |- trivial };", true, 1)>]
-    [<DataRow("01f", "cor A$1() {true} thm T() {true} proof T$1 {1. bydef A$1 |- trivial };", true, 1)>]
-    [<DataRow("01g", "proof A$1 {1. |- trivial } thm T() {true} proof T$1 {1. bydef A$1 |- trivial };", true, 1)>]
-    [<DataRow("01h", "inf A() {pre: true con: true} thm T() {true} proof T$1 {1. bydef A |- trivial };", true, 1)>]
-    [<DataRow("02a", "def cl A:obj {intr} thm T() {true} proof T$1 {1. A |- trivial };", false, 1)>]
-    [<DataRow("02b", "def pred A() {intr} thm T() {true} proof T$1 {1. A |- trivial };", false, 1)>]
-    [<DataRow("02c", "def func A()->obj {intr} thm T() {true} proof T$1 {1. A |- trivial };", false, 1)>]
-    [<DataRow("03a", "ax A() {true} thm T() {true} proof T$1 {1. A |- trivial };", false, 0)>]
-    [<DataRow("03b", "conj A() {true} thm T() {true} proof T$1 {1. A |- trivial };", false, 1)>]
-    [<DataRow("03c", "thm A() {true} thm T() {true} proof T$1 {1. A |- trivial };", false, 0)>]
-    [<DataRow("03d", "lem A() {true} thm T() {true} proof T$1 {1. A |- trivial };", false, 0)>]
-    [<DataRow("03e", "prop A() {true} thm T() {true} proof T$1 {1. A |- trivial };", false, 0)>]
-    [<DataRow("03f", "cor A$1() {true} thm T() {true} proof T$1 {1. A$1 |- trivial };", false, 0)>]
-    [<DataRow("03g", "proof A$1 {1. |- trivial } thm T() {true} proof T$1 {1. A$1 |- trivial };", false, 1)>]
-    [<DataRow("03h", "inf A() {pre: true con: true} thm T() {true} proof T$1 {1. A |- trivial };", true, 0)>]
-    [<DataRow("99", "uses Fpl.Commons.Structures ;", true, 0)>]
-    [<DataRow("99a", "uses Fpl.Commons.Structures ;", false, 0)>]
-    [<TestMethod>]
-    member this.TestID022(no:string, fplCode:string, isByDef, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
-            ()
-        else
-            let code = ID022 ("", isByDef)
-            runTestHelper "TestID022.fpl" fplCode code expected
-
     [<DataRow("00a", "def cl A:obj {intr} thm T() {true} proof T$1 {1. bydef A |- trivial };", 0)>]
-    [<DataRow("00b", "def cl A:obj {intr} def cl B:A {intr} thm T() {true} proof T$1 {1. bydef A |- trivial };", 0)>]
+    [<DataRow("00b", "def cl A:obj {intr} def cl B:A {intr} thm T {true} proof T$1 {1. bydef A |- trivial };", 0)>]
     [<DataRow("01a", "lem A() {true} thm T() {true} proof T$1 {1. A |- trivial };", 0)>]
-    [<DataRow("01b", "lem A() {true} def pred A(x:obj) {intr} thm T() {true} proof T$1 {1. bydef A |- trivial };", 1)>]
-    [<DataRow("02a", "cor A$1() {true} thm T() {true} proof T$1 {1. A$1 |- trivial };", 0)>]
-    [<DataRow("02b", "proof A$1 {1. |-  trivial} cor A$1() {true} thm T() {true} proof T$1 {1. A$1 |- trivial };", 1)>]
+    [<DataRow("01b", "lem A() {true} def pred A(x:obj) {intr} thm T {true} proof T$1 {1. bydef A |- trivial };", 1)>]
+    [<DataRow("02a", "cor A$1() {true} thm T {true} proof T$1 {1. A$1 |- trivial };", 0)>]
+    [<DataRow("02b", "proof A$1 {1. |-  trivial} cor A$1() {true} thm T {true} proof T$1 {1. A$1 |- trivial };", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID023(no:string, fplCode:string, expected) =
@@ -1152,7 +1077,7 @@ type TestInterpreterErrors() =
     [<DataRow("35", """def pred T (x,y,z:obj) {true} def pred Caller() {dec ~x,y:obj ~z:ind; T(x,y,z)} ;""", 1)>]
     [<DataRow("36", """def pred T (x,y:obj,z:ind) {true} def pred Caller() {dec ~x,y:obj ~z:ind; T(x,y,z)} ;""", 0)>]
     [<DataRow("37", """def pred T (x,y:obj) {true} def pred Caller() {dec ~x,y:obj ~z:ind; T(x,y,z)} ;""", 1)>]
-    [<DataRow("38", """def class Nat: obj {ctor Nat(){dec self:=x.R(); self}};""", 1)>]
+    [<DataRow("38", """def class Nat: obj {ctor Nat(){dec self:=x.R(); }};""", 1)>]
     [<DataRow("39", """def func Succ(n:Nat) -> obj {intr};""", 1)>]
     [<DataRow("40", """def func T()->obj { dec ~x:obj; return x};""", 0)>]
     [<DataRow("40a", """def func S(n:obj) -> obj {intr} def func T()->obj { dec ~x:obj; return S(x)} ;""", 0)>]
@@ -1165,22 +1090,22 @@ type TestInterpreterErrors() =
     [<DataRow("45", """def cl A:obj {intr} def func Add(n,m:A)->A {dec ~x:A; return x};""", 0)>]
     [<DataRow("46", """def cl A:obj {intr} def func Add(n,m:A)->A {dec ~x:A; return x} prop P(op:Add) {true};""", 0)>]
     [<DataRow("47", """def cl A:obj {intr property pred T() {true} property pred S() {T()}};""", 0)>]
-    [<DataRow("48", """def cl A:obj {dec ~x:obj; ctor A(y:obj) {dec base.obj() x:=y; self} property func P()->obj {return x}} def pred T(r:A) {r.P()};""", 0)>]
-    [<DataRow("49", """def cl A:obj {ctor A(y:+obj) {self}} def class B:obj {ctor B(z:+obj) {dec ~a:A base.obj() a := A(z); self}};""", 0)>]
-    [<DataRow("50", """def cl A:obj {intr property pred T() {true}} def cl B:A {ctor B() {dec base.A() assert self.T(); self}};""", 0)>]
+    [<DataRow("48", """def cl A:obj {dec ~x:obj; ctor A(y:obj) {dec base.obj() x:=y; } property func P()->obj {return x}} def pred T(r:A) {r.P()};""", 0)>]
+    [<DataRow("49", """def cl A:obj {ctor A(y:+obj) {}} def class B:obj {ctor B(z:+obj) {dec ~a:A base.obj() a := A(z); }};""", 0)>]
+    [<DataRow("50", """def cl A:obj {intr property pred T() {true}} def cl B:A {ctor B() {dec base.A() assert self.T(); }};""", 0)>]
     [<DataRow("51", """def func A(n,m:obj)->obj {intr} prop T(op:A) {dec ~x,y:obj; (op(x,y) = x)};""", 0)>]
-    [<DataRow("52", """def cl T:obj { dec ~x:+tpl; ctor T(y:+tpl) {dec base.obj() x:=y; self} property func C(i:ind) -> tpl {return x[i]}};""", 0)>]
+    [<DataRow("52", """def cl T:obj { dec ~x:+tpl; ctor T(y:+tpl) {dec base.obj() x:=y; } property func C(i:ind) -> tpl {return x[i]}};""", 0)>]
     [<DataRow("53", """def cl Nat:obj {intr} ext D x@/\d+/ -> Nat {dec ~n,m:Nat cases ( | (x = @0) : n:=m ? m:=n ); return n } def func Add()->obj {intr} prop K(op:Add) {dec ~n:Nat; ( op(n,@0) = n ) } ;""", 0)>]
-    [<DataRow("54", """def cl C: obj {ctor C() {dec base.obj (); self }} def pred T() {dec ~cI1:C cI1:=C; true } ;""", 0)>]
-    [<DataRow("54a", """def cl C: obj {ctor C() {dec base.obj (); self }} def pred T() {dec ~cI1:C cI1:=C(); true } ;""", 0)>]
-    [<DataRow("54b", """def cl C: obj {ctor C(x:obj) {dec base.obj (); self }} def pred T() {dec ~cI1:C cI1:=C(); true } ;""", 1)>]
-    [<DataRow("54c", """def cl C: obj {ctor C(x:obj) {dec base.obj (); self }} def pred T() {dec ~x:obj ~cI1:C cI1:=C(x); true } ;""", 0)>]
-    [<DataRow("54b_", """def cl C1: obj {ctor C1(i1:ind) {dec ~o:ind o:=i1 base.obj (); self }} ;""", 0)>]
-    [<DataRow("54c_", """def cl C1: obj {ctor C1(i1:ind) {dec ~o:ind o:=i1 base.obj (); self }} ;""", 0)>]
-    [<DataRow("55", """def cl B: A {intr} def cl D: B {ctor D() {dec base.B(); self }} def pred T() {dec ~dI1:D dI1:=D; true } ;""", 0)>]
-    [<DataRow("55a", """def cl B: A {intr} def cl D: B {ctor D() {dec base.B(); self }} def pred T() {dec ~dI1:D dI1:=D(); true } ;""", 0)>]
-    [<DataRow("55b", """def cl B: A {intr} def cl D: B {ctor D(x:obj) {dec base.B(); self }} def pred T() {dec ~dI1:D dI1:=D; true } ;""", 1)>]
-    [<DataRow("55c", """def cl B: A {intr} def cl D: B {ctor D(x:obj) {dec base.B(); self }} def pred T() {dec ~dI1:D dI1:=D(); true } ;""", 1)>]
+    [<DataRow("54", """def cl C: obj {ctor C() {dec base.obj ();  }} def pred T() {dec ~cI1:C cI1:=C; true } ;""", 0)>]
+    [<DataRow("54a", """def cl C: obj {ctor C() {dec base.obj ();  }} def pred T() {dec ~cI1:C cI1:=C(); true } ;""", 0)>]
+    [<DataRow("54b", """def cl C: obj {ctor C(x:obj) {dec base.obj ();  }} def pred T() {dec ~cI1:C cI1:=C(); true } ;""", 1)>]
+    [<DataRow("54c", """def cl C: obj {ctor C(x:obj) {dec base.obj ();  }} def pred T() {dec ~x:obj ~cI1:C cI1:=C(x); true } ;""", 0)>]
+    [<DataRow("54b_", """def cl C1: obj {ctor C1(i1:ind) {dec ~o:ind o:=i1 base.obj ();  }} ;""", 0)>]
+    [<DataRow("54c_", """def cl C1: obj {ctor C1(i1:ind) {dec ~o:ind o:=i1 base.obj ();  }} ;""", 0)>]
+    [<DataRow("55", """def cl B: A {intr} def cl D: B {ctor D() {dec base.B();  }} def pred T() {dec ~dI1:D dI1:=D; true } ;""", 0)>]
+    [<DataRow("55a", """def cl B: A {intr} def cl D: B {ctor D() {dec base.B();  }} def pred T() {dec ~dI1:D dI1:=D(); true } ;""", 0)>]
+    [<DataRow("55b", """def cl B: A {intr} def cl D: B {ctor D(x:obj) {dec base.B();  }} def pred T() {dec ~dI1:D dI1:=D; true } ;""", 1)>]
+    [<DataRow("55c", """def cl B: A {intr} def cl D: B {ctor D(x:obj) {dec base.B();  }} def pred T() {dec ~dI1:D dI1:=D(); true } ;""", 1)>]
     [<DataRow("56", """def pred T() {dec ~x:ind x:=$1; true } ;""", 0)>]
     [<DataRow("57", """def pred T() {dec ~x:pred x:=true; true } ;""", 0)>]
     [<DataRow("57a", """def pred T() {dec ~x:pred x:=not true; true } ;""", 0)>]
@@ -1205,32 +1130,32 @@ type TestInterpreterErrors() =
     [<DataRow("inh_type_a", """def cl A:obj { intr } def pred T() {dec ~n:ind n:=A(); true};""", 1)>]
     [<DataRow("inh_type_b", """def cl A:obj { intr } def pred T() {dec ~n:pred n:=A(); true};""", 1)>]
     [<DataRow("inh_type_c", """def cl A:obj { intr } def pred T() {dec ~n:func n:=A(); true};""", 1)>]
-    [<DataRow("constr_a", """def cl A:obj { intr } def cl B: A {intr} def cl D: B {ctor D() {dec base.B(); self }} def pred T() {dec ~dI2:D dI2:=D(); true};""", 0)>]
-    [<DataRow("constr_b", """def cl A:obj { intr } def cl B: A {intr} def cl D: B {ctor D() {dec base.B(); self }} def pred T() {dec ~dI2:B dI2:=D(); true};""", 0)>]
-    [<DataRow("constr_c", """def cl A:obj { intr } def cl B: A {intr} def cl D: B {ctor D() {dec base.B(); self }} def pred T() {dec ~dI2:A dI2:=D(); true};""", 0)>]
-    [<DataRow("constr_d", """def cl A:obj { intr } def cl B: A {intr} def cl D: B {ctor D() {dec base.B(); self }} def pred T() {dec ~dI2:obj dI2:=D(); true};""", 0)>]
-    [<DataRow("constr_inh_a", """def cl A:obj { ctor A(x:obj) {dec base.obj(); self} } def cl B:A { ctor B(x:pred) {dec base.A(); self} } def pred T() {dec ~n:A n:=B(); true};""", 1)>]
-    [<DataRow("constr_inh_b", """def cl A:obj { ctor A(x:obj) {dec base.obj(); self} } def cl B:A { ctor B(x:pred) {dec base.A(); self} } def pred T() {dec ~n:obj n:=B(); true};""", 1)>]
-    [<DataRow("constr_inh_c", """def cl A:obj { ctor A(x:obj) {dec base.obj(); self} } def cl B:A { ctor B(x:pred) {dec base.A(); self} } def pred T() {dec ~n:obj n:=A(); true};""", 1)>]
-    [<DataRow("constr_inh_d", """def cl A:obj { ctor A(x:obj) {dec base.obj(); self} } def cl B:A { ctor B(x:pred) {dec base.A(); self} } def pred T() {dec ~n:B ~x:obj n:=A(x); true};""", 1)>]
-    [<DataRow("constr_inh_e", """def cl A:obj { ctor A(x:obj) {dec base.obj(); self} } def cl B:obj { ctor B(x:pred) {dec base.obj(); self} } def pred T() {dec ~n:B ~x:obj n:=A(x); true};""", 1)>]
-    [<DataRow("constr_inh_f", """def cl A:obj { ctor A(x:obj) {dec base.obj(); self} } def cl B:obj { ctor B(x:pred) {dec base.obj(); self} } def pred T() {dec ~n:A ~x:pred n:=B(x); true};""", 1)>]
-    [<DataRow("ass_ind_ind", """def cl C1: obj {ctor C1(i1:ind) {dec ~o:ind o:=i1 base.obj (); self }} ;""", 0)>]
-    [<DataRow("ass_ind_pred", """def cl C1: obj {ctor C1(i1:pred) {dec ~o:ind o:=i1 base.obj (); self }};""", 1)>]
-    [<DataRow("ass_ind_func", """def cl C1: obj {ctor C1(i1:func) {dec ~o:ind o:=i1 base.obj (); self }};""", 1)>]
-    [<DataRow("ass_ind_obj", """def cl C1: obj {ctor C1(i1:obj) {dec ~o:ind o:=i1 base.obj (); self }};""", 1)>]
-    [<DataRow("ass_pred_ind", """def cl C1: obj {ctor C1(i1:ind) {dec ~o:pred o:=i1 base.obj (); self }} ;""", 1)>]
-    [<DataRow("ass_pred_pred", """def cl C1: obj {ctor C1(i1:pred) {dec ~o:pred o:=i1 base.obj (); self }};""", 0)>]
-    [<DataRow("ass_pred_func", """def cl C1: obj {ctor C1(i1:func) {dec ~o:pred o:=i1 base.obj (); self }};""", 1)>]
-    [<DataRow("ass_pred_obj", """def cl C1: obj {ctor C1(i1:obj) {dec ~o:pred o:=i1 base.obj (); self }};""", 1)>]
-    [<DataRow("ass_func_ind", """def cl C1: obj {ctor C1(i1:ind) {dec ~o:func o:=i1 base.obj (); self }} ;""", 1)>]
-    [<DataRow("ass_func_pred", """def cl C1: obj {ctor C1(i1:pred) {dec ~o:func o:=i1 base.obj (); self }};""", 1)>]
-    [<DataRow("ass_func_func", """def cl C1: obj {ctor C1(i1:func) {dec ~o:func o:=i1 base.obj (); self }};""", 0)>]
-    [<DataRow("ass_func_obj", """def cl C1: obj {ctor C1(i1:obj) {dec ~o:func o:=i1 base.obj (); self }};""", 1)>]
-    [<DataRow("ass_obj_ind", """def cl C1: obj {ctor C1(i1:ind) {dec ~o:obj o:=i1 base.obj (); self }} ;""", 1)>]
-    [<DataRow("ass_obj_pred", """def cl C1: obj {ctor C1(i1:pred) {dec ~o:obj o:=i1 base.obj (); self }};""", 1)>]
-    [<DataRow("ass_obj_func", """def cl C1: obj {ctor C1(i1:func) {dec ~o:obj o:=i1 base.obj (); self }};""", 1)>]
-    [<DataRow("ass_obj_obj", """def cl C1: obj {ctor C1(i1:obj) {dec ~o:obj o:=i1 base.obj (); self }};""", 0)>]
+    [<DataRow("constr_a", """def cl A:obj { intr } def cl B: A {intr} def cl D: B {ctor D() {dec base.B();  }} def pred T() {dec ~dI2:D dI2:=D(); true};""", 0)>]
+    [<DataRow("constr_b", """def cl A:obj { intr } def cl B: A {intr} def cl D: B {ctor D() {dec base.B();  }} def pred T() {dec ~dI2:B dI2:=D(); true};""", 0)>]
+    [<DataRow("constr_c", """def cl A:obj { intr } def cl B: A {intr} def cl D: B {ctor D() {dec base.B();  }} def pred T() {dec ~dI2:A dI2:=D(); true};""", 0)>]
+    [<DataRow("constr_d", """def cl A:obj { intr } def cl B: A {intr} def cl D: B {ctor D() {dec base.B();  }} def pred T() {dec ~dI2:obj dI2:=D(); true};""", 0)>]
+    [<DataRow("constr_inh_a", """def cl A:obj { ctor A(x:obj) {dec base.obj(); } } def cl B:A { ctor B(x:pred) {dec base.A(); } } def pred T() {dec ~n:A n:=B(); true};""", 1)>]
+    [<DataRow("constr_inh_b", """def cl A:obj { ctor A(x:obj) {dec base.obj(); } } def cl B:A { ctor B(x:pred) {dec base.A(); } } def pred T() {dec ~n:obj n:=B(); true};""", 1)>]
+    [<DataRow("constr_inh_c", """def cl A:obj { ctor A(x:obj) {dec base.obj(); } } def cl B:A { ctor B(x:pred) {dec base.A(); } } def pred T() {dec ~n:obj n:=A(); true};""", 1)>]
+    [<DataRow("constr_inh_d", """def cl A:obj { ctor A(x:obj) {dec base.obj(); } } def cl B:A { ctor B(x:pred) {dec base.A(); } } def pred T() {dec ~n:B ~x:obj n:=A(x); true};""", 1)>]
+    [<DataRow("constr_inh_e", """def cl A:obj { ctor A(x:obj) {dec base.obj(); } } def cl B:obj { ctor B(x:pred) {dec base.obj(); } } def pred T() {dec ~n:B ~x:obj n:=A(x); true};""", 1)>]
+    [<DataRow("constr_inh_f", """def cl A:obj { ctor A(x:obj) {dec base.obj(); } } def cl B:obj { ctor B(x:pred) {dec base.obj(); } } def pred T() {dec ~n:A ~x:pred n:=B(x); true};""", 1)>]
+    [<DataRow("ass_ind_ind", """def cl C1: obj {ctor C1(i1:ind) {dec ~o:ind o:=i1 base.obj ();  }} ;""", 0)>]
+    [<DataRow("ass_ind_pred", """def cl C1: obj {ctor C1(i1:pred) {dec ~o:ind o:=i1 base.obj ();  }};""", 1)>]
+    [<DataRow("ass_ind_func", """def cl C1: obj {ctor C1(i1:func) {dec ~o:ind o:=i1 base.obj ();  }};""", 1)>]
+    [<DataRow("ass_ind_obj", """def cl C1: obj {ctor C1(i1:obj) {dec ~o:ind o:=i1 base.obj ();  }};""", 1)>]
+    [<DataRow("ass_pred_ind", """def cl C1: obj {ctor C1(i1:ind) {dec ~o:pred o:=i1 base.obj ();  }} ;""", 1)>]
+    [<DataRow("ass_pred_pred", """def cl C1: obj {ctor C1(i1:pred) {dec ~o:pred o:=i1 base.obj ();  }};""", 0)>]
+    [<DataRow("ass_pred_func", """def cl C1: obj {ctor C1(i1:func) {dec ~o:pred o:=i1 base.obj ();  }};""", 1)>]
+    [<DataRow("ass_pred_obj", """def cl C1: obj {ctor C1(i1:obj) {dec ~o:pred o:=i1 base.obj ();  }};""", 1)>]
+    [<DataRow("ass_func_ind", """def cl C1: obj {ctor C1(i1:ind) {dec ~o:func o:=i1 base.obj ();  }} ;""", 1)>]
+    [<DataRow("ass_func_pred", """def cl C1: obj {ctor C1(i1:pred) {dec ~o:func o:=i1 base.obj ();  }};""", 1)>]
+    [<DataRow("ass_func_func", """def cl C1: obj {ctor C1(i1:func) {dec ~o:func o:=i1 base.obj ();  }};""", 0)>]
+    [<DataRow("ass_func_obj", """def cl C1: obj {ctor C1(i1:obj) {dec ~o:func o:=i1 base.obj ();  }};""", 1)>]
+    [<DataRow("ass_obj_ind", """def cl C1: obj {ctor C1(i1:ind) {dec ~o:obj o:=i1 base.obj ();  }} ;""", 1)>]
+    [<DataRow("ass_obj_pred", """def cl C1: obj {ctor C1(i1:pred) {dec ~o:obj o:=i1 base.obj ();  }};""", 1)>]
+    [<DataRow("ass_obj_func", """def cl C1: obj {ctor C1(i1:func) {dec ~o:obj o:=i1 base.obj ();  }};""", 1)>]
+    [<DataRow("ass_obj_obj", """def cl C1: obj {ctor C1(i1:obj) {dec ~o:obj o:=i1 base.obj ();  }};""", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG05Assignments(no:string, fplCode:string, expected) =
@@ -1255,45 +1180,6 @@ type TestInterpreterErrors() =
             checkForUnexpectedErrors code
             let result = filterByErrorCode ad code.Code
             Assert.AreEqual<string>(expected, result.Head.Message)
-
-
-    /// todo PR000 is no more syntactically possible
-    [<DataRow("""def pred T() { 1. };;""", 1)>]
-    [<DataRow("""proof T$1 {1. |- trivial };""", 0)>]
-    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
-    [<TestMethod>]
-    member this.TestPR000(fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
-            ()
-        else
-            let code = PR000 ""
-            runTestHelper "TestPR000.fpl" fplCode code expected
-
-    /// todo PR001 is no more syntactically possible
-    [<DataRow("""def pred T() { bydef A };;""", 1)>]
-    [<DataRow("""proof T$1 {1. bydef A |- true qed };""", 0)>]
-    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
-    [<TestMethod>]
-    member this.TestPR001(fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
-            ()
-        else
-            let code = PR001 
-            runTestHelper "TestPR001.fpl" fplCode code expected
-
-    [<DataRow("""def pred T() { Test$1 };;""", 1)>]
-    [<DataRow("""proof T$1 {1. |- Test$1 };""", 1)>]
-    [<DataRow("""def pred T() { Test$1() };;""", 0)>]
-    [<DataRow("""proof T$1 {1. |- Test$1() };""", 0)>]
-    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
-    [<TestMethod>]
-    member this.TestPR002(fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
-            ()
-        else
-            let code = PR002
-            runTestHelper "TestPR002.fpl" fplCode code expected
-
 
     [<DataRow("00", """def pred T() { not true };""", 0)>]
     [<DataRow("01", """def pred T() { dec ~x:pred; not x };""", 0)>] // no LG000 diagnostics because of intrinsic use x
@@ -1470,29 +1356,156 @@ type TestInterpreterErrors() =
             let code = LG005 "" 
             runTestHelper "TestLG004.fpl" fplCode code expected
 
-    [<DataRow("01", """thm T() { true } proof T$1 {1. |- trivial};""", 0)>]
-    [<DataRow("02a", """thm T() { true } proof T$1 {1. |- true};""", 0)>]
-    [<DataRow("02b", """thm T() { true } proof T$1 {1. 2 |- false};""", 1)>]
-    [<DataRow("02c", """thm T() { true } proof T$1 {1. B |- true};""", 1)>]
-    [<DataRow("02d", """thm T() { true } proof T$1 {1. bydef S |- false};""", 1)>]
+    [<DataRow("0a", "def cl A:obj {intr} thm T {true} proof T$1 {1. bydef A |- trivial };", 0)>]
+    [<DataRow("0b", "def pred A() {intr} thm T {true} proof T$1 {1. bydef A |- trivial };", 0)>]
+    [<DataRow("0c", "def func A()->obj {intr} thm T {true} proof T$1 {1. bydef A |- trivial };", 0)>]
+    [<DataRow("1a", "ax A {true} thm T {true} proof T$1 {1. bydef A |- trivial };", 1)>]
+    [<DataRow("1b", "conj A {true} thm T {true} proof T$1 {1. bydef A |- trivial };", 1)>]
+    [<DataRow("1c", "thm A {true} thm T {true} proof T$1 {1. bydef A |- trivial };", 1)>]
+    [<DataRow("1d", "lem A {true} thm T {true} proof T$1 {1. bydef A |- trivial };", 1)>]
+    [<DataRow("1e", "prop A {true} thm T {true} proof T$1 {1. bydef A |- trivial };", 1)>]
+    [<DataRow("1f", "cor A$1 {true} thm T {true} proof T$1 {1. bydef A$1 |- trivial };", 1)>]
+    [<DataRow("1f_", "thm A {true} cor A$1 {true} thm T {true} proof T$1 {1. bydef A$1 |- trivial };", 1)>]
+    [<DataRow("1g", "proof A$1 {1. |- trivial } thm T {true} proof T$1 {1. bydef A$1 |- trivial };", 1)>]
+    [<DataRow("1h", "proof A$1 {1. |- trivial } thm T {true} proof T$1 {1. bydef A$1:2 |- trivial };", 1)>]
+    [<DataRow("1i", "proof A$1 {1. |- trivial } thm T {true} proof T$1 {1. bydef A$1:1 |- trivial };", 1)>]
+    [<DataRow("1g_", "thm A {true} proof A$1 {1. |- trivial } thm T {true} proof T$1 {1. bydef A$1 |- trivial };", 1)>]
+    [<DataRow("1h_", "thm A {true} proof A$1 {1. |- trivial } thm T {true} proof T$1 {1. bydef A$1:2 |- trivial };", 1)>]
+    [<DataRow("1i_", "thm A {true} proof A$1 {1. |- trivial } thm T {true} proof T$1 {1. bydef A$1:1 |- trivial };", 1)>]
+    [<DataRow("1j", "inf A {pre: true con: true} thm T {true} proof T$1 {1. bydef A |- trivial };", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
-    member this.TestPR006(no:string, fplCode:string, expected) =
+    member this.TestPR000(no:string, fplCode:string, expected) =
         if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = PR006 
-            runTestHelper "TestPR006.fpl" fplCode code expected
+            let code = PR000 ""
+            runTestHelper "TestPR000.fpl" fplCode code expected
 
-    [<DataRow("01", """theorem T() { true } proof T$1 {1. |- trivial};""", 0)>]
-    [<DataRow("01a", """theorem T() { true };""", 1)>]
-    [<DataRow("02", """proposition T() { true } proof T$1 {1. |- trivial};""", 0)>]
-    [<DataRow("02a", """proposition T() { true };""", 1)>]
-    [<DataRow("03", """lemma T() { true } proof T$1 {1. |- trivial};""", 0)>]
-    [<DataRow("03a", """lemma T() { true };""", 1)>]
-    [<DataRow("04", """corollary T$1() { true } proof T$1$1 {1. |- trivial};""", 0)>]
-    [<DataRow("04a", """corollary T$1() { true };""", 1)>]
-    [<DataRow("04b", """corollary T$1() { true } proof T$1$1 {1. bydef A |- trivial};""", 0)>]
+    [<DataRow("0a", "def cl A:obj {intr} thm T {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
+    [<DataRow("0b", "def pred A() {intr} thm T {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
+    [<DataRow("0c", "def func A()->obj {intr} thm T {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
+    [<DataRow("1a", "ax A {true} thm T {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
+    [<DataRow("1b", "conj A {true} thm T {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
+    [<DataRow("1c", "thm A {true} thm T {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
+    [<DataRow("1d", "lem A {true} thm T {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
+    [<DataRow("1e", "prop A {true} thm T {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
+    [<DataRow("1f", "cor A$1 {true} thm T {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
+    [<DataRow("1f_", "thm A {true} cor A$1 {true} thm T {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
+    [<DataRow("1g", "proof A$1 {1. |- trivial } thm T {true} proof T$1 {1. A$1:1 |- trivial };", 0)>]
+    [<DataRow("1h", "proof A$1 {1. |- trivial } thm T {true} proof T$1 {1. A$1:2 |- trivial };", 0)>]
+    [<DataRow("1g_", "thm A {true} proof A$1 {1. |- trivial } thm T {true} proof T$1 {1. A$1:1 |- trivial };", 0)>]
+    [<DataRow("1h_", "thm A {true} proof A$1 {1. |- trivial } thm T {true} proof T$1 {1. A$1:2 |- trivial };", 0)>]
+    [<DataRow("1j", "inf A {pre: true con: true} thm T {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestPR001(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = PR001 ""
+            runTestHelper "TestPR001.fpl" fplCode code expected
+
+    [<DataRow("2a", "def cl A:obj {intr} thm T {true} proof T$1 {1. A |- trivial };", 1)>]
+    [<DataRow("2b", "def pred A() {intr} thm T {true} proof T$1 {1. A |- trivial };", 1)>]
+    [<DataRow("2c", "def func A()->obj {intr} thm T {true} proof T$1 {1. A |- trivial };", 1)>]
+    [<DataRow("2d", "ax A {true} thm T {true} proof T$1 {1. A |- trivial };", 0)>]
+    [<DataRow("2e", "conj A {true} thm T {true} proof T$1 {1. A |- trivial };", 1)>]
+    [<DataRow("2f", "thm A {true} thm T {true} proof T$1 {1. A |- trivial };", 0)>]
+    [<DataRow("2g", "lem A {true} thm T {true} proof T$1 {1. A |- trivial };", 0)>]
+    [<DataRow("2h", "prop A {true} thm T {true} proof T$1 {1. A |- trivial };", 0)>]
+    [<DataRow("2i", "inf A {pre: true con: true} thm T {true} proof T$1 {1. A |- trivial };", 0)>]
+    [<DataRow("2j", "cor A$1 {true} thm T {true} proof T$1 {1. A |- trivial };", 1)>]
+    [<DataRow("2j_", "thm A {true} cor A$1 {true} thm T {true} proof T$1 {1. A |- trivial };", 0)>]
+    [<DataRow("2k", "proof A$1 {1. |- trivial} thm T {true} proof T$1 {1. A |- trivial };", 1)>]
+    [<DataRow("2k_", "thm A {true} proof A$1 {1. |- trivial} thm T {true} proof T$1 {1. A |- trivial };", 0)>]
+
+    [<DataRow("3a", "def cl A:obj {intr} thm T {true} proof T$1 {1. A$1 |- trivial };", 1)>]
+    [<DataRow("3b", "def pred A() {intr} thm T {true} proof T$1 {1. A$1 |- trivial };", 1)>]
+    [<DataRow("3c", "def func A()->obj {intr} thm T {true} proof T$1 {1. A$1 |- trivial };", 1)>]
+    [<DataRow("3d", "ax A {true} thm T {true} proof T$1 {1. A$1 |- trivial };", 1)>]
+    [<DataRow("3e", "conj A {true} thm T {true} proof T$1 {1. A$1 |- trivial };", 1)>]
+    [<DataRow("3f", "thm A {true} thm T {true} proof T$1 {1. A$1 |- trivial };", 1)>]
+    [<DataRow("3g", "lem A {true} thm T {true} proof T$1 {1. A$1 |- trivial };", 1)>]
+    [<DataRow("3h", "prop A {true} thm T {true} proof T$1 {1. A$1 |- trivial };", 1)>]
+    [<DataRow("3i", "inf A {pre: true con: true} thm T {true} proof T$1 {1. A$1 |- trivial };", 1)>]
+    [<DataRow("3j", "cor A$1 {true} thm T {true} proof T$1 {1. A$1 |- trivial };", 0)>]
+    [<DataRow("3j_", "thm A {true} cor A$1 {true} thm T {true} proof T$1 {1. A$1 |- trivial };", 0)>]
+    [<DataRow("3k", "proof A$1 {1. |- trivial} thm T {true} proof T$1 {1. A$1 |- trivial };", 1)>]
+    [<DataRow("3k_", "thm A {true} proof A$1 {1. |- trivial} thm T {true} proof T$1 {1. A$1 |- trivial };", 1)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestPR002(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = PR002 ""
+            runTestHelper "TestPR002.fpl" fplCode code expected
+
+    [<DataRow("""proof T$1 { 100. |- assume somePremise 300. |- trivial 100. |- trivial qed};""", 1)>]
+    [<DataRow("""proof T$1 { 1. |- trivial 1. |- trivial qed};""", 1)>]
+    [<DataRow("""proof T$1 { 1. |- trivial 2. |- trivial qed};""", 0)>]
+    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestPR003(fplCode:string, expected:int) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = PR003 ("", "")
+            runTestHelper "TestPR003.fpl" fplCode code expected
+
+    [<DataRow("""proof T$1 { 1. |- trivial qed};""", 0)>]
+    [<DataRow("""proof T$1 { 1. 2, 3 |- trivial qed};""", 0)>]
+    [<DataRow("""proof T$1 { 1. 1, 1 |- trivial qed};""", 1)>]
+    [<DataRow("""proof T$1 { 1. 1, 1, 1 |- trivial qed};""", 2)>]
+    [<DataRow("""proof T$1 { 1. 1, 2, 1 |- trivial qed};""", 1)>]
+    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestPR004(fplCode:string, expected:int) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = PR004 ("", "")
+            runTestHelper "TestPR004.fpl" fplCode code expected
+
+
+    [<DataRow("""proof T$1 { 1. |- trivial qed};""", 0)>]
+    [<DataRow("""proof T$1 { 1. 2, 3 |- trivial qed};""", 2)>]
+    [<DataRow("""proof T$1 { 1. |- trivial 2. 1 |- trivial qed};""", 0)>]
+    [<DataRow("""proof T$1 { 1. |- trivial 2. 1, 1a |- trivial qed};""", 1)>]
+    [<DataRow("""proof T$1 { 1. 1, 1, 1 |- trivial qed};""", 3)>]
+    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestPR005(fplCode:string, expected:int) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = PR005 ""
+            runTestHelper "TestPR005.fpl" fplCode code expected
+
+    [<DataRow("00", """thm A {true} proof A$1 {1. |- trivial} proof T$1 { 1. |- trivial qed};""", 0)>]
+    [<DataRow("01", """thm A {true} proof A$1 {1. |- trivial} proof T$1 { 1. A$1:2, A$1:3 |- trivial qed};""", 2)>]
+    [<DataRow("02", """thm A {true} proof A$1 {1. |- trivial} proof T$1 { 1. |- trivial 2. A$1:1 |- trivial qed};""", 0)>]
+    [<DataRow("03", """thm A {true} proof A$1 {1. |- trivial} proof T$1 { 1. |- trivial 2. A$1:1, A$1:1a |- trivial qed};""", 1)>]
+    [<DataRow("04", """thm A {true} proof A$1 {1. |- trivial} proof T$1 { 1. A$1:2, A$1:2, A$1:1 |- trivial qed};""", 2)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestPR006(no: string, fplCode:string, expected:int) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = PR006 ("", "")
+            runTestHelper "TestPR005.fpl" fplCode code expected
+
+    [<DataRow("01", """theorem T { true } proof T$1 {1. |- trivial};""", 0)>]
+    [<DataRow("01a", """theorem T { true };""", 1)>]
+    [<DataRow("02", """proposition T { true } proof T$1 {1. |- trivial};""", 0)>]
+    [<DataRow("02a", """proposition T { true };""", 1)>]
+    [<DataRow("03", """lemma T { true } proof T$1 {1. |- trivial};""", 0)>]
+    [<DataRow("03a", """lemma T { true };""", 1)>]
+    [<DataRow("04", """corollary T$1 { true } proof T$1$1 {1. |- trivial};""", 0)>]
+    [<DataRow("04a", """corollary T$1 { true };""", 1)>]
+    [<DataRow("04b", """corollary T$1 { true } proof T$1$1 {1. bydef A |- trivial};""", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR007(no:string, fplCode:string, expected) =
@@ -1502,9 +1515,9 @@ type TestInterpreterErrors() =
             let code = PR007 ("", "") 
             runTestHelper "TestPR007.fpl" fplCode code expected
 
-    [<DataRow("01", """inference ModusPonens() { dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q } theorem T() { true } proof T$1 {1. |- and (x, impl(x,z)) 2. ModusPonens |- z };""", 0)>]
-    [<DataRow("01a", """inference ModusPonens() { dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q } theorem T() { true } proof T$1 {1. |- or (x, z) 2. ModusPonens |- z };""", 1)>]
-    [<DataRow("01b", """inference ModusPonens() { dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q } theorem T() { true } proof T$1 {1. |- and (x, impl(y,z)) 2. ModusPonens |- z };""", 1)>]
+    [<DataRow("01", """inference ModusPonens { dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q } theorem T { true } proof T$1 {1. |- and (x, impl(x,z)) 2. ModusPonens |- z };""", 0)>]
+    [<DataRow("01a", """inference ModusPonens { dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q } theorem T { true } proof T$1 {1. |- or (x, z) 2. ModusPonens |- z };""", 1)>]
+    [<DataRow("01b", """inference ModusPonens { dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q } theorem T { true } proof T$1 {1. |- and (x, impl(y,z)) 2. ModusPonens |- z };""", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR008(no:string, fplCode:string, expected) =
@@ -1513,3 +1526,80 @@ type TestInterpreterErrors() =
         else
             let code = PR008 ("", "", "") 
             runTestHelper "TestPR008.fpl" fplCode code expected
+
+    [<DataRow("01", """thm T { true } proof T$1 {1. |- trivial};""", 0)>]
+    [<DataRow("02a", """thm T { true } proof T$1 {1. |- true};""", 0)>]
+    [<DataRow("02b", """thm T { true } proof T$1 {1. 2 |- false};""", 1)>]
+    [<DataRow("02c", """thm T { true } proof T$1 {1. B |- true};""", 1)>]
+    [<DataRow("02d", """thm T { true } proof T$1 {1. bydef S |- false};""", 1)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestPR009(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = PR009 
+            runTestHelper "TestPR009.fpl" fplCode code expected
+
+    [<DataRow("00", "proof T$1 {byax A |- trivial}", 0)>]
+    [<DataRow("01", "proof T$1 {byax A$1 |- trivial}", 1)>]
+    [<DataRow("02", "proof T$1 {byinf A |- trivial}", 0)>]
+    [<DataRow("03", "proof T$1 {byinf A$1 |- trivial}", 1)>]
+    [<DataRow("04", "proof T$1 {bydef A |- trivial}", 0)>]
+    [<DataRow("05", "proof T$1 {bydef A$1 |- trivial}", 1)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestPR010(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = PR010 ("", "")
+            runTestHelper "TestPR010.fpl" fplCode code expected
+
+    [<DataRow("00", "proof T$1 {byax A |- trivial}", 0)>]
+    [<DataRow("01", "proof T$1 {byax A$1:3 |- trivial}", 1)>]
+    [<DataRow("02", "proof T$1 {byinf A |- trivial}", 0)>]
+    [<DataRow("03", "proof T$1 {byinf A$1:3 |- trivial}", 1)>]
+    [<DataRow("04", "proof T$1 {bydef A |- trivial}", 0)>]
+    [<DataRow("05", "proof T$1 {bydef A$1:3 |- trivial}", 1)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestPR011(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = PR011 ("", "")
+            runTestHelper "TestPR011.fpl" fplCode code expected
+
+    [<DataRow("00", "proof T$1 {bycor A$1 |- trivial}", 0)>]
+    [<DataRow("01", "proof T$1 {bycor A |- trivial}", 1)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestPR012(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = PR012 
+            runTestHelper "TestPR012.fpl" fplCode code expected
+
+    [<DataRow("00", "proof T$1 {bycor A$1 |- trivial}", 0)>]
+    [<DataRow("01", "proof T$1 {A$1 |- trivial}", 1)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestPR013(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = PR013 
+            runTestHelper "TestPR013.fpl" fplCode code expected
+
+    [<DataRow("00", "proof T$1 {A |- trivial}", 0)>]
+    [<DataRow("01", "proof T$1 {A:2 |- trivial}", 1)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestPR014(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = PR014 
+            runTestHelper "TestPR014.fpl" fplCode code expected

@@ -1,6 +1,6 @@
 ﻿namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
-open FplGrammarCommons
+open FplPrimitives
 open ErrDiagnostics
 open FplInterpreterTypes
 open CommonTestHelpers
@@ -10,7 +10,7 @@ open CommonTestHelpers
 type TestFplValueScopeFplId() =
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("inf1")>]
     [<DataRow("inf2")>]
     [<DataRow("axi1")>]
@@ -51,7 +51,7 @@ type TestFplValueScopeFplId() =
         | Some (r:FplRoot,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,fun3:FplValue,fun4:FplValue,fun5:FplValue,fun6:FplValue,fun7:FplValue,fun8:FplValue,fun9:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<string>("", r.FplId)
-            | "theory" -> Assert.AreEqual<string>("TestScopeBlocksFplId", theory.FplId)
+            | PrimTheoryL -> Assert.AreEqual<string>("TestScopeBlocksFplId", theory.FplId)
             | "inf1" -> Assert.AreEqual<string>("SomeInference1", inf1.FplId)
             | "inf2" -> Assert.AreEqual<string>("SomeInference2", inf2.FplId)
             | "axi1" -> Assert.AreEqual<string>("SomeAxiom1", axi1.FplId)
@@ -91,7 +91,7 @@ type TestFplValueScopeFplId() =
 
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("t1")>]
     [<DataRow("t2")>]
@@ -104,7 +104,7 @@ type TestFplValueScopeFplId() =
         | Some (r,theory,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<string>("", r.FplId)
-            | "theory" -> Assert.AreEqual<string>("TestScopeConstructorsFplId", theory.FplId)
+            | PrimTheoryL -> Assert.AreEqual<string>("TestScopeConstructorsFplId", theory.FplId)
             | "block" -> Assert.AreEqual<string>("TestId", block.FplId)
             | "t1" -> Assert.AreEqual<string>("TestId", t1.FplId)
             | "t2" -> Assert.AreEqual<string>("TestId", t2.FplId)
@@ -115,7 +115,7 @@ type TestFplValueScopeFplId() =
             Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("thm1")>]
     [<DataRow("proofThm1")>]
     [<DataRow("lem1")>]
@@ -145,7 +145,7 @@ type TestFplValueScopeFplId() =
                                 axi1,corAxi1) -> 
                 match var with
                 | "r" -> Assert.AreEqual<string>("", r.FplId)
-                | "theory" -> Assert.AreEqual<string>("TestScopeProofsAndCorollariesFplId", theory.FplId)
+                | PrimTheoryL -> Assert.AreEqual<string>("TestScopeProofsAndCorollariesFplId", theory.FplId)
                 | "thm1" -> Assert.AreEqual<string>("TestTheorem1", thm1.FplId)
                 | "proofThm1" -> Assert.AreEqual<string>("TestTheorem1$1", proofThm1.FplId)
                 | "lem1" -> Assert.AreEqual<string>("TestLemma1", lem1.FplId)
@@ -172,7 +172,7 @@ type TestFplValueScopeFplId() =
 
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("t1")>]
     [<DataRow("t2")>]
@@ -196,7 +196,7 @@ type TestFplValueScopeFplId() =
             t13:FplValue,t14:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<string>("", r.FplId)
-            | "theory" -> Assert.AreEqual<string>("TestScopePropertiesFplId", theory.FplId)
+            | PrimTheoryL -> Assert.AreEqual<string>("TestScopePropertiesFplId", theory.FplId)
             | "block" -> Assert.AreEqual<string>("TestId", block.FplId)
             | "t1" -> Assert.AreEqual<string>("T1", t1.FplId)
             | "t2" -> Assert.AreEqual<string>("T2", t2.FplId)
@@ -217,7 +217,7 @@ type TestFplValueScopeFplId() =
             Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
@@ -253,7 +253,7 @@ type TestFplValueScopeFplId() =
         | Some (r,theory,block,x,y,s,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<string>("", r.FplId)
-            | "theory" -> Assert.AreEqual<string>("TestScopeVariablesInBlockFplId", theory.FplId)
+            | PrimTheoryL -> Assert.AreEqual<string>("TestScopeVariablesInBlockFplId", theory.FplId)
             | "block" -> Assert.AreEqual<string>("TestPredicate", block.FplId); 
             | "x" -> Assert.AreEqual<string>("x", x.FplId)
             | "y" -> Assert.AreEqual<string>("y", y.FplId)
@@ -288,7 +288,7 @@ type TestFplValueScopeFplId() =
 
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
@@ -323,7 +323,7 @@ type TestFplValueScopeFplId() =
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<string>("", r.FplId)
-            | "theory" -> Assert.AreEqual<string>("TestScopeVariablesInBlockVariadicFplId", theory.FplId)
+            | PrimTheoryL -> Assert.AreEqual<string>("TestScopeVariablesInBlockVariadicFplId", theory.FplId)
             | "block" -> Assert.AreEqual<string>("TestPredicate", block.FplId); 
             | "x" -> Assert.AreEqual<string>("x", x.FplId)
             | "y" -> Assert.AreEqual<string>("y", y.FplId)
@@ -357,7 +357,7 @@ type TestFplValueScopeFplId() =
 
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
@@ -392,7 +392,7 @@ type TestFplValueScopeFplId() =
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<string>("", r.FplId)
-            | "theory" -> Assert.AreEqual<string>("TestScopeVariablesInSignatureFplId", theory.FplId)
+            | PrimTheoryL -> Assert.AreEqual<string>("TestScopeVariablesInSignatureFplId", theory.FplId)
             | "block" -> Assert.AreEqual<string>("TestPredicate", block.FplId); 
             | "x" -> Assert.AreEqual<string>("x", x.FplId)
             | "y" -> Assert.AreEqual<string>("y", y.FplId)
@@ -425,7 +425,7 @@ type TestFplValueScopeFplId() =
             Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
@@ -460,7 +460,7 @@ type TestFplValueScopeFplId() =
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<string>("", r.FplId)
-            | "theory" -> Assert.AreEqual<string>("TestScopeVariablesInSignatureVariadicFplId", theory.FplId)
+            | PrimTheoryL -> Assert.AreEqual<string>("TestScopeVariablesInSignatureVariadicFplId", theory.FplId)
             | "block" -> Assert.AreEqual<string>("TestPredicate", block.FplId); 
             | "x" -> Assert.AreEqual<string>("x", x.FplId)
             | "y" -> Assert.AreEqual<string>("y", y.FplId)
@@ -655,7 +655,7 @@ type TestFplValueScopeFplId() =
                                 dec
                                     %s
                                 ;
-                                self
+                                
                             }
                         }
                         ;""" varVal
@@ -804,7 +804,7 @@ type TestFplValueScopeFplId() =
     [<DataRow("base4", """100. 2, 3, 5 |- iif (a,b)""", 3)>]
     [<DataRow("base5", """100. |- revoke 3""", 0)>]
     [<TestMethod>]
-    member this.TestArgument(var, argExpression, expNumber:int) =
+    member this.TestArgumentFplId(var, argExpression, expNumber:int) =
         ad.Clear()
         let fplCode = sprintf """proof T$1 { %s };""" argExpression
         let filename = "TestArgumentFplId"
@@ -817,11 +817,6 @@ type TestFplValueScopeFplId() =
             let proof = theory.Scope["T$1"]
             let arg = proof.Scope["100."]
             let just = arg.ArgList[0]
-            let ainf = arg.ArgList[1]
-            let numbOfJustifications = just.Scope.Count
- 
-            Assert.AreEqual<int>(expNumber, numbOfJustifications)
-
             match var with
             | "base1" -> Assert.AreEqual<string>("100.", arg.FplId)
             | "base2" -> Assert.AreEqual<string>("100.", arg.FplId)

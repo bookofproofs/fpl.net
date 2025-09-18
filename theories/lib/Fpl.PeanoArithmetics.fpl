@@ -39,12 +39,12 @@ ext Digits x@/\d+/ -> Nat
     return n
 }
 
-axiom ZeroIsNat()
+axiom ZeroIsNat
 {
     is(Zero,Nat)
 }
 
-axiom SuccessorExistsAndIsUnique()
+axiom SuccessorExistsAndIsUnique
 {
     all n:Nat
     {
@@ -59,7 +59,7 @@ axiom SuccessorExistsAndIsUnique()
     }
 }
 
-axiom ZeroIsNotSuccessor()
+axiom ZeroIsNotSuccessor
 {
     all n:Nat
     {
@@ -67,7 +67,7 @@ axiom ZeroIsNotSuccessor()
     }
 }
 
-axiom SuccessorIsInjective()
+axiom SuccessorIsInjective
 {
     all n,m:Nat
     {
@@ -79,9 +79,9 @@ axiom SuccessorIsInjective()
     }
 }
 
-axiom CompleteInduction(p:pred(n:Nat))
+axiom CompleteInduction
 {
-
+    dec ~p:pred(n:Nat);
     impl
     (
         and ( p(@0), all n1:Nat { impl ( p(n1), p(Succ(n1)) ) } ),
@@ -117,7 +117,7 @@ def class SetNat: Set
                 }
             base.Set()
         ;
-        self
+    
     }
 }
 
@@ -141,10 +141,10 @@ def pred IsGreaterOrEqual(n,m: Nat)
     ex k: Nat { (n = Add(m,k)) }
 }
 
-prop AddIsUnique(op: Add)
+prop AddIsUnique
 {
     dec
-        ~anotherAdd: Add
+        ~anotherAdd, op: Add
     ;
     impl
     (
@@ -257,7 +257,7 @@ def func Sum(from,to:Nat, addend: Addend) -> Nat
     return result
 }
 
-proposition SumOfConsecutiveNumbers()
+proposition SumOfConsecutiveNumbers
 {
     dec
         ~limit: Nat
@@ -353,6 +353,6 @@ def function ContinuedFraction(arr: RightOpenRangeInt[k:Nat]) -> Real
 }
 
 // Example of defining a constant for the natural number 100 using the
-def class N100:Set{ctor N100(){dec ~n:Nat  base.Set() self:=SetBuilder(SetNat(),IsGreater(n,@100)); self }}
+def class N100:Set{ctor N100(){dec ~n:Nat  base.Set() self:=SetBuilder(SetNat(),IsGreater(n,@100));  }}
 
 ;

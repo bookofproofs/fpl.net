@@ -1,4 +1,5 @@
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using static FplPrimitives;
 
 namespace FplLSTests
 {
@@ -8,7 +9,7 @@ namespace FplLSTests
         [DataRow("?")]
         [DataRow("|")]
         [DataRow("@")]
-        [DataRow("=")]
+        [DataRow(PrimEquality)]
         [DataRow(":=")]
         [DataRow(":+")]
         [DataRow(":*")]
@@ -40,7 +41,7 @@ namespace FplLSTests
         [DataRow("?")]
         [DataRow("|")]
         [DataRow("@")]
-        [DataRow("=")]
+        [DataRow(PrimEquality)]
         [DataRow(":=")]
         [DataRow(":+")]
         [DataRow(":*")]
@@ -77,7 +78,7 @@ namespace FplLSTests
         [DataRow("?")]
         [DataRow("|")]
         [DataRow("@")]
-        [DataRow("=")]
+        [DataRow(PrimEquality)]
         [DataRow(":=")]
         [DataRow(":+")]
         [DataRow(":*")]
@@ -112,7 +113,7 @@ namespace FplLSTests
         [DataRow("?")]
         [DataRow("|")]
         [DataRow("@")]
-        [DataRow("=")]
+        [DataRow(PrimEquality)]
         [DataRow(":=")]
         [DataRow(":+")]
         [DataRow(":*")]
@@ -147,7 +148,7 @@ namespace FplLSTests
         [DataRow("?", "else case '?'")]
         [DataRow("|", "new case '|'")]
         [DataRow("@", "parent self reference '@'")]
-        [DataRow("=", "equal sign '='")]
+        [DataRow(PrimEquality, "equal sign '='")]
         [DataRow(":=", "assignment sign ':='")]
         [DataRow(":+", "one or more '*'")]
         [DataRow(":*", "zero or more '*'")]
@@ -182,7 +183,7 @@ namespace FplLSTests
         [DataRow("?")]
         [DataRow("|")]
         [DataRow("@")]
-        [DataRow("=")]
+        [DataRow(PrimEquality)]
         [DataRow(":=")]
         [DataRow(":+")]
         [DataRow(":*")]

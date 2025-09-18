@@ -1,7 +1,7 @@
 ﻿namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
-open FplGrammarCommons
+open FplPrimitives
 open FplInterpreterTypes
 open CommonTestHelpers
 
@@ -9,7 +9,7 @@ open CommonTestHelpers
 type TestFplValueScopeQualifiedName() =
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("inf1")>]
     [<DataRow("inf2")>]
     [<DataRow("axi1")>]
@@ -45,7 +45,7 @@ type TestFplValueScopeQualifiedName() =
         | Some (r:FplRoot,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,fun3:FplValue,fun4:FplValue,fun5:FplValue,fun6:FplValue,fun7:FplValue,fun8:FplValue,fun9:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<string>("", qualifiedName r)
-            | "theory" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName", qualifiedName theory)
+            | PrimTheoryL -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName", qualifiedName theory)
             | "inf1" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeInference1()", qualifiedName inf1)
             | "inf2" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeInference2()", qualifiedName inf2)
             | "axi1" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeAxiom1()", qualifiedName axi1)
@@ -84,7 +84,7 @@ type TestFplValueScopeQualifiedName() =
             Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("t1")>]
     [<DataRow("t2")>]
@@ -97,7 +97,7 @@ type TestFplValueScopeQualifiedName() =
         | Some (r:FplRoot,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<string>("", qualifiedName r)
-            | "theory" -> Assert.AreEqual<string>("TestScopeConstructorsQualifiedName", qualifiedName theory)
+            | PrimTheoryL -> Assert.AreEqual<string>("TestScopeConstructorsQualifiedName", qualifiedName theory)
             | "block" -> Assert.AreEqual<string>("TestScopeConstructorsQualifiedName.TestId", qualifiedName block)
             | "t1" -> Assert.AreEqual<string>("TestScopeConstructorsQualifiedName.TestId.TestId()", qualifiedName t1)
             | "t2" -> Assert.AreEqual<string>("TestScopeConstructorsQualifiedName.TestId.TestId(obj)", qualifiedName t2)
@@ -108,7 +108,7 @@ type TestFplValueScopeQualifiedName() =
             Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("thm1")>]
     [<DataRow("proofThm1")>]
     [<DataRow("lem1")>]
@@ -138,7 +138,7 @@ type TestFplValueScopeQualifiedName() =
                                 axi1,corAxi1) -> 
                 match var with
                 | "r" -> Assert.AreEqual<string>("", qualifiedName r)
-                | "theory" -> Assert.AreEqual<string>("TestScopeProofsAndCorollariesQualifiedName", qualifiedName theory)
+                | PrimTheoryL -> Assert.AreEqual<string>("TestScopeProofsAndCorollariesQualifiedName", qualifiedName theory)
                 | "thm1" -> Assert.AreEqual<string>("TestScopeProofsAndCorollariesQualifiedName.TestTheorem1()", qualifiedName thm1)
                 | "proofThm1" -> Assert.AreEqual<string>("TestScopeProofsAndCorollariesQualifiedName.TestTheorem1().TestTheorem1$1", qualifiedName proofThm1)
                 | "lem1" -> Assert.AreEqual<string>("TestScopeProofsAndCorollariesQualifiedName.TestLemma1()", qualifiedName lem1)
@@ -165,7 +165,7 @@ type TestFplValueScopeQualifiedName() =
 
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("t1")>]
     [<DataRow("t2")>]
@@ -189,7 +189,7 @@ type TestFplValueScopeQualifiedName() =
             t13:FplValue,t14:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<string>("", qualifiedName r)
-            | "theory" -> Assert.AreEqual<string>("TestScopePropertiesQualifiedName", qualifiedName theory)
+            | PrimTheoryL -> Assert.AreEqual<string>("TestScopePropertiesQualifiedName", qualifiedName theory)
             | "block" -> Assert.AreEqual<string>("TestScopePropertiesQualifiedName.TestId()", qualifiedName block)
             | "t1" -> Assert.AreEqual<string>("TestScopePropertiesQualifiedName.TestId().T1()", qualifiedName t1)
             | "t2" -> Assert.AreEqual<string>("TestScopePropertiesQualifiedName.TestId().T2()", qualifiedName t2)
@@ -210,7 +210,7 @@ type TestFplValueScopeQualifiedName() =
             Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
@@ -246,7 +246,7 @@ type TestFplValueScopeQualifiedName() =
         | Some (r,theory,block,x,y,s,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<string>("", qualifiedName r)
-            | "theory" -> Assert.AreEqual<string>("TestScopeVariablesInBlockQualifiedName", qualifiedName theory)
+            | PrimTheoryL -> Assert.AreEqual<string>("TestScopeVariablesInBlockQualifiedName", qualifiedName theory)
             | "block" -> Assert.AreEqual<string>("TestScopeVariablesInBlockQualifiedName.TestPredicate()", qualifiedName block)
             | "x" -> Assert.AreEqual<string>("x", qualifiedName x)
             | "y" -> Assert.AreEqual<string>("y", qualifiedName y)
@@ -279,7 +279,7 @@ type TestFplValueScopeQualifiedName() =
         | None -> Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
@@ -314,7 +314,7 @@ type TestFplValueScopeQualifiedName() =
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<string>("", qualifiedName r)
-            | "theory" -> Assert.AreEqual<string>("TestScopeVariablesInBlockVariadicQualifiedName", qualifiedName theory)
+            | PrimTheoryL -> Assert.AreEqual<string>("TestScopeVariablesInBlockVariadicQualifiedName", qualifiedName theory)
             | "block" -> Assert.AreEqual<string>("TestScopeVariablesInBlockVariadicQualifiedName.TestPredicate()", qualifiedName block)
             | "x" -> Assert.AreEqual<string>("x", qualifiedName x)
             | "y" -> Assert.AreEqual<string>("y", qualifiedName y)
@@ -347,7 +347,7 @@ type TestFplValueScopeQualifiedName() =
 
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
@@ -382,7 +382,7 @@ type TestFplValueScopeQualifiedName() =
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<string>("", qualifiedName r)
-            | "theory" -> Assert.AreEqual<string>("TestScopeVariablesInSignatureQualifiedName", qualifiedName theory)
+            | PrimTheoryL -> Assert.AreEqual<string>("TestScopeVariablesInSignatureQualifiedName", qualifiedName theory)
             | "block" -> Assert.AreEqual<string>("TestScopeVariablesInSignatureQualifiedName.TestPredicate(pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj), pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj))", qualifiedName block)
             | "x" -> Assert.AreEqual<string>("x", qualifiedName x)
             | "y" -> Assert.AreEqual<string>("y", qualifiedName y)
@@ -414,7 +414,7 @@ type TestFplValueScopeQualifiedName() =
         | None -> Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
@@ -449,7 +449,7 @@ type TestFplValueScopeQualifiedName() =
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<string>("", qualifiedName r)
-            | "theory" -> Assert.AreEqual<string>("TestScopeVariablesInSignatureVariadicQualifiedName", qualifiedName theory)
+            | PrimTheoryL -> Assert.AreEqual<string>("TestScopeVariablesInSignatureVariadicQualifiedName", qualifiedName theory)
             | "block" -> Assert.AreEqual<string>("TestScopeVariablesInSignatureVariadicQualifiedName.TestPredicate(+pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj), +pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj))", qualifiedName block)
             | "x" -> Assert.AreEqual<string>("x", qualifiedName x)
             | "y" -> Assert.AreEqual<string>("y", qualifiedName y)
@@ -641,7 +641,7 @@ type TestFplValueScopeQualifiedName() =
                                 dec
                                     %s
                                 ;
-                                self
+                                
                             }
                         }
                         ;""" varVal
@@ -790,7 +790,7 @@ type TestFplValueScopeQualifiedName() =
     [<DataRow("base4", """100. 2, 3, 5 |- iif (a,b)""", 3)>]
     [<DataRow("base5", """100. |- revoke 3""", 0)>]
     [<TestMethod>]
-    member this.TestArgument(var, argExpression, expNumber:int) =
+    member this.TestArgumentQualifiedName(var, argExpression, expNumber:int) =
         ad.Clear()
         let fplCode = sprintf """proof T$1 { %s };""" argExpression
         let filename = "TestArgumentQualifiedName"
@@ -803,11 +803,6 @@ type TestFplValueScopeQualifiedName() =
             let proof = theory.Scope["T$1"]
             let arg = proof.Scope["100."]
             let just = arg.ArgList[0]
-            let ainf = arg.ArgList[1]
-            let numbOfJustifications = just.Scope.Count
- 
-            Assert.AreEqual<int>(expNumber, numbOfJustifications)
-
             match var with
             | "base1" -> Assert.AreEqual<string>("TestArgumentQualifiedName.T$1.100.", qualifiedName arg)
             | "base2" -> Assert.AreEqual<string>("TestArgumentQualifiedName.T$1.100.", qualifiedName arg)

@@ -1,5 +1,5 @@
 ﻿using OmniSharp.Extensions.LanguageServer.Protocol.Models;
-using static FplGrammarCommons;
+using static FplPrimitives;
 
 namespace FplLS
 {
@@ -79,7 +79,7 @@ namespace FplLS
                     return new FplCompletionItemChoicesRegex().GetChoices(this);
                 case "word":
                     return new FplCompletionItemChoicesWord().GetChoices(this);
-                case "variable":
+                case PrimVariableL:
                 case "variable (got keyword)":
                 case "variable (got template)":
                     return new FplCompletionItemChoicesVariable().GetChoices(this);
@@ -485,7 +485,7 @@ namespace FplLS
                     this.IsShort = true;
                     break;
                 case literalInfL:
-                    this.Detail = "rule of inference";
+                    this.Detail = PrimRuleOfInference;
                     this.SortText = "inference01";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = false;

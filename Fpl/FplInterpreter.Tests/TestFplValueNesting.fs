@@ -1,7 +1,7 @@
 ﻿namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
-open FplGrammarCommons
+open FplPrimitives
 open FplInterpreterTypes
 open CommonTestHelpers
 open System
@@ -32,7 +32,7 @@ type TestFplValueNesting() =
             Assert.AreEqual<string>(literalTrue, resS)
         | _ -> Assert.IsTrue(false)
 
-    [<DataRow("lem Le2() { true } proof Le2$1 {  1. |- trivial  2. 1, 2, 3 |- trivial 3. |- trivial qed };")>]
+    [<DataRow("lem Le2 { true } proof Le2$1 {  1. |- trivial  2. 1, 2, 3 |- trivial 3. |- trivial qed };")>]
     [<TestMethod>]
     member this.TestProofArgumentsInScope(varVal) =
         ad.Clear()

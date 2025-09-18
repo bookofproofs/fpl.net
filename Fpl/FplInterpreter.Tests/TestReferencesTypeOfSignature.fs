@@ -1,6 +1,6 @@
 ﻿namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
-open FplGrammarCommons
+open FplPrimitives
 open ErrDiagnostics
 open FplInterpreterTypes
 open CommonTestHelpers
@@ -176,7 +176,7 @@ type TestReferencesTypeOfSignature() =
                                 dec
                                     %s
                                 ;
-                                self
+                                
                             }
                         }
                         ;""" varVal
@@ -238,23 +238,16 @@ type TestReferencesTypeOfSignature() =
             Assert.IsTrue(false)
 
     [<DataRow("""loc and(p,q) := !tex: x "=" y;;""", "pred(undef, undef)")>]
-    [<DataRow("""thm T(p:obj) {true};""","pred(obj)")>]
-    [<DataRow("""thm T() {true};""", "pred()")>]
-    [<DataRow("""ax T(p:obj) {true};""","pred(obj)")>]
-    [<DataRow("""ax T() {true};""", "pred()")>]
-    [<DataRow("""lem T(p:obj) {true};""","pred(obj)")>]
-    [<DataRow("""lem T() {true};""", "pred()")>]
-    [<DataRow("""prop T(p:obj) {true};""","pred(obj)")>]
-    [<DataRow("""prop T() {true};""", "pred()")>]
-    [<DataRow("""conj T(p:obj) {true};""","pred(obj)")>]
-    [<DataRow("""conj T() {true};""", "pred()")>]
-    [<DataRow("""cor T$1(p:obj) {true};""","pred$1(obj)")>]
-    [<DataRow("""cor T$1() {true};""", "pred$1()")>]
+    [<DataRow("""thm T {true};""","pred")>]
+    [<DataRow("""ax T {true};""", "pred")>]
+    [<DataRow("""lem T {true};""", "pred")>]
+    [<DataRow("""prop T {true};""", "pred")>]
+    [<DataRow("""conj T {true};""", "pred")>]
+    [<DataRow("""cor T$1 {true};""", "pred$1")>]
     [<DataRow("""proof T$1 {1. |- trivial};""","pred$1")>]
     [<DataRow("""def pred T(p:obj) {true};""","pred(obj)")>]
     [<DataRow("""def pred T() {true};""", "pred()")>]
-    [<DataRow("""inf T(p:obj) {pre: true con:true};""","pred(obj)")>]
-    [<DataRow("""inf T() {pre: true con:true};""", "pred()")>]
+    [<DataRow("""inf T {pre: true con:true};""", "pred")>]
     [<TestMethod>]
     member this.TestBlock(varVal, name:string) =
         ad.Clear()

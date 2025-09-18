@@ -2,7 +2,7 @@
 /// It is not really needed because the necessary FPL modules are run 
 /// as an FPL Language Server (see FplLS C# Project in the same solution).
 
-open FplGrammarCommons
+open FplPrimitives
 open ErrDiagnostics
 open FplParser
 open FplInterpreter

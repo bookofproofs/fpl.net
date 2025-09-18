@@ -14,7 +14,7 @@ type TestTheoremLikeStatements () =
 
     [<TestMethod>]
     member this.TestProposition01 () =
-        let result = run (proposition .>> eof) """proposition SuccessorExistsAndIsUnique()
+        let result = run (proposition .>> eof) """proposition SuccessorExistsAndIsUnique
         {
             all n:Nat
             {
@@ -34,7 +34,7 @@ type TestTheoremLikeStatements () =
 
     [<TestMethod>]
     member this.TestTheorem01 () =
-        let result = run (theorem .>> eof) """thm CompleteInduction()
+        let result = run (theorem .>> eof) """thm CompleteInduction
         {
             all p:pred
             {
@@ -52,7 +52,7 @@ type TestTheoremLikeStatements () =
 
     [<TestMethod>]
     member this.TestTheorem02 () =
-        let result = run (theorem .>> eof) """theorem ZeroIsNat()
+        let result = run (theorem .>> eof) """theorem ZeroIsNat
         {
             is(Zero,Nat)
         }"""
@@ -62,7 +62,7 @@ type TestTheoremLikeStatements () =
 
     [<TestMethod>]
     member this.TestLemma01 () =
-        let result = run (lemma .>> eof) """lem EmptySetExists()
+        let result = run (lemma .>> eof) """lem EmptySetExists
         {
             ex x:Set
             {
@@ -76,7 +76,7 @@ type TestTheoremLikeStatements () =
 
     [<TestMethod>]
     member this.TestLemma02 () =
-        let result = run (lemma .>> eof) """lemma ZeroIsNotSuccessor()
+        let result = run (lemma .>> eof) """lemma ZeroIsNotSuccessor
         {
             all n:Nat
             {
@@ -89,7 +89,7 @@ type TestTheoremLikeStatements () =
 
     [<TestMethod>]
     member this.TestConjecture01 () =
-        let result = run (conjecture .>> eof) """conjecture SuccessorIsInjective()
+        let result = run (conjecture .>> eof) """conjecture SuccessorIsInjective
         {
             all n,m: Nat
             {
@@ -106,7 +106,7 @@ type TestTheoremLikeStatements () =
 
     [<TestMethod>]
     member this.TestConjecture02 () =
-        let result = run (conjecture .>> eof) """conj Extensionality()
+        let result = run (conjecture .>> eof) """conj Extensionality
         {
             all x,y: Set
             {

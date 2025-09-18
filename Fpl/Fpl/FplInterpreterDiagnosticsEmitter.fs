@@ -4,7 +4,7 @@ module FplInterpreterDiagnosticsEmitter
 open System.Collections.Generic
 open System.Text.RegularExpressions
 open FParsec
-open FplGrammarCommons
+open FplPrimitives
 open ErrDiagnostics
 open FplInterpreterTypes
 open FplInterpreterDiagnosticsEmitterPre
@@ -589,47 +589,6 @@ let rec blocktIsProof (fplValue: FplValue) =
                 blocktIsProof parent
         | None -> false
 
-let emitPR000Diagnostics (fplValue: FplValue) =
-    if not (blocktIsProof fplValue) then
-        let diagnostic =
-            { 
-                Diagnostic.Uri = ad.CurrentUri
-                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                Diagnostic.Severity = DiagnosticSeverity.Error
-                Diagnostic.StartPos = fplValue.StartPos
-                Diagnostic.EndPos = fplValue.EndPos
-                Diagnostic.Code = PR000 (fplValue.Type(SignatureType.Type))
-                Diagnostic.Alternatives = None 
-            }
-        ad.AddDiagnostic diagnostic
-
-let emitPR001Diagnostics (fplValue: FplValue) pos1 pos2 =
-    if not (blocktIsProof fplValue) then
-        let diagnostic =
-            { 
-                Diagnostic.Uri = ad.CurrentUri
-                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                Diagnostic.Severity = DiagnosticSeverity.Error
-                Diagnostic.StartPos = pos1
-                Diagnostic.EndPos = pos2
-                Diagnostic.Code = PR001
-                Diagnostic.Alternatives = None 
-            }
-        ad.AddDiagnostic diagnostic
-
-let emitPR002Diagnostics pos1 pos2 =
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = pos1
-            Diagnostic.EndPos = pos2
-            Diagnostic.Code = PR002
-            Diagnostic.Alternatives = None 
-        }
-    ad.AddDiagnostic diagnostic
-
 let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
     let filterByErrorCode (input: Diagnostics) errCode =
         input.Collection |> List.filter (fun d -> d.Code.Code = errCode)
@@ -677,9 +636,9 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
             emitLG000Diagnostics argument
         else
             match repr with
-            | FplGrammarCommons.literalTrue
-            | FplGrammarCommons.literalFalse -> ()
-            | FplGrammarCommons.literalUndetermined -> emitLG000Diagnostics argument 
+            | FplPrimitives.literalTrue
+            | FplPrimitives.literalFalse -> ()
+            | FplPrimitives.literalUndetermined -> emitLG000Diagnostics argument 
             | _ -> emitLG001Diagnostics argument.StartPos argument.EndPos argument
     )
 

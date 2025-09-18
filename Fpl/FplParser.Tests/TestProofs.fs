@@ -1,7 +1,7 @@
 namespace FplParser.Tests
 
 open FParsec
-open FplGrammarCommons
+open FplPrimitives
 open FplParser
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
@@ -193,7 +193,7 @@ type TestProofs () =
     [<DataRow("|- revoke 2")>]
     [<DataRow("bydef A, 1, C |- revoke 2")>]
     [<DataRow("T$1:1 |- revoke 2")>]
-    [<DataRow("T$1:1, T$1 :2, T$1: 3 |- revoke 2")>]
+    [<DataRow("T$1:1, T$1:2, T$1: 3 |- revoke 2")>]
     [<DataRow("|- assume and(a,b)")>]
     [<TestMethod>]
     member this.TestArgument (test:string) =
@@ -264,7 +264,7 @@ type TestProofs () =
     member this.TestProof03 () =
         let result = run (proof .>> eof) """prf AddIsUnique$1
         {
-            1. |- assume true
+            1. |- assume and(x,b)
             2. |- trivial
             qed
         }"""
@@ -283,3 +283,32 @@ type TestProofs () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
         
+    [<DataRow(FplPrimitives.literalByCor, "$1", ":1")>]
+    [<DataRow(FplPrimitives.literalByDef, "$1", ":1")>]
+    [<DataRow(FplPrimitives.literalByAx, "$1", ":1")>]
+    [<DataRow(FplPrimitives.literalByInf, "$1", ":1")>]
+    [<DataRow(FplPrimitives.literalByCor, "$1", "")>]
+    [<DataRow(FplPrimitives.literalByDef, "$1", "")>]
+    [<DataRow(FplPrimitives.literalByAx, "$1", "")>]
+    [<DataRow(FplPrimitives.literalByInf, "$1", "")>]
+    [<DataRow(FplPrimitives.literalByCor, "", ":1")>]
+    [<DataRow(FplPrimitives.literalByDef, "", ":1")>]
+    [<DataRow(FplPrimitives.literalByAx, "", ":1")>]
+    [<DataRow(FplPrimitives.literalByInf, "", "")>]
+    [<DataRow(FplPrimitives.literalByCor, "", "")>]
+    [<DataRow(FplPrimitives.literalByDef, "", "")>]
+    [<DataRow(FplPrimitives.literalByAx, "", "")>]
+    [<DataRow(FplPrimitives.literalByInf, "", "")>]
+    [<TestMethod>]
+    member this.TestJustificationIdentifier (keyword:string, corRef:string, argRef:string) =
+        let result = run (justificationReference .>> eof) $"{keyword} A{corRef}{argRef}"
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestJustificationIdentifierByDef () =
+        let result = run (justificationReference .>> eof) $"bydef x"
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))

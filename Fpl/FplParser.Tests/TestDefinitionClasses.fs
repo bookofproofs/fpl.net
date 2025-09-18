@@ -86,7 +86,6 @@ type TestClasses () =
             ctor FieldPowerN()
             {
                 dec base.obj() ;
-                self
             }
         }"""
         let actual = sprintf "%O" result
@@ -102,7 +101,6 @@ type TestClasses () =
             constructor FieldPowerN() 
             {
                 dec base.obj() ;
-                self
             }
         }"""
         let actual = sprintf "%O" result
@@ -133,7 +131,6 @@ type TestClasses () =
             ctor FieldPowerN() 
             {
                 dec base.obj() ;
-                self
             }
         }"""
         let actual = sprintf "%O" result
@@ -163,7 +160,6 @@ type TestClasses () =
             ctor FieldPowerN() 
             {
                 dec base.obj() ;
-                self
             }
         }"""
         let actual = sprintf "%O" result
@@ -192,12 +188,10 @@ type TestClasses () =
             ctor FieldPowerN() 
             {
                 dec base.obj() ;
-                self
             }
             constructor FieldPowerN() 
             {
                 dec base.T1() ;
-                self
             }
         }"""
         let actual = sprintf "%O" result
@@ -212,13 +206,11 @@ type TestClasses () =
             ctor FieldPowerN() 
             {
                 dec base.obj() ;
-                self
             }
 
             ctor FieldPowerN() 
             {
                 dec base.T1() ;
-                self
             }
 
             property func T() -> obj
@@ -285,7 +277,6 @@ type TestClasses () =
             ctor FieldPowerN() 
             {
                 dec base.T1() ;
-                self
             }
 
             property pred opt T() 
@@ -394,10 +385,10 @@ type TestClasses () =
     member this.TestClass10 () =
         let result = run (definitionClass .>> eof) """cl TestId:obj 
         {
-            ctor TestId() {self} 
-            ctor TestId(x:obj) {self} 
-            ctor TestId(x:pred) {self} 
-            ctor TestId(x:ind) {self} 
+            ctor TestId() {} 
+            ctor TestId(x:obj) {} 
+            ctor TestId(x:pred) {} 
+            ctor TestId(x:ind) {} 
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual

@@ -265,10 +265,10 @@ type CommonFplValueTestCases =
         let fplCode = """
         def cl TestId:obj 
         {
-            ctor TestId() {self} 
-            ctor TestId(x:obj) {self} 
-            ctor TestId(x:pred) {self} 
-            ctor TestId(x:ind) {self} 
+            ctor TestId() {} 
+            ctor TestId(x:obj) {} 
+            ctor TestId(x:pred) {} 
+            ctor TestId(x:ind) {} 
         }
         ;
         """

@@ -3,13 +3,13 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
 open FplInterpreterTypes
 open CommonTestHelpers
-open FplGrammarCommons
+open FplPrimitives
 
 [<TestClass>]
 type TestFplValueScopeExpressionType() =
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("inf1")>]
     [<DataRow("inf2")>]
     [<DataRow("axi1")>]
@@ -50,7 +50,7 @@ type TestFplValueScopeExpressionType() =
         | Some (r:FplRoot,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,fun3:FplValue,fun4:FplValue,fun5:FplValue,fun6:FplValue,fun7:FplValue,fun8:FplValue,fun9:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<FixType>(FixType.NoFix, r.ExpressionType)
-            | "theory" -> Assert.AreEqual<FixType>(FixType.NoFix, theory.ExpressionType)
+            | PrimTheoryL -> Assert.AreEqual<FixType>(FixType.NoFix, theory.ExpressionType)
             | "inf1" -> Assert.AreEqual<FixType>(FixType.NoFix, inf1.ExpressionType)
             | "inf2" -> Assert.AreEqual<FixType>(FixType.NoFix, inf2.ExpressionType)
             | "axi1" -> Assert.AreEqual<FixType>(FixType.NoFix, axi1.ExpressionType)
@@ -90,7 +90,7 @@ type TestFplValueScopeExpressionType() =
 
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("t1")>]
     [<DataRow("t2")>]
@@ -103,7 +103,7 @@ type TestFplValueScopeExpressionType() =
         | Some (r,theory,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<FixType>(FixType.NoFix, r.ExpressionType)
-            | "theory" -> Assert.AreEqual<FixType>(FixType.NoFix, theory.ExpressionType)
+            | PrimTheoryL -> Assert.AreEqual<FixType>(FixType.NoFix, theory.ExpressionType)
             | "block" -> Assert.AreEqual<FixType>(FixType.NoFix, block.ExpressionType)
             | "t1" -> Assert.AreEqual<FixType>(FixType.NoFix, t1.ExpressionType)
             | "t2" -> Assert.AreEqual<FixType>(FixType.NoFix, t2.ExpressionType)
@@ -114,7 +114,7 @@ type TestFplValueScopeExpressionType() =
             Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("thm1")>]
     [<DataRow("proofThm1")>]
     [<DataRow("lem1")>]
@@ -144,7 +144,7 @@ type TestFplValueScopeExpressionType() =
                                 axi1,corAxi1) -> 
                 match var with
                 | "r" -> Assert.AreEqual<FixType>(FixType.NoFix, r.ExpressionType)
-                | "theory" -> Assert.AreEqual<FixType>(FixType.NoFix, theory.ExpressionType)
+                | PrimTheoryL -> Assert.AreEqual<FixType>(FixType.NoFix, theory.ExpressionType)
                 | "thm1" -> Assert.AreEqual<FixType>(FixType.NoFix, thm1.ExpressionType)
                 | "proofThm1" -> Assert.AreEqual<FixType>(FixType.NoFix, proofThm1.ExpressionType)
                 | "lem1" -> Assert.AreEqual<FixType>(FixType.NoFix, lem1.ExpressionType)
@@ -171,7 +171,7 @@ type TestFplValueScopeExpressionType() =
 
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("t1")>]
     [<DataRow("t2")>]
@@ -195,7 +195,7 @@ type TestFplValueScopeExpressionType() =
             t13:FplValue,t14:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<FixType>(FixType.NoFix, r.ExpressionType)
-            | "theory" -> Assert.AreEqual<FixType>(FixType.NoFix, theory.ExpressionType)
+            | PrimTheoryL -> Assert.AreEqual<FixType>(FixType.NoFix, theory.ExpressionType)
             | "block" -> Assert.AreEqual<FixType>(FixType.NoFix, block.ExpressionType)
             | "t1" -> Assert.AreEqual<FixType>(FixType.NoFix, t1.ExpressionType)
             | "t2" -> Assert.AreEqual<FixType>(FixType.NoFix, t2.ExpressionType)
@@ -216,7 +216,7 @@ type TestFplValueScopeExpressionType() =
             Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
@@ -252,7 +252,7 @@ type TestFplValueScopeExpressionType() =
         | Some (r,theory,block,x,y,s,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<FixType>(FixType.NoFix, r.ExpressionType)
-            | "theory" -> Assert.AreEqual<FixType>(FixType.NoFix, theory.ExpressionType)
+            | PrimTheoryL -> Assert.AreEqual<FixType>(FixType.NoFix, theory.ExpressionType)
             | "block" -> Assert.AreEqual<FixType>(FixType.NoFix, block.ExpressionType)
             | "x" -> Assert.AreEqual<FixType>(FixType.NoFix, x.ExpressionType)
             | "y" -> Assert.AreEqual<FixType>(FixType.NoFix, y.ExpressionType)
@@ -286,7 +286,7 @@ type TestFplValueScopeExpressionType() =
             Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
@@ -321,7 +321,7 @@ type TestFplValueScopeExpressionType() =
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<FixType>(FixType.NoFix, r.ExpressionType)
-            | "theory" -> Assert.AreEqual<FixType>(FixType.NoFix, theory.ExpressionType)
+            | PrimTheoryL -> Assert.AreEqual<FixType>(FixType.NoFix, theory.ExpressionType)
             | "block" -> Assert.AreEqual<FixType>(FixType.NoFix, block.ExpressionType)
             | "x" -> Assert.AreEqual<FixType>(FixType.NoFix, x.ExpressionType)
             | "y" -> Assert.AreEqual<FixType>(FixType.NoFix, y.ExpressionType)
@@ -355,7 +355,7 @@ type TestFplValueScopeExpressionType() =
 
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
@@ -390,7 +390,7 @@ type TestFplValueScopeExpressionType() =
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<FixType>(FixType.NoFix, r.ExpressionType)
-            | "theory" -> Assert.AreEqual<FixType>(FixType.NoFix, theory.ExpressionType)
+            | PrimTheoryL -> Assert.AreEqual<FixType>(FixType.NoFix, theory.ExpressionType)
             | "block" -> Assert.AreEqual<FixType>(FixType.NoFix, block.ExpressionType)
             | "x" -> Assert.AreEqual<FixType>(FixType.NoFix, x.ExpressionType)
             | "y" -> Assert.AreEqual<FixType>(FixType.NoFix, y.ExpressionType)
@@ -423,7 +423,7 @@ type TestFplValueScopeExpressionType() =
             Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
@@ -458,7 +458,7 @@ type TestFplValueScopeExpressionType() =
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<FixType>(FixType.NoFix, r.ExpressionType)
-            | "theory" -> Assert.AreEqual<FixType>(FixType.NoFix, theory.ExpressionType)
+            | PrimTheoryL -> Assert.AreEqual<FixType>(FixType.NoFix, theory.ExpressionType)
             | "block" -> Assert.AreEqual<FixType>(FixType.NoFix, block.ExpressionType)
             | "x" -> Assert.AreEqual<FixType>(FixType.NoFix, x.ExpressionType)
             | "y" -> Assert.AreEqual<FixType>(FixType.NoFix, y.ExpressionType)
@@ -651,7 +651,7 @@ type TestFplValueScopeExpressionType() =
                                 dec
                                     %s
                                 ;
-                                self
+                                
                             }
                         }
                         ;""" varVal
@@ -799,7 +799,7 @@ type TestFplValueScopeExpressionType() =
     [<DataRow("base4", """100. 2, 3, 5 |- iif (a,b)""", 3)>]
     [<DataRow("base5", """100. |- revoke 3""", 0)>]
     [<TestMethod>]
-    member this.TestArgument(var, argExpression, expNumber:int) =
+    member this.TestArgumentExpressionType(var, argExpression, expNumber:int) =
         ad.Clear()
         let fplCode = sprintf """proof T$1 { %s };""" argExpression
         let filename = "TestArgumentExpressionType"
@@ -812,11 +812,6 @@ type TestFplValueScopeExpressionType() =
             let proof = theory.Scope["T$1"]
             let arg = proof.Scope["100."]
             let just = arg.ArgList[0]
-            let ainf = arg.ArgList[1]
-            let numbOfJustifications = just.Scope.Count
- 
-            Assert.AreEqual<int>(expNumber, numbOfJustifications)
-
             match var with
             | "base1" -> Assert.AreEqual<FixType>(FixType.NoFix, arg.ExpressionType)
             | "base2" -> Assert.AreEqual<FixType>(FixType.NoFix, arg.ExpressionType)

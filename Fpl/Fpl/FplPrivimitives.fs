@@ -1,4 +1,4 @@
-﻿module FplGrammarCommons
+﻿module FplPrimitives
 
 open System
 open System.Collections.Generic
@@ -27,7 +27,13 @@ let literalAxL = "axiom"
 [<Literal>]
 let literalBase = "base"
 [<Literal>]
+let literalByAx = "byax"
+[<Literal>]
 let literalByDef = "bydef"
+[<Literal>]
+let literalByCor = "bycor"
+[<Literal>]
+let literalByInf = "byinf"
 [<Literal>]
 let literalCases = "cases"
 [<Literal>]
@@ -200,7 +206,10 @@ let keyWordSet =
            literalAx
            literalAxL
            literalBase
+           literalByAx
+           literalByCor
            literalByDef
+           literalByInf
            literalCases
            literalCl
            literalClL
@@ -1281,3 +1290,184 @@ let postfixMathSymbols: Parser<string,unit> = fixChar isPostfix "<postfix symbol
 let prefixMathSymbols: Parser<string,unit> = fixChar isPrefix "<prefix symbol>"
 
 let objectMathSymbols: Parser<string,unit> = fixChar isObject "<object symbol>"
+
+
+(* Strint primitives *)
+[<Literal>]
+let PrimArgInf = "ainf"
+[<Literal>]
+let PrimArg = "arg"
+[<Literal>]
+let PrimArgL = "argument"
+[<Literal>]
+let PrimAssertion = "assertion"
+[<Literal>]
+let PrimAssignment = "assignment statement"
+[<Literal>]
+let PrimArgInfAssume = "assume argument inference"
+[<Literal>]
+let PrimArgInfDerive = "derived argument inference"
+[<Literal>]
+let PrimArgInfRevoke = "revoke argument inference"
+[<Literal>]
+let PrimArgInfTrivial = "trivial argument inference"
+[<Literal>]
+let PrimCases = "cases statement"
+[<Literal>]
+let PrimCaseElse = "else case statement"
+[<Literal>]
+let PrimCaseSingle = "single case statement"
+[<Literal>]
+let PrimClass = "def cl"
+[<Literal>]
+let PrimClassL = "class definition"
+[<Literal>]
+let PrimConjunction = "conjunction"
+[<Literal>]
+let PrimDecrement = "decr"
+[<Literal>]
+let PrimDecrementL = "decrement statement"
+[<Literal>]
+let PrimDisjunction = "disjunction"
+[<Literal>]
+let PrimEquality = "="
+[<Literal>]
+let PrimEqualityL = "equality"
+[<Literal>]
+let PrimEquivalence = "equivalence"
+[<Literal>]
+let PrimExclusiveOr = "exclusive disjunction"
+[<Literal>]
+let PrimExtension = "def ext"
+[<Literal>]
+let PrimExtensionL = "extension definition"
+[<Literal>]
+let PrimExtensionObj = "extension object"
+[<Literal>]
+let PrimForInStmt = "for in statement"
+[<Literal>]
+let PrimForInStmtDomain = "for in statement's domain"
+[<Literal>]
+let PrimForInStmtEntity = "for in statement's entity"
+[<Literal>]
+let PrimFuncionalTerm = "def func"
+[<Literal>]
+let PrimFuncionalTermL = "functional term definition"
+[<Literal>]
+let PrimInstance = "inst" 
+[<Literal>]
+let PrimInstanceL = "instance"
+[<Literal>]
+let PrimIntrinsicFunc = "intrinsic functional term"
+[<Literal>]
+let PrimIntrinsicInd = "intrinsic index"
+[<Literal>]
+let PrimIntrinsicObj = "intrinsic object"
+[<Literal>]
+let PrimIntrinsicPred = "intrinsic predicate"
+[<Literal>]
+let PrimIntrinsicTpl = "intrinsic template"
+[<Literal>]
+let PrimIntrinsicUndef = "intrinsic undefined"
+[<Literal>]
+let PrimIsOperator = "is operator"
+[<Literal>]
+let PrimImplication = "implication"
+[<Literal>]
+let PrimJIByAx = "justification by axiom"
+[<Literal>]
+let PrimJIByCor = "justification by corollary"
+[<Literal>]
+let PrimJIByDef = "justification by definition"
+[<Literal>]
+let PrimJIByDefVar = "justification by variable definition"
+[<Literal>]
+let PrimJIByInf = "justification by rule of inference"
+[<Literal>]
+let PrimJIByProofArgument = "justification by argument in another proof"
+[<Literal>]
+let PrimJIByRefArgument = "justification by argument reference"
+[<Literal>]
+let PrimJIByTheoremLikeStmt = "justification by theorem-like statement"
+[<Literal>]
+let PrimJustification = "just"
+[<Literal>]
+let PrimJustificationL = "justification"
+[<Literal>]
+let PrimLanguage = "lang"
+[<Literal>]
+let PrimLanguageL = "language"
+[<Literal>]
+let PrimMandatoryFunctionalTerm = "mfunc"
+[<Literal>]
+let PrimMandatoryFunctionalTermL = "functional term property"
+[<Literal>]
+let PrimMandatoryPredicate = "mpred"
+[<Literal>]
+let PrimMandatoryPredicateL = "predicate property"
+[<Literal>]
+let PrimMapCases = "mapcases statement"
+[<Literal>]
+let PrimMapCaseElse = "else mapcase statement"
+[<Literal>]
+let PrimMapCaseSingle = "single mapcase statement"
+[<Literal>]
+let PrimMapping = "map"
+[<Literal>]
+let PrimMappingL = "mapping"
+[<Literal>]
+let PrimNegation = "negation"
+[<Literal>]
+let PrimOptionalFunctionalTerm = "ofunc"
+[<Literal>]
+let PrimOptionalFunctionalTermL = "optional functional term property"
+[<Literal>]
+let PrimOptionalPredicate = "opred"
+[<Literal>]
+let PrimOptionalPredicateL = "optional predicate property"
+[<Literal>]
+let PrimPredicate = "def pred"
+[<Literal>]
+let PrimPredicateL = "predicate definition"
+[<Literal>]
+let PrimQuantor = "qtr"
+[<Literal>]
+let PrimQuantorAll = "all quantor"
+[<Literal>]
+let PrimQuantorExists = "exists quantor"
+[<Literal>]
+let PrimQuantorExistsN = "exists n times quantor"
+[<Literal>]
+let PrimReturn = "return statement"
+[<Literal>]
+let PrimRef = "ref"
+[<Literal>]
+let PrimRefL = "reference"
+[<Literal>]
+let PrimRuleOfInference = "rule of inference"
+[<Literal>]
+let PrimRoot = "root"
+[<Literal>]
+let PrimStmt = "stmt"
+[<Literal>]
+let PrimStmtL = "statement"
+[<Literal>]
+let PrimTheory = "th"
+[<Literal>]
+let PrimTheoryL = "theory"
+[<Literal>]
+let PrimTranslation = "trsl"
+[<Literal>]
+let PrimTranslationL = "translation"
+[<Literal>]
+let PrimVariable = "var"
+[<Literal>]
+let PrimVariableL = "variable"
+[<Literal>]
+let PrimVariableMany = "*var"
+[<Literal>]
+let PrimVariableManyL = "zero-or-more variable"
+[<Literal>]
+let PrimVariableMany1 = "+var"
+[<Literal>]
+let PrimVariableMany1L = "one-or-more variable"

@@ -1,7 +1,7 @@
 namespace FplParser.Tests
 
 open FParsec
-open FplGrammarCommons
+open FplPrimitives
 open FplParser
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
@@ -79,9 +79,13 @@ type TestKeywordSpaces() =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("Expecting: <significant whitespace>"))
 
+    [<DataRow(FplPrimitives.literalByCor)>]
+    [<DataRow(FplPrimitives.literalByDef)>]
+    [<DataRow(FplPrimitives.literalByAx)>]
+    [<DataRow(FplPrimitives.literalByInf)>]
     [<TestMethod>]
-    member this.TestSpacesBydef () =
-        let result = run (byDefinition .>> eof) """bydefp"""
+    member this.TestSpacesBydef (keyword:string) =
+        let result = run (byModifier .>> eof) $"{keyword}p"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("Expecting: <significant whitespace>"))
@@ -351,7 +355,7 @@ type TestKeywordSpaces() =
     [<DataRow(literalPre)>]
     [<TestMethod>]
     member this.TestSpacesPremise (word:string) =
-        let result = run (premise .>> eof) $"""{word}:true"""
+        let result = run (premiseList .>> eof) $"""{word}:true"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -360,7 +364,7 @@ type TestKeywordSpaces() =
     [<DataRow(literalPre)>]
     [<TestMethod>]
     member this.TestSpacesPremiseA (word:string) =
-        let result = run (premise .>> eof) $"""{word} :true"""
+        let result = run (premiseList .>> eof) $"""{word} :true"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -369,7 +373,7 @@ type TestKeywordSpaces() =
     [<DataRow(literalPre)>]
     [<TestMethod>]
     member this.TestSpacesPremiseB (word:string) =
-        let result = run (premise .>> eof) $"""{word}: true"""
+        let result = run (premiseList .>> eof) $"""{word}: true"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

@@ -1,5 +1,5 @@
 ﻿using OmniSharp.Extensions.LanguageServer.Protocol.Models;
-using System;
+using static FplPrimitives;
 
 namespace FplLS
 {
@@ -20,7 +20,7 @@ namespace FplLS
                 case "@":
                     ci.Detail = "parent self reference '@'";
                     break;
-                case "=":
+                case PrimEquality:
                     ci.Detail = "equal sign '='";
                     break;
                 case ":=":

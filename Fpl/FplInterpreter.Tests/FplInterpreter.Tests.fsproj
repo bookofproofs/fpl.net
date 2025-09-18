@@ -10,15 +10,16 @@
   <ItemGroup>
     <Compile Include="CommonTestHelpers.fs" />
     <Compile Include="CommonFplValueTestCases.fs" />
-	  <Compile Include="TestExpressionEvaluationVariables.fs" />
-	  <Compile Include="TestDecrement.fs" />
-	  <Compile Include="TestArity.fs" />
-	  <Compile Include="TestRepresentation.fs" />
+	<Compile Include="TestExpressionEvaluationVariables.fs" />
+	<Compile Include="TestDecrement.fs" />
+	<Compile Include="TestArity.fs" />
+	<Compile Include="TestRepresentation.fs" />
     <Compile Include="TestSignatureMatching.fs" />
     <Compile Include="TestPrecedence.fs" />
     <Compile Include="TestInfixOperations.fs" />
-	  <Compile Include="UpdatingSymbolTableNavigation.fs" />
-    <Compile Include="TestFplValueNesting.fs" />
+	<Compile Include="SymbolTableNavigation.fs" />
+	<Compile Include="SymbolTableStructure.fs" />
+	<Compile Include="TestFplValueNesting.fs" />
     <Compile Include="TestFplValueScopeExpressionType.fs" />
     <Compile Include="TestExpressionEvaluation.fs" />
     <Compile Include="TestFplValueScopeFplRepresentation.fs" />
@@ -27,7 +28,6 @@
     <Compile Include="TestFplValueScopeTypeSignature.fs" />
     <Compile Include="TestFplValueScopeNameEndPos.fs" />
     <Compile Include="TestFplValueScopeQualifiedName.fs" />
-    <Compile Include="TestFplValueScopeBlockTypeName.fs" />
     <Compile Include="TestFplValueScopeBlockType.fs" />
     <Compile Include="TestFplValueScopeName.fs" />
     <Compile Include="TestFplValueScopeQualifiedStartPos.fs" />

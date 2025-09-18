@@ -2,7 +2,7 @@ namespace FplParser.Tests
 
 open FParsec
 open FplParser
-open FplGrammarCommons
+open FplPrimitives
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
 
@@ -515,23 +515,7 @@ type TestPredicatesSpecific () =
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
-
-
-    [<TestMethod>]
-    member this.TestByDef01 () =
-        let result = run (byDefinition .>> eof) """bydef A"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestByDef02 () =
-        let result = run (byDefinition .>> eof) """bydef Bdd"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
  
-
     [<TestMethod>]
     member this.TestOperator01 () =
         let result = run (infixOperation .>> eof) """( x = 1 )"""

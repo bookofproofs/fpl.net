@@ -111,7 +111,7 @@ Please see also [DocuFplGrammarPocShiftFromPythonToFSharp.md](https://github.com
 * Moved IndexValue from Identifier to PrimePredicate to prevent IndexValue being (illegally) parenthesized
 * Extended optional IndexValue (instead of Identifier) in IsOperator to allow variadic variables being used in the operator
 * Extended optional IndexValue in CoordInType to allow  variadic variables being used
-* Disambiguation: New keyword literalCases in CaseStatement (instead of "case"). The keyword "case" now starts every ConditionFollowedByResult.
+* Disambiguation: New keyword literalCases in CaseStatement (instead of "case"). The keyword "case" now starts every CaseSingle.
 * PrimePredicate put before CompoundPredicate in Predicate to avoid conflicts of variables starting with keywords of CompoundPredicate.
 * Allow intrinsic definitions of properties (contents of InstanceBlock and PredicateInstanceBlock are now optional).
 ## 1.1.4

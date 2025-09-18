@@ -13,7 +13,7 @@ type TestReferenceRules() =
 
     [<TestMethod>]
     member this.TestReferenceRule01 () =
-        let result = run (ruleOfInference .>> eof) """inf ModusPonens()
+        let result = run (ruleOfInference .>> eof) """inf ModusPonens
         {
             dec ~a:obj ~p,q: pred;
 
@@ -28,7 +28,7 @@ type TestReferenceRules() =
 
     [<TestMethod>]
     member this.TestReferenceRule02 () =
-        let result = run (ruleOfInference .>> eof) """inference ModusTollens()
+        let result = run (ruleOfInference .>> eof) """inference ModusTollens
         {
             dec ~a:obj ~p,q: pred;
 
@@ -43,7 +43,7 @@ type TestReferenceRules() =
 
     [<TestMethod>]
     member this.TestReferenceRule03 () =
-        let result = run (ruleOfInference .>> eof) """inf HypotheticalSyllogism()
+        let result = run (ruleOfInference .>> eof) """inf HypotheticalSyllogism
         {
             dec ~a:obj ~ p,q,r: pred;
             premise:
@@ -57,7 +57,7 @@ type TestReferenceRules() =
 
     [<TestMethod>]
     member this.TestReferenceRule04 () =
-        let result = run (ruleOfInference .>> eof) """inference DisjunctiveSyllogism()
+        let result = run (ruleOfInference .>> eof) """inference DisjunctiveSyllogism
         {
             dec ~a:obj ~p,q: pred;
             premise:
@@ -71,17 +71,11 @@ type TestReferenceRules() =
 
     [<TestMethod>]
     member this.TestReferenceRule05 () =
-        let result = run (ruleOfInference .>> eof) """inf ProceedingResults(p:+ pred)
+        let result = run (ruleOfInference .>> eof) """inf ProceedingResults2
         {
-            dec ~a:obj ~ proceedingResult: pred
-
-                for proceedingResult in p
-                {
-                    assert proceedingResult
-                }
-            ;
-            premise: undefined
-            conclusion: and (p,true)
+            dec ~a,b: pred;
+            premise: a, b
+            conclusion: and (a,b)
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -89,11 +83,11 @@ type TestReferenceRules() =
 
     [<TestMethod>]
     member this.TestReferenceRule05a () =
-        let result = run (ruleOfInference .>> eof) """inference ProceedingResults(p:+ pred)
+        let result = run (ruleOfInference .>> eof) """inference ProceedingResults3
         {
-            dec ~a:obj ~res,proceedingResult: pred res:=true for proceedingResult in p { res:=and(res, proceedingResult) } ;
-            premise: res
-            conclusion: and (false,p)
+            dec ~a,b,c: pred;
+            premise: a,b,c
+            conclusion: and(and(a,b),c)
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -101,7 +95,7 @@ type TestReferenceRules() =
 
     [<TestMethod>]
     member this.TestReferenceRule06 () =
-        let result = run (ruleOfInference .>> eof) """inf ExistsByExample(p: pred(c: obj))
+        let result = run (ruleOfInference .>> eof) """inf ExistsByExample
         {
             dec ~p:pred(c:obj);
             premise:
@@ -115,7 +109,7 @@ type TestReferenceRules() =
 
     [<TestMethod>]
     member this.TestReferenceRule07 () =
-        let result = run (ruleOfInference .>> eof) """inf TestRuleOfInference()
+        let result = run (ruleOfInference .>> eof) """inf TestRuleOfInference
         {
             premise:true
             conclusion:true
@@ -126,7 +120,14 @@ type TestReferenceRules() =
 
     [<TestMethod>]
     member this.TestVarsInReferenceRule() =
-        let result = run (ruleOfInference .>> eof) """inf ExistsByExample(p: pred(c: obj)) {dec ~c: obj; pre: true con: true}"""
+        let result = run (ruleOfInference .>> eof) """inf ExistsByExample {dec ~c: obj; pre: true con: true}"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestReferenceRule08() =
+        let result = run (ruleOfInference .>> eof) """inf ProceedingResults {dec ~a,b: pred; pre: a, b con: and(a,b)}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
