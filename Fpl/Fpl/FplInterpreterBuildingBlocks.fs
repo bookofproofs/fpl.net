@@ -225,6 +225,13 @@ let rec eval (st: SymbolTable) ast =
         | PrimFuncionalTermL
         | PrimPredicateL
         | LiteralPrfL
+        | LiteralCtorL
+        | PrimMandatoryFunctionalTermL
+        | PrimOptionalFunctionalTermL
+        | PrimMandatoryPredicateL
+        | PrimOptionalPredicateL
+        | PrimPredicateL
+        | PrimFuncionalTermL
         | PrimRuleOfInference -> fv.FplId <- s
         | _ -> ()
         st.EvalPop() 

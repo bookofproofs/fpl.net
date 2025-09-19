@@ -823,7 +823,7 @@ type TestFplValueScopeNameEndPos() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("base0", LiteralTrue, """!tex: "1" !eng: LiteralTrue !ger: "wahr";""")>]
+    [<DataRow("base0", LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr";""")>]
     [<DataRow("base1", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
     [<DataRow("base2", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
     [<DataRow("base3", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q;""")>]
@@ -882,7 +882,7 @@ type TestFplValueScopeNameEndPos() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("base0", LiteralTrue, """!tex: "1" !eng: LiteralTrue !ger: "wahr";""")>]
+    [<DataRow("base0", LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr";""")>]
     [<DataRow("base1", "iif(x, y)", """!tex: x " \Leftrightarrow " y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
     [<DataRow("base2", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
     [<DataRow("base3", "and(p, q)", """!tex: p " \wedge " q !eng: p " and " q !ger: p " und " q;""")>]
