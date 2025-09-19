@@ -9,9 +9,9 @@ open CommonTestHelpers
 type TestReferencesTypeOfSignature() =
 
 
-    [<DataRow("base1", literalTrue)>]
-    [<DataRow("base2", literalFalse)>]
-    [<DataRow("base3", literalUndef)>]
+    [<DataRow("base1", LiteralTrue)>]
+    [<DataRow("base2", LiteralFalse)>]
+    [<DataRow("base3", LiteralUndef)>]
     [<DataRow("base4", "-1")>]
     [<DataRow("base5", "del.Test()")>]
     [<DataRow("base6", "$1")>]
@@ -23,7 +23,7 @@ type TestReferencesTypeOfSignature() =
     [<DataRow("base11v1", "dec ~v:obj; v")>]
     [<DataRow("base11v2", "dec ~v:ind; v")>]
     [<DataRow("base11v3", "dec ~v:Nat; v")>]
-    [<DataRow("base12", literalParent)>]
+    [<DataRow("base12", LiteralParent)>]
     [<DataRow("base13", "@1")>]
     [<DataRow("base11a", "v.x")>]
     [<DataRow("base12a", "parent.x")>]
@@ -87,21 +87,21 @@ type TestReferencesTypeOfSignature() =
             let pr1 = theory.Scope["T()"] 
             let base1 = pr1.ArgList[0]
             match var with
-            | "base1" -> Assert.AreEqual<string>(literalPred, base1.Type(SignatureType.Type))
-            | "base2" -> Assert.AreEqual<string>(literalPred, base1.Type(SignatureType.Type))
-            | "base3" -> Assert.AreEqual<string>(literalUndef, base1.Type(SignatureType.Type))
-            | "base4" -> Assert.AreEqual<string>(literalPred, base1.Type(SignatureType.Type))
+            | "base1" -> Assert.AreEqual<string>(LiteralPred, base1.Type(SignatureType.Type))
+            | "base2" -> Assert.AreEqual<string>(LiteralPred, base1.Type(SignatureType.Type))
+            | "base3" -> Assert.AreEqual<string>(LiteralUndef, base1.Type(SignatureType.Type))
+            | "base4" -> Assert.AreEqual<string>(LiteralPred, base1.Type(SignatureType.Type))
             | "base5" -> Assert.AreEqual<string>("undef()", base1.Type(SignatureType.Type))
-            | "base6" -> Assert.AreEqual<string>(literalInd, base1.Type(SignatureType.Type))
+            | "base6" -> Assert.AreEqual<string>(LiteralInd, base1.Type(SignatureType.Type))
             | "base7" -> Assert.AreEqual<string>("Test$1(undef)", base1.Type(SignatureType.Type))
             | "base8" -> Assert.AreEqual<string>("Test$1", base1.Type(SignatureType.Type))
             | "base9" -> Assert.AreEqual<string>("Test$1()", base1.Type(SignatureType.Type))
             | "base10" -> Assert.AreEqual<string>("Test", base1.Type(SignatureType.Type))
-            | "base11" -> Assert.AreEqual<string>(literalUndef, base1.Type(SignatureType.Type))
-            | "base11v1" -> Assert.AreEqual<string>(literalObj, base1.Type(SignatureType.Type))
-            | "base11v2" -> Assert.AreEqual<string>(literalInd, base1.Type(SignatureType.Type))
+            | "base11" -> Assert.AreEqual<string>(LiteralUndef, base1.Type(SignatureType.Type))
+            | "base11v1" -> Assert.AreEqual<string>(LiteralObj, base1.Type(SignatureType.Type))
+            | "base11v2" -> Assert.AreEqual<string>(LiteralInd, base1.Type(SignatureType.Type))
             | "base11v3" -> Assert.AreEqual<string>("Nat", base1.Type(SignatureType.Type))
-            | "base12" -> Assert.AreEqual<string>(literalParent, base1.Type(SignatureType.Type))
+            | "base12" -> Assert.AreEqual<string>(LiteralParent, base1.Type(SignatureType.Type))
             | "base13" -> Assert.AreEqual<string>("obj", base1.Type(SignatureType.Type))
             | "base11a" -> Assert.AreEqual<string>("undef", base1.Type(SignatureType.Type))
             | "base12a" -> Assert.AreEqual<string>("parent.undef", base1.Type(SignatureType.Type))
@@ -288,9 +288,9 @@ type TestReferencesTypeOfSignature() =
             let r = st.Root
             let theory = r.Scope[filename]
             let base1 = 
-                if varVal.Contains literalCl then 
+                if varVal.Contains LiteralCl then 
                     theory.Scope["T1"]
-                elif varVal.Contains literalFunc then 
+                elif varVal.Contains LiteralFunc then 
                     theory.Scope["T1() -> obj"]
                 else 
                     theory.Scope["T1()"]

@@ -6,7 +6,7 @@ namespace FplLSTests
     public class TestGetCompletionItemIsOperator
     {
 
-        [DataRow(literalIs)]
+        [DataRow(LiteralIs)]
         [TestMethod]
         public void TestAddIsOperatorChoicesNumber(string choice)
         {
@@ -15,7 +15,7 @@ namespace FplLSTests
             Assert.AreEqual<int>(2, actual.Count);
         }
 
-        [DataRow(literalIs)]
+        [DataRow(LiteralIs)]
         [TestMethod]
         public void TestAddIsOperatorKeywordCounts(string choice)
         {
@@ -29,8 +29,8 @@ namespace FplLSTests
             Assert.AreEqual<int>(1, count);
         }
 
-        [DataRow(literalIs, CompletionItemKind.Property, literalIs)]
-        [DataRow(literalIs, CompletionItemKind.Keyword, "zzzis")]
+        [DataRow(LiteralIs, CompletionItemKind.Property, LiteralIs)]
+        [DataRow(LiteralIs, CompletionItemKind.Keyword, "zzzis")]
         [TestMethod]
         public void TestAddChoicesSortText(string choice, CompletionItemKind kind, string expected)
         {
@@ -45,7 +45,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow(literalIs)]
+        [DataRow(LiteralIs)]
         [TestMethod]
         public void TestAddIsOperatorChoicesLabel(string choice)
         {
@@ -57,7 +57,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow(literalIs)]
+        [DataRow(LiteralIs)]
         [TestMethod]
         public void TestAddIsOperatorChoicesDetail(string choice)
         {
@@ -69,7 +69,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow(literalIs)]
+        [DataRow(LiteralIs)]
         [TestMethod]
         public void TestAddIsOperatorChoicesInsertText(string choice)
         {

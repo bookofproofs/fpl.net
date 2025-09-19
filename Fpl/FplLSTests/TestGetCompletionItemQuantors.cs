@@ -8,9 +8,9 @@ namespace FplLSTests
     public class TestGetCompletionItemQuantors
     {
 
-        [DataRow(literalAll, 2)]
-        [DataRow(literalEx, 2)]
-        [DataRow(literalExN, 2)]
+        [DataRow(LiteralAll, 2)]
+        [DataRow(LiteralEx, 2)]
+        [DataRow(LiteralExN, 2)]
         [TestMethod]
         public void TestAddQuantorChoicesNumber(string choice, int number)
         {
@@ -19,9 +19,9 @@ namespace FplLSTests
             Assert.AreEqual<int>(number, actual.Count);
         }
 
-        [DataRow(literalAll, 1)]
-        [DataRow(literalEx, 1)]
-        [DataRow(literalExN, 1)]
+        [DataRow(LiteralAll, 1)]
+        [DataRow(LiteralEx, 1)]
+        [DataRow(LiteralExN, 1)]
         [TestMethod]
         public void TestAddQuantorKeywordCounts(string choice, int number)
         {
@@ -36,23 +36,23 @@ namespace FplLSTests
             Assert.AreEqual<int>(number, count);
         }
 
-        [DataRow(literalAll, "all ...", CompletionItemKind.Operator, "all01")]
-        [DataRow(literalAll, "type ...", CompletionItemKind.Operator, "all02")]
-        [DataRow(literalAll, "list ...", CompletionItemKind.Operator, "all03")]
-        [DataRow(literalAll, "range ...", CompletionItemKind.Operator, "all04")]
-        [DataRow(literalAll, "combined ...", CompletionItemKind.Operator, "all05")]
-        [DataRow(literalAll, "", CompletionItemKind.Keyword, "zzzall")]
-        [DataRow(literalEx, "ex ...", CompletionItemKind.Operator, "ex01")]
-        [DataRow(literalEx, "type ...", CompletionItemKind.Operator, "ex02")]
-        [DataRow(literalEx, "list ...", CompletionItemKind.Operator, "ex03")]
-        [DataRow(literalEx, "range ...", CompletionItemKind.Operator, "ex04")]
-        [DataRow(literalEx, "combined ...", CompletionItemKind.Operator, "ex05")]
-        [DataRow(literalEx, "", CompletionItemKind.Keyword, "zzzex")]
-        [DataRow(literalExN, "exn!1 ...", CompletionItemKind.Operator, "exn01")]
-        [DataRow(literalExN, "type ...", CompletionItemKind.Operator, "exn02")]
-        [DataRow(literalExN, "list ...", CompletionItemKind.Operator, "exn03")]
-        [DataRow(literalExN, "range ...", CompletionItemKind.Operator, "exn04")]
-        [DataRow(literalExN, "", CompletionItemKind.Keyword, "zzzexn")]
+        [DataRow(LiteralAll, "all ...", CompletionItemKind.Operator, "all01")]
+        [DataRow(LiteralAll, "type ...", CompletionItemKind.Operator, "all02")]
+        [DataRow(LiteralAll, "list ...", CompletionItemKind.Operator, "all03")]
+        [DataRow(LiteralAll, "range ...", CompletionItemKind.Operator, "all04")]
+        [DataRow(LiteralAll, "combined ...", CompletionItemKind.Operator, "all05")]
+        [DataRow(LiteralAll, "", CompletionItemKind.Keyword, "zzzall")]
+        [DataRow(LiteralEx, "ex ...", CompletionItemKind.Operator, "ex01")]
+        [DataRow(LiteralEx, "type ...", CompletionItemKind.Operator, "ex02")]
+        [DataRow(LiteralEx, "list ...", CompletionItemKind.Operator, "ex03")]
+        [DataRow(LiteralEx, "range ...", CompletionItemKind.Operator, "ex04")]
+        [DataRow(LiteralEx, "combined ...", CompletionItemKind.Operator, "ex05")]
+        [DataRow(LiteralEx, "", CompletionItemKind.Keyword, "zzzex")]
+        [DataRow(LiteralExN, "exn!1 ...", CompletionItemKind.Operator, "exn01")]
+        [DataRow(LiteralExN, "type ...", CompletionItemKind.Operator, "exn02")]
+        [DataRow(LiteralExN, "list ...", CompletionItemKind.Operator, "exn03")]
+        [DataRow(LiteralExN, "range ...", CompletionItemKind.Operator, "exn04")]
+        [DataRow(LiteralExN, "", CompletionItemKind.Keyword, "zzzexn")]
         [TestMethod]
         public void TestAddChoicesSortText(string choice, string subType, CompletionItemKind isKeyword, string expected)
         {
@@ -67,9 +67,9 @@ namespace FplLSTests
             }
         }
 
-        [DataRow(literalAll)]
-        [DataRow(literalEx)]
-        [DataRow(literalExN)]
+        [DataRow(LiteralAll)]
+        [DataRow(LiteralEx)]
+        [DataRow(LiteralExN)]
         [TestMethod]
         public void TestInsertTextEndsWithSpace(string choice)
         {
@@ -84,9 +84,9 @@ namespace FplLSTests
             }
         }
 
-        [DataRow(literalAll)]
-        [DataRow(literalEx)]
-        [DataRow(literalExN)]
+        [DataRow(LiteralAll)]
+        [DataRow(LiteralEx)]
+        [DataRow(LiteralExN)]
         [TestMethod]
         public void TestAddQuantorChoicesLabel(string choice)
         {
@@ -99,9 +99,9 @@ namespace FplLSTests
             }
         }
 
-        [DataRow(literalAll, literalAll)]
-        [DataRow(literalEx, "exists")]
-        [DataRow(literalExN, "n-times")]
+        [DataRow(LiteralAll, LiteralAll)]
+        [DataRow(LiteralEx, "exists")]
+        [DataRow(LiteralExN, "n-times")]
         [TestMethod]
         public void TestAddQuantorChoicesDetail(string choice, string s)
         {
@@ -116,9 +116,9 @@ namespace FplLSTests
             }
         }
 
-        [DataRow(literalAll)]
-        [DataRow(literalEx)]
-        [DataRow(literalExN)]
+        [DataRow(LiteralAll)]
+        [DataRow(LiteralEx)]
+        [DataRow(LiteralExN)]
         [TestMethod]
         public void TestAddQuantorChoicesInsertText(string choice)
         {

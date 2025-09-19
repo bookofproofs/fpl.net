@@ -7,9 +7,9 @@ namespace FplLSTests
     public class TestGetCompletionItemSelf
     {
 
-        [DataRow(literalSelf)]
-        [DataRow(literalBase)]
-        [DataRow(literalParent)]
+        [DataRow(LiteralSelf)]
+        [DataRow(LiteralBase)]
+        [DataRow(LiteralParent)]
         [TestMethod]
         public void TestAddSelfChoicesNumber(string choice)
         {
@@ -18,9 +18,9 @@ namespace FplLSTests
             Assert.AreEqual<int>(1, actual.Count);
         }
 
-        [DataRow(literalSelf)]
-        [DataRow(literalBase)]
-        [DataRow(literalParent)]
+        [DataRow(LiteralSelf)]
+        [DataRow(LiteralBase)]
+        [DataRow(LiteralParent)]
         [TestMethod]
         public void TestAddSelfReferenceCounts(string choice)
         {
@@ -34,9 +34,9 @@ namespace FplLSTests
             Assert.AreEqual<int>(1, count);
         }
 
-        [DataRow(literalSelf, CompletionItemKind.Reference, "self01")]
-        [DataRow(literalParent, CompletionItemKind.Reference, "parent02")]
-        [DataRow(literalBase, CompletionItemKind.Reference, "self03")]
+        [DataRow(LiteralSelf, CompletionItemKind.Reference, "self01")]
+        [DataRow(LiteralParent, CompletionItemKind.Reference, "parent02")]
+        [DataRow(LiteralBase, CompletionItemKind.Reference, "self03")]
         [TestMethod]
         public void TestAddChoicesSortText(string choice, CompletionItemKind kind, string expected)
         {
@@ -51,9 +51,9 @@ namespace FplLSTests
             }
         }
 
-        [DataRow(literalSelf)]
-        [DataRow(literalBase)]
-        [DataRow(literalParent)]
+        [DataRow(LiteralSelf)]
+        [DataRow(LiteralBase)]
+        [DataRow(LiteralParent)]
         [TestMethod]
         public void TestInsertTextEndsWithSpace(string choice)
         {
@@ -61,16 +61,16 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesSelf().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                if (item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice) && choice!=literalBase)
+                if (item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice) && choice!=LiteralBase)
                 {
                     Assert.IsTrue(item.InsertText.EndsWith(" "));
                 }
             }
         }
 
-        [DataRow(literalSelf)]
-        [DataRow(literalBase)]
-        [DataRow(literalParent)]
+        [DataRow(LiteralSelf)]
+        [DataRow(LiteralBase)]
+        [DataRow(LiteralParent)]
         [TestMethod]
         public void TestAddSelfChoicesLabel(string choice)
         {
@@ -82,9 +82,9 @@ namespace FplLSTests
             }
         }
 
-        [DataRow(literalSelf, "self reference")]
-        [DataRow(literalBase, "ctor call (parent class)")]
-        [DataRow(literalParent, "parent self reference")]
+        [DataRow(LiteralSelf, "self reference")]
+        [DataRow(LiteralBase, "ctor call (parent class)")]
+        [DataRow(LiteralParent, "parent self reference")]
         [TestMethod]
         public void TestAddSelfChoicesDetail(string choice, string l)
         {
@@ -96,9 +96,9 @@ namespace FplLSTests
             }
         }
 
-        [DataRow(literalSelf)]
-        [DataRow(literalBase)]
-        [DataRow(literalParent)]
+        [DataRow(LiteralSelf)]
+        [DataRow(LiteralBase)]
+        [DataRow(LiteralParent)]
         [TestMethod]
         public void TestAddSelfChoicesInsertText(string choice)
         {

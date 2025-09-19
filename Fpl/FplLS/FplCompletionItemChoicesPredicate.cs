@@ -13,21 +13,21 @@ namespace FplLS
             // snippets
             switch (defaultCi.Word)
             {
-                case literalTrue:
-                case literalFalse:
-                case literalUndef:
-                case literalUndefL:
+                case LiteralTrue:
+                case LiteralFalse:
+                case LiteralUndef:
+                case LiteralUndefL:
                     // keyword
                     var ciK = defaultCi.Clone(); ciK.Kind = CompletionItemKind.Keyword; ciK.AdjustToKeyword(); ret.Add(ciK);
                     break;
-                case literalNot:
+                case LiteralNot:
                     // snippet
                     var ci = defaultCi.Clone(); SetBody(ci, 1); ret.Add(ci);
                     // keyword
                     var ci1 = defaultCi.Clone(); ci1.Kind = CompletionItemKind.Keyword; ci1.AdjustToKeyword(); ret.Add(ci1);
                     break;
-                case literalIif:
-                case literalImpl:
+                case LiteralIif:
+                case LiteralImpl:
                     // snippet
                     var ci2 = defaultCi.Clone(); SetBody(ci2, 2); ret.Add(ci2);
                     // keyword
@@ -37,9 +37,9 @@ namespace FplLS
                     // snippet for equality
                     var ciEquals = defaultCi.Clone(); SetBodyEquality(ciEquals); ret.Add(ciEquals);
                     break;
-                case literalAnd:
-                case literalOr:
-                case literalXor:
+                case LiteralAnd:
+                case LiteralOr:
+                case LiteralXor:
                     var ci3 = defaultCi.Clone(); SetBody(ci3, 3); ret.Add(ci3);
                     var ci3K = defaultCi.Clone(); ci3K.Kind = CompletionItemKind.Keyword; ci3K.AdjustToKeyword(); ret.Add(ci3K);
                     break;

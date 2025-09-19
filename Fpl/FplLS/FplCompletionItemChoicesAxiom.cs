@@ -9,7 +9,7 @@ namespace FplLS
             var ret = new List<FplCompletionItem>();
             // snippets
             var ci = defaultCi.Clone();
-            if (ci.Word.StartsWith(literalAx))
+            if (ci.Word.StartsWith(LiteralAx))
             {
                 ci.InsertText = GetBody(ci.Word, "Axiom");
                 ci.Label += " ...";

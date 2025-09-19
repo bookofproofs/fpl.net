@@ -23,7 +23,7 @@ namespace FplLS
         {
             if (ci.IsShort)
             {
-                TokenAssume = literalAss;
+                TokenAssume = LiteralAss;
                 ci.Detail = "corollary (short)";
                 ci.SortText = "z" + ci.SortText;
             }

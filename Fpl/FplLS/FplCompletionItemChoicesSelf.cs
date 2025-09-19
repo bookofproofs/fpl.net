@@ -10,7 +10,7 @@ namespace FplLS
         public override List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi) 
         {
             var ret = new List<FplCompletionItem>();
-            if (defaultCi.Word == literalSelf)
+            if (defaultCi.Word == LiteralSelf)
             {
                 var ci = defaultCi.Clone();
                 ci.Detail = "self reference";
@@ -20,7 +20,7 @@ namespace FplLS
                 ci.SortText = "self01";
                 ret.Add(ci);
             }
-            if (defaultCi.Word == literalParent)
+            if (defaultCi.Word == LiteralParent)
             {
                 var ci = defaultCi.Clone();
                 ci.Detail = "parent self reference";
@@ -30,11 +30,11 @@ namespace FplLS
                 ci.SortText = "parent02";
                 ret.Add(ci);
             }
-            if (defaultCi.Word == literalBase)
+            if (defaultCi.Word == LiteralBase)
             {
                 var ci = defaultCi.Clone();
                 ci.Detail = "ctor call (parent class)";
-                ci.InsertText = literalBase;
+                ci.InsertText = LiteralBase;
                 ci.Label = TokenPrefix + ci.InsertText;
                 ci.Kind = CompletionItemKind.Reference;
                 ci.SortText = "self03";

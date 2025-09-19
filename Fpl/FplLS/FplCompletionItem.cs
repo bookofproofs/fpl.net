@@ -85,115 +85,115 @@ namespace FplLS
                     return new FplCompletionItemChoicesVariable().GetChoices(this);
                 case "PascalCaseId":
                     return new FplCompletionItemChoicesPascalCaseId().GetChoices(this);
-                case literalDel:
-                case literalDelL:
+                case LiteralDel:
+                case LiteralDelL:
                     return new FplCompletionItemChoicesDelegate().GetChoices(this);
-                case literalIs:
+                case LiteralIs:
                     return new FplCompletionItemChoicesIsOperator().GetChoices(this);
-                case literalAlias:
-                case literalAssL:
-                case literalAss:
-                case literalAssume:
-                case literalByDef:
-                case literalCl:
-                case literalClL:
-                case literalCon:
-                case literalConL:
-                case literalExt:
-                case literalExtL:
-                case literalFunc:
-                case literalFuncL:
-                case literalInd:
-                case literalIndL:
-                case literalIntr:
-                case literalIntrL:
-                case literalIn:
-                case literalObj:
-                case literalObjL:
-                case literalOpt:
-                case literalOptL:
-                case literalPred:
-                case literalPredL:
-                case literalPre:
-                case literalPreL:
-                case literalQed:
-                case literalRet:
-                case literalRetL:
-                case literalRev:
-                case literalRevL:
-                case literalTrivial:
+                case LiteralAlias:
+                case LiteralAssL:
+                case LiteralAss:
+                case LiteralAssume:
+                case LiteralByDef:
+                case LiteralCl:
+                case LiteralClL:
+                case LiteralCon:
+                case LiteralConL:
+                case LiteralExt:
+                case LiteralExtL:
+                case LiteralFunc:
+                case LiteralFuncL:
+                case LiteralInd:
+                case LiteralIndL:
+                case LiteralIntr:
+                case LiteralIntrL:
+                case LiteralIn:
+                case LiteralObj:
+                case LiteralObjL:
+                case LiteralOpt:
+                case LiteralOptL:
+                case LiteralPred:
+                case LiteralPredL:
+                case LiteralPre:
+                case LiteralPreL:
+                case LiteralQed:
+                case LiteralRet:
+                case LiteralRetL:
+                case LiteralRev:
+                case LiteralRevL:
+                case LiteralTrivial:
                     return new FplCompletionItemChoicesKeyword().GetChoices(this);
-                case literalSelf:
-                case literalBase:
-                case literalParent:
+                case LiteralSelf:
+                case LiteralBase:
+                case LiteralParent:
                     return new FplCompletionItemChoicesSelf().GetChoices(this);
-                case literalAll:
-                case literalEx:
-                case literalExN:
+                case LiteralAll:
+                case LiteralEx:
+                case LiteralExN:
                     return new FplCompletionItemChoicesQuantor().GetChoices(this);
-                case literalTrue:
-                case literalFalse:
-                case literalUndef:
-                case literalUndefL:
-                case literalNot:
-                case literalXor:
-                case literalIif:
-                case literalImpl:
-                case literalAnd:
-                case literalOr:
+                case LiteralTrue:
+                case LiteralFalse:
+                case LiteralUndef:
+                case LiteralUndefL:
+                case LiteralNot:
+                case LiteralXor:
+                case LiteralIif:
+                case LiteralImpl:
+                case LiteralAnd:
+                case LiteralOr:
                 case "(":
                     return new FplCompletionItemChoicesPredicate().GetChoices(this);
-                case literalCtor:
-                case literalCtorL:
+                case LiteralCtor:
+                case LiteralCtorL:
                     return new FplCompletionItemChoicesConstructor().GetChoices(this);
-                case literalDec:
-                case literalDecL:
+                case LiteralDec:
+                case LiteralDecL:
                     return new FplCompletionItemChoicesDeclaration().GetChoices(this);
-                case literalCases:
+                case LiteralCases:
                     return new FplCompletionItemChoicesCases().GetChoices(this);
-                case literalFor:
+                case LiteralFor:
                     return new FplCompletionItemChoicesFor().GetChoices(this);
-                case literalPrty:
-                case literalPrtyL:
+                case LiteralPrty:
+                case LiteralPrtyL:
                     return new FplCompletionItemChoicesProperty().GetChoices(this);
-                case literalAx:
-                case literalAxL:
-                case literalPost:
-                case literalPostL:
+                case LiteralAx:
+                case LiteralAxL:
+                case LiteralPost:
+                case LiteralPostL:
                     return new FplCompletionItemChoicesAxiom().GetChoices(this);
-                case literalDef:
-                case literalDefL:
+                case LiteralDef:
+                case LiteralDefL:
                     return new FplCompletionItemChoicesDefinition().GetChoices(this);
-                case literalThm:
-                case literalThmL:
+                case LiteralThm:
+                case LiteralThmL:
                     return new FplCompletionItemChoicesTheoremLikeStmt("Theorem").GetChoices(this);
-                case literalLem:
-                case literalLemL:
+                case LiteralLem:
+                case LiteralLemL:
                     return new FplCompletionItemChoicesTheoremLikeStmt("Lemma").GetChoices(this);
-                case literalProp:
-                case literalPropL:
+                case LiteralProp:
+                case LiteralPropL:
                     return new FplCompletionItemChoicesTheoremLikeStmt("Proposition").GetChoices(this);
-                case literalConj:
-                case literalConjL:
+                case LiteralConj:
+                case LiteralConjL:
                     return new FplCompletionItemChoicesTheoremLikeStmt("Conjecture").GetChoices(this);
-                case literalInf:
-                case literalInfL:
+                case LiteralInf:
+                case LiteralInfL:
                     return new FplCompletionItemChoicesRuleOfInference().GetChoices(this);
-                case literalCor:
-                case literalCorL:
+                case LiteralCor:
+                case LiteralCorL:
                     return new FplCompletionItemChoicesCorollary().GetChoices(this);
-                case literalPrf:
-                case literalPrfL:
+                case LiteralPrf:
+                case LiteralPrfL:
                     return new FplCompletionItemChoicesProof().GetChoices(this);
-                case literalLoc:
-                case literalLocL:
+                case LiteralLoc:
+                case LiteralLocL:
                     return new FplCompletionItemChoicesLocalization().GetChoices(this);
-                case literalUses:
+                case LiteralUses:
                     return new FplCompletionItemChoicesUses().GetChoices(this);
-                case literalPrefix:
-                case literalPostFix:
-                case literalSymbol:
-                case literalInfix:
+                case LiteralPrefix:
+                case LiteralPostFix:
+                case LiteralSymbol:
+                case LiteralInfix:
                     return new FplCompletionItemChoicesSymbol(Word, true).GetChoices(this);
                 case "prefix symbol":
                 case "postfix symbol":
@@ -244,165 +244,165 @@ namespace FplLS
             this.Label = _prefix + Word;
             switch (Word)
             {
-                case literalAlias:
-                    this.Detail = literalAlias;
-                    this.SortText = literalAlias;
+                case LiteralAlias:
+                    this.Detail = LiteralAlias;
+                    this.SortText = LiteralAlias;
                     this.Kind = CompletionItemKind.Struct;
                     this.IsShort = false;
                     break;
-                case literalAll:
+                case LiteralAll:
                     this.Detail = "predicate (all quantor)";
-                    this.SortText = literalAll;
+                    this.SortText = LiteralAll;
                     this.Kind = CompletionItemKind.Operator;
                     this.IsShort = false;
                     break;
-                case literalAnd:
+                case LiteralAnd:
                     this.Detail = "predicate (conjunction)";
-                    this.SortText = literalAnd;
+                    this.SortText = LiteralAnd;
                     this.Kind = CompletionItemKind.Operator;
                     this.IsShort = false;
                     break;
-                case literalAss:
+                case LiteralAss:
                     this.Detail = "argument (assume, short form)";
                     this.SortText = "assume02";
                     this.Kind = CompletionItemKind.Property;
                     this.IsShort = true;
                     break;
-                case literalAssL:
+                case LiteralAssL:
                     this.Detail = "statement (assert)";
-                    this.SortText = literalAssL;
+                    this.SortText = LiteralAssL;
                     this.Kind = CompletionItemKind.Property;
                     this.IsShort = false;
                     break;
-                case literalAssume:
+                case LiteralAssume:
                     this.Detail = "argument (assume)";
                     this.SortText = "assume01";
                     this.Kind = CompletionItemKind.Property;
                     this.IsShort = false;
                     break;
-                case literalAx:
+                case LiteralAx:
                     this.Detail = "axiom (short form)";
                     this.SortText = "axiom02";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = true;
                     break;
-                case literalAxL:
-                    this.Detail = literalAxL;
+                case LiteralAxL:
+                    this.Detail = LiteralAxL;
                     this.SortText = "axiom01";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = false;
                     break;
-                case literalCases:
+                case LiteralCases:
                     this.Detail = "statement (cases)";
-                    this.SortText = literalCases;
+                    this.SortText = LiteralCases;
                     this.Kind = CompletionItemKind.Property;
                     this.IsShort = false;
                     break;
-                case literalCl:
+                case LiteralCl:
                     this.Detail = "class (short form)";
                     this.SortText = "class02";
                     this.Kind = CompletionItemKind.TypeParameter;
                     this.IsShort = true;
                     break;
-                case literalClL:
-                    this.Detail = literalClL;
+                case LiteralClL:
+                    this.Detail = LiteralClL;
                     this.SortText = "class01";
                     this.Kind = CompletionItemKind.TypeParameter;
                     this.IsShort = false;
                     break;
-                case literalCon:
+                case LiteralCon:
                     this.Detail = "conclusion (short form)";
                     this.SortText = "conclusion02";
                     this.Kind = CompletionItemKind.Struct;
                     this.IsShort = true;
                     break;
-                case literalConL:
-                    this.Detail = literalConL;
+                case LiteralConL:
+                    this.Detail = LiteralConL;
                     this.SortText = "conclusion01";
                     this.Kind = CompletionItemKind.Struct;
                     this.IsShort = false;
                     break;
-                case literalCor:
+                case LiteralCor:
                     this.Detail = "corollary (short form)";
                     this.SortText = "corollary02";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = true;
                     break;
-                case literalCorL:
-                    this.Detail = literalCorL;
+                case LiteralCorL:
+                    this.Detail = LiteralCorL;
                     this.SortText = "corollary01";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = false;
                     break;
-                case literalConj:
+                case LiteralConj:
                     this.Detail = "conjecture (short form)";
                     this.SortText = "conjecture02";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = true;
                     break;
-                case literalConjL:
-                    this.Detail = literalConjL;
+                case LiteralConjL:
+                    this.Detail = LiteralConjL;
                     this.SortText = "conjecture01";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = false;
                     break;
-                case literalCtor:
+                case LiteralCtor:
                     this.Detail = "constructor (short form)";
                     this.SortText = "constructor02";
                     this.Kind = CompletionItemKind.Constructor;
                     this.IsShort = true;
                     break;
-                case literalCtorL:
-                    this.Detail = literalCtorL;
+                case LiteralCtorL:
+                    this.Detail = LiteralCtorL;
                     this.SortText = "constructor01";
                     this.Kind = CompletionItemKind.Constructor;
                     this.IsShort = false;
                     break;
-                case literalDec:
+                case LiteralDec:
                     this.Detail = "declaration (short form)";
                     this.SortText = "declaration02";
                     this.Kind = CompletionItemKind.Property;
                     this.IsShort = true;
                     break;
-                case literalDecL:
-                    this.Detail = literalDecL;
+                case LiteralDecL:
+                    this.Detail = LiteralDecL;
                     this.SortText = "declaration01";
                     this.Kind = CompletionItemKind.Property;
                     this.IsShort = false;
                     break;
-                case literalDel:
+                case LiteralDel:
                     this.Detail = "delegate (short form)";
                     this.SortText = "delegate02";
                     this.Kind = CompletionItemKind.Event;
                     this.IsShort = true;
                     break;
-                case literalDelL:
-                    this.Detail = literalDelL;
+                case LiteralDelL:
+                    this.Detail = LiteralDelL;
                     this.SortText = "delegate01";
                     this.Kind = CompletionItemKind.Event;
                     this.IsShort = false;
                     break;
-                case literalDef:
+                case LiteralDef:
                     this.Detail = "definition (short form)";
                     this.SortText = "definition02";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = true;
                     break;
-                case literalDefL:
-                    this.Detail = literalDefL;
+                case LiteralDefL:
+                    this.Detail = LiteralDefL;
                     this.SortText = "definition01";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = false;
                     break;
-                case literalEx:
+                case LiteralEx:
                     this.Detail = "predicate (exists quantor)";
-                    this.SortText = literalEx;
+                    this.SortText = LiteralEx;
                     this.Kind = CompletionItemKind.Operator;
                     this.IsShort = false;
                     break;
-                case literalExN:
+                case LiteralExN:
                     this.Detail = "predicate (exists n-times quantor)";
-                    this.SortText = literalExN;
+                    this.SortText = LiteralExN;
                     this.Kind = CompletionItemKind.Operator;
                     this.IsShort = false;
                     break;
@@ -412,345 +412,345 @@ namespace FplLS
                     this.Kind = CompletionItemKind.Operator;
                     this.IsShort = false;
                     break;
-                case literalExt:
+                case LiteralExt:
                     this.Detail = "extension (short form)";
                     this.SortText = "extension02";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = true;
                     break;
-                case literalExtL:
-                    this.Detail = literalExtL;
+                case LiteralExtL:
+                    this.Detail = LiteralExtL;
                     this.SortText = "extension01";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = false;
                     break;
-                case literalFalse:
+                case LiteralFalse:
                     this.Detail = "predicate (false)";
-                    this.SortText = literalFalse;
+                    this.SortText = LiteralFalse;
                     this.Kind = CompletionItemKind.Constant;
                     this.IsShort = false;
                     break;
-                case literalFor:
+                case LiteralFor:
                     this.Detail = "statement (for loop)";
-                    this.SortText = literalFor;
+                    this.SortText = LiteralFor;
                     this.Kind = CompletionItemKind.Property;
                     this.IsShort = false;
                     break;
-                case literalFunc:
+                case LiteralFunc:
                     this.Detail = "type (functional term, short form)";
                     this.SortText = "function02";
                     this.Kind = CompletionItemKind.TypeParameter;
                     this.IsShort = true;
                     break;
-                case literalFuncL:
+                case LiteralFuncL:
                     this.Detail = "type (functional term)";
                     this.SortText = "function01";
                     this.Kind = CompletionItemKind.TypeParameter;
                     this.IsShort = false;
                     break;
-                case literalIif:
+                case LiteralIif:
                     this.Detail = "predicate (equivalence, <=>)";
-                    this.SortText = literalIif;
+                    this.SortText = LiteralIif;
                     this.Kind = CompletionItemKind.Operator;
                     this.IsShort = false;
                     break;
-                case literalImpl:
+                case LiteralImpl:
                     this.Detail = "predicate (implication, =>)";
-                    this.SortText = literalImpl;
+                    this.SortText = LiteralImpl;
                     this.Kind = CompletionItemKind.Operator;
                     this.IsShort = false;
                     break;
-                case literalIn:
+                case LiteralIn:
                     this.Detail = "clause (in type or in range)";
-                    this.SortText = literalIn;
+                    this.SortText = LiteralIn;
                     this.Kind = CompletionItemKind.Property;
                     this.IsShort = false;
                     break;
-                case literalInd:
+                case LiteralInd:
                     this.Detail = "type (index, short form)";
                     this.SortText = "index02";
                     this.Kind = CompletionItemKind.TypeParameter;
                     this.IsShort = true;
                     break;
-                case literalIndL:
+                case LiteralIndL:
                     this.Detail = "type (index)";
                     this.SortText = "index01";
                     this.Kind = CompletionItemKind.TypeParameter;
                     this.IsShort = false;
                     break;
-                case literalInf:
+                case LiteralInf:
                     this.Detail = "rule of inference (short form)";
                     this.SortText = "inference02";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = true;
                     break;
-                case literalInfL:
+                case LiteralInfL:
                     this.Detail = PrimRuleOfInference;
                     this.SortText = "inference01";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = false;
                     break;
-                case literalInfix:
+                case LiteralInfix:
                     this.Detail = "infix operator";
-                    this.SortText = literalInfix;
+                    this.SortText = LiteralInfix;
                     this.Kind = CompletionItemKind.Operator;
                     this.IsShort = false;
                     break;
-                case literalIntr:
+                case LiteralIntr:
                     this.Detail = "intrinsic (short form)";
                     this.SortText = "intrinsic02";
                     this.Kind = CompletionItemKind.Struct;
                     this.IsShort = true;
                     break;
-                case literalIntrL:
-                    this.Detail = literalIntrL;
+                case LiteralIntrL:
+                    this.Detail = LiteralIntrL;
                     this.SortText = "intrinsic01";
                     this.Kind = CompletionItemKind.Struct;
                     this.IsShort = false;
                     break;
-                case literalIs:
+                case LiteralIs:
                     this.Detail = "predicate (is of type)";
-                    this.SortText = literalIs;
+                    this.SortText = LiteralIs;
                     this.Kind = CompletionItemKind.Interface;
                     this.IsShort = false;
                     break;
-                case literalLem:
+                case LiteralLem:
                     this.Detail = "lemma (short form)";
                     this.SortText = "lemma02";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = true;
                     break;
-                case literalLemL:
-                    this.Detail = literalLemL;
+                case LiteralLemL:
+                    this.Detail = LiteralLemL;
                     this.SortText = "lemma01";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = false;
                     break;
-                case literalLoc:
+                case LiteralLoc:
                     this.Detail = "localization (short form)";
                     this.SortText = "localization02";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = true;
                     break;
-                case literalLocL:
-                    this.Detail = literalLocL;
+                case LiteralLocL:
+                    this.Detail = LiteralLocL;
                     this.SortText = "localization01";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = false;
                     break;
-                case literalNot:
+                case LiteralNot:
                     this.Detail = "predicate (negation)";
-                    this.SortText = literalNot;
+                    this.SortText = LiteralNot;
                     this.Kind = CompletionItemKind.Operator;
                     this.IsShort = false;
                     break;
-                case literalObj:
+                case LiteralObj:
                     this.Detail = "type (object, short form)";
                     this.SortText = "object02";
                     this.Kind = CompletionItemKind.TypeParameter;
                     this.IsShort = true;
                     break;
-                case literalObjL:
+                case LiteralObjL:
                     this.Detail = "type (object)";
                     this.SortText = "object01";
                     this.Kind = CompletionItemKind.TypeParameter;
                     this.IsShort = false;
                     break;
-                case literalOpt:
+                case LiteralOpt:
                     this.Detail = "optional (short form)";
                     this.SortText = "optional02";
                     this.Kind = CompletionItemKind.Property;
                     this.IsShort = true;
                     break;
-                case literalOptL:
-                    this.Detail = literalOptL;
+                case LiteralOptL:
+                    this.Detail = LiteralOptL;
                     this.SortText = "optional01";
                     this.Kind = CompletionItemKind.Property;
                     this.IsShort = false;
                     break;
-                case literalOr:
+                case LiteralOr:
                     this.Detail = "predicate (disjunction)";
-                    this.SortText = literalOr;
+                    this.SortText = LiteralOr;
                     this.Kind = CompletionItemKind.Operator;
                     this.IsShort = false;
                     break;
-                case literalParent:
+                case LiteralParent:
                     this.Detail = "reference (to parent)";
-                    this.SortText = literalParent;
+                    this.SortText = LiteralParent;
                     this.Kind = CompletionItemKind.Reference;
                     this.IsShort = false;
                     break;
-                case literalPost:
+                case LiteralPost:
                     this.Detail = "postulate (short form)";
                     this.SortText = "postulate02";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = true;
                     break;
-                case literalPostL:
-                    this.Detail = literalPostL;
+                case LiteralPostL:
+                    this.Detail = LiteralPostL;
                     this.SortText = "postulate01";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = false;
                     break;
-                case literalPre:
+                case LiteralPre:
                     this.Detail = "premise (short form)";
                     this.SortText = "premise02";
                     this.Kind = CompletionItemKind.Struct;
                     this.IsShort = true;
                     break;
-                case literalPred:
+                case LiteralPred:
                     this.Detail = "type (predicate, short form)";
                     this.SortText = "predicate02";
                     this.Kind = CompletionItemKind.TypeParameter;
                     this.IsShort = true;
                     break;
-                case literalPredL:
+                case LiteralPredL:
                     this.Detail = "type (predicate)";
                     this.SortText = "predicate01";
                     this.Kind = CompletionItemKind.TypeParameter;
                     this.IsShort = false;
                     break;
-                case literalPrefix:
+                case LiteralPrefix:
                     this.Detail = "prefix operator";
-                    this.SortText = literalPrefix;
+                    this.SortText = LiteralPrefix;
                     this.Kind = CompletionItemKind.Operator;
                     this.IsShort = false;
                     break;
-                case literalPostFix:
+                case LiteralPostFix:
                     this.Detail = "postfix operator";
-                    this.SortText = literalPostFix;
+                    this.SortText = LiteralPostFix;
                     this.Kind = CompletionItemKind.Operator;
                     this.IsShort = false;
                     break;
-                case literalPreL:
-                    this.Detail = literalPreL;
+                case LiteralPreL:
+                    this.Detail = LiteralPreL;
                     this.SortText = "premise01";
                     this.Kind = CompletionItemKind.Struct;
                     this.IsShort = false;
                     break;
-                case literalProp:
+                case LiteralProp:
                     this.Detail = "proposition (short form)";
                     this.SortText = "proposition02";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = true;
                     break;
-                case literalPropL:
-                    this.Detail = literalPropL;
+                case LiteralPropL:
+                    this.Detail = LiteralPropL;
                     this.SortText = "proposition01";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = false;
                     break;
-                case literalPrty:
+                case LiteralPrty:
                     this.Detail = "property (short form)";
                     this.SortText = "property02";
                     this.Kind = CompletionItemKind.Value;
                     this.IsShort = true;
                     break;
-                case literalPrtyL:
-                    this.Detail = literalPrtyL;
+                case LiteralPrtyL:
+                    this.Detail = LiteralPrtyL;
                     this.SortText = "property01";
                     this.Kind = CompletionItemKind.Value;
                     this.IsShort = false;
                     break;
-                case literalPrf:
+                case LiteralPrf:
                     this.Detail = "proof (short form)";
                     this.SortText = "proof02";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = true;
                     break;
-                case literalPrfL:
-                    this.Detail = literalPrfL;
+                case LiteralPrfL:
+                    this.Detail = LiteralPrfL;
                     this.SortText = "proof01";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = false;
                     break;
-                case literalQed:
+                case LiteralQed:
                     this.Detail = "(quod erat demonstrandum)";
-                    this.SortText = literalQed;
+                    this.SortText = LiteralQed;
                     this.Kind = CompletionItemKind.Text;
                     this.IsShort = false;
                     break;
-                case literalRet:
+                case LiteralRet:
                     this.Detail = "statement (return, short form)";
                     this.SortText = "return02";
                     this.Kind = CompletionItemKind.Property;
                     this.IsShort = true;
                     break;
-                case literalRetL:
+                case LiteralRetL:
                     this.Detail = "statement (return)";
                     this.SortText = "return01";
                     this.Kind = CompletionItemKind.Property;
                     this.IsShort = false;
                     break;
-                case literalRev:
+                case LiteralRev:
                     this.Detail = "argument (revoke, short form)";
                     this.SortText = "revoke02";
                     this.Kind = CompletionItemKind.Property;
                     this.IsShort = true;
                     break;
-                case literalRevL:
+                case LiteralRevL:
                     this.Detail = "argument (revoke)";
                     this.SortText = "revoke01";
                     this.Kind = CompletionItemKind.Property;
                     this.IsShort = false;
                     break;
-                case literalSelf:
+                case LiteralSelf:
                     this.Detail = "reference (to self)";
-                    this.SortText = literalSelf;
+                    this.SortText = LiteralSelf;
                     this.Kind = CompletionItemKind.Reference;
                     this.IsShort = false;
                     break;
-                case literalSymbol:
+                case LiteralSymbol:
                     this.Detail = "object symbol";
-                    this.SortText = literalSymbol;
+                    this.SortText = LiteralSymbol;
                     this.Kind = CompletionItemKind.TypeParameter;
                     this.IsShort = false;
                     break;
-                case literalThm:
+                case LiteralThm:
                     this.Detail = "theorem (short form)";
                     this.SortText = "theorem02";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = true;
                     break;
-                case literalThmL:
-                    this.Detail = literalThmL;
+                case LiteralThmL:
+                    this.Detail = LiteralThmL;
                     this.SortText = "theorem01";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = false;
                     break;
-                case literalTrue:
+                case LiteralTrue:
                     this.Detail = "predicate (true)";
-                    this.SortText = literalTrue;
+                    this.SortText = LiteralTrue;
                     this.Kind = CompletionItemKind.Constant;
                     this.IsShort = false;
                     break;
-                case literalTrivial:
+                case LiteralTrivial:
                     this.Detail = "argument (trivial)";
-                    this.SortText = literalTrivial;
+                    this.SortText = LiteralTrivial;
                     this.Kind = CompletionItemKind.Text;
                     this.IsShort = false;
                     break;
-                case literalUndef:
+                case LiteralUndef:
                     this.Detail = "undefined (short form)";
                     this.SortText = "undefined02";
                     this.Kind = CompletionItemKind.Constant;
                     this.IsShort = true;
                     break;
-                case literalUndefL:
-                    this.Detail = literalUndefL;
+                case LiteralUndefL:
+                    this.Detail = LiteralUndefL;
                     this.SortText = "undefined01";
                     this.Kind = CompletionItemKind.Constant;
                     this.IsShort = false;
                     break;
-                case literalUses:
+                case LiteralUses:
                     this.Detail = "clause (uses)";
-                    this.SortText = literalUses;
+                    this.SortText = LiteralUses;
                     this.Kind = CompletionItemKind.Module;
                     this.IsShort = false;
                     break;
-                case literalXor:
+                case LiteralXor:
                     this.Detail = "predicate (exclusive or)";
-                    this.SortText = literalXor;
+                    this.SortText = LiteralXor;
                     this.Kind = CompletionItemKind.Operator;
                     this.IsShort = false;
                     break;

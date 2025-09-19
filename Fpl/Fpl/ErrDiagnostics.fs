@@ -346,8 +346,8 @@ type DiagnosticCode =
             | PR009 -> "Not all arguments of the proof could be verified."
             | PR010 (keyword, expectedRef) -> $"Justification `{keyword}` expects a reference to {expected}, not to a proof or corollary."
             | PR011 (keyword, expectedRef) -> $"Justification `{keyword}` expects a reference to {expected}, not to an argument in some proof."
-            | PR012 -> $"Justification `{literalByCor}` expects a reference to a corollary."
-            | PR013 -> $"Add the keyword `{literalByCor}` when referencing to corollaries to increase readability."
+            | PR012 -> $"Justification `{LiteralByCor}` expects a reference to a corollary."
+            | PR013 -> $"Add the keyword `{LiteralByCor}` when referencing to corollaries to increase readability."
             | PR014 -> $"Justification expects a reference to a theorem-like statement without any more specific references."
             // signature-related error codes
             | SIG00 (fixType, arity) -> sprintf $"Illegal arity `{arity}` using `{fixType}` notation."
@@ -534,7 +534,7 @@ let replaceFParsecErrMsgForFplParser (errMsg: string) (choices:string) (pos: Pos
     else
         errMsg
 
-let split = [|" or "; literalOr + Environment.NewLine ; "or\r" ; "or "; " Other error"; Environment.NewLine + "Other error"; ", "; "," + Environment.NewLine; Environment.NewLine + Environment.NewLine; Environment.NewLine|]
+let split = [|" or "; LiteralOr + Environment.NewLine ; "or\r" ; "or "; " Other error"; Environment.NewLine + "Other error"; ", "; "," + Environment.NewLine; Environment.NewLine + Environment.NewLine; Environment.NewLine|]
 let groupRegex = "(?<=Expecting: )(.+?)(?=(Expecting|(\n.+)+|$))"
 let retrieveExpectedParserChoices (errMsg:string) =
     // replace accidental new lines injected by FParsec into FPL parser labels that start by "<" and end by ">"
@@ -878,7 +878,7 @@ let preParsePreProcess (input:string) =
 /// The pattern has to start with non-whitespace characters (e.g. keywords or other strings that are distinctive for the language)
 /// we want to provide with emitting error recovery messages
 /// The list will be filtered to include only those matches that really start with that pattern, i.e. are proceeded some whitespace character 
-/// in the remaining source code. For instance, if literalFor is the pattern than " for" will match, but "_for" will not.
+/// in the remaining source code. For instance, if LiteralFor is the pattern than " for" will match, but "_for" will not.
 
 let stringMatches (input: string) (pattern: string) =
     let regex = new Regex(pattern)

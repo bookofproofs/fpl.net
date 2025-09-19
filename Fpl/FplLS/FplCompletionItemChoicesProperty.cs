@@ -28,10 +28,10 @@ namespace FplLS
             SetSortText(ci,propertyType,isOptional);
             if (ci.IsShort)
             {
-                TokenIntrinsic = literalIntr;
-                TokenFunction = literalFunc;
-                TokenPredicate = literalPred;
-                TokenOptional = literalOpt;
+                TokenIntrinsic = LiteralIntr;
+                TokenFunction = LiteralFunc;
+                TokenPredicate = LiteralPred;
+                TokenOptional = LiteralOpt;
                 if (isKeyword)
                 {
                     ci.Label = GetLabelKeyword(ci, propertyType, isOptional);

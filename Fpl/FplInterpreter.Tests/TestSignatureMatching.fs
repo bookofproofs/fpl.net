@@ -502,7 +502,7 @@ type TestSignatureMatching() =
             let theory = r.Scope[filename]
             let blocks = theory.Scope.Values |> Seq.toList 
             let cl = blocks |> List.filter(fun fv -> (fv.Type(SignatureType.Name)).StartsWith("T")) |> List.head
-            let res = findClassInheritanceChain cl literalObj
+            let res = findClassInheritanceChain cl LiteralObj
             match res with 
             | None -> Assert.AreEqual<string>("was not found", "was not found")
             | Some str -> Assert.AreEqual<string>(var, str)

@@ -27,11 +27,11 @@ namespace FplLS
         {
             if (ci.IsShort)
             {
-                TokenIntrinsic = literalIntr;
-                TokenObject = literalObj;
-                TokenFunction = literalFunc;
-                TokenPredicate = literalPred;
-                TokenClass = literalCl;
+                TokenIntrinsic = LiteralIntr;
+                TokenObject = LiteralObj;
+                TokenFunction = LiteralFunc;
+                TokenPredicate = LiteralPred;
+                TokenClass = LiteralCl;
                 if (forKeyword)
                 {
                     ci.Label = GetLabelKeyword(ci, definitionType);

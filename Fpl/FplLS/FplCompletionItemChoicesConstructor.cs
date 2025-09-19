@@ -22,7 +22,7 @@ namespace FplLS
 
             if (ci.IsShort)
             {
-                TokenDeclaration = literalDec;
+                TokenDeclaration = LiteralDec;
             }
             ci.Label += " ...";
             ci.InsertText = 

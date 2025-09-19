@@ -16,35 +16,35 @@ type TestPredicates () =
 
     [<TestMethod>]
     member this.TestPredicate01 () =
-        let result = run (predicate .>> eof) literalTrue
+        let result = run (predicate .>> eof) LiteralTrue
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate01a () =
-        let result = run (primePredicate .>> eof) literalTrue
+        let result = run (primePredicate .>> eof) LiteralTrue
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate02 () =
-        let result = run (predicate .>> eof) literalFalse
+        let result = run (predicate .>> eof) LiteralFalse
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate03 () =
-        let result = run (predicate .>> eof) literalUndef
+        let result = run (predicate .>> eof) LiteralUndef
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate04 () =
-        let result = run (predicate .>> eof) literalUndefL
+        let result = run (predicate .>> eof) LiteralUndefL
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

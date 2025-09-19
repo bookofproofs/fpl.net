@@ -9,7 +9,7 @@ namespace FplLSTests
     public class TestGetCompletionItemCases
     {
 
-        [DataRow(literalCases)]
+        [DataRow(LiteralCases)]
         [TestMethod]
         public void TestAddCasesChoicesNumber(string choice)
         {
@@ -18,7 +18,7 @@ namespace FplLSTests
             Assert.AreEqual<int>(2, actual.Count);
         }
 
-        [DataRow(literalCases)]
+        [DataRow(LiteralCases)]
         [TestMethod]
         public void TestAddCasesKeywordCounts(string choice)
         {
@@ -32,7 +32,7 @@ namespace FplLSTests
             Assert.AreEqual<int>(1, count);
         }
 
-        [DataRow(literalCases)]
+        [DataRow(LiteralCases)]
         [TestMethod]
         public void TestAddChoicesSortText(string choice)
         {
@@ -40,11 +40,11 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesCases().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.SortText.Contains(literalCases));
+                Assert.IsTrue(item.SortText.Contains(LiteralCases));
             }
         }
 
-        [DataRow(literalCases)]
+        [DataRow(LiteralCases)]
         [TestMethod]
         public void TestAddCasesChoicesLabel(string choice)
         {
@@ -56,7 +56,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow(literalCases)]
+        [DataRow(LiteralCases)]
         [TestMethod]
         public void TestAddCasesChoicesDetail(string choice)
         {
@@ -68,7 +68,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow(literalCases)]
+        [DataRow(LiteralCases)]
         [TestMethod]
         public void TestAddCasesChoicesInsertText(string choice)
         {

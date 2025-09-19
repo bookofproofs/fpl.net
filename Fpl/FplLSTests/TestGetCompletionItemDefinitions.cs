@@ -10,8 +10,8 @@ namespace FplLSTests
     public class TestGetCompletionItemDefinitions
     {
 
-        [DataRow(literalDef)]
-        [DataRow(literalDefL)]
+        [DataRow(LiteralDef)]
+        [DataRow(LiteralDefL)]
         [TestMethod]
         public void TestAddDefinitionChoicesNumber(string choice)
         {
@@ -20,8 +20,8 @@ namespace FplLSTests
             Assert.AreEqual<int>(6, actual.Count);
         }
 
-        [DataRow(literalDef)]
-        [DataRow(literalDefL)]
+        [DataRow(LiteralDef)]
+        [DataRow(LiteralDefL)]
         [TestMethod]
         public void TestAddDefinitionKeywordCounts(string choice)
         {
@@ -35,18 +35,18 @@ namespace FplLSTests
             Assert.AreEqual<int>(3, count);
         }
 
-        [DataRow(literalDefL, literalClL, CompletionItemKind.Class, "definition01")]
-        [DataRow(literalDefL, literalPredL, CompletionItemKind.Class, "definition02")]
-        [DataRow(literalDefL, literalFuncL, CompletionItemKind.Class, "definition03")]
-        [DataRow(literalDef, literalCl, CompletionItemKind.Class, "zdefinition01")]
-        [DataRow(literalDef, literalPred, CompletionItemKind.Class, "zdefinition02")]
-        [DataRow(literalDef, literalFunc, CompletionItemKind.Class, "zdefinition03")]
-        [DataRow(literalDefL, literalClL, CompletionItemKind.Keyword, "zzzdefinition01")]
-        [DataRow(literalDefL, literalPredL, CompletionItemKind.Keyword, "zzzdefinition02")]
-        [DataRow(literalDefL, literalFuncL, CompletionItemKind.Keyword, "zzzdefinition03")]
-        [DataRow(literalDef, literalCl, CompletionItemKind.Keyword, "zzzzdefinition01")]
-        [DataRow(literalDef, literalPred, CompletionItemKind.Keyword, "zzzzdefinition02")]
-        [DataRow(literalDef, literalFunc, CompletionItemKind.Keyword, "zzzzdefinition03")]
+        [DataRow(LiteralDefL, LiteralClL, CompletionItemKind.Class, "definition01")]
+        [DataRow(LiteralDefL, LiteralPredL, CompletionItemKind.Class, "definition02")]
+        [DataRow(LiteralDefL, LiteralFuncL, CompletionItemKind.Class, "definition03")]
+        [DataRow(LiteralDef, LiteralCl, CompletionItemKind.Class, "zdefinition01")]
+        [DataRow(LiteralDef, LiteralPred, CompletionItemKind.Class, "zdefinition02")]
+        [DataRow(LiteralDef, LiteralFunc, CompletionItemKind.Class, "zdefinition03")]
+        [DataRow(LiteralDefL, LiteralClL, CompletionItemKind.Keyword, "zzzdefinition01")]
+        [DataRow(LiteralDefL, LiteralPredL, CompletionItemKind.Keyword, "zzzdefinition02")]
+        [DataRow(LiteralDefL, LiteralFuncL, CompletionItemKind.Keyword, "zzzdefinition03")]
+        [DataRow(LiteralDef, LiteralCl, CompletionItemKind.Keyword, "zzzzdefinition01")]
+        [DataRow(LiteralDef, LiteralPred, CompletionItemKind.Keyword, "zzzzdefinition02")]
+        [DataRow(LiteralDef, LiteralFunc, CompletionItemKind.Keyword, "zzzzdefinition03")]
         [TestMethod]
         public void TestAddChoicesSortText(string choice, string subType, CompletionItemKind isKeyword, string expected)
         {
@@ -61,12 +61,12 @@ namespace FplLSTests
             }
         }
 
-        [DataRow(literalDef, literalCl)]
-        [DataRow(literalDefL, literalClL)]
-        [DataRow(literalDef, literalPred)]
-        [DataRow(literalDefL, literalPredL)]
-        [DataRow(literalDef, literalFunc)]
-        [DataRow(literalDefL, literalFuncL)]
+        [DataRow(LiteralDef, LiteralCl)]
+        [DataRow(LiteralDefL, LiteralClL)]
+        [DataRow(LiteralDef, LiteralPred)]
+        [DataRow(LiteralDefL, LiteralPredL)]
+        [DataRow(LiteralDef, LiteralFunc)]
+        [DataRow(LiteralDefL, LiteralFuncL)]
         [TestMethod]
         public void TestInsertTextEndsWithTwoNewLines(string choice, string l)
         {
@@ -81,12 +81,12 @@ namespace FplLSTests
             }
         }
 
-        [DataRow(literalDef, literalCl)]
-        [DataRow(literalDefL, literalClL)]
-        [DataRow(literalDef, literalPred)]
-        [DataRow(literalDefL, literalPredL)]
-        [DataRow(literalDef, literalFunc)]
-        [DataRow(literalDefL, literalFuncL)]
+        [DataRow(LiteralDef, LiteralCl)]
+        [DataRow(LiteralDefL, LiteralClL)]
+        [DataRow(LiteralDef, LiteralPred)]
+        [DataRow(LiteralDefL, LiteralPredL)]
+        [DataRow(LiteralDef, LiteralFunc)]
+        [DataRow(LiteralDefL, LiteralFuncL)]
         [TestMethod]
         public void TestAddDefinitionChoicesLabel(string choice, string subType)
         {
@@ -109,8 +109,8 @@ namespace FplLSTests
             Assert.AreEqual<int>(2, counterRelated);
         }
 
-        [DataRow(literalDef)]
-        [DataRow(literalDefL)]
+        [DataRow(LiteralDef)]
+        [DataRow(LiteralDefL)]
         [TestMethod]
         public void TestAddDefinitionChoicesDetail(string choice)
         {
@@ -122,12 +122,12 @@ namespace FplLSTests
             }
         }
 
-        [DataRow(literalDef, literalCl)]
-        [DataRow(literalDefL, literalClL)]
-        [DataRow(literalDef, literalPred)]
-        [DataRow(literalDefL, literalPredL)]
-        [DataRow(literalDef, literalFunc)]
-        [DataRow(literalDefL, literalFuncL)]
+        [DataRow(LiteralDef, LiteralCl)]
+        [DataRow(LiteralDefL, LiteralClL)]
+        [DataRow(LiteralDef, LiteralPred)]
+        [DataRow(LiteralDefL, LiteralPredL)]
+        [DataRow(LiteralDef, LiteralFunc)]
+        [DataRow(LiteralDefL, LiteralFuncL)]
         [TestMethod]
         public void TestAddDefinitionChoicesInsertText(string choice, string subType)
         {
