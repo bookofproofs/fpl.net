@@ -1002,11 +1002,7 @@ type FplIntrinsicPred(positions: Positions, parent: FplValue) =
 type FplGenericPredicateWithExpression(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(positions, parent)
 
-    override this.Type signatureType = 
-        let head = getFplHead this signatureType
-
-        let paramT = getParamTuple this signatureType
-        sprintf "%s(%s)" head paramT
+    override this.Type signatureType = getFplHead this signatureType
             
 [<AbstractClass>]
 type FplGenericObject(positions: Positions, parent: FplValue) as this =
@@ -1237,7 +1233,7 @@ type IHaveAProof =
     abstract member HasProof : bool with get, set
 
 type FplPredicate(positions: Positions, parent: FplValue, runOrder) =
-    inherit FplGenericPredicateWithExpression(positions, parent)
+    inherit FplGenericPredicate(positions, parent)
     let _runOrder = runOrder
     let mutable _isReady = false
     let mutable _callCounter = 0
@@ -1255,6 +1251,12 @@ type FplPredicate(positions: Positions, parent: FplValue, runOrder) =
         let ret = new FplPredicate((this.StartPos, this.EndPos), this.Parent.Value, _runOrder)
         this.AssignParts(ret)
         ret
+
+    override this.Type signatureType = 
+        let head = getFplHead this signatureType
+
+        let paramT = getParamTuple this signatureType
+        sprintf "%s(%s)" head paramT
 
     override this.IsFplBlock () = true
     override this.IsBlock () = true

@@ -216,6 +216,15 @@ let rec eval (st: SymbolTable) ast =
         eval_string st s
         match fv.Name with
         | LiteralAxL
+        | LiteralThmL
+        | LiteralPropL
+        | LiteralLemL
+        | LiteralConjL
+        | LiteralCorL
+        | PrimClassL
+        | PrimFuncionalTermL
+        | PrimPredicateL
+        | LiteralPrfL
         | PrimRuleOfInference -> fv.FplId <- s
         | _ -> ()
         st.EvalPop() 
@@ -930,13 +939,9 @@ let rec eval (st: SymbolTable) ast =
         optAst |> Option.map (eval st) |> ignore
         eval_pos_ast_ast_opt st pos1 pos2
         st.EvalPop()
-    | Ast.ReferenceToProofOrCorollary((pos1, pos2), (referencingIdentifierAst, optArgumentTuple)) ->
-        if optArgumentTuple.IsNone then
-            st.EvalPush("ReferenceToProof")
-        else
-            st.EvalPush("ReferenceToCorollary")
+    | Ast.ReferenceToProofOrCorollary((pos1, pos2), (referencingIdentifierAst)) ->
+        st.EvalPush("ReferenceToProofOrCorollary")
         eval st referencingIdentifierAst
-        optArgumentTuple |> Option.map (eval st) |> ignore
         eval_pos_ast_ast_opt st pos1 pos2
         st.EvalPop()
     | Ast.PredicateWithOptSpecification((pos1, pos2), (fplIdentifierAst, optionalSpecificationAst)) ->
@@ -1145,6 +1150,11 @@ let rec eval (st: SymbolTable) ast =
     | ReferencingIdentifier((pos1, pos2), (predicateIdentifierAst, dollarDigitListAsts)) ->
         st.EvalPush("ReferencingIdentifier")
         eval st predicateIdentifierAst
+        dollarDigitListAsts |> List.map (eval st) |> ignore
+        st.EvalPop()
+    | ProofOrCorollaryIdentifier((pos1, pos2), (simpleSignatureAst, dollarDigitListAsts)) ->
+        st.EvalPush("ReferencingIdentifier")
+        eval st simpleSignatureAst
         dollarDigitListAsts |> List.map (eval st) |> ignore
         st.EvalPop()
     | Ast.Localization((pos1, pos2), (predicateAst, translationListAsts)) ->

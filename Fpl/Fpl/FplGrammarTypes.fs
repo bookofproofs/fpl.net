@@ -58,6 +58,7 @@ type Ast =
     | UsesClause of Positions * Ast
     | BrackedCoordList of Positions * Ast list
     | ReferencingIdentifier of Positions * (Ast * Ast list)
+    | ProofOrCorollaryIdentifier of Positions * (Ast * Ast list)
 
     // Types
     | One of Positions * unit
@@ -164,7 +165,7 @@ type Ast =
     // Proofs
     | ArgumentIdentifier of Positions * string
     | RefArgumentIdentifier of Positions * string
-    | ReferenceToProofOrCorollary of Positions * (Ast * Ast option) 
+    | ReferenceToProofOrCorollary of Positions * Ast
     | JustificationItem of Positions * Ast 
     | Justification of Positions * Ast list
     | ByDef of Positions * Ast 

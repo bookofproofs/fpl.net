@@ -347,8 +347,9 @@ let predicateWithOptSpecification = positions "PredicateWithOptSpecification" (f
 let dottedPredicate = positions "DottedPredicate" (dot >>. predicateWithOptSpecification) |>> Ast.DottedPredicate
 let qualificationList = positions "QualificationList" (many dottedPredicate) |>> Ast.QualificationList
 let dollarDigitList = many1 dollarDigits
+let proofOrCorollaryIdentifier = positions "ProofOrCorollaryIdentifier" (simpleSignature .>>. dollarDigitList) .>> IW |>> Ast.ProofOrCorollaryIdentifier
 let referencingIdentifier = positions "ReferencingIdentifier" (predicateIdentifier .>>. dollarDigitList) .>> IW |>> Ast.ReferencingIdentifier
-let referenceToProofOrCorollary = positions "ReferenceToProofOrCorollary" (referencingIdentifier .>>. opt argumentTuple) .>> IW |>> Ast.ReferenceToProofOrCorollary
+let referenceToProofOrCorollary = positions "ReferenceToProofOrCorollary" referencingIdentifier |>> Ast.ReferenceToProofOrCorollary
 
 predicateWithQualificationRef.Value <- predicateWithOptSpecification .>>. qualificationList |>> Ast.PredicateWithQualification 
 
@@ -454,8 +455,7 @@ let lemma = positions "Lemma" (keywordLemma >>. signatureWithTheoremLikeBlock) |
 let proposition = positions "Proposition" (keywordProposition >>. signatureWithTheoremLikeBlock) |>> Ast.Proposition
 let conjecture = positions "Conjecture" (keywordConjecture >>. signatureWithTheoremLikeBlock) |>> Ast.Conjecture
 
-let corollarySignature = referencingIdentifier .>> IW |>> Ast.CorollarySignature
-let corollary = positions "Corollary" (keywordCorollary >>. corollarySignature .>>. theoremLikeBlock) |>> Ast.Corollary
+let corollary = positions "Corollary" (keywordCorollary >>. proofOrCorollaryIdentifier .>>. theoremLikeBlock) |>> Ast.Corollary
 
 (* FPL building blocks - Axioms *)
 
@@ -535,7 +535,7 @@ let proofArgument = positions "Argument" ((argumentIdentifier .>> IW) .>>. justi
 let proofArgumentList = many1 (IW >>. (proofArgument <|> varDeclBlock))
 let keywordProof = (skipString LiteralPrfL <|> skipString LiteralPrf) .>> SW 
 let proofBlock = leftBrace >>. proofArgumentList .>>. opt keywordQed .>> spacesRightBrace
-let proof = positions "Proof" ((keywordProof >>. referencingIdentifier) .>>. (IW >>. proofBlock)) |>> Ast.Proof
+let proof = positions "Proof" (keywordProof >>. proofOrCorollaryIdentifier .>>. proofBlock) |>> Ast.Proof
 
 (* FPL building blocks - Definitions *)
 
@@ -555,8 +555,7 @@ let classCompleteContent = varDeclOrSpecList .>>. constructorList|>> Ast.DefClas
 let classDefinitionBlock = leftBrace  >>. ((keywordIntrinsic <|> classCompleteContent) .>> IW) .>>. propertyList .>> spacesRightBrace
 let inheritedClassTypeList = sepBy1 inheritedClassType comma
 
-let classIdentifier = positions "ClassIdentifier" (predicateIdentifier .>> IW) |>> Ast.ClassIdentifier
-let classSignature = classIdentifier .>>. opt userDefinedObjSym .>>. (colon >>. inheritedClassTypeList)
+let classSignature = simpleSignature .>>. opt userDefinedObjSym .>>. (colon >>. inheritedClassTypeList)
 let definitionClass = positions "DefinitionClass" ((keywordClass >>. SW >>. classSignature .>> IW) .>>. classDefinitionBlock) |>> Ast.DefinitionClass 
 
 let keywordDefinition = (skipString LiteralDefL <|> skipString LiteralDef) >>. SW
