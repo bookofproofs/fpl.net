@@ -1,26 +1,29 @@
+// Ignore Spelling: Fpl
+
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using static FplPrimitives;
+
 namespace FplLSTests
 {
     [TestClass]
-    public class TestGetCompletionItemIsOperator
+    public class TestGetCompletionItemMapCases
     {
 
-        [DataRow(LiteralIs)]
+        [DataRow(LiteralMapCases)]
         [TestMethod]
-        public void TestAddIsOperatorChoicesNumber(string choice)
+        public void TestAddMapCasesChoicesNumber(string choice)
         {
             var detailCi = new FplCompletionItem(choice);
-            var actual = new FplCompletionItemChoicesIsOperator().GetChoices(detailCi);
+            var actual = new FplCompletionItemChoicesMapCases().GetChoices(detailCi);
             Assert.AreEqual<int>(2, actual.Count);
         }
 
-        [DataRow(LiteralIs)]
+        [DataRow(LiteralMapCases)]
         [TestMethod]
-        public void TestAddIsOperatorKeywordCounts(string choice)
+        public void TestAddMapCasesKeywordCounts(string choice)
         {
             var detailCi = new FplCompletionItem(choice);
-            var actual = new FplCompletionItemChoicesIsOperator().GetChoices(detailCi);
+            var actual = new FplCompletionItemChoicesMapCases().GetChoices(detailCi);
             var count = 0;
             foreach (var item in actual)
             {
@@ -29,59 +32,55 @@ namespace FplLSTests
             Assert.AreEqual<int>(1, count);
         }
 
-        [DataRow(LiteralIs, CompletionItemKind.Property, LiteralIs)]
-        [DataRow(LiteralIs, CompletionItemKind.Keyword, "zzzis")]
+        [DataRow(LiteralMapCases)]
         [TestMethod]
-        public void TestAddChoicesSortText(string choice, CompletionItemKind kind, string expected)
+        public void TestAddMapChoicesSortText(string choice)
         {
             var detailCi = new FplCompletionItem(choice);
-            var actual = new FplCompletionItemChoicesIsOperator().GetChoices(detailCi);
+            var actual = new FplCompletionItemChoicesMapCases().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                if (item.Label.Contains(choice) && item.Kind == kind)
-                {
-                    Assert.AreEqual<string>(expected, item.SortText);
-                }
+                Assert.IsTrue(item.SortText.Contains(LiteralCases));
             }
         }
 
-        [DataRow(LiteralIs)]
+        [DataRow(LiteralMapCases)]
         [TestMethod]
-        public void TestAddIsOperatorChoicesLabel(string choice)
+        public void TestAddMapCasesChoicesLabel(string choice)
         {
             var detailCi = new FplCompletionItem(choice);
-            var actual = new FplCompletionItemChoicesIsOperator().GetChoices(detailCi);
+            var actual = new FplCompletionItemChoicesMapCases().GetChoices(detailCi);
             foreach (var item in actual)
             {
                 Assert.IsTrue(item.Label.Contains(choice) && item.Label.StartsWith("_ "));
             }
         }
 
-        [DataRow(LiteralIs)]
+        [DataRow(LiteralMapCases)]
         [TestMethod]
-        public void TestAddIsOperatorChoicesDetail(string choice)
+        public void TestAddMapCasesChoicesDetail(string choice)
         {
             var detailCi = new FplCompletionItem(choice);
-            var actual = new FplCompletionItemChoicesIsOperator().GetChoices(detailCi);
+            var actual = new FplCompletionItemChoicesMapCases().GetChoices(detailCi);
             foreach (var item in actual)
             {
                 Assert.IsTrue(item.Detail.Contains(choice));
             }
         }
 
-        [DataRow(LiteralIs)]
+        [DataRow(LiteralMapCases)]
         [TestMethod]
-        public void TestAddIsOperatorChoicesInsertText(string choice)
+        public void TestAddMapCasesChoicesInsertText(string choice)
         {
             var detailCi = new FplCompletionItem(choice);
-            var actual = new FplCompletionItemChoicesIsOperator().GetChoices(detailCi);
+            var actual = new FplCompletionItemChoicesMapCases().GetChoices(detailCi);
             var counterSnippets = 0;
             foreach (var item in actual)
             {
                 if (item.InsertText.Contains(choice)) { counterSnippets++; }
                 if (item.InsertText.Contains(" "))
                 {
-                    var res = FplParser.testParser(LiteralIs, item.InsertText);
+                    var res = FplParser.testParser(LiteralMapCases, item.InsertText);
                     if (!res.StartsWith("Success:"))
                     {
                         Assert.IsTrue(false, res);

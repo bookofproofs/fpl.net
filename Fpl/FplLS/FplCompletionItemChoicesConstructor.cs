@@ -31,7 +31,6 @@ namespace FplLS
                 $"\t{TokenDeclaration}{Environment.NewLine}" +
                 $"\t\tbase.obj (){Environment.NewLine}" +
                 $"\t;{Environment.NewLine}" +
-                $"\tself{Environment.NewLine}" +
                 $"{TokenRightBrace}{Environment.NewLine}" +
                 $"{Environment.NewLine}";
         }

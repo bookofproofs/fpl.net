@@ -42,8 +42,7 @@ type TestDefinitionPredicates () =
             {
                 IsBounded(f(x))
             }
-        }
-"""
+        }"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

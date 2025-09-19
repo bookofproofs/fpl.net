@@ -63,7 +63,7 @@ let tokenize (tokenName:string) (p: Parser<_,_>): Parser<_,_> =
 (* Literals *)
 
 let leftBrace = tokenize "LeftBrace" (skipChar '{') >>. spaces 
-let rightBrace = tokenize "RightBrace" (skipChar '}') >>. spaces
+let rightBrace = tokenize "RightBrace" (skipChar '}') 
 let leftParen = tokenize "LeftParen" (skipChar '(') >>. spaces 
 let rightParen = tokenize "RightParen" (skipChar ')') 
 let comma = tokenize "Comma" (skipChar ',') >>. spaces 
@@ -494,8 +494,8 @@ let extensionRegex = regex "[^\/]+" <?> "<extension regex>" |>> Ast.ExtensionReg
 let extensionAssignment = positions "ExtensionAssignment" ((variable .>> IW .>> at .>> IW) .>>. (slash >>. extensionRegex .>> slash)) |>> Ast.ExtensionAssignment
 
 let extensionSignature = positions "ExtensionSignature" ((extensionAssignment .>> IW) .>>. mapping .>> IW) |>> Ast.ExtensionSignature
-let extensionTerm = leftBrace >>. funcContent .>> spacesRightBrace
-let extensionBlock = positions "ExtensionBlock" (keywordExtension >>. (extensionName .>> SW) .>>. extensionSignature .>>. extensionTerm) |>> Ast.DefinitionExtension
+let extensionTerm = leftBrace >>. (funcContent <|> mapCases) .>> spacesRightBrace
+let definitionExtension = positions "ExtensionBlock" (keywordExtension >>. (extensionName .>> SW) .>>. extensionSignature .>>. extensionTerm) |>> Ast.DefinitionExtension
 
 let definitionProperty = choice [
     predicateInstance
@@ -597,7 +597,7 @@ let buildingBlock = choice [
     ruleOfInference
     localization
     usesClause
-    extensionBlock
+    definitionExtension
 ]
 
 let buildingBlockList = many (buildingBlock .>> IW)
@@ -758,3 +758,45 @@ let getParserChoicesAtPosition (input:string) index =
     | Failure(errorMsg, restInput, userState) ->
         let newErrMsg, choices = mapErrMsgToRecText input errorMsg restInput.Position
         choices, restInput.Position.Index
+
+/// Used to test FplLS CompletionItems correct syntax
+let testParser (parserType:string) (input:string) =
+    let trimmed = input.Trim()
+    match parserType with 
+    | LiteralLoc -> 
+        let result = run (localization .>> eof) trimmed
+        sprintf "%O" result
+    | LiteralAx -> 
+        let result = run (axiom .>> eof) trimmed 
+        sprintf "%O" result
+    | LiteralCases ->
+        let result = run (casesStatement .>> eof) trimmed 
+        sprintf "%O" result
+    | LiteralMapCases ->
+        let result = run (mapCases .>> eof) trimmed 
+        sprintf "%O" result
+    | LiteralCtor ->
+        let result = run (constructor .>> eof) trimmed 
+        sprintf "%O" result
+    | LiteralCor ->
+        let result = run (corollary .>> eof) trimmed 
+        sprintf "%O" result
+    | LiteralDec ->
+        let result = run (varDeclBlock .>> eof) trimmed 
+        sprintf "%O" result
+    | LiteralDef ->
+        let result = run (definition .>> eof) trimmed 
+        sprintf "%O" result
+    | LiteralDel ->
+        let result = run (fplDelegate .>> eof) trimmed 
+        sprintf "%O" result
+    | LiteralExt ->
+        let result = run (definitionExtension .>> eof) trimmed 
+        sprintf "%O" result
+    | LiteralFor ->
+        let result = run (forStatement .>> eof) trimmed 
+        sprintf "%O" result
+    | LiteralIs ->
+        let result = run (isOperator .>> eof) trimmed 
+        sprintf "%O" result
+    | _ -> $"testParser {parserType} not implemented"

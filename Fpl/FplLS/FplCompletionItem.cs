@@ -93,7 +93,7 @@ namespace FplLS
                 case LiteralAlias:
                 case LiteralAssL:
                 case LiteralAss:
-                case LiteralAssume:
+                case LiteralAssert:
                 case LiteralByDef:
                 case LiteralCl:
                 case LiteralClL:
@@ -269,14 +269,14 @@ namespace FplLS
                     this.IsShort = true;
                     break;
                 case LiteralAssL:
-                    this.Detail = "statement (assert)";
-                    this.SortText = LiteralAssL;
+                    this.Detail = "argument (assume)";
+                    this.SortText = "assume01";
                     this.Kind = CompletionItemKind.Property;
                     this.IsShort = false;
                     break;
-                case LiteralAssume:
-                    this.Detail = "argument (assume)";
-                    this.SortText = "assume01";
+                case LiteralAssert:
+                    this.Detail = "statement (assert)";
+                    this.SortText = LiteralAssert;
                     this.Kind = CompletionItemKind.Property;
                     this.IsShort = false;
                     break;

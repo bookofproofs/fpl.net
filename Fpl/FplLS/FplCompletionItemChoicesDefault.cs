@@ -17,9 +17,6 @@ namespace FplLS
                 case "|":
                     ci.Detail = "new case '|'";
                     break;
-                case "@":
-                    ci.Detail = "parent self reference '@'";
-                    break;
                 case PrimEquality:
                     ci.Detail = "equal sign '='";
                     break;
@@ -27,7 +24,7 @@ namespace FplLS
                     ci.Detail = "assignment sign ':='";
                     break;
                 case ":+":
-                    ci.Detail = "one or more '*'";
+                    ci.Detail = "one or more '+'";
                     break;
                 case ":*":
                     ci.Detail = "zero or more '*'";
@@ -36,7 +33,7 @@ namespace FplLS
                     ci.Detail = "colon ':'";
                     break;
                 case ".":
-                    ci.Detail = "dot ','";
+                    ci.Detail = "dot '.'";
                     break;
                 case ",":
                     ci.Detail = "enumeration ','";
@@ -53,9 +50,6 @@ namespace FplLS
                 case ";":
                     ci.Detail = "closing ';'";
                     break;
-                case "!":
-                    ci.Detail = "index '!'";
-                    break;
                 case "{":
                     ci.Detail = "opening '{'";
                     break;
@@ -67,18 +61,6 @@ namespace FplLS
                     break;
                 case ")":
                     ci.Detail = "closing '('";
-                    break;
-                case "<":
-                    ci.Detail = "opening '<'";
-                    break;
-                case ">":
-                    ci.Detail = "closing '>'";
-                    break;
-                case ":ext":
-                    ci.Detail = "extension header";
-                    break;
-                case ":end":
-                    ci.Detail = "extension tail";
                     break;
                 default:
                     ci.Detail = "unknown";
