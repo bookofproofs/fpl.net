@@ -79,15 +79,20 @@ type DiagnosticCode =
     | PRF000
     | INF000
     | LOC000
+    | EXT000
     | USE000
     | PRD000
-    | SMT000
     | AGI000
-    | CAS000
-    | DCS000
-    | ASS000
-    | REV000
-    | RET000
+    | STMASE
+    | STMASU
+    | STMCAL
+    | STMCAS
+    | STMDEL
+    | STMFOI
+    | STMFOR
+    | STMMAP
+    | STMREV
+    | STMRET
     | PRE000
     | CON000
     | TYD000
@@ -177,15 +182,20 @@ type DiagnosticCode =
             | PRF000 -> "PRF000"
             | INF000 -> "INF000"
             | LOC000 -> "LOC000"
+            | EXT000 -> "EXT000"
             | USE000 -> "USE000"
             | PRD000 -> "PRD000"
-            | SMT000 -> "SMT000"
+            | STMASE -> "STMASE"
+            | STMASU -> "STMASU"
+            | STMCAL -> "STMCAL"
+            | STMCAS -> "STMCAS"
+            | STMDEL -> "STMDEL"
+            | STMFOI -> "STMFOI"
+            | STMFOR -> "STMFOR"
+            | STMMAP -> "STMMAP"
+            | STMREV -> "STMREV"
+            | STMRET -> "STMRET"
             | AGI000 -> "AGI000"
-            | CAS000 -> "CAS000"
-            | DCS000 -> "DCS000"
-            | ASS000 -> "ASS000"
-            | REV000 -> "REV000"
-            | RET000 -> "RET000"
             | PRE000 -> "PRE000"
             | CON000 -> "CON000"
             | TYD000 -> "TYD000"
@@ -274,16 +284,21 @@ type DiagnosticCode =
             | CTR000 -> "Syntax error in constructor"
             | PRF000 -> "Syntax error in proof"
             | INF000 -> "Syntax error in rule of inference"
-            | LOC000 -> "Syntax error in rule of localization"
+            | LOC000 -> "Syntax error in localization"
+            | EXT000 -> "Syntax error in extension"
             | USE000 -> "Syntax error in uses clause"
-            | PRD000 -> "Syntax error in predicate"
-            | SMT000 -> "Syntax error in statement"
+            | PRD000 -> "Syntax error in predicate definition"
+            | STMASE -> "Syntax error in assertion"
+            | STMASU -> "Syntax error in assumption"
+            | STMCAL -> "Syntax error in call to a constructor"
+            | STMCAS -> "Syntax error in cases statement"
+            | STMDEL -> "Syntax error in delegate"
+            | STMFOI -> "Syntax error in domain"
+            | STMFOR -> "Syntax error in for statement"
+            | STMMAP -> "Syntax error in mapcases statement"
+            | STMREV -> "Syntax error in revocation"
+            | STMRET -> "Syntax error in return statement"
             | AGI000 -> "Syntax error in proof argument"
-            | CAS000 -> "Syntax error in case block"
-            | DCS000 -> "Syntax error in default case block"
-            | ASS000 -> "Syntax error in assumption"
-            | REV000 -> "Syntax error in revocation"
-            | RET000 -> "Syntax error in return statement"
             | PRE000 -> "Syntax error in premise"
             | CON000 -> "Syntax error in conclusion"
             | TYD000 -> "Syntax error in type declaration"

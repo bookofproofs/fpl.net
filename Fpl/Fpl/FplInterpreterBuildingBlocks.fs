@@ -608,7 +608,7 @@ let rec eval (st: SymbolTable) ast =
         let fv = variableStack.PeekEvalStack()
         fv.StartPos <- pos1
         fv.EndPos <- pos2
-        fv.FplId <- LiteralAssL
+        fv.FplId <- LiteralAssert
         let rb = new FplReference((pos1,pos2), fv)
         variableStack.PushEvalStack(rb)
         eval st predicateAst

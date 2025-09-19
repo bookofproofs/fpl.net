@@ -60,8 +60,8 @@ type TestErrDiagnostics() =
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual<int>(4, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual<int>(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("EXT000"))
 
     [<TestMethod>]
     member this.TestTryParseExtension004Diag () =
@@ -99,8 +99,8 @@ type TestErrDiagnostics() =
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual<int>(4, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual<int>(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("EXT000"))
         
     [<TestMethod>]
     member this.TestTryParseUses001Diag () =

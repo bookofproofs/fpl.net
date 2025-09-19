@@ -17,9 +17,9 @@ let LiteralAnd = "and"
 [<Literal>]
 let LiteralAss = "ass"
 [<Literal>]
-let LiteralAssL = "assert"
+let LiteralAssL = "assume"
 [<Literal>]
-let LiteralAssume = "assume"
+let LiteralAssert = "assert"
 [<Literal>]
 let LiteralAx = "ax"
 [<Literal>]
@@ -200,9 +200,9 @@ let keyWordSet =
         [| LiteralAlias
            LiteralAll
            LiteralAnd
-           LiteralAssL
+           LiteralAssert
            LiteralAss
-           LiteralAssume
+           LiteralAssL
            LiteralAx
            LiteralAxL
            LiteralBase

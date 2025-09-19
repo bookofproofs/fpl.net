@@ -1442,7 +1442,7 @@ type TestInterpreterErrors() =
             let code = PR002 ""
             runTestHelper "TestPR002.fpl" fplCode code expected
 
-    [<DataRow("""proof T$1 { 100. |- assume somePremise 300. |- trivial 100. |- trivial qed};""", 1)>]
+    [<DataRow("""proof T$1 { 100. |- assume and(x,y) 300. |- trivial 100. |- trivial qed};""", 1)>]
     [<DataRow("""proof T$1 { 1. |- trivial 1. |- trivial qed};""", 1)>]
     [<DataRow("""proof T$1 { 1. |- trivial 2. |- trivial qed};""", 0)>]
     [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
@@ -1541,12 +1541,12 @@ type TestInterpreterErrors() =
             let code = PR009 
             runTestHelper "TestPR009.fpl" fplCode code expected
 
-    [<DataRow("00", "proof T$1 {1. byax A |- trivial}", 0)>]
-    [<DataRow("01", "proof T$1 {1. byax A$1 |- trivial}", 1)>]
-    [<DataRow("02", "proof T$1 {1. byinf A |- trivial}", 0)>]
-    [<DataRow("03", "proof T$1 {1. byinf A$1 |- trivial}", 1)>]
-    [<DataRow("04", "proof T$1 {1. bydef A |- trivial}", 0)>]
-    [<DataRow("05", "proof T$1 {1. bydef A$1 |- trivial}", 1)>]
+    [<DataRow("00", "proof T$1 {1. byax A |- trivial};", 0)>]
+    [<DataRow("01", "proof T$1 {1. byax A$1 |- trivial};", 1)>]
+    [<DataRow("02", "proof T$1 {1. byinf A |- trivial};", 0)>]
+    [<DataRow("03", "proof T$1 {1. byinf A$1 |- trivial};", 1)>]
+    [<DataRow("04", "proof T$1 {1. bydef A |- trivial};", 0)>]
+    [<DataRow("05", "proof T$1 {1. bydef A$1 |- trivial};", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR010(no:string, fplCode:string, expected) =
@@ -1556,12 +1556,12 @@ type TestInterpreterErrors() =
             let code = PR010 ("", "")
             runTestHelper "TestPR010.fpl" fplCode code expected
 
-    [<DataRow("00", "proof T$1 {1. byax A |- trivial}", 0)>]
-    [<DataRow("01", "proof T$1 {1. byax A$1:3 |- trivial}", 1)>]
-    [<DataRow("02", "proof T$1 {1. byinf A |- trivial}", 0)>]
-    [<DataRow("03", "proof T$1 {1. byinf A$1:3 |- trivial}", 1)>]
-    [<DataRow("04", "proof T$1 {1. bydef A |- trivial}", 0)>]
-    [<DataRow("05", "proof T$1 {1. bydef A$1:3 |- trivial}", 1)>]
+    [<DataRow("00", "proof T$1 {1. byax A |- trivial};", 0)>]
+    [<DataRow("01", "proof T$1 {1. byax A$1:3 |- trivial};", 1)>]
+    [<DataRow("02", "proof T$1 {1. byinf A |- trivial};", 0)>]
+    [<DataRow("03", "proof T$1 {1. byinf A$1:3 |- trivial};", 1)>]
+    [<DataRow("04", "proof T$1 {1. bydef A |- trivial};", 0)>]
+    [<DataRow("05", "proof T$1 {1. bydef A$1:3 |- trivial};", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR011(no:string, fplCode:string, expected) =
@@ -1571,8 +1571,8 @@ type TestInterpreterErrors() =
             let code = PR011 ("", "")
             runTestHelper "TestPR011.fpl" fplCode code expected
 
-    [<DataRow("00", "proof T$1 {1. bycor A$1 |- trivial}", 0)>]
-    [<DataRow("01", "proof T$1 {1. bycor A |- trivial}", 1)>]
+    [<DataRow("00", "proof T$1 {1. bycor A$1 |- trivial};", 0)>]
+    [<DataRow("01", "proof T$1 {1. bycor A |- trivial};", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR012(no:string, fplCode:string, expected) =
@@ -1582,8 +1582,8 @@ type TestInterpreterErrors() =
             let code = PR012 
             runTestHelper "TestPR012.fpl" fplCode code expected
 
-    [<DataRow("00", "proof T$1 {1. bycor A$1 |- trivial}", 0)>]
-    [<DataRow("01", "proof T$1 {1. A$1 |- trivial}", 1)>]
+    [<DataRow("00", "proof T$1 {1. bycor A$1 |- trivial};", 0)>]
+    [<DataRow("01", "proof T$1 {1. A$1 |- trivial};", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR013(no:string, fplCode:string, expected) =
@@ -1593,8 +1593,8 @@ type TestInterpreterErrors() =
             let code = PR013 
             runTestHelper "TestPR013.fpl" fplCode code expected
 
-    [<DataRow("00", "proof T$1 {1. A |- trivial}", 0)>]
-    [<DataRow("01", "proof T$1 {1. A:2 |- trivial}", 1)>]
+    [<DataRow("00", "proof T$1 {1. A |- trivial};", 0)>]
+    [<DataRow("01", "proof T$1 {1. A:2 |- trivial};", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR014(no:string, fplCode:string, expected) =

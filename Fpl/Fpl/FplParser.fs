@@ -155,7 +155,7 @@ let keywordFor = skipString LiteralFor .>> SW
 let keywordIn = skipString LiteralIn .>> SW 
 let keywordCases = skipString LiteralCases .>> IW 
 let keywordMapCases = skipString LiteralMapCases .>> IW 
-let keywordAssert = skipString LiteralAssL .>> SW
+let keywordAssert = (skipString LiteralAssert <|> skipString LiteralAss) .>> SW
 
 (* Predicate-related Keywords *)
 let keywordUndefined = positions "Undefined" (skipString LiteralUndefL <|> skipString LiteralUndef) .>> IW |>> Ast.Undefined
@@ -516,7 +516,7 @@ let propertyList = opt (many1 (property .>> IW))
 let keywordRevoke = (skipString LiteralRevL <|> skipString LiteralRev) .>> SW 
 let revokeArgument = positions "RevokeArgument" (keywordRevoke >>. refArgumentIdentifier) |>> Ast.RevokeArgument 
     
-let keywordAssume = skipString LiteralAssume <|> skipString LiteralAss .>> SW 
+let keywordAssume = skipString LiteralAssL <|> skipString LiteralAss .>> SW 
 let assumeArgument = positions "AssumeArgument" (keywordAssume >>. compoundPredicate) |>> Ast.AssumeArgument
 let keywordTrivial  = positions "Trivial" (skipString LiteralTrivial) .>> IW |>> Ast.Trivial
 let keywordQed  = positions "Qed" (skipString LiteralQed) .>> IW |>> Ast.Qed
@@ -619,33 +619,47 @@ let calculateCurrentContext (matchList:System.Collections.Generic.List<int>) i =
     else
         index, index
 
-let errRecPattern = "(definition|def|mandatory|mand|optional|opt|axiom|ax|postulate|post|theorem|thm|proposition|prop|lemma|lem|corollary|cor|conjecture|conj|declaration|dec|constructor|ctor|proof|prf|inference|inf|localization|loc|uses|and|or|impl|iif|xor|not|all|extension|ext|exn|ex|is|assert|cases|self\!|for|delegate|del|\|\-|\||\?|assume|ass|revoke|rev|return|ret)\W|(conclusion|con|premise|pre)\s*\:|(~|\!)[a-z]"
+let errRecPattern = $"({LiteralDefL}|{LiteralDef}|{LiteralPrtyL}|{LiteralPrty}|{LiteralAxL}|{LiteralAx}|{LiteralPostL}|{LiteralPost}|{LiteralThmL}|{LiteralThm}|{LiteralPropL}|{LiteralProp}|{LiteralLemL}|{LiteralLem}|{LiteralCorL}|{LiteralCor}|{LiteralConjL}|{LiteralConj}|{LiteralDecL}|{LiteralDec}|{LiteralCtorL}|{LiteralCtor}|{LiteralPrfL}|{LiteralPrf}|{LiteralInfL}|{LiteralInf}|{LiteralLocL}|{LiteralLoc}|{LiteralExtL}|{LiteralExt}|{LiteralUses}|{LiteralAnd}|{LiteralOr}|{LiteralImpl}|{LiteralIif}|{LiteralXor}|{LiteralNot}|{LiteralAll}|{LiteralExN}|{LiteralEx}|{LiteralIs}|{LiteralAssert}|{LiteralAssL}|{LiteralAss}|{LiteralBase}|{LiteralCases}|{LiteralMapCases}|{LiteralFor}|{LiteralIn}|{LiteralDelL}|{LiteralDel}|\|\-|{LiteralRevL}|{LiteralRev}|{LiteralRetL}|{LiteralRet})\W|({LiteralConL}|{LiteralCon}|{LiteralPreL}|{LiteralPre})\s*\:|~[a-z]+"
 
 let errInformation = [
-    (DEF000, [LiteralDef], definition)
-    (PRP000, ["mand"; LiteralOpt], property)
-    (AXI000, [LiteralAx; LiteralPost], axiom)
+    (DEF000, [LiteralDefL; LiteralDef], definition)
+    (PRP000, [LiteralPrtyL; LiteralPrty], property)
+    (AXI000, [LiteralAxL; LiteralAx; LiteralPostL; LiteralPost], axiom)
     (THM000, [LiteralThmL; LiteralThm], theorem)
-    (COR000, [LiteralThmL; LiteralCor], corollary)
-    (LEM000, [LiteralLem], lemma)
-    (PPS000, [LiteralProp], proposition)
-    (CNJ000, [LiteralConj], conjecture)
-    (VAR000, [LiteralDec], varDeclBlock)
+    (COR000, [LiteralCorL; LiteralCor], corollary)
+    (LEM000, [LiteralLemL; LiteralLem], lemma)
+    (PPS000, [LiteralPropL; LiteralProp], proposition)
+    (CNJ000, [LiteralConjL; LiteralConj], conjecture)
+    (VAR000, [LiteralDecL; LiteralDec], varDeclBlock)
     (CTR000, [LiteralCtorL; LiteralCtor], constructor)
-    (PRF000, [LiteralPrf; LiteralPrf], proof)
-    (INF000, [LiteralInf], ruleOfInference)
-    (LOC000, [LiteralLoc], localization)
+    (PRF000, [LiteralPrfL; LiteralPrf], proof)
+    (INF000, [LiteralInfL; LiteralInf], ruleOfInference)
+    (LOC000, [LiteralLocL; LiteralLoc], localization)
+    (EXT000, [LiteralExtL; LiteralExt], extension)
     (USE000, [LiteralUses], usesClause)
-    (PRD000, [LiteralAnd; LiteralOr; LiteralImpl; LiteralIif; LiteralXor; LiteralNot; LiteralAll; LiteralEx; LiteralIs], compoundPredicate)
-    (SMT000, [LiteralAssL; LiteralCases; LiteralBase; LiteralFor; LiteralDel], statement)
+    (PRD000, [LiteralAnd], conjunction)
+    (PRD000, [LiteralOr], disjunction)
+    (PRD000, [LiteralImpl], implication)
+    (PRD000, [LiteralIif], equivalence)
+    (PRD000, [LiteralXor], exclusiveOr)
+    (PRD000, [LiteralNot], negation)
+    (PRD000, [LiteralAll], all)
+    (PRD000, [LiteralEx], exists)
+    (PRD000, [LiteralExN], existsTimesN)
+    (PRD000, [LiteralIs], isOperator)
+    (STMASE, [LiteralAssert], assertionStatement)
+    (STMCAL, [LiteralBase], callConstructorParentClass)
+    (STMCAS, [LiteralCases], casesStatement)
+    (STMMAP, [LiteralMapCases], mapCases)
+    (STMFOI, [LiteralIn], inEntity)
+    (STMFOR, [LiteralFor], forStatement)
+    (STMDEL, [LiteralDelL; LiteralDel], fplDelegate)
+    (STMASU, [LiteralAssL; LiteralAss], assumeArgument)
+    (STMREV, [LiteralRevL; LiteralRev], revokeArgument)
+    (STMRET, [LiteralRetL; LiteralRet], returnStatement)
     (AGI000, ["|-"], argumentInference)
-    (CAS000, ["|"], caseSingle)
-    (DCS000, ["?"], caseElse)
-    (ASS000, [LiteralAss], assumeArgument)
-    (REV000, [LiteralRev], revokeArgument)
-    (RET000, [LiteralRet], returnStatement)
-    (PRE000, [LiteralPre], premiseList)
-    (CON000, [LiteralCon], conclusion)
+    (PRE000, [LiteralPreL; LiteralPre], premiseList)
+    (CON000, [LiteralConL; LiteralCon], conclusion)
     (TYD000, ["~"], varDecl)
 ]
 /// Finds the error information tuple based on a prefix of a string from the errInformation list. 
