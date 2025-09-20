@@ -36,7 +36,7 @@ def class C: obj
     intr
 }
 
-def pred Greater infix ">" 5 (x,y: obj)
+def pred Greater(x,y: obj) infix ">" 5 
 {
     intr
 }
