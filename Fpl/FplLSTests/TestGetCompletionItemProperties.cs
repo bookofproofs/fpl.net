@@ -107,11 +107,11 @@ namespace FplLSTests
                 {
                     if (choice == LiteralPrty)
                     {
-                        Assert.AreEqual<string>("_ " + choice + " " + subType + " opt" + postfix, item.Label);
+                        Assert.AreEqual<string>("_ opt " + choice + " " + subType + postfix, item.Label);
                     }
                     else
                     {
-                        Assert.AreEqual<string>("_ " + choice + " " + subType + " optional" + postfix, item.Label);
+                        Assert.AreEqual<string>("_ optional " + choice + " " + subType + postfix, item.Label);
                     }
                     counterRelatedOpt++;
                 }
@@ -186,7 +186,7 @@ namespace FplLSTests
             var counterSnippets = 0;
             foreach (var item in actual)
             {
-                if (item.InsertText.Contains(choice) && item.InsertText.Contains(subType+" ")) { counterSnippets++; }
+                if (item.InsertText.Contains(choice) && item.InsertText.Contains(subType)) { counterSnippets++; }
                 if (item.InsertText.Contains("{"))
                 {
                     var res = FplParser.testParser(LiteralPrty, item.InsertText);
@@ -196,7 +196,7 @@ namespace FplLSTests
                     }
                 }
             }
-            Assert.AreEqual<int>(3, counterSnippets);
+            Assert.AreEqual<int>(4, counterSnippets);
         }
 
     }

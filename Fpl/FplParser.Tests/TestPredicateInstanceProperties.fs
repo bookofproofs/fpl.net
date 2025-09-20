@@ -9,7 +9,7 @@ type TestPredicateInstanceProperties () =
 
     [<TestMethod>]
     member this.TestPredicateInstance01 () =
-        let result = run (property .>> eof) """mand pred X() 
+        let result = run (definitionProperty .>> eof) """prty pred X() 
 	        {
                 // a predicate instance without a predicate is not allowed
 	        }"""
@@ -19,7 +19,7 @@ type TestPredicateInstanceProperties () =
 
     [<TestMethod>]
     member this.TestPredicateInstance01a () =
-        let result = run (property .>> eof) """mand pred X() 
+        let result = run (definitionProperty .>> eof) """prty pred X() 
 	        {
                 // a predicate instance without a predicate is not allowed
                 dec:;
@@ -30,7 +30,7 @@ type TestPredicateInstanceProperties () =
 
     [<TestMethod>]
     member this.TestPredicateInstance01b () =
-        let result = run (property .>> eof) """mand pred X() 
+        let result = run (definitionProperty .>> eof) """prty pred X() 
 	        {
                 // a predicate instance without a predicate is not allowed
                 dec ~a:obj ;
@@ -41,7 +41,7 @@ type TestPredicateInstanceProperties () =
 
     [<TestMethod>]
     member this.TestPredicateInstance01c () =
-        let result = run (property .>> eof) """mand pred X() 
+        let result = run (definitionProperty .>> eof) """prty pred X() 
 	        {
                 // a predicate instance without a predicate is not allowed
                 dec ~a:obj ;
@@ -52,7 +52,7 @@ type TestPredicateInstanceProperties () =
 
     [<TestMethod>]
     member this.TestPredicateInstance01d () =
-        let result = run (property .>> eof) """mand pred X() 
+        let result = run (definitionProperty .>> eof) """prty pred X() 
 	        {
                 // a predicate instance without a predicate is not allowed
                 dec ~a:obj ;
@@ -64,7 +64,7 @@ type TestPredicateInstanceProperties () =
 
     [<TestMethod>]
     member this.TestPredicateInstance01e () =
-        let result = run (property .>> eof) """mand pred X() 
+        let result = run (definitionProperty .>> eof) """prty pred X() 
 	        {
                 // a predicate instance without a predicate is not allowed
                 dec:;
@@ -77,7 +77,7 @@ type TestPredicateInstanceProperties () =
     [<TestMethod>]
     member this.TestPredicateInstance01f () =
         // a predicate instance without a predicate is not allowed
-        let result = run (property .>> eof) """mand pred X() 
+        let result = run (definitionProperty .>> eof) """prty pred X() 
 	        {
                 return x
 	        }"""
@@ -88,7 +88,7 @@ type TestPredicateInstanceProperties () =
     [<TestMethod>]
     member this.TestPredicateInstance2a () =
         // a predicate instance with a return statement 
-        let result = run (property .>> eof) """property pred optional X() 
+        let result = run (definitionProperty .>> eof) """optional property pred X() 
 	        {
                 dec ~a:obj ;
                 true
@@ -100,7 +100,7 @@ type TestPredicateInstanceProperties () =
     [<TestMethod>]
     member this.TestPredicateInstance2b () =
         // a predicate instance with a return statement 
-        let result = run (property .>> eof) """property pred X() 
+        let result = run (definitionProperty .>> eof) """property pred X() 
 	        {
                 dec ~a:obj ;
                 true
@@ -112,7 +112,7 @@ type TestPredicateInstanceProperties () =
     [<TestMethod>]
     member this.TestPredicateInstance2c () =
         // a predicate instance with a return statement 
-        let result = run (property .>> eof) """property  pred optional X() 
+        let result = run (definitionProperty .>> eof) """optional property  pred X() 
 	        {
                 dec ~a:obj ;
                 true
@@ -124,7 +124,7 @@ type TestPredicateInstanceProperties () =
     [<TestMethod>]
     member this.TestPredicateInstance2d () =
         // a predicate instance with a return statement 
-        let result = run (property .>> eof) """property pred X() 
+        let result = run (definitionProperty .>> eof) """property pred X() 
 	        {
                 dec ~a:obj ;
                 true
@@ -136,7 +136,7 @@ type TestPredicateInstanceProperties () =
     [<TestMethod>]
     member this.TestPredicateInstance2e () =
         // a predicate instance with a return statement 
-        let result = run (property .>> eof) """property pred opt X() 
+        let result = run (definitionProperty .>> eof) """opt property pred X() 
 	        {
                 dec ~a:obj ;
                 true
@@ -148,7 +148,7 @@ type TestPredicateInstanceProperties () =
     [<TestMethod>]
     member this.TestPredicateInstance2f () =
         // a predicate instance with a return statement 
-        let result = run (property .>> eof) """property pred X() 
+        let result = run (definitionProperty .>> eof) """property pred X() 
 	        {
                 dec ~a:obj ;
                 true
@@ -161,7 +161,7 @@ type TestPredicateInstanceProperties () =
     member this.TestPredicateInstance3 () =
         // a predicate instance with a return statement and 
         // some other content following it is not allowed
-        let result = run (property .>> eof) """property pred X() 
+        let result = run (definitionProperty .>> eof) """property pred X() 
 	        {
                 true
 	        }"""
@@ -173,7 +173,7 @@ type TestPredicateInstanceProperties () =
     member this.TestPredicateInstance3a () =
         // a predicate instance with a return statement and 
         // some other content following it is not allowed
-        let result = run (property .>> eof) """property pred X() 
+        let result = run (definitionProperty .>> eof) """property pred X() 
 	        {
                 true
                 dec ~a:obj ;
@@ -186,7 +186,7 @@ type TestPredicateInstanceProperties () =
     [<TestMethod>]
     member this.TestPredicateInstance4 () =
         // a predicate instance can be intrinsic
-        let result = run (property .>> eof) """property pred X() 
+        let result = run (definitionProperty .>> eof) """property pred X() 
 	        {
                 intr
 
@@ -197,7 +197,7 @@ type TestPredicateInstanceProperties () =
 
     [<TestMethod>]
     member this.TestPredicateInstance5 () =
-        let result = run (property .>> eof) """prty pred opt T() {true}"""
+        let result = run (definitionProperty .>> eof) """opt prty pred T() {true}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

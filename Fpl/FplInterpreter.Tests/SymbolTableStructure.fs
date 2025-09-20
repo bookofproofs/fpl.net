@@ -1429,11 +1429,11 @@ type SymbolTableStructure() =
     // two constructors
     [<DataRow("FplClass", "02a", """def cl A:obj { ctor A() {} ctor A(x,y,z:obj) {} };""", "")>]
     // intrinsic (without constructor), but with properties
-    [<DataRow("FplClass", "03", """def cl A:obj { intr prty func MandF()->obj {intr} prty func opt OptF()->obj {intr} prty pred MandP() {true} prty pred opt OptP() {true} };""", "")>]
+    [<DataRow("FplClass", "03", """def cl A:obj { intr prty func MandF()->obj {intr} opt prty func OptF()->obj {intr} prty pred MandP() {true} opt prty pred OptP() {true} };""", "")>]
     // with constructor and properties
-    [<DataRow("FplClass", "04", """def cl A:obj { ctor A() {} prty func MandF()->obj {intr} prty func opt OptF()->obj {intr} prty pred MandP() {true} prty pred opt OptP() {true} };""", "")>]
+    [<DataRow("FplClass", "04", """def cl A:obj { ctor A() {} prty func MandF()->obj {intr} opt prty func OptF()->obj {intr} prty pred MandP() {true} opt prty pred OptP() {true} };""", "")>]
     // with variables constructor and properties
-    [<DataRow("FplClass", "05", """def cl A:obj { dec ~x,y:obj; ctor A() {} prty func MandF()->obj {intr} prty func opt OptF()->obj {intr} prty pred MandP() {true} prty pred opt OptP() {true} };""", "")>]
+    [<DataRow("FplClass", "05", """def cl A:obj { dec ~x,y:obj; ctor A() {} prty func MandF()->obj {intr} opt prty func OptF()->obj {intr} prty pred MandP() {true} opt prty pred OptP() {true} };""", "")>]
     
     // conjecture
     [<DataRow("FplConjecture", "00", """conj T {true};""", "")>]
@@ -1466,9 +1466,9 @@ type SymbolTableStructure() =
     // intrinsic functional term with variables
     [<DataRow("FplFunctionalTerm", "01", """def func T(x,y:obj)->obj {intr};""", "")>]
     // intrinsic functional term with variables and properties
-    [<DataRow("FplFunctionalTerm", "02", """def func T(x,y:obj)->obj {intr prty func MandF()->obj {intr} prty func opt OptF()->obj {intr} prty pred MandP() {true} prty pred opt OptP() {true} };""", "")>]
+    [<DataRow("FplFunctionalTerm", "02", """def func T(x,y:obj)->obj {intr prty func MandF()->obj {intr} opt prty func OptF()->obj {intr} prty pred MandP() {true} opt prty pred OptP() {true} };""", "")>]
     // non-intrinsic functional term with variables and properties
-    [<DataRow("FplFunctionalTerm", "03", """def func T(x,y:obj)->obj {dec ~z:obj; return z prty func MandF()->obj {intr} prty func opt OptF()->obj {intr} prty pred MandP() {true} prty pred opt OptP() {true} };""", "")>]
+    [<DataRow("FplFunctionalTerm", "03", """def func T(x,y:obj)->obj {dec ~z:obj; return z prty func MandF()->obj {intr} opt prty func OptF()->obj {intr} prty pred MandP() {true} opt prty pred OptP() {true} };""", "")>]
     // non-intrinsic functional term with some statements 
     [<DataRow("FplFunctionalTerm", "04", """def func T(x,y:obj)->obj {dec ~z:obj z:=x y:=z; return z };""", "")>]
     
@@ -1580,51 +1580,51 @@ type SymbolTableStructure() =
     [<DataRow("FplNegation", "00", """;""", "")>]
 
     // intrinsic optional functional term with predicate parent
-    [<DataRow("FplOptionalFunctionalTerm", "00",  """def pred T() {intr prty func opt MandF(x:obj)->obj {intr} };""", "")>]
+    [<DataRow("FplOptionalFunctionalTerm", "00",  """def pred T() {intr opt prty func MandF(x:obj)->obj {intr} };""", "")>]
     // intrinsic optional functional term with functional term parent
-    [<DataRow("FplOptionalFunctionalTerm", "01",  """def func T()->obj {intr prty func opt MandF(x:obj)->obj {intr} };""", "")>]
+    [<DataRow("FplOptionalFunctionalTerm", "01",  """def func T()->obj {intr opt prty func MandF(x:obj)->obj {intr} };""", "")>]
     // intrinsic optional functional term with class parent
-    [<DataRow("FplOptionalFunctionalTerm", "02",  """def cl T:obj {intr prty func opt MandF(x:obj)->obj {intr} };""", "")>]
+    [<DataRow("FplOptionalFunctionalTerm", "02",  """def cl T:obj {intr opt prty func MandF(x:obj)->obj {intr} };""", "")>]
     // non-intrinsic optional functional term with predicate parent
-    [<DataRow("FplOptionalFunctionalTerm", "03",  """def pred T() {intr prty func opt MandF(x:obj)->obj {return x} };""", "")>]
+    [<DataRow("FplOptionalFunctionalTerm", "03",  """def pred T() {intr opt prty func MandF(x:obj)->obj {return x} };""", "")>]
     // non-intrinsic optional functional term with functional term parent
-    [<DataRow("FplOptionalFunctionalTerm", "04",  """def func T()->obj {intr prty func opt MandF(x:obj)->obj {return x} };""", "")>]
+    [<DataRow("FplOptionalFunctionalTerm", "04",  """def func T()->obj {intr opt prty func MandF(x:obj)->obj {return x} };""", "")>]
     // non-intrinsic optional functional term with class parent
-    [<DataRow("FplOptionalFunctionalTerm", "05",  """def cl T:obj {intr prty func opt MandF(x:obj)->obj {return x} };""", "")>]
+    [<DataRow("FplOptionalFunctionalTerm", "05",  """def cl T:obj {intr opt prty func MandF(x:obj)->obj {return x} };""", "")>]
     // non-intrinsic optional functional term with predicate parent, shared variables and one statement
-    [<DataRow("FplOptionalFunctionalTerm", "06",  """def pred T() {dec ~y:obj; true prty func opt MandF(x:obj)->obj {dec x:=y; return x} };""", "")>]
+    [<DataRow("FplOptionalFunctionalTerm", "06",  """def pred T() {dec ~y:obj; true opt prty func MandF(x:obj)->obj {dec x:=y; return x} };""", "")>]
     // non-intrinsic optional functional term with functional term parent, shared variables and one statement
-    [<DataRow("FplOptionalFunctionalTerm", "07",  """def func T()->obj {dec ~y:obj; return y prty func opt MandF(x:obj)->obj {dec x:=y; return x} };""", "")>]
+    [<DataRow("FplOptionalFunctionalTerm", "07",  """def func T()->obj {dec ~y:obj; return y opt prty func MandF(x:obj)->obj {dec x:=y; return x} };""", "")>]
     // non-intrinsic optional functional term with class parent, shared variables and one statement
-    [<DataRow("FplOptionalFunctionalTerm", "08",  """def cl T:obj {dec ~y:obj; ctor T() {} prty func opt MandF(x:obj)->obj {dec x:=y; return x} };""", "")>]
+    [<DataRow("FplOptionalFunctionalTerm", "08",  """def cl T:obj {dec ~y:obj; ctor T() {} opt prty func MandF(x:obj)->obj {dec x:=y; return x} };""", "")>]
 
     // intrinsic optional predicate with predicate parent
-    [<DataRow("FplOptionalPredicate", "00",  """def pred T() {intr prty pred opt MandF(x:obj) {intr} };""", "")>]
+    [<DataRow("FplOptionalPredicate", "00",  """def pred T() {intr opt prty pred MandF(x:obj) {intr} };""", "")>]
     // intrinsic optional predicate with functional term parent
-    [<DataRow("FplOptionalPredicate", "01",  """def func T()->obj {intr prty pred opt MandF(x:obj) {intr} };""", "")>]
+    [<DataRow("FplOptionalPredicate", "01",  """def func T()->obj {intr opt prty pred MandF(x:obj) {intr} };""", "")>]
     // intrinsic optional predicate with class parent
-    [<DataRow("FplOptionalPredicate", "02",  """def cl T:obj {intr prty pred opt MandF(x:obj) {intr} };""", "")>]
+    [<DataRow("FplOptionalPredicate", "02",  """def cl T:obj {intr opt prty pred MandF(x:obj) {intr} };""", "")>]
     // non-intrinsic optional predicate with predicate parent
-    [<DataRow("FplOptionalPredicate", "03",  """def pred T() {intr prty pred opt MandF(x:obj) {true} };""", "")>]
+    [<DataRow("FplOptionalPredicate", "03",  """def pred T() {intr opt prty pred MandF(x:obj) {true} };""", "")>]
     // non-intrinsic optional predicate with functional term parent
-    [<DataRow("FplOptionalPredicate", "04",  """def func T()->obj {intr prty pred opt MandF(x:obj) {true} };""", "")>]
+    [<DataRow("FplOptionalPredicate", "04",  """def func T()->obj {intr opt prty pred MandF(x:obj) {true} };""", "")>]
     // non-intrinsic optional predicate with class parent
-    [<DataRow("FplOptionalPredicate", "05",  """def cl T:obj {intr prty pred opt MandF(x:obj) {true} };""", "")>]
+    [<DataRow("FplOptionalPredicate", "05",  """def cl T:obj {intr opt prty pred MandF(x:obj) {true} };""", "")>]
     // non-intrinsic optional predicate with predicate parent, shared variables and one statement
-    [<DataRow("FplOptionalPredicate", "06",  """def pred T() {dec ~y:obj; true prty pred opt MandF(x:obj) {dec x:=y; true} };""", "")>]
+    [<DataRow("FplOptionalPredicate", "06",  """def pred T() {dec ~y:obj; true opt prty pred MandF(x:obj) {dec x:=y; true} };""", "")>]
     // non-intrinsic optional predicate with functional term parent, shared variables and one statement
-    [<DataRow("FplOptionalPredicate", "07",  """def func T()->obj {dec ~y:obj; return y prty pred opt MandF(x:obj) {dec x:=y; true} };""", "")>]
+    [<DataRow("FplOptionalPredicate", "07",  """def func T()->obj {dec ~y:obj; return y opt prty pred MandF(x:obj) {dec x:=y; true} };""", "")>]
     // non-intrinsic optional predicate with class parent, shared variables and one statement
-    [<DataRow("FplOptionalPredicate", "08",  """def cl T:obj {dec ~y:obj; ctor T() {} prty pred opt MandF(x:obj) {dec x:=y; true} };""", "")>]
+    [<DataRow("FplOptionalPredicate", "08",  """def cl T:obj {dec ~y:obj; ctor T() {} opt prty pred MandF(x:obj) {dec x:=y; true} };""", "")>]
 
     // intrinsic predicate
     [<DataRow("FplPredicate", "00", """def pred T() {intr};""", "")>]
     // intrinsic predicate with variables
     [<DataRow("FplPredicate", "01", """def pred T(x,y:obj) {intr};""", "")>]
     // intrinsic predicate with variables and properties
-    [<DataRow("FplPredicate", "02", """def pred T(x,y:obj) {intr prty func MandF()->obj {intr} prty func opt OptF()->obj {intr} prty pred MandP() {true} prty pred opt OptP() {true} };""", "")>]
+    [<DataRow("FplPredicate", "02", """def pred T(x,y:obj) {intr prty func MandF()->obj {intr} opt prty func OptF()->obj {intr} prty pred MandP() {true} opt prty pred OptP() {true} };""", "")>]
     // non-intrinsic predicate with variables and properties
-    [<DataRow("FplPredicate", "03", """def pred T(x,y:obj) {dec ~z:obj; true prty func MandF()->obj {intr} prty func opt OptF()->obj {intr} prty pred MandP() {true} prty pred opt OptP() {true} };""", "")>]
+    [<DataRow("FplPredicate", "03", """def pred T(x,y:obj) {dec ~z:obj; true prty func MandF()->obj {intr} opt prty func OptF()->obj {intr} prty pred MandP() {true} opt prty pred OptP() {true} };""", "")>]
     // non-intrinsic predicate with some statements 
     [<DataRow("FplPredicate", "04", """def pred T(x,y:obj) {dec ~z:obj z:=x y:=z; false };""", "")>]
 

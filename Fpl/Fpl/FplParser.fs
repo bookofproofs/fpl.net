@@ -474,19 +474,19 @@ let constructorBlock = leftBrace >>. varDeclOrSpecList .>> spacesRightBrace
 let constructor = positions "Constructor" (keywordConstructor >>. signature .>>. constructorBlock) |>> Ast.Constructor
 
 (* FPL building blocks - Properties *)
-let keywordOptional = positions "Optional" (skipString LiteralOptL <|> skipString LiteralOpt) .>> SW |>> Ast.Optional
-let keywordProperty = positions "Property" (skipString LiteralPrtyL <|> skipString LiteralPrty) .>> SW |>> Ast.Property
+let keywordOptional = (skipString LiteralOptL <|> skipString LiteralOpt) .>> SW 
+let keywordProperty = (skipString LiteralPrtyL <|> skipString LiteralPrty) .>> SW 
 
 let predInstanceBlock = leftBrace >>. (keywordIntrinsic <|> predContent) .>> spacesRightBrace
-let predicateInstance = positions "PredicateInstance" ((keywordPredicate >>. SW >>. opt keywordOptional) .>>. signature .>>. (IW >>. predInstanceBlock)) |>> Ast.PredicateInstance
+let predicateInstance = positions "PredicateInstance" ((opt keywordOptional .>> keywordProperty) .>>. (keywordPredicate >>. SW >>. (signature .>>. (IW >>. predInstanceBlock)))) |>> Ast.PredicateInstance
 
-mappingRef.Value <- toArrow >>. IW >>. positions "Mapping" (variableType) |>> Ast.Mapping
-let functionalTermSignature = positions "FunctionalTermSignature" ((keywordFunction >>. SW >>. opt keywordOptional) .>>. signatureWithUserDefinedString .>>. (IW >>. mapping)) .>> IW |>> Ast.FunctionalTermSignature
+mappingRef.Value <- toArrow >>. IW >>. positions "Mapping" (variableType) .>> IW |>> Ast.Mapping
+let functionalTermSignature = positions "FunctionalTermSignature" (keywordFunction >>. SW >>. signatureWithUserDefinedString .>>. (IW >>. mapping)) |>> Ast.FunctionalTermSignature
 
 let returnStatement = positions "Return" (keywordReturn >>. predicate) .>> IW |>> Ast.Return
 let funcContent = varDeclOrSpecList .>>. returnStatement |>> Ast.DefFunctionContent
 let functionalTermInstanceBlock = leftBrace >>. (keywordIntrinsic <|> funcContent) .>> spacesRightBrace
-let functionalTermInstance = positions "FunctionalTermInstance" (functionalTermSignature .>>. functionalTermInstanceBlock) |>> Ast.FunctionalTermInstance
+let functionalTermInstance = positions "FunctionalTermInstance" (((opt keywordOptional .>> keywordProperty) .>>. (keywordFunction >>. SW >>. signature .>>. (IW >>. mapping))) .>>. functionalTermInstanceBlock) |>> Ast.FunctionalTermInstance
 
 
 let extensionRegex = regex "[^\/]+" <?> "<extension regex>" |>> Ast.ExtensionRegex
@@ -498,11 +498,10 @@ let extensionTerm = leftBrace >>. (funcContent <|> mapCases) .>> spacesRightBrac
 let definitionExtension = positions "ExtensionBlock" (keywordExtension >>. (extensionName .>> SW) .>>. extensionSignature .>>. extensionTerm) |>> Ast.DefinitionExtension
 
 let definitionProperty = choice [
-    predicateInstance
+    attempt predicateInstance
     functionalTermInstance
 ]
-let property = IW >>. positions "PropertyBlock" (keywordProperty .>>. definitionProperty) |>> Ast.PropertyBlock
-let propertyList = opt (many1 (property .>> IW)) 
+let propertyList = opt (many1 (definitionProperty .>> IW)) 
 
 (* FPL building blocks - Proofs 
 
@@ -623,7 +622,7 @@ let errRecPattern = $"({LiteralDefL}|{LiteralDef}|{LiteralPrtyL}|{LiteralPrty}|{
 
 let errInformation = [
     (DEF000, [LiteralDefL; LiteralDef], definition)
-    (PRP000, [LiteralPrtyL; LiteralPrty], property)
+    (PRP000, [LiteralPrtyL; LiteralPrty], definitionProperty)
     (AXI000, [LiteralAxL; LiteralAx; LiteralPostL; LiteralPost], axiom)
     (THM000, [LiteralThmL; LiteralThm], theorem)
     (COR000, [LiteralCorL; LiteralCor], corollary)
@@ -809,7 +808,7 @@ let testParser (parserType:string) (input:string) =
         let result = run (proof .>> eof) trimmed 
         sprintf "%O" result
     | LiteralPrty ->
-        let result = run (property .>> eof) trimmed 
+        let result = run (definitionProperty .>> eof) trimmed 
         sprintf "%O" result
     | PrimQuantor ->
         let result = run (compoundPredicate .>> eof) trimmed 

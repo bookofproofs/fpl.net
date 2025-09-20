@@ -194,12 +194,6 @@ let rec eval (st: SymbolTable) ast =
         let fv = variableStack.PeekEvalStack()
         fv.IsIntrinsic <- true // flag that this block is intrinsic
         st.EvalPop()
-    | Ast.Property((pos1, pos2),()) -> 
-        st.EvalPush("Property")
-        st.EvalPop()
-    | Ast.Optional((pos1, pos2),()) -> 
-        st.EvalPush("Optional")
-        st.EvalPop()
     | Ast.Error  ->   
         st.EvalPush("Error")
         st.EvalPop()
@@ -1148,11 +1142,6 @@ let rec eval (st: SymbolTable) ast =
         let fv = variableStack.PeekEvalStack()
         emitSIG00Diagnostics fv pos1 pos2
         st.EvalPop()
-    | Ast.PropertyBlock((pos1, pos2), (keywordPropertyAst, definitionPropertyAst)) ->
-        st.EvalPush("PropertyBlock")
-        eval st keywordPropertyAst
-        eval st definitionPropertyAst
-        st.EvalPop()
     // | ReferencingIdentifier of Positions * (Ast * Ast list)
     | ReferencingIdentifier((pos1, pos2), (predicateIdentifierAst, dollarDigitListAsts)) ->
         st.EvalPush("ReferencingIdentifier")
@@ -1195,11 +1184,24 @@ let rec eval (st: SymbolTable) ast =
         diagList
         |> Seq.iter (fun diag -> ad.AddDiagnostic diag)
         st.EvalPop()
-    | Ast.FunctionalTermInstance((pos1, pos2), (functionalTermSignatureAst, functionalTermInstanceBlockAst)) ->
+    | Ast.FunctionalTermInstance((pos1, pos2), ((optionalPropAst, (signatureAst, mappingAst)), functionalTermInstanceBlockAst)) ->
         st.EvalPush("FunctionalTermInstance")
-        eval st functionalTermSignatureAst // push functional term property to stack is here
-        eval st functionalTermInstanceBlockAst
-        variableStack.PopEvalStack() // pop functional term property 
+        let parent = variableStack.PeekEvalStack()
+        match optionalPropAst with
+        | Some _ -> 
+                let fvNew = new FplOptionalFunctionalTerm((pos1, pos2), parent)
+                variableStack.PushEvalStack(fvNew)
+                eval st signatureAst
+                eval st mappingAst
+                eval st functionalTermInstanceBlockAst
+                variableStack.PopEvalStack()
+        | None -> 
+                let fvNew = new FplMandatoryFunctionalTerm((pos1, pos2), parent)
+                variableStack.PushEvalStack(fvNew)
+                eval st signatureAst
+                eval st mappingAst
+                eval st functionalTermInstanceBlockAst
+                variableStack.PopEvalStack()
         st.EvalPop()
     // | All of Positions * ((Ast list * Ast option) list * Ast)
     | Ast.All((pos1, pos2), (namedVarDeclAstList, predicateAst)) ->
@@ -1248,34 +1250,11 @@ let rec eval (st: SymbolTable) ast =
         emitLG000orLG001Diagnostics fv PrimQuantorExistsN
         st.EvalPop()
     // | FunctionalTermSignature of Positions * (Ast * Ast)
-    | Ast.FunctionalTermSignature((pos1, pos2), ((keywordOptionalAst, signatureWithUserDefinedStringAst), mappingAst)) -> 
+    | Ast.FunctionalTermSignature((pos1, pos2), (signatureWithUserDefinedStringAst, mappingAst)) -> 
         variableStack.InSignatureEvaluation <- true
         st.EvalPush("FunctionalTermSignature")
-        let parent = variableStack.PeekEvalStack()
-        match keywordOptionalAst with
-        | Some keywordOptional -> 
-            eval st keywordOptional
-            if parent.Name = PrimTheoryL then
-                let fvNew = new FplFunctionalTerm((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
-                variableStack.PushEvalStack(fvNew)
-                eval st signatureWithUserDefinedStringAst
-                eval st mappingAst
-            else
-                let fvNew = new FplOptionalFunctionalTerm((pos1, pos2), parent)
-                variableStack.PushEvalStack(fvNew)
-                eval st signatureWithUserDefinedStringAst
-                eval st mappingAst
-        | None -> 
-            if parent.Name = PrimTheoryL then
-                let fvNew = new FplFunctionalTerm((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
-                variableStack.PushEvalStack(fvNew)
-                eval st signatureWithUserDefinedStringAst
-                eval st mappingAst
-            else
-                let fvNew = new FplMandatoryFunctionalTerm((pos1, pos2), parent)
-                variableStack.PushEvalStack(fvNew)
-                eval st signatureWithUserDefinedStringAst
-                eval st mappingAst
+        eval st signatureWithUserDefinedStringAst
+        eval st mappingAst
         st.EvalPop()
         variableStack.InSignatureEvaluation <- false
     | Ast.PredicateWithQualification(predicateWithOptSpecificationAst, qualificationListAst) ->
@@ -1494,12 +1473,11 @@ let rec eval (st: SymbolTable) ast =
         eval st predicateAst
         variableStack.PopEvalStack() // remove value
         st.EvalPop()
-    | Ast.PredicateInstance((pos1, pos2), ((keywordOptionalAst, signatureAst), predInstanceBlockAst)) ->
+    | Ast.PredicateInstance((pos1, pos2), (keywordOptionalAst, (signatureAst, predInstanceBlockAst))) ->
         st.EvalPush("PredicateInstance")
         let parent = variableStack.PeekEvalStack()
         match keywordOptionalAst with
-        | Some keywordOptional -> 
-            eval st keywordOptional
+        | Some _ -> 
             let fvNew = new FplOptionalPredicate((pos1, pos2), parent)
             variableStack.PushEvalStack(fvNew)
             eval st signatureAst
@@ -1768,21 +1746,20 @@ let rec eval (st: SymbolTable) ast =
         optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
         if not fv.IsIntrinsic then // if not intrinsic, check variable usage
             emitVAR04diagnostics fv
-        else    
-            let value = new FplIntrinsicPred((pos1, pos2), fv)
-            fv.ValueList.Add(value)
         variableStack.PopEvalStack()
         st.EvalPop()
     // | DefinitionFunctionalTerm of Positions * ((Ast * Ast) * (Ast * Ast list option))
     | Ast.DefinitionFunctionalTerm((pos1, pos2), (functionalTermSignatureAst, (funcContentAst, optPropertyListAsts))) ->
         st.EvalPush("DefinitionFunctionalTerm")
-        eval st functionalTermSignatureAst // add functional term
+        let parent = variableStack.PeekEvalStack()
+        let fvNew = new FplFunctionalTerm((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
+        variableStack.PushEvalStack(fvNew)
+        eval st functionalTermSignatureAst 
         eval st funcContentAst
         optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
-        let fv = variableStack.PeekEvalStack()
-        fv.StartPos <- pos1 
-        fv.EndPos <- pos2 
-        variableStack.PopEvalStack() // remove functional term
+        if not fvNew.IsIntrinsic then // if not intrinsic, check variable usage
+            emitVAR04diagnostics fvNew
+        variableStack.PopEvalStack()
         st.EvalPop()
     // | DefinitionClass of Positions * (((Ast * Ast option) * Ast list) * (Ast * Ast list option))
     | Ast.DefinitionClass((pos1, pos2),

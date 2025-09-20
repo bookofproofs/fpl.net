@@ -217,19 +217,19 @@ type CommonFplValueTestCases =
         {
             intr 
             prty pred T1() {true}
-            prty pred opt T2() {true}
+            opt prty pred T2() {true}
             prty func T3()->obj {intr}
-            prty func opt T4()->obj {intr}
+            opt prty func T4()->obj {intr}
             prty func T5()->ind {intr}
-            prty func opt T6()->ind {intr}
+            opt prty func T6()->ind {intr}
             prty func T7()->pred {intr}
-            prty func opt T8()->pred {intr}
+            opt prty func T8()->pred {intr}
             prty func T9()->tpl {intr}
-            prty func opt T10()->tpl {intr}
+            opt prty func T10()->tpl {intr}
             prty func T11()->Nat {intr}
-            prty func opt T12()->Nat {intr}
+            opt prty func T12()->Nat {intr}
             prty func T13()->func {intr}
-            prty func opt T14()->func {intr}
+            opt prty func T14()->func {intr}
         }
         ;
         """
