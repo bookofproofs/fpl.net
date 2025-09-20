@@ -618,11 +618,8 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Assertion((pos1, pos2), predicateAst) ->
         st.EvalPush("Assertion")
         let fv = variableStack.PeekEvalStack()
-        fv.StartPos <- pos1
-        fv.EndPos <- pos2
-        fv.FplId <- LiteralAssert
-        let rb = new FplReference((pos1,pos2), fv)
-        variableStack.PushEvalStack(rb)
+        let fvNew = new FplAssertion((pos1, pos2), fv)
+        variableStack.PushEvalStack(fvNew)
         eval st predicateAst
         variableStack.PopEvalStack()
         st.EvalPop()
@@ -862,17 +859,8 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.VarDeclBlock((pos1, pos2), varDeclOrStmtAstList) ->
         st.EvalPush("VarDeclBlock")
-        let fv = variableStack.PeekEvalStack()
-        let stmtList = List<FplValue>()
         varDeclOrStmtAstList 
-        |> List.map (fun subAst -> 
-            match subAst with 
-            | Ast.NamedVarDecl _ -> eval st subAst
-            | _ -> 
-                eval st subAst
-                stmtList.Add(variableStack.Pop())
-        ) |> ignore
-        fv.ArgList.AddRange(stmtList)
+        |> List.map (fun subAst -> eval st subAst) |> ignore
         st.EvalPop()
     | Ast.StatementList((pos1, pos2), asts) ->
         st.EvalPush("StatementList")
@@ -1508,6 +1496,7 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(dummyValue) // add value
         eval st predicateAst
         variableStack.PopEvalStack() // remove value
+        variableStack.PopEvalStack() // remove Assignment
         st.EvalPop()
     | Ast.PredicateInstance((pos1, pos2), (keywordOptionalAst, (signatureAst, predInstanceBlockAst))) ->
         st.EvalPush("PredicateInstance")

@@ -447,7 +447,6 @@ let keywordCorollary = (skipString LiteralCorL <|> skipString LiteralCor) .>> SW
 let keywordConjecture = (skipString LiteralConjL <|> skipString LiteralConj) .>> SW
 
 let theoremLikeBlock = leftBrace >>. varDeclOrSpecList .>>. spacesPredicate .>> spacesRightBrace
-let signatureWithTheoremLikeBlock = simpleSignature .>>. theoremLikeBlock
 
 let theoremSignature = positions "TheoremSignature" (keywordTheorem >>. pascalCaseId) .>> IW |>> Ast.TheoremSignature
 let theorem = positions "Theorem" (theoremSignature .>>. theoremLikeBlock) |>> Ast.Theorem
@@ -501,7 +500,7 @@ let extensionAssignment = positions "ExtensionAssignment" ((variable .>> IW .>> 
 
 let extensionSignature = positions "ExtensionSignature" ((extensionAssignment .>> IW) .>>. mapping) .>> IW |>> Ast.ExtensionSignature
 let extensionTerm = leftBrace >>. (funcContent <|> mapCases) .>> spacesRightBrace
-let definitionExtension = positions "ExtensionBlock" (keywordExtension >>. (extensionName .>> SW) .>>. extensionSignature .>>. extensionTerm) |>> Ast.DefinitionExtension
+let definitionExtension = positions "DefinitionExtension" (keywordExtension >>. (extensionName .>> SW) .>>. extensionSignature .>>. extensionTerm) |>> Ast.DefinitionExtension
 
 let definitionProperty = choice [
     attempt predicateInstance
