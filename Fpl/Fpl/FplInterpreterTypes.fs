@@ -998,9 +998,24 @@ type FplIntrinsicPred(positions: Positions, parent: FplValue) =
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
 
+
+type IHasSignature =
+    abstract member SignStartPos : Position with get, set
+    abstract member SignEndPos : Position with get, set
+
 [<AbstractClass>]
 type FplGenericPredicateWithExpression(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(positions, parent)
+    let mutable _signStartPos = Position("", (int64)0, (int64)0, (int64)0)
+    let mutable _signEndPos = Position("", (int64)0, (int64)0, (int64)0)
+
+    interface IHasSignature with
+        member _.SignStartPos 
+            with get (): Position = _signStartPos
+            and set (value) = _signStartPos <- value
+        member _.SignEndPos 
+            with get (): Position = _signEndPos
+            and set (value) = _signEndPos <- value
 
     override this.Type signatureType = getFplHead this signatureType
             
@@ -1097,6 +1112,16 @@ type FplInstance(positions: Positions, parent: FplValue) =
 
 type FplConstructor(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(positions, parent)
+    let mutable _signStartPos = Position("", (int64)0, (int64)0, (int64)0)
+    let mutable _signEndPos = Position("", (int64)0, (int64)0, (int64)0)
+
+    interface IHasSignature with
+        member _.SignStartPos 
+            with get (): Position = _signStartPos
+            and set (value) = _signStartPos <- value
+        member _.SignEndPos 
+            with get (): Position = _signEndPos
+            and set (value) = _signEndPos <- value
 
     override this.Name = LiteralCtorL
     override this.ShortName = LiteralCtor
@@ -1127,6 +1152,16 @@ let isConstructor (fv:FplValue) =
 
 type FplClass(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(positions, parent)
+    let mutable _signStartPos = Position("", (int64)0, (int64)0, (int64)0)
+    let mutable _signEndPos = Position("", (int64)0, (int64)0, (int64)0)
+
+    interface IHasSignature with
+        member _.SignStartPos 
+            with get (): Position = _signStartPos
+            and set (value) = _signStartPos <- value
+        member _.SignEndPos 
+            with get (): Position = _signEndPos
+            and set (value) = _signEndPos <- value
 
     override this.Name = PrimClassL
     override this.ShortName = PrimClass
@@ -1229,7 +1264,7 @@ type ICanBeCalledRecusively =
 type IReady =
     abstract member IsReady : bool
 
-type IHaveAProof =
+type IHasProof =
     abstract member HasProof : bool with get, set
 
 type FplPredicate(positions: Positions, parent: FplValue, runOrder) =
@@ -1237,6 +1272,16 @@ type FplPredicate(positions: Positions, parent: FplValue, runOrder) =
     let _runOrder = runOrder
     let mutable _isReady = false
     let mutable _callCounter = 0
+    let mutable _signStartPos = Position("", (int64)0, (int64)0, (int64)0)
+    let mutable _signEndPos = Position("", (int64)0, (int64)0, (int64)0)
+
+    interface IHasSignature with
+        member _.SignStartPos 
+            with get (): Position = _signStartPos
+            and set (value) = _signStartPos <- value
+        member _.SignEndPos 
+            with get (): Position = _signEndPos
+            and set (value) = _signEndPos <- value
 
     interface IReady with
         member _.IsReady = _isReady
@@ -1359,14 +1404,13 @@ type FplGenericTheoremLikeStmt(positions: Positions, parent: FplValue, runOrder)
     let mutable _isReady = false
     let mutable _hasProof = false
 
-
     override this.Name = LiteralThmL
     override this.ShortName = LiteralThm
 
     interface IReady with
         member _.IsReady = _isReady
 
-    interface IHaveAProof with
+    interface IHasProof with
         member this.HasProof
             with get (): bool = _hasProof
             and set (value) = _hasProof <- value
@@ -1798,7 +1842,17 @@ and FplArgument(positions: Positions, parent: FplValue, runOrder) =
 and FplProof(positions: Positions, parent: FplValue, runOrder) =
     inherit FplGenericPredicate(positions, parent)
     let _runOrder = runOrder
-    
+    let mutable _signStartPos = Position("", (int64)0, (int64)0, (int64)0)
+    let mutable _signEndPos = Position("", (int64)0, (int64)0, (int64)0)
+
+    interface IHasSignature with
+        member _.SignStartPos 
+            with get (): Position = _signStartPos
+            and set (value) = _signStartPos <- value
+        member _.SignEndPos 
+            with get (): Position = _signEndPos
+            and set (value) = _signEndPos <- value
+            
     override this.Name = LiteralPrfL
     override this.ShortName = LiteralPrf
 
@@ -1825,7 +1879,7 @@ and FplProof(positions: Positions, parent: FplValue, runOrder) =
         // tell the parent theorem-like statement that it has a proof
         let parent = this.Parent.Value 
         match box parent with 
-        | :? IHaveAProof as parentWithProof ->
+        | :? IHasProof as parentWithProof ->
             parentWithProof.HasProof <- true
         | _ -> ()
         // evaluate the proof by evaluating all arguments according to their order in the FPL code
@@ -3134,6 +3188,16 @@ type FplOptionalFunctionalTerm(positions: Positions, parent: FplValue) =
 
 type FplExtension(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
+    let mutable _signStartPos = Position("", (int64)0, (int64)0, (int64)0)
+    let mutable _signEndPos = Position("", (int64)0, (int64)0, (int64)0)
+
+    interface IHasSignature with
+        member _.SignStartPos 
+            with get (): Position = _signStartPos
+            and set (value) = _signStartPos <- value
+        member _.SignEndPos 
+            with get (): Position = _signEndPos
+            and set (value) = _signEndPos <- value
 
     override this.Name = PrimExtensionL 
     override this.ShortName = PrimExtension
