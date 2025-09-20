@@ -1342,6 +1342,11 @@ type FplMandatoryPredicate(positions: Positions, parent: FplValue) =
         // todo implement run
         ()
 
+    override this.Type signatureType = 
+        let head = getFplHead this signatureType
+
+        let paramT = getParamTuple this signatureType
+        sprintf "%s(%s)" head paramT
 
 type FplOptionalPredicate(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicateWithExpression(positions, parent)
@@ -1355,6 +1360,12 @@ type FplOptionalPredicate(positions: Positions, parent: FplValue) =
         ret
 
     override this.IsBlock () = true
+
+    override this.Type signatureType = 
+        let head = getFplHead this signatureType
+
+        let paramT = getParamTuple this signatureType
+        sprintf "%s(%s)" head paramT
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 
