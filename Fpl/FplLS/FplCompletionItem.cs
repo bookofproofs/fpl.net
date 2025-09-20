@@ -83,7 +83,7 @@ namespace FplLS
                 case "variable (got keyword)":
                 case "variable (got template)":
                     return new FplCompletionItemChoicesVariable().GetChoices(this);
-                case "PascalCaseId":
+                case PrimPascalCaseId:
                     return new FplCompletionItemChoicesPascalCaseId().GetChoices(this);
                 case LiteralDel:
                 case LiteralDelL:

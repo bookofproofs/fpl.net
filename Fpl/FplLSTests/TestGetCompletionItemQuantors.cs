@@ -128,6 +128,14 @@ namespace FplLSTests
             foreach (var item in actual)
             {
                 Assert.IsTrue(item.InsertText.Contains(choice));
+                if (item.InsertText.Contains("{"))
+                {
+                    var res = FplParser.testParser(PrimQuantor, item.InsertText);
+                    if (!res.StartsWith("Success:"))
+                    {
+                        Assert.IsTrue(false, res);
+                    }
+                }
             }
         }
     }

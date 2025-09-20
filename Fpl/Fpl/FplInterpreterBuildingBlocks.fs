@@ -211,7 +211,7 @@ let rec eval (st: SymbolTable) ast =
         fv.TypeId <- s
         st.EvalPop()
     | Ast.PascalCaseId s -> 
-        st.EvalPush("PascalCaseId")
+        st.EvalPush(PrimPascalCaseId)
         let fv = variableStack.PeekEvalStack()
         eval_string st s
         match fv.Name with

@@ -517,7 +517,7 @@ let keywordRevoke = (skipString LiteralRevL <|> skipString LiteralRev) .>> SW
 let revokeArgument = positions "RevokeArgument" (keywordRevoke >>. refArgumentIdentifier) |>> Ast.RevokeArgument 
     
 let keywordAssume = skipString LiteralAssL <|> skipString LiteralAss .>> SW 
-let assumeArgument = positions "AssumeArgument" (keywordAssume >>. compoundPredicate) |>> Ast.AssumeArgument
+let assumeArgument = positions "AssumeArgument" (keywordAssume >>. predicate) |>> Ast.AssumeArgument
 let keywordTrivial  = positions "Trivial" (skipString LiteralTrivial) .>> IW |>> Ast.Trivial
 let keywordQed  = positions "Qed" (skipString LiteralQed) .>> IW |>> Ast.Qed
 let derivedPredicate = positions "DerivedPredicate" predicate |>> Ast.DerivedPredicate
@@ -761,7 +761,7 @@ let getParserChoicesAtPosition (input:string) index =
 
 /// Used to test FplLS CompletionItems correct syntax
 let testParser (parserType:string) (input:string) =
-    let trimmed = input.Trim()
+    let trimmed = preParsePreProcess (input.Trim())
     match parserType with 
     | LiteralLoc -> 
         let result = run (localization .>> eof) trimmed
@@ -798,5 +798,23 @@ let testParser (parserType:string) (input:string) =
         sprintf "%O" result
     | LiteralIs ->
         let result = run (isOperator .>> eof) trimmed 
+        sprintf "%O" result
+    | PrimPascalCaseId ->
+        let result = run (pascalCaseId .>> eof) trimmed 
+        sprintf "%O" result
+    | PrimPredicate ->
+        let result = run (predicate .>> eof) trimmed 
+        sprintf "%O" result
+    | LiteralPrf ->
+        let result = run (proof .>> eof) trimmed 
+        sprintf "%O" result
+    | LiteralPrty ->
+        let result = run (property .>> eof) trimmed 
+        sprintf "%O" result
+    | PrimQuantor ->
+        let result = run (compoundPredicate .>> eof) trimmed 
+        sprintf "%O" result
+    | PrimTheoremLike ->
+        let result = run (buildingBlock .>> eof) trimmed 
         sprintf "%O" result
     | _ -> $"testParser {parserType} not implemented"

@@ -1426,6 +1426,8 @@ let PrimOptionalPredicate = "opred"
 [<Literal>]
 let PrimOptionalPredicateL = "optional predicate property"
 [<Literal>]
+let PrimPascalCaseId = "PascalCaseId"
+[<Literal>]
 let PrimPredicate = "def pred"
 [<Literal>]
 let PrimPredicateL = "predicate definition"
@@ -1455,6 +1457,8 @@ let PrimStmtL = "statement"
 let PrimTheory = "th"
 [<Literal>]
 let PrimTheoryL = "theory"
+[<Literal>]
+let PrimTheoremLike = "thmlike"
 [<Literal>]
 let PrimTranslation = "trsl"
 [<Literal>]
