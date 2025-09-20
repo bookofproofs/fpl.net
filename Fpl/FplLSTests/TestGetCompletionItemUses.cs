@@ -6,7 +6,7 @@ namespace FplLSTests
     public class TestGetCompletionItemUses
     {
 
-        [DataRow(literalUses)]
+        [DataRow(LiteralUses)]
 
         [TestMethod]
         public void TestAddUsesChoicesNumber(string choice)
@@ -16,7 +16,7 @@ namespace FplLSTests
             Assert.AreEqual<int>(4, actual.Count);
         }
 
-        [DataRow(literalUses)]
+        [DataRow(LiteralUses)]
         [TestMethod]
         public void TestAddUsesKeywordCounts(string choice)
         {
@@ -30,9 +30,9 @@ namespace FplLSTests
             Assert.AreEqual<int>(1, count);
         }
 
-        [DataRow(literalUses, "...", CompletionItemKind.Property, "uses01")]
-        [DataRow(literalUses, "... alias", CompletionItemKind.Property, "uses02")]
-        [DataRow(literalUses, "", CompletionItemKind.Keyword, "uses03")]
+        [DataRow(LiteralUses, "...", CompletionItemKind.Property, "uses01")]
+        [DataRow(LiteralUses, "... alias", CompletionItemKind.Property, "uses02")]
+        [DataRow(LiteralUses, "", CompletionItemKind.Keyword, "uses03")]
         [TestMethod]
         public void TestAddChoicesSortText(string choice, string l, CompletionItemKind kind, string expected)
         {
@@ -47,7 +47,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow(literalUses)]
+        [DataRow(LiteralUses)]
         [TestMethod]
         public void TestInsertTextEndsWithTwoNewLines(string choice)
         {
@@ -62,7 +62,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow(literalUses)]
+        [DataRow(LiteralUses)]
         [TestMethod]
         public void TestAddUsesChoicesLabel(string choice)
         {
@@ -74,7 +74,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow(literalUses)]
+        [DataRow(LiteralUses)]
 
         [TestMethod]
         public void TestAddUsesChoicesDetail(string choice)
@@ -87,7 +87,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow(literalUses)]
+        [DataRow(LiteralUses)]
 
         [TestMethod]
         public void TestAddUsesChoicesInsertText(string choice)

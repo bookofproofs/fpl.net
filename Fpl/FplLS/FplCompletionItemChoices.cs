@@ -21,32 +21,32 @@ namespace FplLS
         public string TokenRevoke { get; set; }
         public FplCompletionItemChoices()
         {
-            TokenAssume = literalAssume;
-            TokenClass = literalClL;
-            TokenConclusion = literalConL;
-            TokenDeclaration = literalDecL;
-            TokenFunction = literalFuncL;
-            TokenIntrinsic = literalIntrL;
-            TokenObject = literalObjL;
-            TokenOptional = literalOptL;
-            TokenPredicate = literalPredL;
-            TokenPremise = literalPreL;
-            TokenRevoke = literalRevL;
+            TokenAssume = LiteralAssL;
+            TokenClass = LiteralClL;
+            TokenConclusion = LiteralConL;
+            TokenDeclaration = LiteralDecL;
+            TokenFunction = LiteralFuncL;
+            TokenIntrinsic = LiteralIntrL;
+            TokenObject = LiteralObjL;
+            TokenOptional = LiteralOptL;
+            TokenPredicate = LiteralPredL;
+            TokenPremise = LiteralPreL;
+            TokenRevoke = LiteralRevL;
         }
 
         public void AdjustToShort()
         {
-            TokenAssume = literalAss;
-            TokenClass = literalCl;
-            TokenConclusion = literalCon;
-            TokenDeclaration = literalDec;
-            TokenFunction = literalFunc;
-            TokenIntrinsic = literalIntr;
-            TokenObject = literalObj;
-            TokenOptional = literalOpt;
-            TokenPredicate = literalPred;
-            TokenPremise = literalPre;
-            TokenRevoke = literalRev;
+            TokenAssume = LiteralAss;
+            TokenClass = LiteralCl;
+            TokenConclusion = LiteralCon;
+            TokenDeclaration = LiteralDec;
+            TokenFunction = LiteralFunc;
+            TokenIntrinsic = LiteralIntr;
+            TokenObject = LiteralObj;
+            TokenOptional = LiteralOpt;
+            TokenPredicate = LiteralPred;
+            TokenPremise = LiteralPre;
+            TokenRevoke = LiteralRev;
         }
 
         public abstract List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi);

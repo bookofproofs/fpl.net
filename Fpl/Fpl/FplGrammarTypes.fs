@@ -58,6 +58,7 @@ type Ast =
     | UsesClause of Positions * Ast
     | BrackedCoordList of Positions * Ast list
     | ReferencingIdentifier of Positions * (Ast * Ast list)
+    | ProofOrCorollaryIdentifier of Positions * (Ast * Ast list)
 
     // Types
     | One of Positions * unit
@@ -139,22 +140,20 @@ type Ast =
     | SimpleSignature of Positions * Ast 
     | Signature of Positions * (Ast * Ast)
     | Mapping of Positions * Ast
-    | SignatureWithUserDefinedString of Positions * ((Ast * Ast option) * Ast)
     | Axiom of Positions * (Ast * (Ast list option * Ast))
     | ParentConstructorCall of Positions * (Ast * Ast)
     | Constructor of Positions * (Ast * (Ast list option)) 
-    | Property of Positions * unit
-    | Optional of Positions * unit
-    | PredicateInstance of Positions * ((Ast option * Ast) * Ast) 
-    | FunctionalTermInstance of Positions * (Ast * Ast)
-    | PropertyBlock of Positions * (Ast * Ast)
+    | PredicateInstance of Positions * (unit option * (Ast * Ast))
+    | FunctionalTermInstance of Positions * ((unit option * (Ast * Ast)) * Ast)
     | DefPredicateContent of Ast list option * Ast
     | DefinitionPredicate of Positions * (Ast * (Ast * Ast list option))
     | DefFunctionContent of Ast list option * Ast
-    | FunctionalTermSignature of Positions * ((Ast option * Ast) * Ast)
+    | PredicateSignature of Positions * ((Ast * Ast) * Ast option)
+    | ClassSignature of Positions * ((Ast * Ast list) * Ast option)
+    | FunctionalTermSignature of Positions * (((Ast * Ast) * Ast) * Ast option)
     | DefinitionFunctionalTerm of Positions * (Ast * (Ast * Ast list option))
     | DefClassCompleteContent of Ast list option * Ast list
-    | DefinitionClass of Positions * (((Ast * Ast option) * Ast list) * (Ast * Ast list option)) 
+    | DefinitionClass of Positions * (Ast * (Ast * Ast list option)) 
     | Prefix of Positions * string
     | Precedence of Positions * int
     | Infix of Positions * (string * Ast)
@@ -164,7 +163,7 @@ type Ast =
     // Proofs
     | ArgumentIdentifier of Positions * string
     | RefArgumentIdentifier of Positions * string
-    | ReferenceToProofOrCorollary of Positions * (Ast * Ast option) 
+    | ReferenceToProofOrCorollary of Positions * Ast
     | JustificationItem of Positions * Ast 
     | Justification of Positions * Ast list
     | ByDef of Positions * Ast 

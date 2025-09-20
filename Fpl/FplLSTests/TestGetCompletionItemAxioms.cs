@@ -9,10 +9,10 @@ namespace FplLSTests
     public class TestGetCompletionItemAxioms
     {
 
-        [DataRow(literalAx)]
-        [DataRow(literalAxL)]
-        [DataRow(literalPost)]
-        [DataRow(literalPostL)]
+        [DataRow(LiteralAx)]
+        [DataRow(LiteralAxL)]
+        [DataRow(LiteralPost)]
+        [DataRow(LiteralPostL)]
         [TestMethod]
         public void TestAddAxiomChoicesNumber(string choice)
         {
@@ -21,10 +21,10 @@ namespace FplLSTests
             Assert.AreEqual<int>(2, actual.Count);
         }
 
-        [DataRow(literalAx)]
-        [DataRow(literalAxL)]
-        [DataRow(literalPost)]
-        [DataRow(literalPostL)]
+        [DataRow(LiteralAx)]
+        [DataRow(LiteralAxL)]
+        [DataRow(LiteralPost)]
+        [DataRow(LiteralPostL)]
         [TestMethod]
         public void TestAddAxiomKeywordCounts(string choice)
         {
@@ -38,8 +38,8 @@ namespace FplLSTests
             Assert.AreEqual<int>(1, count);
         }
 
-        [DataRow(literalAx)]
-        [DataRow(literalAxL)]
+        [DataRow(LiteralAx)]
+        [DataRow(LiteralAxL)]
         [TestMethod]
         public void TestAddChoicesSortText(string choice)
         {
@@ -47,12 +47,12 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesAxiom().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.SortText.Contains(literalAxL));
+                Assert.IsTrue(item.SortText.Contains(LiteralAxL));
             }
         }
 
-        [DataRow(literalPost)]
-        [DataRow(literalPostL)]
+        [DataRow(LiteralPost)]
+        [DataRow(LiteralPostL)]
         [TestMethod]
         public void TestAddPostulateChoicesSortText(string choice)
         {
@@ -60,14 +60,14 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesAxiom().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.SortText.Contains(literalPostL));
+                Assert.IsTrue(item.SortText.Contains(LiteralPostL));
             }
         }
 
-        [DataRow(literalAx)]
-        [DataRow(literalAxL)]
-        [DataRow(literalPost)]
-        [DataRow(literalPostL)]
+        [DataRow(LiteralAx)]
+        [DataRow(LiteralAxL)]
+        [DataRow(LiteralPost)]
+        [DataRow(LiteralPostL)]
         [TestMethod]
         public void TestAddAxiomChoicesLabel(string choice)
         {
@@ -79,10 +79,10 @@ namespace FplLSTests
             }
         }
 
-        [DataRow(literalAx)]
-        [DataRow(literalAxL)]
-        [DataRow(literalPost)]
-        [DataRow(literalPostL)]
+        [DataRow(LiteralAx)]
+        [DataRow(LiteralAxL)]
+        [DataRow(LiteralPost)]
+        [DataRow(LiteralPostL)]
         [TestMethod]
         public void TestAddAxiomChoicesDetail(string choice)
         {
@@ -94,10 +94,10 @@ namespace FplLSTests
             }
         }
 
-        [DataRow(literalAx)]
-        [DataRow(literalAxL)]
-        [DataRow(literalPost)]
-        [DataRow(literalPostL)]
+        [DataRow(LiteralAx)]
+        [DataRow(LiteralAxL)]
+        [DataRow(LiteralPost)]
+        [DataRow(LiteralPostL)]
         [TestMethod]
         public void TestAddAxiomChoicesInsertText(string choice)
         {
@@ -107,14 +107,22 @@ namespace FplLSTests
             foreach (var item in actual)
             {
                 if (item.InsertText.Contains(choice)) { counterSnippets++; }
+                if (item.InsertText.Contains(" "))
+                {
+                    var res = FplParser.testParser(LiteralAx, item.InsertText);
+                    if (!res.StartsWith("Success:"))
+                    {
+                        Assert.IsTrue(false, res);
+                    }
+                }
             }
             Assert.AreEqual<int>(actual.Count, counterSnippets);
         }
 
-        [DataRow(literalAx)]
-        [DataRow(literalAxL)]
-        [DataRow(literalPost)]
-        [DataRow(literalPostL)]
+        [DataRow(LiteralAx)]
+        [DataRow(LiteralAxL)]
+        [DataRow(LiteralPost)]
+        [DataRow(LiteralPostL)]
         [TestMethod]
         public void TestInsertTextEndsWithTwoNewLines(string choice)
         {

@@ -25,7 +25,7 @@ namespace FplLS
             string firstLine;
             if (subType == 0)
             {
-                firstLine = $"for i in [a,b]{Environment.NewLine}";
+                firstLine = $"for i in Range(){Environment.NewLine}";
                 ci.SortText = "for01";
                 ci.Detail = $"for statement (range)";
                 ci.Label = $"{TokenPrefix}for ... []";
@@ -45,10 +45,9 @@ namespace FplLS
                 ci.Label = $"{TokenPrefix}for ... type";
             }
             ci.InsertText = firstLine +
-                $"({Environment.NewLine}" +
-                $"\tx<i> := 1{Environment.NewLine}" +
-                $"\ty<i> := 0{Environment.NewLine}" +
-                $"){Environment.NewLine}";
+                $"{TokenLeftBrace}{Environment.NewLine}" +
+                $"\tx[i] := 1{Environment.NewLine}" +
+                $"{TokenRightBrace}{Environment.NewLine}";
         }
     }
 }

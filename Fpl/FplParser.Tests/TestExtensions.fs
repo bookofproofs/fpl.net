@@ -13,7 +13,7 @@ type TestExtensions () =
     [<DataRow(@"ext T z@/ / -> S {return z}")>]
     [<TestMethod>]
     member this.TestExtension (ext:string) =
-        let result = run (extensionBlock .>> eof) ext
+        let result = run (definitionExtension .>> eof) ext
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -23,7 +23,7 @@ type TestExtensions () =
     [<DataRow(@"ext Alpha: x:=[a-z]+/ {return x}")>]
     [<TestMethod>]
     member this.TestExtensionSyntaxError (ext:string) =
-        let result = run (extensionBlock .>> eof) ext
+        let result = run (definitionExtension .>> eof) ext
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))

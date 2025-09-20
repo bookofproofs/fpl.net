@@ -15,56 +15,56 @@ type TestVariableTypes () =
 
     [<TestMethod>]
     member this.TestVariableType001 () =
-        let result = run (variableType .>> eof) literalObjL
+        let result = run (variableType .>> eof) LiteralObjL
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestVariableType002 () =
-        let result = run (variableType .>> eof) literalObj
+        let result = run (variableType .>> eof) LiteralObj
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestVariableType003 () =
-        let result = run (variableType .>> eof) literalFuncL
+        let result = run (variableType .>> eof) LiteralFuncL
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestVariableType004 () =
-        let result = run (variableType .>> eof) literalFunc
+        let result = run (variableType .>> eof) LiteralFunc
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestVariableType005 () =
-        let result = run (variableType .>> eof) literalPredL
+        let result = run (variableType .>> eof) LiteralPredL
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestVariableType006 () =
-        let result = run (variableType .>> eof) literalPred
+        let result = run (variableType .>> eof) LiteralPred
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestVariableType007 () =
-        let result = run (variableType .>> eof) literalIndL
+        let result = run (variableType .>> eof) LiteralIndL
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestVariableType008 () =
-        let result = run (variableType .>> eof) literalInd
+        let result = run (variableType .>> eof) LiteralInd
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -92,7 +92,7 @@ type TestVariableTypes () =
 
     [<TestMethod>]
     member this.TestVariableType012 () =
-        let result = run (variableType .>> eof) literalTpl
+        let result = run (variableType .>> eof) LiteralTpl
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -281,7 +281,7 @@ type TestVariableTypes () =
 
     [<TestMethod>]
     member this.TestVariableType020 () =
-        let result = run (variableType .>> eof) literalPred
+        let result = run (variableType .>> eof) LiteralPred
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -295,7 +295,7 @@ type TestVariableTypes () =
 
     [<TestMethod>]
     member this.TestVariableType022 () =
-        let result = run (variableType .>> eof) literalInd
+        let result = run (variableType .>> eof) LiteralInd
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -491,14 +491,14 @@ type TestVariableTypes () =
 
     [<TestMethod>]
     member this.TestVariableType046 () =
-        let result = run (variableType .>> eof) literalFunc
+        let result = run (variableType .>> eof) LiteralFunc
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestVariableType047 () =
-        let result = run (variableType .>> eof) literalPredL
+        let result = run (variableType .>> eof) LiteralPredL
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

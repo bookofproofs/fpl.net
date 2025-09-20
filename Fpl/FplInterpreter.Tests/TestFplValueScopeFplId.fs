@@ -83,7 +83,7 @@ type TestFplValueScopeFplId() =
             | "fun9" -> Assert.AreEqual<string>("SomeFunctionalTerm9", fun9.FplId)
             | "prf1" -> Assert.AreEqual<string>("SomeTheorem1$1", prf1.FplId)
             | "prf2" -> Assert.AreEqual<string>("SomeTheorem2$1", prf2.FplId)
-            | "loc1" -> Assert.AreEqual<string>(literalNot, loc1.FplId)
+            | "loc1" -> Assert.AreEqual<string>(LiteralNot, loc1.FplId)
             | "loc2" -> Assert.AreEqual<string>("Equal", loc2.FplId)
             | _ -> Assert.IsTrue(false)
         | _ -> 
@@ -492,18 +492,18 @@ type TestFplValueScopeFplId() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("base1", literalTrue)>]
-    [<DataRow("base2", literalFalse)>]
-    [<DataRow("base3", literalUndef)>]
+    [<DataRow("base1", LiteralTrue)>]
+    [<DataRow("base2", LiteralFalse)>]
+    [<DataRow("base3", LiteralUndef)>]
     [<DataRow("base4", "-1")>]
     [<DataRow("base5", "del.Test()")>]
     [<DataRow("base6", "$1")>]
-    [<DataRow("base7", "Test$1(x)")>] 
+    [<DataRow("base7", "Test$1")>] 
     [<DataRow("base8", "Test$1")>]
-    [<DataRow("base9", "Test$1()")>]
+    [<DataRow("base9", "Test$1")>]
     [<DataRow("base10", "Test")>]
     [<DataRow("base11", "v")>]
-    [<DataRow("base12", literalSelf)>]
+    [<DataRow("base12", LiteralSelf)>]
     [<DataRow("base13", "@1")>]
     [<DataRow("base13a", "1")>]
     [<DataRow("base11a", "v.x")>]
@@ -584,26 +584,26 @@ type TestFplValueScopeFplId() =
             | "base13" -> Assert.AreEqual<string>("1", base1.FplId)
             | "base13a" -> Assert.AreEqual<string>(varVal, base1.FplId)
             | "base11a" -> Assert.AreEqual<string>("v", base1.FplId)
-            | "base12a" -> Assert.AreEqual<string>(literalSelf, base1.FplId)
+            | "base12a" -> Assert.AreEqual<string>(LiteralSelf, base1.FplId)
             | "base10b" -> Assert.AreEqual<string>("Test", base1.FplId)
             | "base11b" -> Assert.AreEqual<string>("v", base1.FplId)
-            | "base12b" -> Assert.AreEqual<string>(literalSelf, base1.FplId)
+            | "base12b" -> Assert.AreEqual<string>(LiteralSelf, base1.FplId)
             | "base13b" -> Assert.AreEqual<string>("1", base1.FplId)
             | "base10c" -> Assert.AreEqual<string>("Test", base1.FplId)
             | "base11c" -> Assert.AreEqual<string>("v", base1.FplId)
-            | "base12c" -> Assert.AreEqual<string>(literalSelf, base1.FplId)
+            | "base12c" -> Assert.AreEqual<string>(LiteralSelf, base1.FplId)
             | "base13c" -> Assert.AreEqual<string>("1", base1.FplId)
             | "base10d" -> Assert.AreEqual<string>("Test", base1.FplId)
             | "base11d" -> Assert.AreEqual<string>("v", base1.FplId)
-            | "base12d" -> Assert.AreEqual<string>(literalSelf, base1.FplId)
+            | "base12d" -> Assert.AreEqual<string>(LiteralSelf, base1.FplId)
             | "base13d" -> Assert.AreEqual<string>("1", base1.FplId)
             | "base10e" -> Assert.AreEqual<string>("Test", base1.FplId)
             | "base11e" -> Assert.AreEqual<string>("v", base1.FplId)
-            | "base12e" -> Assert.AreEqual<string>(literalSelf, base1.FplId)
+            | "base12e" -> Assert.AreEqual<string>(LiteralSelf, base1.FplId)
             | "base13e" -> Assert.AreEqual<string>("1", base1.FplId)
             | "base10f" -> Assert.AreEqual<string>("Test", base1.FplId)
             | "base11f" -> Assert.AreEqual<string>("v", base1.FplId)
-            | "base12f" -> Assert.AreEqual<string>(literalSelf, base1.FplId)
+            | "base12f" -> Assert.AreEqual<string>(LiteralSelf, base1.FplId)
             | "base13f" -> Assert.AreEqual<string>("1", base1.FplId)
             | "base14" -> Assert.AreEqual<string>(varVal, base1.FplId)
             | "base15" -> Assert.AreEqual<string>("-", base1.FplId)
@@ -611,17 +611,17 @@ type TestFplValueScopeFplId() =
             | "base15b" -> Assert.AreEqual<string>("'", base1.FplId)
             | "base16" -> Assert.AreEqual<string>("-", base1.FplId)
             | "base17" -> Assert.AreEqual<string>("'", base1.FplId)
-            | "base18" -> Assert.AreEqual<string>(literalEx, base1.FplId)
+            | "base18" -> Assert.AreEqual<string>(LiteralEx, base1.FplId)
             | "base19" -> Assert.AreEqual<string>("exn$1", base1.FplId)
-            | "base20" -> Assert.AreEqual<string>(literalAll, base1.FplId)
-            | "base21" -> Assert.AreEqual<string>(literalAnd, base1.FplId)
-            | "base21a" -> Assert.AreEqual<string>(literalNot, base1.FplId)
-            | "base21b" -> Assert.AreEqual<string>(literalNot, base1.FplId)
-            | "base22" -> Assert.AreEqual<string>(literalXor, base1.FplId)
-            | "base23" -> Assert.AreEqual<string>(literalOr, base1.FplId)
-            | "base24" -> Assert.AreEqual<string>(literalIif, base1.FplId)
-            | "base25" -> Assert.AreEqual<string>(literalImpl, base1.FplId)
-            | "base26" -> Assert.AreEqual<string>(literalIs, base1.FplId)
+            | "base20" -> Assert.AreEqual<string>(LiteralAll, base1.FplId)
+            | "base21" -> Assert.AreEqual<string>(LiteralAnd, base1.FplId)
+            | "base21a" -> Assert.AreEqual<string>(LiteralNot, base1.FplId)
+            | "base21b" -> Assert.AreEqual<string>(LiteralNot, base1.FplId)
+            | "base22" -> Assert.AreEqual<string>(LiteralXor, base1.FplId)
+            | "base23" -> Assert.AreEqual<string>(LiteralOr, base1.FplId)
+            | "base24" -> Assert.AreEqual<string>(LiteralIif, base1.FplId)
+            | "base25" -> Assert.AreEqual<string>(LiteralImpl, base1.FplId)
+            | "base26" -> Assert.AreEqual<string>(LiteralIs, base1.FplId)
             | "base27" -> Assert.AreEqual<string>("B", base1.FplId)
             | "base28" -> Assert.AreEqual<string>("C", base1.FplId)
             | "base29" -> Assert.AreEqual<string>("D", base1.FplId)
@@ -629,7 +629,7 @@ type TestFplValueScopeFplId() =
             | "base31" -> Assert.AreEqual<string>("C", base1.FplId)
             | "base32" -> Assert.AreEqual<string>("E", base1.FplId)
             | "base33" -> Assert.AreEqual<string>("p", base1.FplId)
-            | "base34" -> Assert.AreEqual<string>(literalIs, base1.FplId)
+            | "base34" -> Assert.AreEqual<string>(LiteralIs, base1.FplId)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
@@ -717,20 +717,20 @@ type TestFplValueScopeFplId() =
             Assert.IsTrue(false)
 
     [<DataRow("base1", """def pred T1() {intr};""")>]
-    [<DataRow("base2", """def pred T1 infix ">" -1 () {intr};""")>]
-    [<DataRow("base3", """def pred T1 postfix "'" () {intr};""")>]
-    [<DataRow("base4", """def pred T1 prefix "-" () {intr};""")>]
-    [<DataRow("base5", """def cl T1 symbol "∅" :obj {intr};""")>]
+    [<DataRow("base2", """def pred T1 () infix ">" -1 {intr};""")>]
+    [<DataRow("base3", """def pred T1 () postfix "'" {intr};""")>]
+    [<DataRow("base4", """def pred T1 () prefix "-" {intr};""")>]
+    [<DataRow("base5", """def cl T1 :obj symbol "∅" {intr};""")>]
     [<DataRow("base5a", """def cl T1:obj {intr};""")>]
     [<DataRow("base6", """def func T1()->obj {intr};""")>]
-    [<DataRow("base7", """def func T1 infix ">" -1 ()->obj {intr};""")>]
-    [<DataRow("base8", """def func T1 postfix "'" ()->obj {intr};""")>]
-    [<DataRow("base9", """def func T1 prefix "-" ()->obj {intr};""")>]
+    [<DataRow("base7", """def func T1 ()->obj infix ">" -1 {intr};""")>]
+    [<DataRow("base8", """def func T1  ()->obj postfix "'"{intr};""")>]
+    [<DataRow("base9", """def func T1 ()->obj prefix "-" {intr};""")>]
     [<TestMethod>]
-    member this.TestFixNotation(var, varVal) =
+    member this.TestFixNotationFplId(var, varVal) =
         ad.Clear()
         let fplCode = sprintf "%s;" varVal
-        let filename = "TestFixNotationName"
+        let filename = "TestFixNotationFplId"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -738,9 +738,9 @@ type TestFplValueScopeFplId() =
             let r = st.Root
             let theory = r.Scope[filename]
             let base1 = 
-                if varVal.Contains literalCl then 
+                if varVal.Contains LiteralCl then 
                     theory.Scope["T1"]
-                elif varVal.Contains literalFunc then 
+                elif varVal.Contains LiteralFunc then 
                     theory.Scope["T1() -> obj"]
                 else 
                     theory.Scope["T1()"]
@@ -827,7 +827,7 @@ type TestFplValueScopeFplId() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("base0", literalTrue, """!tex: "1" !eng: literalTrue !ger: "wahr";""")>]
+    [<DataRow("base0", LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr";""")>]
     [<DataRow("base1", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
     [<DataRow("base2", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
     [<DataRow("base3", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q;""")>]
@@ -877,16 +877,16 @@ type TestFplValueScopeFplId() =
             let pred = theory.Scope[predName]
 
             match var with
-            | "base1" -> Assert.AreEqual<string>(literalIif , pred.FplId)
-            | "base2" -> Assert.AreEqual<string>(literalNot, pred.FplId)
-            | "base3" -> Assert.AreEqual<string>(literalAnd, pred.FplId)
+            | "base1" -> Assert.AreEqual<string>(LiteralIif , pred.FplId)
+            | "base2" -> Assert.AreEqual<string>(LiteralNot, pred.FplId)
+            | "base3" -> Assert.AreEqual<string>(LiteralAnd, pred.FplId)
             | "base4" -> Assert.AreEqual<string>("Equal", pred.FplId)
             | "base5" -> Assert.AreEqual<string>("NotEqual", pred.FplId)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("base0", literalTrue, """!tex: "1" !eng: literalTrue !ger: "wahr";""")>]
+    [<DataRow("base0", LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr";""")>]
     [<DataRow("base1", "iif(x, y)", """!tex: x " \Leftrightarrow " y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
     [<DataRow("base2", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
     [<DataRow("base3", "and(p, q)", """!tex: p " \wedge " q !eng: p " and " q !ger: p " und " q;""")>]
@@ -931,10 +931,10 @@ type TestFplValueScopeFplId() =
         | Some (i:FplValue, b:FplValue, p:FplValue, o:FplValue, u:FplValue, t:FplValue) -> 
             match var with 
             | "i" -> Assert.AreEqual<string>($"$1", i.FplId)
-            | "b" -> Assert.AreEqual<string>($"{literalFunc}", b.FplId)
-            | "p" -> Assert.AreEqual<string>($"{literalTrue}", p.FplId)
+            | "b" -> Assert.AreEqual<string>($"{LiteralFunc}", b.FplId)
+            | "p" -> Assert.AreEqual<string>($"{LiteralTrue}", p.FplId)
             | "o" -> Assert.AreEqual<string>($"A", o.FplId)
-            | "u" -> Assert.AreEqual<string>($"{literalUndef}", u.FplId)
+            | "u" -> Assert.AreEqual<string>($"{LiteralUndef}", u.FplId)
             | "t" -> Assert.AreEqual<string>("$2", t.FplId)
             | _ -> Assert.IsTrue(false)
         | _ -> 

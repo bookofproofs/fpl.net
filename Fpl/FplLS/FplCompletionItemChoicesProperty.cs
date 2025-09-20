@@ -28,10 +28,10 @@ namespace FplLS
             SetSortText(ci,propertyType,isOptional);
             if (ci.IsShort)
             {
-                TokenIntrinsic = literalIntr;
-                TokenFunction = literalFunc;
-                TokenPredicate = literalPred;
-                TokenOptional = literalOpt;
+                TokenIntrinsic = LiteralIntr;
+                TokenFunction = LiteralFunc;
+                TokenPredicate = LiteralPred;
+                TokenOptional = LiteralOpt;
                 if (isKeyword)
                 {
                     ci.Label = GetLabelKeyword(ci, propertyType, isOptional);
@@ -78,11 +78,11 @@ namespace FplLS
                 switch (propertyType)
                 {
                     case "Function":
-                        ret = $"{TokenPrefix}{ci.Word} {TokenFunction} {TokenOptional}";
+                        ret = $"{TokenPrefix}{TokenOptional} {ci.Word} {TokenFunction}";
                         break;
                     case "Predicate":
                     default:
-                        ret = $"{TokenPrefix}{ci.Word} {TokenPredicate} {TokenOptional}";
+                        ret = $"{TokenPrefix}{TokenOptional} {ci.Word} {TokenPredicate}";
                         break;
                 }
             }
@@ -108,11 +108,11 @@ namespace FplLS
             switch (propertyType)
             {
                 case "Function":
-                    ret = $"{GetLabelKeyword(ci, propertyType, isOptional).Substring(TokenPrefix.Length)} SomeFpl{propertyType}Property() -> {TokenObject}{Environment.NewLine}";
+                    ret = $"{GetLabelKeyword(ci, propertyType, isOptional).Replace("_ ","")} SomeFpl{propertyType}Property() -> {TokenObject}{Environment.NewLine}";
                     break;
                 case "Predicate":
                 default:
-                    ret = $"{GetLabelKeyword(ci, propertyType, isOptional).Substring(TokenPrefix.Length)} SomeFpl{propertyType}Property(){Environment.NewLine}";
+                    ret = $"{GetLabelKeyword(ci, propertyType, isOptional).Replace("_ ", "")} SomeFpl{propertyType}Property(){Environment.NewLine}";
                     break;
 
             }

@@ -9,32 +9,32 @@ uses Fpl.SetTheory
 def func BinOp(x,y: tplSetElem) -> tplSetElem
 {
     intr
-    property pred optional IsAssociative()
+    optional property pred  IsAssociative()
     {
         all a,b,c: tplSetElem {  (@self(a,@self(b,c)) = @self(@self(a,b),c))  }
     }
 
-    property pred optional IsCommutative()
+    optional property pred  IsCommutative()
     {
         all a,b: tplSetElem { (@self(a,b) = @self(b,a)) }
     }
 
-    property pred optional IsLeftNeutralElement(e: tplSetElem)
+    optional property pred  IsLeftNeutralElement(e: tplSetElem)
     {
         all x: tplSetElem { (@self(e,x) = x) }
     }
 
-    property pred optional IsRightNeutralElement(e: tplSetElem)
+    optional property pred  IsRightNeutralElement(e: tplSetElem)
     {
         all x: tplSetElem { (@self(x,e) = x) }
     }
 
-    property pred optional IsNeutralElement(e: tplSetElem)
+    optional property pred  IsNeutralElement(e: tplSetElem)
     {
         and (IsLeftNeutralElement(e), IsRightNeutralElement(e))
     }
 
-    property pred optional HasLeftNeutralElement()
+    optional property pred  HasLeftNeutralElement()
     {
         ex e: tplSetElem { IsLeftNeutralElement(e) }
     }
@@ -44,12 +44,12 @@ def func BinOp(x,y: tplSetElem) -> tplSetElem
         ex e: tplSetElem { IsRightNeutralElement(e) }
     }
 
-    property pred optional HasNeutralElement()
+    optional property pred  HasNeutralElement()
     {
         ex e: tplSetElem { IsNeutralElement(e) }
     }
 
-    property func optional LeftNeutralElement() -> tplSetElem
+    optional property func  LeftNeutralElement() -> tplSetElem
     {
         dec 
             ~result:tplSetElem 
@@ -57,7 +57,7 @@ def func BinOp(x,y: tplSetElem) -> tplSetElem
         return result
     }
 
-    property func optional RightNeutralElement() -> tplSetElem
+    optional property func RightNeutralElement() -> tplSetElem
     {
         dec 
             ~result:tplSetElem 
@@ -65,7 +65,7 @@ def func BinOp(x,y: tplSetElem) -> tplSetElem
         return result
     }
 
-    property func optional NeutralElement() -> tplSetElem
+    optional property func  NeutralElement() -> tplSetElem
     {
         dec 
             ~result:tplSetElem 
@@ -117,7 +117,7 @@ def class AlgebraicStructure: obj
                 }
             base.obj()
         ;
-        self
+        
 
     }
 
@@ -144,7 +144,7 @@ def class Magma: AlgebraicStructure
         dec
             base.AlgebraicStructure(x,op)
         ;
-        self
+        
     }
 }
 
@@ -157,7 +157,7 @@ def class Semigroup: Magma
             assert op.IsAssociative()
             base.Magma(x,op)
         ;
-        self
+        
     }
 
 }
@@ -176,7 +176,7 @@ def class Monoid: Semigroup
             assert myOp.HasNeutralElement()
             base.Semigroup(x,op)
         ;
-        self
+        
     }
 
     property func NeutralElem() -> tplSetElem
@@ -222,7 +222,7 @@ def class Group: Monoid
             myOp:=op
             base.Monoid(x,op)
         ;
-        self
+        
     }
 
     property pred InverseExistsForAllElements()
@@ -261,7 +261,7 @@ def class CommutativeGroup: Group
             assert op.IsCommutative()
             base.Group(x,op)
         ;
-        self                
+                        
     }
 }
 
@@ -284,7 +284,7 @@ def class Ring: AlgebraicStructure
             myMul:=mul
             base.AlgebraicStructure(x, add, mul)
         ;
-        self
+        
     }
 
     property func Add(a,b:tplElem)->tplElem
@@ -348,7 +348,7 @@ def class UnitRing: Ring
         dec
             base.Ring(x,add,mul)
         ;
-        self
+        
     }
 
     property func MultiplicativeMonoid() -> Monoid 
@@ -365,7 +365,7 @@ def class CommutativeUnitRing: UnitRing
             assert mul.IsCommutative() 
             base.UnitRing(x,add,mul)
         ;
-        self            
+                    
     }
 }
 
@@ -377,7 +377,7 @@ def class Field: CommutativeUnitRing
         dec 
             base.CommutativeUnitRing(x,add,mul)
         ;
-        self
+        
     }
 
     property func MultiplicativeGroup() -> CommutativeGroup
@@ -456,7 +456,7 @@ def class VectorSpaceOverField : obj
             myVecAdd:=vecAdd
             myField:= field
         ;
-        self
+        
     }
 
 

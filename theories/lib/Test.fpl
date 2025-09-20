@@ -1,2 +1,1 @@
-def pred T() { dec ~x,y,z:pred x:=true y:=true z:=true; and(and(x,y),z) };
-;
+proof T$1 {1. byax A |- trivial};

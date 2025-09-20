@@ -127,7 +127,7 @@ type TestTheoremLikeStatements () =
 
     [<TestMethod>]
     member this.TestCorollary01 () =
-        let result = run (corollary .>> eof) """corollary SuccessorIsInjective$1()
+        let result = run (corollary .>> eof) """corollary SuccessorIsInjective$1
         {
             all n,m: Nat
             {
@@ -144,7 +144,7 @@ type TestTheoremLikeStatements () =
 
     [<TestMethod>]
     member this.TestCorollary02 () =
-        let result = run (corollary .>> eof) """cor Extensionality$1()
+        let result = run (corollary .>> eof) """cor Extensionality$1
         {
             all x,y:Set
             {

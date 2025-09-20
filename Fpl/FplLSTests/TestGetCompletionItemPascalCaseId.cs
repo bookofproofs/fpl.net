@@ -1,12 +1,12 @@
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
-
+using static FplPrimitives;
 namespace FplLSTests
 {
     [TestClass]
     public class TestGetCompletionItemPascalCaseId
     {
 
-        [DataRow("PascalCaseId")]
+        [DataRow(PrimPascalCaseId)]
         [TestMethod]
         public void TestAddPascalCaseIdChoicesNumber(string choice)
         {
@@ -15,7 +15,7 @@ namespace FplLSTests
             Assert.AreEqual<int>(1, actual.Count);
         }
 
-        [DataRow("PascalCaseId")]
+        [DataRow(PrimPascalCaseId)]
         [TestMethod]
         public void TestAddPascalCaseIdReferenceCounts(string choice)
         {
@@ -29,7 +29,7 @@ namespace FplLSTests
             Assert.AreEqual<int>(1, count);
         }
 
-        [DataRow("PascalCaseId", CompletionItemKind.Reference, "PascalCaseId")]
+        [DataRow(PrimPascalCaseId, CompletionItemKind.Reference, PrimPascalCaseId)]
         [TestMethod]
         public void TestAddChoicesSortText(string choice, CompletionItemKind kind, string expected)
         {
@@ -44,7 +44,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("PascalCaseId")]
+        [DataRow(PrimPascalCaseId)]
         [TestMethod]
         public void TestInsertTextEndsWithSpace(string choice)
         {
@@ -59,7 +59,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("PascalCaseId")]
+        [DataRow(PrimPascalCaseId)]
         [TestMethod]
         public void TestAddPascalCaseIdChoicesLabel(string choice)
         {
@@ -71,7 +71,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("PascalCaseId", "user-defined id")]
+        [DataRow(PrimPascalCaseId, "user-defined id")]
         [TestMethod]
         public void TestAddPascalCaseIdChoicesDetail(string choice, string l)
         {
@@ -83,7 +83,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("PascalCaseId")]
+        [DataRow(PrimPascalCaseId)]
         [TestMethod]
         public void TestAddPascalCaseIdChoicesInsertText(string choice)
         {
@@ -93,6 +93,14 @@ namespace FplLSTests
             foreach (var item in actual)
             {
                 if (item.InsertText.Contains(choice)) { counterSnippets++; }
+                if (item.InsertText.Contains(" "))
+                {
+                    var res = FplParser.testParser(PrimPascalCaseId, item.InsertText);
+                    if (!res.StartsWith("Success:"))
+                    {
+                        Assert.IsTrue(false, res);
+                    }
+                }
             }
             Assert.AreEqual<int>(actual.Count, counterSnippets);
         }

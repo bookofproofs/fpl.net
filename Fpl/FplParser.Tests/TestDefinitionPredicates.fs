@@ -42,8 +42,7 @@ type TestDefinitionPredicates () =
             {
                 IsBounded(f(x))
             }
-        }
-"""
+        }"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -285,7 +284,7 @@ type TestDefinitionPredicates () =
                 return x
 	        } 
 
-            property pred opt T() 
+            opt property pred  T() 
 	        {
                 true
 	        } 
@@ -382,7 +381,7 @@ type TestDefinitionPredicates () =
                 return x
 	        } 
 
-            property  pred opt T() 
+            opt property  pred  T() 
 	        {
                 true
 	        } 

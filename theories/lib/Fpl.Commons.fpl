@@ -46,17 +46,17 @@ inf ExistsByExample
         ex x:obj {p(x)}
 }
 
-def pred Equal infix "=" 50 (x,y: tpl)
+def pred Equal(x,y: tpl) infix "=" 50 
 {
     del.Equal(x,y)
 }
 
-def pred NotEqual infix "<>" 60 (x,y: tpl)
+def pred NotEqual(x,y: tpl) infix "<>" 60 
 {
     not (x = y) 
 }
 
-def pred Implies infix "=>" 70 (x,y: pred)
+def pred Implies(x,y: pred) infix "=>" 70 
 {
     impl
     (
@@ -66,7 +66,7 @@ def pred Implies infix "=>" 70 (x,y: pred)
     )
 }
 
-def pred IfAndOnlyIf infix "<=>" 80 (x,y: pred)
+def pred IfAndOnlyIf(x,y: pred) infix "<=>" 80
 {
     iif
     (
@@ -76,17 +76,17 @@ def pred IfAndOnlyIf infix "<=>" 80 (x,y: pred)
     )
 }
 
-def pred And infix "and" 7 (x,y: pred)
+def pred And(x,y: pred) infix "and" 7 
 {
     and (x,y)
 }
 
-def pred Or infix "or" 10 (x,y: pred)
+def pred Or(x,y: pred) infix "or" 10 
 {
     or (x,y)
 }
 
-def pred Xor infix "xor" 20 (x,y: pred)
+def pred Xor(x,y: pred) infix "xor" 20 
 {
     xor (x,y)
 }

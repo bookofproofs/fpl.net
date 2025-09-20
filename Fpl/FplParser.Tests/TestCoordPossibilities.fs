@@ -40,21 +40,21 @@ type TestCoordPossibilities () =
 
     [<TestMethod>]
     member this.TestSelf () =
-        let result = run (coord .>> eof) literalSelf
+        let result = run (coord .>> eof) LiteralSelf
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSelf1 () =
-        let result = run (coord .>> eof) literalParent
+        let result = run (coord .>> eof) LiteralParent
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPascalCaseId () =
-        let result = run (coord .>> eof) """PascalCaseId"""
+        let result = run (coord .>> eof) PrimPascalCaseId
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

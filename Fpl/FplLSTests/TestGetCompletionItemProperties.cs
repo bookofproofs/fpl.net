@@ -9,8 +9,8 @@ namespace FplLSTests
     public class TestGetCompletionItemProperties
     {
 
-        [DataRow(literalPrty)]
-        [DataRow(literalPrtyL)]
+        [DataRow(LiteralPrty)]
+        [DataRow(LiteralPrtyL)]
         [TestMethod]
         public void TestAddPropertyChoicesNumber(string choice)
         {
@@ -19,8 +19,8 @@ namespace FplLSTests
             Assert.AreEqual<int>(8, actual.Count);
         }
 
-        [DataRow(literalPrty)]
-        [DataRow(literalPrtyL)]
+        [DataRow(LiteralPrty)]
+        [DataRow(LiteralPrtyL)]
         [TestMethod]
         public void TestAddPropertyKeywordCounts(string choice)
         {
@@ -34,23 +34,23 @@ namespace FplLSTests
             Assert.AreEqual<int>(4, count);
         }
 
-        [DataRow(literalPrtyL, literalPredL, CompletionItemKind.Value, false, "property02")]
-        [DataRow(literalPrtyL, literalFuncL, CompletionItemKind.Value, false, "property03")]
-        [DataRow(literalPrtyL, literalPredL, CompletionItemKind.Value, true, "property05")]
-        [DataRow(literalPrtyL, literalFuncL, CompletionItemKind.Value, true, "property06")]
-        [DataRow(literalPrty, literalPred, CompletionItemKind.Value, false, "zproperty02")]
-        [DataRow(literalPrty, literalFunc, CompletionItemKind.Value, false, "zproperty03")]
-        [DataRow(literalPrty, literalPred, CompletionItemKind.Value, true, "zproperty05")]
-        [DataRow(literalPrty, literalFunc, CompletionItemKind.Value, true, "zproperty06")]
+        [DataRow(LiteralPrtyL, LiteralPredL, CompletionItemKind.Value, false, "property02")]
+        [DataRow(LiteralPrtyL, LiteralFuncL, CompletionItemKind.Value, false, "property03")]
+        [DataRow(LiteralPrtyL, LiteralPredL, CompletionItemKind.Value, true, "property05")]
+        [DataRow(LiteralPrtyL, LiteralFuncL, CompletionItemKind.Value, true, "property06")]
+        [DataRow(LiteralPrty, LiteralPred, CompletionItemKind.Value, false, "zproperty02")]
+        [DataRow(LiteralPrty, LiteralFunc, CompletionItemKind.Value, false, "zproperty03")]
+        [DataRow(LiteralPrty, LiteralPred, CompletionItemKind.Value, true, "zproperty05")]
+        [DataRow(LiteralPrty, LiteralFunc, CompletionItemKind.Value, true, "zproperty06")]
 
-        [DataRow(literalPrtyL, literalPredL, CompletionItemKind.Keyword, false, "zzzproperty02")]
-        [DataRow(literalPrtyL, literalFuncL, CompletionItemKind.Keyword, false, "zzzproperty03")]
-        [DataRow(literalPrtyL, literalPredL, CompletionItemKind.Keyword, true, "zzzproperty05")]
-        [DataRow(literalPrtyL, literalFuncL, CompletionItemKind.Keyword, true, "zzzproperty06")]
-        [DataRow(literalPrty, literalPred, CompletionItemKind.Keyword, false, "zzzzproperty02")]
-        [DataRow(literalPrty, literalFunc, CompletionItemKind.Keyword, false, "zzzzproperty03")]
-        [DataRow(literalPrty, literalPred, CompletionItemKind.Keyword, true, "zzzzproperty05")]
-        [DataRow(literalPrty, literalFunc, CompletionItemKind.Keyword, true, "zzzzproperty06")]
+        [DataRow(LiteralPrtyL, LiteralPredL, CompletionItemKind.Keyword, false, "zzzproperty02")]
+        [DataRow(LiteralPrtyL, LiteralFuncL, CompletionItemKind.Keyword, false, "zzzproperty03")]
+        [DataRow(LiteralPrtyL, LiteralPredL, CompletionItemKind.Keyword, true, "zzzproperty05")]
+        [DataRow(LiteralPrtyL, LiteralFuncL, CompletionItemKind.Keyword, true, "zzzproperty06")]
+        [DataRow(LiteralPrty, LiteralPred, CompletionItemKind.Keyword, false, "zzzzproperty02")]
+        [DataRow(LiteralPrty, LiteralFunc, CompletionItemKind.Keyword, false, "zzzzproperty03")]
+        [DataRow(LiteralPrty, LiteralPred, CompletionItemKind.Keyword, true, "zzzzproperty05")]
+        [DataRow(LiteralPrty, LiteralFunc, CompletionItemKind.Keyword, true, "zzzzproperty06")]
         [TestMethod]
         public void TestAddChoicesSortText(string choice, string subType, CompletionItemKind isKeyword, bool isOptional, string expected)
         {
@@ -58,17 +58,17 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesProperty().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                if (item.Label.Contains(choice) && item.Label.Contains(subType) && item.Kind == isKeyword && isOptional == (item.Label.Contains(literalOpt)))
+                if (item.Label.Contains(choice) && item.Label.Contains(subType) && item.Kind == isKeyword && isOptional == (item.Label.Contains(LiteralOpt)))
                 {
                     Assert.AreEqual<string>(expected, item.SortText);
                 }
             }
         }
 
-        [DataRow(literalPrty, "pred ")]
-        [DataRow(literalPrtyL, literalPredL)]
-        [DataRow(literalPrty, "func ")]
-        [DataRow(literalPrtyL, literalFuncL)]
+        [DataRow(LiteralPrty, "pred ")]
+        [DataRow(LiteralPrtyL, LiteralPredL)]
+        [DataRow(LiteralPrty, "func ")]
+        [DataRow(LiteralPrtyL, LiteralFuncL)]
         [TestMethod]
         public void TestInsertTextEndsWithTwoNewLines(string choice, string l)
         {
@@ -84,10 +84,10 @@ namespace FplLSTests
         }
 
 
-        [DataRow(literalPrty, literalPred)]
-        [DataRow(literalPrtyL, literalPredL)]
-        [DataRow(literalPrty, literalFunc)]
-        [DataRow(literalPrtyL, literalFuncL)]
+        [DataRow(LiteralPrty, LiteralPred)]
+        [DataRow(LiteralPrtyL, LiteralPredL)]
+        [DataRow(LiteralPrty, LiteralFunc)]
+        [DataRow(LiteralPrtyL, LiteralFuncL)]
         [TestMethod]
         public void TestAddPropertyChoicesLabel(string choice, string subType)
         {
@@ -103,15 +103,15 @@ namespace FplLSTests
                     postfix = " ...";
                 }
 
-                if (item.Label.Contains(subType) && item.Label.Contains(literalOpt))
+                if (item.Label.Contains(subType) && item.Label.Contains(LiteralOpt))
                 {
-                    if (choice == literalPrty)
+                    if (choice == LiteralPrty)
                     {
-                        Assert.AreEqual<string>("_ " + choice + " " + subType + " opt" + postfix, item.Label);
+                        Assert.AreEqual<string>("_ opt " + choice + " " + subType + postfix, item.Label);
                     }
                     else
                     {
-                        Assert.AreEqual<string>("_ " + choice + " " + subType + " optional" + postfix, item.Label);
+                        Assert.AreEqual<string>("_ optional " + choice + " " + subType + postfix, item.Label);
                     }
                     counterRelatedOpt++;
                 }
@@ -125,8 +125,8 @@ namespace FplLSTests
             Assert.AreEqual<int>(2, counterRelatedOpt);
         }
 
-        [DataRow(literalPrty, "pr")]
-        [DataRow(literalPrtyL, literalPrtyL)]
+        [DataRow(LiteralPrty, "pr")]
+        [DataRow(LiteralPrtyL, LiteralPrtyL)]
         [TestMethod]
         public void TestAddPropertyChoicesDetailKeyword(string choice, string l)
         {
@@ -139,8 +139,8 @@ namespace FplLSTests
                 if (item.Kind == CompletionItemKind.Keyword)
                 {
                     Assert.IsTrue(item.Detail.Contains(l));
-                    if (item.Detail.Contains(literalPred)) countPredicative++;
-                    if (item.Detail.Contains(literalFunc)) countFunctional++;
+                    if (item.Detail.Contains(LiteralPred)) countPredicative++;
+                    if (item.Detail.Contains(LiteralFunc)) countFunctional++;
                 }
             }
             Assert.AreEqual<int>(2, countPredicative);
@@ -148,8 +148,8 @@ namespace FplLSTests
 
         }
 
-        [DataRow(literalPrty, "pr")]
-        [DataRow(literalPrtyL, literalPrtyL)]
+        [DataRow(LiteralPrty, "pr")]
+        [DataRow(LiteralPrtyL, LiteralPrtyL)]
         [TestMethod]
         public void TestAddPropertyChoicesDetailNonKeyword(string choice, string l)
         {
@@ -163,9 +163,9 @@ namespace FplLSTests
                 if (item.Kind != CompletionItemKind.Keyword)
                 {
                     Assert.IsTrue(item.Detail.Contains(l));
-                    if (item.Detail.Contains(literalOpt)) countOptional++;
-                    if (item.Detail.Contains(literalPred)) countPredicative++;
-                    if (item.Detail.Contains(literalFunc)) countFunctional++;
+                    if (item.Detail.Contains(LiteralOpt)) countOptional++;
+                    if (item.Detail.Contains(LiteralPred)) countPredicative++;
+                    if (item.Detail.Contains(LiteralFunc)) countFunctional++;
                 }
             }
             Assert.AreEqual<int>(2, countOptional);
@@ -174,10 +174,10 @@ namespace FplLSTests
 
         }
 
-        [DataRow(literalPrty, literalPred)]
-        [DataRow(literalPrtyL, literalPredL)]
-        [DataRow(literalPrty, literalFunc)]
-        [DataRow(literalPrtyL, literalFuncL)]
+        [DataRow(LiteralPrty, LiteralPred)]
+        [DataRow(LiteralPrtyL, LiteralPredL)]
+        [DataRow(LiteralPrty, LiteralFunc)]
+        [DataRow(LiteralPrtyL, LiteralFuncL)]
         [TestMethod]
         public void TestAddPropertyChoicesInsertText(string choice, string subType)
         {
@@ -186,9 +186,17 @@ namespace FplLSTests
             var counterSnippets = 0;
             foreach (var item in actual)
             {
-                if (item.InsertText.Contains(choice) && item.InsertText.Contains(subType+" ")) { counterSnippets++; }
+                if (item.InsertText.Contains(choice) && item.InsertText.Contains(subType)) { counterSnippets++; }
+                if (item.InsertText.Contains("{"))
+                {
+                    var res = FplParser.testParser(LiteralPrty, item.InsertText);
+                    if (!res.StartsWith("Success:"))
+                    {
+                        Assert.IsTrue(false, res);
+                    }
+                }
             }
-            Assert.AreEqual<int>(3, counterSnippets);
+            Assert.AreEqual<int>(4, counterSnippets);
         }
 
     }

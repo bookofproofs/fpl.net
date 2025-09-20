@@ -12,7 +12,7 @@ type TestFplValueNesting() =
 
 
 
-    [<DataRow("axiom X() { true };")>]
+    [<DataRow("axiom X { true };")>]
     [<TestMethod>]
     member this.TestAxiomHasValue(varVal) =
         ad.Clear()
@@ -29,7 +29,7 @@ type TestFplValueNesting() =
             let base1 = pr1.ArgList[0]
             let resS = base1.Type(SignatureType.Mixed)
 
-            Assert.AreEqual<string>(literalTrue, resS)
+            Assert.AreEqual<string>(LiteralTrue, resS)
         | _ -> Assert.IsTrue(false)
 
     [<DataRow("lem Le2 { true } proof Le2$1 {  1. |- trivial  2. 1, 2, 3 |- trivial 3. |- trivial qed };")>]

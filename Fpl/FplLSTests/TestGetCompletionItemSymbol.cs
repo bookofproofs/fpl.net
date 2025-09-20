@@ -11,10 +11,10 @@ namespace FplLSTests
         [DataRow("prefix symbol", false, 4)]
         [DataRow("postfix symbol", false, 1)]
         [DataRow("object symbol", false, 8)]
-        [DataRow(literalInfix, true, 2)]
-        [DataRow(literalPrefix, true, 4)]
-        [DataRow(literalPostFix, true, 1)]
-        [DataRow(literalSymbol, true, 8)]
+        [DataRow(LiteralInfix, true, 2)]
+        [DataRow(LiteralPrefix, true, 4)]
+        [DataRow(LiteralPostFix, true, 1)]
+        [DataRow(LiteralSymbol, true, 8)]
         [TestMethod]
         public void TestAddSymbolChoicesNumber(string choice, bool declarative, int bitMask)
         {
@@ -36,10 +36,10 @@ namespace FplLSTests
         [DataRow("prefix symbol", false)]
         [DataRow("postfix symbol", false)]
         [DataRow("object symbol", false)]
-        [DataRow(literalInfix, true)]
-        [DataRow(literalPrefix, true)]
-        [DataRow(literalPostFix, true)]
-        [DataRow(literalSymbol, true)]
+        [DataRow(LiteralInfix, true)]
+        [DataRow(LiteralPrefix, true)]
+        [DataRow(LiteralPostFix, true)]
+        [DataRow(LiteralSymbol, true)]
         [TestMethod]
         public void TestAddSymbolOperatorCounts(string choice, bool declarative)
         {
@@ -57,10 +57,10 @@ namespace FplLSTests
         [DataRow("prefix symbol", false)]
         [DataRow("postfix symbol", false)]
         [DataRow("object symbol", false)]
-        [DataRow(literalInfix, true)]
-        [DataRow(literalPrefix, true)]
-        [DataRow(literalPostFix, true)]
-        [DataRow(literalSymbol, true)]
+        [DataRow(LiteralInfix, true)]
+        [DataRow(LiteralPrefix, true)]
+        [DataRow(LiteralPostFix, true)]
+        [DataRow(LiteralSymbol, true)]
         [TestMethod]
         public void TestAddChoicesSortText(string choice, bool declarative)
         {
@@ -76,10 +76,10 @@ namespace FplLSTests
         [DataRow("prefix symbol", false)]
         [DataRow("postfix symbol", false)]
         [DataRow("object symbol", false)]
-        [DataRow(literalInfix, true)]
-        [DataRow(literalPrefix, true)]
-        [DataRow(literalPostFix, true)]
-        [DataRow(literalSymbol, true)]
+        [DataRow(LiteralInfix, true)]
+        [DataRow(LiteralPrefix, true)]
+        [DataRow(LiteralPostFix, true)]
+        [DataRow(LiteralSymbol, true)]
         [TestMethod]
         public void TestInsertTextDoesNotEndWithSpace(string choice, bool declarative)
         {
@@ -95,10 +95,10 @@ namespace FplLSTests
         [DataRow("prefix symbol", false)]
         [DataRow("postfix symbol", false)]
         [DataRow("object symbol", false)]
-        [DataRow(literalInfix, true)]
-        [DataRow(literalPrefix, true)]
-        [DataRow(literalPostFix, true)]
-        [DataRow(literalSymbol, true)]
+        [DataRow(LiteralInfix, true)]
+        [DataRow(LiteralPrefix, true)]
+        [DataRow(LiteralPostFix, true)]
+        [DataRow(LiteralSymbol, true)]
         [TestMethod]
         public void TestAddSymbolChoicesLabel(string choice, bool declarative)
         {
@@ -122,10 +122,10 @@ namespace FplLSTests
         [DataRow("prefix symbol", false)]
         [DataRow("postfix symbol", false)]
         [DataRow("object symbol", false)]
-        [DataRow(literalInfix, true)]
-        [DataRow(literalPrefix, true)]
-        [DataRow(literalPostFix, true)]
-        [DataRow(literalSymbol, true)]
+        [DataRow(LiteralInfix, true)]
+        [DataRow(LiteralPrefix, true)]
+        [DataRow(LiteralPostFix, true)]
+        [DataRow(LiteralSymbol, true)]
         [TestMethod]
         public void TestAddSymbolChoicesDetail(string choice, bool declarative)
         {
@@ -141,10 +141,10 @@ namespace FplLSTests
         [DataRow("prefix symbol", false)]
         [DataRow("postfix symbol", false)]
         [DataRow("object symbol", false)]
-        [DataRow(literalInfix, true)]
-        [DataRow(literalPrefix, true)]
-        [DataRow(literalPostFix, true)]
-        [DataRow(literalSymbol, true)]
+        [DataRow(LiteralInfix, true)]
+        [DataRow(LiteralPrefix, true)]
+        [DataRow(LiteralPostFix, true)]
+        [DataRow(LiteralSymbol, true)]
         [TestMethod]
         public void TestAddSymbolChoicesInsertText(string choice, bool declarative)
         {

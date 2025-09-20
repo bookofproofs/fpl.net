@@ -9,8 +9,8 @@ namespace FplLSTests
     public class TestGetCompletionItemConstructors
     {
 
-        [DataRow(literalCtor)]
-        [DataRow(literalCtorL)]
+        [DataRow(LiteralCtor)]
+        [DataRow(LiteralCtorL)]
         [TestMethod]
         public void TestAddConstructorChoicesNumber(string choice)
         {
@@ -19,8 +19,8 @@ namespace FplLSTests
             Assert.AreEqual<int>(2, actual.Count);
         }
 
-        [DataRow(literalCtor)]
-        [DataRow(literalCtorL)]
+        [DataRow(LiteralCtor)]
+        [DataRow(LiteralCtorL)]
         [TestMethod]
         public void TestAddConstructorKeywordCounts(string choice)
         {
@@ -34,10 +34,10 @@ namespace FplLSTests
             Assert.AreEqual<int>(1, count);
         }
 
-        [DataRow(literalCtorL, CompletionItemKind.Property, "constructor01")]
-        [DataRow(literalCtor, CompletionItemKind.Property, "constructor02")]
-        [DataRow(literalCtorL, CompletionItemKind.Keyword, "zzzconstructor01")]
-        [DataRow(literalCtor, CompletionItemKind.Keyword, "zzzzconstructor02")]
+        [DataRow(LiteralCtorL, CompletionItemKind.Property, "constructor01")]
+        [DataRow(LiteralCtor, CompletionItemKind.Property, "constructor02")]
+        [DataRow(LiteralCtorL, CompletionItemKind.Keyword, "zzzconstructor01")]
+        [DataRow(LiteralCtor, CompletionItemKind.Keyword, "zzzzconstructor02")]
         [TestMethod]
         public void TestAddChoicesSortText(string choice, CompletionItemKind kind, string expected)
         {
@@ -52,8 +52,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow(literalCtorL)]
-        [DataRow(literalCtor)]
+        [DataRow(LiteralCtorL)]
+        [DataRow(LiteralCtor)]
         [TestMethod]
         public void TestInsertTextEndsWithTwoNewLines(string choice)
         {
@@ -68,8 +68,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow(literalCtor)]
-        [DataRow(literalCtorL)]
+        [DataRow(LiteralCtor)]
+        [DataRow(LiteralCtorL)]
         [TestMethod]
         public void TestAddConstructorChoicesLabel(string choice)
         {
@@ -81,8 +81,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow(literalCtor)]
-        [DataRow(literalCtorL)]
+        [DataRow(LiteralCtor)]
+        [DataRow(LiteralCtorL)]
         [TestMethod]
         public void TestAddConstructorChoicesDetail(string choice)
         {
@@ -94,8 +94,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow(literalCtor)]
-        [DataRow(literalCtorL)]
+        [DataRow(LiteralCtor)]
+        [DataRow(LiteralCtorL)]
         [TestMethod]
         public void TestAddConstructorChoicesInsertText(string choice)
         {
@@ -105,6 +105,14 @@ namespace FplLSTests
             foreach (var item in actual)
             {
                 if (item.InsertText.Contains(choice)) { counterSnippets++; }
+                if (item.InsertText.Contains(" "))
+                {
+                    var res = FplParser.testParser(LiteralCtor, item.InsertText);
+                    if (!res.StartsWith("Success:"))
+                    {
+                        Assert.IsTrue(false, res);
+                    }
+                }
             }
             Assert.AreEqual<int>(actual.Count, counterSnippets);
         }

@@ -93,7 +93,7 @@ type TestProofs () =
 
     [<TestMethod>]
     member this.TestPremiseOrOtherPredicate01 () =
-        let result = run (predicate .>> eof) literalPre
+        let result = run (predicate .>> eof) LiteralPre
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
@@ -114,28 +114,28 @@ type TestProofs () =
 
     [<TestMethod>]
     member this.TestDerivedArgument01 () =
-        let result = run (derivedArgument .>> eof) literalQed
+        let result = run (derivedArgument .>> eof) LiteralQed
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestDerivedArgument02 () =
-        let result = run (derivedArgument .>> eof) literalTrivial
+        let result = run (derivedArgument .>> eof) LiteralTrivial
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestDerivedArgument03 () =
-        let result = run (derivedArgument .>> eof) literalCon
+        let result = run (derivedArgument .>> eof) LiteralCon
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestDerivedArgument04 () =
-        let result = run (derivedArgument .>> eof) literalConL
+        let result = run (derivedArgument .>> eof) LiteralConL
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
@@ -283,22 +283,22 @@ type TestProofs () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
         
-    [<DataRow(FplPrimitives.literalByCor, "$1", ":1")>]
-    [<DataRow(FplPrimitives.literalByDef, "$1", ":1")>]
-    [<DataRow(FplPrimitives.literalByAx, "$1", ":1")>]
-    [<DataRow(FplPrimitives.literalByInf, "$1", ":1")>]
-    [<DataRow(FplPrimitives.literalByCor, "$1", "")>]
-    [<DataRow(FplPrimitives.literalByDef, "$1", "")>]
-    [<DataRow(FplPrimitives.literalByAx, "$1", "")>]
-    [<DataRow(FplPrimitives.literalByInf, "$1", "")>]
-    [<DataRow(FplPrimitives.literalByCor, "", ":1")>]
-    [<DataRow(FplPrimitives.literalByDef, "", ":1")>]
-    [<DataRow(FplPrimitives.literalByAx, "", ":1")>]
-    [<DataRow(FplPrimitives.literalByInf, "", "")>]
-    [<DataRow(FplPrimitives.literalByCor, "", "")>]
-    [<DataRow(FplPrimitives.literalByDef, "", "")>]
-    [<DataRow(FplPrimitives.literalByAx, "", "")>]
-    [<DataRow(FplPrimitives.literalByInf, "", "")>]
+    [<DataRow(LiteralByCor, "$1", ":1")>]
+    [<DataRow(LiteralByDef, "$1", ":1")>]
+    [<DataRow(LiteralByAx, "$1", ":1")>]
+    [<DataRow(LiteralByInf, "$1", ":1")>]
+    [<DataRow(LiteralByCor, "$1", "")>]
+    [<DataRow(LiteralByDef, "$1", "")>]
+    [<DataRow(LiteralByAx, "$1", "")>]
+    [<DataRow(LiteralByInf, "$1", "")>]
+    [<DataRow(LiteralByCor, "", ":1")>]
+    [<DataRow(LiteralByDef, "", ":1")>]
+    [<DataRow(LiteralByAx, "", ":1")>]
+    [<DataRow(LiteralByInf, "", "")>]
+    [<DataRow(LiteralByCor, "", "")>]
+    [<DataRow(LiteralByDef, "", "")>]
+    [<DataRow(LiteralByAx, "", "")>]
+    [<DataRow(LiteralByInf, "", "")>]
     [<TestMethod>]
     member this.TestJustificationIdentifier (keyword:string, corRef:string, argRef:string) =
         let result = run (justificationReference .>> eof) $"{keyword} A{corRef}{argRef}"

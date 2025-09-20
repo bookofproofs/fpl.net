@@ -219,7 +219,7 @@ type TestClasses () =
                 return x
 	        } 
 
-            property pred optional T() 
+            optional property pred T() 
 	        {
                 true
 	        } 
@@ -279,7 +279,7 @@ type TestClasses () =
                 dec base.T1() ;
             }
 
-            property pred opt T() 
+            opt property pred T() 
 	        {
                 true
 	        } 
@@ -349,7 +349,7 @@ type TestClasses () =
                 return x
 	        } 
 
-            property pred optional T() 
+            optional property pred  T() 
 	        {
                 true
 	        } 

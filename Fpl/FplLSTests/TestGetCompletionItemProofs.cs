@@ -6,8 +6,8 @@ namespace FplLSTests
     public class TestGetCompletionItemProofs
     {
 
-        [DataRow(literalPrf)]
-        [DataRow(literalPrfL)]
+        [DataRow(LiteralPrf)]
+        [DataRow(LiteralPrfL)]
         [TestMethod]
         public void TestAddProofChoicesNumber(string choice)
         {
@@ -16,8 +16,8 @@ namespace FplLSTests
             Assert.AreEqual<int>(15, actual.Count);
         }
 
-        [DataRow(literalPrf)]
-        [DataRow(literalPrfL)]
+        [DataRow(LiteralPrf)]
+        [DataRow(LiteralPrfL)]
         [TestMethod]
         public void TestAddProofKeywordCounts(string choice)
         {
@@ -31,10 +31,10 @@ namespace FplLSTests
             Assert.AreEqual<int>(1, count);
         }
 
-        [DataRow(literalPrfL, CompletionItemKind.Property, "proof01")]
-        [DataRow(literalPrf, CompletionItemKind.Property, "proof02")]
-        [DataRow(literalPrfL, CompletionItemKind.Keyword, "zzzproof01")]
-        [DataRow(literalPrf, CompletionItemKind.Keyword, "zzzzproof02")]
+        [DataRow(LiteralPrfL, CompletionItemKind.Property, "proof01")]
+        [DataRow(LiteralPrf, CompletionItemKind.Property, "proof02")]
+        [DataRow(LiteralPrfL, CompletionItemKind.Keyword, "zzzproof01")]
+        [DataRow(LiteralPrf, CompletionItemKind.Keyword, "zzzzproof02")]
         [TestMethod]
         public void TestAddChoicesSortText(string choice, CompletionItemKind kind, string expected)
         {
@@ -49,8 +49,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow(literalPrfL)]
-        [DataRow(literalPrf)]
+        [DataRow(LiteralPrfL)]
+        [DataRow(LiteralPrf)]
         [TestMethod]
         public void TestInsertTextEndsWithTwoNewLines(string choice)
         {
@@ -65,8 +65,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow(literalPrf)]
-        [DataRow(literalPrfL)]
+        [DataRow(LiteralPrf)]
+        [DataRow(LiteralPrfL)]
         [TestMethod]
         public void TestAddProofChoicesLabel(string choice)
         {
@@ -78,8 +78,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow(literalPrf, literalPrfL)]
-        [DataRow(literalPrfL, literalPrfL)]
+        [DataRow(LiteralPrf, LiteralPrfL)]
+        [DataRow(LiteralPrfL, LiteralPrfL)]
         [TestMethod]
         public void TestAddProofChoicesDetail(string choice, string l)
         {
@@ -98,8 +98,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow(literalPrf)]
-        [DataRow(literalPrfL)]
+        [DataRow(LiteralPrf)]
+        [DataRow(LiteralPrfL)]
         [TestMethod]
         public void TestAddProofChoicesInsertText(string choice)
         {
@@ -109,6 +109,14 @@ namespace FplLSTests
             foreach (var item in actual)
             {
                 if (item.InsertText.Contains(choice)) { counterSnippets++; }
+                if (item.InsertText.Contains(" "))
+                {
+                    var res = FplParser.testParser(LiteralPrf, item.InsertText);
+                    if (!res.StartsWith("Success:"))
+                    {
+                        Assert.IsTrue(false, res);
+                    }
+                }
             }
             Assert.AreEqual<int>(actual.Count, counterSnippets);
         }

@@ -90,7 +90,7 @@ namespace FplLS
                 $"\t200. |- trivial{Environment.NewLine}" +
                 $"\t300. |- trivial{Environment.NewLine}" +
                 $"\t400. |- false{Environment.NewLine}" +
-                $"\t500. |- {TokenRevoke} 100.{Environment.NewLine}" +
+                $"\t500. |- {TokenRevoke} 100{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\tqed{Environment.NewLine}" +
                 $"{TokenRightBrace}{Environment.NewLine}";
@@ -113,7 +113,7 @@ namespace FplLS
                 $"\t200. |- trivial{Environment.NewLine}" +
                 $"\t300. |- trivial{Environment.NewLine}" +
                 $"\t400. |- false{Environment.NewLine}" +
-                $"\t500. |- {TokenRevoke} 100.{Environment.NewLine}" +
+                $"\t500. |- {TokenRevoke} 100{Environment.NewLine}" +
                 $"\t600. |- or (not somePremise, someConclusion){Environment.NewLine}" +
                 $"\t700. |- impl (somePremise, someConclusion){Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
@@ -200,7 +200,7 @@ namespace FplLS
                 $"\t300. |- trivial{Environment.NewLine}" +
                 $"\t400. |- or (not p, not q){Environment.NewLine}" +
                 $"\t500. |- not somePremise{Environment.NewLine}" +
-                $"\t600. and (100., 500.) |- impl(not someConclusion, not somePremise){Environment.NewLine}" +
+                $"\t600. 100, 500, byinf ProceedingResults |- impl(not someConclusion, not somePremise){Environment.NewLine}" +
                 $"\t700. |- impl(somePremise, someConclusion){Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\tqed{Environment.NewLine}" +
@@ -268,8 +268,8 @@ namespace FplLS
             ci.InsertText =
                 $"{ci.Word} SomeFplTheorem$1{Environment.NewLine}" +
                 $"{TokenLeftBrace}{Environment.NewLine}" +
-                $"\t// Proof by Counterexample of `not all x p(x)`){Environment.NewLine}" +
-                $"\t// Strategy: Assume `all x ( p(x) )`, then produce an example of x for which p(x) is false.{Environment.NewLine}" +
+                $"\t// Proof by Counterexample of `not all x:tpl {TokenLeftBrace} p(x) {TokenRightBrace}`){Environment.NewLine}" +
+                $"\t// Strategy: Assume `all x:tpl {TokenLeftBrace} p(x) {TokenRightBrace}`, then produce an example of x for which p(x) is false.{Environment.NewLine}" +
                 $"\t// Revoking the assumption proves the argument.{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\tdec {Environment.NewLine}" +
@@ -277,10 +277,10 @@ namespace FplLS
                 $"\t\t // construct a counterexample c := ... {Environment.NewLine}" +
                 $"\t;{Environment.NewLine}" +
                 $"\t100. |- {TokenAssume} not somePremise{Environment.NewLine}" +
-                $"\t200. |- not all x p(x){Environment.NewLine}" +
-                $"\t300. |- ex x not p(x){Environment.NewLine}" +
-                $"\t400. ExistsByExample(c), 300. |- false{Environment.NewLine}" +
-                $"\t500. |- {TokenRevoke} 100.{Environment.NewLine}" +
+                $"\t200. |- not all x:tpl {TokenLeftBrace} p(x) {TokenRightBrace}{Environment.NewLine}" +
+                $"\t300. |- ex x:tpl {TokenLeftBrace} not p(x) {TokenRightBrace}{Environment.NewLine}" +
+                $"\t400. 300, byinf ExistsByExample |- false{Environment.NewLine}" +
+                $"\t500. |- {TokenRevoke} 100{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\tqed{Environment.NewLine}" +
                 $"{TokenRightBrace}{Environment.NewLine}";
@@ -295,14 +295,14 @@ namespace FplLS
             ci.InsertText =
                 $"{ci.Word} SomeFplTheorem$1{Environment.NewLine}" +
                 $"{TokenLeftBrace}{Environment.NewLine}" +
-                $"\t// Proof by Counterexample of `not ex x p(x)`){Environment.NewLine}" +
-                $"\t// Strategy: Prove that for `all x not p(x)` is true.{Environment.NewLine}" +
+                $"\t// Proof by Counterexample of `not ex x:tpl {TokenLeftBrace} p(x) {TokenRightBrace}`){Environment.NewLine}" +
+                $"\t// Strategy: Prove that for `all x:tpl {TokenLeftBrace} not p(x) {TokenRightBrace}` is true.{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
-                $"\t100. |- {TokenAssume} all x not p(x){Environment.NewLine}" +
+                $"\t100. |- {TokenAssume} all x:tpl {TokenLeftBrace} not p(x) {TokenRightBrace}{Environment.NewLine}" +
                 $"\t300. |- trivial{Environment.NewLine}" +
                 $"\t400. |- trivial{Environment.NewLine}" +
                 $"\t500. |- true{Environment.NewLine}" +
-                $"\t600. |- not ex x p(x){Environment.NewLine}" +
+                $"\t600. |- not ex x:tpl {TokenLeftBrace} p(x) {TokenRightBrace}{Environment.NewLine}" +
                 $"\t700. |- someConclusion{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\tqed{Environment.NewLine}" +
@@ -318,24 +318,21 @@ namespace FplLS
             ci.InsertText =
                 $"{ci.Word} SomeFplTheorem$1{Environment.NewLine}" +
                 $"{TokenLeftBrace}{Environment.NewLine}" +
-                $"\t// Proof by Induction (to prove: `all n in N p(n)`){Environment.NewLine}" +
+                $"\t// Proof by Induction (to prove: `all n:N {TokenLeftBrace} p(n) {TokenRightBrace}`){Environment.NewLine}" +
                 $"\t// Strategy: Prove the \"base case\": p(1){Environment.NewLine}" +
                 $"\t// Then do the \"inductive step\": Prove that if `p(n)` is true, then also `p( (n + 1) )` is true.{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
-                $"\tdec {Environment.NewLine}" +
-                $"\t\t ~n : N{Environment.NewLine}" +
-                $"\t;{Environment.NewLine}" +
                 $"\t// \"base case\" {Environment.NewLine}" +
                 $"\t100. |- trivial{Environment.NewLine}" +
                 $"\t200. |- p(1){Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\t// \"inductive step\" {Environment.NewLine}" +
-                $"\t300. 200. |- {TokenAssume} ex n in N p(n){Environment.NewLine}" +
+                $"\t300. 200 |- {TokenAssume} ex n:N {TokenLeftBrace} p(n) {TokenRightBrace}{Environment.NewLine}" +
                 $"\t400. |- trivial{Environment.NewLine}" +
                 $"\t500. |- trivial{Environment.NewLine}" +
                 $"\t600. |- p( (n + 1) ){Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
-                $"\t700. |- all n in N p(n){Environment.NewLine}" +
+                $"\t700. |- all n:N {TokenLeftBrace} p(n) {TokenRightBrace}{Environment.NewLine}" +
                 $"\tqed{Environment.NewLine}" +
                 $"{TokenRightBrace}{Environment.NewLine}";
             ci.Label += " (by induction) ...";
@@ -349,9 +346,9 @@ namespace FplLS
             ci.InsertText =
                 $"{ci.Word} SomeFplTheorem$1{Environment.NewLine}" +
                 $"{TokenLeftBrace}{Environment.NewLine}" +
-                $"\t// Proof by Strong Induction (to prove: `all n in N p(n)`){Environment.NewLine}" +
+                $"\t// Proof by Strong Induction (to prove: `all n:N {TokenLeftBrace} p(n) {TokenRightBrace}`){Environment.NewLine}" +
                 $"\t// Strategy: Prove the \"base cases\": `p(1)`,..., `p(m)`{Environment.NewLine}" +
-                $"\t// Then do the \"inductive step\": Prove that if `p(n)` is for all `n in [[1,n]]`, then also `p( (n + 1) )` is true.{Environment.NewLine}" +
+                $"\t// Then do the \"inductive step\": Prove that if exists n for which `p(m)` is true is for all `m <= n`, then also `p( (n + 1) )` is true.{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\tdec {Environment.NewLine}" +
                 $"\t\t ~n, m : N{Environment.NewLine}" +
@@ -363,12 +360,12 @@ namespace FplLS
                 $"\t250. |- p(2){Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\t// \"inductive step\" {Environment.NewLine}" +
-                $"\t300. and (150., 250.) |- {TokenAssume} ex n all m in [[1,n]] p(m){Environment.NewLine}" +
+                $"\t300. 150, 250, byinf ProceedingResults |- {TokenAssume} ex n:N {TokenLeftBrace} all m:N {TokenLeftBrace} impl((m <= n), p(m)) {TokenRightBrace}{TokenRightBrace}{Environment.NewLine}" +
                 $"\t400. |- trivial{Environment.NewLine}" +
                 $"\t500. |- trivial{Environment.NewLine}" +
                 $"\t600. |- p( (n + 1) ){Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
-                $"\t700. |- all n in N p(n){Environment.NewLine}" +
+                $"\t700. |- all n:N {TokenLeftBrace} p(n) {TokenRightBrace}{Environment.NewLine}" +
                 $"\tqed{Environment.NewLine}" +
                 $"{TokenRightBrace}{Environment.NewLine}";
             ci.Label += " (by strong induction) ...";
@@ -382,9 +379,9 @@ namespace FplLS
             ci.InsertText =
                 $"{ci.Word} SomeFplTheorem$1{Environment.NewLine}" +
                 $"{TokenLeftBrace}{Environment.NewLine}" +
-                $"\t// Proof by Induction With Smallest CounterExample (to prove: `all n in N p(n)`){Environment.NewLine}" +
+                $"\t// Proof by Induction With Smallest CounterExample (to prove: `all n:N {TokenLeftBrace} p(n) {TokenRightBrace}`){Environment.NewLine}" +
                 $"\t// Strategy: Prove the \"base case\": `p(1)`{Environment.NewLine}" +
-                $"\t// Then assume that it is not true that for `all n in N p(n)`.{Environment.NewLine}" +
+                $"\t// Then assume that it is not true that for `all n:N {TokenLeftBrace} p(n) {TokenRightBrace}`.{Environment.NewLine}" +
                 $"\t// Then assume that k is the smallest such k for which `p(k)` fails, in particular, `p( (k - 1) )` is then true.{Environment.NewLine}" +
                 $"\t// Then seek the contradiction for the expression `and ( p( (k - 1) ) , not p(k) )`.{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
@@ -392,7 +389,7 @@ namespace FplLS
                 $"\t\t ~n, k : N{Environment.NewLine}" +
                 $"\t\t ~kFails, p : {TokenPredicate}{Environment.NewLine}" +
                 $"\t\t // p(n) := ... // set to your predicate about n here and uncomment the line{Environment.NewLine}" +
-                $"\t\t pFailsFor_k := ex k in N not p(k){Environment.NewLine}" +
+                $"\t\t pFailsFor_k := ex k:N {TokenLeftBrace} not p(k) {TokenRightBrace}{Environment.NewLine}" +
                 $"\t;{Environment.NewLine}" +
                 $"\t// \"base case\" {Environment.NewLine}" +
                 $"\t100. |- trivial{Environment.NewLine}" +
@@ -401,15 +398,15 @@ namespace FplLS
                 $"\t// \"inductive step\" {Environment.NewLine}" +
                 $"\t300. |- {TokenAssume} pFailsFor_k{Environment.NewLine}" +
                 $"\t// we make use of the `Smallest` predicate defined in the namespace Fpl.Arithmetics{Environment.NewLine}" +
-                $"\t350. WellOrderingPrinciple() |- {TokenAssume} Smallest(k, pFailsFor_k){Environment.NewLine}" +
+                $"\t350. WellOrderingPrinciple |- {TokenAssume} Smallest(k, pFailsFor_k){Environment.NewLine}" +
                 $"\t400. |- p( (k - 1) ){Environment.NewLine}" +
                 $"\t450. |- trivial{Environment.NewLine}" +
                 $"\t500. |- trivial{Environment.NewLine}" +
                 $"\t550. |- p(k){Environment.NewLine}" +
                 $"\t600. |- false{Environment.NewLine}" +
-                $"\t650. |- {TokenRevoke} 350.{Environment.NewLine}" +
+                $"\t650. |- {TokenRevoke} 350{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
-                $"\t700. |- all n in N p(n){Environment.NewLine}" +
+                $"\t700. |- all n:N {TokenLeftBrace} p(n) {TokenRightBrace}{Environment.NewLine}" +
                 $"\tqed{Environment.NewLine}" +
                 $"{TokenRightBrace}{Environment.NewLine}";
             ci.Label += " (smallest counterex.) ...";

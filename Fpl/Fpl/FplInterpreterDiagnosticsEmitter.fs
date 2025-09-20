@@ -613,7 +613,7 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
         let argName = arg.Type(SignatureType.Name)
         let whatWeGot = 
             if argType = argName then
-                literalUndef
+                LiteralUndef
             else
                 argType
 
@@ -632,13 +632,13 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
     fplValue.ArgList
     |> Seq.iter (fun argument ->
         let repr = argument.Represent()
-        if repr = $"{literalDec} {literalPred}" then 
+        if repr = $"{LiteralDec} {LiteralPred}" then 
             emitLG000Diagnostics argument
         else
             match repr with
-            | FplPrimitives.literalTrue
-            | FplPrimitives.literalFalse -> ()
-            | FplPrimitives.literalUndetermined -> emitLG000Diagnostics argument 
+            | LiteralTrue
+            | LiteralFalse -> ()
+            | LiteralUndetermined -> emitLG000Diagnostics argument 
             | _ -> emitLG001Diagnostics argument.StartPos argument.EndPos argument
     )
 

@@ -535,7 +535,7 @@ type SymbolTableNavigation() =
                 }
 
 
-                axiom Axiom1()
+                axiom Axiom1
                 {
                     is(1,Natural)
                 };
@@ -557,7 +557,7 @@ type SymbolTableNavigation() =
                 }
 
 
-                axiom Axiom1()
+                axiom Axiom1
                 {
                     is(1,NaturalTypo)
                 };
@@ -579,7 +579,7 @@ type SymbolTableNavigation() =
                 }
 
 
-                axiom Axiom1()
+                axiom Axiom1
                 {
                     is(1,Natural)
                 };

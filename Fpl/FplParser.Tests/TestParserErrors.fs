@@ -56,7 +56,7 @@ type TestParserErrors() =
     member this.TestPRP000() =
         let code = PRP000
         printf "Trying %s" code.Message
-        let input = """def pred T() {true mand prop pred T(){#}}
+        let input = """def pred T() {true property pred T(){#}}
         ;
         """
         let ast = fplParser input
@@ -68,7 +68,7 @@ type TestParserErrors() =
         let code = AXI000
         printf "Trying %s" code.Message
         let input = """
-        axiom x() { true }
+        axiom x { true }
         ;
         """
         let ast = fplParser input
@@ -218,7 +218,7 @@ type TestParserErrors() =
 
     [<TestMethod>]
     member this.TestSMT000() =
-        let code = SMT000
+        let code = STMDEL
         printf "Trying %s" code.Message
         let input = """
         def pred T() { del.x }
@@ -240,7 +240,7 @@ type TestParserErrors() =
 
     [<TestMethod>]
     member this.TestCAS000() =
-        let code = CAS000
+        let code = STMCAS
         printf "Trying %s" code.Message
         let input = """def pred T() 
             { 
@@ -261,7 +261,7 @@ type TestParserErrors() =
 
     [<TestMethod>]
     member this.TestDCS000() =
-        let code = DCS000
+        let code = STMCAS
         printf "Trying %s" code.Message
         let input = """def pred T() 
             { 
@@ -287,7 +287,7 @@ type TestParserErrors() =
     [<TestMethod>]
     member this.TestASS000() =
         ad.Clear()
-        let code = ASS000
+        let code = STMASU
         printf "Trying %s" code.Message
         let input = """proof T$1 { 1. |- assume :: };"""
         let ast = fplParser input
@@ -296,7 +296,7 @@ type TestParserErrors() =
 
     [<TestMethod>]
     member this.TestREV000() =
-        let code = REV000
+        let code = STMREV
         printf "Trying %s" code.Message
         let input = """
             proof T$1
@@ -311,7 +311,7 @@ type TestParserErrors() =
 
     [<TestMethod>]
     member this.TestRET000() =
-        let code = RET000
+        let code = STMRET
         printf "Trying %s" code.Message
         let input = """def func T()->obj {return #}
         ;

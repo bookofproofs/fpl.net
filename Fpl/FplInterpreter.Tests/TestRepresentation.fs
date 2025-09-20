@@ -9,12 +9,12 @@ open CommonTestHelpers
 type TestRepresentation() =
 
 
-    [<DataRow("00",literalFalse, literalFalse)>]
-    [<DataRow("01",literalTrue, literalTrue)>]
-    [<DataRow("02","(x = x)", literalTrue)>]
-    [<DataRow("02a","not(x = x)", literalFalse)>]
-    [<DataRow("03","(x = y)", literalFalse)>]
-    [<DataRow("04","not (x = y)", literalTrue)>]
+    [<DataRow("00",LiteralFalse, LiteralFalse)>]
+    [<DataRow("01",LiteralTrue, LiteralTrue)>]
+    [<DataRow("02","(x = x)", LiteralTrue)>]
+    [<DataRow("02a","not(x = x)", LiteralFalse)>]
+    [<DataRow("03","(x = y)", LiteralFalse)>]
+    [<DataRow("04","not (x = y)", LiteralTrue)>]
     [<TestMethod>]
     member this.TestRepresentationPredicate(var:string, varVal, expected:string) =
         ad.Clear()
@@ -75,7 +75,7 @@ type TestRepresentation() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("00","(@0 = Zero())", literalTrue)>]
+    [<DataRow("00","(@0 = Zero())", LiteralTrue)>]
     [<TestMethod>]
     member this.TestRepresentationCases(var:string, varVal, expected:string) =
         ad.Clear()
@@ -92,28 +92,28 @@ type TestRepresentation() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("($0 = $0)", literalTrue)>]
-    [<DataRow("($1 = $2)", literalFalse)>]
-    [<DataRow("($3 = $3)", literalTrue)>]
-    [<DataRow("(@3 = $3)", literalUndef)>]
-    [<DataRow("(true = false)", literalFalse)>]
-    [<DataRow("(undef = undef)", literalUndef)>]
-    [<DataRow("(true = true)", literalTrue)>]
-    [<DataRow("(true = undef)", literalUndef)>]
-    [<DataRow("(undef = true)", literalUndef)>]
-    [<DataRow("(a = true)", literalUndef)>]
-    [<DataRow("(i = $3)", literalUndetermined)>]
-    [<DataRow("(j = $2)", literalTrue)>]
-    [<DataRow("(k = $2)", literalFalse)>]
-    [<DataRow("(true = a)", literalUndef)>]
-    [<DataRow("($3 = i)", literalUndetermined)>]
-    [<DataRow("($2 = j)", literalTrue)>]
-    [<DataRow("($2 = k)", literalFalse)>]
+    [<DataRow("($0 = $0)", LiteralTrue)>]
+    [<DataRow("($1 = $2)", LiteralFalse)>]
+    [<DataRow("($3 = $3)", LiteralTrue)>]
+    [<DataRow("(@3 = $3)", LiteralUndef)>]
+    [<DataRow("(true = false)", LiteralFalse)>]
+    [<DataRow("(undef = undef)", LiteralUndef)>]
+    [<DataRow("(true = true)", LiteralTrue)>]
+    [<DataRow("(true = undef)", LiteralUndef)>]
+    [<DataRow("(undef = true)", LiteralUndef)>]
+    [<DataRow("(a = true)", LiteralUndef)>]
+    [<DataRow("(i = $3)", LiteralUndetermined)>]
+    [<DataRow("(j = $2)", LiteralTrue)>]
+    [<DataRow("(k = $2)", LiteralFalse)>]
+    [<DataRow("(true = a)", LiteralUndef)>]
+    [<DataRow("($3 = i)", LiteralUndetermined)>]
+    [<DataRow("($2 = j)", LiteralTrue)>]
+    [<DataRow("($2 = k)", LiteralFalse)>]
     [<TestMethod>]
     member this.TestRepresentationEquality(varVal, expected:string) =
         ad.Clear()
         let fplCode = sprintf """
-        def pred Equal infix "=" 50 (x,y: tpl)
+        def pred Equal(x,y: tpl) infix "=" 50 
         {
             del.Equal(x,y)
         } 
@@ -156,8 +156,8 @@ type TestRepresentation() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("00","""def pred T() { dec ~v:pred v:=true; false};""", literalTrue)>]
-    [<DataRow("01","""def pred T() { dec ~v:pred v:=false; false};""", literalFalse)>]
+    [<DataRow("00","""def pred T() { dec ~v:pred v:=true; false};""", LiteralTrue)>]
+    [<DataRow("01","""def pred T() { dec ~v:pred v:=false; false};""", LiteralFalse)>]
     [<TestMethod>]
     member this.TestRepresentationItializedVars(var:string, fplCode, expected:string) =
         ad.Clear()
@@ -175,15 +175,15 @@ type TestRepresentation() =
             Assert.IsTrue(false)
 
 
-    [<DataRow("00","(@0 = A())", literalFalse)>]
-    [<DataRow("00a","(@1 = A())", literalFalse)>]
-    [<DataRow("00b","(@2 = A())", literalTrue)>]
-    [<DataRow("01","(@0 = B())", literalTrue)>]
-    [<DataRow("01a","(@1 = B())", literalFalse)>]
-    [<DataRow("01b","(@2 = A())", literalFalse)>]
-    [<DataRow("02","(@0 = C())", literalFalse)>]
-    [<DataRow("02a","(@1 = C())", literalTrue)>]
-    [<DataRow("02b","(@2 = C())", literalFalse)>]
+    [<DataRow("00","(@0 = A())", LiteralFalse)>]
+    [<DataRow("00a","(@1 = A())", LiteralFalse)>]
+    [<DataRow("00b","(@2 = A())", LiteralTrue)>]
+    [<DataRow("01","(@0 = B())", LiteralTrue)>]
+    [<DataRow("01a","(@1 = B())", LiteralFalse)>]
+    [<DataRow("01b","(@2 = A())", LiteralFalse)>]
+    [<DataRow("02","(@0 = C())", LiteralFalse)>]
+    [<DataRow("02a","(@1 = C())", LiteralTrue)>]
+    [<DataRow("02b","(@2 = C())", LiteralFalse)>]
     [<TestMethod>]
     member this.TestRepresentationCases2(var:string, varVal, expected:string) =
         ad.Clear()

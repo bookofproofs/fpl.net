@@ -200,7 +200,7 @@ let emitLG002diagnostic nodeTypeName times pos1 pos2 =
     ad.AddDiagnostic diagnostic
 
 let emitLG003diagnostic nodeTypeName nodeName nodeRepr pos1 pos2 = 
-    if nodeRepr = literalFalse then
+    if nodeRepr = LiteralFalse then
         let code = 
             if isEnglishAn nodeName then
                 LG003(nodeTypeName, $"an {nodeName}")

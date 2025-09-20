@@ -11,7 +11,7 @@ namespace FplLS
         {
             var ret = new List<FplCompletionItem>();
             var postfix = "";
-            if (defaultCi.Word.Contains(literalExN))
+            if (defaultCi.Word.Contains(LiteralExN))
             {
                 postfix = "$1";
             }
@@ -32,13 +32,13 @@ namespace FplLS
             ci.InsertText = $"{ci.Word}{postfix} x:FplType" + GetBody();
             switch (ci.Word)
             {
-                case literalAll:
+                case LiteralAll:
                     ci.Detail = $"all quantor (in type)";
                     break;
-                case literalEx:
+                case LiteralEx:
                     ci.Detail = $"exists quantor (in type)";
                     break;
-                case literalExN:
+                case LiteralExN:
                     ci.Detail = $"exists n-times quantor (in type)";
                     break;
             }

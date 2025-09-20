@@ -18,28 +18,28 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestPrimePredicate1 () =
-        let result = run (primePredicate .>> eof) literalTrue
+        let result = run (primePredicate .>> eof) LiteralTrue
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPrimePredicate2 () =
-        let result = run (primePredicate .>> eof) literalFalse
+        let result = run (primePredicate .>> eof) LiteralFalse
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPrimePredicate3 () =
-        let result = run (primePredicate .>> eof) literalUndef
+        let result = run (primePredicate .>> eof) LiteralUndef
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPrimePredicate4 () =
-        let result = run (primePredicate .>> eof) literalUndefL
+        let result = run (primePredicate .>> eof) LiteralUndefL
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -60,7 +60,7 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestPrimePredicate7 () =
-        let result = run (primePredicate .>> eof) literalParent
+        let result = run (primePredicate .>> eof) LiteralParent
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -448,7 +448,7 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestEx1 () =
-        let result = run (exists .>> eof) """ex x,y,z:func {true} """
+        let result = run (exists .>> eof) """ex x,y,z:func {true}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -511,7 +511,7 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestExN4 () =
-        let result = run (existsTimesN .>> eof) """exn$3 x:obj { not (iif ( iif ( true, iif( true, false)), not (true) )) } """
+        let result = run (existsTimesN .>> eof) """exn$3 x:obj { not (iif ( iif ( true, iif( true, false)), not (true) )) }"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

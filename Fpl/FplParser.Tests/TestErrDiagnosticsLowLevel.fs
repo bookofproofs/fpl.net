@@ -159,7 +159,7 @@ The parser backtracked after:
                     // This is comparable to implementing an interface (or comparable to multiple inheritance).
                     base.Set()
                 ;
-                self
+                
             }
         }
 
@@ -179,7 +179,7 @@ The parser backtracked after:
         function T() -> Real { intr }
 
         // Example of defining a constant for the natural number 100 using the
-        class N100:Set{N100(){dec ~n:Nat  base.Set() self:=SetBuilder(SetNat(),IsGreater(n,100)); self }}""", 1605, 46)>]
+        class N100:Set{N100(){dec ~n:Nat  base.Set() base.SetBuilder(SetNat(),IsGreater(n,100)); }}""", 1595, 46)>]
     [<DataRow("",0,1)>]
     member this.TestReplaceFplComments
         (

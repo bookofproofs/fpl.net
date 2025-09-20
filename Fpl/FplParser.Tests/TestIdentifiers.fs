@@ -86,7 +86,7 @@ type TestIdentifiers () =
 
     [<TestMethod>]
     member this.TestSelf0 () =
-        let result = run (selfOrParent .>> eof) literalSelf
+        let result = run (selfOrParent .>> eof) LiteralSelf
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -100,21 +100,21 @@ type TestIdentifiers () =
 
     [<TestMethod>]
     member this.TestSelf2 () =
-        let result = run (selfOrParent .>> eof) literalParent
+        let result = run (selfOrParent .>> eof) LiteralParent
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestEntitySelf () =
-        let result = run (entity .>> eof) literalSelf
+        let result = run (entity .>> eof) LiteralSelf
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestEntityAtSelf () =
-        let result = run (entity .>> eof) literalSelf
+        let result = run (entity .>> eof) LiteralSelf
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -135,28 +135,28 @@ type TestIdentifiers () =
 
     [<TestMethod>]
     member this.TestExtensionBlock1 () =
-        let result = run (extensionBlock .>> eof) """ext Digits x @/\d+/ ->Nat {return x}"""
+        let result = run (definitionExtension .>> eof) """ext Digits x @/\d+/ ->Nat {return x}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestExtensionBlock1a () =
-        let result = run (extensionBlock .>> eof) """extension Digits x@ /\d+/ -> Nat { ret x}"""
+        let result = run (definitionExtension .>> eof) """extension Digits x@ /\d+/ -> Nat { ret x}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestExtensionBlock1b () =
-        let result = run (extensionBlock .>> eof) """extension Digits x @ /\d+/ -> Nat { return x}"""
+        let result = run (definitionExtension .>> eof) """extension Digits x @ /\d+/ -> Nat { return x}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestExtensionBlock1c () =
-        let result = run (extensionBlock .>> eof) """ext Digits x@/\d+/->Nat{return x}"""
+        let result = run (definitionExtension .>> eof) """ext Digits x@/\d+/->Nat{return x}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

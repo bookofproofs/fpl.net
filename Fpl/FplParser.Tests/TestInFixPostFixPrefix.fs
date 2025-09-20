@@ -14,14 +14,14 @@ type TestInfixPostfixPrefix () =
 
     [<TestMethod>]
     member this.TestPostfix () =
-        let result = run (definition .>> eof) """def pred Successor postfix "'" (x: Nat) { intr }"""
+        let result = run (definition .>> eof) """def pred Successor(x: Nat) postfix "'" { intr }"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPostfixA () =
-        let result = run (definition .>> eof) """def pred T postfix "" () {intr}"""
+        let result = run (definition .>> eof) """def pred T() postfix "" {intr}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
@@ -142,14 +142,14 @@ type TestInfixPostfixPrefix () =
 
     [<TestMethod>]
     member this.TestInfix () =
-        let result = run (definition .>> eof) """def func Add infix "+" 2 (x,y: Nat) -> Nat { intr }"""
+        let result = run (definition .>> eof) """def func Add (x,y: Nat) -> Nat infix "+" 2 { intr }"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestInfixA () =
-        let result = run (definition .>> eof) """def pred T infix "" 0 () {intr}"""
+        let result = run (definition .>> eof) """def pred T() infix "" 0 {intr}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
@@ -291,14 +291,14 @@ type TestInfixPostfixPrefix () =
 
     [<TestMethod>]
     member this.TestPrefix () =
-        let result = run (definition .>> eof) """def func Minus prefix "-" (x: Nat) -> Nat { intr }"""
+        let result = run (definition .>> eof) """def func Minus(x: Nat) -> Nat prefix "-" { intr }"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPrefixA () =
-        let result = run (definition .>> eof) """def pred T prefix "" () {intr}"""
+        let result = run (definition .>> eof) """def pred T() prefix "" {intr}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))

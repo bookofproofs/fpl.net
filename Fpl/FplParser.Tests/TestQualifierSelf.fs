@@ -33,7 +33,7 @@ type TestQualifiersSelf () =
 
     [<TestMethod>]
     member this.TestDottedBothC () =
-        let result = run (predicate .>> eof) literalSelf
+        let result = run (predicate .>> eof) LiteralSelf
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -89,14 +89,14 @@ type TestQualifiersSelf () =
 
     [<TestMethod>]
     member this.TestCoordsBoth () =
-        let result = run (predicate .>> eof) literalSelf
+        let result = run (predicate .>> eof) LiteralSelf
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestCoordsBothA () =
-        let result = run (predicate .>> eof) literalParent
+        let result = run (predicate .>> eof) LiteralParent
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

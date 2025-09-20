@@ -336,7 +336,7 @@ type SymbolTableStructure() =
         | "FplAssignment" ->
             Assert.AreEqual<string>(PrimAssignment, (getName var).[index])
         | "FplAxiom" ->
-            Assert.AreEqual<string>(literalAxL, (getName var).[index])
+            Assert.AreEqual<string>(LiteralAxL, (getName var).[index])
         | "FplCases" ->
             Assert.AreEqual<string>(PrimCases, (getName var).[index])
         | "FplCaseElse" ->
@@ -346,13 +346,13 @@ type SymbolTableStructure() =
         | "FplClass" ->
             Assert.AreEqual<string>(PrimClassL, (getName var).[index])
         | "FplConjecture" ->
-            Assert.AreEqual<string>(literalConjL, (getName var).[index])
+            Assert.AreEqual<string>(LiteralConjL, (getName var).[index])
         | "FplConjunction" ->
             Assert.AreEqual<string>(PrimConjunction, (getName var).[index])        
         | "FplConstructor" ->
-            Assert.AreEqual<string>(literalCtorL, (getName var).[index])
+            Assert.AreEqual<string>(LiteralCtorL, (getName var).[index])
         | "FplCorollary" ->
-            Assert.AreEqual<string>(literalCorL, (getName var).[index])
+            Assert.AreEqual<string>(LiteralCorL, (getName var).[index])
         | "FplDecrement" ->
             Assert.AreEqual<string>(PrimDecrementL, (getName var).[index])        
         | "FplDisjunction" ->
@@ -414,9 +414,9 @@ type SymbolTableStructure() =
         | "FplLanguage" ->
             Assert.AreEqual<string>(PrimLanguageL, (getName var).[index])        
         | "FplLemma" ->
-            Assert.AreEqual<string>(literalLemL, (getName var).[index])
+            Assert.AreEqual<string>(LiteralLemL, (getName var).[index])
         | "FplLocalization" ->
-            Assert.AreEqual<string>(literalLocL, (getName var).[index])
+            Assert.AreEqual<string>(LiteralLocL, (getName var).[index])
         | "FplMandatoryFunctionalTerm" ->
             Assert.AreEqual<string>(PrimMandatoryFunctionalTermL, (getName var).[index])
         | "FplMandatoryPredicate" ->
@@ -438,11 +438,11 @@ type SymbolTableStructure() =
         | "FplPredicate" ->
             Assert.AreEqual<string>(PrimPredicateL, (getName var).[index])
         | "FplPredicateList" ->
-            Assert.AreEqual<string>(literalPreL, (getName var).[index])
+            Assert.AreEqual<string>(LiteralPreL, (getName var).[index])
         | "FplProof" ->
-            Assert.AreEqual<string>(literalPrfL, (getName var).[index])
+            Assert.AreEqual<string>(LiteralPrfL, (getName var).[index])
         | "FplProposition" ->
-            Assert.AreEqual<string>(literalPropL, (getName var).[index])
+            Assert.AreEqual<string>(LiteralPropL, (getName var).[index])
         | "FplQuantorAll" ->
             Assert.AreEqual<string>(PrimQuantorAll, (getName var).[index])
         | "FplQuantorExists" ->
@@ -458,7 +458,7 @@ type SymbolTableStructure() =
         | "FplRuleOfInference" ->
             Assert.AreEqual<string>(PrimRuleOfInference, (getName var).[index])
         | "FplTheorem" ->
-            Assert.AreEqual<string>(literalThmL, (getName var).[index])
+            Assert.AreEqual<string>(LiteralThmL, (getName var).[index])
         | "FplTheory" ->
             Assert.AreEqual<string>(PrimTheoryL, (getName var).[index])
         | "FplTranslation" ->
@@ -563,11 +563,11 @@ type SymbolTableStructure() =
         | "FplArgument" ->
             Assert.AreEqual<string>(PrimArg, (getName var).[index])
         | "FplAssertion" ->
-            Assert.AreEqual<string>(literalAss, (getName var).[index])
+            Assert.AreEqual<string>(LiteralAss, (getName var).[index])
         | "FplAssignment" ->
             Assert.AreEqual<string>(PrimStmt, (getName var).[index])
         | "FplAxiom" ->
-            Assert.AreEqual<string>(literalAx, (getName var).[index])
+            Assert.AreEqual<string>(LiteralAx, (getName var).[index])
         | "FplCases" ->
             Assert.AreEqual<string>(PrimStmt, (getName var).[index])
         | "FplCaseElse" ->
@@ -577,27 +577,27 @@ type SymbolTableStructure() =
         | "FplClass" ->
             Assert.AreEqual<string>(PrimClass, (getName var).[index])
         | "FplConjecture" ->
-            Assert.AreEqual<string>(literalConj, (getName var).[index])
+            Assert.AreEqual<string>(LiteralConj, (getName var).[index])
         | "FplConjunction" ->
-            Assert.AreEqual<string>(literalAnd, (getName var).[index])        
+            Assert.AreEqual<string>(LiteralAnd, (getName var).[index])        
         | "FplConstructor" ->
-            Assert.AreEqual<string>(literalCtor, (getName var).[index])
+            Assert.AreEqual<string>(LiteralCtor, (getName var).[index])
         | "FplCorollary" ->
-            Assert.AreEqual<string>(literalCor, (getName var).[index])
+            Assert.AreEqual<string>(LiteralCor, (getName var).[index])
         | "FplDecrement" ->
             Assert.AreEqual<string>(PrimDecrement, (getName var).[index])        
         | "FplDisjunction" ->
-            Assert.AreEqual<string>(literalOr, (getName var).[index])        
+            Assert.AreEqual<string>(LiteralOr, (getName var).[index])        
         | "FplEquality" ->
             Assert.AreEqual<string>(PrimEquality, (getName var).[index])        
         | "FplEquivalence" ->
-            Assert.AreEqual<string>(literalIif, (getName var).[index])        
+            Assert.AreEqual<string>(LiteralIif, (getName var).[index])        
         | "FplExclusiveOr" ->
-            Assert.AreEqual<string>(literalXor, (getName var).[index])        
+            Assert.AreEqual<string>(LiteralXor, (getName var).[index])        
         | "FplExtension" ->
             Assert.AreEqual<string>(PrimExtension, (getName var).[index])
         | "FplExtensionObj" ->
-            Assert.AreEqual<string>(literalObj, (getName var).[index])
+            Assert.AreEqual<string>(LiteralObj, (getName var).[index])
         | "FplForInStmt" ->
             Assert.AreEqual<string>(PrimStmt, (getName var).[index])
         | "FplForInStmtDomain" ->
@@ -607,23 +607,23 @@ type SymbolTableStructure() =
         | "FplFunctionalTerm" ->
             Assert.AreEqual<string>(PrimFuncionalTerm, (getName var).[index])
         | "FplImplication" ->
-            Assert.AreEqual<string>(literalImpl, (getName var).[index])        
+            Assert.AreEqual<string>(LiteralImpl, (getName var).[index])        
         | "FplInstance" ->
             Assert.AreEqual<string>(PrimInstance, (getName var).[index])
         | "FplIntrinsicFunc" ->
-            Assert.AreEqual<string>(literalFunc, (getName var).[index])
+            Assert.AreEqual<string>(LiteralFunc, (getName var).[index])
         | "FplIntrinsicInd" ->
-            Assert.AreEqual<string>(literalInd, (getName var).[index])
+            Assert.AreEqual<string>(LiteralInd, (getName var).[index])
         | "FplIntrinsicObj" ->
-            Assert.AreEqual<string>(literalObj, (getName var).[index])
+            Assert.AreEqual<string>(LiteralObj, (getName var).[index])
         | "FplIntrinsicPred" ->
-            Assert.AreEqual<string>(literalPred, (getName var).[index])
+            Assert.AreEqual<string>(LiteralPred, (getName var).[index])
         | "FplIntrinsicTpl" ->
-            Assert.AreEqual<string>(literalTpl, (getName var).[index])
+            Assert.AreEqual<string>(LiteralTpl, (getName var).[index])
         | "FplIntrinsicUndef" ->
-            Assert.AreEqual<string>(literalUndef, (getName var).[index])
+            Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
         | "FplIsOperator" ->
-            Assert.AreEqual<string>(literalIs, (getName var).[index])        
+            Assert.AreEqual<string>(LiteralIs, (getName var).[index])        
         | "FplJustification" ->
             Assert.AreEqual<string>(PrimJustification, (getName var).[index])
         | "FplJustificationItemByAx" ->
@@ -645,9 +645,9 @@ type SymbolTableStructure() =
         | "FplLanguage" ->
             Assert.AreEqual<string>(PrimLanguage, (getName var).[index])
         | "FplLemma" ->
-            Assert.AreEqual<string>(literalLem, (getName var).[index])
+            Assert.AreEqual<string>(LiteralLem, (getName var).[index])
         | "FplLocalization" ->
-            Assert.AreEqual<string>(literalLoc, (getName var).[index])
+            Assert.AreEqual<string>(LiteralLoc, (getName var).[index])
         | "FplMandatoryFunctionalTerm" ->
             Assert.AreEqual<string>(PrimMandatoryFunctionalTerm, (getName var).[index])
         | "FplMandatoryPredicate" ->
@@ -661,7 +661,7 @@ type SymbolTableStructure() =
         | "FplMapping" ->
             Assert.AreEqual<string>(PrimMapping, (getName var).[index])
         | "FplNegation" ->
-            Assert.AreEqual<string>(literalNot, (getName var).[index])
+            Assert.AreEqual<string>(LiteralNot, (getName var).[index])
         | "FplOptionalFunctionalTerm" ->
             Assert.AreEqual<string>(PrimOptionalFunctionalTerm, (getName var).[index])
         | "FplOptionalPredicate" ->
@@ -669,11 +669,11 @@ type SymbolTableStructure() =
         | "FplPredicate" ->
             Assert.AreEqual<string>(PrimPredicate, (getName var).[index])
         | "FplPredicateList" ->
-            Assert.AreEqual<string>(literalInf, (getName var).[index])
+            Assert.AreEqual<string>(LiteralInf, (getName var).[index])
         | "FplProof" ->
-            Assert.AreEqual<string>(literalPrf, (getName var).[index])
+            Assert.AreEqual<string>(LiteralPrf, (getName var).[index])
         | "FplProposition" ->
-            Assert.AreEqual<string>(literalProp, (getName var).[index])
+            Assert.AreEqual<string>(LiteralProp, (getName var).[index])
         | "FplQuantorAll" ->
             Assert.AreEqual<string>(PrimQuantor, (getName var).[index])
         | "FplQuantorExists" ->
@@ -687,9 +687,9 @@ type SymbolTableStructure() =
         | "FplRoot" ->
             Assert.AreEqual<string>(PrimRoot, (getName var).[index])
         | "FplRuleOfInference" ->
-            Assert.AreEqual<string>(literalInf, (getName var).[index])
+            Assert.AreEqual<string>(LiteralInf, (getName var).[index])
         | "FplTheorem" ->
-            Assert.AreEqual<string>(literalThm, (getName var).[index])
+            Assert.AreEqual<string>(LiteralThm, (getName var).[index])
         | "FplTheory" ->
             Assert.AreEqual<string>(PrimTheory, (getName var).[index])
         | "FplTranslation" ->
@@ -783,21 +783,21 @@ type SymbolTableStructure() =
         let index = 2 // FplId
         match var with
         | "FplArgInferenceAssume" ->
-            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralUndetermined, (getName var).[index])
         | "FplArgInferenceDerived" ->
-            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralUndetermined, (getName var).[index])
         | "FplArgInferenceRevoke" ->
-            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralUndetermined, (getName var).[index])
         | "FplArgInferenceTrivial" ->
-            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralUndetermined, (getName var).[index])
         | "FplArgument" ->
-            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralUndetermined, (getName var).[index])
         | "FplAssertion" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplAssignment" ->
             Assert.AreEqual<string>("assign (ln 0)", (getName var).[index])
         | "FplAxiom" ->
-            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralUndetermined, (getName var).[index])
         | "FplCases" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplCaseElse" ->
@@ -805,25 +805,25 @@ type SymbolTableStructure() =
         | "FplCaseSingle" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplClass" ->
-            Assert.AreEqual<string>(literalObj, (getName var).[index])
+            Assert.AreEqual<string>(LiteralObj, (getName var).[index])
         | "FplConjecture" ->
-            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralUndetermined, (getName var).[index])
         | "FplConjunction" ->
-            Assert.AreEqual<string>(literalAnd, (getName var).[index])        
+            Assert.AreEqual<string>(LiteralAnd, (getName var).[index])        
         | "FplConstructor" ->
-            Assert.AreEqual<string>(literalObj, (getName var).[index])
+            Assert.AreEqual<string>(LiteralObj, (getName var).[index])
         | "FplCorollary" ->
-            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralUndetermined, (getName var).[index])
         | "FplDecrement" ->
             Assert.AreEqual<string>("del.", (getName var).[index])        
         | "FplDisjunction" ->
-            Assert.AreEqual<string>(literalOr, (getName var).[index])        
+            Assert.AreEqual<string>(LiteralOr, (getName var).[index])        
         | "FplEquality" ->
             Assert.AreEqual<string>("del.", (getName var).[index])        
         | "FplEquivalence" ->
-            Assert.AreEqual<string>(literalIif, (getName var).[index])        
+            Assert.AreEqual<string>(LiteralIif, (getName var).[index])        
         | "FplExclusiveOr" ->
-            Assert.AreEqual<string>(literalXor, (getName var).[index])        
+            Assert.AreEqual<string>(LiteralXor, (getName var).[index])        
         | "FplExtension" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplExtensionObj" ->
@@ -837,25 +837,25 @@ type SymbolTableStructure() =
         | "FplFunctionalTerm" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplImplication" ->
-            Assert.AreEqual<string>(literalImpl, (getName var).[index])        
+            Assert.AreEqual<string>(LiteralImpl, (getName var).[index])        
         | "FplInstance" ->
-            Assert.AreEqual<string>(literalObj, (getName var).[index])
+            Assert.AreEqual<string>(LiteralObj, (getName var).[index])
         | "FplIntrinsicFunc" ->
-            Assert.AreEqual<string>(literalFunc, (getName var).[index])
+            Assert.AreEqual<string>(LiteralFunc, (getName var).[index])
         | "FplIntrinsicInd" ->
-            Assert.AreEqual<string>(literalInd, (getName var).[index])
+            Assert.AreEqual<string>(LiteralInd, (getName var).[index])
         | "FplIntrinsicObj" ->
-            Assert.AreEqual<string>(literalObj, (getName var).[index])
+            Assert.AreEqual<string>(LiteralObj, (getName var).[index])
         | "FplIntrinsicPred" ->
-            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralUndetermined, (getName var).[index])
         | "FplIntrinsicTpl" ->
-            Assert.AreEqual<string>(literalTpl, (getName var).[index])
+            Assert.AreEqual<string>(LiteralTpl, (getName var).[index])
         | "FplIntrinsicUndef" ->
-            Assert.AreEqual<string>(literalUndef, (getName var).[index])
+            Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
         | "FplIsOperator" ->
-            Assert.AreEqual<string>(literalIs, (getName var).[index])        
+            Assert.AreEqual<string>(LiteralIs, (getName var).[index])        
         | "FplJustification" ->
-            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralUndetermined, (getName var).[index])
         | "FplJustificationItemByAx" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplJustificationItemByCor" ->
@@ -875,13 +875,13 @@ type SymbolTableStructure() =
         | "FplLanguage" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplLemma" ->
-            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralUndetermined, (getName var).[index])
         | "FplLocalization" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplMandatoryFunctionalTerm" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplMandatoryPredicate" ->
-            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralUndetermined, (getName var).[index])
         | "FplMapCaseElse" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplMapCaseSingle" ->
@@ -891,35 +891,35 @@ type SymbolTableStructure() =
         | "FplMapping" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplNegation" ->
-            Assert.AreEqual<string>(literalNot, (getName var).[index])
+            Assert.AreEqual<string>(LiteralNot, (getName var).[index])
         | "FplOptionalFunctionalTerm" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplOptionalPredicate" ->
-            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralUndetermined, (getName var).[index])
         | "FplPredicate" ->
-            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralUndetermined, (getName var).[index])
         | "FplPredicateList" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplProof" ->
-            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralUndetermined, (getName var).[index])
         | "FplProposition" ->
-            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralUndetermined, (getName var).[index])
         | "FplQuantorAll" ->
-            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralUndetermined, (getName var).[index])
         | "FplQuantorExists" ->
-            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralUndetermined, (getName var).[index])
         | "FplQuantorExistsN" ->
-            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralUndetermined, (getName var).[index])
         | "FplReference" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplReturn" ->
-            Assert.AreEqual<string>(literalRet, (getName var).[index])
+            Assert.AreEqual<string>(LiteralRet, (getName var).[index])
         | "FplRoot" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplRuleOfInference" ->
-            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralUndetermined, (getName var).[index])
         | "FplTheorem" ->
-            Assert.AreEqual<string>(literalUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralUndetermined, (getName var).[index])
         | "FplTheory" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplTranslation" ->
@@ -1014,21 +1014,21 @@ type SymbolTableStructure() =
         let index = 3 // TypeId
         match var with
         | "FplArgInferenceAssume" ->
-            Assert.AreEqual<string>(literalPred, (getName var).[index])
+            Assert.AreEqual<string>(LiteralPred, (getName var).[index])
         | "FplArgInferenceDerived" ->
-            Assert.AreEqual<string>(literalPred, (getName var).[index])
+            Assert.AreEqual<string>(LiteralPred, (getName var).[index])
         | "FplArgInferenceRevoke" ->
-            Assert.AreEqual<string>(literalPred, (getName var).[index])
+            Assert.AreEqual<string>(LiteralPred, (getName var).[index])
         | "FplArgInferenceTrivial" ->
-            Assert.AreEqual<string>(literalPred, (getName var).[index])
+            Assert.AreEqual<string>(LiteralPred, (getName var).[index])
         | "FplArgument" ->
-            Assert.AreEqual<string>(literalPred, (getName var).[index])
+            Assert.AreEqual<string>(LiteralPred, (getName var).[index])
         | "FplAssertion" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplAssignment" ->
-            Assert.AreEqual<string>(literalUndef, (getName var).[index])
+            Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
         | "FplAxiom" ->
-            Assert.AreEqual<string>(literalPred, (getName var).[index])
+            Assert.AreEqual<string>(LiteralPred, (getName var).[index])
         | "FplCases" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplCaseElse" ->
@@ -1036,25 +1036,25 @@ type SymbolTableStructure() =
         | "FplCaseSingle" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplClass" ->
-            Assert.AreEqual<string>(literalObj, (getName var).[index])
+            Assert.AreEqual<string>(LiteralObj, (getName var).[index])
         | "FplConjecture" ->
-            Assert.AreEqual<string>(literalPred, (getName var).[index])
+            Assert.AreEqual<string>(LiteralPred, (getName var).[index])
         | "FplConjunction" ->
-            Assert.AreEqual<string>(literalPred, (getName var).[index])        
+            Assert.AreEqual<string>(LiteralPred, (getName var).[index])        
         | "FplConstructor" ->
-            Assert.AreEqual<string>(literalObj, (getName var).[index])
+            Assert.AreEqual<string>(LiteralObj, (getName var).[index])
         | "FplCorollary" ->
-            Assert.AreEqual<string>(literalPred, (getName var).[index])
+            Assert.AreEqual<string>(LiteralPred, (getName var).[index])
         | "FplDecrement" ->
             Assert.AreEqual<string>("del.", (getName var).[index])        
         | "FplDisjunction" ->
-            Assert.AreEqual<string>(literalPred, (getName var).[index])        
+            Assert.AreEqual<string>(LiteralPred, (getName var).[index])        
         | "FplEquality" ->
             Assert.AreEqual<string>("del.", (getName var).[index])        
         | "FplEquivalence" ->
-            Assert.AreEqual<string>(literalPred, (getName var).[index])        
+            Assert.AreEqual<string>(LiteralPred, (getName var).[index])        
         | "FplExclusiveOr" ->
-            Assert.AreEqual<string>(literalPred, (getName var).[index])        
+            Assert.AreEqual<string>(LiteralPred, (getName var).[index])        
         | "FplExtension" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplExtensionObj" ->
@@ -1068,25 +1068,25 @@ type SymbolTableStructure() =
         | "FplFunctionalTerm" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplImplication" ->
-            Assert.AreEqual<string>(literalPred, (getName var).[index])        
+            Assert.AreEqual<string>(LiteralPred, (getName var).[index])        
         | "FplInstance" ->
-            Assert.AreEqual<string>(literalObj, (getName var).[index])
+            Assert.AreEqual<string>(LiteralObj, (getName var).[index])
         | "FplIntrinsicFunc" ->
-            Assert.AreEqual<string>(literalFunc, (getName var).[index])
+            Assert.AreEqual<string>(LiteralFunc, (getName var).[index])
         | "FplIntrinsicInd" ->
-            Assert.AreEqual<string>(literalInd, (getName var).[index])
+            Assert.AreEqual<string>(LiteralInd, (getName var).[index])
         | "FplIntrinsicObj" ->
-            Assert.AreEqual<string>(literalObj, (getName var).[index])
+            Assert.AreEqual<string>(LiteralObj, (getName var).[index])
         | "FplIntrinsicPred" ->
-            Assert.AreEqual<string>(literalPred, (getName var).[index])
+            Assert.AreEqual<string>(LiteralPred, (getName var).[index])
         | "FplIntrinsicTpl" ->
-            Assert.AreEqual<string>(literalTpl, (getName var).[index])
+            Assert.AreEqual<string>(LiteralTpl, (getName var).[index])
         | "FplIntrinsicUndef" ->
-            Assert.AreEqual<string>(literalUndef, (getName var).[index])
+            Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
         | "FplIsOperator" ->
-            Assert.AreEqual<string>(literalPred, (getName var).[index])        
+            Assert.AreEqual<string>(LiteralPred, (getName var).[index])        
         | "FplJustification" ->
-            Assert.AreEqual<string>(literalPred, (getName var).[index])
+            Assert.AreEqual<string>(LiteralPred, (getName var).[index])
         | "FplJustificationItemByAx" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplJustificationItemByCor" ->
@@ -1106,13 +1106,13 @@ type SymbolTableStructure() =
         | "FplLanguage" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplLemma" ->
-            Assert.AreEqual<string>(literalPred, (getName var).[index])
+            Assert.AreEqual<string>(LiteralPred, (getName var).[index])
         | "FplLocalization" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplMandatoryFunctionalTerm" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplMandatoryPredicate" ->
-            Assert.AreEqual<string>(literalPred, (getName var).[index])
+            Assert.AreEqual<string>(LiteralPred, (getName var).[index])
         | "FplMapCaseElse" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplMapCaseSingle" ->
@@ -1122,35 +1122,35 @@ type SymbolTableStructure() =
         | "FplMapping" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplNegation" ->
-            Assert.AreEqual<string>(literalPred, (getName var).[index])
+            Assert.AreEqual<string>(LiteralPred, (getName var).[index])
         | "FplOptionalFunctionalTerm" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplOptionalPredicate" ->
-            Assert.AreEqual<string>(literalPred, (getName var).[index])
+            Assert.AreEqual<string>(LiteralPred, (getName var).[index])
         | "FplPredicate" ->
-            Assert.AreEqual<string>(literalPred, (getName var).[index])
+            Assert.AreEqual<string>(LiteralPred, (getName var).[index])
         | "FplPredicateList" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplProof" ->
-            Assert.AreEqual<string>(literalPred, (getName var).[index])
+            Assert.AreEqual<string>(LiteralPred, (getName var).[index])
         | "FplProposition" ->
-            Assert.AreEqual<string>(literalPred, (getName var).[index])
+            Assert.AreEqual<string>(LiteralPred, (getName var).[index])
         | "FplQuantorAll" ->
-            Assert.AreEqual<string>(literalPred, (getName var).[index])
+            Assert.AreEqual<string>(LiteralPred, (getName var).[index])
         | "FplQuantorExists" ->
-            Assert.AreEqual<string>(literalPred, (getName var).[index])
+            Assert.AreEqual<string>(LiteralPred, (getName var).[index])
         | "FplQuantorExistsN" ->
-            Assert.AreEqual<string>(literalPred, (getName var).[index])
+            Assert.AreEqual<string>(LiteralPred, (getName var).[index])
         | "FplReference" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplReturn" ->
-            Assert.AreEqual<string>(literalUndef, (getName var).[index])
+            Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
         | "FplRoot" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplRuleOfInference" ->
-            Assert.AreEqual<string>(literalPred, (getName var).[index])
+            Assert.AreEqual<string>(LiteralPred, (getName var).[index])
         | "FplTheorem" ->
-            Assert.AreEqual<string>(literalPred, (getName var).[index])
+            Assert.AreEqual<string>(LiteralPred, (getName var).[index])
         | "FplTheory" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplTranslation" ->
@@ -1414,7 +1414,7 @@ type SymbolTableStructure() =
     [<DataRow("FplArgument", "00", """;""", "")>]
     [<DataRow("FplAssertion", "00", """;""", "")>]
     [<DataRow("FplAssignment", "00", """def pred T() {dec ~x:pred x:=false; true};""", "")>]
-    [<DataRow("FplAxiom", "00", """ax T() {true};""", "")>]
+    [<DataRow("FplAxiom", "00", """ax T {true};""", "")>]
     [<DataRow("FplCases", "00", """;""", "")>]
     [<DataRow("FplCaseElse", "00", """;""", "")>]
     [<DataRow("FplCaseSingle", "00", """;""", "")>]
@@ -1429,14 +1429,14 @@ type SymbolTableStructure() =
     // two constructors
     [<DataRow("FplClass", "02a", """def cl A:obj { ctor A() {} ctor A(x,y,z:obj) {} };""", "")>]
     // intrinsic (without constructor), but with properties
-    [<DataRow("FplClass", "03", """def cl A:obj { intr prty func MandF()->obj {intr} prty func opt OptF()->obj {intr} prty pred MandP() {true} prty pred opt OptP() {true} };""", "")>]
+    [<DataRow("FplClass", "03", """def cl A:obj { intr prty func MandF()->obj {intr} opt prty func OptF()->obj {intr} prty pred MandP() {true} opt prty pred OptP() {true} };""", "")>]
     // with constructor and properties
-    [<DataRow("FplClass", "04", """def cl A:obj { ctor A() {} prty func MandF()->obj {intr} prty func opt OptF()->obj {intr} prty pred MandP() {true} prty pred opt OptP() {true} };""", "")>]
+    [<DataRow("FplClass", "04", """def cl A:obj { ctor A() {} prty func MandF()->obj {intr} opt prty func OptF()->obj {intr} prty pred MandP() {true} opt prty pred OptP() {true} };""", "")>]
     // with variables constructor and properties
-    [<DataRow("FplClass", "05", """def cl A:obj { dec ~x,y:obj; ctor A() {} prty func MandF()->obj {intr} prty func opt OptF()->obj {intr} prty pred MandP() {true} prty pred opt OptP() {true} };""", "")>]
+    [<DataRow("FplClass", "05", """def cl A:obj { dec ~x,y:obj; ctor A() {} prty func MandF()->obj {intr} opt prty func OptF()->obj {intr} prty pred MandP() {true} opt prty pred OptP() {true} };""", "")>]
     
     // conjecture
-    [<DataRow("FplConjecture", "00", """conj T() {true};""", "")>]
+    [<DataRow("FplConjecture", "00", """conj T {true};""", "")>]
 
     [<DataRow("FplConjunction", "00", """;""", "")>]
 
@@ -1466,9 +1466,9 @@ type SymbolTableStructure() =
     // intrinsic functional term with variables
     [<DataRow("FplFunctionalTerm", "01", """def func T(x,y:obj)->obj {intr};""", "")>]
     // intrinsic functional term with variables and properties
-    [<DataRow("FplFunctionalTerm", "02", """def func T(x,y:obj)->obj {intr prty func MandF()->obj {intr} prty func opt OptF()->obj {intr} prty pred MandP() {true} prty pred opt OptP() {true} };""", "")>]
+    [<DataRow("FplFunctionalTerm", "02", """def func T(x,y:obj)->obj {intr prty func MandF()->obj {intr} opt prty func OptF()->obj {intr} prty pred MandP() {true} opt prty pred OptP() {true} };""", "")>]
     // non-intrinsic functional term with variables and properties
-    [<DataRow("FplFunctionalTerm", "03", """def func T(x,y:obj)->obj {dec ~z:obj; return z prty func MandF()->obj {intr} prty func opt OptF()->obj {intr} prty pred MandP() {true} prty pred opt OptP() {true} };""", "")>]
+    [<DataRow("FplFunctionalTerm", "03", """def func T(x,y:obj)->obj {dec ~z:obj; return z prty func MandF()->obj {intr} opt prty func OptF()->obj {intr} prty pred MandP() {true} opt prty pred OptP() {true} };""", "")>]
     // non-intrinsic functional term with some statements 
     [<DataRow("FplFunctionalTerm", "04", """def func T(x,y:obj)->obj {dec ~z:obj z:=x y:=z; return z };""", "")>]
     
@@ -1520,7 +1520,7 @@ type SymbolTableStructure() =
     [<DataRow("FplJustificationItemByCor", "00", """;""", "")>]
     [<DataRow("FplJustificationItemByDef", "00", """;""", "")>]
     [<DataRow("FplJustificationItemByDefVar", "00", """;""", "")>]
-    [<DataRow("FplJustificationItemByInf", "00", """inf ExistsByExample() {pre:true con:true} proof T$1 { 100. ExistsByExample, 1 |- false };""", "")>]
+    [<DataRow("FplJustificationItemByInf", "00", """inf ExistsByExample {pre:true con:true} proof T$1 { 100. ExistsByExample, 1 |- false };""", "")>]
     [<DataRow("FplJustificationItemByProofArgument", "00", """;""", "")>]
     [<DataRow("FplJustificationItemByRefArgument", "00", """;""", "")>]
     [<DataRow("FplJustificationItemByTheoremLikeStmt", "00", """;""", "")>]
@@ -1580,51 +1580,51 @@ type SymbolTableStructure() =
     [<DataRow("FplNegation", "00", """;""", "")>]
 
     // intrinsic optional functional term with predicate parent
-    [<DataRow("FplOptionalFunctionalTerm", "00",  """def pred T() {intr prty func opt MandF(x:obj)->obj {intr} };""", "")>]
+    [<DataRow("FplOptionalFunctionalTerm", "00",  """def pred T() {intr opt prty func MandF(x:obj)->obj {intr} };""", "")>]
     // intrinsic optional functional term with functional term parent
-    [<DataRow("FplOptionalFunctionalTerm", "01",  """def func T()->obj {intr prty func opt MandF(x:obj)->obj {intr} };""", "")>]
+    [<DataRow("FplOptionalFunctionalTerm", "01",  """def func T()->obj {intr opt prty func MandF(x:obj)->obj {intr} };""", "")>]
     // intrinsic optional functional term with class parent
-    [<DataRow("FplOptionalFunctionalTerm", "02",  """def cl T:obj {intr prty func opt MandF(x:obj)->obj {intr} };""", "")>]
+    [<DataRow("FplOptionalFunctionalTerm", "02",  """def cl T:obj {intr opt prty func MandF(x:obj)->obj {intr} };""", "")>]
     // non-intrinsic optional functional term with predicate parent
-    [<DataRow("FplOptionalFunctionalTerm", "03",  """def pred T() {intr prty func opt MandF(x:obj)->obj {return x} };""", "")>]
+    [<DataRow("FplOptionalFunctionalTerm", "03",  """def pred T() {intr opt prty func MandF(x:obj)->obj {return x} };""", "")>]
     // non-intrinsic optional functional term with functional term parent
-    [<DataRow("FplOptionalFunctionalTerm", "04",  """def func T()->obj {intr prty func opt MandF(x:obj)->obj {return x} };""", "")>]
+    [<DataRow("FplOptionalFunctionalTerm", "04",  """def func T()->obj {intr opt prty func MandF(x:obj)->obj {return x} };""", "")>]
     // non-intrinsic optional functional term with class parent
-    [<DataRow("FplOptionalFunctionalTerm", "05",  """def cl T:obj {intr prty func opt MandF(x:obj)->obj {return x} };""", "")>]
+    [<DataRow("FplOptionalFunctionalTerm", "05",  """def cl T:obj {intr opt prty func MandF(x:obj)->obj {return x} };""", "")>]
     // non-intrinsic optional functional term with predicate parent, shared variables and one statement
-    [<DataRow("FplOptionalFunctionalTerm", "06",  """def pred T() {dec ~y:obj; true prty func opt MandF(x:obj)->obj {dec x:=y; return x} };""", "")>]
+    [<DataRow("FplOptionalFunctionalTerm", "06",  """def pred T() {dec ~y:obj; true opt prty func MandF(x:obj)->obj {dec x:=y; return x} };""", "")>]
     // non-intrinsic optional functional term with functional term parent, shared variables and one statement
-    [<DataRow("FplOptionalFunctionalTerm", "07",  """def func T()->obj {dec ~y:obj; return y prty func opt MandF(x:obj)->obj {dec x:=y; return x} };""", "")>]
+    [<DataRow("FplOptionalFunctionalTerm", "07",  """def func T()->obj {dec ~y:obj; return y opt prty func MandF(x:obj)->obj {dec x:=y; return x} };""", "")>]
     // non-intrinsic optional functional term with class parent, shared variables and one statement
-    [<DataRow("FplOptionalFunctionalTerm", "08",  """def cl T:obj {dec ~y:obj; ctor T() {} prty func opt MandF(x:obj)->obj {dec x:=y; return x} };""", "")>]
+    [<DataRow("FplOptionalFunctionalTerm", "08",  """def cl T:obj {dec ~y:obj; ctor T() {} opt prty func MandF(x:obj)->obj {dec x:=y; return x} };""", "")>]
 
     // intrinsic optional predicate with predicate parent
-    [<DataRow("FplOptionalPredicate", "00",  """def pred T() {intr prty pred opt MandF(x:obj) {intr} };""", "")>]
+    [<DataRow("FplOptionalPredicate", "00",  """def pred T() {intr opt prty pred MandF(x:obj) {intr} };""", "")>]
     // intrinsic optional predicate with functional term parent
-    [<DataRow("FplOptionalPredicate", "01",  """def func T()->obj {intr prty pred opt MandF(x:obj) {intr} };""", "")>]
+    [<DataRow("FplOptionalPredicate", "01",  """def func T()->obj {intr opt prty pred MandF(x:obj) {intr} };""", "")>]
     // intrinsic optional predicate with class parent
-    [<DataRow("FplOptionalPredicate", "02",  """def cl T:obj {intr prty pred opt MandF(x:obj) {intr} };""", "")>]
+    [<DataRow("FplOptionalPredicate", "02",  """def cl T:obj {intr opt prty pred MandF(x:obj) {intr} };""", "")>]
     // non-intrinsic optional predicate with predicate parent
-    [<DataRow("FplOptionalPredicate", "03",  """def pred T() {intr prty pred opt MandF(x:obj) {true} };""", "")>]
+    [<DataRow("FplOptionalPredicate", "03",  """def pred T() {intr opt prty pred MandF(x:obj) {true} };""", "")>]
     // non-intrinsic optional predicate with functional term parent
-    [<DataRow("FplOptionalPredicate", "04",  """def func T()->obj {intr prty pred opt MandF(x:obj) {true} };""", "")>]
+    [<DataRow("FplOptionalPredicate", "04",  """def func T()->obj {intr opt prty pred MandF(x:obj) {true} };""", "")>]
     // non-intrinsic optional predicate with class parent
-    [<DataRow("FplOptionalPredicate", "05",  """def cl T:obj {intr prty pred opt MandF(x:obj) {true} };""", "")>]
+    [<DataRow("FplOptionalPredicate", "05",  """def cl T:obj {intr opt prty pred MandF(x:obj) {true} };""", "")>]
     // non-intrinsic optional predicate with predicate parent, shared variables and one statement
-    [<DataRow("FplOptionalPredicate", "06",  """def pred T() {dec ~y:obj; true prty pred opt MandF(x:obj) {dec x:=y; true} };""", "")>]
+    [<DataRow("FplOptionalPredicate", "06",  """def pred T() {dec ~y:obj; true opt prty pred MandF(x:obj) {dec x:=y; true} };""", "")>]
     // non-intrinsic optional predicate with functional term parent, shared variables and one statement
-    [<DataRow("FplOptionalPredicate", "07",  """def func T()->obj {dec ~y:obj; return y prty pred opt MandF(x:obj) {dec x:=y; true} };""", "")>]
+    [<DataRow("FplOptionalPredicate", "07",  """def func T()->obj {dec ~y:obj; return y opt prty pred MandF(x:obj) {dec x:=y; true} };""", "")>]
     // non-intrinsic optional predicate with class parent, shared variables and one statement
-    [<DataRow("FplOptionalPredicate", "08",  """def cl T:obj {dec ~y:obj; ctor T() {} prty pred opt MandF(x:obj) {dec x:=y; true} };""", "")>]
+    [<DataRow("FplOptionalPredicate", "08",  """def cl T:obj {dec ~y:obj; ctor T() {} opt prty pred MandF(x:obj) {dec x:=y; true} };""", "")>]
 
     // intrinsic predicate
     [<DataRow("FplPredicate", "00", """def pred T() {intr};""", "")>]
     // intrinsic predicate with variables
     [<DataRow("FplPredicate", "01", """def pred T(x,y:obj) {intr};""", "")>]
     // intrinsic predicate with variables and properties
-    [<DataRow("FplPredicate", "02", """def pred T(x,y:obj) {intr prty func MandF()->obj {intr} prty func opt OptF()->obj {intr} prty pred MandP() {true} prty pred opt OptP() {true} };""", "")>]
+    [<DataRow("FplPredicate", "02", """def pred T(x,y:obj) {intr prty func MandF()->obj {intr} opt prty func OptF()->obj {intr} prty pred MandP() {true} opt prty pred OptP() {true} };""", "")>]
     // non-intrinsic predicate with variables and properties
-    [<DataRow("FplPredicate", "03", """def pred T(x,y:obj) {dec ~z:obj; true prty func MandF()->obj {intr} prty func opt OptF()->obj {intr} prty pred MandP() {true} prty pred opt OptP() {true} };""", "")>]
+    [<DataRow("FplPredicate", "03", """def pred T(x,y:obj) {dec ~z:obj; true prty func MandF()->obj {intr} opt prty func OptF()->obj {intr} prty pred MandP() {true} opt prty pred OptP() {true} };""", "")>]
     // non-intrinsic predicate with some statements 
     [<DataRow("FplPredicate", "04", """def pred T(x,y:obj) {dec ~z:obj z:=x y:=z; false };""", "")>]
 
@@ -1645,12 +1645,12 @@ type SymbolTableStructure() =
     // proof with conjecture
     [<DataRow("FplProof", "01c", """prop T {true} proof T$1 {1. |- trivial};""", "")>]
     // proof with corollary
-    [<DataRow("FplProof", "02", """thm T {true} cor T$1() {true} proof T$1$1 {1. |- trivial};""", "")>]
+    [<DataRow("FplProof", "02", """thm T {true} cor T$1 {true} proof T$1$1 {1. |- trivial};""", "")>]
     // proof with two arguments
     [<DataRow("FplProof", "03", """proof T$1$1 {1. byax A |- trivial 2. |- trivial};""", "")>]
 
     // proposition
-    [<DataRow("FplProposition", "00", """prop T() {true};""", "")>]
+    [<DataRow("FplProposition", "00", """prop T {true};""", "")>]
 
     [<DataRow("FplQuantorAll", "00", """;""", "")>]
     [<DataRow("FplQuantorExists", "00", """;""", "")>]
@@ -1660,9 +1660,9 @@ type SymbolTableStructure() =
     [<DataRow("FplRoot", "00", """;""", "")>]
 
     // rule of inference with one premise
-    [<DataRow("FplRuleOfInference", "00", """inf T() {pre:true con:false};""", "")>]
+    [<DataRow("FplRuleOfInference", "00", """inf T {pre:true con:false};""", "")>]
     // rule of inference with three premises
-    [<DataRow("FplRuleOfInference", "01", """inf T() {pre:true, true, true con:false};""", "")>]
+    [<DataRow("FplRuleOfInference", "01", """inf T {pre:true, true, true con:false};""", "")>]
 
     // theorem
     [<DataRow("FplTheorem", "00", """thm T {true};""", "")>]

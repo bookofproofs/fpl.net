@@ -100,7 +100,7 @@ namespace FplLS
                 ,{ "cmc","Chamic languages" }
                 ,{ "cnr","Montenegrin" }
                 ,{ "cop","Coptic" }
-                ,{ literalCor,"Cornish" }
+                ,{ LiteralCor,"Cornish" }
                 ,{ "cos","Corsican" }
                 ,{ "cpe","Creoles and pidgins, English based" }
                 ,{ "cpf","Creoles and pidgins, French-based" }
@@ -116,7 +116,7 @@ namespace FplLS
                 ,{ "dan","Danish" }
                 ,{ "dar","Dargwa" }
                 ,{ "day","Land Dayak languages" }
-                ,{ literalDel,"Delaware" }
+                ,{ LiteralDel,"Delaware" }
                 ,{ "den","Slave (Athapascan)" }
                 ,{ "deu","German" }
                 ,{ "dgr","Dogrib" }
@@ -203,7 +203,7 @@ namespace FplLS
                 ,{ "ilo","Iloko" }
                 ,{ "ina","Interlingua (International Auxiliary Language Association)" }
                 ,{ "inc","Indic languages" }
-                ,{ literalInd,"Indonesian" }
+                ,{ LiteralInd,"Indonesian" }
                 ,{ "ine","Indo-European languages" }
                 ,{ "inh","Ingush" }
                 ,{ "ipk","Inupiaq" }

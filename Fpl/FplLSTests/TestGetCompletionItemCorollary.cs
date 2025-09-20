@@ -7,8 +7,8 @@ namespace FplLSTests
     public class TestGetCompletionItemCorollary
     {
 
-        [DataRow(literalCorL)]
-        [DataRow(literalCor)]
+        [DataRow(LiteralCorL)]
+        [DataRow(LiteralCor)]
         [TestMethod]
         public void TestAddCorollaryChoicesNumber(string choice)
         {
@@ -17,8 +17,8 @@ namespace FplLSTests
             Assert.AreEqual<int>(2, actual.Count);
         }
 
-        [DataRow(literalCorL)]
-        [DataRow(literalCor)]
+        [DataRow(LiteralCorL)]
+        [DataRow(LiteralCor)]
         [TestMethod]
         public void TestAddCorollaryKeywordCounts(string choice)
         {
@@ -32,10 +32,10 @@ namespace FplLSTests
             Assert.AreEqual<int>(1, count);
         }
 
-        [DataRow(literalCorL, CompletionItemKind.Property, "corollary01")]
-        [DataRow(literalCor, CompletionItemKind.Property, "corollary02")]
-        [DataRow(literalCorL, CompletionItemKind.Keyword, "zzzcorollary01")]
-        [DataRow(literalCor, CompletionItemKind.Keyword, "zzzzcorollary02")]
+        [DataRow(LiteralCorL, CompletionItemKind.Property, "corollary01")]
+        [DataRow(LiteralCor, CompletionItemKind.Property, "corollary02")]
+        [DataRow(LiteralCorL, CompletionItemKind.Keyword, "zzzcorollary01")]
+        [DataRow(LiteralCor, CompletionItemKind.Keyword, "zzzzcorollary02")]
         [TestMethod]
         public void TestAddChoicesSortText(string choice, CompletionItemKind kind, string expected)
         {
@@ -50,8 +50,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow(literalCorL)]
-        [DataRow(literalCor)]
+        [DataRow(LiteralCorL)]
+        [DataRow(LiteralCor)]
         [TestMethod]
         public void TestInsertTextEndsWithTwoNewLines(string choice)
         {
@@ -66,8 +66,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow(literalCorL)]
-        [DataRow(literalCor)]
+        [DataRow(LiteralCorL)]
+        [DataRow(LiteralCor)]
         [TestMethod]
         public void TestAddCorollaryChoicesLabel(string choice)
         {
@@ -79,8 +79,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow(literalCorL)]
-        [DataRow(literalCor)]
+        [DataRow(LiteralCorL)]
+        [DataRow(LiteralCor)]
         [TestMethod]
         public void TestAddCorollaryChoicesDetail(string choice)
         {
@@ -92,8 +92,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow(literalCorL)]
-        [DataRow(literalCor)]
+        [DataRow(LiteralCorL)]
+        [DataRow(LiteralCor)]
         [TestMethod]
         public void TestAddCorollaryChoicesInsertText(string choice)
         {
@@ -103,6 +103,14 @@ namespace FplLSTests
             foreach (var item in actual)
             {
                 if (item.InsertText.Contains(choice)) { counterSnippets++; }
+                if (item.InsertText.Contains(" "))
+                {
+                    var res = FplParser.testParser(LiteralCor, item.InsertText);
+                    if (!res.StartsWith("Success:"))
+                    {
+                        Assert.IsTrue(false, res);
+                    }
+                }
             }
             Assert.AreEqual<int>(actual.Count, counterSnippets);
         }

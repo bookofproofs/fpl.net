@@ -20,7 +20,7 @@ type TestClassInheritanceTypes () =
 
     [<TestMethod>]
     member this.TestSpecificType4 () =
-        let result = run (specificClassType .>> eof) literalTpl
+        let result = run (specificClassType .>> eof) LiteralTpl
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
