@@ -62,6 +62,12 @@ namespace FplLS
                 case ")":
                     ci.Detail = "closing '('";
                     break;
+                case "[":
+                    ci.Detail = "opening '['";
+                    break;
+                case "]":
+                    ci.Detail = "closing ']'";
+                    break;
                 default:
                     ci.Detail = "unknown";
                     break;
