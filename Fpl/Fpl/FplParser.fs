@@ -562,9 +562,9 @@ let keywordClass = (skipString LiteralClL <|> skipString LiteralCl)
 let constructorList = many1 (constructor .>> IW)
 let classCompleteContent = varDeclOrSpecList .>>. constructorList|>> Ast.DefClassCompleteContent
 let classDefinitionBlock = leftBrace  >>. ((keywordIntrinsic <|> classCompleteContent) .>> IW) .>>. propertyList .>> spacesRightBrace
-let inheritedClassTypeList = sepBy1 (IW >>. inheritedClassType .>>  IW) comma
+let inheritedClassTypeList = sepBy1 (inheritedClassType) (attempt (IW >>. comma))
 
-let classSignature = positions "ClassSignature" (keywordClass >>. SW >>. simpleSignature .>>. (colon >>. inheritedClassTypeList) .>>. opt userDefinedObjSym) .>> IW |>> Ast.ClassSignature 
+let classSignature = positions "ClassSignature" (keywordClass >>. SW >>. simpleSignature .>>. (colon >>. inheritedClassTypeList) .>>. opt (attempt (IW >>. userDefinedObjSym))) .>> IW |>> Ast.ClassSignature 
 let definitionClass = positions "DefinitionClass" (classSignature .>>. classDefinitionBlock) |>> Ast.DefinitionClass 
 
 let keywordDefinition = (skipString LiteralDefL <|> skipString LiteralDef) >>. SW
