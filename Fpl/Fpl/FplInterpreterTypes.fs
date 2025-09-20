@@ -3074,8 +3074,21 @@ type FplVariable(positions: Positions, parent: FplValue) =
     override this.RunOrder = None
 
 [<AbstractClass>]
-type FplGenericFunctionalTerm(positions: Positions, parent: FplValue) =
+type FplGenericFunctionalTerm(positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
+    let mutable _signStartPos = Position("", (int64)0, (int64)0, (int64)0)
+    let mutable _signEndPos = Position("", (int64)0, (int64)0, (int64)0)
+
+    do 
+        this.TypeId <- LiteralFunc
+
+    interface IHasSignature with
+        member _.SignStartPos 
+            with get (): Position = _signStartPos
+            and set (value) = _signStartPos <- value
+        member _.SignEndPos 
+            with get (): Position = _signEndPos
+            and set (value) = _signEndPos <- value
 
     override this.Type signatureType = 
         let head = getFplHead this signatureType

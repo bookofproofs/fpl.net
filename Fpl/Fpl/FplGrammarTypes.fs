@@ -58,7 +58,7 @@ type Ast =
     | UsesClause of Positions * Ast
     | BrackedCoordList of Positions * Ast list
     | ReferencingIdentifier of Positions * (Ast * Ast list)
-    | ProofOrCorollaryIdentifier of Positions * (Ast * Ast list)
+    | ProofSignature of Positions * (Ast * Ast list)
 
     // Types
     | One of Positions * unit
@@ -127,24 +127,31 @@ type Ast =
     | StatementList of Positions * Ast list
     | PremiseList of Positions * Ast list
     | PremiseConclusionBlock of Positions * ((Ast list option * Ast) * Ast)
+    | RuleOfInferenceSignature of Positions * Ast
     | RuleOfInference of Positions * (Ast * Ast)
     | Localization of Positions * (Ast * Ast list)
-    | Theorem of Positions * (Ast *(Ast list option * Ast))
+    | TheoremSignature of Positions * Ast
+    | Theorem of Positions * (Ast * (Ast list option * Ast))
+    | LemmaSignature of Positions * Ast
     | Lemma of Positions * (Ast *(Ast list option * Ast))
+    | PropositionSignature of Positions * Ast
     | Proposition of Positions * (Ast *(Ast list option * Ast))
     | Corollary of Positions * (Ast * (Ast list option * Ast))
-    | CorollarySignature of Ast
+    | CorollarySignature of Positions * (Ast * Ast list)
+    | ConjectureSignature of Positions * Ast
     | Conjecture of Positions * (Ast *(Ast list option * Ast))
     | NamedVarDecl of Positions * ((Ast list * Ast) * Ast) 
     | ParamTuple of Positions * Ast list
-    | SimpleSignature of Positions * Ast 
-    | Signature of Positions * (Ast * Ast)
     | Mapping of Positions * Ast
+    | AxiomSignature of Positions * Ast
     | Axiom of Positions * (Ast * (Ast list option * Ast))
     | ParentConstructorCall of Positions * (Ast * Ast)
+    | ConstructorSignature of Positions * (Ast * Ast)
+    | PredicateInstanceSignature of Positions * (Ast * Ast)
+    | FunctionalTermInstanceSignature of Positions * ((Ast * Ast) * Ast)
     | Constructor of Positions * (Ast * (Ast list option)) 
     | PredicateInstance of Positions * (unit option * (Ast * Ast))
-    | FunctionalTermInstance of Positions * ((unit option * (Ast * Ast)) * Ast)
+    | FunctionalTermInstance of Positions * ((unit option * Ast) * Ast)
     | DefPredicateContent of Ast list option * Ast
     | DefinitionPredicate of Positions * (Ast * (Ast * Ast list option))
     | DefFunctionContent of Ast list option * Ast

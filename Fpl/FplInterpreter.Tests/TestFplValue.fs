@@ -232,15 +232,20 @@ type TestFplValue() =
         let block = result.Value.Root.Scope[filename]
         let fplValue = block.Scope[expectedName]
         let actualTypeSignature = fplValue.Type(SignatureType.Type)
-        let actualSignatureStart = fplValue.StartPos.Index
-        let actualSignatureEnd = fplValue.EndPos.Index
         Assert.AreEqual<string>(expectedType, actualTypeSignature)
-        let expectedStart =
-            if fplCode.StartsWith("def ") then 
-                (int64)4
-            else
-                (int64)0
-        Assert.AreEqual<int64>(expectedStart, actualSignatureStart)
+        match box fplValue with
+        | :? IHasSignature as withSignature ->
+            let expectedStart =
+                if fplCode.StartsWith("def ") then 
+                    (int64)4
+                else
+                    (int64)0            
+            Assert.AreEqual<int64>(expectedStart, withSignature.SignStartPos.Index)
+            let expectedEnd = (int64)(fplCode.IndexOf(" {", System.StringComparison.OrdinalIgnoreCase))
+            Assert.AreEqual<int64>(expectedEnd, withSignature.SignEndPos.Index)
+        | _ -> failwith($"{expectedName} does not implement IHasSignature")
+
+
         prepareFplCode(filename, "", true) |> ignore
 
     [<DataRow("""loc not(x) := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;;""", "not(x)")>]
@@ -533,13 +538,11 @@ type TestFplValue() =
         let cl = result.Value.Root.Scope[filename].Scope["T"]
         let fplValue = cl.Scope[expectedName]
         let actualTypeSignature = fplValue.Type(SignatureType.Type)
-        let actualSignatureStart = fplValue.StartPos.Index
-        let actualSignatureEnd = fplValue.EndPos.Index
+        match box fplValue with
+        | :? IHasSignature as withSignature ->
+            Assert.AreEqual<int64>((int64)14, withSignature.SignStartPos.Index)
+            let expectedEnd = (int64)(fplCode.IndexOf(" {}", System.StringComparison.OrdinalIgnoreCase))
+            Assert.AreEqual<int64>(expectedEnd, withSignature.SignEndPos.Index)
+        | _ -> failwith($"{expectedName} does not implement IHasSignature")
         Assert.AreEqual<string>(expectedType, actualTypeSignature)
-        let expectedStart =
-                (int64)14
-        Assert.AreEqual<int64>(expectedStart, actualSignatureStart)
-        let expectedEnd =
-                (int64)(fplCode.IndexOf(" {}", System.StringComparison.OrdinalIgnoreCase))
-        Assert.AreEqual<int64>(expectedEnd, actualSignatureEnd)
         prepareFplCode(filename, "", true) |> ignore
