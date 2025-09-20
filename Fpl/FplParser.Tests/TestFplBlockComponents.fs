@@ -13,98 +13,98 @@ type TestFplBlockComponentes () =
 
     [<TestMethod>]
     member this.TestSignature01 () =
-        let result = run (signature .>> eof) """AreRelated(u,v: Set, r: BinaryRelation)"""
+        let result = run (predicateSignature .>> eof) """pred AreRelated(u,v: Set, r: BinaryRelation)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSignature02 () =
-        let result = run (signature .>> eof) """ExistsByExample(p: pred(c: obj))"""
+        let result = run (ruleOfInferenceSignature .>> eof) """inf ExistsByExample"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSignature03 () =
-        let result = run (signature .>> eof) """Zero()"""
+        let result = run (constructorSignature .>> eof) """ctor Zero()"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSignature04 () =
-        let result = run (signature .>> eof) """Test(a,b: tpl)"""
+        let result = run (predicateInstanceSignature .>> eof) """pred Test(a,b: tpl)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSignature05 () =
-        let result = run (signature .>> eof) """TestPredicate(a,b:obj)"""
+        let result = run (functionalTermSignature .>> eof) """func TestPredicate(a,b:obj)->obj"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSignature06 () =
-        let result = run (signature .>> eof) """BinOp(x,y: tplSetElem)"""
+        let result = run (functionalTermInstanceSignature .>> eof) """func BinOp(x,y: tplSetElem) -> obj(a:pred)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSignature07 () =
-        let result = run (signature .>> eof) """IsSubset(subset,superset: Set)"""
+        let result = run (predicateSignature .>> eof) """pred IsSubset(subset,superset: Set) infix "in" 2"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSignature08 () =
-        let result = run (signature .>> eof) """SetRoster(listOfSets:* Set)"""
+        let result = run (constructorSignature .>> eof) """constructor SetRoster(listOfSets:* Set)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSignature09 () =
-        let result = run (signature .>> eof) """VecAdd(v,w: tplFieldElem[from,to:Nat])"""
+        let result = run (functionalTermSignature .>> eof) """func VecAdd(v,w: tplFieldElem[from,to:Nat]) -> obj prefix "+" """
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSignature10 () =
-        let result = run (signature .>> eof) """ZeroVectorN(n: Nat, field: Field)"""
+        let result = run (classSignature .>> eof) """cl ZeroVectorN:A, B, C,D ,E symbol "0" """
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSignature11 () =
-        let result = run (signature .>> eof) """ProceedingResults(p:+ pred)"""
+        let result = run (ruleOfInferenceSignature .>> eof) """inference ProceedingResults"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSignature12 () =
-        let result = run (signature .>> eof) """Nat(x: @Decimal)"""
+        let result = run (constructorSignature .>> eof) """ctor Nat(x: @Decimal)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSignature13 () =
-        let result = run (signature .>> eof) """Add(n,m: Nat)"""
+        let result = run (functionalTermInstanceSignature .>> eof) """func Add(n,m: Nat) -> pred"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSignature14 () =
-        let result = run (signature .>> eof) """AlgebraicStructure(x: tplSet, ops:+ Composition(args:* tplSetElem))"""
+        let result = run (constructorSignature .>> eof) """ctor AlgebraicStructure(x: tplSet, ops:+ Composition(args:* tplSetElem))"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

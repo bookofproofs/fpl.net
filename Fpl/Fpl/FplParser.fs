@@ -288,7 +288,7 @@ let precedence = positions "Precedence" (pint32) .>> IW |>> Ast.Precedence
 let userDefinedInfix = positions "Infix" (keywordInfix >>. (infixString .>>. (IW >>. precedence))) .>> IW |>> Ast.Infix
 let userDefinedPostfix = positions "Postfix" (keywordPostfix >>. postfixString) .>> IW |>> Ast.Postfix
 let userDefinedPrefix = positions "Prefix" (keywordPrefix >>. prefixString) .>> IW |>> Ast.Prefix
-let userDefinedSymbol = opt (choice [userDefinedPrefix; userDefinedInfix; userDefinedPostfix ])
+let userDefinedSymbol = opt (attempt (IW >>. choice [userDefinedPrefix; userDefinedInfix; userDefinedPostfix ]))
 
 (* Statements *)
 let argumentTuple = positions "ArgumentTuple" ((leftParen >>. predicateList) .>> (IW .>> rightParen)) |>> Ast.ArgumentTuple 
@@ -486,7 +486,7 @@ let predicateInstanceBlock = leftBrace >>. (keywordIntrinsic <|> predContent) .>
 let predicateInstanceSignature = positions "PredicateInstanceSignature" (keywordPredicate >>. SW >>. simpleSignature .>>. paramTuple) .>> IW |>> Ast.PredicateInstanceSignature
 let predicateInstance = positions "PredicateInstance" ((opt keywordOptional .>> keywordProperty) .>>. (predicateInstanceSignature .>>. predicateInstanceBlock)) |>> Ast.PredicateInstance
 
-mappingRef.Value <- toArrow >>. IW >>. positions "Mapping" (variableType) .>> IW |>> Ast.Mapping
+mappingRef.Value <- toArrow >>. IW >>. positions "Mapping" (variableType) |>> Ast.Mapping
 
 let returnStatement = positions "Return" (keywordReturn >>. predicate) .>> IW |>> Ast.Return
 let funcContent = varDeclOrSpecList .>>. returnStatement |>> Ast.DefFunctionContent
@@ -499,7 +499,7 @@ let extensionRegex = regex "[^\/]+" <?> "<extension regex>" |>> Ast.ExtensionReg
 
 let extensionAssignment = positions "ExtensionAssignment" ((variable .>> IW .>> at .>> IW) .>>. (slash >>. extensionRegex .>> slash)) |>> Ast.ExtensionAssignment
 
-let extensionSignature = positions "ExtensionSignature" ((extensionAssignment .>> IW) .>>. mapping .>> IW) |>> Ast.ExtensionSignature
+let extensionSignature = positions "ExtensionSignature" ((extensionAssignment .>> IW) .>>. mapping) .>> IW |>> Ast.ExtensionSignature
 let extensionTerm = leftBrace >>. (funcContent <|> mapCases) .>> spacesRightBrace
 let definitionExtension = positions "ExtensionBlock" (keywordExtension >>. (extensionName .>> SW) .>>. extensionSignature .>>. extensionTerm) |>> Ast.DefinitionExtension
 
@@ -548,8 +548,8 @@ let proof = positions "Proof" (proofSignature .>>. proofBlock) |>> Ast.Proof
 
 // Predicate building blocks can be defined similarly to classes, they can have properties but they cannot be derived any parent type 
 let predicateDefinitionBlock = leftBrace  >>. ((keywordIntrinsic <|> predContent) .>> IW) .>>. propertyList .>> spacesRightBrace 
-let predicateSignature = positions "PredicateSignature" (simpleSignature .>>. paramTuple .>>. (IW >>. userDefinedSymbol)) .>> IW |>> Ast.PredicateSignature
-let definitionPredicate = positions "DefinitionPredicate" (keywordPredicate >>. SW >>. (predicateSignature .>>. predicateDefinitionBlock)) |>> Ast.DefinitionPredicate
+let predicateSignature = positions "PredicateSignature" (keywordPredicate >>. SW >>. simpleSignature .>>. paramTuple .>>. (IW >>. userDefinedSymbol)) .>> IW |>> Ast.PredicateSignature
+let definitionPredicate = positions "DefinitionPredicate" (predicateSignature .>>. predicateDefinitionBlock) |>> Ast.DefinitionPredicate
 
 // Functional term building blocks can be defined similarly to classes, they can have properties but they cannot be derived any parent type 
 let functionalTermDefinitionBlock = leftBrace  >>. ((keywordIntrinsic <|> funcContent) .>> IW) .>>. propertyList .>> spacesRightBrace
@@ -562,7 +562,7 @@ let keywordClass = (skipString LiteralClL <|> skipString LiteralCl)
 let constructorList = many1 (constructor .>> IW)
 let classCompleteContent = varDeclOrSpecList .>>. constructorList|>> Ast.DefClassCompleteContent
 let classDefinitionBlock = leftBrace  >>. ((keywordIntrinsic <|> classCompleteContent) .>> IW) .>>. propertyList .>> spacesRightBrace
-let inheritedClassTypeList = sepBy1 (IW >>. inheritedClassType ) comma
+let inheritedClassTypeList = sepBy1 (IW >>. inheritedClassType .>>  IW) comma
 
 let classSignature = positions "ClassSignature" (keywordClass >>. SW >>. simpleSignature .>>. (colon >>. inheritedClassTypeList) .>>. opt userDefinedObjSym) .>> IW |>> Ast.ClassSignature 
 let definitionClass = positions "DefinitionClass" (classSignature .>>. classDefinitionBlock) |>> Ast.DefinitionClass 
