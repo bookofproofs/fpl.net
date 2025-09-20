@@ -19,7 +19,7 @@ type TestPrecedence() =
         let fplCode = sprintf """ 
                  def pred Mul infix "*" 1 (x,y: obj) {intr}
                  def pred Add infix "+" 2 (x,y: obj) {intr} 
-                 def pred Eq infix "=" 1000 (x,y: obj) {intr} 
+                 def pred Eq(x,y: obj) infix "=" 1000 {intr} 
                  def pred T1() { %s };""" varVal
         let filename = "TestPrecedenceInfix.fpl"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 

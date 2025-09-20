@@ -703,17 +703,17 @@ type TestFplValueScopeQualifiedName() =
             Assert.IsTrue(false)
 
     [<DataRow("base1", """def pred T1() {intr};""")>]
-    [<DataRow("base2", """def pred T1 infix ">" -1 () {intr};""")>]
-    [<DataRow("base3", """def pred T1 postfix "'" () {intr};""")>]
-    [<DataRow("base4", """def pred T1 prefix "-" () {intr};""")>]
-    [<DataRow("base5", """def cl T1 symbol "∅" :obj {intr};""")>]
+    [<DataRow("base2", """def pred T1 () infix ">" -1 {intr};""")>]
+    [<DataRow("base3", """def pred T1 () postfix "'" {intr};""")>]
+    [<DataRow("base4", """def pred T1 () prefix "-" {intr};""")>]
+    [<DataRow("base5", """def cl T1 :obj symbol "∅" {intr};""")>]
     [<DataRow("base5a", """def cl T1:obj {intr};""")>]
     [<DataRow("base6", """def func T1()->obj {intr};""")>]
-    [<DataRow("base7", """def func T1 infix ">" -1 ()->obj {intr};""")>]
-    [<DataRow("base8", """def func T1 postfix "'" ()->obj {intr};""")>]
-    [<DataRow("base9", """def func T1 prefix "-" ()->obj {intr};""")>]
+    [<DataRow("base7", """def func T1 ()->obj infix ">" -1 {intr};""")>]
+    [<DataRow("base8", """def func T1  ()->obj postfix "'"{intr};""")>]
+    [<DataRow("base9", """def func T1 ()->obj prefix "-" {intr};""")>]
     [<TestMethod>]
-    member this.TestFixNotation(var, varVal) =
+    member this.TestFixNotationQualifiedName(var, varVal) =
         ad.Clear()
         let fplCode = sprintf "%s;" varVal
         let filename = "TestFixNotationQualifiedName"
@@ -757,7 +757,7 @@ type TestFplValueScopeQualifiedName() =
     [<DataRow("base9", """def func T()->pred(f:+func(x:A)->A) {intr};""")>]
     [<DataRow("base10", """def cl A:obj {intr} def func T()->A(f:func(x:A)->A) {intr};""")>]
     [<TestMethod>]
-    member this.TestMapping(var, varVal) =
+    member this.TestMappingQualifiedName(var, varVal) =
         ad.Clear()
         let fplCode = sprintf "%s;" varVal
         let filename = "TestMappingQualifiedName"

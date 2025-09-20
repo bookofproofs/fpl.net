@@ -1130,17 +1130,16 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PopEvalStack()
         st.EvalPop()
     // | ClosedOrOpenRange of Positions * ((Ast * Ast option) * Ast)
-    | Ast.SignatureWithUserDefinedString((pos1, pos2),
-                                         ((predicateIdentifierAst, optUserDefinedSymbolAst), paramTupleAst)) ->
-        st.EvalPush("SignatureWithUserDefinedString")
-        eval st predicateIdentifierAst
-        optUserDefinedSymbolAst
-        |> Option.map (eval st)
-        |> Option.defaultValue ()
-        |> ignore
+    | Ast.PredicateSignature((pos1, pos2),
+                                         ((simpleSignatureAst, paramTupleAst), optUserDefinedSymbolAst)) ->
+        st.EvalPush("PredicateSignature")
+        variableStack.InSignatureEvaluation <- true
+        eval st simpleSignatureAst
         eval st paramTupleAst
+        optUserDefinedSymbolAst |> Option.map (eval st) |> Option.defaultValue () |> ignore
         let fv = variableStack.PeekEvalStack()
         emitSIG00Diagnostics fv pos1 pos2
+        variableStack.InSignatureEvaluation <- false
         st.EvalPop()
     // | ReferencingIdentifier of Positions * (Ast * Ast list)
     | ReferencingIdentifier((pos1, pos2), (predicateIdentifierAst, dollarDigitListAsts)) ->
@@ -1250,11 +1249,13 @@ let rec eval (st: SymbolTable) ast =
         emitLG000orLG001Diagnostics fv PrimQuantorExistsN
         st.EvalPop()
     // | FunctionalTermSignature of Positions * (Ast * Ast)
-    | Ast.FunctionalTermSignature((pos1, pos2), (signatureWithUserDefinedStringAst, mappingAst)) -> 
+    | Ast.FunctionalTermSignature((pos1, pos2), (((simpleSignatureAst, paramTupleAst), mappingAst), optUserDefinedSymbolAst)) -> 
         variableStack.InSignatureEvaluation <- true
         st.EvalPush("FunctionalTermSignature")
-        eval st signatureWithUserDefinedStringAst
+        eval st simpleSignatureAst
+        eval st paramTupleAst
         eval st mappingAst
+        optUserDefinedSymbolAst |> Option.map (eval st) |> Option.defaultValue () 
         st.EvalPop()
         variableStack.InSignatureEvaluation <- false
     | Ast.PredicateWithQualification(predicateWithOptSpecificationAst, qualificationListAst) ->
@@ -1734,14 +1735,12 @@ let rec eval (st: SymbolTable) ast =
         constructorListAsts |> List.map (eval st) |> ignore
         st.EvalPop()
     // | DefinitionPredicate of Positions * (Ast * (Ast * Ast list option))
-    | Ast.DefinitionPredicate((pos1, pos2), (signatureWithUserDefinedStringAst, (predicateContentAst, optPropertyListAsts))) ->
+    | Ast.DefinitionPredicate((pos1, pos2), (predicateSignature, (predicateContentAst, optPropertyListAsts))) ->
         st.EvalPush("DefinitionPredicate")
         let parent = variableStack.PeekEvalStack()
         let fv = new FplPredicate((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
         variableStack.PushEvalStack(fv)
-        variableStack.InSignatureEvaluation <- true
-        eval st signatureWithUserDefinedStringAst
-        variableStack.InSignatureEvaluation <- false
+        eval st predicateSignature
         eval st predicateContentAst
         optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
         if not fv.IsIntrinsic then // if not intrinsic, check variable usage
@@ -1761,29 +1760,24 @@ let rec eval (st: SymbolTable) ast =
             emitVAR04diagnostics fvNew
         variableStack.PopEvalStack()
         st.EvalPop()
-    // | DefinitionClass of Positions * (((Ast * Ast option) * Ast list) * (Ast * Ast list option))
-    | Ast.DefinitionClass((pos1, pos2),
-                          (((predicateIdentifierAst, optUserDefinedObjSymAst), classTypeListAsts),
-                           (classContentAst, optPropertyListAsts))) ->
+    | Ast.ClassSignature((pos1, pos2),((simpleSignatureAst, classTypeListAsts), optUserDefinedObjSymAst)) ->
+        st.EvalPush("ClassSignature")
+        variableStack.InSignatureEvaluation <- true
+        eval st simpleSignatureAst
+        // clear the storage of parent class counters before evaluating the list of parent classes
+        variableStack.ParentClassCalls.Clear() 
+        classTypeListAsts |> List.map (eval st) |> ignore
+        optUserDefinedObjSymAst |> Option.map (eval st) |> Option.defaultValue ()
+        variableStack.InSignatureEvaluation <- false
+        st.EvalPop()
+    | Ast.DefinitionClass((pos1, pos2),(classSignatureAst, (classContentAst, optPropertyListAsts))) ->
         st.EvalPush("DefinitionClass")
         let parent = variableStack.PeekEvalStack()
         let fv = new FplClass((pos1, pos2), parent)
         variableStack.PushEvalStack(fv)
-        variableStack.InSignatureEvaluation <- true
-
-        eval st predicateIdentifierAst
-        variableStack.InSignatureEvaluation <- false
-        optUserDefinedObjSymAst |> Option.map (eval st) |> Option.defaultValue ()
-
-        // clear the storage of parent class counters before evaluating the list of parent classes
-        variableStack.ParentClassCalls.Clear() 
-        // now evaluate the list of parent classes while adding the identified classes to the storage
-        classTypeListAsts |> List.map (eval st) |> ignore
-
+        eval st classSignatureAst
         eval st classContentAst
-        optPropertyListAsts
-        |> Option.map (List.map (eval st) >> ignore)
-        |> Option.defaultValue ()
+        optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
         emitVAR04diagnostics fv
         variableStack.PopEvalStack()
         st.EvalPop()

@@ -290,7 +290,6 @@ let userDefinedPostfix = positions "Postfix" (keywordPostfix >>. postfixString) 
 let userDefinedPrefix = positions "Prefix" (keywordPrefix >>. prefixString) .>> IW |>> Ast.Prefix
 let userDefinedSymbol = opt (choice [userDefinedPrefix; userDefinedInfix; userDefinedPostfix ])
 
-let signatureWithUserDefinedString = positions "SignatureWithUserDefinedString" (simpleSignature .>>. userDefinedSymbol .>>. paramTuple) .>> IW |>> Ast.SignatureWithUserDefinedString
 (* Statements *)
 let argumentTuple = positions "ArgumentTuple" ((leftParen >>. predicateList) .>> (IW .>> rightParen)) |>> Ast.ArgumentTuple 
 
@@ -481,7 +480,6 @@ let predInstanceBlock = leftBrace >>. (keywordIntrinsic <|> predContent) .>> spa
 let predicateInstance = positions "PredicateInstance" ((opt keywordOptional .>> keywordProperty) .>>. (keywordPredicate >>. SW >>. (signature .>>. (IW >>. predInstanceBlock)))) |>> Ast.PredicateInstance
 
 mappingRef.Value <- toArrow >>. IW >>. positions "Mapping" (variableType) .>> IW |>> Ast.Mapping
-let functionalTermSignature = positions "FunctionalTermSignature" (keywordFunction >>. SW >>. signatureWithUserDefinedString .>>. (IW >>. mapping)) |>> Ast.FunctionalTermSignature
 
 let returnStatement = positions "Return" (keywordReturn >>. predicate) .>> IW |>> Ast.Return
 let funcContent = varDeclOrSpecList .>>. returnStatement |>> Ast.DefFunctionContent
@@ -540,11 +538,13 @@ let proof = positions "Proof" (keywordProof >>. proofOrCorollaryIdentifier .>>. 
 
 // Predicate building blocks can be defined similarly to classes, they can have properties but they cannot be derived any parent type 
 let predicateDefinitionBlock = leftBrace  >>. ((keywordIntrinsic <|> predContent) .>> IW) .>>. propertyList .>> spacesRightBrace 
-let definitionPredicate = positions "DefinitionPredicate" (keywordPredicate >>. SW >>. (signatureWithUserDefinedString .>> IW) .>>. predicateDefinitionBlock) |>> Ast.DefinitionPredicate
+let predicateSignature = positions "PredicateSignature" (simpleSignature .>>. paramTuple .>>. (IW >>. userDefinedSymbol)) .>> IW |>> Ast.PredicateSignature
+let definitionPredicate = positions "DefinitionPredicate" (keywordPredicate >>. SW >>. (predicateSignature .>>. predicateDefinitionBlock)) |>> Ast.DefinitionPredicate
 
 // Functional term building blocks can be defined similarly to classes, they can have properties but they cannot be derived any parent type 
 let functionalTermDefinitionBlock = leftBrace  >>. ((keywordIntrinsic <|> funcContent) .>> IW) .>>. propertyList .>> spacesRightBrace
-let definitionFunctionalTerm = positions "DefinitionFunctionalTerm" ((functionalTermSignature .>> IW) .>>. functionalTermDefinitionBlock) |>> Ast.DefinitionFunctionalTerm
+let functionalTermSignature = positions "FunctionalTermSignature" ((simpleSignature .>>. paramTuple) .>>. (IW >>. mapping) .>>. userDefinedSymbol) .>> IW |>> Ast.FunctionalTermSignature
+let definitionFunctionalTerm = positions "DefinitionFunctionalTerm" (keywordFunction >>. SW >>. functionalTermSignature .>>. functionalTermDefinitionBlock) |>> Ast.DefinitionFunctionalTerm
 
 // Class definitions
 let keywordClass = (skipString LiteralClL <|> skipString LiteralCl)
@@ -554,8 +554,8 @@ let classCompleteContent = varDeclOrSpecList .>>. constructorList|>> Ast.DefClas
 let classDefinitionBlock = leftBrace  >>. ((keywordIntrinsic <|> classCompleteContent) .>> IW) .>>. propertyList .>> spacesRightBrace
 let inheritedClassTypeList = sepBy1 inheritedClassType comma
 
-let classSignature = simpleSignature .>>. opt userDefinedObjSym .>>. (colon >>. inheritedClassTypeList)
-let definitionClass = positions "DefinitionClass" ((keywordClass >>. SW >>. classSignature .>> IW) .>>. classDefinitionBlock) |>> Ast.DefinitionClass 
+let classSignature = positions "ClassSignature" (simpleSignature .>>. (colon >>. inheritedClassTypeList) .>>. opt userDefinedObjSym) .>> IW |>> Ast.ClassSignature 
+let definitionClass = positions "DefinitionClass" (keywordClass >>. SW >>. classSignature .>>. classDefinitionBlock) |>> Ast.DefinitionClass 
 
 let keywordDefinition = (skipString LiteralDefL <|> skipString LiteralDef) >>. SW
 let definition = keywordDefinition >>. choice [

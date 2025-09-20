@@ -613,11 +613,18 @@ type TestKeywordSpaces() =
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("<significant whitespace>"))
 
     [<DataRow(LiteralPrefix)>]
-    [<DataRow(LiteralInfix)>]
     [<DataRow(LiteralPostFix)>]
     [<TestMethod>]
     member this.TestSpacesSomeFixNotation (word:string) =
-        let result = run (definition .>> eof) ($"def pred T {word}x \"~\"" + " () {true}")
+        let result = run (definition .>> eof) ($"def pred T(){word}\"-\"" + "{true}")
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("<whitespace>"))
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<DataRow(LiteralInfix)>]
+    [<TestMethod>]
+    member this.TestSpacesInfixNotation (word:string) =
+        let result = run (definition .>> eof) ($"def pred T(){word}\"-\" 2" + "{true}")
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))

@@ -386,7 +386,7 @@ type TestInterpreterErrors() =
             let code = ID016 ""
             runTestHelper "TestID016.fpl" fplCode code expected
 
-    [<DataRow("""def pred Equal infix "=" 50 (x,y: tpl) {intr} ;""", 0)>]
+    [<DataRow("""def pred Equal(x,y: tpl) infix "=" 50 {intr} ;""", 0)>]
     [<DataRow("uses Fpl.Commons inf ModusPonens {pre:true con:true} ;", 1)>]
     [<DataRow("uses Fpl.Commons theorem ModusTollens {true} ;", 1)>]
     [<DataRow("uses Fpl.Commons def pred HypotheticalSyllogism() {true} ;", 1)>]
@@ -816,7 +816,7 @@ type TestInterpreterErrors() =
     [<DataRow("01", "def pred T() {del.Test1(x,y)};", 1, "Unknown delegate `Test1`")>]
     [<DataRow("02", "def pred T() {del.Equal(x,y)};", 1, "Predicate `=` cannot be evaluated because the left argument is undefined.")>]
     [<DataRow("03", "def pred T(x:pred) {del.Equal(x,y)};", 1, "Predicate `=` cannot be evaluated because the right argument is undefined.")>]
-    [<DataRow("04", """def pred Equal infix "=" 50 (x,y: tpl) {del.Equal(x,y)};""", 0, "missing error message")>]
+    [<DataRow("04", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)};""", 0, "missing error message")>]
     [<DataRow("05", "def pred T(x,y:pred) {del.Equal(true,y)};", 1, "Predicate `=` cannot be evaluated because the right argument is undetermined.")>]
     [<DataRow("06", "ax T {all x,y:obj {del.Equal(x,y)}};", 0, "missing error message")>]
     [<DataRow("06a", "def cl Nat: obj {intr} ax T {all x,y:Nat {del.Equal(x,y)}};", 0, "missing error message")>]
@@ -969,7 +969,7 @@ type TestInterpreterErrors() =
             let code = SIG00 ("",0)
             runTestHelper "TestSIG00.fpl" fplCode code expected
 
-    [<DataRow("01", """def pred Equal infix "=" 0 (x,y:tpl) { delegate.Equal(x,y) } def pred NotEqual (x,y: tpl) { not (x = y) };""", 0)>]
+    [<DataRow("01", """def pred Equal(x,y:tpl) infix "=" 0 { delegate.Equal(x,y) } def pred NotEqual (x,y: tpl) { not (x = y) };""", 0)>]
     [<DataRow("02", """def pred NotEqual (x,y: tpl) { not (x = y) };""", 1)>]
     [<DataRow("03", """def pred T infix "+" 0 (x,y:obj) {true} def pred Test() {(x + y)};""", 0)>]
     [<DataRow("04", """def pred T infix "+" 0 (x,y:obj) {true} def pred Test() {+x};""", 0)>]
@@ -1062,13 +1062,13 @@ type TestInterpreterErrors() =
     [<DataRow("20", """def pred T (x:obj) {true} def pred Caller() {dec ~x:ind; T(x)} ;""", 1)>]
     [<DataRow("21", "inf ExistsByExample {dec ~p: pred(c: obj) ~x: obj; pre: p(c) con: ex x:obj {p(x)}};", 0)>]
     [<DataRow("22", """loc NotEqual(x,y) := !tex: x "\neq" y; ;""", 0)>]
-    [<DataRow("23", """def pred Eq infix "=" 1000 (x,y: obj) {intr} axiom A {dec ~x,y:obj; (x = y) };""", 0)>]
-    [<DataRow("24", """def pred Eq infix "=" 1000 (x,y: obj) {intr} axiom A {dec ~x,y:obj; Eq(x,y) };""", 0)>]
-    [<DataRow("25", """def pred Eq infix "=" 1000 (x,y: obj) {intr} axiom A {dec ~x:ind ~y:obj; (x = y) };""", 1)>]
-    [<DataRow("26", """def pred Eq infix "=" 1000 (x,y: obj) {intr} axiom A {dec ~x:ind ~y:obj; (x = y) };""", 1)>]
-    [<DataRow("27", """def pred Eq infix "=" 1000 (x,y: Nat) {intr} axiom A {dec ~x:ind ~y:obj; (x = y) };""", 2)>]
-    [<DataRow("28", """def pred Eq infix "=" 1000 (x,y: ind) {intr} axiom A {dec ~x:ind ~y:obj; (x = y) };""", 1)>]
-    [<DataRow("29", """def pred Mul infix "*" 1 (x,y: pred) {intr} def pred Add infix "+" 2 (x,y: ind) {intr} def pred Eq infix "=" 1000 (x,y: obj) {intr} def pred T1() { (x = y * z + 1) };""", 3)>]
+    [<DataRow("23", """def pred Eq(x,y: obj) infix "=" 1000 {intr} axiom A {dec ~x,y:obj; (x = y) };""", 0)>]
+    [<DataRow("24", """def pred Eq(x,y: obj) infix "=" 1000 {intr} axiom A {dec ~x,y:obj; Eq(x,y) };""", 0)>]
+    [<DataRow("25", """def pred Eq(x,y: obj) infix "=" 1000 {intr} axiom A {dec ~x:ind ~y:obj; (x = y) };""", 1)>]
+    [<DataRow("26", """def pred Eq(x,y: obj) infix "=" 1000 {intr} axiom A {dec ~x:ind ~y:obj; (x = y) };""", 1)>]
+    [<DataRow("27", """def pred Eq(x,y: Nat) infix "=" 1000 {intr} axiom A {dec ~x:ind ~y:obj; (x = y) };""", 2)>]
+    [<DataRow("28", """def pred Eq(x,y: ind) infix "=" 1000 {intr} axiom A {dec ~x:ind ~y:obj; (x = y) };""", 1)>]
+    [<DataRow("29", """def pred Mul(x,y: pred) infix "*" 1 {intr} def pred Add(x,y: ind) infix "+" 2 {intr} def pred Eq infix "=" 1000 (x,y: obj) {intr} def pred T1() { (x = y * z + 1) };""", 3)>]
     [<DataRow("30", """def pred T (x:tpl) {true} def pred Caller() {dec ~x:ind; T(x)} ;""", 0)>]
     [<DataRow("31", """def pred T (x:tplTest) {true} def pred Caller() {dec ~x:ind; T(x)} ;""", 0)>]
     [<DataRow("32", """def pred T (x,y,z:obj) {true} def pred Caller() {dec ~x:obj; T(x)} ;""", 1)>]
@@ -1166,7 +1166,7 @@ type TestInterpreterErrors() =
             ad.Clear()
             runTestHelper "TestSIG05.fpl" fplCode code expected
 
-    [<DataRow("""def pred Eq infix "=" 1000 (x,y: obj) {intr} axiom A {dec ~x:ind ~y:obj; (x = y) };""", 
+    [<DataRow("""def pred Eq(x,y: obj) infix "=" 1000 {intr} axiom A {dec ~x:ind ~y:obj; (x = y) };""", 
         "No overload matching `=(ind, obj)`. `x:ind` does not match `x:obj` in TestSIG04MsgSpecificity.Eq(obj, obj).")>]
     [<DataRow("""def func Succ(n:Nat) -> obj {intr};""", 
         "No overload matching `Nat`, no candidates were found. Are you missing a uses clause?")>]

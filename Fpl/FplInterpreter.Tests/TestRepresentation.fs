@@ -113,7 +113,7 @@ type TestRepresentation() =
     member this.TestRepresentationEquality(varVal, expected:string) =
         ad.Clear()
         let fplCode = sprintf """
-        def pred Equal infix "=" 50 (x,y: tpl)
+        def pred Equal(x,y: tpl) infix "=" 50 
         {
             del.Equal(x,y)
         } 
