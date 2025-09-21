@@ -396,25 +396,43 @@ let rec eval (st: SymbolTable) ast =
         fv.EndPos <- pos2
         emitSIG01Diagnostics st fv pos1 pos2 
         st.EvalPop()
-    | Ast.ArgumentIdentifier((pos1, pos2), s) -> 
+    | Ast.ArgumentIdentifier((pos1, pos2), argumentId) -> 
         st.EvalPush("ArgumentIdentifier")
         let fv = variableStack.PeekEvalStack()
-        fv.FplId <- s.Substring(0,s.Length-1) // argument id without the "." at the end
+        fv.FplId <- argumentId.Substring(0,argumentId.Length-1) // argument id without the "." at the end
         st.EvalPop() 
-    | Ast.RefArgumentIdentifier((pos1, pos2), s) -> 
+    | Ast.RefArgumentIdentifier((pos1, pos2), argumentId) -> 
         st.EvalPush("RefArgumentIdentifier")
         let fv = variableStack.PeekEvalStack()
         match fv.Name with 
-        | PrimJIByProofArgument -> fv.FplId <- $"{fv.FplId}:{s}"
+        | PrimJIByProofArgument -> fv.FplId <- $"{fv.FplId}:{argumentId}"
         | PrimArgInfRevoke -> 
             let fvAi = fv :?> FplArgInferenceRevoke
             let arg = fvAi.ParentArgument
             let proof = arg.ParentProof
-            proof.RevokeArgument s pos1 pos2 
-            fvAi.FplId <- s
+            if proof.HasArgument argumentId then 
+                let refArg = proof.Scope[argumentId] :?> FplArgument
+                let aiOpt = refArg.ArgumentInference
+                match aiOpt with
+                | Some (:? FplArgInferenceAssume as toBeRevoked) -> 
+                    match variableStack.LastAssumedArgument with 
+                    | Some (:? FplArgInferenceAssume as last) when last = toBeRevoked -> 
+                        variableStack.RevokeLastArgument() 
+                    | Some (:? FplArgInferenceAssume as last) when last <> toBeRevoked -> 
+                        let lastArg = last.ParentArgument
+                        emitPR016Diagnostics argumentId lastArg.FplId pos1 pos2
+                    | _ ->    
+                        // the referenced argument is not an assumption in the proof
+                        emitPR015Diagnostics argumentId pos1 pos2
+                | _ -> 
+                    // the referenced argument is not an assumption in the proof
+                    emitPR015Diagnostics argumentId pos1 pos2
+            else
+                emitPR005Diagnostics argumentId pos1 pos2
+            fvAi.FplId <- argumentId
         | PrimJustificationL -> 
             let fvAi = new FplJustificationItemByRefArgument((pos1, pos2), fv)
-            fvAi.FplId <- s
+            fvAi.FplId <- argumentId
             variableStack.PushEvalStack(fvAi)
             variableStack.PopEvalStack()
         | _ -> ()
@@ -643,8 +661,7 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(fvNew)
         eval st predicateAst
         variableStack.PopEvalStack()
-        let proof = fvNew.ParentArgument.ParentProof
-        proof.AssumeArgument (fvNew)
+        variableStack.AssumeArgument fvNew
         st.EvalPop()
     | Ast.RevokeArgument((pos1, pos2), predicateAst) ->
         st.EvalPush("RevokeArgument")
@@ -2032,7 +2049,6 @@ let evaluateSymbolTable (st: SymbolTable) =
     st.OrderAsts()
 
     let mutable found = true
-    let mutable order = 0
 
     while found do
         let usesClausesEvaluatedParsedAst =
@@ -2042,10 +2058,9 @@ let evaluateSymbolTable (st: SymbolTable) =
         | Some pa ->
             variableStack.ClearEvalStack()
             // evaluate the ParsedAst of a theory
-            let theoryValue = new FplTheory((Position("",0,1,1), Position("",0,1,1)), st.Root, pa.Parsing.Uri.AbsolutePath, order);
+            let theoryValue = new FplTheory((Position("",0,1,1), Position("",0,1,1)), st.Root, pa.Parsing.Uri.AbsolutePath, variableStack.GetNextAvailableFplBlockRunOrder);
             if not (st.Root.Scope.ContainsKey(pa.Id)) then
                 st.Root.Scope.Add(pa.Id, theoryValue)
-                order <- order + 1 // after adding a new theory to the symbol table, increase the order counter
             else
                 st.Root.Scope[pa.Id] <- theoryValue
             theoryValue.FplId <- pa.Id

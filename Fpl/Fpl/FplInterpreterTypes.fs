@@ -327,10 +327,6 @@ type FplValue(positions: Positions, parent: FplValue option) =
     let _scope = Dictionary<string, FplValue>()
     let _argList = List<FplValue>()
     let _valueList = List<FplValue>()
-    let _assertedPredicates = List<FplValue>()
-
-    /// A list of asserted predicates for this FplValue
-    member this.AssertedPredicates = _assertedPredicates
 
     /// A scope of this FplValue
     member this.Scope = _scope
@@ -444,12 +440,6 @@ type FplValue(positions: Positions, parent: FplValue option) =
         |> Seq.iter (fun (fv1:FplValue) ->
             let value = fv1.Clone()
             ret.ValueList.Add(value))
-
-        this.AssertedPredicates
-        |> Seq.iter (fun (fv1:FplValue) ->
-            // asserted predicates do not have to be cloned
-            ret.ArgList.Add(fv1))
-            
 
     /// Indicates if this FplValue's Scope or ArgList can be treated as bracketed coordinates or as parenthesized parameters.
     member this.HasBrackets
@@ -576,9 +566,6 @@ type FplValue(positions: Positions, parent: FplValue option) =
         this.ValueList.Clear()
         this.ValueList.AddRange(other.ValueList)
 
-        this.AssertedPredicates.Clear()
-        this.AssertedPredicates.AddRange(other.AssertedPredicates)
-
     override this.TryAddToParentsArgList () = 
         match this.Parent with 
         | Some parent -> parent.ArgList.Add(this)
@@ -694,6 +681,7 @@ and FplVariableStack() =
     let _classCounters = Dictionary<string,FplValue option>()
     let _stack = Stack<KeyValuePair<string, Dictionary<string,FplValue>>>()
     let _valueStack = Stack<FplValue>()
+    let _assumedArguments = Stack<FplValue>()
 
     let mutable _nextRunOrder = 0
     /// Returns the next available RunOrder to be stored, when inserting an FplValue into its parent.
@@ -825,9 +813,22 @@ and FplVariableStack() =
     // Peeks an FplValue from the stack.
     member this.PeekEvalStack() = _valueStack.Peek()
 
-    // Clears stack.
-    member this.ClearEvalStack() = _valueStack.Clear()
+    member this.LastAssumedArgument =
+        if _assumedArguments.Count > 0 then
+            Some (_assumedArguments.Peek())
+        else 
+            None
 
+    member this.AssumeArgument assumption = _assumedArguments.Push (assumption)
+    
+    member this.RevokeLastArgument() = if _assumedArguments.Count > 0 then _assumedArguments.Pop() |> ignore
+
+    // Clears stack.
+    member this.ClearEvalStack() = 
+        _valueStack.Clear()
+        _assumedArguments.Clear()
+        _stack.Clear()
+        _classCounters.Clear()
     
 let private getFplHead (fv:FplValue) (signatureType:SignatureType) =
     match signatureType with
@@ -1855,7 +1856,6 @@ and FplProof(positions: Positions, parent: FplValue, runOrder) =
     let _runOrder = runOrder
     let mutable _signStartPos = Position("", (int64)0, (int64)0, (int64)0)
     let mutable _signEndPos = Position("", (int64)0, (int64)0, (int64)0)
-    let _assumedArguments = Stack<FplArgInferenceAssume>()
 
     interface IHasSignature with
         member _.SignStartPos 
@@ -1887,37 +1887,7 @@ and FplProof(positions: Positions, parent: FplValue, runOrder) =
         |> Seq.map (fun fv -> fv :?> FplArgument)
         |> Seq.sortBy (fun fv -> fv.RunOrder)
 
-    member this.LastAssumedArgument =
-        if _assumedArguments.Count > 0 then
-            Some (_assumedArguments.Peek())
-        else 
-            None
-
-    member this.AssumeArgument assumption = _assumedArguments.Push (assumption)
-    
     member this.HasArgument argumentId = this.Scope.ContainsKey(argumentId)
-
-    member this.RevokeArgument argumentId pos1 pos2 = 
-        if not (this.HasArgument argumentId) then 
-            emitPR005Diagnostics argumentId pos1 pos2
-        else 
-            let refArg = this.Scope[argumentId] :?> FplArgument
-            let aiOpt = refArg.ArgumentInference
-            match aiOpt with
-            | Some (:? FplArgInferenceAssume as toBeRevoked) -> 
-                match this.LastAssumedArgument with 
-                | Some last when last = toBeRevoked -> 
-                    _assumedArguments.Pop() |> ignore
-                | Some last when last <> toBeRevoked -> 
-                    let lastArg = last.ParentArgument
-                    emitPR016Diagnostics argumentId lastArg.FplId pos1 pos2
-                | _ ->    
-                    // the referenced argument is not an assumption in the proof
-                   emitPR015Diagnostics argumentId pos1 pos2
-            | _ -> 
-                // the referenced argument is not an assumption in the proof
-                emitPR015Diagnostics argumentId pos1 pos2
-
 
     override this.Run variableStack = 
         // tell the parent theorem-like statement that it has a proof
