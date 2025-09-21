@@ -997,16 +997,24 @@ type IHasSignature =
 [<AbstractClass>]
 type FplGenericPredicateWithExpression(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(positions, parent)
-    let mutable _signStartPos = Position("", (int64)0, (int64)0, (int64)0)
-    let mutable _signEndPos = Position("", (int64)0, (int64)0, (int64)0)
+    let mutable _signStartPos = Position("", 0L, 0L, 0L)
+    let mutable _signEndPos = Position("", 0L, 0L, 0L)
+
+    member this.SignStartPos
+        with get() = _signStartPos
+        and set(value) = _signStartPos <- value
+
+    member this.SignEndPos
+        with get() = _signEndPos
+        and set(value) = _signEndPos <- value
 
     interface IHasSignature with
-        member _.SignStartPos 
-            with get (): Position = _signStartPos
-            and set (value) = _signStartPos <- value
-        member _.SignEndPos 
-            with get (): Position = _signEndPos
-            and set (value) = _signEndPos <- value
+        member this.SignStartPos 
+            with get () = this.SignStartPos
+            and set (value) = this.SignStartPos <- value
+        member this.SignEndPos 
+            with get () = this.SignEndPos
+            and set (value) = this.SignEndPos <- value
 
     override this.Type signatureType = getFplHead this signatureType
             
@@ -1103,8 +1111,8 @@ type FplInstance(positions: Positions, parent: FplValue) =
 
 type FplConstructor(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(positions, parent)
-    let mutable _signStartPos = Position("", (int64)0, (int64)0, (int64)0)
-    let mutable _signEndPos = Position("", (int64)0, (int64)0, (int64)0)
+    let mutable _signStartPos = Position("", 0L, 0L, 0L)
+    let mutable _signEndPos = Position("", 0L, 0L, 0L)
 
     interface IHasSignature with
         member this.SignStartPos 
@@ -1140,16 +1148,24 @@ type FplConstructor(positions: Positions, parent: FplValue) =
 
 and FplClass(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(positions, parent)
-    let mutable _signStartPos = Position("", (int64)0, (int64)0, (int64)0)
-    let mutable _signEndPos = Position("", (int64)0, (int64)0, (int64)0)
+    let mutable _signStartPos = Position("", 0L, 0L, 0L)
+    let mutable _signEndPos = Position("", 0L, 0L, 0L)
+
+    member this.SignStartPos
+        with get() = _signStartPos
+        and set(value) = _signStartPos <- value
+
+    member this.SignEndPos
+        with get() = _signEndPos
+        and set(value) = _signEndPos <- value
 
     interface IHasSignature with
-        member _.SignStartPos 
-            with get (): Position = _signStartPos
-            and set (value) = _signStartPos <- value
-        member _.SignEndPos 
-            with get (): Position = _signEndPos
-            and set (value) = _signEndPos <- value
+        member this.SignStartPos 
+            with get () = this.SignStartPos
+            and set (value) = this.SignStartPos <- value
+        member this.SignEndPos 
+            with get () = this.SignEndPos
+            and set (value) = this.SignEndPos <- value
 
     override this.Name = PrimClassL
     override this.ShortName = PrimClass
@@ -1256,20 +1272,10 @@ type IHasProof =
     abstract member HasProof : bool with get, set
 
 type FplPredicate(positions: Positions, parent: FplValue, runOrder) =
-    inherit FplGenericPredicate(positions, parent)
+    inherit FplGenericPredicateWithExpression(positions, parent)
     let _runOrder = runOrder
     let mutable _isReady = false
     let mutable _callCounter = 0
-    let mutable _signStartPos = Position("", (int64)0, (int64)0, (int64)0)
-    let mutable _signEndPos = Position("", (int64)0, (int64)0, (int64)0)
-
-    interface IHasSignature with
-        member _.SignStartPos 
-            with get (): Position = _signStartPos
-            and set (value) = _signStartPos <- value
-        member _.SignEndPos 
-            with get (): Position = _signEndPos
-            and set (value) = _signEndPos <- value
 
     interface IReady with
         member _.IsReady = _isReady
@@ -1857,18 +1863,8 @@ and FplArgument(positions: Positions, parent: FplValue, runOrder) =
 
 
 and FplProof(positions: Positions, parent: FplValue, runOrder) =
-    inherit FplGenericPredicate(positions, parent)
+    inherit FplGenericPredicateWithExpression(positions, parent)
     let _runOrder = runOrder
-    let mutable _signStartPos = Position("", (int64)0, (int64)0, (int64)0)
-    let mutable _signEndPos = Position("", (int64)0, (int64)0, (int64)0)
-
-    interface IHasSignature with
-        member _.SignStartPos 
-            with get (): Position = _signStartPos
-            and set (value) = _signStartPos <- value
-        member _.SignEndPos 
-            with get (): Position = _signEndPos
-            and set (value) = _signEndPos <- value
             
     override this.Name = LiteralPrfL
     override this.ShortName = LiteralPrf
@@ -3111,19 +3107,27 @@ type FplVariable(positions: Positions, parent: FplValue) =
 [<AbstractClass>]
 type FplGenericFunctionalTerm(positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
-    let mutable _signStartPos = Position("", (int64)0, (int64)0, (int64)0)
-    let mutable _signEndPos = Position("", (int64)0, (int64)0, (int64)0)
+    let mutable _signStartPos = Position("", 0L, 0L, 0L)
+    let mutable _signEndPos = Position("", 0L, 0L, 0L)
 
     do 
         this.TypeId <- LiteralFunc
 
+    member this.SignStartPos
+        with get() = _signStartPos
+        and set(value) = _signStartPos <- value
+
+    member this.SignEndPos
+        with get() = _signEndPos
+        and set(value) = _signEndPos <- value
+
     interface IHasSignature with
-        member _.SignStartPos 
-            with get (): Position = _signStartPos
-            and set (value) = _signStartPos <- value
-        member _.SignEndPos 
-            with get (): Position = _signEndPos
-            and set (value) = _signEndPos <- value
+        member this.SignStartPos 
+            with get () = this.SignStartPos
+            and set (value) = this.SignStartPos <- value
+        member this.SignEndPos 
+            with get () = this.SignEndPos
+            and set (value) = this.SignEndPos <- value
 
     override this.Type signatureType = 
         let head = getFplHead this signatureType
@@ -3236,8 +3240,8 @@ type FplOptionalFunctionalTerm(positions: Positions, parent: FplValue) =
 
 type FplExtension(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
-    let mutable _signStartPos = Position("", (int64)0, (int64)0, (int64)0)
-    let mutable _signEndPos = Position("", (int64)0, (int64)0, (int64)0)
+    let mutable _signStartPos = Position("", 0L, 0L, 0L)
+    let mutable _signEndPos = Position("", 0L, 0L, 0L)
 
     interface IHasSignature with
         member _.SignStartPos 

@@ -1811,23 +1811,23 @@ let rec eval (st: SymbolTable) ast =
             emitVAR04diagnostics fvNew
         variableStack.PopEvalStack()
         st.EvalPop()
-    | Ast.ClassSignature((pos1, pos2),((simpleSignatureAst, classTypeListAsts), optUserDefinedObjSymAst)) ->
+    | Ast.ClassSignature((pos1, pos2), simpleSignatureAst) ->
         st.EvalPush("ClassSignature")
         variableStack.InSignatureEvaluation <- true
         eval st simpleSignatureAst
         // clear the storage of parent class counters before evaluating the list of parent classes
         variableStack.ParentClassCalls.Clear() 
-        classTypeListAsts |> List.map (eval st) |> ignore
-        optUserDefinedObjSymAst |> Option.map (eval st) |> Option.defaultValue ()
         setSignaturePositions pos1 pos2
         variableStack.InSignatureEvaluation <- false
         st.EvalPop()
-    | Ast.DefinitionClass((pos1, pos2),(classSignatureAst, (classContentAst, optPropertyListAsts))) ->
+    | Ast.DefinitionClass((pos1, pos2),(((classSignatureAst, classTypeListAsts), optUserDefinedObjSymAst), (classContentAst, optPropertyListAsts))) ->
         st.EvalPush("DefinitionClass")
         let parent = variableStack.PeekEvalStack()
         let fv = new FplClass((pos1, pos2), parent)
         variableStack.PushEvalStack(fv)
         eval st classSignatureAst
+        classTypeListAsts |> List.map (eval st) |> ignore
+        optUserDefinedObjSymAst |> Option.map (eval st) |> Option.defaultValue ()
         eval st classContentAst
         optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
         emitVAR04diagnostics fv

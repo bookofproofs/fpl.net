@@ -52,39 +52,103 @@ type TestFplValueScopeNameEndPos() =
             match var with 
             | "r" -> Assert.IsTrue(r.EndPos.ToString().Contains("Ln: 1, Col: 1)"))
             | PrimTheoryL -> Assert.IsTrue(theory.EndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "inf1" -> Assert.IsTrue(inf1.EndPos.ToString().Contains("Ln: 2, Col: 33)"))
-            | "inf2" -> Assert.IsTrue(inf2.EndPos.ToString().Contains("Ln: 3, Col: 33)"))
-            | "axi1" -> Assert.IsTrue(axi1.EndPos.ToString().Contains("Ln: 4, Col: 31)"))
-            | "axi2" -> Assert.IsTrue(axi2.EndPos.ToString().Contains("Ln: 5, Col: 31)"))
-            | "pst1" -> Assert.IsTrue(pst1.EndPos.ToString().Contains("Ln: 6, Col: 39)"))
-            | "pst2" -> Assert.IsTrue(pst2.EndPos.ToString().Contains("Ln: 7, Col: 39)"))
-            | "thm1" -> Assert.IsTrue(thm1.EndPos.ToString().Contains("Ln: 8, Col: 35)"))
-            | "thm2" -> Assert.IsTrue(thm2.EndPos.ToString().Contains("Ln: 9, Col: 35)"))
-            | "pro1" -> Assert.IsTrue(pro1.EndPos.ToString().Contains("Ln: 10, Col: 43)"))
-            | "pro2" -> Assert.IsTrue(pro2.EndPos.ToString().Contains("Ln: 11, Col: 43)"))
-            | "lem1" -> Assert.IsTrue(lem1.EndPos.ToString().Contains("Ln: 12, Col: 31)"))
-            | "lem2" -> Assert.IsTrue(lem2.EndPos.ToString().Contains("Ln: 13, Col: 31)"))
-            | "cor1" -> Assert.IsTrue(cor1.EndPos.ToString().Contains("Ln: 14, Col: 37)"))
-            | "cor2" -> Assert.IsTrue(cor2.EndPos.ToString().Contains("Ln: 15, Col: 37)"))
-            | "con1" -> Assert.IsTrue(con1.EndPos.ToString().Contains("Ln: 16, Col: 41)"))
-            | "con2" -> Assert.IsTrue(con2.EndPos.ToString().Contains("Ln: 17, Col: 41)"))
-            | "cla1" -> Assert.IsTrue(cla1.EndPos.ToString().Contains("Ln: 18, Col: 30)"))
-            | "cla2" -> Assert.IsTrue(cla2.EndPos.ToString().Contains("Ln: 19, Col: 30)"))
-            | "pre1" -> Assert.IsTrue(pre1.EndPos.ToString().Contains("Ln: 20, Col: 38)"))
-            | "pre2" -> Assert.IsTrue(pre2.EndPos.ToString().Contains("Ln: 21, Col: 38)"))
-            | "fun1" -> Assert.IsTrue(fun1.EndPos.ToString().Contains("Ln: 22, Col: 48)"))
-            | "fun2" -> Assert.IsTrue(fun2.EndPos.ToString().Contains("Ln: 23, Col: 48)"))
-            | "fun3" -> Assert.IsTrue(fun3.EndPos.ToString().Contains("Ln: 24, Col: 48)"))
-            | "fun4" -> Assert.IsTrue(fun4.EndPos.ToString().Contains("Ln: 25, Col: 56)"))
-            | "fun5" -> Assert.IsTrue(fun5.EndPos.ToString().Contains("Ln: 26, Col: 55)"))
-            | "fun6" -> Assert.IsTrue(fun6.EndPos.ToString().Contains("Ln: 27, Col: 55)"))
-            | "fun7" -> Assert.IsTrue(fun7.EndPos.ToString().Contains("Ln: 28, Col: 55)"))
-            | "fun8" -> Assert.IsTrue(fun8.EndPos.ToString().Contains("Ln: 29, Col: 48)"))
-            | "fun9" -> Assert.IsTrue(fun9.EndPos.ToString().Contains("Ln: 30, Col: 48)"))
-            | "prf1" -> Assert.IsTrue(prf1.EndPos.ToString().Contains("Ln: 31, Col: 33)"))
-            | "prf2" -> Assert.IsTrue(prf2.EndPos.ToString().Contains("Ln: 32, Col: 33)"))
-            | "loc1" -> Assert.IsTrue(loc1.EndPos.ToString().Contains("Ln: 33, Col: 24)"))
-            | "loc2" -> Assert.IsTrue(loc2.EndPos.ToString().Contains("Ln: 34, Col: 27)"))
+            | "inf1" -> 
+                let hasSignature = inf1 :?> FplRuleOfInference
+                Assert.AreEqual<int64>(31L, hasSignature.SignEndPos.Column)
+            | "inf2" -> 
+                let hasSignature = inf2 :?> FplRuleOfInference
+                Assert.AreEqual<int64>(31L, hasSignature.SignEndPos.Column) 
+            | "axi1" -> 
+                let hasSignature = axi1 :?> FplAxiom
+                Assert.AreEqual<int64>(29L, hasSignature.SignEndPos.Column) 
+            | "axi2" -> 
+                let hasSignature = axi2 :?> FplAxiom
+                Assert.AreEqual<int64>(29L, hasSignature.SignEndPos.Column) 
+            | "pst1" -> 
+                let hasSignature = pst1 :?> FplAxiom
+                Assert.AreEqual<int64>(37L, hasSignature.SignEndPos.Column) 
+            | "pst2" -> 
+                let hasSignature = pst2 :?> FplAxiom
+                Assert.AreEqual<int64>(37L, hasSignature.SignEndPos.Column) 
+            | "thm1" -> 
+                let hasSignature = thm1 :?> FplTheorem
+                Assert.AreEqual<int64>(33L, hasSignature.SignEndPos.Column) 
+            | "thm2" -> 
+                let hasSignature = thm2 :?> FplTheorem
+                Assert.AreEqual<int64>(33L, hasSignature.SignEndPos.Column) 
+            | "pro1" -> 
+                let hasSignature = pro1 :?> FplProposition
+                Assert.AreEqual<int64>(41L, hasSignature.SignEndPos.Column) 
+            | "pro2" -> 
+                let hasSignature = pro2 :?> FplProposition
+                Assert.AreEqual<int64>(41L, hasSignature.SignEndPos.Column) 
+            | "lem1" -> 
+                let hasSignature = lem1 :?> FplLemma
+                Assert.AreEqual<int64>(29L, hasSignature.SignEndPos.Column) 
+            | "lem2" -> 
+                let hasSignature = lem2 :?> FplLemma
+                Assert.AreEqual<int64>(29L, hasSignature.SignEndPos.Column) 
+            | "cor1" -> 
+                let hasSignature = cor1 :?> FplCorollary
+                Assert.AreEqual<int64>(35L, hasSignature.SignEndPos.Column) 
+            | "cor2" -> 
+                let hasSignature = cor2 :?> FplCorollary
+                Assert.AreEqual<int64>(35L, hasSignature.SignEndPos.Column) 
+            | "con1" -> 
+                let hasSignature = con1 :?> FplConjecture
+                Assert.AreEqual<int64>(39L, hasSignature.SignEndPos.Column) 
+            | "con2" -> 
+                let hasSignature = con2 :?> FplConjecture
+                Assert.AreEqual<int64>(39L, hasSignature.SignEndPos.Column) 
+            | "cla1" -> 
+                let hasSignature = cla1 :?> FplClass
+                Assert.AreEqual<int64>(30L, hasSignature.SignEndPos.Column) 
+            | "cla2" -> 
+                let hasSignature = cla2 :?> FplClass
+                Assert.AreEqual<int64>(30L, hasSignature.SignEndPos.Column) 
+            | "pre1" -> 
+                let hasSignature = pre1 :?> FplPredicate
+                Assert.AreEqual<int64>(38L, hasSignature.SignEndPos.Column) 
+            | "pre2" -> 
+                let hasSignature = pre2 :?> FplPredicate
+                Assert.AreEqual<int64>(38L, hasSignature.SignEndPos.Column) 
+            | "fun1" -> 
+                let hasSignature = fun1 :?> FplFunctionalTerm
+                Assert.AreEqual<int64>(48L, hasSignature.SignEndPos.Column) 
+            | "fun2" -> 
+                let hasSignature = fun2 :?> FplFunctionalTerm
+                Assert.AreEqual<int64>(48L, hasSignature.SignEndPos.Column) 
+            | "fun3" ->     
+                let hasSignature = fun3 :?> FplFunctionalTerm
+                Assert.AreEqual<int64>(48L, hasSignature.SignEndPos.Column) 
+            | "fun4" -> 
+                let hasSignature = fun4 :?> FplFunctionalTerm
+                Assert.AreEqual<int64>(56L, hasSignature.SignEndPos.Column) 
+            | "fun5" -> 
+                let hasSignature = fun5 :?> FplFunctionalTerm
+                Assert.AreEqual<int64>(55L, hasSignature.SignEndPos.Column) 
+            | "fun6" -> 
+                let hasSignature = fun6 :?> FplFunctionalTerm
+                Assert.AreEqual<int64>(55L, hasSignature.SignEndPos.Column) 
+            | "fun7" -> 
+                let hasSignature = fun7 :?> FplFunctionalTerm
+                Assert.AreEqual<int64>(55L, hasSignature.SignEndPos.Column) 
+            | "fun8" -> 
+                let hasSignature = fun8 :?> FplFunctionalTerm
+                Assert.AreEqual<int64>(48L, hasSignature.SignEndPos.Column) 
+            | "fun9" -> 
+                let hasSignature = fun9 :?> FplFunctionalTerm
+                Assert.AreEqual<int64>(48L, hasSignature.SignEndPos.Column) 
+            | "prf1" -> 
+                let hasSignature = prf1 :?> FplProof
+                Assert.AreEqual<int64>(33L, hasSignature.SignEndPos.Column)
+            | "prf2" -> 
+                let hasSignature = prf2 :?> FplProof
+                Assert.AreEqual<int64>(33L, hasSignature.SignEndPos.Column)
+            | "loc1" -> 
+                Assert.AreEqual<int64>(24L, loc1.EndPos.Column) 
+            | "loc2" -> 
+                Assert.AreEqual<int64>(27L, loc2.EndPos.Column) 
             | _ -> Assert.IsTrue(false, "hier1")
         | _ -> 
             Assert.IsTrue(false, "hier2")

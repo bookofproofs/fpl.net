@@ -241,7 +241,11 @@ type TestFplValue() =
                 else
                     (int64)0            
             Assert.AreEqual<int64>(expectedStart, withSignature.SignStartPos.Index)
-            let expectedEnd = (int64)(fplCode.IndexOf(" {", System.StringComparison.OrdinalIgnoreCase))
+            let expectedEnd = 
+                if fplCode.Contains("def cl") then
+                    (int64)(fplCode.IndexOf(":", System.StringComparison.OrdinalIgnoreCase))
+                else
+                    (int64)(fplCode.IndexOf(" {", System.StringComparison.OrdinalIgnoreCase))
             Assert.AreEqual<int64>(expectedEnd, withSignature.SignEndPos.Index)
         | _ -> failwith($"{expectedName} does not implement IHasSignature")
 
