@@ -399,23 +399,19 @@ let rec eval (st: SymbolTable) ast =
     | Ast.ArgumentIdentifier((pos1, pos2), s) -> 
         st.EvalPush("ArgumentIdentifier")
         let fv = variableStack.PeekEvalStack()
-        fv.FplId <- s
+        fv.FplId <- s.Substring(0,s.Length-1) // argument id without the "." at the end
         st.EvalPop() 
     | Ast.RefArgumentIdentifier((pos1, pos2), s) -> 
         st.EvalPush("RefArgumentIdentifier")
         let fv = variableStack.PeekEvalStack()
         match fv.Name with 
         | PrimJIByProofArgument -> fv.FplId <- $"{fv.FplId}:{s}"
-        | PrimArgInfAssume -> 
-            let fvAi = fv :?> FplArgInferenceAssume
-            let proof = fvAi.ParentArgument.ParentProof
-            if not (proof.HasArgument s) then
-                emitPR005Diagnostics s pos1 pos2
         | PrimArgInfRevoke -> 
             let fvAi = fv :?> FplArgInferenceRevoke
-            let proof = fvAi.ParentArgument.ParentProof
-            if not (proof.HasArgument s) then
-                emitPR005Diagnostics s pos1 pos2
+            let arg = fvAi.ParentArgument
+            let proof = arg.ParentProof
+            proof.RevokeArgument s pos1 pos2 
+            fvAi.FplId <- s
         | PrimJustificationL -> 
             let fvAi = new FplJustificationItemByRefArgument((pos1, pos2), fv)
             fvAi.FplId <- s
@@ -643,10 +639,12 @@ let rec eval (st: SymbolTable) ast =
     | Ast.AssumeArgument((pos1, pos2), predicateAst) ->
         st.EvalPush("AssumeArgument")
         let fv = variableStack.PeekEvalStack()
-        let argInf = new FplArgInferenceAssume((pos1, pos2), fv) 
-        variableStack.PushEvalStack(argInf)
+        let fvNew = new FplArgInferenceAssume((pos1, pos2), fv) 
+        variableStack.PushEvalStack(fvNew)
         eval st predicateAst
         variableStack.PopEvalStack()
+        let proof = fvNew.ParentArgument.ParentProof
+        proof.AssumeArgument (fvNew)
         st.EvalPop()
     | Ast.RevokeArgument((pos1, pos2), predicateAst) ->
         st.EvalPush("RevokeArgument")

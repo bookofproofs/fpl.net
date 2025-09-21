@@ -150,6 +150,8 @@ type DiagnosticCode =
     | PR012 
     | PR013
     | PR014
+    | PR015 of string
+    | PR016 of string
     // signature-related error codes
     | SIG00 of string * int
     | SIG01 of string 
@@ -253,6 +255,8 @@ type DiagnosticCode =
             | PR012 -> "PR012"
             | PR013 -> "PR013"
             | PR014 -> "PR014"
+            | PR015 _ -> "PR015"
+            | PR016 _ -> "PR016"
             // signature-related error codes
             | SIG00 _ -> "SIG00"
             | SIG01 _ -> "SIG01"
@@ -363,7 +367,9 @@ type DiagnosticCode =
             | PR011 (keyword, expectedRef) -> $"Justification `{keyword}` expects a reference to {expected}, not to an argument in some proof."
             | PR012 -> $"Justification `{LiteralByCor}` expects a reference to a corollary."
             | PR013 -> $"Add the keyword `{LiteralByCor}` when referencing to corollaries to increase readability."
-            | PR014 -> $"Justification expects a reference to a theorem-like statement without any more specific references."
+            | PR014 -> "Justification expects a reference to a theorem-like statement without any more specific references."
+            | PR015 argId -> $"Cannot revoke the argument `{argId}` because it wasn't assumed."
+            | PR016 argId -> $"Cannot revoke the argument `{argId}` because it wasn't the last assumed one."
             // signature-related error codes
             | SIG00 (fixType, arity) -> sprintf $"Illegal arity `{arity}` using `{fixType}` notation."
             | SIG01 symbol -> $"The symbol `{symbol}` was not declared." 

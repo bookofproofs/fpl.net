@@ -1855,6 +1855,7 @@ and FplProof(positions: Positions, parent: FplValue, runOrder) =
     let _runOrder = runOrder
     let mutable _signStartPos = Position("", (int64)0, (int64)0, (int64)0)
     let mutable _signEndPos = Position("", (int64)0, (int64)0, (int64)0)
+    let _assumedArguments = Stack<FplArgInferenceAssume>()
 
     interface IHasSignature with
         member _.SignStartPos 
@@ -1886,6 +1887,38 @@ and FplProof(positions: Positions, parent: FplValue, runOrder) =
         |> Seq.map (fun fv -> fv :?> FplArgument)
         |> Seq.sortBy (fun fv -> fv.RunOrder)
 
+    member this.LastAssumedArgument =
+        if _assumedArguments.Count > 0 then
+            Some (_assumedArguments.Peek())
+        else 
+            None
+
+    member this.AssumeArgument assumption = _assumedArguments.Push (assumption)
+    
+    member this.HasArgument argumentId = this.Scope.ContainsKey(argumentId)
+
+    member this.RevokeArgument argumentId pos1 pos2 = 
+        if not (this.HasArgument argumentId) then 
+            emitPR005Diagnostics argumentId pos1 pos2
+        else 
+            let refArg = this.Scope[argumentId] :?> FplArgument
+            let aiOpt = refArg.ArgumentInference
+            match aiOpt with
+            | Some (:? FplArgInferenceAssume as toBeRevoked) -> 
+                match this.LastAssumedArgument with 
+                | Some last when last = toBeRevoked -> 
+                    _assumedArguments.Pop() |> ignore
+                | Some last when last <> toBeRevoked -> 
+                    let lastArg = last.ParentArgument
+                    emitPR016Diagnostics argumentId lastArg.FplId pos1 pos2
+                | _ ->    
+                    // the referenced argument is not an assumption in the proof
+                   emitPR015Diagnostics argumentId pos1 pos2
+            | _ -> 
+                // the referenced argument is not an assumption in the proof
+                emitPR015Diagnostics argumentId pos1 pos2
+
+
     override this.Run variableStack = 
         // tell the parent theorem-like statement that it has a proof
         let parent = this.Parent.Value 
@@ -1908,7 +1941,6 @@ and FplProof(positions: Positions, parent: FplValue, runOrder) =
 
     override this.RunOrder = Some _runOrder
 
-    member this.HasArgument argumentId = this.Scope.ContainsKey(argumentId)
 
 let getArgumentInProof (fv1:FplGenericJustificationItem) argName =
     let proof = 
@@ -2656,6 +2688,7 @@ type FplDecrement(positions: Positions, parent: FplValue) as this =
 
     do 
         this.FplId <- $"{LiteralDel}."
+        this.TypeId <- LiteralObj
 
     override this.Name = PrimDecrementL
     override this.ShortName = PrimDecrement

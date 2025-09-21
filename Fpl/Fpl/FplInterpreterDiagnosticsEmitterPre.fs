@@ -469,6 +469,32 @@ let emitPR014Diagnostics pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
 
+let emitPR015Diagnostics argumentID pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = PR015 argumentID
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
+let emitPR016Diagnostics argumentID lastAssumedArgumentId pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = PR016 argumentID
+            Diagnostic.Alternatives = Some $"Did you mean `{lastAssumedArgumentId}`?" 
+        }
+    ad.AddDiagnostic diagnostic
+
 let emitSIG03Diagnostics errMsg mapTypeStr pos1 pos2 = 
     let diagnostic =
         { 

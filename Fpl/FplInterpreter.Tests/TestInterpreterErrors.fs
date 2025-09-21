@@ -1603,3 +1603,29 @@ type TestInterpreterErrors() =
         else
             let code = PR014 
             runTestHelper "TestPR014.fpl" fplCode code expected
+
+    [<DataRow("00", "proof T$1 {1. |- assume x 2. |- revoke 1};", 0)>]
+    [<DataRow("01", "proof T$1 {1. |- assume x 2. |- revoke 2};", 0)>] // its ok, 2 is not evaluated at this stage but this will issue PR005 anyway, 
+    [<DataRow("02", "proof T$1 {1. |- assume x 2. |- trivial 3. |- revoke 2};", 1)>]
+    [<DataRow("03", "proof T$1 {1. |- assume x 2. |- trivial 3. |- revoke 1};", 0)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestPR015(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = PR015 ""
+            runTestHelper "TestPR015.fpl" fplCode code expected
+
+    [<DataRow("00", "proof T$1 {1. |- assume x 2. |- trivial 3. |- revoke 2};", 0)>]
+    [<DataRow("01", "proof T$1 {1. |- assume x 2. |- trivial 3. |- assume y 4. |- trivial 5. |- revoke 1};", 1)>]
+    [<DataRow("02", "proof T$1 {1. |- assume x 2. |- trivial 3. |- assume y 4. |- trivial 5. |- revoke 3};", 0)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestPR016(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = PR016 ""
+            runTestHelper "TestPR016.fpl" fplCode code expected
+           
