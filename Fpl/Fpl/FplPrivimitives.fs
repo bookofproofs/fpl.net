@@ -1324,6 +1324,8 @@ let PrimClassL = "class definition"
 [<Literal>]
 let PrimConjunction = "conjunction"
 [<Literal>]
+let PrimConstructorCall = "constructor call"
+[<Literal>]
 let PrimDecrement = "decr"
 [<Literal>]
 let PrimDecrementL = "decrement statement"

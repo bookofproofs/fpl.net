@@ -877,7 +877,7 @@ type TestFplValueScopeNameEndPos() =
             let proof = theory.Scope["T$1"]
             let arg = proof.Scope["100"]
             match var with
-            | "base1" -> Assert.AreEqual<int64>((int64)28, arg.EndPos.Column)
+            | "base1" -> Assert.AreEqual<int64>((int64)29, arg.EndPos.Column)
             | "base2" -> Assert.AreEqual<int64>((int64)46, arg.EndPos.Column)
             | "base3" -> Assert.AreEqual<int64>((int64)48, arg.EndPos.Column)
             | "base4" -> Assert.AreEqual<int64>((int64)39, arg.EndPos.Column)

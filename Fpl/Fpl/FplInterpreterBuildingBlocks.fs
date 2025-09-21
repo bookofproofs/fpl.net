@@ -1516,17 +1516,14 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.ParentConstructorCall((pos1, pos2), (inheritedClassTypeAst, argumentTupleAst)) ->
         st.EvalPush("ParentConstructorCall")
-        let fv = variableStack.PeekEvalStack()
-        fv.StartPos <- pos1
-        fv.EndPos <- pos2
-        fv.FplId <- "bas"
-        let refBlock = new FplReference((pos1, pos2), fv) 
-        variableStack.PushEvalStack(refBlock)
+        let parent = variableStack.PeekEvalStack()
+        let fvNew = new FplConstructorCall((pos1, pos2), parent) 
+        variableStack.PushEvalStack(fvNew)
         eval st inheritedClassTypeAst
         eval st argumentTupleAst
         variableStack.PopEvalStack()
-        if fv.ArgList.Count>0 then
-            let parentConstructorCallReference = fv.ArgList[0]
+        if parent.ArgList.Count>0 then
+            let parentConstructorCallReference = parent.ArgList[0]
             let parentConstructorCallRefValue = getArgument parentConstructorCallReference
             match parentConstructorCallRefValue with
             | Some refVal -> 
@@ -1755,10 +1752,6 @@ let rec eval (st: SymbolTable) ast =
                 // for this class no parent class was called 
                 emitID020Diagnostics kvp.Key pos1
         )
-
-        let rb = new FplReference((pos1, pos2), fv)
-        variableStack.PushEvalStack(rb)
-        variableStack.PopEvalStack()
         emitVAR04diagnostics fv
         variableStack.PopEvalStack()
         st.EvalPop()
