@@ -2940,8 +2940,11 @@ type FplGenericQuantor(positions: Positions, parent: FplValue) =
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
     
-type FplQuantorAll(positions: Positions, parent: FplValue) =
+type FplQuantorAll(positions: Positions, parent: FplValue) as this =
     inherit FplGenericQuantor(positions, parent)
+
+    do 
+        this.FplId <- LiteralAll
 
     override this.Name = PrimQuantorAll
 
@@ -2952,8 +2955,11 @@ type FplQuantorAll(positions: Positions, parent: FplValue) =
 
     override this.Run _ = () // todo implement run
 
-type FplQuantorExists(positions: Positions, parent: FplValue) =
+type FplQuantorExists(positions: Positions, parent: FplValue) as this =
     inherit FplGenericQuantor(positions, parent)
+
+    do 
+        this.FplId <- LiteralEx
 
     override this.Name = PrimQuantorExists
 
@@ -2968,6 +2974,7 @@ type FplQuantorExistsN(positions: Positions, parent: FplValue) as this =
     inherit FplGenericQuantor(positions, parent)
 
     do 
+        this.FplId <- LiteralExN
         this.Arity <- 1
 
 

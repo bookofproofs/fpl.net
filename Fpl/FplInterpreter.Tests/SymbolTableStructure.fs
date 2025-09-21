@@ -905,11 +905,11 @@ type SymbolTableStructure() =
         | "FplProposition" ->
             Assert.AreEqual<string>(LiteralUndetermined, (getName var).[index])
         | "FplQuantorAll" ->
-            Assert.AreEqual<string>(LiteralUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralAll, (getName var).[index])
         | "FplQuantorExists" ->
-            Assert.AreEqual<string>(LiteralUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralEx, (getName var).[index])
         | "FplQuantorExistsN" ->
-            Assert.AreEqual<string>(LiteralUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralExN, (getName var).[index])
         | "FplReference" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplReturn" ->
