@@ -611,8 +611,6 @@ type FplValue(positions: Positions, parent: FplValue option) =
                 ad.DiagnosticsStopped <- false
                 emitID014Diagnostics (this.Type(SignatureType.Mixed)) conflict.QualifiedStartPos this.StartPos this.EndPos 
                 ad.DiagnosticsStopped <- oldDiagnosticsStopped
-            | PrimArg -> 
-                emitPR003Diagnostics (this.Type(SignatureType.Mixed)) conflict.QualifiedStartPos this.StartPos this.EndPos 
             | PrimVariable 
             | PrimVariableMany 
             | PrimVariableMany1 -> // variable
@@ -1850,7 +1848,13 @@ and FplArgument(positions: Positions, parent: FplValue, runOrder) =
         *)
 
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+    override this.EmbedInSymbolTable _ = 
+        let (proof:FplProof) = this.ParentProof
+        if proof.HasArgument (this.FplId) then 
+            let conflict = proof.Scope[this.FplId]
+            emitPR003Diagnostics this.FplId conflict.QualifiedStartPos this.StartPos this.EndPos 
+        else 
+            proof.Scope.Add(this.FplId, this)
 
     override this.RunOrder = Some _runOrder
 
