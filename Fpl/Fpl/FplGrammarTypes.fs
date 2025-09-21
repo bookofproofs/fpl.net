@@ -35,7 +35,7 @@ type Ast =
     | Digits of string
     | Extension of Positions * string
     | DollarDigits of Positions * uint
-    | PascalCaseId of string
+    | PascalCaseId of Positions * string
     | NamespaceIdentifier of Positions * Ast list
     | AliasedNamespaceIdentifier of Positions * (Ast * Ast option)
     | PredicateIdentifier of Positions * Ast list 

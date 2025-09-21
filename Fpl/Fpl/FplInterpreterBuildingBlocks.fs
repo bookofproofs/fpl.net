@@ -212,10 +212,10 @@ let rec eval (st: SymbolTable) ast =
         fv.FplId <- s
         fv.TypeId <- s
         st.EvalPop()
-    | Ast.PascalCaseId s -> 
+    | Ast.PascalCaseId ((pos1, pos2), pascalCaseId) -> 
         st.EvalPush(PrimPascalCaseId)
         let fv = variableStack.PeekEvalStack()
-        eval_string st s
+        eval_string st pascalCaseId
         match fv.Name with
         | LiteralAxL
         | LiteralThmL
@@ -233,11 +233,14 @@ let rec eval (st: SymbolTable) ast =
         | PrimPredicateL
         | PrimFuncionalTermL
         | PrimRuleOfInference -> 
-            fv.FplId <- s
-        | LiteralCtorL
+            fv.FplId <- pascalCaseId
+        | LiteralCtorL ->
+            fv.FplId <- pascalCaseId
+            fv.TypeId <- pascalCaseId
+            emitID008Diagnostics pascalCaseId fv.Parent.Value.FplId pos1 pos2
         | PrimClassL ->
-            fv.FplId <- s
-            fv.TypeId <- s
+            fv.FplId <- pascalCaseId
+            fv.TypeId <- pascalCaseId
         | _ -> ()
         st.EvalPop() 
     | Ast.ExtensionRegex s -> 
@@ -691,7 +694,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.PredicateIdentifier((pos1, pos2), asts) ->
         st.EvalPush("PredicateIdentifier")
 
-        let pascalCaseIdList = asts |> List.collect (function Ast.PascalCaseId s -> [s] | _ -> [])
+        let pascalCaseIdList = asts |> List.collect (function Ast.PascalCaseId (_,s) -> [s] | _ -> [])
         let identifier = String.concat "." pascalCaseIdList
         let evalPath = st.EvalPath()
         let fv = variableStack.PeekEvalStack()
@@ -715,21 +718,6 @@ let rec eval (st: SymbolTable) ast =
                 | Some classNode -> 
                     fv.ArgList.Add classNode
                 | None -> ()
-
-        | :? FplProof 
-        | :? FplMandatoryPredicate
-        | :? FplOptionalPredicate ->
-            fv.FplId <- identifier
-            fv.TypeId <- LiteralPred
-        | :? FplMandatoryFunctionalTerm
-        | :? FplOptionalFunctionalTerm
-        | :? FplFunctionalTerm ->
-            fv.FplId <- identifier
-            fv.TypeId <- LiteralFunc
-        | :? FplConstructor -> 
-            fv.FplId <- identifier
-            fv.TypeId <- identifier
-            checkID008Diagnostics fv pos1 pos2
         | :? FplVariable as var when var.IsMany -> 
             fv.TypeId <- $"*{identifier}"
         | :? FplVariable as var when var.IsMany1 -> 
@@ -1013,7 +1001,7 @@ let rec eval (st: SymbolTable) ast =
             // make sure, we still add a referenced node candidate to the scope of a reference
             let candidates = searchForCandidatesOfReferenceBlock fv
             let classes = candidates |> List.filter (fun c -> c.IsClass())
-            let constructors = candidates |> List.filter (fun c -> isConstructor c) 
+            let constructors = candidates |> List.filter (fun c -> c.Name = LiteralCtorL) 
             if constructors.Length > 0 then
                 // if among the candidates are class constructors (that due to the FPL syntax always have a signature with 0 or more parameters)
                 // we check if to issue a SIG04 diagnostic. At this AST case, a class was referred with a PascalCaseIdentifier 

@@ -1117,10 +1117,10 @@ type FplConstructor(positions: Positions, parent: FplValue) =
     let mutable _signEndPos = Position("", (int64)0, (int64)0, (int64)0)
 
     interface IHasSignature with
-        member _.SignStartPos 
+        member this.SignStartPos 
             with get (): Position = _signStartPos
             and set (value) = _signStartPos <- value
-        member _.SignEndPos 
+        member this.SignEndPos 
             with get (): Position = _signEndPos
             and set (value) = _signEndPos <- value
 
@@ -1146,12 +1146,9 @@ type FplConstructor(positions: Positions, parent: FplValue) =
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 
-let isConstructor (fv:FplValue) =
-    match fv with
-    | :? FplConstructor -> true
-    | _ -> false
+    member this.ParentClass = this.Parent.Value :?> FplClass
 
-type FplClass(positions: Positions, parent: FplValue) =
+and FplClass(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(positions, parent)
     let mutable _signStartPos = Position("", (int64)0, (int64)0, (int64)0)
     let mutable _signEndPos = Position("", (int64)0, (int64)0, (int64)0)
@@ -1180,7 +1177,7 @@ type FplClass(positions: Positions, parent: FplValue) =
     member this.GetConstructors() =
         this.Scope
         |> Seq.map (fun kvp -> kvp.Value)
-        |> Seq.filter (fun fv -> isConstructor fv)
+        |> Seq.filter (fun fv -> fv.Name = LiteralCtorL)
         |> Seq.toList
     
     override this.Type signatureType =
@@ -2643,7 +2640,7 @@ let getArgument (fv:FplValue) =
         // Exceptions: 
         // 1) if refValue is a class, its "arg list" means something else - namely parent classes. In this case we only want to return the main class
         // 2) if refValue is a constructor, its "arg list" means something else - namely the calls to some base classes' constructors classes. In this case we only want to return the main constructor
-        if refValue.ArgList.Count > 0 && not (refValue.IsClass()) && not (isConstructor refValue) then
+        if refValue.ArgList.Count > 0 && not (refValue.IsClass()) && (refValue.Name <> LiteralCtorL) then
             Some refValue.ArgList[0] // return existing values except of classes, because those denoted their parent classes
         else 
             Some refValue 
@@ -3427,7 +3424,7 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
                 // issue SIG05 diagnostics if either no inheritance chain found 
                 emitSIG05Diagnostics (assignee.Type(SignatureType.Type)) (value.Type(SignatureType.Type)) toBeAssignedValue.StartPos toBeAssignedValue.EndPos
             | _ -> () // inheritance chain found (no SIG05 diagnostics)
-        | Some value when isConstructor value ->
+        | Some value when (value.Name = LiteralCtorL) ->
             // find a class inheritance chain for the constructor's class (which is stored in its parent value)
             let chainOpt = findClassInheritanceChain value.Parent.Value assignee.TypeId
             match chainOpt with
@@ -4200,7 +4197,7 @@ let findCandidatesByName (st: SymbolTable) (name: string) withClassConstructors 
             if withClassConstructors && block.IsClass() then
                 block.Scope
                 |> Seq.map (fun kvp -> kvp.Value)
-                |> Seq.filter (fun (fv: FplValue) -> isConstructor fv)
+                |> Seq.filter (fun (fv: FplValue) -> (fv.Name = LiteralCtorL))
                 |> Seq.iter (fun (fv: FplValue) -> pm.Add(fv))
 
             if withCorollariesOrProofs && (block :? FplGenericTheoremLikeStmt) then 

@@ -82,6 +82,20 @@ let emitID007Diagnostics pos1 pos2 fplValueTypeStr listOfCandidates =
         }
     ad.AddDiagnostic diagnostic
 
+let emitID008Diagnostics constructorId classId pos1 pos2 =
+    if constructorId <> classId then
+        let diagnostic =
+            { 
+                Diagnostic.Uri = ad.CurrentUri
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = pos1
+                Diagnostic.EndPos = pos2
+                Diagnostic.Code = ID008(constructorId, classId) // misspelled constructor name
+                Diagnostic.Alternatives = None 
+            }
+        ad.AddDiagnostic diagnostic
+
 let emitID010Diagnostics identifier pos1 pos2 =
     let diagnostic =
         { 

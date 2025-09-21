@@ -106,7 +106,7 @@ let extension = positions "Extension" (at >>. extensionString) |>> Ast.Extension
 
 let IdStartsWithSmallCase = regex @"[a-z]\w*" 
 let idStartsWithCap = (regex @"[A-Z]\w*") <?> "<PascalCaseId>"
-let pascalCaseId = idStartsWithCap |>> Ast.PascalCaseId
+let pascalCaseId = positions "PascalCaseId" idStartsWithCap |>> Ast.PascalCaseId
 
 let namespaceIdentifier = positions "NamespaceIdentifier" (sepBy1 pascalCaseId dot) .>> IW |>> Ast.NamespaceIdentifier
 let predicateIdentifier = positions "PredicateIdentifier" (sepBy1 pascalCaseId dot) |>> Ast.PredicateIdentifier 
