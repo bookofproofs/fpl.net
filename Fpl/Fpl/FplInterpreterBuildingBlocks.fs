@@ -697,16 +697,6 @@ let rec eval (st: SymbolTable) ast =
         let fv = variableStack.PeekEvalStack()
 
         match fv with 
-        | :? FplTheorem
-        | :? FplLemma
-        | :? FplProposition
-        | :? FplCorollary
-        | :? FplConjecture
-        | :? FplPredicate
-        | :? FplAxiom
-        | :? FplRuleOfInference ->
-            fv.FplId <- identifier
-            fv.TypeId <- LiteralPred
         | :? FplClass -> 
             if evalPath.EndsWith("InheritedClassType.PredicateIdentifier") then 
                 match checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2 with
