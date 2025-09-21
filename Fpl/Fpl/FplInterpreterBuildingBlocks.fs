@@ -691,10 +691,10 @@ let rec eval (st: SymbolTable) ast =
         eval st ast1
         st.EvalPop()
     // | NamespaceIdentifier of Positions * Ast list
-    | Ast.PredicateIdentifier((pos1, pos2), asts) ->
+    | Ast.PredicateIdentifier((pos1, pos2), dottedIdListAst) ->
         st.EvalPush("PredicateIdentifier")
 
-        let pascalCaseIdList = asts |> List.collect (function Ast.PascalCaseId (_,s) -> [s] | _ -> [])
+        let pascalCaseIdList = dottedIdListAst |> List.collect (function Ast.PascalCaseId (_,s) -> [s] | _ -> [])
         let identifier = String.concat "." pascalCaseIdList
         let evalPath = st.EvalPath()
         let fv = variableStack.PeekEvalStack()

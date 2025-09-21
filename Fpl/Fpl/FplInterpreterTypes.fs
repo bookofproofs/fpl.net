@@ -605,23 +605,20 @@ type FplValue(positions: Positions, parent: FplValue option) =
                 this.Type(SignatureType.Name)
         match this.InScopeOfParent identifier with
         | ScopeSearchResult.Found conflict -> 
-            match next.ShortName with
-            | PrimJustification -> emitPR004Diagnostics (this.Type(SignatureType.Type)) conflict.QualifiedStartPos this.StartPos this.EndPos 
-            | _ -> 
-                match this.ShortName with
-                | PrimLanguage -> // language
-                    let oldDiagnosticsStopped = ad.DiagnosticsStopped
-                    ad.DiagnosticsStopped <- false
-                    emitID014Diagnostics (this.Type(SignatureType.Mixed)) conflict.QualifiedStartPos this.StartPos this.EndPos 
-                    ad.DiagnosticsStopped <- oldDiagnosticsStopped
-                | PrimArg -> 
-                    emitPR003Diagnostics (this.Type(SignatureType.Mixed)) conflict.QualifiedStartPos this.StartPos this.EndPos 
-                | PrimVariable 
-                | PrimVariableMany 
-                | PrimVariableMany1 -> // variable
-                    ()
-                | _ ->
-                    emitID001Diagnostics (this.Type(SignatureType.Type)) conflict.QualifiedStartPos this.StartPos this.EndPos 
+            match this.ShortName with
+            | PrimLanguage -> // language
+                let oldDiagnosticsStopped = ad.DiagnosticsStopped
+                ad.DiagnosticsStopped <- false
+                emitID014Diagnostics (this.Type(SignatureType.Mixed)) conflict.QualifiedStartPos this.StartPos this.EndPos 
+                ad.DiagnosticsStopped <- oldDiagnosticsStopped
+            | PrimArg -> 
+                emitPR003Diagnostics (this.Type(SignatureType.Mixed)) conflict.QualifiedStartPos this.StartPos this.EndPos 
+            | PrimVariable 
+            | PrimVariableMany 
+            | PrimVariableMany1 -> // variable
+                ()
+            | _ ->
+                emitID001Diagnostics (this.Type(SignatureType.Type)) conflict.QualifiedStartPos this.StartPos this.EndPos 
         | _ -> 
             next.Scope.Add(identifier,this)
 
@@ -1553,7 +1550,19 @@ type FplGenericJustificationItem(positions: Positions, parent: FplValue) =
 
     override this.Represent() = this.Type(SignatureType.Name)
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
+    override this.EmbedInSymbolTable _ = 
+        let thisJustificationItemId = this.Type(SignatureType.Mixed)
+
+        let alreadyAddedIdOpt = 
+            this.Parent.Value.ArgList
+            |> Seq.map (fun argJi -> argJi.Type(SignatureType.Mixed))
+            |> Seq.tryFind (fun otherId -> otherId = thisJustificationItemId)
+        match alreadyAddedIdOpt with
+        | Some otherId ->
+            emitPR004Diagnostics thisJustificationItemId otherId this.StartPos this.EndPos 
+        | _ -> ()
+            
+        this.TryAddToParentsArgList() 
 
     override this.RunOrder = None
 
