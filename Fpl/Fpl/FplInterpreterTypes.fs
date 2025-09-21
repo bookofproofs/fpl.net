@@ -606,11 +606,6 @@ type FplValue(positions: Positions, parent: FplValue option) =
         match this.InScopeOfParent identifier with
         | ScopeSearchResult.Found conflict -> 
             match this.ShortName with
-            | PrimLanguage -> // language
-                let oldDiagnosticsStopped = ad.DiagnosticsStopped
-                ad.DiagnosticsStopped <- false
-                emitID014Diagnostics (this.Type(SignatureType.Mixed)) conflict.QualifiedStartPos this.StartPos this.EndPos 
-                ad.DiagnosticsStopped <- oldDiagnosticsStopped
             | PrimVariable 
             | PrimVariableMany 
             | PrimVariableMany1 -> // variable
@@ -2022,7 +2017,16 @@ type FplLanguage(positions: Positions, parent: FplValue) =
         // todo implement run
         ()
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+    override this.EmbedInSymbolTable _ = 
+        let parent = this.Parent.Value
+        if parent.Scope.ContainsKey(this.FplId) then 
+            let conflict = parent.Scope[this.FplId]
+            let oldDiagnosticsStopped = ad.DiagnosticsStopped
+            ad.DiagnosticsStopped <- false
+            emitID014Diagnostics this.FplId conflict.QualifiedStartPos this.StartPos this.EndPos 
+            ad.DiagnosticsStopped <- oldDiagnosticsStopped
+        else
+            parent.Scope.Add(this.FplId, this)
 
     override this.RunOrder = None
 
