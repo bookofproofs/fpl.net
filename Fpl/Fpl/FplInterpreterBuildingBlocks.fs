@@ -1514,10 +1514,10 @@ let rec eval (st: SymbolTable) ast =
             printf "%O" d
             variableStack.PopEvalStack()
         st.EvalPop()
-    | Ast.ParentConstructorCall((pos1, pos2), (inheritedClassTypeAst, argumentTupleAst)) ->
-        st.EvalPush("ParentConstructorCall")
+    | Ast.BaseConstructorCall((pos1, pos2), (inheritedClassTypeAst, argumentTupleAst)) ->
+        st.EvalPush("BaseConstructorCall")
         let parent = variableStack.PeekEvalStack()
-        let fvNew = new FplConstructorCall((pos1, pos2), parent) 
+        let fvNew = new FplBaseConstructorCall((pos1, pos2), parent) 
         variableStack.PushEvalStack(fvNew)
         eval st inheritedClassTypeAst
         eval st argumentTupleAst

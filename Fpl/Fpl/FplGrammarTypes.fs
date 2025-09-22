@@ -145,7 +145,7 @@ type Ast =
     | Mapping of Positions * Ast
     | AxiomSignature of Positions * Ast
     | Axiom of Positions * (Ast * (Ast list option * Ast))
-    | ParentConstructorCall of Positions * (Ast * Ast)
+    | BaseConstructorCall of Positions * (Ast * Ast)
     | ConstructorSignature of Positions * (Ast * Ast)
     | PredicateInstanceSignature of Positions * (Ast * Ast)
     | FunctionalTermInstanceSignature of Positions * ((Ast * Ast) * Ast)

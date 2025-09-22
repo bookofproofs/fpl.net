@@ -326,11 +326,11 @@ let forStatement = positions "ForIn" (keywordFor >>. forInBody) |>> Ast.ForIn
 //// Difference of assertion to assume: the latter will be used only in the scope of proofs
 let assertionStatement = positions "Assertion" (keywordAssert >>. predicate) |>> Ast.Assertion
 let inheritedClassType = positions "InheritedClassType" (choice [keywordObject; predicateIdentifier]) |>> Ast.InheritedClassType
-let callConstructorParentClass = positions "ParentConstructorCall" (keywordBaseClassReference >>. dot >>. (inheritedClassType .>> IW).>>. argumentTuple .>> IW) |>> Ast.ParentConstructorCall
+let baseConstructorCall = positions "BaseConstructorCall" (keywordBaseClassReference >>. dot >>. (inheritedClassType .>> IW).>>. argumentTuple .>> IW) |>> Ast.BaseConstructorCall
 
 let statement = 
     IW >>. (choice [
-        callConstructorParentClass
+        baseConstructorCall
         casesStatement
         mapCases
         assertionStatement
@@ -657,7 +657,7 @@ let errInformation = [
     (PRD000, [LiteralExN], existsTimesN)
     (PRD000, [LiteralIs], isOperator)
     (STMASE, [LiteralAssert], assertionStatement)
-    (STMCAL, [LiteralBase], callConstructorParentClass)
+    (STMCAL, [LiteralBase], baseConstructorCall)
     (STMCAS, [LiteralCases], casesStatement)
     (STMMAP, [LiteralMapCases], mapCases)
     (STMFOI, [LiteralIn], inEntity)

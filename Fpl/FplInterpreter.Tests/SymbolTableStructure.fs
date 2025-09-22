@@ -60,8 +60,8 @@ type SymbolTableStructure() =
         | "FplConstructor" ->
             let x = new FplConstructor(positions, parent)
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
-        | "FplConstructorCall" ->
-            let x = new FplConstructorCall(positions, parent)
+        | "FplBaseConstructorCall" ->
+            let x = new FplBaseConstructorCall(positions, parent)
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplCorollary" ->
             let x = new FplCorollary(positions, parent, 0)
@@ -254,6 +254,7 @@ type SymbolTableStructure() =
     [<DataRow("FplAssertion")>]
     [<DataRow("FplAssignment")>]
     [<DataRow("FplAxiom")>]
+    [<DataRow("FplBaseConstructorCall")>]
     [<DataRow("FplCases")>]
     [<DataRow("FplCaseElse")>]
     [<DataRow("FplCaseSingle")>]
@@ -261,7 +262,6 @@ type SymbolTableStructure() =
     [<DataRow("FplConjecture")>]
     [<DataRow("FplConjunction")>]
     [<DataRow("FplConstructor")>]
-    [<DataRow("FplConstructorCall")>]
     [<DataRow("FplCorollary")>]
     [<DataRow("FplDecrement")>]
     [<DataRow("FplDisjunction")>]
@@ -341,6 +341,8 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>(PrimAssignment, (getName var).[index])
         | "FplAxiom" ->
             Assert.AreEqual<string>(LiteralAxL, (getName var).[index])
+        | "FplBaseConstructorCall" ->
+            Assert.AreEqual<string>(PrimBaseConstructorCall, (getName var).[index])
         | "FplCases" ->
             Assert.AreEqual<string>(PrimCases, (getName var).[index])
         | "FplCaseElse" ->
@@ -355,8 +357,6 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>(PrimConjunction, (getName var).[index])        
         | "FplConstructor" ->
             Assert.AreEqual<string>(LiteralCtorL, (getName var).[index])
-        | "FplConstructorCall" ->
-            Assert.AreEqual<string>(PrimConstructorCall, (getName var).[index])
         | "FplCorollary" ->
             Assert.AreEqual<string>(LiteralCorL, (getName var).[index])
         | "FplDecrement" ->
@@ -486,6 +486,7 @@ type SymbolTableStructure() =
     [<DataRow("FplAssertion")>]
     [<DataRow("FplAssignment")>]
     [<DataRow("FplAxiom")>]
+    [<DataRow("FplBaseConstructorCall")>]
     [<DataRow("FplCases")>]
     [<DataRow("FplCaseElse")>]
     [<DataRow("FplCaseSingle")>]
@@ -493,7 +494,6 @@ type SymbolTableStructure() =
     [<DataRow("FplConjecture")>]
     [<DataRow("FplConjunction")>]
     [<DataRow("FplConstructor")>]
-    [<DataRow("FplConstructorCall")>]
     [<DataRow("FplCorollary")>]
     [<DataRow("FplDecrement")>]
     [<DataRow("FplDisjunction")>]
@@ -575,6 +575,8 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>(PrimStmt, (getName var).[index])
         | "FplAxiom" ->
             Assert.AreEqual<string>(LiteralAx, (getName var).[index])
+        | "FplBaseConstructorCall" ->
+            Assert.AreEqual<string>(PrimStmt, (getName var).[index])
         | "FplCases" ->
             Assert.AreEqual<string>(PrimStmt, (getName var).[index])
         | "FplCaseElse" ->
@@ -589,8 +591,6 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>(LiteralAnd, (getName var).[index])        
         | "FplConstructor" ->
             Assert.AreEqual<string>(LiteralCtor, (getName var).[index])
-        | "FplConstructorCall" ->
-            Assert.AreEqual<string>(PrimStmt, (getName var).[index])
         | "FplCorollary" ->
             Assert.AreEqual<string>(LiteralCor, (getName var).[index])
         | "FplDecrement" ->
@@ -720,6 +720,7 @@ type SymbolTableStructure() =
     [<DataRow("FplAssertion")>]
     [<DataRow("FplAssignment")>]
     [<DataRow("FplAxiom")>]
+    [<DataRow("FplBaseConstructorCall")>]
     [<DataRow("FplCases")>]
     [<DataRow("FplCaseElse")>]
     [<DataRow("FplCaseSingle")>]
@@ -727,7 +728,6 @@ type SymbolTableStructure() =
     [<DataRow("FplConjecture")>]
     [<DataRow("FplConjunction")>]
     [<DataRow("FplConstructor")>]
-    [<DataRow("FplConstructorCall")>]
     [<DataRow("FplCorollary")>]
     [<DataRow("FplDecrement")>]
     [<DataRow("FplDisjunction")>]
@@ -808,6 +808,8 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>("assign (ln 0)", (getName var).[index])
         | "FplAxiom" ->
             Assert.AreEqual<string>(LiteralUndetermined, (getName var).[index])
+        | "FplBaseConstructorCall" ->
+            Assert.AreEqual<string>(LiteralObj, (getName var).[index])
         | "FplCases" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplCaseElse" ->
@@ -821,8 +823,6 @@ type SymbolTableStructure() =
         | "FplConjunction" ->
             Assert.AreEqual<string>(LiteralAnd, (getName var).[index])        
         | "FplConstructor" ->
-            Assert.AreEqual<string>(LiteralObj, (getName var).[index])
-        | "FplConstructorCall" ->
             Assert.AreEqual<string>(LiteralObj, (getName var).[index])
         | "FplCorollary" ->
             Assert.AreEqual<string>(LiteralUndetermined, (getName var).[index])
@@ -954,6 +954,7 @@ type SymbolTableStructure() =
     [<DataRow("FplAssertion")>]
     [<DataRow("FplAssignment")>]
     [<DataRow("FplAxiom")>]
+    [<DataRow("FplBaseConstructorCall")>]
     [<DataRow("FplCases")>]
     [<DataRow("FplCaseElse")>]
     [<DataRow("FplCaseSingle")>]
@@ -961,7 +962,6 @@ type SymbolTableStructure() =
     [<DataRow("FplConjecture")>]
     [<DataRow("FplConjunction")>]
     [<DataRow("FplConstructor")>]
-    [<DataRow("FplConstructorCall")>]
     [<DataRow("FplCorollary")>]
     [<DataRow("FplDecrement")>]
     [<DataRow("FplDisjunction")>]
@@ -1042,6 +1042,8 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
         | "FplAxiom" ->
             Assert.AreEqual<string>(LiteralPred, (getName var).[index])
+        | "FplBaseConstructorCall" ->
+            Assert.AreEqual<string>(LiteralObj, (getName var).[index])
         | "FplCases" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplCaseElse" ->
@@ -1055,8 +1057,6 @@ type SymbolTableStructure() =
         | "FplConjunction" ->
             Assert.AreEqual<string>(LiteralPred, (getName var).[index])        
         | "FplConstructor" ->
-            Assert.AreEqual<string>(LiteralObj, (getName var).[index])
-        | "FplConstructorCall" ->
             Assert.AreEqual<string>(LiteralObj, (getName var).[index])
         | "FplCorollary" ->
             Assert.AreEqual<string>(LiteralPred, (getName var).[index])
@@ -1187,6 +1187,7 @@ type SymbolTableStructure() =
     [<DataRow("FplAssertion")>]
     [<DataRow("FplAssignment")>]
     [<DataRow("FplAxiom")>]
+    [<DataRow("FplBaseConstructorCall")>]
     [<DataRow("FplCases")>]
     [<DataRow("FplCaseElse")>]
     [<DataRow("FplCaseSingle")>]
@@ -1194,7 +1195,6 @@ type SymbolTableStructure() =
     [<DataRow("FplConjecture")>]
     [<DataRow("FplConjunction")>]
     [<DataRow("FplConstructor")>]
-    [<DataRow("FplConstructorCall")>]
     [<DataRow("FplCorollary")>]
     [<DataRow("FplDecrement")>]
     [<DataRow("FplDisjunction")>]
@@ -1275,6 +1275,8 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>("None", (getName var).[index])
         | "FplAxiom" ->
             Assert.AreEqual<string>("Some", (getName var).[index])
+        | "FplBaseConstructorCall" ->
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplCases" ->
             Assert.AreEqual<string>("None", (getName var).[index])
         | "FplCaseElse" ->
@@ -1288,8 +1290,6 @@ type SymbolTableStructure() =
         | "FplConjunction" ->
             Assert.AreEqual<string>("None", (getName var).[index])
         | "FplConstructor" ->
-            Assert.AreEqual<string>("None", (getName var).[index])
-        | "FplConstructorCall" ->
             Assert.AreEqual<string>("None", (getName var).[index])
         | "FplCorollary" ->
             Assert.AreEqual<string>("Some", (getName var).[index])
@@ -1430,8 +1430,13 @@ type SymbolTableStructure() =
     
     [<DataRow("FplArgument", "00", """;""", "")>]
     [<DataRow("FplAssertion", "00", """;""", "")>]
+
     [<DataRow("FplAssignment", "00", """def pred T() {dec ~x:pred x:=false; true};""", "")>]
+
     [<DataRow("FplAxiom", "00", """ax T {true};""", "")>]
+
+    [<DataRow("FplBaseConstructorCall", "00", """def cl A:obj { ctor A() {dec base.obj(); } };""", "")>]
+
     [<DataRow("FplCases", "00", """;""", "")>]
     [<DataRow("FplCaseElse", "00", """;""", "")>]
     [<DataRow("FplCaseSingle", "00", """;""", "")>]
@@ -1466,7 +1471,6 @@ type SymbolTableStructure() =
     // with with shared variables and stmts
     [<DataRow("FplConstructor", "03", """def cl A:obj { dec ~x,y:obj; ctor A(z:obj) {dec z:=x; } };""", "")>]
 
-    [<DataRow("FplConstructorCall", "00", """;""", "")>]
     [<DataRow("FplCorollary", "00", """;""", "")>]
     [<DataRow("FplDecrement", "00", """;""", "")>]
     [<DataRow("FplDisjunction", "00", """;""", "")>]
@@ -1773,6 +1777,7 @@ type SymbolTableStructure() =
                     Assert.IsInstanceOfType<FplAssignment>(node)
                     Assert.AreEqual<int>(2, node.ArgList.Count)
                     Assert.AreEqual<int>(0, node.Scope.Count)
+
                 | "FplAxiom", "00" -> 
                     Assert.IsInstanceOfType<FplTheory>(parent)
                     Assert.AreEqual<int>(0, parent.ArgList.Count)
@@ -1780,6 +1785,15 @@ type SymbolTableStructure() =
                     Assert.IsInstanceOfType<FplAxiom>(node)
                     Assert.AreEqual<int>(1, node.ArgList.Count)
                     Assert.AreEqual<int>(0, node.Scope.Count)
+
+                | "FplBaseConstructorCall", "00" -> 
+                    Assert.IsInstanceOfType<FplConstructor>(parent)
+                    Assert.AreEqual<int>(1, parent.ArgList.Count) // constructor
+                    Assert.AreEqual<int>(0, parent.Scope.Count) 
+                    Assert.IsInstanceOfType<FplBaseConstructorCall>(node)
+                    Assert.AreEqual<int>(1, node.ArgList.Count) // call to base.obj()
+                    Assert.AreEqual<int>(0, node.Scope.Count) 
+
                 | "FplClass", "00" -> 
                     Assert.IsInstanceOfType<FplTheory>(parent)
                     Assert.AreEqual<int>(0, parent.ArgList.Count)

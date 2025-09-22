@@ -3700,17 +3700,17 @@ type FplForInStmtDomain(positions: Positions, parent: FplValue) =
         // todo implement run
         ()
 
-type FplConstructorCall(positions: Positions, parent: FplValue) as this =
+type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
     inherit FplGenericStmt(positions, parent)
 
     do 
         this.FplId <- LiteralObj
         this.TypeId <- LiteralObj
 
-    override this.Name = PrimConstructorCall
+    override this.Name = PrimBaseConstructorCall
 
     override this.Clone () =
-        let ret = new FplConstructorCall((this.StartPos, this.EndPos), this.Parent.Value)
+        let ret = new FplBaseConstructorCall((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
 
