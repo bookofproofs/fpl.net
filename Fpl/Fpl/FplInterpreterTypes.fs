@@ -307,6 +307,29 @@ type SignatureType =
 /// Maximum number of calls allowed for an Fpl Node
 let maxRecursion = 5
 
+(*
+    todo: 1) implement a function ToPL0Form transforming a predicative expresssion into a PL0 formula by replacing predicates with free pred variables
+             possible applications: see 1a) 
+    todo: 1a) implement a function ToTrueTable generating a true table out of ToPL0Form
+             possible applications: see 2), 2a) 3) 4)
+    todo: 2) implement a satifiability check to the Output of ToTrueTable
+             possible applications: 
+                issue error, if a formula of a theorem / axiom / conjecture is not satisfiable
+                issue warning, if a subformula is not satisfiable to replace it by false
+    todo: 2a) implement a tautology check to the output of ToTrueTable
+             possible applications: 
+                issue warning, if a formula of a theorem / axiom / conjecture is a tautology, because it could be replaced by a trivial true
+                issue warning, if a subformula is a tautology to replace it by true
+    todo: 3) implement a CanonicalDNF (disjunctive normal form) based on ToTrueTable with a sorted representation.
+             possible applications:
+                issue error, if in a proof there are two consecutive arguments aprev, anext whose outputs have the same ToTrueTables 
+                    in terms of variables (its columns) that are not equivalent (have different rows)
+    todo: 4) implement unit tests for all inference rules defined in Fpl.Commons checking if the respective premises and conclusions produce the same outputs of ToTrueTable.
+             In this case, it is ensured that each inference rule in this library is a tautology. This is a required for 
+             FPL to use inference rules as a Hilbert Calculus (see definition D.Hoffmann "Theoretische Informatik" 3rd. ed., p. 98)
+*)
+
+
 [<AbstractClass>]
 type FplValue(positions: Positions, parent: FplValue option) =
     let mutable _expressionType = FixType.NoFix
