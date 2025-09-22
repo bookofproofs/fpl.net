@@ -1,10 +1,252 @@
+inf AndCummutative
+{
+    dec ~p, q: pred;
+    premise:
+        and(p, q)
+    conclusion:
+        and(q, p)
+}
+
+inf OrCummutative
+{
+    dec ~p, q: pred;
+    premise:
+        or(p, q)
+    conclusion:
+        or(q, p)
+}
+
+inf XorCummutative
+{
+    dec ~p, q: pred;
+    premise:
+        xor(p, q)
+    conclusion:
+        xor(q, p)
+}
+
+inf IifCummutative
+{
+    dec ~p, q: pred;
+    premise:
+        iif(p, q)
+    conclusion:
+        iif(q, p)
+}
+
+inf AndAssociative
+{
+    dec ~p, q, s: pred;
+    premise:
+        and(p, and(q, s))
+    conclusion:
+        and(and (p, q), s)
+}
+
+inf OrAssociative
+{
+    dec ~p, q, s: pred;
+    premise:
+        or(p, or(q, s))
+    conclusion:
+        or(or (p, q), s)
+}
+
+inf XorAssociative
+{
+    dec ~p, q, s: pred;
+    premise:
+        xor(p, xor(q, s))
+    conclusion:
+        xor(xor (p, q), s)
+}
+
+inf IifAssociative
+{
+    dec ~p, q, s: pred;
+    premise:
+        iif(p, iif(q, s))
+    conclusion:
+        iif(iif (p, q), s)
+}
+
+inf FalseAndAbsorbing
+{
+    dec ~p: pred;
+    premise:
+        and(false, p)
+    conclusion:
+        false
+}
+
+inf TrueOrAbsorbing
+{
+    dec ~p: pred;
+    premise:
+        or(true, p)
+    conclusion:
+        true
+}
+
+inf OrAndAbsorbing
+{
+    dec ~p, q: pred;
+    premise:
+        or(p, and (p, q))
+    conclusion:
+        p
+}
+
+inf AndOrAbsorbing
+{
+    dec ~p, q: pred;
+    premise:
+        and(p, or (p, q))
+    conclusion:
+        p
+}
+
+inf AndTrueNeutral
+{
+    dec ~p: pred;
+    premise:
+        and(true, p)
+    conclusion:
+        p
+}
+
+inf OrFalseNeutral
+{
+    dec ~p: pred;
+    premise:
+        or(false, p)
+    conclusion:
+        p
+}
+
+inf AndInversion
+{
+    dec ~p: pred;
+    premise:
+        and(p, not p)
+    conclusion:
+        false
+}
+
+inf OrInversion
+{
+    dec ~p: pred;
+    premise:
+        or(p, not p)
+    conclusion:
+        true
+}
+
+inf AndIdempodence
+{
+    dec ~p: pred;
+    premise:
+        and(p, p)
+    conclusion:
+        p
+}
+
+inf OrIdempodence
+{
+    dec ~p: pred;
+    premise:
+        or(p, p)
+    conclusion:
+        p
+}
+
+inf OrAndDistributiveUnpack
+{
+    dec ~p, q, s: pred;
+    premise:
+        or(p, and(q, s))
+    conclusion:
+        and(or(p, q), or(p, s))
+}
+
+inf AndOrDistributivePack
+{
+    dec ~p, q, s: pred;
+    premise:
+        and(or(p, q), or(p, s))
+    conclusion:
+        or(p, and(q, s))
+}
+
+inf AndOrDistributiveUnpack
+{
+    dec ~p, q, s: pred;
+    premise:
+        and(p, or(q, s))
+    conclusion:
+        or(and(p, q), and(p, s))
+}
+
+inf OrAndDistributivePack
+{
+    dec ~p, q, s: pred;
+    premise:
+        or(and(p, q), and(p, s))
+    conclusion:
+        and(p, or(q, s))
+}
+
+inf DeMorganAndUnpack
+{
+    dec ~p, q: pred;
+    premise:
+        not and(p, q)
+    conclusion:
+        or (not p, not q)
+}
+
+inf DeMorganOrPack
+{
+    dec ~p, q: pred;
+    premise:
+        or (not p, not q)
+    conclusion:
+        not and(p, q)
+}
+
+inf DeMorganOrUnpack
+{
+    dec ~p, q: pred;
+    premise:
+        not or(p, q)
+    conclusion:
+        and (not p, not q)
+}
+
+inf DeMorganAndPack
+{
+    dec ~p, q: pred;
+    premise:
+        and (not p, not q)
+    conclusion:
+        not or(p, q)
+}
+
+inf NotDouble
+{
+    dec ~p: pred;
+    premise:
+        not not p
+    conclusion:
+        p
+}
 
 inf ModusPonens
 {
     dec ~p,q: pred;
 
     premise:
-        and (p, impl (p,q) )
+        and(p, impl (p,q) )
     conclusion:
         q
 }
@@ -14,7 +256,7 @@ inf ModusTollens
     dec ~p,q: pred;
 
     premise:
-        and (not q, impl(p,q) )
+        and(not q, impl(p,q) )
     conclusion:
         not (p)
 }
@@ -23,7 +265,7 @@ inf HypotheticalSyllogism
 {
     dec ~p,q,r: pred;
     premise:
-        and (impl(p,q), impl(q,r))
+        and(impl(p,q), impl(q,r))
     conclusion:
         impl(p,r)
 }
@@ -32,7 +274,7 @@ inf DisjunctiveSyllogism
 {
     dec ~p,q: pred;
     premise:
-        and (not(p), or(p,q))
+        and(not(p), or(p,q))
     conclusion:
         q
 }
@@ -78,17 +320,17 @@ def pred IfAndOnlyIf(x,y: pred) infix "<=>" 80
 
 def pred And(x,y: pred) infix "and" 7 
 {
-    and (x,y)
+    and(x,y)
 }
 
 def pred Or(x,y: pred) infix "or" 10 
 {
-    or (x,y)
+    or(x,y)
 }
 
 def pred Xor(x,y: pred) infix "xor" 20 
 {
-    xor (x,y)
+    xor(x,y)
 }
 
 localization iif(x,y) :=
