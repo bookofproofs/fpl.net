@@ -348,7 +348,9 @@ let maxRecursion = 5
                                 all x1:tpl1, x2:tpl2, x:tpl {p(x1,x2,x)} 
                             will be transformed to  
                                 all x1:tpl1, x2:tpl2 {p(x1,x2, g(x1, x2))} 
-
+    todo: 8) write unit-test checking if FplValue.Type(SignatureType.Type) of expressions like p(u()) or all x1:tpl1, x2:tpl2 {p(x1,x2, g(x1, x2))} 
+        includes full signatures of the functions u() and g(,), .i.e., including their mappings. This will later become necessary 
+        to be able to recognize the equivalence of two NormalizeSkolem outputs (see 7)
 *)
 
 
