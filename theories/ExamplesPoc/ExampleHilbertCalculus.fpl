@@ -1,0 +1,61 @@
+// Example from D. Hoffmann, "Theoretische Informatik", 3rd. ed. p. 99
+
+// weakening rule
+axiom A1
+{
+    dec ~f, g: pred;
+    impl(f, impl(g, f))
+}
+
+// impl distributive
+axiom A2 
+{
+    dec ~f, g, h: pred;
+    impl(
+        impl(f, impl(g, h))
+        , impl( impl(f, g), impl (f, h) )  
+
+    )
+}
+
+// contraposition
+axiom A3 
+{
+    dec ~f, g: pred;
+    impl(
+        impl(not f, not g)
+        , impl(g, f)  
+
+    )
+}
+
+inf ModusPonens
+{
+    dec ~f, g: pred;
+    premise:
+        f, impl(f, g) 
+    conclusion:
+        g
+}
+
+theorem Example1
+{
+    dec ~a:pred;
+    impl (a, a)
+}
+
+proof Example1$1
+{
+    // Direct Proof
+    // Strategy: Assume that the premise is true, then prove that the conclusion also must be true.
+    
+    1. byax A2 |- impl(impl(a, impl(a, a)), impl(impl(a, a), impl (a, a) ))
+    2. byax A1 |- impl(a, impl(impl(a, a),  a))  
+    3. 1, 2, byinf ModusPonens |- impl(impl(a, impl(a, a)), impl(a, a))
+    4. byax A1 |- impl(a, impl(a, a))
+    5. 3, 4, byinf ModusPonens |- impl(a, a)
+    qed
+}
+
+
+;

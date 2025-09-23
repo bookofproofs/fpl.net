@@ -408,7 +408,7 @@ inf ModusPonens
     dec ~p,q: pred;
 
     pre:
-        and(p, impl (p,q) )
+        p, impl (p, q)
     con:
         q
 }
@@ -418,25 +418,25 @@ inf ModusTollens
     dec ~p,q: pred;
 
     pre:
-        and(not q, impl(p,q) )
+        not q, impl(p, q)
     con:
         not (p)
 }
 
 inf HypotheticalSyllogism
 {
-    dec ~p,q,r: pred;
+    dec ~p ,q, s: pred;
     pre:
-        and(impl(p,q), impl(q,r))
+        impl(p, q), impl(q, s)
     con:
-        impl(p,r)
+        impl(p,s)
 }
 
 inf DisjunctiveSyllogism
 {
-    dec ~p,q: pred;
+    dec ~p, q: pred;
     pre:
-        and(not(p), or(p,q))
+        not p, or(p, q)
     con:
         q
 }
@@ -448,6 +448,24 @@ inf ExistsByExample
         p(c)
     con: 
         ex x:obj {p(x)}
+}
+
+inf Contraposition
+{
+    dec ~p,q: pred;
+    pre:
+        impl(not p, not q)
+    con:
+        impl(q, p)
+}
+
+inf WeakeningRule
+{
+    dec ~p,q: pred;
+    pre:
+        p
+    con:
+        impl(q, p)
 }
 
 def pred Equal(x,y: tpl) infix "=" 50 

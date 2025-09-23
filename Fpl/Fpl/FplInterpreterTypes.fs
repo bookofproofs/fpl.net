@@ -327,6 +327,28 @@ let maxRecursion = 5
     todo: 4) implement unit tests for all inference rules defined in Fpl.Commons checking if the respective premises and conclusions produce the same outputs of ToTrueTable.
              In this case, it is ensured that each inference rule in this library is a tautology. This is a required for 
              FPL to use inference rules as a Hilbert Calculus (see definition D.Hoffmann "Theoretische Informatik" 3rd. ed., p. 98)
+             respectively inference rules with a premise being a predicate list: Here it is sufficient to check, if each rule 
+             conserves the tautology property: If each predicate in a list is a tautology, so is the conclusion (see D.Hoffmann, "Theoretische Informatik", p. 104)
+    todo: 5) ensure cleaned-up expressions by renaming variable with the same names in independent parts of the same formula expression.
+             (see D.H. "Theoretische Informatik", 3rd. p. 119) 
+             Implementation idea: This can be accomplished by moving the scope of variables declared in quantors to the containing FPL block, forcing renaming the variables by the end-user at coding-time of the formula. 
+    todo: 6) issue error if arity-0 predicates are intrinsically defined, enforcing true or false (see D.H. "Theoretische Informatik", 3rd. p. 120) 
+    todo: 7) write functions for normalizing predicative formulas (see D.H. "Th. Inf", 3rd. p. 122-123):
+                NormalizeNeg - (uses cleaned-up expressions - see 5) replace impl, iif, xor, by and/or/not and move all negations from the beginning of non-atomar formula to its atomar sub formulas 
+                NormalizePrenex - (uses the output of NormalizeNeg): move quantors from all subformulas the most outer quantor using fixed rules (see figure 3.35, p. 122)
+                NormalizeSkolem - (uses the output of NormalizePrenex): eliminated all exists-quantors from the formula
+                    there are two use cases: 
+                        exists quantor is not proceeded by all quantors: - then just remove the ex quantor by replacing x <- u() with some intrinsic 0-ary function u()->tpl {intr} (some constant u fulfilling p)
+                            for instance, 
+                                ex x:tpl { p(x) } 
+                            will be transformed to 
+                                p(u())
+                        exists quantor is proceeded by some all quantors: then remove the ex quantor by replacing x<-g_p(x1,x2) with some intrinsic n-ary function g(tpl1,tpl2)->tpl {intr} (some function fulfilling p, depending on proceeding variables bounded by all quantors) 
+                            for instance, 
+                                all x1:tpl1, x2:tpl2, x:tpl {p(x1,x2,x)} 
+                            will be transformed to  
+                                all x1:tpl1, x2:tpl2 {p(x1,x2, g(x1, x2))} 
+
 *)
 
 
