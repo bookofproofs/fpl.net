@@ -193,9 +193,7 @@ let keywordObject = positions "ObjectType" (skipString LiteralObjL <|> skipStrin
 let templateType = positions "TemplateType" ((attempt templateWithTail) <|> keywordTemplate) |>>  Ast.TemplateType
 
 let objectHeader = choice [
-    keywordObject
-    templateType
-    
+    keywordObject    
 ] 
 
 let keywordPredicate = positions "PredicateType" (skipString LiteralPredL <|> skipString LiteralPred) |>> Ast.PredicateType
@@ -247,7 +245,7 @@ let extensionName = positions "ExtensionName" (idStartsWithCap) |>> Ast.Extensio
 
 let xId = positions "ExtensionType" (at >>. extensionName) |>> Ast.ExtensionType 
 
-let specificClassType = choice [ objectHeader; xId; predicateIdentifier ] 
+let specificClassType = choice [ objectHeader; predicateIdentifier ] 
 
 //// later semantics: Star: 0 or more occurrences, Plus: 1 or more occurrences
 let varDeclModifier = choice [ colonStar; colonPlus; colon ] .>> IW
@@ -263,10 +261,9 @@ let bracketModifier = choice [bracketedCoordsInType; paramTuple ]
 classTypeRef.Value <- positions "ClassType" (specificClassType .>>. opt bracketModifier) |>> Ast.ClassType
 
 let mapping, mappingRef = createParserForwardedToRef()
-let predicateType = positions "CompoundPredicateType" (keywordPredicate .>>. opt paramTuple) |>> Ast.CompoundPredicateType
-let functionalTermType = positions "CompoundFunctionalTermType" (keywordFunction .>>. opt (paramTuple .>>. (IW >>. mapping))) |>> Ast.CompoundFunctionalTermType
-
-let compoundVariableType = choice [ keywordIndex; xId; classType; functionalTermType; predicateType ] 
+let predicateType = positions "CompoundPredicateType" ((keywordPredicate <|> templateType) .>>. opt paramTuple) |>> Ast.CompoundPredicateType
+let functionalTermType = positions "CompoundFunctionalTermType" ((keywordFunction <|> templateType) .>>. opt (paramTuple .>>. (IW >>. mapping))) |>> Ast.CompoundFunctionalTermType
+let compoundVariableType = choice [ keywordIndex; xId; classType; attempt functionalTermType; predicateType ] 
 let variableType = positions "VariableType" (compoundVariableType) |>> Ast.VariableType
 
 let namedVariableDeclaration = positions "NamedVarDecl" (variableList .>>. varDeclModifier .>>. variableType .>> IW) |>> Ast.NamedVarDecl

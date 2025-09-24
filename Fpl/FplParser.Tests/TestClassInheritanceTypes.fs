@@ -23,14 +23,14 @@ type TestClassInheritanceTypes () =
         let result = run (specificClassType .>> eof) LiteralTpl
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestSpecificType5 () =
         let result = run (specificClassType .>> eof) """tplSetElem"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
 
     member this.TestSpecificType7 () =
@@ -72,21 +72,21 @@ type TestClassInheritanceTypes () =
         let result = run (classType .>> eof) """tpl[a:Nat,b:func]"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestClassType4a () =
         let result = run (classType .>> eof) """tpl[a:pred , b:index]"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestClassType4b () =
         let result = run (classType .>> eof) """tpl[a:tpl ,b:tplA]"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestClassType5 () =
@@ -122,7 +122,7 @@ type TestClassInheritanceTypes () =
         let result = run (classType .>> eof) """@Nat"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestClassType8 () =

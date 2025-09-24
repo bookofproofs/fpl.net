@@ -426,7 +426,7 @@ type TestInterpreterErrors() =
     [<DataRow("08", """loc and(p,q) := !tex: x "\wedge" y;;""", 2)>]
     [<DataRow("09", """def pred Add(x,y: obj) infix "+" 2 {intr} loc (x + y) := !tex: x "+" y !eng: x "plus" y !ger: x "plus" y;;""", 0)>]
     [<DataRow("10", """def pred Add(x,y: obj) infix "+" 2 {intr} axiom A {(x + y * z = 1)};""", 3)>]
-    [<DataRow("11", "axiom A {dec ~arr: tpl[x:pred]; x };", 0)>]
+    [<DataRow("11", "axiom A {dec ~arr: tpl(x:pred); x };", 0)>]
     [<DataRow("12", "prop A {dec ~d:pred; true} proof A$1 {1. |- d qed};", 0)>]
     [<DataRow("13", "prop A {dec ~d:pred; true} cor A$1 { d };", 0)>]
     [<DataRow("14", "def class A: obj {ctor A(x: obj, p:obj(u: pred)) {dec assert u;  }};", 0)>]

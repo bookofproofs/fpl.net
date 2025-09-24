@@ -1510,8 +1510,6 @@ let rec eval (st: SymbolTable) ast =
             eval st predInstanceBlockAst
             if not fvNew.IsIntrinsic then // if not intrinsic, check variable usage
                 emitVAR04diagnostics fvNew
-            let d = fvNew.Type(SignatureType.Mixed)
-            printf "%O" d
             variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.BaseConstructorCall((pos1, pos2), (inheritedClassTypeAst, argumentTupleAst)) ->

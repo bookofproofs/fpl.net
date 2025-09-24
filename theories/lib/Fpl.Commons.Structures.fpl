@@ -9,7 +9,7 @@ definition class Tuple : obj
     dec 
         ~myFrom:Nat
         ~myLength: Nat
-        ~myArr: tpl[from, length:Nat]
+        ~myArr: tpl(from, length:Nat)
     ;
     ctor Tuple(listOfTpl:+ tpl)
     {
@@ -28,7 +28,7 @@ definition class Tuple : obj
         
     }
 
-    ctor Tuple(arr: tpl[from, length:Nat])
+    ctor Tuple(arr: tpl(from, length:Nat))
     {
         
         dec 
