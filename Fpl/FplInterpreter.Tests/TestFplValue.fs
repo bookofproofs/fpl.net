@@ -123,7 +123,6 @@ type TestFplValue() =
     [<DataRow("def func TestId() -> tplTest {intrinsic};", "TestId() -> tplTest", "func() -> tplTest")>]
     [<DataRow("def func TestId() -> templateTest {intrinsic};", "TestId() -> templateTest", "func() -> templateTest")>]
     [<DataRow("def func TestId() -> pred(x,y,z:obj) {intrinsic};", "TestId() -> pred(obj, obj, obj)", "func() -> pred(obj, obj, obj)")>]
-    [<DataRow("def func TestId() -> template(x,y:pred(z:obj)) {intrinsic};", "TestId() -> template(pred(obj), pred(obj))", "func() -> template(pred(obj), pred(obj))")>]
     [<DataRow("def func TestId() -> pred(x,y:pred(u,v,w:obj)) {intrinsic};", "TestId() -> pred(pred(obj, obj, obj), pred(obj, obj, obj))", "func() -> pred(pred(obj, obj, obj), pred(obj, obj, obj))")>]
 
     [<DataRow("def func TestId() -> pred(x:func(u:obj)->Nat) {intrinsic};", "TestId() -> pred(func(obj) -> Nat)", "func() -> pred(func(obj) -> Nat)")>]
@@ -261,7 +260,6 @@ type TestFplValue() =
     [<DataRow("def cl T:obj {intr prty func TestId() -> template {intrinsic}};", "TestId() -> template", "func() -> template")>]
     [<DataRow("def cl T:obj {intr prty func TestId() -> tplTest {intrinsic}};", "TestId() -> tplTest", "func() -> tplTest")>]
     [<DataRow("def cl T:obj {intr prty func TestId() -> templateTest {intrinsic}};", "TestId() -> templateTest", "func() -> templateTest")>]
-    [<DataRow("def cl T:obj {intr prty func TestId() -> template(x,y:pred(z:obj)) {intrinsic}};", "TestId() -> template(pred(obj), pred(obj))", "func() -> template(pred(obj), pred(obj))")>]
 
     [<DataRow("def cl T:obj {intr prty func TestId() -> pred(x:func(u:obj)->Nat) {intrinsic}};", "TestId() -> pred(func(obj) -> Nat)", "func() -> pred(func(obj) -> Nat)")>]
 

@@ -255,10 +255,9 @@ let varDeclModifier = choice [ colonStar; colonPlus; colon ] .>> IW
 classTypeRef.Value <- positions "ClassType" (specificClassType) |>> Ast.ClassType
 
 let mapping, mappingRef = createParserForwardedToRef()
-let predicateType = positions "CompoundPredicateType" ((keywordPredicate <|> templateType) .>>. opt paramTuple) |>> Ast.CompoundPredicateType
-let functionalTermType = positions "CompoundFunctionalTermType" ((keywordFunction <|> templateType) .>>. opt (paramTuple .>>. (IW >>. mapping))) |>> Ast.CompoundFunctionalTermType
-let compoundVariableType = choice [ keywordIndex; xId; classType; attempt functionalTermType; predicateType ] 
-let variableType = positions "VariableType" (compoundVariableType) |>> Ast.VariableType
+let predicateType = positions "CompoundPredicateType" (keywordPredicate .>>. opt paramTuple) |>> Ast.CompoundPredicateType
+let functionalTermType = positions "CompoundFunctionalTermType" (keywordFunction .>>. opt (paramTuple .>>. (IW >>. mapping))) |>> Ast.CompoundFunctionalTermType
+let variableType = positions "VariableType" (choice [ keywordIndex; xId; classType; templateType; functionalTermType; predicateType ]) |>> Ast.VariableType
 
 let namedVariableDeclaration = positions "NamedVarDecl" (variableList .>>. varDeclModifier .>>. variableType .>> IW) |>> Ast.NamedVarDecl
 namedVariableDeclarationListRef.Value <- sepBy namedVariableDeclaration comma

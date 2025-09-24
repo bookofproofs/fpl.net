@@ -69,7 +69,7 @@ type TestFplBlockComponentes () =
 
     [<TestMethod>]
     member this.TestSignature09 () =
-        let result = run (functionalTermSignature .>> eof) """func VecAdd(v,w: tplFieldElem(from,to:Nat)) -> obj prefix "+" """
+        let result = run (functionalTermSignature .>> eof) """func VecAdd(v,w: tplFieldElem) -> obj prefix "+" """
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
