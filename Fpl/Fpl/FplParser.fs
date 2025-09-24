@@ -182,17 +182,20 @@ let keywordIs = skipString LiteralIs .>> attemptSW
 // objects and their properties that defer the concrete
 // specification of one or more types until the definition or method is declared and instantiated by
 // client code
-let keywordTemplate = positions "TemplateType" (pstring LiteralTplL <|> pstring LiteralTpl) |>> Ast.TemplateType
+let keywordTemplate = (pstring LiteralTplL <|> pstring LiteralTpl) 
 
 let templateTail = choice [ idStartsWithCap; (regex @"\d+") ]
 
-let templateWithTail = positions "TemplateType" (many1Strings2 (pstring "template" <|> pstring LiteralTpl) templateTail) |>>  Ast.TemplateType
+let templateWithTail = (many1Strings2 (pstring "template" <|> pstring LiteralTpl) templateTail) 
 
 let keywordObject = positions "ObjectType" (skipString LiteralObjL <|> skipString LiteralObj) |>> Ast.ObjectType 
 
+let templateType = positions "TemplateType" ((attempt templateWithTail) <|> keywordTemplate) |>>  Ast.TemplateType
+
 let objectHeader = choice [
     keywordObject
-    (attempt templateWithTail) <|> keywordTemplate
+    templateType
+    
 ] 
 
 let keywordPredicate = positions "PredicateType" (skipString LiteralPredL <|> skipString LiteralPred) |>> Ast.PredicateType

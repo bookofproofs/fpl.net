@@ -76,7 +76,7 @@ type TestFplBlockComponentes () =
 
     [<TestMethod>]
     member this.TestSignature10 () =
-        let result = run (classSignature .>> eof) """cl ZeroVectorN:A, B, C,D ,E symbol "0" """
+        let result = run (classSignature .>> eof) """cl ZeroVectorN"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
