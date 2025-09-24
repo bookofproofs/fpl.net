@@ -192,10 +192,6 @@ let keywordObject = positions "ObjectType" (skipString LiteralObjL <|> skipStrin
 
 let templateType = positions "TemplateType" ((attempt templateWithTail) <|> keywordTemplate) |>>  Ast.TemplateType
 
-let objectHeader = choice [
-    keywordObject    
-] 
-
 let keywordPredicate = positions "PredicateType" (skipString LiteralPredL <|> skipString LiteralPred) |>> Ast.PredicateType
 let keywordFunction = positions "FunctionalTermType" (skipString LiteralFuncL <|> skipString LiteralFunc) |>> Ast.FunctionalTermType
 
@@ -245,20 +241,18 @@ let extensionName = positions "ExtensionName" (idStartsWithCap) |>> Ast.Extensio
 
 let xId = positions "ExtensionType" (at >>. extensionName) |>> Ast.ExtensionType 
 
-let specificClassType = choice [ objectHeader; predicateIdentifier ] 
+let specificClassType = choice [ keywordObject; predicateIdentifier ] 
 
 //// later semantics: Star: 0 or more occurrences, Plus: 1 or more occurrences
 let varDeclModifier = choice [ colonStar; colonPlus; colon ] .>> IW
-
-let bracketedCoordsInType = positions "BracketedCoordsInType" (leftBracket >>. namedVariableDeclarationList .>> rightBracket) |>> Ast.BracketedCoordsInType
 
 // The classType is the last type in FPL we can derive FPL classes from.
 // It therefore excludes the in-built FPL-types keywordPredicate, keywordFunction, and keywordIndex
 // to restrict it to pure objects.
 // In contrast to variableType which can also be used for declaring variables 
 // in the scope of FPL building blocks
-let bracketModifier = choice [bracketedCoordsInType; paramTuple ]
-classTypeRef.Value <- positions "ClassType" (specificClassType .>>. opt bracketModifier) |>> Ast.ClassType
+
+classTypeRef.Value <- positions "ClassType" (specificClassType) |>> Ast.ClassType
 
 let mapping, mappingRef = createParserForwardedToRef()
 let predicateType = positions "CompoundPredicateType" ((keywordPredicate <|> templateType) .>>. opt paramTuple) |>> Ast.CompoundPredicateType

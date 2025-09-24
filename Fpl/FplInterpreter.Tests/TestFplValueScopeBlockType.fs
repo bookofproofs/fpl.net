@@ -763,7 +763,7 @@ type TestFplValueScopeBlockType() =
     [<DataRow("base3", """def func T()->func {intr};""")>]
     [<DataRow("base4", """def func T()->pred {intr};""")>]
     [<DataRow("base5", """def cl A:obj {intr} def func T()->A {intr};""")>]
-    [<DataRow("base6", """def func T()->obj(z:ind) {intr};""")>]
+    [<DataRow("base6", """def func T()->tpl(z:ind) {intr};""")>]
     [<DataRow("base7", """def func T()->pred(z:*obj) {intr};""")>]
     [<DataRow("base8", """def func T()->func(p:*pred(x:obj))->pred(x:ind) {intr};""")>]
     [<DataRow("base9", """def func T()->pred(f:+func(x:A)->A) {intr};""")>]

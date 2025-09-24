@@ -84,7 +84,8 @@ type TestDefinitionPredicates () =
         let result = run (definitionPredicate .>> eof) """pred AreRelated(u,v: Set, r: BinaryRelation)
         {
             dec ~a:obj
-                ~tuple: Tuple[one:Nat,two:Nat]
+                ~one, two:Nat
+                ~tuple:+Tuple
                 tuple:=Tuple(Nat(1),Nat(2))
                 ;
             

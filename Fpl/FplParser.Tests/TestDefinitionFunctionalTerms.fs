@@ -87,7 +87,7 @@ type TestDefinitionFunctionalTerms01 () =
 
     [<TestMethod>]
     member this.TestDefinitionFunctionalTerm06 () =
-        let result = run (definitionFunctionalTerm .>> eof) """func Sum(arr: Nat[from:Nat,to:Nat]) -> Nat
+        let result = run (definitionFunctionalTerm .>> eof) """func Sum(from, to: Nat, arr:+Nat) -> Nat
         {
             dec ~a:obj ~ 
                 i, result: Nat

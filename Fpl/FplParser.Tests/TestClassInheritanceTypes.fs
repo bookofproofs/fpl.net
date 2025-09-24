@@ -65,7 +65,7 @@ type TestClassInheritanceTypes () =
         let result = run (classType .>> eof) """object[x:SomeObject1, y:SomeObject2, a,b,c:SomeObject3]"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestClassType4 () =
@@ -93,21 +93,21 @@ type TestClassInheritanceTypes () =
         let result = run (classType .>> eof) """Set[x:ind , a,b:Nat]"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestClassType5a () =
         let result = run (classType .>> eof) """Set[x:index , y:func]"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestClassType5a1 () =
         let result = run (classType .>> eof) """Set[x:index , y:func()->obj]"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestClassType5b () =
@@ -143,11 +143,11 @@ type TestClassInheritanceTypes () =
         let result = run (classType .>> eof) """object[x:ind,y:index]"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestClassType10a () =
         let result = run (classType .>> eof) """object[x:obj,y:Nat]"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))

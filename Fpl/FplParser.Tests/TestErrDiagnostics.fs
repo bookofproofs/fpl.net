@@ -1619,7 +1619,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred T()
         {
-            dec ~x:tpl[ ;
+            dec ~x:tpl( ;
             true
         }
         y
@@ -1637,7 +1637,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred T()
         {
-            dec ~x:tpl[! ;
+            dec ~x:tpl(! ;
             true
         }
         y
@@ -1655,7 +1655,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred T()
         {
-            dec ~x:tpl[ ;
+            dec ~x:tpl( ;
             true
         }
         y

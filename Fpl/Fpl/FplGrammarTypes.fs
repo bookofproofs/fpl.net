@@ -71,9 +71,8 @@ type Ast =
     | FunctionalTermType of Positions * unit
     | IndexType of Positions * unit
     | VariableType of Positions * Ast 
-    | BracketedCoordsInType of Positions * Ast list 
     | InheritedClassType of Positions * Ast
-    | ClassType of Positions * (Ast * Ast option)
+    | ClassType of Positions * Ast
     | CompoundPredicateType of Positions * (Ast * Ast option)
     | CompoundFunctionalTermType of Positions * (Ast * (Ast * Ast) option)
     // Variables

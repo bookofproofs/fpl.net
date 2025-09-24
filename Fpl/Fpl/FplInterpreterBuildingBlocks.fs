@@ -769,16 +769,6 @@ let rec eval (st: SymbolTable) ast =
             eval st child
         ) |> ignore
         st.EvalPop()
-    | Ast.BracketedCoordsInType((pos1, pos2), asts) ->
-        st.EvalPush("BracketedCoordsInType")
-        let fv = variableStack.PeekEvalStack()
-        fv.HasBrackets <- true
-        asts 
-        |> List.map (fun ast1 ->
-            eval st ast1
-        ) |> ignore
-        fv.EndPos <- pos2
-        st.EvalPop()
     | Ast.NamespaceIdentifier((pos1, pos2), asts) ->
         st.EvalPush("NamespaceIdentifier")
         asts |> List.map (eval st) |> ignore
@@ -926,10 +916,9 @@ let rec eval (st: SymbolTable) ast =
         optAst |> Option.map (eval st) |> ignore
         eval_pos_ast_ast_opt st pos1 pos2
         st.EvalPop()
-    | Ast.ClassType((pos1, pos2), (specificClassTypeAst, optbracketModifierAst)) ->
+    | Ast.ClassType((pos1, pos2), specificClassTypeAst) ->
         st.EvalPush("ClassType")
         eval st specificClassTypeAst
-        optbracketModifierAst |> Option.map (eval st) |> ignore
         eval_pos_ast_ast_opt st pos1 pos2
         st.EvalPop()
     | Ast.CompoundPredicateType((pos1, pos2), (ast1, optAst)) ->

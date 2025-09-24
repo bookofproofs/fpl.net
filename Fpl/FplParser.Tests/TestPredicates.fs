@@ -392,7 +392,7 @@ type TestPredicates () =
 
     [<TestMethod>]
     member this.TestPredicate53 () =
-        let result = run (predicate .>> eof) """all x:Range(a:B), y:C, z:obj {and (and(a,b),c)}"""
+        let result = run (predicate .>> eof) """all x:Range, y:C, z:obj {and (and(a,b),c)}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -406,7 +406,7 @@ type TestPredicates () =
 
     [<TestMethod>]
     member this.TestPredicate55 () =
-        let result = run (predicate .>> eof) """ex x:Range(a:B), y:C, z:obj {and (a,and( b,c))}"""
+        let result = run (predicate .>> eof) """ex x:Range, y:C, z:obj {and (a,and( b,c))}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

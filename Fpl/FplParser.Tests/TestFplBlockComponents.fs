@@ -48,7 +48,7 @@ type TestFplBlockComponentes () =
 
     [<TestMethod>]
     member this.TestSignature06 () =
-        let result = run (functionalTermInstanceSignature .>> eof) """func BinOp(x,y: tplSetElem) -> obj(a:pred)"""
+        let result = run (functionalTermInstanceSignature .>> eof) """func BinOp(x,y: tplSetElem) -> tplSetElem"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -69,7 +69,7 @@ type TestFplBlockComponentes () =
 
     [<TestMethod>]
     member this.TestSignature09 () =
-        let result = run (functionalTermSignature .>> eof) """func VecAdd(v,w: tplFieldElem[from,to:Nat]) -> obj prefix "+" """
+        let result = run (functionalTermSignature .>> eof) """func VecAdd(v,w: tplFieldElem(from,to:Nat)) -> obj prefix "+" """
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -104,7 +104,7 @@ type TestFplBlockComponentes () =
 
     [<TestMethod>]
     member this.TestSignature14 () =
-        let result = run (constructorSignature .>> eof) """ctor AlgebraicStructure(x: tplSet, ops:+ Composition(args:* tplSetElem))"""
+        let result = run (constructorSignature .>> eof) """ctor AlgebraicStructure(x: tplSet, ops:+ func(args:* tplSetElem)->tplSetElem)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
