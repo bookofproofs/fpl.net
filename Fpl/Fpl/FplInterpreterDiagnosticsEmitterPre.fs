@@ -82,6 +82,20 @@ let emitID007Diagnostics pos1 pos2 fplValueTypeStr listOfCandidates =
         }
     ad.AddDiagnostic diagnostic
 
+let emitID008Diagnostics constructorId classId pos1 pos2 =
+    if constructorId <> classId then
+        let diagnostic =
+            { 
+                Diagnostic.Uri = ad.CurrentUri
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = pos1
+                Diagnostic.EndPos = pos2
+                Diagnostic.Code = ID008(constructorId, classId) // misspelled constructor name
+                Diagnostic.Alternatives = None 
+            }
+        ad.AddDiagnostic diagnostic
+
 let emitID010Diagnostics identifier pos1 pos2 =
     let diagnostic =
         { 
@@ -310,7 +324,7 @@ let emitPR004Diagnostics alreadyDeclaredTypeStr qualifiedStartPosConflictStr pos
         { 
             Diagnostic.Uri = ad.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.Severity = DiagnosticSeverity.Warning
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = PR004(alreadyDeclaredTypeStr, qualifiedStartPosConflictStr)
@@ -466,6 +480,32 @@ let emitPR014Diagnostics pos1 pos2 =
             Diagnostic.EndPos = pos2
             Diagnostic.Code = PR014 
             Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
+let emitPR015Diagnostics argumentID pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = PR015 argumentID
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
+let emitPR016Diagnostics argumentID lastAssumedArgumentId pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = PR016 argumentID
+            Diagnostic.Alternatives = Some $"Did you mean `{lastAssumedArgumentId}`?" 
         }
     ad.AddDiagnostic diagnostic
 

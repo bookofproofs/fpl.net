@@ -199,23 +199,6 @@ let checkVAR00Diagnostics numberOfVariadicVars startPos endPos =
             }
         ad.AddDiagnostic diagnostic
 
-let checkID008Diagnostics (fv: FplValue) pos1 pos2 =
-    let nameStart = fv.FplId
-    let className = fv.Parent.Value.FplId
-
-    if nameStart <> className then
-        let diagnostic =
-            { 
-                Diagnostic.Uri = ad.CurrentUri
-                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                Diagnostic.Severity = DiagnosticSeverity.Error
-                Diagnostic.StartPos = pos1
-                Diagnostic.EndPos = pos2
-                Diagnostic.Code = ID008(nameStart, className) // misspelled constructor name
-                Diagnostic.Alternatives = None 
-            }
-        ad.AddDiagnostic diagnostic
-
 /// Given the class node fplValue and the identifier `name`, this function checks the 
 /// semantical consistency of a parent class with this name, covering ID009, ID010 and ID011 diagnostics.
 /// It will return None or Some reference to the parent class node with this name, if it could be found.

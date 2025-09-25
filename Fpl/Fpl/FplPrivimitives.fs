@@ -1312,6 +1312,8 @@ let PrimArgInfRevoke = "revoke argument inference"
 [<Literal>]
 let PrimArgInfTrivial = "trivial argument inference"
 [<Literal>]
+let PrimBaseConstructorCall = "base constructor call"
+[<Literal>]
 let PrimCases = "cases statement"
 [<Literal>]
 let PrimCaseElse = "else case statement"

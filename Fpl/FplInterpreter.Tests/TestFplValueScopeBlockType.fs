@@ -763,7 +763,7 @@ type TestFplValueScopeBlockType() =
     [<DataRow("base3", """def func T()->func {intr};""")>]
     [<DataRow("base4", """def func T()->pred {intr};""")>]
     [<DataRow("base5", """def cl A:obj {intr} def func T()->A {intr};""")>]
-    [<DataRow("base6", """def func T()->obj(z:ind) {intr};""")>]
+    [<DataRow("base6", """def func T()->tpl(z:ind) {intr};""")>]
     [<DataRow("base7", """def func T()->pred(z:*obj) {intr};""")>]
     [<DataRow("base8", """def func T()->func(p:*pred(x:obj))->pred(x:ind) {intr};""")>]
     [<DataRow("base9", """def func T()->pred(f:+func(x:A)->A) {intr};""")>]
@@ -813,20 +813,20 @@ type TestFplValueScopeBlockType() =
             let r = st.Root
             let theory = r.Scope[filename]
             let proof = theory.Scope["T$1"]
-            let arg = proof.Scope["100."]
+            let arg = proof.Scope["100"]
             let just = arg.ArgList[0]
-            let numbOfJustifications = just.Scope.Count
+            let numbOfJustifications = just.ArgList.Count
             Assert.AreEqual<int>(expNumber, numbOfJustifications)
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("base1", """100. |- trivial""", 0)>]
-    [<DataRow("base2", """100. ExistsByExample, 1 |- false""", 2)>]
-    [<DataRow("base3", """100. T1 |- assume not somePremise """, 1)>]
-    [<DataRow("base4", """100. 2, 3, 5 |- iif (a,b)""", 3)>]
-    [<DataRow("base5", """100. |- revoke 3""", 0)>]
+    [<DataRow("base1", """100. |- trivial""")>]
+    [<DataRow("base2", """100. ExistsByExample, 1 |- false""")>]
+    [<DataRow("base3", """100. T1 |- assume not somePremise """)>]
+    [<DataRow("base4", """100. 2, 3, 5 |- iif (a,b)""")>]
+    [<DataRow("base5", """100. |- revoke 3""")>]
     [<TestMethod>]
-    member this.TestArgumentBlockType(var, argExpression, expNumber:int) =
+    member this.TestArgumentBlockType(var, argExpression) =
         ad.Clear()
         let fplCode = sprintf """proof T$1 { %s };""" argExpression
         let filename = "TestArgumentBlockType"
@@ -837,8 +837,7 @@ type TestFplValueScopeBlockType() =
             let r = st.Root
             let theory = r.Scope[filename]
             let proof = theory.Scope["T$1"]
-            let arg = proof.Scope["100."]
-            let just = arg.ArgList[0]
+            let arg = proof.Scope["100"]
             match var with
             | "base1" -> Assert.IsInstanceOfType<FplArgument>(arg)
             | "base2" -> Assert.IsInstanceOfType<FplArgument>(arg)

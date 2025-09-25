@@ -798,13 +798,13 @@ type TestFplValueScopeFplId() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("base1", """100. |- trivial""", 0)>]
-    [<DataRow("base2", """100. ExistsByExample, 1 |- false""", 2)>]
-    [<DataRow("base3", """100. T1 |- assume not somePremise """, 1)>]
-    [<DataRow("base4", """100. 2, 3, 5 |- iif (a,b)""", 3)>]
-    [<DataRow("base5", """100. |- revoke 3""", 0)>]
+    [<DataRow("base1", """base1. |- trivial""")>]
+    [<DataRow("base2", """base2. ExistsByExample, 1 |- false""")>]
+    [<DataRow("base3", """base3. T1 |- assume not somePremise """)>]
+    [<DataRow("base4", """base4. 2, 3, 5 |- iif (a,b)""")>]
+    [<DataRow("base5", """base5. |- revoke 3""")>]
     [<TestMethod>]
-    member this.TestArgumentFplId(var, argExpression, expNumber:int) =
+    member this.TestArgumentFplId(var:string, argExpression) =
         ad.Clear()
         let fplCode = sprintf """proof T$1 { %s };""" argExpression
         let filename = "TestArgumentFplId"
@@ -815,15 +815,8 @@ type TestFplValueScopeFplId() =
             let r = st.Root
             let theory = r.Scope[filename]
             let proof = theory.Scope["T$1"]
-            let arg = proof.Scope["100."]
-            let just = arg.ArgList[0]
-            match var with
-            | "base1" -> Assert.AreEqual<string>("100.", arg.FplId)
-            | "base2" -> Assert.AreEqual<string>("100.", arg.FplId)
-            | "base3" -> Assert.AreEqual<string>("100.", arg.FplId)
-            | "base4" -> Assert.AreEqual<string>("100.", arg.FplId)
-            | "base5" -> Assert.AreEqual<string>("100.", arg.FplId)
-            | _ -> Assert.IsTrue(false)
+            let arg = proof.Scope[var]
+            Assert.AreEqual<string>(var, arg.FplId)
         | None -> 
             Assert.IsTrue(false)
 

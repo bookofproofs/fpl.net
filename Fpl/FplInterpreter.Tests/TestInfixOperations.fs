@@ -151,7 +151,7 @@ type TestInfixOperations() =
     [<TestMethod>]
     member this.TestConjunctionCalls(no:string, varVal, expected:string) =
         ad.Clear()
-        let fplCode = sprintf """def pred And infix "and" 7 (x,y: pred) { and (x,y) } %s""" varVal
+        let fplCode = sprintf """def pred And(x,y: pred) infix "and" 7 { and (x,y) } %s""" varVal
         let filename = "TestConjunctionCalls"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         checkForUnexpectedErrors VAR00

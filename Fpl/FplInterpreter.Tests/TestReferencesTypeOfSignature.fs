@@ -249,7 +249,7 @@ type TestReferencesTypeOfSignature() =
     [<DataRow("""def pred T() {true};""", "pred()")>]
     [<DataRow("""inf T {pre: true con:true};""", "pred")>]
     [<TestMethod>]
-    member this.TestBlock(varVal, name:string) =
+    member this.TestBlockTypeSignature(varVal, name:string) =
         ad.Clear()
         let fplCode = sprintf "%s" varVal
         let filename = "TestBlockTypeSignature"
@@ -262,50 +262,5 @@ type TestReferencesTypeOfSignature() =
 
             let loc = theory.Scope.Values |> Seq.toList |> List.head 
             Assert.AreEqual<string>(name, loc.Type(SignatureType.Type))
-        | None -> 
-            Assert.IsTrue(false)
-
-
-    [<DataRow("base1", """def pred T1() {intr};""")>]
-    [<DataRow("base2", """def pred T1 infix ">" -1 () {intr};""")>]
-    [<DataRow("base3", """def pred T1 postfix "'" () {intr};""")>]
-    [<DataRow("base4", """def pred T1 prefix "-" () {intr};""")>]
-    [<DataRow("base5", """def cl T1 symbol "∅" :obj {intr};""")>]
-    [<DataRow("base5a", """def cl T1:obj {intr};""")>]
-    [<DataRow("base6", """def func T1()->obj {intr};""")>]
-    [<DataRow("base7", """def func T1 infix ">" -1 ()->obj {intr};""")>]
-    [<DataRow("base8", """def func T1 postfix "'" ()->obj {intr};""")>]
-    [<DataRow("base9", """def func T1 prefix "-" ()->obj {intr};""")>]
-    [<TestMethod>]
-    member this.TestFixNotation(var, varVal) =
-        ad.Clear()
-        let fplCode = sprintf "%s;" varVal
-        let filename = "TestFixNotationTypeSignature"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
-        prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let base1 = 
-                if varVal.Contains LiteralCl then 
-                    theory.Scope["T1"]
-                elif varVal.Contains LiteralFunc then 
-                    theory.Scope["T1() -> obj"]
-                else 
-                    theory.Scope["T1()"]
-
-            match var with
-            | "base1" -> Assert.AreEqual<string>("pred()", base1.Type(SignatureType.Type))
-            | "base2" -> Assert.AreEqual<string>("pred()", base1.Type(SignatureType.Type))
-            | "base3" -> Assert.AreEqual<string>("pred()", base1.Type(SignatureType.Type))
-            | "base4" -> Assert.AreEqual<string>("pred()", base1.Type(SignatureType.Type))
-            | "base5" -> Assert.AreEqual<string>("T1", base1.Type(SignatureType.Type))
-            | "base5a" -> Assert.AreEqual<string>("T1", base1.Type(SignatureType.Type))
-            | "base6" -> Assert.AreEqual<string>("func() -> obj", base1.Type(SignatureType.Type))
-            | "base7" -> Assert.AreEqual<string>("func() -> obj", base1.Type(SignatureType.Type))
-            | "base8" -> Assert.AreEqual<string>("func() -> obj", base1.Type(SignatureType.Type))
-            | "base9" -> Assert.AreEqual<string>("func() -> obj", base1.Type(SignatureType.Type))
-            | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

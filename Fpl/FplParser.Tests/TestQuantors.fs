@@ -17,7 +17,7 @@ type TestQuantors () =
 
     [<TestMethod>]
     member this.TestQuantors02 () =
-        let result = run (predicate .>> eof) """all x:obj[x:TestClass] {true}"""
+        let result = run (predicate .>> eof) """all x:obj {true}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -101,14 +101,14 @@ type TestQuantors () =
 
     [<TestMethod>]
     member this.TestQuantors14 () =
-        let result = run (predicate .>> eof) """all x:T[x:func] {true}"""
+        let result = run (predicate .>> eof) """all x:T {true}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestQuantors15 () =
-        let result = run (predicate .>> eof) """all x:Range(a:B), y:C, z:obj {true}"""
+        let result = run (predicate .>> eof) """all x:Range, y:C, z:obj {true}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -122,7 +122,7 @@ type TestQuantors () =
 
     [<TestMethod>]
     member this.TestQuantors17 () =
-        let result = run (predicate .>> eof) """ex x:Range(a:B), y:C, z:obj {and (and(a,b),c)}"""
+        let result = run (predicate .>> eof) """ex x:Range, y:C, z:obj {and (and(a,b),c)}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -221,7 +221,7 @@ type TestQuantors () =
 
     [<TestMethod>]
     member this.TestQuantors31 () =
-        let result = run (predicate .>> eof) """all x:Range(a:B), y:C, z:obj {and (and(a,b),c)}"""
+        let result = run (predicate .>> eof) """all x:Range, y:C, z:obj {and (and(a,b),c)}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -235,7 +235,7 @@ type TestQuantors () =
 
     [<TestMethod>]
     member this.TestQuantors33 () =
-        let result = run (predicate .>> eof) """ex x:Range(a:B), y:C, z:obj {and (and(a,b),c)}"""
+        let result = run (predicate .>> eof) """ex x:Range, y:C, z:obj {and (and(a,b),c)}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

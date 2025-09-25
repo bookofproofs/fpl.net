@@ -307,6 +307,54 @@ type SignatureType =
 /// Maximum number of calls allowed for an Fpl Node
 let maxRecursion = 5
 
+(*
+    todo: 1) implement a function ToPL0Form transforming a predicative expresssion into a PL0 formula by replacing predicates with free pred variables
+             possible applications: see 1a) 
+    todo: 1a) implement a function ToTrueTable generating a true table out of ToPL0Form
+             possible applications: see 2), 2a) 3) 4)
+    todo: 2) implement a satifiability check to the Output of ToTrueTable
+             possible applications: 
+                issue error, if a formula of a theorem / axiom / conjecture is not satisfiable
+                issue warning, if a subformula is not satisfiable to replace it by false
+    todo: 2a) implement a tautology check to the output of ToTrueTable
+             possible applications: 
+                issue warning, if a formula of a theorem / axiom / conjecture is a tautology, because it could be replaced by a trivial true
+                issue warning, if a subformula is a tautology to replace it by true
+    todo: 3) implement a CanonicalDNF (disjunctive normal form) based on ToTrueTable with a sorted representation.
+             possible applications:
+                issue error, if in a proof there are two consecutive arguments aprev, anext whose outputs have the same ToTrueTables 
+                    in terms of variables (its columns) that are not equivalent (have different rows)
+    todo: 4) implement unit tests for all inference rules defined in Fpl.Commons checking if the respective premises and conclusions produce the same outputs of ToTrueTable.
+             In this case, it is ensured that each inference rule in this library is a tautology. This is a required for 
+             FPL to use inference rules as a Hilbert Calculus (see definition D.Hoffmann "Theoretische Informatik" 3rd. ed., p. 98)
+             respectively inference rules with a premise being a predicate list: Here it is sufficient to check, if each rule 
+             conserves the tautology property: If each predicate in a list is a tautology, so is the conclusion (see D.Hoffmann, "Theoretische Informatik", p. 104)
+    todo: 5) ensure cleaned-up expressions by renaming variable with the same names in independent parts of the same formula expression.
+             (see D.H. "Theoretische Informatik", 3rd. p. 119) 
+             Implementation idea: This can be accomplished by moving the scope of variables declared in quantors to the containing FPL block, forcing renaming the variables by the end-user at coding-time of the formula. 
+    todo: 6) issue error if arity-0 predicates are intrinsically defined, enforcing true or false (see D.H. "Theoretische Informatik", 3rd. p. 120) 
+    todo: 7) write functions for normalizing predicative formulas (see D.H. "Th. Inf", 3rd. p. 122-123):
+                NormalizeNeg - (uses cleaned-up expressions - see 5) replace impl, iif, xor, by and/or/not and move all negations from the beginning of non-atomar formula to its atomar sub formulas 
+                NormalizePrenex - (uses the output of NormalizeNeg): move quantors from all subformulas the most outer quantor using fixed rules (see figure 3.35, p. 122)
+                NormalizeSkolem - (uses the output of NormalizePrenex): eliminated all exists-quantors from the formula
+                    there are two use cases: 
+                        exists quantor is not proceeded by all quantors: - then just remove the ex quantor by replacing x <- u() with some intrinsic 0-ary function u()->tpl {intr} (some constant u fulfilling p)
+                            for instance, 
+                                ex x:tpl { p(x) } 
+                            will be transformed to 
+                                p(u())
+                        exists quantor is proceeded by some all quantors: then remove the ex quantor by replacing x<-g_p(x1,x2) with some intrinsic n-ary function g(tpl1,tpl2)->tpl {intr} (some function fulfilling p, depending on proceeding variables bounded by all quantors) 
+                            for instance, 
+                                all x1:tpl1, x2:tpl2, x:tpl {p(x1,x2,x)} 
+                            will be transformed to  
+                                all x1:tpl1, x2:tpl2 {p(x1,x2, g(x1, x2))} 
+    todo: 8) write unit-test checking if FplValue.Type(SignatureType.Type) of expressions like p(u()) or all x1:tpl1, x2:tpl2 {p(x1,x2, g(x1, x2))} 
+        includes full signatures of the functions u() and g(,), .i.e., including their mappings. This will later become necessary 
+        to be able to recognize the satisfiability-equivalence of two NormalizeSkolem outputs (see 7)
+        For the term "satisfiability-equivalence" see D.H. "Th. Inf", 3rd. p. 124
+*)
+
+
 [<AbstractClass>]
 type FplValue(positions: Positions, parent: FplValue option) =
     let mutable _expressionType = FixType.NoFix
@@ -327,10 +375,6 @@ type FplValue(positions: Positions, parent: FplValue option) =
     let _scope = Dictionary<string, FplValue>()
     let _argList = List<FplValue>()
     let _valueList = List<FplValue>()
-    let _assertedPredicates = List<FplValue>()
-
-    /// A list of asserted predicates for this FplValue
-    member this.AssertedPredicates = _assertedPredicates
 
     /// A scope of this FplValue
     member this.Scope = _scope
@@ -444,12 +488,6 @@ type FplValue(positions: Positions, parent: FplValue option) =
         |> Seq.iter (fun (fv1:FplValue) ->
             let value = fv1.Clone()
             ret.ValueList.Add(value))
-
-        this.AssertedPredicates
-        |> Seq.iter (fun (fv1:FplValue) ->
-            // asserted predicates do not have to be cloned
-            ret.ArgList.Add(fv1))
-            
 
     /// Indicates if this FplValue's Scope or ArgList can be treated as bracketed coordinates or as parenthesized parameters.
     member this.HasBrackets
@@ -576,9 +614,6 @@ type FplValue(positions: Positions, parent: FplValue option) =
         this.ValueList.Clear()
         this.ValueList.AddRange(other.ValueList)
 
-        this.AssertedPredicates.Clear()
-        this.AssertedPredicates.AddRange(other.AssertedPredicates)
-
     override this.TryAddToParentsArgList () = 
         match this.Parent with 
         | Some parent -> parent.ArgList.Add(this)
@@ -618,23 +653,13 @@ type FplValue(positions: Positions, parent: FplValue option) =
                 this.Type(SignatureType.Name)
         match this.InScopeOfParent identifier with
         | ScopeSearchResult.Found conflict -> 
-            match next.ShortName with
-            | PrimJustification -> emitPR004Diagnostics (this.Type(SignatureType.Type)) conflict.QualifiedStartPos this.StartPos this.EndPos 
-            | _ -> 
-                match this.ShortName with
-                | PrimLanguage -> // language
-                    let oldDiagnosticsStopped = ad.DiagnosticsStopped
-                    ad.DiagnosticsStopped <- false
-                    emitID014Diagnostics (this.Type(SignatureType.Mixed)) conflict.QualifiedStartPos this.StartPos this.EndPos 
-                    ad.DiagnosticsStopped <- oldDiagnosticsStopped
-                | PrimArg -> 
-                    emitPR003Diagnostics (this.Type(SignatureType.Mixed)) conflict.QualifiedStartPos this.StartPos this.EndPos 
-                | PrimVariable 
-                | PrimVariableMany 
-                | PrimVariableMany1 -> // variable
-                    ()
-                | _ ->
-                    emitID001Diagnostics (this.Type(SignatureType.Type)) conflict.QualifiedStartPos this.StartPos this.EndPos 
+            match this.ShortName with
+            | PrimVariable 
+            | PrimVariableMany 
+            | PrimVariableMany1 -> // variable
+                ()
+            | _ ->
+                emitID001Diagnostics (this.Type(SignatureType.Type)) conflict.QualifiedStartPos this.StartPos this.EndPos 
         | _ -> 
             next.Scope.Add(identifier,this)
 
@@ -694,6 +719,7 @@ and FplVariableStack() =
     let _classCounters = Dictionary<string,FplValue option>()
     let _stack = Stack<KeyValuePair<string, Dictionary<string,FplValue>>>()
     let _valueStack = Stack<FplValue>()
+    let _assumedArguments = Stack<FplValue>()
 
     let mutable _nextRunOrder = 0
     /// Returns the next available RunOrder to be stored, when inserting an FplValue into its parent.
@@ -825,9 +851,22 @@ and FplVariableStack() =
     // Peeks an FplValue from the stack.
     member this.PeekEvalStack() = _valueStack.Peek()
 
-    // Clears stack.
-    member this.ClearEvalStack() = _valueStack.Clear()
+    member this.LastAssumedArgument =
+        if _assumedArguments.Count > 0 then
+            Some (_assumedArguments.Peek())
+        else 
+            None
 
+    member this.AssumeArgument assumption = _assumedArguments.Push (assumption)
+    
+    member this.RevokeLastArgument() = if _assumedArguments.Count > 0 then _assumedArguments.Pop() |> ignore
+
+    // Clears stack.
+    member this.ClearEvalStack() = 
+        _valueStack.Clear()
+        _assumedArguments.Clear()
+        _stack.Clear()
+        _classCounters.Clear()
     
 let private getFplHead (fv:FplValue) (signatureType:SignatureType) =
     match signatureType with
@@ -1006,16 +1045,24 @@ type IHasSignature =
 [<AbstractClass>]
 type FplGenericPredicateWithExpression(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(positions, parent)
-    let mutable _signStartPos = Position("", (int64)0, (int64)0, (int64)0)
-    let mutable _signEndPos = Position("", (int64)0, (int64)0, (int64)0)
+    let mutable _signStartPos = Position("", 0L, 0L, 0L)
+    let mutable _signEndPos = Position("", 0L, 0L, 0L)
+
+    member this.SignStartPos
+        with get() = _signStartPos
+        and set(value) = _signStartPos <- value
+
+    member this.SignEndPos
+        with get() = _signEndPos
+        and set(value) = _signEndPos <- value
 
     interface IHasSignature with
-        member _.SignStartPos 
-            with get (): Position = _signStartPos
-            and set (value) = _signStartPos <- value
-        member _.SignEndPos 
-            with get (): Position = _signEndPos
-            and set (value) = _signEndPos <- value
+        member this.SignStartPos 
+            with get () = this.SignStartPos
+            and set (value) = this.SignStartPos <- value
+        member this.SignEndPos 
+            with get () = this.SignEndPos
+            and set (value) = this.SignEndPos <- value
 
     override this.Type signatureType = getFplHead this signatureType
             
@@ -1112,14 +1159,14 @@ type FplInstance(positions: Positions, parent: FplValue) =
 
 type FplConstructor(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(positions, parent)
-    let mutable _signStartPos = Position("", (int64)0, (int64)0, (int64)0)
-    let mutable _signEndPos = Position("", (int64)0, (int64)0, (int64)0)
+    let mutable _signStartPos = Position("", 0L, 0L, 0L)
+    let mutable _signEndPos = Position("", 0L, 0L, 0L)
 
     interface IHasSignature with
-        member _.SignStartPos 
+        member this.SignStartPos 
             with get (): Position = _signStartPos
             and set (value) = _signStartPos <- value
-        member _.SignEndPos 
+        member this.SignEndPos 
             with get (): Position = _signEndPos
             and set (value) = _signEndPos <- value
 
@@ -1145,23 +1192,28 @@ type FplConstructor(positions: Positions, parent: FplValue) =
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 
-let isConstructor (fv:FplValue) =
-    match fv with
-    | :? FplConstructor -> true
-    | _ -> false
+    member this.ParentClass = this.Parent.Value :?> FplClass
 
-type FplClass(positions: Positions, parent: FplValue) =
+and FplClass(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(positions, parent)
-    let mutable _signStartPos = Position("", (int64)0, (int64)0, (int64)0)
-    let mutable _signEndPos = Position("", (int64)0, (int64)0, (int64)0)
+    let mutable _signStartPos = Position("", 0L, 0L, 0L)
+    let mutable _signEndPos = Position("", 0L, 0L, 0L)
+
+    member this.SignStartPos
+        with get() = _signStartPos
+        and set(value) = _signStartPos <- value
+
+    member this.SignEndPos
+        with get() = _signEndPos
+        and set(value) = _signEndPos <- value
 
     interface IHasSignature with
-        member _.SignStartPos 
-            with get (): Position = _signStartPos
-            and set (value) = _signStartPos <- value
-        member _.SignEndPos 
-            with get (): Position = _signEndPos
-            and set (value) = _signEndPos <- value
+        member this.SignStartPos 
+            with get () = this.SignStartPos
+            and set (value) = this.SignStartPos <- value
+        member this.SignEndPos 
+            with get () = this.SignEndPos
+            and set (value) = this.SignEndPos <- value
 
     override this.Name = PrimClassL
     override this.ShortName = PrimClass
@@ -1179,7 +1231,7 @@ type FplClass(positions: Positions, parent: FplValue) =
     member this.GetConstructors() =
         this.Scope
         |> Seq.map (fun kvp -> kvp.Value)
-        |> Seq.filter (fun fv -> isConstructor fv)
+        |> Seq.filter (fun fv -> fv.Name = LiteralCtorL)
         |> Seq.toList
     
     override this.Type signatureType =
@@ -1268,20 +1320,10 @@ type IHasProof =
     abstract member HasProof : bool with get, set
 
 type FplPredicate(positions: Positions, parent: FplValue, runOrder) =
-    inherit FplGenericPredicate(positions, parent)
+    inherit FplGenericPredicateWithExpression(positions, parent)
     let _runOrder = runOrder
     let mutable _isReady = false
     let mutable _callCounter = 0
-    let mutable _signStartPos = Position("", (int64)0, (int64)0, (int64)0)
-    let mutable _signEndPos = Position("", (int64)0, (int64)0, (int64)0)
-
-    interface IHasSignature with
-        member _.SignStartPos 
-            with get (): Position = _signStartPos
-            and set (value) = _signStartPos <- value
-        member _.SignEndPos 
-            with get (): Position = _signEndPos
-            and set (value) = _signEndPos <- value
 
     interface IReady with
         member _.IsReady = _isReady
@@ -1342,6 +1384,11 @@ type FplMandatoryPredicate(positions: Positions, parent: FplValue) =
         // todo implement run
         ()
 
+    override this.Type signatureType = 
+        let head = getFplHead this signatureType
+
+        let paramT = getParamTuple this signatureType
+        sprintf "%s(%s)" head paramT
 
 type FplOptionalPredicate(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicateWithExpression(positions, parent)
@@ -1355,6 +1402,12 @@ type FplOptionalPredicate(positions: Positions, parent: FplValue) =
         ret
 
     override this.IsBlock () = true
+
+    override this.Type signatureType = 
+        let head = getFplHead this signatureType
+
+        let paramT = getParamTuple this signatureType
+        sprintf "%s(%s)" head paramT
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 
@@ -1544,7 +1597,19 @@ type FplGenericJustificationItem(positions: Positions, parent: FplValue) =
 
     override this.Represent() = this.Type(SignatureType.Name)
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
+    override this.EmbedInSymbolTable _ = 
+        let thisJustificationItemId = this.Type(SignatureType.Mixed)
+
+        let alreadyAddedIdOpt = 
+            this.Parent.Value.ArgList
+            |> Seq.map (fun argJi -> argJi.Type(SignatureType.Mixed))
+            |> Seq.tryFind (fun otherId -> otherId = thisJustificationItemId)
+        match alreadyAddedIdOpt with
+        | Some otherId ->
+            emitPR004Diagnostics thisJustificationItemId otherId this.StartPos this.EndPos 
+        | _ -> ()
+            
+        this.TryAddToParentsArgList() 
 
     override this.RunOrder = None
 
@@ -1832,7 +1897,13 @@ and FplArgument(positions: Positions, parent: FplValue, runOrder) =
         *)
 
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+    override this.EmbedInSymbolTable _ = 
+        let (proof:FplProof) = this.ParentProof
+        if proof.HasArgument (this.FplId) then 
+            let conflict = proof.Scope[this.FplId]
+            emitPR003Diagnostics this.FplId conflict.QualifiedStartPos this.StartPos this.EndPos 
+        else 
+            proof.Scope.Add(this.FplId, this)
 
     override this.RunOrder = Some _runOrder
 
@@ -1840,18 +1911,8 @@ and FplArgument(positions: Positions, parent: FplValue, runOrder) =
 
 
 and FplProof(positions: Positions, parent: FplValue, runOrder) =
-    inherit FplGenericPredicate(positions, parent)
+    inherit FplGenericPredicateWithExpression(positions, parent)
     let _runOrder = runOrder
-    let mutable _signStartPos = Position("", (int64)0, (int64)0, (int64)0)
-    let mutable _signEndPos = Position("", (int64)0, (int64)0, (int64)0)
-
-    interface IHasSignature with
-        member _.SignStartPos 
-            with get (): Position = _signStartPos
-            and set (value) = _signStartPos <- value
-        member _.SignEndPos 
-            with get (): Position = _signEndPos
-            and set (value) = _signEndPos <- value
             
     override this.Name = LiteralPrfL
     override this.ShortName = LiteralPrf
@@ -1875,6 +1936,8 @@ and FplProof(positions: Positions, parent: FplValue, runOrder) =
         |> Seq.map (fun fv -> fv :?> FplArgument)
         |> Seq.sortBy (fun fv -> fv.RunOrder)
 
+    member this.HasArgument argumentId = this.Scope.ContainsKey(argumentId)
+
     override this.Run variableStack = 
         // tell the parent theorem-like statement that it has a proof
         let parent = this.Parent.Value 
@@ -1897,7 +1960,6 @@ and FplProof(positions: Positions, parent: FplValue, runOrder) =
 
     override this.RunOrder = Some _runOrder
 
-    member this.HasArgument argumentId = this.Scope.ContainsKey(argumentId)
 
 let getArgumentInProof (fv1:FplGenericJustificationItem) argName =
     let proof = 
@@ -1999,7 +2061,16 @@ type FplLanguage(positions: Positions, parent: FplValue) =
         // todo implement run
         ()
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+    override this.EmbedInSymbolTable _ = 
+        let parent = this.Parent.Value
+        if parent.Scope.ContainsKey(this.FplId) then 
+            let conflict = parent.Scope[this.FplId]
+            let oldDiagnosticsStopped = ad.DiagnosticsStopped
+            ad.DiagnosticsStopped <- false
+            emitID014Diagnostics this.FplId conflict.QualifiedStartPos this.StartPos this.EndPos 
+            ad.DiagnosticsStopped <- oldDiagnosticsStopped
+        else
+            parent.Scope.Add(this.FplId, this)
 
     override this.RunOrder = None
 
@@ -2630,7 +2701,7 @@ let getArgument (fv:FplValue) =
         // Exceptions: 
         // 1) if refValue is a class, its "arg list" means something else - namely parent classes. In this case we only want to return the main class
         // 2) if refValue is a constructor, its "arg list" means something else - namely the calls to some base classes' constructors classes. In this case we only want to return the main constructor
-        if refValue.ArgList.Count > 0 && not (refValue.IsClass()) && not (isConstructor refValue) then
+        if refValue.ArgList.Count > 0 && not (refValue.IsClass()) && (refValue.Name <> LiteralCtorL) then
             Some refValue.ArgList[0] // return existing values except of classes, because those denoted their parent classes
         else 
             Some refValue 
@@ -2645,6 +2716,7 @@ type FplDecrement(positions: Positions, parent: FplValue) as this =
 
     do 
         this.FplId <- $"{LiteralDel}."
+        this.TypeId <- LiteralObj
 
     override this.Name = PrimDecrementL
     override this.ShortName = PrimDecrement
@@ -2926,8 +2998,11 @@ type FplGenericQuantor(positions: Positions, parent: FplValue) =
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
     
-type FplQuantorAll(positions: Positions, parent: FplValue) =
+type FplQuantorAll(positions: Positions, parent: FplValue) as this =
     inherit FplGenericQuantor(positions, parent)
+
+    do 
+        this.FplId <- LiteralAll
 
     override this.Name = PrimQuantorAll
 
@@ -2938,8 +3013,11 @@ type FplQuantorAll(positions: Positions, parent: FplValue) =
 
     override this.Run _ = () // todo implement run
 
-type FplQuantorExists(positions: Positions, parent: FplValue) =
+type FplQuantorExists(positions: Positions, parent: FplValue) as this =
     inherit FplGenericQuantor(positions, parent)
+
+    do 
+        this.FplId <- LiteralEx
 
     override this.Name = PrimQuantorExists
 
@@ -2954,6 +3032,7 @@ type FplQuantorExistsN(positions: Positions, parent: FplValue) as this =
     inherit FplGenericQuantor(positions, parent)
 
     do 
+        this.FplId <- LiteralExN
         this.Arity <- 1
 
 
@@ -3074,8 +3153,29 @@ type FplVariable(positions: Positions, parent: FplValue) =
     override this.RunOrder = None
 
 [<AbstractClass>]
-type FplGenericFunctionalTerm(positions: Positions, parent: FplValue) =
+type FplGenericFunctionalTerm(positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
+    let mutable _signStartPos = Position("", 0L, 0L, 0L)
+    let mutable _signEndPos = Position("", 0L, 0L, 0L)
+
+    do 
+        this.TypeId <- LiteralFunc
+
+    member this.SignStartPos
+        with get() = _signStartPos
+        and set(value) = _signStartPos <- value
+
+    member this.SignEndPos
+        with get() = _signEndPos
+        and set(value) = _signEndPos <- value
+
+    interface IHasSignature with
+        member this.SignStartPos 
+            with get () = this.SignStartPos
+            and set (value) = this.SignStartPos <- value
+        member this.SignEndPos 
+            with get () = this.SignEndPos
+            and set (value) = this.SignEndPos <- value
 
     override this.Type signatureType = 
         let head = getFplHead this signatureType
@@ -3188,8 +3288,8 @@ type FplOptionalFunctionalTerm(positions: Positions, parent: FplValue) =
 
 type FplExtension(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
-    let mutable _signStartPos = Position("", (int64)0, (int64)0, (int64)0)
-    let mutable _signEndPos = Position("", (int64)0, (int64)0, (int64)0)
+    let mutable _signStartPos = Position("", 0L, 0L, 0L)
+    let mutable _signEndPos = Position("", 0L, 0L, 0L)
 
     interface IHasSignature with
         member _.SignStartPos 
@@ -3393,7 +3493,7 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
                 // issue SIG05 diagnostics if either no inheritance chain found 
                 emitSIG05Diagnostics (assignee.Type(SignatureType.Type)) (value.Type(SignatureType.Type)) toBeAssignedValue.StartPos toBeAssignedValue.EndPos
             | _ -> () // inheritance chain found (no SIG05 diagnostics)
-        | Some value when isConstructor value ->
+        | Some value when (value.Name = LiteralCtorL) ->
             // find a class inheritance chain for the constructor's class (which is stored in its parent value)
             let chainOpt = findClassInheritanceChain value.Parent.Value assignee.TypeId
             match chainOpt with
@@ -3636,6 +3736,29 @@ type FplForInStmtDomain(positions: Positions, parent: FplValue) =
 
     override this.Clone () =
         let ret = new FplForInStmtDomain((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Type signatureType = 
+        getFplHead this signatureType
+
+    override this.Represent () = LiteralUndef
+
+    override this.Run variableStack = 
+        // todo implement run
+        ()
+
+type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
+    inherit FplGenericStmt(positions, parent)
+
+    do 
+        this.FplId <- LiteralObj
+        this.TypeId <- LiteralObj
+
+    override this.Name = PrimBaseConstructorCall
+
+    override this.Clone () =
+        let ret = new FplBaseConstructorCall((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
 
@@ -4166,7 +4289,7 @@ let findCandidatesByName (st: SymbolTable) (name: string) withClassConstructors 
             if withClassConstructors && block.IsClass() then
                 block.Scope
                 |> Seq.map (fun kvp -> kvp.Value)
-                |> Seq.filter (fun (fv: FplValue) -> isConstructor fv)
+                |> Seq.filter (fun (fv: FplValue) -> (fv.Name = LiteralCtorL))
                 |> Seq.iter (fun (fv: FplValue) -> pm.Add(fv))
 
             if withCorollariesOrProofs && (block :? FplGenericTheoremLikeStmt) then 

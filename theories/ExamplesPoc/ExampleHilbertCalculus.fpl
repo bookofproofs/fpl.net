@@ -1,4 +1,4 @@
-// Example from 
+// Example from D. Hoffmann, "Theoretische Informatik", 3rd. ed. p. 99
 
 // weakening rule
 axiom A1
@@ -33,7 +33,7 @@ inf ModusPonens
 {
     dec ~f, g: pred;
     premise:
-        and(not f, impl(f, g) )
+        f, impl(f, g) 
     conclusion:
         g
 }
@@ -49,14 +49,11 @@ proof Example1$1
     // Direct Proof
     // Strategy: Assume that the premise is true, then prove that the conclusion also must be true.
     
-    100. byax A2 |- impl(
-        impl(a, impl(a, a))
-        , impl( impl(a, a), impl (a, a) )  
-    )
-    200. byax A1 |- impl(a, impl(impl(a, a),  a))  
-    300. byinf ModusPonens |- impl(impl(a, impl(a, a)), impl(a, a))
-    400. byax A1 |- impl(a, impl(a, a))
-    500. byinf ModusPonens |- impl(a, a)
+    1. byax A2 |- impl(impl(a, impl(a, a)), impl(impl(a, a), impl (a, a) ))
+    2. byax A1 |- impl(a, impl(impl(a, a),  a))  
+    3. 1, 2, byinf ModusPonens |- impl(impl(a, impl(a, a)), impl(a, a))
+    4. byax A1 |- impl(a, impl(a, a))
+    5. 3, 4, byinf ModusPonens |- impl(a, a)
     qed
 }
 
