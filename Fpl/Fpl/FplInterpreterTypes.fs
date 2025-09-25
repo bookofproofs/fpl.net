@@ -3146,6 +3146,8 @@ type FplVariable(positions: Positions, parent: FplValue) =
                 emitVAR02diagnostics this.FplId this.StartPos this.EndPos
             elif next.Name = PrimQuantorExistsN && next.Scope.Count>0 then 
                 emitVAR07diagnostics this.FplId this.StartPos this.EndPos
+            elif this.IsVariadic() then 
+                emitVAR08diagnostics this.StartPos this.EndPos
             else
                 this.TryAddToParentsScope()
                 

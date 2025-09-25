@@ -588,6 +588,25 @@ type TestInterpreterErrors() =
             let code = VAR07 ""
             runTestHelper "TestVAR07.fpl" fplCode code expected
 
+
+    [<DataRow("00", "axiom T {all n:pred { n } };", 0)>]
+    [<DataRow("00a", "axiom T {all n:*pred { n } };", 1)>]
+    [<DataRow("00b", "axiom T {all n:+pred { n } };", 1)>]
+    [<DataRow("01", "axiom T {ex n:pred { n } };", 0)>]
+    [<DataRow("01a", "axiom T {ex n:*pred { n } };", 1)>]
+    [<DataRow("01b", "axiom T {ex n:+pred { n } };", 1)>]
+    [<DataRow("02", "axiom T {exn$1 n:pred { n } };", 0)>]
+    [<DataRow("02a", "axiom T {exn$1 n:*pred { n } };", 1)>]
+    [<DataRow("02a", "axiom T {exn$1 n:+pred { n } };", 1)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestVAR08(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = VAR08
+            runTestHelper "TestVAR08.fpl" fplCode code expected
+
     [<DataRow("00", "def pred Test(x,x:* pred) {true};", 1)>]
     [<DataRow("00a", "def pred Test(x,x:+ pred) {true};", 1)>]
     [<DataRow("00b", "def pred Test(x,x: pred) {true};", 1)>]

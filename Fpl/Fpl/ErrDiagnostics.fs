@@ -168,6 +168,7 @@ type DiagnosticCode =
     | VAR05 of string 
     | VAR06 of string * string
     | VAR07 of string 
+    | VAR08 
     member this.Code = 
         match this with
             // parser error messages
@@ -275,6 +276,7 @@ type DiagnosticCode =
             | VAR05 _  -> "VAR05"
             | VAR06 _  -> "VAR06"
             | VAR07 _  -> "VAR07"
+            | VAR08 -> "VAR08"
     member this.Message = 
         match this with
             // parser error messages
@@ -398,6 +400,7 @@ type DiagnosticCode =
             | VAR05 name -> $"Bound variable `{name}` was not used in this quantor."
             | VAR06 (name, parentClass) -> $"Variable `{name}` of the parent class `{parentClass}` will be shadowed by a local variable with the same name in this scope."
             | VAR07 name -> $"The {PrimQuantorExistsN} accepts only one bound variable `{name}`."
+            | VAR08 -> "Variadic variables cannot be bound in a quantor."
 
 /// Computes an MD5 checksum of a string
 let computeMD5Checksum (input: string) =
