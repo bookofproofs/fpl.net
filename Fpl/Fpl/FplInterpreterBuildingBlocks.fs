@@ -317,7 +317,7 @@ let rec eval (st: SymbolTable) ast =
             match variableInBlockScopeByName fv name true with 
             | ScopeSearchResult.Found other ->
                 // replace the variable by other on stack
-                emitVAR03diagnostics varValue other 
+                emitVAR03diagnostics (varValue.Type(SignatureType.Mixed)) other.QualifiedStartPos varValue.StartPos varValue.EndPos
             | _ -> ()
 
             match variableInBlockScopeByName fv name false with 
@@ -332,7 +332,7 @@ let rec eval (st: SymbolTable) ast =
         elif isLocalizationDeclaration then 
             match variableInBlockScopeByName fv name false with 
             | ScopeSearchResult.Found other ->
-                emitVAR03diagnostics varValue other 
+                emitVAR03diagnostics (varValue.Type(SignatureType.Mixed)) other.QualifiedStartPos varValue.StartPos varValue.EndPos
             | _ -> 
                 let rec getLocalization (fValue:FplValue) = 
                     match fValue with
@@ -1223,14 +1223,17 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PopEvalStack() // remove exists quantor
         emitLG000orLG001Diagnostics fv PrimQuantorExists
         st.EvalPop()
-    // | ExistsN of Positions * ((Ast * (Ast * Ast option)) * Ast)
-    | Ast.ExistsN((pos1, pos2), ((dollarDigitsAst, namedVarDeclAst), predicateAst)) ->
+    | Ast.ExistsN((pos1, pos2), ((dollarDigitsAst, namedVarDeclListAst), predicateAst)) ->
         st.EvalPush("ExistsN")
         let parent = variableStack.PeekEvalStack()
         let fv = new FplQuantorExistsN((pos1, pos2), parent)
         variableStack.PushEvalStack(fv) // add exists n quantor
         eval st dollarDigitsAst
-        eval st namedVarDeclAst
+        namedVarDeclListAst
+        |> List.map (fun namedVarDeclAst ->
+            eval st namedVarDeclAst
+        )
+        |> ignore
         eval st predicateAst
         emitVAR05diagnostics fv
         variableStack.PopEvalStack() // remove exists n quantor

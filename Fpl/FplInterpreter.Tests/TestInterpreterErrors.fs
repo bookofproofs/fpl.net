@@ -426,7 +426,7 @@ type TestInterpreterErrors() =
     [<DataRow("08", """loc and(p,q) := !tex: x "\wedge" y;;""", 2)>]
     [<DataRow("09", """def pred Add(x,y: obj) infix "+" 2 {intr} loc (x + y) := !tex: x "+" y !eng: x "plus" y !ger: x "plus" y;;""", 0)>]
     [<DataRow("10", """def pred Add(x,y: obj) infix "+" 2 {intr} axiom A {(x + y * z = 1)};""", 3)>]
-    [<DataRow("11", "axiom A {dec ~arr: tpl; x };", 0)>]
+    [<DataRow("11", "axiom A {dec ~arr: tpl; x };", 1)>]
     [<DataRow("12", "prop A {dec ~d:pred; true} proof A$1 {1. |- d qed};", 0)>]
     [<DataRow("13", "prop A {dec ~d:pred; true} cor A$1 { d };", 0)>]
     [<DataRow("14", "def class A: obj {ctor A(x: obj, p:pred(u: pred)) {dec assert u;  }};", 0)>]
@@ -440,6 +440,26 @@ type TestInterpreterErrors() =
         else
             let code = VAR01 ""
             runTestHelper "TestVAR01.fpl" fplCode code expected
+
+    [<DataRow("00", "axiom T {all n:pred { n } };", 0)>]
+    [<DataRow("00a", "axiom T {all n, n:pred { n } };", 1)>]
+    [<DataRow("00b", "axiom T {all n:pred, n:pred { n } };", 1)>]
+    [<DataRow("01", "axiom T {ex n:pred { n } };", 0)>]
+    [<DataRow("01a", "axiom T {ex n, n:pred { n } };", 1)>]
+    [<DataRow("01b", "axiom T {ex n:pred, n:pred { n } };", 1)>]
+    [<DataRow("02", "axiom T {exn$1 n:pred { n } };", 0)>]
+    [<DataRow("02a", "axiom T {exn$1 n, n:pred { n } };", 1)>]
+    [<DataRow("02a", "axiom T {exn$1 n:pred, n:pred { n } };", 1)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestVAR02(no: string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = VAR02 ""
+            runTestHelper "TestVAR02.fpl" fplCode code expected
+
+
 
     [<DataRow("01", "def pred T(x:obj) {true};", 1)>]
     [<DataRow("01a", "def pred T(x:obj) {intr};", 0)>]
@@ -555,6 +575,7 @@ type TestInterpreterErrors() =
         else
             let code = VAR06 ("","")
             runTestHelper "TestVAR06.fpl" fplCode code expected
+
 
     [<DataRow("00", "def pred Test(x,x:* pred) {true};", 1)>]
     [<DataRow("00a", "def pred Test(x,x:+ pred) {true};", 1)>]

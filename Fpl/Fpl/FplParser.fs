@@ -374,10 +374,11 @@ let exclusiveOr = positions "Xor" (keywordXor >>. twoPredicatesInParens) |>> Ast
 let implication = positions "Impl" (keywordImpl >>. twoPredicatesInParens) |>> Ast.Impl
 let equivalence = positions "Iif" (keywordIif >>. twoPredicatesInParens) |>> Ast.Iif
 let negation = positions "Not" (keywordNot >>. predicate) |>> Ast.Not
+
 let all = positions "All" ((keywordAll >>. namedVariableDeclarationList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.All
 let exists = positions "Exists" ((keywordEx >>. namedVariableDeclarationList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.Exists
 
-let existsTimesN = positions "ExistsN" (((keywordExN >>. dollarDigits .>> SW) .>>. namedVariableDeclaration) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.ExistsN
+let existsTimesN = positions "ExistsN" (((keywordExN >>. dollarDigits .>> SW) .>>. namedVariableDeclarationList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.ExistsN
 let isOpArg = choice [ objectSymbol; predicateIdentifier; variable; selfOrParent ] .>> IW
 let isOperator = positions "IsOperator" ((keywordIs >>. leftParen >>. isOpArg) .>>. (comma >>. variableType) .>> rightParen) |>> Ast.IsOperator
 

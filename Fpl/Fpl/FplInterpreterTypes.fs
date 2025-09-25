@@ -653,13 +653,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
                 this.Type(SignatureType.Name)
         match this.InScopeOfParent identifier with
         | ScopeSearchResult.Found conflict -> 
-            match this.ShortName with
-            | PrimVariable 
-            | PrimVariableMany 
-            | PrimVariableMany1 -> // variable
-                ()
-            | _ ->
-                emitID001Diagnostics (this.Type(SignatureType.Type)) conflict.QualifiedStartPos this.StartPos this.EndPos 
+            emitID001Diagnostics (this.Type(SignatureType.Type)) conflict.QualifiedStartPos this.StartPos this.EndPos 
         | _ -> 
             next.Scope.Add(identifier,this)
 
@@ -3146,7 +3140,10 @@ type FplVariable(positions: Positions, parent: FplValue) =
         | Some next when next.IsVariable() ->
             this.TryAddToParentsScope()
         | Some next when next.Name = PrimMappingL || next.Name = PrimQuantorAll || next.Name = PrimQuantorExists || next.Name = PrimQuantorExistsN ->  
-            this.TryAddToParentsScope()
+            if next.Scope.ContainsKey(this.FplId) then
+                emitVAR02diagnostics this.FplId this.StartPos this.EndPos
+            else
+                this.TryAddToParentsScope()
         | _ ->
             this.TryAddToParentsArgList()
 

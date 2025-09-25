@@ -61,33 +61,7 @@ let emitID016diagnostics name (self:FplValue) =
         }
     ad.AddDiagnostic diagnostic
 
-let emitVAR01diagnostics name pos1 pos2 =
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = pos1
-            Diagnostic.EndPos = pos2
-            Diagnostic.Code = VAR01 name
-            Diagnostic.Alternatives = None 
-        }
 
-    ad.AddDiagnostic diagnostic
-
-let emitVAR03diagnostics (fplValue: FplValue) (conflict: FplValue) =
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = fplValue.StartPos
-            Diagnostic.EndPos = fplValue.EndPos
-            Diagnostic.Code = VAR03(fplValue.Type(SignatureType.Mixed), conflict.QualifiedStartPos)
-            Diagnostic.Alternatives = Some "Remove this variable declaration or rename the variable." 
-        }
-
-    ad.AddDiagnostic diagnostic
 
 let emitVAR03diagnosticsForCorollaryOrProofVariable (fplValue: FplValue) =
     match fplValue with 
@@ -98,7 +72,9 @@ let emitVAR03diagnosticsForCorollaryOrProofVariable (fplValue: FplValue) =
         |> Seq.iter (fun kv -> 
             let res = variableInBlockScopeByName (kv.Value) (kv.Value.Type(SignatureType.Mixed)) false
             match res with
-            | ScopeSearchResult.Found conflict -> emitVAR03diagnostics kv.Value conflict
+            | ScopeSearchResult.Found conflict -> 
+                let fv = kv.Value
+                emitVAR03diagnostics (fv.Type(SignatureType.Mixed)) (conflict.QualifiedStartPos) fv.StartPos fv.EndPos
             | _ -> ()
         )
     | _ -> ()

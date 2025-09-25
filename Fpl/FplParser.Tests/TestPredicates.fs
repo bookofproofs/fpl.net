@@ -342,7 +342,7 @@ type TestPredicates () =
         let result = run (predicate .>> eof) """exn$2 x: Nat,y:B {not (iif ( iif( true, false), true))}"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:"))
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate46 () =

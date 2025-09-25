@@ -162,6 +162,7 @@ type DiagnosticCode =
     // variable-related error codes
     | VAR00 
     | VAR01 of string 
+    | VAR02 of string 
     | VAR03 of string * string
     | VAR04 of string 
     | VAR05 of string 
@@ -267,6 +268,7 @@ type DiagnosticCode =
             // variable-related error codes
             | VAR00 -> "VAR00"
             | VAR01 _  -> "VAR01"
+            | VAR02 _  -> "VAR02"
             | VAR03 _  -> "VAR03"
             | VAR04 _  -> "VAR04"
             | VAR05 _  -> "VAR05"
@@ -388,6 +390,7 @@ type DiagnosticCode =
             // variable-related error codes
             | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
             | VAR01 name -> $"Variable `{name}` not declared in this scope."
+            | VAR02 name -> $"Variable `{name}` was already used in this quantor."
             | VAR03 (identifier, conflict) -> sprintf "Variable `%s` was already declared in the scope of the associated block at %s" identifier conflict
             | VAR04 name -> $"Declared variable `{name}` not used in this scope."
             | VAR05 name -> $"Bound variable `{name}` not used in this quantor."

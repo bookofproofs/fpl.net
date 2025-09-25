@@ -535,6 +535,46 @@ let emitSIG05Diagnostics assigneeTypeStr assignedTypeStr pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
         
+let emitVAR01diagnostics name pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = VAR01 name
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
+let emitVAR02diagnostics name pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = VAR02 name
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
+let emitVAR03diagnostics mixedName conflictStartPos pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = VAR03(mixedName, conflictStartPos)
+            Diagnostic.Alternatives = Some "Remove this variable declaration or rename the variable." 
+        }
+
+    ad.AddDiagnostic diagnostic
+
 let emitVAR06iagnostic name parentClass pos = 
     let diagnostic =
         { 
