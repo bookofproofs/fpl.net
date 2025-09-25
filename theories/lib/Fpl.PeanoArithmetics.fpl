@@ -212,21 +212,8 @@ def func Sum2(list:* Nat)->Nat
     return result
 }
 
-def func Sum(arr: Nat[from,to:Nat]) -> Nat
-{
-    dec
-        ~i, result: Nat
-        result:=Zero()
 
-        for i in Range(from,to)
-        {
-            result:=Add(result,arr[i])
-        }
-    ;
-    return result
-}
-
-def func Sum(arr: Nat) -> Nat
+def func Sum(arr:*Nat) -> Nat
 {
     dec
         ~addend, result: Nat
@@ -327,7 +314,7 @@ def func RiemannIntegral(from,to:Real, f: RealValuedFunction ) -> Real
     return result
 }
 
-def func PowerSeries(arr: RightOpenRange[k:Nat]) -> Real
+def func PowerSeries(k:Nat, arr: RightOpenRange) -> Real
 {
     dec
         ~result: Real
@@ -341,7 +328,7 @@ def func PowerSeries(arr: RightOpenRange[k:Nat]) -> Real
     return result
 }
 
-def function ContinuedFraction(arr: RightOpenRangeInt[k:Nat]) -> Real
+def function ContinuedFraction(k:Nat, arr: RightOpenRangeInt) -> Real
 {
     dec
         ~i: Nat

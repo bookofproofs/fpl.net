@@ -447,7 +447,7 @@ inf Or2NotXor
 
 inf NotAll2ExNot
 {
-    dec ~p: pred(y:tpl);
+    dec ~p: pred(x:tpl);
     pre:
         not all x:tpl {p(x)}
     con:
