@@ -356,8 +356,8 @@ type DiagnosticCode =
             | PR000 incorrectBlockType -> $"Cannot find a justifying `by definition`, found {incorrectBlockType} instead."
             | PR001 incorrectBlockType -> $"Cannot find a justifying `other proof argument`, found {incorrectBlockType} instead."
             | PR002 incorrectBlockType -> $"Cannot find a justifying theorem-like statement or rule of inference, found {incorrectBlockType} instead." 
-            | PR003 (name, conflict) -> sprintf "Argument identifier `%s` was already declared at %s." name conflict
-            | PR004 (name, conflict)  -> sprintf "Justification `%s` was already declared at %s." name conflict
+            | PR003 (name, conflict) -> $"Argument identifier `{name}` was already declared at {conflict}."  
+            | PR004 (name, conflict)  -> $"Justification `{name}` was already declared at {conflict}." 
             | PR005 name ->  $"Argument identifier `{name}` not declared in this proof."
             | PR006 (proofName, argumentName)->  $"A proof {proofName} was found, but there ít has no argument with the name `{argumentName}`."
             | PR007 (nodeTypeName, nodeName) ->  $"{nodeTypeName} is {nodeName} and is missing a proof."
@@ -387,11 +387,11 @@ type DiagnosticCode =
             | SIG05 (assigneeType, assignedType) -> $"Cannot assign type `{assignedType}` to type `{assigneeType}`."
             // variable-related error codes
             | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
-            | VAR01 name ->  sprintf $"Variable `{name}` not declared in this scope."
+            | VAR01 name -> $"Variable `{name}` not declared in this scope."
             | VAR03 (identifier, conflict) -> sprintf "Variable `%s` was already declared in the scope of the associated block at %s" identifier conflict
-            | VAR04 name ->  sprintf $"Declared variable `{name}` not used in this scope."
-            | VAR05 name ->  sprintf $"Bound variable `{name}` not used in this quantor."
-            | VAR06 (name, parentClass) ->  sprintf $"Variable `{name}` of the parent class `{parentClass}` will be shadowed by a local variable with the same name in this scope."
+            | VAR04 name -> $"Declared variable `{name}` not used in this scope."
+            | VAR05 name -> $"Bound variable `{name}` not used in this quantor."
+            | VAR06 (name, parentClass) -> $"Variable `{name}` of the parent class `{parentClass}` will be shadowed by a local variable with the same name in this scope."
 
 /// Computes an MD5 checksum of a string
 let computeMD5Checksum (input: string) =

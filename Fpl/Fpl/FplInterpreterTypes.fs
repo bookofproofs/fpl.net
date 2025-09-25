@@ -3145,7 +3145,7 @@ type FplVariable(positions: Positions, parent: FplValue) =
             this.TryAddToParentsScope()
         | Some next when next.IsVariable() ->
             this.TryAddToParentsScope()
-        | Some next when next.Name = PrimMappingL || next.Name = "quantor" ->  
+        | Some next when next.Name = PrimMappingL || next.Name = PrimQuantorAll || next.Name = PrimQuantorExists || next.Name = PrimQuantorExistsN ->  
             this.TryAddToParentsScope()
         | _ ->
             this.TryAddToParentsArgList()

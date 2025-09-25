@@ -1674,7 +1674,9 @@ type SymbolTableStructure() =
     // proposition
     [<DataRow("FplProposition", "00", """prop T {true};""", "")>]
 
-    [<DataRow("FplQuantorAll", "00", """;""", "")>]
+    [<DataRow("FplQuantorAll", "00", """inf T {pre: true con: all x:pred {and (x,x)}};""", "")>]
+    [<DataRow("FplQuantorAll", "01", """inf T {dec ~p: pred(c: obj); pre: p(c) con: all x:obj {p(x)}};""", "")>]
+
     [<DataRow("FplQuantorExists", "00", """;""", "")>]
     [<DataRow("FplQuantorExistsN", "00", """;""", "")>]
     [<DataRow("FplReference", "00", """;""", "")>]
@@ -2354,6 +2356,23 @@ type SymbolTableStructure() =
                     Assert.IsInstanceOfType<FplProposition>(node)
                     Assert.AreEqual<int>(1, node.ArgList.Count)
                     Assert.AreEqual<int>(0, node.Scope.Count)
+
+                | "FplQuantorAll", "00" -> 
+                    Assert.IsInstanceOfType<FplRuleOfInference>(parent)
+                    Assert.AreEqual<int>(2, parent.ArgList.Count)
+                    Assert.AreEqual<int>(0, parent.Scope.Count)
+                    Assert.IsInstanceOfType<FplQuantorAll>(node)
+                    Assert.AreEqual<int>(1, node.ArgList.Count) // conjunction
+                    Assert.AreEqual<int>(1, node.Scope.Count) // x variable
+
+                | "FplQuantorAll", "01" -> 
+                    Assert.IsInstanceOfType<FplRuleOfInference>(parent)
+                    Assert.AreEqual<int>(2, parent.ArgList.Count)
+                    Assert.AreEqual<int>(1, parent.Scope.Count) // variable p
+                    Assert.IsInstanceOfType<FplQuantorAll>(node)
+                    Assert.AreEqual<int>(1, node.ArgList.Count) // reference to p
+                    Assert.AreEqual<int>(1, node.Scope.Count) // x variable
+
 
                 | "FplRuleOfInference", "00" -> 
                     Assert.IsInstanceOfType<FplTheory>(parent)
