@@ -1650,7 +1650,8 @@ type SymbolTableStructure() =
     // non-intrinsic predicate with some statements 
     [<DataRow("FplPredicate", "04", """def pred T(x,y:obj) {dec ~z:obj z:=x y:=z; false };""", "")>]
 
-    [<DataRow("FplPredicateList", "00", """;""", "")>]
+    [<DataRow("FplPredicateList", "00", """inf T {pre: true con: true};""", "")>]
+    [<DataRow("FplPredicateList", "01", """inf T {pre: true, true, true con: true};""", "")>]
 
     // proof 
     [<DataRow("FplProof", "00", """proof T$1 {1. |- trivial};""", "")>]
@@ -1677,8 +1678,14 @@ type SymbolTableStructure() =
     [<DataRow("FplQuantorAll", "00", """inf T {pre: true con: all x:pred {and (x,x)}};""", "")>]
     [<DataRow("FplQuantorAll", "01", """inf T {dec ~p: pred(c: obj); pre: p(c) con: all x:obj {p(x)}};""", "")>]
 
-    [<DataRow("FplQuantorExists", "00", """;""", "")>]
-    [<DataRow("FplQuantorExistsN", "00", """;""", "")>]
+    [<DataRow("FplQuantorExists", "00", """inf T {pre: ex x:tpl {or(p, q(x))} con: true};""", "")>]
+    [<DataRow("FplQuantorExists", "01", """inf T {dec ~p: pred ~q:pred(z:tpl); pre: ex x:pred { p(z) } con: true};""", "")>]
+    [<DataRow("FplQuantorExists", "02", """inf T {pre: ex x,y:pred { and(x,y) }, true con: true};""", "")>]
+
+    [<DataRow("FplQuantorExistsN", "00", """ax T {exn$1 x:tpl {and(p, q(x))} };""", "")>]
+    [<DataRow("FplQuantorExistsN", "01", """conj T {dec ~p: pred ~q:pred(z:tpl); exn$1 x:pred { p(z) } };""", "")>]
+    [<DataRow("FplQuantorExistsN", "02", """lem T {exn$1 x:pred { x } };""", "")>]
+
     [<DataRow("FplReference", "00", """;""", "")>]
     [<DataRow("FplReturn", "00", """;""", "")>]
     [<DataRow("FplRoot", "00", """;""", "")>]
@@ -2291,6 +2298,21 @@ type SymbolTableStructure() =
                     Assert.AreEqual<int>(3, node.ArgList.Count) // non-intrinsic with 2 statements
                     Assert.AreEqual<int>(3, node.Scope.Count) // 3 variables
 
+                | "FplPredicateList", "00" -> 
+                    Assert.IsInstanceOfType<FplRuleOfInference>(parent)
+                    Assert.AreEqual<int>(2, parent.ArgList.Count)
+                    Assert.AreEqual<int>(0, parent.Scope.Count)
+                    Assert.IsInstanceOfType<FplPredicateList>(node)
+                    Assert.AreEqual<int>(1, node.ArgList.Count) // one predicate
+                    Assert.AreEqual<int>(0, node.Scope.Count) 
+                | "FplPredicateList", "01" -> 
+                    Assert.IsInstanceOfType<FplRuleOfInference>(parent)
+                    Assert.AreEqual<int>(2, parent.ArgList.Count)
+                    Assert.AreEqual<int>(0, parent.Scope.Count)
+                    Assert.IsInstanceOfType<FplPredicateList>(node)
+                    Assert.AreEqual<int>(3, node.ArgList.Count) // three predicates
+                    Assert.AreEqual<int>(0, node.Scope.Count) 
+
                 | "FplProof", "00" -> 
                     Assert.IsInstanceOfType<FplTheory>(parent)
                     Assert.AreEqual<int>(0, parent.ArgList.Count)
@@ -2364,7 +2386,6 @@ type SymbolTableStructure() =
                     Assert.IsInstanceOfType<FplQuantorAll>(node)
                     Assert.AreEqual<int>(1, node.ArgList.Count) // conjunction
                     Assert.AreEqual<int>(1, node.Scope.Count) // x variable
-
                 | "FplQuantorAll", "01" -> 
                     Assert.IsInstanceOfType<FplRuleOfInference>(parent)
                     Assert.AreEqual<int>(2, parent.ArgList.Count)
@@ -2373,6 +2394,49 @@ type SymbolTableStructure() =
                     Assert.AreEqual<int>(1, node.ArgList.Count) // reference to p
                     Assert.AreEqual<int>(1, node.Scope.Count) // x variable
 
+                | "FplQuantorExists", "00" -> 
+                    Assert.IsInstanceOfType<FplPredicateList>(parent)
+                    Assert.AreEqual<int>(1, parent.ArgList.Count)
+                    Assert.AreEqual<int>(0, parent.Scope.Count)
+                    Assert.IsInstanceOfType<FplQuantorExists>(node)
+                    Assert.AreEqual<int>(1, node.ArgList.Count) // disjunction
+                    Assert.AreEqual<int>(1, node.Scope.Count) // x variable
+                | "FplQuantorExists", "01" -> 
+                    Assert.IsInstanceOfType<FplPredicateList>(parent)
+                    Assert.AreEqual<int>(1, parent.ArgList.Count)
+                    Assert.AreEqual<int>(0, parent.Scope.Count) // variable p
+                    Assert.IsInstanceOfType<FplQuantorExists>(node)
+                    Assert.AreEqual<int>(1, node.ArgList.Count) // reference to p
+                    Assert.AreEqual<int>(1, node.Scope.Count) // x variable
+                | "FplQuantorExists", "02" -> 
+                    Assert.IsInstanceOfType<FplPredicateList>(parent)
+                    Assert.AreEqual<int>(2, parent.ArgList.Count) // two predicates in list
+                    Assert.AreEqual<int>(0, parent.Scope.Count) 
+                    Assert.IsInstanceOfType<FplQuantorExists>(node)
+                    Assert.AreEqual<int>(1, node.ArgList.Count) // conjunction
+                    Assert.AreEqual<int>(2, node.Scope.Count) // 2 variables
+
+                | "FplQuantorExistsN", "00" -> 
+                    Assert.IsInstanceOfType<FplAxiom>(parent)
+                    Assert.AreEqual<int>(1, parent.ArgList.Count)
+                    Assert.AreEqual<int>(0, parent.Scope.Count)
+                    Assert.IsInstanceOfType<FplQuantorExistsN>(node)
+                    Assert.AreEqual<int>(1, node.ArgList.Count) // conjunction
+                    Assert.AreEqual<int>(1, node.Scope.Count) // 1 variable
+                | "FplQuantorExistsN", "01" -> 
+                    Assert.IsInstanceOfType<FplConjecture>(parent)
+                    Assert.AreEqual<int>(1, parent.ArgList.Count)
+                    Assert.AreEqual<int>(2, parent.Scope.Count) // 2 variables
+                    Assert.IsInstanceOfType<FplQuantorExistsN>(node)
+                    Assert.AreEqual<int>(1, node.ArgList.Count) // reference to p
+                    Assert.AreEqual<int>(1, node.Scope.Count) // 1 variable
+                | "FplQuantorExistsN", "02" -> 
+                    Assert.IsInstanceOfType<FplLemma>(parent)
+                    Assert.AreEqual<int>(1, parent.ArgList.Count) // inner predicate
+                    Assert.AreEqual<int>(0, parent.Scope.Count) 
+                    Assert.IsInstanceOfType<FplQuantorExistsN>(node)
+                    Assert.AreEqual<int>(1, node.ArgList.Count) // reference to p
+                    Assert.AreEqual<int>(1, node.Scope.Count) // z variable
 
                 | "FplRuleOfInference", "00" -> 
                     Assert.IsInstanceOfType<FplTheory>(parent)
