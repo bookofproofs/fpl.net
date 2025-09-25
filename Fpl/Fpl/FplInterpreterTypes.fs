@@ -3139,11 +3139,16 @@ type FplVariable(positions: Positions, parent: FplValue) =
             this.TryAddToParentsScope()
         | Some next when next.IsVariable() ->
             this.TryAddToParentsScope()
-        | Some next when next.Name = PrimMappingL || next.Name = PrimQuantorAll || next.Name = PrimQuantorExists || next.Name = PrimQuantorExistsN ->  
+        | Some next when next.Name = PrimMappingL ->  
+            this.TryAddToParentsScope()
+        | Some next when next.Name = PrimQuantorAll || next.Name = PrimQuantorExists || next.Name = PrimQuantorExistsN ->  
             if next.Scope.ContainsKey(this.FplId) then
                 emitVAR02diagnostics this.FplId this.StartPos this.EndPos
+            elif next.Name = PrimQuantorExistsN && next.Scope.Count>0 then 
+                emitVAR07diagnostics this.FplId this.StartPos this.EndPos
             else
                 this.TryAddToParentsScope()
+                
         | _ ->
             this.TryAddToParentsArgList()
 
