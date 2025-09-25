@@ -315,7 +315,7 @@ type CommonFplValueTestCases =
             def func SomeFunctionalTerm1()->obj {intr}
             def func SomeFunctionalTerm2()->obj {intr}
             def func SomeFunctionalTerm3()->obj {dec ~v:obj v:=v; return v}
-            def func SomeFunctionalTerm4()->tpl(c:pred) {dec ~v:tpl(c:pred) v:=v; return v}
+            def func SomeFunctionalTerm4()->tpl {dec ~v:tpl v:=v; return v}
             def func SomeFunctionalTerm5()->SomeClass1 {dec ~v:SomeClass1; return v}
             def func SomeFunctionalTerm6()->SomeClass1 {dec ~v:SomeClass1 v:=SomeClass; return v}
             def func SomeFunctionalTerm7()->SomeClass1 {dec ~v:SomeClass1 v:=SomeClass(); return v}
@@ -357,7 +357,7 @@ type CommonFplValueTestCases =
                             let fun1 = CommonFplValueTestCases.getScopedElement theory "SomeFunctionalTerm1() -> obj" subtype
                             let fun2 = CommonFplValueTestCases.getScopedElement theory "SomeFunctionalTerm2() -> obj" subtype
                             let fun3 = CommonFplValueTestCases.getScopedElement theory "SomeFunctionalTerm3() -> obj" subtype
-                            let fun4 = CommonFplValueTestCases.getScopedElement theory "SomeFunctionalTerm4() -> tpl(pred)" subtype
+                            let fun4 = CommonFplValueTestCases.getScopedElement theory "SomeFunctionalTerm4() -> tpl" subtype
                             let fun5 = CommonFplValueTestCases.getScopedElement theory "SomeFunctionalTerm5() -> SomeClass1" subtype
                             let fun6 = CommonFplValueTestCases.getScopedElement theory "SomeFunctionalTerm6() -> SomeClass1" subtype
                             let fun7 = CommonFplValueTestCases.getScopedElement theory "SomeFunctionalTerm7() -> SomeClass1" subtype

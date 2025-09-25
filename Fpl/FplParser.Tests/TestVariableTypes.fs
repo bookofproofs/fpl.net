@@ -103,6 +103,8 @@ type TestVariableTypes () =
     [<DataRow("tpl[x:index   ]")>]
     [<DataRow("templateTest[x:ind ,y:pred]")>]
     [<DataRow("tplTest[]")>]
+    [<DataRow("func()->obj()")>]
+    [<DataRow("func()->tpl()")>]
     [<TestMethod>]
     member this.TestVariableTypeFailure (input:string) =
         let result = run (variableType .>> eof) input
