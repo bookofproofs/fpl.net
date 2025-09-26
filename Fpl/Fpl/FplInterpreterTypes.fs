@@ -3164,6 +3164,26 @@ type FplVariable(positions: Positions, parent: FplValue) =
             else
                 property.Scope.Add(this.FplId, this)
 
+        let addToProofOrCorolllary (proofOrCorollary:FplValue) = 
+            let rec conflictInScope (node:FplValue) =
+                if node.Scope.ContainsKey(this.FplId) then
+                    emitVAR03diagnostics this.FplId node.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos
+                    true
+                else 
+                    let parent = node.Parent.Value
+                    match parent.Name with
+                    | LiteralCorL
+                    | LiteralThm
+                    | LiteralLem
+                    | LiteralProp
+                    | LiteralConj
+                    | LiteralAx ->
+                        conflictInScope parent
+                    | _ -> false
+
+            if not (conflictInScope proofOrCorollary) then
+                proofOrCorollary.Scope.Add(this.FplId, this)
+
 
         match nextOpt with 
         | Some next when (  next.Name = LiteralAxL 
@@ -3182,6 +3202,9 @@ type FplVariable(positions: Positions, parent: FplValue) =
                         || next.Name = PrimOptionalPredicateL
                         || next.Name = PrimOptionalFunctionalTermL) ->
             addToProperty next
+        | Some next when (next.Name = LiteralPrfL 
+                        || next.Name = LiteralCorL) ->
+            addToProofOrCorolllary next
         | Some next when next.IsBlock() ->
             this.TryAddToParentsScope()
         | Some next when next.IsVariable() ->
