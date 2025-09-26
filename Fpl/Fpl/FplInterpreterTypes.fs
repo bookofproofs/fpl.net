@@ -3056,12 +3056,16 @@ type FplVariable(positions: Positions, parent: FplValue) =
     member this.SetToMany() = 
         if _variadicType = String.Empty then
             _variadicType <- "many"
+        elif _variadicType = "many" then 
+            ()
         else 
             failwith($"The variadic type was already set to {_variadicType}.")
 
     member this.SetToMany1() = 
         if _variadicType = String.Empty then
             _variadicType <- "many1"
+        elif _variadicType = "many1" then 
+            ()
         else 
             failwith($"The variadic type was already set to {_variadicType}.")
 
@@ -3133,8 +3137,51 @@ type FplVariable(positions: Positions, parent: FplValue) =
 
     override this.Run _ = ()
 
+
     override this.EmbedInSymbolTable nextOpt =
+        let addToRuleOfInference (block:FplValue) = 
+            if block.Scope.ContainsKey(this.FplId) then
+                let old = ad.DiagnosticsStopped 
+                ad.DiagnosticsStopped <- false
+                emitVAR03diagnostics this.FplId block.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos
+                ad.DiagnosticsStopped <- old
+            else
+                block.Scope.Add(this.FplId, this)
+
+        let addToSimpleFplBlocksScope (block:FplValue) = 
+            if block.Scope.ContainsKey(this.FplId) then
+                emitVAR03diagnostics this.FplId block.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos
+            else
+                block.Scope.Add(this.FplId, this)
+        
+        let addToProperty (property:FplValue) = 
+            let parentOfProperty = property.Parent.Value
+            if property.Scope.ContainsKey(this.FplId) then
+                emitVAR03diagnostics this.FplId property.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos
+            elif parentOfProperty.Scope.ContainsKey(this.FplId) then
+                // check also the scope of the property's parent block
+                emitVAR03diagnostics this.FplId parentOfProperty.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos
+            else
+                property.Scope.Add(this.FplId, this)
+
+
         match nextOpt with 
+        | Some next when (  next.Name = LiteralAxL 
+                        || next.Name = LiteralThmL 
+                        || next.Name = LiteralLemL 
+                        || next.Name = LiteralPropL 
+                        || next.Name = LiteralConjL 
+                        || next.Name = PrimClassL 
+                        || next.Name = PrimFuncionalTermL
+                        || next.Name = PrimPredicateL) ->
+            addToSimpleFplBlocksScope next
+        | Some next when next.Name = PrimRuleOfInference ->
+            addToRuleOfInference next
+        | Some next when (  next.Name = PrimMandatoryFunctionalTermL 
+                        || next.Name = PrimMandatoryPredicateL 
+                        || next.Name = PrimOptionalPredicateL
+                        || next.Name = PrimOptionalFunctionalTermL) ->
+            addToProperty next
         | Some next when next.IsBlock() ->
             this.TryAddToParentsScope()
         | Some next when next.IsVariable() ->
@@ -3149,7 +3196,7 @@ type FplVariable(positions: Positions, parent: FplValue) =
             elif this.IsVariadic() then 
                 emitVAR08diagnostics this.StartPos this.EndPos
             else
-                this.TryAddToParentsScope()
+                next.Scope.TryAdd(this.FplId, this) |> ignore
                 
         | _ ->
             this.TryAddToParentsArgList()

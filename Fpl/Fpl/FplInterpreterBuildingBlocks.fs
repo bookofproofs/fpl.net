@@ -313,12 +313,6 @@ let rec eval (st: SymbolTable) ast =
         varValue.SetValue(undefined)
         varValue.IsSignatureVariable <- variableStack.InSignatureEvaluation 
         if isDeclaration then 
-            // check for VAR03 diagnostics
-            match variableInBlockScopeByName fv name true with 
-            | ScopeSearchResult.Found other ->
-                // replace the variable by other on stack
-                emitVAR03diagnostics (varValue.Type(SignatureType.Mixed)) other.QualifiedStartPos varValue.StartPos varValue.EndPos
-            | _ -> ()
 
             match variableInBlockScopeByName fv name false with 
             | ScopeSearchResult.Found other ->
