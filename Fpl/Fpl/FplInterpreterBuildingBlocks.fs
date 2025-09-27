@@ -350,7 +350,8 @@ let rec eval (st: SymbolTable) ast =
                     variableStack.PopEvalStack()
                 | _ -> ()
 
-        if isLocalizationDeclaration && fv.IsVariable() then 
+        if isLocalizationDeclaration && fv.ArgList.Count>0 && fv.ArgList[0].IsVariable() then 
+            let variable = fv.ArgList[0] :?> FplVariable
             let rec getLocalization (fValue:FplValue) = 
                 match fValue with
                 | :? FplLocalization -> fValue
@@ -363,7 +364,7 @@ let rec eval (st: SymbolTable) ast =
                 let other = loc.Scope[name]
                 emitVAR03diagnostics name other.QualifiedStartPos pos1 pos2
             else 
-                loc.Scope.Add(name, fv)
+                loc.Scope.Add(name, variable)
 
         //if isExtensionDeclaration then 
         //    fv.Scope.Add(name, varValue)
@@ -1178,14 +1179,14 @@ let rec eval (st: SymbolTable) ast =
             |> List.filter (fun (var:FplValue) -> var.AuxiliaryInfo = 0)
             |> List.map (fun var ->
                 let loc = variableStack.PeekEvalStack()
-                let lanList = 
+                let languageList = 
                     loc.Scope 
                     |> Seq.filter (fun kvp -> isLanguage kvp.Value) 
                     |> Seq.map (fun kvp -> kvp.Value) 
                     |> Seq.toList 
                     |> List.rev
-                if not lanList.IsEmpty then
-                    let lan = lanList.Head
+                if not languageList.IsEmpty then
+                    let lan = languageList.Head
                     diagList.Add(getVAR04diagnostic lan var.FplId)
             )
         ) |> ignore

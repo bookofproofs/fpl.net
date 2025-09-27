@@ -232,7 +232,7 @@ type DiagnosticCode =
             | ID020 _ -> "ID020"
             | ID021 _ -> "ID021"
             | ID023 _ -> "ID023"
-            | ID024 _ -> "ID024<"
+            | ID024 _ -> "ID024"
             // logic-related error codes
             | LG000 _ -> "LG000"
             | LG001 _ -> "LG001"

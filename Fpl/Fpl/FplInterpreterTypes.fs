@@ -1081,19 +1081,22 @@ let tryAddSubBlockToFplBlock (fplValue:FplValue) =
 
 // Tries to add an FPL block to its parent's scope using its named signature, or issues ID001 diagnostics if a conflict occurs
 let tryAddToParentUsingNamedSignature (fplValue:FplValue) =
-    let identifier = fplValue.Type SignatureType.Name
+    let identifier = fplValue.Type SignatureType.Type
     let root = getRoot fplValue
     let conflicts = 
         root.OrderedTheories
         |> Seq.map (fun theory -> 
             theory.Scope.Values
-            |> Seq.filter (fun fv -> fv.Type SignatureType.Name = identifier)
+            |> Seq.filter (fun fv -> fv.Type SignatureType.Type = identifier)
         )
         |> Seq.concat
         |> Seq.toList
 
     if conflicts.Length > 0 then 
-        emitID001Diagnostics identifier (conflicts.Head.QualifiedStartPos) fplValue.StartPos fplValue.EndPos
+        let old = ad.DiagnosticsStopped 
+        ad.DiagnosticsStopped <- false
+        emitID024Diagnostics identifier (conflicts.Head.QualifiedStartPos) fplValue.StartPos fplValue.EndPos
+        ad.DiagnosticsStopped <- old
     else
         let parent = fplValue.Parent.Value
         parent.Scope.Add(identifier, fplValue)
@@ -2500,8 +2503,7 @@ type FplReference(positions: Positions, parent: FplValue) =
     override this.EmbedInSymbolTable nextOpt = 
         match nextOpt with 
         | Some next when next.Name = LiteralLocL -> 
-            next.FplId <- this.FplId
-            next.TypeId <- this.TypeId
+            next.FplId <- this.Type SignatureType.Name
             next.EndPos <- this.EndPos
         | Some next when next.IsBlock() ->
             this.Parent.Value.ArgList.Add this 

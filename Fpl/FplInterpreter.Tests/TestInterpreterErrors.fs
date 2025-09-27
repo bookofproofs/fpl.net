@@ -1093,6 +1093,18 @@ type TestInterpreterErrors() =
             let code = ID023 ""
             runTestHelper "TestID023.fpl" fplCode code expected
 
+    [<DataRow("00", """loc not(x) :=  !tex: "\neg(" x ")";;""", 0)>]
+    [<DataRow("00a", """loc not(x) :=  !tex: "\neg(" x ")"; loc not(x) :=  !tex: "\neg(" x ")";;""", 1)>]
+    [<DataRow("00a", """loc not(y) :=  !tex: "\neg(" x ")"; loc not(x) :=  !tex: "\neg(" x ")";;""", 1)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestID024(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = ID024 ("", "")
+            runTestHelper "TestID024.fpl" fplCode code expected
+
     [<DataRow("""def pred Or (x:+ pred) infix "or" 0 {true};""", 0)>]
     [<DataRow("""def pred Or (x:* pred) infix "or" 0 {true};""", 0)>]
     [<DataRow("""def pred T() {true};""", 1)>]
