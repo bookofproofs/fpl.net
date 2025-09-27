@@ -2015,13 +2015,11 @@ let evaluateSymbolTable (st: SymbolTable) =
         | Some pa ->
             variableStack.ClearEvalStack()
             // evaluate the ParsedAst of a theory
-            let theoryValue = new FplTheory((Position("",0,1,1), Position("",0,1,1)), st.Root, pa.Parsing.Uri.AbsolutePath, variableStack.GetNextAvailableFplBlockRunOrder);
+            let theoryValue = new FplTheory(pa.Id, st.Root, pa.Parsing.Uri.AbsolutePath, variableStack.GetNextAvailableFplBlockRunOrder);
             if not (st.Root.Scope.ContainsKey(pa.Id)) then
                 st.Root.Scope.Add(pa.Id, theoryValue)
             else
                 st.Root.Scope[pa.Id] <- theoryValue
-            theoryValue.FplId <- pa.Id
-            theoryValue.TypeId <- pa.Id
             variableStack.PushEvalStack(theoryValue)
             ad.CurrentUri <- pa.Parsing.Uri
             eval st pa.Parsing.Ast

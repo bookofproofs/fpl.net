@@ -936,18 +936,19 @@ let private getParamTuple (fv:FplValue)  (signatureType:SignatureType) =
         |> Seq.map (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.Type(propagate))
         |> String.concat ", "
 
-type FplTheory(positions: Positions, parent: FplValue, filePath: string, runOrder) as this =
-    inherit FplValue(positions, Some parent)
+type FplTheory(theoryName, parent: FplValue, filePath: string, runOrder) as this =
+    inherit FplValue((Position("",0,1,1), Position("",0,1,1)), Some parent)
     let _runOrder = runOrder
 
     do
         this.FilePath <- Some filePath
+        this.FplId <- theoryName
 
     override this.Name = PrimTheoryL
     override this.ShortName = PrimTheory
 
     override this.Clone () =
-        let ret = new FplTheory((this.StartPos, this.EndPos), this.Parent.Value, this.FilePath.Value, _runOrder)
+        let ret = new FplTheory(this.FplId, this.Parent.Value, this.FilePath.Value, _runOrder)
         this.AssignParts(ret)
         ret
 

@@ -226,7 +226,7 @@ type SymbolTableStructure() =
             let x = new FplTheorem(positions, parent, 0)
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplTheory" ->
-            let x = new FplTheory(positions, parent, "", 0)
+            let x = new FplTheory("", parent, "", 0)
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplTranslation" ->
             let x = new FplTranslation(positions, parent)
