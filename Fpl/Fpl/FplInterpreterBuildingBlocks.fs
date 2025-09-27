@@ -300,66 +300,91 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Var((pos1, pos2), name) ->
         st.EvalPush("Var")
         let evalPath = st.EvalPath()
-        let isDeclaration = evalPath.Contains("NamedVarDecl.")  
         let isLocalizationDeclaration = evalPath.StartsWith("AST.Namespace.Localization.Expression.")
         let isExtensionDeclaration = evalPath.Contains("ExtensionAssignment.Var")
-        let diagnosticsStopFlag = ad.DiagnosticsStopped
-        ad.DiagnosticsStopped <- false // enable var-related diagnostics in AST.Var, even if it was stopped (e.g. in Ast.Localization)
         let fv = variableStack.PeekEvalStack()
-        let varValue = new FplVariable((pos1, pos2), fv) 
-        varValue.FplId <- name
-        varValue.TypeId <- LiteralUndef
-        let undefined = new FplIntrinsicUndef((pos1, pos2), varValue)  
-        varValue.SetValue(undefined)
-        varValue.IsSignatureVariable <- variableStack.InSignatureEvaluation 
-        if isDeclaration then 
-
-            match variableInBlockScopeByName fv name false with 
-            | ScopeSearchResult.Found other ->
-                // replace the variable by other on stack
-                variableStack.PushEvalStack(other)
-            | _ -> 
-                variableStack.PushEvalStack(varValue)
-
-        elif isExtensionDeclaration then 
-            fv.Scope.Add(name, varValue)
-        elif isLocalizationDeclaration then 
-            match variableInBlockScopeByName fv name false with 
-            | ScopeSearchResult.Found other ->
-                emitVAR03diagnostics (varValue.Type(SignatureType.Mixed)) other.QualifiedStartPos varValue.StartPos varValue.EndPos
-            | _ -> 
-                let rec getLocalization (fValue:FplValue) = 
-                    match fValue with
-                    | :? FplLocalization -> fValue
-                    | _ ->
-                        match fValue.Parent with
-                        | Some parent -> getLocalization parent
-                        | None -> fValue
-                let loc = getLocalization fv
-                loc.Scope.Add(name, varValue)
-                // Add the variable to the reference in the localization
-                variableStack.PushEvalStack(varValue)
-                variableStack.PopEvalStack()
-        else
-            match variableInBlockScopeByName fv name true with 
-            | ScopeSearchResult.Found other -> 
-                match fv with
-                | :? FplReference ->
-                    if not (fv.Scope.ContainsKey(name)) then
-                        fv.Scope.Add(name, other)
-                | _ -> ()
-                // count usages of the variable in scope
-                other.AuxiliaryInfo <- other.AuxiliaryInfo + 1
-            | _ -> 
-                // otherwise emit variable not declared if this is not a declaration 
-                emitVAR01diagnostics name pos1 pos2
-                if fv.Name = PrimRefL then 
-                    // for references, still add the variable to the scope of the reference. 
-                    // It will then be treated as a "variable" that is undefined
-                    fv.Scope.Add(name, varValue)
+        match fv.Name with 
+        | PrimVariableL
+        | PrimVariableManyL
+        | PrimVariableMany1L -> 
+            // in the context of variable declarations, we set the name and positions of the variables
             fv.FplId <- name
-            fv.TypeId <- LiteralUndef
-        ad.DiagnosticsStopped <- diagnosticsStopFlag
+            fv.StartPos <- pos1
+            fv.EndPos <- pos2
+        | PrimExtensionL -> 
+            let newVar = new FplVariable((pos1, pos2), fv)
+            newVar.FplId <- name
+            variableStack.PushEvalStack(newVar)
+            variableStack.PopEvalStack()
+        | _ -> 
+            // in all other contexts, check by name, if this variable was declared in some scope
+            let rec IsInUpperScope (fv1: FplValue): FplVariable option =
+                if fv1.Name = PrimTheoryL then 
+                    None
+                elif fv1.Scope.ContainsKey(name) then
+                    Some (fv1.Scope[name] :?> FplVariable)
+                else
+                    IsInUpperScope fv1.Parent.Value
+            match IsInUpperScope fv with
+            | Some foundVar -> 
+                // it was declared in the scope
+                match fv.Name with 
+                | PrimRefL ->
+                    // for references, add to the reference's scope
+                    fv.Scope.Add(name, foundVar)
+                | _ -> ()
+            | _ ->
+                // otherwise emit variable not declared 
+                emitVAR01diagnostics name pos1 pos2
+                match fv.Name with 
+                | PrimRefL ->
+                    // name the reference to a non-existing variable
+                    // and set its variable to an undefined one
+                    fv.FplId <- name
+                    let undefVar = new FplVariable((pos1, pos2), fv)
+                    let undefined = new FplIntrinsicUndef((pos1, pos2), undefVar)
+                    undefVar.SetValue(undefined)
+                    variableStack.PushEvalStack(undefVar)
+                    variableStack.PopEvalStack()
+                | _ -> ()
+
+        if isLocalizationDeclaration && fv.IsVariable() then 
+            let rec getLocalization (fValue:FplValue) = 
+                match fValue with
+                | :? FplLocalization -> fValue
+                | _ ->
+                    match fValue.Parent with
+                    | Some parent -> getLocalization parent
+                    | None -> fValue
+            let loc = getLocalization fv
+            if loc.Scope.ContainsKey(name) then 
+                let other = loc.Scope[name]
+                emitVAR03diagnostics name other.QualifiedStartPos pos1 pos2
+            else 
+                loc.Scope.Add(name, fv)
+
+        //if isExtensionDeclaration then 
+        //    fv.Scope.Add(name, varValue)
+
+        //else
+        //    match variableInBlockScopeByName fv name true with 
+        //    | ScopeSearchResult.Found other -> 
+        //        match fv with
+        //        | :? FplReference ->
+        //            if not (fv.Scope.ContainsKey(name)) then
+        //                fv.Scope.Add(name, other)
+        //        | _ -> ()
+        //        // count usages of the variable in scope
+        //        other.AuxiliaryInfo <- other.AuxiliaryInfo + 1
+        //    | _ -> 
+        //        // otherwise emit variable not declared if this is not a declaration 
+        //        emitVAR01diagnostics name pos1 pos2
+        //        if fv.Name = PrimRefL then 
+        //            // for references, still add the variable to the scope of the reference. 
+        //            // It will then be treated as a "variable" that is undefined
+        //            fv.Scope.Add(name, varValue)
+        //    fv.FplId <- name
+        //    fv.TypeId <- LiteralUndef
         st.EvalPop() 
     | Ast.DelegateId((pos1, pos2), s) -> 
         st.EvalPush("DelegateId")
@@ -1690,22 +1715,24 @@ let rec eval (st: SymbolTable) ast =
             emitID007Diagnostics fv.StartPos fv.EndPos (fv.Type(SignatureType.Type)) listOfKandidates  
         | _ -> ()
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
-        // now, we are ready to emit VAR03 diagnostics for all variables declared in the signature of the corollary.
-        emitVAR03diagnosticsForCorollaryOrProofVariable fv  
-        emitVAR04diagnostics fv
         variableStack.PopEvalStack()
+        // now, we are ready to emit VAR03 diagnostics for all variables declared in the signature of the corollary.
+        emitVAR04diagnostics fv
         st.EvalPop()
     // | NamedVarDecl of Positions * ((Ast list * Ast) * Ast)
     | Ast.NamedVarDecl((pos1, pos2), ((variableListAst, varDeclModifierAst), variableTypeAst)) ->
         st.EvalPush("NamedVarDecl")
-        let fv = variableStack.PeekEvalStack()
-        fv.AuxiliaryInfo <- variableListAst |> List.length // remember how many variables to create
+        let parent = variableStack.PeekEvalStack()
+        parent.AuxiliaryInfo <- variableListAst |> List.length // remember how many variables to create
         // create all variables of the named variable declaration in the current scope
         variableListAst |> List.iter (fun varAst ->
-            eval st varAst // here, the var is created and put on stack, but not popped
+            let newVar = new FplVariable((pos1, pos2), parent)
+            newVar.IsSignatureVariable <- variableStack.InSignatureEvaluation
+            variableStack.PushEvalStack(newVar)
+            eval st varAst 
             eval st varDeclModifierAst
             eval st variableTypeAst
-            variableStack.PopEvalStack() // take the var from stack 
+            variableStack.PopEvalStack()
         ) |> ignore 
         st.EvalPop()
     // | Axiom of Constructor * (Ast * (Ast list option * Ast))
@@ -1838,8 +1865,7 @@ let rec eval (st: SymbolTable) ast =
             emitID004Diagnostics (fv.Type(SignatureType.Type)) listOfKandidates fv.StartPos fv.EndPos
         | _ -> ()
         proofArgumentListAst |> List.map (eval st) |> ignore
-        // now, we are ready to emit VAR03 diagnostics for all variables declared in the signature of the proof.
-        emitVAR03diagnosticsForCorollaryOrProofVariable fv  
+        variableStack.PopEvalStack()
         optQedAst |> Option.map (eval st) |> Option.defaultValue ()
         emitVAR04diagnostics fv
         let value = new FplIntrinsicPred((pos1,pos1), fv)
@@ -1857,7 +1883,6 @@ let rec eval (st: SymbolTable) ast =
             | _ -> () // todo argumentinference not found
         )
         fv.ValueList.Add(value)
-        variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.Precedence((pos1, pos2), precedence) ->
         st.EvalPush("Precedence")

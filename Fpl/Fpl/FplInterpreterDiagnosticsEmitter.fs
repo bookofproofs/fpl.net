@@ -62,23 +62,6 @@ let emitID016diagnostics name (self:FplValue) =
     ad.AddDiagnostic diagnostic
 
 
-
-let emitVAR03diagnosticsForCorollaryOrProofVariable (fplValue: FplValue) =
-    match fplValue with 
-    | :? FplProof 
-    | :? FplCorollary ->
-        fplValue.Scope
-        |> Seq.filter (fun kv -> kv.Value.IsVariable())
-        |> Seq.iter (fun kv -> 
-            let res = variableInBlockScopeByName (kv.Value) (kv.Value.Type(SignatureType.Mixed)) false
-            match res with
-            | ScopeSearchResult.Found conflict -> 
-                let fv = kv.Value
-                emitVAR03diagnostics (fv.Type(SignatureType.Mixed)) (conflict.QualifiedStartPos) fv.StartPos fv.EndPos
-            | _ -> ()
-        )
-    | _ -> ()
-
 let getVAR04diagnostic (fv:FplValue) name = 
     { 
         Diagnostic.Uri = ad.CurrentUri

@@ -3042,6 +3042,8 @@ type FplQuantorExistsN(positions: Positions, parent: FplValue) as this =
 type FplVariable(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
     let mutable _variadicType = String.Empty // "" = variable, "many" = many, "many1" = many1 
+
+
     override this.Name = 
         match _variadicType with
         | "many" -> PrimVariableManyL
@@ -3154,7 +3156,7 @@ type FplVariable(positions: Positions, parent: FplValue) =
             else
                 block.Scope.Add(this.FplId, this)
         
-        let addToProperty (property:FplValue) = 
+        let addToPropertyOrConstructor (property:FplValue) = 
             let parentOfProperty = property.Parent.Value
             if property.Scope.ContainsKey(this.FplId) then
                 emitVAR03diagnostics this.FplId property.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos
@@ -3184,34 +3186,49 @@ type FplVariable(positions: Positions, parent: FplValue) =
             if not (conflictInScope proofOrCorollary) then
                 proofOrCorollary.Scope.Add(this.FplId, this)
 
+        let addToVariableOrQuantorOrMapping (variableOrQuantor:FplValue) =
+            let rec conflictInScope (node:FplValue) =
+                if node.Scope.ContainsKey(this.FplId) then
+                    emitVAR03diagnostics this.FplId node.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos
+                    true
+                else 
+                    let parent = node.Parent.Value
+                    match parent.Name with
+                    | PrimTheoryL -> false
+                    | _ ->
+                        conflictInScope parent
+
+            if not (conflictInScope variableOrQuantor) then
+                variableOrQuantor.Scope.Add(this.FplId, this)
 
         match nextOpt with 
-        | Some next when (  next.Name = LiteralAxL 
+        | Some next when ( next.Name = LiteralAxL 
                         || next.Name = LiteralThmL 
                         || next.Name = LiteralLemL 
                         || next.Name = LiteralPropL 
                         || next.Name = LiteralConjL 
                         || next.Name = PrimClassL 
                         || next.Name = PrimFuncionalTermL
-                        || next.Name = PrimPredicateL) ->
+                        || next.Name = PrimPredicateL
+                        || next.Name = PrimExtensionL ) ->
             addToSimpleFplBlocksScope next
         | Some next when next.Name = PrimRuleOfInference ->
             addToRuleOfInference next
-        | Some next when (  next.Name = PrimMandatoryFunctionalTermL 
+        | Some next when ( next.Name = LiteralCtorL
+                        || next.Name = PrimMandatoryFunctionalTermL 
                         || next.Name = PrimMandatoryPredicateL 
                         || next.Name = PrimOptionalPredicateL
                         || next.Name = PrimOptionalFunctionalTermL) ->
-            addToProperty next
+            addToPropertyOrConstructor next
         | Some next when (next.Name = LiteralPrfL 
                         || next.Name = LiteralCorL) ->
             addToProofOrCorolllary next
-        | Some next when next.IsBlock() ->
-            this.TryAddToParentsScope()
         | Some next when next.IsVariable() ->
-            this.TryAddToParentsScope()
-        | Some next when next.Name = PrimMappingL ->  
-            this.TryAddToParentsScope()
+            addToVariableOrQuantorOrMapping next
+        | Some next when next.Name = PrimMappingL ->
+            addToVariableOrQuantorOrMapping next
         | Some next when next.Name = PrimQuantorAll || next.Name = PrimQuantorExists || next.Name = PrimQuantorExistsN ->  
+            addToVariableOrQuantorOrMapping next
             if next.Scope.ContainsKey(this.FplId) then
                 emitVAR02diagnostics this.FplId this.StartPos this.EndPos
             elif next.Name = PrimQuantorExistsN && next.Scope.Count>0 then 
