@@ -61,47 +61,6 @@ let emitID016diagnostics name (self:FplValue) =
         }
     ad.AddDiagnostic diagnostic
 
-let emitVAR01diagnostics name pos1 pos2 =
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = pos1
-            Diagnostic.EndPos = pos2
-            Diagnostic.Code = VAR01 name
-            Diagnostic.Alternatives = None 
-        }
-
-    ad.AddDiagnostic diagnostic
-
-let emitVAR03diagnostics (fplValue: FplValue) (conflict: FplValue) =
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = fplValue.StartPos
-            Diagnostic.EndPos = fplValue.EndPos
-            Diagnostic.Code = VAR03(fplValue.Type(SignatureType.Mixed), conflict.QualifiedStartPos)
-            Diagnostic.Alternatives = Some "Remove this variable declaration or rename the variable." 
-        }
-
-    ad.AddDiagnostic diagnostic
-
-let emitVAR03diagnosticsForCorollaryOrProofVariable (fplValue: FplValue) =
-    match fplValue with 
-    | :? FplProof 
-    | :? FplCorollary ->
-        fplValue.Scope
-        |> Seq.filter (fun kv -> kv.Value.IsVariable())
-        |> Seq.iter (fun kv -> 
-            let res = variableInBlockScopeByName (kv.Value) (kv.Value.Type(SignatureType.Mixed)) false
-            match res with
-            | ScopeSearchResult.Found conflict -> emitVAR03diagnostics kv.Value conflict
-            | _ -> ()
-        )
-    | _ -> ()
 
 let getVAR04diagnostic (fv:FplValue) name = 
     { 
@@ -139,51 +98,6 @@ let emitVAR05diagnostics (fv:FplValue) =
         ad.AddDiagnostic diagnostic
     )
     |> ignore
-
-let emitID005diagnostics (fplValue: FplValue) incorrectBlockType =
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = fplValue.StartPos
-            Diagnostic.EndPos = fplValue.EndPos
-            Diagnostic.Code = ID005(fplValue.Type(SignatureType.Type), incorrectBlockType)
-            Diagnostic.Alternatives =
-                Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary), a conjecture, or an axiom." 
-         }
-
-    ad.AddDiagnostic diagnostic
-
-let emitID003diagnostics (fplValue: FplValue) =
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = fplValue.StartPos
-            Diagnostic.EndPos = fplValue.EndPos
-            Diagnostic.Code = ID003 (fplValue.Type(SignatureType.Type))
-            Diagnostic.Alternatives = 
-                Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary)." 
-        }
-
-    ad.AddDiagnostic diagnostic
-
-let emitID006diagnostics (fplValue: FplValue) =
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = fplValue.StartPos
-            Diagnostic.EndPos = fplValue.EndPos
-            Diagnostic.Code = ID006 (fplValue.Type(SignatureType.Type))
-            Diagnostic.Alternatives =
-                Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary), a conjecture, or an axiom." 
-        }
-
-    ad.AddDiagnostic diagnostic
 
 let checkVAR00Diagnostics numberOfVariadicVars startPos endPos =
     if numberOfVariadicVars > 1 then

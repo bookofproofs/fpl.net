@@ -40,7 +40,6 @@ let emitID001Diagnostics alreadyDeclaredTypeStr qualifiedStartPosConflictStr pos
             Diagnostic.Code = ID001(alreadyDeclaredTypeStr, qualifiedStartPosConflictStr)
             Diagnostic.Alternatives = None 
         }
-
     ad.AddDiagnostic diagnostic
 
 let emitID002Diagnostics nodeTypeName incorrectBlockType pos1 pos2 =
@@ -66,6 +65,51 @@ let emitID004Diagnostics nodeTypeName listOfCandidates pos1 pos2 =
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ID004(nodeTypeName, listOfCandidates)
             Diagnostic.Alternatives = Some "Disambiguate the candidates by naming them differently." 
+        }
+    ad.AddDiagnostic diagnostic
+
+
+let emitID003diagnostics name pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ID003 name
+            Diagnostic.Alternatives = 
+                Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary)." 
+        }
+    ad.AddDiagnostic diagnostic
+
+let emitID005diagnostics name incorrectBlockType pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ID005(name, incorrectBlockType)
+            Diagnostic.Alternatives =
+                Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary), a conjecture, or an axiom." 
+         }
+
+    ad.AddDiagnostic diagnostic
+
+
+let emitID006diagnostics name pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ID006 name
+            Diagnostic.Alternatives =
+                Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary), a conjecture, or an axiom." 
         }
     ad.AddDiagnostic diagnostic
 
@@ -200,6 +244,19 @@ let emitID023Diagnostics multipleCandidates pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
 
+let emitID024Diagnostics alreadyLocalizedExpr qualifiedStartPosConflictStr pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ID024(alreadyLocalizedExpr, qualifiedStartPosConflictStr)
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
 let emitLG002diagnostic nodeTypeName times pos1 pos2 = 
     let diagnostic =
         { 
@@ -262,7 +319,6 @@ let emitLG005Diagnostics name pos1 pos2 =
             Diagnostic.Code = LG005 name
             Diagnostic.Alternatives = Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary)." 
         }
-
     ad.AddDiagnostic diagnostic
 
 let emitPR000Diagnostics incorrectBlockType pos1 pos2 =
@@ -535,6 +591,46 @@ let emitSIG05Diagnostics assigneeTypeStr assignedTypeStr pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
         
+let emitVAR01diagnostics name pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = VAR01 name
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
+let emitVAR02diagnostics name pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = VAR02 name
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
+let emitVAR03diagnostics mixedName conflictStartPos pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = VAR03(mixedName, conflictStartPos)
+            Diagnostic.Alternatives = Some "Remove this variable declaration or rename the variable." 
+        }
+
+    ad.AddDiagnostic diagnostic
+
 let emitVAR06iagnostic name parentClass pos = 
     let diagnostic =
         { 
@@ -544,6 +640,32 @@ let emitVAR06iagnostic name parentClass pos =
             Diagnostic.StartPos = pos
             Diagnostic.EndPos = pos
             Diagnostic.Code = VAR06(name,parentClass)
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
+let emitVAR07diagnostics name pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = VAR07 name
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
+let emitVAR08diagnostics pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = VAR08
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic

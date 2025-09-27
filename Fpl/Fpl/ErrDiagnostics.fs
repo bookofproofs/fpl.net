@@ -127,6 +127,7 @@ type DiagnosticCode =
     | ID020 of string 
     | ID021 of string 
     | ID023 of string 
+    | ID024 of string * string
     // logic-related error codes
     | LG000 of string * string 
     | LG001 of string * string * string
@@ -162,10 +163,13 @@ type DiagnosticCode =
     // variable-related error codes
     | VAR00 
     | VAR01 of string 
+    | VAR02 of string 
     | VAR03 of string * string
     | VAR04 of string 
     | VAR05 of string 
     | VAR06 of string * string
+    | VAR07 of string 
+    | VAR08 
     member this.Code = 
         match this with
             // parser error messages
@@ -232,6 +236,7 @@ type DiagnosticCode =
             | ID020 _ -> "ID020"
             | ID021 _ -> "ID021"
             | ID023 _ -> "ID023"
+            | ID024 _ -> "ID024<"
             // logic-related error codes
             | LG000 _ -> "LG000"
             | LG001 _ -> "LG001"
@@ -267,10 +272,13 @@ type DiagnosticCode =
             // variable-related error codes
             | VAR00 -> "VAR00"
             | VAR01 _  -> "VAR01"
+            | VAR02 _  -> "VAR02"
             | VAR03 _  -> "VAR03"
             | VAR04 _  -> "VAR04"
             | VAR05 _  -> "VAR05"
             | VAR06 _  -> "VAR06"
+            | VAR07 _  -> "VAR07"
+            | VAR08 -> "VAR08"
     member this.Message = 
         match this with
             // parser error messages
@@ -314,7 +322,7 @@ type DiagnosticCode =
             | NSP03 alias -> sprintf "Alias `%s` appeared previously in this namespace" alias
             | NSP04 path -> sprintf "Circular theory reference detected: `%s`" path
             | NSP05 (pathTypes, theory, chosenSource) -> sprintf "Multiple sources %A for theory %s detected (%s was chosen)." pathTypes theory chosenSource
-            // identifier-related error codes 
+             // identifier-related error codes 
             | ID001 (signature, conflict) -> sprintf "Signature `%s` was already declared at %s." signature conflict
             | ID002 (signature, incorrectBlockType) -> sprintf "Cannot find a block to be associated with the proof %s, found only %s." signature incorrectBlockType
             | ID003 signature -> sprintf "The proof `%s` is missing a block to be associated with." signature 
@@ -345,6 +353,8 @@ type DiagnosticCode =
             | ID020 name -> sprintf "Missing call of base constructor `%s`." name
             | ID021 name -> sprintf "Duplicate call of base constructor `%s`." name
             | ID023 candidates  -> $"Cannot associate a justification with a single block. Found more candidates: {candidates}." 
+            | ID024 (signature, conflict) -> sprintf "Expression `%s` was already localized at %s." signature conflict
+
             // logic-related error codes
             | LG000 (typeOfPredicate,argument) -> $"Cannot evaluate `{typeOfPredicate}`; its argument `{argument}` is a predicate but couldn't be determined."
             | LG001 (typeOfPredicate,argument,typeOfExpression) -> $"Cannot evaluate `{typeOfPredicate}`; expecting a predicate argument `{argument}`, got `{typeOfExpression}`."
@@ -356,8 +366,8 @@ type DiagnosticCode =
             | PR000 incorrectBlockType -> $"Cannot find a justifying `by definition`, found {incorrectBlockType} instead."
             | PR001 incorrectBlockType -> $"Cannot find a justifying `other proof argument`, found {incorrectBlockType} instead."
             | PR002 incorrectBlockType -> $"Cannot find a justifying theorem-like statement or rule of inference, found {incorrectBlockType} instead." 
-            | PR003 (name, conflict) -> sprintf "Argument identifier `%s` was already declared at %s." name conflict
-            | PR004 (name, conflict)  -> sprintf "Justification `%s` was already declared at %s." name conflict
+            | PR003 (name, conflict) -> $"Argument identifier `{name}` was already declared at {conflict}."  
+            | PR004 (name, conflict)  -> $"Justification `{name}` was already declared at {conflict}." 
             | PR005 name ->  $"Argument identifier `{name}` not declared in this proof."
             | PR006 (proofName, argumentName)->  $"A proof {proofName} was found, but there ít has no argument with the name `{argumentName}`."
             | PR007 (nodeTypeName, nodeName) ->  $"{nodeTypeName} is {nodeName} and is missing a proof."
@@ -387,11 +397,14 @@ type DiagnosticCode =
             | SIG05 (assigneeType, assignedType) -> $"Cannot assign type `{assignedType}` to type `{assigneeType}`."
             // variable-related error codes
             | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
-            | VAR01 name ->  sprintf $"Variable `{name}` not declared in this scope."
+            | VAR01 name -> $"Variable `{name}` not declared in this scope."
+            | VAR02 name -> $"Variable `{name}` was already bound in this quantor."
             | VAR03 (identifier, conflict) -> sprintf "Variable `%s` was already declared in the scope of the associated block at %s" identifier conflict
-            | VAR04 name ->  sprintf $"Declared variable `{name}` not used in this scope."
-            | VAR05 name ->  sprintf $"Bound variable `{name}` not used in this quantor."
-            | VAR06 (name, parentClass) ->  sprintf $"Variable `{name}` of the parent class `{parentClass}` will be shadowed by a local variable with the same name in this scope."
+            | VAR04 name -> $"Declared variable `{name}` not used in this scope."
+            | VAR05 name -> $"Bound variable `{name}` was not used in this quantor."
+            | VAR06 (name, parentClass) -> $"Variable `{name}` of the parent class `{parentClass}` will be shadowed by a local variable with the same name in this scope."
+            | VAR07 name -> $"The {PrimQuantorExistsN} accepts only one bound variable `{name}`."
+            | VAR08 -> "Variadic variables cannot be bound in a quantor."
 
 /// Computes an MD5 checksum of a string
 let computeMD5Checksum (input: string) =

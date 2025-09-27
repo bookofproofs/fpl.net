@@ -213,7 +213,7 @@ def func Sum2(list:* Nat)->Nat
 }
 
 
-def func Sum(arr:*Nat) -> Nat
+def func Sum3(arr:*Nat) -> Nat
 {
     dec
         ~addend, result: Nat
