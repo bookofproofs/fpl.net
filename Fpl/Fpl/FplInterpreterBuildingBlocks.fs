@@ -332,6 +332,7 @@ let rec eval (st: SymbolTable) ast =
                 | PrimRefL ->
                     // for references, add to the reference's scope
                     fv.Scope.Add(name, foundVar)
+                    fv.FplId <- name
                 | _ -> ()
             | _ ->
                 // otherwise emit variable not declared 

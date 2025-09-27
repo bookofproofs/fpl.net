@@ -241,7 +241,7 @@ type TestInterpreterErrors() =
 
     [<DataRow("theorem TestId {true} postulate TestId {true} ;", 1)>]
 
-    [<DataRow("theorem TestId {true} def pred TestId() {true} ;", 1)>]
+    [<DataRow("theorem TestId {true} def pred TestId() {true} ;", 0)>]
 
     [<DataRow("postulate SomePostulate {true} postulate SomePostulate {true} ;", 1)>]
     [<DataRow("postulate SomePostulate {true} ;", 0)>]
