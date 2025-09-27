@@ -334,6 +334,7 @@ let rec eval (st: SymbolTable) ast =
                     fv.Scope.Add(name, foundVar)
                     fv.FplId <- name
                 | _ -> ()
+                foundVar.AuxiliaryInfo <- foundVar.AuxiliaryInfo + 1
             | _ ->
                 // otherwise emit variable not declared 
                 emitVAR01diagnostics name pos1 pos2

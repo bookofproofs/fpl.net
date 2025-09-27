@@ -1037,8 +1037,9 @@ let tryAddToParentUsingFplId (fplValue:FplValue) =
     let conflicts = 
         root.OrderedTheories
         |> Seq.map (fun theory -> 
-            theory.Scope.Values
-            |> Seq.filter (fun fv -> fv.FplId = identifier)
+            theory.Scope
+            |> Seq.filter (fun kvp -> kvp.Key = identifier)
+            |> Seq.map (fun kvp -> kvp.Value)
         )
         |> Seq.concat
         |> Seq.toList
@@ -1056,8 +1057,9 @@ let tryAddToParentUsingMixedSignature (fplValue:FplValue) =
     let conflicts = 
         root.OrderedTheories
         |> Seq.map (fun theory -> 
-            theory.Scope.Values
-            |> Seq.filter (fun fv -> fv.Type SignatureType.Mixed = identifier)
+            theory.Scope
+            |> Seq.filter (fun kvp -> kvp.Key = identifier)
+            |> Seq.map (fun kvp -> kvp.Value)
         )
         |> Seq.concat
         |> Seq.toList
@@ -1716,8 +1718,6 @@ type FplCorollary(positions: Positions, parent: FplValue, runOrder) =
         | ScopeSearchResult.NotFound ->
             emitID006diagnostics this.FplId this.StartPos this.EndPos
             tryAddToParentUsingFplId this
-        | ScopeSearchResult.FoundMultiple listOfKandidates ->
-            emitID007Diagnostics this.StartPos this.EndPos (this.Type(SignatureType.Type)) listOfKandidates  
         | _ -> ()
 
 
@@ -2192,8 +2192,6 @@ and FplProof(positions: Positions, parent: FplValue, runOrder) =
         | ScopeSearchResult.NotFound ->
             emitID003diagnostics this.FplId this.StartPos this.EndPos
             tryAddToParentUsingFplId this
-        | ScopeSearchResult.FoundMultiple listOfKandidates ->
-            emitID004Diagnostics (this.Type(SignatureType.Type)) listOfKandidates this.StartPos this.EndPos
         | _ -> ()
 
     override this.RunOrder = Some _runOrder

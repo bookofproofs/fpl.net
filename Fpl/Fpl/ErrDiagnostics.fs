@@ -108,10 +108,8 @@ type DiagnosticCode =
     | ID001 of string * string
     | ID002 of string * string
     | ID003 of string
-    | ID004 of string * string
     | ID005 of string * string
     | ID006 of string
-    | ID007 of string * string
     | ID008 of string * string
     | ID009 of string
     | ID010 of string
@@ -217,10 +215,8 @@ type DiagnosticCode =
             | ID001 _ -> "ID001"
             | ID002 _ -> "ID002"
             | ID003 _ -> "ID003"
-            | ID004 _ -> "ID004"
             | ID005 _ -> "ID005"
             | ID006 _ -> "ID006"
-            | ID007 _ -> "ID007"
             | ID008 _ -> "ID008"
             | ID009 _ -> "ID009"
             | ID010 _ -> "ID010"
@@ -323,16 +319,14 @@ type DiagnosticCode =
             | NSP04 path -> sprintf "Circular theory reference detected: `%s`" path
             | NSP05 (pathTypes, theory, chosenSource) -> sprintf "Multiple sources %A for theory %s detected (%s was chosen)." pathTypes theory chosenSource
              // identifier-related error codes 
-            | ID001 (signature, conflict) -> sprintf "Signature `%s` was already declared at %s." signature conflict
-            | ID002 (signature, incorrectBlockType) -> sprintf "Cannot find a block to be associated with the proof %s, found only %s." signature incorrectBlockType
-            | ID003 signature -> sprintf "The proof `%s` is missing a block to be associated with." signature 
-            | ID004 (signature, candidates)  -> sprintf "Cannot associate proof `%s` with a single block. Found more candidates: %s." signature candidates
-            | ID005 (signature, incorrectBlockType) -> sprintf "Cannot find a block to be associated with the corollary `%s`, found only %s." signature incorrectBlockType
-            | ID006 signature -> sprintf "The corollary `%s` is missing a block to be associated with." signature 
-            | ID007 (signature, candidates)  -> sprintf "Cannot associate corollary `%s` with a single block. Found more candidates: %s." signature candidates
+            | ID001 (signature, conflict) -> $"Signature `{signature}` was already declared at {conflict}."  
+            | ID002 (signature, incorrectBlockType) -> $"Cannot find a block to be associated with the proof `{signature}`, found only {incorrectBlockType}."  
+            | ID003 signature -> $"The proof `{signature}` is missing a block to be associated with."  
+             | ID005 (signature, incorrectBlockType) -> $"Cannot find a block to be associated with the corollary `{signature}`, found only {incorrectBlockType}."  
+            | ID006 signature -> $"The corollary `{signature}` is missing a block to be associated with."  
             | ID008 (constructorId, classId)  -> $"Misspelled constructor name `{constructorId}`, expecting `{classId}`."  
-            | ID009 name -> sprintf "Circular base type dependency involving `%s`." name
-            | ID010 name -> sprintf "The type `%s` could not be found. Are you missing a uses clause?" name
+            | ID009 name -> $"Circular base type dependency involving `{name}`." 
+            | ID010 name -> $"The type `{name}` could not be found. Are you missing a uses clause?" 
             | ID011 (name, inheritanceChain) -> $"Inheritance from `{name}` can be dropped because of the inheritance chain {inheritanceChain}."  
             | ID012 (name, candidates) -> 
                 if candidates.Length > 0 then 

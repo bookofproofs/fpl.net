@@ -237,7 +237,7 @@ type TestInterpreterErrors() =
 
     [<DataRow("axiom TestId {true} postulate TestId {true} ;", 1)>]
 
-    [<DataRow("def pred TestId() {true} postulate TestId {true} ;", 1)>]
+    [<DataRow("def pred TestId() {true} postulate TestId {true} ;", 0)>]
 
     [<DataRow("theorem TestId {true} postulate TestId {true} ;", 1)>]
 
@@ -389,7 +389,7 @@ type TestInterpreterErrors() =
     [<DataRow("""def pred Equal(x,y: tpl) infix "=" 50 {intr} ;""", 0)>]
     [<DataRow("uses Fpl.Commons inf ModusPonens {pre:true con:true} ;", 1)>]
     [<DataRow("uses Fpl.Commons theorem ModusTollens {true} ;", 1)>]
-    [<DataRow("uses Fpl.Commons def pred HypotheticalSyllogism() {true} ;", 1)>]
+    [<DataRow("uses Fpl.Commons def pred HypotheticalSyllogism() {true} ;", 0)>]
     [<DataRow("uses Fpl.Commons axiom DisjunctiveSyllogism {true} ;", 1)>]
     [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
@@ -872,28 +872,6 @@ type TestInterpreterErrors() =
         else
             let code = ID006 ""
             runTestHelper "TestID006.fpl" fplCode code expected
-
-    [<DataRow("theorem Test {true} lemma Test {dec ~x:obj; true} proof Test$1 {1. |- trivial};", 1)>]
-    [<DataRow("theorem Test {dec ~x:ind; true} theorem Test {true} proof Test$1 {1. |- trivial};", 1)>]
-    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
-    [<TestMethod>]
-    member this.TestID004(fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
-            ()
-        else
-            let code = ID004 ("", "") 
-            runTestHelper "TestID004.fpl" fplCode code expected
-
-    [<DataRow("theorem Test {true} lemma Test {dec ~x:obj; true} corollary Test$1 {true};", 1)>]
-    [<DataRow("theorem Test {dec ~x:ind; true} theorem Test {true} corollary Test$1 {true};", 1)>]
-    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
-    [<TestMethod>]
-    member this.TestID007(fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
-            ()
-        else
-            let code = ID007 ("", "") 
-            runTestHelper "TestID007.fpl" fplCode code expected
 
     [<DataRow("def cl Test:obj {ctor TestTypo(x:Nat) {}};", 1)>]
     [<DataRow("def cl Test:obj {ctor TestTypo1() {}};", 1)>]

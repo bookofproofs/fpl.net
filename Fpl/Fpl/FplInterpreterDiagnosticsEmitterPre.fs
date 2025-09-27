@@ -55,20 +55,6 @@ let emitID002Diagnostics nodeTypeName incorrectBlockType pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
 
-let emitID004Diagnostics nodeTypeName listOfCandidates pos1 pos2 =
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = pos1
-            Diagnostic.EndPos = pos2
-            Diagnostic.Code = ID004(nodeTypeName, listOfCandidates)
-            Diagnostic.Alternatives = Some "Disambiguate the candidates by naming them differently." 
-        }
-    ad.AddDiagnostic diagnostic
-
-
 let emitID003diagnostics name pos1 pos2 =
     let diagnostic =
         { 
@@ -110,19 +96,6 @@ let emitID006diagnostics name pos1 pos2 =
             Diagnostic.Code = ID006 name
             Diagnostic.Alternatives =
                 Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary), a conjecture, or an axiom." 
-        }
-    ad.AddDiagnostic diagnostic
-
-let emitID007Diagnostics pos1 pos2 fplValueTypeStr listOfCandidates =
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = pos1
-            Diagnostic.EndPos = pos2
-            Diagnostic.Code = ID007(fplValueTypeStr, listOfCandidates)
-            Diagnostic.Alternatives = Some "Disambiguate the candidates by naming them differently." 
         }
     ad.AddDiagnostic diagnostic
 
