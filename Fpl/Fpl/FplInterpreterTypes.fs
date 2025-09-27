@@ -1067,6 +1067,15 @@ let tryAddToParentUsingMixedSignature (fplValue:FplValue) =
         let parent = fplValue.Parent.Value
         parent.Scope.Add(identifier, fplValue)
 
+// Tries to add a constructor or property to it's parent FPL block's scope using its mixed signature, or issues ID001 diagnostics if a conflict occurs
+let tryAddSubBlockToFplBlock (fplValue:FplValue) =
+    let identifier = fplValue.Type SignatureType.Mixed
+    let parent = fplValue.Parent.Value
+    if parent.Scope.ContainsKey(identifier) then 
+        emitID001Diagnostics identifier (parent.Scope[identifier].QualifiedStartPos) fplValue.StartPos fplValue.EndPos
+    else
+        parent.Scope.Add(identifier, fplValue)   
+
 // Tries to add an FPL block to its parent's scope using its named signature, or issues ID001 diagnostics if a conflict occurs
 let tryAddToParentUsingNamedSignature (fplValue:FplValue) =
     let identifier = fplValue.Type SignatureType.Name
@@ -1230,12 +1239,7 @@ type FplRuleOfInference(positions: Positions, parent: FplValue, runOrder) =
         // todo implement run
         emitLG004diagnostic this.Name this.Arity this.StartPos this.EndPos
 
-    override this.EmbedInSymbolTable _ = 
-        let theory = this.Parent.Value
-        if theory.Scope.ContainsKey(this.FplId) then
-            emitID001Diagnostics this.FplId (theory.Scope[this.FplId].QualifiedStartPos) this.StartPos this.EndPos
-        else
-            this.Scope.Add(this.FplId, this)
+    override this.EmbedInSymbolTable _ = tryAddToParentUsingFplId this
 
     override this.RunOrder = Some _runOrder
 
@@ -1301,13 +1305,7 @@ type FplConstructor(positions: Positions, parent: FplValue) =
     override this.Run _ = 
         this.SetValue(new FplInstance((this.StartPos, this.EndPos), this))
 
-    override this.EmbedInSymbolTable _ = 
-        let identifier = this.Type SignatureType.Mixed
-        let parent = this.Parent.Value
-        if parent.Scope.ContainsKey(identifier) then 
-            emitID001Diagnostics identifier (parent.Scope[identifier].QualifiedStartPos) this.StartPos this.EndPos
-        else
-            parent.Scope.Add(this.FplId, this)    
+    override this.EmbedInSymbolTable _ = tryAddSubBlockToFplBlock this
 
     member this.ParentClass = this.Parent.Value :?> FplClass
 
@@ -1495,13 +1493,7 @@ type FplMandatoryPredicate(positions: Positions, parent: FplValue) =
 
     override this.IsBlock () = true
 
-    override this.EmbedInSymbolTable _ = 
-        let identifier = this.Type SignatureType.Mixed
-        let parent = this.Parent.Value
-        if parent.Scope.ContainsKey(identifier) then 
-            emitID001Diagnostics identifier (parent.Scope[identifier].QualifiedStartPos) this.StartPos this.EndPos
-        else
-            parent.Scope.Add(this.FplId, this)    
+    override this.EmbedInSymbolTable _ = tryAddSubBlockToFplBlock this
 
     override this.Run variableStack = 
         // todo implement run
@@ -1532,14 +1524,7 @@ type FplOptionalPredicate(positions: Positions, parent: FplValue) =
         let paramT = getParamTuple this signatureType
         sprintf "%s(%s)" head paramT
 
-    override this.EmbedInSymbolTable _ = 
-        let identifier = this.Type SignatureType.Mixed
-        let parent = this.Parent.Value
-        if parent.Scope.ContainsKey(identifier) then 
-            emitID001Diagnostics identifier (parent.Scope[identifier].QualifiedStartPos) this.StartPos this.EndPos
-        else
-            parent.Scope.Add(this.FplId, this)
-
+    override this.EmbedInSymbolTable _ = tryAddSubBlockToFplBlock this
 
     override this.Run variableStack = 
         // todo implement run
@@ -1670,6 +1655,70 @@ type FplCorollary(positions: Positions, parent: FplValue, runOrder) =
         let ret = new FplCorollary((this.StartPos, this.EndPos), this.Parent.Value, this.RunOrder.Value)
         this.AssignParts(ret)
         ret
+
+    override this.EmbedInSymbolTable _ =
+        /// Tries to find a theorem-like statement, a conjecture, or an axiom for a corollary
+        /// and returns different cases of ScopeSearchResult, depending on different semantical error situations.
+        let tryFindAssociatedBlockForCorollary (fplValue: FplValue) =
+            match fplValue.Parent with
+            | Some theory ->
+
+                let flattenedScopes = flattenScopes theory.Parent.Value
+
+                // The parent node of the proof is the theory. In its scope
+                // we should find the theorem we are looking for.
+                let buildingBlocksMatchingDollarDigitNameList =
+                    // the potential theorem name of the corollary is the
+                    // concatenated type signature of the name of the corollary
+                    // without the last dollar digit
+                    let potentialBlockName = stripLastDollarDigit (fplValue.Type(SignatureType.Mixed))
+
+                    flattenedScopes
+                    |> Seq.filter (fun fv -> fv.FplId = potentialBlockName)
+                    |> Seq.toList
+
+                let potentialBlockList =
+                    buildingBlocksMatchingDollarDigitNameList
+                    |> List.filter (fun fv -> isProvable fv || isAxiomOrConnjecture fv)
+
+                let notPotentialBlockList =
+                    buildingBlocksMatchingDollarDigitNameList
+                    |> List.filter (fun fv ->
+                        not (
+                            isProvable fv || isAxiomOrConnjecture fv
+                        ))
+
+                if potentialBlockList.Length > 1 then
+                    ScopeSearchResult.FoundMultiple(
+                        potentialBlockList
+                        |> List.map (fun fv -> sprintf "'%s' %s" fv.Name (fv.Type(SignatureType.Mixed)))
+                        |> String.concat ", "
+                    )
+                elif potentialBlockList.Length > 0 then
+                    let potentialTheorem = potentialBlockList.Head
+                    ScopeSearchResult.FoundAssociate potentialTheorem
+                elif notPotentialBlockList.Length > 0 then
+                    let potentialOther = notPotentialBlockList.Head
+                    ScopeSearchResult.FoundIncorrectBlock (qualifiedName potentialOther)
+                else
+                    ScopeSearchResult.NotFound
+            | None -> ScopeSearchResult.NotApplicable
+
+
+        match tryFindAssociatedBlockForCorollary this with
+        | ScopeSearchResult.FoundAssociate potentialParent -> 
+            // everything is ok, change the parent of the provable from theory to the found parent 
+            this.Parent <- Some potentialParent
+            tryAddToParentUsingFplId this
+        | ScopeSearchResult.FoundIncorrectBlock incorrectBlock ->
+            emitID005diagnostics this.FplId incorrectBlock this.StartPos this.EndPos
+        | ScopeSearchResult.NotFound ->
+            emitID006diagnostics this.FplId this.StartPos this.EndPos
+            tryAddToParentUsingFplId this
+        | ScopeSearchResult.FoundMultiple listOfKandidates ->
+            emitID007Diagnostics this.StartPos this.EndPos (this.Type(SignatureType.Type)) listOfKandidates  
+        | _ -> ()
+
 
 type FplConjecture(positions: Positions, parent: FplValue, runOrder) =
     inherit FplGenericPredicateWithExpression(positions, parent)
@@ -2136,14 +2185,15 @@ and FplProof(positions: Positions, parent: FplValue, runOrder) =
         | ScopeSearchResult.FoundAssociate potentialParent -> 
             // everything is ok, change the parent of the provable from theory to the found parent 
             this.Parent <- Some potentialParent
-        | ScopeSearchResult.FoundIncorrectBlock block ->
-            emitID002Diagnostics (this.Type(SignatureType.Type)) block this.StartPos this.EndPos
+            tryAddToParentUsingFplId this
+        | ScopeSearchResult.FoundIncorrectBlock incorrectBlock ->
+            emitID002Diagnostics this.FplId incorrectBlock this.StartPos this.EndPos
         | ScopeSearchResult.NotFound ->
             emitID003diagnostics this.FplId this.StartPos this.EndPos
+            tryAddToParentUsingFplId this
         | ScopeSearchResult.FoundMultiple listOfKandidates ->
             emitID004Diagnostics (this.Type(SignatureType.Type)) listOfKandidates this.StartPos this.EndPos
         | _ -> ()
-
 
     override this.RunOrder = Some _runOrder
 
@@ -3559,14 +3609,7 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) =
 
     override this.IsBlock () = true
 
-    override this.EmbedInSymbolTable _ = 
-        let identifier = this.Type SignatureType.Mixed
-        let parent = this.Parent.Value
-        if parent.Scope.ContainsKey(identifier) then 
-            emitID001Diagnostics identifier (parent.Scope[identifier].QualifiedStartPos) this.StartPos this.EndPos
-        else
-            parent.Scope.Add(this.FplId, this)
-
+    override this.EmbedInSymbolTable _ = tryAddSubBlockToFplBlock this
 
     override this.RunOrder = None
 
@@ -3587,14 +3630,7 @@ type FplOptionalFunctionalTerm(positions: Positions, parent: FplValue) =
 
     override this.IsBlock () = true
 
-    override this.EmbedInSymbolTable _ = 
-        let identifier = this.Type SignatureType.Mixed
-        let parent = this.Parent.Value
-        if parent.Scope.ContainsKey(identifier) then 
-            emitID001Diagnostics identifier (parent.Scope[identifier].QualifiedStartPos) this.StartPos this.EndPos
-        else
-            parent.Scope.Add(this.FplId, this)
-    
+    override this.EmbedInSymbolTable _ = tryAddSubBlockToFplBlock this
 
     override this.RunOrder = None
 
@@ -4167,58 +4203,6 @@ let variableInBlockScopeByName (fplValue: FplValue) name withNestedVariableSearc
                         ScopeSearchResult.NotFound
 
     firstBlockParent fplValue
-
-/// Tries to find a theorem-like statement, a conjecture, or an axiom for a corollary
-/// and returns different cases of ScopeSearchResult, depending on different semantical error situations.
-let tryFindAssociatedBlockForCorollary (fplValue: FplValue) =
-
-    match fplValue with 
-    | :? FplCorollary ->
-        match fplValue.Parent with
-        | Some theory ->
-
-            let flattenedScopes = flattenScopes theory.Parent.Value
-
-            // The parent node of the proof is the theory. In its scope
-            // we should find the theorem we are looking for.
-            let buildingBlocksMatchingDollarDigitNameList =
-                // the potential theorem name of the corollary is the
-                // concatenated type signature of the name of the corollary
-                // without the last dollar digit
-                let potentialBlockName = stripLastDollarDigit (fplValue.Type(SignatureType.Mixed))
-
-                flattenedScopes
-                |> Seq.filter (fun fv -> fv.FplId = potentialBlockName)
-                |> Seq.toList
-
-            let potentialBlockList =
-                buildingBlocksMatchingDollarDigitNameList
-                |> List.filter (fun fv -> isProvable fv || isAxiomOrConnjecture fv)
-
-            let notPotentialBlockList =
-                buildingBlocksMatchingDollarDigitNameList
-                |> List.filter (fun fv ->
-                    not (
-                        isProvable fv || isAxiomOrConnjecture fv
-                    ))
-
-            if potentialBlockList.Length > 1 then
-                ScopeSearchResult.FoundMultiple(
-                    potentialBlockList
-                    |> List.map (fun fv -> sprintf "'%s' %s" fv.Name (fv.Type(SignatureType.Mixed)))
-                    |> String.concat ", "
-                )
-            elif potentialBlockList.Length > 0 then
-                let potentialTheorem = potentialBlockList.Head
-                ScopeSearchResult.FoundAssociate potentialTheorem
-            elif notPotentialBlockList.Length > 0 then
-                let potentialOther = notPotentialBlockList.Head
-                ScopeSearchResult.FoundIncorrectBlock (qualifiedName potentialOther)
-            else
-                ScopeSearchResult.NotFound
-        | None -> ScopeSearchResult.NotApplicable
-    | _ ->
-        ScopeSearchResult.NotApplicable
 
 /// Tries to find a theorem-like statement, an axiom or a corollary
 /// and returns different cases of ScopeSearchResult, depending on different semantical error situations.

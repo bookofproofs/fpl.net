@@ -1701,17 +1701,6 @@ let rec eval (st: SymbolTable) ast =
         let fv = new FplCorollary((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
         variableStack.PushEvalStack(fv)
         eval st corollarySignatureAst
-        match tryFindAssociatedBlockForCorollary fv with
-        | ScopeSearchResult.FoundAssociate potentialParent -> 
-            // everything is ok, change the parent of the provable from theory to the found parent 
-            fv.Parent <- Some potentialParent
-        | ScopeSearchResult.FoundIncorrectBlock block ->
-            emitID005diagnostics fv block  
-        | ScopeSearchResult.NotFound ->
-            emitID006diagnostics fv  
-        | ScopeSearchResult.FoundMultiple listOfKandidates ->
-            emitID007Diagnostics fv.StartPos fv.EndPos (fv.Type(SignatureType.Type)) listOfKandidates  
-        | _ -> ()
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
         variableStack.PopEvalStack()
         // now, we are ready to emit VAR03 diagnostics for all variables declared in the signature of the corollary.

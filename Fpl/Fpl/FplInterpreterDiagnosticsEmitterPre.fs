@@ -83,6 +83,35 @@ let emitID003diagnostics name pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
 
+let emitID005diagnostics name incorrectBlockType pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ID005(name, incorrectBlockType)
+            Diagnostic.Alternatives =
+                Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary), a conjecture, or an axiom." 
+         }
+
+    ad.AddDiagnostic diagnostic
+
+
+let emitID006diagnostics name pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ID006 name
+            Diagnostic.Alternatives =
+                Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary), a conjecture, or an axiom." 
+        }
+    ad.AddDiagnostic diagnostic
 
 let emitID007Diagnostics pos1 pos2 fplValueTypeStr listOfCandidates =
     let diagnostic =
