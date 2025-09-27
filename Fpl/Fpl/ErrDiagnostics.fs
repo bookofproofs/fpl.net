@@ -127,6 +127,7 @@ type DiagnosticCode =
     | ID020 of string 
     | ID021 of string 
     | ID023 of string 
+    | ID024 of string * string
     // logic-related error codes
     | LG000 of string * string 
     | LG001 of string * string * string
@@ -235,6 +236,7 @@ type DiagnosticCode =
             | ID020 _ -> "ID020"
             | ID021 _ -> "ID021"
             | ID023 _ -> "ID023"
+            | ID024 _ -> "ID024<"
             // logic-related error codes
             | LG000 _ -> "LG000"
             | LG001 _ -> "LG001"
@@ -320,7 +322,7 @@ type DiagnosticCode =
             | NSP03 alias -> sprintf "Alias `%s` appeared previously in this namespace" alias
             | NSP04 path -> sprintf "Circular theory reference detected: `%s`" path
             | NSP05 (pathTypes, theory, chosenSource) -> sprintf "Multiple sources %A for theory %s detected (%s was chosen)." pathTypes theory chosenSource
-            // identifier-related error codes 
+             // identifier-related error codes 
             | ID001 (signature, conflict) -> sprintf "Signature `%s` was already declared at %s." signature conflict
             | ID002 (signature, incorrectBlockType) -> sprintf "Cannot find a block to be associated with the proof %s, found only %s." signature incorrectBlockType
             | ID003 signature -> sprintf "The proof `%s` is missing a block to be associated with." signature 
@@ -351,6 +353,8 @@ type DiagnosticCode =
             | ID020 name -> sprintf "Missing call of base constructor `%s`." name
             | ID021 name -> sprintf "Duplicate call of base constructor `%s`." name
             | ID023 candidates  -> $"Cannot associate a justification with a single block. Found more candidates: {candidates}." 
+            | ID024 (signature, conflict) -> sprintf "Expression `%s` was already localized at %s." signature conflict
+
             // logic-related error codes
             | LG000 (typeOfPredicate,argument) -> $"Cannot evaluate `{typeOfPredicate}`; its argument `{argument}` is a predicate but couldn't be determined."
             | LG001 (typeOfPredicate,argument,typeOfExpression) -> $"Cannot evaluate `{typeOfPredicate}`; expecting a predicate argument `{argument}`, got `{typeOfExpression}`."

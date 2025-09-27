@@ -114,20 +114,6 @@ let emitID005diagnostics (fplValue: FplValue) incorrectBlockType =
 
     ad.AddDiagnostic diagnostic
 
-let emitID003diagnostics (fplValue: FplValue) =
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = fplValue.StartPos
-            Diagnostic.EndPos = fplValue.EndPos
-            Diagnostic.Code = ID003 (fplValue.Type(SignatureType.Type))
-            Diagnostic.Alternatives = 
-                Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary)." 
-        }
-
-    ad.AddDiagnostic diagnostic
 
 let emitID006diagnostics (fplValue: FplValue) =
     let diagnostic =

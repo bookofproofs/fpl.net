@@ -399,12 +399,6 @@ type FplValue(positions: Positions, parent: FplValue option) =
 
     /// Generates a type string identifier or type-specific naming convention of this FplValue.
     abstract member Type: SignatureType -> string
-    
-    /// Adds this FplValue to its parent's ArgList, if such a Parent exists.
-    abstract member TryAddToParentsArgList: unit -> unit
-
-    /// Adds this FplValue to its parent's Scope, if such a Parent exists
-    abstract member TryAddToParentsScope: unit -> unit
 
     /// Embeds this FplValue in the SymbolTable by adding it to the Scope or as an argument of its predecessor in the SymbolTable.
     abstract member EmbedInSymbolTable: FplValue option -> unit
@@ -614,12 +608,6 @@ type FplValue(positions: Positions, parent: FplValue option) =
         this.ValueList.Clear()
         this.ValueList.AddRange(other.ValueList)
 
-    override this.TryAddToParentsArgList () = 
-        match this.Parent with 
-        | Some parent -> parent.ArgList.Add(this)
-        | _ -> ()
-              
-
     /// Qualified starting position of this FplValue
     member this.QualifiedStartPos =
         let rec getFullName (fv: FplValue) (first: bool) =
@@ -641,21 +629,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
 
         getFullName this true
 
-    /// Adds the FplValue to it's parent's Scope.
-    override this.TryAddToParentsScope () = 
-        let next = this.Parent.Value
-        let identifier = 
-            if this.IsBlock() then 
-                this.Type(SignatureType.Mixed)
-            elif this.IsVariable() then 
-                this.FplId
-            else
-                this.Type(SignatureType.Name)
-        match this.InScopeOfParent identifier with
-        | ScopeSearchResult.Found conflict -> 
-            emitID001Diagnostics (this.Type(SignatureType.Type)) conflict.QualifiedStartPos this.StartPos this.EndPos 
-        | _ -> 
-            next.Scope.Add(identifier,this)
+
 
     /// Checks if a block named name is in the scope of the fplValue' parent.
     member this.InScopeOfParent name =
@@ -862,6 +836,84 @@ and FplVariableStack() =
         _stack.Clear()
         _classCounters.Clear()
     
+// Create an FplValue list containing all Scopes of an FplNode
+let rec flattenScopes (root: FplValue) =
+    let rec helper (node: FplValue) (acc: FplValue list) =
+        let newAcc = node :: acc
+        node.Scope |> Seq.fold (fun acc kvp -> helper kvp.Value acc) newAcc
+
+    helper root []
+
+let stripLastDollarDigit (s: string) =
+    let lastIndex = s.LastIndexOf('$')
+    if lastIndex <> -1 then s.Substring(0, lastIndex) else s
+
+/// Qualified name of this FplValue
+let qualifiedName (fplValue:FplValue)=
+    let rec getFullName (fv: FplValue) (first: bool) =
+        let fplValueType =
+            match fv.Name with
+            | LiteralLocL
+            | PrimExclusiveOr 
+            | PrimConjunction
+            | PrimDisjunction 
+            | PrimNegation
+            | PrimImplication
+            | PrimEquivalence 
+            | PrimIsOperator 
+            | PrimExtensionObj 
+            | PrimEqualityL 
+            | PrimRefL -> fv.Type(SignatureType.Name)
+            | PrimQuantorAll
+            | PrimQuantorExists
+            | PrimQuantorExistsN
+            | PrimClassL
+            | PrimPredicateL
+            | PrimFuncionalTermL
+            | PrimOptionalFunctionalTermL
+            | PrimOptionalPredicateL
+            | PrimMandatoryPredicateL
+            | PrimMandatoryFunctionalTermL -> fv.Type(SignatureType.Mixed)
+            | _ -> fv.FplId
+
+        match fv.Name with
+        | PrimRoot -> ""
+        | _ -> 
+            if first then
+                if fv.Parent.Value.Name = PrimRoot then
+                    getFullName fv.Parent.Value false + fplValueType
+                else if fv.IsVariable() && not (fv.Parent.Value.IsVariable()) then
+                    fplValueType
+                else
+                    getFullName fv.Parent.Value false + "." + fplValueType
+            elif fv.Parent.Value.Name = PrimRoot then
+                getFullName fv.Parent.Value false + fplValueType
+            elif fv.IsVariable() && not (fv.Parent.Value.IsVariable()) then
+                fplValueType
+            else
+                getFullName fv.Parent.Value false + "." + fplValueType
+
+    getFullName fplValue true
+
+
+/// Checks if an fv is provable. This will only be true if
+/// it is a theorem, a lemma, a proposition, or a corollary
+let isProvable (fv: FplValue) =
+    match fv.Name with
+    | LiteralThmL
+    | LiteralLemL
+    | LiteralPropL
+    | LiteralCorL -> true
+    | _ -> false
+
+/// Checks if an fplValue is a conjecture or an axiom. This is used to decide whether or
+/// not it is not provable.
+let isAxiomOrConnjecture (fv:FplValue) = 
+    match fv.Name with
+    | LiteralConjL 
+    | LiteralAxL -> true
+    | _ -> false
+
 let private getFplHead (fv:FplValue) (signatureType:SignatureType) =
     match signatureType with
             | SignatureType.Name 
@@ -910,7 +962,11 @@ type FplTheory(positions: Positions, parent: FplValue, filePath: string, runOrde
     /// The RunOrder in which this theory is to be executed.
     override this.RunOrder = Some _runOrder
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope()
+    override this.EmbedInSymbolTable _ = 
+        let next = this.Parent.Value
+        // name conflicts of theories do not occur because of *.fpl file management 
+        // and file-names being namespace names
+        next.Scope.TryAdd(this.FplId, this) |> ignore
 
     /// Returns all Fpl Building Blocks that run on their own in this theory ordered by their RunOrder ascending.
     /// Only some of the building block run on their own in the theory, including axioms, theorems, lemmas, propositions, and conjectures.
@@ -948,13 +1004,12 @@ type FplRoot() =
 
     override this.Type _ = String.Empty
     override this.Represent () = LiteralUndef
-    override this.TryAddToParentsArgList () = () 
 
     override this.EmbedInSymbolTable _ = () 
 
     /// Returns all theories in the scope of this root ordered by their discovery time (parsing of the AST).
     /// This means that the theory with the lowest RunOrder comes first.
-    member private this.OrderedTheories =
+    member this.OrderedTheories =
         this.Scope.Values
         |> Seq.choose (fun item ->
             match item with
@@ -968,6 +1023,78 @@ type FplRoot() =
         this.OrderedTheories
         |> Seq.iter (fun theory -> theory.Run variableStack)        
 
+// Returns the root node of any FplValue
+let rec getRoot (fv:FplValue) =
+    if fv.Name = PrimRoot then 
+        fv :?> FplRoot
+    else getRoot fv.Parent.Value
+        
+// Tries to add an FPL block to its parent's scope using its FplId, or issues ID001 diagnostics if a conflict occurs
+let tryAddToParentUsingFplId (fplValue:FplValue) =
+    let identifier = fplValue.FplId
+    let root = getRoot fplValue
+    let conflicts = 
+        root.OrderedTheories
+        |> Seq.map (fun theory -> 
+            theory.Scope.Values
+            |> Seq.filter (fun fv -> fv.FplId = identifier)
+        )
+        |> Seq.concat
+        |> Seq.toList
+
+    if conflicts.Length > 0 then 
+        emitID001Diagnostics identifier (conflicts.Head.QualifiedStartPos) fplValue.StartPos fplValue.EndPos
+    else
+        let parent = fplValue.Parent.Value
+        parent.Scope.Add(identifier, fplValue)
+
+// Tries to add an FPL block to its parent's scope using its mixed signature, or issues ID001 diagnostics if a conflict occurs
+let tryAddToParentUsingMixedSignature (fplValue:FplValue) =
+    let identifier = fplValue.Type SignatureType.Mixed
+    let root = getRoot fplValue
+    let conflicts = 
+        root.OrderedTheories
+        |> Seq.map (fun theory -> 
+            theory.Scope.Values
+            |> Seq.filter (fun fv -> fv.Type SignatureType.Mixed = identifier)
+        )
+        |> Seq.concat
+        |> Seq.toList
+
+    if conflicts.Length > 0 then 
+        emitID001Diagnostics identifier (conflicts.Head.QualifiedStartPos) fplValue.StartPos fplValue.EndPos
+    else
+        let parent = fplValue.Parent.Value
+        parent.Scope.Add(identifier, fplValue)
+
+// Tries to add an FPL block to its parent's scope using its named signature, or issues ID001 diagnostics if a conflict occurs
+let tryAddToParentUsingNamedSignature (fplValue:FplValue) =
+    let identifier = fplValue.Type SignatureType.Name
+    let root = getRoot fplValue
+    let conflicts = 
+        root.OrderedTheories
+        |> Seq.map (fun theory -> 
+            theory.Scope.Values
+            |> Seq.filter (fun fv -> fv.Type SignatureType.Name = identifier)
+        )
+        |> Seq.concat
+        |> Seq.toList
+
+    if conflicts.Length > 0 then 
+        emitID001Diagnostics identifier (conflicts.Head.QualifiedStartPos) fplValue.StartPos fplValue.EndPos
+    else
+        let parent = fplValue.Parent.Value
+        parent.Scope.Add(identifier, fplValue)
+
+// Adds an expression to Parent's argument list
+let addExpressionToParentArgList (fplValue:FplValue) =
+    let parent = fplValue.Parent.Value
+    match parent.Name with 
+    | LiteralLocL ->
+        let identifier = fplValue.Type SignatureType.Name
+        parent.FplId <- identifier
+    | _ -> ()
+    parent.ArgList.Add fplValue
 
 /// Indicates if an FplValue is the root of the SymbolTable.
 let isRoot (fv:FplValue) = 
@@ -988,21 +1115,6 @@ type FplGenericPredicate(positions: Positions, parent: FplValue) as this =
         this.ValueList
         |> Seq.map (fun subfv -> subfv.Represent())
         |> String.concat ", "
-
-    override this.EmbedInSymbolTable nextOpt = 
-        match nextOpt with 
-        | Some next when next.Name = PrimJustificationL -> 
-            this.TryAddToParentsScope()
-        | Some next when next.Name = LiteralLocL -> 
-            next.FplId <- this.FplId
-            next.TypeId <- this.TypeId
-            next.EndPos <- this.EndPos
-        | Some next when next.IsBlock() || next.Name = PrimArgL ->
-            this.TryAddToParentsArgList() 
-        | Some next -> 
-            this.TryAddToParentsArgList()
-            next.EndPos <- this.EndPos
-        | _ -> ()
 
     override this.RunOrder = None
 
@@ -1029,7 +1141,7 @@ type FplIntrinsicPred(positions: Positions, parent: FplValue) =
 
     override this.Run _ = ()
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
+    override this.EmbedInSymbolTable _ = this.Parent.Value.ArgList.Add this 
 
 
 type IHasSignature =
@@ -1095,7 +1207,7 @@ type FplPredicateList(positions: Positions, parent: FplValue, runOrder) =
         // todo implement run
         ()
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
+    override this.EmbedInSymbolTable _ = this.Parent.Value.ArgList.Add this
 
     override this.RunOrder = Some _runOrder
 
@@ -1118,7 +1230,12 @@ type FplRuleOfInference(positions: Positions, parent: FplValue, runOrder) =
         // todo implement run
         emitLG004diagnostic this.Name this.Arity this.StartPos this.EndPos
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+    override this.EmbedInSymbolTable _ = 
+        let theory = this.Parent.Value
+        if theory.Scope.ContainsKey(this.FplId) then
+            emitID001Diagnostics this.FplId (theory.Scope[this.FplId].QualifiedStartPos) this.StartPos this.EndPos
+        else
+            this.Scope.Add(this.FplId, this)
 
     override this.RunOrder = Some _runOrder
 
@@ -1149,7 +1266,7 @@ type FplInstance(positions: Positions, parent: FplValue) =
 
     override this.Run _ = ()
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
+    override this.EmbedInSymbolTable _ = this.Parent.Value.ArgList.Add this 
 
 type FplConstructor(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(positions, parent)
@@ -1184,7 +1301,13 @@ type FplConstructor(positions: Positions, parent: FplValue) =
     override this.Run _ = 
         this.SetValue(new FplInstance((this.StartPos, this.EndPos), this))
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+    override this.EmbedInSymbolTable _ = 
+        let identifier = this.Type SignatureType.Mixed
+        let parent = this.Parent.Value
+        if parent.Scope.ContainsKey(identifier) then 
+            emitID001Diagnostics identifier (parent.Scope[identifier].QualifiedStartPos) this.StartPos this.EndPos
+        else
+            parent.Scope.Add(this.FplId, this)    
 
     member this.ParentClass = this.Parent.Value :?> FplClass
 
@@ -1240,7 +1363,7 @@ and FplClass(positions: Positions, parent: FplValue) =
         this.SetValue(new FplInstance((this.StartPos, this.EndPos), this))
 
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+    override this.EmbedInSymbolTable _ = tryAddToParentUsingFplId this 
 
     override this.RunOrder = None
 
@@ -1276,7 +1399,7 @@ type FplIntrinsicObj(positions: Positions, parent: FplValue) =
     override this.Run variableStack = 
         this.SetValue (new FplInstance((this.StartPos, this.EndPos), this.Parent.Value))
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
+    override this.EmbedInSymbolTable _ = this.Parent.Value.ArgList.Add this 
 
 let isIntrinsicObj (fv1:FplValue) = 
     match fv1 with
@@ -1342,7 +1465,7 @@ type FplPredicate(positions: Positions, parent: FplValue, runOrder) =
     override this.IsFplBlock () = true
     override this.IsBlock () = true
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+    override this.EmbedInSymbolTable _ = tryAddToParentUsingMixedSignature this
 
     override this.Run variableStack = 
         if not _isReady then
@@ -1372,7 +1495,13 @@ type FplMandatoryPredicate(positions: Positions, parent: FplValue) =
 
     override this.IsBlock () = true
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+    override this.EmbedInSymbolTable _ = 
+        let identifier = this.Type SignatureType.Mixed
+        let parent = this.Parent.Value
+        if parent.Scope.ContainsKey(identifier) then 
+            emitID001Diagnostics identifier (parent.Scope[identifier].QualifiedStartPos) this.StartPos this.EndPos
+        else
+            parent.Scope.Add(this.FplId, this)    
 
     override this.Run variableStack = 
         // todo implement run
@@ -1403,7 +1532,14 @@ type FplOptionalPredicate(positions: Positions, parent: FplValue) =
         let paramT = getParamTuple this signatureType
         sprintf "%s(%s)" head paramT
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+    override this.EmbedInSymbolTable _ = 
+        let identifier = this.Type SignatureType.Mixed
+        let parent = this.Parent.Value
+        if parent.Scope.ContainsKey(identifier) then 
+            emitID001Diagnostics identifier (parent.Scope[identifier].QualifiedStartPos) this.StartPos this.EndPos
+        else
+            parent.Scope.Add(this.FplId, this)
+
 
     override this.Run variableStack = 
         // todo implement run
@@ -1429,7 +1565,7 @@ type FplAxiom(positions: Positions, parent: FplValue, runOrder) =
     override this.IsFplBlock () = true
     override this.IsBlock () = true
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+    override this.EmbedInSymbolTable _ = tryAddToParentUsingFplId this
 
     override this.Run variableStack = 
         if not _isReady then
@@ -1465,7 +1601,7 @@ type FplGenericTheoremLikeStmt(positions: Positions, parent: FplValue, runOrder)
     override this.IsFplBlock () = true
     override this.IsBlock () = true
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+    override this.EmbedInSymbolTable _ = tryAddToParentUsingFplId this 
 
     override this.Run variableStack = 
         if not _isReady then
@@ -1554,7 +1690,7 @@ type FplConjecture(positions: Positions, parent: FplValue, runOrder) =
     override this.IsFplBlock () = true
     override this.IsBlock () = true
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+    override this.EmbedInSymbolTable _ = tryAddToParentUsingFplId this 
 
     override this.Run variableStack = 
         if not _isReady then
@@ -1577,7 +1713,7 @@ type FplGenericArgInference(positions: Positions, parent: FplValue) =
         let head = getFplHead this signatureType
         head
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
+    override this.EmbedInSymbolTable _ = this.Parent.Value.ArgList.Add this 
 
 [<AbstractClass>]
 type FplGenericJustificationItem(positions: Positions, parent: FplValue) =
@@ -1602,8 +1738,7 @@ type FplGenericJustificationItem(positions: Positions, parent: FplValue) =
         | Some otherId ->
             emitPR004Diagnostics thisJustificationItemId otherId this.StartPos this.EndPos 
         | _ -> ()
-            
-        this.TryAddToParentsArgList() 
+        this.Parent.Value.ArgList.Add this
 
     override this.RunOrder = None
 
@@ -1756,7 +1891,7 @@ and FplJustification(positions: Positions, parent: FplValue) =
             |> Seq.map (fun fv -> fv :?> FplGenericJustificationItem)
             |> Seq.toList
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
+    override this.EmbedInSymbolTable _ = this.Parent.Value.ArgList.Add this
 
     member this.ParentArgument = this.Parent.Value :?> FplArgument
 
@@ -1950,7 +2085,65 @@ and FplProof(positions: Positions, parent: FplValue, runOrder) =
         if not allArgumentsEvaluateToTrue then
             emitPR009Diagnostics this.StartPos this.StartPos
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+    override this.EmbedInSymbolTable _ = 
+        /// Tries to find a theorem-like statement for a proof
+        /// and returns different cases of ScopeSearchResult, depending on different semantical error situations.
+        let tryFindAssociatedBlockForProof (fplValue: FplValue) =
+            match fplValue.Parent with
+            | Some theory ->
+
+                let flattenedScopes = flattenScopes theory.Parent.Value
+
+                let potentialProvableName = stripLastDollarDigit (fplValue.FplId)
+
+                // The parent node of the proof is the theory. In its scope
+                // we should find the theorem we are looking for.
+                let buildingBlocksMatchingDollarDigitNameList =
+                    // the potential block name of the proof is the
+                    // concatenated type signature of the name of the proof
+                    // without the last dollar digit
+                    flattenedScopes |> List.filter (fun fv -> fv.FplId = potentialProvableName || fv.FplId = $"@{potentialProvableName}")
+
+                let provableBlocklist =
+                    buildingBlocksMatchingDollarDigitNameList
+                    |> List.filter (fun fv -> isProvable fv)
+
+                let notProvableBlocklist =
+                    buildingBlocksMatchingDollarDigitNameList
+                    |> List.filter (fun fv -> not (isProvable fv ))
+
+                if provableBlocklist.Length > 1 then
+                    ScopeSearchResult.FoundMultiple(
+                        provableBlocklist
+                        |> List.map (fun fv -> sprintf "'%s' %s" fv.Name (fv.Type(SignatureType.Mixed)))
+                        |> String.concat ", "
+                    )
+                elif provableBlocklist.Length > 0 then
+                    let potentialTheorem = provableBlocklist.Head
+                    ScopeSearchResult.FoundAssociate potentialTheorem
+                elif notProvableBlocklist.Length > 0 then
+                    let potentialOther = notProvableBlocklist.Head
+
+                    ScopeSearchResult.FoundIncorrectBlock(
+                        sprintf "'%s' %s" potentialOther.Name (qualifiedName potentialOther)
+                    )
+                else
+                    ScopeSearchResult.NotFound
+            | None -> ScopeSearchResult.NotApplicable
+
+
+        match tryFindAssociatedBlockForProof this with
+        | ScopeSearchResult.FoundAssociate potentialParent -> 
+            // everything is ok, change the parent of the provable from theory to the found parent 
+            this.Parent <- Some potentialParent
+        | ScopeSearchResult.FoundIncorrectBlock block ->
+            emitID002Diagnostics (this.Type(SignatureType.Type)) block this.StartPos this.EndPos
+        | ScopeSearchResult.NotFound ->
+            emitID003diagnostics this.FplId this.StartPos this.EndPos
+        | ScopeSearchResult.FoundMultiple listOfKandidates ->
+            emitID004Diagnostics (this.Type(SignatureType.Type)) listOfKandidates this.StartPos this.EndPos
+        | _ -> ()
+
 
     override this.RunOrder = Some _runOrder
 
@@ -2002,7 +2195,7 @@ type FplLocalization(positions: Positions, parent: FplValue) =
 
     override this.RunOrder = None
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+    override this.EmbedInSymbolTable _ = tryAddToParentUsingNamedSignature this
 
 type FplTranslation(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
@@ -2030,7 +2223,7 @@ type FplTranslation(positions: Positions, parent: FplValue) =
         // todo implement run
         ()
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
+    override this.EmbedInSymbolTable _ = this.Parent.Value.ArgList.Add this 
 
     override this.RunOrder = None
 
@@ -2092,7 +2285,7 @@ type FplAssertion(positions: Positions, parent: FplValue) =
         // todo implement run
         ()
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
+    override this.EmbedInSymbolTable _ = this.Parent.Value.ArgList.Add this 
 
     override this.RunOrder = None
 
@@ -2117,7 +2310,7 @@ type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
 
     override this.Run _ = ()
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
+    override this.EmbedInSymbolTable _ = this.Parent.Value.ArgList.Add this 
 
     override this.RunOrder = None
 
@@ -2262,11 +2455,11 @@ type FplReference(positions: Positions, parent: FplValue) =
             next.TypeId <- this.TypeId
             next.EndPos <- this.EndPos
         | Some next when next.IsBlock() ->
-            this.TryAddToParentsArgList() 
+            this.Parent.Value.ArgList.Add this 
         | Some next when next.Scope.ContainsKey(".") -> 
             next.EndPos <- this.EndPos
         | Some next -> 
-            this.TryAddToParentsArgList()
+            this.Parent.Value.ArgList.Add this
             next.EndPos <- this.EndPos
         | _ -> ()
 
@@ -2319,6 +2512,8 @@ type FplConjunction(positions: Positions, parent: FplValue) as this =
             | _ -> LiteralUndetermined
         this.SetValue(newValue)
 
+    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
+
 
 /// Implements the semantics of an FPL disjunction compound predicate.
 type FplDisjunction(positions: Positions, parent: FplValue) as this =
@@ -2363,6 +2558,7 @@ type FplDisjunction(positions: Positions, parent: FplValue) as this =
                 LiteralUndetermined
         this.SetValue(newValue)  
 
+    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
 
 /// Implements the semantics of an FPL xor compound predicate.
 type FplExclusiveOr(positions: Positions, parent: FplValue) as this =
@@ -2410,6 +2606,8 @@ type FplExclusiveOr(positions: Positions, parent: FplValue) as this =
 
         this.SetValue(newValue)  
 
+    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
+
 /// Implements the semantics of an FPL negation compound predicate.
 type FplNegation(positions: Positions, parent: FplValue) as this =
     inherit FplGenericPredicate(positions, parent)
@@ -2446,6 +2644,9 @@ type FplNegation(positions: Positions, parent: FplValue) as this =
             | _ -> LiteralUndetermined  
 
         this.SetValue(newValue)  
+
+    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
+
 
 /// Implements the semantics of an FPL implication compound predicate.
 type FplImplication(positions: Positions, parent: FplValue) as this =
@@ -2486,6 +2687,9 @@ type FplImplication(positions: Positions, parent: FplValue) as this =
             | _ -> LiteralUndetermined
         
         this.SetValue(newValue) 
+
+    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
+
 
 /// Implements the semantics of an FPL equivalence compound predicate.
 type FplEquivalence(positions: Positions, parent: FplValue) as this =
@@ -2528,6 +2732,9 @@ type FplEquivalence(positions: Positions, parent: FplValue) as this =
             | _ -> LiteralUndetermined
         
         this.SetValue(newValue)
+
+    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
+
 
 /// Implements the semantics of an FPL equality.
 type FplEquality(positions: Positions, parent: FplValue) as this =
@@ -2609,6 +2816,9 @@ type FplEquality(positions: Positions, parent: FplValue) as this =
                             | _ -> LiteralUndetermined
                         this.SetValue(newValue)
 
+    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
+
+
 
 /// Implements an object that is used to provide a representation of extensions in FPL.
 type FplExtensionObj(positions: Positions, parent: FplValue) as this =
@@ -2681,7 +2891,7 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
     override this.EmbedInSymbolTable nextOpt = 
         match nextOpt with
         | Some next when next.Scope.ContainsKey(".") -> ()
-        | _ -> this.TryAddToParentsArgList() 
+        | _ -> this.Parent.Value.ArgList.Add this
 
     override this.RunOrder = None
 
@@ -2784,7 +2994,7 @@ type FplDecrement(positions: Positions, parent: FplValue) as this =
                 string n'
         this.SetValue(newValue)
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList()
+    override this.EmbedInSymbolTable _ = this.Parent.Value.ArgList.Add this
 
     override this.RunOrder = None
 
@@ -2833,7 +3043,7 @@ type FplMapping(positions: Positions, parent: FplValue) =
 
     override this.Run _ = ()
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
+    override this.EmbedInSymbolTable _ = this.Parent.Value.ArgList.Add this 
 
     override this.RunOrder = None
 
@@ -2971,6 +3181,8 @@ type FplIsOperator(positions: Positions, parent: FplValue) as this =
         
         this.SetValue(newValue)  
 
+    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
+
 [<AbstractClass>]
 type FplGenericQuantor(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(positions, parent)
@@ -2990,7 +3202,7 @@ type FplGenericQuantor(positions: Positions, parent: FplValue) =
         | "" -> head
         | _ -> sprintf "%s(%s)" head paramT
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
+    override this.EmbedInSymbolTable _ = this.Parent.Value.ArgList.Add this
     
 type FplQuantorAll(positions: Positions, parent: FplValue) as this =
     inherit FplGenericQuantor(positions, parent)
@@ -3238,8 +3450,7 @@ type FplVariable(positions: Positions, parent: FplValue) =
             else
                 next.Scope.TryAdd(this.FplId, this) |> ignore
                 
-        | _ ->
-            this.TryAddToParentsArgList()
+        | _ -> this.Parent.Value.ArgList.Add this
 
     override this.RunOrder = None
 
@@ -3317,7 +3528,7 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) =
     override this.IsFplBlock () = true
     override this.IsBlock () = true
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+    override this.EmbedInSymbolTable _ = tryAddToParentUsingMixedSignature this
 
     override this.RunOrder = Some _runOrder
 
@@ -3348,7 +3559,14 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) =
 
     override this.IsBlock () = true
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+    override this.EmbedInSymbolTable _ = 
+        let identifier = this.Type SignatureType.Mixed
+        let parent = this.Parent.Value
+        if parent.Scope.ContainsKey(identifier) then 
+            emitID001Diagnostics identifier (parent.Scope[identifier].QualifiedStartPos) this.StartPos this.EndPos
+        else
+            parent.Scope.Add(this.FplId, this)
+
 
     override this.RunOrder = None
 
@@ -3369,7 +3587,14 @@ type FplOptionalFunctionalTerm(positions: Positions, parent: FplValue) =
 
     override this.IsBlock () = true
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+    override this.EmbedInSymbolTable _ = 
+        let identifier = this.Type SignatureType.Mixed
+        let parent = this.Parent.Value
+        if parent.Scope.ContainsKey(identifier) then 
+            emitID001Diagnostics identifier (parent.Scope[identifier].QualifiedStartPos) this.StartPos this.EndPos
+        else
+            parent.Scope.Add(this.FplId, this)
+    
 
     override this.RunOrder = None
 
@@ -3408,7 +3633,7 @@ type FplExtension(positions: Positions, parent: FplValue) =
         // todo implement run
         ()
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+    override this.EmbedInSymbolTable _ = tryAddToParentUsingMixedSignature this
 
     override this.RunOrder = None
 
@@ -3441,7 +3666,7 @@ type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
 
     override this.Run _ = ()
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
+    override this.EmbedInSymbolTable _ = this.Parent.Value.ArgList.Add this 
 
     override this.RunOrder = None
 
@@ -3466,7 +3691,7 @@ type FplIntrinsicFunc(positions: Positions, parent: FplValue) as this =
 
     override this.Run _ = () 
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
+    override this.EmbedInSymbolTable _ = this.Parent.Value.ArgList.Add this 
 
     override this.RunOrder = None
 
@@ -3492,7 +3717,7 @@ type FplIntrinsicTpl(positions: Positions, parent: FplValue) as this =
 
     override this.Run _ = () 
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
+    override this.EmbedInSymbolTable _ = this.Parent.Value.ArgList.Add this 
 
     override this.RunOrder = None
 
@@ -3505,7 +3730,7 @@ type FplGenericStmt(positions: Positions, parent: FplValue) =
     override this.Type signatureType = this.FplId
     override this.Represent () = ""
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
+    override this.EmbedInSymbolTable _ = this.Parent.Value.ArgList.Add this
 
     override this.RunOrder = None
 
@@ -3865,47 +4090,6 @@ type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
 /// A string representation of an FplValue
 let toString (fplValue:FplValue) = $"{fplValue.ShortName} {fplValue.Type(SignatureType.Name)}"
 
-/// Qualified name of this FplValue
-let qualifiedName (fplValue:FplValue)=
-    let rec getFullName (fv: FplValue) (first: bool) =
-        let fplValueType =
-            match fv with
-            | :? FplLocalization
-            | :? FplExclusiveOr 
-            | :? FplConjunction
-            | :? FplDisjunction 
-            | :? FplNegation 
-            | :? FplImplication 
-            | :? FplEquivalence 
-            | :? FplIsOperator 
-            | :? FplExtensionObj 
-            | :? FplEquality 
-            | :? FplReference -> fv.Type(SignatureType.Name)
-            | :? FplLocalization
-            | :? FplConstructor
-            | _ when fv.IsBlock() -> fv.Type(SignatureType.Mixed)
-            | :? FplGenericQuantor -> fv.Type(SignatureType.Mixed)
-            | _ -> fv.FplId
-
-        match fv with
-        | :? FplRoot -> ""
-        | _ -> 
-            if first then
-                if isRoot fv.Parent.Value then
-                    getFullName fv.Parent.Value false + fplValueType
-                else if fv.IsVariable() && not (fv.Parent.Value.IsVariable()) then
-                    fplValueType
-                else
-                    getFullName fv.Parent.Value false + "." + fplValueType
-            else if isRoot fv.Parent.Value then
-                getFullName fv.Parent.Value false + fplValueType
-            else if fv.IsVariable() && not (fv.Parent.Value.IsVariable()) then
-                fplValueType
-            else
-                getFullName fv.Parent.Value false + "." + fplValueType
-
-    getFullName fplValue true
-
 /// Checks if a variable is defined in the scope of block, if any
 /// looking for it recursively, up the symbol tree.
 let variableInBlockScopeByName (fplValue: FplValue) name withNestedVariableSearch =
@@ -3983,85 +4167,6 @@ let variableInBlockScopeByName (fplValue: FplValue) name withNestedVariableSearc
                         ScopeSearchResult.NotFound
 
     firstBlockParent fplValue
-
-// Create an FplValue list containing all Scopes of an FplNode
-let rec flattenScopes (root: FplValue) =
-    let rec helper (node: FplValue) (acc: FplValue list) =
-        let newAcc = node :: acc
-        node.Scope |> Seq.fold (fun acc kvp -> helper kvp.Value acc) newAcc
-
-    helper root []
-
-let stripLastDollarDigit (s: string) =
-    let lastIndex = s.LastIndexOf('$')
-    if lastIndex <> -1 then s.Substring(0, lastIndex) else s
-
-/// Checks if an fv is provable. This will only be true if
-/// it is a theorem, a lemma, a proposition, or a corollary
-let isProvable (fv: FplValue) =
-    match fv with
-    | :? FplTheorem
-    | :? FplLemma
-    | :? FplProposition
-    | :? FplCorollary -> true
-    | _ -> false
-
-/// Checks if an fplValue is a conjecture or an axiom. This is used to decide whether or
-/// not it is not provable.
-let isAxiomOrConnjecture (fv:FplValue) = 
-    match fv with
-    | :? FplConjecture 
-    | :? FplAxiom -> true
-    | _ -> false
-
-/// Tries to find a theorem-like statement for a proof
-/// and returns different cases of ScopeSearchResult, depending on different semantical error situations.
-let tryFindAssociatedBlockForProof (fplValue: FplValue) =
-    match fplValue with
-    | :? FplProof ->
-        match fplValue.Parent with
-        | Some theory ->
-
-            let flattenedScopes = flattenScopes theory.Parent.Value
-
-            let potentialProvableName = stripLastDollarDigit (fplValue.FplId)
-
-            // The parent node of the proof is the theory. In its scope
-            // we should find the theorem we are looking for.
-            let buildingBlocksMatchingDollarDigitNameList =
-                // the potential block name of the proof is the
-                // concatenated type signature of the name of the proof
-                // without the last dollar digit
-                flattenedScopes |> List.filter (fun fv -> fv.FplId = potentialProvableName || fv.FplId = $"@{potentialProvableName}")
-
-            let provableBlocklist =
-                buildingBlocksMatchingDollarDigitNameList
-                |> List.filter (fun fv -> isProvable fv)
-
-            let notProvableBlocklist =
-                buildingBlocksMatchingDollarDigitNameList
-                |> List.filter (fun fv -> not (isProvable fv ))
-
-            if provableBlocklist.Length > 1 then
-                ScopeSearchResult.FoundMultiple(
-                    provableBlocklist
-                    |> List.map (fun fv -> sprintf "'%s' %s" fv.Name (fv.Type(SignatureType.Mixed)))
-                    |> String.concat ", "
-                )
-            elif provableBlocklist.Length > 0 then
-                let potentialTheorem = provableBlocklist.Head
-                ScopeSearchResult.FoundAssociate potentialTheorem
-            elif notProvableBlocklist.Length > 0 then
-                let potentialOther = notProvableBlocklist.Head
-
-                ScopeSearchResult.FoundIncorrectBlock(
-                    sprintf "'%s' %s" potentialOther.Name (qualifiedName potentialOther)
-                )
-            else
-                ScopeSearchResult.NotFound
-        | None -> ScopeSearchResult.NotApplicable
-    | _ ->
-        ScopeSearchResult.NotApplicable
 
 /// Tries to find a theorem-like statement, a conjecture, or an axiom for a corollary
 /// and returns different cases of ScopeSearchResult, depending on different semantical error situations.

@@ -40,7 +40,6 @@ let emitID001Diagnostics alreadyDeclaredTypeStr qualifiedStartPosConflictStr pos
             Diagnostic.Code = ID001(alreadyDeclaredTypeStr, qualifiedStartPosConflictStr)
             Diagnostic.Alternatives = None 
         }
-
     ad.AddDiagnostic diagnostic
 
 let emitID002Diagnostics nodeTypeName incorrectBlockType pos1 pos2 =
@@ -68,6 +67,22 @@ let emitID004Diagnostics nodeTypeName listOfCandidates pos1 pos2 =
             Diagnostic.Alternatives = Some "Disambiguate the candidates by naming them differently." 
         }
     ad.AddDiagnostic diagnostic
+
+
+let emitID003diagnostics name pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ID003 name
+            Diagnostic.Alternatives = 
+                Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary)." 
+        }
+    ad.AddDiagnostic diagnostic
+
 
 let emitID007Diagnostics pos1 pos2 fplValueTypeStr listOfCandidates =
     let diagnostic =
@@ -200,6 +215,19 @@ let emitID023Diagnostics multipleCandidates pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
 
+let emitID024Diagnostics alreadyLocalizedExpr qualifiedStartPosConflictStr pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ID024(alreadyLocalizedExpr, qualifiedStartPosConflictStr)
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
 let emitLG002diagnostic nodeTypeName times pos1 pos2 = 
     let diagnostic =
         { 
@@ -262,7 +290,6 @@ let emitLG005Diagnostics name pos1 pos2 =
             Diagnostic.Code = LG005 name
             Diagnostic.Alternatives = Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary)." 
         }
-
     ad.AddDiagnostic diagnostic
 
 let emitPR000Diagnostics incorrectBlockType pos1 pos2 =

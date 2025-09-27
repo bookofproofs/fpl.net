@@ -1405,8 +1405,6 @@ let rec eval (st: SymbolTable) ast =
                         subNode.Parent <- fv.Parent
                         fv.ArgList.Clear()
                     | _ -> ()
-        | :? FplLocalization -> 
-            fv.FplId <- last.FplId
         | _ -> ()
         st.EvalPop()
     // | Cases of Positions * (Ast list * Ast)
@@ -1853,17 +1851,6 @@ let rec eval (st: SymbolTable) ast =
         let fv = new FplProof((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
         variableStack.PushEvalStack(fv)
         eval st referencingIdentifierAst
-        match tryFindAssociatedBlockForProof fv with
-        | ScopeSearchResult.FoundAssociate potentialParent -> 
-            // everything is ok, change the parent of the provable from theory to the found parent 
-            fv.Parent <- Some potentialParent
-        | ScopeSearchResult.FoundIncorrectBlock block ->
-            emitID002Diagnostics (fv.Type(SignatureType.Type)) block fv.StartPos fv.EndPos
-        | ScopeSearchResult.NotFound ->
-            emitID003diagnostics fv  
-        | ScopeSearchResult.FoundMultiple listOfKandidates ->
-            emitID004Diagnostics (fv.Type(SignatureType.Type)) listOfKandidates fv.StartPos fv.EndPos
-        | _ -> ()
         proofArgumentListAst |> List.map (eval st) |> ignore
         variableStack.PopEvalStack()
         optQedAst |> Option.map (eval st) |> Option.defaultValue ()
