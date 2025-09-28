@@ -366,7 +366,6 @@ type FplValue(positions: Positions, parent: FplValue option) =
     let mutable _fplId = ""
     let mutable _typeId = ""
     let mutable (_filePath: string option) = None
-    let mutable _hasBrackets = false
     let mutable _isIntrinsic = false
     let mutable _isInitializedVariable = false
     let mutable _isSignatureVariable = false
@@ -463,7 +462,6 @@ type FplValue(positions: Positions, parent: FplValue option) =
         ret.TypeId <- this.TypeId
         ret.Arity <- this.Arity
         ret.AuxiliaryInfo <- this.AuxiliaryInfo
-        ret.HasBrackets <- this.HasBrackets
         ret.IsIntrinsic <- this.IsIntrinsic
         ret.ExpressionType <- this.ExpressionType
         ret.IsInitializedVariable <- this.IsInitializedVariable
@@ -482,11 +480,6 @@ type FplValue(positions: Positions, parent: FplValue option) =
         |> Seq.iter (fun (fv1:FplValue) ->
             let value = fv1.Clone()
             ret.ValueList.Add(value))
-
-    /// Indicates if this FplValue's Scope or ArgList can be treated as bracketed coordinates or as parenthesized parameters.
-    member this.HasBrackets
-        with get () = _hasBrackets
-        and set (value) = _hasBrackets <- value
 
     /// TypeId of the FplValue.
     member this.TypeId
@@ -595,7 +588,6 @@ type FplValue(positions: Positions, parent: FplValue option) =
         this.TypeId <- other.TypeId
         this.Arity <- other.Arity
         this.AuxiliaryInfo <- other.AuxiliaryInfo
-        this.HasBrackets <- other.HasBrackets
         this.IsIntrinsic <- other.IsIntrinsic
         this.IsInitializedVariable <- other.IsInitializedVariable
 
@@ -2369,6 +2361,8 @@ type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
 
 type FplReference(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
+    let mutable _hasParentheses = false
+    let mutable _hasBrackets = false
 
     override this.Name = PrimRefL
     override this.ShortName = PrimRef
@@ -2381,6 +2375,16 @@ type FplReference(positions: Positions, parent: FplValue) =
             var.SetValue(fv)
         else
             base.SetValue(fv)
+
+    /// Indicates if this Reference was followed by brackets in the FPL code.
+    member this.HasParentheses
+        with get () = _hasParentheses
+        and set (value) = _hasParentheses <- value
+
+    /// Indicates if this Reference was followed by parentheses in the FPL code.
+    member this.HasBrackets
+        with get () = _hasBrackets
+        and set (value) = _hasBrackets <- value
 
     override this.Type signatureType =
         if this.Scope.ContainsKey(this.FplId) then
@@ -2905,27 +2909,14 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
 
         match (head, args, qualification) with
         | (_, "", Some qual) -> sprintf "%s.%s" head (qual.Type(propagate))
-        | (_, "???", Some qual) ->
-            if this.HasBrackets then
-                sprintf "%s[].%s" head (qual.Type(propagate))
-            else
-                sprintf "%s().%s" head (qual.Type(propagate))
-        | (_, _, Some qual) ->
-            if this.HasBrackets then
-                sprintf "%s[%s].%s" head args (qual.Type(propagate))
-            else
-                sprintf "%s(%s).%s" head args (qual.Type(propagate))
+        | (_, "???", Some qual) -> sprintf "%s().%s" head (qual.Type(propagate))
+        | (_, _, Some qual) -> sprintf "%s(%s).%s" head args (qual.Type(propagate))
         | ("???", _, None) -> sprintf "%s" head
         | ("", _, None) -> sprintf "%s" args
         | (_, "", None) -> sprintf "%s" head
-        | (_, "???", None) ->
-            if this.HasBrackets then
-                sprintf "%s[]" head
-            else
-                sprintf "%s()" head
+        | (_, "???", None) -> sprintf "%s()" head
         | (_, _, None) ->
-            if this.HasBrackets then sprintf "%s[%s]" head args
-            elif head = "bydef." then sprintf "%s%s" head args
+            if head = "bydef." then sprintf "%s%s" head args
             else sprintf "%s(%s)" head args
 
 
@@ -3081,16 +3072,8 @@ type FplMapping(positions: Positions, parent: FplValue) =
         match (pars, myMapping) with
         | ("", None) -> this.TypeId
         | ("", Some map) -> sprintf "%s() -> %s" this.TypeId (map.Type(propagate))
-        | (_, None) ->
-            if this.HasBrackets then
-                sprintf "%s[%s]" this.TypeId pars
-            else
-                sprintf "%s(%s)" this.TypeId pars
-        | (_, Some map) ->
-            if this.HasBrackets then
-                sprintf "%s[%s] -> %s" this.TypeId pars (map.Type(propagate))
-            else
-                sprintf "%s(%s) -> %s" this.TypeId pars (map.Type(propagate))
+        | (_, None) -> sprintf "%s(%s)" this.TypeId pars
+        | (_, Some map) -> sprintf "%s(%s) -> %s" this.TypeId pars (map.Type(propagate))
 
     override this.Represent() = $"dec {this.Type(SignatureType.Type)}"
 
@@ -3362,16 +3345,8 @@ type FplVariable(positions: Positions, parent: FplValue) =
         match (pars, getMapping this) with
         | ("", None) -> head
         | ("", Some map) -> sprintf "%s() -> %s" head (map.Type(propagate))
-        | (_, None) ->
-            if this.HasBrackets then
-                sprintf "%s[%s]" head pars
-            else
-                sprintf "%s(%s)" head pars
-        | (_, Some map) ->
-            if this.HasBrackets then
-                sprintf "%s[%s] -> %s" head pars (map.Type(propagate))
-            else
-                sprintf "%s(%s) -> %s" head pars (map.Type(propagate))
+        | (_, None) -> sprintf "%s(%s)" head pars
+        | (_, Some map) -> sprintf "%s(%s) -> %s" head pars (map.Type(propagate))
 
     override this.Represent () = 
         if this.ValueList.Count = 0 then

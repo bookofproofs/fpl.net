@@ -796,21 +796,18 @@ let rec eval (st: SymbolTable) ast =
     | Ast.BrackedCoordList((pos1, pos2), coordListAst) ->
         st.EvalPush("BrackedCoordList")
         let fv = variableStack.PeekEvalStack()
-        fv.HasBrackets <- true
-        if coordListAst.Length > 0 then 
-            coordListAst 
-            |> List.iter (fun pred -> 
-                let ref = new FplReference((pos1, pos2), fv)
-                variableStack.PushEvalStack(ref)
-                eval st pred
-                variableStack.PopEvalStack()
-            ) 
-        else
-            let ref = new FplReference((pos1, pos2), fv)
-            ref.FplId <- "???"
-            ref.TypeId <- "???"
-            variableStack.PushEvalStack(ref)
-            variableStack.PopEvalStack()
+        match fv with 
+        | :? FplReference as ref -> 
+            ref.HasBrackets <- true
+            if coordListAst.Length > 0 then 
+                coordListAst 
+                |> List.iter (fun pred -> 
+                    let ref = new FplReference((pos1, pos2), fv)
+                    variableStack.PushEvalStack(ref)
+                    eval st pred
+                    variableStack.PopEvalStack()
+                ) 
+        | _ -> ()
         st.EvalPop()
     | Ast.And((pos1, pos2), (predicateAst1, predicateAst2)) ->
         st.EvalPush("And")
