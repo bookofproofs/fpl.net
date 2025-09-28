@@ -3467,6 +3467,12 @@ type FplVariable(positions: Positions, parent: FplValue) =
                 variableOrQuantor.Scope.Add(this.FplId, this)
 
         match nextOpt with 
+        | Some next when next.Name = PrimRefL && this.TypeId <> LiteralUndef ->
+            next.FplId <- this.FplId
+            tryAddToParentUsingFplId this
+        | Some next when next.Name = PrimRefL && this.TypeId = LiteralUndef ->
+            next.FplId <- this.FplId
+            addExpressionToParentArgList this
         | Some next when ( next.Name = LiteralAxL 
                         || next.Name = LiteralThmL 
                         || next.Name = LiteralLemL 

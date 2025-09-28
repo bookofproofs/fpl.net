@@ -343,9 +343,7 @@ let rec eval (st: SymbolTable) ast =
                 emitVAR01diagnostics name pos1 pos2
                 match fv.Name with 
                 | PrimRefL ->
-                    // name the reference to a non-existing variable
-                    // and set its variable to an undefined one
-                    fv.FplId <- name
+                    //  set its variable to an undefined one
                     let undefVar = new FplVariable((pos1, pos2), fv)
                     undefVar.FplId <- name
                     undefVar.TypeId <- LiteralUndef
