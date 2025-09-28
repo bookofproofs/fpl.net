@@ -1079,8 +1079,8 @@ let tryAddSubBlockToFplBlock (fplValue:FplValue) =
     else
         parent.Scope.Add(identifier, fplValue)   
 
-// Tries to add an FPL block to its parent's scope using its named signature, or issues ID001 diagnostics if a conflict occurs
-let tryAddToParentUsingNamedSignature (fplValue:FplValue) =
+// Tries to add an FPL block to its parent's scope using its typed signature, or issues ID001 diagnostics if a conflict occurs
+let tryAddToParentUsingTypedSignature (fplValue:FplValue) =
     let identifier = fplValue.Type SignatureType.Type
     let root = getRoot fplValue
     let conflicts = 
@@ -1106,8 +1106,9 @@ let addExpressionToParentArgList (fplValue:FplValue) =
     let parent = fplValue.Parent.Value
     match parent.Name with 
     | LiteralLocL ->
-        let identifier = fplValue.Type SignatureType.Name
+        let identifier = fplValue.FplId
         parent.FplId <- identifier
+        parent.TypeId <- identifier
     | _ -> ()
     parent.ArgList.Add fplValue
 
@@ -2247,7 +2248,7 @@ type FplLocalization(positions: Positions, parent: FplValue) =
 
     override this.RunOrder = None
 
-    override this.EmbedInSymbolTable _ = tryAddToParentUsingNamedSignature this
+    override this.EmbedInSymbolTable _ = tryAddToParentUsingTypedSignature this
 
 type FplTranslation(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
@@ -2503,7 +2504,8 @@ type FplReference(positions: Positions, parent: FplValue) =
     override this.EmbedInSymbolTable nextOpt = 
         match nextOpt with 
         | Some next when next.Name = LiteralLocL -> 
-            next.FplId <- this.Type SignatureType.Name
+            next.FplId <- this.FplId
+            next.TypeId <- this.FplId
             next.EndPos <- this.EndPos
         | Some next when next.IsBlock() ->
             this.Parent.Value.ArgList.Add this 

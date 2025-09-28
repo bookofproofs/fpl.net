@@ -309,6 +309,7 @@ let rec eval (st: SymbolTable) ast =
         | PrimVariableMany1L -> 
             // in the context of variable declarations, we set the name and positions of the variables
             fv.FplId <- name
+            fv.TypeId <- LiteralUndef 
             fv.StartPos <- pos1
             fv.EndPos <- pos2
         | PrimExtensionL -> 
@@ -344,6 +345,8 @@ let rec eval (st: SymbolTable) ast =
                     // and set its variable to an undefined one
                     fv.FplId <- name
                     let undefVar = new FplVariable((pos1, pos2), fv)
+                    undefVar.FplId <- name
+                    undefVar.TypeId <- LiteralUndef
                     let undefined = new FplIntrinsicUndef((pos1, pos2), undefVar)
                     undefVar.SetValue(undefined)
                     variableStack.PushEvalStack(undefVar)
