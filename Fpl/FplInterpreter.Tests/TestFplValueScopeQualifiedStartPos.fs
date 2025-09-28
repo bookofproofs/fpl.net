@@ -868,6 +868,7 @@ type TestFplValueScopeQualifiedStartPos() =
             let pred = theory.Scope[predName]
 
             match var with
+            | "base0" -> Assert.AreEqual<string>("TestLocalizationQualifiedStartPos(Ln: 1, Col: 1)", (pred.QualifiedStartPos).ToString())
             | "base1" -> Assert.AreEqual<string>("TestLocalizationQualifiedStartPos(Ln: 1, Col: 1)", (pred.QualifiedStartPos).ToString())
             | "base2" -> Assert.AreEqual<string>("TestLocalizationQualifiedStartPos(Ln: 1, Col: 1)", (pred.QualifiedStartPos).ToString())
             | "base3" -> Assert.AreEqual<string>("TestLocalizationQualifiedStartPos(Ln: 1, Col: 1)", (pred.QualifiedStartPos).ToString())

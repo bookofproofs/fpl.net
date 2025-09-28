@@ -866,9 +866,9 @@ type TestFplValueScopeParent() =
     [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""")>]
     [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
     [<TestMethod>]
-    member this.TestLocalizationParent(var, predName, trslCode) =
+    member this.TestLocalizationParent(var, predName, predDecl, trslCode) =
         ad.Clear()
-        let fplCode = sprintf """loc %s := %s;""" predName trslCode
+        let fplCode = sprintf """loc %s := %s;""" predDecl trslCode
         let filename = "TestLocalizationParent"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore

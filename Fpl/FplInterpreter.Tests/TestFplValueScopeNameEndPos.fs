@@ -924,9 +924,9 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""")>]
     [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
     [<TestMethod>]
-    member this.TestLocalizationNameEndPos(var, predName, trslCode) =
+    member this.TestLocalizationNameEndPos(var, predName, predDecl, trslCode) =
         ad.Clear()
-        let fplCode = sprintf """loc %s := %s;""" predName trslCode
+        let fplCode = sprintf """loc %s := %s;""" predDecl trslCode
         let filename = "TestLocalizationNameEndPos"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
@@ -939,8 +939,8 @@ type TestFplValueScopeNameEndPos() =
             match var with
             | "base0" -> Assert.AreEqual<int64>((int64)14, pred.EndPos.Column)
             | "base1" -> Assert.AreEqual<int64>((int64)14, pred.EndPos.Column)
-            | "base2" -> Assert.AreEqual<int64>((int64)12, pred.EndPos.Column)
-            | "base3" -> Assert.AreEqual<int64>((int64)14, pred.EndPos.Column)
+            | "base2" -> Assert.AreEqual<int64>((int64)67, pred.EndPos.Column)
+            | "base3" -> Assert.AreEqual<int64>((int64)73, pred.EndPos.Column)
             | "base4" -> Assert.AreEqual<int64>((int64)16, pred.EndPos.Column)
             | "base5" -> Assert.AreEqual<int64>((int64)19, pred.EndPos.Column)
             | _ -> Assert.IsTrue(false)
