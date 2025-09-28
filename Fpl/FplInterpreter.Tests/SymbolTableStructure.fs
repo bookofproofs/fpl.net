@@ -232,15 +232,13 @@ type SymbolTableStructure() =
             let x = new FplTranslation(positions, parent)
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplVariable" -> 
-            let x = new FplVariable(positions, parent) 
+            let x = new FplVariable("x", positions, parent) 
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplVariadicVariableMany" ->
-            let x = new FplVariable(positions, parent)
-            x.SetToMany() |> ignore
+            let x = new FplVariableMany("x", positions, parent)
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplVariadicVariableMany1" ->
-            let x = new FplVariable(positions, parent)
-            x.SetToMany1() |> ignore
+            let x = new FplVariableMany1("x", positions, parent)
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | _ -> 
             failwith $"Unknown node type {nodeType}"

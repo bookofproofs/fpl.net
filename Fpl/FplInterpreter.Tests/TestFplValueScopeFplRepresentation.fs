@@ -1030,11 +1030,13 @@ type TestFplValueScopeFplRepresentation() =
             assign.Run variableStack
             let assigneeVariableOpt = assign.Assignee
             match assigneeVariableOpt with
-            | Some var -> 
-                let actual = var.IsInitializedVariable
-                Assert.AreEqual<bool>(expected, actual)
+            | Some varUncast ->
+                match varUncast with
+                | :? FplGenericVariable as var ->
+                    let actual = var.IsInitializedVariable
+                    Assert.AreEqual<bool>(expected, actual)
+                | _ -> Assert.IsTrue(false)
             | None -> 
                 Assert.IsTrue(false)
-
         | None -> 
             Assert.IsTrue(false)

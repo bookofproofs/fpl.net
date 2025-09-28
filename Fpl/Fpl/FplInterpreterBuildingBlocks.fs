@@ -114,13 +114,8 @@ let rec eval (st: SymbolTable) ast =
             fv.SetValue value
 
         match fv with
-        | :? FplVariable as v -> 
-            if v.IsMany then
-                fv.TypeId <- $"*{fv.TypeId}"
-            elif v.IsMany1 then
-                fv.TypeId <- $"+{fv.TypeId}"
-            else 
-                ()
+        | :? FplVariableMany -> fv.TypeId <- $"*{fv.TypeId}"
+        | :? FplVariableMany1 -> fv.TypeId <- $"+{fv.TypeId}"
         | _ -> ()
     
     let setSignaturePositions pos1 pos2 = 
@@ -168,25 +163,9 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.Many((pos1, pos2),()) ->
         st.EvalPush("Many")
-        let fv = variableStack.PeekEvalStack()
-        match fv.Parent with 
-        | Some parent -> 
-            checkVAR00Diagnostics parent.AuxiliaryInfo pos1 pos2
-        | _ -> ()
-        match fv with 
-        | :? FplVariable as var -> var.SetToMany()
-        | _ -> ()
         st.EvalPop()
     | Ast.Many1((pos1, pos2),()) ->
         st.EvalPush("Many1")
-        let fv = variableStack.PeekEvalStack()
-        match fv.Parent with 
-        | Some parent -> 
-            checkVAR00Diagnostics parent.AuxiliaryInfo pos1 pos2
-        | _ -> ()
-        match fv with 
-        | :? FplVariable as var -> var.SetToMany1()
-        | _ -> ()
         st.EvalPop()
     | Ast.One((pos1, pos2),()) ->
         st.EvalPush("One")
@@ -281,10 +260,10 @@ let rec eval (st: SymbolTable) ast =
             fv.TypeId <- extensionName
             fv.StartPos <- pos1
             fv.EndPos <- pos2
-        | :? FplVariable as var when var.IsMany -> 
+        | :? FplVariableMany -> 
             let sid = $"*{extensionName}"
             fv.TypeId <- sid
-        | :? FplVariable as var when var.IsMany1 -> 
+        | :? FplVariableMany1 -> 
             let sid = $"+{extensionName}"
             fv.TypeId <- sid
         | _ -> 
@@ -312,17 +291,16 @@ let rec eval (st: SymbolTable) ast =
             fv.StartPos <- pos1
             fv.EndPos <- pos2
         | PrimExtensionL -> 
-            let newVar = new FplVariable((pos1, pos2), fv)
-            newVar.FplId <- name
+            let newVar = new FplVariable(name, (pos1, pos2), fv)
             variableStack.PushEvalStack(newVar)
             variableStack.PopEvalStack()
         | _ -> 
             // in all other contexts, check by name, if this variable was declared in some scope
-            let rec IsInUpperScope (fv1: FplValue): FplVariable option =
+            let rec IsInUpperScope (fv1: FplValue): FplGenericVariable option =
                 if fv1.Name = PrimTheoryL then 
                     None
                 elif fv1.Scope.ContainsKey(name) then
-                    Some (fv1.Scope[name] :?> FplVariable)
+                    Some (fv1.Scope[name] :?> FplGenericVariable)
                 else
                     IsInUpperScope fv1.Parent.Value
             match IsInUpperScope fv with
@@ -344,17 +322,15 @@ let rec eval (st: SymbolTable) ast =
                 match fv.Name with 
                 | PrimRefL ->
                     //  set its variable to an undefined one
-                    let undefVar = new FplVariable((pos1, pos2), fv)
-                    undefVar.FplId <- name
-                    undefVar.TypeId <- LiteralUndef
+                    let undefVar = new FplVariable(name, (pos1, pos2), fv)
                     let undefined = new FplIntrinsicUndef((pos1, pos2), undefVar)
                     undefVar.SetValue(undefined)
                     variableStack.PushEvalStack(undefVar)
                     variableStack.PopEvalStack()
                 | _ -> ()
 
-        if isLocalizationDeclaration && fv.ArgList.Count>0 && fv.ArgList[0].IsVariable() then 
-            let variable = fv.ArgList[0] :?> FplVariable
+        if isLocalizationDeclaration && fv.ArgList.Count>0 then 
+            let variable = fv.ArgList[0] 
             let rec getLocalization (fValue:FplValue) = 
                 match fValue with
                 | :? FplLocalization -> fValue
@@ -720,11 +696,11 @@ let rec eval (st: SymbolTable) ast =
                 | Some classNode -> 
                     fv.ArgList.Add classNode
                 | None -> ()
-        | :? FplVariable as var when var.IsMany -> 
+        | :? FplVariableMany -> 
             fv.TypeId <- $"*{identifier}"
-        | :? FplVariable as var when var.IsMany1 -> 
+        | :? FplVariableMany1 -> 
             fv.TypeId <- $"+{identifier}"
-        | :? FplVariable as var when not (var.IsVariadic()) -> 
+        | :? FplVariable -> 
             fv.TypeId <- identifier
         | :? FplMapping -> 
             fv.TypeId <- fv.TypeId + identifier
@@ -1692,13 +1668,37 @@ let rec eval (st: SymbolTable) ast =
         parent.AuxiliaryInfo <- variableListAst |> List.length // remember how many variables to create
         // create all variables of the named variable declaration in the current scope
         variableListAst |> List.iter (fun varAst ->
-            let newVar = new FplVariable((pos1, pos2), parent)
-            newVar.IsSignatureVariable <- variableStack.InSignatureEvaluation
-            variableStack.PushEvalStack(newVar)
-            eval st varAst 
-            eval st varDeclModifierAst
-            eval st variableTypeAst
-            variableStack.PopEvalStack()
+            match varDeclModifierAst with 
+            | Ast.Many((posMan1, posMan2),()) ->
+                checkVAR00Diagnostics parent.AuxiliaryInfo posMan1 posMan2        
+                match varAst with 
+                | Ast.Var((varPos1, varPos2), varName) ->
+                    let newVar = new FplVariableMany(varName, (varPos1, varPos2), parent)
+                    newVar.IsSignatureVariable <- variableStack.InSignatureEvaluation
+                    variableStack.PushEvalStack(newVar)
+                    eval st variableTypeAst
+                    variableStack.PopEvalStack()
+                | _ -> ()
+            | Ast.Many1((posMan1, posMan2),()) ->
+                checkVAR00Diagnostics parent.AuxiliaryInfo posMan1 posMan2        
+                match varAst with 
+                | Ast.Var((varPos1, varPos2), varName) ->
+                    let newVar = new FplVariableMany1(varName, (varPos1, varPos2), parent)
+                    newVar.IsSignatureVariable <- variableStack.InSignatureEvaluation
+                    variableStack.PushEvalStack(newVar)
+                    eval st variableTypeAst
+                    variableStack.PopEvalStack()
+                | _ -> ()
+            | Ast.One((_, _),()) ->
+                match varAst with 
+                | Ast.Var((varPos1, varPos2), varName) ->
+                    let newVar = new FplVariable(varName, (varPos1, varPos2), parent)
+                    newVar.IsSignatureVariable <- variableStack.InSignatureEvaluation
+                    variableStack.PushEvalStack(newVar)
+                    eval st variableTypeAst
+                    variableStack.PopEvalStack()
+                | _ -> ()
+            | _ -> ()
         ) |> ignore 
         st.EvalPop()
     // | Axiom of Constructor * (Ast * (Ast list option * Ast))

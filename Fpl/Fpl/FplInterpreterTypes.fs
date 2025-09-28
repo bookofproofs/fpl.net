@@ -355,6 +355,10 @@ let maxRecursion = 5
 *)
 
 
+type IVariable =
+    abstract member IsSignatureVariable : bool with get, set
+    abstract member IsInitializedVariable : bool with get, set
+
 [<AbstractClass>]
 type FplValue(positions: Positions, parent: FplValue option) =
     let mutable _expressionType = FixType.NoFix
@@ -367,8 +371,6 @@ type FplValue(positions: Positions, parent: FplValue option) =
     let mutable _typeId = ""
     let mutable (_filePath: string option) = None
     let mutable _isIntrinsic = false
-    let mutable _isInitializedVariable = false
-    let mutable _isSignatureVariable = false
 
     let mutable _parent = parent
     let _scope = Dictionary<string, FplValue>()
@@ -417,12 +419,6 @@ type FplValue(positions: Positions, parent: FplValue option) =
     /// Indicates if this FplValue is a proof.
     abstract member IsProof: unit -> bool
 
-    /// Indicates if this FplValue is a variable or some variadic variable.
-    abstract member IsVariable: unit -> bool
-
-    /// Indicates if this FplValue is a variable or some variadic variable.
-    abstract member IsVariadic: unit -> bool
-
     /// Indicates if this FplValue is a mapping.
     abstract member IsMapping: unit -> bool
 
@@ -449,22 +445,17 @@ type FplValue(positions: Positions, parent: FplValue option) =
     override this.IsBlock () = false
     override this.IsClass () = false
     override this.IsProof () = false
-    override this.IsVariable () = false
-    override this.IsVariadic () = false
     override this.IsMapping () = false
     
     override this.AssignParts (ret:FplValue) =
         ret.FplId <- this.FplId
 
-        if this.IsSignatureVariable then
-            ret.IsSignatureVariable <- this.IsSignatureVariable
 
         ret.TypeId <- this.TypeId
         ret.Arity <- this.Arity
         ret.AuxiliaryInfo <- this.AuxiliaryInfo
         ret.IsIntrinsic <- this.IsIntrinsic
         ret.ExpressionType <- this.ExpressionType
-        ret.IsInitializedVariable <- this.IsInitializedVariable
 
         this.Scope
         |> Seq.iter (fun (kvp:KeyValuePair<string, FplValue>) ->
@@ -510,23 +501,6 @@ type FplValue(positions: Positions, parent: FplValue option) =
                     )
                 )
 
-    /// Indicates if this FplValue is a variable declared in the signature (true) or in the block (false).
-    member this.IsSignatureVariable
-        with get () =
-            if this.IsVariable() then
-                _isSignatureVariable
-            else
-                false
-        and set (value) =
-            if this.IsVariable() then
-                _isSignatureVariable <- value
-            else
-                raise (
-                    ArgumentException(
-                        sprintf "Cannot set IsSignatureVariable for non-variable %s" this.ShortName
-                    )
-                )
-
     /// Starting position of this FplValue
     member this.StartPos
         with get () = _startPos
@@ -552,11 +526,6 @@ type FplValue(positions: Positions, parent: FplValue option) =
         with get () = _parent
         and set (value) = _parent <- value
 
-    /// Indicates if this FplValue is an initialized variable
-    member this.IsInitializedVariable
-        with get () = _isInitializedVariable
-        and set (value) = _isInitializedVariable <- value
-
     /// Indicates if this FplValue is an intrinsically defined block
     member this.IsIntrinsic
         with get () = _isIntrinsic
@@ -565,31 +534,18 @@ type FplValue(positions: Positions, parent: FplValue option) =
     /// Create a (possibly empty) list of all variables in the scope of this FplValue.
     /// If the FplValue is itself a variable, it will be included in the list.
     member this.GetVariables() =
-        let rec collectVariables (fv: FplValue) =
-            let mutable result = []
-
-            if fv.IsVariable() then
-                result <- fv :: result
-
-            for kvp in fv.Scope do
-                result <- result @ collectVariables kvp.Value
-
-            result
-
-        collectVariables this
+        this.Scope.Values
+        |> Seq.filter (fun fv -> fv.Name = PrimVariableL || fv.Name = PrimVariableManyL || fv.Name = PrimVariableMany1L)
+        |> Seq.toList
 
     /// Copies other FplValue to this one without changing its reference pointer.
     member this.Copy(other: FplValue) =
         this.FplId <- other.FplId
 
-        if other.IsSignatureVariable then
-            this.IsSignatureVariable <- other.IsSignatureVariable
-
         this.TypeId <- other.TypeId
         this.Arity <- other.Arity
         this.AuxiliaryInfo <- other.AuxiliaryInfo
         this.IsIntrinsic <- other.IsIntrinsic
-        this.IsInitializedVariable <- other.IsInitializedVariable
 
         this.Scope.Clear()
         other.Scope |> Seq.iter (fun kvp -> this.Scope.Add(kvp.Key, kvp.Value))
@@ -731,31 +687,39 @@ and FplVariableStack() =
             |> List.iter (fun (fv:FplValue) ->
                 let fvClone = fv.Clone()
                 p.ValueList.Add(fvClone)
-                p.IsInitializedVariable <- true
+                match box p with
+                | :? IVariable as var -> var.IsInitializedVariable <- true
+                | _ -> ()
             )
 
         let rec replace (pars:FplValue list) (args: FplValue list) = 
             match (pars, args) with
             | (p::ps, ar::ars) ->
-                match p.IsVariadic(), ar.IsVariadic() with
+                match p.Name , ar.Name with
                 // p is variadic, ar is variadic 
-                | true, true ->
+                | PrimVariableMany1L, PrimVariableMany1L 
+                | PrimVariableMany1L, PrimVariableManyL 
+                | PrimVariableManyL, PrimVariableMany1L 
+                | PrimVariableManyL, PrimVariableManyL ->
                     replaceValues p ar
                     // continue replacing variables with the remaining lists
                     replace ps ars
                 // p is variadic, ar is anything
-                | true, _ ->
+                | PrimVariableMany1L, _ 
+                | PrimVariableManyL, _ ->
                     replaceValues p ar              
                     // continue replacing variables with the original pars and the remaining ars list
                     replace pars ars
                 // p is not variadic, ar is variadic 
-                | false, true -> ()
+                | PrimVariableL, PrimVariableMany1L 
+                | PrimVariableL, PrimVariableManyL -> ()
                  // p is not variadic, ar is anything but variadic 
-                | false, _ ->
+                | PrimVariableL, _ ->
                     // otherwise, simply assign the argument's representation to the parameter's representation
                     replaceValues p ar
                     // continue replacing variables with the remaining lists
                     replace ps ars
+                | _ , _ -> ()
             | (p::ps, []) -> ()
             | ([], ar::ars) -> ()
             | ([], []) -> ()
@@ -770,15 +734,16 @@ and FplVariableStack() =
         // and pushing the originals on the stack
         let toBeSavedScopeVariables = Dictionary<string, FplValue>()
         let pars = List<FplValue>()
-        called.Scope
-        |> Seq.filter (fun (kvp:KeyValuePair<string,FplValue>) -> kvp.Value.IsVariable()) 
-        |> Seq.iter (fun paramKvp -> 
+        let vars = called.GetVariables()
+        vars 
+        |> List.iter (fun parOriginal -> 
             // save the clone of the original parameter variable
-            let parOriginal = paramKvp.Value
             let parClone = parOriginal.Clone()
-            toBeSavedScopeVariables.Add(paramKvp.Key, parClone)
-            if paramKvp.Value.IsSignatureVariable then 
+            toBeSavedScopeVariables.Add(parOriginal.FplId, parClone)
+            match box parOriginal with 
+            | :? IVariable as parOrig when parOrig.IsSignatureVariable ->
                 pars.Add(parOriginal)
+            | _ -> ()
         )
         let kvp = KeyValuePair(called.FplId,toBeSavedScopeVariables)
         _stack.Push(kvp)
@@ -840,6 +805,18 @@ let stripLastDollarDigit (s: string) =
     let lastIndex = s.LastIndexOf('$')
     if lastIndex <> -1 then s.Substring(0, lastIndex) else s
 
+let isVar (fv1:FplValue) =
+    match fv1.Name with
+    | PrimVariableL
+    | PrimVariableManyL
+    | PrimVariableMany1L -> true
+    | _ -> false
+    
+let isSignatureVar (fv1:FplValue) = 
+    match box fv1 with 
+    | :? IVariable as var when var.IsSignatureVariable -> true
+    | _ -> false
+
 /// Qualified name of this FplValue
 let qualifiedName (fplValue:FplValue)=
     let rec getFullName (fv: FplValue) (first: bool) =
@@ -871,16 +848,18 @@ let qualifiedName (fplValue:FplValue)=
         match fv.Name with
         | PrimRoot -> ""
         | _ -> 
+
+
             if first then
                 if fv.Parent.Value.Name = PrimRoot then
                     getFullName fv.Parent.Value false + fplValueType
-                else if fv.IsVariable() && not (fv.Parent.Value.IsVariable()) then
+                else if (isVar fv) && not (isVar fv.Parent.Value) then
                     fplValueType
                 else
                     getFullName fv.Parent.Value false + "." + fplValueType
             elif fv.Parent.Value.Name = PrimRoot then
                 getFullName fv.Parent.Value false + fplValueType
-            elif fv.IsVariable() && not (fv.Parent.Value.IsVariable()) then
+            elif (isVar fv) && not (isVar fv.Parent.Value) then
                 fplValueType
             else
                 getFullName fv.Parent.Value false + "." + fplValueType
@@ -922,8 +901,8 @@ let private getParamTuple (fv:FplValue)  (signatureType:SignatureType) =
         let propagate = propagateSignatureType signatureType
         fv.Scope
         |> Seq.filter (fun (kvp: KeyValuePair<string, FplValue>) ->
-            kvp.Value.IsSignatureVariable
-            || fv.IsVariable() && not (kvp.Value.IsClass())
+            isSignatureVar kvp.Value
+            || (isVar fv) && not (kvp.Value.IsClass())
             || fv.IsMapping())
         |> Seq.map (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.Type(propagate))
         |> String.concat ", "
@@ -2223,7 +2202,7 @@ type FplLocalization(positions: Positions, parent: FplValue) =
         let head = getFplHead this signatureType
         let paramT =
             this.Scope
-            |> Seq.filter (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.IsVariable())
+            |> Seq.filter (fun (kvp: KeyValuePair<string, FplValue>) -> isVar kvp.Value)
             |> Seq.map (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.Type(signatureType))
             |> String.concat ", "
 
@@ -2436,7 +2415,7 @@ type FplReference(positions: Positions, parent: FplValue) =
 
     override this.Represent () = 
         if this.ValueList.Count = 0 then 
-            if this.Scope.ContainsKey(this.FplId) && this.Scope[this.FplId].IsVariable() then
+            if this.Scope.ContainsKey(this.FplId) && isVar this.Scope[this.FplId] then
                 this.Scope[this.FplId].Represent()
             else
                 let args = 
@@ -3013,7 +2992,7 @@ type FplDecrement(positions: Positions, parent: FplValue) as this =
         let argOpt = getArgument argPre
         let numericValue = 
             match argOpt with
-            | Some arg when arg.IsVariable() -> 
+            | Some arg when isVar arg -> 
                 arg.Represent()
             | Some arg -> arg.FplId
             | None -> argPre.FplId
@@ -3222,9 +3201,8 @@ type FplGenericQuantor(positions: Positions, parent: FplValue) =
         let head = getFplHead this signatureType
 
         let paramT =
-            this.Scope
-            |> Seq.filter (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.IsVariable())
-            |> Seq.map (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.Type(signatureType))
+            this.GetVariables()
+            |> Seq.map (fun fv -> fv.Type(signatureType))
             |> String.concat ", "
 
         match paramT with
@@ -3280,55 +3258,15 @@ type FplQuantorExistsN(positions: Positions, parent: FplValue) as this =
 
     override this.Run _ = () // todo implement run
 
-type FplVariable(positions: Positions, parent: FplValue) =
+[<AbstractClass>]
+type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
-    let mutable _variadicType = String.Empty // "" = variable, "many" = many, "many1" = many1 
+    let mutable _isSignatureVariable = false
+    let mutable _isInitializedVariable = false
 
-
-    override this.Name = 
-        match _variadicType with
-        | "many" -> PrimVariableManyL
-        | "many1"-> PrimVariableMany1L
-        | _ -> PrimVariableL
-    override this.ShortName = 
-        match _variadicType with
-        | "many" -> PrimVariableMany
-        | "many1"-> PrimVariableMany1
-        | _ -> PrimVariable
-
-    member this.SetToMany() = 
-        if _variadicType = String.Empty then
-            _variadicType <- "many"
-        elif _variadicType = "many" then 
-            ()
-        else 
-            failwith($"The variadic type was already set to {_variadicType}.")
-
-    member this.SetToMany1() = 
-        if _variadicType = String.Empty then
-            _variadicType <- "many1"
-        elif _variadicType = "many1" then 
-            ()
-        else 
-            failwith($"The variadic type was already set to {_variadicType}.")
-
-    override this.IsVariadic() = _variadicType <> String.Empty
-
-    member this.IsMany = _variadicType = "many"
-    member this.IsMany1 = _variadicType = "many1"
-
-
-    override this.Clone () =
-        let ret = new FplVariable((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.IsVariable () = true
-
-    override this.SetValue fv =
-        base.SetValue(fv)
-        if fv.FplId <> LiteralUndef then
-            this.IsInitializedVariable <- true
+    do 
+        this.FplId <- fplId
+        this.TypeId <- LiteralUndef
 
     override this.Type signatureType =
         let pars = getParamTuple this signatureType
@@ -3341,37 +3279,24 @@ type FplVariable(positions: Positions, parent: FplValue) =
         | (_, None) -> sprintf "%s(%s)" head pars
         | (_, Some map) -> sprintf "%s(%s) -> %s" head pars (map.Type(propagate))
 
-    override this.Represent () = 
-        if this.ValueList.Count = 0 then
-            if this.IsInitializedVariable then 
-                // this case should never happen, because isInitializesVariable is a contradiction to ValueList.Count 0
-                LiteralUndef
-            else
-                match this.TypeId with
-                | LiteralUndef -> LiteralUndef
-                | _ -> 
-                    if this.IsVariadic() then
-                        $"dec {this.Type(SignatureType.Type)}[]" 
-                    else
-                        $"dec {this.Type(SignatureType.Type)}" 
-        else
-            let subRepr = 
-                this.ValueList
-                |> Seq.map (fun subfv -> subfv.Represent())
-                |> String.concat ", "
-            if this.IsInitializedVariable then 
-                subRepr
-            else
-                match this.TypeId with
-                | LiteralUndef -> LiteralUndef
-                | _ -> 
-                    if this.IsVariadic() then
-                        $"dec {this.Type(SignatureType.Type)}[]" 
-                    else
-                        $"dec {this.Type(SignatureType.Type)}" 
 
-    override this.Run _ = ()
+    /// Indicates if this Variable is declared in the signature (true) or in the block (false).
+    member this.IsSignatureVariable
+        with get () = _isSignatureVariable
+        and set (value) = _isSignatureVariable <- value
 
+    /// Indicates if this FplValue is an initialized variable
+    member this.IsInitializedVariable
+        with get () = _isInitializedVariable
+        and set (value) = _isInitializedVariable <- value
+
+    interface IVariable with
+        member this.IsSignatureVariable 
+            with get () = this.IsSignatureVariable
+            and set (value) = this.IsSignatureVariable <- value
+        member this.IsInitializedVariable 
+            with get () = this.IsInitializedVariable
+            and set (value) = this.IsInitializedVariable <- value
 
     override this.EmbedInSymbolTable nextOpt =
         let addToRuleOfInference (block:FplValue) = 
@@ -3462,7 +3387,7 @@ type FplVariable(positions: Positions, parent: FplValue) =
         | Some next when (next.Name = LiteralPrfL 
                         || next.Name = LiteralCorL) ->
             addToProofOrCorolllary next
-        | Some next when next.IsVariable() ->
+        | Some next when isVar next ->
             addToVariableOrQuantorOrMapping next
         | Some next when next.Name = PrimMappingL ->
             addToVariableOrQuantorOrMapping next
@@ -3472,14 +3397,132 @@ type FplVariable(positions: Positions, parent: FplValue) =
                 emitVAR02diagnostics this.FplId this.StartPos this.EndPos
             elif next.Name = PrimQuantorExistsN && next.Scope.Count>0 then 
                 emitVAR07diagnostics this.FplId this.StartPos this.EndPos
-            elif this.IsVariadic() then 
+            elif this.Name = PrimVariableMany1L || this.Name = PrimVariableManyL then 
                 emitVAR08diagnostics this.StartPos this.EndPos
             else
                 next.Scope.TryAdd(this.FplId, this) |> ignore
                 
         | _ -> addExpressionToParentArgList this
 
+    override this.Run _ = ()
+
     override this.RunOrder = None
+
+
+type FplVariableMany1(fplId, positions: Positions, parent: FplValue) =
+    inherit FplGenericVariable(fplId, positions, parent)
+
+    override this.Name = PrimVariableMany1L
+
+    override this.ShortName = PrimVariableMany1
+
+    override this.Clone () =
+        let ret = new FplVariableMany1(this.FplId, (this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        if this.IsSignatureVariable then
+            ret.IsSignatureVariable <- this.IsSignatureVariable
+        ret.IsInitializedVariable <- this.IsInitializedVariable
+        ret
+
+    override this.Represent () = 
+        if this.ValueList.Count = 0 then
+            if this.IsInitializedVariable then 
+                // this case should never happen, because isInitializesVariable is a contradiction to ValueList.Count 0
+                LiteralUndef
+            else
+                match this.TypeId with
+                | LiteralUndef -> LiteralUndef
+                | _ -> $"dec {this.Type(SignatureType.Type)}[]" 
+        else
+            let subRepr = 
+                this.ValueList
+                |> Seq.map (fun subfv -> subfv.Represent())
+                |> String.concat ", "
+            if this.IsInitializedVariable then 
+                subRepr
+            else
+                match this.TypeId with
+                | LiteralUndef -> LiteralUndef
+                | _ -> $"dec {this.Type(SignatureType.Type)}[]" 
+
+
+type FplVariableMany(fplId, positions: Positions, parent: FplValue) =
+    inherit FplGenericVariable(fplId, positions, parent)
+
+    override this.Name = PrimVariableManyL
+
+    override this.ShortName = PrimVariableMany
+
+    override this.Clone () =
+        let ret = new FplVariableMany(this.FplId, (this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        if this.IsSignatureVariable then
+            ret.IsSignatureVariable <- this.IsSignatureVariable
+        ret.IsInitializedVariable <- this.IsInitializedVariable
+        ret
+
+    override this.Represent () = 
+        if this.ValueList.Count = 0 then
+            if this.IsInitializedVariable then 
+                // this case should never happen, because isInitializesVariable is a contradiction to ValueList.Count 0
+                LiteralUndef
+            else
+                match this.TypeId with
+                | LiteralUndef -> LiteralUndef
+                | _ -> $"dec {this.Type(SignatureType.Type)}[]" 
+        else
+            let subRepr = 
+                this.ValueList
+                |> Seq.map (fun subfv -> subfv.Represent())
+                |> String.concat ", "
+            if this.IsInitializedVariable then 
+                subRepr
+            else
+                match this.TypeId with
+                | LiteralUndef -> LiteralUndef
+                | _ -> $"dec {this.Type(SignatureType.Type)}[]" 
+
+type FplVariable(fplId, positions: Positions, parent: FplValue) =
+    inherit FplGenericVariable(fplId, positions, parent)
+
+
+    override this.Name = PrimVariableL
+
+    override this.ShortName = PrimVariable
+
+    override this.Clone () =
+        let ret = new FplVariable(this.FplId, (this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        if this.IsSignatureVariable then
+            ret.IsSignatureVariable <- this.IsSignatureVariable
+        ret.IsInitializedVariable <- this.IsInitializedVariable
+        ret
+
+    override this.SetValue fv =
+        base.SetValue(fv)
+        if fv.FplId <> LiteralUndef then
+            this.IsInitializedVariable <- true
+
+    override this.Represent () = 
+        if this.ValueList.Count = 0 then
+            if this.IsInitializedVariable then 
+                // this case should never happen, because isInitializesVariable is a contradiction to ValueList.Count 0
+                LiteralUndef
+            else
+                match this.TypeId with
+                | LiteralUndef -> LiteralUndef
+                | _ -> $"dec {this.Type(SignatureType.Type)}" 
+        else
+            let subRepr = 
+                this.ValueList
+                |> Seq.map (fun subfv -> subfv.Represent())
+                |> String.concat ", "
+            if this.IsInitializedVariable then 
+                subRepr
+            else
+                match this.TypeId with
+                | LiteralUndef -> LiteralUndef
+                | _ -> $"dec {this.Type(SignatureType.Type)}" 
 
 [<AbstractClass>]
 type FplGenericFunctionalTerm(positions: Positions, parent: FplValue) as this =
@@ -3875,8 +3918,8 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
                 this.CheckSIG05Diagnostics assignee assignedValue
                 assignedValue.Run variableStack
                 assignee.SetValuesOf assignedValue
-                match assignee with
-                | :? FplVariable -> assignee.IsInitializedVariable <- true
+                match box assignee with
+                | :? IVariable as assigneeCast -> assigneeCast.IsInitializedVariable <- true
                 | _ -> ()
         | _ -> ()
 
@@ -4615,7 +4658,7 @@ let matchArgumentsWithParameters (fva: FplValue) (fvp: FplValue) =
         | :? FplMandatoryFunctionalTerm
         | :? FplOptionalPredicate
         | :? FplOptionalFunctionalTerm ->
-            fvp.Scope.Values |> Seq.filter (fun fv -> fv.IsSignatureVariable) |> Seq.toList
+            fvp.Scope.Values |> Seq.filter (fun fv -> isSignatureVar fv) |> Seq.toList
         | _ -> []
 
     let arguments = fva.ArgList |> Seq.toList
