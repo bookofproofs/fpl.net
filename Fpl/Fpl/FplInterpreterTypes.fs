@@ -1157,7 +1157,7 @@ type FplIntrinsicPred(positions: Positions, parent: FplValue) =
 
     override this.Run _ = ()
 
-    override this.EmbedInSymbolTable _ = this.Parent.Value.ArgList.Add this 
+    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
 
 
 type IHasSignature =
@@ -1223,7 +1223,7 @@ type FplPredicateList(positions: Positions, parent: FplValue, runOrder) =
         // todo implement run
         ()
 
-    override this.EmbedInSymbolTable _ = this.Parent.Value.ArgList.Add this
+    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
 
     override this.RunOrder = Some _runOrder
 
@@ -1277,7 +1277,7 @@ type FplInstance(positions: Positions, parent: FplValue) =
 
     override this.Run _ = ()
 
-    override this.EmbedInSymbolTable _ = this.Parent.Value.ArgList.Add this 
+    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
 
 type FplConstructor(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(positions, parent)
@@ -1404,7 +1404,7 @@ type FplIntrinsicObj(positions: Positions, parent: FplValue) =
     override this.Run variableStack = 
         this.SetValue (new FplInstance((this.StartPos, this.EndPos), this.Parent.Value))
 
-    override this.EmbedInSymbolTable _ = this.Parent.Value.ArgList.Add this 
+    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
 
 let isIntrinsicObj (fv1:FplValue) = 
     match fv1 with
@@ -1767,7 +1767,7 @@ type FplGenericArgInference(positions: Positions, parent: FplValue) =
         let head = getFplHead this signatureType
         head
 
-    override this.EmbedInSymbolTable _ = this.Parent.Value.ArgList.Add this 
+    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
 
 [<AbstractClass>]
 type FplGenericJustificationItem(positions: Positions, parent: FplValue) =
@@ -1792,7 +1792,7 @@ type FplGenericJustificationItem(positions: Positions, parent: FplValue) =
         | Some otherId ->
             emitPR004Diagnostics thisJustificationItemId otherId this.StartPos this.EndPos 
         | _ -> ()
-        this.Parent.Value.ArgList.Add this
+        addExpressionToParentArgList this
 
     override this.RunOrder = None
 
@@ -1945,7 +1945,7 @@ and FplJustification(positions: Positions, parent: FplValue) =
             |> Seq.map (fun fv -> fv :?> FplGenericJustificationItem)
             |> Seq.toList
 
-    override this.EmbedInSymbolTable _ = this.Parent.Value.ArgList.Add this
+    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
 
     member this.ParentArgument = this.Parent.Value :?> FplArgument
 
@@ -2276,7 +2276,7 @@ type FplTranslation(positions: Positions, parent: FplValue) =
         // todo implement run
         ()
 
-    override this.EmbedInSymbolTable _ = this.Parent.Value.ArgList.Add this 
+    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
 
     override this.RunOrder = None
 
@@ -2338,7 +2338,7 @@ type FplAssertion(positions: Positions, parent: FplValue) =
         // todo implement run
         ()
 
-    override this.EmbedInSymbolTable _ = this.Parent.Value.ArgList.Add this 
+    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
 
     override this.RunOrder = None
 
@@ -2363,7 +2363,7 @@ type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
 
     override this.Run _ = ()
 
-    override this.EmbedInSymbolTable _ = this.Parent.Value.ArgList.Add this 
+    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
 
     override this.RunOrder = None
 
@@ -2508,11 +2508,11 @@ type FplReference(positions: Positions, parent: FplValue) =
             next.TypeId <- this.FplId
             next.EndPos <- this.EndPos
         | Some next when next.IsBlock() ->
-            this.Parent.Value.ArgList.Add this 
+            addExpressionToParentArgList this 
         | Some next when next.Scope.ContainsKey(".") -> 
             next.EndPos <- this.EndPos
         | Some next -> 
-            this.Parent.Value.ArgList.Add this
+            addExpressionToParentArgList this
             next.EndPos <- this.EndPos
         | _ -> ()
 
@@ -2944,7 +2944,7 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
     override this.EmbedInSymbolTable nextOpt = 
         match nextOpt with
         | Some next when next.Scope.ContainsKey(".") -> ()
-        | _ -> this.Parent.Value.ArgList.Add this
+        | _ -> addExpressionToParentArgList this
 
     override this.RunOrder = None
 
@@ -3047,7 +3047,7 @@ type FplDecrement(positions: Positions, parent: FplValue) as this =
                 string n'
         this.SetValue(newValue)
 
-    override this.EmbedInSymbolTable _ = this.Parent.Value.ArgList.Add this
+    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
 
     override this.RunOrder = None
 
@@ -3096,7 +3096,7 @@ type FplMapping(positions: Positions, parent: FplValue) =
 
     override this.Run _ = ()
 
-    override this.EmbedInSymbolTable _ = this.Parent.Value.ArgList.Add this 
+    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
 
     override this.RunOrder = None
 
@@ -3255,7 +3255,7 @@ type FplGenericQuantor(positions: Positions, parent: FplValue) =
         | "" -> head
         | _ -> sprintf "%s(%s)" head paramT
 
-    override this.EmbedInSymbolTable _ = this.Parent.Value.ArgList.Add this
+    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
     
 type FplQuantorAll(positions: Positions, parent: FplValue) as this =
     inherit FplGenericQuantor(positions, parent)
@@ -3503,7 +3503,7 @@ type FplVariable(positions: Positions, parent: FplValue) =
             else
                 next.Scope.TryAdd(this.FplId, this) |> ignore
                 
-        | _ -> this.Parent.Value.ArgList.Add this
+        | _ -> addExpressionToParentArgList this
 
     override this.RunOrder = None
 
@@ -3705,7 +3705,7 @@ type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
 
     override this.Run _ = ()
 
-    override this.EmbedInSymbolTable _ = this.Parent.Value.ArgList.Add this 
+    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
 
     override this.RunOrder = None
 
@@ -3730,7 +3730,7 @@ type FplIntrinsicFunc(positions: Positions, parent: FplValue) as this =
 
     override this.Run _ = () 
 
-    override this.EmbedInSymbolTable _ = this.Parent.Value.ArgList.Add this 
+    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
 
     override this.RunOrder = None
 
@@ -3756,7 +3756,7 @@ type FplIntrinsicTpl(positions: Positions, parent: FplValue) as this =
 
     override this.Run _ = () 
 
-    override this.EmbedInSymbolTable _ = this.Parent.Value.ArgList.Add this 
+    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
 
     override this.RunOrder = None
 
@@ -3769,7 +3769,7 @@ type FplGenericStmt(positions: Positions, parent: FplValue) =
     override this.Type signatureType = this.FplId
     override this.Represent () = ""
 
-    override this.EmbedInSymbolTable _ = this.Parent.Value.ArgList.Add this
+    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
 
     override this.RunOrder = None
 
