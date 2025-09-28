@@ -74,7 +74,7 @@ type TestFplValueScopeTypeSignature() =
             | "fun1" -> Assert.AreEqual<string>("func() -> obj", fun1.Type(SignatureType.Type))
             | "fun2" -> Assert.AreEqual<string>("func() -> obj", fun2.Type(SignatureType.Type))
             | "fun3" -> Assert.AreEqual<string>("func() -> obj", fun3.Type(SignatureType.Type))
-            | "fun4" -> Assert.AreEqual<string>("func() -> obj(pred)", fun4.Type(SignatureType.Type))
+            | "fun4" -> Assert.AreEqual<string>("func() -> tpl", fun4.Type(SignatureType.Type))
             | "fun5" -> Assert.AreEqual<string>("func() -> SomeClass1", fun5.Type(SignatureType.Type))
             | "fun6" -> Assert.AreEqual<string>("func() -> SomeClass1", fun6.Type(SignatureType.Type))
             | "fun7" -> Assert.AreEqual<string>("func() -> SomeClass1", fun7.Type(SignatureType.Type))

@@ -935,6 +935,7 @@ type FplTheory(theoryName, parent: FplValue, filePath: string, runOrder) as this
     do
         this.FilePath <- Some filePath
         this.FplId <- theoryName
+        this.TypeId <- theoryName
 
     override this.Name = PrimTheoryL
     override this.ShortName = PrimTheory
