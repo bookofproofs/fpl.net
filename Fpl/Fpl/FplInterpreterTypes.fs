@@ -2359,10 +2359,14 @@ type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
 
     override this.RunOrder = None
 
+type ArgType = 
+    | Brackets
+    | Parentheses
+    | Nothing
+
 type FplReference(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
-    let mutable _hasParentheses = false
-    let mutable _hasBrackets = false
+    let mutable _argType = ArgType.Nothing
 
     override this.Name = PrimRefL
     override this.ShortName = PrimRef
@@ -2376,15 +2380,10 @@ type FplReference(positions: Positions, parent: FplValue) =
         else
             base.SetValue(fv)
 
-    /// Indicates if this Reference was followed by brackets in the FPL code.
-    member this.HasParentheses
-        with get () = _hasParentheses
-        and set (value) = _hasParentheses <- value
-
-    /// Indicates if this Reference was followed by parentheses in the FPL code.
-    member this.HasBrackets
-        with get () = _hasBrackets
-        and set (value) = _hasBrackets <- value
+    /// Indicates if this Reference was followed by brackets, by parentheses, or by nothing in the FPL code.
+    member this.ArgType
+        with get () = _argType
+        and set (value) = _argType <- value
 
     override this.Type signatureType =
         if this.Scope.ContainsKey(this.FplId) then
@@ -2400,36 +2399,38 @@ type FplReference(positions: Positions, parent: FplValue) =
                     Some(this.Scope["."])
                 else
                     None
+
             // The arguments are reserved for the arguments or the coordinates of the reference
-            // If the argument tuple equals "???", an empty argument or coordinates list has occurred
             let args =
                 this.ArgList
                 |> Seq.map (fun fv -> fv.Type(propagate))
                 |> String.concat ", "
 
-            match (head, args, qualification) with
-            | (_, "", Some qual) -> sprintf "%s.%s" head (qual.Type(propagate))
-            | (_, "???", Some qual) ->
-                if this.HasBrackets then
-                    sprintf "%s[].%s" head (qual.Type(propagate))
-                else
-                    sprintf "%s().%s" head (qual.Type(propagate))
-            | (_, _, Some qual) ->
-                if this.HasBrackets then
-                    sprintf "%s[%s].%s" head args (qual.Type(propagate))
-                else
-                    sprintf "%s(%s).%s" head args (qual.Type(propagate))
-            | ("???", _, None) -> sprintf "%s" head
-            | ("", _, None) -> sprintf "%s" args
-            | (_, "", None) -> sprintf "%s" head
-            | (_, "???", None) ->
-                if this.HasBrackets then
-                    sprintf "%s[]" head
-                else
-                    sprintf "%s()" head
-            | (_, _, None) ->
-                if this.HasBrackets then sprintf "%s[%s]" head args
-                else sprintf "%s(%s)" head args
+            match args.Length = 0, this.ArgType, qualification with
+            | true, ArgType.Nothing, Some qual ->
+                $"{head}.{qual.Type(propagate)}"
+            | true, ArgType.Brackets, Some qual ->
+                $"{head}[].{qual.Type(propagate)}"
+            | true, ArgType.Parentheses, Some qual ->
+                $"{head}().{qual.Type(propagate)}"
+            | false, ArgType.Nothing, Some qual -> 
+                $"{head}{args}.{qual.Type(propagate)}"
+            | false, ArgType.Brackets, Some qual ->
+                $"{head}[{args}].{qual.Type(propagate)}"
+            | false, ArgType.Parentheses, Some qual ->
+                $"{head}({args}).{qual.Type(propagate)}"
+            | true, ArgType.Nothing, None -> 
+                $"{head}"
+            | true, ArgType.Brackets, None ->
+                $"{head}[]"
+            | true, ArgType.Parentheses, None ->
+                $"{head}()"
+            | false, ArgType.Nothing, None -> 
+                $"{head}{args}"
+            | false, ArgType.Brackets, None ->
+                $"{head}[{args}]"
+            | false, ArgType.Parentheses, None ->
+                $"{head}({args})"
 
 
     override this.Represent () = 
@@ -2448,30 +2449,31 @@ type FplReference(positions: Positions, parent: FplValue) =
                     else
                         None
 
-                match (this.FplId, args, qualification) with
-                | (_, "", Some qual) -> sprintf "%s.%s" LiteralUndef (qual.Represent())
-                | (_, "???", Some qual) ->
-                    if this.HasBrackets then
-                        sprintf "%s[].%s" LiteralUndef (qual.Represent())
-                    else
-                        sprintf "%s().%s" LiteralUndef (qual.Represent())
-                | (_, _, Some qual) ->
-                    if this.HasBrackets then
-                        sprintf "%s[%s].%s" LiteralUndef args (qual.Represent())
-                    else
-                        sprintf "%s(%s).%s" LiteralUndef args (qual.Represent())
-                | ("???", _, None) -> "()" 
-                | ("", _, None) -> sprintf "%s" args
-                | (_, "()", None) -> sprintf "%s()" LiteralUndef
-                | (_, "", None) -> sprintf "%s" LiteralUndef
-                | (_, "???", None) ->
-                    if this.HasBrackets then
-                        sprintf "%s[]" LiteralUndef
-                    else
-                        sprintf "%s()" LiteralUndef
-                | (_, _, None) ->
-                    if this.HasBrackets then sprintf "%s[%s]" LiteralUndef args
-                    else sprintf "%s(%s)" LiteralUndef args
+                match args.Length = 0, this.ArgType, qualification with
+                | true, ArgType.Nothing, Some qual ->
+                    $"{LiteralUndef}.{qual.Represent()}"
+                | true, ArgType.Brackets, Some qual ->
+                    $"{LiteralUndef}[].{qual.Represent()}"
+                | true, ArgType.Parentheses, Some qual ->
+                    $"{LiteralUndef}().{qual.Represent()}"
+                | false, ArgType.Nothing, Some qual -> 
+                    $"{LiteralUndef}{args}.{qual.Represent()}"
+                | false, ArgType.Brackets, Some qual ->
+                    $"{LiteralUndef}[{args}].{qual.Represent()}"
+                | false, ArgType.Parentheses, Some qual ->
+                    $"{LiteralUndef}({args}).{qual.Represent()}"
+                | true, ArgType.Nothing, None -> 
+                    $"{LiteralUndef}"
+                | true, ArgType.Brackets, None ->
+                    $"{LiteralUndef}[]"
+                | true, ArgType.Parentheses, None ->
+                    $"{LiteralUndef}()"
+                | false, ArgType.Nothing, None -> 
+                    $"{LiteralUndef}{args}"
+                | false, ArgType.Brackets, None ->
+                    $"{LiteralUndef}[{args}]"
+                | false, ArgType.Parentheses, None ->
+                    $"{LiteralUndef}({args})"
         else
             let subRepr = 
                 this.ValueList
@@ -2896,10 +2898,6 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
     override this.Type signatureType = 
         let head = getFplHead this signatureType
         let propagate = propagateSignatureType signatureType
-        let args = 
-            this.ArgList
-            |> Seq.map (fun arg -> arg.Type(propagate))
-            |> String.concat ", "
 
         let qualification =
             if this.Scope.ContainsKey(".") then
@@ -2907,18 +2905,9 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
             else
                 None
 
-        match (head, args, qualification) with
-        | (_, "", Some qual) -> sprintf "%s.%s" head (qual.Type(propagate))
-        | (_, "???", Some qual) -> sprintf "%s().%s" head (qual.Type(propagate))
-        | (_, _, Some qual) -> sprintf "%s(%s).%s" head args (qual.Type(propagate))
-        | ("???", _, None) -> sprintf "%s" head
-        | ("", _, None) -> sprintf "%s" args
-        | (_, "", None) -> sprintf "%s" head
-        | (_, "???", None) -> sprintf "%s()" head
-        | (_, _, None) ->
-            if head = "bydef." then sprintf "%s%s" head args
-            else sprintf "%s(%s)" head args
-
+        match (head, qualification) with
+        | (_, Some qual) -> sprintf "%s.%s" head (qual.Type(propagate))
+        | (_, None) -> sprintf "%s" head
 
     override this.Represent () = 
         let subRepr = 
@@ -3102,22 +3091,22 @@ let rec getMapping (fv:FplValue) =
             None
 
 /// Tries to match parameters of an FplValue with its arguments recursively
-let rec mpwa (args: FplValue list) (pars: FplValue list) =
+let rec mpwa hasArguments (args: FplValue list) (pars: FplValue list) =
     match (args, pars) with
     | (a :: ars, p :: prs) ->
         let aType = a.Type(SignatureType.Type)
         let pType = p.Type(SignatureType.Type) 
 
         if aType = pType then
-            mpwa ars prs
+            mpwa hasArguments ars prs
         elif pType.StartsWith(LiteralTpl) || pType.StartsWith("template") then
-            mpwa ars prs
-        elif pType = $"*{aType}" || pType.StartsWith("*") && aType = "???" then
-            if ars.Length > 0 then mpwa ars pars else None
-        elif pType.StartsWith("+") && aType = "???" then
+            mpwa hasArguments ars prs
+        elif pType = $"*{aType}" || pType.StartsWith("*") && aType = "" && hasArguments then
+            if ars.Length > 0 then mpwa hasArguments ars pars else None
+        elif pType.StartsWith("+") && aType = "" && hasArguments then
             Some($"() does not match `{p.Type(SignatureType.Name)}:{pType}`")
         elif pType = $"+{aType}" then
-            if ars.Length > 0 then mpwa ars pars else None
+            if ars.Length > 0 then mpwa hasArguments ars pars else None
         elif
             aType.Length > 0
             && Char.IsUpper(aType[0])
@@ -3134,7 +3123,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) =
                     let inheritanceList = findClassInheritanceChain cl pType
 
                     match inheritanceList with
-                    | Some str -> mpwa ars prs
+                    | Some str -> mpwa hasArguments ars prs
                     | None ->
                         Some(
                             $"`{a.Type(SignatureType.Name)}:{aType}` neither matches `{p.Type(SignatureType.Name)}:{pType}` nor the base classes"
@@ -3150,13 +3139,13 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) =
                 )
         elif aType.StartsWith(pType + "(") then
             None
-        elif aType = "???" && pType <> "???" then
+        elif hasArguments && aType = "" && pType <> "" then
             Some($"`()` does not match `{p.Type(SignatureType.Name)}:{pType}`")
         elif aType.StartsWith(LiteralFunc) then
             let someMap = getMapping a
 
             match someMap with
-            | Some map -> mpwa [ map ] [ p ]
+            | Some map -> mpwa hasArguments [ map ] [ p ]
             | _ -> Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
         else
             Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
@@ -3172,7 +3161,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) =
         | _ -> 
             Some($"missing argument for `{p.Type(SignatureType.Name)}:{pType}`")
     | (a :: [], []) ->
-        if a.FplId = "???" then
+        if a.FplId = "" && hasArguments then
             None
         else
             let aType = a.Type(SignatureType.Type)
@@ -3211,9 +3200,12 @@ type FplIsOperator(positions: Positions, parent: FplValue) as this =
         let newValue = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
         newValue.FplId <- 
             // FPL truth-table
-            match mpwa [operand] [typeOfOperand] with
-            | Some errMsg -> LiteralFalse
-            | None -> LiteralTrue
+            match operand with 
+            | :? FplReference as op ->
+                match mpwa (op.ArgType = ArgType.Parentheses) [operand] [typeOfOperand] with
+                | Some errMsg -> LiteralFalse
+                | None -> LiteralTrue
+            | _ -> LiteralFalse
         
         this.SetValue(newValue)  
 
@@ -3772,17 +3764,21 @@ type FplReturn(positions: Positions, parent: FplValue) as this =
     override this.Type signatureType = this.FplId
     override this.Represent () = this.FplId
 
-    member private this.MatchWithMapping (fva: FplValue) (fvp: FplValue) =
+    member private this.MatchWithMapping hasParentheses (fva: FplValue) (fvp: FplValue) =
         let targetMapping = getMapping fvp
-
         match targetMapping with
-        | Some tm -> mpwa [ fva ] [ tm ]
-        | None -> Some($"Btest")
+        | Some tm -> mpwa hasParentheses [ fva ] [ tm ]
+        | None -> None
 
     override this.Run _ =
         let returnedReference = this.ArgList[0]
         let mapType = this.Parent.Value
-        match this.MatchWithMapping returnedReference mapType with
+        let hasParentheses = 
+            match returnedReference with 
+            | :? FplReference as retRef -> (retRef.ArgType = ArgType.Parentheses)
+            | _ -> false
+        
+        match this.MatchWithMapping hasParentheses returnedReference mapType with
         | Some errMsg -> emitSIG03Diagnostics errMsg (mapType.Type(SignatureType.Type)) (returnedReference.StartPos) (returnedReference.EndPos)
         | _ -> 
             let returnedValueOpt = getArgument returnedReference
@@ -4609,30 +4605,26 @@ let rec nextDefinition (fv: FplValue) counter =
 let matchArgumentsWithParameters (fva: FplValue) (fvp: FplValue) =
     let parameters =
         match fvp with
-        | :? FplTheorem
-        | :? FplLemma
-        | :? FplProposition
-        | :? FplCorollary
-        | :? FplConjecture
+        | :? FplVariable ->
+            fvp.Scope.Values |> Seq.toList
+        | :? FplFunctionalTerm
         | :? FplPredicate
-        | :? FplAxiom
-        | :? FplRuleOfInference ->
+        | :? FplConstructor
+        | :? FplMandatoryPredicate
+        | :? FplMandatoryFunctionalTerm
+        | :? FplOptionalPredicate
+        | :? FplOptionalFunctionalTerm ->
             fvp.Scope.Values |> Seq.filter (fun fv -> fv.IsSignatureVariable) |> Seq.toList
-        | _ ->
-            match fvp with
-            | :? FplFunctionalTerm
-            | :? FplConstructor
-            | :? FplMandatoryPredicate
-            | :? FplMandatoryFunctionalTerm
-            | :? FplOptionalPredicate
-            | :? FplOptionalFunctionalTerm ->
-                fvp.Scope.Values |> Seq.filter (fun fv -> fv.IsSignatureVariable) |> Seq.toList
-            | _ -> fvp.Scope.Values |> Seq.toList
+        | _ -> []
 
     let arguments = fva.ArgList |> Seq.toList
+    let hasArguments = 
+        match fva with 
+        | :? FplReference as refFva -> (refFva.ArgType = ArgType.Parentheses)
+        | _ -> false
 
     let stdMsg = $"{qualifiedName fvp}"
-    let argResult = mpwa arguments parameters
+    let argResult = mpwa hasArguments arguments parameters
 
     match argResult with
     | Some aErr -> Some($"{aErr} in {stdMsg}")

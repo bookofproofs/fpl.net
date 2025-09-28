@@ -798,7 +798,7 @@ let rec eval (st: SymbolTable) ast =
         let fv = variableStack.PeekEvalStack()
         match fv with 
         | :? FplReference as ref -> 
-            ref.HasBrackets <- true
+            ref.ArgType <- ArgType.Brackets
             if coordListAst.Length > 0 then 
                 coordListAst 
                 |> List.iter (fun pred -> 
@@ -871,17 +871,15 @@ let rec eval (st: SymbolTable) ast =
     | Ast.ArgumentTuple((pos1, pos2), predicateListAst) ->
         st.EvalPush("ArgumentTuple")
         let fv = variableStack.PeekEvalStack()
-        if predicateListAst.Length > 0 then 
-            predicateListAst 
-            |> List.iter (fun pred -> 
-                eval st pred
-            ) 
-        else
-            let ref = new FplReference((pos1, pos2), fv)
-            ref.FplId <- "???"
-            ref.TypeId <- "???"
-            variableStack.PushEvalStack(ref)
-            variableStack.PopEvalStack()
+        match fv with 
+        | :? FplReference as ref ->
+            ref.ArgType <- ArgType.Parentheses
+            if predicateListAst.Length > 0 then 
+                predicateListAst 
+                |> List.iter (fun pred -> 
+                    eval st pred
+                )
+        | _ -> ()
         st.EvalPop()
     | Ast.QualificationList((pos1, pos2), asts) ->
         st.EvalPush("QualificationList")
