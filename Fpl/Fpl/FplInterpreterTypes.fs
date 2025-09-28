@@ -2266,7 +2266,7 @@ type FplTranslation(positions: Positions, parent: FplValue) =
         let args =
             this.ArgList
             |> Seq.map (fun fv -> fv.Type(SignatureType.Name))
-            |> String.concat ""
+            |> String.concat " "
 
         sprintf "%s%s" head args
 

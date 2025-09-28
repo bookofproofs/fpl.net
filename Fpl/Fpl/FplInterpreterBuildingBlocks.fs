@@ -301,7 +301,6 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Var")
         let evalPath = st.EvalPath()
         let isLocalizationDeclaration = evalPath.StartsWith("AST.Namespace.Localization.Expression.")
-        let isExtensionDeclaration = evalPath.Contains("ExtensionAssignment.Var")
         let fv = variableStack.PeekEvalStack()
         match fv.Name with 
         | PrimVariableL
@@ -334,6 +333,9 @@ let rec eval (st: SymbolTable) ast =
                     // for references, add to the reference's scope
                     fv.Scope.Add(name, foundVar)
                     fv.FplId <- name
+                | PrimTranslationL ->
+                    // for translations, use the name of the variable
+                    fv.FplId <- foundVar.Type SignatureType.Name
                 | _ -> ()
                 foundVar.AuxiliaryInfo <- foundVar.AuxiliaryInfo + 1
             | _ ->
@@ -368,29 +370,6 @@ let rec eval (st: SymbolTable) ast =
                 emitVAR03diagnostics name other.QualifiedStartPos pos1 pos2
             else 
                 loc.Scope.Add(name, variable)
-
-        //if isExtensionDeclaration then 
-        //    fv.Scope.Add(name, varValue)
-
-        //else
-        //    match variableInBlockScopeByName fv name true with 
-        //    | ScopeSearchResult.Found other -> 
-        //        match fv with
-        //        | :? FplReference ->
-        //            if not (fv.Scope.ContainsKey(name)) then
-        //                fv.Scope.Add(name, other)
-        //        | _ -> ()
-        //        // count usages of the variable in scope
-        //        other.AuxiliaryInfo <- other.AuxiliaryInfo + 1
-        //    | _ -> 
-        //        // otherwise emit variable not declared if this is not a declaration 
-        //        emitVAR01diagnostics name pos1 pos2
-        //        if fv.Name = PrimRefL then 
-        //            // for references, still add the variable to the scope of the reference. 
-        //            // It will then be treated as a "variable" that is undefined
-        //            fv.Scope.Add(name, varValue)
-        //    fv.FplId <- name
-        //    fv.TypeId <- LiteralUndef
         st.EvalPop() 
     | Ast.DelegateId((pos1, pos2), s) -> 
         st.EvalPush("DelegateId")
@@ -798,8 +777,8 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("NamespaceIdentifier")
         asts |> List.map (eval st) |> ignore
         st.EvalPop()
-    | Ast.LocalizationTerm((pos1, pos2), asts) ->
-        st.EvalPush("LocalizationTerm")
+    | Ast.TranslationTerm((pos1, pos2), asts) ->
+        st.EvalPush("TranslationTerm")
         let fv = variableStack.PeekEvalStack()
         asts |> List.map (fun ebnfTerm ->
             let trsl = new FplTranslation((pos1, pos2), fv)
@@ -808,8 +787,8 @@ let rec eval (st: SymbolTable) ast =
             variableStack.PopEvalStack()
         ) |> ignore
         st.EvalPop()
-    | Ast.LocalizationTermList((pos1, pos2), ebnfTermAsts) ->
-        st.EvalPush("LocalizationTermList")
+    | Ast.TranslationTermList((pos1, pos2), ebnfTermAsts) ->
+        st.EvalPush("TranslationTermList")
         let chooseRandomMember (lst: Ast list) =
             let rnd = Random()
             let index = rnd.Next(lst.Length)
@@ -1044,17 +1023,18 @@ let rec eval (st: SymbolTable) ast =
         eval st selforParentAst
         st.EvalPop()
     // | Translation of string * Ast
-    | Ast.Translation((pos1, pos2),(langCode, ebnfAst)) ->
-        st.EvalPush("Translation")
+    | Ast.Language((pos1, pos2),(langCode, ebnfAst)) ->
+        st.EvalPush("Language")
         let fv = variableStack.PeekEvalStack()
         let lang = new FplLanguage((pos1, pos2), fv) 
         variableStack.PushEvalStack(lang)
         eval st langCode
+        // translations are nested ebnfTerms in the parser, therfore, we have to provide an additional root translation in the symbol table
         let trsl = new FplTranslation((pos1, pos2), lang) 
         variableStack.PushEvalStack(trsl)
         eval st ebnfAst
-        variableStack.PopEvalStack()
-        variableStack.PopEvalStack()
+        variableStack.PopEvalStack() // remove root translation
+        variableStack.PopEvalStack() // remove language
         st.EvalPop()
     // | ExtensionBlock of Positions * (Ast * Ast)
     | Ast.InheritedClassType((pos1, pos2), ast1) -> 

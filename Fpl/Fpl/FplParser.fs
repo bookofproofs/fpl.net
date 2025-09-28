@@ -581,11 +581,11 @@ let ebnfFactor = choice [
     quote >>. localizationString .>> quote
     ebnfTranslTuple
 ] 
-let ebnfTerm = positions "LocalizationTerm" (sepEndBy1 ebnfFactor SW) |>> Ast.LocalizationTerm
-ebnfTranslRef.Value <-  positions "LocalizationTermList" (sepBy1 ebnfTerm (IW >>. case >>. IW)) |>> Ast.LocalizationTermList
-let translation = positions "Translation" ((exclamationMark >>. localizationLanguageCode .>> IW .>> colon) .>>. ebnfTransl) |>> Ast.Translation
-let translationList = many1 (IW >>. translation .>> IW)
-let localization = positions "Localization" (keywordLocalization >>. (predicate .>> IW .>> colonEqual) .>>. (translationList .>> IW .>> semiColon)) .>> IW |>> Ast.Localization
+let ebnfTerm = positions "TranslationTerm" (sepEndBy1 ebnfFactor SW) |>> Ast.TranslationTerm
+ebnfTranslRef.Value <-  positions "TranslationTermList" (sepBy1 ebnfTerm (IW >>. case >>. IW)) |>> Ast.TranslationTermList
+let language = positions "Language" ((exclamationMark >>. localizationLanguageCode .>> IW .>> colon) .>>. ebnfTransl) |>> Ast.Language
+let languageList = many1 (IW >>. language .>> IW)
+let localization = positions "Localization" (keywordLocalization >>. (predicate .>> IW .>> colonEqual) .>>. (languageList .>> IW .>> semiColon)) .>> IW |>> Ast.Localization
 
 // FPL building blocks can be definitions, axioms, Theorem-proof blocks and conjectures
 let buildingBlock = choice [

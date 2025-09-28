@@ -46,9 +46,9 @@ type Ast =
     | Self of Positions * unit
     | Parent of Positions * unit
     | LocalizationString of Positions * string
-    | LocalizationTerm of Positions * Ast list
-    | LocalizationTermList of Positions * Ast list
-    | Translation of Positions * (Ast * Ast)
+    | TranslationTerm of Positions * Ast list
+    | TranslationTermList of Positions * Ast list
+    | Language of Positions * (Ast * Ast)
     | ExtensionName of Positions * string
     | ExtensionRegex of string
     | ExtensionType of Positions * Ast 

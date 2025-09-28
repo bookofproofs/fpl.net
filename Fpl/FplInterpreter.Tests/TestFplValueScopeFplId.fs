@@ -903,9 +903,9 @@ type TestFplValueScopeFplId() =
             let trsl = lang.ArgList[0]
 
             match var with
-            | "base0" -> Assert.AreEqual<string>(@"", trsl.FplId)
+            | "base0" -> Assert.AreEqual<string>(@"1", trsl.FplId)
             | "base1" -> Assert.AreEqual<string>(@"", trsl.FplId)
-            | "base2" -> Assert.AreEqual<string>(@"", trsl.FplId)
+            | "base2" -> Assert.AreEqual<string>(@"\neg(", trsl.FplId)
             | "base3" -> Assert.AreEqual<string>(@"", trsl.FplId)
             | "base4" -> Assert.AreEqual<string>(@"", trsl.FplId)
             | "base5" -> Assert.AreEqual<string>(@"", trsl.FplId)
