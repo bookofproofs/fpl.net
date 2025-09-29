@@ -3387,7 +3387,9 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
         | Some next when (next.Name = LiteralPrfL 
                         || next.Name = LiteralCorL) ->
             addToProofOrCorolllary next
-        | Some next when isVar next ->
+        | Some next when (next.Name = PrimVariableL
+                        || next.Name = PrimVariableManyL
+                        || next.Name = PrimVariableMany1L) ->
             addToVariableOrQuantorOrMapping next
         | Some next when next.Name = PrimMappingL ->
             addToVariableOrQuantorOrMapping next
