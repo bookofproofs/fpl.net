@@ -3303,61 +3303,74 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
             if block.Scope.ContainsKey(this.FplId) then
                 let old = ad.DiagnosticsStopped 
                 ad.DiagnosticsStopped <- false
-                emitVAR03diagnostics this.FplId block.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos
+                emitVAR03diagnostics this.FplId block.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos false
                 ad.DiagnosticsStopped <- old
             else
                 block.Scope.Add(this.FplId, this)
 
-        let addToSimpleFplBlocksScope (block:FplValue) = 
+        let addToSimpleFplBlocksScope (block:FplValue) formulaConflict = 
             if block.Scope.ContainsKey(this.FplId) then
-                emitVAR03diagnostics this.FplId block.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos
+                emitVAR03diagnostics this.FplId block.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos formulaConflict
             else
                 block.Scope.Add(this.FplId, this)
         
-        let addToPropertyOrConstructor (property:FplValue) = 
+        let addToPropertyOrConstructor (property:FplValue) formulaConflict = 
             let parentOfProperty = property.Parent.Value
             if property.Scope.ContainsKey(this.FplId) then
-                emitVAR03diagnostics this.FplId property.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos
+                emitVAR03diagnostics this.FplId property.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos formulaConflict
             elif parentOfProperty.Scope.ContainsKey(this.FplId) then
                 // check also the scope of the property's parent block
-                emitVAR03diagnostics this.FplId parentOfProperty.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos
+                emitVAR03diagnostics this.FplId parentOfProperty.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos formulaConflict
             else
                 property.Scope.Add(this.FplId, this)
 
         let addToProofOrCorolllary (proofOrCorollary:FplValue) = 
-            let rec conflictInScope (node:FplValue) =
+            let rec conflictInScope (node:FplValue) formulaConflict =
                 if node.Scope.ContainsKey(this.FplId) then
-                    emitVAR03diagnostics this.FplId node.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos
+                    emitVAR03diagnostics this.FplId node.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos formulaConflict
                     true
                 else 
                     let parent = node.Parent.Value
                     match parent.Name with
                     | LiteralCorL
-                    | LiteralThm
-                    | LiteralLem
-                    | LiteralProp
-                    | LiteralConj
-                    | LiteralAx ->
-                        conflictInScope parent
+                    | LiteralThmL
+                    | LiteralLemL
+                    | LiteralPropL
+                    | LiteralConjL
+                    | LiteralAxL ->
+                        conflictInScope parent formulaConflict
                     | _ -> false
 
-            if not (conflictInScope proofOrCorollary) then
+            if not (conflictInScope proofOrCorollary false) then
                 proofOrCorollary.Scope.Add(this.FplId, this)
 
         let addToVariableOrQuantorOrMapping (variableOrQuantor:FplValue) =
-            let rec conflictInScope (node:FplValue) =
+            let rec conflictInScope (node:FplValue) formulaConflict =
                 if node.Scope.ContainsKey(this.FplId) then
-                    emitVAR03diagnostics this.FplId node.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos
+                    emitVAR03diagnostics this.FplId node.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos formulaConflict
                     true
                 else 
                     let parent = node.Parent.Value
                     match parent.Name with
+                    | PrimRoot 
                     | PrimTheoryL -> false
                     | _ ->
-                        conflictInScope parent
+                        conflictInScope parent formulaConflict
+            
+            let rec blockNode (node:FplValue) =
+                let parent = node.Parent.Value
+                match parent.Name with
+                | PrimRoot -> None
+                | PrimTheoryL -> Some node
+                | _ ->
+                    blockNode parent
 
-            if not (conflictInScope variableOrQuantor) then
+            if not (conflictInScope variableOrQuantor true) then
                 variableOrQuantor.Scope.Add(this.FplId, this)
+                let blockOpt = blockNode variableOrQuantor
+                match blockOpt with
+                | Some block -> block.Scope.Add(this.FplId, this)
+                | None -> ()
 
         match nextOpt with 
         | Some next when next.Name = PrimRefL && this.TypeId <> LiteralUndef ->
@@ -3375,7 +3388,7 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
                         || next.Name = PrimFuncionalTermL
                         || next.Name = PrimPredicateL
                         || next.Name = PrimExtensionL ) ->
-            addToSimpleFplBlocksScope next
+            addToSimpleFplBlocksScope next false
         | Some next when next.Name = PrimRuleOfInference ->
             addToRuleOfInference next
         | Some next when ( next.Name = LiteralCtorL
@@ -3383,7 +3396,7 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
                         || next.Name = PrimMandatoryPredicateL 
                         || next.Name = PrimOptionalPredicateL
                         || next.Name = PrimOptionalFunctionalTermL) ->
-            addToPropertyOrConstructor next
+            addToPropertyOrConstructor next false
         | Some next when (next.Name = LiteralPrfL 
                         || next.Name = LiteralCorL) ->
             addToProofOrCorolllary next

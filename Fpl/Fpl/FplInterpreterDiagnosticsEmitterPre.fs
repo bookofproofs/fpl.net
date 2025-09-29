@@ -590,7 +590,7 @@ let emitVAR02diagnostics name pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
 
-let emitVAR03diagnostics mixedName conflictStartPos pos1 pos2 =
+let emitVAR03diagnostics mixedName conflictStartPos pos1 pos2 formulaConflict =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -599,7 +599,11 @@ let emitVAR03diagnostics mixedName conflictStartPos pos1 pos2 =
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = VAR03(mixedName, conflictStartPos)
-            Diagnostic.Alternatives = Some "Remove this variable declaration or rename the variable." 
+            Diagnostic.Alternatives = 
+                if formulaConflict then 
+                    Some "Cleanup the formula by renaming the variable."
+                else
+                    Some "Remove this variable declaration or rename the variable."
         }
 
     ad.AddDiagnostic diagnostic

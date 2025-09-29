@@ -1,1 +1,12 @@
-uses Fpl.Commons axiom HypotheticalSyllogism {true} ;
+def pred TestPredicate(
+        x1:+pred(x1u1:func(x1u1a,x1u1b,x1u1c:obj)->obj, x1u2:func(x1u2a,x1u2b,x1u2c:obj)->obj, x1u3:func(x1u3a,x1u3b,x1u3c:obj)->obj)        
+        ,x2:+pred(x2u1:func(x2u1a,x2u1b,x2u1c:obj)->obj, x2u2:func(x2u2a,x2u2b,x2u2c:obj)->obj, x2u3:func(x2u3a,x2u3b,x2u3c:obj)->obj)         
+        ,x3:+pred(x3u1:func(x3u1a,x3u1b,x3u1c:obj)->obj, x3u2:func(x3u2a,x3u2b,x3u2c:obj)->obj, x3u3:func(x3u3a,x3u3b,x3u3c:obj)->obj)        
+        ,x4:+pred(x4u1:func(x4u1a,x4u1b,x4u1c:obj)->obj, x4u2:func(x4u2a,x4u2b,x4u2c:obj)->obj, x4u3:func(x4u3a,x4u3b,x4u3c:obj)->obj)       
+        ,x5:+pred(x5u1:func(x5u1a,x5u1b,x5u1c:obj)->obj, x5u2:func(x5u2a,x5u2b,x5u2c:obj)->obj, x5u3:func(x5u3a,x5u3b,x5u3c:obj)->obj)        
+        ,x6:+pred(x6u1:func(x6u1a,x6u1b,x6u1c:obj)->obj, x6u2:func(x6u2a,x6u2b,x6u2c:obj)->obj, x6u3:func(x6u3a,x6u3b,x6u3c:obj)->obj)       
+) 
+    {
+        intr
+    }
+;

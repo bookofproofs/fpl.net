@@ -341,7 +341,7 @@ let rec eval (st: SymbolTable) ast =
             let loc = getLocalization fv
             if loc.Scope.ContainsKey(name) then 
                 let other = loc.Scope[name]
-                emitVAR03diagnostics name other.QualifiedStartPos pos1 pos2
+                emitVAR03diagnostics name other.QualifiedStartPos pos1 pos2 true
             else 
                 loc.Scope.Add(name, variable)
         st.EvalPop() 
@@ -1656,10 +1656,12 @@ let rec eval (st: SymbolTable) ast =
         let fv = new FplCorollary((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
         variableStack.PushEvalStack(fv)
         eval st corollarySignatureAst
+        variableStack.PopEvalStack() // add to parent theorem (if any) 
+        variableStack.PushEvalStack(fv) // push again to have the current corollary on stack
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
-        variableStack.PopEvalStack()
         // now, we are ready to emit VAR03 diagnostics for all variables declared in the signature of the corollary.
         emitVAR04diagnostics fv
+        variableStack.Pop() |> ignore // pop without 
         st.EvalPop()
     // | NamedVarDecl of Positions * ((Ast list * Ast) * Ast)
     | Ast.NamedVarDecl((pos1, pos2), ((variableListAst, varDeclModifierAst), variableTypeAst)) ->
@@ -1674,7 +1676,7 @@ let rec eval (st: SymbolTable) ast =
                 match varAst with 
                 | Ast.Var((varPos1, varPos2), varName) ->
                     let newVar = new FplVariableMany(varName, (varPos1, varPos2), parent)
-                    newVar.IsSignatureVariable <- variableStack.InSignatureEvaluation
+                    newVar.IsSignatureVariable <- (variableStack.InSignatureEvaluation && not (isVar parent))
                     variableStack.PushEvalStack(newVar)
                     eval st variableTypeAst
                     variableStack.PopEvalStack()
@@ -1684,7 +1686,7 @@ let rec eval (st: SymbolTable) ast =
                 match varAst with 
                 | Ast.Var((varPos1, varPos2), varName) ->
                     let newVar = new FplVariableMany1(varName, (varPos1, varPos2), parent)
-                    newVar.IsSignatureVariable <- variableStack.InSignatureEvaluation
+                    newVar.IsSignatureVariable <- (variableStack.InSignatureEvaluation && not (isVar parent))
                     variableStack.PushEvalStack(newVar)
                     eval st variableTypeAst
                     variableStack.PopEvalStack()
@@ -1693,7 +1695,7 @@ let rec eval (st: SymbolTable) ast =
                 match varAst with 
                 | Ast.Var((varPos1, varPos2), varName) ->
                     let newVar = new FplVariable(varName, (varPos1, varPos2), parent)
-                    newVar.IsSignatureVariable <- variableStack.InSignatureEvaluation
+                    newVar.IsSignatureVariable <- (variableStack.InSignatureEvaluation && not (isVar parent))
                     variableStack.PushEvalStack(newVar)
                     eval st variableTypeAst
                     variableStack.PopEvalStack()
@@ -1819,8 +1821,9 @@ let rec eval (st: SymbolTable) ast =
         let fv = new FplProof((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
         variableStack.PushEvalStack(fv)
         eval st referencingIdentifierAst
+        variableStack.PopEvalStack() // add to parent theorem (if any)
+        variableStack.PushEvalStack(fv) // push again
         proofArgumentListAst |> List.map (eval st) |> ignore
-        variableStack.PopEvalStack()
         optQedAst |> Option.map (eval st) |> Option.defaultValue ()
         emitVAR04diagnostics fv
         let value = new FplIntrinsicPred((pos1,pos1), fv)
@@ -1838,6 +1841,7 @@ let rec eval (st: SymbolTable) ast =
             | _ -> () // todo argumentinference not found
         )
         fv.ValueList.Add(value)
+        variableStack.Pop() |> ignore // pop without embedding in theorem (already done)
         st.EvalPop()
     | Ast.Precedence((pos1, pos2), precedence) ->
         st.EvalPush("Precedence")

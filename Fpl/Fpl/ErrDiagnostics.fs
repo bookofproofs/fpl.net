@@ -393,7 +393,7 @@ type DiagnosticCode =
             | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
             | VAR01 name -> $"Variable `{name}` not declared in this scope."
             | VAR02 name -> $"Variable `{name}` was already bound in this quantor."
-            | VAR03 (identifier, conflict) -> sprintf "Variable `%s` was already declared in the scope of the associated block at %s" identifier conflict
+            | VAR03 (identifier, conflict) -> $"Variable `{identifier}` was already declared at {conflict}."  
             | VAR04 name -> $"Declared variable `{name}` not used in this scope."
             | VAR05 name -> $"Bound variable `{name}` was not used in this quantor."
             | VAR06 (name, parentClass) -> $"Variable `{name}` of the parent class `{parentClass}` will be shadowed by a local variable with the same name in this scope."
