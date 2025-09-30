@@ -1469,7 +1469,28 @@ type SymbolTableStructure() =
     // with with shared variables and stmts
     [<DataRow("FplConstructor", "03", """def cl A:obj { dec ~x,y:obj; ctor A(z:obj) {dec z:=x; } };""", "")>]
 
-    [<DataRow("FplCorollary", "00", """;""", "")>]
+    // corollary with wrong parent
+    [<DataRow("FplCorollary", "00a", """cor T$1 {true};""", "")>]
+    [<DataRow("FplCorollary", "00b", """inf T {pre:true con:true} cor T$1 {true};""", "")>]
+    [<DataRow("FplCorollary", "00c", """def cl T:obj {intr} cor T$1 {true};""", "")>]
+    [<DataRow("FplCorollary", "00d", """def pred T() {true} cor T$1 {true};""", "")>]
+    [<DataRow("FplCorollary", "00e", """def func T()->obj {intr} cor T$1 {true};""", "")>]
+    [<DataRow("FplCorollary", "00f", """loc T := !tex: "T"; cor T$1 {true};""", "")>]
+    [<DataRow("FplCorollary", "00g", """ext T x@/\d+/->obj {ret x} cor T$1 {true};""", "")>]
+    [<DataRow("FplCorollary", "00h", """proof T$1 {1. |- trivial} cor T$1$1 {true};""", "")>]
+    // corollary with conjecture
+    [<DataRow("FplCorollary", "01a", """conj T {true} cor T$1 {true};""", "")>]
+    // corollary with axiom
+    [<DataRow("FplCorollary", "01b", """ax T {true} cor T$1 {true};""", "")>]
+    // corollary with theorem
+    [<DataRow("FplCorollary", "01c", """thm T {true} cor T$1 {true};""", "")>]
+    // corollary with lemma
+    [<DataRow("FplCorollary", "01d", """lem T {true} cor T$1 {true};""", "")>]
+    // corollary with proposition
+    [<DataRow("FplCorollary", "01e", """prop T {true} cor T$1 {true};""", "")>]
+    // corollary with corollary
+    [<DataRow("FplCorollary", "01f", """thm T {true} cor T$1 {true} cor T$1$1 {true};""", "T$1$1")>]
+
     [<DataRow("FplDecrement", "00", """;""", "")>]
     [<DataRow("FplDisjunction", "00", """;""", "")>]
     [<DataRow("FplEquality", "00", """;""", "")>]
@@ -1600,25 +1621,25 @@ type SymbolTableStructure() =
     [<DataRow("FplMapCaseSingle", "00", """;""", "")>]
 
     // mapping of functional terms
-    [<DataRow("FplMapping", "00a", """def func T()->pred(x:obj) {intr};""", "")>]
-    [<DataRow("FplMapping", "00b", """def func T()->func()->pred(x,y:obj) {intr};""", "")>]
-    [<DataRow("FplMapping", "00c", """def func T()->func()->pred(x,y:obj) {intr};""", "pred(x, y)")>]
+    [<DataRow("FplMapping", "00a", """def func T()->pred(a:obj) {intr};""", "")>]
+    [<DataRow("FplMapping", "00b", """def func T()->func()->pred(a,b:obj) {intr};""", "")>]
+    [<DataRow("FplMapping", "00c", """def func T()->func()->pred(a,b:obj) {intr};""", "pred(a, b)")>]
     [<DataRow("FplMapping", "00d", """def func T()->func(x,y,z:obj)->obj {intr};""", "")>]
     // mapping of mandatory properties
-    [<DataRow("FplMapping", "01a", """def pred T1() {intr prty func T()->pred(x:obj) {intr}};""", "")>]
-    [<DataRow("FplMapping", "01b", """def pred T1() {intr prty func T()->func()->pred(x,y:obj) {intr}};""", "")>]
-    [<DataRow("FplMapping", "01c", """def pred T1() {intr prty func T()->func()->pred(x,y:obj) {intr}};""", "pred(x, y)")>]
-    [<DataRow("FplMapping", "01d", """def pred T1() {intr prty func T()->func(x,y,z:obj)->obj {intr}};""", "")>]
+    [<DataRow("FplMapping", "01a", """def pred T1() {intr prty func T()->pred(a:obj) {intr}};""", "")>]
+    [<DataRow("FplMapping", "01b", """def pred T1() {intr prty func T()->func()->pred(a,b:obj) {intr}};""", "")>]
+    [<DataRow("FplMapping", "01c", """def pred T1() {intr prty func T()->func()->pred(a,b:obj) {intr}};""", "pred(a, b)")>]
+    [<DataRow("FplMapping", "01d", """def pred T1() {intr prty func T()->func(a,b,c:obj)->obj {intr}};""", "")>]
     // mapping of optional properties
-    [<DataRow("FplMapping", "02a", """def pred T1() {intr opt prty func T()->pred(x:obj) {intr}};""", "")>]
-    [<DataRow("FplMapping", "02b", """def pred T1() {intr opt prty func T()->func()->pred(x,y:obj) {intr}};""", "")>]
-    [<DataRow("FplMapping", "02c", """def pred T1() {intr opt prty func T()->func()->pred(x,y:obj) {intr}};""", "pred(x, y)")>]
-    [<DataRow("FplMapping", "02d", """def pred T1() {intr opt prty func T()->func(x,y,z:obj)->obj {intr}};""", "")>]
+    [<DataRow("FplMapping", "02a", """def pred T1() {intr opt prty func T()->pred(a:obj) {intr}};""", "")>]
+    [<DataRow("FplMapping", "02b", """def pred T1() {intr opt prty func T()->func()->pred(a,b:obj) {intr}};""", "")>]
+    [<DataRow("FplMapping", "02c", """def pred T1() {intr opt prty func T()->func()->pred(a,b:obj) {intr}};""", "pred(a, b)")>]
+    [<DataRow("FplMapping", "02d", """def pred T1() {intr opt prty func T()->func(a,b,c:obj)->obj {intr}};""", "")>]
     // mapping of extensions
-    [<DataRow("FplMapping", "03a", """ext Digits x@/\d+/->pred(x:obj) {ret x};""", "")>]
-    [<DataRow("FplMapping", "03b", """ext Digits x@/\d+/->func()->pred(x,y:obj) {ret x};""", "")>]
-    [<DataRow("FplMapping", "03c", """ext Digits x@/\d+/->func()->pred(x,y:obj) {ret x};""", "pred(x, y)")>]
-    [<DataRow("FplMapping", "03d", """ext Digits x@/\d+/->func(x,y,z:obj)->obj {ret x};""", "")>]
+    [<DataRow("FplMapping", "03a", """ext Digits x@/\d+/->pred(a:obj) {ret x};""", "")>]
+    [<DataRow("FplMapping", "03b", """ext Digits x@/\d+/->func()->pred(a,b:obj) {ret x};""", "")>]
+    [<DataRow("FplMapping", "03c", """ext Digits x@/\d+/->func()->pred(a,b:obj) {ret x};""", "pred(a, b)")>]
+    [<DataRow("FplMapping", "03d", """ext Digits x@/\d+/->func(a,b,c:obj)->obj {ret x};""", "")>]
 
 
 
@@ -1680,15 +1701,21 @@ type SymbolTableStructure() =
     [<DataRow("FplProof", "00", """proof T$1 {1. |- trivial};""", "")>]
     // proof with qed
     [<DataRow("FplProof", "00x", """proof T$1 {1. |- trivial qed};""", "")>]
-    // proof with axiom
+    // proof with wrong parent
     [<DataRow("FplProof", "00a", """ax T {true} proof T$1 {1. |- trivial};""", "")>]
-    // proof with conjecture
     [<DataRow("FplProof", "00b", """conj T {true} proof T$1 {1. |- trivial};""", "")>]
+    [<DataRow("FplProof", "00c", """inf T {pre:true con:true} proof T$1 {1. |- trivial};""", "")>]
+    [<DataRow("FplProof", "00d", """def cl T:obj {intr} proof T$1 {1. |- trivial};""", "")>]
+    [<DataRow("FplProof", "00e", """def pred T() {true} proof T$1 {1. |- trivial};""", "")>]
+    [<DataRow("FplProof", "00f", """def func T()->obj {intr} proof T$1 {1. |- trivial};""", "")>]
+    [<DataRow("FplProof", "00g", """loc T := !tex: "T"; proof T$1 {1. |- trivial};""", "")>]
+    [<DataRow("FplProof", "00h", """ext T x@/\d+/->obj {ret x} proof T$1 {1. |- trivial};""", "")>]
+    [<DataRow("FplProof", "00i", """proof T$1 {1. |- trivial} proof T$1$1 {1. |- trivial};""", "T$1$1")>]
     // proof with theorem
     [<DataRow("FplProof", "01a", """thm T {true} proof T$1 {1. |- trivial};""", "")>]
-    // proof with conjecture
+    // proof with lem
     [<DataRow("FplProof", "01b", """lem T {true} proof T$1 {1. |- trivial};""", "")>]
-    // proof with conjecture
+    // proof with proposition
     [<DataRow("FplProof", "01c", """prop T {true} proof T$1 {1. |- trivial};""", "")>]
     // proof with corollary
     [<DataRow("FplProof", "02", """thm T {true} cor T$1 {true} proof T$1$1 {1. |- trivial};""", "")>]
@@ -1761,7 +1788,7 @@ type SymbolTableStructure() =
     // variable in mapping
     [<DataRow("FplVariable", "03a", """def func T()->pred(x:obj) {intr};""", "")>]
     [<DataRow("FplVariable", "03b", """def func T()->func()->pred(x,y:obj) {intr};""", "y")>]
-    [<DataRow("FplVariable", "03c", """def func T()->func(x,y,z:obj)->obj {intr};""", "z")>]
+    [<DataRow("FplVariable", "03c", """def func T()->func(a,b,c:obj)->obj {intr};""", "z")>]
 
     [<DataRow("FplVariableMany", "00", """;""", "")>]
     [<DataRow("FplVariableMany1", "00", """;""", "")>]
@@ -1842,7 +1869,7 @@ type SymbolTableStructure() =
 
                 | "FplAssignment", "00" -> 
                     Assert.IsInstanceOfType<FplPredicate>(parent)
-                    Assert.AreEqual<int>(0, parent.ArgList.Count)
+                    Assert.AreEqual<int>(2, parent.ArgList.Count)
                     Assert.AreEqual<int>(1, parent.Scope.Count)
                     Assert.IsInstanceOfType<FplAssignment>(node)
                     Assert.AreEqual<int>(2, node.ArgList.Count)
@@ -1956,6 +1983,72 @@ type SymbolTableStructure() =
                     Assert.AreEqual<int>(0, parent.ArgList.Count)
                     Assert.AreEqual<int>(1, parent.Scope.Count)
                     Assert.IsInstanceOfType<FplConjecture>(node)
+                    Assert.AreEqual<int>(1, node.ArgList.Count)
+                    Assert.AreEqual<int>(0, node.Scope.Count)
+
+                // corollary without parent
+                | "FplCorollary", "00a" ->
+                    Assert.IsInstanceOfType<FplTheory>(parent)
+                    Assert.AreEqual<int>(0, parent.ArgList.Count)
+                    Assert.AreEqual<int>(1, parent.Scope.Count) 
+                    Assert.IsInstanceOfType<FplCorollary>(node) 
+                    Assert.AreEqual<int>(1, node.ArgList.Count)
+                    Assert.AreEqual<int>(0, node.Scope.Count)
+                // corollary with wrong parent
+                | "FplCorollary", "00b" 
+                | "FplCorollary", "00c" 
+                | "FplCorollary", "00d" 
+                | "FplCorollary", "00e" 
+                | "FplCorollary", "00f" 
+                | "FplCorollary", "00g" 
+                | "FplCorollary", "00h" 
+                | "FplCorollary", "00i" -> 
+                    Assert.IsInstanceOfType<FplTheory>(parent)
+                    Assert.AreEqual<int>(0, parent.ArgList.Count)
+                    Assert.AreEqual<int>(2, parent.Scope.Count) 
+                    Assert.IsInstanceOfType<FplCorollary>(node) 
+                    Assert.AreEqual<int>(1, node.ArgList.Count)
+                    Assert.AreEqual<int>(0, node.Scope.Count)
+                | "FplCorollary", "01a" ->
+                    Assert.IsInstanceOfType<FplConjecture>(parent)
+                    Assert.AreEqual<int>(1, parent.ArgList.Count)
+                    Assert.AreEqual<int>(1, parent.Scope.Count) 
+                    Assert.IsInstanceOfType<FplCorollary>(node)  
+                    Assert.AreEqual<int>(1, node.ArgList.Count)
+                    Assert.AreEqual<int>(0, node.Scope.Count)
+                | "FplCorollary", "01b" ->
+                    Assert.IsInstanceOfType<FplAxiom>(parent)
+                    Assert.AreEqual<int>(1, parent.ArgList.Count)
+                    Assert.AreEqual<int>(1, parent.Scope.Count) 
+                    Assert.IsInstanceOfType<FplCorollary>(node)  
+                    Assert.AreEqual<int>(1, node.ArgList.Count)
+                    Assert.AreEqual<int>(0, node.Scope.Count)
+                | "FplCorollary", "01c" -> 
+                    Assert.IsInstanceOfType<FplTheorem>(parent)
+                    Assert.AreEqual<int>(1, parent.ArgList.Count)
+                    Assert.AreEqual<int>(1, parent.Scope.Count) 
+                    Assert.IsInstanceOfType<FplCorollary>(node)  
+                    Assert.AreEqual<int>(1, node.ArgList.Count)
+                    Assert.AreEqual<int>(0, node.Scope.Count)
+                | "FplCorollary", "01d" -> 
+                    Assert.IsInstanceOfType<FplLemma>(parent)
+                    Assert.AreEqual<int>(1, parent.ArgList.Count)
+                    Assert.AreEqual<int>(1, parent.Scope.Count) 
+                    Assert.IsInstanceOfType<FplCorollary>(node)  
+                    Assert.AreEqual<int>(1, node.ArgList.Count)
+                    Assert.AreEqual<int>(0, node.Scope.Count)
+                | "FplCorollary", "01e" -> 
+                    Assert.IsInstanceOfType<FplProposition>(parent)
+                    Assert.AreEqual<int>(1, parent.ArgList.Count)
+                    Assert.AreEqual<int>(1, parent.Scope.Count) 
+                    Assert.IsInstanceOfType<FplCorollary>(node)  
+                    Assert.AreEqual<int>(1, node.ArgList.Count)
+                    Assert.AreEqual<int>(0, node.Scope.Count)
+                | "FplCorollary", "01f" -> 
+                    Assert.IsInstanceOfType<FplCorollary>(parent)
+                    Assert.AreEqual<int>(1, parent.ArgList.Count)
+                    Assert.AreEqual<int>(1, parent.Scope.Count) 
+                    Assert.IsInstanceOfType<FplCorollary>(node)  
                     Assert.AreEqual<int>(1, node.ArgList.Count)
                     Assert.AreEqual<int>(0, node.Scope.Count)
 
@@ -2208,14 +2301,14 @@ type SymbolTableStructure() =
                 | "FplMapping", "00a" -> 
                     Assert.IsInstanceOfType<FplFunctionalTerm>(parent) 
                     Assert.AreEqual<int>(1, parent.ArgList.Count) // mapping
-                    Assert.AreEqual<int>(0, parent.Scope.Count) 
+                    Assert.AreEqual<int>(1, parent.Scope.Count) // mapping's variable(s) in node's scope
                     Assert.IsInstanceOfType<FplMapping>(node)
                     Assert.AreEqual<int>(0, node.ArgList.Count) 
                     Assert.AreEqual<int>(1, node.Scope.Count) 
                 | "FplMapping", "00b" -> 
                     Assert.IsInstanceOfType<FplFunctionalTerm>(parent) 
                     Assert.AreEqual<int>(1, parent.ArgList.Count) // mapping
-                    Assert.AreEqual<int>(0, parent.Scope.Count) 
+                    Assert.AreEqual<int>(2, parent.Scope.Count) // mapping's variable(s) in node's scope
                     Assert.IsInstanceOfType<FplMapping>(node)
                     Assert.AreEqual<int>(1, node.ArgList.Count) // nested mapping
                     Assert.AreEqual<int>(0, node.Scope.Count) // 0 variables
@@ -2232,7 +2325,7 @@ type SymbolTableStructure() =
                 | "FplMapping", "00d" -> 
                     Assert.IsInstanceOfType<FplFunctionalTerm>(parent) 
                     Assert.AreEqual<int>(1, parent.ArgList.Count) // mapping
-                    Assert.AreEqual<int>(0, parent.Scope.Count) // 0 variables
+                    Assert.AreEqual<int>(3, parent.Scope.Count) // mapping's variable(s) in node's scope
                     Assert.IsInstanceOfType<FplMapping>(node) 
                     Assert.AreEqual<int>(1, node.ArgList.Count) // nested mapping
                     Assert.AreEqual<int>(3, node.Scope.Count) // 3 variables
@@ -2280,22 +2373,22 @@ type SymbolTableStructure() =
                     Assert.AreEqual<int>(3, node.Scope.Count) // 3 variables
                 | "FplMapping", "03a" -> 
                     Assert.IsInstanceOfType<FplExtension>(parent) 
-                    Assert.AreEqual<int>(1, parent.ArgList.Count) // mapping
-                    Assert.AreEqual<int>(0, parent.Scope.Count) 
+                    Assert.AreEqual<int>(2, parent.ArgList.Count) // mapping + return 
+                    Assert.AreEqual<int>(2, parent.Scope.Count) // mapping's variable(s) in node's scope
                     Assert.IsInstanceOfType<FplMapping>(node)
                     Assert.AreEqual<int>(0, node.ArgList.Count) 
                     Assert.AreEqual<int>(1, node.Scope.Count) 
                 | "FplMapping", "03b" -> 
                     Assert.IsInstanceOfType<FplExtension>(parent) 
-                    Assert.AreEqual<int>(1, parent.ArgList.Count) // mapping
-                    Assert.AreEqual<int>(0, parent.Scope.Count) 
+                    Assert.AreEqual<int>(2, parent.ArgList.Count) // mapping + return
+                    Assert.AreEqual<int>(3, parent.Scope.Count) // mapping's variable(s) in node's scope
                     Assert.IsInstanceOfType<FplMapping>(node)
                     Assert.AreEqual<int>(1, node.ArgList.Count) // nested mapping
                     Assert.AreEqual<int>(0, node.Scope.Count) // 0 variables
                 | "FplMapping", "03d" -> 
                     Assert.IsInstanceOfType<FplExtension>(parent) 
-                    Assert.AreEqual<int>(2, parent.ArgList.Count) // mapping  // return
-                    Assert.AreEqual<int>(1, parent.Scope.Count) // 1 variables
+                    Assert.AreEqual<int>(2, parent.ArgList.Count) // mapping + return
+                    Assert.AreEqual<int>(4, parent.Scope.Count) // mapping's variable(s) in node's scope
                     Assert.IsInstanceOfType<FplMapping>(node) 
                     Assert.AreEqual<int>(1, node.ArgList.Count) // nested mapping
                     Assert.AreEqual<int>(3, node.Scope.Count) // 3 variables
@@ -2494,10 +2587,17 @@ type SymbolTableStructure() =
                     Assert.AreEqual<int>(0, node.ArgList.Count) 
                     Assert.AreEqual<int>(1, node.Scope.Count)
                 | "FplProof", "00a" 
-                | "FplProof", "00b" -> 
+                | "FplProof", "00b" 
+                | "FplProof", "00c" 
+                | "FplProof", "00d" 
+                | "FplProof", "00e" 
+                | "FplProof", "00f" 
+                | "FplProof", "00g" 
+                | "FplProof", "00h" 
+                | "FplProof", "00i" -> 
                     Assert.IsInstanceOfType<FplTheory>(parent)
                     Assert.AreEqual<int>(0, parent.ArgList.Count)
-                    Assert.AreEqual<int>(2, parent.Scope.Count) // proof with wrong parent (axiom or conjecture)
+                    Assert.AreEqual<int>(2, parent.Scope.Count) // proof with wrong parent (e.g. axiom or conjecture)
                     Assert.IsInstanceOfType<FplProof>(node) 
                     Assert.AreEqual<int>(0, node.ArgList.Count)
                     Assert.AreEqual<int>(1, node.Scope.Count)
@@ -2870,6 +2970,16 @@ type SymbolTableStructure() =
                     let x = (node:?>FplGenericVariable)
                     Assert.IsFalse(x.IsInitializedVariable)
                     Assert.IsFalse(x.IsSignatureVariable)
+                | "FplVariable", "01j" ->
+                    Assert.IsInstanceOfType<FplOptionalFunctionalTerm>(parent)
+                    Assert.AreEqual<int>(1, parent.ArgList.Count)
+                    Assert.AreEqual<int>(1, parent.Scope.Count)
+                    Assert.IsInstanceOfType<FplVariable>(node)
+                    Assert.AreEqual<int>(0, node.ArgList.Count)
+                    Assert.AreEqual<int>(0, node.Scope.Count)
+                    let x = (node:?>FplGenericVariable)
+                    Assert.IsFalse(x.IsInitializedVariable)
+                    Assert.IsTrue(x.IsSignatureVariable)
                 // variable to variable
                 | "FplVariable", "02a" ->
                     Assert.IsInstanceOfType<FplVariable>(parent)

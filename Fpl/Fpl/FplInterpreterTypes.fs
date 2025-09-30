@@ -1688,13 +1688,12 @@ type FplCorollary(positions: Positions, parent: FplValue, runOrder) =
         | ScopeSearchResult.FoundAssociate potentialParent -> 
             // everything is ok, change the parent of the provable from theory to the found parent 
             this.Parent <- Some potentialParent
-            tryAddToParentUsingFplId this
         | ScopeSearchResult.FoundIncorrectBlock incorrectBlock ->
             emitID005diagnostics this.FplId incorrectBlock this.StartPos this.EndPos
         | ScopeSearchResult.NotFound ->
             emitID006diagnostics this.FplId this.StartPos this.EndPos
-            tryAddToParentUsingFplId this
         | _ -> ()
+        tryAddToParentUsingFplId this
 
 
 type FplConjecture(positions: Positions, parent: FplValue, runOrder) =
@@ -2162,13 +2161,12 @@ and FplProof(positions: Positions, parent: FplValue, runOrder) =
         | ScopeSearchResult.FoundAssociate potentialParent -> 
             // everything is ok, change the parent of the provable from theory to the found parent 
             this.Parent <- Some potentialParent
-            tryAddToParentUsingFplId this
         | ScopeSearchResult.FoundIncorrectBlock incorrectBlock ->
             emitID002Diagnostics this.FplId incorrectBlock this.StartPos this.EndPos
         | ScopeSearchResult.NotFound ->
             emitID003diagnostics this.FplId this.StartPos this.EndPos
-            tryAddToParentUsingFplId this
         | _ -> ()
+        tryAddToParentUsingFplId this
 
     override this.RunOrder = Some _runOrder
 
