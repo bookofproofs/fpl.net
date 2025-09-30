@@ -2152,6 +2152,48 @@ type SymbolTableStructure() =
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
 
+    [<DataRow("FplLocalization", "01", """loc not x := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;;""", "")>]
+    [<DataRow("FplLocalization", "02", """loc not(x) := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;;""", "")>]
+    [<DataRow("FplLocalization", "03", """loc Equal(x,y) := !tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;;""", "")>]
+    [<DataRow("FplLocalization", "04", """and(p,q) := !tex: p "\wedge" q !eng: p " and" q !ger: p " und " q;;""", "")>]
+    [<TestMethod>]
+    member this.TestStructureFplLocalization(nodeType, varVal, fplCode, identifier) =
+        let filename = "TestStructureFplLocalization.fpl"
+        let parent, node = testSkeleton nodeType filename fplCode identifier
+        
+        match nodeType, varVal with
+        | "FplLocalization", "01" ->
+            Assert.IsInstanceOfType<FplTheory>(parent) 
+            Assert.AreEqual<int>(0, parent.ArgList.Count)
+            Assert.AreEqual<int>(1, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplLocalization>(node)
+            Assert.AreEqual<int>(1, node.ArgList.Count)
+            Assert.AreEqual<int>(4, node.Scope.Count) // a variable + 3 languages
+        | "FplLocalization", "02" ->
+            Assert.IsInstanceOfType<FplTheory>(parent) 
+            Assert.AreEqual<int>(0, parent.ArgList.Count)
+            Assert.AreEqual<int>(1, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplLocalization>(node)
+            Assert.AreEqual<int>(1, node.ArgList.Count)
+            Assert.AreEqual<int>(4, node.Scope.Count) // a variable + 3 languages
+        | "FplLocalization", "03" ->
+            Assert.IsInstanceOfType<FplTheory>(parent) 
+            Assert.AreEqual<int>(0, parent.ArgList.Count)
+            Assert.AreEqual<int>(1, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplLocalization>(node)
+            Assert.AreEqual<int>(0, node.ArgList.Count)
+            Assert.AreEqual<int>(7, node.Scope.Count) // 2 variables + 5 languages
+        | "FplLocalization", "04" ->
+            Assert.IsInstanceOfType<FplTheory>(parent) 
+            Assert.AreEqual<int>(0, parent.ArgList.Count)
+            Assert.AreEqual<int>(1, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplLocalization>(node)
+            Assert.AreEqual<int>(0, node.ArgList.Count)
+            Assert.AreEqual<int>(5, node.Scope.Count) // 2 variables + 3 languages
+
+        | _ -> failwith($"unmatched test {nodeType} {varVal}")
+
+
     // mapping of functional terms
     [<DataRow("FplMapping", "00a", """def func T()->pred(a:obj) {intr};""", "")>]
     [<DataRow("FplMapping", "00b", """def func T()->func()->pred(a,b:obj) {intr};""", "")>]
@@ -2775,22 +2817,6 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplTranslation", "00", """;""", "")>]
-    [<TestMethod>]
-    member this.TestStructureFplTranslation(nodeType, varVal, fplCode, identifier) =
-        let filename = "TestStructureFplTranslation.fpl"
-        let parent, node = testSkeleton nodeType filename fplCode identifier
-        
-        match nodeType, varVal with
-        | "FplTranslation", "00" ->
-            Assert.IsInstanceOfType<FplRoot>(parent)
-            Assert.AreEqual<int>(0, parent.ArgList.Count)
-            Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplTranslation>(node)
-            Assert.AreEqual<int>(0, node.ArgList.Count)
-            Assert.AreEqual<int>(0, node.Scope.Count)
-        | _ -> failwith($"unmatched test {nodeType} {varVal}")
-
     [<DataRow("FplRoot", "00", """;""", "")>]
     [<TestMethod>]
     member this.TestStructureFplRoot(nodeType, varVal, fplCode, identifier) =
@@ -2861,6 +2887,48 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
 
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
+
+    [<DataRow("FplTranslation", "01", """loc not x := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;;""", "")>]
+    [<DataRow("FplTranslation", "02", """loc not x := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;;""", "x")>]
+    [<DataRow("FplTranslation", "03", """loc not x := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;;""", ")")>]
+    [<DataRow("FplTranslation", "04", """loc not x := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;;""", "nicht ")>]
+    [<TestMethod>]
+    member this.TestStructureFplTranslation(nodeType, varVal, fplCode, identifier) =
+        let filename = "TestStructureFplTranslation.fpl"
+        let parent, node = testSkeleton nodeType filename fplCode identifier
+        
+        match nodeType, varVal with
+        | "FplTranslation", "01" ->
+            Assert.IsInstanceOfType<FplLanguage>(parent) 
+            Assert.AreEqual<int>(3, parent.ArgList.Count)
+            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplTranslation>(node)
+            Assert.AreEqual<int>(0, node.ArgList.Count)
+            Assert.AreEqual<int>(0, node.Scope.Count)
+        | "FplTranslation", "02" ->
+            Assert.IsInstanceOfType<FplLanguage>(parent) 
+            Assert.AreEqual<int>(3, parent.ArgList.Count)
+            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplTranslation>(node)
+            Assert.AreEqual<int>(0, node.ArgList.Count)
+            Assert.AreEqual<int>(0, node.Scope.Count)
+        | "FplTranslation", "03" ->
+            Assert.IsInstanceOfType<FplLanguage>(parent) 
+            Assert.AreEqual<int>(3, parent.ArgList.Count)
+            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplTranslation>(node)
+            Assert.AreEqual<int>(0, node.ArgList.Count)
+            Assert.AreEqual<int>(0, node.Scope.Count)
+        | "FplTranslation", "04" ->
+            Assert.IsInstanceOfType<FplLanguage>(parent) 
+            Assert.AreEqual<int>(2, parent.ArgList.Count)
+            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplTranslation>(node)
+            Assert.AreEqual<int>(0, node.ArgList.Count)
+            Assert.AreEqual<int>(0, node.Scope.Count)
+        | _ -> failwith($"unmatched test {nodeType} {varVal}")
+
+
 
 
     // variable simple blocks

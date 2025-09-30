@@ -999,11 +999,7 @@ let rec eval (st: SymbolTable) ast =
         let lang = new FplLanguage((pos1, pos2), fv) 
         variableStack.PushEvalStack(lang)
         eval st langCode
-        // translations are nested ebnfTerms in the parser, therfore, we have to provide an additional root translation in the symbol table
-        let trsl = new FplTranslation((pos1, pos2), lang) 
-        variableStack.PushEvalStack(trsl)
         eval st ebnfAst
-        variableStack.PopEvalStack() // remove root translation
         variableStack.PopEvalStack() // remove language
         st.EvalPop()
     // | ExtensionBlock of Positions * (Ast * Ast)
