@@ -3373,12 +3373,9 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
                 variableOrQuantor.Scope.TryAdd(this.FplId, this) |> ignore
 
         match nextOpt with 
-        | Some next when next.Name = PrimRefL && this.TypeId <> LiteralUndef ->
+        | Some next when next.Name = PrimRefL ->
             next.FplId <- this.FplId
             tryAddToParentUsingFplId this
-        | Some next when next.Name = PrimRefL && this.TypeId = LiteralUndef ->
-            next.FplId <- this.FplId
-            addExpressionToParentArgList this
         | Some next when ( next.Name = LiteralAxL 
                         || next.Name = LiteralThmL 
                         || next.Name = LiteralLemL 

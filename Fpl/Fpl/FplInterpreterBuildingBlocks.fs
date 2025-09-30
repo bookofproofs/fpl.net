@@ -329,8 +329,8 @@ let rec eval (st: SymbolTable) ast =
                     variableStack.PopEvalStack()
                 | _ -> ()
 
-        if isLocalizationDeclaration && fv.ArgList.Count>0 then 
-            let variable = fv.ArgList[0] 
+        if isLocalizationDeclaration && fv.Scope.ContainsKey(name) then 
+            let variable = fv.Scope[name] 
             let rec getLocalization (fValue:FplValue) = 
                 match fValue with
                 | :? FplLocalization -> fValue
@@ -344,6 +344,7 @@ let rec eval (st: SymbolTable) ast =
                 emitVAR03diagnostics name other.QualifiedStartPos pos1 pos2 true
             else 
                 loc.Scope.Add(name, variable)
+                variable.Parent <- Some loc
         st.EvalPop() 
     | Ast.DelegateId((pos1, pos2), s) -> 
         st.EvalPush("DelegateId")

@@ -1,4 +1,4 @@
-namespace FplInterpreter.Tests
+﻿namespace FplInterpreter.Tests
 open System
 open System.Collections.Generic
 open Microsoft.VisualStudio.TestTools.UnitTesting
@@ -2735,7 +2735,8 @@ type SymbolTableStructure() =
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
 
-    [<DataRow("FplReference", "00", """;""", "")>]
+    [<DataRow("FplReference", "00", """ax T {x};""", "")>]
+    [<DataRow("FplReference", "01", """ax T {dec ~x:pred; x};""", "")>]
     [<TestMethod>]
     member this.TestStructureFplReference(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplReference.fpl"
@@ -2743,11 +2744,19 @@ type SymbolTableStructure() =
         
         match nodeType, varVal with
         | "FplReference", "00" ->
-            Assert.IsInstanceOfType<FplRoot>(parent)
-            Assert.AreEqual<int>(0, parent.ArgList.Count)
+            Assert.IsInstanceOfType<FplAxiom>(parent)
+            Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsInstanceOfType<FplReference>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
+            Assert.AreEqual<int>(1, node.Scope.Count)
+        | "FplReference", "01" ->
+            Assert.IsInstanceOfType<FplAxiom>(parent)
+            Assert.AreEqual<int>(1, parent.ArgList.Count)
+            Assert.AreEqual<int>(1, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplReference>(node)
+            Assert.AreEqual<int>(0, node.ArgList.Count)
+            Assert.AreEqual<int>(1, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     [<DataRow("FplReturn", "00", """;""", "")>]
@@ -2891,6 +2900,11 @@ type SymbolTableStructure() =
     [<DataRow("FplVariable", "03a", """def func T()->pred(x:obj) {intr};""", "")>]
     [<DataRow("FplVariable", "03b", """def func T()->func()->pred(a,b:obj) {intr};""", "b")>]
     [<DataRow("FplVariable", "03c", """def func T()->func(a,b,c:obj)->obj {intr};""", "c")>]
+    // variable in localization
+    [<DataRow("FplVariable", "04a", """loc not x := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;;""", "")>]
+    [<DataRow("FplVariable", "04b", """loc not(x) := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;;""", "")>]
+    [<DataRow("FplVariable", "04c", """loc Equal(x,y) := !tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""", "")>]
+    [<DataRow("FplVariable", "04d", """and(p,q) := !tex: p "\wedge" q !eng: p " and" q !ger: p " und " q;;""", "")>]
     [<TestMethod>]
     member this.TestStructureFplVariable(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplVariable.fpl"
@@ -3252,6 +3266,18 @@ type SymbolTableStructure() =
             let x = (node:?>FplGenericVariable)
             Assert.IsFalse(x.IsInitializedVariable)
             Assert.IsFalse(x.IsSignatureVariable)
+
+        | "FplVariable", "04a" ->
+            Assert.IsInstanceOfType<FplLocalization>(parent)
+            Assert.AreEqual<int>(1, parent.ArgList.Count) 
+            Assert.AreEqual<int>(4, parent.Scope.Count) // a variable and 3 languages
+            Assert.IsInstanceOfType<FplVariable>(node)
+            Assert.AreEqual<int>(0, node.ArgList.Count)
+            Assert.AreEqual<int>(0, node.Scope.Count)
+            let x = (node:?>FplGenericVariable)
+            Assert.IsFalse(x.IsInitializedVariable)
+            Assert.IsFalse(x.IsSignatureVariable)
+
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     [<DataRow("FplVariableMany", "00", """;""", "")>]
@@ -3267,6 +3293,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsInstanceOfType<FplVariableMany>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
+            Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     [<DataRow("FplVariableMany1", "00", """;""", "")>]
@@ -3282,4 +3309,5 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsInstanceOfType<FplVariableMany1>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
+            Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
