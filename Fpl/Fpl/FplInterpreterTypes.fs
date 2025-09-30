@@ -3371,6 +3371,8 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
                 match blockOpt with
                 | Some block -> block.Scope.Add(this.FplId, this)
                 | None -> ()
+            else
+                variableOrQuantor.Scope.TryAdd(this.FplId, this) |> ignore
 
         match nextOpt with 
         | Some next when next.Name = PrimRefL && this.TypeId <> LiteralUndef ->

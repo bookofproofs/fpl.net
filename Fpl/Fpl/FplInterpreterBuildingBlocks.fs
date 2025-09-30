@@ -1219,11 +1219,11 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("FunctionalTermSignature")
         eval st simpleSignatureAst
         eval st paramTupleAst
+        variableStack.InSignatureEvaluation <- false
         eval st mappingAst
         optUserDefinedSymbolAst |> Option.map (eval st) |> Option.defaultValue () 
         setSignaturePositions pos1 pos2
         st.EvalPop()
-        variableStack.InSignatureEvaluation <- false
     | Ast.PredicateWithQualification(predicateWithOptSpecificationAst, qualificationListAst) ->
         st.EvalPush("PredicateWithQualification")
         eval st predicateWithOptSpecificationAst
@@ -1420,10 +1420,10 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("FunctionalTermInstanceSignature")
         eval st simpleSignatureAst
         eval st paramTupleAst
+        variableStack.InSignatureEvaluation <- false
         eval st mappingAst
         setSignaturePositions pos1 pos2
         st.EvalPop()
-        variableStack.InSignatureEvaluation <- false
     | Ast.PredicateInstanceSignature((pos1, pos2), (simpleSignatureAst, paramTupleAst)) ->
         variableStack.InSignatureEvaluation <- true
         st.EvalPush("PredicateInstanceSignature")
