@@ -319,15 +319,11 @@ let rec eval (st: SymbolTable) ast =
             | _ ->
                 // otherwise emit variable not declared 
                 emitVAR01diagnostics name pos1 pos2
-                match fv.Name with 
-                | PrimRefL ->
-                    //  set its variable to an undefined one
-                    let undefVar = new FplVariable(name, (pos1, pos2), fv)
-                    let undefined = new FplIntrinsicUndef((pos1, pos2), undefVar)
-                    undefVar.SetValue(undefined)
-                    variableStack.PushEvalStack(undefVar)
-                    variableStack.PopEvalStack()
-                | _ -> ()
+                let undefVar = new FplVariable(name, (pos1, pos2), fv)
+                let undefined = new FplIntrinsicUndef((pos1, pos2), undefVar)
+                undefVar.SetValue(undefined)
+                variableStack.PushEvalStack(undefVar)
+                variableStack.PopEvalStack()
 
         if isLocalizationDeclaration && fv.Scope.ContainsKey(name) then 
             let variable = fv.Scope[name] 
