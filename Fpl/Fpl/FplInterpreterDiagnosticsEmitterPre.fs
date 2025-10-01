@@ -240,14 +240,7 @@ let emitID025Diagnostics qualifiedNameCandidate candidateEnglishName blockEnglis
     | LiteralConjL
     | LiteralCorL
     | LiteralPrfL
-    | PrimFuncionalTermL
-    | PrimPredicateL
-    | PrimClassL
     | PrimExtensionL
-    | PrimMandatoryFunctionalTermL
-    | PrimOptionalFunctionalTermL
-    | PrimMandatoryPredicateL
-    | PrimOptionalPredicateL
     | LiteralLocL ->
         let diagnostic =
             { 

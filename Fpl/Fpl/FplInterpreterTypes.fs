@@ -4504,26 +4504,27 @@ let findCandidatesByName (st: SymbolTable) (name: string) withClassConstructors 
         else
             name
 
-    st.Root.Scope // iterate all theories
-    |> Seq.iter (fun theory ->
-        theory.Value.Scope
-        // filter only blocks starting with the same FplId as the reference
-        |> Seq.map (fun kvp -> kvp.Value)
-        |> Seq.filter (fun fv -> fv.FplId = name || fv.FplId = nameWithoutProofOrCorRef || fv.FplId.StartsWith(nameWithProofOrCorRef))
-        |> Seq.iter (fun (block: FplValue) ->
-            pm.Add(block)
+    if name.Length > 0 && System.Char.IsUpper(name[0]) then 
+        st.Root.Scope // iterate all theories
+        |> Seq.iter (fun theory ->
+            theory.Value.Scope
+            // filter only blocks starting with the same FplId as the reference
+            |> Seq.map (fun kvp -> kvp.Value)
+            |> Seq.filter (fun fv -> fv.FplId = name || fv.FplId = nameWithoutProofOrCorRef || fv.FplId.StartsWith(nameWithProofOrCorRef))
+            |> Seq.iter (fun (block: FplValue) ->
+                pm.Add(block)
 
-            if withClassConstructors && block.IsClass() then
-                block.Scope
-                |> Seq.map (fun kvp -> kvp.Value)
-                |> Seq.filter (fun (fv: FplValue) -> (fv.Name = LiteralCtorL))
-                |> Seq.iter (fun (fv: FplValue) -> pm.Add(fv))
+                if withClassConstructors && block.IsClass() then
+                    block.Scope
+                    |> Seq.map (fun kvp -> kvp.Value)
+                    |> Seq.filter (fun (fv: FplValue) -> (fv.Name = LiteralCtorL))
+                    |> Seq.iter (fun (fv: FplValue) -> pm.Add(fv))
 
-            if withCorollariesOrProofs && (block :? FplGenericTheoremLikeStmt) then 
-                flattenCorollariesAndProofs block
+                if withCorollariesOrProofs && (block :? FplGenericTheoremLikeStmt) then 
+                    flattenCorollariesAndProofs block
+            )
         )
-    )
-    |> ignore
+        |> ignore
 
     pm |> Seq.toList
 

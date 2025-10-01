@@ -725,17 +725,7 @@ let rec eval (st: SymbolTable) ast =
                     |> String.concat ", "
                 emitID017Diagnostics identifier candidatesNames pos1 pos2
             | _ -> ()
-        let candidates = findCandidatesByName st identifier true false
-        if candidates.Length > 0 then 
-            let candidate = candidates.Head 
-            match fv with
-            | :? FplReference -> 
-                fv.Scope.Add(identifier, candidate)
-                match fv.BlockNode with
-                | Some block ->
-                    emitID025Diagnostics (qualifiedName candidate) candidate.EnglishName block.EnglishName block.Name fv.StartPos fv.EndPos
-                | _ -> ()
-            | _ -> fv.ArgList.Add(candidate)
+
         
         st.EvalPop()
     | Ast.ParamTuple((pos1, pos2), namedVariableDeclarationListAsts) ->
@@ -962,6 +952,7 @@ let rec eval (st: SymbolTable) ast =
         | None -> 
             // if no specification was found then simply continue in the same context
             eval st fplIdentifierAst
+            let block = fv.BlockNode.Value
             // make sure, we still add a referenced node candidate to the scope of a reference
             let candidates = searchForCandidatesOfReferenceBlock fv
             let classes = candidates |> List.filter (fun c -> c.IsClass())
@@ -980,9 +971,13 @@ let rec eval (st: SymbolTable) ast =
             elif classes.Length > 0 && constructors.Length = 0 then
                 // add the class (intrinsic case, no constructors at all)
                 fv.Scope.TryAdd(fv.FplId, classes.Head) |> ignore
+                // let candidate = classes.Head
+                // emitID025Diagnostics (qualifiedName candidate) candidate.EnglishName block.EnglishName block.Name fv.StartPos fv.EndPos
             elif candidates.Length > 0 then
                 // not a class was referred, add the candidate (e.g., referenced variable)
-                fv.Scope.TryAdd(fv.FplId, candidates.Head) |> ignore
+                let candidate = candidates.Head
+                fv.Scope.TryAdd(fv.FplId, candidate) |> ignore
+                emitID025Diagnostics (qualifiedName candidate) candidate.EnglishName block.EnglishName block.Name fv.StartPos fv.EndPos
             else
                 ()
 

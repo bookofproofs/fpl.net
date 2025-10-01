@@ -1106,6 +1106,7 @@ type TestInterpreterErrors() =
             let code = ID024 ("", "")
             runTestHelper "TestID024.fpl" fplCode code expected
 
+    [<DataRow("00", """loc not(x) := !tex: "\not(x)" ; ax T { n };""", 0)>]
     [<DataRow("01e", """def cl A:obj {intr} ax T { A };""", 1)>]
     [<DataRow("01f", """inf A {pre:true con:true} ax T { A };""", 1)>]
     [<DataRow("01g", """ax A {true} ax T { A };""", 1)>]
