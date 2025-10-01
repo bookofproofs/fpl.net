@@ -1097,7 +1097,6 @@ type TestInterpreterErrors() =
     [<DataRow("00b", """loc not(x) :=  !tex: "\neg(" x ")"; loc not(x) :=  !tex: "\neg(" x ")";;""", 1)>]
     [<DataRow("00c", """loc not(y) :=  !tex: "\neg(" x ")"; loc not(x) :=  !tex: "\neg(" x ")";;""", 1)>]
     [<DataRow("01a", """loc Equal(x,y) := !tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y;;""", 0)>]
-
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID024(no:string, fplCode:string, expected) =
@@ -1106,6 +1105,26 @@ type TestInterpreterErrors() =
         else
             let code = ID024 ("", "")
             runTestHelper "TestID024.fpl" fplCode code expected
+
+    [<DataRow("01e", """def cl A:obj {intr} ax T { A };""", 1)>]
+    [<DataRow("01f", """inf A {pre:true con:true} ax T { A };""", 1)>]
+    [<DataRow("01g", """ax A {true} ax T { A };""", 1)>]
+    [<DataRow("01h", """thm A {true} ax T { A };""", 1)>]
+    [<DataRow("01i", """lem A {true} ax T { A };""", 1)>]
+    [<DataRow("01j", """prop A {true} ax T { A };""", 1)>]
+    [<DataRow("01k", """conj A {true} ax T { A };""", 1)>]
+    [<DataRow("01l", """cor A$1 {true} ax T { A$1 };""", 1)>]
+    [<DataRow("01m", """proof A$1 {1. |- trivial} ax T { A$1 };""", 1)>]
+    [<DataRow("01n", """ext A x@/\d+/ -> obj {ret x} ax T { A };""", 1)>]
+    [<DataRow("01o", """loc A := !tex: "\alpha" ; ax T { A };""", 1)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestID025(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = ID025 ("", "", "")
+            runTestHelper "TestID025.fpl" fplCode code expected
 
     [<DataRow("""def pred Or (x:+ pred) infix "or" 0 {true};""", 0)>]
     [<DataRow("""def pred Or (x:* pred) infix "or" 0 {true};""", 0)>]

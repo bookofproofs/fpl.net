@@ -577,7 +577,25 @@ type FplValue(positions: Positions, parent: FplValue option) =
 
         getFullName this true
 
+    /// Calculcates this FplValue's block Node
+    member this.BlockNode = 
+        let rec blockNode (node:FplValue) =
+            match node.Parent with
+            | Some parent ->
+                match parent.Name with
+                | PrimRoot -> None
+                | PrimTheoryL -> Some node
+                | _ ->
+                    blockNode parent
+            | None -> None
+        blockNode this
 
+    /// Provides a name with an english article (an or a).
+    member this.EnglishName = 
+        if isEnglishAn this.Name then 
+            $"an {this.Name}"
+        else    
+            $"{this.Name}"
 
     /// Checks if a block named name is in the scope of the fplValue' parent.
     member this.InScopeOfParent name =
@@ -3355,17 +3373,9 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
                     | _ ->
                         conflictInScope parent formulaConflict
             
-            let rec blockNode (node:FplValue) =
-                let parent = node.Parent.Value
-                match parent.Name with
-                | PrimRoot -> None
-                | PrimTheoryL -> Some node
-                | _ ->
-                    blockNode parent
-
             if not (conflictInScope variableOrQuantor true) then
                 variableOrQuantor.Scope.Add(this.FplId, this)
-                let blockOpt = blockNode variableOrQuantor
+                let blockOpt = variableOrQuantor.BlockNode
                 match blockOpt with
                 | Some block -> block.Scope.Add(this.FplId, this)
                 | None -> ()

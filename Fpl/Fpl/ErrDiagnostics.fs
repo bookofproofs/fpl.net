@@ -126,6 +126,7 @@ type DiagnosticCode =
     | ID021 of string 
     | ID023 of string 
     | ID024 of string * string
+    | ID025 of string * string * string
     // logic-related error codes
     | LG000 of string * string 
     | LG001 of string * string * string
@@ -233,6 +234,7 @@ type DiagnosticCode =
             | ID021 _ -> "ID021"
             | ID023 _ -> "ID023"
             | ID024 _ -> "ID024"
+            | ID025 _ -> "ID025"
             // logic-related error codes
             | LG000 _ -> "LG000"
             | LG001 _ -> "LG001"
@@ -348,6 +350,7 @@ type DiagnosticCode =
             | ID021 name -> sprintf "Duplicate call of base constructor `%s`." name
             | ID023 candidates  -> $"Cannot associate a justification with a single block. Found more candidates: {candidates}." 
             | ID024 (signature, conflict) -> sprintf "Expression `%s` was already localized at %s." signature conflict
+            | ID025 (candidate, candidateType, nodeType)  -> $"Cannot reference to `{candidate}` which is {candidateType} inside {nodeType}." 
 
             // logic-related error codes
             | LG000 (typeOfPredicate,argument) -> $"Cannot evaluate `{typeOfPredicate}`; its argument `{argument}` is a predicate but couldn't be determined."

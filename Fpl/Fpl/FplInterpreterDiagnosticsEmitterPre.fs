@@ -230,6 +230,39 @@ let emitID024Diagnostics alreadyLocalizedExpr qualifiedStartPosConflictStr pos1 
         }
     ad.AddDiagnostic diagnostic
 
+let emitID025Diagnostics qualifiedNameCandidate candidateEnglishName blockEnglishName blockName pos1 pos2 =
+    match blockName with 
+    | LiteralAxL
+    | LiteralThmL
+    | LiteralLemL
+    | LiteralPropL
+    | LiteralConjL
+    | LiteralConjL
+    | LiteralCorL
+    | LiteralPrfL
+    | PrimFuncionalTermL
+    | PrimPredicateL
+    | PrimClassL
+    | PrimExtensionL
+    | PrimMandatoryFunctionalTermL
+    | PrimOptionalFunctionalTermL
+    | PrimMandatoryPredicateL
+    | PrimOptionalPredicateL
+    | LiteralLocL ->
+        let diagnostic =
+            { 
+                Diagnostic.Uri = ad.CurrentUri
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = pos1
+                Diagnostic.EndPos = pos2
+                Diagnostic.Code = ID025(qualifiedNameCandidate, candidateEnglishName, blockEnglishName)
+                Diagnostic.Alternatives = None
+            }
+        ad.AddDiagnostic diagnostic
+    | _ -> ()
+
+
 let emitLG002diagnostic nodeTypeName times pos1 pos2 = 
     let diagnostic =
         { 

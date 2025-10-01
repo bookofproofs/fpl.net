@@ -724,13 +724,18 @@ let rec eval (st: SymbolTable) ast =
                     |> Seq.map (fun fv -> qualifiedName fv)
                     |> String.concat ", "
                 emitID017Diagnostics identifier candidatesNames pos1 pos2
-            | _ -> 
-                match checkSIG04Diagnostics fv candidates with
-                | Some candidate -> 
-                    match fv with
-                    | :? FplReference -> fv.Scope.Add(identifier, candidate)
-                    | _ -> fv.ArgList.Add(candidate)
+            | _ -> ()
+        let candidates = findCandidatesByName st identifier true false
+        if candidates.Length > 0 then 
+            let candidate = candidates.Head 
+            match fv with
+            | :? FplReference -> 
+                fv.Scope.Add(identifier, candidate)
+                match fv.BlockNode with
+                | Some block ->
+                    emitID025Diagnostics (qualifiedName candidate) candidate.EnglishName block.EnglishName block.Name fv.StartPos fv.EndPos
                 | _ -> ()
+            | _ -> fv.ArgList.Add(candidate)
         
         st.EvalPop()
     | Ast.ParamTuple((pos1, pos2), namedVariableDeclarationListAsts) ->
@@ -1100,6 +1105,18 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("ReferencingIdentifier")
         eval st predicateIdentifierAst
         dollarDigitListAsts |> List.map (eval st) |> ignore
+        let fv = variableStack.PeekEvalStack()
+        match fv with 
+        | :? FplReference ->
+            let candidates = findCandidatesByName st fv.FplId false true
+            if candidates.Length > 0 then 
+                let candidate = candidates.Head
+                fv.Scope.TryAdd(fv.FplId, candidate) |> ignore
+                match fv.BlockNode with
+                | Some block ->
+                    emitID025Diagnostics (qualifiedName candidate) candidate.EnglishName block.EnglishName block.Name fv.StartPos fv.EndPos
+                | _ -> ()
+        | _ -> ()
         st.EvalPop()
     | ProofSignature((pos1, pos2), (simpleSignatureAst, dollarDigitListAsts)) ->
         st.EvalPush("ProofSignature")
