@@ -811,11 +811,11 @@ type TestFplValueScopeName() =
             let proof = theory.Scope["T$1"]
             let arg = proof.Scope["100"]
             match var with
-            | "base1" -> Assert.AreEqual<string>("100.", arg.Type(SignatureType.Mixed))
-            | "base2" -> Assert.AreEqual<string>("100.", arg.Type(SignatureType.Mixed))
-            | "base3" -> Assert.AreEqual<string>("100.", arg.Type(SignatureType.Mixed))
-            | "base4" -> Assert.AreEqual<string>("100.", arg.Type(SignatureType.Mixed))
-            | "base5" -> Assert.AreEqual<string>("100.", arg.Type(SignatureType.Mixed))
+            | "base1" -> Assert.AreEqual<string>("100", arg.Type(SignatureType.Mixed))
+            | "base2" -> Assert.AreEqual<string>("100", arg.Type(SignatureType.Mixed))
+            | "base3" -> Assert.AreEqual<string>("100", arg.Type(SignatureType.Mixed))
+            | "base4" -> Assert.AreEqual<string>("100", arg.Type(SignatureType.Mixed))
+            | "base5" -> Assert.AreEqual<string>("100", arg.Type(SignatureType.Mixed))
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
@@ -928,11 +928,11 @@ type TestFplValueScopeName() =
             | "base3" -> Assert.AreEqual<string>(LiteralFunc, mapping.Type(SignatureType.Mixed))
             | "base4" -> Assert.AreEqual<string>(LiteralPred, mapping.Type(SignatureType.Mixed))
             | "base5" -> Assert.AreEqual<string>("A", mapping.Type(SignatureType.Mixed))
-            | "base6" -> Assert.AreEqual<string>("obj(ind)", mapping.Type(SignatureType.Mixed))
+            | "base6" -> Assert.AreEqual<string>("pred(ind)", mapping.Type(SignatureType.Mixed))
             | "base7" -> Assert.AreEqual<string>("pred(*obj)", mapping.Type(SignatureType.Mixed))
             | "base8" -> Assert.AreEqual<string>("func(*pred(obj)) -> pred(ind)", mapping.Type(SignatureType.Mixed))
             | "base9" -> Assert.AreEqual<string>("pred(+func(A) -> A)", mapping.Type(SignatureType.Mixed))
-            | "base10" -> Assert.AreEqual<string>("A(func(A) -> A)", mapping.Type(SignatureType.Mixed))
+            | "base10" -> Assert.AreEqual<string>("pred(func(A) -> A)", mapping.Type(SignatureType.Mixed))
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
