@@ -2382,67 +2382,67 @@ type FplReference(positions: Positions, parent: FplValue) =
         and set (value) = _argType <- value
 
     override this.Type signatureType =
-        if this.Scope.ContainsKey(this.FplId) then
-            // delegate the type identifier to the referenced entity
-            let val1 = this.Scope[this.FplId]
-            val1.Type(signatureType)
-        else
-            let head = getFplHead this signatureType
-            let propagate = propagateSignatureType signatureType
+        let headObj = 
+            if this.Scope.Count > 0 then 
+                this.Scope.Values |> Seq.head
+            else
+                this
+        let head = getFplHead headObj signatureType
+        let propagate = propagateSignatureType signatureType
 
-            let qualification =
-                if this.Scope.ContainsKey(".") then
-                    Some(this.Scope["."])
-                else
-                    None
+        let qualification =
+            if this.Scope.ContainsKey(".") then
+                Some(this.Scope["."])
+            else
+                None
 
-            // The arguments are reserved for the arguments or the coordinates of the reference
-            let args =
-                this.ArgList
-                |> Seq.map (fun fv -> fv.Type(propagate))
-                |> String.concat ", "
+        // The arguments are reserved for the arguments or the coordinates of the reference
+        let args =
+            this.ArgList
+            |> Seq.map (fun fv -> fv.Type(propagate))
+            |> String.concat ", "
 
-            match this.ArgList.Count, this.ArgType, qualification with
-            | 0, ArgType.Nothing, Some qual ->
-                $"{head}.{qual.Type(propagate)}"
-            | 0, ArgType.Brackets, Some qual ->
-                $"{head}[].{qual.Type(propagate)}"
-            | 0, ArgType.Parentheses, Some qual ->
-                $"{head}().{qual.Type(propagate)}"
-            | 0, ArgType.Nothing, None -> 
-                $"{head}"
-            | 0, ArgType.Brackets, None ->
-                $"{head}[]"
-            | 0, ArgType.Parentheses, None ->
-                $"{head}()"
-            | 1, ArgType.Nothing, Some qual -> 
+        match this.ArgList.Count, this.ArgType, qualification with
+        | 0, ArgType.Nothing, Some qual ->
+            $"{head}.{qual.Type(propagate)}"
+        | 0, ArgType.Brackets, Some qual ->
+            $"{head}[].{qual.Type(propagate)}"
+        | 0, ArgType.Parentheses, Some qual ->
+            $"{head}().{qual.Type(propagate)}"
+        | 0, ArgType.Nothing, None -> 
+            $"{head}"
+        | 0, ArgType.Brackets, None ->
+            $"{head}[]"
+        | 0, ArgType.Parentheses, None ->
+            $"{head}()"
+        | 1, ArgType.Nothing, Some qual -> 
                 
-                $"{head}{args}.{qual.Type(propagate)}"
-            | 1, ArgType.Brackets, Some qual ->
-                $"{head}[{args}].{qual.Type(propagate)}"
-            | 1, ArgType.Parentheses, Some qual ->
-                $"{head}({args}).{qual.Type(propagate)}"
-            | 1, ArgType.Nothing, None -> 
-                if this.FplId <> String.Empty then 
-                    $"{head}({args})"
-                else
-                    $"{head}{args}"
-            | 1, ArgType.Brackets, None ->
-                $"{head}[{args}]"
-            | 1, ArgType.Parentheses, None ->
+            $"{head}{args}.{qual.Type(propagate)}"
+        | 1, ArgType.Brackets, Some qual ->
+            $"{head}[{args}].{qual.Type(propagate)}"
+        | 1, ArgType.Parentheses, Some qual ->
+            $"{head}({args}).{qual.Type(propagate)}"
+        | 1, ArgType.Nothing, None -> 
+            if this.FplId <> String.Empty then 
+                $"{head}({args})"
+            else
                 $"{head}{args}"
-            | _, ArgType.Nothing, Some qual -> 
-                $"{head}({args}).{qual.Type(propagate)}"
-            | _, ArgType.Brackets, Some qual ->
-                $"{head}[{args}].{qual.Type(propagate)}"
-            | _, ArgType.Parentheses, Some qual ->
-                $"{head}({args}).{qual.Type(propagate)}"
-            | _, ArgType.Nothing, None -> 
-                $"{head}({args})"
-            | _, ArgType.Brackets, None ->
-                $"{head}[{args}]"
-            | _, ArgType.Parentheses, None ->
-                $"{head}({args})"
+        | 1, ArgType.Brackets, None ->
+            $"{head}[{args}]"
+        | 1, ArgType.Parentheses, None ->
+            $"{head}({args})"
+        | _, ArgType.Nothing, Some qual -> 
+            $"{head}({args}).{qual.Type(propagate)}"
+        | _, ArgType.Brackets, Some qual ->
+            $"{head}[{args}].{qual.Type(propagate)}"
+        | _, ArgType.Parentheses, Some qual ->
+            $"{head}({args}).{qual.Type(propagate)}"
+        | _, ArgType.Nothing, None -> 
+            $"{head}({args})"
+        | _, ArgType.Brackets, None ->
+            $"{head}[{args}]"
+        | _, ArgType.Parentheses, None ->
+            $"{head}({args})"
 
 
     override this.Represent () = 
@@ -2489,7 +2489,7 @@ type FplReference(positions: Positions, parent: FplValue) =
                 | 1, ArgType.Brackets, None ->
                     $"{LiteralUndef}[{args}]"
                 | 1, ArgType.Parentheses, None ->
-                    $"{LiteralUndef}{args}"
+                    $"{LiteralUndef}({args})"
                 | _, ArgType.Nothing, Some qual -> 
                     $"{LiteralUndef}({args}).{qual.Represent()}"
                 | _, ArgType.Brackets, Some qual ->
@@ -2953,6 +2953,8 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
     override this.EmbedInSymbolTable nextOpt = 
         match nextOpt with
         | Some next when next.Scope.ContainsKey(".") -> ()
+        | Some next when next.Name = PrimRefL -> 
+            next.Scope.TryAdd(this.FplId, this) |> ignore
         | _ -> addExpressionToParentArgList this
 
     override this.RunOrder = None

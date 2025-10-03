@@ -904,11 +904,11 @@ type TestFplValueScopeFplId() =
 
             match var with
             | "base0" -> Assert.AreEqual<string>(@"1", trsl.FplId)
-            | "base1" -> Assert.AreEqual<string>(@"", trsl.FplId)
+            | "base1" -> Assert.AreEqual<string>(@"x", trsl.FplId)
             | "base2" -> Assert.AreEqual<string>(@"\neg(", trsl.FplId)
-            | "base3" -> Assert.AreEqual<string>(@"", trsl.FplId)
-            | "base4" -> Assert.AreEqual<string>(@"", trsl.FplId)
-            | "base5" -> Assert.AreEqual<string>(@"", trsl.FplId)
+            | "base3" -> Assert.AreEqual<string>(@"p", trsl.FplId)
+            | "base4" -> Assert.AreEqual<string>(@"x", trsl.FplId)
+            | "base5" -> Assert.AreEqual<string>(@"x", trsl.FplId)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
