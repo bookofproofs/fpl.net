@@ -33,35 +33,6 @@ let emitUnexpectedErrorDiagnostics errMsg =
 
     ad.AddDiagnostic(diagnostic)
 
-let emitID015diagnostics name (self:FplValue) =
-    let c = ID015 name
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = self.StartPos
-            Diagnostic.EndPos = self.EndPos
-            Diagnostic.Code = c
-            Diagnostic.Alternatives = None 
-        }
-    ad.AddDiagnostic diagnostic
-
-let emitID016diagnostics name (self:FplValue) =
-    let c = ID016 name
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = self.StartPos
-            Diagnostic.EndPos = self.EndPos
-            Diagnostic.Code = c
-            Diagnostic.Alternatives = None 
-        }
-    ad.AddDiagnostic diagnostic
-
-
 let getVAR04diagnostic (fv:FplValue) name = 
     { 
         Diagnostic.Uri = ad.CurrentUri

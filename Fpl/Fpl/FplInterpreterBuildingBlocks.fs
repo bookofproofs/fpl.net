@@ -468,46 +468,47 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Self((pos1, pos2), _) -> 
         st.EvalPush("Self")
         let rb = variableStack.PeekEvalStack()
-        rb.StartPos <- pos1
-        rb.EndPos <- pos2
-        rb.FplId <- LiteralSelf
-        rb.TypeId <- LiteralSelf
+        let fv = new FplSelf((pos1, pos2), rb)
+        variableStack.PushEvalStack(fv)
+        variableStack.PopEvalStack()
         let oldDiagnosticsStopped = ad.DiagnosticsStopped
         ad.DiagnosticsStopped <- false
-        let referencedBlock = nextDefinition rb 0
-        match referencedBlock with
-        | ScopeSearchResult.FoundIncorrectBlock name -> 
-            emitID015diagnostics name rb
-        | ScopeSearchResult.Found block -> 
-            rb.Scope.Add(rb.FplId, block)
-        | ScopeSearchResult.FoundMultiple name -> 
-            emitID016diagnostics name rb
-        | ScopeSearchResult.NotFound -> 
-            emitID016diagnostics "(no block found)" rb
+        match fv.NextBlockNode with
+        | Some block ->
+            match block.Name with 
+            | PrimOptionalFunctionalTermL
+            | PrimMandatoryFunctionalTermL
+            | PrimOptionalPredicateL
+            | PrimMandatoryPredicateL
+            | PrimClassL
+            | PrimPredicateL
+            | PrimFuncionalTermL ->
+                rb.Scope.Add(rb.FplId, block)
+            | _ ->
+                emitID016diagnostics $"'{block.Name}' {block.Type(SignatureType.Name)}" pos1 pos2
         | _ -> ()
         ad.DiagnosticsStopped <- oldDiagnosticsStopped
         st.EvalPop() 
     | Ast.Parent((pos1, pos2), _) -> 
         st.EvalPush("Parent")
         let rb = variableStack.PeekEvalStack()
-        rb.StartPos <- pos1
-        rb.EndPos <- pos2
-        rb.FplId <- LiteralParent
-        rb.TypeId <- LiteralParent
+        let fv = new FplParent((pos1, pos2), rb)
+        variableStack.PushEvalStack(fv)
+        variableStack.PopEvalStack()
         let oldDiagnosticsStopped = ad.DiagnosticsStopped
         ad.DiagnosticsStopped <- false
-        let referencedBlock = nextDefinition rb 1
-        match referencedBlock with
-        | ScopeSearchResult.FoundIncorrectBlock name -> 
-            emitID015diagnostics name rb
-        | ScopeSearchResult.Found block -> 
-            rb.Scope.Add(rb.FplId, block)
-        | ScopeSearchResult.FoundMultiple name -> 
-            emitID016diagnostics name rb
-        | ScopeSearchResult.NotFound -> 
-            emitID016diagnostics "(no block found)" rb
+        match fv.UltimateBlockNode with
+        | Some block ->
+            match block.Name with 
+            | PrimClassL
+            | PrimPredicateL
+            | PrimFuncionalTermL ->
+                rb.Scope.Add(rb.FplId, block)
+            | _ ->
+                emitID015diagnostics $"'{block.Name}' {block.Type(SignatureType.Name)}" pos1 pos2
         | _ -> ()
         ad.DiagnosticsStopped <- oldDiagnosticsStopped
+
         st.EvalPop() 
     | Ast.True((pos1, pos2), _) -> 
         st.EvalPush("True")
@@ -969,7 +970,7 @@ let rec eval (st: SymbolTable) ast =
         | None -> 
             // if no specification was found then simply continue in the same context
             eval st fplIdentifierAst
-            let block = fv.BlockNode.Value
+            let block = fv.UltimateBlockNode.Value
             // make sure, we still add a referenced node candidate to the scope of a reference
             let candidates = searchForCandidatesOfReferenceBlock fv
             let classes = candidates |> List.filter (fun c -> c.IsClass())
@@ -1124,7 +1125,7 @@ let rec eval (st: SymbolTable) ast =
             if candidates.Length > 0 then 
                 let candidate = candidates.Head
                 fv.Scope.TryAdd(fv.FplId, candidate) |> ignore
-                match fv.BlockNode with
+                match fv.UltimateBlockNode with
                 | Some block ->
                     emitID025Diagnostics (qualifiedName candidate) candidate.EnglishName block.EnglishName block.Name fv.StartPos fv.EndPos
                 | _ -> ()

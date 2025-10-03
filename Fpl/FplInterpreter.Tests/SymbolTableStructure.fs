@@ -209,6 +209,9 @@ type SymbolTableStructure() =
         | "FplOptionalPredicate" ->
             let x = new FplOptionalPredicate(positions, parent)
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
+        | "FplParent" ->
+            let x = new FplParent(positions, parent)
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplPredicate" ->
             let x = new FplPredicate(positions, parent, 0)
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
@@ -241,6 +244,9 @@ type SymbolTableStructure() =
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplRuleOfInference" ->
             let x = new FplRuleOfInference(positions, parent, 0)
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
+        | "FplSelf" ->
+            let x = new FplSelf(positions, parent)
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplTheorem" ->
             let x = new FplTheorem(positions, parent, 0)
@@ -349,6 +355,7 @@ type SymbolTableStructure() =
     [<DataRow("FplNegation")>]
     [<DataRow("FplOptionalFunctionalTerm")>]
     [<DataRow("FplOptionalPredicate")>]
+    [<DataRow("FplParent")>]
     [<DataRow("FplPredicate")>]
     [<DataRow("FplPredicateList")>]
     [<DataRow("FplProof")>]
@@ -360,6 +367,7 @@ type SymbolTableStructure() =
     [<DataRow("FplReturn")>]
     [<DataRow("FplRoot")>]
     [<DataRow("FplRuleOfInference")>]
+    [<DataRow("FplSelf")>]
     [<DataRow("FplTheorem")>]
     [<DataRow("FplTheory")>]
     [<DataRow("FplTranslation")>]
@@ -486,6 +494,8 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>(PrimOptionalFunctionalTermL, (getName var).[index])
         | "FplOptionalPredicate" ->
             Assert.AreEqual<string>(PrimOptionalPredicateL, (getName var).[index])
+        | "FplParent" ->
+            Assert.AreEqual<string>(LiteralParent, (getName var).[index])
         | "FplPredicate" ->
             Assert.AreEqual<string>(PrimPredicateL, (getName var).[index])
         | "FplPredicateList" ->
@@ -508,6 +518,8 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>(PrimRoot, (getName var).[index])
         | "FplRuleOfInference" ->
             Assert.AreEqual<string>(PrimRuleOfInference, (getName var).[index])
+        | "FplSelf" ->
+            Assert.AreEqual<string>(LiteralSelf, (getName var).[index])
         | "FplTheorem" ->
             Assert.AreEqual<string>(LiteralThmL, (getName var).[index])
         | "FplTheory" ->
@@ -582,6 +594,7 @@ type SymbolTableStructure() =
     [<DataRow("FplNegation")>]
     [<DataRow("FplOptionalFunctionalTerm")>]
     [<DataRow("FplOptionalPredicate")>]
+    [<DataRow("FplParent")>]
     [<DataRow("FplPredicate")>]
     [<DataRow("FplPredicateList")>]
     [<DataRow("FplProof")>]
@@ -593,6 +606,7 @@ type SymbolTableStructure() =
     [<DataRow("FplReturn")>]
     [<DataRow("FplRoot")>]
     [<DataRow("FplRuleOfInference")>]
+    [<DataRow("FplSelf")>]
     [<DataRow("FplTheorem")>]
     [<DataRow("FplTheory")>]
     [<DataRow("FplTranslation")>]
@@ -720,6 +734,8 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>(PrimOptionalFunctionalTerm, (getName var).[index])
         | "FplOptionalPredicate" ->
             Assert.AreEqual<string>(PrimOptionalPredicate, (getName var).[index])
+        | "FplParent" ->
+            Assert.AreEqual<string>(LiteralParent, (getName var).[index])
         | "FplPredicate" ->
             Assert.AreEqual<string>(PrimPredicate, (getName var).[index])
         | "FplPredicateList" ->
@@ -742,6 +758,8 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>(PrimRoot, (getName var).[index])
         | "FplRuleOfInference" ->
             Assert.AreEqual<string>(LiteralInf, (getName var).[index])
+        | "FplSelf" ->
+            Assert.AreEqual<string>(LiteralSelf, (getName var).[index])
         | "FplTheorem" ->
             Assert.AreEqual<string>(LiteralThm, (getName var).[index])
         | "FplTheory" ->
@@ -815,6 +833,7 @@ type SymbolTableStructure() =
     [<DataRow("FplNegation")>]
     [<DataRow("FplOptionalFunctionalTerm")>]
     [<DataRow("FplOptionalPredicate")>]
+    [<DataRow("FplParent")>]
     [<DataRow("FplPredicate")>]
     [<DataRow("FplPredicateList")>]
     [<DataRow("FplProof")>]
@@ -826,6 +845,7 @@ type SymbolTableStructure() =
     [<DataRow("FplReturn")>]
     [<DataRow("FplRoot")>]
     [<DataRow("FplRuleOfInference")>]
+    [<DataRow("FplSelf")>]
     [<DataRow("FplTheorem")>]
     [<DataRow("FplTheory")>]
     [<DataRow("FplTranslation")>]
@@ -953,6 +973,8 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplOptionalPredicate" ->
             Assert.AreEqual<string>(LiteralUndetermined, (getName var).[index])
+        | "FplParent" ->
+            Assert.AreEqual<string>(LiteralParent, (getName var).[index])
         | "FplPredicate" ->
             Assert.AreEqual<string>(LiteralUndetermined, (getName var).[index])
         | "FplPredicateList" ->
@@ -975,6 +997,8 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplRuleOfInference" ->
             Assert.AreEqual<string>(LiteralUndetermined, (getName var).[index])
+        | "FplSelf" ->
+            Assert.AreEqual<string>(LiteralSelf, (getName var).[index])
         | "FplTheorem" ->
             Assert.AreEqual<string>(LiteralUndetermined, (getName var).[index])
         | "FplTheory" ->
@@ -1049,6 +1073,7 @@ type SymbolTableStructure() =
     [<DataRow("FplNegation")>]
     [<DataRow("FplOptionalFunctionalTerm")>]
     [<DataRow("FplOptionalPredicate")>]
+    [<DataRow("FplParent")>]
     [<DataRow("FplPredicate")>]
     [<DataRow("FplPredicateList")>]
     [<DataRow("FplProof")>]
@@ -1060,6 +1085,7 @@ type SymbolTableStructure() =
     [<DataRow("FplReturn")>]
     [<DataRow("FplRoot")>]
     [<DataRow("FplRuleOfInference")>]
+    [<DataRow("FplSelf")>]
     [<DataRow("FplTheorem")>]
     [<DataRow("FplTheory")>]
     [<DataRow("FplTranslation")>]
@@ -1282,6 +1308,7 @@ type SymbolTableStructure() =
     [<DataRow("FplNegation")>]
     [<DataRow("FplOptionalFunctionalTerm")>]
     [<DataRow("FplOptionalPredicate")>]
+    [<DataRow("FplParent")>]
     [<DataRow("FplPredicate")>]
     [<DataRow("FplPredicateList")>]
     [<DataRow("FplProof")>]
@@ -1293,6 +1320,7 @@ type SymbolTableStructure() =
     [<DataRow("FplReturn")>]
     [<DataRow("FplRoot")>]
     [<DataRow("FplRuleOfInference")>]
+    [<DataRow("FplSelf")>]
     [<DataRow("FplTheorem")>]
     [<DataRow("FplTheory")>]
     [<DataRow("FplTranslation")>]
@@ -1420,6 +1448,8 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>("None", (getName var).[index])
         | "FplOptionalPredicate" ->
             Assert.AreEqual<string>("None", (getName var).[index])
+        | "FplParent" ->
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplPredicate" ->
             Assert.AreEqual<string>("Some", (getName var).[index])
         | "FplPredicateList" ->
@@ -1442,6 +1472,8 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>("None", (getName var).[index])
         | "FplRuleOfInference" ->
             Assert.AreEqual<string>("Some", (getName var).[index])
+        | "FplSelf" ->
+            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplTheorem" ->
             Assert.AreEqual<string>("Some", (getName var).[index])
         | "FplTheory" ->
@@ -1670,6 +1702,10 @@ type SymbolTableStructure() =
 
 
     [<DataRow("FplNegation", "00", """;""", "")>]
+
+    [<DataRow("FplParent", "00", """;""", "")>]
+    [<DataRow("FplSelf", "00", """;""", "")>]
+
 
     [<TestMethod>]
     member this.TestStructure(nodeType, varVal, fplCode, identifier) =

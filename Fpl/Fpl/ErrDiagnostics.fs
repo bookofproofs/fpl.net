@@ -337,8 +337,8 @@ type DiagnosticCode =
                     sprintf "Base class `%s` not found, no candidates found." name 
             | ID013 delegateDiagnostic -> sprintf "%s" delegateDiagnostic // just emit the delegate's diagnostic
             | ID014 (signature, conflict) -> sprintf "Language code `%s` was already declared at %s." signature conflict
-            | ID015 signature -> sprintf "Referencing self impossible inside non-definitions; the outer block is %s." signature
-            | ID016 signature -> sprintf "Referencing self impossible outside definitions, the outer block is %s." signature
+            | ID015 signature -> sprintf "Referencing parent impossible inside non-definitions; the outer block is %s." signature
+            | ID016 signature -> sprintf "Referencing self impossible outside properties and definitions, the outer block is %s." signature
             | ID017 (name, candidates) -> 
                 if candidates.Length > 0 then
                    sprintf "The type `%s` could not be determined, found more than one candidates %s." name candidates

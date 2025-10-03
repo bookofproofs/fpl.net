@@ -7,5 +7,6 @@
       <Workers>1</Workers>
       <Scope>ClassLevel</Scope>
     </Parallelize>
+    <OrderTestsByNameInClass>true</OrderTestsByNameInClass>
   </MSTest>
 </RunSettings>

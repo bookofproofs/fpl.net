@@ -577,18 +577,41 @@ type FplValue(positions: Positions, parent: FplValue option) =
 
         getFullName this true
 
-    /// Calculcates this FplValue's block Node
-    member this.BlockNode = 
-        let rec blockNode (node:FplValue) =
+    /// Calculcates this FplValue's ultimate block node (if such exists).
+    /// The ultimate block node is the FPL building block's FplValue enclosing this FplValue (if such extists)
+    member this.UltimateBlockNode = 
+        let rec ultimateBlockNode (node:FplValue) =
             match node.Parent with
             | Some parent ->
                 match parent.Name with
                 | PrimRoot -> None
                 | PrimTheoryL -> Some node
                 | _ ->
-                    blockNode parent
+                    ultimateBlockNode parent
             | None -> None
-        blockNode this
+        ultimateBlockNode this
+
+    /// Calculcates this FplValue's ultimate block node (if such exists).
+    /// The next block node is either an FPL property (if such exists) 
+    /// or the Fpl building block's FplValue enclosing this FplValue (if such exists).
+    member this.NextBlockNode = 
+        let rec nextBlockNode (node:FplValue) =
+            match node.Name with 
+            | PrimOptionalFunctionalTermL
+            | PrimMandatoryFunctionalTermL
+            | PrimOptionalPredicateL
+            | PrimMandatoryPredicateL ->
+                Some node
+            | _ ->
+                match node.Parent with
+                | Some parent ->
+                    match parent.Name with
+                    | PrimRoot -> None
+                    | PrimTheoryL -> Some node
+                    | _ ->
+                        nextBlockNode parent
+                | None -> None
+        nextBlockNode this
 
     /// Provides a name with an english article (an or a).
     member this.EnglishName = 
@@ -2553,6 +2576,82 @@ type FplReference(positions: Positions, parent: FplValue) =
 
     override this.RunOrder = None
 
+/// Reference to "parent" using the FPL parent keyword. 
+// It will point to a parent only inside FPL properties. Otherwise, it is undefined
+type FplParent(positions: Positions, parent: FplValue) as this =
+    inherit FplValue(positions, Some parent)
+
+    do 
+        this.FplId <- LiteralParent
+
+    override this.Name = LiteralParent
+    override this.ShortName = LiteralParent
+
+    override this.Clone () =
+        let ret = new FplParent((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Type signatureType = 
+        if this.Scope.Count > 1 then 
+            (this.Scope.Values |> Seq.head).Type signatureType
+        else 
+            LiteralParent
+
+    override this.Represent()= 
+        if this.Scope.Count > 1 then 
+            (this.Scope.Values |> Seq.head).Represent()
+        else 
+            LiteralUndef
+
+    override this.Run _ = () // todo implement Run
+
+    override this.EmbedInSymbolTable nextOpt = 
+        match nextOpt with
+        | Some (:? FplReference) as Some next ->
+            next.Scope.TryAdd(this.FplId, this) |> ignore
+        | _ -> addExpressionToParentArgList this 
+
+    override this.RunOrder = None
+
+/// Reference to "self" using the FPL self keyword. 
+// It will point to the enclosing block inside FPL predicate definitions, functional terms, and properties. Otherwise, it is undefined.
+type FplSelf(positions: Positions, parent: FplValue) as this =
+    inherit FplValue(positions, Some parent)
+
+    do 
+        this.FplId <- LiteralSelf
+
+    override this.Name = LiteralSelf
+    override this.ShortName = LiteralSelf
+
+    override this.Clone () =
+        let ret = new FplSelf((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Type signatureType = 
+        if this.Scope.Count > 1 then 
+            (this.Scope.Values |> Seq.head).Type signatureType
+        else 
+            LiteralParent
+
+    override this.Represent()= 
+        if this.Scope.Count > 1 then 
+            (this.Scope.Values |> Seq.head).Represent()
+        else 
+            LiteralUndef
+
+    override this.Run _ = () // todo implement Run
+
+    override this.EmbedInSymbolTable nextOpt = 
+        match nextOpt with
+        | Some (:? FplReference) as Some next ->
+            next.Scope.TryAdd(this.FplId, this) |> ignore
+        | _ -> addExpressionToParentArgList this 
+
+    override this.RunOrder = None
+
 /// Implements the semantics of an FPL conjunction compound predicate.
 type FplConjunction(positions: Positions, parent: FplValue) as this =
     inherit FplGenericPredicate(positions, parent)
@@ -3405,7 +3504,7 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
             
             if not (conflictInScope variableOrQuantor true) then
                 variableOrQuantor.Scope.Add(this.FplId, this)
-                let blockOpt = variableOrQuantor.BlockNode
+                let blockOpt = variableOrQuantor.UltimateBlockNode
                 match blockOpt with
                 | Some block -> block.Scope.Add(this.FplId, this)
                 | None -> ()
@@ -4618,85 +4717,6 @@ let findCandidatesByNameInDotted (fv: FplValue) (name: string) =
                 []
         | _ -> []
     | _ -> []
-
-/// Searches in the counter-th parent predecessor of fv and checks if it is a definition block.
-/// Returns ScopeSearchResult.NotFound if no such block was reached.
-/// Returns ScopeSearchResult.FoundIncorrectBlock if the reached block is not a definition block.
-/// Returns ScopeSearchResult.Found if a definition block was reached.
-let rec nextDefinition (fv: FplValue) counter =
-    let blocks = Stack<FplValue>()
-
-    if isTheory fv then
-        let name =
-            if blocks.Count > 0 then
-                let fv1 = blocks.Peek()
-                $"'{fv1.Name}' {fv1.Type(SignatureType.Name)}"
-            else
-                "(no block found)"
-
-        ScopeSearchResult.FoundIncorrectBlock name
-    else
-        match fv with
-        | :? FplTheorem
-        | :? FplLemma
-        | :? FplProposition
-        | :? FplCorollary
-        | :? FplConjecture
-        | :? FplAxiom 
-        | :? FplRuleOfInference 
-        | :? FplProof
-        | :? FplLocalization ->
-            let name = $"'{fv.Name}' {fv.Type(SignatureType.Name)}"
-            ScopeSearchResult.FoundIncorrectBlock name
-        | :? FplPredicate ->
-                blocks.Push(fv)
-
-                if counter <= 0 then
-                    ScopeSearchResult.Found fv
-                else
-                    let next = fv.Parent
-
-                    match next with
-                    | Some parent -> nextDefinition parent (counter - 1)
-                    | None ->
-                        let name =
-                            if blocks.Count > 0 then
-                                let fv1 = blocks.Peek()
-                                $"'{fv1.Name}' {fv.Type(SignatureType.Name)}"
-                            else
-                                "(no block found)"
-
-                        ScopeSearchResult.FoundMultiple name
-        | :? FplMandatoryPredicate
-        | :? FplOptionalPredicate
-        | :? FplMandatoryFunctionalTerm
-        | :? FplOptionalFunctionalTerm
-        | :? FplFunctionalTerm
-        | :? FplClass ->
-            blocks.Push(fv)
-
-            if counter <= 0 then
-                ScopeSearchResult.Found fv
-            else
-                let next = fv.Parent
-
-                match next with
-                | Some parent -> nextDefinition parent (counter - 1)
-                | None ->
-                    let name =
-                        if blocks.Count > 0 then
-                            let fv1 = blocks.Peek()
-                            $"'{fv1.Name}' {fv.Type(SignatureType.Name)}"
-                        else
-                            "(no block found)"
-
-                    ScopeSearchResult.FoundMultiple name
-        | _ ->
-            let next = fv.Parent
-
-            match next with
-            | Some parent -> nextDefinition parent counter
-            | None -> ScopeSearchResult.NotFound
 
 /// Tries to match the arguments of `fva` FplValue with the parameters of the `fvp` FplValue and returns
 /// Some(specific error message) or None, if the match succeeded.
