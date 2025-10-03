@@ -2584,6 +2584,7 @@ type FplParent(positions: Positions, parent: FplValue) as this =
 
     do 
         this.FplId <- LiteralParent
+        this.TypeId <- LiteralUndef
 
     override this.Name = LiteralParent
     override this.ShortName = LiteralParent
@@ -2622,6 +2623,7 @@ type FplSelf(positions: Positions, parent: FplValue) as this =
 
     do 
         this.FplId <- LiteralSelf
+        this.TypeId <- LiteralUndef
 
     override this.Name = LiteralSelf
     override this.ShortName = LiteralSelf
