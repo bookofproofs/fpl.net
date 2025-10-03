@@ -166,7 +166,7 @@ let emitID014Diagnostics alreadyDeclaredMixedStr qualifiedStartPosConflictStr po
     ad.AddDiagnostic diagnostic
 
 
-let emitID015diagnostics name pos1 pos2 =
+let emitID015diagnostics name pos1 pos2 alternative =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -175,7 +175,7 @@ let emitID015diagnostics name pos1 pos2 =
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ID015 name
-            Diagnostic.Alternatives = None 
+            Diagnostic.Alternatives = alternative 
         }
     ad.AddDiagnostic diagnostic
 

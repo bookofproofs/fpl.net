@@ -597,6 +597,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
     member this.NextBlockNode = 
         let rec nextBlockNode (node:FplValue) =
             match node.Name with 
+            | LiteralCtorL
             | PrimOptionalFunctionalTermL
             | PrimMandatoryFunctionalTermL
             | PrimOptionalPredicateL

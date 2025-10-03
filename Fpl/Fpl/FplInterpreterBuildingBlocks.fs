@@ -467,8 +467,12 @@ let rec eval (st: SymbolTable) ast =
     // | Self of Positions * unit
     | Ast.Self((pos1, pos2), _) -> 
         st.EvalPush("Self")
-        let rb = variableStack.PeekEvalStack()
-        let fv = new FplSelf((pos1, pos2), rb)
+        let parent = variableStack.PeekEvalStack()
+        let fv = new FplSelf((pos1, pos2), parent)
+        match parent with 
+        | :? FplReference -> 
+            parent.FplId <- fv.FplId
+        | _ -> ()
         variableStack.PushEvalStack(fv)
         variableStack.PopEvalStack()
         let oldDiagnosticsStopped = ad.DiagnosticsStopped
@@ -483,7 +487,7 @@ let rec eval (st: SymbolTable) ast =
             | PrimClassL
             | PrimPredicateL
             | PrimFuncionalTermL ->
-                rb.Scope.Add(rb.FplId, block)
+                fv.Scope.Add(block.FplId, block)
             | _ ->
                 emitID016diagnostics $"'{block.Name}' {block.Type(SignatureType.Name)}" pos1 pos2
         | _ -> ()
@@ -491,21 +495,38 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop() 
     | Ast.Parent((pos1, pos2), _) -> 
         st.EvalPush("Parent")
-        let rb = variableStack.PeekEvalStack()
-        let fv = new FplParent((pos1, pos2), rb)
+        let parent = variableStack.PeekEvalStack()
+        let fv = new FplParent((pos1, pos2), parent)
+        match parent with 
+        | :? FplReference -> 
+            parent.FplId <- fv.FplId
+        | _ -> ()
         variableStack.PushEvalStack(fv)
         variableStack.PopEvalStack()
         let oldDiagnosticsStopped = ad.DiagnosticsStopped
         ad.DiagnosticsStopped <- false
-        match fv.UltimateBlockNode with
-        | Some block ->
-            match block.Name with 
-            | PrimClassL
-            | PrimPredicateL
-            | PrimFuncionalTermL ->
-                rb.Scope.Add(rb.FplId, block)
+        match fv.UltimateBlockNode, fv.NextBlockNode with
+        | Some block, Some nextBlock ->
+            match block.Name, nextBlock.Name with 
+            | PrimClassL, LiteralCtorL 
+            | PrimClassL, PrimMandatoryFunctionalTermL
+            | PrimClassL, PrimMandatoryPredicateL
+            | PrimClassL, PrimOptionalFunctionalTermL
+            | PrimClassL, PrimOptionalPredicateL
+            | PrimPredicateL, PrimMandatoryFunctionalTermL
+            | PrimPredicateL, PrimMandatoryPredicateL
+            | PrimPredicateL, PrimOptionalFunctionalTermL
+            | PrimPredicateL, PrimOptionalPredicateL
+            | PrimFuncionalTermL, PrimMandatoryFunctionalTermL
+            | PrimFuncionalTermL, PrimMandatoryPredicateL
+            | PrimFuncionalTermL, PrimOptionalFunctionalTermL
+            | PrimFuncionalTermL, PrimOptionalPredicateL ->
+                fv.Scope.Add(block.FplId, block)
+            | PrimClassL, PrimClassL ->
+                let alternative = Some "However, the reference was made inside the class block and not inside its constructor or its property."
+                emitID015diagnostics $"'{block.Name}' {block.Type(SignatureType.Name)}" pos1 pos2 alternative
             | _ ->
-                emitID015diagnostics $"'{block.Name}' {block.Type(SignatureType.Name)}" pos1 pos2
+                emitID015diagnostics $"'{block.Name}' {block.Type(SignatureType.Name)}" pos1 pos2 None
         | _ -> ()
         ad.DiagnosticsStopped <- oldDiagnosticsStopped
 
