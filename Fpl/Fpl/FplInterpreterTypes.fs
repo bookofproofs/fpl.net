@@ -2553,11 +2553,6 @@ type FplReference(positions: Positions, parent: FplValue) =
 
     override this.RunOrder = None
 
-let isReference (fv:FplValue) =
-    match fv with
-    | :? FplReference -> true
-    | _ -> false
-
 /// Implements the semantics of an FPL conjunction compound predicate.
 type FplConjunction(positions: Positions, parent: FplValue) as this =
     inherit FplGenericPredicate(positions, parent)
@@ -3141,7 +3136,7 @@ let rec mpwa hasArguments (args: FplValue list) (pars: FplValue list) =
         elif
             aType.Length > 0
             && Char.IsUpper(aType[0])
-            && isReference a
+            && a.Name = PrimRefL
             && a.Scope.Count = 1
         then
             let var = a.Scope.Values |> Seq.toList |> List.head
