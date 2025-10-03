@@ -763,14 +763,21 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.BrackedCoordList((pos1, pos2), coordListAst) ->
         st.EvalPush("BrackedCoordList")
-        let fv = variableStack.PeekEvalStack()
-        match fv with 
-        | :? FplReference as ref -> 
+        let getProceedingReference =
+            let getFirstRefFromStack =
+                variableStack.EvalStack
+                |> Seq.tryFind (fun fv -> fv :? FplReference )
+            match getFirstRefFromStack with 
+            | Some ref -> Some (ref :?> FplReference)
+            | _ -> None
+
+        match getProceedingReference with 
+        | Some ref -> 
             ref.ArgType <- ArgType.Brackets
             if coordListAst.Length > 0 then 
                 coordListAst 
                 |> List.iter (fun pred -> 
-                    let ref = new FplReference((pos1, pos2), fv)
+                    let ref = new FplReference((pos1, pos2), ref)
                     variableStack.PushEvalStack(ref)
                     eval st pred
                     variableStack.PopEvalStack()
@@ -838,14 +845,24 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.ArgumentTuple((pos1, pos2), predicateListAst) ->
         st.EvalPush("ArgumentTuple")
-        let fv = variableStack.PeekEvalStack()
-        match fv with 
-        | :? FplReference as ref ->
+        let getProceedingReference =
+            let getFirstRefFromStack =
+                variableStack.EvalStack
+                |> Seq.tryFind (fun fv -> fv :? FplReference )
+            match getFirstRefFromStack with 
+            | Some ref -> Some (ref :?> FplReference)
+            | _ -> None
+            
+        match getProceedingReference with 
+        | Some ref ->
             ref.ArgType <- ArgType.Parentheses
             if predicateListAst.Length > 0 then 
                 predicateListAst 
                 |> List.iter (fun pred -> 
+                    let ref = new FplReference((pos1, pos2), ref)
+                    variableStack.PushEvalStack(ref)
                     eval st pred
+                    variableStack.PopEvalStack()
                 )
         | _ -> ()
         st.EvalPop()

@@ -2402,30 +2402,46 @@ type FplReference(positions: Positions, parent: FplValue) =
                 |> Seq.map (fun fv -> fv.Type(propagate))
                 |> String.concat ", "
 
-            match args.Length = 0, this.ArgType, qualification with
-            | true, ArgType.Nothing, Some qual ->
+            match this.ArgList.Count, this.ArgType, qualification with
+            | 0, ArgType.Nothing, Some qual ->
                 $"{head}.{qual.Type(propagate)}"
-            | true, ArgType.Brackets, Some qual ->
+            | 0, ArgType.Brackets, Some qual ->
                 $"{head}[].{qual.Type(propagate)}"
-            | true, ArgType.Parentheses, Some qual ->
+            | 0, ArgType.Parentheses, Some qual ->
                 $"{head}().{qual.Type(propagate)}"
-            | false, ArgType.Nothing, Some qual -> 
-                $"{head}{args}.{qual.Type(propagate)}"
-            | false, ArgType.Brackets, Some qual ->
-                $"{head}[{args}].{qual.Type(propagate)}"
-            | false, ArgType.Parentheses, Some qual ->
-                $"{head}({args}).{qual.Type(propagate)}"
-            | true, ArgType.Nothing, None -> 
+            | 0, ArgType.Nothing, None -> 
                 $"{head}"
-            | true, ArgType.Brackets, None ->
+            | 0, ArgType.Brackets, None ->
                 $"{head}[]"
-            | true, ArgType.Parentheses, None ->
+            | 0, ArgType.Parentheses, None ->
                 $"{head}()"
-            | false, ArgType.Nothing, None -> 
-                $"{head}{args}"
-            | false, ArgType.Brackets, None ->
+            | 1, ArgType.Nothing, Some qual -> 
+                
+                $"{head}{args}.{qual.Type(propagate)}"
+            | 1, ArgType.Brackets, Some qual ->
+                $"{head}[{args}].{qual.Type(propagate)}"
+            | 1, ArgType.Parentheses, Some qual ->
+                $"{head}({args}).{qual.Type(propagate)}"
+            | 1, ArgType.Nothing, None -> 
+                if this.FplId <> String.Empty then 
+                    $"{head}({args})"
+                else
+                    $"{head}{args}"
+            | 1, ArgType.Brackets, None ->
                 $"{head}[{args}]"
-            | false, ArgType.Parentheses, None ->
+            | 1, ArgType.Parentheses, None ->
+                $"{head}{args}"
+            | _, ArgType.Nothing, Some qual -> 
+                $"{head}({args}).{qual.Type(propagate)}"
+            | _, ArgType.Brackets, Some qual ->
+                $"{head}[{args}].{qual.Type(propagate)}"
+            | _, ArgType.Parentheses, Some qual ->
+                $"{head}({args}).{qual.Type(propagate)}"
+            | _, ArgType.Nothing, None -> 
+                $"{head}({args})"
+            | _, ArgType.Brackets, None ->
+                $"{head}[{args}]"
+            | _, ArgType.Parentheses, None ->
                 $"{head}({args})"
 
 
@@ -2445,31 +2461,48 @@ type FplReference(positions: Positions, parent: FplValue) =
                     else
                         None
 
-                match args.Length = 0, this.ArgType, qualification with
-                | true, ArgType.Nothing, Some qual ->
+                match this.ArgList.Count, this.ArgType, qualification with
+                | 0, ArgType.Nothing, Some qual ->
                     $"{LiteralUndef}.{qual.Represent()}"
-                | true, ArgType.Brackets, Some qual ->
+                | 0, ArgType.Brackets, Some qual ->
                     $"{LiteralUndef}[].{qual.Represent()}"
-                | true, ArgType.Parentheses, Some qual ->
+                | 0, ArgType.Parentheses, Some qual ->
                     $"{LiteralUndef}().{qual.Represent()}"
-                | false, ArgType.Nothing, Some qual -> 
-                    $"{LiteralUndef}{args}.{qual.Represent()}"
-                | false, ArgType.Brackets, Some qual ->
-                    $"{LiteralUndef}[{args}].{qual.Represent()}"
-                | false, ArgType.Parentheses, Some qual ->
-                    $"{LiteralUndef}({args}).{qual.Represent()}"
-                | true, ArgType.Nothing, None -> 
+                | 0, ArgType.Nothing, None -> 
                     $"{LiteralUndef}"
-                | true, ArgType.Brackets, None ->
+                | 0, ArgType.Brackets, None ->
                     $"{LiteralUndef}[]"
-                | true, ArgType.Parentheses, None ->
+                | 0, ArgType.Parentheses, None ->
                     $"{LiteralUndef}()"
-                | false, ArgType.Nothing, None -> 
-                    $"{LiteralUndef}{args}"
-                | false, ArgType.Brackets, None ->
+                | 1, ArgType.Nothing, Some qual -> 
+                
+                    $"{LiteralUndef}{args}.{qual.Represent()}"
+                | 1, ArgType.Brackets, Some qual ->
+                    $"{LiteralUndef}[{args}].{qual.Represent()}"
+                | 1, ArgType.Parentheses, Some qual ->
+                    $"{LiteralUndef}({args}).{qual.Represent()}"
+                | 1, ArgType.Nothing, None -> 
+                    if this.FplId <> String.Empty then 
+                        $"{LiteralUndef}({args})"
+                    else
+                        $"{LiteralUndef}{args}"
+                | 1, ArgType.Brackets, None ->
                     $"{LiteralUndef}[{args}]"
-                | false, ArgType.Parentheses, None ->
+                | 1, ArgType.Parentheses, None ->
+                    $"{LiteralUndef}{args}"
+                | _, ArgType.Nothing, Some qual -> 
+                    $"{LiteralUndef}({args}).{qual.Represent()}"
+                | _, ArgType.Brackets, Some qual ->
+                    $"{LiteralUndef}[{args}].{qual.Represent()}"
+                | _, ArgType.Parentheses, Some qual ->
+                    $"{LiteralUndef}({args}).{qual.Represent()}"
+                | _, ArgType.Nothing, None -> 
                     $"{LiteralUndef}({args})"
+                | _, ArgType.Brackets, None ->
+                    $"{LiteralUndef}[{args}]"
+                | _, ArgType.Parentheses, None ->
+                    $"{LiteralUndef}({args})"                
+                
         else
             let subRepr = 
                 this.ValueList
