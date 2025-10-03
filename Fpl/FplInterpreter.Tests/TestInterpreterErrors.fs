@@ -237,7 +237,7 @@ type TestInterpreterErrors() =
 
     [<DataRow("axiom TestId {true} postulate TestId {true} ;", 1)>]
 
-    [<DataRow("def pred TestId() {true} postulate TestId {true} ;", 1)>]
+    [<DataRow("def pred TestId() {true} postulate TestId {true} ;", 0)>]
 
     [<DataRow("theorem TestId {true} postulate TestId {true} ;", 1)>]
 
@@ -301,41 +301,33 @@ type TestInterpreterErrors() =
             let code = ID014 ("", "")
             runTestHelper "TestID014.fpl" fplCode code expected
 
-    [<DataRow("00", """def cl A:obj {ctor A() {}};""", 0)>]
-    [<DataRow("00a", """def cl A:obj {intr property pred T() { is(parent,A) } };""", 0)>]
-    [<DataRow("00b", """def cl A:obj {intr property pred T() { is(self,A) } };""", 0)>]
-    [<DataRow("00c", """def cl A:obj {ctor A() {}};""", 0)>]
-    [<DataRow("01", """def cl A:obj {dec assert is(parent,A); ctor A() {}};""", 1)>]
-    [<DataRow("02", """def cl A:obj {intr property pred T() { is(parent,A) } };""", 0)>]
-    [<DataRow("03", """def cl A:obj {intr property pred T() { is(self,A) } };""", 0)>]
-    [<DataRow("04", """def pred A() {intr property pred T() { is(parent,A) } };""", 0)>]
-    [<DataRow("04a", """def pred A() {dec assert is(parent,A); true};""", 1)>]
-    [<DataRow("04b", """def pred A() {dec assert is(self,A); true};""", 0)>]
-    [<DataRow("05", """def pred A() {intr property pred T() { is(self,A) } };""", 0)>]
-    [<DataRow("06", """def func A()->obj {intr property pred T() { is(parent,A) } };""", 0)>]
-    [<DataRow("06a", """def func A()->obj {dec ~x:obj assert is(parent,A); return x};""", 1)>]
-    [<DataRow("06b", """def func A()->obj {dec ~x:obj assert is(self,A); return x};""", 0)>]
-    [<DataRow("07", """def func A()->obj {intr property pred T() { is(self,A) } };""", 0)>]
-    [<DataRow("08", """axiom A {self};""", 1)>]
-    [<DataRow("09", """axiom A {parent};""", 1)>]
-    [<DataRow("10", """theorem A {self};""", 1)>]
-    [<DataRow("11", """theorem A {parent};""", 1)>]
-    [<DataRow("12", """lemma A {self};""", 1)>]
-    [<DataRow("13", """lemma A {parent};""", 1)>]
-    [<DataRow("14", """prop A {self};""", 1)>]
-    [<DataRow("15", """prop A {parent};""", 1)>]
-    [<DataRow("16", """conj A {self};""", 1)>]
-    [<DataRow("17", """conj A {parent};""", 1)>]
-    [<DataRow("18", """cor A$1 {self};""", 1)>]
-    [<DataRow("19", """cor A$1 {parent};""", 1)>]
-    [<DataRow("20", """prf A$1 {1. |- self qed};""", 1)>]
-    [<DataRow("21", """prf A$1 {1. |- parent qed};""", 1)>]
-    [<DataRow("22", """inf A {pre: true con: parent};""", 1)>]
-    [<DataRow("23", """inf A {pre: true con: self};""", 1)>]
-    [<DataRow("24", """inf A {pre: self con: true};""", 1)>]
-    [<DataRow("25", """inf A {pre: parent con: true};""", 1)>]
-    [<DataRow("26", """loc not(self) := !tex: "\neg(" x ")";;""", 1)>]
-    [<DataRow("27", """loc not(parent) := !tex: "\neg(" x ")";;""", 1)>]
+    [<DataRow("00a", """def cl A:obj {dec ~x:obj x:=parent; ctor A() {}};""", 1)>]
+    [<DataRow("00b", """def cl A:obj {ctor A() {dec ~x:obj x:=parent;}};""", 0)>]
+    [<DataRow("00c", """def cl A:obj {intr property pred T() { is(parent,A) } };""", 0)>]
+    [<DataRow("00d", """def cl A:obj {intr property func T()->obj {dec ~x:obj x:=parent; return x } };""", 0)>]
+    [<DataRow("00e", """def cl A:obj {intr opt property pred T() { is(parent,A) } };""", 0)>]
+    [<DataRow("00f", """def cl A:obj {intr opt property func T()->obj {dec ~x:obj x:=parent; return x } };""", 0)>]
+    [<DataRow("01a", """def pred A() {dec assert is(parent,A); true };""", 1)>]
+    [<DataRow("01b", """def pred A() {intr property pred T() { is(parent,A) } };""", 0)>]
+    [<DataRow("01c", """def pred A() {intr property pred T() { is(parent,A) } };""", 0)>]
+    [<DataRow("01d", """def pred A() {intr opt property pred T() { is(parent,A) } };""", 0)>]
+    [<DataRow("01e", """def pred A() {intr opt property pred T() { is(parent,A) } };""", 0)>]
+    [<DataRow("02a", """def func A()->obj {dec ~x:obj assert is(parent,A); return x};""", 1)>]
+    [<DataRow("02b", """def func A()->obj {intr property pred T() { is(parent,A) } };""", 0)>]
+    [<DataRow("02c", """def func A()->obj {intr property pred T() { is(parent,A) } };""", 0)>]
+    [<DataRow("02d", """def func A()->obj {intr opt property pred T() { is(parent,A) } };""", 0)>]
+    [<DataRow("02e", """def func A()->obj {intr opt property pred T() { is(parent,A) } };""", 0)>]
+    [<DataRow("03", """axiom A {parent};""", 1)>]
+    [<DataRow("04", """theorem A {parent};""", 1)>]
+    [<DataRow("05", """lemma A {parent};""", 1)>]
+    [<DataRow("06", """prop A {parent};""", 1)>]
+    [<DataRow("08", """conj A {parent};""", 1)>]
+    [<DataRow("09", """cor A$1 {parent};""", 1)>]
+    [<DataRow("10", """prf A$1 {1. |- parent qed};""", 1)>]
+    [<DataRow("11", """inf A {pre: true con: parent};""", 1)>]
+    [<DataRow("12", """inf A {pre: parent con: true};""", 1)>]
+    [<DataRow("13", """loc not(parent) := !tex: "\neg(" x ")";;""", 1)>]
+    [<DataRow("14", """ext A x@/\d+/ -> obj {dec assert is(parent,A); ret x};""", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID015(no:string, fplCode:string, expected:int) =
@@ -345,38 +337,33 @@ type TestInterpreterErrors() =
             let code = ID015 ""
             runTestHelper "TestID015.fpl" fplCode code expected
 
-    [<DataRow("00", """def cl A:obj {ctor A() {}};""", 0)>]
-    [<DataRow("01", """def cl A:obj {dec assert is(parent,A); ctor A() {}};""", 0)>]
-    [<DataRow("02", """def cl A:obj {intr property pred T() { is(parent,A) } };""", 0)>]
-    [<DataRow("03", """def cl A:obj {intr property pred T() { is(self,A) } };""", 0)>]
-    [<DataRow("04", """def pred A() {intr property pred T() { is(parent,A) } };""", 0)>]
-    [<DataRow("04a", """def pred A() {dec assert is(parent,A); true};""", 0)>]
-    [<DataRow("04b", """def pred A() {dec assert is(self,A); true};""", 0)>]
-    [<DataRow("05", """def pred A() {intr property pred T() { is(self,A) } };""", 0)>]
-    [<DataRow("06", """def func A()->obj {intr property pred T() { is(parent,A) } };""", 0)>]
-    [<DataRow("06a", """def func A()->obj {dec ~x:obj assert is(parent,A); return x};""", 0)>]
-    [<DataRow("06b", """def func A()->obj {dec ~x:obj assert is(self,A); return x};""", 0)>]
-    [<DataRow("07", """def func A()->obj {intr property pred T() { is(self,A) } };""", 0)>]
-    [<DataRow("08", """axiom A {self};""", 0)>]
-    [<DataRow("09", """axiom A {parent};""", 0)>]
-    [<DataRow("10", """theorem A {self};""", 0)>]
-    [<DataRow("11", """theorem A {parent};""", 0)>]
-    [<DataRow("12", """lemma A {self};""", 0)>]
-    [<DataRow("13", """lemma A {parent};""", 0)>]
-    [<DataRow("14", """prop A {self};""", 0)>]
-    [<DataRow("15", """prop A {parent};""", 0)>]
-    [<DataRow("16", """conj A {self};""", 0)>]
-    [<DataRow("17", """conj A {parent};""", 0)>]
-    [<DataRow("18", """cor A$1 {self};""", 0)>]
-    [<DataRow("19", """cor A$1 {parent};""", 0)>]
-    [<DataRow("20", """prf A$1 {1. |- self qed};""", 0)>]
-    [<DataRow("21", """prf A$1 {1. |- parent qed};""", 0)>]
-    [<DataRow("22", """inf A {pre: true con: parent};""", 0)>]
-    [<DataRow("23", """inf A {pre: true con: self};""", 0)>]
-    [<DataRow("24", """inf A {pre: self con: true};""", 0)>]
-    [<DataRow("25", """inf A {pre: parent con: true};""", 0)>]
-    [<DataRow("26", """loc not(self) := !tex: "\neg(" x ")";;""", 0)>]
-    [<DataRow("27", """loc not(parent) := !tex: "\neg(" x ")";;""", 0)>]
+    [<DataRow("00a", """def cl A:obj {dec ~x:obj x:=self; ctor A() {}};""", 0)>]
+    [<DataRow("00b", """def cl A:obj {ctor A() {dec ~x:obj x:=self;}};""", 1)>]
+    [<DataRow("00c", """def cl A:obj {intr property pred T() { is(self,A) } };""", 0)>]
+    [<DataRow("00d", """def cl A:obj {intr property func T()->obj {dec ~x:obj x:=self; return x } };""", 0)>]
+    [<DataRow("00e", """def cl A:obj {intr opt property pred T() { is(self,A) } };""", 0)>]
+    [<DataRow("00f", """def cl A:obj {intr opt property func T()->obj {dec ~x:obj x:=self; return x } };""", 0)>]
+    [<DataRow("01a", """def pred A() {dec assert is(self,A); true };""", 0)>]
+    [<DataRow("01b", """def pred A() {intr property pred T() { is(self,A) } };""", 0)>]
+    [<DataRow("01c", """def pred A() {intr property pred T() { is(self,A) } };""", 0)>]
+    [<DataRow("01d", """def pred A() {intr opt property pred T() { is(self,A) } };""", 0)>]
+    [<DataRow("01e", """def pred A() {intr opt property pred T() { is(self,A) } };""", 0)>]
+    [<DataRow("02a", """def func A()->obj {dec ~x:obj assert is(self,A); return x};""", 0)>]
+    [<DataRow("02b", """def func A()->obj {intr property pred T() { is(self,A) } };""", 0)>]
+    [<DataRow("02c", """def func A()->obj {intr property pred T() { is(self,A) } };""", 0)>]
+    [<DataRow("02d", """def func A()->obj {intr opt property pred T() { is(self,A) } };""", 0)>]
+    [<DataRow("02e", """def func A()->obj {intr opt property pred T() { is(self,A) } };""", 0)>]
+    [<DataRow("03", """axiom A {self};""", 1)>]
+    [<DataRow("04", """theorem A {self};""", 1)>]
+    [<DataRow("05", """lemma A {self};""", 1)>]
+    [<DataRow("06", """prop A {self};""", 1)>]
+    [<DataRow("08", """conj A {self};""", 1)>]
+    [<DataRow("09", """cor A$1 {self};""", 1)>]
+    [<DataRow("10", """prf A$1 {1. |- self qed};""", 1)>]
+    [<DataRow("11", """inf A {pre: true con: self};""", 1)>]
+    [<DataRow("12", """inf A {pre: self con: true};""", 1)>]
+    [<DataRow("13", """loc not(self) := !tex: "\neg(" x ")";;""", 1)>]
+    [<DataRow("14", """ext A x@/\d+/ -> obj {dec assert is(self,A); ret x};""", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID016(no: string, fplCode:string, expected:int) =
@@ -389,7 +376,7 @@ type TestInterpreterErrors() =
     [<DataRow("""def pred Equal(x,y: tpl) infix "=" 50 {intr} ;""", 0)>]
     [<DataRow("uses Fpl.Commons inf ModusPonens {pre:true con:true} ;", 1)>]
     [<DataRow("uses Fpl.Commons theorem ModusTollens {true} ;", 1)>]
-    [<DataRow("uses Fpl.Commons def pred HypotheticalSyllogism() {true} ;", 1)>]
+    [<DataRow("uses Fpl.Commons def pred HypotheticalSyllogism() {true} ;", 0)>]
     [<DataRow("uses Fpl.Commons axiom DisjunctiveSyllogism {true} ;", 1)>]
     [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
@@ -873,28 +860,6 @@ type TestInterpreterErrors() =
             let code = ID006 ""
             runTestHelper "TestID006.fpl" fplCode code expected
 
-    [<DataRow("theorem Test {true} lemma Test {dec ~x:obj; true} proof Test$1 {1. |- trivial};", 1)>]
-    [<DataRow("theorem Test {dec ~x:ind; true} theorem Test {true} proof Test$1 {1. |- trivial};", 1)>]
-    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
-    [<TestMethod>]
-    member this.TestID004(fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
-            ()
-        else
-            let code = ID004 ("", "") 
-            runTestHelper "TestID004.fpl" fplCode code expected
-
-    [<DataRow("theorem Test {true} lemma Test {dec ~x:obj; true} corollary Test$1 {true};", 1)>]
-    [<DataRow("theorem Test {dec ~x:ind; true} theorem Test {true} corollary Test$1 {true};", 1)>]
-    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
-    [<TestMethod>]
-    member this.TestID007(fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
-            ()
-        else
-            let code = ID007 ("", "") 
-            runTestHelper "TestID007.fpl" fplCode code expected
-
     [<DataRow("def cl Test:obj {ctor TestTypo(x:Nat) {}};", 1)>]
     [<DataRow("def cl Test:obj {ctor TestTypo1() {}};", 1)>]
     [<DataRow("def cl Test:obj {ctor Test() {}};", 0)>]
@@ -1114,6 +1079,40 @@ type TestInterpreterErrors() =
         else
             let code = ID023 ""
             runTestHelper "TestID023.fpl" fplCode code expected
+
+    [<DataRow("00a", """loc not(x) :=  !tex: "\neg(" x ")";;""", 0)>]
+    [<DataRow("00b", """loc not(x) :=  !tex: "\neg(" x ")"; loc not(x) :=  !tex: "\neg(" x ")";;""", 1)>]
+    [<DataRow("00c", """loc not(y) :=  !tex: "\neg(" x ")"; loc not(x) :=  !tex: "\neg(" x ")";;""", 1)>]
+    [<DataRow("01a", """loc Equal(x,y) := !tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y;;""", 0)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestID024(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = ID024 ("", "")
+            runTestHelper "TestID024.fpl" fplCode code expected
+
+    [<DataRow("00", """loc not(x) := !tex: "\not(x)" ; ax T { n };""", 0)>]
+    [<DataRow("01e", """def cl A:obj {intr} ax T { A };""", 1)>]
+    [<DataRow("01f", """inf A {pre:true con:true} ax T { A };""", 1)>]
+    [<DataRow("01g", """ax A {true} ax T { A };""", 1)>]
+    [<DataRow("01h", """thm A {true} ax T { A };""", 1)>]
+    [<DataRow("01i", """lem A {true} ax T { A };""", 1)>]
+    [<DataRow("01j", """prop A {true} ax T { A };""", 1)>]
+    [<DataRow("01k", """conj A {true} ax T { A };""", 1)>]
+    [<DataRow("01l", """cor A$1 {true} ax T { A$1 };""", 1)>]
+    [<DataRow("01m", """proof A$1 {1. |- trivial} ax T { A$1 };""", 1)>]
+    [<DataRow("01n", """ext A x@/\d+/ -> obj {ret x} ax T { A };""", 1)>]
+    [<DataRow("01o", """loc A := !tex: "\alpha" ; ax T { A };""", 1)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestID025(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = ID025 ("", "", "")
+            runTestHelper "TestID025.fpl" fplCode code expected
 
     [<DataRow("""def pred Or (x:+ pred) infix "or" 0 {true};""", 0)>]
     [<DataRow("""def pred Or (x:* pred) infix "or" 0 {true};""", 0)>]

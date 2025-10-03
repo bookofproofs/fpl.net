@@ -256,33 +256,33 @@ type TestFplValueScopeBlockType() =
             | "r" -> Assert.IsInstanceOfType<FplRoot>(r)
             | PrimTheoryL -> Assert.IsInstanceOfType<FplTheory>(theory)
             | "block" -> Assert.IsInstanceOfType<FplPredicate>(block)
-            | "s" -> Assert.IsTrue(s.IsVariable() && not (s.IsVariadic()))
-            | "x" -> Assert.IsTrue(x.IsVariable() && not (x.IsVariadic()))
-            | "y" -> Assert.IsTrue(y.IsVariable() && not (y.IsVariadic()))
-            | "xu" -> Assert.IsTrue(xu.IsVariable() && not (xu.IsVariadic())) 
-            | "xv" -> Assert.IsTrue(xv.IsVariable() && not (xv.IsVariadic()))
-            | "xw" -> Assert.IsTrue(xw.IsVariable() && not (xw.IsVariadic())) 
-            | "yu" -> Assert.IsTrue(yu.IsVariable() && not (yu.IsVariadic())) 
-            | "yv" -> Assert.IsTrue(yv.IsVariable() && not (yv.IsVariadic())) 
-            | "yw" -> Assert.IsTrue(yw.IsVariable() && not (yw.IsVariadic())) 
-            | "xua" -> Assert.IsTrue(xua.IsVariable() && not (xua.IsVariadic())) 
-            | "xub" -> Assert.IsTrue(xub.IsVariable() && not (xub.IsVariadic()))
-            | "xuc" -> Assert.IsTrue(xuc.IsVariable() && not (xuc.IsVariadic()))
-            | "xva" -> Assert.IsTrue(xva.IsVariable() && not (xva.IsVariadic()))
-            | "xvb" -> Assert.IsTrue(xvb.IsVariable() && not (xvb.IsVariadic()))
-            | "xvc" -> Assert.IsTrue(xvc.IsVariable() && not (xvc.IsVariadic()))
-            | "xwa" -> Assert.IsTrue(xwa.IsVariable() && not (xwa.IsVariadic()))
-            | "xwb" -> Assert.IsTrue(xwb.IsVariable() && not (xwb.IsVariadic()))
-            | "xwc" -> Assert.IsTrue(xwc.IsVariable() && not (xwc.IsVariadic()))
-            | "yua" -> Assert.IsTrue(yua.IsVariable() && not (yua.IsVariadic()))
-            | "yub" -> Assert.IsTrue(yub.IsVariable() && not (yub.IsVariadic()))
-            | "yuc" -> Assert.IsTrue(yuc.IsVariable() && not (yuc.IsVariadic()))
-            | "yva" -> Assert.IsTrue(yva.IsVariable() && not (yva.IsVariadic()))
-            | "yvb" -> Assert.IsTrue(yvb.IsVariable() && not (yvb.IsVariadic()))
-            | "yvc" -> Assert.IsTrue(yvc.IsVariable() && not (yvc.IsVariadic()))
-            | "ywa" -> Assert.IsTrue(ywa.IsVariable() && not (ywa.IsVariadic()))
-            | "ywb" -> Assert.IsTrue(ywb.IsVariable() && not (ywb.IsVariadic()))
-            | "ywc" -> Assert.IsTrue(ywc.IsVariable() && not (ywc.IsVariadic()))
+            | "s" -> Assert.IsInstanceOfType<FplVariable>(s)
+            | "x" -> Assert.IsInstanceOfType<FplVariable>(x)
+            | "y" -> Assert.IsInstanceOfType<FplVariable>(y)
+            | "xu" -> Assert.IsInstanceOfType<FplVariable>(xu) 
+            | "xv" -> Assert.IsInstanceOfType<FplVariable>(xv)
+            | "xw" -> Assert.IsInstanceOfType<FplVariable>(xw) 
+            | "yu" -> Assert.IsInstanceOfType<FplVariable>(yu) 
+            | "yv" -> Assert.IsInstanceOfType<FplVariable>(yv) 
+            | "yw" -> Assert.IsInstanceOfType<FplVariable>(yw) 
+            | "xua" -> Assert.IsInstanceOfType<FplVariable>(xua)
+            | "xub" -> Assert.IsInstanceOfType<FplVariable>(xub)
+            | "xuc" -> Assert.IsInstanceOfType<FplVariable>(xuc)
+            | "xva" -> Assert.IsInstanceOfType<FplVariable>(xva)
+            | "xvb" -> Assert.IsInstanceOfType<FplVariable>(xvb)
+            | "xvc" -> Assert.IsInstanceOfType<FplVariable>(xvc)
+            | "xwa" -> Assert.IsInstanceOfType<FplVariable>(xwa)
+            | "xwb" -> Assert.IsInstanceOfType<FplVariable>(xwb)
+            | "xwc" -> Assert.IsInstanceOfType<FplVariable>(xwc)
+            | "yua" -> Assert.IsInstanceOfType<FplVariable>(yua)
+            | "yub" -> Assert.IsInstanceOfType<FplVariable>(yub)
+            | "yuc" -> Assert.IsInstanceOfType<FplVariable>(yuc)
+            | "yva" -> Assert.IsInstanceOfType<FplVariable>(yva)
+            | "yvb" -> Assert.IsInstanceOfType<FplVariable>(yvb)
+            | "yvc" -> Assert.IsInstanceOfType<FplVariable>(yvc)
+            | "ywa" -> Assert.IsInstanceOfType<FplVariable>(ywa)
+            | "ywb" -> Assert.IsInstanceOfType<FplVariable>(ywb)
+            | "ywc" -> Assert.IsInstanceOfType<FplVariable>(ywc)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
@@ -325,32 +325,32 @@ type TestFplValueScopeBlockType() =
             | "r" -> Assert.IsInstanceOfType<FplRoot>(r)
             | PrimTheoryL -> Assert.IsInstanceOfType<FplTheory>(theory)
             | "block" -> Assert.IsInstanceOfType<FplPredicate>(block)
-            | "x" -> Assert.IsTrue(x.IsVariable() && (x :?> FplVariable).IsMany1)
-            | "y" -> Assert.IsTrue(y.IsVariable() && (y :?> FplVariable).IsMany1)
-            | "xu" -> Assert.IsTrue(xu.IsVariable() && not (xu.IsVariadic())) 
-            | "xv" -> Assert.IsTrue(xv.IsVariable() && not (xv.IsVariadic()))
-            | "xw" -> Assert.IsTrue(xw.IsVariable() && not (xw.IsVariadic())) 
-            | "yu" -> Assert.IsTrue(yu.IsVariable() && not (yu.IsVariadic())) 
-            | "yv" -> Assert.IsTrue(yv.IsVariable() && not (yv.IsVariadic())) 
-            | "yw" -> Assert.IsTrue(yw.IsVariable() && not (yw.IsVariadic())) 
-            | "xua" -> Assert.IsTrue(xua.IsVariable() && (xua :?> FplVariable).IsMany) 
-            | "xub" -> Assert.IsTrue(xub.IsVariable() && (xub :?> FplVariable).IsMany)
-            | "xuc" -> Assert.IsTrue(xuc.IsVariable() && (xuc :?> FplVariable).IsMany)
-            | "xva" -> Assert.IsTrue(xva.IsVariable() && (xva :?> FplVariable).IsMany)
-            | "xvb" -> Assert.IsTrue(xvb.IsVariable() && (xvb :?> FplVariable).IsMany)
-            | "xvc" -> Assert.IsTrue(xvc.IsVariable() && (xvc :?> FplVariable).IsMany)
-            | "xwa" -> Assert.IsTrue(xwa.IsVariable() && (xwa :?> FplVariable).IsMany)
-            | "xwb" -> Assert.IsTrue(xwb.IsVariable() && (xwb :?> FplVariable).IsMany)
-            | "xwc" -> Assert.IsTrue(xwc.IsVariable() && (xwc :?> FplVariable).IsMany)
-            | "yua" -> Assert.IsTrue(yua.IsVariable() && (yua :?> FplVariable).IsMany)
-            | "yub" -> Assert.IsTrue(yub.IsVariable() && (yub :?> FplVariable).IsMany)
-            | "yuc" -> Assert.IsTrue(yuc.IsVariable() && (yuc :?> FplVariable).IsMany)
-            | "yva" -> Assert.IsTrue(yva.IsVariable() && (yva :?> FplVariable).IsMany)
-            | "yvb" -> Assert.IsTrue(yvb.IsVariable() && (yvb :?> FplVariable).IsMany)
-            | "yvc" -> Assert.IsTrue(yvc.IsVariable() && (yvc :?> FplVariable).IsMany)
-            | "ywa" -> Assert.IsTrue(ywa.IsVariable() && (ywa :?> FplVariable).IsMany)
-            | "ywb" -> Assert.IsTrue(ywb.IsVariable() && (ywb :?> FplVariable).IsMany)
-            | "ywc" -> Assert.IsTrue(ywc.IsVariable() && (ywc :?> FplVariable).IsMany)
+            | "x" -> Assert.IsInstanceOfType<FplVariableMany1>(x)
+            | "y" -> Assert.IsInstanceOfType<FplVariableMany1>(y)
+            | "xu" -> Assert.IsInstanceOfType<FplVariable>(xu) 
+            | "xv" -> Assert.IsInstanceOfType<FplVariable>(xv)
+            | "xw" -> Assert.IsInstanceOfType<FplVariable>(xw) 
+            | "yu" -> Assert.IsInstanceOfType<FplVariable>(yu) 
+            | "yv" -> Assert.IsInstanceOfType<FplVariable>(yv) 
+            | "yw" -> Assert.IsInstanceOfType<FplVariable>(yw) 
+            | "xua" -> Assert.IsInstanceOfType<FplVariableMany>(xua) 
+            | "xub" -> Assert.IsInstanceOfType<FplVariableMany>(xub)
+            | "xuc" -> Assert.IsInstanceOfType<FplVariableMany>(xuc)
+            | "xva" -> Assert.IsInstanceOfType<FplVariableMany>(xva)
+            | "xvb" -> Assert.IsInstanceOfType<FplVariableMany>(xvb)
+            | "xvc" -> Assert.IsInstanceOfType<FplVariableMany>(xvc)
+            | "xwa" -> Assert.IsInstanceOfType<FplVariableMany>(xwa)
+            | "xwb" -> Assert.IsInstanceOfType<FplVariableMany>(xwb)
+            | "xwc" -> Assert.IsInstanceOfType<FplVariableMany>(xwc)
+            | "yua" -> Assert.IsInstanceOfType<FplVariableMany>(yua)
+            | "yub" -> Assert.IsInstanceOfType<FplVariableMany>(yub)
+            | "yuc" -> Assert.IsInstanceOfType<FplVariableMany>(yuc)
+            | "yva" -> Assert.IsInstanceOfType<FplVariableMany>(yva)
+            | "yvb" -> Assert.IsInstanceOfType<FplVariableMany>(yvb)
+            | "yvc" -> Assert.IsInstanceOfType<FplVariableMany>(yvc)
+            | "ywa" -> Assert.IsInstanceOfType<FplVariableMany>(ywa)
+            | "ywb" -> Assert.IsInstanceOfType<FplVariableMany>(ywb)
+            | "ywc" -> Assert.IsInstanceOfType<FplVariableMany>(ywc)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
@@ -394,32 +394,32 @@ type TestFplValueScopeBlockType() =
             | "r" -> Assert.IsInstanceOfType<FplRoot>(r)
             | PrimTheoryL -> Assert.IsInstanceOfType<FplTheory>(theory)
             | "block" -> Assert.IsInstanceOfType<FplPredicate>(block)
-            | "x" -> Assert.IsTrue(x.IsVariable() && not (x.IsVariadic()))
-            | "y" -> Assert.IsTrue(y.IsVariable() && not (y.IsVariadic()))
-            | "xu" -> Assert.IsTrue(xu.IsVariable() && not (xu.IsVariadic())) 
-            | "xv" -> Assert.IsTrue(xv.IsVariable() && not (xv.IsVariadic())) 
-            | "xw" -> Assert.IsTrue(xw.IsVariable() && not (xw.IsVariadic())) 
-            | "yu" -> Assert.IsTrue(yu.IsVariable() && not (yu.IsVariadic())) 
-            | "yv" -> Assert.IsTrue(yv.IsVariable() && not (yv.IsVariadic())) 
-            | "yw" -> Assert.IsTrue(yw.IsVariable() && not (yw.IsVariadic())) 
-            | "xua" -> Assert.IsTrue(xua.IsVariable() && not (xua.IsVariadic())) 
-            | "xub" -> Assert.IsTrue(xub.IsVariable() && not (xub.IsVariadic()))
-            | "xuc" -> Assert.IsTrue(xuc.IsVariable() && not (xuc.IsVariadic()))
-            | "xva" -> Assert.IsTrue(xva.IsVariable() && not (xva.IsVariadic()))
-            | "xvb" -> Assert.IsTrue(xvb.IsVariable() && not (xvb.IsVariadic()))
-            | "xvc" -> Assert.IsTrue(xvc.IsVariable() && not (xvc.IsVariadic()))
-            | "xwa" -> Assert.IsTrue(xwa.IsVariable() && not (xwa.IsVariadic()))
-            | "xwb" -> Assert.IsTrue(xwb.IsVariable() && not (xwb.IsVariadic()))
-            | "xwc" -> Assert.IsTrue(xwc.IsVariable() && not (xwc.IsVariadic()))
-            | "yua" -> Assert.IsTrue(yua.IsVariable() && not (yua.IsVariadic()))
-            | "yub" -> Assert.IsTrue(yub.IsVariable() && not (yub.IsVariadic()))
-            | "yuc" -> Assert.IsTrue(yuc.IsVariable() && not (yuc.IsVariadic()))
-            | "yva" -> Assert.IsTrue(yva.IsVariable() && not (yva.IsVariadic()))
-            | "yvb" -> Assert.IsTrue(yvb.IsVariable() && not (yvb.IsVariadic()))
-            | "yvc" -> Assert.IsTrue(yvc.IsVariable() && not (yvc.IsVariadic()))
-            | "ywa" -> Assert.IsTrue(ywa.IsVariable() && not (ywa.IsVariadic()))
-            | "ywb" -> Assert.IsTrue(ywb.IsVariable() && not (ywb.IsVariadic()))
-            | "ywc" -> Assert.IsTrue(ywc.IsVariable() && not (ywc.IsVariadic()))
+            | "x" -> Assert.IsInstanceOfType<FplVariable>(x)
+            | "y" -> Assert.IsInstanceOfType<FplVariable>(y)
+            | "xu" -> Assert.IsInstanceOfType<FplVariable>(xu) 
+            | "xv" -> Assert.IsInstanceOfType<FplVariable>(xv) 
+            | "xw" -> Assert.IsInstanceOfType<FplVariable>(xw) 
+            | "yu" -> Assert.IsInstanceOfType<FplVariable>(yu) 
+            | "yv" -> Assert.IsInstanceOfType<FplVariable>(yv) 
+            | "yw" -> Assert.IsInstanceOfType<FplVariable>(yw) 
+            | "xua" -> Assert.IsInstanceOfType<FplVariable>(xua)
+            | "xub" -> Assert.IsInstanceOfType<FplVariable>(xub)
+            | "xuc" -> Assert.IsInstanceOfType<FplVariable>(xuc)
+            | "xva" -> Assert.IsInstanceOfType<FplVariable>(xva)
+            | "xvb" -> Assert.IsInstanceOfType<FplVariable>(xvb)
+            | "xvc" -> Assert.IsInstanceOfType<FplVariable>(xvc)
+            | "xwa" -> Assert.IsInstanceOfType<FplVariable>(xwa)
+            | "xwb" -> Assert.IsInstanceOfType<FplVariable>(xwb)
+            | "xwc" -> Assert.IsInstanceOfType<FplVariable>(xwc)
+            | "yua" -> Assert.IsInstanceOfType<FplVariable>(yua)
+            | "yub" -> Assert.IsInstanceOfType<FplVariable>(yub)
+            | "yuc" -> Assert.IsInstanceOfType<FplVariable>(yuc)
+            | "yva" -> Assert.IsInstanceOfType<FplVariable>(yva)
+            | "yvb" -> Assert.IsInstanceOfType<FplVariable>(yvb)
+            | "yvc" -> Assert.IsInstanceOfType<FplVariable>(yvc)
+            | "ywa" -> Assert.IsInstanceOfType<FplVariable>(ywa)
+            | "ywb" -> Assert.IsInstanceOfType<FplVariable>(ywb)
+            | "ywc" -> Assert.IsInstanceOfType<FplVariable>(ywc)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
@@ -462,32 +462,32 @@ type TestFplValueScopeBlockType() =
             | "r" -> Assert.IsInstanceOfType<FplRoot>(r)
             | PrimTheoryL -> Assert.IsInstanceOfType<FplTheory>(theory)
             | "block" -> Assert.IsInstanceOfType<FplPredicate>(block)
-            | "x" -> Assert.IsTrue(x.IsVariable() && (x :?> FplVariable).IsMany1)
-            | "y" -> Assert.IsTrue(y.IsVariable() && (y :?> FplVariable).IsMany1)
-            | "xu" -> Assert.IsTrue(xu.IsVariable() && not (xu.IsVariadic())) 
-            | "xv" -> Assert.IsTrue(xv.IsVariable() && not (xv.IsVariadic()))
-            | "xw" -> Assert.IsTrue(xw.IsVariable() && not (xw.IsVariadic())) 
-            | "yu" -> Assert.IsTrue(yu.IsVariable() && not (yu.IsVariadic())) 
-            | "yv" -> Assert.IsTrue(yv.IsVariable() && not (yv.IsVariadic())) 
-            | "yw" -> Assert.IsTrue(yw.IsVariable() && not (yw.IsVariadic())) 
-            | "xua" -> Assert.IsTrue(xua.IsVariable() && (xua :?> FplVariable).IsMany) 
-            | "xub" -> Assert.IsTrue(xub.IsVariable() && (xub :?> FplVariable).IsMany)
-            | "xuc" -> Assert.IsTrue(xuc.IsVariable() && (xuc :?> FplVariable).IsMany)
-            | "xva" -> Assert.IsTrue(xva.IsVariable() && (xva :?> FplVariable).IsMany)
-            | "xvb" -> Assert.IsTrue(xvb.IsVariable() && (xvb :?> FplVariable).IsMany)
-            | "xvc" -> Assert.IsTrue(xvc.IsVariable() && (xvc :?> FplVariable).IsMany)
-            | "xwa" -> Assert.IsTrue(xwa.IsVariable() && (xwa :?> FplVariable).IsMany)
-            | "xwb" -> Assert.IsTrue(xwb.IsVariable() && (xwb :?> FplVariable).IsMany)
-            | "xwc" -> Assert.IsTrue(xwc.IsVariable() && (xwc :?> FplVariable).IsMany)
-            | "yua" -> Assert.IsTrue(yua.IsVariable() && (yua :?> FplVariable).IsMany)
-            | "yub" -> Assert.IsTrue(yub.IsVariable() && (yub :?> FplVariable).IsMany)
-            | "yuc" -> Assert.IsTrue(yuc.IsVariable() && (yuc :?> FplVariable).IsMany)
-            | "yva" -> Assert.IsTrue(yva.IsVariable() && (yva :?> FplVariable).IsMany)
-            | "yvb" -> Assert.IsTrue(yvb.IsVariable() && (yvb :?> FplVariable).IsMany)
-            | "yvc" -> Assert.IsTrue(yvc.IsVariable() && (yvc :?> FplVariable).IsMany)
-            | "ywa" -> Assert.IsTrue(ywa.IsVariable() && (ywa :?> FplVariable).IsMany)
-            | "ywb" -> Assert.IsTrue(ywb.IsVariable() && (ywb :?> FplVariable).IsMany)
-            | "ywc" -> Assert.IsTrue(ywc.IsVariable() && (ywc :?> FplVariable).IsMany)
+            | "x" -> Assert.IsInstanceOfType<FplVariableMany1>(x)
+            | "y" -> Assert.IsInstanceOfType<FplVariableMany1>(y)
+            | "xu" -> Assert.IsInstanceOfType<FplVariable>(xu) 
+            | "xv" -> Assert.IsInstanceOfType<FplVariable>(xv)
+            | "xw" -> Assert.IsInstanceOfType<FplVariable>(xw) 
+            | "yu" -> Assert.IsInstanceOfType<FplVariable>(yu) 
+            | "yv" -> Assert.IsInstanceOfType<FplVariable>(yv) 
+            | "yw" -> Assert.IsInstanceOfType<FplVariable>(yw) 
+            | "xua" -> Assert.IsInstanceOfType<FplVariableMany>(xua) 
+            | "xub" -> Assert.IsInstanceOfType<FplVariableMany>(xub)
+            | "xuc" -> Assert.IsInstanceOfType<FplVariableMany>(xuc)
+            | "xva" -> Assert.IsInstanceOfType<FplVariableMany>(xva)
+            | "xvb" -> Assert.IsInstanceOfType<FplVariableMany>(xvb)
+            | "xvc" -> Assert.IsInstanceOfType<FplVariableMany>(xvc)
+            | "xwa" -> Assert.IsInstanceOfType<FplVariableMany>(xwa)
+            | "xwb" -> Assert.IsInstanceOfType<FplVariableMany>(xwb)
+            | "xwc" -> Assert.IsInstanceOfType<FplVariableMany>(xwc)
+            | "yua" -> Assert.IsInstanceOfType<FplVariableMany>(yua)
+            | "yub" -> Assert.IsInstanceOfType<FplVariableMany>(yub)
+            | "yuc" -> Assert.IsInstanceOfType<FplVariableMany>(yuc)
+            | "yva" -> Assert.IsInstanceOfType<FplVariableMany>(yva)
+            | "yvb" -> Assert.IsInstanceOfType<FplVariableMany>(yvb)
+            | "yvc" -> Assert.IsInstanceOfType<FplVariableMany>(yvc)
+            | "ywa" -> Assert.IsInstanceOfType<FplVariableMany>(ywa)
+            | "ywb" -> Assert.IsInstanceOfType<FplVariableMany>(ywb)
+            | "ywc" -> Assert.IsInstanceOfType<FplVariableMany>(ywc)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
@@ -586,23 +586,23 @@ type TestFplValueScopeBlockType() =
             | "base10b" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base11b" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base12b" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base13b" -> Assert.IsInstanceOfType<FplExtensionObj>(base1)
+            | "base13b" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base10c" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base11c" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base12c" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base13c" -> Assert.IsInstanceOfType<FplExtensionObj>(base1)
+            | "base13c" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base10d" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base11d" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base12d" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base13d" -> Assert.IsInstanceOfType<FplExtensionObj>(base1)
+            | "base13d" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base10e" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base11e" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base12e" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base13e" -> Assert.IsInstanceOfType<FplExtensionObj>(base1)
+            | "base13e" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base10f" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base11f" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base12f" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base13f" -> Assert.IsInstanceOfType<FplExtensionObj>(base1)
+            | "base13f" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base14" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base15" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base15a" -> Assert.IsInstanceOfType<FplReference>(base1)
@@ -848,16 +848,16 @@ type TestFplValueScopeBlockType() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("base0", LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr";""")>]
-    [<DataRow("base1", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
-    [<DataRow("base2", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
-    [<DataRow("base3", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q;""")>]
-    [<DataRow("base4", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""")>]
-    [<DataRow("base5", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
+    [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr";""")>]
+    [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
+    [<DataRow("base2", "not(undef)", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
+    [<DataRow("base3", "and(undef, undef)", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q;""")>]
+    [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""")>]
+    [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
     [<TestMethod>]
-    member this.TestLanguage(var, predName, trslCode) =
+    member this.TestLanguageBlockType(var, predName, predDecl, trslCode) =
         ad.Clear()
-        let fplCode = sprintf """loc %s := %s;""" predName trslCode
+        let fplCode = sprintf """loc %s := %s;""" predDecl trslCode
         let filename = "TestLanguageBlockType"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
@@ -879,15 +879,16 @@ type TestFplValueScopeBlockType() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("base1", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
-    [<DataRow("base2", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
-    [<DataRow("base3", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q;""")>]
-    [<DataRow("base4", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""")>]
-    [<DataRow("base5", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
+    [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr";""")>]
+    [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
+    [<DataRow("base2", "not(undef)", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
+    [<DataRow("base3", "and(undef, undef)", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q;""")>]
+    [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""")>]
+    [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
     [<TestMethod>]
-    member this.TestLocalization(var, predName, trslCode) =
+    member this.TestLocalizationBlockType(var, predName, predDecl, trslCode) =
         ad.Clear()
-        let fplCode = sprintf """loc %s := %s;""" predName trslCode
+        let fplCode = sprintf """loc %s := %s;""" predDecl trslCode
         let filename = "TestLocalizationBlockType"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
@@ -898,6 +899,7 @@ type TestFplValueScopeBlockType() =
             let pred = theory.Scope[predName]
 
             match var with
+            | "base0" -> Assert.IsInstanceOfType<FplLocalization>(pred)
             | "base1" -> Assert.IsInstanceOfType<FplLocalization>(pred)
             | "base2" -> Assert.IsInstanceOfType<FplLocalization>(pred)
             | "base3" -> Assert.IsInstanceOfType<FplLocalization>(pred)
@@ -907,16 +909,16 @@ type TestFplValueScopeBlockType() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("base0", LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr";""")>]
-    [<DataRow("base1", "iif(x, y)", """!tex: x " \Leftrightarrow " y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
-    [<DataRow("base2", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
-    [<DataRow("base3", "and(p, q)", """!tex: p " \wedge " q !eng: p " and " q !ger: p " und " q;""")>]
-    [<DataRow("base4", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""")>]
-    [<DataRow("base5", "NotEqual(x, y)", """!tex: x "\neq " y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
+    [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr";""")>]
+    [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
+    [<DataRow("base2", "not(undef)", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
+    [<DataRow("base3", "and(undef, undef)", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q;""")>]
+    [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""")>]
+    [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
     [<TestMethod>]
-    member this.TestTranslation(var, predName, trslCode) =
+    member this.TestTranslationBlockType(var, predName, predDecl, trslCode) =
         ad.Clear()
-        let fplCode = sprintf """loc %s := %s;""" predName trslCode
+        let fplCode = sprintf """loc %s := %s;""" predDecl trslCode
         let filename = "TestTranslationBlockType"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore

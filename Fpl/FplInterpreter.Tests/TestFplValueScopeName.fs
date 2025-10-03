@@ -45,7 +45,7 @@ type TestFplValueScopeName() =
     [<DataRow("loc1")>]
     [<DataRow("loc2")>]
     [<TestMethod>]
-    member this.TestBlocks(var) =
+    member this.TestScopeBlocksName(var) =
         let res = CommonFplValueTestCases.ScopeBlocks("Name") 
         match res with
         | Some (r:FplRoot,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,fun3:FplValue,fun4:FplValue,fun5:FplValue,fun6:FplValue,fun7:FplValue,fun8:FplValue,fun9:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
@@ -82,8 +82,8 @@ type TestFplValueScopeName() =
                 Assert.AreEqual<string>("SomeFunctionalTerm3() -> obj", fun3.Type(SignatureType.Mixed))
                 Assert.AreEqual<string>("SomeFunctionalTerm3() -> obj", fun3.Type(SignatureType.Name))
             | "fun4" -> 
-                Assert.AreEqual<string>("SomeFunctionalTerm4() -> obj(pred)", fun4.Type(SignatureType.Mixed))
-                Assert.AreEqual<string>("SomeFunctionalTerm4() -> obj(c)", fun4.Type(SignatureType.Name))
+                Assert.AreEqual<string>("SomeFunctionalTerm4() -> tpl", fun4.Type(SignatureType.Mixed))
+                Assert.AreEqual<string>("SomeFunctionalTerm4() -> tpl", fun4.Type(SignatureType.Name))
             | "fun5" -> 
                 Assert.AreEqual<string>("SomeFunctionalTerm5() -> SomeClass1", fun5.Type(SignatureType.Mixed))
                 Assert.AreEqual<string>("SomeFunctionalTerm5() -> SomeClass1", fun5.Type(SignatureType.Name))
@@ -164,26 +164,26 @@ type TestFplValueScopeName() =
                 match var with
                 | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Mixed))
                 | PrimTheoryL -> Assert.AreEqual<string>("TestScopeProofsAndCorollariesName", theory.Type(SignatureType.Mixed))
-                | "thm1" -> Assert.AreEqual<string>("TestTheorem1()", thm1.Type(SignatureType.Mixed))
+                | "thm1" -> Assert.AreEqual<string>("TestTheorem1", thm1.Type(SignatureType.Mixed))
                 | "proofThm1" -> Assert.AreEqual<string>("TestTheorem1$1", proofThm1.Type(SignatureType.Mixed))
-                | "lem1" -> Assert.AreEqual<string>("TestLemma1()", lem1.Type(SignatureType.Mixed))
+                | "lem1" -> Assert.AreEqual<string>("TestLemma1", lem1.Type(SignatureType.Mixed))
                 | "proofLem1" -> Assert.AreEqual<string>("TestLemma1$1", proofLem1.Type(SignatureType.Mixed))
-                | "prp1" -> Assert.AreEqual<string>("TestProposition1()", prp1.Type(SignatureType.Mixed))
+                | "prp1" -> Assert.AreEqual<string>("TestProposition1", prp1.Type(SignatureType.Mixed))
                 | "proofPrp1" -> Assert.AreEqual<string>("TestProposition1$1", proofPrp1.Type(SignatureType.Mixed))
-                | "cor1" -> Assert.AreEqual<string>("TestCorollary1$2()", cor1.Type(SignatureType.Mixed))
+                | "cor1" -> Assert.AreEqual<string>("TestCorollary1$2", cor1.Type(SignatureType.Mixed))
                 | "proofCor1" -> Assert.AreEqual<string>("TestCorollary1$2$1", proofCor1.Type(SignatureType.Mixed))
-                | "thm2" -> Assert.AreEqual<string>("TestTheorem2()", thm2.Type(SignatureType.Mixed))
-                | "corThm2" -> Assert.AreEqual<string>("TestTheorem2$1()", corThm2.Type(SignatureType.Mixed))
-                | "lem2" -> Assert.AreEqual<string>("TestLemma2()", lem2.Type(SignatureType.Mixed))
-                | "corLem2" -> Assert.AreEqual<string>("TestLemma2$1()", corLem2.Type(SignatureType.Mixed))
-                | "prp2" -> Assert.AreEqual<string>("TestProposition2()", prp2.Type(SignatureType.Mixed))
-                | "corPrp2" -> Assert.AreEqual<string>("TestProposition2$1()", corPrp2.Type(SignatureType.Mixed))
-                | "cor2" -> Assert.AreEqual<string>("TestCorollary2$2()", cor2.Type(SignatureType.Mixed))
-                | "corCor2" -> Assert.AreEqual<string>("TestCorollary2$2$1()", corCor2.Type(SignatureType.Mixed))
-                | "con1" -> Assert.AreEqual<string>("TestConjecture()", con1.Type(SignatureType.Mixed))
-                | "corCon1" -> Assert.AreEqual<string>("TestConjecture$1()", corCon1.Type(SignatureType.Mixed))
-                | "axi1" -> Assert.AreEqual<string>("TestAxiom()", axi1.Type(SignatureType.Mixed))
-                | "corAxi1"  -> Assert.AreEqual<string>("TestAxiom$1()", corAxi1.Type(SignatureType.Mixed)) 
+                | "thm2" -> Assert.AreEqual<string>("TestTheorem2", thm2.Type(SignatureType.Mixed))
+                | "corThm2" -> Assert.AreEqual<string>("TestTheorem2$1", corThm2.Type(SignatureType.Mixed))
+                | "lem2" -> Assert.AreEqual<string>("TestLemma2", lem2.Type(SignatureType.Mixed))
+                | "corLem2" -> Assert.AreEqual<string>("TestLemma2$1", corLem2.Type(SignatureType.Mixed))
+                | "prp2" -> Assert.AreEqual<string>("TestProposition2", prp2.Type(SignatureType.Mixed))
+                | "corPrp2" -> Assert.AreEqual<string>("TestProposition2$1", corPrp2.Type(SignatureType.Mixed))
+                | "cor2" -> Assert.AreEqual<string>("TestCorollary2$2", cor2.Type(SignatureType.Mixed))
+                | "corCor2" -> Assert.AreEqual<string>("TestCorollary2$2$1", corCor2.Type(SignatureType.Mixed))
+                | "con1" -> Assert.AreEqual<string>("TestConjecture", con1.Type(SignatureType.Mixed))
+                | "corCon1" -> Assert.AreEqual<string>("TestConjecture$1", corCon1.Type(SignatureType.Mixed))
+                | "axi1" -> Assert.AreEqual<string>("TestAxiom", axi1.Type(SignatureType.Mixed))
+                | "corAxi1"  -> Assert.AreEqual<string>("TestAxiom$1", corAxi1.Type(SignatureType.Mixed)) 
                 | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
@@ -599,26 +599,26 @@ type TestFplValueScopeName() =
             | "base11" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
             | "base12" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
             | "base13" -> Assert.AreEqual<string>("1", base1.Type(SignatureType.Name))
-            | "base11a" -> Assert.AreEqual<string>("v", base1.Type(SignatureType.Name))
+            | "base11a" -> Assert.AreEqual<string>("v.x", base1.Type(SignatureType.Name))
             | "base12a" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
             | "base10b" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
-            | "base11b" -> Assert.AreEqual<string>("v", base1.Type(SignatureType.Name))
+            | "base11b" -> Assert.AreEqual<string>("v()", base1.Type(SignatureType.Name))
             | "base12b" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
             | "base13b" -> Assert.AreEqual<string>("1()", base1.Type(SignatureType.Name))
             | "base10c" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
-            | "base11c" -> Assert.AreEqual<string>("v", base1.Type(SignatureType.Name))
+            | "base11c" -> Assert.AreEqual<string>("v(x, y)", base1.Type(SignatureType.Name))
             | "base12c" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
             | "base13c" -> Assert.AreEqual<string>("1(x, y)", base1.Type(SignatureType.Name))
             | "base10d" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
-            | "base11d" -> Assert.AreEqual<string>("v", base1.Type(SignatureType.Name))
+            | "base11d" -> Assert.AreEqual<string>("v[x, y]", base1.Type(SignatureType.Name))
             | "base12d" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
             | "base13d" -> Assert.AreEqual<string>("1[x]", base1.Type(SignatureType.Name))
             | "base10e" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
-            | "base11e" -> Assert.AreEqual<string>("v", base1.Type(SignatureType.Name))
+            | "base11e" -> Assert.AreEqual<string>("v(x, y).x[a, b]", base1.Type(SignatureType.Name))
             | "base12e" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
             | "base13e" -> Assert.AreEqual<string>("1(x, y).T[a, b]", base1.Type(SignatureType.Name))
-            | "base10f" -> Assert.AreEqual<string>("Test[x, y].x", base1.Type(SignatureType.Name))
-            | "base11f" -> Assert.AreEqual<string>("v", base1.Type(SignatureType.Name))
+            | "base10f" -> Assert.AreEqual<string>("Test[x, y].x(a, b)", base1.Type(SignatureType.Name))
+            | "base11f" -> Assert.AreEqual<string>("v[x, y].x(a, b)", base1.Type(SignatureType.Name))
             | "base12f" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
             | "base13f" -> Assert.AreEqual<string>("1[x].T(a, b)", base1.Type(SignatureType.Name))
             | "base14" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
@@ -627,10 +627,10 @@ type TestFplValueScopeName() =
             | "base15b" -> Assert.AreEqual<string>("'(-(x))", base1.Type(SignatureType.Name))
             | "base16" -> Assert.AreEqual<string>("-(*(=(+(y, x), 2), x))", base1.Type(SignatureType.Name))
             | "base17" -> Assert.AreEqual<string>("'(*(=(+(y, '(x)), 2), x))", base1.Type(SignatureType.Name))
-            | "base18" -> Assert.AreEqual<string>("ex(x(a), y, z)", base1.Type(SignatureType.Name))
+            | "base18" -> Assert.AreEqual<string>("ex(x(a, b), y, z)", base1.Type(SignatureType.Name))
             | "base19" -> Assert.AreEqual<string>("exn$1(x)", base1.Type(SignatureType.Name))
             | "base20" -> Assert.AreEqual<string>("all(x)", base1.Type(SignatureType.Name))
-            | "base21" -> Assert.AreEqual<string>("and(x, abc)", base1.Type(SignatureType.Name))
+            | "base21" -> Assert.AreEqual<string>("and(x, abc(y, z))", base1.Type(SignatureType.Name))
             | "base21a" -> Assert.AreEqual<string>("not(x)", base1.Type(SignatureType.Name))
             | "base21b" -> Assert.AreEqual<string>("not(x)", base1.Type(SignatureType.Name))
             | "base22" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
@@ -698,15 +698,16 @@ type TestFplValueScopeName() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("base1", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
-    [<DataRow("base2", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
-    [<DataRow("base3", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q;""")>]
-    [<DataRow("base4", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""")>]
-    [<DataRow("base5", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
+    [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr";""")>]
+    [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
+    [<DataRow("base2", "not(undef)", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
+    [<DataRow("base3", "and(undef, undef)", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q;""")>]
+    [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""")>]
+    [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
     [<TestMethod>]
-    member this.TestLocalization(var, predName, trslCode) =
+    member this.TestLocalizationName(var, predName, predDecl, trslCode) =
         ad.Clear()
-        let fplCode = sprintf """loc %s := %s;""" predName trslCode
+        let fplCode = sprintf """loc %s := %s;""" predDecl trslCode
         let filename = "TestLocalizationName"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
@@ -717,25 +718,26 @@ type TestFplValueScopeName() =
             let pred = theory.Scope[predName]
 
             match var with
-            | "base1" -> Assert.AreEqual<string>(predName, pred.Type(SignatureType.Mixed))
-            | "base2" -> Assert.AreEqual<string>(predName, pred.Type(SignatureType.Mixed))
-            | "base3" -> Assert.AreEqual<string>(predName, pred.Type(SignatureType.Mixed))
-            | "base4" -> Assert.AreEqual<string>(predName, pred.Type(SignatureType.Mixed))
-            | "base5" -> Assert.AreEqual<string>(predName, pred.Type(SignatureType.Mixed))
+            | "base0" -> Assert.AreEqual<string>(predDecl, pred.Type(SignatureType.Mixed))
+            | "base1" -> Assert.AreEqual<string>(predDecl, pred.Type(SignatureType.Mixed))
+            | "base2" -> Assert.AreEqual<string>(predDecl, pred.Type(SignatureType.Mixed))
+            | "base3" -> Assert.AreEqual<string>(predDecl, pred.Type(SignatureType.Mixed))
+            | "base4" -> Assert.AreEqual<string>(predDecl, pred.Type(SignatureType.Mixed))
+            | "base5" -> Assert.AreEqual<string>(predDecl, pred.Type(SignatureType.Mixed))
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("base0", LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr";""")>]
-    [<DataRow("base1", "iif(x, y)", """!tex: x " \Leftrightarrow " y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
-    [<DataRow("base2", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
-    [<DataRow("base3", "and(p, q)", """!tex: p " \wedge " q !eng: p " and " q !ger: p " und " q;""")>]
-    [<DataRow("base4", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""")>]
-    [<DataRow("base5", "NotEqual(x, y)", """!tex: x "\neq " y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
+    [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr";""")>]
+    [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
+    [<DataRow("base2", "not(undef)", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
+    [<DataRow("base3", "and(undef, undef)", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q;""")>]
+    [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""")>]
+    [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
     [<TestMethod>]
-    member this.TestTranslation(var, predName, trslCode) =
+    member this.TestTranslationName(var, predName, predDecl, trslCode) =
         ad.Clear()
-        let fplCode = sprintf """loc %s := %s;""" predName trslCode
+        let fplCode = sprintf """loc %s := %s;""" predDecl trslCode
         let filename = "TestTranslationName"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
@@ -750,25 +752,25 @@ type TestFplValueScopeName() =
             match var with
             | "base0" -> Assert.AreEqual<string>(@"1", trsl.Type(SignatureType.Mixed))
             | "base1" -> Assert.AreEqual<string>(@"x \Leftrightarrow y", trsl.Type(SignatureType.Mixed))
-            | "base2" -> Assert.AreEqual<string>(@"\neg(x)", trsl.Type(SignatureType.Mixed))
+            | "base2" -> Assert.AreEqual<string>(@"\neg( x )", trsl.Type(SignatureType.Mixed))
             | "base3" -> Assert.AreEqual<string>(@"p \wedge q", trsl.Type(SignatureType.Mixed))
-            | "base4" -> Assert.AreEqual<string>(@"x=y", trsl.Type(SignatureType.Mixed))
-            | "base5" -> Assert.AreEqual<string>(@"x\neq y", trsl.Type(SignatureType.Mixed))
+            | "base4" -> Assert.AreEqual<string>(@"x = y", trsl.Type(SignatureType.Mixed))
+            | "base5" -> Assert.AreEqual<string>(@"x \neq y", trsl.Type(SignatureType.Mixed))
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
 
 
-    [<DataRow("base0", LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr";""")>]
-    [<DataRow("base1", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
-    [<DataRow("base2", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
-    [<DataRow("base3", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q;""")>]
-    [<DataRow("base4", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""")>]
-    [<DataRow("base5", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
+    [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr";""")>]
+    [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
+    [<DataRow("base2", "not(undef)", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
+    [<DataRow("base3", "and(undef, undef)", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q;""")>]
+    [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""")>]
+    [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
     [<TestMethod>]
-    member this.TestLanguage(var, predName, trslCode) =
+    member this.TestLanguageNameMixed(var, predName, predDecl, trslCode) =
         ad.Clear()
-        let fplCode = sprintf """loc %s := %s;""" predName trslCode
+        let fplCode = sprintf """loc %s := %s;""" predDecl trslCode
         let filename = "TestLanguageName"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
@@ -809,11 +811,11 @@ type TestFplValueScopeName() =
             let proof = theory.Scope["T$1"]
             let arg = proof.Scope["100"]
             match var with
-            | "base1" -> Assert.AreEqual<string>("100.", arg.Type(SignatureType.Mixed))
-            | "base2" -> Assert.AreEqual<string>("100.", arg.Type(SignatureType.Mixed))
-            | "base3" -> Assert.AreEqual<string>("100.", arg.Type(SignatureType.Mixed))
-            | "base4" -> Assert.AreEqual<string>("100.", arg.Type(SignatureType.Mixed))
-            | "base5" -> Assert.AreEqual<string>("100.", arg.Type(SignatureType.Mixed))
+            | "base1" -> Assert.AreEqual<string>("100", arg.Type(SignatureType.Mixed))
+            | "base2" -> Assert.AreEqual<string>("100", arg.Type(SignatureType.Mixed))
+            | "base3" -> Assert.AreEqual<string>("100", arg.Type(SignatureType.Mixed))
+            | "base4" -> Assert.AreEqual<string>("100", arg.Type(SignatureType.Mixed))
+            | "base5" -> Assert.AreEqual<string>("100", arg.Type(SignatureType.Mixed))
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
@@ -926,11 +928,11 @@ type TestFplValueScopeName() =
             | "base3" -> Assert.AreEqual<string>(LiteralFunc, mapping.Type(SignatureType.Mixed))
             | "base4" -> Assert.AreEqual<string>(LiteralPred, mapping.Type(SignatureType.Mixed))
             | "base5" -> Assert.AreEqual<string>("A", mapping.Type(SignatureType.Mixed))
-            | "base6" -> Assert.AreEqual<string>("obj(ind)", mapping.Type(SignatureType.Mixed))
+            | "base6" -> Assert.AreEqual<string>("pred(ind)", mapping.Type(SignatureType.Mixed))
             | "base7" -> Assert.AreEqual<string>("pred(*obj)", mapping.Type(SignatureType.Mixed))
             | "base8" -> Assert.AreEqual<string>("func(*pred(obj)) -> pred(ind)", mapping.Type(SignatureType.Mixed))
             | "base9" -> Assert.AreEqual<string>("pred(+func(A) -> A)", mapping.Type(SignatureType.Mixed))
-            | "base10" -> Assert.AreEqual<string>("A(func(A) -> A)", mapping.Type(SignatureType.Mixed))
+            | "base10" -> Assert.AreEqual<string>("pred(func(A) -> A)", mapping.Type(SignatureType.Mixed))
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

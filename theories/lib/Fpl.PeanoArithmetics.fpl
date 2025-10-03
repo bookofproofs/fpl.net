@@ -112,7 +112,7 @@ def class SetNat: Set
                     and
                     (
                         is(n, Set),
-                        In(n, self)
+                        In(n, parent)
                     )
                 }
             base.Set()
@@ -340,6 +340,6 @@ def function ContinuedFraction(k:Nat, arr: RightOpenRangeInt) -> Real
 }
 
 // Example of defining a constant for the natural number 100 using the
-def class N100:Set{ctor N100(){dec ~n:Nat  base.Set() self:=SetBuilder(SetNat(),IsGreater(n,@100));  }}
+def class N100:Set{ctor N100(){dec ~n:Nat  base.Set() parent:=SetBuilder(SetNat(),IsGreater(n,@100));  }}
 
 ;

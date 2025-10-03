@@ -56,14 +56,14 @@ type TestLocalizations () =
 
     [<TestMethod>]
     member this.TestTranslation01 () =
-        let result = run (translation .>> eof) """!tex: x "\Leftrightarrow" y """
+        let result = run (language .>> eof) """!tex: x "\Leftrightarrow" y """
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestTranslation02 () =
-        let result = run (translation .>> eof) """!tex: x "\Leftrightarrow" y | x "\Rightarrow" y """
+        let result = run (language .>> eof) """!tex: x "\Leftrightarrow" y | x "\Rightarrow" y """
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

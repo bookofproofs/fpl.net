@@ -35,7 +35,7 @@ def class EmptySet: Set
     {
         dec 
             base.Set()
-            assert IsEmpty(self) 
+            assert IsEmpty(parent) 
         ;
         
     }
@@ -57,7 +57,7 @@ def class Subset: Set
     {
         dec
             base.Set()
-            assert IsSubset(self, superSet)
+            assert IsSubset(parent, superSet)
         ;
         
     }
@@ -91,7 +91,7 @@ def class SetRoster: Set
             base.Set()
             for elem in listOfSets
             {
-                assert In(elem, self)
+                assert In(elem, parent)
             }
         ;
         
@@ -114,7 +114,7 @@ def class SetBuilder: Set
             {
                 iif
                 (
-                    In(u2,self),
+                    In(u2,parent),
                     and ( In(u2,x), p(u2,o) )
                 )
             }

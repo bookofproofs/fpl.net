@@ -76,6 +76,12 @@ type TestArity() =
                     failwith("Interface IReady should not be implemented for proofs because they are already run from blocks implementing this interface. This, they will be run only when their caller is not ready.")
                 | _ -> 
                       Assert.AreEqual<int>(arity, test.Arity)
+            | :? FplRuleOfInference ->
+                match box test with
+                | :? IReady as testReady -> 
+                    failwith("Interface IReady should not be implemented for rule of inferences because they could be run multiple times using different input.")
+                | _ -> 
+                      Assert.AreEqual<int>(arity, test.Arity)
             | _ ->
                 match box test with
                 | :? IReady as testReady -> 

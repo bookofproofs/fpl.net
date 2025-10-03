@@ -108,10 +108,8 @@ type DiagnosticCode =
     | ID001 of string * string
     | ID002 of string * string
     | ID003 of string
-    | ID004 of string * string
     | ID005 of string * string
     | ID006 of string
-    | ID007 of string * string
     | ID008 of string * string
     | ID009 of string
     | ID010 of string
@@ -128,6 +126,7 @@ type DiagnosticCode =
     | ID021 of string 
     | ID023 of string 
     | ID024 of string * string
+    | ID025 of string * string * string
     // logic-related error codes
     | LG000 of string * string 
     | LG001 of string * string * string
@@ -217,10 +216,8 @@ type DiagnosticCode =
             | ID001 _ -> "ID001"
             | ID002 _ -> "ID002"
             | ID003 _ -> "ID003"
-            | ID004 _ -> "ID004"
             | ID005 _ -> "ID005"
             | ID006 _ -> "ID006"
-            | ID007 _ -> "ID007"
             | ID008 _ -> "ID008"
             | ID009 _ -> "ID009"
             | ID010 _ -> "ID010"
@@ -236,7 +233,8 @@ type DiagnosticCode =
             | ID020 _ -> "ID020"
             | ID021 _ -> "ID021"
             | ID023 _ -> "ID023"
-            | ID024 _ -> "ID024<"
+            | ID024 _ -> "ID024"
+            | ID025 _ -> "ID025"
             // logic-related error codes
             | LG000 _ -> "LG000"
             | LG001 _ -> "LG001"
@@ -323,16 +321,14 @@ type DiagnosticCode =
             | NSP04 path -> sprintf "Circular theory reference detected: `%s`" path
             | NSP05 (pathTypes, theory, chosenSource) -> sprintf "Multiple sources %A for theory %s detected (%s was chosen)." pathTypes theory chosenSource
              // identifier-related error codes 
-            | ID001 (signature, conflict) -> sprintf "Signature `%s` was already declared at %s." signature conflict
-            | ID002 (signature, incorrectBlockType) -> sprintf "Cannot find a block to be associated with the proof %s, found only %s." signature incorrectBlockType
-            | ID003 signature -> sprintf "The proof `%s` is missing a block to be associated with." signature 
-            | ID004 (signature, candidates)  -> sprintf "Cannot associate proof `%s` with a single block. Found more candidates: %s." signature candidates
-            | ID005 (signature, incorrectBlockType) -> sprintf "Cannot find a block to be associated with the corollary `%s`, found only %s." signature incorrectBlockType
-            | ID006 signature -> sprintf "The corollary `%s` is missing a block to be associated with." signature 
-            | ID007 (signature, candidates)  -> sprintf "Cannot associate corollary `%s` with a single block. Found more candidates: %s." signature candidates
+            | ID001 (signature, conflict) -> $"Signature `{signature}` was already declared at {conflict}."  
+            | ID002 (signature, incorrectBlockType) -> $"Cannot find a block to be associated with the proof `{signature}`, found only {incorrectBlockType}."  
+            | ID003 signature -> $"The proof `{signature}` is missing a block to be associated with."  
+             | ID005 (signature, incorrectBlockType) -> $"Cannot find a block to be associated with the corollary `{signature}`, found only {incorrectBlockType}."  
+            | ID006 signature -> $"The corollary `{signature}` is missing a block to be associated with."  
             | ID008 (constructorId, classId)  -> $"Misspelled constructor name `{constructorId}`, expecting `{classId}`."  
-            | ID009 name -> sprintf "Circular base type dependency involving `%s`." name
-            | ID010 name -> sprintf "The type `%s` could not be found. Are you missing a uses clause?" name
+            | ID009 name -> $"Circular base type dependency involving `{name}`." 
+            | ID010 name -> $"The type `{name}` could not be found. Are you missing a uses clause?" 
             | ID011 (name, inheritanceChain) -> $"Inheritance from `{name}` can be dropped because of the inheritance chain {inheritanceChain}."  
             | ID012 (name, candidates) -> 
                 if candidates.Length > 0 then 
@@ -341,8 +337,8 @@ type DiagnosticCode =
                     sprintf "Base class `%s` not found, no candidates found." name 
             | ID013 delegateDiagnostic -> sprintf "%s" delegateDiagnostic // just emit the delegate's diagnostic
             | ID014 (signature, conflict) -> sprintf "Language code `%s` was already declared at %s." signature conflict
-            | ID015 signature -> sprintf "Referencing self impossible inside non-definitions; the outer block is %s." signature
-            | ID016 signature -> sprintf "Referencing self impossible outside definitions, the outer block is %s." signature
+            | ID015 signature -> sprintf "Referencing parent impossible inside non-definitions; the outer block is %s." signature
+            | ID016 signature -> sprintf "Referencing self impossible outside properties and definitions, the outer block is %s." signature
             | ID017 (name, candidates) -> 
                 if candidates.Length > 0 then
                    sprintf "The type `%s` could not be determined, found more than one candidates %s." name candidates
@@ -354,6 +350,7 @@ type DiagnosticCode =
             | ID021 name -> sprintf "Duplicate call of base constructor `%s`." name
             | ID023 candidates  -> $"Cannot associate a justification with a single block. Found more candidates: {candidates}." 
             | ID024 (signature, conflict) -> sprintf "Expression `%s` was already localized at %s." signature conflict
+            | ID025 (candidate, candidateType, nodeType)  -> $"Cannot reference to `{candidate}` which is {candidateType} inside {nodeType}." 
 
             // logic-related error codes
             | LG000 (typeOfPredicate,argument) -> $"Cannot evaluate `{typeOfPredicate}`; its argument `{argument}` is a predicate but couldn't be determined."
@@ -399,7 +396,7 @@ type DiagnosticCode =
             | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
             | VAR01 name -> $"Variable `{name}` not declared in this scope."
             | VAR02 name -> $"Variable `{name}` was already bound in this quantor."
-            | VAR03 (identifier, conflict) -> sprintf "Variable `%s` was already declared in the scope of the associated block at %s" identifier conflict
+            | VAR03 (identifier, conflict) -> $"Variable `{identifier}` was already declared at {conflict}."  
             | VAR04 name -> $"Declared variable `{name}` not used in this scope."
             | VAR05 name -> $"Bound variable `{name}` was not used in this quantor."
             | VAR06 (name, parentClass) -> $"Variable `{name}` of the parent class `{parentClass}` will be shadowed by a local variable with the same name in this scope."

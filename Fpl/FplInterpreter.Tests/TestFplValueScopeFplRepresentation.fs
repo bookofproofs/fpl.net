@@ -74,7 +74,7 @@ type TestFplValueScopeFplRepresentation() =
             | "fun1" -> Assert.AreEqual<string>("dec obj", fun1.Represent())
             | "fun2" -> Assert.AreEqual<string>("dec obj", fun2.Represent())
             | "fun3" -> Assert.AreEqual<string>("dec obj", fun3.Represent())
-            | "fun4" -> Assert.AreEqual<string>("dec obj(pred)", fun4.Represent())
+            | "fun4" -> Assert.AreEqual<string>("dec tpl", fun4.Represent())
             | "fun5" -> Assert.AreEqual<string>("dec SomeClass1", fun5.Represent())
             | "fun6" -> Assert.AreEqual<string>("dec SomeClass1", fun6.Represent())
             | "fun7" -> Assert.AreEqual<string>("dec SomeClass1", fun7.Represent())
@@ -1030,11 +1030,13 @@ type TestFplValueScopeFplRepresentation() =
             assign.Run variableStack
             let assigneeVariableOpt = assign.Assignee
             match assigneeVariableOpt with
-            | Some var -> 
-                let actual = var.IsInitializedVariable
-                Assert.AreEqual<bool>(expected, actual)
+            | Some varUncast ->
+                match varUncast with
+                | :? FplGenericVariable as var ->
+                    let actual = var.IsInitializedVariable
+                    Assert.AreEqual<bool>(expected, actual)
+                | _ -> Assert.IsTrue(false)
             | None -> 
                 Assert.IsTrue(false)
-
         | None -> 
             Assert.IsTrue(false)

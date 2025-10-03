@@ -279,8 +279,8 @@ definition class Function: BinaryRelation
     {
         dec
             base.BinaryRelation(x,y)
-            assert self.LeftTotal()
-            assert self.RightUnique()
+            assert parent.LeftTotal()
+            assert parent.RightUnique()
         ;
         
     }
@@ -292,9 +292,9 @@ definition class EquivalenceRelation: BinaryRelation
     {
         dec
             base.BinaryRelation(x,y)
-            assert self.Reflexive()
-            assert self.Symmetric()
-            assert self.Transitive()
+            assert parent.Reflexive()
+            assert parent.Symmetric()
+            assert parent.Transitive()
         ;
         
     }

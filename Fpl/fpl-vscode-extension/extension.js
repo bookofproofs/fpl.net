@@ -334,7 +334,7 @@ class MyTreeItem extends vscode.TreeItem {
             this.label = typ + " " + label;
         }
         // tooltip showing the name, the type and the representation of a node
-        this.tooltip = "n: " + label + "\nt: "+ fplValueType + "\nr: " + fplValueRepr;
+        this.tooltip = "Name:\n" + label + "\nType:\n"+ fplValueType + "\nValue:\n" + fplValueRepr;
         this.scope = scope;
         if (this.typ == "th") log2Console(this.label + " " + scope.length, false);
         this.arglist = arglist;

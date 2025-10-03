@@ -46,22 +46,22 @@ type TestFplValueScopeQualifiedName() =
             match var with 
             | "r" -> Assert.AreEqual<string>("", qualifiedName r)
             | PrimTheoryL -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName", qualifiedName theory)
-            | "inf1" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeInference1()", qualifiedName inf1)
-            | "inf2" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeInference2()", qualifiedName inf2)
-            | "axi1" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeAxiom1()", qualifiedName axi1)
-            | "axi2" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeAxiom2()", qualifiedName axi2)
-            | "pst1" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomePostulate1()", qualifiedName pst1)
-            | "pst2" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomePostulate2()", qualifiedName pst2)
-            | "thm1" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeTheorem1()", qualifiedName thm1)
-            | "thm2" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeTheorem2()", qualifiedName thm2)
-            | "pro1" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeProposition1()", qualifiedName pro1)
-            | "pro2" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeProposition2()", qualifiedName pro2)
-            | "lem1" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeLemma1()", qualifiedName lem1)
-            | "lem2" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeLemma2()", qualifiedName lem2)
-            | "cor1" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeLemma1().SomeLemma1$1()", qualifiedName cor1)
-            | "cor2" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeLemma2().SomeLemma2$1()", qualifiedName cor2)
-            | "con1" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeConjecture1()", qualifiedName con1)
-            | "con2" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeConjecture2()", qualifiedName con2)
+            | "inf1" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeInference1", qualifiedName inf1)
+            | "inf2" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeInference2", qualifiedName inf2)
+            | "axi1" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeAxiom1", qualifiedName axi1)
+            | "axi2" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeAxiom2", qualifiedName axi2)
+            | "pst1" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomePostulate1", qualifiedName pst1)
+            | "pst2" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomePostulate2", qualifiedName pst2)
+            | "thm1" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeTheorem1", qualifiedName thm1)
+            | "thm2" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeTheorem2", qualifiedName thm2)
+            | "pro1" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeProposition1", qualifiedName pro1)
+            | "pro2" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeProposition2", qualifiedName pro2)
+            | "lem1" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeLemma1", qualifiedName lem1)
+            | "lem2" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeLemma2", qualifiedName lem2)
+            | "cor1" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeLemma1.SomeLemma1$1", qualifiedName cor1)
+            | "cor2" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeLemma2.SomeLemma2$1", qualifiedName cor2)
+            | "con1" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeConjecture1", qualifiedName con1)
+            | "con2" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeConjecture2", qualifiedName con2)
             | "cla1" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeClass1", qualifiedName cla1)
             | "cla2" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeClass2", qualifiedName cla2)
             | "pre1" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomePredicate1()", qualifiedName pre1)
@@ -69,14 +69,14 @@ type TestFplValueScopeQualifiedName() =
             | "fun1" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeFunctionalTerm1() -> obj", qualifiedName fun1)
             | "fun2" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeFunctionalTerm2() -> obj", qualifiedName fun2)
             | "fun3" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeFunctionalTerm3() -> obj", qualifiedName fun3)
-            | "fun4" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeFunctionalTerm4() -> obj(pred)", qualifiedName fun4)
+            | "fun4" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeFunctionalTerm4() -> tpl", qualifiedName fun4)
             | "fun5" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeFunctionalTerm5() -> SomeClass1", qualifiedName fun5)
             | "fun6" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeFunctionalTerm6() -> SomeClass1", qualifiedName fun6)
             | "fun7" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeFunctionalTerm7() -> SomeClass1", qualifiedName fun7)
             | "fun8" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeFunctionalTerm8() -> ind", qualifiedName fun8)
             | "fun9" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeFunctionalTerm9() -> ind", qualifiedName fun9)
-            | "prf1" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeTheorem1().SomeTheorem1$1", qualifiedName prf1)
-            | "prf2" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeTheorem2().SomeTheorem2$1", qualifiedName prf2)
+            | "prf1" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeTheorem1.SomeTheorem1$1", qualifiedName prf1)
+            | "prf2" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeTheorem2.SomeTheorem2$1", qualifiedName prf2)
             | "loc1" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.not(x)", qualifiedName loc1)
             | "loc2" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.Equal(x, y)", qualifiedName loc2)
             | _ -> Assert.IsTrue(false)
@@ -812,16 +812,16 @@ type TestFplValueScopeQualifiedName() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("base0", LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr";""")>]
-    [<DataRow("base1", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
-    [<DataRow("base2", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
-    [<DataRow("base3", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q;""")>]
-    [<DataRow("base4", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""")>]
-    [<DataRow("base5", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
+    [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr";""")>]
+    [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
+    [<DataRow("base2", "not(undef)", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
+    [<DataRow("base3", "and(undef, undef)", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q;""")>]
+    [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""")>]
+    [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
     [<TestMethod>]
-    member this.TestLanguage(var, predName, trslCode) =
+    member this.TestLanguageQualifiedName(var, predName, predDecl, trslCode) =
         ad.Clear()
-        let fplCode = sprintf """loc %s := %s;""" predName trslCode
+        let fplCode = sprintf """loc %s := %s;""" predDecl trslCode
         let filename = "TestLanguageQualifiedName"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
@@ -843,15 +843,16 @@ type TestFplValueScopeQualifiedName() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("base1", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
-    [<DataRow("base2", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
-    [<DataRow("base3", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q;""")>]
-    [<DataRow("base4", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""")>]
-    [<DataRow("base5", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
+    [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr";""")>]
+    [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
+    [<DataRow("base2", "not(undef)", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
+    [<DataRow("base3", "and(undef, undef)", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q;""")>]
+    [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""")>]
+    [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
     [<TestMethod>]
-    member this.TestLocalization(var, predName, trslCode) =
+    member this.TestLocalizationQualifiedName(var, predName, predDecl, trslCode) =
         ad.Clear()
-        let fplCode = sprintf """loc %s := %s;""" predName trslCode
+        let fplCode = sprintf """loc %s := %s;""" predDecl trslCode
         let filename = "TestLocalizationQualifiedName"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
@@ -862,25 +863,26 @@ type TestFplValueScopeQualifiedName() =
             let pred = theory.Scope[predName]
 
             match var with
-            | "base1" -> Assert.AreEqual<string>("TestLocalizationQualifiedName." + predName, qualifiedName pred)
-            | "base2" -> Assert.AreEqual<string>("TestLocalizationQualifiedName." + predName, qualifiedName pred)
-            | "base3" -> Assert.AreEqual<string>("TestLocalizationQualifiedName." + predName, qualifiedName pred)
-            | "base4" -> Assert.AreEqual<string>("TestLocalizationQualifiedName." + predName, qualifiedName pred)
-            | "base5" -> Assert.AreEqual<string>("TestLocalizationQualifiedName." + predName, qualifiedName pred)
+            | "base0" -> Assert.AreEqual<string>("TestLocalizationQualifiedName." + predDecl, qualifiedName pred)
+            | "base1" -> Assert.AreEqual<string>("TestLocalizationQualifiedName." + predDecl, qualifiedName pred)
+            | "base2" -> Assert.AreEqual<string>("TestLocalizationQualifiedName." + predDecl, qualifiedName pred)
+            | "base3" -> Assert.AreEqual<string>("TestLocalizationQualifiedName." + predDecl, qualifiedName pred)
+            | "base4" -> Assert.AreEqual<string>("TestLocalizationQualifiedName." + predDecl, qualifiedName pred)
+            | "base5" -> Assert.AreEqual<string>("TestLocalizationQualifiedName." + predDecl, qualifiedName pred)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("base0", LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr";""")>]
-    [<DataRow("base1", "iif(x, y)", """!tex: x " \Leftrightarrow " y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
-    [<DataRow("base2", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
-    [<DataRow("base3", "and(p, q)", """!tex: p " \wedge " q !eng: p " and " q !ger: p " und " q;""")>]
-    [<DataRow("base4", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""")>]
-    [<DataRow("base5", "NotEqual(x, y)", """!tex: x "\neq " y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
+    [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr";""")>]
+    [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
+    [<DataRow("base2", "not(undef)", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
+    [<DataRow("base3", "and(undef, undef)", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q;""")>]
+    [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""")>]
+    [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
     [<TestMethod>]
-    member this.TestTranslation(var, predName, trslCode) =
+    member this.TestTranslationQualifiedName(var, predName, predDecl, trslCode) =
         ad.Clear()
-        let fplCode = sprintf """loc %s := %s;""" predName trslCode
+        let fplCode = sprintf """loc %s := %s;""" predDecl trslCode
         let filename = "TestTranslationQualifiedName"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
