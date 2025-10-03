@@ -2383,7 +2383,7 @@ type FplReference(positions: Positions, parent: FplValue) =
 
     override this.Type signatureType =
         let headObj = 
-            if this.Scope.Count > 0 then 
+            if this.Scope.Count > 0 && not (this.Scope.ContainsKey(".")) then 
                 this.Scope.Values |> Seq.head
             else
                 this
