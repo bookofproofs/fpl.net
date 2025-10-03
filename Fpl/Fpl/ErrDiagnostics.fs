@@ -324,7 +324,7 @@ type DiagnosticCode =
             | ID001 (signature, conflict) -> $"Signature `{signature}` was already declared at {conflict}."  
             | ID002 (signature, incorrectBlockType) -> $"Cannot find a block to be associated with the proof `{signature}`, found only {incorrectBlockType}."  
             | ID003 signature -> $"The proof `{signature}` is missing a block to be associated with."  
-             | ID005 (signature, incorrectBlockType) -> $"Cannot find a block to be associated with the corollary `{signature}`, found only {incorrectBlockType}."  
+            | ID005 (signature, incorrectBlockType) -> $"Cannot find a block to be associated with the corollary `{signature}`, found only {incorrectBlockType}."  
             | ID006 signature -> $"The corollary `{signature}` is missing a block to be associated with."  
             | ID008 (constructorId, classId)  -> $"Misspelled constructor name `{constructorId}`, expecting `{classId}`."  
             | ID009 name -> $"Circular base type dependency involving `{name}`." 
@@ -337,8 +337,8 @@ type DiagnosticCode =
                     sprintf "Base class `%s` not found, no candidates found." name 
             | ID013 delegateDiagnostic -> sprintf "%s" delegateDiagnostic // just emit the delegate's diagnostic
             | ID014 (signature, conflict) -> sprintf "Language code `%s` was already declared at %s." signature conflict
-            | ID015 signature -> sprintf "Referencing parent impossible inside non-definitions; the outer block is %s." signature
-            | ID016 signature -> sprintf "Referencing self impossible outside properties and definitions, the outer block is %s." signature
+            | ID015 signature -> $"Cannot refer to `parent` inside a block that is not a definition; the block was {signature}." 
+            | ID016 signature -> $"Cannot refer to `self` inside a block that is neither a definition, nor a property; the block was {signature}." 
             | ID017 (name, candidates) -> 
                 if candidates.Length > 0 then
                    sprintf "The type `%s` could not be determined, found more than one candidates %s." name candidates

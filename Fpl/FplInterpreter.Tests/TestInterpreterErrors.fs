@@ -290,6 +290,210 @@ type TestInterpreterErrors() =
             let code = ID001 ("", "")
             runTestHelper "TestID001.fpl" fplCode code expected
 
+    [<DataRow("""def pred Equal(x,y: tpl) infix "=" 50 {intr} ;""", 0)>]
+    [<DataRow("uses Fpl.Commons inf ModusPonens {pre:true con:true} ;", 1)>]
+    [<DataRow("uses Fpl.Commons theorem ModusTollens {true} ;", 1)>]
+    [<DataRow("uses Fpl.Commons def pred HypotheticalSyllogism() {true} ;", 0)>]
+    [<DataRow("uses Fpl.Commons axiom DisjunctiveSyllogism {true} ;", 1)>]
+    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestID001ConflictWithOtherTheories(fplCode:string, expected:int) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = ID001 ("", "")
+            runTestHelper "TestID001ConflictWithOtherTheories.fpl" fplCode code expected
+
+    [<DataRow("axiom Test {true} proof Test$1 {1. |- trivial};", 1)>]
+    [<DataRow("postulate Test {true} proof Test$1 {1. |- trivial};", 1)>]
+    [<DataRow("conjecture Test {true} proof Test$1 {1. |- trivial};", 1)>]
+    [<DataRow("def pred Test() {true} proof Test$1 {1. |- trivial};", 1)>]
+    [<DataRow("def cl Test:obj {intr} proof Test$1 {1. |- trivial};", 1)>]
+    [<DataRow("def func Test()->obj {intr} proof Test$1 {1. |- trivial};", 1)>]
+    [<DataRow("proof Test$1 {1. |- trivial} proof Test$1$1 {1. |- trivial};", 1)>]
+    [<DataRow("theorem Test {true} proof Test$1 {1. |- trivial};", 0)>]
+    [<DataRow("lemma Test {true} proof Test$1 {1. |- trivial};", 0)>]
+    [<DataRow("proposition Test {true} proof Test$1 {1. |- trivial};", 0)>]
+    [<DataRow("corollary Test$1 {true} proof Test$1$1 {1. |- trivial};", 0)>]
+    [<DataRow("inf T { pre: true con: true } proof T$1 {1. |- trivial};", 1)>]
+    [<DataRow("ext T x@/\d+/ -> obj {ret x} proof T$1 {1. |- trivial};", 1)>]
+    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestID002(fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = ID002 ("","")
+            runTestHelper "TestID002.fpl" fplCode code expected
+
+    [<DataRow("theorem Test {true} proof Test$1 {1. |- trivial};", 0)>]
+    [<DataRow("theorem TestTypo {true} proof Test$1 {1. |- trivial};", 1)>]
+    [<DataRow("corollary Test$1 {true} proof Test$1$1 {1. |- trivial};", 0)>]
+    [<DataRow("theorem Test {true} corollary Test$1 {true} proof Test$1$1 {1. |- trivial};", 0)>]
+    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestID003(fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = ID003 ""
+            runTestHelper "TestID003.fpl" fplCode code expected
+
+    [<DataRow("def pred Test() {true} corollary Test$1 {true};", 1)>]
+    [<DataRow("def cl Test:obj {intr} corollary Test$1 {true};", 1)>]
+    [<DataRow("def func Test()->obj {intr} corollary Test$1 {true};", 1)>]
+    [<DataRow("proof Test$1 {1. |- trivial} corollary Test$1$1 {true};", 1)>] // corollaries of proofs are not allowed
+    [<DataRow("theorem Test {true} corollary Test$1 {true};", 0)>]
+    [<DataRow("lemma Test {true} corollary Test$1 {true};", 0)>]
+    [<DataRow("proposition Test {true} corollary Test$1 {true};", 0)>]
+    [<DataRow("axiom Test {true} corollary Test$1 {true};", 0)>] // corollaries of axioms are allowed
+    [<DataRow("postulate Test {true} corollary Test$1 {true};", 0)>] // corollaries of postulates (axioms) not allowed
+    [<DataRow("conjecture Test {true} corollary Test$1 {true};", 0)>] // corollaries of conjectures are not allowed
+    [<DataRow("corollary Test$1 {true} corollary Test$1$1 {true};", 0)>] // corollaries of corollaries are allowed
+    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestID005(fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = ID005 ("","")
+            runTestHelper "TestID005.fpl" fplCode code expected
+
+    [<DataRow("theorem Test {true} corollary Test$1 {true};", 0)>]
+    [<DataRow("theorem TestTypo {true} corollary Test$1 {true};", 1)>]
+    [<DataRow("theorem Test {true} corollary Test$1 {true} corollary Test$1$1 {true};", 0)>]
+    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestID006(fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = ID006 ""
+            runTestHelper "TestID006.fpl" fplCode code expected
+
+    [<DataRow("def cl Test:obj {ctor TestTypo(x:Nat) {}};", 1)>]
+    [<DataRow("def cl Test:obj {ctor TestTypo1() {}};", 1)>]
+    [<DataRow("def cl Test:obj {ctor Test() {}};", 0)>]
+    [<DataRow("def cl Test:obj {dec ~x:obj x := 0; ctor Test() {dec base.obj(); }};", 0)>]
+    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestID008(fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = ID008 ("", "") 
+            runTestHelper "TestID008.fpl" fplCode code expected
+
+    [<DataRow("def cl Test:obj {intr};", 0)>]
+    [<DataRow("def cl Test:Test {intr};", 1)>]
+    [<DataRow("def cl Test:Test1, Test2, Test3 {intr};", 0)>]
+    [<DataRow("def cl Test:Test1, Test2, Test3, Test {intr};", 1)>]
+    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestID009(fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = ID009 ""
+            runTestHelper "TestID009.fpl" fplCode code expected
+
+    [<DataRow("def cl Test:obj {intr};", 0)>]
+    [<DataRow("def cl Test:Set {intr};", 1)>]
+    [<DataRow("def class Set: obj {intr} def cl Test:Set {intr};", 0)>]
+    [<DataRow("def cl Set:obj {intr} def cl Test:Set {intr};", 0)>]
+    [<DataRow("def cl Set:obj {intr} def cl Test:SetTypo {intr};", 1)>]
+    [<DataRow("def cl Set:obj {intr} def pred Test() {dec ~x:Set; true};", 0)>]
+    [<DataRow("def cl Set:obj {intr} def pred Test() {dec ~x:object; is(x,Set)};", 0)>]
+
+    [<DataRow("def cl A:obj {intr} thm T {true} proof T$1 {1. bydef A |- trivial };", 0)>]
+    [<DataRow("def cl A:obj {intr} thm T {true} proof T$1 {1. bydef B |- trivial };", 1)>]
+    [<DataRow("thm A {true} thm T {true} proof T$1 {1. A |- trivial };", 0)>]
+    [<DataRow("thm B {true} thm T {true} proof T$1 {1. A |- trivial };", 1)>]
+
+    // the following examples should not emit ID010 because this context is covered by the SIG04 diagnostics
+    [<DataRow("def pred Test(x:Set) {intr};", 0)>]
+    [<DataRow("def class Set: obj {intr} def pred IsEmpty(x: Set) {true};", 0)>]
+    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestID010(fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = ID010 ""
+            runTestHelper "TestID010.fpl" fplCode code expected
+
+    [<DataRow("def cl A:obj {intr} def cl B:A {intr} def cl C:B,A {intr};", 1)>]
+    [<DataRow("uses Fpl.SetTheory def cl Test:EmptySet,Set {intr};", 1)>]
+    [<DataRow("uses Fpl.SetTheory def cl Test:Set, EmptySet {intr};", 1)>]
+    [<DataRow("def cl A:obj {intr} def cl B:A {intr} def cl C:A,B {intr};", 1)>]
+    [<DataRow("def cl A:obj {intr} def cl B:A {intr} def cl C:B {intr};", 0)>]
+    [<DataRow("uses Fpl.SetTheory def cl Test:EmptySet {intr};", 0)>]
+    [<DataRow("uses Fpl.SetTheory def cl Test:Set {intr};", 0)>]
+    [<DataRow("uses Fpl.Commons uses Fpl.SetTheory def cl Test:Set {intr};", 0)>]
+    [<DataRow("def cl A:obj {intr} def cl B:A {intr} def cl C:A {intr};", 0)>]
+    [<DataRow("def cl A:obj {intr} def cl B:A {intr} def cl C:A,A {intr};", 1)>]
+    [<DataRow("def cl A:obj {intr} def cl B:A {intr} def cl C:obj,object {intr};", 1)>]
+    [<DataRow("def cl A:obj {intr} def cl B:A {intr} def cl C:object,D,E,obj {intr};", 1)>]
+    [<DataRow("uses Fpl.SetTheory def cl Test:Set,obj {intr};", 1)>]
+    [<DataRow("uses Fpl.SetTheory def cl Test:EmptySet,obj {intr};", 1)>]
+    [<DataRow("uses Fpl.SetTheory def cl Test:obj,Set {intr};", 1)>]
+    [<DataRow("uses Fpl.SetTheory def cl Test:obj,EmptySet {intr};", 1)>]
+    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestID011(fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = ID011 ("","")
+            runTestHelper "TestID011.fpl" fplCode code expected
+
+    [<DataRow("def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C,E {ctor D() {dec base.A() base.B() base.C() base.F(); } };", 1)>]
+    [<DataRow("def cl A:obj {intr} def cl B:A {ctor B() {dec base.A(); } };", 0)>]
+    [<DataRow("def cl A:obj {intr} def cl B:A {ctor B() {dec base.C(); } };", 1)>]
+    [<DataRow("def cl A:obj { ctor A() {dec base.obj(); } };", 0)>]
+    [<DataRow("def cl A:obj { ctor A() {dec base.B(); } };", 1)>]
+    [<DataRow("def cl A:C { ctor A() {dec base.obj(); } };", 1)>]
+    [<DataRow("uses Fpl.SetTheory def cl Test:Set {ctor Test() {dec base.obj(); } };", 1)>]
+    [<DataRow("uses Fpl.SetTheory def cl Test:Set {ctor Test() {dec base.Set(); } };", 0)>]
+    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestID012(fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = ID012 ("","")
+            runTestHelper "TestID012.fpl" fplCode code expected
+
+
+    [<DataRow("00", "def pred T() {del.Test()};", 1, "Unknown delegate `Test`")>]
+    [<DataRow("01", "def pred T() {del.Test1(x,y)};", 1, "Unknown delegate `Test1`")>]
+    [<DataRow("02", "def pred T() {del.Equal(x,y)};", 1, "Predicate `=` cannot be evaluated because the left argument is undefined.")>]
+    [<DataRow("03", "def pred T(x:pred) {del.Equal(x,y)};", 1, "Predicate `=` cannot be evaluated because the right argument is undefined.")>]
+    [<DataRow("04", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)};""", 0, "missing error message")>]
+    [<DataRow("05", "def pred T(x,y:pred) {del.Equal(true,y)};", 1, "Predicate `=` cannot be evaluated because the right argument is undetermined.")>]
+    [<DataRow("06", "ax T {all x,y:obj {del.Equal(x,y)}};", 0, "missing error message")>]
+    [<DataRow("06a", "def cl Nat: obj {intr} ax T {all x,y:Nat {del.Equal(x,y)}};", 0, "missing error message")>]
+    [<DataRow("06b", "ax T {all x,y:Bla {del.Equal(x,y)}};", 0, "Predicate `=` cannot be evaluated because the left argument is undefined.")>]
+    [<DataRow("07", "ax T {exn$1 x:obj {del.Equal(x,@1)}};", 0, "missing error message")>]
+    [<DataRow("07a", "def cl Nat: obj {intr} ax T {exn$1 x:Nat {del.Equal(x,@1)}};", 0, "missing error message")>]
+    [<DataRow("07b", "ax T {exn$1 x:obj {del.Equal(x,$1)}};", 0, "missing error message")>]
+    [<DataRow("07b_", "def cl Nat: obj {intr} ax T {exn$1 x:Nat {del.Equal(x,$1)}};", 0, "missing error message")>]
+    [<DataRow("08", """ax T {all n:obj {exn$1 y:obj {del.Equal(y,n)}}};""", 0, "missing error message")>]
+    [<DataRow("08a", """def cl Nat: obj {intr} ax T {all n:Nat {exn$1 y:Nat {del.Equal(y,n)}}};""", 0, "missing error message")>]
+    [<DataRow("09", """def func Add()->obj {intr} prop AddIsSomething {dec ~anotherAdd, op: Add; all n,m:obj { (add(n,m) = anotherAdd(n,m) )} };""", 0, "missing error message")>]
+    [<DataRow("10", """def func Add()->obj {intr} prop AddIsSomething {dec ~anotherAdd: Add; all n,m:obj { (anotherAdd(n,m) = n) } };""", 0, "missing error message")>]
+    [<DataRow("11", """def func Add()->obj {intr} prop AddIsSomething {dec ~anotherAdd: Add; all n,m:obj { (anotherAdd(n,@0) = n) } };""", 0, "missing error message")>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0, "missing error message")>]
+    [<TestMethod>]
+    member this.TestID013(no:string, fplCode:string, expected, expectedErrMsg:string) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = ID013 ""
+            let errMsg = runTestHelperWithText "TestID013.fpl" fplCode code expected
+            Assert.AreEqual<string>(expectedErrMsg, errMsg)
+
+
     [<DataRow("""loc iif(x, y) := !tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;;""", 0)>]
     [<DataRow("""loc iif(x, y) := !tex: x "\Leftrightarrow" y !eng: x " if and only if " y !tex: x " dann und nur dann wenn " y;;""", 1)>]
     [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
@@ -373,19 +577,136 @@ type TestInterpreterErrors() =
             let code = ID016 ""
             runTestHelper "TestID016.fpl" fplCode code expected
 
-    [<DataRow("""def pred Equal(x,y: tpl) infix "=" 50 {intr} ;""", 0)>]
-    [<DataRow("uses Fpl.Commons inf ModusPonens {pre:true con:true} ;", 1)>]
-    [<DataRow("uses Fpl.Commons theorem ModusTollens {true} ;", 1)>]
-    [<DataRow("uses Fpl.Commons def pred HypotheticalSyllogism() {true} ;", 0)>]
-    [<DataRow("uses Fpl.Commons axiom DisjunctiveSyllogism {true} ;", 1)>]
+    [<DataRow("def pred A() {true} def pred A(x:obj) {true} def pred T(x:A) {intr};", 1)>]
+    [<DataRow("def pred A() {true} def func A(x:obj)->obj {intr} def pred T(x:A) {intr};", 1)>]
+    [<DataRow("def pred A() {true} def func A()->obj {intr} def pred T(x:A) {intr};", 1)>]
+    [<DataRow("def pred A() {true} def pred T(x:A) {intr};", 0)>]
+    [<DataRow("def func A(x:obj)->obj {intr} def pred T(x:A) {intr};", 0)>]
+    [<DataRow("def pred B() {true} def func A()->obj {intr} def pred T(x:A) {intr};", 0)>]
     [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
-    member this.TestID001ConflictWithOtherTheories(fplCode:string, expected:int) =
+    member this.TestID017(fplCode:string, expected) =
         if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = ID001 ("", "")
-            runTestHelper "TestID001ConflictWithOtherTheories.fpl" fplCode code expected
+            let code = ID017 ("","")
+            runTestHelper "TestID017.fpl" fplCode code expected
+
+    [<DataRow("00", @"ext Digits x @ /\d+/ -> N {return x} def pred T() {@1};", 0)>]
+    [<DataRow("01", @"ext Alpha x @ /[a-z]+/ -> N {return x} ext Digits x @ /\d+/ -> P {ret x} def pred T() {@123};", 0)>]
+    [<DataRow("02", @"ext Alpha x @ /[a-z]+/ -> N {return x} ext Digits x @ /\d+/ -> P {ret x} def pred T() {@abc};", 0)>]
+    [<DataRow("03", @"ext Alpha x @ /[a-z]+/ -> N {return x} def pred T() {@123};", 1)>]
+    [<DataRow("04", @"ext Digits x @ /\d+/ -> N {return x} def pred T() {@abc};", 1)>]
+    [<DataRow("05", @"ext Alpha x @ /[a-z]+/ -> N {return x} def pred T() {@abc};", 0)>]
+    [<DataRow("06", @"ext Digits x @ /\d+/ -> N {return (x = @0)};", 0)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestID018(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = ID018 ""
+            runTestHelper "TestID018.fpl" fplCode code expected
+
+    [<DataRow("00", @"ext Digits x @ /\d+/->obj {dec ~y:obj; return y} def pred T(x:@Digits) {true};", 0)>]
+    [<DataRow("01", @"ext Digits x @ /\d+/->obj {dec ~y:obj; return y} def pred T(x:@Typo) {true};", 1)>]
+    [<DataRow("01", @"ext Digits x @ /\d+/->obj {dec ~y:obj; return y} def pred T(x:tpl) {true};", 0)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestID019(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = ID019 ""
+            runTestHelper "TestID019.fpl" fplCode code expected
+
+
+    [<DataRow("00", "def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C {ctor D() {dec base.A(); } };", 2)>]
+    [<DataRow("00a", "def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C {ctor D() {dec base.B(); } };", 2)>]
+    [<DataRow("00b", "def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C {ctor D() {dec base.C(); } };", 2)>]
+    [<DataRow("00c", "def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C {ctor D() {dec base.A() base.B(); } };", 1)>]
+    [<DataRow("00d", "def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C {ctor D() {dec base.A() base.C(); } };", 1)>]
+    [<DataRow("00e", "def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C {ctor D() {dec base.B() base.C(); } };", 1)>]
+    [<DataRow("00f", "def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C {ctor D() {dec base.A() base.B() base.C(); } };", 0)>]
+    [<DataRow("01", "def cl A:obj {intr} def cl B:A {ctor B() {dec base.A(); } };", 0)>]
+    [<DataRow("01a", "def cl A:obj {intr} def cl B:A {ctor B() {} };", 1)>]
+    [<DataRow("02", "def cl A:obj { ctor A() {dec base.obj(); } };", 0)>]
+    [<DataRow("02a", "def cl A:obj { ctor A() {} };", 1)>]
+    [<DataRow("03", "def cl A:obj { ctor A() {dec base.obj(); } };", 0)>]
+    [<DataRow("03a", "def cl A:C { ctor A() {dec base.obj(); } };", 1)>]
+    [<DataRow("03b", "def cl A:obj {intr} def cl B:A {intr} def cl C:B { ctor C() {dec base.obj(); } };", 1)>]
+    [<DataRow("04", "uses Fpl.SetTheory def cl Test:Set {ctor Test() {dec base.obj(); } };", 1)>]
+    [<DataRow("04a", "uses Fpl.SetTheory def cl Test:Set {ctor Test() {dec base.Set(); } };", 0)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestID020(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = ID020 ""
+            runTestHelper "TestID020.fpl" fplCode code expected
+
+    [<DataRow("01", "def cl A:obj {intr} def cl B:A {ctor B() {dec base.A(); } };", 0)>]
+    [<DataRow("01a", "def cl A:obj {intr} def cl B:A {ctor B() {dec base.A() base.A(); } };", 1)>]
+    [<DataRow("02", "def cl A:obj { ctor A() {dec base.obj(); } };", 0)>]
+    [<DataRow("02a", "def cl A:obj { ctor A() {dec base.obj() base.obj(); } };", 1)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestID021(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = ID021 ""
+            runTestHelper "TestID021.fpl" fplCode code expected
+
+    [<DataRow("00a", "def cl A:obj {intr} thm T {true} proof T$1 {1. bydef A |- trivial };", 0)>]
+    [<DataRow("00b", "def cl A:obj {intr} def cl B:A {intr} thm T {true} proof T$1 {1. bydef A |- trivial };", 0)>]
+    [<DataRow("01a", "lem A {true} thm T {true} proof T$1 {1. A |- trivial };", 0)>]
+    [<DataRow("01b", "lem A {true} def pred A(x:obj) {intr} thm T {true} proof T$1 {1. bydef A |- trivial };", 1)>]
+    [<DataRow("02a", "cor A$1 {true} thm T {true} proof T$1 {1. A$1 |- trivial };", 0)>]
+    [<DataRow("02b", "proof A$1 {1. |-  trivial} cor A$1 {true} thm T {true} proof T$1 {1. A$1 |- trivial };", 1)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestID023(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = ID023 ""
+            runTestHelper "TestID023.fpl" fplCode code expected
+
+    [<DataRow("00a", """loc not(x) :=  !tex: "\neg(" x ")";;""", 0)>]
+    [<DataRow("00b", """loc not(x) :=  !tex: "\neg(" x ")"; loc not(x) :=  !tex: "\neg(" x ")";;""", 1)>]
+    [<DataRow("00c", """loc not(y) :=  !tex: "\neg(" x ")"; loc not(x) :=  !tex: "\neg(" x ")";;""", 1)>]
+    [<DataRow("01a", """loc Equal(x,y) := !tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y;;""", 0)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestID024(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = ID024 ("", "")
+            runTestHelper "TestID024.fpl" fplCode code expected
+
+    [<DataRow("00", """loc not(x) := !tex: "\not(x)" ; ax T { n };""", 0)>]
+    [<DataRow("01e", """def cl A:obj {intr} ax T { A };""", 1)>]
+    [<DataRow("01f", """inf A {pre:true con:true} ax T { A };""", 1)>]
+    [<DataRow("01g", """ax A {true} ax T { A };""", 1)>]
+    [<DataRow("01h", """thm A {true} ax T { A };""", 1)>]
+    [<DataRow("01i", """lem A {true} ax T { A };""", 1)>]
+    [<DataRow("01j", """prop A {true} ax T { A };""", 1)>]
+    [<DataRow("01k", """conj A {true} ax T { A };""", 1)>]
+    [<DataRow("01l", """cor A$1 {true} ax T { A$1 };""", 1)>]
+    [<DataRow("01m", """proof A$1 {1. |- trivial} ax T { A$1 };""", 1)>]
+    [<DataRow("01n", """ext A x@/\d+/ -> obj {ret x} ax T { A };""", 1)>]
+    [<DataRow("01o", """loc A := !tex: "\alpha" ; ax T { A };""", 1)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestID025(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = ID025 ("", "", "")
+            runTestHelper "TestID025.fpl" fplCode code expected
 
     [<DataRow("def predicate Test(x,y:* pred) {true};", 1)>]
     [<DataRow("def predicate Test(x,y:+ pred) {true};", 1)>]
@@ -792,327 +1113,6 @@ type TestInterpreterErrors() =
         else
             let code = VAR03 ("", "")
             runTestHelper "TestVAR03.fpl" fplCode code expected
-
-    [<DataRow("axiom Test {true} proof Test$1 {1. |- trivial};", 1)>]
-    [<DataRow("postulate Test {true} proof Test$1 {1. |- trivial};", 1)>]
-    [<DataRow("conjecture Test {true} proof Test$1 {1. |- trivial};", 1)>]
-    [<DataRow("def pred Test() {true} proof Test$1 {1. |- trivial};", 1)>]
-    [<DataRow("def cl Test:obj {intr} proof Test$1 {1. |- trivial};", 1)>]
-    [<DataRow("def func Test()->obj {intr} proof Test$1 {1. |- trivial};", 1)>]
-    [<DataRow("proof Test$1 {1. |- trivial} proof Test$1$1 {1. |- trivial};", 1)>]
-    [<DataRow("theorem Test {true} proof Test$1 {1. |- trivial};", 0)>]
-    [<DataRow("lemma Test {true} proof Test$1 {1. |- trivial};", 0)>]
-    [<DataRow("proposition Test {true} proof Test$1 {1. |- trivial};", 0)>]
-    [<DataRow("corollary Test$1 {true} proof Test$1$1 {1. |- trivial};", 0)>]
-    [<DataRow("inf T { pre: true con: true } proof T$1 {1. |- trivial};", 1)>]
-    [<DataRow("ext T x@/\d+/ -> obj {ret x} proof T$1 {1. |- trivial};", 1)>]
-    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
-    [<TestMethod>]
-    member this.TestID002(fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
-            ()
-        else
-            let code = ID002 ("","")
-            runTestHelper "TestID002.fpl" fplCode code expected
-
-    [<DataRow("def pred Test() {true} corollary Test$1 {true};", 1)>]
-    [<DataRow("def cl Test:obj {intr} corollary Test$1 {true};", 1)>]
-    [<DataRow("def func Test()->obj {intr} corollary Test$1 {true};", 1)>]
-    [<DataRow("proof Test$1 {1. |- trivial} corollary Test$1$1 {true};", 1)>] // corollaries of proofs are not allowed
-    [<DataRow("theorem Test {true} corollary Test$1 {true};", 0)>]
-    [<DataRow("lemma Test {true} corollary Test$1 {true};", 0)>]
-    [<DataRow("proposition Test {true} corollary Test$1 {true};", 0)>]
-    [<DataRow("axiom Test {true} corollary Test$1 {true};", 0)>] // corollaries of axioms are allowed
-    [<DataRow("postulate Test {true} corollary Test$1 {true};", 0)>] // corollaries of postulates (axioms) not allowed
-    [<DataRow("conjecture Test {true} corollary Test$1 {true};", 0)>] // corollaries of conjectures are not allowed
-    [<DataRow("corollary Test$1 {true} corollary Test$1$1 {true};", 0)>] // corollaries of corollaries are allowed
-    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
-    [<TestMethod>]
-    member this.TestID005(fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
-            ()
-        else
-            let code = ID005 ("","")
-            runTestHelper "TestID005.fpl" fplCode code expected
-
-    [<DataRow("theorem Test {true} proof Test$1 {1. |- trivial};", 0)>]
-    [<DataRow("theorem TestTypo {true} proof Test$1 {1. |- trivial};", 1)>]
-    [<DataRow("corollary Test$1 {true} proof Test$1$1 {1. |- trivial};", 0)>]
-    [<DataRow("theorem Test {true} corollary Test$1 {true} proof Test$1$1 {1. |- trivial};", 0)>]
-    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
-    [<TestMethod>]
-    member this.TestID003(fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
-            ()
-        else
-            let code = ID003 ""
-            runTestHelper "TestID003.fpl" fplCode code expected
-
-    [<DataRow("theorem Test {true} corollary Test$1 {true};", 0)>]
-    [<DataRow("theorem TestTypo {true} corollary Test$1 {true};", 1)>]
-    [<DataRow("theorem Test {true} corollary Test$1 {true} corollary Test$1$1 {true};", 0)>]
-    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
-    [<TestMethod>]
-    member this.TestID006(fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
-            ()
-        else
-            let code = ID006 ""
-            runTestHelper "TestID006.fpl" fplCode code expected
-
-    [<DataRow("def cl Test:obj {ctor TestTypo(x:Nat) {}};", 1)>]
-    [<DataRow("def cl Test:obj {ctor TestTypo1() {}};", 1)>]
-    [<DataRow("def cl Test:obj {ctor Test() {}};", 0)>]
-    [<DataRow("def cl Test:obj {dec ~x:obj x := 0; ctor Test() {dec base.obj(); }};", 0)>]
-    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
-    [<TestMethod>]
-    member this.TestID008(fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
-            ()
-        else
-            let code = ID008 ("", "") 
-            runTestHelper "TestID008.fpl" fplCode code expected
-
-    [<DataRow("def cl Test:obj {intr};", 0)>]
-    [<DataRow("def cl Test:Test {intr};", 1)>]
-    [<DataRow("def cl Test:Test1, Test2, Test3 {intr};", 0)>]
-    [<DataRow("def cl Test:Test1, Test2, Test3, Test {intr};", 1)>]
-    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
-    [<TestMethod>]
-    member this.TestID009(fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
-            ()
-        else
-            let code = ID009 ""
-            runTestHelper "TestID009.fpl" fplCode code expected
-
-    [<DataRow("def cl Test:obj {intr};", 0)>]
-    [<DataRow("def cl Test:Set {intr};", 1)>]
-    [<DataRow("def class Set: obj {intr} def cl Test:Set {intr};", 0)>]
-    [<DataRow("def cl Set:obj {intr} def cl Test:Set {intr};", 0)>]
-    [<DataRow("def cl Set:obj {intr} def cl Test:SetTypo {intr};", 1)>]
-    [<DataRow("def cl Set:obj {intr} def pred Test() {dec ~x:Set; true};", 0)>]
-    [<DataRow("def cl Set:obj {intr} def pred Test() {dec ~x:object; is(x,Set)};", 0)>]
-
-    [<DataRow("def cl A:obj {intr} thm T {true} proof T$1 {1. bydef A |- trivial };", 0)>]
-    [<DataRow("def cl A:obj {intr} thm T {true} proof T$1 {1. bydef B |- trivial };", 1)>]
-    [<DataRow("thm A {true} thm T {true} proof T$1 {1. A |- trivial };", 0)>]
-    [<DataRow("thm B {true} thm T {true} proof T$1 {1. A |- trivial };", 1)>]
-
-    // the following examples should not emit ID010 because this context is covered by the SIG04 diagnostics
-    [<DataRow("def pred Test(x:Set) {intr};", 0)>]
-    [<DataRow("def class Set: obj {intr} def pred IsEmpty(x: Set) {true};", 0)>]
-    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
-    [<TestMethod>]
-    member this.TestID010(fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
-            ()
-        else
-            let code = ID010 ""
-            runTestHelper "TestID010.fpl" fplCode code expected
-
-    [<DataRow("def cl A:obj {intr} def cl B:A {intr} def cl C:B,A {intr};", 1)>]
-    [<DataRow("uses Fpl.SetTheory def cl Test:EmptySet,Set {intr};", 1)>]
-    [<DataRow("uses Fpl.SetTheory def cl Test:Set, EmptySet {intr};", 1)>]
-    [<DataRow("def cl A:obj {intr} def cl B:A {intr} def cl C:A,B {intr};", 1)>]
-    [<DataRow("def cl A:obj {intr} def cl B:A {intr} def cl C:B {intr};", 0)>]
-    [<DataRow("uses Fpl.SetTheory def cl Test:EmptySet {intr};", 0)>]
-    [<DataRow("uses Fpl.SetTheory def cl Test:Set {intr};", 0)>]
-    [<DataRow("uses Fpl.Commons uses Fpl.SetTheory def cl Test:Set {intr};", 0)>]
-    [<DataRow("def cl A:obj {intr} def cl B:A {intr} def cl C:A {intr};", 0)>]
-    [<DataRow("def cl A:obj {intr} def cl B:A {intr} def cl C:A,A {intr};", 1)>]
-    [<DataRow("def cl A:obj {intr} def cl B:A {intr} def cl C:obj,object {intr};", 1)>]
-    [<DataRow("def cl A:obj {intr} def cl B:A {intr} def cl C:object,D,E,obj {intr};", 1)>]
-    [<DataRow("uses Fpl.SetTheory def cl Test:Set,obj {intr};", 1)>]
-    [<DataRow("uses Fpl.SetTheory def cl Test:EmptySet,obj {intr};", 1)>]
-    [<DataRow("uses Fpl.SetTheory def cl Test:obj,Set {intr};", 1)>]
-    [<DataRow("uses Fpl.SetTheory def cl Test:obj,EmptySet {intr};", 1)>]
-    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
-    [<TestMethod>]
-    member this.TestID011(fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
-            ()
-        else
-            let code = ID011 ("","")
-            runTestHelper "TestID011.fpl" fplCode code expected
-
-    [<DataRow("def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C,E {ctor D() {dec base.A() base.B() base.C() base.F(); } };", 1)>]
-    [<DataRow("def cl A:obj {intr} def cl B:A {ctor B() {dec base.A(); } };", 0)>]
-    [<DataRow("def cl A:obj {intr} def cl B:A {ctor B() {dec base.C(); } };", 1)>]
-    [<DataRow("def cl A:obj { ctor A() {dec base.obj(); } };", 0)>]
-    [<DataRow("def cl A:obj { ctor A() {dec base.B(); } };", 1)>]
-    [<DataRow("def cl A:C { ctor A() {dec base.obj(); } };", 1)>]
-    [<DataRow("uses Fpl.SetTheory def cl Test:Set {ctor Test() {dec base.obj(); } };", 1)>]
-    [<DataRow("uses Fpl.SetTheory def cl Test:Set {ctor Test() {dec base.Set(); } };", 0)>]
-    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
-    [<TestMethod>]
-    member this.TestID012(fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
-            ()
-        else
-            let code = ID012 ("","")
-            runTestHelper "TestID012.fpl" fplCode code expected
-
-
-    [<DataRow("00", "def pred T() {del.Test()};", 1, "Unknown delegate `Test`")>]
-    [<DataRow("01", "def pred T() {del.Test1(x,y)};", 1, "Unknown delegate `Test1`")>]
-    [<DataRow("02", "def pred T() {del.Equal(x,y)};", 1, "Predicate `=` cannot be evaluated because the left argument is undefined.")>]
-    [<DataRow("03", "def pred T(x:pred) {del.Equal(x,y)};", 1, "Predicate `=` cannot be evaluated because the right argument is undefined.")>]
-    [<DataRow("04", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)};""", 0, "missing error message")>]
-    [<DataRow("05", "def pred T(x,y:pred) {del.Equal(true,y)};", 1, "Predicate `=` cannot be evaluated because the right argument is undetermined.")>]
-    [<DataRow("06", "ax T {all x,y:obj {del.Equal(x,y)}};", 0, "missing error message")>]
-    [<DataRow("06a", "def cl Nat: obj {intr} ax T {all x,y:Nat {del.Equal(x,y)}};", 0, "missing error message")>]
-    [<DataRow("06b", "ax T {all x,y:Bla {del.Equal(x,y)}};", 0, "Predicate `=` cannot be evaluated because the left argument is undefined.")>]
-    [<DataRow("07", "ax T {exn$1 x:obj {del.Equal(x,@1)}};", 0, "missing error message")>]
-    [<DataRow("07a", "def cl Nat: obj {intr} ax T {exn$1 x:Nat {del.Equal(x,@1)}};", 0, "missing error message")>]
-    [<DataRow("07b", "ax T {exn$1 x:obj {del.Equal(x,$1)}};", 0, "missing error message")>]
-    [<DataRow("07b_", "def cl Nat: obj {intr} ax T {exn$1 x:Nat {del.Equal(x,$1)}};", 0, "missing error message")>]
-    [<DataRow("08", """ax T {all n:obj {exn$1 y:obj {del.Equal(y,n)}}};""", 0, "missing error message")>]
-    [<DataRow("08a", """def cl Nat: obj {intr} ax T {all n:Nat {exn$1 y:Nat {del.Equal(y,n)}}};""", 0, "missing error message")>]
-    [<DataRow("09", """def func Add()->obj {intr} prop AddIsSomething {dec ~anotherAdd, op: Add; all n,m:obj { (add(n,m) = anotherAdd(n,m) )} };""", 0, "missing error message")>]
-    [<DataRow("10", """def func Add()->obj {intr} prop AddIsSomething {dec ~anotherAdd: Add; all n,m:obj { (anotherAdd(n,m) = n) } };""", 0, "missing error message")>]
-    [<DataRow("11", """def func Add()->obj {intr} prop AddIsSomething {dec ~anotherAdd: Add; all n,m:obj { (anotherAdd(n,@0) = n) } };""", 0, "missing error message")>]
-    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0, "missing error message")>]
-    [<TestMethod>]
-    member this.TestID013(no:string, fplCode:string, expected, expectedErrMsg:string) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
-            ()
-        else
-            let code = ID013 ""
-            let errMsg = runTestHelperWithText "TestID013.fpl" fplCode code expected
-            Assert.AreEqual<string>(expectedErrMsg, errMsg)
-
-
-    [<DataRow("def pred A() {true} def pred A(x:obj) {true} def pred T(x:A) {intr};", 1)>]
-    [<DataRow("def pred A() {true} def func A(x:obj)->obj {intr} def pred T(x:A) {intr};", 1)>]
-    [<DataRow("def pred A() {true} def func A()->obj {intr} def pred T(x:A) {intr};", 1)>]
-    [<DataRow("def pred A() {true} def pred T(x:A) {intr};", 0)>]
-    [<DataRow("def func A(x:obj)->obj {intr} def pred T(x:A) {intr};", 0)>]
-    [<DataRow("def pred B() {true} def func A()->obj {intr} def pred T(x:A) {intr};", 0)>]
-    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
-    [<TestMethod>]
-    member this.TestID017(fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
-            ()
-        else
-            let code = ID017 ("","")
-            runTestHelper "TestID017.fpl" fplCode code expected
-
-    [<DataRow("00", @"ext Digits x @ /\d+/ -> N {return x} def pred T() {@1};", 0)>]
-    [<DataRow("01", @"ext Alpha x @ /[a-z]+/ -> N {return x} ext Digits x @ /\d+/ -> P {ret x} def pred T() {@123};", 0)>]
-    [<DataRow("02", @"ext Alpha x @ /[a-z]+/ -> N {return x} ext Digits x @ /\d+/ -> P {ret x} def pred T() {@abc};", 0)>]
-    [<DataRow("03", @"ext Alpha x @ /[a-z]+/ -> N {return x} def pred T() {@123};", 1)>]
-    [<DataRow("04", @"ext Digits x @ /\d+/ -> N {return x} def pred T() {@abc};", 1)>]
-    [<DataRow("05", @"ext Alpha x @ /[a-z]+/ -> N {return x} def pred T() {@abc};", 0)>]
-    [<DataRow("06", @"ext Digits x @ /\d+/ -> N {return (x = @0)};", 0)>]
-    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
-    [<TestMethod>]
-    member this.TestID018(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
-            ()
-        else
-            let code = ID018 ""
-            runTestHelper "TestID018.fpl" fplCode code expected
-
-    [<DataRow("00", @"ext Digits x @ /\d+/->obj {dec ~y:obj; return y} def pred T(x:@Digits) {true};", 0)>]
-    [<DataRow("01", @"ext Digits x @ /\d+/->obj {dec ~y:obj; return y} def pred T(x:@Typo) {true};", 1)>]
-    [<DataRow("01", @"ext Digits x @ /\d+/->obj {dec ~y:obj; return y} def pred T(x:tpl) {true};", 0)>]
-    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
-    [<TestMethod>]
-    member this.TestID019(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
-            ()
-        else
-            let code = ID019 ""
-            runTestHelper "TestID019.fpl" fplCode code expected
-
-
-    [<DataRow("00", "def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C {ctor D() {dec base.A(); } };", 2)>]
-    [<DataRow("00a", "def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C {ctor D() {dec base.B(); } };", 2)>]
-    [<DataRow("00b", "def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C {ctor D() {dec base.C(); } };", 2)>]
-    [<DataRow("00c", "def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C {ctor D() {dec base.A() base.B(); } };", 1)>]
-    [<DataRow("00d", "def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C {ctor D() {dec base.A() base.C(); } };", 1)>]
-    [<DataRow("00e", "def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C {ctor D() {dec base.B() base.C(); } };", 1)>]
-    [<DataRow("00f", "def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C {ctor D() {dec base.A() base.B() base.C(); } };", 0)>]
-    [<DataRow("01", "def cl A:obj {intr} def cl B:A {ctor B() {dec base.A(); } };", 0)>]
-    [<DataRow("01a", "def cl A:obj {intr} def cl B:A {ctor B() {} };", 1)>]
-    [<DataRow("02", "def cl A:obj { ctor A() {dec base.obj(); } };", 0)>]
-    [<DataRow("02a", "def cl A:obj { ctor A() {} };", 1)>]
-    [<DataRow("03", "def cl A:obj { ctor A() {dec base.obj(); } };", 0)>]
-    [<DataRow("03a", "def cl A:C { ctor A() {dec base.obj(); } };", 1)>]
-    [<DataRow("03b", "def cl A:obj {intr} def cl B:A {intr} def cl C:B { ctor C() {dec base.obj(); } };", 1)>]
-    [<DataRow("04", "uses Fpl.SetTheory def cl Test:Set {ctor Test() {dec base.obj(); } };", 1)>]
-    [<DataRow("04a", "uses Fpl.SetTheory def cl Test:Set {ctor Test() {dec base.Set(); } };", 0)>]
-    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
-    [<TestMethod>]
-    member this.TestID020(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
-            ()
-        else
-            let code = ID020 ""
-            runTestHelper "TestID020.fpl" fplCode code expected
-
-    [<DataRow("01", "def cl A:obj {intr} def cl B:A {ctor B() {dec base.A(); } };", 0)>]
-    [<DataRow("01a", "def cl A:obj {intr} def cl B:A {ctor B() {dec base.A() base.A(); } };", 1)>]
-    [<DataRow("02", "def cl A:obj { ctor A() {dec base.obj(); } };", 0)>]
-    [<DataRow("02a", "def cl A:obj { ctor A() {dec base.obj() base.obj(); } };", 1)>]
-    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
-    [<TestMethod>]
-    member this.TestID021(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
-            ()
-        else
-            let code = ID021 ""
-            runTestHelper "TestID021.fpl" fplCode code expected
-
-    [<DataRow("00a", "def cl A:obj {intr} thm T {true} proof T$1 {1. bydef A |- trivial };", 0)>]
-    [<DataRow("00b", "def cl A:obj {intr} def cl B:A {intr} thm T {true} proof T$1 {1. bydef A |- trivial };", 0)>]
-    [<DataRow("01a", "lem A {true} thm T {true} proof T$1 {1. A |- trivial };", 0)>]
-    [<DataRow("01b", "lem A {true} def pred A(x:obj) {intr} thm T {true} proof T$1 {1. bydef A |- trivial };", 1)>]
-    [<DataRow("02a", "cor A$1 {true} thm T {true} proof T$1 {1. A$1 |- trivial };", 0)>]
-    [<DataRow("02b", "proof A$1 {1. |-  trivial} cor A$1 {true} thm T {true} proof T$1 {1. A$1 |- trivial };", 1)>]
-    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
-    [<TestMethod>]
-    member this.TestID023(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
-            ()
-        else
-            let code = ID023 ""
-            runTestHelper "TestID023.fpl" fplCode code expected
-
-    [<DataRow("00a", """loc not(x) :=  !tex: "\neg(" x ")";;""", 0)>]
-    [<DataRow("00b", """loc not(x) :=  !tex: "\neg(" x ")"; loc not(x) :=  !tex: "\neg(" x ")";;""", 1)>]
-    [<DataRow("00c", """loc not(y) :=  !tex: "\neg(" x ")"; loc not(x) :=  !tex: "\neg(" x ")";;""", 1)>]
-    [<DataRow("01a", """loc Equal(x,y) := !tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y;;""", 0)>]
-    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
-    [<TestMethod>]
-    member this.TestID024(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
-            ()
-        else
-            let code = ID024 ("", "")
-            runTestHelper "TestID024.fpl" fplCode code expected
-
-    [<DataRow("00", """loc not(x) := !tex: "\not(x)" ; ax T { n };""", 0)>]
-    [<DataRow("01e", """def cl A:obj {intr} ax T { A };""", 1)>]
-    [<DataRow("01f", """inf A {pre:true con:true} ax T { A };""", 1)>]
-    [<DataRow("01g", """ax A {true} ax T { A };""", 1)>]
-    [<DataRow("01h", """thm A {true} ax T { A };""", 1)>]
-    [<DataRow("01i", """lem A {true} ax T { A };""", 1)>]
-    [<DataRow("01j", """prop A {true} ax T { A };""", 1)>]
-    [<DataRow("01k", """conj A {true} ax T { A };""", 1)>]
-    [<DataRow("01l", """cor A$1 {true} ax T { A$1 };""", 1)>]
-    [<DataRow("01m", """proof A$1 {1. |- trivial} ax T { A$1 };""", 1)>]
-    [<DataRow("01n", """ext A x@/\d+/ -> obj {ret x} ax T { A };""", 1)>]
-    [<DataRow("01o", """loc A := !tex: "\alpha" ; ax T { A };""", 1)>]
-    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
-    [<TestMethod>]
-    member this.TestID025(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
-            ()
-        else
-            let code = ID025 ("", "", "")
-            runTestHelper "TestID025.fpl" fplCode code expected
 
     [<DataRow("""def pred Or (x:+ pred) infix "or" 0 {true};""", 0)>]
     [<DataRow("""def pred Or (x:* pred) infix "or" 0 {true};""", 0)>]
