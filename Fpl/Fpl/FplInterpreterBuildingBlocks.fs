@@ -258,8 +258,6 @@ let rec eval (st: SymbolTable) ast =
         | :? FplExtension ->
             fv.FplId <- extensionName
             fv.TypeId <- extensionName
-            fv.StartPos <- pos1
-            fv.EndPos <- pos2
         | :? FplVariableMany -> 
             let sid = $"*{extensionName}"
             fv.TypeId <- sid
