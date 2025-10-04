@@ -4655,7 +4655,7 @@ let findCandidatesByName (st: SymbolTable) (name: string) withClassConstructors 
             theory.Value.Scope
             // filter only blocks starting with the same FplId as the reference
             |> Seq.map (fun kvp -> kvp.Value)
-            |> Seq.filter (fun fv -> fv.FplId = $"@{name}" || fv.FplId = name || fv.FplId = nameWithoutProofOrCorRef || fv.FplId.StartsWith(nameWithProofOrCorRef))
+            |> Seq.filter (fun fv -> fv.FplId = name || fv.FplId = nameWithoutProofOrCorRef || fv.FplId.StartsWith(nameWithProofOrCorRef) || fv.FplId = $"@{nameWithoutProofOrCorRef}")
             |> Seq.iter (fun (block: FplValue) ->
                 pm.Add(block)
 

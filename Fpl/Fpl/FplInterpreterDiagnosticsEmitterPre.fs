@@ -348,7 +348,7 @@ let emitLG005Diagnostics name pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
 
-let emitPR000Diagnostics incorrectBlockType pos1 pos2 =
+let emitPR001Diagnostics incorrectBlockType justificationItemName pos1 pos2 alternative =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -356,37 +356,10 @@ let emitPR000Diagnostics incorrectBlockType pos1 pos2 =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = PR000 incorrectBlockType
-            Diagnostic.Alternatives = Some "Expected a definition (def class, def predicate, def function)."
+            Diagnostic.Code = PR001 (incorrectBlockType, justificationItemName)
+            Diagnostic.Alternatives = Some alternative 
         }
     ad.AddDiagnostic diagnostic
-
-let emitPR001Diagnostics incorrectBlockType pos1 pos2 =
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = pos1
-            Diagnostic.EndPos = pos2
-            Diagnostic.Code = PR001 incorrectBlockType
-            Diagnostic.Alternatives = Some "Expected another proof, followed by its argument." 
-        }
-    ad.AddDiagnostic diagnostic
-
-let emitPR002Diagnostics incorrectBlockType pos1 pos2 =
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = pos1
-            Diagnostic.EndPos = pos2
-            Diagnostic.Code = PR002 incorrectBlockType
-            Diagnostic.Alternatives = Some "Expected another proof, followed by its argument." 
-        }
-    ad.AddDiagnostic diagnostic
-
 
 let emitPR003Diagnostics alreadyDeclaredMixedStr qualifiedStartPosConflictStr pos1 pos2 =
     let diagnostic =

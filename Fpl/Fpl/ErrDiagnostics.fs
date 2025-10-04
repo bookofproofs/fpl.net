@@ -135,9 +135,7 @@ type DiagnosticCode =
     | LG004 of string
     | LG005 of string
     // proof-related error codes
-    | PR000 of string 
-    | PR001 of string
-    | PR002 of string
+    | PR001 of string * string 
     | PR003 of string * string
     | PR004 of string * string
     | PR005 of string
@@ -243,9 +241,7 @@ type DiagnosticCode =
             | LG004 _ -> "LG004"
             | LG005 _ -> "LG005"
             // proof-related error codes
-            | PR000 _ -> "PR000"
             | PR001 _ -> "PR001"
-            | PR002 _ -> "PR002"
             | PR003 _ -> "PR003"
             | PR004 _ -> "PR004"
             | PR005 _ -> "PR005"
@@ -360,9 +356,7 @@ type DiagnosticCode =
             | LG004 nodeType -> $"`Parameters not allowed for {nodeType}."
             | LG005 name -> $"`Unnecessary assignment of `{name}` detected (will be implicitely ignored)."
             // proof-related error codes
-            | PR000 incorrectBlockType -> $"Cannot find a justifying `by definition`, found {incorrectBlockType} instead."
-            | PR001 incorrectBlockType -> $"Cannot find a justifying `other proof argument`, found {incorrectBlockType} instead."
-            | PR002 incorrectBlockType -> $"Cannot find a justifying theorem-like statement or rule of inference, found {incorrectBlockType} instead." 
+            | PR001 (incorrectBlockType, justificatinItemName) -> $"Cannot find a `{justificatinItemName}`, found {incorrectBlockType} instead."
             | PR003 (name, conflict) -> $"Argument identifier `{name}` was already declared at {conflict}."  
             | PR004 (name, conflict)  -> $"Justification `{name}` was already declared at {conflict}." 
             | PR005 name ->  $"Argument identifier `{name}` not declared in this proof."
@@ -370,8 +364,8 @@ type DiagnosticCode =
             | PR007 (nodeTypeName, nodeName) ->  $"{nodeTypeName} is {nodeName} and is missing a proof."
             | PR008 (nodeName, expectedInputArgInference, actualInputArgInference) ->  $"This {nodeName} expects `{expectedInputArgInference}` and could not be applied to the proceeding argument inference which was `{actualInputArgInference}`."
             | PR009 -> "Not all arguments of the proof could be verified."
-            | PR010 (keyword, expectedRef) -> $"Justification `{keyword}` expects a reference to {expected}, not to a proof or corollary."
-            | PR011 (keyword, expectedRef) -> $"Justification `{keyword}` expects a reference to {expected}, not to an argument in some proof."
+            | PR010 (keyword, expectedRef) -> $"Justification `{keyword}` expects a reference to {expectedRef}, not to a proof or corollary."
+            | PR011 (keyword, expectedRef) -> $"Justification `{keyword}` expects a reference to {expectedRef}, not to an argument in some proof."
             | PR012 -> $"Justification `{LiteralByCor}` expects a reference to a corollary."
             | PR013 -> $"Add the keyword `{LiteralByCor}` when referencing to corollaries to increase readability."
             | PR014 -> "Justification expects a reference to a theorem-like statement without any more specific references."

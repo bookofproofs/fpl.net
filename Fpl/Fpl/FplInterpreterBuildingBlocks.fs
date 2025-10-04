@@ -409,6 +409,11 @@ let rec eval (st: SymbolTable) ast =
         | PrimJustificationL -> 
             let fvAi = new FplJustificationItemByRefArgument((pos1, pos2), fv)
             fvAi.FplId <- argumentId
+            let just = fvAi.ParentJustification
+            let arg = just.ParentArgument
+            let proof = arg.ParentProof
+            if not (proof.HasArgument argumentId) then
+                emitPR005Diagnostics argumentId pos1 pos2
             variableStack.PushEvalStack(fvAi)
             variableStack.PopEvalStack()
         | _ -> ()
@@ -1904,19 +1909,34 @@ let rec eval (st: SymbolTable) ast =
                     let split = fvJi.FplId.Split(":")
                     if split.Length > 1 then 
                         // here, argName is the argument identifier of the other proof
-                        let argName = $"{split.[1]}."
+                        let argName = $"{split.[1]}"
                         match getArgumentInProof fvJi argName with
                         | Some argument -> fvJi.ArgList.Add(argument) 
                         | _ -> emitPR006Diagnostics fvJi.FplId argName fvJi.StartPos fvJi.EndPos 
                 | _ -> ()
             | ScopeSearchResult.FoundIncorrectBlock otherBlock ->
-                match fvJi with 
-                | :? FplJustificationItemByDef ->
-                    emitPR000Diagnostics otherBlock fvJi.StartPos fvJi.EndPos
-                | :? FplJustificationItemByProofArgument ->
-                    emitPR001Diagnostics otherBlock fvJi.StartPos fvJi.EndPos
-                | _ ->
-                    emitPR002Diagnostics otherBlock fvJi.StartPos fvJi.EndPos
+                let alternative = 
+                    match fvJi with 
+                    | :? FplJustificationItemByAx ->
+                        "Expected a reference to an axiom."
+                    | :? FplJustificationItemByConj ->
+                        "Expected a reference to a conjecture."
+                    | :? FplJustificationItemByCor ->
+                        "Expected a reference to a corollary ."
+                    | :? FplJustificationItemByDef ->
+                        "Expected a reference to a definition (of a class, a predicate, or a functional term)."
+                    | :? FplJustificationItemByDefVar ->
+                        "Expected a reference to a variable."
+                    | :? FplJustificationItemByInf ->
+                        "Expected a reference to a rule of inference."
+                    | :? FplJustificationItemByProofArgument ->
+                        "Expected a reference to an argument in onother proof."
+                    | :? FplJustificationItemByRefArgument ->
+                        "Expected a reference to a previous argument in this proof."
+                    | :? FplJustificationItemByTheoremLikeStmt ->
+                        "Expected a reference to a theorem, a lemma, or a proposition."
+                    | _ -> "Expected another reference."
+                emitPR001Diagnostics otherBlock fvJi.Name fvJi.StartPos fvJi.EndPos alternative
             | ScopeSearchResult.NotFound ->
                 emitID010Diagnostics fvJi.FplId fvJi.StartPos fvJi.EndPos
             | ScopeSearchResult.FoundMultiple listOfKandidates ->
@@ -2015,10 +2035,15 @@ let rec eval (st: SymbolTable) ast =
                 let parts = input.Split(':')
                 if parts.Length > 0 then parts.[0] else ""
             let name = splitOffAnyArgumentId fvJi.FplId
-            let candidates = findCandidatesByName st fvJi.FplId false true |> List.filter (fun fv -> fv.FplId = name)
+            let candidates = findCandidatesByName st name false true 
+            let candidatesFiltered = 
+                if candidates.Length > 1 then 
+                    candidates |> List.filter (fun fv -> fv.FplId = name)
+                else
+                    candidates
             // check, if indeed the predicateId points to another proof, if not issue diagnostics, 
             // also check if arg exists, if not issue diagnostics
-            checkDiagnostics fvJi candidates
+            checkDiagnostics fvJi candidatesFiltered
             variableStack.PopEvalStack()
         | None, None, Some _ ->  
             // issue diagnostics a theorem-like statement justification cannot be used together with a proof argument reference 
