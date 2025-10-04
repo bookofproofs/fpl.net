@@ -29,9 +29,11 @@ let LiteralBase = "base"
 [<Literal>]
 let LiteralByAx = "byax"
 [<Literal>]
-let LiteralByDef = "bydef"
+let LiteralByConj = "byconj"
 [<Literal>]
 let LiteralByCor = "bycor"
+[<Literal>]
+let LiteralByDef = "bydef"
 [<Literal>]
 let LiteralByInf = "byinf"
 [<Literal>]
@@ -1377,6 +1379,8 @@ let PrimIsOperator = "is operator"
 let PrimImplication = "implication"
 [<Literal>]
 let PrimJIByAx = "justification by axiom"
+[<Literal>]
+let PrimJIByConj = "justification by conjecture"
 [<Literal>]
 let PrimJIByCor = "justification by corollary"
 [<Literal>]

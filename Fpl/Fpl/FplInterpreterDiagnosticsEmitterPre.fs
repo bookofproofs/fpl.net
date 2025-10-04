@@ -509,9 +509,9 @@ let emitPR010Diagnostics keyword exptectedRef pos1 pos2 =
 let emitPR011Diagnostics keyword exptectedRef pos1 pos2 =
     let code = 
         if isEnglishAn exptectedRef then
-            PR010 (keyword, $"an {exptectedRef}")
+            PR011 (keyword, $"an {exptectedRef}")
         else
-            PR010 (keyword, $"a {exptectedRef}")
+            PR011 (keyword, $"a {exptectedRef}")
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri

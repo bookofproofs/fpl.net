@@ -1927,11 +1927,11 @@ let rec eval (st: SymbolTable) ast =
 
 
         match byModifierOption, dollarDigitListAsts, refArgumentIdentifierAst with
-        | Some LiteralByAx, Some _, _ -> 
-            // byAx justification cannot be used together with a proof or corollary reference
+        | Some LiteralByAx, Some _, None -> 
+            // byax justification cannot be used together with a proof or corollary reference
             emitPR010Diagnostics LiteralByAx LiteralAxL pos1 pos2 
-        | Some LiteralByAx, None, Some _ -> 
-            // byAx justification cannot be used together with a proof argument reference 
+        | Some LiteralByAx, Some _, Some _ -> 
+            // byax justification cannot be used together with a proof argument reference 
             emitPR011Diagnostics LiteralByAx LiteralAxL pos1 pos2 
         | Some LiteralByAx, None, None -> 
             let fvJi = new FplJustificationItemByAx((pos1, pos2), parent)
@@ -1941,32 +1941,18 @@ let rec eval (st: SymbolTable) ast =
             let candidates = findCandidatesByName st fvJi.FplId false false
             checkDiagnostics fvJi candidates
             variableStack.PopEvalStack()
-        | Some LiteralByInf, Some _, _ -> 
-            // byInf justification cannot be used together with a proof reference
-            emitPR010Diagnostics LiteralByInf PrimRuleOfInference pos1 pos2 
-        | Some LiteralByInf, None, Some _ -> 
-            // byInf justification cannot be used together with a proof argument reference 
-            emitPR011Diagnostics LiteralByInf PrimRuleOfInference pos1 pos2 
-        | Some LiteralByInf, None, None -> 
-            let fvJi = new FplJustificationItemByAx((pos1, pos2), parent)
+        | Some LiteralByConj, Some _, None -> 
+            // byconj justification cannot be used together with a proof reference
+            emitPR010Diagnostics LiteralByConj LiteralConjL pos1 pos2 
+        | Some LiteralByConj, Some _, Some _ -> 
+            // byconj justification cannot be used together with a proof argument reference 
+            emitPR011Diagnostics LiteralByConj LiteralConjL pos1 pos2 
+        | Some LiteralByConj, None, None -> 
+            let fvJi = new FplJustificationItemByConj((pos1, pos2), parent)
             variableStack.PushEvalStack(fvJi)
             eval st predicateIdentifierAst
-            // check, if indeed the predicateId points to a rule of inference, if not issue diagnostics
+            // check, if indeed the predicateId points to a conjecture, if not issue diagnostics
             let candidates = findCandidatesByName st fvJi.FplId false false
-            checkDiagnostics fvJi candidates
-            variableStack.PopEvalStack()
-        | Some LiteralByDef, Some _, _ -> 
-            // byDef justification cannot be used together with a proof reference
-            emitPR010Diagnostics LiteralByDef LiteralDefL pos1 pos2 
-        | Some LiteralByDef, None, Some _ -> 
-            // byDef justification cannot be used together with a proof argument reference 
-            emitPR011Diagnostics LiteralByDef LiteralDefL pos1 pos2 
-        | Some LiteralByDef, None, None -> 
-            let fvJi = new FplJustificationItemByDef((pos1, pos2), parent)
-            variableStack.PushEvalStack(fvJi)
-            eval st predicateIdentifierAst
-            // check, if indeed the predicateId points to a definition, if not issue diagnostics
-            let candidates = findCandidatesByName st fvJi.FplId true false
             checkDiagnostics fvJi candidates
             variableStack.PopEvalStack()
         | Some LiteralByCor, Some _, _ -> 
@@ -1981,6 +1967,34 @@ let rec eval (st: SymbolTable) ast =
         | Some LiteralByCor, None, _ -> 
             // byCor justification a reference to a corollary
             emitPR012Diagnostics pos1 pos2 
+        | Some LiteralByDef, Some _, None -> 
+            // byDef justification cannot be used together with a proof reference
+            emitPR010Diagnostics LiteralByDef LiteralDefL pos1 pos2 
+        | Some LiteralByDef, Some _, Some _ -> 
+            // byDef justification cannot be used together with a proof argument reference 
+            emitPR011Diagnostics LiteralByDef LiteralDefL pos1 pos2 
+        | Some LiteralByDef, None, None -> 
+            let fvJi = new FplJustificationItemByDef((pos1, pos2), parent)
+            variableStack.PushEvalStack(fvJi)
+            eval st predicateIdentifierAst
+            // check, if indeed the predicateId points to a definition, if not issue diagnostics
+            let candidates = findCandidatesByName st fvJi.FplId true false
+            checkDiagnostics fvJi candidates
+            variableStack.PopEvalStack()
+        | Some LiteralByInf, Some _, None -> 
+            // byInf justification cannot be used together with a proof reference
+            emitPR010Diagnostics LiteralByInf PrimRuleOfInference pos1 pos2 
+        | Some LiteralByInf, Some _, Some _ -> 
+            // byInf justification cannot be used together with a proof argument reference 
+            emitPR011Diagnostics LiteralByInf PrimRuleOfInference pos1 pos2 
+        | Some LiteralByInf, None, None -> 
+            let fvJi = new FplJustificationItemByInf((pos1, pos2), parent)
+            variableStack.PushEvalStack(fvJi)
+            eval st predicateIdentifierAst
+            // check, if indeed the predicateId points to a rule of inference, if not issue diagnostics
+            let candidates = findCandidatesByName st fvJi.FplId false false
+            checkDiagnostics fvJi candidates
+            variableStack.PopEvalStack()
         | Some _, _, _ -> () // does not occur, because the parser byModifier choices between only two keywords LiteralByAx or LiteralByDef
         | None, Some _, None -> 
             let fvJi = new FplJustificationItemByCor((pos1, pos2), parent)

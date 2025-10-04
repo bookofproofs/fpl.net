@@ -1837,6 +1837,18 @@ type FplGenericJustificationItem(positions: Positions, parent: FplValue) =
         else
             None
 
+and FplJustificationItemByAx(positions: Positions, parent: FplValue) =
+    inherit FplGenericJustificationItem(positions, parent)
+
+    override this.Name = PrimJIByAx
+
+    override this.Clone () =
+        let ret = new FplJustificationItemByAx((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Run variableStack = () // todo implement Run
+
 and FplJustificationItemByDef(positions: Positions, parent: FplValue) =
     inherit FplGenericJustificationItem(positions, parent)
 
@@ -1856,6 +1868,42 @@ and FplJustificationItemByDefVar(positions: Positions, parent: FplValue) =
 
     override this.Clone () =
         let ret = new FplJustificationItemByDefVar((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Run variableStack = () // todo implement Run
+
+and FplJustificationItemByConj(positions: Positions, parent: FplValue) =
+    inherit FplGenericJustificationItem(positions, parent)
+
+    override this.Name = PrimJIByConj
+
+    override this.Clone () =
+        let ret = new FplJustificationItemByConj((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Run variableStack = () // todo implement Run
+
+and FplJustificationItemByCor(positions: Positions, parent: FplValue) =
+    inherit FplGenericJustificationItem(positions, parent)
+
+    override this.Name = PrimJIByCor
+
+    override this.Clone () =
+        let ret = new FplJustificationItemByCor((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Run variableStack = () // todo implement Run
+
+and FplJustificationItemByInf(positions: Positions, parent: FplValue) =
+    inherit FplGenericJustificationItem(positions, parent)
+
+    override this.Name = PrimJIByInf
+
+    override this.Clone () =
+        let ret = new FplJustificationItemByInf((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
 
@@ -1885,30 +1933,6 @@ and FplJustificationItemByProofArgument(positions: Positions, parent: FplValue) 
 
     override this.Run variableStack = () // todo implement Run
 
-and FplJustificationItemByAx(positions: Positions, parent: FplValue) =
-    inherit FplGenericJustificationItem(positions, parent)
-
-    override this.Name = PrimJIByAx
-
-    override this.Clone () =
-        let ret = new FplJustificationItemByAx((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.Run variableStack = () // todo implement Run
-
-and FplJustificationItemByInf(positions: Positions, parent: FplValue) =
-    inherit FplGenericJustificationItem(positions, parent)
-
-    override this.Name = PrimJIByInf
-
-    override this.Clone () =
-        let ret = new FplJustificationItemByInf((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.Run variableStack = () // todo implement Run
-
 and FplJustificationItemByTheoremLikeStmt(positions: Positions, parent: FplValue) =
     inherit FplGenericJustificationItem(positions, parent)
 
@@ -1916,18 +1940,6 @@ and FplJustificationItemByTheoremLikeStmt(positions: Positions, parent: FplValue
 
     override this.Clone () =
         let ret = new FplJustificationItemByTheoremLikeStmt((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.Run variableStack = () // todo implement Run
-
-and FplJustificationItemByCor(positions: Positions, parent: FplValue) =
-    inherit FplGenericJustificationItem(positions, parent)
-
-    override this.Name = PrimJIByCor
-
-    override this.Clone () =
-        let ret = new FplJustificationItemByCor((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
 
@@ -4401,6 +4413,7 @@ let tryFindAssociatedBlockForJustificationItem (fvJi: FplGenericJustificationIte
         | :? FplJustificationItemByDef, :? FplClass
         | :? FplJustificationItemByDef, :? FplPredicate
         | :? FplJustificationItemByDef, :? FplFunctionalTerm
+        | :? FplJustificationItemByConj, :? FplConjecture
         | :? FplJustificationItemByCor, :? FplCorollary
         | :? FplJustificationItemByAx, :? FplAxiom
         | :? FplJustificationItemByInf, :? FplRuleOfInference

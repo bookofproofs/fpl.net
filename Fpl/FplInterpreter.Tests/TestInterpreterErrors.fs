@@ -511,6 +511,7 @@ type TestInterpreterErrors() =
     [<DataRow("00d", """def cl A:obj {intr property func T()->obj {dec ~x:obj x:=parent; return x } };""", 0)>]
     [<DataRow("00e", """def cl A:obj {intr opt property pred T() { is(parent,A) } };""", 0)>]
     [<DataRow("00f", """def cl A:obj {intr opt property func T()->obj {dec ~x:obj x:=parent; return x } };""", 0)>]
+    // todo: issure diagnostics when asserting is(parent,...), only asserting is(self,...) inside classes is allowed
     [<DataRow("01a", """def pred A() {dec assert is(parent,A); true };""", 1)>]
     [<DataRow("01b", """def pred A() {intr property pred T() { is(parent,A) } };""", 0)>]
     [<DataRow("01c", """def pred A() {intr property pred T() { is(parent,A) } };""", 0)>]
@@ -547,6 +548,7 @@ type TestInterpreterErrors() =
     [<DataRow("00d", """def cl A:obj {intr property func T()->obj {dec ~x:obj x:=self; return x } };""", 0)>]
     [<DataRow("00e", """def cl A:obj {intr opt property pred T() { is(self,A) } };""", 0)>]
     [<DataRow("00f", """def cl A:obj {intr opt property func T()->obj {dec ~x:obj x:=self; return x } };""", 0)>]
+    // todo: issure diagnostics when asserting is(self,...) outside classes
     [<DataRow("01a", """def pred A() {dec assert is(self,A); true };""", 0)>]
     [<DataRow("01b", """def pred A() {intr property pred T() { is(self,A) } };""", 0)>]
     [<DataRow("01c", """def pred A() {intr property pred T() { is(self,A) } };""", 0)>]
@@ -1719,10 +1721,12 @@ type TestInterpreterErrors() =
 
     [<DataRow("00", "proof T$1 {1. byax A |- trivial};", 0)>]
     [<DataRow("01", "proof T$1 {1. byax A$1 |- trivial};", 1)>]
-    [<DataRow("02", "proof T$1 {1. byinf A |- trivial};", 0)>]
-    [<DataRow("03", "proof T$1 {1. byinf A$1 |- trivial};", 1)>]
+    [<DataRow("00", "proof T$1 {1. byconj A |- trivial};", 0)>]
+    [<DataRow("01", "proof T$1 {1. byconj A$1 |- trivial};", 1)>]
     [<DataRow("04", "proof T$1 {1. bydef A |- trivial};", 0)>]
     [<DataRow("05", "proof T$1 {1. bydef A$1 |- trivial};", 1)>]
+    [<DataRow("02", "proof T$1 {1. byinf A |- trivial};", 0)>]
+    [<DataRow("03", "proof T$1 {1. byinf A$1 |- trivial};", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR010(no:string, fplCode:string, expected) =
@@ -1734,10 +1738,12 @@ type TestInterpreterErrors() =
 
     [<DataRow("00", "proof T$1 {1. byax A |- trivial};", 0)>]
     [<DataRow("01", "proof T$1 {1. byax A$1:3 |- trivial};", 1)>]
-    [<DataRow("02", "proof T$1 {1. byinf A |- trivial};", 0)>]
-    [<DataRow("03", "proof T$1 {1. byinf A$1:3 |- trivial};", 1)>]
+    [<DataRow("00", "proof T$1 {1. byconj A |- trivial};", 0)>]
+    [<DataRow("01", "proof T$1 {1. byconj A$1:3 |- trivial};", 1)>]
     [<DataRow("04", "proof T$1 {1. bydef A |- trivial};", 0)>]
     [<DataRow("05", "proof T$1 {1. bydef A$1:3 |- trivial};", 1)>]
+    [<DataRow("02", "proof T$1 {1. byinf A |- trivial};", 0)>]
+    [<DataRow("03", "proof T$1 {1. byinf A$1:3 |- trivial};", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR011(no:string, fplCode:string, expected) =

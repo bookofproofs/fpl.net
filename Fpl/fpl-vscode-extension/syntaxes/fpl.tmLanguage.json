@@ -45,7 +45,7 @@
 		"keywords": {
 			"patterns": [{
 				"name": "keyword.fpl keyword",
-				"match": "\\b(all|and|assert|assume|ass|base|byax|bycor|bydef|byinf|cases|conclusion|con|declaration|dec|delegate|del|end|exn|ex|false|for|iif|impl|in|intrinsic|intr|is|mcases|not|or|parent|premise|pre|qed|return|ret|revoke|rev|self|trivial|true|xor)\\b"
+				"match": "\\b(all|and|assert|assume|ass|base|byax|byconj|bycor|bydef|byinf|cases|conclusion|con|declaration|dec|delegate|del|end|exn|ex|false|for|iif|impl|in|intrinsic|intr|is|mcases|not|or|parent|premise|pre|qed|return|ret|revoke|rev|self|trivial|true|xor)\\b"
 			}]
 		},
 		"inbuiltTypes": {
