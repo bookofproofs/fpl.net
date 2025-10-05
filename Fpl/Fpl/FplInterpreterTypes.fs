@@ -428,6 +428,11 @@ type FplValue(positions: Positions, parent: FplValue option) =
     /// Clears the ValueList and adds the argument to it. Previous value(s), if any, get lost.
     abstract member SetValuesOf: FplValue -> unit
 
+    /// A method used to issue diagnostics related to this FplValue and its structure retrieved during the FPL interpreter.
+    abstract member CheckConsistency: unit -> unit
+
+    override this.CheckConsistency() = ()
+    
     (* Default implementations = everything is false, only the trues are overridden in derived classes *)
     override this.SetValue fv =
         this.ValueList.Clear()
@@ -449,8 +454,6 @@ type FplValue(positions: Positions, parent: FplValue option) =
     
     override this.AssignParts (ret:FplValue) =
         ret.FplId <- this.FplId
-
-
         ret.TypeId <- this.TypeId
         ret.Arity <- this.Arity
         ret.AuxiliaryInfo <- this.AuxiliaryInfo
@@ -1503,6 +1506,26 @@ type FplGenericPredicateBlock(positions: Positions, parent: FplValue) =
                     )
             _isReady <- this.Arity = 0 
 
+    override this.CheckConsistency () = 
+        base.CheckConsistency()
+        if not this.IsIntrinsic then // if not intrinsic, check variable usage
+            this.GetVariables()
+            |> List.filter(fun var -> var.AuxiliaryInfo = 0)
+            |> List.iter (fun var -> 
+                emitVAR04diagnostics var.FplId var.StartPos var.EndPos
+            )
+        if this.Arity = 0 && this.ArgList.Count > 0 then 
+            let refValue = this.ArgList[this.ArgList.Count-1]
+            match refValue.Name with 
+            | PrimRefL when refValue.Scope.Count = 1 ->
+                let predValue = refValue.Scope.Values |> Seq.head
+                match predValue with 
+                | :? FplIntrinsicPred as pred when (pred.FplId = LiteralTrue || pred.FplId = LiteralFalse) ->
+                    () // no parameters with a constant
+                | _ -> emitLG007Diagnostics $"{this.Name} `{this.Type SignatureType.Name}`" refValue.StartPos refValue.EndPos
+            | _ -> 
+                emitLG007Diagnostics $"{this.Name} `{this.Type SignatureType.Name}`" refValue.StartPos refValue.EndPos
+
 type FplPredicate(positions: Positions, parent: FplValue, runOrder) =
     inherit FplGenericPredicateBlock(positions, parent)
     let _runOrder = runOrder
@@ -1518,9 +1541,8 @@ type FplPredicate(positions: Positions, parent: FplValue, runOrder) =
     override this.IsFplBlock () = true
 
     override this.EmbedInSymbolTable _ = 
+        base.CheckConsistency()
         tryAddToParentUsingMixedSignature this
-
-
 
     override this.RunOrder = Some _runOrder
 
@@ -1536,7 +1558,7 @@ type FplMandatoryPredicate(positions: Positions, parent: FplValue) =
         ret
 
     override this.EmbedInSymbolTable _ = 
-        
+        base.CheckConsistency()
         tryAddSubBlockToFplBlock this
 
 type FplOptionalPredicate(positions: Positions, parent: FplValue) =
@@ -1550,7 +1572,9 @@ type FplOptionalPredicate(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
-    override this.EmbedInSymbolTable _ = tryAddSubBlockToFplBlock this
+    override this.EmbedInSymbolTable _ = 
+        base.CheckConsistency()
+        tryAddSubBlockToFplBlock this
 
 
 type FplAxiom(positions: Positions, parent: FplValue, runOrder) =

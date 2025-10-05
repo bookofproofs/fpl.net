@@ -1821,19 +1821,6 @@ let rec eval (st: SymbolTable) ast =
         eval st predicateSignature
         eval st predicateContentAst
         optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
-        if not fv.IsIntrinsic then // if not intrinsic, check variable usage
-            emitVAR04diagnostics fv
-        if fv.Arity = 0 && fv.ArgList.Count > 0 then 
-            let refValue = fv.ArgList[fv.ArgList.Count-1]
-            match refValue with 
-            | :? FplReference as ref when ref.Scope.Count=1 ->
-                let predValue = ref.Scope.Values |> Seq.head
-                match predValue with 
-                | :? FplIntrinsicPred as pred when (pred.FplId = LiteralTrue || pred.FplId = LiteralFalse) ->
-                    () // no parameters with a constant
-                | _ -> emitLG007Diagnostics $"{fv.Name} `{fv.Type SignatureType.Name}`" refValue.StartPos refValue.EndPos
-            | _ -> 
-                emitLG007Diagnostics $"{fv.Name} `{fv.Type SignatureType.Name}`" refValue.StartPos refValue.EndPos
         variableStack.PopEvalStack()
         st.EvalPop()
     // | DefinitionFunctionalTerm of Positions * ((Ast * Ast) * (Ast * Ast list option))
