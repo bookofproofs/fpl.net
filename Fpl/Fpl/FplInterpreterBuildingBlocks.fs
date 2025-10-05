@@ -27,16 +27,8 @@ open FplInterpreterDiagnosticsEmitter
 
 let variableStack = FplVariableStack()
 
-let eval_string (st: SymbolTable) s = ()
-
-let eval_pos_string (st: SymbolTable) (startpos: Position) (endpos: Position) ast = ()
-
-let eval_pos_ast_ast_opt (st: SymbolTable) (startpos: Position) (endpos: Position) = ()
-
 let eval_pos_char_list (st: SymbolTable) (startpos: Position) (endpos: Position) charlist =
     charlist |> List.map string |> String.concat "" |> ignore
-
-let eval_pos_string_ast (st: SymbolTable) str = ()
 
 /// Simplify trivially nested expressions by removing from the stack FplValue nodes that were created due to too long parsing tree and replacing them by their subnodes 
 let simplifyTriviallyNestedExpressions (rb:FplValue) = 
@@ -201,7 +193,6 @@ let rec eval (st: SymbolTable) ast =
     | Ast.PascalCaseId ((pos1, pos2), pascalCaseId) -> 
         st.EvalPush(PrimPascalCaseId)
         let fv = variableStack.PeekEvalStack()
-        eval_string st pascalCaseId
         match fv.Name with
         | LiteralAxL
         | LiteralThmL
@@ -250,12 +241,11 @@ let rec eval (st: SymbolTable) ast =
             variableStack.PopEvalStack()
         else
             fv.FplId <- fv.FplId + sid
-            if fv.TypeId <> "" then
-                fv.TypeId <- fv.TypeId + sid
-            else
-                fv.TypeId <- LiteralInd
-                    
-            fv.EndPos <- pos2
+            match fv.TypeId with 
+            | "" -> fv.TypeId <- LiteralInd
+            | LiteralPred -> ()
+            | _ -> fv.TypeId <- fv.TypeId + sid
+
         st.EvalPop() 
     | Ast.ExtensionName((pos1, pos2), s) ->
         st.EvalPush("ExtensionName")
@@ -354,7 +344,6 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop() 
     | Ast.Alias((pos1, pos2), s) -> 
         st.EvalPush("Alias")
-        eval_pos_string st pos1 pos2 s
         st.EvalPop() 
     | Ast.LanguageCode((pos1, pos2), s) -> 
         st.EvalPush("LanguageCode")
@@ -928,23 +917,19 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("AliasedNamespaceIdentifier")
         eval st ast1
         optAst |> Option.map (eval st) |> ignore
-        eval_pos_ast_ast_opt st pos1 pos2
         st.EvalPop()
     | Ast.ClassType((pos1, pos2), specificClassTypeAst) ->
         st.EvalPush("ClassType")
         eval st specificClassTypeAst
-        eval_pos_ast_ast_opt st pos1 pos2
         st.EvalPop()
     | Ast.CompoundPredicateType((pos1, pos2), (ast1, optAst)) ->
         st.EvalPush("CompoundPredicateType")
         eval st ast1
         optAst |> Option.map (eval st) |> ignore
-        eval_pos_ast_ast_opt st pos1 pos2
         st.EvalPop()
     | Ast.ReferenceToProofOrCorollary((pos1, pos2), (referencingIdentifierAst)) ->
         st.EvalPush("ReferenceToProofOrCorollary")
         eval st referencingIdentifierAst
-        eval_pos_ast_ast_opt st pos1 pos2
         st.EvalPop()
     | Ast.PredicateWithOptSpecification((pos1, pos2), (fplIdentifierAst, optionalSpecificationAst)) ->
         st.EvalPush("PredicateWithOptSpecification")

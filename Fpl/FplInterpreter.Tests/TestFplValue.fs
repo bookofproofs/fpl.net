@@ -16,13 +16,13 @@ type TestFplValue() =
     [<DataRow("lemma TestId {true};", "TestId", "pred")>]
     [<DataRow("proposition TestId {true};", "TestId", "pred")>]
     [<DataRow("conjecture TestId {true};", "TestId", "pred")>]
-    [<DataRow("corollary TestId$1 {true};", "TestId$1", "pred$1")>]
-    [<DataRow("corollary TestId$1$2 {true};", "TestId$1$2", "pred$1$2")>]
-    [<DataRow("corollary TestId$1$2$3 {true};", "TestId$1$2$3", "pred$1$2$3")>]
+    [<DataRow("corollary TestId$1 {true};", "TestId$1", "pred")>]
+    [<DataRow("corollary TestId$1$2 {true};", "TestId$1$2", "pred")>]
+    [<DataRow("corollary TestId$1$2$3 {true};", "TestId$1$2$3", "pred")>]
 
-    [<DataRow("proof TestId$1 {1. |- trivial} ;", "TestId$1", "pred$1")>]
-    [<DataRow("proof TestId$1$2 {1. |- trivial} ;", "TestId$1$2", "pred$1$2")>]
-    [<DataRow("proof TestId$1$2$3 {1. |- trivial} ;", "TestId$1$2$3", "pred$1$2$3")>]
+    [<DataRow("proof TestId$1 {1. |- trivial} ;", "TestId$1", "pred")>]
+    [<DataRow("proof TestId$1$2 {1. |- trivial} ;", "TestId$1$2", "pred")>]
+    [<DataRow("proof TestId$1$2$3 {1. |- trivial} ;", "TestId$1$2$3", "pred")>]
 
     
     [<DataRow("def class Test:obj {intr} proof Test$1 {1. |- trivial};", "Test", "Test")>]
