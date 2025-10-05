@@ -1466,9 +1466,9 @@ type IReady =
 type IHasProof =
     abstract member HasProof : bool with get, set
 
-type FplPredicate(positions: Positions, parent: FplValue, runOrder) =
+[<AbstractClass>]
+type FplGenericPredicateBlock(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicateWithExpression(positions, parent)
-    let _runOrder = runOrder
     let mutable _isReady = false
     let mutable _callCounter = 0
 
@@ -1478,24 +1478,13 @@ type FplPredicate(positions: Positions, parent: FplValue, runOrder) =
     interface ICanBeCalledRecusively with
         member _.CallCounter = _callCounter
 
-    override this.Name = PrimPredicateL
-    override this.ShortName = PrimPredicate
-
-    override this.Clone () =
-        let ret = new FplPredicate((this.StartPos, this.EndPos), this.Parent.Value, _runOrder)
-        this.AssignParts(ret)
-        ret
+    override this.IsBlock () = true
 
     override this.Type signatureType = 
         let head = getFplHead this signatureType
 
         let paramT = getParamTuple this signatureType
         sprintf "%s(%s)" head paramT
-
-    override this.IsFplBlock () = true
-    override this.IsBlock () = true
-
-    override this.EmbedInSymbolTable _ = tryAddToParentUsingMixedSignature this
 
     override this.Run variableStack = 
         if not _isReady then
@@ -1514,10 +1503,29 @@ type FplPredicate(positions: Positions, parent: FplValue, runOrder) =
                     )
             _isReady <- this.Arity = 0 
 
+type FplPredicate(positions: Positions, parent: FplValue, runOrder) =
+    inherit FplGenericPredicateBlock(positions, parent)
+    let _runOrder = runOrder
+
+    override this.Name = PrimPredicateL
+    override this.ShortName = PrimPredicate
+
+    override this.Clone () =
+        let ret = new FplPredicate((this.StartPos, this.EndPos), this.Parent.Value, _runOrder)
+        this.AssignParts(ret)
+        ret
+
+    override this.IsFplBlock () = true
+
+    override this.EmbedInSymbolTable _ = 
+        tryAddToParentUsingMixedSignature this
+
+
+
     override this.RunOrder = Some _runOrder
 
 type FplMandatoryPredicate(positions: Positions, parent: FplValue) =
-    inherit FplGenericPredicateWithExpression(positions, parent)
+    inherit FplGenericPredicateBlock(positions, parent)
 
     override this.Name = PrimMandatoryPredicateL
     override this.ShortName = PrimMandatoryPredicate
@@ -1527,22 +1535,12 @@ type FplMandatoryPredicate(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
-    override this.IsBlock () = true
-
-    override this.EmbedInSymbolTable _ = tryAddSubBlockToFplBlock this
-
-    override this.Run variableStack = 
-        // todo implement run
-        ()
-
-    override this.Type signatureType = 
-        let head = getFplHead this signatureType
-
-        let paramT = getParamTuple this signatureType
-        sprintf "%s(%s)" head paramT
+    override this.EmbedInSymbolTable _ = 
+        
+        tryAddSubBlockToFplBlock this
 
 type FplOptionalPredicate(positions: Positions, parent: FplValue) =
-    inherit FplGenericPredicateWithExpression(positions, parent)
+    inherit FplGenericPredicateBlock(positions, parent)
 
     override this.Name = PrimOptionalPredicateL
     override this.ShortName = PrimOptionalPredicate
@@ -1552,19 +1550,7 @@ type FplOptionalPredicate(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
-    override this.IsBlock () = true
-
-    override this.Type signatureType = 
-        let head = getFplHead this signatureType
-
-        let paramT = getParamTuple this signatureType
-        sprintf "%s(%s)" head paramT
-
     override this.EmbedInSymbolTable _ = tryAddSubBlockToFplBlock this
-
-    override this.Run variableStack = 
-        // todo implement run
-        ()
 
 
 type FplAxiom(positions: Positions, parent: FplValue, runOrder) =
