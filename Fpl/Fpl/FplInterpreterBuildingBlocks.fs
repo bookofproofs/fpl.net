@@ -180,6 +180,13 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Intrinsic")
         let fv = variableStack.PeekEvalStack()
         fv.IsIntrinsic <- true // flag that this block is intrinsic
+        match fv with 
+        | :? FplPredicate
+        | :? FplMandatoryPredicate
+        | :? FplOptionalPredicate ->
+            if fv.Arity = 0 then 
+                emitLG006Diagnostics $"{fv.Name} `{fv.Type SignatureType.Name}`" pos1 pos2
+        | _ -> ()
         st.EvalPop()
     | Ast.Error  ->   
         st.EvalPush("Error")

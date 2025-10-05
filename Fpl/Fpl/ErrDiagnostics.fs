@@ -134,6 +134,7 @@ type DiagnosticCode =
     | LG003 of string * string
     | LG004 of string
     | LG005 of string
+    | LG006 of string
     // proof-related error codes
     | PR001 of string * string 
     | PR003 of string * string
@@ -240,6 +241,7 @@ type DiagnosticCode =
             | LG003 _ -> "LG003"
             | LG004 _ -> "LG004"
             | LG005 _ -> "LG005"
+            | LG006 _ -> "LG006"
             // proof-related error codes
             | PR001 _ -> "PR001"
             | PR003 _ -> "PR003"
@@ -354,7 +356,8 @@ type DiagnosticCode =
             | LG002 (nodeTypeName, times) -> $"Possible infinite recursion detected, `{nodeTypeName}` was called for more than {times} times.`."
             | LG003 (nodeTypeName, nodeName) -> $"`{nodeTypeName}` evaluates to `false` and cannot be {nodeName}."
             | LG004 nodeType -> $"`Parameters not allowed for {nodeType}."
-            | LG005 name -> $"`Unnecessary assignment of `{name}` detected (will be implicitely ignored)."
+            | LG005 name -> $"Unnecessary assignment of `{name}` detected (will be implicitely ignored)."
+            | LG006 blockName -> $"A {blockName} without parameters cannot be {LiteralIntrL}."
             // proof-related error codes
             | PR001 (incorrectBlockType, justificatinItemName) -> $"Cannot find a `{justificatinItemName}`, found {incorrectBlockType} instead."
             | PR003 (name, conflict) -> $"Argument identifier `{name}` was already declared at {conflict}."  
