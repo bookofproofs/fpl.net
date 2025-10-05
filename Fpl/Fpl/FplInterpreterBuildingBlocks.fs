@@ -1018,6 +1018,7 @@ let rec eval (st: SymbolTable) ast =
             elif candidates.Length > 0 then
                 // not a class was referred, add the candidate (e.g., referenced variable)
                 let candidate = candidates.Head
+                fv.FplId <- candidate.FplId 
                 fv.Scope.TryAdd(fv.FplId, candidate) |> ignore
                 emitID025Diagnostics (qualifiedName candidate) candidate.EnglishName block.EnglishName block.Name fv.StartPos fv.EndPos
             else

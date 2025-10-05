@@ -1126,6 +1126,16 @@ let addExpressionToParentArgList (fplValue:FplValue) =
     | _ -> ()
     parent.ArgList.Add fplValue
 
+// Add an expression to a reference
+let addExpressionToReference (fplValue:FplValue) =
+    let nextOpt = fplValue.Parent
+    match nextOpt with
+    | Some next when next.Name = PrimRefL && next.Scope.ContainsKey(".") -> ()
+    | Some next when next.Name = PrimRefL ->
+        next.FplId <- fplValue.FplId
+        next.Scope.TryAdd(fplValue.FplId, fplValue) |> ignore
+    | _ -> addExpressionToParentArgList fplValue 
+
 /// Indicates if an FplValue is the root of the SymbolTable.
 let isRoot (fv:FplValue) = 
     match fv with
@@ -1171,7 +1181,8 @@ type FplIntrinsicPred(positions: Positions, parent: FplValue) =
 
     override this.Run _ = ()
 
-    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
+    override this.EmbedInSymbolTable _ = addExpressionToReference this
+
 
 
 type IHasSignature =
@@ -2483,8 +2494,8 @@ type FplReference(positions: Positions, parent: FplValue) =
 
     override this.Represent () = 
         if this.ValueList.Count = 0 then 
-            if this.Scope.ContainsKey(this.FplId) && isVar this.Scope[this.FplId] then
-                this.Scope[this.FplId].Represent()
+            if this.Scope.Count > 0 && not (this.Scope.ContainsKey(".")) then 
+                (this.Scope.Values |> Seq.head).Represent()
             else
                 let args = 
                     this.ArgList
@@ -2620,11 +2631,7 @@ type FplParent(positions: Positions, parent: FplValue) as this =
 
     override this.Run _ = () // todo implement Run
 
-    override this.EmbedInSymbolTable nextOpt = 
-        match nextOpt with
-        | Some (:? FplReference) as Some next ->
-            next.Scope.TryAdd(this.FplId, this) |> ignore
-        | _ -> addExpressionToParentArgList this 
+    override this.EmbedInSymbolTable _ = addExpressionToReference this
 
     override this.RunOrder = None
 
@@ -2659,11 +2666,7 @@ type FplSelf(positions: Positions, parent: FplValue) as this =
 
     override this.Run _ = () // todo implement Run
 
-    override this.EmbedInSymbolTable nextOpt = 
-        match nextOpt with
-        | Some (:? FplReference) as Some next ->
-            next.Scope.TryAdd(this.FplId, this) |> ignore
-        | _ -> addExpressionToParentArgList this 
+    override this.EmbedInSymbolTable _ = addExpressionToReference this
 
     override this.RunOrder = None
 
@@ -3059,12 +3062,7 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
 
     override this.Run _ = ()
 
-    override this.EmbedInSymbolTable nextOpt = 
-        match nextOpt with
-        | Some next when next.Scope.ContainsKey(".") -> ()
-        | Some next when next.Name = PrimRefL -> 
-            next.Scope.TryAdd(this.FplId, this) |> ignore
-        | _ -> addExpressionToParentArgList this
+    override this.EmbedInSymbolTable _ = addExpressionToReference this
 
     override this.RunOrder = None
 
