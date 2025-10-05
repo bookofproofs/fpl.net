@@ -1503,12 +1503,16 @@ type FplPredicate(positions: Positions, parent: FplValue, runOrder) =
             if _callCounter > maxRecursion then
                 emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
             else
-                this.ArgList
-                |> Seq.iter (fun fv -> 
-                    fv.Run variableStack
-                    this.SetValuesOf fv
-                )
-                _isReady <- this.Arity = 0 
+                if this.IsIntrinsic then 
+                    let undetermined = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+                    this.SetValue undetermined
+                else
+                    this.ArgList
+                    |> Seq.iter (fun fv -> 
+                        fv.Run variableStack
+                        this.SetValuesOf fv
+                    )
+            _isReady <- this.Arity = 0 
 
     override this.RunOrder = Some _runOrder
 

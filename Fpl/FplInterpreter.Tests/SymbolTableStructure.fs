@@ -3364,6 +3364,7 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplPredicate>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.AreEqual<string>(LiteralUndetermined, node.Represent())
         | "FplPredicate", "01" -> 
             Assert.IsInstanceOfType<FplTheory>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
@@ -3371,6 +3372,7 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplPredicate>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count) // intrinsic
             Assert.AreEqual<int>(2, node.Scope.Count) // two variables
+            Assert.AreEqual<string>(LiteralUndetermined, node.Represent())
         | "FplPredicate", "02" -> 
             Assert.IsInstanceOfType<FplTheory>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
@@ -3378,6 +3380,7 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplPredicate>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count) // intrinsic
             Assert.AreEqual<int>(6, node.Scope.Count) // 2 variables, 4 properties
+            Assert.AreEqual<string>(LiteralUndetermined, node.Represent())
         | "FplPredicate", "03" -> 
             Assert.IsInstanceOfType<FplTheory>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
@@ -3385,6 +3388,7 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplPredicate>(node)
             Assert.AreEqual<int>(1, node.ArgList.Count) // non-intrinsic
             Assert.AreEqual<int>(7, node.Scope.Count) // 3 variables, 4 properties
+            Assert.AreEqual<string>(LiteralTrue, node.Represent())
         | "FplPredicate", "04" -> 
             Assert.IsInstanceOfType<FplTheory>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
@@ -3392,6 +3396,7 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplPredicate>(node)
             Assert.AreEqual<int>(3, node.ArgList.Count) // non-intrinsic with 2 statements
             Assert.AreEqual<int>(3, node.Scope.Count) // 3 variables
+            Assert.AreEqual<string>(LiteralFalse, node.Represent())
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
 
