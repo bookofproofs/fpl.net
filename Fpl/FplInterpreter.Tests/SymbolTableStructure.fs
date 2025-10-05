@@ -1645,7 +1645,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
             let assignment = node :?> FplAssignment
             Assert.IsInstanceOfType<FplVariable>(assignment.Assignee.Value)
-            Assert.IsInstanceOfType<FplVariable>(assignment.AssignedValue.Value)
+            Assert.IsInstanceOfType<FplIntrinsicPred>(assignment.AssignedValue.Value)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
 
@@ -3625,18 +3625,18 @@ type SymbolTableStructure() =
     [<DataRow("FplReference", "00a", """ax T {x};""", "")>]
     [<DataRow("FplReference", "00b", """ax T {dec ~x:pred; x};""", "")>]
     // references to blocks
-    [<DataRow("FplReference", "01a", """ax T {dec ~x,y:obj; A(x,y) };""", "")>]
-    [<DataRow("FplReference", "01b", """def pred A(x,y:obj) {intr} ax T {dec ~x,y:obj; A(x,y) };""", "")>]
-    [<DataRow("FplReference", "01c", """def func A(x,y:obj)->obj {intr} ax T {dec ~x,y:obj; A(x,y) };""", "")>]
-    [<DataRow("FplReference", "01d", """ax T { A };""", "")>]
-    [<DataRow("FplReference", "01e", """def cl A:obj {intr} ax T { A };""", "")>]
-    [<DataRow("FplReference", "01f", """inf A {pre:true con:true} ax T { A };""", "")>]
-    [<DataRow("FplReference", "01g", """ax A {true} ax T { A };""", "")>]
-    [<DataRow("FplReference", "01h", """thm A {true} ax T { A };""", "")>]
-    [<DataRow("FplReference", "01i", """lem A {true} ax T { A };""", "")>]
-    [<DataRow("FplReference", "01j", """prop A {true} ax T { A };""", "")>]
-    [<DataRow("FplReference", "01k", """conj A {true} ax T { A };""", "")>]
-    [<DataRow("FplReference", "01l", """cor A$1 {true} ax T { A$1 };""", "")>]
+    [<DataRow("FplReference", "01a", """ax T {dec ~x,y:obj; A(x,y) };""", "A(x, y)")>]
+    [<DataRow("FplReference", "01b", """def pred A(x,y:obj) {intr} ax T {dec ~x,y:obj; A(x,y) };""", "A(x, y)")>]
+    [<DataRow("FplReference", "01c", """def func A(x,y:obj)->obj {intr} ax T {dec ~x,y:obj; A(x,y) };""", "A(x, y)")>]
+    [<DataRow("FplReference", "01d", """ax T { A };""", "A")>]
+    [<DataRow("FplReference", "01e", """def cl A:obj {intr} ax T { A };""", "A")>]
+    [<DataRow("FplReference", "01f", """inf A {pre:true con:true} ax T { A };""", "A")>]
+    [<DataRow("FplReference", "01g", """ax A {true} ax T { A };""", "A")>]
+    [<DataRow("FplReference", "01h", """thm A {true} ax T { A };""", "A")>]
+    [<DataRow("FplReference", "01i", """lem A {true} ax T { A };""", "A")>]
+    [<DataRow("FplReference", "01j", """prop A {true} ax T { A };""", "A")>]
+    [<DataRow("FplReference", "01k", """conj A {true} ax T { A };""", "A")>]
+    [<DataRow("FplReference", "01l", """cor A$1 {true} ax T { A$1 };""", "A$1")>]
     [<DataRow("FplReference", "01m", """proof A$1 {1. |- trivial} ax T { A$1 };""", "")>]
     [<DataRow("FplReference", "01n", """ext A x@/\d+/ -> obj {ret x} ax T { A };""", "@A")>]
     [<DataRow("FplReference", "01o", """loc A := !tex: "\alpha" ; ax T { A };""", "")>]
