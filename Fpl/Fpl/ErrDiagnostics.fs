@@ -135,6 +135,7 @@ type DiagnosticCode =
     | LG004 of string
     | LG005 of string
     | LG006 of string
+    | LG007 of string
     // proof-related error codes
     | PR001 of string * string 
     | PR003 of string * string
@@ -242,6 +243,7 @@ type DiagnosticCode =
             | LG004 _ -> "LG004"
             | LG005 _ -> "LG005"
             | LG006 _ -> "LG006"
+            | LG007 _ -> "LG007"
             // proof-related error codes
             | PR001 _ -> "PR001"
             | PR003 _ -> "PR003"
@@ -358,6 +360,7 @@ type DiagnosticCode =
             | LG004 nodeType -> $"`Parameters not allowed for {nodeType}."
             | LG005 name -> $"Unnecessary assignment of `{name}` detected (will be implicitely ignored)."
             | LG006 blockName -> $"A {blockName} without parameters cannot be {LiteralIntrL}."
+            | LG007 blockName -> $"A {blockName} without parameters cannot have value based on an expression."
             // proof-related error codes
             | PR001 (incorrectBlockType, justificatinItemName) -> $"Cannot find a `{justificatinItemName}`, found {incorrectBlockType} instead."
             | PR003 (name, conflict) -> $"Argument identifier `{name}` was already declared at {conflict}."  

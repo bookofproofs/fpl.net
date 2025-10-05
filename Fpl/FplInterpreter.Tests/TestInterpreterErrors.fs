@@ -1567,6 +1567,41 @@ type TestInterpreterErrors() =
             let code = LG006 "" 
             runTestHelper "TestLG006.fpl" fplCode code expected
 
+    [<DataRow("00a", """def pred T() { true };""", 0)>]
+    [<DataRow("00b", """def pred T() { false };""", 0)>]
+    [<DataRow("00c", """def pred T() { true prty func A(x:obj)->obj {ret x}};""", 0)>]
+    [<DataRow("00d", """def pred T() { false prty func A(x:obj)->obj {ret x}};""", 0)>]
+    [<DataRow("00e", """def pred T() { not true };""", 1)>]
+    [<DataRow("00f", """def pred T() { and(false,true) };""", 1)>]
+    [<DataRow("00g", """def pred T() { x prty func A(x:obj)->obj {ret x}};""", 1)>]
+    [<DataRow("00h", """def pred T() { undef prty func A(x:obj)->obj {ret x}};""", 1)>]
+    [<DataRow("01a", """def pred T(x:obj) { not true };""", 0)>]
+    [<DataRow("01b", """def pred T(x:obj) { true };""", 0)>]
+    [<DataRow("01c", """def pred T(x:obj) { and(false,true) };""", 0)>]
+    [<DataRow("01d", """def pred T(x:obj) { x prty func A(x:obj)->obj {ret x}};""", 0)>]
+    [<DataRow("01e", """def pred T(x:obj) { undef prty func A(x:obj)->obj {ret x}};""", 0)>]
+    [<DataRow("01f", """def pred T(x:obj) { xor(x,y) prty func A(x:obj)->obj {ret x}};""", 0)>]
+    [<DataRow("02a", """def cl A:obj {ctor A(){} prty pred T() { true }};""", 0)>]
+    [<DataRow("02b", """def cl A:obj {ctor A(){} prty pred T() { false }};""", 0)>]
+    [<DataRow("02c", """def cl A:obj {ctor A(){} prty pred T() { y }};""", 1)>]
+    [<DataRow("02d", """def cl A:obj {ctor A(){} prty pred T() { (x = y) }};""", 1)>]
+    [<DataRow("02e", """def cl A:obj {ctor A(){} prty pred T(y:obj) { y }};""", 0)>]
+    [<DataRow("02f", """def cl A:obj {ctor A(){} prty pred T(y:obj) { (x = y) }};""", 0)>]
+    [<DataRow("03a", """def cl A:obj {ctor A(){} opt prty pred T() { true }};""", 0)>]
+    [<DataRow("03b", """def cl A:obj {ctor A(){} opt prty pred T() { false }};""", 0)>]
+    [<DataRow("03c", """def cl A:obj {ctor A(){} opt prty pred T() { y }};""", 1)>]
+    [<DataRow("03d", """def cl A:obj {ctor A(){} opt prty pred T() { (x = y) }};""", 1)>]
+    [<DataRow("02e", """def cl A:obj {ctor A(){} opt prty pred T(y:obj) { y }};""", 0)>]
+    [<DataRow("02f", """def cl A:obj {ctor A(){} opt prty pred T(y:obj) { (x = y) }};""", 0)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestLG007(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = LG007 "" 
+            runTestHelper "TestLG007.fpl" fplCode code expected
+
     [<DataRow("00", "def cl A:obj {intr} thm T {true} proof T$1 {1. bydef A |- trivial };", 0)>]
     [<DataRow("00a", "def cl A:obj {intr} thm T {true} proof T$1 {1. A |- trivial };", 1)>]
     [<DataRow("00b", "def cl A:obj {intr} thm T {true} proof T$1 {1. byax A |- trivial };", 1)>]
