@@ -2458,7 +2458,12 @@ type FplReference(positions: Positions, parent: FplValue) =
                 this.Scope.Values |> Seq.head
             else
                 this
-        let head = getFplHead headObj signatureType
+        let head = 
+            let ret = getFplHead headObj signatureType 
+            match signatureType, ret with
+            | SignatureType.Type, "" -> LiteralUndef
+            | _ -> ret
+            
         let propagate = propagateSignatureType signatureType
 
         let qualification =
