@@ -885,7 +885,11 @@ let rec eval (st: SymbolTable) ast =
                     eval st pred
                     variableStack.PopEvalStack()
                 )
-        | _ -> ()
+        | _ -> 
+            let fv = variableStack.PeekEvalStack()
+            match fv with
+            | :? FplBaseConstructorCall -> fv.EndPos <- pos2
+            | _ -> ()
         st.EvalPop()
     | Ast.QualificationList((pos1, pos2), asts) ->
         st.EvalPush("QualificationList")

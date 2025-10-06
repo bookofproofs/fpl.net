@@ -1312,13 +1312,21 @@ type FplConstructor(positions: Positions, parent: FplValue) =
     let mutable _signStartPos = Position("", 0L, 0L, 0L)
     let mutable _signEndPos = Position("", 0L, 0L, 0L)
 
+    member this.SignStartPos
+        with get() = _signStartPos
+        and set(value) = _signStartPos <- value
+
+    member this.SignEndPos
+        with get() = _signEndPos
+        and set(value) = _signEndPos <- value
+
     interface IHasSignature with
         member this.SignStartPos 
-            with get (): Position = _signStartPos
-            and set (value) = _signStartPos <- value
+            with get () = this.SignStartPos
+            and set (value) = this.SignStartPos <- value
         member this.SignEndPos 
-            with get (): Position = _signEndPos
-            and set (value) = _signEndPos <- value
+            with get () = this.SignEndPos
+            and set (value) = this.SignEndPos <- value
 
     override this.Name = LiteralCtorL
     override this.ShortName = LiteralCtor
