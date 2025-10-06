@@ -232,6 +232,25 @@ let emitID021Diagnostics identifier pos1 =
         }
     ad.AddDiagnostic diagnostic
 
+let emitID022Diagnostics name pos1 pos2 =
+    let alternative = 
+        if name = LiteralObjL || name = LiteralObj then 
+            "Remove the paramaters."
+        else 
+            $"Either remove the parameters or add an appropriate constructor to the class `{name}`."
+
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ID022 name
+            Diagnostic.Alternatives = Some alternative
+        }
+    ad.AddDiagnostic diagnostic
+
 let emitID023Diagnostics multipleCandidates pos1 pos2 =
     let diagnostic =
         { 
@@ -295,6 +314,8 @@ let emitID026Diagnostics name candidates pos1 pos2 =
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
+
+
 
 let emitLG002diagnostic nodeTypeName times pos1 pos2 = 
     let diagnostic =
@@ -368,7 +389,7 @@ let emitLG007Diagnostics name pos1 pos2 =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = LG007 name
+            Diagnostic.Code = ID022 name
             Diagnostic.Alternatives = Some $"Choose one of the constants `{LiteralTrue}` or `{LiteralFalse}` instead." 
         }
     ad.AddDiagnostic diagnostic

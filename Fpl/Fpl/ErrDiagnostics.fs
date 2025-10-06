@@ -124,6 +124,7 @@ type DiagnosticCode =
     | ID019 of string 
     | ID020 of string 
     | ID021 of string 
+    | ID022 of string
     | ID023 of string 
     | ID024 of string * string
     | ID025 of string * string * string
@@ -135,7 +136,6 @@ type DiagnosticCode =
     | LG003 of string * string
     | LG004 of string
     | LG005 of string
-    | LG007 of string
     // proof-related error codes
     | PR001 of string * string 
     | PR003 of string * string
@@ -232,6 +232,7 @@ type DiagnosticCode =
             | ID019 _ -> "ID019"
             | ID020 _ -> "ID020"
             | ID021 _ -> "ID021"
+            | ID022 _ -> "ID022"
             | ID023 _ -> "ID023"
             | ID024 _ -> "ID024"
             | ID025 _ -> "ID025"
@@ -243,7 +244,6 @@ type DiagnosticCode =
             | LG003 _ -> "LG003"
             | LG004 _ -> "LG004"
             | LG005 _ -> "LG005"
-            | LG007 _ -> "LG007"
             // proof-related error codes
             | PR001 _ -> "PR001"
             | PR003 _ -> "PR003"
@@ -348,11 +348,11 @@ type DiagnosticCode =
             | ID019 name -> sprintf "The extension `%s` could not be found. Are you missing a uses clause?" name
             | ID020 name -> $"Missing call of base constructor `{name}`." 
             | ID021 name -> $"Duplicate call of base constructor `{name}`."
+            | ID022 name -> $"`{name}` is intrinsic, it has no parameterized constructors. This call uses parameters."
             | ID023 candidates  -> $"Cannot associate a justification with a single block. Found more candidates: {candidates}." 
             | ID024 (signature, conflict) -> sprintf "Expression `%s` was already localized at %s." signature conflict
             | ID025 (candidate, candidateType, nodeType)  -> $"Cannot reference to `{candidate}` which is {candidateType} inside {nodeType}." 
             | ID026 (name, candidates)  -> $"The base constructor call's id `{name}` is not among the base classes this class is derived from. The candidate classes are {candidates}." 
-
             // logic-related error codes
             | LG000 (typeOfPredicate,argument) -> $"Cannot evaluate `{typeOfPredicate}`; its argument `{argument}` is a predicate but couldn't be determined."
             | LG001 (typeOfPredicate,argument,typeOfExpression) -> $"Cannot evaluate `{typeOfPredicate}`; expecting a predicate argument `{argument}`, got `{typeOfExpression}`."
@@ -360,7 +360,6 @@ type DiagnosticCode =
             | LG003 (nodeTypeName, nodeName) -> $"`{nodeTypeName}` evaluates to `false` and cannot be {nodeName}."
             | LG004 nodeType -> $"`Parameters not allowed for {nodeType}."
             | LG005 name -> $"Unnecessary assignment of `{name}` detected (will be implicitely ignored)."
-            | LG007 blockName -> $"A {blockName} without parameters cannot have value based on an expression."
             // proof-related error codes
             | PR001 (incorrectBlockType, justificatinItemName) -> $"Cannot find a `{justificatinItemName}`, found {incorrectBlockType} instead."
             | PR003 (name, conflict) -> $"Argument identifier `{name}` was already declared at {conflict}."  

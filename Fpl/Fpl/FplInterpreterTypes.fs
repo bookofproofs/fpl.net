@@ -4468,8 +4468,9 @@ type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
                     // call of a constructor of an intrinsic class (i.e., that is missing any constructor) with 0 paramters
                     () // todo: add "default constructor reference"
                 | true, _ ->
-                    // todo: issue diagnostics, since the call uses parameters that are not possible for calling a non-existing constructor of an intrisic class
-                    ()
+                    // the call uses parameters that are not possible for calling a non-existing constructor 
+                    // obj() or an intrinsic class
+                    emitID022Diagnostics parentClassOrIntrinsicObject.FplId this.StartPos this.EndPos
                 | false, _ ->
                     let parentClass = parentClassOrIntrinsicObject :?> FplClass
                     let candidates = parentClass.GetConstructors()
