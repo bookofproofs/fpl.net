@@ -639,7 +639,7 @@ type TestFplValueScopeBlockType() =
     [<DataRow("base5", "base.C(Test1(a), Test2(b, c, d))")>]
     [<DataRow("base6", "base.E(true, undef, false)")>]
     [<TestMethod>]
-    member this.TestBaseConstructorCall(var, varVal) =
+    member this.TestBaseConstructorCallBlockType(var, varVal) =
         ad.Clear()
         let fplCode = sprintf """
                         def cl B:obj {intr}
@@ -669,12 +669,12 @@ type TestFplValueScopeBlockType() =
             let base1 = ctor.ArgList[0]
 
             match var with
-            | "base1" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base2" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base3" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base4" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base5" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base6" -> Assert.IsInstanceOfType<FplReference>(base1)
+            | "base1" -> Assert.IsInstanceOfType<FplBaseConstructorCall>(base1)
+            | "base2" -> Assert.IsInstanceOfType<FplBaseConstructorCall>(base1)
+            | "base3" -> Assert.IsInstanceOfType<FplBaseConstructorCall>(base1)
+            | "base4" -> Assert.IsInstanceOfType<FplBaseConstructorCall>(base1)
+            | "base5" -> Assert.IsInstanceOfType<FplBaseConstructorCall>(base1)
+            | "base6" -> Assert.IsInstanceOfType<FplBaseConstructorCall>(base1)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
@@ -1039,7 +1039,7 @@ type TestFplValueScopeBlockType() =
     [<DataRow("base4", "$0")>]
     [<DataRow("base5", "$4")>]
     [<TestMethod>]
-    member this.TestConditionResultStatement(var, input) =
+    member this.TestMapCasesBlockType(var, input) =
         ad.Clear()
         let fplCode = sprintf """
                 def pred Equal (x,y: tpl) infix "=" 50 
@@ -1057,7 +1057,7 @@ type TestFplValueScopeBlockType() =
                     ? undef  
                 )
                 ;n } def pred T() {Test(%s)};""" input 
-        let filename = "TestConditionResultStatement"
+        let filename = "TestMapCasesBlockType"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -1070,11 +1070,11 @@ type TestFplValueScopeBlockType() =
             let cr = res.ArgList[0]
  
             match var with
-            | "base1" -> Assert.IsInstanceOfType<FplMapCaseSingle>(cr)
-            | "base2" -> Assert.IsInstanceOfType<FplMapCaseSingle>(cr)
-            | "base3" -> Assert.IsInstanceOfType<FplMapCaseSingle>(cr)
-            | "base4" -> Assert.IsInstanceOfType<FplMapCaseSingle>(cr)
-            | "base5" -> Assert.IsInstanceOfType<FplMapCaseSingle>(cr)
+            | "base1" -> Assert.IsInstanceOfType<FplMapCases>(cr)
+            | "base2" -> Assert.IsInstanceOfType<FplMapCases>(cr)
+            | "base3" -> Assert.IsInstanceOfType<FplMapCases>(cr)
+            | "base4" -> Assert.IsInstanceOfType<FplMapCases>(cr)
+            | "base5" -> Assert.IsInstanceOfType<FplMapCases>(cr)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
