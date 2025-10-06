@@ -1332,6 +1332,10 @@ let PrimDecrement = "decr"
 [<Literal>]
 let PrimDecrementL = "decrement statement"
 [<Literal>]
+let PrimDelegateEqual = "Equal"
+[<Literal>]
+let PrimDelegateDecrement = "Decrement"
+[<Literal>]
 let PrimDisjunction = "disjunction"
 [<Literal>]
 let PrimEquality = "="

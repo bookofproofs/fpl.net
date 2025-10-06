@@ -1147,8 +1147,6 @@ let isRoot (fv:FplValue) =
     | :? FplRoot -> true
     | _ -> false
 
-
-
 [<AbstractClass>]
 type FplGenericPredicate(positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
@@ -2964,20 +2962,32 @@ type FplEquivalence(positions: Positions, parent: FplValue) as this =
 
     override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
 
-
-/// Implements the semantics of an FPL equality.
-type FplEquality(positions: Positions, parent: FplValue) as this =
-    inherit FplGenericPredicate(positions, parent)
+[<AbstractClass>]
+type FplGenericDelegate(name, positions: Positions, parent: FplValue) as this =
+    inherit FplValue(positions, Some parent)
 
     do 
-        this.FplId <- $"{LiteralDel}."
+        this.FplId <- name
+
+    override this.Represent () =
+        this.ValueList
+        |> Seq.map (fun subfv -> subfv.Represent())
+        |> String.concat ", "
+
+    override this.RunOrder = None
+
+/// Implements the semantics of an FPL equality.
+type FplEquality(name, positions: Positions, parent: FplValue) as this =
+    inherit FplGenericDelegate(name, positions, parent)
+
+    do 
         this.TypeId <- LiteralPred
 
     override this.Name = PrimEqualityL
     override this.ShortName = PrimEquality
 
     override this.Clone () =
-        let ret = new FplEquality((this.StartPos, this.EndPos), this.Parent.Value)
+        let ret = new FplEquality(this.FplId, (this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
 
@@ -3115,18 +3125,17 @@ let getArgument (fv:FplValue) =
     | _ -> None
 
 /// Implements the semantics of an FPL decrement delegate.
-type FplDecrement(positions: Positions, parent: FplValue) as this =
-    inherit FplValue(positions, Some parent)
+type FplDecrement(name, positions: Positions, parent: FplValue) as this =
+    inherit FplGenericDelegate(name, positions, parent)
 
     do 
-        this.FplId <- $"{LiteralDel}."
         this.TypeId <- LiteralObj
 
     override this.Name = PrimDecrementL
     override this.ShortName = PrimDecrement
 
     override this.Clone () =
-        let ret = new FplDecrement((this.StartPos, this.EndPos), this.Parent.Value)
+        let ret = new FplDecrement(this.FplId, (this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
 

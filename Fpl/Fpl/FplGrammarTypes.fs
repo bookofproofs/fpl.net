@@ -39,7 +39,6 @@ type Ast =
     | NamespaceIdentifier of Positions * Ast list
     | AliasedNamespaceIdentifier of Positions * (Ast * Ast option)
     | PredicateIdentifier of Positions * Ast list 
-    | DelegateId of Positions * string 
     | LanguageCode of Positions * string
     | Alias of Positions * string
     | SelfOrParent of Positions * Ast
@@ -93,7 +92,7 @@ type Ast =
     | Exists of Positions * (Ast list * Ast) 
     | ExistsN of Positions * ((Ast * Ast list) * Ast)
     | IsOperator of Positions * (Ast * Ast)
-    | Delegate of Positions * (Ast * Ast)
+    | Delegate of Positions * (string * Ast)
     | ArgumentTuple of Positions * Ast list
     | PredicateWithOptSpecification of Positions * (Ast * Ast option)
     | DottedPredicate of Positions * Ast 

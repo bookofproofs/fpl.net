@@ -287,9 +287,7 @@ let userDefinedSymbol = opt (attempt (IW >>. choice [userDefinedPrefix; userDefi
 (* Statements *)
 let argumentTuple = positions "ArgumentTuple" ((leftParen >>. predicateList) .>> (IW .>> rightParen)) |>> Ast.ArgumentTuple 
 
-let word = regex @"\w+" <?> "<word>" .>> IW
-let fplDelegateIdentifier = positions "DelegateId" (keywordDel >>. dot >>. word) .>> IW |>> Ast.DelegateId
-let fplDelegate = positions "Delegate" (fplDelegateIdentifier .>>. argumentTuple) |>> Ast.Delegate
+let fplDelegate = positions "Delegate" (keywordDel >>. dot >>. idStartsWithCap .>>. (IW >>. argumentTuple)) |>> Ast.Delegate
 
 let spacesRightBrace = (IW .>> rightBrace) 
 

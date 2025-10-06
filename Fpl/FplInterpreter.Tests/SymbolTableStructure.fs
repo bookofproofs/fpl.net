@@ -87,13 +87,13 @@ type SymbolTableStructure() =
             let x = new FplCorollary(positions, parent, 0)
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplDecrement" ->
-            let x = new FplDecrement(positions, parent)
+            let x = new FplDecrement(PrimDelegateDecrement, positions, parent)
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplDisjunction" ->
             let x = new FplDisjunction(positions, parent)
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplEquality" ->
-            let x = new FplEquality(positions, parent)
+            let x = new FplEquality(PrimDelegateEqual, positions, parent)
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""]
         | "FplEquivalence" ->
             let x = new FplEquivalence(positions, parent)
@@ -902,11 +902,11 @@ type SymbolTableStructure() =
         | "FplCorollary" ->
             Assert.AreEqual<string>(LiteralUndetermined, (getName var).[index])
         | "FplDecrement" ->
-            Assert.AreEqual<string>("del.", (getName var).[index])        
+            Assert.AreEqual<string>(PrimDelegateDecrement, (getName var).[index])        
         | "FplDisjunction" ->
             Assert.AreEqual<string>(LiteralOr, (getName var).[index])        
         | "FplEquality" ->
-            Assert.AreEqual<string>("del.", (getName var).[index])        
+            Assert.AreEqual<string>(PrimDelegateEqual, (getName var).[index])        
         | "FplEquivalence" ->
             Assert.AreEqual<string>(LiteralIif, (getName var).[index])        
         | "FplExclusiveOr" ->

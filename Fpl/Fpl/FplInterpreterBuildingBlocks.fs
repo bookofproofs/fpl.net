@@ -337,11 +337,6 @@ let rec eval (st: SymbolTable) ast =
                 loc.Scope.Add(name, variable)
                 variable.Parent <- Some loc
         st.EvalPop() 
-    | Ast.DelegateId((pos1, pos2), s) -> 
-        st.EvalPush("DelegateId")
-        let fv = variableStack.PeekEvalStack()
-        fv.FplId <- s
-        st.EvalPop() 
     | Ast.Alias((pos1, pos2), s) -> 
         st.EvalPush("Alias")
         st.EvalPop() 
@@ -1104,30 +1099,27 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PopEvalStack()
         variableStack.PopEvalStack()
         st.EvalPop()
-    | Ast.Delegate((pos1, pos2), (fplDelegateIdentifierAst, argumentTupleAst)) ->
+    | Ast.Delegate((pos1, pos2), (delegateId, argumentTupleAst)) ->
         st.EvalPush("Delegate")
         let fv = variableStack.PeekEvalStack()
-        let refBlock = new FplReference((pos1, pos2), fv) 
-        refBlock.FplId <- "del."
-        refBlock.TypeId <- "del."
-        variableStack.PushEvalStack(refBlock)
-        eval st fplDelegateIdentifierAst
-        eval st argumentTupleAst
-        match refBlock.FplId with 
-        | "Equal" -> 
-            let deleg = new FplEquality((pos1, pos2), fv)
-            deleg.Copy refBlock
-            variableStack.Pop() |> ignore
+        match delegateId with 
+        | PrimDelegateEqual -> 
+            let deleg = new FplEquality(delegateId, (pos1, pos2), fv)
             variableStack.PushEvalStack(deleg)
-        | "Decrement" -> 
-            let deleg = new FplDecrement((pos1, pos2), fv)
-            deleg.Copy refBlock
-            variableStack.Pop() |> ignore
+            eval st argumentTupleAst
+            variableStack.PopEvalStack()
+        | PrimDelegateDecrement -> 
+            let deleg = new FplDecrement(delegateId, (pos1, pos2), fv)
             variableStack.PushEvalStack(deleg)
+            eval st argumentTupleAst
+            variableStack.PopEvalStack()
         | _ -> 
-            refBlock.TypeId <- LiteralUndef
-            emitID013Diagnostics pos1 pos2 $"Unknown delegate `{refBlock.FplId}`"  
-        variableStack.PopEvalStack()
+            let deleg = new FplReference((pos1, pos2), fv)
+            deleg.FplId <- delegateId
+            variableStack.PushEvalStack(deleg)
+            eval st argumentTupleAst
+            variableStack.PopEvalStack()
+            emitID013Diagnostics pos1 pos2 $"Unknown delegate `{delegateId}`"  
         st.EvalPop()
     // | ClosedOrOpenRange of Positions * ((Ast * Ast option) * Ast)
     | Ast.PredicateSignature(((pos1, pos2), (simpleSignatureAst, paramTupleAst)), optUserDefinedSymbolAst) ->
