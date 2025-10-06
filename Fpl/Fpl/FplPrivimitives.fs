@@ -1328,6 +1328,8 @@ let PrimClassL = "class definition"
 [<Literal>]
 let PrimConjunction = "conjunction"
 [<Literal>]
+let PrimDefaultConstructor = "default constructor"
+[<Literal>]
 let PrimDelegateEqual = "="
 [<Literal>]
 let PrimDelegateEqualL = "Equal"

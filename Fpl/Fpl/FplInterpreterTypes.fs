@@ -4400,6 +4400,45 @@ let checkSIG04Diagnostics (calling:FplValue) (candidates: FplValue list) =
         ad.AddDiagnostic diagnostic
         None
 
+
+type FplDefaultConstructor(name, positions: Positions, parent: FplValue) as this =
+    inherit FplValue(positions, Some parent)
+    let mutable (_toBeConstructedClass:FplValue option) = None 
+
+    do
+        this.FplId <- name
+        this.TypeId <- name
+
+    override this.Name = PrimDefaultConstructor
+    override this.ShortName = LiteralCtor
+
+    override this.Clone () =
+        let ret = new FplDefaultConstructor(this.FplId, (this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Type _ = $"{this.FplId}()" 
+
+    override this.EmbedInSymbolTable nextOpt = 
+        this.CheckConsistency()
+        match nextOpt with 
+        | Some next ->
+            next.Scope.TryAdd(this.FplId, this) |> ignore
+        | _ -> ()
+
+    override this.Represent () = ""
+
+    override this.Run variableStack = 
+        // todo implement run
+        ()
+
+    override this.RunOrder = None
+
+    member this.ToBeConstructedClass  
+        with get () = _toBeConstructedClass
+        and set (value) = _toBeConstructedClass <- value
+
+
 type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
     inherit FplGenericStmt(positions, parent)
 
@@ -4425,29 +4464,6 @@ type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
 
     override this.Represent () = LiteralUndef
 
-
-
-    //if
-    //    context.EndsWith("ParentConstructorCall.InheritedClassType.PredicateIdentifier")
-    //    || context.EndsWith("ParentConstructorCall.InheritedClassType.ObjectType")
-    //then
-    //    let stmt = parentConstructorCall.Parent.Value
-    //    let constructor = stmt.Parent.Value
-    //    let classOfConstructor = constructor.Parent.Value
-    //    let mutable foundInheritanceClass = false
-
-    //    let candidates =
-    //        classOfConstructor.ArgList
-    //        |> Seq.map (fun inheritanceClass ->
-    //            let inheritanceClassType = inheritanceClass.Type(SignatureType.Type)
-    //            if inheritanceClassType = identifier then
-    //                foundInheritanceClass <- true
-    //            inheritanceClassType)
-    //        |> String.concat ", "
-
-    //    if not foundInheritanceClass then
-    //        emitID012Diagnostics identifier candidates pos1 pos2
-
     override this.CheckConsistency() = 
         base.CheckConsistency()
 
@@ -4466,7 +4482,10 @@ type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
                 match parentClassOrIntrinsicObject.IsIntrinsic, this.ArgList.Count with
                 | true, 0 ->
                     // call of a constructor of an intrinsic class (i.e., that is missing any constructor) with 0 paramters
-                    () // todo: add "default constructor reference"
+                    // add "default constructor reference"
+                    let defaultConstructor = new FplDefaultConstructor(parentClassOrIntrinsicObject.FplId, (this.StartPos, this.EndPos), this)
+                    defaultConstructor.EmbedInSymbolTable defaultConstructor.Parent
+                    defaultConstructor.ToBeConstructedClass <- Some parentClassOrIntrinsicObject
                 | true, _ ->
                     // the call uses parameters that are not possible for calling a non-existing constructor 
                     // obj() or an intrinsic class
@@ -4503,7 +4522,7 @@ type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
             () 
 
 
-    override this.EmbedInSymbolTable (arg: FplValue option): unit = 
+    override this.EmbedInSymbolTable _ = 
         this.CheckConsistency()
         addExpressionToParentArgList this
 
