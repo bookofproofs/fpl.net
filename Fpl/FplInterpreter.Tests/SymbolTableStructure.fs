@@ -2257,7 +2257,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplInstance", "00", """;""", "")>]
+    [<DataRow("FplInstance", "00", """def cl A:obj {intr} def pred T() {dec ~x:A x:=A(); x};""", "")>]
     [<TestMethod>]
     member this.TestStructureFplInstance(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplInstance.fpl"

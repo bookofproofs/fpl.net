@@ -970,7 +970,12 @@ let rec eval (st: SymbolTable) ast =
                 let candidates = searchForCandidatesOfReferenceBlock refBlock
                 match checkSIG04Diagnostics refBlock candidates with
                 | Some matchedCandidate -> 
-                    refBlock.Scope.TryAdd(refBlock.FplId,matchedCandidate) |> ignore
+                    if matchedCandidate.IsIntrinsic then 
+                        let defaultConstructor = new FplDefaultConstructor(matchedCandidate.FplId, (refBlock.StartPos, refBlock.EndPos), refBlock)
+                        defaultConstructor.EmbedInSymbolTable defaultConstructor.Parent
+                        defaultConstructor.ToBeConstructedClass <- Some matchedCandidate
+                    else
+                        refBlock.Scope.TryAdd(refBlock.FplId, matchedCandidate) |> ignore
                 | _ -> ()
 
             variableStack.PopEvalStack()
