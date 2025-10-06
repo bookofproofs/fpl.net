@@ -82,7 +82,7 @@ type TestFplValueScopeTypeSignature() =
             | "fun9" -> Assert.AreEqual<string>("func() -> ind", fun9.Type(SignatureType.Type))
             | "prf1" -> Assert.AreEqual<string>(LiteralPred, prf1.Type(SignatureType.Type))
             | "prf2" -> Assert.AreEqual<string>(LiteralPred, prf2.Type(SignatureType.Type))
-            | "loc1" -> Assert.AreEqual<string>("pred(undef)", loc1.Type(SignatureType.Type))
+            | "loc1" -> Assert.AreEqual<string>("not(undef)", loc1.Type(SignatureType.Type))
             | "loc2" -> Assert.AreEqual<string>("Equal(undef, undef)", loc2.Type(SignatureType.Type))
             | _ -> Assert.IsTrue(false)
         | _ -> 

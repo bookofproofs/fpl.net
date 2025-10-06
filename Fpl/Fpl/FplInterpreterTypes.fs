@@ -677,7 +677,6 @@ and ScopeSearchResult =
 /// replacing parameters by a calling function with arguments.
 and FplVariableStack() = 
     let mutable _inSignatureEvaluation = false
-    let _classCounters = Dictionary<string,FplValue option>()
     let _stack = Stack<KeyValuePair<string, Dictionary<string,FplValue>>>()
     let _valueStack = Stack<FplValue>()
     let _assumedArguments = Stack<FplValue>()
@@ -698,18 +697,6 @@ and FplVariableStack() =
     member this.InSignatureEvaluation
         with get () = _inSignatureEvaluation
         and set (value) = _inSignatureEvaluation <- value
-
-    /// In the context of a class being evaluated, this dictionary provides a dictionary
-    /// of potential calls of parent classes (=Key). The optional FplValue values become some values
-    /// if the a particular call was found. 
-    /// This dictionary is used to emit ID020/ID021 diagnostics. If a class A inherits from class B but doesn't call its base constructor
-    /// ID020 diagnostics will be emitted. If a class A inherits from class B and calls its base constructor more than once
-    /// ID021 diagnostics will be emitted.
-    member this.ParentClassCalls = _classCounters
-    
-    /// Resets the counters of th ID020 diagnostics evaluation.
-    member this.ParentClassCountersInitialize() = 
-        _classCounters |> Seq.iter (fun kvp -> _classCounters[kvp.Key] <- None)
         
     // The stack memory of the runner to store the variables of all run programs
     member this.Stack = _stack
@@ -836,7 +823,6 @@ and FplVariableStack() =
         _valueStack.Clear()
         _assumedArguments.Clear()
         _stack.Clear()
-        _classCounters.Clear()
     
 // Create an FplValue list containing all Scopes of an FplNode
 let rec flattenScopes (root: FplValue) =
@@ -1312,6 +1298,7 @@ type FplConstructor(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(positions, parent)
     let mutable _signStartPos = Position("", 0L, 0L, 0L)
     let mutable _signEndPos = Position("", 0L, 0L, 0L)
+    let mutable _parentConstructorCalls = HashSet<string>()
 
     member this.SignStartPos
         with get() = _signStartPos
@@ -1337,6 +1324,8 @@ type FplConstructor(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
+    member this.ParentConstructorCalls = _parentConstructorCalls
+
     override this.IsBlock () = true
 
     override this.Type signatureType =
@@ -1349,7 +1338,27 @@ type FplConstructor(positions: Positions, parent: FplValue) =
     override this.Run _ = 
         this.SetValue(new FplInstance((this.StartPos, this.EndPos), this))
 
-    override this.EmbedInSymbolTable _ = tryAddSubBlockToFplBlock this
+    override this.CheckConsistency () = 
+        base.CheckConsistency()
+        // check if the constructor calls all necessary parent classes
+        let parentClassOpt = this.UltimateBlockNode
+        match parentClassOpt with
+        | Some (:? FplClass as parentClass) ->
+            parentClass.ArgList 
+            |> Seq.iter (fun fv -> 
+                if not (this.ParentConstructorCalls.Contains fv.FplId) then
+                    emitID020Diagnostics fv.FplId fv.StartPos
+            )
+        | _ -> ()
+        this.GetVariables()
+        |> List.filter(fun var -> var.AuxiliaryInfo = 0)
+        |> List.iter (fun var -> 
+            emitVAR04diagnostics var.FplId var.StartPos var.EndPos
+        )
+
+    override this.EmbedInSymbolTable _ = 
+        this.CheckConsistency()
+        tryAddSubBlockToFplBlock this
 
     member this.ParentClass = this.Parent.Value :?> FplClass
 
@@ -1409,18 +1418,11 @@ and FplClass(positions: Positions, parent: FplValue) =
 
     override this.RunOrder = None
 
-
-/// Returns Some or none FplValue being the enclosing class block of a node inside a class.
-let rec getClassBlock (fv: FplValue) =
-    match fv with
-    | :? FplClass -> Some fv
-    | _ ->
-        match fv.Parent with
-        | Some parent -> getClassBlock parent
-        | _ -> None
-
-type FplIntrinsicObj(positions: Positions, parent: FplValue) =
+type FplIntrinsicObj(positions: Positions, parent: FplValue) as this =
     inherit FplGenericObject(positions, parent)
+
+    do 
+        this.IsIntrinsic <- true
 
     override this.Name = PrimIntrinsicObj
     override this.ShortName = LiteralObj
@@ -2457,25 +2459,27 @@ type FplReference(positions: Positions, parent: FplValue) =
                 this.Scope.Values |> Seq.head
             else
                 this
-        let head = 
-            let ret = getFplHead headObj signatureType 
-            match signatureType, ret with
-            | SignatureType.Type, "" -> LiteralUndef
-            | _ -> ret
-            
         let propagate = propagateSignatureType signatureType
-
-        let qualification =
-            if this.Scope.ContainsKey(".") then
-                Some(this.Scope["."])
-            else
-                None
 
         // The arguments are reserved for the arguments or the coordinates of the reference
         let args =
             this.ArgList
             |> Seq.map (fun fv -> fv.Type(propagate))
             |> String.concat ", "
+
+        let head = 
+            let ret = getFplHead headObj signatureType 
+            match signatureType, ret, args with
+            | SignatureType.Type, "", LiteralUndef -> ""
+            | SignatureType.Type, "", "" -> LiteralUndef
+            | _ -> ret
+            
+
+        let qualification =
+            if this.Scope.ContainsKey(".") then
+                Some(this.Scope["."])
+            else
+                None
 
         match this.ArgList.Count, this.ArgType, qualification with
         | 0, ArgType.Nothing, Some qual ->
@@ -4335,6 +4339,67 @@ type FplForInStmtDomain(positions: Positions, parent: FplValue) =
         // todo implement run
         ()
 
+
+/// Tries to match the arguments of `fva` FplValue with the parameters of the `fvp` FplValue and returns
+/// Some(specific error message) or None, if the match succeeded.
+let matchArgumentsWithParameters (fva: FplValue) (fvp: FplValue) =
+    let parameters =
+        match fvp with
+        | :? FplVariable ->
+            fvp.Scope.Values |> Seq.toList
+        | :? FplFunctionalTerm
+        | :? FplPredicate
+        | :? FplConstructor
+        | :? FplMandatoryPredicate
+        | :? FplMandatoryFunctionalTerm
+        | :? FplOptionalPredicate
+        | :? FplOptionalFunctionalTerm ->
+            fvp.Scope.Values |> Seq.filter (fun fv -> isSignatureVar fv) |> Seq.toList
+        | _ -> []
+
+    let arguments = fva.ArgList |> Seq.toList
+    let hasArguments = 
+        match fva with 
+        | :? FplReference as refFva -> (refFva.ArgType = ArgType.Parentheses)
+        | _ -> false
+
+    let stdMsg = $"{qualifiedName fvp}"
+    let argResult = mpwa hasArguments arguments parameters
+
+    match argResult with
+    | Some aErr -> Some($"{aErr} in {stdMsg}")
+    | None -> None
+
+
+
+/// Tries to match the signatures of toBeMatched with the signatures of all candidates and accoumulates any
+/// error messages in accResultList.
+let rec checkCandidates (toBeMatched: FplValue) (candidates: FplValue list) (accResultList: string list) =
+    match candidates with
+    | [] -> (None, accResultList)
+    | candidate :: candidates ->
+        match matchArgumentsWithParameters toBeMatched candidate with
+        | None -> (Some candidate, [])
+        | Some errMsg -> checkCandidates toBeMatched candidates (accResultList @ [ errMsg ])
+
+
+let checkSIG04Diagnostics (calling:FplValue) (candidates: FplValue list) = 
+    match checkCandidates calling candidates [] with
+    | (Some candidate,_) -> Some candidate // no error occured
+    | (None, errList) -> 
+        let diagnostic =
+            { 
+                Diagnostic.Uri = ad.CurrentUri
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = calling.StartPos
+                Diagnostic.EndPos = calling.EndPos
+                Diagnostic.Code = SIG04(calling.Type(SignatureType.Mixed), candidates.Length, errList)
+                Diagnostic.Alternatives = None 
+            }
+        ad.AddDiagnostic diagnostic
+        None
+
 type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
     inherit FplGenericStmt(positions, parent)
 
@@ -4359,6 +4424,87 @@ type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
         sprintf "%s(%s)" head args
 
     override this.Represent () = LiteralUndef
+
+
+
+    //if
+    //    context.EndsWith("ParentConstructorCall.InheritedClassType.PredicateIdentifier")
+    //    || context.EndsWith("ParentConstructorCall.InheritedClassType.ObjectType")
+    //then
+    //    let stmt = parentConstructorCall.Parent.Value
+    //    let constructor = stmt.Parent.Value
+    //    let classOfConstructor = constructor.Parent.Value
+    //    let mutable foundInheritanceClass = false
+
+    //    let candidates =
+    //        classOfConstructor.ArgList
+    //        |> Seq.map (fun inheritanceClass ->
+    //            let inheritanceClassType = inheritanceClass.Type(SignatureType.Type)
+    //            if inheritanceClassType = identifier then
+    //                foundInheritanceClass <- true
+    //            inheritanceClassType)
+    //        |> String.concat ", "
+
+    //    if not foundInheritanceClass then
+    //        emitID012Diagnostics identifier candidates pos1 pos2
+
+    override this.CheckConsistency() = 
+        base.CheckConsistency()
+
+        // Check the base constructor call's id is the same as one of the classes this class is derived from,
+        let enclosingClassOpt = this.UltimateBlockNode
+        let enclosingConstructorOpt = this.NextBlockNode
+        match enclosingClassOpt with
+        | Some (:? FplClass as enclosingClass) ->
+            let filteredClassesEnclisingClassInheritsFrom = 
+                enclosingClass.ArgList 
+                |> Seq.filter (fun pc -> pc.FplId = this.FplId)
+                |> Seq.toList
+            if filteredClassesEnclisingClassInheritsFrom.Length = 1 then
+                let parentClassOrIntrinsicObject = filteredClassesEnclisingClassInheritsFrom.Head
+                // now, try to match a constructor of the parentClass based on the signature of this base constructor call
+                match parentClassOrIntrinsicObject.IsIntrinsic, this.ArgList.Count with
+                | true, 0 ->
+                    // call of a constructor of an intrinsic class (i.e., that is missing any constructor) with 0 paramters
+                    () // todo: add "default constructor reference"
+                | true, _ ->
+                    // todo: issue diagnostics, since the call uses parameters that are not possible for calling a non-existing constructor of an intrisic class
+                    ()
+                | false, _ ->
+                    let parentClass = parentClassOrIntrinsicObject :?> FplClass
+                    let candidates = parentClass.GetConstructors()
+                    match checkSIG04Diagnostics this candidates with
+                    | Some candidate ->
+                        let name = candidate.Type SignatureType.Mixed
+                        this.Scope.TryAdd(name, candidate) |> ignore
+                    | None -> ()
+                    match enclosingConstructorOpt with 
+                    | Some (:? FplConstructor as ctor) ->
+                        if ctor.ParentConstructorCalls.Contains(this.FplId) then 
+                            // todo duplicate constructor call
+                            emitID021Diagnostics this.FplId this.StartPos
+                        else
+                            ctor.ParentConstructorCalls.Add this.FplId |> ignore
+                    | _ -> ()
+                    //let (shadowedVars, shadowedProperties) = copyParentToDerivedClass parentClass derivedClass
+                    //shadowedVars
+                    //|> Seq.iter (fun name -> 
+                    //    emitVAR06iagnostic name derivedClass.FplId pos1
+                    //)
+
+            else
+                // the base constructor call's id is not among the base classes this class is derived from
+                let candidates = enclosingClass.ArgList |> Seq.map (fun fv -> fv.FplId) |> Seq.sort |> String.concat ", "
+                emitID026Diagnostics this.FplId candidates this.StartPos this.EndPos
+        | _ ->
+            // this case never happens, 
+            // if so the bug will become apparent by failing to call the parent class constructor
+            () 
+
+
+    override this.EmbedInSymbolTable (arg: FplValue option): unit = 
+        this.CheckConsistency()
+        addExpressionToParentArgList this
 
     override this.Run variableStack = 
         // todo implement run
@@ -4783,48 +4929,6 @@ let findCandidatesByNameInDotted (fv: FplValue) (name: string) =
                 []
         | _ -> []
     | _ -> []
-
-/// Tries to match the arguments of `fva` FplValue with the parameters of the `fvp` FplValue and returns
-/// Some(specific error message) or None, if the match succeeded.
-let matchArgumentsWithParameters (fva: FplValue) (fvp: FplValue) =
-    let parameters =
-        match fvp with
-        | :? FplVariable ->
-            fvp.Scope.Values |> Seq.toList
-        | :? FplFunctionalTerm
-        | :? FplPredicate
-        | :? FplConstructor
-        | :? FplMandatoryPredicate
-        | :? FplMandatoryFunctionalTerm
-        | :? FplOptionalPredicate
-        | :? FplOptionalFunctionalTerm ->
-            fvp.Scope.Values |> Seq.filter (fun fv -> isSignatureVar fv) |> Seq.toList
-        | _ -> []
-
-    let arguments = fva.ArgList |> Seq.toList
-    let hasArguments = 
-        match fva with 
-        | :? FplReference as refFva -> (refFva.ArgType = ArgType.Parentheses)
-        | _ -> false
-
-    let stdMsg = $"{qualifiedName fvp}"
-    let argResult = mpwa hasArguments arguments parameters
-
-    match argResult with
-    | Some aErr -> Some($"{aErr} in {stdMsg}")
-    | None -> None
-
-
-
-/// Tries to match the signatures of toBeMatched with the signatures of all candidates and accoumulates any
-/// error messages in accResultList.
-let rec checkCandidates (toBeMatched: FplValue) (candidates: FplValue list) (accResultList: string list) =
-    match candidates with
-    | [] -> (None, accResultList)
-    | candidate :: candidates ->
-        match matchArgumentsWithParameters toBeMatched candidate with
-        | None -> (Some candidate, [])
-        | Some errMsg -> checkCandidates toBeMatched candidates (accResultList @ [ errMsg ])
 
 let rec getParentExtension (leaf: FplValue) =
     match leaf with

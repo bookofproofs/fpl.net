@@ -200,31 +200,6 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
     else    
         None
 
-let checkID012Diagnostics (st: SymbolTable) (parentConstructorCall: FplValue) identifier (pos1: Position) pos2 =
-    let context = st.EvalPath()
-
-    if
-        context.EndsWith("ParentConstructorCall.InheritedClassType.PredicateIdentifier")
-        || context.EndsWith("ParentConstructorCall.InheritedClassType.ObjectType")
-    then
-        let stmt = parentConstructorCall.Parent.Value
-        let constructor = stmt.Parent.Value
-        let classOfConstructor = constructor.Parent.Value
-        let mutable foundInheritanceClass = false
-
-        let candidates =
-            classOfConstructor.ArgList
-            |> Seq.map (fun inheritanceClass ->
-                let inheritanceClassType = inheritanceClass.Type(SignatureType.Type)
-                if inheritanceClassType = identifier then
-                    foundInheritanceClass <- true
-                inheritanceClassType)
-            |> String.concat ", "
-
-        if not foundInheritanceClass then
-            emitID012Diagnostics identifier candidates pos1 pos2
-           
-
 let checkID018Diagnostics (st: SymbolTable) (fv:FplValue) (identifier:string) pos1 pos2 =
     let matchReprId (fv1:FplValue) (identifier:string) = 
         let vars = fv1.GetVariables()
@@ -425,23 +400,6 @@ let emitSIG04DiagnosticsForTypes identifier pos1 pos2 =
                 Diagnostic.Alternatives = None 
             }
     ad.AddDiagnostic diagnostic
-
-let checkSIG04Diagnostics (calling:FplValue) (candidates: FplValue list) = 
-    match checkCandidates calling candidates [] with
-    | (Some candidate,_) -> Some candidate // no error occured
-    | (None, errList) -> 
-        let diagnostic =
-            { 
-                Diagnostic.Uri = ad.CurrentUri
-                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                Diagnostic.Severity = DiagnosticSeverity.Error
-                Diagnostic.StartPos = calling.StartPos
-                Diagnostic.EndPos = calling.EndPos
-                Diagnostic.Code = SIG04(calling.Type(SignatureType.Mixed), candidates.Length, errList)
-                Diagnostic.Alternatives = None 
-            }
-        ad.AddDiagnostic diagnostic
-        None
 
 let rec blocktIsProof (fplValue: FplValue) =
     if fplValue.IsProof() then

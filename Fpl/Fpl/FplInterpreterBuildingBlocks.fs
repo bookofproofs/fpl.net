@@ -135,11 +135,6 @@ let rec eval (st: SymbolTable) ast =
         | Some classNode -> 
             fv.ArgList.Add classNode
         | None -> ()
-        checkID012Diagnostics st fv LiteralObj pos1 pos2 
-        // add potential parent class call for this identifier (if it is one) 
-        let path = st.EvalPath()
-        if path.Contains("DefinitionClass.InheritedClassType") then 
-            variableStack.ParentClassCalls.TryAdd(LiteralObj, None) |> ignore
         st.EvalPop()
     | Ast.PredicateType((pos1, pos2),()) -> 
         st.EvalPush("PredicateType")
@@ -172,13 +167,6 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Intrinsic")
         let fv = variableStack.PeekEvalStack()
         fv.IsIntrinsic <- true // flag that this block is intrinsic
-        match fv with 
-        | :? FplPredicate
-        | :? FplMandatoryPredicate
-        | :? FplOptionalPredicate ->
-            if fv.Arity = 0 then 
-                emitLG006Diagnostics $"{fv.Name} `{fv.Type SignatureType.Name}`" pos1 pos2
-        | _ -> ()
         st.EvalPop()
     | Ast.Error  ->   
         st.EvalPush("Error")
@@ -698,10 +686,6 @@ let rec eval (st: SymbolTable) ast =
                     // add known class
                     fv.ArgList.Add classNode
                 | None -> ()
-                // add potential parent class call for this identifier
-                let path = st.EvalPath()
-                if path.Contains("DefinitionClass.InheritedClassType") then 
-                    variableStack.ParentClassCalls.TryAdd(identifier, None) |> ignore
             else
                 fv.FplId <- identifier
                 fv.TypeId <- identifier
@@ -720,7 +704,6 @@ let rec eval (st: SymbolTable) ast =
         | :? FplBaseConstructorCall -> 
             fv.FplId <- identifier
             fv.TypeId <- identifier
-            checkID012Diagnostics st fv identifier pos1 pos2
         | :? FplReference -> 
             fv.FplId <- fv.FplId + identifier
             fv.TypeId <- fv.TypeId + identifier
@@ -1529,40 +1512,6 @@ let rec eval (st: SymbolTable) ast =
         eval st inheritedClassTypeAst
         eval st argumentTupleAst
         variableStack.PopEvalStack()
-        if parent.ArgList.Count>0 then
-            let parentConstructorCallReference = parent.ArgList[0]
-            let parentConstructorCallRefValue = getArgument parentConstructorCallReference
-            match parentConstructorCallRefValue with
-            | Some refVal -> 
-                if variableStack.ParentClassCalls.ContainsKey(refVal.FplId) then
-                    // Since the reference's id is the same as one of the classes this class is derived from,
-                    let derivedClassOpt = getClassBlock parentConstructorCallReference
-                    match derivedClassOpt with
-                    | Some derivedClass ->
-                        let parentClassFilterList = 
-                            derivedClass.ArgList 
-                            |> Seq.filter (fun pc -> pc.FplId = refVal.FplId)
-                            |> Seq.toList
-                        if parentClassFilterList.Length > 0 then
-                            let parentClass = parentClassFilterList.Head
-                            // add the found parent class to the parentClassCalls 
-                            if Option.isNone variableStack.ParentClassCalls[refVal.FplId] then 
-                                variableStack.ParentClassCalls[parentClass.FplId] <- Some parentClass
-                                let (shadowedVars, shadowedProperties) = copyParentToDerivedClass parentClass derivedClass
-                                shadowedVars
-                                |> Seq.iter (fun name -> 
-                                    emitVAR06iagnostic name derivedClass.FplId pos1
-                                )
-                            else
-                                emitID021Diagnostics parentClass.FplId pos1
-                    | None ->
-                        // this case never happens, 
-                        // if so the bug will become apparent by failing to call the parent class constructor
-                        () 
-                else 
-                    () 
-            | None -> 
-                ()
         st.EvalPop()
     | Ast.JustArgInf((pos1, pos2), (justificationAst, argumentInferenceAst)) ->
         st.EvalPush("JustArgInf")
@@ -1755,28 +1704,10 @@ let rec eval (st: SymbolTable) ast =
         let fv = new FplConstructor((pos1, pos2), parent)
         variableStack.PushEvalStack(fv)
         eval st signatureAst
-        
-        // Initialize the counters of parent classes before evaluating the declaration block
-        // of the constructor in which we want to count the calls to parent classes.
-        // (we need to reset the counters for every constructor of the same class to avoid 
-        // ID020 false positives for the wrong constructors)
-        variableStack.ParentClassCountersInitialize()  
-
         // evaluate the declaration block
         match optVarDeclOrSpecListAst with
         | Some astList -> astList |> List.map (eval st) |> ignore
         | None -> ()
-
-        // check if the constructor calls all necessary parent classes
-        variableStack.ParentClassCalls 
-        |> Seq.iter (fun kvp -> 
-            match kvp.Value with
-            | Some calledClassNode -> ()
-            | None ->
-                // for this class no parent class was called 
-                emitID020Diagnostics kvp.Key pos1
-        )
-        emitVAR04diagnostics fv
         variableStack.PopEvalStack()
         st.EvalPop()
     // | DefPredicateContent of Ast list option * Ast
@@ -1830,8 +1761,6 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("ClassSignature")
         variableStack.InSignatureEvaluation <- true
         eval st simpleSignatureAst
-        // clear the storage of parent class counters before evaluating the list of parent classes
-        variableStack.ParentClassCalls.Clear() 
         setSignaturePositions pos1 pos2
         variableStack.InSignatureEvaluation <- false
         st.EvalPop()

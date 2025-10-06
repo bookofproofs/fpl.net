@@ -283,6 +283,18 @@ let emitID025Diagnostics qualifiedNameCandidate candidateEnglishName blockEnglis
         ad.AddDiagnostic diagnostic
     | _ -> ()
 
+let emitID026Diagnostics name candidates pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ID026 (name, candidates)
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
 
 let emitLG002diagnostic nodeTypeName times pos1 pos2 = 
     let diagnostic =
@@ -345,19 +357,6 @@ let emitLG005Diagnostics name pos1 pos2 =
             Diagnostic.EndPos = pos2
             Diagnostic.Code = LG005 name
             Diagnostic.Alternatives = Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary)." 
-        }
-    ad.AddDiagnostic diagnostic
-
-let emitLG006Diagnostics name pos1 pos2 =
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = pos1
-            Diagnostic.EndPos = pos2
-            Diagnostic.Code = LG006 name
-            Diagnostic.Alternatives = Some $"Choose one of the constants `{LiteralTrue}` or `{LiteralFalse}` instead." 
         }
     ad.AddDiagnostic diagnostic
 

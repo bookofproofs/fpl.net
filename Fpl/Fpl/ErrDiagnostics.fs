@@ -127,6 +127,7 @@ type DiagnosticCode =
     | ID023 of string 
     | ID024 of string * string
     | ID025 of string * string * string
+    | ID026 of string * string
     // logic-related error codes
     | LG000 of string * string 
     | LG001 of string * string * string
@@ -134,7 +135,6 @@ type DiagnosticCode =
     | LG003 of string * string
     | LG004 of string
     | LG005 of string
-    | LG006 of string
     | LG007 of string
     // proof-related error codes
     | PR001 of string * string 
@@ -235,6 +235,7 @@ type DiagnosticCode =
             | ID023 _ -> "ID023"
             | ID024 _ -> "ID024"
             | ID025 _ -> "ID025"
+            | ID026 _ -> "ID026"
             // logic-related error codes
             | LG000 _ -> "LG000"
             | LG001 _ -> "LG001"
@@ -242,7 +243,6 @@ type DiagnosticCode =
             | LG003 _ -> "LG003"
             | LG004 _ -> "LG004"
             | LG005 _ -> "LG005"
-            | LG006 _ -> "LG006"
             | LG007 _ -> "LG007"
             // proof-related error codes
             | PR001 _ -> "PR001"
@@ -346,11 +346,12 @@ type DiagnosticCode =
                    sprintf "The type `%s` could not be determined, found no candidates." name 
             | ID018 name -> sprintf "The extension `%s` could not be matched. Declare an extension with this pattern." name
             | ID019 name -> sprintf "The extension `%s` could not be found. Are you missing a uses clause?" name
-            | ID020 name -> sprintf "Missing call of base constructor `%s`." name
-            | ID021 name -> sprintf "Duplicate call of base constructor `%s`." name
+            | ID020 name -> $"Missing call of base constructor `{name}`." 
+            | ID021 name -> $"Duplicate call of base constructor `{name}`."
             | ID023 candidates  -> $"Cannot associate a justification with a single block. Found more candidates: {candidates}." 
             | ID024 (signature, conflict) -> sprintf "Expression `%s` was already localized at %s." signature conflict
             | ID025 (candidate, candidateType, nodeType)  -> $"Cannot reference to `{candidate}` which is {candidateType} inside {nodeType}." 
+            | ID026 (name, candidates)  -> $"The base constructor call's id `{name}` is not among the base classes this class is derived from. The candidate classes are {candidates}." 
 
             // logic-related error codes
             | LG000 (typeOfPredicate,argument) -> $"Cannot evaluate `{typeOfPredicate}`; its argument `{argument}` is a predicate but couldn't be determined."
@@ -359,7 +360,6 @@ type DiagnosticCode =
             | LG003 (nodeTypeName, nodeName) -> $"`{nodeTypeName}` evaluates to `false` and cannot be {nodeName}."
             | LG004 nodeType -> $"`Parameters not allowed for {nodeType}."
             | LG005 name -> $"Unnecessary assignment of `{name}` detected (will be implicitely ignored)."
-            | LG006 blockName -> $"A {blockName} without parameters cannot be {LiteralIntrL}."
             | LG007 blockName -> $"A {blockName} without parameters cannot have value based on an expression."
             // proof-related error codes
             | PR001 (incorrectBlockType, justificatinItemName) -> $"Cannot find a `{justificatinItemName}`, found {incorrectBlockType} instead."

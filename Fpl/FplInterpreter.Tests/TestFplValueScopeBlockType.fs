@@ -959,7 +959,8 @@ type TestFplValueScopeBlockType() =
             let r = st.Root
             let theory = r.Scope[filename]
             let pr = theory.Scope["T()"] 
-            let base1 = pr.ArgList |> Seq.toList |> List.rev |> List.head
+            let pre = pr.ArgList |> Seq.toList |> List.rev |> List.head
+            let base1 = pre.Scope.Values |> Seq.toList |> List.rev |> List.head
             Assert.IsInstanceOfType<FplDecrement>(base1)
         | None -> 
             Assert.IsTrue(false)
