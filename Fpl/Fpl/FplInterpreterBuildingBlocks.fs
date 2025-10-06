@@ -1160,7 +1160,7 @@ let rec eval (st: SymbolTable) ast =
         setSignaturePositions pos1 pos2
         variableStack.InSignatureEvaluation <- false
         st.EvalPop()
-    | Ast.Localization((pos1, pos2), (predicateAst, translationListAsts)) ->
+    | Ast.Localization(((pos1, pos2), predicateAst), translationListAsts) ->
         st.EvalPush("Localization")
         let parent = variableStack.PeekEvalStack()
         let fv = new FplLocalization((pos1, pos2), parent)

@@ -128,7 +128,7 @@ type Ast =
     | PremiseConclusionBlock of Positions * ((Ast list option * Ast) * Ast)
     | RuleOfInferenceSignature of Positions * Ast
     | RuleOfInference of Positions * (Ast * Ast)
-    | Localization of Positions * (Ast * Ast list)
+    | Localization of (Positions * Ast) * Ast list
     | TheoremSignature of Positions * Ast
     | Theorem of Positions * (Ast * (Ast list option * Ast))
     | LemmaSignature of Positions * Ast
