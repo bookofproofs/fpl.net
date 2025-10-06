@@ -634,7 +634,7 @@ type TestFplValueScopeTypeSignature() =
     [<DataRow("base5", "base.C(Test1(a), Test2(b, c, d))")>]
     [<DataRow("base6", "base.E(true, undef, false)")>]
     [<TestMethod>]
-    member this.TestCallConstructorParentClass(var, varVal) =
+    member this.TestBaseConstructorCall(var, varVal) =
         ad.Clear()
         let fplCode = sprintf """
                         def cl B:obj {intr}
@@ -652,7 +652,7 @@ type TestFplValueScopeTypeSignature() =
                             }
                         }
                         ;""" varVal
-        let filename = "TestCallConstructorParentClassTypeSignature"
+        let filename = "TestBaseConstructorCallTypeSignature"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -661,8 +661,7 @@ type TestFplValueScopeTypeSignature() =
             let theory = r.Scope[filename]
             let cl = theory.Scope["A"]
             let ctor = cl.Scope["A(T1, func, ind, pred)"]
-            let stmt = ctor.ArgList[0]
-            let base1 = stmt.ArgList[0]
+            let base1 = ctor.ArgList[0]
 
             match var with
             | "base1" -> Assert.AreEqual<string>("B()", base1.Type(SignatureType.Type))

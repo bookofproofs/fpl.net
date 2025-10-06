@@ -657,7 +657,7 @@ type TestFplValueScopeName() =
     [<DataRow("base5", "base.C(Test1(a), Test2(b, c, d))")>]
     [<DataRow("base6", "base.E(true, undef, false)")>]
     [<TestMethod>]
-    member this.TestCallConstructorParentClass(var, varVal) =
+    member this.TestBaseConstructorCall(var, varVal) =
         ad.Clear()
         let fplCode = sprintf """
                         def cl B:obj {intr}
@@ -675,7 +675,7 @@ type TestFplValueScopeName() =
                             }
                         }
                         ;""" varVal
-        let filename = "TestCallConstructorParentClassName"
+        let filename = "TestBaseConstructorCallName"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -684,12 +684,10 @@ type TestFplValueScopeName() =
             let theory = r.Scope[filename]
             let cl = theory.Scope["A"]
             let ctor = cl.Scope["A(T1, func, ind, pred)"]
-            let stmt = ctor.ArgList[0]
-            let base1 = stmt.ArgList[0]
-
+            let base1 = ctor.ArgList[0]
             match var with
             | "base1" -> Assert.AreEqual<string>("B()", base1.Type(SignatureType.Mixed))
-            | "base2" -> Assert.AreEqual<string>("C(T1, func, ind, pred)", base1.Type(SignatureType.Mixed))
+            | "base2" -> Assert.AreEqual<string>("C(a, b, c, d)", base1.Type(SignatureType.Mixed))
             | "base3" -> Assert.AreEqual<string>("D(parent, T1, func)", base1.Type(SignatureType.Mixed))
             | "base4" -> Assert.AreEqual<string>("B(In(undef))", base1.Type(SignatureType.Mixed))
             | "base5" -> Assert.AreEqual<string>("C(Test1(T1), Test2(func, ind, pred))", base1.Type(SignatureType.Mixed))

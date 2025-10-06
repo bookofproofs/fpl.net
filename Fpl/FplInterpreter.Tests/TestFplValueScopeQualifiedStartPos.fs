@@ -633,7 +633,7 @@ type TestFplValueScopeQualifiedStartPos() =
     [<DataRow("base5", "base.C(Test1(a), Test2(b, c, d))")>]
     [<DataRow("base6", "base.E(true, undef, false)")>]
     [<TestMethod>]
-    member this.TestCallConstructorParentClass(var, varVal) =
+    member this.TestBaseConstructorCall(var, varVal) =
         ad.Clear()
         let fplCode = sprintf """
                         def cl B:obj {intr}
@@ -651,7 +651,7 @@ type TestFplValueScopeQualifiedStartPos() =
                             }
                         }
                         ;""" varVal
-        let filename = "TestCallConstructorParentClassQualifiedStartPos"
+        let filename = "TestBaseConstructorCallQualifiedStartPos"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with

@@ -4326,7 +4326,12 @@ type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
         ret
 
     override this.Type signatureType = 
-        getFplHead this signatureType
+        let head = getFplHead this signatureType
+        let args =
+            this.ArgList
+            |> Seq.map (fun fv -> fv.Type signatureType)
+            |> String.concat ", "
+        sprintf "%s(%s)" head args
 
     override this.Represent () = LiteralUndef
 

@@ -627,7 +627,7 @@ type TestFplValueScopeQualifiedName() =
     [<DataRow("base5", "base.C(Test1(a), Test2(b, c, d))")>]
     [<DataRow("base6", "base.E(true, undef, false)")>]
     [<TestMethod>]
-    member this.TestCallConstructorParentClass(var, varVal) =
+    member this.TestBaseConstructorCall(var, varVal) =
         ad.Clear()
         let fplCode = sprintf """
                         def cl B:obj {intr}
@@ -645,7 +645,7 @@ type TestFplValueScopeQualifiedName() =
                             }
                         }
                         ;""" varVal
-        let filename = "TestCallConstructorParentClassQualifiedName"
+        let filename = "TestBaseConstructorCallQualifiedName"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -658,12 +658,12 @@ type TestFplValueScopeQualifiedName() =
             let base1 = stmt.ArgList[0]
 
             match var with
-            | "base1" -> Assert.AreEqual<string>("TestCallConstructorParentClassQualifiedName.A.A(T1, func, ind, pred).bas.B()", qualifiedName base1)
-            | "base2" -> Assert.AreEqual<string>("TestCallConstructorParentClassQualifiedName.A.A(T1, func, ind, pred).bas.C(a, b, c, d)", qualifiedName base1)
-            | "base3" -> Assert.AreEqual<string>("TestCallConstructorParentClassQualifiedName.A.A(T1, func, ind, pred).bas.D(A, a, b)", qualifiedName base1)
-            | "base4" -> Assert.AreEqual<string>("TestCallConstructorParentClassQualifiedName.A.A(T1, func, ind, pred).bas.B(In(x))", qualifiedName base1)
-            | "base5" -> Assert.AreEqual<string>("TestCallConstructorParentClassQualifiedName.A.A(T1, func, ind, pred).bas.C(Test1(a), Test2(b, c, d))", qualifiedName base1)
-            | "base6" -> Assert.AreEqual<string>("TestCallConstructorParentClassQualifiedName.A.A(T1, func, ind, pred).bas.E(true, undef, false)", qualifiedName base1)
+            | "base1" -> Assert.AreEqual<string>("TestBaseConstructorCallQualifiedName.A.A(T1, func, ind, pred).bas.B()", qualifiedName base1)
+            | "base2" -> Assert.AreEqual<string>("TestBaseConstructorCallQualifiedName.A.A(T1, func, ind, pred).bas.C(a, b, c, d)", qualifiedName base1)
+            | "base3" -> Assert.AreEqual<string>("TestBaseConstructorCallQualifiedName.A.A(T1, func, ind, pred).bas.D(A, a, b)", qualifiedName base1)
+            | "base4" -> Assert.AreEqual<string>("TestBaseConstructorCallQualifiedName.A.A(T1, func, ind, pred).bas.B(In(x))", qualifiedName base1)
+            | "base5" -> Assert.AreEqual<string>("TestBaseConstructorCallQualifiedName.A.A(T1, func, ind, pred).bas.C(Test1(a), Test2(b, c, d))", qualifiedName base1)
+            | "base6" -> Assert.AreEqual<string>("TestBaseConstructorCallQualifiedName.A.A(T1, func, ind, pred).bas.E(true, undef, false)", qualifiedName base1)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
@@ -803,11 +803,11 @@ type TestFplValueScopeQualifiedName() =
             let proof = theory.Scope["T$1"]
             let arg = proof.Scope["100"]
             match var with
-            | "base1" -> Assert.AreEqual<string>("TestArgumentQualifiedName.T$1.100.", qualifiedName arg)
-            | "base2" -> Assert.AreEqual<string>("TestArgumentQualifiedName.T$1.100.", qualifiedName arg)
-            | "base3" -> Assert.AreEqual<string>("TestArgumentQualifiedName.T$1.100.", qualifiedName arg)
-            | "base4" -> Assert.AreEqual<string>("TestArgumentQualifiedName.T$1.100.", qualifiedName arg)
-            | "base5" -> Assert.AreEqual<string>("TestArgumentQualifiedName.T$1.100.", qualifiedName arg)
+            | "base1" -> Assert.AreEqual<string>("TestArgumentQualifiedName.T$1.100", qualifiedName arg)
+            | "base2" -> Assert.AreEqual<string>("TestArgumentQualifiedName.T$1.100", qualifiedName arg)
+            | "base3" -> Assert.AreEqual<string>("TestArgumentQualifiedName.T$1.100", qualifiedName arg)
+            | "base4" -> Assert.AreEqual<string>("TestArgumentQualifiedName.T$1.100", qualifiedName arg)
+            | "base5" -> Assert.AreEqual<string>("TestArgumentQualifiedName.T$1.100", qualifiedName arg)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

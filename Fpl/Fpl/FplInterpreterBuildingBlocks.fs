@@ -722,10 +722,13 @@ let rec eval (st: SymbolTable) ast =
             fv.TypeId <- identifier
         | :? FplMapping -> 
             fv.TypeId <- fv.TypeId + identifier
+        | :? FplBaseConstructorCall -> 
+            fv.FplId <- identifier
+            fv.TypeId <- identifier
+            checkID012Diagnostics st fv identifier pos1 pos2
         | :? FplReference -> 
             fv.FplId <- fv.FplId + identifier
             fv.TypeId <- fv.TypeId + identifier
-            checkID012Diagnostics st fv identifier pos1 pos2
         | :? FplGenericJustificationItem as fvJi -> 
             fvJi.FplId <- identifier
         | _ -> ()
@@ -866,6 +869,16 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.ArgumentTuple((pos1, pos2), predicateListAst) ->
         st.EvalPush("ArgumentTuple")
+        let consumeArgumentsWithParent (parent:FplValue) =
+            if predicateListAst.Length > 0 then 
+                predicateListAst 
+                |> List.iter (fun pred -> 
+                    let ref = new FplReference((pos1, pos2), parent)
+                    variableStack.PushEvalStack(ref)
+                    eval st pred
+                    variableStack.PopEvalStack()
+                )
+        
         let getProceedingReference =
             let getFirstRefFromStack =
                 variableStack.EvalStack
@@ -877,18 +890,12 @@ let rec eval (st: SymbolTable) ast =
         match getProceedingReference with 
         | Some ref ->
             ref.ArgType <- ArgType.Parentheses
-            if predicateListAst.Length > 0 then 
-                predicateListAst 
-                |> List.iter (fun pred -> 
-                    let ref = new FplReference((pos1, pos2), ref)
-                    variableStack.PushEvalStack(ref)
-                    eval st pred
-                    variableStack.PopEvalStack()
-                )
+            consumeArgumentsWithParent ref
         | _ -> 
             let fv = variableStack.PeekEvalStack()
             match fv with
-            | :? FplBaseConstructorCall -> fv.EndPos <- pos2
+            | :? FplBaseConstructorCall -> 
+                consumeArgumentsWithParent fv
             | _ -> ()
         st.EvalPop()
     | Ast.QualificationList((pos1, pos2), asts) ->

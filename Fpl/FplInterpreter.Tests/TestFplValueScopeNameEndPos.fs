@@ -146,7 +146,7 @@ type TestFplValueScopeNameEndPos() =
                 let hasSignature = prf2 :?> FplProof
                 Assert.AreEqual<int64>(33L, hasSignature.SignEndPos.Column)
             | "loc1" -> 
-                Assert.AreEqual<int64>(13L, loc1.EndPos.Column) 
+                Assert.AreEqual<int64>(24L, loc1.EndPos.Column) 
             | "loc2" -> 
                 Assert.AreEqual<int64>(27L, loc2.EndPos.Column) 
             | _ -> Assert.IsTrue(false, "hier1")
