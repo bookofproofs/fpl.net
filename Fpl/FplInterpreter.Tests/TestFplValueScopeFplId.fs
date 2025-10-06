@@ -84,7 +84,7 @@ type TestFplValueScopeFplId() =
             | "prf1" -> Assert.AreEqual<string>("SomeTheorem1$1", prf1.FplId)
             | "prf2" -> Assert.AreEqual<string>("SomeTheorem2$1", prf2.FplId)
             | "loc1" -> Assert.AreEqual<string>(LiteralNot, loc1.FplId)
-            | "loc2" -> Assert.AreEqual<string>(PrimDelegateEqual, loc2.FplId)
+            | "loc2" -> Assert.AreEqual<string>(PrimDelegateEqualL, loc2.FplId)
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
@@ -874,7 +874,7 @@ type TestFplValueScopeFplId() =
             | "base1" -> Assert.AreEqual<string>(LiteralIif , pred.FplId)
             | "base2" -> Assert.AreEqual<string>(LiteralNot, pred.FplId)
             | "base3" -> Assert.AreEqual<string>(LiteralAnd, pred.FplId)
-            | "base4" -> Assert.AreEqual<string>(PrimDelegateEqual, pred.FplId)
+            | "base4" -> Assert.AreEqual<string>(PrimDelegateEqualL, pred.FplId)
             | "base5" -> Assert.AreEqual<string>("NotEqual", pred.FplId)
             | _ -> Assert.IsTrue(false)
         | None -> 

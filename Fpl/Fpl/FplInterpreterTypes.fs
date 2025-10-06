@@ -876,7 +876,8 @@ let qualifiedName (fplValue:FplValue)=
             | PrimEquivalence 
             | PrimIsOperator 
             | PrimExtensionObj 
-            | PrimEqualityL 
+            | PrimDelegateEqualL 
+            | PrimDelegateDecrementL 
             | PrimRefL -> fv.Type(SignatureType.Name)
             | LiteralCtorL
             | PrimBaseConstructorCall
@@ -1259,7 +1260,7 @@ type FplRuleOfInference(positions: Positions, parent: FplValue, runOrder) =
     inherit FplGenericPredicateWithExpression(positions, parent)
     let _runOrder = runOrder
 
-    override this.Name = $"rule of {LiteralInfL}"
+    override this.Name = PrimRuleOfInference
     override this.ShortName = LiteralInf
 
     override this.Clone () =
@@ -2595,7 +2596,15 @@ type FplReference(positions: Positions, parent: FplValue) =
                 |> Seq.map (fun kvp -> kvp.Value) 
                 |> Seq.toList 
                 |> List.head
-            if called.IsBlock() then
+            match called.Name with
+            | LiteralCtorL
+            | PrimBaseConstructorCall
+            | PrimPredicateL
+            | PrimFuncionalTermL
+            | PrimMandatoryFunctionalTermL
+            | PrimMandatoryPredicateL
+            | PrimOptionalFunctionalTermL
+            | PrimOptionalPredicateL ->
                 match box called with
                 | :? ICanBeCalledRecusively as calledRecursively when calledRecursively.CallCounter > maxRecursion -> () // stop recursion
                 | _ ->
@@ -2606,6 +2615,10 @@ type FplReference(positions: Positions, parent: FplValue) =
                     called.Run variableStack
                     this.SetValuesOf called
                     variableStack.RestoreVariables(called)
+            | PrimDelegateDecrementL
+            | PrimDelegateEqualL ->
+                called.Run variableStack
+            | _ -> ()
         elif this.ArgList.Count = 1 then
             let arg = this.ArgList[0]
             arg.Run variableStack
@@ -2974,7 +2987,10 @@ type FplGenericDelegate(name, positions: Positions, parent: FplValue) as this =
         |> Seq.map (fun subfv -> subfv.Represent())
         |> String.concat ", "
 
+    override this.EmbedInSymbolTable _ = addExpressionToReference this
+
     override this.RunOrder = None
+
 
 /// Implements the semantics of an FPL equality.
 type FplEquality(name, positions: Positions, parent: FplValue) as this =
@@ -2983,8 +2999,8 @@ type FplEquality(name, positions: Positions, parent: FplValue) as this =
     do 
         this.TypeId <- LiteralPred
 
-    override this.Name = PrimEqualityL
-    override this.ShortName = PrimEquality
+    override this.Name = PrimDelegateEqualL
+    override this.ShortName = PrimDelegateEqual
 
     override this.Clone () =
         let ret = new FplEquality(this.FplId, (this.StartPos, this.EndPos), this.Parent.Value)
@@ -3054,10 +3070,6 @@ type FplEquality(name, positions: Positions, parent: FplValue) as this =
                                 $"{(a1Repr = b1Repr)}".ToLower()
                             | _ -> LiteralUndetermined
                         this.SetValue(newValue)
-
-    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
-
-
 
 /// Implements an object that is used to provide a representation of extensions in FPL.
 type FplExtensionObj(positions: Positions, parent: FplValue) as this =
@@ -3131,8 +3143,8 @@ type FplDecrement(name, positions: Positions, parent: FplValue) as this =
     do 
         this.TypeId <- LiteralObj
 
-    override this.Name = PrimDecrementL
-    override this.ShortName = PrimDecrement
+    override this.Name = PrimDelegateDecrementL
+    override this.ShortName = PrimDelegateDecrement
 
     override this.Clone () =
         let ret = new FplDecrement(this.FplId, (this.StartPos, this.EndPos), this.Parent.Value)
@@ -3202,10 +3214,6 @@ type FplDecrement(name, positions: Positions, parent: FplValue) as this =
             else
                 string n'
         this.SetValue(newValue)
-
-    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
-
-    override this.RunOrder = None
 
 type FplMapping(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)

@@ -864,6 +864,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.ArgumentTuple((pos1, pos2), predicateListAst) ->
         st.EvalPush("ArgumentTuple")
+        let next = variableStack.PeekEvalStack()
         let consumeArgumentsWithParent (parent:FplValue) =
             if predicateListAst.Length > 0 then 
                 predicateListAst 
@@ -882,15 +883,16 @@ let rec eval (st: SymbolTable) ast =
             | Some ref -> Some (ref :?> FplReference)
             | _ -> None
             
-        match getProceedingReference with 
-        | Some ref ->
-            ref.ArgType <- ArgType.Parentheses
-            consumeArgumentsWithParent ref
+        match next with 
+        | :? FplEquality 
+        | :? FplDecrement
+        | :? FplBaseConstructorCall -> 
+            consumeArgumentsWithParent next
         | _ -> 
-            let fv = variableStack.PeekEvalStack()
-            match fv with
-            | :? FplBaseConstructorCall -> 
-                consumeArgumentsWithParent fv
+            match getProceedingReference with 
+            | Some ref ->
+                ref.ArgType <- ArgType.Parentheses
+                consumeArgumentsWithParent ref
             | _ -> ()
         st.EvalPop()
     | Ast.QualificationList((pos1, pos2), asts) ->
@@ -1103,12 +1105,12 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Delegate")
         let fv = variableStack.PeekEvalStack()
         match delegateId with 
-        | PrimDelegateEqual -> 
+        | PrimDelegateEqualL -> 
             let deleg = new FplEquality(delegateId, (pos1, pos2), fv)
             variableStack.PushEvalStack(deleg)
             eval st argumentTupleAst
             variableStack.PopEvalStack()
-        | PrimDelegateDecrement -> 
+        | PrimDelegateDecrementL -> 
             let deleg = new FplDecrement(delegateId, (pos1, pos2), fv)
             variableStack.PushEvalStack(deleg)
             eval st argumentTupleAst

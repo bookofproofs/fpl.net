@@ -1328,19 +1328,15 @@ let PrimClassL = "class definition"
 [<Literal>]
 let PrimConjunction = "conjunction"
 [<Literal>]
-let PrimDecrement = "decr"
+let PrimDelegateEqual = "="
 [<Literal>]
-let PrimDecrementL = "decrement statement"
+let PrimDelegateEqualL = "Equal"
 [<Literal>]
-let PrimDelegateEqual = "Equal"
+let PrimDelegateDecrement = "decr"
 [<Literal>]
-let PrimDelegateDecrement = "Decrement"
+let PrimDelegateDecrementL = "Decrement"
 [<Literal>]
 let PrimDisjunction = "disjunction"
-[<Literal>]
-let PrimEquality = "="
-[<Literal>]
-let PrimEqualityL = "equality"
 [<Literal>]
 let PrimEquivalence = "equivalence"
 [<Literal>]
