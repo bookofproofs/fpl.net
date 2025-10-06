@@ -542,12 +542,12 @@ let proof = positions "Proof" (proofSignature .>>. proofBlock) |>> Ast.Proof
 
 // Predicate building blocks can be defined similarly to classes, they can have properties but they cannot be derived any parent type 
 let predicateDefinitionBlock = leftBrace  >>. ((keywordIntrinsic <|> predContent) .>> IW) .>>. propertyList .>> spacesRightBrace 
-let predicateSignature = positions "PredicateSignature" (keywordPredicate >>. SW >>. simpleSignature .>>. paramTuple .>>. userDefinedSymbol) .>> IW |>> Ast.PredicateSignature
+let predicateSignature = positions "PredicateSignature" (keywordPredicate >>. SW >>. simpleSignature .>>. paramTuple) .>>. userDefinedSymbol .>> IW |>> Ast.PredicateSignature
 let definitionPredicate = positions "DefinitionPredicate" (predicateSignature .>>. predicateDefinitionBlock) |>> Ast.DefinitionPredicate
 
 // Functional term building blocks can be defined similarly to classes, they can have properties but they cannot be derived any parent type 
 let functionalTermDefinitionBlock = leftBrace  >>. ((keywordIntrinsic <|> funcContent) .>> IW) .>>. propertyList .>> spacesRightBrace
-let functionalTermSignature = positions "FunctionalTermSignature" (keywordFunction >>. SW >>. simpleSignature .>>. paramTuple .>>. (IW >>. mapping) .>>. userDefinedSymbol) .>> IW |>> Ast.FunctionalTermSignature
+let functionalTermSignature = positions "FunctionalTermSignature" (keywordFunction >>. SW >>. simpleSignature .>>. paramTuple .>>. (IW >>. mapping)) .>>. userDefinedSymbol .>> IW |>> Ast.FunctionalTermSignature
 let definitionFunctionalTerm = positions "DefinitionFunctionalTerm" (functionalTermSignature .>>. functionalTermDefinitionBlock) |>> Ast.DefinitionFunctionalTerm
 
 // Class definitions

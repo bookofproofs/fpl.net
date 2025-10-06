@@ -1123,7 +1123,7 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PopEvalStack()
         st.EvalPop()
     // | ClosedOrOpenRange of Positions * ((Ast * Ast option) * Ast)
-    | Ast.PredicateSignature((pos1, pos2), ((simpleSignatureAst, paramTupleAst), optUserDefinedSymbolAst)) ->
+    | Ast.PredicateSignature(((pos1, pos2), (simpleSignatureAst, paramTupleAst)), optUserDefinedSymbolAst) ->
         st.EvalPush("PredicateSignature")
         variableStack.InSignatureEvaluation <- true
         eval st simpleSignatureAst
@@ -1258,7 +1258,7 @@ let rec eval (st: SymbolTable) ast =
         emitLG000orLG001Diagnostics fv PrimQuantorExistsN
         st.EvalPop()
     // | FunctionalTermSignature of Positions * (Ast * Ast)
-    | Ast.FunctionalTermSignature((pos1, pos2), (((simpleSignatureAst, paramTupleAst), mappingAst), optUserDefinedSymbolAst)) -> 
+    | Ast.FunctionalTermSignature(((pos1, pos2), ((simpleSignatureAst, paramTupleAst), mappingAst)), optUserDefinedSymbolAst) -> 
         variableStack.InSignatureEvaluation <- true
         st.EvalPush("FunctionalTermSignature")
         eval st simpleSignatureAst
