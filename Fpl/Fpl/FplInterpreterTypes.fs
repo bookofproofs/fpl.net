@@ -878,6 +878,8 @@ let qualifiedName (fplValue:FplValue)=
             | PrimExtensionObj 
             | PrimEqualityL 
             | PrimRefL -> fv.Type(SignatureType.Name)
+            | LiteralCtorL
+            | PrimBaseConstructorCall
             | PrimQuantorAll
             | PrimQuantorExists
             | PrimQuantorExistsN
@@ -4327,9 +4329,10 @@ type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
 
     override this.Type signatureType = 
         let head = getFplHead this signatureType
+        let propagate = propagateSignatureType signatureType
         let args =
             this.ArgList
-            |> Seq.map (fun fv -> fv.Type signatureType)
+            |> Seq.map (fun fv -> fv.Type propagate)
             |> String.concat ", "
         sprintf "%s(%s)" head args
 

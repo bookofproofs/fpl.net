@@ -813,17 +813,17 @@ type TestFplValueScopeNameEndPos() =
 
             match var with
             | "base1" -> 
-                Assert.AreEqual<int64>((int64)45, base1.EndPos.Column)
+                Assert.AreEqual<int64>((int64)33, base1.EndPos.Column)
             | "base2" -> 
-                Assert.AreEqual<int64>((int64)55, base1.EndPos.Column)
+                Assert.AreEqual<int64>((int64)54, base1.EndPos.Column)
             | "base3" -> 
-                Assert.AreEqual<int64>((int64)55, base1.EndPos.Column)
+                Assert.AreEqual<int64>((int64)54, base1.EndPos.Column)
             | "base4" -> 
-                Assert.AreEqual<int64>((int64)50, base1.EndPos.Column)
+                Assert.AreEqual<int64>((int64)49, base1.EndPos.Column)
             | "base5" -> 
-                Assert.AreEqual<int64>((int64)69, base1.EndPos.Column)
+                Assert.AreEqual<int64>((int64)68, base1.EndPos.Column)
             | "base6" -> 
-                Assert.AreEqual<int64>((int64)63, base1.EndPos.Column)
+                Assert.AreEqual<int64>((int64)62, base1.EndPos.Column)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

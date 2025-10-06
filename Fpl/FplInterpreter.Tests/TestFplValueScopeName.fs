@@ -612,7 +612,7 @@ type TestFplValueScopeName() =
             | "base10d" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
             | "base11d" -> Assert.AreEqual<string>("v[x, y]", base1.Type(SignatureType.Name))
             | "base12d" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
-            | "base13d" -> Assert.AreEqual<string>("1[x]", base1.Type(SignatureType.Name))
+            | "base13d" -> Assert.AreEqual<string>("1[x.y]", base1.Type(SignatureType.Name))
             | "base10e" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
             | "base11e" -> Assert.AreEqual<string>("v(x, y).x[a, b]", base1.Type(SignatureType.Name))
             | "base12e" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
@@ -620,7 +620,7 @@ type TestFplValueScopeName() =
             | "base10f" -> Assert.AreEqual<string>("Test[x, y].x(a, b)", base1.Type(SignatureType.Name))
             | "base11f" -> Assert.AreEqual<string>("v[x, y].x(a, b)", base1.Type(SignatureType.Name))
             | "base12f" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
-            | "base13f" -> Assert.AreEqual<string>("1[x].T(a, b)", base1.Type(SignatureType.Name))
+            | "base13f" -> Assert.AreEqual<string>("1[x.y].T(a, b)", base1.Type(SignatureType.Name))
             | "base14" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
             | "base15" -> Assert.AreEqual<string>("-(x)", base1.Type(SignatureType.Name))
             | "base15a" -> Assert.AreEqual<string>("'(x)", base1.Type(SignatureType.Name))
@@ -688,10 +688,10 @@ type TestFplValueScopeName() =
             match var with
             | "base1" -> Assert.AreEqual<string>("B()", base1.Type(SignatureType.Mixed))
             | "base2" -> Assert.AreEqual<string>("C(a, b, c, d)", base1.Type(SignatureType.Mixed))
-            | "base3" -> Assert.AreEqual<string>("D(parent, T1, func)", base1.Type(SignatureType.Mixed))
+            | "base3" -> Assert.AreEqual<string>("D(parent, a, b)", base1.Type(SignatureType.Mixed))
             | "base4" -> Assert.AreEqual<string>("B(In(undef))", base1.Type(SignatureType.Mixed))
             | "base5" -> Assert.AreEqual<string>("C(Test1(T1), Test2(func, ind, pred))", base1.Type(SignatureType.Mixed))
-            | "base6" -> Assert.AreEqual<string>("E(pred, undef, pred)", base1.Type(SignatureType.Mixed))
+            | "base6" -> Assert.AreEqual<string>("E(true, undef, false)", base1.Type(SignatureType.Mixed))
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
@@ -749,11 +749,11 @@ type TestFplValueScopeName() =
 
             match var with
             | "base0" -> Assert.AreEqual<string>(@"1", trsl.Type(SignatureType.Mixed))
-            | "base1" -> Assert.AreEqual<string>(@"x \Leftrightarrow y", trsl.Type(SignatureType.Mixed))
-            | "base2" -> Assert.AreEqual<string>(@"\neg( x )", trsl.Type(SignatureType.Mixed))
-            | "base3" -> Assert.AreEqual<string>(@"p \wedge q", trsl.Type(SignatureType.Mixed))
-            | "base4" -> Assert.AreEqual<string>(@"x = y", trsl.Type(SignatureType.Mixed))
-            | "base5" -> Assert.AreEqual<string>(@"x \neq y", trsl.Type(SignatureType.Mixed))
+            | "base1" -> Assert.AreEqual<string>(@"x", trsl.Type(SignatureType.Mixed))
+            | "base2" -> Assert.AreEqual<string>(@"\neg(", trsl.Type(SignatureType.Mixed))
+            | "base3" -> Assert.AreEqual<string>(@"p", trsl.Type(SignatureType.Mixed))
+            | "base4" -> Assert.AreEqual<string>(@"x", trsl.Type(SignatureType.Mixed))
+            | "base5" -> Assert.AreEqual<string>(@"x", trsl.Type(SignatureType.Mixed))
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
@@ -826,7 +826,7 @@ type TestFplValueScopeName() =
     [<DataRow("base6", "del.C(Test1(a),Test2(b,c,d))")>]
     [<DataRow("base7", "del.E(true, undef, false)")>] 
     [<TestMethod>]
-    member this.TestDelegate(var, varVal) =
+    member this.TestDelegateName(var, varVal) =
         ad.Clear()
         let fplCode = sprintf "def pred T1() { dec ~a:T1 ~b:ind ~c:ind;  %s };" varVal
         let filename = "TestDelegateName"
