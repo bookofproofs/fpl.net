@@ -1000,6 +1000,7 @@ let rec eval (st: SymbolTable) ast =
                 | _ -> ()
             elif classes.Length > 0 && constructors.Length = 0 then
                 // add the class (intrinsic case, no constructors at all)
+
                 fv.Scope.TryAdd(fv.FplId, classes.Head) |> ignore
                 // let candidate = classes.Head
                 // emitID025Diagnostics (qualifiedName candidate) candidate.EnglishName block.EnglishName block.Name fv.StartPos fv.EndPos
@@ -1482,8 +1483,8 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(assigneeReference) // add assignee
         eval st predicateWithQualificationAst
         variableStack.PopEvalStack() // remove assignee
-        let dummyValue = new FplReference((pos1,pos2), fvNew)
-        variableStack.PushEvalStack(dummyValue) // add value
+        let assignedValue = new FplReference((pos1,pos2), fvNew)
+        variableStack.PushEvalStack(assignedValue) // add value
         eval st predicateAst
         variableStack.PopEvalStack() // remove value
         variableStack.PopEvalStack() // remove Assignment

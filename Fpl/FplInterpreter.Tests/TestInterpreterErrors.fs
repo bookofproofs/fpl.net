@@ -359,6 +359,17 @@ type TestInterpreterErrors() =
             let code = ID005 ("","")
             runTestHelper "TestID005.fpl" fplCode code expected
 
+    [<DataRow("""def cl A:obj {intr} def pred T() {dec ~x:A x:=A; x};""", 1)>]
+    [<DataRow("""def cl A:obj {intr} def pred T() {dec ~x:A x:=A(); x};""", 0)>]
+    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestID004(fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = ID004 ""
+            runTestHelper "TestID004.fpl" fplCode code expected
+
     [<DataRow("theorem Test {true} corollary Test$1 {true};", 0)>]
     [<DataRow("theorem TestTypo {true} corollary Test$1 {true};", 1)>]
     [<DataRow("theorem Test {true} corollary Test$1 {true} corollary Test$1$1 {true};", 0)>]

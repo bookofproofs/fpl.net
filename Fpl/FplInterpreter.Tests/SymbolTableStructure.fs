@@ -2,6 +2,8 @@
 open System
 open System.Collections.Generic
 open Microsoft.VisualStudio.TestTools.UnitTesting
+open Newtonsoft.Json
+open Newtonsoft.Json.Linq
 open FParsec
 open ErrDiagnostics
 open FplPrimitives
@@ -12,6 +14,14 @@ open CommonTestHelpers
 type SymbolTableStructure() =
     let positions = (Position("",0,0,0), Position("",0,0,0))
     let parent = new FplRoot()
+
+    let isValidJson (input: string) =
+        try
+            JToken.Parse(input) |> ignore
+            true
+        with
+        | :? JsonReaderException -> false
+        | _ -> false
 
     let rec findNamedItem firstTypeNode identifier (infiniteLoop:HashSet<obj>) (root:FplValue) = 
         if infiniteLoop.Contains(root) then
@@ -1529,6 +1539,334 @@ type SymbolTableStructure() =
         | _ -> 
             Assert.IsTrue(false, var)
 
+
+    [<DataRow("FplArgInferenceAssume")>]
+    [<DataRow("FplArgInferenceDerived")>]
+    [<DataRow("FplArgInferenceRevoke")>]
+    [<DataRow("FplArgInferenceTrivial")>]
+    [<DataRow("FplArgument")>]
+    [<DataRow("FplAssertion")>]
+    [<DataRow("FplAssignment")>]
+    [<DataRow("FplAxiom")>]
+    [<DataRow("FplBaseConstructorCall")>]
+    [<DataRow("FplCases")>]
+    [<DataRow("FplCaseElse")>]
+    [<DataRow("FplCaseSingle")>]
+    [<DataRow("FplClass")>]
+    [<DataRow("FplConjecture")>]
+    [<DataRow("FplConjunction")>]
+    [<DataRow("FplConstructor")>]
+    [<DataRow("FplCorollary")>]
+    [<DataRow("FplDecrement")>]
+    [<DataRow("FplDefaultConstructor")>]
+    [<DataRow("FplDisjunction")>]
+    [<DataRow("FplEquality")>]
+    [<DataRow("FplEquivalence")>]
+    [<DataRow("FplExclusiveOr")>]
+    [<DataRow("FplExtension")>]
+    [<DataRow("FplExtensionObj")>]
+    [<DataRow("FplForInStmt")>]
+    [<DataRow("FplForInStmtDomain")>]
+    [<DataRow("FplForInStmtEntity")>]
+    [<DataRow("FplFunctionalTerm")>]
+    [<DataRow("FplImplication")>]
+    [<DataRow("FplInstance")>]
+    [<DataRow("FplIntrinsicFunc")>]
+    [<DataRow("FplIntrinsicInd")>]
+    [<DataRow("FplIntrinsicObj")>]
+    [<DataRow("FplIntrinsicPred")>]
+    [<DataRow("FplIntrinsicTpl")>]
+    [<DataRow("FplIntrinsicUndef")>]
+    [<DataRow("FplIsOperator")>]
+    [<DataRow("FplJustification")>]
+    [<DataRow("FplJustificationItemByAx")>]
+    [<DataRow("FplJustificationItemByConj")>]
+    [<DataRow("FplJustificationItemByCor")>]
+    [<DataRow("FplJustificationItemByDef")>]
+    [<DataRow("FplJustificationItemByDefVar")>]
+    [<DataRow("FplJustificationItemByInf")>]
+    [<DataRow("FplJustificationItemByProofArgument")>]
+    [<DataRow("FplJustificationItemByRefArgument")>]
+    [<DataRow("FplJustificationItemByTheoremLikeStmt")>]
+    [<DataRow("FplLanguage")>]
+    [<DataRow("FplLemma")>]
+    [<DataRow("FplLocalization")>]
+    [<DataRow("FplMandatoryFunctionalTerm")>]
+    [<DataRow("FplMandatoryPredicate")>]
+    [<DataRow("FplMapCases")>]
+    [<DataRow("FplMapCaseElse")>]
+    [<DataRow("FplMapCaseSingle")>]
+    [<DataRow("FplMapping")>]
+    [<DataRow("FplNegation")>]
+    [<DataRow("FplOptionalFunctionalTerm")>]
+    [<DataRow("FplOptionalPredicate")>]
+    [<DataRow("FplParent")>]
+    [<DataRow("FplPredicate")>]
+    [<DataRow("FplPredicateList")>]
+    [<DataRow("FplProof")>]
+    [<DataRow("FplProposition")>]
+    [<DataRow("FplQuantorAll")>]
+    [<DataRow("FplQuantorExists")>]
+    [<DataRow("FplQuantorExistsN")>]
+    [<DataRow("FplReference")>]
+    [<DataRow("FplReturn")>]
+    [<DataRow("FplRoot")>]
+    [<DataRow("FplRuleOfInference")>]
+    [<DataRow("FplSelf")>]
+    [<DataRow("FplTheorem")>]
+    [<DataRow("FplTheory")>]
+    [<DataRow("FplTranslation")>]
+    [<DataRow("FplVariable")>]
+    [<DataRow("FplVariable")>]
+    [<DataRow("FplVariableMany")>]
+    [<DataRow("FplVariableMany1")>]
+    [<TestMethod>]
+    member this.TestFplBlockTypeRepresent(var) =
+
+
+        let index = 5 // Represent
+        match var with
+        | "FplArgInferenceAssume" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplArgInferenceDerived" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplArgInferenceRevoke" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplArgInferenceTrivial" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplArgument" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplAssertion" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplAssignment" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplAxiom" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplBaseConstructorCall" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplCases" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplCaseElse" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplCaseSingle" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplClass" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplConjecture" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplConjunction" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplConstructor" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplCorollary" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplDecrement" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplDefaultConstructor" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplDisjunction" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplEquality" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplEquivalence" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplExclusiveOr" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplExtension" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplExtensionObj" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplForInStmt" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplForInStmtDomain" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplForInStmtEntity" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplFunctionalTerm" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplImplication" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplInstance" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("{obj:{}}", (getName var).[index])
+        | "FplIntrinsicFunc" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplIntrinsicInd" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplIntrinsicObj" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplIntrinsicPred" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplIntrinsicTpl" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplIntrinsicUndef" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplIsOperator" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplJustification" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplJustificationItemByAx" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplJustificationItemByConj" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplJustificationItemByCor" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplJustificationItemByDef" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplJustificationItemByDefVar" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplJustificationItemByInf" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplJustificationItemByProofArgument" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplJustificationItemByRefArgument" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplJustificationItemByTheoremLikeStmt" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplLanguage" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplLemma" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplLocalization" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplMandatoryFunctionalTerm" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplMandatoryPredicate" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplMapCaseElse" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplMapCaseSingle" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplMapCases" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplMapping" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplNegation" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplOptionalFunctionalTerm" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplOptionalPredicate" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplParent" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplPredicate" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplPredicateList" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplProof" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplProposition" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplQuantorAll" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplQuantorExists" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplQuantorExistsN" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplReference" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplReturn" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplRoot" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplRuleOfInference" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplSelf" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplTheorem" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplTheory" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplTranslation" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplVariable" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplVariableMany" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | "FplVariableMany1" ->
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("[]", (getName var).[index])
+        | _ -> 
+            Assert.IsTrue(false, $"Unimplemented test {var}")
+
+
     // todo: issue diagnostics if assuming referenced arguments
     // todo: issue diagnostics restricting assumtions only to non-compound predicates and to references to definitions of predicates
     // todo: issue diagnostics if proving an implication impl(a,b) and the first argument is not the assumption of a, and the last derived argument is not b.
@@ -2264,7 +2602,8 @@ type SymbolTableStructure() =
         let parent, node = testSkeleton nodeType filename fplCode identifier
         
         match nodeType, varVal with
-        | "FplInstance", "00" ->
+        | "FplInstance", "00" 
+        | "FplInstance", "01" ->
             Assert.IsInstanceOfType<FplVariable>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
@@ -2273,6 +2612,8 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplInstance>(node)
             Assert.AreEqual<int>(1, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.IsTrue(isValidJson (node.Represent()), "json not valid")
+            Assert.AreEqual<string>("""{"name":"A","base":[{"name":"obj"}],"vars":[],"prtys":[]}""", node.Represent())
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     [<DataRow("FplIntrinsicFunc", "00", """;""", "")>]

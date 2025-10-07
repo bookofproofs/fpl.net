@@ -108,6 +108,7 @@ type DiagnosticCode =
     | ID001 of string * string
     | ID002 of string * string
     | ID003 of string
+    | ID004 of string
     | ID005 of string * string
     | ID006 of string
     | ID008 of string * string
@@ -216,6 +217,7 @@ type DiagnosticCode =
             | ID001 _ -> "ID001"
             | ID002 _ -> "ID002"
             | ID003 _ -> "ID003"
+            | ID004 _ -> "ID004"
             | ID005 _ -> "ID005"
             | ID006 _ -> "ID006"
             | ID008 _ -> "ID008"
@@ -324,6 +326,7 @@ type DiagnosticCode =
             | ID001 (signature, conflict) -> $"Signature `{signature}` was already declared at {conflict}."  
             | ID002 (signature, incorrectBlockType) -> $"Cannot find a block to be associated with the proof `{signature}`, found only {incorrectBlockType}."  
             | ID003 signature -> $"The proof `{signature}` is missing a block to be associated with."  
+            | ID004 name -> $"Cannot assign `{name}`, it is a class, not an instance; use a constructor `{name}()` instead."  
             | ID005 (signature, incorrectBlockType) -> $"Cannot find a block to be associated with the corollary `{signature}`, found only {incorrectBlockType}."  
             | ID006 signature -> $"The corollary `{signature}` is missing a block to be associated with."  
             | ID008 (constructorId, classId)  -> $"Misspelled constructor name `{constructorId}`, expecting `{classId}`."  

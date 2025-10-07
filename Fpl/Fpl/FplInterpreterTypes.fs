@@ -12,6 +12,7 @@ open FplGrammarTypes
 open FplParser
 open ErrDiagnostics
 open FplInterpreterDiagnosticsEmitterPre
+open Newtonsoft.Json
 
 (* MIT License
 
@@ -24,6 +25,13 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
 
 *)
+
+let toJson (keyValueList: string list) =
+    match keyValueList with
+    | [key; value] ->
+        let dict = dict [ (key, value) ]
+        JsonConvert.SerializeObject(dict, Formatting.None)
+    | _ -> failwith "List must contain exactly two elements"
 
 type EvalAlias =
     { StartPos: Position
@@ -1145,6 +1153,7 @@ type FplGenericPredicate(positions: Positions, parent: FplValue) as this =
         this.ValueList
         |> Seq.map (fun subfv -> subfv.Represent())
         |> String.concat ", "
+        |> fun body -> $"[{body}]"
 
     override this.RunOrder = None
 
@@ -1283,11 +1292,13 @@ type FplInstance(positions: Positions, parent: FplValue) =
     override this.Represent () = 
         let head = this.TypeId
 
-        // args = instances of all base classes
-        let args =
+        // baseClasses = instances of all base classes
+        let baseClasses =
             this.ArgList
             |> Seq.map (fun fv -> fv.Represent())
-            |> String.concat $",{System.Environment.NewLine}"
+            |> String.concat ","
+            |> fun body -> "\"base\":[" + body + "]"
+            
         let vars =
             this.Scope.Values
             |> Seq.filter (fun fv -> 
@@ -1295,8 +1306,10 @@ type FplInstance(positions: Positions, parent: FplValue) =
                 || fv.Name = PrimVariableManyL
                 || fv.Name = PrimVariableMany1L
                 )
-            |> Seq.map (fun fv -> $"{fv.FplId} = {fv.Represent()}")
-            |> String.concat $",{System.Environment.NewLine}"
+            |> Seq.map (fun fv -> "{" + fv.FplId + ":{" + fv.Represent() + "}}")
+            |> String.concat ","
+            |> fun body -> "\"vars\":[" + body + "]"
+
         // only mandatory properties
         let prtys =
             this.Scope.Values
@@ -1304,16 +1317,21 @@ type FplInstance(positions: Positions, parent: FplValue) =
                 fv.Name = PrimMandatoryFunctionalTermL 
                 || fv.Name = PrimMandatoryPredicateL
                 )
-            |> Seq.map (fun fv -> $"{fv.FplId} = {fv.Represent()}")
-            |> String.concat $",{System.Environment.NewLine}"
+            |> Seq.map (fun fv -> $"\"{fv.Type SignatureType.Mixed}\"")
+            |> String.concat $","
+            |> fun body -> "\"prtys\":[" + body + "]"
 
-        match head, args, vars, prtys with 
-        | LiteralObj, _, _, _ 
-        | LiteralObjL, _, _, _ ->
-            $"{head}()"
-        | _, _, _, _ ->
-            $"{head}({args});vars({vars});prtys({prtys})"
-
+        let body = 
+            match head, baseClasses, vars, prtys with 
+            | LiteralObj, _, _, _ 
+            | LiteralObjL, _, _, _ ->
+                "\"name\":\"" + head + "\""
+            | _, _, _, _ ->
+                "\"name\":\"" + head + "\"," +
+                baseClasses + "," +
+                vars + "," +
+                prtys
+        "{" + body + "}"
 
     override this.Run _ = ()
 
@@ -4504,15 +4522,17 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
                 emitLG005Diagnostics nameAssignedValue assignedValue.StartPos assignedValue.EndPos
             else
                 this.CheckSIG05Diagnostics assignee assignedValue
-                assignedValue.Run variableStack
                 match assignedValue with 
                 | :? FplGenericConstructor as ctor ->
+                    ctor.Run variableStack
                     match ctor.Instance with 
                     | Some instance ->
                         assignee.SetValue instance // set value to the created instance 
                         // reposition the instance in symbol table
                         instance.Parent <- Some assignee
                     | None -> () // todo, issue diagnostics?
+                | :? FplClass as classBlock ->
+                    emitID004diagnostics classBlock.FplId assignedValue.StartPos assignedValue.EndPos
                 | _ ->
                     assignee.SetValuesOf assignedValue
                 match box assignee with
