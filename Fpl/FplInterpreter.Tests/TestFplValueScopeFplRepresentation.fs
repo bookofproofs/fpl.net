@@ -1016,7 +1016,7 @@ type TestFplValueScopeFplRepresentation() =
     member this.TestAssignmentVariableInitialized(no:string, input, (expected:bool)) =
         ad.Clear()
         let fplCode = sprintf "def pred T() {%s true};" input
-        let filename = "TestAssignment"
+        let filename = "TestAssignmentVariableInitialized"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with

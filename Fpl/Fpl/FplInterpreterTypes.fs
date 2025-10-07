@@ -1281,14 +1281,39 @@ type FplInstance(positions: Positions, parent: FplValue) =
         head
 
     override this.Represent () = 
-        let subRepr = 
-            this.ValueList
-            |> Seq.map (fun subfv -> subfv.Represent())
-            |> String.concat ", "
-        if subRepr = String.Empty then 
-            LiteralUndef
-        else
-            subRepr
+        let head = this.TypeId
+
+        // args = instances of all base classes
+        let args =
+            this.ArgList
+            |> Seq.map (fun fv -> fv.Represent())
+            |> String.concat $",{System.Environment.NewLine}"
+        let vars =
+            this.Scope.Values
+            |> Seq.filter (fun fv -> 
+                fv.Name = PrimVariableL 
+                || fv.Name = PrimVariableManyL
+                || fv.Name = PrimVariableMany1L
+                )
+            |> Seq.map (fun fv -> $"{fv.FplId} = {fv.Represent()}")
+            |> String.concat $",{System.Environment.NewLine}"
+        // only mandatory properties
+        let prtys =
+            this.Scope.Values
+            |> Seq.filter (fun fv -> 
+                fv.Name = PrimMandatoryFunctionalTermL 
+                || fv.Name = PrimMandatoryPredicateL
+                )
+            |> Seq.map (fun fv -> $"{fv.FplId} = {fv.Represent()}")
+            |> String.concat $",{System.Environment.NewLine}"
+
+        match head, args, vars, prtys with 
+        | LiteralObj, _, _, _ 
+        | LiteralObjL, _, _, _ ->
+            $"{head}()"
+        | _, _, _, _ ->
+            $"{head}({args});vars({vars});prtys({prtys})"
+
 
     override this.Run _ = ()
 
@@ -4054,90 +4079,6 @@ type FplReturn(positions: Positions, parent: FplValue) as this =
                 let value = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
                 this.SetValue(value)
 
-/// Implements the assigment statement in FPL.
-type FplAssignment(positions: Positions, parent: FplValue) as this =
-    inherit FplGenericStmt(positions, parent)
-
-    do
-        this.FplId <- $"assign (ln {this.StartPos.Line})"
-        this.TypeId <- LiteralUndef
-
-    override this.Name = PrimAssignment
-
-    override this.Clone () =
-        let ret = new FplAssignment((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.Type signatureType = 
-        getFplHead this signatureType
-
-    override this.Represent () = this.TypeId
-
-    member private this.CheckSIG05Diagnostics (assignee:FplValue) (toBeAssignedValue: FplValue) = 
-        let valueOpt = getArgument toBeAssignedValue
-        match valueOpt with
-        | Some value when value.IsClass() ->
-            let chainOpt = findClassInheritanceChain value assignee.TypeId
-            match chainOpt with
-            | None ->
-                // issue SIG05 diagnostics if either no inheritance chain found 
-                emitSIG05Diagnostics (assignee.Type(SignatureType.Type)) (value.Type(SignatureType.Type)) toBeAssignedValue.StartPos toBeAssignedValue.EndPos
-            | _ -> () // inheritance chain found (no SIG05 diagnostics)
-        | Some value when (value.Name = LiteralCtorL) ->
-            // find a class inheritance chain for the constructor's class (which is stored in its parent value)
-            let chainOpt = findClassInheritanceChain value.Parent.Value assignee.TypeId
-            match chainOpt with
-            | None ->
-                // issue SIG05 diagnostics if either no inheritance chain found 
-                emitSIG05Diagnostics (assignee.Type(SignatureType.Type)) (value.Type(SignatureType.Type)) toBeAssignedValue.StartPos toBeAssignedValue.EndPos
-            | _ -> () // inheritance chain found (no SIG05 diagnostics)
-        | Some value when assignee.TypeId <> value.TypeId ->
-            // Issue SIG05 diagnostics if value is not a constructor and not a class and still the types are not the same 
-            emitSIG05Diagnostics (assignee.Type(SignatureType.Type)) (value.Type(SignatureType.Type)) toBeAssignedValue.StartPos toBeAssignedValue.EndPos
-        | Some value when assignee.TypeId = value.TypeId ->
-            // Issue no SIG05 diagnostics if value is not a constructor and not a class but the types match
-            ()
-        | _ ->
-            // Issue SIG05 diagnostics if there is (for some reason) no value of the toBeAssignedValue 
-            emitSIG05Diagnostics (assignee.Type(SignatureType.Type)) (toBeAssignedValue.Type(SignatureType.Type)) toBeAssignedValue.StartPos toBeAssignedValue.EndPos
-
-    member this.Assignee =
-        if this.ArgList.Count > 0 then 
-            let candidate = this.ArgList[0]
-            if candidate.Name = PrimRefL && candidate.Scope.ContainsKey(candidate.FplId) then 
-                Some candidate.Scope[candidate.FplId]
-            else
-                Some candidate
-        else
-            None
-
-    member this.AssignedValue =
-        if this.ArgList.Count > 1 then 
-            let candidate = this.ArgList[1]
-            if candidate.Name = PrimRefL && candidate.Scope.ContainsKey(candidate.FplId) then 
-                Some candidate.Scope[candidate.FplId]
-            else
-                Some candidate
-        else
-            None
-
-    override this.Run variableStack = 
-        match this.Assignee, this.AssignedValue with
-        | Some assignee, Some assignedValue ->
-            let nameAssignee = assignee.Type(SignatureType.Name)
-            let nameAssignedValue = assignedValue.Type(SignatureType.Name)
-            if nameAssignee = nameAssignedValue then
-                emitLG005Diagnostics nameAssignedValue assignedValue.StartPos assignedValue.EndPos
-            else
-                this.CheckSIG05Diagnostics assignee assignedValue
-                assignedValue.Run variableStack
-                assignee.SetValuesOf assignedValue
-                match box assignee with
-                | :? IVariable as assigneeCast -> assigneeCast.IsInitializedVariable <- true
-                | _ -> ()
-        | _ -> ()
-
 type FplMapCaseSingle(positions: Positions, parent: FplValue) =
     inherit FplGenericStmt(positions, parent)
 
@@ -4401,7 +4342,8 @@ let checkSIG04Diagnostics (calling:FplValue) (candidates: FplValue list) =
         None
 
 
-type FplDefaultConstructor(name, positions: Positions, parent: FplValue) as this =
+[<AbstractClass>]
+type FplGenericConstructor(name, positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
     let mutable (_toBeConstructedClass:FplValue option) = None 
 
@@ -4412,12 +4354,190 @@ type FplDefaultConstructor(name, positions: Positions, parent: FplValue) as this
     override this.Name = PrimDefaultConstructor
     override this.ShortName = LiteralCtor
 
+    override this.Represent () = 
+        let head = this.TypeId
+
+        // args = instances of all base classes
+        let args =
+            this.ArgList
+            |> Seq.map (fun fv -> fv.Represent())
+            |> String.concat $",{System.Environment.NewLine}"
+        let vars =
+            this.Scope.Values
+            |> Seq.filter (fun fv -> 
+                fv.Name = PrimVariableL 
+                || fv.Name = PrimVariableManyL
+                || fv.Name = PrimVariableMany1L
+                )
+            |> Seq.map (fun fv -> $"{fv.FplId} = {fv.Represent()}")
+            |> String.concat $",{System.Environment.NewLine}"
+        // only mandatory properties
+        let prtys =
+            this.Scope.Values
+            |> Seq.filter (fun fv -> 
+                fv.Name = PrimMandatoryFunctionalTermL 
+                || fv.Name = PrimMandatoryPredicateL
+                )
+            |> Seq.map (fun fv -> $"{fv.FplId} = {fv.Represent()}")
+            |> String.concat $",{System.Environment.NewLine}"
+
+        match head, args, vars, prtys with 
+        | LiteralObj, _, _, _ 
+        | LiteralObjL, _, _, _ ->
+            $"{head}()"
+        | _, _, _, _ ->
+            $"{head}({args});vars({vars});prtys({prtys})"
+            
+    member this.ToBeConstructedClass  
+        with get () = _toBeConstructedClass
+        and set (value) = _toBeConstructedClass <- value
+
+
+    override this.Run variableStack = 
+        let rec createSubInstance (classDef:FplValue) (instance:FplValue) =
+            if classDef.IsIntrinsic then
+                classDef.ArgList
+                |> Seq.filter (fun fv -> fv.Name = PrimClassL || fv.Name = PrimIntrinsicObj)
+                |> Seq.iter (fun baseClass ->
+                    let subInstance = new FplInstance((this.StartPos, this.EndPos), this)
+                    subInstance.FplId <- baseClass.FplId
+                    subInstance.TypeId <- subInstance.FplId
+                    createSubInstance baseClass subInstance
+                    instance.ArgList.Add subInstance
+                )
+            else
+                () // todo handle non-intrisic
+
+        let instance = new FplInstance((this.StartPos, this.EndPos), this)
+        match this.ToBeConstructedClass with
+        | Some classDef -> 
+            instance.FplId <- classDef.FplId
+            instance.TypeId <- classDef.FplId
+            createSubInstance classDef instance
+        | None ->
+            instance.FplId <- LiteralUndef
+            instance.TypeId <- LiteralUndef
+        this.ArgList.Add instance
+
+    member this.Instance = 
+        if this.ArgList.Count = 1 then 
+            Some (this.ArgList[0] :?> FplInstance)
+        else
+            None
+
+    override this.RunOrder = None
+
+/// Implements the assigment statement in FPL.
+type FplAssignment(positions: Positions, parent: FplValue) as this =
+    inherit FplGenericStmt(positions, parent)
+
+    do
+        this.FplId <- $"assign (ln {this.StartPos.Line})"
+        this.TypeId <- LiteralUndef
+
+    override this.Name = PrimAssignment
+
+    override this.Clone () =
+        let ret = new FplAssignment((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Type signatureType = 
+        getFplHead this signatureType
+
+    override this.Represent () = this.TypeId
+
+    member private this.CheckSIG05Diagnostics (assignee:FplValue) (toBeAssignedValue: FplValue) = 
+        let valueOpt = getArgument toBeAssignedValue
+        match valueOpt with
+        | Some value when value.IsClass() ->
+            let chainOpt = findClassInheritanceChain value assignee.TypeId
+            match chainOpt with
+            | None ->
+                // issue SIG05 diagnostics if either no inheritance chain found 
+                emitSIG05Diagnostics (assignee.Type(SignatureType.Type)) (value.Type(SignatureType.Type)) toBeAssignedValue.StartPos toBeAssignedValue.EndPos
+            | _ -> () // inheritance chain found (no SIG05 diagnostics)
+        | Some value when (value.Name = LiteralCtorL) ->
+            // find a class inheritance chain for the constructor's class (which is stored in its parent value)
+            let chainOpt = findClassInheritanceChain value.Parent.Value assignee.TypeId
+            match chainOpt with
+            | None ->
+                // issue SIG05 diagnostics if either no inheritance chain found 
+                emitSIG05Diagnostics (assignee.Type(SignatureType.Type)) (value.Type(SignatureType.Type)) toBeAssignedValue.StartPos toBeAssignedValue.EndPos
+            | _ -> () // inheritance chain found (no SIG05 diagnostics)
+        | Some value when assignee.TypeId <> value.TypeId ->
+            // Issue SIG05 diagnostics if value is not a constructor and not a class and still the types are not the same 
+            emitSIG05Diagnostics (assignee.Type(SignatureType.Type)) (value.Type(SignatureType.Type)) toBeAssignedValue.StartPos toBeAssignedValue.EndPos
+        | Some value when assignee.TypeId = value.TypeId ->
+            // Issue no SIG05 diagnostics if value is not a constructor and not a class but the types match
+            ()
+        | _ ->
+            // Issue SIG05 diagnostics if there is (for some reason) no value of the toBeAssignedValue 
+            emitSIG05Diagnostics (assignee.Type(SignatureType.Type)) (toBeAssignedValue.Type(SignatureType.Type)) toBeAssignedValue.StartPos toBeAssignedValue.EndPos
+
+    member this.Assignee =
+        if this.ArgList.Count > 0 then 
+            let candidate = this.ArgList[0]
+            if candidate.Name = PrimRefL && candidate.Scope.ContainsKey(candidate.FplId) then 
+                Some candidate.Scope[candidate.FplId]
+            else
+                Some candidate
+        else
+            None
+
+    member this.AssignedValue =
+        if this.ArgList.Count > 1 then 
+            let candidate = this.ArgList[1]
+            if candidate.Name = PrimRefL && candidate.Scope.ContainsKey(candidate.FplId) then 
+                Some candidate.Scope[candidate.FplId]
+            else
+                Some candidate
+        else
+            None
+
+    override this.Run variableStack = 
+        match this.Assignee, this.AssignedValue with
+        | Some assignee, Some assignedValue ->
+            let nameAssignee = assignee.Type(SignatureType.Name)
+            let nameAssignedValue = assignedValue.Type(SignatureType.Name)
+            if nameAssignee = nameAssignedValue then
+                emitLG005Diagnostics nameAssignedValue assignedValue.StartPos assignedValue.EndPos
+            else
+                this.CheckSIG05Diagnostics assignee assignedValue
+                assignedValue.Run variableStack
+                match assignedValue with 
+                | :? FplGenericConstructor as ctor ->
+                    match ctor.Instance with 
+                    | Some instance ->
+                        assignee.SetValue instance // set value to the created instance 
+                        // reposition the instance in symbol table
+                        instance.Parent <- Some assignee
+                    | None -> () // todo, issue diagnostics?
+                | _ ->
+                    assignee.SetValuesOf assignedValue
+                match box assignee with
+                | :? IVariable as assigneeCast -> assigneeCast.IsInitializedVariable <- true
+                | _ -> ()
+        | _ -> ()
+
+/// This constructor is only used for creating instances of classes that have no declared constructors.
+/// In FPL, such classes are "intrinsic". When the default constructor calls the constructor
+/// of some base classes, it is only possible if those classes are also intrisic or have declared constructors
+/// without parameters. 
+type FplDefaultConstructor(name, positions: Positions, parent: FplValue) =
+    inherit FplGenericConstructor(name, positions, parent)
+
+    override this.Name = PrimDefaultConstructor
+    override this.ShortName = LiteralCtor
+
     override this.Clone () =
         let ret = new FplDefaultConstructor(this.FplId, (this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
 
-    override this.Type _ = $"{this.FplId}()" 
+    override this.Type _ = $"{this.TypeId}()" 
+
+    override this.Represent() = $"{this.TypeId}()" 
 
     override this.EmbedInSymbolTable nextOpt = 
         this.CheckConsistency()
@@ -4425,19 +4545,6 @@ type FplDefaultConstructor(name, positions: Positions, parent: FplValue) as this
         | Some next ->
             next.Scope.TryAdd(this.FplId, this) |> ignore
         | _ -> ()
-
-    override this.Represent () = ""
-
-    override this.Run variableStack = 
-        // todo implement run
-        ()
-
-    override this.RunOrder = None
-
-    member this.ToBeConstructedClass  
-        with get () = _toBeConstructedClass
-        and set (value) = _toBeConstructedClass <- value
-
 
 type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
     inherit FplGenericStmt(positions, parent)
