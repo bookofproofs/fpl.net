@@ -4377,23 +4377,9 @@ type FplGenericConstructor(name, positions: Positions, parent: FplValue) as this
 
     override this.Run variableStack = 
         // a dictionary to prevent shadowed variables
-        let distinctVariables = Dictionary<string,FplValue>()
+        let distinctVariables = Dictionary<string, FplValue>()
         // a dictionary to prevent shadowed properties
-        let distinctProperties = Dictionary<string,FplValue>()
-        
-
-        /// Copy the variables and properties of a parent class into a derived class.
-        let copyParentToDerivedClass (parentClass: FplValue) (derivedClass: FplValue) =
-            let shadowedVars = List<string>()
-            let shadowedProperties = List<string>()
-            let parentVariables = parentClass.GetVariables()
-
-            parentVariables
-            |> List.iter (fun parentVar ->
-                if derivedClass.Scope.ContainsKey(parentVar.FplId) then
-                    shadowedVars.Add(parentVar.FplId))
-
-            (shadowedVars, shadowedProperties)
+        let distinctProperties = Dictionary<string, FplValue>()
     
         let rec createSubInstance (classDef:FplValue) (instance:FplValue) (baseInstance:FplValue)=
             if classDef.IsIntrinsic then
@@ -4406,16 +4392,21 @@ type FplGenericConstructor(name, positions: Positions, parent: FplValue) as this
                     baseClass.GetVariables()
                     |> List.iter (fun var ->
                         if distinctVariables.ContainsKey var.FplId then
-                            emitVAR06iagnostic var.FplId baseClass.FplId baseInstance.StartPos
+                            emitVAR06iagnostic var.FplId baseClass.FplId (distinctVariables[var.FplId].FplId) true baseInstance.StartPos baseInstance.EndPos
                         else
+                            // store the variable name and the class, it is from 
+                            distinctVariables.Add (var.FplId, baseClass)
                             baseInstance.Scope.Add (var.FplId, var.Clone())
                     )
                     baseClass.GetProperties()
-                    |> List.iter (fun var ->
-                        if distinctVariables.ContainsKey var.FplId then
-                            () // todo issue diagnostic shadowed variable
+                    |> List.iter (fun prty ->
+                        let prtyName = prty.Type SignatureType.Mixed
+                        if distinctProperties.ContainsKey prtyName then
+                            emitSIG06iagnostic prtyName baseClass.FplId (distinctProperties[prtyName].FplId) true baseInstance.StartPos baseInstance.EndPos
                         else
-                            baseInstance.Scope.Add (var.FplId, var.Clone())
+                            // store the property name and the class, it is from 
+                            distinctProperties.Add (prtyName, baseClass)
+                            baseInstance.Scope.Add (prtyName, prty.Clone())
                     )
                     createSubInstance baseClass subInstance baseInstance
                     instance.ArgList.Add subInstance

@@ -651,6 +651,20 @@ let emitSIG05Diagnostics assigneeTypeStr assignedTypeStr pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
         
+
+let emitSIG06iagnostic name first second isClass pos1 pos2  = 
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = SIG06(name, first, second, isClass)
+            Diagnostic.Alternatives = Some "Rename the original properties to avoid name conflicts." 
+        }
+    ad.AddDiagnostic diagnostic
+
 let emitVAR01diagnostics name pos1 pos2 =
     let diagnostic =
         { 
@@ -707,16 +721,16 @@ let emitVAR04diagnostics name pos1 pos2 =
     }
     ad.AddDiagnostic diagnostic
 
-let emitVAR06iagnostic name parentClass pos = 
+let emitVAR06iagnostic name first second isClass pos1 pos2  = 
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = pos
-            Diagnostic.EndPos = pos
-            Diagnostic.Code = VAR06(name,parentClass)
-            Diagnostic.Alternatives = None 
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = VAR06(name, first, second, isClass)
+            Diagnostic.Alternatives = Some "Rename the original variables to avoid name conflicts." 
         }
     ad.AddDiagnostic diagnostic
 

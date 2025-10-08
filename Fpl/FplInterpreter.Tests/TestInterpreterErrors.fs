@@ -1531,6 +1531,22 @@ type TestInterpreterErrors() =
             let result = filterByErrorCode ad code.Code
             Assert.AreEqual<string>(expected, result.Head.Message)
 
+    [<DataRow("00a", "def cl A:obj { intr prty pred T() {intr} } def cl B:obj { intr prty pred T() {intr} } def cl C:A,B { intr } def pred Test() {dec ~c:C c:=C(); true} ;", 1)>]
+    [<DataRow("00b", "def cl A:obj { intr prty pred T() {intr} } def cl B:obj { intr prty pred S() {intr} } def cl C:A,B { intr } def pred Test() {dec ~c:C c:=C(); true} ;", 0)>]
+    [<DataRow("00c", "def cl A:obj { intr prty pred T() {intr} } def cl B:obj { intr prty pred T(x:func) {intr} } def cl C:A,B { intr } def pred Test() {dec ~c:C c:=C(); true} ;", 0)>]
+    [<DataRow("01a", "def cl A:obj { intr prty func T()->obj {intr} } def cl B:obj { intr prty func T()->obj {intr} } def cl C:A,B { intr } def pred Test() {dec ~c:C c:=C(); true} ;", 1)>]
+    [<DataRow("01b", "def cl A:obj { intr prty func T()->obj {intr} } def cl B:obj { intr prty pred T() {intr} } def cl C:A,B { intr } def pred Test() {dec ~c:C c:=C(); true} ;", 0)>]
+    [<DataRow("01c", "def cl A:obj { intr prty func T()->obj {intr} } def cl B:obj { intr prty func T(x:ind)->obj {intr} } def cl C:A,B { intr } def pred Test() {dec ~c:C c:=C(); true} ;", 0)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestSIG06(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = SIG06 ("","","", true)
+            runTestHelper "TestVAR06.fpl" fplCode code expected
+
+
     [<DataRow("def predicate Test(x,y:* pred) {true};", 1)>]
     [<DataRow("def predicate Test(x,y:+ pred) {true};", 1)>]
     [<DataRow("def predicate Test(x,y: pred) {true};", 0)>]
@@ -1892,16 +1908,15 @@ type TestInterpreterErrors() =
             let code = VAR05 ""
             runTestHelper "TestVAR05.fpl" fplCode code expected
 
-    [<DataRow("00", "def cl T:obj { dec ~x:obj; ctor T() { dec base.obj() ; }} def cl S:T { dec ~x:obj; ctor S() { dec base.T() ; }} ;", 1)>]
-    [<DataRow("01", "def cl T:obj { dec ~x:obj; ctor T() { dec base.obj() ; }} def cl S:T { dec ~y:obj; ctor S() { dec base.T() ; }} ;", 0)>]
-    [<DataRow("02", "def cl T:Stypo { dec ~x:obj; ctor T() { dec base.Stypo() ; }} ;", 0)>]
+    [<DataRow("00a", "def cl T:obj { dec ~x:obj; ctor T() { dec base.obj() ; }} def cl S:T { dec ~x:obj; ctor S() { dec base.T() ; }} ;", 1)>]
+    [<DataRow("00b", "def cl T:obj { dec ~x:obj; ctor T() { dec base.obj() ; }} def cl S:T { dec ~y:obj; ctor S() { dec base.T() ; }} ;", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestVAR06(no:string, fplCode:string, expected) =
         if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = VAR06 ("","")
+            let code = VAR06 ("","","", true)
             runTestHelper "TestVAR06.fpl" fplCode code expected
             
     [<DataRow("00", "def pred T() {exn$1 n:pred { n } };", 0)>]

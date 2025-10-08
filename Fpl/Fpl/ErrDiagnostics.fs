@@ -160,6 +160,7 @@ type DiagnosticCode =
     | SIG03 of string * string 
     | SIG04 of string * int * string list
     | SIG05 of string * string
+    | SIG06 of string * string * string * bool
     // variable-related error codes
     | VAR00 
     | VAR01 of string 
@@ -167,7 +168,7 @@ type DiagnosticCode =
     | VAR03 of string * string
     | VAR04 of string 
     | VAR05 of string 
-    | VAR06 of string * string
+    | VAR06 of string * string * string * bool
     | VAR07 of string 
     | VAR08 
     member this.Code = 
@@ -269,6 +270,7 @@ type DiagnosticCode =
             | SIG03 _ -> "SIG03"
             | SIG04 _ -> "SIG04"
             | SIG05 _ -> "SIG05"
+            | SIG06 _ -> "SIG06"
             // variable-related error codes
             | VAR00 -> "VAR00"
             | VAR01 _  -> "VAR01"
@@ -394,6 +396,11 @@ type DiagnosticCode =
                     let errMsg = errorList |> List.mapi (fun i s -> sprintf "%d. %s" (i + 1) s) |> String.concat ", "
                     $"No overload matching `{signature}`. Checked candidates: {errorList}." 
             | SIG05 (assigneeType, assignedType) -> $"Cannot assign type `{assignedType}` to type `{assigneeType}`."
+            | SIG06 (name, first, second, isClass) -> 
+                if isClass then
+                    $"Property name `{name}` conflict between base classes `{first} and `{second}`."
+                else
+                    $"Property name `{name}` conflict between base functional terms `{first} and `{second}`."
             // variable-related error codes
             | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
             | VAR01 name -> $"Variable `{name}` not declared in this scope."
@@ -401,7 +408,11 @@ type DiagnosticCode =
             | VAR03 (identifier, conflict) -> $"Variable `{identifier}` was already declared at {conflict}."  
             | VAR04 name -> $"Declared variable `{name}` not used in this scope."
             | VAR05 name -> $"Bound variable `{name}` was not used in this quantor."
-            | VAR06 (name, parentClass) -> $"Variable `{name}` of the parent class `{parentClass}` will be shadowed by a local variable with the same name in this scope."
+            | VAR06 (name, first, second, isClass) -> 
+                if isClass then
+                    $"Variable name `{name}` conflict between base classes `{first} and `{second}`."
+                else
+                    $"Variable name `{name}` conflict between base functional terms `{first} and `{second}`."
             | VAR07 name -> $"The {PrimQuantorExistsN} accepts only one bound variable `{name}`."
             | VAR08 -> "Variadic variables cannot be bound in a quantor."
 
