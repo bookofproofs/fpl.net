@@ -172,43 +172,28 @@ type TestFplValueScopeTypeSignature() =
     [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("t1")>]
-    [<DataRow("t2")>]
     [<DataRow("t3")>]
-    [<DataRow("t4")>]
     [<DataRow("t5")>]
-    [<DataRow("t6")>]
     [<DataRow("t7")>]
-    [<DataRow("t8")>]
     [<DataRow("t9")>]
-    [<DataRow("t10")>]
     [<DataRow("t11")>]
-    [<DataRow("t12")>]
     [<DataRow("t13")>]
-    [<DataRow("t14")>]
     [<TestMethod>]
     member this.TestProperties(var) =
         let res = CommonFplValueTestCases.ScopeProperties("TypeSignature") 
         match res with
-        | Some (r:FplRoot,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue,t5:FplValue,t6:FplValue,t7:FplValue,t8:FplValue,t9:FplValue,t10:FplValue,t11:FplValue,t12:FplValue,
-            t13:FplValue,t14:FplValue) -> 
+        | Some (r:FplRoot,theory:FplValue,block:FplValue,t1:FplValue,t3:FplValue,t5:FplValue,t7:FplValue,t9:FplValue,t11:FplValue,t13:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Type))
             | PrimTheoryL -> Assert.AreEqual<string>("TestScopePropertiesTypeSignature", theory.Type(SignatureType.Type))
             | "block" -> Assert.AreEqual<string>("pred()", block.Type(SignatureType.Type))
             | "t1" -> Assert.AreEqual<string>("pred()", t1.Type(SignatureType.Type))
-            | "t2" -> Assert.AreEqual<string>("pred()", t2.Type(SignatureType.Type))
             | "t3" -> Assert.AreEqual<string>("func() -> obj", t3.Type(SignatureType.Type))
-            | "t4" -> Assert.AreEqual<string>("func() -> obj", t4.Type(SignatureType.Type))
             | "t5" -> Assert.AreEqual<string>("func() -> ind", t5.Type(SignatureType.Type))
-            | "t6" -> Assert.AreEqual<string>("func() -> ind", t6.Type(SignatureType.Type))
             | "t7" -> Assert.AreEqual<string>("func() -> pred", t7.Type(SignatureType.Type))
-            | "t8" -> Assert.AreEqual<string>("func() -> pred", t8.Type(SignatureType.Type))
             | "t9" -> Assert.AreEqual<string>("func() -> tpl", t9.Type(SignatureType.Type))
-            | "t10" -> Assert.AreEqual<string>("func() -> tpl", t10.Type(SignatureType.Type))
             | "t11" -> Assert.AreEqual<string>("func() -> Nat", t11.Type(SignatureType.Type))
-            | "t12" -> Assert.AreEqual<string>("func() -> Nat", t12.Type(SignatureType.Type))
             | "t13" -> Assert.AreEqual<string>("func() -> func", t13.Type(SignatureType.Type))
-            | "t14" -> Assert.AreEqual<string>("func() -> func", t14.Type(SignatureType.Type))
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)

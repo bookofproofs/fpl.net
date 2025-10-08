@@ -168,43 +168,28 @@ type TestFplValueScopeQualifiedName() =
     [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("t1")>]
-    [<DataRow("t2")>]
     [<DataRow("t3")>]
-    [<DataRow("t4")>]
     [<DataRow("t5")>]
-    [<DataRow("t6")>]
     [<DataRow("t7")>]
-    [<DataRow("t8")>]
     [<DataRow("t9")>]
-    [<DataRow("t10")>]
     [<DataRow("t11")>]
-    [<DataRow("t12")>]
     [<DataRow("t13")>]
-    [<DataRow("t14")>]
     [<TestMethod>]
     member this.TestProperties(var) =
         let res = CommonFplValueTestCases.ScopeProperties("QualifiedName") 
         match res with
-        | Some (r:FplRoot,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue,t5:FplValue,t6:FplValue,t7:FplValue,t8:FplValue,t9:FplValue,t10:FplValue,t11:FplValue,t12:FplValue,
-            t13:FplValue,t14:FplValue) -> 
+        | Some (r:FplRoot,theory:FplValue,block:FplValue,t1:FplValue,t3:FplValue,t5:FplValue,t7:FplValue,t9:FplValue,t11:FplValue,t13:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<string>("", qualifiedName r)
             | PrimTheoryL -> Assert.AreEqual<string>("TestScopePropertiesQualifiedName", qualifiedName theory)
             | "block" -> Assert.AreEqual<string>("TestScopePropertiesQualifiedName.TestId()", qualifiedName block)
             | "t1" -> Assert.AreEqual<string>("TestScopePropertiesQualifiedName.TestId().T1()", qualifiedName t1)
-            | "t2" -> Assert.AreEqual<string>("TestScopePropertiesQualifiedName.TestId().T2()", qualifiedName t2)
             | "t3" -> Assert.AreEqual<string>("TestScopePropertiesQualifiedName.TestId().T3() -> obj", qualifiedName t3)
-            | "t4" -> Assert.AreEqual<string>("TestScopePropertiesQualifiedName.TestId().T4() -> obj", qualifiedName t4)
             | "t5" -> Assert.AreEqual<string>("TestScopePropertiesQualifiedName.TestId().T5() -> ind", qualifiedName t5)
-            | "t6" -> Assert.AreEqual<string>("TestScopePropertiesQualifiedName.TestId().T6() -> ind", qualifiedName t6)
             | "t7" -> Assert.AreEqual<string>("TestScopePropertiesQualifiedName.TestId().T7() -> pred", qualifiedName t7)
-            | "t8" -> Assert.AreEqual<string>("TestScopePropertiesQualifiedName.TestId().T8() -> pred", qualifiedName t8)
             | "t9" -> Assert.AreEqual<string>("TestScopePropertiesQualifiedName.TestId().T9() -> tpl", qualifiedName t9)
-            | "t10" -> Assert.AreEqual<string>("TestScopePropertiesQualifiedName.TestId().T10() -> tpl", qualifiedName t10)
             | "t11" -> Assert.AreEqual<string>("TestScopePropertiesQualifiedName.TestId().T11() -> Nat", qualifiedName t11)
-            | "t12" -> Assert.AreEqual<string>("TestScopePropertiesQualifiedName.TestId().T12() -> Nat", qualifiedName t12)
             | "t13" -> Assert.AreEqual<string>("TestScopePropertiesQualifiedName.TestId().T13() -> func", qualifiedName t13)
-            | "t14" -> Assert.AreEqual<string>("TestScopePropertiesQualifiedName.TestId().T14() -> func", qualifiedName t14)
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)

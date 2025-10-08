@@ -317,17 +317,9 @@ class MyTreeItem extends vscode.TreeItem {
         {
             this.label = "pred prop " + label;
         }
-        else if (typ == "opred") 
-        {
-            this.label = "opt pred prop " + label;
-        }
         else if (typ == "mfunc") 
         {
             this.label = "func prop " + label;
-        }
-        else if (typ == "ofunc") 
-        {
-            this.label = "opt func prop " + label;
         }
         else 
         {

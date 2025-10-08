@@ -174,43 +174,28 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("t1")>]
-    [<DataRow("t2")>]
     [<DataRow("t3")>]
-    [<DataRow("t4")>]
     [<DataRow("t5")>]
-    [<DataRow("t6")>]
     [<DataRow("t7")>]
-    [<DataRow("t8")>]
     [<DataRow("t9")>]
-    [<DataRow("t10")>]
     [<DataRow("t11")>]
-    [<DataRow("t12")>]
     [<DataRow("t13")>]
-    [<DataRow("t14")>]
     [<TestMethod>]
     member this.TestProperties(var) =
         let res = CommonFplValueTestCases.ScopeProperties("FplRepresentation") 
         match res with
-        | Some (r:FplRoot,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue,t5:FplValue,t6:FplValue,t7:FplValue,t8:FplValue,t9:FplValue,t10:FplValue,t11:FplValue,t12:FplValue,
-            t13:FplValue,t14:FplValue) -> 
+        | Some (r:FplRoot,theory:FplValue,block:FplValue,t1:FplValue,t3:FplValue,t5:FplValue,t7:FplValue,t9:FplValue,t11:FplValue,t13:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<string>(LiteralUndef, r.Represent())
             | PrimTheoryL -> Assert.AreEqual<string>(LiteralUndef, theory.Represent())
             | "block" -> Assert.AreEqual<string>(PrimUndetermined, block.Represent())
             | "t1" -> Assert.AreEqual<string>(LiteralTrue, t1.Represent())
-            | "t2" -> Assert.AreEqual<string>(LiteralTrue, t2.Represent())
             | "t3" -> Assert.AreEqual<string>("dec obj", t3.Represent())
-            | "t4" -> Assert.AreEqual<string>("dec obj", t4.Represent())
             | "t5" -> Assert.AreEqual<string>($"dec {LiteralInd}", t5.Represent())
-            | "t6" -> Assert.AreEqual<string>($"dec {LiteralInd}", t6.Represent())
             | "t7" -> Assert.AreEqual<string>($"dec {LiteralPred}", t7.Represent())
-            | "t8" -> Assert.AreEqual<string>($"dec {LiteralPred}", t8.Represent())
             | "t9" -> Assert.AreEqual<string>($"dec {LiteralTpl}", t9.Represent())
-            | "t10" -> Assert.AreEqual<string>($"dec {LiteralTpl}", t10.Represent())
             | "t11" -> Assert.AreEqual<string>($"dec Nat", t11.Represent())
-            | "t12" -> Assert.AreEqual<string>($"dec Nat", t12.Represent())
             | "t13" -> Assert.AreEqual<string>($"dec {LiteralFunc}", t13.Represent())
-            | "t14" -> Assert.AreEqual<string>($"dec {LiteralFunc}", t14.Represent())
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)

@@ -285,7 +285,7 @@ type TestDefinitionPredicates () =
                 return x
 	        } 
 
-            opt property pred  T() 
+            property pred  T() 
 	        {
                 true
 	        } 
@@ -382,7 +382,7 @@ type TestDefinitionPredicates () =
                 return x
 	        } 
 
-            opt property  pred  T() 
+            property  pred  T() 
 	        {
                 true
 	        } 
@@ -487,4 +487,12 @@ type TestDefinitionPredicates () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
-    
+    [<TestMethod>]
+    member this.TestDefinitionPredicate27 () =
+        let result = run (definitionPredicate .>> eof) """pred  T(x,y:obj)
+                {
+                    @self(a,@self(b,c)) 
+                }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))

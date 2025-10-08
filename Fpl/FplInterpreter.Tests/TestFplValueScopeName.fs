@@ -193,43 +193,28 @@ type TestFplValueScopeName() =
     [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("t1")>]
-    [<DataRow("t2")>]
     [<DataRow("t3")>]
-    [<DataRow("t4")>]
     [<DataRow("t5")>]
-    [<DataRow("t6")>]
     [<DataRow("t7")>]
-    [<DataRow("t8")>]
     [<DataRow("t9")>]
-    [<DataRow("t10")>]
     [<DataRow("t11")>]
-    [<DataRow("t12")>]
     [<DataRow("t13")>]
-    [<DataRow("t14")>]
     [<TestMethod>]
     member this.TestProperties(var) =
         let res = CommonFplValueTestCases.ScopeProperties("Name") 
         match res with
-        | Some (r:FplRoot,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue,t5:FplValue,t6:FplValue,t7:FplValue,t8:FplValue,t9:FplValue,t10:FplValue,t11:FplValue,t12:FplValue,
-            t13:FplValue,t14:FplValue) -> 
+        | Some (r:FplRoot,theory:FplValue,block:FplValue,t1:FplValue,t3:FplValue,t5:FplValue,t7:FplValue,t9:FplValue,t11:FplValue,t13:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Mixed))
             | PrimTheoryL -> Assert.AreEqual<string>("TestScopePropertiesName", theory.Type(SignatureType.Mixed))
             | "block" -> Assert.AreEqual<string>("TestId()", block.Type(SignatureType.Mixed))
             | "t1" -> Assert.AreEqual<string>("T1()", t1.Type(SignatureType.Mixed))
-            | "t2" -> Assert.AreEqual<string>("T2()", t2.Type(SignatureType.Mixed))
             | "t3" -> Assert.AreEqual<string>("T3() -> obj", t3.Type(SignatureType.Mixed))
-            | "t4" -> Assert.AreEqual<string>("T4() -> obj", t4.Type(SignatureType.Mixed))
             | "t5" -> Assert.AreEqual<string>("T5() -> ind", t5.Type(SignatureType.Mixed))
-            | "t6" -> Assert.AreEqual<string>("T6() -> ind", t6.Type(SignatureType.Mixed))
             | "t7" -> Assert.AreEqual<string>("T7() -> pred", t7.Type(SignatureType.Mixed))
-            | "t8" -> Assert.AreEqual<string>("T8() -> pred", t8.Type(SignatureType.Mixed))
             | "t9" -> Assert.AreEqual<string>("T9() -> tpl", t9.Type(SignatureType.Mixed))
-            | "t10" -> Assert.AreEqual<string>("T10() -> tpl", t10.Type(SignatureType.Mixed))
             | "t11" -> Assert.AreEqual<string>("T11() -> Nat", t11.Type(SignatureType.Mixed))
-            | "t12" -> Assert.AreEqual<string>("T12() -> Nat", t12.Type(SignatureType.Mixed))
             | "t13" -> Assert.AreEqual<string>("T13() -> func", t13.Type(SignatureType.Mixed))
-            | "t14" -> Assert.AreEqual<string>("T14() -> func", t14.Type(SignatureType.Mixed))
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)

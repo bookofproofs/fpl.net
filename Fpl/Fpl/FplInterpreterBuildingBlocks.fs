@@ -192,9 +192,7 @@ let rec eval (st: SymbolTable) ast =
         | PrimPredicateL
         | LiteralPrfL
         | PrimMandatoryFunctionalTermL
-        | PrimOptionalFunctionalTermL
         | PrimMandatoryPredicateL
-        | PrimOptionalPredicateL
         | PrimPredicateL
         | PrimFuncionalTermL
         | PrimRuleOfInference -> 
@@ -462,9 +460,7 @@ let rec eval (st: SymbolTable) ast =
         match fv.NextBlockNode with
         | Some block ->
             match block.Name with 
-            | PrimOptionalFunctionalTermL
             | PrimMandatoryFunctionalTermL
-            | PrimOptionalPredicateL
             | PrimMandatoryPredicateL
             | PrimClassL
             | PrimPredicateL
@@ -493,16 +489,10 @@ let rec eval (st: SymbolTable) ast =
             | PrimClassL, LiteralCtorL 
             | PrimClassL, PrimMandatoryFunctionalTermL
             | PrimClassL, PrimMandatoryPredicateL
-            | PrimClassL, PrimOptionalFunctionalTermL
-            | PrimClassL, PrimOptionalPredicateL
             | PrimPredicateL, PrimMandatoryFunctionalTermL
             | PrimPredicateL, PrimMandatoryPredicateL
-            | PrimPredicateL, PrimOptionalFunctionalTermL
-            | PrimPredicateL, PrimOptionalPredicateL
             | PrimFuncionalTermL, PrimMandatoryFunctionalTermL
-            | PrimFuncionalTermL, PrimMandatoryPredicateL
-            | PrimFuncionalTermL, PrimOptionalFunctionalTermL
-            | PrimFuncionalTermL, PrimOptionalPredicateL ->
+            | PrimFuncionalTermL, PrimMandatoryPredicateL ->
                 fv.Scope.Add(block.FplId, block)
             | PrimClassL, PrimClassL ->
                 let alternative = Some "However, the reference was made inside the class block and not inside its constructor or its property."
@@ -1181,22 +1171,14 @@ let rec eval (st: SymbolTable) ast =
         diagList
         |> Seq.iter (fun diag -> ad.AddDiagnostic diag)
         st.EvalPop()
-    | Ast.FunctionalTermInstance((pos1, pos2), ((optionalPropAst, functionalTerMInstanceSignatureAst), functionalTermInstanceBlockAst)) ->
+    | Ast.FunctionalTermInstance((pos1, pos2), (functionalTermInstanceSignatureAst, functionalTermInstanceBlockAst)) ->
         st.EvalPush("FunctionalTermInstance")
         let parent = variableStack.PeekEvalStack()
-        match optionalPropAst with
-        | Some _ -> 
-                let fvNew = new FplOptionalFunctionalTerm((pos1, pos2), parent)
-                variableStack.PushEvalStack(fvNew)
-                eval st functionalTerMInstanceSignatureAst
-                eval st functionalTermInstanceBlockAst
-                variableStack.PopEvalStack()
-        | None -> 
-                let fvNew = new FplMandatoryFunctionalTerm((pos1, pos2), parent)
-                variableStack.PushEvalStack(fvNew)
-                eval st functionalTerMInstanceSignatureAst
-                eval st functionalTermInstanceBlockAst
-                variableStack.PopEvalStack()
+        let fvNew = new FplMandatoryFunctionalTerm((pos1, pos2), parent)
+        variableStack.PushEvalStack(fvNew)
+        eval st functionalTermInstanceSignatureAst
+        eval st functionalTermInstanceBlockAst
+        variableStack.PopEvalStack()
         st.EvalPop()
     // | All of Positions * ((Ast list * Ast option) list * Ast)
     | Ast.All((pos1, pos2), (namedVarDeclAstList, predicateAst)) ->
@@ -1380,8 +1362,7 @@ let rec eval (st: SymbolTable) ast =
         | :? FplConjecture  
         | :? FplPredicate  
         | :? FplAxiom 
-        | :? FplMandatoryPredicate 
-        | :? FplOptionalPredicate ->
+        | :? FplMandatoryPredicate ->
             fv.SetValue(last)
         | :? FplReference ->
             // simplify references created due to superfluous parentheses of expressions
@@ -1493,26 +1474,16 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PopEvalStack() // remove value
         variableStack.PopEvalStack() // remove Assignment
         st.EvalPop()
-    | Ast.PredicateInstance((pos1, pos2), (keywordOptionalAst, (signatureAst, predInstanceBlockAst))) ->
+    | Ast.PredicateInstance((pos1, pos2), (signatureAst, predInstanceBlockAst)) ->
         st.EvalPush("PredicateInstance")
         let parent = variableStack.PeekEvalStack()
-        match keywordOptionalAst with
-        | Some _ -> 
-            let fvNew = new FplOptionalPredicate((pos1, pos2), parent)
-            variableStack.PushEvalStack(fvNew)
-            eval st signatureAst
-            eval st predInstanceBlockAst
-            if not fvNew.IsIntrinsic then // if not intrinsic, check variable usage
-                emitVAR04diagnostics fvNew
-            variableStack.PopEvalStack()
-        | None -> 
-            let fvNew = new FplMandatoryPredicate((pos1, pos2), parent)
-            variableStack.PushEvalStack(fvNew)
-            eval st signatureAst
-            eval st predInstanceBlockAst
-            if not fvNew.IsIntrinsic then // if not intrinsic, check variable usage
-                emitVAR04diagnostics fvNew
-            variableStack.PopEvalStack()
+        let fvNew = new FplMandatoryPredicate((pos1, pos2), parent)
+        variableStack.PushEvalStack(fvNew)
+        eval st signatureAst
+        eval st predInstanceBlockAst
+        if not fvNew.IsIntrinsic then // if not intrinsic, check variable usage
+            emitVAR04diagnostics fvNew
+        variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.BaseConstructorCall((pos1, pos2), (inheritedClassTypeAst, argumentTupleAst)) ->
         st.EvalPush("BaseConstructorCall")

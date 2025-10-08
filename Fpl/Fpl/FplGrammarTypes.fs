@@ -148,8 +148,8 @@ type Ast =
     | PredicateInstanceSignature of Positions * (Ast * Ast)
     | FunctionalTermInstanceSignature of Positions * ((Ast * Ast) * Ast)
     | Constructor of Positions * (Ast * (Ast list option)) 
-    | PredicateInstance of Positions * (unit option * (Ast * Ast))
-    | FunctionalTermInstance of Positions * ((unit option * Ast) * Ast)
+    | PredicateInstance of Positions * (Ast * Ast)
+    | FunctionalTermInstance of Positions * (Ast * Ast)
     | DefPredicateContent of Ast list option * Ast
     | DefinitionPredicate of Positions * (Ast * (Ast * Ast list option))
     | DefFunctionContent of Ast list option * Ast

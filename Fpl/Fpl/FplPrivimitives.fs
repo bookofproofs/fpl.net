@@ -125,10 +125,6 @@ let LiteralObj = "obj"
 [<Literal>]
 let LiteralObjL = "object"
 [<Literal>]
-let LiteralOpt = "opt"
-[<Literal>]
-let LiteralOptL = "optional"
-[<Literal>]
 let LiteralOr = "or"
 [<Literal>]
 let LiteralParent = "parent"
@@ -254,8 +250,6 @@ let keyWordSet =
            LiteralNot
            LiteralObj
            LiteralObjL
-           LiteralOpt
-           LiteralOptL
            LiteralOr
            LiteralParent
            LiteralPost
@@ -1423,14 +1417,6 @@ let PrimMapping = "map"
 let PrimMappingL = "mapping"
 [<Literal>]
 let PrimNegation = "negation"
-[<Literal>]
-let PrimOptionalFunctionalTerm = "ofunc"
-[<Literal>]
-let PrimOptionalFunctionalTermL = "optional functional term property"
-[<Literal>]
-let PrimOptionalPredicate = "opred"
-[<Literal>]
-let PrimOptionalPredicateL = "optional predicate property"
 [<Literal>]
 let PrimPascalCaseId = "PascalCaseId"
 [<Literal>]

@@ -15,7 +15,6 @@ namespace FplLS
         public string TokenFunction { get; set; }
         public string TokenIntrinsic { get; set; }
         public string TokenObject { get; set; }
-        public string TokenOptional { get; set; }
         public string TokenPredicate { get; set; }
         public string TokenPremise { get; set; }
         public string TokenRevoke { get; set; }
@@ -28,7 +27,6 @@ namespace FplLS
             TokenFunction = LiteralFuncL;
             TokenIntrinsic = LiteralIntrL;
             TokenObject = LiteralObjL;
-            TokenOptional = LiteralOptL;
             TokenPredicate = LiteralPredL;
             TokenPremise = LiteralPreL;
             TokenRevoke = LiteralRevL;
@@ -43,7 +41,6 @@ namespace FplLS
             TokenFunction = LiteralFunc;
             TokenIntrinsic = LiteralIntr;
             TokenObject = LiteralObj;
-            TokenOptional = LiteralOpt;
             TokenPredicate = LiteralPred;
             TokenPremise = LiteralPre;
             TokenRevoke = LiteralRev;

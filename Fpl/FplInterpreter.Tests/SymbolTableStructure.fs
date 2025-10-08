@@ -229,16 +229,6 @@ type SymbolTableStructure() =
         | "FplNegation" ->
             let x = new FplNegation(positions, parent)
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""; x.Represent(); x.Type SignatureType.Mixed]
-        | "FplOptionalFunctionalTerm" ->
-            let x = new FplOptionalFunctionalTerm(positions, parent)
-            let mapping = new FplMapping(positions, x)
-            mapping.TypeId <- LiteralObj
-            mapping.FplId <- LiteralObj
-            x.ArgList.Add mapping
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""; x.Represent(); x.Type SignatureType.Mixed]
-        | "FplOptionalPredicate" ->
-            let x = new FplOptionalPredicate(positions, parent)
-            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""; x.Represent(); x.Type SignatureType.Mixed]
         | "FplParent" ->
             let x = new FplParent(positions, parent)
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""; x.Represent(); x.Type SignatureType.Mixed]
@@ -385,8 +375,6 @@ type SymbolTableStructure() =
     [<DataRow("FplMapCaseSingle")>]
     [<DataRow("FplMapping")>]
     [<DataRow("FplNegation")>]
-    [<DataRow("FplOptionalFunctionalTerm")>]
-    [<DataRow("FplOptionalPredicate")>]
     [<DataRow("FplParent")>]
     [<DataRow("FplPredicate")>]
     [<DataRow("FplPredicateList")>]
@@ -526,10 +514,6 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>(PrimMappingL, (getName var).[index])
         | "FplNegation" ->
             Assert.AreEqual<string>(PrimNegation, (getName var).[index])        
-        | "FplOptionalFunctionalTerm" ->
-            Assert.AreEqual<string>(PrimOptionalFunctionalTermL, (getName var).[index])
-        | "FplOptionalPredicate" ->
-            Assert.AreEqual<string>(PrimOptionalPredicateL, (getName var).[index])
         | "FplParent" ->
             Assert.AreEqual<string>(LiteralParent, (getName var).[index])
         | "FplPredicate" ->
@@ -630,8 +614,6 @@ type SymbolTableStructure() =
     [<DataRow("FplMapCaseSingle")>]
     [<DataRow("FplMapping")>]
     [<DataRow("FplNegation")>]
-    [<DataRow("FplOptionalFunctionalTerm")>]
-    [<DataRow("FplOptionalPredicate")>]
     [<DataRow("FplParent")>]
     [<DataRow("FplPredicate")>]
     [<DataRow("FplPredicateList")>]
@@ -772,10 +754,6 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>(PrimMapping, (getName var).[index])
         | "FplNegation" ->
             Assert.AreEqual<string>(LiteralNot, (getName var).[index])
-        | "FplOptionalFunctionalTerm" ->
-            Assert.AreEqual<string>(PrimOptionalFunctionalTerm, (getName var).[index])
-        | "FplOptionalPredicate" ->
-            Assert.AreEqual<string>(PrimOptionalPredicate, (getName var).[index])
         | "FplParent" ->
             Assert.AreEqual<string>(LiteralParent, (getName var).[index])
         | "FplPredicate" ->
@@ -875,8 +853,6 @@ type SymbolTableStructure() =
     [<DataRow("FplMapCaseSingle")>]
     [<DataRow("FplMapping")>]
     [<DataRow("FplNegation")>]
-    [<DataRow("FplOptionalFunctionalTerm")>]
-    [<DataRow("FplOptionalPredicate")>]
     [<DataRow("FplParent")>]
     [<DataRow("FplPredicate")>]
     [<DataRow("FplPredicateList")>]
@@ -1017,10 +993,6 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>(LiteralObj, (getName var).[index])
         | "FplNegation" ->
             Assert.AreEqual<string>(LiteralNot, (getName var).[index])
-        | "FplOptionalFunctionalTerm" ->
-            Assert.AreEqual<string>(LiteralFunc, (getName var).[index])
-        | "FplOptionalPredicate" ->
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
         | "FplParent" ->
             Assert.AreEqual<string>(LiteralParent, (getName var).[index])
         | "FplPredicate" ->
@@ -1121,8 +1093,6 @@ type SymbolTableStructure() =
     [<DataRow("FplMapCaseSingle")>]
     [<DataRow("FplMapping")>]
     [<DataRow("FplNegation")>]
-    [<DataRow("FplOptionalFunctionalTerm")>]
-    [<DataRow("FplOptionalPredicate")>]
     [<DataRow("FplParent")>]
     [<DataRow("FplPredicate")>]
     [<DataRow("FplPredicateList")>]
@@ -1263,10 +1233,6 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplNegation" ->
             Assert.AreEqual<string>(LiteralPred, (getName var).[index])
-        | "FplOptionalFunctionalTerm" ->
-            Assert.AreEqual<string>(LiteralFunc, (getName var).[index])
-        | "FplOptionalPredicate" ->
-            Assert.AreEqual<string>(LiteralPred, (getName var).[index])
         | "FplParent" ->
             Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
         | "FplPredicate" ->
@@ -1366,8 +1332,6 @@ type SymbolTableStructure() =
     [<DataRow("FplMapCaseSingle")>]
     [<DataRow("FplMapping")>]
     [<DataRow("FplNegation")>]
-    [<DataRow("FplOptionalFunctionalTerm")>]
-    [<DataRow("FplOptionalPredicate")>]
     [<DataRow("FplParent")>]
     [<DataRow("FplPredicate")>]
     [<DataRow("FplPredicateList")>]
@@ -1508,10 +1472,6 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>("None", (getName var).[index])
         | "FplNegation" ->
             Assert.AreEqual<string>("None", (getName var).[index])
-        | "FplOptionalFunctionalTerm" ->
-            Assert.AreEqual<string>("None", (getName var).[index])
-        | "FplOptionalPredicate" ->
-            Assert.AreEqual<string>("None", (getName var).[index])
         | "FplParent" ->
             Assert.AreEqual<string>("None", (getName var).[index])
         | "FplPredicate" ->
@@ -1612,8 +1572,6 @@ type SymbolTableStructure() =
     [<DataRow("FplMapCaseSingle")>]
     [<DataRow("FplMapping")>]
     [<DataRow("FplNegation")>]
-    [<DataRow("FplOptionalFunctionalTerm")>]
-    [<DataRow("FplOptionalPredicate")>]
     [<DataRow("FplParent")>]
     [<DataRow("FplPredicate")>]
     [<DataRow("FplPredicateList")>]
@@ -1812,12 +1770,6 @@ type SymbolTableStructure() =
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>($"{LiteralDec} {LiteralObj}", (getName var).[index])
         | "FplNegation" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>("", (getName var).[index])
-        | "FplOptionalFunctionalTerm" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>($"{LiteralDec} {LiteralFunc}() -> {LiteralObj}", (getName var).[index])
-        | "FplOptionalPredicate" ->
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplParent" ->
@@ -2112,11 +2064,11 @@ type SymbolTableStructure() =
     // two constructors
     [<DataRow("FplClass", "02a", """def cl A:obj { ctor A() {} ctor A(x,y,z:obj) {} };""", "")>]
     // intrinsic (without constructor), but with properties
-    [<DataRow("FplClass", "03", """def cl A:obj { intr prty func MandF()->obj {intr} opt prty func OptF()->obj {intr} prty pred MandP() {true} opt prty pred OptP() {true} };""", "")>]
+    [<DataRow("FplClass", "03", """def cl A:obj { intr prty func MandF()->obj {intr} prty func OptF()->obj {intr} prty pred MandP() {true} prty pred OptP() {true} };""", "")>]
     // with constructor and properties
-    [<DataRow("FplClass", "04", """def cl A:obj { ctor A() {} prty func MandF()->obj {intr} opt prty func OptF()->obj {intr} prty pred MandP() {true} opt prty pred OptP() {true} };""", "")>]
+    [<DataRow("FplClass", "04", """def cl A:obj { ctor A() {} prty func MandF()->obj {intr} prty func OptF()->obj {intr} prty pred MandP() {true} prty pred OptP() {true} };""", "")>]
     // with variables constructor and properties
-    [<DataRow("FplClass", "05", """def cl A:obj { dec ~x,y:obj; ctor A() {} prty func MandF()->obj {intr} opt prty func OptF()->obj {intr} prty pred MandP() {true} opt prty pred OptP() {true} };""", "")>]
+    [<DataRow("FplClass", "05", """def cl A:obj { dec ~x,y:obj; ctor A() {} prty func MandF()->obj {intr} prty func OptF()->obj {intr} prty pred MandP() {true} prty pred OptP() {true} };""", "")>]
     [<TestMethod>]
     member this.TestStructureFplClass(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplClass.fpl"
@@ -2544,9 +2496,9 @@ type SymbolTableStructure() =
     // intrinsic functional term with variables
     [<DataRow("FplFunctionalTerm", "01", """def func T(x,y:obj)->obj {intr};""", "")>]
     // intrinsic functional term with variables and properties
-    [<DataRow("FplFunctionalTerm", "02", """def func T(x,y:obj)->obj {intr prty func MandF()->obj {intr} opt prty func OptF()->obj {intr} prty pred MandP() {true} opt prty pred OptP() {true} };""", "")>]
+    [<DataRow("FplFunctionalTerm", "02", """def func T(x,y:obj)->obj {intr prty func MandF()->obj {intr} prty func OptF()->obj {intr} prty pred MandP() {true} prty pred OptP() {true} };""", "")>]
     // non-intrinsic functional term with variables and properties
-    [<DataRow("FplFunctionalTerm", "03", """def func T(x,y:obj)->obj {dec ~z:obj; return z prty func MandF()->obj {intr} opt prty func OptF()->obj {intr} prty pred MandP() {true} opt prty pred OptP() {true} };""", "")>]
+    [<DataRow("FplFunctionalTerm", "03", """def func T(x,y:obj)->obj {dec ~z:obj; return z prty func MandF()->obj {intr} prty func OptF()->obj {intr} prty pred MandP() {true} prty pred OptP() {true} };""", "")>]
     // non-intrinsic functional term with some statements 
     [<DataRow("FplFunctionalTerm", "04", """def func T(x,y:obj)->obj {dec ~z:obj z:=x y:=z; return z };""", "")>]
     [<TestMethod>]
@@ -3262,23 +3214,23 @@ type SymbolTableStructure() =
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
 
-    // intrinsic optional predicate with predicate parent
+    // intrinsic predicate with predicate parent
     [<DataRow("FplMandatoryPredicate", "00",  """def pred T() {intr prty pred MandF(x:obj) {intr} };""", "")>]
-    // intrinsic optional predicate with functional term parent
+    // intrinsic predicate with functional term parent
     [<DataRow("FplMandatoryPredicate", "01",  """def func T()->obj {intr prty pred MandF(x:obj) {intr} };""", "")>]
-    // intrinsic optional predicate with class parent
+    // intrinsic predicate with class parent
     [<DataRow("FplMandatoryPredicate", "02",  """def cl T:obj {intr prty pred MandF(x:obj) {intr} };""", "")>]
-    // non-intrinsic optional predicate with predicate parent
+    // non-intrinsic predicate with predicate parent
     [<DataRow("FplMandatoryPredicate", "03",  """def pred T() {intr prty pred MandF(x:obj) {true} };""", "")>]
-    // non-intrinsic optional predicate with functional term parent
+    // non-intrinsic predicate with functional term parent
     [<DataRow("FplMandatoryPredicate", "04",  """def func T()->obj {intr prty pred MandF(x:obj) {true} };""", "")>]
-    // non-intrinsic optional predicate with class parent
+    // non-intrinsic predicate with class parent
     [<DataRow("FplMandatoryPredicate", "05",  """def cl T:obj {intr prty pred MandF(x:obj) {true} };""", "")>]
-    // non-intrinsic optional predicate with predicate parent, shared variables and one statement
+    // non-intrinsic predicate with predicate parent, shared variables and one statement
     [<DataRow("FplMandatoryPredicate", "06",  """def pred T() {dec ~y:obj; true prty pred MandF(x:obj) {dec x:=y; true} };""", "")>]
-    // non-intrinsic optional predicate with functional term parent, shared variables and one statement
+    // non-intrinsic predicate with functional term parent, shared variables and one statement
     [<DataRow("FplMandatoryPredicate", "07",  """def func T()->obj {dec ~y:obj; return y prty pred MandF(x:obj) {dec x:=y; true} };""", "")>]
-    // non-intrinsic optional predicate with class parent, shared variables and one statement
+    // non-intrinsic predicate with class parent, shared variables and one statement
     [<DataRow("FplMandatoryPredicate", "08",  """def cl T:obj {dec ~y:obj; ctor T() {} prty pred MandF(x:obj) {dec x:=y; true} };""", "")>]
     [<TestMethod>]
     member this.TestStructureFplMandatoryPredicate(nodeType, varVal, fplCode, identifier) =
@@ -3410,11 +3362,6 @@ type SymbolTableStructure() =
     [<DataRow("FplMapping", "01b", """def pred T1() {intr prty func T()->func()->pred(a,b:obj) {intr}};""", "")>]
     [<DataRow("FplMapping", "01c", """def pred T1() {intr prty func T()->func()->pred(a,b:obj) {intr}};""", "pred(a, b)")>]
     [<DataRow("FplMapping", "01d", """def pred T1() {intr prty func T()->func(a,b,c:obj)->obj {intr}};""", "")>]
-    // mapping of optional properties
-    [<DataRow("FplMapping", "02a", """def pred T1() {intr opt prty func T()->pred(a:obj) {intr}};""", "")>]
-    [<DataRow("FplMapping", "02b", """def pred T1() {intr opt prty func T()->func()->pred(a,b:obj) {intr}};""", "")>]
-    [<DataRow("FplMapping", "02c", """def pred T1() {intr opt prty func T()->func()->pred(a,b:obj) {intr}};""", "pred(a, b)")>]
-    [<DataRow("FplMapping", "02d", """def pred T1() {intr opt prty func T()->func(a,b,c:obj)->obj {intr}};""", "")>]
     // mapping of extensions
     [<DataRow("FplMapping", "03a", """ext Digits x@/\d+/->pred(a:obj) {ret x};""", "")>]
     [<DataRow("FplMapping", "03b", """ext Digits x@/\d+/->func()->pred(a,b:obj) {ret x};""", "")>]
@@ -3478,27 +3425,6 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplMapping>(node) 
             Assert.AreEqual<int>(1, node.ArgList.Count) // nested mapping
             Assert.AreEqual<int>(3, node.Scope.Count) // 3 variables
-        | "FplMapping", "02a" -> 
-            Assert.IsInstanceOfType<FplOptionalFunctionalTerm>(parent) 
-            Assert.AreEqual<int>(1, parent.ArgList.Count) // mapping
-            Assert.AreEqual<int>(0, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplMapping>(node)
-            Assert.AreEqual<int>(0, node.ArgList.Count) 
-            Assert.AreEqual<int>(1, node.Scope.Count) 
-        | "FplMapping", "02b" -> 
-            Assert.IsInstanceOfType<FplOptionalFunctionalTerm>(parent) 
-            Assert.AreEqual<int>(1, parent.ArgList.Count) // mapping
-            Assert.AreEqual<int>(0, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplMapping>(node)
-            Assert.AreEqual<int>(1, node.ArgList.Count) // nested mapping
-            Assert.AreEqual<int>(0, node.Scope.Count) // 0 variables
-        | "FplMapping", "02d" -> 
-            Assert.IsInstanceOfType<FplOptionalFunctionalTerm>(parent) 
-            Assert.AreEqual<int>(1, parent.ArgList.Count) // mapping
-            Assert.AreEqual<int>(0, parent.Scope.Count) // 0 variables
-            Assert.IsInstanceOfType<FplMapping>(node) 
-            Assert.AreEqual<int>(1, node.ArgList.Count) // nested mapping
-            Assert.AreEqual<int>(3, node.Scope.Count) // 3 variables
         | "FplMapping", "03a" -> 
             Assert.IsInstanceOfType<FplExtension>(parent) 
             Assert.AreEqual<int>(2, parent.ArgList.Count) // mapping + return 
@@ -3539,95 +3465,6 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    // intrinsic optional functional term with predicate parent
-    [<DataRow("FplOptionalFunctionalTerm", "00",  """def pred T() {intr opt prty func MandF(x:obj)->obj {intr} };""", "")>]
-    // intrinsic optional functional term with functional term parent
-    [<DataRow("FplOptionalFunctionalTerm", "01",  """def func T()->obj {intr opt prty func MandF(x:obj)->obj {intr} };""", "")>]
-    // intrinsic optional functional term with class parent
-    [<DataRow("FplOptionalFunctionalTerm", "02",  """def cl T:obj {intr opt prty func MandF(x:obj)->obj {intr} };""", "")>]
-    // non-intrinsic optional functional term with predicate parent
-    [<DataRow("FplOptionalFunctionalTerm", "03",  """def pred T() {intr opt prty func MandF(x:obj)->obj {return x} };""", "")>]
-    // non-intrinsic optional functional term with functional term parent
-    [<DataRow("FplOptionalFunctionalTerm", "04",  """def func T()->obj {intr opt prty func MandF(x:obj)->obj {return x} };""", "")>]
-    // non-intrinsic optional functional term with class parent
-    [<DataRow("FplOptionalFunctionalTerm", "05",  """def cl T:obj {intr opt prty func MandF(x:obj)->obj {return x} };""", "")>]
-    // non-intrinsic optional functional term with predicate parent, shared variables and one statement
-    [<DataRow("FplOptionalFunctionalTerm", "06",  """def pred T() {dec ~y:obj; true opt prty func MandF(x:obj)->obj {dec x:=y; return x} };""", "")>]
-    // non-intrinsic optional functional term with functional term parent, shared variables and one statement
-    [<DataRow("FplOptionalFunctionalTerm", "07",  """def func T()->obj {dec ~y:obj; return y opt prty func MandF(x:obj)->obj {dec x:=y; return x} };""", "")>]
-    // non-intrinsic optional functional term with class parent, shared variables and one statement
-    [<DataRow("FplOptionalFunctionalTerm", "08",  """def cl T:obj {dec ~y:obj; ctor T() {} opt prty func MandF(x:obj)->obj {dec x:=y; return x} };""", "")>]
-    [<TestMethod>]
-    member this.TestStructureFplOptionalFunctionalTerm(nodeType, varVal, fplCode, identifier) =
-        let filename = "TestStructureFplOptionalFunctionalTerm.fpl"
-        let parent, node = testSkeleton nodeType filename fplCode identifier
-        
-        match nodeType, varVal with
-        | "FplOptionalFunctionalTerm", "00" -> 
-            Assert.IsInstanceOfType<FplPredicate>(parent) // predicate parent
-            Assert.AreEqual<int>(0, parent.ArgList.Count)
-            Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplOptionalFunctionalTerm>(node)
-            Assert.AreEqual<int>(1, node.ArgList.Count) // intrinsic with mapping 
-            Assert.AreEqual<int>(1, node.Scope.Count) // one variable
-        | "FplOptionalFunctionalTerm", "01" -> 
-            Assert.IsInstanceOfType<FplFunctionalTerm>(parent) // functional term parent
-            Assert.AreEqual<int>(1, parent.ArgList.Count) // parent's mapping
-            Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplOptionalFunctionalTerm>(node)
-            Assert.AreEqual<int>(1, node.ArgList.Count) // intrinsic with mapping 
-            Assert.AreEqual<int>(1, node.Scope.Count) // one variable
-        | "FplOptionalFunctionalTerm", "02" -> 
-            Assert.IsInstanceOfType<FplClass>(parent) // class parent
-            Assert.AreEqual<int>(1, parent.ArgList.Count) // class's base class
-            Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplOptionalFunctionalTerm>(node)
-            Assert.AreEqual<int>(1, node.ArgList.Count) // intrinsic with mapping 
-            Assert.AreEqual<int>(1, node.Scope.Count) // one variable
-        | "FplOptionalFunctionalTerm", "03" -> 
-            Assert.IsInstanceOfType<FplPredicate>(parent) // predicate parent
-            Assert.AreEqual<int>(0, parent.ArgList.Count)
-            Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplOptionalFunctionalTerm>(node)
-            Assert.AreEqual<int>(2, node.ArgList.Count) // non-intrinsic with mapping and return stmt 
-            Assert.AreEqual<int>(1, node.Scope.Count) // one variable
-        | "FplOptionalFunctionalTerm", "04" -> 
-            Assert.IsInstanceOfType<FplFunctionalTerm>(parent) // functional term parent
-            Assert.AreEqual<int>(1, parent.ArgList.Count) // parent's mapping
-            Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplOptionalFunctionalTerm>(node)
-            Assert.AreEqual<int>(2, node.ArgList.Count) // non-intrinsic with mapping and return stmt 
-            Assert.AreEqual<int>(1, node.Scope.Count) // one variable
-        | "FplOptionalFunctionalTerm", "05" -> 
-            Assert.IsInstanceOfType<FplClass>(parent) // class parent
-            Assert.AreEqual<int>(1, parent.ArgList.Count) // class's base class
-            Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplOptionalFunctionalTerm>(node)
-            Assert.AreEqual<int>(2, node.ArgList.Count) // non-intrinsic with mapping and return stmt
-            Assert.AreEqual<int>(1, node.Scope.Count) // one variable
-        | "FplOptionalFunctionalTerm", "06" -> 
-            Assert.IsInstanceOfType<FplPredicate>(parent) // predicate parent
-            Assert.AreEqual<int>(1, parent.ArgList.Count) // predicate's value
-            Assert.AreEqual<int>(2, parent.Scope.Count) // variable and property
-            Assert.IsInstanceOfType<FplOptionalFunctionalTerm>(node)
-            Assert.AreEqual<int>(3, node.ArgList.Count) // non-intrinsic with mapping, assignment, and return stmt 
-            Assert.AreEqual<int>(1, node.Scope.Count) // one variable
-        | "FplOptionalFunctionalTerm", "07" -> 
-            Assert.IsInstanceOfType<FplFunctionalTerm>(parent) // functional term parent
-            Assert.AreEqual<int>(2, parent.ArgList.Count) // parent's mapping, return stmt
-            Assert.AreEqual<int>(2, parent.Scope.Count) // variable and property
-            Assert.IsInstanceOfType<FplOptionalFunctionalTerm>(node)
-            Assert.AreEqual<int>(3, node.ArgList.Count) // non-intrinsic with mapping, assignment, and return stmt 
-            Assert.AreEqual<int>(1, node.Scope.Count) // one variable
-        | "FplOptionalFunctionalTerm", "08" -> 
-            Assert.IsInstanceOfType<FplClass>(parent) // class parent
-            Assert.AreEqual<int>(1, parent.ArgList.Count) // class's base class
-            Assert.AreEqual<int>(3, parent.Scope.Count) // variable, property and constructor
-            Assert.IsInstanceOfType<FplOptionalFunctionalTerm>(node)
-            Assert.AreEqual<int>(3, node.ArgList.Count) // non-intrinsic with mapping, assignment, and return stmt
-            Assert.AreEqual<int>(1, node.Scope.Count) // one variable
-        | _ -> failwith($"unmatched test {nodeType} {varVal}")
-
     [<DataRow("FplParent", "00", """;""", "")>]
     [<TestMethod>]
     member this.TestStructureFplParent(nodeType, varVal, fplCode, identifier) =
@@ -3644,103 +3481,15 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    // intrinsic optional predicate with predicate parent
-    [<DataRow("FplOptionalPredicate", "00",  """def pred T() {intr opt prty pred MandF(x:obj) {intr} };""", "")>]
-    // intrinsic optional predicate with functional term parent
-    [<DataRow("FplOptionalPredicate", "01",  """def func T()->obj {intr opt prty pred MandF(x:obj) {intr} };""", "")>]
-    // intrinsic optional predicate with class parent
-    [<DataRow("FplOptionalPredicate", "02",  """def cl T:obj {intr opt prty pred MandF(x:obj) {intr} };""", "")>]
-    // non-intrinsic optional predicate with predicate parent
-    [<DataRow("FplOptionalPredicate", "03",  """def pred T() {intr opt prty pred MandF(x:obj) {true} };""", "")>]
-    // non-intrinsic optional predicate with functional term parent
-    [<DataRow("FplOptionalPredicate", "04",  """def func T()->obj {intr opt prty pred MandF(x:obj) {true} };""", "")>]
-    // non-intrinsic optional predicate with class parent
-    [<DataRow("FplOptionalPredicate", "05",  """def cl T:obj {intr opt prty pred MandF(x:obj) {true} };""", "")>]
-    // non-intrinsic optional predicate with predicate parent, shared variables and one statement
-    [<DataRow("FplOptionalPredicate", "06",  """def pred T() {dec ~y:obj; true opt prty pred MandF(x:obj) {dec x:=y; true} };""", "")>]
-    // non-intrinsic optional predicate with functional term parent, shared variables and one statement
-    [<DataRow("FplOptionalPredicate", "07",  """def func T()->obj {dec ~y:obj; return y opt prty pred MandF(x:obj) {dec x:=y; true} };""", "")>]
-    // non-intrinsic optional predicate with class parent, shared variables and one statement
-    [<DataRow("FplOptionalPredicate", "08",  """def cl T:obj {dec ~y:obj; ctor T() {} opt prty pred MandF(x:obj) {dec x:=y; true} };""", "")>]
-    [<TestMethod>]
-    member this.TestStructureFplOptionalPredicate(nodeType, varVal, fplCode, identifier) =
-        let filename = "TestStructureFplOptionalPredicate.fpl"
-        let parent, node = testSkeleton nodeType filename fplCode identifier
-        
-        match nodeType, varVal with
-        | "FplOptionalPredicate", "00" -> 
-            Assert.IsInstanceOfType<FplPredicate>(parent) // predicate parent
-            Assert.AreEqual<int>(0, parent.ArgList.Count)
-            Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplOptionalPredicate>(node)
-            Assert.AreEqual<int>(0, node.ArgList.Count) // intrinsic  
-            Assert.AreEqual<int>(1, node.Scope.Count) // one variable
-        | "FplOptionalPredicate", "01" -> 
-            Assert.IsInstanceOfType<FplFunctionalTerm>(parent) // functional term parent
-            Assert.AreEqual<int>(1, parent.ArgList.Count) // parent's mapping
-            Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplOptionalPredicate>(node)
-            Assert.AreEqual<int>(0, node.ArgList.Count) // intrinsic 
-            Assert.AreEqual<int>(1, node.Scope.Count) // one variable
-        | "FplOptionalPredicate", "02" -> 
-            Assert.IsInstanceOfType<FplClass>(parent) // class parent
-            Assert.AreEqual<int>(1, parent.ArgList.Count) // class's base class
-            Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplOptionalPredicate>(node)
-            Assert.AreEqual<int>(0, node.ArgList.Count) // intrinsic
-            Assert.AreEqual<int>(1, node.Scope.Count) // one variable
-        | "FplOptionalPredicate", "03" -> 
-            Assert.IsInstanceOfType<FplPredicate>(parent) // predicate parent
-            Assert.AreEqual<int>(0, parent.ArgList.Count)
-            Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplOptionalPredicate>(node)
-            Assert.AreEqual<int>(1, node.ArgList.Count) // non-intrinsic  
-            Assert.AreEqual<int>(1, node.Scope.Count) // one variable
-        | "FplOptionalPredicate", "04" -> 
-            Assert.IsInstanceOfType<FplFunctionalTerm>(parent) // functional term parent
-            Assert.AreEqual<int>(1, parent.ArgList.Count) // parent's mapping
-            Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplOptionalPredicate>(node)
-            Assert.AreEqual<int>(1, node.ArgList.Count) // non-intrinsic
-            Assert.AreEqual<int>(1, node.Scope.Count) // one variable
-        | "FplOptionalPredicate", "05" -> 
-            Assert.IsInstanceOfType<FplClass>(parent) // class parent
-            Assert.AreEqual<int>(1, parent.ArgList.Count) // class's base class
-            Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplOptionalPredicate>(node)
-            Assert.AreEqual<int>(1, node.ArgList.Count) // non-intrinsic 
-            Assert.AreEqual<int>(1, node.Scope.Count) // one variable
-        | "FplOptionalPredicate", "06" -> 
-            Assert.IsInstanceOfType<FplPredicate>(parent) // predicate parent
-            Assert.AreEqual<int>(1, parent.ArgList.Count) // predicate's value
-            Assert.AreEqual<int>(2, parent.Scope.Count) // variable and property
-            Assert.IsInstanceOfType<FplOptionalPredicate>(node)
-            Assert.AreEqual<int>(2, node.ArgList.Count) // non-intrinsic with assignment 
-            Assert.AreEqual<int>(1, node.Scope.Count) // one variable
-        | "FplOptionalPredicate", "07" -> 
-            Assert.IsInstanceOfType<FplFunctionalTerm>(parent) // functional term parent
-            Assert.AreEqual<int>(2, parent.ArgList.Count) // parent's mapping, return stmt
-            Assert.AreEqual<int>(2, parent.Scope.Count) // variable and property
-            Assert.IsInstanceOfType<FplOptionalPredicate>(node)
-            Assert.AreEqual<int>(2, node.ArgList.Count) // non-intrinsic assignment
-            Assert.AreEqual<int>(1, node.Scope.Count) // one variable
-        | "FplOptionalPredicate", "08" -> 
-            Assert.IsInstanceOfType<FplClass>(parent) // class parent
-            Assert.AreEqual<int>(1, parent.ArgList.Count) // class's base class
-            Assert.AreEqual<int>(3, parent.Scope.Count) // variable, property and constructor
-            Assert.IsInstanceOfType<FplOptionalPredicate>(node)
-            Assert.AreEqual<int>(2, node.ArgList.Count) // non-intrinsic withassignment
-            Assert.AreEqual<int>(1, node.Scope.Count) // one variable
-        | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     // intrinsic predicate
     [<DataRow("FplPredicate", "00", """def pred T() {intr};""", "")>]
     // intrinsic predicate with variables
     [<DataRow("FplPredicate", "01", """def pred T(x,y:obj) {intr};""", "")>]
     // intrinsic predicate with variables and properties
-    [<DataRow("FplPredicate", "02", """def pred T(x,y:obj) {intr prty func MandF()->obj {intr} opt prty func OptF()->obj {intr} prty pred MandP() {true} opt prty pred OptP() {true} };""", "")>]
+    [<DataRow("FplPredicate", "02", """def pred T(x,y:obj) {intr prty func MandF()->obj {intr} prty func OptF()->obj {intr} prty pred MandP() {true} prty pred OptP() {true} };""", "")>]
     // non-intrinsic predicate with variables and properties
-    [<DataRow("FplPredicate", "03", """def pred T(x,y:obj) {dec ~z:obj; true prty func MandF()->obj {intr} opt prty func OptF()->obj {intr} prty pred MandP() {true} opt prty pred OptP() {true} };""", "")>]
+    [<DataRow("FplPredicate", "03", """def pred T(x,y:obj) {dec ~z:obj; true prty func MandF()->obj {intr} prty func OptF()->obj {intr} prty pred MandP() {true} prty pred OptP() {true} };""", "")>]
     // non-intrinsic predicate with some statements 
     [<DataRow("FplPredicate", "04", """def pred T(x,y:obj) {dec ~z:obj z:=x y:=z; false };""", "")>]
     [<TestMethod>]
@@ -4278,7 +4027,6 @@ type SymbolTableStructure() =
     [<DataRow("FplReturn", "00", """def func A(x:obj)->obj {ret x};""", "")>]
     [<DataRow("FplReturn", "01", """ext Digits x@/\d+/ -> obj {ret x};""", "")>]
     [<DataRow("FplReturn", "02", """def cl A:obj {intr prty func A(x:obj)->obj {ret x}};""", "")>]
-    [<DataRow("FplReturn", "03", """def cl A:obj {intr opt prty func A(x:obj)->obj {ret x}};""", "")>]
     [<TestMethod>]
     member this.TestStructureFplReturn(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplReturn.fpl"
@@ -4301,13 +4049,6 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count) 
         | "FplReturn", "02" ->
             Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(parent)
-            Assert.AreEqual<int>(2, parent.ArgList.Count) // mapping + return 
-            Assert.AreEqual<int>(1, parent.Scope.Count) // variable
-            Assert.IsInstanceOfType<FplReturn>(node)
-            Assert.AreEqual<int>(1, node.ArgList.Count) // reference
-            Assert.AreEqual<int>(0, node.Scope.Count) 
-        | "FplReturn", "03" ->
-            Assert.IsInstanceOfType<FplOptionalFunctionalTerm>(parent)
             Assert.AreEqual<int>(2, parent.ArgList.Count) // mapping + return 
             Assert.AreEqual<int>(1, parent.Scope.Count) // variable
             Assert.IsInstanceOfType<FplReturn>(node)
@@ -4467,12 +4208,8 @@ type SymbolTableStructure() =
     [<DataRow("FplVariable", "01b", """def cl T:obj {ctor T(x:obj) {}};""", "")>]
     [<DataRow("FplVariable", "01c", """def cl T:obj {intr prty pred T() {dec ~x:obj; true}};""", "")>]
     [<DataRow("FplVariable", "01d", """def cl T:obj {intr prty pred T(x:obj) {true}};""", "")>]
-    [<DataRow("FplVariable", "01e", """def cl T:obj {intr opt prty pred T() {dec ~x:obj; true}};""", "")>]
-    [<DataRow("FplVariable", "01f", """def cl T:obj {intr opt prty pred T(x:obj) {true}};""", "")>]
     [<DataRow("FplVariable", "01g", """def cl T:obj {intr prty func T()->obj {dec ~x:obj; ret x}};""", "")>]
     [<DataRow("FplVariable", "01h", """def cl T:obj {intr prty func T(x:obj)->obj {intr}};""", "")>]
-    [<DataRow("FplVariable", "01i", """def cl T:obj {intr opt prty func T()->obj {dec ~x:obj; ret x}};""", "")>]
-    [<DataRow("FplVariable", "01j", """def cl T:obj {intr opt prty func T(x:obj)->obj {intr}};""", "")>]
     // variable to variable 
     [<DataRow("FplVariable", "02a", """def pred T() {dec ~p:pred(x:obj); true};""", "x")>]
     [<DataRow("FplVariable", "02b", """def pred T(p:pred(x:obj)) {true};""", "x")>]
@@ -4680,26 +4417,6 @@ type SymbolTableStructure() =
             let x = (node:?>FplGenericVariable)
             Assert.IsFalse(x.IsInitializedVariable)
             Assert.IsTrue(x.IsSignatureVariable)
-        | "FplVariable", "01e" ->
-            Assert.IsInstanceOfType<FplOptionalPredicate>(parent)
-            Assert.AreEqual<int>(1, parent.ArgList.Count)
-            Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplVariable>(node)
-            Assert.AreEqual<int>(0, node.ArgList.Count)
-            Assert.AreEqual<int>(0, node.Scope.Count)
-            let x = (node:?>FplGenericVariable)
-            Assert.IsFalse(x.IsInitializedVariable)
-            Assert.IsFalse(x.IsSignatureVariable)
-        | "FplVariable", "01f" ->
-            Assert.IsInstanceOfType<FplOptionalPredicate>(parent)
-            Assert.AreEqual<int>(1, parent.ArgList.Count)
-            Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplVariable>(node)
-            Assert.AreEqual<int>(0, node.ArgList.Count)
-            Assert.AreEqual<int>(0, node.Scope.Count)
-            let x = (node:?>FplGenericVariable)
-            Assert.IsFalse(x.IsInitializedVariable)
-            Assert.IsTrue(x.IsSignatureVariable)
         | "FplVariable", "01g" ->
             Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(parent)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
@@ -4712,26 +4429,6 @@ type SymbolTableStructure() =
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "01h" ->
             Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(parent)
-            Assert.AreEqual<int>(1, parent.ArgList.Count)
-            Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplVariable>(node)
-            Assert.AreEqual<int>(0, node.ArgList.Count)
-            Assert.AreEqual<int>(0, node.Scope.Count)
-            let x = (node:?>FplGenericVariable)
-            Assert.IsFalse(x.IsInitializedVariable)
-            Assert.IsTrue(x.IsSignatureVariable)
-        | "FplVariable", "01i" ->
-            Assert.IsInstanceOfType<FplOptionalFunctionalTerm>(parent)
-            Assert.AreEqual<int>(2, parent.ArgList.Count)
-            Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplVariable>(node)
-            Assert.AreEqual<int>(0, node.ArgList.Count)
-            Assert.AreEqual<int>(0, node.Scope.Count)
-            let x = (node:?>FplGenericVariable)
-            Assert.IsFalse(x.IsInitializedVariable)
-            Assert.IsFalse(x.IsSignatureVariable)
-        | "FplVariable", "01j" ->
-            Assert.IsInstanceOfType<FplOptionalFunctionalTerm>(parent)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplVariable>(node)

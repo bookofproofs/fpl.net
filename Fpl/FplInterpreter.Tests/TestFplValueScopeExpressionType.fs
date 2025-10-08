@@ -174,43 +174,28 @@ type TestFplValueScopeExpressionType() =
     [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("t1")>]
-    [<DataRow("t2")>]
     [<DataRow("t3")>]
-    [<DataRow("t4")>]
     [<DataRow("t5")>]
-    [<DataRow("t6")>]
     [<DataRow("t7")>]
-    [<DataRow("t8")>]
     [<DataRow("t9")>]
-    [<DataRow("t10")>]
     [<DataRow("t11")>]
-    [<DataRow("t12")>]
     [<DataRow("t13")>]
-    [<DataRow("t14")>]
     [<TestMethod>]
     member this.TestProperties(var) =
         let res = CommonFplValueTestCases.ScopeProperties("ExpressionType") 
         match res with
-        | Some (r:FplRoot,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue,t5:FplValue,t6:FplValue,t7:FplValue,t8:FplValue,t9:FplValue,t10:FplValue,t11:FplValue,t12:FplValue,
-            t13:FplValue,t14:FplValue) -> 
+        | Some (r:FplRoot,theory:FplValue,block:FplValue,t1:FplValue,t3:FplValue,t5:FplValue,t7:FplValue,t9:FplValue,t11:FplValue,t13:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<FixType>(FixType.NoFix, r.ExpressionType)
             | PrimTheoryL -> Assert.AreEqual<FixType>(FixType.NoFix, theory.ExpressionType)
             | "block" -> Assert.AreEqual<FixType>(FixType.NoFix, block.ExpressionType)
             | "t1" -> Assert.AreEqual<FixType>(FixType.NoFix, t1.ExpressionType)
-            | "t2" -> Assert.AreEqual<FixType>(FixType.NoFix, t2.ExpressionType)
             | "t3" -> Assert.AreEqual<FixType>(FixType.NoFix, t3.ExpressionType)
-            | "t4" -> Assert.AreEqual<FixType>(FixType.NoFix, t4.ExpressionType)
             | "t5" -> Assert.AreEqual<FixType>(FixType.NoFix, t5.ExpressionType)
-            | "t6" -> Assert.AreEqual<FixType>(FixType.NoFix, t6.ExpressionType)
             | "t7" -> Assert.AreEqual<FixType>(FixType.NoFix, t7.ExpressionType)
-            | "t8" -> Assert.AreEqual<FixType>(FixType.NoFix, t8.ExpressionType)
             | "t9" -> Assert.AreEqual<FixType>(FixType.NoFix, t9.ExpressionType)
-            | "t10" -> Assert.AreEqual<FixType>(FixType.NoFix, t10.ExpressionType)
             | "t11" -> Assert.AreEqual<FixType>(FixType.NoFix, t11.ExpressionType)
-            | "t12" -> Assert.AreEqual<FixType>(FixType.NoFix, t12.ExpressionType)
             | "t13" -> Assert.AreEqual<FixType>(FixType.NoFix, t13.ExpressionType)
-            | "t14" -> Assert.AreEqual<FixType>(FixType.NoFix, t14.ExpressionType)
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)

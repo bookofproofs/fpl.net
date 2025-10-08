@@ -175,43 +175,28 @@ type TestFplValueScopeBlockType() =
     [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("t1")>]
-    [<DataRow("t2")>]
     [<DataRow("t3")>]
-    [<DataRow("t4")>]
     [<DataRow("t5")>]
-    [<DataRow("t6")>]
     [<DataRow("t7")>]
-    [<DataRow("t8")>]
     [<DataRow("t9")>]
-    [<DataRow("t10")>]
     [<DataRow("t11")>]
-    [<DataRow("t12")>]
     [<DataRow("t13")>]
-    [<DataRow("t14")>]
     [<TestMethod>]
     member this.TestProperties(var) =
         let res = CommonFplValueTestCases.ScopeProperties("BlockType") 
         match res with
-        | Some (r:FplRoot,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue,t5:FplValue,t6:FplValue,t7:FplValue,t8:FplValue,t9:FplValue,t10:FplValue,t11:FplValue,t12:FplValue,
-            t13:FplValue,t14:FplValue) -> 
+        | Some (r:FplRoot,theory:FplValue,block:FplValue,t1:FplValue,t3:FplValue,t5:FplValue,t7:FplValue,t9:FplValue,t11:FplValue,t13:FplValue) -> 
             match var with 
             | "r" -> Assert.IsInstanceOfType<FplRoot>(r)
             | PrimTheoryL -> Assert.IsInstanceOfType<FplTheory>(theory)
             | "block" -> Assert.IsInstanceOfType<FplPredicate>(block)
             | "t1" -> Assert.IsInstanceOfType<FplMandatoryPredicate>(t1)
-            | "t2" -> Assert.IsInstanceOfType<FplOptionalPredicate>(t2)
             | "t3" -> Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(t3)
-            | "t4" -> Assert.IsInstanceOfType<FplOptionalFunctionalTerm>(t4)
             | "t5" -> Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(t5)
-            | "t6" -> Assert.IsInstanceOfType<FplOptionalFunctionalTerm>(t6)
             | "t7" -> Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(t7)
-            | "t8" -> Assert.IsInstanceOfType<FplOptionalFunctionalTerm>(t8)
             | "t9" -> Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(t9)
-            | "t10" -> Assert.IsInstanceOfType<FplOptionalFunctionalTerm>(t10)
             | "t11" -> Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(t11)
-            | "t12" -> Assert.IsInstanceOfType<FplOptionalFunctionalTerm>(t12)
             | "t13" -> Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(t13)
-            | "t14" -> Assert.IsInstanceOfType<FplOptionalFunctionalTerm>(t14)
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)

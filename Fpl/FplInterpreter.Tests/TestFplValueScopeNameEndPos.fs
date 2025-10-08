@@ -289,25 +289,17 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("t1")>]
-    [<DataRow("t2")>]
     [<DataRow("t3")>]
-    [<DataRow("t4")>]
     [<DataRow("t5")>]
-    [<DataRow("t6")>]
     [<DataRow("t7")>]
-    [<DataRow("t8")>]
     [<DataRow("t9")>]
-    [<DataRow("t10")>]
     [<DataRow("t11")>]
-    [<DataRow("t12")>]
     [<DataRow("t13")>]
-    [<DataRow("t14")>]
     [<TestMethod>]
     member this.TestProperties(var) =
         let res = CommonFplValueTestCases.ScopeProperties("NameEndPos") 
         match res with
-        | Some (r:FplRoot,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue,t5:FplValue,t6:FplValue,t7:FplValue,t8:FplValue,t9:FplValue,t10:FplValue,t11:FplValue,t12:FplValue,
-            t13:FplValue,t14:FplValue) -> 
+        | Some (r:FplRoot,theory:FplValue,block:FplValue,t1:FplValue,t3:FplValue,t5:FplValue,t7:FplValue,t9:FplValue,t11:FplValue,t13:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<int64>(1L, r.EndPos.Column)
             | PrimTheoryL -> Assert.AreEqual<int64>(1L, theory.EndPos.Column)
@@ -317,45 +309,24 @@ type TestFplValueScopeNameEndPos() =
             | "t1" -> 
                 let hasSignature = t1 :?> FplMandatoryPredicate
                 Assert.AreEqual<int64>(27L, hasSignature.SignEndPos.Column)
-            | "t2" -> 
-                let hasSignature = t2 :?> FplOptionalPredicate
-                Assert.AreEqual<int64>(31L, hasSignature.SignEndPos.Column)
             | "t3" -> 
                 let hasSignature = t3 :?> FplMandatoryFunctionalTerm
                 Assert.AreEqual<int64>(32L, hasSignature.SignEndPos.Column)
-            | "t4" -> 
-                let hasSignature = t4 :?> FplOptionalFunctionalTerm
-                Assert.AreEqual<int64>(36L, hasSignature.SignEndPos.Column)
             | "t5" -> 
                 let hasSignature = t5 :?> FplMandatoryFunctionalTerm
                 Assert.AreEqual<int64>(32L, hasSignature.SignEndPos.Column)
-            | "t6" -> 
-                let hasSignature = t6 :?> FplOptionalFunctionalTerm
-                Assert.AreEqual<int64>(36L, hasSignature.SignEndPos.Column)
             | "t7" -> 
                 let hasSignature = t7 :?> FplMandatoryFunctionalTerm
                 Assert.AreEqual<int64>(33L, hasSignature.SignEndPos.Column)
-            | "t8" -> 
-                let hasSignature = t8 :?> FplOptionalFunctionalTerm
-                Assert.AreEqual<int64>(37L, hasSignature.SignEndPos.Column)
             | "t9" -> 
                 let hasSignature = t9 :?> FplMandatoryFunctionalTerm
                 Assert.AreEqual<int64>(32L, hasSignature.SignEndPos.Column)
-            | "t10" -> 
-                let hasSignature = t10 :?> FplOptionalFunctionalTerm
-                Assert.AreEqual<int64>(37L, hasSignature.SignEndPos.Column)
             | "t11" -> 
                 let hasSignature = t11 :?> FplMandatoryFunctionalTerm
                 Assert.AreEqual<int64>(33L, hasSignature.SignEndPos.Column)
-            | "t12" -> 
-                let hasSignature = t12 :?> FplOptionalFunctionalTerm
-                Assert.AreEqual<int64>(37L, hasSignature.SignEndPos.Column)
             | "t13" -> 
                 let hasSignature = t13 :?> FplMandatoryFunctionalTerm
                 Assert.AreEqual<int64>(34L, hasSignature.SignEndPos.Column)
-            | "t14" -> 
-                let hasSignature = t14 :?> FplOptionalFunctionalTerm
-                Assert.AreEqual<int64>(38L, hasSignature.SignEndPos.Column)
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)

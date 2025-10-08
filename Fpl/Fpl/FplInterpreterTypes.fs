@@ -558,8 +558,6 @@ type FplValue(positions: Positions, parent: FplValue option) =
         |> Seq.filter (fun fv -> 
             fv.Name = PrimMandatoryFunctionalTermL 
             || fv.Name = PrimMandatoryPredicateL 
-            || fv.Name = PrimOptionalFunctionalTermL 
-            || fv.Name = PrimOptionalPredicateL
         )
         |> Seq.toList
 
@@ -623,9 +621,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
         let rec nextBlockNode (node:FplValue) =
             match node.Name with 
             | LiteralCtorL
-            | PrimOptionalFunctionalTermL
             | PrimMandatoryFunctionalTermL
-            | PrimOptionalPredicateL
             | PrimMandatoryPredicateL ->
                 Some node
             | _ ->
@@ -895,8 +891,6 @@ let qualifiedName (fplValue:FplValue)=
             | PrimClassL
             | PrimPredicateL
             | PrimFuncionalTermL
-            | PrimOptionalFunctionalTermL
-            | PrimOptionalPredicateL
             | PrimMandatoryPredicateL
             | PrimMandatoryFunctionalTermL -> fv.Type(SignatureType.Mixed)
             | _ -> fv.FplId
@@ -1627,22 +1621,6 @@ type FplMandatoryPredicate(positions: Positions, parent: FplValue) =
     override this.EmbedInSymbolTable _ = 
         base.CheckConsistency()
         tryAddSubBlockToFplBlock this
-
-type FplOptionalPredicate(positions: Positions, parent: FplValue) =
-    inherit FplGenericPredicateBlock(positions, parent)
-
-    override this.Name = PrimOptionalPredicateL
-    override this.ShortName = PrimOptionalPredicate
-
-    override this.Clone () =
-        let ret = new FplOptionalPredicate((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.EmbedInSymbolTable _ = 
-        base.CheckConsistency()
-        tryAddSubBlockToFplBlock this
-
 
 type FplAxiom(positions: Positions, parent: FplValue, runOrder) =
     inherit FplGenericPredicateWithExpression(positions, parent)
@@ -2662,9 +2640,7 @@ type FplReference(positions: Positions, parent: FplValue) =
             | PrimPredicateL
             | PrimFuncionalTermL
             | PrimMandatoryFunctionalTermL
-            | PrimMandatoryPredicateL
-            | PrimOptionalFunctionalTermL
-            | PrimOptionalPredicateL ->
+            | PrimMandatoryPredicateL ->
                 match box called with
                 | :? ICanBeCalledRecusively as calledRecursively when calledRecursively.CallCounter > maxRecursion -> () // stop recursion
                 | _ ->
@@ -3649,9 +3625,7 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
             addToRuleOfInference next
         | Some next when ( next.Name = LiteralCtorL
                         || next.Name = PrimMandatoryFunctionalTermL 
-                        || next.Name = PrimMandatoryPredicateL 
-                        || next.Name = PrimOptionalPredicateL
-                        || next.Name = PrimOptionalFunctionalTermL) ->
+                        || next.Name = PrimMandatoryPredicateL) ->
             addToPropertyOrConstructor next false
         | Some next when (next.Name = LiteralPrfL 
                         || next.Name = LiteralCorL) ->
@@ -3895,27 +3869,6 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) =
 
     override this.Clone () =
         let ret = new FplMandatoryFunctionalTerm((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.IsBlock () = true
-
-    override this.EmbedInSymbolTable _ = tryAddSubBlockToFplBlock this
-
-    override this.RunOrder = None
-
-    override this.Run variableStack = 
-        // todo implement run
-        ()
-
-type FplOptionalFunctionalTerm(positions: Positions, parent: FplValue) =
-    inherit FplGenericFunctionalTerm(positions, parent)
-
-    override this.Name = PrimOptionalFunctionalTermL
-    override this.ShortName = PrimOptionalFunctionalTerm
-
-    override this.Clone () =
-        let ret = new FplOptionalFunctionalTerm((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
 
@@ -4323,9 +4276,7 @@ let matchArgumentsWithParameters (fva: FplValue) (fvp: FplValue) =
         | :? FplPredicate
         | :? FplConstructor
         | :? FplMandatoryPredicate
-        | :? FplMandatoryFunctionalTerm
-        | :? FplOptionalPredicate
-        | :? FplOptionalFunctionalTerm ->
+        | :? FplMandatoryFunctionalTerm ->
             fvp.Scope.Values |> Seq.filter (fun fv -> isSignatureVar fv) |> Seq.toList
         | _ -> []
 
@@ -4753,9 +4704,7 @@ let variableInBlockScopeByName (fplValue: FplValue) name withNestedVariableSearc
                 | :? FplLocalization
                 | :? FplGenericQuantor
                 | :? FplMandatoryFunctionalTerm
-                | :? FplOptionalFunctionalTerm
                 | :? FplMandatoryPredicate
-                | :? FplOptionalPredicate
                 | :? FplProof
                 | :? FplExtension
                 | :? FplFunctionalTerm

@@ -471,12 +471,11 @@ let constructorSignature = positions "ConstructorSignature" (keywordConstructor 
 let constructor = positions "Constructor" (constructorSignature .>>. constructorBlock) |>> Ast.Constructor
 
 (* FPL building blocks - Properties *)
-let keywordOptional = (skipString LiteralOptL <|> skipString LiteralOpt) .>> SW 
 let keywordProperty = (skipString LiteralPrtyL <|> skipString LiteralPrty) .>> SW 
 
 let predicateInstanceBlock = leftBrace >>. (keywordIntrinsic <|> predContent) .>> spacesRightBrace
 let predicateInstanceSignature = positions "PredicateInstanceSignature" (keywordPredicate >>. SW >>. simpleSignature .>>. paramTuple) .>> IW |>> Ast.PredicateInstanceSignature
-let predicateInstance = positions "PredicateInstance" ((opt keywordOptional .>> keywordProperty) .>>. (predicateInstanceSignature .>>. predicateInstanceBlock)) |>> Ast.PredicateInstance
+let predicateInstance = positions "PredicateInstance" (keywordProperty >>. predicateInstanceSignature .>>. predicateInstanceBlock) |>> Ast.PredicateInstance
 
 mappingRef.Value <- toArrow >>. IW >>. positions "Mapping" (variableType) |>> Ast.Mapping
 
@@ -484,7 +483,7 @@ let returnStatement = positions "Return" (keywordReturn >>. predicate) .>> IW |>
 let funcContent = varDeclOrSpecList .>>. returnStatement |>> Ast.DefFunctionContent
 let functionalTermInstanceBlock = leftBrace >>. (keywordIntrinsic <|> funcContent) .>> spacesRightBrace
 let functionalTermInstanceSignature = positions "FunctionalTermInstanceSignature" (keywordFunction >>. SW >>. simpleSignature .>>. paramTuple .>>. (IW >>. mapping)) .>> IW |>> Ast.FunctionalTermInstanceSignature
-let functionalTermInstance = positions "FunctionalTermInstance" ((opt keywordOptional .>> keywordProperty) .>>. functionalTermInstanceSignature .>>. functionalTermInstanceBlock) |>> Ast.FunctionalTermInstance
+let functionalTermInstance = positions "FunctionalTermInstance" (keywordProperty >>. functionalTermInstanceSignature .>>. functionalTermInstanceBlock) |>> Ast.FunctionalTermInstance
 
 
 let extensionRegex = regex "[^\/]+" <?> "<extension regex>" |>> Ast.ExtensionRegex

@@ -173,43 +173,28 @@ type TestFplValueScopeParent() =
     [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("t1")>]
-    [<DataRow("t2")>]
     [<DataRow("t3")>]
-    [<DataRow("t4")>]
     [<DataRow("t5")>]
-    [<DataRow("t6")>]
     [<DataRow("t7")>]
-    [<DataRow("t8")>]
     [<DataRow("t9")>]
-    [<DataRow("t10")>]
     [<DataRow("t11")>]
-    [<DataRow("t12")>]
     [<DataRow("t13")>]
-    [<DataRow("t14")>]
     [<TestMethod>]
     member this.TestProperties(var) =
         let res = CommonFplValueTestCases.ScopeProperties("Parent") 
         match res with
-        | Some (r:FplRoot,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue,t5:FplValue,t6:FplValue,t7:FplValue,t8:FplValue,t9:FplValue,t10:FplValue,t11:FplValue,t12:FplValue,
-            t13:FplValue,t14:FplValue) -> 
+        | Some (r:FplRoot,theory:FplValue,block:FplValue,t1:FplValue,t3:FplValue,t5:FplValue,t7:FplValue,t9:FplValue,t11:FplValue,t13:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<FplValue option>(None, r.Parent)
             | PrimTheoryL -> Assert.AreEqual<FplValue>(r, theory.Parent.Value)
             | "block" -> Assert.AreEqual<FplValue>(theory, block.Parent.Value)
             | "t1" -> Assert.AreEqual<FplValue>(block, t1.Parent.Value)
-            | "t2" -> Assert.AreEqual<FplValue>(block, t2.Parent.Value)
             | "t3" -> Assert.AreEqual<FplValue>(block, t3.Parent.Value)
-            | "t4" -> Assert.AreEqual<FplValue>(block, t4.Parent.Value)
-            | "t5" -> Assert.AreEqual<FplValue>(block, t4.Parent.Value)
             | "t6" -> Assert.AreEqual<FplValue>(block, t5.Parent.Value)
-            | "t7" -> Assert.AreEqual<FplValue>(block, t6.Parent.Value)
             | "t8" -> Assert.AreEqual<FplValue>(block, t7.Parent.Value)
-            | "t9" -> Assert.AreEqual<FplValue>(block, t8.Parent.Value)
             | "t10" -> Assert.AreEqual<FplValue>(block, t9.Parent.Value)
-            | "t11" -> Assert.AreEqual<FplValue>(block, t10.Parent.Value)
             | "t12" -> Assert.AreEqual<FplValue>(block, t11.Parent.Value)
             | "t13" -> Assert.AreEqual<FplValue>(block, t13.Parent.Value)
-            | "t14" -> Assert.AreEqual<FplValue>(block, t14.Parent.Value)
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)

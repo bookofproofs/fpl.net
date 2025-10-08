@@ -175,43 +175,28 @@ type TestFplValueScopeFplId() =
     [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("t1")>]
-    [<DataRow("t2")>]
     [<DataRow("t3")>]
-    [<DataRow("t4")>]
     [<DataRow("t5")>]
-    [<DataRow("t6")>]
     [<DataRow("t7")>]
-    [<DataRow("t8")>]
     [<DataRow("t9")>]
-    [<DataRow("t10")>]
     [<DataRow("t11")>]
-    [<DataRow("t12")>]
     [<DataRow("t13")>]
-    [<DataRow("t14")>]
     [<TestMethod>]
     member this.TestProperties(var) =
         let res = CommonFplValueTestCases.ScopeProperties("FplId") 
         match res with
-        | Some (r:FplRoot,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue,t5:FplValue,t6:FplValue,t7:FplValue,t8:FplValue,t9:FplValue,t10:FplValue,t11:FplValue,t12:FplValue,
-            t13:FplValue,t14:FplValue) -> 
+        | Some (r:FplRoot,theory:FplValue,block:FplValue,t1:FplValue,t3:FplValue,t5:FplValue,t7:FplValue,t9:FplValue,t11:FplValue,t13:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<string>("", r.FplId)
             | PrimTheoryL -> Assert.AreEqual<string>("TestScopePropertiesFplId", theory.FplId)
             | "block" -> Assert.AreEqual<string>("TestId", block.FplId)
             | "t1" -> Assert.AreEqual<string>("T1", t1.FplId)
-            | "t2" -> Assert.AreEqual<string>("T2", t2.FplId)
             | "t3" -> Assert.AreEqual<string>("T3", t3.FplId)
-            | "t4" -> Assert.AreEqual<string>("T4", t4.FplId)
             | "t5" -> Assert.AreEqual<string>("T5", t5.FplId)
-            | "t6" -> Assert.AreEqual<string>("T6", t6.FplId)
             | "t7" -> Assert.AreEqual<string>("T7", t7.FplId)
-            | "t8" -> Assert.AreEqual<string>("T8", t8.FplId)
             | "t9" -> Assert.AreEqual<string>("T9", t9.FplId)
-            | "t10" -> Assert.AreEqual<string>("T10", t10.FplId)
             | "t11" -> Assert.AreEqual<string>("T11", t11.FplId)
-            | "t12" -> Assert.AreEqual<string>("T12", t12.FplId)
             | "t13" -> Assert.AreEqual<string>("T13", t13.FplId)
-            | "t14" -> Assert.AreEqual<string>("T14", t14.FplId)
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
