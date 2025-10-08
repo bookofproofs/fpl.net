@@ -958,7 +958,7 @@ type SymbolTableStructure() =
         | "FplForInStmtEntity" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplFunctionalTerm" ->
-            Assert.AreEqual<string>("", (getName var).[index])
+            Assert.AreEqual<string>(LiteralFunc, (getName var).[index])
         | "FplImplication" ->
             Assert.AreEqual<string>(LiteralImpl, (getName var).[index])        
         | "FplInstance" ->
@@ -1004,7 +1004,7 @@ type SymbolTableStructure() =
         | "FplLocalization" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplMandatoryFunctionalTerm" ->
-            Assert.AreEqual<string>("", (getName var).[index])
+            Assert.AreEqual<string>(LiteralFunc, (getName var).[index])
         | "FplMandatoryPredicate" ->
             Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
         | "FplMapCaseElse" ->
@@ -1014,11 +1014,11 @@ type SymbolTableStructure() =
         | "FplMapCases" ->
             Assert.AreEqual<string>("", (getName var).[index])        
         | "FplMapping" ->
-            Assert.AreEqual<string>("", (getName var).[index])
+            Assert.AreEqual<string>(LiteralObj, (getName var).[index])
         | "FplNegation" ->
             Assert.AreEqual<string>(LiteralNot, (getName var).[index])
         | "FplOptionalFunctionalTerm" ->
-            Assert.AreEqual<string>("", (getName var).[index])
+            Assert.AreEqual<string>(LiteralFunc, (getName var).[index])
         | "FplOptionalPredicate" ->
             Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
         | "FplParent" ->
@@ -1040,7 +1040,7 @@ type SymbolTableStructure() =
         | "FplReference" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplReturn" ->
-            Assert.AreEqual<string>(LiteralRet, (getName var).[index])
+            Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
         | "FplRoot" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplRuleOfInference" ->
@@ -1258,7 +1258,7 @@ type SymbolTableStructure() =
         | "FplMapCaseSingle" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplMapCases" ->
-            Assert.AreEqual<string>("", (getName var).[index])        
+            Assert.AreEqual<string>(LiteralObj, (getName var).[index])        
         | "FplMapping" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplNegation" ->

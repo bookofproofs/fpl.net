@@ -1248,11 +1248,15 @@ let rec eval (st: SymbolTable) ast =
         emitLG000orLG001Diagnostics fv PrimQuantorExistsN
         st.EvalPop()
     // | FunctionalTermSignature of Positions * (Ast * Ast)
-    | Ast.FunctionalTermSignature(((pos1, pos2), ((simpleSignatureAst, paramTupleAst), mappingAst)), optUserDefinedSymbolAst) -> 
+    | Ast.FunctionalTermSignature(((pos1, pos2), (((simpleSignatureAst, inhFunctionalTypeListAstsOpt), paramTupleAst), mappingAst)), optUserDefinedSymbolAst) -> 
         variableStack.InSignatureEvaluation <- true
         st.EvalPush("FunctionalTermSignature")
         eval st simpleSignatureAst
         eval st paramTupleAst
+        match inhFunctionalTypeListAstsOpt with
+        | Some inhFunctionalTypeListAsts ->
+            inhFunctionalTypeListAsts |> List.map (fun inhFunctionalTypeList -> eval st inhFunctionalTypeList) |> ignore
+        | None -> ()
         variableStack.InSignatureEvaluation <- false
         eval st mappingAst
         optUserDefinedSymbolAst |> Option.map (eval st) |> Option.defaultValue () 

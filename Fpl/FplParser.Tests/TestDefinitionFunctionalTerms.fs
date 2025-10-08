@@ -42,7 +42,7 @@ type TestDefinitionFunctionalTerms01 () =
     member this.TestDefinitionFunctionalTerm03 () =
         let result = run (definitionFunctionalTerm .>> eof) """func Add(n,m: @Digits)->Nat
         {
-            return delegate.add(n,m)
+            return delegate.Add(n,m)
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -527,3 +527,18 @@ type TestDefinitionFunctionalTerms01 () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
+    [<DataRow("T() ->obj")>]
+    [<DataRow("T() -> obj")>]
+    [<DataRow("T()-> obj")>]
+    [<DataRow("T:A()->obj")>]
+    [<DataRow("T: A()->obj")>]
+    [<DataRow("T :A()->obj")>]
+    [<DataRow("T:A,B,C()->obj")>]
+    [<DataRow("T: A, B, C()->obj")>]
+    [<DataRow("T : A , B , C ()->obj")>]
+    [<TestMethod>]
+    member this.TestDefinitionFunctionalTermSignatures (fplCode:string) =
+        let result = run (definitionFunctionalTerm .>> eof) (sprintf """func %s { dec ~x:obj; return x }""" fplCode)
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))

@@ -545,7 +545,8 @@ let definitionPredicate = positions "DefinitionPredicate" (predicateSignature .>
 
 // Functional term building blocks can be defined similarly to classes, they can have properties but they cannot be derived any parent type 
 let functionalTermDefinitionBlock = leftBrace  >>. ((keywordIntrinsic <|> funcContent) .>> IW) .>>. propertyList .>> spacesRightBrace
-let functionalTermSignature = positions "FunctionalTermSignature" (keywordFunction >>. SW >>. simpleSignature .>>. paramTuple .>>. (IW >>. mapping)) .>>. userDefinedSymbol .>> IW |>> Ast.FunctionalTermSignature
+let inheritedFunctionalTypeList = sepBy1 (predicateIdentifier) (attempt (IW >>. comma))
+let functionalTermSignature = positions "FunctionalTermSignature" (keywordFunction >>. SW >>. (simpleSignature .>>. opt (colon >>. inheritedFunctionalTypeList) .>> IW) .>>. paramTuple .>>. (IW >>. mapping)) .>>. userDefinedSymbol .>> IW |>> Ast.FunctionalTermSignature
 let definitionFunctionalTerm = positions "DefinitionFunctionalTerm" (functionalTermSignature .>>. functionalTermDefinitionBlock) |>> Ast.DefinitionFunctionalTerm
 
 // Class definitions

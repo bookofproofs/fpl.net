@@ -70,14 +70,14 @@ type TestStatements () =
 
     [<TestMethod>]
     member this.TestDelegate01 () =
-        let result = run (fplDelegate .>> eof) """del.test(1,2)"""
+        let result = run (fplDelegate .>> eof) """del.Test(1,2)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestDelegate02 () =
-        let result = run (fplDelegate .>> eof) """del.decrement(x)"""
+        let result = run (fplDelegate .>> eof) """del.Decrement(x)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -105,7 +105,7 @@ type TestStatements () =
                         self := Succ(Zero())
                     | Equal(x,2) :
                         self := Succ(Succ(Zero()))
-                    ? self := Succ(del.decrement(x))
+                    ? self := Succ(del.Decrement(x))
                 )"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -133,7 +133,7 @@ type TestStatements () =
                         | (x = 0) : self := Zero() 
                         | (x = 1) : self := Succ(Zero())
                         | (x = 2) : self := Succ(Succ(Zero()))
-                        ? self := Succ(delegate.decrement(x))  
+                        ? self := Succ(delegate.Decrement(x))  
                     )"""
         let actual = sprintf "%O" result
         printf "%O" actual
