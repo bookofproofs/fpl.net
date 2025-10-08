@@ -464,7 +464,7 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
             match repr with
             | LiteralTrue
             | LiteralFalse -> ()
-            | LiteralUndetermined -> emitLG000Diagnostics argument 
+            | PrimUndetermined -> emitLG000Diagnostics argument 
             | _ -> emitLG001Diagnostics argument.StartPos argument.EndPos argument
     )
 

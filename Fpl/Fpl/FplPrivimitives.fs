@@ -191,8 +191,6 @@ let LiteralUndef = "undef"
 [<Literal>]
 let LiteralUndefL = "undefined"
 [<Literal>]
-let LiteralUndetermined = "undetermined"
-[<Literal>]
 let LiteralUses = "uses"
 [<Literal>]
 let LiteralXor = "xor"
@@ -1471,6 +1469,8 @@ let PrimTheoremLike = "thmlike"
 let PrimTranslation = "trsl"
 [<Literal>]
 let PrimTranslationL = "translation"
+[<Literal>]
+let PrimUndetermined = "undetermined"
 [<Literal>]
 let PrimVariable = "var"
 [<Literal>]

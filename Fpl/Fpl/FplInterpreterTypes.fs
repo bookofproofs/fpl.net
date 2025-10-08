@@ -543,10 +543,24 @@ type FplValue(positions: Positions, parent: FplValue option) =
         and set (value) = _isIntrinsic <- value
 
     /// Create a (possibly empty) list of all variables in the scope of this FplValue.
-    /// If the FplValue is itself a variable, it will be included in the list.
     member this.GetVariables() =
         this.Scope.Values
-        |> Seq.filter (fun fv -> fv.Name = PrimVariableL || fv.Name = PrimVariableManyL || fv.Name = PrimVariableMany1L)
+        |> Seq.filter (fun fv -> 
+            fv.Name = PrimVariableL 
+            || fv.Name = PrimVariableManyL 
+            || fv.Name = PrimVariableMany1L
+        )
+        |> Seq.toList
+
+    /// Create a (possibly empty) list of all properties in the scope of this FplValue.
+    member this.GetProperties() =
+        this.Scope.Values
+        |> Seq.filter (fun fv -> 
+            fv.Name = PrimMandatoryFunctionalTermL 
+            || fv.Name = PrimMandatoryPredicateL 
+            || fv.Name = PrimOptionalFunctionalTermL 
+            || fv.Name = PrimOptionalPredicateL
+        )
         |> Seq.toList
 
     /// Copies other FplValue to this one without changing its reference pointer.
@@ -1146,14 +1160,13 @@ let isRoot (fv:FplValue) =
 type FplGenericPredicate(positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
     do 
-        this.FplId <- LiteralUndetermined
+        this.FplId <- PrimUndetermined
         this.TypeId <- LiteralPred
 
     override this.Represent () =
         this.ValueList
         |> Seq.map (fun subfv -> subfv.Represent())
         |> String.concat ", "
-        |> fun body -> $"[{body}]"
 
     override this.RunOrder = None
 
@@ -2796,7 +2809,7 @@ type FplConjunction(positions: Positions, parent: FplValue) as this =
                 LiteralFalse
             | (LiteralTrue, LiteralTrue) -> 
                 LiteralTrue
-            | _ -> LiteralUndetermined
+            | _ -> PrimUndetermined
         this.SetValue(newValue)
 
     override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
@@ -2842,7 +2855,7 @@ type FplDisjunction(positions: Positions, parent: FplValue) as this =
             | (LiteralFalse, LiteralFalse) -> 
                 LiteralFalse
             | _ -> 
-                LiteralUndetermined
+                PrimUndetermined
         this.SetValue(newValue)  
 
     override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
@@ -2889,7 +2902,7 @@ type FplExclusiveOr(positions: Positions, parent: FplValue) as this =
             | (LiteralFalse, LiteralFalse) -> 
                 LiteralFalse
             | _ -> 
-                LiteralUndetermined
+                PrimUndetermined
 
         this.SetValue(newValue)  
 
@@ -2928,7 +2941,7 @@ type FplNegation(positions: Positions, parent: FplValue) as this =
             // FPL truth-table
             | LiteralFalse -> LiteralTrue
             | LiteralTrue -> LiteralFalse
-            | _ -> LiteralUndetermined  
+            | _ -> PrimUndetermined  
 
         this.SetValue(newValue)  
 
@@ -2971,7 +2984,7 @@ type FplImplication(positions: Positions, parent: FplValue) as this =
             | (LiteralFalse, LiteralTrue) 
             | (LiteralFalse, LiteralFalse) 
             | (LiteralTrue, LiteralTrue) -> LiteralTrue
-            | _ -> LiteralUndetermined
+            | _ -> PrimUndetermined
         
         this.SetValue(newValue) 
 
@@ -3016,7 +3029,7 @@ type FplEquivalence(positions: Positions, parent: FplValue) as this =
             | (LiteralFalse, LiteralFalse) -> LiteralTrue
             | (LiteralFalse, LiteralTrue) 
             | (LiteralTrue, LiteralFalse) -> LiteralFalse
-            | _ -> LiteralUndetermined
+            | _ -> PrimUndetermined
         
         this.SetValue(newValue)
 
@@ -3098,13 +3111,13 @@ type FplEquality(name, positions: Positions, parent: FplValue) as this =
                 let newValue = FplIntrinsicPred((this.StartPos, this.EndPos), this.Parent.Value)
                 match a1Repr with
                 | "dec pred"  
-                | LiteralUndetermined -> 
+                | PrimUndetermined -> 
                     emitID013Diagnostics this.StartPos this.EndPos "Predicate `=` cannot be evaluated because the left argument is undetermined." 
                     this.SetValue(newValue)
                 | _ -> 
                     match b1Repr with
                     | "dec pred"  
-                    | LiteralUndetermined -> 
+                    | PrimUndetermined -> 
                         emitID013Diagnostics this.StartPos this.EndPos "Predicate `=` cannot be evaluated because the right argument is undetermined." 
                         this.SetValue(newValue)
                     | _ -> 
@@ -3115,7 +3128,7 @@ type FplEquality(name, positions: Positions, parent: FplValue) as this =
                             | false, false 
                             | true, true ->
                                 $"{(a1Repr = b1Repr)}".ToLower()
-                            | _ -> LiteralUndetermined
+                            | _ -> PrimUndetermined
                         this.SetValue(newValue)
 
 /// Implements an object that is used to provide a representation of extensions in FPL.
@@ -3789,6 +3802,7 @@ type FplGenericFunctionalTerm(positions: Positions, parent: FplValue) as this =
     let mutable _signEndPos = Position("", 0L, 0L, 0L)
 
     do 
+        this.FplId <- LiteralFunc
         this.TypeId <- LiteralFunc
 
     member this.SignStartPos
@@ -3824,8 +3838,7 @@ type FplGenericFunctionalTerm(positions: Positions, parent: FplValue) as this =
             // if the Functional Term is intrinsic.
             // In this case, the "representation" of the function is
             // its declared mapping type
-            let mapping = this.ArgList |> Seq.head 
-            mapping.Represent()
+            $"dec {this.Type(SignatureType.Mixed)}"
         else
             let subRepr = 
                 this.ValueList
@@ -4053,7 +4066,7 @@ type FplReturn(positions: Positions, parent: FplValue) as this =
     inherit FplGenericStmt(positions, parent)
 
     do
-        this.FplId <- LiteralRet
+        this.FplId <- LiteralUndef
         this.TypeId <- LiteralUndef
 
     override this.Name = PrimReturn
@@ -4412,7 +4425,26 @@ type FplGenericConstructor(name, positions: Positions, parent: FplValue) as this
 
 
     override this.Run variableStack = 
-        let rec createSubInstance (classDef:FplValue) (instance:FplValue) =
+        // a dictionary to prevent shadowed variables
+        let distinctVariables = Dictionary<string,FplValue>()
+        // a dictionary to prevent shadowed properties
+        let distinctProperties = Dictionary<string,FplValue>()
+        
+
+        /// Copy the variables and properties of a parent class into a derived class.
+        let copyParentToDerivedClass (parentClass: FplValue) (derivedClass: FplValue) =
+            let shadowedVars = List<string>()
+            let shadowedProperties = List<string>()
+            let parentVariables = parentClass.GetVariables()
+
+            parentVariables
+            |> List.iter (fun parentVar ->
+                if derivedClass.Scope.ContainsKey(parentVar.FplId) then
+                    shadowedVars.Add(parentVar.FplId))
+
+            (shadowedVars, shadowedProperties)
+    
+        let rec createSubInstance (classDef:FplValue) (instance:FplValue) (baseInstance:FplValue)=
             if classDef.IsIntrinsic then
                 classDef.ArgList
                 |> Seq.filter (fun fv -> fv.Name = PrimClassL || fv.Name = PrimIntrinsicObj)
@@ -4420,7 +4452,21 @@ type FplGenericConstructor(name, positions: Positions, parent: FplValue) as this
                     let subInstance = new FplInstance((this.StartPos, this.EndPos), this)
                     subInstance.FplId <- baseClass.FplId
                     subInstance.TypeId <- subInstance.FplId
-                    createSubInstance baseClass subInstance
+                    baseClass.GetVariables()
+                    |> List.iter (fun var ->
+                        if distinctVariables.ContainsKey var.FplId then
+                            emitVAR06iagnostic var.FplId baseClass.FplId baseInstance.StartPos
+                        else
+                            baseInstance.Scope.Add (var.FplId, var.Clone())
+                    )
+                    baseClass.GetProperties()
+                    |> List.iter (fun var ->
+                        if distinctVariables.ContainsKey var.FplId then
+                            () // todo issue diagnostic shadowed variable
+                        else
+                            baseInstance.Scope.Add (var.FplId, var.Clone())
+                    )
+                    createSubInstance baseClass subInstance baseInstance
                     instance.ArgList.Add subInstance
                 )
             else
@@ -4431,7 +4477,7 @@ type FplGenericConstructor(name, positions: Positions, parent: FplValue) as this
         | Some classDef -> 
             instance.FplId <- classDef.FplId
             instance.TypeId <- classDef.FplId
-            createSubInstance classDef instance
+            createSubInstance classDef instance instance
         | None ->
             instance.FplId <- LiteralUndef
             instance.TypeId <- LiteralUndef
@@ -4633,11 +4679,6 @@ type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
                         else
                             ctor.ParentConstructorCalls.Add this.FplId |> ignore
                     | _ -> ()
-                    //let (shadowedVars, shadowedProperties) = copyParentToDerivedClass parentClass derivedClass
-                    //shadowedVars
-                    //|> Seq.iter (fun name -> 
-                    //    emitVAR06iagnostic name derivedClass.FplId pos1
-                    //)
 
             else
                 // the base constructor call's id is not among the base classes this class is derived from
@@ -5102,15 +5143,3 @@ let searchExtensionByName (root: FplValue) identifier =
     else
         ScopeSearchResult.Found candidates.Head
 
-/// Copy the variables and properties of a parent class into a derived class.
-let copyParentToDerivedClass (parentClass: FplValue) (derivedClass: FplValue) =
-    let shadowedVars = List<string>()
-    let shadowedProperties = List<string>()
-    let parentVariables = parentClass.GetVariables()
-
-    parentVariables
-    |> List.iter (fun parentVar ->
-        if derivedClass.Scope.ContainsKey(parentVar.FplId) then
-            shadowedVars.Add(parentVar.FplId))
-
-    (shadowedVars, shadowedProperties)
