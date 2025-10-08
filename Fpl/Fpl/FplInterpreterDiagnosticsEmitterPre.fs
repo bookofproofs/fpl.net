@@ -140,6 +140,20 @@ let emitID010Diagnostics identifier pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
 
+
+let emitID011Diagnostics name chain pos1 pos2 = 
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ID011(name, chain) // inheritance chain duplicate
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
 let emitID012Diagnostics identifier candidates pos1 pos2 =
     let diagnostic =
         { 

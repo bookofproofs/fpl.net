@@ -70,7 +70,8 @@ type Ast =
     | FunctionalTermType of Positions * unit
     | IndexType of Positions * unit
     | VariableType of Positions * Ast 
-    | InheritedClassType of Positions * Ast
+    | InheritedClassTypeList of Ast list
+    | InheritedFunctionalTypeList of Ast list
     | ClassType of Positions * Ast
     | CompoundPredicateType of Positions * (Ast * Ast option)
     | CompoundFunctionalTermType of Positions * (Ast * (Ast * Ast) option)
@@ -155,10 +156,10 @@ type Ast =
     | DefFunctionContent of Ast list option * Ast
     | PredicateSignature of (Positions * (Ast * Ast)) * Ast option
     | ClassSignature of Positions * Ast
-    | FunctionalTermSignature of (Positions * (((Ast * Ast list option) * Ast) * Ast)) * Ast option
+    | FunctionalTermSignature of (Positions * (((Ast * Ast option) * Ast) * Ast)) * Ast option
     | DefinitionFunctionalTerm of Positions * (Ast * (Ast * Ast list option))
     | DefClassCompleteContent of Ast list option * Ast list
-    | DefinitionClass of Positions * (((Ast * Ast list) * Ast option) * (Ast * Ast list option)) 
+    | DefinitionClass of Positions * (((Ast * Ast) * Ast option) * (Ast * Ast list option)) 
     | Prefix of Positions * string
     | Precedence of Positions * int
     | Infix of Positions * (string * Ast)

@@ -119,7 +119,6 @@ let rec eval (st: SymbolTable) ast =
         | _ -> ()
 
     match ast with
-    // units: | Star
     | Ast.IndexType((pos1, pos2),()) -> 
         st.EvalPush("IndexType")
         let fv = variableStack.PeekEvalStack()
@@ -131,10 +130,6 @@ let rec eval (st: SymbolTable) ast =
         let fv = variableStack.PeekEvalStack()
         let value = new FplIntrinsicObj((pos1, pos2), fv)
         setUnitType fv value ""
-        match checkID009_ID010_ID011_Diagnostics st fv LiteralObj pos1 pos2 with
-        | Some classNode -> 
-            fv.ArgList.Add classNode
-        | None -> ()
         st.EvalPop()
     | Ast.PredicateType((pos1, pos2),()) -> 
         st.EvalPush("PredicateType")
@@ -669,20 +664,6 @@ let rec eval (st: SymbolTable) ast =
         let fv = variableStack.PeekEvalStack()
 
         match fv with 
-        | :? FplClass -> 
-            if evalPath.EndsWith("InheritedClassType.PredicateIdentifier") then 
-                match checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2 with
-                | Some classNode -> 
-                    // add known class
-                    fv.ArgList.Add classNode
-                | None -> ()
-            else
-                fv.FplId <- identifier
-                fv.TypeId <- identifier
-                match checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2 with
-                | Some classNode -> 
-                    fv.ArgList.Add classNode
-                | None -> ()
         | :? FplVariableMany -> 
             fv.TypeId <- $"*{identifier}"
         | :? FplVariableMany1 -> 
@@ -1010,7 +991,6 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("SelfAts")
         eval st selforParentAst
         st.EvalPop()
-    // | Translation of string * Ast
     | Ast.Language((pos1, pos2),(langCode, ebnfAst)) ->
         st.EvalPush("Language")
         let fv = variableStack.PeekEvalStack()
@@ -1020,10 +1000,45 @@ let rec eval (st: SymbolTable) ast =
         eval st ebnfAst
         variableStack.PopEvalStack() // remove language
         st.EvalPop()
-    // | ExtensionBlock of Positions * (Ast * Ast)
-    | Ast.InheritedClassType((pos1, pos2), ast1) -> 
+    | Ast.InheritedClassTypeList inheritedClassTypeAsts -> 
         st.EvalPush("InheritedClassType")
-        eval st ast1
+        // a dictionary to prevent shadowed variables
+        let distinctVariables = Dictionary<string, FplValue>()
+        // a dictionary to prevent shadowed properties
+        let distinctProperties = Dictionary<string, FplValue>()
+        // a dictionary to prevent cyclic inheritance
+        let distinctInheritance = Dictionary<string, Position>()
+
+        let beingCreatedNode = variableStack.PeekEvalStack()
+        inheritedClassTypeAsts
+        |> List.iter (fun baseClassAst ->
+            match baseClassAst with
+            | Ast.ObjectType((pos1, pos2), _) ->
+                let dummy = new FplReference((pos1, pos2), beingCreatedNode)
+                variableStack.PushEvalStack(dummy)        
+                eval st baseClassAst
+                variableStack.Pop() |> ignore
+                let obJ = new FplIntrinsicObj((pos1, pos2), beingCreatedNode)
+                beingCreatedNode.ArgList.Add obJ
+            | Ast.PredicateIdentifier((pos1, pos2), _) ->
+                // retrieve the name of the class and the class (if it exists)
+                let dummy = new FplReference((pos1, pos2), beingCreatedNode)
+                variableStack.PushEvalStack(dummy)            
+                eval st baseClassAst
+                variableStack.Pop() |> ignore
+                let candidates = findCandidatesByName st dummy.FplId false false
+                if candidates.Length > 0 then 
+                   let foundBaseClass = candidates.Head
+                   beingCreatedNode.ArgList.Add foundBaseClass // add base
+                distinctInheritance.TryAdd (dummy.FplId, pos1) |> ignore
+            | _ -> ()
+        )
+        let classInheritanceChain = findClassInheritanceChain beingCreatedNode beingCreatedNode.FplId
+        match classInheritanceChain with 
+        | Some chain ->
+            if chain <> beingCreatedNode.FplId then
+                emitID011Diagnostics beingCreatedNode.FplId chain beingCreatedNode.StartPos beingCreatedNode.EndPos
+        | _ -> ()
         st.EvalPop()
     | Ast.ExtensionAssignment((pos1, pos2), (varAst, extensionRegexAst)) ->
         st.EvalPush("ExtensionAssignment")
@@ -1235,10 +1250,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("FunctionalTermSignature")
         eval st simpleSignatureAst
         eval st paramTupleAst
-        match inhFunctionalTypeListAstsOpt with
-        | Some inhFunctionalTypeListAsts ->
-            inhFunctionalTypeListAsts |> List.map (fun inhFunctionalTypeList -> eval st inhFunctionalTypeList) |> ignore
-        | None -> ()
+        inhFunctionalTypeListAstsOpt |> Option.map (eval st) |> Option.defaultValue () 
         variableStack.InSignatureEvaluation <- false
         eval st mappingAst
         optUserDefinedSymbolAst |> Option.map (eval st) |> Option.defaultValue () 
@@ -1745,13 +1757,13 @@ let rec eval (st: SymbolTable) ast =
         setSignaturePositions pos1 pos2
         variableStack.InSignatureEvaluation <- false
         st.EvalPop()
-    | Ast.DefinitionClass((pos1, pos2),(((classSignatureAst, classTypeListAsts), optUserDefinedObjSymAst), (classContentAst, optPropertyListAsts))) ->
+    | Ast.DefinitionClass((pos1, pos2),(((classSignatureAst, inheritedClassTypeListAst), optUserDefinedObjSymAst), (classContentAst, optPropertyListAsts))) ->
         st.EvalPush("DefinitionClass")
         let parent = variableStack.PeekEvalStack()
         let fv = new FplClass((pos1, pos2), parent)
         variableStack.PushEvalStack(fv)
         eval st classSignatureAst
-        classTypeListAsts |> List.map (eval st) |> ignore
+        eval st inheritedClassTypeListAst 
         optUserDefinedObjSymAst |> Option.map (eval st) |> Option.defaultValue ()
         eval st classContentAst
         optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()

@@ -108,17 +108,7 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
         else
             match classInheritanceChain with
             | Some chain ->
-                let diagnostic =
-                    { 
-                        Diagnostic.Uri = ad.CurrentUri
-                        Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                        Diagnostic.Severity = DiagnosticSeverity.Error
-                        Diagnostic.StartPos = pos1
-                        Diagnostic.EndPos = pos2
-                        Diagnostic.Code = ID011(name, chain) // inheritance chain duplicate
-                        Diagnostic.Alternatives = None 
-                    }
-                ad.AddDiagnostic diagnostic
+                emitID011Diagnostics name chain pos1 pos2
                 None
             | _ ->
                 match fplValue.InScopeOfParent name with
@@ -132,17 +122,7 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
 
                         match classInheritanceChain with
                         | Some chain ->
-                            let diagnostic =
-                                { 
-                                    Diagnostic.Uri = ad.CurrentUri
-                                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                                    Diagnostic.Severity = DiagnosticSeverity.Error
-                                    Diagnostic.StartPos = pos1
-                                    Diagnostic.EndPos = pos2
-                                    Diagnostic.Code = ID011(childType, chain) // inheritance chain duplicate
-                                    Diagnostic.Alternatives = None 
-                                }
-                            ad.AddDiagnostic diagnostic
+                            emitID011Diagnostics childType chain pos1 pos2
                             duplicateInheritanceChainFound <- true
                         | _ -> ())
 
