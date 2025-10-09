@@ -1037,6 +1037,8 @@ let rec eval (st: SymbolTable) ast =
                 if candidates.Length > 0 then 
                    let foundBaseClass = candidates.Head
                    beingCreatedNode.ArgList.Add foundBaseClass // add base
+                else
+                    emitID010Diagnostics dummy.FplId pos1 pos2
                 distinctInheritance.TryAdd (dummy.FplId, pos1) |> ignore
             | _ -> ()
         )

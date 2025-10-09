@@ -434,6 +434,7 @@ type TestInterpreterErrors() =
             runTestHelper "TestID010.fpl" fplCode code expected
 
     [<DataRow("def cl A:obj {intr};", 0)>]
+    [<DataRow("def cl A:obj {intr} def cl B:A,obj {intr};", 1)>]
     [<DataRow("def cl A:obj {intr} def cl B:A {intr} def cl C:B,A {intr};", 1)>]
     [<DataRow("uses Fpl.SetTheory def cl Test:EmptySet,Set {intr};", 1)>]
     [<DataRow("uses Fpl.SetTheory def cl Test:Set, EmptySet {intr};", 1)>]
