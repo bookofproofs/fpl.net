@@ -127,6 +127,20 @@ let emitID008Diagnostics constructorId classId pos1 pos2 =
             }
         ad.AddDiagnostic diagnostic
 
+let emitID009Diagnostics name pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ID009 name // circular base dependency
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
+
 let emitID010Diagnostics identifier pos1 pos2 =
     let diagnostic =
         { 

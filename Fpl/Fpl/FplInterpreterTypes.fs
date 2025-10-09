@@ -1527,11 +1527,11 @@ let findInheritanceChains (baseNode: FplValue) (baseName: string) =
             if predecessors[currName].Count = 1 then 
                 // a cycle detected since currNode had only one predecessor so far
                 // and thus, it must be the first one
-                paths.TryAdd (newPath,"cycle detected") |> ignore 
+                paths[newPath] <- $"cycle detected" 
             else
                 // a cross-inheritance
-                let cross = predecessors[currName] |> String.concat "` and `"
-                paths.TryAdd (newPath,$"cross-inheritance not supported, `{currName}` is base for `{cross}`.") |> ignore 
+                let cross = predecessors[currName] |> Seq.distinct |> String.concat "` and `"
+                paths[newPath] <- $"cross-inheritance not supported, `{currName}` is base for `{cross}`." 
         | false, true -> // obj encountered the very first time
             // add object to distinct names
             distinctNames.Add currName |> ignore

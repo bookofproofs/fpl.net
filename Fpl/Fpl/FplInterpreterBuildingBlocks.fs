@@ -1039,6 +1039,8 @@ let rec eval (st: SymbolTable) ast =
                    beingCreatedNode.ArgList.Add foundBaseClass // add base
                 else
                     emitID010Diagnostics dummy.FplId pos1 pos2
+                if dummy.FplId = beingCreatedNode.FplId then 
+                    emitID009Diagnostics dummy.FplId pos1 pos2
                 distinctInheritance.TryAdd (dummy.FplId, pos1) |> ignore
             | _ -> ()
         )
@@ -1046,7 +1048,7 @@ let rec eval (st: SymbolTable) ast =
         classInheritanceChains
         |> Seq.filter (fun kvp -> kvp.Value <> "ok")
         |> Seq.iter (fun kvp -> 
-            emitID011Diagnostics beingCreatedNode.FplId kvp.Key beingCreatedNode.StartPos beingCreatedNode.EndPos
+            emitID011Diagnostics kvp.Key kvp.Value beingCreatedNode.StartPos beingCreatedNode.EndPos
         )
         st.EvalPop()
     | Ast.ExtensionAssignment((pos1, pos2), (varAst, extensionRegexAst)) ->
