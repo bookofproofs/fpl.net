@@ -84,12 +84,13 @@ let checkVAR00Diagnostics numberOfVariadicVars startPos endPos =
             }
         ad.AddDiagnostic diagnostic
 
+(*
 /// Given the class node fplValue and the identifier `name`, this function checks the 
 /// semantical consistency of a parent class with this name, covering ID009, ID010 and ID011 diagnostics.
 /// It will return None or Some reference to the parent class node with this name, if it could be found.
 let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) name pos1 pos2 =
     let rightContext = st.EvalPath()
-    let classInheritanceChain = findClassInheritanceChain fplValue name
+    let classInheritanceChain = findClassInheritanceChain fplValue name true
 
     if rightContext.EndsWith("InheritedClassType.PredicateIdentifier") then
         if fplValue.Type(SignatureType.Type) = name then
@@ -118,7 +119,7 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
                     fplValue.ArgList
                     |> Seq.iter (fun child ->
                         let childType = child.Type(SignatureType.Type)
-                        let classInheritanceChain = findClassInheritanceChain classCandidate childType
+                        let classInheritanceChain = findClassInheritanceChain classCandidate childType true
 
                         match classInheritanceChain with
                         | Some chain ->
@@ -154,7 +155,7 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
 
             fplValue.ArgList
             |> Seq.iter (fun child ->
-                let classInheritanceChain = findClassInheritanceChain child name
+                let classInheritanceChain = findClassInheritanceChain child name true
 
                 match classInheritanceChain with
                 | Some chain ->
@@ -179,6 +180,9 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
                 None
     else    
         None
+
+*)
+
 
 let checkID018Diagnostics (st: SymbolTable) (fv:FplValue) (identifier:string) pos1 pos2 =
     let matchReprId (fv1:FplValue) (identifier:string) = 
@@ -236,7 +240,6 @@ let checkID018Diagnostics (st: SymbolTable) (fv:FplValue) (identifier:string) po
             }
         ad.AddDiagnostic diagnostic
      
-
 
 let checkID019Diagnostics (st: SymbolTable) (name:string) pos1 pos2 =
     if name.StartsWith("@") then 

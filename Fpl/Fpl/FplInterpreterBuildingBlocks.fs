@@ -1000,8 +1000,15 @@ let rec eval (st: SymbolTable) ast =
         eval st ebnfAst
         variableStack.PopEvalStack() // remove language
         st.EvalPop()
+    | Ast.InheritedFunctionalTypeList inheritedFunctionalTypeAsts -> 
+        st.EvalPush("InheritedFunctionalTypeList")
+        inheritedFunctionalTypeAsts
+        |> List.iter (fun baseFunctionalAst ->
+            eval st baseFunctionalAst
+        )
+        st.EvalPop()
     | Ast.InheritedClassTypeList inheritedClassTypeAsts -> 
-        st.EvalPush("InheritedClassType")
+        st.EvalPush("InheritedClassTypeList")
         // a dictionary to prevent shadowed variables
         let distinctVariables = Dictionary<string, FplValue>()
         // a dictionary to prevent shadowed properties
@@ -1033,12 +1040,12 @@ let rec eval (st: SymbolTable) ast =
                 distinctInheritance.TryAdd (dummy.FplId, pos1) |> ignore
             | _ -> ()
         )
-        let classInheritanceChain = findClassInheritanceChain beingCreatedNode beingCreatedNode.FplId
-        match classInheritanceChain with 
-        | Some chain ->
-            if chain <> beingCreatedNode.FplId then
-                emitID011Diagnostics beingCreatedNode.FplId chain beingCreatedNode.StartPos beingCreatedNode.EndPos
-        | _ -> ()
+        let classInheritanceChains = findInheritanceChains beingCreatedNode beingCreatedNode.FplId
+        classInheritanceChains
+        |> Seq.filter (fun kvp -> kvp.Value <> "ok")
+        |> Seq.iter (fun kvp -> 
+            emitID011Diagnostics beingCreatedNode.FplId kvp.Key beingCreatedNode.StartPos beingCreatedNode.EndPos
+        )
         st.EvalPop()
     | Ast.ExtensionAssignment((pos1, pos2), (varAst, extensionRegexAst)) ->
         st.EvalPush("ExtensionAssignment")

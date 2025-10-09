@@ -1503,23 +1503,72 @@ let isIntrinsicObj (fv1:FplValue) =
 /// Checks if the baseClassName is contained in the classRoot's base classes (it derives from).
 /// If so, the function will produce Some path where path equals a string of base classes concatenated by ":".
 /// The classRoot is required to have an FplValueType.Class.
-let rec findClassInheritanceChain (classRoot: FplValue) (baseClassName: string) =
-    let rootType = classRoot.Type(SignatureType.Type)
+let findInheritanceChains (baseNode: FplValue) (baseName: string) =
+    let distinctNames = HashSet<string>()
+    let paths = Dictionary<string,string>() // collects all paths (keys) and errors (values)
+    let predecessors = Dictionary<string,List<string>>() // inner dictionary = predecessors
 
-    match classRoot with
-    | :? FplClass
-    | :? FplIntrinsicObj ->
-        if rootType = baseClassName then
-            Some(rootType)
-        else
-            classRoot.ArgList
-            |> Seq.collect (fun child ->
-                match findClassInheritanceChain child baseClassName with
-                | Some path -> [ rootType + ":" + path ]
-                | None -> [])
-            |> Seq.tryLast
-    | _ -> 
-        None
+    let rec findChains (bNode: FplValue) predecessorName accPath =
+        let currName = bNode.Type(SignatureType.Mixed)
+        let newPath = 
+            if accPath = String.Empty then 
+                currName
+            else
+                $"{accPath}:{currName}" 
+        match distinctNames.Contains currName, currName = LiteralObj with
+        | true, true -> // obj is the sink of all inheritance paths 
+            predecessors[currName].Add predecessorName
+            if paths.ContainsKey newPath then 
+                paths[newPath] <- $"duplicate inheritance of {currName} detected"
+            else
+                paths.TryAdd(newPath,"ok") |> ignore // new path found
+        | true, false -> // a cross-inheritance between two paths or a cycle detected
+            predecessors[currName].Add predecessorName
+            if predecessors[currName].Count = 1 then 
+                // a cycle detected since currNode had only one predecessor so far
+                // and thus, it must be the first one
+                paths.TryAdd (newPath,"cycle detected") |> ignore 
+            else
+                // a cross-inheritance
+                let cross = predecessors[currName] |> String.concat "` and `"
+                paths.TryAdd (newPath,$"cross-inheritance not supported, `{currName}` is base for `{cross}`.") |> ignore 
+        | false, true -> // obj encountered the very first time
+            // add object to distinct names
+            distinctNames.Add currName |> ignore
+            // add predecessor to object
+            predecessors.Add (currName, List<string>())
+            predecessors[currName].Add predecessorName
+            paths.TryAdd (newPath,"ok") |> ignore // new path found
+        | false, false -> // a node encountered the very first time
+            // add node name to distinct names
+            distinctNames.Add currName |> ignore
+            // add predecessor to node name
+            predecessors.Add (currName, List<string>())
+            predecessors[currName].Add predecessorName
+            bNode.ArgList
+            |> Seq.iter (fun subNode ->
+                findChains subNode currName newPath 
+            )
+
+    findChains baseNode "" ""
+    paths
+
+/// Checks if a node inherits from some type.
+let inheritsFrom (node:FplValue) someType = 
+    let inheritanceList = findInheritanceChains node node.FplId
+    let inheritanceFound = 
+        inheritanceList 
+        |> Seq.filter (fun kvp -> 
+            kvp.Value = "ok" && 
+            (
+                kvp.Key.EndsWith $":{someType}" 
+            || kvp.Key.Contains $":{someType}:"
+            )
+        )
+        |> Seq.tryLast
+    match inheritanceFound with 
+    | Some _ -> true
+    | None -> false
 
 type ICanBeCalledRecusively =
     abstract member CallCounter : int
@@ -3340,16 +3389,14 @@ let rec mpwa hasArguments (args: FplValue list) (pars: FplValue list) =
 
                 match cl with
                 | :? FplClass ->
-                    let inheritanceList = findClassInheritanceChain cl pType
-
-                    match inheritanceList with
-                    | Some str -> mpwa hasArguments ars prs
-                    | None ->
+                    if inheritsFrom cl pType then 
+                        mpwa hasArguments ars prs
+                    else
                         Some(
                             $"`{a.Type(SignatureType.Name)}:{aType}` neither matches `{p.Type(SignatureType.Name)}:{pType}` nor the base classes"
                         )
                 | _ ->
-                    // this case does not occur but for we cover it for completeness reasons
+                    // this case does not occur but we cover it for completeness reasons
                     Some(
                         $"`{a.Type(SignatureType.Name)}:{aType}` is undefined and doesn't match `{p.Type(SignatureType.Name)}:{pType}`"
                     )
@@ -4457,20 +4504,13 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
         let valueOpt = getArgument toBeAssignedValue
         match valueOpt with
         | Some value when value.IsClass() ->
-            let chainOpt = findClassInheritanceChain value assignee.TypeId
-            match chainOpt with
-            | None ->
+            if not (inheritsFrom value assignee.TypeId) then 
                 // issue SIG05 diagnostics if either no inheritance chain found 
                 emitSIG05Diagnostics (assignee.Type(SignatureType.Type)) (value.Type(SignatureType.Type)) toBeAssignedValue.StartPos toBeAssignedValue.EndPos
-            | _ -> () // inheritance chain found (no SIG05 diagnostics)
         | Some value when (value.Name = LiteralCtorL) ->
-            // find a class inheritance chain for the constructor's class (which is stored in its parent value)
-            let chainOpt = findClassInheritanceChain value.Parent.Value assignee.TypeId
-            match chainOpt with
-            | None ->
+            if not (inheritsFrom value.Parent.Value assignee.TypeId) then 
                 // issue SIG05 diagnostics if either no inheritance chain found 
                 emitSIG05Diagnostics (assignee.Type(SignatureType.Type)) (value.Type(SignatureType.Type)) toBeAssignedValue.StartPos toBeAssignedValue.EndPos
-            | _ -> () // inheritance chain found (no SIG05 diagnostics)
         | Some value when assignee.TypeId <> value.TypeId ->
             // Issue SIG05 diagnostics if value is not a constructor and not a class and still the types are not the same 
             emitSIG05Diagnostics (assignee.Type(SignatureType.Type)) (value.Type(SignatureType.Type)) toBeAssignedValue.StartPos toBeAssignedValue.EndPos

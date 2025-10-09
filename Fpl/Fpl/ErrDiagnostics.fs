@@ -334,7 +334,7 @@ type DiagnosticCode =
             | ID008 (constructorId, classId)  -> $"Misspelled constructor name `{constructorId}`, expecting `{classId}`."  
             | ID009 name -> $"Circular base type dependency involving `{name}`." 
             | ID010 name -> $"The type `{name}` could not be found. Are you missing a uses clause?" 
-            | ID011 (name, inheritanceChain) -> $"Inheritance from `{name}` can be dropped because of the inheritance chain {inheritanceChain}."  
+            | ID011 (chain, errorMsg) -> $"The inheritance chain `{chain}` causes the following error: {errorMsg}."  
             | ID012 (name, candidates) -> 
                 if candidates.Length > 0 then 
                     sprintf "Base class `%s` not found, candidates are %s." name candidates

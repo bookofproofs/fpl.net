@@ -141,7 +141,7 @@ let emitID010Diagnostics identifier pos1 pos2 =
     ad.AddDiagnostic diagnostic
 
 
-let emitID011Diagnostics name chain pos1 pos2 = 
+let emitID011Diagnostics chain errorMsg pos1 pos2 = 
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -149,7 +149,7 @@ let emitID011Diagnostics name chain pos1 pos2 =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = ID011(name, chain) // inheritance chain duplicate
+            Diagnostic.Code = ID011(chain, errorMsg) // inheritance chain-related error
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
