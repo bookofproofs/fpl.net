@@ -4,7 +4,7 @@ uses Fpl.PeanoArithmetics
 
 
 // defines a fixed length tuple template using a natural-number index
-definition class Tuple : obj
+definition class Tuple 
 {
     dec 
         ~myFrom:Nat
@@ -23,7 +23,6 @@ definition class Tuple : obj
                 myArr[i]:=elem
             }
             myLength:=i
-            base.obj()
         ;
         
     }
@@ -37,7 +36,7 @@ definition class Tuple : obj
 }
 
 // defines a tuple template starting from a specific index with an arbitrary length
-definition class UnlimitedTupleFrom: obj
+definition class UnlimitedTupleFrom
 {
     dec 
         ~myX:+ tpl
@@ -47,7 +46,6 @@ definition class UnlimitedTupleFrom: obj
     constructor UnlimitedTupleFrom(from:index, x:+ tpl)
     {
         dec
-            base.obj()
             myX:=x
             myFrom:=from
         ;

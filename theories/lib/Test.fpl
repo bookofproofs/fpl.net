@@ -1,12 +1,507 @@
-def pred TestPredicate(
-        x1:+pred(x1u1:func(x1u1a,x1u1b,x1u1c:obj)->obj, x1u2:func(x1u2a,x1u2b,x1u2c:obj)->obj, x1u3:func(x1u3a,x1u3b,x1u3c:obj)->obj)        
-        ,x2:+pred(x2u1:func(x2u1a,x2u1b,x2u1c:obj)->obj, x2u2:func(x2u2a,x2u2b,x2u2c:obj)->obj, x2u3:func(x2u3a,x2u3b,x2u3c:obj)->obj)         
-        ,x3:+pred(x3u1:func(x3u1a,x3u1b,x3u1c:obj)->obj, x3u2:func(x3u2a,x3u2b,x3u2c:obj)->obj, x3u3:func(x3u3a,x3u3b,x3u3c:obj)->obj)        
-        ,x4:+pred(x4u1:func(x4u1a,x4u1b,x4u1c:obj)->obj, x4u2:func(x4u2a,x4u2b,x4u2c:obj)->obj, x4u3:func(x4u3a,x4u3b,x4u3c:obj)->obj)       
-        ,x5:+pred(x5u1:func(x5u1a,x5u1b,x5u1c:obj)->obj, x5u2:func(x5u2a,x5u2b,x5u2c:obj)->obj, x5u3:func(x5u3a,x5u3b,x5u3c:obj)->obj)        
-        ,x6:+pred(x6u1:func(x6u1a,x6u1b,x6u1c:obj)->obj, x6u2:func(x6u2a,x6u2b,x6u2c:obj)->obj, x6u3:func(x6u3a,x6u3b,x6u3c:obj)->obj)       
-) 
+uses Fpl.Commons
+uses Fpl.SetTheory
+
+/* Binary operation. Note that the generic type "tplSetElem" limits a Binary operation to be closed
+    inside a type, however, it still might be not closed inside a particular set of elements of this type.
+    we will therefore need another predicate to ensure, but defining it will require the the context
+    of a particular set. It is, therefore, not possible to define the closure for a binary operation without this
+    broader context. */
+def func BinOp(x,y: tplSetElem) -> tplSetElem
+{
+    intr
+    property pred  IsAssociative()
     {
-        intr
+        all a,b,c: tplSetElem {  (parent(a,parent(b,c)) = parent(parent(a,b),c))  }
     }
+
+    property pred  IsCommutative()
+    {
+        all a,b: tplSetElem { (parent(a,b) = parent(b,a)) }
+    }
+
+    property pred  IsLeftNeutralElement(e: tplSetElem)
+    {
+        all x: tplSetElem { (parent(e,x) = x) }
+    }
+
+    property pred  IsRightNeutralElement(e: tplSetElem)
+    {
+        all x: tplSetElem { (parent(x,e) = x) }
+    }
+
+    property pred  IsNeutralElement(e: tplSetElem)
+    {
+        and (IsLeftNeutralElement(e), IsRightNeutralElement(e))
+    }
+
+    property pred  HasLeftNeutralElement()
+    {
+        ex e: tplSetElem { IsLeftNeutralElement(e) }
+    }
+
+    property pred HasRightNeutralElement()
+    {
+        ex e: tplSetElem { IsRightNeutralElement(e) }
+    }
+
+    property pred  HasNeutralElement()
+    {
+        ex e: tplSetElem { IsNeutralElement(e) }
+    }
+
+    property func  LeftNeutralElement() -> tplSetElem
+    {
+        dec 
+            ~result:tplSetElem 
+            assert IsLeftNeutralElement(result);
+        return result
+    }
+
+    property func RightNeutralElement() -> tplSetElem
+    {
+        dec 
+            ~result:tplSetElem 
+            assert IsRightNeutralElement(result);
+        return result
+    }
+
+    property func  NeutralElement() -> tplSetElem
+    {
+        dec 
+            ~result:tplSetElem 
+            assert IsNeutralElement(result);
+        return result
+    }
+
+}
+
+def func Composition(operands:* tplSetElem) -> tplSetElem
+{
+    intrinsic
+}
+
+/* an algebraic structure is derived from a set type with at least one binary operation
+    defined on its set elements ("BinOp +ops" stands for one or more operands of type BinOp).
+    Since tplSet and tplSetElem are independent from each other, we will have to ensure the closure of each of
+    them inside the set x of type tplSet. */
+def class AlgebraicStructure
+{
+
+    dec
+        ~myCarrierSet: tplSet
+        ~myOps:+ func(myElem:* tplSetElem) -> tplSetElem
+    ;
+
+    ctor AlgebraicStructure(x: tplSet, ops:+ Composition)
+    {
+        dec
+            ~arg: index
+            myOps := ops
+            myCarrierSet := x
+
+            // Assert that all types used in the declaration of AlgebraicStructure
+            // can be treated like they were sets, even if they are not derived from the type "Set" in their original
+            // definition! This, means that the In predicate has a non-transitive model
+            // this is comparable to implementing an interface (or comparable to multiple inheritance).
+            // The interpreter only asserts the types tplSet, and tplSetElement to be sets
+            assert is (x,Set)
+            for arg in args 
+            {
+                assert is(arg,Set)
+            }
+
+            assert
+                all a:obj
+                {
+                    impl ( is(a,tplSetElem), In(a,myCarrierSet) )
+                }
+
+        ;
+        
+
+    }
+
+    property  func NthOp(n: index) -> Composition
+    {
+        return myOps[n]
+    }
+
+    // Every algebraic structure will have a mandatory property called CarrierSet of type Set.
+    property func CarrierSet() -> Set
+    {
+        return myCarrierSet
+    }
+
+}
+
+// a magma is an algebraic structure with one binary operation defined on it
+// Note how the "constructor" of the base class AlgebraicStructure is called with the arguments x and op
+def class Magma: AlgebraicStructure
+{
+
+    ctor Magma(x: tplSet, op: BinOp)
+    {
+        dec
+            base.AlgebraicStructure(x,op)
+        ;
+        
+    }
+}
+
+// a semigroup is a magma whose binary operation is associative using "non-full-qualified" parameters
+def class Semigroup: Magma
+{
+    ctor Semigroup(x: tplSet, op: BinOp)
+    {
+        dec 
+            assert op.IsAssociative()
+            base.Magma(x,op)
+        ;
+        
+    }
+
+}
+
+// a monoid is a semigroup whose binary operation has a neutral element
+// we define this element a mandatory property of the monoid.
+// Note how we use "full-qualified" parameters to ensure that the type "tpl" will be of exactly the  same ty
+def class Monoid: Semigroup
+{
+    dec ~myOp: func(a,b: tplSetElem) -> tplSetElem;
+
+    ctor Monoid(x: tplSet, op: BinOp)
+    {
+        dec 
+            myOp:=op
+            assert myOp.HasNeutralElement()
+            base.Semigroup(x,op)
+        ;
+        
+    }
+
+    property func NeutralElem() -> tplSetElem
+    {
+        return myOp.NeutralElement()
+    }
+}
+
+// Exponentiation in a monoid
+// Note how we use the Zermelo Fraenkel In predicate to ensure that y is the element of the monoid carrier set x.
+def func Exp
+    (
+    m: Monoid,
+    y: tplSetElem,
+    n: Nat
+    ) -> tplSetElem
+{
+    dec 
+        ~result:tplSetElem 
+        assert In(y,x)
+        cases
+        (
+            | (n = @0): result := m.NeutralElem()
+            ? result :=
+                    op(
+                        y,
+                        Exp( m(y,op), y, Sub(n,@1))
+                    )
+        )
+    ;
+    return result
+
+}
+
+// a group is a monoid, in which an inverse element exists for all elements
+def class Group: Monoid
+{
+    dec ~myOp: func(a,b: tplSetElem)->tplSetElem;
+
+    ctor Group(x: tplSet, op: BinOp)
+    {
+        dec
+            myOp:=op
+            base.Monoid(x,op)
+        ;
+        
+    }
+
+    property pred InverseExistsForAllElements()
+    {
+        all x1: tplSetElem
+        {
+            ex x2: tplSetElem
+            {
+                Equal( myOp(x1,x2), self.NeutralElem() )
+            }
+        }
+    }
+
+    // provides a standard functionality inside a group that "returns" the inverse element to a given element
+    // we can refer to this functionality as group.InverseOf(x)
+    property func InverseOf(x: tplSetElem) -> tplSetElem
+    {
+        dec
+                ~val: tplSetElem
+            assert
+                and
+                (
+                    (myOp(x,val) = self.NeutralElem()),
+                    (myOp(val,x) = self.NeutralElem())
+                )
+        ;
+        ret val
+    }
+}
+
+def class CommutativeGroup: Group
+{
+    ctor CommutativeGroup(x: tpl, op: BinOp)
+    {
+        dec
+            assert op.IsCommutative()
+            base.Group(x,op)
+        ;
+                        
+    }
+}
+
+def class Ring: AlgebraicStructure
+{
+    dec 
+        ~myX : tpl
+        ~myAdd,myMul : BinOp
+    ;
+
+    ctor Ring (
+        x: tpl,
+        add: BinOp,
+        mul: BinOp
+    )
+    {
+        dec 
+            myX:= x
+            myAdd:=add
+            myMul:=mul
+            base.AlgebraicStructure(x, add, mul)
+        ;
+        
+    }
+
+    property func Add(a,b:tplElem)->tplElem
+    {
+        dec
+            assert and(In(a, myX), In(b, myX))
+        ;
+        return myAdd(a,b)
+    }
+
+
+    property func Mul(a,b:tplElem)->tplElem
+    {
+        dec
+            assert and(In(a, myX), In(b, myX))
+        ;
+        return myMul(a,b)
+    }
+
+    property func AdditiveGroup() -> CommutativeGroup
+    {
+        return CommutativeGroup(myX, myAdd)
+    }
+
+    property func MultiplicativeSemiGroup() -> Semigroup
+    {
+        return CommutativeGroup(myX, myMul)
+    }
+
+    property pred RightDistributive()
+    {
+        all a,b,c:  tplElem
+        {
+            ( myMul(myAdd(a,b),c) = myAdd(myMul(a,c),myMul(b,c)) )
+        }
+    }
+
+    property pred LeftDistributive()
+    {
+        all a,b,c: tplElem
+        {
+            ( myMul(a,myAdd(b,c)) = myAdd(myMul(a,b),myMul(a,c)) )
+        }
+    }
+
+    property pred Distributive()
+    {
+        and
+        (
+            RightDistributive(),
+            LeftDistributive()
+        )
+    }
+}
+
+def class UnitRing: Ring
+{
+
+    ctor UnitRing(x: tpl, add, mul: BinOp)
+    {
+        dec
+            base.Ring(x,add,mul)
+        ;
+        
+    }
+
+    property func MultiplicativeMonoid() -> Monoid 
+    {
+        return Monoid(self.CarrierSet(), self.Mul())
+    }
+}
+
+def class CommutativeUnitRing: UnitRing
+{
+    ctor CommutativeUnitRing(x: tpl, add, mul: BinOp)
+    {
+        dec 
+            assert mul.IsCommutative() 
+            base.UnitRing(x,add,mul)
+        ;
+                    
+    }
+}
+
+def class Field: CommutativeUnitRing
+{
+
+    ctor Field(x: tpl, add,mul: BinOp)
+    {
+        dec 
+            base.CommutativeUnitRing(x,add,mul)
+        ;
+        
+    }
+
+    property func MultiplicativeGroup() -> CommutativeGroup
+    {
+        return CommutativeGroup(self.CarrierSet(), self.Mul())
+    }
+
+    property pred OneUnequalZero()
+    {
+        NotEqual(
+            self.AdditiveGroup().NeutralElement(),
+            self.MultiplicativeGroup().NeutralElement()
+        )
+    }
+
+    property pred CollectElements()
+    {
+        all elem:  tplElem
+        {
+            and 
+            (
+                and
+                (
+                    In(elem, x),
+                    is(elem, Set)
+                ),
+                In(elem, self)
+            )
+            
+        }
+    }
+}
+
+// Vector addition
+def func AddVec(x,y: tplVector) -> tplVector
+{
+    intr
+}
+
+// Scalar Multiplication
+def func ScalarMul(x: tplFieldElem, y: tplVector) -> tplVector
+{
+    intr
+}
+
+// Vector space over a field
+def class VectorSpaceOverField 
+{
+    dec
+        ~mySpace: NonemptySet
+        ~myFieldAdd, myFieldMul: BinOp
+        ~myFieldSet: tplFieldSet
+        ~myScalarMul: ScalarMul 
+        ~myVecAdd: AddVec 
+        ~myField: Field
+    ;
+    ctor VectorSpaceOverField
+        (
+            space: NonemptySet,
+                field: Field,
+            vecAdd: AddVec,
+            scalarMul: func(a: tplFieldElement,v1: tplVector) -> tplVector
+        )
+    {
+        dec
+            mySpace:= space
+            myFieldAdd:= fieldAdd
+            myFieldMul:= fieldMul
+            myFieldSet:= fieldSet
+            myScalarMul:= scalarMul
+            myVecAdd:=vecAdd
+            myField:= field
+        ;
+        
+    }
+
+
+    // vs together with oppAdd is a commutative group,
+    // let's call it with the identifier "Space"
+    property func Space() -> CommutativeGroup
+    {
+        return CommutativeGroup(mySpace, myFieldAdd)
+    }
+
+    property func MyField() -> Field
+    {
+        return myField
+    }
+
+    property pred ScalarMulIsRightDistributive()
+    {
+        all u,w: tplVector, a:  tplFieldElement
+        {
+            ( myScalarMul(myVecAdd(u,w),a) = myVecAdd(myScalarMul(u,a),myScalarMul(w,a)) )
+        }
+    }
+
+    property pred ScalarMulIsLeftDistributive()
+    {
+        all u,w:  tplVector, a:  tplFieldElement
+        {
+            ( myScalarMul(a,myVecAdd(u,w)) = myVecAdd(myScalarMul(a,u),myScalarMul(a,w)) )
+        }
+    }
+
+    property pred ScalarMulIsIsAssociative()
+    {
+        all a,b:  tplFieldElement, u:  tplVector
+        {
+            ( myScalarMul(myFieldMul(a,b),u) = myScalarMul(a,myScalarMul(b,u)) )
+        }
+    }
+
+    property pred ScalarMulNorm()
+    {
+        dec
+            ~one: tplFieldElement
+            one := myField.MultiplicativeGroup().NeutralElement()
+        ;
+        all u:  tplVector
+        {
+            ( myScalarMul(one,u) =  u )
+        }
+    }
+}
+
 ;

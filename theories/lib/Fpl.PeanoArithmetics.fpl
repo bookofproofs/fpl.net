@@ -6,16 +6,9 @@ uses Fpl.Commons
 uses Fpl.SetTheory
 
 // definition of a new mathematical object (natural number)
-def cl Nat: obj
-{
-    intrinsic
-}
+def cl Nat
 
 def cl Zero: Nat
-{
-    intr
-}
-
 
 
 // definition of a functional term denoting the successor of a natural number
@@ -268,10 +261,7 @@ proposition SumOfConsecutiveNumbers
     )
 }
 
-def cl Real: obj
-{
-    intr
-}
+def cl Real
 
 def pred LowerEqual (x,y:tpl) 
 {

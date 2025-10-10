@@ -21,25 +21,13 @@ inference ExistsByExample
         ex x: obj {p(x, other)}
 }
 
-def class A: obj
-{
-    intr
-}
+def class A
 
-def class B: obj
-{
-    intr
-}
+def class B
 
-def class C: obj
-{
-    intr
-}
+def class C
 
 def pred Greater(x,y: obj) infix ">" 5 
-{
-    intr
-}
 
 axiom GreaterAB
 {
