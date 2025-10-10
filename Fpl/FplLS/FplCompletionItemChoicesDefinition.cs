@@ -101,11 +101,7 @@ namespace FplLS
                     break;
 
             }
-            return ret +
-                $"{Environment.NewLine}" +
-                $"{TokenLeftBrace}{Environment.NewLine}" +
-                $"\t{TokenIntrinsic}{Environment.NewLine}" +
-                $"{TokenRightBrace}{Environment.NewLine}";
+            return ret + Environment.NewLine;
         }
 
     }

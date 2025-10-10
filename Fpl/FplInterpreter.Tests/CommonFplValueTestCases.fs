@@ -249,7 +249,7 @@ type CommonFplValueTestCases =
     static member ScopeConstructors(subtype) =
         ad.Clear()
         let fplCode = """
-        def cl TestId:obj 
+        def cl TestId 
         {
             ctor TestId() {} 
             ctor TestId(x:obj) {} 
@@ -294,8 +294,8 @@ type CommonFplValueTestCases =
             corollary SomeLemma2$1 {true}
             conjecture SomeConjecture1 {true}
             conjecture SomeConjecture2 {true}
-            def cl SomeClass1:obj {intr}
-            def cl SomeClass2:obj {intr}
+            def cl SomeClass1 {intr}
+            def cl SomeClass2 {intr}
             def pred SomePredicate1() {true}
             def pred SomePredicate2() {true}
             def func SomeFunctionalTerm1()->obj {intr}
@@ -430,7 +430,7 @@ type CommonFplValueTestCases =
     static member ScopeIntrinsicPrimitives(subtype) =
         ad.Clear()
         let fplCode = """
-            def cl A:obj {intr}
+            def cl A {intr}
             def func B()->obj {intr}
             def pred T() {
                 dec 

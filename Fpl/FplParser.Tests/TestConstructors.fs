@@ -152,7 +152,7 @@ type TestConstructors () =
         let result = run (constructor .>> eof) """ctor Magma(x: tplSet, op: BinOp)
             {
                 dec ~a:obj
-                base.obj()
+                base.Obj()
                 ;
                 
             }"""

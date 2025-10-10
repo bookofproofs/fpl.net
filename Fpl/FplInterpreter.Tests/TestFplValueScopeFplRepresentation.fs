@@ -625,9 +625,9 @@ type TestFplValueScopeFplRepresentation() =
     member this.TestBaseConstructorCall(var, varVal) =
         ad.Clear()
         let fplCode = sprintf """
-                        def cl B:obj {intr}
-                        def cl C:obj {intr}
-                        def cl D:obj {intr}
+                        def cl B {intr}
+                        def cl C {intr}
+                        def cl D {intr}
 
                         def cl A:B,C,D,E
                         {
@@ -667,12 +667,12 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("base2", """def func T()->ind {intr};""")>]
     [<DataRow("base3", """def func T()->func {intr};""")>]
     [<DataRow("base4", """def func T()->pred {intr};""")>]
-    [<DataRow("base5", """def cl A:obj {intr} def func T()->A {intr};""")>]
+    [<DataRow("base5", """def cl A {intr} def func T()->A {intr};""")>]
     [<DataRow("base6", """def func T()->pred(z:ind) {intr};""")>]
     [<DataRow("base7", """def func T()->pred(z:*obj) {intr};""")>]
     [<DataRow("base8", """def func T()->func(p:*pred(x:obj))->pred(x:ind) {intr};""")>]
     [<DataRow("base9", """def func T()->pred(f:+func(x:A)->A) {intr};""")>]
-    [<DataRow("base10", """def cl A:obj {intr} def func T()->pred(f:func(x:A)->A) {intr};""")>]
+    [<DataRow("base10", """def cl A {intr} def func T()->pred(f:func(x:A)->A) {intr};""")>]
     [<TestMethod>]
     member this.TestMapping(var, varVal) =
         ad.Clear()
@@ -743,8 +743,8 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("base2", """def pred T1 () infix ">" -1 {intr};""")>]
     [<DataRow("base3", """def pred T1 () postfix "'" {intr};""")>]
     [<DataRow("base4", """def pred T1 () prefix "-" {intr};""")>]
-    [<DataRow("base5", """def cl T1 :obj symbol "∅" {intr};""")>]
-    [<DataRow("base5a", """def cl T1:obj {intr};""")>]
+    [<DataRow("base5", """def cl T1 symbol "∅" {intr};""")>]
+    [<DataRow("base5a", """def cl T1 {intr};""")>]
     [<DataRow("base6", """def func T1()->obj {intr};""")>]
     [<DataRow("base7", """def func T1 ()->obj infix ">" -1 {intr};""")>]
     [<DataRow("base8", """def func T1  ()->obj postfix "'"{intr};""")>]
@@ -819,18 +819,18 @@ type TestFplValueScopeFplRepresentation() =
             Assert.IsTrue(false)
 
     [<DataRow("o", """def pred T() {dec ~o:obj; true};""", "dec obj")>]    // without anything
-    [<DataRow("a", """def cl A: obj {intr} def pred T() {dec ~a:A; true};""", "dec A")>]    // without constructor, without inheritance, without instantiation
-    [<DataRow("aI1", """def cl A: obj {intr} def pred T() {dec ~aI1:A aI1:=A; true};""", "intr A:intr obj")>]  // without constructor, without inheritance, with instantiation (without ())
-    [<DataRow("aI2", """def cl A: obj {intr} def pred T() {dec ~aI2:A aI2:=A(); true};""", "intr A:intr obj")>]  // without constructor, without inheritance, with instantiation (with ()) -> should also trigger another error
-    [<DataRow("b", """def cl A: obj {intr} def cl B: A {intr} def pred T() {dec ~b:B; true};""", "dec B")>]    // without constructor, with inheritance, without instantiation
-    [<DataRow("bI1", """def cl A: obj {intr} def cl B: A {intr} def pred T() {dec ~bI1:B bI1:=B; true};""", "intr B:intr A:intr obj")>]  // without constructor, with inheritance, with instantiation (without ())
-    [<DataRow("bI2", """def cl A: obj {intr} def cl B: A {intr} def pred T() {dec ~bI2:B bI2:=B(); true};""", "intr B:intr A:intr obj")>]  // without constructor, with inheritance, with instantiation (with ()) -> should also trigger another error
-    [<DataRow("c", """def cl A: obj {intr} def cl B: A {intr} def cl C: obj {ctor C() {dec base.obj (); }} def pred T() {dec ~c:C; true};""", "dec C")>]    // with constructor, without inheritance, without instantiation
-    [<DataRow("cI1", """def cl A: obj {intr} def cl B: A {intr} def cl C: obj {ctor C() {dec base.obj (); }} def pred T() {dec ~cI1:C cI1:=C; true};""", "C:intr obj")>]  // with constructor, without inheritance, with instantiation (without ()) -> should also trigger another error
-    [<DataRow("cI2", """def cl A: obj {intr} def cl B: A {intr} def cl C: obj {ctor C() {dec base.obj (); }} def pred T() {dec ~cI2:C cI2:=C(); true};""", "C:obj")>]  // with constructor, without inheritance, with instantiation (with ())
-    [<DataRow("d", """def cl A: obj {intr} def cl B: A {intr} def cl D: B {ctor D() {dec base.B(); }} def pred T() {dec ~d:D; true};""", "dec D")>]    // with constructor, with inheritance, without instantiation
-    [<DataRow("dI1", """def cl A: obj {intr} def cl B: A {intr} def cl D: B {ctor D() {dec base.B(); }} def pred T() {dec ~dI1:D dI1:=D; true};""", "D:intr B:intr A:intr obj")>]  // with constructor, with inheritance, with instantiation (without ())
-    [<DataRow("dI2", """def cl A: obj {intr} def cl B: A {intr} def cl D: B {ctor D() {dec base.B(); }} def pred T() {dec ~dI2:D dI2:=D(); true};""", "D:intr B:intr A")>]  
+    [<DataRow("a", """def cl A {intr} def pred T() {dec ~a:A; true};""", "dec A")>]    // without constructor, without inheritance, without instantiation
+    [<DataRow("aI1", """def cl A {intr} def pred T() {dec ~aI1:A aI1:=A; true};""", "intr A:intr obj")>]  // without constructor, without inheritance, with instantiation (without ())
+    [<DataRow("aI2", """def cl A {intr} def pred T() {dec ~aI2:A aI2:=A(); true};""", "intr A:intr obj")>]  // without constructor, without inheritance, with instantiation (with ()) -> should also trigger another error
+    [<DataRow("b", """def cl A {intr} def cl B: A {intr} def pred T() {dec ~b:B; true};""", "dec B")>]    // without constructor, with inheritance, without instantiation
+    [<DataRow("bI1", """def cl A {intr} def cl B: A {intr} def pred T() {dec ~bI1:B bI1:=B; true};""", "intr B:intr A:intr obj")>]  // without constructor, with inheritance, with instantiation (without ())
+    [<DataRow("bI2", """def cl A {intr} def cl B: A {intr} def pred T() {dec ~bI2:B bI2:=B(); true};""", "intr B:intr A:intr obj")>]  // without constructor, with inheritance, with instantiation (with ()) -> should also trigger another error
+    [<DataRow("c", """def cl A {intr} def cl B: A {intr} def cl C {ctor C() {dec base.obj (); }} def pred T() {dec ~c:C; true};""", "dec C")>]    // with constructor, without inheritance, without instantiation
+    [<DataRow("cI1", """def cl A {intr} def cl B: A {intr} def cl C {ctor C() {dec base.obj (); }} def pred T() {dec ~cI1:C cI1:=C; true};""", "C:intr obj")>]  // with constructor, without inheritance, with instantiation (without ()) -> should also trigger another error
+    [<DataRow("cI2", """def cl A {intr} def cl B: A {intr} def cl C {ctor C() {dec base.obj (); }} def pred T() {dec ~cI2:C cI2:=C(); true};""", "C:obj")>]  // with constructor, without inheritance, with instantiation (with ())
+    [<DataRow("d", """def cl A {intr} def cl B: A {intr} def cl D: B {ctor D() {dec base.B(); }} def pred T() {dec ~d:D; true};""", "dec D")>]    // with constructor, with inheritance, without instantiation
+    [<DataRow("dI1", """def cl A {intr} def cl B: A {intr} def cl D: B {ctor D() {dec base.B(); }} def pred T() {dec ~dI1:D dI1:=D; true};""", "D:intr B:intr A:intr obj")>]  // with constructor, with inheritance, with instantiation (without ())
+    [<DataRow("dI2", """def cl A {intr} def cl B: A {intr} def cl D: B {ctor D() {dec base.B(); }} def pred T() {dec ~dI2:D dI2:=D(); true};""", "D:intr B:intr A")>]  
     [<TestMethod>]
     member this.TestVariableRepresentationObjects(var, fplCode:string, expected:string) =
         ad.Clear()

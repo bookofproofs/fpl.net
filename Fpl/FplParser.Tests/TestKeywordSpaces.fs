@@ -428,7 +428,7 @@ type TestKeywordSpaces() =
     [<DataRow(LiteralCl)>]
     [<TestMethod>]
     member this.TestSpacesClass (word:string) =
-        let result = run (definition .>> eof) ("def " + word + "T:obj{intr}")
+        let result = run (definition .>> eof) ("def " + word + "T{intr}")
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("Expecting: <significant whitespace>"))
@@ -437,7 +437,7 @@ type TestKeywordSpaces() =
     [<DataRow(LiteralCl)>]
     [<TestMethod>]
     member this.TestSpacesClassWithSpace (word:string) =
-        let result = run (definition .>> eof) ("def " + word + " T:obj{intr}")
+        let result = run (definition .>> eof) ("def " + word + " T{intr}")
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

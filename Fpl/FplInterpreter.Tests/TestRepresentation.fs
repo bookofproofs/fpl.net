@@ -19,8 +19,8 @@ type TestRepresentation() =
     member this.TestRepresentationPredicate(var:string, varVal, expected:string) =
         ad.Clear()
         let fplCode = sprintf """uses Fpl.Commons 
-            def cl A: obj  {intr} 
-            def cl B: obj  {intr} 
+            def cl A  {intr} 
+            def cl B  {intr} 
             def pred T() { dec ~x,y:obj x:=A() y:=B(); %s };""" varVal
         let filename = "TestRepresentationPredicate.fpl"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -139,7 +139,7 @@ type TestRepresentation() =
     [<DataRow("01b","""def pred T() { dec ~v:pred(d:pred(e,f:obj)); true };""", "dec pred(pred(obj, obj))")>]
     [<DataRow("01c","""def pred T() { dec ~v:func(d:pred(e:obj,d,e:ind)) ->pred(d:pred(e,f:obj)); true };""", "dec func(pred(obj, ind, ind)) -> pred(pred(obj, obj))")>]
     [<DataRow("02","""def pred T() { dec ~v:A; true };""", "dec A")>]
-    [<DataRow("02a","""def cl A:obj {intr} def pred T() { dec ~v:A; true };""", "dec A")>]
+    [<DataRow("02a","""def cl A {intr} def pred T() { dec ~v:A; true };""", "dec A")>]
     [<TestMethod>]
     member this.TestRepresentationUnitializedVars(var:string, fplCode, expected:string) =
         ad.Clear()
@@ -190,9 +190,9 @@ type TestRepresentation() =
         let fplCode = sprintf """
             uses Fpl.Commons
             
-            def cl X: obj { intr }
+            def cl X { intr }
             
-            def cl A: obj { intr }
+            def cl A { intr }
             def cl B: A { intr }
             def cl C: A { intr }
 

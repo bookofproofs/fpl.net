@@ -165,9 +165,9 @@ type TestReferencesTypeOfSignature() =
     member this.TestBaseConstructorCall(var, varVal) =
         ad.Clear()
         let fplCode = sprintf """
-                        def cl B:obj {intr}
-                        def cl C:obj {intr}
-                        def cl D:obj {intr}
+                        def cl B {intr}
+                        def cl C {intr}
+                        def cl D {intr}
 
                         def cl A:B,C,D,E
                         {

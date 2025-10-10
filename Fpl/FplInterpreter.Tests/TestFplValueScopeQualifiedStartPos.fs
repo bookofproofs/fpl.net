@@ -621,9 +621,9 @@ type TestFplValueScopeQualifiedStartPos() =
     member this.TestBaseConstructorCall(var, varVal) =
         ad.Clear()
         let fplCode = sprintf """
-                        def cl B:obj {intr}
-                        def cl C:obj {intr}
-                        def cl D:obj {intr}
+                        def cl B {intr}
+                        def cl C {intr}
+                        def cl D {intr}
 
                         def cl A:B,C,D,E
                         {
@@ -696,8 +696,8 @@ type TestFplValueScopeQualifiedStartPos() =
     [<DataRow("base2", """def pred T1() infix ">" -1 {intr};""")>]
     [<DataRow("base3", """def pred T1 () postfix "'" {intr};""")>]
     [<DataRow("base4", """def pred T1 () prefix "-" {intr};""")>]
-    [<DataRow("base5", """def cl T1 :obj symbol "∅" {intr};""")>]
-    [<DataRow("base5a", """def cl T1:obj {intr};""")>]
+    [<DataRow("base5", """def cl T1 symbol "∅" {intr};""")>]
+    [<DataRow("base5a", """def cl T1 {intr};""")>]
     [<DataRow("base6", """def func T1()->obj {intr};""")>]
     [<DataRow("base7", """def func T1 ()->obj infix ">" -1 {intr};""")>]
     [<DataRow("base8", """def func T1 ()->obj postfix "'" {intr};""")>]
@@ -740,12 +740,12 @@ type TestFplValueScopeQualifiedStartPos() =
     [<DataRow("base2", """def func T()->ind {intr};""")>]
     [<DataRow("base3", """def func T()->func {intr};""")>]
     [<DataRow("base4", """def func T()->pred {intr};""")>]
-    [<DataRow("base5", """def cl A:obj {intr} def func T()->A {intr};""")>]
+    [<DataRow("base5", """def cl A {intr} def func T()->A {intr};""")>]
     [<DataRow("base6", """def func T()->pred(z:ind) {intr};""")>]
     [<DataRow("base7", """def func T()->pred(z:*obj) {intr};""")>]
     [<DataRow("base8", """def func T()->func(p:*pred(x:obj))->pred(x:ind) {intr};""")>]
     [<DataRow("base9", """def func T()->pred(f:+func(x:A)->A) {intr};""")>]
-    [<DataRow("base10", """def cl A:obj {intr} def func T()->pred(f:func(x:A)->A) {intr};""")>]
+    [<DataRow("base10", """def cl A {intr} def func T()->pred(f:func(x:A)->A) {intr};""")>]
     [<TestMethod>]
     member this.TestMapping(var, varVal) =
         ad.Clear()

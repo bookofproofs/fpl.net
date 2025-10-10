@@ -317,7 +317,7 @@ let forStatement = positions "ForIn" (keywordFor >>. forInBody) |>> Ast.ForIn
 //// the scope of a definition. An assertion uses a predicate referring to existing identifiers in the whole theory
 //// Difference of assertion to assume: the latter will be used only in the scope of proofs
 let assertionStatement = positions "Assertion" (keywordAssert >>. predicate) |>> Ast.Assertion
-let inheritedClassType = choice [keywordObject; predicateIdentifier] 
+let inheritedClassType = predicateIdentifier
 let baseConstructorCall = positions "BaseConstructorCall" (keywordBaseClassReference >>. dot >>. (inheritedClassType .>> IW).>>. argumentTuple .>> IW) |>> Ast.BaseConstructorCall
 
 let statement = 
@@ -545,7 +545,8 @@ let definitionPredicate = positions "DefinitionPredicate" (predicateSignature .>
 // Functional term building blocks can be defined similarly to classes, they can have properties but they cannot be derived any parent type 
 let functionalTermDefinitionBlock = opt (leftBrace  >>. ((keywordIntrinsic <|> funcContent) .>> IW) .>>. propertyList .>> spacesRightBrace)
 
-let inheritedFunctionalTypeList = sepBy1 (predicateIdentifier) (attempt (IW >>. comma)) |>> Ast.InheritedFunctionalTypeList
+let inheritedFunctionalType = predicateIdentifier
+let inheritedFunctionalTypeList = sepBy1 (inheritedFunctionalType) (attempt (IW >>. comma)) |>> Ast.InheritedFunctionalTypeList
 let functionalTermSignature = positions "FunctionalTermSignature" (keywordFunction >>. SW >>. (simpleSignature .>>. opt (colon >>. inheritedFunctionalTypeList) .>> IW) .>>. paramTuple .>>. (IW >>. mapping)) .>>. userDefinedSymbol .>> IW |>> Ast.FunctionalTermSignature
 let definitionFunctionalTerm = positions "DefinitionFunctionalTerm" (functionalTermSignature .>>. functionalTermDefinitionBlock) |>> Ast.DefinitionFunctionalTerm
 
