@@ -25,8 +25,8 @@ type TestFplValue() =
     [<DataRow("proof TestId$1$2$3 {1. |- trivial} ;", "TestId$1$2$3", "pred")>]
 
     
-    [<DataRow("def class Test proof Test$1 {1. |- trivial};", "Test", "Test")>]
-    [<DataRow("def class TestId;", "TestId", "TestId")>]
+    [<DataRow("def class Test:Obj proof Test$1 {1. |- trivial};", "Test", "Test")>]
+    [<DataRow("def class TestId:Obj;", "TestId", "TestId")>]
     [<DataRow("def class TestId:Nat1, Nat2, Nat3, Nat4 {intrinsic} ;", "TestId", "TestId")>]
     [<DataRow("def class TestId:Nat3 {intrinsic} ;", "TestId", "TestId")>]
 
@@ -322,7 +322,7 @@ type TestFplValue() =
         let actualTypeSignature = fplValue.Type(SignatureType.Type)
         match box fplValue with
         | :? IHasSignature as withSignature ->
-            Assert.AreEqual<int64>((int64)14, withSignature.SignStartPos.Index)
+            Assert.AreEqual<int64>((int64)10, withSignature.SignStartPos.Index)
             let expectedEnd = (int64)(fplCode.IndexOf(" {}", System.StringComparison.OrdinalIgnoreCase))
             Assert.AreEqual<int64>(expectedEnd, withSignature.SignEndPos.Index)
         | _ -> failwith($"{expectedName} does not implement IHasSignature")
