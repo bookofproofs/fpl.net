@@ -133,28 +133,28 @@ type TestKeywordSpaces() =
 
     [<TestMethod>]
     member this.TestSpacesDeclaration () =
-        let result = run (varDeclBlock .>> eof) """declaration ~a:Obj ;"""
+        let result = run (varDeclBlock .>> eof) """declaration ~a:obj ;"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSpacesDeclarationA () =
-        let result = run (varDeclBlock .>> eof) """declaration~a:Obj ;"""
+        let result = run (varDeclBlock .>> eof) """declaration~a:obj ;"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestSpacesDec () =
-        let result = run (varDeclBlock .>> eof) """dec ~a:Obj ;"""
+        let result = run (varDeclBlock .>> eof) """dec ~a:obj ;"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSpacesDecA () =
-        let result = run (varDeclBlock .>> eof) """dec~a:Obj ;"""
+        let result = run (varDeclBlock .>> eof) """dec~a:obj ;"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
@@ -419,25 +419,25 @@ type TestKeywordSpaces() =
     [<DataRow(LiteralDef)>]
     [<TestMethod>]
     member this.TestSpacesDefinition (word:string) =
-        let result = run (definition .>> eof) (word + """class:Obj{intr}""")
+        let result = run (definition .>> eof) (word + """class:obj{intr}""")
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("Expecting: <significant whitespace>"))
 
-    [<DataRow(LiteralObjL)>]
-    [<DataRow(LiteralObj)>]
+    [<DataRow(LiteralClL)>]
+    [<DataRow(LiteralCl)>]
     [<TestMethod>]
     member this.TestSpacesClass (word:string) =
-        let result = run (definition .>> eof) ("def " + word + "T:Obj{intr}")
+        let result = run (definition .>> eof) ("def " + word + "T:obj{intr}")
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("Expecting: <significant whitespace>"))
 
-    [<DataRow(LiteralObjL)>]
-    [<DataRow(LiteralObj)>]
+    [<DataRow(LiteralClL)>]
+    [<DataRow(LiteralCl)>]
     [<TestMethod>]
     member this.TestSpacesClassWithSpace (word:string) =
-        let result = run (definition .>> eof) ("def " + word + " T:Obj{intr}")
+        let result = run (definition .>> eof) ("def " + word + " T:obj{intr}")
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

@@ -44,7 +44,7 @@ type TestParserErrors() =
     member this.TestDEF000() =
         let code = DEF000
         printf "Trying %s" code.Message
-        let input = """def obj A
+        let input = """def cl A
     y
 ;
         """
@@ -155,7 +155,7 @@ type TestParserErrors() =
     member this.TestCTR000() =
         let code = CTR000
         printf "Trying %s" code.Message
-        let input = """def obj T:Obj {ctor x() {self}}
+        let input = """def cl T:obj {ctor x() {self}}
         ;
         """
         let ast = fplParser input

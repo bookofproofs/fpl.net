@@ -83,7 +83,7 @@ type TestDefinitionPredicates () =
     member this.TestDefinitionPredicate06 () =
         let result = run (definitionPredicate .>> eof) """pred AreRelated(u,v: Set, r: BinaryRelation)
         {
-            dec ~a:Obj
+            dec ~a:obj
                 ~one, two:Nat
                 ~tuple:+Tuple
                 tuple:=Tuple(Nat(1),Nat(2))
@@ -101,7 +101,7 @@ type TestDefinitionPredicates () =
 
     [<TestMethod>]
     member this.TestDefinitionPredicate07 () =
-        let result = run (definitionPredicate .>> eof) """pred Greater(x,y: Obj)
+        let result = run (definitionPredicate .>> eof) """pred Greater(x,y: obj)
         {
             intrinsic
         }"""
@@ -161,7 +161,7 @@ type TestDefinitionPredicates () =
         let result = run (definitionPredicate .>> eof) """pred T()
         {
             // a predicate cannot be empty with spec
-            dec ~a:Obj ;
+            dec ~a:obj ;
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -172,7 +172,7 @@ type TestDefinitionPredicates () =
         let result = run (definitionPredicate .>> eof) """pred T()
         {
             // a predicate cannot be empty with some spec or dec
-            dec ~a:Obj ;
+            dec ~a:obj ;
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -183,7 +183,7 @@ type TestDefinitionPredicates () =
         let result = run (definitionPredicate .>> eof) """pred T()
         {
             // a predicate cannot be intrinsic with some proceeding spec or dec
-            dec ~a:Obj ;
+            dec ~a:obj ;
             intrinsic
         }"""
         let actual = sprintf "%O" result
@@ -207,7 +207,7 @@ type TestDefinitionPredicates () =
         let result = run (definitionPredicate .>> eof) """pred T()
         {
             // a predicate cannot be intrinsic with some proceeding spec or dec
-            dec ~a:Obj ;
+            dec ~a:obj ;
             intrinsic
         }"""
         let actual = sprintf "%O" result
@@ -254,7 +254,7 @@ type TestDefinitionPredicates () =
         {
             // a predicate cannot be intrinsic with some following declarations or specifications
             intrinsic
-            dec ~a:Obj ;
+            dec ~a:obj ;
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -266,7 +266,7 @@ type TestDefinitionPredicates () =
         {
             // a predicate cannot be intrinsic with some following declarations or specifications
             intrinsic
-            dec ~a:Obj ;
+            dec ~a:obj ;
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -281,7 +281,7 @@ type TestDefinitionPredicates () =
 
             property func T() -> obj
 	        {
-	            dec ~a:Obj ;
+	            dec ~a:obj ;
                 return x
 	        } 
 
@@ -301,7 +301,7 @@ type TestDefinitionPredicates () =
         {
             mand func T() -> obj
 	        {
-	            dec ~a:Obj ;
+	            dec ~a:obj ;
                 return x
 	        } 
 
@@ -325,7 +325,7 @@ type TestDefinitionPredicates () =
         // a predicate with some proceeding declarations or specifications
         let result = run (definitionPredicate .>> eof) """pred T()
         {
-            dec ~a:Obj ;
+            dec ~a:obj ;
             true
         }"""
         let actual = sprintf "%O" result
@@ -337,7 +337,7 @@ type TestDefinitionPredicates () =
         let result = run (definitionPredicate .>> eof) """pred T()
         {
             // a predicate with some proceeding declarations or specifications
-            dec ~a:Obj ~ ;
+            dec ~a:obj ~ ;
             true
         }"""
         let actual = sprintf "%O" result
@@ -349,7 +349,7 @@ type TestDefinitionPredicates () =
         // a predicate with some proceeding declarations or specifications
         let result = run (definitionPredicate .>> eof) """pred T()
         {
-            dec ~a:Obj ;
+            dec ~a:obj ;
             true
         }"""
         let actual = sprintf "%O" result
@@ -378,7 +378,7 @@ type TestDefinitionPredicates () =
 
             property func T() -> obj
 	        {
-	            dec ~a:Obj ;
+	            dec ~a:obj ;
                 return x
 	        } 
 
@@ -489,7 +489,7 @@ type TestDefinitionPredicates () =
 
     [<TestMethod>]
     member this.TestDefinitionPredicate27 () =
-        let result = run (definitionPredicate .>> eof) """pred  T(x,y:Obj)
+        let result = run (definitionPredicate .>> eof) """pred  T(x,y:obj)
                 {
                     @self(a,@self(b,c)) 
                 }"""

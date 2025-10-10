@@ -15,7 +15,7 @@ type TestReferenceRules() =
     member this.TestReferenceRule01 () =
         let result = run (ruleOfInference .>> eof) """inf ModusPonens
         {
-            dec ~a:Obj ~p,q: pred;
+            dec ~a:obj ~p,q: pred;
 
             premise:
                 and (p, impl (p,q) )
@@ -30,7 +30,7 @@ type TestReferenceRules() =
     member this.TestReferenceRule02 () =
         let result = run (ruleOfInference .>> eof) """inference ModusTollens
         {
-            dec ~a:Obj ~p,q: pred;
+            dec ~a:obj ~p,q: pred;
 
             premise:
                 and (not (q), impl(p,q) )
@@ -45,7 +45,7 @@ type TestReferenceRules() =
     member this.TestReferenceRule03 () =
         let result = run (ruleOfInference .>> eof) """inf HypotheticalSyllogism
         {
-            dec ~a:Obj ~ p,q,r: pred;
+            dec ~a:obj ~ p,q,r: pred;
             premise:
                 and (impl(p,q), impl(q,r))
             conclusion:
@@ -59,7 +59,7 @@ type TestReferenceRules() =
     member this.TestReferenceRule04 () =
         let result = run (ruleOfInference .>> eof) """inference DisjunctiveSyllogism
         {
-            dec ~a:Obj ~p,q: pred;
+            dec ~a:obj ~p,q: pred;
             premise:
                 and (not (p), or(p,q))
             conclusion:
@@ -97,11 +97,11 @@ type TestReferenceRules() =
     member this.TestReferenceRule06 () =
         let result = run (ruleOfInference .>> eof) """inf ExistsByExample
         {
-            dec ~p:pred(c:Obj);
+            dec ~p:pred(c:obj);
             premise:
                 p(c)
             conclusion:
-                ex x:Obj {p(x)}
+                ex x:obj {p(x)}
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -120,7 +120,7 @@ type TestReferenceRules() =
 
     [<TestMethod>]
     member this.TestVarsInReferenceRule() =
-        let result = run (ruleOfInference .>> eof) """inf ExistsByExample {dec ~c: Obj; pre: true con: true}"""
+        let result = run (ruleOfInference .>> eof) """inf ExistsByExample {dec ~c: obj; pre: true con: true}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

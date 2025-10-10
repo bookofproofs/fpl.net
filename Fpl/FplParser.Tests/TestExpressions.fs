@@ -224,17 +224,17 @@ type TestExpressions () =
 
             def pred T18()
             {
-                ex x:Range, y:C, z:Obj {and (and(a,b),c)}
+                ex x:Range, y:C, z:obj {and (and(a,b),c)}
             }
 
             def pred T19()
             {
-                exn$1 x:Obj {all y:N {true}}
+                exn$1 x:obj {all y:N {true}}
             }
 
             def pred T20()
             {
-                all x:Obj {not x}
+                all x:obj {not x}
             }
 
             def pred T21()
@@ -277,7 +277,7 @@ type TestExpressions () =
                 is (x,Nat)
             }
 
-            def obj T27:Obj {ctor T27() {dec base.C(a, b, c, d); } }
+            def cl T27:obj {ctor T27() {dec base.C(a, b, c, d); } }
             ; 
         """
         let actual = sprintf "%O" result

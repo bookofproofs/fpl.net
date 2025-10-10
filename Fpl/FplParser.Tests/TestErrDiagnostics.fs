@@ -700,7 +700,7 @@ type TestErrDiagnostics() =
     member this.TestTryParseClasses000Diag () =
         ad.Clear()
         let input = """
-        def obj 
+        def cl 
         {
         }
     y
@@ -716,7 +716,7 @@ type TestErrDiagnostics() =
     member this.TestTryParseClasses001Diag () =
         ad.Clear()
         let input = """
-        def obj T
+        def cl T
         {
         }
     y
@@ -732,7 +732,7 @@ type TestErrDiagnostics() =
     member this.TestTryParseClasses002Diag () =
         ad.Clear()
         let input = """
-        def obj T:
+        def cl T:
         {
         }
     y
@@ -748,7 +748,7 @@ type TestErrDiagnostics() =
     member this.TestTryParseClasses003Diag () =
         ad.Clear()
         let input = """
-        def obj T: Obj
+        def cl T: obj
         {
         }
     y
@@ -928,7 +928,7 @@ type TestErrDiagnostics() =
     member this.TestTryParseVarDecl003fDiag () =
         ad.Clear()
         let input = """
-    inf D(x:Obj: )
+    inf D(x:obj: )
         {
             pre:true
             con:true
@@ -1245,7 +1245,7 @@ type TestErrDiagnostics() =
         let input = """
     inf D()
         {
-            x:Obj: 
+            x:obj: 
             pre:true
             con:true
         }
@@ -1529,7 +1529,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred T()
         {
-            dec~x:Obj: ;
+            dec~x:obj: ;
             true
         }
         y
@@ -1671,7 +1671,7 @@ type TestErrDiagnostics() =
     member this.TestTryParseVarDeclInScopeClass001Diag () =
         ad.Clear()
         let input = """
-        def obj T:Obj
+        def cl T:obj
         {
             x, 
         }
@@ -1688,7 +1688,7 @@ type TestErrDiagnostics() =
     member this.TestTryParseVarDeclInScopeClass002Diag () =
         ad.Clear()
         let input = """
-        def obj T:Obj
+        def cl T:obj
         {
             x: 
         }
@@ -1705,7 +1705,7 @@ type TestErrDiagnostics() =
     member this.TestTryParseVarDeclInScopeClass003aDiag () =
         ad.Clear()
         let input = """
-        def obj T:Obj
+        def cl T:obj
         {
             x:* 
         }
@@ -1722,7 +1722,7 @@ type TestErrDiagnostics() =
     member this.TestTryParseVarDeclInScopeClass003_Diag () =
         ad.Clear()
         let input = """
-        def obj T:Obj
+        def cl T:obj
         {
             x::
         }
@@ -1739,7 +1739,7 @@ type TestErrDiagnostics() =
     member this.TestTryParseVarDeclInScopeClass003bDiag () =
         ad.Clear()
         let input = """
-        def obj T:Obj
+        def cl T:obj
         {
             x:+ 
         }
@@ -1756,7 +1756,7 @@ type TestErrDiagnostics() =
     member this.TestTryParseVarDeclInScopeClass003cDiag () =
         ad.Clear()
         let input = """
-        def obj T:Obj
+        def cl T:obj
         {
             x:@ 
         }
@@ -1773,7 +1773,7 @@ type TestErrDiagnostics() =
     member this.TestTryParseVarDeclInScopeClass003dDiag () =
         ad.Clear()
         let input = """
-        def obj T:Obj
+        def cl T:obj
         {
             x:func: 
         }
@@ -1790,7 +1790,7 @@ type TestErrDiagnostics() =
     member this.TestTryParseVarDeclInScopeClass003eDiag () =
         ad.Clear()
         let input = """
-        def obj T:Obj
+        def cl T:obj
         {
             x:ind: 
         }
@@ -1807,9 +1807,9 @@ type TestErrDiagnostics() =
     member this.TestTryParseVarDeclInScopeClass003fDiag () =
         ad.Clear()
         let input = """
-        def obj T:Obj
+        def cl T:obj
         {
-            x:Obj: 
+            x:obj: 
         }
         y
 ;"""
@@ -1824,7 +1824,7 @@ type TestErrDiagnostics() =
     member this.TestTryParseVarDeclInScopeClass003gDiag () =
         ad.Clear()
         let input = """
-        def obj T:Obj
+        def cl T:obj
         {
             x:pred: 
         }
@@ -1841,7 +1841,7 @@ type TestErrDiagnostics() =
     member this.TestTryParseVarDeclInScopeClass003hDiag () =
         ad.Clear()
         let input = """
-        def obj T:Obj
+        def cl T:obj
         {
             x:tpl: 
         }
@@ -1858,7 +1858,7 @@ type TestErrDiagnostics() =
     member this.TestTryParseVarDeclInScopeClass003iDiag () =
         ad.Clear()
         let input = """
-        def obj T:Obj
+        def cl T:obj
         {
             x:T: 
         }
@@ -1875,7 +1875,7 @@ type TestErrDiagnostics() =
     member this.TestTryParseVarDeclInScopeClass003i000Diag () =
         ad.Clear()
         let input = """
-        def obj T:Obj
+        def cl T:obj
         {
             x:tpl. 
         }
@@ -1892,7 +1892,7 @@ type TestErrDiagnostics() =
     member this.TestTryParseVarDeclInScopeClass003i001Diag () =
         ad.Clear()
         let input = """
-        def obj T:Obj
+        def cl T:obj
         {
             x:tpl[ 
         }
@@ -1909,7 +1909,7 @@ type TestErrDiagnostics() =
     member this.TestTryParseVarDeclInScopeClass003i002Diag () =
         ad.Clear()
         let input = """
-        def obj T:Obj
+        def cl T:obj
         {
             x:tpl[! 
         }
@@ -1926,7 +1926,7 @@ type TestErrDiagnostics() =
     member this.TestTryParseVarDeclInScopeClass003i003Diag () =
         ad.Clear()
         let input = """
-        def obj T:Obj
+        def cl T:obj
         {
             x:tpl< 
         }
@@ -1957,7 +1957,7 @@ type TestErrDiagnostics() =
     member this.TestTryParseClass001Diag () =
         ad.Clear()
         let input = """
-        def obj x
+        def cl x
     y
 ;"""
         let result = fplParser input
@@ -1971,7 +1971,7 @@ type TestErrDiagnostics() =
     member this.TestTryParseClass001aDiag () =
         ad.Clear()
         let input = """
-        def obj .
+        def cl .
     y
 ;"""
         let result = fplParser input
@@ -1985,7 +1985,7 @@ type TestErrDiagnostics() =
     member this.TestTryParseClass001bDiag () =
         ad.Clear()
         let input = """
-        def obj ,
+        def cl ,
     y
 ;"""
         let result = fplParser input
@@ -1999,7 +1999,7 @@ type TestErrDiagnostics() =
     member this.TestTryParseClass002Diag () =
         ad.Clear()
         let input = """
-        def obj A
+        def cl A
     y
 ;"""
         let result = fplParser input
@@ -2013,7 +2013,7 @@ type TestErrDiagnostics() =
     member this.TestTryParseClass003Diag () =
         ad.Clear()
         let input = """
-        def obj A #
+        def cl A #
     y
 ;"""
         let result = fplParser input
@@ -2027,7 +2027,7 @@ type TestErrDiagnostics() =
     member this.TestTryParseClass003aDiag () =
         ad.Clear()
         let input = """
-        def obj A -
+        def cl A -
     y
 ;"""
         let result = fplParser input
@@ -2041,7 +2041,7 @@ type TestErrDiagnostics() =
     member this.TestTryParseClass004Diag () =
         ad.Clear()
         let input = """
-        def obj A:
+        def cl A:
     y
 ;"""
         let result = fplParser input
@@ -2055,7 +2055,7 @@ type TestErrDiagnostics() =
     member this.TestTryParseClass004aDiag () =
         ad.Clear()
         let input = """
-        def obj A:@
+        def cl A:@
     y
 ;"""
         let result = fplParser input
@@ -2069,7 +2069,7 @@ type TestErrDiagnostics() =
     member this.TestTryParseClass005Diag () =
         ad.Clear()
         let input = """
-        def obj A:Obj
+        def cl A:obj
     y
 ;"""
         let result = fplParser input
@@ -2083,7 +2083,7 @@ type TestErrDiagnostics() =
     member this.TestTryParseClass006Diag () =
         ad.Clear()
         let input = """
-        def obj A:Obj 
+        def cl A:obj 
         {
     y
 ;"""
@@ -2098,9 +2098,9 @@ type TestErrDiagnostics() =
     member this.TestTryParseClass007Diag () =
         ad.Clear()
         let input = """
-        def obj A:Obj 
+        def cl A:obj 
         {
-            dec ~a:Obj ;
+            dec ~a:obj ;
         }
     y
 ;"""
@@ -2115,7 +2115,7 @@ type TestErrDiagnostics() =
     member this.TestTryParseClass008Diag () =
         ad.Clear()
         let input = """
-        def obj A:Obj 
+        def cl A:obj 
         {
             #
         }
@@ -2333,7 +2333,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred A() 
         {
-            dec ~a:Obj ;
+            dec ~a:obj ;
         }
     y
 ;"""
@@ -2369,7 +2369,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred A() 
         {
-            dec ~a:Obj ;
+            dec ~a:obj ;
         }
     y
 ;"""
@@ -2387,7 +2387,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred A() 
         {
-            dec ~a:Obj ;
+            dec ~a:obj ;
         }
     y
 ;"""
@@ -2405,7 +2405,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred A() 
         {
-            dec ~a: Obj ;
+            dec ~a: obj ;
             true
         }
     y

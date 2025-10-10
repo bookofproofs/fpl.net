@@ -239,26 +239,26 @@ type TestExpressionEvaluation() =
             Assert.AreEqual<string>(expected, actual)
         | None -> Assert.IsTrue(false)
 
-    [<DataRow("def pred T() { dec ~x:Obj; is(x,obj) };", LiteralTrue)>]
+    [<DataRow("def pred T() { dec ~x:obj; is(x,obj) };", LiteralTrue)>]
     [<DataRow("def pred T() { dec ~x:Nat; is(x,Nat) };", LiteralTrue)>]
     [<DataRow("def pred T() { dec ~x:Nat; is(x,obj) };", LiteralFalse)>]
-    [<DataRow("def obj Nat:Obj {intr} def pred T() { dec ~x:Nat; is(x,obj) };", LiteralTrue)>]
-    [<DataRow("def obj A:Obj {intr} def obj B:A {intr} def pred T() { dec ~x:B; is(x,A) };", LiteralTrue)>]
-    [<DataRow("def obj A:Obj {intr} def obj B:A {intr} def pred T() { dec ~x:B; is(x,obj) };", LiteralTrue)>]
-    [<DataRow("def obj A:Obj {intr} def obj B:A {intr} def pred T() { dec ~x:A; is(x,obj) };", LiteralTrue)>]
-    [<DataRow("def obj A:Obj {intr} def obj B:A {intr} def pred T() { dec ~x:A; is(x,B) };", LiteralFalse)>]
-    [<DataRow("def pred T() { dec ~x:pred(y:Obj); is(x,pred(z:Obj)) };", LiteralTrue)>]
-    [<DataRow("def pred T() { dec ~x:pred(y:Obj); is(x,pred) };", LiteralTrue)>]
-    [<DataRow("def pred T() { dec ~x:func(y:Obj)->obj; is(x,func) };", LiteralTrue)>]
-    [<DataRow("def pred T() { dec ~x:func(y:Obj)->ind; is(x,func(y:Obj)->ind) };", LiteralTrue)>]
-    [<DataRow("def pred T() { dec ~x:pred(y:Obj); is(self,pred) };", LiteralTrue)>]
+    [<DataRow("def cl Nat:obj {intr} def pred T() { dec ~x:Nat; is(x,obj) };", LiteralTrue)>]
+    [<DataRow("def cl A:obj {intr} def cl B:A {intr} def pred T() { dec ~x:B; is(x,A) };", LiteralTrue)>]
+    [<DataRow("def cl A:obj {intr} def cl B:A {intr} def pred T() { dec ~x:B; is(x,obj) };", LiteralTrue)>]
+    [<DataRow("def cl A:obj {intr} def cl B:A {intr} def pred T() { dec ~x:A; is(x,obj) };", LiteralTrue)>]
+    [<DataRow("def cl A:obj {intr} def cl B:A {intr} def pred T() { dec ~x:A; is(x,B) };", LiteralFalse)>]
+    [<DataRow("def pred T() { dec ~x:pred(y:obj); is(x,pred(z:obj)) };", LiteralTrue)>]
+    [<DataRow("def pred T() { dec ~x:pred(y:obj); is(x,pred) };", LiteralTrue)>]
+    [<DataRow("def pred T() { dec ~x:func(y:obj)->obj; is(x,func) };", LiteralTrue)>]
+    [<DataRow("def pred T() { dec ~x:func(y:obj)->ind; is(x,func(y:obj)->ind) };", LiteralTrue)>]
+    [<DataRow("def pred T() { dec ~x:pred(y:obj); is(self,pred) };", LiteralTrue)>]
     [<DataRow("def pred T() { dec ~x:pred(y:func()->obj); is(x,pred) };", LiteralTrue)>]
     [<DataRow("def pred T() { dec ~x:pred(y:func()->obj); is(x,pred(y:func()->obj)) };", LiteralTrue)>]
     [<DataRow("def pred T() { dec ~x:pred(y:func()->obj); is(x,pred(y:func()->ind)) };", LiteralFalse)>]
-    [<DataRow("def pred T() { dec ~x:pred(y:func()->obj); is(x,pred(y:func(z:Obj)->obj)) };", LiteralFalse)>]
-    [<DataRow("def pred T() { dec ~x:pred(y:func(z:Obj)->obj); is(x,pred(y:func(z:Obj)->Nat)) };", LiteralFalse)>]
-    [<DataRow("def pred T() { dec ~x:pred(y:func(z:Obj)->Nat); is(x,pred(y:func(z:Obj)->Nat)) };", LiteralTrue)>]
-    [<DataRow("def pred T() { dec ~x:pred(y:func(z:Obj)->Nat); is(x,pred(a:func(b:Obj)->Nat)) };", LiteralTrue)>]
+    [<DataRow("def pred T() { dec ~x:pred(y:func()->obj); is(x,pred(y:func(z:obj)->obj)) };", LiteralFalse)>]
+    [<DataRow("def pred T() { dec ~x:pred(y:func(z:obj)->obj); is(x,pred(y:func(z:obj)->Nat)) };", LiteralFalse)>]
+    [<DataRow("def pred T() { dec ~x:pred(y:func(z:obj)->Nat); is(x,pred(y:func(z:obj)->Nat)) };", LiteralTrue)>]
+    [<DataRow("def pred T() { dec ~x:pred(y:func(z:obj)->Nat); is(x,pred(a:func(b:obj)->Nat)) };", LiteralTrue)>]
     [<TestMethod>]
     member this.TestExpressionEvaluationIsOperand(fplCode, expected: string) =
         ad.Clear()
@@ -278,9 +278,9 @@ type TestExpressionEvaluation() =
             Assert.AreEqual<string>(expected, actual)
         | None -> Assert.IsTrue(false)
 
-    [<DataRow("def pred T() { dec ~x:pred(y:Obj); is(self,pred) };", LiteralPred)>]
-    [<DataRow("def pred T() { dec ~x:pred(y:func(z:Obj)->obj); is(x,pred(y:func(z:Obj)->Nat)) };", "pred(func(obj) -> Nat)")>]
-    [<DataRow("def pred T() { dec ~x:pred(y:func()->obj); is(x,pred(y:func(z:Obj)->obj)) };", "pred(func(obj) -> obj)")>]
+    [<DataRow("def pred T() { dec ~x:pred(y:obj); is(self,pred) };", LiteralPred)>]
+    [<DataRow("def pred T() { dec ~x:pred(y:func(z:obj)->obj); is(x,pred(y:func(z:obj)->Nat)) };", "pred(func(obj) -> Nat)")>]
+    [<DataRow("def pred T() { dec ~x:pred(y:func()->obj); is(x,pred(y:func(z:obj)->obj)) };", "pred(func(obj) -> obj)")>]
     [<DataRow("def pred T() { dec ~x:pred(y:func()->obj); is(x,pred(y:func()->ind)) };", "pred(func() -> ind)")>]
     [<TestMethod>]
     member this.TestExpressionEvaluationIsOperandRepr(fplCode, expected: string) =

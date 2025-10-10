@@ -189,6 +189,8 @@ let templateTail = choice [ idStartsWithCap; (regex @"\d+") ]
 
 let templateWithTail = (many1Strings2 (pstring "template" <|> pstring LiteralTpl) templateTail) 
 
+let keywordObject = positions "ObjectType" (skipString LiteralObjL <|> skipString LiteralObj) |>> Ast.ObjectType 
+
 let templateType = positions "TemplateType" ((attempt templateWithTail) <|> keywordTemplate) |>>  Ast.TemplateType
 
 let keywordPredicate = positions "PredicateType" (skipString LiteralPredL <|> skipString LiteralPred) |>> Ast.PredicateType
@@ -240,6 +242,8 @@ let extensionName = positions "ExtensionName" (idStartsWithCap) |>> Ast.Extensio
 
 let xId = positions "ExtensionType" (at >>. extensionName) |>> Ast.ExtensionType 
 
+let specificClassType = choice [ keywordObject; predicateIdentifier ] 
+
 //// later semantics: Star: 0 or more occurrences, Plus: 1 or more occurrences
 let varDeclModifier = choice [ colonStar; colonPlus; colon ] .>> IW
 
@@ -249,7 +253,7 @@ let varDeclModifier = choice [ colonStar; colonPlus; colon ] .>> IW
 // In contrast to variableType which can also be used for declaring variables 
 // in the scope of FPL building blocks
 
-classTypeRef.Value <- positions "ClassType" (predicateIdentifier) |>> Ast.ClassType
+classTypeRef.Value <- positions "ClassType" (specificClassType) |>> Ast.ClassType
 
 let mapping, mappingRef = createParserForwardedToRef()
 let predicateType = positions "CompoundPredicateType" (keywordPredicate .>>. opt paramTuple) |>> Ast.CompoundPredicateType
@@ -313,8 +317,8 @@ let forStatement = positions "ForIn" (keywordFor >>. forInBody) |>> Ast.ForIn
 //// the scope of a definition. An assertion uses a predicate referring to existing identifiers in the whole theory
 //// Difference of assertion to assume: the latter will be used only in the scope of proofs
 let assertionStatement = positions "Assertion" (keywordAssert >>. predicate) |>> Ast.Assertion
-
-let baseConstructorCall = positions "BaseConstructorCall" (keywordBaseClassReference >>. dot >>. (predicateIdentifier .>> IW).>>. argumentTuple .>> IW) |>> Ast.BaseConstructorCall
+let inheritedClassType = choice [keywordObject; predicateIdentifier] 
+let baseConstructorCall = positions "BaseConstructorCall" (keywordBaseClassReference >>. dot >>. (inheritedClassType .>> IW).>>. argumentTuple .>> IW) |>> Ast.BaseConstructorCall
 
 let statement = 
     IW >>. (choice [
@@ -546,14 +550,14 @@ let functionalTermSignature = positions "FunctionalTermSignature" (keywordFuncti
 let definitionFunctionalTerm = positions "DefinitionFunctionalTerm" (functionalTermSignature .>>. functionalTermDefinitionBlock) |>> Ast.DefinitionFunctionalTerm
 
 // Class definitions
-let keywordObject = (skipString LiteralObjL <|> skipString LiteralObj) 
+let keywordClass = (skipString LiteralClL <|> skipString LiteralCl)
 
 let constructorList = many1 (constructor .>> IW)
 let classCompleteContent = varDeclOrSpecList .>>. constructorList|>> Ast.DefClassCompleteContent
 let classDefinitionBlock = leftBrace  >>. ((keywordIntrinsic <|> classCompleteContent) .>> IW) .>>. propertyList .>> spacesRightBrace
-let inheritedClassTypeList = sepBy1 (classType) (attempt (IW >>. comma)) |>> Ast.InheritedClassTypeList
+let inheritedClassTypeList = sepBy1 (inheritedClassType) (attempt (IW >>. comma)) |>> Ast.InheritedClassTypeList
 
-let classSignature = positions "ClassSignature" (keywordObject >>. SW >>. pascalCaseId) .>> IW |>> Ast.ClassSignature
+let classSignature = positions "ClassSignature" (keywordClass >>. SW >>. pascalCaseId) .>> IW |>> Ast.ClassSignature
 let classSignatureExtended = classSignature .>>. opt (colon >>. inheritedClassTypeList) .>>. opt (attempt (IW >>. userDefinedObjSym)) .>> IW
 let definitionClass = positions "DefinitionClass" (classSignatureExtended .>>. classDefinitionBlock) |>> Ast.DefinitionClass 
 

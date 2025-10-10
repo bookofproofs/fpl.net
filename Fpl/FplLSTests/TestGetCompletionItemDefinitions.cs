@@ -35,16 +35,16 @@ namespace FplLSTests
             Assert.AreEqual<int>(3, count);
         }
 
-        [DataRow(LiteralDefL, LiteralObjL, CompletionItemKind.Class, "definition01")]
+        [DataRow(LiteralDefL, LiteralClL, CompletionItemKind.Class, "definition01")]
         [DataRow(LiteralDefL, LiteralPredL, CompletionItemKind.Class, "definition02")]
         [DataRow(LiteralDefL, LiteralFuncL, CompletionItemKind.Class, "definition03")]
-        [DataRow(LiteralDef, LiteralObj, CompletionItemKind.Class, "zdefinition01")]
+        [DataRow(LiteralDef, LiteralCl, CompletionItemKind.Class, "zdefinition01")]
         [DataRow(LiteralDef, LiteralPred, CompletionItemKind.Class, "zdefinition02")]
         [DataRow(LiteralDef, LiteralFunc, CompletionItemKind.Class, "zdefinition03")]
-        [DataRow(LiteralDefL, LiteralObjL, CompletionItemKind.Keyword, "zzzdefinition01")]
+        [DataRow(LiteralDefL, LiteralClL, CompletionItemKind.Keyword, "zzzdefinition01")]
         [DataRow(LiteralDefL, LiteralPredL, CompletionItemKind.Keyword, "zzzdefinition02")]
         [DataRow(LiteralDefL, LiteralFuncL, CompletionItemKind.Keyword, "zzzdefinition03")]
-        [DataRow(LiteralDef, LiteralObj, CompletionItemKind.Keyword, "zzzzdefinition01")]
+        [DataRow(LiteralDef, LiteralCl, CompletionItemKind.Keyword, "zzzzdefinition01")]
         [DataRow(LiteralDef, LiteralPred, CompletionItemKind.Keyword, "zzzzdefinition02")]
         [DataRow(LiteralDef, LiteralFunc, CompletionItemKind.Keyword, "zzzzdefinition03")]
         [TestMethod]
@@ -61,8 +61,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow(LiteralDef, LiteralObj)]
-        [DataRow(LiteralDefL, LiteralObjL)]
+        [DataRow(LiteralDef, LiteralCl)]
+        [DataRow(LiteralDefL, LiteralClL)]
         [DataRow(LiteralDef, LiteralPred)]
         [DataRow(LiteralDefL, LiteralPredL)]
         [DataRow(LiteralDef, LiteralFunc)]
@@ -81,8 +81,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow(LiteralDef, LiteralObj)]
-        [DataRow(LiteralDefL, LiteralObjL)]
+        [DataRow(LiteralDef, LiteralCl)]
+        [DataRow(LiteralDefL, LiteralClL)]
         [DataRow(LiteralDef, LiteralPred)]
         [DataRow(LiteralDefL, LiteralPredL)]
         [DataRow(LiteralDef, LiteralFunc)]
@@ -122,8 +122,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow(LiteralDef, LiteralObj)]
-        [DataRow(LiteralDefL, LiteralObjL)]
+        [DataRow(LiteralDef, LiteralCl)]
+        [DataRow(LiteralDefL, LiteralClL)]
         [DataRow(LiteralDef, LiteralPred)]
         [DataRow(LiteralDefL, LiteralPredL)]
         [DataRow(LiteralDef, LiteralFunc)]

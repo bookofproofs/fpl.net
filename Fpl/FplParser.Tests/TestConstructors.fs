@@ -24,7 +24,7 @@ type TestConstructors () =
         let result = run (constructor .>> eof) """ctor Magma(x: tplSet, op: BinOp)
             {
                 
-                dec: x: Obj ;
+                dec: x: obj ;
             }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -73,7 +73,7 @@ type TestConstructors () =
         let result = run (constructor .>> eof) """ctor Magma(x: tplSet, op: BinOp)
             {
                 
-                dec ~a:Obj ;
+                dec ~a:obj ;
                 intr
             }"""
         let actual = sprintf "%O" result
@@ -86,7 +86,7 @@ type TestConstructors () =
         let result = run (constructor .>> eof) """ctor Magma(x: tplSet, op: BinOp)
             {
                 
-                dec ~a:Obj ;
+                dec ~a:obj ;
                 intr
             }"""
         let actual = sprintf "%O" result
@@ -100,7 +100,7 @@ type TestConstructors () =
        
         let result = run (constructor .>> eof) """ctor Magma(x: tplSet, op: BinOp)
             {
-                dec ~a:Obj  base.AlgebraicStructure(x,op);
+                dec ~a:obj  base.AlgebraicStructure(x,op);
             }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -113,7 +113,7 @@ type TestConstructors () =
        
         let result = run (constructor .>> eof) """constructor Magma(x: tplSet, op: BinOp)
             {
-                dec ~a:Obj
+                dec ~a:obj
                     base.AlgebraicStructure(x,op)
                 ;
                 
@@ -126,7 +126,7 @@ type TestConstructors () =
     member this.TestConstructor03a () =
         let result = run (constructor .>> eof) """ctor Magma(x: tplSet, op: BinOp)
             {
-                dec ~a:Obj ;
+                dec ~a:obj ;
             
             }"""
         let actual = sprintf "%O" result
@@ -138,7 +138,7 @@ type TestConstructors () =
         // incomplete (syntax error)
         let result = run (constructor .>> eof) """ctor Magma(x: tplSet, op: BinOp)
             {
-                dec ~a:Obj 
+                dec ~a:obj 
                     base. 
                 ;
             }"""
@@ -151,7 +151,7 @@ type TestConstructors () =
         // incomplete ( self missing)
         let result = run (constructor .>> eof) """ctor Magma(x: tplSet, op: BinOp)
             {
-                dec ~a:Obj
+                dec ~a:obj
                 base.obj()
                 ;
                 
@@ -168,7 +168,7 @@ type TestConstructors () =
             {
                 
                 dec 
-                    ~a:Obj
+                    ~a:obj
                     base.obj () 
                     base.T1(x) 
                     base.T2(op) 
@@ -187,7 +187,7 @@ type TestConstructors () =
                 n: Nat
             )
             {
-    			dec ~a:Obj
+    			dec ~a:obj
                     myField := field
                     addInField := myField.AddOp()
                     mulInField := myField.MulOp()

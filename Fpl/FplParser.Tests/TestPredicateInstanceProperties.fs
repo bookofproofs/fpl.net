@@ -33,7 +33,7 @@ type TestPredicateInstanceProperties () =
         let result = run (definitionProperty .>> eof) """prty pred X() 
 	        {
                 // a predicate instance without a predicate is not allowed
-                dec ~a:Obj ;
+                dec ~a:obj ;
 	        }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -44,7 +44,7 @@ type TestPredicateInstanceProperties () =
         let result = run (definitionProperty .>> eof) """prty pred X() 
 	        {
                 // a predicate instance without a predicate is not allowed
-                dec ~a:Obj ;
+                dec ~a:obj ;
 	        }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -55,7 +55,7 @@ type TestPredicateInstanceProperties () =
         let result = run (definitionProperty .>> eof) """prty pred X() 
 	        {
                 // a predicate instance without a predicate is not allowed
-                dec ~a:Obj ;
+                dec ~a:obj ;
                 return x
 	        }"""
         let actual = sprintf "%O" result
@@ -90,7 +90,7 @@ type TestPredicateInstanceProperties () =
         // a predicate instance with a return statement 
         let result = run (definitionProperty .>> eof) """property pred X() 
 	        {
-                dec ~a:Obj ;
+                dec ~a:obj ;
                 true
 	        }"""
         let actual = sprintf "%O" result
@@ -102,7 +102,7 @@ type TestPredicateInstanceProperties () =
         // a predicate instance with a return statement 
         let result = run (definitionProperty .>> eof) """property pred X() 
 	        {
-                dec ~a:Obj ;
+                dec ~a:obj ;
                 true
 	        }"""
         let actual = sprintf "%O" result
@@ -114,7 +114,7 @@ type TestPredicateInstanceProperties () =
         // a predicate instance with a return statement 
         let result = run (definitionProperty .>> eof) """property  pred X() 
 	        {
-                dec ~a:Obj ;
+                dec ~a:obj ;
                 true
 	        }"""
         let actual = sprintf "%O" result
@@ -126,7 +126,7 @@ type TestPredicateInstanceProperties () =
         // a predicate instance with a return statement 
         let result = run (definitionProperty .>> eof) """property pred X() 
 	        {
-                dec ~a:Obj ;
+                dec ~a:obj ;
                 true
 	        }"""
         let actual = sprintf "%O" result
@@ -138,7 +138,7 @@ type TestPredicateInstanceProperties () =
         // a predicate instance with a return statement 
         let result = run (definitionProperty .>> eof) """property pred X() 
 	        {
-                dec ~a:Obj ;
+                dec ~a:obj ;
                 true
 	        }"""
         let actual = sprintf "%O" result
@@ -150,7 +150,7 @@ type TestPredicateInstanceProperties () =
         // a predicate instance with a return statement 
         let result = run (definitionProperty .>> eof) """property pred X() 
 	        {
-                dec ~a:Obj ;
+                dec ~a:obj ;
                 true
 	        }"""
         let actual = sprintf "%O" result
@@ -176,7 +176,7 @@ type TestPredicateInstanceProperties () =
         let result = run (definitionProperty .>> eof) """property pred X() 
 	        {
                 true
-                dec ~a:Obj ;
+                dec ~a:obj ;
 	        }"""
         let actual = sprintf "%O" result
         printf "%O" actual

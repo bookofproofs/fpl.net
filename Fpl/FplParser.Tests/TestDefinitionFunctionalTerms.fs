@@ -11,7 +11,7 @@ type TestDefinitionFunctionalTerms01 () =
     member this.TestDefinitionFunctionalTerm01 () =
         let result = run (definitionFunctionalTerm .>> eof) """func LeftNeutralElement() -> tplSetElem
         {
-            dec ~e1:Obj 
+            dec ~e1:obj 
 
             assert 
                 ex e: tplSetElem
@@ -52,7 +52,7 @@ type TestDefinitionFunctionalTerms01 () =
     member this.TestDefinitionFunctionalTerm04 () =
         let result = run (definitionFunctionalTerm .>> eof) """func Sum(list:* Nat)->Nat
         {
-            dec ~a:Obj ~  
+            dec ~a:obj ~  
                 result, addend: Nat
                 result:=Zero()
                 for addend in list
@@ -71,7 +71,7 @@ type TestDefinitionFunctionalTerms01 () =
     member this.TestDefinitionFunctionalTerm05 () =
         let result = run (definitionFunctionalTerm .>> eof) """func Sum(list:* Nat)->Nat
         {
-            dec ~a:Obj ~  
+            dec ~a:obj ~  
                 i: index
                 result:=Zero()
                 for i in list
@@ -89,7 +89,7 @@ type TestDefinitionFunctionalTerms01 () =
     member this.TestDefinitionFunctionalTerm06 () =
         let result = run (definitionFunctionalTerm .>> eof) """func Sum(from, to: Nat, arr:+Nat) -> Nat
         {
-            dec ~a:Obj ~ 
+            dec ~a:obj ~ 
                 i, result: Nat
             
                 result:=Zero()
@@ -109,7 +109,7 @@ type TestDefinitionFunctionalTerms01 () =
     member this.TestDefinitionFunctionalTerm07 () =
         let result = run (definitionFunctionalTerm .>> eof) """func Sum(arr: Nat) -> Nat
         {
-            dec ~a:Obj ~ 
+            dec ~a:obj ~ 
                 addend, result: Nat
             
                 result:=Zero()
@@ -128,7 +128,7 @@ type TestDefinitionFunctionalTerms01 () =
     member this.TestDefinitionFunctionalTerm07a () =
         let result = run (definitionFunctionalTerm .>> eof) """func Sum() -> Nat
         {
-            dec ~a:Obj ~ 
+            dec ~a:obj ~ 
                 addend, result: Nat
             
                 result:=Zero()
@@ -147,7 +147,7 @@ type TestDefinitionFunctionalTerms01 () =
     member this.TestDefinitionFunctionalTerm07b () =
         let result = run (definitionFunctionalTerm .>> eof) """func Sum() -> Nat
         {
-            dec ~a:Obj ~ 
+            dec ~a:obj ~ 
                 addend, result: Nat
             
                 result:=Zero()
@@ -166,7 +166,7 @@ type TestDefinitionFunctionalTerms01 () =
     member this.TestDefinitionFunctionalTerm07c () =
         let result = run (definitionFunctionalTerm .>> eof) """func Sum() -> Nat
         {
-            dec ~a:Obj ~ 
+            dec ~a:obj ~ 
                 addend, result: Nat
             
                 result:=Zero()
@@ -195,7 +195,7 @@ type TestDefinitionFunctionalTerms01 () =
     member this.TestDefinitionFunctionalTerm09 () =
         let result = run (definitionFunctionalTerm .>> eof) """func PowerSet(x: Set) -> Set
         {
-            dec ~a:Obj ~ 
+            dec ~a:obj ~ 
                 y: Set
             
                 assert IsPowerSet(x,y)
@@ -232,7 +232,7 @@ type TestDefinitionFunctionalTerms01 () =
         let result = run (definitionFunctionalTerm .>> eof) """func T() -> obj
         {
             // a functional term cannot be empty with spec
-            dec ~a:Obj ;
+            dec ~a:obj ;
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -243,7 +243,7 @@ type TestDefinitionFunctionalTerms01 () =
         let result = run (definitionFunctionalTerm .>> eof) """func T() -> obj
         {
             // a functional term cannot be empty with some spec or dec
-            dec ~a:Obj ;
+            dec ~a:obj ;
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -254,7 +254,7 @@ type TestDefinitionFunctionalTerms01 () =
         let result = run (definitionFunctionalTerm .>> eof) """func T() -> obj
         {
             // a functional term cannot be intrinsic with some proceeding spec or dec
-            dec ~a:Obj ;
+            dec ~a:obj ;
             intrinsic
         }"""
         let actual = sprintf "%O" result
@@ -278,7 +278,7 @@ type TestDefinitionFunctionalTerms01 () =
         let result = run (definitionFunctionalTerm .>> eof) """func T() -> obj
         {
             // a functional term cannot be intrinsic with some proceeding spec or dec
-            dec ~a:Obj ;
+            dec ~a:obj ;
             intrinsic
         }"""
         let actual = sprintf "%O" result
@@ -325,7 +325,7 @@ type TestDefinitionFunctionalTerms01 () =
         {
             // a functional term cannot be intrinsic with some following declarations or specifications
             intrinsic
-            dec ~a:Obj ;
+            dec ~a:obj ;
             spec:;
         }"""
         let actual = sprintf "%O" result
@@ -338,7 +338,7 @@ type TestDefinitionFunctionalTerms01 () =
         {
             // a functional term cannot be intrinsic with some following declarations or specifications
             intrinsic
-            dec ~a:Obj ;
+            dec ~a:obj ;
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -353,7 +353,7 @@ type TestDefinitionFunctionalTerms01 () =
 
             property func T() -> obj
 	        {
-	            dec ~a:Obj ;
+	            dec ~a:obj ;
                 return x
 	        } 
 
@@ -373,7 +373,7 @@ type TestDefinitionFunctionalTerms01 () =
         {
             mand func T() -> obj
 	        {
-	            dec ~a:Obj ;
+	            dec ~a:obj ;
                 return x
 	        } 
 
@@ -397,7 +397,7 @@ type TestDefinitionFunctionalTerms01 () =
         // a functional term with some proceeding declarations or specifications
         let result = run (definitionFunctionalTerm .>> eof) """func T() -> obj
         {
-            dec ~a:Obj ;
+            dec ~a:obj ;
             return x
         }"""
         let actual = sprintf "%O" result
@@ -409,7 +409,7 @@ type TestDefinitionFunctionalTerms01 () =
         // a functional term with some proceeding declarations or specifications
         let result = run (definitionFunctionalTerm .>> eof) """func T() -> obj
         {
-            dec ~a:Obj ;
+            dec ~a:obj ;
             return x
         }"""
         let actual = sprintf "%O" result
@@ -421,7 +421,7 @@ type TestDefinitionFunctionalTerms01 () =
         // a functional term with some proceeding declarations or specifications
         let result = run (definitionFunctionalTerm .>> eof) """func T() -> obj
         {
-            dec ~a:Obj ;
+            dec ~a:obj ;
             return x
         }"""
         let actual = sprintf "%O" result
@@ -450,7 +450,7 @@ type TestDefinitionFunctionalTerms01 () =
 
             property func T() -> obj
 	        {
-	            dec ~a:Obj ;
+	            dec ~a:obj ;
                 return x
 	        } 
 
@@ -494,28 +494,28 @@ type TestDefinitionFunctionalTerms01 () =
 
     [<TestMethod>]
     member this.TestDefinitionFunctionalTerm22 () =
-        let result = run (definitionFunctionalTerm .>> eof) """func T()->obj { dec ~x:Obj; return (S(x)) }"""
+        let result = run (definitionFunctionalTerm .>> eof) """func T()->obj { dec ~x:obj; return (S(x)) }"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestDefinitionFunctionalTerm24a () =
-        let result = run (definitionFunctionalTerm .>> eof) """func T() ->obj { dec ~x:Obj; return x }"""
+        let result = run (definitionFunctionalTerm .>> eof) """func T() ->obj { dec ~x:obj; return x }"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestDefinitionFunctionalTerm24b () =
-        let result = run (definitionFunctionalTerm .>> eof) """func T() -> obj { dec ~x:Obj; return x }"""
+        let result = run (definitionFunctionalTerm .>> eof) """func T() -> obj { dec ~x:obj; return x }"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestDefinitionFunctionalTerm24c () =
-        let result = run (definitionFunctionalTerm .>> eof) """func T()-> obj { dec ~x:Obj; return x }"""
+        let result = run (definitionFunctionalTerm .>> eof) """func T()-> obj { dec ~x:obj; return x }"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -538,7 +538,7 @@ type TestDefinitionFunctionalTerms01 () =
     [<DataRow("T : A , B , C ()->obj")>]
     [<TestMethod>]
     member this.TestDefinitionFunctionalTermSignatures (fplCode:string) =
-        let result = run (definitionFunctionalTerm .>> eof) (sprintf """func %s { dec ~x:Obj; return x }""" fplCode)
+        let result = run (definitionFunctionalTerm .>> eof) (sprintf """func %s { dec ~x:obj; return x }""" fplCode)
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

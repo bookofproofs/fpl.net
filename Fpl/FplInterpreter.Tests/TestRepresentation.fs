@@ -19,9 +19,9 @@ type TestRepresentation() =
     member this.TestRepresentationPredicate(var:string, varVal, expected:string) =
         ad.Clear()
         let fplCode = sprintf """uses Fpl.Commons 
-            def obj A: Obj  {intr} 
-            def obj B: Obj  {intr} 
-            def pred T() { dec ~x,y:Obj x:=A() y:=B(); %s };""" varVal
+            def cl A: obj  {intr} 
+            def cl B: obj  {intr} 
+            def pred T() { dec ~x,y:obj x:=A() y:=B(); %s };""" varVal
         let filename = "TestRepresentationPredicate.fpl"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
@@ -132,14 +132,14 @@ type TestRepresentation() =
 
     [<DataRow("00","""def pred T() { dec ~v:ind; true };""", "dec ind")>]
     [<DataRow("00a","""def pred T() { dec ~v:pred; true };""", "dec pred")>]
-    [<DataRow("00b","""def pred T() { dec ~v:Obj; true };""", "dec obj")>]
+    [<DataRow("00b","""def pred T() { dec ~v:obj; true };""", "dec obj")>]
     [<DataRow("00c","""def pred T() { dec ~v:func; true };""", "dec func")>]
     [<DataRow("00d","""def pred T() { dec ~v:tpl; true };""", "dec tpl")>]
     [<DataRow("01a","""def pred T() { dec ~v:pred(d:ind); true };""", "dec pred(ind)")>]
-    [<DataRow("01b","""def pred T() { dec ~v:pred(d:pred(e,f:Obj)); true };""", "dec pred(pred(obj, obj))")>]
-    [<DataRow("01c","""def pred T() { dec ~v:func(d:pred(e:Obj,d,e:ind)) ->pred(d:pred(e,f:Obj)); true };""", "dec func(pred(obj, ind, ind)) -> pred(pred(obj, obj))")>]
+    [<DataRow("01b","""def pred T() { dec ~v:pred(d:pred(e,f:obj)); true };""", "dec pred(pred(obj, obj))")>]
+    [<DataRow("01c","""def pred T() { dec ~v:func(d:pred(e:obj,d,e:ind)) ->pred(d:pred(e,f:obj)); true };""", "dec func(pred(obj, ind, ind)) -> pred(pred(obj, obj))")>]
     [<DataRow("02","""def pred T() { dec ~v:A; true };""", "dec A")>]
-    [<DataRow("02a","""def obj A:Obj {intr} def pred T() { dec ~v:A; true };""", "dec A")>]
+    [<DataRow("02a","""def cl A:obj {intr} def pred T() { dec ~v:A; true };""", "dec A")>]
     [<TestMethod>]
     member this.TestRepresentationUnitializedVars(var:string, fplCode, expected:string) =
         ad.Clear()
@@ -190,11 +190,11 @@ type TestRepresentation() =
         let fplCode = sprintf """
             uses Fpl.Commons
             
-            def obj X: Obj { intr }
+            def cl X: obj { intr }
             
-            def obj A: Obj { intr }
-            def obj B: A { intr }
-            def obj C: A { intr }
+            def cl A: obj { intr }
+            def cl B: A { intr }
+            def cl C: A { intr }
 
             ext Digits x@/\d+/ -> A 
             {

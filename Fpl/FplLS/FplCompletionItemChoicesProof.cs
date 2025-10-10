@@ -273,7 +273,7 @@ namespace FplLS
                 $"\t// Revoking the assumption proves the argument.{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\tdec {Environment.NewLine}" +
-                $"\t\t ~c:Obj{Environment.NewLine}" +
+                $"\t\t ~c:obj{Environment.NewLine}" +
                 $"\t\t // construct a counterexample c := ... {Environment.NewLine}" +
                 $"\t;{Environment.NewLine}" +
                 $"\t100. |- {TokenAssume} not somePremise{Environment.NewLine}" +

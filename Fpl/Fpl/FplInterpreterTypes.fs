@@ -1458,7 +1458,7 @@ and FplClass(positions: Positions, parent: FplValue) =
         | SignatureType.Mixed -> this.FplId
         | SignatureType.Type -> this.TypeId
 
-    override this.Represent () = $"dec {LiteralObj} {this.FplId}"
+    override this.Represent () = $"dec {LiteralCl} {this.FplId}"
 
     override this.Run _ = 
         this.SetValue(new FplInstance((this.StartPos, this.EndPos), this))

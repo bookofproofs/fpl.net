@@ -14,41 +14,41 @@ type TestClassInheritanceTypes () =
 
     [<TestMethod>]
     member this.TestSpecificType3 () =
-        let result = run (classType .>> eof) """object """
+        let result = run (specificClassType .>> eof) """object """
         let actual = sprintf "%O" result
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestSpecificType4 () =
-        let result = run (classType .>> eof) LiteralTpl
+        let result = run (specificClassType .>> eof) LiteralTpl
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestSpecificType5 () =
-        let result = run (classType .>> eof) """tplSetElem"""
+        let result = run (specificClassType .>> eof) """tplSetElem"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
 
     member this.TestSpecificType7 () =
-        let result = run (classType .>> eof) """@extNat"""
+        let result = run (specificClassType .>> eof) """@extNat"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSpecificType8 () =
-        let result = run (classType .>> eof) """SomeClass"""
+        let result = run (specificClassType .>> eof) """SomeClass"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSpecificType9 () =
-        let result = run (classType .>> eof) """bla"""
+        let result = run (specificClassType .>> eof) """bla"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
@@ -147,7 +147,7 @@ type TestClassInheritanceTypes () =
 
     [<TestMethod>]
     member this.TestClassType10a () =
-        let result = run (classType .>> eof) """object[x:Obj,y:Nat]"""
+        let result = run (classType .>> eof) """object[x:obj,y:Nat]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))

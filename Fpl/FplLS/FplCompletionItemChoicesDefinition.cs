@@ -31,7 +31,7 @@ namespace FplLS
                 TokenObject = LiteralObj;
                 TokenFunction = LiteralFunc;
                 TokenPredicate = LiteralPred;
-                TokenClass = LiteralObj;
+                TokenClass = LiteralCl;
                 if (forKeyword)
                 {
                     ci.Label = GetLabelKeyword(ci, definitionType);

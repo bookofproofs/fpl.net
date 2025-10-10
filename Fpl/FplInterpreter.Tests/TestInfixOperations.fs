@@ -8,7 +8,7 @@ open CommonTestHelpers
 [<TestClass>]
 type TestInfixOperations() =
 
-    [<DataRow("""def pred T1() { dec ~x,y:Obj; (x = y) }""", LiteralTrue)>]
+    [<DataRow("""def pred T1() { dec ~x,y:obj; (x = y) }""", LiteralTrue)>]
     [<DataRow("""def pred T1() { (@1 = @2) }""", LiteralFalse)>]
     [<DataRow("""def pred T1() { (@1 = @1) }""", LiteralTrue)>]
     [<TestMethod>]

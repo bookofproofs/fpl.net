@@ -435,7 +435,7 @@ type TestFplValueScopeQualifiedName() =
             match var with
             | "r" -> Assert.AreEqual<string>("", qualifiedName r)
             | PrimTheoryL -> Assert.AreEqual<string>("TestScopeVariablesInSignatureVariadicQualifiedName", qualifiedName theory)
-            | "block" -> Assert.AreEqual<string>("TestScopeVariablesInSignatureVariadicQualifiedName.TestPredicate(+pred(func(*Obj, *Obj, *Obj) -> obj, func(*Obj, *Obj, *Obj) -> obj, func(*Obj, *Obj, *Obj) -> obj), +pred(func(*Obj, *Obj, *Obj) -> obj, func(*Obj, *Obj, *Obj) -> obj, func(*Obj, *Obj, *Obj) -> obj))", qualifiedName block)
+            | "block" -> Assert.AreEqual<string>("TestScopeVariablesInSignatureVariadicQualifiedName.TestPredicate(+pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj), +pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj))", qualifiedName block)
             | "x" -> Assert.AreEqual<string>("x", qualifiedName x)
             | "y" -> Assert.AreEqual<string>("y", qualifiedName y)
             | "xu" -> Assert.AreEqual<string>("x.u", qualifiedName xu)
@@ -506,9 +506,9 @@ type TestFplValueScopeQualifiedName() =
     [<DataRow("base15b", "-x'")>]
     [<DataRow("base16", "-(y + x = @2 * x)")>]
     [<DataRow("base17", "(y + x' = @2 * x)'")>]
-    [<DataRow("base18", "ex x:pred(a:T), y:C, z:Obj {and (a,and(b,c))}")>]
-    [<DataRow("base19", "exn$1 x:Obj {all y:N {true}}")>]
-    [<DataRow("base20", "all x:Obj {not x}")>]
+    [<DataRow("base18", "ex x:pred(a:T), y:C, z:obj {and (a,and(b,c))}")>]
+    [<DataRow("base19", "exn$1 x:obj {all y:N {true}}")>]
+    [<DataRow("base20", "all x:obj {not x}")>]
     [<DataRow("base21", "and(x, abc(y, z))")>]
     [<DataRow("base21a", "not x")>]
     [<DataRow("base21b", "not(x)")>]
@@ -523,7 +523,7 @@ type TestFplValueScopeQualifiedName() =
     [<DataRow("base30", "B(In(x))")>]
     [<DataRow("base31", "C(Test1(a), Test2(b, c, d))")>]
     [<DataRow("base32", "E(true, undef, false)")>]
-    [<DataRow("base33", "dec ~p: pred(c: Obj); p(c)")>]
+    [<DataRow("base33", "dec ~p: pred(c: obj); p(c)")>]
     [<DataRow("base34", "is(x, Set)")>]
     [<TestMethod>]
     member this.TestPredicate(var, varVal) =
@@ -615,11 +615,11 @@ type TestFplValueScopeQualifiedName() =
     member this.TestBaseConstructorCall(var, varVal) =
         ad.Clear()
         let fplCode = sprintf """
-                        def obj B:Obj {intr}
-                        def obj C:Obj {intr}
-                        def obj D:Obj {intr}
+                        def cl B:obj {intr}
+                        def cl C:obj {intr}
+                        def cl D:obj {intr}
 
-                        def obj A:B,C,D,E
+                        def cl A:B,C,D,E
                         {
                             ctor A(a:T1, b:func, c:ind, d:pred) 
                             {
@@ -690,8 +690,8 @@ type TestFplValueScopeQualifiedName() =
     [<DataRow("base2", """def pred T1 () infix ">" -1 {intr};""")>]
     [<DataRow("base3", """def pred T1 () postfix "'" {intr};""")>]
     [<DataRow("base4", """def pred T1 () prefix "-" {intr};""")>]
-    [<DataRow("base5", """def obj T1 :Obj symbol "∅" {intr};""")>]
-    [<DataRow("base5a", """def obj T1:Obj {intr};""")>]
+    [<DataRow("base5", """def cl T1 :obj symbol "∅" {intr};""")>]
+    [<DataRow("base5a", """def cl T1:obj {intr};""")>]
     [<DataRow("base6", """def func T1()->obj {intr};""")>]
     [<DataRow("base7", """def func T1 ()->obj infix ">" -1 {intr};""")>]
     [<DataRow("base8", """def func T1  ()->obj postfix "'"{intr};""")>]
@@ -708,7 +708,7 @@ type TestFplValueScopeQualifiedName() =
             let r = st.Root
             let theory = r.Scope[filename]
             let base1 = 
-                if varVal.Contains "def obj" then 
+                if varVal.Contains LiteralCl then 
                     theory.Scope["T1"]
                 elif varVal.Contains LiteralFunc then 
                     theory.Scope["T1() -> obj"]
@@ -734,12 +734,12 @@ type TestFplValueScopeQualifiedName() =
     [<DataRow("base2", """def func T()->ind {intr};""")>]
     [<DataRow("base3", """def func T()->func {intr};""")>]
     [<DataRow("base4", """def func T()->pred {intr};""")>]
-    [<DataRow("base5", """def obj A:Obj {intr} def func T()->A {intr};""")>]
+    [<DataRow("base5", """def cl A:obj {intr} def func T()->A {intr};""")>]
     [<DataRow("base6", """def func T()->pred(z:ind) {intr};""")>]
-    [<DataRow("base7", """def func T()->pred(z:*Obj) {intr};""")>]
-    [<DataRow("base8", """def func T()->func(p:*pred(x:Obj))->pred(x:ind) {intr};""")>]
+    [<DataRow("base7", """def func T()->pred(z:*obj) {intr};""")>]
+    [<DataRow("base8", """def func T()->func(p:*pred(x:obj))->pred(x:ind) {intr};""")>]
     [<DataRow("base9", """def func T()->pred(f:+func(x:A)->A) {intr};""")>]
-    [<DataRow("base10", """def obj A:Obj {intr} def func T()->pred(f:func(x:A)->A) {intr};""")>]
+    [<DataRow("base10", """def cl A:obj {intr} def func T()->pred(f:func(x:A)->A) {intr};""")>]
     [<TestMethod>]
     member this.TestMappingQualifiedName(var, varVal) =
         ad.Clear()
@@ -760,7 +760,7 @@ type TestFplValueScopeQualifiedName() =
             | "base4" -> Assert.AreEqual<string>("TestMappingQualifiedName.T() -> pred.", qualifiedName mapping)
             | "base5" -> Assert.AreEqual<string>("TestMappingQualifiedName.T() -> A.", qualifiedName mapping)
             | "base6" -> Assert.AreEqual<string>("TestMappingQualifiedName.T() -> pred(ind).", qualifiedName mapping)
-            | "base7" -> Assert.AreEqual<string>("TestMappingQualifiedName.T() -> pred(*Obj).", qualifiedName mapping)
+            | "base7" -> Assert.AreEqual<string>("TestMappingQualifiedName.T() -> pred(*obj).", qualifiedName mapping)
             | "base8" -> Assert.AreEqual<string>("TestMappingQualifiedName.T() -> func(*pred(obj)) -> pred(ind).", qualifiedName mapping)
             | "base9" -> Assert.AreEqual<string>("TestMappingQualifiedName.T() -> pred(+func(A) -> A).", qualifiedName mapping)
             | "base10" -> Assert.AreEqual<string>("TestMappingQualifiedName.T() -> pred(func(A) -> A).", qualifiedName mapping)
