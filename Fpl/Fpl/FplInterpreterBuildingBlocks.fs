@@ -1768,13 +1768,13 @@ let rec eval (st: SymbolTable) ast =
         setSignaturePositions pos1 pos2
         variableStack.InSignatureEvaluation <- false
         st.EvalPop()
-    | Ast.DefinitionClass((pos1, pos2),(((classSignatureAst, inheritedClassTypeListAst), optUserDefinedObjSymAst), (classContentAst, optPropertyListAsts))) ->
+    | Ast.DefinitionClass((pos1, pos2),(((classSignatureAst, optInheritedClassTypeListAst), optUserDefinedObjSymAst), (classContentAst, optPropertyListAsts))) ->
         st.EvalPush("DefinitionClass")
         let parent = variableStack.PeekEvalStack()
         let fv = new FplClass((pos1, pos2), parent)
         variableStack.PushEvalStack(fv)
         eval st classSignatureAst
-        eval st inheritedClassTypeListAst 
+        optInheritedClassTypeListAst |> Option.map (eval st) |> Option.defaultValue ()
         optUserDefinedObjSymAst |> Option.map (eval st) |> Option.defaultValue ()
         eval st classContentAst
         optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()

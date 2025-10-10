@@ -558,7 +558,7 @@ let classDefinitionBlock = leftBrace  >>. ((keywordIntrinsic <|> classCompleteCo
 let inheritedClassTypeList = sepBy1 (inheritedClassType) (attempt (IW >>. comma)) |>> Ast.InheritedClassTypeList
 
 let classSignature = positions "ClassSignature" (keywordClass >>. SW >>. pascalCaseId) .>> IW |>> Ast.ClassSignature
-let classSignatureExtended = classSignature .>>. (colon >>. inheritedClassTypeList) .>>. opt (attempt (IW >>. userDefinedObjSym)) .>> IW
+let classSignatureExtended = classSignature .>>. opt (colon >>. inheritedClassTypeList) .>>. opt (attempt (IW >>. userDefinedObjSym)) .>> IW
 let definitionClass = positions "DefinitionClass" (classSignatureExtended .>>. classDefinitionBlock) |>> Ast.DefinitionClass 
 
 let keywordDefinition = (skipString LiteralDefL <|> skipString LiteralDef) >>. SW
