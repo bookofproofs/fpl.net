@@ -17,9 +17,9 @@ type TestPrecedence() =
     member this.TestPrecedenceInfix(var, varVal) =
         ad.Clear()
         let fplCode = sprintf """ 
-                 def pred Mul(x,y: obj) infix "*" 1 {intr}
-                 def pred Add(x,y: obj)infix "+" 2  {intr} 
-                 def pred Eq(x,y: obj) infix "=" 1000{intr} 
+                 def pred Mul(x,y: Obj) infix "*" 1 {intr}
+                 def pred Add(x,y: Obj)infix "+" 2  {intr} 
+                 def pred Eq(x,y: Obj) infix "=" 1000{intr} 
                  def pred T1() { %s };""" varVal
         let filename = "TestPrecedenceInfix.fpl"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 

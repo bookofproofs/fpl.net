@@ -95,8 +95,6 @@ namespace FplLS
                 case LiteralAss:
                 case LiteralAssert:
                 case LiteralByDef:
-                case LiteralCl:
-                case LiteralClL:
                 case LiteralCon:
                 case LiteralConL:
                 case LiteralExt:
@@ -294,18 +292,6 @@ namespace FplLS
                     this.Detail = "statement (cases)";
                     this.SortText = LiteralCases;
                     this.Kind = CompletionItemKind.Property;
-                    this.IsShort = false;
-                    break;
-                case LiteralCl:
-                    this.Detail = "class (short form)";
-                    this.SortText = "class02";
-                    this.Kind = CompletionItemKind.TypeParameter;
-                    this.IsShort = true;
-                    break;
-                case LiteralClL:
-                    this.Detail = LiteralClL;
-                    this.SortText = "class01";
-                    this.Kind = CompletionItemKind.TypeParameter;
                     this.IsShort = false;
                     break;
                 case LiteralCon:
@@ -543,14 +529,14 @@ namespace FplLS
                     this.IsShort = false;
                     break;
                 case LiteralObj:
-                    this.Detail = "type (object, short form)";
-                    this.SortText = "object02";
+                    this.Detail = "object class (short form)";
+                    this.SortText = "class02";
                     this.Kind = CompletionItemKind.TypeParameter;
                     this.IsShort = true;
                     break;
                 case LiteralObjL:
-                    this.Detail = "type (object)";
-                    this.SortText = "object01";
+                    this.Detail = LiteralObjL;
+                    this.SortText = "class01";
                     this.Kind = CompletionItemKind.TypeParameter;
                     this.IsShort = false;
                     break;

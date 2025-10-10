@@ -41,7 +41,7 @@ type TestFplBlockComponentes () =
 
     [<TestMethod>]
     member this.TestSignature05 () =
-        let result = run (functionalTermSignature .>> eof) """func TestPredicate(a,b:obj)->obj"""
+        let result = run (functionalTermSignature .>> eof) """func TestPredicate(a,b:Obj)->obj"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

@@ -20,7 +20,7 @@ type TestReferencesTypeOfSignature() =
     [<DataRow("base9", "Test$1()")>]
     [<DataRow("base10", "Test")>]
     [<DataRow("base11", "v")>]
-    [<DataRow("base11v1", "dec ~v:obj; v")>]
+    [<DataRow("base11v1", "dec ~v:Obj; v")>]
     [<DataRow("base11v2", "dec ~v:ind; v")>]
     [<DataRow("base11v3", "dec ~v:Nat; v")>]
     [<DataRow("base12", LiteralParent)>]
@@ -53,9 +53,9 @@ type TestReferencesTypeOfSignature() =
     [<DataRow("base15b", "-x'")>]
     [<DataRow("base16", "-(y + x = @2 * x)")>]
     [<DataRow("base17", "(y + x' = @2 * x)'")>]
-    [<DataRow("base18", "ex x:pred(a:T), y:C, z:obj {and (a,and(b,c))}")>]
-    [<DataRow("base19", "exn$1 x:obj {all y:N {true}}")>]
-    [<DataRow("base20", "all x:obj {not x}")>]
+    [<DataRow("base18", "ex x:pred(a:T), y:C, z:Obj {and (a,and(b,c))}")>]
+    [<DataRow("base19", "exn$1 x:Obj {all y:N {true}}")>]
+    [<DataRow("base20", "all x:Obj {not x}")>]
     [<DataRow("base21", "and (x, and(y, z))")>]
     [<DataRow("base21a", "not x")>]
     [<DataRow("base21b", "not (x)")>]
@@ -70,7 +70,7 @@ type TestReferencesTypeOfSignature() =
     [<DataRow("base30", "B(In(x))")>]
     [<DataRow("base31", "C(Test1(a),Test2(b,c,d))")>]
     [<DataRow("base32", "E(true, undef, false)")>]
-    [<DataRow("base33", "dec ~p: pred(c: obj); p(c)")>]
+    [<DataRow("base33", "dec ~p: pred(c: Obj); p(c)")>]
     [<DataRow("base34", "is(x, Set)")>]
     
     [<TestMethod>]
@@ -165,11 +165,11 @@ type TestReferencesTypeOfSignature() =
     member this.TestBaseConstructorCall(var, varVal) =
         ad.Clear()
         let fplCode = sprintf """
-                        def cl B:obj {intr}
-                        def cl C:obj {intr}
-                        def cl D:obj {intr}
+                        def obj B:Obj {intr}
+                        def obj C:Obj {intr}
+                        def obj D:Obj {intr}
 
-                        def cl A:B,C,D,E
+                        def obj A:B,C,D,E
                         {
                             ctor A(a:T1, b:func, c:ind, d:pred) 
                             {
@@ -244,7 +244,7 @@ type TestReferencesTypeOfSignature() =
     [<DataRow("""conj T {true};""", "pred")>]
     [<DataRow("""cor T$1 {true};""", "pred$1")>]
     [<DataRow("""proof T$1 {1. |- trivial};""","pred$1")>]
-    [<DataRow("""def pred T(p:obj) {true};""","pred(obj)")>]
+    [<DataRow("""def pred T(p:Obj) {true};""","pred(obj)")>]
     [<DataRow("""def pred T() {true};""", "pred()")>]
     [<DataRow("""inf T {pre: true con:true};""", "pred")>]
     [<TestMethod>]

@@ -158,7 +158,7 @@ type TestAxioms () =
 
     [<TestMethod>]
     member this.TestAxiom11 () =
-        let result = run (axiom .>> eof) """ax T {exn$1 x:obj {del.Equal(x,$1)}}"""
+        let result = run (axiom .>> eof) """ax T {exn$1 x:Obj {del.Equal(x,$1)}}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

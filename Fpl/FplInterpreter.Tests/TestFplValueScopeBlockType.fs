@@ -518,9 +518,9 @@ type TestFplValueScopeBlockType() =
     [<DataRow("base15b", "-x'")>]
     [<DataRow("base16", "-(y + x = @2 * x)")>]
     [<DataRow("base17", "(y + x' = @2 * x)'")>]
-    [<DataRow("base18", "ex x:pred(a:obj,b:T), y:C, z:obj {and (a,and(b,c))}")>]
-    [<DataRow("base19", "exn$1 x:obj {all y:N {true}}")>]
-    [<DataRow("base20", "all x:obj {not x}")>]
+    [<DataRow("base18", "ex x:pred(a:Obj,b:T), y:C, z:Obj {and (a,and(b,c))}")>]
+    [<DataRow("base19", "exn$1 x:Obj {all y:N {true}}")>]
+    [<DataRow("base20", "all x:Obj {not x}")>]
     [<DataRow("base21", "and (x, and(y, z))")>]
     [<DataRow("base21a", "not x")>]
     [<DataRow("base21b", "not (x)")>]
@@ -535,7 +535,7 @@ type TestFplValueScopeBlockType() =
     [<DataRow("base30", "B(In(x))")>]
     [<DataRow("base31", "C(Test1(a),Test2(b,c,d))")>]
     [<DataRow("base32", "E(true, undef, false)")>]
-    [<DataRow("base33", "dec ~p: pred(c: obj); p(c)")>]
+    [<DataRow("base33", "dec ~p: pred(c: Obj); p(c)")>]
     [<DataRow("base34", "is(x, Set)")>]
     [<TestMethod>]
     member this.TestPredicate(var, varVal) =
@@ -627,11 +627,11 @@ type TestFplValueScopeBlockType() =
     member this.TestBaseConstructorCallBlockType(var, varVal) =
         ad.Clear()
         let fplCode = sprintf """
-                        def cl B:obj {intr}
-                        def cl C:obj {intr}
-                        def cl D:obj {intr}
+                        def obj B:Obj {intr}
+                        def obj C:Obj {intr}
+                        def obj D:Obj {intr}
 
-                        def cl A:B,C,D,E
+                        def obj A:B,C,D,E
                         {
                             ctor A(a:T1, b:func, c:ind, d:pred) 
                             {
@@ -702,8 +702,8 @@ type TestFplValueScopeBlockType() =
     [<DataRow("base2", """def pred T1() infix ">" -1 {intr};""")>]
     [<DataRow("base3", """def pred T1 () postfix "'" {intr};""")>]
     [<DataRow("base4", """def pred T1 () prefix "-" {intr};""")>]
-    [<DataRow("base5", """def cl T1 :obj symbol "∅" {intr};""")>]
-    [<DataRow("base5a", """def cl T1:obj {intr};""")>]
+    [<DataRow("base5", """def obj T1 :Obj symbol "∅" {intr};""")>]
+    [<DataRow("base5a", """def obj T1:Obj {intr};""")>]
     [<DataRow("base6", """def func T1()->obj {intr};""")>]
     [<DataRow("base7", """def func T1 ()->obj infix ">" -1 {intr};""")>]
     [<DataRow("base8", """def func T1 ()->obj postfix "'" {intr};""")>]
@@ -720,7 +720,7 @@ type TestFplValueScopeBlockType() =
             let r = st.Root
             let theory = r.Scope[filename]
             let base1 = 
-                if varVal.Contains LiteralCl then 
+                if varVal.Contains "def obj" then 
                     theory.Scope["T1"]
                 elif varVal.Contains LiteralFunc then 
                     theory.Scope["T1() -> obj"]
@@ -746,12 +746,12 @@ type TestFplValueScopeBlockType() =
     [<DataRow("base2", """def func T()->ind {intr};""")>]
     [<DataRow("base3", """def func T()->func {intr};""")>]
     [<DataRow("base4", """def func T()->pred {intr};""")>]
-    [<DataRow("base5", """def cl A:obj {intr} def func T()->A {intr};""")>]
+    [<DataRow("base5", """def obj A:Obj {intr} def func T()->A {intr};""")>]
     [<DataRow("base6", """def func T()->tpl {intr};""")>]
-    [<DataRow("base7", """def func T()->pred(z:*obj) {intr};""")>]
-    [<DataRow("base8", """def func T()->func(p:*pred(x:obj))->pred(x:ind) {intr};""")>]
+    [<DataRow("base7", """def func T()->pred(z:*Obj) {intr};""")>]
+    [<DataRow("base8", """def func T()->func(p:*pred(x:Obj))->pred(x:ind) {intr};""")>]
     [<DataRow("base9", """def func T()->pred(f:+func(x:A)->A) {intr};""")>]
-    [<DataRow("base10", """def cl A:obj {intr} def func T()->pred(f:func(x:A)->A) {intr};""")>]
+    [<DataRow("base10", """def obj A:Obj {intr} def func T()->pred(f:func(x:A)->A) {intr};""")>]
     [<TestMethod>]
     member this.TestMapping(var, varVal) =
         ad.Clear()

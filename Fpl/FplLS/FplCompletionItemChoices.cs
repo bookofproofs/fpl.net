@@ -21,7 +21,7 @@ namespace FplLS
         public FplCompletionItemChoices()
         {
             TokenAssume = LiteralAssL;
-            TokenClass = LiteralClL;
+            TokenClass = LiteralObj;
             TokenConclusion = LiteralConL;
             TokenDeclaration = LiteralDecL;
             TokenFunction = LiteralFuncL;
@@ -35,7 +35,7 @@ namespace FplLS
         public void AdjustToShort()
         {
             TokenAssume = LiteralAss;
-            TokenClass = LiteralCl;
+            TokenClass = LiteralObj;
             TokenConclusion = LiteralCon;
             TokenDeclaration = LiteralDec;
             TokenFunction = LiteralFunc;

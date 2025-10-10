@@ -39,10 +39,6 @@ let LiteralByInf = "byinf"
 [<Literal>]
 let LiteralCases = "cases"
 [<Literal>]
-let LiteralCl = "cl"
-[<Literal>]
-let LiteralClL = "class"
-[<Literal>]
 let LiteralCon = "con"
 [<Literal>]
 let LiteralConj = "conj"
@@ -207,8 +203,6 @@ let keyWordSet =
            LiteralByDef
            LiteralByInf
            LiteralCases
-           LiteralCl
-           LiteralClL
            LiteralConj
            LiteralConjL
            LiteralCon

@@ -23,7 +23,7 @@ type CommonFplValueTestCases =
     static member ScopeVariablesInSignature(subtype) =
         ad.Clear()
         let fplCode = """
-        def pred TestPredicate(x,y:pred(u,v,w:func(a,b,c:obj)->obj)) 
+        def pred TestPredicate(x,y:pred(u,v,w:func(a,b,c:Obj)->obj)) 
             {true}
         ;
         """
@@ -69,7 +69,7 @@ type CommonFplValueTestCases =
     static member ScopeVariablesInSignatureVariadic(subtype) =
         ad.Clear()
         let fplCode = """
-        def pred TestPredicate(x,y:+pred(u,v,w:func(a,b,c:*obj)->obj)) 
+        def pred TestPredicate(x,y:+pred(u,v,w:func(a,b,c:*Obj)->obj)) 
             {true}
         ;
         """
@@ -77,7 +77,7 @@ type CommonFplValueTestCases =
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         let result = match stOption with
                         | Some st -> 
-                            let name = "TestPredicate(+pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj), +pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj))"
+                            let name = "TestPredicate(+pred(func(*Obj, *Obj, *Obj) -> obj, func(*Obj, *Obj, *Obj) -> obj, func(*Obj, *Obj, *Obj) -> obj), +pred(func(*Obj, *Obj, *Obj) -> obj, func(*Obj, *Obj, *Obj) -> obj, func(*Obj, *Obj, *Obj) -> obj))"
                             let r = st.Root
                             let theory = CommonFplValueTestCases.getScopedElement r filename subtype
                             let block = CommonFplValueTestCases.getScopedElement theory name subtype
@@ -117,7 +117,7 @@ type CommonFplValueTestCases =
         let fplCode = """
         def pred TestPredicate() 
         {   dec 
-                ~x,y:pred(u,v,w:func(a,b,c:obj)->obj)
+                ~x,y:pred(u,v,w:func(a,b,c:Obj)->obj)
                 ~s:Set
             ; 
             true
@@ -168,7 +168,7 @@ type CommonFplValueTestCases =
         ad.Clear()
         let fplCode = """
         def pred TestPredicate() 
-            {dec ~x,y:+pred(u,v,w:func(a,b,c:*obj)->obj); true}
+            {dec ~x,y:+pred(u,v,w:func(a,b,c:*Obj)->obj); true}
         ;
         """
         let filename = "TestScopeVariablesInBlockVariadic" + subtype
@@ -249,10 +249,10 @@ type CommonFplValueTestCases =
     static member ScopeConstructors(subtype) =
         ad.Clear()
         let fplCode = """
-        def cl TestId:obj 
+        def obj TestId:Obj 
         {
             ctor TestId() {} 
-            ctor TestId(x:obj) {} 
+            ctor TestId(x:Obj) {} 
             ctor TestId(x:pred) {} 
             ctor TestId(x:ind) {} 
         }
@@ -294,13 +294,13 @@ type CommonFplValueTestCases =
             corollary SomeLemma2$1 {true}
             conjecture SomeConjecture1 {true}
             conjecture SomeConjecture2 {true}
-            def cl SomeClass1:obj {intr}
-            def cl SomeClass2:obj {intr}
+            def obj SomeClass1:Obj {intr}
+            def obj SomeClass2:Obj {intr}
             def pred SomePredicate1() {true}
             def pred SomePredicate2() {true}
             def func SomeFunctionalTerm1()->obj {intr}
             def func SomeFunctionalTerm2()->obj {intr}
-            def func SomeFunctionalTerm3()->obj {dec ~v:obj v:=v; return v}
+            def func SomeFunctionalTerm3()->obj {dec ~v:Obj v:=v; return v}
             def func SomeFunctionalTerm4()->tpl {dec ~v:tpl v:=v; return v}
             def func SomeFunctionalTerm5()->SomeClass1 {dec ~v:SomeClass1; return v}
             def func SomeFunctionalTerm6()->SomeClass1 {dec ~v:SomeClass1 v:=SomeClass; return v}
@@ -430,15 +430,15 @@ type CommonFplValueTestCases =
     static member ScopeIntrinsicPrimitives(subtype) =
         ad.Clear()
         let fplCode = """
-            def cl A:obj {intr}
+            def obj A:Obj {intr}
             def func B()->obj {intr}
             def pred T() {
                 dec 
                     ~i:ind i:=$1 
                     ~b:func b:=B()  
                     ~p:pred p:=true 
-                    ~o:obj o:=A()
-                    ~u:obj u:=undef
+                    ~o:Obj o:=A()
+                    ~u:Obj u:=undef
                     ~t:tpl t:=$2
                 ;
                 true 
