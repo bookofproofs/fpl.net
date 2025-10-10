@@ -110,8 +110,6 @@ namespace FplLS
                 case LiteralIn:
                 case LiteralObj:
                 case LiteralObjL:
-                case LiteralOpt:
-                case LiteralOptL:
                 case LiteralPred:
                 case LiteralPredL:
                 case LiteralPre:
@@ -554,18 +552,6 @@ namespace FplLS
                     this.Detail = "type (object)";
                     this.SortText = "object01";
                     this.Kind = CompletionItemKind.TypeParameter;
-                    this.IsShort = false;
-                    break;
-                case LiteralOpt:
-                    this.Detail = "optional (short form)";
-                    this.SortText = "optional02";
-                    this.Kind = CompletionItemKind.Property;
-                    this.IsShort = true;
-                    break;
-                case LiteralOptL:
-                    this.Detail = LiteralOptL;
-                    this.SortText = "optional01";
-                    this.Kind = CompletionItemKind.Property;
                     this.IsShort = false;
                     break;
                 case LiteralOr:

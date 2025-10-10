@@ -217,19 +217,12 @@ type CommonFplValueTestCases =
         {
             intr 
             prty pred T1() {true}
-            opt prty pred T2() {true}
             prty func T3()->obj {intr}
-            opt prty func T4()->obj {intr}
             prty func T5()->ind {intr}
-            opt prty func T6()->ind {intr}
             prty func T7()->pred {intr}
-            opt prty func T8()->pred {intr}
             prty func T9()->tpl {intr}
-            opt prty func T10()->tpl {intr}
             prty func T11()->Nat {intr}
-            opt prty func T12()->Nat {intr}
             prty func T13()->func {intr}
-            opt prty func T14()->func {intr}
         }
         ;
         """
@@ -242,20 +235,13 @@ type CommonFplValueTestCases =
                             let theory = CommonFplValueTestCases.getScopedElement r filename subtype
                             let block = CommonFplValueTestCases.getScopedElement theory name subtype
                             let t1 = CommonFplValueTestCases.getScopedElement block "T1()" subtype
-                            let t2 = CommonFplValueTestCases.getScopedElement block "T2()" subtype
                             let t3 = CommonFplValueTestCases.getScopedElement block "T3() -> obj" subtype
-                            let t4 = CommonFplValueTestCases.getScopedElement block "T4() -> obj" subtype
                             let t5 = CommonFplValueTestCases.getScopedElement block "T5() -> ind" subtype
-                            let t6 = CommonFplValueTestCases.getScopedElement block "T6() -> ind" subtype
                             let t7 = CommonFplValueTestCases.getScopedElement block "T7() -> pred" subtype
-                            let t8 = CommonFplValueTestCases.getScopedElement block "T8() -> pred" subtype
                             let t9 = CommonFplValueTestCases.getScopedElement block "T9() -> tpl" subtype
-                            let t10 = CommonFplValueTestCases.getScopedElement block "T10() -> tpl" subtype
                             let t11 = CommonFplValueTestCases.getScopedElement block "T11() -> Nat" subtype
-                            let t12 = CommonFplValueTestCases.getScopedElement block "T12() -> Nat" subtype
                             let t13 = CommonFplValueTestCases.getScopedElement block "T13() -> func" subtype
-                            let t14 = CommonFplValueTestCases.getScopedElement block "T14() -> func" subtype
-                            Some (r,theory,block,t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14)
+                            Some (r,theory,block,t1,t3,t5,t7,t9,t11,t13)
                         | None -> None
         prepareFplCode(filename, "", true) |> ignore
         result
@@ -263,7 +249,7 @@ type CommonFplValueTestCases =
     static member ScopeConstructors(subtype) =
         ad.Clear()
         let fplCode = """
-        def cl TestId:obj 
+        def cl TestId 
         {
             ctor TestId() {} 
             ctor TestId(x:obj) {} 
@@ -308,8 +294,8 @@ type CommonFplValueTestCases =
             corollary SomeLemma2$1 {true}
             conjecture SomeConjecture1 {true}
             conjecture SomeConjecture2 {true}
-            def cl SomeClass1:obj {intr}
-            def cl SomeClass2:obj {intr}
+            def cl SomeClass1 {intr}
+            def cl SomeClass2 {intr}
             def pred SomePredicate1() {true}
             def pred SomePredicate2() {true}
             def func SomeFunctionalTerm1()->obj {intr}
@@ -444,7 +430,7 @@ type CommonFplValueTestCases =
     static member ScopeIntrinsicPrimitives(subtype) =
         ad.Clear()
         let fplCode = """
-            def cl A:obj {intr}
+            def cl A {intr}
             def func B()->obj {intr}
             def pred T() {
                 dec 

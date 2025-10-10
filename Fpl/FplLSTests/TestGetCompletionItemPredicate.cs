@@ -144,7 +144,7 @@ namespace FplLSTests
         [DataRow(LiteralImpl, "predicate (implication, =>)")]
         [DataRow(LiteralAnd, "predicate (conjunction)")]
         [DataRow(LiteralOr, "predicate (disjunction)")]
-        [DataRow("(", PrimEqualityL)]
+        [DataRow("(", PrimDelegateEqual)]
         [TestMethod]
         public void TestAddPredicateChoicesDetail(string choice, string l)
         {

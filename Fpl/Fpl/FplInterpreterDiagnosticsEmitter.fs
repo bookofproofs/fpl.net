@@ -84,146 +84,6 @@ let checkVAR00Diagnostics numberOfVariadicVars startPos endPos =
             }
         ad.AddDiagnostic diagnostic
 
-/// Given the class node fplValue and the identifier `name`, this function checks the 
-/// semantical consistency of a parent class with this name, covering ID009, ID010 and ID011 diagnostics.
-/// It will return None or Some reference to the parent class node with this name, if it could be found.
-let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) name pos1 pos2 =
-    let rightContext = st.EvalPath()
-    let classInheritanceChain = findClassInheritanceChain fplValue name
-
-    if rightContext.EndsWith("InheritedClassType.PredicateIdentifier") then
-        if fplValue.Type(SignatureType.Type) = name then
-            let diagnostic =
-                { 
-                    Diagnostic.Uri = ad.CurrentUri
-                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                    Diagnostic.Severity = DiagnosticSeverity.Error
-                    Diagnostic.StartPos = pos1
-                    Diagnostic.EndPos = pos2
-                    Diagnostic.Code = ID009 name // circular base dependency
-                    Diagnostic.Alternatives = None 
-                }
-            ad.AddDiagnostic diagnostic
-            None
-        else
-            match classInheritanceChain with
-            | Some chain ->
-                let diagnostic =
-                    { 
-                        Diagnostic.Uri = ad.CurrentUri
-                        Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                        Diagnostic.Severity = DiagnosticSeverity.Error
-                        Diagnostic.StartPos = pos1
-                        Diagnostic.EndPos = pos2
-                        Diagnostic.Code = ID011(name, chain) // inheritance chain duplicate
-                        Diagnostic.Alternatives = None 
-                    }
-                ad.AddDiagnostic diagnostic
-                None
-            | _ ->
-                match fplValue.InScopeOfParent name with
-                | ScopeSearchResult.Found classCandidate ->
-                    let mutable duplicateInheritanceChainFound = false
-
-                    fplValue.ArgList
-                    |> Seq.iter (fun child ->
-                        let childType = child.Type(SignatureType.Type)
-                        let classInheritanceChain = findClassInheritanceChain classCandidate childType
-
-                        match classInheritanceChain with
-                        | Some chain ->
-                            let diagnostic =
-                                { 
-                                    Diagnostic.Uri = ad.CurrentUri
-                                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                                    Diagnostic.Severity = DiagnosticSeverity.Error
-                                    Diagnostic.StartPos = pos1
-                                    Diagnostic.EndPos = pos2
-                                    Diagnostic.Code = ID011(childType, chain) // inheritance chain duplicate
-                                    Diagnostic.Alternatives = None 
-                                }
-                            ad.AddDiagnostic diagnostic
-                            duplicateInheritanceChainFound <- true
-                        | _ -> ())
-
-                    if not duplicateInheritanceChainFound then
-                        Some classCandidate
-                    else
-                        None
-                | _ ->
-                    emitID010Diagnostics name pos1 pos2
-                    None
-
-    elif rightContext.EndsWith("InheritedClassType.ObjectType") then
-        match classInheritanceChain with
-        | Some chain ->
-            let diagnostic =
-                { 
-                    Diagnostic.Uri = ad.CurrentUri
-                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                    Diagnostic.Severity = DiagnosticSeverity.Error
-                    Diagnostic.StartPos = pos1
-                    Diagnostic.EndPos = pos2
-                    Diagnostic.Code = ID011(name, chain) // inheritance chain duplicate
-                    Diagnostic.Alternatives = None 
-                }
-            ad.AddDiagnostic diagnostic
-            None
-        | _ ->
-            let mutable duplicateInheritanceChainFound = false
-
-            fplValue.ArgList
-            |> Seq.iter (fun child ->
-                let classInheritanceChain = findClassInheritanceChain child name
-
-                match classInheritanceChain with
-                | Some chain ->
-                    let diagnostic =
-                        { 
-                            Diagnostic.Uri = ad.CurrentUri
-                            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                            Diagnostic.Severity = DiagnosticSeverity.Error
-                            Diagnostic.StartPos = pos1
-                            Diagnostic.EndPos = pos2
-                            Diagnostic.Code = ID011(name, chain) // inheritance chain duplicate
-                            Diagnostic.Alternatives = None 
-                        }
-                    ad.AddDiagnostic diagnostic
-                    duplicateInheritanceChainFound <- true
-                | _ -> ())
-
-            if not duplicateInheritanceChainFound then
-                let obJ = new FplIntrinsicObj((pos1, pos2), fplValue)
-                Some obJ
-            else
-                None
-    else    
-        None
-
-let checkID012Diagnostics (st: SymbolTable) (parentConstructorCall: FplValue) identifier (pos1: Position) pos2 =
-    let context = st.EvalPath()
-
-    if
-        context.EndsWith("ParentConstructorCall.InheritedClassType.PredicateIdentifier")
-        || context.EndsWith("ParentConstructorCall.InheritedClassType.ObjectType")
-    then
-        let stmt = parentConstructorCall.Parent.Value
-        let constructor = stmt.Parent.Value
-        let classOfConstructor = constructor.Parent.Value
-        let mutable foundInheritanceClass = false
-
-        let candidates =
-            classOfConstructor.ArgList
-            |> Seq.map (fun inheritanceClass ->
-                let inheritanceClassType = inheritanceClass.Type(SignatureType.Type)
-                if inheritanceClassType = identifier then
-                    foundInheritanceClass <- true
-                inheritanceClassType)
-            |> String.concat ", "
-
-        if not foundInheritanceClass then
-            emitID012Diagnostics identifier candidates pos1 pos2
-           
 
 let checkID018Diagnostics (st: SymbolTable) (fv:FplValue) (identifier:string) pos1 pos2 =
     let matchReprId (fv1:FplValue) (identifier:string) = 
@@ -281,7 +141,6 @@ let checkID018Diagnostics (st: SymbolTable) (fv:FplValue) (identifier:string) po
             }
         ad.AddDiagnostic diagnostic
      
-
 
 let checkID019Diagnostics (st: SymbolTable) (name:string) pos1 pos2 =
     if name.StartsWith("@") then 
@@ -426,23 +285,6 @@ let emitSIG04DiagnosticsForTypes identifier pos1 pos2 =
             }
     ad.AddDiagnostic diagnostic
 
-let checkSIG04Diagnostics (calling:FplValue) (candidates: FplValue list) = 
-    match checkCandidates calling candidates [] with
-    | (Some candidate,_) -> Some candidate // no error occured
-    | (None, errList) -> 
-        let diagnostic =
-            { 
-                Diagnostic.Uri = ad.CurrentUri
-                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                Diagnostic.Severity = DiagnosticSeverity.Error
-                Diagnostic.StartPos = calling.StartPos
-                Diagnostic.EndPos = calling.EndPos
-                Diagnostic.Code = SIG04(calling.Type(SignatureType.Mixed), candidates.Length, errList)
-                Diagnostic.Alternatives = None 
-            }
-        ad.AddDiagnostic diagnostic
-        None
-
 let rec blocktIsProof (fplValue: FplValue) =
     if fplValue.IsProof() then
         true
@@ -506,7 +348,7 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
             match repr with
             | LiteralTrue
             | LiteralFalse -> ()
-            | LiteralUndetermined -> emitLG000Diagnostics argument 
+            | PrimUndetermined -> emitLG000Diagnostics argument 
             | _ -> emitLG001Diagnostics argument.StartPos argument.EndPos argument
     )
 

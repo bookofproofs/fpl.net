@@ -17,7 +17,7 @@ namespace FplLS
                 case "|":
                     ci.Detail = "new case '|'";
                     break;
-                case PrimEquality:
+                case PrimDelegateEqual:
                     ci.Detail = "equal sign '='";
                     break;
                 case ":=":

@@ -182,7 +182,7 @@ type TestSignatureMatching() =
         "`a:obj` does not match `x:Nat` in TestSignatureMatchingReferencesClasses.T(Nat, Nat)")>]
     [<DataRow("""def pred T (x,y:obj) {true} def pred Caller() {dec ~a,b:Nat; T(a,b)} ;""",
         "`a:Nat` is undefined and does not match `x:obj` in TestSignatureMatchingReferencesClasses.T(obj, obj)")>]
-    [<DataRow("""def cl Nat:obj {intr} def pred T (x,y:obj) {true} def pred Caller() {dec ~a,b:Nat; T(a,b)} ;""",
+    [<DataRow("""def cl Nat {intr} def pred T (x,y:obj) {true} def pred Caller() {dec ~a,b:Nat; T(a,b)} ;""",
         "")>]
     [<DataRow("""def pred T (x,y:tpl) {true} def pred Caller() {dec ~a,b:obj; T(a,b)} ;""",
         "")>]
@@ -209,23 +209,23 @@ type TestSignatureMatching() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("""def cl A:obj {ctor A(){dec base.obj(); }} 
+    [<DataRow("""def cl A {ctor A(){dec base.Obj(); }} 
                  def cl B:A {ctor B(x:obj){dec base.A(); }} 
                  def cl C:B {ctor C(){dec base.B(); }};;""",
         "`()` does not match `x:obj` in TestSignatureMatchingReferencesConstructors.B.B(obj)")>]
-    [<DataRow("""def cl A:obj {ctor A(){dec base.obj(); }} 
+    [<DataRow("""def cl A {ctor A(){dec base.Obj(); }} 
                  def cl B:A {ctor B(x:obj){dec base.A(); }} 
                  def cl C:B {ctor C(){dec ~x:ind base.B(x); }};;""",
         "`x:ind` does not match `x:obj` in TestSignatureMatchingReferencesConstructors.B.B(obj)")>]
-    [<DataRow("""def cl A:obj {ctor A(){dec base.obj(); }} 
+    [<DataRow("""def cl A {ctor A(){dec base.Obj(); }} 
                  def cl B:A {ctor B(x:obj){dec base.A(); }} 
                  def cl C:B {ctor C(){dec ~x:obj base.B(x); }};;""",
         "")>]
-    [<DataRow("""def cl A:obj {ctor A(){dec base.obj(); }} 
+    [<DataRow("""def cl A {ctor A(){dec base.Obj(); }} 
                  def cl B:A {ctor B(x:A){dec base.A(); }} 
                  def cl C:B {ctor C(){dec ~x:obj base.B(x); }};;""",
         "`x:obj` does not match `x:A` in TestSignatureMatchingReferencesConstructors.B.B(A)")>]
-    [<DataRow("""def cl A:obj {ctor A(){dec base.obj(); }} 
+    [<DataRow("""def cl A {ctor A(){dec base.Obj(); }} 
                  def cl B:A {ctor B(x:A){dec base.A(); }} 
                  def cl C:B {ctor C(){dec ~x:A base.B(x); }};;""",
         "")>]
@@ -461,34 +461,34 @@ type TestSignatureMatching() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("00", "def cl T:obj {intr};", "T:obj")>]
+    [<DataRow("00", "def cl T {intr};", "T:obj")>]
     [<DataRow("01", "def cl T:Test {intr};", "1")>]
     [<DataRow("02", "def cl T:Test1, object, Test3 {intr};", "T:obj")>]
     [<DataRow("03", "def cl T:Test1, Test2, Test3, object {intr};", "T:obj")>]
-    [<DataRow("04", "def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl T:A,B,C,E {ctor D() {dec base.A() base.B() base.C() base.F(); } };", "T:C:obj")>]
-    [<DataRow("05", "def cl A:obj {intr} def cl T:A {ctor B() {dec base.A(); } };", "T:A:obj")>]
-    [<DataRow("06", "def cl A:obj {intr} def cl T:A {ctor B() {dec base.C(); } };", "T:A:obj")>]
-    [<DataRow("07", "def cl T:obj { ctor A() {dec base.obj(); } };", "T:obj")>]
-    [<DataRow("08", "def cl T:obj { ctor A() {dec base.B(); } };", "T:obj")>]
-    [<DataRow("09", "def cl T:C { ctor A() {dec base.obj(); } };", "None")>]
-    [<DataRow("10", "uses Fpl.SetTheory def cl T:Set {ctor Test() {dec base.obj(); } };", "T:Set:obj")>]
+    [<DataRow("04", "def cl A {intr} def cl B {intr} def cl C {intr} def cl T:A,B,C,E {ctor D() {dec base.A() base.B() base.C() base.F(); } };", "T:C:obj")>]
+    [<DataRow("05", "def cl A {intr} def cl T:A {ctor B() {dec base.A(); } };", "T:A:obj")>]
+    [<DataRow("06", "def cl A {intr} def cl T:A {ctor B() {dec base.C(); } };", "T:A:obj")>]
+    [<DataRow("07", "def cl T { ctor A() {dec base.Obj(); } };", "T:obj")>]
+    [<DataRow("08", "def cl T { ctor A() {dec base.B(); } };", "T:obj")>]
+    [<DataRow("09", "def cl T:C { ctor A() {dec base.Obj(); } };", "None")>]
+    [<DataRow("10", "uses Fpl.SetTheory def cl T:Set {ctor Test() {dec base.Obj(); } };", "T:Set:obj")>]
     [<DataRow("11", "uses Fpl.SetTheory def cl T:Set {ctor Test() {dec base.Set(); } };", "T:Set:obj")>]
-    [<DataRow("12", "def cl A:obj {intr} def cl B:A {intr} def cl T:B,A {intr};", "T:B:A:obj")>]
+    [<DataRow("12", "def cl A {intr} def cl B:A {intr} def cl T:B,A {intr};", "T:B:A:obj")>]
     [<DataRow("13", "uses Fpl.SetTheory def cl T:EmptySet,Set {intr};", "T:EmptySet:Set:obj")>]
     [<DataRow("14", "uses Fpl.SetTheory def cl T:Set, EmptySet {intr};", "T:Set:obj")>]
-    [<DataRow("15", "def cl A:obj {intr} def cl B:A {intr} def cl T:A,B {intr};", "T:A:obj")>]
-    [<DataRow("16", "def cl A:obj {intr} def cl B:A {intr} def cl T:B {intr};", "T:B:A:obj")>]
+    [<DataRow("15", "def cl A {intr} def cl B:A {intr} def cl T:A,B {intr};", "T:A:obj")>]
+    [<DataRow("16", "def cl A {intr} def cl B:A {intr} def cl T:B {intr};", "T:B:A:obj")>]
     [<DataRow("17", "uses Fpl.SetTheory def cl T:EmptySet {intr};", "T:EmptySet:Set:obj")>]
     [<DataRow("18", "uses Fpl.SetTheory def cl T:Set {intr};", "T:Set:obj")>]
     [<DataRow("19", "uses Fpl.Commons uses Fpl.SetTheory def cl T:Set {intr};", "T:Set:obj")>]
-    [<DataRow("20", "def cl A:obj {intr} def cl B:A {intr} def cl T:A {intr};", "T:A:obj")>]
-    [<DataRow("21", "def cl A:obj {intr} def cl B:A {intr} def cl T:A,A {intr};", "T:A:obj")>]
-    [<DataRow("22", "def cl A:obj {intr} def cl B:A {intr} def cl T:obj,object {intr};", "T:obj")>]
-    [<DataRow("23", "def cl A:obj {intr} def cl B:A {intr} def cl T:object,D,E,obj {intr};", "T:obj")>]
+    [<DataRow("20", "def cl A {intr} def cl B:A {intr} def cl T:A {intr};", "T:A:obj")>]
+    [<DataRow("21", "def cl A {intr} def cl B:A {intr} def cl T:A,A {intr};", "T:A:obj")>]
+    [<DataRow("22", "def cl A {intr} def cl B:A {intr} def cl T {intr};", "T:obj")>]
+    [<DataRow("23", "def cl A {intr} def cl B:A {intr} def cl T:object,D,E,obj {intr};", "T:obj")>]
     [<DataRow("24", "uses Fpl.SetTheory def cl T:Set,obj {intr};", "T:Set:obj")>]
     [<DataRow("25", "uses Fpl.SetTheory def cl T:EmptySet,obj {intr};", "T:EmptySet:Set:obj")>]
-    [<DataRow("26", "uses Fpl.SetTheory def cl T:obj,Set {intr};", "T:obj")>]
-    [<DataRow("27", "uses Fpl.SetTheory def cl T:obj,EmptySet {intr};", "T:obj")>]
+    [<DataRow("26", "uses Fpl.SetTheory def cl T,Set {intr};", "T:obj")>]
+    [<DataRow("27", "uses Fpl.SetTheory def cl T,EmptySet {intr};", "T:obj")>]
     [<TestMethod>]
     member this.TestBaseClassPath(no:string, varVal:string, var:string) =
         ad.Clear()
@@ -502,35 +502,36 @@ type TestSignatureMatching() =
             let theory = r.Scope[filename]
             let blocks = theory.Scope.Values |> Seq.toList 
             let cl = blocks |> List.filter(fun fv -> (fv.Type(SignatureType.Name)).StartsWith("T")) |> List.head
-            let res = findClassInheritanceChain cl LiteralObj
-            match res with 
-            | None -> Assert.AreEqual<string>("was not found", "was not found")
-            | Some str -> Assert.AreEqual<string>(var, str)
+            if inheritsFrom cl LiteralObj then
+                let str = findInheritanceChains cl LiteralObj |> Seq.map (fun kvp -> kvp.Key) |> Seq.head
+                Assert.AreEqual<string>(var, str)
+            else 
+                Assert.AreEqual<string>("was not found", "was not found")
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("inh", """def cl A:obj { intr } def pred T() {dec ~n:A n:=A(); true};""", "")>]
-    [<DataRow("inh_a", """def cl A:obj { intr } def pred T() {dec ~n:obj n:=A(); true};""", "")>]
-    [<DataRow("inh_b", """def cl A:obj {intr} def cl B:A { intr } def pred T() {dec ~n:A n:=B(); true};""", "")>]
-    [<DataRow("inh_c", """def cl A:obj {intr} def cl B:A { intr } def pred T() {dec ~n:B n:=A(); true};""", "x")>]
-    [<DataRow("inh_d", """def cl A:obj {intr} def cl B:A { intr } def pred T() {dec ~n:obj n:=B(); true};""", "")>]
-    [<DataRow("inh_e", """def cl A:obj {intr} def cl B:A { intr } def pred T() {dec ~n:obj n:=A(); true};""", "")>]
-    [<DataRow("inh_f", """def cl A:obj {intr} def cl B:obj { intr } def pred T() {dec ~n:B n:=A(); true};""", "x")>]
-    [<DataRow("inh_g", """def cl A:obj {intr} def cl B:obj { intr } def pred T() {dec ~n:A n:=B(); true};""", "x")>]
-    [<DataRow("inh_type_a", """def cl A:obj { intr } def pred T() {dec ~n:ind n:=A(); true};""", "x")>]
-    [<DataRow("inh_type_b", """def cl A:obj { intr } def pred T() {dec ~n:pred n:=A(); true};""", "x")>]
-    [<DataRow("inh_type_c", """def cl A:obj { intr } def pred T() {dec ~n:func n:=A(); true};""", "x")>]
-    [<DataRow("constr_a", """def cl A:obj { ctor A(x:obj) {dec base.obj(); } } def pred T() {dec ~n:A n:=A(); true};""", "x")>]
-    [<DataRow("constr_b", """def cl A:obj { ctor A(x:obj) {dec base.obj(); } } def pred T() {dec ~n:A ~x:ind n:=A(x); true};""", "x")>]
-    [<DataRow("constr_c", """def cl A:obj { ctor A(x:obj) {dec base.obj(); } } def pred T() {dec ~n:A ~y:pred n:=A(y); true};""", "x")>]
-    [<DataRow("constr_d", """def cl A:obj { ctor A(x:obj) {dec base.obj(); } } def pred T() {dec ~n:A ~z:tpl n:=A(z); true};""", "x")>]
-    [<DataRow("constr_e", """def cl A:obj { ctor A(x:obj) {dec base.obj(); } } def pred T() {dec ~n:obj ~z:obj n:=A(z); true};""", "")>]
-    [<DataRow("constr_inh_a", """def cl A:obj { ctor A(x:obj) {dec base.obj(); } } def cl B:A { ctor B(x:pred) {dec base.A(); } } def pred T() {dec ~n:A n:=B(); true};""", "x")>]
-    [<DataRow("constr_inh_b", """def cl A:obj { ctor A(x:obj) {dec base.obj(); } } def cl B:A { ctor B(x:pred) {dec base.A(); } } def pred T() {dec ~n:obj n:=B(); true};""", "y")>]
-    [<DataRow("constr_inh_c", """def cl A:obj { ctor A(x:obj) {dec base.obj(); } } def cl B:A { ctor B(x:pred) {dec base.A(); } } def pred T() {dec ~n:obj n:=A(); true};""", "y")>]
-    [<DataRow("constr_inh_d", """def cl A:obj { ctor A(x:obj) {dec base.obj(); } } def cl B:A { ctor B(x:pred) {dec base.A(); } } def pred T() {dec ~n:B ~x:obj n:=A(x); true};""", "x")>]
-    [<DataRow("constr_inh_e", """def cl A:obj { ctor A(x:obj) {dec base.obj(); } } def cl B:obj { ctor B(x:pred) {dec base.obj(); } } def pred T() {dec ~n:B ~x:obj n:=A(x); true};""", "x")>]
-    [<DataRow("constr_inh_f", """def cl A:obj { ctor A(x:obj) {dec base.obj(); } } def cl B:obj { ctor B(x:pred) {dec base.obj(); } } def pred T() {dec ~n:A ~x:pred n:=B(x); true};""", "")>]
+    [<DataRow("inh", """def cl A { intr } def pred T() {dec ~n:A n:=A(); true};""", "")>]
+    [<DataRow("inh_a", """def cl A { intr } def pred T() {dec ~n:obj n:=A(); true};""", "")>]
+    [<DataRow("inh_b", """def cl A {intr} def cl B:A { intr } def pred T() {dec ~n:A n:=B(); true};""", "")>]
+    [<DataRow("inh_c", """def cl A {intr} def cl B:A { intr } def pred T() {dec ~n:B n:=A(); true};""", "x")>]
+    [<DataRow("inh_d", """def cl A {intr} def cl B:A { intr } def pred T() {dec ~n:obj n:=B(); true};""", "")>]
+    [<DataRow("inh_e", """def cl A {intr} def cl B:A { intr } def pred T() {dec ~n:obj n:=A(); true};""", "")>]
+    [<DataRow("inh_f", """def cl A {intr} def cl B { intr } def pred T() {dec ~n:B n:=A(); true};""", "x")>]
+    [<DataRow("inh_g", """def cl A {intr} def cl B { intr } def pred T() {dec ~n:A n:=B(); true};""", "x")>]
+    [<DataRow("inh_type_a", """def cl A { intr } def pred T() {dec ~n:ind n:=A(); true};""", "x")>]
+    [<DataRow("inh_type_b", """def cl A { intr } def pred T() {dec ~n:pred n:=A(); true};""", "x")>]
+    [<DataRow("inh_type_c", """def cl A { intr } def pred T() {dec ~n:func n:=A(); true};""", "x")>]
+    [<DataRow("constr_a", """def cl A { ctor A(x:obj) {dec base.Obj(); } } def pred T() {dec ~n:A n:=A(); true};""", "x")>]
+    [<DataRow("constr_b", """def cl A { ctor A(x:obj) {dec base.Obj(); } } def pred T() {dec ~n:A ~x:ind n:=A(x); true};""", "x")>]
+    [<DataRow("constr_c", """def cl A { ctor A(x:obj) {dec base.Obj(); } } def pred T() {dec ~n:A ~y:pred n:=A(y); true};""", "x")>]
+    [<DataRow("constr_d", """def cl A { ctor A(x:obj) {dec base.Obj(); } } def pred T() {dec ~n:A ~z:tpl n:=A(z); true};""", "x")>]
+    [<DataRow("constr_e", """def cl A { ctor A(x:obj) {dec base.Obj(); } } def pred T() {dec ~n:obj ~z:obj n:=A(z); true};""", "")>]
+    [<DataRow("constr_inh_a", """def cl A { ctor A(x:obj) {dec base.Obj(); } } def cl B:A { ctor B(x:pred) {dec base.A(); } } def pred T() {dec ~n:A n:=B(); true};""", "x")>]
+    [<DataRow("constr_inh_b", """def cl A { ctor A(x:obj) {dec base.Obj(); } } def cl B:A { ctor B(x:pred) {dec base.A(); } } def pred T() {dec ~n:obj n:=B(); true};""", "y")>]
+    [<DataRow("constr_inh_c", """def cl A { ctor A(x:obj) {dec base.Obj(); } } def cl B:A { ctor B(x:pred) {dec base.A(); } } def pred T() {dec ~n:obj n:=A(); true};""", "y")>]
+    [<DataRow("constr_inh_d", """def cl A { ctor A(x:obj) {dec base.Obj(); } } def cl B:A { ctor B(x:pred) {dec base.A(); } } def pred T() {dec ~n:B ~x:obj n:=A(x); true};""", "x")>]
+    [<DataRow("constr_inh_e", """def cl A { ctor A(x:obj) {dec base.Obj(); } } def cl B { ctor B(x:pred) {dec base.Obj(); } } def pred T() {dec ~n:B ~x:obj n:=A(x); true};""", "x")>]
+    [<DataRow("constr_inh_f", """def cl A { ctor A(x:obj) {dec base.Obj(); } } def cl B { ctor B(x:pred) {dec base.Obj(); } } def pred T() {dec ~n:A ~x:pred n:=B(x); true};""", "")>]
     [<TestMethod>]
     member this.TestAssignmentsOfConstructors(no:string, varVal:string, var:string) =
         ad.Clear()
@@ -554,12 +555,12 @@ type TestSignatureMatching() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("00", """def cl A:obj { intr } def pred T() {dec ~n:A n:=A; true};""", "A")>]
-    [<DataRow("01", """def cl A:obj { ctor A(x:obj) {dec base.obj(); } } def pred T() {dec ~n:A ~x:obj n:=A(x); true};""", "A(obj)")>]
-    [<DataRow("02", """def cl A:obj { ctor A(x:pred) {dec base.obj(); } } def pred T() {dec ~n:A ~x:pred n:=A(x); true};""", "A(pred)")>]
-    [<DataRow("03a", """def cl A:obj { ctor A(x:obj) {dec base.obj(); } ctor A(x:pred) {dec base.obj(); } ctor A(x:ind) {dec base.obj(); } } def pred T() {dec ~n:A ~x:obj n:=A(x); true};""", "A(obj)")>]
-    [<DataRow("03b", """def cl A:obj { ctor A(x:obj) {dec base.obj(); } ctor A(x:pred) {dec base.obj(); } ctor A(x:ind) {dec base.obj(); } } def pred T() {dec ~n:A ~x:pred n:=A(x); true};""", "A(pred)")>]
-    [<DataRow("03c", """def cl A:obj { ctor A(x:obj) {dec base.obj(); } ctor A(x:pred) {dec base.obj(); } ctor A(x:ind) {dec base.obj(); } } def pred T() {dec ~n:A ~x:ind n:=A(x); true};""", "A(ind)")>]
+    [<DataRow("00", """def cl A { intr } def pred T() {dec ~n:A n:=A; true};""", "A")>]
+    [<DataRow("01", """def cl A { ctor A(x:obj) {dec base.Obj(); } } def pred T() {dec ~n:A ~x:obj n:=A(x); true};""", "A(obj)")>]
+    [<DataRow("02", """def cl A { ctor A(x:pred) {dec base.Obj(); } } def pred T() {dec ~n:A ~x:pred n:=A(x); true};""", "A(pred)")>]
+    [<DataRow("03a", """def cl A { ctor A(x:obj) {dec base.Obj(); } ctor A(x:pred) {dec base.Obj(); } ctor A(x:ind) {dec base.Obj(); } } def pred T() {dec ~n:A ~x:obj n:=A(x); true};""", "A(obj)")>]
+    [<DataRow("03b", """def cl A { ctor A(x:obj) {dec base.Obj(); } ctor A(x:pred) {dec base.Obj(); } ctor A(x:ind) {dec base.Obj(); } } def pred T() {dec ~n:A ~x:pred n:=A(x); true};""", "A(pred)")>]
+    [<DataRow("03c", """def cl A { ctor A(x:obj) {dec base.Obj(); } ctor A(x:pred) {dec base.Obj(); } ctor A(x:ind) {dec base.Obj(); } } def pred T() {dec ~n:A ~x:ind n:=A(x); true};""", "A(ind)")>]
     [<TestMethod>]
     /// Test if a reference of the assigned value gets the correct candidate 
     /// depending on its signature and the available constructor candidates in the referenced class

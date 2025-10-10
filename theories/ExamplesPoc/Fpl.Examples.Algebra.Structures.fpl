@@ -9,32 +9,32 @@ uses Fpl.SetTheory
 def func BinOp(x,y: tplSetElem) -> tplSetElem
 {
     intr
-    optional property pred  IsAssociative()
+    property pred  IsAssociative()
     {
-        all a,b,c: tplSetElem {  (@self(a,@self(b,c)) = @self(@self(a,b),c))  }
+        all a,b,c: tplSetElem {  (parent(a,parent(b,c)) = parent(parent(a,b),c))  }
     }
 
-    optional property pred  IsCommutative()
+    property pred  IsCommutative()
     {
-        all a,b: tplSetElem { (@self(a,b) = @self(b,a)) }
+        all a,b: tplSetElem { (parent(a,b) = parent(b,a)) }
     }
 
-    optional property pred  IsLeftNeutralElement(e: tplSetElem)
+    property pred  IsLeftNeutralElement(e: tplSetElem)
     {
-        all x: tplSetElem { (@self(e,x) = x) }
+        all x: tplSetElem { (parent(e,x) = x) }
     }
 
-    optional property pred  IsRightNeutralElement(e: tplSetElem)
+    property pred  IsRightNeutralElement(e: tplSetElem)
     {
-        all x: tplSetElem { (@self(x,e) = x) }
+        all x: tplSetElem { (parent(x,e) = x) }
     }
 
-    optional property pred  IsNeutralElement(e: tplSetElem)
+    property pred  IsNeutralElement(e: tplSetElem)
     {
         and (IsLeftNeutralElement(e), IsRightNeutralElement(e))
     }
 
-    optional property pred  HasLeftNeutralElement()
+    property pred  HasLeftNeutralElement()
     {
         ex e: tplSetElem { IsLeftNeutralElement(e) }
     }
@@ -44,12 +44,12 @@ def func BinOp(x,y: tplSetElem) -> tplSetElem
         ex e: tplSetElem { IsRightNeutralElement(e) }
     }
 
-    optional property pred  HasNeutralElement()
+    property pred  HasNeutralElement()
     {
         ex e: tplSetElem { IsNeutralElement(e) }
     }
 
-    optional property func  LeftNeutralElement() -> tplSetElem
+    property func  LeftNeutralElement() -> tplSetElem
     {
         dec 
             ~result:tplSetElem 
@@ -57,7 +57,7 @@ def func BinOp(x,y: tplSetElem) -> tplSetElem
         return result
     }
 
-    optional property func RightNeutralElement() -> tplSetElem
+    property func RightNeutralElement() -> tplSetElem
     {
         dec 
             ~result:tplSetElem 
@@ -65,7 +65,7 @@ def func BinOp(x,y: tplSetElem) -> tplSetElem
         return result
     }
 
-    optional property func  NeutralElement() -> tplSetElem
+    property func  NeutralElement() -> tplSetElem
     {
         dec 
             ~result:tplSetElem 
@@ -84,15 +84,15 @@ def func Composition(operands:* tplSetElem) -> tplSetElem
     defined on its set elements ("BinOp +ops" stands for one or more operands of type BinOp).
     Since tplSet and tplSetElem are independent from each other, we will have to ensure the closure of each of
     them inside the set x of type tplSet. */
-def class AlgebraicStructure: obj
+def class AlgebraicStructure
 {
 
     dec
         ~myCarrierSet: tplSet
-        ~myOps:+ Composition(myElem:* tplSetElem)
+        ~myOps:+ func(myElem:* tplSetElem) -> tplSetElem
     ;
 
-    ctor AlgebraicStructure(x: tplSet, ops:+ Composition(args:* tplSetElem))
+    ctor AlgebraicStructure(x: tplSet, ops:+ Composition)
     {
         dec
             ~arg: index
@@ -115,7 +115,7 @@ def class AlgebraicStructure: obj
                 {
                     impl ( is(a,tplSetElem), In(a,myCarrierSet) )
                 }
-            base.obj()
+
         ;
         
 
@@ -167,7 +167,7 @@ def class Semigroup: Magma
 // Note how we use "full-qualified" parameters to ensure that the type "tpl" will be of exactly the  same ty
 def class Monoid: Semigroup
 {
-    dec ~myOp: BinOp(a,b: tplSetElem);
+    dec ~myOp: func(a,b: tplSetElem) -> tplSetElem;
 
     ctor Monoid(x: tplSet, op: BinOp)
     {
@@ -189,7 +189,7 @@ def class Monoid: Semigroup
 // Note how we use the Zermelo Fraenkel In predicate to ensure that y is the element of the monoid carrier set x.
 def func Exp
     (
-    m: Monoid(x: tplSet, op: BinOp(a,b: tplSetElem)),
+    m: Monoid,
     y: tplSetElem,
     n: Nat
     ) -> tplSetElem
@@ -199,11 +199,11 @@ def func Exp
         assert In(y,x)
         cases
         (
-            | (n = 0): result := m.NeutralElem()
+            | (n = @0): result := m.NeutralElem()
             ? result :=
                     op(
                         y,
-                        Exp( m(y,op), y, Sub(n,1))
+                        Exp( m(y,op), y, Sub(n,@1))
                     )
         )
     ;
@@ -214,7 +214,7 @@ def func Exp
 // a group is a monoid, in which an inverse element exists for all elements
 def class Group: Monoid
 {
-    dec ~myOp: BinOp(a,b: tplSetElem);
+    dec ~myOp: func(a,b: tplSetElem)->tplSetElem;
 
     ctor Group(x: tplSet, op: BinOp)
     {
@@ -424,7 +424,7 @@ def func ScalarMul(x: tplFieldElem, y: tplVector) -> tplVector
 }
 
 // Vector space over a field
-def class VectorSpaceOverField : obj
+def class VectorSpaceOverField 
 {
     dec
         ~mySpace: NonemptySet
@@ -437,17 +437,12 @@ def class VectorSpaceOverField : obj
     ctor VectorSpaceOverField
         (
             space: NonemptySet,
-                field: Field(
-                    fieldSet: tplFieldSet,
-                    fieldAdd: BinOp,
-                    fieldMul: BinOp
-                ),
-            vecAdd: AddVec(v,w: tplVector),
-            scalarMul: ScalarMul(a: tplFieldElement,v1: tplVector)
+                field: Field,
+            vecAdd: AddVec,
+            scalarMul: func(a: tplFieldElement,v1: tplVector) -> tplVector
         )
     {
         dec
-            base.obj()
             mySpace:= space
             myFieldAdd:= fieldAdd
             myFieldMul:= fieldMul

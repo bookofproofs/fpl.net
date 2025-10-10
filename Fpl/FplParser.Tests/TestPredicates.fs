@@ -363,7 +363,7 @@ type TestPredicates () =
 
     [<TestMethod>]
     member this.TestPredicate49 () =
-        let result = run (predicate .>> eof) """delegate.abc(x,y,z)"""
+        let result = run (predicate .>> eof) """delegate.Abc(x,y,z)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

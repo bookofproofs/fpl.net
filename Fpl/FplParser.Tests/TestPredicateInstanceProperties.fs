@@ -88,7 +88,7 @@ type TestPredicateInstanceProperties () =
     [<TestMethod>]
     member this.TestPredicateInstance2a () =
         // a predicate instance with a return statement 
-        let result = run (definitionProperty .>> eof) """optional property pred X() 
+        let result = run (definitionProperty .>> eof) """property pred X() 
 	        {
                 dec ~a:obj ;
                 true
@@ -112,7 +112,7 @@ type TestPredicateInstanceProperties () =
     [<TestMethod>]
     member this.TestPredicateInstance2c () =
         // a predicate instance with a return statement 
-        let result = run (definitionProperty .>> eof) """optional property  pred X() 
+        let result = run (definitionProperty .>> eof) """property  pred X() 
 	        {
                 dec ~a:obj ;
                 true
@@ -136,7 +136,7 @@ type TestPredicateInstanceProperties () =
     [<TestMethod>]
     member this.TestPredicateInstance2e () =
         // a predicate instance with a return statement 
-        let result = run (definitionProperty .>> eof) """opt property pred X() 
+        let result = run (definitionProperty .>> eof) """property pred X() 
 	        {
                 dec ~a:obj ;
                 true
@@ -197,7 +197,7 @@ type TestPredicateInstanceProperties () =
 
     [<TestMethod>]
     member this.TestPredicateInstance5 () =
-        let result = run (definitionProperty .>> eof) """opt prty pred T() {true}"""
+        let result = run (definitionProperty .>> eof) """prty pred T() {true}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

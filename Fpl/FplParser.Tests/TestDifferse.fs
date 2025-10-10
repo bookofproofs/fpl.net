@@ -6,7 +6,7 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 
 
 [<TestClass>]
-type TestDifferse () =
+type TestDiverse () =
     let replaceWhiteSpace (input: string) =
         let whiteSpaceChars = [|' '; '\t'; '\n'; '\r'|]
         input.Split(whiteSpaceChars)

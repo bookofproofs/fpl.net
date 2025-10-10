@@ -29,9 +29,11 @@ let LiteralBase = "base"
 [<Literal>]
 let LiteralByAx = "byax"
 [<Literal>]
-let LiteralByDef = "bydef"
+let LiteralByConj = "byconj"
 [<Literal>]
 let LiteralByCor = "bycor"
+[<Literal>]
+let LiteralByDef = "bydef"
 [<Literal>]
 let LiteralByInf = "byinf"
 [<Literal>]
@@ -123,10 +125,6 @@ let LiteralObj = "obj"
 [<Literal>]
 let LiteralObjL = "object"
 [<Literal>]
-let LiteralOpt = "opt"
-[<Literal>]
-let LiteralOptL = "optional"
-[<Literal>]
 let LiteralOr = "or"
 [<Literal>]
 let LiteralParent = "parent"
@@ -188,8 +186,6 @@ let LiteralTrue = "true"
 let LiteralUndef = "undef"
 [<Literal>]
 let LiteralUndefL = "undefined"
-[<Literal>]
-let LiteralUndetermined = "undetermined"
 [<Literal>]
 let LiteralUses = "uses"
 [<Literal>]
@@ -254,8 +250,6 @@ let keyWordSet =
            LiteralNot
            LiteralObj
            LiteralObjL
-           LiteralOpt
-           LiteralOptL
            LiteralOr
            LiteralParent
            LiteralPost
@@ -1326,15 +1320,17 @@ let PrimClassL = "class definition"
 [<Literal>]
 let PrimConjunction = "conjunction"
 [<Literal>]
-let PrimDecrement = "decr"
+let PrimDefaultConstructor = "default constructor"
 [<Literal>]
-let PrimDecrementL = "decrement statement"
+let PrimDelegateEqual = "="
+[<Literal>]
+let PrimDelegateEqualL = "Equal"
+[<Literal>]
+let PrimDelegateDecrement = "decr"
+[<Literal>]
+let PrimDelegateDecrementL = "Decrement"
 [<Literal>]
 let PrimDisjunction = "disjunction"
-[<Literal>]
-let PrimEquality = "="
-[<Literal>]
-let PrimEqualityL = "equality"
 [<Literal>]
 let PrimEquivalence = "equivalence"
 [<Literal>]
@@ -1378,6 +1374,8 @@ let PrimImplication = "implication"
 [<Literal>]
 let PrimJIByAx = "justification by axiom"
 [<Literal>]
+let PrimJIByConj = "justification by conjecture"
+[<Literal>]
 let PrimJIByCor = "justification by corollary"
 [<Literal>]
 let PrimJIByDef = "justification by definition"
@@ -1420,14 +1418,6 @@ let PrimMappingL = "mapping"
 [<Literal>]
 let PrimNegation = "negation"
 [<Literal>]
-let PrimOptionalFunctionalTerm = "ofunc"
-[<Literal>]
-let PrimOptionalFunctionalTermL = "optional functional term property"
-[<Literal>]
-let PrimOptionalPredicate = "opred"
-[<Literal>]
-let PrimOptionalPredicateL = "optional predicate property"
-[<Literal>]
 let PrimPascalCaseId = "PascalCaseId"
 [<Literal>]
 let PrimPredicate = "def pred"
@@ -1465,6 +1455,8 @@ let PrimTheoremLike = "thmlike"
 let PrimTranslation = "trsl"
 [<Literal>]
 let PrimTranslationL = "translation"
+[<Literal>]
+let PrimUndetermined = "undetermined"
 [<Literal>]
 let PrimVariable = "var"
 [<Literal>]

@@ -25,7 +25,7 @@ type TestFplValueNesting() =
             let r = st.Root
             let theory = r.Scope[filename]
 
-            let pr1 = theory.Scope["X()"] 
+            let pr1 = theory.Scope["X"] 
             let base1 = pr1.ArgList[0]
             let resS = base1.Type(SignatureType.Mixed)
 
@@ -44,12 +44,12 @@ type TestFplValueNesting() =
         | Some st -> 
             let r = st.Root
             let theory = r.Scope[filename]
-            let lem = theory.Scope["Le2()"] 
+            let lem = theory.Scope["Le2"] 
             let prf = lem.Scope["Le2$1"]
-            let arg1 = prf.Scope["1."]
-            let arg2 = prf.Scope["2."]
-            let arg3 = prf.Scope["3."]
-            Assert.AreEqual<string>("1.",arg1.Type(SignatureType.Mixed))
-            Assert.AreEqual<string>("2.",arg2.Type(SignatureType.Mixed))
-            Assert.AreEqual<string>("3.",arg3.Type(SignatureType.Mixed))
+            let arg1 = prf.Scope["1"]
+            let arg2 = prf.Scope["2"]
+            let arg3 = prf.Scope["3"]
+            Assert.AreEqual<string>("1",arg1.Type(SignatureType.Mixed))
+            Assert.AreEqual<string>("2",arg2.Type(SignatureType.Mixed))
+            Assert.AreEqual<string>("3",arg3.Type(SignatureType.Mixed))
         | _ -> Assert.IsTrue(false)

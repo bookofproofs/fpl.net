@@ -317,24 +317,33 @@ class MyTreeItem extends vscode.TreeItem {
         {
             this.label = "pred prop " + label;
         }
-        else if (typ == "opred") 
-        {
-            this.label = "opt pred prop " + label;
-        }
         else if (typ == "mfunc") 
         {
             this.label = "func prop " + label;
-        }
-        else if (typ == "ofunc") 
-        {
-            this.label = "opt func prop " + label;
         }
         else 
         {
             this.label = typ + " " + label;
         }
+
+        const markdown = new vscode.MarkdownString();
+
+        // Create a MarkdownString for the tooltip
+        const markdownTooltip = new vscode.MarkdownString();
+        markdownTooltip.isTrusted = true; // Optional: allows links/images if needed
+        markdownTooltip.appendMarkdown(`📌 **Name:** ${label}\n\n`);
+        markdownTooltip.appendMarkdown(`🧩 **Type:** ${fplValueType}\n\n`);
+        try {
+            const parsedJson = JSON.parse(fplValueRepr);
+            const formattedJson = JSON.stringify(parsedJson, null, 2);
+            markdownTooltip.appendMarkdown(`🗃️ **Value:**\n`);
+            markdownTooltip.appendCodeblock(formattedJson, 'json');
+            } catch (error) {
+            markdownTooltip.appendMarkdown(`🧩 **Value:** ${fplValueRepr}\n\n`);
+        }
+
         // tooltip showing the name, the type and the representation of a node
-        this.tooltip = "Name:\n" + label + "\nType:\n"+ fplValueType + "\nValue:\n" + fplValueRepr;
+        this.tooltip = markdownTooltip;
         this.scope = scope;
         if (this.typ == "th") log2Console(this.label + " " + scope.length, false);
         this.arglist = arglist;

@@ -164,8 +164,9 @@ let keywordFalse = positions "False" (skipString LiteralFalse) .>> IW |>>  Ast.F
 let keywordByDef = pstring LiteralByDef 
 let keywordByAx = pstring LiteralByAx 
 let keywordByInf = pstring LiteralByInf
+let keywordByConj = pstring LiteralByConj
 let keywordByCor = pstring LiteralByCor
-let byModifier = choice [keywordByDef; keywordByAx; keywordByInf; keywordByCor] .>> SW 
+let byModifier = choice [keywordByAx; keywordByConj; keywordByCor; keywordByDef; keywordByInf] .>> SW 
 let keywordAnd = skipString LiteralAnd .>> IW 
 let keywordOr = skipString LiteralOr .>> IW 
 let keywordImpl = skipString LiteralImpl .>> IW 
@@ -286,9 +287,7 @@ let userDefinedSymbol = opt (attempt (IW >>. choice [userDefinedPrefix; userDefi
 (* Statements *)
 let argumentTuple = positions "ArgumentTuple" ((leftParen >>. predicateList) .>> (IW .>> rightParen)) |>> Ast.ArgumentTuple 
 
-let word = regex @"\w+" <?> "<word>" .>> IW
-let fplDelegateIdentifier = positions "DelegateId" (keywordDel >>. dot >>. word) .>> IW |>> Ast.DelegateId
-let fplDelegate = positions "Delegate" (fplDelegateIdentifier .>>. argumentTuple) |>> Ast.Delegate
+let fplDelegate = positions "Delegate" (keywordDel >>. dot >>. idStartsWithCap .>>. (IW >>. argumentTuple)) |>> Ast.Delegate
 
 let spacesRightBrace = (IW .>> rightBrace) 
 
@@ -318,7 +317,7 @@ let forStatement = positions "ForIn" (keywordFor >>. forInBody) |>> Ast.ForIn
 //// the scope of a definition. An assertion uses a predicate referring to existing identifiers in the whole theory
 //// Difference of assertion to assume: the latter will be used only in the scope of proofs
 let assertionStatement = positions "Assertion" (keywordAssert >>. predicate) |>> Ast.Assertion
-let inheritedClassType = positions "InheritedClassType" (choice [keywordObject; predicateIdentifier]) |>> Ast.InheritedClassType
+let inheritedClassType = predicateIdentifier
 let baseConstructorCall = positions "BaseConstructorCall" (keywordBaseClassReference >>. dot >>. (inheritedClassType .>> IW).>>. argumentTuple .>> IW) |>> Ast.BaseConstructorCall
 
 let statement = 
@@ -472,12 +471,11 @@ let constructorSignature = positions "ConstructorSignature" (keywordConstructor 
 let constructor = positions "Constructor" (constructorSignature .>>. constructorBlock) |>> Ast.Constructor
 
 (* FPL building blocks - Properties *)
-let keywordOptional = (skipString LiteralOptL <|> skipString LiteralOpt) .>> SW 
 let keywordProperty = (skipString LiteralPrtyL <|> skipString LiteralPrty) .>> SW 
 
 let predicateInstanceBlock = leftBrace >>. (keywordIntrinsic <|> predContent) .>> spacesRightBrace
 let predicateInstanceSignature = positions "PredicateInstanceSignature" (keywordPredicate >>. SW >>. simpleSignature .>>. paramTuple) .>> IW |>> Ast.PredicateInstanceSignature
-let predicateInstance = positions "PredicateInstance" ((opt keywordOptional .>> keywordProperty) .>>. (predicateInstanceSignature .>>. predicateInstanceBlock)) |>> Ast.PredicateInstance
+let predicateInstance = positions "PredicateInstance" (keywordProperty >>. predicateInstanceSignature .>>. predicateInstanceBlock) |>> Ast.PredicateInstance
 
 mappingRef.Value <- toArrow >>. IW >>. positions "Mapping" (variableType) |>> Ast.Mapping
 
@@ -485,7 +483,7 @@ let returnStatement = positions "Return" (keywordReturn >>. predicate) .>> IW |>
 let funcContent = varDeclOrSpecList .>>. returnStatement |>> Ast.DefFunctionContent
 let functionalTermInstanceBlock = leftBrace >>. (keywordIntrinsic <|> funcContent) .>> spacesRightBrace
 let functionalTermInstanceSignature = positions "FunctionalTermInstanceSignature" (keywordFunction >>. SW >>. simpleSignature .>>. paramTuple .>>. (IW >>. mapping)) .>> IW |>> Ast.FunctionalTermInstanceSignature
-let functionalTermInstance = positions "FunctionalTermInstance" ((opt keywordOptional .>> keywordProperty) .>>. functionalTermInstanceSignature .>>. functionalTermInstanceBlock) |>> Ast.FunctionalTermInstance
+let functionalTermInstance = positions "FunctionalTermInstance" (keywordProperty >>. functionalTermInstanceSignature .>>. functionalTermInstanceBlock) |>> Ast.FunctionalTermInstance
 
 
 let extensionRegex = regex "[^\/]+" <?> "<extension regex>" |>> Ast.ExtensionRegex
@@ -540,13 +538,16 @@ let proof = positions "Proof" (proofSignature .>>. proofBlock) |>> Ast.Proof
 (* FPL building blocks - Definitions *)
 
 // Predicate building blocks can be defined similarly to classes, they can have properties but they cannot be derived any parent type 
-let predicateDefinitionBlock = leftBrace  >>. ((keywordIntrinsic <|> predContent) .>> IW) .>>. propertyList .>> spacesRightBrace 
-let predicateSignature = positions "PredicateSignature" (keywordPredicate >>. SW >>. simpleSignature .>>. paramTuple .>>. userDefinedSymbol) .>> IW |>> Ast.PredicateSignature
+let predicateDefinitionBlock = opt (leftBrace  >>. ((keywordIntrinsic <|> predContent) .>> IW) .>>. propertyList .>> spacesRightBrace)
+let predicateSignature = positions "PredicateSignature" (keywordPredicate >>. SW >>. simpleSignature .>>. paramTuple) .>>. userDefinedSymbol .>> IW |>> Ast.PredicateSignature
 let definitionPredicate = positions "DefinitionPredicate" (predicateSignature .>>. predicateDefinitionBlock) |>> Ast.DefinitionPredicate
 
 // Functional term building blocks can be defined similarly to classes, they can have properties but they cannot be derived any parent type 
-let functionalTermDefinitionBlock = leftBrace  >>. ((keywordIntrinsic <|> funcContent) .>> IW) .>>. propertyList .>> spacesRightBrace
-let functionalTermSignature = positions "FunctionalTermSignature" (keywordFunction >>. SW >>. simpleSignature .>>. paramTuple .>>. (IW >>. mapping) .>>. userDefinedSymbol) .>> IW |>> Ast.FunctionalTermSignature
+let functionalTermDefinitionBlock = opt (leftBrace  >>. ((keywordIntrinsic <|> funcContent) .>> IW) .>>. propertyList .>> spacesRightBrace)
+
+let inheritedFunctionalType = predicateIdentifier
+let inheritedFunctionalTypeList = sepBy1 (inheritedFunctionalType) (attempt (IW >>. comma)) |>> Ast.InheritedFunctionalTypeList
+let functionalTermSignature = positions "FunctionalTermSignature" (keywordFunction >>. SW >>. (simpleSignature .>>. opt (colon >>. inheritedFunctionalTypeList) .>> IW) .>>. paramTuple .>>. (IW >>. mapping)) .>>. userDefinedSymbol .>> IW |>> Ast.FunctionalTermSignature
 let definitionFunctionalTerm = positions "DefinitionFunctionalTerm" (functionalTermSignature .>>. functionalTermDefinitionBlock) |>> Ast.DefinitionFunctionalTerm
 
 // Class definitions
@@ -554,11 +555,11 @@ let keywordClass = (skipString LiteralClL <|> skipString LiteralCl)
 
 let constructorList = many1 (constructor .>> IW)
 let classCompleteContent = varDeclOrSpecList .>>. constructorList|>> Ast.DefClassCompleteContent
-let classDefinitionBlock = leftBrace  >>. ((keywordIntrinsic <|> classCompleteContent) .>> IW) .>>. propertyList .>> spacesRightBrace
-let inheritedClassTypeList = sepBy1 (inheritedClassType) (attempt (IW >>. comma))
+let classDefinitionBlock = opt (leftBrace  >>. ((keywordIntrinsic <|> classCompleteContent) .>> IW) .>>. propertyList .>> spacesRightBrace)
+let inheritedClassTypeList = sepBy1 (inheritedClassType) (attempt (IW >>. comma)) |>> Ast.InheritedClassTypeList
 
 let classSignature = positions "ClassSignature" (keywordClass >>. SW >>. pascalCaseId) .>> IW |>> Ast.ClassSignature
-let classSignatureExtended = classSignature .>>. (colon >>. inheritedClassTypeList) .>>. opt (attempt (IW >>. userDefinedObjSym)) .>> IW
+let classSignatureExtended = classSignature .>>. opt (colon >>. inheritedClassTypeList) .>>. opt (attempt (IW >>. userDefinedObjSym)) .>> IW
 let definitionClass = positions "DefinitionClass" (classSignatureExtended .>>. classDefinitionBlock) |>> Ast.DefinitionClass 
 
 let keywordDefinition = (skipString LiteralDefL <|> skipString LiteralDef) >>. SW
@@ -585,7 +586,7 @@ let ebnfTerm = positions "TranslationTerm" (sepEndBy1 ebnfFactor SW) |>> Ast.Tra
 ebnfTranslRef.Value <-  positions "TranslationTermList" (sepBy1 ebnfTerm (IW >>. case >>. IW)) |>> Ast.TranslationTermList
 let language = positions "Language" ((exclamationMark >>. localizationLanguageCode .>> IW .>> colon) .>>. ebnfTransl) |>> Ast.Language
 let languageList = many1 (IW >>. language .>> IW)
-let localization = positions "Localization" (keywordLocalization >>. (predicate .>> IW .>> colonEqual) .>>. (languageList .>> IW .>> semiColon)) .>> IW |>> Ast.Localization
+let localization = positions "Localization" (keywordLocalization >>. predicate) .>> (IW .>> colonEqual) .>>. (languageList .>> IW .>> semiColon) .>> IW |>> Ast.Localization
 
 // FPL building blocks can be definitions, axioms, Theorem-proof blocks and conjectures
 let buildingBlock = choice [

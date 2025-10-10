@@ -108,6 +108,7 @@ type DiagnosticCode =
     | ID001 of string * string
     | ID002 of string * string
     | ID003 of string
+    | ID004 of string
     | ID005 of string * string
     | ID006 of string
     | ID008 of string * string
@@ -124,9 +125,11 @@ type DiagnosticCode =
     | ID019 of string 
     | ID020 of string 
     | ID021 of string 
+    | ID022 of string
     | ID023 of string 
     | ID024 of string * string
     | ID025 of string * string * string
+    | ID026 of string * string
     // logic-related error codes
     | LG000 of string * string 
     | LG001 of string * string * string
@@ -135,9 +138,7 @@ type DiagnosticCode =
     | LG004 of string
     | LG005 of string
     // proof-related error codes
-    | PR000 of string 
-    | PR001 of string
-    | PR002 of string
+    | PR001 of string * string 
     | PR003 of string * string
     | PR004 of string * string
     | PR005 of string
@@ -159,6 +160,7 @@ type DiagnosticCode =
     | SIG03 of string * string 
     | SIG04 of string * int * string list
     | SIG05 of string * string
+    | SIG06 of string * string * string * bool
     // variable-related error codes
     | VAR00 
     | VAR01 of string 
@@ -166,7 +168,7 @@ type DiagnosticCode =
     | VAR03 of string * string
     | VAR04 of string 
     | VAR05 of string 
-    | VAR06 of string * string
+    | VAR06 of string * string * string * bool
     | VAR07 of string 
     | VAR08 
     member this.Code = 
@@ -216,6 +218,7 @@ type DiagnosticCode =
             | ID001 _ -> "ID001"
             | ID002 _ -> "ID002"
             | ID003 _ -> "ID003"
+            | ID004 _ -> "ID004"
             | ID005 _ -> "ID005"
             | ID006 _ -> "ID006"
             | ID008 _ -> "ID008"
@@ -232,9 +235,11 @@ type DiagnosticCode =
             | ID019 _ -> "ID019"
             | ID020 _ -> "ID020"
             | ID021 _ -> "ID021"
+            | ID022 _ -> "ID022"
             | ID023 _ -> "ID023"
             | ID024 _ -> "ID024"
             | ID025 _ -> "ID025"
+            | ID026 _ -> "ID026"
             // logic-related error codes
             | LG000 _ -> "LG000"
             | LG001 _ -> "LG001"
@@ -243,9 +248,7 @@ type DiagnosticCode =
             | LG004 _ -> "LG004"
             | LG005 _ -> "LG005"
             // proof-related error codes
-            | PR000 _ -> "PR000"
             | PR001 _ -> "PR001"
-            | PR002 _ -> "PR002"
             | PR003 _ -> "PR003"
             | PR004 _ -> "PR004"
             | PR005 _ -> "PR005"
@@ -267,6 +270,7 @@ type DiagnosticCode =
             | SIG03 _ -> "SIG03"
             | SIG04 _ -> "SIG04"
             | SIG05 _ -> "SIG05"
+            | SIG06 _ -> "SIG06"
             // variable-related error codes
             | VAR00 -> "VAR00"
             | VAR01 _  -> "VAR01"
@@ -324,12 +328,13 @@ type DiagnosticCode =
             | ID001 (signature, conflict) -> $"Signature `{signature}` was already declared at {conflict}."  
             | ID002 (signature, incorrectBlockType) -> $"Cannot find a block to be associated with the proof `{signature}`, found only {incorrectBlockType}."  
             | ID003 signature -> $"The proof `{signature}` is missing a block to be associated with."  
-             | ID005 (signature, incorrectBlockType) -> $"Cannot find a block to be associated with the corollary `{signature}`, found only {incorrectBlockType}."  
+            | ID004 name -> $"Cannot assign `{name}`, it is a class, not an instance; use a constructor `{name}()` instead."  
+            | ID005 (signature, incorrectBlockType) -> $"Cannot find a block to be associated with the corollary `{signature}`, found only {incorrectBlockType}."  
             | ID006 signature -> $"The corollary `{signature}` is missing a block to be associated with."  
             | ID008 (constructorId, classId)  -> $"Misspelled constructor name `{constructorId}`, expecting `{classId}`."  
             | ID009 name -> $"Circular base type dependency involving `{name}`." 
             | ID010 name -> $"The type `{name}` could not be found. Are you missing a uses clause?" 
-            | ID011 (name, inheritanceChain) -> $"Inheritance from `{name}` can be dropped because of the inheritance chain {inheritanceChain}."  
+            | ID011 (chain, errorMsg) -> $"The inheritance chain `{chain}` causes the following error: {errorMsg}."  
             | ID012 (name, candidates) -> 
                 if candidates.Length > 0 then 
                     sprintf "Base class `%s` not found, candidates are %s." name candidates
@@ -337,8 +342,8 @@ type DiagnosticCode =
                     sprintf "Base class `%s` not found, no candidates found." name 
             | ID013 delegateDiagnostic -> sprintf "%s" delegateDiagnostic // just emit the delegate's diagnostic
             | ID014 (signature, conflict) -> sprintf "Language code `%s` was already declared at %s." signature conflict
-            | ID015 signature -> sprintf "Referencing parent impossible inside non-definitions; the outer block is %s." signature
-            | ID016 signature -> sprintf "Referencing self impossible outside properties and definitions, the outer block is %s." signature
+            | ID015 signature -> $"Cannot refer to `parent` inside a block that is not a definition; the block was {signature}." 
+            | ID016 signature -> $"Cannot refer to `self` inside a block that is neither a definition, nor a property; the block was {signature}." 
             | ID017 (name, candidates) -> 
                 if candidates.Length > 0 then
                    sprintf "The type `%s` could not be determined, found more than one candidates %s." name candidates
@@ -346,23 +351,22 @@ type DiagnosticCode =
                    sprintf "The type `%s` could not be determined, found no candidates." name 
             | ID018 name -> sprintf "The extension `%s` could not be matched. Declare an extension with this pattern." name
             | ID019 name -> sprintf "The extension `%s` could not be found. Are you missing a uses clause?" name
-            | ID020 name -> sprintf "Missing call of base constructor `%s`." name
-            | ID021 name -> sprintf "Duplicate call of base constructor `%s`." name
+            | ID020 name -> $"Missing call of base constructor `{name}`." 
+            | ID021 name -> $"Duplicate call of base constructor `{name}`."
+            | ID022 name -> $"`{name}` is intrinsic, it has no parameterized constructors. This call uses parameters."
             | ID023 candidates  -> $"Cannot associate a justification with a single block. Found more candidates: {candidates}." 
             | ID024 (signature, conflict) -> sprintf "Expression `%s` was already localized at %s." signature conflict
             | ID025 (candidate, candidateType, nodeType)  -> $"Cannot reference to `{candidate}` which is {candidateType} inside {nodeType}." 
-
+            | ID026 (name, candidates)  -> $"The base constructor call's id `{name}` is not among the base classes this class is derived from. The candidate classes are {candidates}." 
             // logic-related error codes
             | LG000 (typeOfPredicate,argument) -> $"Cannot evaluate `{typeOfPredicate}`; its argument `{argument}` is a predicate but couldn't be determined."
             | LG001 (typeOfPredicate,argument,typeOfExpression) -> $"Cannot evaluate `{typeOfPredicate}`; expecting a predicate argument `{argument}`, got `{typeOfExpression}`."
             | LG002 (nodeTypeName, times) -> $"Possible infinite recursion detected, `{nodeTypeName}` was called for more than {times} times.`."
             | LG003 (nodeTypeName, nodeName) -> $"`{nodeTypeName}` evaluates to `false` and cannot be {nodeName}."
             | LG004 nodeType -> $"`Parameters not allowed for {nodeType}."
-            | LG005 name -> $"`Unnecessary assignment of `{name}` detected (will be implicitely ignored)."
+            | LG005 name -> $"Unnecessary assignment of `{name}` detected (will be implicitely ignored)."
             // proof-related error codes
-            | PR000 incorrectBlockType -> $"Cannot find a justifying `by definition`, found {incorrectBlockType} instead."
-            | PR001 incorrectBlockType -> $"Cannot find a justifying `other proof argument`, found {incorrectBlockType} instead."
-            | PR002 incorrectBlockType -> $"Cannot find a justifying theorem-like statement or rule of inference, found {incorrectBlockType} instead." 
+            | PR001 (incorrectBlockType, justificatinItemName) -> $"Cannot find a `{justificatinItemName}`, found {incorrectBlockType} instead."
             | PR003 (name, conflict) -> $"Argument identifier `{name}` was already declared at {conflict}."  
             | PR004 (name, conflict)  -> $"Justification `{name}` was already declared at {conflict}." 
             | PR005 name ->  $"Argument identifier `{name}` not declared in this proof."
@@ -370,8 +374,8 @@ type DiagnosticCode =
             | PR007 (nodeTypeName, nodeName) ->  $"{nodeTypeName} is {nodeName} and is missing a proof."
             | PR008 (nodeName, expectedInputArgInference, actualInputArgInference) ->  $"This {nodeName} expects `{expectedInputArgInference}` and could not be applied to the proceeding argument inference which was `{actualInputArgInference}`."
             | PR009 -> "Not all arguments of the proof could be verified."
-            | PR010 (keyword, expectedRef) -> $"Justification `{keyword}` expects a reference to {expected}, not to a proof or corollary."
-            | PR011 (keyword, expectedRef) -> $"Justification `{keyword}` expects a reference to {expected}, not to an argument in some proof."
+            | PR010 (keyword, expectedRef) -> $"Justification `{keyword}` expects a reference to {expectedRef}, not to a proof or corollary."
+            | PR011 (keyword, expectedRef) -> $"Justification `{keyword}` expects a reference to {expectedRef}, not to an argument in some proof."
             | PR012 -> $"Justification `{LiteralByCor}` expects a reference to a corollary."
             | PR013 -> $"Add the keyword `{LiteralByCor}` when referencing to corollaries to increase readability."
             | PR014 -> "Justification expects a reference to a theorem-like statement without any more specific references."
@@ -392,6 +396,11 @@ type DiagnosticCode =
                     let errMsg = errorList |> List.mapi (fun i s -> sprintf "%d. %s" (i + 1) s) |> String.concat ", "
                     $"No overload matching `{signature}`. Checked candidates: {errorList}." 
             | SIG05 (assigneeType, assignedType) -> $"Cannot assign type `{assignedType}` to type `{assigneeType}`."
+            | SIG06 (name, first, second, isClass) -> 
+                if isClass then
+                    $"Property name `{name}` conflict between base classes `{first} and `{second}`."
+                else
+                    $"Property name `{name}` conflict between base functional terms `{first} and `{second}`."
             // variable-related error codes
             | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
             | VAR01 name -> $"Variable `{name}` not declared in this scope."
@@ -399,7 +408,11 @@ type DiagnosticCode =
             | VAR03 (identifier, conflict) -> $"Variable `{identifier}` was already declared at {conflict}."  
             | VAR04 name -> $"Declared variable `{name}` not used in this scope."
             | VAR05 name -> $"Bound variable `{name}` was not used in this quantor."
-            | VAR06 (name, parentClass) -> $"Variable `{name}` of the parent class `{parentClass}` will be shadowed by a local variable with the same name in this scope."
+            | VAR06 (name, first, second, isClass) -> 
+                if isClass then
+                    $"Variable name `{name}` conflict between base classes `{first} and `{second}`."
+                else
+                    $"Variable name `{name}` conflict between base functional terms `{first} and `{second}`."
             | VAR07 name -> $"The {PrimQuantorExistsN} accepts only one bound variable `{name}`."
             | VAR08 -> "Variadic variables cannot be bound in a quantor."
 

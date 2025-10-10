@@ -69,6 +69,20 @@ let emitID003diagnostics name pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
 
+let emitID004diagnostics name pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ID004 name
+            Diagnostic.Alternatives = None
+        }
+    ad.AddDiagnostic diagnostic
+
+
 let emitID005diagnostics name incorrectBlockType pos1 pos2 =
     let diagnostic =
         { 
@@ -113,6 +127,20 @@ let emitID008Diagnostics constructorId classId pos1 pos2 =
             }
         ad.AddDiagnostic diagnostic
 
+let emitID009Diagnostics name pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ID009 name // circular base dependency
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
+
 let emitID010Diagnostics identifier pos1 pos2 =
     let diagnostic =
         { 
@@ -122,6 +150,20 @@ let emitID010Diagnostics identifier pos1 pos2 =
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ID010 identifier // identifier not found
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
+
+let emitID011Diagnostics chain errorMsg pos1 pos2 = 
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ID011(chain, errorMsg) // inheritance chain-related error
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
@@ -232,6 +274,25 @@ let emitID021Diagnostics identifier pos1 =
         }
     ad.AddDiagnostic diagnostic
 
+let emitID022Diagnostics name pos1 pos2 =
+    let alternative = 
+        if name = LiteralObjL || name = LiteralObj then 
+            "Remove the paramaters."
+        else 
+            $"Either remove the parameters or add an appropriate constructor to the class `{name}`."
+
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ID022 name
+            Diagnostic.Alternatives = Some alternative
+        }
+    ad.AddDiagnostic diagnostic
+
 let emitID023Diagnostics multipleCandidates pos1 pos2 =
     let diagnostic =
         { 
@@ -282,6 +343,20 @@ let emitID025Diagnostics qualifiedNameCandidate candidateEnglishName blockEnglis
             }
         ad.AddDiagnostic diagnostic
     | _ -> ()
+
+let emitID026Diagnostics name candidates pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ID026 (name, candidates)
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
 
 
 let emitLG002diagnostic nodeTypeName times pos1 pos2 = 
@@ -348,7 +423,7 @@ let emitLG005Diagnostics name pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
 
-let emitPR000Diagnostics incorrectBlockType pos1 pos2 =
+let emitLG007Diagnostics name pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -356,12 +431,12 @@ let emitPR000Diagnostics incorrectBlockType pos1 pos2 =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = PR000 incorrectBlockType
-            Diagnostic.Alternatives = Some "Expected a definition (def class, def predicate, def function)."
+            Diagnostic.Code = ID022 name
+            Diagnostic.Alternatives = Some $"Choose one of the constants `{LiteralTrue}` or `{LiteralFalse}` instead." 
         }
     ad.AddDiagnostic diagnostic
 
-let emitPR001Diagnostics incorrectBlockType pos1 pos2 =
+let emitPR001Diagnostics incorrectBlockType justificationItemName pos1 pos2 alternative =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -369,24 +444,10 @@ let emitPR001Diagnostics incorrectBlockType pos1 pos2 =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = PR001 incorrectBlockType
-            Diagnostic.Alternatives = Some "Expected another proof, followed by its argument." 
+            Diagnostic.Code = PR001 (incorrectBlockType, justificationItemName)
+            Diagnostic.Alternatives = Some alternative 
         }
     ad.AddDiagnostic diagnostic
-
-let emitPR002Diagnostics incorrectBlockType pos1 pos2 =
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = pos1
-            Diagnostic.EndPos = pos2
-            Diagnostic.Code = PR002 incorrectBlockType
-            Diagnostic.Alternatives = Some "Expected another proof, followed by its argument." 
-        }
-    ad.AddDiagnostic diagnostic
-
 
 let emitPR003Diagnostics alreadyDeclaredMixedStr qualifiedStartPosConflictStr pos1 pos2 =
     let diagnostic =
@@ -509,9 +570,9 @@ let emitPR010Diagnostics keyword exptectedRef pos1 pos2 =
 let emitPR011Diagnostics keyword exptectedRef pos1 pos2 =
     let code = 
         if isEnglishAn exptectedRef then
-            PR010 (keyword, $"an {exptectedRef}")
+            PR011 (keyword, $"an {exptectedRef}")
         else
-            PR010 (keyword, $"a {exptectedRef}")
+            PR011 (keyword, $"a {exptectedRef}")
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -618,6 +679,20 @@ let emitSIG05Diagnostics assigneeTypeStr assignedTypeStr pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
         
+
+let emitSIG06iagnostic name first second isClass pos1 pos2  = 
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = SIG06(name, first, second, isClass)
+            Diagnostic.Alternatives = Some "Rename the original properties to avoid name conflicts." 
+        }
+    ad.AddDiagnostic diagnostic
+
 let emitVAR01diagnostics name pos1 pos2 =
     let diagnostic =
         { 
@@ -662,16 +737,28 @@ let emitVAR03diagnostics mixedName conflictStartPos pos1 pos2 formulaConflict =
 
     ad.AddDiagnostic diagnostic
 
-let emitVAR06iagnostic name parentClass pos = 
+let emitVAR04diagnostics name pos1 pos2 = 
+    let diagnostic = { 
+        Diagnostic.Uri = ad.CurrentUri
+        Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+        Diagnostic.Severity = DiagnosticSeverity.Error
+        Diagnostic.StartPos = pos1
+        Diagnostic.EndPos = pos2
+        Diagnostic.Code = VAR04 name
+        Diagnostic.Alternatives = None 
+    }
+    ad.AddDiagnostic diagnostic
+
+let emitVAR06iagnostic name first second isClass pos1 pos2  = 
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = pos
-            Diagnostic.EndPos = pos
-            Diagnostic.Code = VAR06(name,parentClass)
-            Diagnostic.Alternatives = None 
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = VAR06(name, first, second, isClass)
+            Diagnostic.Alternatives = Some "Rename the original variables to avoid name conflicts." 
         }
     ad.AddDiagnostic diagnostic
 

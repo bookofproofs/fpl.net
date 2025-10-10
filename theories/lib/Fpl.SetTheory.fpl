@@ -1,9 +1,6 @@
 uses Fpl.Commons
 
-def class Set: obj
-{
-    intr
-}
+def class Set
 
 // "in relation" ("is element of") relation
 def pred In(x,y: Set) infix "in" 5 

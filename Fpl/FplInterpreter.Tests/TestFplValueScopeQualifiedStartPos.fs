@@ -173,43 +173,28 @@ type TestFplValueScopeQualifiedStartPos() =
     [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("t1")>]
-    [<DataRow("t2")>]
     [<DataRow("t3")>]
-    [<DataRow("t4")>]
     [<DataRow("t5")>]
-    [<DataRow("t6")>]
     [<DataRow("t7")>]
-    [<DataRow("t8")>]
     [<DataRow("t9")>]
-    [<DataRow("t10")>]
     [<DataRow("t11")>]
-    [<DataRow("t12")>]
     [<DataRow("t13")>]
-    [<DataRow("t14")>]
     [<TestMethod>]
     member this.TestProperties(var) =
         let res = CommonFplValueTestCases.ScopeProperties("QualifiedStartPos") 
         match res with
-        | Some (r:FplRoot,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue,t5:FplValue,t6:FplValue,t7:FplValue,t8:FplValue,t9:FplValue,t10:FplValue,t11:FplValue,t12:FplValue,
-            t13:FplValue,t14:FplValue) -> 
+        | Some (r:FplRoot,theory:FplValue,block:FplValue,t1:FplValue,t3:FplValue,t5:FplValue,t7:FplValue,t9:FplValue,t11:FplValue,t13:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<string>("", r.QualifiedStartPos)
             | PrimTheoryL -> Assert.IsTrue((theory.QualifiedStartPos).Contains("Ln: 1, Col: 1)"))
             | "block" -> Assert.IsTrue((block.QualifiedStartPos).Contains("Ln: 2, Col: 13)"))
             | "t1" -> Assert.IsTrue((t1.QualifiedStartPos).Contains("Ln: 5, Col: 13)"))
-            | "t2" -> Assert.IsTrue((t2.QualifiedStartPos).Contains("Ln: 6, Col: 13)"))
             | "t3" -> Assert.IsTrue((t3.QualifiedStartPos).Contains("Ln: 7, Col: 13)"))
-            | "t4" -> Assert.IsTrue((t4.QualifiedStartPos).Contains("Ln: 8, Col: 13)"))
             | "t5" -> Assert.IsTrue((t5.QualifiedStartPos).Contains("Ln: 9, Col: 13)"))
-            | "t6" -> Assert.IsTrue((t6.QualifiedStartPos).Contains("Ln: 10, Col: 13)"))
             | "t7" -> Assert.IsTrue((t7.QualifiedStartPos).Contains("Ln: 11, Col: 13)"))
-            | "t8" -> Assert.IsTrue((t8.QualifiedStartPos).Contains("Ln: 12, Col: 13)"))
             | "t9" -> Assert.IsTrue((t9.QualifiedStartPos).Contains("Ln: 13, Col: 13)"))
-            | "t10" -> Assert.IsTrue((t10.QualifiedStartPos).Contains("Ln: 14, Col: 13)"))
             | "t11" -> Assert.IsTrue((t11.QualifiedStartPos).Contains("Ln: 15, Col: 13)"))
-            | "t12" -> Assert.IsTrue((t12.QualifiedStartPos).Contains("Ln: 16, Col: 13)"))
             | "t13" -> Assert.IsTrue((t13.QualifiedStartPos).Contains("Ln: 17, Col: 13)"))
-            | "t14" -> Assert.IsTrue((t14.QualifiedStartPos).Contains("Ln: 18, Col: 13)"))
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
@@ -633,12 +618,12 @@ type TestFplValueScopeQualifiedStartPos() =
     [<DataRow("base5", "base.C(Test1(a), Test2(b, c, d))")>]
     [<DataRow("base6", "base.E(true, undef, false)")>]
     [<TestMethod>]
-    member this.TestCallConstructorParentClass(var, varVal) =
+    member this.TestBaseConstructorCall(var, varVal) =
         ad.Clear()
         let fplCode = sprintf """
-                        def cl B:obj {intr}
-                        def cl C:obj {intr}
-                        def cl D:obj {intr}
+                        def cl B {intr}
+                        def cl C {intr}
+                        def cl D {intr}
 
                         def cl A:B,C,D,E
                         {
@@ -651,7 +636,7 @@ type TestFplValueScopeQualifiedStartPos() =
                             }
                         }
                         ;""" varVal
-        let filename = "TestCallConstructorParentClassQualifiedStartPos"
+        let filename = "TestBaseConstructorCallQualifiedStartPos"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -711,8 +696,8 @@ type TestFplValueScopeQualifiedStartPos() =
     [<DataRow("base2", """def pred T1() infix ">" -1 {intr};""")>]
     [<DataRow("base3", """def pred T1 () postfix "'" {intr};""")>]
     [<DataRow("base4", """def pred T1 () prefix "-" {intr};""")>]
-    [<DataRow("base5", """def cl T1 :obj symbol "∅" {intr};""")>]
-    [<DataRow("base5a", """def cl T1:obj {intr};""")>]
+    [<DataRow("base5", """def cl T1 symbol "∅" {intr};""")>]
+    [<DataRow("base5a", """def cl T1 {intr};""")>]
     [<DataRow("base6", """def func T1()->obj {intr};""")>]
     [<DataRow("base7", """def func T1 ()->obj infix ">" -1 {intr};""")>]
     [<DataRow("base8", """def func T1 ()->obj postfix "'" {intr};""")>]
@@ -755,12 +740,12 @@ type TestFplValueScopeQualifiedStartPos() =
     [<DataRow("base2", """def func T()->ind {intr};""")>]
     [<DataRow("base3", """def func T()->func {intr};""")>]
     [<DataRow("base4", """def func T()->pred {intr};""")>]
-    [<DataRow("base5", """def cl A:obj {intr} def func T()->A {intr};""")>]
+    [<DataRow("base5", """def cl A {intr} def func T()->A {intr};""")>]
     [<DataRow("base6", """def func T()->pred(z:ind) {intr};""")>]
     [<DataRow("base7", """def func T()->pred(z:*obj) {intr};""")>]
     [<DataRow("base8", """def func T()->func(p:*pred(x:obj))->pred(x:ind) {intr};""")>]
     [<DataRow("base9", """def func T()->pred(f:+func(x:A)->A) {intr};""")>]
-    [<DataRow("base10", """def cl A:obj {intr} def func T()->pred(f:func(x:A)->A) {intr};""")>]
+    [<DataRow("base10", """def cl A {intr} def func T()->pred(f:func(x:A)->A) {intr};""")>]
     [<TestMethod>]
     member this.TestMapping(var, varVal) =
         ad.Clear()

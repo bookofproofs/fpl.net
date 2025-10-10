@@ -51,8 +51,8 @@ type TestFplValueScopeFplRepresentation() =
             match var with 
             | "r" -> Assert.AreEqual<string>(LiteralUndef, r.Represent())
             | PrimTheoryL -> Assert.AreEqual<string>(LiteralUndef, theory.Represent())
-            | "inf1" -> Assert.AreEqual<string>(LiteralUndetermined, inf1.Represent())
-            | "inf2" -> Assert.AreEqual<string>(LiteralUndetermined, inf2.Represent())
+            | "inf1" -> Assert.AreEqual<string>(PrimUndetermined, inf1.Represent())
+            | "inf2" -> Assert.AreEqual<string>(PrimUndetermined, inf2.Represent())
             | "axi1" -> Assert.AreEqual<string>(LiteralTrue, axi1.Represent())
             | "axi2" -> Assert.AreEqual<string>(LiteralTrue, axi2.Represent())
             | "pst1" -> Assert.AreEqual<string>(LiteralTrue, pst1.Represent())
@@ -80,8 +80,8 @@ type TestFplValueScopeFplRepresentation() =
             | "fun7" -> Assert.AreEqual<string>("dec SomeClass1", fun7.Represent())
             | "fun8" -> Assert.AreEqual<string>("dec ind", fun8.Represent())
             | "fun9" -> Assert.AreEqual<string>("dec ind", fun9.Represent())
-            | "prf1" -> Assert.AreEqual<string>(LiteralUndetermined, prf1.Represent())
-            | "prf2" -> Assert.AreEqual<string>(LiteralUndetermined, prf2.Represent())
+            | "prf1" -> Assert.AreEqual<string>(LiteralFalse, prf1.Represent())
+            | "prf2" -> Assert.AreEqual<string>(LiteralFalse, prf2.Represent())
             | "loc1" -> Assert.AreEqual<string>("not(x)", loc1.Represent())
             | "loc2" -> Assert.AreEqual<string>("Equal(x, y)", loc2.Represent())
             | _ -> Assert.IsTrue(false)
@@ -146,13 +146,13 @@ type TestFplValueScopeFplRepresentation() =
                 | "r" -> Assert.AreEqual<string>(LiteralUndef, r.Represent())
                 | PrimTheoryL -> Assert.AreEqual<string>(LiteralUndef, theory.Represent())
                 | "thm1" -> Assert.AreEqual<string>(LiteralTrue, thm1.Represent())
-                | "proofThm1" -> Assert.AreEqual<string>(LiteralTrue, proofThm1.Represent())
+                | "proofThm1" -> Assert.AreEqual<string>(LiteralFalse, proofThm1.Represent())
                 | "lem1" -> Assert.AreEqual<string>(LiteralTrue, lem1.Represent())
-                | "proofLem1" -> Assert.AreEqual<string>(LiteralTrue, proofLem1.Represent())
+                | "proofLem1" -> Assert.AreEqual<string>(LiteralFalse, proofLem1.Represent())
                 | "prp1" -> Assert.AreEqual<string>(LiteralTrue, prp1.Represent())
-                | "proofPrp1" -> Assert.AreEqual<string>(LiteralTrue, proofPrp1.Represent())
+                | "proofPrp1" -> Assert.AreEqual<string>(LiteralFalse, proofPrp1.Represent())
                 | "cor1" -> Assert.AreEqual<string>(LiteralTrue, cor1.Represent())
-                | "proofCor1" -> Assert.AreEqual<string>(LiteralTrue, proofCor1.Represent())
+                | "proofCor1" -> Assert.AreEqual<string>(LiteralFalse, proofCor1.Represent())
                 | "thm2" -> Assert.AreEqual<string>(LiteralTrue, thm2.Represent())
                 | "corThm2" -> Assert.AreEqual<string>(LiteralTrue, corThm2.Represent())
                 | "lem2" -> Assert.AreEqual<string>(LiteralTrue, lem2.Represent())
@@ -174,43 +174,28 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("t1")>]
-    [<DataRow("t2")>]
     [<DataRow("t3")>]
-    [<DataRow("t4")>]
     [<DataRow("t5")>]
-    [<DataRow("t6")>]
     [<DataRow("t7")>]
-    [<DataRow("t8")>]
     [<DataRow("t9")>]
-    [<DataRow("t10")>]
     [<DataRow("t11")>]
-    [<DataRow("t12")>]
     [<DataRow("t13")>]
-    [<DataRow("t14")>]
     [<TestMethod>]
     member this.TestProperties(var) =
         let res = CommonFplValueTestCases.ScopeProperties("FplRepresentation") 
         match res with
-        | Some (r:FplRoot,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue,t5:FplValue,t6:FplValue,t7:FplValue,t8:FplValue,t9:FplValue,t10:FplValue,t11:FplValue,t12:FplValue,
-            t13:FplValue,t14:FplValue) -> 
+        | Some (r:FplRoot,theory:FplValue,block:FplValue,t1:FplValue,t3:FplValue,t5:FplValue,t7:FplValue,t9:FplValue,t11:FplValue,t13:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<string>(LiteralUndef, r.Represent())
             | PrimTheoryL -> Assert.AreEqual<string>(LiteralUndef, theory.Represent())
-            | "block" -> Assert.AreEqual<string>(LiteralUndetermined, block.Represent())
+            | "block" -> Assert.AreEqual<string>(PrimUndetermined, block.Represent())
             | "t1" -> Assert.AreEqual<string>(LiteralTrue, t1.Represent())
-            | "t2" -> Assert.AreEqual<string>(LiteralTrue, t2.Represent())
             | "t3" -> Assert.AreEqual<string>("dec obj", t3.Represent())
-            | "t4" -> Assert.AreEqual<string>("dec obj", t4.Represent())
             | "t5" -> Assert.AreEqual<string>($"dec {LiteralInd}", t5.Represent())
-            | "t6" -> Assert.AreEqual<string>($"dec {LiteralInd}", t6.Represent())
             | "t7" -> Assert.AreEqual<string>($"dec {LiteralPred}", t7.Represent())
-            | "t8" -> Assert.AreEqual<string>($"dec {LiteralPred}", t8.Represent())
             | "t9" -> Assert.AreEqual<string>($"dec {LiteralTpl}", t9.Represent())
-            | "t10" -> Assert.AreEqual<string>($"dec {LiteralTpl}", t10.Represent())
             | "t11" -> Assert.AreEqual<string>($"dec Nat", t11.Represent())
-            | "t12" -> Assert.AreEqual<string>($"dec Nat", t12.Represent())
             | "t13" -> Assert.AreEqual<string>($"dec {LiteralFunc}", t13.Represent())
-            | "t14" -> Assert.AreEqual<string>($"dec {LiteralFunc}", t14.Represent())
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
@@ -607,16 +592,16 @@ type TestFplValueScopeFplRepresentation() =
             | "base15b" -> Assert.AreEqual<string>($"{LiteralUndef}({LiteralUndef}({LiteralUndef}))", base1.Represent())
             | "base16" -> Assert.AreEqual<string>($"{LiteralUndef}({LiteralUndef}({LiteralUndef}({LiteralUndef}({LiteralUndef}, {LiteralUndef}), {LiteralUndef}), {LiteralUndef}))", base1.Represent())
             | "base17" -> Assert.AreEqual<string>($"{LiteralUndef}({LiteralUndef}({LiteralUndef}({LiteralUndef}({LiteralUndef}, {LiteralUndef}({LiteralUndef})), {LiteralUndef}), {LiteralUndef}))", base1.Represent())
-            | "base18" -> Assert.AreEqual<string>(LiteralUndetermined, base1.Represent())
-            | "base19" -> Assert.AreEqual<string>(LiteralUndetermined, base1.Represent())
-            | "base20" -> Assert.AreEqual<string>(LiteralUndetermined, base1.Represent())
-            | "base21" -> Assert.AreEqual<string>(LiteralUndetermined, base1.Represent())
-            | "base21a" -> Assert.AreEqual<string>(LiteralUndetermined, base1.Represent())
-            | "base21b" -> Assert.AreEqual<string>(LiteralUndetermined, base1.Represent())
-            | "base22" -> Assert.AreEqual<string>(LiteralUndetermined, base1.Represent())
-            | "base23" -> Assert.AreEqual<string>(LiteralUndetermined, base1.Represent())
-            | "base24" -> Assert.AreEqual<string>(LiteralUndetermined, base1.Represent())
-            | "base25" -> Assert.AreEqual<string>(LiteralUndetermined, base1.Represent())
+            | "base18" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
+            | "base19" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
+            | "base20" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
+            | "base21" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
+            | "base21a" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
+            | "base21b" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
+            | "base22" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
+            | "base23" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
+            | "base24" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
+            | "base25" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
             | "base26" -> Assert.AreEqual<string>(LiteralFalse, base1.Represent())
             | "base27" -> Assert.AreEqual<string>($"{LiteralUndef}()", base1.Represent())
             | "base28" -> Assert.AreEqual<string>($"{LiteralUndef}({LiteralUndef}, {LiteralUndef}, {LiteralUndef}, {LiteralUndef})", base1.Represent())
@@ -637,12 +622,12 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("base5", "base.C(Test1(a), Test2(b, c, d))")>]
     [<DataRow("base6", "base.E(true, undef, false)")>]
     [<TestMethod>]
-    member this.TestCallConstructorParentClass(var, varVal) =
+    member this.TestBaseConstructorCall(var, varVal) =
         ad.Clear()
         let fplCode = sprintf """
-                        def cl B:obj {intr}
-                        def cl C:obj {intr}
-                        def cl D:obj {intr}
+                        def cl B {intr}
+                        def cl C {intr}
+                        def cl D {intr}
 
                         def cl A:B,C,D,E
                         {
@@ -655,7 +640,7 @@ type TestFplValueScopeFplRepresentation() =
                             }
                         }
                         ;""" varVal
-        let filename = "TestCallConstructorParentClassFplRepresentation"
+        let filename = "TestBaseConstructorCallFplRepresentation"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -667,12 +652,12 @@ type TestFplValueScopeFplRepresentation() =
             let base1 = ctor.ArgList[0]
 
             match var with
-            | "base1" -> Assert.AreEqual<string>("bas", base1.Represent())
-            | "base2" -> Assert.AreEqual<string>("bas", base1.Represent())
-            | "base3" -> Assert.AreEqual<string>("bas", base1.Represent())
-            | "base4" -> Assert.AreEqual<string>("bas", base1.Represent())
-            | "base5" -> Assert.AreEqual<string>("bas", base1.Represent())
-            | "base6" -> Assert.AreEqual<string>("bas", base1.Represent())
+            | "base1" -> Assert.AreEqual<string>("undef", base1.Represent())
+            | "base2" -> Assert.AreEqual<string>("undef", base1.Represent())
+            | "base3" -> Assert.AreEqual<string>("undef", base1.Represent())
+            | "base4" -> Assert.AreEqual<string>("undef", base1.Represent())
+            | "base5" -> Assert.AreEqual<string>("undef", base1.Represent())
+            | "base6" -> Assert.AreEqual<string>("undef", base1.Represent())
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
@@ -682,12 +667,12 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("base2", """def func T()->ind {intr};""")>]
     [<DataRow("base3", """def func T()->func {intr};""")>]
     [<DataRow("base4", """def func T()->pred {intr};""")>]
-    [<DataRow("base5", """def cl A:obj {intr} def func T()->A {intr};""")>]
+    [<DataRow("base5", """def cl A {intr} def func T()->A {intr};""")>]
     [<DataRow("base6", """def func T()->pred(z:ind) {intr};""")>]
     [<DataRow("base7", """def func T()->pred(z:*obj) {intr};""")>]
     [<DataRow("base8", """def func T()->func(p:*pred(x:obj))->pred(x:ind) {intr};""")>]
     [<DataRow("base9", """def func T()->pred(f:+func(x:A)->A) {intr};""")>]
-    [<DataRow("base10", """def cl A:obj {intr} def func T()->pred(f:func(x:A)->A) {intr};""")>]
+    [<DataRow("base10", """def cl A {intr} def func T()->pred(f:func(x:A)->A) {intr};""")>]
     [<TestMethod>]
     member this.TestMapping(var, varVal) =
         ad.Clear()
@@ -707,11 +692,11 @@ type TestFplValueScopeFplRepresentation() =
             | "base3" -> Assert.AreEqual<string>($"dec {LiteralFunc}", mapping.Represent())
             | "base4" -> Assert.AreEqual<string>($"dec {LiteralPred}", mapping.Represent())
             | "base5" -> Assert.AreEqual<string>("dec A", mapping.Represent())
-            | "base6" -> Assert.AreEqual<string>($"dec {LiteralObj}({LiteralInd})", mapping.Represent())
+            | "base6" -> Assert.AreEqual<string>($"dec {LiteralPred}({LiteralInd})", mapping.Represent())
             | "base7" -> Assert.AreEqual<string>($"dec {LiteralPred}(*{LiteralObj})", mapping.Represent())
             | "base8" -> Assert.AreEqual<string>($"dec {LiteralFunc}(*{LiteralPred}({LiteralObj})) -> {LiteralPred}({LiteralInd})", mapping.Represent())
             | "base9" -> Assert.AreEqual<string>($"dec {LiteralPred}(+{LiteralFunc}(A) -> A)", mapping.Represent())
-            | "base10" -> Assert.AreEqual<string>($"dec A({LiteralFunc}(A) -> A)", mapping.Represent())
+            | "base10" -> Assert.AreEqual<string>($"dec {LiteralPred}({LiteralFunc}(A) -> A)", mapping.Represent())
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
@@ -758,8 +743,8 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("base2", """def pred T1 () infix ">" -1 {intr};""")>]
     [<DataRow("base3", """def pred T1 () postfix "'" {intr};""")>]
     [<DataRow("base4", """def pred T1 () prefix "-" {intr};""")>]
-    [<DataRow("base5", """def cl T1 :obj symbol "∅" {intr};""")>]
-    [<DataRow("base5a", """def cl T1:obj {intr};""")>]
+    [<DataRow("base5", """def cl T1 symbol "∅" {intr};""")>]
+    [<DataRow("base5a", """def cl T1 {intr};""")>]
     [<DataRow("base6", """def func T1()->obj {intr};""")>]
     [<DataRow("base7", """def func T1 ()->obj infix ">" -1 {intr};""")>]
     [<DataRow("base8", """def func T1  ()->obj postfix "'"{intr};""")>]
@@ -784,12 +769,12 @@ type TestFplValueScopeFplRepresentation() =
                     theory.Scope["T1()"]
 
             match var with
-            | "base1" -> Assert.AreEqual<string>(LiteralUndetermined, base1.Represent())
-            | "base2" -> Assert.AreEqual<string>(LiteralUndetermined, base1.Represent())
-            | "base3" -> Assert.AreEqual<string>(LiteralUndetermined, base1.Represent())
-            | "base4" -> Assert.AreEqual<string>(LiteralUndetermined, base1.Represent())
-            | "base5" -> Assert.AreEqual<string>("class T1", base1.Represent())
-            | "base5a" -> Assert.AreEqual<string>("class T1", base1.Represent())
+            | "base1" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
+            | "base2" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
+            | "base3" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
+            | "base4" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
+            | "base5" -> Assert.AreEqual<string>("dec cl T1", base1.Represent())
+            | "base5a" -> Assert.AreEqual<string>("dec cl T1", base1.Represent())
             | "base6" -> Assert.AreEqual<string>("dec obj", base1.Represent())
             | "base7" -> Assert.AreEqual<string>("dec obj", base1.Represent())
             | "base8" -> Assert.AreEqual<string>("dec obj", base1.Represent())
@@ -834,18 +819,18 @@ type TestFplValueScopeFplRepresentation() =
             Assert.IsTrue(false)
 
     [<DataRow("o", """def pred T() {dec ~o:obj; true};""", "dec obj")>]    // without anything
-    [<DataRow("a", """def cl A: obj {intr} def pred T() {dec ~a:A; true};""", "dec A")>]    // without constructor, without inheritance, without instantiation
-    [<DataRow("aI1", """def cl A: obj {intr} def pred T() {dec ~aI1:A aI1:=A; true};""", "intr A:intr obj")>]  // without constructor, without inheritance, with instantiation (without ())
-    [<DataRow("aI2", """def cl A: obj {intr} def pred T() {dec ~aI2:A aI2:=A(); true};""", "intr A:intr obj")>]  // without constructor, without inheritance, with instantiation (with ()) -> should also trigger another error
-    [<DataRow("b", """def cl A: obj {intr} def cl B: A {intr} def pred T() {dec ~b:B; true};""", "dec B")>]    // without constructor, with inheritance, without instantiation
-    [<DataRow("bI1", """def cl A: obj {intr} def cl B: A {intr} def pred T() {dec ~bI1:B bI1:=B; true};""", "intr B:intr A:intr obj")>]  // without constructor, with inheritance, with instantiation (without ())
-    [<DataRow("bI2", """def cl A: obj {intr} def cl B: A {intr} def pred T() {dec ~bI2:B bI2:=B(); true};""", "intr B:intr A:intr obj")>]  // without constructor, with inheritance, with instantiation (with ()) -> should also trigger another error
-    [<DataRow("c", """def cl A: obj {intr} def cl B: A {intr} def cl C: obj {ctor C() {dec base.obj (); }} def pred T() {dec ~c:C; true};""", "dec C")>]    // with constructor, without inheritance, without instantiation
-    [<DataRow("cI1", """def cl A: obj {intr} def cl B: A {intr} def cl C: obj {ctor C() {dec base.obj (); }} def pred T() {dec ~cI1:C cI1:=C; true};""", "C:intr obj")>]  // with constructor, without inheritance, with instantiation (without ()) -> should also trigger another error
-    [<DataRow("cI2", """def cl A: obj {intr} def cl B: A {intr} def cl C: obj {ctor C() {dec base.obj (); }} def pred T() {dec ~cI2:C cI2:=C(); true};""", "C:obj")>]  // with constructor, without inheritance, with instantiation (with ())
-    [<DataRow("d", """def cl A: obj {intr} def cl B: A {intr} def cl D: B {ctor D() {dec base.B(); }} def pred T() {dec ~d:D; true};""", "dec D")>]    // with constructor, with inheritance, without instantiation
-    [<DataRow("dI1", """def cl A: obj {intr} def cl B: A {intr} def cl D: B {ctor D() {dec base.B(); }} def pred T() {dec ~dI1:D dI1:=D; true};""", "D:intr B:intr A:intr obj")>]  // with constructor, with inheritance, with instantiation (without ())
-    [<DataRow("dI2", """def cl A: obj {intr} def cl B: A {intr} def cl D: B {ctor D() {dec base.B(); }} def pred T() {dec ~dI2:D dI2:=D(); true};""", "D:intr B:intr A")>]  
+    [<DataRow("a", """def cl A {intr} def pred T() {dec ~a:A; true};""", "dec A")>]    // without constructor, without inheritance, without instantiation
+    [<DataRow("aI1", """def cl A {intr} def pred T() {dec ~aI1:A aI1:=A; true};""", "intr A:intr obj")>]  // without constructor, without inheritance, with instantiation (without ())
+    [<DataRow("aI2", """def cl A {intr} def pred T() {dec ~aI2:A aI2:=A(); true};""", "intr A:intr obj")>]  // without constructor, without inheritance, with instantiation (with ()) -> should also trigger another error
+    [<DataRow("b", """def cl A {intr} def cl B: A {intr} def pred T() {dec ~b:B; true};""", "dec B")>]    // without constructor, with inheritance, without instantiation
+    [<DataRow("bI1", """def cl A {intr} def cl B: A {intr} def pred T() {dec ~bI1:B bI1:=B; true};""", "intr B:intr A:intr obj")>]  // without constructor, with inheritance, with instantiation (without ())
+    [<DataRow("bI2", """def cl A {intr} def cl B: A {intr} def pred T() {dec ~bI2:B bI2:=B(); true};""", "intr B:intr A:intr obj")>]  // without constructor, with inheritance, with instantiation (with ()) -> should also trigger another error
+    [<DataRow("c", """def cl A {intr} def cl B: A {intr} def cl C {ctor C() {dec base.obj (); }} def pred T() {dec ~c:C; true};""", "dec C")>]    // with constructor, without inheritance, without instantiation
+    [<DataRow("cI1", """def cl A {intr} def cl B: A {intr} def cl C {ctor C() {dec base.obj (); }} def pred T() {dec ~cI1:C cI1:=C; true};""", "C:intr obj")>]  // with constructor, without inheritance, with instantiation (without ()) -> should also trigger another error
+    [<DataRow("cI2", """def cl A {intr} def cl B: A {intr} def cl C {ctor C() {dec base.obj (); }} def pred T() {dec ~cI2:C cI2:=C(); true};""", "C:obj")>]  // with constructor, without inheritance, with instantiation (with ())
+    [<DataRow("d", """def cl A {intr} def cl B: A {intr} def cl D: B {ctor D() {dec base.B(); }} def pred T() {dec ~d:D; true};""", "dec D")>]    // with constructor, with inheritance, without instantiation
+    [<DataRow("dI1", """def cl A {intr} def cl B: A {intr} def cl D: B {ctor D() {dec base.B(); }} def pred T() {dec ~dI1:D dI1:=D; true};""", "D:intr B:intr A:intr obj")>]  // with constructor, with inheritance, with instantiation (without ())
+    [<DataRow("dI2", """def cl A {intr} def cl B: A {intr} def cl D: B {ctor D() {dec base.B(); }} def pred T() {dec ~dI2:D dI2:=D(); true};""", "D:intr B:intr A")>]  
     [<TestMethod>]
     member this.TestVariableRepresentationObjects(var, fplCode:string, expected:string) =
         ad.Clear()
@@ -1016,7 +1001,7 @@ type TestFplValueScopeFplRepresentation() =
     member this.TestAssignmentVariableInitialized(no:string, input, (expected:bool)) =
         ad.Clear()
         let fplCode = sprintf "def pred T() {%s true};" input
-        let filename = "TestAssignment"
+        let filename = "TestAssignmentVariableInitialized"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
