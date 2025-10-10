@@ -152,14 +152,14 @@ type Ast =
     | PredicateInstance of Positions * (Ast * Ast)
     | FunctionalTermInstance of Positions * (Ast * Ast)
     | DefPredicateContent of Ast list option * Ast
-    | DefinitionPredicate of Positions * (Ast * (Ast * Ast list option))
+    | DefinitionPredicate of Positions * (Ast * (Ast * Ast list option) option)
     | DefFunctionContent of Ast list option * Ast
     | PredicateSignature of (Positions * (Ast * Ast)) * Ast option
     | ClassSignature of Positions * Ast
     | FunctionalTermSignature of (Positions * (((Ast * Ast option) * Ast) * Ast)) * Ast option
-    | DefinitionFunctionalTerm of Positions * (Ast * (Ast * Ast list option))
+    | DefinitionFunctionalTerm of Positions * (Ast * (Ast * Ast list option) option)
     | DefClassCompleteContent of Ast list option * Ast list
-    | DefinitionClass of Positions * (((Ast * Ast option) * Ast option) * (Ast * Ast list option)) 
+    | DefinitionClass of Positions * (((Ast * Ast option) * Ast option) * (Ast * Ast list option) option) 
     | Prefix of Positions * string
     | Precedence of Positions * int
     | Infix of Positions * (string * Ast)

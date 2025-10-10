@@ -671,7 +671,7 @@ type TestErrDiagnostics() =
     member this.TestTryParseFunction005Diag () =
         ad.Clear()
         let input = """
-        def func A () -> T
+        def func a () -> T
     y
 ;"""
         let result = fplParser input
@@ -1999,7 +1999,7 @@ type TestErrDiagnostics() =
     member this.TestTryParseClass002Diag () =
         ad.Clear()
         let input = """
-        def cl A
+        def cl a
     y
 ;"""
         let result = fplParser input
@@ -2009,33 +2009,6 @@ type TestErrDiagnostics() =
         Assert.IsTrue(ad.CountDiagnostics>0)
         Assert.IsTrue(actualDiag.Contains("DEF000"))
 
-    [<TestMethod>]
-    member this.TestTryParseClass003Diag () =
-        ad.Clear()
-        let input = """
-        def cl A #
-    y
-;"""
-        let result = fplParser input
-        let actual = sprintf "%O" result
-        let actualDiag = ad.DiagnosticsToString
-        printf "%s" actualDiag
-        Assert.IsTrue(ad.CountDiagnostics>0)
-        Assert.IsTrue(actualDiag.Contains("DEF000"))
-
-    [<TestMethod>]
-    member this.TestTryParseClass003aDiag () =
-        ad.Clear()
-        let input = """
-        def cl A -
-    y
-;"""
-        let result = fplParser input
-        let actual = sprintf "%O" result
-        let actualDiag = ad.DiagnosticsToString
-        printf "%s" actualDiag
-        Assert.IsTrue(ad.CountDiagnostics>0)
-        Assert.IsTrue(actualDiag.Contains("DEF000"))
 
     [<TestMethod>]
     member this.TestTryParseClass004Diag () =
@@ -2056,20 +2029,6 @@ type TestErrDiagnostics() =
         ad.Clear()
         let input = """
         def cl A:@
-    y
-;"""
-        let result = fplParser input
-        let actual = sprintf "%O" result
-        let actualDiag = ad.DiagnosticsToString
-        printf "%s" actualDiag
-        Assert.IsTrue(ad.CountDiagnostics>0)
-        Assert.IsTrue(actualDiag.Contains("DEF000"))
-
-    [<TestMethod>]
-    member this.TestTryParseClass005Diag () =
-        ad.Clear()
-        let input = """
-        def cl A:obj
     y
 ;"""
         let result = fplParser input

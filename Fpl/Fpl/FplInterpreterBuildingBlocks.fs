@@ -1738,27 +1738,33 @@ let rec eval (st: SymbolTable) ast =
         constructorListAsts |> List.map (eval st) |> ignore
         st.EvalPop()
     // | DefinitionPredicate of Positions * (Ast * (Ast * Ast list option))
-    | Ast.DefinitionPredicate((pos1, pos2), (predicateSignature, (predicateContentAst, optPropertyListAsts))) ->
+    | Ast.DefinitionPredicate((pos1, pos2), (predicateSignature, optDefBlock)) ->
         st.EvalPush("DefinitionPredicate")
         let parent = variableStack.PeekEvalStack()
         let fv = new FplPredicate((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
         variableStack.PushEvalStack(fv)
         eval st predicateSignature
-        eval st predicateContentAst
-        optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
+        match optDefBlock with 
+        | Some (predicateContentAst, optPropertyListAsts) ->
+            eval st predicateContentAst
+            optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
+        | None -> fv.IsIntrinsic <- true
         variableStack.PopEvalStack()
         st.EvalPop()
     // | DefinitionFunctionalTerm of Positions * ((Ast * Ast) * (Ast * Ast list option))
-    | Ast.DefinitionFunctionalTerm((pos1, pos2), (functionalTermSignatureAst, (funcContentAst, optPropertyListAsts))) ->
+    | Ast.DefinitionFunctionalTerm((pos1, pos2), (functionalTermSignatureAst, optDefBlock)) ->
         st.EvalPush("DefinitionFunctionalTerm")
         let parent = variableStack.PeekEvalStack()
-        let fvNew = new FplFunctionalTerm((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
-        variableStack.PushEvalStack(fvNew)
+        let fv = new FplFunctionalTerm((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
+        variableStack.PushEvalStack(fv)
         eval st functionalTermSignatureAst 
-        eval st funcContentAst
-        optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
-        if not fvNew.IsIntrinsic then // if not intrinsic, check variable usage
-            emitVAR04diagnostics fvNew
+        match optDefBlock with 
+        | Some (funcContentAst, optPropertyListAsts) ->
+            eval st funcContentAst
+            optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
+        | None -> fv.IsIntrinsic <- true
+        if not fv.IsIntrinsic then // if not intrinsic, check variable usage
+            emitVAR04diagnostics fv
         variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.ClassSignature((pos1, pos2), simpleSignatureAst) ->
@@ -1768,7 +1774,7 @@ let rec eval (st: SymbolTable) ast =
         setSignaturePositions pos1 pos2
         variableStack.InSignatureEvaluation <- false
         st.EvalPop()
-    | Ast.DefinitionClass((pos1, pos2),(((classSignatureAst, optInheritedClassTypeListAst), optUserDefinedObjSymAst), (classContentAst, optPropertyListAsts))) ->
+    | Ast.DefinitionClass((pos1, pos2),(((classSignatureAst, optInheritedClassTypeListAst), optUserDefinedObjSymAst), optDefBlock)) ->
         st.EvalPush("DefinitionClass")
         let parent = variableStack.PeekEvalStack()
         let fv = new FplClass((pos1, pos2), parent)
@@ -1776,8 +1782,11 @@ let rec eval (st: SymbolTable) ast =
         eval st classSignatureAst
         optInheritedClassTypeListAst |> Option.map (eval st) |> Option.defaultValue ()
         optUserDefinedObjSymAst |> Option.map (eval st) |> Option.defaultValue ()
-        eval st classContentAst
-        optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
+        match optDefBlock with 
+        | Some (classContentAst, optPropertyListAsts) ->
+            eval st classContentAst
+            optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
+        | None -> fv.IsIntrinsic <- true
         emitVAR04diagnostics fv
         variableStack.PopEvalStack()
         st.EvalPop()

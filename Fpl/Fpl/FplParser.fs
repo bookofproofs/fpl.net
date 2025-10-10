@@ -538,12 +538,12 @@ let proof = positions "Proof" (proofSignature .>>. proofBlock) |>> Ast.Proof
 (* FPL building blocks - Definitions *)
 
 // Predicate building blocks can be defined similarly to classes, they can have properties but they cannot be derived any parent type 
-let predicateDefinitionBlock = leftBrace  >>. ((keywordIntrinsic <|> predContent) .>> IW) .>>. propertyList .>> spacesRightBrace 
+let predicateDefinitionBlock = opt (leftBrace  >>. ((keywordIntrinsic <|> predContent) .>> IW) .>>. propertyList .>> spacesRightBrace)
 let predicateSignature = positions "PredicateSignature" (keywordPredicate >>. SW >>. simpleSignature .>>. paramTuple) .>>. userDefinedSymbol .>> IW |>> Ast.PredicateSignature
 let definitionPredicate = positions "DefinitionPredicate" (predicateSignature .>>. predicateDefinitionBlock) |>> Ast.DefinitionPredicate
 
 // Functional term building blocks can be defined similarly to classes, they can have properties but they cannot be derived any parent type 
-let functionalTermDefinitionBlock = leftBrace  >>. ((keywordIntrinsic <|> funcContent) .>> IW) .>>. propertyList .>> spacesRightBrace
+let functionalTermDefinitionBlock = opt (leftBrace  >>. ((keywordIntrinsic <|> funcContent) .>> IW) .>>. propertyList .>> spacesRightBrace)
 
 let inheritedFunctionalTypeList = sepBy1 (predicateIdentifier) (attempt (IW >>. comma)) |>> Ast.InheritedFunctionalTypeList
 let functionalTermSignature = positions "FunctionalTermSignature" (keywordFunction >>. SW >>. (simpleSignature .>>. opt (colon >>. inheritedFunctionalTypeList) .>> IW) .>>. paramTuple .>>. (IW >>. mapping)) .>>. userDefinedSymbol .>> IW |>> Ast.FunctionalTermSignature
@@ -554,7 +554,7 @@ let keywordClass = (skipString LiteralClL <|> skipString LiteralCl)
 
 let constructorList = many1 (constructor .>> IW)
 let classCompleteContent = varDeclOrSpecList .>>. constructorList|>> Ast.DefClassCompleteContent
-let classDefinitionBlock = leftBrace  >>. ((keywordIntrinsic <|> classCompleteContent) .>> IW) .>>. propertyList .>> spacesRightBrace
+let classDefinitionBlock = opt (leftBrace  >>. ((keywordIntrinsic <|> classCompleteContent) .>> IW) .>>. propertyList .>> spacesRightBrace)
 let inheritedClassTypeList = sepBy1 (inheritedClassType) (attempt (IW >>. comma)) |>> Ast.InheritedClassTypeList
 
 let classSignature = positions "ClassSignature" (keywordClass >>. SW >>. pascalCaseId) .>> IW |>> Ast.ClassSignature

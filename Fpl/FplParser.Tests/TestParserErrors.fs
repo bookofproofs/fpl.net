@@ -40,17 +40,6 @@ type TestParserErrors() =
         let result = filterByErrorCode ad code
         Assert.IsTrue(result.Length>0)
 
-    [<TestMethod>]
-    member this.TestDEF000() =
-        let code = DEF000
-        printf "Trying %s" code.Message
-        let input = """def cl A
-    y
-;
-        """
-        let ast = fplParser input
-        let result = filterByErrorCode ad code
-        Assert.IsTrue(result.Length>0)
 
     [<TestMethod>]
     member this.TestPRP000() =
