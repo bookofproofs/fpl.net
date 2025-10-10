@@ -463,8 +463,8 @@ type TestSignatureMatching() =
 
     [<DataRow("00", "def cl T {intr};", "T:obj")>]
     [<DataRow("01", "def cl T:Test {intr};", "1")>]
-    [<DataRow("02", "def cl T:Test1, object, Test3 {intr};", "T:obj")>]
-    [<DataRow("03", "def cl T:Test1, Test2, Test3, object {intr};", "T:obj")>]
+    [<DataRow("02", "def cl T:Test1, Test3 {intr};", "T:obj")>]
+    [<DataRow("03", "def cl T:Test1, Test2, Test3 {intr};", "T:obj")>]
     [<DataRow("04", "def cl A {intr} def cl B {intr} def cl C {intr} def cl T:A,B,C,E {ctor D() {dec base.A() base.B() base.C() base.F(); } };", "T:C:obj")>]
     [<DataRow("05", "def cl A {intr} def cl T:A {ctor B() {dec base.A(); } };", "T:A:obj")>]
     [<DataRow("06", "def cl A {intr} def cl T:A {ctor B() {dec base.C(); } };", "T:A:obj")>]
@@ -484,11 +484,11 @@ type TestSignatureMatching() =
     [<DataRow("20", "def cl A {intr} def cl B:A {intr} def cl T:A {intr};", "T:A:obj")>]
     [<DataRow("21", "def cl A {intr} def cl B:A {intr} def cl T:A,A {intr};", "T:A:obj")>]
     [<DataRow("22", "def cl A {intr} def cl B:A {intr} def cl T {intr};", "T:obj")>]
-    [<DataRow("23", "def cl A {intr} def cl B:A {intr} def cl T:object,D,E,obj {intr};", "T:obj")>]
-    [<DataRow("24", "uses Fpl.SetTheory def cl T:Set,obj {intr};", "T:Set:obj")>]
-    [<DataRow("25", "uses Fpl.SetTheory def cl T:EmptySet,obj {intr};", "T:EmptySet:Set:obj")>]
-    [<DataRow("26", "uses Fpl.SetTheory def cl T,Set {intr};", "T:obj")>]
-    [<DataRow("27", "uses Fpl.SetTheory def cl T,EmptySet {intr};", "T:obj")>]
+    [<DataRow("23", "def cl A {intr} def cl B:A {intr} def cl T:D,E {intr};", "T:obj")>]
+    [<DataRow("24", "uses Fpl.SetTheory def cl T:Set {intr};", "T:Set:obj")>]
+    [<DataRow("25", "uses Fpl.SetTheory def cl T:EmptySet {intr};", "T:EmptySet:Set:obj")>]
+    [<DataRow("26", "uses Fpl.SetTheory def cl T:Set {intr};", "T:obj")>]
+    [<DataRow("27", "uses Fpl.SetTheory def cl T:EmptySet {intr};", "T:obj")>]
     [<TestMethod>]
     member this.TestBaseClassPath(no:string, varVal:string, var:string) =
         ad.Clear()

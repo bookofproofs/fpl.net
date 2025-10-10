@@ -25,10 +25,10 @@ type TestFplValue() =
     [<DataRow("proof TestId$1$2$3 {1. |- trivial} ;", "TestId$1$2$3", "pred")>]
 
     
-    [<DataRow("def class Test:obj {intr} proof Test$1 {1. |- trivial};", "Test", "Test")>]
-    [<DataRow("def class TestId:obj {intrinsic} ;", "TestId", "TestId")>]
+    [<DataRow("def class Test proof Test$1 {1. |- trivial};", "Test", "Test")>]
+    [<DataRow("def class TestId;", "TestId", "TestId")>]
     [<DataRow("def class TestId:Nat1, Nat2, Nat3, Nat4 {intrinsic} ;", "TestId", "TestId")>]
-    [<DataRow("def class TestId:obj, Nat3 {intrinsic} ;", "TestId", "TestId")>]
+    [<DataRow("def class TestId:Nat3 {intrinsic} ;", "TestId", "TestId")>]
 
     [<DataRow("def pred TestId() {true};", "TestId()", "pred()")>]
     [<DataRow("def pred TestId(x:ind) {true};", "TestId(ind)", "pred(ind)")>]

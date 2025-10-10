@@ -529,10 +529,7 @@ type SymbolTableNavigation() =
             deleteFiles currentPath "*.fpl"
 
             let fplCode = """
-                def cl Natural: object
-                {
-                    intr
-                }
+                def cl Natural
 
 
                 axiom Axiom1
@@ -551,10 +548,7 @@ type SymbolTableNavigation() =
 
             // do the test - now, modify the file with a typo to provoke SIG04 diagnostics
             let fplCode = """
-                def cl Natural: object
-                {
-                    intr
-                }
+                def cl Natural
 
 
                 axiom Axiom1
@@ -573,10 +567,7 @@ type SymbolTableNavigation() =
 
             // now, correct the typo to make SIG04 diagnostics disappear
             let fplCode = """
-                def cl Natural: object
-                {
-                    intr
-                }
+                def cl Natural
 
 
                 axiom Axiom1
