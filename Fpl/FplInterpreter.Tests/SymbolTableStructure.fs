@@ -2010,18 +2010,34 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplBase", "00", """;""", "")>]
+    [<DataRow("FplBase", "00", """def cl A:B,C {intr};""", "")>] 
+    [<DataRow("FplBase", "01", """def cl A {intr} def cl B:A {intr} def cl C:B {intr} def cl D:A,B,C {intr};""", "C")>]
+    [<DataRow("FplBase", "02", """def cl A {intr} def cl B:A {intr} def cl C:B {intr} def cl D:C,E {intr};""", "E")>]
     [<TestMethod>]
     member this.TestStructureFplBase(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplBase.fpl"
         let parent, node = testSkeleton nodeType filename fplCode identifier
         
         match nodeType, varVal with
-        | "FplReturn", "00" ->
-            Assert.IsInstanceOfType<FplRoot>(parent)
-            Assert.AreEqual<int>(0, parent.ArgList.Count)
+        | "FplBase", "00" ->
+            Assert.IsInstanceOfType<FplClass>(parent)
+            Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplReturn>(node)
+            Assert.IsInstanceOfType<FplBase>(node)
+            Assert.AreEqual<int>(0, node.ArgList.Count)
+            Assert.AreEqual<int>(0, node.Scope.Count)
+        | "FplBase", "01" ->
+            Assert.IsInstanceOfType<FplClass>(parent)
+            Assert.AreEqual<int>(3, parent.ArgList.Count)
+            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplBase>(node)
+            Assert.AreEqual<int>(0, node.ArgList.Count)
+            Assert.AreEqual<int>(1, node.Scope.Count)
+        | "FplBase", "02" ->
+            Assert.IsInstanceOfType<FplClass>(parent)
+            Assert.AreEqual<int>(2, parent.ArgList.Count)
+            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplBase>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -2118,14 +2134,14 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplClass>(node)
-            Assert.AreEqual<int>(1, node.ArgList.Count)
+            Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplClass", "00a" -> 
             Assert.IsInstanceOfType<FplTheory>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplClass>(node)
-            Assert.AreEqual<int>(0, node.ArgList.Count) // base classes are added only if they were previously declared
+            Assert.AreEqual<int>(2, node.ArgList.Count) // base classes are added only if they were previously declared
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplClass", "01" -> 
             Assert.IsInstanceOfType<FplTheory>(parent)
@@ -2139,35 +2155,35 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplClass>(node)
-            Assert.AreEqual<int>(1, node.ArgList.Count) 
+            Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(1, node.Scope.Count) // constructor
         | "FplClass", "02a" -> 
             Assert.IsInstanceOfType<FplTheory>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplClass>(node)
-            Assert.AreEqual<int>(1, node.ArgList.Count) 
+            Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(2, node.Scope.Count) // 2 constructors
         | "FplClass", "03" -> 
             Assert.IsInstanceOfType<FplTheory>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplClass>(node)
-            Assert.AreEqual<int>(1, node.ArgList.Count) 
+            Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(4, node.Scope.Count) // 4 properties
         | "FplClass", "04" -> 
             Assert.IsInstanceOfType<FplTheory>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplClass>(node)
-            Assert.AreEqual<int>(1, node.ArgList.Count) 
+            Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(5, node.Scope.Count) // 1 constructor + 4 properties
         | "FplClass", "05" -> 
             Assert.IsInstanceOfType<FplTheory>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplClass>(node)
-            Assert.AreEqual<int>(1, node.ArgList.Count) 
+            Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(7, node.Scope.Count) // 2 variables + 1 constructor + 4 properties
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 

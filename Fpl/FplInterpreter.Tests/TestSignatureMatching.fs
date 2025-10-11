@@ -501,9 +501,9 @@ type TestSignatureMatching() =
             let r = st.Root
             let theory = r.Scope[filename]
             let blocks = theory.Scope.Values |> Seq.toList 
-            let cl = blocks |> List.filter(fun fv -> (fv.Type(SignatureType.Name)).StartsWith("T")) |> List.head
+            let cl = blocks |> List.filter(fun fv -> fv.FplId = "T") |> List.head
             let str = 
-                findInheritanceChains cl cl.FplId 
+                findInheritanceChains cl 
                 |> Seq.map (fun kvp -> kvp.Key) 
                 |> String.concat ", "
             Assert.AreEqual<string>(var, str)

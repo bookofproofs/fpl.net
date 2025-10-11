@@ -1019,7 +1019,6 @@ let rec eval (st: SymbolTable) ast =
                 variableStack.PushEvalStack(baseNode)            
                 eval st baseClassAst
                 variableStack.PopEvalStack() |> ignore
-                beingCreatedNode.ArgList.Add baseNode
                 let candidates = findCandidatesByName st baseNode.FplId false false
                 if candidates.Length > 0 then 
                    let foundBaseClass = candidates.Head
@@ -1030,7 +1029,7 @@ let rec eval (st: SymbolTable) ast =
                     emitID009Diagnostics baseNode.FplId pos1 pos2
             | _ -> ()
         )
-        let classInheritanceChains = findInheritanceChains beingCreatedNode beingCreatedNode.FplId
+        let classInheritanceChains = findInheritanceChains beingCreatedNode 
         classInheritanceChains
         |> Seq.filter (fun kvp -> kvp.Value <> "ok")
         |> Seq.iter (fun kvp -> 

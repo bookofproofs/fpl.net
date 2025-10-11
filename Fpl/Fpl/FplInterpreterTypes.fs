@@ -1489,6 +1489,12 @@ type FplBase(positions: Positions, parent: FplValue) =
 
     override this.RunOrder = None
 
+    member this.BaseClass = 
+        if this.Scope.Count > 0 then
+            Some (this.Scope.Values |> Seq.head)
+        else 
+            None        
+
 type FplIntrinsicObj(positions: Positions, parent: FplValue) as this =
     inherit FplGenericObject(positions, parent)
 
@@ -3313,7 +3319,7 @@ let rec getMapping (fv:FplValue) =
 /// Checks if the baseClassName is contained in the classRoot's base classes (it derives from).
 /// If so, the function will produce Some path where path equals a string of base classes concatenated by ":".
 /// The classRoot is required to have an FplValueType.Class.
-let findInheritanceChains (baseNode: FplValue) (baseName: string) =
+let findInheritanceChains (baseNode: FplValue) =
     let distinctNames = HashSet<string>()
     let paths = Dictionary<string,string>() // collects all paths (keys) and errors (values)
     let predecessors = Dictionary<string,List<string>>() // inner dictionary = predecessors
@@ -3351,7 +3357,12 @@ let findInheritanceChains (baseNode: FplValue) (baseName: string) =
             | :? FplBase ->
                 if bNode.Scope.Count > 0 then
                     let bClass = bNode.Scope.Values |> Seq.head
-                    findChains bClass currName newPath
+                    findChains bClass predecessorName accPath
+                elif 
+                    paths.ContainsKey newPath then 
+                        paths[newPath] <- $"duplicate inheritance detected, `{newPath}`." 
+                    else
+                        paths.Add (newPath, "ok")
             | _ -> ()
 
     findChains baseNode "" ""
@@ -3361,7 +3372,7 @@ let findInheritanceChains (baseNode: FplValue) (baseName: string) =
 
 /// Checks if a node inherits from some type.
 let inheritsFrom (node:FplValue) someType = 
-    let inheritanceList = findInheritanceChains node node.FplId
+    let inheritanceList = findInheritanceChains node 
     let inheritanceFound = 
         inheritanceList 
         |> Seq.filter (fun kvp -> 
@@ -4641,48 +4652,52 @@ type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
         base.CheckConsistency()
 
         // Check the base constructor call's id is the same as one of the classes this class is derived from,
-        let enclosingClassOpt = this.UltimateBlockNode
+        let outerClassOpt = this.UltimateBlockNode
         let enclosingConstructorOpt = this.NextBlockNode
-        match enclosingClassOpt with
-        | Some (:? FplClass as enclosingClass) ->
-            let filteredClassesEnclisingClassInheritsFrom = 
-                enclosingClass.ArgList 
+        match outerClassOpt with
+        | Some (:? FplClass as outerClass) ->
+            let filteredBaseObjectsWithSameNameAsBaseCaller = 
+                outerClass.ArgList 
                 |> Seq.filter (fun pc -> pc.FplId = this.FplId)
                 |> Seq.toList
-            if filteredClassesEnclisingClassInheritsFrom.Length = 1 then
-                let parentClassOrIntrinsicObject = filteredClassesEnclisingClassInheritsFrom.Head
-                // now, try to match a constructor of the parentClass based on the signature of this base constructor call
-                match parentClassOrIntrinsicObject.IsIntrinsic, this.ArgList.Count with
-                | true, 0 ->
-                    // call of a constructor of an intrinsic class (i.e., that is missing any constructor) with 0 paramters
-                    // add "default constructor reference"
-                    let defaultConstructor = new FplDefaultConstructor(parentClassOrIntrinsicObject.FplId, (this.StartPos, this.EndPos), this)
-                    defaultConstructor.EmbedInSymbolTable defaultConstructor.Parent
-                    defaultConstructor.ToBeConstructedClass <- Some parentClassOrIntrinsicObject
-                | true, _ ->
-                    // the call uses parameters that are not possible for calling a non-existing constructor 
-                    // obj() or an intrinsic class
-                    emitID022Diagnostics parentClassOrIntrinsicObject.FplId this.StartPos this.EndPos
-                | false, _ ->
-                    let parentClass = parentClassOrIntrinsicObject :?> FplClass
-                    let candidates = parentClass.GetConstructors()
-                    match checkSIG04Diagnostics this candidates with
-                    | Some candidate ->
-                        let name = candidate.Type SignatureType.Mixed
-                        this.Scope.TryAdd(name, candidate) |> ignore
-                    | None -> ()
-                    match enclosingConstructorOpt with 
-                    | Some (:? FplConstructor as ctor) ->
-                        if ctor.ParentConstructorCalls.Contains(this.FplId) then 
-                            // todo duplicate constructor call
-                            emitID021Diagnostics this.FplId this.StartPos
-                        else
-                            ctor.ParentConstructorCalls.Add this.FplId |> ignore
-                    | _ -> ()
+            if filteredBaseObjectsWithSameNameAsBaseCaller.Length = 1 then
+                let baseClassObject = filteredBaseObjectsWithSameNameAsBaseCaller |> Seq.head :?> FplBase
 
+                match baseClassObject.BaseClass with
+                | Some baseClass ->
+                    // now, try to match a constructor of the parentClass based on the signature of this base constructor call
+                    match baseClass.IsIntrinsic, this.ArgList.Count with
+                    | true, 0 ->
+                        // call of a constructor of an intrinsic class (i.e., that is missing any constructor) with 0 paramters
+                        // add "default constructor reference"
+                        let defaultConstructor = new FplDefaultConstructor(baseClass.FplId, (this.StartPos, this.EndPos), this)
+                        defaultConstructor.EmbedInSymbolTable defaultConstructor.Parent
+                        defaultConstructor.ToBeConstructedClass <- Some baseClass
+                    | true, _ ->
+                        // the call uses parameters that are not possible for calling a non-existing constructor 
+                        // obj() or an intrinsic class
+                        emitID022Diagnostics baseClass.FplId this.StartPos this.EndPos
+                    | false, _ ->
+                        let parentClass = baseClass :?> FplClass
+                        let candidates = parentClass.GetConstructors()
+                        match checkSIG04Diagnostics this candidates with
+                        | Some candidate ->
+                            let name = candidate.Type SignatureType.Mixed
+                            this.Scope.TryAdd(name, candidate) |> ignore
+                        | None -> ()
+                        match enclosingConstructorOpt with 
+                        | Some (:? FplConstructor as ctor) ->
+                            if ctor.ParentConstructorCalls.Contains(this.FplId) then 
+                                // todo duplicate constructor call
+                                emitID021Diagnostics this.FplId this.StartPos
+                            else
+                                ctor.ParentConstructorCalls.Add this.FplId |> ignore
+                        | _ -> ()
+                | None ->
+                    () // todo: issue, base caller constructor of unknown class
             else
                 // the base constructor call's id is not among the base classes this class is derived from
-                let candidates = enclosingClass.ArgList |> Seq.map (fun fv -> fv.FplId) |> Seq.sort |> String.concat ", "
+                let candidates = outerClass.ArgList |> Seq.map (fun fv -> fv.FplId) |> Seq.sort |> String.concat ", "
                 emitID026Diagnostics this.FplId candidates this.StartPos this.EndPos
         | _ ->
             // this case never happens, 
