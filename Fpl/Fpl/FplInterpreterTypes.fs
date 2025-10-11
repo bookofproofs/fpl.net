@@ -3341,7 +3341,10 @@ let findInheritanceChains (baseNode: FplValue) =
             else
                 // a cross-inheritance
                 let cross = predecessors[currName] |> Seq.distinct |> String.concat "` and `"
-                paths[newPath] <- $"cross-inheritance not supported, `{currName}` is base for `{cross}`." 
+                if cross.Contains " and " then 
+                    paths[newPath] <- $"cross-inheritance not supported, `{currName}` is base for `{cross}`."
+                else 
+                    paths[newPath] <- $"duplicate inheritance from `{currName}` detected." 
         | false -> // a node encountered the very first time
             // add node name to distinct names
             distinctNames.Add currName |> ignore
@@ -3357,9 +3360,17 @@ let findInheritanceChains (baseNode: FplValue) =
             | :? FplBase ->
                 if bNode.Scope.Count > 0 then
                     let bClass = bNode.Scope.Values |> Seq.head
-                    findChains bClass predecessorName accPath
-                elif 
-                    paths.ContainsKey newPath then 
+                    if bClass.ArgList.Count > 0 then 
+                        bClass.ArgList
+                        |> Seq.iter (fun subNode ->
+                            findChains subNode currName newPath 
+                        )
+                    elif paths.ContainsKey newPath then 
+                        paths[newPath] <- $"duplicate inheritance detected, `{newPath}`." 
+                    else
+                        paths.Add (newPath, "ok")
+                else 
+                    if paths.ContainsKey newPath then 
                         paths[newPath] <- $"duplicate inheritance detected, `{newPath}`." 
                     else
                         paths.Add (newPath, "ok")

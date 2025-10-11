@@ -461,36 +461,43 @@ type TestSignatureMatching() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("00", "def cl T {intr};", "T")>]
-    [<DataRow("01", "def cl T:Test {intr};", "T:Test")>]
-    [<DataRow("02", "def cl T:Test1, Test3 {intr};", "T:Test1, T:Test3")>]
-    [<DataRow("03", "def cl T:Test1, Test2, Test3 {intr};", "T:Test1, T:Test2, T:Test3")>]
-    [<DataRow("04", "def cl A {intr} def cl B {intr} def cl C {intr} def cl T:A,B,C,E {ctor D() {dec base.A() base.B() base.C() base.F(); } };", "T:A, T:B, T:C, T:E")>]
-    [<DataRow("05", "def cl A {intr} def cl T:A {ctor B() {dec base.A(); } };", "T:A")>]
-    [<DataRow("06", "def cl A {intr} def cl T:A {ctor B() {dec base.C(); } };", "T:A")>]
-    [<DataRow("07", "def cl T { ctor A() {dec base.Obj(); } };", "T")>]
-    [<DataRow("08", "def cl T { ctor A() {dec base.B(); } };", "T")>]
-    [<DataRow("09", "def cl T:C { ctor A() {dec base.Obj(); } };", "T:C")>]
-    [<DataRow("10", "uses Fpl.SetTheory def cl T:Set {ctor Test() {dec base.Obj(); } };", "T:Set")>]
-    [<DataRow("11", "uses Fpl.SetTheory def cl T:Set {ctor Test() {dec base.Set(); } };", "T:Set")>]
-    [<DataRow("12", "def cl A {intr} def cl B:A {intr} def cl T:B,A {intr};", "T:B, T:A")>]
-    [<DataRow("13", "uses Fpl.SetTheory def cl T:EmptySet,Set {intr};", "T:EmptySet:Set, T:Set")>]
-    [<DataRow("14", "uses Fpl.SetTheory def cl T:Set, EmptySet {intr};", "T:Set:obj")>]
-    [<DataRow("15", "def cl A {intr} def cl B:A {intr} def cl T:A,B {intr};", "T:A:obj")>]
-    [<DataRow("16", "def cl A {intr} def cl B:A {intr} def cl T:B {intr};", "T:B:A:obj")>]
-    [<DataRow("17", "uses Fpl.SetTheory def cl T:EmptySet {intr};", "T:EmptySet:Set:obj")>]
-    [<DataRow("18", "uses Fpl.SetTheory def cl T:Set {intr};", "T:Set:obj")>]
-    [<DataRow("19", "uses Fpl.Commons uses Fpl.SetTheory def cl T:Set {intr};", "T:Set:obj")>]
-    [<DataRow("20", "def cl A {intr} def cl B:A {intr} def cl T:A {intr};", "T:A:obj")>]
-    [<DataRow("21", "def cl A {intr} def cl B:A {intr} def cl T:A,A {intr};", "T:A:obj")>]
-    [<DataRow("22", "def cl A {intr} def cl B:A {intr} def cl T {intr};", "T:obj")>]
-    [<DataRow("23", "def cl A {intr} def cl B:A {intr} def cl T:D,E {intr};", "T:obj")>]
-    [<DataRow("24", "uses Fpl.SetTheory def cl T:Set {intr};", "T:Set:obj")>]
-    [<DataRow("25", "uses Fpl.SetTheory def cl T:EmptySet {intr};", "T:EmptySet:Set:obj")>]
-    [<DataRow("26", "uses Fpl.SetTheory def cl T:Set {intr};", "T:obj")>]
-    [<DataRow("27", "uses Fpl.SetTheory def cl T:EmptySet {intr};", "T:obj")>]
+    [<DataRow("00", "def cl T {intr};", "T", "ok")>]
+    [<DataRow("01", "def cl T:Test {intr};", "T:Test", "ok")>]
+    [<DataRow("02", "def cl T:Test1, Test3 {intr};", "T:Test1, T:Test3", "ok|ok")>]
+    [<DataRow("03", "def cl T:Test1, Test2, Test3 {intr};", "T:Test1, T:Test2, T:Test3", "ok|ok|ok")>]
+    [<DataRow("04", "def cl A {intr} def cl B {intr} def cl C {intr} def cl T:A,B,C,E {ctor D() {dec base.A() base.B() base.C() base.F(); } };", "T:A, T:B, T:C, T:E", "ok|ok|ok|ok")>]
+    [<DataRow("05", "def cl A {intr} def cl T:A {ctor B() {dec base.A(); } };", "T:A", "ok")>]
+    [<DataRow("06", "def cl A {intr} def cl T:A {ctor B() {dec base.C(); } };", "T:A", "ok")>]
+    [<DataRow("07", "def cl T { ctor A() {dec base.Obj(); } };", "T", "ok")>]
+    [<DataRow("08", "def cl T { ctor A() {dec base.B(); } };", "T", "ok")>]
+    [<DataRow("09", "def cl T:C { ctor A() {dec base.Obj(); } };", "T:C", "ok")>]
+    [<DataRow("10", "uses Fpl.SetTheory def cl T:Set {ctor Test() {dec base.Obj(); } };", "T:Set", "ok")>]
+    [<DataRow("11", "uses Fpl.SetTheory def cl T:Set {ctor Test() {dec base.Set(); } };", "T:Set", "ok")>]
+    [<DataRow("12", "def cl A {intr} def cl B:A {intr} def cl T:B,A {intr};", "T:B:A, T:A", "ok|cross-inheritance not supported, `A` is base for `B` and `T`.")>]
+    [<DataRow("13", "uses Fpl.SetTheory def cl T:EmptySet,Set {intr};", "T:EmptySet:Set, T:Set", "ok|cross-inheritance not supported, `Set` is base for `EmptySet` and `T`.")>]
+    [<DataRow("13a", "uses Fpl.SetTheory def cl T:EmptySet;", "T:EmptySet:Set", "ok")>]
+    [<DataRow("13b", "def cl Set def cl EmptySet:Set def cl T:EmptySet;", "T:EmptySet:Set", "ok")>]
+    [<DataRow("14", "uses Fpl.SetTheory def cl T:Set, EmptySet {intr};", "T:Set, T:EmptySet:Set", "ok|cross-inheritance not supported, `Set` is base for `T` and `EmptySet`.")>]
+    [<DataRow("15", "def cl A {intr} def cl B:A {intr} def cl T:A,B {intr};", "T:A, T:B:A", "ok|cross-inheritance not supported, `A` is base for `T` and `B`.")>]
+    [<DataRow("16", "def cl A {intr} def cl B:A {intr} def cl T:B {intr};", "T:B:A", "ok")>]
+    [<DataRow("17", "uses Fpl.SetTheory def cl T:EmptySet {intr};", "T:EmptySet:Set", "ok")>]
+    [<DataRow("18", "uses Fpl.SetTheory def cl T:Set {intr};", "T:Set", "ok")>]
+    [<DataRow("19", "uses Fpl.Commons uses Fpl.SetTheory def cl T:Set {intr};", "T:Set", "ok")>]
+    [<DataRow("20", "def cl A {intr} def cl B:A {intr} def cl T:A {intr};", "T:A", "ok")>]
+    [<DataRow("21", "def cl A {intr} def cl B:A {intr} def cl T:A,A {intr};", "T:A", "duplicate inheritance from `A` detected.")>]
+    [<DataRow("21a", "def cl A {intr} def cl B:A {intr} def cl T:A,C,A {intr};", "T:A, T:C", "duplicate inheritance from `A` detected.|ok")>]
+    [<DataRow("22", "def cl A {intr} def cl B:A {intr} def cl T {intr};", "T", "ok")>]
+    [<DataRow("23", "def cl A {intr} def cl B:A {intr} def cl T:D,E {intr};", "T:D, T:E", "ok|ok")>]
+    [<DataRow("24", "uses Fpl.SetTheory def cl T:Set {intr};", "T:Set", "ok")>]
+    [<DataRow("25", "uses Fpl.SetTheory def cl T:EmptySet {intr};", "T:EmptySet:Set", "ok")>]
+    [<DataRow("26", "uses Fpl.SetTheory def cl T:Set {intr};", "T:Set", "ok")>]
+    [<DataRow("27", "uses Fpl.SetTheory def cl T:EmptySet {intr};", "T:EmptySet:Set", "ok")>]
+    [<DataRow("29a", "def cl A:B def cl B:A def cl T:A;", "T:A:B", "ok")>]
+    [<DataRow("29b", "def cl A:B def cl B:A def cl T:B;", "T:B:A:B", "cross-inheritance not supported, `B` is base for `T` and `A`.")>]
+    [<DataRow("29c", "def cl A:B def cl B:A def cl T:A,B;", "T:A:B, T:B", "ok|cross-inheritance not supported, `B` is base for `A` and `T`.")>]
+    [<DataRow("29d", "def cl A:B def cl B:A def cl T:B,A;", "T:B:A:B, T:A", "cross-inheritance not supported, `B` is base for `T` and `A`.|cross-inheritance not supported, `A` is base for `B` and `T`.")>]
     [<TestMethod>]
-    member this.TestBaseClassPath(no:string, varVal:string, var:string) =
+    member this.TestBaseClassPath(no:string, varVal:string, expectedPaths:string, expectedMessages:string) =
         ad.Clear()
         let fplCode = sprintf """%s""" varVal
         let filename = "TestBaseClassPath"
@@ -502,11 +509,16 @@ type TestSignatureMatching() =
             let theory = r.Scope[filename]
             let blocks = theory.Scope.Values |> Seq.toList 
             let cl = blocks |> List.filter(fun fv -> fv.FplId = "T") |> List.head
-            let str = 
+            let paths = 
                 findInheritanceChains cl 
                 |> Seq.map (fun kvp -> kvp.Key) 
                 |> String.concat ", "
-            Assert.AreEqual<string>(var, str)
+            Assert.AreEqual<string>(expectedPaths, paths)
+            let messages = 
+                findInheritanceChains cl 
+                |> Seq.map (fun kvp -> kvp.Value) 
+                |> String.concat "|"
+            Assert.AreEqual<string>(expectedMessages, messages)
         | None -> 
             Assert.IsTrue(false)
 
