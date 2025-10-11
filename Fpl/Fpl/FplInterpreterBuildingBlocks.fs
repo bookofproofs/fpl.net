@@ -1,5 +1,4 @@
-﻿/// This module evaluates the abstract syntax tree (AST) and interprets its semantics.
-/// This module evaluates the abstract syntax tree (AST) and interprets its semantics./// This module evaluates the abstract syntax tree (AST) and interprets its semantics.
+﻿/// This module evaluates the abstract syntax tree (AST) and interprets its semantics./// This module evaluates the abstract syntax tree (AST) and interprets its semantics.
 /// It produces a SymbolTable object containing a current semantical representation of the AST.
 
 (* MIT License
@@ -672,6 +671,7 @@ let rec eval (st: SymbolTable) ast =
             fv.TypeId <- identifier
         | :? FplMapping -> 
             fv.TypeId <- fv.TypeId + identifier
+        | :? FplBase 
         | :? FplBaseConstructorCall -> 
             fv.FplId <- identifier
             fv.TypeId <- identifier
@@ -1009,39 +1009,25 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.InheritedClassTypeList inheritedClassTypeAsts -> 
         st.EvalPush("InheritedClassTypeList")
-        // a dictionary to prevent shadowed variables
-        let distinctVariables = Dictionary<string, FplValue>()
-        // a dictionary to prevent shadowed properties
-        let distinctProperties = Dictionary<string, FplValue>()
-        // a dictionary to prevent cyclic inheritance
-        let distinctInheritance = Dictionary<string, Position>()
-
         let beingCreatedNode = variableStack.PeekEvalStack()
         inheritedClassTypeAsts
         |> List.iter (fun baseClassAst ->
             match baseClassAst with
-            | Ast.ObjectType((pos1, pos2), _) ->
-                let dummy = new FplReference((pos1, pos2), beingCreatedNode)
-                variableStack.PushEvalStack(dummy)        
-                eval st baseClassAst
-                variableStack.Pop() |> ignore
-                let obJ = new FplIntrinsicObj((pos1, pos2), beingCreatedNode)
-                beingCreatedNode.ArgList.Add obJ
             | Ast.PredicateIdentifier((pos1, pos2), _) ->
                 // retrieve the name of the class and the class (if it exists)
-                let dummy = new FplReference((pos1, pos2), beingCreatedNode)
-                variableStack.PushEvalStack(dummy)            
+                let baseNode = new FplBase((pos1, pos2), beingCreatedNode)
+                variableStack.PushEvalStack(baseNode)            
                 eval st baseClassAst
-                variableStack.Pop() |> ignore
-                let candidates = findCandidatesByName st dummy.FplId false false
+                variableStack.PopEvalStack() |> ignore
+                beingCreatedNode.ArgList.Add baseNode
+                let candidates = findCandidatesByName st baseNode.FplId false false
                 if candidates.Length > 0 then 
                    let foundBaseClass = candidates.Head
-                   beingCreatedNode.ArgList.Add foundBaseClass // add base
+                   baseNode.Scope.Add (foundBaseClass.FplId, foundBaseClass) // add base class to base
                 else
-                    emitID010Diagnostics dummy.FplId pos1 pos2
-                if dummy.FplId = beingCreatedNode.FplId then 
-                    emitID009Diagnostics dummy.FplId pos1 pos2
-                distinctInheritance.TryAdd (dummy.FplId, pos1) |> ignore
+                    emitID010Diagnostics baseNode.FplId pos1 pos2
+                if baseNode.FplId = beingCreatedNode.FplId then 
+                    emitID009Diagnostics baseNode.FplId pos1 pos2
             | _ -> ()
         )
         let classInheritanceChains = findInheritanceChains beingCreatedNode beingCreatedNode.FplId

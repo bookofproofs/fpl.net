@@ -461,20 +461,20 @@ type TestSignatureMatching() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("00", "def cl T {intr};", "T:obj")>]
-    [<DataRow("01", "def cl T:Test {intr};", "1")>]
-    [<DataRow("02", "def cl T:Test1, Test3 {intr};", "T:obj")>]
-    [<DataRow("03", "def cl T:Test1, Test2, Test3 {intr};", "T:obj")>]
-    [<DataRow("04", "def cl A {intr} def cl B {intr} def cl C {intr} def cl T:A,B,C,E {ctor D() {dec base.A() base.B() base.C() base.F(); } };", "T:C:obj")>]
-    [<DataRow("05", "def cl A {intr} def cl T:A {ctor B() {dec base.A(); } };", "T:A:obj")>]
-    [<DataRow("06", "def cl A {intr} def cl T:A {ctor B() {dec base.C(); } };", "T:A:obj")>]
-    [<DataRow("07", "def cl T { ctor A() {dec base.Obj(); } };", "T:obj")>]
-    [<DataRow("08", "def cl T { ctor A() {dec base.B(); } };", "T:obj")>]
-    [<DataRow("09", "def cl T:C { ctor A() {dec base.Obj(); } };", "None")>]
-    [<DataRow("10", "uses Fpl.SetTheory def cl T:Set {ctor Test() {dec base.Obj(); } };", "T:Set:obj")>]
-    [<DataRow("11", "uses Fpl.SetTheory def cl T:Set {ctor Test() {dec base.Set(); } };", "T:Set:obj")>]
-    [<DataRow("12", "def cl A {intr} def cl B:A {intr} def cl T:B,A {intr};", "T:B:A:obj")>]
-    [<DataRow("13", "uses Fpl.SetTheory def cl T:EmptySet,Set {intr};", "T:EmptySet:Set:obj")>]
+    [<DataRow("00", "def cl T {intr};", "T")>]
+    [<DataRow("01", "def cl T:Test {intr};", "T:Test")>]
+    [<DataRow("02", "def cl T:Test1, Test3 {intr};", "T:Test1, T:Test3")>]
+    [<DataRow("03", "def cl T:Test1, Test2, Test3 {intr};", "T:Test1, T:Test2, T:Test3")>]
+    [<DataRow("04", "def cl A {intr} def cl B {intr} def cl C {intr} def cl T:A,B,C,E {ctor D() {dec base.A() base.B() base.C() base.F(); } };", "T:A, T:B, T:C, T:E")>]
+    [<DataRow("05", "def cl A {intr} def cl T:A {ctor B() {dec base.A(); } };", "T:A")>]
+    [<DataRow("06", "def cl A {intr} def cl T:A {ctor B() {dec base.C(); } };", "T:A")>]
+    [<DataRow("07", "def cl T { ctor A() {dec base.Obj(); } };", "T")>]
+    [<DataRow("08", "def cl T { ctor A() {dec base.B(); } };", "T")>]
+    [<DataRow("09", "def cl T:C { ctor A() {dec base.Obj(); } };", "T:C")>]
+    [<DataRow("10", "uses Fpl.SetTheory def cl T:Set {ctor Test() {dec base.Obj(); } };", "T:Set")>]
+    [<DataRow("11", "uses Fpl.SetTheory def cl T:Set {ctor Test() {dec base.Set(); } };", "T:Set")>]
+    [<DataRow("12", "def cl A {intr} def cl B:A {intr} def cl T:B,A {intr};", "T:B, T:A")>]
+    [<DataRow("13", "uses Fpl.SetTheory def cl T:EmptySet,Set {intr};", "T:EmptySet:Set, T:Set")>]
     [<DataRow("14", "uses Fpl.SetTheory def cl T:Set, EmptySet {intr};", "T:Set:obj")>]
     [<DataRow("15", "def cl A {intr} def cl B:A {intr} def cl T:A,B {intr};", "T:A:obj")>]
     [<DataRow("16", "def cl A {intr} def cl B:A {intr} def cl T:B {intr};", "T:B:A:obj")>]
@@ -502,11 +502,11 @@ type TestSignatureMatching() =
             let theory = r.Scope[filename]
             let blocks = theory.Scope.Values |> Seq.toList 
             let cl = blocks |> List.filter(fun fv -> (fv.Type(SignatureType.Name)).StartsWith("T")) |> List.head
-            if inheritsFrom cl LiteralObj then
-                let str = findInheritanceChains cl LiteralObj |> Seq.map (fun kvp -> kvp.Key) |> Seq.head
-                Assert.AreEqual<string>(var, str)
-            else 
-                Assert.AreEqual<string>("was not found", "was not found")
+            let str = 
+                findInheritanceChains cl cl.FplId 
+                |> Seq.map (fun kvp -> kvp.Key) 
+                |> String.concat ", "
+            Assert.AreEqual<string>(var, str)
         | None -> 
             Assert.IsTrue(false)
 

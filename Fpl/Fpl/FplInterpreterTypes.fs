@@ -1468,6 +1468,27 @@ and FplClass(positions: Positions, parent: FplValue) =
 
     override this.RunOrder = None
 
+type FplBase(positions: Positions, parent: FplValue) =
+    inherit FplValue(positions, Some parent)
+
+    override this.Name = LiteralBase
+    override this.ShortName = LiteralBase
+
+    override this.Clone () =
+        let ret = new FplBase((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Type _ = this.FplId
+
+    override this.Represent () = LiteralUndef
+
+    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
+
+    override this.Run variableStack = ()
+
+    override this.RunOrder = None
+
 type FplIntrinsicObj(positions: Positions, parent: FplValue) as this =
     inherit FplGenericObject(positions, parent)
 
@@ -1499,76 +1520,6 @@ let isIntrinsicObj (fv1:FplValue) =
     match fv1 with
     | :? FplIntrinsicObj -> true
     | _ -> false
-
-/// Checks if the baseClassName is contained in the classRoot's base classes (it derives from).
-/// If so, the function will produce Some path where path equals a string of base classes concatenated by ":".
-/// The classRoot is required to have an FplValueType.Class.
-let findInheritanceChains (baseNode: FplValue) (baseName: string) =
-    let distinctNames = HashSet<string>()
-    let paths = Dictionary<string,string>() // collects all paths (keys) and errors (values)
-    let predecessors = Dictionary<string,List<string>>() // inner dictionary = predecessors
-
-    let rec findChains (bNode: FplValue) predecessorName accPath =
-        let currName = bNode.Type(SignatureType.Mixed)
-        let newPath = 
-            if accPath = String.Empty then 
-                currName
-            else
-                $"{accPath}:{currName}" 
-        match distinctNames.Contains currName, currName = LiteralObj with
-        | true, true -> // obj is the sink of all inheritance paths 
-            predecessors[currName].Add predecessorName
-            if paths.ContainsKey newPath then 
-                paths[newPath] <- $"duplicate inheritance of {currName} detected"
-            else
-                paths.TryAdd(newPath,"ok") |> ignore // new path found
-        | true, false -> // a cross-inheritance between two paths or a cycle detected
-            predecessors[currName].Add predecessorName
-            if predecessors[currName].Count = 1 then 
-                // a cycle detected since currNode had only one predecessor so far
-                // and thus, it must be the first one
-                paths[newPath] <- $"cycle detected" 
-            else
-                // a cross-inheritance
-                let cross = predecessors[currName] |> Seq.distinct |> String.concat "` and `"
-                paths[newPath] <- $"cross-inheritance not supported, `{currName}` is base for `{cross}`." 
-        | false, true -> // obj encountered the very first time
-            // add object to distinct names
-            distinctNames.Add currName |> ignore
-            // add predecessor to object
-            predecessors.Add (currName, List<string>())
-            predecessors[currName].Add predecessorName
-            paths.TryAdd (newPath,"ok") |> ignore // new path found
-        | false, false -> // a node encountered the very first time
-            // add node name to distinct names
-            distinctNames.Add currName |> ignore
-            // add predecessor to node name
-            predecessors.Add (currName, List<string>())
-            predecessors[currName].Add predecessorName
-            bNode.ArgList
-            |> Seq.iter (fun subNode ->
-                findChains subNode currName newPath 
-            )
-
-    findChains baseNode "" ""
-    paths
-
-/// Checks if a node inherits from some type.
-let inheritsFrom (node:FplValue) someType = 
-    let inheritanceList = findInheritanceChains node node.FplId
-    let inheritanceFound = 
-        inheritanceList 
-        |> Seq.filter (fun kvp -> 
-            kvp.Value = "ok" && 
-            (
-                kvp.Key.EndsWith $":{someType}" 
-            || kvp.Key.Contains $":{someType}:"
-            )
-        )
-        |> Seq.tryLast
-    match inheritanceFound with 
-    | Some _ -> true
-    | None -> false
 
 type ICanBeCalledRecusively =
     abstract member CallCounter : int
@@ -3359,6 +3310,73 @@ let rec getMapping (fv:FplValue) =
         else
             None
 
+/// Checks if the baseClassName is contained in the classRoot's base classes (it derives from).
+/// If so, the function will produce Some path where path equals a string of base classes concatenated by ":".
+/// The classRoot is required to have an FplValueType.Class.
+let findInheritanceChains (baseNode: FplValue) (baseName: string) =
+    let distinctNames = HashSet<string>()
+    let paths = Dictionary<string,string>() // collects all paths (keys) and errors (values)
+    let predecessors = Dictionary<string,List<string>>() // inner dictionary = predecessors
+
+    let rec findChains (bNode: FplValue) predecessorName accPath =
+        let currName = bNode.Type(SignatureType.Mixed)
+        let newPath = 
+            if accPath = String.Empty then 
+                currName
+            else
+                $"{accPath}:{currName}" 
+        match distinctNames.Contains currName with
+        | true -> // a cross-inheritance between two paths or a cycle detected
+            predecessors[currName].Add predecessorName
+            if predecessors[currName].Count = 1 then 
+                // a cycle detected since currNode had only one predecessor so far
+                // and thus, it must be the first one
+                paths[newPath] <- $"cycle detected" 
+            else
+                // a cross-inheritance
+                let cross = predecessors[currName] |> Seq.distinct |> String.concat "` and `"
+                paths[newPath] <- $"cross-inheritance not supported, `{currName}` is base for `{cross}`." 
+        | false -> // a node encountered the very first time
+            // add node name to distinct names
+            distinctNames.Add currName |> ignore
+            // add predecessor to node name
+            predecessors.Add (currName, List<string>())
+            predecessors[currName].Add predecessorName
+            match bNode with 
+            | :? FplClass ->
+                bNode.ArgList
+                |> Seq.iter (fun subNode ->
+                    findChains subNode currName newPath 
+                )
+            | :? FplBase ->
+                if bNode.Scope.Count > 0 then
+                    let bClass = bNode.Scope.Values |> Seq.head
+                    findChains bClass currName newPath
+            | _ -> ()
+
+    findChains baseNode "" ""
+    if paths.Count = 0 then 
+        distinctNames |> Seq.iter (fun s -> paths.Add (s, "ok"))
+    paths
+
+/// Checks if a node inherits from some type.
+let inheritsFrom (node:FplValue) someType = 
+    let inheritanceList = findInheritanceChains node node.FplId
+    let inheritanceFound = 
+        inheritanceList 
+        |> Seq.filter (fun kvp -> 
+            kvp.Value = "ok" && 
+            (
+                kvp.Key.EndsWith $":{someType}" 
+            || kvp.Key.Contains $":{someType}:"
+            )
+        )
+        |> Seq.tryLast
+    match inheritanceFound with 
+    | Some _ -> true
+    | None -> false
+
+
 /// Tries to match parameters of an FplValue with its arguments recursively
 let rec mpwa hasArguments (args: FplValue list) (pars: FplValue list) =
     match (args, pars) with
@@ -4680,6 +4698,7 @@ type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
         // todo implement run
         ()
 
+
 /// A string representation of an FplValue
 let toString (fplValue:FplValue) = $"{fplValue.ShortName} {fplValue.Type(SignatureType.Name)}"
 
@@ -5001,10 +5020,7 @@ let findCandidatesByName (st: SymbolTable) (name: string) withClassConstructors 
     let nameWithoutProofOrCorRef = 
         if withCorollariesOrProofs && name.Contains("$") then 
             let parts = name.Split('$')
-            if parts.Length > 0 then 
-                parts.[0] 
-            else 
-                ""
+            parts.[0] 
         else
             name
     let nameWithProofOrCorRef = 
@@ -5019,7 +5035,7 @@ let findCandidatesByName (st: SymbolTable) (name: string) withClassConstructors 
             theory.Value.Scope
             // filter only blocks starting with the same FplId as the reference
             |> Seq.map (fun kvp -> kvp.Value)
-            |> Seq.filter (fun fv -> fv.FplId = name || fv.FplId = nameWithoutProofOrCorRef || fv.FplId.StartsWith(nameWithProofOrCorRef) || fv.FplId = $"@{nameWithoutProofOrCorRef}")
+            |> Seq.filter (fun fv -> fv.FplId = name || fv.FplId = nameWithoutProofOrCorRef || fv.FplId = $"@{nameWithoutProofOrCorRef}")
             |> Seq.iter (fun (block: FplValue) ->
                 pm.Add(block)
 
