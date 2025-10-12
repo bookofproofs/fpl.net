@@ -44,7 +44,7 @@ let getVAR04diagnostic (fv:FplValue) name =
         Diagnostic.Alternatives = None 
     }
 
-let emitVAR04diagnostics (fv:FplValue) =
+let emitVAR04diagnosticsOld (fv:FplValue) =
     fv.GetVariables()
     |> List.filter(fun var -> var.AuxiliaryInfo = 0)
     |> List.map (fun var -> 

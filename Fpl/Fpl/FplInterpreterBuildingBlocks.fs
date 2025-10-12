@@ -1198,7 +1198,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Localization")
         let parent = variableStack.PeekEvalStack()
         let fv = new FplLocalization((pos1, pos2), parent)
-        let diagList = List<Diagnostic>()
+        let var04List = Dictionary<string, Positions>()
         ad.DiagnosticsStopped <- true // stop all diagnostics during localization
         variableStack.PushEvalStack(fv)
         eval st predicateAst
@@ -1217,13 +1217,15 @@ let rec eval (st: SymbolTable) ast =
                     |> List.rev
                 if not languageList.IsEmpty then
                     let lan = languageList.Head
-                    diagList.Add(getVAR04diagnostic lan var.FplId)
+                    var04List.Add (var.FplId,(lan.StartPos, lan.EndPos))
             )
         ) |> ignore
         variableStack.PopEvalStack()
         ad.DiagnosticsStopped <- false // enable all diagnostics during localization
-        diagList
-        |> Seq.iter (fun diag -> ad.AddDiagnostic diag)
+        var04List
+        |> Seq.iter (fun kvp -> 
+            emitVAR04diagnostics kvp.Key (fst kvp.Value) (snd kvp.Value)
+        )
         st.EvalPop()
     | Ast.FunctionalTermInstance((pos1, pos2), (functionalTermInstanceSignatureAst, functionalTermInstanceBlockAst)) ->
         st.EvalPush("FunctionalTermInstance")
@@ -1533,7 +1535,7 @@ let rec eval (st: SymbolTable) ast =
         eval st signatureAst
         eval st predInstanceBlockAst
         if not fvNew.IsIntrinsic then // if not intrinsic, check variable usage
-            emitVAR04diagnostics fvNew
+            emitVAR04diagnosticsOld fvNew
         variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.BaseConstructorCall((pos1, pos2), (inheritedClassTypeAst, argumentTupleAst)) ->
@@ -1597,7 +1599,7 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(fv)
         eval st signatureAst
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
-        emitVAR04diagnostics fv
+        emitVAR04diagnosticsOld fv
         variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.LemmaSignature((pos1, pos2), simpleSignatureAst) ->
@@ -1614,7 +1616,7 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(fv)
         eval st signatureAst
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
-        emitVAR04diagnostics fv
+        emitVAR04diagnosticsOld fv
         variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.PropositionSignature((pos1, pos2), simpleSignatureAst) ->
@@ -1631,7 +1633,7 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(fv)
         eval st signatureAst
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
-        emitVAR04diagnostics fv
+        emitVAR04diagnosticsOld fv
         variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.ConjectureSignature((pos1, pos2), simpleSignatureAst) ->
@@ -1648,7 +1650,7 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(fv)
         eval st signatureAst
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
-        emitVAR04diagnostics fv
+        emitVAR04diagnosticsOld fv
         variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.AxiomSignature((pos1, pos2), simpleSignatureAst) ->
@@ -1665,7 +1667,7 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(fv)
         eval st signatureAst
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
-        emitVAR04diagnostics fv
+        emitVAR04diagnosticsOld fv
         variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.CorollarySignature((pos1, pos2), (simpleSignatureAst, dollarDigitListAsts)) ->
@@ -1686,7 +1688,7 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(fv) // push again to have the current corollary on stack
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
         // now, we are ready to emit VAR03 diagnostics for all variables declared in the signature of the corollary.
-        emitVAR04diagnostics fv
+        emitVAR04diagnosticsOld fv
         variableStack.Pop() |> ignore // pop without 
         st.EvalPop()
     // | NamedVarDecl of Positions * ((Ast list * Ast) * Ast)
@@ -1792,7 +1794,7 @@ let rec eval (st: SymbolTable) ast =
         | None -> fv.IsIntrinsic <- true
         eval st functionalTermSignatureAst 
         if not fv.IsIntrinsic then // if not intrinsic, check variable usage
-            emitVAR04diagnostics fv
+            emitVAR04diagnosticsOld fv
         variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.ClassSignature((pos1, pos2), simpleSignatureAst) ->
@@ -1815,7 +1817,7 @@ let rec eval (st: SymbolTable) ast =
             optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
         | None -> fv.IsIntrinsic <- true
         optInheritedClassTypeListAst |> Option.map (eval st) |> Option.defaultValue ()
-        emitVAR04diagnostics fv
+        emitVAR04diagnosticsOld fv
         variableStack.PopEvalStack()
         st.EvalPop()
     // | DerivedPredicate of Ast
@@ -1838,7 +1840,7 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(fv) // push again
         proofArgumentListAst |> List.map (eval st) |> ignore
         optQedAst |> Option.map (eval st) |> Option.defaultValue ()
-        emitVAR04diagnostics fv
+        emitVAR04diagnosticsOld fv
         let value = new FplIntrinsicPred((pos1,pos1), fv)
         value.FplId <- LiteralTrue
         // check if all arguments could be correctly inferred
