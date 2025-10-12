@@ -2546,6 +2546,9 @@ type SymbolTableStructure() =
     
     // intrinsic functional term
     [<DataRow("FplFunctionalTerm", "00", """def func T()->obj {intr};""", "")>]
+    [<DataRow("FplFunctionalTerm", "00a", """def func T()->obj;""", "")>]
+    [<DataRow("FplFunctionalTerm", "00b", """def func T:A()->obj;""", "")>]
+    [<DataRow("FplFunctionalTerm", "00c", """def func T:A,B,C()->obj;""", "")>]
     // intrinsic functional term with variables
     [<DataRow("FplFunctionalTerm", "01", """def func T(x,y:obj)->obj {intr};""", "")>]
     // intrinsic functional term with variables and properties
@@ -2566,6 +2569,27 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplFunctionalTerm>(node)
             Assert.AreEqual<int>(1, node.ArgList.Count) // intrinsic with mapping 
+            Assert.AreEqual<int>(0, node.Scope.Count)
+        | "FplFunctionalTerm", "00a" -> 
+            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.AreEqual<int>(0, parent.ArgList.Count)
+            Assert.AreEqual<int>(1, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplFunctionalTerm>(node)
+            Assert.AreEqual<int>(1, node.ArgList.Count) // intrinsic with mapping 
+            Assert.AreEqual<int>(0, node.Scope.Count)
+        | "FplFunctionalTerm", "00b" -> 
+            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.AreEqual<int>(0, parent.ArgList.Count)
+            Assert.AreEqual<int>(1, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplFunctionalTerm>(node)
+            Assert.AreEqual<int>(2, node.ArgList.Count) // intrinsic with mapping and 1 base
+            Assert.AreEqual<int>(0, node.Scope.Count)
+        | "FplFunctionalTerm", "00c" -> 
+            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.AreEqual<int>(0, parent.ArgList.Count)
+            Assert.AreEqual<int>(1, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplFunctionalTerm>(node)
+            Assert.AreEqual<int>(4, node.ArgList.Count) // intrinsic with mapping and 3 bases
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplFunctionalTerm", "01" -> 
             Assert.IsInstanceOfType<FplTheory>(parent)

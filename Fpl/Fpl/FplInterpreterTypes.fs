@@ -3307,14 +3307,99 @@ let rec getMapping (fv:FplValue) =
         else
             None
     | _ ->
-        if fv.ArgList.Count > 0 then 
-            let arg = fv.ArgList[0]
-            match arg with 
-            | :? FplMapping ->
-                Some(arg)
-            | _ -> None
+        fv.ArgList |> Seq.tryFind (fun fv -> fv.Name = PrimMappingL)
+
+
+[<AbstractClass>]
+type FplGenericFunctionalTerm(positions: Positions, parent: FplValue) as this =
+    inherit FplValue(positions, Some parent)
+    let mutable _signStartPos = Position("", 0L, 0L, 0L)
+    let mutable _signEndPos = Position("", 0L, 0L, 0L)
+
+    do 
+        this.FplId <- LiteralFunc
+        this.TypeId <- LiteralFunc
+
+    member this.SignStartPos
+        with get() = _signStartPos
+        and set(value) = _signStartPos <- value
+
+    member this.SignEndPos
+        with get() = _signEndPos
+        and set(value) = _signEndPos <- value
+
+    interface IHasSignature with
+        member this.SignStartPos 
+            with get () = this.SignStartPos
+            and set (value) = this.SignStartPos <- value
+        member this.SignEndPos 
+            with get () = this.SignEndPos
+            and set (value) = this.SignEndPos <- value
+
+    override this.Type signatureType = 
+        let head = getFplHead this signatureType
+        let propagate = propagateSignatureType signatureType
+
+        match getMapping this with
+        | Some map ->
+            let paramT = getParamTuple this signatureType
+            sprintf "%s(%s) -> %s" head paramT (map.Type(propagate))
+        | _ -> ""
+
+    override this.Represent () = 
+        if this.ValueList.Count = 0 then 
+            // since the FunctionTerm has no value, it has no return statement
+            // And the FPL syntax ensures that this can only be the case
+            // if the Functional Term is intrinsic.
+            // In this case, the "representation" of the function is
+            // its declared mapping type
+            $"dec {this.Type(SignatureType.Mixed)}"
         else
-            None
+            let subRepr = 
+                this.ValueList
+                |> Seq.map (fun subfv -> subfv.Represent())
+                |> String.concat ", "
+            if subRepr = String.Empty then 
+                LiteralUndef
+            else
+                subRepr
+
+type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) =
+    inherit FplGenericFunctionalTerm(positions, parent)
+    let _runOrder = runOrder
+    let mutable _isReady = false
+    let mutable _callCounter = 0
+
+    interface IReady with
+        member _.IsReady = _isReady
+
+    override this.Name = PrimFuncionalTermL
+    override this.ShortName = PrimFuncionalTerm
+
+    override this.Clone () =
+        let ret = new FplFunctionalTerm((this.StartPos, this.EndPos), this.Parent.Value, _runOrder)
+        this.AssignParts(ret)
+        ret
+
+    override this.IsFplBlock () = true
+    override this.IsBlock () = true
+
+    override this.EmbedInSymbolTable _ = tryAddToParentUsingMixedSignature this
+
+    override this.RunOrder = Some _runOrder
+
+    override this.Run variableStack = 
+        if not _isReady then
+            _callCounter <- _callCounter + 1
+            if _callCounter > maxRecursion then
+                emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
+            else
+                this.ArgList
+                |> Seq.iter (fun fv -> 
+                    fv.Run variableStack
+                    this.SetValuesOf fv
+                )
+                _isReady <- this.Arity = 0 
 
 /// Checks if the baseClassName is contained in the classRoot's base classes (it derives from).
 /// If so, the function will produce Some path where path equals a string of base classes concatenated by ":".
@@ -3325,7 +3410,7 @@ let findInheritanceChains (baseNode: FplValue) =
     let predecessors = Dictionary<string,List<string>>() // inner dictionary = predecessors
 
     let rec findChains (bNode: FplValue) predecessorName accPath =
-        let currName = bNode.Type(SignatureType.Mixed)
+        let currName = bNode.FplId
         let newPath = 
             if accPath = String.Empty then 
                 currName
@@ -3351,20 +3436,25 @@ let findInheritanceChains (baseNode: FplValue) =
             // add predecessor to node name
             predecessors.Add (currName, List<string>())
             predecessors[currName].Add predecessorName
-            match bNode with 
-            | :? FplClass ->
+            match baseNode, bNode with 
+            | :? FplFunctionalTerm, :? FplFunctionalTerm 
+            | :? FplClass, :? FplClass ->
                 bNode.ArgList
                 |> Seq.filter (fun subNode -> subNode :? FplBase)
                 |> Seq.iter (fun subNode ->
                     findChains subNode currName newPath 
                 )
-            | :? FplBase ->
+            | :? FplFunctionalTerm, :? FplBase 
+            | :? FplClass, :? FplBase ->
                 if bNode.Scope.Count > 0 then
-                    let bClass = bNode.Scope.Values |> Seq.head
-                    if bClass.ArgList.Count > 0 then 
-                        bClass.ArgList
+                    let nextBNode = bNode.Scope.Values |> Seq.head
+                    let baseNodes = 
+                        nextBNode.ArgList
                         |> Seq.filter (fun subNode -> subNode :? FplBase)
-                        |> Seq.iter (fun subNode ->
+                        |> Seq.toList
+                    if baseNodes.Length > 0 then 
+                        baseNodes
+                        |> List.iter (fun subNode ->
                             findChains subNode currName newPath 
                         )
                     elif paths.ContainsKey newPath then 
@@ -3858,96 +3948,6 @@ type FplVariable(fplId, positions: Positions, parent: FplValue) =
                 | LiteralUndef -> LiteralUndef
                 | _ -> $"dec {this.Type(SignatureType.Type)}" 
 
-[<AbstractClass>]
-type FplGenericFunctionalTerm(positions: Positions, parent: FplValue) as this =
-    inherit FplValue(positions, Some parent)
-    let mutable _signStartPos = Position("", 0L, 0L, 0L)
-    let mutable _signEndPos = Position("", 0L, 0L, 0L)
-
-    do 
-        this.FplId <- LiteralFunc
-        this.TypeId <- LiteralFunc
-
-    member this.SignStartPos
-        with get() = _signStartPos
-        and set(value) = _signStartPos <- value
-
-    member this.SignEndPos
-        with get() = _signEndPos
-        and set(value) = _signEndPos <- value
-
-    interface IHasSignature with
-        member this.SignStartPos 
-            with get () = this.SignStartPos
-            and set (value) = this.SignStartPos <- value
-        member this.SignEndPos 
-            with get () = this.SignEndPos
-            and set (value) = this.SignEndPos <- value
-
-    override this.Type signatureType = 
-        let head = getFplHead this signatureType
-        let propagate = propagateSignatureType signatureType
-
-        match getMapping this with
-        | Some map ->
-            let paramT = getParamTuple this signatureType
-            sprintf "%s(%s) -> %s" head paramT (map.Type(propagate))
-        | _ -> ""
-
-    override this.Represent () = 
-        if this.ValueList.Count = 0 then 
-            // since the FunctionTerm has no value, it has no return statement
-            // And the FPL syntax ensures that this can only be the case
-            // if the Functional Term is intrinsic.
-            // In this case, the "representation" of the function is
-            // its declared mapping type
-            $"dec {this.Type(SignatureType.Mixed)}"
-        else
-            let subRepr = 
-                this.ValueList
-                |> Seq.map (fun subfv -> subfv.Represent())
-                |> String.concat ", "
-            if subRepr = String.Empty then 
-                LiteralUndef
-            else
-                subRepr
-
-type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) =
-    inherit FplGenericFunctionalTerm(positions, parent)
-    let _runOrder = runOrder
-    let mutable _isReady = false
-    let mutable _callCounter = 0
-
-    interface IReady with
-        member _.IsReady = _isReady
-
-    override this.Name = PrimFuncionalTermL
-    override this.ShortName = PrimFuncionalTerm
-
-    override this.Clone () =
-        let ret = new FplFunctionalTerm((this.StartPos, this.EndPos), this.Parent.Value, _runOrder)
-        this.AssignParts(ret)
-        ret
-
-    override this.IsFplBlock () = true
-    override this.IsBlock () = true
-
-    override this.EmbedInSymbolTable _ = tryAddToParentUsingMixedSignature this
-
-    override this.RunOrder = Some _runOrder
-
-    override this.Run variableStack = 
-        if not _isReady then
-            _callCounter <- _callCounter + 1
-            if _callCounter > maxRecursion then
-                emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
-            else
-                this.ArgList
-                |> Seq.iter (fun fv -> 
-                    fv.Run variableStack
-                    this.SetValuesOf fv
-                )
-                _isReady <- this.Arity = 0 
 
 
 type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) =
