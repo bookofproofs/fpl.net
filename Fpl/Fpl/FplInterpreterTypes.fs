@@ -1594,7 +1594,6 @@ type FplGenericPredicateBlock(positions: Positions, parent: FplValue) =
             _isReady <- this.Arity = 0 
 
     override this.CheckConsistency () = 
-        base.CheckConsistency()
         if not this.IsIntrinsic then // if not intrinsic, check variable usage
             this.GetVariables()
             |> List.filter(fun var -> var.AuxiliaryInfo = 0)

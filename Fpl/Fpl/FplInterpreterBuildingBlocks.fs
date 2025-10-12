@@ -1287,15 +1287,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     // | FunctionalTermSignature of Positions * (Ast * Ast)
     | Ast.FunctionalTermSignature(((pos1, pos2), (((simpleSignatureAst, inhFunctionalTypeListAstsOpt), paramTupleAst), mappingAst)), optUserDefinedSymbolAst) -> 
-        eval st mappingAst
-        variableStack.InSignatureEvaluation <- true
         st.EvalPush("FunctionalTermSignature")
-        eval st simpleSignatureAst
-        eval st paramTupleAst
-        inhFunctionalTypeListAstsOpt |> Option.map (eval st) |> Option.defaultValue () 
-        variableStack.InSignatureEvaluation <- false
-        optUserDefinedSymbolAst |> Option.map (eval st) |> Option.defaultValue () 
-        setSignaturePositions pos1 pos2
         st.EvalPop()
     | Ast.PredicateWithQualification(predicateWithOptSpecificationAst, qualificationListAst) ->
         st.EvalPush("PredicateWithQualification")
@@ -1780,12 +1772,23 @@ let rec eval (st: SymbolTable) ast =
         let parent = variableStack.PeekEvalStack()
         let fv = new FplFunctionalTerm((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
         variableStack.PushEvalStack(fv)
-        match optDefBlock with 
-        | Some (funcContentAst, optPropertyListAsts) ->
-            eval st funcContentAst
-            optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
-        | None -> fv.IsIntrinsic <- true
-        eval st functionalTermSignatureAst 
+        match functionalTermSignatureAst with
+        | Ast.FunctionalTermSignature(((pos1, pos2), (((simpleSignatureAst, inhFunctionalTypeListAstsOpt), paramTupleAst), mappingAst)), optUserDefinedSymbolAst) -> 
+            eval st mappingAst
+            variableStack.InSignatureEvaluation <- true
+            eval st simpleSignatureAst
+            eval st paramTupleAst
+            variableStack.InSignatureEvaluation <- false
+            optUserDefinedSymbolAst |> Option.map (eval st) |> Option.defaultValue () 
+            match optDefBlock with 
+            | Some (funcContentAst, optPropertyListAsts) ->
+                eval st funcContentAst
+                optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
+            | None -> fv.IsIntrinsic <- true
+            inhFunctionalTypeListAstsOpt |> Option.map (eval st) |> Option.defaultValue () 
+            setSignaturePositions pos1 pos2
+        | _ -> ()
+        //eval st functionalTermSignatureAst 
         variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.ClassSignature((pos1, pos2), simpleSignatureAst) ->
