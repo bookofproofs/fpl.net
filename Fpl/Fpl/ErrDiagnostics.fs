@@ -402,9 +402,9 @@ type DiagnosticCode =
             | SIG05 (assigneeType, assignedType) -> $"Cannot assign type `{assignedType}` to type `{assigneeType}`."
             | SIG06 (name, first, second, isClass) -> 
                 if isClass then
-                    $"Property name `{name}` conflict between base classes `{first} and `{second}`."
+                    $"Property name `{name}` of base class `{first} will be overshadowed by `{second}`."
                 else
-                    $"Property name `{name}` conflict between base functional terms `{first} and `{second}`."
+                    $"Property name `{name}` of base functional term `{first} will be overshadowed by `{second}`."
             // variable-related error codes
             | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
             | VAR01 name -> $"Variable `{name}` not declared in this scope."
@@ -414,9 +414,9 @@ type DiagnosticCode =
             | VAR05 name -> $"Bound variable `{name}` was not used in this quantor."
             | VAR06 (name, first, second, isClass) -> 
                 if isClass then
-                    $"Variable name `{name}` conflict between base classes `{first} and `{second}`."
+                    $"Variable name `{name}` of base class `{first} will be overshadowed by `{second}`."
                 else
-                    $"Variable name `{name}` conflict between base functional terms `{first} and `{second}`."
+                    $"Variable name `{name}` of base functional term `{first} will be overshadowed by `{second}`."
             | VAR07 name -> $"The {PrimQuantorExistsN} accepts only one bound variable `{name}`."
             | VAR08 -> "Variadic variables cannot be bound in a quantor."
 

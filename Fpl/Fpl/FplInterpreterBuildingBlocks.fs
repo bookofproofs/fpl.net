@@ -1004,6 +1004,33 @@ let rec eval (st: SymbolTable) ast =
     | Ast.InheritedClassTypeList inheritedTypeAsts -> 
         st.EvalPush("InheritedFunctionalOrClassTypeList")
         let beingCreatedNode = variableStack.PeekEvalStack()
+
+        let addVariablesAndPropertiesOfBaseNode (bNode:FplValue) = 
+            // a dictionary to prevent shadowed variables
+            let distinctVariables = Dictionary<string, FplValue>()
+            // a dictionary to prevent shadowed properties
+            let distinctProperties = Dictionary<string, FplValue>()
+
+            bNode.GetVariables()
+            |> List.iter (fun var ->
+                if distinctVariables.ContainsKey var.FplId then
+                    emitVAR06iagnostic var.FplId bNode.FplId (distinctVariables[var.FplId].FplId) true bNode.StartPos bNode.EndPos
+                else
+                    // store the variable name and the class, it is from 
+                    distinctVariables.Add (var.FplId, bNode)
+                    beingCreatedNode.Scope.Add (var.FplId, var.Clone())
+            )
+            bNode.GetProperties()
+            |> List.iter (fun prty ->
+                let prtyName = prty.Type SignatureType.Mixed
+                if distinctProperties.ContainsKey prtyName then
+                    emitSIG06iagnostic prtyName bNode.FplId (distinctProperties[prtyName].FplId) true bNode.StartPos bNode.EndPos
+                else
+                    // store the property name and the class, it is from 
+                    distinctProperties.Add (prtyName, bNode)
+                    beingCreatedNode.Scope.Add (prtyName, prty.Clone())
+            )
+
         inheritedTypeAsts
         |> List.iter (fun baseAst ->
             match baseAst with
@@ -1024,8 +1051,10 @@ let rec eval (st: SymbolTable) ast =
                             emitID007diagnostics beingCreatedNode.Name nodeType foundBase.Name baseType pos1 pos2
                         else 
                             baseNode.Scope.Add (foundBase.FplId, foundBase) // add found functional term to base
+                            addVariablesAndPropertiesOfBaseNode foundBase
                     | :? FplClass, :? FplClass -> 
                         baseNode.Scope.Add (foundBase.FplId, foundBase) // add found base class to base
+                        addVariablesAndPropertiesOfBaseNode foundBase
                     | :? FplFunctionalTerm, _
                     | :? FplClass, _ ->
                         let nodeType = beingCreatedNode.Type SignatureType.Type

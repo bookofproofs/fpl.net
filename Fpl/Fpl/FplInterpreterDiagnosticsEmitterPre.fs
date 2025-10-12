@@ -698,11 +698,11 @@ let emitSIG06iagnostic name first second isClass pos1 pos2  =
         { 
             Diagnostic.Uri = ad.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.Severity = DiagnosticSeverity.Warning
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = SIG06(name, first, second, isClass)
-            Diagnostic.Alternatives = Some "Rename the original properties to avoid name conflicts." 
+            Diagnostic.Alternatives = Some "Consider renaming the properties to avoid name conflicts." 
         }
     ad.AddDiagnostic diagnostic
 
@@ -767,11 +767,11 @@ let emitVAR06iagnostic name first second isClass pos1 pos2  =
         { 
             Diagnostic.Uri = ad.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.Severity = DiagnosticSeverity.Warning
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = VAR06(name, first, second, isClass)
-            Diagnostic.Alternatives = Some "Rename the original variables to avoid name conflicts." 
+            Diagnostic.Alternatives = Some "Consider renaming the original variables to avoid name conflicts." 
         }
     ad.AddDiagnostic diagnostic
 

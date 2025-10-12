@@ -4465,11 +4465,6 @@ type FplGenericConstructor(name, positions: Positions, parent: FplValue) as this
 
 
     override this.Run variableStack = 
-        // a dictionary to prevent shadowed variables
-        let distinctVariables = Dictionary<string, FplValue>()
-        // a dictionary to prevent shadowed properties
-        let distinctProperties = Dictionary<string, FplValue>()
-    
         let rec createSubInstance (classDef:FplValue) (instance:FplValue) (baseInstance:FplValue)=
             if classDef.IsIntrinsic then
                 classDef.ArgList
@@ -4478,25 +4473,6 @@ type FplGenericConstructor(name, positions: Positions, parent: FplValue) as this
                     let subInstance = new FplInstance((this.StartPos, this.EndPos), this)
                     subInstance.FplId <- baseClass.FplId
                     subInstance.TypeId <- subInstance.FplId
-                    baseClass.GetVariables()
-                    |> List.iter (fun var ->
-                        if distinctVariables.ContainsKey var.FplId then
-                            emitVAR06iagnostic var.FplId baseClass.FplId (distinctVariables[var.FplId].FplId) true baseInstance.StartPos baseInstance.EndPos
-                        else
-                            // store the variable name and the class, it is from 
-                            distinctVariables.Add (var.FplId, baseClass)
-                            baseInstance.Scope.Add (var.FplId, var.Clone())
-                    )
-                    baseClass.GetProperties()
-                    |> List.iter (fun prty ->
-                        let prtyName = prty.Type SignatureType.Mixed
-                        if distinctProperties.ContainsKey prtyName then
-                            emitSIG06iagnostic prtyName baseClass.FplId (distinctProperties[prtyName].FplId) true baseInstance.StartPos baseInstance.EndPos
-                        else
-                            // store the property name and the class, it is from 
-                            distinctProperties.Add (prtyName, baseClass)
-                            baseInstance.Scope.Add (prtyName, prty.Clone())
-                    )
                     createSubInstance baseClass subInstance baseInstance
                     instance.ArgList.Add subInstance
                 )
