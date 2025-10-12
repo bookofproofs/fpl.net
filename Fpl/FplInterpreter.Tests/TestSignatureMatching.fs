@@ -522,6 +522,55 @@ type TestSignatureMatching() =
         | None -> 
             Assert.IsTrue(false)
 
+    [<DataRow("00", "def func T()->obj {intr};", "T() -> obj", "ok")>]
+    [<DataRow("01", "def func T:Test()->obj {intr};", "T:Test", "ok")>]
+    [<DataRow("02", "def func T:Test1, Test3()->obj {intr};", "T:Test1, T:Test3", "ok|ok")>]
+    [<DataRow("03", "def func T:Test1, Test2, Test3()->obj {intr};", "T:Test1, T:Test2, T:Test3", "ok|ok|ok")>]
+    [<DataRow("04", "def func A()->obj {intr} def func B()->obj {intr} def func C()->obj {intr} def func T:A,B,C,E()->obj {ctor D() {dec base.A() base.B() base.C() base.F(); } };", "T:A, T:B, T:C, T:E", "ok|ok|ok|ok")>]
+    [<DataRow("05", "def func A()->obj {intr} def func T:A()->obj {ctor B() {dec base.A(); } };", "T:A", "ok")>]
+    [<DataRow("06", "def func A()->obj {intr} def func T:A()->obj {ctor B() {dec base.C(); } };", "T:A", "ok")>]
+    [<DataRow("07", "def func T()->obj { ctor A() {dec base.Obj(); } };", "T() -> obj", "ok")>]
+    [<DataRow("08", "def func T()->obj { ctor A() {dec base.B(); } };", "T() -> obj", "ok")>]
+    [<DataRow("09", "def func T:C()->obj { ctor A() {dec base.Obj(); } };", "T:C", "ok")>]
+    [<DataRow("10", "def func A()->obj {intr} def func B:A ()->obj {intr} def func T:B,A()->obj {intr};", "T:B:A, T:A", "ok|cross-inheritance not supported, `A` is base for `B` and `T`.")>]
+    [<DataRow("11", "def func Set()->obj def func EmptySet:Set()->obj def func T:EmptySet()->obj;", "T:EmptySet:Set", "ok")>]
+    [<DataRow("12", "def func A()->obj {intr} def func B:A()->obj {intr} def func T:A,B()->obj {intr};", "T:A, T:B:A", "ok|cross-inheritance not supported, `A` is base for `T` and `B`.")>]
+    [<DataRow("13", "def func A()->obj {intr} def func B:A()->obj {intr} def func T:B()->obj {intr};", "T:B:A", "ok")>]
+    [<DataRow("14", "def func A()->obj {intr} def func B:A()->obj {intr} def func T:A()->obj {intr};", "T:A", "ok")>]
+    [<DataRow("15", "def func A()->obj {intr} def func B:A()->obj {intr} def func T:A,A()->obj {intr};", "T:A", "duplicate inheritance from `A` detected.")>]
+    [<DataRow("16", "def func A()->obj {intr} def func B:A()->obj {intr} def func T:A,C,A()->obj {intr};", "T:A, T:C", "duplicate inheritance from `A` detected.|ok")>]
+    [<DataRow("17", "def func A()->obj {intr} def func B:A()->obj {intr} def func T()->obj {intr};", "T() -> obj", "ok")>]
+    [<DataRow("18", "def func A()->obj {intr} def func B:A()->obj {intr} def func T:D,E()->obj {intr};", "T:D, T:E", "ok|ok")>]
+    [<DataRow("19", "def func A:B()->obj def func B:A()->obj def func T:A()->obj;", "T:A:B", "ok")>]
+    [<DataRow("20a", "def func A:B()->obj def func B:A()->obj def func T:B()->obj;", "T:B:A:B", "cross-inheritance not supported, `B` is base for `T` and `A`.")>]
+    [<DataRow("20b", "def func A:B()->obj def func B:A()->obj def func T:A,B()->obj;", "T:A:B, T:B", "ok|cross-inheritance not supported, `B` is base for `A` and `T`.")>]
+    [<DataRow("20c", "def func A:B()->obj def func B:A()->obj def func T:B,A()->obj;", "T:B:A:B, T:A", "cross-inheritance not supported, `B` is base for `T` and `A`.|cross-inheritance not supported, `A` is base for `B` and `T`.")>]
+    [<TestMethod>]
+    member this.TestBaseFunctionalTermPath(no:string, varVal:string, expectedPaths:string, expectedMessages:string) =
+        ad.Clear()
+        let fplCode = sprintf """%s""" varVal
+        let filename = "TestBaseFunctionalTermPath"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let blocks = theory.Scope.Values |> Seq.toList 
+            let cl = blocks |> List.filter(fun fv -> fv.FplId = "T") |> List.head
+            let paths = 
+                findInheritanceChains cl 
+                |> Seq.map (fun kvp -> kvp.Key) 
+                |> String.concat ", "
+            Assert.AreEqual<string>(expectedPaths, paths)
+            let messages = 
+                findInheritanceChains cl 
+                |> Seq.map (fun kvp -> kvp.Value) 
+                |> String.concat "|"
+            Assert.AreEqual<string>(expectedMessages, messages)
+        | None -> 
+            Assert.IsTrue(false)
+
     [<DataRow("inh", """def cl A { intr } def pred T() {dec ~n:A n:=A(); true};""", "")>]
     [<DataRow("inh_a", """def cl A { intr } def pred T() {dec ~n:obj n:=A(); true};""", "")>]
     [<DataRow("inh_b", """def cl A {intr} def cl B:A { intr } def pred T() {dec ~n:A n:=B(); true};""", "")>]

@@ -1000,24 +1000,18 @@ let rec eval (st: SymbolTable) ast =
         eval st ebnfAst
         variableStack.PopEvalStack() // remove language
         st.EvalPop()
-    | Ast.InheritedFunctionalTypeList inheritedFunctionalTypeAsts -> 
-        st.EvalPush("InheritedFunctionalTypeList")
-        inheritedFunctionalTypeAsts
-        |> List.iter (fun baseFunctionalAst ->
-            eval st baseFunctionalAst
-        )
-        st.EvalPop()
-    | Ast.InheritedClassTypeList inheritedClassTypeAsts -> 
-        st.EvalPush("InheritedClassTypeList")
+    | Ast.InheritedFunctionalTypeList inheritedTypeAsts 
+    | Ast.InheritedClassTypeList inheritedTypeAsts -> 
+        st.EvalPush("InheritedFunctionalOrClassTypeList")
         let beingCreatedNode = variableStack.PeekEvalStack()
-        inheritedClassTypeAsts
-        |> List.iter (fun baseClassAst ->
-            match baseClassAst with
+        inheritedTypeAsts
+        |> List.iter (fun baseAst ->
+            match baseAst with
             | Ast.PredicateIdentifier((pos1, pos2), _) ->
                 // retrieve the name of the class and the class (if it exists)
                 let baseNode = new FplBase((pos1, pos2), beingCreatedNode)
                 variableStack.PushEvalStack(baseNode)            
-                eval st baseClassAst
+                eval st baseAst
                 variableStack.PopEvalStack() |> ignore
                 let candidates = findCandidatesByName st baseNode.FplId false false
                 if candidates.Length > 0 then 

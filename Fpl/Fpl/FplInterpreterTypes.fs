@@ -3354,6 +3354,7 @@ let findInheritanceChains (baseNode: FplValue) =
             match bNode with 
             | :? FplClass ->
                 bNode.ArgList
+                |> Seq.filter (fun subNode -> subNode :? FplBase)
                 |> Seq.iter (fun subNode ->
                     findChains subNode currName newPath 
                 )
@@ -3362,6 +3363,7 @@ let findInheritanceChains (baseNode: FplValue) =
                     let bClass = bNode.Scope.Values |> Seq.head
                     if bClass.ArgList.Count > 0 then 
                         bClass.ArgList
+                        |> Seq.filter (fun subNode -> subNode :? FplBase)
                         |> Seq.iter (fun subNode ->
                             findChains subNode currName newPath 
                         )
@@ -5061,7 +5063,11 @@ let findCandidatesByName (st: SymbolTable) (name: string) withClassConstructors 
             theory.Value.Scope
             // filter only blocks starting with the same FplId as the reference
             |> Seq.map (fun kvp -> kvp.Value)
-            |> Seq.filter (fun fv -> fv.FplId = name || fv.FplId = nameWithoutProofOrCorRef || fv.FplId = $"@{nameWithoutProofOrCorRef}")
+            |> Seq.filter (fun fv -> 
+                fv.FplId = name 
+                || fv.FplId = nameWithoutProofOrCorRef 
+                || $"{fv.FplId}$" = nameWithProofOrCorRef 
+                || fv.FplId = $"@{nameWithoutProofOrCorRef}")
             |> Seq.iter (fun (block: FplValue) ->
                 pm.Add(block)
 
