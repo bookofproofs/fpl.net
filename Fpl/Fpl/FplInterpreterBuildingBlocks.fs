@@ -549,7 +549,6 @@ let rec eval (st: SymbolTable) ast =
         eval st signatureAst
         eval st premiseConclusionBlockAst
         ad.DiagnosticsStopped <- false // enable all diagnostics after rule of inference
-        emitVAR04diagnostics fv
         variableStack.PopEvalStack() 
         st.EvalPop() 
     | Ast.Mapping((pos1, pos2), variableTypeAst) ->

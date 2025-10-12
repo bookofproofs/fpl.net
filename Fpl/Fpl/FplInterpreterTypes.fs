@@ -1218,6 +1218,15 @@ type FplGenericPredicateWithExpression(positions: Positions, parent: FplValue) =
             and set (value) = this.SignEndPos <- value
 
     override this.Type signatureType = getFplHead this signatureType
+
+    override this.CheckConsistency () = 
+        base.CheckConsistency()
+        this.GetVariables()
+        |> List.filter(fun var -> var.AuxiliaryInfo = 0)
+        |> List.iter (fun var -> 
+            emitVAR04diagnostics var.FplId var.StartPos var.EndPos
+        )
+
             
 [<AbstractClass>]
 type FplGenericObject(positions: Positions, parent: FplValue) as this =
@@ -1277,7 +1286,9 @@ type FplRuleOfInference(positions: Positions, parent: FplValue, runOrder) =
         // todo implement run
         emitLG004diagnostic this.Name this.Arity this.StartPos this.EndPos
 
-    override this.EmbedInSymbolTable _ = tryAddToParentUsingFplId this
+    override this.EmbedInSymbolTable _ = 
+        this.CheckConsistency()
+        tryAddToParentUsingFplId this
 
     override this.RunOrder = Some _runOrder
 
