@@ -469,27 +469,27 @@ type TestInterpreterErrors() =
             let code = ID010 ""
             runTestHelper "TestID010.fpl" fplCode code expected
 
-    [<DataRow("def cl A {intr};", 0)>]
-    [<DataRow("def cl A {intr} def cl B:A {intr};", 1)>]
-    [<DataRow("def cl A {intr} def cl B:A {intr} def cl C:B,A {intr};", 1)>]
-    [<DataRow("uses Fpl.SetTheory def cl Test:EmptySet,Set {intr};", 1)>]
-    [<DataRow("uses Fpl.SetTheory def cl Test:Set, EmptySet {intr};", 1)>]
-    [<DataRow("def cl A {intr} def cl B:A {intr} def cl C:A,B {intr};", 1)>]
-    [<DataRow("def cl A {intr} def cl B:A {intr} def cl C:B {intr};", 0)>]
-    [<DataRow("uses Fpl.SetTheory def cl Test:EmptySet {intr};", 0)>]
-    [<DataRow("uses Fpl.SetTheory def cl Test:Set {intr};", 0)>]
-    [<DataRow("uses Fpl.Commons uses Fpl.SetTheory def cl Test:Set {intr};", 0)>]
-    [<DataRow("def cl A {intr} def cl B:A {intr} def cl C:A {intr};", 0)>]
-    [<DataRow("def cl A {intr} def cl B:A {intr} def cl C:A,A {intr};", 1)>]
-    [<DataRow("def cl A {intr} def cl B:A {intr} def cl C {intr};", 1)>]
-    [<DataRow("def cl A {intr} def cl B:A {intr} def cl C:D,E {intr};", 1)>]
-    [<DataRow("uses Fpl.SetTheory def cl Test:Set {intr};", 1)>]
-    [<DataRow("uses Fpl.SetTheory def cl Test:EmptySet {intr};", 1)>]
-    [<DataRow("uses Fpl.SetTheory def cl Test:Set {intr};", 1)>]
-    [<DataRow("uses Fpl.SetTheory def cl Test:EmptySet {intr};", 1)>]
-    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
+    [<DataRow("00", "def cl A {intr};", 0)>]
+    [<DataRow("01", "def cl A {intr} def cl B:A {intr};", 0)>]
+    [<DataRow("02", "def cl A {intr} def cl B:A {intr} def cl C:B,A {intr};", 1)>]
+    [<DataRow("03", "uses Fpl.SetTheory def cl Test:EmptySet,Set {intr};", 1)>]
+    [<DataRow("04", "uses Fpl.SetTheory def cl Test:Set, EmptySet {intr};", 1)>]
+    [<DataRow("05", "def cl A {intr} def cl B:A {intr} def cl C:A,B {intr};", 1)>]
+    [<DataRow("06", "def cl A {intr} def cl B:A {intr} def cl C:B {intr};", 0)>]
+    [<DataRow("07", "uses Fpl.SetTheory def cl Test:EmptySet {intr};", 0)>]
+    [<DataRow("08", "uses Fpl.SetTheory def cl Test:Set {intr};", 0)>]
+    [<DataRow("09", "uses Fpl.Commons uses Fpl.SetTheory def cl Test:Set {intr};", 0)>]
+    [<DataRow("10", "def cl A {intr} def cl B:A {intr} def cl C:A {intr};", 0)>]
+    [<DataRow("11", "def cl A {intr} def cl B:A {intr} def cl C:A,A {intr};", 1)>]
+    [<DataRow("12", "def cl A {intr} def cl B:A {intr} def cl C {intr};", 0)>]
+    [<DataRow("13", "def cl A {intr} def cl B:A {intr} def cl C:D,E {intr};", 0)>]
+    [<DataRow("14", "uses Fpl.SetTheory def cl Test:Set {intr};", 0)>]
+    [<DataRow("15", "uses Fpl.SetTheory def cl Test:EmptySet {intr};", 0)>]
+    [<DataRow("16", "uses Fpl.SetTheory def cl Test:Set {intr};", 0)>]
+    [<DataRow("17", "uses Fpl.SetTheory def cl Test:EmptySet {intr};", 0)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
-    member this.TestID011(fplCode:string, expected) =
+    member this.TestID011(no:string, fplCode:string, expected) =
         if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else

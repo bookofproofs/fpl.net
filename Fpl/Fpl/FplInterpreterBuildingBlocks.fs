@@ -1004,13 +1004,19 @@ let rec eval (st: SymbolTable) ast =
     | Ast.InheritedClassTypeList inheritedTypeAsts -> 
         st.EvalPush("InheritedFunctionalOrClassTypeList")
         let beingCreatedNode = variableStack.PeekEvalStack()
-
+        // a dictionary to prevent shadowed variables
+        let distinctVariables = Dictionary<string, FplValue>()
+        beingCreatedNode.GetVariables()
+        |> List.iter (fun fv ->
+            distinctVariables.Add(fv.FplId, beingCreatedNode)
+        )
+        // a dictionary to prevent shadowed properties
+        let distinctProperties = Dictionary<string, FplValue>()
+        beingCreatedNode.GetProperties()
+        |> List.iter (fun fv ->
+            distinctVariables.Add(fv.Type SignatureType.Mixed, beingCreatedNode)
+        )
         let addVariablesAndPropertiesOfBaseNode (bNode:FplValue) = 
-            // a dictionary to prevent shadowed variables
-            let distinctVariables = Dictionary<string, FplValue>()
-            // a dictionary to prevent shadowed properties
-            let distinctProperties = Dictionary<string, FplValue>()
-
             bNode.GetVariables()
             |> List.iter (fun var ->
                 if distinctVariables.ContainsKey var.FplId then
@@ -1780,12 +1786,12 @@ let rec eval (st: SymbolTable) ast =
         let parent = variableStack.PeekEvalStack()
         let fv = new FplFunctionalTerm((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
         variableStack.PushEvalStack(fv)
-        eval st functionalTermSignatureAst 
         match optDefBlock with 
         | Some (funcContentAst, optPropertyListAsts) ->
             eval st funcContentAst
             optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
         | None -> fv.IsIntrinsic <- true
+        eval st functionalTermSignatureAst 
         if not fv.IsIntrinsic then // if not intrinsic, check variable usage
             emitVAR04diagnostics fv
         variableStack.PopEvalStack()
@@ -1803,13 +1809,13 @@ let rec eval (st: SymbolTable) ast =
         let fv = new FplClass((pos1, pos2), parent)
         variableStack.PushEvalStack(fv)
         eval st classSignatureAst
-        optInheritedClassTypeListAst |> Option.map (eval st) |> Option.defaultValue ()
         optUserDefinedObjSymAst |> Option.map (eval st) |> Option.defaultValue ()
         match optDefBlock with 
         | Some (classContentAst, optPropertyListAsts) ->
             eval st classContentAst
             optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
         | None -> fv.IsIntrinsic <- true
+        optInheritedClassTypeListAst |> Option.map (eval st) |> Option.defaultValue ()
         emitVAR04diagnostics fv
         variableStack.PopEvalStack()
         st.EvalPop()
