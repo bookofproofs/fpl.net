@@ -1694,7 +1694,9 @@ type FplGenericTheoremLikeStmt(positions: Positions, parent: FplValue, runOrder)
     override this.IsFplBlock () = true
     override this.IsBlock () = true
 
-    override this.EmbedInSymbolTable _ = tryAddToParentUsingFplId this 
+    override this.EmbedInSymbolTable _ = 
+        this.CheckConsistency()
+        tryAddToParentUsingFplId this 
 
     override this.Run variableStack = 
         if not _isReady then

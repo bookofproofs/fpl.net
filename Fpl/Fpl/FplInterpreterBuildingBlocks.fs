@@ -1534,8 +1534,6 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(fvNew)
         eval st signatureAst
         eval st predInstanceBlockAst
-        if not fvNew.IsIntrinsic then // if not intrinsic, check variable usage
-            emitVAR04diagnosticsOld fvNew
         variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.BaseConstructorCall((pos1, pos2), (inheritedClassTypeAst, argumentTupleAst)) ->
@@ -1599,7 +1597,6 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(fv)
         eval st signatureAst
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
-        emitVAR04diagnosticsOld fv
         variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.LemmaSignature((pos1, pos2), simpleSignatureAst) ->
@@ -1616,7 +1613,6 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(fv)
         eval st signatureAst
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
-        emitVAR04diagnosticsOld fv
         variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.PropositionSignature((pos1, pos2), simpleSignatureAst) ->
@@ -1633,7 +1629,6 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(fv)
         eval st signatureAst
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
-        emitVAR04diagnosticsOld fv
         variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.ConjectureSignature((pos1, pos2), simpleSignatureAst) ->
