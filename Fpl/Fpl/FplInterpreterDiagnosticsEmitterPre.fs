@@ -113,6 +113,19 @@ let emitID006diagnostics name pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
 
+let emitID007diagnostics nodeType signatureNode baseType signatureBase pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ID007 (nodeType, signatureNode, baseType, signatureBase)
+            Diagnostic.Alternatives = None
+        }
+    ad.AddDiagnostic diagnostic
+
 let emitID008Diagnostics constructorId classId pos1 pos2 =
     if constructorId <> classId then
         let diagnostic =

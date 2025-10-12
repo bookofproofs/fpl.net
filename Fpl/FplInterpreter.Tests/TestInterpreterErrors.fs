@@ -382,6 +382,21 @@ type TestInterpreterErrors() =
             let code = ID006 ""
             runTestHelper "TestID006.fpl" fplCode code expected
 
+    [<DataRow("00", "def cl T;", 0)>]
+    [<DataRow("00a", "def cl A def cl T:A;", 0)>]
+    [<DataRow("00b", "ax A {true} def cl T:A;", 1)>]
+    [<DataRow("01", "def func T()->obj;", 0)>]
+    [<DataRow("01a", "def func A()->obj def func T:A()->obj ;", 0)>]
+    [<DataRow("01b", "def func A(x:obj)->obj def func T:A()->obj ;", 1)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestID007(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = ID007 ("", "", "", "") 
+            runTestHelper "TestID007.fpl" fplCode code expected
+
     [<DataRow("def cl Test {ctor TestTypo(x:Nat) {}};", 1)>]
     [<DataRow("def cl Test {ctor TestTypo1() {}};", 1)>]
     [<DataRow("def cl Test {ctor Test() {}};", 0)>]

@@ -111,6 +111,8 @@ type DiagnosticCode =
     | ID004 of string
     | ID005 of string * string
     | ID006 of string
+    /// (nodeType, signatureNode, baseType, signatureBase) -> $"The {nodeType} `{signatureNode}` cannot inherit from {baseType} `{signatureBase}`."  
+    | ID007 of string * string * string * string
     | ID008 of string * string
     | ID009 of string
     | ID010 of string
@@ -221,6 +223,7 @@ type DiagnosticCode =
             | ID004 _ -> "ID004"
             | ID005 _ -> "ID005"
             | ID006 _ -> "ID006"
+            | ID007 _ -> "ID007"
             | ID008 _ -> "ID008"
             | ID009 _ -> "ID009"
             | ID010 _ -> "ID010"
@@ -331,6 +334,7 @@ type DiagnosticCode =
             | ID004 name -> $"Cannot assign `{name}`, it is a class, not an instance; use a constructor `{name}()` instead."  
             | ID005 (signature, incorrectBlockType) -> $"Cannot find a block to be associated with the corollary `{signature}`, found only {incorrectBlockType}."  
             | ID006 signature -> $"The corollary `{signature}` is missing a block to be associated with."  
+            | ID007 (nodeType, signatureNode, baseType, signatureBase) -> $"The {nodeType} `{signatureNode}` cannot inherit from {baseType} `{signatureBase}`."  
             | ID008 (constructorId, classId)  -> $"Misspelled constructor name `{constructorId}`, expecting `{classId}`."  
             | ID009 name -> $"Circular base type dependency involving `{name}`." 
             | ID010 name -> $"The type `{name}` could not be found. Are you missing a uses clause?" 

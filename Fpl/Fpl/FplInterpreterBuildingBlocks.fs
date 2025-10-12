@@ -1015,8 +1015,23 @@ let rec eval (st: SymbolTable) ast =
                 variableStack.PopEvalStack() |> ignore
                 let candidates = findCandidatesByName st baseNode.FplId false false
                 if candidates.Length > 0 then 
-                   let foundBaseClass = candidates.Head
-                   baseNode.Scope.Add (foundBaseClass.FplId, foundBaseClass) // add base class to base
+                    let foundBase = candidates.Head
+                    match beingCreatedNode, foundBase with
+                    | :? FplFunctionalTerm, :? FplFunctionalTerm ->
+                        let nodeType = beingCreatedNode.Type SignatureType.Type
+                        let baseType = foundBase.Type SignatureType.Type
+                        if nodeType <> baseType then 
+                            emitID007diagnostics beingCreatedNode.Name nodeType foundBase.Name baseType pos1 pos2
+                        else 
+                            baseNode.Scope.Add (foundBase.FplId, foundBase) // add found functional term to base
+                    | :? FplClass, :? FplClass -> 
+                        baseNode.Scope.Add (foundBase.FplId, foundBase) // add found base class to base
+                    | :? FplFunctionalTerm, _
+                    | :? FplClass, _ ->
+                        let nodeType = beingCreatedNode.Type SignatureType.Type
+                        let baseType = foundBase.Type SignatureType.Type
+                        emitID007diagnostics beingCreatedNode.Name nodeType foundBase.Name baseType pos1 pos2
+                    | _ -> () // does not occur, since syntax of inherited base from non-classes and non-functional terms is not supported 
                 else
                     emitID010Diagnostics baseNode.FplId pos1 pos2
                 if baseNode.FplId = beingCreatedNode.FplId then 
@@ -1236,13 +1251,13 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     // | FunctionalTermSignature of Positions * (Ast * Ast)
     | Ast.FunctionalTermSignature(((pos1, pos2), (((simpleSignatureAst, inhFunctionalTypeListAstsOpt), paramTupleAst), mappingAst)), optUserDefinedSymbolAst) -> 
+        eval st mappingAst
         variableStack.InSignatureEvaluation <- true
         st.EvalPush("FunctionalTermSignature")
         eval st simpleSignatureAst
         eval st paramTupleAst
         inhFunctionalTypeListAstsOpt |> Option.map (eval st) |> Option.defaultValue () 
         variableStack.InSignatureEvaluation <- false
-        eval st mappingAst
         optUserDefinedSymbolAst |> Option.map (eval st) |> Option.defaultValue () 
         setSignaturePositions pos1 pos2
         st.EvalPop()
