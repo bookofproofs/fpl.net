@@ -1013,7 +1013,7 @@ let rec eval (st: SymbolTable) ast =
                 variableStack.PushEvalStack(baseNode)            
                 eval st baseAst
                 variableStack.PopEvalStack() |> ignore
-                let candidates = findCandidatesByName st baseNode.FplId false false
+                let candidates = findCandidatesByName st baseNode.FplId false true
                 if candidates.Length > 0 then 
                     let foundBase = candidates.Head
                     match beingCreatedNode, foundBase with

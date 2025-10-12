@@ -5066,7 +5066,7 @@ let findCandidatesByName (st: SymbolTable) (name: string) withClassConstructors 
             |> Seq.filter (fun fv -> 
                 fv.FplId = name 
                 || fv.FplId = nameWithoutProofOrCorRef 
-                || $"{fv.FplId}$" = nameWithProofOrCorRef 
+                || $"{fv.FplId}$".StartsWith nameWithProofOrCorRef 
                 || fv.FplId = $"@{nameWithoutProofOrCorRef}")
             |> Seq.iter (fun (block: FplValue) ->
                 pm.Add(block)
