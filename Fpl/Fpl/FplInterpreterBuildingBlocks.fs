@@ -544,11 +544,12 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("RuleOfInference")
         let parent = variableStack.PeekEvalStack()
         let fv = new FplRuleOfInference((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
+        let oldDiagnosticsStopped = ad.DiagnosticsStopped
         ad.DiagnosticsStopped <- true // stop all diagnostics during rule of inference
         variableStack.PushEvalStack(fv)
         eval st signatureAst
         eval st premiseConclusionBlockAst
-        ad.DiagnosticsStopped <- false // enable all diagnostics after rule of inference
+        ad.DiagnosticsStopped <- oldDiagnosticsStopped // enable all diagnostics after rule of inference
         variableStack.PopEvalStack() 
         st.EvalPop() 
     | Ast.Mapping((pos1, pos2), variableTypeAst) ->
@@ -1198,7 +1199,8 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Localization")
         let parent = variableStack.PeekEvalStack()
         let fv = new FplLocalization((pos1, pos2), parent)
-        let var04List = Dictionary<string, Positions>()
+        let var04List = List<KeyValuePair<string, Positions>>()
+        let oldDiagnosticsStopped = ad.DiagnosticsStopped
         ad.DiagnosticsStopped <- true // stop all diagnostics during localization
         variableStack.PushEvalStack(fv)
         eval st predicateAst
@@ -1217,11 +1219,12 @@ let rec eval (st: SymbolTable) ast =
                     |> List.rev
                 if not languageList.IsEmpty then
                     let lan = languageList.Head
-                    var04List.Add (var.FplId,(lan.StartPos, lan.EndPos))
+                    let kvp = KeyValuePair(var.FplId,(lan.StartPos, lan.EndPos))
+                    var04List.Add kvp
             )
         ) |> ignore
         variableStack.PopEvalStack()
-        ad.DiagnosticsStopped <- false // enable all diagnostics during localization
+        ad.DiagnosticsStopped <- oldDiagnosticsStopped // enable all diagnostics during localization
         var04List
         |> Seq.iter (fun kvp -> 
             emitVAR04diagnostics kvp.Key (fst kvp.Value) (snd kvp.Value)

@@ -1115,10 +1115,10 @@ let tryAddToParentUsingTypedSignature (fplValue:FplValue) =
         |> Seq.toList
 
     if conflicts.Length > 0 then 
-        let old = ad.DiagnosticsStopped 
+        let oldDiagnosticsStopped = ad.DiagnosticsStopped 
         ad.DiagnosticsStopped <- false
         emitID024Diagnostics identifier (conflicts.Head.QualifiedStartPos) fplValue.StartPos fplValue.EndPos
-        ad.DiagnosticsStopped <- old
+        ad.DiagnosticsStopped <- oldDiagnosticsStopped
     else
         let parent = fplValue.Parent.Value
         parent.Scope.Add(identifier, fplValue)
@@ -3756,10 +3756,10 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
     override this.EmbedInSymbolTable nextOpt =
         let addToRuleOfInference (block:FplValue) = 
             if block.Scope.ContainsKey(this.FplId) then
-                let old = ad.DiagnosticsStopped 
+                let oldDiagnosticsStopped = ad.DiagnosticsStopped 
                 ad.DiagnosticsStopped <- false
                 emitVAR03diagnostics this.FplId block.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos false
-                ad.DiagnosticsStopped <- old
+                ad.DiagnosticsStopped <- oldDiagnosticsStopped
             else
                 block.Scope.Add(this.FplId, this)
 
@@ -3999,7 +3999,9 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) =
 
     override this.IsBlock () = true
 
-    override this.EmbedInSymbolTable _ = tryAddSubBlockToFplBlock this
+    override this.EmbedInSymbolTable _ = 
+        this.CheckConsistency()
+        tryAddSubBlockToFplBlock this
 
     override this.RunOrder = None
 
