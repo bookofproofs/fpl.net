@@ -1645,7 +1645,6 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(fv)
         eval st signatureAst
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
-        emitVAR04diagnosticsOld fv
         variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.AxiomSignature((pos1, pos2), simpleSignatureAst) ->
@@ -1662,7 +1661,6 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(fv)
         eval st signatureAst
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
-        emitVAR04diagnosticsOld fv
         variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.CorollarySignature((pos1, pos2), (simpleSignatureAst, dollarDigitListAsts)) ->
@@ -1682,8 +1680,8 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PopEvalStack() // add to parent theorem (if any) 
         variableStack.PushEvalStack(fv) // push again to have the current corollary on stack
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
-        // now, we are ready to emit VAR03 diagnostics for all variables declared in the signature of the corollary.
-        emitVAR04diagnosticsOld fv
+        // now, we are ready to emit VAR04 diagnostics for all variables declared in the signature of the corollary.
+        fv.CheckConsistency()
         variableStack.Pop() |> ignore // pop without 
         st.EvalPop()
     // | NamedVarDecl of Positions * ((Ast list * Ast) * Ast)
@@ -1788,8 +1786,6 @@ let rec eval (st: SymbolTable) ast =
             optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
         | None -> fv.IsIntrinsic <- true
         eval st functionalTermSignatureAst 
-        if not fv.IsIntrinsic then // if not intrinsic, check variable usage
-            emitVAR04diagnosticsOld fv
         variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.ClassSignature((pos1, pos2), simpleSignatureAst) ->
@@ -1812,7 +1808,6 @@ let rec eval (st: SymbolTable) ast =
             optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
         | None -> fv.IsIntrinsic <- true
         optInheritedClassTypeListAst |> Option.map (eval st) |> Option.defaultValue ()
-        emitVAR04diagnosticsOld fv
         variableStack.PopEvalStack()
         st.EvalPop()
     // | DerivedPredicate of Ast
@@ -1835,7 +1830,7 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(fv) // push again
         proofArgumentListAst |> List.map (eval st) |> ignore
         optQedAst |> Option.map (eval st) |> Option.defaultValue ()
-        emitVAR04diagnosticsOld fv
+        fv.CheckConsistency()
         let value = new FplIntrinsicPred((pos1,pos1), fv)
         value.FplId <- LiteralTrue
         // check if all arguments could be correctly inferred

@@ -1474,8 +1474,17 @@ and FplClass(positions: Positions, parent: FplValue) =
     override this.Run _ = 
         this.SetValue(new FplInstance((this.StartPos, this.EndPos), this))
 
+    override this.CheckConsistency () = 
+        base.CheckConsistency()
+        this.GetVariables()
+        |> List.filter(fun var -> var.AuxiliaryInfo = 0)
+        |> List.iter (fun var -> 
+            emitVAR04diagnostics var.FplId var.StartPos var.EndPos
+        )
 
-    override this.EmbedInSymbolTable _ = tryAddToParentUsingFplId this 
+    override this.EmbedInSymbolTable _ = 
+        this.CheckConsistency()
+        tryAddToParentUsingFplId this 
 
     override this.RunOrder = None
 
@@ -1658,7 +1667,9 @@ type FplAxiom(positions: Positions, parent: FplValue, runOrder) =
     override this.IsFplBlock () = true
     override this.IsBlock () = true
 
-    override this.EmbedInSymbolTable _ = tryAddToParentUsingFplId this
+    override this.EmbedInSymbolTable _ = 
+        this.CheckConsistency()
+        tryAddToParentUsingFplId this
 
     override this.Run variableStack = 
         if not _isReady then
@@ -1846,7 +1857,9 @@ type FplConjecture(positions: Positions, parent: FplValue, runOrder) =
     override this.IsFplBlock () = true
     override this.IsBlock () = true
 
-    override this.EmbedInSymbolTable _ = tryAddToParentUsingFplId this 
+    override this.EmbedInSymbolTable _ = 
+        this.CheckConsistency()
+        tryAddToParentUsingFplId this 
 
     override this.Run variableStack = 
         if not _isReady then
@@ -3377,6 +3390,15 @@ type FplGenericFunctionalTerm(positions: Positions, parent: FplValue) as this =
             else
                 subRepr
 
+    override this.CheckConsistency () = 
+        base.CheckConsistency()
+        if not this.IsIntrinsic then // if not intrinsic, check variable usage
+            this.GetVariables()
+            |> List.filter(fun var -> var.AuxiliaryInfo = 0)
+            |> List.iter (fun var -> 
+                emitVAR04diagnostics var.FplId var.StartPos var.EndPos
+            )
+
 type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) =
     inherit FplGenericFunctionalTerm(positions, parent)
     let _runOrder = runOrder
@@ -3397,7 +3419,9 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) =
     override this.IsFplBlock () = true
     override this.IsBlock () = true
 
-    override this.EmbedInSymbolTable _ = tryAddToParentUsingMixedSignature this
+    override this.EmbedInSymbolTable _ = 
+        this.CheckConsistency()
+        tryAddToParentUsingMixedSignature this
 
     override this.RunOrder = Some _runOrder
 

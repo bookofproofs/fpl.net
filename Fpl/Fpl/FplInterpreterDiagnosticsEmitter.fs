@@ -33,25 +33,6 @@ let emitUnexpectedErrorDiagnostics errMsg =
 
     ad.AddDiagnostic(diagnostic)
 
-let getVAR04diagnostic (fv:FplValue) name = 
-    { 
-        Diagnostic.Uri = ad.CurrentUri
-        Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-        Diagnostic.Severity = DiagnosticSeverity.Error
-        Diagnostic.StartPos = fv.StartPos
-        Diagnostic.EndPos = fv.EndPos
-        Diagnostic.Code = VAR04 name
-        Diagnostic.Alternatives = None 
-    }
-
-let emitVAR04diagnosticsOld (fv:FplValue) =
-    fv.GetVariables()
-    |> List.filter(fun var -> var.AuxiliaryInfo = 0)
-    |> List.map (fun var -> 
-        ad.AddDiagnostic (getVAR04diagnostic var var.FplId)
-    )
-    |> ignore
-
 let emitVAR05diagnostics (fv:FplValue) =
     fv.GetVariables()
     |> List.filter(fun var -> var.AuxiliaryInfo = 0)
