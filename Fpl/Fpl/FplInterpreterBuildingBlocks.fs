@@ -290,7 +290,7 @@ let rec eval (st: SymbolTable) ast =
                     // for translations, use the name of the variable
                     fv.FplId <- foundVar.Type SignatureType.Name
                 | _ -> ()
-                foundVar.AuxiliaryInfo <- foundVar.AuxiliaryInfo + 1
+                foundVar.SetIsUsed()
             | _ ->
                 // otherwise emit variable not declared 
                 emitVAR01diagnostics name pos1 pos2
@@ -1208,7 +1208,8 @@ let rec eval (st: SymbolTable) ast =
             eval st subAst
             let vars = fv.GetVariables()
             vars
-            |> List.filter (fun (var:FplValue) -> var.AuxiliaryInfo = 0)
+            |> List.map (fun var -> var :?> FplGenericVariable)
+            |> List.filter (fun var -> not var.IsUsed)
             |> List.map (fun var ->
                 let loc = variableStack.PeekEvalStack()
                 let languageList = 

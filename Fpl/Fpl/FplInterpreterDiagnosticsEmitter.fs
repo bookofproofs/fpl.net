@@ -33,9 +33,12 @@ let emitUnexpectedErrorDiagnostics errMsg =
 
     ad.AddDiagnostic(diagnostic)
 
+
+
 let emitVAR05diagnostics (fv:FplValue) =
     fv.GetVariables()
-    |> List.filter(fun var -> var.AuxiliaryInfo = 0)
+    |> List.map(fun var -> var :?> FplGenericVariable)
+    |> List.filter(fun var -> not var.IsUsed)
     |> List.map (fun var -> 
         let diagnostic =
             { 
