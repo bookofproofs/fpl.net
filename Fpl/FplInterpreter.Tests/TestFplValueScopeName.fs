@@ -673,7 +673,7 @@ type TestFplValueScopeName() =
             match var with
             | "base1" -> Assert.AreEqual<string>("B()", base1.Type(SignatureType.Mixed))
             | "base2" -> Assert.AreEqual<string>("C(T1, func, ind, pred)", base1.Type(SignatureType.Mixed))
-            | "base3" -> Assert.AreEqual<string>("D(parent, a, b)", base1.Type(SignatureType.Mixed))
+            | "base3" -> Assert.AreEqual<string>("D(undef, T1, func)", base1.Type(SignatureType.Mixed))
             | "base4" -> Assert.AreEqual<string>("B(In(undef))", base1.Type(SignatureType.Mixed))
             | "base5" -> Assert.AreEqual<string>("C(Test1(T1), Test2(func, ind, pred))", base1.Type(SignatureType.Mixed))
             | "base6" -> Assert.AreEqual<string>("E(pred, undef, pred)", base1.Type(SignatureType.Mixed))
@@ -828,7 +828,7 @@ type TestFplValueScopeName() =
             match var with
             | "base1" -> Assert.AreEqual<string>("B()", base1.Type(SignatureType.Mixed))
             | "base2" -> Assert.AreEqual<string>("C(T1, ind, ind, undef)", base1.Type(SignatureType.Mixed))
-            | "base3" -> Assert.AreEqual<string>("D(parent, ind, ind)", base1.Type(SignatureType.Mixed))
+            | "base3" -> Assert.AreEqual<string>("D(undef, ind, ind)", base1.Type(SignatureType.Mixed))
             | "base4" -> Assert.AreEqual<string>("B(In(undef))", base1.Type(SignatureType.Mixed))
             | "base5" -> Assert.AreEqual<string>("Test()", base1.Type(SignatureType.Mixed))
             | "base6" -> Assert.AreEqual<string>("C(Test1(T1), Test2(ind, ind, undef))", base1.Type(SignatureType.Mixed))

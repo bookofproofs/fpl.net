@@ -1333,6 +1333,7 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
         | Some next when ( next.Name = PrimRefL 
                         || next.Name = PrimTranslationL ) ->
             next.FplId <- this.FplId
+            next.TypeId <- this.TypeId
             tryAddToParentUsingFplId this
         | Some next when ( next.Name = LiteralAxL 
                         || next.Name = LiteralThmL 
@@ -3668,20 +3669,23 @@ let findInheritanceChains (baseNode: FplValue) =
 
 /// Checks if a node inherits from some type.
 let inheritsFrom (node:FplValue) someType = 
-    let inheritanceList = findInheritanceChains node 
-    let inheritanceFound = 
-        inheritanceList 
-        |> Seq.filter (fun kvp -> 
-            kvp.Value = "ok" && 
-            (
-                kvp.Key.EndsWith $":{someType}" 
-            || kvp.Key.Contains $":{someType}:"
+    match node, someType with 
+    | :? FplClass, "obj" -> true
+    | _ -> 
+        let inheritanceList = findInheritanceChains node 
+        let inheritanceFound = 
+            inheritanceList 
+            |> Seq.filter (fun kvp -> 
+                kvp.Value = "ok" && 
+                (
+                    kvp.Key.EndsWith $":{someType}" 
+                || kvp.Key.Contains $":{someType}:"
+                )
             )
-        )
-        |> Seq.tryLast
-    match inheritanceFound with 
-    | Some _ -> true
-    | None -> false
+            |> Seq.tryLast
+        match inheritanceFound with 
+        | Some _ -> true
+        | None -> false
 
 
 /// Tries to match parameters of an FplValue with its arguments recursively

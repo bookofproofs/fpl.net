@@ -296,6 +296,7 @@ let rec eval (st: SymbolTable) ast =
                 emitVAR01diagnostics name pos1 pos2
                 let undefVar = new FplVariable(name, (pos1, pos2), fv)
                 let undefined = new FplIntrinsicUndef((pos1, pos2), undefVar)
+                
                 undefVar.SetValue(undefined)
                 variableStack.PushEvalStack(undefVar)
                 variableStack.PopEvalStack()
