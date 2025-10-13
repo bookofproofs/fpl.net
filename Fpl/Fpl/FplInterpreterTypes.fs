@@ -3825,7 +3825,19 @@ type FplGenericQuantor(positions: Positions, parent: FplValue) =
         | "" -> head
         | _ -> sprintf "%s(%s)" head paramT
 
-    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
+    override this.CheckConsistency () = 
+        base.CheckConsistency()
+        this.GetVariables()
+        |> List.map(fun var -> var :?> FplGenericVariable)
+        |> List.filter(fun var -> not var.IsUsed)
+        |> List.iter (fun var -> 
+            emitVAR05diagnostics var.FplId var.StartPos var.EndPos
+        )
+
+
+    override this.EmbedInSymbolTable _ = 
+        this.CheckConsistency()
+        addExpressionToParentArgList this
     
 type FplQuantorAll(positions: Positions, parent: FplValue) as this =
     inherit FplGenericQuantor(positions, parent)

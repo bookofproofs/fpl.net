@@ -34,26 +34,6 @@ let emitUnexpectedErrorDiagnostics errMsg =
     ad.AddDiagnostic(diagnostic)
 
 
-
-let emitVAR05diagnostics (fv:FplValue) =
-    fv.GetVariables()
-    |> List.map(fun var -> var :?> FplGenericVariable)
-    |> List.filter(fun var -> not var.IsUsed)
-    |> List.map (fun var -> 
-        let diagnostic =
-            { 
-                Diagnostic.Uri = ad.CurrentUri
-                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                Diagnostic.Severity = DiagnosticSeverity.Error
-                Diagnostic.StartPos = var.StartPos
-                Diagnostic.EndPos = var.EndPos
-                Diagnostic.Code = VAR05 var.FplId
-                Diagnostic.Alternatives = None 
-            }
-        ad.AddDiagnostic diagnostic
-    )
-    |> ignore
-
 let checkVAR00Diagnostics numberOfVariadicVars startPos endPos =
     if numberOfVariadicVars > 1 then
         let diagnostic =

@@ -1256,7 +1256,6 @@ let rec eval (st: SymbolTable) ast =
         )
         |> ignore
         eval st predicateAst
-        emitVAR05diagnostics fv
         variableStack.PopEvalStack() // remove all quantor
         emitLG000orLG001Diagnostics fv PrimQuantorAll
         st.EvalPop()
@@ -1272,7 +1271,6 @@ let rec eval (st: SymbolTable) ast =
         )
         |> ignore
         eval st predicateAst
-        emitVAR05diagnostics fv
         variableStack.PopEvalStack() // remove exists quantor
         emitLG000orLG001Diagnostics fv PrimQuantorExists
         st.EvalPop()
@@ -1288,7 +1286,6 @@ let rec eval (st: SymbolTable) ast =
         )
         |> ignore
         eval st predicateAst
-        emitVAR05diagnostics fv
         variableStack.PopEvalStack() // remove exists n quantor
         emitLG000orLG001Diagnostics fv PrimQuantorExistsN
         st.EvalPop()
