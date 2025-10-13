@@ -7,7 +7,6 @@ uses Fpl.PeanoArithmetics
 definition class Tuple 
 {
     dec 
-        ~myFrom:Nat
         ~myLength: Nat
         ~myArr:+tpl
     ;

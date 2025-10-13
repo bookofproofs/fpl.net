@@ -289,6 +289,7 @@ let rec eval (st: SymbolTable) ast =
                 | PrimTranslationL ->
                     // for translations, use the name of the variable
                     fv.FplId <- foundVar.Type SignatureType.Name
+                    fv.TypeId <- foundVar.Type SignatureType.Type
                 | _ -> ()
                 foundVar.SetIsUsed()
             | _ ->
@@ -296,7 +297,6 @@ let rec eval (st: SymbolTable) ast =
                 emitVAR01diagnostics name pos1 pos2
                 let undefVar = new FplVariable(name, (pos1, pos2), fv)
                 let undefined = new FplIntrinsicUndef((pos1, pos2), undefVar)
-                
                 undefVar.SetValue(undefined)
                 variableStack.PushEvalStack(undefVar)
                 variableStack.PopEvalStack()
@@ -447,6 +447,7 @@ let rec eval (st: SymbolTable) ast =
         match parent with 
         | :? FplReference -> 
             parent.FplId <- fv.FplId
+            parent.TypeId <- fv.TypeId
         | _ -> ()
         variableStack.PushEvalStack(fv)
         variableStack.PopEvalStack()
@@ -473,6 +474,7 @@ let rec eval (st: SymbolTable) ast =
         match parent with 
         | :? FplReference -> 
             parent.FplId <- fv.FplId
+            parent.TypeId <- fv.TypeId
         | _ -> ()
         variableStack.PushEvalStack(fv)
         variableStack.PopEvalStack()

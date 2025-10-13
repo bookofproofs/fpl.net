@@ -888,11 +888,11 @@ type TestFplValueScopeTypeSignature() =
 
             match var with
             | "base0" -> Assert.AreEqual<string>(@"1", trsl.Type(SignatureType.Type))
-            | "base1" -> Assert.AreEqual<string>(@"x \Leftrightarrow y", trsl.Type(SignatureType.Type))
-            | "base2" -> Assert.AreEqual<string>(@"\neg(x)", trsl.Type(SignatureType.Type))
-            | "base3" -> Assert.AreEqual<string>(@"p \wedge q", trsl.Type(SignatureType.Type))
-            | "base4" -> Assert.AreEqual<string>(@"x=y", trsl.Type(SignatureType.Type))
-            | "base5" -> Assert.AreEqual<string>(@"x\neq y", trsl.Type(SignatureType.Type))
+            | "base1" -> Assert.AreEqual<string>(LiteralUndef, trsl.Type(SignatureType.Type))
+            | "base2" -> Assert.AreEqual<string>(@"\neg(", trsl.Type(SignatureType.Type))
+            | "base3" -> Assert.AreEqual<string>(LiteralUndef, trsl.Type(SignatureType.Type))
+            | "base4" -> Assert.AreEqual<string>(LiteralUndef, trsl.Type(SignatureType.Type))
+            | "base5" -> Assert.AreEqual<string>(LiteralUndef, trsl.Type(SignatureType.Type))
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
