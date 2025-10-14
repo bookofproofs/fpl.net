@@ -269,19 +269,6 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
 
     let diags = Diagnostics()
 
-    let emitVAR09DiagnosticsOld (arg: FplValue) =
-        let diagnostic =
-            { 
-                Diagnostic.Uri = ad.CurrentUri
-                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                Diagnostic.Severity = DiagnosticSeverity.Error
-                Diagnostic.StartPos = arg.StartPos
-                Diagnostic.EndPos = arg.EndPos
-                Diagnostic.Code = VAR09(typeOfPredicate, arg.Type(SignatureType.Name))
-                Diagnostic.Alternatives = None 
-            }
-        diags.AddDiagnostic diagnostic
-
     let emitLG001Diagnostics pos1 pos2 (arg: FplValue) =
         let argType = arg.Type(SignatureType.Type)
         let argName = arg.Type(SignatureType.Name)
@@ -305,14 +292,18 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
 
     fplValue.ArgList
     |> Seq.iter (fun argument ->
-        let repr = argument.Represent()
-        if repr = $"{LiteralDec} {LiteralPred}" then 
-            emitVAR09DiagnosticsOld argument
-        else
+        if argument.Scope.ContainsKey(argument.FplId) then
+            let ref = argument.Scope[argument.FplId]
+            match ref with 
+            | :? FplGenericVariable as var ->
+                if not var.IsBound then 
+                    emitVAR09diagnostics var.FplId var.TypeId var.StartPos var.EndPos
+            | _ -> ()
+            let repr = argument.Represent()
             match repr with
             | LiteralTrue
-            | LiteralFalse -> ()
-            | PrimUndetermined -> emitVAR09DiagnosticsOld argument 
+            | LiteralFalse 
+            | PrimUndetermined -> () 
             | _ -> emitLG001Diagnostics argument.StartPos argument.EndPos argument
     )
 

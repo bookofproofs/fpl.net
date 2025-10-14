@@ -811,7 +811,7 @@ let emitVAR08diagnostics pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
 
-let emitVAR09diagnostics nameOfPredicate typeOfPredicate pos1 pos2 =
+let emitVAR09diagnostics varName varType pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -819,7 +819,7 @@ let emitVAR09diagnostics nameOfPredicate typeOfPredicate pos1 pos2 =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = VAR09(typeOfPredicate, nameOfPredicate)
+            Diagnostic.Code = VAR09(varName, varType)
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic

@@ -1212,6 +1212,7 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
     let mutable _isSignatureVariable = false
     let mutable _isInitializedVariable = false
+    let mutable _isBound = false
     let mutable _isUsed = false
 
     do 
@@ -1222,7 +1223,7 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
     member this.IsUsed
         with get () = _isUsed
 
-    /// Setter if this variable was used after its declaration.
+    /// Sets this variable to a used one .
     member this.SetIsUsed() =
         let rec setIsUsed (fv:FplValue) =
             fv.GetVariables()
@@ -1230,6 +1231,19 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
             |> List.iter (fun var -> var.SetIsUsed())
         _isUsed <- true
         setIsUsed this        
+
+    /// Getter if this variable is bound (by a quantor of otherwise).
+    member this.IsBound
+        with get () = _isBound
+
+    /// Sets this variable to a bound one.
+    member this.SetIsBound() =
+        let rec setIsBound (fv:FplValue) =
+            fv.GetVariables()
+            |> List.map (fun var -> var :?> FplGenericVariable)
+            |> List.iter (fun var -> var.SetIsBound())
+        _isBound <- true
+        setIsBound this        
 
     override this.Type signatureType =
         let pars = getParamTuple this signatureType
@@ -1246,12 +1260,16 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
     /// Indicates if this Variable is declared in the signature (true) or in the block (false).
     member this.IsSignatureVariable
         with get () = _isSignatureVariable
-        and set (value) = _isSignatureVariable <- value
+        and set (value) = 
+            _isSignatureVariable <- value
+            _isBound <- value // all signature variables are also bound
 
     /// Indicates if this FplValue is an initialized variable
     member this.IsInitializedVariable
         with get () = _isInitializedVariable
-        and set (value) = _isInitializedVariable <- value
+        and set (value) = 
+            _isInitializedVariable <- value
+            _isBound <- value // all initialized variables are also bound
 
     interface IVariable with
         member this.IsSignatureVariable 
@@ -1359,8 +1377,10 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
                         || next.Name = PrimVariableMany1L) ->
             addToVariableOrQuantorOrMapping next
         | Some next when next.Name = PrimMappingL ->
+            this.SetIsBound() // mapping-Variables are bound
             addToVariableOrQuantorOrMapping next
         | Some next when next.Name = PrimQuantorAll || next.Name = PrimQuantorExists || next.Name = PrimQuantorExistsN ->  
+            this.SetIsBound() // quantor-Variables are bound
             addToVariableOrQuantorOrMapping next
             if next.Scope.ContainsKey(this.FplId) then
                 emitVAR02diagnostics this.FplId this.StartPos this.EndPos
@@ -1377,7 +1397,7 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
 
     override this.RunOrder = None
 
-let checkVAR09Diagnostics (fv:FplValue) = 
+let checkVAR04Diagnostics (fv:FplValue) = 
     fv.GetVariables()
     |> List.map (fun var -> var :?> FplGenericVariable)
     |> List.filter(fun var -> not var.IsUsed)
@@ -1411,7 +1431,7 @@ type FplGenericPredicateWithExpression(positions: Positions, parent: FplValue) =
 
     override this.CheckConsistency () = 
         base.CheckConsistency()
-        checkVAR09Diagnostics this
+        checkVAR04Diagnostics this
 
             
 [<AbstractClass>]
@@ -1597,7 +1617,7 @@ type FplConstructor(positions: Positions, parent: FplValue) =
                     emitID020Diagnostics fv.FplId fv.StartPos
             )
         | _ -> ()
-        checkVAR09Diagnostics this
+        checkVAR04Diagnostics this
 
     override this.EmbedInSymbolTable _ = 
         this.CheckConsistency()
@@ -1658,7 +1678,7 @@ and FplClass(positions: Positions, parent: FplValue) =
 
     override this.CheckConsistency () = 
         base.CheckConsistency()
-        checkVAR09Diagnostics this
+        checkVAR04Diagnostics this
 
     override this.EmbedInSymbolTable _ = 
         this.CheckConsistency()
@@ -1773,7 +1793,7 @@ type FplGenericPredicateBlock(positions: Positions, parent: FplValue) =
 
     override this.CheckConsistency () = 
         if not this.IsIntrinsic then // if not intrinsic, check variable usage
-            checkVAR09Diagnostics this
+            checkVAR04Diagnostics this
         if this.Arity = 0 && this.ArgList.Count > 0 then 
             let refValue = this.ArgList[this.ArgList.Count-1]
             match refValue.Name with 
@@ -3554,7 +3574,7 @@ type FplGenericFunctionalTerm(positions: Positions, parent: FplValue) as this =
     override this.CheckConsistency () = 
         base.CheckConsistency()
         if not this.IsIntrinsic then // if not intrinsic, check variable usage
-            checkVAR09Diagnostics this
+            checkVAR04Diagnostics this
 
 type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) =
     inherit FplGenericFunctionalTerm(positions, parent)
@@ -3834,9 +3854,12 @@ type FplGenericQuantor(positions: Positions, parent: FplValue) =
             emitVAR05diagnostics var.FplId var.StartPos var.EndPos
         )
 
-
     override this.EmbedInSymbolTable _ = 
         this.CheckConsistency()
+        // set all the variables of this quantor to bound ones
+        this.GetVariables()
+        |> List.map (fun var -> var :?> FplGenericVariable)
+        |> List.iter (fun var -> var.SetIsBound())
         addExpressionToParentArgList this
     
 type FplQuantorAll(positions: Positions, parent: FplValue) as this =
@@ -4018,6 +4041,11 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) =
 
     override this.EmbedInSymbolTable _ = 
         this.CheckConsistency()
+        // set all signature variables of this block to bound ones
+        this.GetVariables()
+        |> List.map (fun var -> var :?> FplGenericVariable)
+        |> List.filter (fun var -> var.IsSignatureVariable)
+        |> List.iter (fun var -> var.SetIsBound())
         tryAddSubBlockToFplBlock this
 
     override this.RunOrder = None
