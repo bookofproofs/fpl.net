@@ -776,39 +776,7 @@ type TestInterpreterErrors() =
         else
             let code = ID026 ("","")
             runTestHelper "TestID026.fpl" fplCode code expected
-
-    [<DataRow("00", """def pred T() { not true };""", 0)>]
-    [<DataRow("01", """def pred T() { dec ~x:pred; not x };""", 0)>] // no LG000 diagnostics because of intrinsic use x
-    [<DataRow("02", """def pred T() { dec ~x:ind; not x };""", 0)>]
-    [<DataRow("03", """def pred T() { dec ~x:pred; not (x) };""", 0)>]
-    [<DataRow("04", """def pred T() { dec ~x:pred; not ((x)) };""", 0)>]
-    [<DataRow("05", """def pred T() { dec ~x:pred; not (((x))) };""", 0)>]
-    [<DataRow("06", """def pred T() { all x:obj {true} };""", 0)>]
-    [<DataRow("07", """def pred T() { dec ~x:pred; and(x,true) };""", 1)>]
-    [<DataRow("08", """def pred T() { dec ~x:pred; all y:obj {and(x,true)} };""", 1)>]
-    [<DataRow("09", """def pred T() { dec ~x:pred; or(x,false) };""", 1)>]
-    [<DataRow("10", """def pred T() { dec ~x,y:pred; or(x,y) };""", 0)>]
-    [<DataRow("11", """def pred T() { all y:obj {and(x,y)} };""", 0)>]
-    [<DataRow("12", """inf ModusTollens {dec ~p,q: pred; pre: and (not q, impl(p,q) ) con: not (p)};""", 0)>]
-    [<DataRow("13", """inf ModusTollens {dec ~p,q: pred; pre: and (not q, impl(p,q) ) con: not p};""", 0)>]
-    [<DataRow("14", """def pred T() { dec ~x:pred; impl(true,x) };""", 1)>]
-    [<DataRow("15", """def pred T() { dec ~x,y:pred; impl(x,y) };""", 0)>]
-    [<DataRow("16", """def pred T() { impl(true,true) };""", 0)>]
-    [<DataRow("17", """def pred T() { dec ~x:pred; iif(true,x) };""", 1)>]
-    [<DataRow("18", """def pred T() { dec ~x,y:pred; iif(x,y) };""", 0)>]
-    [<DataRow("19", """def pred T() { iif(true,true) };""", 0)>]
-    [<DataRow("20", """def pred T() { xor(xor(true,true),true) };""", 0)>]
-    [<DataRow("21", """def pred T() { dec ~x,y:pred; xor(xor(y,x),true) };""", 1)>]
-    [<DataRow("22", """def pred T() { all i:Nat {true} };""", 0)>]
-    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
-    [<TestMethod>]
-    member this.TestLG000(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
-            ()
-        else
-            let code = LG000 ("","")
-            runTestHelper "TestLG000.fpl" fplCode code expected
-
+            
     [<DataRow("00a", """def pred T() { true };""", 0)>]
     [<DataRow("00", """def pred T() { not true };""", 0)>]
     [<DataRow("01", """def pred T() { dec ~x:pred; not x };""", 0)>]
@@ -2001,3 +1969,35 @@ type TestInterpreterErrors() =
         else
             let code = VAR08
             runTestHelper "TestVAR08.fpl" fplCode code expected
+
+    [<DataRow("00", """def pred T() { not true };""", 0)>]
+    [<DataRow("01", """def pred T() { dec ~x:pred; not x };""", 0)>] // no LG000 diagnostics because of intrinsic use x
+    [<DataRow("02", """def pred T() { dec ~x:ind; not x };""", 0)>]
+    [<DataRow("03", """def pred T() { dec ~x:pred; not (x) };""", 0)>]
+    [<DataRow("04", """def pred T() { dec ~x:pred; not ((x)) };""", 0)>]
+    [<DataRow("05", """def pred T() { dec ~x:pred; not (((x))) };""", 0)>]
+    [<DataRow("06", """def pred T() { all x:obj {true} };""", 0)>]
+    [<DataRow("07", """def pred T() { dec ~x:pred; and(x,true) };""", 1)>]
+    [<DataRow("08", """def pred T() { dec ~x:pred; all y:obj {and(x,true)} };""", 1)>]
+    [<DataRow("09", """def pred T() { dec ~x:pred; or(x,false) };""", 1)>]
+    [<DataRow("10", """def pred T() { dec ~x,y:pred; or(x,y) };""", 0)>]
+    [<DataRow("11", """def pred T() { all y:obj {and(x,y)} };""", 0)>]
+    [<DataRow("12", """inf ModusTollens {dec ~p,q: pred; pre: and (not q, impl(p,q) ) con: not (p)};""", 0)>]
+    [<DataRow("13", """inf ModusTollens {dec ~p,q: pred; pre: and (not q, impl(p,q) ) con: not p};""", 0)>]
+    [<DataRow("14", """def pred T() { dec ~x:pred; impl(true,x) };""", 1)>]
+    [<DataRow("15", """def pred T() { dec ~x,y:pred; impl(x,y) };""", 0)>]
+    [<DataRow("16", """def pred T() { impl(true,true) };""", 0)>]
+    [<DataRow("17", """def pred T() { dec ~x:pred; iif(true,x) };""", 1)>]
+    [<DataRow("18", """def pred T() { dec ~x,y:pred; iif(x,y) };""", 0)>]
+    [<DataRow("19", """def pred T() { iif(true,true) };""", 0)>]
+    [<DataRow("20", """def pred T() { xor(xor(true,true),true) };""", 0)>]
+    [<DataRow("21", """def pred T() { dec ~x,y:pred; xor(xor(y,x),true) };""", 1)>]
+    [<DataRow("22", """def pred T() { all i:Nat {true} };""", 0)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestVAR09(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = VAR09 ("","")
+            runTestHelper "TestVAR09.fpl" fplCode code expected

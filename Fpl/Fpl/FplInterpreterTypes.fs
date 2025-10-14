@@ -351,7 +351,7 @@ let maxRecursion = 5
                                 ex x:tpl { p(x) } 
                             will be transformed to 
                                 p(u())
-                        exists quantor is proceeded by some all quantors: then remove the ex quantor by replacing x<-g_p(x1,x2) with some intrinsic n-ary function g(tpl1,tpl2)->tpl {intr} (some function fulfilling p, depending on proceeding variables bounded by all quantors) 
+                        exists quantor is proceeded by some all quantors: then remove the ex quantor by replacing x<-g_p(x1,x2) with some intrinsic n-ary function g(tpl1,tpl2)->tpl {intr} (some function fulfilling p, depending on proceeding variables bound by all quantors) 
                             for instance, 
                                 all x1:tpl1, x2:tpl2, x:tpl {p(x1,x2,x)} 
                             will be transformed to  

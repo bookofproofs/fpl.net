@@ -370,8 +370,6 @@ let emitID026Diagnostics name candidates pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
 
-
-
 let emitLG002diagnostic nodeTypeName times pos1 pos2 = 
     let diagnostic =
         { 
@@ -809,6 +807,19 @@ let emitVAR08diagnostics pos1 pos2 =
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = VAR08
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
+let emitVAR09diagnostics nameOfPredicate typeOfPredicate pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = VAR09(typeOfPredicate, nameOfPredicate)
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic

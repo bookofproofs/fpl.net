@@ -133,7 +133,6 @@ type DiagnosticCode =
     | ID025 of string * string * string
     | ID026 of string * string
     // logic-related error codes
-    | LG000 of string * string 
     | LG001 of string * string * string
     | LG002 of string * int
     | LG003 of string * string
@@ -173,6 +172,7 @@ type DiagnosticCode =
     | VAR06 of string * string * string * bool
     | VAR07 of string 
     | VAR08 
+    | VAR09 of string * string 
     member this.Code = 
         match this with
             // parser error messages
@@ -244,7 +244,6 @@ type DiagnosticCode =
             | ID025 _ -> "ID025"
             | ID026 _ -> "ID026"
             // logic-related error codes
-            | LG000 _ -> "LG000"
             | LG001 _ -> "LG001"
             | LG002 _ -> "LG002"
             | LG003 _ -> "LG003"
@@ -284,6 +283,7 @@ type DiagnosticCode =
             | VAR06 _  -> "VAR06"
             | VAR07 _  -> "VAR07"
             | VAR08 -> "VAR08"
+            | VAR09 _ -> "VAR09"
     member this.Message = 
         match this with
             // parser error messages
@@ -363,7 +363,6 @@ type DiagnosticCode =
             | ID025 (candidate, candidateType, nodeType)  -> $"Cannot reference to `{candidate}` which is {candidateType} inside {nodeType}." 
             | ID026 (name, candidates)  -> $"The base constructor call's id `{name}` is not among the base classes this class is derived from. The candidate classes are {candidates}." 
             // logic-related error codes
-            | LG000 (typeOfPredicate,argument) -> $"Cannot evaluate `{typeOfPredicate}`; its argument `{argument}` is a predicate but couldn't be determined."
             | LG001 (typeOfPredicate,argument,typeOfExpression) -> $"Cannot evaluate `{typeOfPredicate}`; expecting a predicate argument `{argument}`, got `{typeOfExpression}`."
             | LG002 (nodeTypeName, times) -> $"Possible infinite recursion detected, `{nodeTypeName}` was called for more than {times} times.`."
             | LG003 (nodeTypeName, nodeName) -> $"`{nodeTypeName}` evaluates to `false` and cannot be {nodeName}."
@@ -419,6 +418,7 @@ type DiagnosticCode =
                     $"Variable name `{name}` of base functional term `{first} will be overshadowed by `{second}`."
             | VAR07 name -> $"The {PrimQuantorExistsN} accepts only one bound variable `{name}`."
             | VAR08 -> "Variadic variables cannot be bound in a quantor."
+            | VAR09 (varName,varType) -> $"The variable {varName}:{varType} is free and cannot be used to evaluate this expresssion."
 
 /// Computes an MD5 checksum of a string
 let computeMD5Checksum (input: string) =

@@ -269,7 +269,7 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
 
     let diags = Diagnostics()
 
-    let emitLG000Diagnostics (arg: FplValue) =
+    let emitVAR09DiagnosticsOld (arg: FplValue) =
         let diagnostic =
             { 
                 Diagnostic.Uri = ad.CurrentUri
@@ -277,7 +277,7 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
                 Diagnostic.Severity = DiagnosticSeverity.Error
                 Diagnostic.StartPos = arg.StartPos
                 Diagnostic.EndPos = arg.EndPos
-                Diagnostic.Code = LG000(typeOfPredicate, arg.Type(SignatureType.Name))
+                Diagnostic.Code = VAR09(typeOfPredicate, arg.Type(SignatureType.Name))
                 Diagnostic.Alternatives = None 
             }
         diags.AddDiagnostic diagnostic
@@ -307,16 +307,16 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
     |> Seq.iter (fun argument ->
         let repr = argument.Represent()
         if repr = $"{LiteralDec} {LiteralPred}" then 
-            emitLG000Diagnostics argument
+            emitVAR09DiagnosticsOld argument
         else
             match repr with
             | LiteralTrue
             | LiteralFalse -> ()
-            | PrimUndetermined -> emitLG000Diagnostics argument 
+            | PrimUndetermined -> emitVAR09DiagnosticsOld argument 
             | _ -> emitLG001Diagnostics argument.StartPos argument.EndPos argument
     )
 
-    let code = LG000("", "")
+    let code = VAR09("", "")
     let numbLG000 = filterByErrorCode diags code.Code
 
     if numbLG000.Length = fplValue.ArgList.Count then
