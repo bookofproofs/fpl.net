@@ -1141,6 +1141,7 @@ let addExpressionToReference (fplValue:FplValue) =
     | Some next when next.Name = PrimRefL && next.Scope.ContainsKey(".") -> ()
     | Some next when next.Name = PrimRefL ->
         next.FplId <- fplValue.FplId
+        next.TypeId <- fplValue.TypeId
         next.Scope.TryAdd(fplValue.FplId, fplValue) |> ignore
     | _ -> addExpressionToParentArgList fplValue 
 
@@ -1381,7 +1382,6 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
             addToVariableOrQuantorOrMapping next
         | Some next when next.Name = PrimQuantorAll || next.Name = PrimQuantorExists || next.Name = PrimQuantorExistsN ->  
             this.SetIsBound() // quantor-Variables are bound
-            addToVariableOrQuantorOrMapping next
             if next.Scope.ContainsKey(this.FplId) then
                 emitVAR02diagnostics this.FplId this.StartPos this.EndPos
             elif next.Name = PrimQuantorExistsN && next.Scope.Count>0 then 
@@ -1389,7 +1389,7 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
             elif this.Name = PrimVariableMany1L || this.Name = PrimVariableManyL then 
                 emitVAR08diagnostics this.StartPos this.EndPos
             else
-                next.Scope.TryAdd(this.FplId, this) |> ignore
+                addToVariableOrQuantorOrMapping next
                 
         | _ -> addExpressionToParentArgList this
 

@@ -204,7 +204,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("ExtensionRegex")
         let fv = variableStack.PeekEvalStack()
         let vars = fv.GetVariables()
-        if vars.Length> 0 then
+        if vars.Length > 0 then
             let mainVar = vars.Head
             mainVar.TypeId <- s // set the extensions's main variable's type to the pattern
         st.EvalPop() 
