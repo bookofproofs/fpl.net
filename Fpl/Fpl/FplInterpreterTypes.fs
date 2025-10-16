@@ -4601,26 +4601,44 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
 
     override this.Represent () = this.TypeId
 
-    member private this.CheckSIG05Diagnostics (assignee:FplValue) (toBeAssignedValue: FplValue) = 
-        let valueOpt = getArgument toBeAssignedValue
-        match valueOpt with
-        | Some value when value.IsClass() ->
-            if not (inheritsFrom value assignee.TypeId) then 
-                // issue SIG05 diagnostics if either no inheritance chain found 
-                emitSIG05Diagnostics (assignee.Type(SignatureType.Type)) (value.Type(SignatureType.Type)) toBeAssignedValue.StartPos toBeAssignedValue.EndPos
-        | Some value when (value.Name = LiteralCtorL) ->
-            if not (inheritsFrom value.Parent.Value assignee.TypeId) then 
-                // issue SIG05 diagnostics if either no inheritance chain found 
-                emitSIG05Diagnostics (assignee.Type(SignatureType.Type)) (value.Type(SignatureType.Type)) toBeAssignedValue.StartPos toBeAssignedValue.EndPos
-        | Some value when assignee.TypeId <> value.TypeId ->
-            // Issue SIG05 diagnostics if value is not a constructor and not a class and still the types are not the same 
-            emitSIG05Diagnostics (assignee.Type(SignatureType.Type)) (value.Type(SignatureType.Type)) toBeAssignedValue.StartPos toBeAssignedValue.EndPos
-        | Some value when assignee.TypeId = value.TypeId ->
-            // Issue no SIG05 diagnostics if value is not a constructor and not a class but the types match
-            ()
-        | _ ->
-            // Issue SIG05 diagnostics if there is (for some reason) no value of the toBeAssignedValue 
-            emitSIG05Diagnostics (assignee.Type(SignatureType.Type)) (toBeAssignedValue.Type(SignatureType.Type)) toBeAssignedValue.StartPos toBeAssignedValue.EndPos
+
+    override this.CheckConsistency () = 
+        match this.Assignee, this.AssignedValue with
+        | Some (assignee:FplValue), Some (assignedValue:FplValue) ->
+            let nameAssignee = assignee.Type SignatureType.Name
+            let nameAssignedValue = assignedValue.Type SignatureType.Name
+            let typeAssignee = assignee.Type SignatureType.Type
+            let typeAssignedValue = assignedValue.Type SignatureType.Type 
+            if nameAssignee = nameAssignedValue then
+                emitLG005Diagnostics nameAssignedValue assignedValue.StartPos assignedValue.EndPos
+            else
+                let valueOpt = getArgument assignedValue
+                match valueOpt with
+                | Some value when value.IsClass() ->
+                    if not (inheritsFrom value assignee.TypeId) then 
+                        // issue SIG05 diagnostics if either no inheritance chain found 
+                        emitSIG05Diagnostics typeAssignee (value.Type(SignatureType.Type)) assignedValue.StartPos assignedValue.EndPos
+                | Some value when (value.Name = LiteralCtorL) ->
+                    if not (inheritsFrom value.Parent.Value assignee.TypeId) then 
+                        // issue SIG05 diagnostics if either no inheritance chain found 
+                        emitSIG05Diagnostics typeAssignee (value.Type(SignatureType.Type)) assignedValue.StartPos assignedValue.EndPos
+                | Some value when assignee.TypeId <> value.TypeId ->
+                    // Issue SIG05 diagnostics if value is not a constructor and not a class and still the types are not the same 
+                    emitSIG05Diagnostics typeAssignee (value.Type(SignatureType.Type)) assignedValue.StartPos assignedValue.EndPos
+                | Some value when assignee.TypeId = value.TypeId ->
+                    // Issue no SIG05 diagnostics if value is not a constructor and not a class but the types match
+                    ()
+                | _ ->
+                    // Issue SIG05 diagnostics if there is (for some reason) no value of the toBeAssignedValue 
+                    emitSIG05Diagnostics typeAssignee typeAssignedValue assignedValue.StartPos assignedValue.EndPos
+        | _ -> ()
+
+        base.CheckConsistency()
+
+    override this.EmbedInSymbolTable _ = 
+        this.CheckConsistency()
+        addExpressionToParentArgList this
+
 
     member this.Assignee =
         if this.ArgList.Count > 0 then 
@@ -4645,28 +4663,25 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
     override this.Run variableStack = 
         match this.Assignee, this.AssignedValue with
         | Some assignee, Some assignedValue ->
-            let nameAssignee = assignee.Type(SignatureType.Name)
-            let nameAssignedValue = assignedValue.Type(SignatureType.Name)
-            if nameAssignee = nameAssignedValue then
-                emitLG005Diagnostics nameAssignedValue assignedValue.StartPos assignedValue.EndPos
-            else
-                this.CheckSIG05Diagnostics assignee assignedValue
-                match assignedValue with 
-                | :? FplGenericConstructor as ctor ->
-                    ctor.Run variableStack
-                    match ctor.Instance with 
-                    | Some instance ->
-                        assignee.SetValue instance // set value to the created instance 
-                        // reposition the instance in symbol table
-                        instance.Parent <- Some assignee
-                    | None -> () // todo, issue diagnostics?
-                | :? FplClass as classBlock ->
-                    emitID004diagnostics classBlock.FplId assignedValue.StartPos assignedValue.EndPos
-                | _ ->
+            match assignedValue with 
+            | :? FplGenericConstructor as ctor ->
+                ctor.Run variableStack
+                match ctor.Instance with 
+                | Some instance ->
+                    assignee.SetValue instance // set value to the created instance 
+                    // reposition the instance in symbol table
+                    instance.Parent <- Some assignee
+                | None -> () // todo, issue diagnostics?
+            | :? FplClass as classBlock ->
+                emitID004diagnostics classBlock.FplId assignedValue.StartPos assignedValue.EndPos
+            | _ ->
+                if assignedValue = assignee then 
+                    emitLG005Diagnostics assignedValue.FplId (this.ArgList[1].StartPos) (this.ArgList[1].EndPos)
+                else
                     assignee.SetValuesOf assignedValue
-                match box assignee with
-                | :? IVariable as assigneeCast -> assigneeCast.IsInitializedVariable <- true
-                | _ -> ()
+                    match box assignee with
+                    | :? IVariable as assigneeCast -> assigneeCast.IsInitializedVariable <- true
+                    | _ -> ()
         | _ -> ()
 
 /// This constructor is only used for creating instances of classes that have no declared constructors.

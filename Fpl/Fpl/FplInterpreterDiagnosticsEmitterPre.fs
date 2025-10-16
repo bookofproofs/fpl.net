@@ -430,7 +430,7 @@ let emitLG005Diagnostics name pos1 pos2 =
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = LG005 name
-            Diagnostic.Alternatives = Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary)." 
+            Diagnostic.Alternatives = None
         }
     ad.AddDiagnostic diagnostic
 
