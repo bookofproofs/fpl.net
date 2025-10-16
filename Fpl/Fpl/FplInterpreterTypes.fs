@@ -3862,6 +3862,12 @@ type FplGenericQuantor(positions: Positions, parent: FplValue) =
         |> List.iter (fun var -> var.SetIsBound())
         addExpressionToParentArgList this
     
+    override this.Run _ = 
+        // todo implement run
+        let pred = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+        this.SetValue pred
+
+
 type FplQuantorAll(positions: Positions, parent: FplValue) as this =
     inherit FplGenericQuantor(positions, parent)
 
@@ -3874,8 +3880,6 @@ type FplQuantorAll(positions: Positions, parent: FplValue) as this =
             let ret = new FplQuantorAll((this.StartPos, this.EndPos), this.Parent.Value)
             this.AssignParts(ret)
             ret
-
-    override this.Run _ = () // todo implement run
 
 type FplQuantorExists(positions: Positions, parent: FplValue) as this =
     inherit FplGenericQuantor(positions, parent)
@@ -3890,7 +3894,6 @@ type FplQuantorExists(positions: Positions, parent: FplValue) as this =
             this.AssignParts(ret)
             ret
 
-    override this.Run _ = () // todo implement run
 
 type FplQuantorExistsN(positions: Positions, parent: FplValue) as this =
     inherit FplGenericQuantor(positions, parent)
@@ -3907,7 +3910,6 @@ type FplQuantorExistsN(positions: Positions, parent: FplValue) as this =
             this.AssignParts(ret)
             ret
 
-    override this.Run _ = () // todo implement run
 
 type FplVariableMany1(fplId, positions: Positions, parent: FplValue) =
     inherit FplGenericVariable(fplId, positions, parent)
