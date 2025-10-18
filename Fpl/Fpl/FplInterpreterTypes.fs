@@ -4613,27 +4613,33 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
             let typeAssignedValue = assignedValue.Type SignatureType.Type 
             if nameAssignee = nameAssignedValue then
                 emitLG005Diagnostics nameAssignedValue assignedValue.StartPos assignedValue.EndPos
-            else
-                let valueOpt = getArgument assignedValue
-                match valueOpt with
-                | Some value when value.IsClass() ->
-                    if not (inheritsFrom value assignee.TypeId) then 
-                        // issue SIG05 diagnostics if either no inheritance chain found 
-                        emitSIG05Diagnostics typeAssignee (value.Type(SignatureType.Type)) assignedValue.StartPos assignedValue.EndPos
-                | Some value when (value.Name = LiteralCtorL) ->
-                    if not (inheritsFrom value.Parent.Value assignee.TypeId) then 
-                        // issue SIG05 diagnostics if either no inheritance chain found 
-                        emitSIG05Diagnostics typeAssignee (value.Type(SignatureType.Type)) assignedValue.StartPos assignedValue.EndPos
-                | Some value when assignee.TypeId <> value.TypeId ->
-                    // Issue SIG05 diagnostics if value is not a constructor and not a class and still the types are not the same 
-                    emitSIG05Diagnostics typeAssignee (value.Type(SignatureType.Type)) assignedValue.StartPos assignedValue.EndPos
-                | Some value when assignee.TypeId = value.TypeId ->
-                    // Issue no SIG05 diagnostics if value is not a constructor and not a class but the types match
-                    ()
-                | _ ->
-                    // Issue SIG05 diagnostics if there is (for some reason) no value of the toBeAssignedValue 
-                    emitSIG05Diagnostics typeAssignee typeAssignedValue assignedValue.StartPos assignedValue.EndPos
-        | _ -> ()
+            elif typeAssignee <> typeAssignedValue then 
+                 emitSIG05Diagnostics typeAssignee typeAssignedValue assignedValue.StartPos assignedValue.EndPos
+            //elif not (inheritsFrom value assignee.TypeId) then 
+            //    // issue SIG05 diagnostics if either no inheritance chain found 
+            //    emitSIG05Diagnostics typeAssignee (value.Type(SignatureType.Type)) assignedValue.StartPos assignedValue.EndPos
+            else   
+                ()
+        //        let valueOpt = getArgument assignedValue
+        //        match valueOpt with
+        //        | Some value when value.IsClass() ->
+        //            if not (inheritsFrom value assignee.TypeId) then 
+        //                // issue SIG05 diagnostics if either no inheritance chain found 
+        //                emitSIG05Diagnostics typeAssignee (value.Type(SignatureType.Type)) assignedValue.StartPos assignedValue.EndPos
+        //        | Some value when (value.Name = LiteralCtorL) ->
+        //            if not (inheritsFrom value.Parent.Value assignee.TypeId) then 
+        //                // issue SIG05 diagnostics if either no inheritance chain found 
+        //                emitSIG05Diagnostics typeAssignee (value.Type(SignatureType.Type)) assignedValue.StartPos assignedValue.EndPos
+        //        | Some value when assignee.TypeId <> value.TypeId ->
+        //            // Issue SIG05 diagnostics if value is not a constructor and not a class and still the types are not the same 
+        //            emitSIG05Diagnostics typeAssignee (value.Type(SignatureType.Type)) assignedValue.StartPos assignedValue.EndPos
+        //        | Some value when assignee.TypeId = value.TypeId ->
+        //            // Issue no SIG05 diagnostics if value is not a constructor and not a class but the types match
+        //            ()
+        //        | _ ->
+        //            // Issue SIG05 diagnostics if there is (for some reason) no value of the toBeAssignedValue 
+        //            emitSIG05Diagnostics typeAssignee typeAssignedValue assignedValue.StartPos assignedValue.EndPos
+        //| _ -> ()
 
         base.CheckConsistency()
 
