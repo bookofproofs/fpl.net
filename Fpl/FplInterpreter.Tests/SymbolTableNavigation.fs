@@ -5,7 +5,8 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open FParsec
 open ErrDiagnostics
 open FplInterpreterTypes
-open FplInterpreterUsesClause
+open Newtonsoft.Json
+open Newtonsoft.Json.Linq
 open CommonTestHelpers
 open TestSharedConfig
 
@@ -529,10 +530,7 @@ type SymbolTableNavigation() =
             deleteFiles currentPath "*.fpl"
 
             let fplCode = """
-                def cl Natural: object
-                {
-                    intr
-                }
+                def cl Natural
 
 
                 axiom Axiom1
@@ -551,10 +549,7 @@ type SymbolTableNavigation() =
 
             // do the test - now, modify the file with a typo to provoke SIG04 diagnostics
             let fplCode = """
-                def cl Natural: object
-                {
-                    intr
-                }
+                def cl Natural
 
 
                 axiom Axiom1
@@ -573,10 +568,7 @@ type SymbolTableNavigation() =
 
             // now, correct the typo to make SIG04 diagnostics disappear
             let fplCode = """
-                def cl Natural: object
-                {
-                    intr
-                }
+                def cl Natural
 
 
                 axiom Axiom1
@@ -594,3 +586,25 @@ type SymbolTableNavigation() =
 
             // remove the test file
             prepareFplCode(filename, "", true) |> ignore
+
+    [<DataRow("uses Fpl.Commons.Structures ;")>]
+    [<TestMethod>]
+    member this.TestJson(fplCode:string) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            prepareFplCode ("TestJson.fpl", "", false) |> ignore
+            match prepareFplCode ("TestJson.fpl", fplCode, false) with
+            | Some st ->
+                try
+                    
+                    JToken.Parse(st.ToJson()) |> ignore
+                with
+                | :? JsonReaderException as ex -> 
+                    let currDir = Directory.GetCurrentDirectory()
+                    File.WriteAllText(Path.Combine(currDir, "TestJson.json"), st.ToJson())
+                    Assert.IsTrue (false, ex.Message)
+                | _ -> Assert.IsTrue (false, "Other exception occurred")
+                
+            | None ->
+                Assert.IsTrue(false, "Syntax error?")

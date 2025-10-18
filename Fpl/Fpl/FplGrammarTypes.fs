@@ -148,7 +148,8 @@ type Ast =
     | ConstructorSignature of Positions * (Ast * Ast)
     | PredicateInstanceSignature of Positions * (Ast * Ast)
     | FunctionalTermInstanceSignature of Positions * ((Ast * Ast) * Ast)
-    | Constructor of Positions * (Ast * (Ast list option)) 
+    | ConstructorBlock of Positions * (Ast list option)
+    | Constructor of Positions * (Ast * Ast) 
     | PredicateInstance of Positions * (Ast * Ast)
     | FunctionalTermInstance of Positions * (Ast * Ast)
     | DefPredicateContent of Ast list option * Ast
@@ -157,9 +158,11 @@ type Ast =
     | PredicateSignature of (Positions * (Ast * Ast)) * Ast option
     | ClassSignature of Positions * Ast
     | FunctionalTermSignature of (Positions * (((Ast * Ast option) * Ast) * Ast)) * Ast option
-    | DefinitionFunctionalTerm of Positions * (Ast * (Ast * Ast list option) option)
+    | FunctionalTermDefinitionBlock of Positions * ((Ast * Ast list option) option)
+    | DefinitionFunctionalTerm of Positions * (Ast * Ast)
     | DefClassCompleteContent of Ast list option * Ast list
-    | DefinitionClass of Positions * (((Ast * Ast option) * Ast option) * (Ast * Ast list option) option) 
+    | ClassDefinitionBlock of Positions * ((Ast * Ast list option) option) 
+    | DefinitionClass of Positions * (((Ast * Ast option) * Ast option) * Ast) 
     | Prefix of Positions * string
     | Precedence of Positions * int
     | Infix of Positions * (string * Ast)

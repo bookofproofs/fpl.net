@@ -111,6 +111,8 @@ type DiagnosticCode =
     | ID004 of string
     | ID005 of string * string
     | ID006 of string
+    /// (nodeType, signatureNode, baseType, signatureBase) -> $"The {nodeType} `{signatureNode}` cannot inherit from {baseType} `{signatureBase}`."  
+    | ID007 of string * string * string * string
     | ID008 of string * string
     | ID009 of string
     | ID010 of string
@@ -131,7 +133,6 @@ type DiagnosticCode =
     | ID025 of string * string * string
     | ID026 of string * string
     // logic-related error codes
-    | LG000 of string * string 
     | LG001 of string * string * string
     | LG002 of string * int
     | LG003 of string * string
@@ -161,6 +162,10 @@ type DiagnosticCode =
     | SIG04 of string * int * string list
     | SIG05 of string * string
     | SIG06 of string * string * string * bool
+    | SIG07 of string * string * string 
+    // structure-related error codes
+    | ST001 of string 
+    | ST002 of string 
     // variable-related error codes
     | VAR00 
     | VAR01 of string 
@@ -171,6 +176,7 @@ type DiagnosticCode =
     | VAR06 of string * string * string * bool
     | VAR07 of string 
     | VAR08 
+    | VAR09 of string * string 
     member this.Code = 
         match this with
             // parser error messages
@@ -221,6 +227,7 @@ type DiagnosticCode =
             | ID004 _ -> "ID004"
             | ID005 _ -> "ID005"
             | ID006 _ -> "ID006"
+            | ID007 _ -> "ID007"
             | ID008 _ -> "ID008"
             | ID009 _ -> "ID009"
             | ID010 _ -> "ID010"
@@ -241,7 +248,6 @@ type DiagnosticCode =
             | ID025 _ -> "ID025"
             | ID026 _ -> "ID026"
             // logic-related error codes
-            | LG000 _ -> "LG000"
             | LG001 _ -> "LG001"
             | LG002 _ -> "LG002"
             | LG003 _ -> "LG003"
@@ -271,6 +277,10 @@ type DiagnosticCode =
             | SIG04 _ -> "SIG04"
             | SIG05 _ -> "SIG05"
             | SIG06 _ -> "SIG06"
+            | SIG07 _ -> "SIG07"
+            // structure-related error codes
+            | ST001 _ -> "ST001"
+            | ST002 _ -> "ST002"
             // variable-related error codes
             | VAR00 -> "VAR00"
             | VAR01 _  -> "VAR01"
@@ -281,6 +291,7 @@ type DiagnosticCode =
             | VAR06 _  -> "VAR06"
             | VAR07 _  -> "VAR07"
             | VAR08 -> "VAR08"
+            | VAR09 _ -> "VAR09"
     member this.Message = 
         match this with
             // parser error messages
@@ -331,6 +342,7 @@ type DiagnosticCode =
             | ID004 name -> $"Cannot assign `{name}`, it is a class, not an instance; use a constructor `{name}()` instead."  
             | ID005 (signature, incorrectBlockType) -> $"Cannot find a block to be associated with the corollary `{signature}`, found only {incorrectBlockType}."  
             | ID006 signature -> $"The corollary `{signature}` is missing a block to be associated with."  
+            | ID007 (nodeType, signatureNode, baseType, signatureBase) -> $"The {nodeType} `{signatureNode}` cannot inherit from {baseType} `{signatureBase}`."  
             | ID008 (constructorId, classId)  -> $"Misspelled constructor name `{constructorId}`, expecting `{classId}`."  
             | ID009 name -> $"Circular base type dependency involving `{name}`." 
             | ID010 name -> $"The type `{name}` could not be found. Are you missing a uses clause?" 
@@ -359,7 +371,6 @@ type DiagnosticCode =
             | ID025 (candidate, candidateType, nodeType)  -> $"Cannot reference to `{candidate}` which is {candidateType} inside {nodeType}." 
             | ID026 (name, candidates)  -> $"The base constructor call's id `{name}` is not among the base classes this class is derived from. The candidate classes are {candidates}." 
             // logic-related error codes
-            | LG000 (typeOfPredicate,argument) -> $"Cannot evaluate `{typeOfPredicate}`; its argument `{argument}` is a predicate but couldn't be determined."
             | LG001 (typeOfPredicate,argument,typeOfExpression) -> $"Cannot evaluate `{typeOfPredicate}`; expecting a predicate argument `{argument}`, got `{typeOfExpression}`."
             | LG002 (nodeTypeName, times) -> $"Possible infinite recursion detected, `{nodeTypeName}` was called for more than {times} times.`."
             | LG003 (nodeTypeName, nodeName) -> $"`{nodeTypeName}` evaluates to `false` and cannot be {nodeName}."
@@ -398,9 +409,13 @@ type DiagnosticCode =
             | SIG05 (assigneeType, assignedType) -> $"Cannot assign type `{assignedType}` to type `{assigneeType}`."
             | SIG06 (name, first, second, isClass) -> 
                 if isClass then
-                    $"Property name `{name}` conflict between base classes `{first} and `{second}`."
+                    $"Property name `{name}` of base class `{first} will be overshadowed by `{second}`."
                 else
-                    $"Property name `{name}` conflict between base functional terms `{first} and `{second}`."
+                    $"Property name `{name}` of base functional term `{first} will be overshadowed by `{second}`."
+            | SIG07 (assigneeName, assigneeType, nodeType) -> $"`{assigneeName}` is {nodeType} (type `{assigneeType}`) and is not assignable."
+            // structure-related error codes
+            | ST001 nodeName -> sprintf $"The {nodeName} does nothing. Simplify the code by the block."
+            | ST002 nodeName -> sprintf $"The {nodeName} does nothing. Simplify the code by removing it entirely."
             // variable-related error codes
             | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
             | VAR01 name -> $"Variable `{name}` not declared in this scope."
@@ -410,11 +425,12 @@ type DiagnosticCode =
             | VAR05 name -> $"Bound variable `{name}` was not used in this quantor."
             | VAR06 (name, first, second, isClass) -> 
                 if isClass then
-                    $"Variable name `{name}` conflict between base classes `{first} and `{second}`."
+                    $"Variable name `{name}` of base class `{first} will be overshadowed by `{second}`."
                 else
-                    $"Variable name `{name}` conflict between base functional terms `{first} and `{second}`."
+                    $"Variable name `{name}` of base functional term `{first} will be overshadowed by `{second}`."
             | VAR07 name -> $"The {PrimQuantorExistsN} accepts only one bound variable `{name}`."
             | VAR08 -> "Variadic variables cannot be bound in a quantor."
+            | VAR09 (varName,varType) -> $"The variable {varName}:{varType} is free and cannot be used to evaluate this expresssion."
 
 /// Computes an MD5 checksum of a string
 let computeMD5Checksum (input: string) =

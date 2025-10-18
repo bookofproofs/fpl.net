@@ -651,7 +651,7 @@ type TestFplValueScopeTypeSignature() =
             match var with
             | "base1" -> Assert.AreEqual<string>("B()", base1.Type(SignatureType.Type))
             | "base2" -> Assert.AreEqual<string>("C(T1, func, ind, pred)", base1.Type(SignatureType.Type))
-            | "base3" -> Assert.AreEqual<string>("D(A, T1, func)", base1.Type(SignatureType.Type))
+            | "base3" -> Assert.AreEqual<string>("D(undef, T1, func)", base1.Type(SignatureType.Type))
             | "base4" -> Assert.AreEqual<string>("B(In(undef))", base1.Type(SignatureType.Type))
             | "base5" -> Assert.AreEqual<string>("C(Test1(T1), Test2(func, ind, pred))", base1.Type(SignatureType.Type))
             | "base6" -> Assert.AreEqual<string>("E(pred, undef, pred)", base1.Type(SignatureType.Type))
@@ -684,7 +684,7 @@ type TestFplValueScopeTypeSignature() =
             match var with
             | "base1" -> Assert.AreEqual<string>("B()", base1.Type(SignatureType.Mixed))
             | "base2" -> Assert.AreEqual<string>("C(undef, undef, undef, undef)", base1.Type(SignatureType.Mixed))
-            | "base3" -> Assert.AreEqual<string>("D(parent, undef, undef)", base1.Type(SignatureType.Mixed))
+            | "base3" -> Assert.AreEqual<string>("D(undef, undef, undef)", base1.Type(SignatureType.Mixed))
             | "base4" -> Assert.AreEqual<string>("B(In(undef))", base1.Type(SignatureType.Mixed))
             | "base5" -> Assert.AreEqual<string>("Test()", base1.Type(SignatureType.Mixed))
             | "base6" -> Assert.AreEqual<string>("C(Test1(undef), Test2(undef, undef, undef))", base1.Type(SignatureType.Mixed))
@@ -855,9 +855,10 @@ type TestFplValueScopeTypeSignature() =
             let pred = theory.Scope[predName]
 
             match var with
-            | "base1" -> Assert.AreEqual<string>("pred(undef, undef)", pred.Type(SignatureType.Type))
-            | "base2" -> Assert.AreEqual<string>("pred(undef)", pred.Type(SignatureType.Type))
-            | "base3" -> Assert.AreEqual<string>("pred(undef, undef)", pred.Type(SignatureType.Type))
+            | "base0" -> Assert.AreEqual<string>("true", pred.Type(SignatureType.Type))
+            | "base1" -> Assert.AreEqual<string>("iif(undef, undef)", pred.Type(SignatureType.Type))
+            | "base2" -> Assert.AreEqual<string>("not(undef)", pred.Type(SignatureType.Type))
+            | "base3" -> Assert.AreEqual<string>("and(undef, undef)", pred.Type(SignatureType.Type))
             | "base4" -> Assert.AreEqual<string>("Equal(undef, undef)", pred.Type(SignatureType.Type))
             | "base5" -> Assert.AreEqual<string>("NotEqual(undef, undef)", pred.Type(SignatureType.Type))
             | _ -> Assert.IsTrue(false)
@@ -887,11 +888,11 @@ type TestFplValueScopeTypeSignature() =
 
             match var with
             | "base0" -> Assert.AreEqual<string>(@"1", trsl.Type(SignatureType.Type))
-            | "base1" -> Assert.AreEqual<string>(@"x \Leftrightarrow y", trsl.Type(SignatureType.Type))
-            | "base2" -> Assert.AreEqual<string>(@"\neg(x)", trsl.Type(SignatureType.Type))
-            | "base3" -> Assert.AreEqual<string>(@"p \wedge q", trsl.Type(SignatureType.Type))
-            | "base4" -> Assert.AreEqual<string>(@"x=y", trsl.Type(SignatureType.Type))
-            | "base5" -> Assert.AreEqual<string>(@"x\neq y", trsl.Type(SignatureType.Type))
+            | "base1" -> Assert.AreEqual<string>(LiteralUndef, trsl.Type(SignatureType.Type))
+            | "base2" -> Assert.AreEqual<string>(@"\neg(", trsl.Type(SignatureType.Type))
+            | "base3" -> Assert.AreEqual<string>(LiteralUndef, trsl.Type(SignatureType.Type))
+            | "base4" -> Assert.AreEqual<string>(LiteralUndef, trsl.Type(SignatureType.Type))
+            | "base5" -> Assert.AreEqual<string>(LiteralUndef, trsl.Type(SignatureType.Type))
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

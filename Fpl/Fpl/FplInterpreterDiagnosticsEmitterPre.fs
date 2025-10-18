@@ -113,6 +113,19 @@ let emitID006diagnostics name pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
 
+let emitID007diagnostics nodeType signatureNode baseType signatureBase pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ID007 (nodeType, signatureNode, baseType, signatureBase)
+            Diagnostic.Alternatives = None
+        }
+    ad.AddDiagnostic diagnostic
+
 let emitID008Diagnostics constructorId classId pos1 pos2 =
     if constructorId <> classId then
         let diagnostic =
@@ -357,8 +370,6 @@ let emitID026Diagnostics name candidates pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
 
-
-
 let emitLG002diagnostic nodeTypeName times pos1 pos2 = 
     let diagnostic =
         { 
@@ -419,7 +430,7 @@ let emitLG005Diagnostics name pos1 pos2 =
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = LG005 name
-            Diagnostic.Alternatives = Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary)." 
+            Diagnostic.Alternatives = None
         }
     ad.AddDiagnostic diagnostic
 
@@ -685,11 +696,55 @@ let emitSIG06iagnostic name first second isClass pos1 pos2  =
         { 
             Diagnostic.Uri = ad.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.Severity = DiagnosticSeverity.Warning
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = SIG06(name, first, second, isClass)
-            Diagnostic.Alternatives = Some "Rename the original properties to avoid name conflicts." 
+            Diagnostic.Alternatives = Some "Consider renaming the properties to avoid name conflicts." 
+        }
+    ad.AddDiagnostic diagnostic
+
+let emitSIG07iagnostic assigneeName assigneeType nodeType pos1 pos2  = 
+    let code = 
+        if isEnglishAn nodeType then
+            SIG07(assigneeName, assigneeType, $"an {nodeType}")
+        else
+            SIG07(assigneeName, assigneeType, $"a {nodeType}")
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Warning
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = code
+            Diagnostic.Alternatives = Some "Expected a variable or array position of a variadic variable." 
+        }
+    ad.AddDiagnostic diagnostic
+
+let emitST001diagnostics name pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Information
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ST001 name
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
+let emitST002diagnostics name pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Information
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ST002 name
+            Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
 
@@ -749,16 +804,28 @@ let emitVAR04diagnostics name pos1 pos2 =
     }
     ad.AddDiagnostic diagnostic
 
+let emitVAR05diagnostics name pos1 pos2 = 
+    let diagnostic = { 
+        Diagnostic.Uri = ad.CurrentUri
+        Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+        Diagnostic.Severity = DiagnosticSeverity.Error
+        Diagnostic.StartPos = pos1
+        Diagnostic.EndPos = pos2
+        Diagnostic.Code = VAR05 name
+        Diagnostic.Alternatives = None 
+    }
+    ad.AddDiagnostic diagnostic
+
 let emitVAR06iagnostic name first second isClass pos1 pos2  = 
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.Severity = DiagnosticSeverity.Warning
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = VAR06(name, first, second, isClass)
-            Diagnostic.Alternatives = Some "Rename the original variables to avoid name conflicts." 
+            Diagnostic.Alternatives = Some "Consider renaming the original variables to avoid name conflicts." 
         }
     ad.AddDiagnostic diagnostic
 
@@ -784,6 +851,19 @@ let emitVAR08diagnostics pos1 pos2 =
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = VAR08
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
+let emitVAR09diagnostics varName varType pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = VAR09(varName, varType)
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic

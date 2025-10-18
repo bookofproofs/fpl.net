@@ -13,9 +13,7 @@ def cl Zero: Nat
 
 // definition of a functional term denoting the successor of a natural number
 def func Succ(n: Nat) -> Nat
-{
-    intr
-}
+
 
 ext Digits x@/\d+/ -> Nat 
 {
@@ -74,13 +72,13 @@ axiom SuccessorIsInjective
 
 axiom CompleteInduction
 {
-    dec ~p:pred(n:Nat);
-    impl
-    (
-        and ( p(@0), all n1:Nat { impl ( p(n1), p(Succ(n1)) ) } ),
-        all n1:Nat { p(n1) }
-    )
-
+    all p:pred(n:Nat)
+    { impl
+        (
+            and ( p(@0), all n1:Nat { impl ( p(n1), p(Succ(n1)) ) } ),
+            all n1:Nat { p(n1) }
+        )
+    }
 }
 
 
@@ -220,9 +218,6 @@ def func Sum3(arr:*Nat) -> Nat
 }
 
 def func Addend(a: Nat)->Nat
-{
-    intr
-}
 
 def func Sum(from,to:Nat, addend: Addend) -> Nat
 {
@@ -270,9 +265,6 @@ def pred LowerEqual (x,y:tpl)
 
 
 def func RealValuedFunction(x:Real) -> Real
-{
-    intr
-}
 
 def pred IsBounded(x: Real)
 {
@@ -329,7 +321,7 @@ def function ContinuedFraction(k:Nat, arr: RightOpenRangeInt) -> Real
     return Add( cf, Div(@1 , ContinuedFraction(i, RightOpenRange[arr[i]])))
 }
 
-// Example of defining a constant for the natural number 100 using the
-def class N100:Set{ctor N100(){dec ~n:Nat  base.Set() parent:=SetBuilder(SetNat(),IsGreater(n,@100));  }}
+// Example of defining a constant for the set of all natural numbers greater than 100 using the
+def class N100:SetBuilder{ctor N100(){dec ~n:Nat  base.SetBuilder(SetNat(), IsGreater(n,@100)) ;  }}
 
 ;

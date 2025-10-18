@@ -644,7 +644,7 @@ type TestFplValueScopeQualifiedName() =
             match var with
             | "base1" -> Assert.AreEqual<string>("TestBaseConstructorCallQualifiedName.A.A(T1, func, ind, pred).B()", qualifiedName base1)
             | "base2" -> Assert.AreEqual<string>("TestBaseConstructorCallQualifiedName.A.A(T1, func, ind, pred).C(T1, func, ind, pred)", qualifiedName base1)
-            | "base3" -> Assert.AreEqual<string>("TestBaseConstructorCallQualifiedName.A.A(T1, func, ind, pred).D(self, T1, func)", qualifiedName base1)
+            | "base3" -> Assert.AreEqual<string>("TestBaseConstructorCallQualifiedName.A.A(T1, func, ind, pred).D(undef, T1, func)", qualifiedName base1)
             | "base4" -> Assert.AreEqual<string>("TestBaseConstructorCallQualifiedName.A.A(T1, func, ind, pred).B(In(undef))", qualifiedName base1)
             | "base5" -> Assert.AreEqual<string>("TestBaseConstructorCallQualifiedName.A.A(T1, func, ind, pred).C(Test1(T1), Test2(func, ind, pred))", qualifiedName base1)
             | "base6" -> Assert.AreEqual<string>("TestBaseConstructorCallQualifiedName.A.A(T1, func, ind, pred).E(pred, undef, pred)", qualifiedName base1)
@@ -677,7 +677,7 @@ type TestFplValueScopeQualifiedName() =
             match var with
             | "base1" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().B()", qualifiedName base1)
             | "base2" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().C(a, b, c, d)", qualifiedName base1)
-            | "base3" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().D(T1(), b, c)", qualifiedName base1)
+            | "base3" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().D(self, b, c)", qualifiedName base1)
             | "base4" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().B(In(x))", qualifiedName base1)
             | "base5" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().Test()", qualifiedName base1)
             | "base6" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().C(Test1(a), Test2(b, c, d))", qualifiedName base1)
