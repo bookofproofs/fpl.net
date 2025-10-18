@@ -1711,16 +1711,25 @@ let rec eval (st: SymbolTable) ast =
         ) |> ignore 
         st.EvalPop()
     // | Axiom of Constructor * (Ast * (Ast list option * Ast))
-    | Ast.Constructor((pos1, pos2), (signatureAst, optVarDeclOrSpecListAst)) ->
+    | Ast.ConstructorBlock((pos1, pos2), optVarDeclOrSpecListAst) ->
+        st.EvalPush("ConstructorBlock")
+        let parent = variableStack.PeekEvalStack()
+        // evaluate the construction block block
+        match optVarDeclOrSpecListAst with
+        | Some astList -> 
+            astList |> List.map (eval st) |> ignore
+        | None -> ()
+        if parent.ArgList.Count = 0 then
+            emitST002diagnostics parent.Name parent.StartPos parent.EndPos
+        st.EvalPop()
+    // | Axiom of Constructor * (Ast * (Ast list option * Ast))
+    | Ast.Constructor((pos1, pos2), (signatureAst, constructorBlockAst)) ->
         st.EvalPush("Constructor")
         let parent = variableStack.PeekEvalStack()
         let fv = new FplConstructor((pos1, pos2), parent)
         variableStack.PushEvalStack(fv)
         eval st signatureAst
-        // evaluate the declaration block
-        match optVarDeclOrSpecListAst with
-        | Some astList -> astList |> List.map (eval st) |> ignore
-        | None -> ()
+        eval st constructorBlockAst
         variableStack.PopEvalStack()
         st.EvalPop()
     // | DefPredicateContent of Ast list option * Ast
@@ -1760,8 +1769,18 @@ let rec eval (st: SymbolTable) ast =
         | None -> fv.IsIntrinsic <- true
         variableStack.PopEvalStack()
         st.EvalPop()
-    // | DefinitionFunctionalTerm of Positions * ((Ast * Ast) * (Ast * Ast list option))
-    | Ast.DefinitionFunctionalTerm((pos1, pos2), (functionalTermSignatureAst, optDefBlock)) ->
+    | Ast.FunctionalTermDefinitionBlock((pos1, pos2), optDefBlock) ->
+        st.EvalPush("FunctionalTermDefinitionBlock")
+        let functionaTermBlock = variableStack.PeekEvalStack()
+        match optDefBlock with 
+        | Some (funcContentAst, optPropertyListAsts) ->
+            eval st funcContentAst
+            optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
+            if functionaTermBlock.GetProperties().IsEmpty && functionaTermBlock.ArgList.Count = 1 then
+                emitST001diagnostics functionaTermBlock.Name pos1 pos2
+        | None -> functionaTermBlock.IsIntrinsic <- true
+        st.EvalPop()
+    | Ast.DefinitionFunctionalTerm((pos1, pos2), (functionalTermSignatureAst, functionalTermDefBlockAst)) ->
         st.EvalPush("DefinitionFunctionalTerm")
         let parent = variableStack.PeekEvalStack()
         let fv = new FplFunctionalTerm((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
@@ -1774,13 +1793,7 @@ let rec eval (st: SymbolTable) ast =
             eval st paramTupleAst
             variableStack.InSignatureEvaluation <- false
             optUserDefinedSymbolAst |> Option.map (eval st) |> Option.defaultValue () 
-            match optDefBlock with 
-            | Some (funcContentAst, optPropertyListAsts) ->
-                eval st funcContentAst
-                optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
-                if fv.Scope.Count = 0 && fv.ArgList.Count = 1 then
-                    emitST001diagnostics fv.Name fv.StartPos fv.EndPos
-            | None -> fv.IsIntrinsic <- true
+            eval st functionalTermDefBlockAst
             inhFunctionalTypeListAstsOpt |> Option.map (eval st) |> Option.defaultValue () 
             setSignaturePositions pos1 pos2
         | _ -> ()
@@ -1794,20 +1807,29 @@ let rec eval (st: SymbolTable) ast =
         setSignaturePositions pos1 pos2
         variableStack.InSignatureEvaluation <- false
         st.EvalPop()
-    | Ast.DefinitionClass((pos1, pos2),(((classSignatureAst, optInheritedClassTypeListAst), optUserDefinedObjSymAst), optDefBlock)) ->
+    | Ast.ClassDefinitionBlock((pos1, pos2), optDefBlock) ->
+        st.EvalPush("ClassDefinitionBlock")
+        let classBlock = variableStack.PeekEvalStack()
+        match optDefBlock with 
+        | Some (classContentAst, optPropertyListAsts) ->
+            eval st classContentAst
+            optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
+            let cls = classBlock :?> FplClass
+            let properties = cls.GetProperties()
+            let constructors = cls.GetConstructors()
+            if properties.IsEmpty && cls.ArgList.Count = 0 && constructors.IsEmpty then
+                emitST001diagnostics classBlock.Name pos1 pos2
+        | None -> classBlock.IsIntrinsic <- true
+        st.EvalPop()
+    // | DerivedPredicate of Ast
+    | Ast.DefinitionClass((pos1, pos2),(((classSignatureAst, optInheritedClassTypeListAst), optUserDefinedObjSymAst), classBlockAst)) ->
         st.EvalPush("DefinitionClass")
         let parent = variableStack.PeekEvalStack()
         let fv = new FplClass((pos1, pos2), parent)
         variableStack.PushEvalStack(fv)
         eval st classSignatureAst
         optUserDefinedObjSymAst |> Option.map (eval st) |> Option.defaultValue ()
-        match optDefBlock with 
-        | Some (classContentAst, optPropertyListAsts) ->
-            eval st classContentAst
-            optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
-            if fv.Scope.Count = 0 && fv.ArgList.Count = 0 then
-                emitST001diagnostics fv.Name fv.StartPos fv.EndPos
-        | None -> fv.IsIntrinsic <- true
+        eval st classBlockAst
         optInheritedClassTypeListAst |> Option.map (eval st) |> Option.defaultValue ()
         variableStack.PopEvalStack()
         st.EvalPop()

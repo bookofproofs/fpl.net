@@ -165,6 +165,7 @@ type DiagnosticCode =
     | SIG07 of string * string * string 
     // structure-related error codes
     | ST001 of string 
+    | ST002 of string 
     // variable-related error codes
     | VAR00 
     | VAR01 of string 
@@ -279,6 +280,7 @@ type DiagnosticCode =
             | SIG07 _ -> "SIG07"
             // structure-related error codes
             | ST001 _ -> "ST001"
+            | ST002 _ -> "ST002"
             // variable-related error codes
             | VAR00 -> "VAR00"
             | VAR01 _  -> "VAR01"
@@ -413,6 +415,7 @@ type DiagnosticCode =
             | SIG07 (assigneeName, assigneeType, nodeType) -> $"`{assigneeName}` is {nodeType} (type `{assigneeType}`) and is not assignable."
             // structure-related error codes
             | ST001 nodeName -> sprintf $"The {nodeName} does nothing. Simplify the code by the block."
+            | ST002 nodeName -> sprintf $"The {nodeName} does nothing. Simplify the code by removing it entirely."
             // variable-related error codes
             | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
             | VAR01 name -> $"Variable `{name}` not declared in this scope."

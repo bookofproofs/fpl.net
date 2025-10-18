@@ -13,9 +13,7 @@ def cl Zero: Nat
 
 // definition of a functional term denoting the successor of a natural number
 def func Succ(n: Nat) -> Nat
-{
-    intr
-}
+
 
 ext Digits x@/\d+/ -> Nat 
 {
@@ -220,9 +218,6 @@ def func Sum3(arr:*Nat) -> Nat
 }
 
 def func Addend(a: Nat)->Nat
-{
-    intr
-}
 
 def func Sum(from,to:Nat, addend: Addend) -> Nat
 {
@@ -270,9 +265,6 @@ def pred LowerEqual (x,y:tpl)
 
 
 def func RealValuedFunction(x:Real) -> Real
-{
-    intr
-}
 
 def pred IsBounded(x: Real)
 {

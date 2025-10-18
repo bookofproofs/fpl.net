@@ -466,7 +466,7 @@ let keywordIntrinsic = positions "Intrinsic" (skipString LiteralIntrL <|> skipSt
 let predContent = varDeclOrSpecList .>>. spacesPredicate |>> Ast.DefPredicateContent
 
 let keywordConstructor = (skipString LiteralCtorL <|> skipString LiteralCtor) .>> SW
-let constructorBlock = leftBrace >>. varDeclOrSpecList .>> spacesRightBrace 
+let constructorBlock = positions "ConstructorBlock" (leftBrace >>. varDeclOrSpecList .>> spacesRightBrace) |>> Ast.ConstructorBlock
 let constructorSignature = positions "ConstructorSignature" (keywordConstructor >>. simpleSignature .>>. paramTuple) .>> IW |>> Ast.ConstructorSignature
 let constructor = positions "Constructor" (constructorSignature .>>. constructorBlock) |>> Ast.Constructor
 
@@ -543,7 +543,7 @@ let predicateSignature = positions "PredicateSignature" (keywordPredicate >>. SW
 let definitionPredicate = positions "DefinitionPredicate" (predicateSignature .>>. predicateDefinitionBlock) |>> Ast.DefinitionPredicate
 
 // Functional term building blocks can be defined similarly to classes, they can have properties but they cannot be derived any parent type 
-let functionalTermDefinitionBlock = opt (leftBrace  >>. ((keywordIntrinsic <|> funcContent) .>> IW) .>>. propertyList .>> spacesRightBrace)
+let functionalTermDefinitionBlock = positions "FunctionalTermDefinitionBlock" (opt (leftBrace  >>. ((keywordIntrinsic <|> funcContent) .>> IW) .>>. propertyList .>> spacesRightBrace))  |>> Ast.FunctionalTermDefinitionBlock
 
 let inheritedFunctionalType = predicateIdentifier
 let inheritedFunctionalTypeList = sepBy1 (inheritedFunctionalType) (attempt (IW >>. comma)) |>> Ast.InheritedFunctionalTypeList
@@ -555,7 +555,7 @@ let keywordClass = (skipString LiteralClL <|> skipString LiteralCl)
 
 let constructorList = many1 (constructor .>> IW)
 let classCompleteContent = varDeclOrSpecList .>>. constructorList|>> Ast.DefClassCompleteContent
-let classDefinitionBlock = opt (leftBrace  >>. ((keywordIntrinsic <|> classCompleteContent) .>> IW) .>>. propertyList .>> spacesRightBrace)
+let classDefinitionBlock = positions "ClassDefinitionBlock" (opt (leftBrace  >>. ((keywordIntrinsic <|> classCompleteContent) .>> IW) .>>. propertyList .>> spacesRightBrace)) |>> Ast.ClassDefinitionBlock
 let inheritedClassTypeList = sepBy1 (inheritedClassType) (attempt (IW >>. comma)) |>> Ast.InheritedClassTypeList
 
 let classSignature = positions "ClassSignature" (keywordClass >>. SW >>. pascalCaseId) .>> IW |>> Ast.ClassSignature
