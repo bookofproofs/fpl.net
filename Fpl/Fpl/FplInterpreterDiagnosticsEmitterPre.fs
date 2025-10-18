@@ -704,6 +704,24 @@ let emitSIG06iagnostic name first second isClass pos1 pos2  =
         }
     ad.AddDiagnostic diagnostic
 
+let emitSIG07iagnostic assigneeName assigneeType nodeType pos1 pos2  = 
+    let code = 
+        if isEnglishAn nodeType then
+            SIG07(assigneeName, assigneeType, $"an {nodeType}")
+        else
+            SIG07(assigneeName, assigneeType, $"a {nodeType}")
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Warning
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = code
+            Diagnostic.Alternatives = Some "Expected a variable or array position of a variadic variable." 
+        }
+    ad.AddDiagnostic diagnostic
+
 let emitVAR01diagnostics name pos1 pos2 =
     let diagnostic =
         { 

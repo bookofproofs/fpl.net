@@ -162,7 +162,7 @@ type DiagnosticCode =
     | SIG04 of string * int * string list
     | SIG05 of string * string
     | SIG06 of string * string * string * bool
-    | SIG07 of string * string
+    | SIG07 of string * string * string 
     // variable-related error codes
     | VAR00 
     | VAR01 of string 
@@ -406,7 +406,7 @@ type DiagnosticCode =
                     $"Property name `{name}` of base class `{first} will be overshadowed by `{second}`."
                 else
                     $"Property name `{name}` of base functional term `{first} will be overshadowed by `{second}`."
-            | SIG07 (assigneeName, assigneeType) -> $"`{assigneeName}` is not assignable. It has the type `{assigneeType}`."
+            | SIG07 (assigneeName, assigneeType, nodeType) -> $"`{assigneeName}` is {nodeType} (type `{assigneeType}`) and is not assignable."
             // variable-related error codes
             | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
             | VAR01 name -> $"Variable `{name}` not declared in this scope."

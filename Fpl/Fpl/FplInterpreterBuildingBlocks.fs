@@ -444,13 +444,6 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Self")
         let parent = variableStack.PeekEvalStack()
         let fv = new FplSelf((pos1, pos2), parent)
-        match parent with 
-        | :? FplReference -> 
-            parent.FplId <- fv.FplId
-            parent.TypeId <- fv.TypeId
-        | _ -> ()
-        variableStack.PushEvalStack(fv)
-        variableStack.PopEvalStack()
         let oldDiagnosticsStopped = ad.DiagnosticsStopped
         ad.DiagnosticsStopped <- false
         match fv.NextBlockNode with
@@ -466,18 +459,13 @@ let rec eval (st: SymbolTable) ast =
                 emitID016diagnostics $"'{block.Name}' {block.Type(SignatureType.Name)}" pos1 pos2
         | _ -> ()
         ad.DiagnosticsStopped <- oldDiagnosticsStopped
+        variableStack.PushEvalStack(fv)
+        variableStack.PopEvalStack()
         st.EvalPop() 
     | Ast.Parent((pos1, pos2), _) -> 
         st.EvalPush("Parent")
         let parent = variableStack.PeekEvalStack()
         let fv = new FplParent((pos1, pos2), parent)
-        match parent with 
-        | :? FplReference -> 
-            parent.FplId <- fv.FplId
-            parent.TypeId <- fv.TypeId
-        | _ -> ()
-        variableStack.PushEvalStack(fv)
-        variableStack.PopEvalStack()
         let oldDiagnosticsStopped = ad.DiagnosticsStopped
         ad.DiagnosticsStopped <- false
         match fv.UltimateBlockNode, fv.NextBlockNode with
@@ -498,6 +486,8 @@ let rec eval (st: SymbolTable) ast =
                 emitID015diagnostics $"'{block.Name}' {block.Type(SignatureType.Name)}" pos1 pos2 None
         | _ -> ()
         ad.DiagnosticsStopped <- oldDiagnosticsStopped
+        variableStack.PushEvalStack(fv)
+        variableStack.PopEvalStack()
 
         st.EvalPop() 
     | Ast.True((pos1, pos2), _) -> 

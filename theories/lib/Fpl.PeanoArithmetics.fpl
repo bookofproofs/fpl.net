@@ -329,7 +329,7 @@ def function ContinuedFraction(k:Nat, arr: RightOpenRangeInt) -> Real
     return Add( cf, Div(@1 , ContinuedFraction(i, RightOpenRange[arr[i]])))
 }
 
-// Example of defining a constant for the natural number 100 using the
-def class N100:Set{ctor N100(){dec ~n:Nat  base.Set() parent:=SetBuilder(SetNat(),IsGreater(n,@100));  }}
+// Example of defining a constant for the set of all natural numbers greater than 100 using the
+def class N100:SetBuilder{ctor N100(){dec ~n:Nat  base.SetBuilder(SetNat(), IsGreater(n,@100)) ;  }}
 
 ;

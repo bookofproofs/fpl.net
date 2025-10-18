@@ -1567,13 +1567,30 @@ type TestInterpreterErrors() =
             let code = SIG06 ("","","", false)
             runTestHelper "TestVAR06.fpl" fplCode code expected
 
+    [<DataRow("00a", "def pred S(x:pred) {dec T:=true; true};", 1)>]
+    [<DataRow("00b", "ax T {true} def pred S(x:pred) {dec T:=true; true};", 1)>]
+    [<DataRow("00c", "thm T {true} def pred S(x:pred) {dec T:=true; true};", 1)>]
+    [<DataRow("00d", "lem T {true} def pred S(x:pred) {dec T:=true; true};", 1)>]
+    [<DataRow("00e", "prop T {true} def pred S(x:pred) {dec T:=true; true};", 1)>]
+    [<DataRow("00f", "conj T {true} def pred S(x:pred) {dec T:=true; true};", 1)>]
+    [<DataRow("00g", "ext T x@/\d+/ -> obj {ret x} def pred S(x:pred) {dec T:=true; true};", 1)>]
+    [<DataRow("00h", "def cl T def pred S(x:pred) {dec T:=true; true};", 1)>]
+    [<DataRow("00i", """loc T := !tex: "T"; def pred S(x:pred) {dec T:=true; true};""", 1)>]
+    [<DataRow("00k", "inf T {pre:true con:true} def pred S(x:pred) {dec T:=true; true};", 1)>]
+    //[<DataRow("00l", "proof T$1 {1. |- trivial} def pred S(x:pred) {dec T$1:=true; true};", 1)>] // syntactically incorrect
+    //[<DataRow("00m", "cor T$1 {true} def pred S(x:pred) {dec T$1:=true; true};", 1)>] // syntactically incorrect
+
+    [<DataRow("01a", "def pred T() {intr} def pred S(x:pred) {dec T():=true; true};", 1)>]
+    [<DataRow("01b", "def func T()->obj {intr} def pred S(x:pred) {dec T():=true; true};", 1)>]
+    [<DataRow("01c", "def pred S() {dec true:=true; true};", 1)>]
+    [<DataRow("01d", "def pred S() {dec false:=true; true};", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG07(no:string, fplCode:string, expected) =
         if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = SIG07 ("","")
+            let code = SIG07 ("", "", "")
             runTestHelper "TestVAR06.fpl" fplCode code expected
 
     [<DataRow("def predicate Test(x,y:* pred) {true};", 1)>]

@@ -4171,18 +4171,82 @@ type SymbolTableStructure() =
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
 
-    [<DataRow("FplSelf", "00", """;""", "")>]
+    [<DataRow("FplSelf", "00", """def pred T() {self()};""", "")>]
+    [<DataRow("FplSelf", "00a", """def cl A {dec ~x:obj x:=self; ctor A() {}};""", "")>]
+    [<DataRow("FplSelf", "00b", """def cl A {ctor A() {dec ~x:obj x:=self;}};""", "")>]
+    [<DataRow("FplSelf", "00c", """def cl A {intr property pred T() { is(self,A) } };""", "")>]
+    [<DataRow("FplSelf", "00d", """def cl A {intr property func T()->obj {dec ~x:obj x:=self; return x } };""", "")>]
+    [<DataRow("FplSelf", "00e", """def cl A {intr property pred T() { is(self,A) } };""", "")>]
+    [<DataRow("FplSelf", "00f", """def cl A {intr property func T()->obj {dec ~x:obj x:=self; return x } };""", "")>]
+    [<DataRow("FplSelf", "01a", """def pred A() {dec assert is(self,A); true };""", "")>]
+    [<DataRow("FplSelf", "01b", """def pred A() {intr property pred T() { is(self,A) } };""", "")>]
+    [<DataRow("FplSelf", "01c", """def pred A() {intr property pred T() { is(self,A) } };""", "")>]
+    [<DataRow("FplSelf", "01d", """def pred A() {intr property pred T() { is(self,A) } };""", "")>]
+    [<DataRow("FplSelf", "01e", """def pred A() {intr property pred T() { is(self,A) } };""", "")>]
+    [<DataRow("FplSelf", "02a", """def func A()->obj {dec ~x:obj assert is(self,A); return x};""", "")>]
+    [<DataRow("FplSelf", "02b", """def func A()->obj {intr property pred T() { is(self,A) } };""", "")>]
+    [<DataRow("FplSelf", "02c", """def func A()->obj {intr property pred T() { is(self,A) } };""", "")>]
+    [<DataRow("FplSelf", "02d", """def func A()->obj {intr property pred T() { is(self,A) } };""", "")>]
+    [<DataRow("FplSelf", "02e", """def func A()->obj {intr property pred T() { is(self,A) } };""", "")>]
+    [<DataRow("FplSelf", "03", """axiom A {self};""", "")>]
+    [<DataRow("FplSelf", "04", """theorem A {self};""", "")>]
+    [<DataRow("FplSelf", "05", """lemma A {self};""", "")>]
+    [<DataRow("FplSelf", "06", """prop A {self};""", "")>]
+    [<DataRow("FplSelf", "08", """conj A {self};""", "")>]
+    [<DataRow("FplSelf", "09", """cor A$1 {self};""", "")>]
+    [<DataRow("FplSelf", "10", """prf A$1 {1. |- self qed};""", "")>]
+    [<DataRow("FplSelf", "11", """inf A {pre: true con: self};""", "")>]
+    [<DataRow("FplSelf", "12", """inf A {pre: self con: true};""", "")>]
+    [<DataRow("FplSelf", "13", """loc not(self) := !tex: "\neg(" x ")";;""", "")>]
+    [<DataRow("FplSelf", "14", """ext A x@/\d+/ -> obj {dec assert is(self,A); ret x};""", "")>]
     [<TestMethod>]
     member this.TestStructureFplSelf(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplSelf.fpl"
         let parent, node = testSkeleton nodeType filename fplCode identifier
         
         match nodeType, varVal with
-        | "FplReturn", "00" ->
-            Assert.IsInstanceOfType<FplRoot>(parent)
+        // nodes that can be referred to as 'self'
+        | "FplSelf", "00" 
+        | "FplSelf", "00a" 
+        | "FplSelf", "00c"
+        | "FplSelf", "00d"
+        | "FplSelf", "00e"
+        | "FplSelf", "00f"
+        | "FplSelf", "01a"
+        | "FplSelf", "01b"
+        | "FplSelf", "01c"
+        | "FplSelf", "01d"
+        | "FplSelf", "01e"
+        | "FplSelf", "02a"
+        | "FplSelf", "02b"
+        | "FplSelf", "02c"
+        | "FplSelf", "02d"
+        | "FplSelf", "02e"
+            ->
+            Assert.IsInstanceOfType<FplReference>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
-            Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplReturn>(node)
+            Assert.AreEqual<int>(1, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplSelf>(node)
+            Assert.AreEqual<int>(0, node.ArgList.Count)
+            Assert.AreEqual<int>(1, node.Scope.Count)
+        // nodes that cannot be referred to as 'self'
+        | "FplSelf", "00b"
+        | "FplSelf", "03"
+        | "FplSelf", "04"
+        | "FplSelf", "05"
+        | "FplSelf", "06"
+        | "FplSelf", "08"
+        | "FplSelf", "09"
+        | "FplSelf", "10"
+        | "FplSelf", "11"
+        | "FplSelf", "12"
+        | "FplSelf", "13"
+        | "FplSelf", "14"
+            ->
+            Assert.IsInstanceOfType<FplReference>(parent)
+            Assert.AreEqual<int>(0, parent.ArgList.Count)
+            Assert.AreEqual<int>(1, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplSelf>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
