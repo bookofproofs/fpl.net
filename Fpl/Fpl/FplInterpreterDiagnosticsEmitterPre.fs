@@ -722,6 +722,19 @@ let emitSIG07iagnostic assigneeName assigneeType nodeType pos1 pos2  =
         }
     ad.AddDiagnostic diagnostic
 
+let emitST001diagnostics name pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Information
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ST001 name
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
 let emitVAR01diagnostics name pos1 pos2 =
     let diagnostic =
         { 

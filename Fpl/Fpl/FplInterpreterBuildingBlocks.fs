@@ -1778,6 +1778,8 @@ let rec eval (st: SymbolTable) ast =
             | Some (funcContentAst, optPropertyListAsts) ->
                 eval st funcContentAst
                 optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
+                if fv.Scope.Count = 0 && fv.ArgList.Count = 1 then
+                    emitST001diagnostics fv.Name fv.StartPos fv.EndPos
             | None -> fv.IsIntrinsic <- true
             inhFunctionalTypeListAstsOpt |> Option.map (eval st) |> Option.defaultValue () 
             setSignaturePositions pos1 pos2
@@ -1803,6 +1805,8 @@ let rec eval (st: SymbolTable) ast =
         | Some (classContentAst, optPropertyListAsts) ->
             eval st classContentAst
             optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
+            if fv.Scope.Count = 0 && fv.ArgList.Count = 0 then
+                emitST001diagnostics fv.Name fv.StartPos fv.EndPos
         | None -> fv.IsIntrinsic <- true
         optInheritedClassTypeListAst |> Option.map (eval st) |> Option.defaultValue ()
         variableStack.PopEvalStack()
