@@ -5,7 +5,8 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open FParsec
 open ErrDiagnostics
 open FplInterpreterTypes
-open FplInterpreterUsesClause
+open Newtonsoft.Json
+open Newtonsoft.Json.Linq
 open CommonTestHelpers
 open TestSharedConfig
 
@@ -585,3 +586,25 @@ type SymbolTableNavigation() =
 
             // remove the test file
             prepareFplCode(filename, "", true) |> ignore
+
+    [<DataRow("uses Fpl.Commons.Structures ;")>]
+    [<TestMethod>]
+    member this.TestJson(fplCode:string) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            prepareFplCode ("TestJson.fpl", "", false) |> ignore
+            match prepareFplCode ("TestJson.fpl", fplCode, false) with
+            | Some st ->
+                try
+                    
+                    JToken.Parse(st.ToJson()) |> ignore
+                with
+                | :? JsonReaderException as ex -> 
+                    let currDir = Directory.GetCurrentDirectory()
+                    File.WriteAllText(Path.Combine(currDir, "TestJson.json"), st.ToJson())
+                    Assert.IsTrue (false, ex.Message)
+                | _ -> Assert.IsTrue (false, "Other exception occurred")
+                
+            | None ->
+                Assert.IsTrue(false, "Syntax error?")

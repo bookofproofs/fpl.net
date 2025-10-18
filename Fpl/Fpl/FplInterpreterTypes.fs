@@ -5013,7 +5013,8 @@ type SymbolTable(parsedAsts: ParsedAstList, debug: bool, offlineMode: bool) =
             sb.AppendLine(indentMinusOne + "{") |> ignore
             let name = $"{root.Type(SignatureType.Name)}".Replace(@"\", @"\\")
             let fplTypeName = $"{root.Type(SignatureType.Type)}".Replace(@"\", @"\\")
-            let fplValueRepr = $"{root.Represent()}".Replace(@"\", @"\\")
+            let mutable fplValueRepr = $"{root.Represent()}".Replace("\\", "\\\\")   // escape backslashes first
+                                                            .Replace("\"", "\\\"")   // then escape double quotes
 
             if name = this.MainTheory then
                 sb.AppendLine($"{indent}\"Name\": \"(Main) {name}\",") |> ignore
