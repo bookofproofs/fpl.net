@@ -19,6 +19,15 @@ type TestExtensions () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
+    [<DataRow(@"@1 :=true")>]
+    [<DataRow(@"@1:=true")>]
+    [<TestMethod>]
+    member this.TestExtensionAssignment (ext:string) =
+        let result = run (assignmentStatement .>> eof) ext
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
     [<DataRow(@"ext Digits: x:=// {return x}")>]
     [<DataRow(@"ext Alpha: x:=/[a-z]+ {return x}")>]
     [<DataRow(@"ext Alpha: x:=[a-z]+/ {return x}")>]

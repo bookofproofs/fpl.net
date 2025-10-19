@@ -98,7 +98,7 @@ let attemptSW = SW <|> (IW .>> attempt (lookAhead (choice [skipChar '('; skipCha
 // The FPL interpreter will try to match extensionString after the @ Literal
 // by tryoing out the regex expressions of all user-declared ExtensionBlocks (in their declaration order)
 // until none or the first of then matches this string. Then, the matched string will get the named type of the ExtensionBlock.
-let extensionString = regex @"[^,\s()\[\]{}]+" <?> "<extensionString>" 
+let extensionString = regex @"[^,\s()\[\]{}\:]+" <?> "<extensionString>" 
 let extension = positions "Extension" (at >>. extensionString) |>> Ast.Extension
 
 (* Identifiers *)
