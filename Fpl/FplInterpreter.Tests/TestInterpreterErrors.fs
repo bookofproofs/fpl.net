@@ -1602,6 +1602,15 @@ type TestInterpreterErrors() =
     [<DataRow("04d", "ext D x@/\d+/ -> obj { ret x } def pred S() {dec @1():=true; true};", 1)>]
     [<DataRow("04e", "def pred S() {dec @1(a):=true; true};", 1)>]
     [<DataRow("04f", "ext D x@/\d+/ -> obj { ret x } def pred S() {dec @1(a):=true; true};", 1)>]
+
+    [<DataRow("10a", "def pred S(x:pred) {dec x:=true; true};", 0)>]
+    [<DataRow("10b", "def pred S(x:pred) {dec x():=true; true};", 1)>]
+    [<DataRow("10c", "def pred S(x:*pred) {dec x[$1]:=true; true};", 0)>]
+    [<DataRow("10d", "def pred S(x:*pred) {dec x[@1]:=true; true};", 0)>]
+    [<DataRow("10e", "def pred S(x:*pred) {dec ~a:Nat x[a]:=true; true};", 0)>]
+    [<DataRow("10f", "def pred S(x:+pred) {dec x[$1]:=true; true};", 0)>]
+    [<DataRow("10g", "def pred S(x:+pred) {dec x[@1]:=true; true};", 0)>]
+    [<DataRow("10h", "def pred S(x:+pred) {dec ~a:Nat x[a]:=true; true};", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG07(no:string, fplCode:string, expected) =

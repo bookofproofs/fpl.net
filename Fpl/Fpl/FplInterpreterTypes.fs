@@ -1135,6 +1135,16 @@ let addExpressionToReference (fplValue:FplValue) =
     let nextOpt = fplValue.Parent
     match nextOpt with
     | Some next when next.Name = PrimRefL && next.Scope.ContainsKey(".") -> ()
+    | Some next when next.Name = PrimRefL && next.Scope.ContainsKey(next.FplId) ->
+        let referenced = next.Scope.Values |> Seq.head
+        match referenced.Name with 
+        | PrimVariableManyL
+        | PrimVariableMany1L ->
+            next.ArgList.Add fplValue
+        | _ ->
+            next.FplId <- fplValue.FplId
+            next.TypeId <- fplValue.TypeId
+            next.Scope.TryAdd(fplValue.FplId, fplValue) |> ignore
     | Some next when next.Name = PrimRefL ->
         next.FplId <- fplValue.FplId
         next.TypeId <- fplValue.TypeId
