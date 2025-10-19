@@ -354,8 +354,8 @@ type DiagnosticCode =
                     sprintf "Base class `%s` not found, no candidates found." name 
             | ID013 delegateDiagnostic -> sprintf "%s" delegateDiagnostic // just emit the delegate's diagnostic
             | ID014 (signature, conflict) -> sprintf "Language code `%s` was already declared at %s." signature conflict
-            | ID015 signature -> $"Cannot refer to `parent` inside a block that is not a definition; the block was {signature}." 
-            | ID016 signature -> $"Cannot refer to `self` inside a block that is neither a definition, nor a property; the block was {signature}." 
+            | ID015 signature -> $"`parent` cannot be referenced from {signature}." 
+            | ID016 signature -> $"`self` cannot be referenced from {signature}." 
             | ID017 (name, candidates) -> 
                 if candidates.Length > 0 then
                    sprintf "The type `%s` could not be determined, found more than one candidates %s." name candidates
@@ -412,7 +412,7 @@ type DiagnosticCode =
                     $"Property name `{name}` of base class `{first} will be overshadowed by `{second}`."
                 else
                     $"Property name `{name}` of base functional term `{first} will be overshadowed by `{second}`."
-            | SIG07 (assigneeName, assigneeType, nodeType) -> $"`{assigneeName}` is {nodeType} (type `{assigneeType}`) and is not assignable."
+            | SIG07 (assigneeName, assigneeType, nodeType) -> $"`{assigneeName}` is {nodeType} ({assigneeType}) and is not assignable."
             // structure-related error codes
             | ST001 nodeName -> sprintf $"The {nodeName} does nothing. Simplify the code by the block."
             | ST002 nodeName -> sprintf $"The {nodeName} does nothing. Simplify the code by removing it entirely."
@@ -976,5 +976,10 @@ let stringMatches (input: string) (pattern: string) =
 let startsWithAny (prefixes:string list) (input:string) = 
     prefixes |> List.exists input.StartsWith
 
-/// A helper function for checking if a string requires the "an" indefinite article in English.
-let isEnglishAn somString = startsWithAny ["a"; "e"; "i"; "o"; "u"] somString 
+/// A helper function adding an English article to a string 
+let getEnglishName someString = 
+    let isEnglishAn = startsWithAny ["a"; "e"; "i"; "o"; "u"] someString
+    if isEnglishAn then 
+        $"an {someString}"
+    else
+        $"a {someString}"

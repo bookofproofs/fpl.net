@@ -1582,8 +1582,8 @@ type TestInterpreterErrors() =
 
     [<DataRow("01a", "def pred T() {intr} def pred S(x:pred) {dec T():=true; true};", 1)>]
     [<DataRow("01b", "def func T()->obj {intr} def pred S(x:pred) {dec T():=true; true};", 1)>]
-    [<DataRow("01c", "def pred S() {dec true:=true; true};", 1)>]
-    [<DataRow("01d", "def pred S() {dec false:=true; true};", 1)>]
+    [<DataRow("01c", "def pred S() {dec self:=true; true};", 1)>]
+    [<DataRow("01d", "def pred S() {dec parent:=true; true};", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG07(no:string, fplCode:string, expected) =

@@ -456,7 +456,7 @@ let rec eval (st: SymbolTable) ast =
             | PrimFuncionalTermL ->
                 fv.Scope.Add(block.FplId, block)
             | _ ->
-                emitID016diagnostics $"'{block.Name}' {block.Type(SignatureType.Name)}" pos1 pos2
+                emitID016diagnostics $"{getEnglishName block.Name} '{block.Type(SignatureType.Name)}'" pos1 pos2
         | _ -> ()
         ad.DiagnosticsStopped <- oldDiagnosticsStopped
         variableStack.PushEvalStack(fv)
@@ -479,11 +479,9 @@ let rec eval (st: SymbolTable) ast =
             | PrimFuncionalTermL, PrimMandatoryFunctionalTermL
             | PrimFuncionalTermL, PrimMandatoryPredicateL ->
                 fv.Scope.Add(block.FplId, block)
-            | PrimClassL, PrimClassL ->
-                let alternative = Some "However, the reference was made inside the class block and not inside its constructor or its property."
-                emitID015diagnostics $"'{block.Name}' {block.Type(SignatureType.Name)}" pos1 pos2 alternative
             | _ ->
-                emitID015diagnostics $"'{block.Name}' {block.Type(SignatureType.Name)}" pos1 pos2 None
+                emitID015diagnostics $"{getEnglishName block.Name} '{block.Type(SignatureType.Name)}'" pos1 pos2
+
         | _ -> ()
         ad.DiagnosticsStopped <- oldDiagnosticsStopped
         variableStack.PushEvalStack(fv)

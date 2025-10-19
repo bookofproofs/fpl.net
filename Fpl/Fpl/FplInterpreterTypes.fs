@@ -636,11 +636,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
         nextBlockNode this
 
     /// Provides a name with an english article (an or a).
-    member this.EnglishName = 
-        if isEnglishAn this.Name then 
-            $"an {this.Name}"
-        else    
-            $"{this.Name}"
+    member this.EnglishName = getEnglishName this.Name 
 
     /// Checks if a block named name is in the scope of the fplValue' parent.
     member this.InScopeOfParent name =
@@ -841,7 +837,7 @@ and FplVariableStack() =
         _valueStack.Clear()
         _assumedArguments.Clear()
         _stack.Clear()
-    
+
 // Create an FplValue list containing all Scopes of an FplNode
 let rec flattenScopes (root: FplValue) =
     let rec helper (node: FplValue) (acc: FplValue list) =
@@ -4642,8 +4638,21 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
             //            // Issue SIG05 diagnostics if there is (for some reason) no value of the toBeAssignedValue 
             //            emitSIG05Diagnostics typeAssignee typeAssignedValue assignedValue.StartPos assignedValue.EndPos
             | _ -> ()
+        | Some (:? FplSelf as otherAssignee) ->
+            let ref = otherAssignee.Scope.Values |> Seq.toList
+            if ref.Length > 0 then 
+                emitSIG07iagnostic (otherAssignee.Type SignatureType.Name) (getEnglishName ref.Head.Name) otherAssignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
+            else
+                emitSIG07iagnostic (otherAssignee.Type SignatureType.Name) "the type of self cound not be determined" otherAssignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
+        | Some (:? FplParent as otherAssignee) ->
+            let ref = otherAssignee.Scope.Values |> Seq.toList
+            if ref.Length > 0 then 
+                emitSIG07iagnostic (otherAssignee.Type SignatureType.Name) (getEnglishName ref.Head.Name) otherAssignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
+            else
+                emitSIG07iagnostic (otherAssignee.Type SignatureType.Name) "the type of parent cound not be determined" otherAssignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
+
         | Some (otherAssignee) ->
-            emitSIG07iagnostic (otherAssignee.Type SignatureType.Name) (otherAssignee.Type SignatureType.Type) otherAssignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
+            emitSIG07iagnostic (otherAssignee.Type SignatureType.Name) $"type `{otherAssignee.Type SignatureType.Type}`" otherAssignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
         | _ -> ()
         base.CheckConsistency()
 
@@ -4895,13 +4904,7 @@ let variableInBlockScopeByName (fplValue: FplValue) name withNestedVariableSearc
 /// Tries to find a theorem-like statement, an axiom or a corollary
 /// and returns different cases of ScopeSearchResult, depending on different semantical error situations.
 let tryFindAssociatedBlockForJustificationItem (fvJi: FplGenericJustificationItem) (candidates:FplValue list) =
-    let nameOfOther (fv:FplValue) =
-        if isEnglishAn fv.Name then 
-            $"'{fv.Type(SignatureType.Name)} which is an {fv.Name}'"
-        else 
-            $"'{fv.Type(SignatureType.Name)} which is a {fv.Name}"
-    
-
+    let nameOfOther (fv:FplValue) = $"'{fv.Type(SignatureType.Name)} which is {getEnglishName fv.Name}'"
     match candidates.Length with
     | 1 ->  // exactly one candidate found
         let potentialCandidate = candidates.Head
