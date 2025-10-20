@@ -74,7 +74,7 @@ type TestReferencesTypeOfSignature() =
     [<DataRow("base34", "is(x, Set)")>]
     
     [<TestMethod>]
-    member this.TestPredicateReference(var, fplCode) =
+    member this.TestPredicateReferenceTypeSignature(var, fplCode) =
         ad.Clear()
         let filename = "TestPredicateReferenceTypeSignature"
         let stOption = prepareFplCode(filename + ".fpl", "def pred T() { " + fplCode + " };", false) 
@@ -162,7 +162,7 @@ type TestReferencesTypeOfSignature() =
     [<DataRow("base5", "base.C(Test1(a), Test2(b, c, d))")>]
     [<DataRow("base6", "base.E(true, undef, false)")>]
     [<TestMethod>]
-    member this.TestBaseConstructorCall(var, varVal) =
+    member this.TestBaseConstructorCallTypeSignature(var, varVal) =
         ad.Clear()
         let fplCode = sprintf """
                         def cl B {intr}
@@ -194,7 +194,7 @@ type TestReferencesTypeOfSignature() =
             match var with
             | "base1" -> Assert.AreEqual<string>("B()", base1.Type(SignatureType.Type))
             | "base2" -> Assert.AreEqual<string>("C(T1, func, ind, pred)", base1.Type(SignatureType.Type))
-            | "base3" -> Assert.AreEqual<string>("D(parent, T1, func)", base1.Type(SignatureType.Type))
+            | "base3" -> Assert.AreEqual<string>("D(undef, T1, func)", base1.Type(SignatureType.Type))
             | "base4" -> Assert.AreEqual<string>("B(In(undef))", base1.Type(SignatureType.Type))
             | "base5" -> Assert.AreEqual<string>("C(Test1(T1), Test2(func, ind, pred))", base1.Type(SignatureType.Type))
             | "base6" -> Assert.AreEqual<string>("E(pred, undef, pred)", base1.Type(SignatureType.Type))
@@ -210,7 +210,7 @@ type TestReferencesTypeOfSignature() =
     [<DataRow("base6", "del.C(Test1(a),Test2(b,c,d))")>]
     [<DataRow("base7", "del.E(true, undef, false)")>] 
     [<TestMethod>]
-    member this.TestDelegate(var, varVal) =
+    member this.TestDelegateTypeSignature(var, varVal) =
         ad.Clear()
         let fplCode = sprintf "def pred T1() { %s };" varVal
         let filename = "TestDelegateTypeSignature"
@@ -236,14 +236,14 @@ type TestReferencesTypeOfSignature() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("""loc and(p,q) := !tex: x "=" y;;""", "pred(undef, undef)")>]
+    [<DataRow("""loc and(p,q) := !tex: x "=" y;;""", "and(undef, undef)")>]
     [<DataRow("""thm T {true};""","pred")>]
     [<DataRow("""ax T {true};""", "pred")>]
     [<DataRow("""lem T {true};""", "pred")>]
     [<DataRow("""prop T {true};""", "pred")>]
     [<DataRow("""conj T {true};""", "pred")>]
-    [<DataRow("""cor T$1 {true};""", "pred$1")>]
-    [<DataRow("""proof T$1 {1. |- trivial};""","pred$1")>]
+    [<DataRow("""cor T$1 {true};""", "pred")>]
+    [<DataRow("""proof T$1 {1. |- trivial};""","pred")>]
     [<DataRow("""def pred T(p:obj) {true};""","pred(obj)")>]
     [<DataRow("""def pred T() {true};""", "pred()")>]
     [<DataRow("""inf T {pre: true con:true};""", "pred")>]

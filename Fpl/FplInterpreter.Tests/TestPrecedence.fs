@@ -31,12 +31,12 @@ type TestPrecedence() =
             let pr1 = theory.Scope["T1()"] 
             let base1 = pr1.ArgList[0]
             match var with
-            | "b01" -> Assert.AreEqual<string>("=(+(x, *(y, z)), 1)", base1.Type(SignatureType.Name))
-            | "b02" -> Assert.AreEqual<string>("=(+(*(x, y), z), 1)", base1.Type(SignatureType.Name))
-            | "b03" -> Assert.AreEqual<string>("=(+(x, y), *(z, 1))", base1.Type(SignatureType.Name))
-            | "b04" -> Assert.AreEqual<string>("=(*(x, y), +(z, 1))", base1.Type(SignatureType.Name))
-            | "b05" -> Assert.AreEqual<string>("=(x, +(y, *(z, 1)))", base1.Type(SignatureType.Name))
-            | "b06" -> Assert.AreEqual<string>("=(x, +(*(y, z), 1))", base1.Type(SignatureType.Name))
+            | "b01" -> Assert.AreEqual<string>("Eq(Add(x, Mul(y, z)), 1)", base1.Type(SignatureType.Name))
+            | "b02" -> Assert.AreEqual<string>("Eq(Add(Mul(x, y), z), 1)", base1.Type(SignatureType.Name))
+            | "b03" -> Assert.AreEqual<string>("Eq(Add(x, y), Mul(z, 1))", base1.Type(SignatureType.Name))
+            | "b04" -> Assert.AreEqual<string>("Eq(Mul(x, y), Add(z, 1))", base1.Type(SignatureType.Name))
+            | "b05" -> Assert.AreEqual<string>("Eq(x, Add(y, Mul(z, 1)))", base1.Type(SignatureType.Name))
+            | "b06" -> Assert.AreEqual<string>("Eq(x, Add(Mul(y, z), 1))", base1.Type(SignatureType.Name))
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
