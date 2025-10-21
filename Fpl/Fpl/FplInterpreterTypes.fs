@@ -3374,7 +3374,7 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
             |> Seq.map (fun subfv -> subfv.Represent())
             |> String.concat ", "
         if subRepr = String.Empty then 
-            LiteralUndef
+            this.FplId
         else
             subRepr
 
