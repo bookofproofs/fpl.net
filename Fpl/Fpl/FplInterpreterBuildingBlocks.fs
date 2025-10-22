@@ -932,7 +932,7 @@ let rec eval (st: SymbolTable) ast =
                 let candidates = searchForCandidatesOfReferenceBlock refBlock
                 match checkSIG04Diagnostics refBlock candidates with
                 | Some matchedCandidate -> 
-                    if matchedCandidate.IsIntrinsic then 
+                    if matchedCandidate.IsIntrinsic && matchedCandidate.Name = PrimClassL then 
                         let defaultConstructor = new FplDefaultConstructor(matchedCandidate.FplId, (refBlock.StartPos, refBlock.EndPos), refBlock)
                         defaultConstructor.EmbedInSymbolTable defaultConstructor.Parent
                         defaultConstructor.ToBeConstructedClass <- Some matchedCandidate
