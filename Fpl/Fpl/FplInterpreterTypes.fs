@@ -3566,7 +3566,8 @@ type FplGenericFunctionalTerm(positions: Positions, parent: FplValue) as this =
             // if the Functional Term is intrinsic.
             // In this case, the "representation" of the function is
             // its declared mapping type
-            $"dec {this.Type(SignatureType.Mixed)}"
+            let mapping = this.ArgList[0]
+            $"dec {mapping.Type(SignatureType.Mixed)}"
         else
             let subRepr = 
                 this.ValueList

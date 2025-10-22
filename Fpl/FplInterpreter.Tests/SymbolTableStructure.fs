@@ -2669,10 +2669,10 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(1, parent.ValueList.Count)
             Assert.AreEqual<FplValue>(parent.ValueList[0], node)
             Assert.IsInstanceOfType<FplInstance>(node)
-            Assert.AreEqual<int>(1, node.ArgList.Count)
+            Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             Assert.IsTrue(isValidJson (node.Represent()), "json not valid")
-            Assert.AreEqual<string>("""{"name":"A","base":[{"name":"obj"}],"vars":[],"prtys":[]}""", node.Represent())
+            Assert.AreEqual<string>("""{"name":"A","base":[],"vars":[],"prtys":[]}""", node.Represent())
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     [<DataRow("FplIntrinsicFunc", "00", """;""", "")>]
@@ -3257,7 +3257,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
         | "FplMandatoryFunctionalTerm", "02" -> 
             Assert.IsInstanceOfType<FplClass>(parent) // class parent
-            Assert.AreEqual<int>(1, parent.ArgList.Count) // class's base class
+            Assert.AreEqual<int>(0, parent.ArgList.Count) 
             Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(node)
             Assert.AreEqual<int>(1, node.ArgList.Count) // intrinsic with mapping 
@@ -3278,7 +3278,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
         | "FplMandatoryFunctionalTerm", "05" -> 
             Assert.IsInstanceOfType<FplClass>(parent) // class parent
-            Assert.AreEqual<int>(1, parent.ArgList.Count) // class's base class
+            Assert.AreEqual<int>(0, parent.ArgList.Count) // class's base class
             Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(node)
             Assert.AreEqual<int>(2, node.ArgList.Count) // non-intrinsic with mapping and return stmt
@@ -3299,7 +3299,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
         | "FplMandatoryFunctionalTerm", "08" -> 
             Assert.IsInstanceOfType<FplClass>(parent) // class parent
-            Assert.AreEqual<int>(1, parent.ArgList.Count) // class's base class
+            Assert.AreEqual<int>(0, parent.ArgList.Count) // class's base class
             Assert.AreEqual<int>(3, parent.Scope.Count) // variable, property and constructor
             Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(node)
             Assert.AreEqual<int>(3, node.ArgList.Count) // non-intrinsic with mapping, assignment, and return stmt
@@ -3347,7 +3347,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
         | "FplMandatoryPredicate", "02" -> 
             Assert.IsInstanceOfType<FplClass>(parent) // class parent
-            Assert.AreEqual<int>(1, parent.ArgList.Count) // class's base class
+            Assert.AreEqual<int>(0, parent.ArgList.Count) // class's base class
             Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplMandatoryPredicate>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count) // intrinsic
@@ -3368,7 +3368,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
         | "FplMandatoryPredicate", "05" -> 
             Assert.IsInstanceOfType<FplClass>(parent) // class parent
-            Assert.AreEqual<int>(1, parent.ArgList.Count) // class's base class
+            Assert.AreEqual<int>(0, parent.ArgList.Count) // class's base class
             Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplMandatoryPredicate>(node)
             Assert.AreEqual<int>(1, node.ArgList.Count) // non-intrinsic 
@@ -3389,7 +3389,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
         | "FplMandatoryPredicate", "08" -> 
             Assert.IsInstanceOfType<FplClass>(parent) // class parent
-            Assert.AreEqual<int>(1, parent.ArgList.Count) // class's base class
+            Assert.AreEqual<int>(0, parent.ArgList.Count) // class's base class
             Assert.AreEqual<int>(3, parent.Scope.Count) // variable, property and constructor
             Assert.IsInstanceOfType<FplMandatoryPredicate>(node)
             Assert.AreEqual<int>(2, node.ArgList.Count) // non-intrinsic withassignment
