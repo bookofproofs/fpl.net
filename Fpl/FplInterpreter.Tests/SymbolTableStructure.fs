@@ -1925,35 +1925,54 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplArgInferenceTrivial", "00", """;""", "")>]
+    [<DataRow("FplArgInferenceTrivial", "00", """proof T$1 {1. |- trivial};""", "")>]
     [<TestMethod>]
     member this.TestStructureFplArgInferenceTrivial(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplArgInferenceTrivial.fpl"
         let parent, node = testSkeleton nodeType filename fplCode identifier
         
         match nodeType, varVal with
-        | "FplReturn", "00" ->
-            Assert.IsInstanceOfType<FplRoot>(parent)
-            Assert.AreEqual<int>(0, parent.ArgList.Count)
+        | "FplArgInferenceTrivial", "00" ->
+            Assert.IsInstanceOfType<FplArgument>(parent)
+            Assert.AreEqual<int>(2, parent.ArgList.Count) // justification / arginference pair
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplReturn>(node)
+            Assert.IsInstanceOfType<FplArgInferenceTrivial>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplArgument", "00", """;""", "")>]
+    [<DataRow("FplArgument", "00", """proof T$1 {1. |- trivial};""", "")>]
+    [<DataRow("FplArgument", "01", """proof T$1 {1. A |- trivial};""", "")>]
+    [<DataRow("FplArgument", "02", """proof T$1 {1. byax A, 2 |- trivial};""", "")>]
+    [<DataRow("FplArgument", "03", """proof T$1 {1. bycor A$1 |- trivial};""", "")>]
+    [<DataRow("FplArgument", "04", """proof T$1 {1. bydef A |- trivial};""", "")>]
+    [<DataRow("FplArgument", "05", """proof T$1 {1. A$1:2, bydef y |- trivial};""", "")>]
+    [<DataRow("FplArgument", "06", """proof T$1 {1. byinf A |- revoke 2};""", "")>]
+    [<DataRow("FplArgument", "07", """proof T$1 {1. 2 |- trivial};""", "")>]
+    [<DataRow("FplArgument", "08", """proof T$1 {1. bydef x |- assume and(x,y)};""", "")>]
+    [<DataRow("FplArgument", "09", """proof T$1 {1.  A, byax B, bycor C$1, bydef D, E$1:2, byinf F, 2, bydef x |- trivial};""", "")>]
     [<TestMethod>]
     member this.TestStructureFplArgument(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplArgument.fpl"
         let parent, node = testSkeleton nodeType filename fplCode identifier
         
         match nodeType, varVal with
-        | "FplReturn", "00" ->
-            Assert.IsInstanceOfType<FplRoot>(parent)
+        | "FplArgument", "00" 
+        | "FplArgument", "01" 
+        | "FplArgument", "02" 
+        | "FplArgument", "03" 
+        | "FplArgument", "04" 
+        | "FplArgument", "05" 
+        | "FplArgument", "06" 
+        | "FplArgument", "07" 
+        | "FplArgument", "08" 
+        | "FplArgument", "09" 
+            ->
+            Assert.IsInstanceOfType<FplProof>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
-            Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplReturn>(node)
-            Assert.AreEqual<int>(0, node.ArgList.Count)
+            Assert.AreEqual<int>(1, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplArgument>(node)
+            Assert.AreEqual<int>(2, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
