@@ -1706,7 +1706,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
         | "FplFunctionalTerm" ->
             Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>($"{LiteralDec} {LiteralFunc}() -> {LiteralObj}", (getName var).[index])
+            Assert.AreEqual<string>($"{LiteralDec} {LiteralObj}", (getName var).[index])
         | "FplImplication" ->
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>("", (getName var).[index])
@@ -1775,7 +1775,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplMandatoryFunctionalTerm" ->
             Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>($"{LiteralDec} {LiteralFunc}() -> {LiteralObj}", (getName var).[index])
+            Assert.AreEqual<string>($"{LiteralDec} {LiteralObj}", (getName var).[index])
         | "FplMandatoryPredicate" ->
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>("", (getName var).[index])
@@ -1976,19 +1976,22 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplAssertion", "00", """;""", "")>]
+    // todo: issue diagnostics if assertions are made outside the definitions of functional terms and definitions of classes
+    // todo: issue diagnostics if assertions are made inside the definitions of functional terms and definitions of classes but do not involve the self keyword
+    // todo: issue diagnostics if assertions involve the is opeperator
+    [<DataRow("FplAssertion", "00", """def cl A {ctor A(){dec assert all x:A,y:obj {In(y,x)};}};""", "")>]
     [<TestMethod>]
     member this.TestStructureFplAssertion(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplAssertion.fpl"
         let parent, node = testSkeleton nodeType filename fplCode identifier
         
         match nodeType, varVal with
-        | "FplReturn", "00" ->
-            Assert.IsInstanceOfType<FplRoot>(parent)
-            Assert.AreEqual<int>(0, parent.ArgList.Count)
+        | "FplAssertion", "00" ->
+            Assert.IsInstanceOfType<FplConstructor>(parent)
+            Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplReturn>(node)
-            Assert.AreEqual<int>(0, node.ArgList.Count)
+            Assert.IsInstanceOfType<FplAssertion>(node)
+            Assert.AreEqual<int>(1, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
@@ -3432,18 +3435,18 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplMapCases", "00", """;""", "")>]
+    [<DataRow("FplMapCases", "00", """def pred T(x:ind) { dec ~n:pred n:= mcases (| (x = $1) : false | (x = $2) : true | (x = $3) : false ? undef ); n };""", "")>]
     [<TestMethod>]
     member this.TestStructureFplMapCases(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplMapCases.fpl"
         let parent, node = testSkeleton nodeType filename fplCode identifier
         
         match nodeType, varVal with
-        | "FplReturn", "00" ->
-            Assert.IsInstanceOfType<FplRoot>(parent)
-            Assert.AreEqual<int>(0, parent.ArgList.Count)
-            Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplReturn>(node)
+        | "FplMapCases", "00" ->
+            Assert.IsInstanceOfType<FplPredicate>(parent)
+            Assert.AreEqual<int>(2, parent.ArgList.Count)
+            Assert.AreEqual<int>(1, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplMapCases>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
