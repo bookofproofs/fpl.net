@@ -1505,10 +1505,7 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(assigneeReference) // add assignee
         eval st predicateWithQualificationAst
         variableStack.PopEvalStack() // remove assignee
-        let assignedValue = new FplReference((pos1,pos2), fvNew)
-        variableStack.PushEvalStack(assignedValue) // add value
         eval st predicateAst
-        variableStack.PopEvalStack() // remove value
         variableStack.PopEvalStack() // remove Assignment
         st.EvalPop()
     | Ast.PredicateInstance((pos1, pos2), (signatureAst, predInstanceBlockAst)) ->
