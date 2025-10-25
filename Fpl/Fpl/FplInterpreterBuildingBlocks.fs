@@ -49,7 +49,8 @@ let simplifyTriviallyNestedExpressions (rb:FplValue) =
         | :? FplReference
         | :? FplGenericQuantor
         | :? FplIntrinsicInd
-        | :? FplIntrinsicPred ->
+        | :? FplIntrinsicPred
+        | :? FplMapCases ->
             variableStack.Pop() |> ignore // pop the removable reference block and ignored it
             variableStack.PushEvalStack(subNode) // push its subNode instead
             // adjust subNode's Parent, EndPos, Scope

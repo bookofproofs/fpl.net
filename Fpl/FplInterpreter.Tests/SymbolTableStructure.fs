@@ -3436,6 +3436,8 @@ type SymbolTableStructure() =
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     [<DataRow("FplMapCases", "00", """def pred T(x:ind) { dec ~n:pred n:= mcases (| (x = $1) : false | (x = $2) : true | (x = $3) : false ? undef ); n };""", "")>]
+    [<DataRow("FplMapCases", "01", """def pred T() { mcases (| true : false | false : true ? undef )};""", "")>]
+    [<DataRow("FplMapCases", "02", """def func T()->pred { return mcases (| true : false | false : true ? undef )};""", "")>]
     [<TestMethod>]
     member this.TestStructureFplMapCases(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplMapCases.fpl"
@@ -3443,11 +3445,25 @@ type SymbolTableStructure() =
         
         match nodeType, varVal with
         | "FplMapCases", "00" ->
-            Assert.IsInstanceOfType<FplPredicate>(parent)
-            Assert.AreEqual<int>(2, parent.ArgList.Count)
-            Assert.AreEqual<int>(1, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplAssignment>(parent)
+            Assert.AreEqual<int>(2, parent.ArgList.Count) // n := mcases
+            Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsInstanceOfType<FplMapCases>(node)
-            Assert.AreEqual<int>(0, node.ArgList.Count)
+            Assert.AreEqual<int>(4, node.ArgList.Count) // 3 cases + 1 else
+            Assert.AreEqual<int>(0, node.Scope.Count)
+        | "FplMapCases", "01" ->
+            Assert.IsInstanceOfType<FplPredicate>(parent)
+            Assert.AreEqual<int>(1, parent.ArgList.Count) 
+            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplMapCases>(node)
+            Assert.AreEqual<int>(3, node.ArgList.Count) // 2 cases + 1 else
+            Assert.AreEqual<int>(0, node.Scope.Count)
+        | "FplMapCases", "02" ->
+            Assert.IsInstanceOfType<FplReturn>(parent)
+            Assert.AreEqual<int>(1, parent.ArgList.Count) 
+            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplMapCases>(node)
+            Assert.AreEqual<int>(3, node.ArgList.Count) // 2 cases + 1 else
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 

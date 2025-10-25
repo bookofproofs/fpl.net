@@ -304,7 +304,7 @@ let mapCaseSingle = positions "MapCaseSingle" ((case >>. predicate .>> colon) .>
 let mapCaseSingleList = many1 (IW >>. mapCaseSingle)
 let mapCases = positions "MapCases" (((keywordMapCases >>. leftParen >>. IW >>. mapCaseSingleList .>>. mapCaseElse .>> rightParen))) |>> Ast.MapCases
 
-let assignmentStatement = positions "Assignment" ((predicateWithQualification .>> IW .>> colonEqual) .>>. (predicate <|> mapCases)) |>> Ast.Assignment
+let assignmentStatement = positions "Assignment" ((predicateWithQualification .>> IW .>> colonEqual) .>>. predicate) |>> Ast.Assignment
 
 let inEntity = keywordIn >>. positions "InEntity" (predicateWithQualification) .>> IW |>> Ast.InEntity
 
@@ -407,7 +407,7 @@ let compoundPredicate = choice [
 
 let postfixOp = positions "PostfixOperator" ( postfixMathSymbols ) .>> IW |>> Ast.PostfixOperator
 let prefixOp = positions "PrefixOperator" ( prefixMathSymbols ) .>> IW |>> Ast.PrefixOperator
-let expression = positions "Expression" (opt prefixOp .>>. choice [compoundPredicate; primePredicate] .>>. opt postfixOp .>>. optionalSpecification .>>. qualificationList) .>> IW |>> Ast.Expression
+let expression = positions "Expression" (opt prefixOp .>>. choice [compoundPredicate; primePredicate; mapCases] .>>. opt postfixOp .>>. optionalSpecification .>>. qualificationList) .>> IW |>> Ast.Expression
 
 predicateRef.Value <- expression
 
