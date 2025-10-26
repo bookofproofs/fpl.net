@@ -2080,52 +2080,68 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count) 
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplCaseElse", "00", """;""", "")>]
+    [<DataRow("FplCaseElse", "00", """def pred T(x:ind) { dec ~n:pred cases (| (x = $1) : n:=false | (x = $2) : n:=true | (x = $3) : n:=false ? n:=undef ); n };""", "")>]
     [<TestMethod>]
     member this.TestStructureFplCaseElse(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplCaseElse.fpl"
         let parent, node = testSkeleton nodeType filename fplCode identifier
         
         match nodeType, varVal with
-        | "FplReturn", "00" ->
-            Assert.IsInstanceOfType<FplRoot>(parent)
-            Assert.AreEqual<int>(0, parent.ArgList.Count)
+        | "FplCaseElse", "00" ->
+            Assert.IsInstanceOfType<FplCases>(parent)
+            Assert.AreEqual<int>(4, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplReturn>(node)
-            Assert.AreEqual<int>(0, node.ArgList.Count)
+            Assert.IsInstanceOfType<FplCaseElse>(node)
+            Assert.AreEqual<int>(1, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplCases", "00", """;""", "")>]
+    [<DataRow("FplCases", "00", """def pred T(x:ind) { dec ~n:pred cases (| (x = $1) : n:=false | (x = $2) : n:=true | (x = $3) : n:=false ? n:=undef ); n };""", "")>]
     [<TestMethod>]
     member this.TestStructureFplCases(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplCases.fpl"
         let parent, node = testSkeleton nodeType filename fplCode identifier
         
         match nodeType, varVal with
-        | "FplReturn", "00" ->
-            Assert.IsInstanceOfType<FplRoot>(parent)
-            Assert.AreEqual<int>(0, parent.ArgList.Count)
-            Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplReturn>(node)
-            Assert.AreEqual<int>(0, node.ArgList.Count)
+        | "FplCases", "00" ->
+            Assert.IsInstanceOfType<FplPredicate>(parent)
+            Assert.AreEqual<int>(2, parent.ArgList.Count)
+            Assert.AreEqual<int>(2, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplCases>(node)
+            Assert.AreEqual<int>(4, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     
-    [<DataRow("FplCaseSingle", "00", """;""", "")>]
+    [<DataRow("FplCaseSingle", "00", """def pred T(x:ind) { dec ~n:pred cases (| (x = $1) : n:=false | (x = $2) : n:=true | (x = $3) : n:=false ? n:=undef ); n };""", "")>]
+    [<DataRow("FplCaseSingle", "01", """def pred T(x:ind) { dec ~n:pred cases (| (x = $1) : n:=true n:=true n:=false | (x = $2) : n:=true | (x = $3) : n:=false ? n:=undef ); n };""", "")>]
+    [<DataRow("FplCaseSingle", "02", """def pred T(x:ind) { dec ~n:pred cases (| (x = $1) : n:=true n:=false | (x = $2) : n:=true | (x = $3) : n:=false ? n:=undef ); n };""", "")>]
     [<TestMethod>]
     member this.TestStructureFplCaseSingle(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplCaseSingle.fpl"
         let parent, node = testSkeleton nodeType filename fplCode identifier
         
         match nodeType, varVal with
-        | "FplReturn", "00" ->
-            Assert.IsInstanceOfType<FplRoot>(parent)
-            Assert.AreEqual<int>(0, parent.ArgList.Count)
+        | "FplCaseSingle", "00" ->
+            Assert.IsInstanceOfType<FplCases>(parent)
+            Assert.AreEqual<int>(4, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplReturn>(node)
-            Assert.AreEqual<int>(0, node.ArgList.Count)
+            Assert.IsInstanceOfType<FplCaseSingle>(node)
+            Assert.AreEqual<int>(2, node.ArgList.Count)
+            Assert.AreEqual<int>(0, node.Scope.Count)
+        | "FplCaseSingle", "01" ->
+            Assert.IsInstanceOfType<FplCases>(parent)
+            Assert.AreEqual<int>(4, parent.ArgList.Count)
+            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplCaseSingle>(node)
+            Assert.AreEqual<int>(4, node.ArgList.Count) // 1 case + 3 statements
+            Assert.AreEqual<int>(0, node.Scope.Count)
+        | "FplCaseSingle", "02" ->
+            Assert.IsInstanceOfType<FplCases>(parent)
+            Assert.AreEqual<int>(4, parent.ArgList.Count)
+            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplCaseSingle>(node)
+            Assert.AreEqual<int>(3, node.ArgList.Count) // 1 case + 2 statements
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
@@ -3419,19 +3435,35 @@ type SymbolTableStructure() =
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
 
-    [<DataRow("FplMapCaseElse", "00", """;""", "")>]
+    [<DataRow("FplMapCaseElse", "00", """def pred T(x:ind) { dec ~n:pred n:= mcases (| (x = $1) : false | (x = $2) : true | (x = $3) : false ? undef ); n };""", "")>]
+    [<DataRow("FplMapCaseElse", "01", """def pred T() { mcases (| true : false | false : true ? undef )};""", "")>]
+    [<DataRow("FplMapCaseElse", "02", """def func T()->pred { return mcases (| true : false | false : true ? undef )};""", "")>]
     [<TestMethod>]
     member this.TestStructureFplMapCaseElse(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplMapCaseElse.fpl"
         let parent, node = testSkeleton nodeType filename fplCode identifier
         
         match nodeType, varVal with
-        | "FplReturn", "00" ->
-            Assert.IsInstanceOfType<FplRoot>(parent)
-            Assert.AreEqual<int>(0, parent.ArgList.Count)
+        | "FplMapCaseElse", "00" ->
+            Assert.IsInstanceOfType<FplMapCases>(parent)
+            Assert.AreEqual<int>(4, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplReturn>(node)
-            Assert.AreEqual<int>(0, node.ArgList.Count)
+            Assert.IsInstanceOfType<FplMapCaseElse>(node)
+            Assert.AreEqual<int>(1, node.ArgList.Count) 
+            Assert.AreEqual<int>(0, node.Scope.Count)
+        | "FplMapCaseElse", "01" ->
+            Assert.IsInstanceOfType<FplMapCases>(parent)
+            Assert.AreEqual<int>(3, parent.ArgList.Count)
+            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplMapCaseElse>(node)
+            Assert.AreEqual<int>(1, node.ArgList.Count) 
+            Assert.AreEqual<int>(0, node.Scope.Count)
+        | "FplMapCaseElse", "02" ->
+            Assert.IsInstanceOfType<FplMapCases>(parent)
+            Assert.AreEqual<int>(3, parent.ArgList.Count)
+            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplMapCaseElse>(node)
+            Assert.AreEqual<int>(1, node.ArgList.Count) 
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
@@ -3467,19 +3499,35 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplMapCaseSingle", "00", """;""", "")>]
+    [<DataRow("FplMapCaseSingle", "00", """def pred T(x:ind) { dec ~n:pred n:= mcases (| (x = $1) : false | (x = $2) : true | (x = $3) : false ? undef ); n };""", "")>]
+    [<DataRow("FplMapCaseSingle", "01", """def pred T() { mcases (| true : false | false : true ? undef )};""", "")>]
+    [<DataRow("FplMapCaseSingle", "02", """def func T()->pred { return mcases (| true : false | false : true ? undef )};""", "")>]
     [<TestMethod>]
     member this.TestStructureFplMapCaseSingle(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplMapCaseSingle.fpl"
         let parent, node = testSkeleton nodeType filename fplCode identifier
         
         match nodeType, varVal with
-        | "FplReturn", "00" ->
-            Assert.IsInstanceOfType<FplRoot>(parent)
-            Assert.AreEqual<int>(0, parent.ArgList.Count)
+        | "FplMapCaseSingle", "00" ->
+            Assert.IsInstanceOfType<FplMapCases>(parent)
+            Assert.AreEqual<int>(4, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplReturn>(node)
-            Assert.AreEqual<int>(0, node.ArgList.Count)
+            Assert.IsInstanceOfType<FplMapCaseSingle>(node)
+            Assert.AreEqual<int>(2, node.ArgList.Count) 
+            Assert.AreEqual<int>(0, node.Scope.Count)
+        | "FplMapCaseSingle", "01" ->
+            Assert.IsInstanceOfType<FplMapCases>(parent)
+            Assert.AreEqual<int>(3, parent.ArgList.Count)
+            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplMapCaseSingle>(node)
+            Assert.AreEqual<int>(2, node.ArgList.Count) 
+            Assert.AreEqual<int>(0, node.Scope.Count)
+        | "FplMapCaseSingle", "02" ->
+            Assert.IsInstanceOfType<FplMapCases>(parent)
+            Assert.AreEqual<int>(3, parent.ArgList.Count)
+            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplMapCaseSingle>(node)
+            Assert.AreEqual<int>(2, node.ArgList.Count) 
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
