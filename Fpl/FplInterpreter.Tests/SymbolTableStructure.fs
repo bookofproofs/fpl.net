@@ -2418,19 +2418,19 @@ type SymbolTableStructure() =
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
 
-    [<DataRow("FplDecrement", "00", """;""", "")>]
+    [<DataRow("FplDecrement", "00", """def func T(x:ind)->ind {ret delegate.Decrement(x)};""", "")>]
     [<TestMethod>]
     member this.TestStructureFplDecrement(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplDecrement.fpl"
         let parent, node = testSkeleton nodeType filename fplCode identifier
         
         match nodeType, varVal with
-        | "FplReturn", "00" ->
-            Assert.IsInstanceOfType<FplRoot>(parent)
-            Assert.AreEqual<int>(0, parent.ArgList.Count)
+        | "FplDecrement", "00" ->
+            Assert.IsInstanceOfType<FplReturn>(parent)
+            Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplReturn>(node)
-            Assert.AreEqual<int>(0, node.ArgList.Count)
+            Assert.IsInstanceOfType<FplDecrement>(node)
+            Assert.AreEqual<int>(1, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
@@ -2467,7 +2467,8 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplEquality", "00", """def pred T() {(x = y)};""", "")>]
+    [<DataRow("FplEquality", "00", """def pred T() {del.Equal(x, y)};""", "")>]
+    [<DataRow("FplEquality", "01", """def pred Equal (x,y: tpl) infix "=" 50 { del.Equal(x,y) };""", "")>]
     [<TestMethod>]
     member this.TestStructureFplEquality(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplEquality.fpl"
@@ -2478,6 +2479,13 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplPredicate>(parent)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplEquality>(node)
+            Assert.AreEqual<int>(2, node.ArgList.Count)
+            Assert.AreEqual<int>(0, node.Scope.Count)
+        | "FplEquality", "01" ->
+            Assert.IsInstanceOfType<FplPredicate>(parent)
+            Assert.AreEqual<int>(1, parent.ArgList.Count)
+            Assert.AreEqual<int>(2, parent.Scope.Count)
             Assert.IsInstanceOfType<FplEquality>(node)
             Assert.AreEqual<int>(2, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)

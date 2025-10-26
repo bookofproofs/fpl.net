@@ -1145,6 +1145,8 @@ let addExpressionToReference (fplValue:FplValue) =
             next.FplId <- fplValue.FplId
             next.TypeId <- fplValue.TypeId
             next.Scope.TryAdd(fplValue.FplId, fplValue) |> ignore
+    | Some next when next.Name = PrimRefL && (fplValue.Name = PrimDelegateEqualL || fplValue.Name = PrimDelegateDecrementL) ->
+        addExpressionToParentArgList fplValue 
     | Some next when next.Name = PrimRefL ->
         next.FplId <- fplValue.FplId
         next.TypeId <- fplValue.TypeId
