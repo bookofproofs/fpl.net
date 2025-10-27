@@ -431,7 +431,7 @@ type CommonFplValueTestCases =
         ad.Clear()
         let fplCode = """
             def cl A {intr}
-            def func B()->obj {intr}
+            def func B()->func {intr}
             def pred T() {
                 dec 
                     ~i:ind i:=$1 

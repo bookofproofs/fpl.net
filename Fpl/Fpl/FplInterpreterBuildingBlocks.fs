@@ -30,7 +30,7 @@ let eval_pos_char_list (st: SymbolTable) (startpos: Position) (endpos: Position)
     charlist |> List.map string |> String.concat "" |> ignore
 
 /// Simplify trivially nested expressions by removing from the stack FplValue nodes that were created due to too long parsing tree and replacing them by their subnodes 
-let simplifyTriviallyNestedExpressions (rb:FplValue) = 
+let rec simplifyTriviallyNestedExpressions (rb:FplValue) = 
     if rb.ArgList.Count = 1 && rb.FplId = "" then
         // removable reference blocks are those with only a single argument and unset FplId 
         let subNode = rb.ArgList[0]
@@ -45,11 +45,11 @@ let simplifyTriviallyNestedExpressions (rb:FplValue) =
         | :? FplEquality 
         | :? FplDecrement 
         | :? FplExtensionObj 
-        | :? FplIntrinsicUndef 
         | :? FplReference
         | :? FplGenericQuantor
         | :? FplIntrinsicInd
         | :? FplIntrinsicPred
+        | :? FplIntrinsicUndef 
         | :? FplMapCases ->
             variableStack.Pop() |> ignore // pop the removable reference block and ignored it
             variableStack.PushEvalStack(subNode) // push its subNode instead
@@ -68,6 +68,7 @@ let simplifyTriviallyNestedExpressions (rb:FplValue) =
             rb.ArgList.Clear() 
             rb.ValueList.Clear()
             rb.Scope.Clear()
+            simplifyTriviallyNestedExpressions subNode
         | _ -> ()
 
 /// A recursive function evaluating an AST and returning a list of EvalAliasedNamespaceIdentifier records

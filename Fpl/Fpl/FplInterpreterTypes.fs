@@ -1149,6 +1149,7 @@ let addExpressionToReference (fplValue:FplValue) =
         (
             fplValue.Name = PrimDelegateEqualL 
          || fplValue.Name = PrimDelegateDecrementL
+         || fplValue.Name = PrimIntrinsicPred
          ) ->
         addExpressionToParentArgList fplValue 
     | Some next when next.Name = PrimRefL ->
@@ -4509,7 +4510,7 @@ type FplGenericConstructor(name, positions: Positions, parent: FplValue) as this
         let rec createSubInstance (classDef:FplValue) (instance:FplValue) (baseInstance:FplValue)=
             if classDef.IsIntrinsic then
                 classDef.ArgList
-                |> Seq.filter (fun fv -> fv.Name = PrimClassL || fv.Name = PrimIntrinsicObj)
+                |> Seq.filter (fun fv -> fv.Name = PrimClassL)
                 |> Seq.iter (fun baseClass ->
                     let subInstance = new FplInstance((this.StartPos, this.EndPos), this)
                     subInstance.FplId <- baseClass.FplId

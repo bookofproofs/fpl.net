@@ -2707,18 +2707,41 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplIntrinsicPred", "00", """;""", "")>]
+    [<DataRow("FplIntrinsicPred", "00", """ax A {true};""", "")>]
+    [<DataRow("FplIntrinsicPred", "01", """ax A {false};""", "")>]
+    // reference to intrinsic pred
+    [<DataRow("FplIntrinsicPred", "03a", """def pred A() {dec ~x:pred x:=true; x};""", "true")>]
+    [<DataRow("FplIntrinsicPred", "03b", """def pred A() {D(true)};""", "true")>]
+    [<DataRow("FplIntrinsicPred", "03c", """def pred A() {dec ~x:pred x:=false; x};""", "false")>]
+    [<DataRow("FplIntrinsicPred", "03d", """def pred A() {D(false)};""", "false")>]
     [<TestMethod>]
     member this.TestStructureFplIntrinsicPred(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplIntrinsicPred.fpl"
         let parent, node = testSkeleton nodeType filename fplCode identifier
         
         match nodeType, varVal with
-        | "FplReturn", "00" ->
-            Assert.IsInstanceOfType<FplRoot>(parent)
-            Assert.AreEqual<int>(0, parent.ArgList.Count)
+        | "FplIntrinsicPred", "00" 
+        | "FplIntrinsicPred", "01" ->
+            Assert.IsInstanceOfType<FplAxiom>(parent)
+            Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplReturn>(node)
+            Assert.IsInstanceOfType<FplIntrinsicPred>(node)
+            Assert.AreEqual<int>(0, node.ArgList.Count)
+            Assert.AreEqual<int>(0, node.Scope.Count)
+        | "FplIntrinsicPred", "03a" 
+        | "FplIntrinsicPred", "03c" ->
+            Assert.IsInstanceOfType<FplAssignment>(parent)
+            Assert.AreEqual<int>(2, parent.ArgList.Count)
+            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplIntrinsicPred>(node)
+            Assert.AreEqual<int>(0, node.ArgList.Count)
+            Assert.AreEqual<int>(0, node.Scope.Count)
+        | "FplIntrinsicPred", "03b" 
+        | "FplIntrinsicPred", "03d" ->
+            Assert.IsInstanceOfType<FplReference>(parent)
+            Assert.AreEqual<int>(1, parent.ArgList.Count)
+            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplIntrinsicPred>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -3975,11 +3998,6 @@ type SymbolTableStructure() =
     [<DataRow("FplReference", "01o", """loc A := !tex: "\alpha" ; ax T { A };""", "")>]
     // return reference
     [<DataRow("FplReference", "02a", """def func A(x:obj)->obj {ret x};""", "")>]
-    // reference to intrinsic pred
-    [<DataRow("FplReference", "03a", """def pred A() {dec ~x:pred x:=true; x};""", "true")>]
-    [<DataRow("FplReference", "03b", """def pred A() {D(true)};""", "true")>]
-    [<DataRow("FplReference", "03c", """def pred A() {dec ~x:pred x:=false; x};""", "false")>]
-    [<DataRow("FplReference", "03d", """def pred A() {D(false)};""", "false")>]
     // reference to named predicate
     [<DataRow("FplReference", "04a", """def pred A() {D()};""", "D()")>]
     [<DataRow("FplReference", "04b", """def pred D() {true} def pred A() {D()};""", "D()")>]
@@ -4151,44 +4169,6 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(1, node.Scope.Count) // one referenced element
             Assert.AreEqual<string>("x", node.FplId) // name of the referenced element
             Assert.IsInstanceOfType<FplVariable>(node.Scope[node.FplId]) // name of the referenced element
-
-        // reference to intrinsic pred
-        | "FplReference", "03a" ->
-            Assert.IsInstanceOfType<FplAssignment>(parent)
-            Assert.AreEqual<int>(2, parent.ArgList.Count) 
-            Assert.AreEqual<int>(0, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplReference>(node)
-            Assert.AreEqual<int>(0, node.ArgList.Count) 
-            Assert.AreEqual<int>(1, node.Scope.Count) 
-            Assert.AreEqual<string>("true", node.FplId) // name of the referenced element
-            Assert.IsInstanceOfType<FplIntrinsicPred>(node.Scope[node.FplId]) // name of the referenced element
-        | "FplReference", "03b" ->
-            Assert.IsInstanceOfType<FplReference>(parent)
-            Assert.AreEqual<int>(1, parent.ArgList.Count) 
-            Assert.AreEqual<int>(0, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplReference>(node)
-            Assert.AreEqual<int>(0, node.ArgList.Count) 
-            Assert.AreEqual<int>(1, node.Scope.Count) 
-            Assert.AreEqual<string>("true", node.FplId) // name of the referenced element
-            Assert.IsInstanceOfType<FplIntrinsicPred>(node.Scope[node.FplId]) // name of the referenced element
-        | "FplReference", "03c" ->
-            Assert.IsInstanceOfType<FplAssignment>(parent)
-            Assert.AreEqual<int>(2, parent.ArgList.Count) 
-            Assert.AreEqual<int>(0, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplReference>(node)
-            Assert.AreEqual<int>(0, node.ArgList.Count) 
-            Assert.AreEqual<int>(1, node.Scope.Count) 
-            Assert.AreEqual<string>("false", node.FplId) // name of the referenced element
-            Assert.IsInstanceOfType<FplIntrinsicPred>(node.Scope[node.FplId]) // name of the referenced element
-        | "FplReference", "03d" ->
-            Assert.IsInstanceOfType<FplReference>(parent)
-            Assert.AreEqual<int>(1, parent.ArgList.Count) 
-            Assert.AreEqual<int>(0, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplReference>(node)
-            Assert.AreEqual<int>(0, node.ArgList.Count) 
-            Assert.AreEqual<int>(1, node.Scope.Count) 
-            Assert.AreEqual<string>("false", node.FplId) // name of the referenced element
-            Assert.IsInstanceOfType<FplIntrinsicPred>(node.Scope[node.FplId]) // name of the referenced element
 
         // reference to named predicate
         | "FplReference", "04a" ->
