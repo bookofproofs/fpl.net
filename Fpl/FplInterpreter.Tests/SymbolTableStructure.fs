@@ -34,7 +34,10 @@ type SymbolTableStructure() =
                 else
                     match root.Scope.Values |> Seq.tryPick (findNamedItem firstTypeNode identifier infiniteLoop) with 
                     | Some found -> Some found
-                    | _ -> root.ArgList |> Seq.tryPick (findNamedItem firstTypeNode identifier infiniteLoop)
+                    | _ -> 
+                        match root.ArgList |> Seq.tryPick (findNamedItem firstTypeNode identifier infiniteLoop) with 
+                        | Some found -> Some found
+                        | _ -> root.ValueList |> Seq.tryPick (findNamedItem firstTypeNode identifier infiniteLoop) 
             else
                 let searchItem = root.Type(SignatureType.Name)
                 if root.Name = firstTypeNode && searchItem = identifier then 
@@ -42,7 +45,10 @@ type SymbolTableStructure() =
                 else
                     match root.Scope.Values |> Seq.tryPick (findNamedItem firstTypeNode identifier infiniteLoop) with 
                     | Some found -> Some found
-                    | _ -> root.ArgList |> Seq.tryPick (findNamedItem firstTypeNode identifier infiniteLoop)
+                    | _ -> 
+                        match root.ArgList |> Seq.tryPick (findNamedItem firstTypeNode identifier infiniteLoop) with 
+                        | Some found -> Some found
+                        | _ -> root.ValueList |> Seq.tryPick (findNamedItem firstTypeNode identifier infiniteLoop) 
     let getName nodeType = 
         match nodeType with
         | "FplArgInferenceAssume" ->
