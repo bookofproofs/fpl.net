@@ -79,37 +79,6 @@ let rec eval (st: SymbolTable) ast =
         | None -> ()
         eval st predicateAst
 
-    let setUnitType (fv:FplValue) (value:FplValue) (tplName:string)=
-        match value with
-        | :? FplIntrinsicPred
-        | :? FplIntrinsicInd 
-        | :? FplIntrinsicObj 
-        | :? FplIntrinsicFunc ->
-            match fv with
-            | :? FplClass -> () // do not override class's type with base obj
-            | :? FplReference ->
-                fv.TypeId <- $"{value.ShortName}"
-                fv.SetValue value
-            | _ ->  fv.TypeId <- $"{value.ShortName}"
-        | :? FplIntrinsicTpl ->
-            match fv with
-            | :? FplClass -> () // do not override class's type with base obj
-            | :? FplReference ->
-                fv.TypeId <- $"{tplName}"
-                value.TypeId <- $"{tplName}"
-                value.FplId <- $"{tplName}"
-                fv.SetValue value
-            | _ ->  
-                fv.TypeId <- $"{tplName}"
-        | _ ->
-            fv.TypeId <- value.ShortName
-            fv.SetValue value
-
-        match fv with
-        | :? FplVariableMany -> fv.TypeId <- $"*{fv.TypeId}"
-        | :? FplVariableMany1 -> fv.TypeId <- $"+{fv.TypeId}"
-        | _ -> ()
-    
     let setSignaturePositions pos1 pos2 = 
         let fv = variableStack.PeekEvalStack()
         match box fv with 
@@ -122,26 +91,42 @@ let rec eval (st: SymbolTable) ast =
     | Ast.IndexType((pos1, pos2),()) -> 
         st.EvalPush("IndexType")
         let fv = variableStack.PeekEvalStack()
-        let value = new FplIntrinsicInd((pos1, pos2), fv)
-        setUnitType fv value ""
+        match fv with
+        | :? FplClass -> () // do not override class's type with base obj
+        | :? FplReference ->
+            fv.TypeId <- LiteralInd
+            fv.SetValue (new FplIntrinsicInd((pos1, pos2), fv))
+        | :? FplVariableMany -> fv.TypeId <- $"*{LiteralInd}"
+        | :? FplVariableMany1 -> fv.TypeId <- $"+{LiteralInd}"
+        | _ ->  fv.TypeId <- LiteralInd
         st.EvalPop() |> ignore
     | Ast.ObjectType((pos1, pos2),()) -> 
         st.EvalPush("ObjectType")
         let fv = variableStack.PeekEvalStack()
-        let value = new FplIntrinsicObj((pos1, pos2), fv)
-        setUnitType fv value ""
+        match fv with
+        | :? FplVariableMany -> fv.TypeId <- $"*{LiteralObj}"
+        | :? FplVariableMany1 -> fv.TypeId <- $"+{LiteralObj}"
+        | _ ->  fv.TypeId <- LiteralObj
         st.EvalPop()
     | Ast.PredicateType((pos1, pos2),()) -> 
         st.EvalPush("PredicateType")
         let fv = variableStack.PeekEvalStack()
-        let value = new FplIntrinsicPred((pos1, pos2), fv)
-        setUnitType fv value ""
+        match fv with
+        | :? FplClass -> () // do not override class's type with base obj
+        | :? FplReference ->
+            fv.TypeId <- LiteralPred
+            fv.SetValue (new FplIntrinsicPred((pos1, pos2), fv))
+        | :? FplVariableMany -> fv.TypeId <- $"*{LiteralPred}"
+        | :? FplVariableMany1 -> fv.TypeId <- $"+{LiteralPred}"
+        | _ ->  fv.TypeId <- LiteralPred
         st.EvalPop()
     | Ast.FunctionalTermType((pos1, pos2),()) -> 
         st.EvalPush("FunctionalTermType")
         let fv = variableStack.PeekEvalStack()
-        let value = new FplIntrinsicFunc((pos1, pos2), fv)
-        setUnitType fv value ""
+        match fv with
+        | :? FplVariableMany -> fv.TypeId <- $"*{LiteralFunc}"
+        | :? FplVariableMany1 -> fv.TypeId <- $"+{LiteralFunc}"
+        | _ ->  fv.TypeId <- LiteralFunc
         st.EvalPop()
     | Ast.Many((pos1, pos2),()) ->
         st.EvalPush("Many")
@@ -249,8 +234,16 @@ let rec eval (st: SymbolTable) ast =
     | Ast.TemplateType((pos1, pos2), s) -> 
         st.EvalPush("TemplateType")
         let fv = variableStack.PeekEvalStack()
-        let value = new FplIntrinsicTpl((pos1, pos2), fv)
-        setUnitType fv value s
+        match fv with
+        | :? FplClass -> () // do not override class's type with base obj
+        | :? FplReference ->
+            let value = new FplIntrinsicTpl((pos1, pos2), fv)
+            value.TypeId <- s
+            value.FplId <- s
+            fv.TypeId <- s
+        | :? FplVariableMany -> fv.TypeId <- $"*{s}"
+        | :? FplVariableMany1 -> fv.TypeId <- $"+{s}"
+        | _ ->  fv.TypeId <- s
         st.EvalPop() 
     | Ast.Var((pos1, pos2), name) ->
         st.EvalPush("Var")
