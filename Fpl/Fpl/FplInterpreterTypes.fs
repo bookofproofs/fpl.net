@@ -4105,31 +4105,6 @@ type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
 
     override this.RunOrder = None
 
-type FplIntrinsicFunc(positions: Positions, parent: FplValue) as this =
-    inherit FplValue(positions, Some parent)
-    do
-        this.TypeId <- LiteralFunc
-        this.FplId <- LiteralFunc
-
-    override this.Name = PrimIntrinsicFunc
-    override this.ShortName = LiteralFunc
-
-    override this.Clone () =
-        let ret = new FplIntrinsicFunc((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.Type (signatureType:SignatureType) = 
-        getFplHead this signatureType
-                    
-    override this.Represent (): string = this.FplId
-
-    override this.Run _ = () 
-
-    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
-
-    override this.RunOrder = None
-
 
 type FplIntrinsicTpl(positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
