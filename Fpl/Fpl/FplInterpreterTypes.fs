@@ -1725,38 +1725,6 @@ type FplBase(positions: Positions, parent: FplValue) =
         else 
             None        
 
-type FplIntrinsicObj(positions: Positions, parent: FplValue) as this =
-    inherit FplGenericObject(positions, parent)
-
-    do 
-        this.IsIntrinsic <- true
-
-    override this.Name = PrimIntrinsicObj
-    override this.ShortName = LiteralObj
-
-    override this.Clone () =
-        let ret = new FplIntrinsicObj((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.Type (signatureType:SignatureType) = 
-        match signatureType with
-            | SignatureType.Name 
-            | SignatureType.Mixed -> this.FplId
-            | SignatureType.Type -> this.TypeId
-
-    override this.Represent (): string = this.FplId
-
-    override this.Run variableStack = 
-        this.SetValue (new FplInstance((this.StartPos, this.EndPos), this.Parent.Value))
-
-    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
-
-let isIntrinsicObj (fv1:FplValue) = 
-    match fv1 with
-    | :? FplIntrinsicObj -> true
-    | _ -> false
-
 type ICanBeCalledRecusively =
     abstract member CallCounter : int
 
