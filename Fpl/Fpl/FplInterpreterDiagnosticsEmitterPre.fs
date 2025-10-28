@@ -370,6 +370,19 @@ let emitID026Diagnostics name candidates pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
 
+let emitID027Diagnostics name pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ID027 name
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
 let emitLG002diagnostic nodeTypeName times pos1 pos2 = 
     let diagnostic =
         { 

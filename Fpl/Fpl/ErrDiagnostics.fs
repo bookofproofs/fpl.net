@@ -132,6 +132,7 @@ type DiagnosticCode =
     | ID024 of string * string
     | ID025 of string * string * string
     | ID026 of string * string
+    | ID027 of string
     // logic-related error codes
     | LG001 of string * string * string
     | LG002 of string * int
@@ -247,6 +248,7 @@ type DiagnosticCode =
             | ID024 _ -> "ID024"
             | ID025 _ -> "ID025"
             | ID026 _ -> "ID026"
+            | ID027 _ -> "ID027"
             // logic-related error codes
             | LG001 _ -> "LG001"
             | LG002 _ -> "LG002"
@@ -370,6 +372,7 @@ type DiagnosticCode =
             | ID024 (signature, conflict) -> sprintf "Expression `%s` was already localized at %s." signature conflict
             | ID025 (candidate, candidateType, nodeType)  -> $"Cannot reference to `{candidate}` which is {candidateType} inside {nodeType}." 
             | ID026 (name, candidates)  -> $"The base constructor call's id `{name}` is not among the base classes this class is derived from. The candidate classes are {candidates}." 
+            | ID027 name -> $"Illegal recursion in for statement. The entity `{name}` cannot be used as its own domain." 
             // logic-related error codes
             | LG001 (typeOfPredicate,argument,typeOfExpression) -> $"Cannot evaluate `{typeOfPredicate}`; expecting a predicate argument `{argument}`, got `{typeOfExpression}`."
             | LG002 (nodeTypeName, times) -> $"Possible infinite recursion detected, `{nodeTypeName}` was called for more than {times} times.`."

@@ -777,6 +777,17 @@ type TestInterpreterErrors() =
             let code = ID026 ("","")
             runTestHelper "TestID026.fpl" fplCode code expected
             
+    [<DataRow("00", "def func T(list:* Nat)->pred { dec ~result for list in list { result:=true }; return result };", 1)>]
+    [<DataRow("01", "def func T(list:* Nat)->pred { dec ~result for list in a { result:=true }; return result };", 0)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestID026(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = ID027 ("","")
+            runTestHelper "TestID027.fpl" fplCode code expected
+
     [<DataRow("00a", """def pred T() { true };""", 0)>]
     [<DataRow("00", """def pred T() { not true };""", 0)>]
     [<DataRow("01", """def pred T() { dec ~x:pred; not x };""", 0)>]
