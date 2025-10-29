@@ -2527,19 +2527,41 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplForInStmt", "00", """;""", "")>]
+    [<DataRow("FplForInStmt", "01", """def func Sum(list:* Nat)->Nat { dec ~a:obj ~result, addend: Nat result:=Zero() for addend in list { result:=Add(result,addend) }; return result };""", "")>]
+    [<DataRow("FplForInStmt", "02", """def func Sum(from, to: Nat, arr:+Nat) -> Nat { dec ~a:obj ~i, result: Nat result:=Zero() for i in ClosedRange(from,to) { result:=Add(result,arr[i]) }; return result };""", "")>]
+    [<DataRow("FplForInStmt", "03", """def func Sum() -> Nat { dec ~addend, result: Nat result:=Zero() for addend in Nat { result:=Add(result,addend) }; return result };""", "")>]
     [<TestMethod>]
     member this.TestStructureFplForInStmt(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplForInStmt.fpl"
         let parent, node = testSkeleton nodeType filename fplCode identifier
         
         match nodeType, varVal with
-        | "FplReturn", "00" ->
-            Assert.IsInstanceOfType<FplRoot>(parent)
-            Assert.AreEqual<int>(0, parent.ArgList.Count)
-            Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplReturn>(node)
-            Assert.AreEqual<int>(0, node.ArgList.Count)
+        | "FplForInStmt", "01" ->
+            Assert.IsInstanceOfType<FplFunctionalTerm>(parent)
+            Assert.AreEqual<int>(4, parent.ArgList.Count)
+            Assert.AreEqual<int>(4, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplForInStmt>(node)
+            Assert.AreEqual<int>(3, node.ArgList.Count) // entity, domain, for body consisting of 1 stmt
+            Assert.AreEqual<string>("addend", node.ArgList[0].Type SignatureType.Name)
+            Assert.AreEqual<string>("list", node.ArgList[1].Type SignatureType.Name)
+            Assert.AreEqual<int>(0, node.Scope.Count)
+        | "FplForInStmt", "02" ->
+            Assert.IsInstanceOfType<FplFunctionalTerm>(parent)
+            Assert.AreEqual<int>(4, parent.ArgList.Count)
+            Assert.AreEqual<int>(6, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplForInStmt>(node)
+            Assert.AreEqual<int>(3, node.ArgList.Count) // entity, domain, for body consisting of 1 stmt
+            Assert.AreEqual<string>("i", node.ArgList[0].Type SignatureType.Name)
+            Assert.AreEqual<string>("ClosedRange(from, to)", node.ArgList[1].Type SignatureType.Name)
+            Assert.AreEqual<int>(0, node.Scope.Count)
+        | "FplForInStmt", "03" ->
+            Assert.IsInstanceOfType<FplFunctionalTerm>(parent)
+            Assert.AreEqual<int>(4, parent.ArgList.Count)
+            Assert.AreEqual<int>(4, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplForInStmt>(node)
+            Assert.AreEqual<int>(3, node.ArgList.Count) // entity, domain, for body consisting of 1 stmt
+            Assert.AreEqual<string>("addend", node.ArgList[0].Type SignatureType.Name)
+            Assert.AreEqual<string>("Nat", node.ArgList[1].Type SignatureType.Name)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 

@@ -945,8 +945,7 @@ type TestFplValueScopeBlockType() =
             let theory = r.Scope[filename]
             let pr = theory.Scope["T()"] 
             let pre = pr.ArgList |> Seq.toList |> List.rev |> List.head
-            let base1 = pre.Scope.Values |> Seq.toList |> List.rev |> List.head
-            Assert.IsInstanceOfType<FplDecrement>(base1)
+            Assert.IsInstanceOfType<FplDecrement>(pre)
         | None -> 
             Assert.IsTrue(false)
 
@@ -1053,14 +1052,14 @@ type TestFplValueScopeBlockType() =
             let pred = theory.Scope["Test(ind)"]
             let assignment = pred.ArgList[0]
             let res = assignment.ArgList[1]
-            let cr = res.ArgList[0]
+
  
             match var with
-            | "base1" -> Assert.IsInstanceOfType<FplMapCases>(cr)
-            | "base2" -> Assert.IsInstanceOfType<FplMapCases>(cr)
-            | "base3" -> Assert.IsInstanceOfType<FplMapCases>(cr)
-            | "base4" -> Assert.IsInstanceOfType<FplMapCases>(cr)
-            | "base5" -> Assert.IsInstanceOfType<FplMapCases>(cr)
+            | "base1" -> Assert.IsInstanceOfType<FplMapCases>(res)
+            | "base2" -> Assert.IsInstanceOfType<FplMapCases>(res)
+            | "base3" -> Assert.IsInstanceOfType<FplMapCases>(res)
+            | "base4" -> Assert.IsInstanceOfType<FplMapCases>(res)
+            | "base5" -> Assert.IsInstanceOfType<FplMapCases>(res)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

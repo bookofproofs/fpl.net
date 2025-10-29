@@ -1047,7 +1047,21 @@ let rec getRoot (fv:FplValue) =
     if fv.Name = PrimRoot then 
         fv :?> FplRoot
     else getRoot fv.Parent.Value
-        
+   
+// Tries to add for statatement's domain or entity to its parent's for statement
+let tryAddToParentForInStmt (fplValue:FplValue) =
+    let identifier = fplValue.Type SignatureType.Name
+    let parent = fplValue.Parent.Value
+
+    if parent.ArgList.Count = 1 then
+        let entityIdentifier = parent.ArgList[0].Type SignatureType.Name
+        if entityIdentifier = identifier then 
+            emitID027Diagnostics identifier fplValue.StartPos fplValue.EndPos
+        else 
+            parent.ArgList.Add fplValue
+    else
+        parent.ArgList.Add fplValue
+
 // Tries to add an FPL block to its parent's scope using its FplId, or issues ID001 diagnostics if a conflict occurs
 let tryAddToParentUsingFplId (fplValue:FplValue) =
     let identifier = fplValue.FplId
@@ -4368,9 +4382,11 @@ type FplForInStmtEntity(positions: Positions, parent: FplValue) =
         ret
 
     override this.Type signatureType = 
-        getFplHead this signatureType
+        getFplHead this.ArgList[0] signatureType
 
     override this.Represent () = LiteralUndef
+
+    override this.EmbedInSymbolTable _ = tryAddToParentForInStmt this
 
     override this.Run variableStack = 
         // todo implement run
@@ -4387,9 +4403,11 @@ type FplForInStmtDomain(positions: Positions, parent: FplValue) =
         ret
 
     override this.Type signatureType = 
-        getFplHead this signatureType
+        getFplHead this.ArgList[0] signatureType
 
     override this.Represent () = LiteralUndef
+
+    override this.EmbedInSymbolTable _ = tryAddToParentForInStmt this
 
     override this.Run variableStack = 
         // todo implement run
