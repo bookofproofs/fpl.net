@@ -3753,6 +3753,10 @@ let rec mpwa hasArguments (args: FplValue list) (pars: FplValue list) =
             None
         elif hasArguments && aType = "" && pType <> "" then
             Some($"`()` does not match `{p.Type(SignatureType.Name)}:{pType}`")
+        elif aType = LiteralPred && pType.StartsWith(LiteralPred) then
+            None
+        elif aType = LiteralFunc && pType.StartsWith(LiteralFunc) then
+            None
         elif aType.StartsWith(LiteralFunc) then
             let someMap = getMapping a
 
@@ -4382,7 +4386,10 @@ type FplForInStmtEntity(positions: Positions, parent: FplValue) =
         ret
 
     override this.Type signatureType = 
-        getFplHead this.ArgList[0] signatureType
+        if this.ArgList.Count = 1 then 
+            getFplHead this.ArgList[0] signatureType
+        else
+            getFplHead this signatureType
 
     override this.Represent () = LiteralUndef
 
@@ -4403,7 +4410,10 @@ type FplForInStmtDomain(positions: Positions, parent: FplValue) =
         ret
 
     override this.Type signatureType = 
-        getFplHead this.ArgList[0] signatureType
+        if this.ArgList.Count = 1 then 
+            getFplHead this.ArgList[0] signatureType
+        else
+            getFplHead this signatureType
 
     override this.Represent () = LiteralUndef
 
