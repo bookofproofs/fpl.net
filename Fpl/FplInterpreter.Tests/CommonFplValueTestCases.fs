@@ -303,8 +303,8 @@ type CommonFplValueTestCases =
             def func SomeFunctionalTerm3()->obj {dec ~v:obj v:=v; return v}
             def func SomeFunctionalTerm4()->tpl {dec ~v:tpl v:=v; return v}
             def func SomeFunctionalTerm5()->SomeClass1 {dec ~v:SomeClass1; return v}
-            def func SomeFunctionalTerm6()->SomeClass1 {dec ~v:SomeClass1 v:=SomeClass; return v}
-            def func SomeFunctionalTerm7()->SomeClass1 {dec ~v:SomeClass1 v:=SomeClass(); return v}
+            def func SomeFunctionalTerm6()->SomeClass1 {dec ~v:SomeClass1 v:=SomeClass1; return v}
+            def func SomeFunctionalTerm7()->SomeClass1 {dec ~v:SomeClass1 v:=SomeClass1(); return v}
             def func SomeFunctionalTerm8()->ind {return $112}
             def func SomeFunctionalTerm9()->ind {dec ~v:ind v:=$13; return v}
             proof SomeTheorem1$1 {1. |- trivial}

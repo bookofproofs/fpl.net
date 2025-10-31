@@ -3713,7 +3713,7 @@ let rec mpwa hasArguments (args: FplValue list) (pars: FplValue list) =
 
         if aType = pType then
             mpwa hasArguments ars prs
-        elif pType.StartsWith(LiteralTpl) || pType.StartsWith("template") then
+        elif pType.StartsWith(LiteralTpl) || pType.StartsWith(LiteralTplL) then
             mpwa hasArguments ars prs
         elif pType = $"*{aType}" || pType.StartsWith("*") && aType = "" && hasArguments then
             if ars.Length > 0 then mpwa hasArguments ars pars else None
