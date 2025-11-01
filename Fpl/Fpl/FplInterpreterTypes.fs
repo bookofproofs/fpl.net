@@ -4189,28 +4189,34 @@ type FplReturn(positions: Positions, parent: FplValue) as this =
 
     override this.Run _ =
         let returnedReference = this.ArgList[0]
-        let mapType = this.Parent.Value
-        let hasParentheses = 
-            match returnedReference with 
-            | :? FplReference as retRef -> (retRef.ArgType = ArgType.Parentheses)
-            | _ -> false
+        let blockOpt = this.NextBlockNode
+        match blockOpt with 
+        | Some funTerm ->
+            let mapTypeOpt = getMapping funTerm
+            match mapTypeOpt with 
+            | Some mapType ->
+                let hasParentheses = 
+                    match returnedReference with 
+                    | :? FplReference as retRef -> (retRef.ArgType = ArgType.Parentheses)
+                    | _ -> false
         
-        match this.MatchWithMapping hasParentheses returnedReference mapType with
-        | Some errMsg -> emitSIG03Diagnostics errMsg (mapType.Type(SignatureType.Type)) (returnedReference.StartPos) (returnedReference.EndPos)
-        | _ -> 
-            let returnedValueOpt = getArgument returnedReference
-            match returnedValueOpt with
-            | Some returnedValue -> 
-                if returnedValue.ValueList.Count > 0 then
-                    this.SetValuesOf returnedValue
-                else
-                    // todo diagnostics returns uninitialized value
-                    let value = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
-                    this.SetValue(value)
-            | _ -> 
-                // add an undefined value since there was no argument of the returnedValue
-                let value = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
-                this.SetValue(value)
+                match this.MatchWithMapping hasParentheses returnedReference mapType with
+                | Some errMsg -> emitSIG03Diagnostics errMsg (mapType.Type(SignatureType.Type)) (returnedReference.StartPos) (returnedReference.EndPos)
+                | _ -> 
+                    match returnedReference with
+                    | :? FplIntrinsicPred 
+                    | :? FplIntrinsicTpl 
+                    | :? FplIntrinsicInd 
+                    | :? FplIntrinsicUndef ->
+                        funTerm.SetValue returnedReference
+                    | :? FplReference when returnedReference.Scope.ContainsKey(returnedReference.FplId) ->
+                        let refValue = returnedReference.Scope[returnedReference.FplId]
+                        funTerm.SetValue refValue
+                    | _ ->
+                        let value = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
+                        funTerm.SetValue(value)
+            | _ -> () // does not occur
+        | _ -> () // does not occur
 
 type FplMapCaseSingle(positions: Positions, parent: FplValue) =
     inherit FplGenericStmt(positions, parent)
