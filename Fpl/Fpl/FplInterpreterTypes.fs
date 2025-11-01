@@ -3373,25 +3373,6 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
 
     override this.RunOrder = None
 
-/// Returns Some argument of the FplValue depending of the type of it.
-let getArgument (fv:FplValue) =
-    match fv with
-    | :? FplReference when fv.Scope.ContainsKey(fv.FplId) ->
-        let refValue = fv.Scope[fv.FplId]
-        // if the reference value itself contains value(s) and is not a class, 
-        // return this value. 
-        // Exceptions: 
-        // 1) if refValue is a class, its "arg list" means something else - namely parent classes. In this case we only want to return the main class
-        // 2) if refValue is a constructor, its "arg list" means something else - namely the calls to some base classes' constructors classes. In this case we only want to return the main constructor
-        if refValue.ArgList.Count > 0 && not (refValue.IsClass()) && (refValue.Name <> LiteralCtorL) then
-            Some refValue.ArgList[0] // return existing values except of classes, because those denoted their parent classes
-        else 
-            Some refValue 
-    | :? FplReference when fv.FplId <> "" -> Some fv
-    | :? FplReference when fv.ArgList.Count = 0 -> Some fv
-    | _ when fv.ArgList.Count > 0 -> Some fv.ArgList[0]
-    | _ -> None
-
 /// Implements the semantics of an FPL decrement delegate.
 type FplDecrement(name, positions: Positions, parent: FplValue) as this =
     inherit FplGenericDelegate(name, positions, parent)
@@ -3453,13 +3434,11 @@ type FplDecrement(name, positions: Positions, parent: FplValue) as this =
         let newValue = FplExtensionObj((this.StartPos, this.EndPos), this.Parent.Value)
 
         let argPre = this.ArgList[0]
-        let argOpt = getArgument argPre
         let numericValue = 
-            match argOpt with
-            | Some arg when isVar arg -> 
-                arg.Represent()
-            | Some arg -> arg.FplId
-            | None -> argPre.FplId
+            match argPre with
+            | :? FplGenericVariable -> 
+                argPre.Represent()
+            | _ -> argPre.FplId
 
         let mutable n = 0
         System.Int32.TryParse(numericValue, &n) |> ignore

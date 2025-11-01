@@ -50,10 +50,7 @@ type TestRepresentation() =
             let fn = theory.Scope["T()"] 
             let assignmentStmt = fn.ArgList[0]
             let assignee = assignmentStmt.ArgList[0]
-            let assignedValue = getArgument assignee
-            match assignedValue with 
-            | Some value -> Assert.AreEqual<string>(expected, value.Represent())
-            | None -> Assert.AreEqual<string>(expected, "no value was assigned")
+            Assert.AreEqual<string>(expected, assignee.Represent())
         | None -> 
             Assert.IsTrue(false)
             

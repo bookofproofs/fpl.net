@@ -607,8 +607,7 @@ type TestSignatureMatching() =
             let blocks = theory.Scope.Values |> Seq.toList 
             let pred = blocks |> List.filter(fun fv -> (fv.Type(SignatureType.Name)).StartsWith("T(")) |> List.head
             let stmtAssign = pred.ArgList[0]
-            let fvParsPre = stmtAssign.ArgList[0]
-            let fvPars = (getArgument fvParsPre).Value
+            let fvPars = stmtAssign.ArgList[0]
             let fvArgs = stmtAssign.ArgList[1]
             match matchArgumentsWithParameters fvArgs fvPars with
             | Some errMsg -> Assert.AreEqual<string>(var, errMsg)
