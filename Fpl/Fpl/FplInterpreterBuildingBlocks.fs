@@ -1820,9 +1820,9 @@ let rec eval (st: SymbolTable) ast =
         let fv = new FplClass((pos1, pos2), parent)
         variableStack.PushEvalStack(fv)
         eval st classSignatureAst
+        optInheritedClassTypeListAst |> Option.map (eval st) |> Option.defaultValue ()
         optUserDefinedObjSymAst |> Option.map (eval st) |> Option.defaultValue ()
         eval st classBlockAst
-        optInheritedClassTypeListAst |> Option.map (eval st) |> Option.defaultValue ()
         variableStack.PopEvalStack()
         st.EvalPop()
     // | DerivedPredicate of Ast

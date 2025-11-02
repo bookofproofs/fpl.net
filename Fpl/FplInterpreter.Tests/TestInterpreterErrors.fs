@@ -710,6 +710,10 @@ type TestInterpreterErrors() =
             let code = ID021 ""
             runTestHelper "TestID021.fpl" fplCode code expected
 
+
+    [<DataRow("00", "def pred T() {intr};", 0)>]
+    [<DataRow("00a", "def pred T() {intr property pred Surjective() {RightTotal()}};", 0)>]
+    [<DataRow("01", "def cl T def cl D:T {ctor D() {dec ~x:ind base.T(x);}};", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID022(no:string, fplCode:string, expected) =

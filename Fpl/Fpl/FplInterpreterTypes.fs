@@ -1792,17 +1792,6 @@ type FplGenericPredicateBlock(positions: Positions, parent: FplValue) =
     override this.CheckConsistency () = 
         if not this.IsIntrinsic then // if not intrinsic, check variable usage
             checkVAR04Diagnostics this
-        if this.Arity = 0 && this.ArgList.Count > 0 then 
-            let refValue = this.ArgList[this.ArgList.Count-1]
-            match refValue.Name with 
-            | PrimRefL when refValue.Scope.Count = 1 ->
-                let predValue = refValue.Scope.Values |> Seq.head
-                match predValue with 
-                | :? FplIntrinsicPred as pred when (pred.FplId = LiteralTrue || pred.FplId = LiteralFalse) ->
-                    () // no parameters with a constant
-                | _ -> emitLG007Diagnostics $"{this.Name} `{this.Type SignatureType.Name}`" refValue.StartPos refValue.EndPos
-            | _ -> 
-                emitLG007Diagnostics $"{this.Name} `{this.Type SignatureType.Name}`" refValue.StartPos refValue.EndPos
 
 type FplPredicate(positions: Positions, parent: FplValue, runOrder) =
     inherit FplGenericPredicateBlock(positions, parent)

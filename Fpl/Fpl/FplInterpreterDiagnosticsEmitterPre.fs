@@ -437,19 +437,6 @@ let emitLG005Diagnostics name pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
 
-let emitLG007Diagnostics name pos1 pos2 =
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = pos1
-            Diagnostic.EndPos = pos2
-            Diagnostic.Code = ID022 name
-            Diagnostic.Alternatives = Some $"Choose one of the constants `{LiteralTrue}` or `{LiteralFalse}` instead." 
-        }
-    ad.AddDiagnostic diagnostic
-
 let emitPR001Diagnostics incorrectBlockType justificationItemName pos1 pos2 alternative =
     let diagnostic =
         { 
