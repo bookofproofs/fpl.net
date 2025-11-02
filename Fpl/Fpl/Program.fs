@@ -43,9 +43,9 @@ let loadFplFile(path:string) =
     let st = SymbolTable(parsedAsts, false, true)
     FplInterpreter.fplInterpreter st fplCode uri fplLibUrl
 
-let input = """uses Fpl.SetTheory;"""
+let input = """def pred T() { intr prty pred T1() {is(parent,pred)} };"""
 
-(*
+
 let result = fplParser input
 
 printf "%O" result
@@ -53,21 +53,10 @@ printf "%O" result
 ad.PrintDiagnostics
 
 prepareFplCode(input,false) |> ignore
-*)
 
-loadFplFile(@"C:\Users\Peaq\source\repos\bookofproofs\fpl.net\theories\FoundationsOfAnalysisLandau\Landau.1.1.Axioms.fpl")
+
+// loadFplFile(@"C:\Users\Peaq\source\repos\bookofproofs\fpl.net\theories\FoundationsOfAnalysisLandau\Landau.1.1.Axioms.fpl")
 // loadFplFile(@"D:\Forschung\fpl.net\theories\FoundationsOfAnalysisLandau\Landau.1.1.Axioms.fpl")
 
 printf "\n--------------------------------\n"
 ad.PrintDiagnostics
-
-let createFormattableString name age =
-    FormattableStringFactory.Create(sprintf "Hello, my name is %s and I am %d years old." name age)
-
-// Initial parameters
-let name = "John"
-let age = 30
-
-// Create and print the FormattableString
-let formattableString = createFormattableString name age
-printfn "%s" (formattableString.ToString())

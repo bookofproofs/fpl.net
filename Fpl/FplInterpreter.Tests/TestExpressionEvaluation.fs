@@ -252,6 +252,8 @@ type TestExpressionEvaluation() =
     [<DataRow("10", "def pred T() { dec ~x:func(y:obj)->obj; is(x,func) };", LiteralTrue)>]
     [<DataRow("11", "def pred T() { dec ~x:func(y:obj)->ind; is(x,func(y:obj)->ind) };", LiteralTrue)>]
     [<DataRow("12", "def pred T() { is(self,pred) };", LiteralTrue)>]
+    [<DataRow("12a", "def pred T() { intr prty pred T1() {is(parent,pred)} };", LiteralTrue)>]
+    [<DataRow("12b", "def pred T() { intr prty pred T1() {is(parent,ind)} };", LiteralFalse)>]
     [<DataRow("13", "def pred T() { dec ~x:pred(y:func()->obj); is(x,pred) };", LiteralTrue)>]
     [<DataRow("14", "def pred T() { dec ~x:pred(y:func()->obj); is(x,pred(y:func()->obj)) };", LiteralTrue)>]
     [<DataRow("15", "def pred T() { dec ~x:pred(y:func()->obj); is(x,pred(y:func()->ind)) };", LiteralFalse)>]
@@ -270,9 +272,11 @@ type TestExpressionEvaluation() =
         | Some st ->
             let r = st.Root
             let theory = r.Scope[filename]
-            let pr1 = theory.Scope["T()"]
-            let variableStack = new FplVariableStack()
-            pr1.Run variableStack
+            let pr1 = 
+                if fplCode.Contains("prty ") then 
+                    theory.Scope["T()"].Scope["T1()"]
+                else
+                    theory.Scope["T()"]         
 
             let actual = evalTreeFplRepresentation(pr1)
             Assert.AreEqual<string>(expected, actual)

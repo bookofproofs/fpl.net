@@ -1700,7 +1700,9 @@ and FplClass(positions: Positions, parent: FplValue) =
 
     override this.Represent () = $"dec {LiteralCl} {this.FplId}"
 
-    override this.Run _ = 
+    override this.Run variableStack = 
+        this.GetProperties()
+        |> List.iter (fun fv -> fv.Run variableStack)
         this.SetValue(new FplInstance((this.StartPos, this.EndPos), this))
 
     override this.CheckConsistency () = 
@@ -1784,6 +1786,7 @@ type FplGenericPredicateBlock(positions: Positions, parent: FplValue) =
                         fv.Run variableStack
                         this.SetValuesOf fv
                     )
+
             _isReady <- this.Arity = 0 
 
     override this.CheckConsistency () = 
@@ -1818,6 +1821,12 @@ type FplPredicate(positions: Positions, parent: FplValue, runOrder) =
     override this.EmbedInSymbolTable _ = 
         base.CheckConsistency()
         tryAddToParentUsingMixedSignature this
+
+    override this.Run variableStack = 
+        base.Run variableStack 
+        this.GetProperties()
+        |> List.iter (fun fv -> fv.Run variableStack)
+
 
     override this.RunOrder = Some _runOrder
 
@@ -2710,7 +2719,15 @@ type FplReference(positions: Positions, parent: FplValue) =
     override this.Type signatureType =
         let headObj = 
             if this.Scope.Count > 0 && not (this.Scope.ContainsKey(".")) then 
-                this.Scope.Values |> Seq.head
+                let ret = this.Scope.Values |> Seq.head
+                match ret.Name with 
+                | LiteralParent 
+                | LiteralSelf ->
+                    if ret.Scope.Count > 0 then 
+                        ret.Scope.Values |> Seq.head
+                    else
+                        ret   
+                | _ -> ret
             else
                 this
         let propagate = propagateSignatureType signatureType
@@ -3588,6 +3605,10 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) =
                     fv.Run variableStack
                     this.SetValuesOf fv
                 )
+
+                this.GetProperties()
+                |> List.iter (fun fv -> fv.Run variableStack)
+
                 _isReady <- this.Arity = 0 
 
 /// Checks if the baseClassName is contained in the classRoot's base classes (it derives from).
