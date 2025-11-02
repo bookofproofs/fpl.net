@@ -2733,10 +2733,16 @@ type FplReference(positions: Positions, parent: FplValue) =
         let propagate = propagateSignatureType signatureType
 
         // The arguments are reserved for the arguments or the coordinates of the reference
-        let args =
-            this.ArgList
-            |> Seq.map (fun fv -> fv.Type(propagate))
-            |> String.concat ", "
+        let args, argsCount =
+            let ret = 
+                this.ArgList
+                |> Seq.map (fun fv -> fv.Type(propagate))
+                |> String.concat ", "
+            // fallback to variable params (and a possibly given mapping) if there are no arguments and the reference is a variable 
+            match ret, headObj.Name with 
+            | "", PrimVariableL -> 
+                (getParamTuple headObj propagate), headObj.Scope.Count
+            | _ -> ret, this.ArgList.Count
 
         let head = 
             let ret = getFplHead headObj signatureType 
@@ -2745,14 +2751,13 @@ type FplReference(positions: Positions, parent: FplValue) =
             | SignatureType.Type, "", "" -> LiteralUndef
             | _ -> ret
             
-
         let qualification =
             if this.Scope.ContainsKey(".") then
                 Some(this.Scope["."])
             else
                 None
 
-        match this.ArgList.Count, this.ArgType, qualification with
+        match argsCount, this.ArgType, qualification with
         | 0, ArgType.Nothing, Some qual ->
             $"{head}.{qual.Type(propagate)}"
         | 0, ArgType.Brackets, Some qual ->
@@ -2774,7 +2779,12 @@ type FplReference(positions: Positions, parent: FplValue) =
             $"{head}({args}).{qual.Type(propagate)}"
         | 1, ArgType.Nothing, None -> 
             if this.FplId <> String.Empty then 
-                $"{head}({args})"
+                let varMappingOpt = getMapping headObj
+                match varMappingOpt with 
+                | Some varMapping ->
+                    $"{head}({args}) -> {varMapping.Type propagate}"
+                | None ->
+                    $"{head}({args})"
             else
                 $"{head}{args}"
         | 1, ArgType.Brackets, None ->
