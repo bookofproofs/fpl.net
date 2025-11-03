@@ -131,7 +131,6 @@ type DiagnosticCode =
     | ID023 of string 
     | ID024 of string * string
     | ID025 of string * string * string
-    | ID026 of string * string
     | ID027 of string
     // logic-related error codes
     | LG001 of string * string * string
@@ -247,7 +246,6 @@ type DiagnosticCode =
             | ID023 _ -> "ID023"
             | ID024 _ -> "ID024"
             | ID025 _ -> "ID025"
-            | ID026 _ -> "ID026"
             | ID027 _ -> "ID027"
             // logic-related error codes
             | LG001 _ -> "LG001"
@@ -351,7 +349,7 @@ type DiagnosticCode =
             | ID011 (chain, errorMsg) -> $"The inheritance chain `{chain}` causes the following error: {errorMsg}."  
             | ID012 (name, candidates) -> 
                 if candidates.Length > 0 then 
-                    sprintf "Base class `%s` not found, candidates are %s." name candidates
+                    sprintf "Base class `%s` could not be determined, candidates were %s." name candidates
                 else
                     sprintf "Base class `%s` not found, no candidates found." name 
             | ID013 delegateDiagnostic -> sprintf "%s" delegateDiagnostic // just emit the delegate's diagnostic
@@ -371,7 +369,6 @@ type DiagnosticCode =
             | ID023 candidates  -> $"Cannot associate a justification with a single block. Found more candidates: {candidates}." 
             | ID024 (signature, conflict) -> sprintf "Expression `%s` was already localized at %s." signature conflict
             | ID025 (candidate, candidateType, nodeType)  -> $"Cannot reference to `{candidate}` which is {candidateType} inside {nodeType}." 
-            | ID026 (name, candidates)  -> $"The base constructor call's id `{name}` is not among the base classes this class is derived from. The candidate classes are {candidates}." 
             | ID027 name -> $"Illegal recursion in for statement. The entity `{name}` cannot be used as its own domain." 
             // logic-related error codes
             | LG001 (typeOfPredicate,argument,typeOfExpression) -> $"Cannot evaluate `{typeOfPredicate}`; expecting a predicate argument `{argument}`, got `{typeOfExpression}`."

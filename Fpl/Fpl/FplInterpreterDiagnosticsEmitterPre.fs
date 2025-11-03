@@ -357,18 +357,6 @@ let emitID025Diagnostics qualifiedNameCandidate candidateEnglishName blockEnglis
         ad.AddDiagnostic diagnostic
     | _ -> ()
 
-let emitID026Diagnostics name candidates pos1 pos2 =
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = pos1
-            Diagnostic.EndPos = pos2
-            Diagnostic.Code = ID026 (name, candidates)
-            Diagnostic.Alternatives = None 
-        }
-    ad.AddDiagnostic diagnostic
 
 let emitID027Diagnostics name pos1 pos2 =
     let diagnostic =

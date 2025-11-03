@@ -499,7 +499,7 @@ type TestInterpreterErrors() =
     [<DataRow("def cl A {intr} def cl B {intr} def cl C {intr} def cl D:A,B,C,E {ctor D() {dec base.A() base.B() base.C() base.F(); } };", 1)>]
     [<DataRow("def cl A {intr} def cl B:A {ctor B() {dec base.A(); } };", 0)>]
     [<DataRow("def cl A {intr} def cl B:A {ctor B() {dec base.C(); } };", 1)>]
-    [<DataRow("def cl A { ctor A() {dec base.Obj(); } };", 0)>]
+    [<DataRow("def cl A { ctor A() {dec base.Obj(); } };", 1)>]
     [<DataRow("def cl A { ctor A() {dec base.B(); } };", 1)>]
     [<DataRow("def cl A:C { ctor A() {dec base.Obj(); } };", 1)>]
     [<DataRow("uses Fpl.SetTheory def cl Test:Set {ctor Test() {dec base.Obj(); } };", 1)>]
@@ -771,15 +771,6 @@ type TestInterpreterErrors() =
         else
             let code = ID025 ("", "", "")
             runTestHelper "TestID025.fpl" fplCode code expected
-
-    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
-    [<TestMethod>]
-    member this.TestID026(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
-            ()
-        else
-            let code = ID026 ("","")
-            runTestHelper "TestID026.fpl" fplCode code expected
             
     [<DataRow("00", "def func T(list:* Nat)->pred { dec ~result:pred for list in list { result:=true }; return result };", 1)>]
     [<DataRow("01", "def func T(list:* Nat)->pred { dec ~result:pred for list in a { result:=true }; return result };", 0)>]
