@@ -496,17 +496,17 @@ type TestInterpreterErrors() =
             let code = ID011 ("","")
             runTestHelper "TestID011.fpl" fplCode code expected
 
-    [<DataRow("def cl A {intr} def cl B {intr} def cl C {intr} def cl D:A,B,C,E {ctor D() {dec base.A() base.B() base.C() base.F(); } };", 1)>]
-    [<DataRow("def cl A {intr} def cl B:A {ctor B() {dec base.A(); } };", 0)>]
-    [<DataRow("def cl A {intr} def cl B:A {ctor B() {dec base.C(); } };", 1)>]
-    [<DataRow("def cl A { ctor A() {dec base.Obj(); } };", 1)>]
-    [<DataRow("def cl A { ctor A() {dec base.B(); } };", 1)>]
-    [<DataRow("def cl A:C { ctor A() {dec base.Obj(); } };", 1)>]
-    [<DataRow("uses Fpl.SetTheory def cl Test:Set {ctor Test() {dec base.Obj(); } };", 1)>]
-    [<DataRow("uses Fpl.SetTheory def cl Test:Set {ctor Test() {dec base.Set(); } };", 0)>]
-    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
+    [<DataRow("00", "def cl A {intr} def cl B {intr} def cl C {intr} def cl D:A,B,C,E {ctor D() {dec base.A() base.B() base.C() base.F(); } };", 1)>]
+    [<DataRow("01", "def cl A {intr} def cl B:A {ctor B() {dec base.A(); } };", 0)>]
+    [<DataRow("02", "def cl A {intr} def cl B:A {ctor B() {dec base.C(); } };", 1)>]
+    [<DataRow("03", "def cl A { ctor A() {dec base.Obj(); } };", 1)>]
+    [<DataRow("04", "def cl A { ctor A() {dec base.B(); } };", 1)>]
+    [<DataRow("05", "def cl A:C { ctor A() {dec base.Obj(); } };", 1)>]
+    [<DataRow("07", "uses Fpl.SetTheory def cl Test:Set {ctor Test() {dec base.Obj(); } };", 1)>]
+    [<DataRow("08", "uses Fpl.SetTheory def cl Test:Set {ctor Test() {dec base.Set(); } };", 0)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
-    member this.TestID012(fplCode:string, expected) =
+    member this.TestID012(no:string, fplCode:string, expected) =
         if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
@@ -1418,6 +1418,7 @@ type TestInterpreterErrors() =
     [<DataRow("14", "axiom A { all x:Nat {true} };", 1)>]
     [<DataRow("15", "def pred Test() {dec ~x:object; is(x,Set)};", 1)>]
     [<DataRow("16", "def cl Set def pred Test() {dec ~x:object; is(x,Set)};", 0)>]
+    [<DataRow("16a", "def cl C {ctor C(x:ind) {}} def cl A:C { ctor A() {dec ~x:obj base.C(x); } };", 1)>]
     [<DataRow("17", """def pred T1() {true} def pred Test() { dec ~x:obj; T1(x) };""", 1)>]
     [<DataRow("18", """def pred T1() {true} def pred Test() { OtherTest() };""", 1)>]
     [<DataRow("19", """def pred T (x:obj) {true} def pred Caller() {dec ~x:obj; T(x)} ;""", 0)>]

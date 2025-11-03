@@ -4758,13 +4758,14 @@ type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
         let enclosingConstructorOpt = this.NextBlockNode
         match outerClassOpt with
         | Some (:? FplClass as outerClass) ->
-            let filteredBaseObjectsWithSameNameAsBaseCaller = 
+            let baseClassObjectOpt = 
                 outerClass.ArgList 
                 |> Seq.filter (fun pc -> pc.FplId = this.FplId)
-                |> Seq.toList
-            if filteredBaseObjectsWithSameNameAsBaseCaller.Length = 1 then
-                let baseClassObject = filteredBaseObjectsWithSameNameAsBaseCaller |> Seq.head :?> FplBase
+                |> Seq.tryHead
+                |> Option.map (fun (pc:FplValue) -> pc :?> FplBase)
 
+            match baseClassObjectOpt with 
+            | Some baseClassObject ->
                 match baseClassObject.BaseClass with
                 | Some baseClass ->
                     // now, try to match a constructor of the parentClass based on the signature of this base constructor call
@@ -4796,11 +4797,11 @@ type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
                                 ctor.ParentConstructorCalls.Add this.FplId |> ignore
                         | _ -> ()
                 | None ->
-                    () // todo: issue, base caller constructor of unknown class
-            else
-                // the base constructor call's id is not among the base classes this class is derived from
-                let candidates = outerClass.ArgList |> Seq.map (fun fv -> fv.FplId) |> Seq.sort |> String.concat ", "
-                emitID012Diagnostics this.FplId candidates this.StartPos this.EndPos
+                    // the base constructor call's id is not among the base classes this class is derived from
+                    let candidates = outerClass.ArgList |> Seq.map (fun fv -> fv.FplId) |> Seq.sort |> String.concat ", "
+                    emitID012Diagnostics this.FplId candidates this.StartPos this.EndPos
+            | _ ->
+                    emitID012Diagnostics this.FplId "" this.StartPos this.EndPos
         | _ ->
             // this case never happens, 
             // if so the bug will become apparent by failing to call the parent class constructor
