@@ -3861,8 +3861,8 @@ type FplGenericQuantor(positions: Positions, parent: FplValue) =
         |> List.iter (fun var -> var.SetIsBound())
         addExpressionToParentArgList this
     
-    override this.Run _ = 
-        // todo implement run
+    override this.Run variableStack = 
+        this.ArgList[0].Run variableStack
         let pred = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
         this.SetValue pred
 
@@ -4018,7 +4018,7 @@ type FplVariable(fplId, positions: Positions, parent: FplValue) =
                 this.ValueList
                 |> Seq.map (fun subfv -> subfv.Represent())
                 |> String.concat ", "
-            if this.IsInitializedVariable then 
+            if this.IsInitializedVariable || this.IsBound then 
                 subRepr
             else
                 match this.TypeId with
