@@ -181,19 +181,6 @@ let emitID011Diagnostics chain errorMsg pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
 
-let emitID012Diagnostics identifier candidates pos1 pos2 =
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = pos1
-            Diagnostic.EndPos = pos2
-            Diagnostic.Code = ID012(identifier, candidates) // call of parent class does not match the class id
-            Diagnostic.Alternatives = None 
-        }
-    ad.AddDiagnostic diagnostic
-
 let emitID013Diagnostics pos1 pos2 message =
     let diagnostic =
         { 

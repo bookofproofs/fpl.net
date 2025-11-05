@@ -117,7 +117,6 @@ type DiagnosticCode =
     | ID009 of string
     | ID010 of string
     | ID011 of string * string
-    | ID012 of string * string 
     | ID013 of string
     | ID014 of string * string
     | ID015 of string 
@@ -232,7 +231,6 @@ type DiagnosticCode =
             | ID009 _ -> "ID009"
             | ID010 _ -> "ID010"
             | ID011 _ -> "ID011"
-            | ID012 _ -> "ID012"
             | ID013 _ -> "ID013"
             | ID014 _ -> "ID014"
             | ID015 _ -> "ID015"
@@ -347,20 +345,15 @@ type DiagnosticCode =
             | ID009 name -> $"Circular base type dependency involving `{name}`." 
             | ID010 name -> $"The type `{name}` could not be found. Are you missing a uses clause?" 
             | ID011 (chain, errorMsg) -> $"The inheritance chain `{chain}` causes the following error: {errorMsg}."  
-            | ID012 (name, candidates) -> 
-                if candidates.Length > 0 then 
-                    sprintf "Base class `%s` could not be determined, candidates were %s." name candidates
-                else
-                    sprintf "Base class `%s` not found, no candidates found." name 
             | ID013 delegateDiagnostic -> sprintf "%s" delegateDiagnostic // just emit the delegate's diagnostic
             | ID014 (signature, conflict) -> sprintf "Language code `%s` was already declared at %s." signature conflict
             | ID015 signature -> $"`parent` cannot be referenced from {signature}." 
             | ID016 signature -> $"`self` cannot be referenced from {signature}." 
             | ID017 (name, candidates) -> 
                 if candidates.Length > 0 then
-                   sprintf "The type `%s` could not be determined, found more than one candidates %s." name candidates
+                   $"The type `{name}` could not be determined, candidates were {candidates}."  
                 else
-                   sprintf "The type `%s` could not be determined, found no candidates." name 
+                   $"The type `{name}` not found, no candidates found."  
             | ID018 name -> sprintf "The extension `%s` could not be matched. Declare an extension with this pattern." name
             | ID019 name -> sprintf "The extension `%s` could not be found. Are you missing a uses clause?" name
             | ID020 name -> $"Missing call of base constructor `{name}`." 

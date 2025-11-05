@@ -670,7 +670,8 @@ let rec eval (st: SymbolTable) ast =
             fvJi.FplId <- identifier
         | _ -> ()
         if evalPath.Contains(".NamedVarDecl.") || evalPath.Contains(".VariableType.ClassType.") then 
-            let candidates = findCandidatesByName st identifier false false
+            let candidates = (findCandidatesByName st identifier false false) |> List.filter (fun fv -> fv.FplId = identifier)
+
             match (fv, candidates.Length) with
             | (:? FplVariable, 0) -> 
                 emitSIG04DiagnosticsForTypes identifier pos1 pos2

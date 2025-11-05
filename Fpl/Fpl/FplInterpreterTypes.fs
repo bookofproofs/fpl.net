@@ -4799,9 +4799,9 @@ type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
                 | None ->
                     // the base constructor call's id is not among the base classes this class is derived from
                     let candidates = outerClass.ArgList |> Seq.map (fun fv -> fv.FplId) |> Seq.sort |> String.concat ", "
-                    emitID012Diagnostics this.FplId candidates this.StartPos this.EndPos
+                    emitID017Diagnostics this.FplId candidates this.StartPos this.EndPos
             | _ ->
-                    emitID012Diagnostics this.FplId "" this.StartPos this.EndPos
+                    emitID017Diagnostics this.FplId "" this.StartPos this.EndPos
         | _ ->
             // this case never happens, 
             // if so the bug will become apparent by failing to call the parent class constructor
