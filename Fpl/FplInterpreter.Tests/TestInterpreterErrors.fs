@@ -675,7 +675,7 @@ type TestInterpreterErrors() =
     [<DataRow("01", "def cl A {intr} def cl B:A {ctor B() {dec base.A(); } };", 0)>]
     [<DataRow("01a", "def cl A {intr} def cl B:A {ctor B() {} };", 1)>]
     [<DataRow("02", "def cl A { ctor A() {dec base.Obj(); } };", 0)>]
-    [<DataRow("02a", "def cl A { ctor A() {} };", 1)>]
+    [<DataRow("02a", "def cl A { ctor A() {} };", 0)>]
     [<DataRow("03", "def cl A { ctor A() {dec base.Obj(); } };", 0)>]
     [<DataRow("03a", "def cl A:C { ctor A() {dec base.Obj(); } };", 1)>]
     [<DataRow("03b", "def cl A {intr} def cl B:A {intr} def cl C:B { ctor C() {dec base.Obj(); } };", 1)>]

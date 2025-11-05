@@ -4753,9 +4753,23 @@ type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
     override this.CheckConsistency() = 
         base.CheckConsistency()
 
+
+
+
         // Check the base constructor call's id is the same as one of the classes this class is derived from,
         let outerClassOpt = this.UltimateBlockNode
         let enclosingConstructorOpt = this.NextBlockNode
+
+        let registerParentConstructor() =
+            match enclosingConstructorOpt with 
+            | Some (:? FplConstructor as ctor) ->
+                if ctor.ParentConstructorCalls.Contains(this.FplId) then 
+                    // todo duplicate constructor call
+                    emitID021Diagnostics this.FplId this.StartPos
+                else
+                    ctor.ParentConstructorCalls.Add this.FplId |> ignore
+            | _ -> ()
+
         match outerClassOpt with
         | Some (:? FplClass as outerClass) ->
             let baseClassObjectOpt = 
@@ -4776,6 +4790,7 @@ type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
                         let defaultConstructor = new FplDefaultConstructor(baseClass.FplId, (this.StartPos, this.EndPos), this)
                         defaultConstructor.EmbedInSymbolTable defaultConstructor.Parent
                         defaultConstructor.ToBeConstructedClass <- Some baseClass
+                        registerParentConstructor()
                     | true, _ ->
                         // the call uses parameters that are not possible for calling a non-existing constructor 
                         // obj() or an intrinsic class
@@ -4788,20 +4803,14 @@ type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
                             let name = candidate.Type SignatureType.Mixed
                             this.Scope.TryAdd(name, candidate) |> ignore
                         | None -> ()
-                        match enclosingConstructorOpt with 
-                        | Some (:? FplConstructor as ctor) ->
-                            if ctor.ParentConstructorCalls.Contains(this.FplId) then 
-                                // todo duplicate constructor call
-                                emitID021Diagnostics this.FplId this.StartPos
-                            else
-                                ctor.ParentConstructorCalls.Add this.FplId |> ignore
-                        | _ -> ()
+                        registerParentConstructor()
                 | None ->
                     // the base constructor call's id is not among the base classes this class is derived from
                     let candidates = outerClass.ArgList |> Seq.map (fun fv -> fv.FplId) |> Seq.sort |> String.concat ", "
                     emitID017Diagnostics this.FplId candidates this.StartPos this.EndPos
             | _ ->
                     emitID017Diagnostics this.FplId "" this.StartPos this.EndPos
+                    registerParentConstructor()
         | _ ->
             // this case never happens, 
             // if so the bug will become apparent by failing to call the parent class constructor
