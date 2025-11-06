@@ -35,7 +35,7 @@ type TestRepresentation() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("00","n:=Zero()", "intr Zero:intr Nat:intr obj")>]
+    [<DataRow("00","n:=Zero()", """{"name":"Zero","base":[],"vars":[],"prtys":[]}""")>]
     [<TestMethod>]
     member this.TestRepresentationAssignment(var:string, varVal, expected:string) =
         ad.Clear()

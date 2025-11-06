@@ -2821,10 +2821,13 @@ type FplReference(positions: Positions, parent: FplValue) =
             if this.Scope.Count > 0 && not (this.Scope.ContainsKey(".")) then 
                 (this.Scope.Values |> Seq.head).Represent()
             else
-                let args = 
-                    this.ArgList
-                    |> Seq.map (fun arg -> arg.Represent())
-                    |> String.concat ", "
+
+                let args, argsCount =
+                    let ret = 
+                        this.ArgList
+                        |> Seq.map (fun fv -> fv.Represent())
+                        |> String.concat ", "
+                    ret, this.ArgList.Count
 
                 let qualification =
                     if this.Scope.ContainsKey(".") then
@@ -2832,7 +2835,7 @@ type FplReference(positions: Positions, parent: FplValue) =
                     else
                         None
 
-                match this.ArgList.Count, this.ArgType, qualification with
+                match argsCount, this.ArgType, qualification with
                 | 0, ArgType.Nothing, Some qual ->
                     $"{LiteralUndef}.{qual.Represent()}"
                 | 0, ArgType.Brackets, Some qual ->
@@ -2856,7 +2859,7 @@ type FplReference(positions: Positions, parent: FplValue) =
                     if this.FplId <> String.Empty then 
                         $"{LiteralUndef}({args})"
                     else
-                        $"{LiteralUndef}{args}"
+                        $"{args}"
                 | 1, ArgType.Brackets, None ->
                     $"{LiteralUndef}[{args}]"
                 | 1, ArgType.Parentheses, None ->

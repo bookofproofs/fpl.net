@@ -194,7 +194,7 @@ type TestReferencesTypeOfSignature() =
             match var with
             | "base1" -> Assert.AreEqual<string>("B()", base1.Type(SignatureType.Type))
             | "base2" -> Assert.AreEqual<string>("C(T1, func, ind, pred)", base1.Type(SignatureType.Type))
-            | "base3" -> Assert.AreEqual<string>("D(undef, T1, func)", base1.Type(SignatureType.Type))
+            | "base3" -> Assert.AreEqual<string>("D(A, T1, func)", base1.Type(SignatureType.Type))
             | "base4" -> Assert.AreEqual<string>("B(In(undef))", base1.Type(SignatureType.Type))
             | "base5" -> Assert.AreEqual<string>("C(Test1(T1), Test2(func, ind, pred))", base1.Type(SignatureType.Type))
             | "base6" -> Assert.AreEqual<string>("E(pred, undef, pred)", base1.Type(SignatureType.Type))
@@ -225,13 +225,13 @@ type TestReferencesTypeOfSignature() =
             let base1 = pr1.ArgList[0]
 
             match var with
-            | "base1" -> Assert.AreEqual<string>("undef()", base1.Type(SignatureType.Type))
-            | "base2" -> Assert.AreEqual<string>("undef(undef, undef, undef, undef)", base1.Type(SignatureType.Type))
-            | "base3" -> Assert.AreEqual<string>("undef(parent, undef, undef)", base1.Type(SignatureType.Type))
-            | "base4" -> Assert.AreEqual<string>("undef(In(undef))", base1.Type(SignatureType.Type))
-            | "base5" -> Assert.AreEqual<string>("undef()", base1.Type(SignatureType.Type))
-            | "base6" -> Assert.AreEqual<string>("undef(Test1(undef), Test2(undef, undef, undef))", base1.Type(SignatureType.Type))
-            | "base7" -> Assert.AreEqual<string>("undef(pred, undef, pred)", base1.Type(SignatureType.Type))
+            | "base1" -> Assert.AreEqual<string>("B()", base1.Type(SignatureType.Type))
+            | "base2" -> Assert.AreEqual<string>("C(undef, undef, undef, undef)", base1.Type(SignatureType.Type))
+            | "base3" -> Assert.AreEqual<string>("D(undef, undef, undef)", base1.Type(SignatureType.Type))
+            | "base4" -> Assert.AreEqual<string>("B(In(undef))", base1.Type(SignatureType.Type))
+            | "base5" -> Assert.AreEqual<string>("Test()", base1.Type(SignatureType.Type))
+            | "base6" -> Assert.AreEqual<string>("C(Test1(undef), Test2(undef, undef, undef))", base1.Type(SignatureType.Type))
+            | "base7" -> Assert.AreEqual<string>("E(pred, undef, pred)", base1.Type(SignatureType.Type))
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

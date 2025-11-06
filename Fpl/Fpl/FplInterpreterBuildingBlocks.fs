@@ -1141,6 +1141,7 @@ let rec eval (st: SymbolTable) ast =
         | _ -> 
             let deleg = new FplReference((pos1, pos2), fv)
             deleg.FplId <- delegateId
+            deleg.TypeId <- delegateId
             variableStack.PushEvalStack(deleg)
             eval st argumentTupleAst
             variableStack.PopEvalStack()
