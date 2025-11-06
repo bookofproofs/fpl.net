@@ -747,11 +747,17 @@ and FplVariableStack() =
                 
             valueList
             |> List.iter (fun (fv:FplValue) ->
-                let fvClone = fv.Clone()
-                p.ValueList.Add(fvClone)
-                match box p with
-                | :? IVariable as var -> var.IsInitializedVariable <- true
-                | _ -> ()
+                match box fv with 
+                | :? IVariable as var ->
+                    p.SetValuesOf fv
+                    if fv.ValueList.Count > 0 then 
+                        var.IsInitializedVariable <- true
+                | _ ->
+                    let fvClone = fv.Clone()
+                    p.SetValue fvClone
+                    match box p with
+                    | :? IVariable as var -> var.IsInitializedVariable <- true
+                    | _ -> ()
             )
 
         let rec replace (pars:FplValue list) (args: FplValue list) = 
