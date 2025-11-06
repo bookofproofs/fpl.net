@@ -517,7 +517,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
         with get () = _startPos
         and set (value) = _startPos <- value
 
-    /// This FplValue's name's end position that can be different from its endig position
+    /// This FplValue's name's end position that can be different from its ending position
     member this.EndPos
         with get () = _endPos
         and set (value) = _endPos <- value
@@ -694,8 +694,24 @@ and FplVariableStack() =
     let _stack = Stack<KeyValuePair<string, Dictionary<string,FplValue>>>()
     let _valueStack = Stack<FplValue>()
     let _assumedArguments = Stack<FplValue>()
+    // positions of the caller to prevent some diagnostics of being shown at the wrong position 
+    let mutable _callerStartPos = Position("", 0,0,0)
+    let mutable _callerEndPos = Position("", 0,0,0)
 
     let mutable _nextRunOrder = 0
+
+
+    /// Starting position of the caller
+    member this.CallerStartPos
+        with get () = _callerStartPos
+        and set (value) = _callerStartPos <- value
+
+    /// End position of the caller 
+    member this.CallerEndPos
+        with get () = _callerEndPos
+        and set (value) = _callerEndPos <- value
+
+
     /// Returns the next available RunOrder to be stored, when inserting an FplValue into its parent.
     /// The need for this functionality is that sometimes, the block is inserted into the parent's scope, which is a dictionary.
     /// When running the nodes in the dictionary, their run order will ensure that they are being run in the the order they have bin inserted.
@@ -2883,6 +2899,9 @@ type FplReference(positions: Positions, parent: FplValue) =
                     let pars = variableStack.SaveVariables(called) 
                     let args = this.ArgList |> Seq.toList
                     variableStack.ReplaceVariables pars args
+                    // store the position of the caller
+                    variableStack.CallerStartPos <- this.StartPos
+                    variableStack.CallerEndPos <- this.EndPos
                     // run all statements of the called node
                     called.Run variableStack
                     this.SetValuesOf called
@@ -3293,9 +3312,9 @@ type FplEquality(name, positions: Positions, parent: FplValue) as this =
 
         sprintf "%s(%s)" head args
 
-    override this.Run _ = 
+    override this.Run variableStack = 
         if this.ArgList.Count <> 2 then 
-            emitID013Diagnostics this.StartPos this.EndPos $"Predicate `=` takes 2 arguments, got {this.ArgList.Count}." 
+            emitID013Diagnostics variableStack.CallerStartPos variableStack.CallerEndPos $"Predicate `=` takes 2 arguments, got {this.ArgList.Count}." 
         else
 
         let getActual (x:FplValue) = 
@@ -3309,28 +3328,28 @@ type FplEquality(name, positions: Positions, parent: FplValue) as this =
         let a1Repr = a1.Represent()
         let b1Repr = b1.Represent()
 
-        let newValue = new FplIntrinsicUndef((this.StartPos, this.EndPos), this.Parent.Value)
+        let newValue = new FplIntrinsicUndef((variableStack.CallerStartPos, variableStack.CallerEndPos), this.Parent.Value)
         match a1Repr with
         | LiteralUndef -> 
-            emitID013Diagnostics this.StartPos this.EndPos "Predicate `=` cannot be evaluated because the left argument is undefined." 
+            emitID013Diagnostics variableStack.CallerStartPos variableStack.CallerEndPos "Predicate `=` cannot be evaluated because the left argument is undefined." 
             this.SetValue(newValue)
         | _ -> 
             match b1Repr with
             | LiteralUndef -> 
-                emitID013Diagnostics this.StartPos this.EndPos "Predicate `=` cannot be evaluated because the right argument is undefined." 
+                emitID013Diagnostics variableStack.CallerStartPos variableStack.CallerEndPos "Predicate `=` cannot be evaluated because the right argument is undefined." 
                 this.SetValue(newValue)
             | _ -> 
-                let newValue = FplIntrinsicPred((this.StartPos, this.EndPos), this.Parent.Value)
+                let newValue = FplIntrinsicPred((variableStack.CallerStartPos, variableStack.CallerEndPos), this.Parent.Value)
                 match a1Repr with
                 | "dec pred"  
                 | PrimUndetermined -> 
-                    emitID013Diagnostics this.StartPos this.EndPos "Predicate `=` cannot be evaluated because the left argument is undetermined." 
+                    emitID013Diagnostics variableStack.CallerStartPos variableStack.CallerEndPos "Predicate `=` cannot be evaluated because the left argument is undetermined." 
                     this.SetValue(newValue)
                 | _ -> 
                     match b1Repr with
                     | "dec pred"  
                     | PrimUndetermined -> 
-                        emitID013Diagnostics this.StartPos this.EndPos "Predicate `=` cannot be evaluated because the right argument is undetermined." 
+                        emitID013Diagnostics variableStack.CallerStartPos variableStack.CallerEndPos "Predicate `=` cannot be evaluated because the right argument is undetermined." 
                         this.SetValue(newValue)
                     | _ -> 
                         let a1IsDeclared = a1Repr.Contains("dec ")
