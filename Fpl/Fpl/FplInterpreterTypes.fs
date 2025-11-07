@@ -4040,6 +4040,7 @@ type FplVariable(fplId, positions: Positions, parent: FplValue) =
             else
                 match this.TypeId with
                 | LiteralUndef -> LiteralUndef
+                | LiteralPred -> PrimUndetermined
                 | _ -> $"dec {this.Type(SignatureType.Type)}" 
         else
             let subRepr = 

@@ -239,8 +239,8 @@ type TestFplValueScopeFplRepresentation() =
             | "r" -> Assert.AreEqual<string>(LiteralUndef, r.Represent())
             | PrimTheoryL -> Assert.AreEqual<string>(LiteralUndef, theory.Represent())
             | "block" -> Assert.AreEqual<string>(LiteralTrue, block.Represent()); 
-            | "x" -> Assert.AreEqual<string>("dec pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)", x.Represent())
-            | "y" -> Assert.AreEqual<string>("dec pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)", y.Represent())
+            | "x" -> Assert.AreEqual<string>(PrimUndetermined, x.Represent())
+            | "y" -> Assert.AreEqual<string>(PrimUndetermined, y.Represent())
             | "s" -> Assert.AreEqual<string>("dec Set", s.Represent())
             | "xu" -> Assert.AreEqual<string>("dec func(obj, obj, obj) -> obj", xu.Represent())
             | "xv" -> Assert.AreEqual<string>("dec func(obj, obj, obj) -> obj", xv.Represent())
@@ -377,8 +377,8 @@ type TestFplValueScopeFplRepresentation() =
             | "r" -> Assert.AreEqual<string>(LiteralUndef, r.Represent())
             | PrimTheoryL -> Assert.AreEqual<string>(LiteralUndef, theory.Represent())
             | "block" -> Assert.AreEqual<string>(LiteralTrue, block.Represent()); 
-            | "x" -> Assert.AreEqual<string>("dec pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)", x.Represent())
-            | "y" -> Assert.AreEqual<string>("dec pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)", y.Represent())
+            | "x" -> Assert.AreEqual<string>(PrimUndetermined, x.Represent())
+            | "y" -> Assert.AreEqual<string>(PrimUndetermined, y.Represent())
             | "xu" -> Assert.AreEqual<string>("dec func(obj, obj, obj) -> obj", xu.Represent())
             | "xv" -> Assert.AreEqual<string>("dec func(obj, obj, obj) -> obj", xv.Represent())
             | "xw" -> Assert.AreEqual<string>("dec func(obj, obj, obj) -> obj", xw.Represent())
@@ -609,7 +609,7 @@ type TestFplValueScopeFplRepresentation() =
             | "base30" -> Assert.AreEqual<string>($"{LiteralUndef}({LiteralUndef}({LiteralUndef}))", base1.Represent())
             | "base31" -> Assert.AreEqual<string>($"{LiteralUndef}({LiteralUndef}({LiteralUndef}), {LiteralUndef}({LiteralUndef}, {LiteralUndef}, {LiteralUndef}))", base1.Represent())
             | "base32" -> Assert.AreEqual<string>($"{LiteralUndef}({LiteralTrue}, {LiteralUndef}, {LiteralFalse})", base1.Represent())
-            | "base33" -> Assert.AreEqual<string>("dec pred(obj)", base1.Represent())
+            | "base33" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
             | "base34" -> Assert.AreEqual<string>(LiteralFalse, base1.Represent())
             | _ -> Assert.IsTrue(false)
         | None -> 
@@ -813,7 +813,7 @@ type TestFplValueScopeFplRepresentation() =
             | "varIndSet42" -> Assert.AreEqual<string>("$42", varObj.Represent())
             | "varIndSet100" -> Assert.AreEqual<string>("$100", varObj.Represent())
             | "varFuncUnset" -> Assert.AreEqual<string>("dec func", varObj.Represent())
-            | "varPredUnset" -> Assert.AreEqual<string>("dec pred", varObj.Represent())
+            | "varPredUnset" -> Assert.AreEqual<string>(PrimUndetermined, varObj.Represent())
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

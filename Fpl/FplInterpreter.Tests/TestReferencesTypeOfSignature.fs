@@ -91,7 +91,7 @@ type TestReferencesTypeOfSignature() =
             | "base2" -> Assert.AreEqual<string>(LiteralPred, base1.Type(SignatureType.Type))
             | "base3" -> Assert.AreEqual<string>(LiteralUndef, base1.Type(SignatureType.Type))
             | "base4" -> Assert.AreEqual<string>("-(1)", base1.Type(SignatureType.Type))
-            | "base5" -> Assert.AreEqual<string>("undef()", base1.Type(SignatureType.Type))
+            | "base5" -> Assert.AreEqual<string>("Test()", base1.Type(SignatureType.Type))
             | "base6" -> Assert.AreEqual<string>(LiteralInd, base1.Type(SignatureType.Type))
             | "base7" -> Assert.AreEqual<string>("Test$1(undef)", base1.Type(SignatureType.Type))
             | "base8" -> Assert.AreEqual<string>("Test$1", base1.Type(SignatureType.Type))

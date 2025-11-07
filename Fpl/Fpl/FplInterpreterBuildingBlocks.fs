@@ -773,7 +773,7 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(fvNew)
         eval st predicateAst1
         eval st predicateAst2
-        emitLG000orLG001Diagnostics fvNew "exclusive-or"
+        emitLG000orLG001Diagnostics fvNew PrimExclusiveOr
         variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.VarDeclBlock((pos1, pos2), varDeclOrStmtAstList) ->
