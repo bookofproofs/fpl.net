@@ -722,7 +722,7 @@ type TestInterpreterErrors() =
     [<DataRow("01a", "lem A {true} thm T {true} proof T$1 {1. A |- trivial };", 0)>]
     [<DataRow("01b", "lem A {true} def pred A(x:obj) {intr} thm T {true} proof T$1 {1. bydef A |- trivial };", 1)>]
     [<DataRow("02a", "cor A$1 {true} thm T {true} proof T$1 {1. A$1 |- trivial };", 0)>]
-    [<DataRow("02b", "proof A$1 {1. |-  trivial} cor A$1 {true} thm T {true} proof T$1 {1. A$1 |- trivial };", 1)>]
+    [<DataRow("02b", "proof A$1 {1. |-  trivial} cor A$11 {true} thm T {true} proof T$1 {1. A$1 |- trivial };", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID023(no:string, fplCode:string, expected) =

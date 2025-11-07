@@ -962,8 +962,8 @@ let rec eval (st: SymbolTable) ast =
                 // add the class (intrinsic case, no constructors at all)
 
                 fv.Scope.TryAdd(fv.FplId, classes.Head) |> ignore
-                // let candidate = classes.Head
-                // emitID025Diagnostics (qualifiedName candidate) candidate.EnglishName block.EnglishName block.Name fv.StartPos fv.EndPos
+                let candidate = classes.Head
+                emitID025Diagnostics (qualifiedName candidate) candidate.EnglishName block.EnglishName block.Name fv.StartPos fv.EndPos
             elif candidates.Length > 0 then
                 // not a class was referred, add the candidate (e.g., referenced variable)
                 let candidate = candidates.Head
