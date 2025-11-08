@@ -807,7 +807,7 @@ type TestInterpreterErrors() =
         if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = LG001 ("","","")
+            let code = LG001 ("", "", "", "")
             runTestHelper "TestLG001.fpl" fplCode code expected
 
     [<DataRow("""axiom A {dec ~x,y:Nat; impl(x,y)};""", 29)>]
@@ -816,7 +816,7 @@ type TestInterpreterErrors() =
         if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = LG001 ("","","")
+            let code = LG001 ("", "", "", "")
             prepareFplCode ("TestLG001Position.fpl", fplCode, false) |> ignore
             checkForUnexpectedErrors code
             let result = filterByErrorCode ad code.Code
@@ -834,7 +834,7 @@ type TestInterpreterErrors() =
         if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = LG001 ("","","")
+            let code = LG001 ("", "", "", "")
             prepareFplCode ("TestLG001MsgSpecificity.fpl", fplCode, false) |> ignore
             checkForUnexpectedErrors code
             let result = filterByErrorCode ad code.Code

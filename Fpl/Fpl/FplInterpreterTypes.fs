@@ -3029,7 +3029,7 @@ let checkArgPred (fv:FplValue) (arg:FplValue)  =
     | LiteralTrue
     | LiteralFalse 
     | PrimUndetermined -> () 
-    | _ -> emitLG001Diagnostics argType argName fv.Name arg.StartPos arg.EndPos
+    | _ -> emitLG001Diagnostics argType argName fv.Name repr arg.StartPos arg.EndPos
 
 
 /// Checks if an argument points to a free variable and if so, issues VAR09 diagnostics.
