@@ -358,7 +358,7 @@ let emitID027Diagnostics name pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
 
-let emitLG001Diagnostics argType argName typeOfPredicate evaluated pos1 pos2 =
+let emitLG001Diagnostics argType argName typeOfPredicate pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -366,7 +366,7 @@ let emitLG001Diagnostics argType argName typeOfPredicate evaluated pos1 pos2 =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = LG001(typeOfPredicate, argName, argType, evaluated)
+            Diagnostic.Code = LG001(typeOfPredicate, argName, argType)
             Diagnostic.Alternatives = Some "This issue might be subsequent to other errors to be resolved first." 
         }
     ad.AddDiagnostic diagnostic

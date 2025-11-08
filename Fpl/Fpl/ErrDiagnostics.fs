@@ -132,7 +132,7 @@ type DiagnosticCode =
     | ID025 of string * string * string
     | ID027 of string
     // logic-related error codes
-    | LG001 of string * string * string * string
+    | LG001 of string * string * string
     | LG002 of string * int
     | LG003 of string * string
     | LG004 of string
@@ -364,7 +364,11 @@ type DiagnosticCode =
             | ID025 (candidate, candidateType, nodeType)  -> $"Cannot reference to `{candidate}` which is {candidateType} inside {nodeType}." 
             | ID027 name -> $"Illegal recursion in for statement. The entity `{name}` cannot be used as its own domain." 
             // logic-related error codes
-            | LG001 (typeOfPredicate,argument,typeOfExpression, evaluatedTo) -> $"Cannot evaluate `{typeOfPredicate}` because `{argument}` typed `{typeOfExpression}` was evaluated to `{evaluatedTo}`."
+            | LG001 (typeOfPredicate,argument,typeOfExpression) -> 
+                if argument = typeOfExpression then 
+                    $"Cannot evaluate `{typeOfPredicate}` because its argument `{argument}` could not be evaluated as a predicate."
+                else
+                    $"Cannot evaluate `{typeOfPredicate}` because its argument `{argument}` typed `{typeOfExpression}` could not be evaluated as a predicate."
             | LG002 (nodeTypeName, times) -> $"Possible infinite recursion detected, `{nodeTypeName}` was called for more than {times} times.`."
             | LG003 (nodeTypeName, nodeName) -> $"`{nodeTypeName}` evaluates to `false` and cannot be {nodeName}."
             | LG004 nodeType -> $"`Parameters not allowed for {nodeType}."

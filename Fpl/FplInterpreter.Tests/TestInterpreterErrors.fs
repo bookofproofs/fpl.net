@@ -807,7 +807,7 @@ type TestInterpreterErrors() =
         if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = LG001 ("", "", "", "")
+            let code = LG001 ("", "", "")
             runTestHelper "TestLG001.fpl" fplCode code expected
 
     [<DataRow("""axiom A {dec ~x,y:Nat; impl(x,y)};""", 29)>]
@@ -816,25 +816,25 @@ type TestInterpreterErrors() =
         if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = LG001 ("", "", "", "")
+            let code = LG001 ("", "", "")
             prepareFplCode ("TestLG001Position.fpl", fplCode, false) |> ignore
             checkForUnexpectedErrors code
             let result = filterByErrorCode ad code.Code
             Assert.AreEqual<int64>(expected, result.Head.StartPos.Column)
         
-    [<DataRow("""axiom A {dec ~x,y:obj; impl(x,y)};""", "Cannot evaluate `implication`; expecting a predicate argument `x`, got `obj`.")>]
-    [<DataRow("""axiom A {dec ~x,y:ind; impl(x,y)};""", "Cannot evaluate `implication`; expecting a predicate argument `x`, got `ind`.")>]
-    [<DataRow("""axiom A {dec ~x,y:func; impl(x,y)};""", "Cannot evaluate `implication`; expecting a predicate argument `x`, got `func`.")>]
-    [<DataRow("""axiom A {impl(x,y)};""", "Cannot evaluate `implication`; expecting a predicate argument `x`, got `undef`.")>]
-    [<DataRow("""axiom A {impl(T(),true)};""", "Cannot evaluate `implication`; expecting a predicate argument `T()`, got `undef`.")>]
-    [<DataRow("""axiom A {impl(T,true)};""", "Cannot evaluate `implication`; expecting a predicate argument `T`, got `undef`.")>]
-    [<DataRow("""def cl T {intr} axiom A {impl(T,true)};""", "Cannot evaluate `implication`; expecting a predicate argument `T`, got `undef`.")>]
+    [<DataRow("00", """axiom A {dec ~x,y:obj; impl(x,y)};""", "Cannot evaluate `implication` because its argument `x` typed `obj` could not be evaluated as a predicate. This issue might be subsequent to other errors to be resolved first.")>]
+    [<DataRow("01", """def cl T {intr} axiom A {impl(T,true)};""", "Cannot evaluate `implication` because its argument `T` could not be evaluated as a predicate. This issue might be subsequent to other errors to be resolved first.")>]
+    [<DataRow("02", """axiom A {dec ~x,y:ind; impl(x,y)};""", "Cannot evaluate `implication` because its argument `x` typed `ind` could not be evaluated as a predicate. This issue might be subsequent to other errors to be resolved first.")>]
+    [<DataRow("03", """axiom A {dec ~x,y:func; impl(x,y)};""", "Cannot evaluate `implication` because its argument `x` typed `func` could not be evaluated as a predicate. This issue might be subsequent to other errors to be resolved first.")>]
+    [<DataRow("04", """axiom A {impl(x,y)};""", "Cannot evaluate `implication` because its argument `x` typed `undef` could not be evaluated as a predicate. This issue might be subsequent to other errors to be resolved first.")>]
+    [<DataRow("05", """axiom A {impl(T(),true)};""", "Cannot evaluate `implication` because its argument `T()` could not be evaluated as a predicate. This issue might be subsequent to other errors to be resolved first.")>]
+    [<DataRow("06", """axiom A {impl(T,true)};""", "Cannot evaluate `implication` because its argument `T` could not be evaluated as a predicate. This issue might be subsequent to other errors to be resolved first.")>]
     [<TestMethod>]
-    member this.TestLG001MsgSpecificity(fplCode:string, (expected:string)) =
+    member this.TestLG001MsgSpecificity(no:string, fplCode:string, (expected:string)) =
         if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = LG001 ("", "", "", "")
+            let code = LG001 ("", "", "")
             prepareFplCode ("TestLG001MsgSpecificity.fpl", fplCode, false) |> ignore
             checkForUnexpectedErrors code
             let result = filterByErrorCode ad code.Code
