@@ -576,7 +576,6 @@ let rec eval (st: SymbolTable) ast =
         let fvNew = new FplNegation((pos1, pos2), fv)
         variableStack.PushEvalStack(fvNew)
         eval st predicateAst
-        emitLG000orLG001Diagnostics fvNew PrimNegation
         variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.InEntity((pos1, pos2), ast1) ->
@@ -753,7 +752,6 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(fvNew)
         eval st predicateAst1
         eval st predicateAst2
-        emitLG000orLG001Diagnostics fvNew PrimConjunction
         variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.Or((pos1, pos2), (predicateAst1, predicateAst2)) ->
@@ -763,7 +761,6 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(fvNew)
         eval st predicateAst1
         eval st predicateAst2
-        emitLG000orLG001Diagnostics fvNew PrimDisjunction
         variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.Xor((pos1, pos2), (predicateAst1, predicateAst2)) ->
@@ -773,7 +770,6 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(fvNew)
         eval st predicateAst1
         eval st predicateAst2
-        emitLG000orLG001Diagnostics fvNew PrimExclusiveOr
         variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.VarDeclBlock((pos1, pos2), varDeclOrStmtAstList) ->
@@ -1096,7 +1092,6 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(fvNew)
         eval st predicateAst1
         eval st predicateAst2
-        emitLG000orLG001Diagnostics fvNew PrimImplication
         variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.Iif((pos1, pos2), (predicateAst1, predicateAst2)) ->
@@ -1106,7 +1101,6 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(fvNew)
         eval st predicateAst1
         eval st predicateAst2
-        emitLG000orLG001Diagnostics fvNew PrimEquivalence
         variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.IsOperator((pos1, pos2), (isOpArgAst, variableTypeAst)) ->
@@ -1244,7 +1238,6 @@ let rec eval (st: SymbolTable) ast =
         |> ignore
         eval st predicateAst
         variableStack.PopEvalStack() // remove all quantor
-        emitLG000orLG001Diagnostics fv PrimQuantorAll
         st.EvalPop()
     | Ast.Exists((pos1, pos2), (namedVarDeclAstList, predicateAst)) ->
         st.EvalPush("Exists")
@@ -1259,7 +1252,6 @@ let rec eval (st: SymbolTable) ast =
         |> ignore
         eval st predicateAst
         variableStack.PopEvalStack() // remove exists quantor
-        emitLG000orLG001Diagnostics fv PrimQuantorExists
         st.EvalPop()
     | Ast.ExistsN((pos1, pos2), ((dollarDigitsAst, namedVarDeclListAst), predicateAst)) ->
         st.EvalPush("ExistsN")
@@ -1274,7 +1266,6 @@ let rec eval (st: SymbolTable) ast =
         |> ignore
         eval st predicateAst
         variableStack.PopEvalStack() // remove exists n quantor
-        emitLG000orLG001Diagnostics fv PrimQuantorExistsN
         st.EvalPop()
     // | FunctionalTermSignature of Positions * (Ast * Ast)
     | Ast.FunctionalTermSignature(((pos1, pos2), (((simpleSignatureAst, inhFunctionalTypeListAstsOpt), paramTupleAst), mappingAst)), optUserDefinedSymbolAst) -> 

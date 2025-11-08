@@ -1208,9 +1208,14 @@ type FplGenericPredicate(positions: Positions, parent: FplValue) as this =
         this.TypeId <- LiteralPred
 
     override this.Represent () =
-        this.ValueList
-        |> Seq.map (fun subfv -> subfv.Represent())
-        |> String.concat ", "
+        let ret = 
+            this.ValueList
+            |> Seq.map (fun subfv -> subfv.Represent())
+            |> String.concat ", "
+        if ret = "" then
+            PrimUndetermined
+        else 
+            ret
 
     override this.RunOrder = None
 
@@ -3010,6 +3015,29 @@ type FplSelf(positions: Positions, parent: FplValue) as this =
 
     override this.RunOrder = None
 
+
+/// Checks if an argument of an FplValue is a predicate and issues LG001Diagnostics if its not.
+let checkArgPred (fv:FplValue) (arg:FplValue)  = 
+    let argType = arg.Type SignatureType.Type
+    let argName = arg.Type SignatureType.Name
+    let repr = arg.Represent()
+    match repr with
+    | LiteralTrue
+    | LiteralFalse 
+    | PrimUndetermined -> () 
+    | _ -> emitLG001Diagnostics argType argName fv.Name arg.StartPos arg.EndPos
+
+
+/// Checks if an argument points to a free variable and if so, issues VAR09 diagnostics.
+let checkFreeVar (arg:FplValue) = 
+    if arg.Scope.ContainsKey(arg.FplId) then
+        let ref = arg.Scope[arg.FplId]
+        match ref with 
+        | :? FplGenericVariable as var ->
+            if not var.IsBound then 
+                emitVAR09diagnostics var.FplId var.TypeId var.StartPos var.EndPos
+        | _ -> ()
+
 /// Implements the semantics of an FPL conjunction compound predicate.
 type FplConjunction(positions: Positions, parent: FplValue) as this =
     inherit FplGenericPredicate(positions, parent)
@@ -3052,7 +3080,19 @@ type FplConjunction(positions: Positions, parent: FplValue) as this =
             | _ -> PrimUndetermined
         this.SetValue(newValue)
 
-    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
+    override this.CheckConsistency() = 
+        base.CheckConsistency() 
+        let arg1 = this.ArgList[0]
+        let arg2 = this.ArgList[1]
+        checkArgPred this arg1
+        checkArgPred this arg2
+        checkFreeVar arg1
+        checkFreeVar arg2
+
+
+    override this.EmbedInSymbolTable _ = 
+        this.CheckConsistency()
+        addExpressionToParentArgList this
 
 
 /// Implements the semantics of an FPL disjunction compound predicate.
@@ -3097,8 +3137,20 @@ type FplDisjunction(positions: Positions, parent: FplValue) as this =
             | _ -> 
                 PrimUndetermined
         this.SetValue(newValue)  
+        
+    override this.CheckConsistency() = 
+        base.CheckConsistency() 
+        let arg1 = this.ArgList[0]
+        let arg2 = this.ArgList[1]
+        checkArgPred this arg1
+        checkArgPred this arg2
+        checkFreeVar arg1
+        checkFreeVar arg2
 
-    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
+
+    override this.EmbedInSymbolTable _ = 
+        this.CheckConsistency()
+        addExpressionToParentArgList this
 
 /// Implements the semantics of an FPL xor compound predicate.
 type FplExclusiveOr(positions: Positions, parent: FplValue) as this =
@@ -3146,7 +3198,20 @@ type FplExclusiveOr(positions: Positions, parent: FplValue) as this =
 
         this.SetValue(newValue)  
 
-    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
+    override this.CheckConsistency() = 
+        base.CheckConsistency() 
+        let arg1 = this.ArgList[0]
+        let arg2 = this.ArgList[1]
+        checkArgPred this arg1
+        checkArgPred this arg2
+        checkFreeVar arg1
+        checkFreeVar arg2
+
+
+    override this.EmbedInSymbolTable _ = 
+        this.CheckConsistency()
+        addExpressionToParentArgList this
+
 
 /// Implements the semantics of an FPL negation compound predicate.
 type FplNegation(positions: Positions, parent: FplValue) as this =
@@ -3185,8 +3250,15 @@ type FplNegation(positions: Positions, parent: FplValue) as this =
 
         this.SetValue(newValue)  
 
-    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
+    override this.CheckConsistency() = 
+        base.CheckConsistency()
+        let arg = this.ArgList[0]
+        checkArgPred this arg
+        checkFreeVar arg
 
+    override this.EmbedInSymbolTable _ = 
+        this.CheckConsistency()
+        addExpressionToParentArgList this
 
 /// Implements the semantics of an FPL implication compound predicate.
 type FplImplication(positions: Positions, parent: FplValue) as this =
@@ -3228,8 +3300,18 @@ type FplImplication(positions: Positions, parent: FplValue) as this =
         
         this.SetValue(newValue) 
 
-    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
+    override this.CheckConsistency() = 
+        base.CheckConsistency() 
+        let arg1 = this.ArgList[0]
+        let arg2 = this.ArgList[1]
+        checkArgPred this arg1
+        checkArgPred this arg2
+        checkFreeVar arg1
+        checkFreeVar arg2
 
+    override this.EmbedInSymbolTable _ = 
+        this.CheckConsistency()
+        addExpressionToParentArgList this
 
 /// Implements the semantics of an FPL equivalence compound predicate.
 type FplEquivalence(positions: Positions, parent: FplValue) as this =
@@ -3273,7 +3355,19 @@ type FplEquivalence(positions: Positions, parent: FplValue) as this =
         
         this.SetValue(newValue)
 
-    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
+    override this.CheckConsistency() = 
+        base.CheckConsistency() 
+        let arg1 = this.ArgList[0]
+        let arg2 = this.ArgList[1]
+        checkArgPred this arg1
+        checkArgPred this arg2
+        checkFreeVar arg1
+        checkFreeVar arg2
+
+    override this.EmbedInSymbolTable _ = 
+        this.CheckConsistency()
+        addExpressionToParentArgList this
+
 
 [<AbstractClass>]
 type FplGenericDelegate(name, positions: Positions, parent: FplValue) as this =
@@ -3880,6 +3974,7 @@ type FplGenericQuantor(positions: Positions, parent: FplValue) =
         |> List.iter (fun var -> 
             emitVAR05diagnostics var.FplId var.StartPos var.EndPos
         )
+        checkArgPred this (this.ArgList[0])
 
     override this.EmbedInSymbolTable _ = 
         this.CheckConsistency()

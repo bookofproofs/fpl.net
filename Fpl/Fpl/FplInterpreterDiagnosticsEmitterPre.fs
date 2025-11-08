@@ -358,6 +358,35 @@ let emitID027Diagnostics name pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
 
+let emitLG001Diagnostics argType argName typeOfPredicate pos1 pos2 =
+    let whatWeGot = 
+        if argType = argName then
+            LiteralUndef
+        else
+            argType
+
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = LG001(typeOfPredicate, argName, whatWeGot)
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
+    //let code = VAR09("", "")
+    //let numbLG000 = filterByErrorCode diags code.Code
+
+    //if numbLG000.Length = fplValue.ArgList.Count then
+    //    () // we have no reason to emit any diagnostics since the are as many undetermined predicates as arguments
+    //else
+    //    diags.Collection
+    //    |> List.iter (fun d -> ad.AddDiagnostic d)
+
+
 let emitLG002diagnostic nodeTypeName times pos1 pos2 = 
     let diagnostic =
         { 

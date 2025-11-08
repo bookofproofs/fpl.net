@@ -800,6 +800,7 @@ type TestInterpreterErrors() =
     [<DataRow("19", """def pred T() { xor(xor(true,true),true) };""", 0)>]
     [<DataRow("20", """def pred T() { dec ~x,y:pred; xor(y,xor(x,z)) };""", 1)>]
     [<DataRow("21", """loc and(p,q) := !tex: p "\wedge" q;;""", 0)>]
+    [<DataRow("22", """def class Set def pred In(x,y: Set) def pred IsEmpty(x: Set) { all y:Set { not In(y, x) } };""", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestLG001(no:string, fplCode:string, expected) =
