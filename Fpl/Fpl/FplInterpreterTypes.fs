@@ -965,7 +965,7 @@ let private propagateSignatureType (signatureType:SignatureType) =
     | _ -> signatureType 
 
 /// Generates a string of parameters based on SignatureType
-let private getParamTuple (fv:FplValue)  (signatureType:SignatureType) =
+let private getParamTuple (fv:FplValue) (signatureType:SignatureType) =
         let propagate = propagateSignatureType signatureType
         fv.Scope
         |> Seq.filter (fun (kvp: KeyValuePair<string, FplValue>) ->
@@ -2757,7 +2757,11 @@ type FplReference(positions: Positions, parent: FplValue) =
             // fallback to variable params (and a possibly given mapping) if there are no arguments and the reference is a variable 
             match ret, headObj.Name with 
             | "", PrimVariableL -> 
-                (getParamTuple headObj propagate), headObj.Scope.Count
+                let countVarParams = 
+                    headObj.Scope 
+                    |> Seq.filter (fun (kvp: KeyValuePair<string, FplValue>) -> isSignatureVar kvp.Value || not (kvp.Value.IsClass()))
+                    |> Seq.toList
+                (getParamTuple headObj propagate), countVarParams.Length
             | _ -> ret, this.ArgList.Count
 
         let head = 
