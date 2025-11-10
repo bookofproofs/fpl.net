@@ -46,6 +46,8 @@ let rec simplifyTriviallyNestedExpressions (rb:FplValue) =
         | :? FplDecrement 
         | :? FplExtensionObj 
         | :? FplReference
+        | :? FplSelf
+        | :? FplParent
         | :? FplGenericQuantor
         | :? FplIntrinsicInd
         | :? FplIntrinsicPred
@@ -899,28 +901,19 @@ let rec eval (st: SymbolTable) ast =
             if System.Char.IsLower(refBlock.FplId[0]) then
                 // match the signatures of small-letter entities (like the self or parent entity, or variables with arguments) 
                 // with their declared types 
-                let candidatesOfSelfOrParentEntity = 
+                
+                let candidates = 
                     refBlock.Scope
-                    |> Seq.filter (fun kvp -> kvp.Key = LiteralSelf || kvp.Key = LiteralParent)
+                    |> Seq.filter (fun kvp -> kvp.Key = LiteralSelf || kvp.Key = LiteralParent || kvp.Key = refBlock.FplId)
                     |> Seq.map (fun kvp -> kvp.Value)
+                    |> Seq.map (fun fv -> 
+                        match fv.Name with
+                        | LiteralSelf when fv.Scope.Count = 1 -> fv.Scope.Values |> Seq.head
+                        | LiteralParent when fv.Scope.Count = 1 -> fv.Scope.Values |> Seq.head
+                        | _ -> fv
+                    )
                     |> Seq.toList
 
-
-                let candidatesOfVariables = 
-                    refBlock.Scope
-                    |> Seq.filter (fun kvp -> kvp.Key = refBlock.FplId)
-                    |> Seq.map (fun kvp -> kvp.Value)
-                    |> Seq.toList
-
-                let candidatesOfVariableTypes = 
-                    candidatesOfVariables
-                    |> Seq.filter (fun fv1 -> fv1.ArgList.Count = 1)
-                    |> Seq.map (fun fv1 -> fv1.ArgList[0])
-                    |> Seq.toList
-
-                let candidates = candidatesOfSelfOrParentEntity 
-                                 @ candidatesOfVariables 
-                                 @ candidatesOfVariableTypes 
                 checkSIG04Diagnostics refBlock candidates |> ignore
             else
                 let candidates = searchForCandidatesOfReferenceBlock refBlock

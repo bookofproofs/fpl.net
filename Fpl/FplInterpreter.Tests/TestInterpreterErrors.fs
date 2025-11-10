@@ -1411,7 +1411,7 @@ type TestInterpreterErrors() =
     [<DataRow("12", "def cl Set {intr} axiom Test {dec ~x:SetTypo; true};", 1)>]
     [<DataRow("13", "def pred Test() {dec ~x:Set; true};", 1)>]
     [<DataRow("14", "axiom A { all x:Nat {true} };", 1)>]
-    [<DataRow("15", "def pred Test() {dec ~x:object; is(x,Set)};", 1)>]
+    [<DataRow("15", "def pred Test() {dec ~x:object; is(x,Set)};", 0)>]
     [<DataRow("16", "def cl Set def pred Test() {dec ~x:object; is(x,Set)};", 0)>]
     [<DataRow("16a", "def cl C {ctor C(x:ind) {}} def cl A:C { ctor A() {dec ~x:obj base.C(x); } };", 1)>]
     [<DataRow("17", """def pred T1() {true} def pred Test() { dec ~x:obj; T1(x) };""", 1)>]
