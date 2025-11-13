@@ -908,7 +908,11 @@ let rec eval (st: SymbolTable) ast =
                     |> Seq.map (fun kvp -> kvp.Value)
                     |> Seq.map (fun fv -> 
                         match fv.Name with
-                        | PrimVariableL when fv.Scope.Count = 1 -> fv.Scope.Values |> Seq.head
+                        | PrimVariableL when fv.Scope.Count = 1 -> 
+                            let ret = fv.Scope.Values |> Seq.head
+                            match ret.Name with 
+                            | PrimVariableL -> fv // if the variable is nesting other variables, it is ok to take the variable
+                            | _ -> ret // otherwise wit peek the nested type referenced by the variable
                         | LiteralSelf when fv.Scope.Count = 1 -> fv.Scope.Values |> Seq.head
                         | LiteralParent when fv.Scope.Count = 1 -> fv.Scope.Values |> Seq.head
                         | _ -> fv
