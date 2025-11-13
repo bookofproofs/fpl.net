@@ -908,6 +908,7 @@ let rec eval (st: SymbolTable) ast =
                     |> Seq.map (fun kvp -> kvp.Value)
                     |> Seq.map (fun fv -> 
                         match fv.Name with
+                        | PrimVariableL when fv.Scope.Count = 1 -> fv.Scope.Values |> Seq.head
                         | LiteralSelf when fv.Scope.Count = 1 -> fv.Scope.Values |> Seq.head
                         | LiteralParent when fv.Scope.Count = 1 -> fv.Scope.Values |> Seq.head
                         | _ -> fv
