@@ -307,6 +307,14 @@ type FixType =
         | Symbol symbol -> sprintf "symbol `%s`" symbol
         | NoFix -> "no fix"
 
+    member this.GetUserDefinedLiteral defaultSymbol =
+        match this with
+        | Infix(symbol, _) -> symbol 
+        | Postfix symbol -> symbol
+        | Prefix symbol -> symbol
+        | Symbol symbol -> symbol
+        | NoFix -> defaultSymbol
+
 type SignatureType =
     | Name
     | Type
@@ -2765,7 +2773,11 @@ type FplReference(positions: Positions, parent: FplValue) =
             | _ -> ret, this.ArgList.Count
 
         let head = 
-            let ret = getFplHead headObj signatureType 
+            let ret = 
+                if headObj.ExpressionType.IsNoFix then
+                    getFplHead headObj signatureType 
+                else
+                    headObj.ExpressionType.GetUserDefinedLiteral headObj.FplId
             match signatureType, ret, args with
             | SignatureType.Type, "", LiteralUndef -> ""
             | SignatureType.Type, "", "" -> LiteralUndef
