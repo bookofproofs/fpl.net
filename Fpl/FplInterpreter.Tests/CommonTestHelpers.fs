@@ -5,7 +5,7 @@ open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
 open FplInterpreterTypes
-open FplInterpreterDiagnosticsEmitter
+open FplInterpreterDiagnosticsEmitterPre
 open TestSharedConfig
 
 let rec deleteDirectory path =

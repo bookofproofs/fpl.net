@@ -675,7 +675,7 @@ let rec eval (st: SymbolTable) ast =
 
             match (fv, candidates.Length) with
             | (:? FplVariable, 0) -> 
-                emitSIG04DiagnosticsForTypes identifier pos1 pos2
+                emitSIG04Diagnostics identifier 0 [""] pos1 pos2
                 let undefValue = new FplIntrinsicUndef((fv.StartPos, fv.EndPos), fv)
                 fv.ValueList.Add(undefValue)
                

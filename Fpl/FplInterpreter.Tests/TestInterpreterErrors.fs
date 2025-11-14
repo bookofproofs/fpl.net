@@ -1467,6 +1467,9 @@ type TestInterpreterErrors() =
     [<DataRow("56", """def pred T() {dec ~x:ind x:=$1; true } ;""", 0)>]
     [<DataRow("57", """def pred T() {dec ~x:pred x:=true; true } ;""", 0)>]
     [<DataRow("57a", """def pred T() {dec ~x:pred x:=not true; true } ;""", 0)>]
+    [<DataRow("66", """def cl Set def pred In(x,y: Set) def cl SetRoster:Set { ctor SetRoster(list:* Set) { dec ~e:Set base.Set() for e in list {assert In(elem, parent)}; } };""", 0)>]
+    [<DataRow("67", """def class Set def pred In(x,y: Set) def pred IsEmpty(x: Set) { all y:Set { not In(y, x) } };""", 0)>]
+    [<DataRow("68", """def class Set def pred In(x,y: Set) def cl SetBuilder: Set { ctor SetBuilder(x: Set, p: pred(u1: Set, o:* obj)) { dec base.Set() assert all u2:Set { iif (In(u2,parent), and ( In(u2,x), p(u2,o) ) ) }; } };""", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG04(no:string, fplCode:string, expected) =

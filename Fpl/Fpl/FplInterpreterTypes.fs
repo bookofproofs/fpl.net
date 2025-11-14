@@ -4614,19 +4614,8 @@ let checkSIG04Diagnostics (calling:FplValue) (candidates: FplValue list) =
     match checkCandidates calling candidates [] with
     | (Some candidate,_) -> Some candidate // no error occured
     | (None, errList) -> 
-        let diagnostic =
-            { 
-                Diagnostic.Uri = ad.CurrentUri
-                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                Diagnostic.Severity = DiagnosticSeverity.Error
-                Diagnostic.StartPos = calling.StartPos
-                Diagnostic.EndPos = calling.EndPos
-                Diagnostic.Code = SIG04(calling.Type(SignatureType.Mixed), candidates.Length, errList)
-                Diagnostic.Alternatives = None 
-            }
-        ad.AddDiagnostic diagnostic
+        emitSIG04Diagnostics (calling.Type SignatureType.Mixed) candidates.Length errList calling.StartPos calling.EndPos
         None
-
 
 [<AbstractClass>]
 type FplGenericConstructor(name, positions: Positions, parent: FplValue) as this =

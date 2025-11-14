@@ -19,20 +19,6 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
 
 *)
-let emitUnexpectedErrorDiagnostics errMsg =
-    let diagnostic =
-        {
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = Position("", 0, 1, 1)
-            Diagnostic.EndPos = Position("", 0, 1, 1)
-            Diagnostic.Code = GEN00 errMsg
-            Diagnostic.Alternatives = None 
-        }
-
-    ad.AddDiagnostic(diagnostic)
-
 
 let checkVAR00Diagnostics numberOfVariadicVars startPos endPos =
     if numberOfVariadicVars > 1 then
@@ -236,30 +222,4 @@ let emitSIG02Diagnostics (st: SymbolTable) (fplValue: FplValue) pos1 pos2 =
             ad.AddDiagnostic diagnostic
     | _ -> ()
 
-let emitSIG04DiagnosticsForTypes identifier pos1 pos2 =
-    let diagnostic =
-            { 
-                Diagnostic.Uri = ad.CurrentUri
-                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                Diagnostic.Severity = DiagnosticSeverity.Error
-                Diagnostic.StartPos = pos1
-                Diagnostic.EndPos = pos2
-                Diagnostic.Code = SIG04(identifier, 0, [""])
-                Diagnostic.Alternatives = None 
-            }
-    ad.AddDiagnostic diagnostic
-
-let rec blocktIsProof (fplValue: FplValue) =
-    if fplValue.IsProof() then
-        true
-    else
-        match fplValue.Parent with
-        | Some parent ->
-            if isTheory parent then
-                false
-            elif parent.IsFplBlock() then
-                parent.IsProof()
-            else
-                blocktIsProof parent
-        | None -> false
 
