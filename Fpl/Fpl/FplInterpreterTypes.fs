@@ -3845,8 +3845,8 @@ let inheritsFrom (node:FplValue) someType =
 let rec mpwa hasArguments (args: FplValue list) (pars: FplValue list) =
     match (args, pars) with
     | (a :: ars, p :: prs) ->
-        let aType = a.Type(SignatureType.Type)
-        let pType = p.Type(SignatureType.Type) 
+        let aType = a.Type SignatureType.Type
+        let pType = p.Type SignatureType.Type
 
         if aType = pType then
             mpwa hasArguments ars prs
@@ -3866,9 +3866,8 @@ let rec mpwa hasArguments (args: FplValue list) (pars: FplValue list) =
         then
             let var = a.Scope.Values |> Seq.toList |> List.head
 
-            if var.Scope.ContainsKey(var.FplId) then
-                let cl = var.Scope[var.FplId]
-
+            if var.Scope.Count > 0 then
+                let cl = var.Scope.Values |> Seq.head
                 match cl with
                 | :? FplClass ->
                     if inheritsFrom cl pType then 
