@@ -735,6 +735,20 @@ let emitST002diagnostics name pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
 
+let emitVAR00Diagnostics numberOfVariadicVars startPos endPos =
+    if numberOfVariadicVars > 1 then
+        let diagnostic =
+            { 
+                Diagnostic.Uri = ad.CurrentUri
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = startPos
+                Diagnostic.EndPos = endPos
+                Diagnostic.Code = VAR00
+                Diagnostic.Alternatives = None 
+            }
+        ad.AddDiagnostic diagnostic
+
 let emitVAR01diagnostics name pos1 pos2 =
     let diagnostic =
         { 

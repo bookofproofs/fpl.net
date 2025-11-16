@@ -1662,7 +1662,7 @@ let rec eval (st: SymbolTable) ast =
         variableListAst |> List.iter (fun varAst ->
             match varDeclModifierAst with 
             | Ast.Many((posMan1, posMan2),()) ->
-                checkVAR00Diagnostics parent.AuxiliaryInfo posMan1 posMan2        
+                emitVAR00Diagnostics parent.AuxiliaryInfo posMan1 posMan2        
                 match varAst with 
                 | Ast.Var((varPos1, varPos2), varName) ->
                     let newVar = new FplVariableMany(varName, (varPos1, varPos2), parent)
@@ -1672,7 +1672,7 @@ let rec eval (st: SymbolTable) ast =
                     variableStack.PopEvalStack()
                 | _ -> ()
             | Ast.Many1((posMan1, posMan2),()) ->
-                checkVAR00Diagnostics parent.AuxiliaryInfo posMan1 posMan2        
+                emitVAR00Diagnostics parent.AuxiliaryInfo posMan1 posMan2        
                 match varAst with 
                 | Ast.Var((varPos1, varPos2), varName) ->
                     let newVar = new FplVariableMany1(varName, (varPos1, varPos2), parent)
