@@ -2745,6 +2745,7 @@ type FplReference(positions: Positions, parent: FplValue) =
             if this.Scope.Count > 0 && not (this.Scope.ContainsKey(".")) then 
                 let ret = this.Scope.Values |> Seq.head
                 match ret.Name with 
+                | PrimExtensionObj 
                 | LiteralParent 
                 | LiteralSelf ->
                     if ret.Scope.Count > 0 then 
@@ -2774,7 +2775,9 @@ type FplReference(positions: Positions, parent: FplValue) =
 
         let head = 
             let ret = 
-                if headObj.ExpressionType.IsNoFix then
+                if headObj.Name = PrimExtensionL then 
+                    headObj.Type signatureType
+                elif headObj.ExpressionType.IsNoFix then
                     getFplHead headObj signatureType 
                 else
                     headObj.ExpressionType.GetUserDefinedLiteral headObj.FplId
