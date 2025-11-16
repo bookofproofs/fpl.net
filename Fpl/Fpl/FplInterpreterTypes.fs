@@ -4265,7 +4265,15 @@ type FplExtension(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
-    override this.Type signatureType = this.FplId
+    override this.Type signatureType = 
+        match signatureType with 
+        | SignatureType.Name
+        | SignatureType.Mixed -> this.FplId
+        | SignatureType.Type -> 
+            match getMapping this with
+            | Some map ->
+                map.Type signatureType
+            | _ -> this.FplId
 
     override this.IsBlock () = true
 
