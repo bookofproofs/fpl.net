@@ -2512,6 +2512,9 @@ type SymbolTableStructure() =
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     [<DataRow("FplExtensionObj", "00", """ax A {@1};""", "")>]
+    [<DataRow("FplExtensionObj", "00a", """def cl Nat ext D x@/\d+/ -> Nat {dec ~n:Nat; return n } ax A {@1};""", "")>]
+    [<DataRow("FplExtensionObj", "00b", """def cl Nat ext D x@/\d+/ -> Nat {dec ~n:Nat; return n } ax A {and(@1,@0)};""", "")>]
+    [<DataRow("FplExtensionObj", "00c", """def cl Nat ext D x@/\d+/ -> Nat {dec ~n:Nat; return n } def func Add(x,y:Nat)->obj prop K {dec ~op:Add ~n:Nat; ( op(n,@0) = n ) } ;""", "")>]
     [<TestMethod>]
     member this.TestStructureFplExtensionObj(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplExtensionObj.fpl"
@@ -2519,12 +2522,33 @@ type SymbolTableStructure() =
         
         match nodeType, varVal with
         | "FplExtensionObj", "00" ->
-            Assert.IsInstanceOfType<FplAxiom>(parent)
-            Assert.AreEqual<int>(1, parent.ArgList.Count)
-            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplReference>(parent)
+            Assert.AreEqual<int>(0, parent.ArgList.Count)
+            Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplExtensionObj>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
+        | "FplExtensionObj", "00a" ->
+            Assert.IsInstanceOfType<FplReference>(parent)
+            Assert.AreEqual<int>(0, parent.ArgList.Count)
+            Assert.AreEqual<int>(1, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplExtensionObj>(node)
+            Assert.AreEqual<int>(0, node.ArgList.Count)
+            Assert.AreEqual<int>(1, node.Scope.Count)
+        | "FplExtensionObj", "00b" ->
+            Assert.IsInstanceOfType<FplReference>(parent)
+            Assert.AreEqual<int>(0, parent.ArgList.Count)
+            Assert.AreEqual<int>(1, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplExtensionObj>(node)
+            Assert.AreEqual<int>(0, node.ArgList.Count)
+            Assert.AreEqual<int>(1, node.Scope.Count)
+        | "FplExtensionObj", "00c" ->
+            Assert.IsInstanceOfType<FplReference>(parent)
+            Assert.AreEqual<int>(0, parent.ArgList.Count)
+            Assert.AreEqual<int>(1, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplExtensionObj>(node)
+            Assert.AreEqual<int>(0, node.ArgList.Count)
+            Assert.AreEqual<int>(1, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     [<DataRow("FplForInStmt", "01", """def func Sum(list:* Nat)->Nat { dec ~a:obj ~result, addend: Nat result:=Zero() for addend in list { result:=Add(result,addend) }; return result };""", "")>]

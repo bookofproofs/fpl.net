@@ -558,11 +558,12 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.Extension((pos1, pos2), extensionString) ->
         st.EvalPush("Extension")
-        let fv = variableStack.Pop()
-        let fplNew = new FplExtensionObj((pos1,pos2), fv.Parent.Value)
+        let fv = variableStack.PeekEvalStack()
+        let fplNew = new FplExtensionObj((pos1,pos2), fv)
         variableStack.PushEvalStack(fplNew)
         fplNew.FplId <- extensionString
         checkID018Diagnostics st fplNew extensionString pos1 pos2
+        variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.ExtensionType((pos1, pos2), extensionNameAst) ->
         st.EvalPush("ExtensionType")
@@ -893,8 +894,8 @@ let rec eval (st: SymbolTable) ast =
 
         match optionalSpecificationAst with
         | Some specificationAst -> 
-            let refBlock = new FplReference((pos1, pos2), fv) 
-            variableStack.PushEvalStack(refBlock)
+            let node = new FplReference((pos1, pos2), fv) 
+            variableStack.PushEvalStack(node)
             eval st fplIdentifierAst
             eval st specificationAst |> ignore
             let refBlock = variableStack.PeekEvalStack()

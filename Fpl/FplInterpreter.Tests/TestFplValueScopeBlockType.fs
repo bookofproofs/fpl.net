@@ -565,7 +565,7 @@ type TestFplValueScopeBlockType() =
             | "base10" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base11" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base12" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base13" -> Assert.IsInstanceOfType<FplExtensionObj>(base1)
+            | "base13" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base11a" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base12a" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base10b" -> Assert.IsInstanceOfType<FplReference>(base1)
@@ -968,7 +968,8 @@ type TestFplValueScopeBlockType() =
             let r = st.Root
             let theory = r.Scope[filename]
             let pr = theory.Scope["T()"] 
-            let base1 = pr.ArgList |> Seq.toList |> List.rev |> List.head
+            let basePre = pr.ArgList |> Seq.head
+            let base1 = basePre.Scope.Values |> Seq.head
             Assert.IsInstanceOfType<FplExtensionObj>(base1)
         | None -> 
             Assert.IsTrue(false)

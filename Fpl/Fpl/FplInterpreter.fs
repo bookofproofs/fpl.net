@@ -23,12 +23,12 @@ open FplInterpreterBuildingBlocks
 open FplInterpreterDiagnosticsEmitterPre
 
 let fplInterpreter (st:SymbolTable) input (uri:PathEquivalentUri) fplLibUrl = 
-    try
+    //try
         if st.MainTheory = String.Empty then
             st.MainTheory <- uri.TheoryName
         loadAllUsesClauses st input uri fplLibUrl 
         evaluateSymbolTable st
         st.Root.Run variableStack
-    with ex -> 
-        emitUnexpectedErrorDiagnostics (ex.Message + Environment.NewLine + ex.StackTrace)
+    //with ex -> 
+    //    emitUnexpectedErrorDiagnostics (ex.Message + Environment.NewLine + ex.StackTrace)
     
