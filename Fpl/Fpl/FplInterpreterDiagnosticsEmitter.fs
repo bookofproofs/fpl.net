@@ -34,53 +34,6 @@ let checkVAR00Diagnostics numberOfVariadicVars startPos endPos =
             }
         ad.AddDiagnostic diagnostic
 
-
-let checkID018Diagnostics (st: SymbolTable) (fv:FplValue) (identifier:string) pos1 pos2 =
-    let matchReprId (fv1:FplValue) (identifier:string) = 
-        let vars = fv1.GetVariables()
-        if vars.Length > 0 then
-            let mainVar = vars.Head
-            let regex = Regex(mainVar.TypeId)
-            regex.IsMatch(identifier)
-        else
-            false
-        
-    let candidatesFromScope =
-        st.Root.Scope
-        |> Seq.map (fun theory ->
-            theory.Value.Scope
-            |> Seq.filter (fun kvp -> isExtension kvp.Value)
-            |> Seq.map (fun kvp -> kvp.Value)
-            |> Seq.filter (fun ext -> 
-                if matchReprId ext identifier && not (fv.Scope.ContainsKey(fv.FplId)) then 
-                    // assign the reference FplValue fv only the first found match 
-                    // even, if there are multiple extensions that would match it 
-                    // (thus, the additional check for Scope.ContainsKey...)
-                    fv.Scope.Add(fv.FplId, ext)
-                    true
-                else
-                    false
-            )
-        )
-        |> Seq.concat
-        |> Seq.toList
-
-    let candidates = 
-        let parentExtension = getParentExtension fv 
-        match parentExtension with 
-        | Some ext -> 
-            if matchReprId ext identifier then
-                // if fv is inside an extension block, we add this block to the candidates
-                // so we can match patterns inside this extension block's definition referring to 
-                // its own pattern even if it is not yet fully parsed and analysed
-                candidatesFromScope @ [ext]
-            else 
-                candidatesFromScope
-        | _ -> candidatesFromScope
-
-    if candidates.Length = 0 then 
-        emitID018Diagnostics identifier pos1 pos2     
-
 let checkID019Diagnostics (st: SymbolTable) (name:string) pos1 pos2 =
     if name.StartsWith("@") then 
         match searchExtensionByName st.Root name with

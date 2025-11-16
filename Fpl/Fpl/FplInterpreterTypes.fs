@@ -3525,6 +3525,51 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
 
     override this.CheckConsistency () = 
         base.CheckConsistency()
+        let matchReprId (fv1:FplValue) (identifier:string) = 
+            let vars = fv1.GetVariables()
+            if vars.Length > 0 then
+                let mainVar = vars.Head
+                let regex = Regex(mainVar.TypeId)
+                regex.IsMatch(identifier)
+            else
+                false
+        
+        let candidatesFromScope =
+            let root = getRoot this
+            root.Scope
+            |> Seq.map (fun theory ->
+                theory.Value.Scope
+                |> Seq.filter (fun kvp -> kvp.Value.Name = PrimExtensionL)
+                |> Seq.map (fun kvp -> kvp.Value)
+                |> Seq.filter (fun ext -> 
+                    if matchReprId ext this.FplId && not (this.Scope.ContainsKey(this.FplId)) then 
+                        // assign the reference FplValue fv only the first found match 
+                        // even, if there are multiple extensions that would match it 
+                        // (thus, the additional check for Scope.ContainsKey...)
+                        this.Scope.Add(this.FplId, ext)
+                        true
+                    else
+                        false
+                )
+            )
+            |> Seq.concat
+            |> Seq.toList
+
+        let candidates = 
+            let parentExtension = this.NextBlockNode
+            match parentExtension with 
+            | Some ext when ext.Name = PrimExtensionL -> 
+                if matchReprId ext this.FplId then
+                    // if fv is inside an extension block, we add this block to the candidates
+                    // so we can match patterns inside this extension block's definition referring to 
+                    // its own pattern even if it is not yet fully parsed and analysed
+                    candidatesFromScope @ [ext]
+                else 
+                    candidatesFromScope
+            | _ -> candidatesFromScope
+
+        if candidates.Length = 0 then 
+            emitID018Diagnostics this.FplId this.StartPos this.EndPos
 
     override this.EmbedInSymbolTable _ = 
         this.CheckConsistency()    

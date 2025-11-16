@@ -562,7 +562,6 @@ let rec eval (st: SymbolTable) ast =
         let fplNew = new FplExtensionObj((pos1,pos2), fv)
         variableStack.PushEvalStack(fplNew)
         fplNew.FplId <- extensionString
-        checkID018Diagnostics st fplNew extensionString pos1 pos2
         variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.ExtensionType((pos1, pos2), extensionNameAst) ->
