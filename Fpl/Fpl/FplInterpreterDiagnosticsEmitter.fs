@@ -20,23 +20,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 
-let checkID019Diagnostics (st: SymbolTable) (name:string) pos1 pos2 =
-    if name.StartsWith("@") then 
-        match searchExtensionByName st.Root name with
-        | ScopeSearchResult.NotFound ->          
-            let diagnostic =
-                { 
-                    Diagnostic.Uri = ad.CurrentUri
-                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                    Diagnostic.Severity = DiagnosticSeverity.Error
-                    Diagnostic.StartPos = pos1
-                    Diagnostic.EndPos = pos2
-                    Diagnostic.Code = ID019 name
-                    Diagnostic.Alternatives = None 
-                }
-            ad.AddDiagnostic diagnostic
-        | _ -> ()
-
 let emitSIG00Diagnostics (fplValue: FplValue) pos1 pos2 =
     let detailed (exprType: FixType) expectedArity actualArity pos1 pos2 =
         let diagnostic =

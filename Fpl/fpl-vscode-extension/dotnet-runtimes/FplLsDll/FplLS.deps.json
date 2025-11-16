@@ -9,7 +9,7 @@
       "FplLS/1.0.0": {
         "dependencies": {
           "Fpl": "1.0.0",
-          "Microsoft.NET.ILLink.Tasks": "8.0.19",
+          "Microsoft.NET.ILLink.Tasks": "8.0.22",
           "OmniSharp.Extensions.LanguageServer": "0.17.0",
           "System.Reactive.Reference": "4.4.0.0"
         },
@@ -154,7 +154,7 @@
           }
         }
       },
-      "Microsoft.NET.ILLink.Tasks/8.0.19": {},
+      "Microsoft.NET.ILLink.Tasks/8.0.22": {},
       "Microsoft.NETCore.Platforms/2.0.0": {},
       "Microsoft.NETCore.Targets/1.1.0": {},
       "Microsoft.VisualStudio.Threading/16.4.33": {
@@ -499,12 +499,12 @@
       "path": "microsoft.extensions.primitives/3.1.0",
       "hashPath": "microsoft.extensions.primitives.3.1.0.nupkg.sha512"
     },
-    "Microsoft.NET.ILLink.Tasks/8.0.19": {
+    "Microsoft.NET.ILLink.Tasks/8.0.22": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-IhHf+zeZiaE5EXRyxILd4qM+Hj9cxV3sa8MpzZgeEhpvaG3a1VEGF6UCaPFLO44Kua3JkLKluE0SWVamS50PlA==",
-      "path": "microsoft.net.illink.tasks/8.0.19",
-      "hashPath": "microsoft.net.illink.tasks.8.0.19.nupkg.sha512"
+      "sha512": "sha512-MhcMithKEiyyNkD2ZfbDZPmcOdi0GheGfg8saEIIEfD/fol3iHmcV8TsZkD4ZYz5gdUuoX4YtlVySUU7Sxl9SQ==",
+      "path": "microsoft.net.illink.tasks/8.0.22",
+      "hashPath": "microsoft.net.illink.tasks.8.0.22.nupkg.sha512"
     },
     "Microsoft.NETCore.Platforms/2.0.0": {
       "type": "package",

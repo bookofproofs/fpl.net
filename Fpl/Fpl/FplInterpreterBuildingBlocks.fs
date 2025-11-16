@@ -232,7 +232,10 @@ let rec eval (st: SymbolTable) ast =
             fv.TypeId <- sid
         | _ -> 
             fv.TypeId <- extensionName
-            checkID019Diagnostics st extensionName pos1 pos2
+            match searchExtensionByName st.Root extensionName with
+            | ScopeSearchResult.NotFound -> 
+                emitID019Diagnostics extensionName pos1 pos2
+            | _ -> ()
         st.EvalPop() 
     | Ast.TemplateType((pos1, pos2), s) -> 
         st.EvalPush("TemplateType")
