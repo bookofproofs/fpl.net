@@ -3523,7 +3523,12 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
 
     override this.Run _ = ()
 
-    override this.EmbedInSymbolTable _ = addExpressionToReference this
+    override this.CheckConsistency () = 
+        base.CheckConsistency()
+
+    override this.EmbedInSymbolTable _ = 
+        this.CheckConsistency()    
+        addExpressionToReference this
 
     override this.RunOrder = None
 

@@ -79,18 +79,7 @@ let checkID018Diagnostics (st: SymbolTable) (fv:FplValue) (identifier:string) po
         | _ -> candidatesFromScope
 
     if candidates.Length = 0 then 
-        let diagnostic =
-            { 
-                Diagnostic.Uri = ad.CurrentUri
-                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                Diagnostic.Severity = DiagnosticSeverity.Error
-                Diagnostic.StartPos = pos1
-                Diagnostic.EndPos = pos2
-                Diagnostic.Code = ID018 identifier
-                Diagnostic.Alternatives = None 
-            }
-        ad.AddDiagnostic diagnostic
-     
+        emitID018Diagnostics identifier pos1 pos2     
 
 let checkID019Diagnostics (st: SymbolTable) (name:string) pos1 pos2 =
     if name.StartsWith("@") then 
