@@ -253,24 +253,24 @@ type TestSignatureMatching() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("""def pred T (x:*obj) {true} def pred Caller() {dec ~a,b:obj; T(a,b)} ;""",
+    [<DataRow("00", """def pred T (x:*obj) {true} def pred Caller() {dec ~a,b:obj; T(a,b)} ;""",
         "")>]
-    [<DataRow("""def pred T (x:*obj) {true} def pred Caller() {dec ~a:obj; T(a)} ;""",
+    [<DataRow("01", """def pred T (x:*obj) {true} def pred Caller() {dec ~a:obj; T(a)} ;""",
         "")>]
-    [<DataRow("""def pred T (x:*obj) {true} def pred Caller() {T()} ;""",
+    [<DataRow("02", """def pred T (x:*obj) {true} def pred Caller() {T()} ;""",
         "")>]
-    [<DataRow("""def pred T (x:+obj) {true} def pred Caller() {dec ~a,b:obj; T(a,b)} ;""",
+    [<DataRow("03", """def pred T (x:+obj) {true} def pred Caller() {dec ~a,b:obj; T(a,b)} ;""",
         "")>]
-    [<DataRow("""def pred T (x:+obj) {true} def pred Caller() {dec ~a:obj; T(a)} ;""",
+    [<DataRow("04", """def pred T (x:+obj) {true} def pred Caller() {dec ~a:obj; T(a)} ;""",
         "")>]
-    [<DataRow("""def pred T (x:+obj) {true} def pred Caller() {T()} ;""",
-        "() does not match `x:+obj` in TestSignatureMatchingReferencesVariadicObj.T(+obj)")>]
-    [<DataRow("""def pred T (x:*obj) {true} def pred Caller() {dec ~a,b:*obj; T(a,b)} ;""",
+    [<DataRow("05", """def pred T (x:+obj) {true} def pred Caller() {T()} ;""",
+        "missing argument for `x:+obj` in TestSignatureMatchingReferencesVariadicObj.T(+obj)")>]
+    [<DataRow("06", """def pred T (x:*obj) {true} def pred Caller() {dec ~a,b:*obj; T(a,b)} ;""",
         "no matching parameter for `b:*obj` in TestSignatureMatchingReferencesVariadicObj.T(*obj)")>]
-    [<DataRow("""def pred T (x:*obj) {true} def pred Caller() {dec ~a:*obj; T(a)} ;""",
+    [<DataRow("07", """def pred T (x:*obj) {true} def pred Caller() {dec ~a:*obj; T(a)} ;""",
         "")>]
     [<TestMethod>]
-    member this.TestSignatureMatchingReferencesVariadicObj(varVal, var:string) =
+    member this.TestSignatureMatchingReferencesVariadicObj(no:string, varVal, var:string) =
         ad.Clear()
         let fplCode = sprintf """%s""" varVal
         let filename = "TestSignatureMatchingReferencesVariadicObj"
@@ -290,24 +290,24 @@ type TestSignatureMatching() =
         | None -> 
             Assert.IsTrue(false)
             
-    [<DataRow("""def pred T (x:*ind) {true} def pred Caller() {dec ~a,b:ind; T(a,b)} ;""",
+    [<DataRow("00", """def pred T (x:*ind) {true} def pred Caller() {dec ~a,b:ind; T(a,b)} ;""",
         "")>]
-    [<DataRow("""def pred T (x:*ind) {true} def pred Caller() {dec ~a:ind; T(a)} ;""",
+    [<DataRow("01", """def pred T (x:*ind) {true} def pred Caller() {dec ~a:ind; T(a)} ;""",
         "")>]
-    [<DataRow("""def pred T (x:*ind) {true} def pred Caller() {T()} ;""",
+    [<DataRow("02", """def pred T (x:*ind) {true} def pred Caller() {T()} ;""",
         "")>]
-    [<DataRow("""def pred T (x:+ind) {true} def pred Caller() {dec ~a,b:ind; T(a,b)} ;""",
+    [<DataRow("03", """def pred T (x:+ind) {true} def pred Caller() {dec ~a,b:ind; T(a,b)} ;""",
         "")>]
-    [<DataRow("""def pred T (x:+ind) {true} def pred Caller() {dec ~a:ind; T(a)} ;""",
+    [<DataRow("04", """def pred T (x:+ind) {true} def pred Caller() {dec ~a:ind; T(a)} ;""",
         "")>]
-    [<DataRow("""def pred T (x:+ind) {true} def pred Caller() {T()} ;""",
-        "() does not match `x:+ind` in TestSignatureMatchingReferencesVariadicInd.T(+ind)")>]
-    [<DataRow("""def pred T (x:*ind) {true} def pred Caller() {dec ~a,b:*ind; T(a,b)} ;""",
+    [<DataRow("05", """def pred T (x:+ind) {true} def pred Caller() {T()} ;""",
+        "missing argument for `x:+ind` in TestSignatureMatchingReferencesVariadicInd.T(+ind)")>]
+    [<DataRow("06", """def pred T (x:*ind) {true} def pred Caller() {dec ~a,b:*ind; T(a,b)} ;""",
         "no matching parameter for `b:*ind` in TestSignatureMatchingReferencesVariadicInd.T(*ind)")>]
-    [<DataRow("""def pred T (x:*ind) {true} def pred Caller() {dec ~a:*ind; T(a)} ;""",
+    [<DataRow("07", """def pred T (x:*ind) {true} def pred Caller() {dec ~a:*ind; T(a)} ;""",
         "")>]
     [<TestMethod>]
-    member this.TestSignatureMatchingReferencesVariadicInd(varVal, var:string) =
+    member this.TestSignatureMatchingReferencesVariadicInd(no:string, varVal, var:string) =
         ad.Clear()
         let fplCode = sprintf """%s""" varVal
         let filename = "TestSignatureMatchingReferencesVariadicInd"
@@ -350,24 +350,24 @@ type TestSignatureMatching() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("""def pred T (x:*pred) {true} def pred Caller() {dec ~a,b:pred; T(a,b)} ;""",
+    [<DataRow("00", """def pred T (x:*pred) {true} def pred Caller() {dec ~a,b:pred; T(a,b)} ;""",
         "")>]
-    [<DataRow("""def pred T (x:*pred) {true} def pred Caller() {dec ~a:pred; T(a)} ;""",
+    [<DataRow("01", """def pred T (x:*pred) {true} def pred Caller() {dec ~a:pred; T(a)} ;""",
         "")>]
-    [<DataRow("""def pred T (x:*pred) {true} def pred Caller() {T()} ;""",
+    [<DataRow("02", """def pred T (x:*pred) {true} def pred Caller() {T()} ;""",
         "")>]
-    [<DataRow("""def pred T (x:+pred) {true} def pred Caller() {dec ~a,b:pred; T(a,b)} ;""",
+    [<DataRow("03", """def pred T (x:+pred) {true} def pred Caller() {dec ~a,b:pred; T(a,b)} ;""",
         "")>]
-    [<DataRow("""def pred T (x:+pred) {true} def pred Caller() {dec ~a:pred; T(a)} ;""",
+    [<DataRow("04", """def pred T (x:+pred) {true} def pred Caller() {dec ~a:pred; T(a)} ;""",
         "")>]
-    [<DataRow("""def pred T (x:+pred) {true} def pred Caller() {T()} ;""",
-        "() does not match `x:+pred` in TestSignatureMatchingReferencesVariadicPred.T(+pred)")>]
-    [<DataRow("""def pred T (x:*pred) {true} def pred Caller() {dec ~a,b:*pred; T(a,b)} ;""",
+    [<DataRow("05", """def pred T (x:+pred) {true} def pred Caller() {T()} ;""",
+        "missing argument for `x:+pred` in TestSignatureMatchingReferencesVariadicPred.T(+pred)")>]
+    [<DataRow("06", """def pred T (x:*pred) {true} def pred Caller() {dec ~a,b:*pred; T(a,b)} ;""",
         "no matching parameter for `b:*pred` in TestSignatureMatchingReferencesVariadicPred.T(*pred)")>]
-    [<DataRow("""def pred T (x:*pred) {true} def pred Caller() {dec ~a:*pred; T(a)} ;""",
+    [<DataRow("07", """def pred T (x:*pred) {true} def pred Caller() {dec ~a:*pred; T(a)} ;""",
         "")>]
     [<TestMethod>]
-    member this.TestSignatureMatchingReferencesVariadicPred(varVal, var:string) =
+    member this.TestSignatureMatchingReferencesVariadicPred(no:string, varVal, var:string) =
         ad.Clear()
         let fplCode = sprintf """%s""" varVal
         let filename = "TestSignatureMatchingReferencesVariadicPred"
@@ -387,24 +387,24 @@ type TestSignatureMatching() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("""def pred T (x:*func) {true} def pred Caller() {dec ~a,b:func; T(a,b)} ;""",
+    [<DataRow("00", """def pred T (x:*func) {true} def pred Caller() {dec ~a,b:func; T(a,b)} ;""",
         "")>]
-    [<DataRow("""def pred T (x:*func) {true} def pred Caller() {dec ~a:func; T(a)} ;""",
+    [<DataRow("01", """def pred T (x:*func) {true} def pred Caller() {dec ~a:func; T(a)} ;""",
         "")>]
-    [<DataRow("""def pred T (x:*func) {true} def pred Caller() {T()} ;""",
+    [<DataRow("02", """def pred T (x:*func) {true} def pred Caller() {T()} ;""",
         "")>]
-    [<DataRow("""def pred T (x:+func) {true} def pred Caller() {dec ~a,b:func; T(a,b)} ;""",
+    [<DataRow("03", """def pred T (x:+func) {true} def pred Caller() {dec ~a,b:func; T(a,b)} ;""",
         "")>]
-    [<DataRow("""def pred T (x:+func) {true} def pred Caller() {dec ~a:func; T(a)} ;""",
+    [<DataRow("04", """def pred T (x:+func) {true} def pred Caller() {dec ~a:func; T(a)} ;""",
         "")>]
-    [<DataRow("""def pred T (x:+func) {true} def pred Caller() {T()} ;""",
-        "() does not match `x:+func` in TestSignatureMatchingReferencesVariadicFunc.T(+func)")>]
-    [<DataRow("""def pred T (x:*func) {true} def pred Caller() {dec ~a,b:*func; T(a,b)} ;""",
+    [<DataRow("05", """def pred T (x:+func) {true} def pred Caller() {T()} ;""",
+        "missing argument for `x:+func` in TestSignatureMatchingReferencesVariadicFunc.T(+func)")>]
+    [<DataRow("06", """def pred T (x:*func) {true} def pred Caller() {dec ~a,b:*func; T(a,b)} ;""",
         "no matching parameter for `b:*func` in TestSignatureMatchingReferencesVariadicFunc.T(*func)")>]
-    [<DataRow("""def pred T (x:*func) {true} def pred Caller() {dec ~a:*func; T(a)} ;""",
+    [<DataRow("07", """def pred T (x:*func) {true} def pred Caller() {dec ~a:*func; T(a)} ;""",
         "")>]
     [<TestMethod>]
-    member this.TestSignatureMatchingReferencesVariadicFunc(varVal, var:string) =
+    member this.TestSignatureMatchingReferencesVariadicFunc(no:string, varVal, var:string) =
         ad.Clear()
         let fplCode = sprintf """%s""" varVal
         let filename = "TestSignatureMatchingReferencesVariadicFunc"
@@ -424,24 +424,24 @@ type TestSignatureMatching() =
         | None -> 
             Assert.IsTrue(false)
             
-    [<DataRow("""def pred T (x:*Nat) {true} def pred Caller() {dec ~a,b:Nat; T(a,b)} ;""",
+    [<DataRow("00", """def pred T (x:*Nat) {true} def pred Caller() {dec ~a,b:Nat; T(a,b)} ;""",
         "")>]
-    [<DataRow("""def pred T (x:*Nat) {true} def pred Caller() {dec ~a:Nat; T(a)} ;""",
+    [<DataRow("01", """def pred T (x:*Nat) {true} def pred Caller() {dec ~a:Nat; T(a)} ;""",
         "")>]
-    [<DataRow("""def pred T (x:*Nat) {true} def pred Caller() {T()} ;""",
+    [<DataRow("02", """def pred T (x:*Nat) {true} def pred Caller() {T()} ;""",
         "")>]
-    [<DataRow("""def pred T (x:+Nat) {true} def pred Caller() {dec ~a,b:Nat; T(a,b)} ;""",
+    [<DataRow("03", """def pred T (x:+Nat) {true} def pred Caller() {dec ~a,b:Nat; T(a,b)} ;""",
         "")>]
-    [<DataRow("""def pred T (x:+Nat) {true} def pred Caller() {dec ~a:Nat; T(a)} ;""",
+    [<DataRow("04", """def pred T (x:+Nat) {true} def pred Caller() {dec ~a:Nat; T(a)} ;""",
         "")>]
-    [<DataRow("""def pred T (x:+Nat) {true} def pred Caller() {T()} ;""",
-        "() does not match `x:+Nat` in TestSignatureMatchingReferencesVariadicNat.T(+Nat)")>]
-    [<DataRow("""def pred T (x:*Nat) {true} def pred Caller() {dec ~a,b:*Nat; T(a,b)} ;""",
+    [<DataRow("05", """def pred T (x:+Nat) {true} def pred Caller() {T()} ;""",
+        "missing argument for `x:+Nat` in TestSignatureMatchingReferencesVariadicNat.T(+Nat)")>]
+    [<DataRow("06", """def pred T (x:*Nat) {true} def pred Caller() {dec ~a,b:*Nat; T(a,b)} ;""",
         "no matching parameter for `b:*Nat` in TestSignatureMatchingReferencesVariadicNat.T(*Nat)")>]
-    [<DataRow("""def pred T (x:*Nat) {true} def pred Caller() {dec ~a:*Nat; T(a)} ;""",
+    [<DataRow("07", """def pred T (x:*Nat) {true} def pred Caller() {dec ~a:*Nat; T(a)} ;""",
         "")>]
     [<TestMethod>]
-    member this.TestSignatureMatchingReferencesVariadicNat(varVal, var:string) =
+    member this.TestSignatureMatchingReferencesVariadicNat(no:string, varVal, var:string) =
         ad.Clear()
         let fplCode = sprintf """%s""" varVal
         let filename = "TestSignatureMatchingReferencesVariadicNat"

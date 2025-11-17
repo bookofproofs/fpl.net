@@ -3963,6 +3963,8 @@ let rec mpwa hasArguments (args: FplValue list) (pars: FplValue list) =
                 None
             else
                 Some($"missing argument for `{p.Type(SignatureType.Name)}:{pType}`")
+        | _ when p.Name = PrimVariableManyL ->
+            None
         | _ -> 
             Some($"missing argument for `{p.Type(SignatureType.Name)}:{pType}`")
     | (a :: [], []) ->
