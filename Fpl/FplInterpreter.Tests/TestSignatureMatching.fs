@@ -245,7 +245,7 @@ type TestSignatureMatching() =
             let parentClass = testClass.ArgList[0]
             let constructorParentClass = parentClass.Scope.Values |> Seq.toList |> List.head
             let constructor = testClass.Scope.Values |> Seq.toList |> List.head
-            let baseConstructorCall = constructor.ArgList |> Seq.filter (fun fv -> fv.FplId = "bas") |> Seq.toList |> List.head
+            let baseConstructorCall = constructor.ArgList |> Seq.filter (fun fv -> fv :? FplBaseConstructorCall) |> Seq.toList |> List.head
             let fvArgs = baseConstructorCall.ArgList[0]
             match matchArgumentsWithParameters fvArgs constructorParentClass with
             | Some errMsg -> Assert.AreEqual<string>(var, errMsg)
@@ -328,7 +328,7 @@ type TestSignatureMatching() =
             Assert.IsTrue(false)
 
     [<DataRow("""def pred T (x:*obj) {dec ~i:ind; x[i]} ;""",
-        "")>]
+        "no matching parameter for `i:ind` in x:*obj")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesVariadicCoord(varVal, var:string) =
         ad.Clear()

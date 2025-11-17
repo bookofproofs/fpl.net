@@ -4652,11 +4652,16 @@ let matchArgumentsWithParameters (fva: FplValue) (fvp: FplValue) =
         | :? FplReference as refFva -> (refFva.ArgType = ArgType.Parentheses)
         | _ -> false
 
-    let stdMsg = $"{qualifiedName fvp}"
     let argResult = mpwa hasArguments arguments parameters
 
     match argResult with
-    | Some aErr -> Some($"{aErr} in {stdMsg}")
+    | Some aErr -> 
+        match fvp.Name with 
+        | PrimVariableMany1L
+        | PrimVariableManyL ->
+            Some($"{aErr} in {qualifiedName fvp}:{fvp.Type SignatureType.Type}")
+        | _ -> 
+            Some($"{aErr} in {qualifiedName fvp}")
     | None -> None
 
 
