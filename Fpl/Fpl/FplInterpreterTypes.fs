@@ -4657,8 +4657,8 @@ let matchArgumentsWithParameters (fva: FplValue) (fvp: FplValue) =
     match argResult with
     | Some aErr -> 
         match fvp.Name with 
-        | PrimVariableMany1L
-        | PrimVariableManyL ->
+        | PrimVariableManyL
+        | PrimVariableMany1L ->
             Some($"{aErr} in {qualifiedName fvp}:{fvp.Type SignatureType.Type}")
         | _ -> 
             Some($"{aErr} in {qualifiedName fvp}")
