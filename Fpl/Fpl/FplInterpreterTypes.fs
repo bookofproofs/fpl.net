@@ -4791,23 +4791,21 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
 
 
     override this.CheckConsistency () = 
-        match this.Assignee with
-        | Some (:? FplGenericVariable as assignee) -> 
+        match this.Assignee, this.AssignedValue with
+        | Some (:? FplGenericVariable as assignee), Some (assignedValue:FplValue) -> 
             let nameAssignee = assignee.Type SignatureType.Name
             let typeAssignee = assignee.Type SignatureType.Type
-            match this.AssignedValue with
-            | Some (assignedValue:FplValue) ->
-                let nameAssignedValue = assignedValue.Type SignatureType.Name
-                let typeAssignedValue = assignedValue.Type SignatureType.Type 
-                if nameAssignee = nameAssignedValue then
-                    emitLG005Diagnostics nameAssignedValue assignedValue.StartPos assignedValue.EndPos
-                elif typeAssignee <> typeAssignedValue then 
-                     emitSIG05Diagnostics typeAssignee typeAssignedValue assignedValue.StartPos assignedValue.EndPos
-                //elif not (inheritsFrom value assignee.TypeId) then 
-                //    // issue SIG05 diagnostics if either no inheritance chain found 
-                //    emitSIG05Diagnostics typeAssignee (value.Type(SignatureType.Type)) assignedValue.StartPos assignedValue.EndPos
-                else   
-                    ()
+            let nameAssignedValue = assignedValue.Type SignatureType.Name
+            let typeAssignedValue = assignedValue.Type SignatureType.Type 
+            if nameAssignee = nameAssignedValue then
+                emitLG005Diagnostics nameAssignedValue assignedValue.StartPos assignedValue.EndPos
+            elif typeAssignee <> typeAssignedValue then 
+                    emitSIG05Diagnostics typeAssignee typeAssignedValue assignedValue.StartPos assignedValue.EndPos
+            //elif not (inheritsFrom value assignee.TypeId) then 
+            //    // issue SIG05 diagnostics if either no inheritance chain found 
+            //    emitSIG05Diagnostics typeAssignee (value.Type(SignatureType.Type)) assignedValue.StartPos assignedValue.EndPos
+            else   
+                ()
             //        let valueOpt = getArgument assignedValue
             //        match valueOpt with
             //        | Some value when value.IsClass() ->
@@ -4827,22 +4825,26 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
             //        | _ ->
             //            // Issue SIG05 diagnostics if there is (for some reason) no value of the toBeAssignedValue 
             //            emitSIG05Diagnostics typeAssignee typeAssignedValue assignedValue.StartPos assignedValue.EndPos
-            | _ -> ()
-        | Some (:? FplSelf as otherAssignee) ->
-            let ref = otherAssignee.Scope.Values |> Seq.toList
+        | Some (:? FplSelf as assignee), _ ->
+            let ref = assignee.Scope.Values |> Seq.toList
             if ref.Length > 0 then 
-                emitSIG07iagnostic (otherAssignee.Type SignatureType.Name) (getEnglishName ref.Head.Name) otherAssignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
+                emitSIG07iagnostic (assignee.Type SignatureType.Name) (getEnglishName ref.Head.Name) assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
             else
-                emitSIG07iagnostic (otherAssignee.Type SignatureType.Name) "the type of self cound not be determined" otherAssignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
-        | Some (:? FplParent as otherAssignee) ->
-            let ref = otherAssignee.Scope.Values |> Seq.toList
+                emitSIG07iagnostic (assignee.Type SignatureType.Name) "the type of self cound not be determined" assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
+        | Some (:? FplParent as assignee), _ ->
+            let ref = assignee.Scope.Values |> Seq.toList
             if ref.Length > 0 then 
-                emitSIG07iagnostic (otherAssignee.Type SignatureType.Name) (getEnglishName ref.Head.Name) otherAssignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
+                emitSIG07iagnostic (assignee.Type SignatureType.Name) (getEnglishName ref.Head.Name) assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
             else
-                emitSIG07iagnostic (otherAssignee.Type SignatureType.Name) "the type of parent cound not be determined" otherAssignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
+                emitSIG07iagnostic (assignee.Type SignatureType.Name) "the type of parent cound not be determined" assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
 
-        | Some (otherAssignee) ->
-            emitSIG07iagnostic (otherAssignee.Type SignatureType.Name) $"type `{otherAssignee.Type SignatureType.Type}`" otherAssignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
+        | Some (assignee), Some assignedValue ->
+            let nameAssignee = assignee.Type SignatureType.Name
+            let nameAssignedValue = assignedValue.Type SignatureType.Name
+            if nameAssignee = nameAssignedValue then
+                emitLG005Diagnostics nameAssignedValue assignedValue.StartPos assignedValue.EndPos
+            else
+                emitSIG07iagnostic (assignee.Type SignatureType.Name) $"type `{assignee.Type SignatureType.Type}`" assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
         | _ -> ()
         base.CheckConsistency()
 
@@ -4887,7 +4889,7 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
                 emitID004diagnostics classBlock.FplId assignedValue.StartPos assignedValue.EndPos
             | _ ->
                 if assignedValue = assignee then 
-                    emitLG005Diagnostics assignedValue.FplId (this.ArgList[1].StartPos) (this.ArgList[1].EndPos)
+                    () // LG005 was already emitted when checking consistency but we want to prevent assigning something to itself to avoid infinite loops
                 else
                     assignee.SetValuesOf assignedValue
                     match box assignee with
