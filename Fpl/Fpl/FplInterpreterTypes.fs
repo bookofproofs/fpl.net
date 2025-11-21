@@ -3872,6 +3872,7 @@ let findInheritanceChains (baseNode: FplValue) =
     | :? FplClass
     | :? FplFunctionalTerm -> ()
     | _ -> failwith ($"Expecting a class or a functional term node, got {baseNode.Name}")
+    
     findChains baseNode "" ""
     if paths.Count = 0 then 
         distinctNames |> Seq.iter (fun s -> paths.Add (s, "ok"))
@@ -4807,9 +4808,18 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
             //    // issue SIG05 diagnostics if either no inheritance chain found 
             //    emitSIG05Diagnostics typeAssignee typeAssignedValue assignedValue.StartPos assignedValue.EndPos
             elif typeAssignee <> typeAssignedValue then 
-                
-                
-                emitSIG05Diagnostics typeAssignee typeAssignedValue assignedValue.StartPos assignedValue.EndPos
+                let referencedTypeOfVarOpt = assignee.Scope.Values |> Seq.tryHead
+                match referencedTypeOfVarOpt with 
+                | Some referencedTypeOfVar when (referencedTypeOfVar.Name = PrimClassL || referencedTypeOfVar.Name = PrimFuncionalTermL) -> 
+                    match assignedValue with 
+                    | :? FplGenericConstructor as constructor when constructor.ToBeConstructedClass.IsSome ->
+                        if not (inheritsFrom constructor.ToBeConstructedClass.Value typeAssignee) then 
+                            // issue SIG05 diagnostics if either no inheritance chain found 
+                            emitSIG05Diagnostics typeAssignee typeAssignedValue assignedValue.StartPos assignedValue.EndPos 
+                    | _ -> 
+                        emitSIG05Diagnostics typeAssignee typeAssignedValue assignedValue.StartPos assignedValue.EndPos
+                | _ -> 
+                    emitSIG05Diagnostics typeAssignee typeAssignedValue assignedValue.StartPos assignedValue.EndPos
             else   
                 ()
             //        let valueOpt = getArgument assignedValue
