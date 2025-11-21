@@ -3867,7 +3867,11 @@ let findInheritanceChains (baseNode: FplValue) =
                     else
                         paths.Add (newPath, "ok")
             | _ -> ()
-
+            
+    match baseNode with 
+    | :? FplClass
+    | :? FplFunctionalTerm -> ()
+    | _ -> failwith ($"Expecting a class or a functional term node, got {baseNode.Name}")
     findChains baseNode "" ""
     if paths.Count = 0 then 
         distinctNames |> Seq.iter (fun s -> paths.Add (s, "ok"))
@@ -4799,11 +4803,13 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
             let typeAssignedValue = assignedValue.Type SignatureType.Type 
             if nameAssignee = nameAssignedValue then
                 emitLG005Diagnostics nameAssignedValue assignedValue.StartPos assignedValue.EndPos
-            elif typeAssignee <> typeAssignedValue then 
-                    emitSIG05Diagnostics typeAssignee typeAssignedValue assignedValue.StartPos assignedValue.EndPos
-            //elif not (inheritsFrom value assignee.TypeId) then 
+            //elif not (inheritsFrom assignee typeAssignedValue) then 
             //    // issue SIG05 diagnostics if either no inheritance chain found 
-            //    emitSIG05Diagnostics typeAssignee (value.Type(SignatureType.Type)) assignedValue.StartPos assignedValue.EndPos
+            //    emitSIG05Diagnostics typeAssignee typeAssignedValue assignedValue.StartPos assignedValue.EndPos
+            elif typeAssignee <> typeAssignedValue then 
+                
+                
+                emitSIG05Diagnostics typeAssignee typeAssignedValue assignedValue.StartPos assignedValue.EndPos
             else   
                 ()
             //        let valueOpt = getArgument assignedValue
@@ -4912,7 +4918,11 @@ type FplDefaultConstructor(name, positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
-    override this.Type _ = $"{this.TypeId}()" 
+    override this.Type signatureType =
+        match signatureType with
+        | SignatureType.Name
+        | SignatureType.Mixed -> $"{this.FplId}()" 
+        | SignatureType.Type -> this.TypeId
 
     override this.Represent() = $"{this.TypeId}()" 
 
