@@ -1623,8 +1623,93 @@ type FplInstance(positions: Positions, parent: FplValue) =
 
     override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
 
+[<AbstractClass>]
+type FplGenericConstructor(name, positions: Positions, parent: FplValue) as this =
+    inherit FplValue(positions, Some parent)
+    let mutable (_toBeConstructedClass:FplValue option) = None 
+
+    do
+        this.FplId <- name
+        this.TypeId <- name
+
+    override this.Name = PrimDefaultConstructor
+    override this.ShortName = LiteralCtor
+
+    override this.Represent () = 
+        let head = this.TypeId
+
+        // args = instances of all base classes
+        let args =
+            this.ArgList
+            |> Seq.map (fun fv -> fv.Represent())
+            |> String.concat $",{System.Environment.NewLine}"
+        let vars =
+            this.Scope.Values
+            |> Seq.filter (fun fv -> 
+                fv.Name = PrimVariableL 
+                || fv.Name = PrimVariableManyL
+                || fv.Name = PrimVariableMany1L
+                )
+            |> Seq.map (fun fv -> $"{fv.FplId} = {fv.Represent()}")
+            |> String.concat $",{System.Environment.NewLine}"
+        // only mandatory properties
+        let prtys =
+            this.Scope.Values
+            |> Seq.filter (fun fv -> 
+                fv.Name = PrimMandatoryFunctionalTermL 
+                || fv.Name = PrimMandatoryPredicateL
+                )
+            |> Seq.map (fun fv -> $"{fv.FplId} = {fv.Represent()}")
+            |> String.concat $",{System.Environment.NewLine}"
+
+        match head, args, vars, prtys with 
+        | LiteralObj, _, _, _ 
+        | LiteralObjL, _, _, _ ->
+            $"{head}()"
+        | _, _, _, _ ->
+            $"{head}({args});vars({vars});prtys({prtys})"
+            
+    member this.ToBeConstructedClass  
+        with get () = _toBeConstructedClass
+        and set (value) = _toBeConstructedClass <- value
+
+
+    override this.Run variableStack = 
+        let rec createSubInstance (classDef:FplValue) (instance:FplValue) (baseInstance:FplValue)=
+            if classDef.IsIntrinsic then
+                classDef.ArgList
+                |> Seq.filter (fun fv -> fv.Name = PrimClassL)
+                |> Seq.iter (fun baseClass ->
+                    let subInstance = new FplInstance((this.StartPos, this.EndPos), this)
+                    subInstance.FplId <- baseClass.FplId
+                    subInstance.TypeId <- subInstance.FplId
+                    createSubInstance baseClass subInstance baseInstance
+                    instance.ArgList.Add subInstance
+                )
+            else
+                () // todo handle non-intrisic
+
+        let instance = new FplInstance((this.StartPos, this.EndPos), this)
+        match this.ToBeConstructedClass with
+        | Some classDef -> 
+            instance.FplId <- classDef.FplId
+            instance.TypeId <- classDef.FplId
+            createSubInstance classDef instance instance
+        | None ->
+            instance.FplId <- LiteralUndef
+            instance.TypeId <- LiteralUndef
+        this.ArgList.Add instance
+
+    member this.Instance = 
+        if this.ArgList.Count = 1 then 
+            Some (this.ArgList[0] :?> FplInstance)
+        else
+            None
+
+    override this.RunOrder = None
+
 type FplConstructor(positions: Positions, parent: FplValue) =
-    inherit FplGenericObject(positions, parent)
+    inherit FplGenericConstructor(parent.FplId, positions, parent)
     let mutable _signStartPos = Position("", 0L, 0L, 0L)
     let mutable _signEndPos = Position("", 0L, 0L, 0L)
     let mutable _parentConstructorCalls = HashSet<string>()
@@ -4688,91 +4773,6 @@ let checkSIG04Diagnostics (calling:FplValue) (candidates: FplValue list) =
     | (None, errList) -> 
         emitSIG04Diagnostics (calling.Type SignatureType.Mixed) candidates.Length errList calling.StartPos calling.EndPos
         None
-
-[<AbstractClass>]
-type FplGenericConstructor(name, positions: Positions, parent: FplValue) as this =
-    inherit FplValue(positions, Some parent)
-    let mutable (_toBeConstructedClass:FplValue option) = None 
-
-    do
-        this.FplId <- name
-        this.TypeId <- name
-
-    override this.Name = PrimDefaultConstructor
-    override this.ShortName = LiteralCtor
-
-    override this.Represent () = 
-        let head = this.TypeId
-
-        // args = instances of all base classes
-        let args =
-            this.ArgList
-            |> Seq.map (fun fv -> fv.Represent())
-            |> String.concat $",{System.Environment.NewLine}"
-        let vars =
-            this.Scope.Values
-            |> Seq.filter (fun fv -> 
-                fv.Name = PrimVariableL 
-                || fv.Name = PrimVariableManyL
-                || fv.Name = PrimVariableMany1L
-                )
-            |> Seq.map (fun fv -> $"{fv.FplId} = {fv.Represent()}")
-            |> String.concat $",{System.Environment.NewLine}"
-        // only mandatory properties
-        let prtys =
-            this.Scope.Values
-            |> Seq.filter (fun fv -> 
-                fv.Name = PrimMandatoryFunctionalTermL 
-                || fv.Name = PrimMandatoryPredicateL
-                )
-            |> Seq.map (fun fv -> $"{fv.FplId} = {fv.Represent()}")
-            |> String.concat $",{System.Environment.NewLine}"
-
-        match head, args, vars, prtys with 
-        | LiteralObj, _, _, _ 
-        | LiteralObjL, _, _, _ ->
-            $"{head}()"
-        | _, _, _, _ ->
-            $"{head}({args});vars({vars});prtys({prtys})"
-            
-    member this.ToBeConstructedClass  
-        with get () = _toBeConstructedClass
-        and set (value) = _toBeConstructedClass <- value
-
-
-    override this.Run variableStack = 
-        let rec createSubInstance (classDef:FplValue) (instance:FplValue) (baseInstance:FplValue)=
-            if classDef.IsIntrinsic then
-                classDef.ArgList
-                |> Seq.filter (fun fv -> fv.Name = PrimClassL)
-                |> Seq.iter (fun baseClass ->
-                    let subInstance = new FplInstance((this.StartPos, this.EndPos), this)
-                    subInstance.FplId <- baseClass.FplId
-                    subInstance.TypeId <- subInstance.FplId
-                    createSubInstance baseClass subInstance baseInstance
-                    instance.ArgList.Add subInstance
-                )
-            else
-                () // todo handle non-intrisic
-
-        let instance = new FplInstance((this.StartPos, this.EndPos), this)
-        match this.ToBeConstructedClass with
-        | Some classDef -> 
-            instance.FplId <- classDef.FplId
-            instance.TypeId <- classDef.FplId
-            createSubInstance classDef instance instance
-        | None ->
-            instance.FplId <- LiteralUndef
-            instance.TypeId <- LiteralUndef
-        this.ArgList.Add instance
-
-    member this.Instance = 
-        if this.ArgList.Count = 1 then 
-            Some (this.ArgList[0] :?> FplInstance)
-        else
-            None
-
-    override this.RunOrder = None
 
 /// Implements the assigment statement in FPL.
 type FplAssignment(positions: Positions, parent: FplValue) as this =
