@@ -448,7 +448,7 @@ type CommonFplValueTestCases =
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         let getValue (varObj:FplValue) =
             match varObj with
-            | :? FplVariable as var -> var.ValueList[0]
+            | :? FplVariable as var when var.ValueList.Count > 0 -> var.ValueList[0]
             | _ -> new FplIntrinsicUndef((Position("",0,0,0), Position("",0,0,0) ), varObj)
 
         let result = match stOption with
