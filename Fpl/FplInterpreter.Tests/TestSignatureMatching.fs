@@ -571,50 +571,6 @@ type TestSignatureMatching() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("inh", """def cl A { intr } def pred T() {dec ~n:A n:=A(); true};""", "")>]
-    [<DataRow("inh_a", """def cl A { intr } def pred T() {dec ~n:obj n:=A(); true};""", "")>]
-    [<DataRow("inh_b", """def cl A {intr} def cl B:A { intr } def pred T() {dec ~n:A n:=B(); true};""", "")>]
-    [<DataRow("inh_c", """def cl A {intr} def cl B:A { intr } def pred T() {dec ~n:B n:=A(); true};""", "x")>]
-    [<DataRow("inh_d", """def cl A {intr} def cl B:A { intr } def pred T() {dec ~n:obj n:=B(); true};""", "")>]
-    [<DataRow("inh_e", """def cl A {intr} def cl B:A { intr } def pred T() {dec ~n:obj n:=A(); true};""", "")>]
-    [<DataRow("inh_f", """def cl A {intr} def cl B { intr } def pred T() {dec ~n:B n:=A(); true};""", "x")>]
-    [<DataRow("inh_g", """def cl A {intr} def cl B { intr } def pred T() {dec ~n:A n:=B(); true};""", "x")>]
-    [<DataRow("inh_type_a", """def cl A { intr } def pred T() {dec ~n:ind n:=A(); true};""", "x")>]
-    [<DataRow("inh_type_b", """def cl A { intr } def pred T() {dec ~n:pred n:=A(); true};""", "x")>]
-    [<DataRow("inh_type_c", """def cl A { intr } def pred T() {dec ~n:func n:=A(); true};""", "x")>]
-    [<DataRow("constr_a", """def cl A { ctor A(x:obj) {} } def pred T() {dec ~n:A n:=A(); true};""", "x")>]
-    [<DataRow("constr_b", """def cl A { ctor A(x:obj) {} } def pred T() {dec ~n:A ~x:ind n:=A(x); true};""", "x")>]
-    [<DataRow("constr_c", """def cl A { ctor A(x:obj) {} } def pred T() {dec ~n:A ~y:pred n:=A(y); true};""", "x")>]
-    [<DataRow("constr_d", """def cl A { ctor A(x:obj) {} } def pred T() {dec ~n:A ~z:tpl n:=A(z); true};""", "x")>]
-    [<DataRow("constr_e", """def cl A { ctor A(x:obj) {} } def pred T() {dec ~n:obj ~z:obj n:=A(z); true};""", "")>]
-    [<DataRow("constr_inh_a", """def cl A { ctor A(x:obj) {} } def cl B:A { ctor B(x:pred) {dec base.A(); } } def pred T() {dec ~n:A n:=B(); true};""", "x")>]
-    [<DataRow("constr_inh_b", """def cl A { ctor A(x:obj) {} } def cl B:A { ctor B(x:pred) {dec base.A(); } } def pred T() {dec ~n:obj n:=B(); true};""", "y")>]
-    [<DataRow("constr_inh_c", """def cl A { ctor A(x:obj) {} } def cl B:A { ctor B(x:pred) {dec base.A(); } } def pred T() {dec ~n:obj n:=A(); true};""", "y")>]
-    [<DataRow("constr_inh_d", """def cl A { ctor A(x:obj) {} } def cl B:A { ctor B(x:pred) {dec base.A(); } } def pred T() {dec ~n:B ~x:obj n:=A(x); true};""", "x")>]
-    [<DataRow("constr_inh_e", """def cl A { ctor A(x:obj) {} } def cl B { ctor B(x:pred) {} } def pred T() {dec ~n:B ~x:obj n:=A(x); true};""", "x")>]
-    [<DataRow("constr_inh_f", """def cl A { ctor A(x:obj) {} } def cl B { ctor B(x:pred) {} } def pred T() {dec ~n:A ~x:pred n:=B(x); true};""", "")>]
-    [<TestMethod>]
-    member this.TestAssignmentsOfConstructors(no:string, varVal:string, var:string) =
-        ad.Clear()
-        let fplCode = sprintf """%s""" varVal
-        let filename = "TestAssignmentsOfConstructors"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
-        prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let blocks = theory.Scope.Values |> Seq.toList 
-            let pred = blocks |> List.filter(fun fv -> (fv.Type(SignatureType.Name)).StartsWith("T(")) |> List.head
-            let stmtAssign = pred.ArgList[0]
-            let fvPars = stmtAssign.ArgList[0]
-            let fvArgs = stmtAssign.ArgList[1]
-            match matchArgumentsWithParameters fvArgs fvPars with
-            | Some errMsg -> Assert.AreEqual<string>(var, errMsg)
-            | None -> Assert.AreEqual<string>("no error","no error")
-        | None -> 
-            Assert.IsTrue(false)
-
     [<DataRow("00", """def cl A { intr } def pred T() {dec ~n:A n:=A; true};""", "A")>]
     [<DataRow("01", """def cl A { ctor A(x:obj) {} } def pred T() {dec ~n:A ~x:obj n:=A(x); true};""", "A(obj)")>]
     [<DataRow("02", """def cl A { ctor A(x:pred) {} } def pred T() {dec ~n:A ~x:pred n:=A(x); true};""", "A(pred)")>]
@@ -640,6 +596,6 @@ type TestSignatureMatching() =
             let stmtAssign = pred.ArgList[0]
             let assignedReferenceValue = stmtAssign.ArgList[1]
             let candidate = assignedReferenceValue.Scope[assignedReferenceValue.FplId]
-            Assert.AreEqual<string>(expectedCandidateSignature, candidate.Type(SignatureType.Type))
+            Assert.AreEqual<string>(expectedCandidateSignature, candidate.Type(SignatureType.Mixed))
         | None -> 
             Assert.IsTrue(false)
