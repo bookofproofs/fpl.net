@@ -1701,18 +1701,21 @@ type FplGenericConstructor(name, positions: Positions, parent: FplValue) as this
         this.ArgList.Add instance
 
     member this.Instance = 
-        if this.ArgList.Count = 1 then 
-            Some (this.ArgList[0] :?> FplInstance)
+        if this.ValueList.Count = 1 then 
+            Some (this.ValueList[0] :?> FplInstance)
         else
             None
 
     override this.RunOrder = None
 
-type FplConstructor(positions: Positions, parent: FplValue) =
+type FplConstructor(positions: Positions, parent: FplValue) as this =
     inherit FplGenericConstructor(parent.FplId, positions, parent)
     let mutable _signStartPos = Position("", 0L, 0L, 0L)
     let mutable _signEndPos = Position("", 0L, 0L, 0L)
     let mutable _parentConstructorCalls = HashSet<string>()
+
+    do 
+        this.ToBeConstructedClass <- Some parent
 
     member this.SignStartPos
         with get() = _signStartPos
@@ -1745,7 +1748,10 @@ type FplConstructor(positions: Positions, parent: FplValue) =
     override this.Type signatureType =
         let head = getFplHead this signatureType
         let paramT = getParamTuple this signatureType
-        sprintf "%s(%s)" head paramT
+        match signatureType with
+        | SignatureType.Name
+        | SignatureType.Mixed -> $"{head}({paramT})" 
+        | SignatureType.Type -> head
 
     override this.Represent () = this.Type(SignatureType.Mixed)
 
@@ -3983,24 +3989,62 @@ let inheritsFrom (node:FplValue) someType =
         | Some _ -> true
         | None -> false
 
+/// Gets the list of arguments of an FplValue if any
+let getArguments (fv:FplValue) =
+    fv.ArgList 
+    |> Seq.toList
+
+/// Gets the list of parameters of an FplValue if any
+let getParameters (fv:FplValue) =
+    match fv.Name with
+    | PrimVariableL ->
+        fv.Scope.Values |> Seq.toList
+    | PrimFuncionalTermL
+    | PrimPredicateL
+    | LiteralCtorL
+    | PrimMandatoryPredicateL
+    | PrimMandatoryFunctionalTermL ->
+        fv.Scope.Values |> Seq.filter (fun fv -> isSignatureVar fv) |> Seq.toList
+    | _ -> []
+
+/// Checks, if an FplValue uses parentheses
+let hasParentheses (fv:FplValue) = 
+    match fv.Name with 
+    | PrimVariableL ->
+        fv.Scope.Count > 0
+    | PrimFuncionalTermL 
+    | PrimPredicateL 
+    | LiteralCtorL 
+    | PrimMandatoryPredicateL
+    | PrimMandatoryFunctionalTermL -> true
+    | PrimRefL -> 
+        let refFv = fv :?> FplReference
+        (refFv.ArgType = ArgType.Parentheses)
+    | _ -> false
 
 /// Tries to match parameters of an FplValue with its arguments recursively
-let rec mpwa hasArguments (args: FplValue list) (pars: FplValue list) =
+let rec mpwa aHasParentheses pHasParentheses (args: FplValue list) (pars: FplValue list) =
     match (args, pars) with
     | (a :: ars, p :: prs) ->
         let aType = a.Type SignatureType.Type
         let pType = p.Type SignatureType.Type
 
         if aType = pType then
-            mpwa hasArguments ars prs
+            mpwa (hasParentheses a) (hasParentheses p) ars prs
         elif pType.StartsWith(LiteralTpl) || pType.StartsWith(LiteralTplL) then
-            mpwa hasArguments ars prs
-        elif pType = $"*{aType}" || pType.StartsWith("*") && aType = "" && hasArguments then
-            if ars.Length > 0 then mpwa hasArguments ars pars else None
-        elif pType.StartsWith("+") && aType = "" && hasArguments then
+            mpwa (hasParentheses a) (hasParentheses p)  ars prs
+        elif pType = $"*{aType}" || pType.StartsWith("*") && aType = "" && aHasParentheses then
+            if ars.Length > 0 then 
+                mpwa (hasParentheses a) (hasParentheses p) ars pars 
+            else 
+                None
+        elif pType.StartsWith("+") && aType = "" && aHasParentheses then
             Some($"() does not match `{p.Type(SignatureType.Name)}:{pType}`")
         elif pType = $"+{aType}" then
-            if ars.Length > 0 then mpwa hasArguments ars pars else None
+            if ars.Length > 0 then 
+                mpwa (hasParentheses a) (hasParentheses p) ars pars 
+            else 
+                None
         elif
             aType.Length > 0
             && Char.IsUpper(aType[0])
@@ -4014,7 +4058,7 @@ let rec mpwa hasArguments (args: FplValue list) (pars: FplValue list) =
                 match cl with
                 | :? FplClass ->
                     if inheritsFrom cl pType then 
-                        mpwa hasArguments ars prs
+                        mpwa (hasParentheses a) (hasParentheses p) ars prs
                     else
                         Some(
                             $"`{a.Type(SignatureType.Name)}:{aType}` neither matches `{p.Type(SignatureType.Name)}:{pType}` nor the base classes"
@@ -4030,7 +4074,7 @@ let rec mpwa hasArguments (args: FplValue list) (pars: FplValue list) =
                 )
         elif aType.StartsWith(pType + "(") then
             None
-        elif hasArguments && aType = "" && pType <> "" then
+        elif aHasParentheses && aType = "" && pType <> "" then
             Some($"`()` does not match `{p.Type(SignatureType.Name)}:{pType}`")
         elif aType = LiteralPred && pType.StartsWith(LiteralPred) then
             None
@@ -4040,7 +4084,7 @@ let rec mpwa hasArguments (args: FplValue list) (pars: FplValue list) =
             let someMap = getMapping a
 
             match someMap with
-            | Some map -> mpwa hasArguments [ map ] [ p ]
+            | Some map -> mpwa (hasParentheses a) (hasParentheses p) [ map ] [ p ]
             | _ -> Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
         else
             Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
@@ -4058,7 +4102,7 @@ let rec mpwa hasArguments (args: FplValue list) (pars: FplValue list) =
         | _ -> 
             Some($"missing argument for `{p.Type(SignatureType.Name)}:{pType}`")
     | (a :: [], []) ->
-        if a.FplId = "" && hasArguments then
+        if a.FplId = "" && aHasParentheses then
             None
         else
             let aType = a.Type(SignatureType.Type)
@@ -4066,6 +4110,8 @@ let rec mpwa hasArguments (args: FplValue list) (pars: FplValue list) =
     | (a :: ars, []) ->
         let aType = a.Type(SignatureType.Type)
         Some($"no matching parameter for `{a.Type(SignatureType.Name)}:{aType}`")
+    | ([], []) when aHasParentheses <> pHasParentheses -> 
+        Some($"calling and called nodes have mismatching use of parentheses")
     | ([], []) -> None
 
 /// Implements the semantics of the FPL is operator.
@@ -4099,7 +4145,7 @@ type FplIsOperator(positions: Positions, parent: FplValue) as this =
             // FPL truth-table
             match operand with 
             | :? FplReference as op ->
-                match mpwa (op.ArgType = ArgType.Parentheses) [operand] [typeOfOperand] with
+                match mpwa (hasParentheses op) (hasParentheses typeOfOperand) [operand] [typeOfOperand] with
                 | Some errMsg -> LiteralFalse
                 | None -> LiteralTrue
             | _ -> LiteralFalse
@@ -4472,10 +4518,10 @@ type FplReturn(positions: Positions, parent: FplValue) as this =
     override this.Type signatureType = this.FplId
     override this.Represent () = this.FplId
 
-    member private this.MatchWithMapping hasParentheses (fva: FplValue) (fvp: FplValue) =
+    member private this.MatchWithMapping (fva: FplValue) (fvp: FplValue) =
         let targetMapping = getMapping fvp
         match targetMapping with
-        | Some tm -> mpwa hasParentheses [ fva ] [ tm ]
+        | Some tm -> mpwa (hasParentheses fva) (hasParentheses fvp) [ fva ] [ tm ]
         | None -> None
 
     override this.Run _ =
@@ -4486,12 +4532,7 @@ type FplReturn(positions: Positions, parent: FplValue) as this =
             let mapTypeOpt = getMapping funTerm
             match mapTypeOpt with 
             | Some mapType ->
-                let hasParentheses = 
-                    match returnedReference with 
-                    | :? FplReference as retRef -> (retRef.ArgType = ArgType.Parentheses)
-                    | _ -> false
-        
-                match this.MatchWithMapping hasParentheses returnedReference mapType with
+                match this.MatchWithMapping returnedReference mapType with
                 | Some errMsg -> emitSIG03Diagnostics errMsg (mapType.Type(SignatureType.Type)) (returnedReference.StartPos) (returnedReference.EndPos)
                 | _ -> 
                     match returnedReference with
@@ -4724,25 +4765,10 @@ type FplForInStmtDomain(positions: Positions, parent: FplValue) =
 /// Tries to match the arguments of `fva` FplValue with the parameters of the `fvp` FplValue and returns
 /// Some(specific error message) or None, if the match succeeded.
 let matchArgumentsWithParameters (fva: FplValue) (fvp: FplValue) =
-    let parameters =
-        match fvp with
-        | :? FplVariable ->
-            fvp.Scope.Values |> Seq.toList
-        | :? FplFunctionalTerm
-        | :? FplPredicate
-        | :? FplConstructor
-        | :? FplMandatoryPredicate
-        | :? FplMandatoryFunctionalTerm ->
-            fvp.Scope.Values |> Seq.filter (fun fv -> isSignatureVar fv) |> Seq.toList
-        | _ -> []
+    let parameters = getParameters fvp
+    let arguments = getArguments fva
 
-    let arguments = fva.ArgList |> Seq.toList
-    let hasArguments = 
-        match fva with 
-        | :? FplReference as refFva -> (refFva.ArgType = ArgType.Parentheses)
-        | _ -> false
-
-    let argResult = mpwa hasArguments arguments parameters
+    let argResult = mpwa (hasParentheses fva) (hasParentheses fvp) arguments parameters
 
     match argResult with
     | Some aErr -> 
