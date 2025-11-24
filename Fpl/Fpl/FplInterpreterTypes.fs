@@ -3347,8 +3347,9 @@ type FplNegation(positions: Positions, parent: FplValue) as this =
             |> String.concat ", "
         sprintf "%s(%s)" head args
 
-    override this.Run _ = 
+    override this.Run variableStack = 
         let arg = this.ArgList[0]
+        arg.Run variableStack
         let argRepr = arg.Represent()
         let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
 

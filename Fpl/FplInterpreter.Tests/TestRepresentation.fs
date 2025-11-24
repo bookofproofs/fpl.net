@@ -15,6 +15,8 @@ type TestRepresentation() =
     [<DataRow("02a","not(x = x)", LiteralFalse)>]
     [<DataRow("03","(x = y)", LiteralFalse)>]
     [<DataRow("04","not (x = y)", LiteralTrue)>]
+    [<DataRow("05","iif ((x = y),(x = y))", LiteralTrue)>]
+    [<DataRow("06","iif ((x = y),not (x = y))", LiteralFalse)>]
     [<TestMethod>]
     member this.TestRepresentationPredicate(var:string, varVal, expected:string) =
         ad.Clear()
