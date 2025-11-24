@@ -4834,6 +4834,8 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
             //elif not (inheritsFrom assignee typeAssignedValue) then 
             //    // issue SIG05 diagnostics if either no inheritance chain found 
             //    emitSIG05Diagnostics typeAssignee typeAssignedValue assignedValue.StartPos assignedValue.EndPos
+            elif typeAssignee = LiteralObj && (assignedValue.Name = PrimDefaultConstructor || assignedValue.Name = LiteralCtorL) then
+                ()
             elif typeAssignee <> typeAssignedValue then 
                 let referencedTypeOfVarOpt = assignee.Scope.Values |> Seq.tryHead
                 match referencedTypeOfVarOpt with 
