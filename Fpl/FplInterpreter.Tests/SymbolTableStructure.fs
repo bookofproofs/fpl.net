@@ -2411,15 +2411,17 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplDefaultConstructor>(node)
-            Assert.AreEqual<int>(1, node.ArgList.Count) // instance
+            Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.AreEqual<int>(1, node.ValueList.Count) // instance
         | "FplDefaultConstructor", "01" ->
             Assert.IsInstanceOfType<FplReference>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplDefaultConstructor>(node)
-            Assert.AreEqual<int>(1, node.ArgList.Count) // no instance?
+            Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.AreEqual<int>(1, node.ValueList.Count) // instance
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     [<DataRow("FplDisjunction", "00", """def pred T() {or (x,y)};""", "")>]

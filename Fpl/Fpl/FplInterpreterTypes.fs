@@ -1698,7 +1698,7 @@ type FplGenericConstructor(name, positions: Positions, parent: FplValue) as this
         | None ->
             instance.FplId <- LiteralUndef
             instance.TypeId <- LiteralUndef
-        this.ArgList.Add instance
+        this.SetValue instance
 
     member this.Instance = 
         if this.ValueList.Count = 1 then 
@@ -3033,6 +3033,7 @@ type FplReference(positions: Positions, parent: FplValue) =
             | PrimDelegateDecrementL
             | PrimDelegateEqualL ->
                 called.Run variableStack
+                this.SetValuesOf called
             | _ -> ()
         elif this.ArgList.Count = 1 then
             let arg = this.ArgList[0]
@@ -3358,7 +3359,7 @@ type FplNegation(positions: Positions, parent: FplValue) as this =
             | LiteralTrue -> LiteralFalse
             | _ -> PrimUndetermined  
 
-        this.SetValue(newValue)  
+        this.SetValue newValue
 
     override this.CheckConsistency() = 
         base.CheckConsistency()
@@ -4525,7 +4526,7 @@ type FplReturn(positions: Positions, parent: FplValue) as this =
         | Some tm -> mpwa (hasParentheses fva) (hasParentheses fvp) [ fva ] [ tm ]
         | None -> None
 
-    override this.Run _ =
+    override this.Run variableStack =
         let returnedReference = this.ArgList[0]
         let blockOpt = this.NextBlockNode
         match blockOpt with 
@@ -4544,6 +4545,7 @@ type FplReturn(positions: Positions, parent: FplValue) as this =
                         funTerm.SetValue returnedReference
                     | :? FplReference when returnedReference.Scope.ContainsKey(returnedReference.FplId) ->
                         let refValue = returnedReference.Scope[returnedReference.FplId]
+                        refValue.Run variableStack
                         funTerm.SetValue refValue
                     | _ ->
                         let value = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
