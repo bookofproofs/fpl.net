@@ -3075,6 +3075,8 @@ type FplReference(positions: Positions, parent: FplValue) =
                 | _ ->
                     let pars = variableStack.SaveVariables(called) 
                     let args = this.ArgList |> Seq.toList
+                    // run all arguments before replacing variables with their values
+                    args |> List.iter (fun arg -> arg.Run variableStack)
                     variableStack.ReplaceVariables pars args
                     // store the position of the caller
                     variableStack.CallerStartPos <- this.StartPos

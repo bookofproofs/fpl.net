@@ -1331,11 +1331,7 @@ let rec eval (st: SymbolTable) ast =
             currentOp.ArgList.Add(firstOp)
             currentOp.ArgList.Add(secondOp)
             match precNodeList currentOp with
-            | x::xs -> 
-                match checkSIG04Diagnostics currentOp [x] with 
-                | Some candidate -> 
-                    currentOp.Run variableStack // execute the matched binary operator
-                | _ -> ()
+            | x::_ -> checkSIG04Diagnostics currentOp [x] |> ignore 
             | _ -> ()
             fv.ArgList.RemoveAt(currMinIndex+1) 
             fv.ArgList.RemoveAt(currMinIndex-1) 

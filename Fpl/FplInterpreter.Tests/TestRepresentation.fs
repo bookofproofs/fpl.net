@@ -20,7 +20,11 @@ type TestRepresentation() =
     [<TestMethod>]
     member this.TestRepresentationPredicate(var:string, varVal, expected:string) =
         ad.Clear()
-        let fplCode = sprintf """uses Fpl.Commons 
+        let fplCode = sprintf """
+            def pred Equal(x,y: tpl) infix "=" 50 
+            {
+                del.Equal(x,y)
+            }           
             def cl A  {intr} 
             def cl B  {intr} 
             def pred T() { dec ~x,y:obj x:=A() y:=B(); %s };""" varVal
