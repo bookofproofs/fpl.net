@@ -942,7 +942,7 @@ let rec eval (st: SymbolTable) ast =
             let block = fv.UltimateBlockNode.Value
             // make sure, we still add a referenced node candidate to the scope of a reference
             let candidates = searchForCandidatesOfReferenceBlock fv
-            let classes = candidates |> List.filter (fun c -> c.IsClass())
+            let classes = candidates |> List.filter (fun c -> c.Name = PrimClassL)
             let constructors = candidates |> List.filter (fun c -> c.Name = LiteralCtorL) 
             if constructors.Length > 0 then
                 // if among the candidates are class constructors (that due to the FPL syntax always have a signature with 0 or more parameters)

@@ -4086,7 +4086,6 @@ let hasParentheses (fv:FplValue) =
         fv.Scope.Count > 0
     | PrimFuncionalTermL 
     | PrimPredicateL 
-    | PrimClassL
     | LiteralCtorL 
     | PrimMandatoryPredicateL
     | PrimMandatoryFunctionalTermL -> true
