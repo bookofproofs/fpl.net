@@ -4287,28 +4287,28 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplReturn", "00d" ->
             Assert.IsInstanceOfType<FplFunctionalTerm>(parent)
-            Assert.AreEqual<int>(2, parent.ArgList.Count) // mapping + return 
-            Assert.AreEqual<int>(2, parent.Scope.Count) // variable
+            Assert.AreEqual<int>(3, parent.ArgList.Count) // mapping + assignment + return 
+            Assert.AreEqual<int>(1, parent.Scope.Count) // variable
             Assert.IsInstanceOfType<FplReturn>(node)
             Assert.AreEqual<int>(1, node.ArgList.Count) // reference
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplReturn", "00e" ->
             Assert.IsInstanceOfType<FplFunctionalTerm>(parent)
-            Assert.AreEqual<int>(2, parent.ArgList.Count) // mapping + return 
+            Assert.AreEqual<int>(3, parent.ArgList.Count) // mapping + return 
             Assert.AreEqual<int>(1, parent.Scope.Count) // variable
             Assert.IsInstanceOfType<FplReturn>(node)
             Assert.AreEqual<int>(1, node.ArgList.Count) // reference
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplReturn", "00f" ->
             Assert.IsInstanceOfType<FplFunctionalTerm>(parent)
-            Assert.AreEqual<int>(2, parent.ArgList.Count) // mapping + return 
+            Assert.AreEqual<int>(3, parent.ArgList.Count) // mapping + return 
             Assert.AreEqual<int>(0, parent.Scope.Count) 
             Assert.IsInstanceOfType<FplReturn>(node)
             Assert.AreEqual<int>(1, node.ArgList.Count) // intrinsic index
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplReturn", "00g" ->
             Assert.IsInstanceOfType<FplFunctionalTerm>(parent)
-            Assert.AreEqual<int>(2, parent.ArgList.Count) // mapping + return 
+            Assert.AreEqual<int>(3, parent.ArgList.Count) // mapping + assignment + return 
             Assert.AreEqual<int>(1, parent.Scope.Count) // variable
             Assert.IsInstanceOfType<FplReturn>(node)
             Assert.AreEqual<int>(1, node.ArgList.Count) // reference
