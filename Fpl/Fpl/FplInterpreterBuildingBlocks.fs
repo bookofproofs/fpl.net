@@ -150,6 +150,11 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Intrinsic")
         let fv = variableStack.PeekEvalStack()
         fv.IsIntrinsic <- true // flag that this block is intrinsic
+        match fv.Name with 
+        | PrimClassL ->
+            let cl = fv :?> FplClass
+            cl.AddDefaultConstructor()
+        | _ -> ()
         st.EvalPop()
     | Ast.Error  ->   
         st.EvalPush("Error")
@@ -926,13 +931,7 @@ let rec eval (st: SymbolTable) ast =
             else
                 let candidates = searchForCandidatesOfReferenceBlock refBlock
                 match checkSIG04Diagnostics refBlock candidates with
-                | Some matchedCandidate -> 
-                    if matchedCandidate.IsIntrinsic && matchedCandidate.Name = PrimClassL then 
-                        let defaultConstructor = new FplDefaultConstructor(matchedCandidate.FplId, (refBlock.StartPos, refBlock.EndPos), refBlock)
-                        defaultConstructor.EmbedInSymbolTable defaultConstructor.Parent
-                        defaultConstructor.ToBeConstructedClass <- Some matchedCandidate
-                    else
-                        refBlock.Scope.TryAdd(refBlock.FplId, matchedCandidate) |> ignore
+                | Some matchedCandidate -> refBlock.Scope.TryAdd(refBlock.FplId, matchedCandidate) |> ignore
                 | _ -> ()
 
             variableStack.PopEvalStack()
@@ -1792,16 +1791,18 @@ let rec eval (st: SymbolTable) ast =
     | Ast.ClassDefinitionBlock((pos1, pos2), optDefBlock) ->
         st.EvalPush("ClassDefinitionBlock")
         let classBlock = variableStack.PeekEvalStack()
+        let cl = classBlock :?> FplClass
         match optDefBlock with 
         | Some (classContentAst, optPropertyListAsts) ->
             eval st classContentAst
             optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
-            let cls = classBlock :?> FplClass
-            let properties = cls.GetProperties()
-            let constructors = cls.GetConstructors()
-            if properties.IsEmpty && cls.ArgList.Count = 0 && constructors.IsEmpty then
+            let properties = cl.GetProperties()
+            let constructors = cl.GetConstructors()
+            if properties.IsEmpty && cl.ArgList.Count = 0 && constructors.IsEmpty then
                 emitST001diagnostics classBlock.Name pos1 pos2
-        | None -> classBlock.IsIntrinsic <- true
+        | None -> 
+            cl.IsIntrinsic <- true
+            cl.AddDefaultConstructor()
         st.EvalPop()
     // | DerivedPredicate of Ast
     | Ast.DefinitionClass((pos1, pos2),(((classSignatureAst, optInheritedClassTypeListAst), optUserDefinedObjSymAst), classBlockAst)) ->

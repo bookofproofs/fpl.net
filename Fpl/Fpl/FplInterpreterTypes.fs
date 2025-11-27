@@ -1727,6 +1727,36 @@ type FplGenericConstructor(name, positions: Positions, parent: FplValue) as this
 
     override this.RunOrder = None
 
+/// This constructor is only used for creating instances of classes that have no declared constructors.
+/// In FPL, such classes are "intrinsic". When the default constructor calls the constructor
+/// of some base classes, it is only possible if those classes are also intrisic or have declared constructors
+/// without parameters. 
+type FplDefaultConstructor(name, positions: Positions, parent: FplValue) =
+    inherit FplGenericConstructor(name, positions, parent)
+
+    override this.Name = PrimDefaultConstructor
+    override this.ShortName = LiteralCtor
+
+    override this.Clone () =
+        let ret = new FplDefaultConstructor(this.FplId, (this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Type signatureType =
+        match signatureType with
+        | SignatureType.Name
+        | SignatureType.Mixed -> $"{this.FplId}()" 
+        | SignatureType.Type -> this.TypeId
+
+    override this.Represent() = $"{this.TypeId}()" 
+
+    override this.EmbedInSymbolTable nextOpt = 
+        this.CheckConsistency()
+        match nextOpt with 
+        | Some next ->
+            next.Scope.TryAdd(this.FplId, this) |> ignore
+        | _ -> ()
+
 type FplConstructor(positions: Positions, parent: FplValue) as this =
     inherit FplGenericConstructor(parent.FplId, positions, parent)
     let mutable _signStartPos = Position("", 0L, 0L, 0L)
@@ -1861,6 +1891,13 @@ and FplClass(positions: Positions, parent: FplValue) =
         tryAddToParentUsingFplId this 
 
     override this.RunOrder = None
+
+    member this.AddDefaultConstructor () = 
+        let defaultConstructor = new FplDefaultConstructor(this.FplId, (this.StartPos, this.EndPos), this)
+        defaultConstructor.EmbedInSymbolTable defaultConstructor.Parent
+        defaultConstructor.ToBeConstructedClass <- Some this
+
+
 
 type FplBase(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
@@ -4087,6 +4124,7 @@ let hasParentheses (fv:FplValue) =
     | PrimFuncionalTermL 
     | PrimPredicateL 
     | LiteralCtorL 
+    | PrimDefaultConstructor 
     | PrimMandatoryPredicateL
     | PrimMandatoryFunctionalTermL -> true
     | PrimRefL -> 
@@ -5021,36 +5059,6 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
                     | _ -> ()
         | _ -> ()
 
-/// This constructor is only used for creating instances of classes that have no declared constructors.
-/// In FPL, such classes are "intrinsic". When the default constructor calls the constructor
-/// of some base classes, it is only possible if those classes are also intrisic or have declared constructors
-/// without parameters. 
-type FplDefaultConstructor(name, positions: Positions, parent: FplValue) =
-    inherit FplGenericConstructor(name, positions, parent)
-
-    override this.Name = PrimDefaultConstructor
-    override this.ShortName = LiteralCtor
-
-    override this.Clone () =
-        let ret = new FplDefaultConstructor(this.FplId, (this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.Type signatureType =
-        match signatureType with
-        | SignatureType.Name
-        | SignatureType.Mixed -> $"{this.FplId}()" 
-        | SignatureType.Type -> this.TypeId
-
-    override this.Represent() = $"{this.TypeId}()" 
-
-    override this.EmbedInSymbolTable nextOpt = 
-        this.CheckConsistency()
-        match nextOpt with 
-        | Some next ->
-            next.Scope.TryAdd(this.FplId, this) |> ignore
-        | _ -> ()
-
 type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
     inherit FplGenericStmt(positions, parent)
 
@@ -5493,7 +5501,7 @@ let findCandidatesByName (st: SymbolTable) (name: string) withClassConstructors 
                 if withClassConstructors && block.IsClass() then
                     block.Scope
                     |> Seq.map (fun kvp -> kvp.Value)
-                    |> Seq.filter (fun (fv: FplValue) -> (fv.Name = LiteralCtorL))
+                    |> Seq.filter (fun (fv: FplValue) -> (fv.Name = LiteralCtorL || fv.Name = PrimDefaultConstructor))
                     |> Seq.iter (fun (fv: FplValue) -> pm.Add(fv))
 
                 if withCorollariesOrProofs && (block :? FplGenericTheoremLikeStmt) then 

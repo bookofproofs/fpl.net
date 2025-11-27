@@ -2007,21 +2007,21 @@ type SymbolTableStructure() =
         | "FplBase", "00" ->
             Assert.IsInstanceOfType<FplClass>(parent)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
-            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplBase>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplBase", "01" ->
             Assert.IsInstanceOfType<FplClass>(parent)
             Assert.AreEqual<int>(3, parent.ArgList.Count)
-            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplBase>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(1, node.Scope.Count)
         | "FplBase", "02" ->
             Assert.IsInstanceOfType<FplClass>(parent)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
-            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplBase>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
@@ -2136,21 +2136,21 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplClass>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
-            Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.AreEqual<int>(1, node.Scope.Count)
         | "FplClass", "00a" -> 
             Assert.IsInstanceOfType<FplTheory>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplClass>(node)
             Assert.AreEqual<int>(2, node.ArgList.Count) // base classes are added only if they were previously declared
-            Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.AreEqual<int>(1, node.Scope.Count) // 1 default constructor
         | "FplClass", "01" -> 
             Assert.IsInstanceOfType<FplTheory>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(4, parent.Scope.Count)
             Assert.IsInstanceOfType<FplClass>(node)
             Assert.AreEqual<int>(3, node.ArgList.Count) // three base classes 
-            Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.AreEqual<int>(1, node.Scope.Count) // 1 default constructor
         | "FplClass", "02" -> 
             Assert.IsInstanceOfType<FplTheory>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
@@ -2171,7 +2171,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplClass>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
-            Assert.AreEqual<int>(4, node.Scope.Count) // 4 properties
+            Assert.AreEqual<int>(5, node.Scope.Count) // 4 properties + 1 default constructor
         | "FplClass", "04" -> 
             Assert.IsInstanceOfType<FplTheory>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
@@ -2407,7 +2407,7 @@ type SymbolTableStructure() =
         
         match nodeType, varVal with
         | "FplDefaultConstructor", "00" ->
-            Assert.IsInstanceOfType<FplReference>(parent)
+            Assert.IsInstanceOfType<FplClass>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplDefaultConstructor>(node)
@@ -2415,7 +2415,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
             Assert.AreEqual<int>(1, node.ValueList.Count) // instance
         | "FplDefaultConstructor", "01" ->
-            Assert.IsInstanceOfType<FplReference>(parent)
+            Assert.IsInstanceOfType<FplClass>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplDefaultConstructor>(node)
@@ -3314,7 +3314,7 @@ type SymbolTableStructure() =
         | "FplMandatoryFunctionalTerm", "02" -> 
             Assert.IsInstanceOfType<FplClass>(parent) // class parent
             Assert.AreEqual<int>(0, parent.ArgList.Count) 
-            Assert.AreEqual<int>(1, parent.Scope.Count)
+            Assert.AreEqual<int>(2, parent.Scope.Count)
             Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(node)
             Assert.AreEqual<int>(1, node.ArgList.Count) // intrinsic with mapping 
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
@@ -3335,7 +3335,7 @@ type SymbolTableStructure() =
         | "FplMandatoryFunctionalTerm", "05" -> 
             Assert.IsInstanceOfType<FplClass>(parent) // class parent
             Assert.AreEqual<int>(0, parent.ArgList.Count) // class's base class
-            Assert.AreEqual<int>(1, parent.Scope.Count)
+            Assert.AreEqual<int>(2, parent.Scope.Count)
             Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(node)
             Assert.AreEqual<int>(2, node.ArgList.Count) // non-intrinsic with mapping and return stmt
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
@@ -3404,7 +3404,7 @@ type SymbolTableStructure() =
         | "FplMandatoryPredicate", "02" -> 
             Assert.IsInstanceOfType<FplClass>(parent) // class parent
             Assert.AreEqual<int>(0, parent.ArgList.Count) // class's base class
-            Assert.AreEqual<int>(1, parent.Scope.Count)
+            Assert.AreEqual<int>(2, parent.Scope.Count)
             Assert.IsInstanceOfType<FplMandatoryPredicate>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count) // intrinsic
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
@@ -3425,7 +3425,7 @@ type SymbolTableStructure() =
         | "FplMandatoryPredicate", "05" -> 
             Assert.IsInstanceOfType<FplClass>(parent) // class parent
             Assert.AreEqual<int>(0, parent.ArgList.Count) // class's base class
-            Assert.AreEqual<int>(1, parent.Scope.Count)
+            Assert.AreEqual<int>(2, parent.Scope.Count)
             Assert.IsInstanceOfType<FplMandatoryPredicate>(node)
             Assert.AreEqual<int>(1, node.ArgList.Count) // non-intrinsic 
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
@@ -4288,7 +4288,7 @@ type SymbolTableStructure() =
         | "FplReturn", "00d" ->
             Assert.IsInstanceOfType<FplFunctionalTerm>(parent)
             Assert.AreEqual<int>(2, parent.ArgList.Count) // mapping + return 
-            Assert.AreEqual<int>(1, parent.Scope.Count) // variable
+            Assert.AreEqual<int>(2, parent.Scope.Count) // variable
             Assert.IsInstanceOfType<FplReturn>(node)
             Assert.AreEqual<int>(1, node.ArgList.Count) // reference
             Assert.AreEqual<int>(0, node.Scope.Count)
