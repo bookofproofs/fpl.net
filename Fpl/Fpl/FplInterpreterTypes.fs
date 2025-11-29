@@ -2902,6 +2902,45 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
 
     override this.Clone () = this // do not clone references to prevent stack overflow 
 
+    override this.Run variableStack =
+        this.Debug "Run"
+        if this.Scope.Count > 0 then 
+            let called = 
+                this.Scope 
+                |> Seq.map (fun kvp -> kvp.Value) 
+                |> Seq.toList 
+                |> List.head
+            match called.Name with
+            | LiteralCtorL
+            | PrimBaseConstructorCall
+            | PrimPredicateL
+            | PrimFuncionalTermL
+            | PrimMandatoryFunctionalTermL
+            | PrimMandatoryPredicateL ->
+                match box called with
+                | :? ICanBeCalledRecusively as calledRecursively when calledRecursively.CallCounter > maxRecursion -> () // stop recursion
+                | _ ->
+                    let pars = variableStack.SaveVariables(called) 
+                    let args = this.ArgList |> Seq.toList
+                    // run all arguments before replacing variables with their values
+                    args |> List.iter (fun arg -> arg.Run variableStack)
+                    variableStack.ReplaceVariables pars args
+                    // store the position of the caller
+                    variableStack.CallerStartPos <- this.StartPos
+                    variableStack.CallerEndPos <- this.EndPos
+                    // run all statements of the called node
+                    called.Run variableStack
+                    this.SetValuesOf called
+                    variableStack.RestoreVariables(called)
+            | PrimDelegateDecrementL
+            | PrimDelegateEqualL ->
+                called.Run variableStack
+                this.SetValuesOf called
+            | _ -> ()
+        elif this.ArgList.Count = 1 then
+            let arg = this.ArgList[0]
+            arg.Run variableStack
+
     override this.RunOrder = None
 
 type FplReference(positions: Positions, parent: FplValue) =
@@ -3022,7 +3061,6 @@ type FplReference(positions: Positions, parent: FplValue) =
         | _, ArgType.Parentheses, None ->
             $"{head}({args})"
 
-
     override this.Represent () = 
         if this.ValueList.Count = 0 then 
             if this.Scope.Count > 0 && not (this.Scope.ContainsKey(".")) then 
@@ -3094,45 +3132,6 @@ type FplReference(positions: Positions, parent: FplValue) =
                 LiteralUndef
             else
                 subRepr            
-
-    override this.Run variableStack =
-        this.Debug "Run"
-        if this.Scope.Count > 0 then 
-            let called = 
-                this.Scope 
-                |> Seq.map (fun kvp -> kvp.Value) 
-                |> Seq.toList 
-                |> List.head
-            match called.Name with
-            | LiteralCtorL
-            | PrimBaseConstructorCall
-            | PrimPredicateL
-            | PrimFuncionalTermL
-            | PrimMandatoryFunctionalTermL
-            | PrimMandatoryPredicateL ->
-                match box called with
-                | :? ICanBeCalledRecusively as calledRecursively when calledRecursively.CallCounter > maxRecursion -> () // stop recursion
-                | _ ->
-                    let pars = variableStack.SaveVariables(called) 
-                    let args = this.ArgList |> Seq.toList
-                    // run all arguments before replacing variables with their values
-                    args |> List.iter (fun arg -> arg.Run variableStack)
-                    variableStack.ReplaceVariables pars args
-                    // store the position of the caller
-                    variableStack.CallerStartPos <- this.StartPos
-                    variableStack.CallerEndPos <- this.EndPos
-                    // run all statements of the called node
-                    called.Run variableStack
-                    this.SetValuesOf called
-                    variableStack.RestoreVariables(called)
-            | PrimDelegateDecrementL
-            | PrimDelegateEqualL ->
-                called.Run variableStack
-                this.SetValuesOf called
-            | _ -> ()
-        elif this.ArgList.Count = 1 then
-            let arg = this.ArgList[0]
-            arg.Run variableStack
 
     override this.EmbedInSymbolTable nextOpt = 
         match nextOpt with 
@@ -3498,10 +3497,6 @@ type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
     override this.EmbedInSymbolTable _ = 
         this.CheckConsistency()
         addExpressionToParentArgList this
-
-    override this.Run variableStack = 
-        // todo implement run
-        this.Debug "Run"
 
 
 /// Reference to "parent" using the FPL parent keyword. 
