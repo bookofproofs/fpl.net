@@ -1640,6 +1640,34 @@ type FplInstance(positions: Positions, parent: FplValue) =
 
     override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
 
+type FplBase(positions: Positions, parent: FplValue) =
+    inherit FplValue(positions, Some parent)
+
+    override this.Name = LiteralBase
+    override this.ShortName = LiteralBase
+
+    override this.Clone () =
+        let ret = new FplBase((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Type _ = this.FplId
+
+    override this.Represent () = LiteralUndef
+
+    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
+
+    override this.Run variableStack = 
+        this.Debug "Run"
+
+    override this.RunOrder = None
+
+    member this.BaseClass = 
+        if this.Scope.Count > 0 then
+            Some (this.Scope.Values |> Seq.head)
+        else 
+            None    
+
 [<AbstractClass>]
 type FplGenericConstructor(name, positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
@@ -1695,18 +1723,20 @@ type FplGenericConstructor(name, positions: Positions, parent: FplValue) as this
         this.Debug "Run"
 
         let rec createSubInstance (classDef:FplValue) (instance:FplValue) (baseInstance:FplValue)=
-            if classDef.IsIntrinsic then
-                classDef.ArgList
-                |> Seq.filter (fun fv -> fv.Name = PrimClassL)
-                |> Seq.iter (fun baseClass ->
+            classDef.ArgList
+            |> Seq.filter (fun fv -> fv.Name = LiteralBase)
+            |> Seq.map (fun fv -> fv :?> FplBase)
+            |> Seq.map (fun fv -> fv.BaseClass)
+            |> Seq.iter (fun baseClassOpt ->
+                match baseClassOpt with
+                | Some baseClass ->
                     let subInstance = new FplInstance((this.StartPos, this.EndPos), this)
                     subInstance.FplId <- baseClass.FplId
                     subInstance.TypeId <- subInstance.FplId
                     createSubInstance baseClass subInstance baseInstance
                     instance.ArgList.Add subInstance
-                )
-            else
-                () // todo handle non-intrisic
+                | _ -> ()
+            )
 
         let instance = new FplInstance((this.StartPos, this.EndPos), this)
         match this.ToBeConstructedClass with
@@ -1804,10 +1834,6 @@ type FplConstructor(positions: Positions, parent: FplValue) as this =
 
     override this.Represent () = this.Type(SignatureType.Mixed)
 
-    override this.Run _ = 
-        this.Debug "Run"
-        this.SetValue(new FplInstance((this.StartPos, this.EndPos), this))
-
     override this.CheckConsistency () = 
         base.CheckConsistency()
         // check if the constructor calls all necessary parent classes
@@ -1896,36 +1922,7 @@ and FplClass(positions: Positions, parent: FplValue) =
         let defaultConstructor = new FplDefaultConstructor(this.FplId, (this.StartPos, this.EndPos), this)
         defaultConstructor.EmbedInSymbolTable defaultConstructor.Parent
         defaultConstructor.ToBeConstructedClass <- Some this
-
-
-
-type FplBase(positions: Positions, parent: FplValue) =
-    inherit FplValue(positions, Some parent)
-
-    override this.Name = LiteralBase
-    override this.ShortName = LiteralBase
-
-    override this.Clone () =
-        let ret = new FplBase((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.Type _ = this.FplId
-
-    override this.Represent () = LiteralUndef
-
-    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
-
-    override this.Run variableStack = 
-        this.Debug "Run"
-
-    override this.RunOrder = None
-
-    member this.BaseClass = 
-        if this.Scope.Count > 0 then
-            Some (this.Scope.Values |> Seq.head)
-        else 
-            None        
+    
 
 type ICanBeCalledRecusively =
     abstract member CallCounter : int
