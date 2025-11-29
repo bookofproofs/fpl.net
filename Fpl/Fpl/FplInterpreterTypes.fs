@@ -2896,14 +2896,20 @@ type ArgType =
     | Parentheses
     | Nothing
 
-type FplReference(positions: Positions, parent: FplValue) =
+[<AbstractClass>]
+type FplGenericReference(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
+
+    override this.Clone () = this // do not clone references to prevent stack overflow 
+
+    override this.RunOrder = None
+
+type FplReference(positions: Positions, parent: FplValue) =
+    inherit FplGenericReference(positions, parent)
     let mutable _argType = ArgType.Nothing
 
     override this.Name = PrimRefL
     override this.ShortName = PrimRef
-
-    override this.Clone () = this // do not clone references to prevent stack overflow 
 
     override this.SetValue fv = 
         if this.Scope.ContainsKey(this.FplId) then
@@ -3143,7 +3149,360 @@ type FplReference(positions: Positions, parent: FplValue) =
             next.EndPos <- this.EndPos
         | _ -> ()
 
-    override this.RunOrder = None
+/// Gets the list of arguments of an FplValue if any
+let getArguments (fv:FplValue) =
+    fv.ArgList 
+    |> Seq.toList
+
+/// Gets the list of parameters of an FplValue if any
+let getParameters (fv:FplValue) =
+    match fv.Name with
+    | PrimVariableL ->
+        fv.Scope.Values |> Seq.toList
+    | PrimFuncionalTermL
+    | PrimPredicateL
+    | LiteralCtorL
+    | PrimMandatoryPredicateL
+    | PrimMandatoryFunctionalTermL ->
+        fv.Scope.Values |> Seq.filter (fun fv -> isSignatureVar fv) |> Seq.toList
+    | _ -> []
+
+/// Checks, if an FplValue uses parentheses
+let hasParentheses (fv:FplValue) = 
+    match fv.Name with 
+    | PrimVariableL ->
+        fv.Scope.Count > 0
+    | PrimFuncionalTermL 
+    | PrimPredicateL 
+    | LiteralCtorL 
+    | PrimDefaultConstructor 
+    | PrimMandatoryPredicateL
+    | PrimMandatoryFunctionalTermL -> true
+    | PrimRefL -> 
+        let refFv = fv :?> FplReference
+        (refFv.ArgType = ArgType.Parentheses)
+    | _ -> false
+
+/// Checks if the baseClassName is contained in the classRoot's base classes (it derives from).
+/// If so, the function will produce Some path where path equals a string of base classes concatenated by ":".
+/// The classRoot is required to have an FplValueType.Class.
+let findInheritanceChains (baseNode: FplValue) =
+    let distinctNames = HashSet<string>()
+    let paths = Dictionary<string,string>() // collects all paths (keys) and errors (values)
+    let predecessors = Dictionary<string,List<string>>() // inner dictionary = predecessors
+
+    let rec findChains (bNode: FplValue) predecessorName accPath =
+        let currName = bNode.FplId
+        let newPath = 
+            if accPath = String.Empty then 
+                currName
+            else
+                $"{accPath}:{currName}" 
+        match distinctNames.Contains currName with
+        | true -> // a cross-inheritance between two paths or a cycle detected
+            predecessors[currName].Add predecessorName
+            if predecessors[currName].Count = 1 then 
+                // a cycle detected since currNode had only one predecessor so far
+                // and thus, it must be the first one
+                paths[newPath] <- $"cycle detected" 
+            else
+                // a cross-inheritance
+                let cross = predecessors[currName] |> Seq.distinct |> String.concat "` and `"
+                if cross.Contains " and " then 
+                    paths[newPath] <- $"cross-inheritance not supported, `{currName}` is base for `{cross}`."
+                else 
+                    paths[newPath] <- $"duplicate inheritance from `{currName}` detected." 
+        | false -> // a node encountered the very first time
+            // add node name to distinct names
+            distinctNames.Add currName |> ignore
+            // add predecessor to node name
+            predecessors.Add (currName, List<string>())
+            predecessors[currName].Add predecessorName
+            match baseNode.Name, bNode.Name with 
+            | PrimFuncionalTermL, PrimFuncionalTermL 
+            | PrimClassL, PrimClassL ->
+                bNode.ArgList
+                |> Seq.filter (fun subNode -> subNode :? FplBase)
+                |> Seq.iter (fun subNode ->
+                    findChains subNode currName newPath 
+                )
+            | PrimFuncionalTermL, LiteralBase 
+            | PrimClassL, LiteralBase ->
+                if bNode.Scope.Count > 0 then
+                    let nextBNode = bNode.Scope.Values |> Seq.head
+                    let baseNodes = 
+                        nextBNode.ArgList
+                        |> Seq.filter (fun subNode -> subNode :? FplBase)
+                        |> Seq.toList
+                    if baseNodes.Length > 0 then 
+                        baseNodes
+                        |> List.iter (fun subNode ->
+                            findChains subNode currName newPath 
+                        )
+                    elif paths.ContainsKey newPath then 
+                        paths[newPath] <- $"duplicate inheritance detected, `{newPath}`." 
+                    else
+                        paths.Add (newPath, "ok")
+                else 
+                    if paths.ContainsKey newPath then 
+                        paths[newPath] <- $"duplicate inheritance detected, `{newPath}`." 
+                    else
+                        paths.Add (newPath, "ok")
+            | _ -> ()
+            
+    match baseNode.Name with 
+    | PrimClassL
+    | PrimFuncionalTermL -> ()
+    | _ -> failwith ($"Expecting a class or a functional term node, got {baseNode.Name}")
+    
+    findChains baseNode "" ""
+    if paths.Count = 0 then 
+        distinctNames |> Seq.iter (fun s -> paths.Add (s, "ok"))
+    paths
+
+
+/// Checks if a node inherits from some type.
+let inheritsFrom (node:FplValue) someType = 
+    match node, someType with 
+    | :? FplClass, "obj" -> true
+    | _ -> 
+        let inheritanceList = findInheritanceChains node 
+        let inheritanceFound = 
+            inheritanceList 
+            |> Seq.filter (fun kvp -> 
+                kvp.Value = "ok" && 
+                (
+                    kvp.Key.EndsWith $":{someType}" 
+                || kvp.Key.Contains $":{someType}:"
+                )
+            )
+            |> Seq.tryLast
+        match inheritanceFound with 
+        | Some _ -> true
+        | None -> false
+
+/// Tries to match parameters of an FplValue with its arguments recursively
+let rec mpwa aHasParentheses pHasParentheses (args: FplValue list) (pars: FplValue list) =
+    match (args, pars) with
+    | (a :: ars, p :: prs) ->
+        let aType = a.Type SignatureType.Type
+        let pType = p.Type SignatureType.Type
+
+        if aType = pType then
+            mpwa (hasParentheses a) (hasParentheses p) ars prs
+        elif pType.StartsWith(LiteralTpl) || pType.StartsWith(LiteralTplL) then
+            mpwa (hasParentheses a) (hasParentheses p)  ars prs
+        elif pType = $"*{aType}" || pType.StartsWith("*") && aType = "" && aHasParentheses then
+            if ars.Length > 0 then 
+                mpwa (hasParentheses a) (hasParentheses p) ars pars 
+            else 
+                None
+        elif pType.StartsWith("+") && aType = "" && aHasParentheses then
+            Some($"() does not match `{p.Type(SignatureType.Name)}:{pType}`")
+        elif pType = $"+{aType}" then
+            if ars.Length > 0 then 
+                mpwa (hasParentheses a) (hasParentheses p) ars pars 
+            else 
+                None
+        elif
+            aType.Length > 0
+            && Char.IsUpper(aType[0])
+            && a.Name = PrimRefL
+            && a.Scope.Count = 1
+        then
+            let var = a.Scope.Values |> Seq.toList |> List.head
+
+            if var.Scope.Count > 0 then
+                let cl = var.Scope.Values |> Seq.head
+                match cl with
+                | :? FplClass ->
+                    if inheritsFrom cl pType then 
+                        mpwa (hasParentheses a) (hasParentheses p) ars prs
+                    else
+                        Some(
+                            $"`{a.Type(SignatureType.Name)}:{aType}` neither matches `{p.Type(SignatureType.Name)}:{pType}` nor the base classes"
+                        )
+                | _ ->
+                    // this case does not occur but we cover it for completeness reasons
+                    Some(
+                        $"`{a.Type(SignatureType.Name)}:{aType}` is undefined and doesn't match `{p.Type(SignatureType.Name)}:{pType}`"
+                    )
+            else
+                Some(
+                    $"`{a.Type(SignatureType.Name)}:{aType}` is undefined and does not match `{p.Type(SignatureType.Name)}:{pType}`"
+                )
+        elif aType.StartsWith(pType + "(") then
+            None
+        elif aHasParentheses && aType = "" && pType <> "" then
+            Some($"`()` does not match `{p.Type(SignatureType.Name)}:{pType}`")
+        elif aType = LiteralPred && pType.StartsWith(LiteralPred) then
+            None
+        elif aType = LiteralFunc && pType.StartsWith(LiteralFunc) then
+            None
+        elif aType.StartsWith(LiteralFunc) then
+            let someMap = getMapping a
+
+            match someMap with
+            | Some map -> mpwa (hasParentheses a) (hasParentheses p) [ map ] [ p ]
+            | _ -> Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
+        else
+            Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
+    | ([], p :: prs) ->
+        let pType = p.Type(SignatureType.Type)
+        match p with 
+        | :? FplClass as cl ->
+            let constructors = cl.GetConstructors()
+            if constructors.Length = 0 then
+                None
+            else
+                Some($"missing argument for `{p.Type(SignatureType.Name)}:{pType}`")
+        | _ when p.Name = PrimVariableManyL ->
+            None
+        | _ -> 
+            Some($"missing argument for `{p.Type(SignatureType.Name)}:{pType}`")
+    | (a :: [], []) ->
+        if a.FplId = "" && aHasParentheses then
+            None
+        else
+            let aType = a.Type(SignatureType.Type)
+            Some($"no matching parameter for `{a.Type(SignatureType.Name)}:{aType}`")
+    | (a :: ars, []) ->
+        let aType = a.Type(SignatureType.Type)
+        Some($"no matching parameter for `{a.Type(SignatureType.Name)}:{aType}`")
+    | ([], []) when aHasParentheses <> pHasParentheses -> 
+        Some($"calling and called nodes have mismatching use of parentheses")
+    | ([], []) -> None
+
+
+/// Tries to match the arguments of `fva` FplValue with the parameters of the `fvp` FplValue and returns
+/// Some(specific error message) or None, if the match succeeded.
+let matchArgumentsWithParameters (fva: FplValue) (fvp: FplValue) =
+    let parameters = getParameters fvp
+    let arguments = getArguments fva
+
+    let argResult = mpwa (hasParentheses fva) (hasParentheses fvp) arguments parameters
+
+    match argResult with
+    | Some aErr -> 
+        match fvp.Name with 
+        | PrimVariableManyL
+        | PrimVariableMany1L ->
+            Some($"{aErr} in {qualifiedName fvp}:{fvp.Type SignatureType.Type}")
+        | _ -> 
+            Some($"{aErr} in {qualifiedName fvp}")
+    | None -> None
+
+/// Tries to match the signatures of toBeMatched with the signatures of all candidates and accoumulates any
+/// error messages in accResultList.
+let rec checkCandidates (toBeMatched: FplValue) (candidates: FplValue list) (accResultList: string list) =
+    match candidates with
+    | [] -> (None, accResultList)
+    | candidate :: candidates ->
+        match matchArgumentsWithParameters toBeMatched candidate with
+        | None -> (Some candidate, [])
+        | Some errMsg -> checkCandidates toBeMatched candidates (accResultList @ [ errMsg ])
+
+/// Checks if there is a candidate among the candiedates that matches the signature of a calling FplValue and returns this as an option.
+let checkSIG04Diagnostics (calling:FplValue) (candidates: FplValue list) = 
+    match checkCandidates calling candidates [] with
+    | (Some candidate,_) -> Some candidate // no error occured
+    | (None, errList) -> 
+        emitSIG04Diagnostics (calling.Type SignatureType.Mixed) candidates.Length errList calling.StartPos calling.EndPos
+        None
+
+type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
+    inherit FplGenericReference(positions, parent)
+
+    do 
+        this.FplId <- LiteralObj
+        this.TypeId <- LiteralObj
+
+    override this.Name = PrimBaseConstructorCall
+    override this.ShortName = PrimStmt
+
+    override this.Type signatureType = 
+        let head = getFplHead this signatureType
+        let propagate = propagateSignatureType signatureType
+        let args =
+            this.ArgList
+            |> Seq.map (fun fv -> fv.Type propagate)
+            |> String.concat ", "
+        sprintf "%s(%s)" head args
+
+    override this.Represent () = LiteralUndef
+
+    override this.CheckConsistency() = 
+        base.CheckConsistency()
+
+        // Check the base constructor call's id is the same as one of the classes this class is derived from,
+        let outerClassOpt = this.UltimateBlockNode
+        let enclosingConstructorOpt = this.NextBlockNode
+
+        let registerParentConstructor() =
+            match enclosingConstructorOpt with 
+            | Some (:? FplConstructor as ctor) ->
+                if ctor.ParentConstructorCalls.Contains(this.FplId) then 
+                    // todo duplicate constructor call
+                    emitID021Diagnostics this.FplId this.StartPos
+                else
+                    ctor.ParentConstructorCalls.Add this.FplId |> ignore
+            | _ -> ()
+
+        match outerClassOpt with
+        | Some (:? FplClass as outerClass) ->
+            let baseClassObjectOpt = 
+                outerClass.ArgList 
+                |> Seq.filter (fun pc -> pc.FplId = this.FplId)
+                |> Seq.tryHead
+                |> Option.map (fun (pc:FplValue) -> pc :?> FplBase)
+
+            match baseClassObjectOpt with 
+            | Some baseClassObject ->
+                match baseClassObject.BaseClass with
+                | Some baseClass ->
+                    // now, try to match a constructor of the parentClass based on the signature of this base constructor call
+                    match baseClass.IsIntrinsic, this.ArgList.Count with
+                    | true, 0 ->
+                        // call of a constructor of an intrinsic class (i.e., that is missing any constructor) with 0 paramters
+                        // add "default constructor reference"
+                        let defaultConstructor = new FplDefaultConstructor(baseClass.FplId, (this.StartPos, this.EndPos), this)
+                        defaultConstructor.EmbedInSymbolTable defaultConstructor.Parent
+                        defaultConstructor.ToBeConstructedClass <- Some baseClass
+                        registerParentConstructor()
+                    | true, _ ->
+                        // the call uses parameters that are not possible for calling a non-existing constructor 
+                        // obj() or an intrinsic class
+                        emitID022Diagnostics baseClass.FplId this.StartPos this.EndPos
+                    | false, _ ->
+                        let parentClass = baseClass :?> FplClass
+                        let candidates = parentClass.GetConstructors()
+                        match checkSIG04Diagnostics this candidates with
+                        | Some candidate ->
+                            let name = candidate.Type SignatureType.Mixed
+                            this.Scope.TryAdd(name, candidate) |> ignore
+                        | None -> ()
+                        registerParentConstructor()
+                | None ->
+                    // the base constructor call's id is not among the base classes this class is derived from
+                    let candidates = outerClass.ArgList |> Seq.map (fun fv -> fv.FplId) |> Seq.sort |> String.concat ", "
+                    emitID017Diagnostics this.FplId candidates this.StartPos this.EndPos
+            | _ ->
+                    emitID017Diagnostics this.FplId "" this.StartPos this.EndPos
+                    registerParentConstructor()
+        | _ ->
+            // this case never happens, 
+            // if so the bug will become apparent by failing to call the parent class constructor
+            () 
+
+
+    override this.EmbedInSymbolTable _ = 
+        this.CheckConsistency()
+        addExpressionToParentArgList this
+
+    override this.Run variableStack = 
+        // todo implement run
+        this.Debug "Run"
+
 
 /// Reference to "parent" using the FPL parent keyword. 
 // It will point to a parent only inside FPL properties. Otherwise, it is undefined
@@ -3998,229 +4357,6 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) =
 
                 _isReady <- this.Arity = 0 
 
-/// Checks if the baseClassName is contained in the classRoot's base classes (it derives from).
-/// If so, the function will produce Some path where path equals a string of base classes concatenated by ":".
-/// The classRoot is required to have an FplValueType.Class.
-let findInheritanceChains (baseNode: FplValue) =
-    let distinctNames = HashSet<string>()
-    let paths = Dictionary<string,string>() // collects all paths (keys) and errors (values)
-    let predecessors = Dictionary<string,List<string>>() // inner dictionary = predecessors
-
-    let rec findChains (bNode: FplValue) predecessorName accPath =
-        let currName = bNode.FplId
-        let newPath = 
-            if accPath = String.Empty then 
-                currName
-            else
-                $"{accPath}:{currName}" 
-        match distinctNames.Contains currName with
-        | true -> // a cross-inheritance between two paths or a cycle detected
-            predecessors[currName].Add predecessorName
-            if predecessors[currName].Count = 1 then 
-                // a cycle detected since currNode had only one predecessor so far
-                // and thus, it must be the first one
-                paths[newPath] <- $"cycle detected" 
-            else
-                // a cross-inheritance
-                let cross = predecessors[currName] |> Seq.distinct |> String.concat "` and `"
-                if cross.Contains " and " then 
-                    paths[newPath] <- $"cross-inheritance not supported, `{currName}` is base for `{cross}`."
-                else 
-                    paths[newPath] <- $"duplicate inheritance from `{currName}` detected." 
-        | false -> // a node encountered the very first time
-            // add node name to distinct names
-            distinctNames.Add currName |> ignore
-            // add predecessor to node name
-            predecessors.Add (currName, List<string>())
-            predecessors[currName].Add predecessorName
-            match baseNode, bNode with 
-            | :? FplFunctionalTerm, :? FplFunctionalTerm 
-            | :? FplClass, :? FplClass ->
-                bNode.ArgList
-                |> Seq.filter (fun subNode -> subNode :? FplBase)
-                |> Seq.iter (fun subNode ->
-                    findChains subNode currName newPath 
-                )
-            | :? FplFunctionalTerm, :? FplBase 
-            | :? FplClass, :? FplBase ->
-                if bNode.Scope.Count > 0 then
-                    let nextBNode = bNode.Scope.Values |> Seq.head
-                    let baseNodes = 
-                        nextBNode.ArgList
-                        |> Seq.filter (fun subNode -> subNode :? FplBase)
-                        |> Seq.toList
-                    if baseNodes.Length > 0 then 
-                        baseNodes
-                        |> List.iter (fun subNode ->
-                            findChains subNode currName newPath 
-                        )
-                    elif paths.ContainsKey newPath then 
-                        paths[newPath] <- $"duplicate inheritance detected, `{newPath}`." 
-                    else
-                        paths.Add (newPath, "ok")
-                else 
-                    if paths.ContainsKey newPath then 
-                        paths[newPath] <- $"duplicate inheritance detected, `{newPath}`." 
-                    else
-                        paths.Add (newPath, "ok")
-            | _ -> ()
-            
-    match baseNode with 
-    | :? FplClass
-    | :? FplFunctionalTerm -> ()
-    | _ -> failwith ($"Expecting a class or a functional term node, got {baseNode.Name}")
-    
-    findChains baseNode "" ""
-    if paths.Count = 0 then 
-        distinctNames |> Seq.iter (fun s -> paths.Add (s, "ok"))
-    paths
-
-/// Checks if a node inherits from some type.
-let inheritsFrom (node:FplValue) someType = 
-    match node, someType with 
-    | :? FplClass, "obj" -> true
-    | _ -> 
-        let inheritanceList = findInheritanceChains node 
-        let inheritanceFound = 
-            inheritanceList 
-            |> Seq.filter (fun kvp -> 
-                kvp.Value = "ok" && 
-                (
-                    kvp.Key.EndsWith $":{someType}" 
-                || kvp.Key.Contains $":{someType}:"
-                )
-            )
-            |> Seq.tryLast
-        match inheritanceFound with 
-        | Some _ -> true
-        | None -> false
-
-/// Gets the list of arguments of an FplValue if any
-let getArguments (fv:FplValue) =
-    fv.ArgList 
-    |> Seq.toList
-
-/// Gets the list of parameters of an FplValue if any
-let getParameters (fv:FplValue) =
-    match fv.Name with
-    | PrimVariableL ->
-        fv.Scope.Values |> Seq.toList
-    | PrimFuncionalTermL
-    | PrimPredicateL
-    | LiteralCtorL
-    | PrimMandatoryPredicateL
-    | PrimMandatoryFunctionalTermL ->
-        fv.Scope.Values |> Seq.filter (fun fv -> isSignatureVar fv) |> Seq.toList
-    | _ -> []
-
-/// Checks, if an FplValue uses parentheses
-let hasParentheses (fv:FplValue) = 
-    match fv.Name with 
-    | PrimVariableL ->
-        fv.Scope.Count > 0
-    | PrimFuncionalTermL 
-    | PrimPredicateL 
-    | LiteralCtorL 
-    | PrimDefaultConstructor 
-    | PrimMandatoryPredicateL
-    | PrimMandatoryFunctionalTermL -> true
-    | PrimRefL -> 
-        let refFv = fv :?> FplReference
-        (refFv.ArgType = ArgType.Parentheses)
-    | _ -> false
-
-/// Tries to match parameters of an FplValue with its arguments recursively
-let rec mpwa aHasParentheses pHasParentheses (args: FplValue list) (pars: FplValue list) =
-    match (args, pars) with
-    | (a :: ars, p :: prs) ->
-        let aType = a.Type SignatureType.Type
-        let pType = p.Type SignatureType.Type
-
-        if aType = pType then
-            mpwa (hasParentheses a) (hasParentheses p) ars prs
-        elif pType.StartsWith(LiteralTpl) || pType.StartsWith(LiteralTplL) then
-            mpwa (hasParentheses a) (hasParentheses p)  ars prs
-        elif pType = $"*{aType}" || pType.StartsWith("*") && aType = "" && aHasParentheses then
-            if ars.Length > 0 then 
-                mpwa (hasParentheses a) (hasParentheses p) ars pars 
-            else 
-                None
-        elif pType.StartsWith("+") && aType = "" && aHasParentheses then
-            Some($"() does not match `{p.Type(SignatureType.Name)}:{pType}`")
-        elif pType = $"+{aType}" then
-            if ars.Length > 0 then 
-                mpwa (hasParentheses a) (hasParentheses p) ars pars 
-            else 
-                None
-        elif
-            aType.Length > 0
-            && Char.IsUpper(aType[0])
-            && a.Name = PrimRefL
-            && a.Scope.Count = 1
-        then
-            let var = a.Scope.Values |> Seq.toList |> List.head
-
-            if var.Scope.Count > 0 then
-                let cl = var.Scope.Values |> Seq.head
-                match cl with
-                | :? FplClass ->
-                    if inheritsFrom cl pType then 
-                        mpwa (hasParentheses a) (hasParentheses p) ars prs
-                    else
-                        Some(
-                            $"`{a.Type(SignatureType.Name)}:{aType}` neither matches `{p.Type(SignatureType.Name)}:{pType}` nor the base classes"
-                        )
-                | _ ->
-                    // this case does not occur but we cover it for completeness reasons
-                    Some(
-                        $"`{a.Type(SignatureType.Name)}:{aType}` is undefined and doesn't match `{p.Type(SignatureType.Name)}:{pType}`"
-                    )
-            else
-                Some(
-                    $"`{a.Type(SignatureType.Name)}:{aType}` is undefined and does not match `{p.Type(SignatureType.Name)}:{pType}`"
-                )
-        elif aType.StartsWith(pType + "(") then
-            None
-        elif aHasParentheses && aType = "" && pType <> "" then
-            Some($"`()` does not match `{p.Type(SignatureType.Name)}:{pType}`")
-        elif aType = LiteralPred && pType.StartsWith(LiteralPred) then
-            None
-        elif aType = LiteralFunc && pType.StartsWith(LiteralFunc) then
-            None
-        elif aType.StartsWith(LiteralFunc) then
-            let someMap = getMapping a
-
-            match someMap with
-            | Some map -> mpwa (hasParentheses a) (hasParentheses p) [ map ] [ p ]
-            | _ -> Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
-        else
-            Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
-    | ([], p :: prs) ->
-        let pType = p.Type(SignatureType.Type)
-        match p with 
-        | :? FplClass as cl ->
-            let constructors = cl.GetConstructors()
-            if constructors.Length = 0 then
-                None
-            else
-                Some($"missing argument for `{p.Type(SignatureType.Name)}:{pType}`")
-        | _ when p.Name = PrimVariableManyL ->
-            None
-        | _ -> 
-            Some($"missing argument for `{p.Type(SignatureType.Name)}:{pType}`")
-    | (a :: [], []) ->
-        if a.FplId = "" && aHasParentheses then
-            None
-        else
-            let aType = a.Type(SignatureType.Type)
-            Some($"no matching parameter for `{a.Type(SignatureType.Name)}:{aType}`")
-    | (a :: ars, []) ->
-        let aType = a.Type(SignatureType.Type)
-        Some($"no matching parameter for `{a.Type(SignatureType.Name)}:{aType}`")
-    | ([], []) when aHasParentheses <> pHasParentheses -> 
-        Some($"calling and called nodes have mismatching use of parentheses")
-    | ([], []) -> None
-
 /// Implements the semantics of the FPL is operator.
 type FplIsOperator(positions: Positions, parent: FplValue) as this =
     inherit FplGenericPredicate(positions, parent)
@@ -4876,44 +5012,6 @@ type FplForInStmtDomain(positions: Positions, parent: FplValue) =
         // todo implement run
         this.Debug "Run"
 
-/// Tries to match the arguments of `fva` FplValue with the parameters of the `fvp` FplValue and returns
-/// Some(specific error message) or None, if the match succeeded.
-let matchArgumentsWithParameters (fva: FplValue) (fvp: FplValue) =
-    let parameters = getParameters fvp
-    let arguments = getArguments fva
-
-    let argResult = mpwa (hasParentheses fva) (hasParentheses fvp) arguments parameters
-
-    match argResult with
-    | Some aErr -> 
-        match fvp.Name with 
-        | PrimVariableManyL
-        | PrimVariableMany1L ->
-            Some($"{aErr} in {qualifiedName fvp}:{fvp.Type SignatureType.Type}")
-        | _ -> 
-            Some($"{aErr} in {qualifiedName fvp}")
-    | None -> None
-
-
-
-/// Tries to match the signatures of toBeMatched with the signatures of all candidates and accoumulates any
-/// error messages in accResultList.
-let rec checkCandidates (toBeMatched: FplValue) (candidates: FplValue list) (accResultList: string list) =
-    match candidates with
-    | [] -> (None, accResultList)
-    | candidate :: candidates ->
-        match matchArgumentsWithParameters toBeMatched candidate with
-        | None -> (Some candidate, [])
-        | Some errMsg -> checkCandidates toBeMatched candidates (accResultList @ [ errMsg ])
-
-
-let checkSIG04Diagnostics (calling:FplValue) (candidates: FplValue list) = 
-    match checkCandidates calling candidates [] with
-    | (Some candidate,_) -> Some candidate // no error occured
-    | (None, errList) -> 
-        emitSIG04Diagnostics (calling.Type SignatureType.Mixed) candidates.Length errList calling.StartPos calling.EndPos
-        None
-
 /// Implements the assigment statement in FPL.
 type FplAssignment(positions: Positions, parent: FplValue) as this =
     inherit FplGenericStmt(positions, parent)
@@ -5055,106 +5153,6 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
                     | :? IVariable as assigneeCast -> assigneeCast.IsInitializedVariable <- true
                     | _ -> ()
         | _ -> ()
-
-type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
-    inherit FplGenericStmt(positions, parent)
-
-    do 
-        this.FplId <- LiteralObj
-        this.TypeId <- LiteralObj
-
-    override this.Name = PrimBaseConstructorCall
-
-    override this.Clone () =
-        let ret = new FplBaseConstructorCall((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.Type signatureType = 
-        let head = getFplHead this signatureType
-        let propagate = propagateSignatureType signatureType
-        let args =
-            this.ArgList
-            |> Seq.map (fun fv -> fv.Type propagate)
-            |> String.concat ", "
-        sprintf "%s(%s)" head args
-
-    override this.Represent () = LiteralUndef
-
-    override this.CheckConsistency() = 
-        base.CheckConsistency()
-
-
-
-
-        // Check the base constructor call's id is the same as one of the classes this class is derived from,
-        let outerClassOpt = this.UltimateBlockNode
-        let enclosingConstructorOpt = this.NextBlockNode
-
-        let registerParentConstructor() =
-            match enclosingConstructorOpt with 
-            | Some (:? FplConstructor as ctor) ->
-                if ctor.ParentConstructorCalls.Contains(this.FplId) then 
-                    // todo duplicate constructor call
-                    emitID021Diagnostics this.FplId this.StartPos
-                else
-                    ctor.ParentConstructorCalls.Add this.FplId |> ignore
-            | _ -> ()
-
-        match outerClassOpt with
-        | Some (:? FplClass as outerClass) ->
-            let baseClassObjectOpt = 
-                outerClass.ArgList 
-                |> Seq.filter (fun pc -> pc.FplId = this.FplId)
-                |> Seq.tryHead
-                |> Option.map (fun (pc:FplValue) -> pc :?> FplBase)
-
-            match baseClassObjectOpt with 
-            | Some baseClassObject ->
-                match baseClassObject.BaseClass with
-                | Some baseClass ->
-                    // now, try to match a constructor of the parentClass based on the signature of this base constructor call
-                    match baseClass.IsIntrinsic, this.ArgList.Count with
-                    | true, 0 ->
-                        // call of a constructor of an intrinsic class (i.e., that is missing any constructor) with 0 paramters
-                        // add "default constructor reference"
-                        let defaultConstructor = new FplDefaultConstructor(baseClass.FplId, (this.StartPos, this.EndPos), this)
-                        defaultConstructor.EmbedInSymbolTable defaultConstructor.Parent
-                        defaultConstructor.ToBeConstructedClass <- Some baseClass
-                        registerParentConstructor()
-                    | true, _ ->
-                        // the call uses parameters that are not possible for calling a non-existing constructor 
-                        // obj() or an intrinsic class
-                        emitID022Diagnostics baseClass.FplId this.StartPos this.EndPos
-                    | false, _ ->
-                        let parentClass = baseClass :?> FplClass
-                        let candidates = parentClass.GetConstructors()
-                        match checkSIG04Diagnostics this candidates with
-                        | Some candidate ->
-                            let name = candidate.Type SignatureType.Mixed
-                            this.Scope.TryAdd(name, candidate) |> ignore
-                        | None -> ()
-                        registerParentConstructor()
-                | None ->
-                    // the base constructor call's id is not among the base classes this class is derived from
-                    let candidates = outerClass.ArgList |> Seq.map (fun fv -> fv.FplId) |> Seq.sort |> String.concat ", "
-                    emitID017Diagnostics this.FplId candidates this.StartPos this.EndPos
-            | _ ->
-                    emitID017Diagnostics this.FplId "" this.StartPos this.EndPos
-                    registerParentConstructor()
-        | _ ->
-            // this case never happens, 
-            // if so the bug will become apparent by failing to call the parent class constructor
-            () 
-
-
-    override this.EmbedInSymbolTable _ = 
-        this.CheckConsistency()
-        addExpressionToParentArgList this
-
-    override this.Run variableStack = 
-        // todo implement run
-        this.Debug "Run"
 
 /// A string representation of an FplValue
 let toString (fplValue:FplValue) = $"{fplValue.ShortName} {fplValue.Type(SignatureType.Name)}"
