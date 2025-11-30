@@ -2000,7 +2000,8 @@ type TestInterpreterErrors() =
     [<DataRow("21d", "def pred S() {intr prty func T()->obj {dec ~x:obj; return x}};", 0)>]
     [<DataRow("22", "axiom T {dec ~p:pred(n:obj); all n:Nat{p(n)} };", 0)>]
     [<DataRow("23", "axiom T {dec ~p:pred(n:obj); p(@0)};", 0)>]
-    [<DataRow("24", "def cl A {dec ~myX:ind; ctor A(x:ind) {dec myX:=x;}} def cl B:A { ctor B() {dec base.A($1); } };", 0)>]    
+    [<DataRow("24a", "def cl A {dec ~myX:ind; ctor A(x:ind) {dec myX:=x;}};", 0)>]    
+    [<DataRow("24b", "def cl A {dec ~myX:ind; ctor A(x:ind) {dec myX:=x;}} def cl B:A { ctor B() {dec base.A($1); } };", 0)>]    
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestVAR04(no:string, fplCode:string, expected) =

@@ -4570,6 +4570,7 @@ type FplVariable(fplId, positions: Positions, parent: FplValue) =
         if this.IsSignatureVariable then
             ret.IsSignatureVariable <- this.IsSignatureVariable
         ret.IsInitializedVariable <- this.IsInitializedVariable
+        if this.IsUsed then ret.SetIsUsed()
         ret
 
     override this.SetValue fv =
