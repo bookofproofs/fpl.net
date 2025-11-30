@@ -1472,6 +1472,7 @@ type TestInterpreterErrors() =
     [<DataRow("67", """def class Set def pred In(x,y: Set) def pred IsEmpty(x: Set) { all y:Set { not In(y, x) } };""", 0)>]
     [<DataRow("68", """def class Set def pred In(x,y: Set) def cl SetBuilder: Set { ctor SetBuilder(x: Set, p: pred(u1: Set, o:* obj)) { dec base.Set() assert all u2:Set { iif (In(u2,parent), and ( In(u2,x), p(u2,o) ) ) }; } };""", 0)>]
     [<DataRow("69", """def cl A {dec ~myX:obj; ctor A(x:obj) {dec myX:=x;}} def cl B:A { ctor B(x:obj) {dec base.A(del.Decrement(x)); } } def pred T() { dec ~v:B v:=B(@2); false};""", 0)>]
+    [<DataRow("70", """def cl A def pred T() { is (self,ATypo) };""", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG04(no:string, fplCode:string, expected) =
@@ -1521,6 +1522,10 @@ type TestInterpreterErrors() =
     [<DataRow("ass_obj_pred", """def cl C1 {ctor C1(i1:pred) {dec ~o:obj o:=i1; }};""", 1)>]
     [<DataRow("ass_obj_func", """def cl C1 {ctor C1(i1:func) {dec ~o:obj o:=i1; }};""", 1)>]
     [<DataRow("ass_obj_obj", """def cl C1 {ctor C1(i1:obj) {dec ~o:obj o:=i1; }};""", 0)>]
+    [<DataRow("24a", "def cl A {dec ~myX:obj; ctor A(x:obj) {dec myX:=x;}} def cl B:A { ctor B(x:obj) {dec base.A(del.Decrement(x)); } } def pred T() { dec ~v:B v:=B(@2); false};", 0)>]    
+    [<DataRow("24b", "def cl A {dec ~myX:ind; ctor A(x:obj) {dec myX:=x;}} def cl B:A { ctor B(x:obj) {dec base.A(del.Decrement(x)); } } def pred T() { dec ~v:B v:=B(@2); false};", 1)>]    
+    [<DataRow("25", "def cl Nat def func Succ(x:Nat)->Nat def cl A {dec ~myX:Nat; ctor A(i:Nat) {dec myX:=Succ(i);}};", 0)>]    
+    [<DataRow("26", "def cl Nat def cl A {ctor A(arr:+Nat,i:Nat) {dec myX[i]:=i;}};", 0)>]    
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG05(no:string, fplCode:string, expected) =

@@ -5056,11 +5056,11 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
                     | :? FplGenericConstructor as constructor when constructor.ToBeConstructedClass.IsSome ->
                         if not (inheritsFrom constructor.ToBeConstructedClass.Value typeAssignee) then 
                             // issue SIG05 diagnostics if either no inheritance chain found 
-                            emitSIG05Diagnostics typeAssignee typeAssignedValue assignedValue.StartPos assignedValue.EndPos 
+                            emitSIG05Diagnostics typeAssignee typeAssignedValue this.ArgList[1].StartPos this.ArgList[1].EndPos 
                     | _ -> 
-                        emitSIG05Diagnostics typeAssignee typeAssignedValue assignedValue.StartPos assignedValue.EndPos
+                        emitSIG05Diagnostics typeAssignee typeAssignedValue this.ArgList[1].StartPos this.ArgList[1].EndPos
                 | _ -> 
-                    emitSIG05Diagnostics typeAssignee typeAssignedValue assignedValue.StartPos assignedValue.EndPos
+                    emitSIG05Diagnostics typeAssignee typeAssignedValue this.ArgList[1].StartPos this.ArgList[1].EndPos
             else   
                 ()
             //        let valueOpt = getArgument assignedValue

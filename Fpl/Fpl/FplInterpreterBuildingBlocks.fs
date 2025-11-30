@@ -686,7 +686,8 @@ let rec eval (st: SymbolTable) ast =
                 emitSIG04Diagnostics identifier 0 [""] pos1 pos2
                 let undefValue = new FplIntrinsicUndef((fv.StartPos, fv.EndPos), fv)
                 fv.ValueList.Add(undefValue)
-               
+            | (:? FplMapping, 0) -> 
+                emitSIG04Diagnostics identifier 0 [""] pos1 pos2               
             | (:? FplVariable, 1) -> 
                 fv.Scope.TryAdd(fv.FplId, candidates.Head) |> ignore
             | (:? FplVariable, _) -> 
@@ -1960,7 +1961,7 @@ let rec eval (st: SymbolTable) ast =
             variableStack.PushEvalStack(fvJi)
             eval st predicateIdentifierAst
             // check, if indeed the predicateId points to a definition, if not issue diagnostics
-            let candidates = findCandidatesByName st fvJi.FplId true false
+            let candidates = findCandidatesByName st fvJi.FplId false false
             checkDiagnostics fvJi candidates
             variableStack.PopEvalStack()
         | Some LiteralByInf, Some _, None -> 
