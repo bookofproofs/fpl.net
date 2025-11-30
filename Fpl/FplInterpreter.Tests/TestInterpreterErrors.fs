@@ -361,6 +361,7 @@ type TestInterpreterErrors() =
 
     [<DataRow("""def cl A {intr} def pred T() {dec ~x:A x:=A; x};""", 1)>]
     [<DataRow("""def cl A {intr} def pred T() {dec ~x:A x:=A(); x};""", 0)>]
+    [<DataRow("""def cl A {dec ~myX:ind; ctor A(x:ind) {dec myX:=x;}} def cl B:A { ctor B(x:ind) {dec base.A(del.Decrement(x)); } } def pred T() { dec ~v:B v:=B($2); false};""", 0)>]
     [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID004(fplCode:string, expected) =
@@ -1470,6 +1471,7 @@ type TestInterpreterErrors() =
     [<DataRow("66", """def cl Set def pred In(x,y: Set) def cl SetRoster:Set { ctor SetRoster(list:* Set) { dec ~e:Set base.Set() for e in list {assert In(e, parent)}; } };""", 0)>]
     [<DataRow("67", """def class Set def pred In(x,y: Set) def pred IsEmpty(x: Set) { all y:Set { not In(y, x) } };""", 0)>]
     [<DataRow("68", """def class Set def pred In(x,y: Set) def cl SetBuilder: Set { ctor SetBuilder(x: Set, p: pred(u1: Set, o:* obj)) { dec base.Set() assert all u2:Set { iif (In(u2,parent), and ( In(u2,x), p(u2,o) ) ) }; } };""", 0)>]
+    [<DataRow("69", """def cl A {dec ~myX:ind; ctor A(x:ind) {dec myX:=x;}} def cl B:A { ctor B(x:ind) {dec base.A(del.Decrement(x)); } } def pred T() { dec ~v:B v:=B($2); false};""", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG04(no:string, fplCode:string, expected) =
@@ -1503,6 +1505,7 @@ type TestInterpreterErrors() =
     [<DataRow("constr_inh_e", """def cl A { ctor A(x:obj) {dec base.Obj(); } } def cl B { ctor B(x:pred) {dec base.Obj(); } } def pred T() {dec ~n:B ~x:obj n:=A(x); true};""", 1)>]
     [<DataRow("constr_inh_f", """def cl A { ctor A(x:obj) {dec base.Obj(); } } def cl B { ctor B(x:pred) {dec base.Obj(); } } def pred T() {dec ~n:A ~x:pred n:=B(x); true};""", 1)>]
     [<DataRow("ass_ind_ind", """def cl C1 {ctor C1(i1:ind) {dec ~o:ind o:=i1; }} ;""", 0)>]
+    [<DataRow("ass_ind_pred1", """def cl A {dec ~myX:ind; ctor A(x:pred) {dec myX:=x;}};""", 1)>]
     [<DataRow("ass_ind_pred", """def cl C1 {ctor C1(i1:pred) {dec ~o:ind o:=i1; }};""", 1)>]
     [<DataRow("ass_ind_func", """def cl C1 {ctor C1(i1:func) {dec ~o:ind o:=i1; }};""", 1)>]
     [<DataRow("ass_ind_obj", """def cl C1 {ctor C1(i1:obj) {dec ~o:ind o:=i1; }} ;""", 1)>]
@@ -1520,13 +1523,13 @@ type TestInterpreterErrors() =
     [<DataRow("ass_obj_obj", """def cl C1 {ctor C1(i1:obj) {dec ~o:obj o:=i1; }};""", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
-    member this.TestSIG05Assignments(no:string, fplCode:string, expected) =
+    member this.TestSIG05(no:string, fplCode:string, expected) =
         if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = SIG05 ("","")
             ad.Clear()
-            runTestHelper "TestSIG05Assignments.fpl" fplCode code expected
+            runTestHelper "TestSIG05.fpl" fplCode code expected
 
     [<DataRow("""def pred Eq(x,y: obj) infix "=" 1000 {intr} axiom A {dec ~x:ind ~y:obj; (x = y) };""", 
         "No overload matching `=(ind, obj)`. `x:ind` does not match `x:obj` in TestSIG04MsgSpecificity.Eq(obj, obj).")>]
@@ -1997,6 +2000,7 @@ type TestInterpreterErrors() =
     [<DataRow("21d", "def pred S() {intr prty func T()->obj {dec ~x:obj; return x}};", 0)>]
     [<DataRow("22", "axiom T {dec ~p:pred(n:obj); all n:Nat{p(n)} };", 0)>]
     [<DataRow("23", "axiom T {dec ~p:pred(n:obj); p(@0)};", 0)>]
+    [<DataRow("24", "def cl A {dec ~myX:ind; ctor A(x:ind) {dec myX:=x;}} def cl B:A { ctor B() {dec base.A($1); } };", 0)>]    
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestVAR04(no:string, fplCode:string, expected) =

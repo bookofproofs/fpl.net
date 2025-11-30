@@ -1743,6 +1743,10 @@ type FplGenericConstructor(name, positions: Positions, parent: FplValue) as this
         | Some classDef -> 
             instance.FplId <- classDef.FplId
             instance.TypeId <- classDef.FplId
+            this.ArgList 
+            |> Seq.iter (fun fv ->
+                fv.Run variableStack
+            )
             createSubInstance classDef instance instance
         | None ->
             instance.FplId <- LiteralUndef
