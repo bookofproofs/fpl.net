@@ -1,0 +1,6 @@
+Run:root
+Run:root>th Test
+Run:root>th Test>def pred T()
+Run:root>th Test>def pred T()
+Run:root>th Test>def pred T()>stmt assign (ln 1)
+Run:root>th Test>def pred T()>pred false

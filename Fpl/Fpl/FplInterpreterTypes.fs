@@ -4149,17 +4149,18 @@ type FplDecrement(name, positions: Positions, parent: FplValue) as this =
 
     member this.Copy(other) =
         base.Copy(other)
-        this.TypeId <- LiteralObj
 
     override this.Type signatureType = 
         let head = getFplHead this signatureType
-        let propagate = propagateSignatureType signatureType
-        let args = 
-            this.ArgList
-            |> Seq.map (fun arg -> arg.Type(propagate))
-            |> String.concat ", "
-
-        sprintf "%s(%s)" head args
+        match signatureType with
+        | SignatureType.Type -> head
+        | _ ->
+            let propagate = propagateSignatureType signatureType
+            let args = 
+                this.ArgList
+                |> Seq.map (fun arg -> arg.Type(propagate))
+                |> String.concat ", "
+            sprintf "%s(%s)" head args
 
     member private this.Diagnostic message = 
         let diagnostic =
@@ -5143,7 +5144,7 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
                     instance.Parent <- Some assignee
                 | None -> () // todo, issue diagnostics?
             | :? FplClass as classBlock ->
-                emitID004diagnostics classBlock.FplId assignedValue.StartPos assignedValue.EndPos
+                emitID004diagnostics classBlock.FplId this.ArgList[1].StartPos this.ArgList[1].EndPos
             | _ ->
                 if assignedValue = assignee then 
                     () // LG005 was already emitted when checking consistency but we want to prevent assigning something to itself to avoid infinite loops

@@ -361,7 +361,7 @@ type TestInterpreterErrors() =
 
     [<DataRow("""def cl A {intr} def pred T() {dec ~x:A x:=A; x};""", 1)>]
     [<DataRow("""def cl A {intr} def pred T() {dec ~x:A x:=A(); x};""", 0)>]
-    [<DataRow("""def cl A {dec ~myX:ind; ctor A(x:ind) {dec myX:=x;}} def cl B:A { ctor B(x:ind) {dec base.A(del.Decrement(x)); } } def pred T() { dec ~v:B v:=B($2); false};""", 0)>]
+    [<DataRow("""def cl A {dec ~myX:obj; ctor A(x:obj) {dec myX:=x;}} def cl B:A { ctor B(x:obj) {dec base.A(del.Decrement(x)); } } def pred T() { dec ~v:B v:=B(@2); false};""", 0)>]
     [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID004(fplCode:string, expected) =
@@ -1471,7 +1471,7 @@ type TestInterpreterErrors() =
     [<DataRow("66", """def cl Set def pred In(x,y: Set) def cl SetRoster:Set { ctor SetRoster(list:* Set) { dec ~e:Set base.Set() for e in list {assert In(e, parent)}; } };""", 0)>]
     [<DataRow("67", """def class Set def pred In(x,y: Set) def pred IsEmpty(x: Set) { all y:Set { not In(y, x) } };""", 0)>]
     [<DataRow("68", """def class Set def pred In(x,y: Set) def cl SetBuilder: Set { ctor SetBuilder(x: Set, p: pred(u1: Set, o:* obj)) { dec base.Set() assert all u2:Set { iif (In(u2,parent), and ( In(u2,x), p(u2,o) ) ) }; } };""", 0)>]
-    [<DataRow("69", """def cl A {dec ~myX:ind; ctor A(x:ind) {dec myX:=x;}} def cl B:A { ctor B(x:ind) {dec base.A(del.Decrement(x)); } } def pred T() { dec ~v:B v:=B($2); false};""", 0)>]
+    [<DataRow("69", """def cl A {dec ~myX:obj; ctor A(x:obj) {dec myX:=x;}} def cl B:A { ctor B(x:obj) {dec base.A(del.Decrement(x)); } } def pred T() { dec ~v:B v:=B(@2); false};""", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG04(no:string, fplCode:string, expected) =
@@ -2000,8 +2000,8 @@ type TestInterpreterErrors() =
     [<DataRow("21d", "def pred S() {intr prty func T()->obj {dec ~x:obj; return x}};", 0)>]
     [<DataRow("22", "axiom T {dec ~p:pred(n:obj); all n:Nat{p(n)} };", 0)>]
     [<DataRow("23", "axiom T {dec ~p:pred(n:obj); p(@0)};", 0)>]
-    [<DataRow("24a", "def cl A {dec ~myX:ind; ctor A(x:ind) {dec myX:=x;}};", 0)>]    
-    [<DataRow("24b", "def cl A {dec ~myX:ind; ctor A(x:ind) {dec myX:=x;}} def cl B:A { ctor B() {dec base.A($1); } };", 0)>]    
+    [<DataRow("24a", "def cl A {dec ~myX:obj; ctor A(x:obj) {dec myX:=x;}};", 0)>]    
+    [<DataRow("24b", "def cl A {dec ~myX:obj; ctor A(x:obj) {dec myX:=x;}} def cl B:A { ctor B() {dec base.A(@1); } };", 0)>]    
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestVAR04(no:string, fplCode:string, expected) =

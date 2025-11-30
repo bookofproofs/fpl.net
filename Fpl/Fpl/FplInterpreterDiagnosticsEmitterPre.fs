@@ -83,7 +83,6 @@ let emitID004diagnostics name pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
 
-
 let emitID005diagnostics name incorrectBlockType pos1 pos2 =
     let diagnostic =
         { 

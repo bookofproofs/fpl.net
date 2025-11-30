@@ -1,1 +1,1 @@
-def cl C {ctor C(x:ind) {}} def cl A:C { ctor A() {dec ~x:obj base.C(x); } };
+def cl A {dec ~myX:ind; ctor A(x:ind) {dec myX:=x;}} def cl B:A { ctor B(x:ind) {dec base.A(del.Decrement(x)); } } def pred T() { dec ~v:B v:=B($2); false};
