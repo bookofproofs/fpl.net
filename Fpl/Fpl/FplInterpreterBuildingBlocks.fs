@@ -906,14 +906,13 @@ let rec eval (st: SymbolTable) ast =
             variableStack.PushEvalStack(node)
             eval st fplIdentifierAst
             eval st specificationAst |> ignore
-            let refBlock = variableStack.PeekEvalStack()
-            if System.Char.IsLower(refBlock.FplId[0]) then
+            if System.Char.IsLower(node.FplId[0]) then
                 // match the signatures of small-letter entities (like the self or parent entity, or variables with arguments) 
                 // with their declared types 
                 
                 let candidates = 
-                    refBlock.Scope
-                    |> Seq.filter (fun kvp -> kvp.Key = LiteralSelf || kvp.Key = LiteralParent || kvp.Key = refBlock.FplId)
+                    node.Scope
+                    |> Seq.filter (fun kvp -> kvp.Key = LiteralSelf || kvp.Key = LiteralParent || kvp.Key = node.FplId)
                     |> Seq.map (fun kvp -> kvp.Value)
                     |> Seq.map (fun fv -> 
                         match fv.Name with
@@ -928,11 +927,11 @@ let rec eval (st: SymbolTable) ast =
                     )
                     |> Seq.toList
 
-                checkSIG04Diagnostics refBlock candidates |> ignore
+                checkSIG04Diagnostics node candidates |> ignore
             else
-                let candidates = searchForCandidatesOfReferenceBlock refBlock
-                match checkSIG04Diagnostics refBlock candidates with
-                | Some matchedCandidate -> refBlock.Scope.TryAdd(refBlock.FplId, matchedCandidate) |> ignore
+                let candidates = searchForCandidatesOfReferenceBlock node
+                match checkSIG04Diagnostics node candidates with
+                | Some matchedCandidate -> node.Scope.TryAdd(node.FplId, matchedCandidate) |> ignore
                 | _ -> ()
 
             variableStack.PopEvalStack()

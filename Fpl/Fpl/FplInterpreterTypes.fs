@@ -3186,7 +3186,8 @@ let getParameters (fv:FplValue) =
 let hasParentheses (fv:FplValue) = 
     match fv.Name with 
     | PrimVariableL ->
-        fv.Scope.Count > 0
+        let vars = fv.GetVariables()
+        vars.Length > 0
     | PrimFuncionalTermL 
     | PrimPredicateL 
     | LiteralCtorL 
@@ -5079,31 +5080,21 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
                         if not (inheritsFrom constructor.ToBeConstructedClass.Value typeAssignee) then 
                             // issue SIG05 diagnostics if either no inheritance chain found 
                             emitSIG05Diagnostics typeAssignee typeAssignedValue this.ArgList[1].StartPos this.ArgList[1].EndPos 
+                    | :? FplFunctionalTerm as funcTerm -> 
+                        let mappingOpt = getMapping funcTerm 
+                        match mappingOpt with 
+                        | Some mapping ->
+                            let newTypeAssignedValue = mapping.Type SignatureType.Type
+                            if typeAssignee <> newTypeAssignedValue then 
+                                // issue SIG05 diagnostics if the return type of an assigned function differs from type of assignee
+                                emitSIG05Diagnostics typeAssignee newTypeAssignedValue this.ArgList[1].StartPos this.ArgList[1].EndPos
+                        | _ -> ()
                     | _ -> 
                         emitSIG05Diagnostics typeAssignee typeAssignedValue this.ArgList[1].StartPos this.ArgList[1].EndPos
                 | _ -> 
                     emitSIG05Diagnostics typeAssignee typeAssignedValue this.ArgList[1].StartPos this.ArgList[1].EndPos
             else   
                 ()
-            //        let valueOpt = getArgument assignedValue
-            //        match valueOpt with
-            //        | Some value when value.IsClass() ->
-            //            if not (inheritsFrom value assignee.TypeId) then 
-            //                // issue SIG05 diagnostics if either no inheritance chain found 
-            //                emitSIG05Diagnostics typeAssignee (value.Type(SignatureType.Type)) assignedValue.StartPos assignedValue.EndPos
-            //        | Some value when (value.Name = LiteralCtorL) ->
-            //            if not (inheritsFrom value.Parent.Value assignee.TypeId) then 
-            //                // issue SIG05 diagnostics if either no inheritance chain found 
-            //                emitSIG05Diagnostics typeAssignee (value.Type(SignatureType.Type)) assignedValue.StartPos assignedValue.EndPos
-            //        | Some value when assignee.TypeId <> value.TypeId ->
-            //            // Issue SIG05 diagnostics if value is not a constructor and not a class and still the types are not the same 
-            //            emitSIG05Diagnostics typeAssignee (value.Type(SignatureType.Type)) assignedValue.StartPos assignedValue.EndPos
-            //        | Some value when assignee.TypeId = value.TypeId ->
-            //            // Issue no SIG05 diagnostics if value is not a constructor and not a class but the types match
-            //            ()
-            //        | _ ->
-            //            // Issue SIG05 diagnostics if there is (for some reason) no value of the toBeAssignedValue 
-            //            emitSIG05Diagnostics typeAssignee typeAssignedValue assignedValue.StartPos assignedValue.EndPos
         | Some (:? FplSelf as assignee), _ ->
             let ref = assignee.Scope.Values |> Seq.toList
             if ref.Length > 0 then 
