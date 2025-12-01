@@ -5068,6 +5068,8 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
             //    emitSIG05Diagnostics typeAssignee typeAssignedValue assignedValue.StartPos assignedValue.EndPos
             elif typeAssignee = LiteralObj && (assignedValue.Name = PrimDefaultConstructor || assignedValue.Name = LiteralCtorL) then
                 ()
+            elif typeAssignee = $"+{typeAssignedValue}" || typeAssignee = $"*{typeAssignedValue}" then 
+                ()
             elif typeAssignee <> typeAssignedValue then 
                 let referencedTypeOfVarOpt = assignee.Scope.Values |> Seq.tryHead
                 match referencedTypeOfVarOpt with 
