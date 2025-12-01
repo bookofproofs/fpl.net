@@ -403,6 +403,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
     member this.ValueList = _valueList
 
     abstract member Clone: unit -> FplValue
+    abstract member Copy : FplValue -> unit
     abstract member AssignParts: FplValue -> unit
     abstract member ShortName: string
     abstract member Name: string
@@ -447,14 +448,14 @@ type FplValue(positions: Positions, parent: FplValue option) =
     /// A method used to issue diagnostics related to this FplValue and its structure retrieved during the FPL interpreter.
     abstract member CheckConsistency: unit -> unit
 
-    override this.CheckConsistency() = ()
-    
     (* Default implementations = everything is false, only the trues are overridden in derived classes *)
-    override this.SetValue fv =
+    default this.CheckConsistency() = ()
+    
+    default this.SetValue fv =
         this.ValueList.Clear()
         this.ValueList.Add(fv)
 
-    override this.SetValuesOf fv =
+    default this.SetValuesOf fv =
         this.ValueList.Clear()
         if fv.ValueList.Count = 0 then
             // if fv has no values then it should be the value itself
@@ -462,13 +463,13 @@ type FplValue(positions: Positions, parent: FplValue option) =
         else
             this.ValueList.AddRange(fv.ValueList)
 
-    override this.IsFplBlock () = false
-    override this.IsBlock () = false
-    override this.IsClass () = false
-    override this.IsProof () = false
-    override this.IsMapping () = false
+    default this.IsFplBlock () = false
+    default this.IsBlock () = false
+    default this.IsClass () = false
+    default this.IsProof () = false
+    default this.IsMapping () = false
     
-    override this.AssignParts (ret:FplValue) =
+    default this.AssignParts (ret:FplValue) =
         ret.FplId <- this.FplId
         ret.TypeId <- this.TypeId
         ret.Arity <- this.Arity
@@ -570,7 +571,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
         |> Seq.toList
 
     /// Copies other FplValue to this one without changing its reference pointer.
-    member this.Copy(other: FplValue) =
+    default this.Copy(other: FplValue) =
         this.FplId <- other.FplId
 
         this.TypeId <- other.TypeId
@@ -1472,6 +1473,17 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
         this.Debug "Run"
 
     override this.RunOrder = None
+
+    override this.Copy(other: FplValue) = 
+        base.Copy(other)
+        let otherVar = other :?> FplGenericVariable
+        if otherVar.IsBound then 
+            this.SetIsBound()
+        if otherVar.IsUsed then 
+            this.SetIsUsed()
+        this.IsSignatureVariable <- otherVar.IsSignatureVariable 
+        this.IsInitializedVariable <- otherVar.IsInitializedVariable
+
 
 let checkVAR04Diagnostics (fv:FplValue) = 
     fv.GetVariables()
@@ -3970,7 +3982,7 @@ type FplEquality(name, positions: Positions, parent: FplValue) as this =
         this.AssignParts(ret)
         ret
 
-    member this.Copy(other) =
+    override this.Copy(other) =
         base.Copy(other)
         this.TypeId <- LiteralPred
 
@@ -4147,7 +4159,7 @@ type FplDecrement(name, positions: Positions, parent: FplValue) as this =
         this.AssignParts(ret)
         ret
 
-    member this.Copy(other) =
+    override this.Copy(other) =
         base.Copy(other)
 
     override this.Type signatureType = 
@@ -4494,8 +4506,11 @@ type FplVariableMany1(fplId, positions: Positions, parent: FplValue) =
     override this.Clone () =
         let ret = new FplVariableMany1(this.FplId, (this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
-        if this.IsSignatureVariable then
-            ret.IsSignatureVariable <- this.IsSignatureVariable
+        if this.IsBound then 
+            ret.SetIsBound()
+        if this.IsUsed then 
+            ret.SetIsUsed()
+        ret.IsSignatureVariable <- this.IsSignatureVariable 
         ret.IsInitializedVariable <- this.IsInitializedVariable
         ret
 
@@ -4531,8 +4546,11 @@ type FplVariableMany(fplId, positions: Positions, parent: FplValue) =
     override this.Clone () =
         let ret = new FplVariableMany(this.FplId, (this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
-        if this.IsSignatureVariable then
-            ret.IsSignatureVariable <- this.IsSignatureVariable
+        if this.IsBound then 
+            ret.SetIsBound()
+        if this.IsUsed then 
+            ret.SetIsUsed()
+        ret.IsSignatureVariable <- this.IsSignatureVariable 
         ret.IsInitializedVariable <- this.IsInitializedVariable
         ret
 
@@ -4568,10 +4586,12 @@ type FplVariable(fplId, positions: Positions, parent: FplValue) =
     override this.Clone () =
         let ret = new FplVariable(this.FplId, (this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
-        if this.IsSignatureVariable then
-            ret.IsSignatureVariable <- this.IsSignatureVariable
+        if this.IsBound then 
+            ret.SetIsBound()
+        if this.IsUsed then 
+            ret.SetIsUsed()
+        ret.IsSignatureVariable <- this.IsSignatureVariable 
         ret.IsInitializedVariable <- this.IsInitializedVariable
-        if this.IsUsed then ret.SetIsUsed()
         ret
 
     override this.SetValue fv =
