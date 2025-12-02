@@ -3327,7 +3327,6 @@ let rec mpwa aHasParentheses pHasParentheses (args: FplValue list) (pars: FplVal
             && a.Scope.Count = 1
         then
             let var = a.Scope.Values |> Seq.toList |> List.head
-
             if var.Scope.Count > 0 then
                 let cl = var.Scope.Values |> Seq.head
                 match cl with
@@ -3343,6 +3342,18 @@ let rec mpwa aHasParentheses pHasParentheses (args: FplValue list) (pars: FplVal
                     Some(
                         $"`{a.Type(SignatureType.Name)}:{aType}` is undefined and doesn't match `{p.Type(SignatureType.Name)}:{pType}`"
                     )
+            elif var.Name = PrimDefaultConstructor then 
+                let defaultCtor = var :?> FplDefaultConstructor
+                let clOpt = defaultCtor.ToBeConstructedClass
+                match clOpt with 
+                | Some cl -> 
+                    if inheritsFrom cl pType then 
+                        None
+                    else
+                        Some(
+                            $"`{a.Type(SignatureType.Name)}:{aType}` neither matches `{p.Type(SignatureType.Name)}:{pType}` nor the base classes"
+                        )
+                | _ -> None
             else
                 Some(
                     $"`{a.Type(SignatureType.Name)}:{aType}` is undefined and does not match `{p.Type(SignatureType.Name)}:{pType}`"

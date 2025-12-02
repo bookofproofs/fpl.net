@@ -1526,6 +1526,7 @@ type TestInterpreterErrors() =
     [<DataRow("24b", "def cl A {dec ~myX:ind; ctor A(x:obj) {dec myX:=x;}} def cl B:A { ctor B(x:obj) {dec base.A(del.Decrement(x)); } } def pred T() { dec ~v:B v:=B(@2); false};", 1)>]    
     [<DataRow("25", "def cl Nat def func Succ(x:Nat)->Nat def cl A {dec ~myX:Nat; ctor A(i:Nat) {dec myX:=Succ(i);}};", 0)>]    
     [<DataRow("26", "def cl Nat def cl A {dec ~arr:+Nat; ctor A(i:Nat) {dec arr[i]:=i;}};", 0)>]    
+    [<DataRow("27", "def cl Nat def cl Zero:Nat def func Succ(n:Nat)->Nat def pred T() {dec ~n:Nat n:=Succ(Zero()); true};", 0)>]    
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG05(no:string, fplCode:string, expected) =
