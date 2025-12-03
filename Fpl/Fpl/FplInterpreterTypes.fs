@@ -1270,6 +1270,8 @@ type FplIntrinsicPred(positions: Positions, parent: FplValue) =
 /// Tries to find a mapping of an FplValue
 let rec getMapping (fv:FplValue) =
     match fv.Name with
+    | LiteralSelf
+    | LiteralParent 
     | PrimRefL ->
         if fv.Scope.ContainsKey(fv.FplId) then
             getMapping fv.Scope[fv.FplId]
@@ -3075,7 +3077,18 @@ type FplReference(positions: Positions, parent: FplValue) =
         | _, ArgType.Brackets, None ->
             $"{head}[{args}]"
         | _, ArgType.Parentheses, None ->
-            $"{head}({args})"
+            let varMappingOpt = getMapping headObj
+            match varMappingOpt with 
+            | Some varMapping ->
+                match headObj.Name with 
+                | PrimFuncionalTermL when signatureType = SignatureType.Type -> 
+                    varMapping.Type propagate
+                | PrimMandatoryFunctionalTermL when signatureType = SignatureType.Type -> 
+                    varMapping.Type propagate
+                | _ -> 
+                    $"{head}({args}) -> {varMapping.Type propagate}"
+            | None ->
+                $"{head}({args})"
 
     override this.Represent () = 
         if this.ValueList.Count = 0 then 
@@ -5075,9 +5088,6 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
             let typeAssignedValue = assignedValue.Type SignatureType.Type 
             if nameAssignee = nameAssignedValue then
                 emitLG005Diagnostics nameAssignedValue assignedValue.StartPos assignedValue.EndPos
-            //elif not (inheritsFrom assignee typeAssignedValue) then 
-            //    // issue SIG05 diagnostics if either no inheritance chain found 
-            //    emitSIG05Diagnostics typeAssignee typeAssignedValue assignedValue.StartPos assignedValue.EndPos
             elif typeAssignee = LiteralObj && (assignedValue.Name = PrimDefaultConstructor || assignedValue.Name = LiteralCtorL) then
                 ()
             elif typeAssignee = $"+{typeAssignedValue}" || typeAssignee = $"*{typeAssignedValue}" then 
@@ -5087,6 +5097,7 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
                 match referencedTypeOfVarOpt with 
                 | Some referencedTypeOfVar when (referencedTypeOfVar.Name = PrimClassL || referencedTypeOfVar.Name = PrimFuncionalTermL) -> 
                     match assignedValue with 
+                    | :? FplIntrinsicUndef -> () // assignment of undef is always accepted
                     | :? FplGenericConstructor as constructor when constructor.ToBeConstructedClass.IsSome ->
                         if not (inheritsFrom constructor.ToBeConstructedClass.Value typeAssignee) then 
                             // issue SIG05 diagnostics if either no inheritance chain found 
