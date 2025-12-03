@@ -1473,6 +1473,7 @@ type TestInterpreterErrors() =
     [<DataRow("68", """def class Set def pred In(x,y: Set) def cl SetBuilder: Set { ctor SetBuilder(x: Set, p: pred(u1: Set, o:* obj)) { dec base.Set() assert all u2:Set { iif (In(u2,parent), and ( In(u2,x), p(u2,o) ) ) }; } };""", 0)>]
     [<DataRow("69", """def cl A {dec ~myX:obj; ctor A(x:obj) {dec myX:=x;}} def cl B:A { ctor B(x:obj) {dec base.A(del.Decrement(x)); } } def pred T() { dec ~v:B v:=B(@2); false};""", 0)>]
     [<DataRow("70", """def cl A def pred T() { is (self,ATypo) };""", 1)>]
+    [<DataRow("71", """def pred Equal(x,y: tpl) infix "=" 50 { del.Equal(x,y) } def cl Nat def cl Zero:Nat def func Succ(n:Nat)->Nat def pred T() {all x,y:Nat {(x = Succ(y))}};""", 0)>]    
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG04(no:string, fplCode:string, expected) =
@@ -1527,6 +1528,10 @@ type TestInterpreterErrors() =
     [<DataRow("25", "def cl Nat def func Succ(x:Nat)->Nat def cl A {dec ~myX:Nat; ctor A(i:Nat) {dec myX:=Succ(i);}};", 0)>]    
     [<DataRow("26", "def cl Nat def cl A {dec ~arr:+Nat; ctor A(i:Nat) {dec arr[i]:=i;}};", 0)>]    
     [<DataRow("27", "def cl Nat def cl Zero:Nat def func Succ(n:Nat)->Nat def pred T() {dec ~n:Nat n:=Succ(Zero()); true};", 0)>]    
+    [<DataRow("28", "def cl Nat def func Succ(n:Nat)->Nat ext Digits x@/\d+/ -> Nat {dec ~n:Nat n:=Succ(delegate.Decrement(x)); return n};", 0)>]      
+    [<DataRow("29", "def cl Nat def cl Zero:Nat def func Succ(n:Nat)->Nat def func Add(n,m: Nat)->Nat {dec ~r:Nat r:= Succ(self(n,m)); return r };", 0)>]    
+    [<DataRow("29a", "def cl Nat def cl Zero:Nat def func Succ(n:Nat)->Nat def func Add(n,m: Nat)->Nat {return Succ(self(n,m))};", 0)>]    
+    [<DataRow("30", "def cl Nat def cl Zero:Nat def func Succ(n:Nat)->Nat def pred T() {dec ~r:Nat r:= undef; true };", 0)>]    
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG05(no:string, fplCode:string, expected) =

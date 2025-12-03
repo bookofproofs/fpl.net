@@ -257,6 +257,7 @@ proposition SumOfConsecutiveNumbers
 }
 
 def cl Real
+def cl ZeroReal:Real
 
 def pred LowerEqual (x,y:tpl) 
 {
