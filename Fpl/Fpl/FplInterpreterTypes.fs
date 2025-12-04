@@ -3311,26 +3311,26 @@ let inheritsFrom (node:FplValue) someType =
         | None -> false
 
 /// Tries to match parameters of an FplValue with its arguments recursively
-let rec mpwa aHasParentheses pHasParentheses (args: FplValue list) (pars: FplValue list) =
+let rec mpwa aHasParentheses (args: FplValue list) (pars: FplValue list) =
     match (args, pars) with
     | (a :: ars, p :: prs) ->
         let aType = a.Type SignatureType.Type
         let pType = p.Type SignatureType.Type
 
         if aType = pType then
-            mpwa (hasParentheses a) (hasParentheses p) ars prs
+            mpwa (hasParentheses a) ars prs
         elif pType.StartsWith(LiteralTpl) || pType.StartsWith(LiteralTplL) then
-            mpwa (hasParentheses a) (hasParentheses p)  ars prs
+            mpwa (hasParentheses a) ars prs
         elif pType = $"*{aType}" || pType.StartsWith("*") && aType = "" && aHasParentheses then
             if ars.Length > 0 then 
-                mpwa (hasParentheses a) (hasParentheses p) ars pars 
+                mpwa (hasParentheses a) ars pars 
             else 
                 None
         elif pType.StartsWith("+") && aType = "" && aHasParentheses then
             Some($"() does not match `{p.Type(SignatureType.Name)}:{pType}`")
         elif pType = $"+{aType}" then
             if ars.Length > 0 then 
-                mpwa (hasParentheses a) (hasParentheses p) ars pars 
+                mpwa (hasParentheses a) ars pars 
             else 
                 None
         elif
@@ -3345,7 +3345,7 @@ let rec mpwa aHasParentheses pHasParentheses (args: FplValue list) (pars: FplVal
                 match cl with
                 | :? FplClass ->
                     if inheritsFrom cl pType then 
-                        mpwa (hasParentheses a) (hasParentheses p) ars prs
+                        mpwa (hasParentheses a) ars prs
                     else
                         Some(
                             $"`{a.Type(SignatureType.Name)}:{aType}` neither matches `{p.Type(SignatureType.Name)}:{pType}` nor the base classes"
@@ -3383,7 +3383,7 @@ let rec mpwa aHasParentheses pHasParentheses (args: FplValue list) (pars: FplVal
             let someMap = getMapping a
 
             match someMap with
-            | Some map -> mpwa (hasParentheses a) (hasParentheses p) [ map ] [ p ]
+            | Some map -> mpwa (hasParentheses a) [ map ] [ p ]
             | _ -> Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
         else
             Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
@@ -3426,7 +3426,7 @@ let matchArgumentsWithParameters (fva: FplValue) (fvp: FplValue) =
         if aHasParentheses <> pHasParentheses && arguments.Length = 0 && parameters.Length = 0 then 
             Some($"calling and called nodes have mismatching use of parentheses")
         else
-            mpwa aHasParentheses pHasParentheses arguments parameters
+            mpwa aHasParentheses arguments parameters
 
     match argResult with
     | Some aErr -> 
@@ -4432,7 +4432,7 @@ type FplIsOperator(positions: Positions, parent: FplValue) as this =
             // FPL truth-table
             match operand with 
             | :? FplReference as op ->
-                match mpwa (hasParentheses operand) (hasParentheses typeOfOperand) [operand] [typeOfOperand] with
+                match mpwa (hasParentheses operand) [operand] [typeOfOperand] with
                 | Some errMsg -> LiteralFalse
                 | None -> LiteralTrue
             | _ -> LiteralFalse
@@ -4820,7 +4820,7 @@ type FplReturn(positions: Positions, parent: FplValue) as this =
     member private this.MatchWithMapping (fva: FplValue) (fvp: FplValue) =
         let targetMapping = getMapping fvp
         match targetMapping with
-        | Some tm -> mpwa (hasParentheses fva) (hasParentheses fvp) [ fva ] [ tm ]
+        | Some tm -> mpwa (hasParentheses fva) [ fva ] [ tm ]
         | None -> None
 
     override this.Run variableStack =
