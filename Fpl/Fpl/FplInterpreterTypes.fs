@@ -3409,8 +3409,6 @@ let rec mpwa aHasParentheses pHasParentheses (args: FplValue list) (pars: FplVal
     | (a :: ars, []) ->
         let aType = a.Type(SignatureType.Type)
         Some($"no matching parameter for `{a.Type(SignatureType.Name)}:{aType}`")
-    | ([], []) when aHasParentheses <> pHasParentheses -> 
-        Some($"calling and called nodes have mismatching use of parentheses")
     | ([], []) -> None
 
 
@@ -3420,7 +3418,15 @@ let matchArgumentsWithParameters (fva: FplValue) (fvp: FplValue) =
     let parameters = getParameters fvp
     let arguments = getArguments fva
 
-    let argResult = mpwa (hasParentheses fva) (hasParentheses fvp) arguments parameters
+    let aHasParentheses = hasParentheses fva
+    let pHasParentheses = hasParentheses fvp
+        
+
+    let argResult = 
+        if aHasParentheses <> pHasParentheses && arguments.Length = 0 && parameters.Length = 0 then 
+            Some($"calling and called nodes have mismatching use of parentheses")
+        else
+            mpwa aHasParentheses pHasParentheses arguments parameters
 
     match argResult with
     | Some aErr -> 
@@ -4426,7 +4432,7 @@ type FplIsOperator(positions: Positions, parent: FplValue) as this =
             // FPL truth-table
             match operand with 
             | :? FplReference as op ->
-                match mpwa (hasParentheses op) (hasParentheses typeOfOperand) [operand] [typeOfOperand] with
+                match mpwa (hasParentheses operand) (hasParentheses typeOfOperand) [operand] [typeOfOperand] with
                 | Some errMsg -> LiteralFalse
                 | None -> LiteralTrue
             | _ -> LiteralFalse

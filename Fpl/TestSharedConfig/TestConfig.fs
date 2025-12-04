@@ -2,4 +2,4 @@
 
 module TestConfig =
     let OfflineMode = false
-    let DebugMode = true
+    let DebugMode = false
