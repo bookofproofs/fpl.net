@@ -77,8 +77,8 @@ def class CartesianProduct: Set
                 i:=Succ(i)
                 mySetArray[i]:=setItem
             }
-            myFrom := Nat(@1)
-            myLength:=i
+            myFrom := @1
+            myLength := i
             base.Set()
         ;
         

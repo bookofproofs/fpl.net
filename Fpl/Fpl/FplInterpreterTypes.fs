@@ -922,6 +922,7 @@ let qualifiedName (fplValue:FplValue)=
             | PrimRefL -> fv.Type(SignatureType.Name)
             | LiteralCtorL
             | PrimBaseConstructorCall
+            | PrimDefaultConstructor
             | PrimQuantorAll
             | PrimQuantorExists
             | PrimQuantorExistsN
@@ -951,7 +952,7 @@ let qualifiedName (fplValue:FplValue)=
             else
                 getFullName fv.Parent.Value false + "." + fplValueType
 
-    getFullName fplValue true
+    $"{fplValue.EnglishName} {getFullName fplValue true}"
 
 
 /// Checks if an fv is provable. This will only be true if
