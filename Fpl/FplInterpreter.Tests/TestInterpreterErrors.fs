@@ -276,8 +276,8 @@ type TestInterpreterErrors() =
     [<DataRow(@"ext Digits x@/\d+/ -> X {ret x} def pred T() {true} ext Digits1 x@/\d+/ -> X {ret x} ;", 0)>]
     [<DataRow(@"ext Digits x@/\d+/ -> X {ret x} def pred T() {true} ext Digits1 x@/\d+/ -> X {ret x} def pred S() {true} ;", 0)>]
     [<DataRow(@"ext Digits x@/\d+/ -> X {ret x} def pred T() {true} ext Digits1 x@/\d+/ -> X {ret x} def pred T() {@1} ;", 1)>]
-    [<DataRow(@"ext Digits x@/\d+/ -> X {ret x} def pred T(x:@Digits) {true};", 0)>]
-    [<DataRow(@"ext Digits x@/\d+/ -> X {ret x} def pred T(x:@Typo) {true};", 0)>]
+    [<DataRow(@"ext Digits x@/\d+/ -> X {ret x} def pred T(x:Digits) {true};", 0)>]
+    [<DataRow(@"ext Digits x@/\d+/ -> X {ret x} def pred T(x:Typo) {true};", 0)>]
 
     [<DataRow("def func Sum(list:* Nat)->Nat {dec ~result: Nat; return result} def func Sum2(list:* Nat)->Nat {dec ~result: Nat; return result};", 0)>]
     [<DataRow("""def cl B {intr} def cl A {dec ~x:obj; ctor A(y:B) {} };""", 0)>]
@@ -653,19 +653,6 @@ type TestInterpreterErrors() =
         else
             let code = ID018 ""
             runTestHelper "TestID018.fpl" fplCode code expected
-
-    [<DataRow("00", @"ext Digits x @ /\d+/->obj {dec ~y:obj; return y} def pred T(x:@Digits) {true};", 0)>]
-    [<DataRow("01", @"ext Digits x @ /\d+/->obj {dec ~y:obj; return y} def pred T(x:@Typo) {true};", 1)>]
-    [<DataRow("01", @"ext Digits x @ /\d+/->obj {dec ~y:obj; return y} def pred T(x:tpl) {true};", 0)>]
-    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
-    [<TestMethod>]
-    member this.TestID019(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
-            ()
-        else
-            let code = ID019 ""
-            runTestHelper "TestID019.fpl" fplCode code expected
-
 
     [<DataRow("00", "def cl A {intr} def cl B {intr} def cl C {intr} def cl D:A,B,C {ctor D() {dec base.A(); } };", 2)>]
     [<DataRow("00a", "def cl A {intr} def cl B {intr} def cl C {intr} def cl D:A,B,C {ctor D() {dec base.B(); } };", 2)>]

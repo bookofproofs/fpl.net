@@ -662,7 +662,7 @@ type TestFplValueScopeQualifiedName() =
     [<TestMethod>]
     member this.TestDelegate(var, varVal) =
         ad.Clear()
-        let fplCode = sprintf "def pred T1() { dec ~a:T1 ~b:pred ~c:@Nat ~d:ind; %s };" varVal
+        let fplCode = sprintf "def pred T1() { dec ~a:T1 ~b:pred ~c:Nat ~d:ind; %s };" varVal
         let filename = "TestDelegateQualifiedName"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore

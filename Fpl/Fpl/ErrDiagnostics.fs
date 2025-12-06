@@ -123,7 +123,6 @@ type DiagnosticCode =
     | ID016 of string 
     | ID017 of string * string 
     | ID018 of string 
-    | ID019 of string 
     | ID020 of string 
     | ID021 of string 
     | ID022 of string
@@ -237,7 +236,6 @@ type DiagnosticCode =
             | ID016 _ -> "ID016"
             | ID017 _ -> "ID017"
             | ID018 _ -> "ID018"
-            | ID019 _ -> "ID019"
             | ID020 _ -> "ID020"
             | ID021 _ -> "ID021"
             | ID022 _ -> "ID022"
@@ -355,7 +353,6 @@ type DiagnosticCode =
                 else
                    $"The type `{name}` not found, no candidates found."  
             | ID018 name -> sprintf "The extension `%s` could not be matched. Declare an extension with this pattern." name
-            | ID019 name -> sprintf "The extension `%s` could not be found. Are you missing a uses clause?" name
             | ID020 name -> $"Missing call of base constructor `{name}`." 
             | ID021 name -> $"Duplicate call of base constructor `{name}`."
             | ID022 name -> $"`{name}` is intrinsic, it has no parameterized constructors. This call uses parameters."

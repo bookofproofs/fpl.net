@@ -240,8 +240,6 @@ let keywordExtension = (skipString LiteralExtL <|> skipString LiteralExt) .>> SW
 
 let extensionName = positions "ExtensionName" (idStartsWithCap) |>> Ast.ExtensionName
 
-let xId = positions "ExtensionType" (at >>. extensionName) |>> Ast.ExtensionType 
-
 let specificClassType = choice [ keywordObject; predicateIdentifier ] 
 
 //// later semantics: Star: 0 or more occurrences, Plus: 1 or more occurrences
@@ -258,7 +256,7 @@ classTypeRef.Value <- positions "ClassType" (specificClassType) |>> Ast.ClassTyp
 let mapping, mappingRef = createParserForwardedToRef()
 let predicateType = positions "CompoundPredicateType" (keywordPredicate .>>. opt paramTuple) |>> Ast.CompoundPredicateType
 let functionalTermType = positions "CompoundFunctionalTermType" (keywordFunction .>>. opt (paramTuple .>>. (IW >>. mapping))) |>> Ast.CompoundFunctionalTermType
-let variableType = positions "VariableType" (choice [ keywordIndex; xId; classType; templateType; functionalTermType; predicateType ]) |>> Ast.VariableType
+let variableType = positions "VariableType" (choice [ keywordIndex; classType; templateType; functionalTermType; predicateType ]) |>> Ast.VariableType
 
 let namedVariableDeclaration = positions "NamedVarDecl" (variableList .>>. varDeclModifier .>>. variableType .>> IW) |>> Ast.NamedVarDecl
 namedVariableDeclarationListRef.Value <- sepBy namedVariableDeclaration comma

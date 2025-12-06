@@ -90,7 +90,7 @@ type TestFplBlockComponentes () =
 
     [<TestMethod>]
     member this.TestSignature12 () =
-        let result = run (constructorSignature .>> eof) """ctor Nat(x: @Decimal)"""
+        let result = run (constructorSignature .>> eof) """ctor Nat(x: Decimal)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

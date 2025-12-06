@@ -50,7 +50,6 @@ type Ast =
     | Language of Positions * (Ast * Ast)
     | ExtensionName of Positions * string
     | ExtensionRegex of string
-    | ExtensionType of Positions * Ast 
     | ExtensionAssignment of Positions * (Ast * Ast) 
     | ExtensionSignature of Positions * (Ast * Ast)
     | DefinitionExtension of Positions * ((Ast * Ast) * Ast)

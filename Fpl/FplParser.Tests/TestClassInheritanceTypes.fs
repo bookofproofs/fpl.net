@@ -119,7 +119,7 @@ type TestClassInheritanceTypes () =
 
     [<TestMethod>]
     member this.TestClassType7 () =
-        let result = run (classType .>> eof) """@Nat"""
+        let result = run (classType .>> eof) """+Nat"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))

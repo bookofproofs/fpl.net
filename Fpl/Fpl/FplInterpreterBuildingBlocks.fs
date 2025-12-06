@@ -229,18 +229,7 @@ let rec eval (st: SymbolTable) ast =
         | :? FplExtension ->
             fv.FplId <- extensionName
             fv.TypeId <- extensionName
-        | :? FplVariableMany -> 
-            let sid = $"*{extensionName}"
-            fv.TypeId <- sid
-        | :? FplVariableMany1 -> 
-            let sid = $"+{extensionName}"
-            fv.TypeId <- sid
-        | _ -> 
-            fv.TypeId <- extensionName
-            match searchExtensionByName st.Root extensionName with
-            | ScopeSearchResult.NotFound -> 
-                emitID019Diagnostics extensionName pos1 pos2
-            | _ -> ()
+        | _ -> ()
         st.EvalPop() 
     | Ast.TemplateType((pos1, pos2), s) -> 
         st.EvalPush("TemplateType")
@@ -571,10 +560,6 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(fplNew)
         fplNew.FplId <- extensionString
         variableStack.PopEvalStack()
-        st.EvalPop()
-    | Ast.ExtensionType((pos1, pos2), extensionNameAst) ->
-        st.EvalPush("ExtensionType")
-        eval st extensionNameAst
         st.EvalPop()
     | Ast.UsesClause((pos1, pos2), ast1) ->
         st.EvalPush("UsesClause")

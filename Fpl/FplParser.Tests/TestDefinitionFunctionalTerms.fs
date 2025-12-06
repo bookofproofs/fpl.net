@@ -40,7 +40,7 @@ type TestDefinitionFunctionalTerms01 () =
 
     [<TestMethod>]
     member this.TestDefinitionFunctionalTerm03 () =
-        let result = run (definitionFunctionalTerm .>> eof) """func Add(n,m: @Digits)->Nat
+        let result = run (definitionFunctionalTerm .>> eof) """func Add(n,m: Digits)->Nat
         {
             return delegate.Add(n,m)
         }"""
