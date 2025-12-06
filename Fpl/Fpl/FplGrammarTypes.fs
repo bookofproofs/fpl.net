@@ -59,9 +59,6 @@ type Ast =
     | ProofSignature of Positions * (Ast * Ast list)
 
     // Types
-    | One of Positions * unit
-    | Many of Positions * unit
-    | Many1 of Positions * unit  
     | TemplateType of Positions * string
     | ObjectType of Positions * unit
     | ClassIdentifier of Positions * Ast
@@ -140,7 +137,7 @@ type Ast =
     | CorollarySignature of Positions * (Ast * Ast list)
     | ConjectureSignature of Positions * Ast
     | Conjecture of Positions * (Ast *(Ast list option * Ast))
-    | NamedVarDecl of Positions * ((Ast list * Ast) * Ast) 
+    | NamedVarDecl of Positions * (Ast list * Ast)
     | ParamTuple of Positions * Ast list
     | Mapping of Positions * Ast
     | AxiomSignature of Positions * Ast

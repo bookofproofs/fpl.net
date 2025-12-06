@@ -69,7 +69,7 @@ type CommonFplValueTestCases =
     static member ScopeVariablesInSignatureVariadic(subtype) =
         ad.Clear()
         let fplCode = """
-        def pred TestPredicate(x,y:+pred(u,v,w:func(a,b,c:*obj)->obj)) 
+        def pred TestPredicate(x,y:*pred(u,v,w:func(a,b,c:*obj[ind])->obj)[obj]) 
             {true}
         ;
         """
@@ -168,7 +168,7 @@ type CommonFplValueTestCases =
         ad.Clear()
         let fplCode = """
         def pred TestPredicate() 
-            {dec ~x,y:+pred(u,v,w:func(a,b,c:*obj)->obj); true}
+            {dec ~x,y:*pred(u,v,w:func(a,b,c:*obj[tpl])->obj)[ind]; true}
         ;
         """
         let filename = "TestScopeVariablesInBlockVariadic" + subtype

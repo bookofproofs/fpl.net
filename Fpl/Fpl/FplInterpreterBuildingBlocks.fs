@@ -113,7 +113,6 @@ let rec eval (st: SymbolTable) ast =
             fv.TypeId <- LiteralInd
             fv.SetValue (new FplIntrinsicInd((pos1, pos2), fv))
         | :? FplVariableMany -> fv.TypeId <- $"*{LiteralInd}"
-        | :? FplVariableMany1 -> fv.TypeId <- $"+{LiteralInd}"
         | _ ->  fv.TypeId <- LiteralInd
         st.EvalPop() |> ignore
     | Ast.ObjectType((pos1, pos2),()) -> 
@@ -121,7 +120,6 @@ let rec eval (st: SymbolTable) ast =
         let fv = variableStack.PeekEvalStack()
         match fv with
         | :? FplVariableMany -> fv.TypeId <- $"*{LiteralObj}"
-        | :? FplVariableMany1 -> fv.TypeId <- $"+{LiteralObj}"
         | _ ->  fv.TypeId <- LiteralObj
         st.EvalPop()
     | Ast.PredicateType((pos1, pos2),()) -> 
@@ -133,7 +131,6 @@ let rec eval (st: SymbolTable) ast =
             fv.TypeId <- LiteralPred
             fv.SetValue (new FplIntrinsicPred((pos1, pos2), fv))
         | :? FplVariableMany -> fv.TypeId <- $"*{LiteralPred}"
-        | :? FplVariableMany1 -> fv.TypeId <- $"+{LiteralPred}"
         | _ ->  fv.TypeId <- LiteralPred
         st.EvalPop()
     | Ast.FunctionalTermType((pos1, pos2),()) -> 
@@ -141,17 +138,7 @@ let rec eval (st: SymbolTable) ast =
         let fv = variableStack.PeekEvalStack()
         match fv with
         | :? FplVariableMany -> fv.TypeId <- $"*{LiteralFunc}"
-        | :? FplVariableMany1 -> fv.TypeId <- $"+{LiteralFunc}"
         | _ ->  fv.TypeId <- LiteralFunc
-        st.EvalPop()
-    | Ast.Many((pos1, pos2),()) ->
-        st.EvalPush("Many")
-        st.EvalPop()
-    | Ast.Many1((pos1, pos2),()) ->
-        st.EvalPush("Many1")
-        st.EvalPop()
-    | Ast.One((pos1, pos2),()) ->
-        st.EvalPush("One")
         st.EvalPop()
     | Ast.Star((pos1, pos2),()) ->
         st.EvalPush("Star")
@@ -255,7 +242,6 @@ let rec eval (st: SymbolTable) ast =
             value.FplId <- s
             fv.TypeId <- s
         | :? FplVariableMany -> fv.TypeId <- $"*{s}"
-        | :? FplVariableMany1 -> fv.TypeId <- $"+{s}"
         | _ ->  fv.TypeId <- s
         st.EvalPop() 
     | Ast.Var((pos1, pos2), name) ->
@@ -660,8 +646,6 @@ let rec eval (st: SymbolTable) ast =
         match fv with 
         | :? FplVariableMany -> 
             fv.TypeId <- $"*{identifier}"
-        | :? FplVariableMany1 -> 
-            fv.TypeId <- $"+{identifier}"
         | :? FplVariable -> 
             fv.TypeId <- identifier
         | :? FplMapping -> 
@@ -709,7 +693,7 @@ let rec eval (st: SymbolTable) ast =
         namedVariableDeclarationListAsts |> List.map (
             fun child ->
             match child with 
-            | Ast.NamedVarDecl(_,((varList,_),_)) -> fv.Arity <- fv.Arity + varList.Length
+            | Ast.NamedVarDecl(_,(varList,_)) -> fv.Arity <- fv.Arity + varList.Length
             | _ -> ()
             eval st child
         ) |> ignore
@@ -1651,40 +1635,30 @@ let rec eval (st: SymbolTable) ast =
         variableStack.Pop() |> ignore // pop without 
         st.EvalPop()
     // | NamedVarDecl of Positions * ((Ast list * Ast) * Ast)
-    | Ast.NamedVarDecl((pos1, pos2), ((variableListAst, varDeclModifierAst), variableTypeAst)) ->
+    | Ast.NamedVarDecl((pos1, pos2), (variableListAst, variableTypeAst)) ->
         st.EvalPush("NamedVarDecl")
         let parent = variableStack.PeekEvalStack()
         parent.AuxiliaryInfo <- variableListAst |> List.length // remember how many variables to create
         // create all variables of the named variable declaration in the current scope
         variableListAst |> List.iter (fun varAst ->
-            match varDeclModifierAst with 
-            | Ast.Many((posMan1, posMan2),()) ->
+            match variableTypeAst with 
+            | Ast.ArrayType((posMan1, posMan2),(mainTypeAst, indexAllowedTypeListAst)) ->
                 emitVAR00Diagnostics parent.AuxiliaryInfo posMan1 posMan2        
                 match varAst with 
                 | Ast.Var((varPos1, varPos2), varName) ->
                     let newVar = new FplVariableMany(varName, (varPos1, varPos2), parent)
                     newVar.IsSignatureVariable <- (variableStack.InSignatureEvaluation && not (isVar parent))
                     variableStack.PushEvalStack(newVar)
-                    eval st variableTypeAst
+                    eval st mainTypeAst
                     variableStack.PopEvalStack()
                 | _ -> ()
-            | Ast.Many1((posMan1, posMan2),()) ->
-                emitVAR00Diagnostics parent.AuxiliaryInfo posMan1 posMan2        
-                match varAst with 
-                | Ast.Var((varPos1, varPos2), varName) ->
-                    let newVar = new FplVariableMany1(varName, (varPos1, varPos2), parent)
-                    newVar.IsSignatureVariable <- (variableStack.InSignatureEvaluation && not (isVar parent))
-                    variableStack.PushEvalStack(newVar)
-                    eval st variableTypeAst
-                    variableStack.PopEvalStack()
-                | _ -> ()
-            | Ast.One((_, _),()) ->
+            | Ast.SimpleVariableType((_, _),simplVariableTypeAst) ->
                 match varAst with 
                 | Ast.Var((varPos1, varPos2), varName) ->
                     let newVar = new FplVariable(varName, (varPos1, varPos2), parent)
                     newVar.IsSignatureVariable <- (variableStack.InSignatureEvaluation && not (isVar parent))
                     variableStack.PushEvalStack(newVar)
-                    eval st variableTypeAst
+                    eval st simplVariableTypeAst
                     variableStack.PopEvalStack()
                 | _ -> ()
             | _ -> ()

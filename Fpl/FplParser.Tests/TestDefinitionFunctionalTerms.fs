@@ -50,7 +50,7 @@ type TestDefinitionFunctionalTerms01 () =
 
     [<TestMethod>]
     member this.TestDefinitionFunctionalTerm04 () =
-        let result = run (definitionFunctionalTerm .>> eof) """func Sum(list:* Nat)->Nat
+        let result = run (definitionFunctionalTerm .>> eof) """func Sum(list:* Nat[ind,ind])->Nat
         {
             dec ~a:obj ~  
                 result, addend: Nat
@@ -69,7 +69,7 @@ type TestDefinitionFunctionalTerms01 () =
 
     [<TestMethod>]
     member this.TestDefinitionFunctionalTerm05 () =
-        let result = run (definitionFunctionalTerm .>> eof) """func Sum(list:* Nat)->Nat
+        let result = run (definitionFunctionalTerm .>> eof) """func Sum(list:* Nat[tpl])->Nat
         {
             dec ~a:obj ~  
                 i: index
@@ -87,7 +87,7 @@ type TestDefinitionFunctionalTerms01 () =
 
     [<TestMethod>]
     member this.TestDefinitionFunctionalTerm06 () =
-        let result = run (definitionFunctionalTerm .>> eof) """func Sum(from, to: Nat, arr:+Nat) -> Nat
+        let result = run (definitionFunctionalTerm .>> eof) """func Sum(from, to: Nat, arr:*Nat[Nat]) -> Nat
         {
             dec ~a:obj ~ 
                 i, result: Nat

@@ -68,9 +68,7 @@ let leftParen = tokenize "LeftParen" (skipChar '(') >>. spaces
 let rightParen = tokenize "RightParen" (skipChar ')') 
 let comma = tokenize "Comma" (skipChar ',') >>. spaces 
 let dot = positions "Dot" (skipChar '.') |>> Ast.Dot
-let colon = positions "One" (skipChar ':') .>> spaces |>> Ast.One
-let colonStar = positions "Many" (skipString ":*") .>> spaces |>> Ast.Many
-let colonPlus = positions "Many1" (skipString ":+") .>> spaces |>> Ast.Many1
+let colon = skipChar ':' .>> spaces 
 let colonEqual = tokenize ":=" (skipString ":=") >>. spaces 
 let at = pchar '@'
 let case = skipChar '|' >>. spaces
@@ -239,8 +237,6 @@ let keywordExtension = (skipString LiteralExtL <|> skipString LiteralExt) .>> SW
 
 let extensionName = positions "ExtensionName" (idStartsWithCap) |>> Ast.ExtensionName
 
-//// later semantics: Star: 0 or more occurrences, Plus: 1 or more occurrences
-let varDeclModifier = choice [ colonStar; colonPlus; colon ] .>> IW
 
 // The classType is the last type in FPL we can derive FPL classes from.
 // It therefore excludes the in-built FPL-types keywordPredicate, keywordFunction, and keywordIndex
@@ -258,10 +254,10 @@ let indexAllowedType = positions "IndexAllowedType" (choice [ keywordIndex; keyw
 
 let indexAllowedTypeList = (sepBy1 (indexAllowedType .>> IW) comma) .>> IW
 // arrayType is used to define arrays in Fpl
-let arrayType = positions "ArrayType" (star >>. simpleVariableType .>>. (leftBracket >>. indexAllowedTypeList .>> rightBracket)) |>> Ast.ArrayType
+let arrayType = positions "ArrayType" (star >>. IW >>. simpleVariableType .>>. (IW >>. leftBracket >>. indexAllowedTypeList .>> rightBracket)) |>> Ast.ArrayType
 let variableType = positions "VariableType" (choice [ simpleVariableType; arrayType ]) |>> Ast.VariableType
 
-let namedVariableDeclaration = positions "NamedVarDecl" (variableList .>>. varDeclModifier .>>. variableType .>> IW) |>> Ast.NamedVarDecl
+let namedVariableDeclaration = positions "NamedVarDecl" ((variableList .>> colon) .>>. variableType .>> IW) |>> Ast.NamedVarDecl
 namedVariableDeclarationListRef.Value <- sepBy namedVariableDeclaration comma
 
 paramTupleRef.Value <- positions "ParamTuple" ((leftParen >>. IW >>. namedVariableDeclarationList) .>> (IW .>> rightParen)) |>> Ast.ParamTuple

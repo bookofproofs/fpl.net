@@ -4526,47 +4526,6 @@ type FplQuantorExistsN(positions: Positions, parent: FplValue) as this =
             this.AssignParts(ret)
             ret
 
-
-type FplVariableMany1(fplId, positions: Positions, parent: FplValue) =
-    inherit FplGenericVariable(fplId, positions, parent)
-
-    override this.Name = PrimVariableMany1L
-
-    override this.ShortName = PrimVariableMany1
-
-    override this.Clone () =
-        let ret = new FplVariableMany1(this.FplId, (this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        if this.IsBound then 
-            ret.SetIsBound()
-        if this.IsUsed then 
-            ret.SetIsUsed()
-        ret.IsSignatureVariable <- this.IsSignatureVariable 
-        ret.IsInitializedVariable <- this.IsInitializedVariable
-        ret
-
-    override this.Represent () = 
-        if this.ValueList.Count = 0 then
-            if this.IsInitializedVariable then 
-                // this case should never happen, because isInitializesVariable is a contradiction to ValueList.Count 0
-                LiteralUndef
-            else
-                match this.TypeId with
-                | LiteralUndef -> LiteralUndef
-                | _ -> $"dec {this.Type(SignatureType.Type)}[]" 
-        else
-            let subRepr = 
-                this.ValueList
-                |> Seq.map (fun subfv -> subfv.Represent())
-                |> String.concat ", "
-            if this.IsInitializedVariable then 
-                subRepr
-            else
-                match this.TypeId with
-                | LiteralUndef -> LiteralUndef
-                | _ -> $"dec {this.Type(SignatureType.Type)}[]" 
-
-
 type FplVariableMany(fplId, positions: Positions, parent: FplValue) =
     inherit FplGenericVariable(fplId, positions, parent)
 

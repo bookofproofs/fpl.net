@@ -62,7 +62,7 @@ type TestFplBlockComponentes () =
 
     [<TestMethod>]
     member this.TestSignature08 () =
-        let result = run (constructorSignature .>> eof) """constructor SetRoster(listOfSets:* Set)"""
+        let result = run (constructorSignature .>> eof) """constructor SetRoster(listOfSets:* Set[obj])"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -104,8 +104,14 @@ type TestFplBlockComponentes () =
 
     [<TestMethod>]
     member this.TestSignature14 () =
-        let result = run (constructorSignature .>> eof) """ctor AlgebraicStructure(x: tplSet, ops:+ func(args:* tplSetElem)->tplSetElem)"""
+        let result = run (constructorSignature .>> eof) """ctor AlgebraicStructure(x: tplSet, ops:* func(args:* tplSetElem[ind,obj])->tplSetElem[ind] )"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
+    [<TestMethod>]
+    member this.TestSignature15 () =
+        let result = run (constructorSignature .>> eof) """ctor AlgebraicStructure(x: tplSet, ops:* func(args:* tplSetElem[ind,obj])->*tplSetElem[ind][obj] )"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
