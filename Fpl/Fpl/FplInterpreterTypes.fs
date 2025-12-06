@@ -4141,6 +4141,10 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
                         // even, if there are multiple extensions that would match it 
                         // (thus, the additional check for Scope.ContainsKey...)
                         this.Scope.Add(this.FplId, ext)
+                        let mappingOpt = getMapping ext
+                        match mappingOpt with
+                        | Some mapping -> this.TypeId <- mapping.TypeId
+                        | _ -> ()
                         true
                     else
                         false
