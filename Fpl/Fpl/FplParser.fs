@@ -221,7 +221,6 @@ let predicate, predicateRef = createParserForwardedToRef()
 let predicateList, predicateListRef = createParserForwardedToRef()
 let predicateWithQualification, predicateWithQualificationRef = createParserForwardedToRef()
 let paramTuple, paramTupleRef = createParserForwardedToRef()
-let classType, classTypeRef = createParserForwardedToRef()
 
 let coord = choice [ predicateWithQualification; dollarDigits ] .>> IW 
 
@@ -240,8 +239,6 @@ let keywordExtension = (skipString LiteralExtL <|> skipString LiteralExt) .>> SW
 
 let extensionName = positions "ExtensionName" (idStartsWithCap) |>> Ast.ExtensionName
 
-let specificClassType = choice [ keywordObject; predicateIdentifier ] 
-
 //// later semantics: Star: 0 or more occurrences, Plus: 1 or more occurrences
 let varDeclModifier = choice [ colonStar; colonPlus; colon ] .>> IW
 
@@ -251,12 +248,10 @@ let varDeclModifier = choice [ colonStar; colonPlus; colon ] .>> IW
 // In contrast to variableType which can also be used for declaring variables 
 // in the scope of FPL building blocks
 
-classTypeRef.Value <- positions "ClassType" (specificClassType) |>> Ast.ClassType
-
 let mapping, mappingRef = createParserForwardedToRef()
 let predicateType = positions "CompoundPredicateType" (keywordPredicate .>>. opt paramTuple) |>> Ast.CompoundPredicateType
 let functionalTermType = positions "CompoundFunctionalTermType" (keywordFunction .>>. opt (paramTuple .>>. (IW >>. mapping))) |>> Ast.CompoundFunctionalTermType
-let variableType = positions "VariableType" (choice [ keywordIndex; classType; templateType; functionalTermType; predicateType ]) |>> Ast.VariableType
+let variableType = positions "VariableType" (choice [ keywordIndex; keywordObject; predicateIdentifier; templateType; functionalTermType; predicateType ]) |>> Ast.VariableType
 
 let namedVariableDeclaration = positions "NamedVarDecl" (variableList .>>. varDeclModifier .>>. variableType .>> IW) |>> Ast.NamedVarDecl
 namedVariableDeclarationListRef.Value <- sepBy namedVariableDeclaration comma

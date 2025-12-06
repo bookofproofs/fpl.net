@@ -866,10 +866,6 @@ let rec eval (st: SymbolTable) ast =
         eval st ast1
         optAst |> Option.map (eval st) |> ignore
         st.EvalPop()
-    | Ast.ClassType((pos1, pos2), specificClassTypeAst) ->
-        st.EvalPush("ClassType")
-        eval st specificClassTypeAst
-        st.EvalPop()
     | Ast.CompoundPredicateType((pos1, pos2), (ast1, optAst)) ->
         st.EvalPush("CompoundPredicateType")
         eval st ast1

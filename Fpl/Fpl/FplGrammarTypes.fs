@@ -71,7 +71,6 @@ type Ast =
     | VariableType of Positions * Ast 
     | InheritedClassTypeList of Ast list
     | InheritedFunctionalTypeList of Ast list
-    | ClassType of Positions * Ast
     | CompoundPredicateType of Positions * (Ast * Ast option)
     | CompoundFunctionalTermType of Positions * (Ast * (Ast * Ast) option)
     // Variables
