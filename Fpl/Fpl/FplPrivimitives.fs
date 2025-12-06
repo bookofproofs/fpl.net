@@ -1356,11 +1356,7 @@ let PrimInstance = "inst"
 [<Literal>]
 let PrimInstanceL = "instance"
 [<Literal>]
-let PrimIntrinsicFunc = "intrinsic functional term"
-[<Literal>]
 let PrimIntrinsicInd = "intrinsic index"
-[<Literal>]
-let PrimIntrinsicObj = "intrinsic object"
 [<Literal>]
 let PrimIntrinsicPred = "intrinsic predicate"
 [<Literal>]

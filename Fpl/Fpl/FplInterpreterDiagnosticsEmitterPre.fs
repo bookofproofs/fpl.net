@@ -29,6 +29,7 @@ let emitUnexpectedErrorDiagnostics errMsg =
 
     ad.AddDiagnostic(diagnostic)
 
+
 let emitID001Diagnostics alreadyDeclaredTypeStr qualifiedStartPosConflictStr pos1 pos2 =
     let diagnostic =
         { 
@@ -81,7 +82,6 @@ let emitID004diagnostics name pos1 pos2 =
             Diagnostic.Alternatives = None
         }
     ad.AddDiagnostic diagnostic
-
 
 let emitID005diagnostics name incorrectBlockType pos1 pos2 =
     let diagnostic =
@@ -181,19 +181,6 @@ let emitID011Diagnostics chain errorMsg pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
 
-let emitID012Diagnostics identifier candidates pos1 pos2 =
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = pos1
-            Diagnostic.EndPos = pos2
-            Diagnostic.Code = ID012(identifier, candidates) // call of parent class does not match the class id
-            Diagnostic.Alternatives = None 
-        }
-    ad.AddDiagnostic diagnostic
-
 let emitID013Diagnostics pos1 pos2 message =
     let diagnostic =
         { 
@@ -221,7 +208,7 @@ let emitID014Diagnostics alreadyDeclaredMixedStr qualifiedStartPosConflictStr po
     ad.AddDiagnostic diagnostic
 
 
-let emitID015diagnostics name pos1 pos2 alternative =
+let emitID015diagnostics name pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -230,7 +217,7 @@ let emitID015diagnostics name pos1 pos2 alternative =
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ID015 name
-            Diagnostic.Alternatives = alternative 
+            Diagnostic.Alternatives = Some $"Use `{LiteralParent}` only inside {getEnglishName LiteralCtorL} or {getEnglishName LiteralPrtyL}."
         }
     ad.AddDiagnostic diagnostic
 
@@ -244,7 +231,7 @@ let emitID016diagnostics name pos1 pos2  =
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ID016 name
-            Diagnostic.Alternatives = None 
+            Diagnostic.Alternatives = Some $"Use `{LiteralSelf}` only inside {getEnglishName PrimClassL}, {getEnglishName PrimPredicateL}, or {getEnglishName PrimFuncionalTermL}."
         }
     ad.AddDiagnostic diagnostic
 
@@ -257,6 +244,20 @@ let emitID017Diagnostics name candidatesNames pos1 pos2 =
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ID017(name, candidatesNames) 
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
+
+let emitID018Diagnostics identifier pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ID018 identifier
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
@@ -357,7 +358,8 @@ let emitID025Diagnostics qualifiedNameCandidate candidateEnglishName blockEnglis
         ad.AddDiagnostic diagnostic
     | _ -> ()
 
-let emitID026Diagnostics name candidates pos1 pos2 =
+
+let emitID027Diagnostics name pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -365,8 +367,21 @@ let emitID026Diagnostics name candidates pos1 pos2 =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = ID026 (name, candidates)
+            Diagnostic.Code = ID027 name
             Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
+let emitLG001Diagnostics argType argName typeOfPredicate pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = LG001(typeOfPredicate, argName, argType)
+            Diagnostic.Alternatives = Some "This issue might be subsequent to other errors to be resolved first." 
         }
     ad.AddDiagnostic diagnostic
 
@@ -385,11 +400,6 @@ let emitLG002diagnostic nodeTypeName times pos1 pos2 =
 
 let emitLG003diagnostic nodeTypeName nodeName nodeRepr pos1 pos2 = 
     if nodeRepr = LiteralFalse then
-        let code = 
-            if isEnglishAn nodeName then
-                LG003(nodeTypeName, $"an {nodeName}")
-            else
-                LG003(nodeTypeName, $"a {nodeName}")
         let diagnostic =
             { 
                 Diagnostic.Uri = ad.CurrentUri
@@ -397,18 +407,13 @@ let emitLG003diagnostic nodeTypeName nodeName nodeRepr pos1 pos2 =
                 Diagnostic.Severity = DiagnosticSeverity.Error
                 Diagnostic.StartPos = pos1
                 Diagnostic.EndPos = pos2
-                Diagnostic.Code = code
+                Diagnostic.Code = LG003(nodeTypeName, getEnglishName nodeName)
                 Diagnostic.Alternatives = None 
             }
         ad.AddDiagnostic diagnostic
 
 let emitLG004diagnostic nodeName arity pos1 pos2 = 
     if arity > 0 then
-        let code = 
-            if isEnglishAn nodeName then
-                LG004 $"an {nodeName}"
-            else
-                LG004 $"a {nodeName}"
         let diagnostic =
             { 
                 Diagnostic.Uri = ad.CurrentUri
@@ -416,7 +421,7 @@ let emitLG004diagnostic nodeName arity pos1 pos2 =
                 Diagnostic.Severity = DiagnosticSeverity.Error
                 Diagnostic.StartPos = pos1
                 Diagnostic.EndPos = pos2
-                Diagnostic.Code = code
+                Diagnostic.Code = LG004 (getEnglishName nodeName)
                 Diagnostic.Alternatives = None 
             }
         ad.AddDiagnostic diagnostic
@@ -431,19 +436,6 @@ let emitLG005Diagnostics name pos1 pos2 =
             Diagnostic.EndPos = pos2
             Diagnostic.Code = LG005 name
             Diagnostic.Alternatives = None
-        }
-    ad.AddDiagnostic diagnostic
-
-let emitLG007Diagnostics name pos1 pos2 =
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = pos1
-            Diagnostic.EndPos = pos2
-            Diagnostic.Code = ID022 name
-            Diagnostic.Alternatives = Some $"Choose one of the constants `{LiteralTrue}` or `{LiteralFalse}` instead." 
         }
     ad.AddDiagnostic diagnostic
 
@@ -515,11 +507,6 @@ let emitPR006Diagnostics proofName argumentName pos1 pos2 =
     ad.AddDiagnostic diagnostic
 
 let emitPR007Diagnostics nodeTypeName nodeName pos1 pos2 = 
-        let code = 
-            if isEnglishAn nodeName then
-                PR007 (nodeTypeName, $"an {nodeName}")
-            else
-                PR007 (nodeTypeName, $"a {nodeName}")
         let diagnostic =
             { 
                 Diagnostic.Uri = ad.CurrentUri
@@ -527,13 +514,12 @@ let emitPR007Diagnostics nodeTypeName nodeName pos1 pos2 =
                 Diagnostic.Severity = DiagnosticSeverity.Warning
                 Diagnostic.StartPos = pos1
                 Diagnostic.EndPos = pos2
-                Diagnostic.Code = code
+                Diagnostic.Code = PR007 (nodeTypeName, getEnglishName nodeName)
                 Diagnostic.Alternatives = None 
             }
         ad.AddDiagnostic diagnostic
 
 let emitPR008Diagnostics nodeName expectedInput actualInput pos1 pos2 = 
-        let code = PR008 (nodeName, expectedInput, actualInput)
         let diagnostic =
             { 
                 Diagnostic.Uri = ad.CurrentUri
@@ -541,7 +527,7 @@ let emitPR008Diagnostics nodeName expectedInput actualInput pos1 pos2 =
                 Diagnostic.Severity = DiagnosticSeverity.Warning
                 Diagnostic.StartPos = pos1
                 Diagnostic.EndPos = pos2
-                Diagnostic.Code = code
+                Diagnostic.Code = PR008 (nodeName, expectedInput, actualInput)
                 Diagnostic.Alternatives = None 
             }
         ad.AddDiagnostic diagnostic
@@ -561,11 +547,6 @@ let emitPR009Diagnostics pos1 pos2 =
     ad.AddDiagnostic diagnostic
     
 let emitPR010Diagnostics keyword exptectedRef pos1 pos2 =
-    let code = 
-        if isEnglishAn exptectedRef then
-            PR010 (keyword, $"an {exptectedRef}")
-        else
-            PR010 (keyword, $"a {exptectedRef}")
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -573,17 +554,12 @@ let emitPR010Diagnostics keyword exptectedRef pos1 pos2 =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = code 
+            Diagnostic.Code = PR010 (keyword, getEnglishName exptectedRef)
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
 
-let emitPR011Diagnostics keyword exptectedRef pos1 pos2 =
-    let code = 
-        if isEnglishAn exptectedRef then
-            PR011 (keyword, $"an {exptectedRef}")
-        else
-            PR011 (keyword, $"a {exptectedRef}")
+let emitPR011Diagnostics keyword exptectedRef pos1 pos2 =            
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -591,7 +567,7 @@ let emitPR011Diagnostics keyword exptectedRef pos1 pos2 =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = code
+            Diagnostic.Code = PR011 (keyword, getEnglishName exptectedRef)
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
@@ -677,6 +653,20 @@ let emitSIG03Diagnostics errMsg mapTypeStr pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
 
+let emitSIG04Diagnostics mixedName candidateCount errList pos1 pos2 = 
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = SIG04(mixedName,candidateCount, errList)
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
+
 let emitSIG05Diagnostics assigneeTypeStr assignedTypeStr pos1 pos2 = 
     let diagnostic =
         { 
@@ -705,11 +695,6 @@ let emitSIG06iagnostic name first second isClass pos1 pos2  =
     ad.AddDiagnostic diagnostic
 
 let emitSIG07iagnostic assigneeName assigneeType nodeType pos1 pos2  = 
-    let code = 
-        if isEnglishAn nodeType then
-            SIG07(assigneeName, assigneeType, $"an {nodeType}")
-        else
-            SIG07(assigneeName, assigneeType, $"a {nodeType}")
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -717,7 +702,7 @@ let emitSIG07iagnostic assigneeName assigneeType nodeType pos1 pos2  =
             Diagnostic.Severity = DiagnosticSeverity.Warning
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = code
+            Diagnostic.Code = SIG07(assigneeName, assigneeType, getEnglishName nodeType)
             Diagnostic.Alternatives = Some "Expected a variable or array position of a variadic variable." 
         }
     ad.AddDiagnostic diagnostic
@@ -747,6 +732,20 @@ let emitST002diagnostics name pos1 pos2 =
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
+
+let emitVAR00Diagnostics numberOfVariadicVars startPos endPos =
+    if numberOfVariadicVars > 1 then
+        let diagnostic =
+            { 
+                Diagnostic.Uri = ad.CurrentUri
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = startPos
+                Diagnostic.EndPos = endPos
+                Diagnostic.Code = VAR00
+                Diagnostic.Alternatives = None 
+            }
+        ad.AddDiagnostic diagnostic
 
 let emitVAR01diagnostics name pos1 pos2 =
     let diagnostic =

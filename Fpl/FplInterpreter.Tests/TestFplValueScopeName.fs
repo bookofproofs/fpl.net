@@ -673,7 +673,7 @@ type TestFplValueScopeName() =
             match var with
             | "base1" -> Assert.AreEqual<string>("B()", base1.Type(SignatureType.Mixed))
             | "base2" -> Assert.AreEqual<string>("C(T1, func, ind, pred)", base1.Type(SignatureType.Mixed))
-            | "base3" -> Assert.AreEqual<string>("D(undef, T1, func)", base1.Type(SignatureType.Mixed))
+            | "base3" -> Assert.AreEqual<string>("D(A, T1, func)", base1.Type(SignatureType.Mixed))
             | "base4" -> Assert.AreEqual<string>("B(In(undef))", base1.Type(SignatureType.Mixed))
             | "base5" -> Assert.AreEqual<string>("C(Test1(T1), Test2(func, ind, pred))", base1.Type(SignatureType.Mixed))
             | "base6" -> Assert.AreEqual<string>("E(pred, undef, pred)", base1.Type(SignatureType.Mixed))
@@ -888,9 +888,9 @@ type TestFplValueScopeName() =
     [<DataRow("base4", """def func T()->pred {intr};""")>]
     [<DataRow("base5", """def cl A {intr} def func T()->A {intr};""")>]
     [<DataRow("base6", """def func T()->pred(z:ind) {intr};""")>]
-    [<DataRow("base7", """def func T()->pred(z:*obj) {intr};""")>]
-    [<DataRow("base8", """def func T()->func(p:*pred(x:obj))->pred(x:ind) {intr};""")>]
-    [<DataRow("base9", """def func T()->pred(f:+func(x:A)->A) {intr};""")>]
+    [<DataRow("base7", """def func T()->pred(z:*obj[ind]) {intr};""")>]
+    [<DataRow("base8", """def func T()->func(p:*pred(x:obj)[ind])->pred(x:ind) {intr};""")>]
+    [<DataRow("base9", """def func T()->pred(f:*func(x:A)->A[ind]) {intr};""")>]
     [<DataRow("base10", """def cl A {intr} def func T()->pred(f:func(x:A)->A) {intr};""")>]
     [<TestMethod>]
     member this.TestMapping(var, varVal) =

@@ -59,7 +59,7 @@ type TestQuantors () =
 
     [<TestMethod>]
     member this.TestQuantors08 () =
-        let result = run (predicate .>> eof) """all x:@Nat {true}"""
+        let result = run (predicate .>> eof) """all x:Nat {true}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

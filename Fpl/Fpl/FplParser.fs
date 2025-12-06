@@ -68,9 +68,7 @@ let leftParen = tokenize "LeftParen" (skipChar '(') >>. spaces
 let rightParen = tokenize "RightParen" (skipChar ')') 
 let comma = tokenize "Comma" (skipChar ',') >>. spaces 
 let dot = positions "Dot" (skipChar '.') |>> Ast.Dot
-let colon = positions "One" (skipChar ':') .>> spaces |>> Ast.One
-let colonStar = positions "Many" (skipString ":*") .>> spaces |>> Ast.Many
-let colonPlus = positions "Many1" (skipString ":+") .>> spaces |>> Ast.Many1
+let colon = skipChar ':' .>> spaces 
 let colonEqual = tokenize ":=" (skipString ":=") >>. spaces 
 let at = pchar '@'
 let case = skipChar '|' >>. spaces
@@ -98,7 +96,7 @@ let attemptSW = SW <|> (IW .>> attempt (lookAhead (choice [skipChar '('; skipCha
 // The FPL interpreter will try to match extensionString after the @ Literal
 // by tryoing out the regex expressions of all user-declared ExtensionBlocks (in their declaration order)
 // until none or the first of then matches this string. Then, the matched string will get the named type of the ExtensionBlock.
-let extensionString = regex @"[^,\s()\[\]{}]+" <?> "<extensionString>" 
+let extensionString = regex @"[^,\s()\[\]{}\:]+" <?> "<extensionString>" 
 let extension = positions "Extension" (at >>. extensionString) |>> Ast.Extension
 
 (* Identifiers *)
@@ -221,7 +219,6 @@ let predicate, predicateRef = createParserForwardedToRef()
 let predicateList, predicateListRef = createParserForwardedToRef()
 let predicateWithQualification, predicateWithQualificationRef = createParserForwardedToRef()
 let paramTuple, paramTupleRef = createParserForwardedToRef()
-let classType, classTypeRef = createParserForwardedToRef()
 
 let coord = choice [ predicateWithQualification; dollarDigits ] .>> IW 
 
@@ -240,12 +237,6 @@ let keywordExtension = (skipString LiteralExtL <|> skipString LiteralExt) .>> SW
 
 let extensionName = positions "ExtensionName" (idStartsWithCap) |>> Ast.ExtensionName
 
-let xId = positions "ExtensionType" (at >>. extensionName) |>> Ast.ExtensionType 
-
-let specificClassType = choice [ keywordObject; predicateIdentifier ] 
-
-//// later semantics: Star: 0 or more occurrences, Plus: 1 or more occurrences
-let varDeclModifier = choice [ colonStar; colonPlus; colon ] .>> IW
 
 // The classType is the last type in FPL we can derive FPL classes from.
 // It therefore excludes the in-built FPL-types keywordPredicate, keywordFunction, and keywordIndex
@@ -253,14 +244,20 @@ let varDeclModifier = choice [ colonStar; colonPlus; colon ] .>> IW
 // In contrast to variableType which can also be used for declaring variables 
 // in the scope of FPL building blocks
 
-classTypeRef.Value <- positions "ClassType" (specificClassType) |>> Ast.ClassType
-
 let mapping, mappingRef = createParserForwardedToRef()
 let predicateType = positions "CompoundPredicateType" (keywordPredicate .>>. opt paramTuple) |>> Ast.CompoundPredicateType
 let functionalTermType = positions "CompoundFunctionalTermType" (keywordFunction .>>. opt (paramTuple .>>. (IW >>. mapping))) |>> Ast.CompoundFunctionalTermType
-let variableType = positions "VariableType" (choice [ keywordIndex; xId; classType; templateType; functionalTermType; predicateType ]) |>> Ast.VariableType
 
-let namedVariableDeclaration = positions "NamedVarDecl" (variableList .>>. varDeclModifier .>>. variableType .>> IW) |>> Ast.NamedVarDecl
+let simpleVariableType = positions "SimpleVariableType" (choice [ keywordIndex; keywordObject; predicateIdentifier; templateType; functionalTermType; predicateType ]) |>> Ast.SimpleVariableType
+// indexAllowedType is used to restrict Fpl types allowed to be used as indexes in arrayType
+let indexAllowedType = positions "IndexAllowedType" (choice [ keywordIndex; keywordObject; predicateIdentifier; templateType]) |>> Ast.IndexAllowedType
+
+let indexAllowedTypeList = (sepBy1 (indexAllowedType .>> IW) comma) .>> IW
+// arrayType is used to define arrays in Fpl
+let arrayType = positions "ArrayType" (star >>. IW >>. simpleVariableType .>>. (IW >>. leftBracket >>. indexAllowedTypeList .>> rightBracket)) |>> Ast.ArrayType
+let variableType = choice [ simpleVariableType; arrayType ]
+
+let namedVariableDeclaration = positions "NamedVarDecl" ((variableList .>> colon) .>>. variableType .>> IW) |>> Ast.NamedVarDecl
 namedVariableDeclarationListRef.Value <- sepBy namedVariableDeclaration comma
 
 paramTupleRef.Value <- positions "ParamTuple" ((leftParen >>. IW >>. namedVariableDeclarationList) .>> (IW .>> rightParen)) |>> Ast.ParamTuple
@@ -304,7 +301,7 @@ let mapCaseSingle = positions "MapCaseSingle" ((case >>. predicate .>> colon) .>
 let mapCaseSingleList = many1 (IW >>. mapCaseSingle)
 let mapCases = positions "MapCases" (((keywordMapCases >>. leftParen >>. IW >>. mapCaseSingleList .>>. mapCaseElse .>> rightParen))) |>> Ast.MapCases
 
-let assignmentStatement = positions "Assignment" ((predicateWithQualification .>> IW .>> colonEqual) .>>. (predicate <|> mapCases)) |>> Ast.Assignment
+let assignmentStatement = positions "Assignment" ((predicateWithQualification .>> IW .>> colonEqual) .>>. predicate) |>> Ast.Assignment
 
 let inEntity = keywordIn >>. positions "InEntity" (predicateWithQualification) .>> IW |>> Ast.InEntity
 
@@ -407,7 +404,7 @@ let compoundPredicate = choice [
 
 let postfixOp = positions "PostfixOperator" ( postfixMathSymbols ) .>> IW |>> Ast.PostfixOperator
 let prefixOp = positions "PrefixOperator" ( prefixMathSymbols ) .>> IW |>> Ast.PrefixOperator
-let expression = positions "Expression" (opt prefixOp .>>. choice [compoundPredicate; primePredicate] .>>. opt postfixOp .>>. optionalSpecification .>>. qualificationList) .>> IW |>> Ast.Expression
+let expression = positions "Expression" (opt prefixOp .>>. choice [compoundPredicate; primePredicate; mapCases] .>>. opt postfixOp .>>. optionalSpecification .>>. qualificationList) .>> IW |>> Ast.Expression
 
 predicateRef.Value <- expression
 

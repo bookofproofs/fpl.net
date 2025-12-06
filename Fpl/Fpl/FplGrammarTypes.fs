@@ -50,7 +50,6 @@ type Ast =
     | Language of Positions * (Ast * Ast)
     | ExtensionName of Positions * string
     | ExtensionRegex of string
-    | ExtensionType of Positions * Ast 
     | ExtensionAssignment of Positions * (Ast * Ast) 
     | ExtensionSignature of Positions * (Ast * Ast)
     | DefinitionExtension of Positions * ((Ast * Ast) * Ast)
@@ -60,19 +59,17 @@ type Ast =
     | ProofSignature of Positions * (Ast * Ast list)
 
     // Types
-    | One of Positions * unit
-    | Many of Positions * unit
-    | Many1 of Positions * unit  
     | TemplateType of Positions * string
     | ObjectType of Positions * unit
     | ClassIdentifier of Positions * Ast
     | PredicateType of Positions * unit
     | FunctionalTermType of Positions * unit
     | IndexType of Positions * unit
-    | VariableType of Positions * Ast 
+    | SimpleVariableType of Positions * Ast 
+    | IndexAllowedType of Positions * Ast 
+    | ArrayType of Positions * (Ast * Ast list)
     | InheritedClassTypeList of Ast list
     | InheritedFunctionalTypeList of Ast list
-    | ClassType of Positions * Ast
     | CompoundPredicateType of Positions * (Ast * Ast option)
     | CompoundFunctionalTermType of Positions * (Ast * (Ast * Ast) option)
     // Variables
@@ -139,7 +136,7 @@ type Ast =
     | CorollarySignature of Positions * (Ast * Ast list)
     | ConjectureSignature of Positions * Ast
     | Conjecture of Positions * (Ast *(Ast list option * Ast))
-    | NamedVarDecl of Positions * ((Ast list * Ast) * Ast) 
+    | NamedVarDecl of Positions * (Ast list * Ast)
     | ParamTuple of Positions * Ast list
     | Mapping of Positions * Ast
     | AxiomSignature of Positions * Ast

@@ -104,10 +104,10 @@ type TestFplValueScopeTypeSignature() =
             | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Type))
             | PrimTheoryL -> Assert.AreEqual<string>("TestScopeConstructorsTypeSignature", theory.Type(SignatureType.Type))
             | "block" -> Assert.AreEqual<string>("TestId", block.Type(SignatureType.Type))
-            | "t1" -> Assert.AreEqual<string>("TestId()", t1.Type(SignatureType.Type))
-            | "t2" -> Assert.AreEqual<string>("TestId(obj)", t2.Type(SignatureType.Type))
-            | "t3" -> Assert.AreEqual<string>("TestId(pred)", t3.Type(SignatureType.Type))
-            | "t4" -> Assert.AreEqual<string>("TestId(ind)", t4.Type(SignatureType.Type))
+            | "t1" -> Assert.AreEqual<string>("TestId", t1.Type(SignatureType.Type))
+            | "t2" -> Assert.AreEqual<string>("TestId", t2.Type(SignatureType.Type))
+            | "t3" -> Assert.AreEqual<string>("TestId", t3.Type(SignatureType.Type))
+            | "t4" -> Assert.AreEqual<string>("TestId", t4.Type(SignatureType.Type))
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
@@ -552,7 +552,7 @@ type TestFplValueScopeTypeSignature() =
             | "base2" -> Assert.AreEqual<string>(LiteralPred, base1.Type(SignatureType.Type))
             | "base3" -> Assert.AreEqual<string>(LiteralUndef, base1.Type(SignatureType.Type))
             | "base4" -> Assert.AreEqual<string>("-(1)", base1.Type(SignatureType.Type))
-            | "base5" -> Assert.AreEqual<string>("undef()", base1.Type(SignatureType.Type))
+            | "base5" -> Assert.AreEqual<string>("Test()", base1.Type(SignatureType.Type))
             | "base6" -> Assert.AreEqual<string>(LiteralInd, base1.Type(SignatureType.Type))
             | "base7" -> Assert.AreEqual<string>("Test$1(undef)", base1.Type(SignatureType.Type))
             | "base8" -> Assert.AreEqual<string>("Test$1", base1.Type(SignatureType.Type))
@@ -578,11 +578,11 @@ type TestFplValueScopeTypeSignature() =
             | "base10e" -> Assert.AreEqual<string>("Test(undef, undef).undef[undef, undef]", base1.Type(SignatureType.Type))
             | "base11e" -> Assert.AreEqual<string>("undef(undef, undef).undef[undef, undef]", base1.Type(SignatureType.Type))
             | "base12e" -> Assert.AreEqual<string>("undef(undef, undef).3[undef, undef]", base1.Type(SignatureType.Type))
-            | "base13e" -> Assert.AreEqual<string>("undef(undef, undef).T[undef, undef]", base1.Type(SignatureType.Type))
+            | "base13e" -> Assert.AreEqual<string>("obj(undef, undef).T[undef, undef]", base1.Type(SignatureType.Type))
             | "base10f" -> Assert.AreEqual<string>("Test[undef, undef].undef(undef, undef)", base1.Type(SignatureType.Type))
             | "base11f" -> Assert.AreEqual<string>("undef[undef, undef].undef(undef, undef)", base1.Type(SignatureType.Type))
             | "base12f" -> Assert.AreEqual<string>("undef[undef, undef].undef(undef, undef)", base1.Type(SignatureType.Type))
-            | "base13f" -> Assert.AreEqual<string>("undef[undef.undef].T(undef, undef)", base1.Type(SignatureType.Type))
+            | "base13f" -> Assert.AreEqual<string>("obj[undef.undef].T(undef, undef)", base1.Type(SignatureType.Type))
             | "base14" -> Assert.AreEqual<string>("∅", base1.Type(SignatureType.Type))
             | "base15" -> Assert.AreEqual<string>("-(undef)", base1.Type(SignatureType.Type))
             | "base15a" -> Assert.AreEqual<string>("'(undef)", base1.Type(SignatureType.Type))
@@ -744,9 +744,9 @@ type TestFplValueScopeTypeSignature() =
     [<DataRow("base4", """def func T()->pred {intr};""")>]
     [<DataRow("base5", """def cl A {intr} def func T()->A {intr};""")>]
     [<DataRow("base6", """def func T()->pred(z:ind) {intr};""")>]
-    [<DataRow("base7", """def func T()->pred(z:*obj) {intr};""")>]
-    [<DataRow("base8", """def func T()->func(p:*pred(x:obj))->pred(x:ind) {intr};""")>]
-    [<DataRow("base9", """def func T()->pred(f:+func(x:A)->A) {intr};""")>]
+    [<DataRow("base7", """def func T()->pred(z:*obj[ind]) {intr};""")>]
+    [<DataRow("base8", """def func T()->func(p:*pred(x:obj)[ind])->pred(x:ind) {intr};""")>]
+    [<DataRow("base9", """def func T()->pred(f:*func(x:A)->A[ind]) {intr};""")>]
     [<DataRow("base10", """def cl A {intr} def func T()->pred(f:func(x:A)->A) {intr};""")>]
     [<TestMethod>]
     member this.TestMapping(var, varVal) =

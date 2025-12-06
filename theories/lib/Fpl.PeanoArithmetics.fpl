@@ -177,7 +177,7 @@ proof AddIsUnique$1
 }
 
 
-def func Sum(list:* Nat)->Nat
+def func Sum(list:*Nat[ind])->Nat
 {
     dec 
         ~result, addend: Nat
@@ -190,7 +190,7 @@ def func Sum(list:* Nat)->Nat
     return result
 }
 
-def func Sum2(list:* Nat)->Nat
+def func Sum2(list:* Nat[ind])->Nat
 {
     dec
         ~elem,result: Nat
@@ -204,7 +204,7 @@ def func Sum2(list:* Nat)->Nat
 }
 
 
-def func Sum3(arr:*Nat) -> Nat
+def func Sum3(arr:*Nat[ind]) -> Nat
 {
     dec
         ~addend, result: Nat
@@ -257,6 +257,7 @@ proposition SumOfConsecutiveNumbers
 }
 
 def cl Real
+def cl ZeroReal:Real
 
 def pred LowerEqual (x,y:tpl) 
 {

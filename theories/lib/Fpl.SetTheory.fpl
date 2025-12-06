@@ -81,7 +81,7 @@ axiom Extensionality
 def class SetRoster: Set
 {
     // to support enumerating set elements, e.g. SetRoster(1,2,3)
-    ctor SetRoster(listOfSets:* Set)
+    ctor SetRoster(listOfSets:* Set[ind])
     {
         dec 
             ~elem: Set
@@ -102,7 +102,7 @@ def class SetRoster: Set
 def class SetBuilder: Set
 {
     // to support set builder notation, ex. all "even" natural numbers like SetBuilder(n: Nat, Even(n))
-    ctor SetBuilder(x: Set, p: pred(u1: Set, o:* obj))
+    ctor SetBuilder(x: Set, p: pred(u1: Set, o:* obj[ind]))
     {
         dec
         base.Set()

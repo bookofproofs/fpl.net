@@ -85,8 +85,8 @@ type TestDefinitionPredicates () =
         {
             dec ~a:obj
                 ~one, two:Nat
-                ~tuple:+Tuple
-                tuple:=Tuple(Nat(1),Nat(2))
+                ~tuple:*Tuple[Nat]
+                tuple:=Tuple(@1,@2)
                 ;
             
             and

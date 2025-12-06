@@ -69,7 +69,7 @@ type CommonFplValueTestCases =
     static member ScopeVariablesInSignatureVariadic(subtype) =
         ad.Clear()
         let fplCode = """
-        def pred TestPredicate(x,y:+pred(u,v,w:func(a,b,c:*obj)->obj)) 
+        def pred TestPredicate(x,y:*pred(u,v,w:func(a,b,c:*obj[ind])->obj)[obj]) 
             {true}
         ;
         """
@@ -168,7 +168,7 @@ type CommonFplValueTestCases =
         ad.Clear()
         let fplCode = """
         def pred TestPredicate() 
-            {dec ~x,y:+pred(u,v,w:func(a,b,c:*obj)->obj); true}
+            {dec ~x,y:*pred(u,v,w:func(a,b,c:*obj[tpl])->obj)[ind]; true}
         ;
         """
         let filename = "TestScopeVariablesInBlockVariadic" + subtype
@@ -303,8 +303,8 @@ type CommonFplValueTestCases =
             def func SomeFunctionalTerm3()->obj {dec ~v:obj v:=v; return v}
             def func SomeFunctionalTerm4()->tpl {dec ~v:tpl v:=v; return v}
             def func SomeFunctionalTerm5()->SomeClass1 {dec ~v:SomeClass1; return v}
-            def func SomeFunctionalTerm6()->SomeClass1 {dec ~v:SomeClass1 v:=SomeClass; return v}
-            def func SomeFunctionalTerm7()->SomeClass1 {dec ~v:SomeClass1 v:=SomeClass(); return v}
+            def func SomeFunctionalTerm6()->SomeClass1 {dec ~v:SomeClass1 v:=SomeClass1; return v}
+            def func SomeFunctionalTerm7()->SomeClass1 {dec ~v:SomeClass1 v:=SomeClass1(); return v}
             def func SomeFunctionalTerm8()->ind {return $112}
             def func SomeFunctionalTerm9()->ind {dec ~v:ind v:=$13; return v}
             proof SomeTheorem1$1 {1. |- trivial}
@@ -431,7 +431,7 @@ type CommonFplValueTestCases =
         ad.Clear()
         let fplCode = """
             def cl A {intr}
-            def func B()->obj {intr}
+            def func B()->func {intr}
             def pred T() {
                 dec 
                     ~i:ind i:=$1 
@@ -448,7 +448,7 @@ type CommonFplValueTestCases =
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         let getValue (varObj:FplValue) =
             match varObj with
-            | :? FplVariable as var -> var.ValueList[0]
+            | :? FplVariable as var when var.ValueList.Count > 0 -> var.ValueList[0]
             | _ -> new FplIntrinsicUndef((Position("",0,0,0), Position("",0,0,0) ), varObj)
 
         let result = match stOption with

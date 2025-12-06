@@ -794,7 +794,7 @@ type TestFplValueScopeNameEndPos() =
             | "base5" -> 
                 Assert.AreEqual<int64>((int64)68, base1.EndPos.Column)
             | "base6" -> 
-                Assert.AreEqual<int64>((int64)62, base1.EndPos.Column)
+                Assert.AreEqual<int64>((int64)63, base1.EndPos.Column)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
@@ -903,9 +903,9 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("base4", """def func T()->pred {intr};""")>]
     [<DataRow("base5", """def cl A {intr} def func T()->A {intr};""")>]
     [<DataRow("base6", """def func T()->pred(z:ind) {intr};""")>]
-    [<DataRow("base7", """def func T()->pred(z:*obj) {intr};""")>]
-    [<DataRow("base8", """def func T()->func(p:*pred(x:obj))->pred(x:ind) {intr};""")>]
-    [<DataRow("base9", """def func T()->pred(f:+func(x:A)->A) {intr};""")>]
+    [<DataRow("base7", """def func T()->pred(z:*obj[ind]) {intr};""")>]
+    [<DataRow("base8", """def func T()->func(p:*pred(x:obj)[ind])->pred(x:ind) {intr};""")>]
+    [<DataRow("base9", """def func T()->pred(f:*func(x:A)->A[ind]) {intr};""")>]
     [<DataRow("base10", """def cl A {intr} def func T()->pred(f:func(x:A)->A) {intr};""")>]
     [<TestMethod>]
     member this.TestMapping(var, varVal) =
@@ -925,12 +925,12 @@ type TestFplValueScopeNameEndPos() =
             | "base2" -> Assert.AreEqual<int64>((int64)18, mapping.EndPos.Column)
             | "base3" -> Assert.AreEqual<int64>((int64)19, mapping.EndPos.Column)
             | "base4" -> Assert.AreEqual<int64>((int64)19, mapping.EndPos.Column)
-            | "base5" -> Assert.AreEqual<int64>((int64)36, mapping.EndPos.Column)
+            | "base5" -> Assert.AreEqual<int64>((int64)32, mapping.EndPos.Column)
             | "base6" -> Assert.AreEqual<int64>((int64)26, mapping.EndPos.Column)
             | "base7" -> Assert.AreEqual<int64>((int64)27, mapping.EndPos.Column)
             | "base8" -> Assert.AreEqual<int64>((int64)48, mapping.EndPos.Column)
             | "base9" -> Assert.AreEqual<int64>((int64)36, mapping.EndPos.Column)
-            | "base10" -> Assert.AreEqual<int64>((int64)55, mapping.EndPos.Column)
+            | "base10" -> Assert.AreEqual<int64>((int64)51, mapping.EndPos.Column)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

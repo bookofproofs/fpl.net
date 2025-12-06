@@ -117,21 +117,19 @@ type DiagnosticCode =
     | ID009 of string
     | ID010 of string
     | ID011 of string * string
-    | ID012 of string * string 
     | ID013 of string
     | ID014 of string * string
     | ID015 of string 
     | ID016 of string 
     | ID017 of string * string 
     | ID018 of string 
-    | ID019 of string 
     | ID020 of string 
     | ID021 of string 
     | ID022 of string
     | ID023 of string 
     | ID024 of string * string
     | ID025 of string * string * string
-    | ID026 of string * string
+    | ID027 of string
     // logic-related error codes
     | LG001 of string * string * string
     | LG002 of string * int
@@ -232,21 +230,19 @@ type DiagnosticCode =
             | ID009 _ -> "ID009"
             | ID010 _ -> "ID010"
             | ID011 _ -> "ID011"
-            | ID012 _ -> "ID012"
             | ID013 _ -> "ID013"
             | ID014 _ -> "ID014"
             | ID015 _ -> "ID015"
             | ID016 _ -> "ID016"
             | ID017 _ -> "ID017"
             | ID018 _ -> "ID018"
-            | ID019 _ -> "ID019"
             | ID020 _ -> "ID020"
             | ID021 _ -> "ID021"
             | ID022 _ -> "ID022"
             | ID023 _ -> "ID023"
             | ID024 _ -> "ID024"
             | ID025 _ -> "ID025"
-            | ID026 _ -> "ID026"
+            | ID027 _ -> "ID027"
             // logic-related error codes
             | LG001 _ -> "LG001"
             | LG002 _ -> "LG002"
@@ -339,7 +335,7 @@ type DiagnosticCode =
             | ID001 (signature, conflict) -> $"Signature `{signature}` was already declared at {conflict}."  
             | ID002 (signature, incorrectBlockType) -> $"Cannot find a block to be associated with the proof `{signature}`, found only {incorrectBlockType}."  
             | ID003 signature -> $"The proof `{signature}` is missing a block to be associated with."  
-            | ID004 name -> $"Cannot assign `{name}`, it is a class, not an instance; use a constructor `{name}()` instead."  
+            | ID004 name -> $"Cannot assign a class `{name}` directly; use a constructor `{name}()` instead."  
             | ID005 (signature, incorrectBlockType) -> $"Cannot find a block to be associated with the corollary `{signature}`, found only {incorrectBlockType}."  
             | ID006 signature -> $"The corollary `{signature}` is missing a block to be associated with."  
             | ID007 (nodeType, signatureNode, baseType, signatureBase) -> $"The {nodeType} `{signatureNode}` cannot inherit from {baseType} `{signatureBase}`."  
@@ -347,31 +343,29 @@ type DiagnosticCode =
             | ID009 name -> $"Circular base type dependency involving `{name}`." 
             | ID010 name -> $"The type `{name}` could not be found. Are you missing a uses clause?" 
             | ID011 (chain, errorMsg) -> $"The inheritance chain `{chain}` causes the following error: {errorMsg}."  
-            | ID012 (name, candidates) -> 
-                if candidates.Length > 0 then 
-                    sprintf "Base class `%s` not found, candidates are %s." name candidates
-                else
-                    sprintf "Base class `%s` not found, no candidates found." name 
             | ID013 delegateDiagnostic -> sprintf "%s" delegateDiagnostic // just emit the delegate's diagnostic
             | ID014 (signature, conflict) -> sprintf "Language code `%s` was already declared at %s." signature conflict
-            | ID015 signature -> $"Cannot refer to `parent` inside a block that is not a definition; the block was {signature}." 
-            | ID016 signature -> $"Cannot refer to `self` inside a block that is neither a definition, nor a property; the block was {signature}." 
+            | ID015 signature -> $"`parent` cannot be referenced from {signature}." 
+            | ID016 signature -> $"`self` cannot be referenced from {signature}." 
             | ID017 (name, candidates) -> 
                 if candidates.Length > 0 then
-                   sprintf "The type `%s` could not be determined, found more than one candidates %s." name candidates
+                   $"The type `{name}` could not be determined, candidates were {candidates}."  
                 else
-                   sprintf "The type `%s` could not be determined, found no candidates." name 
+                   $"The type `{name}` not found, no candidates found."  
             | ID018 name -> sprintf "The extension `%s` could not be matched. Declare an extension with this pattern." name
-            | ID019 name -> sprintf "The extension `%s` could not be found. Are you missing a uses clause?" name
             | ID020 name -> $"Missing call of base constructor `{name}`." 
             | ID021 name -> $"Duplicate call of base constructor `{name}`."
             | ID022 name -> $"`{name}` is intrinsic, it has no parameterized constructors. This call uses parameters."
             | ID023 candidates  -> $"Cannot associate a justification with a single block. Found more candidates: {candidates}." 
             | ID024 (signature, conflict) -> sprintf "Expression `%s` was already localized at %s." signature conflict
             | ID025 (candidate, candidateType, nodeType)  -> $"Cannot reference to `{candidate}` which is {candidateType} inside {nodeType}." 
-            | ID026 (name, candidates)  -> $"The base constructor call's id `{name}` is not among the base classes this class is derived from. The candidate classes are {candidates}." 
+            | ID027 name -> $"Illegal recursion in for statement. The entity `{name}` cannot be used as its own domain." 
             // logic-related error codes
-            | LG001 (typeOfPredicate,argument,typeOfExpression) -> $"Cannot evaluate `{typeOfPredicate}`; expecting a predicate argument `{argument}`, got `{typeOfExpression}`."
+            | LG001 (typeOfPredicate,argument,typeOfExpression) -> 
+                if argument = typeOfExpression then 
+                    $"Cannot evaluate `{typeOfPredicate}` because its argument `{argument}` could not be evaluated as a predicate."
+                else
+                    $"Cannot evaluate `{typeOfPredicate}` because its argument `{argument}` typed `{typeOfExpression}` could not be evaluated as a predicate."
             | LG002 (nodeTypeName, times) -> $"Possible infinite recursion detected, `{nodeTypeName}` was called for more than {times} times.`."
             | LG003 (nodeTypeName, nodeName) -> $"`{nodeTypeName}` evaluates to `false` and cannot be {nodeName}."
             | LG004 nodeType -> $"`Parameters not allowed for {nodeType}."
@@ -412,7 +406,7 @@ type DiagnosticCode =
                     $"Property name `{name}` of base class `{first} will be overshadowed by `{second}`."
                 else
                     $"Property name `{name}` of base functional term `{first} will be overshadowed by `{second}`."
-            | SIG07 (assigneeName, assigneeType, nodeType) -> $"`{assigneeName}` is {nodeType} (type `{assigneeType}`) and is not assignable."
+            | SIG07 (assigneeName, assigneeType, nodeType) -> $"`{assigneeName}` is {nodeType} ({assigneeType}) and is not assignable."
             // structure-related error codes
             | ST001 nodeName -> sprintf $"The {nodeName} does nothing. Simplify the code by the block."
             | ST002 nodeName -> sprintf $"The {nodeName} does nothing. Simplify the code by removing it entirely."
@@ -976,5 +970,10 @@ let stringMatches (input: string) (pattern: string) =
 let startsWithAny (prefixes:string list) (input:string) = 
     prefixes |> List.exists input.StartsWith
 
-/// A helper function for checking if a string requires the "an" indefinite article in English.
-let isEnglishAn somString = startsWithAny ["a"; "e"; "i"; "o"; "u"] somString 
+/// A helper function adding an English article to a string 
+let getEnglishName someString = 
+    let isEnglishAn = startsWithAny ["a"; "e"; "i"; "o"; "u"] someString
+    if isEnglishAn then 
+        $"an {someString}"
+    else
+        $"a {someString}"

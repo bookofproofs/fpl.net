@@ -20,7 +20,7 @@ open ErrDiagnostics
 open FplInterpreterTypes
 open FplInterpreterUsesClause
 open FplInterpreterBuildingBlocks
-open FplInterpreterDiagnosticsEmitter
+open FplInterpreterDiagnosticsEmitterPre
 
 let fplInterpreter (st:SymbolTable) input (uri:PathEquivalentUri) fplLibUrl = 
     try

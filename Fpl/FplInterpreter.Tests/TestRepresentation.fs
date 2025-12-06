@@ -15,10 +15,16 @@ type TestRepresentation() =
     [<DataRow("02a","not(x = x)", LiteralFalse)>]
     [<DataRow("03","(x = y)", LiteralFalse)>]
     [<DataRow("04","not (x = y)", LiteralTrue)>]
+    [<DataRow("05","iif ((x = y),(x = y))", LiteralTrue)>]
+    [<DataRow("06","iif ((x = y),not (x = y))", LiteralFalse)>]
     [<TestMethod>]
     member this.TestRepresentationPredicate(var:string, varVal, expected:string) =
         ad.Clear()
-        let fplCode = sprintf """uses Fpl.Commons 
+        let fplCode = sprintf """
+            def pred Equal(x,y: tpl) infix "=" 50 
+            {
+                del.Equal(x,y)
+            }           
             def cl A  {intr} 
             def cl B  {intr} 
             def pred T() { dec ~x,y:obj x:=A() y:=B(); %s };""" varVal
@@ -35,7 +41,7 @@ type TestRepresentation() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("00","n:=Zero()", "intr Zero:intr Nat:intr obj")>]
+    [<DataRow("00","n:=Zero()", """{"name":"Zero","base":[{"name":"Nat","base":[],"vars":[],"prtys":[]}],"vars":[],"prtys":[]}""")>]
     [<TestMethod>]
     member this.TestRepresentationAssignment(var:string, varVal, expected:string) =
         ad.Clear()
@@ -50,10 +56,7 @@ type TestRepresentation() =
             let fn = theory.Scope["T()"] 
             let assignmentStmt = fn.ArgList[0]
             let assignee = assignmentStmt.ArgList[0]
-            let assignedValue = getArgument assignee
-            match assignedValue with 
-            | Some value -> Assert.AreEqual<string>(expected, value.Represent())
-            | None -> Assert.AreEqual<string>(expected, "no value was assigned")
+            Assert.AreEqual<string>(expected, assignee.Represent())
         | None -> 
             Assert.IsTrue(false)
             
@@ -95,7 +98,7 @@ type TestRepresentation() =
     [<DataRow("($0 = $0)", LiteralTrue)>]
     [<DataRow("($1 = $2)", LiteralFalse)>]
     [<DataRow("($3 = $3)", LiteralTrue)>]
-    [<DataRow("(@3 = $3)", LiteralUndef)>]
+    [<DataRow("(@3 = $3)", LiteralFalse)>]
     [<DataRow("(true = false)", LiteralFalse)>]
     [<DataRow("(undef = undef)", LiteralUndef)>]
     [<DataRow("(true = true)", LiteralTrue)>]
@@ -131,12 +134,12 @@ type TestRepresentation() =
             Assert.IsTrue(false)
 
     [<DataRow("00","""def pred T() { dec ~v:ind; true };""", "dec ind")>]
-    [<DataRow("00a","""def pred T() { dec ~v:pred; true };""", "dec pred")>]
+    [<DataRow("00a","""def pred T() { dec ~v:pred; true };""", PrimUndetermined)>]
     [<DataRow("00b","""def pred T() { dec ~v:obj; true };""", "dec obj")>]
     [<DataRow("00c","""def pred T() { dec ~v:func; true };""", "dec func")>]
     [<DataRow("00d","""def pred T() { dec ~v:tpl; true };""", "dec tpl")>]
-    [<DataRow("01a","""def pred T() { dec ~v:pred(d:ind); true };""", "dec pred(ind)")>]
-    [<DataRow("01b","""def pred T() { dec ~v:pred(d:pred(e,f:obj)); true };""", "dec pred(pred(obj, obj))")>]
+    [<DataRow("01a","""def pred T() { dec ~v:pred(d:ind); true };""", PrimUndetermined)>]
+    [<DataRow("01b","""def pred T() { dec ~v:pred(d:pred(e,f:obj)); true };""", PrimUndetermined)>]
     [<DataRow("01c","""def pred T() { dec ~v:func(d:pred(e:obj,d,e:ind)) ->pred(d:pred(e,f:obj)); true };""", "dec func(pred(obj, ind, ind)) -> pred(pred(obj, obj))")>]
     [<DataRow("02","""def pred T() { dec ~v:A; true };""", "dec A")>]
     [<DataRow("02a","""def cl A {intr} def pred T() { dec ~v:A; true };""", "dec A")>]
@@ -156,8 +159,11 @@ type TestRepresentation() =
         | None -> 
             Assert.IsTrue(false)
 
+
     [<DataRow("00","""def pred T() { dec ~v:pred v:=true; false};""", LiteralTrue)>]
     [<DataRow("01","""def pred T() { dec ~v:pred v:=false; false};""", LiteralFalse)>]
+    [<DataRow("02","""def cl A {dec ~myX:obj; ctor A(x:obj) {dec myX:=x;}} def cl B:A { ctor B(x:obj) {dec base.A(del.Decrement(x)); } } def pred T() { dec ~v:B v:=B(@2); false};""", """todo""")>]
+    [<DataRow("03","""def cl A {dec ~myX:pred; ctor A(x:pred) {dec myX:=x;}} def cl B:A { ctor B(x:pred) {dec base.A(not x); } } def pred T() { dec ~v:B v:=B(true); false};""", """todo""")>]
     [<TestMethod>]
     member this.TestRepresentationItializedVars(var:string, fplCode, expected:string) =
         ad.Clear()

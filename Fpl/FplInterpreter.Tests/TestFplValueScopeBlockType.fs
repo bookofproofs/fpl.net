@@ -310,8 +310,8 @@ type TestFplValueScopeBlockType() =
             | "r" -> Assert.IsInstanceOfType<FplRoot>(r)
             | PrimTheoryL -> Assert.IsInstanceOfType<FplTheory>(theory)
             | "block" -> Assert.IsInstanceOfType<FplPredicate>(block)
-            | "x" -> Assert.IsInstanceOfType<FplVariableMany1>(x)
-            | "y" -> Assert.IsInstanceOfType<FplVariableMany1>(y)
+            | "x" -> Assert.IsInstanceOfType<FplVariableMany>(x)
+            | "y" -> Assert.IsInstanceOfType<FplVariableMany>(y)
             | "xu" -> Assert.IsInstanceOfType<FplVariable>(xu) 
             | "xv" -> Assert.IsInstanceOfType<FplVariable>(xv)
             | "xw" -> Assert.IsInstanceOfType<FplVariable>(xw) 
@@ -447,8 +447,8 @@ type TestFplValueScopeBlockType() =
             | "r" -> Assert.IsInstanceOfType<FplRoot>(r)
             | PrimTheoryL -> Assert.IsInstanceOfType<FplTheory>(theory)
             | "block" -> Assert.IsInstanceOfType<FplPredicate>(block)
-            | "x" -> Assert.IsInstanceOfType<FplVariableMany1>(x)
-            | "y" -> Assert.IsInstanceOfType<FplVariableMany1>(y)
+            | "x" -> Assert.IsInstanceOfType<FplVariableMany>(x)
+            | "y" -> Assert.IsInstanceOfType<FplVariableMany>(y)
             | "xu" -> Assert.IsInstanceOfType<FplVariable>(xu) 
             | "xv" -> Assert.IsInstanceOfType<FplVariable>(xv)
             | "xw" -> Assert.IsInstanceOfType<FplVariable>(xw) 
@@ -553,8 +553,8 @@ type TestFplValueScopeBlockType() =
             let base1 = pr1.ArgList[0]
 
             match var with
-            | "base1" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base2" -> Assert.IsInstanceOfType<FplReference>(base1)
+            | "base1" -> Assert.IsInstanceOfType<FplIntrinsicPred>(base1)
+            | "base2" -> Assert.IsInstanceOfType<FplIntrinsicPred>(base1)
             | "base3" -> Assert.IsInstanceOfType<FplIntrinsicUndef>(base1)
             | "base4" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base5" -> Assert.IsInstanceOfType<FplReference>(base1)
@@ -565,7 +565,7 @@ type TestFplValueScopeBlockType() =
             | "base10" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base11" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base12" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base13" -> Assert.IsInstanceOfType<FplExtensionObj>(base1)
+            | "base13" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base11a" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base12a" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base10b" -> Assert.IsInstanceOfType<FplReference>(base1)
@@ -748,9 +748,9 @@ type TestFplValueScopeBlockType() =
     [<DataRow("base4", """def func T()->pred {intr};""")>]
     [<DataRow("base5", """def cl A {intr} def func T()->A {intr};""")>]
     [<DataRow("base6", """def func T()->tpl {intr};""")>]
-    [<DataRow("base7", """def func T()->pred(z:*obj) {intr};""")>]
-    [<DataRow("base8", """def func T()->func(p:*pred(x:obj))->pred(x:ind) {intr};""")>]
-    [<DataRow("base9", """def func T()->pred(f:+func(x:A)->A) {intr};""")>]
+    [<DataRow("base7", """def func T()->pred(z:*obj[ind]) {intr};""")>]
+    [<DataRow("base8", """def func T()->func(p:*pred(x:obj)[ind])->pred(x:ind) {intr};""")>]
+    [<DataRow("base9", """def func T()->pred(f:*func(x:A)->A[ind]) {intr};""")>]
     [<DataRow("base10", """def cl A {intr} def func T()->pred(f:func(x:A)->A) {intr};""")>]
     [<TestMethod>]
     member this.TestMapping(var, varVal) =
@@ -945,8 +945,7 @@ type TestFplValueScopeBlockType() =
             let theory = r.Scope[filename]
             let pr = theory.Scope["T()"] 
             let pre = pr.ArgList |> Seq.toList |> List.rev |> List.head
-            let base1 = pre.Scope.Values |> Seq.toList |> List.rev |> List.head
-            Assert.IsInstanceOfType<FplDecrement>(base1)
+            Assert.IsInstanceOfType<FplDecrement>(pre)
         | None -> 
             Assert.IsTrue(false)
 
@@ -969,7 +968,8 @@ type TestFplValueScopeBlockType() =
             let r = st.Root
             let theory = r.Scope[filename]
             let pr = theory.Scope["T()"] 
-            let base1 = pr.ArgList |> Seq.toList |> List.rev |> List.head
+            let basePre = pr.ArgList |> Seq.head
+            let base1 = basePre.Scope.Values |> Seq.head
             Assert.IsInstanceOfType<FplExtensionObj>(base1)
         | None -> 
             Assert.IsTrue(false)
@@ -1053,14 +1053,14 @@ type TestFplValueScopeBlockType() =
             let pred = theory.Scope["Test(ind)"]
             let assignment = pred.ArgList[0]
             let res = assignment.ArgList[1]
-            let cr = res.ArgList[0]
+
  
             match var with
-            | "base1" -> Assert.IsInstanceOfType<FplMapCases>(cr)
-            | "base2" -> Assert.IsInstanceOfType<FplMapCases>(cr)
-            | "base3" -> Assert.IsInstanceOfType<FplMapCases>(cr)
-            | "base4" -> Assert.IsInstanceOfType<FplMapCases>(cr)
-            | "base5" -> Assert.IsInstanceOfType<FplMapCases>(cr)
+            | "base1" -> Assert.IsInstanceOfType<FplMapCases>(res)
+            | "base2" -> Assert.IsInstanceOfType<FplMapCases>(res)
+            | "base3" -> Assert.IsInstanceOfType<FplMapCases>(res)
+            | "base4" -> Assert.IsInstanceOfType<FplMapCases>(res)
+            | "base5" -> Assert.IsInstanceOfType<FplMapCases>(res)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
