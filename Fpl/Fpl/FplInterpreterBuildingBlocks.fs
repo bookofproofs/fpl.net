@@ -669,7 +669,8 @@ let rec eval (st: SymbolTable) ast =
         | :? FplMapping -> 
             fv.TypeId <- fv.TypeId + identifier
         | :? FplBase 
-        | :? FplBaseConstructorCall -> 
+        | :? FplBaseConstructorCall 
+        | :? FplForInStmtDomain -> 
             fv.FplId <- identifier
             fv.TypeId <- identifier
         | :? FplReference -> 
@@ -679,7 +680,11 @@ let rec eval (st: SymbolTable) ast =
             fvJi.FplId <- identifier
         | _ -> ()
         if evalPath.Contains(".NamedVarDecl.") || evalPath.Contains(".VariableType.ClassType.") then 
-            let candidates = (findCandidatesByName st identifier false false) |> List.filter (fun fv -> fv.FplId = identifier)
+            let candidatesPre =    
+                findCandidatesByName st identifier false false
+            let candidates =
+                candidatesPre
+                |> List.filter (fun fv1 -> fv1.FplId = identifier)
 
             match (fv, candidates.Length) with
             | (:? FplVariable, 0) -> 

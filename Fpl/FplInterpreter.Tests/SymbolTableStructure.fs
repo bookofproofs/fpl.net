@@ -2597,7 +2597,7 @@ type SymbolTableStructure() =
         | "FplForInStmt", "03" ->
             Assert.IsInstanceOfType<FplFunctionalTerm>(parent)
             Assert.AreEqual<int>(4, parent.ArgList.Count)
-            Assert.AreEqual<int>(4, parent.Scope.Count)
+            Assert.AreEqual<int>(2, parent.Scope.Count)
             Assert.IsInstanceOfType<FplForInStmt>(node)
             Assert.AreEqual<int>(3, node.ArgList.Count) // entity, domain, for body consisting of 1 stmt
             Assert.AreEqual<string>("addend", node.ArgList[0].Type SignatureType.Name)

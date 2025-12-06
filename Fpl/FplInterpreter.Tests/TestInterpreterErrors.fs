@@ -1412,7 +1412,8 @@ type TestInterpreterErrors() =
     [<DataRow("12", "def cl Set {intr} axiom Test {dec ~x:SetTypo; true};", 1)>]
     [<DataRow("13", "def pred Test() {dec ~x:Set; true};", 1)>]
     [<DataRow("14", "axiom A { all x:Nat {true} };", 1)>]
-    [<DataRow("15", "def pred Test() {dec ~x:object; is(x,Set)};", 0)>]
+    [<DataRow("15", "def pred Test() {dec ~x:object; is(x,Set)};", 1)>]
+    [<DataRow("15a", "def cl Set def pred Test() {dec ~x:object; is(x,Set)};", 0)>]
     [<DataRow("16", "def cl Set def pred Test() {dec ~x:object; is(x,Set)};", 0)>]
     [<DataRow("16a", "def cl C {ctor C(x:ind) {}} def cl A:C { ctor A() {dec ~x:obj base.C(x); } };", 1)>]
     [<DataRow("17", """def pred T1() {true} def pred Test() { dec ~x:obj; T1(x) };""", 1)>]
@@ -1449,13 +1450,13 @@ type TestInterpreterErrors() =
     [<DataRow("45", """def cl A {intr} def func Add(n,m:A)->A {dec ~x:A; return x};""", 0)>]
     [<DataRow("46", """def cl A {intr} def func Add(n,m:A)->A {dec ~x:A; return x} prop P {dec ~op:Add; true};""", 0)>]
     [<DataRow("47", """def cl A {intr property pred T() {true} property pred S() {T()}};""", 0)>]
-    [<DataRow("48", """def cl A {dec ~x:obj; ctor A(y:obj) {dec base.Obj() x:=y; } property func P()->obj {return x}} def pred T(r:A) {r.P()};""", 0)>]
-    [<DataRow("49", """def cl A {ctor A(y:+obj) {}} def class B {ctor B(z:+obj) {dec ~a:A base.Obj() a := A(z); }};""", 0)>]
+    [<DataRow("48", """def cl Obj def cl A:Obj {dec ~x:obj; ctor A(y:obj) {dec base.Obj() x:=y; } property func P()->obj {return x}} def pred T(r:A) {r.P()};""", 0)>]
+    [<DataRow("49", """def cl A:Obj {ctor A(y:+obj) {}} def class B {ctor B(z:+obj) {dec ~a:A base.Obj() a := A(z); }};""", 0)>]
     [<DataRow("50", """def cl A {intr property pred T() {true}} def cl B:A {ctor B() {dec base.A() assert self.T(); }};""", 0)>]
     [<DataRow("51", """def func A(n,m:obj)->obj {intr} prop T {dec ~op:A ~x,y:obj; (op(x,y) = x)};""", 0)>]
-    [<DataRow("52", """def cl T { dec ~x:+tpl; ctor T(y:+tpl) {dec base.Obj() x:=y; } property func C(i:ind) -> tpl {return x[i]}};""", 0)>]
+    [<DataRow("52", """def cl T { dec ~x:+tpl; ctor T(y:+tpl) {dec x:=y; } property func C(i:ind) -> tpl {return x[i]}};""", 0)>]
     [<DataRow("53", """def cl Nat ext D x@/\d+/ -> Nat {dec ~n,m:Nat cases ( | (x = @0) : n:=m ? m:=n ); return n } def func Add(x,y:Nat)->obj {intr} prop K {dec ~op:Add ~n:Nat; ( op(n,@0) = n ) } ;""", 0)>]
-    [<DataRow("54", """def cl C {ctor C() {}} def pred T() {dec ~cI1:C cI1:=C; true } ;""", 0)>]
+    [<DataRow("54", """def cl C {ctor C() {}} def pred T() {dec ~cI1:C cI1:=C; true } ;""", 1)>]
     [<DataRow("54a", """def cl C {ctor C() {}} def pred T() {dec ~cI1:C cI1:=C(); true } ;""", 0)>]
     [<DataRow("54b", """def cl C {ctor C(x:obj) {}} def pred T() {dec ~cI1:C cI1:=C(); true } ;""", 1)>]
     [<DataRow("54c", """def cl C {ctor C(x:obj) {}} def pred T() {dec ~x:obj ~cI1:C cI1:=C(x); true } ;""", 0)>]
@@ -1543,7 +1544,7 @@ type TestInterpreterErrors() =
             runTestHelper "TestSIG05.fpl" fplCode code expected
 
     [<DataRow("""def pred Eq(x,y: obj) infix "=" 1000 {intr} axiom A {dec ~x:ind ~y:obj; (x = y) };""", 
-        "No overload matching `=(ind, obj)`. `x:ind` does not match `x:obj` in TestSIG04MsgSpecificity.Eq(obj, obj).")>]
+        "No overload matching `=(ind, obj)`. `x:ind` does not match `x:obj` in a predicate definition TestSIG04MsgSpecificity.Eq(obj, obj).")>]
     [<DataRow("""def func Succ(n:Nat) -> obj {intr};""", 
         "No overload matching `Nat`, no candidates were found. Are you missing a uses clause?")>]
     [<TestMethod>]
