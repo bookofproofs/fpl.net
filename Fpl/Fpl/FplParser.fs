@@ -255,7 +255,7 @@ let indexAllowedType = positions "IndexAllowedType" (choice [ keywordIndex; keyw
 let indexAllowedTypeList = (sepBy1 (indexAllowedType .>> IW) comma) .>> IW
 // arrayType is used to define arrays in Fpl
 let arrayType = positions "ArrayType" (star >>. IW >>. simpleVariableType .>>. (IW >>. leftBracket >>. indexAllowedTypeList .>> rightBracket)) |>> Ast.ArrayType
-let variableType = positions "VariableType" (choice [ simpleVariableType; arrayType ]) |>> Ast.VariableType
+let variableType = choice [ simpleVariableType; arrayType ]
 
 let namedVariableDeclaration = positions "NamedVarDecl" ((variableList .>> colon) .>>. variableType .>> IW) |>> Ast.NamedVarDecl
 namedVariableDeclarationListRef.Value <- sepBy namedVariableDeclaration comma

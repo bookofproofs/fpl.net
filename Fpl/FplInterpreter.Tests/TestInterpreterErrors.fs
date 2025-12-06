@@ -1283,8 +1283,8 @@ type TestInterpreterErrors() =
             let code = PR016 ""
             runTestHelper "TestPR016.fpl" fplCode code expected
            
-    [<DataRow("""def pred Or (x:+ pred) infix "or" 0 {true};""", 0)>]
-    [<DataRow("""def pred Or (x:* pred) infix "or" 0 {true};""", 0)>]
+    [<DataRow("""def pred Or (x:*pred[obj]) infix "or" 0 {true};""", 0)>]
+    [<DataRow("""def pred Or (x:* pred[ind]) infix "or" 0 {true};""", 0)>]
     [<DataRow("""def pred T() {true};""", 1)>]
     [<DataRow("""def pred T(x:obj) infix "+" 0 {true};""", 1)>]
     [<DataRow("""def pred T(x,y:obj) infix "+" 0{true};""", 0)>]
@@ -1438,10 +1438,10 @@ type TestInterpreterErrors() =
     [<DataRow("46", """def cl A {intr} def func Add(n,m:A)->A {dec ~x:A; return x} prop P {dec ~op:Add; true};""", 0)>]
     [<DataRow("47", """def cl A {intr property pred T() {true} property pred S() {T()}};""", 0)>]
     [<DataRow("48", """def cl Obj def cl A:Obj {dec ~x:obj; ctor A(y:obj) {dec base.Obj() x:=y; } property func P()->obj {return x}} def pred T(r:A) {r.P()};""", 0)>]
-    [<DataRow("49", """def cl A:Obj {ctor A(y:+obj) {}} def class B {ctor B(z:+obj) {dec ~a:A base.Obj() a := A(z); }};""", 0)>]
+    [<DataRow("49", """def cl A:Obj {ctor A(y:+obj) {}} def class B {ctor B(z:*obj[ind]) {dec ~a:A base.Obj() a := A(z); }};""", 0)>]
     [<DataRow("50", """def cl A {intr property pred T() {true}} def cl B:A {ctor B() {dec base.A() assert self.T(); }};""", 0)>]
     [<DataRow("51", """def func A(n,m:obj)->obj {intr} prop T {dec ~op:A ~x,y:obj; (op(x,y) = x)};""", 0)>]
-    [<DataRow("52", """def cl T { dec ~x:+tpl; ctor T(y:+tpl) {dec x:=y; } property func C(i:ind) -> tpl {return x[i]}};""", 0)>]
+    [<DataRow("52", """def cl T { dec ~x:+tpl; ctor T(y:*tpl[ind]) {dec x:=y; } property func C(i:ind) -> tpl {return x[i]}};""", 0)>]
     [<DataRow("53", """def cl Nat ext D x@/\d+/ -> Nat {dec ~n,m:Nat cases ( | (x = @0) : n:=m ? m:=n ); return n } def func Add(x,y:Nat)->obj {intr} prop K {dec ~op:Add ~n:Nat; ( op(n,@0) = n ) } ;""", 0)>]
     [<DataRow("54", """def cl C {ctor C() {}} def pred T() {dec ~cI1:C cI1:=C; true } ;""", 1)>]
     [<DataRow("54a", """def cl C {ctor C() {}} def pred T() {dec ~cI1:C cI1:=C(); true } ;""", 0)>]
@@ -1514,7 +1514,7 @@ type TestInterpreterErrors() =
     [<DataRow("24a", "def cl A {dec ~myX:obj; ctor A(x:obj) {dec myX:=x;}} def cl B:A { ctor B(x:obj) {dec base.A(del.Decrement(x)); } } def pred T() { dec ~v:B v:=B(@2); false};", 0)>]    
     [<DataRow("24b", "def cl A {dec ~myX:ind; ctor A(x:obj) {dec myX:=x;}} def cl B:A { ctor B(x:obj) {dec base.A(del.Decrement(x)); } } def pred T() { dec ~v:B v:=B(@2); false};", 1)>]    
     [<DataRow("25", "def cl Nat def func Succ(x:Nat)->Nat def cl A {dec ~myX:Nat; ctor A(i:Nat) {dec myX:=Succ(i);}};", 0)>]    
-    [<DataRow("26", "def cl Nat def cl A {dec ~arr:+Nat; ctor A(i:Nat) {dec arr[i]:=i;}};", 0)>]    
+    [<DataRow("26", "def cl Nat def cl A {dec ~arr:*Nat[Nat]; ctor A(i:Nat) {dec arr[i]:=i;}};", 0)>]    
     [<DataRow("27", "def cl Nat def cl Zero:Nat def func Succ(n:Nat)->Nat def pred T() {dec ~n:Nat n:=Succ(Zero()); true};", 0)>]    
     [<DataRow("28", "def cl Nat def func Succ(n:Nat)->Nat ext Digits x@/\d+/ -> Nat {dec ~n:Nat n:=Succ(delegate.Decrement(x)); return n};", 0)>]      
     [<DataRow("29", "def cl Nat def cl Zero:Nat def func Succ(n:Nat)->Nat def func Add(x,y: Nat)->Nat {dec ~r:Nat r := Succ(self(x,y)); return r };", 0)>]    
@@ -1613,12 +1613,9 @@ type TestInterpreterErrors() =
 
     [<DataRow("10a", "def pred S(x:pred) {dec x:=true; true};", 0)>]
     [<DataRow("10b", "def pred S(x:pred) {dec x():=true; true};", 1)>]
-    [<DataRow("10c", "def pred S(x:*pred) {dec x[$1]:=true; true};", 0)>]
-    [<DataRow("10d", "def pred S(x:*pred) {dec x[@1]:=true; true};", 0)>]
-    [<DataRow("10e", "def pred S(x:*pred) {dec ~a:Nat x[a]:=true; true};", 0)>]
-    [<DataRow("10f", "def pred S(x:+pred) {dec x[$1]:=true; true};", 0)>]
-    [<DataRow("10g", "def pred S(x:+pred) {dec x[@1]:=true; true};", 0)>]
-    [<DataRow("10h", "def pred S(x:+pred) {dec ~a:Nat x[a]:=true; true};", 0)>]
+    [<DataRow("10c", "def pred S(x:*pred[ind]) {dec x[$1]:=true; true};", 0)>]
+    [<DataRow("10d", "def pred S(x:*pred[obj]) {dec x[@1]:=true; true};", 0)>]
+    [<DataRow("10e", "def pred S(x:*pred[Nat]) {dec ~a:Nat x[a]:=true; true};", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG07(no:string, fplCode:string, expected) =

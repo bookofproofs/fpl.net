@@ -626,10 +626,6 @@ let rec eval (st: SymbolTable) ast =
         eval st variableAst
         variableStack.PopEvalStack()
         st.EvalPop()
-    | Ast.VariableType((pos1, pos2), compoundVariableTypeAst) ->
-        st.EvalPush("VariableType")
-        eval st compoundVariableTypeAst
-        st.EvalPop()
     | Ast.AST((pos1, pos2), ast1) ->
         st.EvalPush("AST")
         eval st ast1

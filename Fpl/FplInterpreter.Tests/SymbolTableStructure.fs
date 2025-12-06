@@ -2545,8 +2545,8 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplForInStmt", "01", """def func Sum(list:* Nat)->Nat { dec ~a:obj ~result, addend: Nat result:=Zero() for addend in list { result:=Add(result,addend) }; return result };""", "")>]
-    [<DataRow("FplForInStmt", "02", """def func Sum(from, to: Nat, arr:+Nat) -> Nat { dec ~a:obj ~i, result: Nat result:=Zero() for i in ClosedRange(from,to) { result:=Add(result,arr[i]) }; return result };""", "")>]
+    [<DataRow("FplForInStmt", "01", """def func Sum(list:* Nat[ind])->Nat { dec ~a:obj ~result, addend: Nat result:=Zero() for addend in list { result:=Add(result,addend) }; return result };""", "")>]
+    [<DataRow("FplForInStmt", "02", """def func Sum(from, to: Nat, arr:*Nat[Nat]) -> Nat { dec ~a:obj ~i, result: Nat result:=Zero() for i in ClosedRange(from,to) { result:=Add(result,arr[i]) }; return result };""", "")>]
     [<DataRow("FplForInStmt", "03", """def func Sum() -> Nat { dec ~addend, result: Nat result:=Zero() for addend in Nat { result:=Add(result,addend) }; return result };""", "")>]
     [<TestMethod>]
     member this.TestStructureFplForInStmt(nodeType, varVal, fplCode, identifier) =
@@ -4541,8 +4541,8 @@ type SymbolTableStructure() =
     // variable to variable 
     [<DataRow("FplVariable", "02a", """def pred T() {dec ~p:pred(x:obj); true};""", "x")>]
     [<DataRow("FplVariable", "02b", """def pred T(p:pred(x:obj)) {true};""", "x")>]
-    [<DataRow("FplVariable", "02c", """def pred T() {dec ~p:*pred(x:obj); true};""", "x")>]
-    [<DataRow("FplVariable", "02d", """def pred T(p:*pred(x:obj)) {true};""", "x")>]
+    [<DataRow("FplVariable", "02c", """def pred T() {dec ~p:*pred(x:obj)[ind]; true};""", "x")>]
+    [<DataRow("FplVariable", "02d", """def pred T(p:*pred(x:obj)[ind]) {true};""", "x")>]
     [<DataRow("FplVariable", "02e", """def pred T() {dec ~p:*pred(x:obj)[tpl,Nat]; true};""", "x")>]
     [<DataRow("FplVariable", "02f", """def pred T(p:*pred(x:obj)[ind,obj]) {true};""", "x")>]
     // variable in mapping
