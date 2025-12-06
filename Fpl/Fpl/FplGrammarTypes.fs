@@ -68,6 +68,9 @@ type Ast =
     | PredicateType of Positions * unit
     | FunctionalTermType of Positions * unit
     | IndexType of Positions * unit
+    | SimpleVariableType of Positions * Ast 
+    | IndexAllowedType of Positions * Ast 
+    | ArrayType of Positions * (Ast * Ast list)
     | VariableType of Positions * Ast 
     | InheritedClassTypeList of Ast list
     | InheritedFunctionalTypeList of Ast list

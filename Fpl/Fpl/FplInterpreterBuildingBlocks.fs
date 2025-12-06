@@ -91,6 +91,19 @@ let rec eval (st: SymbolTable) ast =
         | _ -> ()
 
     match ast with
+    | Ast.IndexAllowedType((pos1, pos2), indexAllowedTypeAst) ->
+        st.EvalPush("IndexAllowedType")
+        eval st indexAllowedTypeAst
+        st.EvalPop()
+    | Ast.SimpleVariableType((pos1, pos2), simpleVariableTypeAst) ->
+        st.EvalPush("SimpleVariableType")
+        eval st simpleVariableTypeAst
+        st.EvalPop()
+    | Ast.ArrayType((pos1, pos2), (mainTypeAst, indexAllowedTypeListAst)) ->
+        st.EvalPush("ArrayType")
+        eval st mainTypeAst
+        indexAllowedTypeListAst |> List.map (eval st) |> ignore
+        st.EvalPop()
     | Ast.IndexType((pos1, pos2),()) -> 
         st.EvalPush("IndexType")
         let fv = variableStack.PeekEvalStack()

@@ -251,7 +251,15 @@ let varDeclModifier = choice [ colonStar; colonPlus; colon ] .>> IW
 let mapping, mappingRef = createParserForwardedToRef()
 let predicateType = positions "CompoundPredicateType" (keywordPredicate .>>. opt paramTuple) |>> Ast.CompoundPredicateType
 let functionalTermType = positions "CompoundFunctionalTermType" (keywordFunction .>>. opt (paramTuple .>>. (IW >>. mapping))) |>> Ast.CompoundFunctionalTermType
-let variableType = positions "VariableType" (choice [ keywordIndex; keywordObject; predicateIdentifier; templateType; functionalTermType; predicateType ]) |>> Ast.VariableType
+
+let simpleVariableType = positions "SimpleVariableType" (choice [ keywordIndex; keywordObject; predicateIdentifier; templateType; functionalTermType; predicateType ]) |>> Ast.SimpleVariableType
+// indexAllowedType is used to restrict Fpl types allowed to be used as indexes in arrayType
+let indexAllowedType = positions "IndexAllowedType" (choice [ keywordIndex; keywordObject; predicateIdentifier; templateType]) |>> Ast.IndexAllowedType
+
+let indexAllowedTypeList = (sepBy1 (indexAllowedType .>> IW) comma) .>> IW
+// arrayType is used to define arrays in Fpl
+let arrayType = positions "ArrayType" (star >>. simpleVariableType .>>. (leftBracket >>. indexAllowedTypeList .>> rightBracket)) |>> Ast.ArrayType
+let variableType = positions "VariableType" (choice [ simpleVariableType; arrayType ]) |>> Ast.VariableType
 
 let namedVariableDeclaration = positions "NamedVarDecl" (variableList .>>. varDeclModifier .>>. variableType .>> IW) |>> Ast.NamedVarDecl
 namedVariableDeclarationListRef.Value <- sepBy namedVariableDeclaration comma
