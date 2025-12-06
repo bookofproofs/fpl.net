@@ -8,9 +8,9 @@ definition class Tuple
 {
     dec 
         ~myLength: Nat
-        ~myArr:+tpl
+        ~myArr:*tpl[Nat]
     ;
-    ctor Tuple(listOfTpl:+tpl)
+    ctor Tuple(listOfTpl:*tpl[Nat])
     {
         dec 
             ~elem: tpl
@@ -38,11 +38,11 @@ definition class Tuple
 definition class UnlimitedTupleFrom
 {
     dec 
-        ~myX:+ tpl
+        ~myX:* tpl[index]
         ~myFrom:index
     ; 
 
-    constructor UnlimitedTupleFrom(from:index, x:+ tpl)
+    constructor UnlimitedTupleFrom(from:index, x:* tpl[index])
     {
         dec
             myX:=x
@@ -66,7 +66,7 @@ def class CartesianProduct: Set
         ~mySetArray: Set
     ;
 
-    constructor CartesianProduct(setList:+ Set)
+    constructor CartesianProduct(setList:* Set[Nat])
     {
         dec
             ~setItem: Set
@@ -124,7 +124,7 @@ def class Relation: Set
         ~mySubset: Subset
     ;
 
-    ctor Relation(setList:+ Set)
+    ctor Relation(setList:*Set[Nat])
     {
         dec
             ~cartProd : CartesianProduct
