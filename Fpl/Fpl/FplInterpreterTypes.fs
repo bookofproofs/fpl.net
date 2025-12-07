@@ -557,7 +557,6 @@ type FplValue(positions: Positions, parent: FplValue option) =
         |> Seq.filter (fun fv -> 
             fv.Name = PrimVariableL 
             || fv.Name = PrimVariableArrayL 
-            || fv.Name = PrimVariableMany1L
         )
         |> Seq.toList
 
@@ -784,21 +783,16 @@ and FplVariableStack() =
             | (p::ps, ar::ars) ->
                 match p.Name , ar.Name with
                 // p is variadic, ar is variadic 
-                | PrimVariableMany1L, PrimVariableMany1L 
-                | PrimVariableMany1L, PrimVariableArrayL 
-                | PrimVariableArrayL, PrimVariableMany1L 
                 | PrimVariableArrayL, PrimVariableArrayL ->
                     replaceValues p ar
                     // continue replacing variables with the remaining lists
                     replace ps ars
                 // p is variadic, ar is anything
-                | PrimVariableMany1L, _ 
                 | PrimVariableArrayL, _ ->
                     replaceValues p ar              
                     // continue replacing variables with the original pars and the remaining ars list
                     replace pars ars
                 // p is not variadic, ar is variadic 
-                | PrimVariableL, PrimVariableMany1L 
                 | PrimVariableL, PrimVariableArrayL -> ()
                  // p is not variadic, ar is anything but variadic 
                 | PrimVariableL, _ ->
@@ -894,8 +888,7 @@ let stripLastDollarDigit (s: string) =
 let isVar (fv1:FplValue) =
     match fv1.Name with
     | PrimVariableL
-    | PrimVariableArrayL
-    | PrimVariableMany1L -> true
+    | PrimVariableArrayL -> true
     | _ -> false
     
 let isSignatureVar (fv1:FplValue) = 
@@ -1196,8 +1189,7 @@ let addExpressionToReference (fplValue:FplValue) =
     | Some next when next.Name = PrimRefL && next.Scope.ContainsKey(next.FplId) ->
         let referenced = next.Scope.Values |> Seq.head
         match referenced.Name with 
-        | PrimVariableArrayL
-        | PrimVariableMany1L ->
+        | PrimVariableArrayL ->
             next.ArgList.Add fplValue
         | _ ->
             next.FplId <- fplValue.FplId
@@ -1453,8 +1445,7 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
                         || next.Name = LiteralCorL) ->
             addToProofOrCorolllary next
         | Some next when (next.Name = PrimVariableL
-                        || next.Name = PrimVariableArrayL
-                        || next.Name = PrimVariableMany1L) ->
+                        || next.Name = PrimVariableArrayL) ->
             addToVariableOrQuantorOrMapping next
         | Some next when next.Name = PrimMappingL ->
             this.SetIsBound() // mapping-Variables are bound
@@ -1465,7 +1456,7 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
                 emitVAR02diagnostics this.FplId this.StartPos this.EndPos
             elif next.Name = PrimQuantorExistsN && next.Scope.Count>0 then 
                 emitVAR07diagnostics this.FplId this.StartPos this.EndPos
-            elif this.Name = PrimVariableMany1L || this.Name = PrimVariableArrayL then 
+            elif this.Name = PrimVariableArrayL then 
                 emitVAR08diagnostics this.StartPos this.EndPos
             else
                 addToVariableOrQuantorOrMapping next
@@ -1621,7 +1612,6 @@ type FplInstance(positions: Positions, parent: FplValue) =
             |> Seq.filter (fun fv -> 
                 fv.Name = PrimVariableL 
                 || fv.Name = PrimVariableArrayL
-                || fv.Name = PrimVariableMany1L
                 )
             |> Seq.map (fun fv -> "{" + fv.FplId + ":{" + fv.Represent() + "}}")
             |> String.concat ","
@@ -1708,7 +1698,6 @@ type FplGenericConstructor(name, positions: Positions, parent: FplValue) as this
             |> Seq.filter (fun fv -> 
                 fv.Name = PrimVariableL 
                 || fv.Name = PrimVariableArrayL
-                || fv.Name = PrimVariableMany1L
                 )
             |> Seq.map (fun fv -> $"{fv.FplId} = {fv.Represent()}")
             |> String.concat $",{System.Environment.NewLine}"
@@ -3427,8 +3416,7 @@ let matchArgumentsWithParameters (fva: FplValue) (fvp: FplValue) =
     match argResult with
     | Some aErr -> 
         match fvp.Name with 
-        | PrimVariableArrayL
-        | PrimVariableMany1L ->
+        | PrimVariableArrayL ->
             Some($"{aErr} in {qualifiedName fvp}:{fvp.Type SignatureType.Type}")
         | _ -> 
             Some($"{aErr} in {qualifiedName fvp}")
