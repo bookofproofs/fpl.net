@@ -23,9 +23,6 @@ namespace FplLS
                 case ":=":
                     ci.Detail = "assignment sign ':='";
                     break;
-                case ":+":
-                    ci.Detail = "one or more '+'";
-                    break;
                 case ":*":
                     ci.Detail = "zero or more '*'";
                     break;
