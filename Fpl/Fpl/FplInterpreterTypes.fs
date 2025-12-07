@@ -1273,11 +1273,14 @@ let rec getMapping (fv:FplValue) =
     | _ ->
         fv.ArgList |> Seq.tryFind (fun fv -> fv.Name = PrimMappingL)
 
-
-
 type IHasSignature =
     abstract member SignStartPos : Position with get, set
     abstract member SignEndPos : Position with get, set
+
+type IHasDimensions =
+    abstract member Dimension : int
+    abstract member DimensionTypes : List<FplValue>
+    abstract member SetType : string -> Position -> Position -> unit
 
 [<AbstractClass>]
 type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
@@ -4243,6 +4246,29 @@ type FplDecrement(name, positions: Positions, parent: FplValue) as this =
 
 type FplMapping(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
+    let _dimensionTypes = new List<FplValue>()
+    let mutable _dimensionTypesBeingSet = false
+
+    member this.Dimension = _dimensionTypes.Count
+
+    member this.DimensionTypes = _dimensionTypes
+
+    /// Sets the during the symbol table construction.
+    /// Because the type consists of a main type and index allowed-types, we use "Dimension being set" as a flag
+    /// to decide which one to be set.
+    member this.SetType (typeId:string) pos1 pos2 = 
+        if not _dimensionTypesBeingSet then 
+            this.TypeId <- $"*{typeId}"
+            _dimensionTypesBeingSet <- true
+        else
+            let indexAllowedType = FplMapping((pos1,pos2), this) 
+            indexAllowedType.TypeId <- typeId
+            this.DimensionTypes.Add indexAllowedType
+
+    interface IHasDimensions with
+        member this.Dimension = this.Dimension
+        member this.DimensionTypes = this.DimensionTypes
+        member this.SetType typeId pos1 pos2 = this.SetType typeId pos1 pos2
 
     override this.Name = PrimMappingL
     override this.ShortName = PrimMapping
@@ -4518,14 +4544,8 @@ type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
     let _dimensionTypes = new List<FplValue>()
     let mutable _dimensionTypesBeingSet = false
 
-    override this.Name = PrimVariableArrayL
-
-    override this.ShortName = PrimVariableArray
-
-    /// Dimension of the FplValueArray.
     member this.Dimension = _dimensionTypes.Count
 
-    /// Types of the dimensions of this FplValueArray.
     member this.DimensionTypes = _dimensionTypes
 
     /// Sets the during the symbol table construction.
@@ -4539,6 +4559,15 @@ type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
             let indexAllowedType = FplMapping((pos1,pos2), this) 
             indexAllowedType.TypeId <- typeId
             this.DimensionTypes.Add indexAllowedType
+
+    interface IHasDimensions with
+        member this.Dimension = this.Dimension
+        member this.DimensionTypes = this.DimensionTypes
+        member this.SetType typeId pos1 pos2 = this.SetType typeId pos1 pos2
+
+    override this.Name = PrimVariableArrayL
+
+    override this.ShortName = PrimVariableArray
 
     override this.Clone () =
         let ret = new FplVariableArray(this.FplId, (this.StartPos, this.EndPos), this.Parent.Value)
