@@ -279,7 +279,7 @@ type TestInterpreterErrors() =
     [<DataRow(@"ext Digits x@/\d+/ -> X {ret x} def pred T(x:Digits) {true};", 0)>]
     [<DataRow(@"ext Digits x@/\d+/ -> X {ret x} def pred T(x:Typo) {true};", 0)>]
 
-    [<DataRow("def func Sum(list:* Nat)->Nat {dec ~result: Nat; return result} def func Sum2(list:* Nat)->Nat {dec ~result: Nat; return result};", 0)>]
+    [<DataRow("def func Sum(list:* Nat[ind])->Nat {dec ~result: Nat; return result} def func Sum2(list:* Nat[ind])->Nat {dec ~result: Nat; return result};", 0)>]
     [<DataRow("""def cl B {intr} def cl A {dec ~x:obj; ctor A(y:B) {} };""", 0)>]
     [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
@@ -754,8 +754,8 @@ type TestInterpreterErrors() =
             let code = ID025 ("", "", "")
             runTestHelper "TestID025.fpl" fplCode code expected
             
-    [<DataRow("00", "def func T(list:* Nat)->pred { dec ~result:pred for list in list { result:=true }; return result };", 1)>]
-    [<DataRow("01", "def func T(list:* Nat)->pred { dec ~result:pred for list in a { result:=true }; return result };", 0)>]
+    [<DataRow("00", "def func T(list:* Nat[ind])->pred { dec ~result:pred for list in list { result:=true }; return result };", 1)>]
+    [<DataRow("01", "def func T(list:* Nat[ind])->pred { dec ~result:pred for list in a { result:=true }; return result };", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID027(no:string, fplCode:string, expected) =
@@ -1456,9 +1456,9 @@ type TestInterpreterErrors() =
     [<DataRow("56", """def pred T() {dec ~x:ind x:=$1; true } ;""", 0)>]
     [<DataRow("57", """def pred T() {dec ~x:pred x:=true; true } ;""", 0)>]
     [<DataRow("57a", """def pred T() {dec ~x:pred x:=not true; true } ;""", 0)>]
-    [<DataRow("66", """def cl Set def pred In(x,y: Set) def cl SetRoster:Set { ctor SetRoster(list:* Set) { dec ~e:Set base.Set() for e in list {assert In(e, parent)}; } };""", 0)>]
+    [<DataRow("66", """def cl Set def pred In(x,y: Set) def cl SetRoster:Set { ctor SetRoster(list:* Set[ind]) { dec ~e:Set base.Set() for e in list {assert In(e, parent)}; } };""", 0)>]
     [<DataRow("67", """def class Set def pred In(x,y: Set) def pred IsEmpty(x: Set) { all y:Set { not In(y, x) } };""", 0)>]
-    [<DataRow("68", """def class Set def pred In(x,y: Set) def cl SetBuilder: Set { ctor SetBuilder(x: Set, p: pred(u1: Set, o:* obj)) { dec base.Set() assert all u2:Set { iif (In(u2,parent), and ( In(u2,x), p(u2,o) ) ) }; } };""", 0)>]
+    [<DataRow("68", """def class Set def pred In(x,y: Set) def cl SetBuilder: Set { ctor SetBuilder(x: Set, p: pred(u1: Set, o:* obj[ind])) { dec base.Set() assert all u2:Set { iif (In(u2,parent), and ( In(u2,x), p(u2,o) ) ) }; } };""", 0)>]
     [<DataRow("69", """def cl A {dec ~myX:obj; ctor A(x:obj) {dec myX:=x;}} def cl B:A { ctor B(x:obj) {dec base.A(del.Decrement(x)); } } def pred T() { dec ~v:B v:=B(@2); false};""", 0)>]
     [<DataRow("70", """def cl A def pred T() { is (self,ATypo) };""", 1)>]
     [<DataRow("71", """def pred Equal(x,y: tpl) infix "=" 50 { del.Equal(x,y) } def cl Nat def cl Zero:Nat def func Succ(n:Nat)->Nat def pred T() {all x,y:Nat {(x = Succ(y))}};""", 0)>]    
