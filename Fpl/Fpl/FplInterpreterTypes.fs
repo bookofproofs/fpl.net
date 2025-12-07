@@ -4248,6 +4248,10 @@ type FplMapping(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
     let _dimensionTypes = new List<FplValue>()
     let mutable _dimensionTypesBeingSet = false
+    let mutable _isArrayMapping = false
+
+    /// Sets this mapping to an array-typed mapping.
+    member this.SetIsArray() = _isArrayMapping <- true
 
     member this.Dimension = _dimensionTypes.Count
 
@@ -4258,7 +4262,11 @@ type FplMapping(positions: Positions, parent: FplValue) =
     /// to decide which one to be set.
     member this.SetType (typeId:string) pos1 pos2 = 
         if not _dimensionTypesBeingSet then 
-            this.TypeId <- $"*{typeId}"
+            this.TypeId <-
+                if _isArrayMapping then 
+                    $"*{typeId}"
+                else
+                    typeId
             _dimensionTypesBeingSet <- true
         else
             let indexAllowedType = FplMapping((pos1,pos2), this) 
@@ -4293,12 +4301,22 @@ type FplMapping(positions: Positions, parent: FplValue) =
                 | _ -> None
             else
                 None
+        let mainType = 
+            match (pars, myMapping) with
+            | ("", None) -> this.TypeId
+            | ("", Some map) -> sprintf "%s() -> %s" this.TypeId (map.Type(propagate))
+            | (_, None) -> sprintf "%s(%s)" this.TypeId pars
+            | (_, Some map) -> sprintf "%s(%s) -> %s" this.TypeId pars (map.Type(propagate))
 
-        match (pars, myMapping) with
-        | ("", None) -> this.TypeId
-        | ("", Some map) -> sprintf "%s() -> %s" this.TypeId (map.Type(propagate))
-        | (_, None) -> sprintf "%s(%s)" this.TypeId pars
-        | (_, Some map) -> sprintf "%s(%s) -> %s" this.TypeId pars (map.Type(propagate))
+        if not _isArrayMapping then
+            mainType
+        else
+            let dimensionTypes = 
+                this.DimensionTypes
+                |> Seq.map (fun fv -> fv.Type signatureType)
+                |> String.concat ","
+            $"{mainType}[{dimensionTypes}]"
+
 
     override this.Represent() = $"dec {this.Type(SignatureType.Type)}"
 

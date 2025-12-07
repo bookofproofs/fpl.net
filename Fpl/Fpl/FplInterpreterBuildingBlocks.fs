@@ -101,6 +101,10 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.ArrayType((pos1, pos2), (mainTypeAst, indexAllowedTypeListAst)) ->
         st.EvalPush("ArrayType")
+        let fv = variableStack.PeekEvalStack()
+        match fv with 
+        | :? FplMapping as mapping -> mapping.SetIsArray()
+        | _ -> ()
         eval st mainTypeAst
         indexAllowedTypeListAst |> List.map (eval st) |> ignore
         st.EvalPop()
@@ -113,6 +117,7 @@ let rec eval (st: SymbolTable) ast =
             fv.TypeId <- LiteralInd
             fv.SetValue (new FplIntrinsicInd((pos1, pos2), fv))
         | :? FplVariableArray as arr -> arr.SetType LiteralInd pos1 pos2
+        | :? FplMapping as map -> map.SetType LiteralInd pos1 pos2
         | _ ->  fv.TypeId <- LiteralInd
         st.EvalPop() |> ignore
     | Ast.ObjectType((pos1, pos2),()) -> 
@@ -120,6 +125,7 @@ let rec eval (st: SymbolTable) ast =
         let fv = variableStack.PeekEvalStack()
         match fv with
         | :? FplVariableArray as arr -> arr.SetType LiteralObj pos1 pos2 
+        | :? FplMapping as map -> map.SetType LiteralObj pos1 pos2
         | _ ->  fv.TypeId <- LiteralObj
         st.EvalPop()
     | Ast.PredicateType((pos1, pos2),()) -> 
@@ -131,6 +137,7 @@ let rec eval (st: SymbolTable) ast =
             fv.TypeId <- LiteralPred
             fv.SetValue (new FplIntrinsicPred((pos1, pos2), fv))
         | :? FplVariableArray as arr -> arr.SetType LiteralPred pos1 pos2
+        | :? FplMapping as map -> map.SetType LiteralPred pos1 pos2
         | _ ->  fv.TypeId <- LiteralPred
         st.EvalPop()
     | Ast.FunctionalTermType((pos1, pos2),()) -> 
@@ -138,6 +145,7 @@ let rec eval (st: SymbolTable) ast =
         let fv = variableStack.PeekEvalStack()
         match fv with
         | :? FplVariableArray as arr -> arr.SetType LiteralFunc pos1 pos2 
+        | :? FplMapping as map -> map.SetType LiteralFunc pos1 pos2
         | _ ->  fv.TypeId <- LiteralFunc
         st.EvalPop()
     | Ast.Star((pos1, pos2),()) ->
@@ -242,6 +250,7 @@ let rec eval (st: SymbolTable) ast =
             value.FplId <- s
             fv.TypeId <- s
         | :? FplVariableArray as arr -> arr.SetType s pos1 pos2 
+        | :? FplMapping as map -> map.SetType s pos1 pos2
         | _ ->  fv.TypeId <- s
         st.EvalPop() 
     | Ast.Var((pos1, pos2), name) ->
@@ -640,10 +649,8 @@ let rec eval (st: SymbolTable) ast =
 
         match fv with 
         | :? FplVariableArray as arr -> arr.SetType identifier pos1 pos2
-        | :? FplVariable -> 
-            fv.TypeId <- identifier
-        | :? FplMapping -> 
-            fv.TypeId <- fv.TypeId + identifier
+        | :? FplMapping as map -> map.SetType identifier pos1 pos2
+        | :? FplVariable -> fv.TypeId <- identifier
         | :? FplBase 
         | :? FplBaseConstructorCall 
         | :? FplForInStmtDomain -> 

@@ -124,7 +124,6 @@ type TestFplValue() =
 
     [<DataRow("def func TestId() -> pred(x:func(u:obj)->Nat) {intrinsic};", "TestId() -> pred(func(obj) -> Nat)", "func() -> pred(func(obj) -> Nat)")>]
 
- 
     [<TestMethod>]
     member this.TestTypeSignatureOfFplBlocks(fplCode:string, expectedName:string, expectedType:string) =
         let filename = "TestTypeSignatureOfFplBlocks"
@@ -250,7 +249,7 @@ type TestFplValue() =
     [<DataRow("def cl T {intr prty func TestId() -> function {intrinsic}};", "TestId() -> func", "func() -> func")>]
     [<DataRow("def cl T {intr prty func TestId() -> object {intrinsic}};", "TestId() -> obj", "func() -> obj")>]
     [<DataRow("def cl T {intr prty func TestId() -> Nat {intrinsic}};", "TestId() -> Nat", "func() -> Nat")>]
-    [<DataRow("def cl T {intr prty func TestId() -> *Nat[ind] {intrinsic}};", "TestId() -> *Nat", "func() -> *Nat")>]
+    [<DataRow("def cl T {intr prty func TestId() -> *Nat[ind] {intrinsic}};", "TestId() -> *Nat[ind]", "func() -> *Nat[ind]")>]
     [<DataRow("def cl T {intr prty func TestId() -> tpl {intrinsic}};", "TestId() -> tpl", "func() -> tpl")>]
     [<DataRow("def cl T {intr prty func TestId() -> template {intrinsic}};", "TestId() -> template", "func() -> template")>]
     [<DataRow("def cl T {intr prty func TestId() -> tplTest {intrinsic}};", "TestId() -> tplTest", "func() -> tplTest")>]
