@@ -77,7 +77,7 @@ type CommonFplValueTestCases =
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         let result = match stOption with
                         | Some st -> 
-                            let name = "TestPredicate(+pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj), +pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj))"
+                            let name = "TestPredicate(*pred(func(*obj[ind], *obj[ind], *obj[ind]) -> obj, func(*obj[ind], *obj[ind], *obj[ind]) -> obj, func(*obj[ind], *obj[ind], *obj[ind]) -> obj)[obj], *pred(func(*obj[ind], *obj[ind], *obj[ind]) -> obj, func(*obj[ind], *obj[ind], *obj[ind]) -> obj, func(*obj[ind], *obj[ind], *obj[ind]) -> obj)[obj])"
                             let r = st.Root
                             let theory = CommonFplValueTestCases.getScopedElement r filename subtype
                             let block = CommonFplValueTestCases.getScopedElement theory name subtype

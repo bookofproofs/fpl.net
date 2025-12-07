@@ -1317,18 +1317,6 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
         _isBound <- true
         setIsBound this        
 
-    override this.Type signatureType =
-        let pars = getParamTuple this signatureType
-        let head = getFplHead this signatureType
-        let propagate = propagateSignatureType signatureType
-
-        match (pars, getMapping this) with
-        | ("", None) -> head
-        | ("", Some map) -> sprintf "%s() -> %s" head (map.Type(propagate))
-        | (_, None) -> sprintf "%s(%s)" head pars
-        | (_, Some map) -> sprintf "%s(%s) -> %s" head pars (map.Type(propagate))
-
-
     /// Indicates if this Variable is declared in the signature (true) or in the block (false).
     member this.IsSignatureVariable
         with get () = _isSignatureVariable
@@ -1462,6 +1450,17 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
                 addToVariableOrQuantorOrMapping next
                 
         | _ -> addExpressionToParentArgList this
+
+    override this.Type signatureType =
+        let pars = getParamTuple this signatureType
+        let head = getFplHead this signatureType
+        let propagate = propagateSignatureType signatureType
+
+        match (pars, getMapping this) with
+        | ("", None) -> head
+        | ("", Some map) -> sprintf "%s() -> %s" head (map.Type(propagate))
+        | (_, None) -> sprintf "%s(%s)" head pars
+        | (_, Some map) -> sprintf "%s(%s) -> %s" head pars (map.Type(propagate))
 
     override this.Run _ = 
         this.Debug "Run"
@@ -4516,10 +4515,30 @@ type FplQuantorExistsN(positions: Positions, parent: FplValue) as this =
 
 type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
     inherit FplGenericVariable(fplId, positions, parent)
+    let _dimensionTypes = new List<FplValue>()
+    let mutable _dimensionTypesBeingSet = false
 
     override this.Name = PrimVariableArrayL
 
     override this.ShortName = PrimVariableArray
+
+    /// Dimension of the FplValueArray.
+    member this.Dimension = _dimensionTypes.Count
+
+    /// Types of the dimensions of this FplValueArray.
+    member this.DimensionTypes = _dimensionTypes
+
+    /// Sets the during the symbol table construction.
+    /// Because the type consists of a main type and index allowed-types, we use "Dimension being set" as a flag
+    /// to decide which one to be set.
+    member this.SetType (typeId:string) pos1 pos2 = 
+        if not _dimensionTypesBeingSet then 
+            this.TypeId <- $"*{typeId}"
+            _dimensionTypesBeingSet <- true
+        else
+            let indexAllowedType = FplMapping((pos1,pos2), this) 
+            indexAllowedType.TypeId <- typeId
+            this.DimensionTypes.Add indexAllowedType
 
     override this.Clone () =
         let ret = new FplVariableArray(this.FplId, (this.StartPos, this.EndPos), this.Parent.Value)
@@ -4530,7 +4549,23 @@ type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
             ret.SetIsUsed()
         ret.IsSignatureVariable <- this.IsSignatureVariable 
         ret.IsInitializedVariable <- this.IsInitializedVariable
+
+        this.DimensionTypes
+        |> Seq.iter (fun (fv1:FplValue) ->
+            let value = fv1.Clone()
+            ret.DimensionTypes.Add(value))
+
         ret
+
+    override this.Type signatureType =
+        let mainType = base.Type signatureType
+
+        let dimensionTypes = 
+            this.DimensionTypes
+            |> Seq.map (fun fv -> fv.Type signatureType)
+            |> String.concat ","
+
+        $"{mainType}[{dimensionTypes}]"
 
     override this.Represent () = 
         if this.ValueList.Count = 0 then
@@ -4540,7 +4575,7 @@ type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
             else
                 match this.TypeId with
                 | LiteralUndef -> LiteralUndef
-                | _ -> $"dec {this.Type(SignatureType.Type)}[]" 
+                | _ -> $"dec {this.Type SignatureType.Type}" 
         else
             let subRepr = 
                 this.ValueList
@@ -4551,7 +4586,7 @@ type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
             else
                 match this.TypeId with
                 | LiteralUndef -> LiteralUndef
-                | _ -> $"dec {this.Type(SignatureType.Type)}[]" 
+                | _ -> $"dec {this.Type(SignatureType.Type)}" 
 
 type FplVariable(fplId, positions: Positions, parent: FplValue) =
     inherit FplGenericVariable(fplId, positions, parent)

@@ -4935,7 +4935,9 @@ type SymbolTableStructure() =
 
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplVariableArray", "00", """;""", "")>]
+    [<DataRow("FplVariableArray", "00", """def pred T(x:*pred[ind]) {true} ;""", "")>]
+    [<DataRow("FplVariableArray", "00a", """def pred T(x:*pred[ind,obj]) {true} ;""", "")>]
+    [<DataRow("FplVariableArray", "01", """def pred T(x:*pred(u,v,w:func(a,b,c:obj)->obj)[Nat] ) {true} ;""", "")>]
     [<TestMethod>]
     member this.TestStructureFplVariableArray(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplVariableArray.fpl"
@@ -4943,11 +4945,37 @@ type SymbolTableStructure() =
         
         match nodeType, varVal with
         | "FplVariableArray", "00" ->
-            Assert.IsInstanceOfType<FplRoot>(parent)
-            Assert.AreEqual<int>(0, parent.ArgList.Count)
-            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplPredicate>(parent)
+            Assert.AreEqual<int>(1, parent.ArgList.Count)
+            Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplVariableArray>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
+            let arr = node :?> FplVariableArray
+            Assert.AreEqual<int>(1, arr.Dimension)
+            Assert.AreEqual<int>(1, arr.DimensionTypes.Count)
+            Assert.AreEqual<string>("*pred[ind]",arr.Type SignatureType.Type)
+        | "FplVariableArray", "00a" ->
+            Assert.IsInstanceOfType<FplPredicate>(parent)
+            Assert.AreEqual<int>(1, parent.ArgList.Count)
+            Assert.AreEqual<int>(1, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplVariableArray>(node)
+            Assert.AreEqual<int>(0, node.ArgList.Count)
+            Assert.AreEqual<int>(0, node.Scope.Count)
+            let arr = node :?> FplVariableArray
+            Assert.AreEqual<int>(2, arr.Dimension)
+            Assert.AreEqual<int>(2, arr.DimensionTypes.Count)
+            Assert.AreEqual<string>("*pred[ind,obj]",arr.Type SignatureType.Type)
+        | "FplVariableArray", "01" ->
+            Assert.IsInstanceOfType<FplPredicate>(parent)
+            Assert.AreEqual<int>(1, parent.ArgList.Count)
+            Assert.AreEqual<int>(7, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplVariableArray>(node)
+            Assert.AreEqual<int>(0, node.ArgList.Count)
+            Assert.AreEqual<int>(3, node.Scope.Count) // u,v,w sub variables 
+            let arr = node :?> FplVariableArray
+            Assert.AreEqual<int>(2, arr.Dimension)
+            Assert.AreEqual<int>(2, arr.DimensionTypes.Count)
+            Assert.AreEqual<string>("*pred[ind,obj]",arr.Type SignatureType.Type)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 

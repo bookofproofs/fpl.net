@@ -328,7 +328,7 @@ type TestSignatureMatching() =
             Assert.IsTrue(false)
 
     [<DataRow("""def pred T (x:*obj[ind]) {dec ~i:ind; x[i]} ;""",
-        "no matching parameter for `i:ind` in a zero-or-more variable x:*obj")>]
+        "no matching parameter for `i:ind` in a variable array x:*obj[ind]")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesVariadicCoord(varVal, var:string) =
         ad.Clear()

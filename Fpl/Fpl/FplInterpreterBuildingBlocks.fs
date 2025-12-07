@@ -112,14 +112,14 @@ let rec eval (st: SymbolTable) ast =
         | :? FplReference ->
             fv.TypeId <- LiteralInd
             fv.SetValue (new FplIntrinsicInd((pos1, pos2), fv))
-        | :? FplVariableArray -> fv.TypeId <- $"*{LiteralInd}"
+        | :? FplVariableArray as arr -> arr.SetType LiteralInd pos1 pos2
         | _ ->  fv.TypeId <- LiteralInd
         st.EvalPop() |> ignore
     | Ast.ObjectType((pos1, pos2),()) -> 
         st.EvalPush("ObjectType")
         let fv = variableStack.PeekEvalStack()
         match fv with
-        | :? FplVariableArray -> fv.TypeId <- $"*{LiteralObj}"
+        | :? FplVariableArray as arr -> arr.SetType LiteralObj pos1 pos2 
         | _ ->  fv.TypeId <- LiteralObj
         st.EvalPop()
     | Ast.PredicateType((pos1, pos2),()) -> 
@@ -130,14 +130,14 @@ let rec eval (st: SymbolTable) ast =
         | :? FplReference ->
             fv.TypeId <- LiteralPred
             fv.SetValue (new FplIntrinsicPred((pos1, pos2), fv))
-        | :? FplVariableArray -> fv.TypeId <- $"*{LiteralPred}"
+        | :? FplVariableArray as arr -> arr.SetType LiteralPred pos1 pos2
         | _ ->  fv.TypeId <- LiteralPred
         st.EvalPop()
     | Ast.FunctionalTermType((pos1, pos2),()) -> 
         st.EvalPush("FunctionalTermType")
         let fv = variableStack.PeekEvalStack()
         match fv with
-        | :? FplVariableArray -> fv.TypeId <- $"*{LiteralFunc}"
+        | :? FplVariableArray as arr -> arr.SetType LiteralFunc pos1 pos2 
         | _ ->  fv.TypeId <- LiteralFunc
         st.EvalPop()
     | Ast.Star((pos1, pos2),()) ->
@@ -241,7 +241,7 @@ let rec eval (st: SymbolTable) ast =
             value.TypeId <- s
             value.FplId <- s
             fv.TypeId <- s
-        | :? FplVariableArray -> fv.TypeId <- $"*{s}"
+        | :? FplVariableArray as arr -> arr.SetType s pos1 pos2 
         | _ ->  fv.TypeId <- s
         st.EvalPop() 
     | Ast.Var((pos1, pos2), name) ->
@@ -251,8 +251,7 @@ let rec eval (st: SymbolTable) ast =
         let fv = variableStack.PeekEvalStack()
         match fv.Name with 
         | PrimVariableL
-        | PrimVariableArrayL
-        | PrimVariableMany1L -> 
+        | PrimVariableArrayL -> 
             // in the context of variable declarations, we set the name and positions of the variables
             fv.FplId <- name
             fv.TypeId <- LiteralUndef 
@@ -640,8 +639,7 @@ let rec eval (st: SymbolTable) ast =
         let fv = variableStack.PeekEvalStack()
 
         match fv with 
-        | :? FplVariableArray -> 
-            fv.TypeId <- $"*{identifier}"
+        | :? FplVariableArray as arr -> arr.SetType identifier pos1 pos2
         | :? FplVariable -> 
             fv.TypeId <- identifier
         | :? FplMapping -> 
@@ -1646,6 +1644,7 @@ let rec eval (st: SymbolTable) ast =
                     newVar.IsSignatureVariable <- (variableStack.InSignatureEvaluation && not (isVar parent))
                     variableStack.PushEvalStack(newVar)
                     eval st mainTypeAst
+                    indexAllowedTypeListAst |> List.map (eval st) |> ignore
                     variableStack.PopEvalStack()
                 | _ -> ()
             | Ast.SimpleVariableType((_, _),simplVariableTypeAst) ->
