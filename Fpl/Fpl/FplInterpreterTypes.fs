@@ -556,7 +556,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
         this.Scope.Values
         |> Seq.filter (fun fv -> 
             fv.Name = PrimVariableL 
-            || fv.Name = PrimVariableManyL 
+            || fv.Name = PrimVariableArrayL 
             || fv.Name = PrimVariableMany1L
         )
         |> Seq.toList
@@ -785,21 +785,21 @@ and FplVariableStack() =
                 match p.Name , ar.Name with
                 // p is variadic, ar is variadic 
                 | PrimVariableMany1L, PrimVariableMany1L 
-                | PrimVariableMany1L, PrimVariableManyL 
-                | PrimVariableManyL, PrimVariableMany1L 
-                | PrimVariableManyL, PrimVariableManyL ->
+                | PrimVariableMany1L, PrimVariableArrayL 
+                | PrimVariableArrayL, PrimVariableMany1L 
+                | PrimVariableArrayL, PrimVariableArrayL ->
                     replaceValues p ar
                     // continue replacing variables with the remaining lists
                     replace ps ars
                 // p is variadic, ar is anything
                 | PrimVariableMany1L, _ 
-                | PrimVariableManyL, _ ->
+                | PrimVariableArrayL, _ ->
                     replaceValues p ar              
                     // continue replacing variables with the original pars and the remaining ars list
                     replace pars ars
                 // p is not variadic, ar is variadic 
                 | PrimVariableL, PrimVariableMany1L 
-                | PrimVariableL, PrimVariableManyL -> ()
+                | PrimVariableL, PrimVariableArrayL -> ()
                  // p is not variadic, ar is anything but variadic 
                 | PrimVariableL, _ ->
                     // otherwise, simply assign the argument's representation to the parameter's representation
@@ -894,7 +894,7 @@ let stripLastDollarDigit (s: string) =
 let isVar (fv1:FplValue) =
     match fv1.Name with
     | PrimVariableL
-    | PrimVariableManyL
+    | PrimVariableArrayL
     | PrimVariableMany1L -> true
     | _ -> false
     
@@ -1196,7 +1196,7 @@ let addExpressionToReference (fplValue:FplValue) =
     | Some next when next.Name = PrimRefL && next.Scope.ContainsKey(next.FplId) ->
         let referenced = next.Scope.Values |> Seq.head
         match referenced.Name with 
-        | PrimVariableManyL
+        | PrimVariableArrayL
         | PrimVariableMany1L ->
             next.ArgList.Add fplValue
         | _ ->
@@ -1453,7 +1453,7 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
                         || next.Name = LiteralCorL) ->
             addToProofOrCorolllary next
         | Some next when (next.Name = PrimVariableL
-                        || next.Name = PrimVariableManyL
+                        || next.Name = PrimVariableArrayL
                         || next.Name = PrimVariableMany1L) ->
             addToVariableOrQuantorOrMapping next
         | Some next when next.Name = PrimMappingL ->
@@ -1465,7 +1465,7 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
                 emitVAR02diagnostics this.FplId this.StartPos this.EndPos
             elif next.Name = PrimQuantorExistsN && next.Scope.Count>0 then 
                 emitVAR07diagnostics this.FplId this.StartPos this.EndPos
-            elif this.Name = PrimVariableMany1L || this.Name = PrimVariableManyL then 
+            elif this.Name = PrimVariableMany1L || this.Name = PrimVariableArrayL then 
                 emitVAR08diagnostics this.StartPos this.EndPos
             else
                 addToVariableOrQuantorOrMapping next
@@ -1620,7 +1620,7 @@ type FplInstance(positions: Positions, parent: FplValue) =
             this.Scope.Values
             |> Seq.filter (fun fv -> 
                 fv.Name = PrimVariableL 
-                || fv.Name = PrimVariableManyL
+                || fv.Name = PrimVariableArrayL
                 || fv.Name = PrimVariableMany1L
                 )
             |> Seq.map (fun fv -> "{" + fv.FplId + ":{" + fv.Represent() + "}}")
@@ -1707,7 +1707,7 @@ type FplGenericConstructor(name, positions: Positions, parent: FplValue) as this
             this.Scope.Values
             |> Seq.filter (fun fv -> 
                 fv.Name = PrimVariableL 
-                || fv.Name = PrimVariableManyL
+                || fv.Name = PrimVariableArrayL
                 || fv.Name = PrimVariableMany1L
                 )
             |> Seq.map (fun fv -> $"{fv.FplId} = {fv.Represent()}")
@@ -3395,7 +3395,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) =
                 None
             else
                 Some($"missing argument for `{p.Type(SignatureType.Name)}:{pType}`")
-        | _ when p.Name = PrimVariableManyL ->
+        | _ when p.Name = PrimVariableArrayL ->
             None
         | _ -> 
             Some($"missing argument for `{p.Type(SignatureType.Name)}:{pType}`")
@@ -3427,7 +3427,7 @@ let matchArgumentsWithParameters (fva: FplValue) (fvp: FplValue) =
     match argResult with
     | Some aErr -> 
         match fvp.Name with 
-        | PrimVariableManyL
+        | PrimVariableArrayL
         | PrimVariableMany1L ->
             Some($"{aErr} in {qualifiedName fvp}:{fvp.Type SignatureType.Type}")
         | _ -> 
@@ -4526,15 +4526,15 @@ type FplQuantorExistsN(positions: Positions, parent: FplValue) as this =
             this.AssignParts(ret)
             ret
 
-type FplVariableMany(fplId, positions: Positions, parent: FplValue) =
+type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
     inherit FplGenericVariable(fplId, positions, parent)
 
-    override this.Name = PrimVariableManyL
+    override this.Name = PrimVariableArrayL
 
-    override this.ShortName = PrimVariableMany
+    override this.ShortName = PrimVariableArray
 
     override this.Clone () =
-        let ret = new FplVariableMany(this.FplId, (this.StartPos, this.EndPos), this.Parent.Value)
+        let ret = new FplVariableArray(this.FplId, (this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         if this.IsBound then 
             ret.SetIsBound()

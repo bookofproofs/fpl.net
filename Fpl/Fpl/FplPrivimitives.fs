@@ -1458,10 +1458,6 @@ let PrimVariable = "var"
 [<Literal>]
 let PrimVariableL = "variable"
 [<Literal>]
-let PrimVariableMany = "*var"
+let PrimVariableArray = "*var"
 [<Literal>]
-let PrimVariableManyL = "zero-or-more variable"
-[<Literal>]
-let PrimVariableMany1 = "+var"
-[<Literal>]
-let PrimVariableMany1L = "one-or-more variable"
+let PrimVariableArrayL = "variable array"

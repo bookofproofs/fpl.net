@@ -284,8 +284,8 @@ type SymbolTableStructure() =
         | "FplVariable" -> 
             let x = new FplVariable("x", positions, parent) 
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""; x.Represent(); x.Type SignatureType.Mixed]
-        | "FplVariableMany" ->
-            let x = new FplVariableMany("x", positions, parent)
+        | "FplVariableArray" ->
+            let x = new FplVariableArray("x", positions, parent)
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""; x.Represent(); x.Type SignatureType.Mixed]
         | _ -> 
             failwith $"Unknown node type {nodeType}"
@@ -392,7 +392,7 @@ type SymbolTableStructure() =
     [<DataRow("FplTheory")>]
     [<DataRow("FplTranslation")>]
     [<DataRow("FplVariable")>]
-    [<DataRow("FplVariableMany")>]
+    [<DataRow("FplVariableArray")>]
     [<TestMethod>]
     member this.TestBlockTypeName(var) =
         let index = 0 // name 
@@ -545,8 +545,8 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>(PrimTranslationL, (getName var).[index])
         | "FplVariable" -> 
             Assert.AreEqual<string>(PrimVariableL, (getName var).[index])
-        | "FplVariableMany" ->
-            Assert.AreEqual<string>(PrimVariableManyL, (getName var).[index])
+        | "FplVariableArray" ->
+            Assert.AreEqual<string>(PrimVariableArrayL, (getName var).[index])
         | _ -> 
             Assert.IsTrue(false)
 
@@ -626,7 +626,7 @@ type SymbolTableStructure() =
     [<DataRow("FplTranslation")>]
     [<DataRow("FplVariable")>]
     [<DataRow("FplVariable")>]
-    [<DataRow("FplVariableMany")>]
+    [<DataRow("FplVariableArray")>]
     [<TestMethod>]
     member this.TestFplBlockTypeShortName(var) =
         let index = 1 // short name 
@@ -779,8 +779,8 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>(PrimTranslation, (getName var).[index])
         | "FplVariable" ->
             Assert.AreEqual<string>(PrimVariable, (getName var).[index])
-        | "FplVariableMany" ->
-            Assert.AreEqual<string>(PrimVariableMany, (getName var).[index])
+        | "FplVariableArray" ->
+            Assert.AreEqual<string>(PrimVariableArray, (getName var).[index])
         | _ -> 
             Assert.IsTrue(false, var)
 
@@ -859,7 +859,7 @@ type SymbolTableStructure() =
     [<DataRow("FplTranslation")>]
     [<DataRow("FplVariable")>]
     [<DataRow("FplVariable")>]
-    [<DataRow("FplVariableMany")>]
+    [<DataRow("FplVariableArray")>]
     [<TestMethod>]
     member this.TestFplBlockTypeFplId(var) =
         let index = 2 // FplId
@@ -1012,7 +1012,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplVariable" ->
             Assert.AreEqual<string>("x", (getName var).[index])
-        | "FplVariableMany" ->
+        | "FplVariableArray" ->
             Assert.AreEqual<string>("x", (getName var).[index])
         | _ -> 
             Assert.IsTrue(false, var)
@@ -1093,7 +1093,7 @@ type SymbolTableStructure() =
     [<DataRow("FplTranslation")>]
     [<DataRow("FplVariable")>]
     [<DataRow("FplVariable")>]
-    [<DataRow("FplVariableMany")>]
+    [<DataRow("FplVariableArray")>]
     [<TestMethod>]
     member this.TestFplBlockTypeId(var) =
         let index = 3 // TypeId
@@ -1246,7 +1246,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplVariable" ->
             Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
-        | "FplVariableMany" ->
+        | "FplVariableArray" ->
             Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
         | _ -> 
             Assert.IsTrue(false, var)
@@ -1326,7 +1326,7 @@ type SymbolTableStructure() =
     [<DataRow("FplTranslation")>]
     [<DataRow("FplVariable")>]
     [<DataRow("FplVariable")>]
-    [<DataRow("FplVariableMany")>]
+    [<DataRow("FplVariableArray")>]
     [<TestMethod>]
     member this.TestFplBlockTypeRunOrder(var) =
         let index = 4 // RunOrder
@@ -1479,7 +1479,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>("None", (getName var).[index])
         | "FplVariable" ->
             Assert.AreEqual<string>("None", (getName var).[index])
-        | "FplVariableMany" ->
+        | "FplVariableArray" ->
             Assert.AreEqual<string>("None", (getName var).[index])
         | _ -> 
             Assert.IsTrue(false, var)
@@ -1560,7 +1560,7 @@ type SymbolTableStructure() =
     [<DataRow("FplTranslation")>]
     [<DataRow("FplVariable")>]
     [<DataRow("FplVariable")>]
-    [<DataRow("FplVariableMany")>]
+    [<DataRow("FplVariableArray")>]
     [<TestMethod>]
     member this.TestFplBlockTypeRepresent(var) =
 
@@ -1789,7 +1789,7 @@ type SymbolTableStructure() =
         | "FplVariable" ->
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
-        | "FplVariableMany" ->
+        | "FplVariableArray" ->
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
         | _ -> 
@@ -4804,7 +4804,7 @@ type SymbolTableStructure() =
             Assert.IsFalse(x.IsSignatureVariable)
         // variable to variable
         | "FplVariable", "02c" ->
-            Assert.IsInstanceOfType<FplVariableMany>(parent)
+            Assert.IsInstanceOfType<FplVariableArray>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
             let p = (parent:?>FplGenericVariable)
@@ -4817,7 +4817,7 @@ type SymbolTableStructure() =
             Assert.IsFalse(x.IsInitializedVariable)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "02d" ->
-            Assert.IsInstanceOfType<FplVariableMany>(parent)
+            Assert.IsInstanceOfType<FplVariableArray>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
             let p = (parent:?>FplGenericVariable)
@@ -4831,7 +4831,7 @@ type SymbolTableStructure() =
             Assert.IsFalse(x.IsSignatureVariable)
         // variable to variable
         | "FplVariable", "02e" ->
-            Assert.IsInstanceOfType<FplVariableMany>(parent)
+            Assert.IsInstanceOfType<FplVariableArray>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
             let p = (parent:?>FplGenericVariable)
@@ -4844,7 +4844,7 @@ type SymbolTableStructure() =
             Assert.IsFalse(x.IsInitializedVariable)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "02f" ->
-            Assert.IsInstanceOfType<FplVariableMany>(parent)
+            Assert.IsInstanceOfType<FplVariableArray>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
             let p = (parent:?>FplGenericVariable)
@@ -4935,18 +4935,18 @@ type SymbolTableStructure() =
 
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplVariableMany", "00", """;""", "")>]
+    [<DataRow("FplVariableArray", "00", """;""", "")>]
     [<TestMethod>]
-    member this.TestStructureFplVariableMany(nodeType, varVal, fplCode, identifier) =
-        let filename = "TestStructureFplVariableMany.fpl"
+    member this.TestStructureFplVariableArray(nodeType, varVal, fplCode, identifier) =
+        let filename = "TestStructureFplVariableArray.fpl"
         let parent, node = testSkeleton nodeType filename fplCode identifier
         
         match nodeType, varVal with
-        | "FplVariableMany", "00" ->
+        | "FplVariableArray", "00" ->
             Assert.IsInstanceOfType<FplRoot>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplVariableMany>(node)
+            Assert.IsInstanceOfType<FplVariableArray>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")

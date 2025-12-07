@@ -112,14 +112,14 @@ let rec eval (st: SymbolTable) ast =
         | :? FplReference ->
             fv.TypeId <- LiteralInd
             fv.SetValue (new FplIntrinsicInd((pos1, pos2), fv))
-        | :? FplVariableMany -> fv.TypeId <- $"*{LiteralInd}"
+        | :? FplVariableArray -> fv.TypeId <- $"*{LiteralInd}"
         | _ ->  fv.TypeId <- LiteralInd
         st.EvalPop() |> ignore
     | Ast.ObjectType((pos1, pos2),()) -> 
         st.EvalPush("ObjectType")
         let fv = variableStack.PeekEvalStack()
         match fv with
-        | :? FplVariableMany -> fv.TypeId <- $"*{LiteralObj}"
+        | :? FplVariableArray -> fv.TypeId <- $"*{LiteralObj}"
         | _ ->  fv.TypeId <- LiteralObj
         st.EvalPop()
     | Ast.PredicateType((pos1, pos2),()) -> 
@@ -130,14 +130,14 @@ let rec eval (st: SymbolTable) ast =
         | :? FplReference ->
             fv.TypeId <- LiteralPred
             fv.SetValue (new FplIntrinsicPred((pos1, pos2), fv))
-        | :? FplVariableMany -> fv.TypeId <- $"*{LiteralPred}"
+        | :? FplVariableArray -> fv.TypeId <- $"*{LiteralPred}"
         | _ ->  fv.TypeId <- LiteralPred
         st.EvalPop()
     | Ast.FunctionalTermType((pos1, pos2),()) -> 
         st.EvalPush("FunctionalTermType")
         let fv = variableStack.PeekEvalStack()
         match fv with
-        | :? FplVariableMany -> fv.TypeId <- $"*{LiteralFunc}"
+        | :? FplVariableArray -> fv.TypeId <- $"*{LiteralFunc}"
         | _ ->  fv.TypeId <- LiteralFunc
         st.EvalPop()
     | Ast.Star((pos1, pos2),()) ->
@@ -241,7 +241,7 @@ let rec eval (st: SymbolTable) ast =
             value.TypeId <- s
             value.FplId <- s
             fv.TypeId <- s
-        | :? FplVariableMany -> fv.TypeId <- $"*{s}"
+        | :? FplVariableArray -> fv.TypeId <- $"*{s}"
         | _ ->  fv.TypeId <- s
         st.EvalPop() 
     | Ast.Var((pos1, pos2), name) ->
@@ -251,7 +251,7 @@ let rec eval (st: SymbolTable) ast =
         let fv = variableStack.PeekEvalStack()
         match fv.Name with 
         | PrimVariableL
-        | PrimVariableManyL
+        | PrimVariableArrayL
         | PrimVariableMany1L -> 
             // in the context of variable declarations, we set the name and positions of the variables
             fv.FplId <- name
@@ -640,7 +640,7 @@ let rec eval (st: SymbolTable) ast =
         let fv = variableStack.PeekEvalStack()
 
         match fv with 
-        | :? FplVariableMany -> 
+        | :? FplVariableArray -> 
             fv.TypeId <- $"*{identifier}"
         | :? FplVariable -> 
             fv.TypeId <- identifier
@@ -1642,7 +1642,7 @@ let rec eval (st: SymbolTable) ast =
                 emitVAR00Diagnostics parent.AuxiliaryInfo posMan1 posMan2        
                 match varAst with 
                 | Ast.Var((varPos1, varPos2), varName) ->
-                    let newVar = new FplVariableMany(varName, (varPos1, varPos2), parent)
+                    let newVar = new FplVariableArray(varName, (varPos1, varPos2), parent)
                     newVar.IsSignatureVariable <- (variableStack.InSignatureEvaluation && not (isVar parent))
                     variableStack.PushEvalStack(newVar)
                     eval st mainTypeAst
