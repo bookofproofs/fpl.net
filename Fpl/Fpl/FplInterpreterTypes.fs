@@ -3313,14 +3313,9 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) =
             mpwa ars prs
         elif pType.StartsWith(LiteralTpl) || pType.StartsWith(LiteralTplL) then
             mpwa ars prs
-        elif pType = $"*{aType}" || pType.StartsWith("*") && aType = "" then
-            if ars.Length > 0 then 
-                mpwa ars pars 
-            else 
-                None
-        elif pType.StartsWith("+") && aType = "" then
-            Some($"() does not match `{p.Type(SignatureType.Name)}:{pType}`")
-        elif pType = $"+{aType}" then
+        elif pType = $"*{aType}[{LiteralInd}]" then
+            // only array parameters indexed with the FPL-inbuilt index type that also 
+            // match the argument's type will accept variadic enumerations of such arguments 
             if ars.Length > 0 then 
                 mpwa ars pars 
             else 
