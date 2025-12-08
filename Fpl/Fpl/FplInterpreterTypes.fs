@@ -3320,6 +3320,12 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) =
                 mpwa ars pars 
             else 
                 None
+        elif pType.StartsWith($"*{aType}[") then
+            // array parameters with indexes that differ from the FPL-inbuilt index type  
+            // or with multidimensional index types will not accept variadic enumerations of arguments
+            // even if they have the same type used for the values of the array
+            let aName = a.Type(SignatureType.Name)
+            Some($"variadic enumeration of `{aName}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`, try `{aName}:{pType}` as argument or use parameter `{p.Type(SignatureType.Name)}:{p.TypeId}[{LiteralInd}]`")
         elif
             aType.Length > 0
             && Char.IsUpper(aType[0])
@@ -3334,14 +3340,10 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) =
                     if inheritsFrom cl pType then 
                         mpwa ars prs
                     else
-                        Some(
-                            $"`{a.Type(SignatureType.Name)}:{aType}` neither matches `{p.Type(SignatureType.Name)}:{pType}` nor the base classes"
-                        )
+                        Some($"`{a.Type(SignatureType.Name)}:{aType}` neither matches `{p.Type(SignatureType.Name)}:{pType}` nor the base classes")
                 | _ ->
                     // this case does not occur but we cover it for completeness reasons
-                    Some(
-                        $"`{a.Type(SignatureType.Name)}:{aType}` is undefined and doesn't match `{p.Type(SignatureType.Name)}:{pType}`"
-                    )
+                    Some($"`{a.Type(SignatureType.Name)}:{aType}` is undefined and doesn't match `{p.Type(SignatureType.Name)}:{pType}`")
             elif var.Name = PrimDefaultConstructor then 
                 let defaultCtor = var :?> FplDefaultConstructor
                 let clOpt = defaultCtor.ToBeConstructedClass
@@ -3350,14 +3352,10 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) =
                     if inheritsFrom cl pType then 
                         None
                     else
-                        Some(
-                            $"`{a.Type(SignatureType.Name)}:{aType}` neither matches `{p.Type(SignatureType.Name)}:{pType}` nor the base classes"
-                        )
+                        Some($"`{a.Type(SignatureType.Name)}:{aType}` neither matches `{p.Type(SignatureType.Name)}:{pType}` nor the base classes")
                 | _ -> None
             else
-                Some(
-                    $"`{a.Type(SignatureType.Name)}:{aType}` is undefined and does not match `{p.Type(SignatureType.Name)}:{pType}`"
-                )
+                Some($"`{a.Type(SignatureType.Name)}:{aType}` is undefined and does not match `{p.Type(SignatureType.Name)}:{pType}`")
         elif aType.StartsWith(pType + "(") then
             None
         elif aType = LiteralPred && pType.StartsWith(LiteralPred) then
@@ -4607,7 +4605,9 @@ type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
             |> Seq.map (fun fv -> fv.Type signatureType)
             |> String.concat ","
 
-        $"{mainType}[{dimensionTypes}]"
+        match signatureType with
+        | SignatureType.Name -> this.FplId
+        | _ -> $"{mainType}[{dimensionTypes}]"
 
     override this.Represent () = 
         if this.ValueList.Count = 0 then
