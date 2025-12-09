@@ -653,6 +653,19 @@ let emitSIG00Diagnostics exprType expectedArity actualArity pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
 
+let emitSIG02Diagnostics symbol precedence conflict pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Information
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = SIG02(symbol, precedence, conflict)
+            Diagnostic.Alternatives = Some "Consider disambiguating the precedence to avoid unexpected results." 
+        }
+    ad.AddDiagnostic diagnostic
+
 let emitSIG03Diagnostics errMsg mapTypeStr pos1 pos2 = 
     let diagnostic =
         { 

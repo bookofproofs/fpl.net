@@ -1986,6 +1986,28 @@ type FplGenericPredicateBlock(positions: Positions, parent: FplValue) =
         if not this.IsIntrinsic then // if not intrinsic, check variable usage
             checkVAR04Diagnostics this
 
+let checkSIG02Diagnostics (root:FplValue) symbol precedence pos1 pos2 = 
+    let precedences = Dictionary<int, FplValue>()
+    let precedenceWasAlreadyThere precedence fv =
+        if not (precedences.ContainsKey(precedence)) then
+            precedences.Add(precedence, fv)
+            false
+        else
+            true
+    root.Scope
+    |> Seq.map (fun kv -> kv.Value)
+    |> Seq.iter (fun theory ->
+        theory.Scope
+        |> Seq.map (fun kv1 -> kv1.Value)
+        |> Seq.iter (fun block ->
+            match block.ExpressionType with
+            | FixType.Infix(_, precedence) -> precedenceWasAlreadyThere precedence block |> ignore
+            | _ -> ()))
+    if precedences.ContainsKey(precedence) then
+        let conflict = precedences[precedence].QualifiedStartPos
+        emitSIG02Diagnostics symbol precedence conflict pos1 pos2
+
+
 type FplPredicate(positions: Positions, parent: FplValue, runOrder) =
     inherit FplGenericPredicateBlock(positions, parent)
     let _runOrder = runOrder
@@ -2006,6 +2028,9 @@ type FplPredicate(positions: Positions, parent: FplValue, runOrder) =
         | FixType.Infix _ when this.Arity <> 2 -> emitSIG00Diagnostics this.ExpressionType.Type 2 this.Arity this.SignStartPos this.SignEndPos
         | FixType.Prefix _ when this.Arity <> 1 -> emitSIG00Diagnostics this.ExpressionType.Type 1 this.Arity this.SignStartPos this.SignEndPos
         | FixType.Postfix _ when this.Arity <> 1 -> emitSIG00Diagnostics this.ExpressionType.Type 1 this.Arity this.SignStartPos this.SignEndPos
+        | _ -> ()
+        match this.ExpressionType with
+        | FixType.Infix (symbol, precedence) -> checkSIG02Diagnostics (getRoot this) symbol precedence this.SignStartPos this.SignEndPos
         | _ -> ()
 
     override this.EmbedInSymbolTable _ = 
@@ -4546,6 +4571,9 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) =
         | FixType.Infix _ when this.Arity <> 2 -> emitSIG00Diagnostics this.ExpressionType.Type 2 this.Arity this.SignStartPos this.SignEndPos
         | FixType.Prefix _ when this.Arity <> 1 -> emitSIG00Diagnostics this.ExpressionType.Type 1 this.Arity this.SignStartPos this.SignEndPos
         | FixType.Postfix _ when this.Arity <> 1 -> emitSIG00Diagnostics this.ExpressionType.Type 1 this.Arity this.SignStartPos this.SignEndPos
+        | _ -> ()
+        match this.ExpressionType with
+        | FixType.Infix (symbol, precedence) -> checkSIG02Diagnostics (getRoot this) symbol precedence this.SignStartPos this.SignEndPos
         | _ -> ()
 
     override this.EmbedInSymbolTable _ = 

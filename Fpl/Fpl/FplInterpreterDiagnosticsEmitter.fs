@@ -66,42 +66,5 @@ let emitSIG01Diagnostics (st: SymbolTable) (fv: FplValue) pos1 pos2 =
             ad.AddDiagnostic diagnostic
     | _ -> ()
 
-let emitSIG02Diagnostics (st: SymbolTable) (fplValue: FplValue) pos1 pos2 =
-    let precedences = Dictionary<int, FplValue>()
-
-    match fplValue.ExpressionType with
-    | FixType.Infix(symbol, precedence) ->
-        let precedenceWasAlreadyThere precedence fv =
-            if not (precedences.ContainsKey(precedence)) then
-                precedences.Add(precedence, fv)
-                false
-            else
-                true
-
-        st.Root.Scope
-        |> Seq.map (fun kv -> kv.Value)
-        |> Seq.iter (fun theory ->
-            theory.Scope
-            |> Seq.map (fun kv1 -> kv1.Value)
-            |> Seq.iter (fun block ->
-                match block.ExpressionType with
-                | FixType.Infix(_, precedence) -> precedenceWasAlreadyThere precedence block |> ignore
-                | _ -> ()))
-
-        if precedences.ContainsKey(precedence) then
-            let conflict = precedences[precedence].QualifiedStartPos
-
-            let diagnostic =
-                { 
-                    Diagnostic.Uri = ad.CurrentUri
-                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                    Diagnostic.Severity = DiagnosticSeverity.Information
-                    Diagnostic.StartPos = pos1
-                    Diagnostic.EndPos = pos2
-                    Diagnostic.Code = SIG02(symbol, precedence, conflict)
-                    Diagnostic.Alternatives = Some "Consider disambiguating the precedence to avoid unexpected results." 
-                }
-            ad.AddDiagnostic diagnostic
-    | _ -> ()
 
 
