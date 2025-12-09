@@ -1131,7 +1131,6 @@ let rec eval (st: SymbolTable) ast =
         eval st paramTupleAst
         optUserDefinedSymbolAst |> Option.map (eval st) |> Option.defaultValue () |> ignore
         let fv = variableStack.PeekEvalStack()
-        emitSIG00Diagnostics fv pos1 pos2
         setSignaturePositions pos1 pos2
         variableStack.InSignatureEvaluation <- false
         st.EvalPop()

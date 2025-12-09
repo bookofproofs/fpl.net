@@ -640,6 +640,19 @@ let emitPR016Diagnostics argumentID lastAssumedArgumentId pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
 
+let emitSIG00Diagnostics exprType expectedArity actualArity pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = SIG00(exprType, actualArity)
+            Diagnostic.Alternatives = Some $"Arity of {expectedArity} expected." 
+        }
+    ad.AddDiagnostic diagnostic
+
 let emitSIG03Diagnostics errMsg mapTypeStr pos1 pos2 = 
     let diagnostic =
         { 

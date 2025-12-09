@@ -2000,8 +2000,16 @@ type FplPredicate(positions: Positions, parent: FplValue, runOrder) =
 
     override this.IsFplBlock () = true
 
-    override this.EmbedInSymbolTable _ = 
+    override this.CheckConsistency() = 
         base.CheckConsistency()
+        match this.ExpressionType with
+        | FixType.Infix _ when this.Arity <> 2 -> emitSIG00Diagnostics this.ExpressionType.Type 2 this.Arity this.SignStartPos this.SignEndPos
+        | FixType.Prefix _ when this.Arity <> 1 -> emitSIG00Diagnostics this.ExpressionType.Type 1 this.Arity this.SignStartPos this.SignEndPos
+        | FixType.Postfix _ when this.Arity <> 1 -> emitSIG00Diagnostics this.ExpressionType.Type 1 this.Arity this.SignStartPos this.SignEndPos
+        | _ -> ()
+
+    override this.EmbedInSymbolTable _ = 
+        this.CheckConsistency()
         tryAddToParentUsingMixedSignature this
 
     override this.Run variableStack = 
@@ -4531,6 +4539,14 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) =
 
     override this.IsFplBlock () = true
     override this.IsBlock () = true
+
+    override this.CheckConsistency (): unit = 
+        base.CheckConsistency()
+        match this.ExpressionType with
+        | FixType.Infix _ when this.Arity <> 2 -> emitSIG00Diagnostics this.ExpressionType.Type 2 this.Arity this.SignStartPos this.SignEndPos
+        | FixType.Prefix _ when this.Arity <> 1 -> emitSIG00Diagnostics this.ExpressionType.Type 1 this.Arity this.SignStartPos this.SignEndPos
+        | FixType.Postfix _ when this.Arity <> 1 -> emitSIG00Diagnostics this.ExpressionType.Type 1 this.Arity this.SignStartPos this.SignEndPos
+        | _ -> ()
 
     override this.EmbedInSymbolTable _ = 
         this.CheckConsistency()

@@ -20,35 +20,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 
-let emitSIG00Diagnostics (fplValue: FplValue) pos1 pos2 =
-    let detailed (exprType: FixType) expectedArity actualArity pos1 pos2 =
-        let diagnostic =
-            { 
-                Diagnostic.Uri = ad.CurrentUri
-                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                Diagnostic.Severity = DiagnosticSeverity.Error
-                Diagnostic.StartPos = pos1
-                Diagnostic.EndPos = pos2
-                Diagnostic.Code = SIG00(exprType.Type, actualArity)
-                Diagnostic.Alternatives = Some $"Arity of {expectedArity} expected." 
-            }
-        ad.AddDiagnostic diagnostic
-
-    match fplValue.ExpressionType with
-    | FixType.Infix _ when fplValue.Arity <> 2 ->
-        let fplValueType = fplValue.Type(SignatureType.Type)
-        if fplValueType.Length > 2
-            && (fplValueType.Substring(5).StartsWith("+") 
-                || fplValueType.Substring(5).StartsWith("*")
-            )
-        then
-            () // avoid false positives for variadic variables
-        else
-            detailed fplValue.ExpressionType 2 fplValue.Arity pos1 pos2
-    | FixType.Prefix _ when fplValue.Arity <> 1 -> detailed fplValue.ExpressionType 1 fplValue.Arity pos1 pos2
-    | FixType.Postfix _ when fplValue.Arity <> 1 -> detailed fplValue.ExpressionType 1 fplValue.Arity pos1 pos2
-    | _ -> ()
-
 let emitSIG01Diagnostics (st: SymbolTable) (fv: FplValue) pos1 pos2 =
     match fv with
     | :? FplReference ->
