@@ -3032,7 +3032,9 @@ type FplReference(positions: Positions, parent: FplValue) =
         | 0, ArgType.Parentheses, Some qual ->
             $"{head}().{qual.Type(propagate)}"
         | 0, ArgType.Nothing, None -> 
-            $"{head}"
+            match headObj.Name with 
+            | PrimVariableArrayL -> $"{headObj.Type signatureType}"
+            | _ -> head
         | 0, ArgType.Brackets, None ->
             $"{head}[]"
         | 0, ArgType.Parentheses, None ->
