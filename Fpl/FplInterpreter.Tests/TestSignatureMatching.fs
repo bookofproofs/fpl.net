@@ -290,8 +290,8 @@ type TestSignatureMatching() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("""def pred T (x:*obj[ind]) {dec ~i:ind; x[i]} ;""",
-        "no matching parameter for `i:ind` in a variable array x:*obj[ind]")>]
+    [<DataRow("""def pred T (x:*obj[ind]) {dec ~i:ind; x[i]} ;""", 
+        "")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesVariadicCoord(varVal, var:string) =
         ad.Clear()
@@ -309,7 +309,7 @@ type TestSignatureMatching() =
             let fvArgs = block.ArgList[0] 
             match matchArgumentsWithParameters fvArgs fvPars with
             | Some errMsg -> Assert.AreEqual<string>(var, errMsg)
-            | None -> Assert.AreEqual<string>("no error","no error")
+            | None -> Assert.AreEqual<string>(var,"")
         | None -> 
             Assert.IsTrue(false)
 

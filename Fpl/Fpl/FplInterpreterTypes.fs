@@ -3176,11 +3176,224 @@ let getArguments (fv:FplValue) =
     fv.ArgList 
     |> Seq.toList
 
+type FplMapping(positions: Positions, parent: FplValue) =
+    inherit FplValue(positions, Some parent)
+    let _dimensionTypes = new List<FplValue>()
+    let mutable _dimensionTypesBeingSet = false
+    let mutable _isArrayMapping = false
+
+    /// Sets this mapping to an array-typed mapping.
+    member this.SetIsArray() = _isArrayMapping <- true
+
+    member this.Dimension = _dimensionTypes.Count
+
+    member this.DimensionTypes = _dimensionTypes
+
+    /// Sets the during the symbol table construction.
+    /// Because the type consists of a main type and index allowed-types, we use "Dimension being set" as a flag
+    /// to decide which one to be set.
+    member this.SetType (typeId:string) pos1 pos2 = 
+        if not _dimensionTypesBeingSet then 
+            this.TypeId <-
+                if _isArrayMapping then 
+                    $"*{typeId}"
+                else
+                    typeId
+            _dimensionTypesBeingSet <- true
+        else
+            let indexAllowedType = FplMapping((pos1,pos2), this) 
+            indexAllowedType.TypeId <- typeId
+            this.DimensionTypes.Add indexAllowedType
+
+    interface IHasDimensions with
+        member this.Dimension = this.Dimension
+        member this.DimensionTypes = this.DimensionTypes
+        member this.SetType typeId pos1 pos2 = this.SetType typeId pos1 pos2
+
+    override this.Name = PrimMappingL
+    override this.ShortName = PrimMapping
+
+    override this.Clone () =
+        let ret = new FplMapping((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.IsMapping () = true
+
+    override this.Type signatureType = 
+        let pars = getParamTuple this signatureType
+        let propagate = propagateSignatureType signatureType
+
+        let myMapping = 
+            if this.ArgList.Count > 0 then 
+                let arg = this.ArgList[0]
+                match arg with 
+                | :? FplMapping ->
+                    Some(arg)
+                | _ -> None
+            else
+                None
+        let mainType = 
+            match (pars, myMapping) with
+            | ("", None) -> this.TypeId
+            | ("", Some map) -> sprintf "%s() -> %s" this.TypeId (map.Type(propagate))
+            | (_, None) -> sprintf "%s(%s)" this.TypeId pars
+            | (_, Some map) -> sprintf "%s(%s) -> %s" this.TypeId pars (map.Type(propagate))
+
+        if not _isArrayMapping then
+            mainType
+        else
+            let dimensionTypes = 
+                this.DimensionTypes
+                |> Seq.map (fun fv -> fv.Type signatureType)
+                |> String.concat ","
+            $"{mainType}[{dimensionTypes}]"
+
+
+    override this.Represent() = $"dec {this.Type(SignatureType.Type)}"
+
+    override this.Run _ = 
+        this.Debug "Run"
+
+    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
+
+    override this.RunOrder = None
+
+type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
+    inherit FplGenericVariable(fplId, positions, parent)
+    let _dimensionTypes = new List<FplValue>()
+    let mutable _dimensionTypesBeingSet = false
+
+    member this.Dimension = _dimensionTypes.Count
+
+    member this.DimensionTypes = _dimensionTypes
+
+    /// Sets the during the symbol table construction.
+    /// Because the type consists of a main type and index allowed-types, we use "Dimension being set" as a flag
+    /// to decide which one to be set.
+    member this.SetType (typeId:string) pos1 pos2 = 
+        if not _dimensionTypesBeingSet then 
+            this.TypeId <- $"*{typeId}"
+            _dimensionTypesBeingSet <- true
+        else
+            let indexAllowedType = FplMapping((pos1,pos2), this) 
+            indexAllowedType.TypeId <- typeId
+            this.DimensionTypes.Add indexAllowedType
+
+    interface IHasDimensions with
+        member this.Dimension = this.Dimension
+        member this.DimensionTypes = this.DimensionTypes
+        member this.SetType typeId pos1 pos2 = this.SetType typeId pos1 pos2
+
+    override this.Name = PrimVariableArrayL
+
+    override this.ShortName = PrimVariableArray
+
+    override this.Clone () =
+        let ret = new FplVariableArray(this.FplId, (this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        if this.IsBound then 
+            ret.SetIsBound()
+        if this.IsUsed then 
+            ret.SetIsUsed()
+        ret.IsSignatureVariable <- this.IsSignatureVariable 
+        ret.IsInitializedVariable <- this.IsInitializedVariable
+
+        this.DimensionTypes
+        |> Seq.iter (fun (fv1:FplValue) ->
+            let value = fv1.Clone()
+            ret.DimensionTypes.Add(value))
+
+        ret
+
+    override this.Type signatureType =
+        let mainType = base.Type signatureType
+
+        let dimensionTypes = 
+            this.DimensionTypes
+            |> Seq.map (fun fv -> fv.Type signatureType)
+            |> String.concat ","
+
+        match signatureType with
+        | SignatureType.Name -> this.FplId
+        | _ -> $"{mainType}[{dimensionTypes}]"
+
+    override this.Represent () = 
+        if this.ValueList.Count = 0 then
+            if this.IsInitializedVariable then 
+                // this case should never happen, because isInitializesVariable is a contradiction to ValueList.Count 0
+                LiteralUndef
+            else
+                match this.TypeId with
+                | LiteralUndef -> LiteralUndef
+                | _ -> $"dec {this.Type SignatureType.Type}" 
+        else
+            let subRepr = 
+                this.ValueList
+                |> Seq.map (fun subfv -> subfv.Represent())
+                |> String.concat ", "
+            if this.IsInitializedVariable then 
+                subRepr
+            else
+                match this.TypeId with
+                | LiteralUndef -> LiteralUndef
+                | _ -> $"dec {this.Type(SignatureType.Type)}" 
+
+type FplVariable(fplId, positions: Positions, parent: FplValue) =
+    inherit FplGenericVariable(fplId, positions, parent)
+
+
+    override this.Name = PrimVariableL
+
+    override this.ShortName = PrimVariable
+
+    override this.Clone () =
+        let ret = new FplVariable(this.FplId, (this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        if this.IsBound then 
+            ret.SetIsBound()
+        if this.IsUsed then 
+            ret.SetIsUsed()
+        ret.IsSignatureVariable <- this.IsSignatureVariable 
+        ret.IsInitializedVariable <- this.IsInitializedVariable
+        ret
+
+    override this.SetValue fv =
+        base.SetValue(fv)
+        if fv.FplId <> LiteralUndef then
+            this.IsInitializedVariable <- true
+
+    override this.Represent () = 
+        if this.ValueList.Count = 0 then
+            if this.IsInitializedVariable then 
+                // this case should never happen, because isInitializesVariable is a contradiction to ValueList.Count 0
+                LiteralUndef
+            else
+                match this.TypeId with
+                | LiteralUndef -> LiteralUndef
+                | LiteralPred -> PrimUndetermined
+                | _ -> $"dec {this.Type(SignatureType.Type)}" 
+        else
+            let subRepr = 
+                this.ValueList
+                |> Seq.map (fun subfv -> subfv.Represent())
+                |> String.concat ", "
+            if this.IsInitializedVariable || this.IsBound then 
+                subRepr
+            else
+                match this.TypeId with
+                | LiteralUndef -> LiteralUndef
+                | _ -> $"dec {this.Type(SignatureType.Type)}" 
+
+
 /// Gets the list of parameters of an FplValue if any
 let getParameters (fv:FplValue) =
     match fv.Name with
     | PrimVariableL ->
         fv.Scope.Values |> Seq.toList
+    | PrimVariableArrayL ->
+        let arr = fv :?> FplVariableArray
+        arr.DimensionTypes |> Seq.toList
     | PrimFuncionalTermL
     | PrimPredicateL
     | LiteralCtorL
@@ -3189,8 +3402,8 @@ let getParameters (fv:FplValue) =
         fv.Scope.Values |> Seq.filter (fun fv -> isSignatureVar fv) |> Seq.toList
     | _ -> []
 
-/// Checks, if an FplValue uses parentheses
-let hasParentheses (fv:FplValue) = 
+/// Checks, if an FplValue uses parentheses or brackets
+let hasBracketsOrParentheses (fv:FplValue) = 
     match fv.Name with 
     | PrimVariableL ->
         let vars = fv.GetVariables()
@@ -3203,7 +3416,7 @@ let hasParentheses (fv:FplValue) =
     | PrimMandatoryFunctionalTermL -> true
     | PrimRefL -> 
         let refFv = fv :?> FplReference
-        (refFv.ArgType = ArgType.Parentheses)
+        (refFv.ArgType = ArgType.Parentheses || refFv.ArgType = ArgType.Brackets)
     | _ -> false
 
 /// Checks if the baseClassName is contained in the classRoot's base classes (it derives from).
@@ -3400,12 +3613,12 @@ let matchArgumentsWithParameters (fva: FplValue) (fvp: FplValue) =
     let parameters = getParameters fvp
     let arguments = getArguments fva
 
-    let aHasParentheses = hasParentheses fva
-    let pHasParentheses = hasParentheses fvp
+    let aHasBracketsOrParentheses = hasBracketsOrParentheses fva
+    let pHasBracketsOrParentheses = hasBracketsOrParentheses fvp
         
 
     let argResult = 
-        if aHasParentheses <> pHasParentheses && arguments.Length = 0 && parameters.Length = 0 then 
+        if aHasBracketsOrParentheses <> pHasBracketsOrParentheses && arguments.Length = 0 && parameters.Length = 0 then 
             Some($"calling and called nodes have mismatching use of parentheses")
         else
             mpwa arguments parameters
@@ -4238,89 +4451,6 @@ type FplDecrement(name, positions: Positions, parent: FplValue) as this =
             else
                 string n'
         this.SetValue(newValue)
-
-type FplMapping(positions: Positions, parent: FplValue) =
-    inherit FplValue(positions, Some parent)
-    let _dimensionTypes = new List<FplValue>()
-    let mutable _dimensionTypesBeingSet = false
-    let mutable _isArrayMapping = false
-
-    /// Sets this mapping to an array-typed mapping.
-    member this.SetIsArray() = _isArrayMapping <- true
-
-    member this.Dimension = _dimensionTypes.Count
-
-    member this.DimensionTypes = _dimensionTypes
-
-    /// Sets the during the symbol table construction.
-    /// Because the type consists of a main type and index allowed-types, we use "Dimension being set" as a flag
-    /// to decide which one to be set.
-    member this.SetType (typeId:string) pos1 pos2 = 
-        if not _dimensionTypesBeingSet then 
-            this.TypeId <-
-                if _isArrayMapping then 
-                    $"*{typeId}"
-                else
-                    typeId
-            _dimensionTypesBeingSet <- true
-        else
-            let indexAllowedType = FplMapping((pos1,pos2), this) 
-            indexAllowedType.TypeId <- typeId
-            this.DimensionTypes.Add indexAllowedType
-
-    interface IHasDimensions with
-        member this.Dimension = this.Dimension
-        member this.DimensionTypes = this.DimensionTypes
-        member this.SetType typeId pos1 pos2 = this.SetType typeId pos1 pos2
-
-    override this.Name = PrimMappingL
-    override this.ShortName = PrimMapping
-
-    override this.Clone () =
-        let ret = new FplMapping((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.IsMapping () = true
-
-    override this.Type signatureType = 
-        let pars = getParamTuple this signatureType
-        let propagate = propagateSignatureType signatureType
-
-        let myMapping = 
-            if this.ArgList.Count > 0 then 
-                let arg = this.ArgList[0]
-                match arg with 
-                | :? FplMapping ->
-                    Some(arg)
-                | _ -> None
-            else
-                None
-        let mainType = 
-            match (pars, myMapping) with
-            | ("", None) -> this.TypeId
-            | ("", Some map) -> sprintf "%s() -> %s" this.TypeId (map.Type(propagate))
-            | (_, None) -> sprintf "%s(%s)" this.TypeId pars
-            | (_, Some map) -> sprintf "%s(%s) -> %s" this.TypeId pars (map.Type(propagate))
-
-        if not _isArrayMapping then
-            mainType
-        else
-            let dimensionTypes = 
-                this.DimensionTypes
-                |> Seq.map (fun fv -> fv.Type signatureType)
-                |> String.concat ","
-            $"{mainType}[{dimensionTypes}]"
-
-
-    override this.Represent() = $"dec {this.Type(SignatureType.Type)}"
-
-    override this.Run _ = 
-        this.Debug "Run"
-
-    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
-
-    override this.RunOrder = None
     
 [<AbstractClass>]
 type FplGenericFunctionalTerm(positions: Positions, parent: FplValue) as this =
@@ -4551,134 +4681,6 @@ type FplQuantorExistsN(positions: Positions, parent: FplValue) as this =
             let ret = new FplQuantorExistsN((this.StartPos, this.EndPos), this.Parent.Value)
             this.AssignParts(ret)
             ret
-
-type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
-    inherit FplGenericVariable(fplId, positions, parent)
-    let _dimensionTypes = new List<FplValue>()
-    let mutable _dimensionTypesBeingSet = false
-
-    member this.Dimension = _dimensionTypes.Count
-
-    member this.DimensionTypes = _dimensionTypes
-
-    /// Sets the during the symbol table construction.
-    /// Because the type consists of a main type and index allowed-types, we use "Dimension being set" as a flag
-    /// to decide which one to be set.
-    member this.SetType (typeId:string) pos1 pos2 = 
-        if not _dimensionTypesBeingSet then 
-            this.TypeId <- $"*{typeId}"
-            _dimensionTypesBeingSet <- true
-        else
-            let indexAllowedType = FplMapping((pos1,pos2), this) 
-            indexAllowedType.TypeId <- typeId
-            this.DimensionTypes.Add indexAllowedType
-
-    interface IHasDimensions with
-        member this.Dimension = this.Dimension
-        member this.DimensionTypes = this.DimensionTypes
-        member this.SetType typeId pos1 pos2 = this.SetType typeId pos1 pos2
-
-    override this.Name = PrimVariableArrayL
-
-    override this.ShortName = PrimVariableArray
-
-    override this.Clone () =
-        let ret = new FplVariableArray(this.FplId, (this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        if this.IsBound then 
-            ret.SetIsBound()
-        if this.IsUsed then 
-            ret.SetIsUsed()
-        ret.IsSignatureVariable <- this.IsSignatureVariable 
-        ret.IsInitializedVariable <- this.IsInitializedVariable
-
-        this.DimensionTypes
-        |> Seq.iter (fun (fv1:FplValue) ->
-            let value = fv1.Clone()
-            ret.DimensionTypes.Add(value))
-
-        ret
-
-    override this.Type signatureType =
-        let mainType = base.Type signatureType
-
-        let dimensionTypes = 
-            this.DimensionTypes
-            |> Seq.map (fun fv -> fv.Type signatureType)
-            |> String.concat ","
-
-        match signatureType with
-        | SignatureType.Name -> this.FplId
-        | _ -> $"{mainType}[{dimensionTypes}]"
-
-    override this.Represent () = 
-        if this.ValueList.Count = 0 then
-            if this.IsInitializedVariable then 
-                // this case should never happen, because isInitializesVariable is a contradiction to ValueList.Count 0
-                LiteralUndef
-            else
-                match this.TypeId with
-                | LiteralUndef -> LiteralUndef
-                | _ -> $"dec {this.Type SignatureType.Type}" 
-        else
-            let subRepr = 
-                this.ValueList
-                |> Seq.map (fun subfv -> subfv.Represent())
-                |> String.concat ", "
-            if this.IsInitializedVariable then 
-                subRepr
-            else
-                match this.TypeId with
-                | LiteralUndef -> LiteralUndef
-                | _ -> $"dec {this.Type(SignatureType.Type)}" 
-
-type FplVariable(fplId, positions: Positions, parent: FplValue) =
-    inherit FplGenericVariable(fplId, positions, parent)
-
-
-    override this.Name = PrimVariableL
-
-    override this.ShortName = PrimVariable
-
-    override this.Clone () =
-        let ret = new FplVariable(this.FplId, (this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        if this.IsBound then 
-            ret.SetIsBound()
-        if this.IsUsed then 
-            ret.SetIsUsed()
-        ret.IsSignatureVariable <- this.IsSignatureVariable 
-        ret.IsInitializedVariable <- this.IsInitializedVariable
-        ret
-
-    override this.SetValue fv =
-        base.SetValue(fv)
-        if fv.FplId <> LiteralUndef then
-            this.IsInitializedVariable <- true
-
-    override this.Represent () = 
-        if this.ValueList.Count = 0 then
-            if this.IsInitializedVariable then 
-                // this case should never happen, because isInitializesVariable is a contradiction to ValueList.Count 0
-                LiteralUndef
-            else
-                match this.TypeId with
-                | LiteralUndef -> LiteralUndef
-                | LiteralPred -> PrimUndetermined
-                | _ -> $"dec {this.Type(SignatureType.Type)}" 
-        else
-            let subRepr = 
-                this.ValueList
-                |> Seq.map (fun subfv -> subfv.Represent())
-                |> String.concat ", "
-            if this.IsInitializedVariable || this.IsBound then 
-                subRepr
-            else
-                match this.TypeId with
-                | LiteralUndef -> LiteralUndef
-                | _ -> $"dec {this.Type(SignatureType.Type)}" 
-
-
 
 type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) =
     inherit FplGenericFunctionalTerm(positions, parent)

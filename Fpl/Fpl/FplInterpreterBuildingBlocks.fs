@@ -890,11 +890,11 @@ let rec eval (st: SymbolTable) ast =
             variableStack.PushEvalStack(node)
             eval st fplIdentifierAst
             eval st specificationAst |> ignore
-            if System.Char.IsLower(node.FplId[0]) then
-                // match the signatures of small-letter entities (like the self or parent entity, or variables with arguments) 
-                // with their declared types 
-                
-                let candidates = 
+            
+            let candidates = 
+                if System.Char.IsLower(node.FplId[0]) then
+                    // match the signatures of small-letter entities (like the self or parent entity, or variables with arguments) 
+                    // with their declared types 
                     node.Scope
                     |> Seq.filter (fun kvp -> kvp.Key = LiteralSelf || kvp.Key = LiteralParent || kvp.Key = node.FplId)
                     |> Seq.map (fun kvp -> kvp.Value)
@@ -910,13 +910,11 @@ let rec eval (st: SymbolTable) ast =
                         | _ -> fv
                     )
                     |> Seq.toList
-
-                checkSIG04Diagnostics node candidates |> ignore
-            else
-                let candidates = searchForCandidatesOfReferenceBlock node
-                match checkSIG04Diagnostics node candidates with
-                | Some matchedCandidate -> node.Scope.TryAdd(node.FplId, matchedCandidate) |> ignore
-                | _ -> ()
+                else
+                    searchForCandidatesOfReferenceBlock node
+            match checkSIG04Diagnostics node candidates with
+            | Some matchedCandidate -> node.Scope.TryAdd(node.FplId, matchedCandidate) |> ignore
+            | _ -> ()
 
             variableStack.PopEvalStack()
         | None -> 
