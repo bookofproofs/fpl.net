@@ -345,7 +345,7 @@ let rec eval (st: SymbolTable) ast =
         fv.TypeId <- symbol
         fv.StartPos <- pos1
         fv.EndPos <- pos2
-        emitSIG01Diagnostics st fv pos1 pos2 
+        checkSIG01Diagnostics fv
         st.EvalPop()
     | Ast.ArgumentIdentifier((pos1, pos2), argumentId) -> 
         st.EvalPush("ArgumentIdentifier")
@@ -421,7 +421,7 @@ let rec eval (st: SymbolTable) ast =
         fv.TypeId <- symbol
         fv.StartPos <- pos1
         fv.EndPos <- pos2
-        emitSIG01Diagnostics st fv pos1 pos2 
+        checkSIG01Diagnostics fv
         st.EvalPop() 
     | Ast.PostfixOperator((pos1, pos2), symbol) -> 
         st.EvalPush("PostfixOperator")
@@ -430,7 +430,7 @@ let rec eval (st: SymbolTable) ast =
         fv.TypeId <- symbol
         fv.StartPos <- pos1
         fv.EndPos <- pos2
-        emitSIG01Diagnostics st fv pos1 pos2 
+        checkSIG01Diagnostics fv
         st.EvalPop() 
     | Ast.PrefixOperator((pos1, pos2), symbol) -> 
         st.EvalPush("PrefixOperator")
@@ -439,7 +439,7 @@ let rec eval (st: SymbolTable) ast =
         fv.TypeId <- symbol
         fv.StartPos <- pos1
         fv.EndPos <- pos2
-        emitSIG01Diagnostics st fv pos1 pos2 
+        checkSIG01Diagnostics fv
         st.EvalPop() 
     // | Self of Positions * unit
     | Ast.Self((pos1, pos2), _) -> 

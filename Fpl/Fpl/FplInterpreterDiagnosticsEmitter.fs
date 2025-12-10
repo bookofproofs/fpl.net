@@ -20,51 +20,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 
-let emitSIG01Diagnostics (st: SymbolTable) (fv: FplValue) pos1 pos2 =
-    match fv with
-    | :? FplReference ->
-        // collect candidates to match this reference from all theories and
-        // add them to fplValues's scope
-        let expressionId = fv.FplId
 
-        st.Root.Scope
-        |> Seq.map (fun kv -> kv.Value)
-        |> Seq.iter (fun theory ->
-            theory.Scope
-            |> Seq.map (fun kv -> kv.Value)
-            |> Seq.iter (fun block ->
-                if expressionId = block.FplId then
-                    let blockType = block.Type(SignatureType.Mixed)
-                    fv.Scope.Add(blockType, block)
-                    fv.TypeId <- block.TypeId
-                else
-                    let blockType = block.Type(SignatureType.Mixed)
-                    match block.ExpressionType with
-                    | FixType.Prefix symbol
-                    | FixType.Symbol symbol
-                    | FixType.Postfix symbol ->
-                        if expressionId = symbol then
-                            fv.Scope.Add(blockType, block)
-                            fv.TypeId <- block.TypeId
-                    | FixType.Infix(symbol, precedence) ->
-                        if expressionId = symbol then
-                            fv.Scope.Add(blockType, block)
-                            fv.TypeId <- block.TypeId
-                    | _ -> ()))
-
-        if fv.Scope.Count = 0 then
-            let diagnostic =
-                { 
-                    Diagnostic.Uri = ad.CurrentUri
-                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                    Diagnostic.Severity = DiagnosticSeverity.Error
-                    Diagnostic.StartPos = pos1
-                    Diagnostic.EndPos = pos2
-                    Diagnostic.Code = SIG01 expressionId
-                    Diagnostic.Alternatives = Some "Declare a functional term, predicate, or class with this symbol." 
-                }
-            ad.AddDiagnostic diagnostic
-    | _ -> ()
 
 
 

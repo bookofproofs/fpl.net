@@ -653,6 +653,19 @@ let emitSIG00Diagnostics exprType expectedArity actualArity pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
 
+let emitSIG01Diagnostics expressionId pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = SIG01 expressionId
+            Diagnostic.Alternatives = Some "Declare a functional term, predicate, or class with this symbol." 
+        }
+    ad.AddDiagnostic diagnostic
+
 let emitSIG02Diagnostics symbol precedence conflict pos1 pos2 =
     let diagnostic =
         { 

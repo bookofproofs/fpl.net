@@ -3187,9 +3187,9 @@ type FplReference(positions: Positions, parent: FplValue) =
             if subRepr = String.Empty then 
                 LiteralUndef
             else
-                subRepr            
-
+                subRepr           
     override this.EmbedInSymbolTable nextOpt = 
+       
         match nextOpt with 
         | Some next when next.Name = LiteralLocL -> 
             next.FplId <- this.FplId
@@ -3203,6 +3203,43 @@ type FplReference(positions: Positions, parent: FplValue) =
             addExpressionToParentArgList this
             next.EndPos <- this.EndPos
         | _ -> ()
+
+/// Checks if a reference to a Symbol, Prefix, PostFix, or Infix exists
+let checkSIG01Diagnostics (fv: FplValue)  =
+    match fv with
+    | :? FplReference ->
+        // collect candidates to match this reference from all theories and
+        // add them to fplValues's scope
+        let expressionId = fv.FplId
+
+        (getRoot fv).Scope
+        |> Seq.map (fun kv -> kv.Value)
+        |> Seq.iter (fun theory ->
+            theory.Scope
+            |> Seq.map (fun kv -> kv.Value)
+            |> Seq.iter (fun block ->
+                if expressionId = block.FplId then
+                    let blockType = block.Type(SignatureType.Mixed)
+                    fv.Scope.Add(blockType, block)
+                    fv.TypeId <- block.TypeId
+                else
+                    let blockType = block.Type(SignatureType.Mixed)
+                    match block.ExpressionType with
+                    | FixType.Prefix symbol
+                    | FixType.Symbol symbol
+                    | FixType.Postfix symbol ->
+                        if expressionId = symbol then
+                            fv.Scope.Add(blockType, block)
+                            fv.TypeId <- block.TypeId
+                    | FixType.Infix(symbol, precedence) ->
+                        if expressionId = symbol then
+                            fv.Scope.Add(blockType, block)
+                            fv.TypeId <- block.TypeId
+                    | _ -> ()))
+
+        if fv.Scope.Count = 0 then
+            emitSIG01Diagnostics expressionId fv.StartPos fv.EndPos
+    | _ -> ()
 
 /// Gets the list of arguments of an FplValue if any
 let getArguments (fv:FplValue) =
