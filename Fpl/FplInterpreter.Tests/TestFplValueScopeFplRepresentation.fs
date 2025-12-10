@@ -693,9 +693,9 @@ type TestFplValueScopeFplRepresentation() =
             | "base4" -> Assert.AreEqual<string>($"dec {LiteralPred}", mapping.Represent())
             | "base5" -> Assert.AreEqual<string>("dec A", mapping.Represent())
             | "base6" -> Assert.AreEqual<string>($"dec {LiteralPred}({LiteralInd})", mapping.Represent())
-            | "base7" -> Assert.AreEqual<string>($"dec {LiteralPred}(*{LiteralObj})", mapping.Represent())
-            | "base8" -> Assert.AreEqual<string>($"dec {LiteralFunc}(*{LiteralPred}({LiteralObj})) -> {LiteralPred}({LiteralInd})", mapping.Represent())
-            | "base9" -> Assert.AreEqual<string>($"dec {LiteralPred}(+{LiteralFunc}(A) -> A)", mapping.Represent())
+            | "base7" -> Assert.AreEqual<string>($"dec {LiteralPred}(*{LiteralObj}[{LiteralInd}])", mapping.Represent())
+            | "base8" -> Assert.AreEqual<string>($"dec {LiteralFunc}(*{LiteralPred}({LiteralObj})[{LiteralInd}]) -> {LiteralPred}({LiteralInd})", mapping.Represent())
+            | "base9" -> Assert.AreEqual<string>($"dec {LiteralPred}(*{LiteralFunc}(A) -> A[{LiteralInd}])", mapping.Represent())
             | "base10" -> Assert.AreEqual<string>($"dec {LiteralPred}({LiteralFunc}(A) -> A)", mapping.Represent())
             | _ -> Assert.IsTrue(false)
         | None -> 
