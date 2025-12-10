@@ -21,7 +21,6 @@ open ErrDiagnostics
 open FplPrimitives
 open FplGrammarTypes
 open FplInterpreterTypes
-open FplInterpreterDiagnosticsEmitterPre
 open FplInterpreterDiagnosticsEmitter
 
 let variableStack = FplVariableStack()

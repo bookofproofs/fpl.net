@@ -11,7 +11,7 @@ open FplPrimitives
 open FplGrammarTypes
 open FplParser
 open ErrDiagnostics
-open FplInterpreterDiagnosticsEmitterPre
+open FplInterpreterDiagnosticsEmitter
 open Newtonsoft.Json
 
 (* MIT License
