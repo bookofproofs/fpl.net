@@ -161,6 +161,7 @@ type DiagnosticCode =
     | SIG05 of string * string
     | SIG06 of string * string * string * bool
     | SIG07 of string * string * string 
+    | SIG08 of string 
     // structure-related error codes
     | ST001 of string 
     | ST002 of string 
@@ -274,6 +275,7 @@ type DiagnosticCode =
             | SIG05 _ -> "SIG05"
             | SIG06 _ -> "SIG06"
             | SIG07 _ -> "SIG07"
+            | SIG08 _ -> "SIG08"
             // structure-related error codes
             | ST001 _ -> "ST001"
             | ST002 _ -> "ST002"
@@ -407,6 +409,7 @@ type DiagnosticCode =
                 else
                     $"Property name `{name}` of base functional term `{first} will be overshadowed by `{second}`."
             | SIG07 (assigneeName, assigneeType, nodeType) -> $"`{assigneeName}` is {nodeType} ({assigneeType}) and is not assignable."
+            | SIG08 indexVar -> $"`{indexVar}` is neither bound nor initialized and cannot be aused as an array index."
             // structure-related error codes
             | ST001 nodeName -> sprintf $"The {nodeName} does nothing. Simplify the code by the block."
             | ST002 nodeName -> sprintf $"The {nodeName} does nothing. Simplify the code by removing it entirely."

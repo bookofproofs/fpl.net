@@ -1022,7 +1022,7 @@ type TestFplValueScopeFplRepresentation() =
             | Some varUncast ->
                 match varUncast with
                 | :? FplGenericVariable as var ->
-                    let actual = var.IsInitializedVariable
+                    let actual = var.IsInitialized
                     Assert.AreEqual<bool>(expected, actual)
                 | _ -> Assert.IsTrue(false)
             | None -> 

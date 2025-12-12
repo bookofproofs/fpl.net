@@ -1636,6 +1636,20 @@ type TestInterpreterErrors() =
             let code = SIG07 ("", "", "")
             runTestHelper "TestSIG07.fpl" fplCode code expected
 
+
+    [<DataRow("00", "def pred T() {dec ~i:ind ~arr:*ind[ind] arr[i]:=i; true};", 1)>]    
+    [<DataRow("00a", "def pred T() {dec ~i:ind i:=$1 ~arr:*ind[ind] arr[i]:=i; true};", 0)>]    
+    [<DataRow("00b", "def pred T(i:ind) {dec ~arr:*ind[ind] arr[i]:=i; true};", 0)>]    
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestSIG08(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = SIG08 ""
+            runTestHelper "TestSIG08.fpl" fplCode code expected
+
+
     [<DataRow("00a", "def cl A {intr} ;", 1)>]
     [<DataRow("00b", "def cl A:B {intr} ;", 1)>]
     [<DataRow("00c", "def cl A:B {intr property pred T() {true} } ;", 0)>]

@@ -373,7 +373,7 @@ let maxRecursion = 5
 
 type IVariable =
     abstract member IsSignatureVariable : bool with get, set
-    abstract member IsInitializedVariable : bool with get, set
+    abstract member IsInitialized : bool with get, set
 
 [<AbstractClass>]
 type FplValue(positions: Positions, parent: FplValue option) =
@@ -769,12 +769,12 @@ and FplVariableStack() =
                 | :? IVariable as var ->
                     p.SetValuesOf fv
                     if fv.ValueList.Count > 0 then 
-                        var.IsInitializedVariable <- true
+                        var.IsInitialized <- true
                 | _ ->
                     let fvClone = fv.Clone()
                     p.SetValue fvClone
                     match box p with
-                    | :? IVariable as var -> var.IsInitializedVariable <- true
+                    | :? IVariable as var -> var.IsInitialized <- true
                     | _ -> ()
             )
 
@@ -1286,7 +1286,7 @@ type IHasDimensions =
 type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
     let mutable _isSignatureVariable = false
-    let mutable _isInitializedVariable = false
+    let mutable _isInitialized = false
     let mutable _isBound = false
     let mutable _isUsed = false
 
@@ -1328,19 +1328,19 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
             _isBound <- value // all signature variables are also bound
 
     /// Indicates if this FplValue is an initialized variable
-    member this.IsInitializedVariable
-        with get () = _isInitializedVariable
+    member this.IsInitialized
+        with get () = _isInitialized
         and set (value) = 
-            _isInitializedVariable <- value
+            _isInitialized <- value
             _isBound <- value // all initialized variables are also bound
 
     interface IVariable with
         member this.IsSignatureVariable 
             with get () = this.IsSignatureVariable
             and set (value) = this.IsSignatureVariable <- value
-        member this.IsInitializedVariable 
-            with get () = this.IsInitializedVariable
-            and set (value) = this.IsInitializedVariable <- value
+        member this.IsInitialized 
+            with get () = this.IsInitialized
+            and set (value) = this.IsInitialized <- value
 
     override this.EmbedInSymbolTable nextOpt =
         let addToRuleOfInference (block:FplValue) = 
@@ -1478,7 +1478,7 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
         if otherVar.IsUsed then 
             this.SetIsUsed()
         this.IsSignatureVariable <- otherVar.IsSignatureVariable 
-        this.IsInitializedVariable <- otherVar.IsInitializedVariable
+        this.IsInitialized <- otherVar.IsInitialized
 
 
 let checkVAR04Diagnostics (fv:FplValue) = 
@@ -3367,7 +3367,7 @@ type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
         if this.IsUsed then 
             ret.SetIsUsed()
         ret.IsSignatureVariable <- this.IsSignatureVariable 
-        ret.IsInitializedVariable <- this.IsInitializedVariable
+        ret.IsInitialized <- this.IsInitialized
 
         this.DimensionTypes
         |> Seq.iter (fun (fv1:FplValue) ->
@@ -3390,7 +3390,7 @@ type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
 
     override this.Represent () = 
         if this.ValueList.Count = 0 then
-            if this.IsInitializedVariable then 
+            if this.IsInitialized then 
                 // this case should never happen, because isInitializesVariable is a contradiction to ValueList.Count 0
                 LiteralUndef
             else
@@ -3402,7 +3402,7 @@ type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
                 this.ValueList
                 |> Seq.map (fun subfv -> subfv.Represent())
                 |> String.concat ", "
-            if this.IsInitializedVariable then 
+            if this.IsInitialized then 
                 subRepr
             else
                 match this.TypeId with
@@ -3425,17 +3425,17 @@ type FplVariable(fplId, positions: Positions, parent: FplValue) =
         if this.IsUsed then 
             ret.SetIsUsed()
         ret.IsSignatureVariable <- this.IsSignatureVariable 
-        ret.IsInitializedVariable <- this.IsInitializedVariable
+        ret.IsInitialized <- this.IsInitialized
         ret
 
     override this.SetValue fv =
         base.SetValue(fv)
         if fv.FplId <> LiteralUndef then
-            this.IsInitializedVariable <- true
+            this.IsInitialized <- true
 
     override this.Represent () = 
         if this.ValueList.Count = 0 then
-            if this.IsInitializedVariable then 
+            if this.IsInitialized then 
                 // this case should never happen, because isInitializesVariable is a contradiction to ValueList.Count 0
                 LiteralUndef
             else
@@ -3448,7 +3448,7 @@ type FplVariable(fplId, positions: Positions, parent: FplValue) =
                 this.ValueList
                 |> Seq.map (fun subfv -> subfv.Represent())
                 |> String.concat ", "
-            if this.IsInitializedVariable || this.IsBound then 
+            if this.IsInitialized || this.IsBound then 
                 subRepr
             else
                 match this.TypeId with
@@ -5196,7 +5196,25 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
 
     override this.CheckConsistency () = 
         match this.Assignee, this.AssignedValue with
-        | Some (:? FplGenericVariable as assignee), Some (assignedValue:FplValue) -> 
+        | Some (:? FplVariableArray as assignee), Some (assignedValue:FplValue) ->
+            let assignedReferenceToArray = this.ArgList[0]
+            
+            assignedReferenceToArray.ArgList
+            |> Seq.iter (fun fv ->
+                match fv with
+                | :? FplReference as ref when ref.Scope.Count > 0 -> 
+                    let referred = ref.Scope.Values |> Seq.head
+                    match referred with 
+                    | :? FplVariable as var when not var.IsBound && not var.IsInitialized -> 
+                        emitSIG08diagnostics var.FplId var.StartPos var.EndPos 
+                    // to do new diagnostic
+                    | _ -> ()
+                | _ -> ()
+            )
+
+            ()
+            // todo TestSIG05.26
+        | Some (:? FplVariable as assignee), Some (assignedValue:FplValue) -> 
             let nameAssignee = assignee.Type SignatureType.Name
             let typeAssignee = assignee.Type SignatureType.Type
             let nameAssignedValue = assignedValue.Type SignatureType.Name
@@ -5301,7 +5319,7 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
                 else
                     assignee.SetValuesOf assignedValue
                     match box assignee with
-                    | :? IVariable as assigneeCast -> assigneeCast.IsInitializedVariable <- true
+                    | :? IVariable as assigneeCast -> assigneeCast.IsInitialized <- true
                     | _ -> ()
         | _ -> ()
 

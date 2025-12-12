@@ -4571,7 +4571,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
-            Assert.IsFalse(x.IsInitializedVariable)
+            Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "00b" ->
             Assert.IsInstanceOfType<FplTheorem>(parent)
@@ -4581,7 +4581,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
-            Assert.IsFalse(x.IsInitializedVariable)
+            Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "00c" ->
             Assert.IsInstanceOfType<FplLemma>(parent)
@@ -4591,7 +4591,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
-            Assert.IsFalse(x.IsInitializedVariable)
+            Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "00d" ->
             Assert.IsInstanceOfType<FplProposition>(parent)
@@ -4601,7 +4601,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
-            Assert.IsFalse(x.IsInitializedVariable)
+            Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "00e" ->
             Assert.IsInstanceOfType<FplConjecture>(parent)
@@ -4611,7 +4611,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
-            Assert.IsFalse(x.IsInitializedVariable)
+            Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "00f" ->
             Assert.IsInstanceOfType<FplClass>(parent)
@@ -4621,7 +4621,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
-            Assert.IsFalse(x.IsInitializedVariable)
+            Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "00g" ->
             Assert.IsInstanceOfType<FplPredicate>(parent)
@@ -4631,7 +4631,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
-            Assert.IsFalse(x.IsInitializedVariable)
+            Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "00h" ->
             Assert.IsInstanceOfType<FplPredicate>(parent)
@@ -4641,7 +4641,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
-            Assert.IsFalse(x.IsInitializedVariable)
+            Assert.IsFalse(x.IsInitialized)
             Assert.IsTrue(x.IsSignatureVariable)
         | "FplVariable", "00i" ->
             Assert.IsInstanceOfType<FplFunctionalTerm>(parent)
@@ -4651,7 +4651,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
-            Assert.IsFalse(x.IsInitializedVariable)
+            Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "00j" ->
             Assert.IsInstanceOfType<FplFunctionalTerm>(parent)
@@ -4661,7 +4661,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
-            Assert.IsFalse(x.IsInitializedVariable)
+            Assert.IsFalse(x.IsInitialized)
             Assert.IsTrue(x.IsSignatureVariable)
         | "FplVariable", "00k" ->
             Assert.IsInstanceOfType<FplRuleOfInference>(parent)
@@ -4671,7 +4671,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
-            Assert.IsFalse(x.IsInitializedVariable)
+            Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "00l" ->
             Assert.IsInstanceOfType<FplExtension>(parent)
@@ -4681,7 +4681,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
-            Assert.IsFalse(x.IsInitializedVariable)
+            Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "00m" ->
             Assert.IsInstanceOfType<FplCorollary>(parent)
@@ -4691,7 +4691,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
-            Assert.IsFalse(x.IsInitializedVariable)
+            Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "00n" ->
             Assert.IsInstanceOfType<FplProof>(parent)
@@ -4701,7 +4701,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
-            Assert.IsFalse(x.IsInitializedVariable)
+            Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "00o" ->
             Assert.IsInstanceOfType<FplLocalization>(parent)
@@ -4711,7 +4711,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
-            Assert.IsFalse(x.IsInitializedVariable)
+            Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
 
         // Variables, sub blocks
@@ -4723,7 +4723,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
-            Assert.IsFalse(x.IsInitializedVariable)
+            Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "01b" ->
             Assert.IsInstanceOfType<FplConstructor>(parent)
@@ -4733,7 +4733,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
-            Assert.IsFalse(x.IsInitializedVariable)
+            Assert.IsFalse(x.IsInitialized)
             Assert.IsTrue(x.IsSignatureVariable)
         | "FplVariable", "01c" ->
             Assert.IsInstanceOfType<FplMandatoryPredicate>(parent)
@@ -4743,7 +4743,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
-            Assert.IsFalse(x.IsInitializedVariable)
+            Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "01d" ->
             Assert.IsInstanceOfType<FplMandatoryPredicate>(parent)
@@ -4753,7 +4753,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
-            Assert.IsFalse(x.IsInitializedVariable)
+            Assert.IsFalse(x.IsInitialized)
             Assert.IsTrue(x.IsSignatureVariable)
         | "FplVariable", "01g" ->
             Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(parent)
@@ -4763,7 +4763,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
-            Assert.IsFalse(x.IsInitializedVariable)
+            Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "01h" ->
             Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(parent)
@@ -4773,7 +4773,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
-            Assert.IsFalse(x.IsInitializedVariable)
+            Assert.IsFalse(x.IsInitialized)
             Assert.IsTrue(x.IsSignatureVariable)
         // variable to variable
         | "FplVariable", "02a" ->
@@ -4781,26 +4781,26 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
             let p = (parent:?>FplGenericVariable)
-            Assert.IsFalse(p.IsInitializedVariable)
+            Assert.IsFalse(p.IsInitialized)
             Assert.IsFalse(p.IsSignatureVariable)                    
             Assert.IsInstanceOfType<FplVariable>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
-            Assert.IsFalse(x.IsInitializedVariable)
+            Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "02b" ->
             Assert.IsInstanceOfType<FplVariable>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
             let p = (parent:?>FplGenericVariable)
-            Assert.IsFalse(p.IsInitializedVariable)
+            Assert.IsFalse(p.IsInitialized)
             Assert.IsTrue(p.IsSignatureVariable)
             Assert.IsInstanceOfType<FplVariable>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
-            Assert.IsFalse(x.IsInitializedVariable)
+            Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         // variable to variable
         | "FplVariable", "02c" ->
@@ -4808,26 +4808,26 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
             let p = (parent:?>FplGenericVariable)
-            Assert.IsFalse(p.IsInitializedVariable)
+            Assert.IsFalse(p.IsInitialized)
             Assert.IsFalse(p.IsSignatureVariable)                    
             Assert.IsInstanceOfType<FplVariable>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
-            Assert.IsFalse(x.IsInitializedVariable)
+            Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "02d" ->
             Assert.IsInstanceOfType<FplVariableArray>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
             let p = (parent:?>FplGenericVariable)
-            Assert.IsFalse(p.IsInitializedVariable)
+            Assert.IsFalse(p.IsInitialized)
             Assert.IsTrue(p.IsSignatureVariable)
             Assert.IsInstanceOfType<FplVariable>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
-            Assert.IsFalse(x.IsInitializedVariable)
+            Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         // variable to variable
         | "FplVariable", "02e" ->
@@ -4835,26 +4835,26 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
             let p = (parent:?>FplGenericVariable)
-            Assert.IsFalse(p.IsInitializedVariable)
+            Assert.IsFalse(p.IsInitialized)
             Assert.IsFalse(p.IsSignatureVariable)                    
             Assert.IsInstanceOfType<FplVariable>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
-            Assert.IsFalse(x.IsInitializedVariable)
+            Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "02f" ->
             Assert.IsInstanceOfType<FplVariableArray>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
             let p = (parent:?>FplGenericVariable)
-            Assert.IsFalse(p.IsInitializedVariable)
+            Assert.IsFalse(p.IsInitialized)
             Assert.IsTrue(p.IsSignatureVariable)
             Assert.IsInstanceOfType<FplVariable>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
-            Assert.IsFalse(x.IsInitializedVariable)
+            Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         // variable to mappping
         | "FplVariable", "03a" ->
@@ -4865,7 +4865,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
-            Assert.IsFalse(x.IsInitializedVariable)
+            Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "03b" ->
             Assert.IsInstanceOfType<FplMapping>(parent)
@@ -4875,7 +4875,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
-            Assert.IsFalse(x.IsInitializedVariable)
+            Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "03c" ->
             Assert.IsInstanceOfType<FplMapping>(parent)
@@ -4885,7 +4885,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
-            Assert.IsFalse(x.IsInitializedVariable)
+            Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
 
         // localizations 
@@ -4898,7 +4898,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
-            Assert.IsFalse(x.IsInitializedVariable)
+            Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "04c" ->
             Assert.IsInstanceOfType<FplLocalization>(parent)
@@ -4908,7 +4908,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
-            Assert.IsFalse(x.IsInitializedVariable)
+            Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "04d" ->
             Assert.IsInstanceOfType<FplLocalization>(parent)
@@ -4918,7 +4918,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
-            Assert.IsFalse(x.IsInitializedVariable)
+            Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
 
         // translations 
@@ -4930,7 +4930,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
-            Assert.IsFalse(x.IsInitializedVariable)
+            Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
 
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
