@@ -746,7 +746,7 @@ let emitSIG07iagnostic assigneeName assigneeType nodeType pos1 pos2  =
         }
     ad.AddDiagnostic diagnostic
 
-let emitSIG08diagnostics indexVar pos1 pos2 =
+let emitSIG08diagnostics arrName indexVarName indexVarType dimType dimNumber pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -754,7 +754,33 @@ let emitSIG08diagnostics indexVar pos1 pos2 =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = SIG08 indexVar
+            Diagnostic.Code = SIG08(arrName, indexVarName, indexVarType, dimType, dimNumber)
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
+let emitSIG09diagnostics arrName dimType dimNumber pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = SIG09(arrName, dimType, dimNumber)
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
+let emitSIG10diagnostics arrName indexVarName indexNumber pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = SIG10(arrName, indexVarName, indexNumber)
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic

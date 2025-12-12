@@ -1646,9 +1646,26 @@ type TestInterpreterErrors() =
         if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = SIG08 ""
+            let code = SIG08 ("", "", "", "", 0)
             runTestHelper "TestSIG08.fpl" fplCode code expected
 
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestSIG09(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = SIG09 ("", "", 0)
+            runTestHelper "TestSIG09.fpl" fplCode code expected
+
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestSIG10(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = SIG10 ("", "", 0)
+            runTestHelper "TestSIG10.fpl" fplCode code expected
 
     [<DataRow("00a", "def cl A {intr} ;", 1)>]
     [<DataRow("00b", "def cl A:B {intr} ;", 1)>]

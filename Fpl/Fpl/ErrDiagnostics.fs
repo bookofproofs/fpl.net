@@ -62,6 +62,14 @@ type PathEquivalentUri(uriString: string) =
 
     member this.TheoryName = Path.GetFileNameWithoutExtension(this.AbsolutePath)
 
+/// Tranforms a whole number into English ordinal
+let englishOrdinal dimNumber = 
+    match dimNumber with
+    | 1 -> "1st"
+    | 2 -> "2nd"
+    | 3 -> "3rd"
+    | _ -> $"{dimNumber}th"
+
 type DiagnosticCode = 
     // parser error codes
     | SYN000
@@ -161,7 +169,9 @@ type DiagnosticCode =
     | SIG05 of string * string
     | SIG06 of string * string * string * bool
     | SIG07 of string * string * string 
-    | SIG08 of string 
+    | SIG08 of string * string * string * string * int
+    | SIG09 of string * string * int
+    | SIG10 of string * string * int 
     // structure-related error codes
     | ST001 of string 
     | ST002 of string 
@@ -276,6 +286,8 @@ type DiagnosticCode =
             | SIG06 _ -> "SIG06"
             | SIG07 _ -> "SIG07"
             | SIG08 _ -> "SIG08"
+            | SIG09 _ -> "SIG09"
+            | SIG10 _ -> "SIG10"
             // structure-related error codes
             | ST001 _ -> "ST001"
             | ST002 _ -> "ST002"
@@ -409,7 +421,10 @@ type DiagnosticCode =
                 else
                     $"Property name `{name}` of base functional term `{first} will be overshadowed by `{second}`."
             | SIG07 (assigneeName, assigneeType, nodeType) -> $"`{assigneeName}` is {nodeType} ({assigneeType}) and is not assignable."
-            | SIG08 indexVar -> $"`{indexVar}` is neither bound nor initialized and cannot be aused as an array index."
+            | SIG08 (arrName, indexVarName, indexVarType, dimType, dimNumber) -> 
+                $"Type mismatch in array's `{arrName}` {englishOrdinal dimNumber} dimension; expected `{dimType}`, got `{indexVarName}:{indexVarType}`."
+            | SIG09 (arrName, dimType, dimNumber) -> $"Missing index for array's `{arrName}` {englishOrdinal dimNumber} dimension `{dimType}`"
+            | SIG10 (arrName, indexVarName, indexNumber) -> $"Array `{arrName}` has less dimensions, {englishOrdinal indexNumber} index `{indexVarName}` not supported"
             // structure-related error codes
             | ST001 nodeName -> sprintf $"The {nodeName} does nothing. Simplify the code by the block."
             | ST002 nodeName -> sprintf $"The {nodeName} does nothing. Simplify the code by removing it entirely."
