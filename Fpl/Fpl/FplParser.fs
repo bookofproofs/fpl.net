@@ -250,7 +250,7 @@ let functionalTermType = positions "CompoundFunctionalTermType" (keywordFunction
 
 let simpleVariableType = positions "SimpleVariableType" (choice [ keywordIndex; keywordObject; predicateIdentifier; templateType; functionalTermType; predicateType ]) |>> Ast.SimpleVariableType
 // indexAllowedType is used to restrict Fpl types allowed to be used as indexes in arrayType
-let indexAllowedType = positions "IndexAllowedType" (choice [ keywordIndex; keywordObject; predicateIdentifier; templateType]) |>> Ast.IndexAllowedType
+let indexAllowedType = positions "IndexAllowedType" (choice [ keywordIndex; keywordObject; predicateIdentifier; templateType; keywordPredicate; keywordFunction]) |>> Ast.IndexAllowedType
 
 let indexAllowedTypeList = (sepBy1 (indexAllowedType .>> IW) comma) .>> IW
 // arrayType is used to define arrays in Fpl
