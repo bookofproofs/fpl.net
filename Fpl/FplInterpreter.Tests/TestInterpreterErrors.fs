@@ -1717,6 +1717,16 @@ type TestInterpreterErrors() =
             let code = SIG08 ("", "", "", "", 0)
             runTestHelper "TestSIG08.fpl" fplCode code expected
 
+    [<DataRow("01", "def pred T() {dec ~i:ind ~arr:*obj[ind,ind] arr[i]:=undef; true};", 1)>] // array two-dimensional, index one-dimensional -> invalid
+    [<DataRow("02", "def pred T() {dec ~i,j:obj ~arr:*Base[obj,obj] arr[i,j]:=undef; true};", 0)>] // array two-dimensional, index two-dimensional -> valid
+    [<DataRow("03", "def pred T() {dec ~i:ind ~arr:*obj[ind,ind,ind] arr[i]:=undef; true};", 2)>]   // 3D array, single index -> 2x SIG09
+    [<DataRow("04", "def pred T() {dec ~i,j:ind ~arr:*obj[ind,ind,ind] arr[i,j]:=undef; true};", 1)>] // 3D array, two indices -> SIG09
+    [<DataRow("05", "def pred T() {dec ~i,j,k:ind ~arr:*obj[ind,ind,ind] arr[i,j,k]:=undef; true};", 0)>] // 3D array, three indices -> valid
+    [<DataRow("06", "def func X()->ind def pred T() {dec ~arr:*obj[ind,ind] arr[X()]:=undef; true};", 1)>] // 2D array, one index via functional term -> SIG09
+    [<DataRow("06a", "def func X()->ind def pred T() {dec ~arr:*obj[ind,ind] arr[X(),X()]:=undef; true};", 0)>] // 2D array, two indexes via functional term -> valid
+    [<DataRow("07", "def func A()->ind def func B()->ind def pred T() {dec ~arr:*obj[ind,ind,ind] arr[A(),B()]:=undef; true};", 1)>] // 3D array, two functional indices -> SIG09
+    [<DataRow("07a", "def func A()->ind def func B()->ind def pred T() {dec ~arr:*obj[ind,ind,ind] arr[A(),B(),$1]:=undef; true};", 0)>] // 3D array, indices -> valid
+    [<DataRow("08", "def pred T() {dec ~arr:*obj[ind,ind] arr[$1,$2]:=undef; true};", 0)>] // 2D array, two indices -> valid
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG09(no:string, fplCode:string, expected) =
@@ -1726,6 +1736,17 @@ type TestInterpreterErrors() =
             let code = SIG09 ("", "", 0)
             runTestHelper "TestSIG09.fpl" fplCode code expected
 
+    [<DataRow("01", "def pred T() {dec ~i,j:ind ~arr:*obj[ind] arr[i,j]:=undef; true};", 1)>]   // 1D array, 2 indices -> 1 extra (SIG10)
+    [<DataRow("01b", "def pred T() {dec ~i:ind ~arr:*obj[ind] arr[i]:=undef; true};", 0)>]   // 1D array, 1 indices -> valid
+    [<DataRow("02", "def pred T() {dec ~i,j,k:ind ~arr:*obj[ind] arr[i,j,k]:=undef; true};", 2)>] // 1D array, 3 indices -> 2 extra (SIG10 x2)
+    [<DataRow("02a", "def pred T() {dec ~i,j,k:ind ~arr:*obj[ind,ind,ind] arr[i,j,k]:=undef; true};", 2)>] // 3D array, 3 indices -> valid
+    [<DataRow("02b", "def pred T() {dec ~i,j,k:ind ~arr:*obj[ind,ind,ind] arr[i,j]:=undef; true};", 2)>] // 3D array, 2 indices -> not relevant for SIG10
+    [<DataRow("03", "def pred T() {dec ~i,j,k:ind ~arr:*obj[ind,ind] arr[i,j,k]:=undef; true};", 1)>] // 2D array, 3 indices -> 1 extra
+    [<DataRow("04", "def pred T() {dec ~i,j,k,l:ind ~arr:*obj[ind,ind,ind] arr[i,j,k,l]:=undef; true};", 1)>] // 3D array, 4 indices -> 1 extra
+    [<DataRow("04a", "def pred T() {dec ~i,j,k,l:ind ~arr:*obj[ind,ind,ind,ind] arr[i,j,k,l]:=undef; true};", 0)>] // 4D array, 4 indices -> valid
+    [<DataRow("05", "def func A()->ind def func B()->ind def pred T() {dec ~arr:*obj[ind] arr[A(),B()]:=undef; true};", 1)>] // functional indices: 2 supplied for 1D array -> 1 extra
+    [<DataRow("06", "def func A()->ind def func B()->ind def func C()->ind def pred T() {dec ~arr:*obj[ind,ind] arr[A(),B(),C()]:=undef; true};", 1)>] // 3 functional indices for 2D array -> 1 extra
+    [<DataRow("07", "def pred T() {dec ~arr:*obj[ind,ind] arr[$1,$2,$3]:=undef; true};", 1)>] // explicit $-indices: 3 provided for 2D array -> 1 extra
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG10(no:string, fplCode:string, expected) =
