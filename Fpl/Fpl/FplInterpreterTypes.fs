@@ -3252,6 +3252,13 @@ type FplMapping(positions: Positions, parent: FplValue) =
     let _dimensionTypes = new List<FplValue>()
     let mutable _dimensionTypesBeingSet = false
     let mutable _isArrayMapping = false
+    let mutable (_toBeReturnedClass:FplValue option) = None
+
+    /// If the mapping maps to classes or arrays of classes,
+    /// this function will yield an optional reference to the corresponding class node.
+    member this.ToBeReturnedClass
+        with get() = _toBeReturnedClass
+        and set(value) = _toBeReturnedClass <- value
 
     /// Sets this mapping to an array-typed mapping.
     member this.SetIsArray() = _isArrayMapping <- true
@@ -3593,8 +3600,6 @@ type FplGenericFunctionalTerm(positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
     let mutable _signStartPos = Position("", 0L, 0L, 0L)
     let mutable _signEndPos = Position("", 0L, 0L, 0L)
-    let mutable (_toBeReturnedClass:FplValue option) = None
-    let mutable _isArray = false
 
     do 
         this.FplId <- LiteralFunc
@@ -3645,21 +3650,15 @@ type FplGenericFunctionalTerm(positions: Positions, parent: FplValue) as this =
             else
                 subRepr
               
-    /// If the functional term returns class objects or arrays of such objects,
-    /// this function will yield an optional reference to the corresponding class node.
-    member this.ToBeReturnedClass
-        with get() = _toBeReturnedClass
-        and set(value) = _toBeReturnedClass <- value
-
-    /// Sets or gets the boolean flag if this functional term yields an array.
-    member this.IsArray
-        with get() = _isArray
-        and set(value) = _isArray <- value
-
     override this.CheckConsistency () = 
         base.CheckConsistency()
         if not this.IsIntrinsic then // if not intrinsic, check variable usage
             checkVAR04Diagnostics this
+
+    // Returns a pointer to the mapping of this functional term
+    member this.Mapping =
+        let map = getMapping this
+        map.Value :?> FplMapping 
 
 /// Tries to match parameters of an FplValue with its arguments recursively
 let rec mpwa (args: FplValue list) (pars: FplValue list) =
@@ -3719,7 +3718,8 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) =
                 matchClassInheritance defaultCtor.ToBeConstructedClass a aType p pType
             elif aReferencedNode.Name = PrimFuncionalTermL || aReferencedNode.Name = PrimMandatoryFunctionalTermL then 
                 let functionalTerm = aReferencedNode :?> FplGenericFunctionalTerm
-                matchClassInheritance functionalTerm.ToBeReturnedClass a aType p pType
+                let map = functionalTerm.Mapping
+                matchClassInheritance map.ToBeReturnedClass a aType p pType
             else
                 Some($"`{a.Type(SignatureType.Name)}:{aType}` is undefined and does not match `{p.Type(SignatureType.Name)}:{pType}`")
         elif aType.StartsWith(pType + "(") then
@@ -4855,6 +4855,10 @@ type FplExtension(positions: Positions, parent: FplValue) =
 
     override this.RunOrder = None
 
+    // Returns a reference to the mapping of this extension
+    member this.Mapping =
+        let map = getMapping this
+        map.Value :?> FplMapping 
 
 let isExtension (fv:FplValue) =
     match fv with

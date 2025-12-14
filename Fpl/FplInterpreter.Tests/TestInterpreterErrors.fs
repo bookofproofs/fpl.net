@@ -1763,6 +1763,31 @@ type TestInterpreterErrors() =
             let code = SIG10 ("", "", 0)
             runTestHelper "TestSIG10.fpl" fplCode code expected
 
+    // mapping
+    [<DataRow("01", """def func T()->A;""", 0)>] // undefined mapping -> no SIG11
+    [<DataRow("01a", """def func T()->*A[ind];""", 0)>] // undefined mapping -> no SIG11
+    [<DataRow("02", """def cl A def func T()->A;""", 0)>] // mapping is defined class -> no SIG11
+    [<DataRow("03", """def cl A def func T()->*A[ind];""", 0)>] // mapping is defined class -> no SIG11
+    [<DataRow("05", """def pred A() {intr} def func T()->A;""", 1)>] // mapping is a defined predicate -> issue SIG11
+    [<DataRow("06", """def func A()->obj {intr} def func T()->A;""", 1)>] // mapping is a defined predicate -> issue SIG11
+    [<DataRow("07", """inf A {pre:true con:true} def func T()->A;""", 1)>] // mapping is a defined predicate -> issue SIG11
+    [<DataRow("07", """ax A {true} def func T()->A;""", 1)>] // mapping is axiom -> issue SIG11
+    [<DataRow("08", """thm A {true} def func T()->A;""", "")>]
+    [<DataRow("09", """prop A {true} def func T()->A;""", "")>]
+    [<DataRow("10", """lem A {true} def func T()->A;""", "")>]
+    [<DataRow("11", """conj A {true} def func T()->A;""", "")>]
+    [<DataRow("12", """ext A x@/\d+/->obj {ret x} def func T()->A;""", "")>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestSIG11(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = SIG11 ("", "")
+            ad.Clear()
+            runTestHelper "TestSIG11.fpl" fplCode code expected
+
+
     [<DataRow("00a", "def cl A {intr} ;", 1)>]
     [<DataRow("00b", "def cl A:B {intr} ;", 1)>]
     [<DataRow("00c", "def cl A:B {intr property pred T() {true} } ;", 0)>]

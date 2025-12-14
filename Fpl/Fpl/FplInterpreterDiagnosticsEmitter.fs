@@ -785,6 +785,19 @@ let emitSIG10diagnostics arrName indexVarName indexNumber pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
 
+let emitSIG11diagnostics qualifiedNameMapping qualifiedWrongCandidate pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = SIG11(qualifiedNameMapping, qualifiedWrongCandidate)
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
 let emitST001diagnostics name pos1 pos2 =
     let diagnostic =
         { 

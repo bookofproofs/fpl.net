@@ -172,6 +172,7 @@ type DiagnosticCode =
     | SIG08 of string * string * string * string * int
     | SIG09 of string * string * int
     | SIG10 of string * string * int 
+    | SIG11 of string * string
     // structure-related error codes
     | ST001 of string 
     | ST002 of string 
@@ -288,6 +289,7 @@ type DiagnosticCode =
             | SIG08 _ -> "SIG08"
             | SIG09 _ -> "SIG09"
             | SIG10 _ -> "SIG10"
+            | SIG11 _ -> "SIG11"
             // structure-related error codes
             | ST001 _ -> "ST001"
             | ST002 _ -> "ST002"
@@ -425,6 +427,7 @@ type DiagnosticCode =
                 $"Type mismatch in array's `{arrName}` {englishOrdinal dimNumber} dimension; expected `{dimType}`, got `{indexVarName}:{indexVarType}`."
             | SIG09 (arrName, dimType, dimNumber) -> $"Missing index for array's `{arrName}` {englishOrdinal dimNumber} dimension `{dimType}`"
             | SIG10 (arrName, indexVarName, indexNumber) -> $"Array `{arrName}` has less dimensions, {englishOrdinal indexNumber} index `{indexVarName}` not supported"
+            | SIG11 (qualifiedNameMapping, qualifiedWrongCandidate) -> $"{qualifiedNameMapping} cannot map to {qualifiedWrongCandidate}"
             // structure-related error codes
             | ST001 nodeName -> sprintf $"The {nodeName} does nothing. Simplify the code by the block."
             | ST002 nodeName -> sprintf $"The {nodeName} does nothing. Simplify the code by removing it entirely."
