@@ -1653,7 +1653,7 @@ type TestInterpreterErrors() =
     [<DataRow("06", "def pred T() {dec ~i:ind ~arr:*obj[ind] arr[i]:=undef; true};", 0)>]    // array element type `obj` incompatible with expected `ind`
     [<DataRow("07", "def pred T(i:obj) {dec ~arr:*ind[ind] arr[i]:=undef; true};", 1)>]        // parameter `i` typed `obj` — invalid
     [<DataRow("08", "def pred T() {dec ~i:ind ~arr:*ind[ind] arr[i]:=undef arr[i]:=undef; true};", 0)>] // repeated valid indexing, should succeed
-    [<DataRow("08a", "def pred T() {dec ~i:ind ~arr1:*ind[ind] ~arr2:*ind[ind] arr1[i]:=undef arr2[arr1[i]]:=undef; true};", 0)>]   // arr indexed by array type *ind[ind], i has that type -> valid
+    [<DataRow("08a", "def pred T() {dec ~i:ind ~arr1:*ind[ind] ~arr2:*ind[ind] arr2[arr1[i]]:=undef; true};", 0)>]   // arr indexed by array type *ind[ind], i has that type -> valid
     [<DataRow("08b", "def pred T() {dec ~i:*ind[ind] ~arr:*ind[ind] arr[i]:=undef; true};", 1)>]         // i is array, arr expects ind -> invalid
     [<DataRow("08c", "def pred T() {dec ~i:ind ~arr:*ind[ind] arr[i]:=undef; true};", 0)>]       // arr expects array index, provided ind -> invalid
     [<DataRow("08d", "def pred T() {dec ~i:*ind[ind] ~j:ind ~arr:*ind[ind] arr[i[j]]:=undef; true};", 0)>] // i[j] is ind, arr indexed by ind -> valid

@@ -3615,6 +3615,13 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) =
             // even if they have the same type used for the values of the array
             let aName = a.Type(SignatureType.Name)
             Some($"variadic enumeration of `{aName}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`, try `{aName}:{pType}` as argument or use parameter `{p.Type(SignatureType.Name)}:{p.TypeId}[{LiteralInd}]`")
+        elif aType.StartsWith($"*{pType}[") && a.Name = PrimRefL then
+            let refA = a :?> FplReference
+            if refA.ArgType = ArgType.Brackets then 
+                // some array elements matching parameter type
+                None
+            else
+                Some($"Array type `{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
         elif
             aType.Length > 0
             && Char.IsUpper(aType[0])
