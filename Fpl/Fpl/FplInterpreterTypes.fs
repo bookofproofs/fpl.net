@@ -3057,6 +3057,20 @@ type FplReference(positions: Positions, parent: FplValue) =
             else
                 None
 
+        let fallBackFunctionalTerm =
+            let varMappingOpt = getMapping headObj
+            match varMappingOpt with 
+            | Some varMapping ->
+                match headObj.Name with 
+                | PrimFuncionalTermL when signatureType = SignatureType.Type -> 
+                    varMapping.Type propagate
+                | PrimMandatoryFunctionalTermL when signatureType = SignatureType.Type -> 
+                    varMapping.Type propagate
+                | _ -> 
+                    $"{head}({args}) -> {varMapping.Type propagate}"
+            | None ->
+                $"{head}({args})"
+
         match argsCount, this.ArgType, qualification with
         | 0, ArgType.Nothing, Some qual ->
             $"{head}.{qual.Type(propagate)}"
@@ -3071,9 +3085,8 @@ type FplReference(positions: Positions, parent: FplValue) =
         | 0, ArgType.Brackets, None ->
             $"{head}[]"
         | 0, ArgType.Parentheses, None ->
-            $"{head}()"
+            fallBackFunctionalTerm
         | 1, ArgType.Nothing, Some qual -> 
-                
             $"{head}{args}.{qual.Type(propagate)}"
         | 1, ArgType.Brackets, Some qual ->
             $"{head}[{args}].{qual.Type(propagate)}"
@@ -3081,12 +3094,7 @@ type FplReference(positions: Positions, parent: FplValue) =
             $"{head}({args}).{qual.Type(propagate)}"
         | 1, ArgType.Nothing, None -> 
             if this.FplId <> String.Empty then 
-                let varMappingOpt = getMapping headObj
-                match varMappingOpt with 
-                | Some varMapping ->
-                    $"{head}({args}) -> {varMapping.Type propagate}"
-                | None ->
-                    $"{head}({args})"
+                fallBackFunctionalTerm
             else
                 $"{head}{args}"
         | 1, ArgType.Brackets, None ->
@@ -3104,18 +3112,7 @@ type FplReference(positions: Positions, parent: FplValue) =
         | _, ArgType.Brackets, None ->
             $"{head}[{args}]"
         | _, ArgType.Parentheses, None ->
-            let varMappingOpt = getMapping headObj
-            match varMappingOpt with 
-            | Some varMapping ->
-                match headObj.Name with 
-                | PrimFuncionalTermL when signatureType = SignatureType.Type -> 
-                    varMapping.Type propagate
-                | PrimMandatoryFunctionalTermL when signatureType = SignatureType.Type -> 
-                    varMapping.Type propagate
-                | _ -> 
-                    $"{head}({args}) -> {varMapping.Type propagate}"
-            | None ->
-                $"{head}({args})"
+            fallBackFunctionalTerm
 
     override this.Represent () = 
         if this.ValueList.Count = 0 then 
@@ -3622,12 +3619,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) =
                 None
             else
                 Some($"Array type `{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
-        elif
-            aType.Length > 0
-            && Char.IsUpper(aType[0])
-            && a.Name = PrimRefL
-            && a.Scope.Count = 1
-        then
+        elif aType.Length > 0 && Char.IsUpper(aType[0]) && a.Name = PrimRefL && a.Scope.Count = 1 then
             let var = a.Scope.Values |> Seq.toList |> List.head
             if var.Scope.Count > 0 then
                 let cl = var.Scope.Values |> Seq.head
