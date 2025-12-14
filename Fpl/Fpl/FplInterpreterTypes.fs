@@ -3588,8 +3588,90 @@ let inheritsFrom (node:FplValue) someType =
         | Some _ -> true
         | None -> false
 
+[<AbstractClass>]
+type FplGenericFunctionalTerm(positions: Positions, parent: FplValue) as this =
+    inherit FplValue(positions, Some parent)
+    let mutable _signStartPos = Position("", 0L, 0L, 0L)
+    let mutable _signEndPos = Position("", 0L, 0L, 0L)
+    let mutable (_toBeReturnedClass:FplValue option) = None
+    let mutable _isArray = false
+
+    do 
+        this.FplId <- LiteralFunc
+        this.TypeId <- LiteralFunc
+
+    member this.SignStartPos
+        with get() = _signStartPos
+        and set(value) = _signStartPos <- value
+
+    member this.SignEndPos
+        with get() = _signEndPos
+        and set(value) = _signEndPos <- value
+
+    interface IHasSignature with
+        member this.SignStartPos 
+            with get () = this.SignStartPos
+            and set (value) = this.SignStartPos <- value
+        member this.SignEndPos 
+            with get () = this.SignEndPos
+            and set (value) = this.SignEndPos <- value
+
+    override this.Type signatureType = 
+        let head = getFplHead this signatureType
+        let propagate = propagateSignatureType signatureType
+
+        match getMapping this with
+        | Some map ->
+            let paramT = getParamTuple this signatureType
+            sprintf "%s(%s) -> %s" head paramT (map.Type(propagate))
+        | _ -> ""
+
+    override this.Represent () = 
+        if this.ValueList.Count = 0 then 
+            // since the FunctionTerm has no value, it has no return statement
+            // And the FPL syntax ensures that this can only be the case
+            // if the Functional Term is intrinsic.
+            // In this case, the "representation" of the function is
+            // its declared mapping type
+            let mapping = this.ArgList[0]
+            $"dec {mapping.Type(SignatureType.Mixed)}"
+        else
+            let subRepr = 
+                this.ValueList
+                |> Seq.map (fun subfv -> subfv.Represent())
+                |> String.concat ", "
+            if subRepr = String.Empty then 
+                LiteralUndef
+            else
+                subRepr
+              
+    /// If the functional term returns class objects or arrays of such objects,
+    /// this function will yield an optional reference to the corresponding class node.
+    member this.ToBeReturnedClass
+        with get() = _toBeReturnedClass
+        and set(value) = _toBeReturnedClass <- value
+
+    /// Sets or gets the boolean flag if this functional term yields an array.
+    member this.IsArray
+        with get() = _isArray
+        and set(value) = _isArray <- value
+
+    override this.CheckConsistency () = 
+        base.CheckConsistency()
+        if not this.IsIntrinsic then // if not intrinsic, check variable usage
+            checkVAR04Diagnostics this
+
 /// Tries to match parameters of an FplValue with its arguments recursively
 let rec mpwa (args: FplValue list) (pars: FplValue list) =
+    let matchClassInheritance (clOpt:FplValue option) (a:FplValue) aType (p:FplValue) pType = 
+        match clOpt with 
+        | Some cl -> 
+            if inheritsFrom cl pType then 
+                None
+            else
+                Some($"`{a.Type(SignatureType.Name)}:{aType}` matches neither `{p.Type(SignatureType.Name)}:{pType}` nor the base classes")
+        | _ -> None
+
     match (args, pars) with
     | (a :: ars, p :: prs) ->
         let aType = a.Type SignatureType.Type
@@ -3620,9 +3702,9 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) =
             else
                 Some($"Array type `{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
         elif aType.Length > 0 && Char.IsUpper(aType[0]) && a.Name = PrimRefL && a.Scope.Count = 1 then
-            let var = a.Scope.Values |> Seq.toList |> List.head
-            if var.Scope.Count > 0 then
-                let cl = var.Scope.Values |> Seq.head
+            let aReferencedNode = a.Scope.Values |> Seq.toList |> List.head
+            if aReferencedNode.Scope.Count > 0 then
+                let cl = aReferencedNode.Scope.Values |> Seq.head
                 match cl with
                 | :? FplClass ->
                     if inheritsFrom cl pType then 
@@ -3632,16 +3714,12 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) =
                 | _ ->
                     // this case does not occur but we cover it for completeness reasons
                     Some($"`{a.Type(SignatureType.Name)}:{aType}` is undefined and doesn't match `{p.Type(SignatureType.Name)}:{pType}`")
-            elif var.Name = PrimDefaultConstructor then 
-                let defaultCtor = var :?> FplDefaultConstructor
-                let clOpt = defaultCtor.ToBeConstructedClass
-                match clOpt with 
-                | Some cl -> 
-                    if inheritsFrom cl pType then 
-                        None
-                    else
-                        Some($"`{a.Type(SignatureType.Name)}:{aType}` neither matches `{p.Type(SignatureType.Name)}:{pType}` nor the base classes")
-                | _ -> None
+            elif aReferencedNode.Name = PrimDefaultConstructor then 
+                let defaultCtor = aReferencedNode :?> FplDefaultConstructor
+                matchClassInheritance defaultCtor.ToBeConstructedClass a aType p pType
+            elif aReferencedNode.Name = PrimFuncionalTermL || aReferencedNode.Name = PrimMandatoryFunctionalTermL then 
+                let functionalTerm = aReferencedNode :?> FplGenericFunctionalTerm
+                matchClassInheritance functionalTerm.ToBeReturnedClass a aType p pType
             else
                 Some($"`{a.Type(SignatureType.Name)}:{aType}` is undefined and does not match `{p.Type(SignatureType.Name)}:{pType}`")
         elif aType.StartsWith(pType + "(") then
@@ -4524,66 +4602,6 @@ type FplDecrement(name, positions: Positions, parent: FplValue) as this =
             else
                 string n'
         this.SetValue(newValue)
-    
-[<AbstractClass>]
-type FplGenericFunctionalTerm(positions: Positions, parent: FplValue) as this =
-    inherit FplValue(positions, Some parent)
-    let mutable _signStartPos = Position("", 0L, 0L, 0L)
-    let mutable _signEndPos = Position("", 0L, 0L, 0L)
-
-    do 
-        this.FplId <- LiteralFunc
-        this.TypeId <- LiteralFunc
-
-    member this.SignStartPos
-        with get() = _signStartPos
-        and set(value) = _signStartPos <- value
-
-    member this.SignEndPos
-        with get() = _signEndPos
-        and set(value) = _signEndPos <- value
-
-    interface IHasSignature with
-        member this.SignStartPos 
-            with get () = this.SignStartPos
-            and set (value) = this.SignStartPos <- value
-        member this.SignEndPos 
-            with get () = this.SignEndPos
-            and set (value) = this.SignEndPos <- value
-
-    override this.Type signatureType = 
-        let head = getFplHead this signatureType
-        let propagate = propagateSignatureType signatureType
-
-        match getMapping this with
-        | Some map ->
-            let paramT = getParamTuple this signatureType
-            sprintf "%s(%s) -> %s" head paramT (map.Type(propagate))
-        | _ -> ""
-
-    override this.Represent () = 
-        if this.ValueList.Count = 0 then 
-            // since the FunctionTerm has no value, it has no return statement
-            // And the FPL syntax ensures that this can only be the case
-            // if the Functional Term is intrinsic.
-            // In this case, the "representation" of the function is
-            // its declared mapping type
-            let mapping = this.ArgList[0]
-            $"dec {mapping.Type(SignatureType.Mixed)}"
-        else
-            let subRepr = 
-                this.ValueList
-                |> Seq.map (fun subfv -> subfv.Represent())
-                |> String.concat ", "
-            if subRepr = String.Empty then 
-                LiteralUndef
-            else
-                subRepr
-
-    override this.CheckConsistency () = 
-        base.CheckConsistency()
-        if not this.IsIntrinsic then // if not intrinsic, check variable usage
-            checkVAR04Diagnostics this
 
 type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) =
     inherit FplGenericFunctionalTerm(positions, parent)

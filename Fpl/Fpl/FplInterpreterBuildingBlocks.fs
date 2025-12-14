@@ -660,7 +660,7 @@ let rec eval (st: SymbolTable) ast =
         | :? FplGenericJustificationItem as fvJi -> 
             fvJi.FplId <- identifier
         | _ -> ()
-        if evalPath.Contains(".NamedVarDecl.") || evalPath.Contains(".VariableType.ClassType.") then 
+        if evalPath.Contains(".NamedVarDecl.") || evalPath.Contains(".VariableType.ClassType.") || evalPath.Contains(".Mapping.") then 
             let candidatesPre =    
                 findCandidatesByName st identifier false false
             let candidates =
