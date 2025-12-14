@@ -2723,7 +2723,7 @@ and FplProof(positions: Positions, parent: FplValue, runOrder) =
                     // the potential block name of the proof is the
                     // concatenated type signature of the name of the proof
                     // without the last dollar digit
-                    flattenedScopes |> List.filter (fun fv -> fv.FplId = potentialProvableName || fv.FplId = $"@{potentialProvableName}")
+                    flattenedScopes |> List.filter (fun fv -> fv.FplId = potentialProvableName)
 
                 let provableBlocklist =
                     buildingBlocksMatchingDollarDigitNameList
@@ -3342,7 +3342,7 @@ type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
     let _dimensionTypes = new List<FplValue>()
     let mutable _dimensionTypesBeingSet = false
 
-    member this.Dimension = _dimensionTypes.Count
+    member this.Dimensionality = _dimensionTypes.Count
 
     member this.DimensionTypes = _dimensionTypes
 
@@ -3359,7 +3359,7 @@ type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
             this.DimensionTypes.Add indexAllowedType
 
     interface IHasDimensions with
-        member this.Dimension = this.Dimension
+        member this.Dimension = this.Dimensionality
         member this.DimensionTypes = this.DimensionTypes
         member this.SetType typeId pos1 pos2 = this.SetType typeId pos1 pos2
 
@@ -4833,15 +4833,23 @@ type FplExtension(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
+    // Returns a reference to the mapping of this extension
+    member this.Mapping =
+        let mapOpt = getMapping this
+        match mapOpt with 
+        | Some map -> map :?> FplMapping
+        | None -> 
+            let defaultMap = new FplMapping((this.StartPos, this.EndPos), this)
+            defaultMap.FplId <- LiteralUndef
+            defaultMap.TypeId <- LiteralUndef
+            defaultMap
+
+
     override this.Type signatureType = 
         match signatureType with 
         | SignatureType.Name
-        | SignatureType.Mixed -> this.FplId
-        | SignatureType.Type -> 
-            match getMapping this with
-            | Some map ->
-                map.Type signatureType
-            | _ -> this.FplId
+        | SignatureType.Mixed -> $"{this.FplId} -> {this.Mapping.Type signatureType}" 
+        | SignatureType.Type -> $"{this.Mapping.Type signatureType}"
 
     override this.IsBlock () = true
 
@@ -4855,10 +4863,6 @@ type FplExtension(positions: Positions, parent: FplValue) =
 
     override this.RunOrder = None
 
-    // Returns a reference to the mapping of this extension
-    member this.Mapping =
-        let map = getMapping this
-        map.Value :?> FplMapping 
 
 let isExtension (fv:FplValue) =
     match fv with
@@ -5699,8 +5703,7 @@ let findCandidatesByName (st: SymbolTable) (name: string) withClassConstructors 
             |> Seq.filter (fun fv -> 
                 fv.FplId = name 
                 || fv.FplId = nameWithoutProofOrCorRef 
-                || $"{fv.FplId}$".StartsWith nameWithProofOrCorRef 
-                || fv.FplId = $"@{nameWithoutProofOrCorRef}")
+                || $"{fv.FplId}$".StartsWith nameWithProofOrCorRef)
             |> Seq.iter (fun (block: FplValue) ->
                 pm.Add(block)
 

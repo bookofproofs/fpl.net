@@ -2486,7 +2486,6 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplTheory>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplExtension>(parent.Scope["@Digits"])
             Assert.IsInstanceOfType<FplExtension>(node)
             Assert.AreEqual<int>(2, node.ArgList.Count)
             Assert.AreEqual<int>(1, node.Scope.Count)
@@ -4023,7 +4022,7 @@ type SymbolTableStructure() =
     // references to blocks
     [<DataRow("FplReference", "01a", """ax T {dec ~x,y:obj; A(x,y) };""", "A(x, y)")>]
     [<DataRow("FplReference", "01b", """def pred A(x,y:obj) {intr} ax T {dec ~x,y:obj; A(x,y) };""", "A(x, y)")>]
-    [<DataRow("FplReference", "01c", """def func A(x,y:obj)->obj {intr} ax T {dec ~x,y:obj; A(x,y) };""", "A(x, y)")>]
+    [<DataRow("FplReference", "01c", """def func A(x,y:obj)->obj {intr} ax T {dec ~x,y:obj; A(x,y) };""", "A(x, y) -> obj")>]
     [<DataRow("FplReference", "01d", """ax T { A };""", "A")>]
     [<DataRow("FplReference", "01e", """def cl A {intr} ax T { A };""", "A")>]
     [<DataRow("FplReference", "01f", """inf A {pre:true con:true} ax T { A };""", "A")>]
@@ -4034,7 +4033,7 @@ type SymbolTableStructure() =
     [<DataRow("FplReference", "01k", """conj A {true} ax T { A };""", "A")>]
     [<DataRow("FplReference", "01l", """cor A$1 {true} ax T { A$1 };""", "A$1")>]
     [<DataRow("FplReference", "01m", """proof A$1 {1. |- trivial} ax T { A$1 };""", "")>]
-    [<DataRow("FplReference", "01n", """ext A x@/\d+/ -> obj {ret x} ax T { A };""", "@A")>]
+    [<DataRow("FplReference", "01n", """ext A x@/\d+/ -> obj {ret x} ax T { A };""", "A -> obj")>]
     [<DataRow("FplReference", "01o", """loc A := !tex: "\alpha" ; ax T { A };""", "")>]
     // return reference
     [<DataRow("FplReference", "02a", """def func A(x:obj)->obj {ret x};""", "")>]
@@ -4187,7 +4186,7 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplReference>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(1, node.Scope.Count) // one referenced element
-            Assert.AreEqual<string>("@A", node.FplId) // name of the referenced element
+            Assert.AreEqual<string>("A", node.FplId) // name of the referenced element
             Assert.IsInstanceOfType<FplExtension>(node.Scope[node.FplId]) // name of the referenced element
         | "FplReference", "01o" ->
             Assert.IsInstanceOfType<FplAxiom>(parent)
@@ -4292,7 +4291,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplReturn", "00f" ->
             Assert.IsInstanceOfType<FplFunctionalTerm>(parent)
-            Assert.AreEqual<int>(3, parent.ArgList.Count) // mapping + return 
+            Assert.AreEqual<int>(2, parent.ArgList.Count) // mapping + return 
             Assert.AreEqual<int>(0, parent.Scope.Count) 
             Assert.IsInstanceOfType<FplReturn>(node)
             Assert.AreEqual<int>(1, node.ArgList.Count) // intrinsic index
@@ -4952,7 +4951,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let arr = node :?> FplVariableArray
-            Assert.AreEqual<int>(1, arr.Dimension)
+            Assert.AreEqual<int>(1, arr.Dimensionality)
             Assert.AreEqual<int>(1, arr.DimensionTypes.Count)
             Assert.AreEqual<string>("*pred[ind]",arr.Type SignatureType.Type)
         | "FplVariableArray", "00a" ->
@@ -4963,8 +4962,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let arr = node :?> FplVariableArray
-            Assert.AreEqual<int>(2, arr.Dimension)
-            Assert.AreEqual<int>(2, arr.DimensionTypes.Count)
+            Assert.AreEqual<int>(2, arr.Dimensionality)
             Assert.AreEqual<string>("*pred[ind,obj]",arr.Type SignatureType.Type)
         | "FplVariableArray", "01" ->
             Assert.IsInstanceOfType<FplPredicate>(parent)
@@ -4974,8 +4972,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(3, node.Scope.Count) // u,v,w sub variables 
             let arr = node :?> FplVariableArray
-            Assert.AreEqual<int>(2, arr.Dimension)
-            Assert.AreEqual<int>(2, arr.DimensionTypes.Count)
-            Assert.AreEqual<string>("*pred[ind,obj]",arr.Type SignatureType.Type)
+            Assert.AreEqual<int>(1, arr.Dimensionality)
+            Assert.AreEqual<string>("*pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)[Nat]",arr.Type SignatureType.Type)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 

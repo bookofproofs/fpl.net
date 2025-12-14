@@ -231,7 +231,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.ExtensionName((pos1, pos2), s) ->
         st.EvalPush("ExtensionName")
         let fv = variableStack.PeekEvalStack()
-        let extensionName = $"@{s}"
+        let extensionName = s
         match fv with 
         | :? FplExtension ->
             fv.FplId <- extensionName
