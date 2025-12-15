@@ -3806,6 +3806,39 @@ let checkSIG04Diagnostics (calling:FplValue) (candidates: FplValue list) =
         emitSIG04Diagnostics (calling.Type SignatureType.Mixed) candidates.Length errList calling.StartPos calling.EndPos
         None
 
+/// Checks if a reference to an array matches its dimensions (in terms of number and types)
+let checkSIG08_SIG10Diagnostics (referenceToArray:FplValue) =
+    let rec matchIndexesWithDimensions (refToArray:FplReference) =
+        match refToArray.TryReferenced with
+        | Some (:? FplVariableArray as varArray) ->
+            let rec matchAllIndexes (indexes:FplValue list) (dims:FplValue list) dimNumber =
+                match indexes, dims with
+                | i::ixs, d::dms ->
+                    match mpwa [i] [d] with
+                    | Some errMsg ->
+                        // type mismatch between dimension and index
+                        emitSIG08diagnostics varArray.FplId i.FplId (i.Type SignatureType.Type) (d.Type SignatureType.Type) dimNumber i.StartPos i.EndPos 
+                        matchAllIndexes ixs dms (dimNumber + 1) 
+                    | _ -> matchAllIndexes ixs dms (dimNumber + 1) 
+                | [], d::dms -> 
+                    // missing index for dimension dimOrdinal
+                    emitSIG09diagnostics varArray.FplId (d.Type SignatureType.Type) dimNumber d.StartPos d.EndPos
+                    matchAllIndexes [] dms (dimNumber + 1) 
+                | i::ixs, [] -> 
+                    // array has less dimensions, index at dimOrdinal not supported
+                    emitSIG10diagnostics varArray.FplId (i.FplId) dimNumber i.StartPos i.EndPos
+                    matchAllIndexes ixs [] (dimNumber + 1)  
+                | [], [] -> ()
+
+            let dims = varArray.DimensionTypes |> Seq.toList
+            let indexes = refToArray.ArgList |> Seq.toList
+            matchAllIndexes indexes dims 1
+        | _ -> ()
+    match referenceToArray with 
+    | :? FplReference as refToArray -> matchIndexesWithDimensions refToArray
+    | _ -> ()
+
+
 type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
     inherit FplGenericReference(positions, parent)
 
@@ -5227,44 +5260,8 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
 
     override this.Represent () = this.TypeId
 
-    member this.CheckIfAllIndexesMatchTypesOfDimension (referenceToArray:FplValue) =
-        let rec matchIndexesWithDimensions (refToArray:FplReference) =
-            match refToArray.TryReferenced with
-            | Some (:? FplVariableArray as varArray) ->
-                let rec matchAllIndexes (indexes:FplValue list) (dims:FplValue list) dimNumber =
-                    match indexes, dims with
-                    | i::ixs, d::dms ->
-                        match mpwa [i] [d] with
-                        | Some errMsg ->
-                            // type mismatch between dimension and index
-                            emitSIG08diagnostics varArray.FplId i.FplId (i.Type SignatureType.Type) (d.Type SignatureType.Type) dimNumber i.StartPos i.EndPos 
-                            matchAllIndexes ixs dms (dimNumber + 1) 
-                        | _ -> matchAllIndexes ixs dms (dimNumber + 1) 
-                    | [], d::dms -> 
-                        // missing index for dimension dimOrdinal
-                        emitSIG09diagnostics varArray.FplId (d.Type SignatureType.Type) dimNumber d.StartPos d.EndPos
-                        matchAllIndexes [] dms (dimNumber + 1) 
-                    | i::ixs, [] -> 
-                        // array has less dimensions, index at dimOrdinal not supported
-                        emitSIG10diagnostics varArray.FplId (i.FplId) dimNumber i.StartPos i.EndPos
-                        matchAllIndexes ixs [] (dimNumber + 1)  
-                    | [], [] -> ()
-
-                let dims = varArray.DimensionTypes |> Seq.toList
-                let indexes = refToArray.ArgList |> Seq.toList
-                matchAllIndexes indexes dims 1
-            | _ -> ()
-        match referenceToArray with 
-        | :? FplReference as refToArray -> matchIndexesWithDimensions refToArray
-        | _ -> ()
-
     override this.CheckConsistency () = 
         match this.Assignee, this.AssignedValue with
-        | Some (:? FplVariableArray as assignee), Some (assignedValue:FplValue) ->
-            let assignedReferenceToArray = this.ArgList[0]
-            
-            // check if all indexes match the types of the array dimensions
-            this.CheckIfAllIndexesMatchTypesOfDimension assignedReferenceToArray
         | Some (:? FplVariable as assignee), Some (assignedValue:FplValue) -> 
             let nameAssignee = assignee.Type SignatureType.Name
             let typeAssignee = assignee.Type SignatureType.Type

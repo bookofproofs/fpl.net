@@ -918,9 +918,14 @@ let rec eval (st: SymbolTable) ast =
                     |> Seq.toList
                 else
                     searchForCandidatesOfReferenceBlock node
-            match checkSIG04Diagnostics node candidates with
-            | Some matchedCandidate -> node.Scope.TryAdd(node.FplId, matchedCandidate) |> ignore
-            | _ -> ()
+            if candidates.Length = 1 && candidates.Head.Name = PrimVariableArrayL then
+                let candidate = candidates.Head
+                node.Scope.TryAdd(node.FplId, candidate) |> ignore
+                checkSIG08_SIG10Diagnostics node
+            else
+                match checkSIG04Diagnostics node candidates with
+                | Some matchedCandidate -> node.Scope.TryAdd(node.FplId, matchedCandidate) |> ignore
+                | _ -> ()
 
             variableStack.PopEvalStack()
         | None -> 
