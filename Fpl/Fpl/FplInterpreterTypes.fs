@@ -1343,6 +1343,7 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
             and set (value) = this.IsInitialized <- value
 
     override this.EmbedInSymbolTable nextOpt =
+        this.CheckConsistency()
         let addToRuleOfInference (block:FplValue) = 
             if block.Scope.ContainsKey(this.FplId) then
                 let oldDiagnosticsStopped = ad.DiagnosticsStopped 
@@ -3417,6 +3418,9 @@ type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
                 | LiteralUndef -> LiteralUndef
                 | _ -> $"dec {this.Type(SignatureType.Type)}" 
 
+    override this.CheckConsistency () = 
+        base.CheckConsistency()
+
 type FplVariable(fplId, positions: Positions, parent: FplValue) =
     inherit FplGenericVariable(fplId, positions, parent)
 
@@ -3470,8 +3474,9 @@ let getParameters (fv:FplValue) =
     | PrimVariableL ->
         fv.Scope.Values |> Seq.toList
     | PrimVariableArrayL ->
-        let arr = fv :?> FplVariableArray
-        arr.DimensionTypes |> Seq.toList
+        match box fv with 
+        | :? IHasDimensions as arr -> arr.DimensionTypes |> Seq.toList
+        | _ -> []
     | PrimFuncionalTermL
     | PrimPredicateL
     | LiteralCtorL
