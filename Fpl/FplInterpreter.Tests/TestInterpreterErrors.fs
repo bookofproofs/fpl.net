@@ -1734,6 +1734,10 @@ type TestInterpreterErrors() =
     [<DataRow("07", "def func A()->ind def func B()->ind def pred T() {dec ~arr:*obj[ind,ind,ind] arr[A(),B()]:=undef; true};", 1)>] // 3D array, two functional indices -> SIG09
     [<DataRow("07a", "def func A()->ind def func B()->ind def pred T() {dec ~arr:*obj[ind,ind,ind] arr[A(),B(),$1]:=undef; true};", 0)>] // 3D array, indices -> valid
     [<DataRow("08", "def pred T() {dec ~arr:*obj[ind,ind] arr[$1,$2]:=undef; true};", 0)>] // 2D array, two indices -> valid
+    // nested indices
+    [<DataRow("N01", "def pred T() {dec ~i:*ind[ind,ind] ~j:ind ~arr:*ind[ind] arr[i[j]]:=undef; true};", 1)>]    // i is 2D, i[j] is 1D -> SIG09
+    [<DataRow("N02", "def pred T() {dec ~i:*ind[obj,ind,ind] ~k:obj ~j:ind ~arr:*ind[ind] arr[i[k,j]]:=undef; true};", 1)>]    // i is 3D, i[k,j] is 2D -> SIG09
+    [<DataRow("N03", "def pred T() {dec ~i:*ind[obj,ind,obj] ~k:obj ~j:ind ~arr:*ind[ind] arr[i[k,j,k]]:=undef; true};", 0)>]    // i is 3D, i[k,j,k] is 3D -> ok
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG09(no:string, fplCode:string, expected) =
@@ -1754,6 +1758,10 @@ type TestInterpreterErrors() =
     [<DataRow("05", "def func A()->ind def func B()->ind def pred T() {dec ~arr:*obj[ind] arr[A(),B()]:=undef; true};", 1)>] // functional indices: 2 supplied for 1D array -> 1 extra
     [<DataRow("06", "def func A()->ind def func B()->ind def func C()->ind def pred T() {dec ~arr:*obj[ind,ind] arr[A(),B(),C()]:=undef; true};", 1)>] // 3 functional indices for 2D array -> 1 extra
     [<DataRow("07", "def pred T() {dec ~arr:*obj[ind,ind] arr[$1,$2,$3]:=undef; true};", 1)>] // explicit $-indices: 3 provided for 2D array -> 1 extra
+    // nested indices
+    [<DataRow("N01", "def pred T() {dec ~i:*ind[ind] ~j:ind ~arr:*ind[ind] arr[i[j]]:=undef; true};", 1)>]    // i is 1D, i[j] is 1D -> ok
+    [<DataRow("N02", "def pred T() {dec ~i:*ind[obj,ind] ~k:obj ~j:ind ~arr:*ind[ind] arr[i[k]]:=undef; true};", 1)>]    // i is 3D, i[k] is 2D -> SIG10
+    [<DataRow("N03", "def pred T() {dec ~i:*ind[obj,obj] ~k:obj ~j:ind ~arr:*ind[ind] arr[i[k,j,k]]:=undef; true};", 0)>]    // i is 2D, i[k,j,k] is 3D -> SIG10
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG10(no:string, fplCode:string, expected) =
