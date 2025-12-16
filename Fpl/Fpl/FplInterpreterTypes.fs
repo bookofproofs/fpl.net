@@ -4994,7 +4994,10 @@ type FplReturn(positions: Positions, parent: FplValue) as this =
     override this.Represent () = this.FplId
 
     member private this.MatchWithMapping (fva: FplValue) (fvp: FplValue) =
-        let targetMapping = getMapping fvp
+        let targetMapping = 
+            match fvp with 
+            | :? FplMapping -> Some fvp
+            | _ -> getMapping fvp
         match targetMapping with
         | Some tm -> mpwa [ fva ] [ tm ]
         | None -> None

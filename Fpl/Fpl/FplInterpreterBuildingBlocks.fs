@@ -660,37 +660,36 @@ let rec eval (st: SymbolTable) ast =
         | :? FplGenericJustificationItem as fvJi -> 
             fvJi.FplId <- identifier
         | _ -> ()
-        if evalPath.Contains(".NamedVarDecl.") || evalPath.Contains(".VariableType.ClassType.") || evalPath.Contains(".Mapping.") then 
-            let candidatesPre =    
-                findCandidatesByName st identifier false false
-            let candidates =
-                candidatesPre
-                |> List.filter (fun fv1 -> fv1.FplId = identifier)
+        let candidatesPre =    
+            findCandidatesByName st identifier false false
+        let candidates =
+            candidatesPre
+            |> List.filter (fun fv1 -> fv1.FplId = identifier)
 
-            let candidatesNames =
-                candidates
-                |> Seq.map (fun fv -> qualifiedName fv)
-                |> String.concat ", "
+        let candidatesNames =
+            candidates
+            |> Seq.map (fun fv -> qualifiedName fv)
+            |> String.concat ", "
 
-            match (fv, candidates.Length) with
-            | (:? FplVariable, 0) -> 
-                emitSIG04Diagnostics identifier 0 [""] pos1 pos2
-                let undefValue = new FplIntrinsicUndef((fv.StartPos, fv.EndPos), fv)
-                fv.ValueList.Add(undefValue)
-            | (:? FplMapping as map, 1) -> 
-                let candidate = candidates.Head
-                match candidate with 
-                | :? FplClass -> map.ToBeReturnedClass <- Some candidate
-                | _ -> emitSIG11diagnostics (qualifiedName map) (qualifiedName candidate) map.StartPos map.EndPos           
-            | (:? FplMapping, 0) -> 
-                emitSIG04Diagnostics identifier 0 [""] pos1 pos2               
-            | (:? FplMapping, _) -> 
-                emitSIG04Diagnostics identifier candidates.Length [""] pos1 pos2               
-            | (:? FplVariable, 1) -> 
-                fv.Scope.TryAdd(fv.FplId, candidates.Head) |> ignore
-            | (:? FplVariable, _) -> 
-                emitID017Diagnostics identifier candidatesNames pos1 pos2
-            | _ -> ()
+        match (fv, candidates.Length) with
+        | (:? FplVariable, 0) -> 
+            emitSIG04Diagnostics identifier 0 [""] pos1 pos2
+            let undefValue = new FplIntrinsicUndef((fv.StartPos, fv.EndPos), fv)
+            fv.ValueList.Add(undefValue)
+        | (:? FplMapping as map, 1) -> 
+            let candidate = candidates.Head
+            match candidate with 
+            | :? FplClass -> map.ToBeReturnedClass <- Some candidate
+            | _ -> emitSIG11diagnostics (qualifiedName map) (qualifiedName candidate) map.StartPos map.EndPos           
+        | (:? FplMapping, 0) -> 
+            emitSIG04Diagnostics identifier 0 [""] pos1 pos2               
+        | (:? FplMapping, _) -> 
+            emitSIG04Diagnostics identifier candidates.Length [""] pos1 pos2               
+        | (:? FplVariable, 1) -> 
+            fv.Scope.TryAdd(fv.FplId, candidates.Head) |> ignore
+        | (:? FplVariable, _) -> 
+            emitID017Diagnostics identifier candidatesNames pos1 pos2
+        | _ -> ()
 
         
         st.EvalPop()
