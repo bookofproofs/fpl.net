@@ -33,13 +33,13 @@ type TestDecrement() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("@0", LiteralObj)>]
-    [<DataRow("@1", LiteralObj)>]
-    [<DataRow("@2", LiteralObj)>]
-    [<DataRow("@3", LiteralObj)>]
-    [<DataRow("@4", LiteralObj)>]
-    [<DataRow("@100", LiteralObj)>]
-    [<DataRow("@42", LiteralObj)>]
+    [<DataRow("@0", "Nat")>]
+    [<DataRow("@1", "Nat")>]
+    [<DataRow("@2", "Nat")>]
+    [<DataRow("@3", "Nat")>]
+    [<DataRow("@4", "Nat")>]
+    [<DataRow("@100", "Nat")>]
+    [<DataRow("@42", "Nat")>]
     [<TestMethod>]
     member this.TestDecrementType(varVal, expected:string) =
         ad.Clear()
@@ -80,6 +80,31 @@ type TestDecrement() =
             Assert.AreEqual<string>(expected, predicateValue.Type SignatureType.Mixed)
         | None -> 
             Assert.IsTrue(false)
+
+    [<DataRow("@0", "Decrement(Nat)")>]
+    [<DataRow("@1", "Decrement(Nat)")>]
+    [<DataRow("@2", "Decrement(Nat)")>]
+    [<DataRow("@3", "Decrement(Nat)")>]
+    [<DataRow("@4", "Decrement(Nat)")>]
+    [<DataRow("@100", "Decrement(Nat)")>]
+    [<DataRow("@42", "Decrement(Nat)")>]
+    [<TestMethod>]
+    member this.TestDecrementMixedWithExtension(varVal, expected:string) =
+        ad.Clear()
+        let fplCode = sprintf """ext Digits x@/\d+/ -> Nat {return x} def pred T() { del.Decrement(%s) };""" varVal
+        let filename = "TestDecrementMixed.fpl"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let pr = theory.Scope["T()"] 
+            let predicateValue = pr.ArgList |> Seq.toList |> List.rev |> List.head
+            Assert.AreEqual<string>(expected, predicateValue.Type SignatureType.Mixed)
+        | None -> 
+            Assert.IsTrue(false)
+
 
     [<DataRow("@0", "Decrement(0)")>]
     [<DataRow("@1", "Decrement(1)")>]

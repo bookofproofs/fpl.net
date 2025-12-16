@@ -1382,8 +1382,9 @@ type TestInterpreterErrors() =
     [<DataRow("04a", "def cl Nat {intr} def func Test()->Nat {dec ~x:obj; return x};", 1)>] // obj is not Nat, error
     [<DataRow("05", "def func Test()->pred {dec ~x:pred; return x};", 0)>]
     [<DataRow("05a", "def func Test()->pred(y:obj) {dec ~a:pred(b:obj); return a};", 0)>]
-    [<DataRow("05b", "def func Test()->pred(y:pred(z:ind)) {dec ~a:pred(b:obj); return a};", 0)>]
+    [<DataRow("05b", "def func Test()->pred(y:pred(z:ind)) {dec ~a:pred(b:obj); return a};", 1)>]
     [<DataRow("05b1", "def func Test()->pred(y:pred(z:ind)) {dec ~a:pred(b:pred(c:obj)); return a};", 1)>]
+    [<DataRow("05b2", "def func Test()->pred(y:pred(z:ind)) {dec ~a:pred(b:pred(c:ind)); return a};", 0)>]
     [<DataRow("06", "def func Test()->func {dec ~x:func; return x};", 0)>]
     [<DataRow("07", "def func Test()->ind {dec ~x:ind; return x};", 0)>]
     [<TestMethod>]
