@@ -900,6 +900,12 @@ type TestInterpreterErrors() =
     [<DataRow("03", """def pred T() { dec ~x:obj Succ(x):=Succ(x); true };""", 1)>]
     [<DataRow("04", """def pred T() { dec ~x,y:pred Succ(x,x):=Succ(x,y); true };""", 0)>]
     [<DataRow("05", """def pred T() { dec ~x,y:pred Succ(y,y):=Succ(y,y); true };""", 1)>]
+    [<DataRow("arr0", """def pred T() { dec ~i:ind ~x:*pred[ind] x[i]:=x[i]; true };""", 1)>]
+    [<DataRow("arr1", """def pred T() { dec ~i,j:ind ~x:*pred[ind] x[i]:=x[j]; true };""", 0)>]
+    [<DataRow("arr2", """def pred T() { dec ~i,j:ind ~x:*pred[ind,ind] x[i,j]:=x[i , j]; true };""", 1)>]
+    [<DataRow("arr3", """def pred T() { dec ~i,j:ind ~x:*pred[ind,ind] x[i,j]:=x[j , i]; true };""", 0)>]
+    [<DataRow("arr4", """def pred T() { dec ~i:ind ~j:obj ~x:*pred[ind,obj] x[i,j]:=x[j , i]; true };""", 0)>]
+    [<DataRow("arr5", """def pred T() { dec ~i:ind ~j:obj ~x:*pred[ind,obj] x[i,j]:=x[ i ,j]; true };""", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestLG005(no:string, fplCode:string, expected) =
@@ -1539,6 +1545,8 @@ type TestInterpreterErrors() =
     [<DataRow("29", "def cl Nat def cl Zero:Nat def func Succ(n:Nat)->Nat def func Add(x,y: Nat)->Nat {dec ~r:Nat r := Succ(self(x,y)); return r };", 0)>]    
     [<DataRow("29a", "def cl Nat def cl Zero:Nat def func Succ(n:Nat)->Nat def func Add(n,m: Nat)->Nat {return Succ(self(n,m))};", 0)>]    
     [<DataRow("30", "def cl Nat def cl Zero:Nat def func Succ(n:Nat)->Nat def pred T() {dec ~r:Nat r:= undef; true };", 0)>]    
+    [<DataRow("31", "def cl Nat def cl Tuple {ctor Tuple(l:*tpl[Nat]) {} } def pred T(x,y:Nat) {dec ~tuple:Tuple tuple:=Tuple(x,y); tuple};", 0)>]    
+    [<DataRow("32", "def cl Nat def cl C {dec ~myLength: Nat; ctor C(x:Nat) {dec myLength:=x;} property func Length() -> Nat {return myLength} } def pred T() {dec ~l:Nat ~c:C c:=C(l) l:=c.Length(); l};", 0)>]    
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG05(no:string, fplCode:string, expected) =

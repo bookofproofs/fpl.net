@@ -742,7 +742,7 @@ let emitSIG07iagnostic assigneeName assigneeType nodeType pos1 pos2  =
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = SIG07(assigneeName, assigneeType, getEnglishName nodeType)
-            Diagnostic.Alternatives = Some "Expected a variable or array position of a variadic variable." 
+            Diagnostic.Alternatives = Some "Expected a variable or an array." 
         }
     ad.AddDiagnostic diagnostic
 

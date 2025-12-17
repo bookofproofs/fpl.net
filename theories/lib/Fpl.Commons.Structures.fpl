@@ -63,7 +63,7 @@ def class CartesianProduct: Set
     dec
         ~myLength: Nat
         ~myFrom: Nat
-        ~mySetArray: Set
+        ~mySetArray: *Set[Nat]
     ;
 
     constructor CartesianProduct(setList:* Set[Nat])
@@ -261,7 +261,7 @@ def pred AreRelated(u,v: Set, r: BinaryRelation)
     dec
         ~tuple: Tuple
 
-        tuple:=Tuple($1,$2)
+        tuple:=Tuple(@1,@2)
     ;
     (
         In(tuple,r) and

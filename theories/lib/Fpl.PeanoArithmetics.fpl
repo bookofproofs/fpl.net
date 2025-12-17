@@ -76,7 +76,7 @@ axiom CompleteInduction
     { impl
         (
             and ( p(@0), all n1:Nat { impl ( p(n1), p(Succ(n1)) ) } ),
-            all n1:Nat { p(n1) }
+            all n2:Nat { p(n2) }
         )
     }
 }

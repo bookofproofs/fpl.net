@@ -5313,13 +5313,20 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
                 emitSIG07iagnostic (assignee.Type SignatureType.Name) (getEnglishName ref.Head.Name) assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
             else
                 emitSIG07iagnostic (assignee.Type SignatureType.Name) "the type of parent cound not be determined" assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
-
+        | Some (:? FplVariableArray as assignee), Some assignedValue ->
+            let nameAssignee = this.ArgList[0].Type SignatureType.Name // get the signature of the array's reference
+            let nameAssignedValue = this.ArgList[1].Type SignatureType.Name // get the signature of the array's reference
+            if nameAssignee = nameAssignedValue then
+                // an array has been assigned to itself
+                emitLG005Diagnostics nameAssignedValue assignedValue.StartPos assignedValue.EndPos
         | Some (assignee), Some assignedValue ->
             let nameAssignee = assignee.Type SignatureType.Name
             let nameAssignedValue = assignedValue.Type SignatureType.Name
             if nameAssignee = nameAssignedValue then
+                // something has been assigned to itself
                 emitLG005Diagnostics nameAssignedValue assignedValue.StartPos assignedValue.EndPos
             else
+                
                 emitSIG07iagnostic (assignee.Type SignatureType.Name) $"type `{assignee.Type SignatureType.Type}`" assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
         | _ -> ()
         base.CheckConsistency()
