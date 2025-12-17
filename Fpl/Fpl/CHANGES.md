@@ -1,4 +1,19 @@
-﻿## 3.4.0
+﻿## 4.0.0
+* Syntax simplifications
+	* remove parameters from theorem-like statements, axioms, and reference rules
+	* remove templates to be used as class type declarations
+	* remove extensions to be used as type declarations
+	* remove nested bracketed types
+	* remove obj from necessary inheritance types 
+	* make curled blocks in intrinsic class and functional term definitions optional 
+	* remove "at least one" variadic variable types (type "+")
+* Syntax enhancements
+	* add mcases keyword (allowing cases to be predicates)
+	* add explicit dimension(s) declarations to variadic variable types (type "*")
+	* add more explicit justification items in proofs (by corollary, by proof reference, by definition)
+* Further bugfixes and refactoring (significant spaces, literals, error recovery, auto-completion, positioning)
+
+## 3.4.0
 * Extension of infix, postfix, prefix, and object symbols in FPL 
 
 
