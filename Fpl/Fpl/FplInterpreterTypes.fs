@@ -1282,6 +1282,10 @@ type IHasDimensions =
     abstract member DimensionTypes : List<FplValue>
     abstract member SetType : string -> Position -> Position -> unit
 
+type IInherits =
+    abstract member InheritVariables: FplValue -> unit
+    abstract member InheritProperties: FplValue -> unit
+
 [<AbstractClass>]
 type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
@@ -1869,6 +1873,10 @@ and FplClass(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(positions, parent)
     let mutable _signStartPos = Position("", 0L, 0L, 0L)
     let mutable _signEndPos = Position("", 0L, 0L, 0L)
+    let _inheritedVariables = Dictionary<string, FplValue>()
+    let _inheritedProperties = Dictionary<string, FplValue>()
+    // used to ensure that every clone of an inherited variable or property will preserve reference identity for referenced nodes 
+    let _cloneMap = Dictionary<string, FplValue>() 
 
     member this.SignStartPos
         with get() = _signStartPos
@@ -1885,6 +1893,43 @@ and FplClass(positions: Positions, parent: FplValue) =
         member this.SignEndPos 
             with get () = this.SignEndPos
             and set (value) = this.SignEndPos <- value
+
+    interface IInherits with
+        member this.InheritVariables (fromBaseNode:FplValue) = 
+            fromBaseNode.GetVariables()
+            |> List.iter (fun var ->
+                if _inheritedVariables.ContainsKey var.FplId then
+                    emitVAR06iagnostic var.FplId fromBaseNode.FplId (_inheritedVariables[var.FplId].FplId) true fromBaseNode.StartPos fromBaseNode.EndPos
+                else
+                    // remember the variable and the base node it is from 
+                    _inheritedVariables.Add (var.FplId, fromBaseNode)
+
+                    // add the inherited variable to the scope of this
+                    if _cloneMap.ContainsKey var.FplId then 
+                        this.Scope.TryAdd (var.FplId, _cloneMap[var.FplId]) |> ignore
+                    else
+                        let clone = var.Clone() // todo: use Clone(_cloneMap) instead
+                        _cloneMap.TryAdd (var.FplId, clone) |> ignore
+                        this.Scope.TryAdd (var.FplId, clone) |> ignore
+            )
+        member this.InheritProperties (fromBaseNode:FplValue)  = 
+            fromBaseNode.GetProperties()
+            |> List.iter (fun prty ->
+                let prtyName = prty.Type SignatureType.Mixed
+                if _inheritedProperties.ContainsKey prtyName then
+                    emitSIG06iagnostic prtyName fromBaseNode.FplId (_inheritedProperties[prtyName].FplId) true fromBaseNode.StartPos fromBaseNode.EndPos
+                else
+                    // remember the property and the base node it is from 
+                    _inheritedProperties.Add (prtyName, fromBaseNode)
+
+                    // add the inherited property to the scope of this
+                    if _cloneMap.ContainsKey prtyName then 
+                        this.Scope.TryAdd (prtyName, _cloneMap[prtyName]) |> ignore
+                    else
+                        let clone = prty.Clone() // todo: use Clone(_cloneMap) instead
+                        _cloneMap.TryAdd (prtyName, clone) |> ignore
+                        this.Scope.TryAdd (prtyName, clone) |> ignore
+            )
 
     override this.Name = PrimClassL
     override this.ShortName = PrimClass
@@ -4649,6 +4694,9 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) =
 
     interface IReady with
         member _.IsReady = _isReady
+
+    interface IInherits with
+        member this.BaseNodes = new List<FplValue>()
 
     override this.Name = PrimFuncionalTermL
     override this.ShortName = PrimFuncionalTerm
