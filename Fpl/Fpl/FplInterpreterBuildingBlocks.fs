@@ -981,38 +981,12 @@ let rec eval (st: SymbolTable) ast =
     | Ast.InheritedClassTypeList inheritedTypeAsts -> 
         st.EvalPush("InheritedFunctionalOrClassTypeList")
         let beingCreatedNode = variableStack.PeekEvalStack()
-        // a dictionary to prevent shadowed variables
-        let distinctVariables = Dictionary<string, FplValue>()
-        beingCreatedNode.GetVariables()
-        |> List.iter (fun fv ->
-            distinctVariables.Add(fv.FplId, beingCreatedNode)
-        )
-        // a dictionary to prevent shadowed properties
-        let distinctProperties = Dictionary<string, FplValue>()
-        beingCreatedNode.GetProperties()
-        |> List.iter (fun fv ->
-            distinctVariables.Add(fv.Type SignatureType.Mixed, beingCreatedNode)
-        )
         let addVariablesAndPropertiesOfBaseNode (bNode:FplValue) = 
-            bNode.GetVariables()
-            |> List.iter (fun var ->
-                if distinctVariables.ContainsKey var.FplId then
-                    emitVAR06iagnostic var.FplId bNode.FplId (distinctVariables[var.FplId].FplId) true bNode.StartPos bNode.EndPos
-                else
-                    // store the variable name and the class, it is from 
-                    distinctVariables.Add (var.FplId, bNode)
-                    beingCreatedNode.Scope.Add (var.FplId, var.Clone())
-            )
-            bNode.GetProperties()
-            |> List.iter (fun prty ->
-                let prtyName = prty.Type SignatureType.Mixed
-                if distinctProperties.ContainsKey prtyName then
-                    emitSIG06iagnostic prtyName bNode.FplId (distinctProperties[prtyName].FplId) true bNode.StartPos bNode.EndPos
-                else
-                    // store the property name and the class, it is from 
-                    distinctProperties.Add (prtyName, bNode)
-                    beingCreatedNode.Scope.Add (prtyName, prty.Clone())
-            )
+            match box beingCreatedNode with
+            | :? IInherits as inheritingNode -> 
+                inheritingNode.InheritVariables bNode
+                inheritingNode.InheritProperties bNode
+            | _ -> ()
 
         inheritedTypeAsts
         |> List.iter (fun baseAst ->
