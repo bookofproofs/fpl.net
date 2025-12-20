@@ -983,7 +983,7 @@ let rec eval (st: SymbolTable) ast =
         let beingCreatedNode = variableStack.PeekEvalStack()
         let addVariablesAndPropertiesOfBaseNode (bNode:FplValue) = 
             match box beingCreatedNode with
-            | :? IInherits as inheritingNode -> 
+            | :? FplGenericInheriting as inheritingNode -> 
                 inheritingNode.InheritVariables bNode
                 inheritingNode.InheritProperties bNode
             | _ -> ()
