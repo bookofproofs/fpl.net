@@ -167,7 +167,7 @@ type DiagnosticCode =
     | SIG03 of string * string 
     | SIG04 of string * int * string list
     | SIG05 of string * string
-    | SIG06 of string * string * string * bool
+    | SIG06 of string * string * string * string
     | SIG07 of string * string * string 
     | SIG08 of string * string * string * string * int
     | SIG09 of string * string * int
@@ -183,7 +183,7 @@ type DiagnosticCode =
     | VAR03 of string * string
     | VAR04 of string 
     | VAR05 of string 
-    | VAR06 of string * string * string * bool
+    | VAR06 of string * string * string * string
     | VAR07 of string 
     | VAR08 
     | VAR09 of string * string 
@@ -417,11 +417,11 @@ type DiagnosticCode =
                     let errMsg = errorList |> List.mapi (fun i s -> sprintf "%d. %s" (i + 1) s) |> String.concat ", "
                     $"No overload matching `{signature}`. Checked candidates: {errorList}." 
             | SIG05 (assigneeType, assignedType) -> $"Cannot assign type `{assignedType}` to type `{assigneeType}`."
-            | SIG06 (name, first, second, isClass) -> 
-                if isClass then
-                    $"Property name `{name}` of base class `{first} will be overshadowed by `{second}`."
-                else
-                    $"Property name `{name}` of base functional term `{first} will be overshadowed by `{second}`."
+            | SIG06 (name, oldFromNode, newFromNode, typeName) -> 
+                match typeName with 
+                | PrimClassL -> $"Property `{name}` of base class `{oldFromNode} will be overshadowed by `{newFromNode}`."
+                | PrimFuncionalTermL -> $"Property `{name}` of base functional term `{oldFromNode} will be overshadowed by `{newFromNode}`."
+                | _ -> $"Property `{name}` of (unknown type) `{oldFromNode} will be overshadowed by `{newFromNode}`."
             | SIG07 (assigneeName, assigneeType, nodeType) -> $"`{assigneeName}` is {nodeType} ({assigneeType}) and is not assignable."
             | SIG08 (arrName, indexVarName, indexVarType, dimType, dimNumber) -> 
                 $"Type mismatch in array's `{arrName}` {englishOrdinal dimNumber} dimension; expected `{dimType}`, got `{indexVarName}:{indexVarType}`."
@@ -438,11 +438,11 @@ type DiagnosticCode =
             | VAR03 (identifier, conflict) -> $"Variable `{identifier}` was already declared at {conflict}."  
             | VAR04 name -> $"Declared variable `{name}` not used in this scope."
             | VAR05 name -> $"Bound variable `{name}` was not used in this quantor."
-            | VAR06 (name, first, second, isClass) -> 
-                if isClass then
-                    $"Variable name `{name}` of base class `{first} will be overshadowed by `{second}`."
-                else
-                    $"Variable name `{name}` of base functional term `{first} will be overshadowed by `{second}`."
+            | VAR06 (name, oldFromNode, newFromNode, typeName) -> 
+                match typeName with 
+                | PrimClassL -> $"Variable `{name}` of base class `{oldFromNode} will be overshadowed by `{newFromNode}`."
+                | PrimFuncionalTermL -> $"Variable `{name}` of base functional term `{oldFromNode} will be overshadowed by `{newFromNode}`."
+                | _ -> $"Variable `{name}` of (unknown type) `{oldFromNode} will be overshadowed by `{newFromNode}`."
             | VAR07 name -> $"The {PrimQuantorExistsN} accepts only one bound variable `{name}`."
             | VAR08 -> "Variadic variables cannot be bound in a quantor."
             | VAR09 (varName,varType) -> $"The variable {varName}:{varType} is free and cannot be used to evaluate this expresssion."

@@ -720,7 +720,7 @@ let emitSIG05Diagnostics assigneeTypeStr assignedTypeStr pos1 pos2 =
     ad.AddDiagnostic diagnostic
         
 
-let emitSIG06iagnostic name first second isClass pos1 pos2  = 
+let emitSIG06iagnostic name oldFromNode newFromNode typeName pos1 pos2  = 
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -728,7 +728,7 @@ let emitSIG06iagnostic name first second isClass pos1 pos2  =
             Diagnostic.Severity = DiagnosticSeverity.Warning
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = SIG06(name, first, second, isClass)
+            Diagnostic.Code = SIG06(name, oldFromNode, newFromNode, typeName)
             Diagnostic.Alternatives = Some "Consider renaming the properties to avoid name conflicts." 
         }
     ad.AddDiagnostic diagnostic
@@ -906,7 +906,7 @@ let emitVAR05diagnostics name pos1 pos2 =
     }
     ad.AddDiagnostic diagnostic
 
-let emitVAR06iagnostic name first second isClass pos1 pos2  = 
+let emitVAR06iagnostic name oldFromNode newFromNode typeName pos1 pos2  = 
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -914,7 +914,7 @@ let emitVAR06iagnostic name first second isClass pos1 pos2  =
             Diagnostic.Severity = DiagnosticSeverity.Warning
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = VAR06(name, first, second, isClass)
+            Diagnostic.Code = VAR06(name, oldFromNode, newFromNode, typeName)
             Diagnostic.Alternatives = Some "Consider renaming the original variables to avoid name conflicts." 
         }
     ad.AddDiagnostic diagnostic

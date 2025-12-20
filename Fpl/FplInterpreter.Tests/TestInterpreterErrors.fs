@@ -1584,7 +1584,7 @@ type TestInterpreterErrors() =
         if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = SIG06 ("","","", true)
+            let code = SIG06 ("","","","")
             runTestHelper "TestSIG06Classes.fpl" fplCode code expected
 
     [<DataRow("00a", "def func A()->obj { intr prty pred T() {intr} } def func B()->obj { intr prty pred T() {intr} } def func C:A,B()->obj ;", 1)>]
@@ -1599,7 +1599,7 @@ type TestInterpreterErrors() =
         if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = SIG06 ("","","", false)
+            let code = SIG06 ("","","","")
             runTestHelper "TestSIG06FunctionalTerms.fpl" fplCode code expected
 
     [<DataRow("00a", "def pred S(x:pred) {dec T:=true; true};", 1)>]
@@ -2212,13 +2212,71 @@ type TestInterpreterErrors() =
     [<DataRow("00b", "def cl T { dec ~x:obj; ctor T() { dec base.Obj() ; }} def cl S:T { dec ~y:obj; ctor S() { dec base.T() ; }} ;", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
-    member this.TestVAR06(no:string, fplCode:string, expected) =
+    member this.TestVAR06Classes(no:string, fplCode:string, expected) =
         if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = VAR06 ("","","", true)
-            runTestHelper "TestVAR06.fpl" fplCode code expected
+            let code = VAR06 ("","","","")
+            runTestHelper "TestVAR06Classes.fpl" fplCode code expected
             
+    // base inner / derived inner 
+    [<DataRow("IIa", "def func T()->obj { dec ~x:obj; return x} def func S:T()->obj { dec ~x:obj; return x } ;", 1)>]
+    [<DataRow("IIb", "def func T()->obj { dec ~x:obj; return x} def func S:T()->obj { dec ~y:obj; return y} ;", 0)>]
+    // base inner / derived signature 
+    [<DataRow("ISa", "def func T()->obj { dec ~x:obj; return x} def func S:T()->pred(x:obj) ;", 1)>]
+    [<DataRow("ISb", "def func T()->obj { dec ~x:obj; return x} def func S:T()->pred(y:obj) ;", 0)>]
+    // base inner / derived pred mapping 
+    [<DataRow("IPa", "def func T()->pred(z:obj) { dec ~x:obj; return x} def func S:T()->pred(x:obj) ;", 1)>]
+    [<DataRow("IPb", "def func T()->pred(z:obj) { dec ~x:obj; return x} def func S:T()->pred(y:obj) ;", 0)>]
+    // base inner / derived func mapping 
+    [<DataRow("IFa", "def func T()->func(z:obj)->obj { dec ~x:obj; return x} def func S:T()->func(x:obj)->obj ;", 1)>]
+    [<DataRow("IFa", "def func T()->func(z:obj)->obj { dec ~x:obj; return x} def func S:T()->func(y:obj)->obj ;", 0)>]
+    // base signature / derived inner 
+    [<DataRow("SIa", "def func T(x:obj)->obj def func S:T(z:obj)->obj { dec ~x:obj; return x } ;", 1)>]
+    [<DataRow("SIb", "def func T(x:obj)->obj def func S:T(z:obj)->obj { dec ~y:obj; return y } ;", 0)>]
+    // base signature / derived signature 
+    [<DataRow("SSa", "def func T(x:obj)->obj def func S:T(x:obj)->obj ;", 1)>]
+    [<DataRow("SSb", "def func T(x:obj)->obj def func S:T(y:obj)->obj ;", 0)>]
+    // base signature / derived pred mapping 
+    [<DataRow("SPa", "def func T(x:obj)->pred(a:obj) def func S:T(z:obj)->pred(x:obj) ;", 1)>]
+    [<DataRow("SPb", "def func T(x:obj)->pred(a:obj) def func S:T(z:obj)->pred(y:obj) ;", 0)>]
+    // base signature / derived func mapping 
+    [<DataRow("SFa", "def func T(x:obj)->func(a:obj)->obj def func S:T(z:obj)->func(x:obj)->obj ;", 1)>]
+    [<DataRow("SFa", "def func T(x:obj)->func(a:obj)->obj def func S:T(z:obj)->func(y:obj)->obj ;", 0)>]
+    // base pred mapping / derived inner 
+    [<DataRow("PIa", "def func T()->pred(x:obj) def func S:T()->pred(z:obj) { dec ~x:obj; return true} ;", 1)>]
+    [<DataRow("PIb", "def func T()->pred(x:obj) def func S:T()->pred(z:obj) { dec ~y:obj; return true} ;", 0)>]
+    // base pred mapping / derived signature 
+    [<DataRow("PSa", "def func T(a:obj)->pred(x:obj) def func S:T(z:obj)->pred(x:obj) ;", 1)>]
+    [<DataRow("PSb", "def func T(a:obj)->pred(x:obj) def func S:T(z:obj)->pred(y:obj) ;", 0)>]
+    // base pred mapping / derived pred mapping 
+    [<DataRow("PPa", "def func T()->pred(x:obj) def func S:T()->pred(x:obj) ;", 1)>]
+    [<DataRow("PPb", "def func T()->pred(x:obj) def func S:T()->pred(y:obj) ;", 0)>]
+    // base pred mapping / derived func mapping (would also cause other signature-related errors like SIG04)
+    [<DataRow("PFa", "def func T()->pred(x:obj) def func S:T()->func(x:obj)->obj ;", 1)>]
+    [<DataRow("PFa", "def func T()->pred(x:obj) def func S:T()->func(y:obj)->obj ;", 0)>]
+    // base func mapping / derived inner 
+    [<DataRow("FIa", "def func T()->func(x:obj)->obj def func S:T()->func(z:obj)->obj { dec ~x:obj; return x } ;", 1)>]
+    [<DataRow("FIb", "def func T()->func(x:obj)->obj def func S:T()->func(z:obj)->obj { dec ~y:obj; return y } ;", 0)>]
+    // base func mapping / derived signature 
+    [<DataRow("FSa", "def func T(a:obj)->func(x:obj)->obj def func S:T(x:obj)->func(z:obj)->obj ;", 1)>]
+    [<DataRow("FSa", "def func T(a:obj)->func(x:obj)->obj def func S:T(y:obj)->func(z:obj)->obj ;", 0)>]
+    // base func mapping / derived pred mapping (would also cause other signature-related errors like SIG04)
+    [<DataRow("FPa", "def func T()->func(x:obj)->obj def func S:T()->pred(x:obj) ;", 1)>]
+    [<DataRow("FPb", "def func T()->func(x:obj)->obj def func S:T()->pred(y:obj) ;", 0)>]
+    // base func mapping / derived func mapping 
+    [<DataRow("FFa", "def func T()->func(x:obj)->obj def func S:T()->func(x:obj)->obj ;", 1)>]
+    [<DataRow("FFb", "def func T()->func(x:obj)->obj def func S:T()->func(y:obj)->obj ;", 0)>]
+    // general
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestVAR06FunctionalTerms(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = VAR06 ("","","","")
+            runTestHelper "TestVAR06FunctionalTerms.fpl" fplCode code expected
+
     [<DataRow("00", "def pred T() {exn$1 n:pred { n } };", 0)>]
     [<DataRow("01", "def pred T() {exn$1 n, m:pred { n } };", 1)>]
     [<DataRow("02", "def pred T() {exn$1 n:pred, m:pred { n } };", 1)>]
