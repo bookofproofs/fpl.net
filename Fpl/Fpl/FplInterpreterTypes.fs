@@ -1351,6 +1351,22 @@ type FplGenericInheriting(positions: Positions, parent: FplValue) as this =
                 // emit VAR06, since the inner variable overrides some inhereted var
                 emitVAR06iagnostic var.FplId oldFromNode newFromNode typeName var.StartPos var.EndPos
         )
+        this.GetProperties()
+        |> Seq.iter (fun prty -> 
+            let prtyName = prty.Type SignatureType.Mixed
+            if _inheritedProperties.ContainsKey prtyName then
+                let oldFrom = _inheritedProperties[prtyName][1]
+                let oldFromNode = oldFrom.Type SignatureType.Mixed
+                let newFromNode = this.Type SignatureType.Mixed
+                let typeName = oldFrom.Name
+                // override the old node
+                let tuple = List<FplValue>()
+                tuple.Add prty // own scope property
+                tuple.Add this // the property is from this
+                _inheritedProperties[prtyName] <- tuple
+                // emit VAR06, since the inner variable overrides some inhereted var
+                emitSIG06iagnostic prtyName oldFromNode newFromNode typeName prty.StartPos prty.EndPos
+        )
 
 [<AbstractClass>]
 type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =

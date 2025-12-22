@@ -1593,6 +1593,9 @@ type TestInterpreterErrors() =
     [<DataRow("01a", "def func A()->obj { intr prty func T()->obj {intr} } def func B()->obj { intr prty func T()->obj {intr} } def func C:A,B()->obj ;", 1)>]
     [<DataRow("01b", "def func A()->obj { intr prty func T()->obj {intr} } def func B()->obj { intr prty pred T() {intr} } def func C:A,B()->obj ;", 0)>]
     [<DataRow("01c", "def func A()->obj { intr prty func T()->obj {intr} } def func B()->obj { intr prty func T(x:ind)->obj {intr} } def func C:A,B()->obj ;", 0)>]
+    [<DataRow("02a", "def func A()->obj { intr prty pred T() {intr} } def func B:A()->obj { intr prty pred T() {intr} } def func C:A()->obj ;", 1)>]
+    [<DataRow("02b", "def func A()->obj { intr prty pred T() {intr} } def func B:A()->obj { intr prty pred T() {intr} } def func C:B()->obj { intr prty pred T() {intr} } ;", 2)>]
+    [<DataRow("03a", "def func A()->obj { intr prty func T()->obj {intr} } def func B()->obj { intr prty func T()->obj {intr} } def func C:A,B()->obj { intr prty func T()->obj {intr} } ;", 2)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG06FunctionalTerms(no:string, fplCode:string, expected) =
