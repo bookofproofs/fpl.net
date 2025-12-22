@@ -2091,7 +2091,7 @@ type TestInterpreterErrors() =
     [<DataRow("12a", "inf ExistsByExample {dec ~p: pred(c: obj); pre: p(c) con: ex x:obj {p(x)}};", 0)>]
     [<DataRow("12b", "inf ExistsByExample {dec ~p: pred(c: obj) ~c: obj; pre: true con: true};", 1)>]
     [<DataRow("13", """loc and(p,q) := !tex: p "\wedge" q;;""", 0)>]
-    [<DataRow("14", """def cl B {intr} def cl A {dec ~x:obj; ctor A(y:B) {} };""", 1)>]
+    [<DataRow("14", """def cl B {intr} def cl A {dec ~x:obj; ctor A(x:B) {} };""", 1)>]
     [<DataRow("15", "axiom T {dec ~p:pred(n:obj); all n:Nat{p(n)} };", 1)>]
     [<DataRow("15a", "axiom T {dec ~p:pred(n:obj); all n1:Nat{p(n1)} };", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
@@ -2230,7 +2230,7 @@ type TestInterpreterErrors() =
     [<DataRow("IPb", "def func T()->pred(z:obj) { dec ~x:obj; return x} def func S:T()->pred(y:obj) ;", 0)>]
     // base inner / derived func mapping 
     [<DataRow("IFa", "def func T()->func(z:obj)->obj { dec ~x:obj; return x} def func S:T()->func(x:obj)->obj ;", 1)>]
-    [<DataRow("IFa", "def func T()->func(z:obj)->obj { dec ~x:obj; return x} def func S:T()->func(y:obj)->obj ;", 0)>]
+    [<DataRow("IFb", "def func T()->func(z:obj)->obj { dec ~x:obj; return x} def func S:T()->func(y:obj)->obj ;", 0)>]
     // base signature / derived inner 
     [<DataRow("SIa", "def func T(x:obj)->obj def func S:T(z:obj)->obj { dec ~x:obj; return x } ;", 1)>]
     [<DataRow("SIb", "def func T(x:obj)->obj def func S:T(z:obj)->obj { dec ~y:obj; return y } ;", 0)>]
@@ -2242,7 +2242,7 @@ type TestInterpreterErrors() =
     [<DataRow("SPb", "def func T(x:obj)->pred(a:obj) def func S:T(z:obj)->pred(y:obj) ;", 0)>]
     // base signature / derived func mapping 
     [<DataRow("SFa", "def func T(x:obj)->func(a:obj)->obj def func S:T(z:obj)->func(x:obj)->obj ;", 1)>]
-    [<DataRow("SFa", "def func T(x:obj)->func(a:obj)->obj def func S:T(z:obj)->func(y:obj)->obj ;", 0)>]
+    [<DataRow("SFb", "def func T(x:obj)->func(a:obj)->obj def func S:T(z:obj)->func(y:obj)->obj ;", 0)>]
     // base pred mapping / derived inner 
     [<DataRow("PIa", "def func T()->pred(x:obj) def func S:T()->pred(z:obj) { dec ~x:obj; return true} ;", 1)>]
     [<DataRow("PIb", "def func T()->pred(x:obj) def func S:T()->pred(z:obj) { dec ~y:obj; return true} ;", 0)>]
@@ -2254,7 +2254,7 @@ type TestInterpreterErrors() =
     [<DataRow("PPb", "def func T()->pred(x:obj) def func S:T()->pred(y:obj) ;", 0)>]
     // base pred mapping / derived func mapping (would also cause other signature-related errors like SIG04)
     [<DataRow("PFa", "def func T()->pred(x:obj) def func S:T()->func(x:obj)->obj ;", 1)>]
-    [<DataRow("PFa", "def func T()->pred(x:obj) def func S:T()->func(y:obj)->obj ;", 0)>]
+    [<DataRow("PFb", "def func T()->pred(x:obj) def func S:T()->func(y:obj)->obj ;", 0)>]
     // base func mapping / derived inner 
     [<DataRow("FIa", "def func T()->func(x:obj)->obj def func S:T()->func(z:obj)->obj { dec ~x:obj; return x } ;", 1)>]
     [<DataRow("FIb", "def func T()->func(x:obj)->obj def func S:T()->func(z:obj)->obj { dec ~y:obj; return y } ;", 0)>]

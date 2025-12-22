@@ -1322,6 +1322,7 @@ type FplGenericInheriting(positions: Positions, parent: FplValue) as this =
             | _ ->
                 ()
         )
+
     member this.InheritProperties (fromBaseNode:FplValue) = 
         fromBaseNode.GetProperties()
         |> List.iter (fun prty ->
@@ -1333,13 +1334,23 @@ type FplGenericInheriting(positions: Positions, parent: FplValue) as this =
                 ()
         )
 
-    member this.AddVariableToScope (var:FplValue) =
-        match this.OverrideInheritedObject var.FplId _inheritedVariables var this false with
-        | (Some typeName, Some oldFromNode, Some newFromNode) ->
-            emitVAR06iagnostic var.FplId oldFromNode newFromNode typeName var.StartPos var.EndPos
-        | _ ->
-            ()            
-
+    override this.CheckConsistency() = 
+        base.CheckConsistency()
+        this.GetVariables()
+        |> Seq.iter (fun var -> 
+            if _inheritedVariables.ContainsKey var.FplId then
+                let oldFrom = _inheritedVariables[var.FplId][1]
+                let oldFromNode = oldFrom.Type SignatureType.Mixed
+                let newFromNode = this.Type SignatureType.Mixed
+                let typeName = oldFrom.Name
+                // override the old node
+                let tuple = List<FplValue>()
+                tuple.Add var // own scope variable
+                tuple.Add this // the var is from this
+                _inheritedVariables[var.FplId] <- tuple
+                // emit VAR06, since the inner variable overrides some inhereted var
+                emitVAR06iagnostic var.FplId oldFromNode newFromNode typeName var.StartPos var.EndPos
+        )
 
 [<AbstractClass>]
 type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
@@ -1465,7 +1476,6 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
                 variableOrQuantor.Scope.Add(this.FplId, this)
                 let blockOpt = variableOrQuantor.UltimateBlockNode
                 match blockOpt with
-                | Some (:? FplGenericInheriting as block) -> block.AddVariableToScope this
                 | Some block -> block.Scope.Add(this.FplId, this)
                 | None -> ()
             else
@@ -4689,6 +4699,7 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) as this
 
 
     override this.CheckConsistency (): unit = 
+        base.CheckConsistency()
         if not this.IsIntrinsic then // if not intrinsic, check variable usage
             checkVAR04Diagnostics this
         match this.ExpressionType with
