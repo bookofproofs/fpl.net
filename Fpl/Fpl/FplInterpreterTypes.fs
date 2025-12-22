@@ -1283,6 +1283,65 @@ type IHasDimensions =
     abstract member SetType : string -> Position -> Position -> unit
 
 [<AbstractClass>]
+type FplGenericInheriting(positions: Positions, parent: FplValue) as this =
+    inherit FplValue(positions, Some parent)
+    // used to ensure that every clone of FplGenericInheriting will preserve reference identity of inherited variables 
+    let _inheritedVariables = Dictionary<string, List<FplValue>>()
+    // used to ensure that every clone of FplGenericInheriting will preserve reference identity of inherited properties
+    let _inheritedProperties = Dictionary<string, List<FplValue>>()
+
+    /// Wraps an inherited object in a tuple together with the newFromNode it was from and stores this tuple with the keyOfInheritedObject in mapOfInheritedObjects. 
+    /// Returns (Some oldFromNode, Some newFromNode) if some other tuple existed in the map, where oldFromNode will be the old base node that was overridden by newFromNode
+    /// Returns (None, None) if no other tuple yet existed in the map
+    member private this.OverrideInheritedObject keyOfInheritedObject (mapOfInheritedObjects:Dictionary<string, List<FplValue>>) (inheritedObject:FplValue) (newFromNode:FplValue) withCloning =
+        let clone = 
+            if withCloning then
+                inheritedObject.Clone() // create a clone of new object to override the old one
+            else
+                inheritedObject
+        // create a tuple (clone, fromBaseNode)
+        let tuple = List<FplValue>()
+        tuple.Add clone 
+        tuple.Add newFromNode // and where it was from
+        if mapOfInheritedObjects.ContainsKey keyOfInheritedObject then
+            // replace the old reference
+            let oldFromNode = mapOfInheritedObjects[keyOfInheritedObject][1]
+            mapOfInheritedObjects[keyOfInheritedObject] <- tuple
+            (Some oldFromNode.Name, Some (oldFromNode.Type SignatureType.Mixed), Some (newFromNode.Type SignatureType.Mixed))
+        else
+            // add a new reference
+            mapOfInheritedObjects.Add(keyOfInheritedObject, tuple)
+            (None, None, None)
+            
+    member this.InheritVariables (fromBaseNode:FplValue) = 
+        fromBaseNode.GetVariables()
+        |> List.iter (fun var ->
+            match this.OverrideInheritedObject var.FplId _inheritedVariables var fromBaseNode true with
+            | (Some typeName, Some oldFromNode, Some newFromNode) ->
+                emitVAR06iagnostic var.FplId oldFromNode newFromNode typeName fromBaseNode.StartPos fromBaseNode.EndPos
+            | _ ->
+                ()
+        )
+    member this.InheritProperties (fromBaseNode:FplValue) = 
+        fromBaseNode.GetProperties()
+        |> List.iter (fun prty ->
+            let prtyName = prty.Type SignatureType.Mixed
+            match this.OverrideInheritedObject prtyName _inheritedProperties prty fromBaseNode true with
+            | (Some typeName, Some oldFromNode, Some newFromNode) ->
+                emitSIG06iagnostic prtyName oldFromNode newFromNode typeName fromBaseNode.StartPos fromBaseNode.EndPos
+            | _ ->
+                ()
+        )
+
+    member this.AddVariableToScope (var:FplValue) =
+        match this.OverrideInheritedObject var.FplId _inheritedVariables var this false with
+        | (Some typeName, Some oldFromNode, Some newFromNode) ->
+            emitVAR06iagnostic var.FplId oldFromNode newFromNode typeName var.StartPos var.EndPos
+        | _ ->
+            ()            
+
+
+[<AbstractClass>]
 type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
     let mutable _isSignatureVariable = false
@@ -1406,6 +1465,7 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
                 variableOrQuantor.Scope.Add(this.FplId, this)
                 let blockOpt = variableOrQuantor.UltimateBlockNode
                 match blockOpt with
+                | Some (:? FplGenericInheriting as block) -> block.AddVariableToScope this
                 | Some block -> block.Scope.Add(this.FplId, this)
                 | None -> ()
             else
@@ -1517,54 +1577,6 @@ type FplGenericPredicateWithExpression(positions: Positions, parent: FplValue) =
     override this.CheckConsistency () = 
         base.CheckConsistency()
         checkVAR04Diagnostics this
-
-            
-[<AbstractClass>]
-type FplGenericInheriting(positions: Positions, parent: FplValue) as this =
-    inherit FplValue(positions, Some parent)
-    // used to ensure that every clone of FplGenericInheriting will preserve reference identity of inherited variables 
-    let _inheritedVariables = Dictionary<string, List<FplValue>>()
-    // used to ensure that every clone of FplGenericInheriting will preserve reference identity of inherited properties
-    let _inheritedProperties = Dictionary<string, List<FplValue>>()
-
-    /// Wraps an inherited object in a tuple together with the newFromNode it was from and stores this tuple with the keyOfInheritedObject in mapOfInheritedObjects. 
-    /// Returns (Some oldFromNode, Some newFromNode) if some other tuple existed in the map, where oldFromNode will be the old base node that was overridden by newFromNode
-    /// Returns (None, None) if no other tuple yet existed in the map
-    member private this.OverrideInheritedObject keyOfInheritedObject (mapOfInheritedObjects:Dictionary<string, List<FplValue>>) (inheritedObject:FplValue) (newFromNode:FplValue) =
-        let clone = inheritedObject.Clone() // create a clone of new object to override the old one
-        // create a tuple (clone, fromBaseNode)
-        let tuple = List<FplValue>()
-        tuple.Add clone 
-        tuple.Add newFromNode // and where it was from
-        if mapOfInheritedObjects.ContainsKey keyOfInheritedObject then
-            // replace the old reference
-            let oldFromNode = mapOfInheritedObjects[keyOfInheritedObject][1]
-            mapOfInheritedObjects[keyOfInheritedObject] <- tuple
-            (Some oldFromNode.Name, Some (oldFromNode.Type SignatureType.Mixed), Some (newFromNode.Type SignatureType.Mixed))
-        else
-            // add a new reference
-            mapOfInheritedObjects.Add(keyOfInheritedObject, tuple)
-            (None, None, None)
-            
-    member this.InheritVariables (fromBaseNode:FplValue) = 
-        fromBaseNode.GetVariables()
-        |> List.iter (fun var ->
-            match this.OverrideInheritedObject var.FplId _inheritedVariables var fromBaseNode with
-            | (Some typeName, Some oldFromNode, Some newFromNode) ->
-                emitVAR06iagnostic var.FplId oldFromNode newFromNode typeName fromBaseNode.StartPos fromBaseNode.EndPos
-            | _ ->
-                ()
-        )
-    member this.InheritProperties (fromBaseNode:FplValue) = 
-        fromBaseNode.GetProperties()
-        |> List.iter (fun prty ->
-            let prtyName = prty.Type SignatureType.Mixed
-            match this.OverrideInheritedObject prtyName _inheritedProperties prty fromBaseNode with
-            | (Some typeName, Some oldFromNode, Some newFromNode) ->
-                emitSIG06iagnostic prtyName oldFromNode newFromNode typeName fromBaseNode.StartPos fromBaseNode.EndPos
-            | _ ->
-                ()
-        )
 
 type FplPredicateList(positions: Positions, parent: FplValue, runOrder) = 
     inherit FplValue(positions, Some parent)
