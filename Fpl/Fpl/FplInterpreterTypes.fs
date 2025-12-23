@@ -5907,16 +5907,20 @@ let findCandidatesByNameInDotted (fv: FplValue) (name: string) =
     match findQualifiedEntity fv with
     | ScopeSearchResult.Found candidate ->
         match candidate with
-        | :? FplVariable ->
-            if candidate.ArgList.Count > 0 then
-                let (varType: FplValue) = candidate.ArgList[0]
-
+        | :? FplVariable as var ->
+            let varTypeOpt = 
+                if var.ValueList.Count > 0 then
+                    // if the variable has a value, then 
+                    Some var.ValueList[0]
+                else 
+                    var.Scope.Values |> Seq.tryHead
+            match varTypeOpt with
+            | Some varType ->
                 varType.Scope
                 |> Seq.filter (fun kvp -> kvp.Value.FplId = name)
                 |> Seq.map (fun kvp -> kvp.Value)
                 |> Seq.toList
-            else
-                []
+            | _ -> []
         | _ -> []
     | _ -> []
 
