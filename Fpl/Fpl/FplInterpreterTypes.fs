@@ -5117,7 +5117,11 @@ type FplReturn(positions: Positions, parent: FplValue) as this =
         ret
 
     override this.Type signatureType = this.FplId
-    override this.Represent () = this.FplId
+    override this.Represent () = 
+        let argOpt = this.ArgList |> Seq.tryHead
+        match argOpt with
+        | Some arg -> arg.Represent()
+        | _ -> this.FplId
 
     member private this.MatchWithMapping (fva: FplValue) (fvp: FplValue) =
         let targetMapping = 

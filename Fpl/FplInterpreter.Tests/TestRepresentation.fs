@@ -60,11 +60,12 @@ type TestRepresentation() =
         | None -> 
             Assert.IsTrue(false)
             
-    [<DataRow("00","n:=Zero()", "Zero()")>]
+    [<DataRow("00","uses Fpl.PeanoArithmetics", "n:=Zero()", """{"name":"Zero","base":[{"name":"Nat","base":[],"vars":[],"prtys":[]}],"vars":[],"prtys":[]}""")>]
+    [<DataRow("00a","def cl Nat def cl Zero:Nat", "n:=Zero()", """{"name":"Zero","base":[{"name":"Nat","base":[],"vars":[],"prtys":[]}],"vars":[],"prtys":[]}""")>]
     [<TestMethod>]
-    member this.TestRepresentationReturn(var:string, varVal, expected:string) =
+    member this.TestRepresentationReturn(var:string, uses:string, varVal, expected:string) =
         ad.Clear()
-        let fplCode = sprintf """uses Fpl.PeanoArithmetics def func T()->Nat { dec ~n:Nat %s; return n };""" varVal
+        let fplCode = sprintf """%s def func T()->Nat { dec ~n:Nat %s; return n };""" uses varVal
         let filename = "TestRepresentationReturn.fpl"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
@@ -73,7 +74,7 @@ type TestRepresentation() =
             let r = st.Root
             let theory = r.Scope[filename]
             let fn = theory.Scope["T() -> Nat"] 
-            let retStmt = fn.ArgList[0]
+            let retStmt = fn.ArgList |> Seq.rev |> Seq.head
             Assert.AreEqual<string>(expected, retStmt.Represent())
         | None -> 
             Assert.IsTrue(false)
