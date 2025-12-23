@@ -3665,7 +3665,7 @@ let findInheritanceChains (baseNode: FplValue) =
     paths
 
 
-/// Checks if a node inherits from some type.
+/// Checks if a node inherits from some type (or is already that type).
 let inheritsFrom (node:FplValue) someType = 
     match node, someType with 
     | :? FplClass, "obj" -> true
@@ -3676,7 +3676,8 @@ let inheritsFrom (node:FplValue) someType =
             |> Seq.filter (fun kvp -> 
                 kvp.Value = "ok" && 
                 (
-                    kvp.Key.EndsWith $":{someType}" 
+                   kvp.Key = someType 
+                || kvp.Key.EndsWith $":{someType}" 
                 || kvp.Key.Contains $":{someType}:"
                 )
             )
