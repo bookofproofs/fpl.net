@@ -4760,11 +4760,27 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) as this
             if _callCounter > maxRecursion then
                 emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
             else
-                this.ArgList
-                |> Seq.iter (fun fv -> 
-                    fv.Run variableStack
-                    this.SetValuesOf fv
-                )
+                if this.IsIntrinsic then 
+                    let mapOpt = getMapping this
+                    match mapOpt with
+                    | Some map ->
+                        match map.Name with 
+                        | LiteralPredL ->
+                            let undetermined = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+                            this.SetValue undetermined
+                        | _ ->
+                            let undef = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
+                            this.SetValue undef
+                    | None ->
+                        let undef = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
+                        this.SetValue undef
+
+                else
+                    this.ArgList
+                    |> Seq.iter (fun fv -> 
+                        fv.Run variableStack
+                        this.SetValuesOf fv
+                    )
 
                 this.GetProperties()
                 |> List.iter (fun fv -> fv.Run variableStack)

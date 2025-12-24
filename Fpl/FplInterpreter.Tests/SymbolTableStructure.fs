@@ -2582,7 +2582,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplForInStmtDomain", "00", """;""", "")>]
+    [<DataRow("FplForInStmtDomain", "00", """def cl A def func Add(x,y:Nat)->Nat def func Sum()->Nat {dec ~addend, result: Nat for addend in Nat() { result:=Add(result,addend) }; ret result };""", "")>]
     [<TestMethod>]
     member this.TestStructureFplForInStmtDomain(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplForInStmtDomain.fpl"

@@ -1029,3 +1029,22 @@ type TestFplValueScopeFplRepresentation() =
                 Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
+
+    [<DataRow("00", """def cl Nat def func A()->Nat def pred P(x:Nat) {dec x:=A(); true}""", "dec Nat")>] // declared constant used
+    [<TestMethod>]
+    member this.TestConstants(var, input, output:string) =
+        ad.Clear()
+        let fplCode = sprintf """%s;""" input 
+        let filename = "TestConstants"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let pred = theory.Scope["P(Nat)"] 
+            let x = pred.Scope["x"]
+            Assert.AreEqual<string>(output, x.Represent())
+        | None -> 
+            Assert.IsTrue(false)
+
