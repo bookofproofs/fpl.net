@@ -558,6 +558,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
             fv.Name = PrimVariableL 
             || fv.Name = PrimVariableArrayL 
         )
+        |> Seq.sortBy(fun fv -> fv.RunOrder)
         |> Seq.toList
 
     /// Create a (possibly empty) list of all properties in the scope of this FplValue.
@@ -4763,15 +4764,36 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) as this
                 if this.IsIntrinsic then 
                     let mapOpt = getMapping this
                     match mapOpt with
-                    | Some map ->
-                        match map.Name with 
-                        | LiteralPredL ->
-                            let undetermined = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
-                            this.SetValue undetermined
+                    | Some (:? FplMapping as map) ->
+                        match map.ToBeReturnedClass with 
+                        | Some cl ->
+                            let defaultCtor = cl.Scope.Values |> Seq.head :?> FplGenericConstructor
+                            defaultCtor.Run variableStack
+                            match defaultCtor.Instance with 
+                            | Some instance ->
+                                // Set the FplId of the created instance to the signature of this functional term
+                                // together with the representations of its signature variables
+                                let signatureVarRepresentations = 
+                                    this.GetVariables()
+                                    |> List.map (fun var -> var:?>FplGenericVariable)
+                                    |> List.filter (fun var -> var.IsSignatureVariable) 
+                                    |> List.map (fun var -> var.Represent())
+                                    |> String.concat ", "
+
+                                instance.FplId <- $"{this.FplId}({signatureVarRepresentations})"
+                                this.SetValue instance // set value to the created instance 
+                                // reposition the instance in symbol table
+                                instance.Parent <- Some this
+                            | None -> () // todo, should not occur issue diagnostics?
                         | _ ->
-                            let undef = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
-                            this.SetValue undef
-                    | None ->
+                            match map.TypeId with
+                            | LiteralPredL ->
+                                let undetermined = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+                                this.SetValue undetermined
+                            | _ ->
+                                let undef = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
+                                this.SetValue undef
+                    | _ ->
                         let undef = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
                         this.SetValue undef
 

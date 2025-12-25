@@ -642,7 +642,6 @@ let rec eval (st: SymbolTable) ast =
 
         let pascalCaseIdList = dottedIdListAst |> List.collect (function Ast.PascalCaseId (_,s) -> [s] | _ -> [])
         let identifier = String.concat "." pascalCaseIdList
-        let evalPath = st.EvalPath()
         let fv = variableStack.PeekEvalStack()
 
         match fv with 
