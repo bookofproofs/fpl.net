@@ -3559,6 +3559,8 @@ type SymbolTableStructure() =
     [<DataRow("FplMapping", "MF1a", """def func T()->A;""", "")>]
     [<DataRow("FplMapping", "MF2", """def cl A def func T()->*A[ind];""", "")>]
     [<DataRow("FplMapping", "MF2a", """def func T()->*A[ind];""", "")>]
+    [<DataRow("FplMapping", "MF3", """def func T()->ind;""", "")>]
+
     [<DataRow("FplMapping", "ME1", """def cl A ext Digits x@/\d+/->A {ret x};""", "")>]
     [<DataRow("FplMapping", "ME1a", """ext Digits x@/\d+/->A {ret x};""", "")>]
     [<DataRow("FplMapping", "ME2", """def cl A ext Digits x@/\d+/->*A[ind] {ret x};""", "")>]
@@ -3644,7 +3646,22 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(1, node.ArgList.Count) // nested mapping
             Assert.AreEqual<int>(3, node.Scope.Count) // 3 variables
         // mapping of with and without references types
-        | "FplMapping", "MF1" 
+        | "FplMapping", "MF1" ->
+            Assert.IsInstanceOfType<FplFunctionalTerm>(parent) 
+            Assert.AreEqual<int>(1, parent.ArgList.Count) // mapping 
+            Assert.AreEqual<int>(0, parent.Scope.Count) 
+            Assert.IsInstanceOfType<FplMapping>(node) 
+            Assert.AreEqual<int>(0, node.ArgList.Count)  
+            Assert.AreEqual<int>(0, node.Scope.Count) 
+            let map = node :?> FplMapping
+            match map.ToBeReturnedClass with
+            | Some cl -> Assert.AreEqual<string>("A", cl.TypeId)
+            | None -> Assert.IsTrue(false, "The is no to be returned class")
+            let fn = node.Parent.Value
+            Assert.AreEqual<int>(1, fn.ValueList.Count)
+            let value = fn.ValueList |> Seq.head
+            Assert.AreEqual<string>("""{"name":"A","base":[],"vars":[],"prtys":[]}""", value.Represent())  
+            Assert.AreEqual<string>("""T()""", value.FplId)  
         | "FplMapping", "MF2" -> 
             Assert.IsInstanceOfType<FplFunctionalTerm>(parent) 
             Assert.AreEqual<int>(1, parent.ArgList.Count) // mapping 
@@ -3656,9 +3673,11 @@ type SymbolTableStructure() =
             match map.ToBeReturnedClass with
             | Some cl -> Assert.AreEqual<string>("A", cl.TypeId)
             | None -> Assert.IsTrue(false, "The is no to be returned class")
-            Assert.AreEqual<int>(1, node.ValueList.Count)
-            let value = node.ValueList |> Seq.head
-            Assert.AreEqual<string>("", value.Represent())  
+            let fn = node.Parent.Value
+            Assert.AreEqual<int>(1, fn.ValueList.Count)
+            let value = fn.ValueList |> Seq.head
+            Assert.AreEqual<string>("""dec *A[ind]""", value.Represent())  
+            Assert.AreEqual<string>("""T()""", value.FplId)  
         | "FplMapping", "MF1a" 
         | "FplMapping", "MF2a" -> 
             Assert.IsInstanceOfType<FplFunctionalTerm>(parent) 
@@ -3671,6 +3690,21 @@ type SymbolTableStructure() =
             match map.ToBeReturnedClass with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
+        | "FplMapping", "MF3" -> 
+            Assert.IsInstanceOfType<FplFunctionalTerm>(parent) 
+            Assert.AreEqual<int>(1, parent.ArgList.Count) // mapping 
+            Assert.AreEqual<int>(0, parent.Scope.Count) 
+            Assert.IsInstanceOfType<FplMapping>(node) 
+            Assert.AreEqual<int>(0, node.ArgList.Count)  
+            Assert.AreEqual<int>(0, node.Scope.Count) 
+            let map = node :?> FplMapping
+            match map.ToBeReturnedClass with
+            | None -> Assert.AreEqual<string>("no class", "no class")
+            | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
+            let fn = node.Parent.Value
+            Assert.AreEqual<int>(1, fn.ValueList.Count)
+            let value = fn.ValueList |> Seq.head
+            Assert.AreEqual<string>("""dec ind""", value.Represent())  
         | "FplMapping", "ME1" 
         | "FplMapping", "ME2" -> 
             Assert.IsInstanceOfType<FplExtension>(parent) 

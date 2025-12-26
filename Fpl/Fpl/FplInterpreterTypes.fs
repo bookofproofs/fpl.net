@@ -1279,7 +1279,7 @@ type IHasSignature =
     abstract member SignEndPos : Position with get, set
 
 type IHasDimensions =
-    abstract member Dimension : int
+    abstract member Dimensionality : int
     abstract member DimensionTypes : List<FplValue>
     abstract member SetType : string -> Position -> Position -> unit
 
@@ -3350,7 +3350,7 @@ type FplMapping(positions: Positions, parent: FplValue) =
     /// Sets this mapping to an array-typed mapping.
     member this.SetIsArray() = _isArrayMapping <- true
 
-    member this.Dimension = _dimensionTypes.Count
+    member this.Dimensionality = _dimensionTypes.Count
 
     member this.DimensionTypes = _dimensionTypes
 
@@ -3371,8 +3371,8 @@ type FplMapping(positions: Positions, parent: FplValue) =
             this.DimensionTypes.Add indexAllowedType
 
     interface IHasDimensions with
-        member this.Dimension = this.Dimension
-        member this.DimensionTypes = this.DimensionTypes
+        member this.Dimensionality = _dimensionTypes.Count
+        member this.DimensionTypes = _dimensionTypes
         member this.SetType typeId pos1 pos2 = this.SetType typeId pos1 pos2
 
     override this.Name = PrimMappingL
@@ -3446,8 +3446,8 @@ type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
             this.DimensionTypes.Add indexAllowedType
 
     interface IHasDimensions with
-        member this.Dimension = this.Dimensionality
-        member this.DimensionTypes = this.DimensionTypes
+        member this.Dimensionality = _dimensionTypes.Count
+        member this.DimensionTypes = _dimensionTypes
         member this.SetType typeId pos1 pos2 = this.SetType typeId pos1 pos2
 
     override this.Name = PrimVariableArrayL
@@ -4663,6 +4663,37 @@ type FplDecrement(name, positions: Positions, parent: FplValue) as this =
                 string n'
         this.SetValue(newValue)
 
+type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
+    inherit FplValue(positions, Some parent)
+    do 
+        this.TypeId <- LiteralInd
+        this.FplId <- LiteralInd
+
+
+    override this.Name = PrimIntrinsicInd
+    override this.ShortName = LiteralInd
+
+    override this.Clone () =
+        let ret = new FplIntrinsicInd((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Type (signatureType:SignatureType) = 
+        getFplHead this signatureType
+                    
+    override this.Represent (): string = 
+        if this.FplId = LiteralInd then 
+            $"dec {this.FplId}"
+        else
+            this.FplId
+
+    override this.Run _ = 
+        this.Debug "Run"
+
+    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
+
+    override this.RunOrder = None
+
 type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) as this =
     inherit FplGenericInheriting(positions, parent)
     let mutable _signStartPos = Position("", 0L, 0L, 0L)
@@ -4762,31 +4793,41 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) as this
                 emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
             else
                 if this.IsIntrinsic then 
+                    // Set the FplId of the created instance to the signature of this functional term
+                    // together with the representations of its signature variables
+                    let fplIdOfValue = 
+                        let signatureVarRepresentations = 
+                            this.GetVariables()
+                            |> List.map (fun var -> var:?>FplGenericVariable)
+                            |> List.filter (fun var -> var.IsSignatureVariable) 
+                            |> List.map (fun var -> var.Represent())
+                            |> String.concat ", "
+                        $"{this.FplId}({signatureVarRepresentations})"
                     let mapOpt = getMapping this
                     match mapOpt with
                     | Some (:? FplMapping as map) ->
                         match map.ToBeReturnedClass with 
-                        | Some cl ->
+                        | Some cl when map.Dimensionality = 0 ->
+                            // a class type without an array
                             let defaultCtor = cl.Scope.Values |> Seq.head :?> FplGenericConstructor
                             defaultCtor.Run variableStack
                             match defaultCtor.Instance with 
                             | Some instance ->
-                                // Set the FplId of the created instance to the signature of this functional term
-                                // together with the representations of its signature variables
-                                let signatureVarRepresentations = 
-                                    this.GetVariables()
-                                    |> List.map (fun var -> var:?>FplGenericVariable)
-                                    |> List.filter (fun var -> var.IsSignatureVariable) 
-                                    |> List.map (fun var -> var.Represent())
-                                    |> String.concat ", "
-
-                                instance.FplId <- $"{this.FplId}({signatureVarRepresentations})"
+                                instance.FplId <- fplIdOfValue
                                 this.SetValue instance // set value to the created instance 
                                 // reposition the instance in symbol table
                                 instance.Parent <- Some this
                             | None -> () // todo, should not occur issue diagnostics?
+                        | Some cl when map.Dimensionality > 0 ->
+                            let value = new FplVariableArray(fplIdOfValue, (this.SignStartPos, this.SignEndPos), this)
+                            value.SetType (map.TypeId.Substring(1)) value.StartPos value.EndPos
+                            map.DimensionTypes |> Seq.iter (fun fv -> value.SetType fv.TypeId value.StartPos value.EndPos)
+                            this.SetValue value // set value to the created array
                         | _ ->
                             match map.TypeId with
+                            | LiteralInd ->
+                                let ind = new FplIntrinsicInd((this.StartPos, this.EndPos), this)
+                                this.SetValue ind
                             | LiteralPredL ->
                                 let undetermined = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
                                 this.SetValue undetermined
@@ -5071,35 +5112,6 @@ let isExtension (fv:FplValue) =
     match fv with
     | :? FplExtension -> true
     | _ -> false
-
-
-type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
-    inherit FplValue(positions, Some parent)
-    do 
-        this.TypeId <- LiteralInd
-        this.FplId <- LiteralInd
-
-
-    override this.Name = PrimIntrinsicInd
-    override this.ShortName = LiteralInd
-
-    override this.Clone () =
-        let ret = new FplIntrinsicInd((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.Type (signatureType:SignatureType) = 
-        getFplHead this signatureType
-                    
-    override this.Represent (): string = this.FplId
-
-    override this.Run _ = 
-        this.Debug "Run"
-
-    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
-
-    override this.RunOrder = None
-
 
 type FplIntrinsicTpl(positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
