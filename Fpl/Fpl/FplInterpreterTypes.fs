@@ -375,6 +375,9 @@ type IVariable =
     abstract member IsSignatureVariable : bool with get, set
     abstract member IsInitialized : bool with get, set
 
+type IConstant =
+    abstract member ConstantName : string with get, set
+
 [<AbstractClass>]
 type FplValue(positions: Positions, parent: FplValue option) =
     let mutable _expressionType = FixType.NoFix
@@ -1238,6 +1241,18 @@ type FplGenericPredicate(positions: Positions, parent: FplValue) as this =
 /// It serves as a value for everything in FPL that is "predicative in nature". These can be predicates, theorem-like-statements, proofs or predicative expressions. The value can have one of three values in FPL: "true", LiteralFalse, and "undetermined". 
 type FplIntrinsicPred(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(positions, parent)
+    let mutable _constantName = ""
+
+    /// Stores the constant's name if this is a constant value
+    member this.ConstantName
+        with get () = _constantName
+        and set (value) = 
+            _constantName <- value
+
+    interface IConstant with
+        member this.ConstantName  
+            with get () = this.ConstantName
+            and set (value) = this.ConstantName <- value
 
     override this.Name = PrimIntrinsicPred
     override this.ShortName = LiteralPred
@@ -1253,7 +1268,11 @@ type FplIntrinsicPred(positions: Positions, parent: FplValue) =
             | SignatureType.Mixed -> this.FplId
             | SignatureType.Type -> this.TypeId
                     
-    override this.Represent (): string = this.FplId
+    override this.Represent() = 
+        if _constantName = String.Empty then
+            this.FplId
+        else
+            $"{_constantName}:{this.FplId}"
 
     override this.Run _ = 
         this.Debug "Run"
@@ -1663,11 +1682,23 @@ type FplRuleOfInference(positions: Positions, parent: FplValue, runOrder) =
 
 type FplInstance(positions: Positions, parent: FplValue) as this =
     inherit FplGenericInheriting(positions, parent)
+    let mutable _constantName = ""
 
     do
         this.FplId <- LiteralObj
         this.TypeId <- LiteralObj
 
+    /// Stores the constant's name if this is a constant value
+    member this.ConstantName
+        with get () = _constantName
+        and set (value) = 
+            _constantName <- value
+
+    interface IConstant with
+        member this.ConstantName  
+            with get () = this.ConstantName
+            and set (value) = this.ConstantName <- value
+ 
     override this.Name = PrimInstanceL
     override this.ShortName = PrimInstance
 
@@ -1712,12 +1743,20 @@ type FplInstance(positions: Positions, parent: FplValue) as this =
             |> fun body -> "\"prtys\":[" + body + "]"
 
         let body = 
-            match head, baseClasses, vars, prtys with 
-            | LiteralObj, _, _, _ 
-            | LiteralObjL, _, _, _ ->
+            match _constantName, head, baseClasses, vars, prtys with 
+            | "", LiteralObj, _, _, _ 
+            | "", LiteralObjL, _, _, _ ->
                 "\"name\":\"" + head + "\""
-            | _, _, _, _ ->
+            | "", _, _, _, _ ->
                 "\"name\":\"" + head + "\"," +
+                baseClasses + "," +
+                vars + "," +
+                prtys
+            | _, LiteralObj, _, _, _ 
+            | _, LiteralObjL, _, _, _ ->
+                "\"name\":\"" + _constantName + ":" + head + "\""
+            | _, _, _, _, _ ->
+                "\"name\":\"" + _constantName + ":" + head + "\"," +
                 baseClasses + "," +
                 vars + "," +
                 prtys
@@ -3491,7 +3530,7 @@ type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
             else
                 match this.TypeId with
                 | LiteralUndef -> LiteralUndef
-                | _ -> $"dec {this.Type SignatureType.Type}" 
+                | _ -> $"{this.FplId}:dec {this.Type SignatureType.Type}" 
         else
             let subRepr = 
                 this.ValueList
@@ -4665,10 +4704,22 @@ type FplDecrement(name, positions: Positions, parent: FplValue) as this =
 
 type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
+    let mutable _constantName = ""
+
     do 
         this.TypeId <- LiteralInd
         this.FplId <- LiteralInd
 
+    /// Stores the constant's name if this is a constant value
+    member this.ConstantName
+        with get () = _constantName
+        and set (value) = 
+            _constantName <- value
+
+    interface IConstant with
+        member this.ConstantName  
+            with get () = this.ConstantName
+            and set (value) = this.ConstantName <- value
 
     override this.Name = PrimIntrinsicInd
     override this.ShortName = LiteralInd
@@ -4681,11 +4732,12 @@ type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
     override this.Type (signatureType:SignatureType) = 
         getFplHead this signatureType
                     
-    override this.Represent (): string = 
-        if this.FplId = LiteralInd then 
-            $"dec {this.FplId}"
-        else
-            this.FplId
+    override this.Represent () = 
+        match _constantName, this.FplId with
+        | "", LiteralInd -> $"dec {this.TypeId}"
+        | "", _ -> this.TypeId
+        | _, LiteralInd -> $"{_constantName}:dec {this.TypeId}"
+        | _, _ -> $"{_constantName}:{this.FplId}"
 
     override this.Run _ = 
         this.Debug "Run"
@@ -4813,7 +4865,7 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) as this
                             defaultCtor.Run variableStack
                             match defaultCtor.Instance with 
                             | Some instance ->
-                                instance.FplId <- fplIdOfValue
+                                instance.ConstantName <- fplIdOfValue
                                 this.SetValue instance // set value to the created instance 
                                 // reposition the instance in symbol table
                                 instance.Parent <- Some this
@@ -4823,14 +4875,36 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) as this
                             value.SetType (map.TypeId.Substring(1)) value.StartPos value.EndPos
                             map.DimensionTypes |> Seq.iter (fun fv -> value.SetType fv.TypeId value.StartPos value.EndPos)
                             this.SetValue value // set value to the created array
+                        | None when map.Dimensionality > 0 ->
+                            let value = new FplVariableArray(fplIdOfValue, (this.SignStartPos, this.SignEndPos), this)
+                            let typeStr = map.TypeId.Substring(1)
+                            match typeStr with 
+                            | LiteralInd ->
+                                value.SetType typeStr value.StartPos value.EndPos
+                                map.DimensionTypes |> Seq.iter (fun fv -> value.SetType fv.TypeId value.StartPos value.EndPos)
+                                this.SetValue value // set value to the created array
+                            | LiteralPred ->
+                                value.SetType typeStr value.StartPos value.EndPos
+                                map.DimensionTypes |> Seq.iter (fun fv -> value.SetType fv.TypeId value.StartPos value.EndPos)
+                                map.GetVariables() |> List.iter (fun fv -> value.Scope.Add(fv.FplId, fv.Clone()))
+                                this.SetValue value // set value to the created array
+                            | _ ->
+                                let undef = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
+                                this.SetValue undef
                         | _ ->
                             match map.TypeId with
+                            | LiteralObj ->
+                                let value = new FplInstance((this.StartPos, this.EndPos), this)
+                                value.ConstantName <- fplIdOfValue
+                                this.SetValue value
                             | LiteralInd ->
-                                let ind = new FplIntrinsicInd((this.StartPos, this.EndPos), this)
-                                this.SetValue ind
-                            | LiteralPredL ->
-                                let undetermined = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
-                                this.SetValue undetermined
+                                let value = new FplIntrinsicInd((this.StartPos, this.EndPos), this)
+                                value.ConstantName <- fplIdOfValue
+                                this.SetValue value
+                            | LiteralPred ->
+                                let value = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+                                value.ConstantName <- fplIdOfValue
+                                this.SetValue value
                             | _ ->
                                 let undef = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
                                 this.SetValue undef
@@ -5115,9 +5189,22 @@ let isExtension (fv:FplValue) =
 
 type FplIntrinsicTpl(positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
+    let mutable _constantName = ""
+
     do
         this.TypeId <- LiteralTpl
         this.FplId <- LiteralTpl
+
+    /// Stores the constant's name if this is a constant value
+    member this.ConstantName
+        with get () = _constantName
+        and set (value) = 
+            _constantName <- value
+
+    interface IConstant with
+        member this.ConstantName  
+            with get () = this.ConstantName
+            and set (value) = this.ConstantName <- value
 
     override this.Name = PrimIntrinsicTpl
     override this.ShortName = LiteralTpl
@@ -5130,7 +5217,12 @@ type FplIntrinsicTpl(positions: Positions, parent: FplValue) as this =
     override this.Type (signatureType:SignatureType) = 
         getFplHead this signatureType
                     
-    override this.Represent (): string = this.FplId
+    override this.Represent () = 
+        match _constantName, (this.FplId.StartsWith("tpl") || this.FplId.StartsWith("template")) with
+        | "", true -> $"dec {this.TypeId}"
+        | "", _ -> this.TypeId
+        | _, true -> $"{_constantName}:dec {this.TypeId}"
+        | _, _ -> $"{_constantName}:{this.FplId}"
 
     override this.Run _ = 
         this.Debug "Run"
