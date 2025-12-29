@@ -3443,10 +3443,13 @@ type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
     inherit FplGenericVariable(fplId, positions, parent)
     let _dimensionTypes = new List<FplValue>()
     let mutable _dimensionTypesBeingSet = false
+    let _valueKeys = new Dictionary<string,int>() // used to store the keys of all values
 
     member this.Dimensionality = _dimensionTypes.Count
 
     member this.DimensionTypes = _dimensionTypes
+
+    member this.ValueKeys = _valueKeys
 
     /// Sets the during the symbol table construction.
     /// Because the type consists of a main type and index allowed-types, we use "Dimension being set" as a flag
@@ -3484,7 +3487,27 @@ type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
             let value = fv1.Clone()
             ret.DimensionTypes.Add(value))
 
+        this.ValueKeys
+        |> Seq.iter (fun kvp ->
+            ret.ValueKeys.Add(kvp.Key, kvp.Value)
+        )
+
         ret
+
+    member this.AssignValueToCoordinates (coordinates:FplValue list) (value:FplValue) =
+        let coordinatesKey = 
+            coordinates
+            |> List.map (fun fv -> fv.Represent())
+            |> String.concat "|"
+        if this.ValueKeys.ContainsKey coordinatesKey then 
+           let index = this.ValueKeys[coordinatesKey]
+           // a value with this coordinates already exists, and we replace it by the new one
+           this.ValueList[index] <- value
+        else
+            // a value with this coordinetes does not exist yet. We ann the value 
+            this.ValueList.Add value
+            // and store the index of the new coordinatesKey
+            this.ValueKeys.Add (coordinatesKey, this.ValueList.Count-1)
 
     override this.Type signatureType =
         let mainType = base.Type signatureType
@@ -3508,9 +3531,34 @@ type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
                 | LiteralUndef -> LiteralUndef
                 | _ -> $"dec {this.Type SignatureType.Type}"
         else
+            // ensure cononical order of keys
+            let sortedKeys = 
+                let sortByCoordinates (items: string seq) =
+                    let parseCoord (coord: string) =
+                        if coord.StartsWith "$" then
+                            // Numeric coordinate: return Left(int)
+                            let n = coord.Substring(1) |> int
+                            Choice1Of2 n
+                        else
+                            // Alphabetic coordinate: return Right(string)
+                            Choice2Of2 coord
+
+                    let keyOf (s: string) =
+                        s.Split('|')
+                        |> Array.map parseCoord
+                        |> Array.toList
+
+                    items
+                    |> Seq.sortBy keyOf
+                sortByCoordinates this.ValueKeys.Keys 
+            
             let subRepr = 
-                this.ValueList
-                |> Seq.map (fun subfv -> subfv.Represent())
+                sortedKeys
+                |> Seq.map (fun coordinatesKey -> 
+                    let index = this.ValueKeys[coordinatesKey]
+                    let valueRepr = this.ValueList[index].Represent()
+                    $"[{coordinatesKey}]->{valueRepr}"
+                )
                 |> String.concat ", "
             if this.IsInitialized then 
                 subRepr

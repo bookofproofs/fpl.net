@@ -2747,7 +2747,7 @@ type SymbolTableStructure() =
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.AreEqual<int>(1, node.ValueList.Count)
-            Assert.AreEqual<string>("""dec *ind[ind]|T()""", node.Represent())  
+            Assert.AreEqual<string>("""dec *ind[ind]""", node.Represent())  
         | "FplFunctionalTerm", "MF4" -> 
             // non-intrinsic constant array
             Assert.IsInstanceOfType<FplTheory>(parent) 
@@ -2761,7 +2761,7 @@ type SymbolTableStructure() =
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.AreEqual<int>(1, node.ValueList.Count)
-            Assert.AreEqual<string>("""dec *ind[ind]|T()""", node.Represent())  
+            Assert.AreEqual<string>("""[$1]->$0, [$2]->$42""", node.Represent())  
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     
