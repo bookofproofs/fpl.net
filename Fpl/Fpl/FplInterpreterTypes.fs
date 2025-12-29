@@ -4748,11 +4748,9 @@ type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
         getFplHead this signatureType
                     
     override this.Represent () = 
-        match _constantName, this.FplId with
-        | "", LiteralInd -> $"dec {this.TypeId}"
-        | "", _ -> this.TypeId
-        | _, LiteralInd -> $"{_constantName}:dec {this.TypeId}"
-        | _, _ -> $"{_constantName}:{this.FplId}"
+        match _constantName with
+        | "" -> $"dec {this.TypeId}"
+        | _ -> _constantName
 
     override this.Run _ = 
         this.Debug "Run"
@@ -4814,10 +4812,6 @@ let runIntrinsicFunction (fv:FplValue) variableStack =
                 fv.SetValue undef
         | _ ->
             match map.TypeId with
-            | LiteralObj ->
-                let value = new FplInstance((fv.StartPos, fv.EndPos), fv)
-                value.ConstantName <- fplIdOfValue
-                fv.SetValue value
             | LiteralInd ->
                 let value = new FplIntrinsicInd((fv.StartPos, fv.EndPos), fv)
                 value.ConstantName <- fplIdOfValue
@@ -4825,6 +4819,12 @@ let runIntrinsicFunction (fv:FplValue) variableStack =
             | LiteralPred ->
                 let value = new FplIntrinsicPred((fv.StartPos, fv.EndPos), fv)
                 value.ConstantName <- fplIdOfValue
+                fv.SetValue value
+            | LiteralObj
+            | LiteralFunc ->
+                let value = new FplVariable("", (fv.StartPos, fv.EndPos), fv)
+                value.ConstantName <- fplIdOfValue
+                value.TypeId <- map.TypeId
                 fv.SetValue value
             | _ ->
                 let undef = new FplIntrinsicUndef((fv.StartPos, fv.EndPos), fv)

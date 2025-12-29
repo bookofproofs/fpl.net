@@ -217,6 +217,7 @@ let rec eval (st: SymbolTable) ast =
         let sid = $"${s.ToString()}"
         if path.Contains("Expression.DollarDigits") then
             let value = new FplIntrinsicInd((pos1, pos2), fv)
+            value.ConstantName <- sid
             value.FplId <- sid
             variableStack.PushEvalStack(value)
             variableStack.PopEvalStack()

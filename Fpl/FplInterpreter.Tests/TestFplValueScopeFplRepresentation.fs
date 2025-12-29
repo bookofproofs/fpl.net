@@ -1030,7 +1030,7 @@ type TestFplValueScopeFplRepresentation() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("00", """def cl Nat def func A()->Nat def pred P(x:Nat) {dec x:=A(); true}""", "dec Nat")>] // declared constant used
+    [<DataRow("00", """def cl Nat def func A()->Nat def pred P(x:Nat) {dec x:=A(); true}""", """{"name":"A():Nat","base":[],"vars":[],"prtys":[]}""")>] // declared constant used
     [<TestMethod>]
     member this.TestConstants(var, input, output:string) =
         ad.Clear()
