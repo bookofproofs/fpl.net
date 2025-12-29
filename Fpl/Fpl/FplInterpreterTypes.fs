@@ -1395,10 +1395,22 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
     let mutable _isInitialized = false
     let mutable _isBound = false
     let mutable _isUsed = false
+    let mutable _constantName = ""
 
     do 
         this.FplId <- fplId
         this.TypeId <- LiteralUndef
+
+    /// Stores the constant's name if this is a constant value
+    member this.ConstantName
+        with get () = _constantName
+        and set (value) = 
+            _constantName <- value
+
+    interface IConstant with
+        member this.ConstantName  
+            with get () = this.ConstantName
+            and set (value) = this.ConstantName <- value
 
     /// Getter if this variable was used after its declaration.
     member this.IsUsed
@@ -3530,7 +3542,10 @@ type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
             else
                 match this.TypeId with
                 | LiteralUndef -> LiteralUndef
-                | _ -> $"{this.FplId}:dec {this.Type SignatureType.Type}" 
+                | _ when this.ConstantName = String.Empty -> 
+                    $"dec {this.Type SignatureType.Type}" 
+                | _ -> 
+                    $"{this.ConstantName}:dec {this.Type SignatureType.Type}" 
         else
             let subRepr = 
                 this.ValueList
