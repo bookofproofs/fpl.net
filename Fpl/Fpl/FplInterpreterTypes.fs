@@ -4746,6 +4746,78 @@ type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
 
     override this.RunOrder = None
 
+let runIntrinsicFunction (fv:FplValue) variableStack =
+    let fvIHasSignature = 
+        match box fv with
+        | :? IHasSignature as fvSign -> Some fvSign
+        | _ -> None
+    // Set the FplId of the created instance to the signature of this functional term
+    // together with the representations of its signature variables
+    let fplIdOfValue = 
+        let signatureVarRepresentations = 
+            fv.GetVariables()
+            |> List.map (fun var -> var:?>FplGenericVariable)
+            |> List.filter (fun var -> var.IsSignatureVariable) 
+            |> List.map (fun var -> var.Represent())
+            |> String.concat ", "
+        $"{fv.FplId}({signatureVarRepresentations})"
+    let mapOpt = getMapping fv
+    match mapOpt with
+    | Some (:? FplMapping as map) ->
+        match map.ToBeReturnedClass with 
+        | Some cl when map.Dimensionality = 0 ->
+            // a class type without an array
+            let defaultCtor = cl.Scope.Values |> Seq.head :?> FplGenericConstructor
+            defaultCtor.Run variableStack
+            match defaultCtor.Instance with 
+            | Some instance ->
+                instance.ConstantName <- fplIdOfValue
+                fv.SetValue instance // set value to the created instance 
+                // reposition the instance in symbol table
+                instance.Parent <- Some fv
+            | None -> () // todo, should not occur issue diagnostics?
+        | Some cl when map.Dimensionality > 0 ->
+            let value = new FplVariableArray(fplIdOfValue, (fvIHasSignature.Value.SignStartPos, fvIHasSignature.Value.SignEndPos), fv)
+            value.SetType (map.TypeId.Substring(1)) value.StartPos value.EndPos
+            map.DimensionTypes |> Seq.iter (fun fv -> value.SetType fv.TypeId value.StartPos value.EndPos)
+            fv.SetValue value // set value to the created array
+        | None when map.Dimensionality > 0 ->
+            let value = new FplVariableArray(fplIdOfValue, (fvIHasSignature.Value.SignStartPos, fvIHasSignature.Value.SignEndPos), fv)
+            let typeStr = map.TypeId.Substring(1)
+            match typeStr with 
+            | LiteralInd ->
+                value.SetType typeStr value.StartPos value.EndPos
+                map.DimensionTypes |> Seq.iter (fun fv -> value.SetType fv.TypeId value.StartPos value.EndPos)
+                fv.SetValue value // set value to the created array
+            | LiteralPred ->
+                value.SetType typeStr value.StartPos value.EndPos
+                map.DimensionTypes |> Seq.iter (fun fv -> value.SetType fv.TypeId value.StartPos value.EndPos)
+                map.GetVariables() |> List.iter (fun fv -> value.Scope.Add(fv.FplId, fv.Clone()))
+                fv.SetValue value // set value to the created array
+            | _ ->
+                let undef = new FplIntrinsicUndef((fv.StartPos, fv.EndPos), fv)
+                fv.SetValue undef
+        | _ ->
+            match map.TypeId with
+            | LiteralObj ->
+                let value = new FplInstance((fv.StartPos, fv.EndPos), fv)
+                value.ConstantName <- fplIdOfValue
+                fv.SetValue value
+            | LiteralInd ->
+                let value = new FplIntrinsicInd((fv.StartPos, fv.EndPos), fv)
+                value.ConstantName <- fplIdOfValue
+                fv.SetValue value
+            | LiteralPred ->
+                let value = new FplIntrinsicPred((fv.StartPos, fv.EndPos), fv)
+                value.ConstantName <- fplIdOfValue
+                fv.SetValue value
+            | _ ->
+                let undef = new FplIntrinsicUndef((fv.StartPos, fv.EndPos), fv)
+                fv.SetValue undef
+    | _ ->
+        let undef = new FplIntrinsicUndef((fv.StartPos, fv.EndPos), fv)
+        fv.SetValue undef
+
 type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) as this =
     inherit FplGenericInheriting(positions, parent)
     let mutable _signStartPos = Position("", 0L, 0L, 0L)
@@ -4845,73 +4917,7 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) as this
                 emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
             else
                 if this.IsIntrinsic then 
-                    // Set the FplId of the created instance to the signature of this functional term
-                    // together with the representations of its signature variables
-                    let fplIdOfValue = 
-                        let signatureVarRepresentations = 
-                            this.GetVariables()
-                            |> List.map (fun var -> var:?>FplGenericVariable)
-                            |> List.filter (fun var -> var.IsSignatureVariable) 
-                            |> List.map (fun var -> var.Represent())
-                            |> String.concat ", "
-                        $"{this.FplId}({signatureVarRepresentations})"
-                    let mapOpt = getMapping this
-                    match mapOpt with
-                    | Some (:? FplMapping as map) ->
-                        match map.ToBeReturnedClass with 
-                        | Some cl when map.Dimensionality = 0 ->
-                            // a class type without an array
-                            let defaultCtor = cl.Scope.Values |> Seq.head :?> FplGenericConstructor
-                            defaultCtor.Run variableStack
-                            match defaultCtor.Instance with 
-                            | Some instance ->
-                                instance.ConstantName <- fplIdOfValue
-                                this.SetValue instance // set value to the created instance 
-                                // reposition the instance in symbol table
-                                instance.Parent <- Some this
-                            | None -> () // todo, should not occur issue diagnostics?
-                        | Some cl when map.Dimensionality > 0 ->
-                            let value = new FplVariableArray(fplIdOfValue, (this.SignStartPos, this.SignEndPos), this)
-                            value.SetType (map.TypeId.Substring(1)) value.StartPos value.EndPos
-                            map.DimensionTypes |> Seq.iter (fun fv -> value.SetType fv.TypeId value.StartPos value.EndPos)
-                            this.SetValue value // set value to the created array
-                        | None when map.Dimensionality > 0 ->
-                            let value = new FplVariableArray(fplIdOfValue, (this.SignStartPos, this.SignEndPos), this)
-                            let typeStr = map.TypeId.Substring(1)
-                            match typeStr with 
-                            | LiteralInd ->
-                                value.SetType typeStr value.StartPos value.EndPos
-                                map.DimensionTypes |> Seq.iter (fun fv -> value.SetType fv.TypeId value.StartPos value.EndPos)
-                                this.SetValue value // set value to the created array
-                            | LiteralPred ->
-                                value.SetType typeStr value.StartPos value.EndPos
-                                map.DimensionTypes |> Seq.iter (fun fv -> value.SetType fv.TypeId value.StartPos value.EndPos)
-                                map.GetVariables() |> List.iter (fun fv -> value.Scope.Add(fv.FplId, fv.Clone()))
-                                this.SetValue value // set value to the created array
-                            | _ ->
-                                let undef = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
-                                this.SetValue undef
-                        | _ ->
-                            match map.TypeId with
-                            | LiteralObj ->
-                                let value = new FplInstance((this.StartPos, this.EndPos), this)
-                                value.ConstantName <- fplIdOfValue
-                                this.SetValue value
-                            | LiteralInd ->
-                                let value = new FplIntrinsicInd((this.StartPos, this.EndPos), this)
-                                value.ConstantName <- fplIdOfValue
-                                this.SetValue value
-                            | LiteralPred ->
-                                let value = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
-                                value.ConstantName <- fplIdOfValue
-                                this.SetValue value
-                            | _ ->
-                                let undef = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
-                                this.SetValue undef
-                    | _ ->
-                        let undef = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
-                        this.SetValue undef
-
+                    runIntrinsicFunction this variableStack
                 else
                     this.ArgList
                     |> Seq.iter (fun fv -> 
@@ -5054,6 +5060,8 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) as this 
     inherit FplValue(positions, Some parent)
     let mutable _signStartPos = Position("", 0L, 0L, 0L)
     let mutable _signEndPos = Position("", 0L, 0L, 0L)
+    let mutable _isReady = false
+    let mutable _callCounter = 0
 
     do 
         this.FplId <- LiteralFunc
@@ -5078,6 +5086,9 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) as this 
             with get () = this.SignEndPos
             and set (value) = this.SignEndPos <- value
 
+    interface IReady with
+        member _.IsReady = _isReady
+        
     override this.Clone () =
         let ret = new FplMandatoryFunctionalTerm((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -5127,8 +5138,21 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) as this 
     override this.RunOrder = None
 
     override this.Run variableStack = 
-        // todo implement run
         this.Debug "Run"
+        if not _isReady then
+            _callCounter <- _callCounter + 1
+            if _callCounter > maxRecursion then
+                emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
+            else
+                if this.IsIntrinsic then 
+                    runIntrinsicFunction this variableStack
+                else
+                    this.ArgList
+                    |> Seq.iter (fun fv -> 
+                        fv.Run variableStack
+                        this.SetValuesOf fv
+                    )
+                _isReady <- this.Arity = 0 
 
 type FplExtension(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
