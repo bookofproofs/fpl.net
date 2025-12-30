@@ -3494,10 +3494,10 @@ type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
 
         ret
 
-    member this.AssignValueToCoordinates (coordinates:FplValue list) (value:FplValue) =
+    member this.AssignValueToCoordinates (coordinates:FplValue seq) (value:FplValue) =
         let coordinatesKey = 
             coordinates
-            |> List.map (fun fv -> fv.Represent())
+            |> Seq.map (fun fv -> fv.Represent())
             |> String.concat "|"
         if this.ValueKeys.ContainsKey coordinatesKey then 
            let index = this.ValueKeys[coordinatesKey]
@@ -5603,6 +5603,12 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
             let nameAssignedValue = assignedValue.Type SignatureType.Name
             let typeAssignedValue = assignedValue.Type SignatureType.Type 
             checkTypes (assignee.Scope.Values |> Seq.tryHead) nameAssignee typeAssignee assignedValue nameAssignedValue typeAssignedValue 
+        | Some (:? FplVariableArray as assignee), Some assignedValue ->
+            let nameAssignee = this.ArgList[0].Type SignatureType.Name // get the signature of the array's reference
+            let nameAssignedValue = this.ArgList[1].Type SignatureType.Name // get the signature of the array's reference
+            let typeAssignee = assignee.TypeId.Substring(1)
+            let typeAssignedValue = assignedValue.Type SignatureType.Type 
+            checkTypes (assignee.Scope.Values |> Seq.tryHead) nameAssignee typeAssignee assignedValue nameAssignedValue typeAssignedValue 
         | Some (:? FplSelf as assignee), _ ->
             let ref = assignee.Scope.Values |> Seq.toList
             if ref.Length > 0 then 
@@ -5615,12 +5621,6 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
                 emitSIG07iagnostic (assignee.Type SignatureType.Name) (getEnglishName ref.Head.Name) assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
             else
                 emitSIG07iagnostic (assignee.Type SignatureType.Name) "the type of parent cound not be determined" assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
-        | Some (:? FplVariableArray as assignee), Some assignedValue ->
-            let nameAssignee = this.ArgList[0].Type SignatureType.Name // get the signature of the array's reference
-            let nameAssignedValue = this.ArgList[1].Type SignatureType.Name // get the signature of the array's reference
-            let typeAssignee = assignee.TypeId.Substring(1)
-            let typeAssignedValue = assignedValue.Type SignatureType.Type 
-            checkTypes (assignee.Scope.Values |> Seq.tryHead) nameAssignee typeAssignee assignedValue nameAssignedValue typeAssignedValue 
         | Some (assignee), Some assignedValue ->
             let nameAssignee = assignee.Type SignatureType.Name
             let nameAssignedValue = assignedValue.Type SignatureType.Name
@@ -5677,7 +5677,11 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
                 if assignedValue = assignee then 
                     () // LG005 was already emitted when checking consistency but we want to prevent assigning something to itself to avoid infinite loops
                 else
-                    assignee.SetValuesOf assignedValue
+                    match assignee with
+                    | :? FplVariableArray as arr ->
+                        arr.AssignValueToCoordinates this.ArgList[0].ArgList assignedValue
+                    | _ ->
+                        assignee.SetValuesOf assignedValue
                     match box assignee with
                     | :? IVariable as assigneeCast -> assigneeCast.IsInitialized <- true
                     | _ -> ()
