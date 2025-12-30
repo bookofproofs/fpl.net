@@ -1547,6 +1547,8 @@ type TestInterpreterErrors() =
     [<DataRow("30", "def cl Nat def cl Zero:Nat def func Succ(n:Nat)->Nat def pred T() {dec ~r:Nat r:= undef; true };", 0)>]    
     [<DataRow("31", "def cl Nat def cl Tuple {ctor Tuple(l:*tpl[Nat]) {} } def pred T(x,y:Nat) {dec ~tuple:Tuple tuple:=Tuple(x,y); tuple};", 0)>]    
     [<DataRow("32", "def cl Nat def cl C {dec ~myLength: Nat; ctor C(x:Nat) {dec myLength:=x;} property func Length() -> Nat {return myLength} } def pred T() {dec ~l:Nat ~c:C c:=C(l) l:=c.Length(); l};", 0)>]    
+    [<DataRow("32", "def pred T(x:ind) {dec ~v:*ind[ind] v[$1]:=x; true};", 0)>]    
+    [<DataRow("32a", "def pred T(x:obj) {dec ~v:*ind[ind] v[$1]:=x; true};", 1)>]    
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG05(no:string, fplCode:string, expected) =

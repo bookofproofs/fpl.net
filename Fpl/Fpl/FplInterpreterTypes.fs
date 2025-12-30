@@ -5564,20 +5564,14 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
     override this.Represent () = this.TypeId
 
     override this.CheckConsistency () = 
-        match this.Assignee, this.AssignedValue with
-        | Some (:? FplVariable as assignee), Some (assignedValue:FplValue) -> 
-            let nameAssignee = assignee.Type SignatureType.Name
-            let typeAssignee = assignee.Type SignatureType.Type
-            let nameAssignedValue = assignedValue.Type SignatureType.Name
-            let typeAssignedValue = assignedValue.Type SignatureType.Type 
+        let checkTypes (referencedTypeOfVarOpt:FplValue option) nameAssignee typeAssignee (assignedValue:FplValue) nameAssignedValue typeAssignedValue = 
             if nameAssignee = nameAssignedValue then
                 emitLG005Diagnostics nameAssignedValue assignedValue.StartPos assignedValue.EndPos
             elif typeAssignee = LiteralObj && (assignedValue.Name = PrimDefaultConstructor || assignedValue.Name = LiteralCtorL) then
                 ()
-            elif typeAssignee = $"+{typeAssignedValue}" || typeAssignee = $"*{typeAssignedValue}" then 
+            elif typeAssignee = $"*{typeAssignedValue}" then 
                 ()
             elif typeAssignee <> typeAssignedValue then 
-                let referencedTypeOfVarOpt = assignee.Scope.Values |> Seq.tryHead
                 match referencedTypeOfVarOpt with 
                 | Some referencedTypeOfVar when (referencedTypeOfVar.Name = PrimClassL || referencedTypeOfVar.Name = PrimFuncionalTermL) -> 
                     match assignedValue with 
@@ -5601,6 +5595,14 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
                     emitSIG05Diagnostics typeAssignee typeAssignedValue this.ArgList[1].StartPos this.ArgList[1].EndPos
             else   
                 ()
+
+        match this.Assignee, this.AssignedValue with
+        | Some (:? FplVariable as assignee), Some (assignedValue:FplValue) -> 
+            let nameAssignee = assignee.Type SignatureType.Name
+            let typeAssignee = assignee.Type SignatureType.Type
+            let nameAssignedValue = assignedValue.Type SignatureType.Name
+            let typeAssignedValue = assignedValue.Type SignatureType.Type 
+            checkTypes (assignee.Scope.Values |> Seq.tryHead) nameAssignee typeAssignee assignedValue nameAssignedValue typeAssignedValue 
         | Some (:? FplSelf as assignee), _ ->
             let ref = assignee.Scope.Values |> Seq.toList
             if ref.Length > 0 then 
@@ -5616,9 +5618,9 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
         | Some (:? FplVariableArray as assignee), Some assignedValue ->
             let nameAssignee = this.ArgList[0].Type SignatureType.Name // get the signature of the array's reference
             let nameAssignedValue = this.ArgList[1].Type SignatureType.Name // get the signature of the array's reference
-            if nameAssignee = nameAssignedValue then
-                // an array has been assigned to itself
-                emitLG005Diagnostics nameAssignedValue assignedValue.StartPos assignedValue.EndPos
+            let typeAssignee = assignee.TypeId.Substring(1)
+            let typeAssignedValue = assignedValue.Type SignatureType.Type 
+            checkTypes (assignee.Scope.Values |> Seq.tryHead) nameAssignee typeAssignee assignedValue nameAssignedValue typeAssignedValue 
         | Some (assignee), Some assignedValue ->
             let nameAssignee = assignee.Type SignatureType.Name
             let nameAssignedValue = assignedValue.Type SignatureType.Name
