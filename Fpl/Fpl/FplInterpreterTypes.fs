@@ -375,10 +375,6 @@ type IVariable =
     abstract member IsSignatureVariable : bool with get, set
     abstract member IsInitialized : bool with get, set
 
-/// Indicates if there was an interpreter error in this FplValue.
-type IErrorOccurred =
-    abstract member ErrorOccurred : string option with get, set
-
 /// The interface ISkolem is used to implement fixed but unknown objects of some type.
 /// In general, the equality of two fixed but unknown objects of the same type cannot be determined, 
 /// unless it is explicitely asserted (or explicitely negated) in the corresponding FPL theory.
@@ -399,6 +395,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
     let mutable _typeId = ""
     let mutable (_filePath: string option) = None
     let mutable _isIntrinsic = false
+    let mutable (_errorOccurred: string option) = None
 
     let mutable _parent = parent
     let _scope = Dictionary<string, FplValue>()
@@ -562,6 +559,15 @@ type FplValue(positions: Positions, parent: FplValue option) =
     member this.IsIntrinsic
         with get () = _isIntrinsic
         and set (value) = _isIntrinsic <- value
+
+    /// Indicates if an interpreter error occurred during the construction of this FplReference
+    member this.ErrorOccurred
+        with get () = _errorOccurred
+        and set (value) = 
+            match _errorOccurred, value with
+            | None, Some next -> _errorOccurred <- Some next // aggregate errors
+            | Some prev, Some next -> _errorOccurred <- Some $"{prev}, {next}" // aggregate errors
+            | _ -> ()
 
     /// Create a (possibly empty) list of all variables in the scope of this FplValue.
     member this.GetVariables() =
@@ -1106,7 +1112,7 @@ let tryAddToParentForInStmt (fplValue:FplValue) =
     if parent.ArgList.Count = 1 then
         let entityIdentifier = parent.ArgList[0].Type SignatureType.Name
         if entityIdentifier = identifier then 
-            emitID027Diagnostics identifier fplValue.StartPos fplValue.EndPos
+            fplValue.ErrorOccurred <- emitID027Diagnostics identifier fplValue.StartPos fplValue.EndPos
         else 
             parent.ArgList.Add fplValue
     else
@@ -1127,7 +1133,7 @@ let tryAddToParentUsingFplId (fplValue:FplValue) =
         |> Seq.toList
 
     if conflicts.Length > 0 then 
-        emitID001Diagnostics identifier (conflicts.Head.QualifiedStartPos) fplValue.StartPos fplValue.EndPos
+        fplValue.ErrorOccurred <- emitID001Diagnostics identifier (conflicts.Head.QualifiedStartPos) fplValue.StartPos fplValue.EndPos
     else
         let parent = fplValue.Parent.Value
         parent.Scope.Add(identifier, fplValue)
@@ -1147,7 +1153,7 @@ let tryAddToParentUsingMixedSignature (fplValue:FplValue) =
         |> Seq.toList
 
     if conflicts.Length > 0 then 
-        emitID001Diagnostics identifier (conflicts.Head.QualifiedStartPos) fplValue.StartPos fplValue.EndPos
+        fplValue.ErrorOccurred <- emitID001Diagnostics identifier (conflicts.Head.QualifiedStartPos) fplValue.StartPos fplValue.EndPos
     else
         let parent = fplValue.Parent.Value
         parent.Scope.Add(identifier, fplValue)
@@ -1157,7 +1163,7 @@ let tryAddSubBlockToFplBlock (fplValue:FplValue) =
     let identifier = fplValue.Type SignatureType.Mixed
     let parent = fplValue.Parent.Value
     if parent.Scope.ContainsKey(identifier) then 
-        emitID001Diagnostics identifier (parent.Scope[identifier].QualifiedStartPos) fplValue.StartPos fplValue.EndPos
+        fplValue.ErrorOccurred <- emitID001Diagnostics identifier (parent.Scope[identifier].QualifiedStartPos) fplValue.StartPos fplValue.EndPos
     else
         parent.Scope.Add(identifier, fplValue)   
 
@@ -1177,7 +1183,7 @@ let tryAddToParentUsingTypedSignature (fplValue:FplValue) =
     if conflicts.Length > 0 then 
         let oldDiagnosticsStopped = ad.DiagnosticsStopped 
         ad.DiagnosticsStopped <- false
-        emitID024Diagnostics identifier (conflicts.Head.QualifiedStartPos) fplValue.StartPos fplValue.EndPos
+        fplValue.ErrorOccurred <- emitID024Diagnostics identifier (conflicts.Head.QualifiedStartPos) fplValue.StartPos fplValue.EndPos
         ad.DiagnosticsStopped <- oldDiagnosticsStopped
     else
         let parent = fplValue.Parent.Value
@@ -1331,7 +1337,7 @@ type FplGenericInheriting(positions: Positions, parent: FplValue) =
         |> List.iter (fun var ->
             match this.OverrideInheritedObject var.FplId _inheritedVariables var fromBaseNode true with
             | (Some typeName, Some oldFromNode, Some newFromNode) ->
-                emitVAR06iagnostic var.FplId oldFromNode newFromNode typeName fromBaseNode.StartPos fromBaseNode.EndPos
+                fromBaseNode.ErrorOccurred <- emitVAR06iagnostic var.FplId oldFromNode newFromNode typeName fromBaseNode.StartPos fromBaseNode.EndPos
             | _ ->
                 ()
         )
@@ -1342,7 +1348,7 @@ type FplGenericInheriting(positions: Positions, parent: FplValue) =
             let prtyName = prty.Type SignatureType.Mixed
             match this.OverrideInheritedObject prtyName _inheritedProperties prty fromBaseNode true with
             | (Some typeName, Some oldFromNode, Some newFromNode) ->
-                emitSIG06iagnostic prtyName oldFromNode newFromNode typeName fromBaseNode.StartPos fromBaseNode.EndPos
+                fromBaseNode.ErrorOccurred <- emitSIG06iagnostic prtyName oldFromNode newFromNode typeName fromBaseNode.StartPos fromBaseNode.EndPos
             | _ ->
                 ()
         )
@@ -1361,8 +1367,8 @@ type FplGenericInheriting(positions: Positions, parent: FplValue) =
                 tuple.Add var // own scope variable
                 tuple.Add this // the var is from this
                 _inheritedVariables[var.FplId] <- tuple
-                // emit VAR06, since the inner variable overrides some inhereted var
-                emitVAR06iagnostic var.FplId oldFromNode newFromNode typeName var.StartPos var.EndPos
+                // emit VAR06, since the inner variable overrides some inherited var
+                var.ErrorOccurred <- emitVAR06iagnostic var.FplId oldFromNode newFromNode typeName var.StartPos var.EndPos
         )
         this.GetProperties()
         |> Seq.iter (fun prty -> 
@@ -1377,8 +1383,8 @@ type FplGenericInheriting(positions: Positions, parent: FplValue) =
                 tuple.Add prty // own scope property
                 tuple.Add this // the property is from this
                 _inheritedProperties[prtyName] <- tuple
-                // emit VAR06, since the inner variable overrides some inhereted var
-                emitSIG06iagnostic prtyName oldFromNode newFromNode typeName prty.StartPos prty.EndPos
+                // emit SIG06, since the inner property overrides some inherited property
+                prty.ErrorOccurred <- emitSIG06iagnostic prtyName oldFromNode newFromNode typeName prty.StartPos prty.EndPos
         )
 
 [<AbstractClass>]
@@ -1447,31 +1453,31 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
             if block.Scope.ContainsKey(this.FplId) then
                 let oldDiagnosticsStopped = ad.DiagnosticsStopped 
                 ad.DiagnosticsStopped <- false
-                emitVAR03diagnostics this.FplId block.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos false
+                this.ErrorOccurred <- emitVAR03diagnostics this.FplId block.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos false
                 ad.DiagnosticsStopped <- oldDiagnosticsStopped
             else
                 block.Scope.Add(this.FplId, this)
 
         let addToSimpleFplBlocksScope (block:FplValue) formulaConflict = 
             if block.Scope.ContainsKey(this.FplId) then
-                emitVAR03diagnostics this.FplId block.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos formulaConflict
+                this.ErrorOccurred <- emitVAR03diagnostics this.FplId block.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos formulaConflict
             else
                 block.Scope.Add(this.FplId, this)
         
         let addToPropertyOrConstructor (property:FplValue) formulaConflict = 
             let parentOfProperty = property.Parent.Value
             if property.Scope.ContainsKey(this.FplId) then
-                emitVAR03diagnostics this.FplId property.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos formulaConflict
+                this.ErrorOccurred <- emitVAR03diagnostics this.FplId property.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos formulaConflict
             elif parentOfProperty.Scope.ContainsKey(this.FplId) then
                 // check also the scope of the property's parent block
-                emitVAR03diagnostics this.FplId parentOfProperty.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos formulaConflict
+                this.ErrorOccurred <- emitVAR03diagnostics this.FplId parentOfProperty.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos formulaConflict
             else
                 property.Scope.Add(this.FplId, this)
 
         let addToProofOrCorolllary (proofOrCorollary:FplValue) = 
             let rec conflictInScope (node:FplValue) formulaConflict =
                 if node.Scope.ContainsKey(this.FplId) then
-                    emitVAR03diagnostics this.FplId node.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos formulaConflict
+                    this.ErrorOccurred <- emitVAR03diagnostics this.FplId node.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos formulaConflict
                     true
                 else 
                     let parent = node.Parent.Value
@@ -1491,7 +1497,7 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
         let addToVariableOrQuantorOrMapping (variableOrQuantor:FplValue) =
             let rec conflictInScope (node:FplValue) formulaConflict =
                 if node.Scope.ContainsKey(this.FplId) then
-                    emitVAR03diagnostics this.FplId node.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos formulaConflict
+                    this.ErrorOccurred <- emitVAR03diagnostics this.FplId node.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos formulaConflict
                     true
                 else 
                     let parent = node.Parent.Value
@@ -1544,11 +1550,11 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
         | Some next when next.Name = PrimQuantorAll || next.Name = PrimQuantorExists || next.Name = PrimQuantorExistsN ->  
             this.SetIsBound() // quantor-Variables are bound
             if next.Scope.ContainsKey(this.FplId) then
-                emitVAR02diagnostics this.FplId this.StartPos this.EndPos
+                this.ErrorOccurred <- emitVAR02diagnostics this.FplId this.StartPos this.EndPos
             elif next.Name = PrimQuantorExistsN && next.Scope.Count>0 then 
-                emitVAR07diagnostics this.FplId this.StartPos this.EndPos
+                this.ErrorOccurred <- emitVAR07diagnostics this.FplId this.StartPos this.EndPos
             elif this.Name = PrimVariableArrayL then 
-                emitVAR08diagnostics this.StartPos this.EndPos
+                this.ErrorOccurred <- emitVAR08diagnostics this.StartPos this.EndPos
             else
                 addToVariableOrQuantorOrMapping next
                 
@@ -1586,7 +1592,7 @@ let checkVAR04Diagnostics (fv:FplValue) =
     |> List.map (fun var -> var :?> FplGenericVariable)
     |> List.filter(fun var -> not var.IsUsed)
     |> List.iter (fun var -> 
-        emitVAR04diagnostics var.FplId var.StartPos var.EndPos
+        var.ErrorOccurred <- emitVAR04diagnostics var.FplId var.StartPos var.EndPos
     )
 
 [<AbstractClass>]
@@ -1663,9 +1669,8 @@ type FplRuleOfInference(positions: Positions, parent: FplValue, runOrder) =
     override this.IsBlock () = true    
 
     override this.Run variableStack = 
-        // todo implement run
         this.Debug "Run"
-        emitLG004diagnostic this.Name this.Arity this.StartPos this.EndPos
+        this.ErrorOccurred <- emitLG004diagnostic this.Name this.Arity this.StartPos this.EndPos
 
     override this.EmbedInSymbolTable _ = 
         this.CheckConsistency()
@@ -1948,7 +1953,7 @@ type FplConstructor(positions: Positions, parent: FplValue) as this =
             parentClass.ArgList 
             |> Seq.iter (fun fv -> 
                 if not (this.ParentConstructorCalls.Contains fv.FplId) then
-                    emitID020Diagnostics fv.FplId fv.StartPos
+                    fv.ErrorOccurred <- emitID020Diagnostics fv.FplId fv.StartPos
             )
         | _ -> ()
         checkVAR04Diagnostics this
@@ -2067,7 +2072,7 @@ type FplGenericPredicateBlock(positions: Positions, parent: FplValue) =
         if not _isReady then
             _callCounter <- _callCounter + 1
             if _callCounter > maxRecursion then
-                emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
+                this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
             else
                 if this.IsIntrinsic then 
                     let undetermined = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
@@ -2104,7 +2109,7 @@ let checkSIG02Diagnostics (root:FplValue) symbol precedence pos1 pos2 =
             | _ -> ()))
     if precedences.ContainsKey(precedence) then
         let conflict = precedences[precedence].QualifiedStartPos
-        emitSIG02Diagnostics symbol precedence conflict pos1 pos2
+        precedences[precedence].ErrorOccurred <- emitSIG02Diagnostics symbol precedence conflict pos1 pos2
 
 let signatureRepresent (fv:FplValue) = 
     let signatureVarRepresentations = 
@@ -2132,9 +2137,9 @@ type FplPredicate(positions: Positions, parent: FplValue, runOrder) =
     override this.CheckConsistency() = 
         base.CheckConsistency()
         match this.ExpressionType with
-        | FixType.Infix _ when this.Arity <> 2 -> emitSIG00Diagnostics this.ExpressionType.Type 2 this.Arity this.SignStartPos this.SignEndPos
-        | FixType.Prefix _ when this.Arity <> 1 -> emitSIG00Diagnostics this.ExpressionType.Type 1 this.Arity this.SignStartPos this.SignEndPos
-        | FixType.Postfix _ when this.Arity <> 1 -> emitSIG00Diagnostics this.ExpressionType.Type 1 this.Arity this.SignStartPos this.SignEndPos
+        | FixType.Infix _ when this.Arity <> 2 -> this.ErrorOccurred <- emitSIG00Diagnostics this.ExpressionType.Type 2 this.Arity this.SignStartPos this.SignEndPos
+        | FixType.Prefix _ when this.Arity <> 1 -> this.ErrorOccurred <- emitSIG00Diagnostics this.ExpressionType.Type 1 this.Arity this.SignStartPos this.SignEndPos
+        | FixType.Postfix _ when this.Arity <> 1 -> this.ErrorOccurred <- emitSIG00Diagnostics this.ExpressionType.Type 1 this.Arity this.SignStartPos this.SignEndPos
         | _ -> ()
         match this.ExpressionType with
         | FixType.Infix (symbol, precedence) -> checkSIG02Diagnostics (getRoot this) symbol precedence this.SignStartPos this.SignEndPos
@@ -2200,8 +2205,8 @@ type FplAxiom(positions: Positions, parent: FplValue, runOrder) =
                 this.SetValuesOf fv
             )
             _isReady <- this.Arity = 0 
-            emitLG003diagnostic (this.Type(SignatureType.Name)) this.Name (this.Represent()) this.StartPos this.EndPos
-            emitLG004diagnostic this.Name this.Arity this.StartPos this.EndPos
+            this.ErrorOccurred <- emitLG003diagnostic (this.Type(SignatureType.Name)) this.Name (this.Represent()) this.StartPos this.EndPos
+            this.ErrorOccurred <- emitLG004diagnostic this.Name this.Arity this.StartPos this.EndPos
 
     override this.RunOrder = Some _runOrder
 
@@ -2239,8 +2244,8 @@ type FplGenericTheoremLikeStmt(positions: Positions, parent: FplValue, runOrder)
                 this.SetValuesOf fv
             )
             _isReady <- this.Arity = 0 
-            emitLG003diagnostic (this.Type(SignatureType.Name)) this.Name (this.Represent()) this.StartPos this.EndPos
-            emitLG004diagnostic this.Name this.Arity this.StartPos this.EndPos
+            this.ErrorOccurred <- emitLG003diagnostic (this.Type(SignatureType.Name)) this.Name (this.Represent()) this.StartPos this.EndPos
+            this.ErrorOccurred <- emitLG004diagnostic this.Name this.Arity this.StartPos this.EndPos
 
             // evaluate all corollaries and proofs of the theorem-like statement
             this.Scope.Values
@@ -2251,7 +2256,7 @@ type FplGenericTheoremLikeStmt(positions: Positions, parent: FplValue, runOrder)
             )
 
         if not _hasProof then 
-           emitPR007Diagnostics (this.Type(SignatureType.Name)) this.Name this.StartPos this.EndPos
+           this.ErrorOccurred <- emitPR007Diagnostics (this.Type(SignatureType.Name)) this.Name this.StartPos this.EndPos
 
     override this.RunOrder = Some _runOrder
 
@@ -2353,9 +2358,9 @@ type FplCorollary(positions: Positions, parent: FplValue, runOrder) =
             // everything is ok, change the parent of the provable from theory to the found parent 
             this.Parent <- Some potentialParent
         | ScopeSearchResult.FoundIncorrectBlock incorrectBlock ->
-            emitID005diagnostics this.FplId incorrectBlock this.StartPos this.EndPos
+            this.ErrorOccurred <- emitID005diagnostics this.FplId incorrectBlock this.StartPos this.EndPos
         | ScopeSearchResult.NotFound ->
-            emitID006diagnostics this.FplId this.StartPos this.EndPos
+            this.ErrorOccurred <- emitID006diagnostics this.FplId this.StartPos this.EndPos
         | _ -> ()
         tryAddToParentUsingFplId this
 
@@ -2392,7 +2397,7 @@ type FplConjecture(positions: Positions, parent: FplValue, runOrder) =
                 this.SetValuesOf fv
             )
             _isReady <- this.Arity = 0 
-            emitLG004diagnostic this.Name this.Arity this.StartPos this.EndPos
+            this.ErrorOccurred <- emitLG004diagnostic this.Name this.Arity this.StartPos this.EndPos
 
 
     override this.RunOrder = Some _runOrder
@@ -2428,7 +2433,7 @@ type FplGenericJustificationItem(positions: Positions, parent: FplValue) =
             |> Seq.tryFind (fun otherId -> otherId = thisJustificationItemId)
         match alreadyAddedIdOpt with
         | Some otherId ->
-            emitPR004Diagnostics thisJustificationItemId otherId this.StartPos this.EndPos 
+            this.ErrorOccurred <- emitPR004Diagnostics thisJustificationItemId otherId this.StartPos this.EndPos 
         | _ -> ()
         addExpressionToParentArgList this
 
@@ -2757,7 +2762,7 @@ and FplArgument(positions: Positions, parent: FplValue, runOrder) =
         let (proof:FplProof) = this.ParentProof
         if proof.HasArgument (this.FplId) then 
             let conflict = proof.Scope[this.FplId]
-            emitPR003Diagnostics this.FplId conflict.QualifiedStartPos this.StartPos this.EndPos 
+            this.ErrorOccurred <- emitPR003Diagnostics this.FplId conflict.QualifiedStartPos this.StartPos this.EndPos 
         else 
             proof.Scope.Add(this.FplId, this)
 
@@ -2811,7 +2816,7 @@ and FplProof(positions: Positions, parent: FplValue, runOrder) =
             allArgumentsEvaluateToTrue <- allArgumentsEvaluateToTrue && argRepr = LiteralTrue 
         )
         if not allArgumentsEvaluateToTrue then
-            emitPR009Diagnostics this.StartPos this.StartPos
+            this.ErrorOccurred <- emitPR009Diagnostics this.StartPos this.StartPos
 
     override this.EmbedInSymbolTable _ = 
         /// Tries to find a theorem-like statement for a proof
@@ -2865,9 +2870,9 @@ and FplProof(positions: Positions, parent: FplValue, runOrder) =
             // everything is ok, change the parent of the provable from theory to the found parent 
             this.Parent <- Some potentialParent
         | ScopeSearchResult.FoundIncorrectBlock incorrectBlock ->
-            emitID002Diagnostics this.FplId incorrectBlock this.StartPos this.EndPos
+            this.ErrorOccurred <- emitID002Diagnostics this.FplId incorrectBlock this.StartPos this.EndPos
         | ScopeSearchResult.NotFound ->
-            emitID003diagnostics this.FplId this.StartPos this.EndPos
+            this.ErrorOccurred <- emitID003diagnostics this.FplId this.StartPos this.EndPos
         | _ -> ()
         tryAddToParentUsingFplId this
 
@@ -2980,7 +2985,7 @@ type FplLanguage(positions: Positions, parent: FplValue) =
             let conflict = parent.Scope[this.FplId]
             let oldDiagnosticsStopped = ad.DiagnosticsStopped
             ad.DiagnosticsStopped <- false
-            emitID014Diagnostics this.FplId conflict.QualifiedStartPos this.StartPos this.EndPos 
+            this.ErrorOccurred <- emitID014Diagnostics this.FplId conflict.QualifiedStartPos this.StartPos this.EndPos 
             ad.DiagnosticsStopped <- oldDiagnosticsStopped
         else
             parent.Scope.Add(this.FplId, this)
@@ -3096,7 +3101,6 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
 type FplReference(positions: Positions, parent: FplValue) =
     inherit FplGenericReference(positions, parent)
     let mutable _argType = ArgType.Nothing
-    let mutable (_errorOccurred:string option) = None
 
     override this.Name = PrimRefL
     override this.ShortName = PrimRef
@@ -3107,20 +3111,6 @@ type FplReference(positions: Positions, parent: FplValue) =
             var.SetValue(fv)
         else
             base.SetValue(fv)
-
-    /// Indicates if an interpreter error occurred during the construction of this FplReference
-    member this.ErrorOccurred
-        with get () = _errorOccurred
-        and set (value) = 
-            match _errorOccurred, value with
-            | None, Some next -> _errorOccurred <- Some next // aggregate errors
-            | Some prev, Some next -> _errorOccurred <- Some $"{prev}, {next}" // aggregate errors
-            | _ -> ()
-
-    interface IErrorOccurred with
-        member this.ErrorOccurred 
-            with get () = this.ErrorOccurred
-            and set (value) = this.ErrorOccurred <- value
 
     /// Indicates if this Reference was followed by brackets, by parentheses, or by nothing in the FPL code.
     member this.ArgType
@@ -3361,7 +3351,7 @@ let checkSIG01Diagnostics (fv: FplValue)  =
                     | _ -> ()))
 
         if fv.Scope.Count = 0 then
-            emitSIG01Diagnostics expressionId fv.StartPos fv.EndPos
+            fv.ErrorOccurred <- emitSIG01Diagnostics expressionId fv.StartPos fv.EndPos
     | _ -> ()
 
 /// Gets the list of arguments of an FplValue if any
@@ -3910,7 +3900,7 @@ let checkSIG04Diagnostics (calling:FplValue) (candidates: FplValue list) =
     match checkCandidates calling candidates [] with
     | (Some candidate,_) -> Some candidate // no error occured
     | (None, errList) -> 
-        emitSIG04Diagnostics (calling.Type SignatureType.Mixed) candidates.Length errList calling.StartPos calling.EndPos
+        calling.ErrorOccurred <- emitSIG04Diagnostics (calling.Type SignatureType.Mixed) candidates.Length errList calling.StartPos calling.EndPos
         None
 
 /// Checks if a reference to an array matches its dimensions (in terms of number and types)
@@ -3924,19 +3914,16 @@ let checkSIG08_SIG10Diagnostics (referenceToArray:FplValue) =
                     match mpwa [i] [d] with
                     | Some errMsg ->
                         // type mismatch between dimension and index
-                        refToArray.ErrorOccurred <- Some (SIG08("","","","",0).Code)
-                        emitSIG08diagnostics varArray.FplId i.FplId (i.Type SignatureType.Type) (d.Type SignatureType.Type) dimNumber i.StartPos i.EndPos 
+                        refToArray.ErrorOccurred <- emitSIG08diagnostics varArray.FplId i.FplId (i.Type SignatureType.Type) (d.Type SignatureType.Type) dimNumber i.StartPos i.EndPos 
                         matchAllIndexes ixs dms (dimNumber + 1) 
                     | _ -> matchAllIndexes ixs dms (dimNumber + 1) 
                 | [], d::dms -> 
                     // missing index for dimension dimOrdinal
-                    refToArray.ErrorOccurred <- Some (SIG09("","",0).Code)
-                    emitSIG09diagnostics varArray.FplId (d.Type SignatureType.Type) dimNumber d.StartPos d.EndPos
+                    refToArray.ErrorOccurred <- emitSIG09diagnostics varArray.FplId (d.Type SignatureType.Type) dimNumber d.StartPos d.EndPos
                     matchAllIndexes [] dms (dimNumber + 1) 
                 | i::ixs, [] -> 
                     // array has less dimensions, index at dimOrdinal not supported
-                    refToArray.ErrorOccurred <- Some (SIG10("","",0).Code)
-                    emitSIG10diagnostics varArray.FplId (i.FplId) dimNumber i.StartPos i.EndPos
+                    refToArray.ErrorOccurred <- emitSIG10diagnostics varArray.FplId (i.FplId) dimNumber i.StartPos i.EndPos
                     matchAllIndexes ixs [] (dimNumber + 1)  
                 | [], [] -> ()
 
@@ -3982,7 +3969,7 @@ type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
             | Some (:? FplConstructor as ctor) ->
                 if ctor.ParentConstructorCalls.Contains(this.FplId) then 
                     // todo duplicate constructor call
-                    emitID021Diagnostics this.FplId this.StartPos
+                    this.ErrorOccurred <- emitID021Diagnostics this.FplId this.StartPos
                 else
                     ctor.ParentConstructorCalls.Add this.FplId |> ignore
             | _ -> ()
@@ -4011,7 +3998,7 @@ type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
                     | true, _ ->
                         // the call uses parameters that are not possible for calling a non-existing constructor 
                         // obj() or an intrinsic class
-                        emitID022Diagnostics baseClass.FplId this.StartPos this.EndPos
+                        this.ErrorOccurred <- emitID022Diagnostics baseClass.FplId this.StartPos this.EndPos
                     | false, _ ->
                         let parentClass = baseClass :?> FplClass
                         let candidates = parentClass.GetConstructors()
@@ -4024,9 +4011,9 @@ type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
                 | None ->
                     // the base constructor call's id is not among the base classes this class is derived from
                     let candidates = outerClass.ArgList |> Seq.map (fun fv -> fv.FplId) |> Seq.sort |> String.concat ", "
-                    emitID017Diagnostics this.FplId candidates this.StartPos this.EndPos
+                    this.ErrorOccurred <- emitID017Diagnostics this.FplId candidates this.StartPos this.EndPos
             | _ ->
-                    emitID017Diagnostics this.FplId "" this.StartPos this.EndPos
+                    this.ErrorOccurred <- emitID017Diagnostics this.FplId "" this.StartPos this.EndPos
                     registerParentConstructor()
         | _ ->
             // this case never happens, 
@@ -4123,7 +4110,7 @@ let checkArgPred (fv:FplValue) (arg:FplValue)  =
     | LiteralTrue
     | LiteralFalse 
     | PrimUndetermined -> () 
-    | _ -> emitLG001Diagnostics argType argName fv.Name arg.StartPos arg.EndPos
+    | _ -> arg.ErrorOccurred <- emitLG001Diagnostics argType argName fv.Name arg.StartPos arg.EndPos
 
 
 /// Checks if an argument points to a free variable and if so, issues VAR09 diagnostics.
@@ -4133,7 +4120,7 @@ let checkFreeVar (arg:FplValue) =
         match ref with 
         | :? FplGenericVariable as var ->
             if not var.IsBound then 
-                emitVAR09diagnostics var.FplId var.TypeId var.StartPos var.EndPos
+                var.ErrorOccurred <- emitVAR09diagnostics var.FplId var.TypeId var.StartPos var.EndPos
         | _ -> ()
 
 /// Implements the semantics of an FPL conjunction compound predicate.
@@ -4523,7 +4510,7 @@ type FplEquality(name, positions: Positions, parent: FplValue) as this =
     override this.Run variableStack = 
         this.Debug "Run"
         if this.ArgList.Count <> 2 then 
-            emitID013Diagnostics variableStack.CallerStartPos variableStack.CallerEndPos $"Predicate `=` takes 2 arguments, got {this.ArgList.Count}." 
+            this.ErrorOccurred <- emitID013Diagnostics variableStack.CallerStartPos variableStack.CallerEndPos $"Predicate `=` takes 2 arguments, got {this.ArgList.Count}." 
         else
 
         let getActual (x:FplValue) = 
@@ -4540,25 +4527,25 @@ type FplEquality(name, positions: Positions, parent: FplValue) as this =
         let newValue = new FplIntrinsicUndef((variableStack.CallerStartPos, variableStack.CallerEndPos), this.Parent.Value)
         match a1Repr with
         | LiteralUndef -> 
-            emitID013Diagnostics variableStack.CallerStartPos variableStack.CallerEndPos "Predicate `=` cannot be evaluated because the left argument is undefined." 
+            this.ErrorOccurred <- emitID013Diagnostics variableStack.CallerStartPos variableStack.CallerEndPos "Predicate `=` cannot be evaluated because the left argument is undefined." 
             this.SetValue(newValue)
         | _ -> 
             match b1Repr with
             | LiteralUndef -> 
-                emitID013Diagnostics variableStack.CallerStartPos variableStack.CallerEndPos "Predicate `=` cannot be evaluated because the right argument is undefined." 
+                this.ErrorOccurred <- emitID013Diagnostics variableStack.CallerStartPos variableStack.CallerEndPos "Predicate `=` cannot be evaluated because the right argument is undefined." 
                 this.SetValue(newValue)
             | _ -> 
                 let newValue = FplIntrinsicPred((variableStack.CallerStartPos, variableStack.CallerEndPos), this.Parent.Value)
                 match a1Repr with
                 | "dec pred"  
                 | PrimUndetermined -> 
-                    emitID013Diagnostics variableStack.CallerStartPos variableStack.CallerEndPos "Predicate `=` cannot be evaluated because the left argument is undetermined." 
+                    this.ErrorOccurred <- emitID013Diagnostics variableStack.CallerStartPos variableStack.CallerEndPos "Predicate `=` cannot be evaluated because the left argument is undetermined." 
                     this.SetValue(newValue)
                 | _ -> 
                     match b1Repr with
                     | "dec pred"  
                     | PrimUndetermined -> 
-                        emitID013Diagnostics variableStack.CallerStartPos variableStack.CallerEndPos "Predicate `=` cannot be evaluated because the right argument is undetermined." 
+                        this.ErrorOccurred <- emitID013Diagnostics variableStack.CallerStartPos variableStack.CallerEndPos "Predicate `=` cannot be evaluated because the right argument is undetermined." 
                         this.SetValue(newValue)
                     | _ -> 
                         let a1IsDeclared = a1Repr.Contains("dec ")
@@ -4664,7 +4651,7 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
             | _ -> candidatesFromScope
 
         if candidates.Length = 0 then 
-            emitID018Diagnostics this.FplId this.StartPos this.EndPos
+            this.ErrorOccurred <- emitID018Diagnostics this.FplId this.StartPos this.EndPos
 
     override this.EmbedInSymbolTable _ = 
         this.CheckConsistency()    
@@ -4946,9 +4933,9 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) as this
         if not this.IsIntrinsic then // if not intrinsic, check variable usage
             checkVAR04Diagnostics this
         match this.ExpressionType with
-        | FixType.Infix _ when this.Arity <> 2 -> emitSIG00Diagnostics this.ExpressionType.Type 2 this.Arity this.SignStartPos this.SignEndPos
-        | FixType.Prefix _ when this.Arity <> 1 -> emitSIG00Diagnostics this.ExpressionType.Type 1 this.Arity this.SignStartPos this.SignEndPos
-        | FixType.Postfix _ when this.Arity <> 1 -> emitSIG00Diagnostics this.ExpressionType.Type 1 this.Arity this.SignStartPos this.SignEndPos
+        | FixType.Infix _ when this.Arity <> 2 -> this.ErrorOccurred <- emitSIG00Diagnostics this.ExpressionType.Type 2 this.Arity this.SignStartPos this.SignEndPos
+        | FixType.Prefix _ when this.Arity <> 1 -> this.ErrorOccurred <- emitSIG00Diagnostics this.ExpressionType.Type 1 this.Arity this.SignStartPos this.SignEndPos
+        | FixType.Postfix _ when this.Arity <> 1 -> this.ErrorOccurred <- emitSIG00Diagnostics this.ExpressionType.Type 1 this.Arity this.SignStartPos this.SignEndPos
         | _ -> ()
         match this.ExpressionType with
         | FixType.Infix (symbol, precedence) -> checkSIG02Diagnostics (getRoot this) symbol precedence this.SignStartPos this.SignEndPos
@@ -4983,7 +4970,7 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) as this
         if not _isReady then
             _callCounter <- _callCounter + 1
             if _callCounter > maxRecursion then
-                emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
+                this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
             else
                 if this.IsIntrinsic then 
                     runIntrinsicFunction this variableStack
@@ -5064,7 +5051,7 @@ type FplGenericQuantor(positions: Positions, parent: FplValue) =
         |> List.map(fun var -> var :?> FplGenericVariable)
         |> List.filter(fun var -> not var.IsUsed)
         |> List.iter (fun var -> 
-            emitVAR05diagnostics var.FplId var.StartPos var.EndPos
+            var.ErrorOccurred <- emitVAR05diagnostics var.FplId var.StartPos var.EndPos
         )
         checkArgPred this (this.ArgList[0])
 
@@ -5218,7 +5205,7 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) as this 
         if not _isReady then
             _callCounter <- _callCounter + 1
             if _callCounter > maxRecursion then
-                emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
+                this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
             else
                 if this.IsIntrinsic then 
                     runIntrinsicFunction this variableStack
@@ -5341,7 +5328,7 @@ type FplReturn(positions: Positions, parent: FplValue) as this =
             match mapTypeOpt with 
             | Some mapType ->
                 match this.MatchWithMapping returnedReference mapType with
-                | Some errMsg -> emitSIG03Diagnostics errMsg (mapType.Type(SignatureType.Type)) (returnedReference.StartPos) (returnedReference.EndPos)
+                | Some errMsg -> returnedReference.ErrorOccurred <- emitSIG03Diagnostics errMsg (mapType.Type(SignatureType.Type)) (returnedReference.StartPos) (returnedReference.EndPos)
                 | _ -> 
                     match returnedReference with
                     | :? FplIntrinsicPred 
@@ -5578,25 +5565,10 @@ type FplForInStmtDomain(positions: Positions, parent: FplValue) =
 /// Implements the assigment statement in FPL.
 type FplAssignment(positions: Positions, parent: FplValue) as this =
     inherit FplGenericStmt(positions, parent)
-    let mutable (_errorOccurred:string option) = None
 
     do
         this.FplId <- $"assign (ln {this.StartPos.Line})"
         this.TypeId <- LiteralUndef
-
-    /// Indicates if an interpreter error occurred during the construction of this FplAssignment
-    member this.ErrorOccurred
-        with get () = _errorOccurred
-        and set (value) = 
-            match _errorOccurred, value with
-            | None, Some next -> _errorOccurred <- Some next // aggregate errors
-            | Some prev, Some next -> _errorOccurred <- Some $"{prev}, {next}" // aggregate errors
-            | _ -> ()
-
-    interface IErrorOccurred with
-        member this.ErrorOccurred 
-            with get () = this.ErrorOccurred
-            and set (value) = this.ErrorOccurred <- value
 
     override this.Name = PrimAssignment
 
@@ -5614,8 +5586,7 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
         base.CheckConsistency()
         let checkTypes (referencedTypeOfVarOpt:FplValue option) nameAssignee typeAssignee (assignedValue:FplValue) nameAssignedValue typeAssignedValue = 
             if nameAssignee = nameAssignedValue then
-                this.ErrorOccurred <- Some (LG005("").Code)
-                emitLG005Diagnostics nameAssignedValue assignedValue.StartPos assignedValue.EndPos
+                this.ErrorOccurred <- emitLG005Diagnostics nameAssignedValue assignedValue.StartPos assignedValue.EndPos
             elif typeAssignee = LiteralObj && (assignedValue.Name = PrimDefaultConstructor || assignedValue.Name = LiteralCtorL) then
                 ()
             elif typeAssignee = $"*{typeAssignedValue}" then 
@@ -5628,8 +5599,7 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
                     | :? FplGenericConstructor as constructor when constructor.ToBeConstructedClass.IsSome ->
                         if not (inheritsFrom constructor.ToBeConstructedClass.Value typeAssignee) then 
                             // issue SIG05 diagnostics if either no inheritance chain found 
-                            this.ErrorOccurred <- Some (SIG05("", "").Code)
-                            emitSIG05Diagnostics typeAssignee typeAssignedValue this.ArgList[1].StartPos this.ArgList[1].EndPos 
+                            this.ErrorOccurred <- emitSIG05Diagnostics typeAssignee typeAssignedValue this.ArgList[1].StartPos this.ArgList[1].EndPos 
                     | :? FplFunctionalTerm as funcTerm -> 
                         let mappingOpt = getMapping funcTerm 
                         match mappingOpt with 
@@ -5637,15 +5607,12 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
                             let newTypeAssignedValue = mapping.Type SignatureType.Type
                             if typeAssignee <> newTypeAssignedValue then 
                                 // issue SIG05 diagnostics if the return type of an assigned function differs from type of assignee
-                                this.ErrorOccurred <- Some (SIG05("", "").Code)
-                                emitSIG05Diagnostics typeAssignee newTypeAssignedValue this.ArgList[1].StartPos this.ArgList[1].EndPos
+                                this.ErrorOccurred <- emitSIG05Diagnostics typeAssignee newTypeAssignedValue this.ArgList[1].StartPos this.ArgList[1].EndPos
                         | _ -> ()
                     | _ -> 
-                        this.ErrorOccurred <- Some (SIG05("", "").Code)
-                        emitSIG05Diagnostics typeAssignee typeAssignedValue this.ArgList[1].StartPos this.ArgList[1].EndPos
+                        this.ErrorOccurred <- emitSIG05Diagnostics typeAssignee typeAssignedValue this.ArgList[1].StartPos this.ArgList[1].EndPos
                 | _ -> 
-                    this.ErrorOccurred <- Some (SIG05("", "").Code)
-                    emitSIG05Diagnostics typeAssignee typeAssignedValue this.ArgList[1].StartPos this.ArgList[1].EndPos
+                    this.ErrorOccurred <- emitSIG05Diagnostics typeAssignee typeAssignedValue this.ArgList[1].StartPos this.ArgList[1].EndPos
             else   
                 ()
         let checkErrorOccuredInReference (fv:FplValue) = 
@@ -5657,6 +5624,8 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
         checkErrorOccuredInReference this.ArgList[0]
         checkErrorOccuredInReference this.ArgList[1]
         match this.Assignee, this.AssignedValue with
+        | Some (:? FplVariable as assignee), Some (assignedValue:FplValue) when assignedValue.Name = LiteralClL ->
+            this.ErrorOccurred <- emitID004diagnostics assignedValue.FplId this.ArgList[1].StartPos this.ArgList[1].EndPos
         | Some (:? FplVariable as assignee), Some (assignedValue:FplValue) -> 
             let nameAssignee = assignee.Type SignatureType.Name
             let typeAssignee = assignee.Type SignatureType.Type
@@ -5672,29 +5641,23 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
         | Some (:? FplSelf as assignee), _ ->
             let ref = assignee.Scope.Values |> Seq.toList
             if ref.Length > 0 then 
-                this.ErrorOccurred <- Some (SIG07("", "", "").Code)
-                emitSIG07iagnostic (assignee.Type SignatureType.Name) (getEnglishName ref.Head.Name) assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
+                this.ErrorOccurred <- emitSIG07iagnostic (assignee.Type SignatureType.Name) (getEnglishName ref.Head.Name) assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
             else
-                this.ErrorOccurred <- Some (SIG07("", "", "").Code)
-                emitSIG07iagnostic (assignee.Type SignatureType.Name) "the type of self cound not be determined" assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
+                this.ErrorOccurred <- emitSIG07iagnostic (assignee.Type SignatureType.Name) "the type of self cound not be determined" assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
         | Some (:? FplParent as assignee), _ ->
             let ref = assignee.Scope.Values |> Seq.toList
             if ref.Length > 0 then 
-                this.ErrorOccurred <- Some (SIG07("", "", "").Code)
-                emitSIG07iagnostic (assignee.Type SignatureType.Name) (getEnglishName ref.Head.Name) assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
+                this.ErrorOccurred <- emitSIG07iagnostic (assignee.Type SignatureType.Name) (getEnglishName ref.Head.Name) assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
             else
-                this.ErrorOccurred <- Some (SIG07("", "", "").Code)
-                emitSIG07iagnostic (assignee.Type SignatureType.Name) "the type of parent cound not be determined" assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
+                this.ErrorOccurred <- emitSIG07iagnostic (assignee.Type SignatureType.Name) "the type of parent cound not be determined" assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
         | Some (assignee), Some assignedValue ->
             let nameAssignee = assignee.Type SignatureType.Name
             let nameAssignedValue = assignedValue.Type SignatureType.Name
             if nameAssignee = nameAssignedValue then
                 // something has been assigned to itself
-                this.ErrorOccurred <- Some (LG005("").Code)
-                emitLG005Diagnostics nameAssignedValue assignedValue.StartPos assignedValue.EndPos
+                this.ErrorOccurred <- emitLG005Diagnostics nameAssignedValue assignedValue.StartPos assignedValue.EndPos
             else
-                this.ErrorOccurred <- Some (SIG07("", "", "").Code)
-                emitSIG07iagnostic (assignee.Type SignatureType.Name) $"type `{assignee.Type SignatureType.Type}`" assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
+                this.ErrorOccurred <- emitSIG07iagnostic (assignee.Type SignatureType.Name) $"type `{assignee.Type SignatureType.Type}`" assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
         | _ -> ()
 
     override this.EmbedInSymbolTable _ = 
@@ -5739,8 +5702,6 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
             assignee.SetValue assignedValue
         | None, Some (:? FplVariable as assignee), Some (:? FplIntrinsicPred as assignedValue) ->
             assignee.SetValue assignedValue
-        | None, Some (:? FplVariable as assignee), Some (:? FplClass as assignedValue) ->
-            emitID004diagnostics assignedValue.FplId this.ArgList[1].StartPos this.ArgList[1].EndPos
         | None, Some (:? FplVariableArray as assignee), Some (:? FplGenericConstructor as assignedValue) ->
             assignedValue.Run variableStack
             match assignedValue.Instance with 

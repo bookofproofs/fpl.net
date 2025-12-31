@@ -26,9 +26,8 @@ let emitUnexpectedErrorDiagnostics errMsg =
             Diagnostic.Code = GEN00 errMsg
             Diagnostic.Alternatives = None 
         }
-
     ad.AddDiagnostic(diagnostic)
-
+    // do not aggregate GEN00 and return unit instead of Some (diagnostic.Code.Code)
 
 let emitID001Diagnostics alreadyDeclaredTypeStr qualifiedStartPosConflictStr pos1 pos2 =
     let diagnostic =
@@ -42,6 +41,7 @@ let emitID001Diagnostics alreadyDeclaredTypeStr qualifiedStartPosConflictStr pos
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitID002Diagnostics nodeTypeName incorrectBlockType pos1 pos2 =
     let diagnostic =
@@ -55,6 +55,7 @@ let emitID002Diagnostics nodeTypeName incorrectBlockType pos1 pos2 =
             Diagnostic.Alternatives = Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary)." 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitID003diagnostics name pos1 pos2 =
     let diagnostic =
@@ -69,6 +70,7 @@ let emitID003diagnostics name pos1 pos2 =
                 Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary)." 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitID004diagnostics name pos1 pos2 =
     let diagnostic =
@@ -82,6 +84,7 @@ let emitID004diagnostics name pos1 pos2 =
             Diagnostic.Alternatives = None
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitID005diagnostics name incorrectBlockType pos1 pos2 =
     let diagnostic =
@@ -95,9 +98,8 @@ let emitID005diagnostics name incorrectBlockType pos1 pos2 =
             Diagnostic.Alternatives =
                 Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary), a conjecture, or an axiom." 
          }
-
     ad.AddDiagnostic diagnostic
-
+    Some (diagnostic.Code.Code)
 
 let emitID006diagnostics name pos1 pos2 =
     let diagnostic =
@@ -112,6 +114,7 @@ let emitID006diagnostics name pos1 pos2 =
                 Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary), a conjecture, or an axiom." 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitID007diagnostics nodeType signatureNode baseType signatureBase pos1 pos2 =
     let diagnostic =
@@ -125,6 +128,7 @@ let emitID007diagnostics nodeType signatureNode baseType signatureBase pos1 pos2
             Diagnostic.Alternatives = None
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitID008Diagnostics constructorId classId pos1 pos2 =
     if constructorId <> classId then
@@ -139,6 +143,9 @@ let emitID008Diagnostics constructorId classId pos1 pos2 =
                 Diagnostic.Alternatives = None 
             }
         ad.AddDiagnostic diagnostic
+        Some (diagnostic.Code.Code)
+    else
+        None
 
 let emitID009Diagnostics name pos1 pos2 =
     let diagnostic =
@@ -152,6 +159,7 @@ let emitID009Diagnostics name pos1 pos2 =
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 
 let emitID010Diagnostics identifier pos1 pos2 =
@@ -166,6 +174,7 @@ let emitID010Diagnostics identifier pos1 pos2 =
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 
 let emitID011Diagnostics chain errorMsg pos1 pos2 = 
@@ -180,6 +189,7 @@ let emitID011Diagnostics chain errorMsg pos1 pos2 =
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitID013Diagnostics pos1 pos2 message =
     let diagnostic =
@@ -193,6 +203,7 @@ let emitID013Diagnostics pos1 pos2 message =
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitID014Diagnostics alreadyDeclaredMixedStr qualifiedStartPosConflictStr pos1 pos2 =
     let diagnostic =
@@ -206,7 +217,7 @@ let emitID014Diagnostics alreadyDeclaredMixedStr qualifiedStartPosConflictStr po
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
-
+    Some (diagnostic.Code.Code)
 
 let emitID015diagnostics name pos1 pos2 =
     let diagnostic =
@@ -220,7 +231,7 @@ let emitID015diagnostics name pos1 pos2 =
             Diagnostic.Alternatives = Some $"Use `{LiteralParent}` only inside {getEnglishName LiteralCtorL} or {getEnglishName LiteralPrtyL}."
         }
     ad.AddDiagnostic diagnostic
-
+    Some (diagnostic.Code.Code)
 
 let emitID016diagnostics name pos1 pos2  =
     let diagnostic =
@@ -234,6 +245,7 @@ let emitID016diagnostics name pos1 pos2  =
             Diagnostic.Alternatives = Some $"Use `{LiteralSelf}` only inside {getEnglishName PrimClassL}, {getEnglishName PrimPredicateL}, or {getEnglishName PrimFuncionalTermL}."
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitID017Diagnostics name candidatesNames pos1 pos2 =
     let diagnostic =
@@ -247,7 +259,7 @@ let emitID017Diagnostics name candidatesNames pos1 pos2 =
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
-
+    Some (diagnostic.Code.Code)
 
 let emitID018Diagnostics identifier pos1 pos2 =
     let diagnostic =
@@ -261,6 +273,7 @@ let emitID018Diagnostics identifier pos1 pos2 =
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitID020Diagnostics identifier pos1 =
     let diagnostic =
@@ -274,6 +287,7 @@ let emitID020Diagnostics identifier pos1 =
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitID021Diagnostics identifier pos1 =
     let diagnostic =
@@ -287,6 +301,7 @@ let emitID021Diagnostics identifier pos1 =
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitID022Diagnostics name pos1 pos2 =
     let alternative = 
@@ -306,6 +321,7 @@ let emitID022Diagnostics name pos1 pos2 =
             Diagnostic.Alternatives = Some alternative
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitID023Diagnostics multipleCandidates pos1 pos2 =
     let diagnostic =
@@ -319,6 +335,7 @@ let emitID023Diagnostics multipleCandidates pos1 pos2 =
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitID024Diagnostics alreadyLocalizedExpr qualifiedStartPosConflictStr pos1 pos2 =
     let diagnostic =
@@ -332,6 +349,7 @@ let emitID024Diagnostics alreadyLocalizedExpr qualifiedStartPosConflictStr pos1 
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitID025Diagnostics qualifiedNameCandidate candidateEnglishName blockEnglishName blockName pos1 pos2 =
     match blockName with 
@@ -356,7 +374,8 @@ let emitID025Diagnostics qualifiedNameCandidate candidateEnglishName blockEnglis
                 Diagnostic.Alternatives = None
             }
         ad.AddDiagnostic diagnostic
-    | _ -> ()
+        Some (diagnostic.Code.Code)
+    | _ -> None
 
 
 let emitID027Diagnostics name pos1 pos2 =
@@ -371,6 +390,7 @@ let emitID027Diagnostics name pos1 pos2 =
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitLG001Diagnostics argType argName typeOfPredicate pos1 pos2 =
     let diagnostic =
@@ -384,6 +404,7 @@ let emitLG001Diagnostics argType argName typeOfPredicate pos1 pos2 =
             Diagnostic.Alternatives = Some "This issue might be subsequent to other errors to be resolved first." 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitLG002diagnostic nodeTypeName times pos1 pos2 = 
     let diagnostic =
@@ -397,6 +418,7 @@ let emitLG002diagnostic nodeTypeName times pos1 pos2 =
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitLG003diagnostic nodeTypeName nodeName nodeRepr pos1 pos2 = 
     if nodeRepr = LiteralFalse then
@@ -411,6 +433,9 @@ let emitLG003diagnostic nodeTypeName nodeName nodeRepr pos1 pos2 =
                 Diagnostic.Alternatives = None 
             }
         ad.AddDiagnostic diagnostic
+        Some (diagnostic.Code.Code)
+    else
+        None
 
 let emitLG004diagnostic nodeName arity pos1 pos2 = 
     if arity > 0 then
@@ -425,6 +450,9 @@ let emitLG004diagnostic nodeName arity pos1 pos2 =
                 Diagnostic.Alternatives = None 
             }
         ad.AddDiagnostic diagnostic
+        Some (diagnostic.Code.Code)
+    else
+        None
 
 let emitLG005Diagnostics name pos1 pos2 =
     let diagnostic =
@@ -438,6 +466,7 @@ let emitLG005Diagnostics name pos1 pos2 =
             Diagnostic.Alternatives = None
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitPR001Diagnostics incorrectBlockType justificationItemName pos1 pos2 alternative =
     let diagnostic =
@@ -451,6 +480,7 @@ let emitPR001Diagnostics incorrectBlockType justificationItemName pos1 pos2 alte
             Diagnostic.Alternatives = Some alternative 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitPR003Diagnostics alreadyDeclaredMixedStr qualifiedStartPosConflictStr pos1 pos2 =
     let diagnostic =
@@ -463,8 +493,8 @@ let emitPR003Diagnostics alreadyDeclaredMixedStr qualifiedStartPosConflictStr po
             Diagnostic.Code = PR003(alreadyDeclaredMixedStr, qualifiedStartPosConflictStr)
             Diagnostic.Alternatives = None 
         }
-
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitPR004Diagnostics alreadyDeclaredTypeStr qualifiedStartPosConflictStr pos1 pos2 =
     let diagnostic =
@@ -477,8 +507,8 @@ let emitPR004Diagnostics alreadyDeclaredTypeStr qualifiedStartPosConflictStr pos
             Diagnostic.Code = PR004(alreadyDeclaredTypeStr, qualifiedStartPosConflictStr)
             Diagnostic.Alternatives = None 
         }
-
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitPR005Diagnostics argumentName pos1 pos2 =
     let diagnostic =
@@ -492,6 +522,7 @@ let emitPR005Diagnostics argumentName pos1 pos2 =
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitPR006Diagnostics proofName argumentName pos1 pos2 =
     let diagnostic =
@@ -505,35 +536,37 @@ let emitPR006Diagnostics proofName argumentName pos1 pos2 =
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitPR007Diagnostics nodeTypeName nodeName pos1 pos2 = 
-        let diagnostic =
-            { 
-                Diagnostic.Uri = ad.CurrentUri
-                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                Diagnostic.Severity = DiagnosticSeverity.Warning
-                Diagnostic.StartPos = pos1
-                Diagnostic.EndPos = pos2
-                Diagnostic.Code = PR007 (nodeTypeName, getEnglishName nodeName)
-                Diagnostic.Alternatives = None 
-            }
-        ad.AddDiagnostic diagnostic
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Warning
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = PR007 (nodeTypeName, getEnglishName nodeName)
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitPR008Diagnostics nodeName expectedInput actualInput pos1 pos2 = 
-        let diagnostic =
-            { 
-                Diagnostic.Uri = ad.CurrentUri
-                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                Diagnostic.Severity = DiagnosticSeverity.Warning
-                Diagnostic.StartPos = pos1
-                Diagnostic.EndPos = pos2
-                Diagnostic.Code = PR008 (nodeName, expectedInput, actualInput)
-                Diagnostic.Alternatives = None 
-            }
-        ad.AddDiagnostic diagnostic
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Warning
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = PR008 (nodeName, expectedInput, actualInput)
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitPR009Diagnostics pos1 pos2 =
-
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -545,6 +578,7 @@ let emitPR009Diagnostics pos1 pos2 =
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
     
 let emitPR010Diagnostics keyword exptectedRef pos1 pos2 =
     let diagnostic =
@@ -558,6 +592,7 @@ let emitPR010Diagnostics keyword exptectedRef pos1 pos2 =
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitPR011Diagnostics keyword exptectedRef pos1 pos2 =            
     let diagnostic =
@@ -571,9 +606,9 @@ let emitPR011Diagnostics keyword exptectedRef pos1 pos2 =
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitPR012Diagnostics pos1 pos2 =
-
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -585,9 +620,9 @@ let emitPR012Diagnostics pos1 pos2 =
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitPR013Diagnostics pos1 pos2 =
-
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -599,9 +634,9 @@ let emitPR013Diagnostics pos1 pos2 =
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitPR014Diagnostics pos1 pos2 =
-
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -613,6 +648,7 @@ let emitPR014Diagnostics pos1 pos2 =
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitPR015Diagnostics argumentID pos1 pos2 =
     let diagnostic =
@@ -626,6 +662,7 @@ let emitPR015Diagnostics argumentID pos1 pos2 =
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitPR016Diagnostics argumentID lastAssumedArgumentId pos1 pos2 =
     let diagnostic =
@@ -639,6 +676,7 @@ let emitPR016Diagnostics argumentID lastAssumedArgumentId pos1 pos2 =
             Diagnostic.Alternatives = Some $"Did you mean `{lastAssumedArgumentId}`?" 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitSIG00Diagnostics exprType expectedArity actualArity pos1 pos2 =
     let diagnostic =
@@ -652,6 +690,7 @@ let emitSIG00Diagnostics exprType expectedArity actualArity pos1 pos2 =
             Diagnostic.Alternatives = Some $"Arity of {expectedArity} expected." 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitSIG01Diagnostics expressionId pos1 pos2 =
     let diagnostic =
@@ -665,6 +704,7 @@ let emitSIG01Diagnostics expressionId pos1 pos2 =
             Diagnostic.Alternatives = Some "Declare a functional term, predicate, or class with this symbol." 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitSIG02Diagnostics symbol precedence conflict pos1 pos2 =
     let diagnostic =
@@ -678,6 +718,7 @@ let emitSIG02Diagnostics symbol precedence conflict pos1 pos2 =
             Diagnostic.Alternatives = Some "Consider disambiguating the precedence to avoid unexpected results." 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitSIG03Diagnostics errMsg mapTypeStr pos1 pos2 = 
     let diagnostic =
@@ -691,6 +732,7 @@ let emitSIG03Diagnostics errMsg mapTypeStr pos1 pos2 =
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitSIG04Diagnostics mixedName candidateCount errList pos1 pos2 = 
     let diagnostic =
@@ -704,7 +746,7 @@ let emitSIG04Diagnostics mixedName candidateCount errList pos1 pos2 =
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
-
+    Some (diagnostic.Code.Code)
 
 let emitSIG05Diagnostics assigneeTypeStr assignedTypeStr pos1 pos2 = 
     let diagnostic =
@@ -718,7 +760,7 @@ let emitSIG05Diagnostics assigneeTypeStr assignedTypeStr pos1 pos2 =
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
-        
+    Some (diagnostic.Code.Code)
 
 let emitSIG06iagnostic name oldFromNode newFromNode typeName pos1 pos2  = 
     let diagnostic =
@@ -732,6 +774,7 @@ let emitSIG06iagnostic name oldFromNode newFromNode typeName pos1 pos2  =
             Diagnostic.Alternatives = Some "Consider renaming the properties to avoid name conflicts." 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitSIG07iagnostic assigneeName assigneeType nodeType pos1 pos2  = 
     let diagnostic =
@@ -745,6 +788,7 @@ let emitSIG07iagnostic assigneeName assigneeType nodeType pos1 pos2  =
             Diagnostic.Alternatives = Some "Expected a variable or an array." 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitSIG08diagnostics arrName indexVarName indexVarType dimType dimNumber pos1 pos2 =
     let diagnostic =
@@ -758,6 +802,7 @@ let emitSIG08diagnostics arrName indexVarName indexVarType dimType dimNumber pos
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitSIG09diagnostics arrName dimType dimNumber pos1 pos2 =
     let diagnostic =
@@ -771,6 +816,7 @@ let emitSIG09diagnostics arrName dimType dimNumber pos1 pos2 =
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitSIG10diagnostics arrName indexVarName indexNumber pos1 pos2 =
     let diagnostic =
@@ -784,6 +830,7 @@ let emitSIG10diagnostics arrName indexVarName indexNumber pos1 pos2 =
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitSIG11diagnostics qualifiedNameMapping qualifiedWrongCandidate pos1 pos2 =
     let diagnostic =
@@ -797,6 +844,7 @@ let emitSIG11diagnostics qualifiedNameMapping qualifiedWrongCandidate pos1 pos2 
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitST001diagnostics name pos1 pos2 =
     let diagnostic =
@@ -810,6 +858,7 @@ let emitST001diagnostics name pos1 pos2 =
             Diagnostic.Alternatives = Some "Simplify the code by the block." 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitST002diagnostics name pos1 pos2 =
     let diagnostic =
@@ -823,6 +872,7 @@ let emitST002diagnostics name pos1 pos2 =
             Diagnostic.Alternatives = Some "Simplify the code by removing it entirely." 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitST003diagnostics errCode pos1 pos2 =
     let diagnostic =
@@ -836,6 +886,7 @@ let emitST003diagnostics errCode pos1 pos2 =
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
+    // do not aggregate ST003 and return unit instead of Some (diagnostic.Code.Code)
 
 let emitVAR00Diagnostics numberOfVariadicVars startPos endPos =
     if numberOfVariadicVars > 1 then
@@ -850,6 +901,9 @@ let emitVAR00Diagnostics numberOfVariadicVars startPos endPos =
                 Diagnostic.Alternatives = None 
             }
         ad.AddDiagnostic diagnostic
+        Some (diagnostic.Code.Code)
+    else
+        None
 
 let emitVAR01diagnostics name pos1 pos2 =
     let diagnostic =
@@ -863,6 +917,7 @@ let emitVAR01diagnostics name pos1 pos2 =
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitVAR02diagnostics name pos1 pos2 =
     let diagnostic =
@@ -876,6 +931,7 @@ let emitVAR02diagnostics name pos1 pos2 =
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitVAR03diagnostics mixedName conflictStartPos pos1 pos2 formulaConflict =
     let diagnostic =
@@ -894,6 +950,7 @@ let emitVAR03diagnostics mixedName conflictStartPos pos1 pos2 formulaConflict =
         }
 
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitVAR04diagnostics name pos1 pos2 = 
     let diagnostic = { 
@@ -906,6 +963,7 @@ let emitVAR04diagnostics name pos1 pos2 =
         Diagnostic.Alternatives = None 
     }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitVAR05diagnostics name pos1 pos2 = 
     let diagnostic = { 
@@ -918,6 +976,7 @@ let emitVAR05diagnostics name pos1 pos2 =
         Diagnostic.Alternatives = None 
     }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitVAR06iagnostic name oldFromNode newFromNode typeName pos1 pos2  = 
     let diagnostic =
@@ -931,6 +990,7 @@ let emitVAR06iagnostic name oldFromNode newFromNode typeName pos1 pos2  =
             Diagnostic.Alternatives = Some "Consider renaming the original variables to avoid name conflicts." 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitVAR07diagnostics name pos1 pos2 =
     let diagnostic =
@@ -944,6 +1004,7 @@ let emitVAR07diagnostics name pos1 pos2 =
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitVAR08diagnostics pos1 pos2 =
     let diagnostic =
@@ -957,6 +1018,7 @@ let emitVAR08diagnostics pos1 pos2 =
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitVAR09diagnostics varName varType pos1 pos2 =
     let diagnostic =
@@ -970,3 +1032,4 @@ let emitVAR09diagnostics varName varType pos1 pos2 =
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)

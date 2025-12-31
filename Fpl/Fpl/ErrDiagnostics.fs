@@ -435,7 +435,7 @@ type DiagnosticCode =
             | ST002 nodeName -> sprintf $"The {nodeName} does nothing."
             | ST003 errCode -> sprintf $"Assignment not possible due to proceeding {errCode} error(s)."
             // variable-related error codes
-            | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
+            | VAR00 ->  sprintf "Declaring multiple arrays at once may cause ambiguities."
             | VAR01 name -> $"Variable `{name}` not declared in this scope."
             | VAR02 name -> $"Variable `{name}` was already bound in this quantor."
             | VAR03 (identifier, conflict) -> $"Variable `{identifier}` was already declared at {conflict}."  

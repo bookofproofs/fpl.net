@@ -195,7 +195,7 @@ let rec eval (st: SymbolTable) ast =
         | LiteralCtorL ->
             fv.FplId <- pascalCaseId
             fv.TypeId <- pascalCaseId
-            emitID008Diagnostics pascalCaseId fv.Parent.Value.FplId pos1 pos2
+            fv.ErrorOccurred <- emitID008Diagnostics pascalCaseId fv.Parent.Value.FplId pos1 pos2
         | PrimClassL ->
             fv.FplId <- pascalCaseId
             fv.TypeId <- pascalCaseId
@@ -294,7 +294,7 @@ let rec eval (st: SymbolTable) ast =
                 foundVar.SetIsUsed()
             | _ ->
                 // otherwise emit variable not declared 
-                emitVAR01diagnostics name pos1 pos2
+                fv.ErrorOccurred <- emitVAR01diagnostics name pos1 pos2
                 let undefVar = new FplVariable(name, (pos1, pos2), fv)
                 let undefined = new FplIntrinsicUndef((pos1, pos2), undefVar)
                 undefVar.SetValue(undefined)
@@ -313,7 +313,7 @@ let rec eval (st: SymbolTable) ast =
             let loc = getLocalization fv
             if loc.Scope.ContainsKey(name) then 
                 let other = loc.Scope[name]
-                emitVAR03diagnostics name other.QualifiedStartPos pos1 pos2 true
+                variable.ErrorOccurred <- emitVAR03diagnostics name other.QualifiedStartPos pos1 pos2 true
             else 
                 loc.Scope.Add(name, variable)
                 variable.Parent <- Some loc
@@ -368,15 +368,15 @@ let rec eval (st: SymbolTable) ast =
                         variableStack.RevokeLastArgument() 
                     | Some (:? FplArgInferenceAssume as last) when last <> toBeRevoked -> 
                         let lastArg = last.ParentArgument
-                        emitPR016Diagnostics argumentId lastArg.FplId pos1 pos2
+                        fv.ErrorOccurred <- emitPR016Diagnostics argumentId lastArg.FplId pos1 pos2
                     | _ ->    
                         // the referenced argument is not an assumption in the proof
-                        emitPR015Diagnostics argumentId pos1 pos2
+                        fv.ErrorOccurred <- emitPR015Diagnostics argumentId pos1 pos2
                 | _ -> 
                     // the referenced argument is not an assumption in the proof
-                    emitPR015Diagnostics argumentId pos1 pos2
+                    fv.ErrorOccurred <- emitPR015Diagnostics argumentId pos1 pos2
             else
-                emitPR005Diagnostics argumentId pos1 pos2
+                fv.ErrorOccurred <- emitPR005Diagnostics argumentId pos1 pos2
             fvAi.FplId <- argumentId
         | PrimJustificationL -> 
             let fvAi = new FplJustificationItemByRefArgument((pos1, pos2), fv)
@@ -385,7 +385,7 @@ let rec eval (st: SymbolTable) ast =
             let arg = just.ParentArgument
             let proof = arg.ParentProof
             if not (proof.HasArgument argumentId) then
-                emitPR005Diagnostics argumentId pos1 pos2
+                fv.ErrorOccurred <- emitPR005Diagnostics argumentId pos1 pos2
             variableStack.PushEvalStack(fvAi)
             variableStack.PopEvalStack()
         | _ -> ()
@@ -455,7 +455,7 @@ let rec eval (st: SymbolTable) ast =
             | PrimFuncionalTermL ->
                 fv.Scope.Add(block.FplId, block)
             | _ ->
-                emitID016diagnostics $"{getEnglishName block.Name} '{block.Type(SignatureType.Name)}'" pos1 pos2
+                fv.ErrorOccurred <- emitID016diagnostics $"{getEnglishName block.Name} '{block.Type(SignatureType.Name)}'" pos1 pos2
         | _ -> ()
         ad.DiagnosticsStopped <- oldDiagnosticsStopped
         variableStack.PushEvalStack(fv)
@@ -479,8 +479,7 @@ let rec eval (st: SymbolTable) ast =
             | PrimFuncionalTermL, PrimMandatoryPredicateL ->
                 fv.Scope.Add(block.FplId, block)
             | _ ->
-                emitID015diagnostics $"{getEnglishName block.Name} '{block.Type(SignatureType.Name)}'" pos1 pos2
-
+                fv.ErrorOccurred <- emitID015diagnostics $"{getEnglishName block.Name} '{block.Type(SignatureType.Name)}'" pos1 pos2
         | _ -> ()
         ad.DiagnosticsStopped <- oldDiagnosticsStopped
         variableStack.PushEvalStack(fv)
@@ -670,22 +669,22 @@ let rec eval (st: SymbolTable) ast =
 
         match (fv, candidates.Length) with
         | (:? FplVariable, 0) -> 
-            emitSIG04Diagnostics identifier 0 [""] pos1 pos2
+            fv.ErrorOccurred <- emitSIG04Diagnostics identifier 0 [""] pos1 pos2
             let undefValue = new FplIntrinsicUndef((fv.StartPos, fv.EndPos), fv)
             fv.ValueList.Add(undefValue)
         | (:? FplMapping as map, 1) -> 
             let candidate = candidates.Head
             match candidate with 
             | :? FplClass -> map.ToBeReturnedClass <- Some candidate
-            | _ -> emitSIG11diagnostics (qualifiedName map) (qualifiedName candidate) map.StartPos map.EndPos           
+            | _ -> fv.ErrorOccurred <- emitSIG11diagnostics (qualifiedName map) (qualifiedName candidate) map.StartPos map.EndPos       
         | (:? FplMapping, 0) -> 
-            emitSIG04Diagnostics identifier 0 [""] pos1 pos2               
+            fv.ErrorOccurred <- emitSIG04Diagnostics identifier 0 [""] pos1 pos2
         | (:? FplMapping, _) -> 
-            emitSIG04Diagnostics identifier candidates.Length [""] pos1 pos2               
+            fv.ErrorOccurred <- emitSIG04Diagnostics identifier candidates.Length [""] pos1 pos2
         | (:? FplVariable, 1) -> 
             fv.Scope.TryAdd(fv.FplId, candidates.Head) |> ignore
         | (:? FplVariable, _) -> 
-            emitID017Diagnostics identifier candidatesNames pos1 pos2
+            fv.ErrorOccurred <- emitID017Diagnostics identifier candidatesNames pos1 pos2
         | _ -> ()
 
         
@@ -948,13 +947,13 @@ let rec eval (st: SymbolTable) ast =
 
                 fv.Scope.TryAdd(fv.FplId, classes.Head) |> ignore
                 let candidate = classes.Head
-                emitID025Diagnostics (qualifiedName candidate) candidate.EnglishName block.EnglishName block.Name fv.StartPos fv.EndPos
+                fv.ErrorOccurred <- emitID025Diagnostics (qualifiedName candidate) candidate.EnglishName block.EnglishName block.Name fv.StartPos fv.EndPos
             elif candidates.Length > 0 then
                 // not a class was referred, add the candidate (e.g., referenced variable)
                 let candidate = candidates.Head
                 fv.FplId <- candidate.FplId 
                 fv.Scope.TryAdd(fv.FplId, candidate) |> ignore
-                emitID025Diagnostics (qualifiedName candidate) candidate.EnglishName block.EnglishName block.Name fv.StartPos fv.EndPos
+                fv.ErrorOccurred <- emitID025Diagnostics (qualifiedName candidate) candidate.EnglishName block.EnglishName block.Name fv.StartPos fv.EndPos
             else
                 ()
 
@@ -1002,7 +1001,7 @@ let rec eval (st: SymbolTable) ast =
                         let nodeType = beingCreatedNode.Type SignatureType.Type
                         let baseType = foundBase.Type SignatureType.Type
                         if nodeType <> baseType then 
-                            emitID007diagnostics beingCreatedNode.Name nodeType foundBase.Name baseType pos1 pos2
+                            baseNode.ErrorOccurred <- emitID007diagnostics beingCreatedNode.Name nodeType foundBase.Name baseType pos1 pos2
                         else 
                             baseNode.Scope.Add (foundBase.FplId, foundBase) // add found functional term to base
                             addVariablesAndPropertiesOfBaseNode foundBase
@@ -1013,19 +1012,19 @@ let rec eval (st: SymbolTable) ast =
                     | :? FplClass, _ ->
                         let nodeType = beingCreatedNode.Type SignatureType.Type
                         let baseType = foundBase.Type SignatureType.Type
-                        emitID007diagnostics beingCreatedNode.Name nodeType foundBase.Name baseType pos1 pos2
+                        baseNode.ErrorOccurred <- emitID007diagnostics beingCreatedNode.Name nodeType foundBase.Name baseType pos1 pos2
                     | _ -> () // does not occur, since syntax of inherited base from non-classes and non-functional terms is not supported 
                 else
-                    emitID010Diagnostics baseNode.FplId pos1 pos2
+                    baseNode.ErrorOccurred <- emitID010Diagnostics baseNode.FplId pos1 pos2
                 if baseNode.FplId = beingCreatedNode.FplId then 
-                    emitID009Diagnostics baseNode.FplId pos1 pos2
+                    baseNode.ErrorOccurred <- emitID009Diagnostics baseNode.FplId pos1 pos2
             | _ -> ()
         )
         let classInheritanceChains = findInheritanceChains beingCreatedNode 
         classInheritanceChains
         |> Seq.filter (fun kvp -> kvp.Value <> "ok")
         |> Seq.iter (fun kvp -> 
-            emitID011Diagnostics kvp.Key kvp.Value beingCreatedNode.StartPos beingCreatedNode.EndPos
+            beingCreatedNode.ErrorOccurred <- emitID011Diagnostics kvp.Key kvp.Value beingCreatedNode.StartPos beingCreatedNode.EndPos
         )
         st.EvalPop()
     | Ast.ExtensionAssignment((pos1, pos2), (varAst, extensionRegexAst)) ->
@@ -1102,7 +1101,7 @@ let rec eval (st: SymbolTable) ast =
             variableStack.PushEvalStack(deleg)
             eval st argumentTupleAst
             variableStack.PopEvalStack()
-            emitID013Diagnostics pos1 pos2 $"Unknown delegate `{delegateId}`"  
+            deleg.ErrorOccurred <- emitID013Diagnostics pos1 pos2 $"Unknown delegate `{delegateId}`"  
         st.EvalPop()
     // | ClosedOrOpenRange of Positions * ((Ast * Ast option) * Ast)
     | Ast.PredicateSignature(((pos1, pos2), (simpleSignatureAst, paramTupleAst)), optUserDefinedSymbolAst) ->
@@ -1129,7 +1128,7 @@ let rec eval (st: SymbolTable) ast =
                 fv.Scope.TryAdd(fv.FplId, candidate) |> ignore
                 match fv.UltimateBlockNode with
                 | Some block ->
-                    emitID025Diagnostics (qualifiedName candidate) candidate.EnglishName block.EnglishName block.Name fv.StartPos fv.EndPos
+                    fv.ErrorOccurred <- emitID025Diagnostics (qualifiedName candidate) candidate.EnglishName block.EnglishName block.Name fv.StartPos fv.EndPos
                 | _ -> ()
         | _ -> ()
         st.EvalPop()
@@ -1174,7 +1173,7 @@ let rec eval (st: SymbolTable) ast =
         ad.DiagnosticsStopped <- oldDiagnosticsStopped // enable all diagnostics during localization
         var04List
         |> Seq.iter (fun kvp -> 
-            emitVAR04diagnostics kvp.Key (fst kvp.Value) (snd kvp.Value)
+            fv.ErrorOccurred <- emitVAR04diagnostics kvp.Key (fst kvp.Value) (snd kvp.Value)
         )
         st.EvalPop()
     | Ast.FunctionalTermInstance((pos1, pos2), (functionalTermInstanceSignatureAst, functionalTermInstanceBlockAst)) ->
@@ -1622,7 +1621,7 @@ let rec eval (st: SymbolTable) ast =
         variableListAst |> List.iter (fun varAst ->
             match variableTypeAst with 
             | Ast.ArrayType((posMan1, posMan2),(mainTypeAst, indexAllowedTypeListAst)) ->
-                emitVAR00Diagnostics parent.AuxiliaryInfo posMan1 posMan2        
+                parent.ErrorOccurred <- emitVAR00Diagnostics parent.AuxiliaryInfo posMan1 posMan2        
                 match varAst with 
                 | Ast.Var((varPos1, varPos2), varName) ->
                     let newVar = new FplVariableArray(varName, (varPos1, varPos2), parent)
@@ -1654,7 +1653,7 @@ let rec eval (st: SymbolTable) ast =
             astList |> List.map (eval st) |> ignore
         | None -> ()
         if parent.ArgList.Count = 0 then
-            emitST002diagnostics parent.Name parent.StartPos parent.EndPos
+            parent.ErrorOccurred <- emitST002diagnostics parent.Name parent.StartPos parent.EndPos
         st.EvalPop()
     // | Axiom of Constructor * (Ast * (Ast list option * Ast))
     | Ast.Constructor((pos1, pos2), (signatureAst, constructorBlockAst)) ->
@@ -1711,7 +1710,7 @@ let rec eval (st: SymbolTable) ast =
             eval st funcContentAst
             optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
             if functionaTermBlock.GetProperties().IsEmpty && functionaTermBlock.ArgList.Count = 1 then
-                emitST001diagnostics functionaTermBlock.Name pos1 pos2
+                functionaTermBlock.ErrorOccurred <- emitST001diagnostics functionaTermBlock.Name pos1 pos2
         | None -> functionaTermBlock.IsIntrinsic <- true
         st.EvalPop()
     | Ast.DefinitionFunctionalTerm((pos1, pos2), (functionalTermSignatureAst, functionalTermDefBlockAst)) ->
@@ -1752,7 +1751,7 @@ let rec eval (st: SymbolTable) ast =
             let properties = cl.GetProperties()
             let constructors = cl.GetConstructors()
             if properties.IsEmpty && cl.ArgList.Count = 0 && constructors.IsEmpty then
-                emitST001diagnostics classBlock.Name pos1 pos2
+                classBlock.ErrorOccurred <- emitST001diagnostics classBlock.Name pos1 pos2
         | None -> 
             cl.IsIntrinsic <- true
             cl.AddDefaultConstructor()
@@ -1829,7 +1828,7 @@ let rec eval (st: SymbolTable) ast =
                         let argName = $"{split.[1]}"
                         match getArgumentInProof fvJi argName with
                         | Some argument -> fvJi.ArgList.Add(argument) 
-                        | _ -> emitPR006Diagnostics fvJi.FplId argName fvJi.StartPos fvJi.EndPos 
+                        | _ -> fvJi.ErrorOccurred <- emitPR006Diagnostics fvJi.FplId argName fvJi.StartPos fvJi.EndPos 
                 | _ -> ()
             | ScopeSearchResult.FoundIncorrectBlock otherBlock ->
                 let alternative = 
@@ -1853,21 +1852,21 @@ let rec eval (st: SymbolTable) ast =
                     | :? FplJustificationItemByTheoremLikeStmt ->
                         "Expected a reference to a theorem, a lemma, or a proposition."
                     | _ -> "Expected another reference."
-                emitPR001Diagnostics otherBlock fvJi.Name fvJi.StartPos fvJi.EndPos alternative
+                fvJi.ErrorOccurred <- emitPR001Diagnostics otherBlock fvJi.Name fvJi.StartPos fvJi.EndPos alternative
             | ScopeSearchResult.NotFound ->
-                emitID010Diagnostics fvJi.FplId fvJi.StartPos fvJi.EndPos
+                fvJi.ErrorOccurred <- emitID010Diagnostics fvJi.FplId fvJi.StartPos fvJi.EndPos
             | ScopeSearchResult.FoundMultiple listOfKandidates ->
-                emitID023Diagnostics listOfKandidates fvJi.StartPos fvJi.EndPos
+                fvJi.ErrorOccurred <- emitID023Diagnostics listOfKandidates fvJi.StartPos fvJi.EndPos
             | _ -> ()
 
 
         match byModifierOption, dollarDigitListAsts, refArgumentIdentifierAst with
         | Some LiteralByAx, Some _, None -> 
             // byax justification cannot be used together with a proof or corollary reference
-            emitPR010Diagnostics LiteralByAx LiteralAxL pos1 pos2 
+            parent.ErrorOccurred <- emitPR010Diagnostics LiteralByAx LiteralAxL pos1 pos2 
         | Some LiteralByAx, Some _, Some _ -> 
             // byax justification cannot be used together with a proof argument reference 
-            emitPR011Diagnostics LiteralByAx LiteralAxL pos1 pos2 
+            parent.ErrorOccurred <- emitPR011Diagnostics LiteralByAx LiteralAxL pos1 pos2 
         | Some LiteralByAx, None, None -> 
             let fvJi = new FplJustificationItemByAx((pos1, pos2), parent)
             variableStack.PushEvalStack(fvJi)
@@ -1878,10 +1877,10 @@ let rec eval (st: SymbolTable) ast =
             variableStack.PopEvalStack()
         | Some LiteralByConj, Some _, None -> 
             // byconj justification cannot be used together with a proof reference
-            emitPR010Diagnostics LiteralByConj LiteralConjL pos1 pos2 
+            parent.ErrorOccurred <- emitPR010Diagnostics LiteralByConj LiteralConjL pos1 pos2 
         | Some LiteralByConj, Some _, Some _ -> 
             // byconj justification cannot be used together with a proof argument reference 
-            emitPR011Diagnostics LiteralByConj LiteralConjL pos1 pos2 
+            parent.ErrorOccurred <- emitPR011Diagnostics LiteralByConj LiteralConjL pos1 pos2 
         | Some LiteralByConj, None, None -> 
             let fvJi = new FplJustificationItemByConj((pos1, pos2), parent)
             variableStack.PushEvalStack(fvJi)
@@ -1901,13 +1900,13 @@ let rec eval (st: SymbolTable) ast =
             variableStack.PopEvalStack()
         | Some LiteralByCor, None, _ -> 
             // byCor justification a reference to a corollary
-            emitPR012Diagnostics pos1 pos2 
+            parent.ErrorOccurred <- emitPR012Diagnostics pos1 pos2 
         | Some LiteralByDef, Some _, None -> 
             // byDef justification cannot be used together with a proof reference
-            emitPR010Diagnostics LiteralByDef LiteralDefL pos1 pos2 
+            parent.ErrorOccurred <- emitPR010Diagnostics LiteralByDef LiteralDefL pos1 pos2 
         | Some LiteralByDef, Some _, Some _ -> 
             // byDef justification cannot be used together with a proof argument reference 
-            emitPR011Diagnostics LiteralByDef LiteralDefL pos1 pos2 
+            parent.ErrorOccurred <- emitPR011Diagnostics LiteralByDef LiteralDefL pos1 pos2 
         | Some LiteralByDef, None, None -> 
             let fvJi = new FplJustificationItemByDef((pos1, pos2), parent)
             variableStack.PushEvalStack(fvJi)
@@ -1918,10 +1917,10 @@ let rec eval (st: SymbolTable) ast =
             variableStack.PopEvalStack()
         | Some LiteralByInf, Some _, None -> 
             // byInf justification cannot be used together with a proof reference
-            emitPR010Diagnostics LiteralByInf PrimRuleOfInference pos1 pos2 
+            parent.ErrorOccurred <- emitPR010Diagnostics LiteralByInf PrimRuleOfInference pos1 pos2 
         | Some LiteralByInf, Some _, Some _ -> 
             // byInf justification cannot be used together with a proof argument reference 
-            emitPR011Diagnostics LiteralByInf PrimRuleOfInference pos1 pos2 
+            parent.ErrorOccurred <- emitPR011Diagnostics LiteralByInf PrimRuleOfInference pos1 pos2 
         | Some LiteralByInf, None, None -> 
             let fvJi = new FplJustificationItemByInf((pos1, pos2), parent)
             variableStack.PushEvalStack(fvJi)
@@ -1940,7 +1939,7 @@ let rec eval (st: SymbolTable) ast =
             // check, if indeed the predicateId points to a corollary, if not issue diagnostics
             checkDiagnostics fvJi candidates
             // issue info diagnostics that references to a corollary need the keyword byCor to increase readability
-            emitPR013Diagnostics pos1 pos2
+            parent.ErrorOccurred <- emitPR013Diagnostics pos1 pos2
             variableStack.PopEvalStack()
         | None, Some _, Some _ -> 
             let fvJi = new FplJustificationItemByProofArgument((pos1, pos2), parent)
@@ -1964,7 +1963,7 @@ let rec eval (st: SymbolTable) ast =
             variableStack.PopEvalStack()
         | None, None, Some _ ->  
             // issue diagnostics a theorem-like statement justification cannot be used together with a proof argument reference 
-            emitPR014Diagnostics pos1 pos2 
+            parent.ErrorOccurred <- emitPR014Diagnostics pos1 pos2 
         | None, None, None -> 
             let fvJi = new FplJustificationItemByTheoremLikeStmt((pos1, pos2), parent)
             variableStack.PushEvalStack(fvJi)
