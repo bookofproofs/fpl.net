@@ -1665,7 +1665,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>("""{"name":"obj"}""", (getName var).[index])
         | "FplIntrinsicInd" ->
             Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(LiteralInd, (getName var).[index])
+            Assert.AreEqual<string>($"dec {LiteralInd}", (getName var).[index])
         | "FplIntrinsicPred" ->
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
@@ -2720,6 +2720,8 @@ type SymbolTableStructure() =
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.AreEqual<int>(1, node.ValueList.Count)
             Assert.AreEqual<string>("""dec ind""", node.Represent())  
+            let fn = node :?> FplFunctionalTerm
+            Assert.AreEqual<string>("T()", fn.SkolemName) // only for intrinsic set
         | "FplFunctionalTerm", "MF2" -> 
             // non-intrinsic constant
             Assert.IsInstanceOfType<FplTheory>(parent) 
@@ -2733,7 +2735,9 @@ type SymbolTableStructure() =
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.AreEqual<int>(1, node.ValueList.Count)
-            Assert.AreEqual<string>("""$1""", node.Represent())  
+            Assert.AreEqual<string>("""$1""", node.Represent())
+            let fn = node :?> FplFunctionalTerm
+            Assert.AreEqual<string>("", fn.SkolemName) // missing, since non-intrinsic
         | "FplFunctionalTerm", "MF3" -> 
             // intrinsic constant array
             Assert.IsInstanceOfType<FplTheory>(parent) 
@@ -2748,6 +2752,8 @@ type SymbolTableStructure() =
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.AreEqual<int>(1, node.ValueList.Count)
             Assert.AreEqual<string>("""dec *ind[ind]""", node.Represent())  
+            let fn = node :?> FplFunctionalTerm
+            Assert.AreEqual<string>("T()", fn.SkolemName) // only for intrinsic set
         | "FplFunctionalTerm", "MF4" -> 
             // non-intrinsic constant array
             Assert.IsInstanceOfType<FplTheory>(parent) 
@@ -2762,6 +2768,88 @@ type SymbolTableStructure() =
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.AreEqual<int>(1, node.ValueList.Count)
             Assert.AreEqual<string>("""[$1]->$0, [$2]->$42""", node.Represent())  
+            let fn = node :?> FplFunctionalTerm
+            Assert.AreEqual<string>("", fn.SkolemName) // missing, since non-intrinsic
+        | _ -> failwith($"unmatched test {nodeType} {varVal}")
+
+    // intrinsic constant
+    [<DataRow("FplFunctionalTerm", "MF1", """def func T()->obj;""", "")>]
+    // non-intrinsic constant
+    [<DataRow("FplFunctionalTerm", "MF2", """def cl A def func T()->obj {return A()};""", "")>]
+    // intrinsic constant array
+    [<DataRow("FplFunctionalTerm", "MF3", """def func T()->*obj[ind];""", "")>]
+    // non-intrinsic constant array
+    [<DataRow("FplFunctionalTerm", "MF4", """def cl A def cl B def func T()->*obj[ind] {dec ~x:*obj[ind] x[$1]:=A() x[$2]:=B(); return x};""", "")>]
+    [<TestMethod>]
+    member this.TestStructureFplFunctionalTermObjectMapping(nodeType, varVal, fplCode, identifier) =
+        let filename = "TestStructureFplFunctionalTermObjectMapping.fpl"
+        let parent, node = testSkeleton nodeType filename fplCode identifier
+        
+        match nodeType, varVal with
+        | "FplFunctionalTerm", "MF1" -> 
+            // intrinsic constant
+            Assert.IsInstanceOfType<FplTheory>(parent) 
+            Assert.AreEqual<int>(0, parent.ArgList.Count) 
+            Assert.AreEqual<int>(1, parent.Scope.Count) 
+            Assert.IsInstanceOfType<FplFunctionalTerm>(node) 
+            Assert.AreEqual<int>(1, node.ArgList.Count)  // mapping
+            Assert.AreEqual<int>(0, node.Scope.Count) 
+            let map = (getMapping node).Value :?> FplMapping 
+            match map.ToBeReturnedClass with
+            | None -> Assert.AreEqual<string>("no class", "no class")
+            | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
+            Assert.AreEqual<int>(1, node.ValueList.Count)
+            Assert.AreEqual<string>("""dec obj""", node.Represent())  
+            let fn = node :?> FplFunctionalTerm
+            Assert.AreEqual<string>("T()", fn.SkolemName) // only for intrinsic set
+        | "FplFunctionalTerm", "MF2" -> 
+            // non-intrinsic constant
+            Assert.IsInstanceOfType<FplTheory>(parent) 
+            Assert.AreEqual<int>(0, parent.ArgList.Count) 
+            Assert.AreEqual<int>(2, parent.Scope.Count) 
+            Assert.IsInstanceOfType<FplFunctionalTerm>(node) 
+            Assert.AreEqual<int>(2, node.ArgList.Count)  // mapping + return
+            Assert.AreEqual<int>(0, node.Scope.Count) 
+            let map = (getMapping node).Value :?> FplMapping 
+            match map.ToBeReturnedClass with
+            | None -> Assert.AreEqual<string>("no class", "no class")
+            | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
+            Assert.AreEqual<int>(1, node.ValueList.Count)
+            Assert.AreEqual<string>("""{"name":"A","base":[],"vars":[],"prtys":[]}""", node.Represent())
+            let fn = node :?> FplFunctionalTerm
+            Assert.AreEqual<string>("", fn.SkolemName) // missing, since non-intrinsic
+        | "FplFunctionalTerm", "MF3" -> 
+            // intrinsic constant array
+            Assert.IsInstanceOfType<FplTheory>(parent) 
+            Assert.AreEqual<int>(0, parent.ArgList.Count) 
+            Assert.AreEqual<int>(1, parent.Scope.Count) 
+            Assert.IsInstanceOfType<FplFunctionalTerm>(node) 
+            Assert.AreEqual<int>(1, node.ArgList.Count)  // mapping 
+            Assert.AreEqual<int>(0, node.Scope.Count) 
+            let map = (getMapping node).Value :?> FplMapping 
+            match map.ToBeReturnedClass with
+            | None -> Assert.AreEqual<string>("no class", "no class")
+            | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
+            Assert.AreEqual<int>(1, node.ValueList.Count)
+            Assert.AreEqual<string>("""dec *obj[ind]""", node.Represent())  
+            let fn = node :?> FplFunctionalTerm
+            Assert.AreEqual<string>("T()", fn.SkolemName) // only for intrinsic set
+        | "FplFunctionalTerm", "MF4" -> 
+            // non-intrinsic constant array
+            Assert.IsInstanceOfType<FplTheory>(parent) 
+            Assert.AreEqual<int>(0, parent.ArgList.Count) 
+            Assert.AreEqual<int>(3, parent.Scope.Count) 
+            Assert.IsInstanceOfType<FplFunctionalTerm>(node) 
+            Assert.AreEqual<int>(4, node.ArgList.Count)  // mapping + stmts + return
+            Assert.AreEqual<int>(1, node.Scope.Count) // one variable
+            let map = (getMapping node).Value :?> FplMapping 
+            match map.ToBeReturnedClass with
+            | None -> Assert.AreEqual<string>("no class", "no class")
+            | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
+            Assert.AreEqual<int>(1, node.ValueList.Count)
+            Assert.AreEqual<string>("""[$1]->$0, [$2]->$42""", node.Represent())  
+            let fn = node :?> FplFunctionalTerm
+            Assert.AreEqual<string>("", fn.SkolemName) // missing, since non-intrinsic
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     

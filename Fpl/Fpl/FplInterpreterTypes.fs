@@ -4832,7 +4832,7 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) as this
     let _runOrder = runOrder
     let mutable _isReady = false
     let mutable _callCounter = 0
-    let mutable _constantName = ""
+    let mutable _skolemName = ""
 
     do 
         this.FplId <- LiteralFunc
@@ -4857,8 +4857,8 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) as this
     interface IReady with
         member _.IsReady = _isReady
 
-    member this.SkolemName = _constantName
-    member this.SetSkolemName() = _constantName <- signatureRepresent this
+    member this.SkolemName = _skolemName
+    member this.SetSkolemName() = _skolemName <- signatureRepresent this
 
     interface ISkolem with
         member this.SkolemName = this.SkolemName 
@@ -5075,7 +5075,7 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) as this 
     let mutable _signEndPos = Position("", 0L, 0L, 0L)
     let mutable _isReady = false
     let mutable _callCounter = 0
-    let mutable _constantName = ""
+    let mutable _skolemName = ""
 
     do 
         this.FplId <- LiteralFunc
@@ -5103,8 +5103,8 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) as this 
     interface IReady with
         member _.IsReady = _isReady
 
-    member this.SkolemName = _constantName
-    member this.SetSkolemName() = _constantName <- signatureRepresent this
+    member this.SkolemName = _skolemName
+    member this.SetSkolemName() = _skolemName <- signatureRepresent this
 
     interface ISkolem with
         member this.SkolemName = this.SkolemName 
@@ -5319,14 +5319,17 @@ type FplReturn(positions: Positions, parent: FplValue) as this =
                     | :? FplIntrinsicTpl 
                     | :? FplIntrinsicInd 
                     | :? FplIntrinsicUndef ->
-                        funTerm.SetValue returnedReference
+                        this.SetValue returnedReference
                     | :? FplReference when returnedReference.Scope.ContainsKey(returnedReference.FplId) ->
                         let refValue = returnedReference.Scope[returnedReference.FplId]
                         refValue.Run variableStack
-                        funTerm.SetValue refValue
+                        match refValue with 
+                        | :? FplGenericConstructor ->
+                            this.SetValuesOf refValue
+                        | _ -> this.SetValue refValue
                     | _ ->
                         let value = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
-                        funTerm.SetValue(value)
+                        this.SetValue(value)
             | _ -> () // does not occur
         | _ -> () // does not occur
 
