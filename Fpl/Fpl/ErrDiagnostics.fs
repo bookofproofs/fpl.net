@@ -176,6 +176,7 @@ type DiagnosticCode =
     // structure-related error codes
     | ST001 of string 
     | ST002 of string 
+    | ST003 of string 
     // variable-related error codes
     | VAR00 
     | VAR01 of string 
@@ -293,6 +294,7 @@ type DiagnosticCode =
             // structure-related error codes
             | ST001 _ -> "ST001"
             | ST002 _ -> "ST002"
+            | ST003 _ -> "ST003"
             // variable-related error codes
             | VAR00 -> "VAR00"
             | VAR01 _  -> "VAR01"
@@ -429,8 +431,9 @@ type DiagnosticCode =
             | SIG10 (arrName, indexVarName, indexNumber) -> $"Array `{arrName}` has less dimensions, {englishOrdinal indexNumber} index `{indexVarName}` not supported"
             | SIG11 (qualifiedNameMapping, qualifiedWrongCandidate) -> $"{qualifiedNameMapping} cannot map to {qualifiedWrongCandidate}"
             // structure-related error codes
-            | ST001 nodeName -> sprintf $"The {nodeName} does nothing. Simplify the code by the block."
-            | ST002 nodeName -> sprintf $"The {nodeName} does nothing. Simplify the code by removing it entirely."
+            | ST001 nodeName -> sprintf $"The {nodeName} does nothing."
+            | ST002 nodeName -> sprintf $"The {nodeName} does nothing."
+            | ST003 errCode -> sprintf $"Assignment not possible due to proceeding {errCode} error(s)."
             // variable-related error codes
             | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
             | VAR01 name -> $"Variable `{name}` not declared in this scope."

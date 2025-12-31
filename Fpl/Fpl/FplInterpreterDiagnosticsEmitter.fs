@@ -807,7 +807,7 @@ let emitST001diagnostics name pos1 pos2 =
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ST001 name
-            Diagnostic.Alternatives = None 
+            Diagnostic.Alternatives = Some "Simplify the code by the block." 
         }
     ad.AddDiagnostic diagnostic
 
@@ -820,6 +820,19 @@ let emitST002diagnostics name pos1 pos2 =
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ST002 name
+            Diagnostic.Alternatives = Some "Simplify the code by removing it entirely." 
+        }
+    ad.AddDiagnostic diagnostic
+
+let emitST003diagnostics errCode pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Warning
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ST003 errCode
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
