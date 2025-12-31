@@ -5156,8 +5156,8 @@ type SymbolTableStructure() =
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "04c" ->
             Assert.IsInstanceOfType<FplLocalization>(parent)
-            Assert.AreEqual<int>(1, parent.ArgList.Count) 
-            Assert.AreEqual<int>(4, parent.Scope.Count) // two variables and 3 languages
+            Assert.AreEqual<int>(0, parent.ArgList.Count) 
+            Assert.AreEqual<int>(7, parent.Scope.Count) // two variables and 5 languages
             Assert.IsInstanceOfType<FplVariable>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)

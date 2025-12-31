@@ -215,18 +215,18 @@ let rec eval (st: SymbolTable) ast =
         let path = st.EvalPath()
         let fv = variableStack.PeekEvalStack()
         let sid = $"${s.ToString()}"
-        if path.Contains("Expression.DollarDigits") then
+        match fv with 
+        | :? FplReference when fv.FplId = String.Empty ->
             let value = new FplIntrinsicInd((pos1, pos2), fv)
             value.FplId <- sid
             variableStack.PushEvalStack(value)
             variableStack.PopEvalStack()
-        else
+        | _ ->
             fv.FplId <- fv.FplId + sid
             match fv.TypeId with 
             | "" -> fv.TypeId <- LiteralInd
             | LiteralPred -> ()
             | _ -> fv.TypeId <- fv.TypeId + sid
-
         st.EvalPop() 
     | Ast.ExtensionName((pos1, pos2), s) ->
         st.EvalPush("ExtensionName")
