@@ -5640,7 +5640,7 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
         checkErrorOccuredInReference this.ArgList[0]
         checkErrorOccuredInReference this.ArgList[1]
         match this.Assignee, this.AssignedValue with
-        | Some (:? FplVariable as assignee), Some (assignedValue:FplValue) when assignedValue.Name = LiteralClL ->
+        | Some (:? FplVariable as assignee), Some (assignedValue:FplValue) when assignedValue.Name = PrimClassL ->
             this.ErrorOccurred <- emitID004diagnostics assignedValue.FplId this.ArgList[1].StartPos this.ArgList[1].EndPos
         | Some (:? FplVariable as assignee), Some (assignedValue:FplValue) -> 
             checkTypes assignee assignedValue 
