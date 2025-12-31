@@ -1848,7 +1848,16 @@ type TestInterpreterErrors() =
             ()
         else
             let code = ST002 ""
-            runTestHelper "TestST001.fpl" fplCode code expected
+            runTestHelper "TestST002.fpl" fplCode code expected
+
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestST003(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = ST003 ""
+            runTestHelper "TestST003.fpl" fplCode code expected
 
     [<DataRow("def predicate Test(x,y:* pred[ind]) {true};", 1)>]
     [<DataRow("def predicate Test(x,y:* pred[obj]) {true};", 1)>]

@@ -244,9 +244,7 @@ let rec eval (st: SymbolTable) ast =
         match fv with
         | :? FplClass -> () // do not override class's type with base obj
         | :? FplReference ->
-            let value = new FplIntrinsicTpl((pos1, pos2), fv)
-            value.TypeId <- s
-            value.FplId <- s
+            let value = new FplIntrinsicTpl(s, (pos1, pos2), fv)
             fv.TypeId <- s
         | :? FplVariableArray as arr -> arr.SetType s pos1 pos2 
         | :? FplMapping as map -> map.SetType s pos1 pos2
