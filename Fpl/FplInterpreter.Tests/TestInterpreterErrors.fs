@@ -1555,7 +1555,7 @@ type TestInterpreterErrors() =
         if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = SIG05 ("","")
+            let code = SIG05 ""
             ad.Clear()
             runTestHelper "TestSIG05.fpl" fplCode code expected
 

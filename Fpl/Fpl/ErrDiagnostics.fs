@@ -166,7 +166,7 @@ type DiagnosticCode =
     | SIG02 of string * int * string
     | SIG03 of string * string 
     | SIG04 of string * int * string list
-    | SIG05 of string * string
+    | SIG05 of string 
     | SIG06 of string * string * string * string
     | SIG07 of string * string * string 
     | SIG08 of string * string * string * string * int
@@ -418,7 +418,7 @@ type DiagnosticCode =
                 else 
                     let errMsg = errorList |> List.mapi (fun i s -> sprintf "%d. %s" (i + 1) s) |> String.concat ", "
                     $"No overload matching `{signature}`. Checked candidates: {errorList}." 
-            | SIG05 (assigneeType, assignedType) -> $"Cannot assign type `{assignedType}` to type `{assigneeType}`."
+            | SIG05 errMsg -> $"Cannot execute assignment; {errMsg}"
             | SIG06 (name, oldFromNode, newFromNode, typeName) -> 
                 match typeName with 
                 | PrimClassL -> $"Property `{name}` of base class `{oldFromNode} will be overshadowed by `{newFromNode}`."

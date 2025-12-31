@@ -3762,8 +3762,13 @@ let inheritsFrom (node:FplValue) someType =
         | Some _ -> true
         | None -> false
 
-/// Tries to match parameters of an FplValue with its arguments recursively
-let rec mpwa (args: FplValue list) (pars: FplValue list) =
+type MatchingMode =
+    | Assignment
+    | Signature
+
+/// Tries to match a list of arguments with a list of parameters by their type recursively.
+/// The comparison depends on MatchingMode.
+let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
     let matchClassInheritance (clOpt:FplValue option) (a:FplValue) aType (p:FplValue) pType = 
         match clOpt with 
         | Some cl -> 
@@ -3778,38 +3783,36 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) =
         let aType = a.Type SignatureType.Type
         let pType = p.Type SignatureType.Type
 
-        if aType = pType then
-            mpwa ars prs
-        elif pType.StartsWith(LiteralTpl) || pType.StartsWith(LiteralTplL) then
-            mpwa ars prs
-        elif pType = $"*{aType}[{LiteralInd}]" then
-            // only array parameters indexed with the FPL-inbuilt index type that also 
-            // match the argument's type will accept variadic enumerations of such arguments 
-            if ars.Length > 0 then 
-                mpwa ars pars 
-            else 
-                None
-        elif pType.StartsWith($"*{aType}[") then
+        match mode with 
+        | _ when aType = pType ->
+            mpwa ars prs mode
+        | _ when pType.StartsWith(LiteralTpl) || pType.StartsWith(LiteralTplL) ->
+            mpwa ars prs mode // tpl accepts everything: todo: really?
+        | MatchingMode.Assignment when aType = LiteralUndef ->
+            mpwa ars prs mode // undef can always be assigned
+        | MatchingMode.Assignment when pType.StartsWith($"*{aType}[") && p.Name = PrimVariableArrayL ->
+            None // assignee array accepting assigned value
+        | _ when pType.StartsWith($"*{aType}[") ->
             // array parameters with indexes that differ from the FPL-inbuilt index type  
             // or with multidimensional index types will not accept variadic enumerations of arguments
             // even if they have the same type used for the values of the array
             let aName = a.Type(SignatureType.Name)
             Some($"variadic enumeration of `{aName}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`, try `{aName}:{pType}` as argument or use parameter `{p.Type(SignatureType.Name)}:{p.TypeId}[{LiteralInd}]`")
-        elif aType.StartsWith($"*{pType}[") && a.Name = PrimRefL then
+        | _ when aType.StartsWith($"*{pType}[") && a.Name = PrimRefL ->
             let refA = a :?> FplReference
             if refA.ArgType = ArgType.Brackets then 
                 // some array elements matching parameter type
                 None
             else
                 Some($"Array type `{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
-        elif aType.Length > 0 && Char.IsUpper(aType[0]) && a.Name = PrimRefL && a.Scope.Count = 1 then
+        | _ when aType.Length > 0 && Char.IsUpper(aType[0]) && a.Name = PrimRefL && a.Scope.Count = 1 ->
             let aReferencedNode = a.Scope.Values |> Seq.toList |> List.head
             if aReferencedNode.Scope.Count > 0 then
                 let cl = aReferencedNode.Scope.Values |> Seq.head
                 match cl with
                 | :? FplClass ->
                     if inheritsFrom cl pType then 
-                        mpwa ars prs
+                        mpwa ars prs mode
                     else
                         Some($"`{a.Type(SignatureType.Name)}:{aType}` neither matches `{p.Type(SignatureType.Name)}:{pType}` nor the base classes")
                 | _ ->
@@ -3824,19 +3827,50 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) =
                 matchClassInheritance map.ToBeReturnedClass a aType p pType
             else
                 Some($"`{a.Type(SignatureType.Name)}:{aType}` is undefined and does not match `{p.Type(SignatureType.Name)}:{pType}`")
-        elif aType.StartsWith(pType + "(") then
-            None
-        elif aType = LiteralPred && pType.StartsWith(LiteralPred) then
-            None
-        elif aType = LiteralFunc && pType.StartsWith(LiteralFunc) then
-            None
-        elif aType.StartsWith(LiteralFunc) then
-            let someMap = getMapping a
-
-            match someMap with
-            | Some map -> mpwa [ map ] [ p ]
+        | MatchingMode.Assignment when a.Name = PrimVariableL ->
+            let clOpt = a.Scope.Values |> Seq.tryHead
+            match clOpt with 
+            | Some (:? FplClass) -> matchClassInheritance clOpt a aType p pType
             | _ -> Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
-        else
+        | MatchingMode.Assignment when a.Name = PrimDefaultConstructor ->
+            let defaultCtor = a :?> FplDefaultConstructor
+            matchClassInheritance defaultCtor.ToBeConstructedClass a aType p pType
+        | MatchingMode.Assignment when a.Name = PrimFuncionalTermL || a.Name = PrimMandatoryFunctionalTermL ->
+            let mapOpt = getMapping a
+            match mapOpt with 
+            | Some (:? FplMapping as map) ->
+                mpwa ([map] @ ars) pars mode
+            | _ -> 
+                Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
+        | _ when aType.StartsWith(pType + "(") ->
+            None
+        | _ when aType = LiteralPred && pType.StartsWith(LiteralPred) ->
+            None
+        | _ when aType = LiteralFunc && pType.StartsWith(LiteralFunc) ->
+            None
+        | _ when aType.StartsWith(LiteralFunc) ->
+            let someMap = getMapping a
+            match someMap with
+            | Some map -> mpwa [ map ] [ p ] mode
+            | _ -> Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
+        | _ when p.Name = PrimFuncionalTermL || p.Name = PrimMandatoryFunctionalTermL ->
+            let mappingOpt = getMapping p 
+            match mappingOpt with 
+            | Some mapping ->
+                let newTypeAssignedValue = mapping.Type SignatureType.Type
+                if aType <> newTypeAssignedValue then 
+                    Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")            
+                else 
+                    None            
+            | None -> None
+        | MatchingMode.Signature when pType = $"*{aType}[{LiteralInd}]" ->
+            // only array parameters indexed with the FPL-inbuilt index type that also 
+            // match the argument's type will accept variadic enumerations of such arguments 
+            if ars.Length > 0 then 
+                mpwa ars pars mode 
+            else 
+                None
+        | _ ->
             Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
     | ([], p :: prs) ->
         let pType = p.Type(SignatureType.Type)
@@ -3874,7 +3908,7 @@ let matchArgumentsWithParameters (fva: FplValue) (fvp: FplValue) =
         if aHasBracketsOrParentheses <> pHasBracketsOrParentheses && arguments.Length = 0 && parameters.Length = 0 then 
             Some($"calling and called nodes have mismatching use of parentheses")
         else
-            mpwa arguments parameters
+            mpwa arguments parameters MatchingMode.Signature
 
     match argResult with
     | Some aErr -> 
@@ -3911,7 +3945,7 @@ let checkSIG08_SIG10Diagnostics (referenceToArray:FplValue) =
             let rec matchAllIndexes (indexes:FplValue list) (dims:FplValue list) dimNumber =
                 match indexes, dims with
                 | i::ixs, d::dms ->
-                    match mpwa [i] [d] with
+                    match mpwa [i] [d] MatchingMode.Signature with
                     | Some errMsg ->
                         // type mismatch between dimension and index
                         refToArray.ErrorOccurred <- emitSIG08diagnostics varArray.FplId i.FplId (i.Type SignatureType.Type) (d.Type SignatureType.Type) dimNumber i.StartPos i.EndPos 
@@ -5018,7 +5052,7 @@ type FplIsOperator(positions: Positions, parent: FplValue) as this =
             // FPL truth-table
             match operand with 
             | :? FplReference as op ->
-                match mpwa [operand] [typeOfOperand] with
+                match mpwa [operand] [typeOfOperand] MatchingMode.Signature with
                 | Some errMsg -> LiteralFalse
                 | None -> LiteralTrue
             | _ -> LiteralFalse
@@ -5315,7 +5349,7 @@ type FplReturn(positions: Positions, parent: FplValue) as this =
             | :? FplMapping -> Some fvp
             | _ -> getMapping fvp
         match targetMapping with
-        | Some tm -> mpwa [ fva ] [ tm ]
+        | Some tm -> mpwa [ fva ] [ tm ] MatchingMode.Signature
         | None -> None
 
     override this.Run variableStack =
@@ -5584,45 +5618,17 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
 
     override this.CheckConsistency () = 
         base.CheckConsistency()
-        let checkTypes (referencedTypeOfVarOpt:FplValue option) nameAssignee typeAssignee (assignedValue:FplValue) nameAssignedValue (typeAssignedValue:string) = 
+        let checkTypes (assignee:FplValue) (assignedValue:FplValue) =
+            let nameAssignee = assignee.Type SignatureType.Name
+            let nameAssignedValue = assignedValue.Type SignatureType.Name
             if nameAssignee = nameAssignedValue then
                 this.ErrorOccurred <- emitLG005Diagnostics nameAssignedValue assignedValue.StartPos assignedValue.EndPos
-            elif typeAssignee = LiteralObj && (assignedValue.Name = PrimDefaultConstructor || assignedValue.Name = LiteralCtorL) then
-                ()
-            elif typeAssignedValue = LiteralUndef then 
-                () // undef is always assignable
-            elif typeAssignee = $"*{typeAssignedValue}" then 
-                ()
-            elif typeAssignee = LiteralFunc && typeAssignedValue.StartsWith(LiteralFunc) then 
-                ()
-            elif typeAssignee = LiteralPred && typeAssignedValue.StartsWith(LiteralPred) then 
-                ()
-            elif typeAssignee.StartsWith(LiteralTpl) || typeAssignee.StartsWith(LiteralTplL) then 
-                () // tpl accepts everything: todo: really?
-            elif typeAssignee <> typeAssignedValue then 
-                match referencedTypeOfVarOpt with 
-                | Some referencedTypeOfVar when (referencedTypeOfVar.Name = PrimClassL || referencedTypeOfVar.Name = PrimFuncionalTermL) -> 
-                    match assignedValue with 
-                    | :? FplIntrinsicUndef -> () // assignment of undef is always accepted
-                    | :? FplGenericConstructor as constructor when constructor.ToBeConstructedClass.IsSome ->
-                        if not (inheritsFrom constructor.ToBeConstructedClass.Value typeAssignee) then 
-                            // issue SIG05 diagnostics if either no inheritance chain found 
-                            this.ErrorOccurred <- emitSIG05Diagnostics typeAssignee typeAssignedValue this.ArgList[1].StartPos this.ArgList[1].EndPos 
-                    | :? FplFunctionalTerm as funcTerm -> 
-                        let mappingOpt = getMapping funcTerm 
-                        match mappingOpt with 
-                        | Some mapping ->
-                            let newTypeAssignedValue = mapping.Type SignatureType.Type
-                            if typeAssignee <> newTypeAssignedValue then 
-                                // issue SIG05 diagnostics if the return type of an assigned function differs from type of assignee
-                                this.ErrorOccurred <- emitSIG05Diagnostics typeAssignee newTypeAssignedValue this.ArgList[1].StartPos this.ArgList[1].EndPos
-                        | _ -> ()
-                    | _ -> 
-                        this.ErrorOccurred <- emitSIG05Diagnostics typeAssignee typeAssignedValue this.ArgList[1].StartPos this.ArgList[1].EndPos
-                | _ -> 
-                    this.ErrorOccurred <- emitSIG05Diagnostics typeAssignee typeAssignedValue this.ArgList[1].StartPos this.ArgList[1].EndPos
-            else   
-                ()
+            else
+                match mpwa [assignedValue] [assignee] MatchingMode.Assignment with
+                | Some errMsg ->
+                    this.ErrorOccurred <- emitSIG05Diagnostics errMsg this.ArgList[1].StartPos this.ArgList[1].EndPos
+                | _ -> ()
+                
         let checkErrorOccuredInReference (fv:FplValue) = 
             match fv with
             | :? FplReference as ref -> 
@@ -5635,17 +5641,19 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
         | Some (:? FplVariable as assignee), Some (assignedValue:FplValue) when assignedValue.Name = LiteralClL ->
             this.ErrorOccurred <- emitID004diagnostics assignedValue.FplId this.ArgList[1].StartPos this.ArgList[1].EndPos
         | Some (:? FplVariable as assignee), Some (assignedValue:FplValue) -> 
-            let nameAssignee = assignee.Type SignatureType.Name
-            let typeAssignee = assignee.Type SignatureType.Type
-            let nameAssignedValue = assignedValue.Type SignatureType.Name
-            let typeAssignedValue = assignedValue.Type SignatureType.Type 
-            checkTypes (assignee.Scope.Values |> Seq.tryHead) nameAssignee typeAssignee assignedValue nameAssignedValue typeAssignedValue 
+            checkTypes assignee assignedValue 
+            //let nameAssignee = assignee.Type SignatureType.Name
+            //let typeAssignee = assignee.Type SignatureType.Type
+            //let nameAssignedValue = assignedValue.Type SignatureType.Name
+            //let typeAssignedValue = assignedValue.Type SignatureType.Type 
+            //checkTypes (assignee.Scope.Values |> Seq.tryHead) nameAssignee typeAssignee assignedValue nameAssignedValue typeAssignedValue 
         | Some (:? FplVariableArray as assignee), Some assignedValue ->
-            let nameAssignee = this.ArgList[0].Type SignatureType.Name // get the signature of the array's reference
-            let nameAssignedValue = this.ArgList[1].Type SignatureType.Name // get the signature of the array's reference
-            let typeAssignee = assignee.TypeId.Substring(1)
-            let typeAssignedValue = assignedValue.Type SignatureType.Type 
-            checkTypes (assignee.Scope.Values |> Seq.tryHead) nameAssignee typeAssignee assignedValue nameAssignedValue typeAssignedValue 
+            //let nameAssignee = this.ArgList[0].Type SignatureType.Name // get the signature of the array's reference
+            //let nameAssignedValue = this.ArgList[1].Type SignatureType.Name // get the signature of the array's reference
+            //let typeAssignee = assignee.TypeId.Substring(1)
+            //let typeAssignedValue = assignedValue.Type SignatureType.Type 
+            //checkTypes (assignee.Scope.Values |> Seq.tryHead) nameAssignee typeAssignee assignedValue nameAssignedValue typeAssignedValue 
+            checkTypes assignee assignedValue 
         | Some (:? FplSelf as assignee), _ ->
             let ref = assignee.Scope.Values |> Seq.toList
             if ref.Length > 0 then 

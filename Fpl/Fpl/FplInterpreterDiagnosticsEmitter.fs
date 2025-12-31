@@ -748,7 +748,7 @@ let emitSIG04Diagnostics mixedName candidateCount errList pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitSIG05Diagnostics assigneeTypeStr assignedTypeStr pos1 pos2 = 
+let emitSIG05Diagnostics errMsg pos1 pos2 = 
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -756,7 +756,7 @@ let emitSIG05Diagnostics assigneeTypeStr assignedTypeStr pos1 pos2 =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = SIG05(assigneeTypeStr, assignedTypeStr)
+            Diagnostic.Code = SIG05 errMsg
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
