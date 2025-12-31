@@ -5584,13 +5584,21 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
 
     override this.CheckConsistency () = 
         base.CheckConsistency()
-        let checkTypes (referencedTypeOfVarOpt:FplValue option) nameAssignee typeAssignee (assignedValue:FplValue) nameAssignedValue typeAssignedValue = 
+        let checkTypes (referencedTypeOfVarOpt:FplValue option) nameAssignee typeAssignee (assignedValue:FplValue) nameAssignedValue (typeAssignedValue:string) = 
             if nameAssignee = nameAssignedValue then
                 this.ErrorOccurred <- emitLG005Diagnostics nameAssignedValue assignedValue.StartPos assignedValue.EndPos
             elif typeAssignee = LiteralObj && (assignedValue.Name = PrimDefaultConstructor || assignedValue.Name = LiteralCtorL) then
                 ()
+            elif typeAssignedValue = LiteralUndef then 
+                () // undef is always assignable
             elif typeAssignee = $"*{typeAssignedValue}" then 
                 ()
+            elif typeAssignee = LiteralFunc && typeAssignedValue.StartsWith(LiteralFunc) then 
+                ()
+            elif typeAssignee = LiteralPred && typeAssignedValue.StartsWith(LiteralPred) then 
+                ()
+            elif typeAssignee.StartsWith(LiteralTpl) || typeAssignee.StartsWith(LiteralTplL) then 
+                () // tpl accepts everything: todo: really?
             elif typeAssignee <> typeAssignedValue then 
                 match referencedTypeOfVarOpt with 
                 | Some referencedTypeOfVar when (referencedTypeOfVar.Name = PrimClassL || referencedTypeOfVar.Name = PrimFuncionalTermL) -> 
