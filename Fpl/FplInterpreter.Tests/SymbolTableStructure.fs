@@ -2847,7 +2847,7 @@ type SymbolTableStructure() =
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.AreEqual<int>(1, node.ValueList.Count)
-            Assert.AreEqual<string>("""[$1]->$0, [$2]->$42""", node.Represent())  
+            Assert.AreEqual<string>("""[$1]->{"name":"A","base":[],"vars":[],"prtys":[]}, [$2]->{"name":"B","base":[],"vars":[],"prtys":[]}""", node.Represent())  
             let fn = node :?> FplFunctionalTerm
             Assert.AreEqual<string>("", fn.SkolemName) // missing, since non-intrinsic
         | _ -> failwith($"unmatched test {nodeType} {varVal}")

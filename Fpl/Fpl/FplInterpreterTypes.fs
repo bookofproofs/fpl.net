@@ -375,9 +375,10 @@ type IVariable =
     abstract member IsSignatureVariable : bool with get, set
     abstract member IsInitialized : bool with get, set
 
-/// The interface ISkolemized is used to implement fixed but unknown objects of some type.
-/// The equality of two fixed but unknown objects of the same type cannot be determined, 
+/// The interface ISkolem is used to implement fixed but unknown objects of some type.
+/// In general, the equality of two fixed but unknown objects of the same type cannot be determined, 
 /// unless it is explicitely asserted (or explicitely negated) in the corresponding FPL theory.
+/// However, once a SkolemName is established, the value will be treated like a fixed constant.
 type ISkolem =
     abstract member SkolemName : string with get
     abstract member SetSkolemName: unit -> unit
@@ -3495,6 +3496,7 @@ type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
         ret
 
     member this.AssignValueToCoordinates (coordinates:FplValue seq) (value:FplValue) =
+        this.IsInitialized <- true
         let coordinatesKey = 
             coordinates
             |> Seq.map (fun fv -> fv.Represent())
@@ -4793,6 +4795,7 @@ let runIntrinsicFunction (fv:FplValue) variableStack =
             value.FplId <- map.TypeId
             let typeStr = map.TypeId.Substring(1)
             match typeStr with 
+            | LiteralObj
             | LiteralInd ->
                 value.SetType typeStr value.StartPos value.EndPos
                 map.DimensionTypes |> Seq.iter (fun fv -> value.SetType fv.TypeId value.StartPos value.EndPos)
@@ -5664,30 +5667,34 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
     override this.Run variableStack =
         this.Debug "Run"
         match this.Assignee, this.AssignedValue with
+        | Some (:? FplVariable as assignee), Some (:? FplGenericConstructor as assignedValue) ->
+            assignedValue.Run variableStack
+            match assignedValue.Instance with 
+            | Some instance ->
+                assignee.SetValue instance // set value to the created instance 
+                // reposition the instance in symbol table
+                instance.Parent <- Some assignee
+            | None -> () // todo, issue diagnostics?
+        | Some (:? FplVariable as assignee), Some (:? FplIntrinsicInd as assignedValue) ->
+            assignee.SetValue assignedValue
+        | Some (:? FplVariable as assignee), Some (:? FplIntrinsicPred as assignedValue) ->
+            assignee.SetValue assignedValue
+        | Some (:? FplVariable as assignee), Some (:? FplClass as assignedValue) ->
+            emitID004diagnostics assignedValue.FplId this.ArgList[1].StartPos this.ArgList[1].EndPos
+        | Some (:? FplVariableArray as assignee), Some (:? FplGenericConstructor as assignedValue) ->
+            assignedValue.Run variableStack
+            match assignedValue.Instance with 
+            | Some instance ->
+                assignee.AssignValueToCoordinates this.ArgList[0].ArgList instance // set value to the created instance 
+                // reposition the instance in symbol table
+                instance.Parent <- Some assignee
+            | None -> () // todo, issue diagnostics?
+        | Some (:? FplVariableArray as assignee), Some (:? FplIntrinsicInd as assignedValue) ->
+            assignee.AssignValueToCoordinates this.ArgList[0].ArgList assignedValue // set value to the created instance 
+        | Some (:? FplVariableArray as assignee), Some (:? FplIntrinsicPred as assignedValue) ->
+            assignee.AssignValueToCoordinates this.ArgList[0].ArgList assignedValue // set value to the created instance 
         | Some assignee, Some assignedValue ->
-            match assignedValue with 
-            | :? FplGenericConstructor as ctor ->
-                ctor.Run variableStack
-                match ctor.Instance with 
-                | Some instance ->
-                    assignee.SetValue instance // set value to the created instance 
-                    // reposition the instance in symbol table
-                    instance.Parent <- Some assignee
-                | None -> () // todo, issue diagnostics?
-            | :? FplClass as classBlock ->
-                emitID004diagnostics classBlock.FplId this.ArgList[1].StartPos this.ArgList[1].EndPos
-            | _ ->
-                if assignedValue = assignee then 
-                    () // LG005 was already emitted when checking consistency but we want to prevent assigning something to itself to avoid infinite loops
-                else
-                    match assignee with
-                    | :? FplVariableArray as arr ->
-                        arr.AssignValueToCoordinates this.ArgList[0].ArgList assignedValue
-                    | _ ->
-                        assignee.SetValuesOf assignedValue
-                    match box assignee with
-                    | :? IVariable as assigneeCast -> assigneeCast.IsInitialized <- true
-                    | _ -> ()
+            assignee.SetValuesOf assignedValue
         | _ -> ()
 
 /// A string representation of an FplValue
