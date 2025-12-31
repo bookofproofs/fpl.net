@@ -3792,6 +3792,8 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
             mpwa ars prs mode // undef can always be assigned
         | MatchingMode.Assignment when pType.StartsWith($"*{aType}[") && p.Name = PrimVariableArrayL ->
             None // assignee array accepting assigned value
+        | MatchingMode.Signature when pType.StartsWith($"*{aType}[{LiteralInd}]") ->
+            None // 1D arrays matching input type with ind as index accept nvariadic enumerations
         | _ when pType.StartsWith($"*{aType}[") ->
             // array parameters with indexes that differ from the FPL-inbuilt index type  
             // or with multidimensional index types will not accept variadic enumerations of arguments
@@ -3818,9 +3820,9 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                 | _ ->
                     // this case does not occur but we cover it for completeness reasons
                     Some($"`{a.Type(SignatureType.Name)}:{aType}` is undefined and doesn't match `{p.Type(SignatureType.Name)}:{pType}`")
-            elif aReferencedNode.Name = PrimDefaultConstructor then 
-                let defaultCtor = aReferencedNode :?> FplDefaultConstructor
-                matchClassInheritance defaultCtor.ToBeConstructedClass a aType p pType
+            elif aReferencedNode.Name = PrimDefaultConstructor || aReferencedNode.Name = LiteralCtorL then 
+                let ctor = aReferencedNode :?> FplGenericConstructor
+                matchClassInheritance ctor.ToBeConstructedClass a aType p pType
             elif aReferencedNode.Name = PrimFuncionalTermL || aReferencedNode.Name = PrimMandatoryFunctionalTermL then 
                 let mapOpt = getMapping aReferencedNode
                 let map = mapOpt.Value :?> FplMapping 
@@ -3832,9 +3834,9 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
             match clOpt with 
             | Some (:? FplClass) -> matchClassInheritance clOpt a aType p pType
             | _ -> Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
-        | MatchingMode.Assignment when a.Name = PrimDefaultConstructor ->
-            let defaultCtor = a :?> FplDefaultConstructor
-            matchClassInheritance defaultCtor.ToBeConstructedClass a aType p pType
+        | MatchingMode.Assignment when a.Name = PrimDefaultConstructor || a.Name = LiteralCtorL ->
+            let ctor = a :?> FplGenericConstructor
+            matchClassInheritance ctor.ToBeConstructedClass a aType p pType
         | MatchingMode.Assignment when a.Name = PrimFuncionalTermL || a.Name = PrimMandatoryFunctionalTermL ->
             let mapOpt = getMapping a
             match mapOpt with 
