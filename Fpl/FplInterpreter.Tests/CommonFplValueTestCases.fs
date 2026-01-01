@@ -213,6 +213,7 @@ type CommonFplValueTestCases =
     static member ScopeProperties(subtype) =
         ad.Clear()
         let fplCode = """
+        def cl Nat
         def pred TestId() 
         {
             intr 

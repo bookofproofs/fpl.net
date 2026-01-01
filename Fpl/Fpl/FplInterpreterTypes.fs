@@ -3788,6 +3788,8 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
             mpwa ars prs mode
         | _ when pType.StartsWith(LiteralTpl) || pType.StartsWith(LiteralTplL) ->
             mpwa ars prs mode // tpl accepts everything: todo: really?
+        | _ when pType.StartsWith($"*{LiteralTpl}") || pType.StartsWith($"*{LiteralTplL}") ->
+            mpwa ars prs mode // tpl arrays accepts everything: todo: really?
         | MatchingMode.Assignment when aType = LiteralUndef ->
             mpwa ars prs mode // undef can always be assigned
         | MatchingMode.Assignment when pType.StartsWith($"*{aType}[") && p.Name = PrimVariableArrayL ->
@@ -4857,29 +4859,34 @@ let runIntrinsicFunction (fv:FplValue) variableStack =
                 instance.Parent <- Some fv
             | None -> () // todo, should not occur issue diagnostics?
         | Some cl when map.Dimensionality > 0 ->
-            let value = new FplVariableArray("", (fvIHasSignature.Value.SignStartPos, fvIHasSignature.Value.SignEndPos), fv)
+            let value = new FplVariableArray("", (map.StartPos, map.EndPos), fv)
             value.FplId <- map.TypeId
-            value.SetType (map.TypeId.Substring(1)) value.StartPos value.EndPos
-            map.DimensionTypes |> Seq.iter (fun fv -> value.SetType fv.TypeId value.StartPos value.EndPos)
+            value.SetType (map.TypeId.Substring(1)) map.StartPos map.EndPos
+            map.DimensionTypes |> Seq.iter (fun fv -> value.SetType fv.TypeId fv.StartPos fv.EndPos)
             fv.SetValue value // set value to the created array
         | None when map.Dimensionality > 0 ->
-            let value = new FplVariableArray("", (fvIHasSignature.Value.SignStartPos, fvIHasSignature.Value.SignEndPos), fv)
+            let value = new FplVariableArray("", (map.StartPos, map.EndPos), fv)
             value.FplId <- map.TypeId
             let typeStr = map.TypeId.Substring(1)
             match typeStr with 
             | LiteralObj
             | LiteralInd ->
                 value.SetType typeStr value.StartPos value.EndPos
-                map.DimensionTypes |> Seq.iter (fun fv -> value.SetType fv.TypeId value.StartPos value.EndPos)
+                map.DimensionTypes |> Seq.iter (fun fv -> value.SetType fv.TypeId fv.StartPos fv.EndPos)
                 fv.SetValue value // set value to the created array
             | LiteralPred ->
                 value.SetType typeStr value.StartPos value.EndPos
-                map.DimensionTypes |> Seq.iter (fun fv -> value.SetType fv.TypeId value.StartPos value.EndPos)
+                map.DimensionTypes |> Seq.iter (fun fv -> value.SetType fv.TypeId fv.StartPos fv.EndPos)
                 map.GetVariables() |> List.iter (fun fv -> value.Scope.Add(fv.FplId, fv.Clone()))
                 fv.SetValue value // set value to the created array
             | _ ->
-                let undef = new FplIntrinsicUndef((fv.StartPos, fv.EndPos), fv)
-                fv.SetValue undef
+                if map.TypeId.StartsWith($"*{LiteralTpl}") || map.TypeId.StartsWith($"*{LiteralTplL}") then
+                    value.SetType LiteralTpl map.StartPos map.EndPos 
+                    map.DimensionTypes |> Seq.iter (fun fv -> value.SetType fv.TypeId fv.StartPos fv.EndPos)
+                    fv.SetValue value // set value to the created array
+                else
+                    let undef = new FplIntrinsicUndef((fv.StartPos, fv.EndPos), fv)
+                    fv.SetValue undef
         | _ ->
             match map.TypeId with
             | LiteralInd ->
