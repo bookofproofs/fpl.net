@@ -4893,54 +4893,11 @@ let runIntrinsicFunction (fv:FplValue) variableStack =
                 instance.Parent <- Some fv
             | None -> () // todo, should not occur issue diagnostics?
         | Some cl when map.Dimensionality > 0 ->
-            let value = new FplVariableArray("", (map.StartPos, map.EndPos), fv)
-            value.FplId <- map.TypeId
-            value.SetType (map.TypeId.Substring(1)) map.StartPos map.EndPos
-            map.DimensionTypes |> Seq.iter (fun fv -> value.SetType fv.TypeId fv.StartPos fv.EndPos)
-            fv.SetValue value // set value to the created array
+            fv.SetValue map // set value to the map
         | None when map.Dimensionality > 0 ->
-            let value = new FplVariableArray("", (map.StartPos, map.EndPos), fv)
-            value.FplId <- map.TypeId
-            let typeStr = map.TypeId.Substring(1)
-            match typeStr with 
-            | LiteralObj
-            | LiteralInd ->
-                value.SetType typeStr value.StartPos value.EndPos
-                map.DimensionTypes |> Seq.iter (fun fv -> value.SetType fv.TypeId fv.StartPos fv.EndPos)
-                fv.SetValue value // set value to the created array
-            | LiteralPred ->
-                value.SetType typeStr value.StartPos value.EndPos
-                map.DimensionTypes |> Seq.iter (fun fv -> value.SetType fv.TypeId fv.StartPos fv.EndPos)
-                map.GetVariables() |> List.iter (fun fv -> value.Scope.Add(fv.FplId, fv.Clone()))
-                fv.SetValue value // set value to the created array
-            | _ ->
-                if map.TypeId.StartsWith($"*{LiteralTpl}") || map.TypeId.StartsWith($"*{LiteralTplL}") then
-                    value.SetType LiteralTpl map.StartPos map.EndPos 
-                    map.DimensionTypes |> Seq.iter (fun fv -> value.SetType fv.TypeId fv.StartPos fv.EndPos)
-                    fv.SetValue value // set value to the created array
-                else
-                    let undef = new FplIntrinsicUndef((fv.StartPos, fv.EndPos), fv)
-                    fv.SetValue undef
+            fv.SetValue map // set value to the map
         | _ ->
-            match map.TypeId with
-            | LiteralInd ->
-                let value = new FplIntrinsicInd((fv.StartPos, fv.EndPos), fv)
-                fv.SetValue value
-            | LiteralPred ->
-                let value = new FplIntrinsicPred((fv.StartPos, fv.EndPos), fv)
-                fv.SetValue value
-            | LiteralObj
-            | LiteralFunc ->
-                let value = new FplVariable("", (fv.StartPos, fv.EndPos), fv)
-                value.TypeId <- map.TypeId
-                fv.SetValue value
-            | _ ->
-                if map.TypeId.StartsWith(LiteralTpl) || map.TypeId.StartsWith(LiteralTplL) then
-                    let value = new FplIntrinsicTpl(map.TypeId, (fv.StartPos, fv.EndPos), fv)
-                    fv.SetValue value
-                else
-                    let undef = new FplIntrinsicUndef((fv.StartPos, fv.EndPos), fv)
-                    fv.SetValue undef
+            fv.SetValue map // set value to the map
     | _ ->
         let undef = new FplIntrinsicUndef((fv.StartPos, fv.EndPos), fv)
         fv.SetValue undef
