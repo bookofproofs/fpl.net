@@ -3769,10 +3769,16 @@ type MatchingMode =
 /// Tries to match a list of arguments with a list of parameters by their type recursively.
 /// The comparison depends on MatchingMode.
 let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
-    let matchClassInheritance (clOpt:FplValue option) (a:FplValue) aType (p:FplValue) pType = 
+    let matchClassInheritance (clOpt:FplValue option) (a:FplValue) aType (p:FplValue) (pType:string) = 
+        let pTypeSimple =
+            if pType.StartsWith("*") then 
+                let ret = pType.Substring(1).Split("[")
+                ret[0]
+            else
+                pType
         match clOpt with 
         | Some cl -> 
-            if inheritsFrom cl pType then 
+            if inheritsFrom cl pTypeSimple then 
                 None
             else
                 Some($"`{a.Type(SignatureType.Name)}:{aType}` matches neither `{p.Type(SignatureType.Name)}:{pType}` nor the base classes")
@@ -5735,9 +5741,7 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
                 // reposition the instance in symbol table
                 instance.Parent <- Some assignee
             | None -> () // todo, issue diagnostics?
-        | None, Some (:? FplVariableArray as assignee), Some (:? FplIntrinsicInd as assignedValue) ->
-            assignee.AssignValueToCoordinates this.ArgList[0].ArgList assignedValue // set value to the created instance 
-        | None, Some (:? FplVariableArray as assignee), Some (:? FplIntrinsicPred as assignedValue) ->
+        | None, Some (:? FplVariableArray as assignee), Some assignedValue ->
             assignee.AssignValueToCoordinates this.ArgList[0].ArgList assignedValue // set value to the created instance 
         | None, Some assignee, Some assignedValue ->
             assignee.SetValuesOf assignedValue
