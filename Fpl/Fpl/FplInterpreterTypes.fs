@@ -3482,6 +3482,13 @@ type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
 
     override this.ShortName = PrimVariableArray
 
+    member this.CopyValueKeys (ret:FplVariableArray) = 
+        this.ValueKeys.Clear()
+        this.ValueKeys
+            |> Seq.iter (fun kvp ->
+                ret.ValueKeys.Add(kvp.Key, kvp.Value)
+            )
+
     override this.Clone () =
         let ret = new FplVariableArray(this.FplId, (this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -3497,10 +3504,7 @@ type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
             let value = fv1.Clone()
             ret.DimensionTypes.Add(value))
 
-        this.ValueKeys
-        |> Seq.iter (fun kvp ->
-            ret.ValueKeys.Add(kvp.Key, kvp.Value)
-        )
+        this.CopyValueKeys ret
 
         ret
 
@@ -3581,6 +3585,24 @@ type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
     override this.CheckConsistency () = 
         base.CheckConsistency()
 
+    
+    override this.SetValue fv =
+        base.SetValue fv
+        if fv.FplId <> LiteralUndef then
+            this.IsInitialized <- true
+        match fv with 
+        | :? FplVariableArray as arr -> arr.CopyValueKeys this
+        | _ -> ()
+
+    override this.SetValuesOf fv =
+        base.SetValuesOf fv
+        if fv.FplId <> LiteralUndef then
+            this.IsInitialized <- true
+        match fv with 
+        | :? FplVariableArray as arr -> arr.CopyValueKeys this
+        | _ -> ()
+
+
 type FplVariable(fplId, positions: Positions, parent: FplValue) =
     inherit FplGenericVariable(fplId, positions, parent)
 
@@ -3601,7 +3623,12 @@ type FplVariable(fplId, positions: Positions, parent: FplValue) =
         ret
 
     override this.SetValue fv =
-        base.SetValue(fv)
+        base.SetValue fv
+        if fv.FplId <> LiteralUndef then
+            this.IsInitialized <- true
+
+    override this.SetValuesOf fv =
+        base.SetValuesOf fv
         if fv.FplId <> LiteralUndef then
             this.IsInitialized <- true
 
@@ -4470,6 +4497,7 @@ type FplEquivalence(positions: Positions, parent: FplValue) as this =
             |> Seq.map (fun arg -> arg.Type(signatureType))
             |> String.concat ", "
         sprintf "%s(%s)" head args
+
 
     override this.Run variableStack = 
         this.Debug "Run"
