@@ -2934,8 +2934,11 @@ type SymbolTableStructure() =
     
     // intrinsic constant
     [<DataRow("FplFunctionalTerm", "MF1", """def func T()->pred;""", "")>]
+    [<DataRow("FplFunctionalTerm", "MF1a", """def func T()->pred(x:obj);""", "")>]
     // non-intrinsic constant
     [<DataRow("FplFunctionalTerm", "MF2", """def func T()->pred {return true};""", "")>]
+    [<DataRow("FplFunctionalTerm", "MF2a", """def func T()->pred(x:obj) {dec ~y:pred(z:obj); return y};""", "")>]
+    [<DataRow("FplFunctionalTerm", "MF2b", """def pred A(z:obj) def func T()->pred(x:obj); {return A(x)};""", "")>]
     // intrinsic constant array
     [<DataRow("FplFunctionalTerm", "MF3", """def func T()->*pred[ind];""", "")>]
     // non-intrinsic constant array
@@ -2962,6 +2965,22 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>(PrimUndetermined, node.Represent())  
             let fn = node :?> FplFunctionalTerm
             Assert.AreEqual<string>("T()", fn.SkolemName) // only for intrinsic set
+        | "FplFunctionalTerm", "MF1a" -> 
+            // intrinsic constant
+            Assert.IsInstanceOfType<FplTheory>(parent) 
+            Assert.AreEqual<int>(0, parent.ArgList.Count) 
+            Assert.AreEqual<int>(1, parent.Scope.Count) 
+            Assert.IsInstanceOfType<FplFunctionalTerm>(node) 
+            Assert.AreEqual<int>(1, node.ArgList.Count)  // mapping
+            Assert.AreEqual<int>(1, node.Scope.Count) 
+            let map = (getMapping node).Value :?> FplMapping 
+            match map.ToBeReturnedClass with
+            | None -> Assert.AreEqual<string>("no class", "no class")
+            | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
+            Assert.AreEqual<int>(1, node.ValueList.Count)
+            Assert.AreEqual<string>(PrimUndetermined, node.Represent())  
+            let fn = node :?> FplFunctionalTerm
+            Assert.AreEqual<string>("T()", fn.SkolemName) // only for intrinsic set
         | "FplFunctionalTerm", "MF2" -> 
             // non-intrinsic constant
             Assert.IsInstanceOfType<FplTheory>(parent) 
@@ -2970,6 +2989,22 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplFunctionalTerm>(node) 
             Assert.AreEqual<int>(2, node.ArgList.Count)  // mapping + return
             Assert.AreEqual<int>(0, node.Scope.Count) 
+            let map = (getMapping node).Value :?> FplMapping 
+            match map.ToBeReturnedClass with
+            | None -> Assert.AreEqual<string>("no class", "no class")
+            | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
+            Assert.AreEqual<int>(1, node.ValueList.Count)
+            Assert.AreEqual<string>(LiteralTrue, node.Represent())
+            let fn = node :?> FplFunctionalTerm
+            Assert.AreEqual<string>("", fn.SkolemName) // missing, since non-intrinsic
+        | "FplFunctionalTerm", "MF2a" -> 
+            // non-intrinsic constant
+            Assert.IsInstanceOfType<FplTheory>(parent) 
+            Assert.AreEqual<int>(0, parent.ArgList.Count) 
+            Assert.AreEqual<int>(1, parent.Scope.Count) 
+            Assert.IsInstanceOfType<FplFunctionalTerm>(node) 
+            Assert.AreEqual<int>(2, node.ArgList.Count)  // mapping + return
+            Assert.AreEqual<int>(3, node.Scope.Count) // 3 variables
             let map = (getMapping node).Value :?> FplMapping 
             match map.ToBeReturnedClass with
             | None -> Assert.AreEqual<string>("no class", "no class")
@@ -3985,13 +4020,11 @@ type SymbolTableStructure() =
             match map.ToBeReturnedClass with
             | Some cl -> Assert.AreEqual<string>("A", cl.TypeId)
             | None -> Assert.IsTrue(false, "The is no to be returned class")
-            let fn = node.Parent.Value
-            Assert.AreEqual<int>(1, fn.ValueList.Count)
-            let value = fn.ValueList |> Seq.head
-            Assert.AreEqual<string>("""{"name":"T():A","base":[],"vars":[],"prtys":[]}""", value.Represent())  
-            Assert.AreEqual<string>("""A""", value.Type SignatureType.Name)  
-            Assert.AreEqual<string>("""A""", value.Type SignatureType.Mixed)  
-            Assert.AreEqual<string>("""A""", value.Type SignatureType.Type)  
+            Assert.AreEqual<string>("""dec A""", node.Represent())  
+            Assert.AreEqual<string>("""A""", node.Type SignatureType.Name)  
+            Assert.AreEqual<string>("""A""", node.Type SignatureType.Mixed)  
+            Assert.AreEqual<string>("""A""", node.Type SignatureType.Type)  
+
         | "FplMapping", "MF2" -> 
             Assert.IsInstanceOfType<FplFunctionalTerm>(parent) 
             Assert.AreEqual<int>(1, parent.ArgList.Count) // mapping 
@@ -4003,13 +4036,10 @@ type SymbolTableStructure() =
             match map.ToBeReturnedClass with
             | Some cl -> Assert.AreEqual<string>("A", cl.TypeId)
             | None -> Assert.IsTrue(false, "The is no to be returned class")
-            let fn = node.Parent.Value
-            Assert.AreEqual<int>(1, fn.ValueList.Count)
-            let value = fn.ValueList |> Seq.head
-            Assert.AreEqual<string>("""T():*A[ind]""", value.Represent())  
-            Assert.AreEqual<string>("""*A""", value.Type SignatureType.Name)  
-            Assert.AreEqual<string>("""*A[ind]""", value.Type SignatureType.Mixed)  
-            Assert.AreEqual<string>("""*A[ind]""", value.Type SignatureType.Type) 
+            Assert.AreEqual<string>("""dec *A[ind]""", node.Represent())  
+            Assert.AreEqual<string>("""*A[ind]""", node.Type SignatureType.Name)  
+            Assert.AreEqual<string>("""*A[ind]""", node.Type SignatureType.Mixed)  
+            Assert.AreEqual<string>("""*A[ind]""", node.Type SignatureType.Type) 
         | "FplMapping", "MF1a" 
         | "FplMapping", "MF2a" 
         | "FplMapping", "MF4" 
@@ -4028,52 +4058,51 @@ type SymbolTableStructure() =
             match map.ToBeReturnedClass with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            let fn = node.Parent.Value
-            Assert.AreEqual<int>(1, fn.ValueList.Count)
-            let value = fn.ValueList |> Seq.head
             match varVal with
-            | "MF1a"
+            | "MF1a" ->
+                Assert.AreEqual<string>("""dec A""", node.Represent())  
+                Assert.AreEqual<string>("""A""", node.Type SignatureType.Name)  
+                Assert.AreEqual<string>("""A""", node.Type SignatureType.Mixed)  
+                Assert.AreEqual<string>("""A""", node.Type SignatureType.Type)  
             | "MF2a" ->
-                Assert.AreEqual<string>("""undef""", value.Represent())  
-                Assert.AreEqual<string>("""undef""", value.Type SignatureType.Name)  
-                Assert.AreEqual<string>("""undef""", value.Type SignatureType.Mixed)  
-                Assert.AreEqual<string>("""undef""", value.Type SignatureType.Type)  
+                Assert.AreEqual<string>("""dec *A[ind]""", node.Represent())  
+                Assert.AreEqual<string>("""*A[ind]""", node.Type SignatureType.Name)  
+                Assert.AreEqual<string>("""*A[ind]""", node.Type SignatureType.Mixed)  
+                Assert.AreEqual<string>("""*A[ind]""", node.Type SignatureType.Type)  
             | "MF4" -> 
-                Assert.AreEqual<string>("""T():undetermined""", value.Represent())  
-                Assert.AreEqual<string>("""undetermined""", value.Type SignatureType.Name)  
-                Assert.AreEqual<string>("""undetermined""", value.Type SignatureType.Mixed)  
-                Assert.AreEqual<string>("""pred""", value.Type SignatureType.Type) 
+                Assert.AreEqual<string>("""dec pred""", node.Represent())  
+                Assert.AreEqual<string>("""pred""", node.Type SignatureType.Name)  
+                Assert.AreEqual<string>("""pred""", node.Type SignatureType.Mixed)  
+                Assert.AreEqual<string>("""pred""", node.Type SignatureType.Type) 
             | "MF4a" -> 
-                Assert.AreEqual<string>("""T():dec *pred[ind]""", value.Represent())  
-                Assert.AreEqual<string>("""T()""", value.Type SignatureType.Name)  
-                Assert.AreEqual<string>("""T()[ind]""", value.Type SignatureType.Mixed)  
-                Assert.AreEqual<string>("""*pred[ind]""", value.Type SignatureType.Type) 
+                Assert.AreEqual<string>("""dec *pred[ind]""", node.Represent())  
+                Assert.AreEqual<string>("""*pred[ind]""", node.Type SignatureType.Name)  
+                Assert.AreEqual<string>("""*pred[ind]""", node.Type SignatureType.Mixed)  
+                Assert.AreEqual<string>("""*pred[ind]""", node.Type SignatureType.Type) 
             | "MF5" -> 
-                Assert.AreEqual<string>("""T():dec *A[ind]""", value.Represent())  
-                Assert.AreEqual<string>("""T()""", value.Type SignatureType.Name)  
-                Assert.AreEqual<string>("""T()[ind]""", value.Type SignatureType.Mixed)  
-                Assert.AreEqual<string>("""*A[ind]""", value.Type SignatureType.Type) 
+                Assert.AreEqual<string>("""dec func""", node.Represent())  
+                Assert.AreEqual<string>("""func""", node.Type SignatureType.Name)  
+                Assert.AreEqual<string>("""func""", node.Type SignatureType.Mixed)  
+                Assert.AreEqual<string>("""func""", node.Type SignatureType.Type) 
             | "MF5a" -> 
-                Assert.AreEqual<string>("""T():dec *A[ind]""", value.Represent())  
-                Assert.AreEqual<string>("""T()""", value.Type SignatureType.Name)  
-                Assert.AreEqual<string>("""T()[ind]""", value.Type SignatureType.Mixed)  
-                Assert.AreEqual<string>("""*A[ind]""", value.Type SignatureType.Type) 
+                Assert.AreEqual<string>("""dec *func[ind]""", node.Represent())  
+                Assert.AreEqual<string>("""*func[ind]""", node.Type SignatureType.Name)  
+                Assert.AreEqual<string>("""*func[ind]""", node.Type SignatureType.Mixed)  
+                Assert.AreEqual<string>("""*func[ind]""", node.Type SignatureType.Type) 
             | "MF6" -> 
-                Assert.AreEqual<string>("""T():dec *A[ind]""", value.Represent())  
-                Assert.AreEqual<string>("""T()""", value.Type SignatureType.Name)  
-                Assert.AreEqual<string>("""T()[ind]""", value.Type SignatureType.Mixed)  
-                Assert.AreEqual<string>("""*A[ind]""", value.Type SignatureType.Type) 
+                Assert.AreEqual<string>("""dec tpl""", node.Represent())  
+                Assert.AreEqual<string>("""tpl""", node.Type SignatureType.Name)  
+                Assert.AreEqual<string>("""tpl""", node.Type SignatureType.Mixed)  
+                Assert.AreEqual<string>("""tpl""", node.Type SignatureType.Type) 
             | "MF6a" -> 
-                Assert.AreEqual<string>("""T():dec *A[ind]""", value.Represent())  
-                Assert.AreEqual<string>("""T()""", value.Type SignatureType.Name)  
-                Assert.AreEqual<string>("""T()[ind]""", value.Type SignatureType.Mixed)  
-                Assert.AreEqual<string>("""*A[ind]""", value.Type SignatureType.Type) 
+                Assert.AreEqual<string>("""dec *tpl[ind]""", node.Represent())  
+                Assert.AreEqual<string>("""*tpl[ind]""", node.Type SignatureType.Name)  
+                Assert.AreEqual<string>("""*tpl[ind]""", node.Type SignatureType.Mixed)  
+                Assert.AreEqual<string>("""*tpl[ind]""", node.Type SignatureType.Type) 
             | _ -> 
                 Assert.IsTrue(false, $"Unknown case {varVal}")   
         | "FplMapping", "MF4b"  
-        | "FplMapping", "MF4c"  
-        | "FplMapping", "MF5b"  
-        | "FplMapping", "MF5c" ->
+        | "FplMapping", "MF4c" ->  
             Assert.IsInstanceOfType<FplFunctionalTerm>(parent) 
             Assert.AreEqual<int>(1, parent.ArgList.Count) // mapping 
             Assert.AreEqual<int>(1, parent.Scope.Count) // one mapping variable
@@ -4084,30 +4113,42 @@ type SymbolTableStructure() =
             match map.ToBeReturnedClass with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            let fn = node.Parent.Value
-            Assert.AreEqual<int>(1, fn.ValueList.Count)
-            let value = fn.ValueList |> Seq.head
             match varVal with
             | "MF4b" -> 
-                Assert.AreEqual<string>("""T():undetermined""", value.Represent())  
-                Assert.AreEqual<string>("""undetermined""", value.Type SignatureType.Name)  
-                Assert.AreEqual<string>("""undetermined""", value.Type SignatureType.Mixed)  
-                Assert.AreEqual<string>("""pred""", value.Type SignatureType.Type) 
+                Assert.AreEqual<string>("""dec pred(obj)""", node.Represent())  
+                Assert.AreEqual<string>("""pred(x)""", node.Type SignatureType.Name)  
+                Assert.AreEqual<string>("""pred(obj)""", node.Type SignatureType.Mixed)  
+                Assert.AreEqual<string>("""pred(obj)""", node.Type SignatureType.Type) 
             | "MF4c" -> 
-                Assert.AreEqual<string>("""T():dec *pred(obj)[ind]""", value.Represent())  
-                Assert.AreEqual<string>("""T()""", value.Type SignatureType.Name)  
-                Assert.AreEqual<string>("""T()[ind]""", value.Type SignatureType.Mixed)  
-                Assert.AreEqual<string>("""*A[ind]""", value.Type SignatureType.Type) 
+                Assert.AreEqual<string>("""dec *pred(obj)[ind]""", node.Represent())  
+                Assert.AreEqual<string>("""*pred(x)[ind]""", node.Type SignatureType.Name)  
+                Assert.AreEqual<string>("""*pred(obj)[ind]""", node.Type SignatureType.Mixed)  
+                Assert.AreEqual<string>("""*pred(obj)[ind]""", node.Type SignatureType.Type) 
+            | _ -> 
+                Assert.IsTrue(false, $"Unknown case {varVal}")   
+        | "FplMapping", "MF5b"  
+        | "FplMapping", "MF5c" ->
+            Assert.IsInstanceOfType<FplFunctionalTerm>(parent) 
+            Assert.AreEqual<int>(1, parent.ArgList.Count) // mapping 
+            Assert.AreEqual<int>(1, parent.Scope.Count) // one mapping variable
+            Assert.IsInstanceOfType<FplMapping>(node) 
+            Assert.AreEqual<int>(1, node.ArgList.Count)  // nested mapping 
+            Assert.AreEqual<int>(1, node.Scope.Count) // one variable
+            let map = node :?> FplMapping
+            match map.ToBeReturnedClass with
+            | None -> Assert.AreEqual<string>("no class", "no class")
+            | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
+            match varVal with
             | "MF5b" -> 
-                Assert.AreEqual<string>("""T():dec *A[ind]""", value.Represent())  
-                Assert.AreEqual<string>("""T()""", value.Type SignatureType.Name)  
-                Assert.AreEqual<string>("""T()[ind]""", value.Type SignatureType.Mixed)  
-                Assert.AreEqual<string>("""*A[ind]""", value.Type SignatureType.Type) 
+                Assert.AreEqual<string>("""dec func(obj) -> obj""", node.Represent())  
+                Assert.AreEqual<string>("""func(x) -> obj""", node.Type SignatureType.Name)  
+                Assert.AreEqual<string>("""func(obj) -> obj""", node.Type SignatureType.Mixed)  
+                Assert.AreEqual<string>("""func(obj) -> obj""", node.Type SignatureType.Type) 
             | "MF5c" -> 
-                Assert.AreEqual<string>("""T():dec *A[ind]""", value.Represent())  
-                Assert.AreEqual<string>("""T()""", value.Type SignatureType.Name)  
-                Assert.AreEqual<string>("""T()[ind]""", value.Type SignatureType.Mixed)  
-                Assert.AreEqual<string>("""*A[ind]""", value.Type SignatureType.Type) 
+                Assert.AreEqual<string>("""dec *func(obj) -> obj[ind]""", node.Represent())  
+                Assert.AreEqual<string>("""*func(x) -> obj[ind]""", node.Type SignatureType.Name)  
+                Assert.AreEqual<string>("""*func(obj) -> obj[ind]""", node.Type SignatureType.Mixed)  
+                Assert.AreEqual<string>("""*func(obj) -> obj[ind]""", node.Type SignatureType.Type) 
             | _ -> 
                 Assert.IsTrue(false, $"Unknown case {varVal}")   
 
