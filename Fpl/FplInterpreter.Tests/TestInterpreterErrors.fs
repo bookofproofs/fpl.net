@@ -1420,11 +1420,11 @@ type TestInterpreterErrors() =
     [<DataRow("MS2g", "lem A {true} def func Test()->pred {return A};", 0)>] // OK: ->pred matches signature A (lemma)
     [<DataRow("MS2h", "prop A {true} def func Test()->pred {return A};", 0)>] // OK: ->pred matches signature A (proposition)
     [<DataRow("MS2i", "conj A {true} def func Test()->pred {return A};", 0)>] // OK: ->pred does matches signature A (conjecture)
-    [<DataRow("MS1j", "cor A$1 {true} def func Test()->pred {return A$1};", 0)>] // OK: ->pred matches signature A$1 (corollary)
-    [<DataRow("MS1k", "proof A$1 {1. |- trivial} def func Test()->pred {return A$1};", 1)>] // SIG03: ->pred does not match signature A$1 (proof)
+    [<DataRow("MS2j", "cor A$1 {true} def func Test()->pred {return A$1};", 0)>] // OK: ->pred matches signature A$1 (corollary)
+    [<DataRow("MS2k", "proof A$1 {1. |- trivial} def func Test()->pred {return A$1};", 1)>] // SIG03: ->pred does not match signature A$1 (proof)
     [<DataRow("MS2l", "inf A {pre:true con:true} def func Test()->pred {return A};", 1)>] // SIG03: ->pred does not match signature A (rule of inference)
     [<DataRow("MS2m", "def func A()->obj def func Test()->pred {return A};", 1)>] // SIG03: ->pred does not match signature A (functional term)
-    [<DataRow("MS2n", "ext A x@/\d+/ -> obj {dec ~y:obj; return y} def func Test()->pred {return A};", 1)>] // SIG03: ->pred(y:obj) does not match signature A (extension)
+    [<DataRow("MS2n", "ext A x@/\d+/ -> obj {dec ~y:obj; return y} def func Test()->pred {return A};", 1)>] // SIG03: ->pred does not match signature A (extension)
 
 
     [<DataRow("MS3", "def func A(z:obj)->ind def func Test()->func(y:obj)->ind {return A};", 0)>] // OK: ->func(y:obj)->ind matches signature A(obj)->ind, whole node would be returned
@@ -1432,11 +1432,32 @@ type TestInterpreterErrors() =
     [<DataRow("MS3b", "def func A(z:obj)->ind def func Test()->func(y:obj)->ind {dec ~x:ind; return A(x)};", 1)>] // SIG03: ->func(y:obj)->ind does not match value A(ind) not matching A(obj)
     [<DataRow("MS3c", "def func A(z:ind)->ind def func Test()->func(y:obj)->ind {dec ~x:ind; return A(x)};", 1)>] // SIG03: ->func(y:obj)->ind does not match value A(ind) 
     [<DataRow("MS3d", "def func A(z:ind)->ind def func Test()->func(y:obj)->ind {return A};", 1)>] // SIG03: ->func(y:obj)->ind does not match signature A(ind)->ind
-    [<DataRow("MS4", "def func A(z:obj)->ind def func Test()->func {return A};", 0)>] // OK: ->func matches signature A(obj), whole node would be returned
-    [<DataRow("MS4a", "def func A(z:obj)->ind def func Test()->func {dec ~x:obj; return A(x)};", 0)>] // OK: ->func matches value A(obj) 
-    [<DataRow("MS4b", "def func A(z:obj)->ind def func Test()->func {dec ~x:ind; return A(x)};", 1)>] // SIG03: ->func does not match value A(ind) since it does not match A(obj)
-    [<DataRow("MS4c", "def func A(z:ind)->ind def func Test()->func {dec ~x:ind; return A(x)};", 0)>] // OK: ->func matches value A(ind) 
-    [<DataRow("MS4d", "def func A(z:ind)->ind def func Test()->func {return A};", 0)>] // OK: ->func matches signature A(ind)->ind
+    [<DataRow("MS3e", "ax A {true} def func Test()->func(y:obj)->ind {return A};", 1)>] // SIG03: ->func(y:obj)->ind does not match signature A (axiom)
+    [<DataRow("MS3f", "thm A {true} def func Test()->func(y:obj)->ind {return A};", 1)>] // SIG03: ->func(y:obj)->ind does not match signature A (theorem)
+    [<DataRow("MS3g", "lem A {true} def func Test()->func(y:obj)->ind {return A};", 1)>] // SIG03: ->func(y:obj)->ind does not match signature A (lemma)
+    [<DataRow("MS3h", "prop A {true} def func Test()->func(y:obj)->ind {return A};", 1)>] // SIG03: ->func(y:obj)->ind does not match signature A (proposition)
+    [<DataRow("MS3i", "conj A {true} def func Test()->func(y:obj)->ind {return A};", 1)>] // SIG03: ->func(y:obj)->ind does not match signature A (conjecture)
+    [<DataRow("MS3j", "cor A$1 {true} def func Test()->func(y:obj)->ind {return A$1};", 1)>] // SIG03: ->func(y:obj)->ind does not match signature A$1 (corollary)
+    [<DataRow("MS3k", "proof A$1 {1. |- trivial} def func Test()->func(y:obj)->ind {return A$1};", 1)>] // SIG03: ->func(y:obj)->ind does not match signature A$1 (proof)
+    [<DataRow("MS3l", "inf A {pre:true con:true} def func Test()->func(y:obj)->ind {return A};", 1)>] // SIG03: ->func(y:obj)->ind does not match signature A (rule of inference)
+    [<DataRow("MS3m", "def func A(z:obj)->func()->obj def func Test()->func(y:obj)->obj {return A};", 1)>] // SIG03: ->func(y:obj)->ind does not match signature A(z:obj)->func()->obj (functional term)
+    [<DataRow("MS3n", "ext A x@/\d+/ -> obj {dec ~y:obj; return y} def func Test()->func(y:obj)->ind {return A};", 1)>] // SIG03: ->func(y:obj)->ind does not match signature A (extension)
+    
+    [<DataRow("MS4", "def func A(z:obj)->ind def func Test()->func {return A};", 0)>] // OK: ->func matches signature A(obj)->ind, whole node would be returned
+    [<DataRow("MS4a", "def func A(z:obj)->ind def func Test()->func {dec ~x:obj; return A(x)};", 1)>] // SIG03: ->func does not match value A(obj) 
+    [<DataRow("MS4b", "def func A(z:obj)->ind def func Test()->func {dec ~x:ind; return A(x)};", 1)>] // SIG03: ->func does not match value A(ind) not matching A(obj)
+    [<DataRow("MS4c", "def func A(z:ind)->ind def func Test()->func {dec ~x:ind; return A(x)};", 1)>] // SIG03: ->func does not match value A(ind) 
+    [<DataRow("MS4d", "def func A(z:ind)->func(a:obj)->ind def func Test()->func {return A};", 0)>] // OK: ->func matches signature A(ind)->func(obj)->ind
+    [<DataRow("MS4e", "ax A {true} def func Test()->func {return A};", 1)>] // SIG03: ->func does not matche signature A (axiom)
+    [<DataRow("MS4f", "thm A {true} def func Test()->func {return A};", 1)>] // SIG03: ->func does not matche signature A (theorem)
+    [<DataRow("MS4g", "lem A {true} def func Test()->func {return A};", 1)>] // SIG03: ->func does not matche signature A (lemma)
+    [<DataRow("MS4h", "prop A {true} def func Test()->func {return A};", 1)>] // SIG03: ->func does not matche signature A (proposition)
+    [<DataRow("MS4i", "conj A {true} def func Test()->func {return A};", 1)>] // SIG03: ->func does not matche signature A (conjecture)
+    [<DataRow("MS4j", "cor A$1 {true} def func Test()->func {return A$1};", 1)>] // SIG03: ->func does not matche signature A$1 (corollary)
+    [<DataRow("MS4k", "proof A$1 {1. |- trivial} def func Test()->func {return A$1};", 1)>] // SIG03: ->func does not matche signature A$1 (proof)
+    [<DataRow("MS4l", "inf A {pre:true con:true} def func Test()->func {return A};", 1)>] // SIG03: ->func does not matche signature A (rule of inference)
+    [<DataRow("MS4m", "def func A(z:obj)->func()->obj def func Test()->func {return A};", 1)>] // OK: ->func matches signature A (functional term)
+    [<DataRow("MS4n", "ext A x@/\d+/ -> obj {dec ~y:obj; return y} def func Test()->func {return A};", 1)>] // SIG03: ->func does not match signature A (extension)
     [<TestMethod>]
     member this.TestSIG03(no:string, fplCode:string, expected) =
         if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
