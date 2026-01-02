@@ -3842,7 +3842,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                 None
             else
                 Some($"Array type `{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
-        | _ when aType.Length > 0 && Char.IsUpper(aType[0]) && a.Name = PrimRefL && a.Scope.Count = 1 ->
+        | _ when isUpper aType && a.Name = PrimRefL && a.Scope.Count = 1 ->
             let aReferencedNode = a.Scope.Values |> Seq.toList |> List.head
             if aReferencedNode.Scope.Count > 0 then
                 let cl = aReferencedNode.Scope.Values |> Seq.head
@@ -5350,14 +5350,89 @@ type FplReturn(positions: Positions, parent: FplValue) as this =
         match blockOpt with 
         | Some funTerm ->
             let mapTypeOpt = getMapping funTerm
-            match mapTypeOpt with 
-            | Some mapType ->
-                // todo: if reference does not use any arguments (e.g. references to a variable or an Fpl building block using only the PredicatIdentifier)
-                // we should match the signature of referenced building block or variable with the signature of the mapping 
-                // and return the whole Fpl building block or variable if matched.
-                // otherwise, we run the reference and match the mapping with the resulting value of the reference
+            let isMappingPredWithParams (mapping:FplValue) =
+                let hasVariables = mapping.GetVariables() |> List.length > 0
+                let typeId = mapping.TypeId
+                hasVariables && typeId.StartsWith(LiteralPred) 
+            let isMappingPredWithoutParams (mapping:FplValue) =
+                mapping.TypeId = LiteralPred 
+            let isMappingWithParams (mapping:FplValue) =
+                mapping.GetVariables() |> List.length > 0
+            let isMappingFunc (mapping:FplValue) =
+                let typeId = mapping.TypeId
+                typeId.StartsWith(LiteralFunc)
+            let referenceNotByValue (ref:FplReference) =
+                isUpper ref.FplId && ref.ArgType = ArgType.Nothing
+            let referenceByValue (ref:FplReference) =
+                ref.ArgType = ArgType.Parentheses
+            let checkSIG03 (refNode:FplValue) (mapType:FplValue) = 
+                match mpwa [ refNode ] [ mapType ] MatchingMode.Assignment with
+                | Some errMsg -> 
+                    let alternative = "Returned type is mismatching the mapping type."
+                    returnedReference.ErrorOccurred <- emitSIG03Diagnostics errMsg alternative (returnedReference.StartPos) (returnedReference.EndPos)
+                | _ -> this.SetValue refNode // return the referenced node
 
-                match mpwa [ returnedReference ] [ mapType ] MatchingMode.Signature with
+            match returnedReference, mapTypeOpt with 
+            | :? FplReference as ref, Some mapType when referenceNotByValue ref && isMappingPredWithParams mapType ->
+                let referredNodeOpt = ref.Scope.Values |> Seq.tryHead
+                match referredNodeOpt with 
+                | Some (:? FplPredicate as refNode) ->
+                    checkSIG03 refNode mapType
+                | Some (:? FplMandatoryPredicate as refNode) ->
+                    checkSIG03 refNode mapType
+                | Some refNode ->
+                    // a node was referenced but 
+                    let errMsg = $"Return type of {qualifiedName refNode} does not match expected mapping type `{mapType.Type SignatureType.Type}`."
+                    returnedReference.ErrorOccurred <- emitSIG03Diagnostics errMsg "" (returnedReference.StartPos) (returnedReference.EndPos)
+                | _ ->
+                    // in all other cases, 
+                    let errMsg = $"Return type of `{ref.Type SignatureType.Name}:{ref.Type SignatureType.Type}` does not match expected mapping type `{mapType.Type SignatureType.Type}`."
+                    returnedReference.ErrorOccurred <- emitSIG03Diagnostics errMsg "" (returnedReference.StartPos) (returnedReference.EndPos)
+            | :? FplReference as ref, Some mapType when referenceNotByValue ref && isMappingPredWithoutParams mapType ->
+                let referredNodeOpt = ref.Scope.Values |> Seq.tryHead
+                match referredNodeOpt with 
+                | Some (:? FplPredicate as refNode) ->
+                    this.SetValue refNode // return the referenced node
+                | Some (:? FplMandatoryPredicate as refNode) ->
+                    this.SetValue refNode // return the referenced node
+                | Some (:? FplAxiom as refNode) ->
+                    this.SetValue refNode // return the referenced node
+                | Some (:? FplGenericTheoremLikeStmt as refNode) ->
+                    this.SetValue refNode // return the referenced node
+                | Some (:? FplConjecture as refNode) ->
+                    this.SetValue refNode // return the referenced node
+                | Some refNode ->
+                    // a node was referenced not a predicate node
+                    let errMsg = $"Return type of {qualifiedName refNode} does not match expected mapping type `{mapType.Type SignatureType.Type}`."
+                    returnedReference.ErrorOccurred <- emitSIG03Diagnostics errMsg "" (returnedReference.StartPos) (returnedReference.EndPos)
+                | _ ->
+                    // in all other cases, 
+                    let errMsg = $"Return type of `{ref.Type SignatureType.Name}:{ref.Type SignatureType.Type}` does not match expected mapping type `{mapType.Type SignatureType.Type}`."
+                    returnedReference.ErrorOccurred <- emitSIG03Diagnostics errMsg "" (returnedReference.StartPos) (returnedReference.EndPos)
+            | :? FplReference as ref, Some mapType when referenceNotByValue ref && isMappingFunc mapType ->
+                let referredNodeOpt = ref.Scope.Values |> Seq.tryHead
+                match referredNodeOpt with 
+                | Some (:? FplFunctionalTerm as refNode) ->
+                    checkSIG03 refNode mapType
+                | Some (:? FplMandatoryFunctionalTerm as refNode) ->
+                    checkSIG03 refNode mapType
+                | Some (:? FplExtension as refNode) ->
+                    checkSIG03 refNode mapType
+                | Some refNode ->
+                    // a node was referenced but 
+                    let errMsg = $"Return type of {qualifiedName refNode} does not match expected mapping type `{mapType.Type SignatureType.Type}`."
+                    returnedReference.ErrorOccurred <- emitSIG03Diagnostics errMsg "" (returnedReference.StartPos) (returnedReference.EndPos)
+                | _ ->
+                    // in all other cases, 
+                    let errMsg = $"Return type of `{ref.Type SignatureType.Name}:{ref.Type SignatureType.Type}` does not match expected mapping type `{mapType.Type SignatureType.Type}`."
+                    returnedReference.ErrorOccurred <- emitSIG03Diagnostics errMsg "" (returnedReference.StartPos) (returnedReference.EndPos)
+            | :? FplReference as ref, Some mapType when referenceByValue ref && isMappingWithParams mapType ->
+                    let errMsg = $"Return type by value `{ref.Type SignatureType.Name}:{ref.Type SignatureType.Type}` does not match expected mapping type `{mapType.Type SignatureType.Type}`."
+                    let alternative = $"Try removing arguments of `{ref.Type SignatureType.Name}` and refer to the referenced node `{ref.FplId}`."
+                    returnedReference.ErrorOccurred <- emitSIG03Diagnostics errMsg alternative (returnedReference.StartPos) (returnedReference.EndPos)
+            | _, Some mapType ->
+
+                match mpwa [ returnedReference ] [ mapType ] MatchingMode.Assignment with
                 | Some errMsg -> returnedReference.ErrorOccurred <- emitSIG03Diagnostics errMsg (mapType.Type(SignatureType.Type)) (returnedReference.StartPos) (returnedReference.EndPos)
                 | _ -> 
                     match returnedReference with
@@ -6053,7 +6128,7 @@ let findCandidatesByName (st: SymbolTable) (name: string) withClassConstructors 
         else
             name
 
-    if name.Length > 0 && System.Char.IsUpper(name[0]) then 
+    if isUpper name then 
         st.Root.Scope // iterate all theories
         |> Seq.iter (fun theory ->
             theory.Value.Scope
