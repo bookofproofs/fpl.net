@@ -5343,15 +5343,6 @@ type FplReturn(positions: Positions, parent: FplValue) as this =
         | Some arg -> arg.Represent()
         | _ -> this.FplId
 
-    member private this.MatchWithMapping (fva: FplValue) (fvp: FplValue) =
-        let targetMapping = 
-            match fvp with 
-            | :? FplMapping -> Some fvp
-            | _ -> getMapping fvp
-        match targetMapping with
-        | Some tm -> mpwa [ fva ] [ tm ] MatchingMode.Signature
-        | None -> None
-
     override this.Run variableStack =
         this.Debug "Run"
         let returnedReference = this.ArgList[0]
@@ -5361,7 +5352,12 @@ type FplReturn(positions: Positions, parent: FplValue) as this =
             let mapTypeOpt = getMapping funTerm
             match mapTypeOpt with 
             | Some mapType ->
-                match this.MatchWithMapping returnedReference mapType with
+                // todo: if reference does not use any arguments (e.g. references to a variable or an Fpl building block using only the PredicatIdentifier)
+                // we should match the signature of referenced building block or variable with the signature of the mapping 
+                // and return the whole Fpl building block or variable if matched.
+                // otherwise, we run the reference and match the mapping with the resulting value of the reference
+
+                match mpwa [ returnedReference ] [ mapType ] MatchingMode.Signature with
                 | Some errMsg -> returnedReference.ErrorOccurred <- emitSIG03Diagnostics errMsg (mapType.Type(SignatureType.Type)) (returnedReference.StartPos) (returnedReference.EndPos)
                 | _ -> 
                     match returnedReference with

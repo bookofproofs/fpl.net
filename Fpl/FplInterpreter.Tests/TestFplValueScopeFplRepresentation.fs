@@ -192,7 +192,7 @@ type TestFplValueScopeFplRepresentation() =
             | "t1" -> Assert.AreEqual<string>(LiteralTrue, t1.Represent())
             | "t3" -> Assert.AreEqual<string>("dec obj", t3.Represent())
             | "t5" -> Assert.AreEqual<string>($"dec {LiteralInd}", t5.Represent())
-            | "t7" -> Assert.AreEqual<string>(PrimUndetermined, t7.Represent())
+            | "t7" -> Assert.AreEqual<string>("dec pred", t7.Represent())
             | "t9" -> Assert.AreEqual<string>(LiteralTpl, t9.Represent())
             | "t11" -> Assert.AreEqual<string>("""{"name":"Nat","base":[],"vars":[],"prtys":[]}""", t11.Represent())
             | "t13" -> Assert.AreEqual<string>($"dec {LiteralFunc}", t13.Represent())

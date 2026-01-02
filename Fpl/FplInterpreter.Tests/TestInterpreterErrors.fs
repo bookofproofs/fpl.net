@@ -1393,6 +1393,27 @@ type TestInterpreterErrors() =
     [<DataRow("05b2", "def func Test()->pred(y:pred(z:ind)) {dec ~a:pred(b:pred(c:ind)); return a};", 0)>]
     [<DataRow("06", "def func Test()->func {dec ~x:func; return x};", 0)>]
     [<DataRow("07", "def func Test()->ind {dec ~x:ind; return x};", 0)>]
+    // mapping signature tests
+    [<DataRow("MS1", "def pred A(z:obj) def func Test()->pred(y:obj) {return A};", 0)>] // OK: ->pred(y:obj) matches signature A(obj), whole node would be returned
+    [<DataRow("MS1a", "def pred A(z:obj) def func Test()->pred(y:obj) {dec ~x:obj; return A(x)};", 1)>] // SIG03: ->pred(y:obj) does not match value A(obj) 
+    [<DataRow("MS1b", "def pred A(z:obj) def func Test()->pred(y:obj) {dec ~x:ind; return A(x)};", 1)>] // SIG03: ->pred(y:obj) does not match value A(ind) not matching A(obj)
+    [<DataRow("MS1c", "def pred A(z:ind) def func Test()->pred(y:obj) {dec ~x:ind; return A(x)};", 1)>] // SIG03: ->pred(y:obj) does not match value A(ind) 
+    [<DataRow("MS1d", "def pred A(z:ind) def func Test()->pred(y:obj) {return A};", 1)>] // SIG03: ->pred(y:obj) does not match signature A(ind)
+    [<DataRow("MS2", "def pred A(z:obj) def func Test()->pred {return A};", 0)>] // OK: ->pred matches signature A(obj), whole node would be returned
+    [<DataRow("MS2a", "def pred A(z:obj) def func Test()->pred {dec ~x:obj; return A(x)};", 0)>] // OK: ->pred matches value A(obj) 
+    [<DataRow("MS2b", "def pred A(z:obj) def func Test()->pred {dec ~x:ind; return A(x)};", 0)>] // SIG03: ->pred does not match value A(ind) since it does not match A(obj)
+    [<DataRow("MS2c", "def pred A(z:ind) def func Test()->pred {dec ~x:ind; return A(x)};", 0)>] // OK: ->pred matches value A(ind) 
+    [<DataRow("MS2d", "def pred A(z:ind) def func Test()->pred {return A};", 0)>] // OK: ->pred matches signature A(ind)
+    [<DataRow("MS3", "def func A(z:obj)->ind def func Test()->func(y:obj)->ind {return A};", 0)>] // OK: ->func(y:obj)->ind matches signature A(obj)->ind, whole node would be returned
+    [<DataRow("MS3a", "def func A(z:obj)->ind def func Test()->func(y:obj)->ind {dec ~x:obj; return A(x)};", 1)>] // SIG03: ->func(y:obj)->ind does not match value A(obj) 
+    [<DataRow("MS3b", "def func A(z:obj)->ind def func Test()->func(y:obj)->ind {dec ~x:ind; return A(x)};", 1)>] // SIG03: ->func(y:obj)->ind does not match value A(ind) not matching A(obj)
+    [<DataRow("MS3c", "def func A(z:ind)->ind def func Test()->func(y:obj)->ind {dec ~x:ind; return A(x)};", 1)>] // SIG03: ->func(y:obj)->ind does not match value A(ind) 
+    [<DataRow("MS3d", "def func A(z:ind)->ind def func Test()->func(y:obj)->ind {return A};", 1)>] // SIG03: ->func(y:obj)->ind does not match signature A(ind)->ind
+    [<DataRow("MS4", "def func A(z:obj)->ind def func Test()->func {return A};", 0)>] // OK: ->func matches signature A(obj), whole node would be returned
+    [<DataRow("MS4a", "def func A(z:obj)->ind def func Test()->func {dec ~x:obj; return A(x)};", 0)>] // OK: ->func matches value A(obj) 
+    [<DataRow("MS4b", "def func A(z:obj)->ind def func Test()->func {dec ~x:ind; return A(x)};", 0)>] // SIG03: ->func does not match value A(ind) since it does not match A(obj)
+    [<DataRow("MS4c", "def func A(z:ind)->ind def func Test()->func {dec ~x:ind; return A(x)};", 0)>] // OK: ->func matches value A(ind) 
+    [<DataRow("MS4d", "def func A(z:ind)->ind def func Test()->func {return A};", 0)>] // OK: ->func matches signature A(ind)->ind
     [<TestMethod>]
     member this.TestSIG03(no:string, fplCode:string, expected) =
         if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
