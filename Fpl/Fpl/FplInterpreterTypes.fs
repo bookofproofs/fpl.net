@@ -3811,20 +3811,19 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                 Some($"`{a.Type(SignatureType.Name)}:{aType}` matches neither `{p.Type(SignatureType.Name)}:{pType}` nor the base classes")
         | _ -> None
 
-    match (args, pars) with
-    | (a :: ars, p :: prs) ->
+    let rec matchTwoTypes (a:FplValue) (p:FplValue) mode =
         let aType = a.Type SignatureType.Type
         let pType = p.Type SignatureType.Type
 
         match mode with 
         | _ when aType = pType ->
-            mpwa ars prs mode
+            None
         | _ when pType.StartsWith(LiteralTpl) || pType.StartsWith(LiteralTplL) ->
-            mpwa ars prs mode // tpl accepts everything: todo: really?
+            None // tpl accepts everything: todo: really?
         | _ when pType.StartsWith($"*{LiteralTpl}") || pType.StartsWith($"*{LiteralTplL}") ->
-            mpwa ars prs mode // tpl arrays accepts everything: todo: really?
+            None // tpl arrays accepts everything: todo: really?
         | MatchingMode.Assignment when aType = LiteralUndef ->
-            mpwa ars prs mode // undef can always be assigned
+            None // undef can always be assigned
         | MatchingMode.Assignment when pType.StartsWith($"*{aType}[") && p.Name = PrimVariableArrayL ->
             None // assignee array accepting assigned value
         | MatchingMode.Signature when pType.StartsWith($"*{aType}[{LiteralInd}]") ->
@@ -3849,7 +3848,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                 match cl with
                 | :? FplClass ->
                     if inheritsFrom cl pType then 
-                        mpwa ars prs mode
+                        None // base class accepting derived class
                     else
                         Some($"`{a.Type(SignatureType.Name)}:{aType}` neither matches `{p.Type(SignatureType.Name)}:{pType}` nor the base classes")
                 | _ ->
@@ -3876,7 +3875,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
             let mapOpt = getMapping a
             match mapOpt with 
             | Some (:? FplMapping as map) ->
-                mpwa ([map] @ ars) pars mode
+                matchTwoTypes map p mode
             | _ -> 
                 Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
         | _ when aType.StartsWith(pType + "(") ->
@@ -3888,7 +3887,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
         | _ when aType.StartsWith(LiteralFunc) ->
             let someMap = getMapping a
             match someMap with
-            | Some map -> mpwa [ map ] [ p ] mode
+            | Some map -> matchTwoTypes map p mode
             | _ -> Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
         | _ when p.Name = PrimFuncionalTermL || p.Name = PrimMandatoryFunctionalTermL ->
             let mappingOpt = getMapping p 
@@ -3903,12 +3902,15 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
         | MatchingMode.Signature when pType = $"*{aType}[{LiteralInd}]" ->
             // only array parameters indexed with the FPL-inbuilt index type that also 
             // match the argument's type will accept variadic enumerations of such arguments 
-            if ars.Length > 0 then 
-                mpwa ars pars mode 
-            else 
-                None
+            None
         | _ ->
             Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
+
+    match (args, pars) with
+    | (a :: ars, p :: prs) ->
+        match matchTwoTypes (a:FplValue) (p:FplValue) mode with
+        | Some errMsg -> Some errMsg
+        | _ -> mpwa ars prs mode
     | ([], p :: prs) ->
         let pType = p.Type(SignatureType.Type)
         match p with 
