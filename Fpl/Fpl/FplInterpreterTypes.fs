@@ -3811,100 +3811,132 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                 Some($"`{a.Type(SignatureType.Name)}:{aType}` matches neither `{p.Type(SignatureType.Name)}:{pType}` nor the base classes")
         | _ -> None
 
-    let rec matchTwoTypes (a:FplValue) (p:FplValue) mode =
+    let isMappingPredWithParams (mapping:FplValue) =
+        let hasVariables = mapping.GetVariables() |> List.length > 0
+        let typeId = mapping.TypeId
+        hasVariables && typeId.StartsWith(LiteralPred) 
+    let isMappingPredWithoutParams (mapping:FplValue) =
+        mapping.TypeId = LiteralPred && mapping.GetVariables() |> List.length = 0
+    let isMappingWithParams (mapping:FplValue) =
+        mapping.GetVariables() |> List.length > 0
+    let isMappingFunc (mapping:FplValue) =
+        let typeId = mapping.TypeId
+        typeId.StartsWith(LiteralFunc)
+    let referenceNotByValue (ref:FplValue) =
+        isUpper ref.FplId && ref.ArgList.Count = 0
+    let referenceByValue (ref:FplReference) =
+        ref.ArgType = ArgType.Parentheses
+
+    let rec matchTwoTypes (a:FplValue) (p:FplValue) (mode:MatchingMode) =
         let aType = a.Type SignatureType.Type
         let pType = p.Type SignatureType.Type
 
-        match mode with 
-        | _ when aType = pType ->
-            None
-        | _ when pType.StartsWith(LiteralTpl) || pType.StartsWith(LiteralTplL) ->
-            None // tpl accepts everything: todo: really?
-        | _ when pType.StartsWith($"*{LiteralTpl}") || pType.StartsWith($"*{LiteralTplL}") ->
-            None // tpl arrays accepts everything: todo: really?
-        | MatchingMode.Assignment when aType = LiteralUndef ->
-            None // undef can always be assigned
-        | MatchingMode.Assignment when pType.StartsWith($"*{aType}[") && p.Name = PrimVariableArrayL ->
-            None // assignee array accepting assigned value
-        | MatchingMode.Signature when pType.StartsWith($"*{aType}[{LiteralInd}]") ->
-            None // 1D arrays matching input type with ind as index accept nvariadic enumerations
-        | _ when pType.StartsWith($"*{aType}[") ->
-            // array parameters with indexes that differ from the FPL-inbuilt index type  
-            // or with multidimensional index types will not accept variadic enumerations of arguments
-            // even if they have the same type used for the values of the array
-            let aName = a.Type(SignatureType.Name)
-            Some($"variadic enumeration of `{aName}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`, try `{aName}:{pType}` as argument or use parameter `{p.Type(SignatureType.Name)}:{p.TypeId}[{LiteralInd}]`")
-        | _ when aType.StartsWith($"*{pType}[") && a.Name = PrimRefL ->
-            let refA = a :?> FplReference
-            if refA.ArgType = ArgType.Brackets then 
-                // some array elements matching parameter type
+        match mode, a.Name, p.Name with 
+        | _, PrimRefL, PrimMappingL when (referenceNotByValue a) && (isMappingPredWithParams p) ->
+            let referredNodeOpt = a.Scope.Values |> Seq.tryHead
+            match referredNodeOpt with 
+            | Some (:? FplPredicate as refNode) ->
+                matchTwoTypes refNode p mode
+            | Some (:? FplMandatoryPredicate as refNode) ->
+                matchTwoTypes refNode p mode
+            | Some refNode ->
+                // a node was referenced but 
+                Some $"Return type of {qualifiedName refNode} does not match expected mapping type `{p.Type SignatureType.Type}`."
+            | _ ->
+                // in all other cases, 
+                Some $"Return type of `{a.Type SignatureType.Name}:{a.Type SignatureType.Type}` does not match expected mapping type `{p.Type SignatureType.Type}`."
+        | _, _ ,_ -> 
+
+            match mode with 
+            | _ when aType = pType ->
                 None
-            else
-                Some($"Array type `{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
-        | _ when isUpper aType && a.Name = PrimRefL && a.Scope.Count = 1 ->
-            let aReferencedNode = a.Scope.Values |> Seq.toList |> List.head
-            if aReferencedNode.Scope.Count > 0 then
-                let cl = aReferencedNode.Scope.Values |> Seq.head
-                match cl with
-                | :? FplClass ->
-                    if inheritsFrom cl pType then 
-                        None // base class accepting derived class
-                    else
-                        Some($"`{a.Type(SignatureType.Name)}:{aType}` neither matches `{p.Type(SignatureType.Name)}:{pType}` nor the base classes")
-                | _ ->
-                    // this case does not occur but we cover it for completeness reasons
-                    Some($"`{a.Type(SignatureType.Name)}:{aType}` is undefined and doesn't match `{p.Type(SignatureType.Name)}:{pType}`")
-            elif aReferencedNode.Name = PrimDefaultConstructor || aReferencedNode.Name = LiteralCtorL then 
-                let ctor = aReferencedNode :?> FplGenericConstructor
+            | _ when pType.StartsWith(LiteralTpl) || pType.StartsWith(LiteralTplL) ->
+                None // tpl accepts everything: todo: really?
+            | _ when pType.StartsWith($"*{LiteralTpl}") || pType.StartsWith($"*{LiteralTplL}") ->
+                None // tpl arrays accepts everything: todo: really?
+            | MatchingMode.Assignment when aType = LiteralUndef ->
+                None // undef can always be assigned
+            | MatchingMode.Assignment when pType.StartsWith($"*{aType}[") && p.Name = PrimVariableArrayL ->
+                None // assignee array accepting assigned value
+            | MatchingMode.Signature when pType.StartsWith($"*{aType}[{LiteralInd}]") ->
+                None // 1D arrays matching input type with ind as index accept nvariadic enumerations
+            | _ when pType.StartsWith($"*{aType}[") ->
+                // array parameters with indexes that differ from the FPL-inbuilt index type  
+                // or with multidimensional index types will not accept variadic enumerations of arguments
+                // even if they have the same type used for the values of the array
+                let aName = a.Type(SignatureType.Name)
+                Some($"variadic enumeration of `{aName}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`, try `{aName}:{pType}` as argument or use parameter `{p.Type(SignatureType.Name)}:{p.TypeId}[{LiteralInd}]`")
+            | _ when aType.StartsWith($"*{pType}[") && a.Name = PrimRefL ->
+                let refA = a :?> FplReference
+                if refA.ArgType = ArgType.Brackets then 
+                    // some array elements matching parameter type
+                    None
+                else
+                    Some($"Array type `{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
+            | _ when isUpper aType && a.Name = PrimRefL && a.Scope.Count = 1 ->
+                let aReferencedNode = a.Scope.Values |> Seq.toList |> List.head
+                if aReferencedNode.Scope.Count > 0 then
+                    let cl = aReferencedNode.Scope.Values |> Seq.head
+                    match cl with
+                    | :? FplClass ->
+                        if inheritsFrom cl pType then 
+                            None // base class accepting derived class
+                        else
+                            Some($"`{a.Type(SignatureType.Name)}:{aType}` neither matches `{p.Type(SignatureType.Name)}:{pType}` nor the base classes")
+                    | _ ->
+                        // this case does not occur but we cover it for completeness reasons
+                        Some($"`{a.Type(SignatureType.Name)}:{aType}` is undefined and doesn't match `{p.Type(SignatureType.Name)}:{pType}`")
+                elif aReferencedNode.Name = PrimDefaultConstructor || aReferencedNode.Name = LiteralCtorL then 
+                    let ctor = aReferencedNode :?> FplGenericConstructor
+                    matchClassInheritance ctor.ToBeConstructedClass a aType p pType
+                elif aReferencedNode.Name = PrimFuncionalTermL || aReferencedNode.Name = PrimMandatoryFunctionalTermL then 
+                    let mapOpt = getMapping aReferencedNode
+                    let map = mapOpt.Value :?> FplMapping 
+                    matchClassInheritance map.ToBeReturnedClass a aType p pType
+                else
+                    Some($"`{a.Type(SignatureType.Name)}:{aType}` is undefined and does not match `{p.Type(SignatureType.Name)}:{pType}`")
+            | MatchingMode.Assignment when a.Name = PrimVariableL ->
+                let clOpt = a.Scope.Values |> Seq.tryHead
+                match clOpt with 
+                | Some (:? FplClass) -> matchClassInheritance clOpt a aType p pType
+                | _ -> Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
+            | MatchingMode.Assignment when a.Name = PrimDefaultConstructor || a.Name = LiteralCtorL ->
+                let ctor = a :?> FplGenericConstructor
                 matchClassInheritance ctor.ToBeConstructedClass a aType p pType
-            elif aReferencedNode.Name = PrimFuncionalTermL || aReferencedNode.Name = PrimMandatoryFunctionalTermL then 
-                let mapOpt = getMapping aReferencedNode
-                let map = mapOpt.Value :?> FplMapping 
-                matchClassInheritance map.ToBeReturnedClass a aType p pType
-            else
-                Some($"`{a.Type(SignatureType.Name)}:{aType}` is undefined and does not match `{p.Type(SignatureType.Name)}:{pType}`")
-        | MatchingMode.Assignment when a.Name = PrimVariableL ->
-            let clOpt = a.Scope.Values |> Seq.tryHead
-            match clOpt with 
-            | Some (:? FplClass) -> matchClassInheritance clOpt a aType p pType
-            | _ -> Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
-        | MatchingMode.Assignment when a.Name = PrimDefaultConstructor || a.Name = LiteralCtorL ->
-            let ctor = a :?> FplGenericConstructor
-            matchClassInheritance ctor.ToBeConstructedClass a aType p pType
-        | MatchingMode.Assignment when a.Name = PrimFuncionalTermL || a.Name = PrimMandatoryFunctionalTermL ->
-            let mapOpt = getMapping a
-            match mapOpt with 
-            | Some (:? FplMapping as map) ->
-                matchTwoTypes map p mode
-            | _ -> 
+            | MatchingMode.Assignment when a.Name = PrimFuncionalTermL || a.Name = PrimMandatoryFunctionalTermL ->
+                let mapOpt = getMapping a
+                match mapOpt with 
+                | Some (:? FplMapping as map) ->
+                    matchTwoTypes map p mode
+                | _ -> 
+                    Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
+            | _ when aType.StartsWith(pType + "(") ->
+                None
+            | _ when aType = LiteralPred && pType.StartsWith(LiteralPred) ->
+                None
+            | _ when aType = LiteralFunc && pType.StartsWith(LiteralFunc) ->
+                None
+            | _ when aType.StartsWith(LiteralFunc) ->
+                let someMap = getMapping a
+                match someMap with
+                | Some map -> matchTwoTypes map p mode
+                | _ -> Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
+            | _ when p.Name = PrimFuncionalTermL || p.Name = PrimMandatoryFunctionalTermL ->
+                let mappingOpt = getMapping p 
+                match mappingOpt with 
+                | Some mapping ->
+                    let newTypeAssignedValue = mapping.Type SignatureType.Type
+                    if aType <> newTypeAssignedValue then 
+                        Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")            
+                    else 
+                        None            
+                | None -> None
+            | MatchingMode.Signature when pType = $"*{aType}[{LiteralInd}]" ->
+                // only array parameters indexed with the FPL-inbuilt index type that also 
+                // match the argument's type will accept variadic enumerations of such arguments 
+                None
+            | _ ->
                 Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
-        | _ when aType.StartsWith(pType + "(") ->
-            None
-        | _ when aType = LiteralPred && pType.StartsWith(LiteralPred) ->
-            None
-        | _ when aType = LiteralFunc && pType.StartsWith(LiteralFunc) ->
-            None
-        | _ when aType.StartsWith(LiteralFunc) ->
-            let someMap = getMapping a
-            match someMap with
-            | Some map -> matchTwoTypes map p mode
-            | _ -> Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
-        | _ when p.Name = PrimFuncionalTermL || p.Name = PrimMandatoryFunctionalTermL ->
-            let mappingOpt = getMapping p 
-            match mappingOpt with 
-            | Some mapping ->
-                let newTypeAssignedValue = mapping.Type SignatureType.Type
-                if aType <> newTypeAssignedValue then 
-                    Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")            
-                else 
-                    None            
-            | None -> None
-        | MatchingMode.Signature when pType = $"*{aType}[{LiteralInd}]" ->
-            // only array parameters indexed with the FPL-inbuilt index type that also 
-            // match the argument's type will accept variadic enumerations of such arguments 
-            None
-        | _ ->
-            Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
 
     match (args, pars) with
     | (a :: ars, p :: prs) ->
@@ -5357,7 +5389,7 @@ type FplReturn(positions: Positions, parent: FplValue) as this =
                 let typeId = mapping.TypeId
                 hasVariables && typeId.StartsWith(LiteralPred) 
             let isMappingPredWithoutParams (mapping:FplValue) =
-                mapping.TypeId = LiteralPred 
+                mapping.TypeId = LiteralPred && mapping.GetVariables() |> List.length = 0
             let isMappingWithParams (mapping:FplValue) =
                 mapping.GetVariables() |> List.length > 0
             let isMappingFunc (mapping:FplValue) =
@@ -5375,21 +5407,6 @@ type FplReturn(positions: Positions, parent: FplValue) as this =
                 | _ -> this.SetValue refNode // return the referenced node
 
             match returnedReference, mapTypeOpt with 
-            | :? FplReference as ref, Some mapType when referenceNotByValue ref && isMappingPredWithParams mapType ->
-                let referredNodeOpt = ref.Scope.Values |> Seq.tryHead
-                match referredNodeOpt with 
-                | Some (:? FplPredicate as refNode) ->
-                    checkSIG03 refNode mapType
-                | Some (:? FplMandatoryPredicate as refNode) ->
-                    checkSIG03 refNode mapType
-                | Some refNode ->
-                    // a node was referenced but 
-                    let errMsg = $"Return type of {qualifiedName refNode} does not match expected mapping type `{mapType.Type SignatureType.Type}`."
-                    returnedReference.ErrorOccurred <- emitSIG03Diagnostics errMsg "" (returnedReference.StartPos) (returnedReference.EndPos)
-                | _ ->
-                    // in all other cases, 
-                    let errMsg = $"Return type of `{ref.Type SignatureType.Name}:{ref.Type SignatureType.Type}` does not match expected mapping type `{mapType.Type SignatureType.Type}`."
-                    returnedReference.ErrorOccurred <- emitSIG03Diagnostics errMsg "" (returnedReference.StartPos) (returnedReference.EndPos)
             | :? FplReference as ref, Some mapType when referenceNotByValue ref && isMappingPredWithoutParams mapType ->
                 let referredNodeOpt = ref.Scope.Values |> Seq.tryHead
                 match referredNodeOpt with 
