@@ -3817,8 +3817,8 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
         hasVariables && typeId.StartsWith(LiteralPred) 
     let isMappingPredWithoutParams (mapping:FplValue) =
         mapping.TypeId = LiteralPred && mapping.GetVariables() |> List.length = 0
-    let isMappingWithParams (mapping:FplValue) =
-        mapping.GetVariables() |> List.length > 0
+    let isMappingWithParamsOrFunc (mapping:FplValue) =
+        mapping.GetVariables() |> List.length > 0 || mapping.TypeId = LiteralFunc
     let isMappingFuncWithParams (mapping:FplValue) =
         let hasVariables = mapping.GetVariables() |> List.length > 0
         let typeId = mapping.TypeId
@@ -3900,8 +3900,9 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
             | _ ->
                 // in all other cases, error
                 Some $"Return type of `{aName}:{aType}` does not match expected mapping type `{pType}`."
-        | _, PrimRefL, PrimMappingL when referenceByValue a && isMappingWithParams p ->
-            // mismatch of a by-value-reference with parameterized mapping
+        | _, PrimRefL, PrimMappingL when referenceByValue a && isMappingWithParamsOrFunc p ->
+            // mismatch of a by-value-reference with parameterized mapping or a func mapping
+            // since in both cases, no by-value reference is allowed
             Some $"Return type by value `{aName}:{aType}` does not match expected mapping type `{pType}`. Try removing arguments of `{aName}` and refer to the referenced node `{a.FplId}`."
         | _, _ ,_ -> 
 

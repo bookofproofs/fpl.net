@@ -1456,7 +1456,7 @@ type TestInterpreterErrors() =
     [<DataRow("MS4j", "cor A$1 {true} def func Test()->func {return A$1};", 1)>] // SIG03: ->func does not matche signature A$1 (corollary)
     [<DataRow("MS4k", "proof A$1 {1. |- trivial} def func Test()->func {return A$1};", 1)>] // SIG03: ->func does not matche signature A$1 (proof)
     [<DataRow("MS4l", "inf A {pre:true con:true} def func Test()->func {return A};", 1)>] // SIG03: ->func does not matche signature A (rule of inference)
-    [<DataRow("MS4m", "def func A(z:obj)->func()->obj def func Test()->func {return A};", 1)>] // OK: ->func matches signature A (functional term)
+    [<DataRow("MS4m", "def func A(z:obj)->func()->obj def func Test()->func {return A};", 0)>] // OK: ->func matches signature A (functional term)
     [<DataRow("MS4n", "ext A x@/\d+/ -> obj {dec ~y:obj; return y} def func Test()->func {return A};", 1)>] // SIG03: ->func does not match signature A (extension)
     [<TestMethod>]
     member this.TestSIG03(no:string, fplCode:string, expected) =
