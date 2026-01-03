@@ -3939,9 +3939,9 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
         let aName = a.Type SignatureType.Name
         let pName = p.Type SignatureType.Name
 
-        match mode, a.Name, p.Name with 
-        | _, PrimRefL, PrimVariableL
-        | _, PrimRefL, PrimMappingL ->
+        match a.Name, p.Name with 
+        | PrimRefL, PrimVariableL
+        | PrimRefL, PrimMappingL ->
             if isCallByReference a && isPredWithParentheses p then 
                 // match a call by reference with pred with parameters
                 let referredNodeOpt = a.Scope.Values |> Seq.tryHead
@@ -4010,23 +4010,8 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                 Some $"Return type by value `{aName}:{aType}` does not match expected mapping type `{pType}`. Try removing arguments of `{aName}` and refer to the referenced node `{a.FplId}`."
             else 
                 matchByTypeStringRepresentation a aName aType p pName pType mode
-        | _, _ ,_ -> 
-
-            match mode with 
-            | MatchingMode.Assignment when a.Name = PrimFunctionalTermL || a.Name = PrimMandatoryFunctionalTermL ->
-                let mapOpt = getMapping a
-                match mapOpt with 
-                | Some (:? FplMapping as map) ->
-                    matchTwoTypes map p mode
-                | _ -> 
-                    Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{pName}:{pType}`")
-            | _ when aType.StartsWith(LiteralFunc) ->
-                let someMap = getMapping a
-                match someMap with
-                | Some map -> matchTwoTypes map p mode
-                | _ -> Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{pName}:{pType}`")
-            | _ ->
-                matchByTypeStringRepresentation a aName aType p pName pType mode
+        | _ ,_ -> 
+            matchByTypeStringRepresentation a aName aType p pName pType mode
 
     match (args, pars) with
     | (a :: ars, p :: prs) ->
