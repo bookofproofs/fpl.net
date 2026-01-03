@@ -1552,8 +1552,8 @@ type TestInterpreterErrors() =
     [<DataRow("MAP2a", """def cl A def func T()->*A[ind] {intr};""", 0)>]
     [<DataRow("MAP3", """def func T()->*ind[A] {intr};""", 1)>]
     [<DataRow("MAP3a", """def cl A def func T()->*ind[A] {intr};""", 0)>]
-    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
 
+    // pointers to predicates matching pred(..)
     [<DataRow("MS1", "def pred B(a:pred(y:obj)) def pred A(z:obj) def pred Test() {B(A)};", 0)>] // OK: pred(y:obj) matches signature A(obj)
     [<DataRow("MS1a", "def pred B(a:pred(y:obj)) def pred A(z:obj) def pred Test() {dec ~x:obj; B(A(x))};", 1)>] // SIG04: pred(y:obj) does not match value A(obj) 
     [<DataRow("MS1b", "def pred B(a:pred(y:obj)) def pred A(z:obj) def pred Test() {dec ~x:ind; B(A(x))};", 1)>] // SIG04: pred(y:obj) does not match value A(ind) not matching A(obj)
@@ -1570,6 +1570,11 @@ type TestInterpreterErrors() =
     [<DataRow("MS1m", "def pred B(a:pred(y:obj)) def func A()obj def pred Test() {B(A)};", 1)>] // SIG04: pred(y:obj) does not match signature A (functional term)
     [<DataRow("MS1n", "def pred B(a:pred(y:obj)) ext A x@/\d+/ -> obj {dec ~y:obj; return y} def pred Test() {B(A)};", 1)>] // SIG04: pred(y:obj) does not match signature A (extension)
 
+    // pointers to predicates and predicate values matching pred
+    // pointers to functional terms matching func(..)
+    // pointers to functional terms and predicate values matching pred
+
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG04(no:string, fplCode:string, expected) =
         if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
