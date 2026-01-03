@@ -3212,7 +3212,10 @@ type FplReference(positions: Positions, parent: FplValue) =
         | 1, ArgType.Brackets, None ->
             $"{head}[{args}]"
         | 1, ArgType.Parentheses, None ->
-            $"{head}({args})"
+            if head = LiteralFunc then 
+                fallBackFunctionalTerm
+            else
+                $"{head}({args})"
         | _, ArgType.Nothing, Some qual -> 
             $"{head}({args}).{qual.Type(propagate)}"
         | _, ArgType.Brackets, Some qual ->
