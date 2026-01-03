@@ -383,9 +383,11 @@ type ISkolem =
     abstract member SkolemName : string with get
     abstract member SetSkolemName: unit -> unit
 
+
 [<AbstractClass>]
 type FplValue(positions: Positions, parent: FplValue option) =
     let mutable _expressionType = FixType.NoFix
+    let mutable _argType = ArgType.Nothing
     let mutable _exprTypeAlreadySet = false
     let mutable _startPos = fst positions
     let mutable _endPos = snd positions
@@ -485,6 +487,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
         ret.AuxiliaryInfo <- this.AuxiliaryInfo
         ret.IsIntrinsic <- this.IsIntrinsic
         ret.ExpressionType <- this.ExpressionType
+        ret.ArgType <- this.ArgType
 
         this.Scope
         |> Seq.iter (fun (kvp:KeyValuePair<string, FplValue>) ->
@@ -523,12 +526,20 @@ type FplValue(positions: Positions, parent: FplValue option) =
             if not _exprTypeAlreadySet then
                 _expressionType <- value
                 _exprTypeAlreadySet <- true
+            elif _expressionType.Type = value.Type then
+                ()
             else
                 raise (
                     ArgumentException(
                         $"Type was already initialized with `{_expressionType.Type}`, cannot set it again with {value.Type}."
                     )
                 )
+
+    /// Indicates if this FplValue has bracketed arguments or parameters, 
+    /// parenthesized arguments or parameters, or no arguments or parameters
+    member this.ArgType
+        with get () = _argType
+        and set (value) = _argType <- value
 
     /// Starting position of this FplValue
     member this.StartPos
@@ -591,11 +602,12 @@ type FplValue(positions: Positions, parent: FplValue option) =
     /// Copies other FplValue to this one without changing its reference pointer.
     default this.Copy(other: FplValue) =
         this.FplId <- other.FplId
-
         this.TypeId <- other.TypeId
         this.Arity <- other.Arity
         this.AuxiliaryInfo <- other.AuxiliaryInfo
         this.IsIntrinsic <- other.IsIntrinsic
+        this.ExpressionType <- other.ExpressionType
+        this.ArgType <- other.ArgType
 
         this.Scope.Clear()
         other.Scope |> Seq.iter (fun kvp -> this.Scope.Add(kvp.Key, kvp.Value))
@@ -712,6 +724,12 @@ type FplValue(positions: Positions, parent: FplValue option) =
             let logLine = $"{caller}:{getPath this}{Environment.NewLine}"
             let currDir = Directory.GetCurrentDirectory()
             File.AppendAllText(Path.Combine(currDir, "Debug.txt"), logLine)
+
+/// a type wrapping the argument type of the FplValue 
+and ArgType = 
+    | Brackets
+    | Parentheses
+    | Nothing
 
 /// A discriminated union type for wrapping search results in the Scope of an FplValue.
 and ScopeSearchResult =
@@ -3046,11 +3064,6 @@ type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
 
     override this.RunOrder = None
 
-type ArgType = 
-    | Brackets
-    | Parentheses
-    | Nothing
-
 [<AbstractClass>]
 type FplGenericReference(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
@@ -3100,7 +3113,6 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
 
 type FplReference(positions: Positions, parent: FplValue) =
     inherit FplGenericReference(positions, parent)
-    let mutable _argType = ArgType.Nothing
 
     override this.Name = PrimRefL
     override this.ShortName = PrimRef
@@ -3111,11 +3123,6 @@ type FplReference(positions: Positions, parent: FplValue) =
             var.SetValue(fv)
         else
             base.SetValue(fv)
-
-    /// Indicates if this Reference was followed by brackets, by parentheses, or by nothing in the FPL code.
-    member this.ArgType
-        with get () = _argType
-        and set (value) = _argType <- value
 
     override this.Type signatureType =
         let headObj = 
@@ -3829,9 +3836,9 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
     let isMappingFuncWithoutParams (mapping:FplValue) =
         mapping.TypeId = LiteralFunc && mapping.GetVariables() |> List.length = 0
     let referenceNotByValue (ref:FplValue) =
-        isUpper ref.FplId && ref.ArgList.Count = 0
+        isUpper ref.FplId && ref.ArgType = ArgType.Nothing
     let referenceByValue (ref:FplValue) =
-        isUpper ref.FplId && ref.ArgList.Count > 0
+        isUpper ref.FplId && ref.ArgType = ArgType.Parentheses
 
     let matchByTypeStringRepresentation (a:FplValue) aName (aType:string) (p:FplValue) pName (pType:string) mode = 
         match mode with 
