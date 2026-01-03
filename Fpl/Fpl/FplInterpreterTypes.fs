@@ -3811,7 +3811,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                 Some($"`{a.Type(SignatureType.Name)}:{aType}` matches neither `{pName}:{pType}` nor the base classes")
         | _ -> None
 
-    let isMappingPredWithParams (mapping:FplValue) =
+    let isPredWithParams (mapping:FplValue) =
         let hasVariables = mapping.GetVariables() |> List.length > 0
         let typeId = mapping.TypeId
         hasVariables && typeId.StartsWith(LiteralPred) 
@@ -3825,11 +3825,11 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
         hasVariables && typeId.StartsWith(LiteralFunc) 
     let isMappingFuncWithoutParams (mapping:FplValue) =
         mapping.TypeId = LiteralFunc && mapping.GetVariables() |> List.length = 0
-
     let referenceNotByValue (ref:FplValue) =
         isUpper ref.FplId && ref.ArgList.Count = 0
     let referenceByValue (ref:FplValue) =
         isUpper ref.FplId && ref.ArgList.Count > 0
+
 
     let rec matchTwoTypes (a:FplValue) (p:FplValue) (mode:MatchingMode) =
         let aType = a.Type SignatureType.Type
@@ -3838,7 +3838,21 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
         let pName = p.Type SignatureType.Name
 
         match mode, a.Name, p.Name with 
-        | _, PrimRefL, PrimMappingL when referenceNotByValue a && isMappingPredWithParams p ->
+        | _, PrimRefL, PrimMappingL when referenceNotByValue a && isPredWithParams p ->
+            // match a not-by-value-reference with pred mapping with parameters
+            let referredNodeOpt = a.Scope.Values |> Seq.tryHead
+            match referredNodeOpt with 
+            | Some (:? FplPredicate as refNode) ->
+                matchTwoTypes refNode p mode // match signatures with parameters
+            | Some (:? FplMandatoryPredicate as refNode) ->
+                matchTwoTypes refNode p mode // match signatures with parameters
+            | Some refNode ->
+                // a node was referenced but is not a predicate
+                Some $"Return type of {qualifiedName refNode} does not match expected mapping type `{pType}`."
+            | _ ->
+                // in all other cases, 
+                Some $"Return type of `{aName}:{aType}` does not match expected mapping type `{pType}`."
+        | _, PrimRefL, PrimVariableL when referenceNotByValue a && isPredWithParams p ->
             // match a not-by-value-reference with pred mapping with parameters
             let referredNodeOpt = a.Scope.Values |> Seq.tryHead
             match referredNodeOpt with 

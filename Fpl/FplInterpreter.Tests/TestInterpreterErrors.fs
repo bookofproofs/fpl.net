@@ -1553,6 +1553,23 @@ type TestInterpreterErrors() =
     [<DataRow("MAP3", """def func T()->*ind[A] {intr};""", 1)>]
     [<DataRow("MAP3a", """def cl A def func T()->*ind[A] {intr};""", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+
+    [<DataRow("MS1", "def pred B(a:pred(y:obj)) def pred A(z:obj) def pred Test() {B(A)};", 0)>] // OK: pred(y:obj) matches signature A(obj)
+    [<DataRow("MS1a", "def pred B(a:pred(y:obj)) def pred A(z:obj) def pred Test() {dec ~x:obj; B(A(x))};", 1)>] // SIG04: pred(y:obj) does not match value A(obj) 
+    [<DataRow("MS1b", "def pred B(a:pred(y:obj)) def pred A(z:obj) def pred Test() {dec ~x:ind; B(A(x))};", 1)>] // SIG04: pred(y:obj) does not match value A(ind) not matching A(obj)
+    [<DataRow("MS1c", "def pred B(a:pred(y:obj)) def pred A(z:ind) def pred Test() {dec ~x:ind; B(A(x))};", 1)>] // SIG04: pred(y:obj) does not match value A(ind) 
+    [<DataRow("MS1d", "def pred B(a:pred(y:obj)) def pred A(z:ind) def pred Test() {B(A)};", 1)>] // SIG04: pred(y:obj) does not match signature A(ind)
+    [<DataRow("MS1e", "def pred B(a:pred(y:obj)) ax A {true} def pred Test() {B(A)};", 1)>] // SIG04: pred(y:obj) does not match signature A (axiom)
+    [<DataRow("MS1f", "def pred B(a:pred(y:obj)) thm A {true} def pred Test() {B(A)};", 1)>] // SIG04: pred(y:obj) does not match signature A (theorem)
+    [<DataRow("MS1g", "def pred B(a:pred(y:obj)) lem A {true} def pred Test() {B(A)};", 1)>] // SIG04: pred(y:obj) does not match signature A (lemma)
+    [<DataRow("MS1h", "def pred B(a:pred(y:obj)) prop A {true} def pred Test() {B(A)};", 1)>] // SIG04: pred(y:obj) does not match signature A (proposition)
+    [<DataRow("MS1i", "def pred B(a:pred(y:obj)) conj A {true} def pred Test() {B(A)};", 1)>] // SIG04: pred(y:obj) does not match signature A (conjecture)
+    [<DataRow("MS1j", "def pred B(a:pred(y:obj)) cor A$1 {true} def pred Test() {B(A$1)};", 1)>] // SIG04: pred(y:obj) does not match signature A (corollary)
+    [<DataRow("MS1k", "def pred B(a:pred(y:obj)) proof A$1 {1. |- trivial} def pred Test() {B(A$1)};", 1)>] // SIG04: pred(y:obj) does not match signature A (proof)
+    [<DataRow("MS1l", "def pred B(a:pred(y:obj)) inf A {pre:true con:true} def pred Test() {B(A)};", 1)>] // SIG04: pred(y:obj) does not match signature A (rule of inference)
+    [<DataRow("MS1m", "def pred B(a:pred(y:obj)) def func A()obj def pred Test() {B(A)};", 1)>] // SIG04: pred(y:obj) does not match signature A (functional term)
+    [<DataRow("MS1n", "def pred B(a:pred(y:obj)) ext A x@/\d+/ -> obj {dec ~y:obj; return y} def pred Test() {B(A)};", 1)>] // SIG04: pred(y:obj) does not match signature A (extension)
+
     [<TestMethod>]
     member this.TestSIG04(no:string, fplCode:string, expected) =
         if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
