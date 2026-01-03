@@ -242,7 +242,7 @@ let emitID016diagnostics name pos1 pos2  =
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ID016 name
-            Diagnostic.Alternatives = Some $"Use `{LiteralSelf}` only inside {getEnglishName PrimClassL}, {getEnglishName PrimPredicateL}, or {getEnglishName PrimFuncionalTermL}."
+            Diagnostic.Alternatives = Some $"Use `{LiteralSelf}` only inside {getEnglishName PrimClassL}, {getEnglishName PrimPredicateL}, or {getEnglishName PrimFunctionalTermL}."
         }
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)

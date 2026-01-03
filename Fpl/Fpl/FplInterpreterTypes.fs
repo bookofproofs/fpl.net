@@ -958,7 +958,7 @@ let qualifiedName (fplValue:FplValue)=
             | PrimQuantorExistsN
             | PrimClassL
             | PrimPredicateL
-            | PrimFuncionalTermL
+            | PrimFunctionalTermL
             | PrimMandatoryPredicateL
             | PrimMandatoryFunctionalTermL -> fv.Type(SignatureType.Mixed)
             | _ -> fv.FplId
@@ -1546,7 +1546,7 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
                         || next.Name = LiteralPropL 
                         || next.Name = LiteralConjL 
                         || next.Name = PrimClassL 
-                        || next.Name = PrimFuncionalTermL
+                        || next.Name = PrimFunctionalTermL
                         || next.Name = PrimPredicateL
                         || next.Name = PrimExtensionL ) ->
             addToSimpleFplBlocksScope next false
@@ -3082,7 +3082,7 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
             | LiteralCtorL
             | PrimBaseConstructorCall
             | PrimPredicateL
-            | PrimFuncionalTermL
+            | PrimFunctionalTermL
             | PrimMandatoryFunctionalTermL
             | PrimMandatoryPredicateL ->
                 match box called with
@@ -3181,7 +3181,7 @@ type FplReference(positions: Positions, parent: FplValue) =
             match varMappingOpt with 
             | Some varMapping ->
                 match headObj.Name with 
-                | PrimFuncionalTermL when signatureType = SignatureType.Type -> 
+                | PrimFunctionalTermL when signatureType = SignatureType.Type -> 
                     varMapping.Type propagate
                 | PrimMandatoryFunctionalTermL when signatureType = SignatureType.Type -> 
                     varMapping.Type propagate
@@ -3199,7 +3199,11 @@ type FplReference(positions: Positions, parent: FplValue) =
             $"{head}().{qual.Type(propagate)}"
         | 0, ArgType.Nothing, None -> 
             match headObj.Name with 
-            | PrimVariableArrayL -> $"{headObj.Type signatureType}"
+            | PrimVariableArrayL 
+            | PrimPredicateL 
+            | PrimMandatoryPredicateL 
+            | PrimFunctionalTermL 
+            | PrimMandatoryFunctionalTermL -> $"{headObj.Type signatureType}"
             | _ -> head
         | 0, ArgType.Brackets, None ->
             $"{head}[]"
@@ -3434,11 +3438,10 @@ type FplMapping(positions: Positions, parent: FplValue) =
             else
                 None
         let mainType = 
-            match (pars, myMapping) with
-            | ("", None) -> this.TypeId
-            | ("", Some map) -> sprintf "%s() -> %s" this.TypeId (map.Type(propagate))
-            | (_, None) -> sprintf "%s(%s)" this.TypeId pars
-            | (_, Some map) -> sprintf "%s(%s) -> %s" this.TypeId pars (map.Type(propagate))
+            match this.ArgType, myMapping with
+            | ArgType.Parentheses, None -> $"{this.TypeId}({pars})"
+            | _, None -> this.TypeId
+            | _, Some map -> $"{this.TypeId}({pars}) -> {map.Type(propagate)}" 
 
         if not _isArrayMapping then
             mainType
@@ -3675,7 +3678,7 @@ let getParameters (fv:FplValue) =
         match box fv with 
         | :? IHasDimensions as arr -> arr.DimensionTypes |> Seq.toList
         | _ -> []
-    | PrimFuncionalTermL
+    | PrimFunctionalTermL
     | PrimPredicateL
     | LiteralCtorL
     | PrimMandatoryPredicateL
@@ -3689,7 +3692,7 @@ let hasBracketsOrParentheses (fv:FplValue) =
     | PrimVariableL ->
         let vars = fv.GetVariables()
         vars.Length > 0
-    | PrimFuncionalTermL 
+    | PrimFunctionalTermL 
     | PrimPredicateL 
     | LiteralCtorL 
     | PrimDefaultConstructor 
@@ -3736,14 +3739,14 @@ let findInheritanceChains (baseNode: FplValue) =
             predecessors.Add (currName, List<string>())
             predecessors[currName].Add predecessorName
             match baseNode.Name, bNode.Name with 
-            | PrimFuncionalTermL, PrimFuncionalTermL 
+            | PrimFunctionalTermL, PrimFunctionalTermL 
             | PrimClassL, PrimClassL ->
                 bNode.ArgList
                 |> Seq.filter (fun subNode -> subNode :? FplBase)
                 |> Seq.iter (fun subNode ->
                     findChains subNode currName newPath 
                 )
-            | PrimFuncionalTermL, LiteralBase 
+            | PrimFunctionalTermL, LiteralBase 
             | PrimClassL, LiteralBase ->
                 if bNode.Scope.Count > 0 then
                     let nextBNode = bNode.Scope.Values |> Seq.head
@@ -3769,7 +3772,7 @@ let findInheritanceChains (baseNode: FplValue) =
             
     match baseNode.Name with 
     | PrimClassL
-    | PrimFuncionalTermL -> ()
+    | PrimFunctionalTermL -> ()
     | _ -> failwith ($"Expecting a class or a functional term node, got {baseNode.Name}")
     
     findChains baseNode "" ""
@@ -3821,24 +3824,35 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                 Some($"`{a.Type(SignatureType.Name)}:{aType}` matches neither `{pName}:{pType}` nor the base classes")
         | _ -> None
 
-    let isPredWithParams (mapping:FplValue) =
-        let hasVariables = mapping.GetVariables() |> List.length > 0
-        let typeId = mapping.TypeId
-        hasVariables && typeId.StartsWith(LiteralPred) 
-    let isMappingPredWithoutParams (mapping:FplValue) =
-        mapping.TypeId = LiteralPred && mapping.GetVariables() |> List.length = 0
-    let isMappingWithParamsOrFunc (mapping:FplValue) =
-        mapping.GetVariables() |> List.length > 0 || mapping.TypeId = LiteralFunc
-    let isMappingFuncWithParams (mapping:FplValue) =
-        let hasVariables = mapping.GetVariables() |> List.length > 0
-        let typeId = mapping.TypeId
-        hasVariables && typeId.StartsWith(LiteralFunc) 
-    let isMappingFuncWithoutParams (mapping:FplValue) =
-        mapping.TypeId = LiteralFunc && mapping.GetVariables() |> List.length = 0
-    let referenceNotByValue (ref:FplValue) =
-        isUpper ref.FplId && ref.ArgType = ArgType.Nothing
-    let referenceByValue (ref:FplValue) =
-        isUpper ref.FplId && ref.ArgType = ArgType.Parentheses
+    let isPredWithParentheses (fv:FplValue) =
+        match fv.ArgType with 
+        | ArgType.Parentheses when fv.TypeId.StartsWith(LiteralPred) -> true
+        | _ -> false
+    let isPredWithoutParentheses (fv:FplValue) =
+        match fv.ArgType with 
+        | ArgType.Nothing when fv.TypeId = LiteralPred -> true
+        | _ -> false
+    let isWithParenthesesOrFunc (fv:FplValue) =
+        match fv.ArgType with 
+        | ArgType.Parentheses -> true
+        | _ when fv.TypeId = LiteralFunc -> true
+        | _ -> false
+    let isFuncWithParentheses (fv:FplValue) =
+        match fv.ArgType with 
+        | ArgType.Parentheses when fv.TypeId.StartsWith(LiteralFunc) -> true
+        | _ -> false
+    let isFuncWithoutParentheses (fv:FplValue) =
+        match fv.ArgType with 
+        | ArgType.Nothing when fv.TypeId = LiteralFunc -> true
+        | _ -> false
+    let isCallByReference (fv:FplValue) =
+        match fv.ArgType with 
+        | ArgType.Nothing when isUpper fv.FplId -> true
+        | _ -> false
+    let isCallByValue (fv:FplValue) =
+        match fv.ArgType with 
+        | ArgType.Parentheses when isUpper fv.FplId -> true
+        | _ -> false
 
     let matchByTypeStringRepresentation (a:FplValue) aName (aType:string) (p:FplValue) pName (pType:string) mode = 
         match mode with 
@@ -3882,7 +3896,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
             elif aReferencedNode.Name = PrimDefaultConstructor || aReferencedNode.Name = LiteralCtorL then 
                 let ctor = aReferencedNode :?> FplGenericConstructor
                 matchClassInheritance ctor.ToBeConstructedClass a aType pName pType
-            elif aReferencedNode.Name = PrimFuncionalTermL || aReferencedNode.Name = PrimMandatoryFunctionalTermL then 
+            elif aReferencedNode.Name = PrimFunctionalTermL || aReferencedNode.Name = PrimMandatoryFunctionalTermL then 
                 let mapOpt = getMapping aReferencedNode
                 let map = mapOpt.Value :?> FplMapping 
                 matchClassInheritance map.ToBeReturnedClass a aType pName pType
@@ -3902,7 +3916,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
             None
         | _ when aType = LiteralFunc && pType.StartsWith(LiteralFunc) ->
             None
-        | _ when p.Name = PrimFuncionalTermL || p.Name = PrimMandatoryFunctionalTermL ->
+        | _ when p.Name = PrimFunctionalTermL || p.Name = PrimMandatoryFunctionalTermL ->
             let mappingOpt = getMapping p 
             match mappingOpt with 
             | Some mapping ->
@@ -3928,8 +3942,8 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
         match mode, a.Name, p.Name with 
         | _, PrimRefL, PrimVariableL
         | _, PrimRefL, PrimMappingL ->
-            if referenceNotByValue a && isPredWithParams p then 
-                // match a not-by-value-reference with pred mapping with parameters
+            if isCallByReference a && isPredWithParentheses p then 
+                // match a call by reference with pred with parameters
                 let referredNodeOpt = a.Scope.Values |> Seq.tryHead
                 match referredNodeOpt with 
                 | Some (:? FplPredicate as refNode) ->
@@ -3942,7 +3956,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                 | _ ->
                     // in all other cases, 
                     Some $"Return type of `{aName}:{aType}` does not match expected mapping type `{pType}`."
-            elif referenceNotByValue a && isMappingPredWithoutParams p then
+            elif isCallByReference a && isPredWithoutParentheses p then
                 // match a not-by-value-reference with pred mapping without parameters
                 let referredNodeOpt = a.Scope.Values |> Seq.tryHead
                 match referredNodeOpt with 
@@ -3962,11 +3976,11 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                 | _ ->
                     // in all other cases, error
                     Some $"Return type of `{aName}:{aType}` does not match expected mapping type `{pType}`."
-            elif  referenceNotByValue a && isMappingFuncWithParams p then
+            elif  isCallByReference a && isFuncWithParentheses p then
                 // match a not-by-value-reference with func mapping with parameters
                 let referredNodeOpt = a.Scope.Values |> Seq.tryHead
                 match referredNodeOpt with 
-                | Some refNode when refNode.Name = PrimFuncionalTermL ->
+                | Some refNode when refNode.Name = PrimFunctionalTermL ->
                     matchTwoTypes refNode p mode // match signatures with parameters
                 | Some refNode when refNode.Name = PrimMandatoryFunctionalTermL ->
                     matchTwoTypes refNode p mode // match signatures with parameters
@@ -3976,11 +3990,11 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                 | _ ->
                     // in all other cases, error
                     Some $"Return type of `{aName}:{aType}` does not match expected mapping type `{pType}`."
-            elif referenceNotByValue a && isMappingFuncWithoutParams p then 
+            elif isCallByReference a && isFuncWithoutParentheses p then 
                 // match a not-by-value-reference with func mapping with parameters
                 let referredNodeOpt = a.Scope.Values |> Seq.tryHead
                 match referredNodeOpt with 
-                | Some refNode when refNode.Name = PrimFuncionalTermL ->
+                | Some refNode when refNode.Name = PrimFunctionalTermL ->
                     None // mapping func accepting functional term nodes
                 | Some refNode when refNode.Name = PrimMandatoryFunctionalTermL ->
                     None // mapping func accepting functional term properties
@@ -3990,7 +4004,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                 | _ ->
                     // in all other cases, error
                     Some $"Return type of `{aName}:{aType}` does not match expected mapping type `{pType}`."
-            elif referenceByValue a && isMappingWithParamsOrFunc p then
+            elif isCallByValue a && isWithParenthesesOrFunc p then
                 // mismatch of a by-value-reference with parameterized mapping or a func mapping
                 // since in both cases, no by-value reference is allowed
                 Some $"Return type by value `{aName}:{aType}` does not match expected mapping type `{pType}`. Try removing arguments of `{aName}` and refer to the referenced node `{a.FplId}`."
@@ -3999,7 +4013,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
         | _, _ ,_ -> 
 
             match mode with 
-            | MatchingMode.Assignment when a.Name = PrimFuncionalTermL || a.Name = PrimMandatoryFunctionalTermL ->
+            | MatchingMode.Assignment when a.Name = PrimFunctionalTermL || a.Name = PrimMandatoryFunctionalTermL ->
                 let mapOpt = getMapping a
                 match mapOpt with 
                 | Some (:? FplMapping as map) ->
@@ -5052,8 +5066,8 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) as this
         member this.SkolemName = this.SkolemName 
         member this.SetSkolemName() = this.SetSkolemName() 
 
-    override this.Name = PrimFuncionalTermL
-    override this.ShortName = PrimFuncionalTerm
+    override this.Name = PrimFunctionalTermL
+    override this.ShortName = PrimFunctionalTerm
 
     override this.Clone () =
         let ret = new FplFunctionalTerm((this.StartPos, this.EndPos), this.Parent.Value, _runOrder)

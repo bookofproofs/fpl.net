@@ -456,7 +456,7 @@ type SymbolTableStructure() =
         | "FplForInStmtEntity" ->
             Assert.AreEqual<string>(PrimForInStmtEntity, (getName var).[index])
         | "FplFunctionalTerm" ->
-            Assert.AreEqual<string>(PrimFuncionalTermL, (getName var).[index])
+            Assert.AreEqual<string>(PrimFunctionalTermL, (getName var).[index])
         | "FplImplication" ->
             Assert.AreEqual<string>(PrimImplication, (getName var).[index])        
         | "FplInstance" ->
@@ -690,7 +690,7 @@ type SymbolTableStructure() =
         | "FplForInStmtEntity" ->
             Assert.AreEqual<string>(PrimStmt, (getName var).[index])
         | "FplFunctionalTerm" ->
-            Assert.AreEqual<string>(PrimFuncionalTerm, (getName var).[index])
+            Assert.AreEqual<string>(PrimFunctionalTerm, (getName var).[index])
         | "FplImplication" ->
             Assert.AreEqual<string>(LiteralImpl, (getName var).[index])        
         | "FplInstance" ->

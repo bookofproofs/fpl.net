@@ -183,13 +183,13 @@ let rec eval (st: SymbolTable) ast =
         | LiteralLemL
         | LiteralConjL
         | LiteralCorL
-        | PrimFuncionalTermL
+        | PrimFunctionalTermL
         | PrimPredicateL
         | LiteralPrfL
         | PrimMandatoryFunctionalTermL
         | PrimMandatoryPredicateL
         | PrimPredicateL
-        | PrimFuncionalTermL
+        | PrimFunctionalTermL
         | PrimRuleOfInference -> 
             fv.FplId <- pascalCaseId
         | LiteralCtorL ->
@@ -452,7 +452,7 @@ let rec eval (st: SymbolTable) ast =
             | PrimMandatoryPredicateL
             | PrimClassL
             | PrimPredicateL
-            | PrimFuncionalTermL ->
+            | PrimFunctionalTermL ->
                 fv.Scope.Add(block.FplId, block)
             | _ ->
                 fv.ErrorOccurred <- emitID016diagnostics $"{getEnglishName block.Name} '{block.Type(SignatureType.Name)}'" pos1 pos2
@@ -475,8 +475,8 @@ let rec eval (st: SymbolTable) ast =
             | PrimClassL, PrimMandatoryPredicateL
             | PrimPredicateL, PrimMandatoryFunctionalTermL
             | PrimPredicateL, PrimMandatoryPredicateL
-            | PrimFuncionalTermL, PrimMandatoryFunctionalTermL
-            | PrimFuncionalTermL, PrimMandatoryPredicateL ->
+            | PrimFunctionalTermL, PrimMandatoryFunctionalTermL
+            | PrimFunctionalTermL, PrimMandatoryPredicateL ->
                 fv.Scope.Add(block.FplId, block)
             | _ ->
                 fv.ErrorOccurred <- emitID015diagnostics $"{getEnglishName block.Name} '{block.Type(SignatureType.Name)}'" pos1 pos2
@@ -692,8 +692,8 @@ let rec eval (st: SymbolTable) ast =
     | Ast.ParamTuple((pos1, pos2), namedVariableDeclarationListAsts) ->
         st.EvalPush("ParamTuple")
         let fv = variableStack.PeekEvalStack()
-        namedVariableDeclarationListAsts |> List.map (
-            fun child ->
+        fv.ArgType <- ArgType.Parentheses
+        namedVariableDeclarationListAsts |> List.map (fun child ->
             match child with 
             | Ast.NamedVarDecl(_,(varList,_)) -> fv.Arity <- fv.Arity + varList.Length
             | _ -> ()
