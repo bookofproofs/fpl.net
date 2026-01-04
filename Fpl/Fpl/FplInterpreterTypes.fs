@@ -729,7 +729,6 @@ type FplValue(positions: Positions, parent: FplValue option) =
 and ArgType = 
     | Parentheses
     | Brackets
-    | Dotted
     | Nothing
 
 /// A discriminated union type for wrapping search results in the Scope of an FplValue.
@@ -3191,7 +3190,7 @@ type FplReference(positions: Positions, parent: FplValue) =
 
     override this.Type signatureType =
         let headObj = 
-            if this.Scope.Count > 0 then 
+            if this.Scope.Count > 0 && not (this.Scope.ContainsKey(".")) then 
                 let ret = this.Scope.Values |> Seq.head
                 match ret.Name with 
                 | PrimExtensionObj 
@@ -3235,6 +3234,12 @@ type FplReference(positions: Positions, parent: FplValue) =
             | SignatureType.Type, "", "" -> LiteralUndef
             | _ -> ret
 
+        let qualification =
+            if this.Scope.ContainsKey(".") then
+                Some(this.Scope["."])
+            else
+                None
+
         let fallBackFunctionalTerm =
             let varMappingOpt = getMapping headObj
             match varMappingOpt with 
@@ -3249,45 +3254,59 @@ type FplReference(positions: Positions, parent: FplValue) =
             | None ->
                 $"{head}({args})"
 
-        match argsCount, this.ArgType with
-        | 0, ArgType.Dotted ->
-            $"{head}"
-        | 0, ArgType.Nothing -> 
-            match headObj.Name with 
-            | PrimVariableArrayL 
-            | PrimPredicateL 
-            | PrimMandatoryPredicateL 
-            | PrimFunctionalTermL 
-            | PrimMandatoryFunctionalTermL -> $"{headObj.Type signatureType}"
-            | _ -> head
-        | 0, ArgType.Brackets ->
-            $"{head}[]"
-        | 0, ArgType.Parentheses ->
-            fallBackFunctionalTerm
-        | 1, ArgType.Brackets->
-            $"{head}[{args}]"
-        | 1, ArgType.Nothing-> 
-            if this.FplId <> String.Empty then 
+        match argsCount, this.ArgType, qualification with
+            | 0, ArgType.Nothing, Some qual ->
+                $"{head}.{qual.Type(propagate)}"
+            | 0, ArgType.Brackets, Some qual ->
+                $"{head}[].{qual.Type(propagate)}"
+            | 0, ArgType.Parentheses, Some qual ->
+                $"{head}().{qual.Type(propagate)}"
+            | 0, ArgType.Nothing, None -> 
+                match headObj.Name with 
+                | PrimVariableArrayL 
+                | PrimPredicateL 
+                | PrimMandatoryPredicateL 
+                | PrimFunctionalTermL 
+                | PrimMandatoryFunctionalTermL -> $"{headObj.Type signatureType}"
+                | _ -> head
+            | 0, ArgType.Brackets, None ->
+                $"{head}[]"
+            | 0, ArgType.Parentheses, None ->
                 fallBackFunctionalTerm
-            else
-                $"{head}{args}"
-        | 1, ArgType.Parentheses ->
-            if head = LiteralFunc then 
-                fallBackFunctionalTerm
-            else
+            | 1, ArgType.Nothing, Some qual -> 
+                $"{head}{args}.{qual.Type(propagate)}"
+            | 1, ArgType.Brackets, Some qual ->
+                $"{head}[{args}].{qual.Type(propagate)}"
+            | 1, ArgType.Parentheses, Some qual ->
+                $"{head}({args}).{qual.Type(propagate)}"
+            | 1, ArgType.Nothing, None -> 
+                if this.FplId <> String.Empty then 
+                    fallBackFunctionalTerm
+                else
+                    $"{head}{args}"
+            | 1, ArgType.Brackets, None ->
+                $"{head}[{args}]"
+            | 1, ArgType.Parentheses, None ->
+                if head = LiteralFunc then 
+                    fallBackFunctionalTerm
+                else
+                    $"{head}({args})"
+            | _, ArgType.Nothing, Some qual -> 
+                $"{head}({args}).{qual.Type(propagate)}"
+            | _, ArgType.Brackets, Some qual ->
+                $"{head}[{args}].{qual.Type(propagate)}"
+            | _, ArgType.Parentheses, Some qual ->
+                $"{head}({args}).{qual.Type(propagate)}"
+            | _, ArgType.Nothing, None -> 
                 $"{head}({args})"
-        | _, ArgType.Dotted -> 
-            $"{head}({args})"
-        | _, ArgType.Nothing -> 
-            $"{head}({args})"
-        | _, ArgType.Brackets ->
-            $"{head}[{args}]"
-        | _, ArgType.Parentheses ->
-            $"{head}({args})"
+            | _, ArgType.Brackets, None ->
+                $"{head}[{args}]"
+            | _, ArgType.Parentheses, None ->
+                fallBackFunctionalTerm
 
     override this.Represent () = 
         if this.ValueList.Count = 0 then 
-            if this.Scope.Count > 0 then 
+            if this.Scope.Count > 0 && not (this.Scope.ContainsKey(".")) then 
                 (this.Scope.Values |> Seq.head).Represent()
             else
 
@@ -3298,34 +3317,53 @@ type FplReference(positions: Positions, parent: FplValue) =
                         |> String.concat ", "
                     ret, this.ArgList.Count
 
-                match argsCount, this.ArgType with
-                | 0, ArgType.Dotted ->
+                let qualification =
+                    if this.Scope.ContainsKey(".") then
+                        Some(this.Scope["."])
+                    else
+                        None
+
+                match argsCount, this.ArgType, qualification with
+                | 0, ArgType.Nothing, Some qual ->
+                    $"{LiteralUndef}.{qual.Represent()}"
+                | 0, ArgType.Brackets, Some qual ->
+                    $"{LiteralUndef}[].{qual.Represent()}"
+                | 0, ArgType.Parentheses, Some qual ->
+                    $"{LiteralUndef}().{qual.Represent()}"
+                | 0, ArgType.Nothing, None -> 
                     $"{LiteralUndef}"
-                | 0, ArgType.Nothing ->
-                    $"{LiteralUndef}"
-                | 0, ArgType.Brackets ->
+                | 0, ArgType.Brackets, None ->
                     $"{LiteralUndef}[]"
-                | 0, ArgType.Parentheses ->
+                | 0, ArgType.Parentheses, None ->
                     $"{LiteralUndef}()"
-                | 1, ArgType.Dotted -> 
-                    $"{LiteralUndef}I{args})"
-                | 1, ArgType.Nothing -> 
+                | 1, ArgType.Nothing, Some qual -> 
+                
+                    $"{LiteralUndef}{args}.{qual.Represent()}"
+                | 1, ArgType.Brackets, Some qual ->
+                    $"{LiteralUndef}[{args}].{qual.Represent()}"
+                | 1, ArgType.Parentheses, Some qual ->
+                    $"{LiteralUndef}({args}).{qual.Represent()}"
+                | 1, ArgType.Nothing, None -> 
                     if this.FplId <> String.Empty then 
                         $"{LiteralUndef}({args})"
                     else
                         $"{args}"
-                | 1, ArgType.Brackets ->
+                | 1, ArgType.Brackets, None ->
                     $"{LiteralUndef}[{args}]"
-                | 1, ArgType.Parentheses ->
+                | 1, ArgType.Parentheses, None ->
                     $"{LiteralUndef}({args})"
-                | _, ArgType.Nothing -> 
-                    $"{LiteralUndef}({args}) "
-                | _, ArgType.Brackets ->
-                    $"{LiteralUndef}[{args}] "
-                | _, ArgType.Parentheses ->
-                    $"{LiteralUndef}({args}) "
-                | _, ArgType.Dotted -> 
-                    $"{LiteralUndef}I{args})"
+                | _, ArgType.Nothing, Some qual -> 
+                    $"{LiteralUndef}({args}).{qual.Represent()}"
+                | _, ArgType.Brackets, Some qual ->
+                    $"{LiteralUndef}[{args}].{qual.Represent()}"
+                | _, ArgType.Parentheses, Some qual ->
+                    $"{LiteralUndef}({args}).{qual.Represent()}"
+                | _, ArgType.Nothing, None -> 
+                    $"{LiteralUndef}({args})"
+                | _, ArgType.Brackets, None ->
+                    $"{LiteralUndef}[{args}]"
+                | _, ArgType.Parentheses, None ->
+                    $"{LiteralUndef}({args})"                
                 
         else
             let subRepr = 
@@ -3337,6 +3375,7 @@ type FplReference(positions: Positions, parent: FplValue) =
                 LiteralUndef
             else
                 subRepr           
+
     override this.EmbedInSymbolTable nextOpt = 
        
         match nextOpt with 

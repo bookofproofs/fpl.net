@@ -590,8 +590,11 @@ let rec eval (st: SymbolTable) ast =
     | Ast.DottedPredicate((pos1, pos2), predicateWithOptSpecificationAst) ->
         st.EvalPush("DottedPredicate")
         let fv = variableStack.PeekEvalStack()
-        fv.ArgType <- ArgType.Dotted
+        let refBlock = new FplReference((pos1, pos2), fv) 
+        fv.Scope.Add(".", refBlock)
+        variableStack.PushEvalStack(refBlock)
         eval st predicateWithOptSpecificationAst
+        variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.Return((pos1, pos2), returneeAst) ->
         st.EvalPush("Return")
@@ -655,7 +658,7 @@ let rec eval (st: SymbolTable) ast =
         | _ -> ()
         let candidatesPre, nodeWithPropertiesOpt = 
             match fv.Parent with 
-            | Some parent when parent.ArgType = ArgType.Dotted ->
+            | Some parent when parent.Scope.ContainsKey(".") ->
                 fv.FplId <- $"{parent.FplId}.{identifier}"
                 match parent.Scope.Values |> Seq.tryHead with
                 | Some (:? FplVariable as var) -> 
