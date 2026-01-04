@@ -25,8 +25,16 @@ open FplInterpreterDiagnosticsEmitter
 
 let variableStack = FplVariableStack()
 
-let eval_pos_char_list (st: SymbolTable) (startpos: Position) (endpos: Position) charlist =
-    charlist |> List.map string |> String.concat "" |> ignore
+let filterCandidates (candidatesPre:FplValue list) identifier =
+    let candidates =
+        candidatesPre
+        |> List.filter (fun fv1 -> fv1.FplId = identifier)
+
+    let candidatesNames =
+        candidatesPre
+        |> Seq.map (fun fv -> qualifiedName fv)
+        |> String.concat ", "
+    (candidates, candidatesNames)
 
 /// Simplify trivially nested expressions by removing from the stack FplValue nodes that were created due to too long parsing tree and replacing them by their subnodes 
 let rec simplifyTriviallyNestedExpressions (rb:FplValue) = 
@@ -656,25 +664,9 @@ let rec eval (st: SymbolTable) ast =
         | :? FplGenericJustificationItem as fvJi -> 
             fvJi.FplId <- identifier
         | _ -> ()
-        let candidatesPre, nodeWithPropertiesOpt = 
-            match fv.Parent with 
-            | Some parent when parent.Scope.ContainsKey(".") ->
-                fv.FplId <- $"{parent.FplId}.{identifier}"
-                match parent.Scope.Values |> Seq.tryHead with
-                | Some (:? FplVariable as var) -> 
-                    match var.Scope.Values |> Seq.tryHead with
-                    | Some refNode ->  refNode.GetProperties(), Some refNode
-                    | _ -> [], None
-                | _ -> [], None
-            | _ -> findCandidatesByName st identifier false false, None
-        let candidates =
-            candidatesPre
-            |> List.filter (fun fv1 -> fv1.FplId = identifier)
+        let candidatesPre = findCandidatesByName st identifier false false
 
-        let candidatesNames =
-            candidatesPre
-            |> Seq.map (fun fv -> qualifiedName fv)
-            |> String.concat ", "
+        let candidates, candidatesNames =  filterCandidates candidatesPre identifier 
 
         match fv, candidates.Length with
         | :? FplVariable, 0 -> 
@@ -694,11 +686,6 @@ let rec eval (st: SymbolTable) ast =
             fv.Scope.TryAdd(fv.FplId, candidates.Head) |> ignore
         | :? FplVariable, _ -> 
             fv.ErrorOccurred <- emitID017Diagnostics identifier candidatesNames pos1 pos2
-        | :? FplReference, 1 when nodeWithPropertiesOpt.IsSome -> 
-            fv.Scope.TryAdd(fv.FplId, candidates.Head) |> ignore
-        | :? FplReference, 0 when nodeWithPropertiesOpt.IsSome -> 
-            let nodeWithProperties = nodeWithPropertiesOpt.Value
-            fv.ErrorOccurred <- emitID012Diagnostics identifier (nodeWithProperties.Type SignatureType.Mixed) candidatesNames pos1 pos2
         | _ -> ()
 
         
@@ -899,7 +886,32 @@ let rec eval (st: SymbolTable) ast =
             @ candidatesFromPropertyScope 
             @ candidatesFromDottedQualification
 
+        let parentFv = fv.Parent.Value
         match optionalSpecificationAst with
+        | Some specificationAst when parentFv.Scope.ContainsKey(".") -> 
+            eval st fplIdentifierAst
+            eval st specificationAst |> ignore
+            let referencedNodeOpt =
+                if parentFv.Scope.ContainsKey(parentFv.FplId) then 
+                    let var = parentFv.Scope[parentFv.FplId]
+                    var.Scope.Values |> Seq.tryHead
+                else
+                    None
+            let candidatesPre = 
+                match referencedNodeOpt with 
+                | Some referencedNode ->
+                    referencedNode.GetVariables() @ referencedNode.GetProperties() 
+                | _ -> []
+            
+            let candidates, candidatesNames =  filterCandidates candidatesPre fv.FplId 
+
+            if candidates.Length = 0 then 
+                fv.ErrorOccurred <- emitID012Diagnostics fv.FplId (parentFv.Type SignatureType.Mixed) candidatesNames pos1 pos2
+            else
+                match checkSIG04Diagnostics fv candidates with
+                | Some matchedCandidate -> fv.Scope.TryAdd(fv.FplId, matchedCandidate) |> ignore
+                | _ -> ()
+
         | Some specificationAst -> 
             let node = new FplReference((pos1, pos2), fv) 
             variableStack.PushEvalStack(node)
@@ -919,7 +931,7 @@ let rec eval (st: SymbolTable) ast =
                             let ret = fv.Scope.Values |> Seq.head
                             match ret.Name with 
                             | PrimVariableL -> fv // if the variable is nesting other variables, it is ok to take the variable
-                            | _ -> ret // otherwise wit peek the nested type referenced by the variable
+                            | _ -> ret // otherwise we peek the nested type referenced by the variable
                         | LiteralSelf when fv.Scope.Count = 1 -> fv.Scope.Values |> Seq.head
                         | LiteralParent when fv.Scope.Count = 1 -> fv.Scope.Values |> Seq.head
                         | _ -> fv
