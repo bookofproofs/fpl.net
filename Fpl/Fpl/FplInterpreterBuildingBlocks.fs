@@ -669,7 +669,7 @@ let rec eval (st: SymbolTable) ast =
             |> List.filter (fun fv1 -> fv1.FplId = identifier)
 
         let candidatesNames =
-            candidates
+            candidatesPre
             |> Seq.map (fun fv -> qualifiedName fv)
             |> String.concat ", "
 
@@ -695,7 +695,7 @@ let rec eval (st: SymbolTable) ast =
             fv.Scope.TryAdd(fv.FplId, candidates.Head) |> ignore
         | :? FplReference, 0 when nodeWithPropertiesOpt.IsSome -> 
             let nodeWithProperties = nodeWithPropertiesOpt.Value
-            fv.ErrorOccurred <- emitID012Diagnostics identifier (nodeWithProperties.Type SignatureType.Mixed) pos1 pos2
+            fv.ErrorOccurred <- emitID012Diagnostics identifier (nodeWithProperties.Type SignatureType.Mixed) candidatesNames pos1 pos2
         | _ -> ()
 
         
@@ -1187,13 +1187,16 @@ let rec eval (st: SymbolTable) ast =
             fv.ErrorOccurred <- emitVAR04diagnostics kvp.Key (fst kvp.Value) (snd kvp.Value)
         )
         st.EvalPop()
-    | Ast.FunctionalTermInstance((pos1, pos2), (functionalTermInstanceSignatureAst, functionalTermInstanceBlockAst)) ->
+    | Ast.FunctionalTermInstance((pos1, pos2), (functionalTermInstanceSignatureAst, functionalTermInstanceBlockOptAst)) ->
         st.EvalPush("FunctionalTermInstance")
         let parent = variableStack.PeekEvalStack()
         let fvNew = new FplMandatoryFunctionalTerm((pos1, pos2), parent)
         variableStack.PushEvalStack(fvNew)
         eval st functionalTermInstanceSignatureAst
-        eval st functionalTermInstanceBlockAst
+        match functionalTermInstanceBlockOptAst with 
+        | Some functionalTermInstanceBlockAst ->
+            eval st functionalTermInstanceBlockAst
+        | None -> fvNew.IsIntrinsic <- true
         variableStack.PopEvalStack()
         st.EvalPop()
     // | All of Positions * ((Ast list * Ast option) list * Ast)
@@ -1466,13 +1469,16 @@ let rec eval (st: SymbolTable) ast =
         eval st predicateAst
         variableStack.PopEvalStack() // remove Assignment
         st.EvalPop()
-    | Ast.PredicateInstance((pos1, pos2), (signatureAst, predInstanceBlockAst)) ->
+    | Ast.PredicateInstance((pos1, pos2), (signatureAst, predInstanceBlockAstOpt)) ->
         st.EvalPush("PredicateInstance")
         let parent = variableStack.PeekEvalStack()
         let fvNew = new FplMandatoryPredicate((pos1, pos2), parent)
         variableStack.PushEvalStack(fvNew)
         eval st signatureAst
-        eval st predInstanceBlockAst
+        match predInstanceBlockAstOpt with 
+        | Some predInstanceBlockAst ->
+            eval st predInstanceBlockAst
+        | None -> fvNew.IsIntrinsic <- true
         variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.BaseConstructorCall((pos1, pos2), (inheritedClassTypeAst, argumentTupleAst)) ->

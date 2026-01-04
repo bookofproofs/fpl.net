@@ -191,7 +191,7 @@ let emitID011Diagnostics chain errorMsg pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitID012Diagnostics prtyName varType pos1 pos2 = 
+let emitID012Diagnostics prtyName varType candidates pos1 pos2 = 
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -199,7 +199,7 @@ let emitID012Diagnostics prtyName varType pos1 pos2 =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = ID012 (prtyName, varType)
+            Diagnostic.Code = ID012 (prtyName, varType, candidates)
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic

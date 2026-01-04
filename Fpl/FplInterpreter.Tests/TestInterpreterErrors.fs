@@ -498,17 +498,17 @@ type TestInterpreterErrors() =
             runTestHelper "TestID011.fpl" fplCode code expected
 
     // class properties
-    [<DataRow("C1", "def cl A {intr prty pred L(){intr}} def pred T() {dec ~x:A; x.L()};", 0)>]
-    [<DataRow("C1a", "def cl A {intr prty pred L(){intr}} def pred T() {dec ~x:A; x.LTypo()};", 1)>]
-    [<DataRow("C2", "def cl A {intr prty pred L(){intr}} def pred T(x:A) {x.L()};", 0)>]
-    [<DataRow("C2a", "def cl A {intr prty pred L(){intr}} def pred T(x:A) {x.LTypo()};", 1)>]
+    [<DataRow("C1", "def cl A {intr prty pred L() } def pred T() {dec ~x:A; x.L()};", 0)>]
+    [<DataRow("C1a", "def cl A {intr prty pred L() } def pred T() {dec ~x:A; x.LTypo()};", 1)>]
+    [<DataRow("C2", "def cl A {intr prty pred L() } def pred T(x:A) {x.L()};", 0)>]
+    [<DataRow("C2a", "def cl A {intr prty pred L() } def pred T(x:A) {x.LTypo()};", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID012(no:string, fplCode:string, expected) =
         if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = ID012 ("","")
+            let code = ID012 ("","", "")
             runTestHelper "TestID012.fpl" fplCode code expected
 
     [<DataRow("00", "def pred T() {del.Test()};", 1, "Unknown delegate `Test`")>]
