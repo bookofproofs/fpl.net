@@ -191,6 +191,20 @@ let emitID011Diagnostics chain errorMsg pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
+let emitID012Diagnostics prtyName varType pos1 pos2 = 
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ID012 (prtyName, varType)
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
+
 let emitID013Diagnostics pos1 pos2 message =
     let diagnostic =
         { 

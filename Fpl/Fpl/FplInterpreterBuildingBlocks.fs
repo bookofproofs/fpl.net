@@ -590,11 +590,8 @@ let rec eval (st: SymbolTable) ast =
     | Ast.DottedPredicate((pos1, pos2), predicateWithOptSpecificationAst) ->
         st.EvalPush("DottedPredicate")
         let fv = variableStack.PeekEvalStack()
-        let refBlock = new FplReference((pos1, pos2), fv) 
-        fv.Scope.Add(".",refBlock)
-        variableStack.PushEvalStack(refBlock)
+        fv.ArgType <- ArgType.Dotted
         eval st predicateWithOptSpecificationAst
-        variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.Return((pos1, pos2), returneeAst) ->
         st.EvalPush("Return")
@@ -656,8 +653,17 @@ let rec eval (st: SymbolTable) ast =
         | :? FplGenericJustificationItem as fvJi -> 
             fvJi.FplId <- identifier
         | _ -> ()
-        let candidatesPre =    
-            findCandidatesByName st identifier false false
+        let candidatesPre, nodeWithPropertiesOpt = 
+            match fv.Parent with 
+            | Some parent when parent.ArgType = ArgType.Dotted ->
+                fv.FplId <- $"{parent.FplId}.{identifier}"
+                match parent.Scope.Values |> Seq.tryHead with
+                | Some (:? FplVariable as var) -> 
+                    match var.Scope.Values |> Seq.tryHead with
+                    | Some refNode ->  refNode.GetProperties(), Some refNode
+                    | _ -> [], None
+                | _ -> [], None
+            | _ -> findCandidatesByName st identifier false false, None
         let candidates =
             candidatesPre
             |> List.filter (fun fv1 -> fv1.FplId = identifier)
@@ -667,24 +673,29 @@ let rec eval (st: SymbolTable) ast =
             |> Seq.map (fun fv -> qualifiedName fv)
             |> String.concat ", "
 
-        match (fv, candidates.Length) with
-        | (:? FplVariable, 0) -> 
+        match fv, candidates.Length with
+        | :? FplVariable, 0 -> 
             fv.ErrorOccurred <- emitSIG04Diagnostics identifier 0 [""] pos1 pos2
             let undefValue = new FplIntrinsicUndef((fv.StartPos, fv.EndPos), fv)
             fv.ValueList.Add(undefValue)
-        | (:? FplMapping as map, 1) -> 
+        | :? FplMapping as map, 1 -> 
             let candidate = candidates.Head
             match candidate with 
             | :? FplClass -> map.ToBeReturnedClass <- Some candidate
             | _ -> fv.ErrorOccurred <- emitSIG11diagnostics (qualifiedName map) (qualifiedName candidate) map.StartPos map.EndPos       
-        | (:? FplMapping, 0) -> 
+        | :? FplMapping, 0 -> 
             fv.ErrorOccurred <- emitSIG04Diagnostics identifier 0 [""] pos1 pos2
-        | (:? FplMapping, _) -> 
+        | :? FplMapping, _ -> 
             fv.ErrorOccurred <- emitSIG04Diagnostics identifier candidates.Length [""] pos1 pos2
-        | (:? FplVariable, 1) -> 
+        | :? FplVariable, 1 -> 
             fv.Scope.TryAdd(fv.FplId, candidates.Head) |> ignore
-        | (:? FplVariable, _) -> 
+        | :? FplVariable, _ -> 
             fv.ErrorOccurred <- emitID017Diagnostics identifier candidatesNames pos1 pos2
+        | :? FplReference, 1 when nodeWithPropertiesOpt.IsSome -> 
+            fv.Scope.TryAdd(fv.FplId, candidates.Head) |> ignore
+        | :? FplReference, 0 when nodeWithPropertiesOpt.IsSome -> 
+            let nodeWithProperties = nodeWithPropertiesOpt.Value
+            fv.ErrorOccurred <- emitID012Diagnostics identifier (nodeWithProperties.Type SignatureType.Mixed) pos1 pos2
         | _ -> ()
 
         

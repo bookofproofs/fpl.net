@@ -497,6 +497,19 @@ type TestInterpreterErrors() =
             let code = ID011 ("","")
             runTestHelper "TestID011.fpl" fplCode code expected
 
+    // class properties
+    [<DataRow("C1", "def cl A {intr prty pred L(){intr}} def pred T() {dec ~x:A; x.L()};", 0)>]
+    [<DataRow("C1a", "def cl A {intr prty pred L(){intr}} def pred T() {dec ~x:A; x.LTypo()};", 1)>]
+    [<DataRow("C2", "def cl A {intr prty pred L(){intr}} def pred T(x:A) {x.L()};", 0)>]
+    [<DataRow("C2a", "def cl A {intr prty pred L(){intr}} def pred T(x:A) {x.LTypo()};", 1)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestID012(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = ID012 ("","")
+            runTestHelper "TestID012.fpl" fplCode code expected
 
     [<DataRow("00", "def pred T() {del.Test()};", 1, "Unknown delegate `Test`")>]
     [<DataRow("01", "def pred T() {del.Test1(x,y)};", 1, "Unknown delegate `Test1`")>]
@@ -1377,6 +1390,7 @@ type TestInterpreterErrors() =
             let code = SIG02 ("",0, "")
             runTestHelper "TestSIG02.fpl" fplCode code expected
 
+    // match return with mapping having simple types
     [<DataRow("00", "def func Test()->obj {dec ~x:obj; return x};", 0)>]
     [<DataRow("01", "def func Test()->obj {dec ~x:Nat; return x};", 1)>] // Nat is undefined, error
     [<DataRow("02", "def cl Nat {intr} def func Test()->obj {dec ~x:Nat; return x};", 0)>]
@@ -1393,7 +1407,8 @@ type TestInterpreterErrors() =
     [<DataRow("05b2", "def func Test()->pred(y:pred(z:ind)) {dec ~a:pred(b:pred(c:ind)); return a};", 0)>]
     [<DataRow("06", "def func Test()->func {dec ~x:func; return x};", 0)>]
     [<DataRow("07", "def func Test()->ind {dec ~x:ind; return x};", 0)>]
-    // mapping signature tests
+    
+    // match return with mapping having the type pred(...) 
     [<DataRow("MS1", "def pred A(z:obj) def func Test()->pred(y:obj) {return A};", 0)>] // OK: ->pred(y:obj) matches signature A(obj), whole node would be returned
     [<DataRow("MS1a", "def pred A(z:obj) def func Test()->pred(y:obj) {dec ~x:obj; return A(x)};", 1)>] // SIG03: ->pred(y:obj) does not match value A(obj) 
     [<DataRow("MS1b", "def pred A(z:obj) def func Test()->pred(y:obj) {dec ~x:ind; return A(x)};", 1)>] // SIG03: ->pred(y:obj) does not match value A(ind) not matching A(obj)
@@ -1411,6 +1426,7 @@ type TestInterpreterErrors() =
     [<DataRow("MS1n", "ext A x@/\d+/ -> obj {dec ~y:obj; return y} def func Test()->pred(y:obj) {return A};", 1)>] // SIG03: ->pred(y:obj) does not match signature A (extension)
     [<DataRow("MS1o", "def cl A def func Test()->pred(y:obj) {return A};", 1)>] // SIG03: ->pred(y:obj) does not match signature A (class)
     
+    // match return with mapping having the type pred() 
     [<DataRow("MS1_", "def pred A() def func Test()->pred() {return A};", 0)>] // OK: ->pred() matches signature A(), whole node would be returned
     [<DataRow("MS1a_", "def pred A() def func Test()->pred() {dec ~x:obj; return A(x)};", 1)>] // SIG03: ->pred() does not match value A(obj) 
     [<DataRow("MS1b_", "def pred A() def func Test()->pred() {dec ~x:ind; return A(x)};", 1)>] // SIG03: ->pred() does not match value A(ind) not matching A(obj)
@@ -1428,6 +1444,7 @@ type TestInterpreterErrors() =
     [<DataRow("MS1n_", "ext A x@/\d+/ -> obj {dec ~y:obj; return y} def func Test()->pred() {return A};", 1)>] // SIG03: ->pred() does not match signature A (extension)
     [<DataRow("MS1o_", "def cl A def func Test()->pred() {return A};", 1)>] // SIG03: ->pred() does not match signature A (class)
      
+    // match return with mapping having the type pred 
     [<DataRow("MS2", "def pred A(z:obj) def func Test()->pred {return A};", 0)>] // OK: ->pred matches signature A(obj), whole node would be returned
     [<DataRow("MS2a", "def pred A(z:obj) def func Test()->pred {dec ~x:obj; return A(x)};", 0)>] // OK: ->pred matches value A(obj) 
     [<DataRow("MS2b", "def pred A(z:obj) def func Test()->pred {dec ~x:ind; return A(x)};", 1)>] // SIG03: ->pred does not match value A(ind) since it does not match A(obj)
@@ -1445,6 +1462,7 @@ type TestInterpreterErrors() =
     [<DataRow("MS2n", "ext A x@/\d+/ -> obj {dec ~y:obj; return y} def func Test()->pred {return A};", 1)>] // SIG03: ->pred does not match signature A (extension)
     [<DataRow("MS2o", "def cl A def func Test()->pred {return A};", 1)>] // SIG03: ->pred does not match signature A (class)
 
+    // match return with mapping having the type func(...)->...
     [<DataRow("MS3", "def func A(z:obj)->ind def func Test()->func(y:obj)->ind {return A};", 0)>] // OK: ->func(y:obj)->ind matches signature A(obj)->ind, whole node would be returned
     [<DataRow("MS3a", "def func A(z:obj)->ind def func Test()->func(y:obj)->ind {dec ~x:obj; return A(x)};", 1)>] // SIG03: ->func(y:obj)->ind does not match value A(obj) 
     [<DataRow("MS3b", "def func A(z:obj)->ind def func Test()->func(y:obj)->ind {dec ~x:ind; return A(x)};", 1)>] // SIG03: ->func(y:obj)->ind does not match value A(ind) not matching A(obj)
@@ -1462,6 +1480,7 @@ type TestInterpreterErrors() =
     [<DataRow("MS3n", "ext A x@/\d+/ -> obj {dec ~y:obj; return y} def func Test()->func(y:obj)->ind {return A};", 1)>] // SIG03: ->func(y:obj)->ind does not match signature A (extension)
     [<DataRow("MS3o", "def cl A def func Test()->func(y:obj)->ind {return A};", 1)>] // SIG03: ->func(y:obj)->ind does not match signature A (class)
     
+    // match return with mapping having the type func()->...
     [<DataRow("MS3_", "def func A()->ind def func Test()->func()->ind {return A};", 0)>] // OK: ->func()->ind matches signature A()->ind, whole node would be returned
     [<DataRow("MS3a_", "def func A()->ind def func Test()->func()->ind {dec ~x:obj; return A(x)};", 1)>] // SIG03: ->func()->ind does not match value A(obj) 
     [<DataRow("MS3b_", "def func A()->ind def func Test()->func()->ind {dec ~x:ind; return A(x)};", 1)>] // SIG03: ->func()->ind does not match value A(ind) not matching A(obj)
@@ -1479,6 +1498,7 @@ type TestInterpreterErrors() =
     [<DataRow("MS3n_", "ext A x@/\d+/ -> obj {dec ~y:obj; return y} def func Test()->func(y:obj)->ind {return A};", 1)>] // SIG03: ->func(y:obj)->ind does not match signature A (extension)
     [<DataRow("MS3o_", "def cl A def func Test()->func()->ind {return A};", 1)>] // SIG03: ->func()->ind does not match signature A (class)
 
+    // match return with mapping having the type func()->...
     [<DataRow("MS4", "def func A(z:obj)->ind def func Test()->func {return A};", 0)>] // OK: ->func matches signature A(obj)->ind, whole node would be returned
     [<DataRow("MS4a", "def func A(z:obj)->ind def func Test()->func {dec ~x:obj; return A(x)};", 1)>] // SIG03: ->func does not match value A(obj) 
     [<DataRow("MS4b", "def func A(z:obj)->ind def func Test()->func {dec ~x:ind; return A(x)};", 1)>] // SIG03: ->func does not match value A(ind) not matching A(obj)
