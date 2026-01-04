@@ -502,6 +502,53 @@ type TestInterpreterErrors() =
     [<DataRow("C1a", "def cl A {intr prty pred L() } def pred T() {dec ~x:A; x.LTypo()};", 1)>]
     [<DataRow("C2", "def cl A {intr prty pred L() } def pred T(x:A) {x.L()};", 0)>]
     [<DataRow("C2a", "def cl A {intr prty pred L() } def pred T(x:A) {x.LTypo()};", 1)>]
+    [<DataRow("C3", "def cl A {intr prty func L()->ind } def pred T() {dec ~x:A; x.L()};", 0)>]
+    [<DataRow("C3a", "def cl A {intr prty func L()->ind } def pred T() {dec ~x:A; x.LTypo()};", 1)>]
+    [<DataRow("C3", "def cl A {intr prty func L()->ind } def pred T(x:A) {x.L()};", 0)>]
+    [<DataRow("C3a", "def cl A {intr prty func L()->ind } def pred T(x:A) {x.LTypo()};", 1)>]
+
+    // inherted class properties
+    [<DataRow("IC1", "def cl A {intr prty pred L() } def cl B:A def pred T() {dec ~x:B; x.L()};", 0)>]
+    [<DataRow("IC1a", "def cl A {intr prty pred L() } def cl B:A def pred T() {dec ~x:B; x.LTypo()};", 1)>]
+    [<DataRow("IC2", "def cl A {intr prty pred L() } def cl B:A def pred T(x:B) {x.L()};", 0)>]
+    [<DataRow("IC2a", "def cl A {intr prty pred L() } def cl B:A def pred T(x:B) {x.LTypo()};", 1)>]
+    [<DataRow("IC3", "def cl A {intr prty func L()->ind } def cl B:A def pred T() {dec ~x:B; x.L()};", 0)>]
+    [<DataRow("IC3a", "def cl A {intr prty func L()->ind } def cl B:A def pred T() {dec ~x:B; x.LTypo()};", 1)>]
+    [<DataRow("IC4", "def cl A {intr prty func L()->ind } def cl B:A def pred T(x:B) {x.L()};", 0)>]
+    [<DataRow("IC4a", "def cl A {intr prty func L()->ind } def cl B:A def pred T(x:B) {x.LTypo()};", 1)>]
+
+    // class instance properties
+    [<DataRow("I1", "def cl A {intr prty pred L() } def pred T() {dec ~x:A x:=A(); x.L()};", 0)>]
+    [<DataRow("I1a", "def cl A {intr prty pred L() } def pred T() {dec ~x:A x:=A(); x.LTypo()};", 1)>]
+    [<DataRow("I2", "def cl A {intr prty pred L() } def pred T(x:A) {dec x:=A(); x.L()};", 0)>]
+    [<DataRow("I2a", "def cl A {intr prty pred L() } def pred T(x:A) {dec x:=A(); x.LTypo()};", 1)>]
+    [<DataRow("I3", "def cl A {intr prty func L()->ind } def pred T() {dec ~x:A x:=A(); x.L()};", 0)>]
+    [<DataRow("I3a", "def cl A {intr prty func L()->ind } def pred T() {dec ~x:A x:=A(); x.LTypo()};", 1)>]
+    [<DataRow("I4", "def cl A {intr prty func L()->ind } def pred T(x:A) {dec x:=A(); x.L()};", 0)>]
+    [<DataRow("I4a", "def cl A {intr prty func L()->ind } def pred T(x:A) {dec x:=A(); x.LTypo()};", 1)>]
+
+    // inherited class instance properties
+    [<DataRow("II1", "def cl A {intr prty pred L() } def cl B:A def pred T() {dec ~x:B x:=B(); x.L()};", 0)>]
+    [<DataRow("II1a", "def cl A {intr prty pred L() } def cl B:A def pred T() {dec ~x:A x:=B(); x.LTypo()};", 1)>]
+    [<DataRow("II2", "def cl A {intr prty pred L() } def cl B:A def pred T(x:B) {dec x:=B(); x.L()};", 0)>]
+    [<DataRow("II2a", "def cl A {intr prty pred L() } def cl B:A def pred T(x:B) {dec x:=B(); x.LTypo()};", 1)>]
+    [<DataRow("II3", "def cl A {intr prty func L()->ind } def cl B:A def pred T() {dec ~x:B x:=B(); x.L()};", 0)>]
+    [<DataRow("II3a", "def cl A {intr prty func L()->ind } def cl B:A def pred T() {dec ~x:A x:=B(); x.LTypo()};", 1)>]
+    [<DataRow("II4", "def cl A {intr prty func L()->ind } def cl B:A def pred T(x:B) {dec x:=B(); x.L()};", 0)>]
+    [<DataRow("II4a", "def cl A {intr prty func L()->ind } def cl B:A def pred T(x:B) {dec x:=B(); x.LTypo()};", 1)>]
+
+    // predicate properties
+    [<DataRow("C1", "def pred A() {intr prty pred L() } def pred T() {dec ~x:A; x.L()};", 0)>]
+    [<DataRow("C1a", "def pred A() {intr prty pred L() } def pred T() {dec ~x:A; x.LTypo()};", 1)>]
+    [<DataRow("C2", "def pred A() {intr prty pred L() } def pred T(x:A) {x.L()};", 0)>]
+    [<DataRow("C2a", "def pred A() {intr prty pred L() } def pred T(x:A) {x.LTypo()};", 1)>]
+
+    // functional term properties
+    [<DataRow("C1", "def func A()->ind {intr prty pred L() } def pred T() {dec ~x:A; x.L()};", 0)>]
+    [<DataRow("C1a", "def func A()->ind {intr prty pred L() } def pred T() {dec ~x:A; x.LTypo()};", 1)>]
+    [<DataRow("C2", "def func A()->ind {intr prty pred L() } def pred T(x:A) {x.L()};", 0)>]
+    [<DataRow("C2a", "def func A()->ind {intr prty pred L() } def pred T(x:A) {x.LTypo()};", 1)>]
+
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID012(no:string, fplCode:string, expected) =

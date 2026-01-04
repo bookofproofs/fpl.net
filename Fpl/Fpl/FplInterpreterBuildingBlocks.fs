@@ -984,9 +984,10 @@ let rec eval (st: SymbolTable) ast =
         eval st ebnfAst
         variableStack.PopEvalStack() // remove language
         st.EvalPop()
+    | Ast.InheritedPredicateTypeList inheritedTypeAsts 
     | Ast.InheritedFunctionalTypeList inheritedTypeAsts 
     | Ast.InheritedClassTypeList inheritedTypeAsts -> 
-        st.EvalPush("InheritedFunctionalOrClassTypeList")
+        st.EvalPush("InheritedPredicateOrFunctionalOrClassTypeList")
         let beingCreatedNode = variableStack.PeekEvalStack()
         let addVariablesAndPropertiesOfBaseNode (bNode:FplValue) = 
             match box beingCreatedNode with
@@ -1115,15 +1116,10 @@ let rec eval (st: SymbolTable) ast =
             deleg.ErrorOccurred <- emitID013Diagnostics pos1 pos2 $"Unknown delegate `{delegateId}`"  
         st.EvalPop()
     // | ClosedOrOpenRange of Positions * ((Ast * Ast option) * Ast)
-    | Ast.PredicateSignature(((pos1, pos2), (simpleSignatureAst, paramTupleAst)), optUserDefinedSymbolAst) ->
+    | Ast.PredicateSignature(((pos1, pos2), ((simpleSignatureAst, inhPredicateTypeListAstsOpt), paramTupleAst)), optUserDefinedSymbolAst) ->
         st.EvalPush("PredicateSignature")
-        variableStack.InSignatureEvaluation <- true
-        eval st simpleSignatureAst
-        eval st paramTupleAst
-        optUserDefinedSymbolAst |> Option.map (eval st) |> Option.defaultValue () |> ignore
-        let fv = variableStack.PeekEvalStack()
-        setSignaturePositions pos1 pos2
-        variableStack.InSignatureEvaluation <- false
+        // empty since the pattern will be matched in DefinitionPredicagte 
+        // we list it her to remove FS0025 incomplete pattern warnings
         st.EvalPop()
     // | ReferencingIdentifier of Positions * (Ast * Ast list)
     | ReferencingIdentifier((pos1, pos2), (predicateIdentifierAst, dollarDigitListAsts)) ->
@@ -1242,9 +1238,12 @@ let rec eval (st: SymbolTable) ast =
         eval st predicateAst
         variableStack.PopEvalStack() // remove exists n quantor
         st.EvalPop()
-    // | FunctionalTermSignature of Positions * (Ast * Ast)
     | Ast.FunctionalTermSignature(((pos1, pos2), (((simpleSignatureAst, inhFunctionalTypeListAstsOpt), paramTupleAst), mappingAst)), optUserDefinedSymbolAst) -> 
         st.EvalPush("FunctionalTermSignature")
+        // empty since the pattern will be matched in DefinitionFunctionalTerm 
+        // we list it her to remove FS0025 incomplete pattern warnings
+        st.EvalPop()
+    // | ReferencingIdentifier of Positions * (Ast * Ast list)
         st.EvalPop()
     | Ast.PredicateWithQualification(predicateWithOptSpecificationAst, qualificationListAst) ->
         st.EvalPush("PredicateWithQualification")
@@ -1705,18 +1704,27 @@ let rec eval (st: SymbolTable) ast =
         optVarDeclOrSpecListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
         constructorListAsts |> List.map (eval st) |> ignore
         st.EvalPop()
-    // | DefinitionPredicate of Positions * (Ast * (Ast * Ast list option))
-    | Ast.DefinitionPredicate((pos1, pos2), (predicateSignature, optDefBlock)) ->
+    // | DefinitionPredicate Deof Positions * (Ast * (Ast * Ast list option))
+    | Ast.DefinitionPredicate((pos1, pos2), (predicateSignatureAst, optDefBlock)) ->
         st.EvalPush("DefinitionPredicate")
         let parent = variableStack.PeekEvalStack()
         let fv = new FplPredicate((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
         variableStack.PushEvalStack(fv)
-        eval st predicateSignature
-        match optDefBlock with 
-        | Some (predicateContentAst, optPropertyListAsts) ->
-            eval st predicateContentAst
-            optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
-        | None -> fv.IsIntrinsic <- true
+        match predicateSignatureAst with
+        | Ast.PredicateSignature(((pos1, pos2), ((simpleSignatureAst, inhPredicateTypeListAstsOpt), paramTupleAst)), optUserDefinedSymbolAst) ->
+            variableStack.InSignatureEvaluation <- true
+            eval st simpleSignatureAst
+            eval st paramTupleAst
+            variableStack.InSignatureEvaluation <- false
+            optUserDefinedSymbolAst |> Option.map (eval st) |> Option.defaultValue () |> ignore
+            match optDefBlock with 
+            | Some (predicateContentAst, optPropertyListAsts) ->
+                eval st predicateContentAst
+                optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
+            | None -> fv.IsIntrinsic <- true
+            inhPredicateTypeListAstsOpt |> Option.map (eval st) |> Option.defaultValue ()
+            setSignaturePositions pos1 pos2
+        | _ -> ()
         variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.FunctionalTermDefinitionBlock((pos1, pos2), optDefBlock) ->
@@ -1747,7 +1755,6 @@ let rec eval (st: SymbolTable) ast =
             inhFunctionalTypeListAstsOpt |> Option.map (eval st) |> Option.defaultValue () 
             setSignaturePositions pos1 pos2
         | _ -> ()
-        //eval st functionalTermSignatureAst 
         variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.ClassSignature((pos1, pos2), simpleSignatureAst) ->

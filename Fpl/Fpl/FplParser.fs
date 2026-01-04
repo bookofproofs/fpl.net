@@ -536,7 +536,9 @@ let proof = positions "Proof" (proofSignature .>>. proofBlock) |>> Ast.Proof
 
 // Predicate building blocks can be defined similarly to classes, they can have properties but they cannot be derived any parent type 
 let predicateDefinitionBlock = opt (leftBrace  >>. ((keywordIntrinsic <|> predContent) .>> IW) .>>. propertyList .>> spacesRightBrace)
-let predicateSignature = positions "PredicateSignature" (keywordPredicate >>. SW >>. simpleSignature .>>. paramTuple) .>>. userDefinedSymbol .>> IW |>> Ast.PredicateSignature
+let inheritedPredicateType = predicateIdentifier
+let inheritedPredicateTypeList = sepBy1 (inheritedPredicateType) (attempt (IW >>. comma)) |>> Ast.InheritedPredicateTypeList
+let predicateSignature = positions "PredicateSignature" (keywordPredicate >>. SW >>. (simpleSignature .>>. opt (colon >>. inheritedPredicateTypeList) .>> IW) .>>. paramTuple) .>>. userDefinedSymbol .>> IW |>> Ast.PredicateSignature
 let definitionPredicate = positions "DefinitionPredicate" (predicateSignature .>>. predicateDefinitionBlock) |>> Ast.DefinitionPredicate
 
 // Functional term building blocks can be defined similarly to classes, they can have properties but they cannot be derived any parent type 

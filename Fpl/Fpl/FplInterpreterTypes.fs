@@ -2139,9 +2139,39 @@ let signatureRepresent (fv:FplValue) =
         |> String.concat ", "
     $"{fv.FplId}({signatureVarRepresentations})"
 
-type FplPredicate(positions: Positions, parent: FplValue, runOrder) =
-    inherit FplGenericPredicateBlock(positions, parent)
+type FplPredicate(positions: Positions, parent: FplValue, runOrder) as this =
+    inherit FplGenericInheriting(positions, parent)
     let _runOrder = runOrder
+    let mutable _signStartPos = Position("", 0L, 0L, 0L)
+    let mutable _signEndPos = Position("", 0L, 0L, 0L)
+    let mutable _isReady = false
+    let mutable _callCounter = 0
+
+    do 
+        this.FplId <- PrimUndetermined
+        this.TypeId <- LiteralPred
+
+    member this.SignStartPos
+        with get() = _signStartPos
+        and set(value) = _signStartPos <- value
+
+    member this.SignEndPos
+        with get() = _signEndPos
+        and set(value) = _signEndPos <- value
+
+    interface IHasSignature with
+        member this.SignStartPos 
+            with get () = this.SignStartPos
+            and set (value) = this.SignStartPos <- value
+        member this.SignEndPos 
+            with get () = this.SignEndPos
+            and set (value) = this.SignEndPos <- value
+
+    interface IReady with
+        member _.IsReady = _isReady
+
+    interface ICanBeCalledRecusively with
+        member _.CallCounter = _callCounter
 
     override this.Name = PrimPredicateL
     override this.ShortName = PrimPredicate
@@ -2152,6 +2182,8 @@ type FplPredicate(positions: Positions, parent: FplValue, runOrder) =
         ret
 
     override this.IsFplBlock () = true
+
+    override this.IsBlock () = true
 
     override this.CheckConsistency() = 
         base.CheckConsistency()
@@ -2166,14 +2198,46 @@ type FplPredicate(positions: Positions, parent: FplValue, runOrder) =
 
     override this.EmbedInSymbolTable _ = 
         this.CheckConsistency()
+        if not this.IsIntrinsic then // if not intrinsic, check variable usage
+            checkVAR04Diagnostics this
         tryAddToParentUsingMixedSignature this
+
+    override this.Type signatureType = 
+        let head = getFplHead this signatureType
+
+        let paramT = getParamTuple this signatureType
+        sprintf "%s(%s)" head paramT
+
+    override this.Represent () =
+        let ret = 
+            this.ValueList
+            |> Seq.map (fun subfv -> subfv.Represent())
+            |> String.concat ", "
+        if ret = "" then
+            PrimUndetermined
+        else 
+            ret
 
     override this.Run variableStack = 
         this.Debug "Run"
-        base.Run variableStack 
+        if not _isReady then
+            _callCounter <- _callCounter + 1
+            if _callCounter > maxRecursion then
+                this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
+            else
+                if this.IsIntrinsic then 
+                    let undetermined = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+                    this.SetValue undetermined
+                else
+                    this.ArgList
+                    |> Seq.iter (fun fv -> 
+                        fv.Run variableStack
+                        this.SetValuesOf fv
+                    )
+
+            _isReady <- this.Arity = 0 
         this.GetProperties()
         |> List.iter (fun fv -> fv.Run variableStack)
-
 
     override this.RunOrder = Some _runOrder
 
