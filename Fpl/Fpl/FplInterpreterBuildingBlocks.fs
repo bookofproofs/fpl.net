@@ -33,6 +33,7 @@ let filterCandidates (candidatesPre:FplValue list) identifier =
     let candidatesNames =
         candidatesPre
         |> Seq.map (fun fv -> qualifiedName fv)
+        |> Seq.mapi (fun i s -> sprintf "%d. %s" (i + 1) s) 
         |> String.concat ", "
     (candidates, candidatesNames)
 
@@ -681,7 +682,7 @@ let rec eval (st: SymbolTable) ast =
         | :? FplMapping, 0 -> 
             fv.ErrorOccurred <- emitSIG04Diagnostics identifier 0 [""] pos1 pos2
         | :? FplMapping, _ -> 
-            fv.ErrorOccurred <- emitSIG04Diagnostics identifier candidates.Length [""] pos1 pos2
+            fv.ErrorOccurred <- emitID017Diagnostics identifier candidatesNames pos1 pos2
         | :? FplVariable, 1 -> 
             fv.Scope.TryAdd(fv.FplId, candidates.Head) |> ignore
         | :? FplVariable, _ -> 

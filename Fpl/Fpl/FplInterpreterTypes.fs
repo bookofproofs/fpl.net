@@ -4247,11 +4247,11 @@ type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
                         this.ErrorOccurred <- emitID022Diagnostics baseClass.FplId this.StartPos this.EndPos
                     | false, _ ->
                         let parentClass = baseClass :?> FplClass
-                        let candidates = parentClass.GetConstructors()
-                        match checkSIG04Diagnostics this candidates with
-                        | Some candidate ->
+                        let constructors = parentClass.GetConstructors()
+                        match checkSIG04Diagnostics this constructors with
+                        | Some ctor ->
                             let name = candidate.Type SignatureType.Mixed
-                            this.Scope.TryAdd(name, candidate) |> ignore
+                            this.Scope.TryAdd(name, ctor) |> ignore
                         | None -> ()
                         registerParentConstructor()
                 | None ->

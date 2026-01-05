@@ -412,15 +412,13 @@ type DiagnosticCode =
             | SIG01 symbol -> $"The symbol `{symbol}` was not declared." 
             | SIG02 (symbol, precedence, conflict) -> $"The symbol `{symbol}` was declared with the same precedence of `{precedence}` in {conflict}." 
             | SIG03 errMsg -> errMsg // Returned type is mismatching the mapping type
-            | SIG04 (signature, numbOfcandidates, errorList) -> 
+            | SIG04 (signature, numbOfcandidates, candidates) -> 
                 if numbOfcandidates = 0 then 
                     $"No overload matching `{signature}`, no candidates were found. Are you missing a uses clause?" 
                 elif numbOfcandidates = 1 then
-                    let errMsg = errorList |> String.concat ", "
-                    $"No overload matching `{signature}`. {errMsg}." 
+                    $"No overload matching `{signature}`. {candidates}." 
                 else 
-                    let errMsg = errorList |> List.mapi (fun i s -> sprintf "%d. %s" (i + 1) s) |> String.concat ", "
-                    $"No overload matching `{signature}`. Checked candidates: {errorList}." 
+                    $"No overload matching `{signature}`. Checked candidates: {candidates}." 
             | SIG05 errMsg -> $"Cannot execute assignment; {errMsg}"
             | SIG06 (name, oldFromNode, newFromNode, typeName) -> 
                 match typeName with 

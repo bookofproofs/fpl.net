@@ -748,6 +748,13 @@ let emitSIG03Diagnostics errMsg alternative pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
+
+/// Occures in the following cases:
+/// 1: A variable type declaration uses a non-existing type reference.
+/// 2: A mapping type declaration uses a non-existing type reference.
+/// 3: A dotted reference uses a signature for call-by-value that doesn't match. 
+/// 4: A reference uses a signature for call-by-value that doesn't match. 
+/// 5: A reference uses a type reference that doesn't exist.
 let emitSIG04Diagnostics mixedName candidateCount errList pos1 pos2 = 
     let diagnostic =
         { 
