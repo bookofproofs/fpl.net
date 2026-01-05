@@ -180,7 +180,7 @@ def pred IsPowerSet(ofSet, potentialPowerSet: Set)
 {
     all z:Set
     {
-        impl (Subset(z,ofSet), In(z, potentialPowerSet))
+        impl (IsSubset(z,ofSet), In(z, potentialPowerSet))
     }
 }
 
