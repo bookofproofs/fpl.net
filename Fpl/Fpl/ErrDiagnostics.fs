@@ -62,6 +62,14 @@ type PathEquivalentUri(uriString: string) =
 
     member this.TheoryName = Path.GetFileNameWithoutExtension(this.AbsolutePath)
 
+/// Tranforms a whole number into English ordinal
+let englishOrdinal dimNumber = 
+    match dimNumber with
+    | 1 -> "1st"
+    | 2 -> "2nd"
+    | 3 -> "3rd"
+    | _ -> $"{dimNumber}th"
+
 type DiagnosticCode = 
     // parser error codes
     | SYN000
@@ -117,6 +125,7 @@ type DiagnosticCode =
     | ID009 of string
     | ID010 of string
     | ID011 of string * string
+    | ID012 of string * string * string * string
     | ID013 of string
     | ID014 of string * string
     | ID015 of string 
@@ -156,14 +165,19 @@ type DiagnosticCode =
     | SIG00 of string * int
     | SIG01 of string 
     | SIG02 of string * int * string
-    | SIG03 of string * string 
+    | SIG03 of string 
     | SIG04 of string * int * string list
-    | SIG05 of string * string
-    | SIG06 of string * string * string * bool
+    | SIG05 of string 
+    | SIG06 of string * string * string * string
     | SIG07 of string * string * string 
+    | SIG08 of string * string * string * string * int
+    | SIG09 of string * string * int
+    | SIG10 of string * string * int 
+    | SIG11 of string * string
     // structure-related error codes
     | ST001 of string 
     | ST002 of string 
+    | ST003 of string 
     // variable-related error codes
     | VAR00 
     | VAR01 of string 
@@ -171,7 +185,7 @@ type DiagnosticCode =
     | VAR03 of string * string
     | VAR04 of string 
     | VAR05 of string 
-    | VAR06 of string * string * string * bool
+    | VAR06 of string * string * string * string
     | VAR07 of string 
     | VAR08 
     | VAR09 of string * string 
@@ -230,6 +244,7 @@ type DiagnosticCode =
             | ID009 _ -> "ID009"
             | ID010 _ -> "ID010"
             | ID011 _ -> "ID011"
+            | ID012 _ -> "ID012"
             | ID013 _ -> "ID013"
             | ID014 _ -> "ID014"
             | ID015 _ -> "ID015"
@@ -274,9 +289,14 @@ type DiagnosticCode =
             | SIG05 _ -> "SIG05"
             | SIG06 _ -> "SIG06"
             | SIG07 _ -> "SIG07"
+            | SIG08 _ -> "SIG08"
+            | SIG09 _ -> "SIG09"
+            | SIG10 _ -> "SIG10"
+            | SIG11 _ -> "SIG11"
             // structure-related error codes
             | ST001 _ -> "ST001"
             | ST002 _ -> "ST002"
+            | ST003 _ -> "ST003"
             // variable-related error codes
             | VAR00 -> "VAR00"
             | VAR01 _  -> "VAR01"
@@ -343,6 +363,11 @@ type DiagnosticCode =
             | ID009 name -> $"Circular base type dependency involving `{name}`." 
             | ID010 name -> $"The type `{name}` could not be found. Are you missing a uses clause?" 
             | ID011 (chain, errorMsg) -> $"The inheritance chain `{chain}` causes the following error: {errorMsg}."  
+            | ID012 (prtyName, varName, varType, candidates) -> 
+                if candidates = String.Empty then 
+                    $"The {varName} `{varType}` does not define the variable or property `{prtyName}`. No candidates found."  
+                else
+                    $"The {varName} `{varType}` does not define the variable or property `{prtyName}`. Candidates: {candidates}."  
             | ID013 delegateDiagnostic -> sprintf "%s" delegateDiagnostic // just emit the delegate's diagnostic
             | ID014 (signature, conflict) -> sprintf "Language code `%s` was already declared at %s." signature conflict
             | ID015 signature -> $"`parent` cannot be referenced from {signature}." 
@@ -390,38 +415,42 @@ type DiagnosticCode =
             | SIG00 (fixType, arity) -> sprintf $"Illegal arity `{arity}` using `{fixType}` notation."
             | SIG01 symbol -> $"The symbol `{symbol}` was not declared." 
             | SIG02 (symbol, precedence, conflict) -> $"The symbol `{symbol}` was declared with the same precedence of `{precedence}` in {conflict}." 
-            | SIG03 (retType, mapType) -> $"The return type `{retType}` does not match the expected functional type `{mapType}`."
-            | SIG04 (signature, numbOfcandidates, errorList) -> 
+            | SIG03 errMsg -> errMsg // Returned type is mismatching the mapping type
+            | SIG04 (signature, numbOfcandidates, candidates) -> 
                 if numbOfcandidates = 0 then 
                     $"No overload matching `{signature}`, no candidates were found. Are you missing a uses clause?" 
                 elif numbOfcandidates = 1 then
-                    let errMsg = errorList |> String.concat ", "
-                    $"No overload matching `{signature}`. {errMsg}." 
+                    $"No overload matching `{signature}`. {candidates}." 
                 else 
-                    let errMsg = errorList |> List.mapi (fun i s -> sprintf "%d. %s" (i + 1) s) |> String.concat ", "
-                    $"No overload matching `{signature}`. Checked candidates: {errorList}." 
-            | SIG05 (assigneeType, assignedType) -> $"Cannot assign type `{assignedType}` to type `{assigneeType}`."
-            | SIG06 (name, first, second, isClass) -> 
-                if isClass then
-                    $"Property name `{name}` of base class `{first} will be overshadowed by `{second}`."
-                else
-                    $"Property name `{name}` of base functional term `{first} will be overshadowed by `{second}`."
+                    $"No overload matching `{signature}`. Checked candidates: {candidates}." 
+            | SIG05 errMsg -> $"Cannot execute assignment; {errMsg}"
+            | SIG06 (name, oldFromNode, newFromNode, typeName) -> 
+                match typeName with 
+                | PrimClassL -> $"Property `{name}` of base class `{oldFromNode} will be overshadowed by `{newFromNode}`."
+                | PrimFunctionalTermL -> $"Property `{name}` of base functional term `{oldFromNode} will be overshadowed by `{newFromNode}`."
+                | _ -> $"Property `{name}` of (unknown type) `{oldFromNode} will be overshadowed by `{newFromNode}`."
             | SIG07 (assigneeName, assigneeType, nodeType) -> $"`{assigneeName}` is {nodeType} ({assigneeType}) and is not assignable."
+            | SIG08 (arrName, indexVarName, indexVarType, dimType, dimNumber) -> 
+                $"Type mismatch in array's `{arrName}` {englishOrdinal dimNumber} dimension; expected `{dimType}`, got `{indexVarName}:{indexVarType}`."
+            | SIG09 (arrName, dimType, dimNumber) -> $"Missing index for array's `{arrName}` {englishOrdinal dimNumber} dimension `{dimType}`"
+            | SIG10 (arrName, indexVarName, indexNumber) -> $"Array `{arrName}` has less dimensions, {englishOrdinal indexNumber} index `{indexVarName}` not supported"
+            | SIG11 (qualifiedNameMapping, qualifiedWrongCandidate) -> $"{qualifiedNameMapping} cannot map to {qualifiedWrongCandidate}"
             // structure-related error codes
-            | ST001 nodeName -> sprintf $"The {nodeName} does nothing. Simplify the code by the block."
-            | ST002 nodeName -> sprintf $"The {nodeName} does nothing. Simplify the code by removing it entirely."
+            | ST001 nodeName -> sprintf $"The {nodeName} does nothing."
+            | ST002 nodeName -> sprintf $"The {nodeName} does nothing."
+            | ST003 errCode -> sprintf $"Assignment not possible due to proceeding {errCode} error(s)."
             // variable-related error codes
-            | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
+            | VAR00 ->  sprintf "Declaring multiple arrays at once may cause ambiguities."
             | VAR01 name -> $"Variable `{name}` not declared in this scope."
             | VAR02 name -> $"Variable `{name}` was already bound in this quantor."
             | VAR03 (identifier, conflict) -> $"Variable `{identifier}` was already declared at {conflict}."  
             | VAR04 name -> $"Declared variable `{name}` not used in this scope."
             | VAR05 name -> $"Bound variable `{name}` was not used in this quantor."
-            | VAR06 (name, first, second, isClass) -> 
-                if isClass then
-                    $"Variable name `{name}` of base class `{first} will be overshadowed by `{second}`."
-                else
-                    $"Variable name `{name}` of base functional term `{first} will be overshadowed by `{second}`."
+            | VAR06 (name, oldFromNode, newFromNode, typeName) -> 
+                match typeName with 
+                | PrimClassL -> $"Variable `{name}` of base class `{oldFromNode} will be overshadowed by `{newFromNode}`."
+                | PrimFunctionalTermL -> $"Variable `{name}` of base functional term `{oldFromNode} will be overshadowed by `{newFromNode}`."
+                | _ -> $"Variable `{name}` of (unknown type) `{oldFromNode} will be overshadowed by `{newFromNode}`."
             | VAR07 name -> $"The {PrimQuantorExistsN} accepts only one bound variable `{name}`."
             | VAR08 -> "Variadic variables cannot be bound in a quantor."
             | VAR09 (varName,varType) -> $"The variable {varName}:{varType} is free and cannot be used to evaluate this expresssion."
@@ -977,3 +1006,6 @@ let getEnglishName someString =
         $"an {someString}"
     else
         $"a {someString}"
+
+let isUpper (name:string) =  
+    name.Length > 0 && System.Char.IsUpper(name[0])

@@ -60,11 +60,12 @@ type TestRepresentation() =
         | None -> 
             Assert.IsTrue(false)
             
-    [<DataRow("00","n:=Zero()", "Zero()")>]
+    [<DataRow("00","uses Fpl.PeanoArithmetics", "n:=Zero()", """{"name":"Zero","base":[{"name":"Nat","base":[],"vars":[],"prtys":[]}],"vars":[],"prtys":[]}""")>]
+    [<DataRow("00a","def cl Nat def cl Zero:Nat", "n:=Zero()", """{"name":"Zero","base":[{"name":"Nat","base":[],"vars":[],"prtys":[]}],"vars":[],"prtys":[]}""")>]
     [<TestMethod>]
-    member this.TestRepresentationReturn(var:string, varVal, expected:string) =
+    member this.TestRepresentationReturn(var:string, uses:string, varVal, expected:string) =
         ad.Clear()
-        let fplCode = sprintf """uses Fpl.PeanoArithmetics def func T()->Nat { dec ~n:Nat %s; return n };""" varVal
+        let fplCode = sprintf """%s def func T()->Nat { dec ~n:Nat %s; return n };""" uses varVal
         let filename = "TestRepresentationReturn.fpl"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
@@ -73,7 +74,7 @@ type TestRepresentation() =
             let r = st.Root
             let theory = r.Scope[filename]
             let fn = theory.Scope["T() -> Nat"] 
-            let retStmt = fn.ArgList[0]
+            let retStmt = fn.ArgList |> Seq.rev |> Seq.head
             Assert.AreEqual<string>(expected, retStmt.Represent())
         | None -> 
             Assert.IsTrue(false)
@@ -140,7 +141,7 @@ type TestRepresentation() =
     [<DataRow("00d","""def pred T() { dec ~v:tpl; true };""", "dec tpl")>]
     [<DataRow("01a","""def pred T() { dec ~v:pred(d:ind); true };""", PrimUndetermined)>]
     [<DataRow("01b","""def pred T() { dec ~v:pred(d:pred(e,f:obj)); true };""", PrimUndetermined)>]
-    [<DataRow("01c","""def pred T() { dec ~v:func(d:pred(e:obj,d,e:ind)) ->pred(d:pred(e,f:obj)); true };""", "dec func(pred(obj, ind, ind)) -> pred(pred(obj, obj))")>]
+    [<DataRow("01c","""def pred T() { dec ~v:func(x:pred(y:obj,d,e:ind)) ->pred(i:pred(j,k:obj)); true };""", "dec func(pred(obj, ind, ind)) -> pred(pred(obj, obj))")>]
     [<DataRow("02","""def pred T() { dec ~v:A; true };""", "dec A")>]
     [<DataRow("02a","""def cl A {intr} def pred T() { dec ~v:A; true };""", "dec A")>]
     [<TestMethod>]
@@ -162,8 +163,8 @@ type TestRepresentation() =
 
     [<DataRow("00","""def pred T() { dec ~v:pred v:=true; false};""", LiteralTrue)>]
     [<DataRow("01","""def pred T() { dec ~v:pred v:=false; false};""", LiteralFalse)>]
-    [<DataRow("02","""def cl A {dec ~myX:obj; ctor A(x:obj) {dec myX:=x;}} def cl B:A { ctor B(x:obj) {dec base.A(del.Decrement(x)); } } def pred T() { dec ~v:B v:=B(@2); false};""", """todo""")>]
-    [<DataRow("03","""def cl A {dec ~myX:pred; ctor A(x:pred) {dec myX:=x;}} def cl B:A { ctor B(x:pred) {dec base.A(not x); } } def pred T() { dec ~v:B v:=B(true); false};""", """todo""")>]
+    [<DataRow("02","""def cl A {dec ~myX:obj; ctor A(x:obj) {dec myX:=x;}} def cl B:A { ctor B(x:obj) {dec base.A(del.Decrement(x)); } } def pred T() { dec ~v:B v:=B(@2); false};""", """{"name":"B","base":[{"name":"A","base":[],"vars":[],"prtys":[]}],"vars":[],"prtys":[]}""")>]
+    [<DataRow("03","""def cl A {dec ~myX:pred; ctor A(x:pred) {dec myX:=x;}} def cl B:A { ctor B(x:pred) {dec base.A(not x); } } def pred T() { dec ~v:B v:=B(true); false};""", """{"name":"B","base":[{"name":"A","base":[],"vars":[],"prtys":[]}],"vars":[],"prtys":[]}""")>]
     [<TestMethod>]
     member this.TestRepresentationItializedVars(var:string, fplCode, expected:string) =
         ad.Clear()

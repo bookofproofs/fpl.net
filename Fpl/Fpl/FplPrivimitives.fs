@@ -1348,9 +1348,9 @@ let PrimForInStmtDomain = "for in statement's domain"
 [<Literal>]
 let PrimForInStmtEntity = "for in statement's entity"
 [<Literal>]
-let PrimFuncionalTerm = "def func"
+let PrimFunctionalTerm = "def func"
 [<Literal>]
-let PrimFuncionalTermL = "functional term definition"
+let PrimFunctionalTermL = "functional term definition"
 [<Literal>]
 let PrimInstance = "inst" 
 [<Literal>]
@@ -1458,10 +1458,6 @@ let PrimVariable = "var"
 [<Literal>]
 let PrimVariableL = "variable"
 [<Literal>]
-let PrimVariableMany = "*var"
+let PrimVariableArray = "*var"
 [<Literal>]
-let PrimVariableManyL = "zero-or-more variable"
-[<Literal>]
-let PrimVariableMany1 = "+var"
-[<Literal>]
-let PrimVariableMany1L = "one-or-more variable"
+let PrimVariableArrayL = "variable array"

@@ -69,6 +69,7 @@ type Ast =
     | IndexAllowedType of Positions * Ast 
     | ArrayType of Positions * (Ast * Ast list)
     | InheritedClassTypeList of Ast list
+    | InheritedPredicateTypeList of Ast list
     | InheritedFunctionalTypeList of Ast list
     | CompoundPredicateType of Positions * (Ast * Ast option)
     | CompoundFunctionalTermType of Positions * (Ast * (Ast * Ast) option)
@@ -147,12 +148,12 @@ type Ast =
     | FunctionalTermInstanceSignature of Positions * ((Ast * Ast) * Ast)
     | ConstructorBlock of Positions * (Ast list option)
     | Constructor of Positions * (Ast * Ast) 
-    | PredicateInstance of Positions * (Ast * Ast)
-    | FunctionalTermInstance of Positions * (Ast * Ast)
+    | PredicateInstance of Positions * (Ast * Ast option)
+    | FunctionalTermInstance of Positions * (Ast * Ast option)
     | DefPredicateContent of Ast list option * Ast
     | DefinitionPredicate of Positions * (Ast * (Ast * Ast list option) option)
     | DefFunctionContent of Ast list option * Ast
-    | PredicateSignature of (Positions * (Ast * Ast)) * Ast option
+    | PredicateSignature of (Positions * ((Ast * Ast option) * Ast)) * Ast option
     | ClassSignature of Positions * Ast
     | FunctionalTermSignature of (Positions * (((Ast * Ast option) * Ast) * Ast)) * Ast option
     | FunctionalTermDefinitionBlock of Positions * ((Ast * Ast list option) option)

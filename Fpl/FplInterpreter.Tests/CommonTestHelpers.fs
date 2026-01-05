@@ -5,7 +5,7 @@ open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
 open FplInterpreterTypes
-open FplInterpreterDiagnosticsEmitterPre
+open FplInterpreterDiagnosticsEmitter
 open TestSharedConfig
 
 let rec deleteDirectory path =
@@ -76,7 +76,7 @@ let prepareFplCode (filename: string, fplCode: string, delete: bool) =
 
         if syntaxErrorFound then
             if fplCode <> "" then File.AppendAllText(Path.Combine(currDir, "SyntaxErrorsLog.txt"), $"Syntax errors detected in test {filename}{Environment.NewLine}{fplCode}{Environment.NewLine}------{Environment.NewLine}")
-            emitUnexpectedErrorDiagnostics "Syntax error found."
+            emitUnexpectedErrorDiagnostics "Syntax error found." |> ignore
 
         Some(st)
 

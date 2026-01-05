@@ -6,7 +6,7 @@ uses Fpl.Commons
 uses Fpl.SetTheory
 
 // definition of a new mathematical object (natural number)
-def cl Nat
+def cl Nat:Set
 
 def cl Zero: Nat
 
@@ -76,7 +76,7 @@ axiom CompleteInduction
     { impl
         (
             and ( p(@0), all n1:Nat { impl ( p(n1), p(Succ(n1)) ) } ),
-            all n1:Nat { p(n1) }
+            all n2:Nat { p(n2) }
         )
     }
 }
@@ -92,21 +92,11 @@ def class SetNat: Set
     ctor SetNat()
     {
         dec 
-            // Assert that elements of class "Nat" can be collected to a bigger object of class "SetNat"
-            // This requires that we can apply the "In" predicate defined in Fpl.Set.ZermeloFraenkel
-            // to object of the class "Nat". This becomes possible when we assert that every variable of the class
-            // "Nat" is a also Set.
-            // This is comparable to implementing an interface (or comparable to multiple inheritance).
-            assert
-                all n:Nat
-                {
-                    and
-                    (
-                        is(n, Set),
-                        In(n, parent)
-                    )
-                }
             base.Set()
+            // Assert that elements of class "Nat" can be collected to a bigger object of class "SetNat"
+            // This requires that we can apply the "In" predicate defined in Fpl.SetTheory
+            // to object of the class "Nat". This becomes possible when we derive the class Nat from Set
+            assert all n:Nat { In(n, parent) }
         ;
     
     }

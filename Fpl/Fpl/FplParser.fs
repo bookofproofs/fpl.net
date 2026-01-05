@@ -74,7 +74,7 @@ let at = pchar '@'
 let case = skipChar '|' >>. spaces
 let elseCase = skipChar '?' >>. spaces
 let leftBracket = skipChar '[' >>. spaces 
-let rightBracket = skipChar ']' >>. spaces  
+let rightBracket = skipChar ']'
 let tilde = skipChar '~' .>> spaces
 let semiColon = skipChar ';' >>. spaces
 let exclamationMark = skipChar '!' 
@@ -250,7 +250,7 @@ let functionalTermType = positions "CompoundFunctionalTermType" (keywordFunction
 
 let simpleVariableType = positions "SimpleVariableType" (choice [ keywordIndex; keywordObject; predicateIdentifier; templateType; functionalTermType; predicateType ]) |>> Ast.SimpleVariableType
 // indexAllowedType is used to restrict Fpl types allowed to be used as indexes in arrayType
-let indexAllowedType = positions "IndexAllowedType" (choice [ keywordIndex; keywordObject; predicateIdentifier; templateType]) |>> Ast.IndexAllowedType
+let indexAllowedType = positions "IndexAllowedType" (choice [ keywordIndex; keywordObject; predicateIdentifier; templateType; keywordPredicate; keywordFunction]) |>> Ast.IndexAllowedType
 
 let indexAllowedTypeList = (sepBy1 (indexAllowedType .>> IW) comma) .>> IW
 // arrayType is used to define arrays in Fpl
@@ -470,7 +470,7 @@ let constructor = positions "Constructor" (constructorSignature .>>. constructor
 (* FPL building blocks - Properties *)
 let keywordProperty = (skipString LiteralPrtyL <|> skipString LiteralPrty) .>> SW 
 
-let predicateInstanceBlock = leftBrace >>. (keywordIntrinsic <|> predContent) .>> spacesRightBrace
+let predicateInstanceBlock = opt (leftBrace >>. (keywordIntrinsic <|> predContent) .>> spacesRightBrace)
 let predicateInstanceSignature = positions "PredicateInstanceSignature" (keywordPredicate >>. SW >>. simpleSignature .>>. paramTuple) .>> IW |>> Ast.PredicateInstanceSignature
 let predicateInstance = positions "PredicateInstance" (keywordProperty >>. predicateInstanceSignature .>>. predicateInstanceBlock) |>> Ast.PredicateInstance
 
@@ -478,7 +478,7 @@ mappingRef.Value <- toArrow >>. IW >>. positions "Mapping" (variableType) |>> As
 
 let returnStatement = positions "Return" (keywordReturn >>. predicate) .>> IW |>> Ast.Return
 let funcContent = varDeclOrSpecList .>>. returnStatement |>> Ast.DefFunctionContent
-let functionalTermInstanceBlock = leftBrace >>. (keywordIntrinsic <|> funcContent) .>> spacesRightBrace
+let functionalTermInstanceBlock = opt (leftBrace >>. (keywordIntrinsic <|> funcContent) .>> spacesRightBrace)
 let functionalTermInstanceSignature = positions "FunctionalTermInstanceSignature" (keywordFunction >>. SW >>. simpleSignature .>>. paramTuple .>>. (IW >>. mapping)) .>> IW |>> Ast.FunctionalTermInstanceSignature
 let functionalTermInstance = positions "FunctionalTermInstance" (keywordProperty >>. functionalTermInstanceSignature .>>. functionalTermInstanceBlock) |>> Ast.FunctionalTermInstance
 
@@ -536,7 +536,9 @@ let proof = positions "Proof" (proofSignature .>>. proofBlock) |>> Ast.Proof
 
 // Predicate building blocks can be defined similarly to classes, they can have properties but they cannot be derived any parent type 
 let predicateDefinitionBlock = opt (leftBrace  >>. ((keywordIntrinsic <|> predContent) .>> IW) .>>. propertyList .>> spacesRightBrace)
-let predicateSignature = positions "PredicateSignature" (keywordPredicate >>. SW >>. simpleSignature .>>. paramTuple) .>>. userDefinedSymbol .>> IW |>> Ast.PredicateSignature
+let inheritedPredicateType = predicateIdentifier
+let inheritedPredicateTypeList = sepBy1 (inheritedPredicateType) (attempt (IW >>. comma)) |>> Ast.InheritedPredicateTypeList
+let predicateSignature = positions "PredicateSignature" (keywordPredicate >>. SW >>. (simpleSignature .>>. opt (colon >>. inheritedPredicateTypeList) .>> IW) .>>. paramTuple) .>>. userDefinedSymbol .>> IW |>> Ast.PredicateSignature
 let definitionPredicate = positions "DefinitionPredicate" (predicateSignature .>>. predicateDefinitionBlock) |>> Ast.DefinitionPredicate
 
 // Functional term building blocks can be defined similarly to classes, they can have properties but they cannot be derived any parent type 
