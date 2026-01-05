@@ -25,15 +25,25 @@ open FplInterpreterDiagnosticsEmitter
 
 let variableStack = FplVariableStack()
 
-let filterCandidates (candidatesPre:FplValue list) identifier =
+let filterCandidates (candidatesPre:FplValue list) identifier qualified =
     let candidates =
         candidatesPre
         |> List.filter (fun fv1 -> fv1.FplId = identifier)
 
     let candidatesNames =
         candidatesPre
-        |> Seq.map (fun fv -> qualifiedName fv)
-        |> Seq.mapi (fun i s -> sprintf "%d. %s" (i + 1) s) 
+        |> Seq.map (fun fv -> 
+            if qualified then 
+                qualifiedName fv
+            else
+                $"`{fv.Type SignatureType.Mixed}`"
+        )
+        |> Seq.mapi (fun i s -> 
+            if candidatesPre.Length > 1 then 
+                sprintf "%d) %s" (i + 1) s
+            else
+                sprintf "%s" s
+        )
         |> String.concat ", "
     (candidates, candidatesNames)
 
@@ -264,6 +274,7 @@ let rec eval (st: SymbolTable) ast =
         let evalPath = st.EvalPath()
         let isLocalizationDeclaration = evalPath.StartsWith("AST.Namespace.Localization.Expression.")
         let fv = variableStack.PeekEvalStack()
+        let parentFv = fv.Parent.Value
         match fv.Name with 
         | PrimVariableL
         | PrimVariableArrayL -> 
@@ -278,6 +289,8 @@ let rec eval (st: SymbolTable) ast =
             let newVar = new FplVariable(name, (pos1, pos2), fv)
             variableStack.PushEvalStack(newVar)
             variableStack.PopEvalStack()
+        | PrimRefL when parentFv.Scope.ContainsKey(".") ->
+            fv.FplId <- name
         | _ -> 
             // in all other contexts, check by name, if this variable was declared in some scope
             let rec IsInUpperScope (fv1: FplValue): FplGenericVariable option =
@@ -667,7 +680,7 @@ let rec eval (st: SymbolTable) ast =
         | _ -> ()
         let candidatesPre = findCandidatesByName st identifier false false
 
-        let candidates, candidatesNames =  filterCandidates candidatesPre identifier 
+        let candidates, candidatesNames =  filterCandidates candidatesPre identifier true
 
         match fv, candidates.Length with
         | :? FplVariable, 0 -> 
@@ -887,27 +900,31 @@ let rec eval (st: SymbolTable) ast =
             @ candidatesFromPropertyScope 
             @ candidatesFromDottedQualification
 
-        let parentFv = fv.Parent.Value
-        match optionalSpecificationAst with
-        | Some specificationAst when parentFv.Scope.ContainsKey(".") -> 
-            eval st fplIdentifierAst
-            eval st specificationAst |> ignore
-            let referencedNodeOpt =
+        let getCandidatesBasedOnDotted (parentFv: FplValue) (fVal:FplValue) = 
+            let referencedNodeOpt, typeRefNode, typeNameRefNode =
                 if parentFv.Scope.ContainsKey(parentFv.FplId) then 
                     let var = parentFv.Scope[parentFv.FplId]
-                    var.Scope.Values |> Seq.tryHead
+                    let refNodeOpt = var.Scope.Values |> Seq.tryHead 
+                    match refNodeOpt with 
+                    | Some refNode -> refNodeOpt, refNode.Type SignatureType.Mixed, refNode.Name
+                    | None -> None, $"{parentFv.FplId}:{LiteralUndef}", parentFv.Name
                 else
-                    None
+                    None, $"{parentFv.FplId}:{LiteralUndef}", parentFv.Name
             let candidatesPre = 
                 match referencedNodeOpt with 
                 | Some referencedNode ->
                     referencedNode.GetVariables() @ referencedNode.GetProperties() 
                 | _ -> []
-            
-            let candidates, candidatesNames =  filterCandidates candidatesPre fv.FplId 
+            typeRefNode, typeNameRefNode, filterCandidates candidatesPre fVal.FplId false
 
+        let parentFv = fv.Parent.Value
+        match optionalSpecificationAst with
+        | Some specificationAst when parentFv.Scope.ContainsKey(".") -> 
+            eval st fplIdentifierAst
+            eval st specificationAst |> ignore
+            let typeRefNode, typeNameRefNode, (candidates, candidatesNames) =  getCandidatesBasedOnDotted parentFv fv
             if candidates.Length = 0 then 
-                fv.ErrorOccurred <- emitID012Diagnostics fv.FplId (parentFv.Type SignatureType.Mixed) candidatesNames pos1 pos2
+                fv.ErrorOccurred <- emitID012Diagnostics (fv.Type SignatureType.Mixed) typeNameRefNode typeRefNode candidatesNames pos1 pos2
             else
                 match checkSIG04Diagnostics fv candidates with
                 | Some matchedCandidate -> fv.Scope.TryAdd(fv.FplId, matchedCandidate) |> ignore
@@ -950,6 +967,13 @@ let rec eval (st: SymbolTable) ast =
                 | _ -> ()
 
             variableStack.PopEvalStack()
+        | None when parentFv.Scope.ContainsKey(".") -> 
+            eval st fplIdentifierAst
+            let typeRefNode, typeNameRefNode, (candidates, candidatesNames) =  getCandidatesBasedOnDotted parentFv fv
+            if candidates.Length = 0 then 
+                fv.ErrorOccurred <- emitID012Diagnostics (fv.Type SignatureType.Mixed) typeNameRefNode typeRefNode candidatesNames pos1 pos2
+            else
+                fv.Scope.TryAdd(fv.FplId, candidates.Head) |> ignore
         | None -> 
             // if no specification was found then simply continue in the same context
             eval st fplIdentifierAst
@@ -1025,6 +1049,7 @@ let rec eval (st: SymbolTable) ast =
                 if candidates.Length > 0 then 
                     let foundBase = candidates.Head
                     match beingCreatedNode, foundBase with
+                    | :? FplPredicate, :? FplPredicate 
                     | :? FplFunctionalTerm, :? FplFunctionalTerm ->
                         let nodeType = beingCreatedNode.Type SignatureType.Type
                         let baseType = foundBase.Type SignatureType.Type
@@ -1036,12 +1061,13 @@ let rec eval (st: SymbolTable) ast =
                     | :? FplClass, :? FplClass -> 
                         baseNode.Scope.Add (foundBase.FplId, foundBase) // add found base class to base
                         addVariablesAndPropertiesOfBaseNode foundBase
+                    | :? FplPredicate, _
                     | :? FplFunctionalTerm, _
                     | :? FplClass, _ ->
                         let nodeType = beingCreatedNode.Type SignatureType.Type
                         let baseType = foundBase.Type SignatureType.Type
                         baseNode.ErrorOccurred <- emitID007diagnostics beingCreatedNode.Name nodeType foundBase.Name baseType pos1 pos2
-                    | _ -> () // does not occur, since syntax of inherited base from non-classes and non-functional terms is not supported 
+                    | _ -> () // does not occur, since syntax of inherited base is not supported from non-classes, non-functional terms, and non-predicates
                 else
                     baseNode.ErrorOccurred <- emitID010Diagnostics baseNode.FplId pos1 pos2
                 if baseNode.FplId = beingCreatedNode.FplId then 

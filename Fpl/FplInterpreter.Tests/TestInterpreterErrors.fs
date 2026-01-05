@@ -383,7 +383,7 @@ type TestInterpreterErrors() =
             let code = ID006 ""
             runTestHelper "TestID006.fpl" fplCode code expected
 
-    [<DataRow("00", "def cl T;", 0)>]
+    // inheritance class from class
     [<DataRow("00a", "def cl A def cl T:A;", 0)>]
     [<DataRow("00b", "ax A {true} def cl T:A;", 1)>]
     [<DataRow("00c", "thm A {true} def cl T:A;", 1)>]
@@ -399,6 +399,7 @@ type TestInterpreterErrors() =
     [<DataRow("01a", "def func A()->obj def func T:A()->obj ;", 0)>]
     [<DataRow("01b", "def func A(x:obj)->obj def func T:A()->obj ;", 1)>]
     [<DataRow("01c", "def func A()->pred def func T:A()->obj ;", 1)>]
+    // inheritance func from func
     [<DataRow("02a", "def cl A def func T:A()->obj;", 1)>]
     [<DataRow("02b", "ax A {true} def func T:A()->obj;", 1)>]
     [<DataRow("02c", "thm A {true} def func T:A()->obj;", 1)>]
@@ -410,6 +411,18 @@ type TestInterpreterErrors() =
     [<DataRow("02i", "ext A x@/\d+/ -> obj {ret x} def func T:A()->obj;", 1)>]
     [<DataRow("02k", "def pred A() {intr} def func T:A()->obj;", 1)>]
     [<DataRow("02l", "def func A(x:obj)->obj {intr} def func T:A()->obj;", 1)>]
+    // inheritance pred from pred
+    [<DataRow("02a", "def cl A def pred T:A();", 1)>]
+    [<DataRow("02b", "ax A {true} def pred T:A();", 1)>]
+    [<DataRow("02c", "thm A {true} def pred T:A();", 1)>]
+    [<DataRow("02d", "lem A {true} def pred T:A();", 1)>]
+    [<DataRow("02e", "prop A {true} def pred T:A();", 1)>]
+    [<DataRow("02f", "cor A$1 {true} def pred T:A();", 1)>]
+    [<DataRow("02g", "proof A$1 {1. |- true} def pred T:A();", 1)>]
+    [<DataRow("02h", "inf A {pre:true con:true} def pred T:A();", 1)>]
+    [<DataRow("02i", "ext A x@/\d+/ -> obj {ret x} def pred T:A();", 1)>]
+    [<DataRow("02k", "def pred A() {intr} def pred T:A();", 0)>]
+    [<DataRow("02l", "def func A(x:obj)->obj {intr} def pred T:A();", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID007(no:string, fplCode:string, expected) =
@@ -568,23 +581,80 @@ type TestInterpreterErrors() =
     [<DataRow("F4a", "def func A()->ind {intr prty func L()->ind } def pred T(x:A) {x.LTypo()};", 1)>]
 
     // inherited functional term properties
-    [<DataRow("IF1", "def func A()->ind {intr prty pred L() } def func B:A() def pred T() {dec ~x:B; x.L()};", 0)>]
-    [<DataRow("IF1a", "def func A()->ind {intr prty pred L() } def func B:A() def pred T() {dec ~x:B; x.LTypo()};", 1)>]
-    [<DataRow("IF2", "def func A()->ind {intr prty pred L() } def func B:A() def pred T(x:B) {x.L()};", 0)>]
-    [<DataRow("IF2a", "def func A()->ind {intr prty pred L() } def func B:A() def pred T(x:B) {x.LTypo()};", 1)>]
-    [<DataRow("IF3", "def func A()->ind {intr prty func L()->ind } def func B:A() def pred T() {dec ~x:B; x.L()};", 0)>]
-    [<DataRow("IF3a", "def func A()->ind {intr prty func L()->ind } def func B:A() def pred T() {dec ~x:B; x.LTypo()};", 1)>]
-    [<DataRow("IF4", "def func A()->ind {intr prty func L()->ind } def func B:A() def pred T(x:B) {x.L()};", 0)>]
-    [<DataRow("IF4a", "def func A()->ind {intr prty func L()->ind } def func B:A() def pred T(x:B) {x.LTypo()};", 1)>]
+    [<DataRow("IF1", "def func A()->ind {intr prty pred L() } def func B:A()->ind def pred T() {dec ~x:B; x.L()};", 0)>]
+    [<DataRow("IF1a", "def func A()->ind {intr prty pred L() } def func B:A()->ind def pred T() {dec ~x:B; x.LTypo()};", 1)>]
+    [<DataRow("IF2", "def func A()->ind {intr prty pred L() } def func B:A()->ind def pred T(x:B) {x.L()};", 0)>]
+    [<DataRow("IF2a", "def func A()->ind {intr prty pred L() } def func B:A()->ind def pred T(x:B) {x.LTypo()};", 1)>]
+    [<DataRow("IF3", "def func A()->ind {intr prty func L()->ind } def func B:A()->ind def pred T() {dec ~x:B; x.L()};", 0)>]
+    [<DataRow("IF3a", "def func A()->ind {intr prty func L()->ind } def func B:A()->ind def pred T() {dec ~x:B; x.LTypo()};", 1)>]
+    [<DataRow("IF4", "def func A()->ind {intr prty func L()->ind } def func B:A()->ind def pred T(x:B) {x.L()};", 0)>]
+    [<DataRow("IF4a", "def func A()->ind {intr prty func L()->ind } def func B:A()->ind def pred T(x:B) {x.LTypo()};", 1)>]
 
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
-    member this.TestID012(no:string, fplCode:string, expected) =
+    member this.TestID012Properties(no:string, fplCode:string, expected) =
         if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = ID012 ("","", "")
-            runTestHelper "TestID012.fpl" fplCode code expected
+            let code = ID012 ("", "", "", "")
+            runTestHelper "TestID012Properties.fpl" fplCode code expected
+
+    // class variables
+    [<DataRow("C1", "def cl A {dec ~a:obj; ctor A() {} } def pred T() {dec ~x:A; x.a};", 0)>]
+    [<DataRow("C1a", "def cl A {dec ~a:obj; ctor A() {} } def pred T() {dec ~x:A; x.aTypo};", 1)>]
+    [<DataRow("C2", "def cl A {dec ~a:obj; ctor A() {} } def pred T(x:A) {x.a};", 0)>]
+    [<DataRow("C2a", "def cl A {dec ~a:obj; ctor A() {} } def pred T(x:A) {x.aTypo};", 1)>]
+
+    // inherted class variables
+    [<DataRow("IC1", "def cl A {dec ~a:obj; ctor A() {} } def cl B:A def pred T() {dec ~x:B; x.a};", 0)>]
+    [<DataRow("IC1a", "def cl A {dec ~a:obj; ctor A() {} } def cl B:A def pred T() {dec ~x:B; x.aTypo};", 1)>]
+    [<DataRow("IC2", "def cl A {dec ~a:obj; ctor A() {} } def cl B:A def pred T(x:B) {x.a};", 0)>]
+    [<DataRow("IC2a", "def cl A {dec ~a:obj; ctor A() {} } def cl B:A def pred T(x:B) {x.aTypo};", 1)>]
+
+    // class instance variables
+    [<DataRow("I1", "def cl A {dec ~a:obj; ctor A() {} } def pred T() {dec ~x:A x:=A(); x.a};", 0)>]
+    [<DataRow("I1a", "def cl A {dec ~a:obj; ctor A() {} } def pred T() {dec ~x:A x:=A(); x.aTypo};", 1)>]
+    [<DataRow("I2", "def cl A {dec ~a:obj; ctor A() {} } def pred T(x:A) {dec x:=A(); x.a};", 0)>]
+    [<DataRow("I2a", "def cl A {dec ~a:obj; ctor A() {} } def pred T(x:A) {dec x:=A(); x.aTypo};", 1)>]
+
+    // inherited class instance variables
+    [<DataRow("II1", "def cl A {dec ~a:obj; ctor A() {} } def cl B:A def pred T() {dec ~x:B x:=B(); x.a};", 0)>]
+    [<DataRow("II1a", "def cl A {dec ~a:obj; ctor A() {} } def cl B:A def pred T() {dec ~x:A x:=B(); x.aTypo};", 1)>]
+    [<DataRow("II2", "def cl A {dec ~a:obj; ctor A() {} } def cl B:A def pred T(x:B) {dec x:=B(); x.a};", 0)>]
+    [<DataRow("II2a", "def cl A {dec ~a:obj; ctor A() {} } def cl B:A def pred T(x:B) {dec x:=B(); x.aTypo};", 1)>]
+
+    // predicate variables
+    [<DataRow("P1", "def pred A() {dec ~a:obj; true} def pred T() {dec ~x:A; x.a};", 0)>]
+    [<DataRow("P1a", "def pred A() {dec ~a:obj; true} def pred T() {dec ~x:A; x.aTypo};", 1)>]
+    [<DataRow("P2", "def pred A() {dec ~a:obj; true} def pred T(x:A) {x.a};", 0)>]
+    [<DataRow("P2a", "def pred A() {dec ~a:obj; true} def pred T(x:A) {x.aTypo};", 1)>]
+
+    // inherited predicate variables
+    [<DataRow("IP1", "def pred A() {dec ~a:obj; true} def pred B:A() def pred T() {dec ~x:B; x.a};", 0)>]
+    [<DataRow("IP1a", "def pred A() {dec ~a:obj; true} def pred B:A() def pred T() {dec ~x:B; x.aTypo};", 1)>]
+    [<DataRow("IP2", "def pred A() {dec ~a:obj; true} def pred B:A() def pred T(x:B) {x.a};", 0)>]
+    [<DataRow("IP2a", "def pred A() {dec ~a:obj; true} def pred B:A() def pred T(x:B) {x.aTypo};", 1)>]
+
+    // functional term variables
+    [<DataRow("F1", "def func A()->ind {dec ~a:obj; return $1} def pred T() {dec ~x:A; x.a};", 0)>]
+    [<DataRow("F1a", "def func A()->ind {dec ~a:obj; return $1} def pred T() {dec ~x:A; x.aTypo};", 1)>]
+    [<DataRow("F2", "def func A()->ind {dec ~a:obj; return $1} def pred T(x:A) {x.a};", 0)>]
+    [<DataRow("F2a", "def func A()->ind {dec ~a:obj; return $1} def pred T(x:A) {x.aTypo};", 1)>]
+
+    // inherited functional term variables
+    [<DataRow("IF1", "def func A()->ind {dec ~a:obj; return $1} def func B:A()->ind def pred T() {dec ~x:B; x.a};", 0)>]
+    [<DataRow("IF1a", "def func A()->ind {dec ~a:obj; return $1} def func B:A()->ind def pred T() {dec ~x:B; x.aTypo};", 1)>]
+    [<DataRow("IF2", "def func A()->ind {dec ~a:obj; return $1} def func B:A()->ind def pred T(x:B) {x.a};", 0)>]
+    [<DataRow("IF2a", "def func A()->ind {dec ~a:obj; return $1} def func B:A()->ind def pred T(x:B) {x.aTypo};", 1)>]
+
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestID012Variables(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = ID012 ("", "", "", "")
+            runTestHelper "TestID012Variables.fpl" fplCode code expected
 
     [<DataRow("00", "def pred T() {del.Test()};", 1, "Unknown delegate `Test`")>]
     [<DataRow("01", "def pred T() {del.Test1(x,y)};", 1, "Unknown delegate `Test1`")>]

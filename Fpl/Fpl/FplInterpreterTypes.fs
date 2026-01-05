@@ -1373,6 +1373,7 @@ type FplGenericInheriting(positions: Positions, parent: FplValue) =
 
     override this.CheckConsistency() = 
         base.CheckConsistency()
+        // check if own declared variables override the inherited ones
         this.GetVariables()
         |> Seq.iter (fun var -> 
             if _inheritedVariables.ContainsKey var.FplId then
@@ -1388,6 +1389,7 @@ type FplGenericInheriting(positions: Positions, parent: FplValue) =
                 // emit VAR06, since the inner variable overrides some inherited var
                 var.ErrorOccurred <- emitVAR06iagnostic var.FplId oldFromNode newFromNode typeName var.StartPos var.EndPos
         )
+        // check if own declared properties override the inherited ones
         this.GetProperties()
         |> Seq.iter (fun prty -> 
             let prtyName = prty.Type SignatureType.Mixed
@@ -1404,6 +1406,25 @@ type FplGenericInheriting(positions: Positions, parent: FplValue) =
                 // emit SIG06, since the inner property overrides some inherited property
                 prty.ErrorOccurred <- emitSIG06iagnostic prtyName oldFromNode newFromNode typeName prty.StartPos prty.EndPos
         )
+        // add inherited variables, if they still do not exist in scope
+        _inheritedVariables
+        |> Seq.iter (fun kvp ->
+            if this.Scope.ContainsKey(kvp.Key) then 
+                () // VAR06 was already emitted
+            else
+                let var = kvp.Value[0]
+                this.Scope.Add (kvp.Key, var)
+        )
+        // add inherited properties, if they still do not exist in scope
+        _inheritedProperties
+        |> Seq.iter (fun kvp ->
+            if this.Scope.ContainsKey(kvp.Key) then 
+                () // SIG06 was already emitted
+            else
+                let prty = kvp.Value[0]
+                this.Scope.Add (kvp.Key, prty)
+        )
+
 
 [<AbstractClass>]
 type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
@@ -3837,8 +3858,9 @@ let findInheritanceChains (baseNode: FplValue) =
             
     match baseNode.Name with 
     | PrimClassL
+    | PrimPredicateL
     | PrimFunctionalTermL -> ()
-    | _ -> failwith ($"Expecting a class or a functional term node, got {baseNode.Name}")
+    | _ -> failwith ($"Expecting a class, a functional term, or a predicate node, got {baseNode.Name}")
     
     findChains baseNode "" ""
     if paths.Count = 0 then 
@@ -4250,7 +4272,7 @@ type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
                         let constructors = parentClass.GetConstructors()
                         match checkSIG04Diagnostics this constructors with
                         | Some ctor ->
-                            let name = candidate.Type SignatureType.Mixed
+                            let name = ctor.Type SignatureType.Mixed
                             this.Scope.TryAdd(name, ctor) |> ignore
                         | None -> ()
                         registerParentConstructor()
