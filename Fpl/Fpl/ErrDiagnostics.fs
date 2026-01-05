@@ -363,7 +363,11 @@ type DiagnosticCode =
             | ID009 name -> $"Circular base type dependency involving `{name}`." 
             | ID010 name -> $"The type `{name}` could not be found. Are you missing a uses clause?" 
             | ID011 (chain, errorMsg) -> $"The inheritance chain `{chain}` causes the following error: {errorMsg}."  
-            | ID012 (prtyName, varName, varType, candidates) -> $"The {varName} `{varType}` does not define the variable or property `{prtyName}`. Candidates were {candidates}"  
+            | ID012 (prtyName, varName, varType, candidates) -> 
+                if candidates = String.Empty then 
+                    $"The {varName} `{varType}` does not define the variable or property `{prtyName}`. No candidates found."  
+                else
+                    $"The {varName} `{varType}` does not define the variable or property `{prtyName}`. Candidates: {candidates}."  
             | ID013 delegateDiagnostic -> sprintf "%s" delegateDiagnostic // just emit the delegate's diagnostic
             | ID014 (signature, conflict) -> sprintf "Language code `%s` was already declared at %s." signature conflict
             | ID015 signature -> $"`parent` cannot be referenced from {signature}." 
