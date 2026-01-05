@@ -32,6 +32,7 @@ let filterCandidates (candidatesPre:FplValue list) identifier qualified =
 
     let candidatesNames =
         candidatesPre
+        |> Seq.sortBy (fun fv -> $"{fv.Name}:{fv.FplId}")
         |> Seq.map (fun fv -> 
             if qualified then 
                 qualifiedName fv
