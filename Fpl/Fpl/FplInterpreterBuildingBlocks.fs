@@ -283,14 +283,13 @@ let rec eval (st: SymbolTable) ast =
             fv.TypeId <- LiteralUndef 
             fv.StartPos <- pos1
             fv.EndPos <- pos2
-        | PrimForInStmtEntity
-        | PrimForInStmtDomain
         | PrimExtensionL -> 
             let newVar = new FplVariable(name, (pos1, pos2), fv)
             variableStack.PushEvalStack(newVar)
             variableStack.PopEvalStack()
         | PrimRefL when parentFv.Scope.ContainsKey(".") ->
             fv.FplId <- name
+            fv.TypeId <- LiteralUndef
         | _ -> 
             // in all other contexts, check by name, if this variable was declared in some scope
             let rec IsInUpperScope (fv1: FplValue): FplGenericVariable option =
