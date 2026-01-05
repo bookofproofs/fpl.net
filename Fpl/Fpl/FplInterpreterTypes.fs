@@ -2359,7 +2359,7 @@ type FplGenericTheoremLikeStmt(positions: Positions, parent: FplValue, runOrder)
             )
 
         if not _hasProof then 
-           this.ErrorOccurred <- emitPR007Diagnostics (this.Type(SignatureType.Name)) this.Name this.StartPos this.EndPos
+           this.ErrorOccurred <- emitPR007Diagnostics (this.Type(SignatureType.Name)) this.Name this.SignStartPos this.SignEndPos
 
     override this.RunOrder = Some _runOrder
 
