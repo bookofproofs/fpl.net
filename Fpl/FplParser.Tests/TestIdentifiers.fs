@@ -105,23 +105,17 @@ type TestIdentifiers () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<TestMethod>]
-    member this.TestEntitySelf () =
-        let result = run (entity .>> eof) LiteralSelf
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestEntityAtSelf () =
-        let result = run (entity .>> eof) LiteralSelf
+        let result = run (selfOrParent .>> eof) LiteralSelf
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestEntityVariable () =
-        let result = run (entity .>> eof) "xyz"
+        let result = run (variable .>> eof) "xyz"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

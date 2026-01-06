@@ -210,8 +210,6 @@ let dollarDigits = positions "DollarDigits" (regex "\$" >>. puint32 <?> "<dollar
 
 let selfOrParent = positions "SelfOrParent" (choice [keywordSelf ; keywordParent]) |>> Ast.SelfOrParent
 
-let entity = choice [ selfOrParent ; variable ] 
-
 ////// resolving recursive parsers
 let statementList, statementListRef = createParserForwardedToRef()
 let primePredicate, primePredicateRef = createParserForwardedToRef()
@@ -225,7 +223,7 @@ let coord = choice [ predicateWithQualification; dollarDigits ] .>> IW
 // infix operators like the equality operator 
 let objectSymbol = positions "ObjectSymbol" ( objectMathSymbols ) .>> IW |>> Ast.ObjectSymbol
 
-let fplIdentifier = choice [ entity; predicateIdentifier; extension; objectSymbol ] 
+let fplIdentifier = choice [ selfOrParent ; variable ; predicateIdentifier; extension; objectSymbol ] 
 
 let coordList = (sepBy1 coord comma) .>> IW
 
@@ -305,7 +303,7 @@ let assignmentStatement = positions "Assignment" ((predicateWithQualification .>
 
 let inEntity = keywordIn >>. positions "InEntity" (predicateWithQualification) .>> IW |>> Ast.InEntity
 
-let entityInDomain = ( entity .>> IW .>>. inEntity ) .>> IW
+let entityInDomain = ( variable .>> IW .>>. inEntity ) .>> IW
 let forInBody = (entityInDomain .>> IW) .>>. (leftBrace >>. IW >>. statementList) .>> (IW >>. rightBrace)
 let forStatement = positions "ForIn" (keywordFor >>. forInBody) |>> Ast.ForIn
 
