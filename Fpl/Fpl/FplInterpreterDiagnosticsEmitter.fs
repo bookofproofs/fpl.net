@@ -242,7 +242,7 @@ let emitID015diagnostics name pos1 pos2 =
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ID015 name
-            Diagnostic.Alternatives = Some $"Use `{LiteralParent}` only inside {getEnglishName LiteralCtorL} or {getEnglishName LiteralPrtyL}."
+            Diagnostic.Alternatives = Some $"Use `{LiteralParent}` only inside {getEnglishName LiteralCtorL false} or {getEnglishName LiteralPrtyL false}."
         }
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
@@ -256,7 +256,7 @@ let emitID016diagnostics name pos1 pos2  =
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ID016 name
-            Diagnostic.Alternatives = Some $"Use `{LiteralSelf}` only inside {getEnglishName PrimClassL}, {getEnglishName PrimPredicateL}, or {getEnglishName PrimFunctionalTermL}."
+            Diagnostic.Alternatives = Some $"Use `{LiteralSelf}` only inside {getEnglishName PrimClassL false}, {getEnglishName PrimPredicateL false}, or {getEnglishName PrimFunctionalTermL false}."
         }
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
@@ -365,7 +365,7 @@ let emitID024Diagnostics alreadyLocalizedExpr qualifiedStartPosConflictStr pos1 
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitID025Diagnostics qualifiedNameCandidate candidateEnglishName blockEnglishName blockName pos1 pos2 =
+let emitID025Diagnostics qualifiedNameCandidate blockEnglishName blockName pos1 pos2 =
     match blockName with 
     | LiteralAxL
     | LiteralThmL
@@ -384,7 +384,7 @@ let emitID025Diagnostics qualifiedNameCandidate candidateEnglishName blockEnglis
                 Diagnostic.Severity = DiagnosticSeverity.Error
                 Diagnostic.StartPos = pos1
                 Diagnostic.EndPos = pos2
-                Diagnostic.Code = ID025(qualifiedNameCandidate, candidateEnglishName, blockEnglishName)
+                Diagnostic.Code = ID025(qualifiedNameCandidate, blockEnglishName)
                 Diagnostic.Alternatives = None
             }
         ad.AddDiagnostic diagnostic
@@ -443,7 +443,7 @@ let emitLG003diagnostic nodeTypeName nodeName nodeRepr pos1 pos2 =
                 Diagnostic.Severity = DiagnosticSeverity.Error
                 Diagnostic.StartPos = pos1
                 Diagnostic.EndPos = pos2
-                Diagnostic.Code = LG003(nodeTypeName, getEnglishName nodeName)
+                Diagnostic.Code = LG003(nodeTypeName, getEnglishName nodeName false)
                 Diagnostic.Alternatives = None 
             }
         ad.AddDiagnostic diagnostic
@@ -460,7 +460,7 @@ let emitLG004diagnostic nodeName arity pos1 pos2 =
                 Diagnostic.Severity = DiagnosticSeverity.Error
                 Diagnostic.StartPos = pos1
                 Diagnostic.EndPos = pos2
-                Diagnostic.Code = LG004 (getEnglishName nodeName)
+                Diagnostic.Code = LG004 (getEnglishName nodeName false)
                 Diagnostic.Alternatives = None 
             }
         ad.AddDiagnostic diagnostic
@@ -560,7 +560,7 @@ let emitPR007Diagnostics nodeTypeName nodeName pos1 pos2 =
             Diagnostic.Severity = DiagnosticSeverity.Warning
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = PR007 (nodeTypeName, getEnglishName nodeName)
+            Diagnostic.Code = PR007 (nodeTypeName, getEnglishName nodeName false)
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
@@ -602,7 +602,7 @@ let emitPR010Diagnostics keyword exptectedRef pos1 pos2 =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = PR010 (keyword, getEnglishName exptectedRef)
+            Diagnostic.Code = PR010 (keyword, getEnglishName exptectedRef false)
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
@@ -616,7 +616,7 @@ let emitPR011Diagnostics keyword exptectedRef pos1 pos2 =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = PR011 (keyword, getEnglishName exptectedRef)
+            Diagnostic.Code = PR011 (keyword, getEnglishName exptectedRef false)
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
@@ -805,7 +805,7 @@ let emitSIG07iagnostic assigneeName assigneeType nodeType pos1 pos2  =
             Diagnostic.Severity = DiagnosticSeverity.Warning
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = SIG07(assigneeName, assigneeType, getEnglishName nodeType)
+            Diagnostic.Code = SIG07(assigneeName, assigneeType, getEnglishName nodeType false)
             Diagnostic.Alternatives = Some "Expected a variable or an array." 
         }
     ad.AddDiagnostic diagnostic

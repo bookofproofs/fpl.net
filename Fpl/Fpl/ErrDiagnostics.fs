@@ -137,7 +137,7 @@ type DiagnosticCode =
     | ID022 of string
     | ID023 of string 
     | ID024 of string * string
-    | ID025 of string * string * string
+    | ID025 of string * string
     | ID027 of string
     // logic-related error codes
     | LG001 of string * string * string
@@ -383,7 +383,7 @@ type DiagnosticCode =
             | ID022 name -> $"`{name}` is intrinsic, it has no parameterized constructors. This call uses parameters."
             | ID023 candidates  -> $"Cannot associate a justification with a single block. Found more candidates: {candidates}." 
             | ID024 (signature, conflict) -> sprintf "Expression `%s` was already localized at %s." signature conflict
-            | ID025 (candidate, candidateType, nodeType)  -> $"Cannot reference to `{candidate}` which is {candidateType} inside {nodeType}." 
+            | ID025 (candidate, nodeType)  -> $"Cannot reference to `{candidate}` inside {nodeType}." 
             | ID027 name -> $"Illegal recursion in for statement. The entity `{name}` cannot be used as its own domain." 
             // logic-related error codes
             | LG001 (typeOfPredicate,argument,typeOfExpression) -> 
@@ -1000,9 +1000,11 @@ let startsWithAny (prefixes:string list) (input:string) =
     prefixes |> List.exists input.StartsWith
 
 /// A helper function adding an English article to a string 
-let getEnglishName someString = 
+let getEnglishName someString determined = 
     let isEnglishAn = startsWithAny ["a"; "e"; "i"; "o"; "u"] someString
-    if isEnglishAn then 
+    if determined then 
+        $"the {someString}"
+    elif isEnglishAn then 
         $"an {someString}"
     else
         $"a {someString}"

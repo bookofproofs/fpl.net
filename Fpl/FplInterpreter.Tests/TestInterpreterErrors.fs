@@ -909,7 +909,7 @@ type TestInterpreterErrors() =
         if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = ID025 ("", "", "")
+            let code = ID025 ("", "")
             runTestHelper "TestID025.fpl" fplCode code expected
             
     [<DataRow("00", "def func T(list:* Nat[ind])->pred { dec ~result:pred for list in list { result:=true }; return result };", 1)>]
@@ -988,9 +988,13 @@ type TestInterpreterErrors() =
 
 
     [<DataRow("00", """def pred T() { true };""", 0)>]
-    [<DataRow("01", """def pred T() { self };""", 1)>]
-    [<DataRow("02", """def func T()->obj { intr };""", 0)>]
-    [<DataRow("03", """def func T()->obj { return self };""", 1)>]
+    [<DataRow("01a", """def pred T() { self };""", 1)>]
+    [<DataRow("01b", """def pred T() { self() };""", 1)>]
+    [<DataRow("02", """def pred T(x:obj) { self(x) };""", 1)>]
+    [<DataRow("03", """def func T()->obj { intr };""", 0)>]
+    [<DataRow("03a", """def func T()->obj { return self };""", 1)>]
+    [<DataRow("03b", """def func T()->obj { return self() };""", 1)>]
+    [<DataRow("04", """def func T(x:obj)->obj { return self(x) };""", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestLG002(no:string, fplCode:string, expected) =

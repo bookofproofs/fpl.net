@@ -35,7 +35,7 @@ let filterCandidates (candidatesPre:FplValue list) identifier qualified =
         |> Seq.sortBy (fun fv -> $"{fv.Name}:{fv.FplId}")
         |> Seq.map (fun fv -> 
             if qualified then 
-                qualifiedName fv
+                qualifiedName fv false
             else
                 $"`{fv.Type SignatureType.Mixed}`"
         )
@@ -477,7 +477,7 @@ let rec eval (st: SymbolTable) ast =
             | PrimFunctionalTermL ->
                 fv.Scope.Add(block.FplId, block)
             | _ ->
-                fv.ErrorOccurred <- emitID016diagnostics $"{getEnglishName block.Name} '{block.Type(SignatureType.Name)}'" pos1 pos2
+                fv.ErrorOccurred <- emitID016diagnostics $"{getEnglishName block.Name true} '{block.Type(SignatureType.Name)}'" pos1 pos2
         | _ -> ()
         ad.DiagnosticsStopped <- oldDiagnosticsStopped
         variableStack.PushEvalStack(fv)
@@ -501,7 +501,7 @@ let rec eval (st: SymbolTable) ast =
             | PrimFunctionalTermL, PrimMandatoryPredicateL ->
                 fv.Scope.Add(block.FplId, block)
             | _ ->
-                fv.ErrorOccurred <- emitID015diagnostics $"{getEnglishName block.Name} '{block.Type(SignatureType.Name)}'" pos1 pos2
+                fv.ErrorOccurred <- emitID015diagnostics $"{getEnglishName block.Name true} '{block.Type(SignatureType.Name)}'" pos1 pos2
         | _ -> ()
         ad.DiagnosticsStopped <- oldDiagnosticsStopped
         variableStack.PushEvalStack(fv)
@@ -691,7 +691,7 @@ let rec eval (st: SymbolTable) ast =
             let candidate = candidates.Head
             match candidate with 
             | :? FplClass -> map.ToBeReturnedClass <- Some candidate
-            | _ -> fv.ErrorOccurred <- emitSIG11diagnostics (qualifiedName map) (qualifiedName candidate) map.StartPos map.EndPos       
+            | _ -> fv.ErrorOccurred <- emitSIG11diagnostics (qualifiedName map false) (qualifiedName candidate false) map.StartPos map.EndPos       
         | :? FplMapping, 0 -> 
             fv.ErrorOccurred <- emitSIG04Diagnostics identifier 0 "" pos1 pos2
         | :? FplMapping, _ -> 
@@ -998,13 +998,13 @@ let rec eval (st: SymbolTable) ast =
 
                 fv.Scope.TryAdd(fv.FplId, classes.Head) |> ignore
                 let candidate = classes.Head
-                fv.ErrorOccurred <- emitID025Diagnostics (qualifiedName candidate) candidate.EnglishName block.EnglishName block.Name fv.StartPos fv.EndPos
+                fv.ErrorOccurred <- emitID025Diagnostics (qualifiedName candidate false) (getEnglishName block.Name false) block.Name fv.StartPos fv.EndPos
             elif candidates.Length > 0 then
                 // not a class was referred, add the candidate (e.g., referenced variable)
                 let candidate = candidates.Head
                 fv.FplId <- candidate.FplId 
                 fv.Scope.TryAdd(fv.FplId, candidate) |> ignore
-                fv.ErrorOccurred <- emitID025Diagnostics (qualifiedName candidate) candidate.EnglishName block.EnglishName block.Name fv.StartPos fv.EndPos
+                fv.ErrorOccurred <- emitID025Diagnostics (qualifiedName candidate false) (getEnglishName block.Name false) block.Name fv.StartPos fv.EndPos
             else
                 ()
 
@@ -1177,7 +1177,7 @@ let rec eval (st: SymbolTable) ast =
                 fv.Scope.TryAdd(fv.FplId, candidate) |> ignore
                 match fv.UltimateBlockNode with
                 | Some block ->
-                    fv.ErrorOccurred <- emitID025Diagnostics (qualifiedName candidate) candidate.EnglishName block.EnglishName block.Name fv.StartPos fv.EndPos
+                    fv.ErrorOccurred <- emitID025Diagnostics (qualifiedName candidate false) (getEnglishName block.Name false) block.Name fv.StartPos fv.EndPos
                 | _ -> ()
         | _ -> ()
         st.EvalPop()
