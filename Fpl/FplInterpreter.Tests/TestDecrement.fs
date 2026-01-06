@@ -33,13 +33,13 @@ type TestDecrement() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("@0", "Nat")>]
-    [<DataRow("@1", "Nat")>]
-    [<DataRow("@2", "Nat")>]
-    [<DataRow("@3", "Nat")>]
-    [<DataRow("@4", "Nat")>]
-    [<DataRow("@100", "Nat")>]
-    [<DataRow("@42", "Nat")>]
+    [<DataRow("@0", LiteralInd)>]
+    [<DataRow("@1", LiteralInd)>]
+    [<DataRow("@2", LiteralInd)>]
+    [<DataRow("@3", LiteralInd)>]
+    [<DataRow("@4", LiteralInd)>]
+    [<DataRow("@100", LiteralInd)>]
+    [<DataRow("@42", LiteralInd)>]
     [<TestMethod>]
     member this.TestDecrementType(varVal, expected:string) =
         ad.Clear()

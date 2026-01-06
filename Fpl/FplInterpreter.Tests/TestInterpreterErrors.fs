@@ -1782,7 +1782,7 @@ type TestInterpreterErrors() =
         if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = SIG04 ("",0,[""])
+            let code = SIG04 ("", 0, "")
             ad.Clear()
             runTestHelper "TestSIG04.fpl" fplCode code expected
 
@@ -1857,7 +1857,7 @@ type TestInterpreterErrors() =
         if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = SIG04 ("",0,[""])
+            let code = SIG04 ("", 0, "" )
             prepareFplCode ("TestSIG04MsgSpecificity.fpl", fplCode, false) |> ignore
             checkForUnexpectedErrors code
             let result = filterByErrorCode ad code.Code

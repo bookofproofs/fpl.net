@@ -166,7 +166,7 @@ type DiagnosticCode =
     | SIG01 of string 
     | SIG02 of string * int * string
     | SIG03 of string 
-    | SIG04 of string * int * string list
+    | SIG04 of string * int * string
     | SIG05 of string 
     | SIG06 of string * string * string * string
     | SIG07 of string * string * string 
