@@ -1709,7 +1709,7 @@ type TestInterpreterErrors() =
     [<DataRow("35", """def pred T (x,y,z:obj) {true} def pred Caller() {dec ~x,y:obj ~z:ind; T(x,y,z)} ;""", 1)>]
     [<DataRow("36", """def pred T (x,y:obj,z:ind) {true} def pred Caller() {dec ~x,y:obj ~z:ind; T(x,y,z)} ;""", 0)>]
     [<DataRow("37", """def pred T (x,y:obj) {true} def pred Caller() {dec ~x,y:obj ~z:ind; T(x,y,z)} ;""", 1)>]
-    [<DataRow("38", """def class Nat  {ctor Nat(){dec self:=x.R(); }};""", 1)>]
+    [<DataRow("38", """def class Nat  {ctor Nat(){dec self:=x.R(); }};""", 0)>] // this would cause SIG03 error
     [<DataRow("39", """def func Succ(n:Nat) -> obj {intr};""", 1)>]
     [<DataRow("40", """def func T()->obj { dec ~x:obj; return x};""", 0)>]
     [<DataRow("40a", """def func S(n:obj) -> obj {intr} def func T()->obj { dec ~x:obj; return S(x)} ;""", 0)>]

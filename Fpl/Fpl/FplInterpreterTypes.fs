@@ -4935,7 +4935,7 @@ type FplDecrement(name, positions: Positions, parent: FplValue) as this =
     inherit FplGenericDelegate(name, positions, parent)
 
     do 
-        this.TypeId <- "Nat"
+        this.TypeId <- LiteralInd
 
     override this.Name = PrimDelegateDecrementL
     override this.ShortName = PrimDelegateDecrement

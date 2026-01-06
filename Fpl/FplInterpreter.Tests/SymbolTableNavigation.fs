@@ -597,8 +597,11 @@ type SymbolTableNavigation() =
             match prepareFplCode ("TestJson.fpl", fplCode, false) with
             | Some st ->
                 try
-                    
-                    JToken.Parse(st.ToJson()) |> ignore
+                    use sr = new StringReader(st.ToJson())
+                    use jr = new JsonTextReader(sr)
+                    // disable the MaxDepth limit (nullable with no value)
+                    jr.MaxDepth <- System.Nullable<int>()
+                    JToken.ReadFrom(jr) |> ignore
                 with
                 | :? JsonReaderException as ex -> 
                     let currDir = Directory.GetCurrentDirectory()
