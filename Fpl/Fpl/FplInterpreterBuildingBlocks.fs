@@ -304,8 +304,9 @@ let rec eval (st: SymbolTable) ast =
             | Some foundVar -> 
                 // it was declared in the scope
                 match fv.Name with 
-                | PrimRefL ->
-                    // for references, add to the reference's scope
+                | PrimRefL 
+                | PrimForInStmtEntity 
+                | PrimForInStmtDomain ->
                     fv.Scope.Add(name, foundVar)
                     fv.FplId <- name
                 | PrimTranslationL ->
@@ -851,9 +852,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.QualificationList((pos1, pos2), asts) ->
         st.EvalPush("QualificationList")
-        if asts.Length > 0 then
-            let fv = variableStack.PeekEvalStack()
-            asts |> List.map (eval st) |> ignore
+        asts |> List.map (eval st) |> ignore
         st.EvalPop()
     // | Namespace of Ast option * Ast list
     | Ast.Namespace(asts) ->

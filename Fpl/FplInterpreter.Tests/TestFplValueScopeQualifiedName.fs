@@ -77,7 +77,7 @@ type TestFplValueScopeQualifiedName() =
             | "fun9" -> Assert.AreEqual<string>("a functional term definition TestScopeBlocksQualifiedName.SomeFunctionalTerm9() -> ind", qualifiedName fun9 false)
             | "prf1" -> Assert.AreEqual<string>("a proof TestScopeBlocksQualifiedName.SomeTheorem1.SomeTheorem1$1", qualifiedName prf1 false) 
             | "prf2" -> Assert.AreEqual<string>("a proof TestScopeBlocksQualifiedName.SomeTheorem2.SomeTheorem2$1", qualifiedName prf2 false) 
-            | "loc1" -> Assert.AreEqual<string>("a localization TestScopeBlocksQualifiedName.not(x) ", qualifiedName loc1 false)
+            | "loc1" -> Assert.AreEqual<string>("a localization TestScopeBlocksQualifiedName.not(x)", qualifiedName loc1 false)
             | "loc2" -> Assert.AreEqual<string>("a localization TestScopeBlocksQualifiedName.Equal(x, y)", qualifiedName loc2 false)
             | _ -> Assert.IsTrue(false)
         | _ -> 

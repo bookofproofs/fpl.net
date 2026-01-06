@@ -913,6 +913,20 @@ and FplVariableStack() =
         _assumedArguments.Clear()
         _stack.Clear()
 
+/// Searches for a references in node symbol table. 
+/// Will works properly only for nodes types that use their scope like FplReference, FplSelf, FplParent, FplForInStmtDomain, FplForInStmtEntity, FplVariable
+let rec calledNodeOpt (fv:FplValue) = 
+    let refNodeOpt = 
+        fv.Scope 
+        |> Seq.map (fun kvp -> kvp.Value) 
+        |> Seq.toList 
+        |> List.tryHead
+    match refNodeOpt with
+    | Some refNode when refNode.Name = LiteralSelf -> calledNodeOpt refNode
+    | Some refNode when refNode.Name = LiteralParent -> calledNodeOpt refNode
+    | Some refNode when refNode.Name = PrimVariableL && refNode.ValueList.Count > 0 -> calledNodeOpt refNode.ValueList[0]
+    | _ -> refNodeOpt
+
 // Create an FplValue list containing all Scopes of an FplNode
 let rec flattenScopes (root: FplValue) =
     let rec helper (node: FplValue) (acc: FplValue list) =
@@ -1125,7 +1139,7 @@ let rec getRoot (fv:FplValue) =
         fv :?> FplRoot
     else getRoot fv.Parent.Value
    
-// Tries to add for statatement's domain or entity to its parent's for statement
+// Tries to add for statement's domain or entity to its parent's for statement
 let tryAddToParentForInStmt (fplValue:FplValue) =
     let identifier = fplValue.Type SignatureType.Name
     let parent = fplValue.Parent.Value
@@ -3161,17 +3175,6 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
     override this.Run variableStack =
         this.Debug "Run"
         if this.Scope.Count > 0 then 
-            let rec calledNodeOpt (fv:FplValue) = 
-                let refNodeOpt = 
-                    fv.Scope 
-                    |> Seq.map (fun kvp -> kvp.Value) 
-                    |> Seq.toList 
-                    |> List.tryHead
-                match refNodeOpt with
-                | Some refNode when refNode.Name = LiteralSelf -> calledNodeOpt refNode
-                | Some refNode when refNode.Name = LiteralParent -> calledNodeOpt refNode
-                | Some refNode when refNode.Name = PrimVariableL && refNode.ValueList.Count > 0 -> calledNodeOpt refNode.ValueList[0]
-                | _ -> refNodeOpt
             let calledOpt = calledNodeOpt this
             match calledOpt with 
             | Some called ->
@@ -3421,6 +3424,9 @@ type FplReference(positions: Positions, parent: FplValue) =
             next.EndPos <- this.EndPos
         | Some next when next.IsBlock() ->
             addExpressionToParentArgList this 
+        | Some next when next.Name = PrimForInStmtDomain -> 
+            next.FplId <- this.FplId
+            tryAddToParentUsingFplId this
         | Some next when next.Scope.ContainsKey(".") -> 
             next.EndPos <- this.EndPos
         | Some next -> 
@@ -5766,10 +5772,10 @@ type FplForInStmtEntity(positions: Positions, parent: FplValue) =
         ret
 
     override this.Type signatureType = 
-        if this.ArgList.Count = 1 then 
-            getFplHead this.ArgList[0] signatureType
-        else
-            getFplHead this signatureType
+        let entityOpt = calledNodeOpt this
+        match entityOpt with 
+        | Some entity -> entity.Type signatureType
+        | _ -> getFplHead this signatureType
 
     override this.Represent () = LiteralUndef
 
@@ -5790,10 +5796,10 @@ type FplForInStmtDomain(positions: Positions, parent: FplValue) =
         ret
 
     override this.Type signatureType = 
-        if this.ArgList.Count = 1 then 
-            getFplHead this.ArgList[0] signatureType
-        else
-            getFplHead this signatureType
+        let domainOpt = calledNodeOpt this
+        match domainOpt with 
+        | Some domain -> domain.Type signatureType
+        | _ -> getFplHead this signatureType
 
     override this.Represent () = LiteralUndef
 
