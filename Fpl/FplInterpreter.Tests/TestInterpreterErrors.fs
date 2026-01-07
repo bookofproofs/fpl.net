@@ -1590,7 +1590,7 @@ type TestInterpreterErrors() =
     [<DataRow("MS1q4", "def cl A {intr prty func X()->obj } def func Test()->pred(y:obj) {dec ~o:A o:=A(); return o.X};", 1)>] // SIG03: ->pred(y:obj) does not match signature A.X()
     [<DataRow("MS1q5", "def cl A {intr prty func X(x:obj)->obj } def func Test()->pred(y:obj) {dec ~o:A o:=A(); return o.X};", 1)>] // SIG03: ->pred(y:obj) does not match signature A.X(obj)->obj
     [<DataRow("MS1q6", "def cl A {intr prty func X(x:ind)->obj } def func Test()->pred(y:obj) {dec ~o:A o:=A(); return o.X};", 1)>] // SIG03: ->pred(y:obj) does not match signature A.X(ind)->obj
-    [<DataRow("MS1q7", "def cl A {intr prty pred X(x:obj) } def func Test()->pred(y:obj) {dec ~a:obj ~o:A ~o:=A(); return o.X(a)};", 1)>] // SIG03: ->pred(y:obj) does not match by value A.X(obj) 
+    [<DataRow("MS1q7", "def cl A {intr prty pred X(x:obj) } def func Test()->pred(y:obj) {dec ~a:obj ~o:A o:=A(); return o.X(a)};", 1)>] // SIG03: ->pred(y:obj) does not match by value A.X(obj) 
     // ... using properties of predicates
     [<DataRow("MS1r1", "def pred A() {intr prty pred X(x:obj) } def func Test()->pred(y:obj) {return A.X};", 0)>] // OK: ->pred(y:obj) matches signature A.X(obj) 
     [<DataRow("MS1r2", "def pred A() {intr prty pred X(x:ind) } def func Test()->pred(y:obj) {return A.X};", 1)>] // SIG03: ->pred(y:obj) does not match signature A.X(ind)

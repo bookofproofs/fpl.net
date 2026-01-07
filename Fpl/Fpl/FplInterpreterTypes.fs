@@ -3959,10 +3959,13 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
         match fv.ArgType with 
         | ArgType.Nothing when fv.TypeId = LiteralFunc -> true
         | _ -> false
-    let isCallByReference (fv:FplValue) =
-        match fv.ArgType with 
-        | ArgType.Nothing when isUpper fv.FplId -> true
-        | _ -> false
+    let rec isCallByReference (fv:FplValue) =
+        if fv.Scope.ContainsKey(".") then
+            isCallByReference fv.Scope["."] // evaluate dotted reference instead
+        else
+            match fv.ArgType with 
+            | ArgType.Nothing when isUpper fv.FplId -> true
+            | _ -> false
     let isCallByValue (fv:FplValue) =
         match fv.ArgType with 
         | ArgType.Parentheses when isUpper fv.FplId -> true
@@ -4055,8 +4058,8 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
         | PrimRefL, PrimMappingL ->
             if isCallByReference a && isPredWithParentheses p then 
                 // match a call by reference with pred with parameters
-                let referredNodeOpt = referencedNodeOpt a
-                match referredNodeOpt with 
+                let refNodeOpt = referencedNodeOpt a
+                match refNodeOpt with 
                 | Some (:? FplPredicate as refNode) ->
                     matchTwoTypes refNode p mode // match signatures with parameters
                 | Some (:? FplMandatoryPredicate as refNode) ->
@@ -4069,8 +4072,8 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                     Some $"Return type of `{aName}:{aType}` does not match expected mapping type `{pType}`.", Parameter.Consumed
             elif isCallByReference a && isPredWithoutParentheses p then
                 // match a not-by-value-reference with pred mapping without parameters
-                let referredNodeOpt = referencedNodeOpt a
-                match referredNodeOpt with 
+                let refNodeOpt = referencedNodeOpt a
+                match refNodeOpt with 
                 | Some (:? FplPredicate as refNode) ->
                     None, Parameter.Consumed // mapping pred accepting predicate nodes
                 | Some (:? FplMandatoryPredicate as refNode) ->
@@ -4089,8 +4092,8 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                     Some $"Return type of `{aName}:{aType}` does not match expected mapping type `{pType}`.", Parameter.Consumed
             elif  isCallByReference a && isFuncWithParentheses p then
                 // match a not-by-value-reference with func mapping with parameters
-                let referredNodeOpt = referencedNodeOpt a
-                match referredNodeOpt with 
+                let refNodeOpt = referencedNodeOpt a
+                match refNodeOpt with 
                 | Some refNode when refNode.Name = PrimFunctionalTermL ->
                     matchTwoTypes refNode p mode // match signatures with parameters
                 | Some refNode when refNode.Name = PrimMandatoryFunctionalTermL ->
@@ -4103,8 +4106,8 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                     Some $"Return type of `{aName}:{aType}` does not match expected mapping type `{pType}`.", Parameter.Consumed
             elif isCallByReference a && isFuncWithoutParentheses p then 
                 // match a not-by-value-reference with func mapping with parameters
-                let referredNodeOpt = referencedNodeOpt a
-                match referredNodeOpt with 
+                let refNodeOpt = referencedNodeOpt a
+                match refNodeOpt with 
                 | Some refNode when refNode.Name = PrimFunctionalTermL ->
                     None, Parameter.Consumed // mapping func accepting functional term nodes
                 | Some refNode when refNode.Name = PrimMandatoryFunctionalTermL ->
