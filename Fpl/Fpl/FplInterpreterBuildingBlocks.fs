@@ -657,11 +657,8 @@ let rec eval (st: SymbolTable) ast =
         eval st ast1
         st.EvalPop()
     // | NamespaceIdentifier of Positions * Ast list
-    | Ast.PredicateIdentifier((pos1, pos2), dottedIdListAst) ->
+    | Ast.PredicateIdentifier((pos1, pos2), identifier) ->
         st.EvalPush("PredicateIdentifier")
-
-        let pascalCaseIdList = dottedIdListAst |> List.collect (function Ast.PascalCaseId (_,s) -> [s] | _ -> [])
-        let identifier = String.concat "." pascalCaseIdList
         let fv = variableStack.PeekEvalStack()
 
         match fv with 
@@ -902,11 +899,16 @@ let rec eval (st: SymbolTable) ast =
         let getCandidatesBasedOnDotted (parentFv: FplValue) (fVal:FplValue) = 
             let referencedNodeOpt, typeRefNode, typeNameRefNode =
                 if parentFv.Scope.ContainsKey(parentFv.FplId) then 
-                    let var = parentFv.Scope[parentFv.FplId]
-                    let refNodeOpt = var.Scope.Values |> Seq.tryHead 
-                    match refNodeOpt with 
-                    | Some refNode -> refNodeOpt, refNode.Type SignatureType.Mixed, refNode.Name
-                    | None -> None, $"{parentFv.FplId}:{LiteralUndef}", parentFv.Name
+                    let dottedReference = parentFv.Scope[parentFv.FplId]
+                    match dottedReference with 
+                    | :? FplFunctionalTerm 
+                    | :? FplPredicate 
+                    | :? FplClass -> Some dottedReference, dottedReference.Type SignatureType.Mixed, dottedReference.Name
+                    | _ ->
+                        let refNodeOpt = dottedReference.Scope.Values |> Seq.tryHead 
+                        match refNodeOpt with 
+                        | Some refNode -> refNodeOpt, refNode.Type SignatureType.Mixed, refNode.Name
+                        | None -> None, $"{parentFv.FplId}:{LiteralUndef}", parentFv.Name
                 else
                     None, $"{parentFv.FplId}:{LiteralUndef}", parentFv.Name
             let candidatesPre = 

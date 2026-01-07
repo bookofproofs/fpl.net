@@ -107,7 +107,7 @@ let idStartsWithCap = (regex @"[A-Z]\w*") <?> "<PascalCaseId>"
 let pascalCaseId = positions "PascalCaseId" idStartsWithCap |>> Ast.PascalCaseId
 
 let namespaceIdentifier = positions "NamespaceIdentifier" (sepBy1 pascalCaseId dot) .>> IW |>> Ast.NamespaceIdentifier
-let predicateIdentifier = positions "PredicateIdentifier" (sepBy1 pascalCaseId dot) |>> Ast.PredicateIdentifier 
+let predicateIdentifier = positions "PredicateIdentifier" idStartsWithCap |>> Ast.PredicateIdentifier 
 
 let alias = positions "Alias" (skipString LiteralAlias >>. SW >>. idStartsWithCap) |>> Ast.Alias
 let star = positions "Star" (skipChar '*') |>> Ast.Star
@@ -373,7 +373,7 @@ let all = positions "All" ((keywordAll >>. namedVariableDeclarationList) .>>. (l
 let exists = positions "Exists" ((keywordEx >>. namedVariableDeclarationList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.Exists
 
 let existsTimesN = positions "ExistsN" (((keywordExN >>. dollarDigits .>> SW) .>>. namedVariableDeclarationList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.ExistsN
-let isOpArg = choice [ objectSymbol; predicateIdentifier; variable; selfOrParent ] .>> IW
+let isOpArg = choice [ objectSymbol; predicateWithQualification ] .>> IW
 let isOperator = positions "IsOperator" ((keywordIs >>. leftParen >>. isOpArg) .>>. (comma >>. variableType) .>> rightParen) |>> Ast.IsOperator
 
 // infix operators like the equality operator 

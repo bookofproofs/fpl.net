@@ -915,16 +915,20 @@ and FplVariableStack() =
 
 /// Searches for a references in node symbol table. 
 /// Will works properly only for nodes types that use their scope like FplReference, FplSelf, FplParent, FplForInStmtDomain, FplForInStmtEntity, FplVariable
-let rec calledNodeOpt (fv:FplValue) = 
+let rec referencedNodeOpt (fv:FplValue) = 
     let refNodeOpt = 
-        fv.Scope 
-        |> Seq.map (fun kvp -> kvp.Value) 
-        |> Seq.toList 
-        |> List.tryHead
+        if fv.Scope.ContainsKey(".") then
+            // start new recursion for dotted references 
+            referencedNodeOpt fv.Scope["."] 
+        else
+            fv.Scope 
+            |> Seq.map (fun kvp -> kvp.Value) 
+            |> Seq.toList 
+            |> List.tryHead
     match refNodeOpt with
-    | Some refNode when refNode.Name = LiteralSelf -> calledNodeOpt refNode
-    | Some refNode when refNode.Name = LiteralParent -> calledNodeOpt refNode
-    | Some refNode when refNode.Name = PrimVariableL && refNode.ValueList.Count > 0 -> calledNodeOpt refNode.ValueList[0]
+    | Some refNode when refNode.Name = LiteralSelf -> referencedNodeOpt refNode
+    | Some refNode when refNode.Name = LiteralParent -> referencedNodeOpt refNode
+    | Some refNode when refNode.Name = PrimVariableL && refNode.ValueList.Count > 0 -> referencedNodeOpt refNode.ValueList[0]
     | _ -> refNodeOpt
 
 // Create an FplValue list containing all Scopes of an FplNode
@@ -3175,7 +3179,7 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
     override this.Run variableStack =
         this.Debug "Run"
         if this.Scope.Count > 0 then 
-            let calledOpt = calledNodeOpt this
+            let calledOpt = referencedNodeOpt this
             match calledOpt with 
             | Some called ->
                 match called.Name with
@@ -4051,7 +4055,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
         | PrimRefL, PrimMappingL ->
             if isCallByReference a && isPredWithParentheses p then 
                 // match a call by reference with pred with parameters
-                let referredNodeOpt = a.Scope.Values |> Seq.tryHead
+                let referredNodeOpt = referencedNodeOpt a
                 match referredNodeOpt with 
                 | Some (:? FplPredicate as refNode) ->
                     matchTwoTypes refNode p mode // match signatures with parameters
@@ -4065,7 +4069,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                     Some $"Return type of `{aName}:{aType}` does not match expected mapping type `{pType}`.", Parameter.Consumed
             elif isCallByReference a && isPredWithoutParentheses p then
                 // match a not-by-value-reference with pred mapping without parameters
-                let referredNodeOpt = a.Scope.Values |> Seq.tryHead
+                let referredNodeOpt = referencedNodeOpt a
                 match referredNodeOpt with 
                 | Some (:? FplPredicate as refNode) ->
                     None, Parameter.Consumed // mapping pred accepting predicate nodes
@@ -4085,7 +4089,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                     Some $"Return type of `{aName}:{aType}` does not match expected mapping type `{pType}`.", Parameter.Consumed
             elif  isCallByReference a && isFuncWithParentheses p then
                 // match a not-by-value-reference with func mapping with parameters
-                let referredNodeOpt = a.Scope.Values |> Seq.tryHead
+                let referredNodeOpt = referencedNodeOpt a
                 match referredNodeOpt with 
                 | Some refNode when refNode.Name = PrimFunctionalTermL ->
                     matchTwoTypes refNode p mode // match signatures with parameters
@@ -4099,7 +4103,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                     Some $"Return type of `{aName}:{aType}` does not match expected mapping type `{pType}`.", Parameter.Consumed
             elif isCallByReference a && isFuncWithoutParentheses p then 
                 // match a not-by-value-reference with func mapping with parameters
-                let referredNodeOpt = a.Scope.Values |> Seq.tryHead
+                let referredNodeOpt = referencedNodeOpt a
                 match referredNodeOpt with 
                 | Some refNode when refNode.Name = PrimFunctionalTermL ->
                     None, Parameter.Consumed // mapping func accepting functional term nodes
@@ -5772,7 +5776,7 @@ type FplForInStmtEntity(positions: Positions, parent: FplValue) =
         ret
 
     override this.Type signatureType = 
-        let entityOpt = calledNodeOpt this
+        let entityOpt = referencedNodeOpt this
         match entityOpt with 
         | Some entity -> entity.Type signatureType
         | _ -> getFplHead this signatureType
@@ -5796,7 +5800,7 @@ type FplForInStmtDomain(positions: Positions, parent: FplValue) =
         ret
 
     override this.Type signatureType = 
-        let domainOpt = calledNodeOpt this
+        let domainOpt = referencedNodeOpt this
         match domainOpt with 
         | Some domain -> domain.Type signatureType
         | _ -> getFplHead this signatureType
