@@ -1625,11 +1625,13 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
         let head = getFplHead this signatureType
         let propagate = propagateSignatureType signatureType
 
-        match (pars, getMapping this) with
-        | ("", None) -> head
-        | ("", Some map) -> sprintf "%s() -> %s" head (map.Type(propagate))
-        | (_, None) -> sprintf "%s(%s)" head pars
-        | (_, Some map) -> sprintf "%s(%s) -> %s" head pars (map.Type(propagate))
+        match this.ArgType, pars, getMapping this with
+        | ArgType.Parentheses, _, None -> $"{head}({pars})"
+        | ArgType.Parentheses, _, Some map -> $"{head}({pars}) -> {map.Type propagate}"
+        | ArgType.Nothing, "", None -> head
+        | ArgType.Nothing, "", Some map -> $"{head}() -> {map.Type propagate}" 
+        | _, _, None -> sprintf "%s(%s)" head pars
+        | _, _, Some map -> sprintf "%s(%s) -> %s" head pars (map.Type propagate)
 
     override this.Run _ = 
         this.Debug "Run"
@@ -3965,6 +3967,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
         else
             match fv.ArgType with 
             | ArgType.Nothing when isUpper fv.FplId -> true
+            | ArgType.Nothing -> true
             | _ -> false
     let isCallByValue (fv:FplValue) =
         match fv.ArgType with 
@@ -4029,9 +4032,9 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
             matchClassInheritance ctor.ToBeConstructedClass a aType pName pType, Parameter.Consumed
         | _ when aType.StartsWith(pType + "(") ->
             None, Parameter.Consumed
-        | _ when aType = LiteralPred && pType.StartsWith(LiteralPred) ->
+        | _ when aType.StartsWith(LiteralPred) && pType = LiteralPred ->
             None, Parameter.Consumed
-        | _ when aType = LiteralFunc && pType.StartsWith(LiteralFunc) ->
+        | _ when aType.StartsWith(LiteralFunc) && pType = LiteralFunc->
             None, Parameter.Consumed
         | _ when p.Name = PrimFunctionalTermL || p.Name = PrimMandatoryFunctionalTermL ->
             let mappingOpt = getMapping p 
@@ -4056,13 +4059,16 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
         match a.Name, p.Name with 
         | PrimRefL, PrimVariableL
         | PrimRefL, PrimMappingL ->
-            if isCallByReference a && isPredWithParentheses p then 
+            let aIsCallByReference = isCallByReference a
+            if aIsCallByReference && isPredWithParentheses p then 
                 // match a call by reference with pred with parameters
                 let refNodeOpt = referencedNodeOpt a
                 match refNodeOpt with 
-                | Some (:? FplPredicate as refNode) ->
+                | Some refNode when refNode.Name = PrimPredicateL ->
                     matchTwoTypes refNode p mode // match signatures with parameters
-                | Some (:? FplMandatoryPredicate as refNode) ->
+                | Some refNode when refNode.Name = PrimMandatoryPredicateL ->
+                    matchTwoTypes refNode p mode // match signatures with parameters
+                | Some refNode when refNode.Name = PrimVariableL && refNode.TypeId = LiteralPred ->
                     matchTwoTypes refNode p mode // match signatures with parameters
                 | Some refNode ->
                     // a node was referenced but is not a predicate
@@ -4070,33 +4076,37 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                 | _ ->
                     // in all other cases, 
                     Some $"Return type of `{aName}:{aType}` does not match expected mapping type `{pType}`.", Parameter.Consumed
-            elif isCallByReference a && isPredWithoutParentheses p then
+            elif aIsCallByReference && isPredWithoutParentheses p then
                 // match a not-by-value-reference with pred mapping without parameters
                 let refNodeOpt = referencedNodeOpt a
                 match refNodeOpt with 
-                | Some (:? FplPredicate as refNode) ->
-                    None, Parameter.Consumed // mapping pred accepting predicate nodes
-                | Some (:? FplMandatoryPredicate as refNode) ->
-                    None, Parameter.Consumed // mapping pred accepting predicate properties
-                | Some (:? FplAxiom as refNode) ->
-                    None, Parameter.Consumed // mapping pred accepting axioms
+                | Some refNode when refNode.Name = PrimPredicateL ->
+                    None, Parameter.Consumed // pred accepting predicate nodes
+                | Some refNode when refNode.Name = PrimMandatoryPredicateL ->
+                    None, Parameter.Consumed // pred accepting predicate properties
+                | Some refNode when refNode.Name = LiteralAxL ->
+                    None, Parameter.Consumed // pred accepting axioms
                 | Some (:? FplGenericTheoremLikeStmt as refNode) ->
-                    None, Parameter.Consumed // mapping pred accepting theorem-like statements
-                | Some (:? FplConjecture as refNode) ->
-                    None, Parameter.Consumed // mapping pred accepting conjectures
+                    None, Parameter.Consumed // pred accepting theorem-like statements
+                | Some refNode when refNode.Name = LiteralConjL ->
+                    None, Parameter.Consumed // pred accepting conjectures
+                | Some refNode when refNode.Name = PrimVariableL && refNode.TypeId = LiteralPred ->
+                    None, Parameter.Consumed // pred accepting pred variables
                 | Some refNode ->
                     // a node was referenced not a predicate node
                     Some $"The return type of {qualifiedName refNode true} does not match expected mapping type `{pType}`.", Parameter.Consumed
                 | _ ->
                     // in all other cases, error
                     Some $"Return type of `{aName}:{aType}` does not match expected mapping type `{pType}`.", Parameter.Consumed
-            elif  isCallByReference a && isFuncWithParentheses p then
+            elif aIsCallByReference && isFuncWithParentheses p then
                 // match a not-by-value-reference with func mapping with parameters
                 let refNodeOpt = referencedNodeOpt a
                 match refNodeOpt with 
                 | Some refNode when refNode.Name = PrimFunctionalTermL ->
                     matchTwoTypes refNode p mode // match signatures with parameters
                 | Some refNode when refNode.Name = PrimMandatoryFunctionalTermL ->
+                    matchTwoTypes refNode p mode // match signatures with parameters
+                | Some refNode when refNode.Name = PrimVariableL && refNode.TypeId = LiteralFunc ->
                     matchTwoTypes refNode p mode // match signatures with parameters
                 | Some refNode ->
                     // a node was referenced but is not a functional term block
@@ -4104,14 +4114,16 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                 | _ ->
                     // in all other cases, error
                     Some $"Return type of `{aName}:{aType}` does not match expected mapping type `{pType}`.", Parameter.Consumed
-            elif isCallByReference a && isFuncWithoutParentheses p then 
+            elif aIsCallByReference && isFuncWithoutParentheses p then 
                 // match a not-by-value-reference with func mapping with parameters
                 let refNodeOpt = referencedNodeOpt a
                 match refNodeOpt with 
                 | Some refNode when refNode.Name = PrimFunctionalTermL ->
-                    None, Parameter.Consumed // mapping func accepting functional term nodes
+                    None, Parameter.Consumed // func accepting functional term nodes
                 | Some refNode when refNode.Name = PrimMandatoryFunctionalTermL ->
-                    None, Parameter.Consumed // mapping func accepting functional term properties
+                    None, Parameter.Consumed // func accepting functional term properties
+                | Some refNode when refNode.Name = PrimVariableL && refNode.TypeId = LiteralFunc ->
+                    None, Parameter.Consumed // func accepting func variables
                 | Some refNode ->
                     // a node was referenced but is not a functional term block
                     Some $"The return type of {qualifiedName refNode true} does not match expected mapping type `{pType}`.", Parameter.Consumed

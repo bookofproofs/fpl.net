@@ -1605,18 +1605,90 @@ type TestInterpreterErrors() =
     [<DataRow("ST3b_func", "def func Test()->func {dec ~x:pred; return x};", 1)>]
     [<DataRow("ST3c_func", "def func Test()->func {dec ~x:pred(y:obj); return x};", 1)>]
 
-    [<DataRow("01", "def func Test()->obj {dec ~x:Nat; return x};", 1)>] // Nat is undefined, error
-    [<DataRow("02", "def cl Nat {intr} def func Test()->obj {dec ~x:Nat; return x};", 0)>]
-    [<DataRow("03", "def cl Nat {intr} def func Test()->Nat {dec ~x:Nat; return x};", 0)>] // Nat is obj, no error
-    [<DataRow("03a", "def cl A {intr} def cl B:A {intr} def func Test()->B {dec ~x:B; return x};", 0)>] // x is B, no error
-    [<DataRow("03b", "def cl A {intr} def cl B:A {intr} def func Test()->A {dec ~x:B; return x};", 0)>] // x is also A, no error
-    [<DataRow("03c", "def cl A {intr} def cl B:A {intr} def func Test()->obj {dec ~x:B; return x};", 0)>] // x is also obj, no error
-    [<DataRow("04", "def cl Nat {intr} def func Test()->obj {dec ~x:obj; return x};", 0)>]
-    [<DataRow("04a", "def cl Nat {intr} def func Test()->Nat {dec ~x:obj; return x};", 1)>] // obj is not Nat, error
-    [<DataRow("05a", "def func Test()->pred(y:obj) {dec ~a:pred(b:obj); return a};", 0)>]
-    [<DataRow("05b", "def func Test()->pred(y:pred(z:ind)) {dec ~a:pred(b:obj); return a};", 1)>]
-    [<DataRow("05b1", "def func Test()->pred(y:pred(z:ind)) {dec ~a:pred(b:pred(c:obj)); return a};", 1)>]
-    [<DataRow("05b2", "def func Test()->pred(y:pred(z:ind)) {dec ~a:pred(b:pred(c:ind)); return a};", 0)>]
+    // (mis)match return with mapping having pred() types
+    [<DataRow("NP0", "def func Test()->pred() {dec ~x:obj; return x};", 1)>]
+    [<DataRow("NP1", "def func Test()->pred() {dec ~x:ind; return x};", 1)>]
+    [<DataRow("NP2", "def func Test()->pred() {dec ~x:func; return x};", 1)>]
+    [<DataRow("NP2a", "def func Test()->pred() {dec ~x:func()->ind; return x};", 1)>]
+    [<DataRow("NP2b", "def func Test()->pred() {dec ~x:func(y:obj)->ind; return x};", 1)>]
+    [<DataRow("NP2c", "def func Test()->pred() {dec ~x:func(y:obj)->func; return x};", 1)>]
+    [<DataRow("NP2d", "def func Test()->pred() {dec ~x:func(y:obj)->func(z:pred)->pred; return x};", 1)>]
+    [<DataRow("NP3", "def func Test()->pred() {dec ~x:pred; return x};", 1)>]
+    [<DataRow("NP3a", "def func Test()->pred() {dec ~x:pred(); return x};", 0)>]
+    [<DataRow("NP3b", "def func Test()->pred() {dec ~x:pred; return x};", 1)>]
+    [<DataRow("NP3c", "def func Test()->pred() {dec ~x:pred(y:obj); return x};", 1)>]
+    // (mis)match return with mapping having pred(...) types
+    [<DataRow("NP_0", "def func Test()->pred(a:obj) {dec ~x:obj; return x};", 1)>]
+    [<DataRow("NP_1", "def func Test()->pred(a:obj) {dec ~x:ind; return x};", 1)>]
+    [<DataRow("NP_2", "def func Test()->pred(a:obj) {dec ~x:func; return x};", 1)>]
+    [<DataRow("NP_2a", "def func Test()->pred(a:obj) {dec ~x:func()->ind; return x};", 1)>]
+    [<DataRow("NP_2b", "def func Test()->pred(a:obj) {dec ~x:func(y:obj)->ind; return x};", 1)>]
+    [<DataRow("NP_2c", "def func Test()->pred(a:obj) {dec ~x:func(y:obj)->func; return x};", 1)>]
+    [<DataRow("NP_2d", "def func Test()->pred(a:obj) {dec ~x:func(y:obj)->func(z:pred)->pred; return x};", 1)>]
+    [<DataRow("NP_3", "def func Test()->pred(a:obj) {dec ~x:pred; return x};", 1)>]
+    [<DataRow("NP_3a", "def func Test()->pred(a:obj) {dec ~x:pred(); return x};", 1)>]
+    [<DataRow("NP_3b", "def func Test()->pred(a:obj) {dec ~x:pred; return x};", 1)>]
+    [<DataRow("NP_3c", "def func Test()->pred(a:obj) {dec ~x:pred(y:obj); return x};", 0)>]
+    [<DataRow("NP_3c", "def func Test()->pred(a:obj) {dec ~x:pred(y:ind); return x};", 1)>]
+
+    // (mis)match return with mapping having func() types
+    [<DataRow("NF0", "def func Test()->func()->ind {dec ~x:obj; return x};", 1)>]
+    [<DataRow("NF1", "def func Test()->func()->ind {dec ~x:ind; return x};", 1)>]
+    [<DataRow("NF2", "def func Test()->func()->ind {dec ~x:func; return x};", 1)>]
+    [<DataRow("NF2a", "def func Test()->func()->ind {dec ~x:func()->ind; return x};", 0)>]
+    [<DataRow("NF2b", "def func Test()->func()->ind {dec ~x:func(y:obj)->ind; return x};", 1)>]
+    [<DataRow("NF2c", "def func Test()->func()->ind {dec ~x:func(y:obj)->obj; return x};", 1)>]
+    [<DataRow("NF2d", "def func Test()->func()->ind {dec ~x:func(y:ind)->ind; return x};", 1)>]
+    [<DataRow("NF2e", "def func Test()->func()->ind {dec ~x:func(y:obj)->func; return x};", 1)>]
+    [<DataRow("NF2f", "def func Test()->func()->ind {dec ~x:func(y:obj)->func(z:pred)->pred; return x};", 1)>]
+    [<DataRow("NF3", "def func Test()->func()->ind {dec ~x:pred; return x};", 1)>]
+    [<DataRow("NF3a", "def func Test()->func()->ind {dec ~x:pred(); return x};", 1)>]
+    [<DataRow("NF3b", "def func Test()->func()->ind {dec ~x:pred; return x};", 1)>]
+    [<DataRow("NF3c", "def func Test()->func()->ind {dec ~x:pred(y:obj); return x};", 1)>]
+    // (mis)match return with mapping having func(...) types
+    [<DataRow("NF_0", "def func Test()->func(a:obj)->ind {dec ~x:obj; return x};", 1)>]
+    [<DataRow("NF_1", "def func Test()->func(a:obj)->ind {dec ~x:ind; return x};", 1)>]
+    [<DataRow("NF_2", "def func Test()->func(a:obj)->ind {dec ~x:func; return x};", 1)>]
+    [<DataRow("NF_2a", "def func Test()->func(a:obj)->ind {dec ~x:func()->ind; return x};", 1)>]
+    [<DataRow("NF_2b", "def func Test()->func(a:obj)->ind {dec ~x:func(y:obj)->ind; return x};", 0)>]
+    [<DataRow("NF_2c", "def func Test()->func(a:obj)->ind {dec ~x:func(y:obj)->obj; return x};", 1)>]
+    [<DataRow("NF_2d", "def func Test()->func(a:obj)->ind {dec ~x:func(y:ind)->ind; return x};", 1)>]
+    [<DataRow("NF_2e", "def func Test()->func(a:obj)->ind {dec ~x:func(y:obj)->func; return x};", 1)>]
+    [<DataRow("NF_2f", "def func Test()->func(a:obj)->ind {dec ~x:func(y:obj)->func(z:pred)->pred; return x};", 1)>]
+    [<DataRow("NF_3", "def func Test()->func(a:obj)->ind {dec ~x:pred; return x};", 1)>]
+    [<DataRow("NF_3a", "def func Test()->func(a:obj)->ind {dec ~x:pred(); return x};", 1)>]
+    [<DataRow("NF_3b", "def func Test()->func(a:obj)->ind {dec ~x:pred; return x};", 1)>]
+    [<DataRow("NF_3c", "def func Test()->func(a:obj)->ind {dec ~x:pred(y:obj); return x};", 1)>]
+    [<DataRow("NF_3d", "def func Test()->func(a:obj)->ind {dec ~x:pred(y:ind); return x};", 1)>]
+
+    // match return with mapping having class type
+    [<DataRow("CT1", "def cl A {intr} def func Test()->obj {dec ~x:A; return x};", 0)>] // A is obj, no error
+    [<DataRow("CT2", "def cl A {intr} def func Test()->A {dec ~x:A; return x};", 0)>] // A is A, no error
+    [<DataRow("CT3", "def cl A {intr} def cl B:A {intr} def func Test()->A {dec ~x:B; return x};", 0)>] // x is also B:A, no error
+    [<DataRow("CT4", "def cl A {intr} def cl B:A {intr} def func Test()->B {dec ~x:B; return x};", 0)>] // x is B, no error
+    [<DataRow("CT5", "def cl A {intr} def cl B:A {intr} def func Test()->obj {dec ~x:B; return x};", 0)>] // x is also B:A:obj, no error
+    // ... with instances
+    [<DataRow("CI1", "def cl A {intr} def func Test()->obj {dec ~x:A x:=A(); return x};", 0)>] // A is obj, no error
+    [<DataRow("CI2", "def cl A {intr} def func Test()->A {dec ~x:A x:=A(); return x};", 0)>] // A is A, no error
+    [<DataRow("CI3", "def cl A {intr} def cl B:A {intr} def func Test()->A {dec ~x:B x:=B(); return x};", 0)>] // x is also B:A, no error
+    [<DataRow("CI4", "def cl A {intr} def cl B:A {intr} def func Test()->B {dec ~x:B x:=B(); return x};", 0)>] // x is B, no error
+    [<DataRow("CI5", "def cl A {intr} def cl B:A {intr} def func Test()->obj {dec ~x:B x:=B(); return x};", 0)>] // x is also B:A:obj, no error
+
+    // mismatch return with mapping having class type
+    [<DataRow("CT1_", "def func Test()->obj {dec ~x:A; return x};", 1)>] // A is undefined, error
+    [<DataRow("CT2_", "def cl A def func Test()->A {dec ~x:obj; return x};", 1)>] // obj is not A, error
+    [<DataRow("CT3_", "def cl A def cl B:A def func Test()->B {dec ~a:A; return a};", 1)>] // A is not B, error
+    // mismatch with class references
+    [<DataRow("CI1_", "def func Test()->obj {dec ~x:A x:=A; return x};", 1)>] // A is undefined, error
+    [<DataRow("CI2_", "def cl A def cl B:A def func Test()->B {dec ~a:A a:=A; return a};", 1)>] // A is not B, error
+    [<DataRow("CI3_", "def cl A def cl B:A def func Test()->B {dec ~a:B a:=B; return a};", 1)>] // B is B, but a class reference, error
+    [<DataRow("CI4_", "def cl A def func Test()->obj {dec ~x:A x:=A; return x};", 1)>] // A is obj, but x is class reference, error
+    [<DataRow("CI5_", "def cl A def cl B:A def func Test()->B {dec ~x:B x:=B; return x};", 1)>] // B is B, but x is class referene, error
+    [<DataRow("CI6_", "def cl A def func Test()->A {dec ~x:A x:=A; return x};", 1)>] // A is A, but x is class reference, error
+    [<DataRow("CI7_", "def cl A def cl B:A def func Test()->A {dec ~x:B x:=B; return x};", 1)>] // B is A but x is a class reference, error 
+    [<DataRow("CI8_", "def cl A def cl B:A def func Test()->B {dec ~x:B x:=B; return x};", 1)>] // x is B, but class reference, error
+    [<DataRow("CI9_", "def cl A def cl B:A def func Test()->obj {dec ~x:B x:=B; return x};", 1)>] // B is obj but x is class reference, error
+
     
     // match return with mapping having the type pred(...) 
     [<DataRow("MS1", "def pred A(z:obj) def func Test()->pred(y:obj) {return A};", 0)>] // OK: ->pred(y:obj) matches signature A(obj), whole node would be returned
