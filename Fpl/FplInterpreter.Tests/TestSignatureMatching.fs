@@ -39,16 +39,16 @@ type TestSignatureMatching() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("""def pred T (x,y:pred) {true} def pred Caller() {dec ~a,b:pred ~c:ind; T(a,b,c)} ;""",
+    [<DataRow("01", """def pred T (x,y:pred) {true} def pred Caller() {dec ~a,b:pred ~c:ind; T(a,b,c)} ;""",
         "no matching parameter for `c:ind` in the predicate definition TestSignatureMatchingReferencesPred.T(pred, pred)")>]
-    [<DataRow("""def pred T (x,y:pred) {true} def pred Caller() {dec ~a,b:pred; T(a,b)} ;""",
+    [<DataRow("02", """def pred T (x,y:pred) {true} def pred Caller() {dec ~a,b:pred; T(a,b)} ;""",
         "")>]
-    [<DataRow("""def pred T (x,y:Nat) {true} def pred Caller() {dec ~a,b:pred; T(a,b)} ;""",
+    [<DataRow("03", """def pred T (x,y:Nat) {true} def pred Caller() {dec ~a,b:pred; T(a,b)} ;""",
         "`a:pred` does not match `x:Nat` in the predicate definition TestSignatureMatchingReferencesPred.T(Nat, Nat)")>]
-    [<DataRow("""def pred T (x,y:pred) {true} def pred Caller() {dec ~a,b:Nat; T(a,b)} ;""",
-        "undefined `a:Nat` doesn't match `x:pred` in the predicate definition TestSignatureMatchingReferencesPred.T(pred, pred)")>]
+    [<DataRow("04", """def pred T (x,y:pred) {true} def pred Caller() {dec ~a,b:Nat; T(a,b)} ;""",
+        "`a:Nat` does not match `x:pred` in the predicate definition TestSignatureMatchingReferencesPred.T(pred, pred)")>]
     [<TestMethod>]
-    member this.TestSignatureMatchingReferencesPred(varVal, var:string) =
+    member this.TestSignatureMatchingReferencesPred(no:string, varVal, var:string) =
         ad.Clear()
         let fplCode = sprintf """%s""" varVal
         let filename = "TestSignatureMatchingReferencesPred"
@@ -71,7 +71,7 @@ type TestSignatureMatching() =
     [<DataRow("00", """def pred T(f:func()->obj) {intr} def pred Caller() {dec ~x:func()->obj; T(x)} ;""",
         "")>]
     [<DataRow("01", """def pred T(f:func()->Nat) {intr} def pred Caller() {dec ~x:func()->obj; T(x)} ;""",
-        "`obj:obj` does not match `f() -> Nat:func() -> Nat` in TestSignatureMatchingReferencesFunc.T(func() -> Nat)")>]
+        "`x:func() -> obj` does not match `f:func() -> Nat` in the predicate definition TestSignatureMatchingReferencesFunc.T(func() -> Nat)")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesFunc(no:string, varVal, var:string) =
         ad.Clear()

@@ -920,6 +920,8 @@ let rec referencedNodeOpt (fv:FplValue) =
         if fv.Scope.ContainsKey(".") then
             // start new recursion for dotted references 
             referencedNodeOpt fv.Scope["."] 
+        elif fv.Name = PrimInstanceL then 
+            Some fv
         else
             fv.Scope 
             |> Seq.map (fun kvp -> kvp.Value) 
@@ -1621,17 +1623,20 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
         | _ -> addExpressionToParentArgList this
 
     override this.Type signatureType =
-        let pars = getParamTuple this signatureType
         let head = getFplHead this signatureType
-        let propagate = propagateSignatureType signatureType
+        match signatureType with 
+        | SignatureType.Name -> head
+        | _ ->
+            let pars = getParamTuple this signatureType
+            let propagate = propagateSignatureType signatureType
 
-        match this.ArgType, pars, getMapping this with
-        | ArgType.Parentheses, _, None -> $"{head}({pars})"
-        | ArgType.Parentheses, _, Some map -> $"{head}({pars}) -> {map.Type propagate}"
-        | ArgType.Nothing, "", None -> head
-        | ArgType.Nothing, "", Some map -> $"{head}() -> {map.Type propagate}" 
-        | _, _, None -> sprintf "%s(%s)" head pars
-        | _, _, Some map -> sprintf "%s(%s) -> %s" head pars (map.Type propagate)
+            match this.ArgType, pars, getMapping this with
+            | ArgType.Parentheses, _, None -> $"{head}({pars})"
+            | ArgType.Parentheses, _, Some map -> $"{head}({pars}) -> {map.Type propagate}"
+            | ArgType.Nothing, "", None -> head
+            | ArgType.Nothing, "", Some map -> $"{head}() -> {map.Type propagate}" 
+            | _, _, None -> sprintf "%s(%s)" head pars
+            | _, _, Some map -> sprintf "%s(%s) -> %s" head pars (map.Type propagate)
 
     override this.Run _ = 
         this.Debug "Run"
@@ -3940,6 +3945,11 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                 Some($"`{a.Type(SignatureType.Name)}:{aType}` matches neither `{pName}:{pType}` nor the base classes")
         | _ -> None
 
+    let isClassType (fv:FplValue) =
+        let refNodeOpt = referencedNodeOpt fv
+        match refNodeOpt with 
+        | Some refNode when refNode.Name = PrimClassL -> true
+        | _ -> false
     let isPredWithParentheses (fv:FplValue) =
         match fv.ArgType with 
         | ArgType.Parentheses when fv.TypeId.StartsWith(LiteralPred) -> true
@@ -4075,7 +4085,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                     Some $"The return type of {qualifiedName refNode true} does not match expected mapping type `{pType}`.", Parameter.Consumed
                 | _ ->
                     // in all other cases, 
-                    Some $"Return type of `{aName}:{aType}` does not match expected mapping type `{pType}`.", Parameter.Consumed
+                    Some $"`{aName}:{aType}` does not match `{pName}:{pType}`", Parameter.Consumed
             elif aIsCallByReference && isPredWithoutParentheses p then
                 // match a not-by-value-reference with pred mapping without parameters
                 let refNodeOpt = referencedNodeOpt a
@@ -4097,7 +4107,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                     Some $"The return type of {qualifiedName refNode true} does not match expected mapping type `{pType}`.", Parameter.Consumed
                 | _ ->
                     // in all other cases, error
-                    Some $"Return type of `{aName}:{aType}` does not match expected mapping type `{pType}`.", Parameter.Consumed
+                    Some $"`{aName}:{aType}` does not match `{pName}:{pType}`", Parameter.Consumed
             elif aIsCallByReference && isFuncWithParentheses p then
                 // match a not-by-value-reference with func mapping with parameters
                 let refNodeOpt = referencedNodeOpt a
@@ -4113,7 +4123,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                     Some $"The return type of {qualifiedName refNode true} does not match expected mapping type `{pType}`.", Parameter.Consumed
                 | _ ->
                     // in all other cases, error
-                    Some $"Return type of `{aName}:{aType}` does not match expected mapping type `{pType}`.", Parameter.Consumed
+                    Some $"`{aName}:{aType}` does not match `{pName}:{pType}`", Parameter.Consumed
             elif aIsCallByReference && isFuncWithoutParentheses p then 
                 // match a not-by-value-reference with func mapping with parameters
                 let refNodeOpt = referencedNodeOpt a
@@ -4130,6 +4140,24 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                 | _ ->
                     // in all other cases, error
                     Some $"Return type of `{aName}:{aType}` does not match expected mapping type `{pType}`.", Parameter.Consumed
+            elif aIsCallByReference && p.Name = PrimMappingL then 
+                let map = p :?> FplMapping
+                let refNodeOpt = referencedNodeOpt a
+                match map.ToBeReturnedClass, refNodeOpt with
+                | Some cl, Some refNode when refNode.Name = PrimInstanceL -> 
+                    matchTwoTypes a cl mode
+                | None, Some refNode when map.TypeId = LiteralObj && refNode.Name = PrimInstanceL -> 
+                    None, Parameter.Consumed // obj accepting instance
+                | Some cl, Some (:? FplGenericVariable as refNode) when refNode.IsInitialized  -> 
+                    Some $"`{aName}:{aType}` references to a class and does not match `{pName}:{pType}`, try passing instance of the same class.", Parameter.Consumed
+                | Some cl, Some (:? FplGenericVariable as refNode) when not refNode.IsInitialized  -> 
+                    matchTwoTypes a cl mode
+                | None, Some (:? FplGenericVariable as refNode) when map.TypeId = LiteralObj && refNode.IsInitialized -> 
+                    Some $"`{aName}:{aType}` references to a class and does not match `{pName}:{pType}`, try passing instance of the same class.", Parameter.Consumed
+                | None, Some refNode -> 
+                    matchTwoTypes refNode map mode
+                | _, _ -> 
+                    Some $"`{aName}:{aType}` does not match mapping `{pType}`", Parameter.Consumed
             elif isCallByValue a && isWithParenthesesOrFunc p then
                 // mismatch of a by-value-reference with parameterized mapping or a func mapping
                 // since in both cases, no by-value reference is allowed
@@ -5936,7 +5964,10 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
     override this.Run variableStack =
         this.Debug "Run"
         match this.ErrorOccurred, this.Assignee, this.AssignedValue with
-        | Some errCode, _, _ ->
+        | Some errCode, Some (:? FplGenericVariable as assignee), _ ->
+            assignee.IsInitialized <- true
+            emitST003diagnostics errCode this.ArgList[0].StartPos this.ArgList[0].EndPos
+        | Some errCode, Some assignee, _ ->
             emitST003diagnostics errCode this.ArgList[0].StartPos this.ArgList[0].EndPos
         | None, Some (:? FplVariable as assignee), Some (:? FplGenericConstructor as assignedValue) ->
             assignedValue.Run variableStack
