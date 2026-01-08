@@ -601,7 +601,7 @@ type TestSignatureMatching() =
             Assert.IsTrue(false)
 
     [<DataRow("""def pred Eq(x,y: obj) infix "=" 1000 axiom A {dec ~x:ind ~y:obj; (x = y) };""", 
-        "No overload matching `=(ind, obj)`. `x:ind` does not match `x:obj` in a predicate definition TestSIG04MsgSpecificity.Eq(obj, obj).")>]
+        "No overload matching `=(ind, obj)`. `x:ind` does not match `x:obj` in the predicate definition TestSIG04MsgSpecificity.Eq(obj, obj).")>]
     [<DataRow("""def func Succ(n:Nat) -> obj {intr};""", 
         "No overload matching `Nat`, no candidates were found. Are you missing a uses clause?")>]
     [<TestMethod>]

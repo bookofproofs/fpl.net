@@ -1624,19 +1624,27 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
 
     override this.Type signatureType =
         let head = getFplHead this signatureType
-        match signatureType with 
-        | SignatureType.Name -> head
-        | _ ->
-            let pars = getParamTuple this signatureType
-            let propagate = propagateSignatureType signatureType
 
-            match this.ArgType, pars, getMapping this with
-            | ArgType.Parentheses, _, None -> $"{head}({pars})"
-            | ArgType.Parentheses, _, Some map -> $"{head}({pars}) -> {map.Type propagate}"
-            | ArgType.Nothing, "", None -> head
-            | ArgType.Nothing, "", Some map -> $"{head}() -> {map.Type propagate}" 
-            | _, _, None -> sprintf "%s(%s)" head pars
-            | _, _, Some map -> sprintf "%s(%s) -> %s" head pars (map.Type propagate)
+        let pars = getParamTuple this signatureType
+        let propagate = propagateSignatureType signatureType
+
+        match this.ArgType, pars, getMapping this with
+        | ArgType.Parentheses, "", None -> 
+            if signatureType = SignatureType.Name then 
+                head
+            else
+                $"{head}({pars})"
+        | ArgType.Parentheses, "", Some map -> 
+            if signatureType = SignatureType.Name then 
+                head
+            else
+                $"{head}({pars}) -> {map.Type propagate}"
+        | ArgType.Parentheses, _, None -> $"{head}({pars})"
+        | ArgType.Parentheses, _, Some map -> $"{head}({pars}) -> {map.Type propagate}"
+        | ArgType.Nothing, "", None -> head
+        | ArgType.Nothing, "", Some map -> $"{head}() -> {map.Type propagate}" 
+        | _, _, None -> sprintf "%s(%s)" head pars
+        | _, _, Some map -> sprintf "%s(%s) -> %s" head pars (map.Type propagate)
 
     override this.Run _ = 
         this.Debug "Run"
