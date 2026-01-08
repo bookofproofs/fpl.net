@@ -4035,6 +4035,12 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                 matchClassInheritance map.ToBeReturnedClass a aType pName pType, Parameter.Consumed
             else
                 Some $"undefined `{aName}:{aType}` doesn't match `{pName}:{pType}`", Parameter.Consumed
+        | _ when aType.StartsWith(pType + "(") ->
+            None, Parameter.Consumed
+        | _ when aType.StartsWith(LiteralPred) && pType = LiteralPred ->
+            None, Parameter.Consumed
+        | _ when aType.StartsWith(LiteralFunc) && pType = LiteralFunc->
+            None, Parameter.Consumed
         | MatchingMode.Assignment when a.Name = PrimVariableL ->
             let clOpt = a.Scope.Values |> Seq.tryHead
             match clOpt with 
@@ -4043,12 +4049,6 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
         | MatchingMode.Assignment when a.Name = PrimDefaultConstructor || a.Name = LiteralCtorL ->
             let ctor = a :?> FplGenericConstructor
             matchClassInheritance ctor.ToBeConstructedClass a aType pName pType, Parameter.Consumed
-        | _ when aType.StartsWith(pType + "(") ->
-            None, Parameter.Consumed
-        | _ when aType.StartsWith(LiteralPred) && pType = LiteralPred ->
-            None, Parameter.Consumed
-        | _ when aType.StartsWith(LiteralFunc) && pType = LiteralFunc->
-            None, Parameter.Consumed
         | _ when p.Name = PrimFunctionalTermL || p.Name = PrimMandatoryFunctionalTermL ->
             let mappingOpt = getMapping p 
             match mappingOpt with 
@@ -5950,20 +5950,9 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
         this.CheckConsistency()
         addExpressionToParentArgList this
 
-
-    member this.Assignee:FplValue option =
-        if this.ArgList.Count > 0 then 
-            let candidate = this.ArgList[0]
-            if candidate.Name = PrimRefL && candidate.Scope.ContainsKey(candidate.FplId) then 
-                Some candidate.Scope[candidate.FplId]
-            else
-                Some candidate
-        else
-            None
-
-    member this.AssignedValue = 
+    member private this.GetAssignmentArg no =
         if this.ArgList.Count > 1 then 
-            let candidate = this.ArgList[1]
+            let candidate = this.ArgList[no]
             if candidate.Name = PrimRefL && candidate.Scope.ContainsKey(".") then 
                 let dottedRef = candidate.Scope["."]
                 if dottedRef.Scope.ContainsKey(dottedRef.FplId) then
@@ -5976,6 +5965,10 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
                 Some candidate
         else
             None
+
+    member this.Assignee:FplValue option = this.GetAssignmentArg 0
+
+    member this.AssignedValue = this.GetAssignmentArg 1
 
     override this.Run variableStack =
         this.Debug "Run"
