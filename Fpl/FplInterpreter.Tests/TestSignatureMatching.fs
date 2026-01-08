@@ -1,7 +1,7 @@
 ﻿namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
-open FplPrimitives
+open TestSharedConfig
 open FplInterpreterTypes
 open CommonTestHelpers
 
@@ -599,3 +599,18 @@ type TestSignatureMatching() =
             Assert.AreEqual<string>(expectedCandidateSignature, candidate.Type(SignatureType.Mixed))
         | None -> 
             Assert.IsTrue(false)
+
+    [<DataRow("""def pred Eq(x,y: obj) infix "=" 1000 axiom A {dec ~x:ind ~y:obj; (x = y) };""", 
+        "No overload matching `=(ind, obj)`. `x:ind` does not match `x:obj` in a predicate definition TestSIG04MsgSpecificity.Eq(obj, obj).")>]
+    [<DataRow("""def func Succ(n:Nat) -> obj {intr};""", 
+        "No overload matching `Nat`, no candidates were found. Are you missing a uses clause?")>]
+    [<TestMethod>]
+    member this.TestSIG04MsgSpecificity(fplCode:string, (expected:string)) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = SIG04 ("", 0, "" )
+            prepareFplCode ("TestSIG04MsgSpecificity.fpl", fplCode, false) |> ignore
+            checkForUnexpectedErrors code
+            let result = filterByErrorCode ad code.Code
+            Assert.AreEqual<string>(expected, result.Head.Message)
