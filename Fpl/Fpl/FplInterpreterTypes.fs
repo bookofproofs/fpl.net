@@ -3927,6 +3927,12 @@ type Parameter =
     | Consumed
     | NotConsumed
 
+/// Determines if the FplValue has parentheses and has an upper case FplId
+let isCallByValue (fv:FplValue) =
+    match fv.ArgType with 
+    | ArgType.Parentheses when isUpper fv.FplId -> true
+    | _ -> false
+
 /// Tries to match a list of arguments with a list of parameters by their type recursively.
 /// The comparison depends on MatchingMode.
 let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
@@ -3979,10 +3985,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
             | ArgType.Nothing when isUpper fv.FplId -> true
             | ArgType.Nothing -> true
             | _ -> false
-    let isCallByValue (fv:FplValue) =
-        match fv.ArgType with 
-        | ArgType.Parentheses when isUpper fv.FplId -> true
-        | _ -> false
+
 
     let matchByTypeStringRepresentation (a:FplValue) aName (aType:string) (p:FplValue) pName (pType:string) mode = 
         match mode with 
@@ -5884,6 +5887,7 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
             if nameAssignee = nameAssignedValue then
                 this.ErrorOccurred <- emitLG005Diagnostics nameAssignedValue assignedValue.StartPos assignedValue.EndPos
             else
+                // assignee is to be treated as parameter, the assignedValue as argument
                 match mpwa [assignedValue] [assignee] MatchingMode.Assignment with
                 | Some errMsg ->
                     this.ErrorOccurred <- emitSIG05Diagnostics errMsg this.ArgList[1].StartPos this.ArgList[1].EndPos
@@ -5900,6 +5904,11 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
         match this.Assignee, this.AssignedValue with
         | Some (:? FplVariable as assignee), Some (assignedValue:FplValue) when assignedValue.Name = PrimClassL ->
             this.ErrorOccurred <- emitID004diagnostics assignedValue.FplId this.ArgList[1].StartPos this.ArgList[1].EndPos
+        | Some (:? FplVariable as assignee), Some (assignedValue:FplValue) when (assignedValue.Name = PrimFunctionalTermL || assignedValue.Name = PrimMandatoryFunctionalTermL) && isCallByValue this.ArgList[1] ->
+            let mapOpt = getMapping assignedValue
+            match mapOpt with 
+            | Some map -> checkTypes this.ArgList[0] map
+            | _ -> checkTypes assignee assignedValue
         | Some (:? FplVariable as assignee), Some (assignedValue:FplValue) -> 
             checkTypes assignee assignedValue 
             //let nameAssignee = assignee.Type SignatureType.Name
