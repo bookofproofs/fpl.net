@@ -5961,10 +5961,16 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
         else
             None
 
-    member this.AssignedValue =
+    member this.AssignedValue = 
         if this.ArgList.Count > 1 then 
             let candidate = this.ArgList[1]
-            if candidate.Name = PrimRefL && candidate.Scope.ContainsKey(candidate.FplId) then 
+            if candidate.Name = PrimRefL && candidate.Scope.ContainsKey(".") then 
+                let dottedRef = candidate.Scope["."]
+                if dottedRef.Scope.ContainsKey(dottedRef.FplId) then
+                    Some dottedRef.Scope[dottedRef.FplId]
+                else 
+                    None
+            elif candidate.Name = PrimRefL && candidate.Scope.ContainsKey(candidate.FplId) then 
                 Some candidate.Scope[candidate.FplId]
             else
                 Some candidate
