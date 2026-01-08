@@ -5904,6 +5904,7 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
         match this.Assignee, this.AssignedValue with
         | Some (:? FplVariable as assignee), Some (assignedValue:FplValue) when assignedValue.Name = PrimClassL ->
             this.ErrorOccurred <- emitID004diagnostics assignedValue.FplId this.ArgList[1].StartPos this.ArgList[1].EndPos
+            checkTypes assignee assignedValue
         | Some (:? FplVariable as assignee), Some (assignedValue:FplValue) when (assignedValue.Name = PrimFunctionalTermL || assignedValue.Name = PrimMandatoryFunctionalTermL) && isCallByValue this.ArgList[1] ->
             let mapOpt = getMapping assignedValue
             match mapOpt with 
