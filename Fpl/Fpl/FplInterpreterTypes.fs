@@ -3771,15 +3771,10 @@ type FplVariable(fplId, positions: Positions, parent: FplValue) =
 
     override this.Represent () = 
         if this.ValueList.Count = 0 then
-            if this.IsInitialized then 
-                // this case should never happen, because isInitializesVariable is a contradiction to ValueList.Count 0
-                LiteralUndef
-            else
-                match this.TypeId with
-                | LiteralUndef -> LiteralUndef
-                | LiteralPred -> PrimUndetermined
-                | _ -> $"dec {this.Type(SignatureType.Type)}" 
-
+            match this.TypeId with
+            | LiteralUndef -> LiteralUndef
+            | LiteralPred -> PrimUndetermined
+            | _ -> $"dec {this.Type(SignatureType.Type)}" 
         else
             let subRepr = 
                 this.ValueList
