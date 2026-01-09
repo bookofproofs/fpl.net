@@ -4160,6 +4160,11 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                     matchTwoTypes a cl mode
                 | None, Some (:? FplGenericVariable as refNode) when map.TypeId = LiteralObj && refNode.IsInitialized -> 
                     Some $"`{aName}:{aType}` references to a class and does not match `{pName}:{pType}`, try passing instance of the same class.", Parameter.Consumed
+                | None, Some (:? FplGenericVariable as refNode) when map.TypeId = LiteralObj && not refNode.IsInitialized -> 
+                    let refNodeOpt = referencedNodeOpt refNode
+                    match refNodeOpt with 
+                    | Some (:? FplClass as cl) -> None, Parameter.Consumed // obj accepting instance
+                    | _ -> Some $"`{aName}:{aType}` does not match type `{pType}`", Parameter.Consumed
                 | None, Some refNode -> 
                     matchTwoTypes refNode map mode
                 | None, None when aType = pType -> 
