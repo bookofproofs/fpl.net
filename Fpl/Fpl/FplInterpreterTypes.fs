@@ -3508,7 +3508,7 @@ type FplMapping(positions: Positions, parent: FplValue) =
 
     /// If the mapping maps to classes or arrays of classes,
     /// this function will yield an optional reference to the corresponding class node.
-    member this.ToBeReturnedClass
+    member this.ToBeReturnedDefinition
         with get() = _toBeReturnedClass
         and set(value) = _toBeReturnedClass <- value
 
@@ -4035,7 +4035,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
             elif aReferencedNode.Name = PrimFunctionalTermL || aReferencedNode.Name = PrimMandatoryFunctionalTermL then 
                 let mapOpt = getMapping aReferencedNode
                 let map = mapOpt.Value :?> FplMapping 
-                matchClassInheritance map.ToBeReturnedClass a aType pName pType, Parameter.Consumed
+                matchClassInheritance map.ToBeReturnedDefinition a aType pName pType, Parameter.Consumed
             else
                 Some $"undefined `{aName}:{aType}` doesn't match `{pName}:{pType}`", Parameter.Consumed
         | _ when aType.StartsWith(pType + "(") ->
@@ -4149,7 +4149,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
             elif aIsCallByReference && p.Name = PrimMappingL then 
                 let map = p :?> FplMapping
                 let refNodeOpt = referencedNodeOpt a
-                match map.ToBeReturnedClass, refNodeOpt with
+                match map.ToBeReturnedDefinition, refNodeOpt with
                 | Some cl, Some refNode when refNode.Name = PrimInstanceL -> 
                     matchTwoTypes a cl mode
                 | None, Some refNode when map.TypeId = LiteralObj && refNode.Name = PrimInstanceL -> 
@@ -4162,8 +4162,10 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                     Some $"`{aName}:{aType}` references to a class and does not match `{pName}:{pType}`, try passing instance of the same class.", Parameter.Consumed
                 | None, Some refNode -> 
                     matchTwoTypes refNode map mode
+                | None, None when aType = pType -> 
+                    Some $"`{aName}:{aType}` matches type `{pType}` but the type is undefined.", Parameter.Consumed
                 | _, _ -> 
-                    Some $"`{aName}:{aType}` does not match mapping `{pType}`", Parameter.Consumed
+                    Some $"`{aName}:{aType}` does not match type `{pType}`", Parameter.Consumed
             elif isCallByValue a && isWithParenthesesOrFunc p then
                 // mismatch of a by-value-reference with parameterized mapping or a func mapping
                 // since in both cases, no by-value reference is allowed
@@ -5155,7 +5157,7 @@ let runIntrinsicFunction (fv:FplValue) variableStack =
     let mapOpt = getMapping fv
     match mapOpt with
     | Some (:? FplMapping as map) ->
-        match map.ToBeReturnedClass with 
+        match map.ToBeReturnedDefinition with 
         | Some cl when map.Dimensionality = 0 ->
             // a class type without an array
             let defaultCtor = cl.Scope.Values |> Seq.head :?> FplGenericConstructor

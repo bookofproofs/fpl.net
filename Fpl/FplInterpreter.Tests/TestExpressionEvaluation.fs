@@ -240,7 +240,9 @@ type TestExpressionEvaluation() =
         | None -> Assert.IsTrue(false)
 
     [<DataRow("00", "def pred T() { dec ~x:obj; is(x,obj) };", LiteralTrue)>]
-    [<DataRow("01", "def pred T() { dec ~x:Nat; is(x,Nat) };", LiteralTrue)>]
+    [<DataRow("01", "def pred T() { dec ~x:A; is(x,A) };", LiteralFalse)>] // Type A is undefined
+    [<DataRow("01a", "def cl A def pred T() { dec ~x:A; is(x,A) };", LiteralTrue)>] // Type A is defined
+    [<DataRow("01b", "def func A()->ind def pred T() { dec ~x:func()->ind; is(x,A) };", LiteralTrue)>] 
     [<DataRow("02", "def pred T() { dec ~x:Nat; is(x,obj) };", LiteralFalse)>]
     [<DataRow("03", "def cl Nat {intr} def pred T() { dec ~x:Nat; is(x,obj) };", LiteralTrue)>]
     [<DataRow("04", "def cl A {intr} def cl B:A {intr} def pred T() { dec ~x:B; is(x,A) };", LiteralTrue)>]

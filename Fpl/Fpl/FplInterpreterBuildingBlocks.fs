@@ -688,7 +688,9 @@ let rec eval (st: SymbolTable) ast =
         | :? FplMapping as map, 1 -> 
             let candidate = candidates.Head
             match candidate with 
-            | :? FplClass -> map.ToBeReturnedClass <- Some candidate
+            | :? FplFunctionalTerm 
+            | :? FplPredicate 
+            | :? FplClass -> map.ToBeReturnedDefinition <- Some candidate
             | _ -> fv.ErrorOccurred <- emitSIG11diagnostics (qualifiedName map false) (qualifiedName candidate false) map.StartPos map.EndPos       
         | :? FplMapping, 0 -> 
             fv.ErrorOccurred <- emitSIG04Diagnostics identifier 0 "" pos1 pos2
