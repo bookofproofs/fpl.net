@@ -4154,8 +4154,10 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                 let map = p :?> FplMapping
                 let refNodeOpt = referencedNodeOpt a
                 match map.ToBeReturnedDefinition, refNodeOpt with
-                | Some cl, Some refNode when refNode.Name = PrimInstanceL -> 
-                    matchTwoTypes a cl mode
+                | Some def, Some refNode when refNode.Name = PrimInstanceL -> 
+                    matchTwoTypes a def mode
+                | Some def, Some refNode when refNode.Name = PrimIntrinsicUndef -> 
+                    None, Parameter.Consumed // definition accepting undef
                 | None, Some refNode when map.TypeId = LiteralObj && refNode.Name = PrimInstanceL -> 
                     None, Parameter.Consumed // obj accepting instance
                 | Some cl, Some (:? FplGenericVariable as refNode) when refNode.IsInitialized  -> 
@@ -4170,6 +4172,8 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                     | Some (:? FplClass as cl) -> None, Parameter.Consumed // obj accepting instance
                     | _ when refNode.TypeId = LiteralObj && aType = pType -> None, Parameter.Consumed // obj accepting obj variable
                     | _ -> Some $"`{aName}:{aType}` does not match type `{pType}`", Parameter.Consumed
+                | None, Some refNode when refNode.Name = PrimIntrinsicUndef -> 
+                    None, Parameter.Consumed // anything accepting undef
                 | None, Some refNode -> 
                     matchTwoTypes refNode map mode
                 | None, None when aType = pType && isUpper aType -> 
@@ -5335,7 +5339,7 @@ type FplIsOperator(positions: Positions, parent: FplValue) as this =
         let operand = this.ArgList[0]
         let typeOfOperand = this.ArgList[1]
         let newValue = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
-        newValue.FplId <- 
+        let evaluateIsOperator =
             // FPL truth-table
             match operand with 
             | :? FplReference as op ->
@@ -5343,6 +5347,9 @@ type FplIsOperator(positions: Positions, parent: FplValue) as this =
                 | Some errMsg -> LiteralFalse
                 | None -> LiteralTrue
             | _ -> LiteralFalse
+        
+        newValue.FplId <- evaluateIsOperator
+           
         
         this.SetValue(newValue)  
 
