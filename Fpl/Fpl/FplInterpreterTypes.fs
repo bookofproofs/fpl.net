@@ -3990,7 +3990,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
             | _ -> false
 
 
-    let matchByTypeStringRepresentation (a:FplValue) aName (aType:string) (p:FplValue) pName (pType:string) mode = 
+    let matchByTypeStringRepresentation (a:FplValue) aName (aType:string) aTypeName (p:FplValue) pName (pType:string) pTypeName mode = 
         match mode with 
         | _ when aType = pType ->
             None, Parameter.Consumed
@@ -4000,7 +4000,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
             None, Parameter.Consumed // tpl arrays accepts everything: todo: really?
         | MatchingMode.Assignment when aType = LiteralUndef ->
             None, Parameter.Consumed // undef can always be assigned
-        | MatchingMode.Assignment when pType.StartsWith($"*{aType}[") && p.Name = PrimVariableArrayL ->
+        | MatchingMode.Assignment when pType.StartsWith($"*{aType}[") && pTypeName = PrimVariableArrayL ->
             None, Parameter.Consumed // assignee array accepting assigned value
         | MatchingMode.Signature when pType.StartsWith($"*{aType}[{LiteralInd}]") ->
             None, Parameter.NotConsumed // 1D arrays matching input type with ind as index accept variadic enumerations
@@ -4009,14 +4009,14 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
             // or with multidimensional index types will not accept variadic enumerations of arguments
             // even if they have the same type used for the values of the array
             Some $"variadic enumeration of `{aName}:{aType}` does not match `{pName}:{pType}`, try `{aName}:{pType}` as argument or use parameter `{pName}:{p.TypeId}[{LiteralInd}]`", Parameter.Consumed
-        | _ when aType.StartsWith($"*{pType}[") && a.Name = PrimRefL ->
+        | _ when aType.StartsWith($"*{pType}[") && aTypeName = PrimRefL ->
             let refA = a :?> FplReference
             if refA.ArgType = ArgType.Brackets then 
                 // some array elements matching parameter type
                 None, Parameter.Consumed
             else
                 Some $"Array type `{aName}:{aType}` does not match `{pName}:{pType}`", Parameter.Consumed
-        | _ when isUpper aType && a.Name = PrimRefL && a.Scope.Count = 1 ->
+        | _ when isUpper aType && aTypeName = PrimRefL && a.Scope.Count = 1 ->
             let aReferencedNode = a.Scope.Values |> Seq.toList |> List.head
             if aReferencedNode.Scope.Count > 0 then
                 let cl = aReferencedNode.Scope.Values |> Seq.head
@@ -4044,15 +4044,15 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
             None, Parameter.Consumed
         | _ when aType.StartsWith(LiteralFunc) && pType = LiteralFunc->
             None, Parameter.Consumed
-        | MatchingMode.Assignment when a.Name = PrimVariableL ->
+        | MatchingMode.Assignment when aTypeName = PrimVariableL ->
             let clOpt = a.Scope.Values |> Seq.tryHead
             match clOpt with 
             | Some (:? FplClass) -> matchClassInheritance clOpt a aType pName pType, Parameter.Consumed
             | _ -> Some $"`{aName}:{aType}` does not match `{pName}:{pType}`", Parameter.Consumed
-        | MatchingMode.Assignment when a.Name = PrimDefaultConstructor || a.Name = LiteralCtorL ->
+        | MatchingMode.Assignment when aTypeName = PrimDefaultConstructor || aTypeName = LiteralCtorL ->
             let ctor = a :?> FplGenericConstructor
             matchClassInheritance ctor.ToBeConstructedClass a aType pName pType, Parameter.Consumed
-        | _ when p.Name = PrimFunctionalTermL || p.Name = PrimMandatoryFunctionalTermL ->
+        | _ when pTypeName = PrimFunctionalTermL || pTypeName = PrimMandatoryFunctionalTermL ->
             let mappingOpt = getMapping p 
             match mappingOpt with 
             | Some mapping ->
@@ -4065,14 +4065,17 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
         | _ ->
             Some $"`{aName}:{aType}` does not match `{pName}:{pType}`", Parameter.Consumed
 
-   
+    let getNames (fv:FplValue) = 
+        let fvName = fv.Type SignatureType.Name
+        let fvType = fv.Type SignatureType.Type
+        let fvTypeName = fv.Name
+        fvName, fvType, fvTypeName
+    
     let rec matchTwoTypes (a:FplValue) (p:FplValue) (mode:MatchingMode) =
-        let aType = a.Type SignatureType.Type
-        let pType = p.Type SignatureType.Type
-        let aName = a.Type SignatureType.Name
-        let pName = p.Type SignatureType.Name
+        let aName, aType, aTypeName = getNames a 
+        let pName, pType, pTypeName = getNames p
 
-        match a.Name, p.Name with 
+        match aTypeName, pTypeName with 
         | PrimRefL, PrimVariableL
         | PrimRefL, PrimMappingL ->
             let aIsCallByReference = isCallByReference a
@@ -4146,7 +4149,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                 | _ ->
                     // in all other cases, error
                     Some $"Return type of `{aName}:{aType}` does not match expected mapping type `{pType}`.", Parameter.Consumed
-            elif aIsCallByReference && p.Name = PrimMappingL then 
+            elif aIsCallByReference && pTypeName = PrimMappingL then 
                 let map = p :?> FplMapping
                 let refNodeOpt = referencedNodeOpt a
                 match map.ToBeReturnedDefinition, refNodeOpt with
@@ -4177,9 +4180,9 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                 // since in both cases, no by-value reference is allowed
                 Some $"Return type by value `{aName}:{aType}` does not match expected mapping type `{pType}`. Try removing arguments of `{aName}` and refer to the referenced node `{a.FplId}`.", Parameter.Consumed
             else 
-                matchByTypeStringRepresentation a aName aType p pName pType mode
+                matchByTypeStringRepresentation a aName aType aTypeName p pName pType pTypeName mode
         | _ ,_ -> 
-            matchByTypeStringRepresentation a aName aType p pName pType mode
+            matchByTypeStringRepresentation a aName aType aTypeName p pName pType pTypeName mode
 
     match (args, pars) with
     | (a :: ars, p :: prs) ->
@@ -4188,8 +4191,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
         | None, Parameter.Consumed -> mpwa ars prs mode
         | None, Parameter.NotConsumed -> mpwa ars pars mode // handle variadic parameters
     | ([], p :: prs) ->
-        let pType = p.Type(SignatureType.Type)
-        let pName = p.Type SignatureType.Name
+        let pName, pType, pTypeName = getNames p
         match p with 
         | :? FplClass as cl ->
             let constructors = cl.GetConstructors()
@@ -4197,7 +4199,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                 None
             else
                 Some($"missing argument for `{pName}:{pType}`")
-        | _ when p.Name = PrimVariableArrayL ->
+        | _ when pTypeName = PrimVariableArrayL ->
             None
         | _ -> 
             Some($"missing argument for `{pName}:{pType}`")
@@ -4222,7 +4224,7 @@ let matchArgumentsWithParameters (fva: FplValue) (fvp: FplValue) =
 
     let argResult = 
         if aHasBracketsOrParentheses <> pHasBracketsOrParentheses && arguments.Length = 0 && parameters.Length = 0 then 
-            Some $"calling and called nodes have mismatching use of parentheses"
+            Some $"calling `{fva.Type SignatureType.Name}` and called `{fvp.Type SignatureType.Name}` nodes have mismatching use of parentheses"
         else
             mpwa arguments parameters MatchingMode.Signature
 
