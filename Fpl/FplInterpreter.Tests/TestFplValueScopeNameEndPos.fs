@@ -794,7 +794,7 @@ type TestFplValueScopeNameEndPos() =
             | "base5" -> 
                 Assert.AreEqual<int64>((int64)68, base1.EndPos.Column)
             | "base6" -> 
-                Assert.AreEqual<int64>((int64)63, base1.EndPos.Column)
+                Assert.AreEqual<int64>((int64)62, base1.EndPos.Column)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

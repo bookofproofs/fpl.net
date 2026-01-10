@@ -543,10 +543,10 @@ type TestFplValueScopeQualifiedName() =
             match var with
             | "base1" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1 false) 
             | "base2" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1 false) 
-            | "base3" -> Assert.AreEqual<string>("an intrinsic undefined TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1 false) 
+            | "base3" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1 false) 
             | "base4" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1().-(1)", qualifiedName base1 false) 
             | "base5" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1().Test()", qualifiedName base1 false) 
-            | "base6" -> Assert.AreEqual<string>("an intrinsic index TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1 false) 
+            | "base6" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1 false) 
             | "base7" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1().Test$1(x)", qualifiedName base1 false) 
             | "base8" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1 false) 
             | "base9" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1 false) 

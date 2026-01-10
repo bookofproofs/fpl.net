@@ -291,6 +291,7 @@ type TestExpressionEvaluation() =
     // match with simple types
     [<DataRow("ST0", "def pred Test() {dec ~x:obj; is(x, obj)};", LiteralTrue)>]
     [<DataRow("ST1", "def pred Test() {dec ~x:ind; is(x, ind)};", LiteralTrue)>]
+    [<DataRow("ST1a", "def pred Test() {is($1, ind)};", LiteralTrue)>]
     [<DataRow("ST2", "def pred Test() {dec ~x:func; is(x, func)};", LiteralTrue)>]
     [<DataRow("ST2a", "def pred Test() {dec ~x:func()->ind; is(x, func)};", LiteralTrue)>]
     [<DataRow("ST2b", "def pred Test() {dec ~x:func(y:obj)->ind; is(x, func)};", LiteralTrue)>]
@@ -300,6 +301,8 @@ type TestExpressionEvaluation() =
     [<DataRow("ST3a", "def pred Test() {dec ~x:pred(); is(x, pred)};", LiteralTrue)>]
     [<DataRow("ST3b", "def pred Test() {dec ~x:pred; is(x, pred)};", LiteralTrue)>]
     [<DataRow("ST3c", "def pred Test() {dec ~x:pred(y:obj); is(x, pred)};", LiteralTrue)>]
+    [<DataRow("ST3d", "def pred Test() {dec ~x:pred; is(true, pred)};", LiteralTrue)>]
+    [<DataRow("ST3e", "def pred Test() {dec ~x:pred; is(false, pred)};", LiteralTrue)>]
 
     // mismatch with simple type obj
     [<DataRow("ST0_obj", "def pred Test() {dec ~x:obj; is(x, obj)};", LiteralTrue)>]

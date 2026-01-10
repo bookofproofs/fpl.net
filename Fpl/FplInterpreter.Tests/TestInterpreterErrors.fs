@@ -1543,6 +1543,7 @@ type TestInterpreterErrors() =
     // match with simple types
     [<DataRow("ST0", "def func Test()->obj {dec ~x:obj; return x};", 0)>]
     [<DataRow("ST1", "def func Test()->ind {dec ~x:ind; return x};", 0)>]
+    [<DataRow("ST1a", "def func Test()->ind {return $1};", 0)>]
     [<DataRow("ST2", "def func Test()->func {dec ~x:func; return x};", 0)>]
     [<DataRow("ST2a", "def func Test()->func {dec ~x:func()->ind; return x};", 0)>]
     [<DataRow("ST2b", "def func Test()->func {dec ~x:func(y:obj)->ind; return x};", 0)>]
@@ -1552,6 +1553,8 @@ type TestInterpreterErrors() =
     [<DataRow("ST3a", "def func Test()->pred {dec ~x:pred(); return x};", 0)>]
     [<DataRow("ST3b", "def func Test()->pred {dec ~x:pred; return x};", 0)>]
     [<DataRow("ST3c", "def func Test()->pred {dec ~x:pred(y:obj); return x};", 0)>]
+    [<DataRow("ST3d", "def func Test()->pred {return true};", 0)>]
+    [<DataRow("ST3e", "def func Test()->pred {return false};", 0)>]
 
     // mismatch with simple type obj
     [<DataRow("ST0_obj", "def func Test()->obj {dec ~x:obj; return x};", 0)>]
@@ -2089,6 +2092,7 @@ type TestInterpreterErrors() =
     // match with simple types
     [<DataRow("ST0", "def pred Test(v:obj) def pred T() {dec ~x:obj; Test(x)};", 0)>]
     [<DataRow("ST1", "def pred Test(v:ind) def pred T() {dec ~x:ind; Test(x)};", 0)>]
+    [<DataRow("ST1a", "def pred Test(v:ind) {Test($1)};", 0)>]
     [<DataRow("ST2", "def pred Test(v:func) def pred T() {dec ~x:func; Test(x)};", 0)>]
     [<DataRow("ST2a", "def pred Test(v:func) def pred T() {dec ~x:func()->ind; Test(x)};", 0)>]
     [<DataRow("ST2b", "def pred Test(v:func) def pred T() {dec ~x:func(y:obj)->ind; Test(x)};", 0)>]
@@ -2098,6 +2102,8 @@ type TestInterpreterErrors() =
     [<DataRow("ST3a", "def pred Test(v:pred) def pred T() {dec ~x:pred(); Test(x)};", 0)>]
     [<DataRow("ST3b", "def pred Test(v:pred) def pred T() {dec ~x:pred; Test(x)};", 0)>]
     [<DataRow("ST3c", "def pred Test(v:pred) def pred T() {dec ~x:pred(y:obj); Test(x)};", 0)>]
+    [<DataRow("ST3d", "def pred Test(v:pred) def pred T() {Test(true)};", 0)>]
+    [<DataRow("ST3e", "def pred Test(v:pred) def pred T() {Test(false)};", 0)>]
 
     // mismatch with simple type obj
     [<DataRow("ST0_obj", "def pred Test(v:obj) def pred T() {dec ~x:obj; Test(x)};", 0)>]
@@ -2603,6 +2609,7 @@ type TestInterpreterErrors() =
     // match with simple types
     [<DataRow("ST0", "def pred T(v:obj) {dec ~x:obj v:=x; true};", 0)>]
     [<DataRow("ST1", "def pred T(v:ind) {dec ~x:ind v:=x; true};", 0)>]
+    [<DataRow("ST1a", "def pred T(v:ind) {dec v:=$1; true};", 0)>]
     [<DataRow("ST2", "def pred T(v:func) {dec ~x:func v:=x; true};", 0)>]
     [<DataRow("ST2a", "def pred T(v:func) {dec ~x:func()->ind v:=x; true};", 0)>]
     [<DataRow("ST2b", "def pred T(v:func) {dec ~x:func(y:obj)->ind v:=x; true};", 0)>]
@@ -2612,6 +2619,8 @@ type TestInterpreterErrors() =
     [<DataRow("ST3a", "def pred T(v:pred) {dec ~x:pred() v:=x; true};", 0)>]
     [<DataRow("ST3b", "def pred T(v:pred) {dec ~x:pred v:=x; true};", 0)>]
     [<DataRow("ST3c", "def pred T(v:pred) {dec ~x:pred(y:obj) v:=x; true};", 0)>]
+    [<DataRow("ST3d", "def pred T(v:pred) {dec ~x:pred v:=true; true};", 0)>]
+    [<DataRow("ST3e", "def pred T(v:pred) {dec ~x:pred v:=false; false};", 0)>]
 
     // mismatch with simple type obj
     [<DataRow("ST0_obj", "def pred T(v:obj) {dec ~x:obj v:=x; true};", 0)>]

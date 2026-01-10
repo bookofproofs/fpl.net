@@ -3180,7 +3180,7 @@ type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
     override this.Run variableStack = 
         this.Debug "Run"
 
-    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
+    override this.EmbedInSymbolTable _ = addExpressionToReference this
 
     override this.RunOrder = None
 
@@ -5123,7 +5123,7 @@ type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
     override this.Run _ = 
         this.Debug "Run"
 
-    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
+    override this.EmbedInSymbolTable _ = addExpressionToReference this
 
     override this.RunOrder = None
 

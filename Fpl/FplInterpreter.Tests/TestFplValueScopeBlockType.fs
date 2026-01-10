@@ -555,10 +555,10 @@ type TestFplValueScopeBlockType() =
             match var with
             | "base1" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base2" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base3" -> Assert.IsInstanceOfType<FplIntrinsicUndef>(base1)
+            | "base3" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base4" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base5" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base6" -> Assert.IsInstanceOfType<FplIntrinsicInd>(base1)
+            | "base6" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base7" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base8" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base9" -> Assert.IsInstanceOfType<FplReference>(base1)
