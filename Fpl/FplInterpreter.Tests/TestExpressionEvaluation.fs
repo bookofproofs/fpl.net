@@ -757,6 +757,70 @@ type TestExpressionEvaluation() =
             Assert.AreEqual<string>(expected, actual)
         | None -> Assert.IsTrue(false)
 
+    // match with simple types
+    [<DataRow("ST0", "def pred Test() {is(undef, obj)};", LiteralTrue)>]
+    [<DataRow("ST1", "def pred Test() {is(undef, ind)};", LiteralTrue)>]
+    [<DataRow("ST2", "def pred Test() {is(undef, func)};", LiteralTrue)>]
+    [<DataRow("ST3", "def pred Test() {is(undef, pred)};", LiteralTrue)>]
+
+    // (mis)match with pred() types
+    [<DataRow("NP0", "def pred Test() {is(undef, pred())};", LiteralTrue)>]
+    // (mis)match with pred(...) types
+    [<DataRow("NP_0", "def pred Test() {is(undef, pred(a:obj))};", LiteralTrue)>]
+
+    // (mis)match with func() types
+    [<DataRow("NF0", "def pred Test() {is(undef, func()->ind)};", LiteralTrue)>]
+
+    // (mis)match with func(...) types
+    [<DataRow("NF_0", "def pred Test() {is(undef, func(a:obj)->ind)};", LiteralTrue)>]
+
+    // mismatch with class type
+    [<DataRow("CT2_", "def cl A def pred Test() {is(undef, A)};", LiteralTrue)>] // undef is A
+    [<DataRow("CT3_", "def cl A def cl B:A def pred Test() {is(undef, B)};", LiteralTrue)>] // undef is B
+
+     
+    // match with the type pred 
+    [<DataRow("MS2e", "ax A {true} def pred Test() {is(undef, A)};", LiteralTrue)>] // true: undef matches signature A (axiom)
+    [<DataRow("MS2f", "thm A {true} def pred Test() {is(undef, A)};", LiteralTrue)>] // true: undef matches signature A (theorem)
+    [<DataRow("MS2g", "lem A {true} def pred Test() {is(undef, A)};", LiteralTrue)>] // true: undef matches signature A (lemma)
+    [<DataRow("MS2h", "prop A {true} def pred Test() {is(undef, A)};", LiteralTrue)>] // true: undef matches signature A (proposition)
+    [<DataRow("MS2i", "conj A {true} def pred Test() {is(undef, A)};", LiteralTrue)>] // true: undef matches signature A (conjecture)
+    [<DataRow("MS2j", "cor A$1 {true} def pred Test() {is(undef, A$1)};", LiteralTrue)>] // true: undef matches signature A$1 (corollary)
+    [<DataRow("MS2k", "proof A$1 {1. |- trivial} def pred Test() {is(undef, A$1)};", LiteralTrue)>] // true: undef matches signature A$1 (proof)
+    [<DataRow("MS2l", "inf A {pre:true con:true} def pred Test() {is(undef, A)};", LiteralTrue)>] // true: undef matches  signature A (rule of inference)
+    [<DataRow("MS2m", "def func A()->obj def pred Test() {is(undef, A)};", LiteralTrue)>] // true: undef matches signature A (functional term)
+    [<DataRow("MS2n", "ext A x@/\d+/ -> obj {dec ~y:obj; return y} def pred Test() {is(undef, A)};", LiteralTrue)>] // true: undef matches signature A (extension)
+    [<DataRow("MS2o", "def cl A def pred Test() {is(undef, A)};", LiteralTrue)>] // true: undef matches signature A (class)
+    // match with the type func(...)->...
+    [<DataRow("MS3", "def func A(z:obj)->ind def pred Test() {is(undef, A)};", LiteralTrue)>] // true: undef matches signature A(obj)->ind
+    [<DataRow("MS3d", "def func A(z:ind)->ind def pred Test() {is(undef, A)};", LiteralTrue)>] // true: undef matches signature A(ind)->ind
+
+    // match with the type func()->...
+    [<DataRow("MS3_", "def func A()->ind def pred Test() {is(undef, A)};", LiteralTrue)>] // true: undef matches signature A()->ind
+    [<DataRow("MS3d_", "def func A(z:ind)->ind def pred Test() {is(undef, A)};", LiteralTrue)>] // true: undef matches signature A(ind)->ind
+    [<DataRow("MS3m_", "def func A()->func()->obj def pred Test() {is(undef, A)};", LiteralTrue)>] // true: undef matches signature A(z:obj)->func()->obj (functional term)
+
+    // match with the type func
+    [<DataRow("MS4", "def func A(z:obj)->ind def pred Test() {is(undef, A)};", LiteralTrue)>] // true: undef matches signature A(obj)->ind
+    [<DataRow("MS4d", "def func A(z:ind)->func(a:obj)->ind def pred Test() {is(undef, A)};", LiteralTrue)>] // true: undef matches signature signature A(ind)->func(obj)->ind
+
+    [<TestMethod>]
+    member this.TestExpressionEvaluationIsOperandUndef(no:string, fplCode, expected: string) =
+        ad.Clear()
+        let filename = "TestExpressionEvaluationIsOperand"
+        let stOption = prepareFplCode (filename + ".fpl", fplCode, false)
+        prepareFplCode (filename, "", false) |> ignore
+
+        match stOption with
+        | Some st ->
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let pr1 = theory.Scope.Values |> Seq.filter (fun fv -> fv.FplId = "Test") |> Seq.head         
+
+            let actual = evalTreeFplRepresentation(pr1)
+            Assert.AreEqual<string>(expected, actual)
+        | None -> Assert.IsTrue(false)
+
     [<DataRow("def pred T() { dec ~x:pred(y:obj); is(self,pred) };", LiteralPred)>]
     [<DataRow("def pred T() { dec ~x:pred(y:func(z:obj)->obj); is(x,pred(y:func(z:obj)->Nat)) };", "pred(func(obj) -> Nat)")>]
     [<DataRow("def pred T() { dec ~x:pred(y:func()->obj); is(x,pred(y:func(z:obj)->obj)) };", "pred(func(obj) -> obj)")>]

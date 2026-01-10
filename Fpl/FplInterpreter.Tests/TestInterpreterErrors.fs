@@ -2001,6 +2001,47 @@ type TestInterpreterErrors() =
             ad.Clear()
             runTestHelper "TestSIG03.fpl" fplCode code expected
 
+    // match with simple types
+    [<DataRow("ST0", "def func Test()->obj {return undef};", 0)>]
+
+    // mismatch with simple type ind
+    [<DataRow("ST0_ind", "def func Test()->ind {return undef};", 0)>]
+
+    // mismatch with simple type pred
+    [<DataRow("ST0_pred", "def func Test()->pred {return undef};", 0)>]
+
+    // mismatch with simple type func
+    [<DataRow("ST0_func", "def func Test()->func {return undef};", 0)>]
+
+    // (mis)match with pred() types
+    [<DataRow("NP0", "def func Test()->pred() {return undef};", 0)>]
+    // (mis)match with pred(...) types
+    [<DataRow("NP_0", "def func Test()->pred(a:obj) {return undef};", 0)>]
+
+    // (mis)match with func() types
+    [<DataRow("NF0", "def func Test()->func()->ind {return undef};", 0)>]
+    // (mis)match with func(...) types
+    [<DataRow("NF_0", "def func Test()->func(a:obj)->ind {return undef};", 0)>]
+
+    // match with class type
+    [<DataRow("CT2", "def cl A {intr} def func Test()->A {return undef};", 0)>] // undef is A, no error
+    [<DataRow("CT4", "def cl A {intr} def cl B:A {intr} def func Test()->B {return undef};", 0)>] // undef is B, no error
+
+    // match with the type func(...)->...
+    [<DataRow("MS3", "def func Test()->func(y:obj)->ind {return undef};", 0)>] // OK: ->func(y:obj)->ind matches undef
+    // ... using properties of classes
+    [<DataRow("MS3n_", "def func Test()->func(y:obj)->ind {return undef};", 0)>] // OK: ->func(y:obj)->ind matches undef 
+    [<DataRow("MS3p_5", "def func Test()->func()->obj {return undef};", 0)>] // OK: ->func()->ind matches undef
+
+    [<TestMethod>]
+    member this.TestSIG03Undef(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = SIG03 ""
+            ad.Clear()
+            runTestHelper "TestSIG03Undef.fpl" fplCode code expected
+
     [<DataRow("00", "def cl Test {intr};", 0)>]
     [<DataRow("01", "def cl Test:Set {intr};", 0)>] // this should cause the ID010 error only and not SIG04
     [<DataRow("02", "def class Set def cl Test:Set {intr};", 0)>]
@@ -2092,7 +2133,7 @@ type TestInterpreterErrors() =
     // match with simple types
     [<DataRow("ST0", "def pred Test(v:obj) def pred T() {dec ~x:obj; Test(x)};", 0)>]
     [<DataRow("ST1", "def pred Test(v:ind) def pred T() {dec ~x:ind; Test(x)};", 0)>]
-    [<DataRow("ST1a", "def pred Test(v:ind) {Test($1)};", 0)>]
+    [<DataRow("ST1a", "def pred Test(v:ind) def pred T() {Test($1)};", 0)>]
     [<DataRow("ST2", "def pred Test(v:func) def pred T() {dec ~x:func; Test(x)};", 0)>]
     [<DataRow("ST2a", "def pred Test(v:func) def pred T() {dec ~x:func()->ind; Test(x)};", 0)>]
     [<DataRow("ST2b", "def pred Test(v:func) def pred T() {dec ~x:func(y:obj)->ind; Test(x)};", 0)>]
@@ -2551,6 +2592,46 @@ type TestInterpreterErrors() =
             ad.Clear()
             runTestHelper "TestSIG04.fpl" fplCode code expected
 
+
+    // match with simple types
+    [<DataRow("ST0", "def pred Test(v:obj) def pred T() {Test(undef)};", 0)>]
+
+    // mismatch with simple type ind
+    [<DataRow("ST0_ind", "def pred Test(v:ind) def pred T() {Test(undef)};", 0)>]
+
+    // mismatch with simple type pred
+    [<DataRow("ST0_pred", "def pred Test(v:pred) def pred T() {Test(undef)};", 0)>]
+
+    // mismatch with simple type func
+    [<DataRow("ST0_func", "def pred Test(v:func) def pred T() {Test(undef)};", 0)>]
+
+    // (mis)match with pred() types
+    [<DataRow("NP0", "def pred Test(v:pred()) def pred T() {Test(undef)};", 0)>]
+    // (mis)match with pred(...) types
+    [<DataRow("NP_0", "def pred Test(v:pred(a:obj)) def pred T() {Test(undef)};", 0)>]
+
+    // (mis)match with func() types
+    [<DataRow("NF0", "def pred Test(v:func()->ind) def pred T() {Test(undef)};", 0)>]
+    // (mis)match with func(...) types
+    [<DataRow("NF_0", "def pred Test(v:func(a:obj)->ind) def pred T() {Test(undef)};", 0)>]
+    [<DataRow("NF_0", "def pred Test(v:func(a:obj)->obj) def pred T() {Test(undef)};", 0)>]
+    [<DataRow("NF_0", "def pred Test(v:func(a:ind)->ind) def pred T() {Test(undef)};", 0)>]
+    [<DataRow("NF_0", "def pred Test(v:func(a:ind)->func(b:obj)->pred) def pred T() {Test(undef)};", 0)>]
+
+    // match with class type
+    [<DataRow("CT2", "def cl A def pred Test(v:A) def pred T() {Test(undef)};", 0)>] // A is A, no error
+    [<DataRow("CT4", "def cl A def cl B:A def pred Test(v:B) def pred T() {Test(undef)};", 0)>] // x is B, no error
+
+    [<TestMethod>]
+    member this.TestSIG04Undef(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = SIG04 ("", 0, "")
+            ad.Clear()
+            runTestHelper "TestSIG04Undef.fpl" fplCode code expected
+
+
     [<DataRow("inh", """def cl A def pred T() {dec ~n:A n:=A(); true};""", 0)>]
     [<DataRow("inh_a", """def cl A def pred T() {dec ~n:obj n:=A(); true};""", 0)>]
     [<DataRow("inh_b", """def cl A def cl B:A def pred T() {dec ~n:A n:=B(); true};""", 0)>]
@@ -2620,7 +2701,7 @@ type TestInterpreterErrors() =
     [<DataRow("ST3b", "def pred T(v:pred) {dec ~x:pred v:=x; true};", 0)>]
     [<DataRow("ST3c", "def pred T(v:pred) {dec ~x:pred(y:obj) v:=x; true};", 0)>]
     [<DataRow("ST3d", "def pred T(v:pred) {dec ~x:pred v:=true; true};", 0)>]
-    [<DataRow("ST3e", "def pred T(v:pred) {dec ~x:pred v:=false; false};", 0)>]
+    [<DataRow("ST3e", "def pred T(v:pred) {dec ~x:pred v:=false; true};", 0)>]
 
     // mismatch with simple type obj
     [<DataRow("ST0_obj", "def pred T(v:obj) {dec ~x:obj v:=x; true};", 0)>]
@@ -3067,6 +3148,51 @@ type TestInterpreterErrors() =
             let code = SIG05 ""
             ad.Clear()
             runTestHelper "TestSIG05.fpl" fplCode code expected
+
+    // -----------------------------
+
+    // match with simple types
+    [<DataRow("ST0", "def pred T(v:obj) {dec v:=undef; true};", 0)>]
+
+    // mismatch with simple type ind
+    [<DataRow("ST0_ind", "def pred T(v:ind) {dec v:=undef; true};", 1)>]
+
+    // mismatch with simple type pred
+    [<DataRow("ST0_pred", "def pred T(v:pred) {dec v:=undef; true};", 1)>]
+
+    // mismatch with simple type func
+    [<DataRow("ST0_func", "def pred T(v:func) {dec v:=undef; true};", 1)>]
+
+    // (mis)match with pred() types
+    [<DataRow("NP0", "def pred T(v:pred()) {dec v:=undef; true};", 1)>]
+
+    // (mis)match with pred(...) types
+    [<DataRow("NP_0", "def pred T(v:pred(a:obj)) {dec v:=undef; true};", 1)>]
+
+    // (mis)match with func() types
+    [<DataRow("NF0", "def pred T(v:func()->ind) {dec v:=undef; true};", 1)>]
+    [<DataRow("NF1", "def pred T(v:func()->obj) {dec v:=undef; true};", 1)>]
+
+    // (mis)match with func(...) types
+    [<DataRow("NF_0", "def pred T(v:func(a:obj)->ind) {dec v:=undef; true};", 1)>]
+    [<DataRow("NF_1", "def pred T(v:func(a:obj)->obj) {dec v:=undef; true};", 1)>]
+    [<DataRow("NF_2", "def pred T(v:func(a:ind)->ind) {dec v:=undef; true};", 1)>]
+    [<DataRow("NF_2a", "def pred T(v:func(a:ind)->obj) {dec v:=undef; true};", 1)>]
+
+    // match with class type
+    [<DataRow("CT2", "def cl A def pred T(v:A) {dec v:=undef; true};", 0)>] // A is A, no error
+    [<DataRow("CT4", "def cl A def cl B:A def pred T(v:B) {dec v:=undef; true};", 0)>] // x is B, no error
+
+    [<DataRow("MS3m", "def pred T(v:func(y:obj)->ind) {dec v:=undef; true};", 1)>] // SIG05: func(y:obj)->ind does not match signature A(z:obj)->func()->obj (functional term)
+
+    [<TestMethod>]
+    member this.TestSIG05Undef(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = SIG05 ""
+            ad.Clear()
+            runTestHelper "TestSIG05Undef.fpl" fplCode code expected
 
 
     [<DataRow("00a", "def cl A { intr prty pred T() {intr} } def cl B { intr prty pred T() {intr} } def cl C:A,B ;", 1)>]
