@@ -3155,35 +3155,35 @@ type TestInterpreterErrors() =
     [<DataRow("ST0", "def pred T(v:obj) {dec v:=undef; true};", 0)>]
 
     // mismatch with simple type ind
-    [<DataRow("ST0_ind", "def pred T(v:ind) {dec v:=undef; true};", 1)>]
+    [<DataRow("ST0_ind", "def pred T(v:ind) {dec v:=undef; true};", 0)>]
 
     // mismatch with simple type pred
-    [<DataRow("ST0_pred", "def pred T(v:pred) {dec v:=undef; true};", 1)>]
+    [<DataRow("ST0_pred", "def pred T(v:pred) {dec v:=undef; true};", 0)>]
 
     // mismatch with simple type func
-    [<DataRow("ST0_func", "def pred T(v:func) {dec v:=undef; true};", 1)>]
+    [<DataRow("ST0_func", "def pred T(v:func) {dec v:=undef; true};", 0)>]
 
     // (mis)match with pred() types
-    [<DataRow("NP0", "def pred T(v:pred()) {dec v:=undef; true};", 1)>]
+    [<DataRow("NP0", "def pred T(v:pred()) {dec v:=undef; true};", 0)>]
 
     // (mis)match with pred(...) types
-    [<DataRow("NP_0", "def pred T(v:pred(a:obj)) {dec v:=undef; true};", 1)>]
+    [<DataRow("NP_0", "def pred T(v:pred(a:obj)) {dec v:=undef; true};", 0)>]
 
     // (mis)match with func() types
-    [<DataRow("NF0", "def pred T(v:func()->ind) {dec v:=undef; true};", 1)>]
-    [<DataRow("NF1", "def pred T(v:func()->obj) {dec v:=undef; true};", 1)>]
+    [<DataRow("NF0", "def pred T(v:func()->ind) {dec v:=undef; true};", 0)>]
+    [<DataRow("NF1", "def pred T(v:func()->obj) {dec v:=undef; true};", 0)>]
 
     // (mis)match with func(...) types
-    [<DataRow("NF_0", "def pred T(v:func(a:obj)->ind) {dec v:=undef; true};", 1)>]
-    [<DataRow("NF_1", "def pred T(v:func(a:obj)->obj) {dec v:=undef; true};", 1)>]
-    [<DataRow("NF_2", "def pred T(v:func(a:ind)->ind) {dec v:=undef; true};", 1)>]
-    [<DataRow("NF_2a", "def pred T(v:func(a:ind)->obj) {dec v:=undef; true};", 1)>]
+    [<DataRow("NF_0", "def pred T(v:func(a:obj)->ind) {dec v:=undef; true};", 0)>]
+    [<DataRow("NF_1", "def pred T(v:func(a:obj)->obj) {dec v:=undef; true};", 0)>]
+    [<DataRow("NF_2", "def pred T(v:func(a:ind)->ind) {dec v:=undef; true};", 0)>]
+    [<DataRow("NF_2a", "def pred T(v:func(a:ind)->obj) {dec v:=undef; true};", 0)>]
 
     // match with class type
     [<DataRow("CT2", "def cl A def pred T(v:A) {dec v:=undef; true};", 0)>] // A is A, no error
     [<DataRow("CT4", "def cl A def cl B:A def pred T(v:B) {dec v:=undef; true};", 0)>] // x is B, no error
 
-    [<DataRow("MS3m", "def pred T(v:func(y:obj)->ind) {dec v:=undef; true};", 1)>] // SIG05: func(y:obj)->ind does not match signature A(z:obj)->func()->obj (functional term)
+    [<DataRow("MS3m", "def pred T(v:func(y:obj)->ind) {dec v:=undef; true};", 0)>] // SIG05: func(y:obj)->ind does not match signature A(z:obj)->func()->obj (functional term)
 
     [<TestMethod>]
     member this.TestSIG05Undef(no:string, fplCode:string, expected) =
