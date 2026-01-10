@@ -472,7 +472,7 @@ let predicateInstanceBlock = opt (leftBrace >>. (keywordIntrinsic <|> predConten
 let predicateInstanceSignature = positions "PredicateInstanceSignature" (keywordPredicate >>. SW >>. simpleSignature .>>. paramTuple) .>> IW |>> Ast.PredicateInstanceSignature
 let predicateInstance = positions "PredicateInstance" (keywordProperty >>. predicateInstanceSignature .>>. predicateInstanceBlock) |>> Ast.PredicateInstance
 
-mappingRef.Value <- toArrow >>. IW >>. positions "Mapping" (variableType) |>> Ast.Mapping
+mappingRef.Value <- toArrow >>. IW >>. positions "Mapping" (keywordUndefined <|> variableType) |>> Ast.Mapping
 
 let returnStatement = positions "Return" (keywordReturn >>. predicate) .>> IW |>> Ast.Return
 let funcContent = varDeclOrSpecList .>>. returnStatement |>> Ast.DefFunctionContent
