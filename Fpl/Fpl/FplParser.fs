@@ -373,7 +373,7 @@ let all = positions "All" ((keywordAll >>. namedVariableDeclarationList) .>>. (l
 let exists = positions "Exists" ((keywordEx >>. namedVariableDeclarationList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.Exists
 
 let existsTimesN = positions "ExistsN" (((keywordExN >>. dollarDigits .>> SW) .>>. namedVariableDeclarationList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.ExistsN
-let isOpArg = choice [ objectSymbol; predicateWithQualification ] .>> IW
+let isOpArg = choice [ objectSymbol; attempt referencingIdentifier; predicateWithQualification; ] .>> IW
 let isOperator = positions "IsOperator" ((keywordIs >>. leftParen >>. isOpArg) .>>. (comma >>. variableType) .>> rightParen) |>> Ast.IsOperator
 
 // infix operators like the equality operator 

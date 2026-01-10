@@ -362,44 +362,16 @@ type TestPredicatesSpecific () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
+    [<DataRow("is(x, Nat)")>]
+    [<DataRow("is(1, Set)")>]
+    [<DataRow("is(One, Set)")>]
+    [<DataRow("is(T.X.Y, Set)")>]
+    [<DataRow("is(self, Set)")>]
+    [<DataRow("is(parent, Set)")>]
+    [<DataRow("is(A$1, Set)")>]
     [<TestMethod>]
-    member this.TestIsOperator1 () =
-        let result = run (isOperator .>> eof) """is(x, Nat)"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestIsOperator2 () =
-        let result = run (isOperator .>> eof) """is(1, Set)"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestIsOperator3 () =
-        let result = run (isOperator .>> eof) """is(One, Set)"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestIsOperator4 () =
-        let result = run (isOperator .>> eof) """is(T.X.Y, Set)"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestIsOperator5 () =
-        let result = run (isOperator .>> eof) """is(self, Set)"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestIsOperator6 () =
-        let result = run (isOperator .>> eof) """is(parent, Set)"""
+    member this.TestIsOperator (fplCode:string) =
+        let result = run (isOperator .>> eof) fplCode
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
