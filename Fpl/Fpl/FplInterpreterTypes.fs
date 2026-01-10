@@ -4084,6 +4084,8 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                 match refNodeOpt with 
                 | Some refNode when refNode.Name = PrimPredicateL ->
                     matchTwoTypes refNode p mode // match signatures with parameters
+                | Some refNode when refNode.Name = PrimIntrinsicUndef -> 
+                    None, Parameter.Consumed // mapping pred(...) accepting undef
                 | Some refNode when refNode.Name = PrimMandatoryPredicateL ->
                     matchTwoTypes refNode p mode // match signatures with parameters
                 | Some refNode when refNode.Name = PrimVariableL && refNode.TypeId = LiteralPred ->
@@ -4100,6 +4102,8 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                 match refNodeOpt with 
                 | Some refNode when refNode.Name = PrimIntrinsicPred ->
                     None, Parameter.Consumed // pred accepting intrinsic predicates
+                | Some refNode when refNode.Name = PrimIntrinsicUndef -> 
+                    None, Parameter.Consumed // mapping pred accepting undef
                 | Some refNode when refNode.Name = PrimPredicateL ->
                     None, Parameter.Consumed // pred accepting predicate nodes
                 | Some refNode when refNode.Name = PrimMandatoryPredicateL ->
