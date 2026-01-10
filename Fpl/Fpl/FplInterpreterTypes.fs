@@ -3792,7 +3792,7 @@ type FplVariable(fplId, positions: Positions, parent: FplValue) =
 let getParameters (fv:FplValue) =
     match fv.Name with
     | PrimVariableL ->
-        fv.Scope.Values |> Seq.toList
+        fv.GetVariables()
     | PrimVariableArrayL ->
         match box fv with 
         | :? IHasDimensions as arr -> arr.DimensionTypes |> Seq.toList
