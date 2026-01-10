@@ -4144,6 +4144,8 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                 // match a not-by-value-reference with func mapping with parameters
                 let refNodeOpt = referencedNodeOpt a
                 match refNodeOpt with 
+                | Some refNode when refNode.Name = PrimIntrinsicUndef -> 
+                    None, Parameter.Consumed // mapping func accepting undef
                 | Some refNode when refNode.Name = PrimFunctionalTermL ->
                     None, Parameter.Consumed // func accepting functional term nodes
                 | Some refNode when refNode.Name = PrimMandatoryFunctionalTermL ->
