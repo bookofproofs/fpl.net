@@ -1686,7 +1686,7 @@ let rec eval (st: SymbolTable) ast =
                 match varAst with 
                 | Ast.Var((varPos1, varPos2), varName) ->
                     let newVar = new FplVariableArray(varName, (varPos1, varPos2), parent)
-                    newVar.IsSignatureVariable <- (variableStack.InSignatureEvaluation && not (isVar parent))
+                    newVar.IsSignatureVariable <- (variableStack.InSignatureEvaluation && hasSignature parent)
                     variableStack.PushEvalStack(newVar)
                     eval st mainTypeAst
                     indexAllowedTypeListAst |> List.map (eval st) |> ignore
@@ -1696,7 +1696,7 @@ let rec eval (st: SymbolTable) ast =
                 match varAst with 
                 | Ast.Var((varPos1, varPos2), varName) ->
                     let newVar = new FplVariable(varName, (varPos1, varPos2), parent)
-                    newVar.IsSignatureVariable <- (variableStack.InSignatureEvaluation && not (isVar parent))
+                    newVar.IsSignatureVariable <- (variableStack.InSignatureEvaluation && hasSignature parent)
                     variableStack.PushEvalStack(newVar)
                     eval st simplVariableTypeAst
                     variableStack.PopEvalStack()

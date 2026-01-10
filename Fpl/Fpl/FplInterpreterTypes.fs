@@ -951,6 +951,15 @@ let isVar (fv1:FplValue) =
     | PrimVariableArrayL -> true
     | _ -> false
     
+type IHasSignature =
+    abstract member SignStartPos : Position with get, set
+    abstract member SignEndPos : Position with get, set
+
+let hasSignature (fv1:FplValue) =
+    match box fv1 with
+    | :? IHasSignature -> true
+    | _ -> false
+
 let isSignatureVar (fv1:FplValue) = 
     match box fv1 with 
     | :? IVariable as var when var.IsSignatureVariable -> true
@@ -1331,10 +1340,6 @@ let rec getMapping (fv:FplValue) =
             None
     | _ ->
         fv.ArgList |> Seq.tryFind (fun fv -> fv.Name = PrimMappingL)
-
-type IHasSignature =
-    abstract member SignStartPos : Position with get, set
-    abstract member SignEndPos : Position with get, set
 
 type IHasDimensions =
     abstract member Dimensionality : int
@@ -3993,6 +3998,8 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
         match mode with 
         | _ when aType = pType ->
             None, Parameter.Consumed
+        | _ when aType = LiteralUndef ->
+            None, Parameter.Consumed // undef matches any type
         | _ when pType.StartsWith(LiteralTpl) || pType.StartsWith(LiteralTplL) ->
             None, Parameter.Consumed // tpl accepts everything: todo: really?
         | _ when pType.StartsWith($"*{LiteralTpl}") || pType.StartsWith($"*{LiteralTplL}") ->
