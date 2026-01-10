@@ -458,25 +458,35 @@ type TestInterpreterErrors() =
             let code = ID009 ""
             runTestHelper "TestID009.fpl" fplCode code expected
 
-    [<DataRow("def cl Test {intr};", 0)>]
-    [<DataRow("def cl Test:Set {intr};", 1)>]
-    [<DataRow("def class Set def cl Test:Set {intr};", 0)>]
-    [<DataRow("def cl Set {intr} def cl Test:Set {intr};", 0)>]
-    [<DataRow("def cl Set {intr} def cl Test:SetTypo {intr};", 1)>]
-    [<DataRow("def cl Set {intr} def pred Test() {dec ~x:Set; true};", 0)>]
-    [<DataRow("def cl Set {intr} def pred Test() {dec ~x:object; is(x,Set)};", 0)>]
+    [<DataRow("00", "def cl Test {intr};", 0)>]
+    [<DataRow("01", "def cl Test:Set {intr};", 1)>]
+    [<DataRow("02", "def class Set def cl Test:Set {intr};", 0)>]
+    [<DataRow("03", "def cl Set {intr} def cl Test:Set {intr};", 0)>]
+    [<DataRow("04", "def cl Set {intr} def cl Test:SetTypo {intr};", 1)>]
+    [<DataRow("05", "def cl Set {intr} def pred Test() {dec ~x:Set; true};", 0)>]
+    [<DataRow("06", "def cl Set {intr} def pred Test() {dec ~x:object; is(x,Set)};", 0)>]
 
-    [<DataRow("def cl A {intr} thm T {true} proof T$1 {1. bydef A |- trivial };", 0)>]
-    [<DataRow("def cl A {intr} thm T {true} proof T$1 {1. bydef B |- trivial };", 1)>]
-    [<DataRow("thm A {true} thm T {true} proof T$1 {1. A |- trivial };", 0)>]
-    [<DataRow("thm B {true} thm T {true} proof T$1 {1. A |- trivial };", 1)>]
+    [<DataRow("07", "def cl A {intr} thm T {true} proof T$1 {1. bydef A |- trivial };", 0)>]
+    [<DataRow("08", "def cl A {intr} thm T {true} proof T$1 {1. bydef B |- trivial };", 1)>]
+    [<DataRow("09", "thm A {true} thm T {true} proof T$1 {1. A |- trivial };", 0)>]
+    [<DataRow("10", "thm B {true} thm T {true} proof T$1 {1. A |- trivial };", 1)>]
 
     // the following examples should not emit ID010 because this context is covered by the SIG04 diagnostics
-    [<DataRow("def pred Test(x:Set) {intr};", 0)>]
-    [<DataRow("def class Set def pred IsEmpty(x: Set) {true};", 0)>]
-    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
+    [<DataRow("11","def pred Test(x:Set) {intr};", 1)>]
+    [<DataRow("12","def class Set def pred IsEmpty(x: Set) {true};", 0)>]
+    [<DataRow("13", "def pred Test(x:Set) {intr};", 1)>]
+    [<DataRow("14", "def cl Set {intr} def pred Test(x:SetTypo) {intr};", 1)>]
+    [<DataRow("15", "def cl Set {intr} axiom Test {dec ~x:SetTypo; true};", 1)>]
+    [<DataRow("16", "def cl Set {intr} axiom Test {dec ~x:SetTypo; true};", 1)>]
+    [<DataRow("17", "def pred Test() {dec ~x:Set; true};", 1)>]
+    [<DataRow("18", "axiom A { all x:Nat {true} };", 1)>]
+    [<DataRow("19", "def pred Test() {dec ~x:object; is(x,Set)};", 1)>]
+    [<DataRow("20", """def pred T1() {true} def pred Test() { OtherTest() };""", 1)>]    
+    [<DataRow("21", """def func Succ(n:Nat) -> obj {intr};""", 1)>]
+    [<DataRow("22", """def cl A def pred T() { is (self,ATypo) };""", 1)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
-    member this.TestID010(fplCode:string, expected) =
+    member this.TestID010(no:string, fplCode:string, expected) =
         if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
@@ -2047,22 +2057,14 @@ type TestInterpreterErrors() =
     [<DataRow("02", "def class Set def cl Test:Set {intr};", 0)>]
     [<DataRow("03", "def cl Set {intr} def cl Test:Set {intr};", 0)>]
     [<DataRow("04", "def cl Set {intr} def cl Test:SetTypo {intr};", 0)>] // this should cause the ID010 error only and not SIG04
-    [<DataRow("05", "def pred Test(x:Set) {intr};", 1)>]
     [<DataRow("06", "def cl Set {intr} def pred Test(x:Set) {intr};", 0)>]
-    [<DataRow("07", "def cl Set {intr} def pred Test(x:SetTypo) {intr};", 1)>]
-    [<DataRow("08", "def cl Set {intr} axiom Test {dec ~x:SetTypo; true};", 1)>]
     [<DataRow("09", "def cl Set {intr} axiom Test {dec ~x:Set; true};", 0)>]
     [<DataRow("10", "def cl Set {intr} def func PowerSer(x:Set) -> Set {dec ~y:Set; return y};", 0)>]
     [<DataRow("11", "def cl Set {intr} axiom Test {dec ~x:Set; true};", 0)>]
-    [<DataRow("12", "def cl Set {intr} axiom Test {dec ~x:SetTypo; true};", 1)>]
-    [<DataRow("13", "def pred Test() {dec ~x:Set; true};", 1)>]
-    [<DataRow("14", "axiom A { all x:Nat {true} };", 1)>]
-    [<DataRow("15", "def pred Test() {dec ~x:object; is(x,Set)};", 1)>]
     [<DataRow("15a", "def cl Set def pred Test() {dec ~x:object; is(x,Set)};", 0)>]
     [<DataRow("16", "def cl Set def pred Test() {dec ~x:object; is(x,Set)};", 0)>]
     [<DataRow("16a", "def cl C {ctor C(x:ind) {}} def cl A:C { ctor A() {dec ~x:obj base.C(x); } };", 1)>]
     [<DataRow("17", """def pred T1() {true} def pred Test() { dec ~x:obj; T1(x) };""", 1)>]
-    [<DataRow("18", """def pred T1() {true} def pred Test() { OtherTest() };""", 1)>]
     [<DataRow("19", """def pred T (x:obj) {true} def pred Caller() {dec ~x:obj; T(x)} ;""", 0)>]
     [<DataRow("20", """def pred T (x:obj) {true} def pred Caller() {dec ~x:ind; T(x)} ;""", 1)>]
     [<DataRow("21", "inf ExistsByExample {dec ~p: pred(c: obj) ~x: obj; pre: p(c) con: ex x:obj {p(x)}};", 0)>]
@@ -2083,7 +2085,6 @@ type TestInterpreterErrors() =
     [<DataRow("36", """def pred T (x,y:obj,z:ind) {true} def pred Caller() {dec ~x,y:obj ~z:ind; T(x,y,z)} ;""", 0)>]
     [<DataRow("37", """def pred T (x,y:obj) {true} def pred Caller() {dec ~x,y:obj ~z:ind; T(x,y,z)} ;""", 1)>]
     [<DataRow("38", """def class Nat  {ctor Nat(){dec self:=x.R(); }};""", 0)>] // this would cause SIG03 error
-    [<DataRow("39", """def func Succ(n:Nat) -> obj {intr};""", 1)>]
     [<DataRow("40", """def func T()->obj { dec ~x:obj; return x};""", 0)>]
     [<DataRow("40a", """def func S(n:obj) -> obj {intr} def func T()->obj { dec ~x:obj; return S(x)} ;""", 0)>]
     [<DataRow("40b", """def func S(n:obj) -> obj {intr} def func T()->obj { dec ~x:obj; return (S(x)) } ;""", 0)>]
@@ -2118,7 +2119,6 @@ type TestInterpreterErrors() =
     [<DataRow("67", """def class Set def pred In(x,y: Set) def pred IsEmpty(x: Set) { all y:Set { not In(y, x) } };""", 0)>]
     [<DataRow("68", """def class Set def pred In(x,y: Set) def cl SetBuilder: Set { ctor SetBuilder(x: Set, p: pred(u1: Set, o:* obj[ind])) { dec base.Set() assert all u2:Set { iif (In(u2,parent), and ( In(u2,x), p(u2,o) ) ) }; } };""", 0)>]
     [<DataRow("69", """def cl A {dec ~myX:obj; ctor A(x:obj) {dec myX:=x;}} def cl B:A { ctor B(x:obj) {dec base.A(del.Decrement(x)); } } def pred T() { dec ~v:B v:=B(@2); false};""", 0)>]
-    [<DataRow("70", """def cl A def pred T() { is (self,ATypo) };""", 1)>]
     [<DataRow("71", """def pred Equal(x,y: tpl) infix "=" 50 { del.Equal(x,y) } def cl Nat def cl Zero:Nat def func Succ(n:Nat)->Nat def pred T() {all x,y:Nat {(x = Succ(y))}};""", 0)>]    
     // mapping
     [<DataRow("MAP1", """def func T()->A {intr};""", 1)>]

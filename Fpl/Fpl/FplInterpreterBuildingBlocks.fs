@@ -682,7 +682,7 @@ let rec eval (st: SymbolTable) ast =
 
         match fv, candidates.Length with
         | :? FplVariable, 0 -> 
-            fv.ErrorOccurred <- emitSIG04Diagnostics identifier 0 "" pos1 pos2
+            fv.ErrorOccurred <- emitID010Diagnostics identifier pos1 pos2
             let undefValue = new FplIntrinsicUndef((fv.StartPos, fv.EndPos), fv)
             fv.ValueList.Add(undefValue)
         | :? FplMapping as map, 1 -> 
@@ -693,7 +693,7 @@ let rec eval (st: SymbolTable) ast =
             | :? FplClass -> map.ToBeReturnedDefinition <- Some candidate
             | _ -> fv.ErrorOccurred <- emitSIG11diagnostics (qualifiedName map false) (qualifiedName candidate false) map.StartPos map.EndPos       
         | :? FplMapping, 0 -> 
-            fv.ErrorOccurred <- emitSIG04Diagnostics identifier 0 "" pos1 pos2
+            fv.ErrorOccurred <- emitID010Diagnostics identifier pos1 pos2
         | :? FplMapping, _ -> 
             fv.ErrorOccurred <- emitID017Diagnostics identifier candidatesNames pos1 pos2
         | :? FplVariable, 1 -> 

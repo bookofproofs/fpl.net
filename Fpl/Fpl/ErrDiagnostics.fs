@@ -417,9 +417,7 @@ type DiagnosticCode =
             | SIG02 (symbol, precedence, conflict) -> $"The symbol `{symbol}` was declared with the same precedence of `{precedence}` in {conflict}." 
             | SIG03 errMsg -> errMsg // Returned type is mismatching the mapping type
             | SIG04 (signature, numbOfcandidates, candidates) -> 
-                if numbOfcandidates = 0 then 
-                    $"No overload matching `{signature}`, no candidates were found. Are you missing a uses clause?" 
-                elif numbOfcandidates = 1 then
+                if numbOfcandidates = 1 then
                     $"No overload matching `{signature}`. {candidates}." 
                 else 
                     $"No overload matching `{signature}`. Checked candidates: {candidates}." 

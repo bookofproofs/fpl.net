@@ -4264,20 +4264,24 @@ let rec checkCandidates (toBeMatched: FplValue) (candidates: FplValue list) (acc
 
 /// Checks if there is a candidate among the candiedates that matches the signature of a calling FplValue and returns this as an option.
 let checkSIG04Diagnostics (calling:FplValue) (candidates: FplValue list) = 
-    match checkCandidates calling candidates [] with
-    | (Some candidate,_) -> Some candidate // no error occured
-    | (None, errList) -> 
-        let errListStr = 
-            errList 
-            |> List.mapi (fun i s -> 
-                if errList.Length > 1 then 
-                    sprintf "%d) %s" (i + 1) s
-                else
-                    sprintf "%s" s
-            )
-            |> String.concat ", "
-        calling.ErrorOccurred <- emitSIG04Diagnostics (calling.Type SignatureType.Mixed) candidates.Length errListStr calling.StartPos calling.EndPos
+    if candidates.Length = 0 then
+        calling.ErrorOccurred <- emitID010Diagnostics calling.FplId calling.StartPos calling.EndPos
         None
+    else
+        match checkCandidates calling candidates [] with
+        | (Some candidate,_) -> Some candidate // no error occured
+        | (None, errList) -> 
+            let errListStr = 
+                errList 
+                |> List.mapi (fun i s -> 
+                    if errList.Length > 1 then 
+                        sprintf "%d) %s" (i + 1) s
+                    else
+                        sprintf "%s" s
+                )
+                |> String.concat ", "
+            calling.ErrorOccurred <- emitSIG04Diagnostics (calling.Type SignatureType.Mixed) candidates.Length errListStr calling.StartPos calling.EndPos
+            None
 
 /// Checks if a reference to an array matches its dimensions (in terms of number and types)
 let checkSIG08_SIG10Diagnostics (referenceToArray:FplValue) =
