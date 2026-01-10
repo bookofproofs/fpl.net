@@ -1,1 +1,1 @@
-def cl A {dec ~myX:ind; ctor A(x:ind) {dec myX:=x;}} def cl B:A { ctor B(x:ind) {dec base.A(del.Decrement(x)); } } def pred T() { dec ~v:B v:=B($2); false};
+def cl Nat def pred Eq(x,y: Nat) infix "=" 1000 {intr} axiom A {dec ~x:ind ~y:obj; (x = y) };
