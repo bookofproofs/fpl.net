@@ -1348,8 +1348,29 @@ let rec eval (st: SymbolTable) ast =
             let secondOp = fv.ArgList[currMinIndex+1]
             currentOp.ArgList.Add(firstOp)
             currentOp.ArgList.Add(secondOp)
-            match precNodeList currentOp with
-            | x::_ -> checkSIG04Diagnostics currentOp [x] |> ignore 
+            let refNodeOpt = referencedNodeOpt currentOp
+            match refNodeOpt with 
+            | Some refNode when refNode.Arity = 2 ->
+                let pars = 
+                    refNode.GetVariables() 
+                    |> List.map (fun var -> var :?> FplGenericVariable)
+                    |> List.filter (fun var -> var.IsSignatureVariable)
+                // try to issue SIG04 diagnostics per argument of the binary operator
+                if pars.Length = 2 then 
+                    match mpwa [firstOp] [pars[0]] MatchingMode.Signature with
+                    | Some errMsg -> 
+                        let extendedErrMsg = $"{errMsg} in {qualifiedName refNode true}"
+                        firstOp.ErrorOccurred <- emitSIG04Diagnostics (currentOp.Type SignatureType.Mixed) 1 extendedErrMsg firstOp.StartPos firstOp.EndPos
+                    | _ -> ()
+                    match mpwa [secondOp] [pars[1]] MatchingMode.Signature with
+                    | Some errMsg -> 
+                        let extendedErrMsg = $"{errMsg} in {qualifiedName refNode true}"
+                        secondOp.ErrorOccurred <- emitSIG04Diagnostics (currentOp.Type SignatureType.Mixed) 1 extendedErrMsg secondOp.StartPos secondOp.EndPos
+                    | _ -> ()
+                else
+                    // if something went wrong (for instance, wrong arity), issue SIG04 with fallback using the operand 
+                    // together with its referenced node
+                    checkSIG04Diagnostics currentOp [refNode] |> ignore
             | _ -> ()
             fv.ArgList.RemoveAt(currMinIndex+1) 
             fv.ArgList.RemoveAt(currMinIndex-1) 
