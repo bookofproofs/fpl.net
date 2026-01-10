@@ -3010,7 +3010,7 @@ type SymbolTableStructure() =
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.AreEqual<int>(1, node.ValueList.Count)
-            Assert.AreEqual<string>(LiteralTrue, node.Represent())
+            Assert.AreEqual<string>(PrimUndetermined, node.Represent())
             let fn = node :?> FplFunctionalTerm
             Assert.AreEqual<string>("", fn.SkolemName) // missing, since non-intrinsic
         | "FplFunctionalTerm", "MF2b" -> 
@@ -3026,7 +3026,7 @@ type SymbolTableStructure() =
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.AreEqual<int>(1, node.ValueList.Count)
-            Assert.AreEqual<string>(LiteralTrue, node.Represent())
+            Assert.AreEqual<string>(PrimUndetermined, node.Represent())
             let fn = node :?> FplFunctionalTerm
             Assert.AreEqual<string>("", fn.SkolemName) // missing, since non-intrinsic
         | "FplFunctionalTerm", "MF3" -> 
@@ -3131,25 +3131,25 @@ type SymbolTableStructure() =
         match nodeType, varVal with
         | "FplIntrinsicPred", "00" 
         | "FplIntrinsicPred", "01" ->
-            Assert.IsInstanceOfType<FplAxiom>(parent)
-            Assert.AreEqual<int>(1, parent.ArgList.Count)
-            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplReference>(parent)
+            Assert.AreEqual<int>(0, parent.ArgList.Count)
+            Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplIntrinsicPred>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplIntrinsicPred", "03a" 
         | "FplIntrinsicPred", "03c" ->
-            Assert.IsInstanceOfType<FplAssignment>(parent)
-            Assert.AreEqual<int>(2, parent.ArgList.Count)
-            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplReference>(parent)
+            Assert.AreEqual<int>(0, parent.ArgList.Count)
+            Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplIntrinsicPred>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplIntrinsicPred", "03b" 
         | "FplIntrinsicPred", "03d" ->
             Assert.IsInstanceOfType<FplReference>(parent)
-            Assert.AreEqual<int>(1, parent.ArgList.Count)
-            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.AreEqual<int>(0, parent.ArgList.Count)
+            Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplIntrinsicPred>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)

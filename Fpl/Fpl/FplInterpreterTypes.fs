@@ -1259,7 +1259,6 @@ let addExpressionToReference (fplValue:FplValue) =
         (
             fplValue.Name = PrimDelegateEqualL 
          || fplValue.Name = PrimDelegateDecrementL
-         || fplValue.Name = PrimIntrinsicPred
          ) ->
         addExpressionToParentArgList fplValue 
     | Some next when next.Name = PrimRefL ->
@@ -4099,6 +4098,8 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                 // match a not-by-value-reference with pred mapping without parameters
                 let refNodeOpt = referencedNodeOpt a
                 match refNodeOpt with 
+                | Some refNode when refNode.Name = PrimIntrinsicPred ->
+                    None, Parameter.Consumed // pred accepting intrinsic predicates
                 | Some refNode when refNode.Name = PrimPredicateL ->
                     None, Parameter.Consumed // pred accepting predicate nodes
                 | Some refNode when refNode.Name = PrimMandatoryPredicateL ->
@@ -4171,8 +4172,10 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                     | _ -> Some $"`{aName}:{aType}` does not match type `{pType}`", Parameter.Consumed
                 | None, Some refNode -> 
                     matchTwoTypes refNode map mode
-                | None, None when aType = pType -> 
+                | None, None when aType = pType && isUpper aType -> 
                     Some $"`{aName}:{aType}` matches type `{pType}` but the type is undefined.", Parameter.Consumed
+                | None, None when aType = pType  -> 
+                    None, Parameter.Consumed // obj accepting obj, ind accepting ind, pred accepting pred, func accepting func
                 | _, _ -> 
                     Some $"`{aName}:{aType}` does not match type `{pType}`", Parameter.Consumed
             elif isCallByValue a && isWithParenthesesOrFunc p then

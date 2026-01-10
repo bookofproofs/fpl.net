@@ -541,8 +541,8 @@ type TestFplValueScopeQualifiedName() =
             let base1 = pr1.ArgList[0]
 
             match var with
-            | "base1" -> Assert.AreEqual<string>("an intrinsic predicate TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1 false) 
-            | "base2" -> Assert.AreEqual<string>("an intrinsic predicate TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1 false) 
+            | "base1" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1 false) 
+            | "base2" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1 false) 
             | "base3" -> Assert.AreEqual<string>("an intrinsic undefined TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1 false) 
             | "base4" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1().-(1)", qualifiedName base1 false) 
             | "base5" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1().Test()", qualifiedName base1 false) 

@@ -553,8 +553,8 @@ type TestFplValueScopeBlockType() =
             let base1 = pr1.ArgList[0]
 
             match var with
-            | "base1" -> Assert.IsInstanceOfType<FplIntrinsicPred>(base1)
-            | "base2" -> Assert.IsInstanceOfType<FplIntrinsicPred>(base1)
+            | "base1" -> Assert.IsInstanceOfType<FplReference>(base1)
+            | "base2" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base3" -> Assert.IsInstanceOfType<FplIntrinsicUndef>(base1)
             | "base4" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base5" -> Assert.IsInstanceOfType<FplReference>(base1)
