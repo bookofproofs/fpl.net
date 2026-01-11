@@ -107,7 +107,7 @@ let idStartsWithCap = (regex @"[A-Z]\w*") <?> "<PascalCaseId>"
 let pascalCaseId = positions "PascalCaseId" idStartsWithCap |>> Ast.PascalCaseId
 
 let namespaceIdentifier = positions "NamespaceIdentifier" (sepBy1 pascalCaseId dot) .>> IW |>> Ast.NamespaceIdentifier
-let predicateIdentifier = positions "PredicateIdentifier" (sepBy1 pascalCaseId dot) |>> Ast.PredicateIdentifier 
+let predicateIdentifier = positions "PredicateIdentifier" idStartsWithCap |>> Ast.PredicateIdentifier 
 
 let alias = positions "Alias" (skipString LiteralAlias >>. SW >>. idStartsWithCap) |>> Ast.Alias
 let star = positions "Star" (skipChar '*') |>> Ast.Star
@@ -210,8 +210,6 @@ let dollarDigits = positions "DollarDigits" (regex "\$" >>. puint32 <?> "<dollar
 
 let selfOrParent = positions "SelfOrParent" (choice [keywordSelf ; keywordParent]) |>> Ast.SelfOrParent
 
-let entity = choice [ selfOrParent ; variable ] 
-
 ////// resolving recursive parsers
 let statementList, statementListRef = createParserForwardedToRef()
 let primePredicate, primePredicateRef = createParserForwardedToRef()
@@ -225,7 +223,7 @@ let coord = choice [ predicateWithQualification; dollarDigits ] .>> IW
 // infix operators like the equality operator 
 let objectSymbol = positions "ObjectSymbol" ( objectMathSymbols ) .>> IW |>> Ast.ObjectSymbol
 
-let fplIdentifier = choice [ entity; predicateIdentifier; extension; objectSymbol ] 
+let fplIdentifier = choice [ selfOrParent ; variable ; predicateIdentifier; extension; objectSymbol ] 
 
 let coordList = (sepBy1 coord comma) .>> IW
 
@@ -305,7 +303,7 @@ let assignmentStatement = positions "Assignment" ((predicateWithQualification .>
 
 let inEntity = keywordIn >>. positions "InEntity" (predicateWithQualification) .>> IW |>> Ast.InEntity
 
-let entityInDomain = ( entity .>> IW .>>. inEntity ) .>> IW
+let entityInDomain = ( variable .>> IW .>>. inEntity ) .>> IW
 let forInBody = (entityInDomain .>> IW) .>>. (leftBrace >>. IW >>. statementList) .>> (IW >>. rightBrace)
 let forStatement = positions "ForIn" (keywordFor >>. forInBody) |>> Ast.ForIn
 
@@ -375,8 +373,8 @@ let all = positions "All" ((keywordAll >>. namedVariableDeclarationList) .>>. (l
 let exists = positions "Exists" ((keywordEx >>. namedVariableDeclarationList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.Exists
 
 let existsTimesN = positions "ExistsN" (((keywordExN >>. dollarDigits .>> SW) .>>. namedVariableDeclarationList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.ExistsN
-let isOpArg = choice [ objectSymbol; predicateIdentifier; variable; selfOrParent ] .>> IW
-let isOperator = positions "IsOperator" ((keywordIs >>. leftParen >>. isOpArg) .>>. (comma >>. variableType) .>> rightParen) |>> Ast.IsOperator
+let isOpArg = choice [ objectSymbol; dollarDigits; keywordFalse; keywordTrue; keywordUndefined; attempt referencingIdentifier; predicateWithQualification] .>> IW
+let isOperator = positions "IsOperator" ((keywordIs >>. leftParen >>. isOpArg) .>>. (comma >>. choice [attempt referencingIdentifier; variableType]) .>> rightParen) |>> Ast.IsOperator
 
 // infix operators like the equality operator 
 let infixOp = positions "InfixOperator" ( infixMathSymbols ) .>> SW |>> Ast.InfixOperator
@@ -474,7 +472,7 @@ let predicateInstanceBlock = opt (leftBrace >>. (keywordIntrinsic <|> predConten
 let predicateInstanceSignature = positions "PredicateInstanceSignature" (keywordPredicate >>. SW >>. simpleSignature .>>. paramTuple) .>> IW |>> Ast.PredicateInstanceSignature
 let predicateInstance = positions "PredicateInstance" (keywordProperty >>. predicateInstanceSignature .>>. predicateInstanceBlock) |>> Ast.PredicateInstance
 
-mappingRef.Value <- toArrow >>. IW >>. positions "Mapping" (variableType) |>> Ast.Mapping
+mappingRef.Value <- toArrow >>. IW >>. positions "Mapping" (keywordUndefined <|> variableType) |>> Ast.Mapping
 
 let returnStatement = positions "Return" (keywordReturn >>. predicate) .>> IW |>> Ast.Return
 let funcContent = varDeclOrSpecList .>>. returnStatement |>> Ast.DefFunctionContent

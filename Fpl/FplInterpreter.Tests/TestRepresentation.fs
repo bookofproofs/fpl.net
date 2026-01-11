@@ -41,7 +41,7 @@ type TestRepresentation() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("00","n:=Zero()", """{"name":"Zero","base":[{"name":"Nat","base":[],"vars":[],"prtys":[]}],"vars":[],"prtys":[]}""")>]
+    [<DataRow("00","n:=Zero()", """{"name":"Zero","base":[{"name":"Nat","base":[{"name":"Set","base":[],"vars":[],"prtys":[]}],"vars":[],"prtys":[]}],"vars":[],"prtys":[]}""")>]
     [<TestMethod>]
     member this.TestRepresentationAssignment(var:string, varVal, expected:string) =
         ad.Clear()
@@ -60,7 +60,7 @@ type TestRepresentation() =
         | None -> 
             Assert.IsTrue(false)
             
-    [<DataRow("00","uses Fpl.PeanoArithmetics", "n:=Zero()", """{"name":"Zero","base":[{"name":"Nat","base":[],"vars":[],"prtys":[]}],"vars":[],"prtys":[]}""")>]
+    [<DataRow("00","uses Fpl.PeanoArithmetics", "n:=Zero()", """{"name":"Zero","base":[{"name":"Nat","base":[{"name":"Set","base":[],"vars":[],"prtys":[]}],"vars":[],"prtys":[]}],"vars":[],"prtys":[]}""")>]
     [<DataRow("00a","def cl Nat def cl Zero:Nat", "n:=Zero()", """{"name":"Zero","base":[{"name":"Nat","base":[],"vars":[],"prtys":[]}],"vars":[],"prtys":[]}""")>]
     [<TestMethod>]
     member this.TestRepresentationReturn(var:string, uses:string, varVal, expected:string) =

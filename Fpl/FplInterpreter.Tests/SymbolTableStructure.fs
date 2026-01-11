@@ -1135,7 +1135,7 @@ type SymbolTableStructure() =
         | "FplCorollary" ->
             Assert.AreEqual<string>(LiteralPred, (getName var).[index])
         | "FplDecrement" ->
-            Assert.AreEqual<string>("Nat", (getName var).[index])        
+            Assert.AreEqual<string>(LiteralObj, (getName var).[index])        
         | "FplDefaultConstructor" ->
             Assert.AreEqual<string>(LiteralObj, (getName var).[index])        
         | "FplDisjunction" ->
@@ -2715,7 +2715,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(1, node.ArgList.Count)  // mapping
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = (getMapping node).Value :?> FplMapping 
-            match map.ToBeReturnedClass with
+            match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.AreEqual<int>(1, node.ValueList.Count)
@@ -2731,7 +2731,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(2, node.ArgList.Count)  // mapping + return
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = (getMapping node).Value :?> FplMapping 
-            match map.ToBeReturnedClass with
+            match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.AreEqual<int>(1, node.ValueList.Count)
@@ -2747,7 +2747,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(1, node.ArgList.Count)  // mapping 
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = (getMapping node).Value :?> FplMapping 
-            match map.ToBeReturnedClass with
+            match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.AreEqual<int>(1, node.ValueList.Count)
@@ -2763,7 +2763,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(4, node.ArgList.Count)  // mapping + stmts + return
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
             let map = (getMapping node).Value :?> FplMapping 
-            match map.ToBeReturnedClass with
+            match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.AreEqual<int>(1, node.ValueList.Count)
@@ -2795,7 +2795,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(1, node.ArgList.Count)  // mapping
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = (getMapping node).Value :?> FplMapping 
-            match map.ToBeReturnedClass with
+            match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.AreEqual<int>(1, node.ValueList.Count)
@@ -2811,7 +2811,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(2, node.ArgList.Count)  // mapping + return
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = (getMapping node).Value :?> FplMapping 
-            match map.ToBeReturnedClass with
+            match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.AreEqual<int>(1, node.ValueList.Count)
@@ -2827,7 +2827,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(1, node.ArgList.Count)  // mapping 
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = (getMapping node).Value :?> FplMapping 
-            match map.ToBeReturnedClass with
+            match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.AreEqual<int>(1, node.ValueList.Count)
@@ -2843,7 +2843,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(4, node.ArgList.Count)  // mapping + stmts + return
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
             let map = (getMapping node).Value :?> FplMapping 
-            match map.ToBeReturnedClass with
+            match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.AreEqual<int>(1, node.ValueList.Count)
@@ -2875,7 +2875,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(1, node.ArgList.Count)  // mapping
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = (getMapping node).Value :?> FplMapping 
-            match map.ToBeReturnedClass with
+            match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.AreEqual<int>(1, node.ValueList.Count)
@@ -2891,7 +2891,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(2, node.ArgList.Count)  // mapping + return
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = (getMapping node).Value :?> FplMapping 
-            match map.ToBeReturnedClass with
+            match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.AreEqual<int>(1, node.ValueList.Count)
@@ -2907,7 +2907,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(1, node.ArgList.Count)  // mapping 
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = (getMapping node).Value :?> FplMapping 
-            match map.ToBeReturnedClass with
+            match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.AreEqual<int>(1, node.ValueList.Count)
@@ -2923,7 +2923,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(5, node.ArgList.Count)  // mapping + stmts + return
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
             let map = (getMapping node).Value :?> FplMapping 
-            match map.ToBeReturnedClass with
+            match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.AreEqual<int>(1, node.ValueList.Count)
@@ -2958,7 +2958,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(1, node.ArgList.Count)  // mapping
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = (getMapping node).Value :?> FplMapping 
-            match map.ToBeReturnedClass with
+            match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.AreEqual<int>(1, node.ValueList.Count)
@@ -2974,7 +2974,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(1, node.ArgList.Count)  // mapping
             Assert.AreEqual<int>(1, node.Scope.Count) 
             let map = (getMapping node).Value :?> FplMapping 
-            match map.ToBeReturnedClass with
+            match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.AreEqual<int>(1, node.ValueList.Count)
@@ -2990,7 +2990,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(2, node.ArgList.Count)  // mapping + return
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = (getMapping node).Value :?> FplMapping 
-            match map.ToBeReturnedClass with
+            match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.AreEqual<int>(1, node.ValueList.Count)
@@ -3006,11 +3006,11 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(2, node.ArgList.Count)  // mapping + return
             Assert.AreEqual<int>(3, node.Scope.Count) // 3 variables
             let map = (getMapping node).Value :?> FplMapping 
-            match map.ToBeReturnedClass with
+            match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.AreEqual<int>(1, node.ValueList.Count)
-            Assert.AreEqual<string>(LiteralTrue, node.Represent())
+            Assert.AreEqual<string>(PrimUndetermined, node.Represent())
             let fn = node :?> FplFunctionalTerm
             Assert.AreEqual<string>("", fn.SkolemName) // missing, since non-intrinsic
         | "FplFunctionalTerm", "MF2b" -> 
@@ -3022,11 +3022,11 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(2, node.ArgList.Count)  // mapping + return 
             Assert.AreEqual<int>(1, node.Scope.Count) // 1 variables
             let map = (getMapping node).Value :?> FplMapping 
-            match map.ToBeReturnedClass with
+            match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.AreEqual<int>(1, node.ValueList.Count)
-            Assert.AreEqual<string>(LiteralTrue, node.Represent())
+            Assert.AreEqual<string>(PrimUndetermined, node.Represent())
             let fn = node :?> FplFunctionalTerm
             Assert.AreEqual<string>("", fn.SkolemName) // missing, since non-intrinsic
         | "FplFunctionalTerm", "MF3" -> 
@@ -3038,7 +3038,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(1, node.ArgList.Count)  // mapping 
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = (getMapping node).Value :?> FplMapping 
-            match map.ToBeReturnedClass with
+            match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.AreEqual<int>(1, node.ValueList.Count)
@@ -3054,7 +3054,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(5, node.ArgList.Count)  // mapping + stmts + return
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
             let map = (getMapping node).Value :?> FplMapping 
-            match map.ToBeReturnedClass with
+            match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.AreEqual<int>(1, node.ValueList.Count)
@@ -3108,9 +3108,9 @@ type SymbolTableStructure() =
         
         match nodeType, varVal with
         | "FplIntrinsicInd", "00" ->
-            Assert.IsInstanceOfType<FplAxiom>(parent)
-            Assert.AreEqual<int>(1, parent.ArgList.Count)
-            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplReference>(parent)
+            Assert.AreEqual<int>(0, parent.ArgList.Count)
+            Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplIntrinsicInd>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
@@ -3131,25 +3131,25 @@ type SymbolTableStructure() =
         match nodeType, varVal with
         | "FplIntrinsicPred", "00" 
         | "FplIntrinsicPred", "01" ->
-            Assert.IsInstanceOfType<FplAxiom>(parent)
-            Assert.AreEqual<int>(1, parent.ArgList.Count)
-            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplReference>(parent)
+            Assert.AreEqual<int>(0, parent.ArgList.Count)
+            Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplIntrinsicPred>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplIntrinsicPred", "03a" 
         | "FplIntrinsicPred", "03c" ->
-            Assert.IsInstanceOfType<FplAssignment>(parent)
-            Assert.AreEqual<int>(2, parent.ArgList.Count)
-            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplReference>(parent)
+            Assert.AreEqual<int>(0, parent.ArgList.Count)
+            Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplIntrinsicPred>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplIntrinsicPred", "03b" 
         | "FplIntrinsicPred", "03d" ->
             Assert.IsInstanceOfType<FplReference>(parent)
-            Assert.AreEqual<int>(1, parent.ArgList.Count)
-            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.AreEqual<int>(0, parent.ArgList.Count)
+            Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplIntrinsicPred>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
@@ -3171,18 +3171,18 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplIntrinsicUndef", "00", """;""", "")>]
+    [<DataRow("FplIntrinsicUndef", "00", """ax A {undef};""", "")>]
     [<TestMethod>]
     member this.TestStructureFplIntrinsicUndef(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplIntrinsicUndef.fpl"
         let parent, node = testSkeleton nodeType filename fplCode identifier
         
         match nodeType, varVal with
-        | "FplReturn", "00" ->
-            Assert.IsInstanceOfType<FplRoot>(parent)
+        | "FplIntrinsicUndef", "00" ->
+            Assert.IsInstanceOfType<FplReference>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
-            Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplReturn>(node)
+            Assert.AreEqual<int>(1, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplIntrinsicUndef>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -4033,7 +4033,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)  
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = node :?> FplMapping
-            match map.ToBeReturnedClass with
+            match map.ToBeReturnedDefinition with
             | Some cl -> Assert.AreEqual<string>("A", cl.TypeId)
             | None -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.AreEqual<string>("""dec A""", node.Represent())  
@@ -4049,7 +4049,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)  
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = node :?> FplMapping
-            match map.ToBeReturnedClass with
+            match map.ToBeReturnedDefinition with
             | Some cl -> Assert.AreEqual<string>("A", cl.TypeId)
             | None -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.AreEqual<string>("""dec *A[ind]""", node.Represent())  
@@ -4071,7 +4071,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)  
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = node :?> FplMapping
-            match map.ToBeReturnedClass with
+            match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             match varVal with
@@ -4126,7 +4126,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)  
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
             let map = node :?> FplMapping
-            match map.ToBeReturnedClass with
+            match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             match varVal with
@@ -4151,7 +4151,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(1, node.ArgList.Count)  // nested mapping 
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
             let map = node :?> FplMapping
-            match map.ToBeReturnedClass with
+            match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             match varVal with
@@ -4177,7 +4177,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)  
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = node :?> FplMapping
-            match map.ToBeReturnedClass with
+            match map.ToBeReturnedDefinition with
             | Some cl -> Assert.AreEqual<string>("A", cl.TypeId)
             | None -> Assert.IsTrue(false, "The is no to be returned class")
         | "FplMapping", "ME1a" 
@@ -4189,7 +4189,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = node :?> FplMapping
-            match map.ToBeReturnedClass with
+            match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
         | _ -> failwith($"unmatched test {nodeType} {varVal}")

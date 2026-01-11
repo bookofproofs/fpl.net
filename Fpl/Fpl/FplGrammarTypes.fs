@@ -38,7 +38,7 @@ type Ast =
     | PascalCaseId of Positions * string
     | NamespaceIdentifier of Positions * Ast list
     | AliasedNamespaceIdentifier of Positions * (Ast * Ast option)
-    | PredicateIdentifier of Positions * Ast list 
+    | PredicateIdentifier of Positions * string 
     | LanguageCode of Positions * string
     | Alias of Positions * string
     | SelfOrParent of Positions * Ast

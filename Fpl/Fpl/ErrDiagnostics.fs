@@ -116,7 +116,6 @@ type DiagnosticCode =
     | ID001 of string * string
     | ID002 of string * string
     | ID003 of string
-    | ID004 of string
     | ID005 of string * string
     | ID006 of string
     /// (nodeType, signatureNode, baseType, signatureBase) -> $"The {nodeType} `{signatureNode}` cannot inherit from {baseType} `{signatureBase}`."  
@@ -137,7 +136,7 @@ type DiagnosticCode =
     | ID022 of string
     | ID023 of string 
     | ID024 of string * string
-    | ID025 of string * string * string
+    | ID025 of string * string
     | ID027 of string
     // logic-related error codes
     | LG001 of string * string * string
@@ -166,7 +165,7 @@ type DiagnosticCode =
     | SIG01 of string 
     | SIG02 of string * int * string
     | SIG03 of string 
-    | SIG04 of string * int * string list
+    | SIG04 of string * int * string
     | SIG05 of string 
     | SIG06 of string * string * string * string
     | SIG07 of string * string * string 
@@ -236,7 +235,6 @@ type DiagnosticCode =
             | ID001 _ -> "ID001"
             | ID002 _ -> "ID002"
             | ID003 _ -> "ID003"
-            | ID004 _ -> "ID004"
             | ID005 _ -> "ID005"
             | ID006 _ -> "ID006"
             | ID007 _ -> "ID007"
@@ -355,7 +353,6 @@ type DiagnosticCode =
             | ID001 (signature, conflict) -> $"Signature `{signature}` was already declared at {conflict}."  
             | ID002 (signature, incorrectBlockType) -> $"Cannot find a block to be associated with the proof `{signature}`, found only {incorrectBlockType}."  
             | ID003 signature -> $"The proof `{signature}` is missing a block to be associated with."  
-            | ID004 name -> $"Cannot assign a class `{name}` directly; use a constructor `{name}()` instead."  
             | ID005 (signature, incorrectBlockType) -> $"Cannot find a block to be associated with the corollary `{signature}`, found only {incorrectBlockType}."  
             | ID006 signature -> $"The corollary `{signature}` is missing a block to be associated with."  
             | ID007 (nodeType, signatureNode, baseType, signatureBase) -> $"The {nodeType} `{signatureNode}` cannot inherit from {baseType} `{signatureBase}`."  
@@ -383,7 +380,7 @@ type DiagnosticCode =
             | ID022 name -> $"`{name}` is intrinsic, it has no parameterized constructors. This call uses parameters."
             | ID023 candidates  -> $"Cannot associate a justification with a single block. Found more candidates: {candidates}." 
             | ID024 (signature, conflict) -> sprintf "Expression `%s` was already localized at %s." signature conflict
-            | ID025 (candidate, candidateType, nodeType)  -> $"Cannot reference to `{candidate}` which is {candidateType} inside {nodeType}." 
+            | ID025 (candidate, nodeType)  -> $"Cannot reference to `{candidate}` inside {nodeType}." 
             | ID027 name -> $"Illegal recursion in for statement. The entity `{name}` cannot be used as its own domain." 
             // logic-related error codes
             | LG001 (typeOfPredicate,argument,typeOfExpression) -> 
@@ -417,9 +414,7 @@ type DiagnosticCode =
             | SIG02 (symbol, precedence, conflict) -> $"The symbol `{symbol}` was declared with the same precedence of `{precedence}` in {conflict}." 
             | SIG03 errMsg -> errMsg // Returned type is mismatching the mapping type
             | SIG04 (signature, numbOfcandidates, candidates) -> 
-                if numbOfcandidates = 0 then 
-                    $"No overload matching `{signature}`, no candidates were found. Are you missing a uses clause?" 
-                elif numbOfcandidates = 1 then
+                if numbOfcandidates = 1 then
                     $"No overload matching `{signature}`. {candidates}." 
                 else 
                     $"No overload matching `{signature}`. Checked candidates: {candidates}." 
@@ -1000,9 +995,11 @@ let startsWithAny (prefixes:string list) (input:string) =
     prefixes |> List.exists input.StartsWith
 
 /// A helper function adding an English article to a string 
-let getEnglishName someString = 
+let getEnglishName someString determined = 
     let isEnglishAn = startsWithAny ["a"; "e"; "i"; "o"; "u"] someString
-    if isEnglishAn then 
+    if determined then 
+        $"the {someString}"
+    elif isEnglishAn then 
         $"an {someString}"
     else
         $"a {someString}"

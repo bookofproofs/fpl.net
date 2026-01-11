@@ -543,7 +543,7 @@ type SymbolTableNavigation() =
             // process the file
             let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
             // test if there is no SIG04 error
-            let result = filterByErrorCode ad (SIG04 ("",0,[""])).Code
+            let result = filterByErrorCode ad (SIG04 ("",0, "")).Code
             Assert.AreEqual<int>(0, result.Length)
 
 
@@ -563,7 +563,7 @@ type SymbolTableNavigation() =
             loadFplFileWithTheSameSymbolTable stOption.Value pathToFile |> ignore
 
             // test if there is a SIG04 error (there should be 1)
-            let result = filterByErrorCode ad (SIG04 ("",0,[""])).Code
+            let result = filterByErrorCode ad (SIG04 ("", 0, "")).Code
             Assert.AreEqual<int>(1, result.Length)
 
             // now, correct the typo to make SIG04 diagnostics disappear
@@ -581,7 +581,7 @@ type SymbolTableNavigation() =
             loadFplFileWithTheSameSymbolTable stOption.Value pathToFile |> ignore
 
             // test if there is a SIG04 error (there should be 0)
-            let result = filterByErrorCode ad (SIG04 ("",0,[""])).Code
+            let result = filterByErrorCode ad (SIG04 ("",0, "")).Code
             Assert.AreEqual<int>(0, result.Length)
 
             // remove the test file
@@ -597,8 +597,11 @@ type SymbolTableNavigation() =
             match prepareFplCode ("TestJson.fpl", fplCode, false) with
             | Some st ->
                 try
-                    
-                    JToken.Parse(st.ToJson()) |> ignore
+                    use sr = new StringReader(st.ToJson())
+                    use jr = new JsonTextReader(sr)
+                    // disable the MaxDepth limit (nullable with no value)
+                    jr.MaxDepth <- System.Nullable<int>()
+                    JToken.ReadFrom(jr) |> ignore
                 with
                 | :? JsonReaderException as ex -> 
                     let currDir = Directory.GetCurrentDirectory()

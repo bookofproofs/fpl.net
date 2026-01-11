@@ -35,7 +35,7 @@ let filterCandidates (candidatesPre:FplValue list) identifier qualified =
         |> Seq.sortBy (fun fv -> $"{fv.Name}:{fv.FplId}")
         |> Seq.map (fun fv -> 
             if qualified then 
-                qualifiedName fv
+                qualifiedName fv false
             else
                 $"`{fv.Type SignatureType.Mixed}`"
         )
@@ -135,16 +135,16 @@ let rec eval (st: SymbolTable) ast =
         | :? FplReference ->
             fv.TypeId <- LiteralInd
             fv.SetValue (new FplIntrinsicInd((pos1, pos2), fv))
-        | :? FplVariableArray as arr -> arr.SetType LiteralInd pos1 pos2
-        | :? FplMapping as map -> map.SetType LiteralInd pos1 pos2
+        | :? FplVariableArray as arr -> arr.SetType LiteralInd None pos1 pos2
+        | :? FplMapping as map -> map.SetType LiteralInd None pos1 pos2
         | _ ->  fv.TypeId <- LiteralInd
         st.EvalPop() |> ignore
     | Ast.ObjectType((pos1, pos2),()) -> 
         st.EvalPush("ObjectType")
         let fv = variableStack.PeekEvalStack()
         match fv with
-        | :? FplVariableArray as arr -> arr.SetType LiteralObj pos1 pos2 
-        | :? FplMapping as map -> map.SetType LiteralObj pos1 pos2
+        | :? FplVariableArray as arr -> arr.SetType LiteralObj None pos1 pos2 
+        | :? FplMapping as map -> map.SetType LiteralObj None pos1 pos2
         | _ ->  fv.TypeId <- LiteralObj
         st.EvalPop()
     | Ast.PredicateType((pos1, pos2),()) -> 
@@ -155,16 +155,16 @@ let rec eval (st: SymbolTable) ast =
         | :? FplReference ->
             fv.TypeId <- LiteralPred
             fv.SetValue (new FplIntrinsicPred((pos1, pos2), fv))
-        | :? FplVariableArray as arr -> arr.SetType LiteralPred pos1 pos2
-        | :? FplMapping as map -> map.SetType LiteralPred pos1 pos2
+        | :? FplVariableArray as arr -> arr.SetType LiteralPred None pos1 pos2
+        | :? FplMapping as map -> map.SetType LiteralPred None pos1 pos2
         | _ ->  fv.TypeId <- LiteralPred
         st.EvalPop()
     | Ast.FunctionalTermType((pos1, pos2),()) -> 
         st.EvalPush("FunctionalTermType")
         let fv = variableStack.PeekEvalStack()
         match fv with
-        | :? FplVariableArray as arr -> arr.SetType LiteralFunc pos1 pos2 
-        | :? FplMapping as map -> map.SetType LiteralFunc pos1 pos2
+        | :? FplVariableArray as arr -> arr.SetType LiteralFunc None pos1 pos2 
+        | :? FplMapping as map -> map.SetType LiteralFunc None pos1 pos2
         | _ ->  fv.TypeId <- LiteralFunc
         st.EvalPop()
     | Ast.Star((pos1, pos2),()) ->
@@ -266,8 +266,8 @@ let rec eval (st: SymbolTable) ast =
         | :? FplReference ->
             let value = new FplIntrinsicTpl(s, (pos1, pos2), fv)
             fv.TypeId <- s
-        | :? FplVariableArray as arr -> arr.SetType s pos1 pos2 
-        | :? FplMapping as map -> map.SetType s pos1 pos2
+        | :? FplVariableArray as arr -> arr.SetType s None pos1 pos2 
+        | :? FplMapping as map -> map.SetType s None pos1 pos2
         | _ ->  fv.TypeId <- s
         st.EvalPop() 
     | Ast.Var((pos1, pos2), name) ->
@@ -304,8 +304,9 @@ let rec eval (st: SymbolTable) ast =
             | Some foundVar -> 
                 // it was declared in the scope
                 match fv.Name with 
-                | PrimRefL ->
-                    // for references, add to the reference's scope
+                | PrimRefL 
+                | PrimForInStmtEntity 
+                | PrimForInStmtDomain ->
                     fv.Scope.Add(name, foundVar)
                     fv.FplId <- name
                 | PrimTranslationL ->
@@ -477,7 +478,7 @@ let rec eval (st: SymbolTable) ast =
             | PrimFunctionalTermL ->
                 fv.Scope.Add(block.FplId, block)
             | _ ->
-                fv.ErrorOccurred <- emitID016diagnostics $"{getEnglishName block.Name} '{block.Type(SignatureType.Name)}'" pos1 pos2
+                fv.ErrorOccurred <- emitID016diagnostics $"{getEnglishName block.Name true} '{block.Type(SignatureType.Name)}'" pos1 pos2
         | _ -> ()
         ad.DiagnosticsStopped <- oldDiagnosticsStopped
         variableStack.PushEvalStack(fv)
@@ -501,7 +502,7 @@ let rec eval (st: SymbolTable) ast =
             | PrimFunctionalTermL, PrimMandatoryPredicateL ->
                 fv.Scope.Add(block.FplId, block)
             | _ ->
-                fv.ErrorOccurred <- emitID015diagnostics $"{getEnglishName block.Name} '{block.Type(SignatureType.Name)}'" pos1 pos2
+                fv.ErrorOccurred <- emitID015diagnostics $"{getEnglishName block.Name true} '{block.Type(SignatureType.Name)}'" pos1 pos2
         | _ -> ()
         ad.DiagnosticsStopped <- oldDiagnosticsStopped
         variableStack.PushEvalStack(fv)
@@ -656,51 +657,59 @@ let rec eval (st: SymbolTable) ast =
         eval st ast1
         st.EvalPop()
     // | NamespaceIdentifier of Positions * Ast list
-    | Ast.PredicateIdentifier((pos1, pos2), dottedIdListAst) ->
+    | Ast.PredicateIdentifier((pos1, pos2), identifier) ->
         st.EvalPush("PredicateIdentifier")
-
-        let pascalCaseIdList = dottedIdListAst |> List.collect (function Ast.PascalCaseId (_,s) -> [s] | _ -> [])
-        let identifier = String.concat "." pascalCaseIdList
         let fv = variableStack.PeekEvalStack()
 
-        match fv with 
-        | :? FplVariableArray as arr -> arr.SetType identifier pos1 pos2
-        | :? FplMapping as map -> map.SetType identifier pos1 pos2
-        | :? FplVariable -> fv.TypeId <- identifier
-        | :? FplBase 
-        | :? FplBaseConstructorCall 
-        | :? FplForInStmtDomain -> 
-            fv.FplId <- identifier
-            fv.TypeId <- identifier
-        | :? FplReference -> 
-            fv.FplId <- fv.FplId + identifier
-            fv.TypeId <- fv.TypeId + identifier
-        | :? FplGenericJustificationItem as fvJi -> 
-            fvJi.FplId <- identifier
-        | _ -> ()
         let candidatesPre = findCandidatesByName st identifier false false
-
         let candidates, candidatesNames =  filterCandidates candidatesPre identifier true
 
-        match fv, candidates.Length with
-        | :? FplVariable, 0 -> 
-            fv.ErrorOccurred <- emitSIG04Diagnostics identifier 0 [""] pos1 pos2
-            let undefValue = new FplIntrinsicUndef((fv.StartPos, fv.EndPos), fv)
-            fv.ValueList.Add(undefValue)
-        | :? FplMapping as map, 1 -> 
+        let correctIds (fv1:FplValue) = 
+            match fv with 
+            | :? FplBase 
+            | :? FplBaseConstructorCall 
+            | :? FplForInStmtDomain -> 
+                fv1.FplId <- identifier
+                fv1.TypeId <- identifier
+            | :? FplReference -> 
+                fv1.FplId <- fv1.FplId + identifier
+                fv1.TypeId <- fv1.TypeId + identifier
+            | :? FplGenericJustificationItem as fvJi -> 
+                fvJi.FplId <- identifier
+            | _ -> ()
+
+        match candidates.Length with
+        | 0 -> 
+            fv.ErrorOccurred <- emitID010Diagnostics identifier pos1 pos2
+            match fv with 
+            | :? FplVariableArray as arr -> arr.SetType identifier None pos1 pos2
+            | :? FplMapping as map -> map.SetType identifier None pos1 pos2
+            | :? FplVariable ->
+                fv.TypeId <- identifier
+                let undefValue = new FplIntrinsicUndef((fv.StartPos, fv.EndPos), fv)
+                fv.ValueList.Add(undefValue)
+            | _ -> correctIds fv 
+        | 1 ->
             let candidate = candidates.Head
-            match candidate with 
-            | :? FplClass -> map.ToBeReturnedClass <- Some candidate
-            | _ -> fv.ErrorOccurred <- emitSIG11diagnostics (qualifiedName map) (qualifiedName candidate) map.StartPos map.EndPos       
-        | :? FplMapping, 0 -> 
-            fv.ErrorOccurred <- emitSIG04Diagnostics identifier 0 [""] pos1 pos2
-        | :? FplMapping, _ -> 
-            fv.ErrorOccurred <- emitID017Diagnostics identifier candidatesNames pos1 pos2
-        | :? FplVariable, 1 -> 
-            fv.Scope.TryAdd(fv.FplId, candidates.Head) |> ignore
-        | :? FplVariable, _ -> 
-            fv.ErrorOccurred <- emitID017Diagnostics identifier candidatesNames pos1 pos2
-        | _ -> ()
+            match fv with 
+            | :? FplVariableArray as arr ->  arr.SetType identifier (Some candidate) pos1 pos2
+            | :? FplMapping as map -> 
+                let candidate = candidates.Head
+                match candidate with 
+                | :? FplFunctionalTerm 
+                | :? FplPredicate 
+                | :? FplClass -> map.SetType identifier (Some candidate) pos1 pos2
+                | _ -> fv.ErrorOccurred <- emitSIG11diagnostics (qualifiedName map false) (qualifiedName candidate false) map.StartPos map.EndPos       
+            | :? FplVariable -> 
+                fv.TypeId <- identifier
+                fv.Scope.TryAdd(fv.FplId, candidate) |> ignore
+            | _ -> correctIds fv
+        | _ ->
+            match fv with 
+            | :? FplMapping 
+            | :? FplVariable -> 
+                fv.ErrorOccurred <- emitID017Diagnostics identifier candidatesNames pos1 pos2
+            | _ -> correctIds fv
 
         
         st.EvalPop()
@@ -851,9 +860,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.QualificationList((pos1, pos2), asts) ->
         st.EvalPush("QualificationList")
-        if asts.Length > 0 then
-            let fv = variableStack.PeekEvalStack()
-            asts |> List.map (eval st) |> ignore
+        asts |> List.map (eval st) |> ignore
         st.EvalPop()
     // | Namespace of Ast option * Ast list
     | Ast.Namespace(asts) ->
@@ -903,11 +910,16 @@ let rec eval (st: SymbolTable) ast =
         let getCandidatesBasedOnDotted (parentFv: FplValue) (fVal:FplValue) = 
             let referencedNodeOpt, typeRefNode, typeNameRefNode =
                 if parentFv.Scope.ContainsKey(parentFv.FplId) then 
-                    let var = parentFv.Scope[parentFv.FplId]
-                    let refNodeOpt = var.Scope.Values |> Seq.tryHead 
-                    match refNodeOpt with 
-                    | Some refNode -> refNodeOpt, refNode.Type SignatureType.Mixed, refNode.Name
-                    | None -> None, $"{parentFv.FplId}:{LiteralUndef}", parentFv.Name
+                    let dottedReference = parentFv.Scope[parentFv.FplId]
+                    match dottedReference with 
+                    | :? FplFunctionalTerm 
+                    | :? FplPredicate 
+                    | :? FplClass -> Some dottedReference, dottedReference.Type SignatureType.Mixed, dottedReference.Name
+                    | _ ->
+                        let refNodeOpt = dottedReference.Scope.Values |> Seq.tryHead 
+                        match refNodeOpt with 
+                        | Some refNode -> refNodeOpt, refNode.Type SignatureType.Mixed, refNode.Name
+                        | None -> None, $"{parentFv.FplId}:{LiteralUndef}", parentFv.Name
                 else
                     None, $"{parentFv.FplId}:{LiteralUndef}", parentFv.Name
             let candidatesPre = 
@@ -998,13 +1010,13 @@ let rec eval (st: SymbolTable) ast =
 
                 fv.Scope.TryAdd(fv.FplId, classes.Head) |> ignore
                 let candidate = classes.Head
-                fv.ErrorOccurred <- emitID025Diagnostics (qualifiedName candidate) candidate.EnglishName block.EnglishName block.Name fv.StartPos fv.EndPos
+                fv.ErrorOccurred <- emitID025Diagnostics (qualifiedName candidate false) (getEnglishName block.Name false) block.Name fv.StartPos fv.EndPos
             elif candidates.Length > 0 then
                 // not a class was referred, add the candidate (e.g., referenced variable)
                 let candidate = candidates.Head
                 fv.FplId <- candidate.FplId 
                 fv.Scope.TryAdd(fv.FplId, candidate) |> ignore
-                fv.ErrorOccurred <- emitID025Diagnostics (qualifiedName candidate) candidate.EnglishName block.EnglishName block.Name fv.StartPos fv.EndPos
+                fv.ErrorOccurred <- emitID025Diagnostics (qualifiedName candidate false) (getEnglishName block.Name false) block.Name fv.StartPos fv.EndPos
             else
                 ()
 
@@ -1177,7 +1189,7 @@ let rec eval (st: SymbolTable) ast =
                 fv.Scope.TryAdd(fv.FplId, candidate) |> ignore
                 match fv.UltimateBlockNode with
                 | Some block ->
-                    fv.ErrorOccurred <- emitID025Diagnostics (qualifiedName candidate) candidate.EnglishName block.EnglishName block.Name fv.StartPos fv.EndPos
+                    fv.ErrorOccurred <- emitID025Diagnostics (qualifiedName candidate false) (getEnglishName block.Name false) block.Name fv.StartPos fv.EndPos
                 | _ -> ()
         | _ -> ()
         st.EvalPop()
@@ -1345,8 +1357,29 @@ let rec eval (st: SymbolTable) ast =
             let secondOp = fv.ArgList[currMinIndex+1]
             currentOp.ArgList.Add(firstOp)
             currentOp.ArgList.Add(secondOp)
-            match precNodeList currentOp with
-            | x::_ -> checkSIG04Diagnostics currentOp [x] |> ignore 
+            let refNodeOpt = referencedNodeOpt currentOp
+            match refNodeOpt with 
+            | Some refNode when refNode.Arity = 2 ->
+                let pars = 
+                    refNode.GetVariables() 
+                    |> List.map (fun var -> var :?> FplGenericVariable)
+                    |> List.filter (fun var -> var.IsSignatureVariable)
+                // try to issue SIG04 diagnostics per argument of the binary operator
+                if pars.Length = 2 then 
+                    match mpwa [firstOp] [pars[0]] MatchingMode.Signature with
+                    | Some errMsg -> 
+                        let extendedErrMsg = $"{errMsg} in {qualifiedName refNode true}"
+                        firstOp.ErrorOccurred <- emitSIG04Diagnostics (currentOp.Type SignatureType.Mixed) 1 extendedErrMsg firstOp.StartPos firstOp.EndPos
+                    | _ -> ()
+                    match mpwa [secondOp] [pars[1]] MatchingMode.Signature with
+                    | Some errMsg -> 
+                        let extendedErrMsg = $"{errMsg} in {qualifiedName refNode true}"
+                        secondOp.ErrorOccurred <- emitSIG04Diagnostics (currentOp.Type SignatureType.Mixed) 1 extendedErrMsg secondOp.StartPos secondOp.EndPos
+                    | _ -> ()
+                else
+                    // if something went wrong (for instance, wrong arity), issue SIG04 with fallback using the operand 
+                    // together with its referenced node
+                    checkSIG04Diagnostics currentOp [refNode] |> ignore
             | _ -> ()
             fv.ArgList.RemoveAt(currMinIndex+1) 
             fv.ArgList.RemoveAt(currMinIndex-1) 
@@ -1683,7 +1716,7 @@ let rec eval (st: SymbolTable) ast =
                 match varAst with 
                 | Ast.Var((varPos1, varPos2), varName) ->
                     let newVar = new FplVariableArray(varName, (varPos1, varPos2), parent)
-                    newVar.IsSignatureVariable <- (variableStack.InSignatureEvaluation && not (isVar parent))
+                    newVar.IsSignatureVariable <- (variableStack.InSignatureEvaluation && hasSignature parent)
                     variableStack.PushEvalStack(newVar)
                     eval st mainTypeAst
                     indexAllowedTypeListAst |> List.map (eval st) |> ignore
@@ -1693,7 +1726,7 @@ let rec eval (st: SymbolTable) ast =
                 match varAst with 
                 | Ast.Var((varPos1, varPos2), varName) ->
                     let newVar = new FplVariable(varName, (varPos1, varPos2), parent)
-                    newVar.IsSignatureVariable <- (variableStack.InSignatureEvaluation && not (isVar parent))
+                    newVar.IsSignatureVariable <- (variableStack.InSignatureEvaluation && hasSignature parent)
                     variableStack.PushEvalStack(newVar)
                     eval st simplVariableTypeAst
                     variableStack.PopEvalStack()

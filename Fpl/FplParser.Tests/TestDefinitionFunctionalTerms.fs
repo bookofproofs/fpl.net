@@ -7,6 +7,18 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 [<TestClass>]
 type TestDefinitionFunctionalTerms01 () =
 
+    [<DataRow("func A()->undef")>]
+    [<DataRow("func A()->ind")>]
+    [<DataRow("func A()->obj")>]
+    [<DataRow("func A()->pred")>]
+    [<DataRow("func A()->func")>]
+    [<TestMethod>]
+    member this.TestDefinitionFunctionalTerm00 (fplCode:string) =
+        let result = run (definitionFunctionalTerm .>> eof) fplCode
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
     [<TestMethod>]
     member this.TestDefinitionFunctionalTerm01 () =
         let result = run (definitionFunctionalTerm .>> eof) """func LeftNeutralElement() -> tplSetElem
