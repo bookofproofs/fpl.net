@@ -3945,295 +3945,292 @@ let isCallByValue (fv:FplValue) =
     | ArgType.Parentheses when isUpper fv.FplId -> true
     | _ -> false
 
+let private errMsgStandard aName aType pName pType = Some $"`{aName}:{aType}` doesn't match `{pName}:{pType}`"
+let private errMsgMissingArgument pName pType = Some $"Missing argument for `{pName}:{pType}`"
+let private errMsgMissingParameter aName aType = Some $"No matching parameter for `{aName}:{aType}`"
+let private errMsgCallByRefToClass aName classType = Some $"Assignee `{aName}` references to a class `{classType}`. Consider initializing `{aName}` with a class constructor `{classType}(...)`."
+let private errMsgDirectClassAssignment classType = Some $"Assignee is a class `{classType}`. Use a class constructor `{classType}(...)` instead."
+
+let private matchClassInheritance (clOpt:FplValue option) (a:FplValue) aType (pName:string) (pType:string) = 
+    let pTypeSimple =
+        if pType.StartsWith("*") then 
+            let ret = pType.Substring(1).Split("[")
+            ret[0]
+        else
+            pType
+    match clOpt with 
+    | Some cl -> 
+        if inheritsFrom cl pTypeSimple then 
+            None
+        else
+            Some($"`{a.Type(SignatureType.Name)}:{aType}` matches neither `{pName}:{pType}` nor the base classes")
+    | _ -> None
+
+let private matchByTypeStringRepresentation (a:FplValue) aName (aType:string) aTypeName (p:FplValue) pName (pType:string) pTypeName mode = 
+
+    match mode with 
+    | _ when aType = pType ->
+        None, Parameter.Consumed
+    | _ when aType = LiteralUndef ->
+        None, Parameter.Consumed // undef matches any type
+    | _ when pType.StartsWith(LiteralTpl) || pType.StartsWith(LiteralTplL) ->
+        None, Parameter.Consumed // tpl accepts everything: todo: really?
+    | _ when pType.StartsWith($"*{LiteralTpl}") || pType.StartsWith($"*{LiteralTplL}") ->
+        None, Parameter.Consumed // tpl arrays accepts everything: todo: really?
+    | MatchingMode.Assignment when aType = LiteralUndef ->
+        None, Parameter.Consumed // undef can always be assigned
+    | MatchingMode.Assignment when pType.StartsWith($"*{aType}[") && pTypeName = PrimVariableArrayL ->
+        None, Parameter.Consumed // assignee array accepting assigned value
+    | MatchingMode.Signature when pType.StartsWith($"*{aType}[{LiteralInd}]") ->
+        None, Parameter.NotConsumed // 1D arrays matching input type with ind as index accept variadic enumerations
+    | _ when pType.StartsWith($"*{aType}[") ->
+        // array parameters with indexes that differ from the FPL-inbuilt index type  
+        // or with multidimensional index types will not accept variadic enumerations of arguments
+        // even if they have the same type used for the values of the array
+        Some $"variadic enumeration of `{aName}:{aType}` doesn't match `{pName}:{pType}`, try `{aName}:{pType}` as argument or use parameter `{pName}:{p.TypeId}[{LiteralInd}]`", Parameter.Consumed
+    | _ when aType.StartsWith($"*{pType}[") && aTypeName = PrimRefL ->
+        let refA = a :?> FplReference
+        if refA.ArgType = ArgType.Brackets then 
+            // some array elements matching parameter type
+            None, Parameter.Consumed
+        else
+            Some $"Array type `{aName}:{aType}` doesn't match `{pName}:{pType}`", Parameter.Consumed
+    | _ when isUpper aType && aTypeName = PrimRefL && a.Scope.Count = 1 ->
+        let aReferencedNode = a.Scope.Values |> Seq.toList |> List.head
+        if aReferencedNode.Scope.Count > 0 then
+            let cl = aReferencedNode.Scope.Values |> Seq.head
+            match cl with
+            | :? FplClass ->
+                if inheritsFrom cl pType then 
+                    None, Parameter.Consumed // base class accepting derived class
+                else
+                    Some $"`{aName}:{aType}` neither matches `{pName}:{pType}` nor the base classes", Parameter.Consumed
+            | _ ->
+                // this case does not occur but we cover it for completeness reasons
+                Some $"undefined `{aName}:{aType}` doesn't match `{pName}:{pType}`", Parameter.Consumed
+        elif aReferencedNode.Name = PrimDefaultConstructor || aReferencedNode.Name = LiteralCtorL then 
+            let ctor = aReferencedNode :?> FplGenericConstructor
+            matchClassInheritance ctor.ToBeConstructedClass a aType pName pType, Parameter.Consumed
+        elif aReferencedNode.Name = PrimFunctionalTermL || aReferencedNode.Name = PrimMandatoryFunctionalTermL then 
+            let mapOpt = getMapping aReferencedNode
+            let map = mapOpt.Value :?> FplMapping 
+            matchClassInheritance map.ToBeReturnedDefinition a aType pName pType, Parameter.Consumed
+        else
+            Some $"undefined `{aName}:{aType}` doesn't match `{pName}:{pType}`", Parameter.Consumed
+    | _ when aType.StartsWith(pType + "(") ->
+        None, Parameter.Consumed
+    | _ when aType.StartsWith(LiteralPred) && pType = LiteralPred ->
+        None, Parameter.Consumed
+    | _ when aType.StartsWith(LiteralFunc) && pType = LiteralFunc->
+        None, Parameter.Consumed
+    | MatchingMode.Assignment when aTypeName = PrimVariableL ->
+        let clOpt = a.Scope.Values |> Seq.tryHead
+        match clOpt with 
+        | Some (:? FplClass) -> matchClassInheritance clOpt a aType pName pType, Parameter.Consumed
+        | _ -> errMsgStandard aName aType pName pType, Parameter.Consumed
+    | MatchingMode.Assignment when aTypeName = PrimDefaultConstructor || aTypeName = LiteralCtorL ->
+        let ctor = a :?> FplGenericConstructor
+        matchClassInheritance ctor.ToBeConstructedClass a aType pName pType, Parameter.Consumed
+    | _ when pTypeName = PrimFunctionalTermL || pTypeName = PrimMandatoryFunctionalTermL ->
+        let mappingOpt = getMapping p 
+        match mappingOpt with 
+        | Some mapping ->
+            let newTypeAssignedValue = mapping.Type SignatureType.Type
+            if aType <> newTypeAssignedValue then 
+                errMsgStandard aName aType pName pType, Parameter.Consumed
+            else 
+                None, Parameter.Consumed
+        | None -> None, Parameter.Consumed
+    | _ ->
+        errMsgStandard aName aType pName pType, Parameter.Consumed
+
+let private isPredWithParentheses (fv:FplValue) =
+    match fv.ArgType with 
+    | ArgType.Parentheses when fv.TypeId.StartsWith(LiteralPred) -> true
+    | _ -> false
+
+let private isPredWithoutParentheses (fv:FplValue) =
+    match fv.ArgType with 
+    | ArgType.Nothing when fv.TypeId = LiteralPred -> true
+    | _ -> false
+
+let private isWithParenthesesOrFunc (fv:FplValue) =
+    match fv.ArgType with 
+    | ArgType.Parentheses -> true
+    | _ when fv.TypeId = LiteralFunc -> true
+    | _ -> false
+
+let private isFuncWithParentheses (fv:FplValue) =
+    match fv.ArgType with 
+    | ArgType.Parentheses when fv.TypeId.StartsWith(LiteralFunc) -> true
+    | _ -> false
+
+let private isFuncWithoutParentheses (fv:FplValue) =
+    match fv.ArgType with 
+    | ArgType.Nothing when fv.TypeId = LiteralFunc -> true
+    | _ -> false
+
+/// Checks if fv is a reference to a variable that points to a class, and at the same time is marked as 'initialized' and still does not any values.
+/// (this is the convention flagging that a variable has been assigned to its class instead of the constructor of the class generating an instance value).
+/// If the function returns a non-empty string, it contains the identifier of the referenced class (that has not been instantiated).
+let private getCallByReferenceToClass (fv:FplValue) =
+    if fv.Scope.ContainsKey(fv.FplId) then 
+        let refNode = fv.Scope[fv.FplId]
+        match refNode with 
+        | :? FplGenericVariable as var when var.IsInitialized && var.ValueList.Count = 0 ->
+            // reference fv points to an initialized variable without values 
+            match var.TypeNode with
+            | Some fv1 when fv1.Name = PrimClassL -> fv1.TypeId // and the variable points to a class
+            | _ -> String.Empty
+        | _ -> String.Empty
+    else
+        String.Empty
+               
+let rec private isCallByReference (fv:FplValue) =
+    if fv.Scope.ContainsKey(".") then
+        isCallByReference fv.Scope["."] // evaluate dotted reference instead
+    else
+        match fv.ArgType with 
+        | ArgType.Nothing when isUpper fv.FplId -> true
+        | ArgType.Nothing -> true
+        | _ -> false
+
+let private getNames (fv:FplValue) = 
+    let fvName = fv.Type SignatureType.Name
+    let fvType = fv.Type SignatureType.Type
+    let fvTypeName = fv.Name
+    fvName, fvType, fvTypeName
+
+let rec private matchTwoTypes (a:FplValue) (p:FplValue) (mode:MatchingMode) =
+    let aName, aType, aTypeName = getNames a 
+    let pName, pType, pTypeName = getNames p
+
+    match aTypeName, pTypeName with 
+    | PrimClassL, PrimVariableL when mode = MatchingMode.Assignment ->
+        errMsgDirectClassAssignment aType, Parameter.Consumed
+    | PrimRefL, PrimVariableL
+    | PrimRefL, PrimMappingL ->
+        let aIsCallByReference = isCallByReference a
+        let callByReferenceToClass = getCallByReferenceToClass a
+        let refNodeOpt = referencedNodeOpt a
+        if callByReferenceToClass <> String.Empty then 
+            errMsgCallByRefToClass aName callByReferenceToClass, Parameter.Consumed
+        elif aIsCallByReference && isPredWithParentheses p then 
+            // match a call by reference with pred with parameters
+            match refNodeOpt with 
+            | Some refNode when refNode.Name = PrimPredicateL ->
+                matchTwoTypes refNode p mode // match signatures with parameters
+            | Some refNode when refNode.Name = PrimIntrinsicUndef -> 
+                None, Parameter.Consumed // mapping pred(...) accepting undef
+            | Some refNode when refNode.Name = PrimMandatoryPredicateL ->
+                matchTwoTypes refNode p mode // match signatures with parameters
+            | Some refNode when refNode.Name = PrimVariableL && refNode.TypeId = LiteralPred ->
+                matchTwoTypes refNode p mode // match signatures with parameters
+            | Some refNode ->
+                // a node was referenced but is not a predicate
+                Some $"The return type of {qualifiedName refNode true} doesn't match `{pType}`.", Parameter.Consumed
+            | _ ->
+                // in all other cases, 
+                errMsgStandard aName aType pName pType, Parameter.Consumed
+        elif aIsCallByReference && isPredWithoutParentheses p then
+            // match a not-by-value-reference with pred mapping without parameters
+            match refNodeOpt with 
+            | Some refNode when refNode.Name = PrimIntrinsicPred ->
+                None, Parameter.Consumed // pred accepting intrinsic predicates
+            | Some refNode when refNode.Name = PrimIntrinsicUndef -> 
+                None, Parameter.Consumed // mapping pred accepting undef
+            | Some refNode when refNode.Name = PrimPredicateL ->
+                None, Parameter.Consumed // pred accepting predicate nodes
+            | Some refNode when refNode.Name = PrimMandatoryPredicateL ->
+                None, Parameter.Consumed // pred accepting predicate properties
+            | Some refNode when refNode.Name = LiteralAxL ->
+                None, Parameter.Consumed // pred accepting axioms
+            | Some (:? FplGenericTheoremLikeStmt as refNode) ->
+                None, Parameter.Consumed // pred accepting theorem-like statements
+            | Some refNode when refNode.Name = LiteralConjL ->
+                None, Parameter.Consumed // pred accepting conjectures
+            | Some refNode when refNode.Name = PrimVariableL && refNode.TypeId = LiteralPred ->
+                None, Parameter.Consumed // pred accepting pred variables
+            | Some refNode ->
+                // a node was referenced not a predicate node
+                Some $"The return type of {qualifiedName refNode true} doesn't match mapping type `{pType}`.", Parameter.Consumed
+            | _ ->
+                // in all other cases, error
+                errMsgStandard aName aType pName pType, Parameter.Consumed
+        elif aIsCallByReference && isFuncWithParentheses p then
+            // match a not-by-value-reference with func mapping with parameters
+            match refNodeOpt with 
+            | Some refNode when refNode.Name = PrimIntrinsicUndef -> 
+                None, Parameter.Consumed // mapping func(...)->.. accepting undef
+            | Some refNode when refNode.Name = PrimFunctionalTermL ->
+                matchTwoTypes refNode p mode // match signatures with parameters
+            | Some refNode when refNode.Name = PrimMandatoryFunctionalTermL ->
+                matchTwoTypes refNode p mode // match signatures with parameters
+            | Some refNode when refNode.Name = PrimVariableL && refNode.TypeId = LiteralFunc ->
+                matchTwoTypes refNode p mode // match signatures with parameters
+            | Some refNode ->
+                // a node was referenced but is not a functional term block
+                Some $"The return type of {qualifiedName refNode true} does not match mapping type `{pType}`.", Parameter.Consumed
+            | _ ->
+                // in all other cases, error
+                errMsgStandard aName aType pName pType, Parameter.Consumed
+        elif aIsCallByReference && isFuncWithoutParentheses p then 
+            // match a not-by-value-reference with func mapping with parameters
+            match refNodeOpt with 
+            | Some refNode when refNode.Name = PrimIntrinsicUndef -> 
+                None, Parameter.Consumed // mapping func accepting undef
+            | Some refNode when refNode.Name = PrimFunctionalTermL ->
+                None, Parameter.Consumed // func accepting functional term nodes
+            | Some refNode when refNode.Name = PrimMandatoryFunctionalTermL ->
+                None, Parameter.Consumed // func accepting functional term properties
+            | Some refNode when refNode.Name = PrimVariableL && refNode.TypeId = LiteralFunc ->
+                None, Parameter.Consumed // func accepting func variables
+            | Some refNode ->
+                // a node was referenced but is not a functional term block
+                Some $"The return type of {qualifiedName refNode true} does not match expected mapping type `{pType}`.", Parameter.Consumed
+            | _ ->
+                // in all other cases, error
+                Some $"Return type of `{aName}:{aType}` does not match expected mapping type `{pType}`.", Parameter.Consumed
+        elif aIsCallByReference && pTypeName = PrimMappingL then 
+            let map = p :?> FplMapping
+            match map.ToBeReturnedDefinition, refNodeOpt with
+            | Some def, Some refNode when refNode.Name = PrimInstanceL -> 
+                matchTwoTypes a def mode
+            | Some def, Some refNode when refNode.Name = PrimIntrinsicUndef -> 
+                None, Parameter.Consumed // definition accepting undef
+            | None, Some refNode when map.TypeId = LiteralObj && refNode.Name = PrimInstanceL -> 
+                None, Parameter.Consumed // obj accepting instance
+            | Some cl, Some (:? FplGenericVariable as refNode) when not refNode.IsInitialized  -> 
+                matchTwoTypes a cl mode
+            | None, Some (:? FplGenericVariable as refNode) when map.TypeId = LiteralObj && not refNode.IsInitialized -> 
+                let refNodeOpt1 = referencedNodeOpt refNode
+                match refNodeOpt1 with 
+                | Some (:? FplClass as cl) -> None, Parameter.Consumed // obj accepting instance
+                | _ when refNode.TypeId = LiteralObj && aType = pType -> None, Parameter.Consumed // obj accepting obj variable
+                | _ -> errMsgStandard aName aType pName pType, Parameter.Consumed
+            | None, Some refNode when refNode.Name = PrimIntrinsicUndef -> 
+                None, Parameter.Consumed // anything accepting undef
+            | None, Some refNode -> 
+                matchTwoTypes refNode map mode
+            | None, None when aType = pType && isUpper aType -> 
+                Some $"`{aName}:{aType}` matches the expected type `{pType}` but the type is undefined.", Parameter.Consumed
+            | None, None when aType = pType  -> 
+                None, Parameter.Consumed // obj accepting obj, ind accepting ind, pred accepting pred, func accepting func
+            | _, _ -> 
+                errMsgStandard aName aType pName pType, Parameter.Consumed
+        elif isCallByValue a && isWithParenthesesOrFunc p then
+            // mismatch of a by-value-reference with parameterized mapping or a func mapping
+            // since in both cases, no by-value reference is allowed
+            Some $"Return type by value `{aName}:{aType}` does not match the expected type `{pType}`. Try removing arguments of `{aName}` and refer to the referenced node `{a.FplId}`.", Parameter.Consumed
+        else 
+            matchByTypeStringRepresentation a aName aType aTypeName p pName pType pTypeName mode
+    | _ ,_ -> 
+        matchByTypeStringRepresentation a aName aType aTypeName p pName pType pTypeName mode
+
+
 /// Tries to match a list of arguments with a list of parameters by their type recursively.
 /// The comparison depends on MatchingMode.
 let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
-    let errMsgStandard aName aType pName pType = Some $"`{aName}:{aType}` doesn't match `{pName}:{pType}`"
-    let errMsgMissingArgument pName pType = Some $"Missing argument for `{pName}:{pType}`"
-    let errMsgMissingParameter aName aType = Some $"No matching parameter for `{aName}:{aType}`"
-    let errMsgCallByRefToClass aName classType = Some $"Assignee `{aName}` references to a class `{classType}`. Consider initializing `{aName}` with a class constructor `{classType}(...)`."
-    let errMsgDirectClassAssignment classType = Some $"Assignee is a class `{classType}`. Use a class constructor `{classType}(...)` instead."
-
-    let matchClassInheritance (clOpt:FplValue option) (a:FplValue) aType (pName:string) (pType:string) = 
-        let pTypeSimple =
-            if pType.StartsWith("*") then 
-                let ret = pType.Substring(1).Split("[")
-                ret[0]
-            else
-                pType
-        match clOpt with 
-        | Some cl -> 
-            if inheritsFrom cl pTypeSimple then 
-                None
-            else
-                Some($"`{a.Type(SignatureType.Name)}:{aType}` matches neither `{pName}:{pType}` nor the base classes")
-        | _ -> None
-
-    let isClassType (fv:FplValue) =
-        let refNodeOpt = referencedNodeOpt fv
-        match refNodeOpt with 
-        | Some refNode when refNode.Name = PrimClassL -> true
-        | _ -> false
-    let isPredWithParentheses (fv:FplValue) =
-        match fv.ArgType with 
-        | ArgType.Parentheses when fv.TypeId.StartsWith(LiteralPred) -> true
-        | _ -> false
-    let isPredWithoutParentheses (fv:FplValue) =
-        match fv.ArgType with 
-        | ArgType.Nothing when fv.TypeId = LiteralPred -> true
-        | _ -> false
-    let isWithParenthesesOrFunc (fv:FplValue) =
-        match fv.ArgType with 
-        | ArgType.Parentheses -> true
-        | _ when fv.TypeId = LiteralFunc -> true
-        | _ -> false
-    let isFuncWithParentheses (fv:FplValue) =
-        match fv.ArgType with 
-        | ArgType.Parentheses when fv.TypeId.StartsWith(LiteralFunc) -> true
-        | _ -> false
-    let isFuncWithoutParentheses (fv:FplValue) =
-        match fv.ArgType with 
-        | ArgType.Nothing when fv.TypeId = LiteralFunc -> true
-        | _ -> false
-    /// Checks if fv is a reference to a variable that points to a class, and at the same time is marked as 'initialized' and still does not any values.
-    /// (this is the convention flagging that a variable has been assigned to its class instead of the constructor of the class generating an instance value).
-    /// If the function returns a non-empty string, it contains the identifier of the referenced class (that has not been instantiated).
-    let getCallByReferenceToClass (fv:FplValue) =
-        if fv.Scope.ContainsKey(fv.FplId) then 
-            let refNode = fv.Scope[fv.FplId]
-            match refNode with 
-            | :? FplGenericVariable as var when var.IsInitialized && var.ValueList.Count = 0 ->
-                // reference fv points to an initialized variable without values 
-                match var.TypeNode with
-                | Some fv1 when fv1.Name = PrimClassL -> fv1.TypeId // and the variable points to a class
-                | _ -> String.Empty
-            | _ -> String.Empty
-        else
-            String.Empty
-                
-    let rec isCallByReference (fv:FplValue) =
-        if fv.Scope.ContainsKey(".") then
-            isCallByReference fv.Scope["."] // evaluate dotted reference instead
-        else
-            match fv.ArgType with 
-            | ArgType.Nothing when isUpper fv.FplId -> true
-            | ArgType.Nothing -> true
-            | _ -> false
-
-
-    let matchByTypeStringRepresentation (a:FplValue) aName (aType:string) aTypeName (p:FplValue) pName (pType:string) pTypeName mode = 
-        match mode with 
-        | _ when aType = pType ->
-            None, Parameter.Consumed
-        | _ when aType = LiteralUndef ->
-            None, Parameter.Consumed // undef matches any type
-        | _ when pType.StartsWith(LiteralTpl) || pType.StartsWith(LiteralTplL) ->
-            None, Parameter.Consumed // tpl accepts everything: todo: really?
-        | _ when pType.StartsWith($"*{LiteralTpl}") || pType.StartsWith($"*{LiteralTplL}") ->
-            None, Parameter.Consumed // tpl arrays accepts everything: todo: really?
-        | MatchingMode.Assignment when aType = LiteralUndef ->
-            None, Parameter.Consumed // undef can always be assigned
-        | MatchingMode.Assignment when pType.StartsWith($"*{aType}[") && pTypeName = PrimVariableArrayL ->
-            None, Parameter.Consumed // assignee array accepting assigned value
-        | MatchingMode.Signature when pType.StartsWith($"*{aType}[{LiteralInd}]") ->
-            None, Parameter.NotConsumed // 1D arrays matching input type with ind as index accept variadic enumerations
-        | _ when pType.StartsWith($"*{aType}[") ->
-            // array parameters with indexes that differ from the FPL-inbuilt index type  
-            // or with multidimensional index types will not accept variadic enumerations of arguments
-            // even if they have the same type used for the values of the array
-            Some $"variadic enumeration of `{aName}:{aType}` doesn't match `{pName}:{pType}`, try `{aName}:{pType}` as argument or use parameter `{pName}:{p.TypeId}[{LiteralInd}]`", Parameter.Consumed
-        | _ when aType.StartsWith($"*{pType}[") && aTypeName = PrimRefL ->
-            let refA = a :?> FplReference
-            if refA.ArgType = ArgType.Brackets then 
-                // some array elements matching parameter type
-                None, Parameter.Consumed
-            else
-                Some $"Array type `{aName}:{aType}` doesn't match `{pName}:{pType}`", Parameter.Consumed
-        | _ when isUpper aType && aTypeName = PrimRefL && a.Scope.Count = 1 ->
-            let aReferencedNode = a.Scope.Values |> Seq.toList |> List.head
-            if aReferencedNode.Scope.Count > 0 then
-                let cl = aReferencedNode.Scope.Values |> Seq.head
-                match cl with
-                | :? FplClass ->
-                    if inheritsFrom cl pType then 
-                        None, Parameter.Consumed // base class accepting derived class
-                    else
-                        Some $"`{aName}:{aType}` neither matches `{pName}:{pType}` nor the base classes", Parameter.Consumed
-                | _ ->
-                    // this case does not occur but we cover it for completeness reasons
-                    Some $"undefined `{aName}:{aType}` doesn't match `{pName}:{pType}`", Parameter.Consumed
-            elif aReferencedNode.Name = PrimDefaultConstructor || aReferencedNode.Name = LiteralCtorL then 
-                let ctor = aReferencedNode :?> FplGenericConstructor
-                matchClassInheritance ctor.ToBeConstructedClass a aType pName pType, Parameter.Consumed
-            elif aReferencedNode.Name = PrimFunctionalTermL || aReferencedNode.Name = PrimMandatoryFunctionalTermL then 
-                let mapOpt = getMapping aReferencedNode
-                let map = mapOpt.Value :?> FplMapping 
-                matchClassInheritance map.ToBeReturnedDefinition a aType pName pType, Parameter.Consumed
-            else
-                Some $"undefined `{aName}:{aType}` doesn't match `{pName}:{pType}`", Parameter.Consumed
-        | _ when aType.StartsWith(pType + "(") ->
-            None, Parameter.Consumed
-        | _ when aType.StartsWith(LiteralPred) && pType = LiteralPred ->
-            None, Parameter.Consumed
-        | _ when aType.StartsWith(LiteralFunc) && pType = LiteralFunc->
-            None, Parameter.Consumed
-        | MatchingMode.Assignment when aTypeName = PrimVariableL ->
-            let clOpt = a.Scope.Values |> Seq.tryHead
-            match clOpt with 
-            | Some (:? FplClass) -> matchClassInheritance clOpt a aType pName pType, Parameter.Consumed
-            | _ -> errMsgStandard aName aType pName pType, Parameter.Consumed
-        | MatchingMode.Assignment when aTypeName = PrimDefaultConstructor || aTypeName = LiteralCtorL ->
-            let ctor = a :?> FplGenericConstructor
-            matchClassInheritance ctor.ToBeConstructedClass a aType pName pType, Parameter.Consumed
-        | _ when pTypeName = PrimFunctionalTermL || pTypeName = PrimMandatoryFunctionalTermL ->
-            let mappingOpt = getMapping p 
-            match mappingOpt with 
-            | Some mapping ->
-                let newTypeAssignedValue = mapping.Type SignatureType.Type
-                if aType <> newTypeAssignedValue then 
-                    errMsgStandard aName aType pName pType, Parameter.Consumed
-                else 
-                    None, Parameter.Consumed
-            | None -> None, Parameter.Consumed
-        | _ ->
-            errMsgStandard aName aType pName pType, Parameter.Consumed
-
-    let getNames (fv:FplValue) = 
-        let fvName = fv.Type SignatureType.Name
-        let fvType = fv.Type SignatureType.Type
-        let fvTypeName = fv.Name
-        fvName, fvType, fvTypeName
-    
-    let rec matchTwoTypes (a:FplValue) (p:FplValue) (mode:MatchingMode) =
-        let aName, aType, aTypeName = getNames a 
-        let pName, pType, pTypeName = getNames p
-
-        match aTypeName, pTypeName with 
-        | PrimClassL, PrimVariableL when mode = MatchingMode.Assignment ->
-            errMsgDirectClassAssignment aType, Parameter.Consumed
-        | PrimRefL, PrimVariableL
-        | PrimRefL, PrimMappingL ->
-            let aIsCallByReference = isCallByReference a
-            let callByReferenceToClass = getCallByReferenceToClass a
-            if callByReferenceToClass <> String.Empty then 
-                errMsgCallByRefToClass aName callByReferenceToClass, Parameter.Consumed
-            elif aIsCallByReference && isPredWithParentheses p then 
-                // match a call by reference with pred with parameters
-                let refNodeOpt = referencedNodeOpt a
-                match refNodeOpt with 
-                | Some refNode when refNode.Name = PrimPredicateL ->
-                    matchTwoTypes refNode p mode // match signatures with parameters
-                | Some refNode when refNode.Name = PrimIntrinsicUndef -> 
-                    None, Parameter.Consumed // mapping pred(...) accepting undef
-                | Some refNode when refNode.Name = PrimMandatoryPredicateL ->
-                    matchTwoTypes refNode p mode // match signatures with parameters
-                | Some refNode when refNode.Name = PrimVariableL && refNode.TypeId = LiteralPred ->
-                    matchTwoTypes refNode p mode // match signatures with parameters
-                | Some refNode ->
-                    // a node was referenced but is not a predicate
-                    Some $"The return type of {qualifiedName refNode true} doesn't match `{pType}`.", Parameter.Consumed
-                | _ ->
-                    // in all other cases, 
-                    errMsgStandard aName aType pName pType, Parameter.Consumed
-            elif aIsCallByReference && isPredWithoutParentheses p then
-                // match a not-by-value-reference with pred mapping without parameters
-                let refNodeOpt = referencedNodeOpt a
-                match refNodeOpt with 
-                | Some refNode when refNode.Name = PrimIntrinsicPred ->
-                    None, Parameter.Consumed // pred accepting intrinsic predicates
-                | Some refNode when refNode.Name = PrimIntrinsicUndef -> 
-                    None, Parameter.Consumed // mapping pred accepting undef
-                | Some refNode when refNode.Name = PrimPredicateL ->
-                    None, Parameter.Consumed // pred accepting predicate nodes
-                | Some refNode when refNode.Name = PrimMandatoryPredicateL ->
-                    None, Parameter.Consumed // pred accepting predicate properties
-                | Some refNode when refNode.Name = LiteralAxL ->
-                    None, Parameter.Consumed // pred accepting axioms
-                | Some (:? FplGenericTheoremLikeStmt as refNode) ->
-                    None, Parameter.Consumed // pred accepting theorem-like statements
-                | Some refNode when refNode.Name = LiteralConjL ->
-                    None, Parameter.Consumed // pred accepting conjectures
-                | Some refNode when refNode.Name = PrimVariableL && refNode.TypeId = LiteralPred ->
-                    None, Parameter.Consumed // pred accepting pred variables
-                | Some refNode ->
-                    // a node was referenced not a predicate node
-                    Some $"The return type of {qualifiedName refNode true} doesn't match mapping type `{pType}`.", Parameter.Consumed
-                | _ ->
-                    // in all other cases, error
-                    errMsgStandard aName aType pName pType, Parameter.Consumed
-            elif aIsCallByReference && isFuncWithParentheses p then
-                // match a not-by-value-reference with func mapping with parameters
-                let refNodeOpt = referencedNodeOpt a
-                match refNodeOpt with 
-                | Some refNode when refNode.Name = PrimIntrinsicUndef -> 
-                    None, Parameter.Consumed // mapping func(...)->.. accepting undef
-                | Some refNode when refNode.Name = PrimFunctionalTermL ->
-                    matchTwoTypes refNode p mode // match signatures with parameters
-                | Some refNode when refNode.Name = PrimMandatoryFunctionalTermL ->
-                    matchTwoTypes refNode p mode // match signatures with parameters
-                | Some refNode when refNode.Name = PrimVariableL && refNode.TypeId = LiteralFunc ->
-                    matchTwoTypes refNode p mode // match signatures with parameters
-                | Some refNode ->
-                    // a node was referenced but is not a functional term block
-                    Some $"The return type of {qualifiedName refNode true} does not match mapping type `{pType}`.", Parameter.Consumed
-                | _ ->
-                    // in all other cases, error
-                    errMsgStandard aName aType pName pType, Parameter.Consumed
-            elif aIsCallByReference && isFuncWithoutParentheses p then 
-                // match a not-by-value-reference with func mapping with parameters
-                let refNodeOpt = referencedNodeOpt a
-                match refNodeOpt with 
-                | Some refNode when refNode.Name = PrimIntrinsicUndef -> 
-                    None, Parameter.Consumed // mapping func accepting undef
-                | Some refNode when refNode.Name = PrimFunctionalTermL ->
-                    None, Parameter.Consumed // func accepting functional term nodes
-                | Some refNode when refNode.Name = PrimMandatoryFunctionalTermL ->
-                    None, Parameter.Consumed // func accepting functional term properties
-                | Some refNode when refNode.Name = PrimVariableL && refNode.TypeId = LiteralFunc ->
-                    None, Parameter.Consumed // func accepting func variables
-                | Some refNode ->
-                    // a node was referenced but is not a functional term block
-                    Some $"The return type of {qualifiedName refNode true} does not match expected mapping type `{pType}`.", Parameter.Consumed
-                | _ ->
-                    // in all other cases, error
-                    Some $"Return type of `{aName}:{aType}` does not match expected mapping type `{pType}`.", Parameter.Consumed
-            elif aIsCallByReference && pTypeName = PrimMappingL then 
-                let map = p :?> FplMapping
-                let refNodeOpt = referencedNodeOpt a
-                match map.ToBeReturnedDefinition, refNodeOpt with
-                | Some def, Some refNode when refNode.Name = PrimInstanceL -> 
-                    matchTwoTypes a def mode
-                | Some def, Some refNode when refNode.Name = PrimIntrinsicUndef -> 
-                    None, Parameter.Consumed // definition accepting undef
-                | None, Some refNode when map.TypeId = LiteralObj && refNode.Name = PrimInstanceL -> 
-                    None, Parameter.Consumed // obj accepting instance
-                | Some cl, Some (:? FplGenericVariable as refNode) when not refNode.IsInitialized  -> 
-                    matchTwoTypes a cl mode
-                | None, Some (:? FplGenericVariable as refNode) when map.TypeId = LiteralObj && not refNode.IsInitialized -> 
-                    let refNodeOpt1 = referencedNodeOpt refNode
-                    match refNodeOpt1 with 
-                    | Some (:? FplClass as cl) -> None, Parameter.Consumed // obj accepting instance
-                    | _ when refNode.TypeId = LiteralObj && aType = pType -> None, Parameter.Consumed // obj accepting obj variable
-                    | _ -> Some $"`{aName}:{aType}` does not match the expected type `{pType}`", Parameter.Consumed
-                | None, Some refNode when refNode.Name = PrimIntrinsicUndef -> 
-                    None, Parameter.Consumed // anything accepting undef
-                | None, Some refNode -> 
-                    matchTwoTypes refNode map mode
-                | None, None when aType = pType && isUpper aType -> 
-                    Some $"`{aName}:{aType}` matches the expected type `{pType}` but the type is undefined.", Parameter.Consumed
-                | None, None when aType = pType  -> 
-                    None, Parameter.Consumed // obj accepting obj, ind accepting ind, pred accepting pred, func accepting func
-                | _, _ -> 
-                    errMsgStandard aName aType pName pType, Parameter.Consumed
-            elif isCallByValue a && isWithParenthesesOrFunc p then
-                // mismatch of a by-value-reference with parameterized mapping or a func mapping
-                // since in both cases, no by-value reference is allowed
-                Some $"Return type by value `{aName}:{aType}` does not match the expected type `{pType}`. Try removing arguments of `{aName}` and refer to the referenced node `{a.FplId}`.", Parameter.Consumed
-            else 
-                matchByTypeStringRepresentation a aName aType aTypeName p pName pType pTypeName mode
-        | _ ,_ -> 
-            matchByTypeStringRepresentation a aName aType aTypeName p pName pType pTypeName mode
-
     match (args, pars) with
     | (a :: ars, p :: prs) ->
         match matchTwoTypes (a:FplValue) (p:FplValue) mode with
