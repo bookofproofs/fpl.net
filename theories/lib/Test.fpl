@@ -1,1 +1,1 @@
-def cl Nat def pred Eq(x,y: Nat) infix "=" 1000 {intr} axiom A {dec ~x:ind ~y:obj; (x = y) };
+def cl A def cl B:A def pred T(v:A) {dec ~x:B x:=B()             v:=x; true};

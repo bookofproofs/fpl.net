@@ -398,6 +398,8 @@ type FplValue(positions: Positions, parent: FplValue option) =
     let mutable (_filePath: string option) = None
     let mutable _isIntrinsic = false
     let mutable (_errorOccurred: string option) = None
+    let mutable (_type:FplValue option) = None
+    let mutable (_value:FplValue option) = None
 
     let mutable _parent = parent
     let _scope = Dictionary<string, FplValue>()
@@ -508,6 +510,16 @@ type FplValue(positions: Positions, parent: FplValue option) =
     member this.TypeId
         with get () = _typeId
         and set (value) = _typeId <- value
+
+    /// Value of this FplValue
+    member this.ValueNew
+        with get () = _value
+        and set (value) = _value <- value
+
+    /// TypeId of this FplValue
+    member this.TypeIdNew 
+        with get () = _type
+        and set (value) = _type <- value
 
     /// FplId of the FplValue.
     member this.FplId
@@ -913,6 +925,18 @@ and FplVariableStack() =
         _assumedArguments.Clear()
         _stack.Clear()
 
+/// Wraps the string representation of the Type of optional FplValues
+let typeToString (fv:FplValue option) = 
+    match fv with 
+    | None -> PrimNone
+    | Some ref -> ref.Type SignatureType.Type
+
+/// Wraps the string representation of the Value of optional FplValues
+let valueToString (fv:FplValue option) = 
+    match fv with 
+    | None -> PrimNone
+    | Some ref -> ref.Represent()
+
 /// Searches for a references in node symbol table. 
 /// Will works properly only for nodes types that use their scope like FplReference, FplSelf, FplParent, FplForInStmtDomain, FplForInStmtEntity, FplVariable
 let rec referencedNodeOpt (fv:FplValue) = 
@@ -1064,7 +1088,6 @@ type FplTheory(theoryName, parent: FplValue, filePath: string, runOrder) as this
     do
         this.FilePath <- Some filePath
         this.FplId <- theoryName
-        this.TypeId <- theoryName
 
     override this.Name = PrimTheoryL
     override this.ShortName = PrimTheory
@@ -1078,7 +1101,7 @@ type FplTheory(theoryName, parent: FplValue, filePath: string, runOrder) as this
         match signatureType with
         | SignatureType.Name 
         | SignatureType.Mixed -> this.FplId
-        | SignatureType.Type -> this.TypeId
+        | SignatureType.Type -> typeToString this.TypeIdNew
 
     override this.Represent () = LiteralUndef
 

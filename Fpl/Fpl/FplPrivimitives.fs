@@ -1414,6 +1414,8 @@ let PrimMappingL = "mapping"
 [<Literal>]
 let PrimNegation = "negation"
 [<Literal>]
+let PrimNone = "None"
+[<Literal>]
 let PrimPascalCaseId = "PascalCaseId"
 [<Literal>]
 let PrimPredicate = "def pred"
