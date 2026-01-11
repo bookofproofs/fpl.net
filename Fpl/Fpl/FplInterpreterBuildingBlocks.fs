@@ -135,16 +135,16 @@ let rec eval (st: SymbolTable) ast =
         | :? FplReference ->
             fv.TypeId <- LiteralInd
             fv.SetValue (new FplIntrinsicInd((pos1, pos2), fv))
-        | :? FplVariableArray as arr -> arr.SetType LiteralInd pos1 pos2
-        | :? FplMapping as map -> map.SetType LiteralInd pos1 pos2
+        | :? FplVariableArray as arr -> arr.SetType LiteralInd None pos1 pos2
+        | :? FplMapping as map -> map.SetType LiteralInd None pos1 pos2
         | _ ->  fv.TypeId <- LiteralInd
         st.EvalPop() |> ignore
     | Ast.ObjectType((pos1, pos2),()) -> 
         st.EvalPush("ObjectType")
         let fv = variableStack.PeekEvalStack()
         match fv with
-        | :? FplVariableArray as arr -> arr.SetType LiteralObj pos1 pos2 
-        | :? FplMapping as map -> map.SetType LiteralObj pos1 pos2
+        | :? FplVariableArray as arr -> arr.SetType LiteralObj None pos1 pos2 
+        | :? FplMapping as map -> map.SetType LiteralObj None pos1 pos2
         | _ ->  fv.TypeId <- LiteralObj
         st.EvalPop()
     | Ast.PredicateType((pos1, pos2),()) -> 
@@ -155,16 +155,16 @@ let rec eval (st: SymbolTable) ast =
         | :? FplReference ->
             fv.TypeId <- LiteralPred
             fv.SetValue (new FplIntrinsicPred((pos1, pos2), fv))
-        | :? FplVariableArray as arr -> arr.SetType LiteralPred pos1 pos2
-        | :? FplMapping as map -> map.SetType LiteralPred pos1 pos2
+        | :? FplVariableArray as arr -> arr.SetType LiteralPred None pos1 pos2
+        | :? FplMapping as map -> map.SetType LiteralPred None pos1 pos2
         | _ ->  fv.TypeId <- LiteralPred
         st.EvalPop()
     | Ast.FunctionalTermType((pos1, pos2),()) -> 
         st.EvalPush("FunctionalTermType")
         let fv = variableStack.PeekEvalStack()
         match fv with
-        | :? FplVariableArray as arr -> arr.SetType LiteralFunc pos1 pos2 
-        | :? FplMapping as map -> map.SetType LiteralFunc pos1 pos2
+        | :? FplVariableArray as arr -> arr.SetType LiteralFunc None pos1 pos2 
+        | :? FplMapping as map -> map.SetType LiteralFunc None pos1 pos2
         | _ ->  fv.TypeId <- LiteralFunc
         st.EvalPop()
     | Ast.Star((pos1, pos2),()) ->
@@ -266,8 +266,8 @@ let rec eval (st: SymbolTable) ast =
         | :? FplReference ->
             let value = new FplIntrinsicTpl(s, (pos1, pos2), fv)
             fv.TypeId <- s
-        | :? FplVariableArray as arr -> arr.SetType s pos1 pos2 
-        | :? FplMapping as map -> map.SetType s pos1 pos2
+        | :? FplVariableArray as arr -> arr.SetType s None pos1 pos2 
+        | :? FplMapping as map -> map.SetType s None pos1 pos2
         | _ ->  fv.TypeId <- s
         st.EvalPop() 
     | Ast.Var((pos1, pos2), name) ->
@@ -661,46 +661,55 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("PredicateIdentifier")
         let fv = variableStack.PeekEvalStack()
 
-        match fv with 
-        | :? FplVariableArray as arr -> arr.SetType identifier pos1 pos2
-        | :? FplMapping as map -> map.SetType identifier pos1 pos2
-        | :? FplVariable -> fv.TypeId <- identifier
-        | :? FplBase 
-        | :? FplBaseConstructorCall 
-        | :? FplForInStmtDomain -> 
-            fv.FplId <- identifier
-            fv.TypeId <- identifier
-        | :? FplReference -> 
-            fv.FplId <- fv.FplId + identifier
-            fv.TypeId <- fv.TypeId + identifier
-        | :? FplGenericJustificationItem as fvJi -> 
-            fvJi.FplId <- identifier
-        | _ -> ()
         let candidatesPre = findCandidatesByName st identifier false false
-
         let candidates, candidatesNames =  filterCandidates candidatesPre identifier true
 
-        match fv, candidates.Length with
-        | :? FplVariable, 0 -> 
+        let correctIds (fv1:FplValue) = 
+            match fv with 
+            | :? FplBase 
+            | :? FplBaseConstructorCall 
+            | :? FplForInStmtDomain -> 
+                fv1.FplId <- identifier
+                fv1.TypeId <- identifier
+            | :? FplReference -> 
+                fv1.FplId <- fv1.FplId + identifier
+                fv1.TypeId <- fv1.TypeId + identifier
+            | :? FplGenericJustificationItem as fvJi -> 
+                fvJi.FplId <- identifier
+            | _ -> ()
+
+        match candidates.Length with
+        | 0 -> 
             fv.ErrorOccurred <- emitID010Diagnostics identifier pos1 pos2
-            let undefValue = new FplIntrinsicUndef((fv.StartPos, fv.EndPos), fv)
-            fv.ValueList.Add(undefValue)
-        | :? FplMapping as map, 1 -> 
+            match fv with 
+            | :? FplVariableArray as arr -> arr.SetType identifier None pos1 pos2
+            | :? FplMapping as map -> map.SetType identifier None pos1 pos2
+            | :? FplVariable ->
+                fv.TypeId <- identifier
+                let undefValue = new FplIntrinsicUndef((fv.StartPos, fv.EndPos), fv)
+                fv.ValueList.Add(undefValue)
+            | _ -> correctIds fv 
+        | 1 ->
             let candidate = candidates.Head
-            match candidate with 
-            | :? FplFunctionalTerm 
-            | :? FplPredicate 
-            | :? FplClass -> map.ToBeReturnedDefinition <- Some candidate
-            | _ -> fv.ErrorOccurred <- emitSIG11diagnostics (qualifiedName map false) (qualifiedName candidate false) map.StartPos map.EndPos       
-        | :? FplMapping, 0 -> 
-            fv.ErrorOccurred <- emitID010Diagnostics identifier pos1 pos2
-        | :? FplMapping, _ -> 
-            fv.ErrorOccurred <- emitID017Diagnostics identifier candidatesNames pos1 pos2
-        | :? FplVariable, 1 -> 
-            fv.Scope.TryAdd(fv.FplId, candidates.Head) |> ignore
-        | :? FplVariable, _ -> 
-            fv.ErrorOccurred <- emitID017Diagnostics identifier candidatesNames pos1 pos2
-        | _ -> ()
+            match fv with 
+            | :? FplVariableArray as arr ->  arr.SetType identifier (Some candidate) pos1 pos2
+            | :? FplMapping as map -> 
+                let candidate = candidates.Head
+                match candidate with 
+                | :? FplFunctionalTerm 
+                | :? FplPredicate 
+                | :? FplClass -> map.SetType identifier (Some candidate) pos1 pos2
+                | _ -> fv.ErrorOccurred <- emitSIG11diagnostics (qualifiedName map false) (qualifiedName candidate false) map.StartPos map.EndPos       
+            | :? FplVariable -> 
+                fv.TypeId <- identifier
+                fv.Scope.TryAdd(fv.FplId, candidate) |> ignore
+            | _ -> correctIds fv
+        | _ ->
+            match fv with 
+            | :? FplMapping 
+            | :? FplVariable -> 
+                fv.ErrorOccurred <- emitID017Diagnostics identifier candidatesNames pos1 pos2
+            | _ -> correctIds fv
 
         
         st.EvalPop()

@@ -473,6 +473,12 @@ type TestInterpreterErrors() =
     [<DataRow("21", """def func Succ(n:Nat) -> obj {intr};""", 1)>]
     [<DataRow("22", """def cl A def pred T() { is (self,ATypo) };""", 1)>]
 
+    // array types 
+    [<DataRow("AR1", "def cl A def pred T() {dec ~arr:*ind[A]; true};", 0)>]  
+    [<DataRow("AR1a", "def cl A def pred T() {dec ~arr:*ind[ATypo]; true};", 1)>]  
+    [<DataRow("AR2", "def cl A def pred T() {dec ~arr:*A[ind]; true};", 0)>]  
+    [<DataRow("AR2a", "def cl A def pred T() {dec ~arr:*ATypo[ind]; true};", 1)>]  
+
     [<DataRow("MAP1", """def func T()->A {intr};""", 1)>]
     [<DataRow("MAP1a", """def cl A def func T()->A {intr};""", 0)>]
     [<DataRow("MAP2", """def func T()->*A[ind] {intr};""", 1)>]
