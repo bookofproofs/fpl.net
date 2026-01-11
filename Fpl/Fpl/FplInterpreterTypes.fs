@@ -3914,6 +3914,7 @@ let findInheritanceChains (baseNode: FplValue) =
 let inheritsFrom (node:FplValue) someType = 
     match node, someType with 
     | :? FplClass, "obj" -> true
+    | :? FplClass, _  when node.FplId = someType -> true
     | _ -> 
         let inheritanceList = findInheritanceChains node 
         let inheritanceFound = 
@@ -4221,7 +4222,7 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) (mode:MatchingMode) =
         elif isCallByValue a && isWithParenthesesOrFunc p then
             // mismatch of a by-value-reference with parameterized mapping or a func mapping
             // since in both cases, no by-value reference is allowed
-            Some $"Return type by value `{aName}:{aType}` does not match the expected type `{pType}`. Try removing arguments of `{aName}` and refer to the referenced node `{a.FplId}`.", Parameter.Consumed
+            Some $"Return type by value `{aName}:{aType}` does not match the expected type `{pType}`. Try removing arguments of `{aName}` and refer to`{a.FplId}` instead.", Parameter.Consumed
         else 
             matchByTypeStringRepresentation a aName aType aTypeName p pName pType pTypeName mode
     | _ ,_ -> 
@@ -6028,9 +6029,9 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
         this.Debug "Run"
         match this.ErrorOccurred, this.Assignee, this.AssignedValue with
         | Some errCode, Some (:? FplGenericVariable as assignee), _ ->
-            emitST003diagnostics errCode this.ArgList[0].StartPos this.ArgList[0].EndPos
+            emitST003diagnostics errCode this.ArgList[1].StartPos this.ArgList[1].EndPos
         | Some errCode, Some assignee, _ ->
-            emitST003diagnostics errCode this.ArgList[0].StartPos this.ArgList[0].EndPos
+            emitST003diagnostics errCode this.ArgList[1].StartPos this.ArgList[1].EndPos
         | None, Some (:? FplVariable as assignee), Some (:? FplGenericConstructor as assignedValue) ->
             assignedValue.Run variableStack
             match assignedValue.Instance with 
