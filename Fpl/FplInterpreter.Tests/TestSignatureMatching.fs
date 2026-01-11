@@ -9,7 +9,7 @@ open CommonTestHelpers
 type TestSignatureMatching() =
 
     [<DataRow("""def pred T (x,y:obj) {true} def pred Caller() {dec ~a,b:obj ~c:ind; T(a,b,c)} ;""",
-        "no matching parameter for `c:ind` in the predicate definition TestSignatureMatchingReferencesPlain.T(obj, obj)")>]
+        "No matching parameter for `c:ind` in the predicate definition TestSignatureMatchingReferencesPlain.T(obj, obj)")>]
     [<DataRow("""def pred T (x,y:obj) {true} def pred Caller() {dec ~a,b:obj; T(a,b)} ;""",
         "")>]
     [<DataRow("""def pred T (x,y:Nat) {true} def pred Caller() {dec ~a,b:obj; T(a,b)} ;""",
@@ -40,7 +40,7 @@ type TestSignatureMatching() =
             Assert.IsTrue(false)
 
     [<DataRow("01", """def pred T (x,y:pred) {true} def pred Caller() {dec ~a,b:pred ~c:ind; T(a,b,c)} ;""",
-        "no matching parameter for `c:ind` in the predicate definition TestSignatureMatchingReferencesPred.T(pred, pred)")>]
+        "No matching parameter for `c:ind` in the predicate definition TestSignatureMatchingReferencesPred.T(pred, pred)")>]
     [<DataRow("02", """def pred T (x,y:pred) {true} def pred Caller() {dec ~a,b:pred; T(a,b)} ;""",
         "")>]
     [<DataRow("03", """def pred T (x,y:Nat) {true} def pred Caller() {dec ~a,b:pred; T(a,b)} ;""",
@@ -175,7 +175,7 @@ type TestSignatureMatching() =
             Assert.IsTrue(false)
 
     [<DataRow("""def pred T (x,y:obj) {true} def pred Caller() {dec ~a,b:obj ~c:ind; T(a,b,c)} ;""",
-        "no matching parameter for `c:ind` in the predicate definition TestSignatureMatchingReferencesClasses.T(obj, obj)")>]
+        "No matching parameter for `c:ind` in the predicate definition TestSignatureMatchingReferencesClasses.T(obj, obj)")>]
     [<DataRow("""def pred T (x,y:obj) {true} def pred Caller() {dec ~a,b:obj; T(a,b)} ;""",
         "")>]
     [<DataRow("""def pred T (x,y:Nat) {true} def pred Caller() {dec ~a,b:obj; T(a,b)} ;""",
@@ -212,7 +212,7 @@ type TestSignatureMatching() =
     [<DataRow("00", """def cl A {ctor A(){}} 
                  def cl B:A {ctor B(x:obj){dec base.A(); }} 
                  def cl C:B {ctor C(){dec base.B(true); }};;""",
-        "no matching parameter for `true:pred` in the class definition TestSignatureMatchingReferencesConstructors.B")>]
+        "No matching parameter for `true:pred` in the class definition TestSignatureMatchingReferencesConstructors.B")>]
     [<DataRow("01", """def cl A {ctor A(){}} 
                  def cl B:A {ctor B(x:obj){dec base.A(); }} 
                  def cl C:B {ctor C(){dec ~x:ind base.B(x); }};;""",
@@ -266,7 +266,7 @@ type TestSignatureMatching() =
     [<DataRow("05", """def pred T (x:*obj[obj]) {true} def pred Caller() {T()} ;""",
         "missing argument for `x:*obj[ind]` in the predicate definition TestSignatureMatchingReferencesVariadicObj.T(+obj[ind])")>]
     [<DataRow("06", """def pred T (x:*obj[ind]) {true} def pred Caller() {dec ~a,b:*obj[ind]; T(a,b)} ;""",
-        "no matching parameter for `b:*obj[ind]` in the predicate definition TestSignatureMatchingReferencesVariadicObj.T(*obj[ind])")>]
+        "No matching parameter for `b:*obj[ind]` in the predicate definition TestSignatureMatchingReferencesVariadicObj.T(*obj[ind])")>]
     [<DataRow("07", """def pred T (x:*obj[ind]) {true} def pred Caller() {dec ~a:*obj[ind]; T(a)} ;""",
         "")>]
     [<TestMethod>]

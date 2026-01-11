@@ -116,7 +116,6 @@ type DiagnosticCode =
     | ID001 of string * string
     | ID002 of string * string
     | ID003 of string
-    | ID004 of string
     | ID005 of string * string
     | ID006 of string
     /// (nodeType, signatureNode, baseType, signatureBase) -> $"The {nodeType} `{signatureNode}` cannot inherit from {baseType} `{signatureBase}`."  
@@ -236,7 +235,6 @@ type DiagnosticCode =
             | ID001 _ -> "ID001"
             | ID002 _ -> "ID002"
             | ID003 _ -> "ID003"
-            | ID004 _ -> "ID004"
             | ID005 _ -> "ID005"
             | ID006 _ -> "ID006"
             | ID007 _ -> "ID007"
@@ -355,7 +353,6 @@ type DiagnosticCode =
             | ID001 (signature, conflict) -> $"Signature `{signature}` was already declared at {conflict}."  
             | ID002 (signature, incorrectBlockType) -> $"Cannot find a block to be associated with the proof `{signature}`, found only {incorrectBlockType}."  
             | ID003 signature -> $"The proof `{signature}` is missing a block to be associated with."  
-            | ID004 name -> $"Cannot assign a class `{name}` directly; use a constructor `{name}()` instead."  
             | ID005 (signature, incorrectBlockType) -> $"Cannot find a block to be associated with the corollary `{signature}`, found only {incorrectBlockType}."  
             | ID006 signature -> $"The corollary `{signature}` is missing a block to be associated with."  
             | ID007 (nodeType, signatureNode, baseType, signatureBase) -> $"The {nodeType} `{signatureNode}` cannot inherit from {baseType} `{signatureBase}`."  

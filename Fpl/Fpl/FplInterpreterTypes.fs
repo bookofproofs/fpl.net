@@ -3949,10 +3949,10 @@ let isCallByValue (fv:FplValue) =
 /// The comparison depends on MatchingMode.
 let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
     let errMsgStandard aName aType pName pType = Some $"`{aName}:{aType}` doesn't match `{pName}:{pType}`"
-    let errMsgMissingArgument pName pType = Some $"missing argument for `{pName}:{pType}`"
-    let errMsgMissingParameter aName aType = Some $"no matching parameter for `{aName}:{aType}`"
-    let errMsgCallByRefToClass aTypeName classType = Some $"`{getEnglishName aTypeName true}` references to a class {classType}. Use a class constructor instead."
-
+    let errMsgMissingArgument pName pType = Some $"Missing argument for `{pName}:{pType}`"
+    let errMsgMissingParameter aName aType = Some $"No matching parameter for `{aName}:{aType}`"
+    let errMsgCallByRefToClass aName classType = Some $"Assignee `{aName}` references to a class `{classType}`. Consider initializing `{aName}` with a class constructor `{classType}(...)`."
+    let errMsgDirectClassAssignment classType = Some $"Assignee is a class `{classType}`. Use a class constructor `{classType}(...)` instead."
 
     let matchClassInheritance (clOpt:FplValue option) (a:FplValue) aType (pName:string) (pType:string) = 
         let pTypeSimple =
@@ -4110,14 +4110,13 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
 
         match aTypeName, pTypeName with 
         | PrimClassL, PrimVariableL when mode = MatchingMode.Assignment ->
-            let callByReferenceToClass = getCallByReferenceToClass p
-            errMsgCallByRefToClass pTypeName callByReferenceToClass, Parameter.Consumed
+            errMsgDirectClassAssignment aType, Parameter.Consumed
         | PrimRefL, PrimVariableL
         | PrimRefL, PrimMappingL ->
             let aIsCallByReference = isCallByReference a
             let callByReferenceToClass = getCallByReferenceToClass a
             if callByReferenceToClass <> String.Empty then 
-                errMsgCallByRefToClass aTypeName callByReferenceToClass, Parameter.Consumed
+                errMsgCallByRefToClass aName callByReferenceToClass, Parameter.Consumed
             elif aIsCallByReference && isPredWithParentheses p then 
                 // match a call by reference with pred with parameters
                 let refNodeOpt = referencedNodeOpt a
@@ -5972,7 +5971,6 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
         match this.Assignee, this.AssignedValue with
         | Some (:? FplVariable as assignee), Some (assignedValue:FplValue) when assignedValue.Name = PrimClassL ->
             assignee.IsInitialized <- true
-            this.ErrorOccurred <- emitID004diagnostics assignedValue.FplId this.ArgList[1].StartPos this.ArgList[1].EndPos
             checkTypes assignee assignedValue
         | Some (:? FplVariable as assignee), Some (assignedValue:FplValue) when (assignedValue.Name = PrimFunctionalTermL || assignedValue.Name = PrimMandatoryFunctionalTermL) && isCallByValue this.ArgList[1] ->
             let mapOpt = getMapping assignedValue
@@ -5980,19 +5978,9 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
             | Some map -> checkTypes this.ArgList[0] map
             | _ -> checkTypes assignee assignedValue
         | Some (:? FplVariable as assignee), Some (assignedValue:FplValue) -> 
-            checkTypes assignee assignedValue 
-            //let nameAssignee = assignee.Type SignatureType.Name
-            //let typeAssignee = assignee.Type SignatureType.Type
-            //let nameAssignedValue = assignedValue.Type SignatureType.Name
-            //let typeAssignedValue = assignedValue.Type SignatureType.Type 
-            //checkTypes (assignee.Scope.Values |> Seq.tryHead) nameAssignee typeAssignee assignedValue nameAssignedValue typeAssignedValue 
+            checkTypes assignee this.ArgList[1] 
         | Some (:? FplVariableArray as assignee), Some assignedValue ->
-            //let nameAssignee = this.ArgList[0].Type SignatureType.Name // get the signature of the array's reference
-            //let nameAssignedValue = this.ArgList[1].Type SignatureType.Name // get the signature of the array's reference
-            //let typeAssignee = assignee.TypeId.Substring(1)
-            //let typeAssignedValue = assignedValue.Type SignatureType.Type 
-            //checkTypes (assignee.Scope.Values |> Seq.tryHead) nameAssignee typeAssignee assignedValue nameAssignedValue typeAssignedValue 
-            checkTypes assignee assignedValue 
+           checkTypes assignee assignedValue 
         | Some (:? FplSelf as assignee), _ ->
             let ref = assignee.Scope.Values |> Seq.toList
             if ref.Length > 0 then 

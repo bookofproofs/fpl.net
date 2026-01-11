@@ -72,20 +72,6 @@ let emitID003diagnostics name pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitID004diagnostics name pos1 pos2 =
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = pos1
-            Diagnostic.EndPos = pos2
-            Diagnostic.Code = ID004 name
-            Diagnostic.Alternatives = None
-        }
-    ad.AddDiagnostic diagnostic
-    Some (diagnostic.Code.Code)
-
 let emitID005diagnostics name incorrectBlockType pos1 pos2 =
     let diagnostic =
         { 
