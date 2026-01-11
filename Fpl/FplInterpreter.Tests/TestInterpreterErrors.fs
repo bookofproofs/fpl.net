@@ -484,6 +484,14 @@ type TestInterpreterErrors() =
     [<DataRow("20", """def pred T1() {true} def pred Test() { OtherTest() };""", 1)>]    
     [<DataRow("21", """def func Succ(n:Nat) -> obj {intr};""", 1)>]
     [<DataRow("22", """def cl A def pred T() { is (self,ATypo) };""", 1)>]
+
+    [<DataRow("MAP1", """def func T()->A {intr};""", 1)>]
+    [<DataRow("MAP1a", """def cl A def func T()->A {intr};""", 0)>]
+    [<DataRow("MAP2", """def func T()->*A[ind] {intr};""", 1)>]
+    [<DataRow("MAP2a", """def cl A def func T()->*A[ind] {intr};""", 0)>]
+    [<DataRow("MAP3", """def func T()->*ind[A] {intr};""", 1)>]
+    [<DataRow("MAP3a", """def cl A def func T()->*ind[A] {intr};""", 0)>]
+
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID010(no:string, fplCode:string, expected) =
@@ -2120,13 +2128,6 @@ type TestInterpreterErrors() =
     [<DataRow("68", """def class Set def pred In(x,y: Set) def cl SetBuilder: Set { ctor SetBuilder(x: Set, p: pred(u1: Set, o:* obj[ind])) { dec base.Set() assert all u2:Set { iif (In(u2,parent), and ( In(u2,x), p(u2,o) ) ) }; } };""", 0)>]
     [<DataRow("69", """def cl A {dec ~myX:obj; ctor A(x:obj) {dec myX:=x;}} def cl B:A { ctor B(x:obj) {dec base.A(del.Decrement(x)); } } def pred T() { dec ~v:B v:=B(@2); false};""", 0)>]
     [<DataRow("71", """def pred Equal(x,y: tpl) infix "=" 50 { del.Equal(x,y) } def cl Nat def cl Zero:Nat def func Succ(n:Nat)->Nat def pred T() {all x,y:Nat {(x = Succ(y))}};""", 0)>]    
-    // mapping
-    [<DataRow("MAP1", """def func T()->A {intr};""", 1)>]
-    [<DataRow("MAP1a", """def cl A def func T()->A {intr};""", 0)>]
-    [<DataRow("MAP2", """def func T()->*A[ind] {intr};""", 1)>]
-    [<DataRow("MAP2a", """def cl A def func T()->*A[ind] {intr};""", 0)>]
-    [<DataRow("MAP3", """def func T()->*ind[A] {intr};""", 1)>]
-    [<DataRow("MAP3a", """def cl A def func T()->*ind[A] {intr};""", 0)>]
 
     // -----------------------------
 

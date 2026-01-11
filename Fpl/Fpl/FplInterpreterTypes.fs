@@ -1665,6 +1665,11 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
         this.IsSignatureVariable <- otherVar.IsSignatureVariable 
         this.IsInitialized <- otherVar.IsInitialized
 
+    member this.TypeNode =
+        this.Scope.Values
+        |> Seq.filter (fun fv -> fv.Name <> PrimVariableL && fv.Name <> PrimVariableArrayL)
+        |> Seq.tryHead
+
 
 let checkVAR04Diagnostics (fv:FplValue) = 
     fv.GetVariables()
@@ -3943,6 +3948,12 @@ let isCallByValue (fv:FplValue) =
 /// Tries to match a list of arguments with a list of parameters by their type recursively.
 /// The comparison depends on MatchingMode.
 let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
+    let errMsgStandard aName aType pName pType = Some $"`{aName}:{aType}` doesn't match `{pName}:{pType}`"
+    let errMsgMissingArgument pName pType = Some $"missing argument for `{pName}:{pType}`"
+    let errMsgMissingParameter aName aType = Some $"no matching parameter for `{aName}:{aType}`"
+    let errMsgCallByRefToClass aTypeName classType = Some $"`{getEnglishName aTypeName true}` references to a class {classType}. Use a class constructor instead."
+
+
     let matchClassInheritance (clOpt:FplValue option) (a:FplValue) aType (pName:string) (pType:string) = 
         let pTypeSimple =
             if pType.StartsWith("*") then 
@@ -3984,6 +3995,22 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
         match fv.ArgType with 
         | ArgType.Nothing when fv.TypeId = LiteralFunc -> true
         | _ -> false
+    /// Checks if fv is a reference to a variable that points to a class, and at the same time is marked as 'initialized' and still does not any values.
+    /// (this is the convention flagging that a variable has been assigned to its class instead of the constructor of the class generating an instance value).
+    /// If the function returns a non-empty string, it contains the identifier of the referenced class (that has not been instantiated).
+    let getCallByReferenceToClass (fv:FplValue) =
+        if fv.Scope.ContainsKey(fv.FplId) then 
+            let refNode = fv.Scope[fv.FplId]
+            match refNode with 
+            | :? FplGenericVariable as var when var.IsInitialized && var.ValueList.Count = 0 ->
+                // reference fv points to an initialized variable without values 
+                match var.TypeNode with
+                | Some fv1 when fv1.Name = PrimClassL -> fv1.TypeId // and the variable points to a class
+                | _ -> String.Empty
+            | _ -> String.Empty
+        else
+            String.Empty
+                
     let rec isCallByReference (fv:FplValue) =
         if fv.Scope.ContainsKey(".") then
             isCallByReference fv.Scope["."] // evaluate dotted reference instead
@@ -4014,14 +4041,14 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
             // array parameters with indexes that differ from the FPL-inbuilt index type  
             // or with multidimensional index types will not accept variadic enumerations of arguments
             // even if they have the same type used for the values of the array
-            Some $"variadic enumeration of `{aName}:{aType}` does not match `{pName}:{pType}`, try `{aName}:{pType}` as argument or use parameter `{pName}:{p.TypeId}[{LiteralInd}]`", Parameter.Consumed
+            Some $"variadic enumeration of `{aName}:{aType}` doesn't match `{pName}:{pType}`, try `{aName}:{pType}` as argument or use parameter `{pName}:{p.TypeId}[{LiteralInd}]`", Parameter.Consumed
         | _ when aType.StartsWith($"*{pType}[") && aTypeName = PrimRefL ->
             let refA = a :?> FplReference
             if refA.ArgType = ArgType.Brackets then 
                 // some array elements matching parameter type
                 None, Parameter.Consumed
             else
-                Some $"Array type `{aName}:{aType}` does not match `{pName}:{pType}`", Parameter.Consumed
+                Some $"Array type `{aName}:{aType}` doesn't match `{pName}:{pType}`", Parameter.Consumed
         | _ when isUpper aType && aTypeName = PrimRefL && a.Scope.Count = 1 ->
             let aReferencedNode = a.Scope.Values |> Seq.toList |> List.head
             if aReferencedNode.Scope.Count > 0 then
@@ -4054,7 +4081,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
             let clOpt = a.Scope.Values |> Seq.tryHead
             match clOpt with 
             | Some (:? FplClass) -> matchClassInheritance clOpt a aType pName pType, Parameter.Consumed
-            | _ -> Some $"`{aName}:{aType}` does not match `{pName}:{pType}`", Parameter.Consumed
+            | _ -> errMsgStandard aName aType pName pType, Parameter.Consumed
         | MatchingMode.Assignment when aTypeName = PrimDefaultConstructor || aTypeName = LiteralCtorL ->
             let ctor = a :?> FplGenericConstructor
             matchClassInheritance ctor.ToBeConstructedClass a aType pName pType, Parameter.Consumed
@@ -4064,12 +4091,12 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
             | Some mapping ->
                 let newTypeAssignedValue = mapping.Type SignatureType.Type
                 if aType <> newTypeAssignedValue then 
-                    Some $"`{aName}:{aType}` does not match `{pName}:{pType}`", Parameter.Consumed
+                    errMsgStandard aName aType pName pType, Parameter.Consumed
                 else 
                     None, Parameter.Consumed
             | None -> None, Parameter.Consumed
         | _ ->
-            Some $"`{aName}:{aType}` does not match `{pName}:{pType}`", Parameter.Consumed
+            errMsgStandard aName aType pName pType, Parameter.Consumed
 
     let getNames (fv:FplValue) = 
         let fvName = fv.Type SignatureType.Name
@@ -4085,7 +4112,10 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
         | PrimRefL, PrimVariableL
         | PrimRefL, PrimMappingL ->
             let aIsCallByReference = isCallByReference a
-            if aIsCallByReference && isPredWithParentheses p then 
+            let callByReferenceToClass = getCallByReferenceToClass a
+            if callByReferenceToClass <> String.Empty then 
+                errMsgCallByRefToClass aTypeName callByReferenceToClass, Parameter.Consumed
+            elif aIsCallByReference && isPredWithParentheses p then 
                 // match a call by reference with pred with parameters
                 let refNodeOpt = referencedNodeOpt a
                 match refNodeOpt with 
@@ -4099,10 +4129,10 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                     matchTwoTypes refNode p mode // match signatures with parameters
                 | Some refNode ->
                     // a node was referenced but is not a predicate
-                    Some $"The return type of {qualifiedName refNode true} does not match expected mapping type `{pType}`.", Parameter.Consumed
+                    Some $"The return type of {qualifiedName refNode true} doesn't match `{pType}`.", Parameter.Consumed
                 | _ ->
                     // in all other cases, 
-                    Some $"`{aName}:{aType}` does not match `{pName}:{pType}`", Parameter.Consumed
+                    errMsgStandard aName aType pName pType, Parameter.Consumed
             elif aIsCallByReference && isPredWithoutParentheses p then
                 // match a not-by-value-reference with pred mapping without parameters
                 let refNodeOpt = referencedNodeOpt a
@@ -4125,10 +4155,10 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                     None, Parameter.Consumed // pred accepting pred variables
                 | Some refNode ->
                     // a node was referenced not a predicate node
-                    Some $"The return type of {qualifiedName refNode true} does not match expected mapping type `{pType}`.", Parameter.Consumed
+                    Some $"The return type of {qualifiedName refNode true} doesn't match mapping type `{pType}`.", Parameter.Consumed
                 | _ ->
                     // in all other cases, error
-                    Some $"`{aName}:{aType}` does not match `{pName}:{pType}`", Parameter.Consumed
+                    errMsgStandard aName aType pName pType, Parameter.Consumed
             elif aIsCallByReference && isFuncWithParentheses p then
                 // match a not-by-value-reference with func mapping with parameters
                 let refNodeOpt = referencedNodeOpt a
@@ -4143,10 +4173,10 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                     matchTwoTypes refNode p mode // match signatures with parameters
                 | Some refNode ->
                     // a node was referenced but is not a functional term block
-                    Some $"The return type of {qualifiedName refNode true} does not match expected mapping type `{pType}`.", Parameter.Consumed
+                    Some $"The return type of {qualifiedName refNode true} does not match mapping type `{pType}`.", Parameter.Consumed
                 | _ ->
                     // in all other cases, error
-                    Some $"`{aName}:{aType}` does not match `{pName}:{pType}`", Parameter.Consumed
+                    errMsgStandard aName aType pName pType, Parameter.Consumed
             elif aIsCallByReference && isFuncWithoutParentheses p then 
                 // match a not-by-value-reference with func mapping with parameters
                 let refNodeOpt = referencedNodeOpt a
@@ -4175,32 +4205,28 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
                     None, Parameter.Consumed // definition accepting undef
                 | None, Some refNode when map.TypeId = LiteralObj && refNode.Name = PrimInstanceL -> 
                     None, Parameter.Consumed // obj accepting instance
-                | Some cl, Some (:? FplGenericVariable as refNode) when refNode.IsInitialized  -> 
-                    Some $"`{aName}:{aType}` references to a class and does not match `{pName}:{pType}`, try passing instance of the same class.", Parameter.Consumed
                 | Some cl, Some (:? FplGenericVariable as refNode) when not refNode.IsInitialized  -> 
                     matchTwoTypes a cl mode
-                | None, Some (:? FplGenericVariable as refNode) when map.TypeId = LiteralObj && refNode.IsInitialized -> 
-                    Some $"`{aName}:{aType}` references to a class and does not match `{pName}:{pType}`, try passing instance of the same class.", Parameter.Consumed
                 | None, Some (:? FplGenericVariable as refNode) when map.TypeId = LiteralObj && not refNode.IsInitialized -> 
                     let refNodeOpt1 = referencedNodeOpt refNode
                     match refNodeOpt1 with 
                     | Some (:? FplClass as cl) -> None, Parameter.Consumed // obj accepting instance
                     | _ when refNode.TypeId = LiteralObj && aType = pType -> None, Parameter.Consumed // obj accepting obj variable
-                    | _ -> Some $"`{aName}:{aType}` does not match type `{pType}`", Parameter.Consumed
+                    | _ -> Some $"`{aName}:{aType}` does not match the expected type `{pType}`", Parameter.Consumed
                 | None, Some refNode when refNode.Name = PrimIntrinsicUndef -> 
                     None, Parameter.Consumed // anything accepting undef
                 | None, Some refNode -> 
                     matchTwoTypes refNode map mode
                 | None, None when aType = pType && isUpper aType -> 
-                    Some $"`{aName}:{aType}` matches type `{pType}` but the type is undefined.", Parameter.Consumed
+                    Some $"`{aName}:{aType}` matches the expected type `{pType}` but the type is undefined.", Parameter.Consumed
                 | None, None when aType = pType  -> 
                     None, Parameter.Consumed // obj accepting obj, ind accepting ind, pred accepting pred, func accepting func
                 | _, _ -> 
-                    Some $"`{aName}:{aType}` does not match type `{pType}`", Parameter.Consumed
+                    errMsgStandard aName aType pName pType, Parameter.Consumed
             elif isCallByValue a && isWithParenthesesOrFunc p then
                 // mismatch of a by-value-reference with parameterized mapping or a func mapping
                 // since in both cases, no by-value reference is allowed
-                Some $"Return type by value `{aName}:{aType}` does not match expected mapping type `{pType}`. Try removing arguments of `{aName}` and refer to the referenced node `{a.FplId}`.", Parameter.Consumed
+                Some $"Return type by value `{aName}:{aType}` does not match the expected type `{pType}`. Try removing arguments of `{aName}` and refer to the referenced node `{a.FplId}`.", Parameter.Consumed
             else 
                 matchByTypeStringRepresentation a aName aType aTypeName p pName pType pTypeName mode
         | _ ,_ -> 
@@ -4220,17 +4246,14 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
             if constructors.Length = 0 then
                 None
             else
-                Some($"missing argument for `{pName}:{pType}`")
+                errMsgMissingArgument pName pType
         | _ when pTypeName = PrimVariableArrayL ->
             None
         | _ -> 
-            Some($"missing argument for `{pName}:{pType}`")
-    | (a :: [], []) ->
-        let aType = a.Type(SignatureType.Type)
-        Some($"no matching parameter for `{a.Type(SignatureType.Name)}:{aType}`")
-    | (a :: ars, []) ->
-        let aType = a.Type(SignatureType.Type)
-        Some($"no matching parameter for `{a.Type(SignatureType.Name)}:{aType}`")
+            errMsgMissingArgument pName pType
+    | (a :: _, []) ->
+        let aName, aType, aTypeName = getNames a
+        errMsgMissingParameter aName aType
     | ([], []) -> None
 
 
@@ -5945,6 +5968,7 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
         checkErrorOccuredInReference this.ArgList[1]
         match this.Assignee, this.AssignedValue with
         | Some (:? FplVariable as assignee), Some (assignedValue:FplValue) when assignedValue.Name = PrimClassL ->
+            assignee.IsInitialized <- true
             this.ErrorOccurred <- emitID004diagnostics assignedValue.FplId this.ArgList[1].StartPos this.ArgList[1].EndPos
             checkTypes assignee assignedValue
         | Some (:? FplVariable as assignee), Some (assignedValue:FplValue) when (assignedValue.Name = PrimFunctionalTermL || assignedValue.Name = PrimMandatoryFunctionalTermL) && isCallByValue this.ArgList[1] ->
@@ -6016,7 +6040,6 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
         this.Debug "Run"
         match this.ErrorOccurred, this.Assignee, this.AssignedValue with
         | Some errCode, Some (:? FplGenericVariable as assignee), _ ->
-            assignee.IsInitialized <- true
             emitST003diagnostics errCode this.ArgList[0].StartPos this.ArgList[0].EndPos
         | Some errCode, Some assignee, _ ->
             emitST003diagnostics errCode this.ArgList[0].StartPos this.ArgList[0].EndPos
