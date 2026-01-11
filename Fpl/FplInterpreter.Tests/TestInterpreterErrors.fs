@@ -2831,7 +2831,7 @@ type TestInterpreterErrors() =
     [<DataRow("CT3_", "def cl A def cl B:A def pred T(v:B) {dec ~a:A v:=a; true};", 1)>] // A is not B, error
     // mismatch with class references
     [<DataRow("CI1_", "def pred T(v:obj) {dec ~x:A x:=A v:=x; true};", 1)>] // A is undefined, error
-    [<DataRow("CI2_", "def cl A def cl B:A def pred T(v:B) {dec ~a:A a:=A v:=a; true};", 1)>] // A is not B, error
+    [<DataRow("CI2_", "def cl A def cl B:A def pred T(v:B) {dec ~a:A a:=A v:=a; true};", 2)>] // A is A but references to a class, error
     [<DataRow("CI3_", "def cl A def cl B:A def pred T(v:B) {dec ~a:B a:=B v:=a; true};", 1)>] // B is B, but a class reference, error
     [<DataRow("CI4_", "def cl A def pred T(v:obj) {dec ~x:A x:=A v:=x; true};", 1)>] // A is obj, but x is class reference, error
     [<DataRow("CI5_", "def cl A def cl B:A def pred T(v:B) {dec ~x:B x:=B v:=x; true};", 1)>] // B is B, but x is class referene, error

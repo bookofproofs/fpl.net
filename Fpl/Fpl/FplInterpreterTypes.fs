@@ -4109,6 +4109,9 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
         let pName, pType, pTypeName = getNames p
 
         match aTypeName, pTypeName with 
+        | PrimClassL, PrimVariableL when mode = MatchingMode.Assignment ->
+            let callByReferenceToClass = getCallByReferenceToClass p
+            errMsgCallByRefToClass pTypeName callByReferenceToClass, Parameter.Consumed
         | PrimRefL, PrimVariableL
         | PrimRefL, PrimMappingL ->
             let aIsCallByReference = isCallByReference a
