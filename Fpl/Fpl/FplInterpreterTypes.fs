@@ -5142,7 +5142,7 @@ type FplDecrement(name, positions: Positions, parent: FplValue) as this =
         let n' = n - 1
         newValue.FplId <- 
             if n' < 0 then 
-                ""
+                LiteralUndef
             else
                 string n'
         this.SetValue(newValue)
