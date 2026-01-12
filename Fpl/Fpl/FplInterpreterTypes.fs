@@ -917,6 +917,11 @@ and FplVariableStack() =
         _assumedArguments.Clear()
         _stack.Clear()
 
+
+type IRefersTo =
+    /// The optional node this FplValue refers to 
+    abstract member RefersTo : FplValue option with get
+
 /// Searches for a references in node symbol table. 
 /// Will works properly only for nodes types that use their scope like FplReference, FplSelf, FplParent, FplForInStmtDomain, FplForInStmtEntity, FplVariable
 let rec referencedNodeOpt (fv:FplValue) = 
@@ -3191,7 +3196,18 @@ type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
 [<AbstractClass>]
 type FplGenericReference(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
+    let mutable _refersTo:FplValue option = None
 
+    /// The Node this generic reference refers to 
+    member this.RefersTo
+        with get () = _refersTo
+        and set (value) = _refersTo <- value
+
+    interface IRefersTo with
+        member this.RefersTo 
+            with get () = this.RefersTo
+            and set (value) = this.RefersTo <- value
+    
     override this.Clone () = this // do not clone references to prevent stack overflow 
 
     override this.Run variableStack =
