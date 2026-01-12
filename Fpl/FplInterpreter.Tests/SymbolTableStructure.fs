@@ -38,7 +38,7 @@ type SymbolTableStructure() =
                         match root.ArgList |> Seq.tryPick (findNamedItem firstTypeNode identifier infiniteLoop) with 
                         | Some found -> Some found
                         | _ -> 
-                            match root.ValueNew with 
+                            match root.Value with 
                             | Some ref -> findNamedItem firstTypeNode identifier infiniteLoop ref
                             | _ -> None
             else
@@ -52,7 +52,7 @@ type SymbolTableStructure() =
                         match root.ArgList |> Seq.tryPick (findNamedItem firstTypeNode identifier infiniteLoop) with 
                         | Some found -> Some found
                         | _ -> 
-                            match root.ValueNew with 
+                            match root.Value with 
                             | Some ref -> findNamedItem firstTypeNode identifier infiniteLoop ref
                             | _ -> None
                             
@@ -2398,7 +2398,7 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplDefaultConstructor>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(0, node.Scope.Count)
-            Assert.IsTrue(node.ValueNew.IsSome) // instance
+            Assert.IsTrue(node.Value.IsSome) // instance
         | "FplDefaultConstructor", "01" ->
             Assert.IsInstanceOfType<FplClass>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
@@ -2406,7 +2406,7 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplDefaultConstructor>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(0, node.Scope.Count)
-            Assert.IsTrue(node.ValueNew.IsSome) // instance
+            Assert.IsTrue(node.Value.IsSome) // instance
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     [<DataRow("FplDisjunction", "00", """def pred T() {or (x,y)};""", "")>]
@@ -2725,7 +2725,7 @@ type SymbolTableStructure() =
             match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            Assert.IsTrue(node.ValueNew.IsSome)
+            Assert.IsTrue(node.Value.IsSome)
             Assert.AreEqual<string>("""dec ind""", node.Represent())  
             let fn = node :?> FplFunctionalTerm
             Assert.AreEqual<string>("T()", fn.SkolemName) // only for intrinsic set
@@ -2741,7 +2741,7 @@ type SymbolTableStructure() =
             match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            Assert.IsTrue(node.ValueNew.IsSome)
+            Assert.IsTrue(node.Value.IsSome)
             Assert.AreEqual<string>("""$1""", node.Represent())
             let fn = node :?> FplFunctionalTerm
             Assert.AreEqual<string>("", fn.SkolemName) // missing, since non-intrinsic
@@ -2757,7 +2757,7 @@ type SymbolTableStructure() =
             match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            Assert.IsTrue(node.ValueNew.IsSome)
+            Assert.IsTrue(node.Value.IsSome)
             Assert.AreEqual<string>("""dec *ind[ind]""", node.Represent())  
             let fn = node :?> FplFunctionalTerm
             Assert.AreEqual<string>("T()", fn.SkolemName) // only for intrinsic set
@@ -2773,7 +2773,7 @@ type SymbolTableStructure() =
             match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            Assert.IsTrue(node.ValueNew.IsSome)
+            Assert.IsTrue(node.Value.IsSome)
             Assert.AreEqual<string>("""[$1]->$0, [$2]->$42""", node.Represent())  
             let fn = node :?> FplFunctionalTerm
             Assert.AreEqual<string>("", fn.SkolemName) // missing, since non-intrinsic
@@ -2805,7 +2805,7 @@ type SymbolTableStructure() =
             match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            Assert.IsTrue(node.ValueNew.IsSome)
+            Assert.IsTrue(node.Value.IsSome)
             Assert.AreEqual<string>("""dec obj""", node.Represent())  
             let fn = node :?> FplFunctionalTerm
             Assert.AreEqual<string>("T()", fn.SkolemName) // only for intrinsic set
@@ -2821,7 +2821,7 @@ type SymbolTableStructure() =
             match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            Assert.IsTrue(node.ValueNew.IsSome)
+            Assert.IsTrue(node.Value.IsSome)
             Assert.AreEqual<string>("""{"name":"A","base":[],"vars":[],"prtys":[]}""", node.Represent())
             let fn = node :?> FplFunctionalTerm
             Assert.AreEqual<string>("", fn.SkolemName) // missing, since non-intrinsic
@@ -2837,7 +2837,7 @@ type SymbolTableStructure() =
             match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            Assert.IsTrue(node.ValueNew.IsSome)
+            Assert.IsTrue(node.Value.IsSome)
             Assert.AreEqual<string>("""dec *obj[ind]""", node.Represent())  
             let fn = node :?> FplFunctionalTerm
             Assert.AreEqual<string>("T()", fn.SkolemName) // only for intrinsic set
@@ -2853,7 +2853,7 @@ type SymbolTableStructure() =
             match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            Assert.IsTrue(node.ValueNew.IsSome)
+            Assert.IsTrue(node.Value.IsSome)
             Assert.AreEqual<string>("""[$1]->{"name":"A","base":[],"vars":[],"prtys":[]}, [$2]->{"name":"B","base":[],"vars":[],"prtys":[]}""", node.Represent())  
             let fn = node :?> FplFunctionalTerm
             Assert.AreEqual<string>("", fn.SkolemName) // missing, since non-intrinsic
@@ -2885,7 +2885,7 @@ type SymbolTableStructure() =
             match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            Assert.IsTrue(node.ValueNew.IsSome)
+            Assert.IsTrue(node.Value.IsSome)
             Assert.AreEqual<string>("""dec tpl""", node.Represent())  
             let fn = node :?> FplFunctionalTerm
             Assert.AreEqual<string>("T()", fn.SkolemName) // only for intrinsic set
@@ -2901,7 +2901,7 @@ type SymbolTableStructure() =
             match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            Assert.IsTrue(node.ValueNew.IsSome)
+            Assert.IsTrue(node.Value.IsSome)
             Assert.AreEqual<string>("""{"name":"A","base":[],"vars":[],"prtys":[]}""", node.Represent())
             let fn = node :?> FplFunctionalTerm
             Assert.AreEqual<string>("", fn.SkolemName) // missing, since non-intrinsic
@@ -2917,7 +2917,7 @@ type SymbolTableStructure() =
             match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            Assert.IsTrue(node.ValueNew.IsSome)
+            Assert.IsTrue(node.Value.IsSome)
             Assert.AreEqual<string>("""dec *tpl[ind]""", node.Represent())  
             let fn = node :?> FplFunctionalTerm
             Assert.AreEqual<string>("T()", fn.SkolemName) // only for intrinsic set
@@ -2933,7 +2933,7 @@ type SymbolTableStructure() =
             match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            Assert.IsTrue(node.ValueNew.IsSome)
+            Assert.IsTrue(node.Value.IsSome)
             Assert.AreEqual<string>("""[$1]->{"name":"A","base":[],"vars":[],"prtys":[]}, [$2]->$2, [$3]->true""", node.Represent())  
             let fn = node :?> FplFunctionalTerm
             Assert.AreEqual<string>("", fn.SkolemName) // missing, since non-intrinsic
@@ -2968,7 +2968,7 @@ type SymbolTableStructure() =
             match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            Assert.IsTrue(node.ValueNew.IsSome)
+            Assert.IsTrue(node.Value.IsSome)
             Assert.AreEqual<string>("dec pred", node.Represent())  
             let fn = node :?> FplFunctionalTerm
             Assert.AreEqual<string>("T()", fn.SkolemName) // only for intrinsic set
@@ -2984,7 +2984,7 @@ type SymbolTableStructure() =
             match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            Assert.IsTrue(node.ValueNew.IsSome)
+            Assert.IsTrue(node.Value.IsSome)
             Assert.AreEqual<string>("dec pred(obj)", node.Represent())  
             let fn = node :?> FplFunctionalTerm
             Assert.AreEqual<string>("T()", fn.SkolemName) // only for intrinsic set
@@ -3000,7 +3000,7 @@ type SymbolTableStructure() =
             match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            Assert.IsTrue(node.ValueNew.IsSome)
+            Assert.IsTrue(node.Value.IsSome)
             Assert.AreEqual<string>(LiteralTrue, node.Represent())
             let fn = node :?> FplFunctionalTerm
             Assert.AreEqual<string>("", fn.SkolemName) // missing, since non-intrinsic
@@ -3016,7 +3016,7 @@ type SymbolTableStructure() =
             match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            Assert.IsTrue(node.ValueNew.IsSome)
+            Assert.IsTrue(node.Value.IsSome)
             Assert.AreEqual<string>(PrimUndetermined, node.Represent())
             let fn = node :?> FplFunctionalTerm
             Assert.AreEqual<string>("", fn.SkolemName) // missing, since non-intrinsic
@@ -3032,7 +3032,7 @@ type SymbolTableStructure() =
             match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            Assert.IsTrue(node.ValueNew.IsSome)
+            Assert.IsTrue(node.Value.IsSome)
             Assert.AreEqual<string>(PrimUndetermined, node.Represent())
             let fn = node :?> FplFunctionalTerm
             Assert.AreEqual<string>("", fn.SkolemName) // missing, since non-intrinsic
@@ -3048,7 +3048,7 @@ type SymbolTableStructure() =
             match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            Assert.IsTrue(node.ValueNew.IsSome)
+            Assert.IsTrue(node.Value.IsSome)
             Assert.AreEqual<string>("""dec *pred[ind]""", node.Represent())  
             let fn = node :?> FplFunctionalTerm
             Assert.AreEqual<string>("T()", fn.SkolemName) // only for intrinsic set
@@ -3064,7 +3064,7 @@ type SymbolTableStructure() =
             match map.ToBeReturnedDefinition with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            Assert.IsTrue(node.ValueNew.IsSome)
+            Assert.IsTrue(node.Value.IsSome)
             Assert.AreEqual<string>("""[$1]->true, [$2]->false, [$3]->undef""", node.Represent())  
             let fn = node :?> FplFunctionalTerm
             Assert.AreEqual<string>("", fn.SkolemName) // missing, since non-intrinsic
@@ -3098,8 +3098,8 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplVariable>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsTrue(parent.ValueNew.IsSome)
-            Assert.AreEqual<FplValue>(parent.ValueNew.Value, node)
+            Assert.IsTrue(parent.Value.IsSome)
+            Assert.AreEqual<FplValue>(parent.Value.Value, node)
             Assert.IsInstanceOfType<FplInstance>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)

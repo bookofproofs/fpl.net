@@ -87,7 +87,7 @@ let rec simplifyTriviallyNestedExpressions (rb:FplValue) =
             | _ -> ()
             // prevent recursive loops
             rb.ArgList.Clear() 
-            rb.ValueNew <- None
+            rb.Value <- None
             rb.TypeIdNew <- None
             rb.Scope.Clear()
             simplifyTriviallyNestedExpressions subNode
@@ -687,7 +687,7 @@ let rec eval (st: SymbolTable) ast =
             | :? FplMapping as map -> map.SetType identifier None pos1 pos2
             | :? FplVariable ->
                 fv.TypeId <- identifier
-                fv.ValueNew <- Some (new FplIntrinsicUndef((fv.StartPos, fv.EndPos), fv))
+                fv.Value <- Some (new FplIntrinsicUndef((fv.StartPos, fv.EndPos), fv))
             | _ -> correctIds fv 
         | 1 ->
             let candidate = candidates.Head
@@ -1902,7 +1902,7 @@ let rec eval (st: SymbolTable) ast =
                 | _ -> value.FplId <- LiteralFalse // todo all other arguments that are either undetermined or false should issue an error
             | _ -> () // todo argumentinference not found
         )
-        fv.ValueNew <- Some value
+        fv.Value <- Some value
         variableStack.Pop() |> ignore // pop without embedding in theorem (already done)
         st.EvalPop()
     | Ast.Precedence((pos1, pos2), precedence) ->

@@ -461,10 +461,10 @@ type FplValue(positions: Positions, parent: FplValue option) =
     default this.CheckConsistency() = ()
     
     default this.SetValue fv =
-        this.ValueNew <- Some fv
+        this.Value <- Some fv
 
     default this.SetValuesOf fv =
-        this.ValueNew <-  fv.ValueNew
+        this.Value <-  fv.Value
 
     default this.IsFplBlock () = false
     default this.IsBlock () = false
@@ -481,7 +481,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
         ret.ExpressionType <- this.ExpressionType
         ret.ArgType <- this.ArgType
         ret.TypeIdNew <- this.TypeIdNew
-        ret.ValueNew <- this.ValueNew
+        ret.Value <- this.Value
 
         this.Scope
         |> Seq.iter (fun (kvp:KeyValuePair<string, FplValue>) ->
@@ -493,7 +493,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
             let value = fv1.Clone()
             ret.ArgList.Add(value))
 
-        ret.ValueNew <- this.ValueNew 
+        ret.Value <- this.Value 
 
     /// TypeId of the FplValue.
     member this.TypeId
@@ -501,7 +501,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
         and set (value) = _typeId <- value
 
     /// Value of this FplValue
-    member this.ValueNew
+    member this.Value
         with get () = _value
         and set (value) = _value <- value
 
@@ -616,7 +616,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
         this.ArgList.Clear()
         this.ArgList.AddRange(other.ArgList)
 
-        this.ValueNew <- other.ValueNew
+        this.Value <- other.Value
 
     /// Qualified starting position of this FplValue
     member this.QualifiedStartPos =
@@ -798,7 +798,7 @@ and FplVariableStack() =
                 | PrimRefL when ar.Scope.ContainsKey(ar.FplId) ->
                     ar.Scope.Values |> Seq.toList
                 | _ -> 
-                    match ar.ValueNew with
+                    match ar.Value with
                     | Some ref -> [ref]
                     | _ -> []
                 
@@ -812,7 +812,7 @@ and FplVariableStack() =
                         var.IsInitialized <- true 
                     else
                         p.SetValuesOf fv
-                        match fv.ValueNew with 
+                        match fv.Value with 
                         | Some ref -> var.IsInitialized <- true
                         | _ -> ()
                 | _ ->
@@ -947,7 +947,7 @@ let rec referencedNodeOpt (fv:FplValue) =
     match refNodeOpt with
     | Some refNode when refNode.Name = LiteralSelf -> referencedNodeOpt refNode
     | Some refNode when refNode.Name = LiteralParent -> referencedNodeOpt refNode
-    | Some refNode when refNode.Name = PrimVariableL && refNode.ValueNew.IsSome -> referencedNodeOpt refNode.ValueNew.Value
+    | Some refNode when refNode.Name = PrimVariableL && refNode.Value.IsSome -> referencedNodeOpt refNode.Value.Value
     | _ -> refNodeOpt
 
 // Create an FplValue list containing all Scopes of an FplNode
@@ -1315,9 +1315,10 @@ type FplGenericPredicate(positions: Positions, parent: FplValue) as this =
         this.TypeId <- LiteralPred
 
     override this.Represent () =
-        match this.ValueNew with 
+        match this.Value with 
         | Some ref -> ref.Represent()
-        | None -> PrimUndetermined
+        | None when this.Name = PrimIntrinsicPred -> this.FplId // the value of intrisic pred is its FplId
+        | _ -> PrimUndetermined
 
     override this.RunOrder = None
 
@@ -1964,7 +1965,7 @@ type FplGenericConstructor(name, positions: Positions, parent: FplValue) as this
         this.SetValue instance
 
     member this.Instance =
-        match this.ValueNew with 
+        match this.Value with 
         | Some ref -> Some (ref :?> FplInstance)
         | _ -> None
 
@@ -2294,7 +2295,7 @@ type FplPredicate(positions: Positions, parent: FplValue, runOrder) as this =
         sprintf "%s(%s)" head paramT
 
     override this.Represent () =
-        match this.ValueNew with 
+        match this.Value with 
         | Some ref -> ref.Represent()
         | None -> PrimUndetermined
 
@@ -3249,6 +3250,11 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
                 | PrimDelegateEqualL ->
                     called.Run variableStack
                     this.SetValuesOf called
+                | PrimIntrinsicInd
+                | PrimIntrinsicUndef 
+                | PrimIntrinsicTpl 
+                | PrimIntrinsicPred ->
+                    this.SetValue called
                 | _ -> ()
             | _ -> ()
         elif this.ArgList.Count = 1 then
@@ -3266,9 +3272,10 @@ type FplReference(positions: Positions, parent: FplValue) =
     override this.SetValue fv = 
         if this.Scope.ContainsKey(this.FplId) then
             let var = this.Scope[this.FplId]
-            var.SetValue(fv)
+            var.SetValue fv
+            base.SetValue fv
         else
-            base.SetValue(fv)
+            base.SetValue fv
 
     override this.Type signatureType =
         let headObj = 
@@ -3387,7 +3394,7 @@ type FplReference(positions: Positions, parent: FplValue) =
                 fallBackFunctionalTerm
 
     override this.Represent () = 
-        match this.ValueNew with 
+        match this.Value with 
         | None ->
             if this.Scope.Count > 0 && not (this.Scope.ContainsKey(".")) then 
                 (this.Scope.Values |> Seq.head).Represent()
@@ -3805,7 +3812,7 @@ type FplVariable(fplId, positions: Positions, parent: FplValue) =
             this.IsInitialized <- true
 
     override this.Represent () = 
-        match this.ValueNew with 
+        match this.Value with 
         | None ->
             match this.TypeId with
             | LiteralUndef -> LiteralUndef
@@ -4102,7 +4109,7 @@ let private getCallByReferenceToClass (fv:FplValue) =
     if fv.Scope.ContainsKey(fv.FplId) then 
         let refNode = fv.Scope[fv.FplId]
         match refNode with 
-        | :? FplGenericVariable as var when var.IsInitialized && var.ValueNew.IsNone ->
+        | :? FplGenericVariable as var when var.IsInitialized && var.Value.IsNone ->
             // reference fv points to an initialized variable without values 
             match var.TypeNode with
             | Some fv1 when fv1.Name = PrimClassL -> fv1.TypeId // and the variable points to a class
@@ -4898,7 +4905,7 @@ type FplGenericDelegate(name, positions: Positions, parent: FplValue) as this =
         this.FplId <- name
 
     override this.Represent () =
-        match this.ValueNew with 
+        match this.Value with 
         | Some ref -> ref.Represent()
         | None -> LiteralUndef
 
@@ -5019,7 +5026,7 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
 
     override this.Represent () = 
         let subRepr = 
-            match this.ValueNew with 
+            match this.Value with 
             | Some ref -> ref.Represent()
             | None -> String.Empty
         if subRepr = String.Empty then 
@@ -5132,7 +5139,7 @@ type FplDecrement(name, positions: Positions, parent: FplValue) as this =
         ad.AddDiagnostic diagnostic
 
     override this.Represent () = 
-        match this.ValueNew with 
+        match this.Value with 
         | Some ref -> ref.Type SignatureType.Name
         | None -> LiteralUndef
 
@@ -5255,7 +5262,7 @@ let runIntrinsicFunction (fv:FplValue) variableStack =
         fv.SetValue undef
 
 let private getFunctionalTermRepresent (fv:FplValue) =
-        match fv.ValueNew with 
+        match fv.Value with 
         | None ->
             // since the function term has no value, it has no return statement
             // And the FPL syntax ensures that this can only be the case
@@ -5725,7 +5732,7 @@ type FplMapCaseSingle(positions: Positions, parent: FplValue) =
         getFplHead this signatureType
 
     override this.Represent () = 
-        match this.ValueNew with 
+        match this.Value with 
         | Some ref -> ref.Represent()
         | None -> String.Empty
 
@@ -5777,7 +5784,7 @@ type FplMapCases(positions: Positions, parent: FplValue) =
         getFplHead this signatureType
 
     override this.Represent () = 
-        match this.ValueNew with 
+        match this.Value with 
         | Some ref -> ref.Represent()
         | None -> String.Empty
 
@@ -6295,7 +6302,7 @@ type SymbolTable(parsedAsts: ParsedAstList, debug: bool, offlineMode: bool) =
 
                 sb.AppendLine($"{indent}\"ValueList\": [") |> ignore
                 let mutable valueList = 0
-                match root.ValueNew with
+                match root.Value with
                 | Some ref -> createJson ref sb (level + 1) true false
                 | None -> ()
                 sb.AppendLine($"{indent}]") |> ignore
@@ -6459,9 +6466,9 @@ let findCandidatesByNameInDotted (fv: FplValue) (name: string) =
         match candidate with
         | :? FplVariable as var ->
             let varTypeOpt = 
-                if var.ValueNew.IsSome then
+                if var.Value.IsSome then
                     // if the variable has a value, then 
-                    var.ValueNew
+                    var.Value
                 else 
                     var.Scope.Values |> Seq.tryHead
             match varTypeOpt with
