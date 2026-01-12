@@ -399,6 +399,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
     let mutable _isIntrinsic = false
     let mutable (_errorOccurred: string option) = None
     let mutable (_value:FplValue option) = None
+    let mutable _refersTo:FplValue option = None
 
     let mutable _parent = parent
     let _scope = Dictionary<string, FplValue>()
@@ -502,6 +503,11 @@ type FplValue(positions: Positions, parent: FplValue option) =
     member this.Value
         with get () = _value
         and set (value) = _value <- value
+
+    /// The optional node this FplValue refers to 
+    member this.RefersTo 
+        with get () = _refersTo
+        and set (value) = _refersTo <- value
 
     /// FplId of the FplValue.
     member this.FplId
@@ -917,10 +923,6 @@ and FplVariableStack() =
         _assumedArguments.Clear()
         _stack.Clear()
 
-
-type IRefersTo =
-    /// The optional node this FplValue refers to 
-    abstract member RefersTo : FplValue option with get
 
 /// Searches for a references in node symbol table. 
 /// Will works properly only for nodes types that use their scope like FplReference, FplSelf, FplParent, FplForInStmtDomain, FplForInStmtEntity, FplVariable
@@ -3196,17 +3198,6 @@ type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
 [<AbstractClass>]
 type FplGenericReference(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
-    let mutable _refersTo:FplValue option = None
-
-    /// The Node this generic reference refers to 
-    member this.RefersTo
-        with get () = _refersTo
-        and set (value) = _refersTo <- value
-
-    interface IRefersTo with
-        member this.RefersTo 
-            with get () = this.RefersTo
-            and set (value) = this.RefersTo <- value
     
     override this.Clone () = this // do not clone references to prevent stack overflow 
 
