@@ -398,20 +398,17 @@ type FplValue(positions: Positions, parent: FplValue option) =
     let mutable (_filePath: string option) = None
     let mutable _isIntrinsic = false
     let mutable (_errorOccurred: string option) = None
+    let mutable (_value:FplValue option) = None
 
     let mutable _parent = parent
     let _scope = Dictionary<string, FplValue>()
     let _argList = List<FplValue>()
-    let _valueList = List<FplValue>()
 
     /// A scope of this FplValue
     member this.Scope = _scope
 
     /// An argument list of this FplValue
     member this.ArgList = _argList
-
-    /// ValueList of the FplValue.
-    member this.ValueList = _valueList
 
     abstract member Clone: unit -> FplValue
     abstract member Copy : FplValue -> unit
@@ -463,16 +460,10 @@ type FplValue(positions: Positions, parent: FplValue option) =
     default this.CheckConsistency() = ()
     
     default this.SetValue fv =
-        this.ValueList.Clear()
-        this.ValueList.Add(fv)
+        this.Value <- Some fv
 
     default this.SetValuesOf fv =
-        this.ValueList.Clear()
-        if fv.ValueList.Count = 0 then
-            // if fv has no values then it should be the value itself
-            this.ValueList.Add(fv)
-        else
-            this.ValueList.AddRange(fv.ValueList)
+        this.Value <-  fv.Value
 
     default this.IsFplBlock () = false
     default this.IsBlock () = false
@@ -488,6 +479,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
         ret.IsIntrinsic <- this.IsIntrinsic
         ret.ExpressionType <- this.ExpressionType
         ret.ArgType <- this.ArgType
+        ret.Value <- this.Value
 
         this.Scope
         |> Seq.iter (fun (kvp:KeyValuePair<string, FplValue>) ->
@@ -499,15 +491,17 @@ type FplValue(positions: Positions, parent: FplValue option) =
             let value = fv1.Clone()
             ret.ArgList.Add(value))
 
-        this.ValueList
-        |> Seq.iter (fun (fv1:FplValue) ->
-            let value = fv1.Clone()
-            ret.ValueList.Add(value))
+        ret.Value <- this.Value 
 
     /// TypeId of the FplValue.
     member this.TypeId
         with get () = _typeId
         and set (value) = _typeId <- value
+
+    /// Value of this FplValue
+    member this.Value
+        with get () = _value
+        and set (value) = _value <- value
 
     /// FplId of the FplValue.
     member this.FplId
@@ -615,8 +609,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
         this.ArgList.Clear()
         this.ArgList.AddRange(other.ArgList)
 
-        this.ValueList.Clear()
-        this.ValueList.AddRange(other.ValueList)
+        this.Value <- other.Value
 
     /// Qualified starting position of this FplValue
     member this.QualifiedStartPos =
@@ -722,6 +715,12 @@ type FplValue(positions: Positions, parent: FplValue option) =
             let currDir = Directory.GetCurrentDirectory()
             File.AppendAllText(Path.Combine(currDir, "Debug.txt"), logLine)
 
+/// a type wrapping the type of the FplValue 
+and TypeNode = 
+    | Simple of FplValue 
+    | Array of FplValue
+    | Nothing
+
 /// a type wrapping the argument type of the FplValue 
 and ArgType = 
     | Parentheses
@@ -789,14 +788,18 @@ and FplVariableStack() =
     /// inserting the clones of the elements.
     member this.ReplaceVariables (parameters:FplValue list) (arguments:FplValue list) =
         let replaceValues (p:FplValue) (ar:FplValue)  =
-            (p.ValueList:List<FplValue>).Clear()
             let valueList = 
                 match ar.Name with 
                 | PrimRefL when ar.FplId = String.Empty ->
-                    ar.ArgList |> Seq.toList
+                    ar.ArgList 
+                    |> Seq.toList
+
                 | PrimRefL when ar.Scope.ContainsKey(ar.FplId) ->
                     ar.Scope.Values |> Seq.toList
-                | _ -> ar.ValueList |> Seq.toList
+                | _ -> 
+                    match ar.Value with
+                    | Some ref -> [ref]
+                    | _ -> []
                 
             valueList
             |> List.iter (fun (fv:FplValue) ->
@@ -808,8 +811,9 @@ and FplVariableStack() =
                         var.IsInitialized <- true 
                     else
                         p.SetValuesOf fv
-                        if fv.ValueList.Count > 0 then 
-                            var.IsInitialized <- true
+                        match fv.Value with 
+                        | Some ref -> var.IsInitialized <- true
+                        | _ -> ()
                 | _ ->
                     let fvClone = fv.Clone()
                     p.SetValue fvClone
@@ -930,7 +934,7 @@ let rec referencedNodeOpt (fv:FplValue) =
     match refNodeOpt with
     | Some refNode when refNode.Name = LiteralSelf -> referencedNodeOpt refNode
     | Some refNode when refNode.Name = LiteralParent -> referencedNodeOpt refNode
-    | Some refNode when refNode.Name = PrimVariableL && refNode.ValueList.Count > 0 -> referencedNodeOpt refNode.ValueList[0]
+    | Some refNode when refNode.Name = PrimVariableL && refNode.Value.IsSome -> referencedNodeOpt refNode.Value.Value
     | _ -> refNodeOpt
 
 // Create an FplValue list containing all Scopes of an FplNode
@@ -1290,14 +1294,10 @@ type FplGenericPredicate(positions: Positions, parent: FplValue) as this =
         this.TypeId <- LiteralPred
 
     override this.Represent () =
-        let ret = 
-            this.ValueList
-            |> Seq.map (fun subfv -> subfv.Represent())
-            |> String.concat ", "
-        if ret = "" then
-            PrimUndetermined
-        else 
-            ret
+        match this.Value with 
+        | Some ref -> ref.Represent()
+        | None when this.Name = PrimIntrinsicPred -> this.FplId // the value of intrisic pred is its FplId
+        | _ -> PrimUndetermined
 
     override this.RunOrder = None
 
@@ -1943,11 +1943,10 @@ type FplGenericConstructor(name, positions: Positions, parent: FplValue) as this
             instance.TypeId <- LiteralUndef
         this.SetValue instance
 
-    member this.Instance = 
-        if this.ValueList.Count = 1 then 
-            Some (this.ValueList[0] :?> FplInstance)
-        else
-            None
+    member this.Instance =
+        match this.Value with 
+        | Some ref -> Some (ref :?> FplInstance)
+        | _ -> None
 
     override this.RunOrder = None
 
@@ -2266,7 +2265,7 @@ type FplPredicate(positions: Positions, parent: FplValue, runOrder) as this =
         if not this.IsIntrinsic then // if not intrinsic, check variable usage
             checkVAR04Diagnostics this
         tryAddToParentUsingMixedSignature this
-
+        
     override this.Type signatureType = 
         let head = getFplHead this signatureType
 
@@ -2274,14 +2273,9 @@ type FplPredicate(positions: Positions, parent: FplValue, runOrder) as this =
         sprintf "%s(%s)" head paramT
 
     override this.Represent () =
-        let ret = 
-            this.ValueList
-            |> Seq.map (fun subfv -> subfv.Represent())
-            |> String.concat ", "
-        if ret = "" then
-            PrimUndetermined
-        else 
-            ret
+        match this.Value with 
+        | Some ref -> ref.Represent()
+        | None -> PrimUndetermined
 
     override this.Run variableStack = 
         this.Debug "Run"
@@ -3234,6 +3228,11 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
                 | PrimDelegateEqualL ->
                     called.Run variableStack
                     this.SetValuesOf called
+                | PrimIntrinsicInd
+                | PrimIntrinsicUndef 
+                | PrimIntrinsicTpl 
+                | PrimIntrinsicPred ->
+                    this.SetValue called
                 | _ -> ()
             | _ -> ()
         elif this.ArgList.Count = 1 then
@@ -3251,9 +3250,10 @@ type FplReference(positions: Positions, parent: FplValue) =
     override this.SetValue fv = 
         if this.Scope.ContainsKey(this.FplId) then
             let var = this.Scope[this.FplId]
-            var.SetValue(fv)
+            var.SetValue fv
+            base.SetValue fv
         else
-            base.SetValue(fv)
+            base.SetValue fv
 
     override this.Type signatureType =
         let headObj = 
@@ -3372,7 +3372,8 @@ type FplReference(positions: Positions, parent: FplValue) =
                 fallBackFunctionalTerm
 
     override this.Represent () = 
-        if this.ValueList.Count = 0 then 
+        match this.Value with 
+        | None ->
             if this.Scope.Count > 0 && not (this.Scope.ContainsKey(".")) then 
                 (this.Scope.Values |> Seq.head).Represent()
             else
@@ -3430,14 +3431,14 @@ type FplReference(positions: Positions, parent: FplValue) =
                 | _, ArgType.Brackets, None ->
                     $"{LiteralUndef}[{args}]"
                 | _, ArgType.Parentheses, None ->
-                    $"{LiteralUndef}({args})"                
-                
-        else
+                    $"{LiteralUndef}({args})"
+        | Some ref ->                
             let subRepr = 
-                this.ValueList
-                |> Seq.filter (fun subfv -> subfv <> this) // prevent reference "self" being the value of itself causing an infinite loop
-                |> Seq.map (fun subfv -> subfv.Represent())
-                |> String.concat ", "
+                if not (Object.ReferenceEquals(ref,this)) then
+                    // prevent reference "self" being the value of itself causing an infinite loop
+                    ref.Represent()
+                else
+                    String.Empty
             if subRepr = String.Empty then 
                 LiteralUndef
             else
@@ -3604,6 +3605,7 @@ type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
     let _dimensionTypes = new List<FplValue>()
     let mutable _dimensionTypesBeingSet = false
     let _valueKeys = new Dictionary<string,int>() // used to store the keys of all values
+    let _valueList = List<FplValue>()
 
     member this.Dimensionality = _dimensionTypes.Count
 
@@ -3661,6 +3663,9 @@ type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
         this.CopyValueKeys ret
 
         ret
+
+    /// ValueList of the FplVariableArray.
+    member this.ValueList = _valueList
 
     member this.AssignValueToCoordinates (coordinates:FplValue seq) (value:FplValue) =
         this.IsInitialized <- true
@@ -3785,16 +3790,14 @@ type FplVariable(fplId, positions: Positions, parent: FplValue) =
             this.IsInitialized <- true
 
     override this.Represent () = 
-        if this.ValueList.Count = 0 then
+        match this.Value with 
+        | None ->
             match this.TypeId with
             | LiteralUndef -> LiteralUndef
             | LiteralPred -> PrimUndetermined
             | _ -> $"dec {this.Type(SignatureType.Type)}" 
-        else
-            let subRepr = 
-                this.ValueList
-                |> Seq.map (fun subfv -> subfv.Represent())
-                |> String.concat ", "
+        | Some ref ->
+            let subRepr = ref.Represent()
             if this.IsInitialized || this.IsBound then 
                 subRepr
             else
@@ -4084,7 +4087,7 @@ let private getCallByReferenceToClass (fv:FplValue) =
     if fv.Scope.ContainsKey(fv.FplId) then 
         let refNode = fv.Scope[fv.FplId]
         match refNode with 
-        | :? FplGenericVariable as var when var.IsInitialized && var.ValueList.Count = 0 ->
+        | :? FplGenericVariable as var when var.IsInitialized && var.Value.IsNone ->
             // reference fv points to an initialized variable without values 
             match var.TypeNode with
             | Some fv1 when fv1.Name = PrimClassL -> fv1.TypeId // and the variable points to a class
@@ -4880,9 +4883,9 @@ type FplGenericDelegate(name, positions: Positions, parent: FplValue) as this =
         this.FplId <- name
 
     override this.Represent () =
-        this.ValueList
-        |> Seq.map (fun subfv -> subfv.Represent())
-        |> String.concat ", "
+        match this.Value with 
+        | Some ref -> ref.Represent()
+        | None -> LiteralUndef
 
     override this.EmbedInSymbolTable _ = addExpressionToReference this
 
@@ -5001,9 +5004,9 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
 
     override this.Represent () = 
         let subRepr = 
-            this.ValueList
-            |> Seq.map (fun subfv -> subfv.Represent())
-            |> String.concat ", "
+            match this.Value with 
+            | Some ref -> ref.Represent()
+            | None -> String.Empty
         if subRepr = String.Empty then 
             this.FplId
         else
@@ -5114,14 +5117,9 @@ type FplDecrement(name, positions: Positions, parent: FplValue) as this =
         ad.AddDiagnostic diagnostic
 
     override this.Represent () = 
-        let subRepr = 
-            this.ValueList
-            |> Seq.map (fun subfv -> subfv.Type(SignatureType.Name))
-            |> String.concat ", "
-        if subRepr = String.Empty then 
-            LiteralUndef
-        else
-            subRepr        
+        match this.Value with 
+        | Some ref -> ref.Type SignatureType.Name
+        | None -> LiteralUndef
 
     override this.Run _ = 
         this.Debug "Run"
@@ -5241,6 +5239,18 @@ let runIntrinsicFunction (fv:FplValue) variableStack =
         let undef = new FplIntrinsicUndef((fv.StartPos, fv.EndPos), fv)
         fv.SetValue undef
 
+let private getFunctionalTermRepresent (fv:FplValue) =
+        match fv.Value with 
+        | None ->
+            // since the function term has no value, it has no return statement
+            // And the FPL syntax ensures that this can only be the case
+            // if the Functional Term is intrinsic.
+            // In this case, the "representation" of the function is
+            // its declared mapping type
+            let mapping = fv.ArgList[0]
+            $"dec {mapping.Type(SignatureType.Mixed)}"
+        | Some ref -> ref.Represent()    
+
 type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) as this =
     inherit FplGenericInheriting(positions, parent)
     let mutable _signStartPos = Position("", 0L, 0L, 0L)
@@ -5320,23 +5330,8 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) as this
 
     override this.RunOrder = Some _runOrder
 
-    override this.Represent () = 
-        if this.ValueList.Count = 0 then 
-            // since the function term has no value, it has no return statement
-            // And the FPL syntax ensures that this can only be the case
-            // if the Functional Term is intrinsic.
-            // In this case, the "representation" of the function is
-            // its declared mapping type
-            let mapping = this.ArgList[0]
-            $"dec {mapping.Type(SignatureType.Mixed)}"
-        else
-            let subRepr = 
-                this.ValueList
-                |> Seq.map (fun subfv -> subfv.Represent())
-                |> String.concat ", "
-            match subRepr with
-            | "" -> LiteralUndef
-            | _ -> subRepr
+    override this.Represent () = getFunctionalTermRepresent this
+
 
     override this.Run variableStack = 
         this.Debug "Run"
@@ -5546,23 +5541,7 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) as this 
             sprintf "%s(%s) -> %s" head paramT (map.Type(propagate))
         | _ -> ""
 
-    override this.Represent () = 
-        if this.ValueList.Count = 0 then 
-            // since the function term has no value, it has no return statement
-            // And the FPL syntax ensures that this can only be the case
-            // if the Functional Term is intrinsic.
-            // In this case, the "representation" of the function is
-            // its declared mapping type
-            let mapping = this.ArgList[0]
-            $"dec {mapping.Type(SignatureType.Mixed)}"
-        else
-            let subRepr = 
-                this.ValueList
-                |> Seq.map (fun subfv -> subfv.Represent())
-                |> String.concat ", "
-            match subRepr with
-            | "" -> LiteralUndef
-            | _ -> subRepr
+    override this.Represent () = getFunctionalTermRepresent this
 
     override this.EmbedInSymbolTable _ = 
         if not this.IsIntrinsic then // if not intrinsic, check variable usage
@@ -5731,9 +5710,9 @@ type FplMapCaseSingle(positions: Positions, parent: FplValue) =
         getFplHead this signatureType
 
     override this.Represent () = 
-        this.ValueList
-        |> Seq.map (fun subfv -> subfv.Represent())
-        |> String.concat ", "
+        match this.Value with 
+        | Some ref -> ref.Represent()
+        | None -> String.Empty
 
     member this.GetCondition() = this.ArgList[0]
     member this.GetResult() = this.ArgList[1]
@@ -5783,9 +5762,9 @@ type FplMapCases(positions: Positions, parent: FplValue) =
         getFplHead this signatureType
 
     override this.Represent () = 
-        this.ValueList
-        |> Seq.map (fun subfv -> subfv.Represent())
-        |> String.concat ", "
+        match this.Value with 
+        | Some ref -> ref.Represent()
+        | None -> String.Empty
 
     member this.GetConditionResultList() = 
         this.ArgList
@@ -6301,10 +6280,9 @@ type SymbolTable(parsedAsts: ParsedAstList, debug: bool, offlineMode: bool) =
 
                 sb.AppendLine($"{indent}\"ValueList\": [") |> ignore
                 let mutable valueList = 0
-                root.ValueList
-                |> Seq.iter (fun child ->
-                    valueList <- valueList + 1
-                    createJson child sb (level + 1) (valueList = root.ValueList.Count) false)
+                match root.Value with
+                | Some ref -> createJson ref sb (level + 1) true false
+                | None -> ()
                 sb.AppendLine($"{indent}]") |> ignore
 
             if isLast then
@@ -6466,9 +6444,9 @@ let findCandidatesByNameInDotted (fv: FplValue) (name: string) =
         match candidate with
         | :? FplVariable as var ->
             let varTypeOpt = 
-                if var.ValueList.Count > 0 then
+                if var.Value.IsSome then
                     // if the variable has a value, then 
-                    Some var.ValueList[0]
+                    var.Value
                 else 
                     var.Scope.Values |> Seq.tryHead
             match varTypeOpt with
