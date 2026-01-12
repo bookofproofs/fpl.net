@@ -398,7 +398,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
     let mutable (_filePath: string option) = None
     let mutable _isIntrinsic = false
     let mutable (_errorOccurred: string option) = None
-    let mutable (_type:FplValue option) = None
+    let mutable (_type:TypeNode) = TypeNode.Nothing
     let mutable (_value:FplValue option) = None
 
     let mutable _parent = parent
@@ -722,6 +722,12 @@ type FplValue(positions: Positions, parent: FplValue option) =
             let currDir = Directory.GetCurrentDirectory()
             File.AppendAllText(Path.Combine(currDir, "Debug.txt"), logLine)
 
+/// a type wrapping the type of the FplValue 
+and TypeNode = 
+    | Simple of FplValue 
+    | Array of FplValue
+    | Nothing
+
 /// a type wrapping the argument type of the FplValue 
 and ArgType = 
     | Parentheses
@@ -919,10 +925,11 @@ and FplVariableStack() =
         _stack.Clear()
 
 /// Wraps the string representation of the Type of optional FplValues
-let typeToString (fv:FplValue option) = 
-    match fv with 
-    | None -> PrimNone
-    | Some ref -> ref.Type SignatureType.Type
+let typeToString typeNode = 
+    match typeNode with 
+    | TypeNode.Simple ref -> ref.Type SignatureType.Type
+    | TypeNode.Array ref -> $"*{ref.Type SignatureType.Type}"
+    | TypeNode.Nothing -> PrimNone
 
 /// Wraps the string representation of the Value of optional FplValues
 let valueToString (fv:FplValue option) = 
@@ -1062,10 +1069,7 @@ let private getFplHeadNew (fv:FplValue) (signatureType:SignatureType) =
     match signatureType with
             | SignatureType.Name 
             | SignatureType.Mixed -> fv.FplId
-            | SignatureType.Type -> 
-                match fv.TypeIdNew with
-                | Some ref -> ref.Type SignatureType.Type
-                | None -> PrimNone
+            | SignatureType.Type -> typeToString fv.TypeIdNew 
 
 let private propagateSignatureType (signatureType:SignatureType) =
     match signatureType with
@@ -2235,7 +2239,7 @@ type FplPredicate(positions: Positions, parent: FplValue, runOrder) as this =
     do 
         this.FplId <- PrimUndetermined
         this.TypeId <- LiteralPred
-        this.TypeIdNew <- Some (new FplIntrinsicPred(positions, this))
+        this.TypeIdNew <- TypeNode.Simple (new FplIntrinsicPred(positions, this))
 
     member this.SignStartPos
         with get() = _signStartPos

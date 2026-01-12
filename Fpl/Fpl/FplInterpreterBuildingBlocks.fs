@@ -88,7 +88,7 @@ let rec simplifyTriviallyNestedExpressions (rb:FplValue) =
             // prevent recursive loops
             rb.ArgList.Clear() 
             rb.Value <- None
-            rb.TypeIdNew <- None
+            rb.TypeIdNew <- TypeNode.Nothing
             rb.Scope.Clear()
             simplifyTriviallyNestedExpressions subNode
         | _ -> ()
