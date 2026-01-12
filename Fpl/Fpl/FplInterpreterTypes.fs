@@ -490,6 +490,8 @@ type FplValue(positions: Positions, parent: FplValue option) =
         ret.IsIntrinsic <- this.IsIntrinsic
         ret.ExpressionType <- this.ExpressionType
         ret.ArgType <- this.ArgType
+        ret.TypeIdNew <- this.TypeIdNew
+        ret.ValueNew <- this.ValueNew
 
         this.Scope
         |> Seq.iter (fun (kvp:KeyValuePair<string, FplValue>) ->
@@ -1064,6 +1066,15 @@ let private getFplHead (fv:FplValue) (signatureType:SignatureType) =
             | SignatureType.Name 
             | SignatureType.Mixed -> fv.FplId
             | SignatureType.Type -> fv.TypeId
+
+let private getFplHeadNew (fv:FplValue) (signatureType:SignatureType) =
+    match signatureType with
+            | SignatureType.Name 
+            | SignatureType.Mixed -> fv.FplId
+            | SignatureType.Type -> 
+                match fv.TypeIdNew with
+                | Some ref -> ref.Type SignatureType.Type
+                | None -> PrimNone
 
 let private propagateSignatureType (signatureType:SignatureType) =
     match signatureType with
@@ -2238,6 +2249,7 @@ type FplPredicate(positions: Positions, parent: FplValue, runOrder) as this =
     do 
         this.FplId <- PrimUndetermined
         this.TypeId <- LiteralPred
+        this.TypeIdNew <- Some (new FplIntrinsicPred(positions, this))
 
     member this.SignStartPos
         with get() = _signStartPos
@@ -2290,21 +2302,26 @@ type FplPredicate(positions: Positions, parent: FplValue, runOrder) as this =
             checkVAR04Diagnostics this
         tryAddToParentUsingMixedSignature this
 
+    override this.SetValue (fv: FplValue) = 
+        this.ValueNew <- Some fv
+
+    override this.SetValuesOf (fv: FplValue) = 
+        this.ValueNew <- 
+            if fv.ValueList.Count > 0 then 
+                Some fv.ValueList[0]
+            else
+                fv.ValueNew
+        
     override this.Type signatureType = 
-        let head = getFplHead this signatureType
+        let head = getFplHeadNew this signatureType
 
         let paramT = getParamTuple this signatureType
         sprintf "%s(%s)" head paramT
 
     override this.Represent () =
-        let ret = 
-            this.ValueList
-            |> Seq.map (fun subfv -> subfv.Represent())
-            |> String.concat ", "
-        if ret = "" then
-            PrimUndetermined
-        else 
-            ret
+        match this.ValueNew with 
+        | Some ref -> ref.Represent()
+        | None -> PrimUndetermined
 
     override this.Run variableStack = 
         this.Debug "Run"
@@ -3458,7 +3475,7 @@ type FplReference(positions: Positions, parent: FplValue) =
         else
             let subRepr = 
                 this.ValueList
-                |> Seq.filter (fun subfv -> subfv <> this) // prevent reference "self" being the value of itself causing an infinite loop
+                |> Seq.filter (fun subfv -> not (Object.ReferenceEquals(subfv,this))) // prevent reference "self" being the value of itself causing an infinite loop
                 |> Seq.map (fun subfv -> subfv.Represent())
                 |> String.concat ", "
             if subRepr = String.Empty then 
