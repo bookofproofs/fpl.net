@@ -3523,13 +3523,6 @@ type FplMapping(positions: Positions, parent: FplValue) =
     let _dimensionTypes = new List<FplValue>()
     let mutable _dimensionTypesBeingSet = false
     let mutable _isArrayMapping = false
-    let mutable (_toBeReturnedClass:FplValue option) = None
-
-    /// If the mapping maps to classes or arrays of classes,
-    /// this function will yield an optional reference to the corresponding class node.
-    member this.ToBeReturnedDefinition
-        with get() = _toBeReturnedClass
-        and set(value) = _toBeReturnedClass <- value
 
     /// Sets this mapping to an array-typed mapping.
     member this.SetIsArray() = _isArrayMapping <- true
@@ -3548,12 +3541,12 @@ type FplMapping(positions: Positions, parent: FplValue) =
                     $"*{typeId}"
                 else
                     typeId
-            this.ToBeReturnedDefinition <- typeNodeOpt 
+            this.RefersTo <- typeNodeOpt 
             _dimensionTypesBeingSet <- true
         else
             let indexAllowedType = FplMapping((pos1,pos2), this) 
             indexAllowedType.TypeId <- typeId
-            indexAllowedType.ToBeReturnedDefinition <- typeNodeOpt 
+            indexAllowedType.RefersTo <- typeNodeOpt 
             this.DimensionTypes.Add indexAllowedType
 
     interface IHasDimensions with
@@ -3635,7 +3628,7 @@ type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
         else
             let indexAllowedType = FplMapping((pos1,pos2), this) 
             indexAllowedType.TypeId <- typeId
-            indexAllowedType.ToBeReturnedDefinition <- typeNodeOpt
+            indexAllowedType.RefersTo <- typeNodeOpt
             this.DimensionTypes.Add indexAllowedType
 
     interface IHasDimensions with
@@ -4033,7 +4026,7 @@ let private matchByTypeStringRepresentation (a:FplValue) aName (aType:string) aT
         elif aReferencedNode.Name = PrimFunctionalTermL || aReferencedNode.Name = PrimMandatoryFunctionalTermL then 
             let mapOpt = getMapping aReferencedNode
             let map = mapOpt.Value :?> FplMapping 
-            matchClassInheritance map.ToBeReturnedDefinition a aType pName pType, Parameter.Consumed
+            matchClassInheritance map.RefersTo a aType pName pType, Parameter.Consumed
         else
             Some $"undefined `{aName}:{aType}` doesn't match `{pName}:{pType}`", Parameter.Consumed
     | _ when aType.StartsWith(pType + "(") ->
@@ -4212,7 +4205,7 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) (mode:MatchingMode) =
                 Some $"Return type of `{aName}:{aType}` does not match expected mapping type `{pType}`.", Parameter.Consumed
         elif aIsCallByReference && pTypeName = PrimMappingL then 
             let map = p :?> FplMapping
-            match map.ToBeReturnedDefinition, refNodeOpt with
+            match map.RefersTo, refNodeOpt with
             | Some def, Some refNode when refNode.Name = PrimInstanceL -> 
                 matchTwoTypes a def mode
             | Some def, Some refNode when refNode.Name = PrimIntrinsicUndef -> 
@@ -5213,9 +5206,10 @@ let runIntrinsicFunction (fv:FplValue) variableStack =
     let mapOpt = getMapping fv
     match mapOpt with
     | Some (:? FplMapping as map) ->
-        match map.ToBeReturnedDefinition with 
+        match map.RefersTo with 
         | Some cl when map.Dimensionality = 0 ->
             // a class type without an array
+            // todo filter by constructors
             let defaultCtor = cl.Scope.Values |> Seq.head :?> FplGenericConstructor
             defaultCtor.Run variableStack
             match defaultCtor.Instance with 
