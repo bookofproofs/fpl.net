@@ -939,7 +939,7 @@ let rec referencedNodeOpt (fv:FplValue) =
             |> Seq.toList 
             |> List.tryHead
     match refNodeOpt with
-    | Some refNode when refNode.Name = LiteralSelf -> referencedNodeOpt refNode
+    | Some refNode when refNode.Name = LiteralSelf -> refNode.RefersTo
     | Some refNode when refNode.Name = LiteralParent -> referencedNodeOpt refNode
     | Some refNode when refNode.Name = PrimVariableL && refNode.Value.IsSome -> referencedNodeOpt refNode.Value.Value
     | _ -> refNodeOpt
@@ -1338,7 +1338,10 @@ type FplIntrinsicPred(positions: Positions, parent: FplValue) =
 /// Tries to find a mapping of an FplValue
 let rec getMapping (fv:FplValue) =
     match fv.Name with
-    | LiteralSelf
+    | LiteralSelf -> 
+        match fv.RefersTo with 
+        | Some ref -> getMapping ref
+        | None -> None
     | LiteralParent 
     | PrimRefL ->
         if fv.Scope.ContainsKey(fv.FplId) then
@@ -3268,12 +3271,15 @@ type FplReference(positions: Positions, parent: FplValue) =
                 let ret = this.Scope.Values |> Seq.head
                 match ret.Name with 
                 | PrimExtensionObj 
-                | LiteralParent 
-                | LiteralSelf ->
+                | LiteralParent ->
                     if ret.Scope.Count > 0 then 
                         ret.Scope.Values |> Seq.head
                     else
                         ret   
+                | LiteralSelf ->
+                    match ret.RefersTo with 
+                    | Some ref -> ref
+                    | None -> ret
                 | _ -> ret
             else
                 this
@@ -4501,16 +4507,14 @@ type FplSelf(positions: Positions, parent: FplValue) as this =
     override this.Clone () = this // do not clone FplSelf to prevent stack overflow 
 
     override this.Type signatureType = 
-        if this.Scope.Count > 1 then 
-            (this.Scope.Values |> Seq.head).Type signatureType
-        else 
-            LiteralSelf
+        match this.RefersTo with 
+        | Some ref -> ref.Type signatureType
+        | _ -> LiteralSelf
 
     override this.Represent()= 
-        if this.Scope.Count > 1 then 
-            (this.Scope.Values |> Seq.head).Represent()
-        else 
-            LiteralUndef
+        match this.RefersTo with 
+        | Some ref -> ref.Represent()
+        | _ -> LiteralUndef
 
     override this.Run variableStack = 
         // todo implement run

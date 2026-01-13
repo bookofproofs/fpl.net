@@ -77,6 +77,7 @@ let rec simplifyTriviallyNestedExpressions (rb:FplValue) =
             // adjust subNode's Parent, EndPos, Scope
             subNode.Parent <- rb.Parent 
             subNode.EndPos <- rb.EndPos
+            subNode.RefersTo <- rb.RefersTo
             if rb.Scope.ContainsKey(".") then 
                 subNode.Scope.Add(".",rb.Scope["."])
             // adjust Parent's scope
@@ -476,7 +477,7 @@ let rec eval (st: SymbolTable) ast =
             | PrimClassL
             | PrimPredicateL
             | PrimFunctionalTermL ->
-                fv.Scope.Add(block.FplId, block)
+                fv.RefersTo <- Some block
             | _ ->
                 fv.ErrorOccurred <- emitID016diagnostics $"{getEnglishName block.Name true} '{block.Type(SignatureType.Name)}'" pos1 pos2
         | _ -> ()
@@ -961,7 +962,7 @@ let rec eval (st: SymbolTable) ast =
                             match ret.Name with 
                             | PrimVariableL -> fv // if the variable is nesting other variables, it is ok to take the variable
                             | _ -> ret // otherwise we peek the nested type referenced by the variable
-                        | LiteralSelf when fv.Scope.Count = 1 -> fv.Scope.Values |> Seq.head
+                        | LiteralSelf when fv.RefersTo.IsSome -> fv.RefersTo.Value 
                         | LiteralParent when fv.Scope.Count = 1 -> fv.Scope.Values |> Seq.head
                         | _ -> fv
                     )
