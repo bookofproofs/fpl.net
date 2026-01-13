@@ -1918,7 +1918,7 @@ let rec eval (st: SymbolTable) ast =
         let checkDiagnostics (fvJi:FplGenericJustificationItem) candidates = 
             match tryFindAssociatedBlockForJustificationItem fvJi candidates with
             | ScopeSearchResult.FoundAssociate potentialCandidate -> 
-                fvJi.Scope.TryAdd(fvJi.FplId, potentialCandidate) |> ignore
+                fvJi.RefersTo <- Some potentialCandidate
                 match fvJi with 
                 | :? FplJustificationItemByProofArgument ->
                     let split = fvJi.FplId.Split(":")

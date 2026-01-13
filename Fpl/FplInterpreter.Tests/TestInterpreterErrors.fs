@@ -1222,12 +1222,7 @@ type TestInterpreterErrors() =
     [<DataRow("1c", "thm A {true} thm T {true} proof T$1 {1. bydef A |- trivial };", 1)>]
     [<DataRow("1d", "lem A {true} thm T {true} proof T$1 {1. bydef A |- trivial };", 1)>]
     [<DataRow("1e", "prop A {true} thm T {true} proof T$1 {1. bydef A |- trivial };", 1)>]
-    [<DataRow("1f", "cor A$1 {true} thm T {true} proof T$1 {1. bydef A$1 |- trivial };", 1)>]
-    [<DataRow("1f_", "thm A {true} cor A$1 {true} thm T {true} proof T$1 {1. bydef A$1 |- trivial };", 1)>]
-    
-    
-    [<DataRow("1g_", "thm A {true} proof A$1 {1. |- trivial } thm T {true} proof T$1 {1. bydef A$1 |- trivial };", 1)>]
-    
+        
     [<DataRow("1j", "inf A {pre: true con: true} thm T {true} proof T$1 {1. bydef A |- trivial };", 1)>]
     [<DataRow("0a", "def cl A {intr} thm T {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
     [<DataRow("0b", "def pred A() {intr} thm T {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
@@ -1252,7 +1247,6 @@ type TestInterpreterErrors() =
     [<DataRow("3g", "lem A {true} thm T {true} proof T$1 {1. A$1 |- trivial };", 1)>]
     [<DataRow("3h", "prop A {true} thm T {true} proof T$1 {1. A$1 |- trivial };", 1)>]
     [<DataRow("3i", "inf A {pre: true con: true} thm T {true} proof T$1 {1. A$1 |- trivial };", 1)>]
-    [<DataRow("3k_", "thm A {true} proof A$1 {1. |- trivial} thm T {true} proof T$1 {1. A$1 |- trivial };", 1)>]
   
     [<DataRow("z2k_", "thm A {true} proof A$1 {1. |- trivial} thm T {true} proof T$1 {1. A |- trivial };", 0)>]
     [<DataRow("z3j", "cor A$1 {true} thm T {true} proof T$1 {1. A$1 |- trivial };", 0)>]
@@ -1380,6 +1374,9 @@ type TestInterpreterErrors() =
     [<DataRow("05", "proof T$1 {1. bydef A$1 |- trivial};", 1)>]
     [<DataRow("02", "proof T$1 {1. byinf A |- trivial};", 0)>]
     [<DataRow("03", "proof T$1 {1. byinf A$1 |- trivial};", 1)>]
+    [<DataRow("1f", "cor A$1 {true} thm T {true} proof T$1 {1. bydef A$1 |- trivial };", 1)>]
+    [<DataRow("1f_", "thm A {true} cor A$1 {true} thm T {true} proof T$1 {1. bydef A$1 |- trivial };", 1)>]
+    [<DataRow("1g_", "thm A {true} proof A$1 {1. |- trivial } thm T {true} proof T$1 {1. bydef A$1 |- trivial };", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR010(no:string, fplCode:string, expected) =
@@ -1419,6 +1416,7 @@ type TestInterpreterErrors() =
 
     [<DataRow("00", "proof T$1 {1. bycor A$1 |- trivial};", 0)>]
     [<DataRow("01", "proof T$1 {1. A$1 |- trivial};", 1)>]
+    [<DataRow("3k_", "thm A {true} proof A$1 {1. |- trivial} thm T {true} proof T$1 {1. A$1 |- trivial };", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR013(no:string, fplCode:string, expected) =

@@ -3340,8 +3340,8 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsInstanceOfType<FplJustificationItemByConj>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
-            Assert.AreEqual<int>(1, node.Scope.Count)
-            Assert.IsInstanceOfType<FplConjecture>(node.Scope[node.FplId])
+            Assert.IsTrue(node.RefersTo.IsSome)
+            Assert.IsInstanceOfType<FplConjecture>(node.RefersTo.Value)
         | "FplJustificationItemByConj", "00b" 
         | "FplJustificationItemByConj", "00c" 
         | "FplJustificationItemByConj", "00d" 
@@ -3356,6 +3356,7 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplJustificationItemByConj>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsNone)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
 
@@ -3402,30 +3403,34 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplJustificationItemByDef>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsNone)
         | "FplJustificationItemByDef", "00g" ->
             Assert.IsInstanceOfType<FplJustification>(parent)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsInstanceOfType<FplJustificationItemByDef>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
-            Assert.AreEqual<int>(1, node.Scope.Count)
-            Assert.IsInstanceOfType<FplClass>(node.Scope[node.FplId])
+            Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsSome)
+            Assert.IsInstanceOfType<FplClass>(node.RefersTo.Value)
         | "FplJustificationItemByDef", "00h" ->
             Assert.IsInstanceOfType<FplJustification>(parent)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsInstanceOfType<FplJustificationItemByDef>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
-            Assert.AreEqual<int>(1, node.Scope.Count)
-            Assert.IsInstanceOfType<FplPredicate>(node.Scope[node.FplId])
+            Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsSome)
+            Assert.IsInstanceOfType<FplPredicate>(node.RefersTo.Value)
         | "FplJustificationItemByDef", "00i" ->
             Assert.IsInstanceOfType<FplJustification>(parent)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsInstanceOfType<FplJustificationItemByDef>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
-            Assert.AreEqual<int>(1, node.Scope.Count)
-            Assert.IsInstanceOfType<FplFunctionalTerm>(node.Scope[node.FplId])
+            Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsSome)
+            Assert.IsInstanceOfType<FplFunctionalTerm>(node.RefersTo.Value)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     [<DataRow("FplJustificationItemByDefVar", "00", """;""", "")>]
@@ -3462,8 +3467,9 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsInstanceOfType<FplJustificationItemByInf>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
-            Assert.AreEqual<int>(1, node.Scope.Count)
-            Assert.IsInstanceOfType<FplRuleOfInference>(node.Scope[node.FplId])
+            Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsSome)
+            Assert.IsInstanceOfType<FplRuleOfInference>(node.RefersTo.Value)
         | "FplJustificationItemByInf", "00b" 
         | "FplJustificationItemByInf", "00c" 
         | "FplJustificationItemByInf", "00d" 
@@ -3475,6 +3481,7 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplJustificationItemByInf>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsNone)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     [<DataRow("FplJustificationItemByProofArgument", "00", """;""", "")>]
@@ -3527,24 +3534,25 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsInstanceOfType<FplJustificationItemByTheoremLikeStmt>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
-            Assert.AreEqual<int>(1, node.Scope.Count)
-            Assert.IsInstanceOfType<FplTheorem>(node.Scope[node.FplId])
+            Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsSome)
+            Assert.IsInstanceOfType<FplTheorem>(node.RefersTo.Value)
         | "FplJustificationItemByTheoremLikeStmt", "00b" ->
             Assert.IsInstanceOfType<FplJustification>(parent)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsInstanceOfType<FplJustificationItemByTheoremLikeStmt>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
-            Assert.AreEqual<int>(1, node.Scope.Count)
-            Assert.IsInstanceOfType<FplProposition>(node.Scope[node.FplId])
+            Assert.IsTrue(node.RefersTo.IsSome)
+            Assert.IsInstanceOfType<FplProposition>(node.RefersTo.Value)
         | "FplJustificationItemByTheoremLikeStmt", "00c" ->
             Assert.IsInstanceOfType<FplJustification>(parent)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsInstanceOfType<FplJustificationItemByTheoremLikeStmt>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
-            Assert.AreEqual<int>(1, node.Scope.Count)
-            Assert.IsInstanceOfType<FplLemma>(node.Scope[node.FplId])
+            Assert.IsTrue(node.RefersTo.IsSome)
+            Assert.IsInstanceOfType<FplLemma>(node.RefersTo.Value)
         | "FplJustificationItemByTheoremLikeStmt", "00d" 
         | "FplJustificationItemByTheoremLikeStmt", "00e" 
         | "FplJustificationItemByTheoremLikeStmt", "00f" ->
@@ -3554,6 +3562,7 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplJustificationItemByTheoremLikeStmt>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsNone)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     [<DataRow("FplLanguage", "00", """;""", "")>]

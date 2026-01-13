@@ -2593,13 +2593,6 @@ type FplGenericJustificationItem(positions: Positions, parent: FplValue) =
 
     member this.ParentJustification = this.Parent.Value :?> FplJustification
 
-    /// Returns Some FPL node that is referenced by this JustificationItem (if it could be found) or None
-    member this.ReferencedJustification = 
-        if this.Scope.Count > 0 then 
-            Some (this.Scope.Values |> Seq.head)
-        else
-            None
-
     /// Returns a) Some expression inferred by the proceeding JustificationItem in the same proof argument.
     /// b) If there is no proceeding JustificationItem in the same proof argument, but there is a proceeding argument proof,
     ///    the function will return Some expression parsed from that proceeding proof argument. 
@@ -3034,8 +3027,8 @@ and FplProof(positions: Positions, parent: FplValue, runOrder) =
 let getArgumentInProof (fv1:FplGenericJustificationItem) argName =
     let proof = 
         match fv1 with 
-        | :? FplJustificationItemByProofArgument ->
-            fv1.Scope.Values |> Seq.head :?> FplProof
+        | :? FplJustificationItemByProofArgument when fv1.RefersTo.IsSome ->
+            fv1.RefersTo.Value :?> FplProof
         | _ ->
             let parent = fv1.ParentJustification
             let arg = parent.ParentArgument
