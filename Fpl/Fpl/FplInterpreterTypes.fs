@@ -940,7 +940,7 @@ let rec referencedNodeOpt (fv:FplValue) =
             |> List.tryHead
     match refNodeOpt with
     | Some refNode when refNode.Name = LiteralSelf -> refNode.RefersTo
-    | Some refNode when refNode.Name = LiteralParent -> referencedNodeOpt refNode
+    | Some refNode when refNode.Name = LiteralParent -> refNode.RefersTo
     | Some refNode when refNode.Name = PrimVariableL && refNode.Value.IsSome -> referencedNodeOpt refNode.Value.Value
     | _ -> refNodeOpt
 
@@ -1338,11 +1338,11 @@ type FplIntrinsicPred(positions: Positions, parent: FplValue) =
 /// Tries to find a mapping of an FplValue
 let rec getMapping (fv:FplValue) =
     match fv.Name with
+    | LiteralParent 
     | LiteralSelf -> 
         match fv.RefersTo with 
         | Some ref -> getMapping ref
         | None -> None
-    | LiteralParent 
     | PrimRefL ->
         if fv.Scope.ContainsKey(fv.FplId) then
             getMapping fv.Scope[fv.FplId]
@@ -3270,12 +3270,12 @@ type FplReference(positions: Positions, parent: FplValue) =
             if this.Scope.Count > 0 && not (this.Scope.ContainsKey(".")) then 
                 let ret = this.Scope.Values |> Seq.head
                 match ret.Name with 
-                | PrimExtensionObj 
-                | LiteralParent ->
+                | PrimExtensionObj ->
                     if ret.Scope.Count > 0 then 
                         ret.Scope.Values |> Seq.head
                     else
                         ret   
+                | LiteralParent 
                 | LiteralSelf ->
                     match ret.RefersTo with 
                     | Some ref -> ref
@@ -4470,19 +4470,17 @@ type FplParent(positions: Positions, parent: FplValue) as this =
     override this.Name = LiteralParent
     override this.ShortName = LiteralParent
 
-    override this.Clone () = this // do not clone FplParent to prevent stack overflow 
+    override this.Clone() = this // do not clone FplParent to prevent stack overflow 
 
     override this.Type signatureType = 
-        if this.Scope.Count > 1 then 
-            (this.Scope.Values |> Seq.head).Type signatureType
-        else 
-            LiteralParent
+        match this.RefersTo with 
+        | Some ref -> ref.Type signatureType
+        | _ -> LiteralParent
 
-    override this.Represent()= 
-        if this.Scope.Count > 1 then 
-            (this.Scope.Values |> Seq.head).Represent()
-        else 
-            LiteralUndef
+    override this.Represent() = 
+        match this.RefersTo with 
+        | Some ref -> ref.Represent()
+        | _ -> LiteralUndef
 
     override this.Run variableStack = 
         // todo implement run
@@ -4504,7 +4502,7 @@ type FplSelf(positions: Positions, parent: FplValue) as this =
     override this.Name = LiteralSelf
     override this.ShortName = LiteralSelf
 
-    override this.Clone () = this // do not clone FplSelf to prevent stack overflow 
+    override this.Clone() = this // do not clone FplSelf to prevent stack overflow 
 
     override this.Type signatureType = 
         match this.RefersTo with 
@@ -5976,16 +5974,16 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
         | Some (:? FplVariableArray as assignee), Some assignedValue ->
            checkTypes assignee assignedValue 
         | Some (:? FplSelf as assignee), _ ->
-            let ref = assignee.Scope.Values |> Seq.toList
-            if ref.Length > 0 then 
-                this.ErrorOccurred <- emitSIG07iagnostic (assignee.Type SignatureType.Name) (getEnglishName ref.Head.Name false) assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
-            else
+            match assignee.RefersTo with 
+            | Some ref -> 
+                this.ErrorOccurred <- emitSIG07iagnostic (assignee.Type SignatureType.Name) (getEnglishName ref.Name false) assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
+            | None ->
                 this.ErrorOccurred <- emitSIG07iagnostic (assignee.Type SignatureType.Name) "the type of self cound not be determined" assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
         | Some (:? FplParent as assignee), _ ->
-            let ref = assignee.Scope.Values |> Seq.toList
-            if ref.Length > 0 then 
-                this.ErrorOccurred <- emitSIG07iagnostic (assignee.Type SignatureType.Name) (getEnglishName ref.Head.Name false) assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
-            else
+            match assignee.RefersTo with 
+            | Some ref -> 
+                this.ErrorOccurred <- emitSIG07iagnostic (assignee.Type SignatureType.Name) (getEnglishName ref.Name false) assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
+            | None ->
                 this.ErrorOccurred <- emitSIG07iagnostic (assignee.Type SignatureType.Name) "the type of parent cound not be determined" assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
         | Some (assignee), Some assignedValue ->
             let nameAssignee = assignee.Type SignatureType.Name

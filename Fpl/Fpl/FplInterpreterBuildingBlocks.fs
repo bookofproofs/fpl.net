@@ -501,7 +501,7 @@ let rec eval (st: SymbolTable) ast =
             | PrimPredicateL, PrimMandatoryPredicateL
             | PrimFunctionalTermL, PrimMandatoryFunctionalTermL
             | PrimFunctionalTermL, PrimMandatoryPredicateL ->
-                fv.Scope.Add(block.FplId, block)
+                fv.RefersTo <- Some block
             | _ ->
                 fv.ErrorOccurred <- emitID015diagnostics $"{getEnglishName block.Name true} '{block.Type(SignatureType.Name)}'" pos1 pos2
         | _ -> ()
@@ -963,7 +963,7 @@ let rec eval (st: SymbolTable) ast =
                             | PrimVariableL -> fv // if the variable is nesting other variables, it is ok to take the variable
                             | _ -> ret // otherwise we peek the nested type referenced by the variable
                         | LiteralSelf when fv.RefersTo.IsSome -> fv.RefersTo.Value 
-                        | LiteralParent when fv.Scope.Count = 1 -> fv.Scope.Values |> Seq.head
+                        | LiteralParent when fv.RefersTo.IsSome -> fv.RefersTo.Value 
                         | _ -> fv
                     )
                     |> Seq.toList

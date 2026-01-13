@@ -4271,7 +4271,7 @@ type SymbolTableStructure() =
                 Assert.AreEqual<int>(1, parent.Scope.Count)
                 Assert.IsInstanceOfType<FplParent>(node)
                 Assert.AreEqual<int>(0, node.ArgList.Count)
-                Assert.AreEqual<int>(1, node.Scope.Count)
+                Assert.IsTrue(node.RefersTo.IsSome)
             // nodes that cannot be referrenced as parent 
             | "FplParent", "00a"
             | "FplParent", "01a"
@@ -4293,7 +4293,7 @@ type SymbolTableStructure() =
                 Assert.AreEqual<int>(1, parent.Scope.Count)
                 Assert.IsInstanceOfType<FplParent>(node)
                 Assert.AreEqual<int>(0, node.ArgList.Count)
-                Assert.AreEqual<int>(0, node.Scope.Count)
+                Assert.IsTrue(node.RefersTo.IsNone)
             | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
 
@@ -4980,7 +4980,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplSelf>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
-            Assert.AreEqual<int>(1, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsSome)
         // nodes that cannot be referred to as 'self'
         | "FplSelf", "00b"
         | "FplSelf", "03"
@@ -5000,7 +5000,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplSelf>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
-            Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsNone)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     [<DataRow("FplTheorem", "00", """thm T {true};""", "")>]
