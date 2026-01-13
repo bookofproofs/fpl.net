@@ -2515,7 +2515,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplExtensionObj>(node)
             Assert.AreEqual<string>("obj", node.TypeId)
-            Assert.AreEqual<int>(0, node.ArgList.Count)
+            Assert.IsTrue(node.RefersTo.IsNone)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplExtensionObj", "00a" ->
             Assert.IsInstanceOfType<FplReference>(parent)
@@ -2524,7 +2524,7 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplExtensionObj>(node)
             Assert.AreEqual<string>("Nat", node.TypeId)
             Assert.AreEqual<int>(0, node.ArgList.Count)
-            Assert.AreEqual<int>(1, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsSome)
         | "FplExtensionObj", "00b" ->
             Assert.IsInstanceOfType<FplReference>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
@@ -2532,7 +2532,7 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplExtensionObj>(node)
             Assert.AreEqual<string>("Nat", node.TypeId)
             Assert.AreEqual<int>(0, node.ArgList.Count)
-            Assert.AreEqual<int>(1, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsSome)
         | "FplExtensionObj", "00c" ->
             Assert.IsInstanceOfType<FplReference>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
@@ -2540,7 +2540,7 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplExtensionObj>(node)
             Assert.AreEqual<string>("Nat", node.TypeId)
             Assert.AreEqual<int>(0, node.ArgList.Count)
-            Assert.AreEqual<int>(1, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsSome)
         | "FplExtensionObj", "00d" ->
             Assert.IsInstanceOfType<FplReference>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
@@ -2548,7 +2548,7 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplExtensionObj>(node)
             Assert.AreEqual<string>("obj", node.TypeId)
             Assert.AreEqual<int>(0, node.ArgList.Count)
-            Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsNone)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     [<DataRow("FplForInStmt", "01", """def func Sum(list:* Nat[ind])->Nat { dec ~a:obj ~result, addend: Nat result:=Zero() for addend in list { result:=Add(result,addend) }; return result };""", "")>]

@@ -3270,11 +3270,7 @@ type FplReference(positions: Positions, parent: FplValue) =
             if this.Scope.Count > 0 && not (this.Scope.ContainsKey(".")) then 
                 let ret = this.Scope.Values |> Seq.head
                 match ret.Name with 
-                | PrimExtensionObj ->
-                    if ret.Scope.Count > 0 then 
-                        ret.Scope.Values |> Seq.head
-                    else
-                        ret   
+                | PrimExtensionObj
                 | LiteralParent 
                 | LiteralSelf ->
                     match ret.RefersTo with 
@@ -4999,18 +4995,8 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
 
     override this.Type signatureType = 
         let head = getFplHead this signatureType
-        let propagate = propagateSignatureType signatureType
-
-        let qualification =
-            if this.Scope.ContainsKey(".") then
-                Some(this.Scope["."])
-            else
-                None
-
-        match (head, qualification) with
-        | (_, Some qual) -> sprintf "%s.%s" head (qual.Type(propagate))
-        | (_, None) -> sprintf "%s" head
-
+        sprintf "%s" head
+    
     override this.Represent () = 
         let subRepr = 
             match this.Value with 
@@ -5047,7 +5033,7 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
                         // assign the reference FplValue fv only the first found match 
                         // even, if there are multiple extensions that would match it 
                         // (thus, the additional check for Scope.ContainsKey...)
-                        this.Scope.Add(this.FplId, ext)
+                        this.RefersTo <- Some ext
                         let mappingOpt = getMapping ext
                         match mappingOpt with
                         | Some mapping -> this.TypeId <- mapping.TypeId
