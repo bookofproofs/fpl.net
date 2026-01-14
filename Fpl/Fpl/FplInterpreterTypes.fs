@@ -924,6 +924,21 @@ and FplVariableStack() =
         _stack.Clear()
 
 
+/// Helper to set the new RefersTo property and keep the old Scope entry for backwards compatibility.
+/// This makes future reads prefer RefersTo while preserving existing consumers that still read Scope.
+let setRefersToAndScope (refNode: FplValue) (target: FplValue) identifier =
+    // set RefersTo first
+    refNode.RefersTo <- Some target
+    // maintain Scope mapping for backward compatibility when an FplId is available
+    if identifier <> "" then
+        try
+            if not (refNode.Scope.ContainsKey(identifier)) then
+                refNode.Scope.TryAdd(identifier, target) |> ignore
+            else
+                refNode.Scope.[identifier] <- target
+        with
+        | _ -> () // tolerant -- do not crash evaluator on scope write issues
+
 /// Searches for a references in node symbol table. 
 /// Will works properly only for nodes types that use their scope like FplReference, FplSelf, FplParent, FplForInStmtDomain, FplForInStmtEntity, FplVariable
 let rec referencedNodeOpt (fv:FplValue) = 
@@ -3481,7 +3496,7 @@ let checkSIG01Diagnostics (fv: FplValue)  =
             |> Seq.iter (fun block ->
                 if expressionId = block.FplId then
                     let blockType = block.Type(SignatureType.Mixed)
-                    fv.Scope.Add(blockType, block)
+                    setRefersToAndScope fv block blockType
                     fv.TypeId <- block.TypeId
                 else
                     let blockType = block.Type(SignatureType.Mixed)
@@ -3490,11 +3505,11 @@ let checkSIG01Diagnostics (fv: FplValue)  =
                     | FixType.Symbol symbol
                     | FixType.Postfix symbol ->
                         if expressionId = symbol then
-                            fv.Scope.Add(blockType, block)
+                            setRefersToAndScope fv block blockType
                             fv.TypeId <- block.TypeId
                     | FixType.Infix(symbol, precedence) ->
                         if expressionId = symbol then
-                            fv.Scope.Add(blockType, block)
+                            setRefersToAndScope fv block blockType
                             fv.TypeId <- block.TypeId
                     | _ -> ()))
 
