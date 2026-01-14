@@ -957,11 +957,7 @@ let rec eval (st: SymbolTable) ast =
                     |> Seq.map (fun kvp -> kvp.Value)
                     |> Seq.map (fun fv -> 
                         match fv.Name with
-                        | PrimVariableL when fv.Scope.Count = 1 -> 
-                            let ret = fv.Scope.Values |> Seq.head
-                            match ret.Name with 
-                            | PrimVariableL -> fv // if the variable is nesting other variables, it is ok to take the variable
-                            | _ -> ret // otherwise we peek the nested type referenced by the variable
+                        | PrimVariableL when fv.RefersTo.IsSome -> fv.RefersTo.Value 
                         | LiteralSelf when fv.RefersTo.IsSome -> fv.RefersTo.Value 
                         | LiteralParent when fv.RefersTo.IsSome -> fv.RefersTo.Value 
                         | _ -> fv
