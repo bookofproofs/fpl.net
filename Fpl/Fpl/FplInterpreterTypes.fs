@@ -933,6 +933,8 @@ let rec referencedNodeOpt (fv:FplValue) =
             referencedNodeOpt fv.Scope["."] 
         elif fv.Name = PrimInstanceL then 
             Some fv
+        elif fv.Name = PrimVariableL then 
+            fv.RefersTo
         else
             fv.Scope 
             |> Seq.map (fun kvp -> kvp.Value) 
@@ -1675,12 +1677,6 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
         this.IsSignatureVariable <- otherVar.IsSignatureVariable 
         this.IsInitialized <- otherVar.IsInitialized
 
-    member this.TypeNode =
-        this.Scope.Values
-        |> Seq.filter (fun fv -> fv.Name <> PrimVariableL && fv.Name <> PrimVariableArrayL)
-        |> Seq.tryHead
-
-
 let checkVAR04Diagnostics (fv:FplValue) = 
     fv.GetVariables()
     |> List.map (fun var -> var :?> FplGenericVariable)
@@ -2165,13 +2161,17 @@ type FplGenericPredicateBlock(positions: Positions, parent: FplValue) =
                     let undetermined = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
                     this.SetValue undetermined
                 else
-                    this.ArgList
-                    |> Seq.iter (fun fv -> 
-                        fv.Run variableStack
-                        this.SetValuesOf fv
-                    )
+                    // run all statements and the last predicate in the FplPredicate
+                    this.ArgList |> Seq.iter (fun fv1 -> fv1.Run variableStack) 
+                    // Assign the value of the FplPredicate using the last predicate
+                    let lastOpt = this.ArgList |> Seq.tryLast
+                    match lastOpt with 
+                    | Some last -> this.SetValuesOf last
+                    | _ -> ()
+
             _callCounter <- _callCounter - 1
-            _isReady <- this.Arity = 0 
+            _isReady <- this.Arity = 0
+
 
     override this.CheckConsistency () = 
         if not this.IsIntrinsic then // if not intrinsic, check variable usage
@@ -2292,15 +2292,17 @@ type FplPredicate(positions: Positions, parent: FplValue, runOrder) as this =
                     let undetermined = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
                     this.SetValue undetermined
                 else
-                    this.ArgList
-                    |> Seq.iter (fun fv -> 
-                        fv.Run variableStack
-                        this.SetValuesOf fv
-                    )
+                    // run all statements and the last predicate in the FplPredicate
+                    this.ArgList |> Seq.iter (fun fv1 -> fv1.Run variableStack) 
+                    // Assign the value of the FplPredicate using the last predicate
+                    let lastOpt = this.ArgList |> Seq.tryLast
+                    match lastOpt with 
+                    | Some last -> this.SetValuesOf last
+                    | _ -> ()
+
             _callCounter <- _callCounter - 1
-            _isReady <- this.Arity = 0 
-        this.GetProperties()
-        |> List.iter (fun fv -> fv.Run variableStack)
+            _isReady <- this.Arity = 0        
+            this.GetProperties() |> List.iter (fun fv -> fv.Run variableStack)
 
     override this.RunOrder = Some _runOrder
 
@@ -4014,6 +4016,8 @@ let private matchByTypeStringRepresentation (a:FplValue) aName (aType:string) aT
             let mapOpt = getMapping aReferencedNode
             let map = mapOpt.Value :?> FplMapping 
             matchClassInheritance map.RefersTo a aType pName pType, Parameter.Consumed
+        elif aReferencedNode.Name = PrimVariableL then 
+            matchClassInheritance aReferencedNode.RefersTo a aType pName pType, Parameter.Consumed
         else
             Some $"undefined `{aName}:{aType}` doesn't match `{pName}:{pType}`", Parameter.Consumed
     | _ when aType.StartsWith(pType + "(") ->
@@ -4078,7 +4082,7 @@ let private getCallByReferenceToClass (fv:FplValue) =
         match refNode with 
         | :? FplGenericVariable as var when var.IsInitialized && var.Value.IsNone ->
             // reference fv points to an initialized variable without values 
-            match var.TypeNode with
+            match var.RefersTo with
             | Some fv1 when fv1.Name = PrimClassL -> fv1.TypeId // and the variable points to a class
             | _ -> String.Empty
         | _ -> String.Empty

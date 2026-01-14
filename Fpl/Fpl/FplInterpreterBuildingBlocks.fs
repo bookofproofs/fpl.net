@@ -702,7 +702,7 @@ let rec eval (st: SymbolTable) ast =
                 | _ -> fv.ErrorOccurred <- emitSIG11diagnostics (qualifiedName map false) (qualifiedName candidate false) map.StartPos map.EndPos       
             | :? FplVariable -> 
                 fv.TypeId <- identifier
-                fv.Scope.TryAdd(fv.FplId, candidate) |> ignore
+                fv.RefersTo <- Some candidate
             | _ -> correctIds fv
         | _ ->
             match fv with 
@@ -915,8 +915,8 @@ let rec eval (st: SymbolTable) ast =
                     | :? FplFunctionalTerm 
                     | :? FplPredicate 
                     | :? FplClass -> Some dottedReference, dottedReference.Type SignatureType.Mixed, dottedReference.Name
-                    | _ ->
-                        let refNodeOpt = dottedReference.Scope.Values |> Seq.tryHead 
+                    | _ -> 
+                        let refNodeOpt = dottedReference.RefersTo
                         match refNodeOpt with 
                         | Some refNode -> refNodeOpt, refNode.Type SignatureType.Mixed, refNode.Name
                         | None -> None, $"{parentFv.FplId}:{LiteralUndef}", parentFv.Name
