@@ -1996,13 +1996,16 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplBase>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsNone)
         | "FplBase", "01" ->
             Assert.IsInstanceOfType<FplClass>(parent)
             Assert.AreEqual<int>(3, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplBase>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
-            Assert.AreEqual<int>(1, node.Scope.Count)
+            Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsSome)
+            Assert.IsInstanceOfType<FplClass>(node.RefersTo.Value)
         | "FplBase", "02" ->
             Assert.IsInstanceOfType<FplClass>(parent)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
@@ -2010,6 +2013,7 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplBase>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsNone)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     [<DataRow("FplBaseConstructorCall", "00", """def cl A { ctor A() {dec base.Obj(); } };""", "")>]

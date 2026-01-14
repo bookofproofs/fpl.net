@@ -1863,12 +1863,6 @@ type FplBase(positions: Positions, parent: FplValue) =
 
     override this.RunOrder = None
 
-    member this.BaseClass = 
-        if this.Scope.Count > 0 then
-            Some (this.Scope.Values |> Seq.head)
-        else 
-            None    
-
 [<AbstractClass>]
 type FplGenericConstructor(name, positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
@@ -1926,7 +1920,7 @@ type FplGenericConstructor(name, positions: Positions, parent: FplValue) as this
             classDef.ArgList
             |> Seq.filter (fun fv -> fv.Name = LiteralBase)
             |> Seq.map (fun fv -> fv :?> FplBase)
-            |> Seq.map (fun fv -> fv.BaseClass)
+            |> Seq.map (fun fv -> fv.RefersTo)
             |> Seq.iter (fun baseClassOpt ->
                 match baseClassOpt with
                 | Some baseClass ->
@@ -3880,8 +3874,8 @@ let findInheritanceChains (baseNode: FplValue) =
                 )
             | PrimFunctionalTermL, LiteralBase 
             | PrimClassL, LiteralBase ->
-                if bNode.Scope.Count > 0 then
-                    let nextBNode = bNode.Scope.Values |> Seq.head
+                match bNode.RefersTo with 
+                | Some nextBNode ->
                     let baseNodes = 
                         nextBNode.ArgList
                         |> Seq.filter (fun subNode -> subNode :? FplBase)
@@ -3895,7 +3889,7 @@ let findInheritanceChains (baseNode: FplValue) =
                         paths[newPath] <- $"duplicate inheritance detected, `{newPath}`." 
                     else
                         paths.Add (newPath, "ok")
-                else 
+                | None ->
                     if paths.ContainsKey newPath then 
                         paths[newPath] <- $"duplicate inheritance detected, `{newPath}`." 
                     else
@@ -4398,7 +4392,7 @@ type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
 
             match baseClassObjectOpt with 
             | Some baseClassObject ->
-                match baseClassObject.BaseClass with
+                match baseClassObject.RefersTo with
                 | Some baseClass ->
                     // now, try to match a constructor of the parentClass based on the signature of this base constructor call
                     match baseClass.IsIntrinsic, this.ArgList.Count with

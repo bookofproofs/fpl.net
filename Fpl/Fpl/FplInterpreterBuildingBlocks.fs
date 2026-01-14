@@ -1068,10 +1068,10 @@ let rec eval (st: SymbolTable) ast =
                         if nodeType <> baseType then 
                             baseNode.ErrorOccurred <- emitID007diagnostics beingCreatedNode.Name nodeType foundBase.Name baseType pos1 pos2
                         else 
-                            baseNode.Scope.Add (foundBase.FplId, foundBase) // add found functional term to base
+                            baseNode.RefersTo <- Some foundBase // add found base class to base
                             addVariablesAndPropertiesOfBaseNode foundBase
                     | :? FplClass, :? FplClass -> 
-                        baseNode.Scope.Add (foundBase.FplId, foundBase) // add found base class to base
+                        baseNode.RefersTo <- Some foundBase // add found base class to base
                         addVariablesAndPropertiesOfBaseNode foundBase
                     | :? FplPredicate, _
                     | :? FplFunctionalTerm, _
