@@ -308,7 +308,7 @@ let rec eval (st: SymbolTable) ast =
                 | PrimRefL 
                 | PrimForInStmtEntity 
                 | PrimForInStmtDomain ->
-                    fv.Scope.Add(name, foundVar)
+                    setRefersToAndScope fv foundVar name
                     fv.FplId <- name
                 | PrimTranslationL ->
                     // for translations, use the name of the variable
@@ -1375,7 +1375,11 @@ let rec eval (st: SymbolTable) ast =
             | _ -> ()
             fv.ArgList.RemoveAt(currMinIndex+1) 
             fv.ArgList.RemoveAt(currMinIndex-1) 
-        simplifyTriviallyNestedExpressions fv
+        if fv.FplId = String.Empty then 
+            variableStack.Pop() |> ignore
+            variableStack.PushEvalStack(fv.ArgList[0])
+            fv.ArgList[0].Parent <- fv.Parent
+        //simplifyTriviallyNestedExpressions fv
         st.EvalPop()
     // | Expression of Positions * ((((Ast option * Ast) * Ast option) * Ast option) * Ast)
     | Ast.Expression((pos1, pos2), ((((prefixOpAst, predicateAst), postfixOpAst), optionalSpecificationAst), qualificationListAst)) ->

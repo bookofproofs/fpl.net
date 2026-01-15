@@ -481,6 +481,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
         ret.ExpressionType <- this.ExpressionType
         ret.ArgType <- this.ArgType
         ret.Value <- this.Value
+        ret.RefersTo <- this.RefersTo
 
         this.Scope
         |> Seq.iter (fun (kvp:KeyValuePair<string, FplValue>) ->
@@ -608,6 +609,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
         this.IsIntrinsic <- other.IsIntrinsic
         this.ExpressionType <- other.ExpressionType
         this.ArgType <- other.ArgType
+       
 
         this.Scope.Clear()
         other.Scope |> Seq.iter (fun kvp -> this.Scope.Add(kvp.Key, kvp.Value))
@@ -616,6 +618,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
         this.ArgList.AddRange(other.ArgList)
 
         this.Value <- other.Value
+        this.RefersTo <- other.RefersTo
 
     /// Qualified starting position of this FplValue
     member this.QualifiedStartPos =
@@ -951,10 +954,7 @@ let rec referencedNodeOpt (fv:FplValue) =
         elif fv.Name = PrimVariableL then 
             fv.RefersTo
         else
-            fv.Scope 
-            |> Seq.map (fun kvp -> kvp.Value) 
-            |> Seq.toList 
-            |> List.tryHead
+            fv.RefersTo
     match refNodeOpt with
     | Some refNode when refNode.Name = LiteralSelf -> refNode.RefersTo
     | Some refNode when refNode.Name = LiteralParent -> refNode.RefersTo
@@ -1301,7 +1301,7 @@ let addExpressionToReference (fplValue:FplValue) =
     | Some next when next.Name = PrimRefL ->
         next.FplId <- fplValue.FplId
         next.TypeId <- fplValue.TypeId
-        next.Scope.TryAdd(fplValue.FplId, fplValue) |> ignore
+        setRefersToAndScope next fplValue fplValue.FplId
     | _ -> addExpressionToParentArgList fplValue 
 
 /// Indicates if an FplValue is the root of the SymbolTable.
@@ -3210,7 +3210,8 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
 
     override this.Run variableStack =
         this.Debug "Run"
-        if this.Scope.Count > 0 then 
+
+        if this.Scope.Count > 0 || this.RefersTo.IsSome then 
             let calledOpt = referencedNodeOpt this
             match calledOpt with 
             | Some called ->
