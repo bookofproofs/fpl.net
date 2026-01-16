@@ -3534,17 +3534,16 @@ let checkSIG01Diagnostics (fv: FplValue)  =
             |> Seq.map (fun kv -> kv.Value)
             |> Seq.filter (fun fv1 -> isDefinition fv1)
             |> Seq.iter (fun block ->
-                let blockType = block.Type(SignatureType.Mixed)
                 match block.ExpressionType with
                 | FixType.Prefix symbol
                 | FixType.Symbol symbol
                 | FixType.Postfix symbol ->
                     if expressionId = symbol then
-                        setRefersToAndScope fv block blockType
+                        fv.RefersTo <- Some block 
                         fv.TypeId <- block.TypeId
                 | FixType.Infix(symbol, precedence) ->
                     if expressionId = symbol then
-                        setRefersToAndScope fv block blockType
+                        fv.RefersTo <- Some block 
                         fv.TypeId <- block.TypeId
                 | _ -> ()))
 
