@@ -1001,6 +1001,26 @@ type TestFplValueScopeFplRepresentation() =
         | None -> 
             Assert.IsTrue(false)
 
+    [<DataRow("00", "T()", "def pred T() {dec ~x:pred x:=false; x};",  LiteralFalse)>]
+    [<DataRow("01", "T()", "def pred T() {dec ~x:ind x:=$42; x};",  "$42")>]
+    [<DataRow("02", "T()", "def cl A def pred T() {dec ~x:A x:=A(); x};",  """{"name":"A","base":[],"vars":[],"prtys":[]}""")>]
+    [<DataRow("02a", "T() -> A", "def cl A def func T()->A {dec ~x:A x:=A(); return x};",  """{"name":"A","base":[],"vars":[],"prtys":[]}""")>]
+    [<TestMethod>]
+    member this.TestAssignedValuePassedToEnclosingBlock(no:string, enclosing:string, fplCode, (expected:string)) =
+        ad.Clear()
+        let filename = "TestAssignment"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let block = theory.Scope[enclosing]
+            let actual = block.Represent()
+            Assert.AreEqual<string>(expected, actual)
+        | None -> 
+            Assert.IsTrue(false)
+
     [<DataRow("00", "dec ~x:pred x:=false;",  true)>]
     [<TestMethod>]
     member this.TestAssignmentVariableInitialized(no:string, input, (expected:bool)) =

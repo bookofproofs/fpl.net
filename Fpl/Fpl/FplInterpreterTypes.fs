@@ -945,6 +945,7 @@ let setRefersToAndScope (refNode: FplValue) (target: FplValue) identifier =
 /// Searches for a references in node symbol table. 
 /// Will works properly only for nodes types that use their scope like FplReference, FplSelf, FplParent, FplForInStmtDomain, FplForInStmtEntity, FplVariable
 let rec referencedNodeOpt (fv:FplValue) = 
+    
     let refNodeOpt = 
         if fv.Scope.ContainsKey(".") then
             // start new recursion for dotted references 
@@ -952,6 +953,8 @@ let rec referencedNodeOpt (fv:FplValue) =
         elif fv.Name = PrimInstanceL then 
             Some fv
         elif fv.Name = PrimIntrinsicPred then 
+            Some fv
+        elif fv.Name = PrimIntrinsicInd then 
             Some fv
         elif fv.Name = PrimVariableL then 
             fv.RefersTo
@@ -981,6 +984,13 @@ let isVar (fv1:FplValue) =
     | PrimVariableArrayL -> true
     | _ -> false
     
+let isDefinition (fv1:FplValue) =
+    match fv1.Name with
+    | PrimClassL
+    | PrimPredicateL
+    | PrimFunctionalTermL -> true
+    | _ -> false
+
 type IHasSignature =
     abstract member SignStartPos : Position with get, set
     abstract member SignEndPos : Position with get, set
@@ -3245,6 +3255,7 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
                 | PrimDelegateEqualL ->
                     called.Run variableStack
                     this.SetValuesOf called
+                | PrimInstanceL
                 | PrimIntrinsicInd
                 | PrimIntrinsicUndef 
                 | PrimIntrinsicTpl 
@@ -3496,27 +3507,23 @@ let checkSIG01Diagnostics (fv: FplValue)  =
         |> Seq.iter (fun theory ->
             theory.Scope
             |> Seq.map (fun kv -> kv.Value)
+            |> Seq.filter (fun fv1 -> isDefinition fv1)
             |> Seq.iter (fun block ->
-                if expressionId = block.FplId then
-                    let blockType = block.Type(SignatureType.Mixed)
-                    setRefersToAndScope fv block blockType
-                    fv.TypeId <- block.TypeId
-                else
-                    let blockType = block.Type(SignatureType.Mixed)
-                    match block.ExpressionType with
-                    | FixType.Prefix symbol
-                    | FixType.Symbol symbol
-                    | FixType.Postfix symbol ->
-                        if expressionId = symbol then
-                            setRefersToAndScope fv block blockType
-                            fv.TypeId <- block.TypeId
-                    | FixType.Infix(symbol, precedence) ->
-                        if expressionId = symbol then
-                            setRefersToAndScope fv block blockType
-                            fv.TypeId <- block.TypeId
-                    | _ -> ()))
+                let blockType = block.Type(SignatureType.Mixed)
+                match block.ExpressionType with
+                | FixType.Prefix symbol
+                | FixType.Symbol symbol
+                | FixType.Postfix symbol ->
+                    if expressionId = symbol then
+                        setRefersToAndScope fv block blockType
+                        fv.TypeId <- block.TypeId
+                | FixType.Infix(symbol, precedence) ->
+                    if expressionId = symbol then
+                        setRefersToAndScope fv block blockType
+                        fv.TypeId <- block.TypeId
+                | _ -> ()))
 
-        if fv.Scope.Count = 0 then
+        if fv.RefersTo.IsNone then
             fv.ErrorOccurred <- emitSIG01Diagnostics expressionId fv.StartPos fv.EndPos
     | _ -> ()
 
