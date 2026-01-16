@@ -617,7 +617,10 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("DottedPredicate")
         let fv = variableStack.PeekEvalStack()
         let refBlock = new FplReference((pos1, pos2), fv) 
-        fv.Scope.Add(".", refBlock)
+        match fv with 
+        | :? FplReference as ref ->
+            ref.DottedChild <- Some refBlock
+        | _ -> ()
         variableStack.PushEvalStack(refBlock)
         eval st predicateWithOptSpecificationAst
         variableStack.PopEvalStack()

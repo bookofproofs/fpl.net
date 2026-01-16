@@ -3271,9 +3271,32 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
 
 type FplReference(positions: Positions, parent: FplValue) =
     inherit FplGenericReference(positions, parent)
+    
+    // single dotted child (Some when parsed a dotted reference), prefer this over using Scope["."] directly
+    let mutable _dottedChild : FplValue option = None
 
     override this.Name = PrimRefL
     override this.ShortName = PrimRef
+
+    /// The optional dotted child set when parsing a dotted reference (preferred over Scope["."]).
+    member this.DottedChild
+        with get() = _dottedChild
+        and set (value:FplValue option) =
+            _dottedChild <- value
+            // keep legacy Scope["."] in sync for backward compatibility during migration
+            try
+                match value with
+                | Some v ->
+                    if this.Scope.ContainsKey(".") then
+                        this.Scope.["."] <- v
+                    else
+                        this.Scope.TryAdd(".", v) |> ignore
+                | None ->
+                    if this.Scope.ContainsKey(".") then
+                        this.Scope.Remove(".") |> ignore
+            with
+            | _ -> () // tolerant: do not break interpreter on sync issues
+
 
     override this.SetValue fv = 
         if this.Scope.ContainsKey(this.FplId) then
@@ -3284,19 +3307,31 @@ type FplReference(positions: Positions, parent: FplValue) =
             base.SetValue fv
 
     override this.Type signatureType =
+        // prefer dotted child qualification first, fallback to legacy Scope["."]
+        let qualification =
+            match this.DottedChild with
+            | Some q -> Some q
+            | None ->
+                if this.Scope.ContainsKey(".") then Some(this.Scope["."]) else None
+
+
         let headObj = 
-            if this.Scope.Count > 0 && not (this.Scope.ContainsKey(".")) then 
-                let ret = this.Scope.Values |> Seq.head
-                match ret.Name with 
-                | PrimExtensionObj
-                | LiteralParent 
-                | LiteralSelf ->
-                    match ret.RefersTo with 
-                    | Some ref -> ref
-                    | None -> ret
-                | _ -> ret
-            else
-                this
+            // prefer dotted child as head if present
+            match this.DottedChild with
+            | Some dc -> dc
+            | None ->
+                if this.Scope.Count > 0 && not (this.Scope.ContainsKey(".")) then 
+                    let ret = this.Scope.Values |> Seq.head
+                    match ret.Name with 
+                    | PrimExtensionObj
+                    | LiteralParent 
+                    | LiteralSelf ->
+                        match ret.RefersTo with 
+                        | Some ref -> ref
+                        | None -> ret
+                    | _ -> ret
+                else
+                    this
         let propagate = propagateSignatureType signatureType
 
         // The arguments are reserved for the arguments or the coordinates of the reference
@@ -3327,12 +3362,6 @@ type FplReference(positions: Positions, parent: FplValue) =
             | SignatureType.Type, "", LiteralUndef -> ""
             | SignatureType.Type, "", "" -> LiteralUndef
             | _ -> ret
-
-        let qualification =
-            if this.Scope.ContainsKey(".") then
-                Some(this.Scope["."])
-            else
-                None
 
         let fallBackFunctionalTerm =
             let varMappingOpt = getMapping headObj
@@ -3401,64 +3430,67 @@ type FplReference(positions: Positions, parent: FplValue) =
     override this.Represent () = 
         match this.Value with 
         | None ->
-            if this.Scope.Count > 0 && not (this.Scope.ContainsKey(".")) then 
-                (this.Scope.Values |> Seq.head).Represent()
-            else
+            // Prefer DottedChild first, then legacy scope logic
+            match this.DottedChild with
+            | Some dc when not (Object.ReferenceEquals(dc, this)) -> dc.Represent()
+            | _ ->
+                if this.Scope.Count > 0 && not (this.Scope.ContainsKey(".")) then 
+                    (this.Scope.Values |> Seq.head).Represent()
+                else
+                    let args, argsCount =
+                        let ret = 
+                            this.ArgList
+                            |> Seq.map (fun fv -> fv.Represent())
+                            |> String.concat ", "
+                        ret, this.ArgList.Count
 
-                let args, argsCount =
-                    let ret = 
-                        this.ArgList
-                        |> Seq.map (fun fv -> fv.Represent())
-                        |> String.concat ", "
-                    ret, this.ArgList.Count
+                    let qualification =
+                        if this.Scope.ContainsKey(".") then
+                            Some(this.Scope["."])
+                        else
+                            None
 
-                let qualification =
-                    if this.Scope.ContainsKey(".") then
-                        Some(this.Scope["."])
-                    else
-                        None
-
-                match argsCount, this.ArgType, qualification with
-                | 0, ArgType.Nothing, Some qual ->
-                    $"{LiteralUndef}.{qual.Represent()}"
-                | 0, ArgType.Brackets, Some qual ->
-                    $"{LiteralUndef}[].{qual.Represent()}"
-                | 0, ArgType.Parentheses, Some qual ->
-                    $"{LiteralUndef}().{qual.Represent()}"
-                | 0, ArgType.Nothing, None -> 
-                    $"{LiteralUndef}"
-                | 0, ArgType.Brackets, None ->
-                    $"{LiteralUndef}[]"
-                | 0, ArgType.Parentheses, None ->
-                    $"{LiteralUndef}()"
-                | 1, ArgType.Nothing, Some qual -> 
+                    match argsCount, this.ArgType, qualification with
+                    | 0, ArgType.Nothing, Some qual ->
+                        $"{LiteralUndef}.{qual.Represent()}"
+                    | 0, ArgType.Brackets, Some qual ->
+                        $"{LiteralUndef}[].{qual.Represent()}"
+                    | 0, ArgType.Parentheses, Some qual ->
+                        $"{LiteralUndef}().{qual.Represent()}"
+                    | 0, ArgType.Nothing, None -> 
+                        $"{LiteralUndef}"
+                    | 0, ArgType.Brackets, None ->
+                        $"{LiteralUndef}[]"
+                    | 0, ArgType.Parentheses, None ->
+                        $"{LiteralUndef}()"
+                    | 1, ArgType.Nothing, Some qual -> 
                 
-                    $"{LiteralUndef}{args}.{qual.Represent()}"
-                | 1, ArgType.Brackets, Some qual ->
-                    $"{LiteralUndef}[{args}].{qual.Represent()}"
-                | 1, ArgType.Parentheses, Some qual ->
-                    $"{LiteralUndef}({args}).{qual.Represent()}"
-                | 1, ArgType.Nothing, None -> 
-                    if this.FplId <> String.Empty then 
+                        $"{LiteralUndef}{args}.{qual.Represent()}"
+                    | 1, ArgType.Brackets, Some qual ->
+                        $"{LiteralUndef}[{args}].{qual.Represent()}"
+                    | 1, ArgType.Parentheses, Some qual ->
+                        $"{LiteralUndef}({args}).{qual.Represent()}"
+                    | 1, ArgType.Nothing, None -> 
+                        if this.FplId <> String.Empty then 
+                            $"{LiteralUndef}({args})"
+                        else
+                            $"{args}"
+                    | 1, ArgType.Brackets, None ->
+                        $"{LiteralUndef}[{args}]"
+                    | 1, ArgType.Parentheses, None ->
                         $"{LiteralUndef}({args})"
-                    else
-                        $"{args}"
-                | 1, ArgType.Brackets, None ->
-                    $"{LiteralUndef}[{args}]"
-                | 1, ArgType.Parentheses, None ->
-                    $"{LiteralUndef}({args})"
-                | _, ArgType.Nothing, Some qual -> 
-                    $"{LiteralUndef}({args}).{qual.Represent()}"
-                | _, ArgType.Brackets, Some qual ->
-                    $"{LiteralUndef}[{args}].{qual.Represent()}"
-                | _, ArgType.Parentheses, Some qual ->
-                    $"{LiteralUndef}({args}).{qual.Represent()}"
-                | _, ArgType.Nothing, None -> 
-                    $"{LiteralUndef}({args})"
-                | _, ArgType.Brackets, None ->
-                    $"{LiteralUndef}[{args}]"
-                | _, ArgType.Parentheses, None ->
-                    $"{LiteralUndef}({args})"
+                    | _, ArgType.Nothing, Some qual -> 
+                        $"{LiteralUndef}({args}).{qual.Represent()}"
+                    | _, ArgType.Brackets, Some qual ->
+                        $"{LiteralUndef}[{args}].{qual.Represent()}"
+                    | _, ArgType.Parentheses, Some qual ->
+                        $"{LiteralUndef}({args}).{qual.Represent()}"
+                    | _, ArgType.Nothing, None -> 
+                        $"{LiteralUndef}({args})"
+                    | _, ArgType.Brackets, None ->
+                        $"{LiteralUndef}[{args}]"
+                    | _, ArgType.Parentheses, None ->
+                        $"{LiteralUndef}({args})"
         | Some ref ->                
             let subRepr = 
                 if not (Object.ReferenceEquals(ref,this)) then
@@ -3483,15 +3515,18 @@ type FplReference(positions: Positions, parent: FplValue) =
         | Some next when next.Name = PrimForInStmtDomain -> 
             next.FplId <- this.FplId
             tryAddToParentUsingFplId this
-        | Some next when next.Scope.ContainsKey(".") -> 
+        | Some next when 
+            // consider dotted child on next (new API) or legacy Scope["."] entry
+            (match next with | :? FplReference as nr -> nr.DottedChild.IsSome | _ -> next.Scope.ContainsKey(".")) -> 
             next.EndPos <- this.EndPos
+
         | Some next -> 
             addExpressionToParentArgList this
             next.EndPos <- this.EndPos
         | _ -> ()
 
-    /// eturns the optional node referenced by this FplReference
-    member this.TryReferenced = this.Scope.Values |> Seq.tryHead
+    /// returns the optional node referenced by this FplReference
+    member this.TryReferenced = this.RefersTo
             
 
 /// Checks if a reference to a Symbol, Prefix, PostFix, or Infix exists
