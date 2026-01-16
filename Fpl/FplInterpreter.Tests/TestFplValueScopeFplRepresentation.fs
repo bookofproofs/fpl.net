@@ -974,6 +974,7 @@ type TestFplValueScopeFplRepresentation() =
             Assert.IsTrue(false)
 
     [<DataRow("00", "dec ~x:pred x:=false;",  LiteralFalse)>]
+    [<DataRow("01", "dec ~x:ind x:=$42;",  "$42")>]
     [<TestMethod>]
     member this.TestAssignmentValue(no:string, input, (expected:string)) =
         ad.Clear()

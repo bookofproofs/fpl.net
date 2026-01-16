@@ -951,6 +951,8 @@ let rec referencedNodeOpt (fv:FplValue) =
             referencedNodeOpt fv.Scope["."] 
         elif fv.Name = PrimInstanceL then 
             Some fv
+        elif fv.Name = PrimIntrinsicPred then 
+            Some fv
         elif fv.Name = PrimVariableL then 
             fv.RefersTo
         else

@@ -77,10 +77,12 @@ let rec simplifyTriviallyNestedExpressions (rb:FplValue) =
             // adjust subNode's Parent, EndPos, Scope
             subNode.Parent <- rb.Parent 
             subNode.EndPos <- rb.EndPos
-            subNode.RefersTo <- rb.RefersTo
             if rb.Scope.ContainsKey(".") then 
-                subNode.Scope.Add(".",rb.Scope["."])
-            // adjust Parent's scope
+                if subNode.Scope.ContainsKey(".") then
+                    subNode.Scope["."] <- rb.Scope["."]
+                else
+                    subNode.Scope.Add(".", rb.Scope["."])
+            // adjust rb Parent's scope
             match rb.Parent with 
             | Some parent -> 
                 if parent.Scope.ContainsKey(".") then
@@ -1375,11 +1377,7 @@ let rec eval (st: SymbolTable) ast =
             | _ -> ()
             fv.ArgList.RemoveAt(currMinIndex+1) 
             fv.ArgList.RemoveAt(currMinIndex-1) 
-        if fv.FplId = String.Empty then 
-            variableStack.Pop() |> ignore
-            variableStack.PushEvalStack(fv.ArgList[0])
-            fv.ArgList[0].Parent <- fv.Parent
-        //simplifyTriviallyNestedExpressions fv
+        simplifyTriviallyNestedExpressions fv
         st.EvalPop()
     // | Expression of Positions * ((((Ast option * Ast) * Ast option) * Ast option) * Ast)
     | Ast.Expression((pos1, pos2), ((((prefixOpAst, predicateAst), postfixOpAst), optionalSpecificationAst), qualificationListAst)) ->
