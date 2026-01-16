@@ -3316,7 +3316,7 @@ type FplReference(positions: Positions, parent: FplValue) =
     override this.Type signatureType =
         let headObj = 
             match this.RefersTo with
-            | Some ref -> ref
+            | Some ret -> ret
             | None ->
                 if this.Scope.Count > 0 && (not (this.Scope.ContainsKey(".")) || this.DottedChild.IsNone) then 
                     let ret = this.Scope.Values |> Seq.head
