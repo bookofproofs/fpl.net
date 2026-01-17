@@ -1293,15 +1293,15 @@ let addExpressionToReference (fplValue:FplValue) =
     | :? IHasDotted as dc when dc.DottedChild.IsSome -> ()
     | _ ->
         match nextOpt with
-        | Some next when next.Name = PrimRefL && next.Scope.ContainsKey(next.FplId) ->
-            let referenced = next.Scope.Values |> Seq.head
+        | Some next when next.Name = PrimRefL && next.RefersTo.IsSome ->
+            let referenced = next.RefersTo.Value
             match referenced.Name with 
             | PrimVariableArrayL ->
                 next.ArgList.Add fplValue
             | _ ->
                 next.FplId <- fplValue.FplId
                 next.TypeId <- fplValue.TypeId
-                next.Scope.TryAdd(fplValue.FplId, fplValue) |> ignore
+                next.RefersTo <- Some fplValue
         | Some next when next.Name = PrimRefL && 
             (
                 fplValue.Name = PrimDelegateEqualL 
@@ -1370,11 +1370,10 @@ let rec getMapping (fv:FplValue) =
         match fv.RefersTo with 
         | Some ref -> getMapping ref
         | None -> None
+    | PrimRefL when fv.RefersTo.IsSome ->
+        getMapping fv.RefersTo.Value
     | PrimRefL ->
-        if fv.Scope.ContainsKey(fv.FplId) then
-            getMapping fv.Scope[fv.FplId]
-        else
-            None
+        None
     | _ ->
         fv.ArgList |> Seq.tryFind (fun fv -> fv.Name = PrimMappingL)
 
@@ -6389,19 +6388,8 @@ let findCandidatesByNameInDotted (fv: FplValue) (name: string) =
     | ScopeSearchResult.Found candidate ->
         match candidate with
         | :? FplVariable as var ->
-            let varTypeOpt = 
-                if var.Value.IsSome then
-                    // if the variable has a value, then 
-                    var.Value
-                else 
-                    var.Scope.Values |> Seq.tryHead
-            match varTypeOpt with
-            | Some varType ->
-                varType.Scope
-                |> Seq.filter (fun kvp -> kvp.Value.FplId = name)
-                |> Seq.map (fun kvp -> kvp.Value)
-                |> Seq.toList
-            | _ -> []
+            // prefer variable value over its referred type node
+            Option.orElse var.Value var.RefersTo |> Option.toList
         | _ -> []
     | _ -> []
 
