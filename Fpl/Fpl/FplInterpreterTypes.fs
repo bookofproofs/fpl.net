@@ -3410,12 +3410,28 @@ type FplReference(positions: Positions, parent: FplValue) =
                 fallBackFunctionalTerm
 
     override this.Represent () = 
-        match this.Value, this.DottedChild, this.RefersTo with 
-        | _, Some dc, _ ->
-            if Object.ReferenceEquals(dc, this) then
-                dc.Represent()
+        let delegateToSubReference (fv:FplValue) = 
+            if Object.ReferenceEquals(fv, this) then
+                // If the subreference is not identical pointer as "this",
+                // then delegate the representation to the subreference.
+                fv.Represent() 
             else
-                dc.Type SignatureType.Type
+                // Otherwise, fall back with "type representation" to prevent infinite loops
+                fv.Type SignatureType.Type
+
+        match this.Value, this.DottedChild, this.RefersTo with 
+        | _, Some dc, _ -> delegateToSubReference dc
+        | Some ref, _, _ ->                
+            let subRepr = 
+                if not (Object.ReferenceEquals(ref,this)) then
+                    // prevent reference "self" being the value of itself causing an infinite loop
+                    ref.Represent()
+                else
+                    String.Empty
+            if subRepr = String.Empty then 
+                LiteralUndef
+            else
+                subRepr           
         | None, _, _ ->
             if this.RefersTo.IsSome then
                 (this.RefersTo.Value).Represent()
@@ -3449,17 +3465,6 @@ type FplReference(positions: Positions, parent: FplValue) =
                     $"{LiteralUndef}[{args}]"
                 | _, ArgType.Parentheses ->
                     $"{LiteralUndef}({args})"
-        | Some ref, _, _ ->                
-            let subRepr = 
-                if not (Object.ReferenceEquals(ref,this)) then
-                    // prevent reference "self" being the value of itself causing an infinite loop
-                    ref.Represent()
-                else
-                    String.Empty
-            if subRepr = String.Empty then 
-                LiteralUndef
-            else
-                subRepr           
 
     override this.EmbedInSymbolTable nextOpt = 
        
