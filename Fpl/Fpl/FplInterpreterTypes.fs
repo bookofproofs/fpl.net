@@ -3312,19 +3312,8 @@ type FplReference(positions: Positions, parent: FplValue) =
         let headObj = 
             match this.RefersTo with
             | Some ret -> ret
-            | None ->
-                if this.Scope.Count > 0 && (not (this.Scope.ContainsKey(".")) || this.DottedChild.IsNone) then 
-                    let ret = this.Scope.Values |> Seq.head
-                    match ret.Name with 
-                    | PrimExtensionObj
-                    | LiteralParent 
-                    | LiteralSelf ->
-                        match ret.RefersTo with 
-                        | Some ref -> ref
-                        | None -> ret
-                    | _ -> ret
-                else
-                    this
+            | None -> this
+
         let propagate = propagateSignatureType signatureType
 
         // The arguments are reserved for the arguments or the coordinates of the reference
@@ -3426,7 +3415,7 @@ type FplReference(positions: Positions, parent: FplValue) =
             match this.DottedChild with
             | Some dc when not (Object.ReferenceEquals(dc, this)) -> dc.Represent()
             | _ when this.RefersTo.IsSome -> (this.RefersTo.Value).Represent()
-            | _ when this.Scope.Count > 0 && (not (this.Scope.ContainsKey(".")) || this.DottedChild.IsNone) -> (this.Scope.Values |> Seq.head).Represent()
+
             | _ ->
                 let args, argsCount =
                     let ret = 
