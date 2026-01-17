@@ -1289,28 +1289,30 @@ let addExpressionToParentArgList (fplValue:FplValue) =
 // Add an expression to a reference
 let addExpressionToReference (fplValue:FplValue) =
     let nextOpt = fplValue.Parent
-    match nextOpt with
-    | Some next when next.Name = PrimRefL && next.Scope.ContainsKey(".") -> ()
-    | Some next when next.Name = PrimRefL && next.Scope.ContainsKey(next.FplId) ->
-        let referenced = next.Scope.Values |> Seq.head
-        match referenced.Name with 
-        | PrimVariableArrayL ->
-            next.ArgList.Add fplValue
-        | _ ->
+    match box nextOpt with 
+    | :? IHasDotted as dc when dc.DottedChild.IsSome -> ()
+    | _ ->
+        match nextOpt with
+        | Some next when next.Name = PrimRefL && next.Scope.ContainsKey(next.FplId) ->
+            let referenced = next.Scope.Values |> Seq.head
+            match referenced.Name with 
+            | PrimVariableArrayL ->
+                next.ArgList.Add fplValue
+            | _ ->
+                next.FplId <- fplValue.FplId
+                next.TypeId <- fplValue.TypeId
+                next.Scope.TryAdd(fplValue.FplId, fplValue) |> ignore
+        | Some next when next.Name = PrimRefL && 
+            (
+                fplValue.Name = PrimDelegateEqualL 
+             || fplValue.Name = PrimDelegateDecrementL
+             ) ->
+            addExpressionToParentArgList fplValue 
+        | Some next when next.Name = PrimRefL ->
             next.FplId <- fplValue.FplId
             next.TypeId <- fplValue.TypeId
-            next.Scope.TryAdd(fplValue.FplId, fplValue) |> ignore
-    | Some next when next.Name = PrimRefL && 
-        (
-            fplValue.Name = PrimDelegateEqualL 
-         || fplValue.Name = PrimDelegateDecrementL
-         ) ->
-        addExpressionToParentArgList fplValue 
-    | Some next when next.Name = PrimRefL ->
-        next.FplId <- fplValue.FplId
-        next.TypeId <- fplValue.TypeId
-        setRefersToAndScope next fplValue fplValue.FplId
-    | _ -> addExpressionToParentArgList fplValue 
+            setRefersToAndScope next fplValue fplValue.FplId
+        | _ -> addExpressionToParentArgList fplValue 
 
 /// Indicates if an FplValue is the root of the SymbolTable.
 let isRoot (fv:FplValue) = 
