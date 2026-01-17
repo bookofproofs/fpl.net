@@ -3448,11 +3448,8 @@ type FplReference(positions: Positions, parent: FplValue) =
         | Some next when next.Name = PrimForInStmtDomain -> 
             next.FplId <- this.FplId
             tryAddToParentUsingFplId this
-        | Some next when 
-            // consider dotted child on next (new API) or legacy Scope["."] entry
-            (match next with | :? FplReference as nr -> nr.DottedChild.IsSome | _ -> next.Scope.ContainsKey(".")) -> 
+        | Some (:? FplReference as next) when next.DottedChild.IsSome -> 
             next.EndPos <- this.EndPos
-
         | Some next -> 
             addExpressionToParentArgList this
             next.EndPos <- this.EndPos
@@ -5965,15 +5962,13 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
     member private this.GetAssignmentArg no =
         if this.ArgList.Count > 1 then 
             let candidate = this.ArgList[no]
-            if candidate.Name = PrimRefL && candidate.Scope.ContainsKey(".") then 
-                let dottedRef = candidate.Scope["."]
-                if dottedRef.Scope.ContainsKey(dottedRef.FplId) then
-                    Some dottedRef.Scope[dottedRef.FplId]
-                else 
-                    None
-            elif candidate.Name = PrimRefL && candidate.Scope.ContainsKey(candidate.FplId) then 
-                Some candidate.Scope[candidate.FplId]
-            else
+            match candidate with 
+            | :? FplReference as ref ->
+                match ref.DottedChild with 
+                | Some dc -> dc.RefersTo
+                | None when ref.RefersTo.IsSome -> ref.RefersTo
+                | _ -> Some candidate
+            | _ ->
                 Some candidate
         else
             None
