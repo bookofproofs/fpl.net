@@ -956,7 +956,8 @@ let rec eval (st: SymbolTable) ast =
                 checkSIG08_SIG10Diagnostics node
             else
                 match checkSIG04Diagnostics node candidates with
-                | Some matchedCandidate -> setRefersToAndScope node matchedCandidate node.FplId
+                | Some matchedCandidate -> 
+                    setRefersToAndScope node matchedCandidate node.FplId
                 | _ -> ()
 
             variableStack.PopEvalStack()

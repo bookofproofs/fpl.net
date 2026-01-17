@@ -3971,10 +3971,10 @@ let private matchByTypeStringRepresentation (a:FplValue) aName (aType:string) aT
             None, Parameter.Consumed
         else
             Some $"Array type `{aName}:{aType}` doesn't match `{pName}:{pType}`", Parameter.Consumed
-    | _ when isUpper aType && aTypeName = PrimRefL && a.Scope.Count = 1 ->
-        let aReferencedNode = a.Scope.Values |> Seq.toList |> List.head
-        if aReferencedNode.Scope.Count > 0 then
-            let cl = aReferencedNode.Scope.Values |> Seq.head
+    | _ when isUpper aType && aTypeName = PrimRefL && a.RefersTo.IsSome ->
+        let aReferencedNode = a.RefersTo.Value
+        if aReferencedNode.RefersTo.IsSome then
+            let cl = aReferencedNode.RefersTo.Value
             match cl with
             | :? FplClass ->
                 if inheritsFrom cl pType then 
