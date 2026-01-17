@@ -3220,7 +3220,7 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
     override this.Run variableStack =
         this.Debug "Run"
 
-        if this.Scope.Count > 0 || this.RefersTo.IsSome then 
+        if this.RefersTo.IsSome then 
             let calledOpt = referencedNodeOpt this
             match calledOpt with 
             | Some called ->

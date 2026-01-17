@@ -1347,6 +1347,9 @@ let rec eval (st: SymbolTable) ast =
                         let extendedErrMsg = $"{errMsg} in {qualifiedName refNode true}"
                         secondOp.ErrorOccurred <- emitSIG04Diagnostics (currentOp.Type SignatureType.Mixed) 1 extendedErrMsg secondOp.StartPos secondOp.EndPos
                     | _ -> ()
+                    firstOp.Run variableStack
+                    secondOp.Run variableStack 
+                    currentOp.Run variableStack
                 else
                     // if something went wrong (for instance, wrong arity), issue SIG04 with fallback using the operand 
                     // together with its referenced node
