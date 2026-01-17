@@ -3410,61 +3410,32 @@ type FplReference(positions: Positions, parent: FplValue) =
                 fallBackFunctionalTerm
 
     override this.Represent () = 
-        let delegateToSubReference (fv:FplValue) = 
-            if Object.ReferenceEquals(fv, this) then
-                // If the subreference is not identical pointer as "this",
-                // then delegate the representation to the subreference.
-                fv.Represent() 
-            else
-                // Otherwise, fall back with "type representation" to prevent infinite loops
-                fv.Type SignatureType.Type
-
         match this.Value, this.DottedChild, this.RefersTo with 
-        | _, Some dc, _ -> delegateToSubReference dc
-        | Some ref, _, _ ->                
-            let subRepr = 
-                if not (Object.ReferenceEquals(ref,this)) then
-                    // prevent reference "self" being the value of itself causing an infinite loop
-                    ref.Represent()
-                else
-                    String.Empty
-            if subRepr = String.Empty then 
+        | _, Some dc, _ -> 
+            if Object.ReferenceEquals(dc, this) then
+                // If the dotted child is not identical as "this",
+                // delegate the representation to dotted.
+                dc.Represent()
+            else
+                // Otherwise, fall back with dotted's "type representation" to prevent infinite loops
+                dc.Type SignatureType.Type
+        | Some value, _, _ ->
+            if not (Object.ReferenceEquals(value,this)) then
+                // If the value is not identical as "this",
+                // delegate the representation to value.
+                value.Represent()
+            else
+                // Otherwise, fall back with "undef" to prevent infinite loops
                 LiteralUndef
+        | _, _, Some refTo ->
+            if not (Object.ReferenceEquals(refTo,this)) then
+                // If refTo is not identical as "this",
+                // delegate the representation to refTo.
+                refTo.Represent()
             else
-                subRepr           
-        | None, _, _ ->
-            if this.RefersTo.IsSome then
-                (this.RefersTo.Value).Represent()
-            else
-                let args, argsCount =
-                    let ret = 
-                        this.ArgList
-                        |> Seq.map (fun fv -> fv.Represent())
-                        |> String.concat ", "
-                    ret, this.ArgList.Count
-
-                match argsCount, this.ArgType with
-                | 0, ArgType.Nothing -> 
-                    $"{LiteralUndef}"
-                | 0, ArgType.Brackets ->
-                    $"{LiteralUndef}[]"
-                | 0, ArgType.Parentheses ->
-                    $"{LiteralUndef}()"
-                | 1, ArgType.Nothing -> 
-                    if this.FplId <> String.Empty then 
-                        $"{LiteralUndef}({args})"
-                    else
-                        $"{args}"
-                | 1, ArgType.Brackets ->
-                    $"{LiteralUndef}[{args}]"
-                | 1, ArgType.Parentheses ->
-                    $"{LiteralUndef}({args})"
-                | _, ArgType.Nothing -> 
-                    $"{LiteralUndef}({args})"
-                | _, ArgType.Brackets ->
-                    $"{LiteralUndef}[{args}]"
-                | _, ArgType.Parentheses ->
-                    $"{LiteralUndef}({args})"
+                refTo.Type SignatureType.Type
+        | _, _, _ ->
+            this.Type SignatureType.Type
 
     override this.EmbedInSymbolTable nextOpt = 
        
