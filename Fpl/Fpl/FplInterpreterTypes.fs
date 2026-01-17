@@ -4052,8 +4052,8 @@ let private isFuncWithoutParentheses (fv:FplValue) =
 /// (this is the convention flagging that a variable has been assigned to its class instead of the constructor of the class generating an instance value).
 /// If the function returns a non-empty string, it contains the identifier of the referenced class (that has not been instantiated).
 let private getCallByReferenceToClass (fv:FplValue) =
-    if fv.Scope.ContainsKey(fv.FplId) then 
-        let refNode = fv.Scope[fv.FplId]
+    match fv.RefersTo with 
+    | Some refNode ->
         match refNode with 
         | :? FplGenericVariable as var when var.IsInitialized && var.Value.IsNone ->
             // reference fv points to an initialized variable without values 
@@ -4061,7 +4061,7 @@ let private getCallByReferenceToClass (fv:FplValue) =
             | Some fv1 when fv1.Name = PrimClassL -> fv1.TypeId // and the variable points to a class
             | _ -> String.Empty
         | _ -> String.Empty
-    else
+    | None ->
         String.Empty
                
 let rec private isCallByReference (fv:FplValue) =
