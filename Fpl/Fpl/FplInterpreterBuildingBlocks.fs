@@ -1177,7 +1177,7 @@ let rec eval (st: SymbolTable) ast =
         // we list it her to remove FS0025 incomplete pattern warnings
         st.EvalPop()
     // | ReferencingIdentifier of Positions * (Ast * Ast list)
-    | ReferencingIdentifier((pos1, pos2), (predicateIdentifierAst, dollarDigitListAsts)) ->
+    | Ast.ReferencingIdentifier((pos1, pos2), (predicateIdentifierAst, dollarDigitListAsts)) ->
         st.EvalPush("ReferencingIdentifier")
         eval st predicateIdentifierAst
         dollarDigitListAsts |> List.map (eval st) |> ignore
@@ -1187,7 +1187,7 @@ let rec eval (st: SymbolTable) ast =
             let candidates = findCandidatesByName st fv.FplId false true
             if candidates.Length > 0 then 
                 let candidate = candidates.Head
-                setRefersToAndScope fv candidate fv.FplId
+                fv.RefersTo <- Some candidate
                 match fv.UltimateBlockNode with
                 | Some block ->
                     fv.ErrorOccurred <- emitID025Diagnostics (qualifiedName candidate false) (getEnglishName block.Name false) block.Name fv.StartPos fv.EndPos
