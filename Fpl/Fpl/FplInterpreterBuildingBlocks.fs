@@ -881,16 +881,17 @@ let rec eval (st: SymbolTable) ast =
             @ candidatesFromPropertyScope 
             @ candidatesFromDottedQualification
 
-        let getCandidatesBasedOnDotted (parentFv: FplValue) (fVal:FplValue) = 
+        /// parentFv is a dotted reference 
+        let getCandidatesBasedOnDottedParent (parentFv: FplValue) = 
             let referencedNodeOpt, typeRefNode, typeNameRefNode =
                 match parentFv.RefersTo with 
-                | Some dottedReference ->
-                    match dottedReference with 
+                | Some parentFvRefersTo ->
+                    match parentFvRefersTo with 
                     | :? FplFunctionalTerm 
                     | :? FplPredicate 
-                    | :? FplClass -> Some dottedReference, dottedReference.Type SignatureType.Mixed, dottedReference.Name
+                    | :? FplClass -> Some parentFvRefersTo, parentFvRefersTo.Type SignatureType.Mixed, parentFvRefersTo.Name
                     | _ -> 
-                        let refNodeOpt = dottedReference.RefersTo
+                        let refNodeOpt = parentFvRefersTo.RefersTo
                         match refNodeOpt with 
                         | Some refNode -> refNodeOpt, refNode.Type SignatureType.Mixed, refNode.Name
                         | None -> None, $"{parentFv.FplId}:{LiteralUndef}", parentFv.Name
@@ -901,14 +902,18 @@ let rec eval (st: SymbolTable) ast =
                 | Some referencedNode ->
                     referencedNode.GetVariables() @ referencedNode.GetProperties() 
                 | _ -> []
-            typeRefNode, typeNameRefNode, filterCandidates candidatesPre fVal.FplId false
+            match box parentFv with
+            | :? IHasDotted as pDotted when pDotted.DottedChild.IsSome -> 
+                let dottedChild = pDotted.DottedChild.Value
+                typeRefNode, typeNameRefNode, filterCandidates candidatesPre dottedChild.FplId false
+            | _ -> typeRefNode, typeNameRefNode, ([], "") // empty candidates list and name
 
         let parentFv = fv.Parent.Value
-        match optionalSpecificationAst with
-        | Some specificationAst when parentFv.Scope.ContainsKey(".") -> 
+        match optionalSpecificationAst, box parentFv with
+        | Some specificationAst, (:? IHasDotted as pDotted) when pDotted.DottedChild.IsSome -> 
             eval st fplIdentifierAst
             eval st specificationAst |> ignore
-            let typeRefNode, typeNameRefNode, (candidates, candidatesNames) =  getCandidatesBasedOnDotted parentFv fv
+            let typeRefNode, typeNameRefNode, (candidates, candidatesNames) = getCandidatesBasedOnDottedParent parentFv 
             if candidates.Length = 0 then 
                 fv.ErrorOccurred <- emitID012Diagnostics (fv.Type SignatureType.Mixed) typeNameRefNode typeRefNode candidatesNames pos1 pos2
             else
@@ -916,7 +921,7 @@ let rec eval (st: SymbolTable) ast =
                 | Some matchedCandidate -> setRefersToAndScope fv matchedCandidate fv.FplId
                 | _ -> ()
 
-        | Some specificationAst -> 
+        | Some specificationAst, _ -> 
             let node = new FplReference((pos1, pos2), fv) 
             variableStack.PushEvalStack(node)
             eval st fplIdentifierAst
@@ -949,14 +954,14 @@ let rec eval (st: SymbolTable) ast =
                 | _ -> ()
 
             variableStack.PopEvalStack()
-        | None when parentFv.Scope.ContainsKey(".") -> 
+        | None, (:? IHasDotted as pDotted) when pDotted.DottedChild.IsSome -> 
             eval st fplIdentifierAst
-            let typeRefNode, typeNameRefNode, (candidates, candidatesNames) =  getCandidatesBasedOnDotted parentFv fv
+            let typeRefNode, typeNameRefNode, (candidates, candidatesNames) = getCandidatesBasedOnDottedParent parentFv
             if candidates.Length = 0 then 
                 fv.ErrorOccurred <- emitID012Diagnostics (fv.Type SignatureType.Mixed) typeNameRefNode typeRefNode candidatesNames pos1 pos2
             else
                 setRefersToAndScope fv candidates.Head fv.FplId
-        | None -> 
+        | None, _ -> 
             // if no specification was found then simply continue in the same context
             eval st fplIdentifierAst
             let block = fv.UltimateBlockNode.Value
