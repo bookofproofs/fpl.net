@@ -1016,7 +1016,7 @@ let rec eval (st: SymbolTable) ast =
                 // not a class was referred, add the candidate (e.g., referenced variable)
                 let candidate = candidates.Head
                 fv.FplId <- candidate.FplId 
-                setRefersToAndScope fv candidate fv.FplId
+                fv.RefersTo <- Some candidate
                 fv.ErrorOccurred <- emitID025Diagnostics (qualifiedName candidate false) (getEnglishName block.Name false) block.Name fv.StartPos fv.EndPos
             else
                 ()
