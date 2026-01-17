@@ -246,25 +246,8 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Var")
         let evalPath = st.EvalPath()
         let isLocalizationDeclaration = evalPath.StartsWith("AST.Namespace.Localization.Expression.")
-        let fv = variableStack.PeekEvalStack()
-        let parentFv = fv.Parent.Value
-        match fv.Name with 
-        | PrimVariableL
-        | PrimVariableArrayL -> 
-            // in the context of variable declarations, we set the name and positions of the variables
-            fv.FplId <- name
-            fv.TypeId <- LiteralUndef 
-            fv.StartPos <- pos1
-            fv.EndPos <- pos2
-        | PrimExtensionL -> 
-            let newVar = new FplVariable(name, (pos1, pos2), fv)
-            variableStack.PushEvalStack(newVar)
-            variableStack.PopEvalStack()
-        | PrimRefL when parentFv.Scope.ContainsKey(".") ->
-            fv.FplId <- name
-            fv.TypeId <- LiteralUndef
-        | _ -> 
-            // in all other contexts, check by name, if this variable was declared in some scope
+
+        let checkByName (fv:FplValue) = 
             let rec IsInUpperScope (fv1: FplValue): FplGenericVariable option =
                 if fv1.Name = PrimTheoryL then 
                     None
@@ -295,7 +278,30 @@ let rec eval (st: SymbolTable) ast =
                 undefVar.SetValue(undefined)
                 variableStack.PushEvalStack(undefVar)
                 variableStack.PopEvalStack()
-
+            
+        let fv = variableStack.PeekEvalStack()
+        let parentFv = fv.Parent.Value
+        match fv.Name with 
+        | PrimVariableL
+        | PrimVariableArrayL -> 
+            // in the context of variable declarations, we set the name and positions of the variables
+            fv.FplId <- name
+            fv.TypeId <- LiteralUndef 
+            fv.StartPos <- pos1
+            fv.EndPos <- pos2
+        | PrimExtensionL -> 
+            let newVar = new FplVariable(name, (pos1, pos2), fv)
+            variableStack.PushEvalStack(newVar)
+            variableStack.PopEvalStack()
+        | PrimRefL ->
+            match box parentFv with 
+            | :? IHasDotted as dotted when dotted.DottedChild.IsSome ->
+                fv.FplId <- name
+                fv.TypeId <- LiteralUndef
+            | _ -> checkByName fv
+        | _ -> 
+            // in all other contexts, check by name, if this variable was declared in some scope
+            checkByName fv
         if isLocalizationDeclaration && fv.Scope.ContainsKey(name) then 
             let variable = fv.Scope[name] 
             let rec getLocalization (fValue:FplValue) = 

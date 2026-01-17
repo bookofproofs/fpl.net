@@ -3270,7 +3270,6 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
 type FplReference(positions: Positions, parent: FplValue) =
     inherit FplGenericReference(positions, parent)
     
-    // single dotted child (Some when parsed a dotted reference), prefer this over using Scope["."] directly
     let mutable _dottedChild : FplValue option = None
 
     override this.Name = PrimRefL
@@ -6396,20 +6395,12 @@ let findCandidatesByNameInBlock (fv: FplValue) (name: string) =
 let findCandidatesByNameInDotted (fv: FplValue) (name: string) =
     let rec findQualifiedEntity (fv1: FplValue) =
         match fv1 with
-        | :? FplReference ->
-            if fv1.Scope.ContainsKey(".") && fv1.Scope.Count > 1 then
-                let result =
-                    fv1.Scope
-                    |> Seq.filter (fun kvp -> kvp.Key <> ".")
-                    |> Seq.map (fun kvp -> kvp.Value)
-                    |> Seq.toList
-                    |> List.head
-
-                ScopeSearchResult.Found(result)
-            else
-                match fv1.Parent with
-                | Some parent -> findQualifiedEntity parent
-                | None -> ScopeSearchResult.NotFound
+        | :? FplReference as ref when ref.DottedChild.IsSome -> 
+            ScopeSearchResult.Found(ref.DottedChild.Value)
+        | :? FplReference -> 
+            match fv1.Parent with
+            | Some parent -> findQualifiedEntity parent
+            | None -> ScopeSearchResult.NotFound
         | _ -> ScopeSearchResult.NotFound
 
     match findQualifiedEntity fv with
