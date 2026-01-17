@@ -937,17 +937,10 @@ let rec eval (st: SymbolTable) ast =
                 if System.Char.IsLower(node.FplId[0]) then
                     // match the signatures of small-letter entities (like the self or parent entity, or variables with arguments) 
                     // with their declared types 
-                    node.Scope
-                    |> Seq.filter (fun kvp -> kvp.Key = LiteralSelf || kvp.Key = LiteralParent || kvp.Key = node.FplId)
-                    |> Seq.map (fun kvp -> kvp.Value)
-                    |> Seq.map (fun fv -> 
-                        match fv.Name with
-                        | PrimVariableL when fv.RefersTo.IsSome -> fv.RefersTo.Value 
-                        | LiteralSelf when fv.RefersTo.IsSome -> fv.RefersTo.Value 
-                        | LiteralParent when fv.RefersTo.IsSome -> fv.RefersTo.Value 
-                        | _ -> fv
-                    )
-                    |> Seq.toList
+                    match node.RefersTo with
+                    | Some fv when (fv.Name = PrimVariableL || fv.Name = LiteralSelf || fv.Name = LiteralParent) && fv.RefersTo.IsSome -> [fv.RefersTo.Value]
+                    | Some fv -> [fv]
+                    | None -> []
                 else
                     searchForCandidatesOfReferenceBlock node
             if candidates.Length = 1 && candidates.Head.Name = PrimVariableArrayL then
