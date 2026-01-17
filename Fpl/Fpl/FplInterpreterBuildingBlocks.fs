@@ -53,47 +53,16 @@ let rec simplifyTriviallyNestedExpressions (rb:FplValue) =
     if rb.ArgList.Count = 1 && rb.FplId = "" then
         // removable reference blocks are those with only a single argument and unset FplId 
         let subNode = rb.ArgList[0]
-        match subNode with
-        | :? FplConjunction
-        | :? FplExclusiveOr 
-        | :? FplDisjunction 
-        | :? FplNegation 
-        | :? FplImplication 
-        | :? FplEquivalence 
-        | :? FplIsOperator 
-        | :? FplEquality 
-        | :? FplDecrement 
-        | :? FplExtensionObj 
-        | :? FplReference
-        | :? FplSelf
-        | :? FplParent
-        | :? FplGenericQuantor
-        | :? FplIntrinsicInd
-        | :? FplIntrinsicPred
-        | :? FplIntrinsicUndef 
-        | :? FplMapCases ->
-            variableStack.Pop() |> ignore // pop the removable reference block and ignored it
-            variableStack.PushEvalStack(subNode) // push its subNode instead
-            // adjust subNode's Parent, EndPos, Scope
-            subNode.Parent <- rb.Parent 
-            subNode.EndPos <- rb.EndPos
-            if rb.Scope.ContainsKey(".") then 
-                if subNode.Scope.ContainsKey(".") then
-                    subNode.Scope["."] <- rb.Scope["."]
-                else
-                    subNode.Scope.Add(".", rb.Scope["."])
-            // adjust rb Parent's scope
-            match rb.Parent with 
-            | Some parent -> 
-                if parent.Scope.ContainsKey(".") then
-                   parent.Scope["."] <- subNode
-            | _ -> ()
-            // prevent recursive loops
-            rb.ArgList.Clear() 
-            rb.Value <- None
-            rb.Scope.Clear()
-            simplifyTriviallyNestedExpressions subNode
-        | _ -> ()
+        variableStack.Pop() |> ignore // pop the removable reference block and ignored it
+        variableStack.PushEvalStack(subNode) // push its subNode instead
+        // adjust subNode's Parent, EndPos, Scope
+        subNode.Parent <- rb.Parent 
+        subNode.EndPos <- rb.EndPos
+        // prevent recursive loops
+        rb.ArgList.Clear() 
+        rb.Value <- None
+        rb.Scope.Clear()
+        simplifyTriviallyNestedExpressions subNode
 
 /// A recursive function evaluating an AST and returning a list of EvalAliasedNamespaceIdentifier records
 /// for each occurrence of the uses clause in the FPL code.
