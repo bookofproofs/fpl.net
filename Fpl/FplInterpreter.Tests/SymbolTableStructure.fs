@@ -3304,7 +3304,9 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsInstanceOfType<FplJustificationItemByAx>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)  
-            Assert.AreEqual<int>(1, node.Scope.Count) // referenced axiom
+            Assert.AreEqual<int>(0, node.Scope.Count) 
+            Assert.IsTrue(node.RefersTo.IsSome) 
+            Assert.IsInstanceOfType<FplAxiom>(node.RefersTo.Value) // referenced axiom
         | "FplJustificationItemByAx", "00b" 
         | "FplJustificationItemByAx", "00c" 
         | "FplJustificationItemByAx", "00d" 

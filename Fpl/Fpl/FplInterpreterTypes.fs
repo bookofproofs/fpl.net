@@ -5639,8 +5639,8 @@ type FplReturn(positions: Positions, parent: FplValue) as this =
                     | :? FplIntrinsicInd 
                     | :? FplIntrinsicUndef ->
                         this.SetValue returnedReference
-                    | :? FplReference when returnedReference.Scope.ContainsKey(returnedReference.FplId) ->
-                        let refValue = returnedReference.Scope[returnedReference.FplId]
+                    | :? FplReference when returnedReference.RefersTo.IsSome ->
+                        let refValue = returnedReference.RefersTo.Value
                         refValue.Run variableStack
                         match refValue with 
                         | :? FplGenericConstructor ->
