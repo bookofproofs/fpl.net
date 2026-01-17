@@ -3275,24 +3275,10 @@ type FplReference(positions: Positions, parent: FplValue) =
     override this.Name = PrimRefL
     override this.ShortName = PrimRef
 
-    /// The optional dotted child set when parsing a dotted reference (preferred over Scope["."]).
+    /// The optional dotted child set when parsing a dotted reference 
     member this.DottedChild
         with get() = _dottedChild
-        and set (value:FplValue option) =
-            _dottedChild <- value
-            // keep legacy Scope["."] in sync for backward compatibility during migration
-            try
-                match value with
-                | Some v ->
-                    if this.Scope.ContainsKey(".") then
-                        this.Scope.["."] <- v
-                    else
-                        this.Scope.TryAdd(".", v) |> ignore
-                | None ->
-                    if this.Scope.ContainsKey(".") then
-                        this.Scope.Remove(".") |> ignore
-            with
-            | _ -> () // tolerant: do not break interpreter on sync issues
+        and set (value:FplValue option) = _dottedChild <- value
 
     interface IHasDotted with 
         member this.DottedChild 
@@ -4079,9 +4065,10 @@ let private getCallByReferenceToClass (fv:FplValue) =
         String.Empty
                
 let rec private isCallByReference (fv:FplValue) =
-    if fv.Scope.ContainsKey(".") then
-        isCallByReference fv.Scope["."] // evaluate dotted reference instead
-    else
+    match fv with 
+    | :? FplReference as ref when ref.DottedChild.IsSome ->
+        isCallByReference ref.DottedChild.Value // evaluate dotted reference instead
+    | _ ->
         match fv.ArgType with 
         | ArgType.Nothing when isUpper fv.FplId -> true
         | ArgType.Nothing -> true
