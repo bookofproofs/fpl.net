@@ -3308,13 +3308,6 @@ type FplReference(positions: Positions, parent: FplValue) =
         else
             base.SetValue fv
 
-    member private this.Qualification = 
-        // prefer dotted child qualification first, fallback to legacy Scope["."]
-        match this.DottedChild with
-        | Some q -> Some q
-        | None ->
-            if this.Scope.ContainsKey(".") then Some(this.Scope["."]) else None
-
     override this.Type signatureType =
         let headObj = 
             match this.RefersTo with
@@ -3377,7 +3370,7 @@ type FplReference(positions: Positions, parent: FplValue) =
             | None ->
                 $"{head}({args})"
 
-        match argsCount, this.ArgType, this.Qualification with
+        match argsCount, this.ArgType, this.DottedChild with
             | 0, ArgType.Nothing, Some qual ->
                 $"{head}.{qual.Type(propagate)}"
             | 0, ArgType.Brackets, Some qual ->
@@ -3442,7 +3435,7 @@ type FplReference(positions: Positions, parent: FplValue) =
                         |> String.concat ", "
                     ret, this.ArgList.Count
 
-                match argsCount, this.ArgType, this.Qualification with
+                match argsCount, this.ArgType, this.DottedChild with
                 | 0, ArgType.Nothing, Some qual ->
                     $"{LiteralUndef}.{qual.Represent()}"
                 | 0, ArgType.Brackets, Some qual ->
