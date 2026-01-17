@@ -596,7 +596,7 @@ type TestSignatureMatching() =
             let pred = blocks |> List.filter(fun fv -> (fv.Type(SignatureType.Name)).StartsWith("T(")) |> List.head
             let stmtAssign = pred.ArgList[0]
             let assignedReferenceValue = stmtAssign.ArgList[1]
-            let candidate = assignedReferenceValue.Scope[assignedReferenceValue.FplId]
+            let candidate = assignedReferenceValue.RefersTo.Value
             Assert.AreEqual<string>(expectedCandidateSignature, candidate.Type(SignatureType.Mixed))
         | None -> 
             Assert.IsTrue(false)

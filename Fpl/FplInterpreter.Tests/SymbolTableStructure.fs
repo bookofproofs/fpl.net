@@ -3097,11 +3097,11 @@ type SymbolTableStructure() =
         let parent, node = testSkeleton nodeType filename fplCode identifier
         
         match nodeType, varVal with
-        | "FplInstance", "00" 
-        | "FplInstance", "01" ->
+        | "FplInstance", "00" ->
             Assert.IsInstanceOfType<FplVariable>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
-            Assert.AreEqual<int>(1, parent.Scope.Count)
+            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsTrue(parent.RefersTo.IsSome)
             Assert.IsTrue(parent.Value.IsSome)
             Assert.AreEqual<FplValue>(parent.Value.Value, node)
             Assert.IsInstanceOfType<FplInstance>(node)

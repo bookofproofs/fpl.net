@@ -262,8 +262,8 @@ let rec eval (st: SymbolTable) ast =
                 | PrimRefL 
                 | PrimForInStmtEntity 
                 | PrimForInStmtDomain ->
-                    setRefersToAndScope fv foundVar name
                     fv.FplId <- name
+                    setRefersToAndScope fv foundVar name
                 | PrimTranslationL ->
                     // for translations, use the name of the variable
                     fv.FplId <- foundVar.Type SignatureType.Name
@@ -924,7 +924,7 @@ let rec eval (st: SymbolTable) ast =
                 fv.ErrorOccurred <- emitID012Diagnostics (fv.Type SignatureType.Mixed) typeNameRefNode typeRefNode candidatesNames pos1 pos2
             else
                 match checkSIG04Diagnostics fv candidates with
-                | Some matchedCandidate -> setRefersToAndScope fv matchedCandidate fv.FplId
+                | Some matchedCandidate -> fv.RefersTo <- Some matchedCandidate
                 | _ -> ()
 
         | Some specificationAst, _ -> 
@@ -952,7 +952,7 @@ let rec eval (st: SymbolTable) ast =
                     searchForCandidatesOfReferenceBlock node
             if candidates.Length = 1 && candidates.Head.Name = PrimVariableArrayL then
                 let candidate = candidates.Head
-                setRefersToAndScope node candidate node.FplId
+                node.RefersTo <- Some candidate 
                 checkSIG08_SIG10Diagnostics node
             else
                 match checkSIG04Diagnostics node candidates with
@@ -966,7 +966,7 @@ let rec eval (st: SymbolTable) ast =
             if candidates.Length = 0 then 
                 fv.ErrorOccurred <- emitID012Diagnostics (fv.Type SignatureType.Mixed) typeNameRefNode typeRefNode candidatesNames pos1 pos2
             else
-                setRefersToAndScope fv candidates.Head fv.FplId
+                fv.RefersTo <- Some candidates.Head 
         | None, _ -> 
             // if no specification was found then simply continue in the same context
             eval st fplIdentifierAst
@@ -984,13 +984,12 @@ let rec eval (st: SymbolTable) ast =
                 match checkSIG04Diagnostics fv constructors with
                 | Some matchedCandidate -> 
                     // add a parameterless constructor (if such exists)
-                     setRefersToAndScope fv matchedCandidate fv.FplId
+                     fv.RefersTo <- Some matchedCandidate 
                 | _ -> ()
             elif classes.Length > 0 && constructors.Length = 0 then
                 // add the class (intrinsic case, no constructors at all)
-
-                setRefersToAndScope fv classes.Head fv.FplId
                 let candidate = classes.Head
+                fv.RefersTo <- Some candidate
                 fv.ErrorOccurred <- emitID025Diagnostics (qualifiedName candidate false) (getEnglishName block.Name false) block.Name fv.StartPos fv.EndPos
             elif candidates.Length > 0 then
                 // not a class was referred, add the candidate (e.g., referenced variable)
