@@ -3410,13 +3410,16 @@ type FplReference(positions: Positions, parent: FplValue) =
                 fallBackFunctionalTerm
 
     override this.Represent () = 
-        match this.Value with 
-        | None ->
-            match this.DottedChild with
-            | Some dc when not (Object.ReferenceEquals(dc, this)) -> dc.Represent()
-            | _ when this.RefersTo.IsSome -> (this.RefersTo.Value).Represent()
-
-            | _ ->
+        match this.Value, this.DottedChild, this.RefersTo with 
+        | _, Some dc, _ ->
+            if Object.ReferenceEquals(dc, this) then
+                dc.Represent()
+            else
+                dc.Type SignatureType.Type
+        | None, _, _ ->
+            if this.RefersTo.IsSome then
+                (this.RefersTo.Value).Represent()
+            else
                 let args, argsCount =
                     let ret = 
                         this.ArgList
@@ -3424,48 +3427,29 @@ type FplReference(positions: Positions, parent: FplValue) =
                         |> String.concat ", "
                     ret, this.ArgList.Count
 
-                match argsCount, this.ArgType, this.DottedChild with
-                | 0, ArgType.Nothing, Some qual ->
-                    $"{LiteralUndef}.{qual.Represent()}"
-                | 0, ArgType.Brackets, Some qual ->
-                    $"{LiteralUndef}[].{qual.Represent()}"
-                | 0, ArgType.Parentheses, Some qual ->
-                    $"{LiteralUndef}().{qual.Represent()}"
-                | 0, ArgType.Nothing, None -> 
+                match argsCount, this.ArgType with
+                | 0, ArgType.Nothing -> 
                     $"{LiteralUndef}"
-                | 0, ArgType.Brackets, None ->
+                | 0, ArgType.Brackets ->
                     $"{LiteralUndef}[]"
-                | 0, ArgType.Parentheses, None ->
+                | 0, ArgType.Parentheses ->
                     $"{LiteralUndef}()"
-                | 1, ArgType.Nothing, Some qual -> 
-                
-                    $"{LiteralUndef}{args}.{qual.Represent()}"
-                | 1, ArgType.Brackets, Some qual ->
-                    $"{LiteralUndef}[{args}].{qual.Represent()}"
-                | 1, ArgType.Parentheses, Some qual ->
-                    $"{LiteralUndef}({args}).{qual.Represent()}"
-                | 1, ArgType.Nothing, None -> 
+                | 1, ArgType.Nothing -> 
                     if this.FplId <> String.Empty then 
                         $"{LiteralUndef}({args})"
                     else
                         $"{args}"
-                | 1, ArgType.Brackets, None ->
+                | 1, ArgType.Brackets ->
                     $"{LiteralUndef}[{args}]"
-                | 1, ArgType.Parentheses, None ->
+                | 1, ArgType.Parentheses ->
                     $"{LiteralUndef}({args})"
-                | _, ArgType.Nothing, Some qual -> 
-                    $"{LiteralUndef}({args}).{qual.Represent()}"
-                | _, ArgType.Brackets, Some qual ->
-                    $"{LiteralUndef}[{args}].{qual.Represent()}"
-                | _, ArgType.Parentheses, Some qual ->
-                    $"{LiteralUndef}({args}).{qual.Represent()}"
-                | _, ArgType.Nothing, None -> 
+                | _, ArgType.Nothing -> 
                     $"{LiteralUndef}({args})"
-                | _, ArgType.Brackets, None ->
+                | _, ArgType.Brackets ->
                     $"{LiteralUndef}[{args}]"
-                | _, ArgType.Parentheses, None ->
+                | _, ArgType.Parentheses ->
                     $"{LiteralUndef}({args})"
-        | Some ref ->                
+        | Some ref, _, _ ->                
             let subRepr = 
                 if not (Object.ReferenceEquals(ref,this)) then
                     // prevent reference "self" being the value of itself causing an infinite loop
