@@ -3255,7 +3255,7 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
                     this.SetValuesOf called
                 | PrimInstanceL
                 | PrimIntrinsicInd
-                | PrimIntrinsicUndef 
+                | PrimIntrinsicUndef
                 | PrimIntrinsicTpl 
                 | PrimIntrinsicPred ->
                     this.SetValue called
@@ -4493,13 +4493,14 @@ let checkArgPred (fv:FplValue) (arg:FplValue)  =
 
 /// Checks if an argument points to a free variable and if so, issues VAR09 diagnostics.
 let checkFreeVar (arg:FplValue) = 
-    if arg.Scope.ContainsKey(arg.FplId) then
-        let ref = arg.Scope[arg.FplId]
+    match arg.RefersTo with 
+    | Some ref ->
         match ref with 
         | :? FplGenericVariable as var ->
             if not var.IsBound then 
                 var.ErrorOccurred <- emitVAR09diagnostics var.FplId var.TypeId var.StartPos var.EndPos
         | _ -> ()
+    | _ -> ()
 
 /// Implements the semantics of an FPL conjunction compound predicate.
 type FplConjunction(positions: Positions, parent: FplValue) as this =

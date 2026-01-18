@@ -263,7 +263,7 @@ let rec eval (st: SymbolTable) ast =
                 | PrimForInStmtEntity 
                 | PrimForInStmtDomain ->
                     fv.FplId <- name
-                    setRefersToAndScope fv foundVar name
+                    fv.RefersTo <- Some foundVar
                 | PrimTranslationL ->
                     // for translations, use the name of the variable
                     fv.FplId <- foundVar.Type SignatureType.Name

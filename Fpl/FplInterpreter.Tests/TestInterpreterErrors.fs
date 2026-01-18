@@ -4005,9 +4005,12 @@ type TestInterpreterErrors() =
     [<DataRow("08", """def pred T() { dec ~x:pred; all y:obj {and(x,true)} };""", 1)>]
     [<DataRow("09", """def pred T() { dec ~x:pred; or(x,false) };""", 1)>]
     [<DataRow("10", """def pred T() { dec ~x,y:pred; or(x,y) };""", 2)>]
-    [<DataRow("11a", """def pred T() { all y:obj {and(x,y)} };""", 1)>]
-    [<DataRow("11b", """def pred T() { ex y:obj {and(x,y)} };""", 1)>]
-    [<DataRow("11c", """def pred T() { exn$1 y:obj {and(x,y)} };""", 1)>]
+    [<DataRow("11a", """def pred T() { all y:obj {and(x,y)} };""", 0)>] // no VAR09, since y is bound, x is undefined 
+    [<DataRow("11a_", """def pred T() { dec ~x:obj; all y:obj {and(x,y)} };""", 1)>] // VAR09, since x is free 
+    [<DataRow("11b", """def pred T() { ex y:obj {and(x,y)} };""", 0)>] // no VAR09, since y is bound, x is undefined 
+    [<DataRow("11b_", """def pred T() { dec ~x:obj; ex y:obj {and(x,y)} };""", 1)>]  // VAR09, since x is free 
+    [<DataRow("11c", """def pred T() { exn$1 y:obj {and(x,y)} };""", 0)>] // no VAR09, since y is bound, x is undefined 
+    [<DataRow("11c_", """def pred T() { dec ~x:obj; exn$1 y:obj {and(x,y)} };""", 1)>]  // VAR09, since x is free 
     [<DataRow("11d", """def pred T() { all x,y:obj {and(x,y)} };""", 0)>]
     [<DataRow("11e", """def pred T() { ex x,y:obj {and(x,y)} };""", 0)>]
     [<DataRow("11f", """def pred T() { exn$1 y:obj {and(true,y)} };""", 0)>]

@@ -4642,7 +4642,9 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplReference>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
-            Assert.AreEqual<int>(1, node.Scope.Count)
+            Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsSome)
+            Assert.IsInstanceOfType<FplVariable>(node.RefersTo.Value)
             Assert.AreEqual<string>("x", node.FplId) // name of the referenced element
         // references to predicates
         | "FplReference", "01a" ->
@@ -4799,9 +4801,10 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, parent.Scope.Count) 
             Assert.IsInstanceOfType<FplReference>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
-            Assert.AreEqual<int>(1, node.Scope.Count) // one referenced element
+            Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsSome)
+            Assert.IsInstanceOfType<FplVariable>(node.RefersTo.Value)
             Assert.AreEqual<string>("x", node.FplId) // name of the referenced element
-            Assert.IsInstanceOfType<FplVariable>(node.Scope[node.FplId]) // type of the referenced element
 
         // reference to named predicate
         | "FplReference", "04a" ->
