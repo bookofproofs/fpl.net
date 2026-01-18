@@ -31,6 +31,8 @@ type SymbolTableStructure() =
             if identifier = "" then 
                 if root.Name = firstTypeNode then 
                     Some root
+                elif root.RefersTo.IsSome && root.RefersTo.Value.Name = firstTypeNode then 
+                    root.RefersTo
                 else
                     match root.Scope.Values |> Seq.tryPick (findNamedItem firstTypeNode identifier infiniteLoop) with 
                     | Some found -> Some found
@@ -45,6 +47,8 @@ type SymbolTableStructure() =
                 let searchItem = root.Type(SignatureType.Name)
                 if root.Name = firstTypeNode && searchItem = identifier then 
                     Some root
+                elif root.RefersTo.IsSome && root.RefersTo.Value.Name = firstTypeNode && searchItem = identifier then 
+                    root.RefersTo
                 else
                     match root.Scope.Values |> Seq.tryPick (findNamedItem firstTypeNode identifier infiniteLoop) with 
                     | Some found -> Some found
@@ -1639,7 +1643,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
         | "FplEquality" ->
             Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>("", (getName var).[index])
+            Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
         | "FplEquivalence" ->
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
@@ -1996,13 +2000,16 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplBase>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsNone)
         | "FplBase", "01" ->
             Assert.IsInstanceOfType<FplClass>(parent)
             Assert.AreEqual<int>(3, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplBase>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
-            Assert.AreEqual<int>(1, node.Scope.Count)
+            Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsSome)
+            Assert.IsInstanceOfType<FplClass>(node.RefersTo.Value)
         | "FplBase", "02" ->
             Assert.IsInstanceOfType<FplClass>(parent)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
@@ -2010,6 +2017,7 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplBase>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsNone)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     [<DataRow("FplBaseConstructorCall", "00", """def cl A { ctor A() {dec base.Obj(); } };""", "")>]
@@ -2512,43 +2520,52 @@ type SymbolTableStructure() =
         | "FplExtensionObj", "00" ->
             Assert.IsInstanceOfType<FplReference>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
-            Assert.AreEqual<int>(1, parent.Scope.Count)
+            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsTrue(parent.RefersTo.IsSome)
+            Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
             Assert.IsInstanceOfType<FplExtensionObj>(node)
             Assert.AreEqual<string>("obj", node.TypeId)
-            Assert.AreEqual<int>(0, node.ArgList.Count)
+            Assert.IsTrue(node.RefersTo.IsNone)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplExtensionObj", "00a" ->
             Assert.IsInstanceOfType<FplReference>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
-            Assert.AreEqual<int>(1, parent.Scope.Count)
+            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsTrue(parent.RefersTo.IsSome)
+            Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
             Assert.IsInstanceOfType<FplExtensionObj>(node)
             Assert.AreEqual<string>("Nat", node.TypeId)
             Assert.AreEqual<int>(0, node.ArgList.Count)
-            Assert.AreEqual<int>(1, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsSome)
         | "FplExtensionObj", "00b" ->
             Assert.IsInstanceOfType<FplReference>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
-            Assert.AreEqual<int>(1, parent.Scope.Count)
+            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsTrue(parent.RefersTo.IsSome)
+            Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
             Assert.IsInstanceOfType<FplExtensionObj>(node)
             Assert.AreEqual<string>("Nat", node.TypeId)
             Assert.AreEqual<int>(0, node.ArgList.Count)
-            Assert.AreEqual<int>(1, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsSome)
         | "FplExtensionObj", "00c" ->
             Assert.IsInstanceOfType<FplReference>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
-            Assert.AreEqual<int>(1, parent.Scope.Count)
+            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsTrue(parent.RefersTo.IsSome)
+            Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
             Assert.IsInstanceOfType<FplExtensionObj>(node)
             Assert.AreEqual<string>("Nat", node.TypeId)
             Assert.AreEqual<int>(0, node.ArgList.Count)
-            Assert.AreEqual<int>(1, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsSome)
         | "FplExtensionObj", "00d" ->
             Assert.IsInstanceOfType<FplReference>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
-            Assert.AreEqual<int>(1, parent.Scope.Count)
+            Assert.IsTrue(parent.RefersTo.IsSome)
+            Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
             Assert.IsInstanceOfType<FplExtensionObj>(node)
             Assert.AreEqual<string>("obj", node.TypeId)
             Assert.AreEqual<int>(0, node.ArgList.Count)
-            Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsNone)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     [<DataRow("FplForInStmt", "01", """def func Sum(list:* Nat[ind])->Nat { dec ~a:obj ~result, addend: Nat result:=Zero() for addend in list { result:=Add(result,addend) }; return result };""", "")>]
@@ -2722,7 +2739,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(1, node.ArgList.Count)  // mapping
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = (getMapping node).Value :?> FplMapping 
-            match map.ToBeReturnedDefinition with
+            match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.IsTrue(node.Value.IsSome)
@@ -2738,7 +2755,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(2, node.ArgList.Count)  // mapping + return
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = (getMapping node).Value :?> FplMapping 
-            match map.ToBeReturnedDefinition with
+            match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.IsTrue(node.Value.IsSome)
@@ -2754,7 +2771,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(1, node.ArgList.Count)  // mapping 
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = (getMapping node).Value :?> FplMapping 
-            match map.ToBeReturnedDefinition with
+            match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.IsTrue(node.Value.IsSome)
@@ -2770,7 +2787,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(4, node.ArgList.Count)  // mapping + stmts + return
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
             let map = (getMapping node).Value :?> FplMapping 
-            match map.ToBeReturnedDefinition with
+            match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.IsTrue(node.Value.IsSome)
@@ -2802,7 +2819,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(1, node.ArgList.Count)  // mapping
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = (getMapping node).Value :?> FplMapping 
-            match map.ToBeReturnedDefinition with
+            match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.IsTrue(node.Value.IsSome)
@@ -2818,7 +2835,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(2, node.ArgList.Count)  // mapping + return
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = (getMapping node).Value :?> FplMapping 
-            match map.ToBeReturnedDefinition with
+            match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.IsTrue(node.Value.IsSome)
@@ -2834,7 +2851,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(1, node.ArgList.Count)  // mapping 
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = (getMapping node).Value :?> FplMapping 
-            match map.ToBeReturnedDefinition with
+            match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.IsTrue(node.Value.IsSome)
@@ -2850,7 +2867,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(4, node.ArgList.Count)  // mapping + stmts + return
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
             let map = (getMapping node).Value :?> FplMapping 
-            match map.ToBeReturnedDefinition with
+            match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.IsTrue(node.Value.IsSome)
@@ -2882,7 +2899,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(1, node.ArgList.Count)  // mapping
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = (getMapping node).Value :?> FplMapping 
-            match map.ToBeReturnedDefinition with
+            match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.IsTrue(node.Value.IsSome)
@@ -2898,7 +2915,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(2, node.ArgList.Count)  // mapping + return
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = (getMapping node).Value :?> FplMapping 
-            match map.ToBeReturnedDefinition with
+            match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.IsTrue(node.Value.IsSome)
@@ -2914,7 +2931,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(1, node.ArgList.Count)  // mapping 
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = (getMapping node).Value :?> FplMapping 
-            match map.ToBeReturnedDefinition with
+            match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.IsTrue(node.Value.IsSome)
@@ -2930,7 +2947,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(5, node.ArgList.Count)  // mapping + stmts + return
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
             let map = (getMapping node).Value :?> FplMapping 
-            match map.ToBeReturnedDefinition with
+            match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.IsTrue(node.Value.IsSome)
@@ -2965,7 +2982,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(1, node.ArgList.Count)  // mapping
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = (getMapping node).Value :?> FplMapping 
-            match map.ToBeReturnedDefinition with
+            match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.IsTrue(node.Value.IsSome)
@@ -2981,7 +2998,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(1, node.ArgList.Count)  // mapping
             Assert.AreEqual<int>(1, node.Scope.Count) 
             let map = (getMapping node).Value :?> FplMapping 
-            match map.ToBeReturnedDefinition with
+            match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.IsTrue(node.Value.IsSome)
@@ -2997,7 +3014,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(2, node.ArgList.Count)  // mapping + return
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = (getMapping node).Value :?> FplMapping 
-            match map.ToBeReturnedDefinition with
+            match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.IsTrue(node.Value.IsSome)
@@ -3013,7 +3030,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(2, node.ArgList.Count)  // mapping + return
             Assert.AreEqual<int>(3, node.Scope.Count) // 3 variables
             let map = (getMapping node).Value :?> FplMapping 
-            match map.ToBeReturnedDefinition with
+            match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.IsTrue(node.Value.IsSome)
@@ -3029,7 +3046,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(2, node.ArgList.Count)  // mapping + return 
             Assert.AreEqual<int>(1, node.Scope.Count) // 1 variables
             let map = (getMapping node).Value :?> FplMapping 
-            match map.ToBeReturnedDefinition with
+            match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.IsTrue(node.Value.IsSome)
@@ -3045,7 +3062,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(1, node.ArgList.Count)  // mapping 
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = (getMapping node).Value :?> FplMapping 
-            match map.ToBeReturnedDefinition with
+            match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.IsTrue(node.Value.IsSome)
@@ -3061,7 +3078,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(5, node.ArgList.Count)  // mapping + stmts + return
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
             let map = (getMapping node).Value :?> FplMapping 
-            match map.ToBeReturnedDefinition with
+            match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.IsTrue(node.Value.IsSome)
@@ -3093,11 +3110,11 @@ type SymbolTableStructure() =
         let parent, node = testSkeleton nodeType filename fplCode identifier
         
         match nodeType, varVal with
-        | "FplInstance", "00" 
-        | "FplInstance", "01" ->
+        | "FplInstance", "00" ->
             Assert.IsInstanceOfType<FplVariable>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
-            Assert.AreEqual<int>(1, parent.Scope.Count)
+            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsTrue(parent.RefersTo.IsSome)
             Assert.IsTrue(parent.Value.IsSome)
             Assert.AreEqual<FplValue>(parent.Value.Value, node)
             Assert.IsInstanceOfType<FplInstance>(node)
@@ -3140,7 +3157,8 @@ type SymbolTableStructure() =
         | "FplIntrinsicPred", "01" ->
             Assert.IsInstanceOfType<FplReference>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
-            Assert.AreEqual<int>(1, parent.Scope.Count)
+            Assert.IsTrue(parent.RefersTo.IsSome)
+            Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
             Assert.IsInstanceOfType<FplIntrinsicPred>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
@@ -3148,7 +3166,8 @@ type SymbolTableStructure() =
         | "FplIntrinsicPred", "03c" ->
             Assert.IsInstanceOfType<FplReference>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
-            Assert.AreEqual<int>(1, parent.Scope.Count)
+            Assert.IsTrue(parent.RefersTo.IsSome)
+            Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
             Assert.IsInstanceOfType<FplIntrinsicPred>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
@@ -3156,7 +3175,8 @@ type SymbolTableStructure() =
         | "FplIntrinsicPred", "03d" ->
             Assert.IsInstanceOfType<FplReference>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
-            Assert.AreEqual<int>(1, parent.Scope.Count)
+            Assert.IsTrue(parent.RefersTo.IsSome)
+            Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
             Assert.IsInstanceOfType<FplIntrinsicPred>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
@@ -3300,7 +3320,9 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsInstanceOfType<FplJustificationItemByAx>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)  
-            Assert.AreEqual<int>(1, node.Scope.Count) // referenced axiom
+            Assert.AreEqual<int>(0, node.Scope.Count) 
+            Assert.IsTrue(node.RefersTo.IsSome) 
+            Assert.IsInstanceOfType<FplAxiom>(node.RefersTo.Value) // referenced axiom
         | "FplJustificationItemByAx", "00b" 
         | "FplJustificationItemByAx", "00c" 
         | "FplJustificationItemByAx", "00d" 
@@ -3340,8 +3362,8 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsInstanceOfType<FplJustificationItemByConj>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
-            Assert.AreEqual<int>(1, node.Scope.Count)
-            Assert.IsInstanceOfType<FplConjecture>(node.Scope[node.FplId])
+            Assert.IsTrue(node.RefersTo.IsSome)
+            Assert.IsInstanceOfType<FplConjecture>(node.RefersTo.Value)
         | "FplJustificationItemByConj", "00b" 
         | "FplJustificationItemByConj", "00c" 
         | "FplJustificationItemByConj", "00d" 
@@ -3356,6 +3378,7 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplJustificationItemByConj>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsNone)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
 
@@ -3402,30 +3425,34 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplJustificationItemByDef>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsNone)
         | "FplJustificationItemByDef", "00g" ->
             Assert.IsInstanceOfType<FplJustification>(parent)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsInstanceOfType<FplJustificationItemByDef>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
-            Assert.AreEqual<int>(1, node.Scope.Count)
-            Assert.IsInstanceOfType<FplClass>(node.Scope[node.FplId])
+            Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsSome)
+            Assert.IsInstanceOfType<FplClass>(node.RefersTo.Value)
         | "FplJustificationItemByDef", "00h" ->
             Assert.IsInstanceOfType<FplJustification>(parent)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsInstanceOfType<FplJustificationItemByDef>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
-            Assert.AreEqual<int>(1, node.Scope.Count)
-            Assert.IsInstanceOfType<FplPredicate>(node.Scope[node.FplId])
+            Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsSome)
+            Assert.IsInstanceOfType<FplPredicate>(node.RefersTo.Value)
         | "FplJustificationItemByDef", "00i" ->
             Assert.IsInstanceOfType<FplJustification>(parent)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsInstanceOfType<FplJustificationItemByDef>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
-            Assert.AreEqual<int>(1, node.Scope.Count)
-            Assert.IsInstanceOfType<FplFunctionalTerm>(node.Scope[node.FplId])
+            Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsSome)
+            Assert.IsInstanceOfType<FplFunctionalTerm>(node.RefersTo.Value)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     [<DataRow("FplJustificationItemByDefVar", "00", """;""", "")>]
@@ -3462,8 +3489,9 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsInstanceOfType<FplJustificationItemByInf>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
-            Assert.AreEqual<int>(1, node.Scope.Count)
-            Assert.IsInstanceOfType<FplRuleOfInference>(node.Scope[node.FplId])
+            Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsSome)
+            Assert.IsInstanceOfType<FplRuleOfInference>(node.RefersTo.Value)
         | "FplJustificationItemByInf", "00b" 
         | "FplJustificationItemByInf", "00c" 
         | "FplJustificationItemByInf", "00d" 
@@ -3475,6 +3503,7 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplJustificationItemByInf>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsNone)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     [<DataRow("FplJustificationItemByProofArgument", "00", """;""", "")>]
@@ -3527,24 +3556,25 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsInstanceOfType<FplJustificationItemByTheoremLikeStmt>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
-            Assert.AreEqual<int>(1, node.Scope.Count)
-            Assert.IsInstanceOfType<FplTheorem>(node.Scope[node.FplId])
+            Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsSome)
+            Assert.IsInstanceOfType<FplTheorem>(node.RefersTo.Value)
         | "FplJustificationItemByTheoremLikeStmt", "00b" ->
             Assert.IsInstanceOfType<FplJustification>(parent)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsInstanceOfType<FplJustificationItemByTheoremLikeStmt>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
-            Assert.AreEqual<int>(1, node.Scope.Count)
-            Assert.IsInstanceOfType<FplProposition>(node.Scope[node.FplId])
+            Assert.IsTrue(node.RefersTo.IsSome)
+            Assert.IsInstanceOfType<FplProposition>(node.RefersTo.Value)
         | "FplJustificationItemByTheoremLikeStmt", "00c" ->
             Assert.IsInstanceOfType<FplJustification>(parent)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsInstanceOfType<FplJustificationItemByTheoremLikeStmt>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
-            Assert.AreEqual<int>(1, node.Scope.Count)
-            Assert.IsInstanceOfType<FplLemma>(node.Scope[node.FplId])
+            Assert.IsTrue(node.RefersTo.IsSome)
+            Assert.IsInstanceOfType<FplLemma>(node.RefersTo.Value)
         | "FplJustificationItemByTheoremLikeStmt", "00d" 
         | "FplJustificationItemByTheoremLikeStmt", "00e" 
         | "FplJustificationItemByTheoremLikeStmt", "00f" ->
@@ -3554,6 +3584,7 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplJustificationItemByTheoremLikeStmt>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsNone)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     [<DataRow("FplLanguage", "00", """;""", "")>]
@@ -4040,7 +4071,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)  
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = node :?> FplMapping
-            match map.ToBeReturnedDefinition with
+            match map.RefersTo with
             | Some cl -> Assert.AreEqual<string>("A", cl.TypeId)
             | None -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.AreEqual<string>("""dec A""", node.Represent())  
@@ -4056,7 +4087,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)  
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = node :?> FplMapping
-            match map.ToBeReturnedDefinition with
+            match map.RefersTo with
             | Some cl -> Assert.AreEqual<string>("A", cl.TypeId)
             | None -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.AreEqual<string>("""dec *A[ind]""", node.Represent())  
@@ -4078,7 +4109,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)  
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = node :?> FplMapping
-            match map.ToBeReturnedDefinition with
+            match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             match varVal with
@@ -4133,7 +4164,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)  
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
             let map = node :?> FplMapping
-            match map.ToBeReturnedDefinition with
+            match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             match varVal with
@@ -4158,7 +4189,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(1, node.ArgList.Count)  // nested mapping 
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
             let map = node :?> FplMapping
-            match map.ToBeReturnedDefinition with
+            match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             match varVal with
@@ -4184,7 +4215,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count)  
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = node :?> FplMapping
-            match map.ToBeReturnedDefinition with
+            match map.RefersTo with
             | Some cl -> Assert.AreEqual<string>("A", cl.TypeId)
             | None -> Assert.IsTrue(false, "The is no to be returned class")
         | "FplMapping", "ME1a" 
@@ -4196,7 +4227,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = node :?> FplMapping
-            match map.ToBeReturnedDefinition with
+            match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -4268,10 +4299,12 @@ type SymbolTableStructure() =
                 ->
                 Assert.IsInstanceOfType<FplReference>(parent)
                 Assert.AreEqual<int>(0, parent.ArgList.Count)
-                Assert.AreEqual<int>(1, parent.Scope.Count)
+                Assert.AreEqual<int>(0, parent.Scope.Count)
+                Assert.IsTrue(parent.RefersTo.IsSome)
+                Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
                 Assert.IsInstanceOfType<FplParent>(node)
                 Assert.AreEqual<int>(0, node.ArgList.Count)
-                Assert.AreEqual<int>(1, node.Scope.Count)
+                Assert.IsTrue(node.RefersTo.IsSome)
             // nodes that cannot be referrenced as parent 
             | "FplParent", "00a"
             | "FplParent", "01a"
@@ -4290,10 +4323,12 @@ type SymbolTableStructure() =
                 ->
                 Assert.IsInstanceOfType<FplReference>(parent)
                 Assert.AreEqual<int>(0, parent.ArgList.Count)
-                Assert.AreEqual<int>(1, parent.Scope.Count)
+                Assert.AreEqual<int>(0, parent.Scope.Count)
+                Assert.IsTrue(parent.RefersTo.IsSome)
+                Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
                 Assert.IsInstanceOfType<FplParent>(node)
                 Assert.AreEqual<int>(0, node.ArgList.Count)
-                Assert.AreEqual<int>(0, node.Scope.Count)
+                Assert.IsTrue(node.RefersTo.IsNone)
             | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
 
@@ -4627,7 +4662,9 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplReference>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
-            Assert.AreEqual<int>(1, node.Scope.Count)
+            Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsSome)
+            Assert.IsInstanceOfType<FplVariable>(node.RefersTo.Value)
             Assert.AreEqual<string>("x", node.FplId) // name of the referenced element
         // references to predicates
         | "FplReference", "01a" ->
@@ -4644,18 +4681,20 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(2, parent.Scope.Count) // 2 variables
             Assert.IsInstanceOfType<FplReference>(node)
             Assert.AreEqual<int>(2, node.ArgList.Count) // 2 arguments
-            Assert.AreEqual<int>(1, node.Scope.Count) // one referenced element
+            Assert.AreEqual<int>(0, node.Scope.Count) 
+            Assert.IsTrue(node.RefersTo.IsSome) // one referenced element
             Assert.AreEqual<string>("A", node.FplId) // name of the referenced element
-            Assert.IsInstanceOfType<FplPredicate>(node.Scope[node.FplId]) // name of the referenced element
+            Assert.IsInstanceOfType<FplPredicate>(node.RefersTo.Value) // type of the referenced element
         | "FplReference", "01c" ->
             Assert.IsInstanceOfType<FplAxiom>(parent)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(2, parent.Scope.Count) // 2 variables
             Assert.IsInstanceOfType<FplReference>(node)
             Assert.AreEqual<int>(2, node.ArgList.Count) // 2 arguments
-            Assert.AreEqual<int>(1, node.Scope.Count) // one referenced element
+            Assert.AreEqual<int>(0, node.Scope.Count) 
+            Assert.IsTrue(node.RefersTo.IsSome) // one referenced element
             Assert.AreEqual<string>("A", node.FplId) // name of the referenced element
-            Assert.IsInstanceOfType<FplFunctionalTerm>(node.Scope[node.FplId]) // name of the referenced element
+            Assert.IsInstanceOfType<FplFunctionalTerm>(node.RefersTo.Value) // type of the referenced element
         | "FplReference", "01d" ->
             Assert.IsInstanceOfType<FplAxiom>(parent)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
@@ -4670,99 +4709,110 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, parent.Scope.Count) 
             Assert.IsInstanceOfType<FplReference>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
-            Assert.AreEqual<int>(1, node.Scope.Count) // one referenced element
+            Assert.AreEqual<int>(0, node.Scope.Count) 
+            Assert.IsTrue(node.RefersTo.IsSome) // one referenced element
             Assert.AreEqual<string>("A", node.FplId) // name of the referenced element
-            Assert.IsInstanceOfType<FplClass>(node.Scope[node.FplId]) // name of the referenced element
+            Assert.IsInstanceOfType<FplClass>(node.RefersTo.Value) // type of the referenced element
         | "FplReference", "01f" ->
             Assert.IsInstanceOfType<FplAxiom>(parent)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count) 
             Assert.IsInstanceOfType<FplReference>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
-            Assert.AreEqual<int>(1, node.Scope.Count) // one referenced element
+            Assert.AreEqual<int>(0, node.Scope.Count) 
+            Assert.IsTrue(node.RefersTo.IsSome) // referenced element
             Assert.AreEqual<string>("A", node.FplId) // name of the referenced element
-            Assert.IsInstanceOfType<FplRuleOfInference>(node.Scope[node.FplId]) // name of the referenced element
+            Assert.IsInstanceOfType<FplRuleOfInference>(node.RefersTo.Value) // type of the referenced element
         | "FplReference", "01g" ->
             Assert.IsInstanceOfType<FplAxiom>(parent)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count) 
             Assert.IsInstanceOfType<FplReference>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
-            Assert.AreEqual<int>(1, node.Scope.Count) // one referenced element
+            Assert.AreEqual<int>(0, node.Scope.Count) 
+            Assert.IsTrue(node.RefersTo.IsSome) // referenced element
             Assert.AreEqual<string>("A", node.FplId) // name of the referenced element
-            Assert.IsInstanceOfType<FplAxiom>(node.Scope[node.FplId]) // name of the referenced element
+            Assert.IsInstanceOfType<FplAxiom>(node.RefersTo.Value) // type of the referenced element
         | "FplReference", "01h" ->
             Assert.IsInstanceOfType<FplAxiom>(parent)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count) 
             Assert.IsInstanceOfType<FplReference>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
-            Assert.AreEqual<int>(1, node.Scope.Count) // one referenced element
+            Assert.AreEqual<int>(0, node.Scope.Count) 
+            Assert.IsTrue(node.RefersTo.IsSome) // referenced element
             Assert.AreEqual<string>("A", node.FplId) // name of the referenced element
-            Assert.IsInstanceOfType<FplTheorem>(node.Scope[node.FplId]) // name of the referenced element
+            Assert.IsInstanceOfType<FplTheorem>(node.RefersTo.Value) // type of the referenced element
         | "FplReference", "01i" ->
             Assert.IsInstanceOfType<FplAxiom>(parent)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count) 
             Assert.IsInstanceOfType<FplReference>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
-            Assert.AreEqual<int>(1, node.Scope.Count) // one referenced element
+            Assert.AreEqual<int>(0, node.Scope.Count) 
+            Assert.IsTrue(node.RefersTo.IsSome) // referenced element
             Assert.AreEqual<string>("A", node.FplId) // name of the referenced element
-            Assert.IsInstanceOfType<FplLemma>(node.Scope[node.FplId]) // name of the referenced element
+            Assert.IsInstanceOfType<FplLemma>(node.RefersTo.Value) // type of the referenced element
         | "FplReference", "01j" ->
             Assert.IsInstanceOfType<FplAxiom>(parent)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count) 
             Assert.IsInstanceOfType<FplReference>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
-            Assert.AreEqual<int>(1, node.Scope.Count) // one referenced element
+            Assert.AreEqual<int>(0, node.Scope.Count) 
+            Assert.IsTrue(node.RefersTo.IsSome) // referenced element
             Assert.AreEqual<string>("A", node.FplId) // name of the referenced element
-            Assert.IsInstanceOfType<FplProposition>(node.Scope[node.FplId]) // name of the referenced element
+            Assert.IsInstanceOfType<FplProposition>(node.RefersTo.Value) // type of the referenced element
         | "FplReference", "01k" ->
             Assert.IsInstanceOfType<FplAxiom>(parent)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count) 
             Assert.IsInstanceOfType<FplReference>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
-            Assert.AreEqual<int>(1, node.Scope.Count) // one referenced element
+            Assert.AreEqual<int>(0, node.Scope.Count) 
+            Assert.IsTrue(node.RefersTo.IsSome) // referenced element
             Assert.AreEqual<string>("A", node.FplId) // name of the referenced element
-            Assert.IsInstanceOfType<FplConjecture>(node.Scope[node.FplId]) // name of the referenced element
+            Assert.IsInstanceOfType<FplConjecture>(node.RefersTo.Value) // type of the referenced element
         | "FplReference", "01l" ->
             Assert.IsInstanceOfType<FplAxiom>(parent)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count) 
             Assert.IsInstanceOfType<FplReference>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
-            Assert.AreEqual<int>(1, node.Scope.Count) // one referenced element
+            Assert.AreEqual<int>(0, node.Scope.Count) 
+            Assert.IsTrue(node.RefersTo.IsSome) // referenced element
             Assert.AreEqual<string>("A$1", node.FplId) // name of the referenced element
-            Assert.IsInstanceOfType<FplCorollary>(node.Scope[node.FplId]) // name of the referenced element
+            Assert.IsInstanceOfType<FplCorollary>(node.RefersTo.Value) 
         | "FplReference", "01m" ->
             Assert.IsInstanceOfType<FplAxiom>(parent)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count) 
             Assert.IsInstanceOfType<FplReference>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
-            Assert.AreEqual<int>(1, node.Scope.Count) // one referenced element
+            Assert.AreEqual<int>(0, node.Scope.Count) 
+            Assert.IsTrue(node.RefersTo.IsSome) // referenced element
             Assert.AreEqual<string>("A$1", node.FplId) // name of the referenced element
-            Assert.IsInstanceOfType<FplProof>(node.Scope[node.FplId]) // name of the referenced element
+            Assert.IsInstanceOfType<FplProof>(node.RefersTo.Value)         
         | "FplReference", "01n" ->
             Assert.IsInstanceOfType<FplAxiom>(parent)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count) 
             Assert.IsInstanceOfType<FplReference>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
-            Assert.AreEqual<int>(1, node.Scope.Count) // one referenced element
+            Assert.AreEqual<int>(0, node.Scope.Count) 
+            Assert.IsTrue(node.RefersTo.IsSome) // referenced element
             Assert.AreEqual<string>("A", node.FplId) // name of the referenced element
-            Assert.IsInstanceOfType<FplExtension>(node.Scope[node.FplId]) // name of the referenced element
+            Assert.IsInstanceOfType<FplExtension>(node.RefersTo.Value) // type of the referenced element
         | "FplReference", "01o" ->
             Assert.IsInstanceOfType<FplAxiom>(parent)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count) 
             Assert.IsInstanceOfType<FplReference>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
-            Assert.AreEqual<int>(1, node.Scope.Count) // one referenced element
+            Assert.AreEqual<int>(0, node.Scope.Count) 
+            Assert.IsTrue(node.RefersTo.IsSome) // referenced element
             Assert.AreEqual<string>("A", node.FplId) // name of the referenced element
-            Assert.IsInstanceOfType<FplLocalization>(node.Scope[node.FplId]) // name of the referenced element
+            Assert.IsInstanceOfType<FplLocalization>(node.RefersTo.Value) // type of the referenced element
         
         // return reference
         | "FplReference", "02a" ->
@@ -4771,9 +4821,10 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, parent.Scope.Count) 
             Assert.IsInstanceOfType<FplReference>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
-            Assert.AreEqual<int>(1, node.Scope.Count) // one referenced element
+            Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsSome)
+            Assert.IsInstanceOfType<FplVariable>(node.RefersTo.Value)
             Assert.AreEqual<string>("x", node.FplId) // name of the referenced element
-            Assert.IsInstanceOfType<FplVariable>(node.Scope[node.FplId]) // name of the referenced element
 
         // reference to named predicate
         | "FplReference", "04a" ->
@@ -4790,9 +4841,10 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, parent.Scope.Count) 
             Assert.IsInstanceOfType<FplReference>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
-            Assert.AreEqual<int>(1, node.Scope.Count) 
+            Assert.AreEqual<int>(0, node.Scope.Count) 
+            Assert.IsTrue(node.RefersTo.IsSome) // one referenced element
             Assert.AreEqual<string>("D", node.FplId) // name of the referenced element
-            Assert.IsInstanceOfType<FplPredicate>(node.Scope[node.FplId]) // name of the referenced element
+            Assert.IsInstanceOfType<FplPredicate>(node.RefersTo.Value) // type of the referenced element
 
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
@@ -4977,10 +5029,12 @@ type SymbolTableStructure() =
             ->
             Assert.IsInstanceOfType<FplReference>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
-            Assert.AreEqual<int>(1, parent.Scope.Count)
+            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsTrue(parent.RefersTo.IsSome)
+            Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
             Assert.IsInstanceOfType<FplSelf>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
-            Assert.AreEqual<int>(1, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsSome)
         // nodes that cannot be referred to as 'self'
         | "FplSelf", "00b"
         | "FplSelf", "03"
@@ -4997,10 +5051,12 @@ type SymbolTableStructure() =
             ->
             Assert.IsInstanceOfType<FplReference>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
-            Assert.AreEqual<int>(1, parent.Scope.Count)
+            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsTrue(parent.RefersTo.IsSome)
+            Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
             Assert.IsInstanceOfType<FplSelf>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
-            Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsNone)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     [<DataRow("FplTheorem", "00", """thm T {true};""", "")>]

@@ -1222,12 +1222,7 @@ type TestInterpreterErrors() =
     [<DataRow("1c", "thm A {true} thm T {true} proof T$1 {1. bydef A |- trivial };", 1)>]
     [<DataRow("1d", "lem A {true} thm T {true} proof T$1 {1. bydef A |- trivial };", 1)>]
     [<DataRow("1e", "prop A {true} thm T {true} proof T$1 {1. bydef A |- trivial };", 1)>]
-    [<DataRow("1f", "cor A$1 {true} thm T {true} proof T$1 {1. bydef A$1 |- trivial };", 1)>]
-    [<DataRow("1f_", "thm A {true} cor A$1 {true} thm T {true} proof T$1 {1. bydef A$1 |- trivial };", 1)>]
-    
-    
-    [<DataRow("1g_", "thm A {true} proof A$1 {1. |- trivial } thm T {true} proof T$1 {1. bydef A$1 |- trivial };", 1)>]
-    
+        
     [<DataRow("1j", "inf A {pre: true con: true} thm T {true} proof T$1 {1. bydef A |- trivial };", 1)>]
     [<DataRow("0a", "def cl A {intr} thm T {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
     [<DataRow("0b", "def pred A() {intr} thm T {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
@@ -1252,7 +1247,6 @@ type TestInterpreterErrors() =
     [<DataRow("3g", "lem A {true} thm T {true} proof T$1 {1. A$1 |- trivial };", 1)>]
     [<DataRow("3h", "prop A {true} thm T {true} proof T$1 {1. A$1 |- trivial };", 1)>]
     [<DataRow("3i", "inf A {pre: true con: true} thm T {true} proof T$1 {1. A$1 |- trivial };", 1)>]
-    [<DataRow("3k_", "thm A {true} proof A$1 {1. |- trivial} thm T {true} proof T$1 {1. A$1 |- trivial };", 1)>]
   
     [<DataRow("z2k_", "thm A {true} proof A$1 {1. |- trivial} thm T {true} proof T$1 {1. A |- trivial };", 0)>]
     [<DataRow("z3j", "cor A$1 {true} thm T {true} proof T$1 {1. A$1 |- trivial };", 0)>]
@@ -1380,6 +1374,9 @@ type TestInterpreterErrors() =
     [<DataRow("05", "proof T$1 {1. bydef A$1 |- trivial};", 1)>]
     [<DataRow("02", "proof T$1 {1. byinf A |- trivial};", 0)>]
     [<DataRow("03", "proof T$1 {1. byinf A$1 |- trivial};", 1)>]
+    [<DataRow("1f", "cor A$1 {true} thm T {true} proof T$1 {1. bydef A$1 |- trivial };", 1)>]
+    [<DataRow("1f_", "thm A {true} cor A$1 {true} thm T {true} proof T$1 {1. bydef A$1 |- trivial };", 1)>]
+    [<DataRow("1g_", "thm A {true} proof A$1 {1. |- trivial } thm T {true} proof T$1 {1. bydef A$1 |- trivial };", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR010(no:string, fplCode:string, expected) =
@@ -1419,6 +1416,7 @@ type TestInterpreterErrors() =
 
     [<DataRow("00", "proof T$1 {1. bycor A$1 |- trivial};", 0)>]
     [<DataRow("01", "proof T$1 {1. A$1 |- trivial};", 1)>]
+    [<DataRow("3k_", "thm A {true} proof A$1 {1. |- trivial} thm T {true} proof T$1 {1. A$1 |- trivial };", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR013(no:string, fplCode:string, expected) =
@@ -4007,9 +4005,12 @@ type TestInterpreterErrors() =
     [<DataRow("08", """def pred T() { dec ~x:pred; all y:obj {and(x,true)} };""", 1)>]
     [<DataRow("09", """def pred T() { dec ~x:pred; or(x,false) };""", 1)>]
     [<DataRow("10", """def pred T() { dec ~x,y:pred; or(x,y) };""", 2)>]
-    [<DataRow("11a", """def pred T() { all y:obj {and(x,y)} };""", 1)>]
-    [<DataRow("11b", """def pred T() { ex y:obj {and(x,y)} };""", 1)>]
-    [<DataRow("11c", """def pred T() { exn$1 y:obj {and(x,y)} };""", 1)>]
+    [<DataRow("11a", """def pred T() { all y:obj {and(x,y)} };""", 0)>] // no VAR09, since y is bound, x is undefined 
+    [<DataRow("11a_", """def pred T() { dec ~x:obj; all y:obj {and(x,y)} };""", 1)>] // VAR09, since x is free 
+    [<DataRow("11b", """def pred T() { ex y:obj {and(x,y)} };""", 0)>] // no VAR09, since y is bound, x is undefined 
+    [<DataRow("11b_", """def pred T() { dec ~x:obj; ex y:obj {and(x,y)} };""", 1)>]  // VAR09, since x is free 
+    [<DataRow("11c", """def pred T() { exn$1 y:obj {and(x,y)} };""", 0)>] // no VAR09, since y is bound, x is undefined 
+    [<DataRow("11c_", """def pred T() { dec ~x:obj; exn$1 y:obj {and(x,y)} };""", 1)>]  // VAR09, since x is free 
     [<DataRow("11d", """def pred T() { all x,y:obj {and(x,y)} };""", 0)>]
     [<DataRow("11e", """def pred T() { ex x,y:obj {and(x,y)} };""", 0)>]
     [<DataRow("11f", """def pred T() { exn$1 y:obj {and(true,y)} };""", 0)>]

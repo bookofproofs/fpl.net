@@ -481,6 +481,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
         ret.ExpressionType <- this.ExpressionType
         ret.ArgType <- this.ArgType
         ret.Value <- this.Value
+        ret.RefersTo <- this.RefersTo
 
         this.Scope
         |> Seq.iter (fun (kvp:KeyValuePair<string, FplValue>) ->
@@ -608,6 +609,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
         this.IsIntrinsic <- other.IsIntrinsic
         this.ExpressionType <- other.ExpressionType
         this.ArgType <- other.ArgType
+       
 
         this.Scope.Clear()
         other.Scope |> Seq.iter (fun kvp -> this.Scope.Add(kvp.Key, kvp.Value))
@@ -616,6 +618,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
         this.ArgList.AddRange(other.ArgList)
 
         this.Value <- other.Value
+        this.RefersTo <- other.RefersTo
 
     /// Qualified starting position of this FplValue
     member this.QualifiedStartPos =
@@ -923,24 +926,24 @@ and FplVariableStack() =
         _assumedArguments.Clear()
         _stack.Clear()
 
+type IHasDotted = 
+    abstract member DottedChild : FplValue option with get, set
 
 /// Searches for a references in node symbol table. 
 /// Will works properly only for nodes types that use their scope like FplReference, FplSelf, FplParent, FplForInStmtDomain, FplForInStmtEntity, FplVariable
 let rec referencedNodeOpt (fv:FplValue) = 
+    
     let refNodeOpt = 
-        if fv.Scope.ContainsKey(".") then
-            // start new recursion for dotted references 
-            referencedNodeOpt fv.Scope["."] 
-        elif fv.Name = PrimInstanceL then 
-            Some fv
-        else
-            fv.Scope 
-            |> Seq.map (fun kvp -> kvp.Value) 
-            |> Seq.toList 
-            |> List.tryHead
+        match box fv with 
+        | :? IHasDotted as dotted when dotted.DottedChild.IsSome -> referencedNodeOpt dotted.DottedChild.Value
+        | _ when fv.Name = PrimInstanceL -> Some fv
+        | _ when fv.Name = PrimIntrinsicPred -> Some fv
+        | _ when fv.Name = PrimIntrinsicInd -> Some fv
+        | _ when fv.Name = PrimVariableL -> fv.RefersTo
+        | _ -> fv.RefersTo
     match refNodeOpt with
-    | Some refNode when refNode.Name = LiteralSelf -> referencedNodeOpt refNode
-    | Some refNode when refNode.Name = LiteralParent -> referencedNodeOpt refNode
+    | Some refNode when refNode.Name = LiteralSelf -> refNode.RefersTo
+    | Some refNode when refNode.Name = LiteralParent -> refNode.RefersTo
     | Some refNode when refNode.Name = PrimVariableL && refNode.Value.IsSome -> referencedNodeOpt refNode.Value.Value
     | _ -> refNodeOpt
 
@@ -962,6 +965,13 @@ let isVar (fv1:FplValue) =
     | PrimVariableArrayL -> true
     | _ -> false
     
+let isDefinition (fv1:FplValue) =
+    match fv1.Name with
+    | PrimClassL
+    | PrimPredicateL
+    | PrimFunctionalTermL -> true
+    | _ -> false
+
 type IHasSignature =
     abstract member SignStartPos : Position with get, set
     abstract member SignEndPos : Position with get, set
@@ -1264,28 +1274,30 @@ let addExpressionToParentArgList (fplValue:FplValue) =
 // Add an expression to a reference
 let addExpressionToReference (fplValue:FplValue) =
     let nextOpt = fplValue.Parent
-    match nextOpt with
-    | Some next when next.Name = PrimRefL && next.Scope.ContainsKey(".") -> ()
-    | Some next when next.Name = PrimRefL && next.Scope.ContainsKey(next.FplId) ->
-        let referenced = next.Scope.Values |> Seq.head
-        match referenced.Name with 
-        | PrimVariableArrayL ->
-            next.ArgList.Add fplValue
-        | _ ->
+    match box nextOpt with 
+    | :? IHasDotted as dc when dc.DottedChild.IsSome -> ()
+    | _ ->
+        match nextOpt with
+        | Some next when next.Name = PrimRefL && next.RefersTo.IsSome ->
+            let referenced = next.RefersTo.Value
+            match referenced.Name with 
+            | PrimVariableArrayL ->
+                next.ArgList.Add fplValue
+            | _ ->
+                next.FplId <- fplValue.FplId
+                next.TypeId <- fplValue.TypeId
+                next.RefersTo <- Some fplValue
+        | Some next when next.Name = PrimRefL && 
+            (
+                fplValue.Name = PrimDelegateEqualL 
+             || fplValue.Name = PrimDelegateDecrementL
+             ) ->
+            addExpressionToParentArgList fplValue 
+        | Some next when next.Name = PrimRefL ->
             next.FplId <- fplValue.FplId
             next.TypeId <- fplValue.TypeId
-            next.Scope.TryAdd(fplValue.FplId, fplValue) |> ignore
-    | Some next when next.Name = PrimRefL && 
-        (
-            fplValue.Name = PrimDelegateEqualL 
-         || fplValue.Name = PrimDelegateDecrementL
-         ) ->
-        addExpressionToParentArgList fplValue 
-    | Some next when next.Name = PrimRefL ->
-        next.FplId <- fplValue.FplId
-        next.TypeId <- fplValue.TypeId
-        next.Scope.TryAdd(fplValue.FplId, fplValue) |> ignore
-    | _ -> addExpressionToParentArgList fplValue 
+            next.RefersTo <- Some fplValue 
+        | _ -> addExpressionToParentArgList fplValue 
 
 /// Indicates if an FplValue is the root of the SymbolTable.
 let isRoot (fv:FplValue) = 
@@ -1338,13 +1350,15 @@ type FplIntrinsicPred(positions: Positions, parent: FplValue) =
 /// Tries to find a mapping of an FplValue
 let rec getMapping (fv:FplValue) =
     match fv.Name with
-    | LiteralSelf
     | LiteralParent 
+    | LiteralSelf -> 
+        match fv.RefersTo with 
+        | Some ref -> getMapping ref
+        | None -> None
+    | PrimRefL when fv.RefersTo.IsSome ->
+        getMapping fv.RefersTo.Value
     | PrimRefL ->
-        if fv.Scope.ContainsKey(fv.FplId) then
-            getMapping fv.Scope[fv.FplId]
-        else
-            None
+        None
     | _ ->
         fv.ArgList |> Seq.tryFind (fun fv -> fv.Name = PrimMappingL)
 
@@ -1672,12 +1686,6 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
         this.IsSignatureVariable <- otherVar.IsSignatureVariable 
         this.IsInitialized <- otherVar.IsInitialized
 
-    member this.TypeNode =
-        this.Scope.Values
-        |> Seq.filter (fun fv -> fv.Name <> PrimVariableL && fv.Name <> PrimVariableArrayL)
-        |> Seq.tryHead
-
-
 let checkVAR04Diagnostics (fv:FplValue) = 
     fv.GetVariables()
     |> List.map (fun var -> var :?> FplGenericVariable)
@@ -1860,12 +1868,6 @@ type FplBase(positions: Positions, parent: FplValue) =
 
     override this.RunOrder = None
 
-    member this.BaseClass = 
-        if this.Scope.Count > 0 then
-            Some (this.Scope.Values |> Seq.head)
-        else 
-            None    
-
 [<AbstractClass>]
 type FplGenericConstructor(name, positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
@@ -1923,7 +1925,7 @@ type FplGenericConstructor(name, positions: Positions, parent: FplValue) as this
             classDef.ArgList
             |> Seq.filter (fun fv -> fv.Name = LiteralBase)
             |> Seq.map (fun fv -> fv :?> FplBase)
-            |> Seq.map (fun fv -> fv.BaseClass)
+            |> Seq.map (fun fv -> fv.RefersTo)
             |> Seq.iter (fun baseClassOpt ->
                 match baseClassOpt with
                 | Some baseClass ->
@@ -2168,13 +2170,17 @@ type FplGenericPredicateBlock(positions: Positions, parent: FplValue) =
                     let undetermined = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
                     this.SetValue undetermined
                 else
-                    this.ArgList
-                    |> Seq.iter (fun fv -> 
-                        fv.Run variableStack
-                        this.SetValuesOf fv
-                    )
+                    // run all statements and the last predicate in the FplPredicate
+                    this.ArgList |> Seq.iter (fun fv1 -> fv1.Run variableStack) 
+                    // Assign the value of the FplPredicate using the last predicate
+                    let lastOpt = this.ArgList |> Seq.tryLast
+                    match lastOpt with 
+                    | Some last -> this.SetValuesOf last
+                    | _ -> ()
+
             _callCounter <- _callCounter - 1
-            _isReady <- this.Arity = 0 
+            _isReady <- this.Arity = 0
+
 
     override this.CheckConsistency () = 
         if not this.IsIntrinsic then // if not intrinsic, check variable usage
@@ -2295,15 +2301,17 @@ type FplPredicate(positions: Positions, parent: FplValue, runOrder) as this =
                     let undetermined = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
                     this.SetValue undetermined
                 else
-                    this.ArgList
-                    |> Seq.iter (fun fv -> 
-                        fv.Run variableStack
-                        this.SetValuesOf fv
-                    )
+                    // run all statements and the last predicate in the FplPredicate
+                    this.ArgList |> Seq.iter (fun fv1 -> fv1.Run variableStack) 
+                    // Assign the value of the FplPredicate using the last predicate
+                    let lastOpt = this.ArgList |> Seq.tryLast
+                    match lastOpt with 
+                    | Some last -> this.SetValuesOf last
+                    | _ -> ()
+
             _callCounter <- _callCounter - 1
-            _isReady <- this.Arity = 0 
-        this.GetProperties()
-        |> List.iter (fun fv -> fv.Run variableStack)
+            _isReady <- this.Arity = 0        
+            this.GetProperties() |> List.iter (fun fv -> fv.Run variableStack)
 
     override this.RunOrder = Some _runOrder
 
@@ -2589,13 +2597,6 @@ type FplGenericJustificationItem(positions: Positions, parent: FplValue) =
     override this.RunOrder = None
 
     member this.ParentJustification = this.Parent.Value :?> FplJustification
-
-    /// Returns Some FPL node that is referenced by this JustificationItem (if it could be found) or None
-    member this.ReferencedJustification = 
-        if this.Scope.Count > 0 then 
-            Some (this.Scope.Values |> Seq.head)
-        else
-            None
 
     /// Returns a) Some expression inferred by the proceeding JustificationItem in the same proof argument.
     /// b) If there is no proceeding JustificationItem in the same proof argument, but there is a proceeding argument proof,
@@ -3031,8 +3032,8 @@ and FplProof(positions: Positions, parent: FplValue, runOrder) =
 let getArgumentInProof (fv1:FplGenericJustificationItem) argName =
     let proof = 
         match fv1 with 
-        | :? FplJustificationItemByProofArgument ->
-            fv1.Scope.Values |> Seq.head :?> FplProof
+        | :? FplJustificationItemByProofArgument when fv1.RefersTo.IsSome ->
+            fv1.RefersTo.Value :?> FplProof
         | _ ->
             let parent = fv1.ParentJustification
             let arg = parent.ParentArgument
@@ -3203,7 +3204,8 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
 
     override this.Run variableStack =
         this.Debug "Run"
-        if this.Scope.Count > 0 then 
+
+        if this.RefersTo.IsSome then 
             let calledOpt = referencedNodeOpt this
             match calledOpt with 
             | Some called ->
@@ -3232,11 +3234,13 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
                         this.SetValuesOf called
                         variableStack.RestoreVariables(called)
                 | PrimDelegateDecrementL
+                | PrimExtensionObj
                 | PrimDelegateEqualL ->
                     called.Run variableStack
                     this.SetValuesOf called
+                | PrimInstanceL
                 | PrimIntrinsicInd
-                | PrimIntrinsicUndef 
+                | PrimIntrinsicUndef
                 | PrimIntrinsicTpl 
                 | PrimIntrinsicPred ->
                     this.SetValue called
@@ -3250,9 +3254,21 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
 
 type FplReference(positions: Positions, parent: FplValue) =
     inherit FplGenericReference(positions, parent)
+    
+    let mutable _dottedChild : FplValue option = None
 
     override this.Name = PrimRefL
     override this.ShortName = PrimRef
+
+    /// The optional dotted child set when parsing a dotted reference 
+    member this.DottedChild
+        with get() = _dottedChild
+        and set (value:FplValue option) = _dottedChild <- value
+
+    interface IHasDotted with 
+        member this.DottedChild 
+            with get () = this.DottedChild
+            and set (value) = this.DottedChild <- value
 
     override this.SetValue fv = 
         if this.Scope.ContainsKey(this.FplId) then
@@ -3264,19 +3280,10 @@ type FplReference(positions: Positions, parent: FplValue) =
 
     override this.Type signatureType =
         let headObj = 
-            if this.Scope.Count > 0 && not (this.Scope.ContainsKey(".")) then 
-                let ret = this.Scope.Values |> Seq.head
-                match ret.Name with 
-                | PrimExtensionObj 
-                | LiteralParent 
-                | LiteralSelf ->
-                    if ret.Scope.Count > 0 then 
-                        ret.Scope.Values |> Seq.head
-                    else
-                        ret   
-                | _ -> ret
-            else
-                this
+            match this.RefersTo with
+            | Some ret -> ret
+            | None -> this
+
         let propagate = propagateSignatureType signatureType
 
         // The arguments are reserved for the arguments or the coordinates of the reference
@@ -3308,12 +3315,6 @@ type FplReference(positions: Positions, parent: FplValue) =
             | SignatureType.Type, "", "" -> LiteralUndef
             | _ -> ret
 
-        let qualification =
-            if this.Scope.ContainsKey(".") then
-                Some(this.Scope["."])
-            else
-                None
-
         let fallBackFunctionalTerm =
             let varMappingOpt = getMapping headObj
             match varMappingOpt with 
@@ -3328,7 +3329,7 @@ type FplReference(positions: Positions, parent: FplValue) =
             | None ->
                 $"{head}({args})"
 
-        match argsCount, this.ArgType, qualification with
+        match argsCount, this.ArgType, this.DottedChild with
             | 0, ArgType.Nothing, Some qual ->
                 $"{head}.{qual.Type(propagate)}"
             | 0, ArgType.Brackets, Some qual ->
@@ -3379,77 +3380,32 @@ type FplReference(positions: Positions, parent: FplValue) =
                 fallBackFunctionalTerm
 
     override this.Represent () = 
-        match this.Value with 
-        | None ->
-            if this.Scope.Count > 0 && not (this.Scope.ContainsKey(".")) then 
-                (this.Scope.Values |> Seq.head).Represent()
+        match this.Value, this.DottedChild, this.RefersTo with 
+        | _, Some dc, _ -> 
+            if Object.ReferenceEquals(dc, this) then
+                // If the dotted child is not identical as "this",
+                // delegate the representation to dotted.
+                dc.Represent()
             else
-
-                let args, argsCount =
-                    let ret = 
-                        this.ArgList
-                        |> Seq.map (fun fv -> fv.Represent())
-                        |> String.concat ", "
-                    ret, this.ArgList.Count
-
-                let qualification =
-                    if this.Scope.ContainsKey(".") then
-                        Some(this.Scope["."])
-                    else
-                        None
-
-                match argsCount, this.ArgType, qualification with
-                | 0, ArgType.Nothing, Some qual ->
-                    $"{LiteralUndef}.{qual.Represent()}"
-                | 0, ArgType.Brackets, Some qual ->
-                    $"{LiteralUndef}[].{qual.Represent()}"
-                | 0, ArgType.Parentheses, Some qual ->
-                    $"{LiteralUndef}().{qual.Represent()}"
-                | 0, ArgType.Nothing, None -> 
-                    $"{LiteralUndef}"
-                | 0, ArgType.Brackets, None ->
-                    $"{LiteralUndef}[]"
-                | 0, ArgType.Parentheses, None ->
-                    $"{LiteralUndef}()"
-                | 1, ArgType.Nothing, Some qual -> 
-                
-                    $"{LiteralUndef}{args}.{qual.Represent()}"
-                | 1, ArgType.Brackets, Some qual ->
-                    $"{LiteralUndef}[{args}].{qual.Represent()}"
-                | 1, ArgType.Parentheses, Some qual ->
-                    $"{LiteralUndef}({args}).{qual.Represent()}"
-                | 1, ArgType.Nothing, None -> 
-                    if this.FplId <> String.Empty then 
-                        $"{LiteralUndef}({args})"
-                    else
-                        $"{args}"
-                | 1, ArgType.Brackets, None ->
-                    $"{LiteralUndef}[{args}]"
-                | 1, ArgType.Parentheses, None ->
-                    $"{LiteralUndef}({args})"
-                | _, ArgType.Nothing, Some qual -> 
-                    $"{LiteralUndef}({args}).{qual.Represent()}"
-                | _, ArgType.Brackets, Some qual ->
-                    $"{LiteralUndef}[{args}].{qual.Represent()}"
-                | _, ArgType.Parentheses, Some qual ->
-                    $"{LiteralUndef}({args}).{qual.Represent()}"
-                | _, ArgType.Nothing, None -> 
-                    $"{LiteralUndef}({args})"
-                | _, ArgType.Brackets, None ->
-                    $"{LiteralUndef}[{args}]"
-                | _, ArgType.Parentheses, None ->
-                    $"{LiteralUndef}({args})"
-        | Some ref ->                
-            let subRepr = 
-                if not (Object.ReferenceEquals(ref,this)) then
-                    // prevent reference "self" being the value of itself causing an infinite loop
-                    ref.Represent()
-                else
-                    String.Empty
-            if subRepr = String.Empty then 
+                // Otherwise, fall back with dotted's "type representation" to prevent infinite loops
+                dc.Type SignatureType.Type
+        | Some value, _, _ ->
+            if not (Object.ReferenceEquals(value,this)) then
+                // If the value is not identical as "this",
+                // delegate the representation to value.
+                value.Represent()
+            else
+                // Otherwise, fall back with "undef" to prevent infinite loops
                 LiteralUndef
+        | _, _, Some refTo ->
+            if not (Object.ReferenceEquals(refTo,this)) then
+                // If refTo is not identical as "this",
+                // delegate the representation to refTo.
+                refTo.Represent()
             else
-                subRepr           
+                refTo.Type SignatureType.Type
+        | _, _, _ ->
+            this.Type SignatureType.Type
 
     override this.EmbedInSymbolTable nextOpt = 
        
@@ -3463,15 +3419,15 @@ type FplReference(positions: Positions, parent: FplValue) =
         | Some next when next.Name = PrimForInStmtDomain -> 
             next.FplId <- this.FplId
             tryAddToParentUsingFplId this
-        | Some next when next.Scope.ContainsKey(".") -> 
+        | Some (:? FplReference as next) when next.DottedChild.IsSome -> 
             next.EndPos <- this.EndPos
         | Some next -> 
             addExpressionToParentArgList this
             next.EndPos <- this.EndPos
         | _ -> ()
 
-    /// eturns the optional node referenced by this FplReference
-    member this.TryReferenced = this.Scope.Values |> Seq.tryHead
+    /// returns the optional node referenced by this FplReference
+    member this.TryReferenced = this.RefersTo
             
 
 /// Checks if a reference to a Symbol, Prefix, PostFix, or Infix exists
@@ -3487,27 +3443,22 @@ let checkSIG01Diagnostics (fv: FplValue)  =
         |> Seq.iter (fun theory ->
             theory.Scope
             |> Seq.map (fun kv -> kv.Value)
+            |> Seq.filter (fun fv1 -> isDefinition fv1)
             |> Seq.iter (fun block ->
-                if expressionId = block.FplId then
-                    let blockType = block.Type(SignatureType.Mixed)
-                    fv.Scope.Add(blockType, block)
-                    fv.TypeId <- block.TypeId
-                else
-                    let blockType = block.Type(SignatureType.Mixed)
-                    match block.ExpressionType with
-                    | FixType.Prefix symbol
-                    | FixType.Symbol symbol
-                    | FixType.Postfix symbol ->
-                        if expressionId = symbol then
-                            fv.Scope.Add(blockType, block)
-                            fv.TypeId <- block.TypeId
-                    | FixType.Infix(symbol, precedence) ->
-                        if expressionId = symbol then
-                            fv.Scope.Add(blockType, block)
-                            fv.TypeId <- block.TypeId
-                    | _ -> ()))
+                match block.ExpressionType with
+                | FixType.Prefix symbol
+                | FixType.Symbol symbol
+                | FixType.Postfix symbol ->
+                    if expressionId = symbol then
+                        fv.RefersTo <- Some block 
+                        fv.TypeId <- block.TypeId
+                | FixType.Infix(symbol, precedence) ->
+                    if expressionId = symbol then
+                        fv.RefersTo <- Some block 
+                        fv.TypeId <- block.TypeId
+                | _ -> ()))
 
-        if fv.Scope.Count = 0 then
+        if fv.RefersTo.IsNone then
             fv.ErrorOccurred <- emitSIG01Diagnostics expressionId fv.StartPos fv.EndPos
     | _ -> ()
 
@@ -3521,13 +3472,6 @@ type FplMapping(positions: Positions, parent: FplValue) =
     let _dimensionTypes = new List<FplValue>()
     let mutable _dimensionTypesBeingSet = false
     let mutable _isArrayMapping = false
-    let mutable (_toBeReturnedClass:FplValue option) = None
-
-    /// If the mapping maps to classes or arrays of classes,
-    /// this function will yield an optional reference to the corresponding class node.
-    member this.ToBeReturnedDefinition
-        with get() = _toBeReturnedClass
-        and set(value) = _toBeReturnedClass <- value
 
     /// Sets this mapping to an array-typed mapping.
     member this.SetIsArray() = _isArrayMapping <- true
@@ -3546,12 +3490,12 @@ type FplMapping(positions: Positions, parent: FplValue) =
                     $"*{typeId}"
                 else
                     typeId
-            this.ToBeReturnedDefinition <- typeNodeOpt 
+            this.RefersTo <- typeNodeOpt 
             _dimensionTypesBeingSet <- true
         else
             let indexAllowedType = FplMapping((pos1,pos2), this) 
             indexAllowedType.TypeId <- typeId
-            indexAllowedType.ToBeReturnedDefinition <- typeNodeOpt 
+            indexAllowedType.RefersTo <- typeNodeOpt 
             this.DimensionTypes.Add indexAllowedType
 
     interface IHasDimensions with
@@ -3633,7 +3577,7 @@ type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
         else
             let indexAllowedType = FplMapping((pos1,pos2), this) 
             indexAllowedType.TypeId <- typeId
-            indexAllowedType.ToBeReturnedDefinition <- typeNodeOpt
+            indexAllowedType.RefersTo <- typeNodeOpt
             this.DimensionTypes.Add indexAllowedType
 
     interface IHasDimensions with
@@ -3892,8 +3836,8 @@ let findInheritanceChains (baseNode: FplValue) =
                 )
             | PrimFunctionalTermL, LiteralBase 
             | PrimClassL, LiteralBase ->
-                if bNode.Scope.Count > 0 then
-                    let nextBNode = bNode.Scope.Values |> Seq.head
+                match bNode.RefersTo with 
+                | Some nextBNode ->
                     let baseNodes = 
                         nextBNode.ArgList
                         |> Seq.filter (fun subNode -> subNode :? FplBase)
@@ -3907,7 +3851,7 @@ let findInheritanceChains (baseNode: FplValue) =
                         paths[newPath] <- $"duplicate inheritance detected, `{newPath}`." 
                     else
                         paths.Add (newPath, "ok")
-                else 
+                | None ->
                     if paths.ContainsKey newPath then 
                         paths[newPath] <- $"duplicate inheritance detected, `{newPath}`." 
                     else
@@ -4012,10 +3956,10 @@ let private matchByTypeStringRepresentation (a:FplValue) aName (aType:string) aT
             None, Parameter.Consumed
         else
             Some $"Array type `{aName}:{aType}` doesn't match `{pName}:{pType}`", Parameter.Consumed
-    | _ when isUpper aType && aTypeName = PrimRefL && a.Scope.Count = 1 ->
-        let aReferencedNode = a.Scope.Values |> Seq.toList |> List.head
-        if aReferencedNode.Scope.Count > 0 then
-            let cl = aReferencedNode.Scope.Values |> Seq.head
+    | _ when isUpper aType && aTypeName = PrimRefL && a.RefersTo.IsSome ->
+        let aReferencedNode = a.RefersTo.Value
+        if aReferencedNode.RefersTo.IsSome then
+            let cl = aReferencedNode.RefersTo.Value
             match cl with
             | :? FplClass ->
                 if inheritsFrom cl pType then 
@@ -4031,7 +3975,9 @@ let private matchByTypeStringRepresentation (a:FplValue) aName (aType:string) aT
         elif aReferencedNode.Name = PrimFunctionalTermL || aReferencedNode.Name = PrimMandatoryFunctionalTermL then 
             let mapOpt = getMapping aReferencedNode
             let map = mapOpt.Value :?> FplMapping 
-            matchClassInheritance map.ToBeReturnedDefinition a aType pName pType, Parameter.Consumed
+            matchClassInheritance map.RefersTo a aType pName pType, Parameter.Consumed
+        elif aReferencedNode.Name = PrimVariableL then 
+            matchClassInheritance aReferencedNode.RefersTo a aType pName pType, Parameter.Consumed
         else
             Some $"undefined `{aName}:{aType}` doesn't match `{pName}:{pType}`", Parameter.Consumed
     | _ when aType.StartsWith(pType + "(") ->
@@ -4091,22 +4037,23 @@ let private isFuncWithoutParentheses (fv:FplValue) =
 /// (this is the convention flagging that a variable has been assigned to its class instead of the constructor of the class generating an instance value).
 /// If the function returns a non-empty string, it contains the identifier of the referenced class (that has not been instantiated).
 let private getCallByReferenceToClass (fv:FplValue) =
-    if fv.Scope.ContainsKey(fv.FplId) then 
-        let refNode = fv.Scope[fv.FplId]
+    match fv.RefersTo with 
+    | Some refNode ->
         match refNode with 
         | :? FplGenericVariable as var when var.IsInitialized && var.Value.IsNone ->
             // reference fv points to an initialized variable without values 
-            match var.TypeNode with
+            match var.RefersTo with
             | Some fv1 when fv1.Name = PrimClassL -> fv1.TypeId // and the variable points to a class
             | _ -> String.Empty
         | _ -> String.Empty
-    else
+    | None ->
         String.Empty
                
 let rec private isCallByReference (fv:FplValue) =
-    if fv.Scope.ContainsKey(".") then
-        isCallByReference fv.Scope["."] // evaluate dotted reference instead
-    else
+    match fv with 
+    | :? FplReference as ref when ref.DottedChild.IsSome ->
+        isCallByReference ref.DottedChild.Value // evaluate dotted reference instead
+    | _ ->
         match fv.ArgType with 
         | ArgType.Nothing when isUpper fv.FplId -> true
         | ArgType.Nothing -> true
@@ -4210,7 +4157,7 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) (mode:MatchingMode) =
                 Some $"Return type of `{aName}:{aType}` does not match expected mapping type `{pType}`.", Parameter.Consumed
         elif aIsCallByReference && pTypeName = PrimMappingL then 
             let map = p :?> FplMapping
-            match map.ToBeReturnedDefinition, refNodeOpt with
+            match map.RefersTo, refNodeOpt with
             | Some def, Some refNode when refNode.Name = PrimInstanceL -> 
                 matchTwoTypes a def mode
             | Some def, Some refNode when refNode.Name = PrimIntrinsicUndef -> 
@@ -4410,7 +4357,7 @@ type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
 
             match baseClassObjectOpt with 
             | Some baseClassObject ->
-                match baseClassObject.BaseClass with
+                match baseClassObject.RefersTo with
                 | Some baseClass ->
                     // now, try to match a constructor of the parentClass based on the signature of this base constructor call
                     match baseClass.IsIntrinsic, this.ArgList.Count with
@@ -4464,19 +4411,17 @@ type FplParent(positions: Positions, parent: FplValue) as this =
     override this.Name = LiteralParent
     override this.ShortName = LiteralParent
 
-    override this.Clone () = this // do not clone FplParent to prevent stack overflow 
+    override this.Clone() = this // do not clone FplParent to prevent stack overflow 
 
     override this.Type signatureType = 
-        if this.Scope.Count > 1 then 
-            (this.Scope.Values |> Seq.head).Type signatureType
-        else 
-            LiteralParent
+        match this.RefersTo with 
+        | Some ref -> ref.Type signatureType
+        | _ -> LiteralParent
 
-    override this.Represent()= 
-        if this.Scope.Count > 1 then 
-            (this.Scope.Values |> Seq.head).Represent()
-        else 
-            LiteralUndef
+    override this.Represent() = 
+        match this.RefersTo with 
+        | Some ref -> ref.Represent()
+        | _ -> LiteralUndef
 
     override this.Run variableStack = 
         // todo implement run
@@ -4498,19 +4443,17 @@ type FplSelf(positions: Positions, parent: FplValue) as this =
     override this.Name = LiteralSelf
     override this.ShortName = LiteralSelf
 
-    override this.Clone () = this // do not clone FplSelf to prevent stack overflow 
+    override this.Clone() = this // do not clone FplSelf to prevent stack overflow 
 
     override this.Type signatureType = 
-        if this.Scope.Count > 1 then 
-            (this.Scope.Values |> Seq.head).Type signatureType
-        else 
-            LiteralSelf
+        match this.RefersTo with 
+        | Some ref -> ref.Type signatureType
+        | _ -> LiteralSelf
 
     override this.Represent()= 
-        if this.Scope.Count > 1 then 
-            (this.Scope.Values |> Seq.head).Represent()
-        else 
-            LiteralUndef
+        match this.RefersTo with 
+        | Some ref -> ref.Represent()
+        | _ -> LiteralUndef
 
     override this.Run variableStack = 
         // todo implement run
@@ -4535,13 +4478,14 @@ let checkArgPred (fv:FplValue) (arg:FplValue)  =
 
 /// Checks if an argument points to a free variable and if so, issues VAR09 diagnostics.
 let checkFreeVar (arg:FplValue) = 
-    if arg.Scope.ContainsKey(arg.FplId) then
-        let ref = arg.Scope[arg.FplId]
+    match arg.RefersTo with 
+    | Some ref ->
         match ref with 
         | :? FplGenericVariable as var ->
             if not var.IsBound then 
                 var.ErrorOccurred <- emitVAR09diagnostics var.FplId var.TypeId var.StartPos var.EndPos
         | _ -> ()
+    | _ -> ()
 
 /// Implements the semantics of an FPL conjunction compound predicate.
 type FplConjunction(positions: Positions, parent: FplValue) as this =
@@ -4997,18 +4941,8 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
 
     override this.Type signatureType = 
         let head = getFplHead this signatureType
-        let propagate = propagateSignatureType signatureType
-
-        let qualification =
-            if this.Scope.ContainsKey(".") then
-                Some(this.Scope["."])
-            else
-                None
-
-        match (head, qualification) with
-        | (_, Some qual) -> sprintf "%s.%s" head (qual.Type(propagate))
-        | (_, None) -> sprintf "%s" head
-
+        sprintf "%s" head
+    
     override this.Represent () = 
         let subRepr = 
             match this.Value with 
@@ -5020,6 +4954,8 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
             subRepr
 
     override this.Run _ = 
+        // todo implement run by calling extension object this RefersTo 
+        // or returning this as value otherwise
         this.Debug "Run"
 
     override this.CheckConsistency () = 
@@ -5045,7 +4981,7 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
                         // assign the reference FplValue fv only the first found match 
                         // even, if there are multiple extensions that would match it 
                         // (thus, the additional check for Scope.ContainsKey...)
-                        this.Scope.Add(this.FplId, ext)
+                        this.RefersTo <- Some ext
                         let mappingOpt = getMapping ext
                         match mappingOpt with
                         | Some mapping -> this.TypeId <- mapping.TypeId
@@ -5225,9 +5161,10 @@ let runIntrinsicFunction (fv:FplValue) variableStack =
     let mapOpt = getMapping fv
     match mapOpt with
     | Some (:? FplMapping as map) ->
-        match map.ToBeReturnedDefinition with 
+        match map.RefersTo with 
         | Some cl when map.Dimensionality = 0 ->
             // a class type without an array
+            // todo filter by constructors
             let defaultCtor = cl.Scope.Values |> Seq.head :?> FplGenericConstructor
             defaultCtor.Run variableStack
             match defaultCtor.Instance with 
@@ -5690,8 +5627,8 @@ type FplReturn(positions: Positions, parent: FplValue) as this =
                     | :? FplIntrinsicInd 
                     | :? FplIntrinsicUndef ->
                         this.SetValue returnedReference
-                    | :? FplReference when returnedReference.Scope.ContainsKey(returnedReference.FplId) ->
-                        let refValue = returnedReference.Scope[returnedReference.FplId]
+                    | :? FplReference when returnedReference.RefersTo.IsSome ->
+                        let refValue = returnedReference.RefersTo.Value
                         refValue.Run variableStack
                         match refValue with 
                         | :? FplGenericConstructor ->
@@ -5972,16 +5909,16 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
         | Some (:? FplVariableArray as assignee), Some assignedValue ->
            checkTypes assignee assignedValue 
         | Some (:? FplSelf as assignee), _ ->
-            let ref = assignee.Scope.Values |> Seq.toList
-            if ref.Length > 0 then 
-                this.ErrorOccurred <- emitSIG07iagnostic (assignee.Type SignatureType.Name) (getEnglishName ref.Head.Name false) assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
-            else
+            match assignee.RefersTo with 
+            | Some ref -> 
+                this.ErrorOccurred <- emitSIG07iagnostic (assignee.Type SignatureType.Name) (getEnglishName ref.Name false) assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
+            | None ->
                 this.ErrorOccurred <- emitSIG07iagnostic (assignee.Type SignatureType.Name) "the type of self cound not be determined" assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
         | Some (:? FplParent as assignee), _ ->
-            let ref = assignee.Scope.Values |> Seq.toList
-            if ref.Length > 0 then 
-                this.ErrorOccurred <- emitSIG07iagnostic (assignee.Type SignatureType.Name) (getEnglishName ref.Head.Name false) assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
-            else
+            match assignee.RefersTo with 
+            | Some ref -> 
+                this.ErrorOccurred <- emitSIG07iagnostic (assignee.Type SignatureType.Name) (getEnglishName ref.Name false) assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
+            | None ->
                 this.ErrorOccurred <- emitSIG07iagnostic (assignee.Type SignatureType.Name) "the type of parent cound not be determined" assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
         | Some (assignee), Some assignedValue ->
             let nameAssignee = assignee.Type SignatureType.Name
@@ -6000,15 +5937,13 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
     member private this.GetAssignmentArg no =
         if this.ArgList.Count > 1 then 
             let candidate = this.ArgList[no]
-            if candidate.Name = PrimRefL && candidate.Scope.ContainsKey(".") then 
-                let dottedRef = candidate.Scope["."]
-                if dottedRef.Scope.ContainsKey(dottedRef.FplId) then
-                    Some dottedRef.Scope[dottedRef.FplId]
-                else 
-                    None
-            elif candidate.Name = PrimRefL && candidate.Scope.ContainsKey(candidate.FplId) then 
-                Some candidate.Scope[candidate.FplId]
-            else
+            match candidate with 
+            | :? FplReference as ref ->
+                match ref.DottedChild with 
+                | Some dc -> dc.RefersTo
+                | None when ref.RefersTo.IsSome -> ref.RefersTo
+                | _ -> Some candidate
+            | _ ->
                 Some candidate
         else
             None
@@ -6430,39 +6365,20 @@ let findCandidatesByNameInBlock (fv: FplValue) (name: string) =
 let findCandidatesByNameInDotted (fv: FplValue) (name: string) =
     let rec findQualifiedEntity (fv1: FplValue) =
         match fv1 with
-        | :? FplReference ->
-            if fv1.Scope.ContainsKey(".") && fv1.Scope.Count > 1 then
-                let result =
-                    fv1.Scope
-                    |> Seq.filter (fun kvp -> kvp.Key <> ".")
-                    |> Seq.map (fun kvp -> kvp.Value)
-                    |> Seq.toList
-                    |> List.head
-
-                ScopeSearchResult.Found(result)
-            else
-                match fv1.Parent with
-                | Some parent -> findQualifiedEntity parent
-                | None -> ScopeSearchResult.NotFound
+        | :? FplReference as ref when ref.DottedChild.IsSome -> 
+            ScopeSearchResult.Found(ref.DottedChild.Value)
+        | :? FplReference -> 
+            match fv1.Parent with
+            | Some parent -> findQualifiedEntity parent
+            | None -> ScopeSearchResult.NotFound
         | _ -> ScopeSearchResult.NotFound
 
     match findQualifiedEntity fv with
     | ScopeSearchResult.Found candidate ->
         match candidate with
         | :? FplVariable as var ->
-            let varTypeOpt = 
-                if var.Value.IsSome then
-                    // if the variable has a value, then 
-                    var.Value
-                else 
-                    var.Scope.Values |> Seq.tryHead
-            match varTypeOpt with
-            | Some varType ->
-                varType.Scope
-                |> Seq.filter (fun kvp -> kvp.Value.FplId = name)
-                |> Seq.map (fun kvp -> kvp.Value)
-                |> Seq.toList
-            | _ -> []
+            // prefer variable value over its referred type node
+            Option.orElse var.Value var.RefersTo |> Option.toList
         | _ -> []
     | _ -> []
 

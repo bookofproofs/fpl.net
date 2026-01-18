@@ -53,44 +53,16 @@ let rec simplifyTriviallyNestedExpressions (rb:FplValue) =
     if rb.ArgList.Count = 1 && rb.FplId = "" then
         // removable reference blocks are those with only a single argument and unset FplId 
         let subNode = rb.ArgList[0]
-        match subNode with
-        | :? FplConjunction
-        | :? FplExclusiveOr 
-        | :? FplDisjunction 
-        | :? FplNegation 
-        | :? FplImplication 
-        | :? FplEquivalence 
-        | :? FplIsOperator 
-        | :? FplEquality 
-        | :? FplDecrement 
-        | :? FplExtensionObj 
-        | :? FplReference
-        | :? FplSelf
-        | :? FplParent
-        | :? FplGenericQuantor
-        | :? FplIntrinsicInd
-        | :? FplIntrinsicPred
-        | :? FplIntrinsicUndef 
-        | :? FplMapCases ->
-            variableStack.Pop() |> ignore // pop the removable reference block and ignored it
-            variableStack.PushEvalStack(subNode) // push its subNode instead
-            // adjust subNode's Parent, EndPos, Scope
-            subNode.Parent <- rb.Parent 
-            subNode.EndPos <- rb.EndPos
-            if rb.Scope.ContainsKey(".") then 
-                subNode.Scope.Add(".",rb.Scope["."])
-            // adjust Parent's scope
-            match rb.Parent with 
-            | Some parent -> 
-                if parent.Scope.ContainsKey(".") then
-                   parent.Scope["."] <- subNode
-            | _ -> ()
-            // prevent recursive loops
-            rb.ArgList.Clear() 
-            rb.Value <- None
-            rb.Scope.Clear()
-            simplifyTriviallyNestedExpressions subNode
-        | _ -> ()
+        variableStack.Pop() |> ignore // pop the removable reference block and ignored it
+        variableStack.PushEvalStack(subNode) // push its subNode instead
+        // adjust subNode's Parent, EndPos, Scope
+        subNode.Parent <- rb.Parent 
+        subNode.EndPos <- rb.EndPos
+        // prevent recursive loops
+        rb.ArgList.Clear() 
+        rb.Value <- None
+        rb.Scope.Clear()
+        simplifyTriviallyNestedExpressions subNode
 
 /// A recursive function evaluating an AST and returning a list of EvalAliasedNamespaceIdentifier records
 /// for each occurrence of the uses clause in the FPL code.
@@ -274,25 +246,8 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Var")
         let evalPath = st.EvalPath()
         let isLocalizationDeclaration = evalPath.StartsWith("AST.Namespace.Localization.Expression.")
-        let fv = variableStack.PeekEvalStack()
-        let parentFv = fv.Parent.Value
-        match fv.Name with 
-        | PrimVariableL
-        | PrimVariableArrayL -> 
-            // in the context of variable declarations, we set the name and positions of the variables
-            fv.FplId <- name
-            fv.TypeId <- LiteralUndef 
-            fv.StartPos <- pos1
-            fv.EndPos <- pos2
-        | PrimExtensionL -> 
-            let newVar = new FplVariable(name, (pos1, pos2), fv)
-            variableStack.PushEvalStack(newVar)
-            variableStack.PopEvalStack()
-        | PrimRefL when parentFv.Scope.ContainsKey(".") ->
-            fv.FplId <- name
-            fv.TypeId <- LiteralUndef
-        | _ -> 
-            // in all other contexts, check by name, if this variable was declared in some scope
+
+        let checkByName (fv:FplValue) = 
             let rec IsInUpperScope (fv1: FplValue): FplGenericVariable option =
                 if fv1.Name = PrimTheoryL then 
                     None
@@ -307,8 +262,8 @@ let rec eval (st: SymbolTable) ast =
                 | PrimRefL 
                 | PrimForInStmtEntity 
                 | PrimForInStmtDomain ->
-                    fv.Scope.Add(name, foundVar)
                     fv.FplId <- name
+                    fv.RefersTo <- Some foundVar
                 | PrimTranslationL ->
                     // for translations, use the name of the variable
                     fv.FplId <- foundVar.Type SignatureType.Name
@@ -323,7 +278,30 @@ let rec eval (st: SymbolTable) ast =
                 undefVar.SetValue(undefined)
                 variableStack.PushEvalStack(undefVar)
                 variableStack.PopEvalStack()
-
+            
+        let fv = variableStack.PeekEvalStack()
+        let parentFv = fv.Parent.Value
+        match fv.Name with 
+        | PrimVariableL
+        | PrimVariableArrayL -> 
+            // in the context of variable declarations, we set the name and positions of the variables
+            fv.FplId <- name
+            fv.TypeId <- LiteralUndef 
+            fv.StartPos <- pos1
+            fv.EndPos <- pos2
+        | PrimExtensionL -> 
+            let newVar = new FplVariable(name, (pos1, pos2), fv)
+            variableStack.PushEvalStack(newVar)
+            variableStack.PopEvalStack()
+        | PrimRefL ->
+            match box parentFv with 
+            | :? IHasDotted as dotted when dotted.DottedChild.IsSome ->
+                fv.FplId <- name
+                fv.TypeId <- LiteralUndef
+            | _ -> checkByName fv
+        | _ -> 
+            // in all other contexts, check by name, if this variable was declared in some scope
+            checkByName fv
         if isLocalizationDeclaration && fv.Scope.ContainsKey(name) then 
             let variable = fv.Scope[name] 
             let rec getLocalization (fValue:FplValue) = 
@@ -476,7 +454,7 @@ let rec eval (st: SymbolTable) ast =
             | PrimClassL
             | PrimPredicateL
             | PrimFunctionalTermL ->
-                fv.Scope.Add(block.FplId, block)
+                fv.RefersTo <- Some block
             | _ ->
                 fv.ErrorOccurred <- emitID016diagnostics $"{getEnglishName block.Name true} '{block.Type(SignatureType.Name)}'" pos1 pos2
         | _ -> ()
@@ -500,7 +478,7 @@ let rec eval (st: SymbolTable) ast =
             | PrimPredicateL, PrimMandatoryPredicateL
             | PrimFunctionalTermL, PrimMandatoryFunctionalTermL
             | PrimFunctionalTermL, PrimMandatoryPredicateL ->
-                fv.Scope.Add(block.FplId, block)
+                fv.RefersTo <- Some block
             | _ ->
                 fv.ErrorOccurred <- emitID015diagnostics $"{getEnglishName block.Name true} '{block.Type(SignatureType.Name)}'" pos1 pos2
         | _ -> ()
@@ -614,7 +592,10 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("DottedPredicate")
         let fv = variableStack.PeekEvalStack()
         let refBlock = new FplReference((pos1, pos2), fv) 
-        fv.Scope.Add(".", refBlock)
+        match fv with 
+        | :? FplReference as ref ->
+            ref.DottedChild <- Some refBlock
+        | _ -> ()
         variableStack.PushEvalStack(refBlock)
         eval st predicateWithOptSpecificationAst
         variableStack.PopEvalStack()
@@ -701,7 +682,7 @@ let rec eval (st: SymbolTable) ast =
                 | _ -> fv.ErrorOccurred <- emitSIG11diagnostics (qualifiedName map false) (qualifiedName candidate false) map.StartPos map.EndPos       
             | :? FplVariable -> 
                 fv.TypeId <- identifier
-                fv.Scope.TryAdd(fv.FplId, candidate) |> ignore
+                fv.RefersTo <- Some candidate
             | _ -> correctIds fv
         | _ ->
             match fv with 
@@ -906,42 +887,47 @@ let rec eval (st: SymbolTable) ast =
             @ candidatesFromPropertyScope 
             @ candidatesFromDottedQualification
 
-        let getCandidatesBasedOnDotted (parentFv: FplValue) (fVal:FplValue) = 
+        /// parentFv is a dotted reference 
+        let getCandidatesBasedOnDottedParent (parentFv: FplValue) = 
             let referencedNodeOpt, typeRefNode, typeNameRefNode =
-                if parentFv.Scope.ContainsKey(parentFv.FplId) then 
-                    let dottedReference = parentFv.Scope[parentFv.FplId]
-                    match dottedReference with 
+                match parentFv.RefersTo with 
+                | Some parentFvRefersTo ->
+                    match parentFvRefersTo with 
                     | :? FplFunctionalTerm 
                     | :? FplPredicate 
-                    | :? FplClass -> Some dottedReference, dottedReference.Type SignatureType.Mixed, dottedReference.Name
-                    | _ ->
-                        let refNodeOpt = dottedReference.Scope.Values |> Seq.tryHead 
+                    | :? FplClass -> Some parentFvRefersTo, parentFvRefersTo.Type SignatureType.Mixed, parentFvRefersTo.Name
+                    | _ -> 
+                        let refNodeOpt = parentFvRefersTo.RefersTo
                         match refNodeOpt with 
                         | Some refNode -> refNodeOpt, refNode.Type SignatureType.Mixed, refNode.Name
                         | None -> None, $"{parentFv.FplId}:{LiteralUndef}", parentFv.Name
-                else
+                | None ->
                     None, $"{parentFv.FplId}:{LiteralUndef}", parentFv.Name
             let candidatesPre = 
                 match referencedNodeOpt with 
                 | Some referencedNode ->
                     referencedNode.GetVariables() @ referencedNode.GetProperties() 
                 | _ -> []
-            typeRefNode, typeNameRefNode, filterCandidates candidatesPre fVal.FplId false
+            match box parentFv with
+            | :? IHasDotted as pDotted when pDotted.DottedChild.IsSome -> 
+                let dottedChild = pDotted.DottedChild.Value
+                typeRefNode, typeNameRefNode, filterCandidates candidatesPre dottedChild.FplId false
+            | _ -> typeRefNode, typeNameRefNode, ([], "") // empty candidates list and name
 
         let parentFv = fv.Parent.Value
-        match optionalSpecificationAst with
-        | Some specificationAst when parentFv.Scope.ContainsKey(".") -> 
+        match optionalSpecificationAst, box parentFv with
+        | Some specificationAst, (:? IHasDotted as pDotted) when pDotted.DottedChild.IsSome -> 
             eval st fplIdentifierAst
             eval st specificationAst |> ignore
-            let typeRefNode, typeNameRefNode, (candidates, candidatesNames) =  getCandidatesBasedOnDotted parentFv fv
+            let typeRefNode, typeNameRefNode, (candidates, candidatesNames) = getCandidatesBasedOnDottedParent parentFv 
             if candidates.Length = 0 then 
                 fv.ErrorOccurred <- emitID012Diagnostics (fv.Type SignatureType.Mixed) typeNameRefNode typeRefNode candidatesNames pos1 pos2
             else
                 match checkSIG04Diagnostics fv candidates with
-                | Some matchedCandidate -> fv.Scope.TryAdd(fv.FplId, matchedCandidate) |> ignore
+                | Some matchedCandidate -> fv.RefersTo <- Some matchedCandidate
                 | _ -> ()
 
-        | Some specificationAst -> 
+        | Some specificationAst, _ -> 
             let node = new FplReference((pos1, pos2), fv) 
             variableStack.PushEvalStack(node)
             eval st fplIdentifierAst
@@ -951,41 +937,31 @@ let rec eval (st: SymbolTable) ast =
                 if System.Char.IsLower(node.FplId[0]) then
                     // match the signatures of small-letter entities (like the self or parent entity, or variables with arguments) 
                     // with their declared types 
-                    node.Scope
-                    |> Seq.filter (fun kvp -> kvp.Key = LiteralSelf || kvp.Key = LiteralParent || kvp.Key = node.FplId)
-                    |> Seq.map (fun kvp -> kvp.Value)
-                    |> Seq.map (fun fv -> 
-                        match fv.Name with
-                        | PrimVariableL when fv.Scope.Count = 1 -> 
-                            let ret = fv.Scope.Values |> Seq.head
-                            match ret.Name with 
-                            | PrimVariableL -> fv // if the variable is nesting other variables, it is ok to take the variable
-                            | _ -> ret // otherwise we peek the nested type referenced by the variable
-                        | LiteralSelf when fv.Scope.Count = 1 -> fv.Scope.Values |> Seq.head
-                        | LiteralParent when fv.Scope.Count = 1 -> fv.Scope.Values |> Seq.head
-                        | _ -> fv
-                    )
-                    |> Seq.toList
+                    match node.RefersTo with
+                    | Some fv when (fv.Name = PrimVariableL || fv.Name = LiteralSelf || fv.Name = LiteralParent) && fv.RefersTo.IsSome -> [fv.RefersTo.Value]
+                    | Some fv -> [fv]
+                    | None -> []
                 else
                     searchForCandidatesOfReferenceBlock node
             if candidates.Length = 1 && candidates.Head.Name = PrimVariableArrayL then
                 let candidate = candidates.Head
-                node.Scope.TryAdd(node.FplId, candidate) |> ignore
+                node.RefersTo <- Some candidate 
                 checkSIG08_SIG10Diagnostics node
             else
                 match checkSIG04Diagnostics node candidates with
-                | Some matchedCandidate -> node.Scope.TryAdd(node.FplId, matchedCandidate) |> ignore
+                | Some matchedCandidate -> 
+                    node.RefersTo <- Some matchedCandidate
                 | _ -> ()
 
             variableStack.PopEvalStack()
-        | None when parentFv.Scope.ContainsKey(".") -> 
+        | None, (:? IHasDotted as pDotted) when pDotted.DottedChild.IsSome -> 
             eval st fplIdentifierAst
-            let typeRefNode, typeNameRefNode, (candidates, candidatesNames) =  getCandidatesBasedOnDotted parentFv fv
+            let typeRefNode, typeNameRefNode, (candidates, candidatesNames) = getCandidatesBasedOnDottedParent parentFv
             if candidates.Length = 0 then 
                 fv.ErrorOccurred <- emitID012Diagnostics (fv.Type SignatureType.Mixed) typeNameRefNode typeRefNode candidatesNames pos1 pos2
             else
-                fv.Scope.TryAdd(fv.FplId, candidates.Head) |> ignore
-        | None -> 
+                fv.RefersTo <- Some candidates.Head 
+        | None, _ -> 
             // if no specification was found then simply continue in the same context
             eval st fplIdentifierAst
             let block = fv.UltimateBlockNode.Value
@@ -1002,19 +978,18 @@ let rec eval (st: SymbolTable) ast =
                 match checkSIG04Diagnostics fv constructors with
                 | Some matchedCandidate -> 
                     // add a parameterless constructor (if such exists)
-                    fv.Scope.TryAdd(fv.FplId,matchedCandidate) |> ignore
+                     fv.RefersTo <- Some matchedCandidate 
                 | _ -> ()
             elif classes.Length > 0 && constructors.Length = 0 then
                 // add the class (intrinsic case, no constructors at all)
-
-                fv.Scope.TryAdd(fv.FplId, classes.Head) |> ignore
                 let candidate = classes.Head
+                fv.RefersTo <- Some candidate
                 fv.ErrorOccurred <- emitID025Diagnostics (qualifiedName candidate false) (getEnglishName block.Name false) block.Name fv.StartPos fv.EndPos
             elif candidates.Length > 0 then
                 // not a class was referred, add the candidate (e.g., referenced variable)
                 let candidate = candidates.Head
                 fv.FplId <- candidate.FplId 
-                fv.Scope.TryAdd(fv.FplId, candidate) |> ignore
+                fv.RefersTo <- Some candidate
                 fv.ErrorOccurred <- emitID025Diagnostics (qualifiedName candidate false) (getEnglishName block.Name false) block.Name fv.StartPos fv.EndPos
             else
                 ()
@@ -1067,10 +1042,10 @@ let rec eval (st: SymbolTable) ast =
                         if nodeType <> baseType then 
                             baseNode.ErrorOccurred <- emitID007diagnostics beingCreatedNode.Name nodeType foundBase.Name baseType pos1 pos2
                         else 
-                            baseNode.Scope.Add (foundBase.FplId, foundBase) // add found functional term to base
+                            baseNode.RefersTo <- Some foundBase // add found base class to base
                             addVariablesAndPropertiesOfBaseNode foundBase
                     | :? FplClass, :? FplClass -> 
-                        baseNode.Scope.Add (foundBase.FplId, foundBase) // add found base class to base
+                        baseNode.RefersTo <- Some foundBase // add found base class to base
                         addVariablesAndPropertiesOfBaseNode foundBase
                     | :? FplPredicate, _
                     | :? FplFunctionalTerm, _
@@ -1175,7 +1150,7 @@ let rec eval (st: SymbolTable) ast =
         // we list it her to remove FS0025 incomplete pattern warnings
         st.EvalPop()
     // | ReferencingIdentifier of Positions * (Ast * Ast list)
-    | ReferencingIdentifier((pos1, pos2), (predicateIdentifierAst, dollarDigitListAsts)) ->
+    | Ast.ReferencingIdentifier((pos1, pos2), (predicateIdentifierAst, dollarDigitListAsts)) ->
         st.EvalPush("ReferencingIdentifier")
         eval st predicateIdentifierAst
         dollarDigitListAsts |> List.map (eval st) |> ignore
@@ -1185,7 +1160,7 @@ let rec eval (st: SymbolTable) ast =
             let candidates = findCandidatesByName st fv.FplId false true
             if candidates.Length > 0 then 
                 let candidate = candidates.Head
-                fv.Scope.TryAdd(fv.FplId, candidate) |> ignore
+                fv.RefersTo <- Some candidate
                 match fv.UltimateBlockNode with
                 | Some block ->
                     fv.ErrorOccurred <- emitID025Diagnostics (qualifiedName candidate false) (getEnglishName block.Name false) block.Name fv.StartPos fv.EndPos
@@ -1327,16 +1302,12 @@ let rec eval (st: SymbolTable) ast =
         )
         |> ignore
         
-        let precNodeList (fv1:FplValue) = 
-            fv1.Scope.Values 
-            |> Seq.toList 
-
         /// Returns the precedence of fv1 if its ExpressionType is Infix
         /// or Int32.MaxValue otherwise
         let getPrecedence (fv1:FplValue) =
-            match precNodeList fv1 with
-            | [] -> Int32.MaxValue
-            | x::xs -> 
+            match fv1.RefersTo with
+            | None -> Int32.MaxValue
+            | Some x -> 
                 match x.ExpressionType with
                 |  FixType.Infix (symb, prec) -> prec
                 | _ -> Int32.MaxValue
@@ -1917,7 +1888,7 @@ let rec eval (st: SymbolTable) ast =
         let checkDiagnostics (fvJi:FplGenericJustificationItem) candidates = 
             match tryFindAssociatedBlockForJustificationItem fvJi candidates with
             | ScopeSearchResult.FoundAssociate potentialCandidate -> 
-                fvJi.Scope.TryAdd(fvJi.FplId, potentialCandidate) |> ignore
+                fvJi.RefersTo <- Some potentialCandidate
                 match fvJi with 
                 | :? FplJustificationItemByProofArgument ->
                     let split = fvJi.FplId.Split(":")

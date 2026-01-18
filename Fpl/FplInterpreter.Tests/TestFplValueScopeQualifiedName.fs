@@ -677,7 +677,7 @@ type TestFplValueScopeQualifiedName() =
             match var with
             | "base1" -> Assert.AreEqual<string>("a reference TestDelegateQualifiedName.T1().B()", qualifiedName base1 false) 
             | "base2" -> Assert.AreEqual<string>("a reference TestDelegateQualifiedName.T1().C(a, b, c, d)", qualifiedName base1 false) 
-            | "base3" -> Assert.AreEqual<string>("a reference TestDelegateQualifiedName.T1().D(T1(), b, c)", qualifiedName base1 false) 
+            | "base3" -> Assert.AreEqual<string>("a reference TestDelegateQualifiedName.T1().D(self, b, c)", qualifiedName base1 false) 
             | "base4" -> Assert.AreEqual<string>("a reference TestDelegateQualifiedName.T1().B(In(x))", qualifiedName base1 false) 
             | "base5" -> Assert.AreEqual<string>("a reference TestDelegateQualifiedName.T1().Test()", qualifiedName base1 false) 
             | "base6" -> Assert.AreEqual<string>("a reference TestDelegateQualifiedName.T1().C(Test1(a), Test2(b, c, d))", qualifiedName base1 false) 

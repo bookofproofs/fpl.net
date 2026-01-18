@@ -243,7 +243,7 @@ type TestSignatureMatching() =
             let blocks = theory.Scope.Values |> Seq.toList 
             let testClass = blocks |> List.filter(fun fv -> (fv.Type(SignatureType.Name)).StartsWith("C")) |> List.head
             let parentClass = testClass.ArgList[0]
-            let constructorParentClass = parentClass.Scope.Values |> Seq.toList |> List.head
+            let constructorParentClass = parentClass.RefersTo.Value
             let constructor = testClass.Scope.Values |> Seq.toList |> List.head
             let baseConstructorCall = constructor.ArgList |> Seq.filter (fun fv -> fv :? FplBaseConstructorCall) |> Seq.toList |> List.head
             let fvArgs = baseConstructorCall.ArgList[0]
@@ -578,6 +578,7 @@ type TestSignatureMatching() =
     [<DataRow("03b", """def cl A { ctor A(x:obj) {} ctor A(x:pred) {} ctor A(x:ind) {} } def pred T() {dec ~n:A ~x:pred n:=A(x); true};""", "A(pred)")>]
     [<DataRow("03c", """def cl A { ctor A(x:obj) {} ctor A(x:pred) {} ctor A(x:ind) {} } def pred T() {dec ~n:A ~x:ind n:=A(x); true};""", "A(ind)")>]
     [<TestMethod>]
+
     /// Test if a reference of the assigned value gets the correct candidate 
     /// depending on its signature and the available constructor candidates in the referenced class
     /// regardless of the order in which the constructors in the referenced class are declared.
@@ -595,7 +596,7 @@ type TestSignatureMatching() =
             let pred = blocks |> List.filter(fun fv -> (fv.Type(SignatureType.Name)).StartsWith("T(")) |> List.head
             let stmtAssign = pred.ArgList[0]
             let assignedReferenceValue = stmtAssign.ArgList[1]
-            let candidate = assignedReferenceValue.Scope[assignedReferenceValue.FplId]
+            let candidate = assignedReferenceValue.RefersTo.Value
             Assert.AreEqual<string>(expectedCandidateSignature, candidate.Type(SignatureType.Mixed))
         | None -> 
             Assert.IsTrue(false)
