@@ -4182,10 +4182,6 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) (mode:MatchingMode) =
                 None, Parameter.Consumed // obj accepting obj, ind accepting ind, pred accepting pred, func accepting func
             | _, _ -> 
                 errMsgStandard aName aType pName pType, Parameter.Consumed
-        elif isCallByValue a && isWithParenthesesOrFunc p then
-            // mismatch of a by-value-reference with parameterized mapping or a func mapping
-            // since in both cases, no by-value reference is allowed
-            Some $"Return type by value `{aName}:{aType}` does not match the expected type `{pType}`. Try removing arguments of `{aName}` and refer to`{a.FplId}` instead.", Parameter.Consumed
         else 
             matchByTypeStringRepresentation a aName aType aTypeName p pName pType pTypeName mode
     | _ ,_ -> 

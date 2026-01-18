@@ -1873,7 +1873,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsInstanceOfType<FplArgInferenceRevoke>(node)
-            Assert.AreEqual<int>(1, node.ArgList.Count)
+            Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
@@ -2560,6 +2560,7 @@ type SymbolTableStructure() =
         | "FplExtensionObj", "00d" ->
             Assert.IsInstanceOfType<FplReference>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
+            Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsTrue(parent.RefersTo.IsSome)
             Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
             Assert.IsInstanceOfType<FplExtensionObj>(node)
@@ -3134,7 +3135,9 @@ type SymbolTableStructure() =
         | "FplIntrinsicInd", "00" ->
             Assert.IsInstanceOfType<FplReference>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
-            Assert.AreEqual<int>(1, parent.Scope.Count)
+            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsTrue(parent.RefersTo.IsSome)
+            Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
             Assert.IsInstanceOfType<FplIntrinsicInd>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
@@ -3157,6 +3160,7 @@ type SymbolTableStructure() =
         | "FplIntrinsicPred", "01" ->
             Assert.IsInstanceOfType<FplReference>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
+            Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsTrue(parent.RefersTo.IsSome)
             Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
             Assert.IsInstanceOfType<FplIntrinsicPred>(node)
@@ -3166,6 +3170,7 @@ type SymbolTableStructure() =
         | "FplIntrinsicPred", "03c" ->
             Assert.IsInstanceOfType<FplReference>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
+            Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsTrue(parent.RefersTo.IsSome)
             Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
             Assert.IsInstanceOfType<FplIntrinsicPred>(node)
@@ -3175,6 +3180,7 @@ type SymbolTableStructure() =
         | "FplIntrinsicPred", "03d" ->
             Assert.IsInstanceOfType<FplReference>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
+            Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsTrue(parent.RefersTo.IsSome)
             Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
             Assert.IsInstanceOfType<FplIntrinsicPred>(node)
@@ -3208,7 +3214,9 @@ type SymbolTableStructure() =
         | "FplIntrinsicUndef", "00" ->
             Assert.IsInstanceOfType<FplReference>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
-            Assert.AreEqual<int>(1, parent.Scope.Count)
+            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsTrue(parent.RefersTo.IsSome)
+            Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
             Assert.IsInstanceOfType<FplIntrinsicUndef>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
@@ -4975,7 +4983,9 @@ type SymbolTableStructure() =
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
 
-    [<DataRow("FplSelf", "00", """def pred T() {self()};""", "")>]
+    [<DataRow("FplSelf", "00", """def pred T() {self};""", "")>]
+    [<DataRow("FplSelf", "00_1", """def pred T() {self()};""", "")>]
+    [<DataRow("FplSelf", "00_2", """def pred T() {self($1)};""", "")>]
     [<DataRow("FplSelf", "00a", """def cl A {dec ~x:obj x:=self; ctor A() {}};""", "")>]
     [<DataRow("FplSelf", "00b", """def cl A {ctor A() {dec ~x:obj x:=self;}};""", "")>]
     [<DataRow("FplSelf", "00c", """def cl A {intr property pred T() { is(self,A) } };""", "")>]

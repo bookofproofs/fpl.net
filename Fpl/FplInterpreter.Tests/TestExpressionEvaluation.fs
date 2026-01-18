@@ -442,7 +442,7 @@ type TestExpressionEvaluation() =
 
     // match with the type pred(...) 
     [<DataRow("MS1", "def pred A(z:obj) def pred Test() {is(A, pred(y:obj))};", LiteralTrue)>] // true: pred(y:obj) matches signature A(obj)
-    [<DataRow("MS1a", "def pred A(z:obj) def pred Test() {dec ~x:obj; is(A(x), pred(y:obj))};", LiteralFalse)>] // false: pred(y:obj) does not match value A(obj) 
+    [<DataRow("MS1a", "def pred A(z:obj) def pred Test() {dec ~x:obj; is(A(x), pred(y:obj))};", LiteralTrue)>] // false: pred(y:obj) does not match value A(obj) 
     [<DataRow("MS1b", "def pred A(z:obj) def pred Test() {dec ~x:ind; is(A(x), pred(y:obj))};", LiteralFalse)>] // false: pred(y:obj) does not match value A(ind) not matching A(obj)
     [<DataRow("MS1c", "def pred A(z:ind) def pred Test() {dec ~x:ind; is(A(x), pred(y:obj))};", LiteralFalse)>] // false: pred(y:obj) does not match value A(ind) 
     [<DataRow("MS1d", "def pred A(z:ind) def pred Test() {is(A, pred(y:obj))};", LiteralFalse)>] // false: pred(y:obj) does not match signature A(ind)

@@ -359,7 +359,10 @@ let rec eval (st: SymbolTable) ast =
             let fvAi = fv :?> FplArgInferenceRevoke
             let arg = fvAi.ParentArgument
             let proof = arg.ParentProof
-            if proof.HasArgument argumentId then 
+            if argumentId = arg.FplId then 
+                // revokes its own argument
+                fv.ErrorOccurred <- emitPR015Diagnostics argumentId pos1 pos2
+            elif proof.HasArgument argumentId then 
                 let refArg = proof.Scope[argumentId] :?> FplArgument
                 let aiOpt = refArg.ArgumentInference
                 match aiOpt with
