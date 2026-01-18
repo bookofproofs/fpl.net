@@ -969,7 +969,7 @@ type TestFplValueScopeBlockType() =
             let theory = r.Scope[filename]
             let pr = theory.Scope["T()"] 
             let basePre = pr.ArgList |> Seq.head
-            let base1 = basePre.Scope.Values |> Seq.head
+            let base1 = basePre.RefersTo.Value 
             Assert.IsInstanceOfType<FplExtensionObj>(base1)
         | None -> 
             Assert.IsTrue(false)

@@ -929,21 +929,6 @@ and FplVariableStack() =
 type IHasDotted = 
     abstract member DottedChild : FplValue option with get, set
 
-/// Helper to set the new RefersTo property and keep the old Scope entry for backwards compatibility.
-/// This makes future reads prefer RefersTo while preserving existing consumers that still read Scope.
-let setRefersToAndScope (refNode: FplValue) (target: FplValue) identifier =
-    // set RefersTo first
-    refNode.RefersTo <- Some target
-    // maintain Scope mapping for backward compatibility when an FplId is available
-    if identifier <> "" then
-        try
-            if not (refNode.Scope.ContainsKey(identifier)) then
-                refNode.Scope.TryAdd(identifier, target) |> ignore
-            else
-                refNode.Scope.[identifier] <- target
-        with
-        | _ -> () // tolerant -- do not crash evaluator on scope write issues
-
 /// Searches for a references in node symbol table. 
 /// Will works properly only for nodes types that use their scope like FplReference, FplSelf, FplParent, FplForInStmtDomain, FplForInStmtEntity, FplVariable
 let rec referencedNodeOpt (fv:FplValue) = 
@@ -1311,7 +1296,7 @@ let addExpressionToReference (fplValue:FplValue) =
         | Some next when next.Name = PrimRefL ->
             next.FplId <- fplValue.FplId
             next.TypeId <- fplValue.TypeId
-            setRefersToAndScope next fplValue fplValue.FplId
+            next.RefersTo <- Some fplValue 
         | _ -> addExpressionToParentArgList fplValue 
 
 /// Indicates if an FplValue is the root of the SymbolTable.
