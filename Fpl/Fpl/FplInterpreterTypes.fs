@@ -3249,6 +3249,7 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
                         this.SetValuesOf called
                         variableStack.RestoreVariables(called)
                 | PrimDelegateDecrementL
+                | PrimExtensionObj
                 | PrimDelegateEqualL ->
                     called.Run variableStack
                     this.SetValuesOf called
@@ -4967,6 +4968,8 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
             subRepr
 
     override this.Run _ = 
+        // todo implement run by calling extension object this RefersTo 
+        // or returning this as value otherwise
         this.Debug "Run"
 
     override this.CheckConsistency () = 
