@@ -757,6 +757,119 @@ type TestExpressionEvaluation() =
             Assert.AreEqual<string>(expected, actual)
         | None -> Assert.IsTrue(false)
 
+
+    // match with val and with pred
+    [<DataRow("VP1", "def pred Test() {is(true, val)};", LiteralTrue)>] // true is val
+    [<DataRow("VP1a", "def pred Test() {is(true, pred)};", LiteralTrue)>] // true is pred
+    [<DataRow("VP2", "def pred Test() {is(false, val)};", LiteralTrue)>] // false is val
+    [<DataRow("VP2a", "def pred Test() {is(false, pred)};", LiteralTrue)>] // false is pred
+    [<DataRow("VP3", "def pred Test() {dec ~x:val; is(x, val)};", LiteralTrue)>] // x typed val is val
+    [<DataRow("VP3a", "def pred Test() {dec ~x:val; is(x, pred)};", LiteralFalse)>] // x typed val is not pred
+    [<DataRow("VP3b", "def pred Test() {dec ~x:pred; is(x, pred)};", LiteralTrue)>] // x typed pred is not pred
+    [<DataRow("VP3c", "def pred Test() {dec ~x:pred; is(x, val)};", LiteralFalse)>] // x typed pred is not val
+
+    // match with and
+    [<DataRow("VP4a", "def pred Test() {dec ~x,y:val; is( and(x,y), val) };", LiteralTrue)>] // and is val
+    [<DataRow("VP4b", "def pred Test() {dec ~x:val,y:pred; is( and(x,y), val) };", LiteralTrue)>] // and is val
+    [<DataRow("VP4c", "def pred Test() {dec ~x:pred,y:val; is( and(x,y), val) };", LiteralTrue)>] // and is val
+    [<DataRow("VP4c", "def pred Test() {dec ~x:pred,y:pred; is( and(x,y), val) };", LiteralTrue)>] // and is val
+    [<DataRow("VP5a", "def pred Test() {dec ~x,y:val; is( and(x,y), pred) };", LiteralTrue)>] // and is pred
+    [<DataRow("VP5b", "def pred Test() {dec ~x:val,y:pred; is( and(x,y), pred) };", LiteralTrue)>] // and is pred
+    [<DataRow("VP5c", "def pred Test() {dec ~x:pred,y:val; is( and(x,y), pred) };", LiteralTrue)>] // and is pred
+    [<DataRow("VP5d", "def pred Test() {dec ~x:pred,y:pred; is( and(x,y), pred) };", LiteralTrue)>] // and is pred
+    [<DataRow("VP6a", "def pred Test() {dec ~x,y:val; is( and(x,y), pred()) };", LiteralFalse)>] // and is not pred()
+    [<DataRow("VP6b", "def pred Test() {dec ~x:val,y:pred; is( and(x,y), pred()) };", LiteralFalse)>] // and is not pred()
+    [<DataRow("VP6c", "def pred Test() {dec ~x:pred,y:val; is( and(x,y), pred()) };", LiteralFalse)>] // and is not pred()
+    [<DataRow("VP6d", "def pred Test() {dec ~x:pred,y:pred; is( and(x,y), pred()) };", LiteralFalse)>] // and is not pred()
+
+    [<DataRow("VP7a", "def pred Test() {dec ~x:pred,y:pred; is( and(x,y), pred(pred,pred) };", LiteralTrue)>] // and(pred,pred) is pred(pred,pred)
+    [<DataRow("VP7b", "def pred Test() {dec ~x:pred,y:pred; is( and(x,y), pred(pred,val)) };", LiteralFalse)>] // and(pred,pred) is not pred(pred,val)
+    [<DataRow("VP7c", "def pred Test() {dec ~x:pred,y:pred; is( and(x,y), pred(val,pred)) };", LiteralFalse)>] // and(pred,pred) is not pred(val,pred) 
+    [<DataRow("VP7d", "def pred Test() {dec ~x:pred,y:pred; is( and(x,y), pred(val,val)) };", LiteralFalse)>] // and(pred,pred) is not pred(val,val)
+    [<DataRow("VP7e", "def pred Test() {dec ~x:pred,y:val; is( and(x,y), pred(pred,pred)) };", LiteralFalse)>] // and(pred,val) is not pred(pred,pred)
+    [<DataRow("VP7f", "def pred Test() {dec ~x:pred,y:val; is( and(x,y), pred(pred,val)) };", LiteralTrue)>] // and(pred,val) is pred(pred,val)
+    [<DataRow("VP7g", "def pred Test() {dec ~x:pred,y:val; is( and(x,y), pred(val,pred)) };", LiteralFalse)>] // and(pred,val) is not pred(val,pred)
+    [<DataRow("VP7h", "def pred Test() {dec ~x:pred,y:val; is( and(x,y), pred(val,val)) };", LiteralFalse)>] // and(pred,val) is not pred(val,val)
+    [<DataRow("VP7i", "def pred Test() {dec ~x:val,y:pred; is( and(x,y), pred(pred,pred)) };", LiteralFalse)>] // and(val,pred) is not pred(pred,pred)
+    [<DataRow("VP7j", "def pred Test() {dec ~x:val,y:pred; is( and(x,y), pred(pred,val)) };", LiteralFalse)>] // and(val,pred) is not pred(pred,val)
+    [<DataRow("VP7k", "def pred Test() {dec ~x:val,y:pred; is( and(x,y), pred(val,pred)) };", LiteralTrue)>] // and(val,pred) is pred(val,pred)
+    [<DataRow("VP7l", "def pred Test() {dec ~x:val,y:pred; is( and(x,y), pred(val,val)) };", LiteralFalse)>] // and(val,pred) is not pred(val,val)
+    [<DataRow("VP7m", "def pred Test() {dec ~x:val,y:val; is( and(x,y), pred(pred,pred)) };", LiteralFalse)>] // and(val,val) is not pred(pred,pred)
+    [<DataRow("VP7n", "def pred Test() {dec ~x:val,y:val; is( and(x,y), pred(pred,val)) };", LiteralFalse)>] // and(val,val) is not pred(pred,val)
+    [<DataRow("VP7o", "def pred Test() {dec ~x:val,y:val; is( and(x,y), pred(val,pred)) };", LiteralFalse)>] // and(val,val) is not pred(val,pred)
+    [<DataRow("VP7p", "def pred Test() {dec ~x:val,y:val; is( and(x,y), pred(val,val)) };", LiteralTrue)>] // and(val,val) is pred(val,val)
+
+    [<DataRow("ST4b", "def pred Test() {dec ~x,y:val; is( or(x,y), val) };", LiteralTrue)>]
+    [<DataRow("ST4c", "def pred Test() {dec ~x,y:val; is( xor(x,y), val) };", LiteralTrue)>]
+    [<DataRow("ST4d", "def pred Test() {dec ~x,y:val; is( impl(x,y), val) };", LiteralTrue)>]
+    [<DataRow("ST4e", "def pred Test() {dec ~x,y:val; is( iif(x,y), val) };", LiteralTrue)>]
+    [<DataRow("ST4f", "dec pred P(x:obj) def pred Test() { is( all x:obj { P(x) }, val) };", LiteralTrue)>]
+    [<DataRow("ST4g", "dec pred P(x:obj) def pred Test() { is( ex x:obj { P(x) }, val) };", LiteralTrue)>]
+    [<DataRow("ST4h", "dec pred P(x:obj) def pred Test() { is( ex$1 x:obj { P(x) }, val) };", LiteralTrue)>]
+
+    // mismatch with other simple types 
+    [<DataRow("ST4_obj", "def pred Test() {dec ~x:val; is(x, obj)};", LiteralFalse)>]
+    [<DataRow("ST4_ind", "def pred Test() {dec ~x:val; is(x, ind)};", LiteralFalse)>]
+    [<DataRow("ST4_pred", "def pred Test() {dec ~x:val; is(x, pred)};", LiteralFalse)>]
+    [<DataRow("ST4_func", "def pred Test() {dec ~x:val; is(x, func)};", LiteralFalse)>]
+
+    // mismatch with simple type val
+    [<DataRow("ST0_val", "def pred Test() {dec ~x:obj; is(x, val)};", LiteralFalse)>]
+    [<DataRow("ST1_val", "def pred Test() {dec ~x:ind; is(x, val)};", LiteralFalse)>]
+    [<DataRow("ST2_val", "def pred Test() {dec ~x:func; is(x, val)};", LiteralFalse)>]
+    [<DataRow("ST2a_val", "def pred Test() {dec ~x:func()->ind; is(x, val)};", LiteralFalse)>]
+    [<DataRow("ST2b_val", "def pred Test() {dec ~x:func(y:obj)->pred; is(x, val)};", LiteralFalse)>]
+    [<DataRow("ST2c_val", "def pred Test() {dec ~x:func(y:obj)->func; is(x, val)};", LiteralFalse)>]
+    [<DataRow("ST2d_val", "def pred Test() {dec ~x:func(y:obj)->func(z:pred)->pred; is(x, val)};", LiteralFalse)>]
+    [<DataRow("ST3_val", "def pred Test() {dec ~x:pred; is(x, val)};", LiteralFalse)>]
+    [<DataRow("ST3a_val", "def pred Test() {dec ~x:pred(); is(x, val)};", LiteralFalse)>]
+    [<DataRow("ST3b_val", "def pred Test() {dec ~x:pred; is(x, val)};", LiteralFalse)>]
+    [<DataRow("ST3c_val", "def pred Test() {dec ~x:pred(y:obj); is(x, val)};", LiteralFalse)>]
+    [<DataRow("ST4_val", "def pred Test() {dec ~x:val; is(x, func)};", LiteralFalse)>]
+
+    [<DataRow("NP4", "def pred Test() {dec ~x:val; is(x, pred())};", LiteralFalse)>]
+
+    [<DataRow("NP_4", "def pred Test() {dec ~x:val; is(x, pred(a:obj))};", LiteralFalse)>]
+
+    [<DataRow("NF4", "def pred Test() {dec ~x:val; is(x, func()->ind)};", LiteralFalse)>]
+
+    [<DataRow("NF_4", "def pred Test() {dec ~x:val; is(x, func(a:obj)->ind)};", LiteralFalse)>]
+
+    // match with the type val
+    [<DataRow("MS2_", "def pred A(z:obj) def pred Test() {is(A, val)};", LiteralTrue)>] // true: pred matches signature A(obj)
+    [<DataRow("MS2a_", "def pred A(z:obj) def pred Test() {dec ~x:obj; is(A(x), val)};", LiteralTrue)>] // true: pred matches value A(obj) 
+    [<DataRow("MS2b_", "def pred A(z:obj) def pred Test() {dec ~x:ind; is(A(x), val)};", LiteralFalse)>] // false: pred does not match value A(ind) since it does not match A(obj)
+    [<DataRow("MS2c_", "def pred A(z:ind) def pred Test() {dec ~x:ind; is(A(x), val)};", LiteralTrue)>] // true: pred matches value A(ind) 
+    [<DataRow("MS2d_", "def pred A(z:ind) def pred Test() {is(A, val)};", LiteralTrue)>] // true: pred matches signature A(ind)
+    [<DataRow("MS2e_", "ax A {true} def pred Test() {is(A, val)};", LiteralTrue)>] // true: pred matches signature A (axiom)
+    [<DataRow("MS2f_", "thm A {true} def pred Test() {is(A, val)};", LiteralTrue)>] // true: pred matches signature A (theorem)
+    [<DataRow("MS2g_", "lem A {true} def pred Test() {is(A, val)};", LiteralTrue)>] // true: pred matches signature A (lemma)
+    [<DataRow("MS2h_", "prop A {true} def pred Test() {is(A, val)};", LiteralTrue)>] // true: pred matches signature A (proposition)
+    [<DataRow("MS2i_", "conj A {true} def pred Test() {is(A, val)};", LiteralTrue)>] // true: pred does matches signature A (conjecture)
+    [<DataRow("MS2j_", "cor A$1 {true} def pred Test() {is(A$1, val)};", LiteralTrue)>] // true: pred matches signature A$1 (corollary)
+    [<DataRow("MS2k_", "proof A$1 {1. |- trivial} def pred Test() {is(A$1, val)};", LiteralFalse)>] // false: pred does not match signature A$1 (proof)
+    [<DataRow("MS2l_", "inf A {pre:true con:true} def pred Test() {is(A, val)};", LiteralFalse)>] // false: pred does not match signature A (rule of inference)
+    [<DataRow("MS2m_", "def func A()->obj def pred Test() {is(A, val)};", LiteralFalse)>] // false: pred does not match signature A (functional term)
+    [<DataRow("MS2n_", "ext A x@/\d+/ -> obj {dec ~y:obj; return y} def pred Test() {is(A, val)};", LiteralFalse)>] // false: pred does not match signature A (extension)
+    [<DataRow("MS2o_", "def cl A def pred Test() {is(A, val)};", LiteralFalse)>] // false: pred does not match signature A (class)
+
+    [<TestMethod>]
+    member this.TestExpressionEvaluationIsOperandValPred(no:string, fplCode, expected: string) =
+        ad.Clear()
+        let filename = "TestExpressionEvaluationIsOperand"
+        let stOption = prepareFplCode (filename + ".fpl", fplCode, false)
+        prepareFplCode (filename, "", false) |> ignore
+
+        match stOption with
+        | Some st ->
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let pr1 = theory.Scope.Values |> Seq.filter (fun fv -> fv.FplId = "Test") |> Seq.head         
+
+            let actual = evalTreeFplRepresentation(pr1)
+            Assert.AreEqual<string>(expected, actual)
+        | None -> Assert.IsTrue(false)
+
     // match with simple types
     [<DataRow("ST0", "def pred Test() {is(undef, obj)};", LiteralTrue)>]
     [<DataRow("ST1", "def pred Test() {is(undef, ind)};", LiteralTrue)>]
@@ -785,8 +898,6 @@ type TestExpressionEvaluation() =
     [<DataRow("MS2g", "lem A {true} def pred Test() {is(undef, A)};", LiteralTrue)>] // true: undef matches signature A (lemma)
     [<DataRow("MS2h", "prop A {true} def pred Test() {is(undef, A)};", LiteralTrue)>] // true: undef matches signature A (proposition)
     [<DataRow("MS2i", "conj A {true} def pred Test() {is(undef, A)};", LiteralTrue)>] // true: undef matches signature A (conjecture)
-    [<DataRow("MS2j", "cor A$1 {true} def pred Test() {is(undef, A$1)};", LiteralTrue)>] // true: undef matches signature A$1 (corollary)
-    [<DataRow("MS2k", "proof A$1 {1. |- trivial} def pred Test() {is(undef, A$1)};", LiteralTrue)>] // true: undef matches signature A$1 (proof)
     [<DataRow("MS2l", "inf A {pre:true con:true} def pred Test() {is(undef, A)};", LiteralTrue)>] // true: undef matches  signature A (rule of inference)
     [<DataRow("MS2m", "def func A()->obj def pred Test() {is(undef, A)};", LiteralTrue)>] // true: undef matches signature A (functional term)
     [<DataRow("MS2n", "ext A x@/\d+/ -> obj {dec ~y:obj; return y} def pred Test() {is(undef, A)};", LiteralTrue)>] // true: undef matches signature A (extension)

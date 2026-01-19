@@ -61,172 +61,68 @@ namespace FplLS
         public List<FplCompletionItem> GetChoices()
         {
 
-            switch (Word)
+            return Word switch
             {
-                case "ISO 639 language code":
-                    return new FplCompletionItemChoicesIso639().GetChoices(this);
-                case "whitespace":
-                case "significant whitespace":
-                    return new FplCompletionItemChoicesWhitespace().GetChoices(this);
-                case "dollarDigits":
-                    return new FplCompletionItemChoicesDigits().GetChoices(this);
-                case "argument identifier":
-                    return new FplCompletionItemChoicesArgumentIdentifier().GetChoices(this);
-                case "language-specific string":
-                    return new FplCompletionItemChoicesString().GetChoices(this);
-                case "extensionString":
-                case "extension regex":
-                    return new FplCompletionItemChoicesRegex().GetChoices(this);
-                case "word":
-                    return new FplCompletionItemChoicesWord().GetChoices(this);
-                case PrimVariableL:
-                case "variable (got keyword)":
-                case "variable (got template)":
-                    return new FplCompletionItemChoicesVariable().GetChoices(this);
-                case PrimPascalCaseId:
-                    return new FplCompletionItemChoicesPascalCaseId().GetChoices(this);
-                case LiteralDel:
-                case LiteralDelL:
-                    return new FplCompletionItemChoicesDelegate().GetChoices(this);
-                case LiteralIs:
-                    return new FplCompletionItemChoicesIsOperator().GetChoices(this);
-                case LiteralAlias:
-                case LiteralAssL:
-                case LiteralAss:
-                case LiteralAssert:
-                case LiteralByDef:
-                case LiteralCl:
-                case LiteralClL:
-                case LiteralCon:
-                case LiteralConL:
-                case LiteralExt:
-                case LiteralExtL:
-                case LiteralFunc:
-                case LiteralFuncL:
-                case LiteralInd:
-                case LiteralIndL:
-                case LiteralIntr:
-                case LiteralIntrL:
-                case LiteralIn:
-                case LiteralObj:
-                case LiteralObjL:
-                case LiteralPred:
-                case LiteralPredL:
-                case LiteralPre:
-                case LiteralPreL:
-                case LiteralQed:
-                case LiteralRet:
-                case LiteralRetL:
-                case LiteralRev:
-                case LiteralRevL:
-                case LiteralTrivial:
-                case LiteralVal:
-                case LiteralValL:
-                    return new FplCompletionItemChoicesKeyword().GetChoices(this);
-                case LiteralSelf:
-                case LiteralBase:
-                case LiteralParent:
-                    return new FplCompletionItemChoicesSelf().GetChoices(this);
-                case LiteralAll:
-                case LiteralEx:
-                case LiteralExN:
-                    return new FplCompletionItemChoicesQuantor().GetChoices(this);
-                case LiteralTrue:
-                case LiteralFalse:
-                case LiteralUndef:
-                case LiteralUndefL:
-                case LiteralNot:
-                case LiteralXor:
-                case LiteralIif:
-                case LiteralImpl:
-                case LiteralAnd:
-                case LiteralOr:
-                case "(":
-                    return new FplCompletionItemChoicesPredicate().GetChoices(this);
-                case LiteralCtor:
-                case LiteralCtorL:
-                    return new FplCompletionItemChoicesConstructor().GetChoices(this);
-                case LiteralDec:
-                case LiteralDecL:
-                    return new FplCompletionItemChoicesDeclaration().GetChoices(this);
-                case LiteralCases:
-                    return new FplCompletionItemChoicesCases().GetChoices(this);
-                case LiteralFor:
-                    return new FplCompletionItemChoicesFor().GetChoices(this);
-                case LiteralPrty:
-                case LiteralPrtyL:
-                    return new FplCompletionItemChoicesProperty().GetChoices(this);
-                case LiteralAx:
-                case LiteralAxL:
-                case LiteralPost:
-                case LiteralPostL:
-                    return new FplCompletionItemChoicesAxiom().GetChoices(this);
-                case LiteralDef:
-                case LiteralDefL:
-                    return new FplCompletionItemChoicesDefinition().GetChoices(this);
-                case LiteralThm:
-                case LiteralThmL:
-                    return new FplCompletionItemChoicesTheoremLikeStmt("Theorem").GetChoices(this);
-                case LiteralLem:
-                case LiteralLemL:
-                    return new FplCompletionItemChoicesTheoremLikeStmt("Lemma").GetChoices(this);
-                case LiteralProp:
-                case LiteralPropL:
-                    return new FplCompletionItemChoicesTheoremLikeStmt("Proposition").GetChoices(this);
-                case LiteralConj:
-                case LiteralConjL:
-                    return new FplCompletionItemChoicesTheoremLikeStmt("Conjecture").GetChoices(this);
-                case LiteralInf:
-                case LiteralInfL:
-                    return new FplCompletionItemChoicesRuleOfInference().GetChoices(this);
-                case LiteralCor:
-                case LiteralCorL:
-                    return new FplCompletionItemChoicesCorollary().GetChoices(this);
-                case LiteralPrf:
-                case LiteralPrfL:
-                    return new FplCompletionItemChoicesProof().GetChoices(this);
-                case LiteralLoc:
-                case LiteralLocL:
-                    return new FplCompletionItemChoicesLocalization().GetChoices(this);
-                case LiteralUses:
-                    return new FplCompletionItemChoicesUses().GetChoices(this);
-                case LiteralPrefix:
-                case LiteralPostFix:
-                case LiteralSymbol:
-                case LiteralInfix:
-                    return new FplCompletionItemChoicesSymbol(Word, true).GetChoices(this);
-                case "prefix symbol":
-                case "postfix symbol":
-                case "object symbol":
-                case "infix symbol":
-                    return new FplCompletionItemChoicesSymbol(Word, false).GetChoices(this);
-                default:
-                    return new FplCompletionItemChoicesDefault().GetChoices(this);
-            }
-
+                "ISO 639 language code" => new FplCompletionItemChoicesIso639().GetChoices(this),
+                "whitespace" or "significant whitespace" => new FplCompletionItemChoicesWhitespace().GetChoices(this),
+                "dollarDigits" => new FplCompletionItemChoicesDigits().GetChoices(this),
+                "argument identifier" => new FplCompletionItemChoicesArgumentIdentifier().GetChoices(this),
+                "language-specific string" => new FplCompletionItemChoicesString().GetChoices(this),
+                "extensionString" or "extension regex" => new FplCompletionItemChoicesRegex().GetChoices(this),
+                "word" => new FplCompletionItemChoicesWord().GetChoices(this),
+                PrimVariableL or "variable (got keyword)" or "variable (got template)" => new FplCompletionItemChoicesVariable().GetChoices(this),
+                PrimPascalCaseId => new FplCompletionItemChoicesPascalCaseId().GetChoices(this),
+                LiteralDel or LiteralDelL => new FplCompletionItemChoicesDelegate().GetChoices(this),
+                LiteralIs => new FplCompletionItemChoicesIsOperator().GetChoices(this),
+                LiteralAlias or LiteralAssL or LiteralAss or LiteralAssert or LiteralByDef or LiteralCl or LiteralClL or LiteralCon or LiteralConL or LiteralExt or LiteralExtL or LiteralFunc or LiteralFuncL or LiteralInd or LiteralIndL or LiteralIntr or LiteralIntrL or LiteralIn or LiteralObj or LiteralObjL or LiteralPred or LiteralPredL or LiteralPre or LiteralPreL or LiteralQed or LiteralRet or LiteralRetL or LiteralRev or LiteralRevL or LiteralTrivial or LiteralVal or LiteralValL => new FplCompletionItemChoicesKeyword().GetChoices(this),
+                LiteralSelf or LiteralBase or LiteralParent => new FplCompletionItemChoicesSelf().GetChoices(this),
+                LiteralAll or LiteralEx or LiteralExN => new FplCompletionItemChoicesQuantor().GetChoices(this),
+                LiteralTrue or LiteralFalse or LiteralUndef or LiteralUndefL or LiteralNot or LiteralXor or LiteralIif or LiteralImpl or LiteralAnd or LiteralOr or "(" => new FplCompletionItemChoicesPredicate().GetChoices(this),
+                LiteralCtor or LiteralCtorL => new FplCompletionItemChoicesConstructor().GetChoices(this),
+                LiteralDec or LiteralDecL => new FplCompletionItemChoicesDeclaration().GetChoices(this),
+                LiteralCases => new FplCompletionItemChoicesCases().GetChoices(this),
+                LiteralFor => new FplCompletionItemChoicesFor().GetChoices(this),
+                LiteralPrty or LiteralPrtyL => new FplCompletionItemChoicesProperty().GetChoices(this),
+                LiteralAx or LiteralAxL or LiteralPost or LiteralPostL => new FplCompletionItemChoicesAxiom().GetChoices(this),
+                LiteralDef or LiteralDefL => new FplCompletionItemChoicesDefinition().GetChoices(this),
+                LiteralThm or LiteralThmL => new FplCompletionItemChoicesTheoremLikeStmt("Theorem").GetChoices(this),
+                LiteralLem or LiteralLemL => new FplCompletionItemChoicesTheoremLikeStmt("Lemma").GetChoices(this),
+                LiteralProp or LiteralPropL => new FplCompletionItemChoicesTheoremLikeStmt("Proposition").GetChoices(this),
+                LiteralConj or LiteralConjL => new FplCompletionItemChoicesTheoremLikeStmt("Conjecture").GetChoices(this),
+                LiteralInf or LiteralInfL => new FplCompletionItemChoicesRuleOfInference().GetChoices(this),
+                LiteralCor or LiteralCorL => new FplCompletionItemChoicesCorollary().GetChoices(this),
+                LiteralPrf or LiteralPrfL => new FplCompletionItemChoicesProof().GetChoices(this),
+                LiteralLoc or LiteralLocL => new FplCompletionItemChoicesLocalization().GetChoices(this),
+                LiteralUses => new FplCompletionItemChoicesUses().GetChoices(this),
+                LiteralPrefix or LiteralPostFix or LiteralSymbol or LiteralInfix => new FplCompletionItemChoicesSymbol(Word, true).GetChoices(this),
+                "prefix symbol" or "postfix symbol" or "object symbol" or "infix symbol" => new FplCompletionItemChoicesSymbol(Word, false).GetChoices(this),
+                _ => new FplCompletionItemChoicesDefault().GetChoices(this),
+            };
         }
 
         public FplCompletionItem Clone()
         {
-            var ret = new FplCompletionItem(this.Word);
-            ret.AdditionalTextEdits = this.AdditionalTextEdits;
-            ret.Command = this.Command;
-            ret.CommitCharacters = this.CommitCharacters;
-            ret.Detail = this.Detail;
-            ret.Documentation = this.Documentation;
-            ret.FilterText = this.FilterText;
-            ret.InsertText = this.InsertText;
-            ret.Kind = this.Kind;
-            ret.Label = this.Label;
-            ret.Preselect = this.Preselect;
-            ret.SortText = this.SortText;
-            ret.TextEdit = this.TextEdit;
+            var ret = new FplCompletionItem(this.Word)
+            {
+                AdditionalTextEdits = this.AdditionalTextEdits,
+                Command = this.Command,
+                CommitCharacters = this.CommitCharacters,
+                Detail = this.Detail,
+                Documentation = this.Documentation,
+                FilterText = this.FilterText,
+                InsertText = this.InsertText,
+                Kind = this.Kind,
+                Label = this.Label,
+                Preselect = this.Preselect,
+                SortText = this.SortText,
+                TextEdit = this.TextEdit
+            };
             return ret;
         }
 
         public static string StripQuotesOrBrackets(string str)
         {
-            if (str.StartsWith("'") && str.EndsWith("'") || str.StartsWith("<") && str.EndsWith(">"))
+            if (str.StartsWith('\'') && str.EndsWith('\'') || str.StartsWith('<') && str.EndsWith('>'))
             {
                 // strip quotes or brackets from label
                 return str.Substring(1, str.Length - 2);
