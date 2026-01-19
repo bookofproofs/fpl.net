@@ -62,6 +62,7 @@ type Ast =
     | TemplateType of Positions * string
     | ObjectType of Positions * unit
     | ClassIdentifier of Positions * Ast
+    | ValidityType of Positions * unit
     | PredicateType of Positions * unit
     | FunctionalTermType of Positions * unit
     | IndexType of Positions * unit

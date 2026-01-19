@@ -120,6 +120,8 @@ namespace FplLS
                 case LiteralRev:
                 case LiteralRevL:
                 case LiteralTrivial:
+                case LiteralVal:
+                case LiteralValL:
                     return new FplCompletionItemChoicesKeyword().GetChoices(this);
                 case LiteralSelf:
                 case LiteralBase:

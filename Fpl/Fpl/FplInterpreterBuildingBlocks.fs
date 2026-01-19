@@ -64,6 +64,13 @@ let rec simplifyTriviallyNestedExpressions (rb:FplValue) =
         rb.Scope.Clear()
         simplifyTriviallyNestedExpressions subNode
 
+let setKeywordType keywordType pos1 pos2 = 
+    let fv = variableStack.PeekEvalStack()
+    match fv with
+    | :? FplVariableArray as arr -> arr.SetType keywordType None pos1 pos2 
+    | :? FplMapping as map -> map.SetType keywordType None pos1 pos2
+    | _ ->  fv.TypeId <- keywordType
+
 /// A recursive function evaluating an AST and returning a list of EvalAliasedNamespaceIdentifier records
 /// for each occurrence of the uses clause in the FPL code.
 let rec eval (st: SymbolTable) ast =
@@ -101,43 +108,23 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.IndexType((pos1, pos2),()) -> 
         st.EvalPush("IndexType")
-        let fv = variableStack.PeekEvalStack()
-        match fv with
-        | :? FplClass -> () // do not override class's type with base obj
-        | :? FplReference ->
-            fv.TypeId <- LiteralInd
-            fv.SetValue (new FplIntrinsicInd((pos1, pos2), fv))
-        | :? FplVariableArray as arr -> arr.SetType LiteralInd None pos1 pos2
-        | :? FplMapping as map -> map.SetType LiteralInd None pos1 pos2
-        | _ ->  fv.TypeId <- LiteralInd
-        st.EvalPop() |> ignore
+        setKeywordType LiteralInd pos1 pos2
+        st.EvalPop()
+    | Ast.ValidityType((pos1, pos2),()) -> 
+        st.EvalPush("ValidityType")
+        setKeywordType LiteralVal pos1 pos2
+        st.EvalPop()
     | Ast.ObjectType((pos1, pos2),()) -> 
         st.EvalPush("ObjectType")
-        let fv = variableStack.PeekEvalStack()
-        match fv with
-        | :? FplVariableArray as arr -> arr.SetType LiteralObj None pos1 pos2 
-        | :? FplMapping as map -> map.SetType LiteralObj None pos1 pos2
-        | _ ->  fv.TypeId <- LiteralObj
+        setKeywordType LiteralObj pos1 pos2
         st.EvalPop()
     | Ast.PredicateType((pos1, pos2),()) -> 
         st.EvalPush("PredicateType")
-        let fv = variableStack.PeekEvalStack()
-        match fv with
-        | :? FplClass -> () // do not override class's type with base obj
-        | :? FplReference ->
-            fv.TypeId <- LiteralPred
-            fv.SetValue (new FplIntrinsicPred((pos1, pos2), fv))
-        | :? FplVariableArray as arr -> arr.SetType LiteralPred None pos1 pos2
-        | :? FplMapping as map -> map.SetType LiteralPred None pos1 pos2
-        | _ ->  fv.TypeId <- LiteralPred
+        setKeywordType LiteralPred pos1 pos2
         st.EvalPop()
     | Ast.FunctionalTermType((pos1, pos2),()) -> 
         st.EvalPush("FunctionalTermType")
-        let fv = variableStack.PeekEvalStack()
-        match fv with
-        | :? FplVariableArray as arr -> arr.SetType LiteralFunc None pos1 pos2 
-        | :? FplMapping as map -> map.SetType LiteralFunc None pos1 pos2
-        | _ ->  fv.TypeId <- LiteralFunc
+        setKeywordType LiteralFunc pos1 pos2
         st.EvalPop()
     | Ast.Star((pos1, pos2),()) ->
         st.EvalPush("Star")
