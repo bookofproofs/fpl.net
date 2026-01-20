@@ -18,7 +18,6 @@ namespace FplLS
         public string TokenPredicate { get; set; }
         public string TokenPremise { get; set; }
         public string TokenRevoke { get; set; }
-        public string TokenValidity { get; set; }
         public FplCompletionItemChoices()
         {
             TokenAssume = LiteralAssL;
@@ -31,7 +30,6 @@ namespace FplLS
             TokenPredicate = LiteralPredL;
             TokenPremise = LiteralPreL;
             TokenRevoke = LiteralRevL;
-            TokenValidity = LiteralValL;
         }
 
         public void AdjustToShort()
@@ -46,7 +44,6 @@ namespace FplLS
             TokenPredicate = LiteralPred;
             TokenPremise = LiteralPre;
             TokenRevoke = LiteralRev;
-            TokenValidity = LiteralVal;
         }
 
         public abstract List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi);

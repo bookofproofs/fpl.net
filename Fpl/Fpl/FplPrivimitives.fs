@@ -189,10 +189,6 @@ let LiteralUndefL = "undefined"
 [<Literal>]
 let LiteralUses = "uses"
 [<Literal>]
-let LiteralVal = "val"
-[<Literal>]
-let LiteralValL = "validity"
-[<Literal>]
 let LiteralXor = "xor"
 
 let keyWordSet =
@@ -284,8 +280,6 @@ let keyWordSet =
            LiteralUndef
            LiteralUndefL
            LiteralUses
-           LiteralVal
-           LiteralValL
            LiteralXor |]
     )
 

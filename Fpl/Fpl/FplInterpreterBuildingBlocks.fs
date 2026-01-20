@@ -110,10 +110,6 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("IndexType")
         setKeywordType LiteralInd pos1 pos2
         st.EvalPop()
-    | Ast.ValidityType((pos1, pos2),()) -> 
-        st.EvalPush("ValidityType")
-        setKeywordType LiteralVal pos1 pos2
-        st.EvalPop()
     | Ast.ObjectType((pos1, pos2),()) -> 
         st.EvalPush("ObjectType")
         setKeywordType LiteralObj pos1 pos2

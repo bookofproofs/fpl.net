@@ -191,7 +191,6 @@ let keywordObject = positions "ObjectType" (skipString LiteralObjL <|> skipStrin
 
 let templateType = positions "TemplateType" ((attempt templateWithTail) <|> keywordTemplate) |>>  Ast.TemplateType
 
-let keywordValidity = positions "ValidityType" (skipString LiteralValL <|> skipString LiteralVal) |>> Ast.ValidityType
 let keywordPredicate = positions "PredicateType" (skipString LiteralPredL <|> skipString LiteralPred) |>> Ast.PredicateType
 let keywordFunction = positions "FunctionalTermType" (skipString LiteralFuncL <|> skipString LiteralFunc) |>> Ast.FunctionalTermType
 
@@ -247,9 +246,9 @@ let mapping, mappingRef = createParserForwardedToRef()
 let predicateType = positions "CompoundPredicateType" (keywordPredicate .>>. opt paramTuple) |>> Ast.CompoundPredicateType
 let functionalTermType = positions "CompoundFunctionalTermType" (keywordFunction .>>. opt (paramTuple .>>. (IW >>. mapping))) |>> Ast.CompoundFunctionalTermType
 
-let simpleVariableType = positions "SimpleVariableType" (choice [ keywordIndex; keywordObject; keywordValidity; predicateIdentifier; templateType; functionalTermType; predicateType ]) |>> Ast.SimpleVariableType
+let simpleVariableType = positions "SimpleVariableType" (choice [ keywordIndex; keywordObject; predicateIdentifier; templateType; functionalTermType; predicateType ]) |>> Ast.SimpleVariableType
 // indexAllowedType is used to restrict Fpl types allowed to be used as indexes in arrayType
-let indexAllowedType = positions "IndexAllowedType" (choice [ keywordIndex; keywordObject; predicateIdentifier; templateType; keywordPredicate; keywordValidity; keywordFunction]) |>> Ast.IndexAllowedType
+let indexAllowedType = positions "IndexAllowedType" (choice [ keywordIndex; keywordObject; predicateIdentifier; templateType; keywordPredicate; keywordFunction]) |>> Ast.IndexAllowedType
 
 let indexAllowedTypeList = (sepBy1 (indexAllowedType .>> IW) comma) .>> IW
 // arrayType is used to define arrays in Fpl
