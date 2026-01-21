@@ -122,6 +122,14 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("FunctionalTermType")
         setKeywordType LiteralFunc pos1 pos2
         st.EvalPop()
+    | Ast.TemplateType((pos1, pos2), s) -> 
+        st.EvalPush("TemplateType")
+        let fv = variableStack.PeekEvalStack()
+        setKeywordType s pos1 pos2
+        let templateNode = new FplIntrinsicTpl(s, (pos1, pos2), fv)
+        variableStack.PushEvalStack(templateNode)
+        variableStack.PopEvalStack()
+        st.EvalPop() 
     | Ast.Star((pos1, pos2),()) ->
         st.EvalPush("Star")
         st.EvalPop()
@@ -212,18 +220,6 @@ let rec eval (st: SymbolTable) ast =
             fv.FplId <- extensionName
             fv.TypeId <- extensionName
         | _ -> ()
-        st.EvalPop() 
-    | Ast.TemplateType((pos1, pos2), s) -> 
-        st.EvalPush("TemplateType")
-        let fv = variableStack.PeekEvalStack()
-        match fv with
-        | :? FplClass -> () // do not override class's type with base obj
-        | :? FplReference ->
-            let value = new FplIntrinsicTpl(s, (pos1, pos2), fv)
-            fv.TypeId <- s
-        | :? FplVariableArray as arr -> arr.SetType s None pos1 pos2 
-        | :? FplMapping as map -> map.SetType s None pos1 pos2
-        | _ ->  fv.TypeId <- s
         st.EvalPop() 
     | Ast.Var((pos1, pos2), name) ->
         st.EvalPush("Var")

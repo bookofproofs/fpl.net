@@ -1185,6 +1185,17 @@ let tryAddToParentForInStmt (fplValue:FplValue) =
     else
         parent.ArgList.Add fplValue
 
+// Tries to add a template to the ultimate block's scope, inside which it was used.
+let tryAddTemplateToParent (templateNode:FplValue) =
+    let identifier = templateNode.FplId
+    let nextOpt = templateNode.UltimateBlockNode // the scope of all templates ís inside the ultimate block
+    match nextOpt with 
+    | Some next when not (next.Scope.ContainsKey identifier) -> 
+        next.Scope.Add(identifier, templateNode)
+        // correct the parent 
+        templateNode.Parent <- Some next
+    | _ -> () // template was already added to the ultimate node
+
 // Tries to add an FPL block to its parent's scope using its FplId, or issues ID001 diagnostics if a conflict occurs
 let tryAddToParentUsingFplId (fplValue:FplValue) =
     let identifier = fplValue.FplId
@@ -5122,7 +5133,7 @@ type FplIntrinsicTpl(name, positions: Positions, parent: FplValue) as this =
     override this.Run _ = 
         this.Debug "Run"
 
-    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
+    override this.EmbedInSymbolTable _ = tryAddTemplateToParent this 
 
     override this.RunOrder = None
 
