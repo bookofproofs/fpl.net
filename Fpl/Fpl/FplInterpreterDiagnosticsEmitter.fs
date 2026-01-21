@@ -853,6 +853,20 @@ let emitSIG11diagnostics qualifiedNameMapping qualifiedWrongCandidate pos1 pos2 
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
+let emitSIG12diagnostics templateName type1 type2 lastPosition pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = SIG12(templateName, type1)
+            Diagnostic.Alternatives = Some $"Last used with `{type2}` at {lastPosition}."
+        }
+    ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
+
 let emitST001diagnostics name pos1 pos2 =
     let diagnostic =
         { 

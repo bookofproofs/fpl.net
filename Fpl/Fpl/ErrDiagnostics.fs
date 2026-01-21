@@ -173,6 +173,7 @@ type DiagnosticCode =
     | SIG09 of string * string * int
     | SIG10 of string * string * int 
     | SIG11 of string * string
+    | SIG12 of string * string 
     // structure-related error codes
     | ST001 of string 
     | ST002 of string 
@@ -291,6 +292,7 @@ type DiagnosticCode =
             | SIG09 _ -> "SIG09"
             | SIG10 _ -> "SIG10"
             | SIG11 _ -> "SIG11"
+            | SIG12 _ -> "SIG12"
             // structure-related error codes
             | ST001 _ -> "ST001"
             | ST002 _ -> "ST002"
@@ -430,6 +432,7 @@ type DiagnosticCode =
             | SIG09 (arrName, dimType, dimNumber) -> $"Missing index for array's `{arrName}` {englishOrdinal dimNumber} dimension `{dimType}`"
             | SIG10 (arrName, indexVarName, indexNumber) -> $"Array `{arrName}` has less dimensions, {englishOrdinal indexNumber} index `{indexVarName}` not supported"
             | SIG11 (qualifiedNameMapping, qualifiedWrongCandidate) -> $"{qualifiedNameMapping} cannot map to {qualifiedWrongCandidate}"
+            | SIG12 (templateName, type1) -> $"Inconsistent use of template `{templateName}` with type `{type1}`. "
             // structure-related error codes
             | ST001 nodeName -> sprintf $"The {nodeName} does nothing."
             | ST002 nodeName -> sprintf $"The {nodeName} does nothing."

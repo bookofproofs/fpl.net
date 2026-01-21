@@ -4967,7 +4967,7 @@ type SymbolTableStructure() =
         | "FplReturn", "00b" ->
             Assert.IsInstanceOfType<FplFunctionalTerm>(parent)
             Assert.AreEqual<int>(3, parent.ArgList.Count) // mapping + assignment + return 
-            Assert.AreEqual<int>(1, parent.Scope.Count) // variable
+            Assert.AreEqual<int>(2, parent.Scope.Count) // variable + template
             Assert.IsInstanceOfType<FplReturn>(node)
             Assert.AreEqual<int>(1, node.ArgList.Count) // reference
             Assert.AreEqual<int>(0, node.Scope.Count)
