@@ -242,6 +242,7 @@ let rec eval (st: SymbolTable) ast =
             | Some foundVar -> 
                 // it was declared in the scope
                 match fv.Name with 
+                | PrimJIByDefVar 
                 | PrimRefL 
                 | PrimForInStmtEntity 
                 | PrimForInStmtDomain ->
