@@ -1095,11 +1095,7 @@ type FplTheory(theoryName, parent: FplValue, filePath: string, runOrder) as this
         this.AssignParts(ret)
         ret
 
-    override this.Type signatureType =
-        match signatureType with
-        | SignatureType.Name 
-        | SignatureType.Mixed -> this.FplId
-        | SignatureType.Type -> this.TypeId
+    override this.Type signatureType = getFplHead this signatureType
 
     override this.Represent () = LiteralUndef
 
@@ -1333,11 +1329,7 @@ type FplIntrinsicPred(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
-    override this.Type (signatureType:SignatureType) = 
-        match signatureType with
-            | SignatureType.Name 
-            | SignatureType.Mixed -> this.FplId
-            | SignatureType.Type -> this.TypeId
+    override this.Type (signatureType:SignatureType) = getFplHead this signatureType
                     
     override this.Represent() = this.FplId
 
@@ -1880,6 +1872,14 @@ type FplGenericConstructor(name, positions: Positions, parent: FplValue) as this
     override this.Name = PrimDefaultConstructor
     override this.ShortName = LiteralCtor
 
+    override this.Type signatureType =
+        let head = getFplHead this signatureType
+        let paramT = getParamTuple this signatureType
+        match signatureType with
+        | SignatureType.Name
+        | SignatureType.Mixed -> $"{head}({paramT})" 
+        | SignatureType.Type -> head
+
     override this.Represent () = 
         let head = this.TypeId
 
@@ -1974,12 +1974,6 @@ type FplDefaultConstructor(name, positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
-    override this.Type signatureType =
-        match signatureType with
-        | SignatureType.Name
-        | SignatureType.Mixed -> $"{this.FplId}()" 
-        | SignatureType.Type -> this.TypeId
-
     override this.Represent() = $"{this.TypeId}()" 
 
     override this.EmbedInSymbolTable nextOpt = 
@@ -2025,14 +2019,6 @@ type FplConstructor(positions: Positions, parent: FplValue) as this =
     member this.ParentConstructorCalls = _parentConstructorCalls
 
     override this.IsBlock () = true
-
-    override this.Type signatureType =
-        let head = getFplHead this signatureType
-        let paramT = getParamTuple this signatureType
-        match signatureType with
-        | SignatureType.Name
-        | SignatureType.Mixed -> $"{head}({paramT})" 
-        | SignatureType.Type -> head
 
     override this.Represent () = this.Type(SignatureType.Mixed)
 
@@ -2100,11 +2086,8 @@ and FplClass(positions: Positions, parent: FplValue) as this =
         |> Seq.filter (fun fv -> fv.Name = LiteralCtorL)
         |> Seq.toList
     
-    override this.Type signatureType =
-        match signatureType with
-        | SignatureType.Name 
-        | SignatureType.Mixed -> this.FplId
-        | SignatureType.Type -> this.TypeId
+    override this.Type signatureType = getFplHead this signatureType
+
 
     override this.Represent () = $"dec {LiteralCl} {this.FplId}"
 
@@ -6072,6 +6055,7 @@ let tryFindAssociatedBlockForJustificationItem (fvJi: FplGenericJustificationIte
         | :? FplJustificationItemByDef, :? FplClass
         | :? FplJustificationItemByDef, :? FplPredicate
         | :? FplJustificationItemByDef, :? FplFunctionalTerm
+        | :? FplJustificationItemByDef, :? FplGenericVariable
         | :? FplJustificationItemByConj, :? FplConjecture
         | :? FplJustificationItemByCor, :? FplCorollary
         | :? FplJustificationItemByAx, :? FplAxiom
