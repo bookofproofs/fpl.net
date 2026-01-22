@@ -3430,6 +3430,24 @@ type TestInterpreterErrors() =
             runTestHelper "TestSIG11.fpl" fplCode code expected
 
 
+    [<DataRow("00", "def pred T(x:tpl) {dec x:=$1 x:=$2; x};", 0)>]
+    [<DataRow("00a", "def pred T(x:tpl) {dec x:=$1 x:=true; x};", 1)>] // A template not accepting assigning different types
+    [<DataRow("01", "def pred Equal(x,y: tpl) { del.Equal(x,y) } def pred T() {dec ~x:ind ~y:ind x:=$1 y:=$2; Equal(x,y)};", 0)>]
+    [<DataRow("01a", "def pred Equal(x,y: tpl) { del.Equal(x,y) } def pred T() {dec ~x:ind ~y:pred x:=$1 y:=true; Equal(x,y)};", 1)>] // same template in Equal do not accept different types
+    [<DataRow("02", "def pred Equal(x: tpl, y:tpl1) { del.Equal(x,y) } def pred T() {dec ~x:ind ~y:ind x:=$1 y:=$2; Equal(x,y)};", 0)>] 
+    [<DataRow("02a", "def pred Equal(x: tpl, y:tpl1) { del.Equal(x,y) } def pred T() {dec ~x:ind ~y:pred x:=$1 y:=true; Equal(x,y)};", 0)>] // two templates in Equal accepting different types
+    [<DataRow("02", "def cl A def pred T() {dec ~x:*tpl[ind] x[$1]:=true x[$2]:=false; true};", 0)>] 
+    [<DataRow("02a", "def cl A def pred T() {dec ~x:*tpl[ind] x[$1]:=true x[$2]:=A(); true};", 1)>] // a template not accepting assigning different types
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestSIG12(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = SIG12 ("", "", "", "")
+            ad.Clear()
+            runTestHelper "TestSIG12.fpl" fplCode code expected
+
     [<DataRow("00a", "def cl A {intr} ;", 1)>]
     [<DataRow("00b", "def cl A:B {intr} ;", 1)>]
     [<DataRow("00c", "def cl A:B {intr property pred T() {true} } ;", 0)>]

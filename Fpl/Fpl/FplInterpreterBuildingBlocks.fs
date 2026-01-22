@@ -127,6 +127,11 @@ let rec eval (st: SymbolTable) ast =
         let fv = variableStack.PeekEvalStack()
         setKeywordType s pos1 pos2
         let templateNode = new FplIntrinsicTpl(s, (pos1, pos2), fv)
+        match fv with 
+        | :? FplGenericVariable as var -> 
+            // attach template type to declared variable 
+            var.RefersTo <- Some templateNode
+        | _ -> () // RefersTo's semantics in other FplValues is different, do not interfer with it
         variableStack.PushEvalStack(templateNode)
         variableStack.PopEvalStack()
         st.EvalPop() 

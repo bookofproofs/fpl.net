@@ -1688,6 +1688,8 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
             this.SetIsUsed()
         this.IsSignatureVariable <- otherVar.IsSignatureVariable 
         this.IsInitialized <- otherVar.IsInitialized
+        this.IsInitialized <- otherVar.IsInitialized
+        this.RefersTo <- otherVar.RefersTo
 
 let checkVAR04Diagnostics (fv:FplValue) = 
     fv.GetVariables()
@@ -3164,6 +3166,48 @@ type FplAssertion(positions: Positions, parent: FplValue) =
 
     override this.RunOrder = None
 
+type FplIntrinsicTpl(name, positions: Positions, parent: FplValue) as this =
+    inherit FplValue(positions, Some parent)
+
+    do
+        this.TypeId <- name
+        this.FplId <- name
+
+    override this.Name = PrimIntrinsicTpl
+    override this.ShortName = LiteralTpl
+
+    override this.Clone () =
+        let ret = new FplIntrinsicTpl(this.TypeId, (this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Type (signatureType:SignatureType) = 
+        getFplHead this signatureType
+                    
+    override this.Represent () = this.FplId
+
+    override this.Run _ = 
+        this.Debug "Run"
+
+    member this.TrySetTemplateUsage (fv:FplValue) = 
+        match this.RefersTo with 
+        | None -> 
+            this.RefersTo <- Some fv // if this template was not used, use it
+        | Some templateUsage -> 
+            // otherwise calculate the type signatures of the las usage  
+            let previousTemplateUsage = templateUsage.Type SignatureType.Type
+            // and the current one
+            let currentTemplateUsage = fv.Type SignatureType.Type
+            // compare both
+            if previousTemplateUsage <> currentTemplateUsage then 
+                // issue diagnostics, if inconsistent usage
+                this.ErrorOccurred <- emitSIG12diagnostics this.FplId currentTemplateUsage previousTemplateUsage (templateUsage.QualifiedStartPos) fv.StartPos fv.EndPos
+
+
+    override this.EmbedInSymbolTable _ = tryAddTemplateToParent this 
+
+    override this.RunOrder = None
+
 type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
     do 
@@ -3564,6 +3608,7 @@ type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
     member this.SetType (typeId:string) (typeNodeOpt:FplValue option) pos1 pos2 = 
         if not _dimensionTypesBeingSet then 
             this.TypeId <- $"*{typeId}"
+            // todo prefer RefersTo over Scope when storing the type node of the variablearray 
             match typeNodeOpt with 
             | Some typeNode -> this.Scope.TryAdd(typeId, typeNode) |> ignore
             | _ -> ()
@@ -3728,6 +3773,10 @@ type FplVariable(fplId, positions: Positions, parent: FplValue) =
         base.SetValue fv
         if fv.FplId <> LiteralUndef then
             this.IsInitialized <- true
+            match this.RefersTo with 
+            | Some (:? FplIntrinsicTpl as tpl) -> tpl.TrySetTemplateUsage fv
+            | _ -> ()
+                
 
     override this.SetValuesOf fv =
         base.SetValuesOf fv
@@ -5107,33 +5156,6 @@ type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
         this.Debug "Run"
 
     override this.EmbedInSymbolTable _ = addExpressionToReference this
-
-    override this.RunOrder = None
-
-type FplIntrinsicTpl(name, positions: Positions, parent: FplValue) as this =
-    inherit FplValue(positions, Some parent)
-
-    do
-        this.TypeId <- name
-        this.FplId <- name
-
-    override this.Name = PrimIntrinsicTpl
-    override this.ShortName = LiteralTpl
-
-    override this.Clone () =
-        let ret = new FplIntrinsicTpl(this.TypeId, (this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.Type (signatureType:SignatureType) = 
-        getFplHead this signatureType
-                    
-    override this.Represent () = this.FplId
-
-    override this.Run _ = 
-        this.Debug "Run"
-
-    override this.EmbedInSymbolTable _ = tryAddTemplateToParent this 
 
     override this.RunOrder = None
 
