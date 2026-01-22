@@ -796,40 +796,14 @@ and FplVariableStack() =
     /// by removing the previous values (if any) and
     /// inserting the clones of the elements.
     member this.ReplaceVariables (parameters:FplValue list) (arguments:FplValue list) =
-        let replaceValues (p:FplValue) (ar:FplValue)  =
-            let valueList = 
-                match ar.Name with 
-                | PrimRefL when ar.FplId = String.Empty ->
-                    ar.ArgList 
-                    |> Seq.toList
-
-                | PrimRefL when ar.Scope.ContainsKey(ar.FplId) ->
-                    ar.Scope.Values |> Seq.toList
-                | _ -> 
-                    match ar.Value with
-                    | Some ref -> [ref]
-                    | _ -> []
-                
-            valueList
-            |> List.iter (fun (fv:FplValue) ->
-                match box fv with 
-                | :? IVariable as var ->
-                    if Object.ReferenceEquals(p, fv) then 
-                        // prevent assigning a variable a s value of itself
-                        // but mark it as "initialized"
-                        var.IsInitialized <- true 
-                    else
-                        p.SetValuesOf fv
-                        match fv.Value with 
-                        | Some ref -> var.IsInitialized <- true
-                        | _ -> ()
-                | _ ->
-                    let fvClone = fv.Clone()
-                    p.SetValue fvClone
-                    match box p with
-                    | :? IVariable as var -> var.IsInitialized <- true
-                    | _ -> ()
-            )
+        let replaceValues (p:FplValue) (ar:FplValue) =
+            match ar.Value with 
+            | Some v -> 
+                p.SetValue v
+                match box v with 
+                | :? IVariable as var -> var.IsInitialized <- true 
+                | _ -> ()
+            | None -> ()
 
         let rec replace (pars:FplValue list) (args: FplValue list) = 
             match (pars, args) with
@@ -3462,11 +3436,7 @@ type FplReference(positions: Positions, parent: FplValue) =
         | Some next -> 
             addExpressionToParentArgList this
             next.EndPos <- this.EndPos
-        | _ -> ()
-
-    /// returns the optional node referenced by this FplReference
-    member this.TryReferenced = this.RefersTo
-            
+        | _ -> ()            
 
 /// Checks if a reference to a Symbol, Prefix, PostFix, or Infix exists
 let checkSIG01Diagnostics (fv: FplValue)  =
@@ -4318,7 +4288,7 @@ let checkSIG04Diagnostics (calling:FplValue) (candidates: FplValue list) =
 /// Checks if a reference to an array matches its dimensions (in terms of number and types)
 let checkSIG08_SIG10Diagnostics (referenceToArray:FplValue) =
     let rec matchIndexesWithDimensions (refToArray:FplReference) =
-        match refToArray.TryReferenced with
+        match refToArray.RefersTo with
         | Some (:? FplVariableArray as varArray) ->
             let rec matchAllIndexes (indexes:FplValue list) (dims:FplValue list) dimNumber =
                 match indexes, dims with
