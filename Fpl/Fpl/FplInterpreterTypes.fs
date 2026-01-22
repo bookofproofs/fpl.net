@@ -798,12 +798,8 @@ and FplVariableStack() =
     member this.ReplaceVariables (parameters:FplValue list) (arguments:FplValue list) =
         let replaceValues (p:FplValue) (ar:FplValue) =
             match ar.Value with 
-            | Some v -> 
-                p.SetValue v
-                match box v with 
-                | :? IVariable as var -> var.IsInitialized <- true 
-                | _ -> ()
-            | None -> ()
+            | Some v -> p.SetValue v
+            | None -> p.Value <- None
 
         let rec replace (pars:FplValue list) (args: FplValue list) = 
             match (pars, args) with
@@ -1166,9 +1162,20 @@ let tryAddTemplateToParent (templateNode:FplValue) =
     match nextOpt with 
     | Some next when not (next.Scope.ContainsKey identifier) -> 
         next.Scope.Add(identifier, templateNode)
-        // correct the parent 
+        // correct the parent of the template
         templateNode.Parent <- Some next
-    | _ -> () // template was already added to the ultimate node
+    | Some next -> 
+        // template was already added to the ultimate node
+        let templateAlreadyInScope = next.Scope[identifier] // return the templateNode that was already added instead of the input 
+        match templateNode.Parent with 
+        | Some var -> 
+            // Replace the variable's newly created template type by the template already in the scope of its ultimate node
+            var.RefersTo <- Some templateAlreadyInScope 
+        | _ -> () // should never occur, since only the root has no parent
+    | _ ->  
+        // should never occur, since FPL's syntax 
+        // does not allow template without UltimateBlocks
+        ()
 
 // Tries to add an FPL block to its parent's scope using its FplId, or issues ID001 diagnostics if a conflict occurs
 let tryAddToParentUsingFplId (fplValue:FplValue) =
