@@ -3495,6 +3495,16 @@ type TestInterpreterErrors() =
             ad.Clear()
             runTestHelper "TestSIG12.fpl" fplCode code expected
 
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestSIG13(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = SIG13 ("", "", "", "")
+            ad.Clear()
+            runTestHelper "TestSIG13.fpl" fplCode code expected
+
     [<DataRow("00a", "def cl A {intr} ;", 1)>]
     [<DataRow("00b", "def cl A:B {intr} ;", 1)>]
     [<DataRow("00c", "def cl A:B {intr property pred T() {true} } ;", 0)>]

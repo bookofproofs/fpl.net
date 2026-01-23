@@ -1728,7 +1728,6 @@ type FplGenericPredicateWithExpression(positions: Positions, parent: FplValue) =
         checkVAR04Diagnostics this
         checkPredicateExpressionReturnsPredicate this
 
-
 type FplPredicateList(positions: Positions, parent: FplValue, runOrder) = 
     inherit FplValue(positions, Some parent)
     let _runOrder = runOrder
@@ -5701,6 +5700,7 @@ type FplMapCaseElse(positions: Positions, parent: FplValue) =
 
 type FplMapCases(positions: Positions, parent: FplValue) =
     inherit FplGenericStmt(positions, parent)
+    let _consistentCaseType = new FplIntrinsicTpl("", positions, parent)
 
     override this.Name = PrimMapCases
 
@@ -5724,7 +5724,15 @@ type FplMapCases(positions: Positions, parent: FplValue) =
             | :? FplMapCaseSingle as condRes -> Some condRes
             | _ -> None)
 
-    member this.GetElseResult() = this.ArgList[this.ArgList.Count-1]
+    member this.GetElseResult() = this.ArgList |> Seq.last
+
+    override this.CheckConsistency() = 
+        base.CheckConsistency()
+
+    override this.EmbedInSymbolTable _ = 
+        this.CheckConsistency()
+        addExpressionToParentArgList this
+
 
     override this.Run _ = 
         this.Debug "Run"

@@ -174,6 +174,7 @@ type DiagnosticCode =
     | SIG10 of string * string * int 
     | SIG11 of string * string
     | SIG12 of string * string * string * string
+    | SIG13 of string * string * string * string 
     // structure-related error codes
     | ST001 of string 
     | ST002 of string 
@@ -293,6 +294,7 @@ type DiagnosticCode =
             | SIG10 _ -> "SIG10"
             | SIG11 _ -> "SIG11"
             | SIG12 _ -> "SIG12"
+            | SIG13 _ -> "SIG13"
             // structure-related error codes
             | ST001 _ -> "ST001"
             | ST002 _ -> "ST002"
@@ -433,6 +435,7 @@ type DiagnosticCode =
             | SIG10 (arrName, indexVarName, indexNumber) -> $"Array `{arrName}` has less dimensions, {englishOrdinal indexNumber} index `{indexVarName}` not supported"
             | SIG11 (qualifiedNameMapping, qualifiedWrongCandidate) -> $"{qualifiedNameMapping} cannot map to {qualifiedWrongCandidate}"
             | SIG12 (templateName, secondUsage, firstUsage, firstUsagePos)-> $"The template `{templateName}` was used inconsistently with `{secondUsage}`, expecting `{firstUsage}` as it was used at `{firstUsagePos}`."
+            | SIG13 (stmtName, secondUsage, firstUsage, firstUsagePos)-> $"This case of the {stmtName} must return a value with a type of the first case at `{firstUsagePos}`, which was `{firstUsage}`. This case returns `{secondUsage}`."
             // structure-related error codes
             | ST001 nodeName -> sprintf $"The {nodeName} does nothing."
             | ST002 nodeName -> sprintf $"The {nodeName} does nothing."

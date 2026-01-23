@@ -867,6 +867,20 @@ let emitSIG12diagnostics templateName secondUsage firstUsage firstUsagePos pos1 
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
+let emitSIG13diagnostics stmtName secondUsage firstUsage firstUsagePos pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Warning
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = SIG13 (stmtName, secondUsage, firstUsage, firstUsagePos)
+            Diagnostic.Alternatives = None
+        }
+    ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
+
 let emitST001diagnostics name pos1 pos2 =
     let diagnostic =
         { 
