@@ -1169,7 +1169,10 @@ let tryAddTemplateToParent (templateNode:FplValue) =
         let templateAlreadyInScope = next.Scope[identifier] // return the templateNode that was already added instead of the input 
         match templateNode.Parent with 
         | Some var -> 
-            // Replace the variable's newly created template type by the template already in the scope of its ultimate node
+            // Replace the variable's newly created template type by 
+            // the template already in the scope of its ultimate node
+            // making sure that only one template with the same identifier will store 
+            // its actual type to issue SIG12 diagnostics properly
             var.RefersTo <- Some templateAlreadyInScope 
         | _ -> () // should never occur, since only the root has no parent
     | _ ->  
