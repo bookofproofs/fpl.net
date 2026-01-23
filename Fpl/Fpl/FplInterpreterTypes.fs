@@ -1683,6 +1683,22 @@ let checkVAR04Diagnostics (fv:FplValue) =
         var.ErrorOccurred <- emitVAR04diagnostics var.FplId var.StartPos var.EndPos
     )
 
+/// Checks if an argument of an FplValue is a predicate and issues LG001Diagnostics if its not.
+let checkArgPred (fv:FplValue) (arg:FplValue)  = 
+    let argType = arg.Type SignatureType.Type
+    if argType.StartsWith(LiteralPred) then 
+        () 
+    else
+        let argName = arg.Type SignatureType.Name
+        arg.ErrorOccurred <- emitLG001Diagnostics argType argName fv.Name arg.StartPos arg.EndPos
+
+/// Checks if a predicate expression to is actually being interpreted as an predicate
+let checkPredicateExpressionReturnsPredicate (fv:FplValue) =
+    let exprOpt = fv.ArgList |> Seq.tryLast
+    match exprOpt with 
+    | Some expr -> checkArgPred fv expr
+    | None -> ()
+
 [<AbstractClass>]
 type FplGenericPredicateWithExpression(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(positions, parent)
@@ -1710,6 +1726,8 @@ type FplGenericPredicateWithExpression(positions: Positions, parent: FplValue) =
     override this.CheckConsistency () = 
         base.CheckConsistency()
         checkVAR04Diagnostics this
+        checkPredicateExpressionReturnsPredicate this
+
 
 type FplPredicateList(positions: Positions, parent: FplValue, runOrder) = 
     inherit FplValue(positions, Some parent)
@@ -2252,6 +2270,7 @@ type FplPredicate(positions: Positions, parent: FplValue, runOrder) as this =
         match this.ExpressionType with
         | FixType.Infix (symbol, precedence) -> checkSIG02Diagnostics (getRoot this) symbol precedence this.SignStartPos this.SignEndPos
         | _ -> ()
+        checkPredicateExpressionReturnsPredicate this
 
     override this.EmbedInSymbolTable _ = 
         this.CheckConsistency()
@@ -4481,19 +4500,6 @@ type FplSelf(positions: Positions, parent: FplValue) as this =
     override this.EmbedInSymbolTable _ = addExpressionToReference this
 
     override this.RunOrder = None
-
-
-/// Checks if an argument of an FplValue is a predicate and issues LG001Diagnostics if its not.
-let checkArgPred (fv:FplValue) (arg:FplValue)  = 
-    let argType = arg.Type SignatureType.Type
-    let argName = arg.Type SignatureType.Name
-    let repr = arg.Represent()
-    match repr with
-    | LiteralTrue
-    | LiteralFalse 
-    | PrimUndetermined -> () 
-    | _ -> arg.ErrorOccurred <- emitLG001Diagnostics argType argName fv.Name arg.StartPos arg.EndPos
-
 
 /// Checks if an argument points to a free variable and if so, issues VAR09 diagnostics.
 let checkFreeVar (arg:FplValue) = 
