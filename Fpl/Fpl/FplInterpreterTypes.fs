@@ -5653,6 +5653,15 @@ type FplMapCaseSingle(positions: Positions, parent: FplValue) =
     member this.GetCondition() = this.ArgList[0]
     member this.GetResult() = this.ArgList[1]
 
+    override this.CheckConsistency() = 
+        base.CheckConsistency()
+        checkArgPred this (this.GetCondition())
+
+
+    override this.EmbedInSymbolTable _ = 
+        this.CheckConsistency()
+        addExpressionToParentArgList this
+    
     override this.Run variableStack = 
         this.Debug "Run"
         let condition = this.GetCondition()
