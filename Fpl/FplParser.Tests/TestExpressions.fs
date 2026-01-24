@@ -309,15 +309,18 @@ type TestExpressions () =
     [<DataRow("00b", "(1)")>]
     [<DataRow("00c", "(1 + )")>]
     [<DataRow("00d", "(1+ )")>]
+    [<DataRow("00e", "(1 +)")>]
     [<DataRow("01a", "(@1 + x)")>]
     [<DataRow("01b", "(@1)")>]
     [<DataRow("01c", "(@1 + )")>]
     [<DataRow("01d", "(@1+ )")>]
+    [<DataRow("01e", "(@1 +)")>]
     [<DataRow("02a", "(x + 1)")>]
     [<DataRow("02a", "(x + @1)")>]
     [<DataRow("02b", "(x)")>]
     [<DataRow("02c", "(x + )")>]
     [<DataRow("02d", "(x+ )")>]
+    [<DataRow("02e", "(x +)")>]
     [<TestMethod>]
     member this.TestInfixOperationSyntax (no:string, expr:string) =
         let result = run (infixOperation .>> eof) expr
