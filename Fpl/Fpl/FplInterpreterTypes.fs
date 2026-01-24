@@ -5789,25 +5789,6 @@ type FplMapCases(positions: Positions, parent: FplValue) =
         | Some found -> this.SetValuesOf (found.GetResult())
         | None -> this.SetValuesOf elseResult
 
-type FplCases(positions: Positions, parent: FplValue) =
-    inherit FplGenericStmt(positions, parent)
-
-    override this.Name = PrimCases
-
-    override this.Clone () =
-        let ret = new FplCases((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.Type signatureType = 
-        getFplHead this signatureType
-
-    override this.Represent () = LiteralUndef
-
-    override this.Run variableStack = 
-        // todo implement run
-        this.Debug "Run"
-
 type FplCaseSingle(positions: Positions, parent: FplValue) =
     inherit FplGenericStmt(positions, parent)
 
@@ -5851,6 +5832,56 @@ type FplCaseElse(positions: Positions, parent: FplValue) =
         getFplHead this signatureType
 
     override this.Represent () = LiteralUndef
+
+    override this.Run variableStack = 
+        // todo implement run
+        this.Debug "Run"
+
+type FplCases(positions: Positions, parent: FplValue) =
+    inherit FplGenericStmt(positions, parent)
+    let _reachableCases = new HashSet<string>()
+
+    override this.Name = PrimCases
+
+    override this.Clone () =
+        let ret = new FplCases((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Type signatureType = 
+        getFplHead this signatureType
+
+    override this.Represent () = LiteralUndef
+
+    member this.GetConditionResultList() = 
+        this.ArgList
+        |> Seq.choose (fun item ->
+            match item with
+            | :? FplCaseSingle as condRes -> Some condRes
+            | _ -> None)
+
+    member private this.CheckAllCasesForBeingReachable() =
+        _reachableCases.Clear()
+        this.GetConditionResultList()
+        |> Seq.map (fun conditionResultPair -> conditionResultPair.GetCondition())
+        |> Seq.iter (fun condition -> 
+            let conditionSignature = condition.Type SignatureType.Name
+            if _reachableCases.Add(conditionSignature) then 
+                () // signature added
+            else
+                // signature was already added
+                this.ErrorOccurred <- emitSIG14diagnostics condition.StartPos condition.EndPos
+                
+        )
+
+    override this.CheckConsistency() = 
+        base.CheckConsistency()
+        this.CheckAllCasesForBeingReachable()
+
+    override this.EmbedInSymbolTable _ = 
+        this.CheckConsistency()
+        addExpressionToParentArgList this
+
 
     override this.Run variableStack = 
         // todo implement run
