@@ -3496,12 +3496,12 @@ type TestInterpreterErrors() =
             runTestHelper "TestSIG12.fpl" fplCode code expected
 
 
-    [<DataRow("23", """def pred T() { mcases (| true : false | false : true ? undef) };""", 0)>]
-    [<DataRow("23a", """def pred T() {dec ~x:obj; mcases (| true : $1 | false : x ? undef) };""", 1)>]
-    [<DataRow("23b", """def pred T() {dec ~x:obj; mcases (| true : false | false : $42 ? undef) };""", 1)>]
-    [<DataRow("23c", """def pred T() {dec ~x:obj; mcases (| true : false | false : $42 | false : $4 ? undef) };""", 2)>]
-    [<DataRow("23d", """def pred T() {dec ~x:obj; mcases (| true : undef | false : $42 | false : true ? undef) };""", 2)>]
-    [<DataRow("23e", """def pred T() {dec ~x:obj; mcases (| true : true | false : undef | false : true ? true) };""", 0)>]
+    [<DataRow("00", """def pred T() { mcases (| true : false | false : true ? undef) };""", 0)>] // undef as else case is allowed, all other cases return the same type as the first branch
+    [<DataRow("01", """def pred T() {dec ~x:obj; mcases (| true : $1 | false : x ? undef) };""", 1)>] // second branch returns type different from first branch
+    [<DataRow("02", """def pred T() {dec ~x:obj; mcases (| true : false | false : $42 ? undef) };""", 1)>] // second branch returns type different from first branch
+    [<DataRow("03", """def pred T() {dec ~x:obj; mcases (| true : false | false : $42 | false : $4 ? undef) };""", 2)>] // two consecutive branches return types different from first branch
+    [<DataRow("04", """def pred T() {dec ~x:obj; mcases (| true : undef | false : $42 | false : true ? false) };""", 3)>] // undef as first branch forces all other branches also to return undef
+    [<DataRow("05", """def pred T() {dec ~x:obj; mcases (| true : true | false : undef | false : true ? true) };""", 0)>] // undef in the middle is allowed
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG13(no:string, fplCode:string, expected) =
@@ -3511,6 +3511,22 @@ type TestInterpreterErrors() =
             let code = SIG13 ("", "", "", "")
             ad.Clear()
             runTestHelper "TestSIG13.fpl" fplCode code expected
+
+    [<DataRow("00", """def pred T() { mcases (| true : false | false : true ? undef) };""", 0)>] 
+    [<DataRow("01", """def pred T() { mcases (| true : $1 | true : $2 ? undef) };""", 1)>] // second condition will never be reached
+    [<DataRow("02", """def pred T() { mcases (| (x + 1 = 2) : $1 | true : $2 ? undef) };""", 0)>] 
+    [<DataRow("03", """def pred T() { mcases (| (x + 1 = 2) : $1 | (x + 1 = 3) : $2 ? undef) };""", 0)>] 
+    [<DataRow("04", """def pred T() { mcases (| (x + 1 = 2) : $1 | (x + 1 = 2) : $2 ? undef) };""", 1)>] // second condition will never be reached
+    [<DataRow("05", """def pred T() { mcases (| ex x:obj { (x = 2) } : $1 | (x + 1 = 2) : $2 | ex x:obj { (x = 2) } : $3 | ex x:obj { (x = 2) } : $4 ? undef) };""", 2)>] // third and forth condition will never be reached
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestSIG14(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = SIG14
+            ad.Clear()
+            runTestHelper "TestSIG14.fpl" fplCode code expected
 
     [<DataRow("00a", "def cl A {intr} ;", 1)>]
     [<DataRow("00b", "def cl A:B {intr} ;", 1)>]

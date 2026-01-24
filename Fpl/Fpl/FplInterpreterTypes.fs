@@ -5709,6 +5709,7 @@ type FplMapCaseElse(positions: Positions, parent: FplValue) =
 type FplMapCases(positions: Positions, parent: FplValue) =
     inherit FplGenericStmt(positions, parent)
     let _consistentCaseType = new FplIntrinsicTpl("", positions, parent)
+    let _reachableCases = new HashSet<string>()
 
     override this.Name = PrimMapCases
 
@@ -5736,14 +5737,33 @@ type FplMapCases(positions: Positions, parent: FplValue) =
         let elseResult = this.ArgList |> Seq.last
         elseResult.ArgList |> Seq.head
 
-    override this.CheckConsistency() = 
-        base.CheckConsistency()
+    member private this.CheckAllResultsForEqualType() =
         // check if all results have the same type
         this.GetConditionResultList()
         |> Seq.map (fun conditionResultPair -> conditionResultPair.GetResult())
         |> Seq.iter (fun result -> _consistentCaseType.TrySetTemplateUsage result (SIG13("", "", "", "").Code))
         // check also else result
         _consistentCaseType.TrySetTemplateUsage (this.GetElseResult()) (SIG13("", "", "", "").Code)
+
+    member private this.CheckAllCasesForBeingReachable() =
+        _reachableCases.Clear()
+        this.GetConditionResultList()
+        |> Seq.map (fun conditionResultPair -> conditionResultPair.GetCondition())
+        |> Seq.iter (fun condition -> 
+            let conditionSignature = condition.Type SignatureType.Name
+            if _reachableCases.Add(conditionSignature) then 
+                () // signature added
+            else
+                // signature was already added
+                this.ErrorOccurred <- emitSIG14diagnostics condition.StartPos condition.EndPos
+                
+        )
+
+    override this.CheckConsistency() = 
+        base.CheckConsistency()
+        this.CheckAllResultsForEqualType()
+        this.CheckAllCasesForBeingReachable()
+
 
     override this.EmbedInSymbolTable _ = 
         this.CheckConsistency()
