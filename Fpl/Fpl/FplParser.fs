@@ -376,7 +376,7 @@ let existsTimesN = positions "ExistsN" (((keywordExN >>. dollarDigits .>> SW) .>
 let isOperator = positions "IsOperator" ((keywordIs >>. leftParen >>. predicate .>> IW) .>>. (comma >>. variableType) .>> rightParen) |>> Ast.IsOperator
 
 // infix operators like the equality operator 
-let infixOp = positions "InfixOperator" ( infixMathSymbols ) .>> SW |>> Ast.InfixOperator
+let infixOp = positions "InfixOperator" ( infixMathSymbols ) .>> attemptSW |>> Ast.InfixOperator
 
 let pWithSep p separator =
     let combinedParser = pipe2 p (opt separator) (fun a b -> (a, b))
