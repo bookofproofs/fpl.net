@@ -1272,9 +1272,9 @@ let isObject c =
     | _ -> false
 
 
-let fixChar predicate expected = 
+let fixChar fixType expected = 
     let prefixChar = 
-        satisfy predicate <|> fail ("Expecting: " + expected)
+        satisfy fixType <|> fail ("Expecting: " + expected)
     many1Chars prefixChar
 
 let infixMathSymbols: Parser<string,unit> = fixChar isInfix "<infix symbol>"

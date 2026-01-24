@@ -3580,6 +3580,20 @@ type TestInterpreterErrors() =
             let code = ST003 ""
             runTestHelper "TestST003.fpl" fplCode code expected
 
+    [<DataRow("00", "def pred T() { (1 = x) } ;", 0)>] // parser does infix operator, no operand missing
+    [<DataRow("01", "def pred T() { (1 = ) } ;", 1)>] // parser does infix operator, missing second operand
+    [<DataRow("02", "def pred T() { (1 =) } ;", 1)>] // parser does infix operator, missing second operand
+    [<DataRow("03", "def pred T() { (1+) } ;", 0)>] // parser does postfix operator, no infix operation check
+    [<DataRow("03", "def pred T() { (1=) } ;", 1)>] // parser does infix operator, missing second operand
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestSY000(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = SY000 ""
+            runTestHelper "TestSY000.fpl" fplCode code expected
+
     [<DataRow("def predicate Test(x,y:* pred[ind]) {true};", 1)>]
     [<DataRow("def predicate Test(x,y:* pred[obj]) {true};", 1)>]
     [<DataRow("def predicate Test(x,y: pred) {true};", 0)>]
