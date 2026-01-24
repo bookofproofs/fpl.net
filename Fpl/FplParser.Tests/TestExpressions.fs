@@ -291,3 +291,44 @@ type TestExpressions () =
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
+
+
+    [<DataRow("00", "(x = y * z + 1)")>]
+    [<DataRow("01", "(x + 1)")>]
+    [<DataRow("01a", "( x + 1)")>]
+    [<DataRow("01b", "(x + 1 )")>]
+    [<DataRow("02", "(1 + x)")>]
+    [<TestMethod>]
+    member this.TestExpressionAcceptableSyntax (no:string, expr:string) =
+        let result = run (expression .>> eof) expr
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<DataRow("00a", "(1 + x)")>]
+    [<DataRow("00b", "(1)")>]
+    [<DataRow("00c", "(1 + )")>]
+    [<DataRow("00d", "(1+ )")>]
+    [<DataRow("01a", "(@1 + x)")>]
+    [<DataRow("01b", "(@1)")>]
+    [<DataRow("01c", "(@1 + )")>]
+    [<DataRow("01d", "(@1+ )")>]
+    [<DataRow("02a", "(x + 1)")>]
+    [<DataRow("02a", "(x + @1)")>]
+    [<DataRow("02b", "(x)")>]
+    [<DataRow("02c", "(x + )")>]
+    [<DataRow("02d", "(x+ )")>]
+    [<TestMethod>]
+    member this.TestInfixOperationSyntax (no:string, expr:string) =
+        let result = run (infixOperation .>> eof) expr
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<DataRow("02", "1")>]
+    [<TestMethod>]
+    member this.TestPredicateSyntax (no:string, expr:string) =
+        let result = run (predicate .>> eof) expr
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))

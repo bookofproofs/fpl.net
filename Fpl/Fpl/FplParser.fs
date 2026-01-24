@@ -221,7 +221,7 @@ let paramTuple, paramTupleRef = createParserForwardedToRef()
 let coord = choice [ predicateWithQualification; dollarDigits ] .>> IW 
 
 // infix operators like the equality operator 
-let objectSymbol = positions "ObjectSymbol" ( objectMathSymbols ) .>> IW |>> Ast.ObjectSymbol
+let objectSymbol = positions "ObjectSymbol" ( objectMathSymbols ) |>> Ast.ObjectSymbol
 
 let fplIdentifier = choice [ selfOrParent ; variable ; predicateIdentifier; extension; objectSymbol ] 
 
