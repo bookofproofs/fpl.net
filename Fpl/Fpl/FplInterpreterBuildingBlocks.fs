@@ -1289,7 +1289,17 @@ let rec eval (st: SymbolTable) ast =
             | None -> () // in this case, we consumed and evaluated all operators in the infix operation (due to FPL parser Ast structure)
         )
         |> ignore
-        
+
+        // If the parsed infix operation ended with an operator (incomplete expression like "(1 =)"),
+        // fv.ArgList will have an even count (pred, op) and no following predicate. Emit SY000 and drop the trailing operator
+        // so the interpreter doesn't crash and can continue on a best-effort basis.
+        if fv.ArgList.Count % 2 = 0 then
+            let trailingOp = fv.ArgList.[fv.ArgList.Count - 1]
+            // record diagnostic on the trailing operator
+            trailingOp.ErrorOccurred <- emitSY000diagnostics trailingOp.FplId trailingOp.StartPos trailingOp.EndPos
+            // remove the trailing operator so further processing won't index out of range
+            fv.ArgList.RemoveAt(fv.ArgList.Count - 1)
+
         /// Returns the precedence of fv1 if its ExpressionType is Infix
         /// or Int32.MaxValue otherwise
         let getPrecedence (fv1:FplValue) =
