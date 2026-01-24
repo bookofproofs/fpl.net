@@ -5744,6 +5744,16 @@ type FplMapCases(positions: Positions, parent: FplValue) =
         |> Seq.iter (fun result -> _consistentCaseType.TrySetTemplateUsage result (SIG13("", "", "", "").Code))
         // check also else result
         _consistentCaseType.TrySetTemplateUsage (this.GetElseResult()) (SIG13("", "", "", "").Code)
+        match _consistentCaseType.ErrorOccurred with
+        | Some errMsg -> 
+            // Since there were proceeding errors regarding inconsistent Type Ids of some branches
+            // set the TypeId of this FplMapCases to undefined
+            this.TypeId <- LiteralUndef  
+         | _ ->
+            // Set the TypeId of this FplMapCases to the consistent TypeId found for all of its branches
+            let typeOfAllBranches = _consistentCaseType.RefersTo.Value
+            this.TypeId <- typeOfAllBranches.TypeId
+
 
     member private this.CheckAllCasesForBeingReachable() =
         _reachableCases.Clear()
