@@ -1296,7 +1296,7 @@ let rec eval (st: SymbolTable) ast =
         if fv.ArgList.Count % 2 = 0 then
             let trailingOp = fv.ArgList.[fv.ArgList.Count - 1]
             // record diagnostic on the trailing operator
-            trailingOp.ErrorOccurred <- emitSY000diagnostics trailingOp.FplId trailingOp.StartPos trailingOp.EndPos
+            trailingOp.ErrorOccurred <- emitSY000diagnostics trailingOp.FplId fv.EndPos fv.EndPos
             // remove the trailing operator so further processing won't index out of range
             fv.ArgList.RemoveAt(fv.ArgList.Count - 1)
 
