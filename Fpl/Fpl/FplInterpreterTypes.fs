@@ -3191,20 +3191,28 @@ type FplIntrinsicTpl(name, positions: Positions, parent: FplValue) as this =
     override this.Run _ = 
         this.Debug "Run"
 
-    member this.TrySetTemplateUsage (fv:FplValue) = 
+    /// Sets a template usage and issues a specific diagnostics if a type conflict occurs.
+    /// The caller decides with specific diagnostics to issue. If the diagnostics is unhandled, 
+    /// GEN00 diagnostic will be issued as default.
+    member this.TrySetTemplateUsage (fv:FplValue) diagnostic = 
         match this.RefersTo with 
         | None -> 
             this.RefersTo <- Some fv // if this template was not used, use it
         | Some templateUsage -> 
-            // otherwise calculate the type signatures of the las usage  
-            let previousTemplateUsage = templateUsage.Type SignatureType.Type
+            // otherwise calculate the type signatures of the very first usage  
+            let firstUsage = templateUsage.Type SignatureType.Type
             // and the current one
-            let currentTemplateUsage = fv.Type SignatureType.Type
+            let currentUsage = fv.Type SignatureType.Type
             // compare both
-            if previousTemplateUsage <> currentTemplateUsage then 
+            match currentUsage with 
+            | LiteralUndef -> () // Usage "undef" is always accepted
+            | _  when firstUsage <> currentUsage ->
                 // issue diagnostics, if inconsistent usage
-                this.ErrorOccurred <- emitSIG12diagnostics this.FplId currentTemplateUsage previousTemplateUsage (templateUsage.QualifiedStartPos) fv.StartPos fv.EndPos
-
+                match diagnostic with 
+                | "SIG12" -> this.ErrorOccurred <- emitSIG12diagnostics this.FplId currentUsage firstUsage (templateUsage.QualifiedStartPos) fv.StartPos fv.EndPos
+                | "SIG13" -> this.ErrorOccurred <- emitSIG13diagnostics this.FplId currentUsage firstUsage (templateUsage.QualifiedStartPos) fv.StartPos fv.EndPos
+                | _ -> emitUnexpectedErrorDiagnostics $"Unhandled diagnostic `{diagnostic}` in FplIntrinsicTpl.TrySetTemplateUsage."
+            | _ -> () // equal usage is accepted
 
     override this.EmbedInSymbolTable _ = tryAddTemplateToParent this 
 
@@ -3772,7 +3780,7 @@ type FplVariable(fplId, positions: Positions, parent: FplValue) =
         if fv.FplId <> LiteralUndef then
             this.IsInitialized <- true
             match this.RefersTo with 
-            | Some (:? FplIntrinsicTpl as tpl) -> tpl.TrySetTemplateUsage fv
+            | Some (:? FplIntrinsicTpl as tpl) -> tpl.TrySetTemplateUsage fv (SIG12("", "", "", "").Code)
             | _ -> ()
                 
 
@@ -5724,10 +5732,18 @@ type FplMapCases(positions: Positions, parent: FplValue) =
             | :? FplMapCaseSingle as condRes -> Some condRes
             | _ -> None)
 
-    member this.GetElseResult() = this.ArgList |> Seq.last
+    member this.GetElseResult() = 
+        let elseResult = this.ArgList |> Seq.last
+        elseResult.ArgList |> Seq.head
 
     override this.CheckConsistency() = 
         base.CheckConsistency()
+        // check if all results have the same type
+        this.GetConditionResultList()
+        |> Seq.map (fun conditionResultPair -> conditionResultPair.GetResult())
+        |> Seq.iter (fun result -> _consistentCaseType.TrySetTemplateUsage result (SIG13("", "", "", "").Code))
+        // check also else result
+        _consistentCaseType.TrySetTemplateUsage (this.GetElseResult()) (SIG13("", "", "", "").Code)
 
     override this.EmbedInSymbolTable _ = 
         this.CheckConsistency()

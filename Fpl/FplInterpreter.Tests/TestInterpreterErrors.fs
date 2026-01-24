@@ -3495,6 +3495,13 @@ type TestInterpreterErrors() =
             ad.Clear()
             runTestHelper "TestSIG12.fpl" fplCode code expected
 
+
+    [<DataRow("23", """def pred T() { mcases (| true : false | false : true ? undef) };""", 0)>]
+    [<DataRow("23a", """def pred T() {dec ~x:obj; mcases (| true : $1 | false : x ? undef) };""", 1)>]
+    [<DataRow("23b", """def pred T() {dec ~x:obj; mcases (| true : false | false : $42 ? undef) };""", 1)>]
+    [<DataRow("23c", """def pred T() {dec ~x:obj; mcases (| true : false | false : $42 | false : $4 ? undef) };""", 2)>]
+    [<DataRow("23d", """def pred T() {dec ~x:obj; mcases (| true : undef | false : $42 | false : true ? undef) };""", 2)>]
+    [<DataRow("23e", """def pred T() {dec ~x:obj; mcases (| true : true | false : undef | false : true ? true) };""", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG13(no:string, fplCode:string, expected) =
