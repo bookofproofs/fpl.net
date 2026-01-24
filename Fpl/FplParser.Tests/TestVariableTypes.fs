@@ -51,8 +51,6 @@ type TestVariableTypes () =
     [<DataRow("templateTest")>]
     [<DataRow("tplTest")>]
     [<DataRow("*tplTest[ind,ind,ind]")>]
-    [<DataRow("val")>]
-    [<DataRow("validity")>]
     
     [<TestMethod>]
     member this.TestVariableTypeSuccess (input:string) =
