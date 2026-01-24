@@ -180,6 +180,8 @@ type DiagnosticCode =
     | ST001 of string 
     | ST002 of string 
     | ST003 of string 
+    // interpreter syntax-related error codes for error-tolerant parser productions
+    | SY000 of string
     // variable-related error codes
     | VAR00 
     | VAR01 of string 
@@ -301,6 +303,8 @@ type DiagnosticCode =
             | ST001 _ -> "ST001"
             | ST002 _ -> "ST002"
             | ST003 _ -> "ST003"
+            // interpreter syntax-related error codes for error-tolerant parser
+            | SY000 _ -> "SY000"
             // variable-related error codes
             | VAR00 -> "VAR00"
             | VAR01 _  -> "VAR01"
@@ -440,11 +444,13 @@ type DiagnosticCode =
             | SIG13 (stmtName, secondUsage, firstUsage, firstUsagePos) -> $"Every branch of the {stmtName} must return a value with a type of the first case at `{firstUsagePos}`, which was `{firstUsage}`. This branch returns `{secondUsage}`."
             | SIG14 -> $"This case will never be matched."
             // structure-related error codes
-            | ST001 nodeName -> sprintf $"The {nodeName} does nothing."
-            | ST002 nodeName -> sprintf $"The {nodeName} does nothing."
-            | ST003 errCode -> sprintf $"Assignment not possible due to proceeding {errCode} error(s)."
+            | ST001 nodeName -> $"The {nodeName} does nothing."
+            | ST002 nodeName -> $"The {nodeName} does nothing."
+            | ST003 errCode -> $"Assignment not possible due to proceeding {errCode} error(s)."
+            // interpreter syntax-related error codes for error-tolerant parser
+            | SY000 infixOp -> $"The infix operator `{infixOp}` is missing a second operand."
             // variable-related error codes
-            | VAR00 ->  sprintf "Declaring multiple arrays at once may cause ambiguities."
+            | VAR00 ->  "Declaring multiple arrays at once may cause ambiguities."
             | VAR01 name -> $"Variable `{name}` not declared in this scope."
             | VAR02 name -> $"Variable `{name}` was already bound in this quantor."
             | VAR03 (identifier, conflict) -> $"Variable `{identifier}` was already declared at {conflict}."  
