@@ -1692,7 +1692,7 @@ let checkArgPred (fv:FplValue) (arg:FplValue)  =
         let argName = arg.Type SignatureType.Name
         arg.ErrorOccurred <- emitLG001Diagnostics argType argName fv.Name arg.StartPos arg.EndPos
 
-/// Checks if a predicate expression to is actually being interpreted as an predicate
+/// Checks if a predicate expression is actually being interpreted as an predicate
 let checkPredicateExpressionReturnsPredicate (fv:FplValue) =
     let exprOpt = fv.ArgList |> Seq.tryLast
     match exprOpt with 
@@ -5670,7 +5670,6 @@ type FplMapCaseSingle(positions: Positions, parent: FplValue) =
         base.CheckConsistency()
         checkArgPred this (this.GetCondition())
 
-
     override this.EmbedInSymbolTable _ = 
         this.CheckConsistency()
         addExpressionToParentArgList this
@@ -5823,6 +5822,16 @@ type FplCaseSingle(positions: Positions, parent: FplValue) =
         getFplHead this signatureType
 
     override this.Represent () = LiteralUndef
+
+    member this.GetCondition() = this.ArgList[0]
+
+    override this.CheckConsistency() = 
+        base.CheckConsistency()
+        checkArgPred this (this.GetCondition())
+
+    override this.EmbedInSymbolTable _ = 
+        this.CheckConsistency()
+        addExpressionToParentArgList this
 
     override this.Run variableStack = 
         // todo implement run
