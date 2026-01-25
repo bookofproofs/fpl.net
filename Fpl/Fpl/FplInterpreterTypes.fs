@@ -722,13 +722,17 @@ type FplValue(positions: Positions, parent: FplValue option) =
             match fv.Parent with 
             | Some parent -> $"{getPath parent} # {fv.ShortName} {fv.Type SignatureType.Name}"
             | None -> $"{fv.ShortName}"
+        let vars =
+            this.GetVariables()
+            |> List.map (fun var -> $"{var.FplId}={var.Represent()}")
+            |> String.concat ", "
         if TestSharedConfig.TestConfig.DebugMode then 
             let logLine =
                 match debugMode with
                 | Debug.Start ->
-                    $"Start:{getPath this}:[{this.Represent()}]{Environment.NewLine}"
+                    $"Start:{getPath this}:[{this.Represent()}][{vars}]{Environment.NewLine}"
                 | Debug.Stop ->
-                    $"Stop :{getPath this}:[{this.Represent()}]{Environment.NewLine}"
+                    $"Stop :{getPath this}:[{this.Represent()}][{vars}]{Environment.NewLine}"
             let currDir = Directory.GetCurrentDirectory()
             File.AppendAllText(Path.Combine(currDir, "Debug.txt"), logLine)
 
@@ -5809,6 +5813,7 @@ type FplMapCaseSingle(positions: Positions, parent: FplValue) as this =
         condition.Run variableStack
         let condRepresent = condition.Represent()
         if condRepresent = LiteralTrue then
+            result.Run variableStack
             this.SetValuesOf result
         else
             let undef = FplIntrinsicUndef((this.StartPos, this.EndPos), this.Parent.Value)
@@ -5919,17 +5924,16 @@ type FplMapCases(positions: Positions, parent: FplValue) as this =
         this.Debug Debug.Start
         let resultLst = this.GetConditionResultList()
         let elseResult = this.GetElseResult()
-        let findTrueCondition = 
+        let mapCaseSingleWithTrueConditionOpt = 
             resultLst
-            |> Seq.tryFind(fun cond -> 
-                cond.Run variableStack
-                let condResult = cond.Represent()
-                condResult = LiteralTrue
+            |> Seq.tryFind(fun mapCaseSingle -> 
+                mapCaseSingle.Run variableStack
+                let condition = mapCaseSingle.GetCondition()
+                condition.Represent() = LiteralTrue
             )
-        match findTrueCondition with
-        | Some found -> 
-            let resOfFound = found.GetResult()
-            resOfFound.Run variableStack
+        match mapCaseSingleWithTrueConditionOpt with
+        | Some mapCaseSingleWithTrueCondition -> 
+            let resOfFound = mapCaseSingleWithTrueCondition.GetResult()
             this.SetValuesOf resOfFound
         | None -> 
             elseResult.Run variableStack

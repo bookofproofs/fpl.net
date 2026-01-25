@@ -1069,3 +1069,37 @@ type TestFplValueScopeFplRepresentation() =
         | None -> 
             Assert.IsTrue(false)
 
+    [<DataRow("01a", "($1 = $1)",  LiteralTrue)>]
+    [<DataRow("01b", "($1 = $2)",  LiteralFalse)>]
+    [<DataRow("01c", "($2 = $1)",  LiteralFalse)>]
+    [<DataRow("01d", "dec ~u:ind u:=$2; (u = $1)",  LiteralFalse)>]
+    [<DataRow("01e", "dec ~u:ind u:=$1; (u = $1)",  LiteralTrue)>]
+    [<DataRow("01f", "dec ~u,v:ind u:=$2 v:=$1; (u = v)",  LiteralFalse)>]
+    [<DataRow("01g", "dec ~u,v:ind u:=$1 v:=$1; (v = v)",  LiteralTrue)>]
+    [<DataRow("02a", "mcases (|($1 = $1) : $42 ? $1)",  "$42")>]
+    [<DataRow("02b", "mcases (|($1 = $2) : $42 ? $1)",  "$1")>]
+    [<DataRow("02c", "mcases (|($2 = $1) : $42 ? $1)",  "$1")>]
+    [<DataRow("02d", "dec ~u:ind u:=$2; mcases (|(u = $1): $42 ? $1)",  "$1")>]
+    [<DataRow("02e", "dec ~u:ind u:=$1; mcases (|(u = $1): $42 ? $1)",  "$42")>]
+    [<DataRow("02f", "dec ~u,v:ind u:=$2 v:=$1; mcases (|(u = v): $42 ? $1)",  "$1")>]
+    [<DataRow("02g", "dec ~u,v:ind u:=$1 v:=$1; mcases (|(v = v): $42 ? $1)",  "$42")>]
+    [<TestMethod>]
+    member this.TestEquality(no:string, input, (output:string)) =
+        ad.Clear()
+        let fplCode = sprintf """
+                def pred Equal (x,y: tpl) infix "=" 50 
+                {
+                    del.Equal(x,y)
+                }              
+                def pred T() {%s};""" input 
+        let filename = "TestMCaseStatementFplRepresentation"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let pred = theory.Scope["T()"]
+            Assert.AreEqual<string>(output, pred.Represent())
+        | None -> 
+            Assert.IsTrue(false)
