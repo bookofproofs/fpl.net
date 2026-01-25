@@ -245,8 +245,8 @@ let rec eval (st: SymbolTable) ast =
                 match fv.Name with 
                 | PrimJIByDefVar 
                 | PrimRefL 
-                | PrimForInStmtEntity 
-                | PrimForInStmtDomain ->
+                | PrimForInStmtEntityL 
+                | PrimForInStmtDomainL ->
                     fv.FplId <- name
                     fv.RefersTo <- Some foundVar
                 | PrimTranslationL ->

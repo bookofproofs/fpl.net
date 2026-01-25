@@ -421,7 +421,7 @@ type SymbolTableStructure() =
         | "FplAssertion" ->
             Assert.AreEqual<string>(PrimAssertion, (getName var).[index])
         | "FplAssignment" ->
-            Assert.AreEqual<string>(PrimAssignment, (getName var).[index])
+            Assert.AreEqual<string>(PrimAssignmentL, (getName var).[index])
         | "FplAxiom" ->
             Assert.AreEqual<string>(LiteralAxL, (getName var).[index])
         | "FplBase" ->
@@ -429,11 +429,11 @@ type SymbolTableStructure() =
         | "FplBaseConstructorCall" ->
             Assert.AreEqual<string>(PrimBaseConstructorCall, (getName var).[index])
         | "FplCases" ->
-            Assert.AreEqual<string>(PrimCases, (getName var).[index])
+            Assert.AreEqual<string>(PrimCasesL, (getName var).[index])
         | "FplCaseElse" ->
-            Assert.AreEqual<string>(PrimCaseElse, (getName var).[index])
+            Assert.AreEqual<string>(PrimCaseElseL, (getName var).[index])
         | "FplCaseSingle" ->
-            Assert.AreEqual<string>(PrimCaseSingle, (getName var).[index])
+            Assert.AreEqual<string>(PrimCaseSingleL, (getName var).[index])
         | "FplClass" ->
             Assert.AreEqual<string>(PrimClassL, (getName var).[index])
         | "FplConjecture" ->
@@ -461,11 +461,11 @@ type SymbolTableStructure() =
         | "FplExtensionObj" ->
             Assert.AreEqual<string>(PrimExtensionObj, (getName var).[index])
         | "FplForInStmt" ->
-            Assert.AreEqual<string>(PrimForInStmt, (getName var).[index])
+            Assert.AreEqual<string>(PrimForInStmtL, (getName var).[index])
         | "FplForInStmtDomain" ->
-            Assert.AreEqual<string>(PrimForInStmtDomain, (getName var).[index])
+            Assert.AreEqual<string>(PrimForInStmtDomainL, (getName var).[index])
         | "FplForInStmtEntity" ->
-            Assert.AreEqual<string>(PrimForInStmtEntity, (getName var).[index])
+            Assert.AreEqual<string>(PrimForInStmtEntityL, (getName var).[index])
         | "FplFunctionalTerm" ->
             Assert.AreEqual<string>(PrimFunctionalTermL, (getName var).[index])
         | "FplImplication" ->
@@ -513,11 +513,11 @@ type SymbolTableStructure() =
         | "FplMandatoryPredicate" ->
             Assert.AreEqual<string>(PrimMandatoryPredicateL, (getName var).[index])        
         | "FplMapCaseElse" ->
-            Assert.AreEqual<string>(PrimMapCaseElse, (getName var).[index])        
+            Assert.AreEqual<string>(PrimMapCaseElseL, (getName var).[index])        
         | "FplMapCaseSingle" ->
-            Assert.AreEqual<string>(PrimMapCaseSingle, (getName var).[index])
+            Assert.AreEqual<string>(PrimMapCaseSingleL, (getName var).[index])
         | "FplMapCases" ->
-            Assert.AreEqual<string>(PrimMapCases, (getName var).[index])        
+            Assert.AreEqual<string>(PrimMapCasesL, (getName var).[index])        
         | "FplMapping" ->
             Assert.AreEqual<string>(PrimMappingL, (getName var).[index])
         | "FplNegation" ->
@@ -888,7 +888,7 @@ type SymbolTableStructure() =
         | "FplAssertion" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplAssignment" ->
-            Assert.AreEqual<string>("assign (ln 0)", (getName var).[index])
+            Assert.AreEqual<string>(PrimAssignment, (getName var).[index])
         | "FplAxiom" ->
             Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
         | "FplBase" ->
@@ -896,11 +896,11 @@ type SymbolTableStructure() =
         | "FplBaseConstructorCall" ->
             Assert.AreEqual<string>(LiteralObj, (getName var).[index])
         | "FplCases" ->
-            Assert.AreEqual<string>("", (getName var).[index])
+            Assert.AreEqual<string>(LiteralCases, (getName var).[index])
         | "FplCaseElse" ->
-            Assert.AreEqual<string>("", (getName var).[index])
+            Assert.AreEqual<string>(PrimCaseElse, (getName var).[index])
         | "FplCaseSingle" ->
-            Assert.AreEqual<string>("", (getName var).[index])
+            Assert.AreEqual<string>(PrimCaseSingle, (getName var).[index])
         | "FplClass" ->
             Assert.AreEqual<string>(LiteralObj, (getName var).[index])
         | "FplConjecture" ->
@@ -918,7 +918,7 @@ type SymbolTableStructure() =
         | "FplDisjunction" ->
             Assert.AreEqual<string>(LiteralOr, (getName var).[index])        
         | "FplEquality" ->
-            Assert.AreEqual<string>(PrimDelegateEqualL, (getName var).[index])        
+            Assert.AreEqual<string>($"{LiteralDel}{PrimDelegateEqual}", (getName var).[index])        
         | "FplEquivalence" ->
             Assert.AreEqual<string>(LiteralIif, (getName var).[index])        
         | "FplExclusiveOr" ->
@@ -928,11 +928,11 @@ type SymbolTableStructure() =
         | "FplExtensionObj" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplForInStmt" ->
-            Assert.AreEqual<string>("", (getName var).[index])
+            Assert.AreEqual<string>(LiteralFor, (getName var).[index])
         | "FplForInStmtDomain" ->
-            Assert.AreEqual<string>("", (getName var).[index])
+            Assert.AreEqual<string>(PrimForInStmtDomain, (getName var).[index])
         | "FplForInStmtEntity" ->
-            Assert.AreEqual<string>("", (getName var).[index])
+            Assert.AreEqual<string>(PrimForInStmtEntity, (getName var).[index])
         | "FplFunctionalTerm" ->
             Assert.AreEqual<string>(LiteralFunc, (getName var).[index])
         | "FplImplication" ->
@@ -980,11 +980,11 @@ type SymbolTableStructure() =
         | "FplMandatoryPredicate" ->
             Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
         | "FplMapCaseElse" ->
-            Assert.AreEqual<string>("", (getName var).[index])
+            Assert.AreEqual<string>(PrimMapCaseElse, (getName var).[index])
         | "FplMapCaseSingle" ->
-            Assert.AreEqual<string>("", (getName var).[index])
+            Assert.AreEqual<string>(PrimMapCaseSingle, (getName var).[index])
         | "FplMapCases" ->
-            Assert.AreEqual<string>("", (getName var).[index])        
+            Assert.AreEqual<string>(LiteralMapCases, (getName var).[index])        
         | "FplMapping" ->
             Assert.AreEqual<string>(LiteralObj, (getName var).[index])
         | "FplNegation" ->
@@ -1008,7 +1008,7 @@ type SymbolTableStructure() =
         | "FplReference" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplReturn" ->
-            Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
+            Assert.AreEqual<string>(LiteralRet, (getName var).[index])
         | "FplRoot" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplRuleOfInference" ->

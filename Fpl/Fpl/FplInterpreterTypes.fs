@@ -383,6 +383,9 @@ type ISkolem =
     abstract member SkolemName : string with get
     abstract member SetSkolemName: unit -> unit
 
+type Debug =
+    | Start
+    | Stop
 
 [<AbstractClass>]
 type FplValue(positions: Positions, parent: FplValue option) =
@@ -641,7 +644,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
 
         getFullName this true
 
-    /// Calculcates this FplValue's ultimate block node (if such exists).
+    /// Calculates this FplValue's ultimate block node (if such exists).
     /// The ultimate block node is the FPL building block's FplValue enclosing this FplValue (if such extists)
     member this.UltimateBlockNode = 
         let rec ultimateBlockNode (node:FplValue) =
@@ -655,7 +658,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
             | None -> None
         ultimateBlockNode this
 
-    /// Calculcates this FplValue's ultimate block node (if such exists).
+    /// Calculates this FplValue's ultimate block node (if such exists).
     /// The next block node is either an FPL property (if such exists) 
     /// or the Fpl building block's FplValue enclosing this FplValue (if such exists).
     member this.NextBlockNode = 
@@ -714,13 +717,18 @@ type FplValue(positions: Positions, parent: FplValue option) =
         | None -> ScopeSearchResult.NotApplicable
 
 
-    member this.Debug (caller:string) =
+    member this.Debug (debugMode:Debug) =
         let rec getPath (fv:FplValue) =
             match fv.Parent with 
-            | Some parent -> $"{getPath parent}>{fv.ShortName} {fv.Type SignatureType.Name}"
+            | Some parent -> $"{getPath parent} # {fv.ShortName} {fv.Type SignatureType.Name}"
             | None -> $"{fv.ShortName}"
         if TestSharedConfig.TestConfig.DebugMode then 
-            let logLine = $"{caller}:{getPath this}{Environment.NewLine}"
+            let logLine =
+                match debugMode with
+                | Debug.Start ->
+                    $"Start:{getPath this}:[{this.Represent()}]{Environment.NewLine}"
+                | Debug.Stop ->
+                    $"Stop :{getPath this}:[{this.Represent()}]{Environment.NewLine}"
             let currDir = Directory.GetCurrentDirectory()
             File.AppendAllText(Path.Combine(currDir, "Debug.txt"), logLine)
 
@@ -1092,10 +1100,11 @@ type FplTheory(theoryName, parent: FplValue, filePath: string, runOrder) as this
         |> Seq.toList
 
     override this.Run variableStack = 
-        this.Debug "Run"
+        this.Debug Debug.Start
         let blocks = this.OrderedBlocksRunningByThemselves
         blocks
         |> Seq.iter (fun block -> block.Run variableStack)        
+        this.Debug Debug.Stop
 
 /// Indicates if an FplValue is the root of the SymbolTable.
 let isTheory (fv:FplValue) = 
@@ -1131,9 +1140,10 @@ type FplRoot() =
     override this.RunOrder = None
 
     override this.Run variableStack = 
-        this.Debug "Run"
+        this.Debug Debug.Start
         this.OrderedTheories
         |> Seq.iter (fun theory -> theory.Run variableStack)        
+        this.Debug Debug.Stop
 
 // Returns the root node of any FplValue
 let rec getRoot (fv:FplValue) =
@@ -1329,7 +1339,8 @@ type FplIntrinsicPred(positions: Positions, parent: FplValue) =
     override this.Represent() = this.FplId
 
     override this.Run _ = 
-        this.Debug "Run"
+        this.Debug Debug.Start
+        this.Debug Debug.Stop
 
     override this.EmbedInSymbolTable _ = addExpressionToReference this
 
@@ -1659,7 +1670,8 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
         | _, _, Some map -> sprintf "%s(%s) -> %s" head pars (map.Type propagate)
 
     override this.Run _ = 
-        this.Debug "Run"
+        this.Debug Debug.Start
+        this.Debug Debug.Stop
 
     override this.RunOrder = None
 
@@ -1751,7 +1763,8 @@ type FplPredicateList(positions: Positions, parent: FplValue, runOrder) =
 
     override this.Run variableStack = 
         // todo implement run
-        this.Debug "Run"
+        this.Debug Debug.Start
+        this.Debug Debug.Stop
 
 
     override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
@@ -1774,8 +1787,9 @@ type FplRuleOfInference(positions: Positions, parent: FplValue, runOrder) =
     override this.IsBlock () = true    
 
     override this.Run variableStack = 
-        this.Debug "Run"
+        this.Debug Debug.Start
         this.ErrorOccurred <- emitLG004diagnostic this.Name this.Arity this.StartPos this.EndPos
+        this.Debug Debug.Stop
 
     override this.EmbedInSymbolTable _ = 
         this.CheckConsistency()
@@ -1846,7 +1860,8 @@ type FplInstance(positions: Positions, parent: FplValue) as this =
         "{" + body + "}"
 
     override this.Run _ = 
-        this.Debug "Run"
+        this.Debug Debug.Start
+        this.Debug Debug.Stop
 
     override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
 
@@ -1870,7 +1885,8 @@ type FplBase(positions: Positions, parent: FplValue) =
     override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
 
     override this.Run variableStack = 
-        this.Debug "Run"
+        this.Debug Debug.Start
+        this.Debug Debug.Stop
 
     override this.RunOrder = None
 
@@ -1933,7 +1949,7 @@ type FplGenericConstructor(name, positions: Positions, parent: FplValue) as this
 
 
     override this.Run variableStack = 
-        this.Debug "Run"
+        this.Debug Debug.Start
 
         let rec createSubInstance (classDef:FplValue) (instance:FplValue) (baseInstance:FplValue)=
             classDef.ArgList
@@ -1965,6 +1981,8 @@ type FplGenericConstructor(name, positions: Positions, parent: FplValue) as this
             instance.FplId <- LiteralUndef
             instance.TypeId <- LiteralUndef
         this.SetValue instance
+        this.Debug Debug.Stop
+
 
     member this.Instance =
         match this.Value with 
@@ -2106,10 +2124,11 @@ and FplClass(positions: Positions, parent: FplValue) as this =
     override this.Represent () = $"dec {LiteralCl} {this.FplId}"
 
     override this.Run variableStack = 
-        this.Debug "Run"
+        this.Debug Debug.Start
         this.GetProperties()
         |> List.iter (fun fv -> fv.Run variableStack)
         this.SetValue(new FplInstance((this.StartPos, this.EndPos), this))
+        this.Debug Debug.Stop
 
     override this.CheckConsistency () = 
         base.CheckConsistency()
@@ -2157,7 +2176,7 @@ type FplGenericPredicateBlock(positions: Positions, parent: FplValue) =
         sprintf "%s(%s)" head paramT
 
     override this.Run variableStack = 
-        this.Debug "Run"
+        this.Debug Debug.Start
         if not _isReady then
             _callCounter <- _callCounter + 1
             if _callCounter > maxRecursion then
@@ -2177,6 +2196,7 @@ type FplGenericPredicateBlock(positions: Positions, parent: FplValue) =
 
             _callCounter <- _callCounter - 1
             _isReady <- this.Arity = 0
+        this.Debug Debug.Stop
 
 
     override this.CheckConsistency () = 
@@ -2289,7 +2309,7 @@ type FplPredicate(positions: Positions, parent: FplValue, runOrder) as this =
         | None -> PrimUndetermined
 
     override this.Run variableStack = 
-        this.Debug "Run"
+        this.Debug Debug.Start
         if not _isReady then
             _callCounter <- _callCounter + 1
             if _callCounter > maxRecursion then
@@ -2310,6 +2330,7 @@ type FplPredicate(positions: Positions, parent: FplValue, runOrder) as this =
             _callCounter <- _callCounter - 1
             _isReady <- this.Arity = 0        
             this.GetProperties() |> List.iter (fun fv -> fv.Run variableStack)
+        this.Debug Debug.Stop
 
     override this.RunOrder = Some _runOrder
 
@@ -2352,7 +2373,7 @@ type FplAxiom(positions: Positions, parent: FplValue, runOrder) =
         tryAddToParentUsingFplId this
 
     override this.Run variableStack = 
-        this.Debug "Run"
+        this.Debug Debug.Start
         if not _isReady then
             this.ArgList
             |> Seq.iter (fun fv -> 
@@ -2362,6 +2383,7 @@ type FplAxiom(positions: Positions, parent: FplValue, runOrder) =
             _isReady <- this.Arity = 0 
             this.ErrorOccurred <- emitLG003diagnostic (this.Type(SignatureType.Name)) this.Name (this.Represent()) this.StartPos this.EndPos
             this.ErrorOccurred <- emitLG004diagnostic this.Name this.Arity this.StartPos this.EndPos
+        this.Debug Debug.Stop
 
     override this.RunOrder = Some _runOrder
 
@@ -2391,7 +2413,7 @@ type FplGenericTheoremLikeStmt(positions: Positions, parent: FplValue, runOrder)
         tryAddToParentUsingFplId this 
 
     override this.Run variableStack = 
-        this.Debug "Run"
+        this.Debug Debug.Start
         if not _isReady then
             this.ArgList
             |> Seq.iter (fun fv -> 
@@ -2412,6 +2434,7 @@ type FplGenericTheoremLikeStmt(positions: Positions, parent: FplValue, runOrder)
 
         if not _hasProof then 
            this.ErrorOccurred <- emitPR007Diagnostics (this.Type(SignatureType.Name)) this.Name this.SignStartPos this.SignEndPos
+        this.Debug Debug.Stop
 
     override this.RunOrder = Some _runOrder
 
@@ -2544,7 +2567,7 @@ type FplConjecture(positions: Positions, parent: FplValue, runOrder) =
         tryAddToParentUsingFplId this 
 
     override this.Run variableStack = 
-        this.Debug "Run"
+        this.Debug Debug.Start
         if not _isReady then
             this.ArgList
             |> Seq.iter (fun fv -> 
@@ -2553,6 +2576,7 @@ type FplConjecture(positions: Positions, parent: FplValue, runOrder) =
             )
             _isReady <- this.Arity = 0 
             this.ErrorOccurred <- emitLG004diagnostic this.Name this.Arity this.StartPos this.EndPos
+        this.Debug Debug.Stop
 
 
     override this.RunOrder = Some _runOrder
@@ -2627,7 +2651,8 @@ and FplJustificationItemByAx(positions: Positions, parent: FplValue) =
 
     override this.Run variableStack = 
         // todo implement Run
-        this.Debug "Run"
+        this.Debug Debug.Start
+        this.Debug Debug.Stop
 
 and FplJustificationItemByDef(positions: Positions, parent: FplValue) =
     inherit FplGenericJustificationItem(positions, parent)
@@ -2641,7 +2666,8 @@ and FplJustificationItemByDef(positions: Positions, parent: FplValue) =
 
     override this.Run variableStack = 
         // todo implement Run
-        this.Debug "Run"
+        this.Debug Debug.Start
+        this.Debug Debug.Stop
 
 and FplJustificationItemByDefVar(positions: Positions, parent: FplValue) =
     inherit FplGenericJustificationItem(positions, parent)
@@ -2655,7 +2681,8 @@ and FplJustificationItemByDefVar(positions: Positions, parent: FplValue) =
 
     override this.Run variableStack = 
         // todo implement Run
-        this.Debug "Run"
+        this.Debug Debug.Start
+        this.Debug Debug.Stop
 
 and FplJustificationItemByConj(positions: Positions, parent: FplValue) =
     inherit FplGenericJustificationItem(positions, parent)
@@ -2669,7 +2696,8 @@ and FplJustificationItemByConj(positions: Positions, parent: FplValue) =
 
     override this.Run variableStack = 
         // todo implement Run
-        this.Debug "Run"
+        this.Debug Debug.Start
+        this.Debug Debug.Stop
 
 and FplJustificationItemByCor(positions: Positions, parent: FplValue) =
     inherit FplGenericJustificationItem(positions, parent)
@@ -2683,7 +2711,8 @@ and FplJustificationItemByCor(positions: Positions, parent: FplValue) =
 
     override this.Run variableStack = 
         // todo implement Run
-        this.Debug "Run"
+        this.Debug Debug.Start
+        this.Debug Debug.Stop
 
 and FplJustificationItemByInf(positions: Positions, parent: FplValue) =
     inherit FplGenericJustificationItem(positions, parent)
@@ -2697,7 +2726,8 @@ and FplJustificationItemByInf(positions: Positions, parent: FplValue) =
 
     override this.Run variableStack = 
         // todo implement Run
-        this.Debug "Run"
+        this.Debug Debug.Start
+        this.Debug Debug.Stop
 
 and FplJustificationItemByRefArgument(positions: Positions, parent: FplValue) =
     inherit FplGenericJustificationItem(positions, parent)
@@ -2711,7 +2741,8 @@ and FplJustificationItemByRefArgument(positions: Positions, parent: FplValue) =
 
     override this.Run variableStack = 
         // todo implement Run
-        this.Debug "Run"
+        this.Debug Debug.Start
+        this.Debug Debug.Stop
 
 and FplJustificationItemByProofArgument(positions: Positions, parent: FplValue) =
     inherit FplGenericJustificationItem(positions, parent)
@@ -2725,7 +2756,8 @@ and FplJustificationItemByProofArgument(positions: Positions, parent: FplValue) 
 
     override this.Run variableStack = 
         // todo implement Run
-        this.Debug "Run"
+        this.Debug Debug.Start
+        this.Debug Debug.Stop
 
 
 and FplJustificationItemByTheoremLikeStmt(positions: Positions, parent: FplValue) =
@@ -2740,8 +2772,8 @@ and FplJustificationItemByTheoremLikeStmt(positions: Positions, parent: FplValue
 
     override this.Run variableStack = 
         // todo implement Run
-        this.Debug "Run"
-
+        this.Debug Debug.Start
+        this.Debug Debug.Stop
 
 and FplJustification(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(positions, parent)
@@ -2760,7 +2792,8 @@ and FplJustification(positions: Positions, parent: FplValue) =
 
     override this.Run variableStack = 
         // todo implement Run
-        this.Debug "Run"
+        this.Debug Debug.Start
+        this.Debug Debug.Stop
 
 
     member this.GetOrderedJustificationItems =
@@ -2786,7 +2819,8 @@ and FplArgInferenceAssume(positions: Positions, parent: FplValue) =
 
     override this.Run variableStack = 
         // todo implement Run
-        this.Debug "Run"
+        this.Debug Debug.Start
+        this.Debug Debug.Stop
 
     member this.ParentArgument = this.Parent.Value :?> FplArgument
 
@@ -2803,7 +2837,8 @@ and FplArgInferenceRevoke(positions: Positions, parent: FplValue) =
 
     override this.Run variableStack = 
         // todo implement Run
-        this.Debug "Run"
+        this.Debug Debug.Start
+        this.Debug Debug.Stop
 
     member this.ParentArgument = this.Parent.Value :?> FplArgument
 
@@ -2819,10 +2854,11 @@ and FplArgInferenceTrivial(positions: Positions, parent: FplValue) =
         ret
 
     override this.Run variableStack = 
-        this.Debug "Run"
+        this.Debug Debug.Start
         let value = new FplIntrinsicPred((this.StartPos, this.EndPos), this) 
         value.FplId <- LiteralTrue
         this.SetValue value
+        this.Debug Debug.Stop
 
     member this.ParentArgument = this.Parent.Value :?> FplArgument
 
@@ -2839,7 +2875,8 @@ and FplArgInferenceDerived(positions: Positions, parent: FplValue) =
 
     override this.Run variableStack = 
         // todo implement run
-        this.Debug "Run"
+        this.Debug Debug.Start
+        this.Debug Debug.Stop
 
     member this.ParentArgument = this.Parent.Value :?> FplArgument
 
@@ -2874,7 +2911,7 @@ and FplArgument(positions: Positions, parent: FplValue, runOrder) =
             None
 
     override this.Run variableStack =
-        this.Debug "Run"
+        this.Debug Debug.Start
         // the argument has two elements, the justification and an argument inference
         let justificationOpt = this.Justification
         let argInferenceOpt = this.ArgumentInference
@@ -2904,6 +2941,8 @@ and FplArgument(positions: Positions, parent: FplValue, runOrder) =
                 c) whether or not the justification is a rule of inference
                 d) whether or not the justification is a by definition
         *)
+        this.Debug Debug.Stop
+
 
 
     override this.EmbedInSymbolTable _ = 
@@ -2948,7 +2987,7 @@ and FplProof(positions: Positions, parent: FplValue, runOrder) =
     member this.HasArgument argumentId = this.Scope.ContainsKey(argumentId)
 
     override this.Run variableStack = 
-        this.Debug "Run"
+        this.Debug Debug.Start
         // tell the parent theorem-like statement that it has a proof
         let parent = this.Parent.Value 
         match box parent with 
@@ -2965,6 +3004,7 @@ and FplProof(positions: Positions, parent: FplValue, runOrder) =
         )
         if not allArgumentsEvaluateToTrue then
             this.ErrorOccurred <- emitPR009Diagnostics this.StartPos this.StartPos
+        this.Debug Debug.Stop
 
     override this.EmbedInSymbolTable _ = 
         /// Tries to find a theorem-like statement for a proof
@@ -3070,7 +3110,8 @@ type FplLocalization(positions: Positions, parent: FplValue) =
 
     override this.Run variableStack = 
         // todo implement run
-        this.Debug "Run"
+        this.Debug Debug.Start
+        this.Debug Debug.Stop
 
     override this.RunOrder = None
 
@@ -3100,7 +3141,8 @@ type FplTranslation(positions: Positions, parent: FplValue) =
 
     override this.Run variableStack = 
         // todo implement run
-        this.Debug "Run"
+        this.Debug Debug.Start
+        this.Debug Debug.Stop
 
     override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
 
@@ -3125,7 +3167,8 @@ type FplLanguage(positions: Positions, parent: FplValue) =
 
     override this.Run variableStack = 
         // todo implement run
-        this.Debug "Run"
+        this.Debug Debug.Start
+        this.Debug Debug.Stop
 
     override this.EmbedInSymbolTable _ = 
         let parent = this.Parent.Value
@@ -3162,7 +3205,8 @@ type FplAssertion(positions: Positions, parent: FplValue) =
 
     override this.Run variableStack = 
         // todo implement run
-        this.Debug "Run"
+        this.Debug Debug.Start
+        this.Debug Debug.Stop
 
     override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
 
@@ -3189,7 +3233,8 @@ type FplIntrinsicTpl(name, positions: Positions, parent: FplValue) as this =
     override this.Represent () = this.FplId
 
     override this.Run _ = 
-        this.Debug "Run"
+        this.Debug Debug.Start
+        this.Debug Debug.Stop
 
     /// Sets a template usage and issues a specific diagnostics if a type conflict occurs.
     /// The caller decides with specific diagnostics to issue. If the diagnostics is unhandled, 
@@ -3238,7 +3283,8 @@ type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
     override this.Represent (): string = this.FplId
 
     override this.Run variableStack = 
-        this.Debug "Run"
+        this.Debug Debug.Start
+        this.Debug Debug.Stop
 
     override this.EmbedInSymbolTable _ = addExpressionToReference this
 
@@ -3251,7 +3297,7 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
     override this.Clone () = this // do not clone references to prevent stack overflow 
 
     override this.Run variableStack =
-        this.Debug "Run"
+        this.Debug Debug.Start
 
         if this.RefersTo.IsSome then 
             let calledOpt = referencedNodeOpt this
@@ -3297,6 +3343,7 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
         elif this.ArgList.Count = 1 then
             let arg = this.ArgList[0]
             arg.Run variableStack
+        this.Debug Debug.Stop
 
     override this.RunOrder = None
 
@@ -3464,7 +3511,7 @@ type FplReference(positions: Positions, parent: FplValue) =
             next.EndPos <- this.EndPos
         | Some next when next.IsBlock() ->
             addExpressionToParentArgList this 
-        | Some next when next.Name = PrimForInStmtDomain -> 
+        | Some next when next.Name = PrimForInStmtDomainL -> 
             next.FplId <- this.FplId
             tryAddToParentUsingFplId this
         | Some (:? FplReference as next) when next.DottedChild.IsSome -> 
@@ -3589,7 +3636,8 @@ type FplMapping(positions: Positions, parent: FplValue) =
     override this.Represent() = $"dec {this.Type(SignatureType.Type)}"
 
     override this.Run _ = 
-        this.Debug "Run"
+        this.Debug Debug.Start
+        this.Debug Debug.Stop
 
     override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
 
@@ -4470,7 +4518,8 @@ type FplParent(positions: Positions, parent: FplValue) as this =
 
     override this.Run variableStack = 
         // todo implement run
-        this.Debug "Run"
+        this.Debug Debug.Start
+        this.Debug Debug.Stop
 
     override this.EmbedInSymbolTable _ = addExpressionToReference this
 
@@ -4502,7 +4551,8 @@ type FplSelf(positions: Positions, parent: FplValue) as this =
 
     override this.Run variableStack = 
         // todo implement run
-        this.Debug "Run"
+        this.Debug Debug.Start
+        this.Debug Debug.Stop
 
     override this.EmbedInSymbolTable _ = addExpressionToReference this
 
@@ -4543,7 +4593,7 @@ type FplConjunction(positions: Positions, parent: FplValue) as this =
         sprintf "%s(%s)" head args
 
     override this.Run variableStack =
-        this.Debug "Run"
+        this.Debug Debug.Start
         let arg1 = this.ArgList[0]
         let arg2 = this.ArgList[1]
         arg1.Run variableStack
@@ -4561,6 +4611,7 @@ type FplConjunction(positions: Positions, parent: FplValue) as this =
                 LiteralTrue
             | _ -> PrimUndetermined
         this.SetValue(newValue)
+        this.Debug Debug.Stop
 
     override this.CheckConsistency() = 
         base.CheckConsistency() 
@@ -4601,7 +4652,7 @@ type FplDisjunction(positions: Positions, parent: FplValue) as this =
         sprintf "%s(%s)" head args
 
     override this.Run variableStack =
-        this.Debug "Run"
+        this.Debug Debug.Start
         let arg1 = this.ArgList[0]
         let arg2 = this.ArgList[1]
         arg1.Run variableStack
@@ -4620,6 +4671,7 @@ type FplDisjunction(positions: Positions, parent: FplValue) as this =
             | _ -> 
                 PrimUndetermined
         this.SetValue(newValue)  
+        this.Debug Debug.Stop
         
     override this.CheckConsistency() = 
         base.CheckConsistency() 
@@ -4659,7 +4711,7 @@ type FplExclusiveOr(positions: Positions, parent: FplValue) as this =
         sprintf "%s(%s)" head args
 
     override this.Run variableStack = 
-        this.Debug "Run"
+        this.Debug Debug.Start
         let arg1 = this.ArgList[0]
         let arg2 = this.ArgList[1]
         arg1.Run variableStack
@@ -4681,6 +4733,7 @@ type FplExclusiveOr(positions: Positions, parent: FplValue) as this =
                 PrimUndetermined
 
         this.SetValue(newValue)  
+        this.Debug Debug.Stop
 
     override this.CheckConsistency() = 
         base.CheckConsistency() 
@@ -4721,7 +4774,7 @@ type FplNegation(positions: Positions, parent: FplValue) as this =
         sprintf "%s(%s)" head args
 
     override this.Run variableStack =
-        this.Debug "Run"
+        this.Debug Debug.Start
         let arg = this.ArgList[0]
         arg.Run variableStack
         let argRepr = arg.Represent()
@@ -4735,6 +4788,7 @@ type FplNegation(positions: Positions, parent: FplValue) as this =
             | _ -> PrimUndetermined  
 
         this.SetValue newValue
+        this.Debug Debug.Stop
 
     override this.CheckConsistency() = 
         base.CheckConsistency()
@@ -4770,7 +4824,7 @@ type FplImplication(positions: Positions, parent: FplValue) as this =
         sprintf "%s(%s)" head args
 
     override this.Run _ = 
-        this.Debug "Run"
+        this.Debug Debug.Start
         let arg1 = this.ArgList[0]
         let arg2 = this.ArgList[1]
         let arg1Repr = arg1.Represent()
@@ -4784,6 +4838,7 @@ type FplImplication(positions: Positions, parent: FplValue) as this =
             | (LiteralFalse, LiteralFalse) 
             | (LiteralTrue, LiteralTrue) -> LiteralTrue
             | _ -> PrimUndetermined
+        this.Debug Debug.Stop
         
         this.SetValue(newValue) 
 
@@ -4825,7 +4880,7 @@ type FplEquivalence(positions: Positions, parent: FplValue) as this =
 
 
     override this.Run variableStack = 
-        this.Debug "Run"
+        this.Debug Debug.Start
         let arg1 = this.ArgList[0]
         let arg2 = this.ArgList[1]
         arg1.Run variableStack
@@ -4843,6 +4898,7 @@ type FplEquivalence(positions: Positions, parent: FplValue) as this =
             | _ -> PrimUndetermined
         
         this.SetValue(newValue)
+        this.Debug Debug.Stop
 
     override this.CheckConsistency() = 
         base.CheckConsistency() 
@@ -4880,6 +4936,7 @@ type FplEquality(name, positions: Positions, parent: FplValue) as this =
     inherit FplGenericDelegate(name, positions, parent)
 
     do 
+        this.FplId <- $"{LiteralDel}{PrimDelegateEqual}"
         this.TypeId <- LiteralPred
 
     override this.Name = PrimDelegateEqualL
@@ -4905,7 +4962,7 @@ type FplEquality(name, positions: Positions, parent: FplValue) as this =
         sprintf "%s(%s)" head args
 
     override this.Run variableStack = 
-        this.Debug "Run"
+        this.Debug Debug.Start
         if this.ArgList.Count <> 2 then 
             this.ErrorOccurred <- emitID013Diagnostics variableStack.CallerStartPos variableStack.CallerEndPos $"Predicate `=` takes 2 arguments, got {this.ArgList.Count}." 
         else
@@ -4954,6 +5011,7 @@ type FplEquality(name, positions: Positions, parent: FplValue) as this =
                                 $"{(a1Repr = b1Repr)}".ToLower()
                             | _ -> PrimUndetermined
                         this.SetValue(newValue)
+        this.Debug Debug.Stop
 
 /// Implements an object that is used to provide a representation of extensions in FPL.
 type FplExtensionObj(positions: Positions, parent: FplValue) as this =
@@ -4988,7 +5046,8 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
     override this.Run _ = 
         // todo implement run by calling extension object this RefersTo 
         // or returning this as value otherwise
-        this.Debug "Run"
+        this.Debug Debug.Start
+        this.Debug Debug.Stop
 
     override this.CheckConsistency () = 
         base.CheckConsistency()
@@ -5097,7 +5156,7 @@ type FplDecrement(name, positions: Positions, parent: FplValue) as this =
         | None -> LiteralUndef
 
     override this.Run _ = 
-        this.Debug "Run"
+        this.Debug Debug.Start
         if this.ArgList.Count <> 1 then 
             this.Diagnostic $"Decrement takes 1 arguments, got {this.ArgList.Count}." 
         else
@@ -5121,6 +5180,7 @@ type FplDecrement(name, positions: Positions, parent: FplValue) as this =
             else
                 string n'
         this.SetValue(newValue)
+        this.Debug Debug.Stop
 
 type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
@@ -5146,7 +5206,8 @@ type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
         | _ -> this.FplId
 
     override this.Run _ = 
-        this.Debug "Run"
+        this.Debug Debug.Start
+        this.Debug Debug.Stop
 
     override this.EmbedInSymbolTable _ = addExpressionToReference this
 
@@ -5283,7 +5344,7 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) as this
 
 
     override this.Run variableStack = 
-        this.Debug "Run"
+        this.Debug Debug.Start
         if not _isReady then
             _callCounter <- _callCounter + 1
             if _callCounter > maxRecursion then
@@ -5302,6 +5363,7 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) as this
                 |> List.iter (fun fv -> fv.Run variableStack)
             _callCounter <- _callCounter - 1
             _isReady <- this.Arity = 0 
+        this.Debug Debug.Stop
 
 /// Implements the semantics of the FPL is operator.
 type FplIsOperator(positions: Positions, parent: FplValue) as this =
@@ -5327,7 +5389,7 @@ type FplIsOperator(positions: Positions, parent: FplValue) as this =
         sprintf "%s(%s)" head args
         
     override this.Run _ = 
-        this.Debug "Run"
+        this.Debug Debug.Start
         let operand = this.ArgList[0]
         let typeOfOperand = this.ArgList[1]
         let newValue = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
@@ -5341,9 +5403,8 @@ type FplIsOperator(positions: Positions, parent: FplValue) as this =
             | _ -> LiteralFalse
         
         newValue.FplId <- evaluateIsOperator
-           
-        
         this.SetValue(newValue)  
+        this.Debug Debug.Stop
 
     override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
 
@@ -5384,10 +5445,11 @@ type FplGenericQuantor(positions: Positions, parent: FplValue) =
         addExpressionToParentArgList this
     
     override this.Run variableStack = 
-        this.Debug "Run"
+        this.Debug Debug.Start
         this.ArgList[0].Run variableStack
         let pred = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
         this.SetValue pred
+        this.Debug Debug.Stop
 
 
 type FplQuantorAll(positions: Positions, parent: FplValue) as this =
@@ -5505,7 +5567,7 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) as this 
     override this.RunOrder = None
 
     override this.Run variableStack = 
-        this.Debug "Run"
+        this.Debug Debug.Start
         if not _isReady then
             _callCounter <- _callCounter + 1
             if _callCounter > maxRecursion then
@@ -5521,6 +5583,7 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) as this 
                     )
             _callCounter <- _callCounter - 1
             _isReady <- this.Arity = 0 
+        this.Debug Debug.Stop
 
 type FplExtension(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
@@ -5567,7 +5630,8 @@ type FplExtension(positions: Positions, parent: FplValue) =
 
     override this.Run variableStack = 
         // todo implement run
-        this.Debug "Run"
+        this.Debug Debug.Start
+        this.Debug Debug.Stop
 
     override this.EmbedInSymbolTable _ = tryAddToParentUsingMixedSignature this
 
@@ -5597,7 +5661,7 @@ type FplReturn(positions: Positions, parent: FplValue) as this =
     inherit FplGenericStmt(positions, parent)
 
     do
-        this.FplId <- LiteralUndef
+        this.FplId <- LiteralRet
         this.TypeId <- LiteralUndef
 
     override this.Name = PrimReturn
@@ -5615,7 +5679,7 @@ type FplReturn(positions: Positions, parent: FplValue) as this =
         | _ -> this.FplId
 
     override this.Run variableStack =
-        this.Debug "Run"
+        this.Debug Debug.Start
         let returnedReference = this.ArgList[0]
         let blockOpt = this.NextBlockNode
         match blockOpt with 
@@ -5644,11 +5708,14 @@ type FplReturn(positions: Positions, parent: FplValue) as this =
                         this.SetValue(value)
             | _ -> () // does not occur
         | _ -> () // does not occur
+        this.Debug Debug.Stop
 
-type FplMapCaseSingle(positions: Positions, parent: FplValue) =
+type FplMapCaseSingle(positions: Positions, parent: FplValue) as this =
     inherit FplGenericStmt(positions, parent)
+    do 
+        this.FplId <- PrimMapCaseSingle
 
-    override this.Name = PrimMapCaseSingle
+    override this.Name = PrimMapCaseSingleL
 
     override this.Clone () =
         let ret = new FplMapCaseSingle((this.StartPos, this.EndPos), this.Parent.Value)
@@ -5675,21 +5742,24 @@ type FplMapCaseSingle(positions: Positions, parent: FplValue) =
         addExpressionToParentArgList this
     
     override this.Run variableStack = 
-        this.Debug "Run"
+        this.Debug Debug.Start
         let condition = this.GetCondition()
         let result = this.GetResult()
         condition.Run variableStack
         let condRepresent = condition.Represent()
-        if condRepresent = "true" then
+        if condRepresent = LiteralTrue then
             this.SetValuesOf result
         else
             let undef = FplIntrinsicUndef((this.StartPos, this.EndPos), this.Parent.Value)
             this.SetValue(undef)
+        this.Debug Debug.Stop
 
-type FplMapCaseElse(positions: Positions, parent: FplValue) =
+type FplMapCaseElse(positions: Positions, parent: FplValue) as this =
     inherit FplGenericStmt(positions, parent)
+    do 
+        this.FplId <- PrimMapCaseElse
 
-    override this.Name = PrimMapCaseElse
+    override this.Name = PrimMapCaseElseL
 
     override this.Clone () =
         let ret = new FplMapCaseElse((this.StartPos, this.EndPos), this.Parent.Value)
@@ -5703,14 +5773,18 @@ type FplMapCaseElse(positions: Positions, parent: FplValue) =
 
     override this.Run variableStack = 
         // todo implement run
-        this.Debug "Run"
+        this.Debug Debug.Start
+        this.Debug Debug.Stop
 
-type FplMapCases(positions: Positions, parent: FplValue) =
+type FplMapCases(positions: Positions, parent: FplValue) as this =
     inherit FplGenericStmt(positions, parent)
     let _consistentCaseType = new FplIntrinsicTpl("", positions, parent)
     let _reachableCases = new HashSet<string>()
 
-    override this.Name = PrimMapCases
+    do 
+        this.FplId <- LiteralMapCases
+
+    override this.Name = PrimMapCasesL
 
     override this.Clone () =
         let ret = new FplMapCases((this.StartPos, this.EndPos), this.Parent.Value)
@@ -5731,6 +5805,7 @@ type FplMapCases(positions: Positions, parent: FplValue) =
             match item with
             | :? FplMapCaseSingle as condRes -> Some condRes
             | _ -> None)
+        |> Seq.toList
 
     member this.GetElseResult() = 
         let elseResult = this.ArgList |> Seq.last
@@ -5779,20 +5854,33 @@ type FplMapCases(positions: Positions, parent: FplValue) =
         addExpressionToParentArgList this
 
 
-    override this.Run _ = 
-        this.Debug "Run"
+    override this.Run variableStack = 
+        this.Debug Debug.Start
         let resultLst = this.GetConditionResultList()
         let elseResult = this.GetElseResult()
         let findTrueCondition = 
-            Seq.tryFind (fun (res:FplMapCaseSingle) -> res.GetCondition().Represent() = "true") resultLst
+            resultLst
+            |> Seq.tryFind(fun cond -> 
+                cond.Run variableStack
+                let condResult = cond.Represent()
+                condResult = LiteralTrue
+            )
         match findTrueCondition with
-        | Some found -> this.SetValuesOf (found.GetResult())
-        | None -> this.SetValuesOf elseResult
+        | Some found -> 
+            let resOfFound = found.GetResult()
+            resOfFound.Run variableStack
+            this.SetValuesOf resOfFound
+        | None -> 
+            elseResult.Run variableStack
+            this.SetValuesOf elseResult
+        this.Debug Debug.Stop
 
-type FplCaseSingle(positions: Positions, parent: FplValue) =
+type FplCaseSingle(positions: Positions, parent: FplValue) as this =
     inherit FplGenericStmt(positions, parent)
+    do 
+        this.FplId <- PrimCaseSingle
 
-    override this.Name = PrimCaseSingle
+    override this.Name = PrimCaseSingleL
 
     override this.Clone () =
         let ret = new FplCaseSingle((this.StartPos, this.EndPos), this.Parent.Value)
@@ -5816,12 +5904,15 @@ type FplCaseSingle(positions: Positions, parent: FplValue) =
 
     override this.Run variableStack = 
         // todo implement run
-        this.Debug "Run"
+        this.Debug Debug.Start
+        this.Debug Debug.Stop
 
-type FplCaseElse(positions: Positions, parent: FplValue) =
+type FplCaseElse(positions: Positions, parent: FplValue) as this =
     inherit FplGenericStmt(positions, parent)
+    do 
+        this.FplId <- PrimCaseElse
 
-    override this.Name = PrimCaseElse
+    override this.Name = PrimCaseElseL
 
     override this.Clone () =
         let ret = new FplCaseElse((this.StartPos, this.EndPos), this.Parent.Value)
@@ -5835,13 +5926,16 @@ type FplCaseElse(positions: Positions, parent: FplValue) =
 
     override this.Run variableStack = 
         // todo implement run
-        this.Debug "Run"
+        this.Debug Debug.Start
+        this.Debug Debug.Stop
 
-type FplCases(positions: Positions, parent: FplValue) =
+type FplCases(positions: Positions, parent: FplValue) as this =
     inherit FplGenericStmt(positions, parent)
     let _reachableCases = new HashSet<string>()
+    do 
+        this.FplId <- LiteralCases
 
-    override this.Name = PrimCases
+    override this.Name = PrimCasesL
 
     override this.Clone () =
         let ret = new FplCases((this.StartPos, this.EndPos), this.Parent.Value)
@@ -5859,6 +5953,7 @@ type FplCases(positions: Positions, parent: FplValue) =
             match item with
             | :? FplCaseSingle as condRes -> Some condRes
             | _ -> None)
+        |> Seq.toList
 
     member private this.CheckAllCasesForBeingReachable() =
         _reachableCases.Clear()
@@ -5885,12 +5980,15 @@ type FplCases(positions: Positions, parent: FplValue) =
 
     override this.Run variableStack = 
         // todo implement run
-        this.Debug "Run"
+        this.Debug Debug.Start
+        this.Debug Debug.Stop
 
-type FplForInStmt(positions: Positions, parent: FplValue) =
+type FplForInStmt(positions: Positions, parent: FplValue) as this =
     inherit FplGenericStmt(positions, parent)
+    do 
+        this.FplId <- LiteralFor
 
-    override this.Name = PrimForInStmt
+    override this.Name = PrimForInStmtL
 
     override this.Clone () =
         let ret = new FplForInStmt((this.StartPos, this.EndPos), this.Parent.Value)
@@ -5904,12 +6002,15 @@ type FplForInStmt(positions: Positions, parent: FplValue) =
 
     override this.Run variableStack = 
         // todo implement run
-        this.Debug "Run"
+        this.Debug Debug.Start
+        this.Debug Debug.Stop
 
-type FplForInStmtEntity(positions: Positions, parent: FplValue) =
+type FplForInStmtEntity(positions: Positions, parent: FplValue) as this =
     inherit FplGenericStmt(positions, parent)
+    do 
+        this.FplId <- PrimForInStmtEntity
 
-    override this.Name = PrimForInStmtEntity
+    override this.Name = PrimForInStmtEntityL
 
     override this.Clone () =
         let ret = new FplForInStmtEntity((this.StartPos, this.EndPos), this.Parent.Value)
@@ -5928,12 +6029,15 @@ type FplForInStmtEntity(positions: Positions, parent: FplValue) =
 
     override this.Run variableStack = 
         // todo implement run
-        this.Debug "Run"
+        this.Debug Debug.Start
+        this.Debug Debug.Stop
 
-type FplForInStmtDomain(positions: Positions, parent: FplValue) =
+type FplForInStmtDomain(positions: Positions, parent: FplValue) as this =
     inherit FplGenericStmt(positions, parent)
+    do 
+        this.FplId <- PrimForInStmtDomain
 
-    override this.Name = PrimForInStmtDomain
+    override this.Name = PrimForInStmtDomainL
 
     override this.Clone () =
         let ret = new FplForInStmtDomain((this.StartPos, this.EndPos), this.Parent.Value)
@@ -5952,17 +6056,18 @@ type FplForInStmtDomain(positions: Positions, parent: FplValue) =
 
     override this.Run variableStack = 
         // todo implement run
-        this.Debug "Run"
+        this.Debug Debug.Start
+        this.Debug Debug.Stop
 
 /// Implements the assigment statement in FPL.
 type FplAssignment(positions: Positions, parent: FplValue) as this =
     inherit FplGenericStmt(positions, parent)
 
     do
-        this.FplId <- $"assign (ln {this.StartPos.Line})"
+        this.FplId <- PrimAssignment
         this.TypeId <- LiteralUndef
 
-    override this.Name = PrimAssignment
+    override this.Name = PrimAssignmentL
 
     override this.Clone () =
         let ret = new FplAssignment((this.StartPos, this.EndPos), this.Parent.Value)
@@ -6054,7 +6159,7 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
     member this.AssignedValue = this.GetAssignmentArg 1
 
     override this.Run variableStack =
-        this.Debug "Run"
+        this.Debug Debug.Start
         match this.ErrorOccurred, this.Assignee, this.AssignedValue with
         | Some errCode, Some (:? FplGenericVariable as assignee), _ ->
             emitST003diagnostics errCode this.ArgList[1].StartPos this.ArgList[1].EndPos
@@ -6083,8 +6188,10 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
         | None, Some (:? FplVariableArray as assignee), Some assignedValue ->
             assignee.AssignValueToCoordinates this.ArgList[0].ArgList assignedValue // set value to the created instance 
         | None, Some assignee, Some assignedValue ->
+            assignedValue.Run variableStack
             assignee.SetValuesOf assignedValue
         | _ -> ()
+        this.Debug Debug.Stop
 
 /// A string representation of an FplValue
 let toString (fplValue:FplValue) = $"{fplValue.ShortName} {fplValue.Type(SignatureType.Name)}"

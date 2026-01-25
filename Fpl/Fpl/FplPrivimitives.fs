@@ -1296,7 +1296,9 @@ let PrimArgL = "argument"
 [<Literal>]
 let PrimAssertion = "assertion"
 [<Literal>]
-let PrimAssignment = "assignment statement"
+let PrimAssignment = "assign"
+[<Literal>]
+let PrimAssignmentL = "assignment statement"
 [<Literal>]
 let PrimArgInfAssume = "assume argument inference"
 [<Literal>]
@@ -1308,11 +1310,15 @@ let PrimArgInfTrivial = "trivial argument inference"
 [<Literal>]
 let PrimBaseConstructorCall = "base constructor call"
 [<Literal>]
-let PrimCases = "cases statement"
+let PrimCasesL = "cases statement"
 [<Literal>]
-let PrimCaseElse = "else case statement"
+let PrimCaseElse = "else"
 [<Literal>]
-let PrimCaseSingle = "single case statement"
+let PrimCaseElseL = "else case statement"
+[<Literal>]
+let PrimCaseSingle = "case"
+[<Literal>]
+let PrimCaseSingleL = "single case statement"
 [<Literal>]
 let PrimClass = "def cl"
 [<Literal>]
@@ -1342,11 +1348,15 @@ let PrimExtensionL = "extension definition"
 [<Literal>]
 let PrimExtensionObj = "extension object"
 [<Literal>]
-let PrimForInStmt = "for in statement"
+let PrimForInStmtL = "for in statement"
 [<Literal>]
-let PrimForInStmtDomain = "for in statement's domain"
+let PrimForInStmtDomain = "fordomain"
 [<Literal>]
-let PrimForInStmtEntity = "for in statement's entity"
+let PrimForInStmtDomainL = "for in statement's domain"
+[<Literal>]
+let PrimForInStmtEntity = "forentity"
+[<Literal>]
+let PrimForInStmtEntityL = "for in statement's entity"
 [<Literal>]
 let PrimFunctionalTerm = "def func"
 [<Literal>]
@@ -1402,11 +1412,15 @@ let PrimMandatoryPredicate = "mpred"
 [<Literal>]
 let PrimMandatoryPredicateL = "predicate property"
 [<Literal>]
-let PrimMapCases = "mapcases statement"
+let PrimMapCasesL = "mapcases statement"
 [<Literal>]
-let PrimMapCaseElse = "else mapcase statement"
+let PrimMapCaseElse = "melse"
 [<Literal>]
-let PrimMapCaseSingle = "single mapcase statement"
+let PrimMapCaseElseL = "else mapcase statement"
+[<Literal>]
+let PrimMapCaseSingle = "mcase"
+[<Literal>]
+let PrimMapCaseSingleL = "single mapcase statement"
 [<Literal>]
 let PrimMapping = "map"
 [<Literal>]
