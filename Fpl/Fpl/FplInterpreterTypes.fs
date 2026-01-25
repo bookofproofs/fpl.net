@@ -755,11 +755,18 @@ and ScopeSearchResult =
 and State() = 
     let _vars = Dictionary<string,FplValue>()
     let mutable _value: FplValue option = None
+    let mutable _refersTo: FplValue option = None
 
     /// The optional value of the called node before it was called
     member this.Value
         with get() = _value
         and set (value:FplValue option) = _value <- value
+
+
+    /// The optional RefersTo of the called node before it was called
+    member this.RefersTo
+        with get() = _refersTo
+        and set (value:FplValue option) = _refersTo <- value
 
     /// The dictionary of the variables of the called node before it was called
     member this.Vars = _vars
@@ -852,34 +859,40 @@ and FplVariableStack() =
     /// where the key is the block's FplId and the value is a dictionary of all scope variables.
     /// Returns a list of parameters of the called FplValue, i.e. its signature variables.
     /// Since the block's FplId is unique in the scope, all variables are stored in a separate scope.
-    member this.SaveVariables (called:FplValue) = 
+    member this.SaveState (called:FplValue) = 
         // now process all scope variables and push by replacing them with their clones
         // and pushing the originals on the stack
-        let toBeSavedScopeVariables = new State()
+        let toBeSavedState = new State()
         let pars = List<FplValue>()
         let vars = called.GetVariables()
         vars 
         |> List.iter (fun parOriginal -> 
             // save the clone of the original parameter variable
             let parClone = parOriginal.Clone()
-            toBeSavedScopeVariables.Vars.Add(parOriginal.FplId, parClone)
+            toBeSavedState.Vars.Add(parOriginal.FplId, parClone)
             match box parOriginal with 
             | :? IVariable as parOrig when parOrig.IsSignatureVariable ->
                 pars.Add(parOriginal)
             | _ -> ()
         )
-        let kvp = KeyValuePair(called.FplId,toBeSavedScopeVariables)
+        toBeSavedState.Value <- called.Value
+        toBeSavedState.RefersTo <- called.RefersTo
+        let kvp = KeyValuePair(called.FplId,toBeSavedState)
+        
         _stateStack.Push(kvp)
         pars |> Seq.toList
 
-    /// Restores the scope variables of an FplValue block from the stack.
-    member this.RestoreVariables (fvPar:FplValue) = 
-        let stateBeforeBeingCalled = _stateStack.Pop()
-        stateBeforeBeingCalled.Value.Vars
+    /// Restores the state of a called FplValue block it had before it was called.
+    member this.RestoreState (called:FplValue) = 
+        let stateBeforeBeingCalled = _stateStack.Pop().Value
+        stateBeforeBeingCalled.Vars
         |> Seq.iter (fun kvp -> 
-            let orig = (fvPar.Scope:Dictionary<string, FplValue>)[kvp.Key] 
+            let orig = (called.Scope:Dictionary<string, FplValue>)[kvp.Key] 
             orig.Copy(kvp.Value)
         )
+        called.Value <- stateBeforeBeingCalled.Value 
+        called.RefersTo <- stateBeforeBeingCalled.RefersTo 
+
 
     member this.EvalStack = _valueStack
 
@@ -3326,7 +3339,7 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
                         Object.ReferenceEquals(blockNodeOfThis, called) && 
                         calledRecursively.CallCounter > maxRecursion -> () // stop recursion
                     | _ ->
-                        let pars = variableStack.SaveVariables(called) 
+                        let pars = variableStack.SaveState(called) 
                         let args = this.ArgList |> Seq.toList
                         // run all arguments before replacing variables with their values
                         args |> List.iter (fun arg -> arg.Run variableStack)
@@ -3337,7 +3350,7 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
                         // run all statements of the called node
                         called.Run variableStack
                         this.SetValuesOf called
-                        variableStack.RestoreVariables(called)
+                        variableStack.RestoreState(called)
                 | PrimDelegateDecrementL
                 | PrimExtensionObj
                 | PrimDelegateEqualL ->
