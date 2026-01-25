@@ -753,7 +753,7 @@ and ScopeSearchResult =
     | NotFound
     | NotApplicable
 and State() = 
-    let _vars = Dictionary<string,FplValue>()
+    let _vars = Dictionary<string,FplValue option>()
     let mutable _value: FplValue option = None
     let mutable _refersTo: FplValue option = None
 
@@ -768,8 +768,8 @@ and State() =
         with get() = _refersTo
         and set (value:FplValue option) = _refersTo <- value
 
-    /// The dictionary of the variables of the called node before it was called
-    member this.Vars = _vars
+    /// The dictionary of the variable values of the called node before it was called
+    member this.VarValues = _vars
 
 /// This type implements the functionality needed to "run" FPL statements step-by-step
 /// while managing the storage of variables and other evaluation-related information.
@@ -867,9 +867,7 @@ and FplVariableStack() =
         let vars = called.GetVariables()
         vars 
         |> List.iter (fun parOriginal -> 
-            // save the clone of the original parameter variable
-            let parClone = parOriginal.Clone()
-            toBeSavedState.Vars.Add(parOriginal.FplId, parClone)
+            toBeSavedState.VarValues.Add(parOriginal.FplId, parOriginal.Value)
             match box parOriginal with 
             | :? IVariable as parOrig when parOrig.IsSignatureVariable ->
                 pars.Add(parOriginal)
@@ -885,10 +883,11 @@ and FplVariableStack() =
     /// Restores the state of a called FplValue block it had before it was called.
     member this.RestoreState (called:FplValue) = 
         let stateBeforeBeingCalled = _stateStack.Pop().Value
-        stateBeforeBeingCalled.Vars
+        stateBeforeBeingCalled.VarValues
         |> Seq.iter (fun kvp -> 
-            let orig = (called.Scope:Dictionary<string, FplValue>)[kvp.Key] 
-            orig.Copy(kvp.Value)
+            let origVariable = (called.Scope:Dictionary<string, FplValue>)[kvp.Key] 
+            let oldValue = kvp.Value
+            origVariable.Value <- oldValue
         )
         called.Value <- stateBeforeBeingCalled.Value 
         called.RefersTo <- stateBeforeBeingCalled.RefersTo 
