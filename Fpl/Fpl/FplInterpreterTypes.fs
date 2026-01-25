@@ -752,6 +752,17 @@ and ScopeSearchResult =
     | Found of FplValue
     | NotFound
     | NotApplicable
+and State() = 
+    let _vars = Dictionary<string,FplValue>()
+    let mutable _value: FplValue option = None
+
+    /// The optional value of the called node before it was called
+    member this.Value
+        with get() = _value
+        and set (value:FplValue option) = _value <- value
+
+    /// The dictionary of the variables of the called node before it was called
+    member this.Vars = _vars
 
 /// This type implements the functionality needed to "run" FPL statements step-by-step
 /// while managing the storage of variables and other evaluation-related information.
@@ -759,7 +770,7 @@ and ScopeSearchResult =
 /// replacing parameters by a calling function with arguments.
 and FplVariableStack() = 
     let mutable _inSignatureEvaluation = false
-    let _stack = Stack<KeyValuePair<string, Dictionary<string,FplValue>>>()
+    let _stateStack = Stack<KeyValuePair<string, State>>()
     let _valueStack = Stack<FplValue>()
     let _recursionCounters = Dictionary<string, int>()
     let _assumedArguments = Stack<FplValue>()
@@ -798,7 +809,7 @@ and FplVariableStack() =
         and set (value) = _inSignatureEvaluation <- value
         
     // The stack memory of the runner to store the variables of all run programs
-    member this.Stack = _stack
+    member this.Stack = _stateStack
 
     /// Copy the ValueList of the variadic ar to the ValueList of the variadic p
     /// by removing the previous values (if any) and
@@ -844,27 +855,27 @@ and FplVariableStack() =
     member this.SaveVariables (called:FplValue) = 
         // now process all scope variables and push by replacing them with their clones
         // and pushing the originals on the stack
-        let toBeSavedScopeVariables = Dictionary<string, FplValue>()
+        let toBeSavedScopeVariables = new State()
         let pars = List<FplValue>()
         let vars = called.GetVariables()
         vars 
         |> List.iter (fun parOriginal -> 
             // save the clone of the original parameter variable
             let parClone = parOriginal.Clone()
-            toBeSavedScopeVariables.Add(parOriginal.FplId, parClone)
+            toBeSavedScopeVariables.Vars.Add(parOriginal.FplId, parClone)
             match box parOriginal with 
             | :? IVariable as parOrig when parOrig.IsSignatureVariable ->
                 pars.Add(parOriginal)
             | _ -> ()
         )
         let kvp = KeyValuePair(called.FplId,toBeSavedScopeVariables)
-        _stack.Push(kvp)
+        _stateStack.Push(kvp)
         pars |> Seq.toList
 
     /// Restores the scope variables of an FplValue block from the stack.
     member this.RestoreVariables (fvPar:FplValue) = 
-        let blockVars = _stack.Pop()
-        blockVars.Value
+        let stateBeforeBeingCalled = _stateStack.Pop()
+        stateBeforeBeingCalled.Value.Vars
         |> Seq.iter (fun kvp -> 
             let orig = (fvPar.Scope:Dictionary<string, FplValue>)[kvp.Key] 
             orig.Copy(kvp.Value)
@@ -902,7 +913,7 @@ and FplVariableStack() =
     member this.ClearEvalStack() = 
         _valueStack.Clear()
         _assumedArguments.Clear()
-        _stack.Clear()
+        _stateStack.Clear()
 
 type IHasDotted = 
     abstract member DottedChild : FplValue option with get, set
@@ -3349,7 +3360,8 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
 
 type FplReference(positions: Positions, parent: FplValue) =
     inherit FplGenericReference(positions, parent)
-    
+    let mutable _callCounter = 0 
+
     let mutable _dottedChild : FplValue option = None
 
     override this.Name = PrimRefL
@@ -3475,32 +3487,44 @@ type FplReference(positions: Positions, parent: FplValue) =
                 fallBackFunctionalTerm
 
     override this.Represent () = 
-        match this.Value, this.DottedChild, this.RefersTo with 
-        | _, Some dc, _ -> 
-            if Object.ReferenceEquals(dc, this) then
-                // If the dotted child is not identical as "this",
-                // delegate the representation to dotted.
-                dc.Represent()
-            else
-                // Otherwise, fall back with dotted's "type representation" to prevent infinite loops
-                dc.Type SignatureType.Type
-        | Some value, _, _ ->
-            if not (Object.ReferenceEquals(value,this)) then
-                // If the value is not identical as "this",
-                // delegate the representation to value.
-                value.Represent()
-            else
-                // Otherwise, fall back with "undef" to prevent infinite loops
-                LiteralUndef
-        | _, _, Some refTo ->
-            if not (Object.ReferenceEquals(refTo,this)) then
-                // If refTo is not identical as "this",
-                // delegate the representation to refTo.
-                refTo.Represent()
-            else
-                refTo.Type SignatureType.Type
-        | _, _, _ ->
-            this.Type SignatureType.Type
+        if _callCounter > maxRecursion then
+            this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
+            LiteralUndef // fallback to undefined after infinite recursion (if any)
+        else
+            _callCounter <- _callCounter + 1
+            let result = 
+                match this.Value, this.DottedChild, this.RefersTo with 
+                | _, Some dc, _ -> 
+                    if not (Object.ReferenceEquals(dc, this)) then
+                        // If the dotted child is not identical as "this",
+                        // delegate the representation to dotted.
+                        dc.Represent()
+                    else
+                        // Otherwise, fall back with dotted's "type representation" to prevent infinite loops
+                        dc.Type SignatureType.Type
+                | Some value, _, _ ->
+                    if not (Object.ReferenceEquals(value,this)) then
+                        // If the value is not identical as "this",
+                        // delegate the representation to value.
+                        value.Represent()
+                    else
+                        // Otherwise, fall back with "undef" to prevent infinite loops
+                        LiteralUndef
+                | _, _, Some refTo when refTo.Name = LiteralSelf && refTo.ErrorOccurred.IsSome ->
+                    // infinite loop or other error in self detected
+                    // fallback to undefined
+                    LiteralUndef 
+                | _, _, Some refTo ->
+                    if not (Object.ReferenceEquals(refTo,this)) then
+                        // If refTo is not identical as "this",
+                        // delegate the representation to refTo.
+                        refTo.Represent()
+                    else
+                        refTo.Type SignatureType.Type
+                | _, _, _ ->
+                    this.Type SignatureType.Type
+            _callCounter <- _callCounter - 1
+            result
 
     override this.EmbedInSymbolTable nextOpt = 
        
@@ -4496,6 +4520,7 @@ type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
 // It will point to a parent only inside FPL properties. Otherwise, it is undefined
 type FplParent(positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
+    let mutable _callCounter = 0
 
     do 
         this.FplId <- LiteralParent
@@ -4513,7 +4538,15 @@ type FplParent(positions: Positions, parent: FplValue) as this =
 
     override this.Represent() = 
         match this.RefersTo with 
-        | Some ref -> ref.Represent()
+        | Some ref -> 
+            if _callCounter > maxRecursion then
+                this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
+                LiteralUndef
+            else
+                _callCounter <- _callCounter + 1
+                let result = ref.Represent()
+                _callCounter <- _callCounter - 1
+                result
         | _ -> LiteralUndef
 
     override this.Run variableStack = 
@@ -4529,6 +4562,7 @@ type FplParent(positions: Positions, parent: FplValue) as this =
 // It will point to the enclosing block inside FPL predicate definitions, functional terms, and properties. Otherwise, it is undefined.
 type FplSelf(positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
+    let mutable _callCounter = 0
 
     do 
         this.FplId <- LiteralSelf
@@ -4544,9 +4578,17 @@ type FplSelf(positions: Positions, parent: FplValue) as this =
         | Some ref -> ref.Type signatureType
         | _ -> LiteralSelf
 
-    override this.Represent()= 
+    override this.Represent() = 
         match this.RefersTo with 
-        | Some ref -> ref.Represent()
+        | Some ref -> 
+            if _callCounter > maxRecursion then
+                this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
+                LiteralUndef
+            else
+                _callCounter <- _callCounter + 1
+                let result = ref.Represent()
+                _callCounter <- _callCounter - 1
+                result
         | _ -> LiteralUndef
 
     override this.Run variableStack = 
@@ -5340,8 +5382,15 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) as this
 
     override this.RunOrder = Some _runOrder
 
-    override this.Represent () = getFunctionalTermRepresent this
-
+    override this.Represent () = 
+        if _callCounter > maxRecursion then
+            this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
+            LiteralUndef
+        else
+            _callCounter <- _callCounter + 1
+            let result = getFunctionalTermRepresent this
+            _callCounter <- _callCounter - 1
+            result
 
     override this.Run variableStack = 
         this.Debug Debug.Start
