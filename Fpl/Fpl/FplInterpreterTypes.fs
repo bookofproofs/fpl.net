@@ -5808,16 +5808,9 @@ type FplMapCaseSingle(positions: Positions, parent: FplValue) as this =
     
     override this.Run variableStack = 
         this.Debug Debug.Start
-        let condition = this.GetCondition()
         let result = this.GetResult()
-        condition.Run variableStack
-        let condRepresent = condition.Represent()
-        if condRepresent = LiteralTrue then
-            result.Run variableStack
-            this.SetValuesOf result
-        else
-            let undef = FplIntrinsicUndef((this.StartPos, this.EndPos), this.Parent.Value)
-            this.SetValue(undef)
+        result.Run variableStack
+        this.SetValuesOf result
         this.Debug Debug.Stop
 
 type FplMapCaseElse(positions: Positions, parent: FplValue) as this =
@@ -5878,7 +5871,7 @@ type FplMapCases(positions: Positions, parent: FplValue) as this =
             | _ -> None)
         |> Seq.toList
 
-    member this.GetElseResult() = 
+    member this.GetMapElse() = 
         this.ArgList |> Seq.last
 
     member private this.CheckAllResultsForEqualType() =
@@ -5887,7 +5880,7 @@ type FplMapCases(positions: Positions, parent: FplValue) as this =
         |> Seq.map (fun conditionResultPair -> conditionResultPair.GetResult())
         |> Seq.iter (fun result -> _consistentCaseType.TrySetTemplateUsage result (SIG13("", "", "", "").Code))
         // check also else result
-        _consistentCaseType.TrySetTemplateUsage (this.GetElseResult()) (SIG13("", "", "", "").Code)
+        _consistentCaseType.TrySetTemplateUsage (this.GetMapElse()) (SIG13("", "", "", "").Code)
         match _consistentCaseType.ErrorOccurred with
         | Some errMsg -> 
             // Since there were proceeding errors regarding inconsistent Type Ids of some branches
@@ -5927,11 +5920,12 @@ type FplMapCases(positions: Positions, parent: FplValue) as this =
     override this.Run variableStack = 
         this.Debug Debug.Start
         let resultLst = this.GetConditionResultList()
-        let elseResult = this.GetElseResult()
+        let mapElse = this.GetMapElse()
         let firstMapCaseWithTrueConditionOpt = 
             resultLst
             |> Seq.tryFind(fun mapCaseSingle -> 
                 let condition = mapCaseSingle.GetCondition()
+                condition.Run variableStack
                 condition.Represent() = LiteralTrue
             )
         match firstMapCaseWithTrueConditionOpt with
@@ -5940,8 +5934,8 @@ type FplMapCases(positions: Positions, parent: FplValue) as this =
             let resOfFound = firstMapCaseWithTrueCondition.GetResult()
             this.SetValuesOf resOfFound
         | None -> 
-            elseResult.Run variableStack
-            this.SetValuesOf elseResult
+            mapElse.Run variableStack
+            this.SetValuesOf mapElse
         this.Debug Debug.Stop
 
 type FplCaseSingle(positions: Positions, parent: FplValue) as this =
@@ -6055,6 +6049,7 @@ type FplCases(positions: Positions, parent: FplValue) as this =
             resultLst
             |> Seq.tryFind(fun caseSingle -> 
                 let condition = caseSingle.GetCondition()
+                condition.Run variableStack
                 condition.Represent() = LiteralTrue
             )
         match firstCaseWithTrueConditionOpt with
