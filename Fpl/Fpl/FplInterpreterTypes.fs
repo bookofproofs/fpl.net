@@ -5715,7 +5715,7 @@ type FplGenericStmt(positions: Positions, parent: FplValue) =
     override this.ShortName = PrimStmt
 
     override this.Type signatureType = this.FplId
-    override this.Represent () = ""
+    override this.Represent () = "" // todo
 
     override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
 
@@ -5835,11 +5835,16 @@ type FplMapCaseElse(positions: Positions, parent: FplValue) as this =
     override this.Type signatureType = 
         getFplHead this signatureType
 
-    override this.Represent () = LiteralUndef
+    override this.Represent () = 
+        match this.Value with 
+        | Some ref -> ref.Represent()
+        | None -> String.Empty
 
     override this.Run variableStack = 
-        // todo implement run
         this.Debug Debug.Start
+        let contentOfElsResult = this.ArgList |> Seq.head
+        contentOfElsResult.Run variableStack
+        this.SetValuesOf contentOfElsResult
         this.Debug Debug.Stop
 
 type FplMapCases(positions: Positions, parent: FplValue) as this =
@@ -5874,8 +5879,7 @@ type FplMapCases(positions: Positions, parent: FplValue) as this =
         |> Seq.toList
 
     member this.GetElseResult() = 
-        let elseResult = this.ArgList |> Seq.last
-        elseResult.ArgList |> Seq.head
+        this.ArgList |> Seq.last
 
     member private this.CheckAllResultsForEqualType() =
         // check if all results have the same type
@@ -5924,16 +5928,16 @@ type FplMapCases(positions: Positions, parent: FplValue) as this =
         this.Debug Debug.Start
         let resultLst = this.GetConditionResultList()
         let elseResult = this.GetElseResult()
-        let mapCaseSingleWithTrueConditionOpt = 
+        let firstMapCaseWithTrueConditionOpt = 
             resultLst
             |> Seq.tryFind(fun mapCaseSingle -> 
-                mapCaseSingle.Run variableStack
                 let condition = mapCaseSingle.GetCondition()
                 condition.Represent() = LiteralTrue
             )
-        match mapCaseSingleWithTrueConditionOpt with
-        | Some mapCaseSingleWithTrueCondition -> 
-            let resOfFound = mapCaseSingleWithTrueCondition.GetResult()
+        match firstMapCaseWithTrueConditionOpt with
+        | Some firstMapCaseWithTrueCondition -> 
+            firstMapCaseWithTrueCondition.Run variableStack
+            let resOfFound = firstMapCaseWithTrueCondition.GetResult()
             this.SetValuesOf resOfFound
         | None -> 
             elseResult.Run variableStack
@@ -5955,9 +5959,8 @@ type FplCaseSingle(positions: Positions, parent: FplValue) as this =
     override this.Type signatureType = 
         getFplHead this signatureType
 
-    override this.Represent () = LiteralUndef
-
     member this.GetCondition() = this.ArgList[0]
+    member this.StmtsAfterCondition() = this.ArgList |> Seq.tail
 
     override this.CheckConsistency() = 
         base.CheckConsistency()
@@ -5968,8 +5971,9 @@ type FplCaseSingle(positions: Positions, parent: FplValue) as this =
         addExpressionToParentArgList this
 
     override this.Run variableStack = 
-        // todo implement run
         this.Debug Debug.Start
+        this.StmtsAfterCondition()
+        |> Seq.iter (fun stmt -> stmt.Run variableStack)
         this.Debug Debug.Stop
 
 type FplCaseElse(positions: Positions, parent: FplValue) as this =
@@ -5987,11 +5991,10 @@ type FplCaseElse(positions: Positions, parent: FplValue) as this =
     override this.Type signatureType = 
         getFplHead this signatureType
 
-    override this.Represent () = LiteralUndef
-
     override this.Run variableStack = 
-        // todo implement run
         this.Debug Debug.Start
+        this.ArgList 
+        |> Seq.iter (fun stmt -> stmt.Run variableStack)
         this.Debug Debug.Stop
 
 type FplCases(positions: Positions, parent: FplValue) as this =
@@ -6020,6 +6023,8 @@ type FplCases(positions: Positions, parent: FplValue) as this =
             | _ -> None)
         |> Seq.toList
 
+    member this.GetElseStmt() = this.ArgList |> Seq.last
+
     member private this.CheckAllCasesForBeingReachable() =
         _reachableCases.Clear()
         this.GetConditionResultList()
@@ -6042,10 +6047,21 @@ type FplCases(positions: Positions, parent: FplValue) as this =
         this.CheckConsistency()
         addExpressionToParentArgList this
 
-
     override this.Run variableStack = 
-        // todo implement run
         this.Debug Debug.Start
+        let resultLst = this.GetConditionResultList()
+        let elseStmt = this.GetElseStmt()
+        let firstCaseWithTrueConditionOpt = 
+            resultLst
+            |> Seq.tryFind(fun caseSingle -> 
+                let condition = caseSingle.GetCondition()
+                condition.Represent() = LiteralTrue
+            )
+        match firstCaseWithTrueConditionOpt with
+        | Some firstCaseWithTrueCondition -> 
+            firstCaseWithTrueCondition.Run variableStack
+        | None -> 
+            elseStmt.Run variableStack
         this.Debug Debug.Stop
 
 type FplForInStmt(positions: Positions, parent: FplValue) as this =

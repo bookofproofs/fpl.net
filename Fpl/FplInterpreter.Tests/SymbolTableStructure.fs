@@ -2037,6 +2037,8 @@ type SymbolTableStructure() =
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     [<DataRow("FplCaseElse", "00", """def pred T(x:ind) { dec ~n:pred cases (| (x = $1) : n:=false | (x = $2) : n:=true | (x = $3) : n:=false ? n:=undef ); n };""", "")>]
+    [<DataRow("FplCaseElse", "01", """def pred T(x:ind) { dec ~n:pred cases (| (x = $1) : n:=false | (x = $2) : n:=true | (x = $3) : n:=false ? n:=false n:=undef ); n };""", "")>]
+    [<DataRow("FplCaseElse", "02", """def pred T(x:ind) { dec ~n:pred cases (| (x = $1) : n:=false | (x = $2) : n:=true | (x = $3) : n:=false ? n:=true n:=false n:=undef ); n };""", "")>]
     [<TestMethod>]
     member this.TestStructureFplCaseElse(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplCaseElse.fpl"
@@ -2048,7 +2050,21 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(4, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsInstanceOfType<FplCaseElse>(node)
-            Assert.AreEqual<int>(1, node.ArgList.Count)
+            Assert.AreEqual<int>(1, node.ArgList.Count) // 1 stmt in else
+            Assert.AreEqual<int>(0, node.Scope.Count)
+        | "FplCaseElse", "01" ->
+            Assert.IsInstanceOfType<FplCases>(parent)
+            Assert.AreEqual<int>(4, parent.ArgList.Count)
+            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplCaseElse>(node)
+            Assert.AreEqual<int>(2, node.ArgList.Count) // 2 stmts in else
+            Assert.AreEqual<int>(0, node.Scope.Count)
+        | "FplCaseElse", "02" ->
+            Assert.IsInstanceOfType<FplCases>(parent)
+            Assert.AreEqual<int>(4, parent.ArgList.Count)
+            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplCaseElse>(node)
+            Assert.AreEqual<int>(3, node.ArgList.Count) // 3 stmts in else
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
@@ -2083,21 +2099,21 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(4, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsInstanceOfType<FplCaseSingle>(node)
-            Assert.AreEqual<int>(2, node.ArgList.Count)
+            Assert.AreEqual<int>(2, node.ArgList.Count) // 1 condition + 1 statement
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplCaseSingle", "01" ->
             Assert.IsInstanceOfType<FplCases>(parent)
             Assert.AreEqual<int>(4, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsInstanceOfType<FplCaseSingle>(node)
-            Assert.AreEqual<int>(4, node.ArgList.Count) // 1 case + 3 statements
+            Assert.AreEqual<int>(4, node.ArgList.Count) // 1 condition + 3 statements
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplCaseSingle", "02" ->
             Assert.IsInstanceOfType<FplCases>(parent)
             Assert.AreEqual<int>(4, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsInstanceOfType<FplCaseSingle>(node)
-            Assert.AreEqual<int>(3, node.ArgList.Count) // 1 case + 2 statements
+            Assert.AreEqual<int>(3, node.ArgList.Count) // 1 condition + 2 statements
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
