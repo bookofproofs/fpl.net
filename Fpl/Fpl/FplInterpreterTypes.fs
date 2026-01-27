@@ -3325,68 +3325,63 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
 
     override this.Run variableStack =
         this.Debug Debug.Start
-
-        if this.RefersTo.IsSome then 
-            let calledOpt = referencedNodeOpt this
-            match calledOpt with 
-            | Some called ->
-                match called.Name with
-                | LiteralCtorL
-                | PrimBaseConstructorCall
-                | PrimPredicateL
-                | PrimFunctionalTermL
-                | PrimMandatoryFunctionalTermL
-                | PrimMandatoryPredicateL ->
-                    match box called, this.NextBlockNode with
-                    | :? ICanBeCalledRecusively as calledRecursively, Some blockNodeOfThis when 
-                        Object.ReferenceEquals(blockNodeOfThis, called) && 
-                        calledRecursively.CallCounter > maxRecursion -> () // stop recursion
-                    | _ ->
-                        let pars = variableStack.SaveState(called) 
-                        let args = this.ArgList |> Seq.toList
-                        // run all arguments before replacing variables with their values
-                        args |> List.iter (fun arg -> arg.Run variableStack)
-                        variableStack.ReplaceVariables pars args
-                        // store the position of the caller
-                        variableStack.CallerStartPos <- this.StartPos
-                        variableStack.CallerEndPos <- this.EndPos
-                        // run all statements of the called node
-                        called.Run variableStack
-                        this.SetValuesOf called
-                        variableStack.RestoreState(called)
-                | PrimDelegateDecrementL
-                | PrimDelegateEqualL ->
+        let calledOpt = referencedNodeOpt this
+        match calledOpt with 
+        | Some called ->
+            match called.Name with
+            | LiteralCtorL
+            | PrimBaseConstructorCall
+            | PrimPredicateL
+            | PrimFunctionalTermL
+            | PrimMandatoryFunctionalTermL
+            | PrimMandatoryPredicateL ->
+                match box called, this.NextBlockNode with
+                | :? ICanBeCalledRecusively as calledRecursively, Some blockNodeOfThis when 
+                    Object.ReferenceEquals(blockNodeOfThis, called) && 
+                    calledRecursively.CallCounter > maxRecursion -> () // stop recursion
+                | _ ->
+                    let pars = variableStack.SaveState(called) 
+                    let args = this.ArgList |> Seq.toList
+                    // run all arguments before replacing variables with their values
+                    args |> List.iter (fun arg -> arg.Run variableStack)
+                    variableStack.ReplaceVariables pars args
+                    // store the position of the caller
+                    variableStack.CallerStartPos <- this.StartPos
+                    variableStack.CallerEndPos <- this.EndPos
+                    // run all statements of the called node
                     called.Run variableStack
                     this.SetValuesOf called
-                | PrimExtensionObj ->
-                    match called.RefersTo with 
-                    | Some extensionDefinition ->
-                        let pars = variableStack.SaveState(extensionDefinition)
-                        let args = [called] // the argument of the extensionDefinition is the extension object itself
-                        variableStack.ReplaceVariables pars args
-                        // store the position of the caller
-                        variableStack.CallerStartPos <- this.StartPos
-                        variableStack.CallerEndPos <- this.EndPos
-                        // run all statements of the called node
-                        extensionDefinition.Run variableStack
-                        this.SetValuesOf extensionDefinition
-                        variableStack.RestoreState(extensionDefinition)
-                    | _ ->
-                        // fall back to storing the value of a reference to the extension Object itself
-                        // if it does not refer to any extension definition
-                        this.SetValue called
-                | PrimInstanceL
-                | PrimIntrinsicInd
-                | PrimIntrinsicUndef
-                | PrimIntrinsicTpl 
-                | PrimExtensionObj
-                | PrimIntrinsicPred ->
+                    variableStack.RestoreState(called)
+            | PrimDelegateDecrementL
+            | PrimDelegateEqualL ->
+                called.Run variableStack
+                this.SetValuesOf called
+            | PrimExtensionObj ->
+                match called.RefersTo with 
+                | Some extensionDefinition ->
+                    let pars = variableStack.SaveState(extensionDefinition)
+                    let args = [called] // the argument of the extensionDefinition is the extension object itself
+                    variableStack.ReplaceVariables pars args
+                    // store the position of the caller
+                    variableStack.CallerStartPos <- this.StartPos
+                    variableStack.CallerEndPos <- this.EndPos
+                    // run all statements of the called node
+                    extensionDefinition.Run variableStack
+                    this.SetValuesOf extensionDefinition
+                    variableStack.RestoreState(extensionDefinition)
+                | _ ->
+                    // fall back to storing the value of a reference to the extension Object itself
+                    // if it does not refer to any extension definition
                     this.SetValue called
-                | _ -> ()
+            | PrimInstanceL
+            | PrimIntrinsicInd
+            | PrimIntrinsicUndef
+            | PrimIntrinsicTpl 
+            | PrimExtensionObj
+            | PrimIntrinsicPred ->
+                this.SetValue called
             | _ -> ()
-        elif this.ArgList.Count = 1 then
-            let arg = this.ArgList[0]
-            arg.Run variableStack
+        | _ -> ()
         this.Debug Debug.Stop
 
     override this.RunOrder = None
