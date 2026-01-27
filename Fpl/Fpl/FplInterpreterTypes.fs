@@ -3355,14 +3355,31 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
                         this.SetValuesOf called
                         variableStack.RestoreState(called)
                 | PrimDelegateDecrementL
-                | PrimExtensionObj
                 | PrimDelegateEqualL ->
                     called.Run variableStack
                     this.SetValuesOf called
+                | PrimExtensionObj ->
+                    match called.RefersTo with 
+                    | Some extensionDefinition ->
+                        let pars = variableStack.SaveState(extensionDefinition)
+                        let args = [called] // the argument of the extensionDefinition is the extension object itself
+                        variableStack.ReplaceVariables pars args
+                        // store the position of the caller
+                        variableStack.CallerStartPos <- this.StartPos
+                        variableStack.CallerEndPos <- this.EndPos
+                        // run all statements of the called node
+                        extensionDefinition.Run variableStack
+                        this.SetValuesOf extensionDefinition
+                        variableStack.RestoreState(extensionDefinition)
+                    | _ ->
+                        // fall back to storing the value of a reference to the extension Object itself
+                        // if it does not refer to any extension definition
+                        this.SetValue called
                 | PrimInstanceL
                 | PrimIntrinsicInd
                 | PrimIntrinsicUndef
                 | PrimIntrinsicTpl 
+                | PrimExtensionObj
                 | PrimIntrinsicPred ->
                     this.SetValue called
                 | _ -> ()
@@ -3428,6 +3445,8 @@ type FplReference(positions: Positions, parent: FplValue) =
         let head = 
             let ret = 
                 if headObj.Name = PrimExtensionL then 
+                    headObj.Type signatureType
+                elif headObj.Name = PrimVariableL then
                     headObj.Type signatureType
                 elif headObj.ExpressionType.IsNoFix then
                     getFplHead headObj signatureType 
@@ -5025,50 +5044,48 @@ type FplEquality(name, positions: Positions, parent: FplValue) as this =
             this.ErrorOccurred <- emitID013Diagnostics variableStack.CallerStartPos variableStack.CallerEndPos $"Predicate `=` takes 2 arguments, got {this.ArgList.Count}." 
         else
 
-        let getActual (x:FplValue) = 
-            if x.ArgList.Count > 0 then
-                x.ArgList[0]
-            else 
-                x
+            let a = this.ArgList[0]
+            let b = this.ArgList[1]
+            let aType = a.Type SignatureType.Type
+            let bType = b.Type SignatureType.Type
+            let aRepr = a.Represent()
+            let bRepr = b.Represent()
 
-        let a1 = getActual(this.ArgList[0])
-        let b1 = getActual(this.ArgList[1])
-        let a1Repr = a1.Represent()
-        let b1Repr = b1.Represent()
-
-        let newValue = new FplIntrinsicUndef((variableStack.CallerStartPos, variableStack.CallerEndPos), this.Parent.Value)
-        match a1Repr with
-        | LiteralUndef -> 
-            this.ErrorOccurred <- emitID013Diagnostics variableStack.CallerStartPos variableStack.CallerEndPos "Predicate `=` cannot be evaluated because the left argument is undefined." 
-            this.SetValue(newValue)
-        | _ -> 
-            match b1Repr with
+            let newValue = new FplIntrinsicPred((variableStack.CallerStartPos, variableStack.CallerEndPos), this.Parent.Value)
+            match aRepr with
+            | _ when aType<>bType -> 
+                newValue.FplId <- LiteralFalse // if the compared arguments have different types, then unequal
+                this.SetValue(newValue)
             | LiteralUndef -> 
-                this.ErrorOccurred <- emitID013Diagnostics variableStack.CallerStartPos variableStack.CallerEndPos "Predicate `=` cannot be evaluated because the right argument is undefined." 
+                this.ErrorOccurred <- emitID013Diagnostics variableStack.CallerStartPos variableStack.CallerEndPos "Predicate `=` cannot be evaluated because the left argument is undefined." 
                 this.SetValue(newValue)
             | _ -> 
-                let newValue = FplIntrinsicPred((variableStack.CallerStartPos, variableStack.CallerEndPos), this.Parent.Value)
-                match a1Repr with
-                | "dec pred"  
-                | PrimUndetermined -> 
-                    this.ErrorOccurred <- emitID013Diagnostics variableStack.CallerStartPos variableStack.CallerEndPos "Predicate `=` cannot be evaluated because the left argument is undetermined." 
+                match bRepr with
+                | LiteralUndef -> 
+                    this.ErrorOccurred <- emitID013Diagnostics variableStack.CallerStartPos variableStack.CallerEndPos "Predicate `=` cannot be evaluated because the right argument is undefined." 
                     this.SetValue(newValue)
                 | _ -> 
-                    match b1Repr with
+                    match aRepr with
                     | "dec pred"  
                     | PrimUndetermined -> 
-                        this.ErrorOccurred <- emitID013Diagnostics variableStack.CallerStartPos variableStack.CallerEndPos "Predicate `=` cannot be evaluated because the right argument is undetermined." 
+                        this.ErrorOccurred <- emitID013Diagnostics variableStack.CallerStartPos variableStack.CallerEndPos "Predicate `=` cannot be evaluated because the left argument is undetermined." 
                         this.SetValue(newValue)
                     | _ -> 
-                        let a1IsDeclared = a1Repr.Contains("dec ")
-                        let b1IsDeclared = b1Repr.Contains("dec ")
-                        newValue.FplId <- 
-                            match a1IsDeclared, b1IsDeclared with
-                            | false, false 
-                            | true, true ->
-                                $"{(a1Repr = b1Repr)}".ToLower()
-                            | _ -> PrimUndetermined
-                        this.SetValue(newValue)
+                        match bRepr with
+                        | "dec pred"  
+                        | PrimUndetermined -> 
+                            this.ErrorOccurred <- emitID013Diagnostics variableStack.CallerStartPos variableStack.CallerEndPos "Predicate `=` cannot be evaluated because the right argument is undetermined." 
+                            this.SetValue(newValue)
+                        | _ -> 
+                            let a1IsDeclared = aRepr.Contains("dec ")
+                            let b1IsDeclared = bRepr.Contains("dec ")
+                            newValue.FplId <- 
+                                match a1IsDeclared, b1IsDeclared with
+                                | false, false 
+                                | true, true ->
+                                    $"{(aRepr = bRepr)}".ToLower()
+                                | _ -> PrimUndetermined
+                            this.SetValue(newValue)
         this.Debug Debug.Stop
 
 /// Implements an object that is used to provide a representation of extensions in FPL.
@@ -5101,7 +5118,7 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
         else
             subRepr
 
-    override this.Run _ = 
+    override this.Run variableStack = 
         // todo implement run by calling extension object this RefersTo 
         // or returning this as value otherwise
         this.Debug Debug.Start

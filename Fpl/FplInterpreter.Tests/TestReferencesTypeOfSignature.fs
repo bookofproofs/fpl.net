@@ -281,7 +281,7 @@ type TestReferencesTypeOfSignature() =
             let base1 = pr1.ArgList[0]
 
             match var with
-            | "base1" -> Assert.AreEqual<string>("pred", base1.Type(SignatureType.Type))
+            | "base1" -> Assert.AreEqual<string>(LiteralUndef, base1.Type(SignatureType.Type))
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
