@@ -727,8 +727,8 @@ type TestFplValueScopeFplRepresentation() =
             let base1 = pr1.ArgList[0]
 
             match var with
-            | "base0" -> Assert.AreEqual<string>("undetermined", base1.Represent())
-            | "base1" -> Assert.AreEqual<string>("undef", base1.Represent())
+            | "base0" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
+            | "base1" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
             | "base2" -> Assert.AreEqual<string>("C(undef, undef, undef, undef)", base1.Represent())
             | "base3" -> Assert.AreEqual<string>("D(undef, undef, undef)", base1.Represent())
             | "base4" -> Assert.AreEqual<string>("B(In(undef))", base1.Represent())
@@ -773,8 +773,8 @@ type TestFplValueScopeFplRepresentation() =
             | "base2" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
             | "base3" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
             | "base4" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
-            | "base5" -> Assert.AreEqual<string>("dec cl T1", base1.Represent())
-            | "base5a" -> Assert.AreEqual<string>("dec cl T1", base1.Represent())
+            | "base5" -> Assert.AreEqual<string>(PrimNone, base1.Represent())
+            | "base5a" -> Assert.AreEqual<string>(PrimNone, base1.Represent())
             | "base6" -> Assert.AreEqual<string>("dec obj", base1.Represent())
             | "base7" -> Assert.AreEqual<string>("dec obj", base1.Represent())
             | "base8" -> Assert.AreEqual<string>("dec obj", base1.Represent())

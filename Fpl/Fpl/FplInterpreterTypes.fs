@@ -2295,11 +2295,6 @@ type FplPredicate(positions: Positions, parent: FplValue, runOrder) as this =
         let paramT = getParamTuple this signatureType
         sprintf "%s(%s)" head paramT
 
-    override this.Represent () =
-        match this.Value with 
-        | Some ref -> ref.Represent()
-        | None -> PrimUndetermined
-
     override this.Run variableStack = 
         this.Debug Debug.Start
         if not _isReady then

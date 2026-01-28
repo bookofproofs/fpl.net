@@ -251,6 +251,7 @@ type SymbolTableStructure() =
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""; x.Represent(); x.Type SignatureType.Mixed]
         | "FplPredicate" ->
             let x = new FplPredicate(positions, parent, 0)
+            x.Value <- Some (new FplIntrinsicPred(positions, x))
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""; x.Represent(); x.Type SignatureType.Mixed]
         | "FplPredicateList" ->
             let x = new FplPredicateList(positions, parent, 0)
@@ -1623,7 +1624,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>(PrimNone, (getName var).[index])
         | "FplClass" ->
             Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>("dec cl obj", (getName var).[index])
+            Assert.AreEqual<string>(PrimNone, (getName var).[index])
         | "FplConjecture" ->
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
