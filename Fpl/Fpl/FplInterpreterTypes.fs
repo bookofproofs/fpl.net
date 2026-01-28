@@ -1363,7 +1363,7 @@ type FplIntrinsicPred(positions: Positions, parent: FplValue) as this =
 
     override this.Run _ = 
         this.Debug Debug.Start
-        // FplIntrinsicPred is a value of predicate closures and has no value on itself
+        // FplIntrinsicPred is a value of predicate closures and has no value on its own
         this.Debug Debug.Stop
 
     override this.EmbedInSymbolTable _ = addExpressionToReference this
@@ -1795,7 +1795,7 @@ type FplPredicateList(positions: Positions, parent: FplValue, runOrder) =
     override this.Run variableStack = 
         this.Debug Debug.Start
         // this line only makes sure that all Run is called recursively
-        // FplPredicateList has no value on itself
+        // FplPredicateList has no value its own
         this.ArgList |> Seq.map (fun fv -> fv.Run variableStack) |> ignore
         this.Debug Debug.Stop
 
@@ -1893,7 +1893,7 @@ type FplInstance(positions: Positions, parent: FplValue) as this =
 
     override this.Run _ = 
         this.Debug Debug.Start
-        // FplInstance is a value representation and has no value on itself
+        // FplInstance is a value representation and has no value on its own
         this.Debug Debug.Stop
 
     override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
@@ -1917,7 +1917,7 @@ type FplBase(positions: Positions, parent: FplValue) =
 
     override this.Run variableStack = 
         this.Debug Debug.Start
-        // FplBase no value on itself
+        // FplBase no value on its own
         this.Debug Debug.Stop
 
     override this.RunOrder = None
@@ -2115,14 +2115,11 @@ and FplClass(positions: Positions, parent: FplValue) as this =
     
     override this.Type signatureType = getFplHead this signatureType
 
-
-    override this.Represent () = $"dec {LiteralCl} {this.FplId}"
-
     override this.Run variableStack = 
         this.Debug Debug.Start
-        this.GetProperties()
-        |> List.iter (fun fv -> fv.Run variableStack)
-        this.SetValue(new FplInstance((this.StartPos, this.EndPos), this))
+        // initialization of the stmts in the class and/or its constructors and/or properties not needed since
+        // it will be done inside instances
+        // FplClass has no value on their own
         this.Debug Debug.Stop
 
     override this.CheckConsistency () = 
