@@ -584,6 +584,17 @@ type FplValue(positions: Positions, parent: FplValue option) =
             | Some prev, Some next -> _errorOccurred <- Some $"{prev}, {next}" // aggregate errors
             | _ -> ()
 
+    /// Standard implementation of value string representation of all nodes in the symbol table
+    /// constructed by the FPL interpreter. Returns 
+    /// "None" - for all nodes in the symbol table that yield no value (e.g. statements).
+    /// "undef" - for all nodes in the symbol table that have a type other from a predicate and usually yield a value (e.g. functional terms), but whose value could not be determined.
+    /// "undetermined" - for all nodes in the symbol table that have a predicate type (e.g. theorems) but whose value could not be determined. 
+    /// otherwise a string representation depending on type of the FPL node and its specific value.
+    override this.Represent () = 
+        match this.Value with 
+        | Some v -> v.Represent() 
+        | _ -> PrimNone // If there is no value, return string "None"
+
     /// Create a (possibly empty) list of all variables in the scope of this FplValue.
     member this.GetVariables() =
         this.Scope.Values
@@ -1102,8 +1113,6 @@ type FplTheory(theoryName, parent: FplValue, filePath: string, runOrder) as this
 
     override this.Type signatureType = getFplHead this signatureType
 
-    override this.Represent () = LiteralUndef
-
     /// The RunOrder in which this theory is to be executed.
     override this.RunOrder = Some _runOrder
 
@@ -1150,7 +1159,6 @@ type FplRoot() =
         ret
 
     override this.Type _ = String.Empty
-    override this.Represent () = LiteralUndef
 
     override this.EmbedInSymbolTable _ = () 
 
@@ -1333,25 +1341,13 @@ let isRoot (fv:FplValue) =
     | :? FplRoot -> true
     | _ -> false
 
-[<AbstractClass>]
-type FplGenericPredicate(positions: Positions, parent: FplValue) as this =
+/// Implements the semantics of an FPL predicate prime predicate that is intrinsic.
+/// It serves as a value for everything in FPL that is "predicative in nature". These can be predicates, theorem-like-statements, proofs or predicative expressions. The value can have one of three values in FPL: "true", LiteralFalse, and "undetermined". 
+type FplIntrinsicPred(positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
     do 
         this.FplId <- PrimUndetermined
         this.TypeId <- LiteralPred
-
-    override this.Represent () =
-        match this.Value with 
-        | Some ref -> ref.Represent()
-        | None when this.Name = PrimIntrinsicPred -> this.FplId // the value of intrisic pred is its FplId
-        | _ -> PrimUndetermined
-
-    override this.RunOrder = None
-
-/// Implements the semantics of an FPL predicate prime predicate that is intrinsic.
-/// It serves as a value for everything in FPL that is "predicative in nature". These can be predicates, theorem-like-statements, proofs or predicative expressions. The value can have one of three values in FPL: "true", LiteralFalse, and "undetermined". 
-type FplIntrinsicPred(positions: Positions, parent: FplValue) =
-    inherit FplGenericPredicate(positions, parent)
 
     override this.Name = PrimIntrinsicPred
     override this.ShortName = LiteralPred
@@ -1367,10 +1363,22 @@ type FplIntrinsicPred(positions: Positions, parent: FplValue) =
 
     override this.Run _ = 
         this.Debug Debug.Start
+        // FplIntrinsicPred is a value of predicate closures and has no value on itself
         this.Debug Debug.Stop
 
     override this.EmbedInSymbolTable _ = addExpressionToReference this
 
+    override this.RunOrder = None
+
+[<AbstractClass>]
+type FplGenericPredicate(positions: Positions, parent: FplValue) as this =
+    inherit FplValue(positions, Some parent)
+    do 
+        this.FplId <- PrimUndetermined
+        this.TypeId <- LiteralPred
+        this.SetValue (new FplIntrinsicPred(positions, parent))
+
+    override this.RunOrder = None
 
 /// Tries to find a mapping of an FplValue
 let rec getMapping (fv:FplValue) =
@@ -1744,6 +1752,7 @@ type FplGenericPredicateWithExpression(positions: Positions, parent: FplValue) =
     let mutable _signStartPos = Position("", 0L, 0L, 0L)
     let mutable _signEndPos = Position("", 0L, 0L, 0L)
 
+
     member this.SignStartPos
         with get() = _signStartPos
         and set(value) = _signStartPos <- value
@@ -1783,16 +1792,12 @@ type FplPredicateList(positions: Positions, parent: FplValue, runOrder) =
         |> Seq.map (fun fv -> fv.Type signatureType)
         |> String.concat ", "
 
-    override this.Represent() = 
-        this.ArgList
-        |> Seq.map (fun fv -> fv.Represent())
-        |> String.concat ", "
-
     override this.Run variableStack = 
-        // todo implement run
         this.Debug Debug.Start
+        // this line only makes sure that all Run is called recursively
+        // FplPredicateList has no value on itself
+        this.ArgList |> Seq.map (fun fv -> fv.Run variableStack) |> ignore
         this.Debug Debug.Stop
-
 
     override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
 
@@ -1888,6 +1893,7 @@ type FplInstance(positions: Positions, parent: FplValue) as this =
 
     override this.Run _ = 
         this.Debug Debug.Start
+        // FplInstance is a value representation and has no value on itself
         this.Debug Debug.Stop
 
     override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
@@ -1907,12 +1913,11 @@ type FplBase(positions: Positions, parent: FplValue) =
 
     override this.Type _ = this.FplId
 
-    override this.Represent () = LiteralUndef
-
     override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
 
     override this.Run variableStack = 
         this.Debug Debug.Start
+        // FplBase no value on itself
         this.Debug Debug.Stop
 
     override this.RunOrder = None
@@ -1936,44 +1941,10 @@ type FplGenericConstructor(name, positions: Positions, parent: FplValue) as this
         | SignatureType.Name
         | SignatureType.Mixed -> $"{head}({paramT})" 
         | SignatureType.Type -> head
-
-    override this.Represent () = 
-        let head = this.TypeId
-
-        // args = instances of all base classes
-        let args =
-            this.ArgList
-            |> Seq.map (fun fv -> fv.Represent())
-            |> String.concat $",{System.Environment.NewLine}"
-        let vars =
-            this.Scope.Values
-            |> Seq.filter (fun fv -> 
-                fv.Name = PrimVariableL 
-                || fv.Name = PrimVariableArrayL
-                )
-            |> Seq.map (fun fv -> $"{fv.FplId} = {fv.Represent()}")
-            |> String.concat $",{System.Environment.NewLine}"
-        // only mandatory properties
-        let prtys =
-            this.Scope.Values
-            |> Seq.filter (fun fv -> 
-                fv.Name = PrimMandatoryFunctionalTermL 
-                || fv.Name = PrimMandatoryPredicateL
-                )
-            |> Seq.map (fun fv -> $"{fv.FplId} = {fv.Represent()}")
-            |> String.concat $",{System.Environment.NewLine}"
-
-        match head, args, vars, prtys with 
-        | LiteralObj, _, _, _ 
-        | LiteralObjL, _, _, _ ->
-            $"{head}()"
-        | _, _, _, _ ->
-            $"{head}({args});vars({vars});prtys({prtys})"
             
     member this.ToBeConstructedClass  
         with get () = _toBeConstructedClass
         and set (value) = _toBeConstructedClass <- value
-
 
     override this.Run variableStack = 
         this.Debug Debug.Start
@@ -2007,7 +1978,8 @@ type FplGenericConstructor(name, positions: Positions, parent: FplValue) as this
         | None ->
             instance.FplId <- LiteralUndef
             instance.TypeId <- LiteralUndef
-        this.SetValue instance
+        // the value of FplGenericConstructor is the created instance
+        this.SetValue instance 
         this.Debug Debug.Stop
 
 
@@ -2032,8 +2004,6 @@ type FplDefaultConstructor(name, positions: Positions, parent: FplValue) =
         let ret = new FplDefaultConstructor(this.FplId, (this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
-
-    override this.Represent() = $"{this.TypeId}()" 
 
     override this.EmbedInSymbolTable nextOpt = 
         this.CheckConsistency()
@@ -2078,8 +2048,6 @@ type FplConstructor(positions: Positions, parent: FplValue) as this =
     member this.ParentConstructorCalls = _parentConstructorCalls
 
     override this.IsBlock () = true
-
-    override this.Represent () = this.Type(SignatureType.Mixed)
 
     override this.CheckConsistency () = 
         base.CheckConsistency()
@@ -2376,7 +2344,7 @@ type FplMandatoryPredicate(positions: Positions, parent: FplValue) =
         base.CheckConsistency()
         tryAddSubBlockToFplBlock this
 
-type FplAxiom(positions: Positions, parent: FplValue, runOrder) =
+type FplAxiom(positions: Positions, parent: FplValue, runOrder) as this =
     inherit FplGenericPredicateWithExpression(positions, parent)
     let _runOrder = runOrder
     let mutable _isReady = false
@@ -5727,7 +5695,7 @@ type FplGenericStmt(positions: Positions, parent: FplValue) =
     override this.ShortName = PrimStmt
 
     override this.Type signatureType = this.FplId
-    override this.Represent () = "" // todo
+    override this.Represent () = PrimNone
 
     override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
 
@@ -6018,8 +5986,6 @@ type FplCases(positions: Positions, parent: FplValue) as this =
 
     override this.Type signatureType = 
         getFplHead this signatureType
-
-    override this.Represent () = LiteralUndef
 
     member this.GetConditionResultList() = 
         this.ArgList

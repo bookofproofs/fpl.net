@@ -113,6 +113,7 @@ type SymbolTableStructure() =
         | "FplConstructor" ->
             parent.FplId <- "obj"
             let x = new FplConstructor(positions, parent)
+            x.Value <- Some (new FplInstance(positions, x))
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""; x.Represent(); x.Type SignatureType.Mixed]
         | "FplCorollary" ->
             let x = new FplCorollary(positions, parent, 0)
@@ -122,6 +123,7 @@ type SymbolTableStructure() =
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""; x.Represent(); x.Type SignatureType.Mixed]
         | "FplDefaultConstructor" ->
             let x = new FplDefaultConstructor(LiteralObj, positions, parent)
+            x.Value <- Some (new FplInstance(positions, x))
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""; x.Represent(); x.Type SignatureType.Mixed]
         | "FplDisjunction" ->
             let x = new FplDisjunction(positions, parent)
@@ -252,6 +254,8 @@ type SymbolTableStructure() =
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""; x.Represent(); x.Type SignatureType.Mixed]
         | "FplPredicateList" ->
             let x = new FplPredicateList(positions, parent, 0)
+            x.ArgList.Add (new FplIntrinsicPred(positions, parent))
+            x.ArgList.Add (new FplIntrinsicPred(positions, parent))
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""; x.Represent(); x.Type SignatureType.Mixed]
         | "FplProof" ->
             let x = new FplProof(positions, parent, 0)
@@ -1604,19 +1608,19 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
         | "FplBase" ->
             Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
+            Assert.AreEqual<string>(PrimNone, (getName var).[index])
         | "FplBaseConstructorCall" ->
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
         | "FplCases" ->
             Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
+            Assert.AreEqual<string>(PrimNone, (getName var).[index])
         | "FplCaseElse" ->
             Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
+            Assert.AreEqual<string>(PrimNone, (getName var).[index])
         | "FplCaseSingle" ->
             Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
+            Assert.AreEqual<string>(PrimNone, (getName var).[index])
         | "FplClass" ->
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>("dec cl obj", (getName var).[index])
@@ -1627,8 +1631,8 @@ type SymbolTableStructure() =
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
         | "FplConstructor" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>($"{LiteralObj}()", (getName var).[index])
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("""{"name":"obj"}""", (getName var).[index])
         | "FplCorollary" ->
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
@@ -1636,8 +1640,8 @@ type SymbolTableStructure() =
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
         | "FplDefaultConstructor" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>($"{LiteralObj}()", (getName var).[index])
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("""{"name":"obj"}""", (getName var).[index])
         | "FplDisjunction" ->
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
@@ -1757,7 +1761,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
         | "FplPredicateList" ->
             Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>("", (getName var).[index])
+            Assert.AreEqual<string>(PrimNone, (getName var).[index])
         | "FplProof" ->
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
@@ -1781,7 +1785,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
         | "FplRoot" ->
             Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
+            Assert.AreEqual<string>(PrimNone, (getName var).[index])
         | "FplRuleOfInference" ->
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
@@ -1793,7 +1797,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
         | "FplTheory" ->
             Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
+            Assert.AreEqual<string>(PrimNone, (getName var).[index])
         | "FplTranslation" ->
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>("", (getName var).[index])

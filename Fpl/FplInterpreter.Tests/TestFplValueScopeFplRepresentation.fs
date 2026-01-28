@@ -49,8 +49,8 @@ type TestFplValueScopeFplRepresentation() =
         match res with
         | Some (r:FplRoot,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,fun3:FplValue,fun4:FplValue,fun5:FplValue,fun6:FplValue,fun7:FplValue,fun8:FplValue,fun9:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
             match var with 
-            | "r" -> Assert.AreEqual<string>(LiteralUndef, r.Represent())
-            | PrimTheoryL -> Assert.AreEqual<string>(LiteralUndef, theory.Represent())
+            | "r" -> Assert.AreEqual<string>(PrimNone, r.Represent())
+            | PrimTheoryL -> Assert.AreEqual<string>(PrimNone, theory.Represent())
             | "inf1" -> Assert.AreEqual<string>(PrimUndetermined, inf1.Represent())
             | "inf2" -> Assert.AreEqual<string>(PrimUndetermined, inf2.Represent())
             | "axi1" -> Assert.AreEqual<string>(LiteralTrue, axi1.Represent())
@@ -102,8 +102,8 @@ type TestFplValueScopeFplRepresentation() =
         match res with
         | Some (r,theory,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
             match var with 
-            | "r" -> Assert.AreEqual<string>(LiteralUndef, r.Represent())
-            | PrimTheoryL -> Assert.AreEqual<string>(LiteralUndef, theory.Represent())
+            | "r" -> Assert.AreEqual<string>(PrimNone, r.Represent())
+            | PrimTheoryL -> Assert.AreEqual<string>(PrimNone, theory.Represent())
             | "block" -> Assert.AreEqual<string>("dec cl TestId", block.Represent())
             | "t1" -> Assert.AreEqual<string>("TestId()", t1.Represent())
             | "t2" -> Assert.AreEqual<string>("TestId(obj)", t2.Represent())
@@ -143,8 +143,8 @@ type TestFplValueScopeFplRepresentation() =
                                 corThm2,lem2,corLem2,prp2,corPrp2,cor2,corCor2,con1,corCon1,
                                 axi1,corAxi1) -> 
                 match var with
-                | "r" -> Assert.AreEqual<string>(LiteralUndef, r.Represent())
-                | PrimTheoryL -> Assert.AreEqual<string>(LiteralUndef, theory.Represent())
+                | "r" -> Assert.AreEqual<string>(PrimNone, r.Represent())
+                | PrimTheoryL -> Assert.AreEqual<string>(PrimNone, theory.Represent())
                 | "thm1" -> Assert.AreEqual<string>(LiteralTrue, thm1.Represent())
                 | "proofThm1" -> Assert.AreEqual<string>(LiteralFalse, proofThm1.Represent())
                 | "lem1" -> Assert.AreEqual<string>(LiteralTrue, lem1.Represent())
@@ -186,8 +186,8 @@ type TestFplValueScopeFplRepresentation() =
         match res with
         | Some (r:FplRoot,theory:FplValue,block:FplValue,t1:FplValue,t3:FplValue,t5:FplValue,t7:FplValue,t9:FplValue,t11:FplValue,t13:FplValue) -> 
             match var with 
-            | "r" -> Assert.AreEqual<string>(LiteralUndef, r.Represent())
-            | PrimTheoryL -> Assert.AreEqual<string>(LiteralUndef, theory.Represent())
+            | "r" -> Assert.AreEqual<string>(PrimNone, r.Represent())
+            | PrimTheoryL -> Assert.AreEqual<string>(PrimNone, theory.Represent())
             | "block" -> Assert.AreEqual<string>(PrimUndetermined, block.Represent())
             | "t1" -> Assert.AreEqual<string>(LiteralTrue, t1.Represent())
             | "t3" -> Assert.AreEqual<string>("dec obj", t3.Represent())
@@ -236,8 +236,8 @@ type TestFplValueScopeFplRepresentation() =
         match result with
         | Some (r,theory,block,x,y,s,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
-            | "r" -> Assert.AreEqual<string>(LiteralUndef, r.Represent())
-            | PrimTheoryL -> Assert.AreEqual<string>(LiteralUndef, theory.Represent())
+            | "r" -> Assert.AreEqual<string>(PrimNone, r.Represent())
+            | PrimTheoryL -> Assert.AreEqual<string>(PrimNone, theory.Represent())
             | "block" -> Assert.AreEqual<string>(LiteralTrue, block.Represent()); 
             | "x" -> Assert.AreEqual<string>(PrimUndetermined, x.Represent())
             | "y" -> Assert.AreEqual<string>(PrimUndetermined, y.Represent())
@@ -305,8 +305,8 @@ type TestFplValueScopeFplRepresentation() =
         match result with
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
-            | "r" -> Assert.AreEqual<string>(LiteralUndef, r.Represent())
-            | PrimTheoryL -> Assert.AreEqual<string>(LiteralUndef, theory.Represent())
+            | "r" -> Assert.AreEqual<string>(PrimNone, r.Represent())
+            | PrimTheoryL -> Assert.AreEqual<string>(PrimNone, theory.Represent())
             | "block" -> Assert.AreEqual<string>(LiteralTrue, block.Represent()); 
             | "x" -> Assert.AreEqual<string>("dec *pred(func(*obj[tpl], *obj[tpl], *obj[tpl]) -> obj, func(*obj[tpl], *obj[tpl], *obj[tpl]) -> obj, func(*obj[tpl], *obj[tpl], *obj[tpl]) -> obj)[ind]", x.Represent())
             | "y" -> Assert.AreEqual<string>("dec *pred(func(*obj[tpl], *obj[tpl], *obj[tpl]) -> obj, func(*obj[tpl], *obj[tpl], *obj[tpl]) -> obj, func(*obj[tpl], *obj[tpl], *obj[tpl]) -> obj)[ind]", y.Represent())
@@ -374,8 +374,8 @@ type TestFplValueScopeFplRepresentation() =
         match result with
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
-            | "r" -> Assert.AreEqual<string>(LiteralUndef, r.Represent())
-            | PrimTheoryL -> Assert.AreEqual<string>(LiteralUndef, theory.Represent())
+            | "r" -> Assert.AreEqual<string>(PrimNone, r.Represent())
+            | PrimTheoryL -> Assert.AreEqual<string>(PrimNone, theory.Represent())
             | "block" -> Assert.AreEqual<string>(LiteralTrue, block.Represent()); 
             | "x" -> Assert.AreEqual<string>(PrimUndetermined, x.Represent())
             | "y" -> Assert.AreEqual<string>(PrimUndetermined, y.Represent())
@@ -442,8 +442,8 @@ type TestFplValueScopeFplRepresentation() =
         match result with
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
-            | "r" -> Assert.AreEqual<string>(LiteralUndef, r.Represent())
-            | PrimTheoryL -> Assert.AreEqual<string>(LiteralUndef, theory.Represent())
+            | "r" -> Assert.AreEqual<string>(PrimNone, r.Represent())
+            | PrimTheoryL -> Assert.AreEqual<string>(PrimNone, theory.Represent())
             | "block" -> Assert.AreEqual<string>(LiteralTrue, block.Represent()); 
             | "x" -> Assert.AreEqual<string>("dec *pred(func(*obj[ind], *obj[ind], *obj[ind]) -> obj, func(*obj[ind], *obj[ind], *obj[ind]) -> obj, func(*obj[ind], *obj[ind], *obj[ind]) -> obj)[obj]", x.Represent())
             | "y" -> Assert.AreEqual<string>("dec *pred(func(*obj[ind], *obj[ind], *obj[ind]) -> obj, func(*obj[ind], *obj[ind], *obj[ind]) -> obj, func(*obj[ind], *obj[ind], *obj[ind]) -> obj)[obj]", y.Represent())
