@@ -1730,14 +1730,18 @@ let checkVAR04Diagnostics (fv:FplValue) =
         var.ErrorOccurred <- emitVAR04diagnostics var.FplId var.StartPos var.EndPos
     )
 
+let isArgPred (arg:FplValue) = 
+    let argType = arg.Type SignatureType.Type
+    (argType, argType.StartsWith(LiteralPred))
+
 /// Checks if an argument of an FplValue is a predicate and issues LG001Diagnostics if its not.
 let checkArgPred (fv:FplValue) (arg:FplValue)  = 
-    let argType = arg.Type SignatureType.Type
-    if argType.StartsWith(LiteralPred) then 
+    let argType, isPred = isArgPred (arg:FplValue) 
+    if isPred then 
         () 
     else
         let argName = arg.Type SignatureType.Name
-        arg.ErrorOccurred <- emitLG001Diagnostics argType argName fv.Name arg.StartPos arg.EndPos
+        fv.ErrorOccurred <- emitLG001Diagnostics argType argName fv.Name arg.StartPos arg.EndPos
 
 /// Checks if a predicate expression is actually being interpreted as an predicate
 let checkPredicateExpressionReturnsPredicate (fv:FplValue) =
@@ -2580,15 +2584,13 @@ type FplGenericArgInference(positions: Positions, parent: FplValue) =
 
 [<AbstractClass>]
 type FplGenericJustificationItem(positions: Positions, parent: FplValue) =
-    inherit FplValue(positions, Some parent)
+    inherit FplGenericPredicate(positions, parent)
 
     override this.ShortName = PrimJustification
 
     override this.Type signatureType =
         let head = getFplHead this signatureType
         head
-
-    override this.Represent() = this.Type(SignatureType.Name)
 
     override this.EmbedInSymbolTable _ = 
         let thisJustificationItemId = this.Type(SignatureType.Mixed)
@@ -2602,8 +2604,6 @@ type FplGenericJustificationItem(positions: Positions, parent: FplValue) =
             this.ErrorOccurred <- emitPR004Diagnostics thisJustificationItemId otherId this.StartPos this.EndPos 
         | _ -> ()
         addExpressionToParentArgList this
-
-    override this.RunOrder = None
 
     member this.ParentJustification = this.Parent.Value :?> FplJustification
 
@@ -2626,6 +2626,30 @@ type FplGenericJustificationItem(positions: Positions, parent: FplValue) =
         else
             None
 
+    override this.Run _ = 
+        this.Debug Debug.Start
+        match this.RefersTo with 
+        | Some ref when ref.Value.IsSome ->
+            let refType, isRefPred = isArgPred ref
+            if isRefPred then 
+                // because the ref must proceed "this" in FPL Code, it was already run
+                // so we only need to copy its value into this
+                this.SetValuesOf ref
+            else
+                // if there is a value but ref is not a predicate, 
+                // keep the undetermined value of "this"
+                // and issue diagnostics saying that this requires a predicate
+                let refName = ref.Type SignatureType.Name
+                this.ErrorOccurred <- emitLG001Diagnostics refType refName this.Name ref.StartPos ref.EndPos
+        | Some ref when ref.Value.IsNone ->
+            // keep the undetermined value 
+            // todo issue diagnostics saying that a predicate expression was expected but has No value
+            ()
+        | _ -> 
+            // keep the undetermined value 
+            () // no diagnostics needed because covered by ID010, ID023, or PR001
+        this.Debug Debug.Stop
+
 and FplJustificationItemByAx(positions: Positions, parent: FplValue) =
     inherit FplGenericJustificationItem(positions, parent)
 
@@ -2635,11 +2659,6 @@ and FplJustificationItemByAx(positions: Positions, parent: FplValue) =
         let ret = new FplJustificationItemByAx((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
-
-    override this.Run variableStack = 
-        // todo implement Run
-        this.Debug Debug.Start
-        this.Debug Debug.Stop
 
 and FplJustificationItemByDef(positions: Positions, parent: FplValue) =
     inherit FplGenericJustificationItem(positions, parent)
@@ -2651,11 +2670,6 @@ and FplJustificationItemByDef(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
-    override this.Run variableStack = 
-        // todo implement Run
-        this.Debug Debug.Start
-        this.Debug Debug.Stop
-
 and FplJustificationItemByDefVar(positions: Positions, parent: FplValue) =
     inherit FplGenericJustificationItem(positions, parent)
 
@@ -2665,11 +2679,6 @@ and FplJustificationItemByDefVar(positions: Positions, parent: FplValue) =
         let ret = new FplJustificationItemByDefVar((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
-
-    override this.Run variableStack = 
-        // todo implement Run
-        this.Debug Debug.Start
-        this.Debug Debug.Stop
 
 and FplJustificationItemByConj(positions: Positions, parent: FplValue) =
     inherit FplGenericJustificationItem(positions, parent)
@@ -2681,11 +2690,6 @@ and FplJustificationItemByConj(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
-    override this.Run variableStack = 
-        // todo implement Run
-        this.Debug Debug.Start
-        this.Debug Debug.Stop
-
 and FplJustificationItemByCor(positions: Positions, parent: FplValue) =
     inherit FplGenericJustificationItem(positions, parent)
 
@@ -2695,11 +2699,6 @@ and FplJustificationItemByCor(positions: Positions, parent: FplValue) =
         let ret = new FplJustificationItemByCor((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
-
-    override this.Run variableStack = 
-        // todo implement Run
-        this.Debug Debug.Start
-        this.Debug Debug.Stop
 
 and FplJustificationItemByInf(positions: Positions, parent: FplValue) =
     inherit FplGenericJustificationItem(positions, parent)
@@ -2711,11 +2710,6 @@ and FplJustificationItemByInf(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
-    override this.Run variableStack = 
-        // todo implement Run
-        this.Debug Debug.Start
-        this.Debug Debug.Stop
-
 and FplJustificationItemByRefArgument(positions: Positions, parent: FplValue) =
     inherit FplGenericJustificationItem(positions, parent)
 
@@ -2725,11 +2719,6 @@ and FplJustificationItemByRefArgument(positions: Positions, parent: FplValue) =
         let ret = new FplJustificationItemByRefArgument((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
-
-    override this.Run variableStack = 
-        // todo implement Run
-        this.Debug Debug.Start
-        this.Debug Debug.Stop
 
 and FplJustificationItemByProofArgument(positions: Positions, parent: FplValue) =
     inherit FplGenericJustificationItem(positions, parent)
@@ -2741,11 +2730,6 @@ and FplJustificationItemByProofArgument(positions: Positions, parent: FplValue) 
         this.AssignParts(ret)
         ret
 
-    override this.Run variableStack = 
-        // todo implement Run
-        this.Debug Debug.Start
-        this.Debug Debug.Stop
-
 
 and FplJustificationItemByTheoremLikeStmt(positions: Positions, parent: FplValue) =
     inherit FplGenericJustificationItem(positions, parent)
@@ -2756,11 +2740,6 @@ and FplJustificationItemByTheoremLikeStmt(positions: Positions, parent: FplValue
         let ret = new FplJustificationItemByTheoremLikeStmt((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
-
-    override this.Run variableStack = 
-        // todo implement Run
-        this.Debug Debug.Start
-        this.Debug Debug.Stop
 
 and FplJustification(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(positions, parent)

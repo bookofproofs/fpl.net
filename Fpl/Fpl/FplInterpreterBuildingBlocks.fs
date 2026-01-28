@@ -1913,7 +1913,7 @@ let rec eval (st: SymbolTable) ast =
                     | :? FplJustificationItemByInf ->
                         "Expected a reference to a rule of inference."
                     | :? FplJustificationItemByProofArgument ->
-                        "Expected a reference to an argument in onother proof."
+                        "Expected a reference to an argument in another proof."
                     | :? FplJustificationItemByRefArgument ->
                         "Expected a reference to a previous argument in this proof."
                     | :? FplJustificationItemByTheoremLikeStmt ->
