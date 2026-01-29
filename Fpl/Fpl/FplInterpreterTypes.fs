@@ -3274,6 +3274,7 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
         | Some called ->
             match called.Name with
             | LiteralCtorL
+            | PrimDefaultConstructor
             | PrimBaseConstructorCall
             | PrimPredicateL
             | PrimFunctionalTermL
@@ -3620,7 +3621,9 @@ type FplMapping(positions: Positions, parent: FplValue) =
                 |> String.concat ","
             $"{mainType}[{dimensionTypes}]"
 
-    override this.Represent() = $"dec {this.Type(SignatureType.Type)}"
+    override this.Represent() = // done
+        // a fall back value representation for intrinsic functional terms
+        $"dec {this.Type(SignatureType.Type)}"
 
     override this.Run _ = 
         this.Debug Debug.Start
@@ -3726,7 +3729,7 @@ type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
         | SignatureType.Name -> this.FplId
         | _ -> $"{mainType}[{dimensionTypes}]"
 
-    override this.Represent () = 
+    override this.Represent () = // done
         if this.ValueList.Count = 0 then
             if this.IsInitialized then 
                 // this case should never happen, because isInitializesVariable is a contradiction to ValueList.Count 0
@@ -3824,7 +3827,7 @@ type FplVariable(fplId, positions: Positions, parent: FplValue) =
         if fv.FplId <> LiteralUndef then
             this.IsInitialized <- true
 
-    override this.Represent () = 
+    override this.Represent () = // done
         match this.Value with 
         | None ->
             match this.TypeId with
@@ -4408,8 +4411,6 @@ type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
             |> String.concat ", "
         sprintf "%s(%s)" head args
 
-    override this.Represent () = LiteralUndef
-
     override this.CheckConsistency() = 
         base.CheckConsistency()
 
@@ -4421,7 +4422,7 @@ type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
             match enclosingConstructorOpt with 
             | Some (:? FplConstructor as ctor) ->
                 if ctor.ParentConstructorCalls.Contains(this.FplId) then 
-                    // todo duplicate constructor call
+                    // issue duplicate constructor call diagnostics
                     this.ErrorOccurred <- emitID021Diagnostics this.FplId this.StartPos
                 else
                     ctor.ParentConstructorCalls.Add this.FplId |> ignore

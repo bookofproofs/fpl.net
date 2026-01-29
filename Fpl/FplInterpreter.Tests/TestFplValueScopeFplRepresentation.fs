@@ -631,7 +631,7 @@ type TestFplValueScopeFplRepresentation() =
 
                         def cl A:B,C,D,E
                         {
-                            ctor A(a:T1, b:func, c:ind, d:pred) 
+                            ctor A() 
                             {
                                 dec
                                     %s
@@ -639,6 +639,7 @@ type TestFplValueScopeFplRepresentation() =
                                 
                             }
                         }
+                        def pred Test() {A()}
                         ;""" varVal
         let filename = "TestBaseConstructorCallFplRepresentation"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -648,7 +649,7 @@ type TestFplValueScopeFplRepresentation() =
             let r = st.Root
             let theory = r.Scope[filename]
             let cl = theory.Scope["A"]
-            let ctor = cl.Scope["A(T1, func, ind, pred)"]
+            let ctor = cl.Scope["A()"]
             let base1 = ctor.ArgList[0]
 
             match var with
