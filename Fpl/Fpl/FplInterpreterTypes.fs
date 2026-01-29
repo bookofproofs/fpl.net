@@ -3250,10 +3250,11 @@ type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
     override this.Type (signatureType:SignatureType) = 
         getFplHead this signatureType
                     
-    override this.Represent (): string = this.FplId
+    override this.Represent (): string = LiteralUndef // done
 
     override this.Run variableStack = 
         this.Debug Debug.Start
+        // FplIntrinsicUndef is a value of not defined FPL objects and has no value on its own
         this.Debug Debug.Stop
 
     override this.EmbedInSymbolTable _ = addExpressionToReference this
@@ -3370,21 +3371,11 @@ type FplReference(positions: Positions, parent: FplValue) =
                 this.ArgList
                 |> Seq.map (fun fv -> fv.Type(propagate))
                 |> String.concat ", "
-            // fallback to variable params (and a possibly given mapping) if there are no arguments and the reference is a variable 
-            match ret, headObj.Name with 
-            | "", PrimVariableL -> 
-                let countVarParams = 
-                    headObj.Scope 
-                    |> Seq.filter (fun (kvp: KeyValuePair<string, FplValue>) -> isSignatureVar kvp.Value || not (kvp.Value.IsClass()))
-                    |> Seq.toList
-                (getParamTuple headObj propagate), countVarParams.Length
-            | _ -> ret, this.ArgList.Count
+            ret, this.ArgList.Count
 
         let head = 
             let ret = 
                 if headObj.Name = PrimExtensionL then 
-                    headObj.Type signatureType
-                elif headObj.Name = PrimVariableL then
                     headObj.Type signatureType
                 elif headObj.ExpressionType.IsNoFix then
                     getFplHead headObj signatureType 
@@ -3459,7 +3450,7 @@ type FplReference(positions: Positions, parent: FplValue) =
             | _, ArgType.Parentheses, None ->
                 fallBackFunctionalTerm
 
-    override this.Represent () = 
+    override this.Represent () = // done
         if _callCounter > maxRecursion then
             this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
             LiteralUndef // fallback to undefined after infinite recursion (if any)
@@ -3628,7 +3619,6 @@ type FplMapping(positions: Positions, parent: FplValue) =
                 |> Seq.map (fun fv -> fv.Type signatureType)
                 |> String.concat ","
             $"{mainType}[{dimensionTypes}]"
-
 
     override this.Represent() = $"dec {this.Type(SignatureType.Type)}"
 
