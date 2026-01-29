@@ -1600,7 +1600,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
         | "FplAssertion" ->
             Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>("", (getName var).[index])
+            Assert.AreEqual<string>(PrimNone, (getName var).[index])
         | "FplAssignment" ->
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
@@ -1687,7 +1687,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
         | "FplIntrinsicTpl" ->
             Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(LiteralTpl, (getName var).[index])
+            Assert.AreEqual<string>(PrimNone, (getName var).[index])
         | "FplIntrinsicUndef" ->
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
@@ -1813,7 +1813,7 @@ type SymbolTableStructure() =
 
 
     // todo: issue diagnostics if assuming referenced arguments
-    // todo: issue diagnostics restricting assumtions only to non-compound predicates and to references to definitions of predicates
+    // todo: issue diagnostics restricting assumptions only to non-compound predicates and to references to definitions of predicates
     // todo: issue diagnostics if proving an implication impl(a,b) and the first argument is not the assumption of a, and the last derived argument is not b.
     // todo: issue diagnostics if proving an equivalence iif(a,b) and the proof does not consist of two blocks, each starting with the assumption of a (resp. b) and ending with the derivation of b (resp. a)
     [<DataRow("FplArgInferenceAssume", "00", """proof T$1 {1. |- assume and(x,y) };""", "")>]
@@ -1935,7 +1935,7 @@ type SymbolTableStructure() =
 
     // todo: issue diagnostics if assertions are made outside the definitions of functional terms and definitions of classes
     // todo: issue diagnostics if assertions are made inside the definitions of functional terms and definitions of classes but do not involve the self keyword
-    // todo: issue diagnostics if assertions involve the is opeperator
+    // todo: issue diagnostics if assertions involve the is operator
     [<DataRow("FplAssertion", "00", """def cl A {ctor A(){dec assert all x:A,y:obj {In(y,x)};}};""", "")>]
     [<TestMethod>]
     member this.TestStructureFplAssertion(nodeType, varVal, fplCode, identifier) =

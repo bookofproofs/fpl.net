@@ -590,7 +590,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
     /// "undef" - for all nodes in the symbol table that have a type other from a predicate and usually yield a value (e.g. functional terms), but whose value could not be determined.
     /// "undetermined" - for all nodes in the symbol table that have a predicate type (e.g. theorems) but whose value could not be determined. 
     /// otherwise a string representation depending on type of the FPL node and its specific value.
-    override this.Represent () = 
+    override this.Represent () = // done
         match this.Value with 
         | Some v -> v.Represent() 
         | _ -> PrimNone // If there is no value, return string "None"
@@ -1359,7 +1359,7 @@ type FplIntrinsicPred(positions: Positions, parent: FplValue) as this =
 
     override this.Type (signatureType:SignatureType) = getFplHead this signatureType
                     
-    override this.Represent() = this.FplId
+    override this.Represent() = this.FplId // done
 
     override this.Run _ = 
         this.Debug Debug.Start
@@ -1852,7 +1852,7 @@ type FplInstance(positions: Positions, parent: FplValue) as this =
         let head = getFplHead this signatureType 
         head
 
-    override this.Represent () = 
+    override this.Represent () = // done
         let head = this.TypeId
 
         // baseClasses = instances of all base classes
@@ -2340,7 +2340,7 @@ type FplMandatoryPredicate(positions: Positions, parent: FplValue) =
         base.CheckConsistency()
         tryAddSubBlockToFplBlock this
 
-type FplAxiom(positions: Positions, parent: FplValue, runOrder) as this =
+type FplAxiom(positions: Positions, parent: FplValue, runOrder) =
     inherit FplGenericPredicateWithExpression(positions, parent)
     let _runOrder = runOrder
     let mutable _isReady = false
@@ -3070,7 +3070,7 @@ type FplLocalization(positions: Positions, parent: FplValue) =
         | "" -> head
         | _ -> sprintf "%s(%s)" head paramT
 
-    override this.Represent() = this.Type(SignatureType.Name)
+    override this.Represent() = this.Type(SignatureType.Name) // todo set language and represent only this one
         
     override this.IsBlock() = true
 
@@ -3103,7 +3103,7 @@ type FplTranslation(positions: Positions, parent: FplValue) =
 
         sprintf "%s%s" head args
 
-    override this.Represent () = this.FplId 
+    override this.Represent () = this.FplId // todo represent according to the language setting of localization
 
     override this.Run variableStack = 
         // todo implement run
@@ -3129,7 +3129,7 @@ type FplLanguage(positions: Positions, parent: FplValue) =
         let head = getFplHead this signatureType
         head
 
-    override this.Represent () = this.FplId
+    override this.Represent () = this.FplId // todo represent according to the language setting of localization
 
     override this.Run variableStack = 
         // todo implement run
@@ -3166,8 +3166,6 @@ type FplAssertion(positions: Positions, parent: FplValue) =
         ret
 
     override this.Type signatureType = this.FplId
-        
-    override this.Represent () = ""
 
     override this.Run variableStack = 
         // todo implement run
@@ -3194,12 +3192,18 @@ type FplIntrinsicTpl(name, positions: Positions, parent: FplValue) as this =
         ret
 
     override this.Type (signatureType:SignatureType) = 
-        getFplHead this signatureType
-                    
-    override this.Represent () = this.FplId
+        match this.RefersTo with
+        | Some fv -> 
+            // if the template was used, its representation is the 
+            // type signature of how it was used
+            fv.Type SignatureType.Type  
+        | None -> 
+            // otherwise, the representation defaults to the user-defined name of the template
+            getFplHead this signatureType
 
     override this.Run _ = 
         this.Debug Debug.Start
+        // A template has no value
         this.Debug Debug.Stop
 
     /// Sets a template usage and issues a specific diagnostics if a type conflict occurs.
@@ -3742,7 +3746,7 @@ type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
                 | LiteralUndef -> LiteralUndef
                 | _ -> $"dec {this.Type SignatureType.Type}"
         else
-            // ensure cononical order of keys
+            // ensure canonical order of keys
             let sortedKeys = 
                 let sortByCoordinates (items: string seq) =
                     let parseCoord (coord: string) =
