@@ -246,7 +246,7 @@ type TestReferencesTypeOfSignature() =
     [<DataRow("""proof T$1 {1. |- trivial};""","pred")>]
     [<DataRow("""def pred T(p:obj) {true};""","pred(obj)")>]
     [<DataRow("""def pred T() {true};""", "pred()")>]
-    [<DataRow("""inf T {pre: true con:true};""", "pred")>]
+    [<DataRow("""inf T {pre: true con:true};""", "undef")>]
     [<TestMethod>]
     member this.TestBlockTypeSignature(varVal, name:string) =
         ad.Clear()

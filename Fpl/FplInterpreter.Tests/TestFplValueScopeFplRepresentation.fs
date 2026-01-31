@@ -51,8 +51,8 @@ type TestFplValueScopeFplRepresentation() =
             match var with 
             | "r" -> Assert.AreEqual<string>(PrimNone, r.Represent())
             | PrimTheoryL -> Assert.AreEqual<string>(PrimNone, theory.Represent())
-            | "inf1" -> Assert.AreEqual<string>(PrimUndetermined, inf1.Represent())
-            | "inf2" -> Assert.AreEqual<string>(PrimUndetermined, inf2.Represent())
+            | "inf1" -> Assert.AreEqual<string>(PrimNone, inf1.Represent())
+            | "inf2" -> Assert.AreEqual<string>(PrimNone, inf2.Represent())
             | "axi1" -> Assert.AreEqual<string>(LiteralTrue, axi1.Represent())
             | "axi2" -> Assert.AreEqual<string>(LiteralTrue, axi2.Represent())
             | "pst1" -> Assert.AreEqual<string>(LiteralTrue, pst1.Represent())

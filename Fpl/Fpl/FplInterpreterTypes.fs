@@ -1376,7 +1376,6 @@ type FplGenericPredicate(positions: Positions, parent: FplValue) as this =
     do 
         this.FplId <- PrimUndetermined
         this.TypeId <- LiteralPred
-        this.SetValue (new FplIntrinsicPred(positions, parent))
 
     override this.RunOrder = None
 
@@ -1807,9 +1806,31 @@ type FplPredicateList(positions: Positions, parent: FplValue, runOrder) =
 
     override this.RunOrder = Some _runOrder
 
-type FplRuleOfInference(positions: Positions, parent: FplValue, runOrder) =
-    inherit FplGenericPredicateWithExpression(positions, parent)
+type FplRuleOfInference(positions: Positions, parent: FplValue, runOrder) as this =
+    inherit FplValue(positions, Some parent)
     let _runOrder = runOrder
+    let mutable _signStartPos = Position("", 0L, 0L, 0L)
+    let mutable _signEndPos = Position("", 0L, 0L, 0L)
+
+    do
+        this.FplId <- LiteralUndef
+        this.TypeId <- LiteralUndef
+
+    member this.SignStartPos
+        with get() = _signStartPos
+        and set(value) = _signStartPos <- value
+
+    member this.SignEndPos
+        with get() = _signEndPos
+        and set(value) = _signEndPos <- value
+
+    interface IHasSignature with
+        member this.SignStartPos 
+            with get () = this.SignStartPos
+            and set (value) = this.SignStartPos <- value
+        member this.SignEndPos 
+            with get () = this.SignEndPos
+            and set (value) = this.SignEndPos <- value
 
     override this.Name = PrimRuleOfInference
     override this.ShortName = LiteralInf
@@ -1819,12 +1840,15 @@ type FplRuleOfInference(positions: Positions, parent: FplValue, runOrder) =
         this.AssignParts(ret)
         ret
 
+    override this.Type signatureType = getFplHead this signatureType
+    
     override this.IsFplBlock () = true
     override this.IsBlock () = true    
 
     override this.Run variableStack = 
+        // todo implement run
         this.Debug Debug.Start
-        this.ErrorOccurred <- emitLG004diagnostic this.Name this.Arity this.StartPos this.EndPos
+        // FplRuleOfReference does not have any Value
         this.Debug Debug.Stop
 
     override this.EmbedInSymbolTable _ = 
@@ -2343,14 +2367,15 @@ type FplMandatoryPredicate(positions: Positions, parent: FplValue) =
 let runArgumentsOfGenericPredicateWithExpression (fv:FplValue) variableStack = 
     let mutable _countStmts = 0
     fv.ArgList
-    |> Seq.iter (fun fv -> 
-        fv.Run variableStack
-        if fv.Value.IsNone then 
+    |> Seq.iter (fun fv1 -> 
+        fv1.Run variableStack
+        if fv1.Value.IsNone then 
             _countStmts <-  _countStmts + 1
         else
-            fv.SetValuesOf fv
+            fv.SetValuesOf fv1
     )
     (_countStmts, fv.GetVariables().Length)
+
 type FplAxiom(positions: Positions, parent: FplValue, runOrder) =
     inherit FplGenericPredicateWithExpression(positions, parent)
     let _runOrder = runOrder
@@ -2379,10 +2404,6 @@ type FplAxiom(positions: Positions, parent: FplValue, runOrder) =
         if not _isReady then
             let countStmts, countVarDeclarations = runArgumentsOfGenericPredicateWithExpression this variableStack
             _isReady <- true
-                fv.Run variableStack
-                this.SetValuesOf fv
-            )
-            _isReady <- this.Arity = 0 
             this.ErrorOccurred <- emitLG003diagnostic (this.Type(SignatureType.Name)) this.Name (this.Represent()) this.StartPos this.EndPos
             this.ErrorOccurred <- emitLG004diagnostic this.Name countVarDeclarations countStmts this.StartPos this.EndPos
         this.Debug Debug.Stop
@@ -2419,10 +2440,6 @@ type FplGenericTheoremLikeStmt(positions: Positions, parent: FplValue, runOrder)
         if not _isReady then
             let countStmts, countVarDeclarations = runArgumentsOfGenericPredicateWithExpression this variableStack
             _isReady <- true
-                fv.Run variableStack
-                this.SetValuesOf fv
-            )
-            _isReady <- this.Arity = 0 
             this.ErrorOccurred <- emitLG003diagnostic (this.Type(SignatureType.Name)) this.Name (this.Represent()) this.StartPos this.EndPos
             this.ErrorOccurred <- emitLG004diagnostic this.Name countVarDeclarations countStmts this.StartPos this.EndPos
 
@@ -2574,10 +2591,6 @@ type FplConjecture(positions: Positions, parent: FplValue, runOrder) =
             let countStmts, countVarDeclarations = runArgumentsOfGenericPredicateWithExpression this variableStack
             _isReady <- true
             this.ErrorOccurred <- emitLG004diagnostic this.Name countVarDeclarations countStmts this.StartPos this.EndPos
-                this.SetValuesOf fv
-            )
-            _isReady <- this.Arity = 0 
-            this.ErrorOccurred <- emitLG004diagnostic this.Name this.Arity this.StartPos this.EndPos
         this.Debug Debug.Stop
 
 
@@ -2648,16 +2661,22 @@ type FplGenericJustificationItem(positions: Positions, parent: FplValue) =
                 this.SetValuesOf ref
             else
                 // if there is a value but ref is not a predicate, 
-                // keep the undetermined value of "this"
+                // set the value of "this" to undetermined
+                let value = new FplIntrinsicPred((this.StartPos, this.EndPos), this) 
+                this.SetValue value
                 // and issue diagnostics saying that this requires a predicate
                 let refName = ref.Type SignatureType.Name
                 this.ErrorOccurred <- emitLG001Diagnostics refType refName this.Name ref.StartPos ref.EndPos
         | Some ref when ref.Value.IsNone ->
-            // keep the undetermined value 
+            // set the value of "this" to undetermined
+            let value = new FplIntrinsicPred((this.StartPos, this.EndPos), this) 
+            this.SetValue value
             // todo issue diagnostics saying that a predicate expression was expected but has No value
             ()
         | _ -> 
-            // keep the undetermined value 
+            // set the value of "this" to undetermined
+            let value = new FplIntrinsicPred((this.StartPos, this.EndPos), this) 
+            this.SetValue value
             () // no diagnostics needed because covered by ID010, ID023, or PR001
         this.Debug Debug.Stop
 
@@ -2770,6 +2789,8 @@ and FplJustification(positions: Positions, parent: FplValue) =
     override this.Run variableStack = 
         // todo implement Run
         this.Debug Debug.Start
+        let v = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+        this.Value <- Some v
         this.Debug Debug.Stop
 
 
@@ -2795,8 +2816,10 @@ and FplArgInferenceAssume(positions: Positions, parent: FplValue) =
         ret
 
     override this.Run variableStack = 
-        // todo implement Run
+        // todo implement Run, assume should return true if the assumption was possible
         this.Debug Debug.Start
+        let v = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+        this.Value <- Some v
         this.Debug Debug.Stop
 
     member this.ParentArgument = this.Parent.Value :?> FplArgument
@@ -2815,6 +2838,8 @@ and FplArgInferenceRevoke(positions: Positions, parent: FplValue) =
     override this.Run variableStack = 
         // todo implement Run
         this.Debug Debug.Start
+        let v = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+        this.Value <- Some v
         this.Debug Debug.Stop
 
     member this.ParentArgument = this.Parent.Value :?> FplArgument
@@ -2853,6 +2878,8 @@ and FplArgInferenceDerived(positions: Positions, parent: FplValue) =
     override this.Run variableStack = 
         // todo implement run
         this.Debug Debug.Start
+        let v = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+        this.Value <- Some v
         this.Debug Debug.Stop
 
     member this.ParentArgument = this.Parent.Value :?> FplArgument
@@ -2918,6 +2945,9 @@ and FplArgument(positions: Positions, parent: FplValue, runOrder) =
                 c) whether or not the justification is a rule of inference
                 d) whether or not the justification is a by definition
         *)
+        let v = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+        this.Value <- Some v
+
         this.Debug Debug.Stop
 
 
@@ -5680,13 +5710,14 @@ type FplGenericStmt(positions: Positions, parent: FplValue) =
 
 /// Implements the return statement in FPL.
 type FplReturn(positions: Positions, parent: FplValue) as this =
-    inherit FplGenericStmt(positions, parent)
+    inherit FplValue(positions, Some parent)
 
     do
         this.FplId <- LiteralRet
         this.TypeId <- LiteralUndef
 
     override this.Name = PrimReturn
+    override this.ShortName = PrimStmt
 
     override this.Clone () =
         let ret = new FplReturn((this.StartPos, this.EndPos), this.Parent.Value)
@@ -5694,11 +5725,10 @@ type FplReturn(positions: Positions, parent: FplValue) as this =
         ret
 
     override this.Type signatureType = this.FplId
-    override this.Represent () = 
-        let argOpt = this.ArgList |> Seq.tryHead
-        match argOpt with
-        | Some arg -> arg.Represent()
-        | _ -> this.FplId
+
+    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
+
+    override this.RunOrder = None
 
     override this.Run variableStack =
         this.Debug Debug.Start
@@ -5727,9 +5757,18 @@ type FplReturn(positions: Positions, parent: FplValue) as this =
                         | _ -> this.SetValue refValue
                     | _ ->
                         let value = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
-                        this.SetValue(value)
-            | _ -> () // does not occur
-        | _ -> () // does not occur
+                        this.SetValue value
+            | _ -> 
+                // should syntactically not occur that a functional term has no mapping
+                // in this case return undef
+                let value = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
+                this.SetValue value
+        | _ -> 
+            // should syntactically not occur that a return statement occurs in something else
+            // then a functional term
+            // in this case return undef
+            let value = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
+            this.SetValue value
         this.Debug Debug.Stop
 
 type FplMapCaseSingle(positions: Positions, parent: FplValue) as this =

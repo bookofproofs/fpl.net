@@ -51,8 +51,8 @@ type TestFplValueScopeTypeSignature() =
             match var with 
             | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Type))
             | PrimTheoryL -> Assert.AreEqual<string>("TestScopeBlocksTypeSignature", theory.Type(SignatureType.Type))
-            | "inf1" -> Assert.AreEqual<string>(LiteralPred, inf1.Type(SignatureType.Type))
-            | "inf2" -> Assert.AreEqual<string>(LiteralPred, inf2.Type(SignatureType.Type))
+            | "inf1" -> Assert.AreEqual<string>(LiteralUndef, inf1.Type(SignatureType.Type))
+            | "inf2" -> Assert.AreEqual<string>(LiteralUndef, inf2.Type(SignatureType.Type))
             | "axi1" -> Assert.AreEqual<string>(LiteralPred, axi1.Type(SignatureType.Type))
             | "axi2" -> Assert.AreEqual<string>(LiteralPred, axi2.Type(SignatureType.Type))
             | "pst1" -> Assert.AreEqual<string>(LiteralPred, pst1.Type(SignatureType.Type))
