@@ -437,13 +437,13 @@ let emitLG003diagnostic nodeTypeName nodeName nodeRepr pos1 pos2 =
     else
         None
 
-let emitLG004diagnostic nodeName arity pos1 pos2 = 
-    if arity > 0 then
+let emitLG004diagnostic nodeName numbOfVariables numbOfStmts pos1 pos2 = 
+    if numbOfVariables > 0 || numbOfStmts > 0 then
         let diagnostic =
             { 
                 Diagnostic.Uri = ad.CurrentUri
                 Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.Severity = DiagnosticSeverity.Warning
                 Diagnostic.StartPos = pos1
                 Diagnostic.EndPos = pos2
                 Diagnostic.Code = LG004 (getEnglishName nodeName false)

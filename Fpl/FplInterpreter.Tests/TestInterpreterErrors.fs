@@ -1109,7 +1109,7 @@ type TestInterpreterErrors() =
     [<DataRow("16", """def func T()->obj { intr };""", 0)>]
     [<DataRow("17", """def func T(x:obj)->obj { intr };""", 0)>]
     [<DataRow("18", """inf T { pre: true con: true };""", 0)>]
-    [<DataRow("19", """inf T {dec ~x:obj; pre: true con: true };""", 1)>]
+    [<DataRow("19", """inf T {dec ~x:obj; pre: true con: true };""", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestLG004(no:string, fplCode:string, expected) =

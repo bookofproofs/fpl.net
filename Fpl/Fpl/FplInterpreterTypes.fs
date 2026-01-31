@@ -2340,6 +2340,17 @@ type FplMandatoryPredicate(positions: Positions, parent: FplValue) =
         base.CheckConsistency()
         tryAddSubBlockToFplBlock this
 
+let runArgumentsOfGenericPredicateWithExpression (fv:FplValue) variableStack = 
+    let mutable _countStmts = 0
+    fv.ArgList
+    |> Seq.iter (fun fv -> 
+        fv.Run variableStack
+        if fv.Value.IsNone then 
+            _countStmts <-  _countStmts + 1
+        else
+            fv.SetValuesOf fv
+    )
+    (_countStmts, fv.GetVariables().Length)
 type FplAxiom(positions: Positions, parent: FplValue, runOrder) =
     inherit FplGenericPredicateWithExpression(positions, parent)
     let _runOrder = runOrder
@@ -2366,14 +2377,14 @@ type FplAxiom(positions: Positions, parent: FplValue, runOrder) =
     override this.Run variableStack = 
         this.Debug Debug.Start
         if not _isReady then
-            this.ArgList
-            |> Seq.iter (fun fv -> 
+            let countStmts, countVarDeclarations = runArgumentsOfGenericPredicateWithExpression this variableStack
+            _isReady <- true
                 fv.Run variableStack
                 this.SetValuesOf fv
             )
             _isReady <- this.Arity = 0 
             this.ErrorOccurred <- emitLG003diagnostic (this.Type(SignatureType.Name)) this.Name (this.Represent()) this.StartPos this.EndPos
-            this.ErrorOccurred <- emitLG004diagnostic this.Name this.Arity this.StartPos this.EndPos
+            this.ErrorOccurred <- emitLG004diagnostic this.Name countVarDeclarations countStmts this.StartPos this.EndPos
         this.Debug Debug.Stop
 
     override this.RunOrder = Some _runOrder
@@ -2406,14 +2417,14 @@ type FplGenericTheoremLikeStmt(positions: Positions, parent: FplValue, runOrder)
     override this.Run variableStack = 
         this.Debug Debug.Start
         if not _isReady then
-            this.ArgList
-            |> Seq.iter (fun fv -> 
+            let countStmts, countVarDeclarations = runArgumentsOfGenericPredicateWithExpression this variableStack
+            _isReady <- true
                 fv.Run variableStack
                 this.SetValuesOf fv
             )
             _isReady <- this.Arity = 0 
             this.ErrorOccurred <- emitLG003diagnostic (this.Type(SignatureType.Name)) this.Name (this.Represent()) this.StartPos this.EndPos
-            this.ErrorOccurred <- emitLG004diagnostic this.Name this.Arity this.StartPos this.EndPos
+            this.ErrorOccurred <- emitLG004diagnostic this.Name countVarDeclarations countStmts this.StartPos this.EndPos
 
             // evaluate all corollaries and proofs of the theorem-like statement
             this.Scope.Values
@@ -2560,9 +2571,9 @@ type FplConjecture(positions: Positions, parent: FplValue, runOrder) =
     override this.Run variableStack = 
         this.Debug Debug.Start
         if not _isReady then
-            this.ArgList
-            |> Seq.iter (fun fv -> 
-                fv.Run variableStack
+            let countStmts, countVarDeclarations = runArgumentsOfGenericPredicateWithExpression this variableStack
+            _isReady <- true
+            this.ErrorOccurred <- emitLG004diagnostic this.Name countVarDeclarations countStmts this.StartPos this.EndPos
                 this.SetValuesOf fv
             )
             _isReady <- this.Arity = 0 
