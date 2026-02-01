@@ -1,4 +1,4 @@
-namespace FplInterpreter.Tests
+﻿namespace FplInterpreter.Tests
 
 open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
@@ -3334,9 +3334,9 @@ type TestInterpreterErrors() =
     [<DataRow("02", "def pred T(i:ind) {dec ~arr:*ind[ind] arr[i]:=undef; true};", 0)>]    
     [<DataRow("03", "def pred T() {dec ~i:ind i:=$1 ~arr:*ind[ind] arr[i]:=undef; true};", 0)>]    
     [<DataRow("04", "def pred T() {dec ~arr:*ind[ind] arr[i]:=undef; true};", 1)>]    
-    [<DataRow("05", "def pred T() {dec ~i:obj ~arr:*ind[ind] arr[i]:=undef; true};", 1)>]    // index typed `obj` � invalid
+    [<DataRow("05", "def pred T() {dec ~i:obj ~arr:*ind[ind] arr[i]:=undef; true};", 1)>]    // index typed `obj` — invalid
     [<DataRow("06", "def pred T() {dec ~i:ind ~arr:*obj[ind] arr[i]:=undef; true};", 0)>]    // array element type `obj` incompatible with expected `ind`
-    [<DataRow("07", "def pred T(i:obj) {dec ~arr:*ind[ind] arr[i]:=undef; true};", 1)>]        // parameter `i` typed `obj` � invalid
+    [<DataRow("07", "def pred T(i:obj) {dec ~arr:*ind[ind] arr[i]:=undef; true};", 1)>]        // parameter `i` typed `obj` — invalid
     [<DataRow("08", "def pred T() {dec ~i:ind ~arr:*ind[ind] arr[i]:=undef arr[i]:=undef; true};", 0)>] // repeated valid indexing, should succeed
     [<DataRow("08a", "def pred T() {dec ~i:ind ~arr1:*ind[ind] ~arr2:*ind[ind] arr2[arr1[i]]:=undef; true};", 0)>]   // arr indexed by array type *ind[ind], i has that type -> valid
     [<DataRow("08b", "def pred T() {dec ~i:*ind[ind] ~arr:*ind[ind] arr[i]:=undef; true};", 1)>]         // i is array, arr expects ind -> invalid
@@ -3579,6 +3579,17 @@ type TestInterpreterErrors() =
         else
             let code = ST003 ""
             runTestHelper "TestST003.fpl" fplCode code expected
+
+    [<DataRow("01", """loc Equal(x,y) := !tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !pol: x " równa się " y;;""", 0)>]
+    [<DataRow("02", """loc Equal(x,y) := !eng: x " equals " y !ger: x " ist gleich " y !pol: x " równa się " y;;""", 1)>] // tex implementation missing
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestST004(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = ST004 ""
+            runTestHelper "TestST004.fpl" fplCode code expected
 
     [<DataRow("00", "def pred T() { (1 = x) } ;", 0)>] // parser does infix operator, no operand missing
     [<DataRow("01", "def pred T() { (1 = ) } ;", 1)>] // parser does infix operator, missing second operand

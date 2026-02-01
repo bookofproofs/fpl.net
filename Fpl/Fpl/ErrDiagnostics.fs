@@ -62,7 +62,7 @@ type PathEquivalentUri(uriString: string) =
 
     member this.TheoryName = Path.GetFileNameWithoutExtension(this.AbsolutePath)
 
-/// Tranforms a whole number into English ordinal
+/// Transforms a whole number into English ordinal
 let englishOrdinal dimNumber = 
     match dimNumber with
     | 1 -> "1st"
@@ -180,6 +180,7 @@ type DiagnosticCode =
     | ST001 of string 
     | ST002 of string 
     | ST003 of string 
+    | ST004 of string
     // interpreter syntax-related error codes for error-tolerant parser productions
     | SY000 of string
     // variable-related error codes
@@ -303,6 +304,7 @@ type DiagnosticCode =
             | ST001 _ -> "ST001"
             | ST002 _ -> "ST002"
             | ST003 _ -> "ST003"
+            | ST004 _ -> "ST004"
             // interpreter syntax-related error codes for error-tolerant parser
             | SY000 _ -> "SY000"
             // variable-related error codes
@@ -344,7 +346,7 @@ type DiagnosticCode =
             | STMDEL -> "Syntax error in delegate"
             | STMFOI -> "Syntax error in domain"
             | STMFOR -> "Syntax error in for statement"
-            | STMMAP -> "Syntax error in mapcases statement"
+            | STMMAP -> "Syntax error in mcases statement"
             | STMREV -> "Syntax error in revocation"
             | STMRET -> "Syntax error in return statement"
             | AGI000 -> "Syntax error in proof argument"
@@ -401,13 +403,13 @@ type DiagnosticCode =
             | LG002 (nodeTypeName, times) -> $"Possible infinite recursion detected, `{nodeTypeName}` was called for more than {times} times.`."
             | LG003 (nodeTypeName, nodeName) -> $"`{nodeTypeName}` evaluates to `false` and cannot be {nodeName}."
             | LG004 nodeType -> $"`Variable declarations or statements inside {nodeType} might cause side effects."
-            | LG005 name -> $"Unnecessary assignment of `{name}` detected (will be implicitely ignored)."
+            | LG005 name -> $"Unnecessary assignment of `{name}` detected (will be implicitly ignored)."
             // proof-related error codes
             | PR001 (incorrectBlockType, justificatinItemName) -> $"Cannot find a `{justificatinItemName}`, found {incorrectBlockType} instead."
             | PR003 (name, conflict) -> $"Argument identifier `{name}` was already declared at {conflict}."  
             | PR004 (name, conflict)  -> $"Justification `{name}` was already declared at {conflict}." 
             | PR005 name ->  $"Argument identifier `{name}` not declared in this proof."
-            | PR006 (proofName, argumentName)->  $"A proof {proofName} was found, but there ít has no argument with the name `{argumentName}`."
+            | PR006 (proofName, argumentName)->  $"A proof {proofName} was found, but it has no argument with the identifier `{argumentName}`."
             | PR007 (nodeTypeName, nodeName) ->  $"{nodeTypeName} is {nodeName} and is missing a proof."
             | PR008 (nodeName, expectedInputArgInference, actualInputArgInference) ->  $"This {nodeName} expects `{expectedInputArgInference}` and could not be applied to the proceeding argument inference which was `{actualInputArgInference}`."
             | PR009 -> "Not all arguments of the proof could be verified."
@@ -447,6 +449,7 @@ type DiagnosticCode =
             | ST001 nodeName -> $"The {nodeName} does nothing."
             | ST002 nodeName -> $"The {nodeName} does nothing."
             | ST003 errCode -> $"Assignment not possible due to proceeding {errCode} error(s)."
+            | ST004 langCode -> $"The language `{langCode}` not implemented."
             // interpreter syntax-related error codes for error-tolerant parser
             | SY000 infixOp -> $"The infix operator `{infixOp}` is missing a second operand."
             // variable-related error codes
@@ -463,7 +466,7 @@ type DiagnosticCode =
                 | _ -> $"Variable `{name}` of (unknown type) `{oldFromNode} will be overshadowed by `{newFromNode}`."
             | VAR07 name -> $"The {PrimQuantorExistsN} accepts only one bound variable `{name}`."
             | VAR08 -> "Variadic variables cannot be bound in a quantor."
-            | VAR09 (varName,varType) -> $"The variable {varName}:{varType} is free and cannot be used to evaluate this expresssion."
+            | VAR09 (varName,varType) -> $"The variable {varName}:{varType} is free and cannot be used to evaluate this expression."
 
 /// Computes an MD5 checksum of a string
 let computeMD5Checksum (input: string) =
@@ -782,7 +785,7 @@ let rec tryParse someParser input startIndexOfInput nextIndex (code:DiagnosticCo
         let newErrMsg, choices = mapErrMsgToRecText input errorMsg restInput.Position
         let previousChoices = String.concat ", " choices
         // calculate the index in the original input because the error index points to the input that might be a 
-        // substring of the original input
+        // sub string of the original input
         let correctedIndex = int restInput.Position.Index + startIndexOfInput
         // since we call the function with lastCorrectedIndex=-1 that is impossible, the following condition checks if 
         // the recursive call have had altered the corrected position, if not, we have to break the recursion
@@ -843,7 +846,7 @@ let rec tryParseRemainingChunk someParser (input:string) startIndexOfInput nextI
                 let newErrMsg, choices = mapErrMsgToRecText input errorMsg restInput.Position
                 let previousChoices = String.concat ", " choices
                 // calculate the index in the original input because the error index points to the input that might be a 
-                // substring of the original input
+                // sub string of the original input
                 let correctedIndex = restInput.Position.Index + startIndexOfInput
                 if correctedIndex < nextIndex && previousChoices<>lastChoices then 
                     let correctedPosition = 
