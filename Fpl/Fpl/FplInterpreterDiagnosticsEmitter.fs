@@ -965,6 +965,21 @@ let emitSY000diagnostics infixOp pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
+let emitST005diagnostics domain nodeType pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Information
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ST005 (domain, nodeType)
+            Diagnostic.Alternatives = None
+        }
+    ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
+
+
 let emitVAR00Diagnostics numberOfVariadicVars startPos endPos =
     if numberOfVariadicVars > 1 then
         let diagnostic =

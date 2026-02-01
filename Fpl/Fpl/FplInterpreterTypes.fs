@@ -6079,6 +6079,11 @@ type FplCases(positions: Positions, parent: FplValue) as this =
             elseStmt.Run variableStack
         this.Debug Debug.Stop
 
+type FplForEnumeratorType = 
+    | ArrayElements
+    | Predicative
+    | Error
+
 type FplForInStmt(positions: Positions, parent: FplValue) as this =
     inherit FplGenericStmt(positions, parent)
     do 
@@ -6094,9 +6099,50 @@ type FplForInStmt(positions: Positions, parent: FplValue) as this =
     override this.Type signatureType = 
         getFplHead this signatureType
 
+    member this.Entity =
+        if this.ArgList.Count > 0 then 
+            this.ArgList[0].RefersTo
+        else 
+            None
+
+    member this.Domain =
+        if this.ArgList.Count > 1 then 
+            this.ArgList[1].RefersTo 
+        else 
+            None
+
+    member this.Body =
+        // the body of the for statement starts after the entity and after the domain
+        if this.ArgList.Count > 2 then 
+            this.ArgList |> Seq.tail |> Seq.tail |> Seq.toList
+        else
+            []
+
+    member this.GetEnumerator() =
+        match this.Domain with
+        | Some (:? FplVariableArray as domain) ->
+            (FplForEnumeratorType.ArrayElements, domain.ValueList |> Seq.toList)
+        | Some domain ->
+            this.ErrorOccurred <- emitST005diagnostics (domain.Type SignatureType.Name) domain.Name domain.StartPos domain.EndPos
+            (FplForEnumeratorType.Error, [])
+        | _ ->
+            this.ErrorOccurred <- emitST005diagnostics "missing" PrimNone this.StartPos this.StartPos
+            (FplForEnumeratorType.Error, [])
+            
     override this.Run variableStack = 
-        // TODO implement run
         this.Debug Debug.Start
+        match this.Entity, this.GetEnumerator() with
+        | Some entity, (FplForEnumeratorType.ArrayElements, lst) ->
+            lst
+            |> List.iter (fun lstElement ->
+                // TODO: check type compatibility of entity accepting lstElement
+                entity.Value <- Some lstElement
+                this.Body
+                |> List.iter (fun stmt ->
+                    stmt.Run variableStack
+                )
+            )
+        | _, _ -> ()
         this.Debug Debug.Stop
 
 type FplForInStmtEntity(positions: Positions, parent: FplValue) as this =

@@ -181,6 +181,7 @@ type DiagnosticCode =
     | ST002 of string 
     | ST003 of string 
     | ST004 of string
+    | ST005 of string * string
     // interpreter syntax-related error codes for error-tolerant parser productions
     | SY000 of string
     // variable-related error codes
@@ -305,6 +306,7 @@ type DiagnosticCode =
             | ST002 _ -> "ST002"
             | ST003 _ -> "ST003"
             | ST004 _ -> "ST004"
+            | ST005 _ -> "ST005"
             // interpreter syntax-related error codes for error-tolerant parser
             | SY000 _ -> "SY000"
             // variable-related error codes
@@ -450,6 +452,7 @@ type DiagnosticCode =
             | ST002 nodeName -> $"The {nodeName} does nothing."
             | ST003 errCode -> $"Assignment not possible due to proceeding {errCode} error(s)."
             | ST004 langCode -> $"The language `{langCode}` not implemented."
+            | ST005 (domain, nodeType) -> $"An enumerator for the domain `{domain}` being {nodeType} could not be established."
             // interpreter syntax-related error codes for error-tolerant parser
             | SY000 infixOp -> $"The infix operator `{infixOp}` is missing a second operand."
             // variable-related error codes

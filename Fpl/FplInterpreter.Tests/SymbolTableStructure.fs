@@ -1729,13 +1729,13 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
         | "FplForInStmt" ->
             Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
+            Assert.AreEqual<string>(PrimNone, (getName var).[index])
         | "FplForInStmtDomain" ->
             Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
+            Assert.AreEqual<string>(PrimNone, (getName var).[index])
         | "FplForInStmtEntity" ->
             Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
+            Assert.AreEqual<string>(PrimNone, (getName var).[index])
         | "FplFunctionalTerm" ->
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>($"{LiteralDec} {LiteralObj}", (getName var).[index])
