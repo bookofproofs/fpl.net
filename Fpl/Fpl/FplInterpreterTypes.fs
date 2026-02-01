@@ -6440,7 +6440,6 @@ let tryFindAssociatedBlockForJustificationItem (fvJi: FplGenericJustificationIte
 type SymbolTable(parsedAsts: ParsedAstList, debug: bool, offlineMode: bool) =
     let _parsedAsts = parsedAsts
     let mutable _mainTheory = ""
-    let _evalPath = Stack<string>()
     let _evalLog = List<string>()
     let _root = new FplRoot()
     let _debug = debug
@@ -6463,23 +6462,6 @@ type SymbolTable(parsedAsts: ParsedAstList, debug: bool, offlineMode: bool) =
     /// Returns the list of parsed asts
     member this.ParsedAsts = _parsedAsts
 
-    /// Returns the path of the current recursive evaluation. The path is reversed, i.e. starting with the root ast name.
-    /// This path can be used to avoid false positives of interpreter diagnostics by further narrowing the parsing context
-    /// in which they occur.
-    member this.EvalPath() =
-        _evalPath |> Seq.toList |> List.rev |> String.concat "."
-
-    /// Logs the current state transformation of the SymbolTable for debugging purposes.
-    member this.Log(message) =
-        if _debug then
-            let enrichedMsg = sprintf "%s at %s" message (this.EvalPath())
-            _evalLog.Add(enrichedMsg)
-
-    /// Returns the logged state transformation of the SymbolTable (only non-empty of debug = true).
-    member this.LoggedState =
-        let log = _evalLog |> String.concat Environment.NewLine
-        Environment.NewLine + log + Environment.NewLine
-
     /// Returns the string representation of all asts .
     member this.AstsToString =
         let res =
@@ -6488,13 +6470,6 @@ type SymbolTable(parsedAsts: ParsedAstList, debug: bool, offlineMode: bool) =
             |> String.concat Environment.NewLine
 
         res
-
-    /// Add the current ast name to the recursive evaluation path.
-    member this.EvalPush(astName: string) = _evalPath.Push(astName)
-
-    /// Remove the current ast name from the recursive evaluation path.
-    member this.EvalPop() = _evalPath.Pop() |> ignore
-
 
     /// If there is a valid topological sorting, order the list descending by this ordering.
     member this.OrderAsts() =

@@ -16,7 +16,6 @@ module FplInterpreterBuildingBlocks
 
 open System
 open System.Collections.Generic
-open FParsec
 open ErrDiagnostics
 open FplPrimitives
 open FplGrammarTypes
@@ -90,40 +89,25 @@ let rec eval (st: SymbolTable) ast =
 
     match ast with
     | Ast.IndexAllowedType((pos1, pos2), indexAllowedTypeAst) ->
-        st.EvalPush("IndexAllowedType")
         eval st indexAllowedTypeAst
-        st.EvalPop()
     | Ast.SimpleVariableType((pos1, pos2), simpleVariableTypeAst) ->
-        st.EvalPush("SimpleVariableType")
         eval st simpleVariableTypeAst
-        st.EvalPop()
     | Ast.ArrayType((pos1, pos2), (mainTypeAst, indexAllowedTypeListAst)) ->
-        st.EvalPush("ArrayType")
         let fv = variableStack.PeekEvalStack()
         match fv with 
         | :? FplMapping as mapping -> mapping.SetIsArray()
         | _ -> ()
         eval st mainTypeAst
         indexAllowedTypeListAst |> List.map (eval st) |> ignore
-        st.EvalPop()
     | Ast.IndexType((pos1, pos2),()) -> 
-        st.EvalPush("IndexType")
         setKeywordType LiteralInd pos1 pos2
-        st.EvalPop()
     | Ast.ObjectType((pos1, pos2),()) -> 
-        st.EvalPush("ObjectType")
         setKeywordType LiteralObj pos1 pos2
-        st.EvalPop()
     | Ast.PredicateType((pos1, pos2),()) -> 
-        st.EvalPush("PredicateType")
         setKeywordType LiteralPred pos1 pos2
-        st.EvalPop()
     | Ast.FunctionalTermType((pos1, pos2),()) -> 
-        st.EvalPush("FunctionalTermType")
         setKeywordType LiteralFunc pos1 pos2
-        st.EvalPop()
     | Ast.TemplateType((pos1, pos2), s) -> 
-        st.EvalPush("TemplateType")
         let fv = variableStack.PeekEvalStack()
         setKeywordType s pos1 pos2
         let templateNode = new FplIntrinsicTpl(s, (pos1, pos2), fv)
@@ -134,15 +118,9 @@ let rec eval (st: SymbolTable) ast =
         | _ -> () // RefersTo's semantics in other FplValues is different, do not interfere with it
         variableStack.PushEvalStack(templateNode)
         variableStack.PopEvalStack()
-        st.EvalPop() 
-    | Ast.Star((pos1, pos2),()) ->
-        st.EvalPush("Star")
-        st.EvalPop()
-    | Ast.Dot((pos1, pos2),()) ->
-        st.EvalPush("Dot")
-        st.EvalPop()
+    | Ast.Star((pos1, pos2),()) -> ()
+    | Ast.Dot((pos1, pos2),()) -> ()
     | Ast.Intrinsic((pos1, pos2),()) -> 
-        st.EvalPush("Intrinsic")
         let fv = variableStack.PeekEvalStack()
         fv.IsIntrinsic <- true // flag that this block is intrinsic
         match fv.Name with 
@@ -150,19 +128,12 @@ let rec eval (st: SymbolTable) ast =
             let cl = fv :?> FplClass
             cl.AddDefaultConstructor()
         | _ -> ()
-        st.EvalPop()
-    | Ast.Error  ->   
-        st.EvalPush("Error")
-        st.EvalPop()
-    // strings: | Digits of string
+    | Ast.Error  -> ()
     | Ast.Digits s -> 
-        st.EvalPush("Digits")
         let fv = variableStack.PeekEvalStack()
         fv.FplId <- s
         fv.TypeId <- s
-        st.EvalPop()
     | Ast.PascalCaseId ((pos1, pos2), pascalCaseId) -> 
-        st.EvalPush(PrimPascalCaseId)
         let fv = variableStack.PeekEvalStack()
         match fv.Name with
         | LiteralAxL
@@ -188,18 +159,13 @@ let rec eval (st: SymbolTable) ast =
             fv.FplId <- pascalCaseId
             fv.TypeId <- pascalCaseId
         | _ -> ()
-        st.EvalPop() 
     | Ast.ExtensionRegex s -> 
-        st.EvalPush("ExtensionRegex")
         let fv = variableStack.PeekEvalStack()
         let vars = fv.GetVariables()
         if vars.Length > 0 then
             let mainVar = vars.Head
             mainVar.TypeId <- s // set the extensions's main variable's type to the pattern
-        st.EvalPop() 
-    // | DollarDigits of Positions * int
     | Ast.DollarDigits((pos1, pos2), s) -> 
-        st.EvalPush("DollarDigits")
         let fv = variableStack.PeekEvalStack()
         let sid = $"${s.ToString()}"
         match fv with 
@@ -214,9 +180,7 @@ let rec eval (st: SymbolTable) ast =
             | "" -> fv.TypeId <- LiteralInd
             | LiteralPred -> ()
             | _ -> fv.TypeId <- fv.TypeId + sid
-        st.EvalPop() 
     | Ast.ExtensionName((pos1, pos2), s) ->
-        st.EvalPush("ExtensionName")
         let fv = variableStack.PeekEvalStack()
         let extensionName = s
         match fv with 
@@ -224,11 +188,7 @@ let rec eval (st: SymbolTable) ast =
             fv.FplId <- extensionName
             fv.TypeId <- extensionName
         | _ -> ()
-        st.EvalPop() 
     | Ast.Var((pos1, pos2), name) ->
-        st.EvalPush("Var")
-        let evalPath = st.EvalPath()
-
         let checkByName (fv:FplValue) = 
             let rec IsInUpperScope (fv1: FplValue): FplGenericVariable option =
                 if fv1.Name = PrimTheoryL then 
@@ -305,40 +265,28 @@ let rec eval (st: SymbolTable) ast =
             else 
                 loc.Scope.Add(name, variable)
                 variable.Parent <- Some loc
-        st.EvalPop() 
-    | Ast.Alias((pos1, pos2), s) -> 
-        st.EvalPush("Alias")
-        st.EvalPop() 
+    | Ast.Alias((pos1, pos2), s) -> ()
     | Ast.LanguageCode((pos1, pos2), s) -> 
-        st.EvalPush("LanguageCode")
         let fv = variableStack.PeekEvalStack()
         fv.FplId <- s
         fv.TypeId <- s
         fv.StartPos <- pos1
         fv.EndPos <- pos2
-        st.EvalPop() 
     | Ast.LocalizationString((pos1, pos2), s) -> 
-        st.EvalPush("LocalizationString")
         let fv = variableStack.PeekEvalStack()
         fv.FplId <- s
         fv.TypeId <- s
-        st.EvalPop() 
     | Ast.ObjectSymbol((pos1, pos2), symbol) -> 
-        st.EvalPush("ObjectSymbol")
         let fv = variableStack.PeekEvalStack()
         fv.FplId <- symbol
         fv.TypeId <- symbol
         fv.StartPos <- pos1
         fv.EndPos <- pos2
         checkSIG01Diagnostics fv
-        st.EvalPop()
     | Ast.ArgumentIdentifier((pos1, pos2), argumentId) -> 
-        st.EvalPush("ArgumentIdentifier")
         let fv = variableStack.PeekEvalStack()
         fv.FplId <- argumentId.Substring(0,argumentId.Length-1) // argument id without the "." at the end
-        st.EvalPop() 
     | Ast.RefArgumentIdentifier((pos1, pos2), argumentId) -> 
-        st.EvalPush("RefArgumentIdentifier")
         let fv = variableStack.PeekEvalStack()
         match fv.Name with 
         | PrimJIByProofArgument -> fv.FplId <- $"{fv.FplId}:{argumentId}"
@@ -380,58 +328,41 @@ let rec eval (st: SymbolTable) ast =
             variableStack.PushEvalStack(fvAi)
             variableStack.PopEvalStack()
         | _ -> ()
-        st.EvalPop() 
     | Ast.Prefix((pos1, pos2), symbol) -> 
-        st.EvalPush("Prefix")
         let fv = variableStack.PeekEvalStack()
         fv.ExpressionType <- FixType.Prefix symbol
-        st.EvalPop() 
     | Ast.Infix((pos1, pos2), (symbol, precedenceAsts)) -> 
-        st.EvalPush("Infix")
         let fv = variableStack.PeekEvalStack()
         eval st precedenceAsts
         fv.ExpressionType <- FixType.Infix (symbol, fv.AuxiliaryInfo)
-        st.EvalPop() 
     | Ast.Postfix((pos1, pos2), symbol) -> 
-        st.EvalPush("Postfix")
         let fv = variableStack.PeekEvalStack()
         fv.ExpressionType <- FixType.Postfix symbol
-        st.EvalPop() 
     | Ast.Symbol((pos1, pos2), symbol) -> 
-        st.EvalPush("Symbol")
         let fv = variableStack.PeekEvalStack()
         fv.ExpressionType <- FixType.Symbol symbol
-        st.EvalPop() 
     | Ast.InfixOperator((pos1, pos2), symbol) -> 
-        st.EvalPush("InfixOperator")
         let fv = variableStack.PeekEvalStack()
         fv.FplId <- symbol
         fv.TypeId <- symbol
         fv.StartPos <- pos1
         fv.EndPos <- pos2
         checkSIG01Diagnostics fv
-        st.EvalPop() 
     | Ast.PostfixOperator((pos1, pos2), symbol) -> 
-        st.EvalPush("PostfixOperator")
         let fv = variableStack.PeekEvalStack()
         fv.FplId <- symbol
         fv.TypeId <- symbol
         fv.StartPos <- pos1
         fv.EndPos <- pos2
         checkSIG01Diagnostics fv
-        st.EvalPop() 
     | Ast.PrefixOperator((pos1, pos2), symbol) -> 
-        st.EvalPush("PrefixOperator")
         let fv = variableStack.PeekEvalStack()
         fv.FplId <- symbol
         fv.TypeId <- symbol
         fv.StartPos <- pos1
         fv.EndPos <- pos2
         checkSIG01Diagnostics fv
-        st.EvalPop() 
-    // | Self of Positions * unit
     | Ast.Self((pos1, pos2), _) -> 
-        st.EvalPush("Self")
         let parent = variableStack.PeekEvalStack()
         let fv = new FplSelf((pos1, pos2), parent)
         let oldDiagnosticsStopped = ad.DiagnosticsStopped
@@ -451,9 +382,7 @@ let rec eval (st: SymbolTable) ast =
         ad.DiagnosticsStopped <- oldDiagnosticsStopped
         variableStack.PushEvalStack(fv)
         variableStack.PopEvalStack()
-        st.EvalPop() 
     | Ast.Parent((pos1, pos2), _) -> 
-        st.EvalPush("Parent")
         let parent = variableStack.PeekEvalStack()
         let fv = new FplParent((pos1, pos2), parent)
         let oldDiagnosticsStopped = ad.DiagnosticsStopped
@@ -475,18 +404,13 @@ let rec eval (st: SymbolTable) ast =
         ad.DiagnosticsStopped <- oldDiagnosticsStopped
         variableStack.PushEvalStack(fv)
         variableStack.PopEvalStack()
-
-        st.EvalPop() 
     | Ast.True((pos1, pos2), _) -> 
-        st.EvalPush("True")
         let fv = variableStack.PeekEvalStack()
         let value = new FplIntrinsicPred((pos1, pos2), fv)
         value.FplId <- LiteralTrue
         variableStack.PushEvalStack(value)
         variableStack.PopEvalStack()
-        st.EvalPop() 
     | Ast.False((pos1, pos2), _) -> 
-        st.EvalPush("False")
         let fv = variableStack.PeekEvalStack()
         let value = new FplIntrinsicPred((pos1, pos2), fv)
         value.StartPos <- pos1
@@ -495,33 +419,23 @@ let rec eval (st: SymbolTable) ast =
         value.TypeId <- LiteralPred
         variableStack.PushEvalStack(value)
         variableStack.PopEvalStack()
-        st.EvalPop() 
     | Ast.Undefined((pos1, pos2), _) -> 
-        st.EvalPush("Undefined")
         let fv = variableStack.PeekEvalStack()
         let fvNew = new FplIntrinsicUndef((pos1, pos2), fv)
         variableStack.PushEvalStack(fvNew)
         variableStack.PopEvalStack()
-        st.EvalPop() 
     | Ast.Trivial((pos1, pos2), _) -> 
-        st.EvalPush("Trivial")
         let fv = variableStack.PeekEvalStack()
         let refBlock = new FplArgInferenceTrivial((pos1, pos2), fv) 
         variableStack.PushEvalStack(refBlock)
         variableStack.PopEvalStack()
-        st.EvalPop() 
-    | Ast.Qed((pos1, pos2), _) -> 
-        st.EvalPush("Qed")
-        st.EvalPop() 
+    | Ast.Qed((pos1, pos2), _) -> ()
     | Ast.RuleOfInferenceSignature((pos1, pos2), simpleSignatureAst) ->
-        st.EvalPush("RuleOfInferenceSignature")
         variableStack.InSignatureEvaluation <- true
         eval st simpleSignatureAst
         setSignaturePositions pos1 pos2
         variableStack.InSignatureEvaluation <- false
-        st.EvalPop()
     | Ast.RuleOfInference((pos1, pos2), (signatureAst, premiseConclusionBlockAst)) ->
-        st.EvalPush("RuleOfInference")
         let parent = variableStack.PeekEvalStack()
         let fv = new FplRuleOfInference((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
         let oldDiagnosticsStopped = ad.DiagnosticsStopped
@@ -531,59 +445,43 @@ let rec eval (st: SymbolTable) ast =
         eval st premiseConclusionBlockAst
         ad.DiagnosticsStopped <- oldDiagnosticsStopped // enable all diagnostics after rule of inference
         variableStack.PopEvalStack() 
-        st.EvalPop() 
     | Ast.Mapping((pos1, pos2), variableTypeAst) ->
-        st.EvalPush("Mapping")
         let fv = variableStack.PeekEvalStack()
         let map = new FplMapping((pos1, pos2), fv)
         variableStack.PushEvalStack(map)
         eval st variableTypeAst
         variableStack.PopEvalStack()
-        st.EvalPop()
     | Ast.ClassIdentifier((pos1, pos2), ast1) ->
-        st.EvalPush("ClassIdentifier")
         eval st ast1
         let fv = variableStack.PeekEvalStack()
         fv.EndPos <- pos2
-        st.EvalPop()
     | Ast.Extension((pos1, pos2), extensionString) ->
-        st.EvalPush("Extension")
         let fv = variableStack.PeekEvalStack()
         let fplNew = new FplExtensionObj((pos1,pos2), fv)
         variableStack.PushEvalStack(fplNew)
         fplNew.FplId <- extensionString
         variableStack.PopEvalStack()
-        st.EvalPop()
     | Ast.UsesClause((pos1, pos2), ast1) ->
-        st.EvalPush("UsesClause")
         eval st ast1
-        st.EvalPop()
     | Ast.Not((pos1, pos2), predicateAst) ->
-        st.EvalPush("Not")
         let fv = variableStack.PeekEvalStack()
         let fvNew = new FplNegation((pos1, pos2), fv)
         variableStack.PushEvalStack(fvNew)
         eval st predicateAst
         variableStack.PopEvalStack()
-        st.EvalPop()
     | Ast.InEntity((pos1, pos2), inDomainAst) ->
-        st.EvalPush("InEntity")
         let forStmt = variableStack.PeekEvalStack()
         let inDomain = new FplForInStmtDomain((pos1,pos2), forStmt)
         variableStack.PushEvalStack(inDomain) // add ForInStmtDomain
         eval st inDomainAst
         variableStack.PopEvalStack() // remove ForInStmtDomain
-        st.EvalPop()
     | Ast.Assertion((pos1, pos2), predicateAst) ->
-        st.EvalPush("Assertion")
         let fv = variableStack.PeekEvalStack()
         let fvNew = new FplAssertion((pos1, pos2), fv)
         variableStack.PushEvalStack(fvNew)
         eval st predicateAst
         variableStack.PopEvalStack()
-        st.EvalPop()
     | Ast.DottedPredicate((pos1, pos2), predicateWithOptSpecificationAst) ->
-        st.EvalPush("DottedPredicate")
         let fv = variableStack.PeekEvalStack()
         let refBlock = new FplReference((pos1, pos2), fv) 
         match fv with 
@@ -593,52 +491,37 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(refBlock)
         eval st predicateWithOptSpecificationAst
         variableStack.PopEvalStack()
-        st.EvalPop()
     | Ast.Return((pos1, pos2), returneeAst) ->
-        st.EvalPush("Return")
         let fv = variableStack.PeekEvalStack()
         let stmt = new FplReturn((pos1,pos2), fv)
         variableStack.PushEvalStack(stmt)
         eval st returneeAst
         variableStack.PopEvalStack() 
-        st.EvalPop()
     | Ast.AssumeArgument((pos1, pos2), predicateAst) ->
-        st.EvalPush("AssumeArgument")
         let fv = variableStack.PeekEvalStack()
         let fvNew = new FplArgInferenceAssume((pos1, pos2), fv) 
         variableStack.PushEvalStack(fvNew)
         eval st predicateAst
         variableStack.PopEvalStack()
         variableStack.AssumeArgument fvNew
-        st.EvalPop()
     | Ast.RevokeArgument((pos1, pos2), predicateAst) ->
-        st.EvalPush("RevokeArgument")
         let fv = variableStack.PeekEvalStack()
         let argInf = new FplArgInferenceRevoke((pos1, pos2), fv) 
         variableStack.PushEvalStack(argInf)
         eval st predicateAst
         variableStack.PopEvalStack()
-        st.EvalPop()
     | Ast.ByDef((pos1, pos2), variableAst) ->
-        st.EvalPush("ByDef")
         let parent = variableStack.PeekEvalStack()
         let fvJi = new FplJustificationItemByDefVar((pos1, pos2), parent)
         variableStack.PushEvalStack(fvJi)
         eval st variableAst
         variableStack.PopEvalStack()
-        st.EvalPop()
     | Ast.AST((pos1, pos2), ast1) ->
-        st.EvalPush("AST")
         eval st ast1
-        st.EvalPop()
-    // | NamespaceIdentifier of Positions * Ast list
     | Ast.PredicateIdentifier((pos1, pos2), identifier) ->
-        st.EvalPush("PredicateIdentifier")
         let fv = variableStack.PeekEvalStack()
-
         let candidatesPre = findCandidatesByName st identifier false false
         let candidates, candidatesNames =  filterCandidates candidatesPre identifier true
-
         let correctIds (fv1:FplValue) = 
             match fv with 
             | :? FplBase 
@@ -684,11 +567,7 @@ let rec eval (st: SymbolTable) ast =
             | :? FplVariable -> 
                 fv.ErrorOccurred <- emitID017Diagnostics identifier candidatesNames pos1 pos2
             | _ -> correctIds fv
-
-        
-        st.EvalPop()
     | Ast.ParamTuple((pos1, pos2), namedVariableDeclarationListAsts) ->
-        st.EvalPush("ParamTuple")
         let fv = variableStack.PeekEvalStack()
         fv.ArgType <- ArgType.Parentheses
         namedVariableDeclarationListAsts |> List.map (fun child ->
@@ -697,13 +576,9 @@ let rec eval (st: SymbolTable) ast =
             | _ -> ()
             eval st child
         ) |> ignore
-        st.EvalPop()
     | Ast.NamespaceIdentifier((pos1, pos2), asts) ->
-        st.EvalPush("NamespaceIdentifier")
         asts |> List.map (eval st) |> ignore
-        st.EvalPop()
     | Ast.TranslationTerm((pos1, pos2), asts) ->
-        st.EvalPush("TranslationTerm")
         let fv = variableStack.PeekEvalStack()
         asts |> List.map (fun ebnfTerm ->
             let trsl = new FplTranslation((pos1, pos2), fv)
@@ -711,17 +586,13 @@ let rec eval (st: SymbolTable) ast =
             eval st ebnfTerm
             variableStack.PopEvalStack()
         ) |> ignore
-        st.EvalPop()
     | Ast.TranslationTermList((pos1, pos2), ebnfTermAsts) ->
-        st.EvalPush("TranslationTermList")
         let chooseRandomMember (lst: Ast list) =
             let rnd = Random()
             let index = rnd.Next(lst.Length)
             lst.[index]
         eval st (chooseRandomMember ebnfTermAsts)
-        st.EvalPop()
     | Ast.BrackedCoordList((pos1, pos2), coordListAst) ->
-        st.EvalPush("BrackedCoordList")
         let getProceedingReference =
             let getFirstRefFromStack =
                 variableStack.EvalStack
@@ -742,65 +613,47 @@ let rec eval (st: SymbolTable) ast =
                     variableStack.PopEvalStack()
                 ) 
         | _ -> ()
-        st.EvalPop()
     | Ast.And((pos1, pos2), (predicateAst1, predicateAst2)) ->
-        st.EvalPush("And")
         let fv = variableStack.PeekEvalStack()
         let fvNew = new FplConjunction((pos1, pos2), fv)
         variableStack.PushEvalStack(fvNew)
         eval st predicateAst1
         eval st predicateAst2
         variableStack.PopEvalStack()
-        st.EvalPop()
     | Ast.Or((pos1, pos2), (predicateAst1, predicateAst2)) ->
-        st.EvalPush("Or")
         let fv = variableStack.PeekEvalStack()
         let fvNew = new FplDisjunction((pos1, pos2), fv)
         variableStack.PushEvalStack(fvNew)
         eval st predicateAst1
         eval st predicateAst2
         variableStack.PopEvalStack()
-        st.EvalPop()
     | Ast.Xor((pos1, pos2), (predicateAst1, predicateAst2)) ->
-        st.EvalPush("Xor")
         let fv = variableStack.PeekEvalStack()
         let fvNew = new FplExclusiveOr((pos1, pos2), fv)
         variableStack.PushEvalStack(fvNew)
         eval st predicateAst1
         eval st predicateAst2
         variableStack.PopEvalStack()
-        st.EvalPop()
     | Ast.VarDeclBlock((pos1, pos2), varDeclOrStmtAstList) ->
-        st.EvalPush("VarDeclBlock")
         varDeclOrStmtAstList 
         |> List.map (fun subAst -> eval st subAst) |> ignore
-        st.EvalPop()
     | Ast.StatementList((pos1, pos2), asts) ->
-        st.EvalPush("StatementList")
         asts |> List.map (eval st) |> ignore
-        st.EvalPop()
     | Ast.PremiseList((pos1, pos2), predicateListAsts) ->
-        st.EvalPush("PremiseList")
         let parent = variableStack.PeekEvalStack()
         let fv = new FplPredicateList((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder) 
         variableStack.PushEvalStack(fv)
         predicateListAsts |> List.map (eval st) |> ignore
         variableStack.PopEvalStack()
-        st.EvalPop()
     | Ast.JustificationItem((pos1, pos2), justificationReferenceAst) ->
-        st.EvalPush("JustificationItem")
         eval st justificationReferenceAst 
-        st.EvalPop()
     | Ast.Justification((pos1, pos2), justificationItemAsts) ->
-        st.EvalPush("Justification")
         let fv = variableStack.PeekEvalStack()
         let just = new FplJustification((pos1, pos2), fv) 
         variableStack.PushEvalStack(just)
         justificationItemAsts |> List.map (eval st) |> ignore
         variableStack.PopEvalStack()
-        st.EvalPop()
     | Ast.ArgumentTuple((pos1, pos2), predicateListAst) ->
-        st.EvalPush("ArgumentTuple")
         let next = variableStack.PeekEvalStack()
         let consumeArgumentsWithParent (parent:FplValue) =
             if predicateListAst.Length > 0 then 
@@ -831,19 +684,11 @@ let rec eval (st: SymbolTable) ast =
                 ref.ArgType <- ArgType.Parentheses
                 consumeArgumentsWithParent ref
             | _ -> ()
-        st.EvalPop()
     | Ast.QualificationList((pos1, pos2), asts) ->
-        st.EvalPush("QualificationList")
         asts |> List.map (eval st) |> ignore
-        st.EvalPop()
-    // | Namespace of Ast option * Ast list
     | Ast.Namespace(asts) ->
-        st.EvalPush("Namespace")
         asts |> List.map (eval st) |> ignore
-        st.EvalPop()
-    // CompoundFunctionalTermType of Positions * ((Ast * Ast) option)
     | Ast.CompoundFunctionalTermType((pos1, pos2), (ast1, astTupleOption)) ->
-        st.EvalPush("CompoundFunctionalTermType")
         eval st ast1
         match astTupleOption with 
         | Some (ast2, _) -> eval st ast2 |> ignore
@@ -854,24 +699,15 @@ let rec eval (st: SymbolTable) ast =
             fv.EndPos <- pos2
             eval st ast3 |> ignore
         | _ -> ()
-        st.EvalPop()
-    // AliasedNamespaceIdentifier of Positions * (Ast * Ast option)
     | Ast.AliasedNamespaceIdentifier((pos1, pos2), (ast1, optAst)) ->
-        st.EvalPush("AliasedNamespaceIdentifier")
         eval st ast1
         optAst |> Option.map (eval st) |> ignore
-        st.EvalPop()
     | Ast.CompoundPredicateType((pos1, pos2), (ast1, optAst)) ->
-        st.EvalPush("CompoundPredicateType")
         eval st ast1
         optAst |> Option.map (eval st) |> ignore
-        st.EvalPop()
     | Ast.ReferenceToProofOrCorollary((pos1, pos2), (referencingIdentifierAst)) ->
-        st.EvalPush("ReferenceToProofOrCorollary")
         eval st referencingIdentifierAst
-        st.EvalPop()
     | Ast.PredicateWithOptSpecification((pos1, pos2), (fplIdentifierAst, optionalSpecificationAst)) ->
-        st.EvalPush("PredicateWithOptSpecification")
         let fv = variableStack.PeekEvalStack()
         let searchForCandidatesOfReferenceBlock (refBlock:FplValue) = 
             let candidatesFromTheory = findCandidatesByName st refBlock.FplId true false
@@ -987,27 +823,19 @@ let rec eval (st: SymbolTable) ast =
                 fv.ErrorOccurred <- emitID025Diagnostics (qualifiedName candidate false) (getEnglishName block.Name false) block.Name fv.StartPos fv.EndPos
             else
                 ()
-
         simplifyTriviallyNestedExpressions fv |> ignore
-        st.EvalPop()
-    // | SelfAts of Positions * char list
     | Ast.SelfOrParent((pos1, pos2), selforParentAst) -> 
-        st.EvalPush("SelfAts")
         eval st selforParentAst
-        st.EvalPop()
     | Ast.Language((pos1, pos2),(langCode, ebnfAst)) ->
-        st.EvalPush("Language")
         let fv = variableStack.PeekEvalStack()
         let lang = new FplLanguage((pos1, pos2), fv) 
         variableStack.PushEvalStack(lang)
         eval st langCode
         eval st ebnfAst
         variableStack.PopEvalStack() // remove language
-        st.EvalPop()
     | Ast.InheritedPredicateTypeList inheritedTypeAsts 
     | Ast.InheritedFunctionalTypeList inheritedTypeAsts 
     | Ast.InheritedClassTypeList inheritedTypeAsts -> 
-        st.EvalPush("InheritedPredicateOrFunctionalOrClassTypeList")
         let beingCreatedNode = variableStack.PeekEvalStack()
         let addVariablesAndPropertiesOfBaseNode (bNode:FplValue) = 
             match box beingCreatedNode with
@@ -1060,19 +888,13 @@ let rec eval (st: SymbolTable) ast =
         |> Seq.iter (fun kvp -> 
             beingCreatedNode.ErrorOccurred <- emitID011Diagnostics kvp.Key kvp.Value beingCreatedNode.StartPos beingCreatedNode.EndPos
         )
-        st.EvalPop()
     | Ast.ExtensionAssignment((pos1, pos2), (varAst, extensionRegexAst)) ->
-        st.EvalPush("ExtensionAssignment")
         eval st varAst
         eval st extensionRegexAst
-        st.EvalPop()
     | Ast.ExtensionSignature((pos1, pos2), (extensionAssignmentAst, extensionMappingAst)) ->
-        st.EvalPush("ExtensionSignature")
         eval st extensionAssignmentAst
         eval st extensionMappingAst
-        st.EvalPop()
     | Ast.DefinitionExtension((pos1, pos2), ((extensionNameAst,extensionSignatureAst), extensionTermAst)) ->
-        st.EvalPush("DefinitionExtension")
         let parent = variableStack.PeekEvalStack()
         let fv = new FplExtension((pos1,pos2), parent)
         variableStack.PushEvalStack(fv)
@@ -1080,27 +902,22 @@ let rec eval (st: SymbolTable) ast =
         eval st extensionSignatureAst
         eval st extensionTermAst
         variableStack.PopEvalStack()
-        st.EvalPop()
     | Ast.Impl((pos1, pos2), (predicateAst1, predicateAst2)) ->
-        st.EvalPush("Impl")
         let fv = variableStack.PeekEvalStack()
         let fvNew = new FplImplication((pos1, pos2), fv)
         variableStack.PushEvalStack(fvNew)
         eval st predicateAst1
         eval st predicateAst2
         variableStack.PopEvalStack()
-        st.EvalPop()
+        
     | Ast.Iif((pos1, pos2), (predicateAst1, predicateAst2)) ->
-        st.EvalPush("Iif")
         let fv = variableStack.PeekEvalStack()
         let fvNew = new FplEquivalence((pos1, pos2), fv)
         variableStack.PushEvalStack(fvNew)
         eval st predicateAst1
         eval st predicateAst2
         variableStack.PopEvalStack()
-        st.EvalPop()
     | Ast.IsOperator((pos1, pos2), (isOpArgAst, variableTypeAst)) ->
-        st.EvalPush("IsOperator")
         let fv = variableStack.PeekEvalStack()
         let fvNew = new FplIsOperator((pos1, pos2), fv)
         variableStack.PushEvalStack(fvNew)
@@ -1113,9 +930,7 @@ let rec eval (st: SymbolTable) ast =
         eval st variableTypeAst
         variableStack.PopEvalStack()
         variableStack.PopEvalStack()
-        st.EvalPop()
     | Ast.Delegate((pos1, pos2), (delegateId, argumentTupleAst)) ->
-        st.EvalPush("Delegate")
         let fv = variableStack.PeekEvalStack()
         match delegateId with 
         | PrimDelegateEqualL -> 
@@ -1136,16 +951,11 @@ let rec eval (st: SymbolTable) ast =
             eval st argumentTupleAst
             variableStack.PopEvalStack()
             deleg.ErrorOccurred <- emitID013Diagnostics  $"Unknown delegate `{delegateId}`" pos1 pos2
-        st.EvalPop()
-    // | ClosedOrOpenRange of Positions * ((Ast * Ast option) * Ast)
-    | Ast.PredicateSignature(((pos1, pos2), ((simpleSignatureAst, inhPredicateTypeListAstsOpt), paramTupleAst)), optUserDefinedSymbolAst) ->
-        st.EvalPush("PredicateSignature")
+    | Ast.PredicateSignature(((pos1, pos2), ((simpleSignatureAst, inhPredicateTypeListAstsOpt), paramTupleAst)), optUserDefinedSymbolAst) -> 
+        ()
         // empty since the pattern will be matched in DefinitionPredicagte 
         // we list it her to remove FS0025 incomplete pattern warnings
-        st.EvalPop()
-    // | ReferencingIdentifier of Positions * (Ast * Ast list)
     | Ast.ReferencingIdentifier((pos1, pos2), (predicateIdentifierAst, dollarDigitListAsts)) ->
-        st.EvalPush("ReferencingIdentifier")
         eval st predicateIdentifierAst
         dollarDigitListAsts |> List.map (eval st) |> ignore
         let fv = variableStack.PeekEvalStack()
@@ -1160,17 +970,13 @@ let rec eval (st: SymbolTable) ast =
                     fv.ErrorOccurred <- emitID025Diagnostics (qualifiedName candidate false) (getEnglishName block.Name false) block.Name fv.StartPos fv.EndPos
                 | _ -> ()
         | _ -> ()
-        st.EvalPop()
     | ProofSignature((pos1, pos2), (simpleSignatureAst, dollarDigitListAsts)) ->
-        st.EvalPush("ProofSignature")
         variableStack.InSignatureEvaluation <- true
         eval st simpleSignatureAst
         dollarDigitListAsts |> List.map (eval st) |> ignore
         setSignaturePositions pos1 pos2
         variableStack.InSignatureEvaluation <- false
-        st.EvalPop()
     | Ast.Localization(((pos1, pos2), predicateAst), translationListAsts) ->
-        st.EvalPush("Localization")
         let parent = variableStack.PeekEvalStack()
         let fv = new FplLocalization((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
         let var04List = List<KeyValuePair<string, Positions>>()
@@ -1204,9 +1010,7 @@ let rec eval (st: SymbolTable) ast =
         |> Seq.iter (fun kvp -> 
             fv.ErrorOccurred <- emitVAR04diagnostics kvp.Key (fst kvp.Value) (snd kvp.Value)
         )
-        st.EvalPop()
     | Ast.FunctionalTermInstance((pos1, pos2), (functionalTermInstanceSignatureAst, functionalTermInstanceBlockOptAst)) ->
-        st.EvalPush("FunctionalTermInstance")
         let parent = variableStack.PeekEvalStack()
         let fvNew = new FplMandatoryFunctionalTerm((pos1, pos2), parent)
         variableStack.PushEvalStack(fvNew)
@@ -1216,10 +1020,7 @@ let rec eval (st: SymbolTable) ast =
             eval st functionalTermInstanceBlockAst
         | None -> fvNew.IsIntrinsic <- true
         variableStack.PopEvalStack()
-        st.EvalPop()
-    // | All of Positions * ((Ast list * Ast option) list * Ast)
     | Ast.All((pos1, pos2), (namedVarDeclAstList, predicateAst)) ->
-        st.EvalPush("All")
         let parent = variableStack.PeekEvalStack()
         let fv = new FplQuantorAll((pos1, pos2), parent)
         variableStack.PushEvalStack(fv) // add all quantor
@@ -1231,9 +1032,7 @@ let rec eval (st: SymbolTable) ast =
         |> ignore
         eval st predicateAst
         variableStack.PopEvalStack() // remove all quantor
-        st.EvalPop()
     | Ast.Exists((pos1, pos2), (namedVarDeclAstList, predicateAst)) ->
-        st.EvalPush("Exists")
         let parent = variableStack.PeekEvalStack()
         let fv = new FplQuantorExists((pos1, pos2), parent)
         variableStack.PushEvalStack(fv) // add exists quantor
@@ -1245,9 +1044,7 @@ let rec eval (st: SymbolTable) ast =
         |> ignore
         eval st predicateAst
         variableStack.PopEvalStack() // remove exists quantor
-        st.EvalPop()
     | Ast.ExistsN((pos1, pos2), ((dollarDigitsAst, namedVarDeclListAst), predicateAst)) ->
-        st.EvalPush("ExistsN")
         let parent = variableStack.PeekEvalStack()
         let fv = new FplQuantorExistsN((pos1, pos2), parent)
         variableStack.PushEvalStack(fv) // add exists n quantor
@@ -1259,22 +1056,14 @@ let rec eval (st: SymbolTable) ast =
         |> ignore
         eval st predicateAst
         variableStack.PopEvalStack() // remove exists n quantor
-        st.EvalPop()
     | Ast.FunctionalTermSignature(((pos1, pos2), (((simpleSignatureAst, inhFunctionalTypeListAstsOpt), paramTupleAst), mappingAst)), optUserDefinedSymbolAst) -> 
-        st.EvalPush("FunctionalTermSignature")
+        ()
         // empty since the pattern will be matched in DefinitionFunctionalTerm 
         // we list it her to remove FS0025 incomplete pattern warnings
-        st.EvalPop()
-    // | ReferencingIdentifier of Positions * (Ast * Ast list)
-        st.EvalPop()
     | Ast.PredicateWithQualification(predicateWithOptSpecificationAst, qualificationListAst) ->
-        st.EvalPush("PredicateWithQualification")
         eval st predicateWithOptSpecificationAst
         eval st qualificationListAst
-        st.EvalPop()
-    // | InfixOperation of Positions * (Ast * Ast option) list
     | Ast.InfixOperation((pos1, pos2), separatedPredicateListAst) ->
-        st.EvalPush("InfixOperation")
         let fv = variableStack.PeekEvalStack()
         separatedPredicateListAst
         |> List.map (fun (predAst, optOperandAst) -> 
@@ -1358,10 +1147,7 @@ let rec eval (st: SymbolTable) ast =
             fv.ArgList.RemoveAt(currMinIndex+1) 
             fv.ArgList.RemoveAt(currMinIndex-1) 
         simplifyTriviallyNestedExpressions fv
-        st.EvalPop()
-    // | Expression of Positions * ((((Ast option * Ast) * Ast option) * Ast option) * Ast)
     | Ast.Expression((pos1, pos2), ((((prefixOpAst, predicateAst), postfixOpAst), optionalSpecificationAst), qualificationListAst)) ->
-        st.EvalPush("Expression")
         let fv = variableStack.PeekEvalStack()
         let refBlock = new FplReference((pos1, pos2), fv) 
         variableStack.PushEvalStack(refBlock)
@@ -1426,87 +1212,66 @@ let rec eval (st: SymbolTable) ast =
                         fv.ArgList.Clear()
                     | _ -> ()
         | _ -> ()
-        st.EvalPop()
-    // | Cases of Positions * (Ast list * Ast)
     | Ast.Cases((pos1, pos2), (caseSingleListAsts, caseElseAst)) ->
-        st.EvalPush("Cases")
         let parent = variableStack.PeekEvalStack()
         let casesStmt = new FplCases((pos1, pos2), parent)
         variableStack.PushEvalStack(casesStmt) // add cases 
         caseSingleListAsts |> List.map (fun caseAst -> eval st caseAst) |> ignore
         eval st caseElseAst
         variableStack.PopEvalStack() // remove cases
-        st.EvalPop()
     | Ast.CaseSingle((pos1, pos2), (predicateAst, statementListAsts)) ->
-        st.EvalPush("CaseSingle")
         let parent = variableStack.PeekEvalStack()
         let singleCase = new FplCaseSingle((pos1,pos2), parent)
         variableStack.PushEvalStack(singleCase) // add single case
         eval st predicateAst
         statementListAsts |> List.map (eval st) |> ignore
         variableStack.PopEvalStack() // remove single case 
-        st.EvalPop()
     | Ast.CaseElse((pos1, pos2), statementListAsts) ->
-        st.EvalPush("CaseElse")
         let parent = variableStack.PeekEvalStack()
         let elseCase = new FplCaseElse((pos1,pos2), parent)
         variableStack.PushEvalStack(elseCase) // add else 
         statementListAsts |> List.map (eval st) |> ignore
         variableStack.PopEvalStack() // remove else 
-        st.EvalPop()
     | Ast.MapCases((pos1, pos2), (mapCaseSingleAstList, elseStatementAst)) ->
-        st.EvalPush("MapCases")
         let parent = variableStack.PeekEvalStack()
         let fvNew = new FplMapCases((pos1, pos2), parent)
         variableStack.PushEvalStack(fvNew) // add mcases
         mapCaseSingleAstList |> List.map (fun caseAst -> eval st caseAst) |> ignore
         eval st elseStatementAst
         variableStack.PopEvalStack() // remove mcases
-        st.EvalPop()
     | Ast.MapCaseSingle((pos1, pos2), (predicateFirstAst, predicateSecondAst)) ->
-        st.EvalPush("MapCaseSingle")
         let parent = variableStack.PeekEvalStack()
         let mapCaseSingle = new FplMapCaseSingle((pos1,pos2), parent)
         variableStack.PushEvalStack(mapCaseSingle) // add mcases single
         eval st predicateFirstAst
         eval st predicateSecondAst 
         variableStack.PopEvalStack() // remove mcases single
-        st.EvalPop()
     | Ast.MapCaseElse((pos1, pos2), predicateAst) ->
-        st.EvalPush("MapCaseElse")
         let parent = variableStack.PeekEvalStack()
         let elseCase = new FplMapCaseElse((pos1,pos2), parent)
         variableStack.PushEvalStack(elseCase) // add mcases else
         eval st predicateAst 
         variableStack.PopEvalStack() // remove mcases else
-        st.EvalPop()
     | Ast.FunctionalTermInstanceSignature((pos1, pos2), ((simpleSignatureAst, paramTupleAst), mappingAst)) ->
         variableStack.InSignatureEvaluation <- true
-        st.EvalPush("FunctionalTermInstanceSignature")
         eval st simpleSignatureAst
         eval st paramTupleAst
         variableStack.InSignatureEvaluation <- false
         eval st mappingAst
         setSignaturePositions pos1 pos2
-        st.EvalPop()
     | Ast.PredicateInstanceSignature((pos1, pos2), (simpleSignatureAst, paramTupleAst)) ->
         variableStack.InSignatureEvaluation <- true
-        st.EvalPush("PredicateInstanceSignature")
         eval st simpleSignatureAst
         eval st paramTupleAst
         setSignaturePositions pos1 pos2
-        st.EvalPop()
         variableStack.InSignatureEvaluation <- false
     | Ast.ConstructorSignature((pos1, pos2), (simpleSignatureAst, paramTupleAst)) ->
         variableStack.InSignatureEvaluation <- true
-        st.EvalPush("ConstructorSignature")
         eval st simpleSignatureAst
         eval st paramTupleAst
         setSignaturePositions pos1 pos2
-        st.EvalPop()
         variableStack.InSignatureEvaluation <- false
     | Ast.Assignment((pos1, pos2), (predicateWithQualificationAst, predicateAst)) ->
-        st.EvalPush("Assignment")
         let parent = variableStack.PeekEvalStack()
         let fvNew = new FplAssignment((pos1, pos2), parent)
         variableStack.PushEvalStack(fvNew) // add assignment
@@ -1516,9 +1281,7 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PopEvalStack() // remove assignee
         eval st predicateAst
         variableStack.PopEvalStack() // remove Assignment
-        st.EvalPop()
     | Ast.PredicateInstance((pos1, pos2), (signatureAst, predInstanceBlockAstOpt)) ->
-        st.EvalPush("PredicateInstance")
         let parent = variableStack.PeekEvalStack()
         let fvNew = new FplMandatoryPredicate((pos1, pos2), parent)
         variableStack.PushEvalStack(fvNew)
@@ -1528,33 +1291,24 @@ let rec eval (st: SymbolTable) ast =
             eval st predInstanceBlockAst
         | None -> fvNew.IsIntrinsic <- true
         variableStack.PopEvalStack()
-        st.EvalPop()
     | Ast.BaseConstructorCall((pos1, pos2), (inheritedClassTypeAst, argumentTupleAst)) ->
-        st.EvalPush("BaseConstructorCall")
         let parent = variableStack.PeekEvalStack()
         let fvNew = new FplBaseConstructorCall((pos1, pos2), parent) 
         variableStack.PushEvalStack(fvNew)
         eval st inheritedClassTypeAst
         eval st argumentTupleAst
         variableStack.PopEvalStack()
-        st.EvalPop()
     | Ast.JustArgInf((pos1, pos2), (justificationAst, argumentInferenceAst)) ->
-        st.EvalPush("JustArgInf")
         eval st justificationAst
         eval st argumentInferenceAst
-        st.EvalPop()
     | Ast.Argument((pos1, pos2), (argIdAst, argAst)) ->
-        st.EvalPush("Argument")
         let fv = variableStack.PeekEvalStack()
         let arg = new FplArgument((pos1, pos2), fv, variableStack.GetNextAvailableFplBlockRunOrder) 
         variableStack.PushEvalStack(arg)
         eval st argIdAst
         eval st argAst
         variableStack.PopEvalStack()
-        st.EvalPop()
-    // | ForIn of Positions * ((Ast * Ast) * Ast list)
     | Ast.ForIn((pos1, pos2), ((entityAst, inDomainAst), statementListAst)) ->
-        st.EvalPush("ForIn")
         let parent = variableStack.PeekEvalStack()
         let forStmt = new FplForInStmt((pos1, pos2), parent)
         variableStack.PushEvalStack(forStmt) // add ForInStmt
@@ -1565,104 +1319,77 @@ let rec eval (st: SymbolTable) ast =
         eval st inDomainAst
         statementListAst |> List.map (fun stmtAst -> eval st stmtAst) |> ignore
         variableStack.PopEvalStack() // remove ForInStmt
-        st.EvalPop()
-    // | SignatureWithPreConBlock of Ast * ((Ast list option * Ast) * Ast)
     | Ast.PremiseConclusionBlock((pos1, pos2), ((optVarDeclOrSpecList, premiseAst), conclusionAst)) ->
-        st.EvalPush("PremiseConclusionBlock")
         optVarDeclOrSpecList |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
         eval st premiseAst
         eval st conclusionAst
-        st.EvalPop()
     | Ast.TheoremSignature((pos1, pos2), simpleSignatureAst) ->
-        st.EvalPush("TheoremSignature")
         variableStack.InSignatureEvaluation <- true
         eval st simpleSignatureAst
         setSignaturePositions pos1 pos2
         variableStack.InSignatureEvaluation <- false
-        st.EvalPop()
     | Ast.Theorem((pos1, pos2), (signatureAst, (optVarDeclOrSpecList, predicateAst))) ->
-        st.EvalPush("Theorem")
         let parent = variableStack.PeekEvalStack()
         let fv = new FplTheorem((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
         variableStack.PushEvalStack(fv)
         eval st signatureAst
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
         variableStack.PopEvalStack()
-        st.EvalPop()
     | Ast.LemmaSignature((pos1, pos2), simpleSignatureAst) ->
-        st.EvalPush("LemmaSignature")
         variableStack.InSignatureEvaluation <- true
         eval st simpleSignatureAst
         setSignaturePositions pos1 pos2
         variableStack.InSignatureEvaluation <- false
-        st.EvalPop()
     | Ast.Lemma((pos1, pos2), (signatureAst, (optVarDeclOrSpecList, predicateAst))) ->
-        st.EvalPush("Lemma")
         let parent = variableStack.PeekEvalStack()
         let fv = new FplLemma((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
         variableStack.PushEvalStack(fv)
         eval st signatureAst
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
         variableStack.PopEvalStack()
-        st.EvalPop()
     | Ast.PropositionSignature((pos1, pos2), simpleSignatureAst) ->
-        st.EvalPush("PropositionSignature")
         variableStack.InSignatureEvaluation <- true
         eval st simpleSignatureAst
         setSignaturePositions pos1 pos2
         variableStack.InSignatureEvaluation <- false
-        st.EvalPop()
     | Ast.Proposition((pos1, pos2), (signatureAst, (optVarDeclOrSpecList, predicateAst))) ->
-        st.EvalPush("Proposition")
         let parent = variableStack.PeekEvalStack()
         let fv = new FplProposition((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
         variableStack.PushEvalStack(fv)
         eval st signatureAst
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
         variableStack.PopEvalStack()
-        st.EvalPop()
     | Ast.ConjectureSignature((pos1, pos2), simpleSignatureAst) ->
-        st.EvalPush("ConjectureSignature")
         variableStack.InSignatureEvaluation <- true
         eval st simpleSignatureAst
         setSignaturePositions pos1 pos2
         variableStack.InSignatureEvaluation <- false
-        st.EvalPop()
     | Ast.Conjecture((pos1, pos2), (signatureAst, (optVarDeclOrSpecList, predicateAst))) ->
-        st.EvalPush("Conjecture")
         let parent = variableStack.PeekEvalStack()
         let fv = new FplConjecture((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
         variableStack.PushEvalStack(fv)
         eval st signatureAst
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
         variableStack.PopEvalStack()
-        st.EvalPop()
     | Ast.AxiomSignature((pos1, pos2), simpleSignatureAst) ->
-        st.EvalPush("AxiomSignature")
         variableStack.InSignatureEvaluation <- true
         eval st simpleSignatureAst
         setSignaturePositions pos1 pos2
         variableStack.InSignatureEvaluation <- false
-        st.EvalPop()
     | Ast.Axiom((pos1, pos2), (signatureAst, (optVarDeclOrSpecList, predicateAst))) ->
-        st.EvalPush("Axiom")
         let parent = variableStack.PeekEvalStack()
         let fv = new FplAxiom((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
         variableStack.PushEvalStack(fv)
         eval st signatureAst
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
         variableStack.PopEvalStack()
-        st.EvalPop()
     | Ast.CorollarySignature((pos1, pos2), (simpleSignatureAst, dollarDigitListAsts)) ->
-        st.EvalPush("CorollarySignature")
         variableStack.InSignatureEvaluation <- true
         eval st simpleSignatureAst
         dollarDigitListAsts |> List.map (eval st) |> ignore
         setSignaturePositions pos1 pos2
         variableStack.InSignatureEvaluation <- false
-        st.EvalPop()
     | Ast.Corollary((pos1, pos2), (corollarySignatureAst, (optVarDeclOrSpecList, predicateAst))) ->
-        st.EvalPush("Corollary")
         let parent = variableStack.PeekEvalStack()
         let fv = new FplCorollary((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
         variableStack.PushEvalStack(fv)
@@ -1673,10 +1400,7 @@ let rec eval (st: SymbolTable) ast =
         // now, we are ready to emit VAR04 diagnostics for all variables declared in the signature of the corollary.
         fv.CheckConsistency()
         variableStack.Pop() |> ignore // pop without 
-        st.EvalPop()
-    // | NamedVarDecl of Positions * ((Ast list * Ast) * Ast)
     | Ast.NamedVarDecl((pos1, pos2), (variableListAst, variableTypeAst)) ->
-        st.EvalPush("NamedVarDecl")
         let parent = variableStack.PeekEvalStack()
         parent.AuxiliaryInfo <- variableListAst |> List.length // remember how many variables to create
         // create all variables of the named variable declaration in the current scope
@@ -1704,10 +1428,7 @@ let rec eval (st: SymbolTable) ast =
                 | _ -> ()
             | _ -> ()
         ) |> ignore 
-        st.EvalPop()
-    // | Axiom of Constructor * (Ast * (Ast list option * Ast))
     | Ast.ConstructorBlock((pos1, pos2), optVarDeclOrSpecListAst) ->
-        st.EvalPush("ConstructorBlock")
         let parent = variableStack.PeekEvalStack()
         // evaluate the construction block 
         match optVarDeclOrSpecListAst with
@@ -1716,43 +1437,29 @@ let rec eval (st: SymbolTable) ast =
         | None -> ()
         if parent.ArgList.Count = 0 then
             parent.ErrorOccurred <- emitST002diagnostics parent.Name parent.StartPos parent.EndPos
-        st.EvalPop()
-    // | Axiom of Constructor * (Ast * (Ast list option * Ast))
     | Ast.Constructor((pos1, pos2), (signatureAst, constructorBlockAst)) ->
-        st.EvalPush("Constructor")
         let parent = variableStack.PeekEvalStack()
         let fv = new FplConstructor((pos1, pos2), parent)
         variableStack.PushEvalStack(fv)
         eval st signatureAst
         eval st constructorBlockAst
         variableStack.PopEvalStack()
-        st.EvalPop()
-    // | DefPredicateContent of Ast list option * Ast
     | Ast.DefPredicateContent(optAsts, ast1) ->
-        st.EvalPush("DefPredicateContent")
         optAsts
         |> Option.map (List.map (eval st) >> ignore)
         |> Option.defaultValue ()
         |> ignore
         eval st ast1
-        st.EvalPop()
     | Ast.DefFunctionContent(optAsts, ast1) ->
-        st.EvalPush("DefFunctionContent")
         optAsts
         |> Option.map (List.map (eval st) >> ignore)
         |> Option.defaultValue ()
         |> ignore
         eval st ast1
-        st.EvalPop()
-    // | DefClassCompleteContent of Ast list option * Ast list
     | Ast.DefClassCompleteContent(optVarDeclOrSpecListAsts, constructorListAsts) ->
-        st.EvalPush("DefClassCompleteContent")
         optVarDeclOrSpecListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
         constructorListAsts |> List.map (eval st) |> ignore
-        st.EvalPop()
-    // | DefinitionPredicate of Positions * (Ast * (Ast * Ast list option))
     | Ast.DefinitionPredicate((pos1, pos2), (predicateSignatureAst, optDefBlock)) ->
-        st.EvalPush("DefinitionPredicate")
         let parent = variableStack.PeekEvalStack()
         let fv = new FplPredicate((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
         variableStack.PushEvalStack(fv)
@@ -1772,9 +1479,7 @@ let rec eval (st: SymbolTable) ast =
             setSignaturePositions pos1 pos2
         | _ -> ()
         variableStack.PopEvalStack()
-        st.EvalPop()
     | Ast.FunctionalTermDefinitionBlock((pos1, pos2), optDefBlock) ->
-        st.EvalPush("FunctionalTermDefinitionBlock")
         let functionaTermBlock = variableStack.PeekEvalStack()
         match optDefBlock with 
         | Some (funcContentAst, optPropertyListAsts) ->
@@ -1783,9 +1488,7 @@ let rec eval (st: SymbolTable) ast =
             if functionaTermBlock.GetProperties().IsEmpty && functionaTermBlock.ArgList.Count = 1 then
                 functionaTermBlock.ErrorOccurred <- emitST001diagnostics functionaTermBlock.Name pos1 pos2
         | None -> functionaTermBlock.IsIntrinsic <- true
-        st.EvalPop()
     | Ast.DefinitionFunctionalTerm((pos1, pos2), (functionalTermSignatureAst, functionalTermDefBlockAst)) ->
-        st.EvalPush("DefinitionFunctionalTerm")
         let parent = variableStack.PeekEvalStack()
         let fv = new FplFunctionalTerm((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
         variableStack.PushEvalStack(fv)
@@ -1802,16 +1505,12 @@ let rec eval (st: SymbolTable) ast =
             setSignaturePositions pos1 pos2
         | _ -> ()
         variableStack.PopEvalStack()
-        st.EvalPop()
     | Ast.ClassSignature((pos1, pos2), simpleSignatureAst) ->
-        st.EvalPush("ClassSignature")
         variableStack.InSignatureEvaluation <- true
         eval st simpleSignatureAst
         setSignaturePositions pos1 pos2
         variableStack.InSignatureEvaluation <- false
-        st.EvalPop()
     | Ast.ClassDefinitionBlock((pos1, pos2), optDefBlock) ->
-        st.EvalPush("ClassDefinitionBlock")
         let classBlock = variableStack.PeekEvalStack()
         let cl = classBlock :?> FplClass
         match optDefBlock with 
@@ -1825,10 +1524,7 @@ let rec eval (st: SymbolTable) ast =
         | None -> 
             cl.IsIntrinsic <- true
             cl.AddDefaultConstructor()
-        st.EvalPop()
-    // | DerivedPredicate of Ast
     | Ast.DefinitionClass((pos1, pos2),(((classSignatureAst, optInheritedClassTypeListAst), optUserDefinedObjSymAst), classBlockAst)) ->
-        st.EvalPush("DefinitionClass")
         let parent = variableStack.PeekEvalStack()
         let fv = new FplClass((pos1, pos2), parent)
         variableStack.PushEvalStack(fv)
@@ -1837,19 +1533,13 @@ let rec eval (st: SymbolTable) ast =
         optUserDefinedObjSymAst |> Option.map (eval st) |> Option.defaultValue ()
         eval st classBlockAst
         variableStack.PopEvalStack()
-        st.EvalPop()
-    // | DerivedPredicate of Ast
     | Ast.DerivedPredicate ((pos1, pos2),predicateAst) -> 
-        st.EvalPush("DerivedPredicate")
         let fv = variableStack.PeekEvalStack()
         let argInf = new FplArgInferenceDerived((pos1, pos2), fv) 
         variableStack.PushEvalStack(argInf)
         eval st predicateAst
         variableStack.PopEvalStack()
-        st.EvalPop()
-    // | Proof of Positions * (Ast * (Ast list * Ast option))
     | Ast.Proof((pos1, pos2), (referencingIdentifierAst, (proofArgumentListAst, optQedAst))) ->
-        st.EvalPush("Proof")
         let parent = variableStack.PeekEvalStack()
         let fv = new FplProof((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
         variableStack.PushEvalStack(fv)
@@ -1875,15 +1565,10 @@ let rec eval (st: SymbolTable) ast =
         )
         fv.Value <- Some value
         variableStack.Pop() |> ignore // pop without embedding in theorem (already done)
-        st.EvalPop()
     | Ast.Precedence((pos1, pos2), precedence) ->
-        st.EvalPush("Precedence")
         let fv = variableStack.PeekEvalStack()
         fv.AuxiliaryInfo <- precedence
-        st.EvalPop()
-    // Positions * ((Ast * Ast list) * Ast) 
     | Ast.JustificationIdentifier((pos1, pos2), (((byModifierOption, predicateIdentifierAst), dollarDigitListAsts), refArgumentIdentifierAst)) ->
-        st.EvalPush("JustificationIdentifier")
         let parent = variableStack.PeekEvalStack()
 
         let checkDiagnostics (fvJi:FplGenericJustificationItem) candidates = 
@@ -2042,7 +1727,6 @@ let rec eval (st: SymbolTable) ast =
             // check if indeed the predicateId points to a theorem-like statement except a corollary, if not issue diagnostics
             checkDiagnostics fvJi candidates
             variableStack.PopEvalStack()
-        st.EvalPop()
 
 
 let tryFindParsedAstUsesClausesEvaluated (parsedAsts: List<ParsedAst>) =
