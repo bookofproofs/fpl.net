@@ -3565,8 +3565,7 @@ type FplReference(positions: Positions, parent: FplValue) =
         | Some next when next.IsBlock() ->
             addExpressionToParentArgList this 
         | Some next when next.Name = PrimForInStmtDomainL -> 
-            next.FplId <- this.FplId
-            tryAddToParentUsingFplId this
+            next.RefersTo <- Some this
         | Some (:? FplReference as next) when next.DottedChild.IsSome -> 
             next.EndPos <- this.EndPos
         | Some next -> 

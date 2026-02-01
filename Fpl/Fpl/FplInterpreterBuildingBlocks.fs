@@ -564,9 +564,13 @@ let rec eval (st: SymbolTable) ast =
         eval st predicateAst
         variableStack.PopEvalStack()
         st.EvalPop()
-    | Ast.InEntity((pos1, pos2), ast1) ->
+    | Ast.InEntity((pos1, pos2), inDomainAst) ->
         st.EvalPush("InEntity")
-        eval st ast1
+        let forStmt = variableStack.PeekEvalStack()
+        let inDomain = new FplForInStmtDomain((pos1,pos2), forStmt)
+        variableStack.PushEvalStack(inDomain) // add ForInStmtDomain
+        eval st inDomainAst
+        variableStack.PopEvalStack() // remove ForInStmtDomain
         st.EvalPop()
     | Ast.Assertion((pos1, pos2), predicateAst) ->
         st.EvalPush("Assertion")
@@ -1556,10 +1560,7 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(entity) // add ForInStmtEntity
         eval st entityAst
         variableStack.PopEvalStack() // remove ForInStmtEntity
-        let inDomain = new FplForInStmtDomain((pos1,pos2), forStmt)
-        variableStack.PushEvalStack(inDomain) // add ForInStmtDomain
         eval st inDomainAst
-        variableStack.PopEvalStack() // remove ForInStmtDomain
         statementListAst |> List.map (fun stmtAst -> eval st stmtAst) |> ignore
         variableStack.PopEvalStack() // remove ForInStmt
         st.EvalPop()
