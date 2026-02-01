@@ -5024,7 +5024,7 @@ type FplEquality(name, positions: Positions, parent: FplValue) as this =
     override this.Run variableStack = 
         this.Debug Debug.Start
         if this.ArgList.Count <> 2 then 
-            this.ErrorOccurred <- emitID013Diagnostics variableStack.CallerStartPos variableStack.CallerEndPos $"Predicate `=` takes 2 arguments, got {this.ArgList.Count}." 
+            this.ErrorOccurred <- emitID013Diagnostics $"Predicate `=` takes 2 arguments, got {this.ArgList.Count}." variableStack.CallerStartPos variableStack.CallerEndPos 
         else
 
             let a = this.ArgList[0]
@@ -5037,12 +5037,12 @@ type FplEquality(name, positions: Positions, parent: FplValue) as this =
             let newValue = new FplIntrinsicPred((variableStack.CallerStartPos, variableStack.CallerEndPos), this.Parent.Value)
             match aRepr with
             | LiteralUndef -> 
-                this.ErrorOccurred <- emitID013Diagnostics variableStack.CallerStartPos variableStack.CallerEndPos "Predicate `=` cannot be evaluated because the left argument is undefined." 
+                this.ErrorOccurred <- emitID013Diagnostics "Predicate `=` cannot be evaluated because the left argument is undefined." variableStack.CallerStartPos variableStack.CallerEndPos 
                 this.SetValue(newValue)
             | _ -> 
                 match bRepr with
                 | LiteralUndef -> 
-                    this.ErrorOccurred <- emitID013Diagnostics variableStack.CallerStartPos variableStack.CallerEndPos "Predicate `=` cannot be evaluated because the right argument is undefined." 
+                    this.ErrorOccurred <- emitID013Diagnostics "Predicate `=` cannot be evaluated because the right argument is undefined." variableStack.CallerStartPos variableStack.CallerEndPos 
                     this.SetValue(newValue)
                 | _ when aRepr = "dec tpl" && bRepr = "dec tpl" -> 
                     this.SetValue(newValue) // undetermined
@@ -5053,13 +5053,13 @@ type FplEquality(name, positions: Positions, parent: FplValue) as this =
                     match aRepr with
                     | "dec pred"  
                     | PrimUndetermined -> 
-                        this.ErrorOccurred <- emitID013Diagnostics variableStack.CallerStartPos variableStack.CallerEndPos "Predicate `=` cannot be evaluated because the left argument is undetermined." 
+                        this.ErrorOccurred <- emitID013Diagnostics "Predicate `=` cannot be evaluated because the left argument is undetermined." variableStack.CallerStartPos variableStack.CallerEndPos 
                         this.SetValue(newValue)
                     | _ -> 
                         match bRepr with
                         | "dec pred"  
                         | PrimUndetermined -> 
-                            this.ErrorOccurred <- emitID013Diagnostics variableStack.CallerStartPos variableStack.CallerEndPos "Predicate `=` cannot be evaluated because the right argument is undetermined." 
+                            this.ErrorOccurred <- emitID013Diagnostics "Predicate `=` cannot be evaluated because the right argument is undetermined." variableStack.CallerStartPos variableStack.CallerEndPos 
                             this.SetValue(newValue)
                         | _ -> 
                             let a1IsDeclared = aRepr.Contains("dec ")
@@ -5217,19 +5217,6 @@ type FplDecrement(name, positions: Positions, parent: FplValue) as this =
                 |> String.concat ", "
             sprintf "%s(%s)" head args
 
-    member private this.Diagnostic message = 
-        let diagnostic =
-            { 
-                Diagnostic.Uri = ad.CurrentUri
-                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                Diagnostic.Severity = DiagnosticSeverity.Error
-                Diagnostic.StartPos = this.StartPos
-                Diagnostic.EndPos = this.EndPos
-                Diagnostic.Code = ID013 message
-                Diagnostic.Alternatives = None 
-            }
-        ad.AddDiagnostic diagnostic
-
     override this.Represent() = 
         match this.Value with 
         | Some ref -> ref.Type SignatureType.Name
@@ -5238,28 +5225,26 @@ type FplDecrement(name, positions: Positions, parent: FplValue) as this =
     override this.Run _ = 
         this.Debug Debug.Start
         if this.ArgList.Count <> 1 then 
-            this.Diagnostic $"Decrement takes 1 arguments, got {this.ArgList.Count}." 
+            this.ErrorOccurred <- emitID013Diagnostics $"Decrement takes 1 arguments, got {this.ArgList.Count}." this.StartPos this.EndPos
         else
+            let newValue = FplExtensionObj((this.StartPos, this.EndPos), this.Parent.Value)
 
+            let argPre = this.ArgList[0]
+            let numericValue = 
+                match argPre with
+                | :? FplGenericVariable -> 
+                    argPre.Represent()
+                | _ -> argPre.FplId
 
-        let newValue = FplExtensionObj((this.StartPos, this.EndPos), this.Parent.Value)
-
-        let argPre = this.ArgList[0]
-        let numericValue = 
-            match argPre with
-            | :? FplGenericVariable -> 
-                argPre.Represent()
-            | _ -> argPre.FplId
-
-        let mutable n = 0
-        System.Int32.TryParse(numericValue, &n) |> ignore
-        let n' = n - 1
-        newValue.FplId <- 
-            if n' < 0 then 
-                LiteralUndef
-            else
-                string n'
-        this.SetValue(newValue)
+            let mutable n = 0
+            System.Int32.TryParse(numericValue, &n) |> ignore
+            let n' = n - 1
+            newValue.FplId <- 
+                if n' < 0 then 
+                    LiteralUndef
+                else
+                    string n'
+            this.SetValue(newValue)
         this.Debug Debug.Stop
 
 type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =

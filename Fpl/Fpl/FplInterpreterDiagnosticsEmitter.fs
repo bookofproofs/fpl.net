@@ -191,7 +191,7 @@ let emitID012Diagnostics prtyName varName varType candidates pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitID013Diagnostics pos1 pos2 message =
+let emitID013Diagnostics message pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri

@@ -1129,7 +1129,7 @@ let rec eval (st: SymbolTable) ast =
             variableStack.PushEvalStack(deleg)
             eval st argumentTupleAst
             variableStack.PopEvalStack()
-            deleg.ErrorOccurred <- emitID013Diagnostics pos1 pos2 $"Unknown delegate `{delegateId}`"  
+            deleg.ErrorOccurred <- emitID013Diagnostics  $"Unknown delegate `{delegateId}`" pos1 pos2
         st.EvalPop()
     // | ClosedOrOpenRange of Positions * ((Ast * Ast option) * Ast)
     | Ast.PredicateSignature(((pos1, pos2), ((simpleSignatureAst, inhPredicateTypeListAstsOpt), paramTupleAst)), optUserDefinedSymbolAst) ->
