@@ -389,9 +389,9 @@ type SymbolTableStructure() =
                     Assert.AreEqual<int>(1, node.Scope.Count)
                     (node, node)
                 else
-                    failwith($"Nodetype {nodeType} has unexpectedly no parent.")
+                    failwith($"Node type {nodeType} has unexpectedly no parent.")
             | None ->
-                failwith($"Nodetype {nodeType} not found in the symbol table. Test is not implemented correctly.")
+                failwith($"Node type {nodeType} not found in the symbol table. Test is not implemented correctly.")
         | None -> 
             failwith($"FPL code could not be interpreted due to errors {Environment.NewLine}{ad.DiagnosticsToString}")
 
@@ -1874,10 +1874,10 @@ type SymbolTableStructure() =
             Assert.IsTrue(false, $"Unimplemented test {var}")
 
 
-    // todo: issue diagnostics if assuming referenced arguments
-    // todo: issue diagnostics restricting assumptions only to non-compound predicates and to references to definitions of predicates
-    // todo: issue diagnostics if proving an implication impl(a,b) and the first argument is not the assumption of a, and the last derived argument is not b.
-    // todo: issue diagnostics if proving an equivalence iif(a,b) and the proof does not consist of two blocks, each starting with the assumption of a (resp. b) and ending with the derivation of b (resp. a)
+    // TODO: issue diagnostics if assuming referenced arguments
+    // TODO: issue diagnostics restricting assumptions only to non-compound predicates and to references to definitions of predicates
+    // TODO: issue diagnostics if proving an implication impl(a,b) and the first argument is not the assumption of a, and the last derived argument is not b.
+    // TODO: issue diagnostics if proving an equivalence iif(a,b) and the proof does not consist of two blocks, each starting with the assumption of a (resp. b) and ending with the derivation of b (resp. a)
     [<DataRow("FplArgInferenceAssume", "00", """proof T$1 {1. |- assume and(x,y) };""", "")>]
     [<DataRow("FplArgInferenceAssume", "01", """proof T$1 {1. |- assume is(x,Nat) };""", "")>]
     [<TestMethod>]
@@ -1902,8 +1902,8 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    // todo: issue diagnostics if the first argument of the proof starts with a derived argument without providing a justification
-    // todo: issue diagnostics if the derived predicate is neither one of the prime predicates 'true' and 'false', nor a compound predicate, nor a reference to a definition of a predicate
+    // TODO: issue diagnostics if the first argument of the proof starts with a derived argument without providing a justification
+    // TODO: issue diagnostics if the derived predicate is neither one of the prime predicates 'true' and 'false', nor a compound predicate, nor a reference to a definition of a predicate
     [<DataRow("FplArgInferenceDerived", "00", """proof T$1 {1. byax A |- and(x,y)};""", "")>]
     [<DataRow("FplArgInferenceDerived", "01", """proof T$1 {1. |- and(x,y)};""", "")>]
     [<TestMethod>]
@@ -1953,7 +1953,7 @@ type SymbolTableStructure() =
         match nodeType, varVal with
         | "FplArgInferenceTrivial", "00" ->
             Assert.IsInstanceOfType<FplArgument>(parent)
-            Assert.AreEqual<int>(2, parent.ArgList.Count) // justification / arginference pair
+            Assert.AreEqual<int>(2, parent.ArgList.Count) // justification / arg inference pair
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsInstanceOfType<FplArgInferenceTrivial>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
@@ -1995,9 +1995,9 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    // todo: issue diagnostics if assertions are made outside the definitions of functional terms and definitions of classes
-    // todo: issue diagnostics if assertions are made inside the definitions of functional terms and definitions of classes but do not involve the self keyword
-    // todo: issue diagnostics if assertions involve the is operator
+    // TODO: issue diagnostics if assertions are made outside the definitions of functional terms and definitions of classes
+    // TODO: issue diagnostics if assertions are made inside the definitions of functional terms and definitions of classes but do not involve the self keyword
+    // TODO: issue diagnostics if assertions involve the is operator
     [<DataRow("FplAssertion", "00", """def cl A {ctor A(){dec assert all x:A,y:obj {In(y,x)};}};""", "")>]
     [<TestMethod>]
     member this.TestStructureFplAssertion(nodeType, varVal, fplCode, identifier) =
@@ -2316,7 +2316,7 @@ type SymbolTableStructure() =
         let parent, node = testSkeleton nodeType filename fplCode identifier
         
         match nodeType, varVal with
-        // todo: issue diagnostics if the constructor does nothing
+        // TODO: issue diagnostics if the constructor does nothing
         | "FplConstructor", "00" -> 
             Assert.IsInstanceOfType<FplClass>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count) // no base 
@@ -2789,7 +2789,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplFunctionalTerm>(node)
-            Assert.AreEqual<int>(2, node.ArgList.Count) // non-intrinsic with mapping and return statemenet
+            Assert.AreEqual<int>(2, node.ArgList.Count) // non-intrinsic with mapping and return statement
             Assert.AreEqual<int>(7, node.Scope.Count) // 3 variables, 4 properties
         | "FplFunctionalTerm", "04" -> 
             Assert.IsInstanceOfType<FplTheory>(parent)
@@ -3301,7 +3301,7 @@ type SymbolTableStructure() =
         | "FplIntrinsicTpl", "02" ->
             Assert.IsInstanceOfType<FplFunctionalTerm>(parent)
             Assert.AreEqual<int>(1, parent.ArgList.Count) // mapping
-            Assert.AreEqual<int>(1, parent.Scope.Count) // emplate
+            Assert.AreEqual<int>(1, parent.Scope.Count) // template
             Assert.IsInstanceOfType<FplIntrinsicTpl>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
@@ -3372,11 +3372,11 @@ type SymbolTableStructure() =
     [<DataRow("FplJustification", "03", """proof T$1 {1. bycor A$1 |- trivial};""", "")>]
     // justification bydef   
     [<DataRow("FplJustification", "04", """proof T$1 {1. bydef A |- trivial};""", "")>]
-    // justificattion by proof argument (other proof)
+    // justification by proof argument (other proof)
     [<DataRow("FplJustification", "05", """proof T$1 {1. A$1:2 |- trivial};""", "")>]
-    // justificattion byinf
+    // justification byinf
     [<DataRow("FplJustification", "06", """proof T$1 {1. byinf A |- trivial};""", "")>]
-    // justificattion by proof argument (this proof)
+    // justification by proof argument (this proof)
     [<DataRow("FplJustification", "07", """proof T$1 {1. 2 |- trivial};""", "")>]
     // justification bydef var  
     [<DataRow("FplJustification", "08", """proof T$1 {1. bydef x |- trivial};""", "")>]
@@ -4001,7 +4001,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, parent.ArgList.Count) // class's base class
             Assert.AreEqual<int>(3, parent.Scope.Count) // variable, property and constructor
             Assert.IsInstanceOfType<FplMandatoryPredicate>(node)
-            Assert.AreEqual<int>(2, node.ArgList.Count) // non-intrinsic withassignment
+            Assert.AreEqual<int>(2, node.ArgList.Count) // non-intrinsic with assignment
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
@@ -4450,7 +4450,7 @@ type SymbolTableStructure() =
         let parent, node = testSkeleton nodeType filename fplCode identifier
         
         match nodeType, varVal with
-            // nodes that can be referrenced as parent 
+            // nodes that can be referenced as parent 
             | "FplParent", "00b"
             | "FplParent", "00c"
             | "FplParent", "00d"
@@ -4473,7 +4473,7 @@ type SymbolTableStructure() =
                 Assert.IsInstanceOfType<FplParent>(node)
                 Assert.AreEqual<int>(0, node.ArgList.Count)
                 Assert.IsTrue(node.RefersTo.IsSome)
-            // nodes that cannot be referrenced as parent 
+            // nodes that cannot be referenced as parent 
             | "FplParent", "00a"
             | "FplParent", "01a"
             | "FplParent", "02a"
@@ -5647,7 +5647,7 @@ type SymbolTableStructure() =
             let x = (node:?>FplGenericVariable)
             Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
-        // variable to mappping
+        // variable to mapping
         | "FplVariable", "03a" ->
             Assert.IsInstanceOfType<FplMapping>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
