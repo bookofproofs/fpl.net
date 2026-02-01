@@ -3231,8 +3231,18 @@ let isLanguage (fv:FplValue) =
     | :? FplLanguage -> true
     | _ -> false
 
+[<AbstractClass>]
+type FplGenericStmt(positions: Positions, parent: FplValue) =
+    inherit FplGenericHasNoValue(positions, parent)
+
+    override this.ShortName = PrimStmt
+
+    override this.Type signatureType = this.FplId
+
+    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
+
 type FplAssertion(positions: Positions, parent: FplValue) =
-    inherit FplValue(positions, Some parent)
+    inherit FplGenericStmt(positions, parent)
 
     override this.Name = PrimAssertion
     override this.ShortName = LiteralAss
@@ -3242,14 +3252,10 @@ type FplAssertion(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
-    override this.Type signatureType = this.FplId
-
     override this.Run variableStack = 
         // TODO implement run
         this.Debug Debug.Start
         this.Debug Debug.Stop
-
-    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
 
     override this.RunOrder = None
 
@@ -5262,13 +5268,14 @@ type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
     override this.Type (signatureType:SignatureType) = 
         getFplHead this signatureType
                     
-    override this.Represent() = 
+    override this.Represent() = // done
         match this.FplId with
         | LiteralInd -> $"dec {this.TypeId}"
         | _ -> this.FplId
 
     override this.Run _ = 
         this.Debug Debug.Start
+        // no Run needed for FplIntrinsicInd
         this.Debug Debug.Stop
 
     override this.EmbedInSymbolTable _ = addExpressionToReference this
@@ -5402,7 +5409,7 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) as this
 
     override this.RunOrder = Some _runOrder
 
-    override this.Represent() = 
+    override this.Represent() = // done
         if _callCounter > maxRecursion then
             this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
             LiteralUndef
@@ -5621,7 +5628,15 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) as this 
             sprintf "%s(%s) -> %s" head paramT (map.Type(propagate))
         | _ -> ""
 
-    override this.Represent() = getFunctionalTermRepresent this
+    override this.Represent() = // done
+        if _callCounter > maxRecursion then
+            this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
+            LiteralUndef
+        else
+            _callCounter <- _callCounter + 1
+            let result = getFunctionalTermRepresent this
+            _callCounter <- _callCounter - 1
+            result
 
     override this.EmbedInSymbolTable _ = 
         if not this.IsIntrinsic then // if not intrinsic, check variable usage
@@ -5723,17 +5738,6 @@ let isExtension (fv:FplValue) =
     match fv with
     | :? FplExtension -> true
     | _ -> false
-
-[<AbstractClass>]
-type FplGenericStmt(positions: Positions, parent: FplValue) =
-    inherit FplGenericHasNoValue(positions, parent)
-
-    override this.ShortName = PrimStmt
-
-    override this.Type signatureType = this.FplId
-
-    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
-
 
 
 /// Implements the return statement in FPL.
@@ -6090,8 +6094,6 @@ type FplForInStmt(positions: Positions, parent: FplValue) as this =
 
     override this.Type signatureType = 
         getFplHead this signatureType
-
-    override this.Represent() = LiteralUndef
 
     override this.Run variableStack = 
         // TODO implement run
