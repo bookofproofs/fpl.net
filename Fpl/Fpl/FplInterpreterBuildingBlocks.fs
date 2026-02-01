@@ -223,10 +223,6 @@ let rec eval (st: SymbolTable) ast =
                 variableStack.PopEvalStack()
             
         let fv = variableStack.PeekEvalStack()
-        let isLocalizationDeclaration = 
-            match fv.UltimateBlockNode with 
-            | Some (:? FplLocalization) -> true
-            | _ -> false
         let parentFv = fv.Parent.Value
         match fv.Name with 
         | PrimVariableL
@@ -249,22 +245,17 @@ let rec eval (st: SymbolTable) ast =
         | _ -> 
             // in all other contexts, check by name, if this variable was declared in some scope
             checkByName fv
-        if isLocalizationDeclaration && fv.Scope.ContainsKey(name) then 
-            let variable = fv.Scope[name] 
-            let rec getLocalization (fValue:FplValue) = 
-                match fValue with
-                | :? FplLocalization -> fValue
-                | _ ->
-                    match fValue.Parent with
-                    | Some parent -> getLocalization parent
-                    | None -> fValue
-            let loc = getLocalization fv
+
+        match fv.UltimateBlockNode with 
+        | Some (:? FplLocalization as loc) when loc.ArgList.Count = 0 && fv.RefersTo.IsSome -> 
+            let variable = fv.RefersTo.Value
             if loc.Scope.ContainsKey(name) then 
                 let other = loc.Scope[name]
                 variable.ErrorOccurred <- emitVAR03diagnostics name other.QualifiedStartPos pos1 pos2 true
             else 
                 loc.Scope.Add(name, variable)
                 variable.Parent <- Some loc
+        | _ -> ()
     | Ast.Alias((pos1, pos2), s) -> ()
     | Ast.LanguageCode((pos1, pos2), s) -> 
         let fv = variableStack.PeekEvalStack()

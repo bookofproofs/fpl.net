@@ -1651,11 +1651,10 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
                 variableOrQuantor.Scope.TryAdd(this.FplId, this) |> ignore
 
         match nextOpt with 
-        | Some next when ( next.Name = PrimRefL 
-                        || next.Name = PrimTranslationL ) ->
+        | Some next when next.Name = PrimRefL ->
             next.FplId <- this.FplId
             next.TypeId <- this.TypeId
-            tryAddToParentUsingFplId this
+            next.RefersTo <- Some this
         | Some next when ( next.Name = LiteralAxL 
                         || next.Name = LiteralThmL 
                         || next.Name = LiteralLemL 
@@ -1664,7 +1663,9 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
                         || next.Name = PrimClassL 
                         || next.Name = PrimFunctionalTermL
                         || next.Name = PrimPredicateL
-                        || next.Name = PrimExtensionL ) ->
+                        || next.Name = PrimExtensionL
+                        || next.Name = PrimTranslationL
+                        ) ->
             addToSimpleFplBlocksScope next false
         | Some next when next.Name = PrimRuleOfInference ->
             addToRuleOfInference next

@@ -4876,7 +4876,8 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsInstanceOfType<FplReference>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
-            Assert.AreEqual<int>(1, node.Scope.Count)
+            Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.IsInstanceOfType<FplVariable>(node.RefersTo.Value)
             Assert.AreEqual<string>("x", node.FplId) // name of the referenced element
         | "FplReference", "00b" ->
             Assert.IsInstanceOfType<FplAxiom>(parent)
