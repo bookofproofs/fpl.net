@@ -200,7 +200,6 @@ let rec eval (st: SymbolTable) ast =
     // | DollarDigits of Positions * int
     | Ast.DollarDigits((pos1, pos2), s) -> 
         st.EvalPush("DollarDigits")
-        let path = st.EvalPath()
         let fv = variableStack.PeekEvalStack()
         let sid = $"${s.ToString()}"
         match fv with 
@@ -229,7 +228,6 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Var((pos1, pos2), name) ->
         st.EvalPush("Var")
         let evalPath = st.EvalPath()
-        let isLocalizationDeclaration = evalPath.StartsWith("AST.Namespace.Localization.Expression.")
 
         let checkByName (fv:FplValue) = 
             let rec IsInUpperScope (fv1: FplValue): FplGenericVariable option =
@@ -265,6 +263,10 @@ let rec eval (st: SymbolTable) ast =
                 variableStack.PopEvalStack()
             
         let fv = variableStack.PeekEvalStack()
+        let isLocalizationDeclaration = 
+            match fv.UltimateBlockNode with 
+            | Some (:? FplLocalization) -> true
+            | _ -> false
         let parentFv = fv.Parent.Value
         match fv.Name with 
         | PrimVariableL
