@@ -48,7 +48,7 @@ let filterCandidates (candidatesPre:FplValue list) identifier qualified =
         |> String.concat ", "
     (candidates, candidatesNames)
 
-/// Simplify trivially nested expressions by removing from the stack FplValue nodes that were created due to too long parsing tree and replacing them by their subnodes 
+/// Simplify trivially nested expressions by removing from the stack FplValue nodes that were created due to too long parsing tree and replacing them by their sub nodes 
 let rec simplifyTriviallyNestedExpressions (rb:FplValue) = 
     if rb.ArgList.Count = 1 && rb.FplId = "" then
         // removable reference blocks are those with only a single argument and unset FplId 
@@ -131,7 +131,7 @@ let rec eval (st: SymbolTable) ast =
         | :? FplGenericVariable as var -> 
             // attach template type to declared variable 
             var.RefersTo <- Some templateNode
-        | _ -> () // RefersTo's semantics in other FplValues is different, do not interfer with it
+        | _ -> () // RefersTo's semantics in other FplValues is different, do not interfere with it
         variableStack.PushEvalStack(templateNode)
         variableStack.PopEvalStack()
         st.EvalPop() 
@@ -708,11 +708,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.TranslationTermList((pos1, pos2), ebnfTermAsts) ->
         st.EvalPush("TranslationTermList")
-        let chooseRandomMember (lst: Ast list) =
-            let rnd = Random()
-            let index = rnd.Next(lst.Length)
-            lst.[index]
-        eval st (chooseRandomMember ebnfTermAsts)
+        ebnfTermAsts |> List.map (eval st) |> ignore
         st.EvalPop()
     | Ast.BrackedCoordList((pos1, pos2), coordListAst) ->
         st.EvalPush("BrackedCoordList")
@@ -1310,7 +1306,7 @@ let rec eval (st: SymbolTable) ast =
                 |  FixType.Infix (symb, prec) -> prec
                 | _ -> Int32.MaxValue
 
-        // This while loop will evaluate multiple unparenthesized infix operations
+        // This while loop will evaluate multiple non-parenthesized infix operations
         // according to their precedence by grouping them into binary operations and leave fv with only one binary operation
         while fv.ArgList.Count > 1 do
             let mutable currentMinimalPrecedence = Int32.MaxValue
@@ -1452,27 +1448,27 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("MapCases")
         let parent = variableStack.PeekEvalStack()
         let fvNew = new FplMapCases((pos1, pos2), parent)
-        variableStack.PushEvalStack(fvNew) // add mapcases
+        variableStack.PushEvalStack(fvNew) // add mcases
         mapCaseSingleAstList |> List.map (fun caseAst -> eval st caseAst) |> ignore
         eval st elseStatementAst
-        variableStack.PopEvalStack() // remove mapcases
+        variableStack.PopEvalStack() // remove mcases
         st.EvalPop()
     | Ast.MapCaseSingle((pos1, pos2), (predicateFirstAst, predicateSecondAst)) ->
         st.EvalPush("MapCaseSingle")
         let parent = variableStack.PeekEvalStack()
         let mapCaseSingle = new FplMapCaseSingle((pos1,pos2), parent)
-        variableStack.PushEvalStack(mapCaseSingle) // add mapcase single
+        variableStack.PushEvalStack(mapCaseSingle) // add mcases single
         eval st predicateFirstAst
         eval st predicateSecondAst 
-        variableStack.PopEvalStack() // remove mapcase single
+        variableStack.PopEvalStack() // remove mcases single
         st.EvalPop()
     | Ast.MapCaseElse((pos1, pos2), predicateAst) ->
         st.EvalPush("MapCaseElse")
         let parent = variableStack.PeekEvalStack()
         let elseCase = new FplMapCaseElse((pos1,pos2), parent)
-        variableStack.PushEvalStack(elseCase) // add mapcase else
+        variableStack.PushEvalStack(elseCase) // add mcases else
         eval st predicateAst 
-        variableStack.PopEvalStack() // remove mapcase else
+        variableStack.PopEvalStack() // remove mcases else
         st.EvalPop()
     | Ast.FunctionalTermInstanceSignature((pos1, pos2), ((simpleSignatureAst, paramTupleAst), mappingAst)) ->
         variableStack.InSignatureEvaluation <- true
@@ -1706,7 +1702,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.ConstructorBlock((pos1, pos2), optVarDeclOrSpecListAst) ->
         st.EvalPush("ConstructorBlock")
         let parent = variableStack.PeekEvalStack()
-        // evaluate the construction block block
+        // evaluate the construction block 
         match optVarDeclOrSpecListAst with
         | Some astList -> 
             astList |> List.map (eval st) |> ignore
@@ -1747,7 +1743,7 @@ let rec eval (st: SymbolTable) ast =
         optVarDeclOrSpecListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
         constructorListAsts |> List.map (eval st) |> ignore
         st.EvalPop()
-    // | DefinitionPredicate Deof Positions * (Ast * (Ast * Ast list option))
+    // | DefinitionPredicate of Positions * (Ast * (Ast * Ast list option))
     | Ast.DefinitionPredicate((pos1, pos2), (predicateSignatureAst, optDefBlock)) ->
         st.EvalPush("DefinitionPredicate")
         let parent = variableStack.PeekEvalStack()
@@ -1867,8 +1863,8 @@ let rec eval (st: SymbolTable) ast =
                 let argInferenceResult = argInference.Represent()
                 match argInferenceResult with
                 | LiteralTrue -> ()
-                | _ -> value.FplId <- LiteralFalse // todo all other arguments that are either undetermined or false should issue an error
-            | _ -> () // todo argumentinference not found
+                | _ -> value.FplId <- LiteralFalse // TODO all other arguments that are either undetermined or false should issue an error
+            | _ -> () // TODO argumentInference not found
         )
         fv.Value <- Some value
         variableStack.Pop() |> ignore // pop without embedding in theorem (already done)

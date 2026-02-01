@@ -324,34 +324,34 @@ type SignatureType =
 let maxRecursion = 5
 
 (*
-    todo: 1) implement a function ToPL0Form transforming a predicative expresssion into a PL0 formula by replacing predicates with free pred variables
+    TODO: 1) implement a function ToPL0Form transforming a predicative expression into a PL0 formula by replacing predicates with free pred variables
              possible applications: see 1a) 
-    todo: 1a) implement a function ToTrueTable generating a true table out of ToPL0Form
+    TODO: 1a) implement a function ToTrueTable generating a true table out of ToPL0Form
              possible applications: see 2), 2a) 3) 4)
-    todo: 2) implement a satifiability check to the Output of ToTrueTable
+    TODO: 2) implement a satisfiability check to the Output of ToTrueTable
              possible applications: 
                 issue error, if a formula of a theorem / axiom / conjecture is not satisfiable
-                issue warning, if a subformula is not satisfiable to replace it by false
-    todo: 2a) implement a tautology check to the output of ToTrueTable
+                issue warning, if a sub formula is not satisfiable to replace it by false
+    TODO: 2a) implement a tautology check to the output of ToTrueTable
              possible applications: 
                 issue warning, if a formula of a theorem / axiom / conjecture is a tautology, because it could be replaced by a trivial true
-                issue warning, if a subformula is a tautology to replace it by true
-    todo: 3) implement a CanonicalDNF (disjunctive normal form) based on ToTrueTable with a sorted representation.
+                issue warning, if a sub formula is a tautology to replace it by true
+    TODO: 3) implement a CanonicalDNF (disjunctive normal form) based on ToTrueTable with a sorted representation.
              possible applications:
                 issue error, if in a proof there are two consecutive arguments aprev, anext whose outputs have the same ToTrueTables 
                     in terms of variables (its columns) that are not equivalent (have different rows)
-    todo: 4) implement unit tests for all inference rules defined in Fpl.Commons checking if the respective premises and conclusions produce the same outputs of ToTrueTable.
+    TODO: 4) implement unit tests for all inference rules defined in Fpl.Commons checking if the respective premises and conclusions produce the same outputs of ToTrueTable.
              In this case, it is ensured that each inference rule in this library is a tautology. This is a required for 
              FPL to use inference rules as a Hilbert Calculus (see definition D.Hoffmann "Theoretische Informatik" 3rd. ed., p. 98)
              respectively inference rules with a premise being a predicate list: Here it is sufficient to check, if each rule 
              conserves the tautology property: If each predicate in a list is a tautology, so is the conclusion (see D.Hoffmann, "Theoretische Informatik", p. 104)
-    todo: 5) ensure cleaned-up expressions by renaming variable with the same names in independent parts of the same formula expression.
+    TODO: 5) ensure cleaned-up expressions by renaming variable with the same names in independent parts of the same formula expression.
              (see D.H. "Theoretische Informatik", 3rd. p. 119) 
              Implementation idea: This can be accomplished by moving the scope of variables declared in quantors to the containing FPL block, forcing renaming the variables by the end-user at coding-time of the formula. 
-    todo: 6) issue error if arity-0 predicates are intrinsically defined, enforcing true or false (see D.H. "Theoretische Informatik", 3rd. p. 120) 
-    todo: 7) write functions for normalizing predicative formulas (see D.H. "Th. Inf", 3rd. p. 122-123):
-                NormalizeNeg - (uses cleaned-up expressions - see 5) replace impl, iif, xor, by and/or/not and move all negations from the beginning of non-atomar formula to its atomar sub formulas 
-                NormalizePrenex - (uses the output of NormalizeNeg): move quantors from all subformulas the most outer quantor using fixed rules (see figure 3.35, p. 122)
+    TODO: 6) issue error if arity-0 predicates are intrinsically defined, enforcing true or false (see D.H. "Theoretische Informatik", 3rd. p. 120) 
+    TODO: 7) write functions for normalizing predicative formulas (see D.H. "Th. Inf", 3rd. p. 122-123):
+                NormalizeNeg - (uses cleaned-up expressions - see 5) replace impl, iif, xor, by and/or/not and move all negations from the beginning of non-atomic formula to its atomic sub formulas 
+                NormalizePrenex - (uses the output of NormalizeNeg): move quantors from all sub formulas the most outer quantor using fixed rules (see figure 3.35, p. 122)
                 NormalizeSkolem - (uses the output of NormalizePrenex): eliminated all exists-quantors from the formula
                     there are two use cases: 
                         exists quantor is not proceeded by all quantors: - then just remove the ex quantor by replacing x <- u() with some intrinsic 0-ary function u()->tpl {intr} (some constant u fulfilling p)
@@ -364,7 +364,7 @@ let maxRecursion = 5
                                 all x1:tpl1, x2:tpl2, x:tpl {p(x1,x2,x)} 
                             will be transformed to  
                                 all x1:tpl1, x2:tpl2 {p(x1,x2, g(x1, x2))} 
-    todo: 8) write unit-test checking if FplValue.Type(SignatureType.Type) of expressions like p(u()) or all x1:tpl1, x2:tpl2 {p(x1,x2, g(x1, x2))} 
+    TODO: 8) write unit-test checking if FplValue.Type(SignatureType.Type) of expressions like p(u()) or all x1:tpl1, x2:tpl2 {p(x1,x2, g(x1, x2))} 
         includes full signatures of the functions u() and g(,), .i.e., including their mappings. This will later become necessary 
         to be able to recognize the satisfiability-equivalence of two NormalizeSkolem outputs (see 7)
         For the term "satisfiability-equivalence" see D.H. "Th. Inf", 3rd. p. 124
@@ -377,7 +377,7 @@ type IVariable =
 
 /// The interface ISkolem is used to implement fixed but unknown objects of some type.
 /// In general, the equality of two fixed but unknown objects of the same type cannot be determined, 
-/// unless it is explicitely asserted (or explicitely negated) in the corresponding FPL theory.
+/// unless it is explicitly asserted (or explicitly negated) in the corresponding FPL theory.
 /// However, once a SkolemName is established, the value will be treated like a fixed constant.
 type ISkolem =
     abstract member SkolemName : string with get
@@ -424,7 +424,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
     /// An optional order in which this FplValue ist to be run after the symbol table is completely created.
     /// None means that it is not running but itself but called to be run from other FplValues.
     /// Some int means that it is running by itself after the creation of the symbol table. 
-    /// Only theories in root, and axioms, theorems, lemmas, propositions, conjectures, and definitions of predicates and functional terms in theories run by themself and call all other types of FplValue to run.
+    /// Only theories in root, and axioms, theorems, lemmas, propositions, conjectures, and definitions of predicates and functional terms in theories run by themselves and call all other types of FplValue to run.
     abstract member RunOrder: int option
 
     /// Generates a type string identifier or type-specific naming convention of this FplValue.
@@ -433,7 +433,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
     /// Embeds this FplValue in the SymbolTable by adding it to the Scope or as an argument of its predecessor in the SymbolTable.
     abstract member EmbedInSymbolTable: FplValue option -> unit
 
-    /// Abstract member for running this FplValue. It has None or Some optional FplVariableStack as paramter.
+    /// Abstract member for running this FplValue. It has None or Some optional FplVariableStack as parameter.
     abstract member Run: FplVariableStack -> unit
 
     /// Indicates if this FplValue is an FPL building block.
@@ -590,7 +590,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
     /// "undef" - for all nodes in the symbol table that have a type other from a predicate and usually yield a value (e.g. functional terms), but whose value could not be determined.
     /// "undetermined" - for all nodes in the symbol table that have a predicate type (e.g. theorems) but whose value could not be determined. 
     /// otherwise a string representation depending on type of the FPL node and its specific value.
-    override this.Represent () = // done
+    override this.Represent() = // done
         match this.Value with 
         | Some v -> v.Represent() 
         | _ -> PrimNone // If there is no value, return string "None"
@@ -656,7 +656,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
         getFullName this true
 
     /// Calculates this FplValue's ultimate block node (if such exists).
-    /// The ultimate block node is the FPL building block's FplValue enclosing this FplValue (if such extists)
+    /// The ultimate block node is the FPL building block's FplValue enclosing this FplValue (if such exists)
     member this.UltimateBlockNode = 
         let rec ultimateBlockNode (node:FplValue) =
             match node.Parent with
@@ -799,9 +799,14 @@ and FplVariableStack() =
     // positions of the caller to prevent some diagnostics of being shown at the wrong position 
     let mutable _callerStartPos = Position("", 0,0,0)
     let mutable _callerEndPos = Position("", 0,0,0)
+    let mutable _language = ""
 
     let mutable _nextRunOrder = 0
 
+    /// Current language choice of all localizations
+    member this.CurrentLanguage
+        with get () = _language
+        and set (value) = _language <- value
 
     /// Starting position of the caller
     member this.CallerStartPos
@@ -816,7 +821,7 @@ and FplVariableStack() =
 
     /// Returns the next available RunOrder to be stored, when inserting an FplValue into its parent.
     /// The need for this functionality is that sometimes, the block is inserted into the parent's scope, which is a dictionary.
-    /// When running the nodes in the dictionary, their run order will ensure that they are being run in the the order they have bin inserted.
+    /// When running the nodes in the dictionary, their run order will ensure that they are being run in the order they have bin inserted.
     /// This order is incremented and stored when specific FplValue when they are created.
     /// All FplValues can have either Some or None RunOrder.
     /// Those with Some RunOrder include e.g. the following building blocks: axioms, theorems, lemmas, propositions, proofs, corollaries, arguments in proofs.
@@ -946,7 +951,7 @@ and FplVariableStack() =
 type FplGenericHasNoValue(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
 
-    override this.Represent () = // done
+    override this.Represent() = // done
         PrimNone
     override this.RunOrder = None
 
@@ -1856,7 +1861,7 @@ type FplRuleOfInference(positions: Positions, parent: FplValue, runOrder) as thi
     override this.IsBlock () = true    
 
     override this.Run variableStack = 
-        // todo implement run
+        // TODO implement run
         this.Debug Debug.Start
         // FplRuleOfReference does not have any Value
         this.Debug Debug.Stop
@@ -1886,7 +1891,7 @@ type FplInstance(positions: Positions, parent: FplValue) as this =
         let head = getFplHead this signatureType 
         head
 
-    override this.Represent () = // done
+    override this.Represent() = // done
         let head = this.TypeId
 
         // baseClasses = instances of all base classes
@@ -2030,7 +2035,7 @@ type FplGenericConstructor(name, positions: Positions, parent: FplValue) as this
 
 /// This constructor is only used for creating instances of classes that have no declared constructors.
 /// In FPL, such classes are "intrinsic". When the default constructor calls the constructor
-/// of some base classes, it is only possible if those classes are also intrisic or have declared constructors
+/// of some base classes, it is only possible if those classes are also intrinsic or have declared constructors
 /// without parameters. 
 type FplDefaultConstructor(name, positions: Positions, parent: FplValue) =
     inherit FplGenericConstructor(name, positions, parent)
@@ -2562,7 +2567,7 @@ type FplCorollary(positions: Positions, parent: FplValue, runOrder) =
 
         match tryFindAssociatedBlockForCorollary this with
         | ScopeSearchResult.FoundAssociate potentialParent -> 
-            // everything is ok, change the parent of the provable from theory to the found parent 
+            // everything is OK, change the parent of the provable from theory to the found parent 
             this.Parent <- Some potentialParent
         | ScopeSearchResult.FoundIncorrectBlock incorrectBlock ->
             this.ErrorOccurred <- emitID005diagnostics this.FplId incorrectBlock this.StartPos this.EndPos
@@ -2681,7 +2686,7 @@ type FplGenericJustificationItem(positions: Positions, parent: FplValue) =
             // set the value of "this" to undetermined
             let value = new FplIntrinsicPred((this.StartPos, this.EndPos), this) 
             this.SetValue value
-            // todo issue diagnostics saying that a predicate expression was expected but has No value
+            // TODO issue diagnostics saying that a predicate expression was expected but has No value
             ()
         | _ -> 
             // set the value of "this" to undetermined
@@ -2797,7 +2802,7 @@ and FplJustification(positions: Positions, parent: FplValue) =
         head
 
     override this.Run variableStack = 
-        // todo implement Run
+        // TODO implement Run
         this.Debug Debug.Start
         let v = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
         this.Value <- Some v
@@ -2826,7 +2831,7 @@ and FplArgInferenceAssume(positions: Positions, parent: FplValue) =
         ret
 
     override this.Run variableStack = 
-        // todo implement Run, assume should return true if the assumption was possible
+        // TODO implement Run, assume should return true if the assumption was possible
         this.Debug Debug.Start
         let v = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
         this.Value <- Some v
@@ -2846,7 +2851,7 @@ and FplArgInferenceRevoke(positions: Positions, parent: FplValue) =
         ret
 
     override this.Run variableStack = 
-        // todo implement Run
+        // TODO implement Run
         this.Debug Debug.Start
         let v = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
         this.Value <- Some v
@@ -2886,7 +2891,7 @@ and FplArgInferenceDerived(positions: Positions, parent: FplValue) =
         ret
 
     override this.Run variableStack = 
-        // todo implement run
+        // TODO implement run
         this.Debug Debug.Start
         let v = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
         this.Value <- Some v
@@ -2939,7 +2944,7 @@ and FplArgument(positions: Positions, parent: FplValue, runOrder) =
             )
 
         | _ -> ()
-        (* todo: Enhance variableStack by the context in which this argument is being evaluated
+        (* TODO: Enhance variableStack by the context in which this argument is being evaluated
             Here are some preliminary considerations: 
             1) The context should include 
                 a) the argumentInference of the previous argument (if such exists) - the first argument doesn't have such a predecessor
@@ -2947,7 +2952,7 @@ and FplArgument(positions: Positions, parent: FplValue, runOrder) =
                    so then next justification from the list can be applied to the last result from variableStack. 
                    The idea is that a list of justification could be "unzipped" in the FPL code by writing a sequence
                    of arguments, each having only a single justification from the original list. This unzipped FPL code should be semantically
-                   the same as "zipping/hiding" the arguments by listing multiply justifications and only inferinig to the last argumentInference.
+                   the same as "zipping/hiding" the arguments by listing multiply justifications and only inferring to the last argumentInference.
                 c) possibly the structure of the to-be-proven predicate of the original theorem
             2) The evaluation of the argument should then handle the following cases
                 a) whether or not the argumentInference of this argument is an FplAssume or FplRevoke 
@@ -3078,7 +3083,7 @@ and FplProof(positions: Positions, parent: FplValue, runOrder) =
 
         match tryFindAssociatedBlockForProof this with
         | ScopeSearchResult.FoundAssociate potentialParent -> 
-            // everything is ok, change the parent of the provable from theory to the found parent 
+            // everything is OK, change the parent of the provable from theory to the found parent 
             this.Parent <- Some potentialParent
         | ScopeSearchResult.FoundIncorrectBlock incorrectBlock ->
             this.ErrorOccurred <- emitID002Diagnostics this.FplId incorrectBlock this.StartPos this.EndPos
@@ -3127,12 +3132,12 @@ type FplLocalization(positions: Positions, parent: FplValue) =
         | "" -> head
         | _ -> sprintf "%s(%s)" head paramT
 
-    override this.Represent() = this.Type(SignatureType.Name) // todo set language and represent only this one
+    override this.Represent() = this.Type(SignatureType.Name) // TODO set language and represent only this one
         
     override this.IsBlock() = true
 
     override this.Run variableStack = 
-        // todo implement run
+        // TODO implement run
         this.Debug Debug.Start
         this.Debug Debug.Stop
 
@@ -3160,10 +3165,10 @@ type FplTranslation(positions: Positions, parent: FplValue) =
 
         sprintf "%s%s" head args
 
-    override this.Represent () = this.FplId // todo represent according to the language setting of localization
+    override this.Represent() = this.FplId // TODO represent according to the language setting of localization
 
     override this.Run variableStack = 
-        // todo implement run
+        // TODO implement run
         this.Debug Debug.Start
         this.Debug Debug.Stop
 
@@ -3186,10 +3191,10 @@ type FplLanguage(positions: Positions, parent: FplValue) =
         let head = getFplHead this signatureType
         head
 
-    override this.Represent () = this.FplId // todo represent according to the language setting of localization
+    override this.Represent() = this.FplId // TODO represent according to the language setting of localization
 
     override this.Run variableStack = 
-        // todo implement run
+        // TODO implement run
         this.Debug Debug.Start
         this.Debug Debug.Stop
 
@@ -3225,7 +3230,7 @@ type FplAssertion(positions: Positions, parent: FplValue) =
     override this.Type signatureType = this.FplId
 
     override this.Run variableStack = 
-        // todo implement run
+        // TODO implement run
         this.Debug Debug.Start
         this.Debug Debug.Stop
 
@@ -3307,7 +3312,7 @@ type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
     override this.Type (signatureType:SignatureType) = 
         getFplHead this signatureType
                     
-    override this.Represent () = // done
+    override this.Represent() = // done
         LiteralUndef 
 
     override this.Run variableStack = 
@@ -3480,8 +3485,8 @@ type FplReference(positions: Positions, parent: FplValue) =
                     fallBackFunctionalTerm
                 else
                     $"{head}({args})"
-            | _, ArgType.Nothing, Some qual -> 
-                $"{head}({args}).{qual.Type(propagate)}"
+            | _, ArgType.Nothing, Some qualification -> 
+                $"{head}({args}).{qualification.Type(propagate)}"
             | _, ArgType.Brackets, Some qual ->
                 $"{head}[{args}].{qual.Type(propagate)}"
             | _, ArgType.Parentheses, Some qual ->
@@ -3493,7 +3498,7 @@ type FplReference(positions: Positions, parent: FplValue) =
             | _, ArgType.Parentheses, None ->
                 fallBackFunctionalTerm
 
-    override this.Represent () = // done
+    override this.Represent() = // done
         if _callCounter > maxRecursion then
             this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
             LiteralUndef // fallback to undefined after infinite recursion (if any)
@@ -3695,7 +3700,7 @@ type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
     member this.SetType (typeId:string) (typeNodeOpt:FplValue option) pos1 pos2 = 
         if not _dimensionTypesBeingSet then 
             this.TypeId <- $"*{typeId}"
-            // todo prefer RefersTo over Scope when storing the type node of the variablearray 
+            // TODO prefer RefersTo over Scope when storing the type node of the variable array 
             match typeNodeOpt with 
             | Some typeNode -> this.Scope.TryAdd(typeId, typeNode) |> ignore
             | _ -> ()
@@ -3755,7 +3760,7 @@ type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
            // a value with this coordinates already exists, and we replace it by the new one
            this.ValueList[index] <- value
         else
-            // a value with this coordinetes does not exist yet. We ann the value 
+            // a value with this coordinates does not exist yet. We ann the value 
             this.ValueList.Add value
             // and store the index of the new coordinatesKey
             this.ValueKeys.Add (coordinatesKey, this.ValueList.Count-1)
@@ -3772,7 +3777,7 @@ type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
         | SignatureType.Name -> this.FplId
         | _ -> $"{mainType}[{dimensionTypes}]"
 
-    override this.Represent () = // done
+    override this.Represent() = // done
         if this.ValueList.Count = 0 then
             if this.IsInitialized then 
                 // this case should never happen, because isInitializesVariable is a contradiction to ValueList.Count 0
@@ -3870,7 +3875,7 @@ type FplVariable(fplId, positions: Positions, parent: FplValue) =
         if fv.FplId <> LiteralUndef then
             this.IsInitialized <- true
 
-    override this.Represent () = // done
+    override this.Represent() = // done
         match this.Value with 
         | None ->
             match this.TypeId with
@@ -4065,9 +4070,9 @@ let private matchByTypeStringRepresentation (a:FplValue) aName (aType:string) aT
     | _ when aType = LiteralUndef ->
         None, Parameter.Consumed // undef matches any type
     | _ when pType.StartsWith(LiteralTpl) || pType.StartsWith(LiteralTplL) ->
-        None, Parameter.Consumed // tpl accepts everything: todo: really?
+        None, Parameter.Consumed // tpl accepts everything: TODO: really?
     | _ when pType.StartsWith($"*{LiteralTpl}") || pType.StartsWith($"*{LiteralTplL}") ->
-        None, Parameter.Consumed // tpl arrays accepts everything: todo: really?
+        None, Parameter.Consumed // tpl arrays accepts everything: TODO: really?
     | MatchingMode.Assignment when aType = LiteralUndef ->
         None, Parameter.Consumed // undef can always be assigned
     | MatchingMode.Assignment when pType.StartsWith($"*{aType}[") && pTypeName = PrimVariableArrayL ->
@@ -4371,7 +4376,7 @@ let matchArgumentsWithParameters (fva: FplValue) (fvp: FplValue) =
             Some($"{aErr} in {qualifiedName fvp true}")
     | None -> None
 
-/// Tries to match the signatures of toBeMatched with the signatures of all candidates and accoumulates any
+/// Tries to match the signatures of toBeMatched with the signatures of all candidates and accumulates any
 /// error messages in accResultList.
 let rec checkCandidates (toBeMatched: FplValue) (candidates: FplValue list) (accResultList: string list) =
     match candidates with
@@ -4381,14 +4386,14 @@ let rec checkCandidates (toBeMatched: FplValue) (candidates: FplValue list) (acc
         | None -> (Some candidate, [])
         | Some errMsg -> checkCandidates toBeMatched candidates (accResultList @ [ errMsg ])
 
-/// Checks if there is a candidate among the candiedates that matches the signature of a calling FplValue and returns this as an option.
+/// Checks if there is a candidate among the candidates that matches the signature of a calling FplValue and returns this as an option.
 let checkSIG04Diagnostics (calling:FplValue) (candidates: FplValue list) = 
     if candidates.Length = 0 then
         calling.ErrorOccurred <- emitID010Diagnostics calling.FplId calling.StartPos calling.EndPos
         None
     else
         match checkCandidates calling candidates [] with
-        | (Some candidate,_) -> Some candidate // no error occured
+        | (Some candidate,_) -> Some candidate // no error occurred
         | (None, errList) -> 
             let errListStr = 
                 errList 
@@ -4486,7 +4491,7 @@ type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
                     // now, try to match a constructor of the parentClass based on the signature of this base constructor call
                     match baseClass.IsIntrinsic, this.ArgList.Count with
                     | true, 0 ->
-                        // call of a constructor of an intrinsic class (i.e., that is missing any constructor) with 0 paramters
+                        // call of a constructor of an intrinsic class (i.e., that is missing any constructor) with 0 parameters
                         // add "default constructor reference"
                         let defaultConstructor = new FplDefaultConstructor(baseClass.FplId, (this.StartPos, this.EndPos), this)
                         defaultConstructor.EmbedInSymbolTable defaultConstructor.Parent
@@ -5156,7 +5161,7 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
                 if matchReprId ext this.FplId then
                     // if fv is inside an extension block, we add this block to the candidates
                     // so we can match patterns inside this extension block's definition referring to 
-                    // its own pattern even if it is not yet fully parsed and analysed
+                    // its own pattern even if it is not yet fully parsed and analyzed
                     candidatesFromScope @ [ext]
                 else 
                     candidatesFromScope
@@ -5214,7 +5219,7 @@ type FplDecrement(name, positions: Positions, parent: FplValue) as this =
             }
         ad.AddDiagnostic diagnostic
 
-    override this.Represent () = 
+    override this.Represent() = 
         match this.Value with 
         | Some ref -> ref.Type SignatureType.Name
         | None -> LiteralUndef
@@ -5264,7 +5269,7 @@ type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
     override this.Type (signatureType:SignatureType) = 
         getFplHead this signatureType
                     
-    override this.Represent () = 
+    override this.Represent() = 
         match this.FplId with
         | LiteralInd -> $"dec {this.TypeId}"
         | _ -> this.FplId
@@ -5294,7 +5299,7 @@ let runIntrinsicFunction (fv:FplValue) variableStack =
         match map.RefersTo with 
         | Some cl when map.Dimensionality = 0 ->
             // a class type without an array
-            // todo filter by constructors
+            // TODO filter by constructors
             let defaultCtor = cl.Scope.Values |> Seq.head :?> FplGenericConstructor
             defaultCtor.Run variableStack
             match defaultCtor.Instance with 
@@ -5302,7 +5307,7 @@ let runIntrinsicFunction (fv:FplValue) variableStack =
                 fv.SetValue instance // set value to the created instance 
                 // reposition the instance in symbol table
                 instance.Parent <- Some fv
-            | None -> () // todo, should not occur issue diagnostics?
+            | None -> () // TODO, should not occur issue diagnostics?
         | Some cl when map.Dimensionality > 0 ->
             fv.SetValue map // set value to the map
         | None when map.Dimensionality > 0 ->
@@ -5404,7 +5409,7 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) as this
 
     override this.RunOrder = Some _runOrder
 
-    override this.Represent () = 
+    override this.Represent() = 
         if _callCounter > maxRecursion then
             this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
             LiteralUndef
@@ -5623,7 +5628,7 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) as this 
             sprintf "%s(%s) -> %s" head paramT (map.Type(propagate))
         | _ -> ""
 
-    override this.Represent () = getFunctionalTermRepresent this
+    override this.Represent() = getFunctionalTermRepresent this
 
     override this.EmbedInSymbolTable _ = 
         if not this.IsIntrinsic then // if not intrinsic, check variable usage
@@ -6093,10 +6098,10 @@ type FplForInStmt(positions: Positions, parent: FplValue) as this =
     override this.Type signatureType = 
         getFplHead this signatureType
 
-    override this.Represent () = LiteralUndef
+    override this.Represent() = LiteralUndef
 
     override this.Run variableStack = 
-        // todo implement run
+        // TODO implement run
         this.Debug Debug.Start
         this.Debug Debug.Stop
 
@@ -6118,12 +6123,10 @@ type FplForInStmtEntity(positions: Positions, parent: FplValue) as this =
         | Some entity -> entity.Type signatureType
         | _ -> getFplHead this signatureType
 
-    override this.Represent () = LiteralUndef
-
     override this.EmbedInSymbolTable _ = tryAddToParentForInStmt this
 
     override this.Run variableStack = 
-        // todo implement run
+        // TODO implement run
         this.Debug Debug.Start
         this.Debug Debug.Stop
 
@@ -6144,17 +6147,14 @@ type FplForInStmtDomain(positions: Positions, parent: FplValue) as this =
         match domainOpt with 
         | Some domain -> domain.Type signatureType
         | _ -> getFplHead this signatureType
-
-    override this.Represent () = LiteralUndef
-
     override this.EmbedInSymbolTable _ = tryAddToParentForInStmt this
 
     override this.Run variableStack = 
-        // todo implement run
+        // TODO implement run
         this.Debug Debug.Start
         this.Debug Debug.Stop
 
-/// Implements the assigment statement in FPL.
+/// Implements the assignment statement in FPL.
 type FplAssignment(positions: Positions, parent: FplValue) as this =
     inherit FplGenericStmt(positions, parent)
 
@@ -6191,7 +6191,7 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
             | :? FplReference as ref -> 
                 this.ErrorOccurred <- ref.ErrorOccurred 
             | _ -> ()
-        // remember proceeding errors of references used in the assingment (if any)
+        // remember proceeding errors of references used in the assignment (if any)
         checkErrorOccuredInReference this.ArgList[0]
         checkErrorOccuredInReference this.ArgList[1]
         match this.Assignee, this.AssignedValue with
@@ -6212,13 +6212,13 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
             | Some ref -> 
                 this.ErrorOccurred <- emitSIG07iagnostic (assignee.Type SignatureType.Name) (getEnglishName ref.Name false) assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
             | None ->
-                this.ErrorOccurred <- emitSIG07iagnostic (assignee.Type SignatureType.Name) "the type of self cound not be determined" assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
+                this.ErrorOccurred <- emitSIG07iagnostic (assignee.Type SignatureType.Name) "the type of self could not be determined" assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
         | Some (:? FplParent as assignee), _ ->
             match assignee.RefersTo with 
             | Some ref -> 
                 this.ErrorOccurred <- emitSIG07iagnostic (assignee.Type SignatureType.Name) (getEnglishName ref.Name false) assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
             | None ->
-                this.ErrorOccurred <- emitSIG07iagnostic (assignee.Type SignatureType.Name) "the type of parent cound not be determined" assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
+                this.ErrorOccurred <- emitSIG07iagnostic (assignee.Type SignatureType.Name) "the type of parent could not be determined" assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
         | Some (assignee), Some assignedValue ->
             let nameAssignee = assignee.Type SignatureType.Name
             let nameAssignedValue = assignedValue.Type SignatureType.Name
@@ -6265,7 +6265,7 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
                 assignee.SetValue instance // set value to the created instance 
                 // reposition the instance in symbol table
                 instance.Parent <- Some assignee
-            | None -> () // todo, issue diagnostics?
+            | None -> () // TODO, issue diagnostics?
         | None, Some (:? FplVariable as assignee), Some (:? FplIntrinsicInd as assignedValue) ->
             assignee.SetValue assignedValue
         | None, Some (:? FplVariable as assignee), Some (:? FplIntrinsicPred as assignedValue) ->
@@ -6277,7 +6277,7 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
                 assignee.AssignValueToCoordinates this.ArgList[0].ArgList instance // set value to the created instance 
                 // reposition the instance in symbol table
                 instance.Parent <- Some assignee
-            | None -> () // todo, issue diagnostics?
+            | None -> () // TODO, issue diagnostics?
         | None, Some (:? FplVariableArray as assignee), Some assignedValue ->
             assignee.AssignValueToCoordinates this.ArgList[0].ArgList assignedValue // set value to the created instance 
         | None, Some assignee, Some assignedValue ->
