@@ -147,6 +147,10 @@ type SymbolTableStructure() =
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""; x.Represent(); x.Type SignatureType.Mixed]
         | "FplDecrement" ->
             let x = new FplDecrement(PrimDelegateDecrementL, positions, parent)
+            let arg = new FplExtensionObj(positions, parent)
+            arg.FplId <- "42"
+            x.ArgList.Add arg
+            x.Run (new FplVariableStack())
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""; x.Represent(); x.Type SignatureType.Mixed]
         | "FplDefaultConstructor" ->
             let x = new FplDefaultConstructor(LiteralObj, positions, parent)
@@ -1700,8 +1704,8 @@ type SymbolTableStructure() =
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
         | "FplDecrement" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("41", (getName var).[index])
         | "FplDefaultConstructor" ->
             Assert.IsTrue(isValidJson (getName var).[index])
             Assert.AreEqual<string>("""{"name":"obj"}""", (getName var).[index])

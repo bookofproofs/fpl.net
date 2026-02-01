@@ -5217,15 +5217,12 @@ type FplDecrement(name, positions: Positions, parent: FplValue) as this =
                 |> String.concat ", "
             sprintf "%s(%s)" head args
 
-    override this.Represent() = 
-        match this.Value with 
-        | Some ref -> ref.Type SignatureType.Name
-        | None -> LiteralUndef
-
     override this.Run _ = 
         this.Debug Debug.Start
         if this.ArgList.Count <> 1 then 
             this.ErrorOccurred <- emitID013Diagnostics $"Decrement takes 1 arguments, got {this.ArgList.Count}." this.StartPos this.EndPos
+            let newValue = FplIntrinsicUndef((this.StartPos, this.EndPos), this)
+            this.SetValue newValue
         else
             let newValue = FplExtensionObj((this.StartPos, this.EndPos), this.Parent.Value)
 
