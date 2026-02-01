@@ -708,7 +708,11 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.TranslationTermList((pos1, pos2), ebnfTermAsts) ->
         st.EvalPush("TranslationTermList")
-        ebnfTermAsts |> List.map (eval st) |> ignore
+        let chooseRandomMember (lst: Ast list) =
+            let rnd = Random()
+            let index = rnd.Next(lst.Length)
+            lst.[index]
+        eval st (chooseRandomMember ebnfTermAsts)
         st.EvalPop()
     | Ast.BrackedCoordList((pos1, pos2), coordListAst) ->
         st.EvalPush("BrackedCoordList")
@@ -1162,7 +1166,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Localization(((pos1, pos2), predicateAst), translationListAsts) ->
         st.EvalPush("Localization")
         let parent = variableStack.PeekEvalStack()
-        let fv = new FplLocalization((pos1, pos2), parent)
+        let fv = new FplLocalization((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
         let var04List = List<KeyValuePair<string, Positions>>()
         let oldDiagnosticsStopped = ad.DiagnosticsStopped
         ad.DiagnosticsStopped <- true // stop all diagnostics during localization

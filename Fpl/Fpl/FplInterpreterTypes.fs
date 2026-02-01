@@ -799,7 +799,7 @@ and FplVariableStack() =
     // positions of the caller to prevent some diagnostics of being shown at the wrong position 
     let mutable _callerStartPos = Position("", 0,0,0)
     let mutable _callerEndPos = Position("", 0,0,0)
-    let mutable _language = ""
+    let mutable _language = "tex" // the default language is tex, otherwise, it should be set in the FPL IDE extension
 
     let mutable _nextRunOrder = 0
 
@@ -3109,14 +3109,16 @@ let getArgumentInProof (fv1:FplGenericJustificationItem) argName =
     else 
         None
 
-type FplLocalization(positions: Positions, parent: FplValue) =
+type FplLocalization(positions: Positions, parent: FplValue, runOrder) =
     inherit FplValue(positions, Some parent)
+    let _runOrder = runOrder
+    let mutable _currentLanguage = ""
 
     override this.Name = LiteralLocL
     override this.ShortName = LiteralLoc
 
     override this.Clone () =
-        let ret = new FplLocalization((this.StartPos, this.EndPos), this.Parent.Value)
+        let ret = new FplLocalization((this.StartPos, this.EndPos), this.Parent.Value, _runOrder)
         this.AssignParts(ret)
         ret
 
@@ -3132,16 +3134,24 @@ type FplLocalization(positions: Positions, parent: FplValue) =
         | "" -> head
         | _ -> sprintf "%s(%s)" head paramT
 
-    override this.Represent() = this.Type(SignatureType.Name) // TODO set language and represent only this one
+    override this.Represent() = // done
+        if this.Scope.ContainsKey(_currentLanguage) then
+            let language = this.Scope[_currentLanguage]
+            language.Represent() // represent the current language
+        else
+            this.Type(SignatureType.Name) 
         
     override this.IsBlock() = true
 
     override this.Run variableStack = 
-        // TODO implement run
         this.Debug Debug.Start
+        _currentLanguage <- variableStack.CurrentLanguage // remember current language for Represent()
+        if not (this.Scope.ContainsKey(_currentLanguage)) then
+            let expression = this.ArgList[0]
+            this.ErrorOccurred <- emitST004diagnostics _currentLanguage expression.StartPos expression.EndPos
         this.Debug Debug.Stop
 
-    override this.RunOrder = None
+    override this.RunOrder = Some _runOrder
 
     override this.EmbedInSymbolTable _ = tryAddToParentUsingTypedSignature this
 
@@ -3165,11 +3175,12 @@ type FplTranslation(positions: Positions, parent: FplValue) =
 
         sprintf "%s%s" head args
 
-    override this.Represent() = this.FplId // TODO represent according to the language setting of localization
+    override this.Represent() = // done
+        this.FplId // represent according to string in the FplId of the translation term
 
     override this.Run variableStack = 
-        // TODO implement run
         this.Debug Debug.Start
+        // no run necessary 
         this.Debug Debug.Stop
 
     override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
@@ -3191,11 +3202,15 @@ type FplLanguage(positions: Positions, parent: FplValue) =
         let head = getFplHead this signatureType
         head
 
-    override this.Represent() = this.FplId // TODO represent according to the language setting of localization
+    override this.Represent() = // done
+        // concatenate all translations of the language
+        this.ArgList
+        |> Seq.map (fun transl -> transl.Represent()) 
+        |> String.concat " "
 
-    override this.Run variableStack = 
-        // TODO implement run
+    override this.Run _ = 
         this.Debug Debug.Start
+        // no run necessary 
         this.Debug Debug.Stop
 
     override this.EmbedInSymbolTable _ = 
@@ -3541,10 +3556,6 @@ type FplReference(positions: Positions, parent: FplValue) =
     override this.EmbedInSymbolTable nextOpt = 
        
         match nextOpt with 
-        | Some next when next.Name = LiteralLocL -> 
-            next.FplId <- this.FplId
-            next.TypeId <- this.FplId
-            next.EndPos <- this.EndPos
         | Some next when next.IsBlock() ->
             addExpressionToParentArgList this 
         | Some next when next.Name = PrimForInStmtDomainL -> 

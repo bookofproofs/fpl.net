@@ -148,7 +148,7 @@ type TestFplValueScopeNameEndPos() =
             | "loc1" -> 
                 Assert.AreEqual<int64>(24L, loc1.EndPos.Column) 
             | "loc2" -> 
-                Assert.AreEqual<int64>(27L, loc2.EndPos.Column) 
+                Assert.AreEqual<int64>(28L, loc2.EndPos.Column) 
             | _ -> Assert.IsTrue(false, "hier1")
         | _ -> 
             Assert.IsTrue(false, "hier2")
@@ -1018,8 +1018,8 @@ type TestFplValueScopeNameEndPos() =
             | "base1" -> Assert.AreEqual<int64>((int64)15, pred.EndPos.Column)
             | "base2" -> Assert.AreEqual<int64>((int64)12, pred.EndPos.Column)
             | "base3" -> Assert.AreEqual<int64>((int64)15, pred.EndPos.Column)
-            | "base4" -> Assert.AreEqual<int64>((int64)16, pred.EndPos.Column)
-            | "base5" -> Assert.AreEqual<int64>((int64)19, pred.EndPos.Column)
+            | "base4" -> Assert.AreEqual<int64>((int64)17, pred.EndPos.Column)
+            | "base5" -> Assert.AreEqual<int64>((int64)20, pred.EndPos.Column)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

@@ -82,8 +82,8 @@ type TestFplValueScopeFplRepresentation() =
             | "fun9" -> Assert.AreEqual<string>("$13", fun9.Represent())
             | "prf1" -> Assert.AreEqual<string>(PrimUndetermined, prf1.Represent())
             | "prf2" -> Assert.AreEqual<string>(PrimUndetermined, prf2.Represent())
-            | "loc1" -> Assert.AreEqual<string>("not(x)", loc1.Represent())
-            | "loc2" -> Assert.AreEqual<string>("Equal(x, y)", loc2.Represent())
+            | "loc1" -> Assert.AreEqual<string>("""\neg( x )""", loc1.Represent())
+            | "loc2" -> Assert.AreEqual<string>("x = y", loc2.Represent())
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)

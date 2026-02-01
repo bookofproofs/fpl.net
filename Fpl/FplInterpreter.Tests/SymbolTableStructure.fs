@@ -265,7 +265,7 @@ type SymbolTableStructure() =
             mockSymbolTableEvaluationPredicate x 1
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""; x.Represent(); x.Type SignatureType.Mixed]
         | "FplLocalization" ->
-            let x = new FplLocalization(positions, parent)
+            let x = new FplLocalization(positions, parent, 0)
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""; x.Represent(); x.Type SignatureType.Mixed]
         | "FplMandatoryFunctionalTerm" ->
             let x = new FplMandatoryFunctionalTerm(positions, parent)
@@ -1509,7 +1509,7 @@ type SymbolTableStructure() =
         | "FplLemma" ->
             Assert.AreEqual<string>("Some", (getName var).[index])
         | "FplLocalization" ->
-            Assert.AreEqual<string>("None", (getName var).[index])
+            Assert.AreEqual<string>("Some", (getName var).[index])
         | "FplMandatoryFunctionalTerm" ->
             Assert.AreEqual<string>("None", (getName var).[index])
         | "FplMandatoryPredicate" ->
@@ -3799,28 +3799,28 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplLocalization>(node)
-            Assert.AreEqual<int>(1, node.ArgList.Count)
+            Assert.AreEqual<int>(1, node.ArgList.Count) // one expression
             Assert.AreEqual<int>(4, node.Scope.Count) // a variable + 3 languages
         | "FplLocalization", "02" ->
             Assert.IsInstanceOfType<FplTheory>(parent) 
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplLocalization>(node)
-            Assert.AreEqual<int>(1, node.ArgList.Count)
+            Assert.AreEqual<int>(1, node.ArgList.Count) // one expression
             Assert.AreEqual<int>(4, node.Scope.Count) // a variable + 3 languages
         | "FplLocalization", "03" ->
             Assert.IsInstanceOfType<FplTheory>(parent) 
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplLocalization>(node)
-            Assert.AreEqual<int>(0, node.ArgList.Count)
+            Assert.AreEqual<int>(1, node.ArgList.Count) // one expression
             Assert.AreEqual<int>(7, node.Scope.Count) // 2 variables + 5 languages
         | "FplLocalization", "04" ->
             Assert.IsInstanceOfType<FplTheory>(parent) 
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
             Assert.IsInstanceOfType<FplLocalization>(node)
-            Assert.AreEqual<int>(1, node.ArgList.Count)
+            Assert.AreEqual<int>(1, node.ArgList.Count) // one expression
             Assert.AreEqual<int>(5, node.Scope.Count) // 2 variables + 3 languages
 
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -4972,15 +4972,12 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>("A", node.FplId) // name of the referenced element
             Assert.IsInstanceOfType<FplExtension>(node.RefersTo.Value) // type of the referenced element
         | "FplReference", "01o" ->
-            Assert.IsInstanceOfType<FplAxiom>(parent)
+            Assert.IsInstanceOfType<FplLocalization>(parent)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
-            Assert.AreEqual<int>(0, parent.Scope.Count) 
+            Assert.AreEqual<int>(1, parent.Scope.Count) 
             Assert.IsInstanceOfType<FplReference>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(0, node.Scope.Count) 
-            Assert.IsTrue(node.RefersTo.IsSome) // referenced element
-            Assert.AreEqual<string>("A", node.FplId) // name of the referenced element
-            Assert.IsInstanceOfType<FplLocalization>(node.RefersTo.Value) // type of the referenced element
         
         // return reference
         | "FplReference", "02a" ->
@@ -5693,7 +5690,7 @@ type SymbolTableStructure() =
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "04c" ->
             Assert.IsInstanceOfType<FplLocalization>(parent)
-            Assert.AreEqual<int>(0, parent.ArgList.Count) 
+            Assert.AreEqual<int>(1, parent.ArgList.Count) 
             Assert.AreEqual<int>(7, parent.Scope.Count) // two variables and 5 languages
             Assert.IsInstanceOfType<FplVariable>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
