@@ -404,7 +404,7 @@ type DiagnosticCode =
                     $"Cannot evaluate `{typeOfPredicate}` because its argument `{argument}` typed `{typeOfExpression}` could not be evaluated as a predicate."
             | LG002 (nodeTypeName, times) -> $"Possible infinite recursion detected, `{nodeTypeName}` was called for more than {times} times.`."
             | LG003 (nodeTypeName, nodeName) -> $"`{nodeTypeName}` evaluates to `false` and cannot be {nodeName}."
-            | LG004 nodeType -> $"`Variable declarations or statements inside {nodeType} might cause side effects."
+            | LG004 nodeType -> $"`Statement inside {nodeType} might cause side effects."
             | LG005 name -> $"Unnecessary assignment of `{name}` detected (will be implicitly ignored)."
             // proof-related error codes
             | PR001 (incorrectBlockType, justificatinItemName) -> $"Cannot find a `{justificatinItemName}`, found {incorrectBlockType} instead."
