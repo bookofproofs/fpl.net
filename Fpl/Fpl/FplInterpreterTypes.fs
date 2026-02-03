@@ -1823,7 +1823,7 @@ type FplPredicateList(positions: Positions, parent: FplValue, runOrder) =
     override this.RunOrder = Some _runOrder
 
 type FplRuleOfInference(positions: Positions, parent: FplValue, runOrder) as this =
-    inherit FplValue(positions, Some parent)
+    inherit FplGenericHasNoValue(positions, parent)
     let _runOrder = runOrder
     let mutable _signStartPos = Position("", 0L, 0L, 0L)
     let mutable _signEndPos = Position("", 0L, 0L, 0L)
@@ -1862,13 +1862,13 @@ type FplRuleOfInference(positions: Positions, parent: FplValue, runOrder) as thi
     override this.IsBlock () = true    
 
     override this.Run variableStack = 
-        // TODO implement run
         this.Debug Debug.Start
         // FplRuleOfReference does not have any Value
         this.Debug Debug.Stop
 
     override this.EmbedInSymbolTable _ = 
         this.CheckConsistency()
+        checkVAR04Diagnostics this
         tryAddToParentUsingFplId this
 
     override this.RunOrder = Some _runOrder
