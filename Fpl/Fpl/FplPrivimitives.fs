@@ -684,7 +684,7 @@ let mathSymbols = dict [
         ('⟍', (7, "Mathematical Falling Diagonal", "U+27CD"))
         ('⟎', (2, "Squared Logical And", "U+27CE"))
         ('⟏', (2, "Squared Logical Or", "U+27CF"))
-        ('⟐', (7, "White Diamond with Centred Dot", "U+27D0"))
+        ('⟐', (7, "White Diamond with Centered Dot", "U+27D0"))
         ('⟑', (7, "and with Dot", "U+27D1"))
         ('⟒', (2, "Element of Opening Upwards", "U+27D2"))
         ('⟓', (7, "Lower Right Corner with Dot", "U+27D3"))
@@ -1011,7 +1011,7 @@ let mathSymbols = dict [
         ('⨺', (2, "Minus Sign In Triangle", "U+2A3A"))
         ('⨻', (2, "Multiplication Sign In Triangle", "U+2A3B"))
         ('⨼', (7, "Interior Product", "U+2A3C"))
-        ('⨽', (7, "Righthand Interior Product", "U+2A3D"))
+        ('⨽', (7, "Right-hand Interior Product", "U+2A3D"))
         ('⨾', (2, "Z Notation Relational Composition", "U+2A3E"))
         ('⨿', (6, "Amalgamation or Coproduct", "U+2A3F"))
         ('⩀', (2, "Intersection with Dot", "U+2A40"))
@@ -1171,7 +1171,7 @@ let mathSymbols = dict [
         ('⫚', (6, "Pitchfork with Tee Top", "U+2ADA"))
         ('⫛', (2, "Transversal Intersection", "U+2ADB"))
         ('⫝̸', (7, "Forking", "U+2ADC"))
-        ('⫝', (7, "Nonforking", "U+2ADD"))
+        ('⫝', (7, "Non-forking", "U+2ADD"))
         ('⫞', (7, "Short Left Tack", "U+2ADE"))
         ('⫟', (7, "Short Down Tack", "U+2ADF"))
         ('⫠', (7, "Short Up Tack", "U+2AE0"))
@@ -1226,7 +1226,7 @@ let mathSymbols = dict [
         ('⭁', (2, "Reverse Tilde Operator Above Leftwards Arrow", "U+2B41"))
         ('⭂', (2, "Leftwards Arrow Above Reverse Almost Equal To", "U+2B42"))
         ('⭃', (2, "Rightwards Arrow Through Greater-Than", "U+2B43"))
-        ('⭄', (2, "Rightwards Arrow Through Superset", "U+2B44"))
+        ('⭄', (2, "Rightwards Arrow Through Super Set", "U+2B44"))
         ('⭇', (2, "Reverse Tilde Operator Above Rightwards Arrow", "U+2B47"))
         ('⭈', (2, "Rightwards Arrow Above Reverse Almost Equal To", "U+2B48"))
         ('⭉', (2, "Tilde Operator Above Leftwards Arrow", "U+2B49"))
@@ -1238,17 +1238,17 @@ let mathSymbols = dict [
         ('﹤', (2, "Small Less-Than Sign", "U+FE64"))
         ('﹥', (2, "Small Greater-Than Sign", "U+FE65"))
         ('﹦', (2, "Small Equals Sign", "U+FE66"))
-        ('＋', (2, "Fullwidth Plus Sign", "U+FF0B"))
-        ('＜', (2, "Fullwidth Less-Than Sign", "U+FF1C"))
-        ('＝', (2, "Fullwidth Equals Sign", "U+FF1D"))
-        ('＞', (2, "Fullwidth Greater-Than Sign", "U+FF1E"))
-        ('｜', (7, "Fullwidth Vertical Line", "U+FF5C"))
-        ('～', (7, "Fullwidth Tilde", "U+FF5E"))
-        ('￢', (4, "Fullwidth Not Sign", "U+FFE2"))
-        ('￩', (2, "Halfwidth Leftwards Arrow", "U+FFE9"))
-        ('￪', (2, "Halfwidth Upwards Arrow", "U+FFEA"))
-        ('￫', (2, "Halfwidth Rightwards Arrow", "U+FFEB"))
-        ('￬', (2, "Halfwidth Downwards Arrow", "U+FFEC"))
+        ('＋', (2, "Full-width Plus Sign", "U+FF0B"))
+        ('＜', (2, "Full-width Less-Than Sign", "U+FF1C"))
+        ('＝', (2, "Full-width Equals Sign", "U+FF1D"))
+        ('＞', (2, "Full-width Greater-Than Sign", "U+FF1E"))
+        ('｜', (7, "Full-width Vertical Line", "U+FF5C"))
+        ('～', (7, "Full-width Tilde", "U+FF5E"))
+        ('￢', (4, "Full-width Not Sign", "U+FFE2"))
+        ('￩', (2, "Half-width Leftwards Arrow", "U+FFE9"))
+        ('￪', (2, "Half-width Upwards Arrow", "U+FFEA"))
+        ('￫', (2, "Half-width Rightwards Arrow", "U+FFEB"))
+        ('￬', (2, "Half-width Downwards Arrow", "U+FFEC"))
     ]
 
 let isInfix c =
@@ -1286,7 +1286,7 @@ let prefixMathSymbols: Parser<string,unit> = fixChar isPrefix "<prefix symbol>"
 let objectMathSymbols: Parser<string,unit> = fixChar isObject "<object symbol>"
 
 
-(* Strint primitives *)
+(* String primitives *)
 [<Literal>]
 let PrimArgInf = "ainf"
 [<Literal>]
