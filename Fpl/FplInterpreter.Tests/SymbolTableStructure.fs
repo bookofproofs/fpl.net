@@ -4760,14 +4760,14 @@ type SymbolTableStructure() =
         | "FplQuantorAll", "00" -> 
             Assert.IsInstanceOfType<FplRuleOfInference>(parent)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
-            Assert.AreEqual<int>(1, parent.Scope.Count) // variable x
+            Assert.AreEqual<int>(0, parent.Scope.Count) // bound variable does not have to be in scope inf
             Assert.IsInstanceOfType<FplQuantorAll>(node)
             Assert.AreEqual<int>(1, node.ArgList.Count) // conjunction
             Assert.AreEqual<int>(1, node.Scope.Count) // x variable
         | "FplQuantorAll", "01" -> 
             Assert.IsInstanceOfType<FplRuleOfInference>(parent)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
-            Assert.AreEqual<int>(3, parent.Scope.Count) // variable p, c, x
+            Assert.AreEqual<int>(2, parent.Scope.Count) // variable p, c (x is bound by quantor, does not have to)
             Assert.IsInstanceOfType<FplQuantorAll>(node)
             Assert.AreEqual<int>(1, node.ArgList.Count) // reference to p
             Assert.AreEqual<int>(1, node.Scope.Count) // x variable
@@ -4819,24 +4819,24 @@ type SymbolTableStructure() =
         | "FplQuantorExistsN", "00" -> 
             Assert.IsInstanceOfType<FplAxiom>(parent)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
-            Assert.AreEqual<int>(2, parent.Scope.Count) // 1 variable, 1 template
+            Assert.AreEqual<int>(1, parent.Scope.Count) // 1 template (bound variable x does not have to)
             Assert.IsInstanceOfType<FplQuantorExistsN>(node)
             Assert.AreEqual<int>(1, node.ArgList.Count) // conjunction
             Assert.AreEqual<int>(1, node.Scope.Count) // 1 variable
         | "FplQuantorExistsN", "01" -> 
             Assert.IsInstanceOfType<FplConjecture>(parent)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
-            Assert.AreEqual<int>(5, parent.Scope.Count) // 4 variables, 1 template
+            Assert.AreEqual<int>(4, parent.Scope.Count) // 3 variables, 1 template, (bound variable x does not have to)
             Assert.IsInstanceOfType<FplQuantorExistsN>(node)
             Assert.AreEqual<int>(1, node.ArgList.Count) // reference to p
             Assert.AreEqual<int>(1, node.Scope.Count) // 1 variable
         | "FplQuantorExistsN", "02" -> 
             Assert.IsInstanceOfType<FplLemma>(parent)
             Assert.AreEqual<int>(1, parent.ArgList.Count) // inner predicate
-            Assert.AreEqual<int>(1, parent.Scope.Count) // 1 variable
+            Assert.AreEqual<int>(0, parent.Scope.Count) // (bound variable x does not have to)
             Assert.IsInstanceOfType<FplQuantorExistsN>(node)
             Assert.AreEqual<int>(1, node.ArgList.Count) // reference to p
-            Assert.AreEqual<int>(1, node.Scope.Count) // z variable
+            Assert.AreEqual<int>(1, node.Scope.Count) // 1 variable
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     // references to variables
