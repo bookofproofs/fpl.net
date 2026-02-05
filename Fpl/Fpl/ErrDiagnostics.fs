@@ -195,6 +195,8 @@ type DiagnosticCode =
     | VAR07 of string 
     | VAR08 
     | VAR09 of string * string 
+    | VAR10 of string * string
+    | VAR11 of string * string
     member this.Code = 
         match this with
             // parser error messages
@@ -320,6 +322,8 @@ type DiagnosticCode =
             | VAR07 _  -> "VAR07"
             | VAR08 -> "VAR08"
             | VAR09 _ -> "VAR09"
+            | VAR10 _ -> "VAR10"
+            | VAR11 _ -> "VAR11"
     member this.Message = 
         match this with
             // parser error messages
@@ -470,6 +474,8 @@ type DiagnosticCode =
             | VAR07 name -> $"The {PrimQuantorExistsN} accepts only one bound variable `{name}`."
             | VAR08 -> "Variadic variables cannot be bound in a quantor."
             | VAR09 (varName,varType) -> $"The variable {varName}:{varType} is free and cannot be used to evaluate this expression."
+            | VAR10 (identifier, conflict) -> $"This bound quantor variable `{identifier}` was used in the same formula at {conflict}."  
+            | VAR11 (identifier, conflict) -> $"All variables in a {LiteralLocL} have to be different. The `{identifier}` was used at {conflict}."
 
 /// Computes an MD5 checksum of a string
 let computeMD5Checksum (input: string) =

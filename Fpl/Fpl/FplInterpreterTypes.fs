@@ -323,6 +323,13 @@ type SignatureType =
 /// Maximum number of calls allowed for an Fpl Node
 let maxRecursion = 5
 
+
+/// Checks if a string starts with a lower case character string
+let checkStartsWithLowerCase (s:string) =
+    if s.Length > 0 then 
+        System.Char.IsLower(s[0])
+    else
+        false
 (*
     TODO: 1) implement a function ToPL0Form transforming a predicative expression into a PL0 formula by replacing predicates with free pred variables
              possible applications: see 1a) 
@@ -1587,31 +1594,31 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
             if block.Scope.ContainsKey(this.FplId) then
                 let oldDiagnosticsStopped = ad.DiagnosticsStopped 
                 ad.DiagnosticsStopped <- false
-                this.ErrorOccurred <- emitVAR03diagnostics this.FplId block.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos false
+                this.ErrorOccurred <- emitVAR03diagnostics this.FplId block.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos
                 ad.DiagnosticsStopped <- oldDiagnosticsStopped
             else
                 block.Scope.Add(this.FplId, this)
 
-        let addToSimpleFplBlocksScope (block:FplValue) formulaConflict = 
+        let addToSimpleFplBlocksScope (block:FplValue) = 
             if block.Scope.ContainsKey(this.FplId) then
-                this.ErrorOccurred <- emitVAR03diagnostics this.FplId block.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos formulaConflict
+                this.ErrorOccurred <- emitVAR03diagnostics this.FplId block.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos
             else
                 block.Scope.Add(this.FplId, this)
         
-        let addToPropertyOrConstructor (property:FplValue) formulaConflict = 
+        let addToPropertyOrConstructor (property:FplValue) = 
             let parentOfProperty = property.Parent.Value
             if property.Scope.ContainsKey(this.FplId) then
-                this.ErrorOccurred <- emitVAR03diagnostics this.FplId property.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos formulaConflict
+                this.ErrorOccurred <- emitVAR03diagnostics this.FplId property.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos
             elif parentOfProperty.Scope.ContainsKey(this.FplId) then
                 // check also the scope of the property's parent block
-                this.ErrorOccurred <- emitVAR03diagnostics this.FplId parentOfProperty.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos formulaConflict
+                this.ErrorOccurred <- emitVAR03diagnostics this.FplId parentOfProperty.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos
             else
                 property.Scope.Add(this.FplId, this)
 
         let addToProofOrCorolllary (proofOrCorollary:FplValue) = 
             let rec conflictInScope (node:FplValue) formulaConflict =
                 if node.Scope.ContainsKey(this.FplId) then
-                    this.ErrorOccurred <- emitVAR03diagnostics this.FplId node.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos formulaConflict
+                    this.ErrorOccurred <- emitVAR03diagnostics this.FplId node.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos
                     true
                 else 
                     let parent = node.Parent.Value
@@ -1628,10 +1635,30 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
             if not (conflictInScope proofOrCorollary false) then
                 proofOrCorollary.Scope.Add(this.FplId, this)
 
-        let addToVariableOrQuantorOrMapping (variableOrQuantor:FplValue) =
-            let rec conflictInScope (node:FplValue) formulaConflict =
+        let addToQuantor (quantor:FplValue) =
+            // issue VAR03, if the variable to be bound by the quantor was declared 
+            // in the scope the quantor is placed in.
+            let rec checkConfictInScope (node:FplValue) =
                 if node.Scope.ContainsKey(this.FplId) then
-                    this.ErrorOccurred <- emitVAR03diagnostics this.FplId node.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos formulaConflict
+                    let oldDiagnosticsStopped = ad.DiagnosticsStopped
+                    ad.DiagnosticsStopped <- false
+                    this.ErrorOccurred <- emitVAR03diagnostics this.FplId node.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos
+                    ad.DiagnosticsStopped <- oldDiagnosticsStopped
+                else 
+                    let parent = node.Parent.Value
+                    match parent.Name with
+                    | PrimRoot 
+                    | PrimTheoryL -> ()
+                    | _ ->
+                        checkConfictInScope parent 
+
+            checkConfictInScope quantor
+            quantor.Scope.TryAdd(this.FplId, this) |> ignore        
+        
+        let addToVariableOrMapping (variableOrMapping:FplValue) =
+            let rec conflictInScope (node:FplValue) =
+                if node.Scope.ContainsKey(this.FplId) then
+                    this.ErrorOccurred <- emitVAR03diagnostics this.FplId node.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos 
                     true
                 else 
                     let parent = node.Parent.Value
@@ -1639,16 +1666,16 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
                     | PrimRoot 
                     | PrimTheoryL -> false
                     | _ ->
-                        conflictInScope parent formulaConflict
+                        conflictInScope parent
             
-            if not (conflictInScope variableOrQuantor true) then
-                variableOrQuantor.Scope.Add(this.FplId, this)
-                let blockOpt = variableOrQuantor.UltimateBlockNode
+            if not (conflictInScope variableOrMapping) then
+                variableOrMapping.Scope.Add(this.FplId, this)
+                let blockOpt = variableOrMapping.UltimateBlockNode
                 match blockOpt with
                 | Some block -> block.Scope.Add(this.FplId, this)
                 | None -> ()
             else
-                variableOrQuantor.Scope.TryAdd(this.FplId, this) |> ignore
+                variableOrMapping.Scope.TryAdd(this.FplId, this) |> ignore
 
         match nextOpt with 
         | Some next when next.Name = PrimRefL ->
@@ -1666,22 +1693,22 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
                         || next.Name = PrimExtensionL
                         || next.Name = PrimTranslationL
                         ) ->
-            addToSimpleFplBlocksScope next false
+            addToSimpleFplBlocksScope next
         | Some next when next.Name = PrimRuleOfInference ->
             addToRuleOfInference next
         | Some next when ( next.Name = LiteralCtorL
                         || next.Name = PrimMandatoryFunctionalTermL 
                         || next.Name = PrimMandatoryPredicateL) ->
-            addToPropertyOrConstructor next false
+            addToPropertyOrConstructor next
         | Some next when (next.Name = LiteralPrfL 
                         || next.Name = LiteralCorL) ->
             addToProofOrCorolllary next
         | Some next when (next.Name = PrimVariableL
                         || next.Name = PrimVariableArrayL) ->
-            addToVariableOrQuantorOrMapping next
+            addToVariableOrMapping next
         | Some next when next.Name = PrimMappingL ->
             this.SetIsBound() // mapping-Variables are bound
-            addToVariableOrQuantorOrMapping next
+            addToVariableOrMapping next
         | Some next when next.Name = PrimQuantorAll || next.Name = PrimQuantorExists || next.Name = PrimQuantorExistsN ->  
             this.SetIsBound() // quantor-Variables are bound
             if next.Scope.ContainsKey(this.FplId) then
@@ -1691,7 +1718,7 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
             elif this.Name = PrimVariableArrayL then 
                 this.ErrorOccurred <- emitVAR08diagnostics this.StartPos this.EndPos
             else
-                addToVariableOrQuantorOrMapping next
+                addToQuantor next
                 
         | _ -> addExpressionToParentArgList this
 
@@ -3395,6 +3422,95 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
 
     override this.RunOrder = None
 
+/// Issue VAR10, if the formula in an FplValue uses 
+/// quantor(s) and the variables bound by these quantor(s) are used elsewhere in the same formula
+/// VAR10 => formula should be cleaned up by renaming the bound variables
+let checkCleanedUpFormula (fv:FplValue) =
+    let formulaCreationInSymbolTableCompleted (formula:FplValue) =
+        match formula.Parent with 
+        | Some parent ->
+            match parent.Name with 
+            | PrimConjunction
+            | PrimDisjunction
+            | PrimImplication
+            | PrimEquivalence
+            | PrimExclusiveOr
+            | PrimNegation
+            | PrimQuantorAll
+            | PrimQuantorExists
+            | PrimQuantorExistsN
+            | PrimIsOperator
+            | PrimRefL -> false
+            | _ -> true
+        | _ -> true
+
+    let rec usedVariablesInFormula (formula:FplValue) = 
+        let extractFromSubFormula (subFormula:FplValue) =
+            subFormula.ArgList 
+            |> Seq.map (fun subF -> usedVariablesInFormula subF)
+            |> List.concat
+        match formula.Name with 
+        | PrimRefL when formula.RefersTo.IsSome ->
+            match formula.RefersTo with
+            | Some (:? FplGenericVariable) -> [formula] 
+            | None when checkStartsWithLowerCase formula.FplId -> 
+                [formula]  
+            | _ -> extractFromSubFormula formula 
+        | PrimQuantorAll
+        | PrimQuantorExists
+        | PrimQuantorExistsN -> (formula.Scope.Values |> Seq.toList) @ extractFromSubFormula formula.ArgList[0]  
+        | _ ->
+            extractFromSubFormula formula 
+
+    let rec extractQuantors (formula:FplValue) =
+        let extractFromSubFormula (subFormula:FplValue) =
+            (subFormula.ArgList |> Seq.map (fun subF -> extractQuantors subF) |> List.concat)
+        match formula.Name with 
+        | PrimQuantorAll
+        | PrimQuantorExists
+        | PrimQuantorExistsN -> 
+            [formula] @ extractFromSubFormula formula
+        | _ -> 
+            extractFromSubFormula formula
+
+    let rec checkQuantors (formula:FplValue) =
+        let varUsedInQuantor (varInFormula:FplValue) (quantor:FplValue) =
+            let varLStart = varInFormula.StartPos.Line
+            let varCStart = varInFormula.StartPos.Column
+            let varLEnd = varInFormula.EndPos.Line
+            let varCEnd = varInFormula.EndPos.Column
+            let quantorLStart = quantor.StartPos.Line
+            let quantorCStart = quantor.StartPos.Column
+            let quantorLEnd = quantor.EndPos.Line
+            let quantorCEnd = quantor.EndPos.Column
+            (
+               (quantorLStart < varLStart && quantorLEnd > varLEnd) // lines(quantor) contain lines(variable)
+            || (quantorLStart = varLStart && quantorLEnd > varLEnd && quantorCStart <= varCStart ) // if start line(q) = start line line(v) && end line(q) > end line(v), compare starting columns
+            || (quantorLStart = varLStart && quantorLEnd = varLEnd && quantorCStart <= varCStart && quantorCEnd >= varCEnd) // if line(q) = line(v) for start and end, compare starting and ending columns
+            )
+
+        let varIsBoundByQuantor (varInFormula:FplValue) (quantor:FplValue) =
+            quantor.Scope.ContainsKey(varInFormula.FplId)
+
+        let quantors = extractQuantors formula
+        let usedVariables = usedVariablesInFormula formula
+        if quantors.Length > 0 then 
+            usedVariables
+            |> List.iter(fun varInFormula ->
+                quantors 
+                |> List.iter (fun quantor ->
+                    if varIsBoundByQuantor varInFormula quantor && 
+                        not (varUsedInQuantor varInFormula quantor) then 
+                        let quantorVar = quantor.Scope[varInFormula.FplId]
+                        fv.ErrorOccurred <- emitVAR10diagnostics varInFormula.FplId varInFormula.QualifiedStartPos quantorVar.StartPos quantorVar.EndPos
+                )
+            )                
+            
+    if formulaCreationInSymbolTableCompleted fv then
+        // here, this reference points to a formula, which is final in the symbol table
+        checkQuantors fv
+
+
 type FplReference(positions: Positions, parent: FplValue) =
     inherit FplGenericReference(positions, parent)
     let mutable _callCounter = 0 
@@ -3555,8 +3671,12 @@ type FplReference(positions: Positions, parent: FplValue) =
             _callCounter <- _callCounter - 1
             result
 
+    override this.CheckConsistency () = 
+        base.CheckConsistency()
+        checkCleanedUpFormula this
+
     override this.EmbedInSymbolTable nextOpt = 
-       
+        this.CheckConsistency()
         match nextOpt with 
         | Some next when next.IsBlock() ->
             addExpressionToParentArgList this 
@@ -4687,6 +4807,7 @@ type FplConjunction(positions: Positions, parent: FplValue) as this =
         checkArgPred this arg2
         checkFreeVar arg1
         checkFreeVar arg2
+        checkCleanedUpFormula this
 
 
     override this.EmbedInSymbolTable _ = 
@@ -4747,7 +4868,7 @@ type FplDisjunction(positions: Positions, parent: FplValue) as this =
         checkArgPred this arg2
         checkFreeVar arg1
         checkFreeVar arg2
-
+        checkCleanedUpFormula this
 
     override this.EmbedInSymbolTable _ = 
         this.CheckConsistency()
@@ -4809,6 +4930,7 @@ type FplExclusiveOr(positions: Positions, parent: FplValue) as this =
         checkArgPred this arg2
         checkFreeVar arg1
         checkFreeVar arg2
+        checkCleanedUpFormula this
 
 
     override this.EmbedInSymbolTable _ = 
@@ -4861,6 +4983,7 @@ type FplNegation(positions: Positions, parent: FplValue) as this =
         let arg = this.ArgList[0]
         checkArgPred this arg
         checkFreeVar arg
+        checkCleanedUpFormula this
 
     override this.EmbedInSymbolTable _ = 
         this.CheckConsistency()
@@ -4916,6 +5039,7 @@ type FplImplication(positions: Positions, parent: FplValue) as this =
         checkArgPred this arg2
         checkFreeVar arg1
         checkFreeVar arg2
+        checkCleanedUpFormula this
 
     override this.EmbedInSymbolTable _ = 
         this.CheckConsistency()
@@ -4974,6 +5098,7 @@ type FplEquivalence(positions: Positions, parent: FplValue) as this =
         checkArgPred this arg2
         checkFreeVar arg1
         checkFreeVar arg2
+        checkCleanedUpFormula this
 
     override this.EmbedInSymbolTable _ = 
         this.CheckConsistency()
@@ -5506,6 +5631,7 @@ type FplGenericQuantor(positions: Positions, parent: FplValue) =
             var.ErrorOccurred <- emitVAR05diagnostics var.FplId var.StartPos var.EndPos
         )
         checkArgPred this (this.ArgList[0])
+        checkCleanedUpFormula this
 
     override this.EmbedInSymbolTable _ = 
         this.CheckConsistency()

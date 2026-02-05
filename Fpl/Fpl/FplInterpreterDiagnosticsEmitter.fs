@@ -1,4 +1,4 @@
-﻿/// This modulde contains all side-effect functions necessary to emit diagnostics for the FPL language server.
+﻿/// This module contains all side-effect functions necessary to emit diagnostics for the FPL language server.
 module FplInterpreterDiagnosticsEmitter
 
 open FParsec
@@ -1022,7 +1022,7 @@ let emitVAR02diagnostics name pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitVAR03diagnostics mixedName conflictStartPos pos1 pos2 formulaConflict =
+let emitVAR03diagnostics varName conflictStartPos pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -1030,12 +1030,8 @@ let emitVAR03diagnostics mixedName conflictStartPos pos1 pos2 formulaConflict =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = VAR03(mixedName, conflictStartPos)
-            Diagnostic.Alternatives = 
-                if formulaConflict then 
-                    Some "Cleanup the formula by renaming the variable."
-                else
-                    Some "Remove this variable declaration or rename the variable."
+            Diagnostic.Code = VAR03(varName, conflictStartPos)
+            Diagnostic.Alternatives = Some "Remove this variable declaration or rename the variable."
         }
 
     ad.AddDiagnostic diagnostic
@@ -1119,6 +1115,36 @@ let emitVAR09diagnostics varName varType pos1 pos2 =
             Diagnostic.EndPos = pos2
             Diagnostic.Code = VAR09(varName, varType)
             Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
+
+let emitVAR10diagnostics varName conflictStartPos pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = VAR10(varName, conflictStartPos)
+            Diagnostic.Alternatives = Some "Clean up the formula by renaming the bound quantor variable."
+                    
+        }
+    ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
+
+let emitVAR11diagnostics varName conflictStartPos pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = VAR11(varName, conflictStartPos)
+            Diagnostic.Alternatives = None
+                    
         }
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)

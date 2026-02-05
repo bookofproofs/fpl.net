@@ -251,7 +251,10 @@ let rec eval (st: SymbolTable) ast =
             let variable = fv.RefersTo.Value
             if loc.Scope.ContainsKey(name) then 
                 let other = loc.Scope[name]
-                variable.ErrorOccurred <- emitVAR03diagnostics name other.QualifiedStartPos pos1 pos2 true
+                let oldDiagnosticsStopped = ad.DiagnosticsStopped
+                ad.DiagnosticsStopped <- false
+                variable.ErrorOccurred <- emitVAR11diagnostics name other.QualifiedStartPos pos1 pos2 
+                ad.DiagnosticsStopped <- oldDiagnosticsStopped
             else 
                 loc.Scope.Add(name, variable)
                 variable.Parent <- Some loc
@@ -755,7 +758,7 @@ let rec eval (st: SymbolTable) ast =
             eval st specificationAst |> ignore
             
             let candidates = 
-                if System.Char.IsLower(node.FplId[0]) then
+                if checkStartsWithLowerCase node.FplId then
                     // match the signatures of small-letter entities (like the self or parent entity, or variables with arguments) 
                     // with their declared types 
                     match node.RefersTo with
