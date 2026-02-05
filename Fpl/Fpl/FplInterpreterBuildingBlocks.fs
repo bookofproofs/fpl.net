@@ -214,8 +214,13 @@ let rec eval (st: SymbolTable) ast =
                 | _ -> ()
                 foundVar.SetIsUsed()
             | _ ->
-                // otherwise emit variable not declared 
-                fv.ErrorOccurred <- emitVAR01diagnostics name pos1 pos2
+                match fv.UltimateBlockNode with 
+                | Some (:? FplLocalization as loc) when variableStack.InSignatureEvaluation -> 
+                    () // localizations during 
+                | _ ->
+                    // otherwise emit variable not declared 
+                    fv.ErrorOccurred <- emitVAR01diagnostics name pos1 pos2
+                
                 let undefVar = new FplVariable(name, (pos1, pos2), fv)
                 let undefined = new FplIntrinsicUndef((pos1, pos2), undefVar)
                 undefVar.SetValue(undefined)
@@ -974,9 +979,10 @@ let rec eval (st: SymbolTable) ast =
         let fv = new FplLocalization((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
         let var04List = List<KeyValuePair<string, Positions>>()
         let oldDiagnosticsStopped = ad.DiagnosticsStopped
-        ad.DiagnosticsStopped <- true // stop all diagnostics during localization
         variableStack.PushEvalStack(fv)
+        variableStack.InSignatureEvaluation <- true
         eval st predicateAst
+        variableStack.InSignatureEvaluation <- false
         translationListAsts |> List.map (fun subAst -> 
             eval st subAst
             let vars = fv.GetVariables()
