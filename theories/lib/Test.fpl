@@ -1,1 +1,1 @@
-def cl A def cl B:A def pred T(v:A) {dec ~x:B x:=B()             v:=x; true};
+inf ExistsByExample {dec ~p: pred(c: obj) ~x: obj; pre: p(c) con: ex x:obj {p(x)}};

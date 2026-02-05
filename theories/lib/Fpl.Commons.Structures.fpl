@@ -266,7 +266,7 @@ def pred AreRelated(u,v: Set, r: BinaryRelation)
     (
         In(tuple,r) and
         In(u,r.Domain()) and
-        In(v,r.Codomain())
+        In(v,r.CoDomain())
     )
 }
 

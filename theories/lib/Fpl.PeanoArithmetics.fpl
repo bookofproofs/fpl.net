@@ -32,7 +32,7 @@ ext Digits x@/\d+/ -> Nat
 
 axiom ZeroIsNat
 {
-    is(Zero,Nat)
+    is(Zero(),Nat)
 }
 
 axiom SuccessorExistsAndIsUnique
@@ -125,23 +125,23 @@ def pred IsGreaterOrEqual(n,m: Nat)
 prop AddIsUnique
 {
     dec
-        ~anotherAdd, op: Add
+        ~anotherAdd: Add
     ;
     impl
     (
         all n, m:Nat
         {
             (
-                ( op(n,@0) = n ) and
+                ( Add(n,@0) = n ) and
                 ( anotherAdd(n,@0) = n ) and
-                ( op(n,Succ(m)) = Succ(op(n,m)) ) and
+                ( Add(n,Succ(m)) = Succ(Add(n,m)) ) and
                 ( anotherAdd(n,Succ(m)) = Succ(anotherAdd(n,m)) )
             )
         }
         ,
-        all n, m:Nat
+        all n1, m1:Nat
         {
-            ( op(n,m) = anotherAdd(n,m) )
+            ( Add(n1,m1) = anotherAdd(n1,m1) )
         }
     )
     
@@ -239,9 +239,9 @@ proposition SumOfConsecutiveNumbers
             
         }
         ,
-        all n:Nat
+        all n1:Nat
         {
-            (Sum(@1,n,f) = Div(Mul(n,Succ(n)),@2))
+            (Sum(@1,n1,f) = Div(Mul(n1,Succ(n1)),@2))
         }
     )
 }
