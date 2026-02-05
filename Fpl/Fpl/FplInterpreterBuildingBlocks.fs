@@ -256,10 +256,7 @@ let rec eval (st: SymbolTable) ast =
             let variable = fv.RefersTo.Value
             if loc.Scope.ContainsKey(name) then 
                 let other = loc.Scope[name]
-                let oldDiagnosticsStopped = ad.DiagnosticsStopped
-                ad.DiagnosticsStopped <- false
                 variable.ErrorOccurred <- emitVAR11diagnostics name other.QualifiedStartPos pos1 pos2 
-                ad.DiagnosticsStopped <- oldDiagnosticsStopped
             else 
                 loc.Scope.Add(name, variable)
                 variable.Parent <- Some loc
@@ -364,8 +361,6 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Self((pos1, pos2), _) -> 
         let parent = variableStack.PeekEvalStack()
         let fv = new FplSelf((pos1, pos2), parent)
-        let oldDiagnosticsStopped = ad.DiagnosticsStopped
-        ad.DiagnosticsStopped <- false
         match fv.NextBlockNode with
         | Some block ->
             match block.Name with 
@@ -378,14 +373,11 @@ let rec eval (st: SymbolTable) ast =
             | _ ->
                 fv.ErrorOccurred <- emitID016diagnostics $"{getEnglishName block.Name true} '{block.Type(SignatureType.Name)}'" pos1 pos2
         | _ -> ()
-        ad.DiagnosticsStopped <- oldDiagnosticsStopped
         variableStack.PushEvalStack(fv)
         variableStack.PopEvalStack()
     | Ast.Parent((pos1, pos2), _) -> 
         let parent = variableStack.PeekEvalStack()
         let fv = new FplParent((pos1, pos2), parent)
-        let oldDiagnosticsStopped = ad.DiagnosticsStopped
-        ad.DiagnosticsStopped <- false
         match fv.UltimateBlockNode, fv.NextBlockNode with
         | Some block, Some nextBlock ->
             match block.Name, nextBlock.Name with 
@@ -400,7 +392,6 @@ let rec eval (st: SymbolTable) ast =
             | _ ->
                 fv.ErrorOccurred <- emitID015diagnostics $"{getEnglishName block.Name true} '{block.Type(SignatureType.Name)}'" pos1 pos2
         | _ -> ()
-        ad.DiagnosticsStopped <- oldDiagnosticsStopped
         variableStack.PushEvalStack(fv)
         variableStack.PopEvalStack()
     | Ast.True((pos1, pos2), _) -> 
@@ -437,11 +428,9 @@ let rec eval (st: SymbolTable) ast =
     | Ast.RuleOfInference((pos1, pos2), (signatureAst, premiseConclusionBlockAst)) ->
         let parent = variableStack.PeekEvalStack()
         let fv = new FplRuleOfInference((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
-        let oldDiagnosticsStopped = ad.DiagnosticsStopped
         variableStack.PushEvalStack(fv)
         eval st signatureAst
         eval st premiseConclusionBlockAst
-        ad.DiagnosticsStopped <- oldDiagnosticsStopped // enable all diagnostics after rule of inference
         variableStack.PopEvalStack() 
     | Ast.Mapping((pos1, pos2), variableTypeAst) ->
         let fv = variableStack.PeekEvalStack()
@@ -978,7 +967,6 @@ let rec eval (st: SymbolTable) ast =
         let parent = variableStack.PeekEvalStack()
         let fv = new FplLocalization((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
         let var04List = List<KeyValuePair<string, Positions>>()
-        let oldDiagnosticsStopped = ad.DiagnosticsStopped
         variableStack.PushEvalStack(fv)
         variableStack.InSignatureEvaluation <- true
         eval st predicateAst
@@ -1004,7 +992,6 @@ let rec eval (st: SymbolTable) ast =
             )
         ) |> ignore
         variableStack.PopEvalStack()
-        ad.DiagnosticsStopped <- oldDiagnosticsStopped // enable all diagnostics during localization
         var04List
         |> Seq.iter (fun kvp -> 
             fv.ErrorOccurred <- emitVAR04diagnostics kvp.Key (fst kvp.Value) (snd kvp.Value)

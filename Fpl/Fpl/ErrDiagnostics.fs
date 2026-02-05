@@ -538,7 +538,6 @@ type Diagnostic =
 
 type Diagnostics() =
     let mutable _currentUri = new PathEquivalentUri("about:blank")
-    let mutable _diagnosticsStopped = false
     let _diagnosticStorageTotal = new Dictionary<PathEquivalentUri,Dictionary<string, Diagnostic>>()
     member this.Collection = 
         _diagnosticStorageTotal
@@ -549,22 +548,16 @@ type Diagnostics() =
         |> Seq.map (fun kvp -> kvp.Value)
         |> Seq.toList
 
-    member this.DiagnosticsStopped
-        with get() = _diagnosticsStopped
-        and set (value) = _diagnosticsStopped <- value
-
     member this.CurrentUri 
         with get() = _currentUri
         and set (value) = _currentUri <- value
 
-
     member this.AddDiagnostic (d:Diagnostic) =
-        if not _diagnosticsStopped then
-            let keyOfd = d.DiagnosticID
-            if not (_diagnosticStorageTotal.ContainsKey(d.Uri)) then
-                _diagnosticStorageTotal.Add(d.Uri, new Dictionary<string, Diagnostic>())
-            if not (_diagnosticStorageTotal[d.Uri].ContainsKey(keyOfd)) then
-                _diagnosticStorageTotal[d.Uri].Add(keyOfd, d) |> ignore
+        let keyOfd = d.DiagnosticID
+        if not (_diagnosticStorageTotal.ContainsKey(d.Uri)) then
+            _diagnosticStorageTotal.Add(d.Uri, new Dictionary<string, Diagnostic>())
+        if not (_diagnosticStorageTotal[d.Uri].ContainsKey(keyOfd)) then
+            _diagnosticStorageTotal[d.Uri].Add(keyOfd, d) |> ignore
 
     member this.CountDiagnostics  =
         this.Collection.Length

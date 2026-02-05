@@ -1309,10 +1309,7 @@ let tryAddToParentUsingTypedSignature (fplValue:FplValue) =
         |> Seq.toList
 
     if conflicts.Length > 0 then 
-        let oldDiagnosticsStopped = ad.DiagnosticsStopped 
-        ad.DiagnosticsStopped <- false
         fplValue.ErrorOccurred <- emitID024Diagnostics identifier (conflicts.Head.QualifiedStartPos) fplValue.StartPos fplValue.EndPos
-        ad.DiagnosticsStopped <- oldDiagnosticsStopped
     else
         let parent = fplValue.Parent.Value
         parent.Scope.Add(identifier, fplValue)
@@ -1592,10 +1589,7 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
         this.CheckConsistency()
         let addToRuleOfInference (block:FplValue) = 
             if block.Scope.ContainsKey(this.FplId) then
-                let oldDiagnosticsStopped = ad.DiagnosticsStopped 
-                ad.DiagnosticsStopped <- false
                 this.ErrorOccurred <- emitVAR03diagnostics this.FplId block.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos
-                ad.DiagnosticsStopped <- oldDiagnosticsStopped
             else
                 block.Scope.Add(this.FplId, this)
 
@@ -1640,10 +1634,7 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
             // in the scope the quantor is placed in.
             let rec checkConfictInScope (node:FplValue) =
                 if node.Scope.ContainsKey(this.FplId) then
-                    let oldDiagnosticsStopped = ad.DiagnosticsStopped
-                    ad.DiagnosticsStopped <- false
                     this.ErrorOccurred <- emitVAR03diagnostics this.FplId node.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos
-                    ad.DiagnosticsStopped <- oldDiagnosticsStopped
                 else 
                     let parent = node.Parent.Value
                     match parent.Name with
@@ -3240,10 +3231,7 @@ type FplLanguage(positions: Positions, parent: FplValue) =
         let parent = this.Parent.Value
         if parent.Scope.ContainsKey(this.FplId) then 
             let conflict = parent.Scope[this.FplId]
-            let oldDiagnosticsStopped = ad.DiagnosticsStopped
-            ad.DiagnosticsStopped <- false
             this.ErrorOccurred <- emitID014Diagnostics this.FplId conflict.QualifiedStartPos this.StartPos this.EndPos 
-            ad.DiagnosticsStopped <- oldDiagnosticsStopped
         else
             parent.Scope.Add(this.FplId, this)
 
