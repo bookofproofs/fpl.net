@@ -2,6 +2,7 @@
 
 open FParsec
 open FplParser
+open FplPrimitives
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
 
@@ -288,6 +289,73 @@ type TestExpressions () =
     [<TestMethod>]
     member this.TestPredecence () =
         let result = run (ast .>> eof) """def pred T1() { (x = y * z + 1) };"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+
+    [<DataRow("00", "(x = y * z + 1)")>]
+    [<DataRow("01", "(x + 1)")>]
+    [<DataRow("01a", "( x + 1)")>]
+    [<DataRow("01b", "(x + 1 )")>]
+    [<DataRow("02", "(1 + x)")>]
+    [<TestMethod>]
+    member this.TestExpressionAcceptableSyntax (no:string, expr:string) =
+        let result = run (expression .>> eof) expr
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<DataRow("00a", "(1 + x)")>]
+    [<DataRow("00b", "(1)")>]
+    [<DataRow("00c", "(1 + )")>]
+    [<DataRow("00d", "(1+ )")>]
+    [<DataRow("00e", "(1 +)")>]
+    [<DataRow("00f", "(1+)")>]
+    [<DataRow("01a", "(@1 + x)")>]
+    [<DataRow("01b", "(@1)")>]
+    [<DataRow("01c", "(@1 + )")>]
+    [<DataRow("01d", "(@1+ )")>]
+    [<DataRow("01e", "(@1 +)")>]
+    [<DataRow("01f", "(@1+)")>]
+    [<DataRow("02a", "(x + 1)")>]
+    [<DataRow("02a", "(x + @1)")>]
+    [<DataRow("02b", "(x)")>]
+    [<DataRow("02c", "(x + )")>]
+    [<DataRow("02d", "(x+ )")>]
+    [<DataRow("02e", "(x +)")>]
+    [<DataRow("02f", "(x+)")>]
+
+    [<DataRow("03a", "(1 = x)")>]
+    [<DataRow("03b", "(1)")>]
+    [<DataRow("03c", "(1 = )")>]
+    [<DataRow("03d", "(1= )")>]
+    [<DataRow("03e", "(1 =)")>]
+    [<DataRow("03f", "(1=)")>]
+    [<DataRow("04a", "(@1 = x)")>]
+    [<DataRow("04b", "(@1)")>]
+    [<DataRow("04c", "(@1 = )")>]
+    [<DataRow("04d", "(@1= )")>]
+    [<DataRow("04e", "(@1 =)")>]
+    [<DataRow("04f", "(@1=)")>]
+    [<DataRow("05a", "(x = 1)")>]
+    [<DataRow("05a", "(x = @1)")>]
+    [<DataRow("05b", "(x)")>]
+    [<DataRow("05c", "(x = )")>]
+    [<DataRow("05d", "(x= )")>]
+    [<DataRow("05e", "(x =)")>]
+    [<DataRow("05f", "(x=)")>]
+    [<TestMethod>]
+    member this.TestInfixOperationSyntax (no:string, expr:string) =
+        let result = run (infixOperation .>> eof) expr
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<DataRow("02", "1")>]
+    [<TestMethod>]
+    member this.TestPredicateSyntax (no:string, expr:string) =
+        let result = run (predicate .>> eof) expr
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

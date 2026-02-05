@@ -221,7 +221,7 @@ let paramTuple, paramTupleRef = createParserForwardedToRef()
 let coord = choice [ predicateWithQualification; dollarDigits ] .>> IW 
 
 // infix operators like the equality operator 
-let objectSymbol = positions "ObjectSymbol" ( objectMathSymbols ) .>> IW |>> Ast.ObjectSymbol
+let objectSymbol = positions "ObjectSymbol" ( objectMathSymbols ) |>> Ast.ObjectSymbol
 
 let fplIdentifier = choice [ selfOrParent ; variable ; predicateIdentifier; extension; objectSymbol ] 
 
@@ -373,11 +373,10 @@ let all = positions "All" ((keywordAll >>. namedVariableDeclarationList) .>>. (l
 let exists = positions "Exists" ((keywordEx >>. namedVariableDeclarationList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.Exists
 
 let existsTimesN = positions "ExistsN" (((keywordExN >>. dollarDigits .>> SW) .>>. namedVariableDeclarationList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.ExistsN
-let isOpArg = choice [ objectSymbol; dollarDigits; keywordFalse; keywordTrue; keywordUndefined; attempt referencingIdentifier; predicateWithQualification] .>> IW
-let isOperator = positions "IsOperator" ((keywordIs >>. leftParen >>. isOpArg) .>>. (comma >>. choice [attempt referencingIdentifier; variableType]) .>> rightParen) |>> Ast.IsOperator
+let isOperator = positions "IsOperator" ((keywordIs >>. leftParen >>. predicate .>> IW) .>>. (comma >>. variableType) .>> rightParen) |>> Ast.IsOperator
 
 // infix operators like the equality operator 
-let infixOp = positions "InfixOperator" ( infixMathSymbols ) .>> SW |>> Ast.InfixOperator
+let infixOp = positions "InfixOperator" ( infixMathSymbols ) .>> attemptSW |>> Ast.InfixOperator
 
 let pWithSep p separator =
     let combinedParser = pipe2 p (opt separator) (fun a b -> (a, b))

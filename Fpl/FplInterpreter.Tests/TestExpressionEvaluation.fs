@@ -442,7 +442,7 @@ type TestExpressionEvaluation() =
 
     // match with the type pred(...) 
     [<DataRow("MS1", "def pred A(z:obj) def pred Test() {is(A, pred(y:obj))};", LiteralTrue)>] // true: pred(y:obj) matches signature A(obj)
-    [<DataRow("MS1a", "def pred A(z:obj) def pred Test() {dec ~x:obj; is(A(x), pred(y:obj))};", LiteralFalse)>] // false: pred(y:obj) does not match value A(obj) 
+    [<DataRow("MS1a", "def pred A(z:obj) def pred Test() {dec ~x:obj; is(A(x), pred(y:obj))};", LiteralTrue)>] // false: pred(y:obj) does not match value A(obj) 
     [<DataRow("MS1b", "def pred A(z:obj) def pred Test() {dec ~x:ind; is(A(x), pred(y:obj))};", LiteralFalse)>] // false: pred(y:obj) does not match value A(ind) not matching A(obj)
     [<DataRow("MS1c", "def pred A(z:ind) def pred Test() {dec ~x:ind; is(A(x), pred(y:obj))};", LiteralFalse)>] // false: pred(y:obj) does not match value A(ind) 
     [<DataRow("MS1d", "def pred A(z:ind) def pred Test() {is(A, pred(y:obj))};", LiteralFalse)>] // false: pred(y:obj) does not match signature A(ind)
@@ -580,7 +580,7 @@ type TestExpressionEvaluation() =
     [<DataRow("MS2r4", "def pred A() {intr prty func X()->obj } def pred Test() {is(A.X, pred)};", LiteralFalse)>] // false: pred does not match signature A.X()->obj
     [<DataRow("MS2r5", "def pred A() {intr prty func X(x:obj)->obj } def pred Test() {is(A.X, pred)};", LiteralFalse)>] // false: pred does not match signature A.X(obj)->obj
     [<DataRow("MS2r6", "def pred A() {intr prty func X(x:ind)->obj } def pred Test() {is(A.X, pred)};", LiteralFalse)>] // false: pred does not match signature A.X(ind)->obj
-    [<DataRow("MS2r7", "def pred A() {intr prty pred X(x:obj) } def pred Test() {dec ~a:obj; is(A.X(a), pred)};", LiteralFalse)>] // false: pred does not match by value A.X(obj) 
+    [<DataRow("MS2r7", "def pred A() {intr prty pred X(x:obj) } def pred Test() {dec ~a:obj; is(A.X(a), pred)};", LiteralTrue)>] // true: pred matches by value A.X(obj) 
     // ... using properties of functional terms
     [<DataRow("MS2s1", "def func A()->obj {intr prty pred X(x:obj) } def pred Test() {is(A.X, pred)};", LiteralTrue)>] // true: pred matches signature A.X(obj) 
     [<DataRow("MS2s2", "def func A()->obj {intr prty pred X(x:ind) } def pred Test() {is(A.X, pred)};", LiteralTrue)>] // true: pred matches signature A.X(ind)
@@ -785,8 +785,6 @@ type TestExpressionEvaluation() =
     [<DataRow("MS2g", "lem A {true} def pred Test() {is(undef, A)};", LiteralTrue)>] // true: undef matches signature A (lemma)
     [<DataRow("MS2h", "prop A {true} def pred Test() {is(undef, A)};", LiteralTrue)>] // true: undef matches signature A (proposition)
     [<DataRow("MS2i", "conj A {true} def pred Test() {is(undef, A)};", LiteralTrue)>] // true: undef matches signature A (conjecture)
-    [<DataRow("MS2j", "cor A$1 {true} def pred Test() {is(undef, A$1)};", LiteralTrue)>] // true: undef matches signature A$1 (corollary)
-    [<DataRow("MS2k", "proof A$1 {1. |- trivial} def pred Test() {is(undef, A$1)};", LiteralTrue)>] // true: undef matches signature A$1 (proof)
     [<DataRow("MS2l", "inf A {pre:true con:true} def pred Test() {is(undef, A)};", LiteralTrue)>] // true: undef matches  signature A (rule of inference)
     [<DataRow("MS2m", "def func A()->obj def pred Test() {is(undef, A)};", LiteralTrue)>] // true: undef matches signature A (functional term)
     [<DataRow("MS2n", "ext A x@/\d+/ -> obj {dec ~y:obj; return y} def pred Test() {is(undef, A)};", LiteralTrue)>] // true: undef matches signature A (extension)

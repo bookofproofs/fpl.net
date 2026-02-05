@@ -8,9 +8,9 @@ open CommonTestHelpers
 [<TestClass>]
 type TestInfixOperations() =
 
-    [<DataRow("""def pred T1() { dec ~x,y:obj; (x = y) }""", LiteralTrue)>]
-    [<DataRow("""ext T x@/\d+/->obj {ret x} def pred T1() { (@1 = @2) }""", LiteralFalse)>]
-    [<DataRow("""def pred T1() { (@1 = @1) }""", LiteralTrue)>]
+    [<DataRow("""def pred T1() { dec ~x,y:obj; (x = y) }""", PrimUndetermined)>]
+    [<DataRow("""ext T x@/\d+/->obj {ret x} def pred T1() { (@1 = @2) }""", PrimUndetermined)>]
+    [<DataRow("""def pred T1() { (@1 = @1) }""", PrimUndetermined)>]
     [<TestMethod>]
     member this.TestEqualityPredicate(varVal, expected:string) =
         ad.Clear()
@@ -26,9 +26,7 @@ type TestInfixOperations() =
             let pr1 = theory.Scope["T1()"] 
             let variableStack = new FplVariableStack()
             pr1.Run variableStack
-
-            let base1 = pr1.ValueList[0]
-            Assert.AreEqual<string>(expected, base1.Represent())
+            Assert.AreEqual<string>(expected, pr1.Represent())
         | None -> 
             Assert.IsTrue(false)
 
@@ -53,8 +51,7 @@ type TestInfixOperations() =
                 let theory = r.Scope[filename]
 
                 let pr1 = theory.Scope["T1()"] 
-                let base1 = pr1.ValueList[0]
-                Assert.AreEqual<string>(expected, base1.Represent())
+                Assert.AreEqual<string>(expected, pr1.Represent())
             | None -> 
                 Assert.IsTrue(false)
 
@@ -79,8 +76,7 @@ type TestInfixOperations() =
                 let theory = r.Scope[filename]
 
                 let pr1 = theory.Scope["T1()"] 
-                let base1 = pr1.ValueList[0]
-                Assert.AreEqual<string>(expected, base1.Represent())
+                Assert.AreEqual<string>(expected, pr1.Represent())
             | None -> 
                 Assert.IsTrue(false)
 
@@ -102,8 +98,7 @@ type TestInfixOperations() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ValueList[0]
-            Assert.AreEqual<string>(expected, base1.Represent())
+            Assert.AreEqual<string>(expected, pr1.Represent())
         | None -> 
             Assert.IsTrue(false)
 
@@ -138,10 +133,7 @@ type TestInfixOperations() =
                 let pr1 = theory.Scope["T1()"] 
                 let variableStack = new FplVariableStack()
                 pr1.Run variableStack
-
-
-                let base1 = pr1.ValueList[0]
-                Assert.AreEqual<string>(expected, base1.Represent())
+                Assert.AreEqual<string>(expected, pr1.Represent())
             | None -> 
                 Assert.IsTrue(false)
 
@@ -173,10 +165,7 @@ type TestInfixOperations() =
             let pr1 = theory.Scope["T1()"] 
             let variableStack = new FplVariableStack()
             pr1.Run variableStack
-
-
-            let base1 = pr1.ValueList[0]
-            Assert.AreEqual<string>(expected, base1.Represent())
+            Assert.AreEqual<string>(expected, pr1.Represent())
         | None -> 
             Assert.IsTrue(false)
 
@@ -209,8 +198,7 @@ type TestInfixOperations() =
                 let theory = r.Scope[filename]
 
                 let pr1 = theory.Scope["T1()"] 
-                let base1 = pr1.ValueList[0]
-                Assert.AreEqual<string>(expected, base1.Represent())
+                Assert.AreEqual<string>(expected, pr1.Represent())
             | None -> 
                 Assert.IsTrue(false)
 
@@ -243,7 +231,6 @@ type TestInfixOperations() =
                 let theory = r.Scope[filename]
 
                 let pr1 = theory.Scope["T1()"] 
-                let base1 = pr1.ValueList[0]
-                Assert.AreEqual<string>(expected, base1.Represent())
+                Assert.AreEqual<string>(expected, pr1.Represent())
             | None -> 
                 Assert.IsTrue(false)

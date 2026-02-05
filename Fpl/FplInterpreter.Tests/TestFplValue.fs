@@ -9,7 +9,7 @@ open CommonTestHelpers
 [<TestClass>]
 type TestFplValue() =
 
-    [<DataRow("inference TestId {pre: true con: true};", "TestId", "pred")>]
+    [<DataRow("inference TestId {pre: true con: true};", "TestId", "undef")>]
     [<DataRow("axiom TestId {true};", "TestId", "pred")>]
     [<DataRow("postulate TestId {true};", "TestId", "pred")>]
     [<DataRow("theorem TestId {true};", "TestId", "pred")>]

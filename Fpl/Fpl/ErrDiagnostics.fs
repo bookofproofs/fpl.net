@@ -62,7 +62,7 @@ type PathEquivalentUri(uriString: string) =
 
     member this.TheoryName = Path.GetFileNameWithoutExtension(this.AbsolutePath)
 
-/// Tranforms a whole number into English ordinal
+/// Transforms a whole number into English ordinal
 let englishOrdinal dimNumber = 
     match dimNumber with
     | 1 -> "1st"
@@ -173,10 +173,17 @@ type DiagnosticCode =
     | SIG09 of string * string * int
     | SIG10 of string * string * int 
     | SIG11 of string * string
+    | SIG12 of string * string * string * string
+    | SIG13 of string * string * string * string 
+    | SIG14 
     // structure-related error codes
     | ST001 of string 
     | ST002 of string 
     | ST003 of string 
+    | ST004 of string
+    | ST005 of string * string
+    // interpreter syntax-related error codes for error-tolerant parser productions
+    | SY000 of string
     // variable-related error codes
     | VAR00 
     | VAR01 of string 
@@ -188,6 +195,8 @@ type DiagnosticCode =
     | VAR07 of string 
     | VAR08 
     | VAR09 of string * string 
+    | VAR10 of string * string
+    | VAR11 of string * string
     member this.Code = 
         match this with
             // parser error messages
@@ -291,10 +300,17 @@ type DiagnosticCode =
             | SIG09 _ -> "SIG09"
             | SIG10 _ -> "SIG10"
             | SIG11 _ -> "SIG11"
+            | SIG12 _ -> "SIG12"
+            | SIG13 _ -> "SIG13"
+            | SIG14 -> "SIG14"
             // structure-related error codes
             | ST001 _ -> "ST001"
             | ST002 _ -> "ST002"
             | ST003 _ -> "ST003"
+            | ST004 _ -> "ST004"
+            | ST005 _ -> "ST005"
+            // interpreter syntax-related error codes for error-tolerant parser
+            | SY000 _ -> "SY000"
             // variable-related error codes
             | VAR00 -> "VAR00"
             | VAR01 _  -> "VAR01"
@@ -306,6 +322,8 @@ type DiagnosticCode =
             | VAR07 _  -> "VAR07"
             | VAR08 -> "VAR08"
             | VAR09 _ -> "VAR09"
+            | VAR10 _ -> "VAR10"
+            | VAR11 _ -> "VAR11"
     member this.Message = 
         match this with
             // parser error messages
@@ -334,7 +352,7 @@ type DiagnosticCode =
             | STMDEL -> "Syntax error in delegate"
             | STMFOI -> "Syntax error in domain"
             | STMFOR -> "Syntax error in for statement"
-            | STMMAP -> "Syntax error in mapcases statement"
+            | STMMAP -> "Syntax error in mcases statement"
             | STMREV -> "Syntax error in revocation"
             | STMRET -> "Syntax error in return statement"
             | AGI000 -> "Syntax error in proof argument"
@@ -390,14 +408,14 @@ type DiagnosticCode =
                     $"Cannot evaluate `{typeOfPredicate}` because its argument `{argument}` typed `{typeOfExpression}` could not be evaluated as a predicate."
             | LG002 (nodeTypeName, times) -> $"Possible infinite recursion detected, `{nodeTypeName}` was called for more than {times} times.`."
             | LG003 (nodeTypeName, nodeName) -> $"`{nodeTypeName}` evaluates to `false` and cannot be {nodeName}."
-            | LG004 nodeType -> $"`Parameters not allowed for {nodeType}."
-            | LG005 name -> $"Unnecessary assignment of `{name}` detected (will be implicitely ignored)."
+            | LG004 nodeType -> $"`Statement inside {nodeType} might cause side effects."
+            | LG005 name -> $"Unnecessary assignment of `{name}` detected (will be implicitly ignored)."
             // proof-related error codes
             | PR001 (incorrectBlockType, justificatinItemName) -> $"Cannot find a `{justificatinItemName}`, found {incorrectBlockType} instead."
             | PR003 (name, conflict) -> $"Argument identifier `{name}` was already declared at {conflict}."  
             | PR004 (name, conflict)  -> $"Justification `{name}` was already declared at {conflict}." 
             | PR005 name ->  $"Argument identifier `{name}` not declared in this proof."
-            | PR006 (proofName, argumentName)->  $"A proof {proofName} was found, but there ít has no argument with the name `{argumentName}`."
+            | PR006 (proofName, argumentName)->  $"A proof {proofName} was found, but it has no argument with the identifier `{argumentName}`."
             | PR007 (nodeTypeName, nodeName) ->  $"{nodeTypeName} is {nodeName} and is missing a proof."
             | PR008 (nodeName, expectedInputArgInference, actualInputArgInference) ->  $"This {nodeName} expects `{expectedInputArgInference}` and could not be applied to the proceeding argument inference which was `{actualInputArgInference}`."
             | PR009 -> "Not all arguments of the proof could be verified."
@@ -430,12 +448,19 @@ type DiagnosticCode =
             | SIG09 (arrName, dimType, dimNumber) -> $"Missing index for array's `{arrName}` {englishOrdinal dimNumber} dimension `{dimType}`"
             | SIG10 (arrName, indexVarName, indexNumber) -> $"Array `{arrName}` has less dimensions, {englishOrdinal indexNumber} index `{indexVarName}` not supported"
             | SIG11 (qualifiedNameMapping, qualifiedWrongCandidate) -> $"{qualifiedNameMapping} cannot map to {qualifiedWrongCandidate}"
+            | SIG12 (templateName, secondUsage, firstUsage, firstUsagePos) -> $"The template `{templateName}` was used inconsistently with `{secondUsage}`, expecting `{firstUsage}` as it was used at `{firstUsagePos}`."
+            | SIG13 (stmtName, secondUsage, firstUsage, firstUsagePos) -> $"Every branch of the {stmtName} must return a value with a type of the first case at `{firstUsagePos}`, which was `{firstUsage}`. This branch returns `{secondUsage}`."
+            | SIG14 -> $"This case will never be matched."
             // structure-related error codes
-            | ST001 nodeName -> sprintf $"The {nodeName} does nothing."
-            | ST002 nodeName -> sprintf $"The {nodeName} does nothing."
-            | ST003 errCode -> sprintf $"Assignment not possible due to proceeding {errCode} error(s)."
+            | ST001 nodeName -> $"The {nodeName} does nothing."
+            | ST002 nodeName -> $"The {nodeName} does nothing."
+            | ST003 errCode -> $"Assignment not possible due to proceeding {errCode} error(s)."
+            | ST004 langCode -> $"The language `{langCode}` not implemented."
+            | ST005 (domain, nodeType) -> $"An enumerator for the domain `{domain}` being {nodeType} could not be established."
+            // interpreter syntax-related error codes for error-tolerant parser
+            | SY000 infixOp -> $"The infix operator `{infixOp}` is missing a second operand."
             // variable-related error codes
-            | VAR00 ->  sprintf "Declaring multiple arrays at once may cause ambiguities."
+            | VAR00 ->  "Declaring multiple arrays at once may cause ambiguities."
             | VAR01 name -> $"Variable `{name}` not declared in this scope."
             | VAR02 name -> $"Variable `{name}` was already bound in this quantor."
             | VAR03 (identifier, conflict) -> $"Variable `{identifier}` was already declared at {conflict}."  
@@ -448,7 +473,9 @@ type DiagnosticCode =
                 | _ -> $"Variable `{name}` of (unknown type) `{oldFromNode} will be overshadowed by `{newFromNode}`."
             | VAR07 name -> $"The {PrimQuantorExistsN} accepts only one bound variable `{name}`."
             | VAR08 -> "Variadic variables cannot be bound in a quantor."
-            | VAR09 (varName,varType) -> $"The variable {varName}:{varType} is free and cannot be used to evaluate this expresssion."
+            | VAR09 (varName,varType) -> $"The variable {varName}:{varType} is free and cannot be used to evaluate this expression."
+            | VAR10 (identifier, conflict) -> $"This bound quantor variable `{identifier}` was used in the same formula at {conflict}."  
+            | VAR11 (identifier, conflict) -> $"All variables in a {LiteralLocL} have to be different. The `{identifier}` was used at {conflict}."
 
 /// Computes an MD5 checksum of a string
 let computeMD5Checksum (input: string) =
@@ -511,7 +538,6 @@ type Diagnostic =
 
 type Diagnostics() =
     let mutable _currentUri = new PathEquivalentUri("about:blank")
-    let mutable _diagnosticsStopped = false
     let _diagnosticStorageTotal = new Dictionary<PathEquivalentUri,Dictionary<string, Diagnostic>>()
     member this.Collection = 
         _diagnosticStorageTotal
@@ -522,22 +548,16 @@ type Diagnostics() =
         |> Seq.map (fun kvp -> kvp.Value)
         |> Seq.toList
 
-    member this.DiagnosticsStopped
-        with get() = _diagnosticsStopped
-        and set (value) = _diagnosticsStopped <- value
-
     member this.CurrentUri 
         with get() = _currentUri
         and set (value) = _currentUri <- value
 
-
     member this.AddDiagnostic (d:Diagnostic) =
-        if not _diagnosticsStopped then
-            let keyOfd = d.DiagnosticID
-            if not (_diagnosticStorageTotal.ContainsKey(d.Uri)) then
-                _diagnosticStorageTotal.Add(d.Uri, new Dictionary<string, Diagnostic>())
-            if not (_diagnosticStorageTotal[d.Uri].ContainsKey(keyOfd)) then
-                _diagnosticStorageTotal[d.Uri].Add(keyOfd, d) |> ignore
+        let keyOfd = d.DiagnosticID
+        if not (_diagnosticStorageTotal.ContainsKey(d.Uri)) then
+            _diagnosticStorageTotal.Add(d.Uri, new Dictionary<string, Diagnostic>())
+        if not (_diagnosticStorageTotal[d.Uri].ContainsKey(keyOfd)) then
+            _diagnosticStorageTotal[d.Uri].Add(keyOfd, d) |> ignore
 
     member this.CountDiagnostics  =
         this.Collection.Length
@@ -767,7 +787,7 @@ let rec tryParse someParser input startIndexOfInput nextIndex (code:DiagnosticCo
         let newErrMsg, choices = mapErrMsgToRecText input errorMsg restInput.Position
         let previousChoices = String.concat ", " choices
         // calculate the index in the original input because the error index points to the input that might be a 
-        // substring of the original input
+        // sub string of the original input
         let correctedIndex = int restInput.Position.Index + startIndexOfInput
         // since we call the function with lastCorrectedIndex=-1 that is impossible, the following condition checks if 
         // the recursive call have had altered the corrected position, if not, we have to break the recursion
@@ -828,7 +848,7 @@ let rec tryParseRemainingChunk someParser (input:string) startIndexOfInput nextI
                 let newErrMsg, choices = mapErrMsgToRecText input errorMsg restInput.Position
                 let previousChoices = String.concat ", " choices
                 // calculate the index in the original input because the error index points to the input that might be a 
-                // substring of the original input
+                // sub string of the original input
                 let correctedIndex = restInput.Position.Index + startIndexOfInput
                 if correctedIndex < nextIndex && previousChoices<>lastChoices then 
                     let correctedPosition = 

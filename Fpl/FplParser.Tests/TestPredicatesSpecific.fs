@@ -373,8 +373,6 @@ type TestPredicatesSpecific () =
     [<DataRow("is(undef, ind)")>]
     [<DataRow("is(true, ind)")>]
     [<DataRow("is(false, ind)")>]
-    [<DataRow("is(x, A$1)")>]
-
     [<TestMethod>]
     member this.TestIsOperator (fplCode:string) =
         let result = run (isOperator .>> eof) fplCode
