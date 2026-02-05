@@ -4748,10 +4748,9 @@ type FplSelf(positions: Positions, parent: FplValue) as this =
 let checkFreeVar (arg:FplValue) = 
     match arg.RefersTo with 
     | Some ref ->
-        match ref with 
-        | :? FplGenericVariable as var ->
-            if not var.IsBound then 
-                var.ErrorOccurred <- emitVAR09diagnostics var.FplId var.TypeId var.StartPos var.EndPos
+        match ref, ref.UltimateBlockNode with 
+        | :? FplGenericVariable as var, Some node when node.Name <> PrimRuleOfInference && not var.IsBound ->
+            var.ErrorOccurred <- emitVAR09diagnostics var.FplId var.TypeId var.StartPos var.EndPos
         | _ -> ()
     | _ -> ()
 

@@ -433,7 +433,6 @@ let rec eval (st: SymbolTable) ast =
         let parent = variableStack.PeekEvalStack()
         let fv = new FplRuleOfInference((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
         let oldDiagnosticsStopped = ad.DiagnosticsStopped
-        ad.DiagnosticsStopped <- true // stop all diagnostics during rule of inference
         variableStack.PushEvalStack(fv)
         eval st signatureAst
         eval st premiseConclusionBlockAst
