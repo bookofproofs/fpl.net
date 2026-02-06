@@ -3562,6 +3562,7 @@ type TestInterpreterErrors() =
     [<DataRow("00d", "def cl A:B {ctor A(){dec base.B();} } ;", 0)>]
     [<DataRow("00e", "def cl A {ctor A(){} } ;", 0)>]
     [<DataRow("00f", "def cl A;", 0)>]
+    [<DataRow("00g", "def cl A:B,C {intr} ;", 1)>]
     [<DataRow("01a", "def func A()->obj {intr} ;", 1)>]
     [<DataRow("01b", "def func A:B()->obj {intr} ;", 1)>]
     [<DataRow("01c", "def func A(x:obj)->obj {intr} ;", 1)>]
@@ -4239,7 +4240,7 @@ type TestInterpreterErrors() =
 
     [<DataRow("01", """loc and(p,q) := !tex: p "\wedge" q;;""", 0)>]
     [<DataRow("02", """loc and(q,q) := !tex: p "\wedge" q;;""", 1)>]
-    [<DataRow("03", """loc ex q:pred { and(q,q) } := !tex: p "\wedge" q;;""", 2)>]
+    [<DataRow("03", """loc ex q:pred { and(q,q) } := !tex: p "\wedge" q;;""", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestVAR11(no: string, fplCode:string, expected) =

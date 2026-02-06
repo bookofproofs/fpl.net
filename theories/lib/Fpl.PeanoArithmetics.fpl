@@ -103,7 +103,7 @@ def class SetNat: Set
 }
 
 // Addition of natural numbers
-def func Add(n,m: Nat)->Nat
+def func Add(n,m: Nat)->Nat infix "+" 30
 {
     dec
         ~result, k: Nat
@@ -153,16 +153,16 @@ proof AddIsUnique$1
         all n, m:Nat
         {
             (
-                ( op(n,@0) = n ) and
+                ( Add(n,@0) = n ) and
                 ( anotherAdd(n,@0) = n ) and
-                ( op(n,Succ(m)) = Succ(op(n,m)) ) and
+                ( Add(n,Succ(m)) = Succ(Add(n,m)) ) and
                 ( anotherAdd(n,Succ(m)) = Succ(anotherAdd(n,m)) )
             )
         }
     2. |- trivial
     3. |- all n, m:Nat
             {
-                ( op(n,m) = anotherAdd(n,m) )
+                ( Add(n,m) = anotherAdd(n,m) )
             }
 }
 
@@ -209,12 +209,24 @@ def func Sum3(arr:*Nat[ind]) -> Nat
 
 def func Addend(a: Nat)->Nat
 
+def pred Range(from, to:Nat)
+
+def pred LowerEqual(x,y:Nat) infix "<=" 71 
+{
+    ex a:Nat {(x + a = y)}
+}
+
+def pred LowerEqual(x,y:Nat) infix ">=" 71 
+{
+    ex a:Nat {(x = y + a)}
+}
+
 def func Sum(from,to:Nat, addend: Addend) -> Nat
 {
     dec
         ~i, result: Nat
         result:=Zero()
-        for i in Range(from,to)
+        for i in Range(from, to)
         {
             result:=Add(result,addend(i))
         }
@@ -244,6 +256,11 @@ proposition SumOfConsecutiveNumbers
             (Sum(@1,n1,f) = Div(Mul(n1,Succ(n1)),@2))
         }
     )
+}
+
+proof SumOfConsecutiveNumbers$1 
+{
+    1. |- trivial
 }
 
 def cl Real

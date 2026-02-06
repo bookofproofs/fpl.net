@@ -3570,12 +3570,12 @@ type FplReference(positions: Positions, parent: FplValue) =
                 $"{head}({args})"
 
         match argsCount, this.ArgType, this.DottedChild with
-            | 0, ArgType.Nothing, Some qual ->
-                $"{head}.{qual.Type(propagate)}"
-            | 0, ArgType.Brackets, Some qual ->
-                $"{head}[].{qual.Type(propagate)}"
-            | 0, ArgType.Parentheses, Some qual ->
-                $"{head}().{qual.Type(propagate)}"
+            | 0, ArgType.Nothing, Some qualification ->
+                $"{head}.{qualification.Type propagate}"
+            | 0, ArgType.Brackets, Some qualification ->
+                $"{head}[].{qualification.Type propagate}"
+            | 0, ArgType.Parentheses, Some qualification ->
+                $"{head}().{qualification.Type propagate}"
             | 0, ArgType.Nothing, None -> 
                 match headObj.Name with 
                 | PrimVariableArrayL 
@@ -3588,30 +3588,17 @@ type FplReference(positions: Positions, parent: FplValue) =
                 $"{head}[]"
             | 0, ArgType.Parentheses, None ->
                 fallBackFunctionalTerm
-            | 1, ArgType.Nothing, Some qual -> 
-                $"{head}{args}.{qual.Type(propagate)}"
-            | 1, ArgType.Brackets, Some qual ->
-                $"{head}[{args}].{qual.Type(propagate)}"
-            | 1, ArgType.Parentheses, Some qual ->
-                $"{head}({args}).{qual.Type(propagate)}"
             | 1, ArgType.Nothing, None -> 
                 if this.FplId <> String.Empty then 
                     fallBackFunctionalTerm
                 else
                     $"{head}{args}"
-            | 1, ArgType.Brackets, None ->
-                $"{head}[{args}]"
-            | 1, ArgType.Parentheses, None ->
-                if head = LiteralFunc then 
-                    fallBackFunctionalTerm
-                else
-                    $"{head}({args})"
             | _, ArgType.Nothing, Some qualification -> 
-                $"{head}({args}).{qualification.Type(propagate)}"
-            | _, ArgType.Brackets, Some qual ->
-                $"{head}[{args}].{qual.Type(propagate)}"
-            | _, ArgType.Parentheses, Some qual ->
-                $"{head}({args}).{qual.Type(propagate)}"
+                $"{head}({args}).{qualification.Type propagate}"
+            | _, ArgType.Brackets, Some qualification ->
+                $"{head}[{args}].{qualification.Type propagate}"
+            | _, ArgType.Parentheses, Some qualification ->
+                $"{head}({args}).{qualification.Type propagate}"
             | _, ArgType.Nothing, None -> 
                 $"{head}({args})"
             | _, ArgType.Brackets, None ->
@@ -4737,7 +4724,7 @@ let checkFreeVar (arg:FplValue) =
     match arg.RefersTo with 
     | Some ref ->
         match ref, ref.UltimateBlockNode with 
-        | :? FplGenericVariable as var, Some node when node.Name <> PrimRuleOfInference && not var.IsBound ->
+        | :? FplGenericVariable as var, Some node when node.Name <> PrimRuleOfInference && node.Name <> LiteralLocL && not var.IsBound ->
             var.ErrorOccurred <- emitVAR09diagnostics var.FplId var.TypeId var.StartPos var.EndPos
         | _ -> ()
     | _ -> ()
