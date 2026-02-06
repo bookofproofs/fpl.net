@@ -1471,7 +1471,8 @@ let rec eval (st: SymbolTable) ast =
         | Some (funcContentAst, optPropertyListAsts) ->
             eval st funcContentAst
             optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
-            if functionaTermBlock.GetProperties().IsEmpty && functionaTermBlock.ArgList.Count = 1 then
+            let properties = functionaTermBlock.GetProperties()
+            if properties.IsEmpty && functionaTermBlock.ArgList.Count = 1 then
                 functionaTermBlock.ErrorOccurred <- emitST001diagnostics functionaTermBlock.Name pos1 pos2
         | None -> functionaTermBlock.IsIntrinsic <- true
     | Ast.DefinitionFunctionalTerm((pos1, pos2), (functionalTermSignatureAst, functionalTermDefBlockAst)) ->
@@ -1505,7 +1506,8 @@ let rec eval (st: SymbolTable) ast =
             optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
             let properties = cl.GetProperties()
             let constructors = cl.GetConstructors()
-            if properties.IsEmpty && cl.ArgList.Count = 0 && constructors.IsEmpty then
+            let classContent =  cl.ArgList |> Seq.filter (fun node -> node.Name <> LiteralBase) |> Seq.toList
+            if properties.IsEmpty && classContent.Length = 0 && constructors.IsEmpty then
                 classBlock.ErrorOccurred <- emitST001diagnostics classBlock.Name pos1 pos2
         | None -> 
             cl.IsIntrinsic <- true

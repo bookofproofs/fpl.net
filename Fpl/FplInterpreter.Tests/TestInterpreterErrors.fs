@@ -3562,6 +3562,7 @@ type TestInterpreterErrors() =
     [<DataRow("00d", "def cl A:B {ctor A(){dec base.B();} } ;", 0)>]
     [<DataRow("00e", "def cl A {ctor A(){} } ;", 0)>]
     [<DataRow("00f", "def cl A;", 0)>]
+    [<DataRow("00g", "def cl A:B,C {intr} ;", 1)>]
     [<DataRow("01a", "def func A()->obj {intr} ;", 1)>]
     [<DataRow("01b", "def func A:B()->obj {intr} ;", 1)>]
     [<DataRow("01c", "def func A(x:obj)->obj {intr} ;", 1)>]
