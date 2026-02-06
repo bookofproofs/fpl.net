@@ -4240,7 +4240,7 @@ type TestInterpreterErrors() =
 
     [<DataRow("01", """loc and(p,q) := !tex: p "\wedge" q;;""", 0)>]
     [<DataRow("02", """loc and(q,q) := !tex: p "\wedge" q;;""", 1)>]
-    [<DataRow("03", """loc ex q:pred { and(q,q) } := !tex: p "\wedge" q;;""", 2)>]
+    [<DataRow("03", """loc ex q:pred { and(q,q) } := !tex: p "\wedge" q;;""", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestVAR11(no: string, fplCode:string, expected) =
