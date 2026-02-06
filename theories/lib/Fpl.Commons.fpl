@@ -449,9 +449,9 @@ inf NotAll2ExNot
 {
     dec ~p: pred(x:tpl);
     pre:
-        not all x:tpl {p(x)}
+        not all x1:tpl {p(x1)}
     con:
-        ex x:tpl {not p(x)}    
+        ex x1:tpl {not p(x1)}    
 }
 
 inf ExNot2NotAll
