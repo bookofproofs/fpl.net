@@ -3527,97 +3527,84 @@ type FplReference(positions: Positions, parent: FplValue) =
             base.SetValue fv
 
     override this.Type signatureType =
-        let headObj = 
-            match this.RefersTo with
-            | Some ret -> ret
-            | None -> this
+        match this.DottedChild with 
+        | Some dotted -> 
+            // delegate to dotted if such is available
+            dotted.Type signatureType 
+        | _ ->
+            let headObj = 
+                match this.RefersTo with
+                | Some ret -> ret
+                | None -> this
 
-        let propagate = propagateSignatureType signatureType
+            let propagate = propagateSignatureType signatureType
 
-        // The arguments are reserved for the arguments or the coordinates of the reference
-        let args, argsCount =
-            let ret = 
-                this.ArgList
-                |> Seq.map (fun fv -> fv.Type(propagate))
-                |> String.concat ", "
-            ret, this.ArgList.Count
+            // The arguments are reserved for the arguments or the coordinates of the reference
+            let args, argsCount =
+                let ret = 
+                    this.ArgList
+                    |> Seq.map (fun fv -> fv.Type(propagate))
+                    |> String.concat ", "
+                ret, this.ArgList.Count
 
-        let head = 
-            let ret = 
-                if headObj.Name = PrimExtensionL then 
-                    headObj.Type signatureType
-                elif headObj.ExpressionType.IsNoFix then
-                    getFplHead headObj signatureType 
-                else
-                    headObj.ExpressionType.GetUserDefinedLiteral headObj.FplId
-            match signatureType, ret, args with
-            | SignatureType.Type, "", LiteralUndef -> ""
-            | SignatureType.Type, "", "" -> LiteralUndef
-            | _ -> ret
+            let head = 
+                let ret = 
+                    if headObj.Name = PrimExtensionL then 
+                        headObj.Type signatureType
+                    elif headObj.ExpressionType.IsNoFix then
+                        getFplHead headObj signatureType 
+                    else
+                        headObj.ExpressionType.GetUserDefinedLiteral headObj.FplId
+                match signatureType, ret, args with
+                | SignatureType.Type, "", LiteralUndef -> ""
+                | SignatureType.Type, "", "" -> LiteralUndef
+                | _ -> ret
 
-        let fallBackFunctionalTerm =
-            let varMappingOpt = getMapping headObj
-            match varMappingOpt with 
-            | Some varMapping ->
-                match headObj.Name with 
-                | PrimFunctionalTermL when signatureType = SignatureType.Type -> 
-                    varMapping.Type propagate
-                | PrimMandatoryFunctionalTermL when signatureType = SignatureType.Type -> 
-                    varMapping.Type propagate
-                | _ -> 
-                    $"{head}({args}) -> {varMapping.Type propagate}"
-            | None ->
-                $"{head}({args})"
-
-        match argsCount, this.ArgType, this.DottedChild with
-            | 0, ArgType.Nothing, Some qual ->
-                $"{head}.{qual.Type(propagate)}"
-            | 0, ArgType.Brackets, Some qual ->
-                $"{head}[].{qual.Type(propagate)}"
-            | 0, ArgType.Parentheses, Some qual ->
-                $"{head}().{qual.Type(propagate)}"
-            | 0, ArgType.Nothing, None -> 
-                match headObj.Name with 
-                | PrimVariableArrayL 
-                | PrimPredicateL 
-                | PrimMandatoryPredicateL 
-                | PrimFunctionalTermL 
-                | PrimMandatoryFunctionalTermL -> $"{headObj.Type signatureType}"
-                | _ -> head
-            | 0, ArgType.Brackets, None ->
-                $"{head}[]"
-            | 0, ArgType.Parentheses, None ->
-                fallBackFunctionalTerm
-            | 1, ArgType.Nothing, Some qual -> 
-                $"{head}{args}.{qual.Type(propagate)}"
-            | 1, ArgType.Brackets, Some qual ->
-                $"{head}[{args}].{qual.Type(propagate)}"
-            | 1, ArgType.Parentheses, Some qual ->
-                $"{head}({args}).{qual.Type(propagate)}"
-            | 1, ArgType.Nothing, None -> 
-                if this.FplId <> String.Empty then 
-                    fallBackFunctionalTerm
-                else
-                    $"{head}{args}"
-            | 1, ArgType.Brackets, None ->
-                $"{head}[{args}]"
-            | 1, ArgType.Parentheses, None ->
-                if head = LiteralFunc then 
-                    fallBackFunctionalTerm
-                else
+            let fallBackFunctionalTerm =
+                let varMappingOpt = getMapping headObj
+                match varMappingOpt with 
+                | Some varMapping ->
+                    match headObj.Name with 
+                    | PrimFunctionalTermL when signatureType = SignatureType.Type -> 
+                        varMapping.Type propagate
+                    | PrimMandatoryFunctionalTermL when signatureType = SignatureType.Type -> 
+                        varMapping.Type propagate
+                    | _ -> 
+                        $"{head}({args}) -> {varMapping.Type propagate}"
+                | None ->
                     $"{head}({args})"
-            | _, ArgType.Nothing, Some qualification -> 
-                $"{head}({args}).{qualification.Type(propagate)}"
-            | _, ArgType.Brackets, Some qual ->
-                $"{head}[{args}].{qual.Type(propagate)}"
-            | _, ArgType.Parentheses, Some qual ->
-                $"{head}({args}).{qual.Type(propagate)}"
-            | _, ArgType.Nothing, None -> 
-                $"{head}({args})"
-            | _, ArgType.Brackets, None ->
-                $"{head}[{args}]"
-            | _, ArgType.Parentheses, None ->
-                fallBackFunctionalTerm
+
+            match argsCount, this.ArgType with
+                | 0, ArgType.Nothing -> 
+                    match headObj.Name with 
+                    | PrimVariableArrayL 
+                    | PrimPredicateL 
+                    | PrimMandatoryPredicateL 
+                    | PrimFunctionalTermL 
+                    | PrimMandatoryFunctionalTermL -> $"{headObj.Type signatureType}"
+                    | _ -> head
+                | 0, ArgType.Brackets ->
+                    $"{head}[]"
+                | 0, ArgType.Parentheses ->
+                    fallBackFunctionalTerm
+                | 1, ArgType.Nothing -> 
+                    if this.FplId <> String.Empty then 
+                        fallBackFunctionalTerm
+                    else
+                        $"{head}{args}"
+                | 1, ArgType.Brackets ->
+                    $"{head}[{args}]"
+                | 1, ArgType.Parentheses ->
+                    if head = LiteralFunc then 
+                        fallBackFunctionalTerm
+                    else
+                        $"{head}({args})"
+                | _, ArgType.Nothing -> 
+                    $"{head}({args})"
+                | _, ArgType.Brackets ->
+                    $"{head}[{args}]"
+                | _, ArgType.Parentheses ->
+                    fallBackFunctionalTerm
 
     override this.Represent() = // done
         if _callCounter > maxRecursion then
