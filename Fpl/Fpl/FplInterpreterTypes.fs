@@ -4175,7 +4175,9 @@ let private matchClassInheritance (clOpt:FplValue option) (a:FplValue) aType (pN
             None
         else
             Some($"`{a.Type(SignatureType.Name)}:{aType}` matches neither `{pName}:{pType}` nor the base classes")
-    | _ -> None
+    | _ -> 
+        Some($"{LiteralUndefL} `{a.Type(SignatureType.Name)}:{aType}` doesn't match `{pName}:{pType}`")
+
 
 let private matchByTypeStringRepresentation (a:FplValue) aName (aType:string) aTypeName (p:FplValue) pName (pType:string) pTypeName mode = 
 

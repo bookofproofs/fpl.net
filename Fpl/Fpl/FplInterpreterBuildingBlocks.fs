@@ -224,6 +224,7 @@ let rec eval (st: SymbolTable) ast =
                 let undefVar = new FplVariable(name, (pos1, pos2), fv)
                 let undefined = new FplIntrinsicUndef((pos1, pos2), undefVar)
                 undefVar.SetValue(undefined)
+                undefVar.TypeId <- LiteralUndef
                 variableStack.PushEvalStack(undefVar)
                 variableStack.PopEvalStack()
             
