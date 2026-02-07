@@ -3553,6 +3553,7 @@ type FplReference(positions: Positions, parent: FplValue) =
             match signatureType, ret, args with
             | SignatureType.Type, "", LiteralUndef -> ""
             | SignatureType.Type, "", "" -> LiteralUndef
+            | SignatureType.Type, _, _ -> headObj.TypeId
             | _ -> ret
 
         let fallBackFunctionalTerm =
