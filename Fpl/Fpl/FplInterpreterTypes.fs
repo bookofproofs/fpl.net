@@ -6785,15 +6785,13 @@ let findCandidatesByNameInBlock (fv: FplValue) (name: string) =
             ScopeSearchResult.NotFound
         else
             match fv1 with
-            | :? FplPredicate -> ScopeSearchResult.Found(fv1)
+            | :? FplPredicate 
+            | :? FplClass
+            | :? FplFunctionalTerm -> ScopeSearchResult.Found(fv1)
             | _ ->
-                match fv1 with
-                | :? FplClass
-                | :? FplFunctionalTerm -> ScopeSearchResult.Found(fv1)
-                | _ ->
-                    match fv1.Parent with
-                    | Some parent -> findDefinition parent
-                    | None -> ScopeSearchResult.NotFound
+                match fv1.Parent with
+                | Some parent -> findDefinition parent
+                | None -> ScopeSearchResult.NotFound
 
     match findDefinition fv with
     | ScopeSearchResult.Found candidate ->

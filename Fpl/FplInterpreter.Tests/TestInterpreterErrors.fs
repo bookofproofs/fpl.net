@@ -472,6 +472,8 @@ type TestInterpreterErrors() =
     [<DataRow("20", """def pred T1() {true} def pred Test() { OtherTest() };""", 1)>]    
     [<DataRow("21", """def func Succ(n:Nat) -> obj {intr};""", 1)>]
     [<DataRow("22", """def cl A def pred T() { is (self,ATypo) };""", 1)>]
+    [<DataRow("23", """def cl A {intr prty func P()->obj prty pred T() {is(P(), obj)} };""", 0)>]
+    [<DataRow("23a", """def cl A {intr prty func P()->obj prty pred T() {is(P, func)} };""", 0)>]
 
     // array types 
     [<DataRow("AR1", "def cl A def pred T() {dec ~arr:*ind[A]; true};", 0)>]  
@@ -485,6 +487,7 @@ type TestInterpreterErrors() =
     [<DataRow("MAP2a", """def cl A def func T()->*A[ind] {intr};""", 0)>]
     [<DataRow("MAP3", """def func T()->*ind[A] {intr};""", 1)>]
     [<DataRow("MAP3a", """def cl A def func T()->*ind[A] {intr};""", 0)>]
+
 
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
@@ -1038,7 +1041,7 @@ type TestInterpreterErrors() =
     [<DataRow("02", """axiom A {dec ~x,y:ind; impl(x,y)};""", "Cannot evaluate `implication` because its argument `x` typed `ind` could not be evaluated as a predicate. This issue might be subsequent to other errors to be resolved first.")>]
     [<DataRow("03", """axiom A {dec ~x,y:func; impl(x,y)};""", "Cannot evaluate `implication` because its argument `x` typed `func` could not be evaluated as a predicate. This issue might be subsequent to other errors to be resolved first.")>]
     [<DataRow("04", """axiom A {impl(x,y)};""", "Cannot evaluate `implication` because its argument `x` typed `undef` could not be evaluated as a predicate. This issue might be subsequent to other errors to be resolved first.")>]
-    [<DataRow("05", """axiom A {impl(T(),true)};""", "Cannot evaluate `implication` because its argument `T()` could not be evaluated as a predicate. This issue might be subsequent to other errors to be resolved first.")>]
+    [<DataRow("05", """axiom A {impl(T(),true)};""", "Cannot evaluate `implication` because its argument `T()` typed `T` could not be evaluated as a predicate. This issue might be subsequent to other errors to be resolved first.")>]
     [<DataRow("06", """axiom A {impl(T,true)};""", "Cannot evaluate `implication` because its argument `T` could not be evaluated as a predicate. This issue might be subsequent to other errors to be resolved first.")>]
     [<TestMethod>]
     member this.TestLG001MsgSpecificity(no:string, fplCode:string, (expected:string)) =
