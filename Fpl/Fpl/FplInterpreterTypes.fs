@@ -3660,6 +3660,10 @@ type FplReference(positions: Positions, parent: FplValue) =
             next.RefersTo <- Some this
         | Some (:? FplReference as next) when next.DottedChild.IsSome -> 
             next.EndPos <- this.EndPos
+        | Some next when (next.Name = PrimMapCaseElseL || next.Name = PrimMapCaseSingleL) -> 
+            addExpressionToParentArgList this
+            next.TypeId <- this.TypeId
+            next.EndPos <- this.EndPos
         | Some next -> 
             addExpressionToParentArgList this
             next.EndPos <- this.EndPos
