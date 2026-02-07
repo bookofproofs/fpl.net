@@ -216,7 +216,7 @@ def pred LowerEqual(x,y:Nat) infix "<=" 71
     ex a:Nat {(x + a = y)}
 }
 
-def pred LowerEqual(x,y:Nat) infix ">=" 71 
+def pred GreaterEqual(x,y:Nat) infix ">=" 72
 {
     ex a:Nat {(x = y + a)}
 }

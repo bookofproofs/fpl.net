@@ -961,7 +961,7 @@ type TestInterpreterErrors() =
     [<DataRow("21", """loc and(p,q) := !tex: p "\wedge" q;;""", 0)>]
     [<DataRow("22", """def class Set def pred In(x,y: Set) def pred IsEmpty(x: Set) { all y:Set { not In(y, x) } };""", 0)>]
     [<DataRow("23", """def pred T() { mcases (| true : false | false : true ? undef) };""", 0)>]
-    [<DataRow("23a", """def pred T() {dec ~x:obj; mcases (| $1 : false | x : true ? undef) };""", 2)>]
+    [<DataRow("23a", """def pred T() {dec ~x:obj; mcases (| $1 : false | x : true ? undef) };""", 3)>]
     [<DataRow("23b", """def pred T() {dec ~res:pred cases (| true : res:=false | false : res:=true ? res:=undef); res};""", 0)>]
     [<DataRow("23c", """def pred T() {dec ~res:pred ~x:obj cases (| $1 : res:=false | x : res:=true ? res:=undef); res};""", 2)>]
     [<DataRow("23d", """def pred T() {dec ~res:pred ~x:obj cases (| true : res:=false | x : res:=true ? res:=undef); res};""", 1)>]
@@ -1010,6 +1010,8 @@ type TestInterpreterErrors() =
     [<DataRow("38", """def pred T() { iif ( true, false ) };""", 0)>]
     [<DataRow("38a", """def pred T() { iif ( true, $1 ) };""", 1)>]
     [<DataRow("38b", """def pred T() { iif ( $1, undef ) };""", 2)>]  
+    [<DataRow("39", """def pred Equal(x,y:tpl) infix "=" 0 { delegate.Equal(x,y) } def cl A def pred EqualA (a,b: A) { (a = b) };""", 0)>]
+    [<DataRow("40", """def pred T() {mcases (| true : false | false : true ? false) };""", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestLG001(no:string, fplCode:string, expected) =

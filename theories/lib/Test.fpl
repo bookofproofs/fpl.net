@@ -1,1 +1,1 @@
-inf ExistsByExample {dec ~p: pred(c: obj) ~x: obj; pre: p(c) con: ex x:obj {p(x)}};
+def pred T() {dec ~x:obj; mcases (| $1 : false | x : true ? undef) };

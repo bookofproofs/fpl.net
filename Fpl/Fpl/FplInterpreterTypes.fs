@@ -1769,12 +1769,15 @@ let isArgPred (arg:FplValue) =
 
 /// Checks if an argument of an FplValue is a predicate and issues LG001Diagnostics if its not.
 let checkArgPred (fv:FplValue) (arg:FplValue)  = 
-    let argType, isPred = isArgPred (arg:FplValue) 
-    if isPred then 
-        () 
-    else
-        let argName = arg.Type SignatureType.Name
-        fv.ErrorOccurred <- emitLG001Diagnostics argType argName fv.Name arg.StartPos arg.EndPos
+    match fv.UltimateBlockNode with 
+    | Some node when node.Name = LiteralLocL -> () // skip this check for localizations
+    | _ ->
+        let argType, isPred = isArgPred (arg:FplValue) 
+        if isPred then 
+            () 
+        else
+            let argName = arg.Type SignatureType.Name
+            fv.ErrorOccurred <- emitLG001Diagnostics argType argName fv.Name arg.StartPos arg.EndPos
 
 /// Checks if a predicate expression is actually being interpreted as an predicate
 let checkPredicateExpressionReturnsPredicate (fv:FplValue) =
@@ -3553,6 +3556,7 @@ type FplReference(positions: Positions, parent: FplValue) =
             match signatureType, ret, args with
             | SignatureType.Type, "", LiteralUndef -> ""
             | SignatureType.Type, "", "" -> LiteralUndef
+            | SignatureType.Type, _, _ -> headObj.TypeId
             | _ -> ret
 
         let fallBackFunctionalTerm =
@@ -3658,6 +3662,10 @@ type FplReference(positions: Positions, parent: FplValue) =
         | Some next when next.Name = PrimForInStmtDomainL -> 
             next.RefersTo <- Some this
         | Some (:? FplReference as next) when next.DottedChild.IsSome -> 
+            next.EndPos <- this.EndPos
+        | Some next when (next.Name = PrimMapCaseElseL || next.Name = PrimMapCaseSingleL) -> 
+            addExpressionToParentArgList this
+            next.TypeId <- this.TypeId
             next.EndPos <- this.EndPos
         | Some next -> 
             addExpressionToParentArgList this
