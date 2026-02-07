@@ -3609,10 +3609,10 @@ type FplReference(positions: Positions, parent: FplValue) =
             | 0, ArgType.Parentheses, None ->
                 fallBackValueClosure
             | 1, ArgType.Nothing, None -> 
-                if this.FplId <> String.Empty then 
-                    fallBackFunctionalTerm
+                if head <> String.Empty then 
+                    $"{head}({args})"
                 else
-                    $"{head}{args}"
+                    args
             | _, ArgType.Nothing, Some qualification -> 
                 $"{head}({args}).{qualification.Type propagate}"
             | _, ArgType.Brackets, Some qualification ->
