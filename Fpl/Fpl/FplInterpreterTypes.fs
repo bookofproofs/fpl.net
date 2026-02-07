@@ -1769,12 +1769,15 @@ let isArgPred (arg:FplValue) =
 
 /// Checks if an argument of an FplValue is a predicate and issues LG001Diagnostics if its not.
 let checkArgPred (fv:FplValue) (arg:FplValue)  = 
-    let argType, isPred = isArgPred (arg:FplValue) 
-    if isPred then 
-        () 
-    else
-        let argName = arg.Type SignatureType.Name
-        fv.ErrorOccurred <- emitLG001Diagnostics argType argName fv.Name arg.StartPos arg.EndPos
+    match fv.UltimateBlockNode with 
+    | Some node when node.Name = LiteralLocL -> () // skip this check for localizations
+    | _ ->
+        let argType, isPred = isArgPred (arg:FplValue) 
+        if isPred then 
+            () 
+        else
+            let argName = arg.Type SignatureType.Name
+            fv.ErrorOccurred <- emitLG001Diagnostics argType argName fv.Name arg.StartPos arg.EndPos
 
 /// Checks if a predicate expression is actually being interpreted as an predicate
 let checkPredicateExpressionReturnsPredicate (fv:FplValue) =
