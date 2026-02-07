@@ -3573,6 +3573,22 @@ type FplReference(positions: Positions, parent: FplValue) =
             | None ->
                 $"{head}({args})"
 
+        let fallBackValueClosure =
+            let varMappingOpt = getMapping headObj
+            match varMappingOpt with 
+            | Some varMapping ->
+                match headObj.Name with 
+                | PrimFunctionalTermL when signatureType = SignatureType.Type -> 
+                    varMapping.Type propagate
+                | PrimMandatoryFunctionalTermL when signatureType = SignatureType.Type -> 
+                    varMapping.Type propagate
+                | _ -> 
+                    $"{head}({args}) -> {varMapping.Type propagate}"
+            | None when signatureType = SignatureType.Type ->
+                head
+            | _ ->
+                $"{head}({args})"
+
         match argsCount, this.ArgType, this.DottedChild with
             | 0, ArgType.Nothing, Some qualification ->
                 $"{head}.{qualification.Type propagate}"
@@ -3591,7 +3607,7 @@ type FplReference(positions: Positions, parent: FplValue) =
             | 0, ArgType.Brackets, None ->
                 $"{head}[]"
             | 0, ArgType.Parentheses, None ->
-                fallBackFunctionalTerm
+                fallBackValueClosure
             | 1, ArgType.Nothing, None -> 
                 if this.FplId <> String.Empty then 
                     fallBackFunctionalTerm
@@ -3608,7 +3624,7 @@ type FplReference(positions: Positions, parent: FplValue) =
             | _, ArgType.Brackets, None ->
                 $"{head}[{args}]"
             | _, ArgType.Parentheses, None ->
-                fallBackFunctionalTerm
+                fallBackValueClosure
 
     override this.Represent() = // done
         if _callCounter > maxRecursion then
@@ -3625,7 +3641,7 @@ type FplReference(positions: Positions, parent: FplValue) =
                         dc.Represent()
                     else
                         // Otherwise, fall back with dotted's "type representation" to prevent infinite loops
-                        dc.Type SignatureType.Type
+                        dc.Type SignatureType.Mixed
                 | Some value, _, _ ->
                     if not (Object.ReferenceEquals(value,this)) then
                         // If the value is not identical as "this",
@@ -3644,9 +3660,9 @@ type FplReference(positions: Positions, parent: FplValue) =
                         // delegate the representation to refTo.
                         refTo.Represent()
                     else
-                        refTo.Type SignatureType.Type
+                        refTo.Type SignatureType.Mixed
                 | _, _, _ ->
-                    this.Type SignatureType.Type
+                    this.Type SignatureType.Mixed
             _callCounter <- _callCounter - 1
             result
 
