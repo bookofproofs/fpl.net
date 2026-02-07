@@ -3590,6 +3590,8 @@ type FplReference(positions: Positions, parent: FplValue) =
                 $"{head}({args})"
 
         match argsCount, this.ArgType, this.DottedChild with
+            | 0, ArgType.Nothing, Some qualification when propagate = SignatureType.Type ->
+                qualification.Type propagate
             | 0, ArgType.Nothing, Some qualification ->
                 $"{head}.{qualification.Type propagate}"
             | 0, ArgType.Brackets, Some qualification ->
