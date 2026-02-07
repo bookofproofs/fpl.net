@@ -264,9 +264,10 @@ type TestReferencesTypeOfSignature() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("base1", "mcases (| true : false | false : true ? undef)")>]
+    [<DataRow("00", "mcases (| true : false | false : true ? undef)", LiteralPred)>]
+    [<DataRow("01", "mcases (| true : $1 | false : $2 ? undef)", LiteralInd)>]
     [<TestMethod>]
-    member this.TestMCasesTypeSignature(var, varVal) =
+    member this.TestMCasesTypeSignature(no:string, varVal, expected:string) =
         ad.Clear()
         let fplCode = sprintf "def pred T1() { %s };" varVal
         let filename = "TestMCasesTypeSignature"
@@ -276,12 +277,9 @@ type TestReferencesTypeOfSignature() =
         | Some st -> 
             let r = st.Root
             let theory = r.Scope[filename]
-
             let pr1 = theory.Scope["T1()"] 
             let base1 = pr1.ArgList[0]
+            Assert.AreEqual<string>(expected, base1.Type(SignatureType.Type))
 
-            match var with
-            | "base1" -> Assert.AreEqual<string>(LiteralUndef, base1.Type(SignatureType.Type))
-            | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
