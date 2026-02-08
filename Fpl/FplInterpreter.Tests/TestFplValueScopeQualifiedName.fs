@@ -645,8 +645,8 @@ type TestFplValueScopeQualifiedName() =
             | "base1" -> Assert.AreEqual<string>("a base constructor call TestBaseConstructorCallQualifiedName.A.A(T1, func, ind, pred).B()", qualifiedName base1 false) 
             | "base2" -> Assert.AreEqual<string>("a base constructor call TestBaseConstructorCallQualifiedName.A.A(T1, func, ind, pred).C(T1, func, ind, pred)", qualifiedName base1 false) 
             | "base3" -> Assert.AreEqual<string>("a base constructor call TestBaseConstructorCallQualifiedName.A.A(T1, func, ind, pred).D(undef, T1, func)", qualifiedName base1 false) 
-            | "base4" -> Assert.AreEqual<string>("a base constructor call TestBaseConstructorCallQualifiedName.A.A(T1, func, ind, pred).B(In(undef))", qualifiedName base1 false) 
-            | "base5" -> Assert.AreEqual<string>("a base constructor call TestBaseConstructorCallQualifiedName.A.A(T1, func, ind, pred).C(Test1(T1), Test2(func, ind, pred))", qualifiedName base1 false) 
+            | "base4" -> Assert.AreEqual<string>("a base constructor call TestBaseConstructorCallQualifiedName.A.A(T1, func, ind, pred).B(In)", qualifiedName base1 false) 
+            | "base5" -> Assert.AreEqual<string>("a base constructor call TestBaseConstructorCallQualifiedName.A.A(T1, func, ind, pred).C(Test1, Test2)", qualifiedName base1 false) 
             | "base6" -> Assert.AreEqual<string>("a base constructor call TestBaseConstructorCallQualifiedName.A.A(T1, func, ind, pred).E(pred, undef, pred)", qualifiedName base1 false) 
             | _ -> Assert.IsTrue(false)
         | None -> 

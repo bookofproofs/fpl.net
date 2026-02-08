@@ -1846,7 +1846,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
         | "FplReference" ->
             Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
+            Assert.AreEqual<string>("", (getName var).[index])
         | "FplReturn" ->
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
@@ -3101,6 +3101,7 @@ type SymbolTableStructure() =
     [<DataRow("FplFunctionalTerm", "MF2", """def func T()->pred {return true};""", "")>]
     [<DataRow("FplFunctionalTerm", "MF2a", """def func T()->pred(x:obj) {dec ~y:pred(z:obj); return y};""", "")>]
     [<DataRow("FplFunctionalTerm", "MF2b", """def pred A(z:obj) def func T()->pred(x:obj) {return A(x)};""", "")>]
+    [<DataRow("FplFunctionalTerm", "MF2c", """def pred A(z:obj) def func T()->pred(x:obj) {return A};""", "")>]
     // intrinsic constant array
     [<DataRow("FplFunctionalTerm", "MF3", """def func T()->*pred[ind];""", "")>]
     // non-intrinsic constant array
@@ -3176,6 +3177,22 @@ type SymbolTableStructure() =
             let fn = node :?> FplFunctionalTerm
             Assert.AreEqual<string>("", fn.SkolemName) // missing, since non-intrinsic
         | "FplFunctionalTerm", "MF2b" -> 
+            // still an intrinsic constant since the non-intrinsic constant does not match the expected return type
+            Assert.IsInstanceOfType<FplTheory>(parent) 
+            Assert.AreEqual<int>(0, parent.ArgList.Count) 
+            Assert.AreEqual<int>(2, parent.Scope.Count) 
+            Assert.IsInstanceOfType<FplFunctionalTerm>(node) 
+            Assert.AreEqual<int>(2, node.ArgList.Count)  // mapping + return 
+            Assert.AreEqual<int>(1, node.Scope.Count) // 1 variables
+            let map = (getMapping node).Value :?> FplMapping 
+            match map.RefersTo with
+            | None -> Assert.AreEqual<string>("no class", "no class")
+            | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
+            Assert.IsTrue(node.Value.IsNone)
+            Assert.AreEqual<string>("dec pred(obj)", node.Represent())
+            let fn = node :?> FplFunctionalTerm
+            Assert.AreEqual<string>("", fn.SkolemName) // missing, since non-intrinsic
+        | "FplFunctionalTerm", "MF2c" -> 
             // non-intrinsic constant
             Assert.IsInstanceOfType<FplTheory>(parent) 
             Assert.AreEqual<int>(0, parent.ArgList.Count) 

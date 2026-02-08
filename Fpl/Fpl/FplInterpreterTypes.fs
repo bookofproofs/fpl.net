@@ -3573,7 +3573,25 @@ type FplReference(positions: Positions, parent: FplValue) =
             | None ->
                 $"{head}({args})"
 
+        let fallBackValueClosure =
+            let varMappingOpt = getMapping headObj
+            match varMappingOpt with 
+            | Some varMapping ->
+                match headObj.Name with 
+                | PrimFunctionalTermL when signatureType = SignatureType.Type -> 
+                    varMapping.Type propagate
+                | PrimMandatoryFunctionalTermL when signatureType = SignatureType.Type -> 
+                    varMapping.Type propagate
+                | _ -> 
+                    $"{head}({args}) -> {varMapping.Type propagate}"
+            | None when signatureType = SignatureType.Type ->
+                head
+            | _ ->
+                $"{head}({args})"
+
         match argsCount, this.ArgType, this.DottedChild with
+            | 0, ArgType.Nothing, Some qualification when propagate = SignatureType.Type ->
+                qualification.Type propagate
             | 0, ArgType.Nothing, Some qualification ->
                 $"{head}.{qualification.Type propagate}"
             | 0, ArgType.Brackets, Some qualification ->
@@ -3591,12 +3609,12 @@ type FplReference(positions: Positions, parent: FplValue) =
             | 0, ArgType.Brackets, None ->
                 $"{head}[]"
             | 0, ArgType.Parentheses, None ->
-                fallBackFunctionalTerm
+                fallBackValueClosure
             | 1, ArgType.Nothing, None -> 
-                if this.FplId <> String.Empty then 
-                    fallBackFunctionalTerm
+                if head <> String.Empty then 
+                    $"{head}({args})"
                 else
-                    $"{head}{args}"
+                    args
             | _, ArgType.Nothing, Some qualification -> 
                 $"{head}({args}).{qualification.Type propagate}"
             | _, ArgType.Brackets, Some qualification ->
@@ -3608,7 +3626,7 @@ type FplReference(positions: Positions, parent: FplValue) =
             | _, ArgType.Brackets, None ->
                 $"{head}[{args}]"
             | _, ArgType.Parentheses, None ->
-                fallBackFunctionalTerm
+                fallBackValueClosure
 
     override this.Represent() = // done
         if _callCounter > maxRecursion then
@@ -3625,7 +3643,7 @@ type FplReference(positions: Positions, parent: FplValue) =
                         dc.Represent()
                     else
                         // Otherwise, fall back with dotted's "type representation" to prevent infinite loops
-                        dc.Type SignatureType.Type
+                        dc.Type SignatureType.Mixed
                 | Some value, _, _ ->
                     if not (Object.ReferenceEquals(value,this)) then
                         // If the value is not identical as "this",
@@ -3644,9 +3662,9 @@ type FplReference(positions: Positions, parent: FplValue) =
                         // delegate the representation to refTo.
                         refTo.Represent()
                     else
-                        refTo.Type SignatureType.Type
+                        refTo.Type SignatureType.Mixed
                 | _, _, _ ->
-                    this.Type SignatureType.Type
+                    this.Type SignatureType.Mixed
             _callCounter <- _callCounter - 1
             result
 
@@ -4175,7 +4193,9 @@ let private matchClassInheritance (clOpt:FplValue option) (a:FplValue) aType (pN
             None
         else
             Some($"`{a.Type(SignatureType.Name)}:{aType}` matches neither `{pName}:{pType}` nor the base classes")
-    | _ -> None
+    | _ -> 
+        Some($"{LiteralUndefL} `{a.Type(SignatureType.Name)}:{aType}` doesn't match `{pName}:{pType}`")
+
 
 let private matchByTypeStringRepresentation (a:FplValue) aName (aType:string) aTypeName (p:FplValue) pName (pType:string) pTypeName mode = 
 
@@ -4504,7 +4524,6 @@ let rec checkCandidates (toBeMatched: FplValue) (candidates: FplValue list) (acc
 /// Checks if there is a candidate among the candidates that matches the signature of a calling FplValue and returns this as an option.
 let checkSIG04Diagnostics (calling:FplValue) (candidates: FplValue list) = 
     if candidates.Length = 0 then
-        calling.ErrorOccurred <- emitID010Diagnostics calling.FplId calling.StartPos calling.EndPos
         None
     else
         match checkCandidates calling candidates [] with
@@ -6765,15 +6784,13 @@ let findCandidatesByNameInBlock (fv: FplValue) (name: string) =
             ScopeSearchResult.NotFound
         else
             match fv1 with
-            | :? FplPredicate -> ScopeSearchResult.Found(fv1)
+            | :? FplPredicate 
+            | :? FplClass
+            | :? FplFunctionalTerm -> ScopeSearchResult.Found(fv1)
             | _ ->
-                match fv1 with
-                | :? FplClass
-                | :? FplFunctionalTerm -> ScopeSearchResult.Found(fv1)
-                | _ ->
-                    match fv1.Parent with
-                    | Some parent -> findDefinition parent
-                    | None -> ScopeSearchResult.NotFound
+                match fv1.Parent with
+                | Some parent -> findDefinition parent
+                | None -> ScopeSearchResult.NotFound
 
     match findDefinition fv with
     | ScopeSearchResult.Found candidate ->

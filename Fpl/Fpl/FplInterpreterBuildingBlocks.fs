@@ -224,6 +224,7 @@ let rec eval (st: SymbolTable) ast =
                 let undefVar = new FplVariable(name, (pos1, pos2), fv)
                 let undefined = new FplIntrinsicUndef((pos1, pos2), undefVar)
                 undefVar.SetValue(undefined)
+                undefVar.TypeId <- LiteralUndef
                 variableStack.PushEvalStack(undefVar)
                 variableStack.PopEvalStack()
             
@@ -507,8 +508,9 @@ let rec eval (st: SymbolTable) ast =
         eval st ast1
     | Ast.PredicateIdentifier((pos1, pos2), identifier) ->
         let fv = variableStack.PeekEvalStack()
-        let candidatesPre = findCandidatesByName st identifier false false
-        let candidates, candidatesNames =  filterCandidates candidatesPre identifier true
+        let candidatesFromTheory = findCandidatesByName st identifier false false
+        let candidatesLocal = findCandidatesByNameInBlock fv identifier
+        let candidates, candidatesNames =  filterCandidates (candidatesFromTheory @ candidatesLocal) identifier true
         let correctIds (fv1:FplValue) = 
             match fv with 
             | :? FplBase 
@@ -525,7 +527,14 @@ let rec eval (st: SymbolTable) ast =
 
         match candidates.Length with
         | 0 -> 
-            fv.ErrorOccurred <- emitID010Diagnostics identifier pos1 pos2
+            match fv.Parent with
+            | Some (:? FplReference as parent) when parent.DottedChild.IsSome && Object.ReferenceEquals(fv, parent.DottedChild.Value) ->
+                // do not emit ID010 diagnostics, if fv is a dotted child, whose identifier we are still evaluating
+                // only with this identifier, it will be possible in AST.PredicateWithOptSpecification to search for correct candidates 
+                () 
+            | _ -> 
+                // otherwise, issue ID010 diagnostics
+                fv.ErrorOccurred <- emitID010Diagnostics identifier pos1 pos2
             match fv with 
             | :? FplVariableArray as arr -> arr.SetType identifier None pos1 pos2
             | :? FplMapping as map -> map.SetType identifier None pos1 pos2
@@ -781,7 +790,7 @@ let rec eval (st: SymbolTable) ast =
         | None, _ -> 
             // if no specification was found then simply continue in the same context
             eval st fplIdentifierAst
-            let block = fv.UltimateBlockNode.Value
+            let node = fv.UltimateBlockNode.Value
             // make sure, we still add a referenced node candidate to the scope of a reference
             let candidates = searchForCandidatesOfReferenceBlock fv
             let classes = candidates |> List.filter (fun c -> c.Name = PrimClassL)
@@ -801,13 +810,13 @@ let rec eval (st: SymbolTable) ast =
                 // add the class (intrinsic case, no constructors at all)
                 let candidate = classes.Head
                 fv.RefersTo <- Some candidate
-                fv.ErrorOccurred <- emitID025Diagnostics (qualifiedName candidate false) (getEnglishName block.Name false) block.Name fv.StartPos fv.EndPos
+                fv.ErrorOccurred <- checkID025Diagnostics (qualifiedName candidate false) node.Name fv.StartPos fv.EndPos
             elif candidates.Length > 0 then
                 // not a class was referred, add the candidate (e.g., referenced variable)
                 let candidate = candidates.Head
                 fv.FplId <- candidate.FplId 
                 fv.RefersTo <- Some candidate
-                fv.ErrorOccurred <- emitID025Diagnostics (qualifiedName candidate false) (getEnglishName block.Name false) block.Name fv.StartPos fv.EndPos
+                fv.ErrorOccurred <- checkID025Diagnostics (qualifiedName candidate false) node.Name fv.StartPos fv.EndPos
             else
                 ()
         simplifyTriviallyNestedExpressions fv |> ignore
@@ -954,7 +963,7 @@ let rec eval (st: SymbolTable) ast =
                 fv.RefersTo <- Some candidate
                 match fv.UltimateBlockNode with
                 | Some block ->
-                    fv.ErrorOccurred <- emitID025Diagnostics (qualifiedName candidate false) (getEnglishName block.Name false) block.Name fv.StartPos fv.EndPos
+                    fv.ErrorOccurred <- checkID025Diagnostics (qualifiedName candidate false) block.Name fv.StartPos fv.EndPos
                 | _ -> ()
         | _ -> ()
     | ProofSignature((pos1, pos2), (simpleSignatureAst, dollarDigitListAsts)) ->

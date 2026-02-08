@@ -472,6 +472,9 @@ type TestInterpreterErrors() =
     [<DataRow("20", """def pred T1() {true} def pred Test() { OtherTest() };""", 1)>]    
     [<DataRow("21", """def func Succ(n:Nat) -> obj {intr};""", 1)>]
     [<DataRow("22", """def cl A def pred T() { is (self,ATypo) };""", 1)>]
+    [<DataRow("23", """def cl A {intr prty func P()->obj prty pred T() {is(P(), obj)} };""", 0)>]
+    [<DataRow("23a", """def cl A {intr prty func P()->obj prty pred T() {is(P, func)} };""", 0)>]
+    [<DataRow("24", """def cl A {intr prty pred P() } def pred T() {dec ~a:A a:=A(); a.P()};""", 0)>]
 
     // array types 
     [<DataRow("AR1", "def cl A def pred T() {dec ~arr:*ind[A]; true};", 0)>]  
@@ -485,6 +488,7 @@ type TestInterpreterErrors() =
     [<DataRow("MAP2a", """def cl A def func T()->*A[ind] {intr};""", 0)>]
     [<DataRow("MAP3", """def func T()->*ind[A] {intr};""", 1)>]
     [<DataRow("MAP3a", """def cl A def func T()->*ind[A] {intr};""", 0)>]
+
 
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
@@ -1038,7 +1042,7 @@ type TestInterpreterErrors() =
     [<DataRow("02", """axiom A {dec ~x,y:ind; impl(x,y)};""", "Cannot evaluate `implication` because its argument `x` typed `ind` could not be evaluated as a predicate. This issue might be subsequent to other errors to be resolved first.")>]
     [<DataRow("03", """axiom A {dec ~x,y:func; impl(x,y)};""", "Cannot evaluate `implication` because its argument `x` typed `func` could not be evaluated as a predicate. This issue might be subsequent to other errors to be resolved first.")>]
     [<DataRow("04", """axiom A {impl(x,y)};""", "Cannot evaluate `implication` because its argument `x` typed `undef` could not be evaluated as a predicate. This issue might be subsequent to other errors to be resolved first.")>]
-    [<DataRow("05", """axiom A {impl(T(),true)};""", "Cannot evaluate `implication` because its argument `T()` could not be evaluated as a predicate. This issue might be subsequent to other errors to be resolved first.")>]
+    [<DataRow("05", """axiom A {impl(T(),true)};""", "Cannot evaluate `implication` because its argument `T()` typed `T` could not be evaluated as a predicate. This issue might be subsequent to other errors to be resolved first.")>]
     [<DataRow("06", """axiom A {impl(T,true)};""", "Cannot evaluate `implication` because its argument `T` could not be evaluated as a predicate. This issue might be subsequent to other errors to be resolved first.")>]
     [<TestMethod>]
     member this.TestLG001MsgSpecificity(no:string, fplCode:string, (expected:string)) =
@@ -1883,7 +1887,7 @@ type TestInterpreterErrors() =
     [<DataRow("MS2f", "thm A {true} def func Test()->pred {return A};", 0)>] // OK: ->pred matches signature A (theorem)
     [<DataRow("MS2g", "lem A {true} def func Test()->pred {return A};", 0)>] // OK: ->pred matches signature A (lemma)
     [<DataRow("MS2h", "prop A {true} def func Test()->pred {return A};", 0)>] // OK: ->pred matches signature A (proposition)
-    [<DataRow("MS2i", "conj A {true} def func Test()->pred {return A};", 0)>] // OK: ->pred does matches signature A (conjecture)
+    [<DataRow("MS2i", "conj A {true} def func Test()->pred {return A};", 0)>] // OK: ->pred matches signature A (conjecture)
     [<DataRow("MS2j", "cor A$1 {true} def func Test()->pred {return A$1};", 0)>] // OK: ->pred matches signature A$1 (corollary)
     [<DataRow("MS2k", "proof A$1 {1. |- trivial} def func Test()->pred {return A$1};", 1)>] // SIG03: ->pred does not match signature A$1 (proof)
     [<DataRow("MS2l", "inf A {pre:true con:true} def func Test()->pred {return A};", 1)>] // SIG03: ->pred does not match signature A (rule of inference)
@@ -1897,7 +1901,7 @@ type TestInterpreterErrors() =
     [<DataRow("MS2p4", "def cl A {intr prty func X()->obj } def func Test()->pred {return A.X};", 1)>] // SIG03: ->pred does not match signature A.X()->obj
     [<DataRow("MS2p5", "def cl A {intr prty func X(x:obj)->obj } def func Test()->pred {return A.X};", 1)>] // SIG03: ->pred does not match signature A.X(obj)->obj
     [<DataRow("MS2p6", "def cl A {intr prty func X(x:ind)->obj } def func Test()->pred {return A.X};", 1)>] // SIG03: ->pred does not match signature A.X(ind)->obj
-    [<DataRow("MS2p7", "def cl A {intr prty pred X(x:obj) } def func Test()->pred {dec ~a:obj; return A.X(a)};", 1)>] // SIG03: ->pred does not match by value A.X(obj) 
+    [<DataRow("MS2p7", "def cl A {intr prty pred X(x:obj) } def func Test()->pred {dec ~a:obj; return A.X(a)};", 0)>] // OK: ->pred matches by value A.X(obj) 
     // ... using properties of instances
     [<DataRow("MS2q1", "def cl A {intr prty pred X(x:obj) } def func Test()->pred {dec ~o:A o:=A(); return o.X};", 0)>] // OK: ->pred matches signature A.X(obj) 
     [<DataRow("MS2q2", "def cl A {intr prty pred X(x:ind) } def func Test()->pred {dec ~o:A o:=A(); return o.X};", 0)>] // OK: ->pred matches signature A.X(ind)
@@ -1905,7 +1909,7 @@ type TestInterpreterErrors() =
     [<DataRow("MS2q4", "def cl A {intr prty func X()->obj } def func Test()->pred {dec ~o:A o:=A(); return o.X};", 1)>] // SIG03: ->pred does not match signature A.X()->obj
     [<DataRow("MS2q5", "def cl A {intr prty func X(x:obj)->obj } def func Test()->pred {dec ~o:A o:=A(); return o.X};", 1)>] // SIG03: ->pred does not match signature A.X(obj)->obj
     [<DataRow("MS2q6", "def cl A {intr prty func X(x:ind)->obj } def func Test()->pred {dec ~o:A o:=A(); return o.X};", 1)>] // SIG03: ->pred does not match signature A.X(ind)->obj
-    [<DataRow("MS2q7", "def cl A {intr prty pred X(x:obj) } def func Test()->pred {dec ~a:obj ~o:A o:=A(); return o.X(a)};", 1)>] // SIG03: ->pred does not match by value A.X(obj) 
+    [<DataRow("MS2q7", "def cl A {intr prty pred X(x:obj) } def func Test()->pred {dec ~a:obj ~o:A o:=A(); return o.X(a)};", 0)>] // OK: ->pred matches by value A.X(obj) 
     // ... using properties of predicates
     [<DataRow("MS2r1", "def pred A() {intr prty pred X(x:obj) } def func Test()->pred {return A.X};", 0)>] // OK: ->pred matches signature A.X(obj) 
     [<DataRow("MS2r2", "def pred A() {intr prty pred X(x:ind) } def func Test()->pred {return A.X};", 0)>] // OK: ->pred matches signature A.X(ind)
@@ -1913,7 +1917,7 @@ type TestInterpreterErrors() =
     [<DataRow("MS2r4", "def pred A() {intr prty func X()->obj } def func Test()->pred {return A.X};", 1)>] // SIG03: ->pred does not match signature A.X()->obj
     [<DataRow("MS2r5", "def pred A() {intr prty func X(x:obj)->obj } def func Test()->pred {return A.X};", 1)>] // SIG03: ->pred does not match signature A.X(obj)->obj
     [<DataRow("MS2r6", "def pred A() {intr prty func X(x:ind)->obj } def func Test()->pred {return A.X};", 1)>] // SIG03: ->pred does not match signature A.X(ind)->obj
-    [<DataRow("MS2r7", "def pred A() {intr prty pred X(x:obj) } def func Test()->pred {dec ~a:obj; return A.X(a)};", 1)>] // SIG03: ->pred does not match by value A.X(obj) 
+    [<DataRow("MS2r7", "def pred A() {intr prty pred X(x:obj) } def func Test()->pred {dec ~a:obj; return A.X(a)};", 0)>] // OK: ->pred matches by value A.X(obj) 
     // ... using properties of functional terms
     [<DataRow("MS2s1", "def func A()->obj {intr prty pred X(x:obj) } def func Test()->pred {return A.X};", 0)>] // OK: ->pred matches signature A.X(obj) 
     [<DataRow("MS2s2", "def func A()->obj {intr prty pred X(x:ind) } def func Test()->pred {return A.X};", 0)>] // OK: ->pred matches signature A.X(ind)
@@ -1921,7 +1925,7 @@ type TestInterpreterErrors() =
     [<DataRow("MS2s4", "def func A()->obj {intr prty func X()->obj } def func Test()->pred {return A.X};", 1)>] // SIG03: ->pred does not match signature A.X()->obj
     [<DataRow("MS2s5", "def func A()->obj {intr prty func X(x:obj)->obj } def func Test()->pred {return A.X};", 1)>] // SIG03: ->pred does not match signature A.X(obj)->obj
     [<DataRow("MS2s6", "def func A()->obj {intr prty func X(x:ind)->obj } def func Test()->pred {return A.X};", 1)>] // SIG03: ->pred does not match signature A.X(ind)->obj
-    [<DataRow("MS2s7", "def func A()->obj {intr prty pred X(x:obj) } def func Test()->pred {dec ~a:obj; return A.X(a)};", 1)>] // SIG03: ->pred does not match by value A.X(obj) 
+    [<DataRow("MS2s7", "def func A()->obj {intr prty pred X(x:obj) } def func Test()->pred {dec ~a:obj; return A.X(a)};", 0)>] // OK: ->pred matches by value A.X(obj) 
 
     // match with the type func(...)->...
     [<DataRow("MS3", "def func A(z:obj)->ind def func Test()->func(y:obj)->ind {return A};", 0)>] // OK: ->func(y:obj)->ind matches signature A(obj)->ind, whole node would be returned
@@ -2456,7 +2460,7 @@ type TestInterpreterErrors() =
     [<DataRow("MS2f", "thm A {true} def pred Test(v:pred) def pred T() {Test(A)};", 0)>] // OK: ->pred matches signature A (theorem)
     [<DataRow("MS2g", "lem A {true} def pred Test(v:pred) def pred T() {Test(A)};", 0)>] // OK: ->pred matches signature A (lemma)
     [<DataRow("MS2h", "prop A {true} def pred Test(v:pred) def pred T() {Test(A)};", 0)>] // OK: ->pred matches signature A (proposition)
-    [<DataRow("MS2i", "conj A {true} def pred Test(v:pred) def pred T() {Test(A)};", 0)>] // OK: ->pred does matches signature A (conjecture)
+    [<DataRow("MS2i", "conj A {true} def pred Test(v:pred) def pred T() {Test(A)};", 0)>] // OK: ->pred matches signature A (conjecture)
     [<DataRow("MS2j", "cor A$1 {true} def pred Test(v:pred) def pred T() {Test(A$1)};", 0)>] // OK: ->pred matches signature A$1 (corollary)
     [<DataRow("MS2k", "proof A$1 {1. |- trivial} def pred Test(v:pred) def pred T() {Test(A$1)};", 1)>] // SIG04: pred does not match signature A$1 (proof)
     [<DataRow("MS2l", "inf A {pre:true con:true} def pred Test(v:pred) def pred T() {Test(A)};", 1)>] // SIG04: pred does not match signature A (rule of inference)
@@ -2470,7 +2474,7 @@ type TestInterpreterErrors() =
     [<DataRow("MS2p4", "def cl A {intr prty func X()->obj } def pred Test(v:pred) def pred T() {Test(A.X)};", 1)>] // SIG04: pred does not match signature A.X()->obj
     [<DataRow("MS2p5", "def cl A {intr prty func X(x:obj)->obj } def pred Test(v:pred) def pred T() {Test(A.X)};", 1)>] // SIG04: pred does not match signature A.X(obj)->obj
     [<DataRow("MS2p6", "def cl A {intr prty func X(x:ind)->obj } def pred Test(v:pred) def pred T() {Test(A.X)};", 1)>] // SIG04: pred does not match signature A.X(ind)->obj
-    [<DataRow("MS2p7", "def cl A {intr prty pred X(x:obj) } def pred Test(v:pred) def pred T() {dec ~a:obj; Test(A.X(a))};", 1)>] // SIG04: pred does not match by value A.X(obj) 
+    [<DataRow("MS2p7", "def cl A {intr prty pred X(x:obj) } def pred Test(v:pred) def pred T() {dec ~a:obj; Test(A.X(a))};", 0)>] // OK: pred matches by value A.X(obj) 
     // ... using properties of instances
     [<DataRow("MS2q1", "def cl A {intr prty pred X(x:obj) } def pred Test(v:pred) def pred T() {dec ~o:A o:=A(); Test(o.X)};", 0)>] // OK: ->pred matches signature A.X(obj) 
     [<DataRow("MS2q2", "def cl A {intr prty pred X(x:ind) } def pred Test(v:pred) def pred T() {dec ~o:A o:=A(); Test(o.X)};", 0)>] // OK: ->pred matches signature A.X(ind)
@@ -2478,7 +2482,7 @@ type TestInterpreterErrors() =
     [<DataRow("MS2q4", "def cl A {intr prty func X()->obj } def pred Test(v:pred) def pred T() {dec ~o:A o:=A(); Test(o.X)};", 1)>] // SIG04: pred does not match signature A.X()->obj
     [<DataRow("MS2q5", "def cl A {intr prty func X(x:obj)->obj } def pred Test(v:pred) def pred T() {dec ~o:A o:=A(); Test(o.X)};", 1)>] // SIG04: pred does not match signature A.X(obj)->obj
     [<DataRow("MS2q6", "def cl A {intr prty func X(x:ind)->obj } def pred Test(v:pred) def pred T() {dec ~o:A o:=A(); Test(o.X)};", 1)>] // SIG04: pred does not match signature A.X(ind)->obj
-    [<DataRow("MS2q7", "def cl A {intr prty pred X(x:obj) } def pred Test(v:pred) def pred T() {dec ~a:obj ~o:A o:=A(); Test(o.X(a))};", 1)>] // SIG04: pred does not match by value A.X(obj) 
+    [<DataRow("MS2q7", "def cl A {intr prty pred X(x:obj) } def pred Test(v:pred) def pred T() {dec ~a:obj ~o:A o:=A(); Test(o.X(a))};", 0)>] // OK: pred matches by value A.X(obj) 
     // ... using properties of predicates
     [<DataRow("MS2r1", "def pred A() {intr prty pred X(x:obj) } def pred Test(v:pred) def pred T() {Test(A.X)};", 0)>] // OK: ->pred matches signature A.X(obj) 
     [<DataRow("MS2r2", "def pred A() {intr prty pred X(x:ind) } def pred Test(v:pred) def pred T() {Test(A.X)};", 0)>] // OK: ->pred matches signature A.X(ind)
@@ -2486,7 +2490,7 @@ type TestInterpreterErrors() =
     [<DataRow("MS2r4", "def pred A() {intr prty func X()->obj } def pred Test(v:pred) def pred T() {Test(A.X)};", 1)>] // SIG04: pred does not match signature A.X()->obj
     [<DataRow("MS2r5", "def pred A() {intr prty func X(x:obj)->obj } def pred Test(v:pred) def pred T() {Test(A.X)};", 1)>] // SIG04: pred does not match signature A.X(obj)->obj
     [<DataRow("MS2r6", "def pred A() {intr prty func X(x:ind)->obj } def pred Test(v:pred) def pred T() {Test(A.X)};", 1)>] // SIG04: pred does not match signature A.X(ind)->obj
-    [<DataRow("MS2r7", "def pred A() {intr prty pred X(x:obj) } def pred Test(v:pred) def pred T() {dec ~a:obj; T(A.X(a))};", 1)>] // SIG04: pred does not match by value A.X(obj) 
+    [<DataRow("MS2r7", "def pred A() {intr prty pred X(x:obj) } def pred Test(v:pred) def pred T() {dec ~a:obj; T(A.X(a))};", 0)>] // OK: pred matches by value A.X(obj) 
     // ... using properties of functional terms
     [<DataRow("MS2s1", "def func A()->obj {intr prty pred X(x:obj) } def pred Test(v:pred) def pred T() {Test(A.X)};", 0)>] // OK: ->pred matches signature A.X(obj) 
     [<DataRow("MS2s2", "def func A()->obj {intr prty pred X(x:ind) } def pred Test(v:pred) def pred T() {Test(A.X)};", 0)>] // OK: ->pred matches signature A.X(ind)
@@ -2494,13 +2498,13 @@ type TestInterpreterErrors() =
     [<DataRow("MS2s4", "def func A()->obj {intr prty func X()->obj } def pred Test(v:pred) def pred T() {Test(A.X)};", 1)>] // SIG04: pred does not match signature A.X()->obj
     [<DataRow("MS2s5", "def func A()->obj {intr prty func X(x:obj)->obj } def pred Test(v:pred) def pred T() {Test(A.X)};", 1)>] // SIG04: pred does not match signature A.X(obj)->obj
     [<DataRow("MS2s6", "def func A()->obj {intr prty func X(x:ind)->obj } def pred Test(v:pred) def pred T() {Test(A.X)};", 1)>] // SIG04: pred does not match signature A.X(ind)->obj
-    [<DataRow("MS2s7", "def func A()->obj {intr prty pred X(x:obj) } def pred Test(v:pred) def pred T() {dec ~a:obj; Test(A.X(a))};", 1)>] // SIG04: pred does not match by value A.X(obj) 
+    [<DataRow("MS2s7", "def func A()->obj {intr prty pred X(x:obj) } def pred Test(v:pred) def pred T() {dec ~a:obj; Test(A.X(a))};", 0)>] // OK: pred matches by value A.X(obj) 
 
     // match with the type func(...)->...
     [<DataRow("MS3", "def func A(z:obj)->ind def pred Test(v:func(y:obj)->ind) def pred T() {Test(A)};", 0)>] // OK: ->func(y:obj)->ind matches signature A(obj)->ind, whole node would be returned
     [<DataRow("MS3a", "def func A(z:obj)->ind def pred Test(v:func(y:obj)->ind) def pred T() {dec ~x:obj; Test(A(x))};", 1)>] // SIG04: func(y:obj)->ind does not match value A(obj) 
     [<DataRow("MS3b", "def func A(z:obj)->ind def pred Test(v:func(y:obj)->ind) def pred T() {dec ~x:obj; Test(A(x))};", 1)>] // SIG04: func(y:obj)->ind does not match value A(ind) not matching A(obj)
-    [<DataRow("MS3c", "def func A(z:ind)->ind def pred Test(v:func(y:obj)->ind) def pred T() {dec ~x:obj; Test(A(x))};", 1)>] // SIG04: func(y:obj)->ind does not match value A(ind) 
+    [<DataRow("MS3c", "def func A(z:ind)->ind def pred Test(v:func(y:obj)->ind) def pred T() {dec ~x:obj; Test(A(x))};", 2)>] // SIG04: func(y:obj)->ind does not match value A(ind) 
     [<DataRow("MS3d", "def func A(z:ind)->ind def pred Test(v:func(y:obj)->ind) def pred T() {Test(A)};", 1)>] // SIG04: func(y:obj)->ind does not match signature A(ind)->ind
     [<DataRow("MS3e", "ax A {true} def pred Test(v:func(y:obj)->ind) def pred T() {Test(A)};", 1)>] // SIG04: func(y:obj)->ind does not match signature A (axiom)
     [<DataRow("MS3f", "thm A {true} def pred Test(v:func(y:obj)->ind) def pred T() {Test(A)};", 1)>] // SIG04: func(y:obj)->ind does not match signature A (theorem)
@@ -2600,7 +2604,7 @@ type TestInterpreterErrors() =
     [<DataRow("MS4", "def func A(z:obj)->ind def pred Test(v:func) def pred T() {Test(A)};", 0)>] // OK: ->func matches signature A(obj)->ind, whole node would be returned
     [<DataRow("MS4a", "def func A(z:obj)->ind def pred Test(v:func) def pred T() {dec ~x:obj; Test(A(x))};", 1)>] // SIG04: func does not match value A(obj) 
     [<DataRow("MS4b", "def func A(z:obj)->ind def pred Test(v:func) def pred T() {dec ~x:obj; Test(A(x))};", 1)>] // SIG04: func does not match value A(ind) not matching A(obj)
-    [<DataRow("MS4c", "def func A(z:ind)->ind def pred Test(v:func) def pred T() {dec ~x:obj; Test(A(x))};", 1)>] // SIG04: func does not match value A(ind) 
+    [<DataRow("MS4c", "def func A(z:ind)->ind def pred Test(v:func) def pred T() {dec ~x:obj; Test(A(x))};", 2)>] // SIG04: func does not match value A(ind) 
     [<DataRow("MS4d", "def func A(z:ind)->func(a:obj)->ind def pred Test(v:func) def pred T() {Test(A)};", 0)>] // OK: ->func matches signature A(ind)->func(obj)->ind
     [<DataRow("MS4e", "ax A {true} def pred Test(v:func) def pred T() {Test(A)};", 1)>] // SIG04: func does not matche signature A (axiom)
     [<DataRow("MS4f", "thm A {true} def pred Test(v:func) def pred T() {Test(A)};", 1)>] // SIG04: func does not matche signature A (theorem)
@@ -3013,7 +3017,7 @@ type TestInterpreterErrors() =
     [<DataRow("MS2f", "thm A {true} def pred T(v:pred) {dec v:=A; true};", 0)>] // OK: ->pred matches signature A (theorem)
     [<DataRow("MS2g", "lem A {true} def pred T(v:pred) {dec v:=A; true};", 0)>] // OK: ->pred matches signature A (lemma)
     [<DataRow("MS2h", "prop A {true} def pred T(v:pred) {dec v:=A; true};", 0)>] // OK: ->pred matches signature A (proposition)
-    [<DataRow("MS2i", "conj A {true} def pred T(v:pred) {dec v:=A; true};", 0)>] // OK: ->pred does matches signature A (conjecture)
+    [<DataRow("MS2i", "conj A {true} def pred T(v:pred) {dec v:=A; true};", 0)>] // OK: ->pred matches signature A (conjecture)
     [<DataRow("MS2j", "cor A$1 {true} def pred T(v:pred) {dec v:=A$1; true};", 0)>] // OK: ->pred matches signature A$1 (corollary)
     [<DataRow("MS2k", "proof A$1 {1. |- trivial} def pred T(v:pred) {dec v:=A$1; true};", 1)>] // SIG05: pred does not match signature A$1 (proof)
     [<DataRow("MS2l", "inf A {pre:true con:true} def pred T(v:pred) {dec v:=A; true};", 1)>] // SIG05: pred does not match signature A (rule of inference)
@@ -3027,7 +3031,7 @@ type TestInterpreterErrors() =
     [<DataRow("MS2p4", "def cl A {intr prty func X()->obj } def pred T(v:pred) {dec v:=A.X; true};", 1)>] // SIG05: pred does not match signature A.X()->obj
     [<DataRow("MS2p5", "def cl A {intr prty func X(x:obj)->obj } def pred T(v:pred) {dec v:=A.X; true};", 1)>] // SIG05: pred does not match signature A.X(obj)->obj
     [<DataRow("MS2p6", "def cl A {intr prty func X(x:ind)->obj } def pred T(v:pred) {dec v:=A.X; true};", 1)>] // SIG05: pred does not match signature A.X(ind)->obj
-    [<DataRow("MS2p7", "def cl A {intr prty pred X(x:obj) } def pred T(v:pred) {dec ~a:obj v:=A.X(a); true};", 1)>] // SIG05: pred does not match by value A.X(obj) 
+    [<DataRow("MS2p7", "def cl A {intr prty pred X(x:obj) } def pred T(v:pred) {dec ~a:obj v:=A.X(a); true};", 0)>] // OK: pred matches by value A.X(obj) 
     // ... using properties of instances
     [<DataRow("MS2q1", "def cl A {intr prty pred X(x:obj) } def pred T(v:pred) {dec ~o:A o:=A() v:=o.X; true};", 0)>] // OK: ->pred matches signature A.X(obj) 
     [<DataRow("MS2q2", "def cl A {intr prty pred X(x:ind) } def pred T(v:pred) {dec ~o:A o:=A() v:=o.X; true};", 0)>] // OK: ->pred matches signature A.X(ind)
@@ -3035,7 +3039,7 @@ type TestInterpreterErrors() =
     [<DataRow("MS2q4", "def cl A {intr prty func X()->obj } def pred T(v:pred) {dec ~o:A o:=A() v:=o.X; true};", 1)>] // SIG05: pred does not match signature A.X()->obj
     [<DataRow("MS2q5", "def cl A {intr prty func X(x:obj)->obj } def pred T(v:pred) {dec ~o:A o:=A() v:=o.X; true};", 1)>] // SIG05: pred does not match signature A.X(obj)->obj
     [<DataRow("MS2q6", "def cl A {intr prty func X(x:ind)->obj } def pred T(v:pred) {dec ~o:A o:=A() v:=o.X; true};", 1)>] // SIG05: pred does not match signature A.X(ind)->obj
-    [<DataRow("MS2q7", "def cl A {intr prty pred X(x:obj) } def pred T(v:pred) {dec ~a:obj ~o:A o:=A() v:=o.X(a); true};", 1)>] // SIG05: pred does not match by value A.X(obj) 
+    [<DataRow("MS2q7", "def cl A {intr prty pred X(x:obj) } def pred T(v:pred) {dec ~a:obj ~o:A o:=A() v:=o.X(a); true};", 0)>] // OK: pred matches by value A.X(obj) 
     // ... using properties of predicates
     [<DataRow("MS2r1", "def pred A() {intr prty pred X(x:obj) } def pred T(v:pred) {dec v:=A.X; true};", 0)>] // OK: ->pred matches signature A.X(obj) 
     [<DataRow("MS2r2", "def pred A() {intr prty pred X(x:ind) } def pred T(v:pred) {dec v:=A.X; true};", 0)>] // OK: ->pred matches signature A.X(ind)
@@ -3043,7 +3047,7 @@ type TestInterpreterErrors() =
     [<DataRow("MS2r4", "def pred A() {intr prty func X()->obj } def pred T(v:pred) {dec v:=A.X; true};", 1)>] // SIG05: pred does not match signature A.X()->obj
     [<DataRow("MS2r5", "def pred A() {intr prty func X(x:obj)->obj } def pred T(v:pred) {dec v:=A.X; true};", 1)>] // SIG05: pred does not match signature A.X(obj)->obj
     [<DataRow("MS2r6", "def pred A() {intr prty func X(x:ind)->obj } def pred T(v:pred) {dec v:=A.X; true};", 1)>] // SIG05: pred does not match signature A.X(ind)->obj
-    [<DataRow("MS2r7", "def pred A() {intr prty pred X(x:obj) } def pred T(v:pred) {dec ~a:obj v:=A.X(a); true};", 1)>] // SIG05: pred does not match by value A.X(obj) 
+    [<DataRow("MS2r7", "def pred A() {intr prty pred X(x:obj) } def pred T(v:pred) {dec ~a:obj v:=A.X(a); true};", 0)>] // OK: pred matches by value A.X(obj) 
     // ... using properties of functional terms
     [<DataRow("MS2s1", "def func A()->obj {intr prty pred X(x:obj) } def pred T(v:pred) {dec v:=A.X; true};", 0)>] // OK: ->pred matches signature A.X(obj) 
     [<DataRow("MS2s2", "def func A()->obj {intr prty pred X(x:ind) } def pred T(v:pred) {dec v:=A.X; true};", 0)>] // OK: ->pred matches signature A.X(ind)
@@ -3051,7 +3055,7 @@ type TestInterpreterErrors() =
     [<DataRow("MS2s4", "def func A()->obj {intr prty func X()->obj } def pred T(v:pred) {dec v:=A.X; true};", 1)>] // SIG05: pred does not match signature A.X()->obj
     [<DataRow("MS2s5", "def func A()->obj {intr prty func X(x:obj)->obj } def pred T(v:pred) {dec v:=A.X; true};", 1)>] // SIG05: pred does not match signature A.X(obj)->obj
     [<DataRow("MS2s6", "def func A()->obj {intr prty func X(x:ind)->obj } def pred T(v:pred) {dec v:=A.X; true};", 1)>] // SIG05: pred does not match signature A.X(ind)->obj
-    [<DataRow("MS2s7", "def func A()->obj {intr prty pred X(x:obj) } def pred T(v:pred) {dec ~a:obj v:=A.X(a); true};", 1)>] // SIG05: pred does not match by value A.X(obj) 
+    [<DataRow("MS2s7", "def func A()->obj {intr prty pred X(x:obj) } def pred T(v:pred) {dec ~a:obj v:=A.X(a); true};", 0)>] // OK: pred matches by value A.X(obj) 
 
     // match with the type func(...)->...
     [<DataRow("MS3", "def func A(z:obj)->ind def pred T(v:func(y:obj)->ind) {dec v:=A; true};", 0)>] // OK: ->func(y:obj)->ind matches signature A(obj)->ind, whole node would be returned

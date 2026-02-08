@@ -351,7 +351,8 @@ let emitID024Diagnostics alreadyLocalizedExpr qualifiedStartPosConflictStr pos1 
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitID025Diagnostics qualifiedNameCandidate blockEnglishName blockName pos1 pos2 =
+/// Emits ID025 diagnostics if the blockName cannot be referred from qualifiedNameCandidate
+let checkID025Diagnostics qualifiedNameCandidate blockName pos1 pos2 =
     match blockName with 
     | LiteralAxL
     | LiteralThmL
@@ -363,6 +364,7 @@ let emitID025Diagnostics qualifiedNameCandidate blockEnglishName blockName pos1 
     | LiteralPrfL
     | PrimExtensionL
     | LiteralLocL ->
+        let blockEnglishName = getEnglishName blockName false
         let diagnostic =
             { 
                 Diagnostic.Uri = ad.CurrentUri
