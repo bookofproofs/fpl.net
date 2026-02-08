@@ -4524,7 +4524,6 @@ let rec checkCandidates (toBeMatched: FplValue) (candidates: FplValue list) (acc
 /// Checks if there is a candidate among the candidates that matches the signature of a calling FplValue and returns this as an option.
 let checkSIG04Diagnostics (calling:FplValue) (candidates: FplValue list) = 
     if candidates.Length = 0 then
-        calling.ErrorOccurred <- emitID010Diagnostics calling.FplId calling.StartPos calling.EndPos
         None
     else
         match checkCandidates calling candidates [] with
