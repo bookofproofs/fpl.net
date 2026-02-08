@@ -221,6 +221,11 @@ def pred GreaterEqual(x,y:Nat) infix ">=" 72
     ex a:Nat {(x = y + a)}
 }
 
+def pred IsGreater(x,y:Nat) infix ">" 73
+{
+    and ((x >= y), (x <> y))
+}
+
 def func Sum(from,to:Nat, addend: Addend) -> Nat
 {
     dec
