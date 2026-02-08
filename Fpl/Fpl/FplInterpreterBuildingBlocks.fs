@@ -508,9 +508,9 @@ let rec eval (st: SymbolTable) ast =
         eval st ast1
     | Ast.PredicateIdentifier((pos1, pos2), identifier) ->
         let fv = variableStack.PeekEvalStack()
-        let candidatesPre = findCandidatesByName st identifier false false
+        let candidatesFromTheory = findCandidatesByName st identifier false false
         let candidatesLocal = findCandidatesByNameInBlock fv identifier
-        let candidates, candidatesNames =  filterCandidates (candidatesPre @ candidatesLocal) identifier true
+        let candidates, candidatesNames =  filterCandidates (candidatesFromTheory @ candidatesLocal) identifier true
         let correctIds (fv1:FplValue) = 
             match fv with 
             | :? FplBase 
