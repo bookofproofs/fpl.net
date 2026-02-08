@@ -803,13 +803,13 @@ let rec eval (st: SymbolTable) ast =
                 // add the class (intrinsic case, no constructors at all)
                 let candidate = classes.Head
                 fv.RefersTo <- Some candidate
-                fv.ErrorOccurred <- emitID025Diagnostics (qualifiedName candidate false) (getEnglishName block.Name false) block.Name fv.StartPos fv.EndPos
+                fv.ErrorOccurred <- checkID025Diagnostics (qualifiedName candidate false) block.Name fv.StartPos fv.EndPos
             elif candidates.Length > 0 then
                 // not a class was referred, add the candidate (e.g., referenced variable)
                 let candidate = candidates.Head
                 fv.FplId <- candidate.FplId 
                 fv.RefersTo <- Some candidate
-                fv.ErrorOccurred <- emitID025Diagnostics (qualifiedName candidate false) (getEnglishName block.Name false) block.Name fv.StartPos fv.EndPos
+                fv.ErrorOccurred <- checkID025Diagnostics (qualifiedName candidate false) block.Name fv.StartPos fv.EndPos
             else
                 ()
         simplifyTriviallyNestedExpressions fv |> ignore
@@ -956,7 +956,7 @@ let rec eval (st: SymbolTable) ast =
                 fv.RefersTo <- Some candidate
                 match fv.UltimateBlockNode with
                 | Some block ->
-                    fv.ErrorOccurred <- emitID025Diagnostics (qualifiedName candidate false) (getEnglishName block.Name false) block.Name fv.StartPos fv.EndPos
+                    fv.ErrorOccurred <- checkID025Diagnostics (qualifiedName candidate false) block.Name fv.StartPos fv.EndPos
                 | _ -> ()
         | _ -> ()
     | ProofSignature((pos1, pos2), (simpleSignatureAst, dollarDigitListAsts)) ->
