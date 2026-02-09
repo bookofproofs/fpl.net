@@ -96,33 +96,58 @@ type TestRepresentation() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("($0 = $0)", LiteralTrue)>]
-    [<DataRow("($1 = $2)", LiteralFalse)>]
-    [<DataRow("($3 = $3)", LiteralTrue)>]
-    [<DataRow("(@3 = $3)", LiteralFalse)>]
-    [<DataRow("(true = false)", LiteralFalse)>]
-    [<DataRow("(undef = undef)", PrimUndetermined)>]
-    [<DataRow("(true = true)", LiteralTrue)>]
-    [<DataRow("(true = undef)", PrimUndetermined)>]
-    [<DataRow("(undef = true)", PrimUndetermined)>]
-    [<DataRow("(a = true)", PrimUndetermined)>]
-    [<DataRow("(i = $3)", PrimUndetermined)>]
-    [<DataRow("(j = $2)", LiteralTrue)>]
-    [<DataRow("(k = $2)", LiteralFalse)>]
-    [<DataRow("(true = a)", PrimUndetermined)>]
-    [<DataRow("($3 = i)", PrimUndetermined)>]
-    [<DataRow("($2 = j)", LiteralTrue)>]
-    [<DataRow("($2 = k)", LiteralFalse)>]
+    [<DataRow("i01", "($0 = $0)", LiteralTrue)>]
+    [<DataRow("i02", "($1 = $2)", LiteralFalse)>]
+    [<DataRow("i03", "($3 = $3)", LiteralTrue)>]
+    [<DataRow("e01", "(@0 = @0)", LiteralTrue)>]
+    [<DataRow("e02", "(@1 = @0)", LiteralFalse)>]
+    [<DataRow("e03", "(@0 = @1)", LiteralFalse)>]
+    [<DataRow("e04", "(@2 = @2)", LiteralTrue)>]
+    [<DataRow("e05", "(@3 = @3)", LiteralTrue)>]
+    [<DataRow("e06", "(@5 = @5)", LiteralTrue)>]
+    [<DataRow("e07", "(@5 = @3)", LiteralFalse)>]
+    [<DataRow("pr01", "(true = false)", LiteralFalse)>]
+    [<DataRow("pr03", "(undef = undef)", PrimUndetermined)>]
+    [<DataRow("pr04", "(true = true)", LiteralTrue)>]
+    [<DataRow("pr05", "(true = undef)", PrimUndetermined)>]
+    [<DataRow("pr06", "(undef = true)", PrimUndetermined)>]
+    [<DataRow("m01", "(@3 = $3)", LiteralFalse)>]
+    [<DataRow("m02", "(a = true)", PrimUndetermined)>]
+    [<DataRow("m03", "(i = $3)", PrimUndetermined)>]
+    [<DataRow("m04", "(j = $2)", LiteralTrue)>]
+    [<DataRow("m05", "(k = $2)", LiteralFalse)>]
+    [<DataRow("m06", "(true = a)", PrimUndetermined)>]
+    [<DataRow("m07", "($3 = i)", PrimUndetermined)>]
+    [<DataRow("m08", "($2 = j)", LiteralTrue)>]
+    [<DataRow("m09", "($2 = k)", LiteralFalse)>]
     [<TestMethod>]
-    member this.TestRepresentationEquality(varVal, expected:string) =
+    member this.TestRepresentationEqualityWithCases(no:string, varVal, expected:string) =
         ad.Clear()
         let fplCode = sprintf """
+        def cl Nat
+        def cl Zero: Nat
+        def func Succ(n: Nat) -> Nat
+        ext Digits x@/\d+/ -> Nat 
+        {
+            dec
+            ~n:Nat
+            cases
+            (
+                | (x = @0) : n := Zero() 
+                | (x = @1) : n := Succ(Zero()) 
+                | (x = @2) : n := Succ(Succ(Zero())) 
+                ? n := Succ(delegate.Decrement(x))  
+            )
+            ;
+            return n
+        }
+
         def pred Equal(x,y: tpl) infix "=" 50 
         {
             del.Equal(x,y)
         } 
         def pred T() { dec ~i,j,k:ind j:=$2 k:=$3; %s };""" varVal
-        let filename = "TestRepresentationCases.fpl"
+        let filename = "TestRepresentationEqualityWithCases.fpl"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -133,6 +158,104 @@ type TestRepresentation() =
             Assert.AreEqual<string>(expected, pr.Represent())
         | None -> 
             Assert.IsTrue(false)
+
+    [<DataRow("i01", "($0 = $0)", LiteralTrue)>]
+    [<DataRow("i02", "($1 = $2)", LiteralFalse)>]
+    [<DataRow("i03", "($3 = $3)", LiteralTrue)>]
+    [<DataRow("e01", "(@0 = @0)", LiteralTrue)>]
+    [<DataRow("e02", "(@1 = @0)", LiteralFalse)>]
+    [<DataRow("e03", "(@0 = @1)", LiteralFalse)>]
+    [<DataRow("e04", "(@2 = @2)", LiteralTrue)>]
+    [<DataRow("e05", "(@3 = @3)", LiteralTrue)>]
+    [<DataRow("e06", "(@5 = @5)", LiteralTrue)>]
+    [<DataRow("e07", "(@5 = @3)", LiteralFalse)>]
+    [<DataRow("pr01", "(true = false)", LiteralFalse)>]
+    [<DataRow("pr03", "(undef = undef)", PrimUndetermined)>]
+    [<DataRow("pr04", "(true = true)", LiteralTrue)>]
+    [<DataRow("pr05", "(true = undef)", PrimUndetermined)>]
+    [<DataRow("pr06", "(undef = true)", PrimUndetermined)>]
+    [<DataRow("m01", "(@3 = $3)", LiteralFalse)>]
+    [<DataRow("m02", "(a = true)", PrimUndetermined)>]
+    [<DataRow("m03", "(i = $3)", PrimUndetermined)>]
+    [<DataRow("m04", "(j = $2)", LiteralTrue)>]
+    [<DataRow("m05", "(k = $2)", LiteralFalse)>]
+    [<DataRow("m06", "(true = a)", PrimUndetermined)>]
+    [<DataRow("m07", "($3 = i)", PrimUndetermined)>]
+    [<DataRow("m08", "($2 = j)", LiteralTrue)>]
+    [<DataRow("m09", "($2 = k)", LiteralFalse)>]
+    [<TestMethod>]
+    member this.TestRepresentationEqualityWithMCases(no:string, varVal, expected:string) =
+        ad.Clear()
+        let fplCode = sprintf """
+        def cl Nat
+        def cl Zero: Nat
+        def func Succ(n: Nat) -> Nat
+        ext Digits x@/\d+/ -> Nat 
+        {
+            return mcases
+            (
+                | (x = @0) : Zero() 
+                | (x = @1) : Succ(Zero()) 
+                | (x = @2) : Succ(Succ(Zero())) 
+                ? Succ(delegate.Decrement(x))  
+            )
+        }
+
+        def pred Equal(x,y: tpl) infix "=" 50 
+        {
+            del.Equal(x,y)
+        } 
+        def pred T() { dec ~i,j,k:ind j:=$2 k:=$3; %s };""" varVal
+        let filename = "TestRepresentationEqualityWithMCases.fpl"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let pr = theory.Scope["T()"] 
+            Assert.AreEqual<string>(expected, pr.Represent())
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("00", "@0", "")>]
+    [<TestMethod>]
+    member this.TestRepresentationMCases(no:string, varVal, expected:string) =
+        ad.Clear()
+        let fplCode = sprintf """
+        def cl Nat
+        def cl Zero: Nat
+        def func Succ(n: Nat) -> Nat
+        def pred Equal(x,y: tpl) infix "=" 50 
+        {
+            del.Equal(x,y)
+        }
+        
+        ext Digits x@/\d+/ -> Nat 
+        {
+            return mcases
+            (
+                | (x = @0) : Zero() 
+                | (x = @1) : Succ(Zero()) 
+                | (x = @2) : Succ(Succ(Zero())) 
+                ? Succ(delegate.Decrement(x))  
+            )
+        }
+
+ 
+        def func T()->Nat { return %s };""" varVal
+        let filename = "TestRepresentationMCases.fpl"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let func = theory.Scope["T() -> Nat"] 
+            Assert.AreEqual<string>(expected, func.Represent())
+        | None -> 
+            Assert.IsTrue(false)
+
 
     [<DataRow("00","""def pred T() { dec ~v:ind; true };""", "dec ind")>]
     [<DataRow("00a","""def pred T() { dec ~v:pred; true };""", PrimUndetermined)>]
@@ -237,3 +360,5 @@ type TestRepresentation() =
             Assert.AreEqual<string>(expected, result)
         | None -> 
             Assert.IsTrue(false)
+
+

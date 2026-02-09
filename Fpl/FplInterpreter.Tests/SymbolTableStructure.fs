@@ -5265,6 +5265,7 @@ type SymbolTableStructure() =
         | "FplSelf", "02c"
         | "FplSelf", "02d"
         | "FplSelf", "02e"
+        | "FplSelf", "14"
             ->
             Assert.IsInstanceOfType<FplReference>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
@@ -5286,7 +5287,6 @@ type SymbolTableStructure() =
         | "FplSelf", "11"
         | "FplSelf", "12"
         | "FplSelf", "13"
-        | "FplSelf", "14"
             ->
             Assert.IsInstanceOfType<FplReference>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
