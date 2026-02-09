@@ -365,6 +365,7 @@ let rec eval (st: SymbolTable) ast =
         match fv.NextBlockNode with
         | Some block ->
             match block.Name with 
+            | PrimExtensionL
             | PrimMandatoryFunctionalTermL
             | PrimMandatoryPredicateL
             | PrimClassL
