@@ -4488,6 +4488,13 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
+    [<DataRow("FplParent", "00", """def pred T() {intr property pred T1() {parent} };""", "")>]
+    [<DataRow("FplParent", "00_1", """def pred T() {intr property pred T1() {parent()} };""", "")>]
+    [<DataRow("FplParent", "00_2", """def pred T() {intr property pred T1() {parent($1)} };""", "")>]
+    [<DataRow("FplParent", "00_3", """def func T()->obj {intr property func T1()->obj {return parent} };""", "")>]
+    [<DataRow("FplParent", "00_4", """def func T()->obj {intr property func T1()->obj {return parent()} };""", "")>]
+    [<DataRow("FplParent", "00_5", """def func T()->obj {intr property func T1()->obj {return parent($1)} };""", "")>]
+
     [<DataRow("FplParent", "00a", """def cl A {dec ~x:obj x:=parent; ctor A() {}};""", "")>]
     [<DataRow("FplParent", "00b", """def cl A {ctor A() {dec ~x:obj x:=parent;}};""", "")>]
     [<DataRow("FplParent", "00c", """def cl A {intr property pred T() { is(parent,A) } };""", "")>]
@@ -4521,7 +4528,22 @@ type SymbolTableStructure() =
         let parent, node = testSkeleton nodeType filename fplCode identifier
         
         match nodeType, varVal with
+            | "FplParent", "00_2"
+            | "FplParent", "00_5"
+                ->
+                Assert.IsInstanceOfType<FplReference>(parent)
+                Assert.AreEqual<int>(1, parent.ArgList.Count)
+                Assert.AreEqual<int>(0, parent.Scope.Count)
+                Assert.IsTrue(parent.RefersTo.IsSome)
+                Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
+                Assert.IsInstanceOfType<FplParent>(node)
+                Assert.AreEqual<int>(0, node.ArgList.Count)
+                Assert.IsTrue(node.RefersTo.IsSome)
             // nodes that can be referenced as parent 
+            | "FplParent", "00"
+            | "FplParent", "00_1"
+            | "FplParent", "00_3"
+            | "FplParent", "00_4"
             | "FplParent", "00b"
             | "FplParent", "00c"
             | "FplParent", "00d"
@@ -5249,7 +5271,19 @@ type SymbolTableStructure() =
         
         match nodeType, varVal with
         // nodes that can be referred to as 'self'
+        | "FplSelf", "00_2" 
+            ->
+            Assert.IsInstanceOfType<FplReference>(parent)
+            Assert.AreEqual<int>(1, parent.ArgList.Count)
+            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsTrue(parent.RefersTo.IsSome)
+            Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
+            Assert.IsInstanceOfType<FplSelf>(node)
+            Assert.AreEqual<int>(0, node.ArgList.Count)
+            Assert.IsTrue(node.RefersTo.IsSome)
+        // nodes that can be referred to as 'self'
         | "FplSelf", "00" 
+        | "FplSelf", "00_1" 
         | "FplSelf", "00a" 
         | "FplSelf", "00c"
         | "FplSelf", "00d"

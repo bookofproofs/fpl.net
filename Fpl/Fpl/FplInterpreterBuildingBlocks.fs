@@ -777,7 +777,13 @@ let rec eval (st: SymbolTable) ast =
             else
                 match checkSIG04Diagnostics node candidates with
                 | Some matchedCandidate -> 
-                    node.RefersTo <- Some matchedCandidate
+                    match node.RefersTo with
+                    | Some self when self.Name = LiteralSelf && self.RefersTo.IsSome && Object.ReferenceEquals(self.RefersTo.Value, matchedCandidate) ->
+                        () // omit replacing node.RefersTo if it refers to FplSelf and FplSelf already refers to the matchedCandidate
+                    | Some parent when parent.Name = LiteralParent && parent.RefersTo.IsSome && Object.ReferenceEquals(parent.RefersTo.Value, matchedCandidate) ->
+                        () // omit replacing node.RefersTo if it refers to FplParent and FplParent already refers to the matchedCandidate
+                    | _ ->
+                        node.RefersTo <- Some matchedCandidate
                 | _ -> ()
 
             variableStack.PopEvalStack()
