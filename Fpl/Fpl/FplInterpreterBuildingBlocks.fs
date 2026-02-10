@@ -240,6 +240,7 @@ let rec eval (st: SymbolTable) ast =
             fv.EndPos <- pos2
         | PrimExtensionL -> 
             let newVar = new FplVariable(name, (pos1, pos2), fv)
+            newVar.IsSignatureVariable <- variableStack.InSignatureEvaluation
             variableStack.PushEvalStack(newVar)
             variableStack.PopEvalStack()
         | PrimRefL ->
@@ -892,8 +893,10 @@ let rec eval (st: SymbolTable) ast =
             beingCreatedNode.ErrorOccurred <- emitID011Diagnostics kvp.Key kvp.Value beingCreatedNode.StartPos beingCreatedNode.EndPos
         )
     | Ast.ExtensionAssignment((pos1, pos2), (varAst, extensionRegexAst)) ->
+        variableStack.InSignatureEvaluation <- true
         eval st varAst
         eval st extensionRegexAst
+        variableStack.InSignatureEvaluation <- false
     | Ast.ExtensionSignature((pos1, pos2), (extensionAssignmentAst, extensionMappingAst)) ->
         eval st extensionAssignmentAst
         eval st extensionMappingAst

@@ -2578,6 +2578,7 @@ type SymbolTableStructure() =
 
 
     [<DataRow("FplExtension", "00", """ext Digits x@/\d+/ -> obj {ret x};""", "")>]
+    [<DataRow("FplExtension", "01", """ext Digits x@/\d+/ -> obj {dec ~y:obj; ret x};""", "")>]
     [<TestMethod>]
     member this.TestStructureFplExtension(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplExtension.fpl"
@@ -2591,6 +2592,17 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplExtension>(node)
             Assert.AreEqual<int>(2, node.ArgList.Count)
             Assert.AreEqual<int>(1, node.Scope.Count)
+            let signatureVars = node.GetVariables() |> List.map (fun var -> var :?> FplGenericVariable) |> List.filter (fun var -> var.IsSignatureVariable) 
+            Assert.AreEqual<int>(1, signatureVars.Length)
+        | "FplExtension", "01" -> 
+            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.AreEqual<int>(0, parent.ArgList.Count)
+            Assert.AreEqual<int>(1, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplExtension>(node)
+            Assert.AreEqual<int>(2, node.ArgList.Count)
+            Assert.AreEqual<int>(2, node.Scope.Count)
+            let signatureVars = node.GetVariables() |> List.map (fun var -> var :?> FplGenericVariable) |> List.filter (fun var -> var.IsSignatureVariable) 
+            Assert.AreEqual<int>(1, signatureVars.Length)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     [<DataRow("FplExtensionObj", "00", """ax A {@1};""", "")>]
@@ -5576,7 +5588,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
             Assert.IsFalse(x.IsInitialized)
-            Assert.IsFalse(x.IsSignatureVariable)
+            Assert.IsTrue(x.IsSignatureVariable)
         | "FplVariable", "00m" ->
             Assert.IsInstanceOfType<FplCorollary>(parent)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
