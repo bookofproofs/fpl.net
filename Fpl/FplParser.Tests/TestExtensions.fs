@@ -46,6 +46,7 @@ type TestExtensions () =
     [<DataRow(@"ext Alpha x@/[a-z]+/ -> A {return x} def pred T() {@abc};")>]
     [<DataRow(@"ext Digits x@/\d+/ -> S {return x};")>]
     [<DataRow(@"ext Alpha x@/[a-z]+/ -> T {return x};")>]
+    [<DataRow(@"ext Alpha x@/\d+/ -> obj {ret x} def pred T() {dec ~a:obj a:=@1; true};")>]
     [<TestMethod>]
     member this.TestExtensionMultiple (ext:string) =
         let result = run (ast .>> eof) ext
