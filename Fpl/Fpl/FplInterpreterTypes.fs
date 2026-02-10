@@ -1739,6 +1739,7 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
 
     override this.Run _ = 
         this.Debug Debug.Start
+        // FplGenericVariable has nothing to run
         this.Debug Debug.Stop
 
     override this.RunOrder = None
@@ -5247,7 +5248,17 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
             variableStack.CallerEndPos <- this.EndPos
             // run all statements of the called node
             extensionDefinition.Run variableStack
-            this.SetValuesOf extensionDefinition
+            match extensionDefinition.Value with 
+            | Some v when Object.ReferenceEquals(this, v) -> 
+                // we have the case that an extension definition evaluated to the same FplExtensionObj 
+                // it was referred from. In this case, we have to prevent the FplExtensionObj to be set with itself as its value
+                // we create a new Extension Obj
+                let v = new FplExtensionObj((this.StartPos, this.EndPos), this)
+                v.FplId <- this.FplId
+                v.TypeId <- this.TypeId
+                this.SetValue v
+            | _ ->
+                this.SetValuesOf extensionDefinition
             variableStack.RestoreState(extensionDefinition)
         | _ ->
             let v = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
@@ -5907,6 +5918,8 @@ type FplReturn(positions: Positions, parent: FplValue) as this =
                         refValue.Run variableStack
                         match refValue with 
                         | :? FplGenericConstructor ->
+                            this.SetValuesOf refValue
+                        | :? FplVariable as var when var.Value.IsSome ->
                             this.SetValuesOf refValue
                         | _ -> this.SetValue refValue
                     | _ ->

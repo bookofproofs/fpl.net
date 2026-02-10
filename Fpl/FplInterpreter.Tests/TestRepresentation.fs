@@ -361,4 +361,26 @@ type TestRepresentation() =
         | None -> 
             Assert.IsTrue(false)
 
-
+    [<DataRow("00", "@0", "0")>]
+    [<DataRow("01", "@42", "42")>]
+    [<TestMethod>]
+    member this.TestRepresentationExtensionObj(no:string, varVal, expected:string) =
+        ad.Clear()
+        let fplCode = sprintf """
+        ext Digits x@/\d+/ -> obj
+        {
+            return x
+        }
+        def pred T() { dec ~a:obj a:=%s; true };""" varVal
+        let filename = "TestRepresentationExtensionObj.fpl"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let pred = theory.Scope["T()"] 
+            let a = pred.Scope["a"] 
+            Assert.AreEqual<string>(expected, a.Represent())
+        | None -> 
+            Assert.IsTrue(false)

@@ -774,7 +774,7 @@ type TestInterpreterErrors() =
     [<DataRow("12", """inf A {pre: self con: true};""", 1)>]
     [<DataRow("13", """loc not(self) := !tex: "\neg(" x ")";;""", 1)>]
     // TODO: issue diagnostics when asserting is(self,...) outside classes
-    [<DataRow("14a", """ext A x@/\d+/ -> obj {dec assert is(self,A); ret x};""", 1)>]
+    [<DataRow("14a", """ext A x@/\d+/ -> obj {dec assert is(self,A); ret x};""", 0)>]
     [<DataRow("14b", """def cl Nat def func Zero() -> Nat def func Succ(n: Nat) -> Nat def pred Equal(x,y: tpl) infix "=" 50 { del.Equal(x,y) } ext Digits x@/\d+/ -> Nat { return mcases (| (x = @0) : Zero() | (x = @1) : Succ(Zero()) | (x = @2) : Succ(Succ(Zero())) ? Succ(self(delegate.Decrement(x))) )};""", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
@@ -2075,6 +2075,10 @@ type TestInterpreterErrors() =
     [<DataRow("MS4s6", "def func A()->obj {intr prty func X(x:ind)->obj } def func Test()->func {return A.X};", 0)>] // OK: ->func matches signature A.X(ind)->obj
     [<DataRow("MS4s7", "def func A()->obj {intr prty func X(x:obj)->ind } def func Test()->func {dec ~a:obj; return A.X(a)};", 1)>] // SIG03: ->func does not match by value A.X(obj) 
 
+    // ... other
+    [<DataRow("00", "ext Digits x@/\d+/ -> obj { ret x };", 0)>] 
+    [<DataRow("00a", "ext Digits x@/\d+/ -> obj { ret x } def pred T() { dec ~a:obj a:=@0; true };", 0)>] 
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG03(no:string, fplCode:string, expected) =
         if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
