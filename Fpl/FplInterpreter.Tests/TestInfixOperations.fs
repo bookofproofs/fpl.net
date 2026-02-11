@@ -9,7 +9,9 @@ open CommonTestHelpers
 type TestInfixOperations() =
 
     [<DataRow("""def pred T1() { dec ~x,y:obj; (x = y) }""", PrimUndetermined)>]
-    [<DataRow("""ext T x@/\d+/->obj {ret x} def pred T1() { (@1 = @2) }""", PrimUndetermined)>]
+    [<DataRow("""ext T x@/\d+/->obj {ret x} def pred T1() { (@1 = @2) }""", LiteralFalse)>]
+    [<DataRow("""ext T x@/\d+/->obj {ret x} def pred T1() { (@42 = @2) }""", LiteralFalse)>]
+    [<DataRow("""ext T x@/\d+/->obj {ret x} def pred T1() { (@42 = @42) }""", LiteralTrue)>]
     [<DataRow("""def pred T1() { (@1 = @1) }""", PrimUndetermined)>]
     [<TestMethod>]
     member this.TestEqualityPredicate(varVal, expected:string) =

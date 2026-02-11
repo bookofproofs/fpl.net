@@ -79,6 +79,25 @@ type TestRepresentation() =
         | None -> 
             Assert.IsTrue(false)
 
+    [<DataRow("00","T() -> A", "def cl A def func T() -> A;", """{"name":"A","base":[],"vars":[],"prtys":[]}""", "A")>]
+    [<TestMethod>]
+    member this.TestRepresentationFunctionalTerms(var:string, funcTermSignature:string, fplCode, expectedRepr:string, expectedType:string) =
+        ad.Clear()
+        let filename = "TestRepresentationFunctionalTerms.fpl"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let fn = theory.Scope[funcTermSignature] 
+            Assert.AreEqual<string>(expectedRepr, fn.Represent())
+            match fn.Value with 
+            | Some v -> Assert.AreEqual<string>(expectedType, v.Type SignatureType.Type)
+            | None -> Assert.IsTrue(false, "The functional term has no value")
+        | None -> 
+            Assert.IsTrue(false)
+
     [<DataRow("00","(@0 = Zero())", LiteralTrue)>]
     [<TestMethod>]
     member this.TestRepresentationCases(var:string, varVal, expected:string) =
@@ -224,7 +243,7 @@ type TestRepresentation() =
         ad.Clear()
         let fplCode = sprintf """
         def cl Nat
-        def cl Zero: Nat
+        def func Zero()-> Nat
         def func Succ(n: Nat) -> Nat
         def pred Equal(x,y: tpl) infix "=" 50 
         {
@@ -238,7 +257,7 @@ type TestRepresentation() =
                 | (x = @0) : Zero() 
                 | (x = @1) : Succ(Zero()) 
                 | (x = @2) : Succ(Succ(Zero())) 
-                ? Succ(delegate.Decrement(x))  
+                ? Succ(self(delegate.Decrement(x)))  
             )
         }
 
