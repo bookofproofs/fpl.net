@@ -5415,16 +5415,7 @@ type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
     override this.RunOrder = None
 
 let runIntrinsicFunction (fv:FplValue) variableStack =
-    let fvIHasSignature = 
-        match box fv with
-        | :? IHasSignature as fvSign -> Some fvSign
-        | _ -> None
-    let fvISkolem = 
-        match box fv with
-        | :? ISkolem as fvConst -> Some fvConst
-        | _ -> None
-    fvISkolem.Value.SetSkolemName()
-
+    
     let mapOpt = getMapping fv
     match mapOpt with
     | Some (:? FplMapping as map) ->
@@ -5460,7 +5451,7 @@ let private getFunctionalTermRepresent (fv:FplValue) =
         // its declared mapping type
         let mapping = fv.ArgList[0]
         $"dec {mapping.Type(SignatureType.Mixed)}"
-    | Some ref -> ref.Represent()
+    | Some ref -> ref.Represent()    
 
 type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) as this =
     inherit FplGenericInheriting(positions, parent)
@@ -5547,7 +5538,11 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) as this
             LiteralUndef
         else
             _callCounter <- _callCounter + 1
-            let result = getFunctionalTermRepresent this
+            let result = 
+                if this.IsIntrinsic then
+                    this.SkolemName
+                else
+                    getFunctionalTermRepresent this
             _callCounter <- _callCounter - 1
             result
 
@@ -5559,6 +5554,7 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) as this
                 this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter variableStack.CallerStartPos variableStack.CallerEndPos
             else
                 if this.IsIntrinsic then 
+                    this.SetSkolemName()
                     runIntrinsicFunction this variableStack
                 else
                     this.ArgList
@@ -5767,7 +5763,11 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) as this 
             LiteralUndef
         else
             _callCounter <- _callCounter + 1
-            let result = getFunctionalTermRepresent this
+            let result = 
+                if this.IsIntrinsic then
+                    this.SkolemName
+                else
+                    getFunctionalTermRepresent this
             _callCounter <- _callCounter - 1
             result
 
@@ -5791,6 +5791,7 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) as this 
                 this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter variableStack.CallerStartPos variableStack.CallerEndPos
             else
                 if this.IsIntrinsic then 
+                    this.SetSkolemName()
                     runIntrinsicFunction this variableStack
                 else
                     this.ArgList

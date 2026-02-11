@@ -79,7 +79,7 @@ type TestRepresentation() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("00","T() -> A", "def cl A def func T() -> A;", """{"name":"A","base":[],"vars":[],"prtys":[]}""", "A")>]
+    [<DataRow("00","T() -> A", "def cl A def func T() -> A;", """T()""", "A")>] // intrinsic function using Skolem representation
     [<TestMethod>]
     member this.TestRepresentationFunctionalTerms(var:string, funcTermSignature:string, fplCode, expectedRepr:string, expectedType:string) =
         ad.Clear()
