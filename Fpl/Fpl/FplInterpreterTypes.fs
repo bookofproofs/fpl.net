@@ -4304,7 +4304,7 @@ let private isFuncWithoutParentheses (fv:FplValue) =
     | ArgType.Nothing when fv.TypeId = LiteralFunc -> true
     | _ -> false
 
-/// Checks if fv is a reference to a variable that points to a class, and at the same time is marked as 'initialized' and still does not any values.
+/// Checks if an FplValue is a reference to a variable that points to a class, and at the same time is marked as 'initialized' and still does not any values.
 /// (this is the convention flagging that a variable has been assigned to its class instead of the constructor of the class generating an instance value).
 /// If the function returns a non-empty string, it contains the identifier of the referenced class (that has not been instantiated).
 let private getCallByReferenceToClass (fv:FplValue) =
@@ -4335,6 +4335,132 @@ let private getNames (fv:FplValue) =
     let fvType = fv.Type SignatureType.Type
     let fvTypeName = fv.Name
     fvName, fvType, fvTypeName
+
+
+/// Implements an object that is used to provide a representation of extensions in FPL.
+type FplExtensionObj(positions: Positions, parent: FplValue) as this =
+    inherit FplValue(positions, Some parent)
+
+    do 
+        this.TypeId <- LiteralObj
+
+
+    override this.Name = PrimExtensionObj
+    override this.ShortName = LiteralObj
+
+    override this.Clone () =
+        let ret = new FplExtensionObj((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Type signatureType = 
+        let head = getFplHead this signatureType
+        sprintf "%s" head
+
+    override this.Represent() = // done 
+        let enclosingBlockOpt = this.UltimateBlockNode
+        match enclosingBlockOpt, this.RefersTo with 
+        | Some enclosingBlock, Some ref when Object.ReferenceEquals(enclosingBlock, ref) ->
+            this.FplId // when this occurs inside its own extension definition, return FplId
+        | _, None ->
+            this.FplId // when this has no occurs inside its own extension definition, return FplId
+        | _, _ when this.Value.IsSome ->
+            this.Value.Value.Represent()
+        | _, _ ->
+            this.FplId // in all other cases return FplId
+
+    override this.Run variableStack = 
+        this.Debug Debug.Start
+        match this.RefersTo with 
+        | Some extensionDefinition ->
+            let pars = variableStack.SaveState(extensionDefinition)
+            if pars.Length = 1 then
+                let extVar = pars[0]
+                extVar.SetValue this
+            else
+                () // should never occur since extensionDefinition has syntactically always only one parameters
+            // store the position of the caller
+            variableStack.CallerStartPos <- this.StartPos
+            variableStack.CallerEndPos <- this.EndPos
+            // run all statements of the called node
+            extensionDefinition.Run variableStack
+            match extensionDefinition.Value with 
+            | Some v when Object.ReferenceEquals(this, v) -> 
+                // we have the case that an extension definition evaluated to the same FplExtensionObj 
+                // it was referred from. In this case, we have to prevent the FplExtensionObj to be set with itself as its value
+                // we create a new Extension Obj
+                let v = new FplExtensionObj((this.StartPos, this.EndPos), this)
+                v.FplId <- this.FplId
+                v.TypeId <- this.TypeId
+                this.SetValue v
+            | _ ->
+                this.SetValuesOf extensionDefinition
+            variableStack.RestoreState(extensionDefinition)
+        | _ ->
+            let v = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
+            // fall back to undef, if this does not refer to any extension definition
+            this.SetValue v
+        this.Debug Debug.Stop
+
+
+    override this.CheckConsistency () = 
+        base.CheckConsistency()
+        let matchReprId (fv1:FplValue) (identifier:string) = 
+            let vars = fv1.GetVariables()
+            if vars.Length > 0 then
+                let mainVar = vars.Head
+                let regex = Regex(mainVar.TypeId)
+                regex.IsMatch(identifier)
+            else
+                false
+        
+        let candidatesFromScope =
+            let root = getRoot this
+            root.Scope
+            |> Seq.map (fun theory ->
+                theory.Value.Scope
+                |> Seq.filter (fun kvp -> kvp.Value.Name = PrimExtensionL)
+                |> Seq.map (fun kvp -> kvp.Value)
+                |> Seq.filter (fun ext -> 
+                    if matchReprId ext this.FplId && not (this.Scope.ContainsKey(this.FplId)) then 
+                        // assign the reference FplValue only the first found match 
+                        // even, if there are multiple extensions that would match it 
+                        // (thus, the additional check for Scope.ContainsKey...)
+                        this.RefersTo <- Some ext
+                        let mappingOpt = getMapping ext
+                        match mappingOpt with
+                        | Some mapping -> this.TypeId <- mapping.TypeId
+                        | _ -> ()
+                        true
+                    else
+                        false
+                )
+            )
+            |> Seq.concat
+            |> Seq.toList
+
+        let candidates = 
+            let parentExtension = this.NextBlockNode
+            match parentExtension with 
+            | Some ext when ext.Name = PrimExtensionL -> 
+                if matchReprId ext this.FplId then
+                    // if fv is inside an extension block, we add this block to the candidates
+                    // so we can match patterns inside this extension block's definition referring to 
+                    // its own pattern even if it is not yet fully parsed and analyzed
+                    candidatesFromScope @ [ext]
+                else 
+                    candidatesFromScope
+            | _ -> candidatesFromScope
+
+        if candidates.Length = 0 then 
+            this.ErrorOccurred <- emitID018Diagnostics this.FplId this.StartPos this.EndPos
+
+    override this.EmbedInSymbolTable _ = 
+        this.CheckConsistency()    
+        addExpressionToReference this
+
+    override this.RunOrder = None
+
 
 let rec private matchTwoTypes (a:FplValue) (p:FplValue) (mode:MatchingMode) =
     let aName, aType, aTypeName = getNames a 
@@ -4433,10 +4559,10 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) (mode:MatchingMode) =
                 matchTwoTypes a def mode
             | Some def, Some refNode when refNode.Name = PrimIntrinsicUndef -> 
                 None, Parameter.Consumed // definition accepting undef
-            | None, Some refNode when map.TypeId = LiteralObj && refNode.Name = PrimInstanceL -> 
-                None, Parameter.Consumed // obj accepting instance
             | Some cl, Some (:? FplGenericVariable as refNode) when not refNode.IsInitialized  -> 
                 matchTwoTypes a cl mode
+            | None, Some refNode when map.TypeId = LiteralObj && refNode.Name = PrimInstanceL -> 
+                None, Parameter.Consumed // obj accepting instance
             | None, Some (:? FplGenericVariable as refNode) when map.TypeId = LiteralObj && not refNode.IsInitialized -> 
                 let refNodeOpt1 = referencedNodeOpt refNode
                 match refNodeOpt1 with 
@@ -5200,130 +5326,6 @@ type FplEquality(name, positions: Positions, parent: FplValue) as this =
                                 | _ -> PrimUndetermined
                             this.SetValue(newValue)
         this.Debug Debug.Stop
-
-/// Implements an object that is used to provide a representation of extensions in FPL.
-type FplExtensionObj(positions: Positions, parent: FplValue) as this =
-    inherit FplValue(positions, Some parent)
-
-    do 
-        this.TypeId <- LiteralObj
-
-
-    override this.Name = PrimExtensionObj
-    override this.ShortName = LiteralObj
-
-    override this.Clone () =
-        let ret = new FplExtensionObj((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.Type signatureType = 
-        let head = getFplHead this signatureType
-        sprintf "%s" head
-
-    override this.Represent() = // done 
-        let enclosingBlockOpt = this.UltimateBlockNode
-        match enclosingBlockOpt, this.RefersTo with 
-        | Some enclosingBlock, Some ref when Object.ReferenceEquals(enclosingBlock, ref) ->
-            this.FplId // when this occurs inside its own extension definition, return FplId
-        | _, None ->
-            this.FplId // when this has no occurs inside its own extension definition, return FplId
-        | _, _ when this.Value.IsSome ->
-            this.Value.Value.Represent()
-        | _, _ ->
-            this.FplId // in all other cases return FplId
-
-    override this.Run variableStack = 
-        this.Debug Debug.Start
-        match this.RefersTo with 
-        | Some extensionDefinition ->
-            let pars = variableStack.SaveState(extensionDefinition)
-            if pars.Length = 1 then
-                let extVar = pars[0]
-                extVar.SetValue this
-            else
-                () // should never occur since extensionDefinition has syntactically always only one parameters
-            // store the position of the caller
-            variableStack.CallerStartPos <- this.StartPos
-            variableStack.CallerEndPos <- this.EndPos
-            // run all statements of the called node
-            extensionDefinition.Run variableStack
-            match extensionDefinition.Value with 
-            | Some v when Object.ReferenceEquals(this, v) -> 
-                // we have the case that an extension definition evaluated to the same FplExtensionObj 
-                // it was referred from. In this case, we have to prevent the FplExtensionObj to be set with itself as its value
-                // we create a new Extension Obj
-                let v = new FplExtensionObj((this.StartPos, this.EndPos), this)
-                v.FplId <- this.FplId
-                v.TypeId <- this.TypeId
-                this.SetValue v
-            | _ ->
-                this.SetValuesOf extensionDefinition
-            variableStack.RestoreState(extensionDefinition)
-        | _ ->
-            let v = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
-            // fall back to undef, if this does not refer to any extension definition
-            this.SetValue v
-        this.Debug Debug.Stop
-
-
-    override this.CheckConsistency () = 
-        base.CheckConsistency()
-        let matchReprId (fv1:FplValue) (identifier:string) = 
-            let vars = fv1.GetVariables()
-            if vars.Length > 0 then
-                let mainVar = vars.Head
-                let regex = Regex(mainVar.TypeId)
-                regex.IsMatch(identifier)
-            else
-                false
-        
-        let candidatesFromScope =
-            let root = getRoot this
-            root.Scope
-            |> Seq.map (fun theory ->
-                theory.Value.Scope
-                |> Seq.filter (fun kvp -> kvp.Value.Name = PrimExtensionL)
-                |> Seq.map (fun kvp -> kvp.Value)
-                |> Seq.filter (fun ext -> 
-                    if matchReprId ext this.FplId && not (this.Scope.ContainsKey(this.FplId)) then 
-                        // assign the reference FplValue fv only the first found match 
-                        // even, if there are multiple extensions that would match it 
-                        // (thus, the additional check for Scope.ContainsKey...)
-                        this.RefersTo <- Some ext
-                        let mappingOpt = getMapping ext
-                        match mappingOpt with
-                        | Some mapping -> this.TypeId <- mapping.TypeId
-                        | _ -> ()
-                        true
-                    else
-                        false
-                )
-            )
-            |> Seq.concat
-            |> Seq.toList
-
-        let candidates = 
-            let parentExtension = this.NextBlockNode
-            match parentExtension with 
-            | Some ext when ext.Name = PrimExtensionL -> 
-                if matchReprId ext this.FplId then
-                    // if fv is inside an extension block, we add this block to the candidates
-                    // so we can match patterns inside this extension block's definition referring to 
-                    // its own pattern even if it is not yet fully parsed and analyzed
-                    candidatesFromScope @ [ext]
-                else 
-                    candidatesFromScope
-            | _ -> candidatesFromScope
-
-        if candidates.Length = 0 then 
-            this.ErrorOccurred <- emitID018Diagnostics this.FplId this.StartPos this.EndPos
-
-    override this.EmbedInSymbolTable _ = 
-        this.CheckConsistency()    
-        addExpressionToReference this
-
-    override this.RunOrder = None
 
 /// Implements the semantics of an FPL decrement delegate.
 type FplDecrement(name, positions: Positions, parent: FplValue) as this =
