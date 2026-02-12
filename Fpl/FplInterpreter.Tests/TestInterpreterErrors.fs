@@ -536,7 +536,7 @@ type TestInterpreterErrors() =
     [<DataRow("C3", "def cl A {intr prty func L()->ind } def pred T(x:A) {x.L()};", 0)>]
     [<DataRow("C3a", "def cl A {intr prty func L()->ind } def pred T(x:A) {x.LTypo()};", 1)>]
 
-    // inherted class properties
+    // inherited class properties
     [<DataRow("IC1", "def cl A {intr prty pred L() } def cl B:A def pred T() {dec ~x:B; x.L()};", 0)>]
     [<DataRow("IC1a", "def cl A {intr prty pred L() } def cl B:A def pred T() {dec ~x:B; x.LTypo()};", 1)>]
     [<DataRow("IC2", "def cl A {intr prty pred L() } def cl B:A def pred T(x:B) {x.L()};", 0)>]
@@ -621,7 +621,7 @@ type TestInterpreterErrors() =
     [<DataRow("C2", "def cl A {dec ~a:obj; ctor A() {} } def pred T(x:A) {x.a};", 0)>]
     [<DataRow("C2a", "def cl A {dec ~a:obj; ctor A() {} } def pred T(x:A) {x.aTypo};", 1)>]
 
-    // inherted class variables
+    // inherited class variables
     [<DataRow("IC1", "def cl A {dec ~a:obj; ctor A() {} } def cl B:A def pred T() {dec ~x:B; x.a};", 0)>]
     [<DataRow("IC1a", "def cl A {dec ~a:obj; ctor A() {} } def cl B:A def pred T() {dec ~x:B; x.aTypo};", 1)>]
     [<DataRow("IC2", "def cl A {dec ~a:obj; ctor A() {} } def cl B:A def pred T(x:B) {x.a};", 0)>]
@@ -1769,7 +1769,7 @@ type TestInterpreterErrors() =
     [<DataRow("CI2_", "def cl A def cl B:A def func Test()->B {dec ~a:A a:=A; return a};", 1)>] // A is not B, error
     [<DataRow("CI3_", "def cl A def cl B:A def func Test()->B {dec ~a:B a:=B; return a};", 1)>] // B is B, but a class reference, error
     [<DataRow("CI4_", "def cl A def func Test()->obj {dec ~x:A x:=A; return x};", 1)>] // A is obj, but x is class reference, error
-    [<DataRow("CI5_", "def cl A def cl B:A def func Test()->B {dec ~x:B x:=B; return x};", 1)>] // B is B, but x is class referene, error
+    [<DataRow("CI5_", "def cl A def cl B:A def func Test()->B {dec ~x:B x:=B; return x};", 1)>] // B is B, but x is class reference, error
     [<DataRow("CI6_", "def cl A def func Test()->A {dec ~x:A x:=A; return x};", 1)>] // A is A, but x is class reference, error
     [<DataRow("CI7_", "def cl A def cl B:A def func Test()->A {dec ~x:B x:=B; return x};", 1)>] // B is A but x is a class reference, error 
     [<DataRow("CI8_", "def cl A def cl B:A def func Test()->B {dec ~x:B x:=B; return x};", 1)>] // x is B, but class reference, error
@@ -2031,14 +2031,14 @@ type TestInterpreterErrors() =
     [<DataRow("MS4b", "def func A(z:obj)->ind def func Test()->func {dec ~x:ind; return A(x)};", 1)>] // SIG03: ->func does not match value A(ind) not matching A(obj)
     [<DataRow("MS4c", "def func A(z:ind)->ind def func Test()->func {dec ~x:ind; return A(x)};", 1)>] // SIG03: ->func does not match value A(ind) 
     [<DataRow("MS4d", "def func A(z:ind)->func(a:obj)->ind def func Test()->func {return A};", 0)>] // OK: ->func matches signature A(ind)->func(obj)->ind
-    [<DataRow("MS4e", "ax A {true} def func Test()->func {return A};", 1)>] // SIG03: ->func does not matche signature A (axiom)
-    [<DataRow("MS4f", "thm A {true} def func Test()->func {return A};", 1)>] // SIG03: ->func does not matche signature A (theorem)
-    [<DataRow("MS4g", "lem A {true} def func Test()->func {return A};", 1)>] // SIG03: ->func does not matche signature A (lemma)
-    [<DataRow("MS4h", "prop A {true} def func Test()->func {return A};", 1)>] // SIG03: ->func does not matche signature A (proposition)
-    [<DataRow("MS4i", "conj A {true} def func Test()->func {return A};", 1)>] // SIG03: ->func does not matche signature A (conjecture)
-    [<DataRow("MS4j", "cor A$1 {true} def func Test()->func {return A$1};", 1)>] // SIG03: ->func does not matche signature A$1 (corollary)
-    [<DataRow("MS4k", "proof A$1 {1. |- trivial} def func Test()->func {return A$1};", 1)>] // SIG03: ->func does not matche signature A$1 (proof)
-    [<DataRow("MS4l", "inf A {pre:true con:true} def func Test()->func {return A};", 1)>] // SIG03: ->func does not matche signature A (rule of inference)
+    [<DataRow("MS4e", "ax A {true} def func Test()->func {return A};", 1)>] // SIG03: ->func does not match signature A (axiom)
+    [<DataRow("MS4f", "thm A {true} def func Test()->func {return A};", 1)>] // SIG03: ->func does not match signature A (theorem)
+    [<DataRow("MS4g", "lem A {true} def func Test()->func {return A};", 1)>] // SIG03: ->func does not match signature A (lemma)
+    [<DataRow("MS4h", "prop A {true} def func Test()->func {return A};", 1)>] // SIG03: ->func does not match signature A (proposition)
+    [<DataRow("MS4i", "conj A {true} def func Test()->func {return A};", 1)>] // SIG03: ->func does not match signature A (conjecture)
+    [<DataRow("MS4j", "cor A$1 {true} def func Test()->func {return A$1};", 1)>] // SIG03: ->func does not matches signature A$1 (corollary)
+    [<DataRow("MS4k", "proof A$1 {1. |- trivial} def func Test()->func {return A$1};", 1)>] // SIG03: ->func does not match signature A$1 (proof)
+    [<DataRow("MS4l", "inf A {pre:true con:true} def func Test()->func {return A};", 1)>] // SIG03: ->func does not match signature A (rule of inference)
     [<DataRow("MS4m", "def func A(z:obj)->func()->obj def func Test()->func {return A};", 0)>] // OK: ->func matches signature A (functional term)
     [<DataRow("MS4n", "ext A x@/\d+/ -> obj {dec ~y:obj; return y} def func Test()->func {return A};", 1)>] // SIG03: ->func does not match signature A (extension)
     [<DataRow("MS4o", "def cl A def func Test()->func {return A};", 1)>] // SIG03: ->func does not match signature A (class)
@@ -2078,6 +2078,11 @@ type TestInterpreterErrors() =
     // ... other
     [<DataRow("00", "ext Digits x@/\d+/ -> obj { ret x };", 0)>] 
     [<DataRow("00a", "ext Digits x@/\d+/ -> obj { ret x } def pred T() { dec ~a:obj a:=@0; true };", 0)>] 
+    [<DataRow("01a", "def cl A ext Digits x@/\d+/ -> A { ret A() } def func T() -> A { ret @9 };", 0)>] 
+    [<DataRow("01b", "ext Digits x@/\d+/ -> ind { ret $42 } def func T() -> ind { ret @9 };", 0)>] 
+    [<DataRow("01c", "ext Digits x@/\d+/ -> pred { ret true } def func T() -> pred { ret @9 };", 0)>] 
+    [<DataRow("01d", "def func A()->obj ext Digits x@/\d+/ -> func { ret A } def func T() -> func { ret @9 };", 0)>] 
+    [<DataRow("01e", "def cl A ext Digits x@/\d+/ -> obj { ret A() } def func T() -> obj { ret @9 };", 0)>] 
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG03(no:string, fplCode:string, expected) =
@@ -2346,7 +2351,7 @@ type TestInterpreterErrors() =
     [<DataRow("CI2_", "def cl A def cl B:A def pred Test(v:B) def pred T() {dec ~a:A a:=A; Test(a)};", 1)>] // A is not B, error
     [<DataRow("CI3_", "def cl A def cl B:A def pred Test(v:B) def pred T() {dec ~a:B a:=B; Test(a)};", 1)>] // B is B, but a class reference, error
     [<DataRow("CI4_", "def cl A def pred Test(v:obj) def pred T() {dec ~x:A x:=A; Test(x)};", 1)>] // A is obj, but x is class reference, error
-    [<DataRow("CI5_", "def cl A def cl B:A def pred Test(v:B) def pred T() {dec ~x:B x:=B; Test(x)};", 1)>] // B is B, but x is class referene, error
+    [<DataRow("CI5_", "def cl A def cl B:A def pred Test(v:B) def pred T() {dec ~x:B x:=B; Test(x)};", 1)>] // B is B, but x is class reference, error
     [<DataRow("CI6_", "def cl A def pred Test(v:A) def pred T() {dec ~x:A x:=A; Test(x)};", 1)>] // A is A, but x is class reference, error
     [<DataRow("CI7_", "def cl A def cl B:A def pred Test(v:A) def pred T() {dec ~x:B x:=B; Test(x)};", 1)>] // B is A but x is a class reference, error 
     [<DataRow("CI8_", "def cl A def cl B:A def pred Test(v:B) def pred T() {dec ~x:B x:=B; Test(x)};", 1)>] // x is B, but class reference, error
@@ -2608,14 +2613,14 @@ type TestInterpreterErrors() =
     [<DataRow("MS4b", "def func A(z:obj)->ind def pred Test(v:func) def pred T() {dec ~x:obj; Test(A(x))};", 1)>] // SIG04: func does not match value A(ind) not matching A(obj)
     [<DataRow("MS4c", "def func A(z:ind)->ind def pred Test(v:func) def pred T() {dec ~x:obj; Test(A(x))};", 2)>] // SIG04: func does not match value A(ind) 
     [<DataRow("MS4d", "def func A(z:ind)->func(a:obj)->ind def pred Test(v:func) def pred T() {Test(A)};", 0)>] // OK: ->func matches signature A(ind)->func(obj)->ind
-    [<DataRow("MS4e", "ax A {true} def pred Test(v:func) def pred T() {Test(A)};", 1)>] // SIG04: func does not matche signature A (axiom)
-    [<DataRow("MS4f", "thm A {true} def pred Test(v:func) def pred T() {Test(A)};", 1)>] // SIG04: func does not matche signature A (theorem)
-    [<DataRow("MS4g", "lem A {true} def pred Test(v:func) def pred T() {Test(A)};", 1)>] // SIG04: func does not matche signature A (lemma)
-    [<DataRow("MS4h", "prop A {true} def pred Test(v:func) def pred T() {Test(A)};", 1)>] // SIG04: func does not matche signature A (proposition)
-    [<DataRow("MS4i", "conj A {true} def pred Test(v:func) def pred T() {Test(A)};", 1)>] // SIG04: func does not matche signature A (conjecture)
-    [<DataRow("MS4j", "cor A$1 {true} def pred Test(v:func) def pred T() {Test(A$1)};", 1)>] // SIG04: func does not matche signature A$1 (corollary)
-    [<DataRow("MS4k", "proof A$1 {1. |- trivial} def pred Test(v:func) def pred T() {Test(A$1)};", 1)>] // SIG04: func does not matche signature A$1 (proof)
-    [<DataRow("MS4l", "inf A {pre:true con:true} def pred Test(v:func) def pred T() {Test(A)};", 1)>] // SIG04: func does not matche signature A (rule of inference)
+    [<DataRow("MS4e", "ax A {true} def pred Test(v:func) def pred T() {Test(A)};", 1)>] // SIG04: func does not match signature A (axiom)
+    [<DataRow("MS4f", "thm A {true} def pred Test(v:func) def pred T() {Test(A)};", 1)>] // SIG04: func does not match signature A (theorem)
+    [<DataRow("MS4g", "lem A {true} def pred Test(v:func) def pred T() {Test(A)};", 1)>] // SIG04: func does not match signature A (lemma)
+    [<DataRow("MS4h", "prop A {true} def pred Test(v:func) def pred T() {Test(A)};", 1)>] // SIG04: func does not match signature A (proposition)
+    [<DataRow("MS4i", "conj A {true} def pred Test(v:func) def pred T() {Test(A)};", 1)>] // SIG04: func does not match signature A (conjecture)
+    [<DataRow("MS4j", "cor A$1 {true} def pred Test(v:func) def pred T() {Test(A$1)};", 1)>] // SIG04: func does not match signature A$1 (corollary)
+    [<DataRow("MS4k", "proof A$1 {1. |- trivial} def pred Test(v:func) def pred T() {Test(A$1)};", 1)>] // SIG04: func does not match signature A$1 (proof)
+    [<DataRow("MS4l", "inf A {pre:true con:true} def pred Test(v:func) def pred T() {Test(A)};", 1)>] // SIG04: func does not match signature A (rule of inference)
     [<DataRow("MS4m", "def func A(z:obj)->func()->obj def pred Test(v:func) def pred T() {Test(A)};", 0)>] // OK: ->func matches signature A (functional term)
     [<DataRow("MS4n", "ext A x@/\d+/ -> obj {dec ~y:obj; return y} def pred Test(v:func) def pred T() {Test(A)};", 1)>] // SIG04: func does not match signature A (extension)
     [<DataRow("MS4o", "def cl A def pred Test(v:func) def pred T() {Test(A)};", 1)>] // SIG04: func does not match signature A (class)
@@ -2903,7 +2908,7 @@ type TestInterpreterErrors() =
     [<DataRow("CI2_", "def cl A def cl B:A def pred T(v:B) {dec ~a:A a:=A v:=a; true};", 2)>] // A is A but references to a class, error
     [<DataRow("CI3_", "def cl A def cl B:A def pred T(v:B) {dec ~a:B a:=B v:=a; true};", 2)>] // B is B, but a class reference, error
     [<DataRow("CI4_", "def cl A def pred T(v:obj) {dec ~x:A x:=A v:=x; true};", 2)>] // A is obj, but x is class reference, error
-    [<DataRow("CI5_", "def cl A def cl B:A def pred T(v:B) {dec ~x:B x:=B v:=x; true};", 2)>] // B is B, but x is class referene, error
+    [<DataRow("CI5_", "def cl A def cl B:A def pred T(v:B) {dec ~x:B x:=B v:=x; true};", 2)>] // B is B, but x is class reference, error
     [<DataRow("CI6_", "def cl A def pred T(v:A) {dec ~x:A x:=A v:=x; true};", 2)>] // A is A, but x is class reference, error
     [<DataRow("CI7_", "def cl A def cl B:A def pred T(v:A) {dec ~x:B x:=B v:=x; true};", 2)>] // B is A but x is a class reference, error 
     [<DataRow("CI8_", "def cl A def cl B:A def pred T(v:B) {dec ~x:B x:=B v:=x; true};", 2)>] // x is B, but class reference, error
@@ -3165,14 +3170,14 @@ type TestInterpreterErrors() =
     [<DataRow("MS4b", "def func A(z:obj)->ind def pred T(v:func) {dec ~x:obj v:=A(x); true};", 1)>] // SIG05: func does not match value A(ind) not matching A(obj)
     [<DataRow("MS4c", "def func A(z:ind)->ind def pred T(v:func) {dec ~x:obj v:=A(x); true};", 1)>] // SIG05: func does not match value A(ind) 
     [<DataRow("MS4d", "def func A(z:ind)->func(a:obj)->ind def pred T(v:func) {dec v:=A; true};", 0)>] // OK: ->func matches signature A(ind)->func(obj)->ind
-    [<DataRow("MS4e", "ax A {true} def pred T(v:func) {dec v:=A; true};", 1)>] // SIG05: func does not matche signature A (axiom)
-    [<DataRow("MS4f", "thm A {true} def pred T(v:func) {dec v:=A; true};", 1)>] // SIG05: func does not matche signature A (theorem)
-    [<DataRow("MS4g", "lem A {true} def pred T(v:func) {dec v:=A; true};", 1)>] // SIG05: func does not matche signature A (lemma)
-    [<DataRow("MS4h", "prop A {true} def pred T(v:func) {dec v:=A; true};", 1)>] // SIG05: func does not matche signature A (proposition)
-    [<DataRow("MS4i", "conj A {true} def pred T(v:func) {dec v:=A; true};", 1)>] // SIG05: func does not matche signature A (conjecture)
-    [<DataRow("MS4j", "cor A$1 {true} def pred T(v:func) {dec v:=A$1; true};", 1)>] // SIG05: func does not matche signature A$1 (corollary)
-    [<DataRow("MS4k", "proof A$1 {1. |- trivial} def pred T(v:func) {dec v:=A$1; true};", 1)>] // SIG05: func does not matche signature A$1 (proof)
-    [<DataRow("MS4l", "inf A {pre:true con:true} def pred T(v:func) {dec v:=A; true};", 1)>] // SIG05: func does not matche signature A (rule of inference)
+    [<DataRow("MS4e", "ax A {true} def pred T(v:func) {dec v:=A; true};", 1)>] // SIG05: func does not match signature A (axiom)
+    [<DataRow("MS4f", "thm A {true} def pred T(v:func) {dec v:=A; true};", 1)>] // SIG05: func does not match signature A (theorem)
+    [<DataRow("MS4g", "lem A {true} def pred T(v:func) {dec v:=A; true};", 1)>] // SIG05: func does not match signature A (lemma)
+    [<DataRow("MS4h", "prop A {true} def pred T(v:func) {dec v:=A; true};", 1)>] // SIG05: func does not match signature A (proposition)
+    [<DataRow("MS4i", "conj A {true} def pred T(v:func) {dec v:=A; true};", 1)>] // SIG05: func does not match signature A (conjecture)
+    [<DataRow("MS4j", "cor A$1 {true} def pred T(v:func) {dec v:=A$1; true};", 1)>] // SIG05: func does not match signature A$1 (corollary)
+    [<DataRow("MS4k", "proof A$1 {1. |- trivial} def pred T(v:func) {dec v:=A$1; true};", 1)>] // SIG05: func does not match signature A$1 (proof)
+    [<DataRow("MS4l", "inf A {pre:true con:true} def pred T(v:func) {dec v:=A; true};", 1)>] // SIG05: func does not match signature A (rule of inference)
     [<DataRow("MS4m", "def func A(z:obj)->func()->obj def pred T(v:func) {dec v:=A; true};", 0)>] // OK: ->func matches signature A (functional term)
     [<DataRow("MS4n", "ext A x@/\d+/ -> obj {dec ~y:obj; return y} def pred T(v:func) {dec v:=A; true};", 1)>] // SIG05: func does not match signature A (extension)
     [<DataRow("MS4o", "def cl A def pred T(v:func) {dec v:=A; true};", 1)>] // SIG05: func does not match signature A (class)
