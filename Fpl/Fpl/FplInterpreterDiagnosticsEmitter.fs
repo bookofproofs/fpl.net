@@ -362,7 +362,6 @@ let checkID025Diagnostics qualifiedNameCandidate blockName pos1 pos2 =
     | LiteralConjL
     | LiteralCorL
     | LiteralPrfL
-    | PrimExtensionL
     | LiteralLocL ->
         let blockEnglishName = getEnglishName blockName false
         let diagnostic =

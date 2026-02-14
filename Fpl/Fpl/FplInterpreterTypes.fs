@@ -4568,6 +4568,8 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) (mode:MatchingMode) =
                 None, Parameter.Consumed // pred accepting conjectures
             | Some refNode when refNode.Name = PrimVariableL && refNode.TypeId = LiteralPred ->
                 None, Parameter.Consumed // pred accepting pred variables
+            | Some refNode when refNode.Name = PrimExtensionObj ->
+                matchTwoTypes refNode p mode // match signatures with parameters
             | Some refNode ->
                 // a node was referenced not a predicate node
                 Some $"The return type of {qualifiedName refNode true} doesn't match mapping type `{pType}`.", Parameter.Consumed
@@ -4613,10 +4615,12 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) (mode:MatchingMode) =
             match map.RefersTo, refNodeOpt with
             | Some def, Some refNode when refNode.Name = PrimInstanceL -> 
                 matchTwoTypes a def mode
-            | Some def, Some refNode when refNode.Name = PrimIntrinsicUndef -> 
+            | Some _, Some refNode when refNode.Name = PrimIntrinsicUndef -> 
                 None, Parameter.Consumed // definition accepting undef
-            | Some cl, Some (:? FplGenericVariable as refNode) when not refNode.IsInitialized  -> 
-                matchTwoTypes a cl mode
+            | Some def, Some (:? FplGenericVariable as refNode) when not refNode.IsInitialized  -> 
+                matchTwoTypes a def mode
+            | Some def, Some (:? FplExtensionObj as extObj) when extObj.RefersTo.IsSome -> 
+                matchTwoTypes extObj def mode
             | None, Some refNode when map.TypeId = LiteralObj && refNode.Name = PrimInstanceL -> 
                 None, Parameter.Consumed // obj accepting instance
             | None, Some (:? FplGenericVariable as refNode) when map.TypeId = LiteralObj && not refNode.IsInitialized -> 
