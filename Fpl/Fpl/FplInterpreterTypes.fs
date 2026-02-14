@@ -4175,168 +4175,6 @@ let isCallByValue (fv:FplValue) =
     | ArgType.Parentheses when isUpper fv.FplId -> true
     | _ -> false
 
-let private errMsgStandard aName aType pName pType = Some $"`{aName}:{aType}` doesn't match `{pName}:{pType}`"
-let private errMsgMissingArgument pName pType = Some $"Missing argument for `{pName}:{pType}`"
-let private errMsgMissingParameter aName aType = Some $"No matching parameter for `{aName}:{aType}`"
-let private errMsgCallByRefToClass aName classType = Some $"Assignee `{aName}` references to a class `{classType}`. Consider initializing `{aName}` with a class constructor `{classType}(...)`."
-let private errMsgDirectClassAssignment classType = Some $"Assignee is a class `{classType}`. Use a class constructor `{classType}(...)` instead."
-
-let private matchClassInheritance (clOpt:FplValue option) (a:FplValue) aType (pName:string) (pType:string) = 
-    let pTypeSimple =
-        if pType.StartsWith("*") then 
-            let ret = pType.Substring(1).Split("[")
-            ret[0]
-        else
-            pType
-    match clOpt with 
-    | Some cl -> 
-        if inheritsFrom cl pTypeSimple then 
-            None
-        else
-            Some($"`{a.Type(SignatureType.Name)}:{aType}` matches neither `{pName}:{pType}` nor the base classes")
-    | _ -> 
-        Some($"{LiteralUndefL} `{a.Type(SignatureType.Name)}:{aType}` doesn't match `{pName}:{pType}`")
-
-
-let private matchByTypeStringRepresentation (a:FplValue) aName (aType:string) aTypeName (p:FplValue) pName (pType:string) pTypeName mode = 
-
-    match mode with 
-    | _ when aType = pType ->
-        None, Parameter.Consumed
-    | _ when aType = LiteralUndef ->
-        None, Parameter.Consumed // undef matches any type
-    | _ when pType.StartsWith(LiteralTpl) || pType.StartsWith(LiteralTplL) ->
-        None, Parameter.Consumed // tpl accepts everything: TODO: really?
-    | _ when pType.StartsWith($"*{LiteralTpl}") || pType.StartsWith($"*{LiteralTplL}") ->
-        None, Parameter.Consumed // tpl arrays accepts everything: TODO: really?
-    | MatchingMode.Assignment when aType = LiteralUndef ->
-        None, Parameter.Consumed // undef can always be assigned
-    | MatchingMode.Assignment when pType.StartsWith($"*{aType}[") && pTypeName = PrimVariableArrayL ->
-        None, Parameter.Consumed // assignee array accepting assigned value
-    | MatchingMode.Signature when pType.StartsWith($"*{aType}[{LiteralInd}]") ->
-        None, Parameter.NotConsumed // 1D arrays matching input type with ind as index accept variadic enumerations
-    | _ when pType.StartsWith($"*{aType}[") ->
-        // array parameters with indexes that differ from the FPL-inbuilt index type  
-        // or with multidimensional index types will not accept variadic enumerations of arguments
-        // even if they have the same type used for the values of the array
-        Some $"variadic enumeration of `{aName}:{aType}` doesn't match `{pName}:{pType}`, try `{aName}:{pType}` as argument or use parameter `{pName}:{p.TypeId}[{LiteralInd}]`", Parameter.Consumed
-    | _ when aType.StartsWith($"*{pType}[") && aTypeName = PrimRefL ->
-        let refA = a :?> FplReference
-        if refA.ArgType = ArgType.Brackets then 
-            // some array elements matching parameter type
-            None, Parameter.Consumed
-        else
-            Some $"Array type `{aName}:{aType}` doesn't match `{pName}:{pType}`", Parameter.Consumed
-    | _ when isUpper aType && aTypeName = PrimRefL && a.RefersTo.IsSome ->
-        let aReferencedNode = a.RefersTo.Value
-        if aReferencedNode.RefersTo.IsSome then
-            let cl = aReferencedNode.RefersTo.Value
-            match cl with
-            | :? FplClass ->
-                if inheritsFrom cl pType then 
-                    None, Parameter.Consumed // base class accepting derived class
-                else
-                    Some $"`{aName}:{aType}` neither matches `{pName}:{pType}` nor the base classes", Parameter.Consumed
-            | _ ->
-                // this case does not occur but we cover it for completeness reasons
-                Some $"undefined `{aName}:{aType}` doesn't match `{pName}:{pType}`", Parameter.Consumed
-        elif aReferencedNode.Name = PrimDefaultConstructor || aReferencedNode.Name = LiteralCtorL then 
-            let ctor = aReferencedNode :?> FplGenericConstructor
-            matchClassInheritance ctor.ToBeConstructedClass a aType pName pType, Parameter.Consumed
-        elif aReferencedNode.Name = PrimFunctionalTermL || aReferencedNode.Name = PrimMandatoryFunctionalTermL then 
-            let mapOpt = getMapping aReferencedNode
-            let map = mapOpt.Value :?> FplMapping 
-            matchClassInheritance map.RefersTo a aType pName pType, Parameter.Consumed
-        elif aReferencedNode.Name = PrimVariableL then 
-            matchClassInheritance aReferencedNode.RefersTo a aType pName pType, Parameter.Consumed
-        else
-            Some $"undefined `{aName}:{aType}` doesn't match `{pName}:{pType}`", Parameter.Consumed
-    | _ when aType.StartsWith(pType + "(") ->
-        None, Parameter.Consumed
-    | _ when aType.StartsWith(LiteralPred) && pType = LiteralPred ->
-        None, Parameter.Consumed
-    | _ when aType.StartsWith(LiteralFunc) && pType = LiteralFunc->
-        None, Parameter.Consumed
-    | MatchingMode.Assignment when aTypeName = PrimVariableL ->
-        let clOpt = a.Scope.Values |> Seq.tryHead
-        match clOpt with 
-        | Some (:? FplClass) -> matchClassInheritance clOpt a aType pName pType, Parameter.Consumed
-        | _ -> errMsgStandard aName aType pName pType, Parameter.Consumed
-    | MatchingMode.Assignment when aTypeName = PrimDefaultConstructor || aTypeName = LiteralCtorL ->
-        let ctor = a :?> FplGenericConstructor
-        matchClassInheritance ctor.ToBeConstructedClass a aType pName pType, Parameter.Consumed
-    | _ when pTypeName = PrimFunctionalTermL || pTypeName = PrimMandatoryFunctionalTermL ->
-        let mappingOpt = getMapping p 
-        match mappingOpt with 
-        | Some mapping ->
-            let newTypeAssignedValue = mapping.Type SignatureType.Type
-            if aType <> newTypeAssignedValue then 
-                errMsgStandard aName aType pName pType, Parameter.Consumed
-            else 
-                None, Parameter.Consumed
-        | None -> None, Parameter.Consumed
-    | _ ->
-        errMsgStandard aName aType pName pType, Parameter.Consumed
-
-let private isPredWithParentheses (fv:FplValue) =
-    match fv.ArgType with 
-    | ArgType.Parentheses when fv.TypeId.StartsWith(LiteralPred) -> true
-    | _ -> false
-
-let private isPredWithoutParentheses (fv:FplValue) =
-    match fv.ArgType with 
-    | ArgType.Nothing when fv.TypeId = LiteralPred -> true
-    | _ -> false
-
-let private isWithParenthesesOrFunc (fv:FplValue) =
-    match fv.ArgType with 
-    | ArgType.Parentheses -> true
-    | _ when fv.TypeId = LiteralFunc -> true
-    | _ -> false
-
-let private isFuncWithParentheses (fv:FplValue) =
-    match fv.ArgType with 
-    | ArgType.Parentheses when fv.TypeId.StartsWith(LiteralFunc) -> true
-    | _ -> false
-
-let private isFuncWithoutParentheses (fv:FplValue) =
-    match fv.ArgType with 
-    | ArgType.Nothing when fv.TypeId = LiteralFunc -> true
-    | _ -> false
-
-/// Checks if an FplValue is a reference to a variable that points to a class, and at the same time is marked as 'initialized' and still does not any values.
-/// (this is the convention flagging that a variable has been assigned to its class instead of the constructor of the class generating an instance value).
-/// If the function returns a non-empty string, it contains the identifier of the referenced class (that has not been instantiated).
-let private getCallByReferenceToClass (fv:FplValue) =
-    match fv.RefersTo with 
-    | Some refNode ->
-        match refNode with 
-        | :? FplGenericVariable as var when var.IsInitialized && var.Value.IsNone ->
-            // reference fv points to an initialized variable without values 
-            match var.RefersTo with
-            | Some fv1 when fv1.Name = PrimClassL -> fv1.TypeId // and the variable points to a class
-            | _ -> String.Empty
-        | _ -> String.Empty
-    | None ->
-        String.Empty
-               
-let rec private isCallByReference (fv:FplValue) =
-    match fv with 
-    | :? FplReference as ref when ref.DottedChild.IsSome ->
-        isCallByReference ref.DottedChild.Value // evaluate dotted reference instead
-    | _ ->
-        match fv.ArgType with 
-        | ArgType.Nothing when isUpper fv.FplId -> true
-        | ArgType.Nothing -> true
-        | _ -> false
-
-let private getNames (fv:FplValue) = 
-    let fvName = fv.Type SignatureType.Name
-    let fvType = fv.Type SignatureType.Type
-    let fvTypeName = fv.Name
-    fvName, fvType, fvTypeName
-
-
 /// Implements an object that is used to provide a representation of extensions in FPL.
 type FplExtensionObj(positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
@@ -4461,6 +4299,224 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
 
     override this.RunOrder = None
 
+type FplExtension(positions: Positions, parent: FplValue) =
+    inherit FplValue(positions, Some parent)
+    let mutable _callCounter = 0
+    let mutable _signStartPos = Position("", 0L, 0L, 0L)
+    let mutable _signEndPos = Position("", 0L, 0L, 0L)
+    
+    interface IHasSignature with
+        member _.SignStartPos 
+            with get (): Position = _signStartPos
+            and set (value) = _signStartPos <- value
+        member _.SignEndPos 
+            with get (): Position = _signEndPos
+            and set (value) = _signEndPos <- value
+
+    override this.Name = PrimExtensionL 
+    override this.ShortName = PrimExtension
+
+    override this.Clone () =
+        let ret = new FplExtension((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    // Returns a reference to the mapping of this extension
+    member this.Mapping =
+        let mapOpt = getMapping this
+        match mapOpt with 
+        | Some map -> map :?> FplMapping
+        | None -> 
+            let defaultMap = new FplMapping((this.StartPos, this.EndPos), this)
+            defaultMap.FplId <- LiteralUndef
+            defaultMap.TypeId <- LiteralUndef
+            defaultMap
+
+
+    override this.Type signatureType = 
+        match signatureType with 
+        | SignatureType.Name
+        | SignatureType.Mixed -> $"{this.FplId} -> {this.Mapping.Type signatureType}" 
+        | SignatureType.Type -> $"{this.Mapping.Type signatureType}"
+
+    override this.IsBlock () = true
+
+    override this.Run variableStack = 
+        this.Debug Debug.Start
+        _callCounter <- _callCounter + 1
+        if _callCounter > maxRecursion then
+            this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter variableStack.CallerStartPos variableStack.CallerEndPos
+        else
+            if this.ArgList.Count = 0 then 
+                let v = FplIntrinsicUndef((this.StartPos, this.EndPos), this)
+                this.SetValue v
+            else
+                this.ArgList
+                |> Seq.iter (fun fv -> 
+                    fv.Run variableStack
+                    this.SetValuesOf fv
+                )
+        _callCounter <- _callCounter - 1
+        this.Debug Debug.Stop
+
+    override this.EmbedInSymbolTable _ = tryAddToParentUsingMixedSignature this
+
+    override this.RunOrder = None
+
+let private errMsgStandard aName aType pName pType = Some $"`{aName}:{aType}` doesn't match `{pName}:{pType}`"
+let private errMsgMissingArgument pName pType = Some $"Missing argument for `{pName}:{pType}`"
+let private errMsgMissingParameter aName aType = Some $"No matching parameter for `{aName}:{aType}`"
+let private errMsgCallByRefToClass aName classType = Some $"Assignee `{aName}` references to a class `{classType}`. Consider initializing `{aName}` with a class constructor `{classType}(...)`."
+let private errMsgDirectClassAssignment classType = Some $"Assignee is a class `{classType}`. Use a class constructor `{classType}(...)` instead."
+
+let private matchClassInheritance (clOpt:FplValue option) aName aType (pName:string) (pType:string) = 
+    let pTypeSimple =
+        if pType.StartsWith("*") then 
+            let ret = pType.Substring(1).Split("[")
+            ret[0]
+        else
+            pType
+    match clOpt with 
+    | Some cl -> 
+        if inheritsFrom cl pTypeSimple then 
+            None
+        else
+            Some $"`{aName}:{aType}` neither matches `{pName}:{pType}` nor the base classes"
+    | _ -> 
+        Some($"{LiteralUndefL} `{aName}:{aType}` doesn't match `{pName}:{pType}`")
+
+
+let private matchByTypeStringRepresentation (a:FplValue) aName (aType:string) aTypeName (p:FplValue) pName (pType:string) pTypeName mode = 
+
+    match mode with 
+    | _ when aType = pType ->
+        None, Parameter.Consumed
+    | _ when aType = LiteralUndef ->
+        None, Parameter.Consumed // undef matches any type
+    | _ when pType.StartsWith(LiteralTpl) || pType.StartsWith(LiteralTplL) ->
+        None, Parameter.Consumed // tpl accepts everything: TODO: really?
+    | _ when pType.StartsWith($"*{LiteralTpl}") || pType.StartsWith($"*{LiteralTplL}") ->
+        None, Parameter.Consumed // tpl arrays accepts everything: TODO: really?
+    | MatchingMode.Assignment when aType = LiteralUndef ->
+        None, Parameter.Consumed // undef can always be assigned
+    | MatchingMode.Assignment when pType.StartsWith($"*{aType}[") && pTypeName = PrimVariableArrayL ->
+        None, Parameter.Consumed // assignee array accepting assigned value
+    | MatchingMode.Signature when pType.StartsWith($"*{aType}[{LiteralInd}]") ->
+        None, Parameter.NotConsumed // 1D arrays matching input type with ind as index accept variadic enumerations
+    | _ when pType.StartsWith($"*{aType}[") ->
+        // array parameters with indexes that differ from the FPL-inbuilt index type  
+        // or with multidimensional index types will not accept variadic enumerations of arguments
+        // even if they have the same type used for the values of the array
+        Some $"variadic enumeration of `{aName}:{aType}` doesn't match `{pName}:{pType}`, try `{aName}:{pType}` as argument or use parameter `{pName}:{p.TypeId}[{LiteralInd}]`", Parameter.Consumed
+    | _ when aType.StartsWith($"*{pType}[") && aTypeName = PrimRefL ->
+        let refA = a :?> FplReference
+        if refA.ArgType = ArgType.Brackets then 
+            // some array elements matching parameter type
+            None, Parameter.Consumed
+        else
+            Some $"Array type `{aName}:{aType}` doesn't match `{pName}:{pType}`", Parameter.Consumed
+    | _ when isUpper aType && aTypeName = PrimRefL && a.RefersTo.IsSome ->
+        let aReferencedNode = a.RefersTo.Value
+        if aReferencedNode.RefersTo.IsSome then
+            let aRef = aReferencedNode.RefersTo.Value
+            match aRef with
+            | :? FplClass ->
+                matchClassInheritance (Some aRef) aName aType pName pType, Parameter.Consumed 
+            | :? FplExtension as extension ->
+                let map = extension.Mapping 
+                matchClassInheritance map.RefersTo aName aType pName pType, Parameter.Consumed  
+            | _ ->
+                // this case does not occur but we cover it for completeness reasons
+                Some $"undefined `{aName}:{aType}` doesn't match `{pName}:{pType}`", Parameter.Consumed
+        elif aReferencedNode.Name = PrimDefaultConstructor || aReferencedNode.Name = LiteralCtorL then 
+            let ctor = aReferencedNode :?> FplGenericConstructor
+            matchClassInheritance ctor.ToBeConstructedClass aName aType pName pType, Parameter.Consumed
+        elif aReferencedNode.Name = PrimFunctionalTermL || aReferencedNode.Name = PrimMandatoryFunctionalTermL then 
+            let mapOpt = getMapping aReferencedNode
+            let map = mapOpt.Value :?> FplMapping 
+            matchClassInheritance map.RefersTo aName aType pName pType, Parameter.Consumed
+        elif aReferencedNode.Name = PrimVariableL then 
+            matchClassInheritance aReferencedNode.RefersTo aName aType pName pType, Parameter.Consumed
+        else
+            Some $"undefined `{aName}:{aType}` doesn't match `{pName}:{pType}`", Parameter.Consumed
+    | _ when aType.StartsWith(pType + "(") ->
+        None, Parameter.Consumed
+    | _ when aType.StartsWith(LiteralPred) && pType = LiteralPred ->
+        None, Parameter.Consumed
+    | _ when aType.StartsWith(LiteralFunc) && pType = LiteralFunc->
+        None, Parameter.Consumed
+    | MatchingMode.Assignment when aTypeName = PrimVariableL ->
+        let clOpt = a.Scope.Values |> Seq.tryHead
+        match clOpt with 
+        | Some (:? FplClass) -> matchClassInheritance clOpt aName aType pName pType, Parameter.Consumed
+        | _ -> errMsgStandard aName aType pName pType, Parameter.Consumed
+    | MatchingMode.Assignment when aTypeName = PrimDefaultConstructor || aTypeName = LiteralCtorL ->
+        let ctor = a :?> FplGenericConstructor
+        matchClassInheritance ctor.ToBeConstructedClass aName aType pName pType, Parameter.Consumed
+    | _ when pTypeName = PrimFunctionalTermL || pTypeName = PrimMandatoryFunctionalTermL ->
+        let mappingOpt = getMapping p 
+        match mappingOpt with 
+        | Some mapping ->
+            let newTypeAssignedValue = mapping.Type SignatureType.Type
+            if aType <> newTypeAssignedValue then 
+                errMsgStandard aName aType pName pType, Parameter.Consumed
+            else 
+                None, Parameter.Consumed
+        | None -> None, Parameter.Consumed
+    | _ ->
+        errMsgStandard aName aType pName pType, Parameter.Consumed
+
+let private isPredWithParentheses (fv:FplValue) =
+    match fv.ArgType with 
+    | ArgType.Parentheses when fv.TypeId.StartsWith(LiteralPred) -> true
+    | _ -> false
+
+let private isPredWithoutParentheses (fv:FplValue) =
+    match fv.ArgType with 
+    | ArgType.Nothing when fv.TypeId = LiteralPred -> true
+    | _ -> false
+
+let private isFuncWithParentheses (fv:FplValue) =
+    match fv.ArgType with 
+    | ArgType.Parentheses when fv.TypeId.StartsWith(LiteralFunc) -> true
+    | _ -> false
+
+let private isFuncWithoutParentheses (fv:FplValue) =
+    match fv.ArgType with 
+    | ArgType.Nothing when fv.TypeId = LiteralFunc -> true
+    | _ -> false
+
+/// Checks if an FplValue is a reference to a variable that points to a class, and at the same time is marked as 'initialized' and still does not any values.
+/// (this is the convention flagging that a variable has been assigned to its class instead of the constructor of the class generating an instance value).
+/// If the function returns a non-empty string, it contains the identifier of the referenced class (that has not been instantiated).
+let private getCallByReferenceToClass (fv:FplValue) =
+    match fv.RefersTo with 
+    | Some refNode ->
+        match refNode with 
+        | :? FplGenericVariable as var when var.IsInitialized && var.Value.IsNone ->
+            // reference fv points to an initialized variable without values 
+            match var.RefersTo with
+            | Some fv1 when fv1.Name = PrimClassL -> fv1.TypeId // and the variable points to a class
+            | _ -> String.Empty
+        | _ -> String.Empty
+    | None ->
+        String.Empty
+               
+let rec private isCallByReference (fv:FplValue) =
+    match fv with 
+    | :? FplReference as ref when ref.DottedChild.IsSome ->
+        isCallByReference ref.DottedChild.Value // evaluate dotted reference instead
+    | _ ->
+        match fv.ArgType with 
+        | ArgType.Nothing when isUpper fv.FplId -> true
+        | ArgType.Nothing -> true
+        | _ -> false
+
+let private getNames (fv:FplValue) = 
+    let fvName = fv.Type SignatureType.Name
+    let fvType = fv.Type SignatureType.Type
+    let fvTypeName = fv.Name
+    fvName, fvType, fvTypeName
 
 let rec private matchTwoTypes (a:FplValue) (p:FplValue) (mode:MatchingMode) =
     let aName, aType, aTypeName = getNames a 
@@ -5804,71 +5860,6 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) as this 
             _callCounter <- _callCounter - 1
             _isReady <- this.Arity = 0 
         this.Debug Debug.Stop
-
-type FplExtension(positions: Positions, parent: FplValue) =
-    inherit FplValue(positions, Some parent)
-    let mutable _callCounter = 0
-    let mutable _signStartPos = Position("", 0L, 0L, 0L)
-    let mutable _signEndPos = Position("", 0L, 0L, 0L)
-    
-    interface IHasSignature with
-        member _.SignStartPos 
-            with get (): Position = _signStartPos
-            and set (value) = _signStartPos <- value
-        member _.SignEndPos 
-            with get (): Position = _signEndPos
-            and set (value) = _signEndPos <- value
-
-    override this.Name = PrimExtensionL 
-    override this.ShortName = PrimExtension
-
-    override this.Clone () =
-        let ret = new FplExtension((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    // Returns a reference to the mapping of this extension
-    member this.Mapping =
-        let mapOpt = getMapping this
-        match mapOpt with 
-        | Some map -> map :?> FplMapping
-        | None -> 
-            let defaultMap = new FplMapping((this.StartPos, this.EndPos), this)
-            defaultMap.FplId <- LiteralUndef
-            defaultMap.TypeId <- LiteralUndef
-            defaultMap
-
-
-    override this.Type signatureType = 
-        match signatureType with 
-        | SignatureType.Name
-        | SignatureType.Mixed -> $"{this.FplId} -> {this.Mapping.Type signatureType}" 
-        | SignatureType.Type -> $"{this.Mapping.Type signatureType}"
-
-    override this.IsBlock () = true
-
-    override this.Run variableStack = 
-        this.Debug Debug.Start
-        _callCounter <- _callCounter + 1
-        if _callCounter > maxRecursion then
-            this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter variableStack.CallerStartPos variableStack.CallerEndPos
-        else
-            if this.ArgList.Count = 0 then 
-                let v = FplIntrinsicUndef((this.StartPos, this.EndPos), this)
-                this.SetValue v
-            else
-                this.ArgList
-                |> Seq.iter (fun fv -> 
-                    fv.Run variableStack
-                    this.SetValuesOf fv
-                )
-        _callCounter <- _callCounter - 1
-        this.Debug Debug.Stop
-
-    override this.EmbedInSymbolTable _ = tryAddToParentUsingMixedSignature this
-
-    override this.RunOrder = None
-
 
 let isExtension (fv:FplValue) =
     match fv with
