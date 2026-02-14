@@ -4604,6 +4604,8 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) (mode:MatchingMode) =
                 None, Parameter.Consumed // func accepting functional term properties
             | Some refNode when refNode.Name = PrimVariableL && refNode.TypeId = LiteralFunc ->
                 None, Parameter.Consumed // func accepting func variables
+            | Some refNode when refNode.Name = PrimExtensionObj ->
+                matchTwoTypes refNode p mode // match signatures with parameters
             | Some refNode ->
                 // a node was referenced but is not a functional term block
                 Some $"The return type of {qualifiedName refNode true} does not match expected mapping type `{pType}`.", Parameter.Consumed
@@ -4619,7 +4621,7 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) (mode:MatchingMode) =
                 None, Parameter.Consumed // definition accepting undef
             | Some def, Some (:? FplGenericVariable as refNode) when not refNode.IsInitialized  -> 
                 matchTwoTypes a def mode
-            | Some def, Some (:? FplExtensionObj as extObj) when extObj.RefersTo.IsSome -> 
+            | Some def, Some (:? FplExtensionObj as extObj) -> 
                 matchTwoTypes extObj def mode
             | None, Some refNode when map.TypeId = LiteralObj && refNode.Name = PrimInstanceL -> 
                 None, Parameter.Consumed // obj accepting instance
