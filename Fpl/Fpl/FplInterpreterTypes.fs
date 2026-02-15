@@ -3605,6 +3605,7 @@ type FplReference(positions: Positions, parent: FplValue) =
                 | PrimPredicateL 
                 | PrimMandatoryPredicateL 
                 | PrimFunctionalTermL 
+                | PrimExtensionObj 
                 | PrimMandatoryFunctionalTermL -> $"{headObj.Type signatureType}"
                 | _ -> head
             | 0, ArgType.Brackets, None ->
@@ -4164,6 +4165,7 @@ let inheritsFrom (node:FplValue) someType =
 type MatchingMode =
     | Assignment
     | Signature
+    | Return
 
 type Parameter =
     | Consumed
@@ -4192,8 +4194,13 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
         ret
 
     override this.Type signatureType = 
-        let head = getFplHead this signatureType
-        sprintf "%s" head
+        match signatureType with 
+        | SignatureType.Type when this.RefersTo.IsSome ->
+            let extension = this.RefersTo.Value
+            extension.Type signatureType
+        | _ ->
+            let head = getFplHead this signatureType
+            sprintf "%s" head
 
     override this.Represent() = // done 
         let enclosingBlockOpt = this.UltimateBlockNode
@@ -4369,8 +4376,8 @@ type FplExtension(positions: Positions, parent: FplValue, runOrder) =
 let private errMsgStandard aName aType pName pType = Some $"`{aName}:{aType}` doesn't match `{pName}:{pType}`"
 let private errMsgMissingArgument pName pType = Some $"Missing argument for `{pName}:{pType}`"
 let private errMsgMissingParameter aName aType = Some $"No matching parameter for `{aName}:{aType}`"
-let private errMsgCallByRefToClass aName classType = Some $"Assignee `{aName}` references to a class `{classType}`. Consider initializing `{aName}` with a class constructor `{classType}(...)`."
-let private errMsgDirectClassAssignment classType = Some $"Assignee is a class `{classType}`. Use a class constructor `{classType}(...)` instead."
+let private errMsgClassValueNotAllowed actualClassType = 
+        Some $"A class `{actualClassType}` cannot be passed directly as a value. Use a class constructor `{actualClassType}(...)` instead."
 
 let private matchClassInheritance (clOpt:FplValue option) aName aType (pName:string) (pType:string) = 
     let pTypeSimple =
@@ -4526,15 +4533,16 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) (mode:MatchingMode) =
     let pName, pType, pTypeName = getNames p
 
     match aTypeName, pTypeName with 
-    | PrimClassL, PrimVariableL when mode = MatchingMode.Assignment ->
-        errMsgDirectClassAssignment aType, Parameter.Consumed
+    | PrimClassL, PrimClassL 
+    | PrimClassL, PrimVariableL ->
+        errMsgClassValueNotAllowed aType, Parameter.Consumed
     | PrimRefL, PrimVariableL
     | PrimRefL, PrimMappingL ->
         let aIsCallByReference = isCallByReference a
         let callByReferenceToClass = getCallByReferenceToClass a
         let refNodeOpt = referencedNodeOpt a
         if callByReferenceToClass <> String.Empty then 
-            errMsgCallByRefToClass aName callByReferenceToClass, Parameter.Consumed
+            errMsgClassValueNotAllowed callByReferenceToClass, Parameter.Consumed
         elif aIsCallByReference && isPredWithParentheses p then 
             // match a call by reference with pred with parameters
             match refNodeOpt with 
@@ -4545,6 +4553,8 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) (mode:MatchingMode) =
             | Some refNode when refNode.Name = PrimMandatoryPredicateL ->
                 matchTwoTypes refNode p mode // match signatures with parameters
             | Some refNode when refNode.Name = PrimVariableL && refNode.TypeId = LiteralPred ->
+                matchTwoTypes refNode p mode // match signatures with parameters
+            | Some refNode when refNode.Name = PrimExtensionObj ->
                 matchTwoTypes refNode p mode // match signatures with parameters
             | Some refNode ->
                 // a node was referenced but is not a predicate
@@ -4626,6 +4636,8 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) (mode:MatchingMode) =
                 matchTwoTypes a def mode
             | Some def, Some (:? FplExtensionObj as extObj) -> 
                 matchTwoTypes extObj def mode
+            | Some (:? FplClass as pCl), Some (:? FplClass as aCl) -> 
+                matchTwoTypes pCl aCl mode
             | None, Some refNode when map.TypeId = LiteralObj && refNode.Name = PrimInstanceL -> 
                 None, Parameter.Consumed // obj accepting instance
             | None, Some (:? FplGenericVariable as refNode) when map.TypeId = LiteralObj && not refNode.IsInitialized -> 
