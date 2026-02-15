@@ -4299,8 +4299,9 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
 
     override this.RunOrder = None
 
-type FplExtension(positions: Positions, parent: FplValue) =
+type FplExtension(positions: Positions, parent: FplValue, runOrder) =
     inherit FplValue(positions, Some parent)
+    let _runOrder = runOrder
     let mutable _callCounter = 0
     let mutable _signStartPos = Position("", 0L, 0L, 0L)
     let mutable _signEndPos = Position("", 0L, 0L, 0L)
@@ -4317,7 +4318,7 @@ type FplExtension(positions: Positions, parent: FplValue) =
     override this.ShortName = PrimExtension
 
     override this.Clone () =
-        let ret = new FplExtension((this.StartPos, this.EndPos), this.Parent.Value)
+        let ret = new FplExtension((this.StartPos, this.EndPos), this.Parent.Value, _runOrder)
         this.AssignParts(ret)
         ret
 
@@ -4361,7 +4362,7 @@ type FplExtension(positions: Positions, parent: FplValue) =
 
     override this.EmbedInSymbolTable _ = tryAddToParentUsingMixedSignature this
 
-    override this.RunOrder = None
+    override this.RunOrder = Some _runOrder
 
 let private errMsgStandard aName aType pName pType = Some $"`{aName}:{aType}` doesn't match `{pName}:{pType}`"
 let private errMsgMissingArgument pName pType = Some $"Missing argument for `{pName}:{pType}`"

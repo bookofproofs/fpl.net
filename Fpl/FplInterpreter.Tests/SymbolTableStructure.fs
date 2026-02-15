@@ -173,12 +173,12 @@ type SymbolTableStructure() =
             mockSymbolTableEvaluationPredicate x 2
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""; x.Represent(); x.Type SignatureType.Mixed]
         | "FplExtension" ->
-            let x = new FplExtension(positions, parent)
+            let x = new FplExtension(positions, parent, 0)
             x.Run (new FplVariableStack())
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""; x.Represent(); x.Type SignatureType.Mixed]
         | "FplExtensionObj" ->
             let x = new FplExtensionObj(positions, parent)
-            let ref = new FplExtension(positions, parent)
+            let ref = new FplExtension(positions, parent, 0)
             x.RefersTo <- Some ref
             x.Run (new FplVariableStack())
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""; x.Represent(); x.Type SignatureType.Mixed]
@@ -1463,7 +1463,7 @@ type SymbolTableStructure() =
         | "FplExclusiveOr" ->
             Assert.AreEqual<string>("None", (getName var).[index])
         | "FplExtension" ->
-            Assert.AreEqual<string>("None", (getName var).[index])
+            Assert.AreEqual<string>("Some", (getName var).[index])
         | "FplExtensionObj" ->
             Assert.AreEqual<string>("None", (getName var).[index])
         | "FplForInStmt" ->

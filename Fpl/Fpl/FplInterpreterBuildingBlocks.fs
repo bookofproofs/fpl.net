@@ -902,7 +902,7 @@ let rec eval (st: SymbolTable) ast =
         eval st extensionMappingAst
     | Ast.DefinitionExtension((pos1, pos2), ((extensionNameAst,extensionSignatureAst), extensionTermAst)) ->
         let parent = variableStack.PeekEvalStack()
-        let fv = new FplExtension((pos1,pos2), parent)
+        let fv = new FplExtension((pos1,pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
         variableStack.PushEvalStack(fv)
         eval st extensionNameAst
         eval st extensionSignatureAst
