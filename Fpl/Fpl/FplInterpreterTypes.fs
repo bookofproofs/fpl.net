@@ -3560,20 +3560,6 @@ type FplReference(positions: Positions, parent: FplValue) =
             | SignatureType.Type, _, _ -> headObj.TypeId
             | _ -> ret
 
-        let fallBackFunctionalTerm =
-            let varMappingOpt = getMapping headObj
-            match varMappingOpt with 
-            | Some varMapping ->
-                match headObj.Name with 
-                | PrimFunctionalTermL when signatureType = SignatureType.Type -> 
-                    varMapping.Type propagate
-                | PrimMandatoryFunctionalTermL when signatureType = SignatureType.Type -> 
-                    varMapping.Type propagate
-                | _ -> 
-                    $"{head}({args}) -> {varMapping.Type propagate}"
-            | None ->
-                $"{head}({args})"
-
         let fallBackValueClosure =
             let varMappingOpt = getMapping headObj
             match varMappingOpt with 
@@ -4162,11 +4148,6 @@ let inheritsFrom (node:FplValue) someType =
         | Some _ -> true
         | None -> false
 
-type MatchingMode =
-    | Assignment
-    | Signature
-    | Return
-
 type Parameter =
     | Consumed
     | NotConsumed
@@ -4396,36 +4377,33 @@ let private matchClassInheritance (clOpt:FplValue option) aName aType (pName:str
         Some($"{LiteralUndefL} `{aName}:{aType}` doesn't match `{pName}:{pType}`")
 
 
-let private matchByTypeStringRepresentation (a:FplValue) aName (aType:string) aTypeName (p:FplValue) pName (pType:string) pTypeName mode = 
+let private matchByTypeStringRepresentation (a:FplValue) aName (aType:string) aTypeName (p:FplValue) pName (pType:string) pTypeName = 
 
-    match mode with 
-    | _ when aType = pType ->
+    if aType = pType then
         None, Parameter.Consumed
-    | _ when aType = LiteralUndef ->
+    elif aType = LiteralUndef then
         None, Parameter.Consumed // undef matches any type
-    | _ when pType.StartsWith(LiteralTpl) || pType.StartsWith(LiteralTplL) ->
+    elif pType.StartsWith(LiteralTpl) || pType.StartsWith(LiteralTplL) then
         None, Parameter.Consumed // tpl accepts everything: TODO: really?
-    | _ when pType.StartsWith($"*{LiteralTpl}") || pType.StartsWith($"*{LiteralTplL}") ->
+    elif pType.StartsWith($"*{LiteralTpl}") || pType.StartsWith($"*{LiteralTplL}") then
         None, Parameter.Consumed // tpl arrays accepts everything: TODO: really?
-    | MatchingMode.Assignment when aType = LiteralUndef ->
+    elif aType = LiteralUndef then
         None, Parameter.Consumed // undef can always be assigned
-    | MatchingMode.Assignment when pType.StartsWith($"*{aType}[") && pTypeName = PrimVariableArrayL ->
-        None, Parameter.Consumed // assignee array accepting assigned value
-    | MatchingMode.Signature when pType.StartsWith($"*{aType}[{LiteralInd}]") ->
+    elif pType.StartsWith($"*{aType}[{LiteralInd}]") then
         None, Parameter.NotConsumed // 1D arrays matching input type with ind as index accept variadic enumerations
-    | _ when pType.StartsWith($"*{aType}[") ->
+    elif pType.StartsWith($"*{aType}[") then
         // array parameters with indexes that differ from the FPL-inbuilt index type  
         // or with multidimensional index types will not accept variadic enumerations of arguments
         // even if they have the same type used for the values of the array
         Some $"variadic enumeration of `{aName}:{aType}` doesn't match `{pName}:{pType}`, try `{aName}:{pType}` as argument or use parameter `{pName}:{p.TypeId}[{LiteralInd}]`", Parameter.Consumed
-    | _ when aType.StartsWith($"*{pType}[") && aTypeName = PrimRefL ->
+    elif aType.StartsWith($"*{pType}[") && aTypeName = PrimRefL then
         let refA = a :?> FplReference
         if refA.ArgType = ArgType.Brackets then 
             // some array elements matching parameter type
             None, Parameter.Consumed
         else
             Some $"Array type `{aName}:{aType}` doesn't match `{pName}:{pType}`", Parameter.Consumed
-    | _ when isUpper aType && aTypeName = PrimRefL && a.RefersTo.IsSome ->
+    elif isUpper aType && aTypeName = PrimRefL && a.RefersTo.IsSome then
         let aReferencedNode = a.RefersTo.Value
         if aReferencedNode.RefersTo.IsSome then
             let aRef = aReferencedNode.RefersTo.Value
@@ -4449,21 +4427,21 @@ let private matchByTypeStringRepresentation (a:FplValue) aName (aType:string) aT
             matchClassInheritance aReferencedNode.RefersTo aName aType pName pType, Parameter.Consumed
         else
             Some $"undefined `{aName}:{aType}` doesn't match `{pName}:{pType}`", Parameter.Consumed
-    | _ when aType.StartsWith(pType + "(") ->
+    elif aType.StartsWith(pType + "(") then
         None, Parameter.Consumed
-    | _ when aType.StartsWith(LiteralPred) && pType = LiteralPred ->
+    elif aType.StartsWith(LiteralPred) && pType = LiteralPred then
         None, Parameter.Consumed
-    | _ when aType.StartsWith(LiteralFunc) && pType = LiteralFunc->
+    elif aType.StartsWith(LiteralFunc) && pType = LiteralFunc then
         None, Parameter.Consumed
-    | MatchingMode.Assignment when aTypeName = PrimVariableL ->
+    elif aTypeName = PrimVariableL then
         let clOpt = a.Scope.Values |> Seq.tryHead
         match clOpt with 
         | Some (:? FplClass) -> matchClassInheritance clOpt aName aType pName pType, Parameter.Consumed
         | _ -> errMsgStandard aName aType pName pType, Parameter.Consumed
-    | MatchingMode.Assignment when aTypeName = PrimDefaultConstructor || aTypeName = LiteralCtorL ->
+    elif aTypeName = PrimDefaultConstructor || aTypeName = LiteralCtorL then
         let ctor = a :?> FplGenericConstructor
         matchClassInheritance ctor.ToBeConstructedClass aName aType pName pType, Parameter.Consumed
-    | _ when pTypeName = PrimFunctionalTermL || pTypeName = PrimMandatoryFunctionalTermL ->
+    elif pTypeName = PrimFunctionalTermL || pTypeName = PrimMandatoryFunctionalTermL then
         let mappingOpt = getMapping p 
         match mappingOpt with 
         | Some mapping ->
@@ -4473,7 +4451,7 @@ let private matchByTypeStringRepresentation (a:FplValue) aName (aType:string) aT
             else 
                 None, Parameter.Consumed
         | None -> None, Parameter.Consumed
-    | _ ->
+    else
         errMsgStandard aName aType pName pType, Parameter.Consumed
 
 let private isPredWithParentheses (fv:FplValue) =
@@ -4528,7 +4506,7 @@ let private getNames (fv:FplValue) =
     let fvTypeName = fv.Name
     fvName, fvType, fvTypeName
 
-let rec private matchTwoTypes (a:FplValue) (p:FplValue) (mode:MatchingMode) =
+let rec private matchTwoTypes (a:FplValue) (p:FplValue) =
     let aName, aType, aTypeName = getNames a 
     let pName, pType, pTypeName = getNames p
 
@@ -4547,15 +4525,15 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) (mode:MatchingMode) =
             // match a call by reference with pred with parameters
             match refNodeOpt with 
             | Some refNode when refNode.Name = PrimPredicateL ->
-                matchTwoTypes refNode p mode // match signatures with parameters
+                matchTwoTypes refNode p // match signatures with parameters
             | Some refNode when refNode.Name = PrimIntrinsicUndef -> 
                 None, Parameter.Consumed // mapping pred(...) accepting undef
             | Some refNode when refNode.Name = PrimMandatoryPredicateL ->
-                matchTwoTypes refNode p mode // match signatures with parameters
+                matchTwoTypes refNode p // match signatures with parameters
             | Some refNode when refNode.Name = PrimVariableL && refNode.TypeId = LiteralPred ->
-                matchTwoTypes refNode p mode // match signatures with parameters
+                matchTwoTypes refNode p // match signatures with parameters
             | Some refNode when refNode.Name = PrimExtensionObj ->
-                matchTwoTypes refNode p mode // match signatures with parameters
+                matchTwoTypes refNode p // match signatures with parameters
             | Some refNode ->
                 // a node was referenced but is not a predicate
                 Some $"The return type of {qualifiedName refNode true} doesn't match `{pType}`.", Parameter.Consumed
@@ -4582,7 +4560,7 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) (mode:MatchingMode) =
             | Some refNode when refNode.Name = PrimVariableL && refNode.TypeId = LiteralPred ->
                 None, Parameter.Consumed // pred accepting pred variables
             | Some refNode when refNode.Name = PrimExtensionObj ->
-                matchTwoTypes refNode p mode // match signatures with parameters
+                matchTwoTypes refNode p // match signatures with parameters
             | Some refNode ->
                 // a node was referenced not a predicate node
                 Some $"The return type of {qualifiedName refNode true} doesn't match mapping type `{pType}`.", Parameter.Consumed
@@ -4595,11 +4573,11 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) (mode:MatchingMode) =
             | Some refNode when refNode.Name = PrimIntrinsicUndef -> 
                 None, Parameter.Consumed // mapping func(...)->.. accepting undef
             | Some refNode when refNode.Name = PrimFunctionalTermL ->
-                matchTwoTypes refNode p mode // match signatures with parameters
+                matchTwoTypes refNode p // match signatures with parameters
             | Some refNode when refNode.Name = PrimMandatoryFunctionalTermL ->
-                matchTwoTypes refNode p mode // match signatures with parameters
+                matchTwoTypes refNode p // match signatures with parameters
             | Some refNode when refNode.Name = PrimVariableL && refNode.TypeId = LiteralFunc ->
-                matchTwoTypes refNode p mode // match signatures with parameters
+                matchTwoTypes refNode p // match signatures with parameters
             | Some refNode ->
                 // a node was referenced but is not a functional term block
                 Some $"The return type of {qualifiedName refNode true} does not match mapping type `{pType}`.", Parameter.Consumed
@@ -4618,7 +4596,7 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) (mode:MatchingMode) =
             | Some refNode when refNode.Name = PrimVariableL && refNode.TypeId = LiteralFunc ->
                 None, Parameter.Consumed // func accepting func variables
             | Some refNode when refNode.Name = PrimExtensionObj ->
-                matchTwoTypes refNode p mode // match signatures with parameters
+                matchTwoTypes refNode p // match signatures with parameters
             | Some refNode ->
                 // a node was referenced but is not a functional term block
                 Some $"The return type of {qualifiedName refNode true} does not match expected mapping type `{pType}`.", Parameter.Consumed
@@ -4629,15 +4607,15 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) (mode:MatchingMode) =
             let map = p :?> FplMapping
             match map.RefersTo, refNodeOpt with
             | Some def, Some refNode when refNode.Name = PrimInstanceL -> 
-                matchTwoTypes a def mode
+                matchTwoTypes a def
             | Some _, Some refNode when refNode.Name = PrimIntrinsicUndef -> 
                 None, Parameter.Consumed // definition accepting undef
             | Some def, Some (:? FplGenericVariable as refNode) when not refNode.IsInitialized  -> 
-                matchTwoTypes a def mode
+                matchTwoTypes a def
             | Some def, Some (:? FplExtensionObj as extObj) -> 
-                matchTwoTypes extObj def mode
+                matchTwoTypes extObj def
             | Some (:? FplClass as pCl), Some (:? FplClass as aCl) -> 
-                matchTwoTypes pCl aCl mode
+                matchTwoTypes pCl aCl
             | None, Some refNode when map.TypeId = LiteralObj && refNode.Name = PrimInstanceL -> 
                 None, Parameter.Consumed // obj accepting instance
             | None, Some (:? FplGenericVariable as refNode) when map.TypeId = LiteralObj && not refNode.IsInitialized -> 
@@ -4650,7 +4628,7 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) (mode:MatchingMode) =
             | None, Some refNode when refNode.Name = PrimIntrinsicUndef -> 
                 None, Parameter.Consumed // anything accepting undef
             | None, Some refNode -> 
-                matchTwoTypes refNode map mode
+                matchTwoTypes refNode map
             | None, None when aType = pType && isUpper aType -> 
                 Some $"`{aName}:{aType}` matches the expected type `{pType}` but the type is undefined.", Parameter.Consumed
             | None, None when pType = LiteralObj && aType.StartsWith($"{pType}:") -> 
@@ -4660,20 +4638,20 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) (mode:MatchingMode) =
             | _, _ -> 
                 errMsgStandard aName aType pName pType, Parameter.Consumed
         else 
-            matchByTypeStringRepresentation a aName aType aTypeName p pName pType pTypeName mode
+            matchByTypeStringRepresentation a aName aType aTypeName p pName pType pTypeName
     | _ ,_ -> 
-        matchByTypeStringRepresentation a aName aType aTypeName p pName pType pTypeName mode
+        matchByTypeStringRepresentation a aName aType aTypeName p pName pType pTypeName
 
 
 /// Tries to match a list of arguments with a list of parameters by their type recursively.
 /// The comparison depends on MatchingMode.
-let rec mpwa (args: FplValue list) (pars: FplValue list) mode =
+let rec mpwa (args: FplValue list) (pars: FplValue list) =
     match (args, pars) with
     | (a :: ars, p :: prs) ->
-        match matchTwoTypes (a:FplValue) (p:FplValue) mode with
+        match matchTwoTypes (a:FplValue) (p:FplValue) with
         | Some errMsg, _ -> Some errMsg
-        | None, Parameter.Consumed -> mpwa ars prs mode
-        | None, Parameter.NotConsumed -> mpwa ars pars mode // handle variadic parameters
+        | None, Parameter.Consumed -> mpwa ars prs
+        | None, Parameter.NotConsumed -> mpwa ars pars // handle variadic parameters
     | ([], p :: prs) ->
         let pName, pType, pTypeName = getNames p
         match p with 
@@ -4707,7 +4685,7 @@ let matchArgumentsWithParameters (fva: FplValue) (fvp: FplValue) =
         if aHasBracketsOrParentheses <> pHasBracketsOrParentheses && arguments.Length = 0 && parameters.Length = 0 then 
             Some $"calling `{fva.Type SignatureType.Name}` and called `{fvp.Type SignatureType.Name}` nodes have mismatching use of parentheses"
         else
-            mpwa arguments parameters MatchingMode.Signature
+            mpwa arguments parameters 
 
     match argResult with
     | Some aErr -> 
@@ -4756,7 +4734,7 @@ let checkSIG08_SIG10Diagnostics (referenceToArray:FplValue) =
             let rec matchAllIndexes (indexes:FplValue list) (dims:FplValue list) dimNumber =
                 match indexes, dims with
                 | i::ixs, d::dms ->
-                    match mpwa [i] [d] MatchingMode.Signature with
+                    match mpwa [i] [d] with
                     | Some errMsg ->
                         // type mismatch between dimension and index
                         refToArray.ErrorOccurred <- emitSIG08diagnostics varArray.FplId i.FplId (i.Type SignatureType.Type) (d.Type SignatureType.Type) dimNumber i.StartPos i.EndPos 
@@ -5683,7 +5661,7 @@ type FplIsOperator(positions: Positions, parent: FplValue) as this =
             // FPL truth-table
             match operand with 
             | :? FplReference as op ->
-                match mpwa [operand] [typeOfOperand] MatchingMode.Signature with
+                match mpwa [operand] [typeOfOperand] with
                 | Some errMsg -> LiteralFalse
                 | None -> LiteralTrue
             | _ -> LiteralFalse
@@ -5922,7 +5900,7 @@ type FplReturn(positions: Positions, parent: FplValue) as this =
             let mapTypeOpt = getMapping funTerm
             match mapTypeOpt with 
             | Some mapType ->
-                match mpwa [ returnedReference ] [ mapType ] MatchingMode.Assignment with
+                match mpwa [ returnedReference ] [ mapType ] with
                 | Some errMsg -> returnedReference.ErrorOccurred <- emitSIG03Diagnostics errMsg (mapType.Type(SignatureType.Type)) (returnedReference.StartPos) (returnedReference.EndPos)
                 | _ -> 
                     match returnedReference with
@@ -6375,7 +6353,7 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
                 this.ErrorOccurred <- emitLG005Diagnostics nameAssignedValue assignedValue.StartPos assignedValue.EndPos
             else
                 // assignee is to be treated as parameter, the assignedValue as argument
-                match mpwa [assignedValue] [assignee] MatchingMode.Assignment with
+                match mpwa [assignedValue] [assignee] with
                 | Some errMsg ->
                     this.ErrorOccurred <- emitSIG05Diagnostics errMsg this.ArgList[1].StartPos this.ArgList[1].EndPos
                 | _ -> ()
