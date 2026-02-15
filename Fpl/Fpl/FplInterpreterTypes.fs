@@ -4633,6 +4633,7 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) (mode:MatchingMode) =
                 match refNodeOpt1 with 
                 | Some (:? FplClass as cl) -> None, Parameter.Consumed // obj accepting instance
                 | _ when refNode.TypeId = LiteralObj && aType = pType -> None, Parameter.Consumed // obj accepting obj variable
+                | _ when pType = LiteralObj && refNode.TypeId.StartsWith($"{pType}:") -> None, Parameter.Consumed // obj accepting obj:<some regex> (relevant for FplExtension and FplExtensionObj only)
                 | _ -> errMsgStandard aName aType pName pType, Parameter.Consumed
             | None, Some refNode when refNode.Name = PrimIntrinsicUndef -> 
                 None, Parameter.Consumed // anything accepting undef
@@ -4640,6 +4641,8 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) (mode:MatchingMode) =
                 matchTwoTypes refNode map mode
             | None, None when aType = pType && isUpper aType -> 
                 Some $"`{aName}:{aType}` matches the expected type `{pType}` but the type is undefined.", Parameter.Consumed
+            | None, None when pType = LiteralObj && aType.StartsWith($"{pType}:") -> 
+                None, Parameter.Consumed // obj accepting obj:<some regex> (relevant for FplExtension and FplExtensionObj only)
             | None, None when aType = pType -> 
                 None, Parameter.Consumed // obj accepting obj, ind accepting ind, pred accepting pred, func accepting func
             | _, _ -> 

@@ -2211,21 +2211,21 @@ type TestInterpreterErrors() =
     [<DataRow("NF_3d", "ext Test x@/\d+/->func(a:obj)->ind {dec ~x:pred(y:ind); return x};", 1)>]
 
     // match with class type
-    [<DataRow("CT1", "def cl A {intr} ext Test x@/\d+/->obj {dec ~x:A; return x};", 0)>] // A is obj, no error
-    [<DataRow("CT2", "def cl A {intr} ext Test x@/\d+/->A {dec ~x:A; return x};", 0)>] // A is A, no error
-    [<DataRow("CT3", "def cl A {intr} def cl B:A {intr} ext Test x@/\d+/->A {dec ~x:B; return x};", 0)>] // x is also B:A, no error
-    [<DataRow("CT4", "def cl A {intr} def cl B:A {intr} ext Test x@/\d+/->B {dec ~x:B; return x};", 0)>] // x is B, no error
-    [<DataRow("CT5", "def cl A {intr} def cl B:A {intr} ext Test x@/\d+/->obj {dec ~x:B; return x};", 0)>] // x is also B:A:obj, no error
+    [<DataRow("CT1", "def cl A {intr} ext Test x@/\d+/->obj {dec ~a:A; return a};", 0)>] // A is obj, no error
+    [<DataRow("CT2", "def cl A {intr} ext Test x@/\d+/->A {dec ~a:A; return a};", 0)>] // A is A, no error
+    [<DataRow("CT3", "def cl A {intr} def cl B:A {intr} ext Test x@/\d+/->A {dec ~a:B; return a};", 0)>] // x is also B:A, no error
+    [<DataRow("CT4", "def cl A {intr} def cl B:A {intr} ext Test x@/\d+/->B {dec ~a:B; return a};", 0)>] // x is B, no error
+    [<DataRow("CT5", "def cl A {intr} def cl B:A {intr} ext Test x@/\d+/->obj {dec ~a:B; return a};", 0)>] // x is also B:A:obj, no error
     // ... with instances
-    [<DataRow("CI1", "def cl A {intr} ext Test x@/\d+/->obj {dec ~x:A x:=A(); return x};", 0)>] // A is obj, no error
-    [<DataRow("CI2", "def cl A {intr} ext Test x@/\d+/->A {dec ~x:A x:=A(); return x};", 0)>] // A is A, no error
-    [<DataRow("CI3", "def cl A {intr} def cl B:A {intr} ext Test x@/\d+/->A {dec ~x:B x:=B(); return x};", 0)>] // x is also B:A, no error
-    [<DataRow("CI4", "def cl A {intr} def cl B:A {intr} ext Test x@/\d+/->B {dec ~x:B x:=B(); return x};", 0)>] // x is B, no error
-    [<DataRow("CI5", "def cl A {intr} def cl B:A {intr} ext Test x@/\d+/->obj {dec ~x:B x:=B(); return x};", 0)>] // x is also B:A:obj, no error
+    [<DataRow("CI1", "def cl A {intr} ext Test x@/\d+/->obj {dec ~a:A a:=A(); return a};", 0)>] // A is obj, no error
+    [<DataRow("CI2", "def cl A {intr} ext Test x@/\d+/->A {dec ~a:A a:=A(); return a};", 0)>] // A is A, no error
+    [<DataRow("CI3", "def cl A {intr} def cl B:A {intr} ext Test x@/\d+/->A {dec ~a:B a:=B(); return a};", 0)>] // x is also B:A, no error
+    [<DataRow("CI4", "def cl A {intr} def cl B:A {intr} ext Test x@/\d+/->B {dec ~a:B a:=B(); return a};", 0)>] // x is B, no error
+    [<DataRow("CI5", "def cl A {intr} def cl B:A {intr} ext Test x@/\d+/->obj {dec ~a:B a:=B(); return a};", 0)>] // x is also B:A:obj, no error
 
     // mismatch with class type
-    [<DataRow("CT1_", "ext Test x@/\d+/->obj {dec ~x:A; return x};", 1)>] // A is undefined, error
-    [<DataRow("CT2_", "def cl A ext Test x@/\d+/->A {dec ~x:obj; return x};", 1)>] // obj is not A, error
+    [<DataRow("CT1_", "ext Test x@/\d+/->obj {dec ~a:A; return a};", 1)>] // A is undefined, error
+    [<DataRow("CT2_", "def cl A ext Test x@/\d+/->A {dec ~a:obj; return a};", 1)>] // obj is not A, error
     [<DataRow("CT3_", "def cl A def cl B:A ext Test x@/\d+/->B {dec ~a:A; return a};", 1)>] // A is not B, error
     // mismatch with class references
     [<DataRow("CI1_", "ext Test x@/\d+/->obj {ret A};", 1)>] // A is undefined, error
