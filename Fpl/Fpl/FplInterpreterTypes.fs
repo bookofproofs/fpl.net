@@ -4247,7 +4247,9 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
             let vars = fv1.GetVariables()
             if vars.Length > 0 then
                 let mainVar = vars.Head
-                let regex = Regex(mainVar.TypeId)
+                // starts always with "obj:", we retrieve only the regex string after it
+                let retrieveRegex = mainVar.TypeId.Substring(4) 
+                let regex = Regex(retrieveRegex)
                 regex.IsMatch(identifier)
             else
                 false
@@ -4638,7 +4640,7 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) (mode:MatchingMode) =
                 matchTwoTypes refNode map mode
             | None, None when aType = pType && isUpper aType -> 
                 Some $"`{aName}:{aType}` matches the expected type `{pType}` but the type is undefined.", Parameter.Consumed
-            | None, None when aType = pType  -> 
+            | None, None when aType = pType -> 
                 None, Parameter.Consumed // obj accepting obj, ind accepting ind, pred accepting pred, func accepting func
             | _, _ -> 
                 errMsgStandard aName aType pName pType, Parameter.Consumed

@@ -164,7 +164,7 @@ let rec eval (st: SymbolTable) ast =
         let vars = fv.GetVariables()
         if vars.Length > 0 then
             let mainVar = vars.Head
-            mainVar.TypeId <- s // set the extensions's main variable's type to the pattern
+            mainVar.TypeId <- $"{LiteralObj}:{s}" // set the extensions's main variable's type to the pattern
     | Ast.DollarDigits((pos1, pos2), s) -> 
         let fv = variableStack.PeekEvalStack()
         let sid = $"${s.ToString()}"
