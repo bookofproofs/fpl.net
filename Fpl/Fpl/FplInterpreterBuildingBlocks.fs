@@ -1533,7 +1533,7 @@ let rec eval (st: SymbolTable) ast =
             cl.AddDefaultConstructor()
     | Ast.DefinitionClass((pos1, pos2),(((classSignatureAst, optInheritedClassTypeListAst), optUserDefinedObjSymAst), classBlockAst)) ->
         let parent = variableStack.PeekEvalStack()
-        let fv = new FplClass((pos1, pos2), parent)
+        let fv = new FplClass((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
         variableStack.PushEvalStack(fv)
         eval st classSignatureAst
         optInheritedClassTypeListAst |> Option.map (eval st) |> Option.defaultValue ()

@@ -2135,8 +2135,9 @@ type FplConstructor(positions: Positions, parent: FplValue) as this =
 
     member this.ParentClass = this.Parent.Value :?> FplClass
 
-and FplClass(positions: Positions, parent: FplValue) as this =
+and FplClass(positions: Positions, parent: FplValue, runOrder) as this =
     inherit FplGenericInheriting(positions, parent)
+    let _runOrder = runOrder
     let mutable _signStartPos = Position("", 0L, 0L, 0L)
     let mutable _signEndPos = Position("", 0L, 0L, 0L)
 
@@ -2164,7 +2165,7 @@ and FplClass(positions: Positions, parent: FplValue) as this =
     override this.ShortName = PrimClass
 
     override this.Clone () =
-        let ret = new FplClass((this.StartPos, this.EndPos), this.Parent.Value)
+        let ret = new FplClass((this.StartPos, this.EndPos), this.Parent.Value, _runOrder)
         this.AssignParts(ret)
         ret
 
@@ -2196,13 +2197,12 @@ and FplClass(positions: Positions, parent: FplValue) as this =
         this.CheckConsistency()
         tryAddToParentUsingFplId this 
 
-    override this.RunOrder = None
+    override this.RunOrder = Some _runOrder
 
     member this.AddDefaultConstructor () = 
         let defaultConstructor = new FplDefaultConstructor(this.FplId, (this.StartPos, this.EndPos), this)
         defaultConstructor.EmbedInSymbolTable defaultConstructor.Parent
         defaultConstructor.ToBeConstructedClass <- Some this
-    
 
 type ICanBeCalledRecusively =
     abstract member CallCounter : int

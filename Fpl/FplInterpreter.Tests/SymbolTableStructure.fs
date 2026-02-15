@@ -126,7 +126,7 @@ type SymbolTableStructure() =
             let x = new FplCaseSingle(positions, parent)
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""; x.Represent(); x.Type SignatureType.Mixed]
         | "FplClass" ->
-            let x = new FplClass(positions, parent)
+            let x = new FplClass(positions, parent, 0)
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> "None"}"""; x.Represent(); x.Type SignatureType.Mixed]
         | "FplConjecture" ->
             let x = new FplConjecture(positions, parent, 0)
@@ -1441,7 +1441,7 @@ type SymbolTableStructure() =
         | "FplCaseSingle" ->
             Assert.AreEqual<string>("None", (getName var).[index])
         | "FplClass" ->
-            Assert.AreEqual<string>("None", (getName var).[index])
+            Assert.AreEqual<string>("Some", (getName var).[index])
         | "FplConjecture" ->
             Assert.AreEqual<string>("Some", (getName var).[index])
         | "FplConjunction" ->
