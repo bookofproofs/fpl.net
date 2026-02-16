@@ -3281,17 +3281,17 @@ type TestInterpreterErrors() =
     [<DataRow("CI1_","ext U x@/\d+/ -> A {ret A} def pred T(v:obj) {true} def pred Test() {T(@1)};", 1)>] // A is undefined, error
     [<DataRow("CI2_","def cl A def cl B:A ext U x@/\d+/ -> A {ret A} def pred T(v:B) {true} def pred Test() {T(@1)};", 1)>] // A is not B; error
     [<DataRow("CI3_","def cl A def cl B:A ext U x@/\d+/ -> B {ret B()} def pred T(v:B) {true} def pred Test() {T(@1)};", 0)>] // B() is B
-    [<DataRow("CI4_","def cl A ext U x@/\d+/ -> A {ret A} def pred T(v:obj) {true} def pred Test() {T(@1)};", 2)>] // A is obj, but x is class reference, error
-    [<DataRow("CI5_","def cl A def cl B:A ext U x@/\d+/ -> B {ret B} def pred T(v:B) {true} def pred Test() {T(@1)};", 2)>] // B is B, but x is class reference, error
-    [<DataRow("CI6_","def cl A ext U x@/\d+/ -> A {ret A} def pred T(v:A) {true} def pred Test() {T(@1)};", 2)>] // A is A, but x is class reference, error
-    [<DataRow("CI7_","def cl A def cl B:A ext U x@/\d+/ -> B {ret B} def pred T(v:A) {true} def pred Test() {T(@1)};", 2)>] // B is A but x is a class reference, error 
-    [<DataRow("CI8_","def cl A def cl B:A ext U x@/\d+/ -> B {ret B} def pred T(v:B) {true} def pred Test() {T(@1)};", 2)>] // x is B, but class reference, error
-    [<DataRow("CI9_","def cl A def cl B:A ext U x@/\d+/ -> B {ret B} def pred T(v:obj) {true} def pred Test() {T(@1)};", 2)>] // B is obj but x is class reference, error
+    [<DataRow("CI4_","def cl A ext U x@/\d+/ -> A {ret A} def pred T(v:obj) {true} def pred Test() {T(@1)};", 0)>] // A() is obj
+    [<DataRow("CI5_","def cl A def cl B:A ext U x@/\d+/ -> B {ret B()} def pred T(v:B) {true} def pred Test() {T(@1)};", 0)>] // B() is B
+    [<DataRow("CI6_","def cl A ext U x@/\d+/ -> A {ret A()} def pred T(v:A) {true} def pred Test() {T(@1)};", 0)>] // A() is A
+    [<DataRow("CI7_","def cl A def cl B:A ext U x@/\d+/ -> B {ret B()} def pred T(v:A) {true} def pred Test() {T(@1)};", 0)>] // B() is A 
+    [<DataRow("CI8_","def cl A def cl B:A ext U x@/\d+/ -> B {ret B()} def pred T(v:B) {true} def pred Test() {T(@1)};", 0)>] //  B() is B
+    [<DataRow("CI9_","def cl A def cl B:A ext U x@/\d+/ -> B {ret B()} def pred T(v:obj) {true} def pred Test() {T(@1)};", 0)>] // B() is obj 
 
     // match with the type pred(...) 
-    [<DataRow("MS1","ext U x@/\d+/ -> pred(z:obj) {dec ~a:pred(y:obj); ret a} def pred T(v:pred(y:obj)) {true} def pred Test() {T(@1)};", 0)>] // OK: ->pred(y:obj) matches signature A(obj), whole node would be returned
-    [<DataRow("MS1a","ext U x@/\d+/ -> pred(z:obj) {dec ~a:pred(y:obj); ret a} def pred T(v:pred(y:obj)) {true} def pred Test() {T(@1)};", 1)>] // SIG04: pred(y:obj) does not match value A(obj) 
-    [<DataRow("MS1b","ext U x@/\d+/ -> pred(z:obj) {dec ~a:pred(y:ind); ret a} def pred T(v:pred(y:obj)) {true} def pred Test() {T(@1)};", 1)>] // SIG04: pred(y:obj) does not match value A(ind) not matching A(obj)
+    [<DataRow("MS1","ext U x@/\d+/ -> pred(z:obj) {dec ~a:pred(y:obj); ret a} def pred T(v:pred(y:obj)) {true} def pred Test() {T(@1)};", 0)>] // OK: ->pred(y:obj) matches signature pred(obj), whole node would be returned
+    [<DataRow("MS1a","ext U x@/\d+/ -> pred(z:obj) {dec ~a:pred(y:obj); ret a} def pred T(v:pred(y:obj)) {true} def pred Test() {T(@1)};", 0)>] // OK: pred(y:obj) matches signature pred(y:obj) 
+    [<DataRow("MS1b","ext U x@/\d+/ -> pred(z:obj) {dec ~a:pred(y:ind); ret a} def pred T(v:pred(y:obj)) {true} def pred Test() {T(@1)};", 0)>] // OK: only SIG03 instead of SIG04 would be issued: pred(y:obj) does not match value pred(ind) not matching A(obj)
     [<DataRow("MS1c","ext U x@/\d+/ -> pred(z:ind) {dec ~a:pred(y:ind); ret a} def pred T(v:pred(y:obj)) {true} def pred Test() {T(@1)};", 1)>] // SIG04: pred(y:obj) does not match value A(ind) 
     [<DataRow("MS1d","ext U x@/\d+/ -> pred(z:ind) {dec ~a:pred(y:ind); ret a} def pred T(v:pred(y:obj)) {true} def pred Test() {T(@1)};", 1)>] // SIG04: pred(y:obj) does not match signature A(ind)
     [<DataRow("MS1e","ax A {true} ext U x@/\d+/ -> pred(z:obj) {ret A} def pred T(v:pred(y:obj)) {true} def pred Test() {T(@1)};", 1)>] // SIG04: pred(y:obj) does not match signature A (axiom)
@@ -4305,17 +4305,17 @@ type TestInterpreterErrors() =
     [<DataRow("CI1_", "ext U x@/\d+/ -> A {ret A} def pred T(v:obj) {dec v:=@1; true};", 1)>] // A is undefined, error
     [<DataRow("CI2_", "def cl A def cl B:A ext U x@/\d+/ -> A {ret A} def pred T(v:B) {dec v:=@1; true};", 1)>] // A is not B, error
     [<DataRow("CI3_", "def cl A def cl B:A ext U x@/\d+/ -> B {ret B} def pred T(v:B) {dec v:=@1; true};", 0)>] // B() is B
-    [<DataRow("CI4_", "def cl A ext U x@/\d+/ -> A {ret A} def pred T(v:obj) {dec v:=@1; true};", 2)>] // A is obj, but x is class reference, error
-    [<DataRow("CI5_", "def cl A def cl B:A ext U x@/\d+/ -> B {ret B} def pred T(v:B) {dec v:=@1; true};", 2)>] // B is B, but x is class reference, error
-    [<DataRow("CI6_", "def cl A ext U x@/\d+/ -> A {ret A} def pred T(v:A) {dec v:=@1; true};", 2)>] // A is A, but x is class reference, error
-    [<DataRow("CI7_", "def cl A def cl B:A ext U x@/\d+/ -> B {ret B} def pred T(v:A) {dec v:=@1; true};", 2)>] // B is A but x is a class reference, error 
-    [<DataRow("CI8_", "def cl A def cl B:A ext U x@/\d+/ -> B {ret B} def pred T(v:B) {dec v:=@1; true};", 2)>] // x is B, but class reference, error
-    [<DataRow("CI9_", "def cl A def cl B:A ext U x@/\d+/ -> B {ret B} def pred T(v:obj) {dec v:=@1; true};", 2)>] // B is obj but x is class reference, error
+    [<DataRow("CI4_", "def cl A ext U x@/\d+/ -> A {ret A} def pred T(v:obj) {dec v:=@1; true};", 0)>] // A() is obj
+    [<DataRow("CI5_", "def cl A def cl B:A ext U x@/\d+/ -> B {ret B()} def pred T(v:B) {dec v:=@1; true};", 0)>] // B() is B
+    [<DataRow("CI6_", "def cl A ext U x@/\d+/ -> A {ret A()} def pred T(v:A) {dec v:=@1; true};", 0)>] // A() is A
+    [<DataRow("CI7_", "def cl A def cl B:A ext U x@/\d+/ -> B {ret B()} def pred T(v:A) {dec v:=@1; true};", 0)>] // B() is A 
+    [<DataRow("CI8_", "def cl A def cl B:A ext U x@/\d+/ -> B {ret B()} def pred T(v:B) {dec v:=@1; true};", 0)>] // B() ia B
+    [<DataRow("CI9_", "def cl A def cl B:A ext U x@/\d+/ -> B {ret B} def pred T(v:obj) {dec v:=@1; true};", 0)>] // B() is obj 
 
     // match with the type pred(...) 
-    [<DataRow("MS1", "ext U x@/\d+/ -> pred(z:obj) {dec ~a:pred(y:obj); ret a} def pred T(v:pred(y:obj)) {dec v:=@1; true};", 0)>] // OK: ->pred(y:obj) matches signature A(obj), whole node would be returned
-    [<DataRow("MS1a", "ext U x@/\d+/ -> pred(z:obj) {dec ~a:pred(y:obj); ret a} def pred T(v:pred(y:obj)) {dec v:=@1; true};", 1)>] // SIG05: pred(y:obj) does not match value A(obj) 
-    [<DataRow("MS1b", "ext U x@/\d+/ -> pred(z:obj) {dec ~a:pred(y:ind); ret a} def pred T(v:pred(y:obj)) {dec v:=@1; true};", 1)>] // SIG05: pred(y:obj) does not match value A(ind) not matching A(obj)
+    [<DataRow("MS1",  "ext U x@/\d+/ -> pred(z:obj) {dec ~a:pred(y:obj); ret a} def pred T(v:pred(y:obj)) {dec v:=@1; true};", 0)>] // OK: ->pred(y:obj) matches signature pred(obj)
+    [<DataRow("MS1a", "ext U x@/\d+/ -> pred(z:obj) {dec ~a:pred(y:obj); ret a} def pred T(v:pred(y:obj)) {dec v:=@1; true};", 0)>] // OK: pred(y:obj) does matches signature pred(obj) 
+    [<DataRow("MS1b", "ext U x@/\d+/ -> pred(z:obj) {dec ~a:pred(y:ind); ret a} def pred T(v:pred(y:obj)) {dec v:=@1; true};", 0)>] // OK, only SIG03 instead of SIG05 would be issued: pred(y:ind) does not match pred(obj)
     [<DataRow("MS1c", "ext U x@/\d+/ -> pred(z:ind) {dec ~a:pred(y:ind); ret a} def pred T(v:pred(y:obj)) {dec v:=@1; true};", 1)>] // SIG05: pred(y:obj) does not match value A(ind) 
     [<DataRow("MS1d", "ext U x@/\d+/ -> pred(z:ind) {dec ~a:pred(y:ind); ret a} def pred T(v:pred(y:obj)) {dec v:=@1; true};", 1)>] // SIG05: pred(y:obj) does not match signature A(ind)
     [<DataRow("MS1e", "ax A {true} ext U x@/\d+/ -> pred(z:obj) {ret A} def pred T(v:pred(y:obj)) {dec v:=@1; true};", 1)>] // SIG05: pred(y:obj) does not match signature A (axiom)

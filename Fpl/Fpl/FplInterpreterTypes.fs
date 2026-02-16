@@ -4357,8 +4357,8 @@ type FplExtension(positions: Positions, parent: FplValue, runOrder) =
 let private errMsgStandard aName aType pName pType = Some $"`{aName}:{aType}` doesn't match `{pName}:{pType}`"
 let private errMsgMissingArgument pName pType = Some $"Missing argument for `{pName}:{pType}`"
 let private errMsgMissingParameter aName aType = Some $"No matching parameter for `{aName}:{aType}`"
-let private errMsgClassValueNotAllowed actualClassType = 
-        Some $"A class `{actualClassType}` cannot be passed directly as a value. Use a class constructor `{actualClassType}(...)` instead."
+let private errMsgClassValueNotAllowed actualClassType = Some $"A class `{actualClassType}` cannot be passed directly as a value. Use a class constructor `{actualClassType}(...)` instead."
+let private errWrongReturnType qualifiedN aType pType = Some $"The returned value is {qualifiedN} of type `{aType}` which doesn't match the expected type `{pType}`."
 
 let private matchClassInheritance (clOpt:FplValue option) aName aType (pName:string) (pType:string) = 
     let pTypeSimple =
@@ -4536,7 +4536,7 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) =
                 matchTwoTypes refNode p // match signatures with parameters
             | Some refNode ->
                 // a node was referenced but is not a predicate
-                Some $"The return type of {qualifiedName refNode true} doesn't match `{pType}`.", Parameter.Consumed
+                errWrongReturnType (qualifiedName refNode false) (refNode.Type SignatureType.Type) (p.Type SignatureType.Mixed), Parameter.Consumed
             | _ ->
                 // in all other cases, 
                 errMsgStandard aName aType pName pType, Parameter.Consumed
@@ -4563,7 +4563,7 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) =
                 matchTwoTypes refNode p // match signatures with parameters
             | Some refNode ->
                 // a node was referenced not a predicate node
-                Some $"The return type of {qualifiedName refNode true} doesn't match mapping type `{pType}`.", Parameter.Consumed
+                errWrongReturnType (qualifiedName refNode false) (refNode.Type SignatureType.Type) (p.Type SignatureType.Mixed), Parameter.Consumed
             | _ ->
                 // in all other cases, error
                 errMsgStandard aName aType pName pType, Parameter.Consumed
@@ -4580,7 +4580,7 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) =
                 matchTwoTypes refNode p // match signatures with parameters
             | Some refNode ->
                 // a node was referenced but is not a functional term block
-                Some $"The return type of {qualifiedName refNode true} does not match mapping type `{pType}`.", Parameter.Consumed
+                errWrongReturnType (qualifiedName refNode false) (refNode.Type SignatureType.Type) (p.Type SignatureType.Mixed), Parameter.Consumed
             | _ ->
                 // in all other cases, error
                 errMsgStandard aName aType pName pType, Parameter.Consumed
@@ -4599,10 +4599,10 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) =
                 matchTwoTypes refNode p // match signatures with parameters
             | Some refNode ->
                 // a node was referenced but is not a functional term block
-                Some $"The return type of {qualifiedName refNode true} does not match expected mapping type `{pType}`.", Parameter.Consumed
+                errWrongReturnType (qualifiedName refNode false) (refNode.Type SignatureType.Type) (p.Type SignatureType.Mixed), Parameter.Consumed
             | _ ->
                 // in all other cases, error
-                Some $"Return type of `{aName}:{aType}` does not match expected mapping type `{pType}`.", Parameter.Consumed
+                errWrongReturnType (qualifiedName a true) aType pType, Parameter.Consumed
         elif aIsCallByReference && pTypeName = PrimMappingL then 
             let map = p :?> FplMapping
             match map.RefersTo, refNodeOpt with
