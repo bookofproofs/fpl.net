@@ -4580,6 +4580,8 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) =
                 matchTwoTypes refNode p // match signatures with parameters
             | Some refNode when refNode.Name = PrimVariableL && refNode.TypeId = LiteralFunc ->
                 matchTwoTypes refNode p // match signatures with parameters
+            | Some refNode when refNode.Name = PrimExtensionObj ->
+                matchTwoTypes refNode p // match signatures with parameters
             | Some refNode ->
                 // a node was referenced but is not a functional term block
                 errWrongReturnType (qualifiedName refNode false) (refNode.Type SignatureType.Type) (p.Type SignatureType.Mixed), Parameter.Consumed
