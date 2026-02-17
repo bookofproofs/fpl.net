@@ -3106,7 +3106,7 @@ and FplProof(positions: Positions, parent: FplValue, runOrder) =
         | ScopeSearchResult.FoundIncorrectBlock incorrectBlock ->
             this.ErrorOccurred <- emitID002Diagnostics this.FplId incorrectBlock this.StartPos this.EndPos
         | ScopeSearchResult.NotFound ->
-            this.ErrorOccurred <- emitID003diagnostics this.FplId this.StartPos this.EndPos
+            this.ErrorOccurred <- emitID003diagnostics this.FplId this.SignStartPos this.SignEndPos
         | _ -> ()
         tryAddToParentUsingFplId this
 
@@ -4551,6 +4551,8 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) =
                 None, Parameter.Consumed // pred accepting predicate nodes
             | Some refNode when refNode.Name = PrimMandatoryPredicateL ->
                 None, Parameter.Consumed // pred accepting predicate properties
+            | Some refNode when refNode.Name = LiteralPrfL ->
+                None, Parameter.Consumed // pred accepting proofs
             | Some refNode when refNode.Name = LiteralAxL ->
                 None, Parameter.Consumed // pred accepting axioms
             | Some (:? FplGenericTheoremLikeStmt as refNode) ->
