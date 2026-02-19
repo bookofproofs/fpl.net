@@ -4896,7 +4896,7 @@ type SymbolTableStructure() =
     // references to blocks
     [<DataRow("FplReference", "01a", """ax T {dec ~x,y:obj; A(x,y) };""", "A(x, y)")>]
     [<DataRow("FplReference", "01b", """def pred A(x,y:obj) {intr} ax T {dec ~x,y:obj; A(x,y) };""", "A(x, y)")>]
-    [<DataRow("FplReference", "01c", """def func A(x,y:obj)->obj {intr} ax T {dec ~x,y:obj; A(x,y) };""", "A(x, y) -> obj")>]
+    [<DataRow("FplReference", "01c", """def func A(x,y:obj)->obj {intr} ax T {dec ~x,y:obj; A(x,y) };""", "A(x, y)")>]
     [<DataRow("FplReference", "01d", """ax T { A };""", "A")>]
     [<DataRow("FplReference", "01e", """def cl A {intr} ax T { A };""", "A")>]
     [<DataRow("FplReference", "01f", """inf A {pre:true con:true} ax T { A };""", "A")>]

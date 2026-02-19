@@ -1981,9 +1981,9 @@ type TestInterpreterErrors() =
     
     // match with the type func()->...
     [<DataRow("MS3_", "def func A()->ind def func Test()->func()->ind {return A};", 0)>] // OK: ->func()->ind matches signature A()->ind, whole node would be returned
-    [<DataRow("MS3a_", "def func A()->ind def func Test()->func()->ind {dec ~x:obj; return A(x)};", 1)>] // SIG03: ->func()->ind does not match value A(obj) 
-    [<DataRow("MS3b_", "def func A()->ind def func Test()->func()->ind {dec ~x:ind; return A(x)};", 1)>] // SIG03: ->func()->ind does not match value A(ind) not matching A(obj)
-    [<DataRow("MS3c_", "def func A()->ind def func Test()->func()->ind {dec ~x:ind; return A(x)};", 1)>] // SIG03: ->func()->ind does not match value A(ind) 
+    [<DataRow("MS3a_", "def func A()->ind def func Test()->func()->ind {dec ~h:obj; return A(h)};", 1)>] // SIG03: ->func()->ind does not match value A(obj) 
+    [<DataRow("MS3b_", "def func A()->ind def func Test()->func()->ind {return A()};", 1)>] // SIG03: ->func()->ind does not match value A(ind) not matching A(obj)
+    [<DataRow("MS3c_", "def func A()->ind def func Test()->func()->ind {dec ~h:ind; return A(h)};", 1)>] // SIG03: ->func()->ind does not match value A(ind) 
     [<DataRow("MS3d_", "def func A(z:ind)->ind def func Test()->func()->ind {return A};", 1)>] // SIG03: ->func()->ind does not match signature A(ind)->ind
     [<DataRow("MS3e_", "ax A {true} def func Test()->func()->ind {return A};", 1)>] // SIG03: ->func()->ind does not match signature A (axiom)
     [<DataRow("MS3f_", "thm A {true} def func Test()->func()->ind {return A};", 1)>] // SIG03: ->func()->ind does not match signature A (theorem)
@@ -2455,9 +2455,9 @@ type TestInterpreterErrors() =
     
     // match with the type func()->...
     [<DataRow("MS3_", "def func A()->ind ext Test x@/\d+/->func()->ind {return A};", 0)>] // OK: ->func()->ind matches signature A()->ind, whole node would be returned
-    [<DataRow("MS3a_", "def func A()->ind ext Test x@/\d+/->func()->ind {dec ~x:obj; return A(x)};", 1)>] // SIG03: ->func()->ind does not match value A(obj) 
-    [<DataRow("MS3b_", "def func A()->ind ext Test x@/\d+/->func()->ind {dec ~x:ind; return A(x)};", 1)>] // SIG03: ->func()->ind does not match value A(ind) not matching A(obj)
-    [<DataRow("MS3c_", "def func A()->ind ext Test x@/\d+/->func()->ind {dec ~x:ind; return A(x)};", 1)>] // SIG03: ->func()->ind does not match value A(ind) 
+    [<DataRow("MS3a_", "def func A()->ind ext Test x@/\d+/->func()->ind {dec ~h:obj; return A(h)};", 1)>] // SIG03: ->func()->ind does not match value A(obj) 
+    [<DataRow("MS3b_", "def func A()->ind ext Test x@/\d+/->func()->ind {return A()};", 1)>] // SIG03: ->func()->ind does not match value A(ind) not matching A(obj)
+    [<DataRow("MS3c_", "def func A()->ind ext Test x@/\d+/->func()->ind {dec ~h:ind; return A(h)};", 1)>] // SIG03: ->func()->ind does not match value A(ind) 
     [<DataRow("MS3d_", "def func A(z:ind)->ind ext Test x@/\d+/->func()->ind {return A};", 1)>] // SIG03: ->func()->ind does not match signature A(ind)->ind
     [<DataRow("MS3e_", "ax A {true} ext Test x@/\d+/->func()->ind {return A};", 1)>] // SIG03: ->func()->ind does not match signature A (axiom)
     [<DataRow("MS3f_", "thm A {true} ext Test x@/\d+/->func()->ind {return A};", 1)>] // SIG03: ->func()->ind does not match signature A (theorem)
@@ -3037,9 +3037,9 @@ type TestInterpreterErrors() =
     
     // match with the type func()->...
     [<DataRow("MS3_", "def func A()->ind def pred Test(v:func()->ind) def pred T() {Test(A)};", 0)>] // OK: ->func()->ind matches signature A()->ind, whole node would be returned
-    [<DataRow("MS3a_", "def func A()->ind def pred Test(v:func()->ind) def pred T() {dec ~x:obj; Test(A(x))};", 2)>] // SIG04: func()->ind does not match value A(obj) not matching A()
-    [<DataRow("MS3b_", "def func A()->ind def pred Test(v:func()->ind) def pred T() {dec ~x:obj; Test(A(x))};", 2)>] // SIG04: func()->ind does not match value A(ind) not matching A()
-    [<DataRow("MS3c_", "def func A()->ind def pred Test(v:func()->ind) def pred T() {dec ~x:obj; Test(A(x))};", 2)>] // SIG04: func()->ind does not match value A(ind) not matching A()
+    [<DataRow("MS3a_", "def func A()->ind def pred Test(v:func()->ind) def pred T() {dec ~h:obj; Test(A(h))};", 2)>] // SIG04: func()->ind does not match value A(obj) not matching A()
+    [<DataRow("MS3b_", "def func A()->ind def pred Test(v:func()->ind) def pred T() {Test(A())};", 1)>] // SIG04: func()->ind does not match value A(ind) not matching A()
+    [<DataRow("MS3c_", "def func A()->ind def pred Test(v:func()->ind) def pred T() {dec ~h:ind; Test(A(h))};", 2)>] // SIG04: func()->ind does not match value A(ind) not matching A()
     [<DataRow("MS3d_", "def func A(z:ind)->ind def pred Test(v:func()->ind) def pred T() {Test(A)};", 1)>] // SIG04: func()->ind does not match signature A(ind)->ind
     [<DataRow("MS3e_", "ax A {true} def pred Test(v:func()->ind) def pred T() {Test(A)};", 1)>] // SIG04: func()->ind does not match signature A (axiom)
     [<DataRow("MS3f_", "thm A {true} def pred Test(v:func()->ind) def pred T() {Test(A)};", 1)>] // SIG04: func()->ind does not match signature A (theorem)
@@ -3501,9 +3501,9 @@ type TestInterpreterErrors() =
     
     // match with the type func()->...
     [<DataRow("MS3_","def func A()->ind ext U x@/\d+/ -> func()->ind {ret A} def pred T(v:func()->ind) {true} def pred Test() {T(@1)};", 0)>] // OK: ->func()->ind matches signature A()->ind, whole node would be returned
-    [<DataRow("MS3a_","def func A()->ind ext U x@/\d+/ -> func()->ind {ret A()} def pred T(v:func()->ind) {true} def pred Test() {T(@1)};", 1)>] // SIG04: func()->ind does not match value A(obj) 
+    [<DataRow("MS3a_","def func A()->ind ext U x@/\d+/ -> func()->ind {dec ~h:obj; ret A(h)} def pred T(v:func()->ind) {true} def pred Test() {T(@1)};", 1)>] // SIG04: func()->ind does not match value A(obj) 
     [<DataRow("MS3b_","def func A()->ind ext U x@/\d+/ -> func()->ind {ret A()} def pred T(v:func()->ind) {true} def pred Test() {T(@1)};", 1)>] // SIG04: func()->ind does not match value A(ind) not matching A(obj)
-    [<DataRow("MS3c_","def func A()->ind ext U x@/\d+/ -> func()->ind {ret A()} def pred T(v:func()->ind) {true} def pred Test() {T(@1)};", 1)>] // SIG04: func()->ind does not match value A(ind) 
+    [<DataRow("MS3c_","def func A()->ind ext U x@/\d+/ -> func()->ind {dec ~h:ind; ret A(h)} def pred T(v:func()->ind) {true} def pred Test() {T(@1)};", 1)>] // SIG04: func()->ind does not match value A(ind) 
     [<DataRow("MS3d_","def func A(z:ind)->ind ext U x@/\d+/ -> func(h:ind)->ind {ret A} def pred T(v:func()->ind) {true} def pred Test() {T(@1)};", 1)>] // SIG04: func()->ind does not match signature A(ind)->ind
     [<DataRow("MS3e_","ax A {true} ext U x@/\d+/ -> pred {ret A} def pred T(v:func()->ind) {true} def pred Test() {T(@1)};", 1)>] // SIG04: func()->ind does not match signature A (axiom)
     [<DataRow("MS3f_","thm A {true} ext U x@/\d+/ -> pred {ret A} def pred T(v:func()->ind) {true} def pred Test() {T(@1)};", 1)>] // SIG04: func()->ind does not match signature A (theorem)
@@ -4061,8 +4061,8 @@ type TestInterpreterErrors() =
     // match with the type func()->...
     [<DataRow("MS3_", "def func A()->ind def pred T(v:func()->ind) {dec v:=A; true};", 0)>] // OK: ->func()->ind matches signature A()->ind, whole node would be returned
     [<DataRow("MS3a_", "def func A()->ind def pred T(v:func()->ind) {dec ~x:obj v:=A(x); true};", 1)>] // SIG05: func()->ind does not match value A(obj) 
-    [<DataRow("MS3b_", "def func A()->ind def pred T(v:func()->ind) {dec ~x:obj v:=A(x); true};", 1)>] // SIG05: func()->ind does not match value A(ind) not matching A(obj)
-    [<DataRow("MS3c_", "def func A()->ind def pred T(v:func()->ind) {dec ~x:obj v:=A(x); true};", 1)>] // SIG05: func()->ind does not match value A(ind) 
+    [<DataRow("MS3b_", "def func A()->ind def pred T(v:func()->ind) {v:=A(); true};", 1)>] // SIG05: func()->ind does not match value A(ind) not matching A(obj)
+    [<DataRow("MS3c_", "def func A()->ind def pred T(v:func()->ind) {dec ~x:ind v:=A(x); true};", 1)>] // SIG05: func()->ind does not match value A(ind) 
     [<DataRow("MS3d_", "def func A(z:ind)->ind def pred T(v:func()->ind) {dec v:=A; true};", 1)>] // SIG05: func()->ind does not match signature A(ind)->ind
     [<DataRow("MS3e_", "ax A {true} def pred T(v:func()->ind) {dec v:=A; true};", 1)>] // SIG05: func()->ind does not match signature A (axiom)
     [<DataRow("MS3f_", "thm A {true} def pred T(v:func()->ind) {dec v:=A; true};", 1)>] // SIG05: func()->ind does not match signature A (theorem)
@@ -4525,9 +4525,9 @@ type TestInterpreterErrors() =
     
     // match with the type func()->...
     [<DataRow("MS3_", "def func A()->ind ext U x@/\d+/ -> func()->ind {ret A} def pred T(v:func()->ind) {dec v:=@1; true};", 0)>] // OK: ->func()->ind matches signature A()->ind, whole node would be returned
-    [<DataRow("MS3a_", "def func A()->ind ext U x@/\d+/ -> func()->ind {ret A()} def pred T(v:func()->ind) {dec v:=@1; true};", 1)>] // SIG05: func()->ind does not match value A(obj) 
+    [<DataRow("MS3a_", "def func A()->ind ext U x@/\d+/ -> func()->ind {dec ~h:obj; ret A(h)} def pred T(v:func()->ind) {dec v:=@1; true};", 0)>] // OK, SIG03 / SIG04 would be issued instead of SIG05: func()->ind does not match value A(obj) 
     [<DataRow("MS3b_", "def func A()->ind ext U x@/\d+/ -> func()->ind {ret A()} def pred T(v:func()->ind) {dec v:=@1; true};", 1)>] // SIG05: func()->ind does not match value A(ind) not matching A(obj)
-    [<DataRow("MS3c_", "def func A()->ind ext U x@/\d+/ -> func()->ind {ret A()} def pred T(v:func()->ind) {dec v:=@1; true};", 1)>] // SIG05: func()->ind does not match value A(ind) 
+    [<DataRow("MS3c_", "def func A()->ind ext U x@/\d+/ -> func()->ind {dec ~h:ind; ret A(h)} def pred T(v:func()->ind) {dec v:=@1; true};", 1)>] // SIG05: func()->ind does not match value A(ind) 
     [<DataRow("MS3d_", "def func A(z:ind)->ind ext U x@/\d+/ -> func(h:ind)->ind {ret A} def pred T(v:func()->ind) {dec v:=@1; true};", 1)>] // SIG05: func()->ind does not match signature A(ind)->ind
     [<DataRow("MS3e_", "ax A {true} ext U x@/\d+/ -> pred {ret A} def pred T(v:func()->ind) {dec v:=@1; true};", 1)>] // SIG05: func()->ind does not match signature A (axiom)
     [<DataRow("MS3f_", "thm A {true} ext U x@/\d+/ -> pred {ret A} def pred T(v:func()->ind) {dec v:=@1; true};", 1)>] // SIG05: func()->ind does not match signature A (theorem)

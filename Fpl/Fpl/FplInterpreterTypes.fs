@@ -3570,7 +3570,7 @@ type FplReference(positions: Positions, parent: FplValue) =
                 | PrimMandatoryFunctionalTermL when signatureType = SignatureType.Type -> 
                     varMapping.Type propagate
                 | _ -> 
-                    $"{head}({args}) -> {varMapping.Type propagate}"
+                    $"{head}({args})"
             | None when signatureType = SignatureType.Type ->
                 head
             | _ ->

@@ -552,7 +552,7 @@ type TestExpressionEvaluation() =
     [<DataRow("MS2h", "prop A {true} def pred Test() {is(A, pred)};", LiteralTrue)>] // true: pred matches signature A (proposition)
     [<DataRow("MS2i", "conj A {true} def pred Test() {is(A, pred)};", LiteralTrue)>] // true: pred matches signature A (conjecture)
     [<DataRow("MS2j", "cor A$1 {true} def pred Test() {is(A$1, pred)};", LiteralTrue)>] // true: pred matches signature A$1 (corollary)
-    [<DataRow("MS2k", "proof A$1 {1. |- trivial} def pred Test() {is(A$1, pred)};", LiteralFalse)>] // false: pred does not match signature A$1 (proof)
+    [<DataRow("MS2k", "proof A$1 {1. |- trivial} def pred Test() {is(A$1, pred)};", LiteralTrue)>] // true: pred matches signature A$1 (proof)
     [<DataRow("MS2l", "inf A {pre:true con:true} def pred Test() {is(A, pred)};", LiteralFalse)>] // false: pred does not match signature A (rule of inference)
     [<DataRow("MS2m", "def func A()->obj def pred Test() {is(A, pred)};", LiteralFalse)>] // false: pred does not match signature A (functional term)
     [<DataRow("MS2n", "ext A x@/\d+/ -> obj {dec ~y:obj; return y} def pred Test() {is(A, pred)};", LiteralFalse)>] // false: pred does not match signature A (extension)
