@@ -692,10 +692,7 @@ let rec eval (st: SymbolTable) ast =
         | Some (ast2, _) -> eval st ast2 |> ignore
         | _ -> ()
         match astTupleOption with 
-        | Some (_, ast3) -> 
-            let fv = variableStack.PeekEvalStack()
-            fv.EndPos <- pos2
-            eval st ast3 |> ignore
+        | Some (_, ast3) -> eval st ast3 |> ignore
         | _ -> ()
     | Ast.AliasedNamespaceIdentifier((pos1, pos2), (ast1, optAst)) ->
         eval st ast1
