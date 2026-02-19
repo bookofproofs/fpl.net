@@ -4354,14 +4354,54 @@ type FplExtension(positions: Positions, parent: FplValue, runOrder) =
 
     override this.RunOrder = Some _runOrder
 
-let private errMsgStandard aName aType pName pType = Some $"`{aName}:{aType}` doesn't match `{pName}:{pType}`"
-let private errMsgMissingArgument pName pType = Some $"Missing argument for `{pName}:{pType}`"
-let private errMsgMissingParameter aName aType = Some $"No matching parameter for `{aName}:{aType}`"
-let private errMsgClassValueNotAllowed actualClassType = Some $"A class `{actualClassType}` cannot be passed directly as a value. Use a class constructor `{actualClassType}(...)` instead."
-let private errWrongReturnType aName aType pType = Some $"The returned value `{aName}` is of type `{aType}` which doesn't match the expected type `{pType}`."
-let private errWrongReturnTypeUndetermined aName pType = Some $"The type of the returned value `{aName}` could not be determined. The the expected type is `{pType}`."
+let private refTypeName aName =
+    if isUpper aName then 
+        "pointer"
+    else 
+        "variable"
+let private errMsgStandard aIsCallByReference aName aType pName pType = 
+    if aIsCallByReference then 
+        Some $"The {refTypeName aName} `{aName}` typed `{aType}` doesn't match the parameter `{pName}` typed `{pType}`"
+    else
+        Some $"The value `{aName}` has the type `{aType}` doesn't match the parameter `{pName}` typed `{pType}`"
+let private errArrayType aIsCallByReference aName aType pName pType = 
+    if aIsCallByReference then 
+        Some $"The {refTypeName aName} `{aName}` refers to the array type `{aType}` doesn't match the parameter `{pName}` typed `{pType}`"
+    else
+        Some $"The value `{aName}` has the array type `{aType}` doesn't match the parameter `{pName}` typed `{pType}`"
 
-let private matchClassInheritance (clOpt:FplValue option) aName aType (pName:string) (pType:string) = 
+let private errMsgMissingArgument pName pType = Some $"Missing argument for the parameter `{pName}` typed `{pType}`"
+let private errMsgMissingParameter aName aType = Some $"No matching parameter for the argument `{aName}` typed `{aType}`"
+let private errMsgClassValueNotAllowed actualClassType = Some $"A class `{actualClassType}` cannot be passed directly as a value. Use a class constructor `{actualClassType}(...)` instead"
+let private errWrongReturnType aIsCallByReference aName aType pType = 
+    if aIsCallByReference then 
+        Some $"The returned {refTypeName aName} `{aName}` typed `{aType}` doesn't match the type `{pType}` this function maps to."
+    else 
+        Some $"The returned value `{aName}` typed `{aType}` doesn't match the type `{pType}` this function maps to."
+let private errWrongReturnTypeUndetermined aIsCallByReference aName pType = 
+    if aIsCallByReference then 
+        Some $"The type of the returned {refTypeName aName} `{aName}` could not be determined. It has to match the type `{pType}` this function maps to."
+    else
+        Some $"The type of the returned value `{aName}` could not be determined. It has to match the type `{pType}` this function maps to."
+let private errWrongClassInheritance aIsCallByReference aName aType pName pType = 
+    if aIsCallByReference then 
+        Some $"The {refTypeName aName} `{aName}` to the class `{aType}` neither matches the parameter `{pName}` typed `{pType}` nor the base classes of this type."
+    else
+        Some $"The value `{aName}` instantiating the class `{aType}` neither matches the parameter `{pName}` typed `{pType}` nor the base classes of this type."
+let private errClassInheritanceUndetermined aIsCallByReference aName aType pName pType = 
+    if aIsCallByReference then 
+        Some $"The type `{aType}` of the {refTypeName aName} `{aName}` could not be determined. The parameter `{pName}` requires the type `{pType}` or some derived class"
+    else
+        Some $"The type `{aType}` of the value `{aName}` could not be determined. The parameter `{pName}` requires the type `{pType}` or some derived class"
+let private errUndefined aIsCallByReference aName pName pType = 
+    if aIsCallByReference then 
+        Some $"The type of the {refTypeName aName} `{aName}` could not be determined. The parameter `{pName}` requires the type `{pType}"
+    else
+        Some $"The type of value `{aName}` could not be determined. The parameter `{pName}` requires the type `{pType}"
+let private errVariadic aName aType pName pType pTypeId = 
+    Some $"Variadic enumeration of `{aName}` typed `{aType}` doesn't match the parameter `{pName}` typed `{pType}`, try `{aName}:{pType}` as argument or use `{pName}:{pTypeId}[{LiteralInd}]` as parameter type"
+
+let private matchClassInheritance aIsCallByReference (clOpt:FplValue option) aName aType (pName:string) (pType:string) = 
     let pTypeSimple =
         if pType.StartsWith("*") then 
             let ret = pType.Substring(1).Split("[")
@@ -4373,12 +4413,12 @@ let private matchClassInheritance (clOpt:FplValue option) aName aType (pName:str
         if inheritsFrom cl pTypeSimple then 
             None
         else
-            Some $"`{aName}:{aType}` neither matches `{pName}:{pType}` nor the base classes"
+            errWrongClassInheritance aIsCallByReference aName aType pName pType
     | _ -> 
-        Some($"{LiteralUndefL} `{aName}:{aType}` doesn't match `{pName}:{pType}`")
+        errClassInheritanceUndetermined aIsCallByReference aName aType pName pType
 
 
-let private matchByTypeStringRepresentation (a:FplValue) aName (aType:string) aTypeName (p:FplValue) pName (pType:string) pTypeName = 
+let private matchByTypeStringRepresentation aIsCallByReference (a:FplValue) aName (aType:string) aTypeName (p:FplValue) pName (pType:string) pTypeName = 
 
     if aType = pType then
         None, Parameter.Consumed
@@ -4396,38 +4436,38 @@ let private matchByTypeStringRepresentation (a:FplValue) aName (aType:string) aT
         // array parameters with indexes that differ from the FPL-inbuilt index type  
         // or with multidimensional index types will not accept variadic enumerations of arguments
         // even if they have the same type used for the values of the array
-        Some $"variadic enumeration of `{aName}:{aType}` doesn't match `{pName}:{pType}`, try `{aName}:{pType}` as argument or use parameter `{pName}:{p.TypeId}[{LiteralInd}]`", Parameter.Consumed
+        errVariadic aName aType pName pType p.TypeId, Parameter.Consumed
     elif aType.StartsWith($"*{pType}[") && aTypeName = PrimRefL then
         let refA = a :?> FplReference
         if refA.ArgType = ArgType.Brackets then 
             // some array elements matching parameter type
             None, Parameter.Consumed
         else
-            Some $"Array type `{aName}:{aType}` doesn't match `{pName}:{pType}`", Parameter.Consumed
+            errArrayType aIsCallByReference aName aType pName pType, Parameter.Consumed
     elif isUpper aType && aTypeName = PrimRefL && a.RefersTo.IsSome then
         let aReferencedNode = a.RefersTo.Value
         if aReferencedNode.RefersTo.IsSome then
             let aRef = aReferencedNode.RefersTo.Value
             match aRef with
             | :? FplClass ->
-                matchClassInheritance (Some aRef) aName aType pName pType, Parameter.Consumed 
+                matchClassInheritance aIsCallByReference (Some aRef) aName aType pName pType, Parameter.Consumed 
             | :? FplExtension as extension ->
                 let map = extension.Mapping 
-                matchClassInheritance map.RefersTo aName aType pName pType, Parameter.Consumed  
+                matchClassInheritance aIsCallByReference map.RefersTo aName aType pName pType, Parameter.Consumed  
             | _ ->
-                // this case does not occur but we cover it for completeness reasons
-                Some $"undefined `{aName}:{aType}` doesn't match `{pName}:{pType}`", Parameter.Consumed
+                // this case does should not occur but we cover it as a fallback case
+                errUndefined aIsCallByReference aName pName pType, Parameter.Consumed
         elif aReferencedNode.Name = PrimDefaultConstructor || aReferencedNode.Name = LiteralCtorL then 
             let ctor = aReferencedNode :?> FplGenericConstructor
-            matchClassInheritance ctor.ToBeConstructedClass aName aType pName pType, Parameter.Consumed
+            matchClassInheritance aIsCallByReference ctor.ToBeConstructedClass aName aType pName pType, Parameter.Consumed
         elif aReferencedNode.Name = PrimFunctionalTermL || aReferencedNode.Name = PrimMandatoryFunctionalTermL then 
             let mapOpt = getMapping aReferencedNode
             let map = mapOpt.Value :?> FplMapping 
-            matchClassInheritance map.RefersTo aName aType pName pType, Parameter.Consumed
+            matchClassInheritance aIsCallByReference map.RefersTo aName aType pName pType, Parameter.Consumed
         elif aReferencedNode.Name = PrimVariableL then 
-            matchClassInheritance aReferencedNode.RefersTo aName aType pName pType, Parameter.Consumed
+            matchClassInheritance aIsCallByReference aReferencedNode.RefersTo aName aType pName pType, Parameter.Consumed
         else
-            Some $"undefined `{aName}:{aType}` doesn't match `{pName}:{pType}`", Parameter.Consumed
+            errUndefined aIsCallByReference aName pName pType, Parameter.Consumed
     elif aType.StartsWith(pType + "(") then
         None, Parameter.Consumed
     elif aType.StartsWith(LiteralPred) && pType = LiteralPred then
@@ -4437,25 +4477,25 @@ let private matchByTypeStringRepresentation (a:FplValue) aName (aType:string) aT
     elif aTypeName = PrimVariableL then
         let clOpt = a.Scope.Values |> Seq.tryHead
         match clOpt with 
-        | Some (:? FplClass) -> matchClassInheritance clOpt aName aType pName pType, Parameter.Consumed
-        | _ -> errMsgStandard aName aType pName pType, Parameter.Consumed
+        | Some (:? FplClass) -> matchClassInheritance aIsCallByReference clOpt aName aType pName pType, Parameter.Consumed
+        | _ -> errMsgStandard aIsCallByReference aName aType pName pType, Parameter.Consumed
     elif aTypeName = PrimDefaultConstructor || aTypeName = LiteralCtorL then
         let ctor = a :?> FplGenericConstructor
-        matchClassInheritance ctor.ToBeConstructedClass aName aType pName pType, Parameter.Consumed
+        matchClassInheritance aIsCallByReference ctor.ToBeConstructedClass aName aType pName pType, Parameter.Consumed
     elif pTypeName = PrimFunctionalTermL || pTypeName = PrimMandatoryFunctionalTermL then
         let mappingOpt = getMapping p 
         match mappingOpt with 
         | Some mapping ->
             let newTypeAssignedValue = mapping.Type SignatureType.Type
             if aType <> newTypeAssignedValue then 
-                errMsgStandard aName aType pName pType, Parameter.Consumed
+                errMsgStandard aIsCallByReference aName aType pName pType, Parameter.Consumed
             else 
                 None, Parameter.Consumed
         | None -> None, Parameter.Consumed
     elif a.Parent.IsSome && a.Parent.Value.Name = PrimReturn && a.RefersTo.IsNone then 
-        errWrongReturnTypeUndetermined aName pType, Parameter.Consumed
+        errWrongReturnTypeUndetermined aIsCallByReference aName pType, Parameter.Consumed
     else
-        errMsgStandard aName aType pName pType, Parameter.Consumed
+        errMsgStandard aIsCallByReference aName aType pName pType, Parameter.Consumed
 
 let private isPredWithParentheses (fv:FplValue) =
     match fv.ArgType with 
@@ -4539,10 +4579,10 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) =
                 matchTwoTypes refNode p // match signatures with parameters
             | Some refNode ->
                 // a node was referenced but is not a predicate
-                errWrongReturnType aName (refNode.Type SignatureType.Type) (p.Type SignatureType.Mixed), Parameter.Consumed
+                errWrongReturnType aIsCallByReference aName (refNode.Type SignatureType.Type) (p.Type SignatureType.Mixed), Parameter.Consumed
             | _ ->
                 // in all other cases, 
-                errMsgStandard aName aType pName pType, Parameter.Consumed
+                errMsgStandard aIsCallByReference aName aType pName pType, Parameter.Consumed
         elif aIsCallByReference && isPredWithoutParentheses p then
             // match a not-by-value-reference with pred mapping without parameters
             match refNodeOpt with 
@@ -4568,10 +4608,10 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) =
                 matchTwoTypes refNode p // match signatures with parameters
             | Some refNode ->
                 // a node was referenced not a predicate node
-                errWrongReturnType aName (refNode.Type SignatureType.Type) (p.Type SignatureType.Mixed), Parameter.Consumed
+                errWrongReturnType aIsCallByReference aName (refNode.Type SignatureType.Type) (p.Type SignatureType.Mixed), Parameter.Consumed
             | _ ->
                 // in all other cases, error
-                errMsgStandard aName aType pName pType, Parameter.Consumed
+                errMsgStandard aIsCallByReference aName aType pName pType, Parameter.Consumed
         elif aIsCallByReference && isFuncWithParentheses p then
             // match a not-by-value-reference with func mapping with parameters
             match refNodeOpt with 
@@ -4587,10 +4627,10 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) =
                 matchTwoTypes refNode p // match signatures with parameters
             | Some refNode ->
                 // a node was referenced but is not a functional term block
-                errWrongReturnType aName (refNode.Type SignatureType.Type) (p.Type SignatureType.Mixed), Parameter.Consumed
+                errWrongReturnType aIsCallByReference aName (refNode.Type SignatureType.Type) (p.Type SignatureType.Mixed), Parameter.Consumed
             | _ ->
                 // in all other cases, error
-                errMsgStandard aName aType pName pType, Parameter.Consumed
+                errMsgStandard aIsCallByReference aName aType pName pType, Parameter.Consumed
         elif aIsCallByReference && isFuncWithoutParentheses p then 
             // match a not-by-value-reference with func mapping with parameters
             match refNodeOpt with 
@@ -4606,10 +4646,10 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) =
                 matchTwoTypes refNode p // match signatures with parameters
             | Some refNode ->
                 // a node was referenced but is not a functional term block
-                errWrongReturnType aName (refNode.Type SignatureType.Type) (p.Type SignatureType.Mixed), Parameter.Consumed
+                errWrongReturnType aIsCallByReference aName (refNode.Type SignatureType.Type) (p.Type SignatureType.Mixed), Parameter.Consumed
             | _ ->
                 // in all other cases, error
-                errWrongReturnType aName aType pType, Parameter.Consumed
+                errWrongReturnType aIsCallByReference aName aType pType, Parameter.Consumed
         elif aIsCallByReference && pTypeName = PrimMappingL then 
             let map = p :?> FplMapping
             match map.RefersTo, refNodeOpt with
@@ -4631,7 +4671,7 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) =
                 | Some (:? FplClass as cl) -> None, Parameter.Consumed // obj accepting instance
                 | _ when refNode.TypeId = LiteralObj && aType = pType -> None, Parameter.Consumed // obj accepting obj variable
                 | _ when pType = LiteralObj && refNode.TypeId.StartsWith($"{pType}:") -> None, Parameter.Consumed // obj accepting obj:<some regex> (relevant for FplExtension and FplExtensionObj only)
-                | _ -> errMsgStandard aName aType pName pType, Parameter.Consumed
+                | _ -> errMsgStandard aIsCallByReference aName aType pName pType, Parameter.Consumed
             | None, Some refNode when refNode.Name = PrimIntrinsicUndef -> 
                 None, Parameter.Consumed // anything accepting undef
             | None, Some refNode -> 
@@ -4643,11 +4683,11 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) =
             | None, None when aType = pType -> 
                 None, Parameter.Consumed // obj accepting obj, ind accepting ind, pred accepting pred, func accepting func
             | _, _ -> 
-                errMsgStandard aName aType pName pType, Parameter.Consumed
+                errMsgStandard aIsCallByReference aName aType pName pType, Parameter.Consumed
         else 
-            matchByTypeStringRepresentation a aName aType aTypeName p pName pType pTypeName
+            matchByTypeStringRepresentation aIsCallByReference a aName aType aTypeName p pName pType pTypeName
     | _ ,_ -> 
-        matchByTypeStringRepresentation a aName aType aTypeName p pName pType pTypeName
+        matchByTypeStringRepresentation true a aName aType aTypeName p pName pType pTypeName
 
 
 /// Tries to match a list of arguments with a list of parameters by their type recursively.
