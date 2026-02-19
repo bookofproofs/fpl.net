@@ -4358,7 +4358,8 @@ let private errMsgStandard aName aType pName pType = Some $"`{aName}:{aType}` do
 let private errMsgMissingArgument pName pType = Some $"Missing argument for `{pName}:{pType}`"
 let private errMsgMissingParameter aName aType = Some $"No matching parameter for `{aName}:{aType}`"
 let private errMsgClassValueNotAllowed actualClassType = Some $"A class `{actualClassType}` cannot be passed directly as a value. Use a class constructor `{actualClassType}(...)` instead."
-let private errWrongReturnType qualifiedN aType pType = Some $"The returned value is {qualifiedN} of type `{aType}` which doesn't match the expected type `{pType}`."
+let private errWrongReturnType aName aType pType = Some $"The returned value `{aName}` is of type `{aType}` which doesn't match the expected type `{pType}`."
+let private errWrongReturnTypeUndetermined aName pType = Some $"The type of the returned value `{aName}` could not be determined. The the expected type is `{pType}`."
 
 let private matchClassInheritance (clOpt:FplValue option) aName aType (pName:string) (pType:string) = 
     let pTypeSimple =
@@ -4451,6 +4452,8 @@ let private matchByTypeStringRepresentation (a:FplValue) aName (aType:string) aT
             else 
                 None, Parameter.Consumed
         | None -> None, Parameter.Consumed
+    elif a.Parent.IsSome && a.Parent.Value.Name = PrimReturn && a.RefersTo.IsNone then 
+        errWrongReturnTypeUndetermined aName pType, Parameter.Consumed
     else
         errMsgStandard aName aType pName pType, Parameter.Consumed
 
@@ -4536,7 +4539,7 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) =
                 matchTwoTypes refNode p // match signatures with parameters
             | Some refNode ->
                 // a node was referenced but is not a predicate
-                errWrongReturnType (qualifiedName refNode false) (refNode.Type SignatureType.Type) (p.Type SignatureType.Mixed), Parameter.Consumed
+                errWrongReturnType aName (refNode.Type SignatureType.Type) (p.Type SignatureType.Mixed), Parameter.Consumed
             | _ ->
                 // in all other cases, 
                 errMsgStandard aName aType pName pType, Parameter.Consumed
@@ -4565,7 +4568,7 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) =
                 matchTwoTypes refNode p // match signatures with parameters
             | Some refNode ->
                 // a node was referenced not a predicate node
-                errWrongReturnType (qualifiedName refNode false) (refNode.Type SignatureType.Type) (p.Type SignatureType.Mixed), Parameter.Consumed
+                errWrongReturnType aName (refNode.Type SignatureType.Type) (p.Type SignatureType.Mixed), Parameter.Consumed
             | _ ->
                 // in all other cases, error
                 errMsgStandard aName aType pName pType, Parameter.Consumed
@@ -4584,7 +4587,7 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) =
                 matchTwoTypes refNode p // match signatures with parameters
             | Some refNode ->
                 // a node was referenced but is not a functional term block
-                errWrongReturnType (qualifiedName refNode false) (refNode.Type SignatureType.Type) (p.Type SignatureType.Mixed), Parameter.Consumed
+                errWrongReturnType aName (refNode.Type SignatureType.Type) (p.Type SignatureType.Mixed), Parameter.Consumed
             | _ ->
                 // in all other cases, error
                 errMsgStandard aName aType pName pType, Parameter.Consumed
@@ -4603,10 +4606,10 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) =
                 matchTwoTypes refNode p // match signatures with parameters
             | Some refNode ->
                 // a node was referenced but is not a functional term block
-                errWrongReturnType (qualifiedName refNode false) (refNode.Type SignatureType.Type) (p.Type SignatureType.Mixed), Parameter.Consumed
+                errWrongReturnType aName (refNode.Type SignatureType.Type) (p.Type SignatureType.Mixed), Parameter.Consumed
             | _ ->
                 // in all other cases, error
-                errWrongReturnType (qualifiedName a true) aType pType, Parameter.Consumed
+                errWrongReturnType aName aType pType, Parameter.Consumed
         elif aIsCallByReference && pTypeName = PrimMappingL then 
             let map = p :?> FplMapping
             match map.RefersTo, refNodeOpt with
@@ -5905,7 +5908,7 @@ type FplReturn(positions: Positions, parent: FplValue) as this =
             match mapTypeOpt with 
             | Some mapType ->
                 match mpwa [ returnedReference ] [ mapType ] with
-                | Some errMsg -> returnedReference.ErrorOccurred <- emitSIG03Diagnostics errMsg (mapType.Type(SignatureType.Type)) (returnedReference.StartPos) (returnedReference.EndPos)
+                | Some errMsg -> returnedReference.ErrorOccurred <- emitSIG03Diagnostics errMsg (returnedReference.StartPos) (returnedReference.EndPos)
                 | _ -> 
                     match returnedReference with
                     | :? FplIntrinsicPred 

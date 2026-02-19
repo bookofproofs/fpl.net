@@ -718,7 +718,7 @@ let emitSIG02Diagnostics symbol precedence conflict pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitSIG03Diagnostics errMsg alternative pos1 pos2 = 
+let emitSIG03Diagnostics errMsg pos1 pos2 = 
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -727,7 +727,7 @@ let emitSIG03Diagnostics errMsg alternative pos1 pos2 =
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = SIG03 errMsg
-            Diagnostic.Alternatives = Some alternative
+            Diagnostic.Alternatives = None
         }
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
