@@ -3533,6 +3533,8 @@ type FplReference(positions: Positions, parent: FplValue) =
     override this.Type signatureType =
         let headObj = 
             match this.RefersTo with
+            | Some ret when ret.Name = LiteralSelf && ret.RefersTo.IsSome -> ret.RefersTo.Value
+            | Some ret when ret.Name = LiteralParent && ret.RefersTo.IsSome -> ret.RefersTo.Value
             | Some ret -> ret
             | None -> this
 
@@ -4431,13 +4433,18 @@ let private matchByTypeStringRepresentation aIsCallByReference (a:FplValue) aNam
         None, Parameter.Consumed // tpl arrays accepts everything: TODO: really?
     elif aType = LiteralUndef then
         None, Parameter.Consumed // undef can always be assigned
-    elif pType.StartsWith($"*{aType}[{LiteralInd}]") then
+    elif pType.StartsWith($"*{aType}[{LiteralInd}]") && p.ArgType <> ArgType.Brackets then
         None, Parameter.NotConsumed // 1D arrays matching input type with ind as index accept variadic enumerations
-    elif pType.StartsWith($"*{aType}[") then
+    elif pType.StartsWith($"*{aType}[") && p.ArgType <> ArgType.Brackets then
         // array parameters with indexes that differ from the FPL-inbuilt index type  
         // or with multidimensional index types will not accept variadic enumerations of arguments
         // even if they have the same type used for the values of the array
         errVariadic aName aType pName pType p.TypeId, Parameter.Consumed
+    elif pType.StartsWith($"*{aType}[") && p.ArgType = ArgType.Brackets then
+        // array parameters with indexes that differ from the FPL-inbuilt index type  
+        // or with multidimensional index types will not accept variadic enumerations of arguments
+        // even if they have the same type used for the values of the array
+        None, Parameter.NotConsumed // 1D arrays matching input type in assignments (ArgType.Brackets reference being assigned to a value)
     elif aType.StartsWith($"*{pType}[") && aTypeName = PrimRefL then
         let refA = a :?> FplReference
         if refA.ArgType = ArgType.Brackets then 
@@ -4700,7 +4707,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) =
         | Some errMsg, _ -> Some errMsg
         | None, Parameter.Consumed -> mpwa ars prs
         | None, Parameter.NotConsumed -> mpwa ars pars // handle variadic parameters
-    | ([], p :: prs) ->
+    | ([], p :: prs) ->  
         let pName, pType, pTypeName = getNames p
         match p with 
         | :? FplClass as cl ->
@@ -4710,6 +4717,10 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) =
             else
                 errMsgMissingArgument pName pType
         | _ when pTypeName = PrimVariableArrayL ->
+            None
+        | _ when p.ArgType = ArgType.Brackets ->
+            // when p is an indexed array and being assigned a value, 
+            // do not expect missing arguments
             None
         | _ -> 
             errMsgMissingArgument pName pType
@@ -6426,7 +6437,7 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
         | Some (:? FplVariable as assignee), Some (assignedValue:FplValue) -> 
             checkTypes assignee this.ArgList[1] 
         | Some (:? FplVariableArray as assignee), Some assignedValue ->
-           checkTypes assignee assignedValue 
+           checkTypes this.ArgList[0] this.ArgList[1] 
         | Some (:? FplSelf as assignee), _ ->
             match assignee.RefersTo with 
             | Some ref -> 

@@ -3688,21 +3688,6 @@ type TestInterpreterErrors() =
     [<DataRow("ass_obj_pred", """def cl C1 {ctor C1(i1:pred) {dec ~o:obj o:=i1; }};""", 1)>]
     [<DataRow("ass_obj_func", """def cl C1 {ctor C1(i1:func) {dec ~o:obj o:=i1; }};""", 1)>]
     [<DataRow("ass_obj_obj", """def cl C1 {ctor C1(i1:obj) {dec ~o:obj o:=i1; }};""", 0)>]
-    [<DataRow("24a", "def cl A {dec ~myX:obj; ctor A(x:obj) {dec myX:=x;}} def cl B:A { ctor B(x:obj) {dec base.A(del.Decrement(x)); } } def pred T() { dec ~v:B v:=B(@2); false};", 0)>]    
-    [<DataRow("24b", "def cl A {dec ~myX:ind; ctor A(x:obj) {dec myX:=x;}} def cl B:A { ctor B(x:obj) {dec base.A(del.Decrement(x)); } } def pred T() { dec ~v:B v:=B(@2); false};", 1)>]    
-    [<DataRow("25", "def cl Nat def func Succ(x:Nat)->Nat def cl A {dec ~myX:Nat; ctor A(i:Nat) {dec myX:=Succ(i);}};", 0)>]    
-    [<DataRow("26", "def cl Nat def cl A {dec ~arr:*Nat[Nat]; ctor A(i:Nat) {dec arr[i]:=i;}};", 0)>]    
-    [<DataRow("27", "def cl Nat def cl Zero:Nat def func Succ(n:Nat)->Nat def pred T() {dec ~n:Nat n:=Succ(Zero()); true};", 0)>]    
-    [<DataRow("28", "def cl Nat def func Succ(n:Nat)->Nat ext Digits x@/\d+/ -> Nat {dec ~n:Nat n:=Succ(delegate.Decrement(x)); return n};", 0)>]      
-    [<DataRow("29", "def cl Nat def cl Zero:Nat def func Succ(n:Nat)->Nat def func Add(x,y: Nat)->Nat {dec ~r:Nat r := Succ(self(x,y)); return r };", 0)>]    
-    [<DataRow("29a", "def cl Nat def cl Zero:Nat def func Succ(n:Nat)->Nat def func Add(n,m: Nat)->Nat {return Succ(self(n,m))};", 0)>]    
-    [<DataRow("30", "def cl Nat def cl Zero:Nat def func Succ(n:Nat)->Nat def pred T() {dec ~r:Nat r:= undef; true };", 0)>]    
-    [<DataRow("31", "def cl Nat def cl Tuple {ctor Tuple(l:*tpl[Nat]) {} } def pred T(x,y:Nat) {dec ~tuple:Tuple tuple:=Tuple(x,y); tuple};", 0)>]    
-    [<DataRow("32", "def cl Nat def cl C {dec ~myLength: Nat; ctor C(x:Nat) {dec myLength:=x;} property func Length() -> Nat {return myLength} } def pred T() {dec ~l:Nat ~c:C c:=C(l) l:=c.Length(); l};", 0)>]    
-    [<DataRow("32", "def pred T(x:ind) {dec ~v:*ind[ind] v[$1]:=x; true};", 0)>]    
-    [<DataRow("32a", "def pred T(x:obj) {dec ~v:*ind[ind] v[$1]:=x; true};", 1)>]    
-    [<DataRow("33a", "def cl A def cl B:A def pred T(v:B) {dec v:=A; true};", 1)>] // A is A but references to a class, error
-    [<DataRow("33b", "def cl A def cl B:A def pred T(v:B) {dec v:=B; true};", 1)>] // B is B, but a class reference, error
 
     // -----------------------------
 
@@ -4061,7 +4046,7 @@ type TestInterpreterErrors() =
     // match with the type func()->...
     [<DataRow("MS3_", "def func A()->ind def pred T(v:func()->ind) {dec v:=A; true};", 0)>] // OK: ->func()->ind matches signature A()->ind, whole node would be returned
     [<DataRow("MS3a_", "def func A()->ind def pred T(v:func()->ind) {dec ~x:obj v:=A(x); true};", 1)>] // SIG05: func()->ind does not match value A(obj) 
-    [<DataRow("MS3b_", "def func A()->ind def pred T(v:func()->ind) {v:=A(); true};", 1)>] // SIG05: func()->ind does not match value A(ind) not matching A(obj)
+    [<DataRow("MS3b_", "def func A()->ind def pred T(v:func()->ind) {dec v:=A(); true};", 1)>] // SIG05: func()->ind does not match value A(ind) not matching A(obj)
     [<DataRow("MS3c_", "def func A()->ind def pred T(v:func()->ind) {dec ~x:ind v:=A(x); true};", 1)>] // SIG05: func()->ind does not match value A(ind) 
     [<DataRow("MS3d_", "def func A(z:ind)->ind def pred T(v:func()->ind) {dec v:=A; true};", 1)>] // SIG05: func()->ind does not match signature A(ind)->ind
     [<DataRow("MS3e_", "ax A {true} def pred T(v:func()->ind) {dec v:=A; true};", 1)>] // SIG05: func()->ind does not match signature A (axiom)
@@ -4158,6 +4143,21 @@ type TestInterpreterErrors() =
     [<DataRow("MS4s6", "def func A()->obj {intr prty func X(x:ind)->obj } def pred T(v:func) {dec v:=A.X; true};", 0)>] // OK: ->func matches signature A.X(ind)->obj
     [<DataRow("MS4s7", "def func A()->obj {intr prty func X(x:obj)->ind } def pred T(v:func) {dec ~a:obj v:=A.X(a); true};", 1)>] // SIG05: func does not match by value A.X(obj) 
 
+    [<DataRow("24a", "def cl A {dec ~myX:obj; ctor A(x:obj) {dec myX:=x;}} def cl B:A { ctor B(x:obj) {dec base.A(del.Decrement(x)); } } def pred T() { dec ~v:B v:=B(@2); false};", 0)>]    
+    [<DataRow("24b", "def cl A {dec ~myX:ind; ctor A(x:obj) {dec myX:=x;}} def cl B:A { ctor B(x:obj) {dec base.A(del.Decrement(x)); } } def pred T() { dec ~v:B v:=B(@2); false};", 1)>]    
+    [<DataRow("25", "def cl Nat def func Succ(x:Nat)->Nat def cl A {dec ~myX:Nat; ctor A(i:Nat) {dec myX:=Succ(i);}};", 0)>]    
+    [<DataRow("26", "def cl Nat def cl A {dec ~arr:*Nat[Nat]; ctor A(i:Nat) {dec arr[i]:=i;}};", 0)>]    
+    [<DataRow("27", "def cl Nat def cl Zero:Nat def func Succ(n:Nat)->Nat def pred T() {dec ~n:Nat n:=Succ(Zero()); true};", 0)>]    
+    [<DataRow("28", "def cl Nat def func Succ(n:Nat)->Nat ext Digits x@/\d+/ -> Nat {dec ~n:Nat n:=Succ(self(delegate.Decrement(x))); return n};", 0)>]      
+    [<DataRow("29", "def cl Nat def cl Zero:Nat def func Succ(n:Nat)->Nat def func Add(x,y: Nat)->Nat {dec ~r:Nat r := Succ(self(x,y)); return r };", 0)>]    
+    [<DataRow("29a", "def cl Nat def cl Zero:Nat def func Succ(n:Nat)->Nat def func Add(n,m: Nat)->Nat {return Succ(self(n,m))};", 0)>]    
+    [<DataRow("30", "def cl Nat def cl Zero:Nat def func Succ(n:Nat)->Nat def pred T() {dec ~r:Nat r:= undef; true };", 0)>]    
+    [<DataRow("31", "def cl Nat def cl Tuple {ctor Tuple(l:*tpl[Nat]) {} } def pred T(x,y:Nat) {dec ~tuple:Tuple tuple:=Tuple(x,y); tuple};", 0)>]    
+    [<DataRow("32", "def cl Nat def cl C {dec ~myLength: Nat; ctor C(x:Nat) {dec myLength:=x;} property func Length() -> Nat {return myLength} } def pred T() {dec ~l:Nat ~c:C c:=C(l) l:=c.Length(); l};", 0)>]    
+    [<DataRow("32", "def pred T(x:ind) {dec ~v:*ind[ind] v[$1]:=x; true};", 0)>]    
+    [<DataRow("32a", "def pred T(x:obj) {dec ~v:*ind[ind] v[$1]:=x; true};", 1)>]    
+    [<DataRow("33a", "def cl A def cl B:A def pred T(v:B) {dec v:=A; true};", 1)>] // A is A but references to a class, error
+    [<DataRow("33b", "def cl A def cl B:A def pred T(v:B) {dec v:=B; true};", 1)>] // B is B, but a class reference, error
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG05(no:string, fplCode:string, expected) =
