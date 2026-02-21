@@ -1895,6 +1895,18 @@ type FplRuleOfInference(positions: Positions, parent: FplValue, runOrder) as thi
 
     override this.RunOrder = Some _runOrder
 
+/// Creates a concatenated string represenation based on a sequence of FplValues.
+let representationSep (coordinates:FplValue seq) sep =
+    coordinates 
+    |> Seq.map (fun fv -> fv.Represent())
+    |> String.concat sep
+
+/// Creates a concatenated string represenation based on a sequence of FplValues.
+let signatureSep (coordinates:FplValue seq) sep signatureType =
+    coordinates
+    |> Seq.map (fun fv -> fv.Type signatureType)
+    |> String.concat sep
+
 type FplInstance(positions: Positions, parent: FplValue) as this =
     inherit FplGenericInheriting(positions, parent)
 
@@ -1919,9 +1931,7 @@ type FplInstance(positions: Positions, parent: FplValue) as this =
 
         // baseClasses = instances of all base classes
         let baseClasses =
-            this.ArgList
-            |> Seq.map (fun fv -> fv.Represent())
-            |> String.concat ","
+            representationSep this.ArgList ","
             |> fun body -> "\"base\":[" + body + "]"
             
         let vars =
@@ -3872,12 +3882,18 @@ type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
     /// ValueList of the FplVariableArray.
     member this.ValueList = _valueList
 
-    member this.AssignValueToCoordinates (coordinates:FplValue seq) (value:FplValue) =
+    member this.GetValueByCoordinates coordinatesKey =
+        if this.ValueKeys.ContainsKey coordinatesKey then 
+           let index = this.ValueKeys[coordinatesKey]
+           // return a value based on coordinates 
+           this.ValueList[index] 
+        else
+           // otherwise, spawn an undefined value
+           new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
+
+    member this.AssignValueToCoordinates coordinatesKey (value:FplValue) =
         this.IsInitialized <- true
-        let coordinatesKey = 
-            coordinates
-            |> Seq.map (fun fv -> fv.Represent())
-            |> String.concat "|"
+
         if this.ValueKeys.ContainsKey coordinatesKey then 
            let index = this.ValueKeys[coordinatesKey]
            // a value with this coordinates already exists, and we replace it by the new one
@@ -6505,12 +6521,19 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
             assignedValue.Run variableStack
             match assignedValue.Instance with 
             | Some instance ->
-                assignee.AssignValueToCoordinates this.ArgList[0].ArgList instance // set value to the created instance 
+                let coordinatesKey = representationSep (this.ArgList[0].ArgList) "|"
+                assignee.AssignValueToCoordinates coordinatesKey instance // set value to the created instance 
                 // reposition the instance in symbol table
                 instance.Parent <- Some assignee
             | None -> () // TODO, issue diagnostics?
+        | None, Some (:? FplVariableArray as sourceArray), Some (:? FplVariableArray as targetArray) ->
+            let sourceCoords = representationSep (this.ArgList[0].ArgList) "|"
+            let targetCoords = representationSep (this.ArgList[1].ArgList) "|"
+            let valueAtTargetCoordinates = targetArray.GetValueByCoordinates targetCoords
+            sourceArray.AssignValueToCoordinates sourceCoords valueAtTargetCoordinates // set value to the created instance 
         | None, Some (:? FplVariableArray as assignee), Some assignedValue ->
-            assignee.AssignValueToCoordinates this.ArgList[0].ArgList assignedValue // set value to the created instance 
+            let coordinatesKey = representationSep (this.ArgList[0].ArgList) "|"
+            assignee.AssignValueToCoordinates coordinatesKey assignedValue // set value to the created instance 
         | None, Some assignee, Some assignedValue ->
             assignedValue.Run variableStack
             assignee.SetValuesOf assignedValue
