@@ -1817,6 +1817,18 @@ type FplGenericPredicateWithExpression(positions: Positions, parent: FplValue) =
         checkVAR04Diagnostics this
         checkPredicateExpressionReturnsPredicate this
 
+/// Creates a concatenated string represenation based on a sequence of FplValues.
+let representationSep sep (coordinates:FplValue seq) =
+    coordinates 
+    |> Seq.map (fun fv -> fv.Represent())
+    |> String.concat sep
+
+/// Creates a concatenated string represenation based on a sequence of FplValues.
+let signatureSep sep (coordinates:FplValue seq) signatureType =
+    coordinates
+    |> Seq.map (fun fv -> fv.Type signatureType)
+    |> String.concat sep
+
 type FplPredicateList(positions: Positions, parent: FplValue, runOrder) = 
     inherit FplGenericHasNoValue(positions, parent)
     let _runOrder = runOrder
@@ -1828,10 +1840,7 @@ type FplPredicateList(positions: Positions, parent: FplValue, runOrder) =
         this.AssignParts(ret)
         ret
 
-    override this.Type signatureType = 
-        this.ArgList
-        |> Seq.map (fun fv -> fv.Type signatureType)
-        |> String.concat ", "
+    override this.Type signatureType = signatureSep ", " this.ArgList signatureType
 
     override this.Run variableStack = 
         this.Debug Debug.Start
@@ -1895,18 +1904,6 @@ type FplRuleOfInference(positions: Positions, parent: FplValue, runOrder) as thi
 
     override this.RunOrder = Some _runOrder
 
-/// Creates a concatenated string represenation based on a sequence of FplValues.
-let representationSep (coordinates:FplValue seq) sep =
-    coordinates 
-    |> Seq.map (fun fv -> fv.Represent())
-    |> String.concat sep
-
-/// Creates a concatenated string represenation based on a sequence of FplValues.
-let signatureSep (coordinates:FplValue seq) sep signatureType =
-    coordinates
-    |> Seq.map (fun fv -> fv.Type signatureType)
-    |> String.concat sep
-
 type FplInstance(positions: Positions, parent: FplValue) as this =
     inherit FplGenericInheriting(positions, parent)
 
@@ -1931,7 +1928,7 @@ type FplInstance(positions: Positions, parent: FplValue) as this =
 
         // baseClasses = instances of all base classes
         let baseClasses =
-            representationSep this.ArgList ","
+            representationSep "," this.ArgList 
             |> fun body -> "\"base\":[" + body + "]"
             
         let vars =
@@ -3155,7 +3152,8 @@ type FplLocalization(positions: Positions, parent: FplValue, runOrder) =
         let paramT =
             this.Scope
             |> Seq.filter (fun (kvp: KeyValuePair<string, FplValue>) -> isVar kvp.Value)
-            |> Seq.map (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.Type(signatureType))
+            |> Seq.map (fun kvp -> kvp.Value)
+            |> Seq.map (fun fv -> fv.Type signatureType)
             |> String.concat ", "
 
         match paramT with
@@ -3196,11 +3194,7 @@ type FplTranslation(positions: Positions, parent: FplValue) =
 
     override this.Type signatureType = 
         let head = getFplHead this signatureType
-        let args =
-            this.ArgList
-            |> Seq.map (fun fv -> fv.Type(SignatureType.Name))
-            |> String.concat " "
-
+        let args = signatureSep " " this.ArgList SignatureType.Name
         sprintf "%s%s" head args
 
     override this.Represent() = // done
@@ -3232,9 +3226,7 @@ type FplLanguage(positions: Positions, parent: FplValue) =
 
     override this.Represent() = // done
         // concatenate all translations of the language
-        this.ArgList
-        |> Seq.map (fun transl -> transl.Represent()) 
-        |> String.concat " "
+        representationSep " " this.ArgList 
 
     override this.Run _ = 
         this.Debug Debug.Start
@@ -3552,10 +3544,7 @@ type FplReference(positions: Positions, parent: FplValue) =
 
         // The arguments are reserved for the arguments or the coordinates of the reference
         let args, argsCount =
-            let ret = 
-                this.ArgList
-                |> Seq.map (fun fv -> fv.Type(propagate))
-                |> String.concat ", "
+            let ret = signatureSep ", " this.ArgList propagate
             ret, this.ArgList.Count
 
         let head = 
@@ -3795,10 +3784,7 @@ type FplMapping(positions: Positions, parent: FplValue) =
         if not _isArrayMapping then
             mainType
         else
-            let dimensionTypes = 
-                this.DimensionTypes
-                |> Seq.map (fun fv -> fv.Type signatureType)
-                |> String.concat ","
+            let dimensionTypes = signatureSep "," this.DimensionTypes signatureType
             $"{mainType}[{dimensionTypes}]"
 
     override this.Represent() = // done
@@ -3906,11 +3892,7 @@ type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
 
     override this.Type signatureType =
         let mainType = base.Type signatureType
-
-        let dimensionTypes = 
-            this.DimensionTypes
-            |> Seq.map (fun fv -> fv.Type signatureType)
-            |> String.concat ","
+        let dimensionTypes = signatureSep "," this.DimensionTypes signatureType
 
         match signatureType with
         | SignatureType.Name -> this.FplId
@@ -4847,10 +4829,7 @@ type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
     override this.Type signatureType = 
         let head = getFplHead this signatureType
         let propagate = propagateSignatureType signatureType
-        let args =
-            this.ArgList
-            |> Seq.map (fun fv -> fv.Type propagate)
-            |> String.concat ", "
+        let args = signatureSep ", " this.ArgList propagate
         sprintf "%s(%s)" head args
 
     override this.CheckConsistency() = 
@@ -5033,10 +5012,7 @@ type FplConjunction(positions: Positions, parent: FplValue) as this =
 
     override this.Type signatureType = 
         let head = getFplHead this signatureType
-        let args = 
-            this.ArgList
-            |> Seq.map (fun arg -> arg.Type(signatureType))
-            |> String.concat ", "
+        let args = signatureSep ", " this.ArgList signatureType
         sprintf "%s(%s)" head args
 
     override this.Run variableStack =
@@ -5093,10 +5069,7 @@ type FplDisjunction(positions: Positions, parent: FplValue) as this =
 
     override this.Type signatureType = 
         let head = getFplHead this signatureType
-        let args = 
-            this.ArgList
-            |> Seq.map (fun arg -> arg.Type(signatureType))
-            |> String.concat ", "
+        let args = signatureSep ", " this.ArgList signatureType
         sprintf "%s(%s)" head args
 
     override this.Run variableStack =
@@ -5152,10 +5125,7 @@ type FplExclusiveOr(positions: Positions, parent: FplValue) as this =
 
     override this.Type signatureType = 
         let head = getFplHead this signatureType
-        let args = 
-            this.ArgList
-            |> Seq.map (fun arg -> arg.Type(signatureType))
-            |> String.concat ", "
+        let args = signatureSep ", " this.ArgList signatureType
         sprintf "%s(%s)" head args
 
     override this.Run variableStack = 
@@ -5216,10 +5186,7 @@ type FplNegation(positions: Positions, parent: FplValue) as this =
 
     override this.Type signatureType = 
         let head = getFplHead this signatureType
-        let args = 
-            this.ArgList
-            |> Seq.map (fun arg -> arg.Type(signatureType))
-            |> String.concat ", "
+        let args = signatureSep ", " this.ArgList signatureType
         sprintf "%s(%s)" head args
 
     override this.Run variableStack =
@@ -5267,10 +5234,7 @@ type FplImplication(positions: Positions, parent: FplValue) as this =
 
     override this.Type signatureType = 
         let head = getFplHead this signatureType
-        let args = 
-            this.ArgList
-            |> Seq.map (fun arg -> arg.Type(signatureType))
-            |> String.concat ", "
+        let args = signatureSep ", " this.ArgList signatureType
         sprintf "%s(%s)" head args
 
     override this.Run _ = 
@@ -5323,10 +5287,7 @@ type FplEquivalence(positions: Positions, parent: FplValue) as this =
 
     override this.Type signatureType = 
         let head = getFplHead this signatureType
-        let args = 
-            this.ArgList
-            |> Seq.map (fun arg -> arg.Type(signatureType))
-            |> String.concat ", "
+        let args = signatureSep ", " this.ArgList signatureType
         sprintf "%s(%s)" head args
 
 
@@ -5401,11 +5362,7 @@ type FplEquality(name, positions: Positions, parent: FplValue) as this =
     override this.Type signatureType = 
         let head = getFplHead this signatureType
         let propagate = propagateSignatureType signatureType
-        let args = 
-            this.ArgList
-            |> Seq.map (fun arg -> arg.Type(propagate))
-            |> String.concat ", "
-
+        let args = signatureSep ", " this.ArgList propagate
         sprintf "%s(%s)" head args
 
     override this.Run variableStack = 
@@ -5484,10 +5441,7 @@ type FplDecrement(name, positions: Positions, parent: FplValue) as this =
         | SignatureType.Type -> head
         | _ ->
             let propagate = propagateSignatureType signatureType
-            let args = 
-                this.ArgList
-                |> Seq.map (fun arg -> arg.Type(propagate))
-                |> String.concat ", "
+            let args = signatureSep ", " this.ArgList propagate
             sprintf "%s(%s)" head args
 
     override this.Run _ = 
@@ -5721,10 +5675,7 @@ type FplIsOperator(positions: Positions, parent: FplValue) as this =
 
     override this.Type signatureType = 
         let head = getFplHead this signatureType
-        let args = 
-            this.ArgList
-            |> Seq.map (fun arg -> arg.Type(signatureType))
-            |> String.concat ", "
+        let args = signatureSep ", " this.ArgList signatureType
         sprintf "%s(%s)" head args
         
     override this.Run _ = 
@@ -5756,10 +5707,7 @@ type FplGenericQuantor(positions: Positions, parent: FplValue) =
     override this.Type signatureType =
         let head = getFplHead this signatureType
 
-        let paramT =
-            this.GetVariables()
-            |> Seq.map (fun fv -> fv.Type(signatureType))
-            |> String.concat ", "
+        let paramT = signatureSep ", " (this.GetVariables()) signatureType
 
         match paramT with
         | "" -> head
@@ -6521,18 +6469,18 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
             assignedValue.Run variableStack
             match assignedValue.Instance with 
             | Some instance ->
-                let coordinatesKey = representationSep (this.ArgList[0].ArgList) "|"
+                let coordinatesKey = representationSep "|" (this.ArgList[0].ArgList) 
                 assignee.AssignValueToCoordinates coordinatesKey instance // set value to the created instance 
                 // reposition the instance in symbol table
                 instance.Parent <- Some assignee
             | None -> () // TODO, issue diagnostics?
         | None, Some (:? FplVariableArray as sourceArray), Some (:? FplVariableArray as targetArray) ->
-            let sourceCoords = representationSep (this.ArgList[0].ArgList) "|"
-            let targetCoords = representationSep (this.ArgList[1].ArgList) "|"
+            let sourceCoords = representationSep "|" (this.ArgList[0].ArgList) 
+            let targetCoords = representationSep "|" (this.ArgList[1].ArgList) 
             let valueAtTargetCoordinates = targetArray.GetValueByCoordinates targetCoords
             sourceArray.AssignValueToCoordinates sourceCoords valueAtTargetCoordinates // set value to the created instance 
         | None, Some (:? FplVariableArray as assignee), Some assignedValue ->
-            let coordinatesKey = representationSep (this.ArgList[0].ArgList) "|"
+            let coordinatesKey = representationSep "|" (this.ArgList[0].ArgList) 
             assignee.AssignValueToCoordinates coordinatesKey assignedValue // set value to the created instance 
         | None, Some assignee, Some assignedValue ->
             assignedValue.Run variableStack
