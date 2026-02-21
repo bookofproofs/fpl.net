@@ -6367,6 +6367,32 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
     override this.Type signatureType = 
         getFplHead this signatureType
 
+    member private this.GetAssignmentArg no =
+        if this.ArgList.Count > 1 then 
+            let candidate = this.ArgList[no]
+            match candidate with 
+            | :? FplReference as ref ->
+                match ref.DottedChild with 
+                | Some dc -> dc.RefersTo
+                | None when ref.RefersTo.IsSome -> ref.RefersTo
+                | _ -> Some candidate
+            | _ ->
+                Some candidate
+        else
+            None
+
+    member this.Assignee:FplValue option = this.GetAssignmentArg 0
+
+    member this.AssignedValue = 
+        let assignedValueOpt = this.GetAssignmentArg 1
+        match assignedValueOpt with 
+        | Some (:? FplVariableArray as targetArray) when this.ArgList[1].ArgType = ArgType.Brackets ->
+            let targetCoords = representationSep "|" (this.ArgList[1].ArgList) 
+            let valueAtTargetCoordinates = targetArray.GetValueByCoordinates targetCoords
+            Some valueAtTargetCoordinates
+        | Some _ -> assignedValueOpt
+        | None -> Some (new FplIntrinsicUndef((this.StartPos, this.EndPos), this))
+
     override this.CheckConsistency () = 
         base.CheckConsistency()
         let checkTypes (assignee:FplValue) (assignedValue:FplValue) =
@@ -6428,24 +6454,6 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
         this.CheckConsistency()
         addExpressionToParentArgList this
 
-    member private this.GetAssignmentArg no =
-        if this.ArgList.Count > 1 then 
-            let candidate = this.ArgList[no]
-            match candidate with 
-            | :? FplReference as ref ->
-                match ref.DottedChild with 
-                | Some dc -> dc.RefersTo
-                | None when ref.RefersTo.IsSome -> ref.RefersTo
-                | _ -> Some candidate
-            | _ ->
-                Some candidate
-        else
-            None
-
-    member this.Assignee:FplValue option = this.GetAssignmentArg 0
-
-    member this.AssignedValue = this.GetAssignmentArg 1
-
     override this.Run variableStack =
         this.Debug Debug.Start
         match this.ErrorOccurred, this.Assignee, this.AssignedValue with
@@ -6465,7 +6473,7 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
             assignee.SetValue assignedValue
         | None, Some (:? FplVariable as assignee), Some (:? FplIntrinsicPred as assignedValue) ->
             assignee.SetValue assignedValue
-        | None, Some (:? FplVariableArray as assignee), Some (:? FplGenericConstructor as assignedValue) ->
+        | None, Some (:? FplVariableArray as assignee), Some (:? FplGenericConstructor as assignedValue) when this.ArgList[0].ArgType = ArgType.Brackets ->
             assignedValue.Run variableStack
             match assignedValue.Instance with 
             | Some instance ->
@@ -6474,12 +6482,7 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
                 // reposition the instance in symbol table
                 instance.Parent <- Some assignee
             | None -> () // TODO, issue diagnostics?
-        | None, Some (:? FplVariableArray as sourceArray), Some (:? FplVariableArray as targetArray) ->
-            let sourceCoords = representationSep "|" (this.ArgList[0].ArgList) 
-            let targetCoords = representationSep "|" (this.ArgList[1].ArgList) 
-            let valueAtTargetCoordinates = targetArray.GetValueByCoordinates targetCoords
-            sourceArray.AssignValueToCoordinates sourceCoords valueAtTargetCoordinates // set value to the created instance 
-        | None, Some (:? FplVariableArray as assignee), Some assignedValue ->
+        | None, Some (:? FplVariableArray as assignee), Some assignedValue when this.ArgList[0].ArgType = ArgType.Brackets ->
             let coordinatesKey = representationSep "|" (this.ArgList[0].ArgList) 
             assignee.AssignValueToCoordinates coordinatesKey assignedValue // set value to the created instance 
         | None, Some assignee, Some assignedValue ->
