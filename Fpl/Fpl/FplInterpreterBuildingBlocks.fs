@@ -164,7 +164,7 @@ let rec eval (st: SymbolTable) ast =
         let vars = fv.GetVariables()
         if vars.Length > 0 then
             let mainVar = vars.Head
-            mainVar.TypeId <- s // set the extensions's main variable's type to the pattern
+            mainVar.TypeId <- $"{LiteralObj}:{s}" // set the extensions's main variable's type to the pattern
     | Ast.DollarDigits((pos1, pos2), s) -> 
         let fv = variableStack.PeekEvalStack()
         let sid = $"${s.ToString()}"
@@ -240,6 +240,7 @@ let rec eval (st: SymbolTable) ast =
             fv.EndPos <- pos2
         | PrimExtensionL -> 
             let newVar = new FplVariable(name, (pos1, pos2), fv)
+            newVar.IsSignatureVariable <- variableStack.InSignatureEvaluation
             variableStack.PushEvalStack(newVar)
             variableStack.PopEvalStack()
         | PrimRefL ->
@@ -365,6 +366,7 @@ let rec eval (st: SymbolTable) ast =
         match fv.NextBlockNode with
         | Some block ->
             match block.Name with 
+            | PrimExtensionL
             | PrimMandatoryFunctionalTermL
             | PrimMandatoryPredicateL
             | PrimClassL
@@ -690,10 +692,7 @@ let rec eval (st: SymbolTable) ast =
         | Some (ast2, _) -> eval st ast2 |> ignore
         | _ -> ()
         match astTupleOption with 
-        | Some (_, ast3) -> 
-            let fv = variableStack.PeekEvalStack()
-            fv.EndPos <- pos2
-            eval st ast3 |> ignore
+        | Some (_, ast3) -> eval st ast3 |> ignore
         | _ -> ()
     | Ast.AliasedNamespaceIdentifier((pos1, pos2), (ast1, optAst)) ->
         eval st ast1
@@ -776,7 +775,13 @@ let rec eval (st: SymbolTable) ast =
             else
                 match checkSIG04Diagnostics node candidates with
                 | Some matchedCandidate -> 
-                    node.RefersTo <- Some matchedCandidate
+                    match node.RefersTo with
+                    | Some self when self.Name = LiteralSelf && self.RefersTo.IsSome && Object.ReferenceEquals(self.RefersTo.Value, matchedCandidate) ->
+                        () // omit replacing node.RefersTo if it refers to FplSelf and FplSelf already refers to the matchedCandidate
+                    | Some parent when parent.Name = LiteralParent && parent.RefersTo.IsSome && Object.ReferenceEquals(parent.RefersTo.Value, matchedCandidate) ->
+                        () // omit replacing node.RefersTo if it refers to FplParent and FplParent already refers to the matchedCandidate
+                    | _ ->
+                        node.RefersTo <- Some matchedCandidate
                 | _ -> ()
 
             variableStack.PopEvalStack()
@@ -885,14 +890,16 @@ let rec eval (st: SymbolTable) ast =
             beingCreatedNode.ErrorOccurred <- emitID011Diagnostics kvp.Key kvp.Value beingCreatedNode.StartPos beingCreatedNode.EndPos
         )
     | Ast.ExtensionAssignment((pos1, pos2), (varAst, extensionRegexAst)) ->
+        variableStack.InSignatureEvaluation <- true
         eval st varAst
         eval st extensionRegexAst
+        variableStack.InSignatureEvaluation <- false
     | Ast.ExtensionSignature((pos1, pos2), (extensionAssignmentAst, extensionMappingAst)) ->
         eval st extensionAssignmentAst
         eval st extensionMappingAst
     | Ast.DefinitionExtension((pos1, pos2), ((extensionNameAst,extensionSignatureAst), extensionTermAst)) ->
         let parent = variableStack.PeekEvalStack()
-        let fv = new FplExtension((pos1,pos2), parent)
+        let fv = new FplExtension((pos1,pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
         variableStack.PushEvalStack(fv)
         eval st extensionNameAst
         eval st extensionSignatureAst
@@ -1124,12 +1131,12 @@ let rec eval (st: SymbolTable) ast =
                     |> List.filter (fun var -> var.IsSignatureVariable)
                 // try to issue SIG04 diagnostics per argument of the binary operator
                 if pars.Length = 2 then 
-                    match mpwa [firstOp] [pars[0]] MatchingMode.Signature with
+                    match mpwa [firstOp] [pars[0]] with
                     | Some errMsg -> 
                         let extendedErrMsg = $"{errMsg} in {qualifiedName refNode true}"
                         firstOp.ErrorOccurred <- emitSIG04Diagnostics (currentOp.Type SignatureType.Mixed) 1 extendedErrMsg firstOp.StartPos firstOp.EndPos
                     | _ -> ()
-                    match mpwa [secondOp] [pars[1]] MatchingMode.Signature with
+                    match mpwa [secondOp] [pars[1]] with
                     | Some errMsg -> 
                         let extendedErrMsg = $"{errMsg} in {qualifiedName refNode true}"
                         secondOp.ErrorOccurred <- emitSIG04Diagnostics (currentOp.Type SignatureType.Mixed) 1 extendedErrMsg secondOp.StartPos secondOp.EndPos
@@ -1523,7 +1530,7 @@ let rec eval (st: SymbolTable) ast =
             cl.AddDefaultConstructor()
     | Ast.DefinitionClass((pos1, pos2),(((classSignatureAst, optInheritedClassTypeListAst), optUserDefinedObjSymAst), classBlockAst)) ->
         let parent = variableStack.PeekEvalStack()
-        let fv = new FplClass((pos1, pos2), parent)
+        let fv = new FplClass((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
         variableStack.PushEvalStack(fv)
         eval st classSignatureAst
         optInheritedClassTypeListAst |> Option.map (eval st) |> Option.defaultValue ()
