@@ -77,7 +77,7 @@ type TestFplValueScopeFplRepresentation() =
             | "fun4" -> Assert.AreEqual<string>("dec tpl", fun4.Represent())
             | "fun5" -> Assert.AreEqual<string>("dec SomeClass1", fun5.Represent())
             | "fun6" -> Assert.AreEqual<string>("dec SomeClass1", fun6.Represent())
-            | "fun7" -> Assert.AreEqual<string>("""{"name":"SomeClass1","base":[],"vars":[],"prtys":[]}""", fun7.Represent())
+            | "fun7" -> Assert.AreEqual<string>("""SomeClass1()""", fun7.Represent())
             | "fun8" -> Assert.AreEqual<string>("$112", fun8.Represent())
             | "fun9" -> Assert.AreEqual<string>("$13", fun9.Represent())
             | "prf1" -> Assert.AreEqual<string>(PrimUndetermined, prf1.Represent())
@@ -827,15 +827,15 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("bI1", """def cl A def cl B: A def pred T() {dec ~bI1:B bI1:=B; true};""", "dec B")>]  
 
     // will create an instance using the default constructor
-    [<DataRow("aI2", """def cl A def pred T() {dec ~aI2:A aI2:=A(); true};""", """{"name":"A","base":[],"vars":[],"prtys":[]}""")>]  
-    [<DataRow("bI2", """def cl A def cl B: A def pred T() {dec ~bI2:B bI2:=B(); true};""", """{"name":"B","base":[{"name":"A","base":[],"vars":[],"prtys":[]}],"vars":[],"prtys":[]}""")>]  
+    [<DataRow("aI2", """def cl A def pred T() {dec ~aI2:A aI2:=A(); true};""", """A()""")>]  
+    [<DataRow("bI2", """def cl A def cl B: A def pred T() {dec ~bI2:B bI2:=B(); true};""", """B()""")>]  
 
     [<DataRow("b", """def cl A def cl B: A def pred T() {dec ~b:B; true};""", "dec B")>]    // without constructor, with inheritance, without instantiation
     [<DataRow("cI1", """def cl A def cl B: A def cl C {ctor C() {}} def pred T() {dec ~cI1:C cI1:=C; true};""", "dec C")>]  // with constructor, without inheritance, with instantiation (without ()) -> should also trigger another error
-    [<DataRow("cI2", """def cl A def cl B: A def cl C {ctor C() {}} def pred T() {dec ~cI2:C cI2:=C(); true};""", """{"name":"C","base":[],"vars":[],"prtys":[]}""")>]  // with constructor, without inheritance, with instantiation (with ())
+    [<DataRow("cI2", """def cl A def cl B: A def cl C {ctor C() {}} def pred T() {dec ~cI2:C cI2:=C(); true};""", """C()""")>]  // with constructor, without inheritance, with instantiation (with ())
     [<DataRow("d", """def cl A def cl B: A def cl D: B {ctor D() {dec base.B(); }} def pred T() {dec ~d:D; true};""", "dec D")>]    // with constructor, with inheritance, without instantiation
     [<DataRow("dI1", """def cl A def cl B: A def cl D: B {ctor D() {dec base.B(); }} def pred T() {dec ~dI1:D dI1:=D; true};""", "dec D")>]  // with constructor, with inheritance, with instantiation (without ())
-    [<DataRow("dI2", """def cl A def cl B: A def cl D: B {ctor D() {dec base.B(); }} def pred T() {dec ~dI2:D dI2:=D(); true};""", """{"name":"D","base":[{"name":"B","base":[{"name":"A","base":[],"vars":[],"prtys":[]}],"vars":[],"prtys":[]}],"vars":[],"prtys":[]}""")>]  
+    [<DataRow("dI2", """def cl A def cl B: A def cl D: B {ctor D() {dec base.B(); }} def pred T() {dec ~dI2:D dI2:=D(); true};""", """D()""")>]  
     [<TestMethod>]
     member this.TestVariableRepresentationObjects(var, fplCode:string, expected:string) =
         ad.Clear()
@@ -1004,8 +1004,8 @@ type TestFplValueScopeFplRepresentation() =
 
     [<DataRow("00", "T()", "def pred T() {dec ~x:pred x:=false; x};",  LiteralFalse)>]
     [<DataRow("01", "T()", "def pred T() {dec ~x:ind x:=$42; x};",  "$42")>]
-    [<DataRow("02", "T()", "def cl A def pred T() {dec ~x:A x:=A(); x};",  """{"name":"A","base":[],"vars":[],"prtys":[]}""")>]
-    [<DataRow("02a", "T() -> A", "def cl A def func T()->A {dec ~x:A x:=A(); return x};",  """{"name":"A","base":[],"vars":[],"prtys":[]}""")>]
+    [<DataRow("02", "T()", "def cl A def pred T() {dec ~x:A x:=A(); x};",  """A()""")>]
+    [<DataRow("02a", "T() -> A", "def cl A def func T()->A {dec ~x:A x:=T(); return x};",  """T()""")>]
     [<TestMethod>]
     member this.TestAssignedValuePassedToEnclosingBlock(no:string, enclosing:string, fplCode, (expected:string)) =
         ad.Clear()
@@ -1052,7 +1052,7 @@ type TestFplValueScopeFplRepresentation() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("00", """def cl Nat def func A()->Nat def pred P(x:Nat) {dec x:=A(); true}""", """{"name":"Nat","base":[],"vars":[],"prtys":[]}""")>] // declared constant used
+    [<DataRow("00", """def cl Nat def func A()->Nat def pred P(x:Nat) {dec x:=A(); true}""", """A()""")>] // declared constant used
     [<TestMethod>]
     member this.TestConstants(var, input, output:string) =
         ad.Clear()

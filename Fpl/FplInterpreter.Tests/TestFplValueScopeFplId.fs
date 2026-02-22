@@ -912,7 +912,7 @@ type TestFplValueScopeFplId() =
             | "i" -> Assert.AreEqual<string>($"$1", i.FplId)
             | "b" -> Assert.AreEqual<string>($"", b.FplId)
             | "p" -> Assert.AreEqual<string>($"{LiteralTrue}", p.FplId)
-            | "o" -> Assert.AreEqual<string>($"A", o.FplId)
+            | "o" -> Assert.AreEqual<string>($"A()", o.FplId)
             | "u" -> Assert.AreEqual<string>($"{LiteralUndef}", u.FplId)
             | "t" -> Assert.AreEqual<string>("$2", t.FplId)
             | _ -> Assert.IsTrue(false)

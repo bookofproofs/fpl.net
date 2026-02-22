@@ -1924,45 +1924,7 @@ type FplInstance(positions: Positions, parent: FplValue) as this =
         head
 
     override this.Represent() = // done
-        let head = this.TypeId
-
-        // baseClasses = instances of all base classes
-        let baseClasses =
-            representationSep "," this.ArgList 
-            |> fun body -> "\"base\":[" + body + "]"
-            
-        let vars =
-            this.Scope.Values
-            |> Seq.filter (fun fv -> 
-                fv.Name = PrimVariableL 
-                || fv.Name = PrimVariableArrayL
-                )
-            |> Seq.map (fun fv -> "{" + fv.FplId + ":{" + fv.Represent() + "}}")
-            |> String.concat ","
-            |> fun body -> "\"vars\":[" + body + "]"
-
-        // only mandatory properties
-        let prtys =
-            this.Scope.Values
-            |> Seq.filter (fun fv -> 
-                fv.Name = PrimMandatoryFunctionalTermL 
-                || fv.Name = PrimMandatoryPredicateL
-                )
-            |> Seq.map (fun fv -> $"\"{fv.Type SignatureType.Mixed}\"")
-            |> String.concat $","
-            |> fun body -> "\"prtys\":[" + body + "]"
-
-        let body = 
-            match head, baseClasses, vars, prtys with 
-            | LiteralObj, _, _, _ 
-            | LiteralObjL, _, _, _ ->
-                "\"name\":\"" + head + "\""
-            | _, _, _, _ ->
-                "\"name\":\"" + head + "\"," +
-                baseClasses + "," +
-                vars + "," +
-                prtys
-        "{" + body + "}"
+        this.FplId
 
     override this.Run _ = 
         this.Debug Debug.Start
@@ -1995,10 +1957,20 @@ type FplBase(positions: Positions, parent: FplValue) =
 
     override this.RunOrder = None
 
+let signatureRepresent (fv:FplValue) = 
+    let signatureVarRepresentations = 
+        fv.GetVariables()
+        |> List.map (fun var -> var:?>FplGenericVariable)
+        |> List.filter (fun var -> var.IsSignatureVariable) 
+        |> List.map (fun var -> var.Represent())
+        |> String.concat ", "
+    $"{fv.FplId}({signatureVarRepresentations})"
+
 [<AbstractClass>]
 type FplGenericConstructor(name, positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
     let mutable (_toBeConstructedClass:FplValue option) = None 
+    let mutable _skolemName = ""
 
     do
         this.FplId <- name
@@ -2006,6 +1978,13 @@ type FplGenericConstructor(name, positions: Positions, parent: FplValue) as this
 
     override this.Name = PrimDefaultConstructor
     override this.ShortName = LiteralCtor
+
+    member this.SkolemName = _skolemName
+    member this.SetSkolemName() = _skolemName <- signatureRepresent this
+
+    interface ISkolem with
+        member this.SkolemName = this.SkolemName 
+        member this.SetSkolemName() = this.SetSkolemName() 
 
     override this.Type signatureType =
         let head = getFplHead this signatureType
@@ -2037,11 +2016,12 @@ type FplGenericConstructor(name, positions: Positions, parent: FplValue) as this
                     instance.ArgList.Add subInstance
                 | _ -> ()
             )
+        this.SetSkolemName()
 
         let instance = new FplInstance((this.StartPos, this.EndPos), this)
         match this.ToBeConstructedClass with
         | Some classDef -> 
-            instance.FplId <- classDef.FplId
+            instance.FplId <- this.SkolemName
             instance.TypeId <- classDef.FplId
             this.ArgList 
             |> Seq.iter (fun fv ->
@@ -2288,15 +2268,6 @@ let checkSIG02Diagnostics (root:FplValue) symbol precedence pos1 pos2 =
     if precedences.ContainsKey(precedence) then
         let conflict = precedences[precedence].QualifiedStartPos
         precedences[precedence].ErrorOccurred <- emitSIG02Diagnostics symbol precedence conflict pos1 pos2
-
-let signatureRepresent (fv:FplValue) = 
-    let signatureVarRepresentations = 
-        fv.GetVariables()
-        |> List.map (fun var -> var:?>FplGenericVariable)
-        |> List.filter (fun var -> var.IsSignatureVariable) 
-        |> List.map (fun var -> var.Represent())
-        |> String.concat ", "
-    $"{fv.FplId}({signatureVarRepresentations})"
 
 type FplPredicate(positions: Positions, parent: FplValue, runOrder) as this =
     inherit FplGenericInheriting(positions, parent)
@@ -5513,15 +5484,19 @@ let runIntrinsicFunction (fv:FplValue) variableStack =
         match map.RefersTo with 
         | Some cl when map.Dimensionality = 0 ->
             // a class type without an array
-            // TODO filter by constructors
             let defaultCtor = cl.Scope.Values |> Seq.head :?> FplGenericConstructor
             defaultCtor.Run variableStack
-            match defaultCtor.Instance with 
-            | Some instance ->
+            match defaultCtor.Instance, box fv with 
+            | Some instance, (:? ISkolem as skolem)  ->
+                instance.FplId <- skolem.SkolemName
                 fv.SetValue instance // set value to the created instance 
                 // reposition the instance in symbol table
                 instance.Parent <- Some fv
-            | None -> () // TODO, should not occur issue diagnostics?
+            | Some instance, _ ->
+                fv.SetValue instance // set value to the created instance 
+                // reposition the instance in symbol table
+                instance.Parent <- Some fv
+            | None, _ -> () // TODO, should not occur issue diagnostics?
         | Some cl when map.Dimensionality > 0 ->
             fv.SetValue map // set value to the map
         | None when map.Dimensionality > 0 ->

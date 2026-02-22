@@ -8,7 +8,7 @@ uses Fpl.SetTheory
 // definition of a new mathematical object (natural number)
 def cl Nat:Set
 
-def cl Zero: Nat
+def func Zero() -> Nat
 
 
 // definition of a functional term denoting the successor of a natural number

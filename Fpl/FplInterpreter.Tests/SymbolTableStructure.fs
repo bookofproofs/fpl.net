@@ -1677,8 +1677,8 @@ type SymbolTableStructure() =
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>(PrimNone, (getName var).[index])
         | "FplBaseConstructorCall" ->
-            Assert.IsTrue(isValidJson (getName var).[index])
-            Assert.AreEqual<string>("""{"name":"undef","base":[],"vars":[],"prtys":[]}""", (getName var).[index])
+            Assert.IsFalse(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
         | "FplCases" ->
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>(PrimNone, (getName var).[index])
@@ -1698,8 +1698,8 @@ type SymbolTableStructure() =
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
         | "FplConstructor" ->
-            Assert.IsTrue(isValidJson (getName var).[index])
-            Assert.AreEqual<string>("""{"name":"obj"}""", (getName var).[index])
+            Assert.IsFalse(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(LiteralObj, (getName var).[index])
         | "FplCorollary" ->
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
@@ -1707,8 +1707,8 @@ type SymbolTableStructure() =
             Assert.IsTrue(isValidJson (getName var).[index])
             Assert.AreEqual<string>("41", (getName var).[index])
         | "FplDefaultConstructor" ->
-            Assert.IsTrue(isValidJson (getName var).[index])
-            Assert.AreEqual<string>("""{"name":"obj"}""", (getName var).[index])
+            Assert.IsFalse(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(LiteralObj, (getName var).[index])
         | "FplDisjunction" ->
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
@@ -1743,8 +1743,8 @@ type SymbolTableStructure() =
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
         | "FplInstance" ->
-            Assert.IsTrue(isValidJson (getName var).[index])
-            Assert.AreEqual<string>("""{"name":"obj"}""", (getName var).[index])
+            Assert.IsFalse(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(LiteralObj, (getName var).[index])
         | "FplIntrinsicInd" ->
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>($"dec {LiteralInd}", (getName var).[index])
@@ -2989,7 +2989,7 @@ type SymbolTableStructure() =
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.IsTrue(node.Value.IsSome)
-            Assert.AreEqual<string>("""{"name":"A","base":[],"vars":[],"prtys":[]}""", node.Represent())
+            Assert.AreEqual<string>("""A()""", node.Represent())
             let fn = node :?> FplFunctionalTerm
             Assert.AreEqual<string>("", fn.SkolemName) // missing, since non-intrinsic
         | "FplFunctionalTerm", "MF3" -> 
@@ -3021,7 +3021,7 @@ type SymbolTableStructure() =
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.IsTrue(node.Value.IsSome)
-            Assert.AreEqual<string>("""[$1]->{"name":"A","base":[],"vars":[],"prtys":[]}, [$2]->{"name":"B","base":[],"vars":[],"prtys":[]}""", node.Represent())  
+            Assert.AreEqual<string>("""[$1]->A(), [$2]->B()""", node.Represent())  
             let fn = node :?> FplFunctionalTerm
             Assert.AreEqual<string>("", fn.SkolemName) // missing, since non-intrinsic
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -3069,7 +3069,7 @@ type SymbolTableStructure() =
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.IsTrue(node.Value.IsSome)
-            Assert.AreEqual<string>("""{"name":"A","base":[],"vars":[],"prtys":[]}""", node.Represent())
+            Assert.AreEqual<string>("""A()""", node.Represent())
             let fn = node :?> FplFunctionalTerm
             Assert.AreEqual<string>("", fn.SkolemName) // missing, since non-intrinsic
         | "FplFunctionalTerm", "MF3" -> 
@@ -3101,7 +3101,7 @@ type SymbolTableStructure() =
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             Assert.IsTrue(node.Value.IsSome)
-            Assert.AreEqual<string>("""[$1]->{"name":"A","base":[],"vars":[],"prtys":[]}, [$2]->$2, [$3]->true""", node.Represent())  
+            Assert.AreEqual<string>("""[$1]->A(), [$2]->$2, [$3]->true""", node.Represent())  
             let fn = node :?> FplFunctionalTerm
             Assert.AreEqual<string>("", fn.SkolemName) // missing, since non-intrinsic
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -3287,8 +3287,7 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplInstance>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
-            Assert.IsTrue(isValidJson (node.Represent()), "json not valid")
-            Assert.AreEqual<string>("""{"name":"A","base":[],"vars":[],"prtys":[]}""", node.Represent())
+            Assert.AreEqual<string>("""A()""", node.Represent())
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
     
     [<DataRow("FplIntrinsicInd", "00", """ax A {$1};""", "")>]

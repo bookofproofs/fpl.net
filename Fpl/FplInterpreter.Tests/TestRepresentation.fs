@@ -41,7 +41,7 @@ type TestRepresentation() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("00","n:=Zero()", """{"name":"Zero","base":[{"name":"Nat","base":[{"name":"Set","base":[],"vars":[],"prtys":[]}],"vars":[],"prtys":[]}],"vars":[],"prtys":[]}""")>]
+    [<DataRow("00","n:=Zero()", """Zero()""")>]
     [<TestMethod>]
     member this.TestRepresentationAssignment(var:string, varVal, expected:string) =
         ad.Clear()
@@ -60,10 +60,10 @@ type TestRepresentation() =
         | None -> 
             Assert.IsTrue(false)
             
-    [<DataRow("00","uses Fpl.PeanoArithmetics", "n:=Zero()", """{"name":"Zero","base":[{"name":"Nat","base":[{"name":"Set","base":[],"vars":[],"prtys":[]}],"vars":[],"prtys":[]}],"vars":[],"prtys":[]}""")>]
-    [<DataRow("00a","def cl Nat def cl Zero:Nat", "n:=Zero()", """{"name":"Zero","base":[{"name":"Nat","base":[],"vars":[],"prtys":[]}],"vars":[],"prtys":[]}""")>]
-    [<DataRow("01","def cl Nat", "n:=Nat()", """{"name":"Zero","base":[{"name":"Nat","base":[],"vars":[],"prtys":[]}],"vars":[],"prtys":[]}""")>]
-    [<DataRow("02","def cl Nat def func Zero() -> Nat", "n:=Zero()", """{"name":"Zero","base":[{"name":"Nat","base":[],"vars":[],"prtys":[]}],"vars":[],"prtys":[]}""")>]
+    [<DataRow("00","uses Fpl.PeanoArithmetics", "n:=Zero()", """Zero()""")>]
+    [<DataRow("00a","def cl Nat def cl Zero:Nat", "n:=Zero()", """Zero()""")>]
+    [<DataRow("01","def cl Nat", "n:=Nat()", """Nat()""")>]
+    [<DataRow("02","def cl Nat def func Zero() -> Nat", "n:=Zero()", """Zero()""")>]
     [<TestMethod>]
     member this.TestRepresentationReturn(var:string, uses:string, varVal, expected:string) =
         ad.Clear()
@@ -277,8 +277,8 @@ type TestRepresentation() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("00", "@0", """{"name":"Nat","base":[],"vars":[],"prtys":[]}""")>]
-    [<DataRow("00", "@1", "")>]
+    [<DataRow("00", "@0", """Zero()""")>]
+    [<DataRow("00", "@1", "Nat()")>]
     [<TestMethod>]
     member this.TestRepresentationMCasesSimple(no:string, varVal, expected:string) =
         ad.Clear()
