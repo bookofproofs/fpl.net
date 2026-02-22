@@ -738,7 +738,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
     member this.Debug (debugMode:Debug) =
         let rec getPath (fv:FplValue) =
             match fv.Parent with 
-            | Some parent -> $"{getPath parent} # {fv.ShortName} {fv.Type SignatureType.Name}"
+            | Some parent -> $"| {getPath parent} # {fv.ShortName} {fv.Type SignatureType.Name}"
             | None -> $"{fv.ShortName}"
         let vars =
             this.GetVariables()
@@ -4022,6 +4022,7 @@ let getParameters (fv:FplValue) =
         match box fv with 
         | :? IHasDimensions as arr -> arr.DimensionTypes |> Seq.toList
         | _ -> []
+    | PrimExtensionL
     | PrimFunctionalTermL
     | PrimPredicateL
     | LiteralCtorL
@@ -4449,6 +4450,8 @@ let private matchByTypeStringRepresentation aIsCallByReference (a:FplValue) aNam
             None, Parameter.Consumed
         else
             errMsgStandard aIsCallByReference aName aType pName pType, Parameter.Consumed
+    elif pType.StartsWith($"{aType}:") && aType = LiteralObj then 
+        None, Parameter.Consumed // extenion type matching object type
     elif isUpper aType && aTypeName = PrimRefL && a.RefersTo.IsSome then
         let aReferencedNode = a.RefersTo.Value
         if aReferencedNode.RefersTo.IsSome then

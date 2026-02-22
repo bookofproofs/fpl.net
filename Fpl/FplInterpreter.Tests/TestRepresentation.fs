@@ -340,8 +340,8 @@ type TestRepresentation() =
             
             def cl X 
             def cl A 
-            def cl B: A 
-            def cl C: A 
+            def func B() -> A 
+            def func C() -> A 
 
             def pred Equal(x,y: tpl) infix "=" 50 
             {
