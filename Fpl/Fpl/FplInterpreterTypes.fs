@@ -4223,9 +4223,8 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
                 this.SetValuesOf extensionDefinition
             variableStack.RestoreState(extensionDefinition)
         | _ ->
-            let v = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
-            // fall back to undef, if this does not refer to any extension definition
-            this.SetValue v
+            // this ExtensionObj is intrinsic since it does not refer to any extension definition
+            this.IsIntrinsic <- true
         this.Debug Debug.Stop
 
 

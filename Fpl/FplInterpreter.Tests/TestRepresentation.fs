@@ -338,11 +338,10 @@ type TestRepresentation() =
         ad.Clear()
         let fplCode = sprintf """
             
-            def cl X { intr }
-            
-            def cl A { intr }
-            def cl B: A { intr }
-            def cl C: A { intr }
+            def cl X 
+            def cl A 
+            def cl B: A 
+            def cl C: A 
 
             def pred Equal(x,y: tpl) infix "=" 50 
             {

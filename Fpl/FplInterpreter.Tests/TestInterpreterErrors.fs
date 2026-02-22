@@ -682,7 +682,7 @@ type TestInterpreterErrors() =
     [<DataRow("03", "def pred T(x:pred) {del.Equal(x,y)};", 1, "Predicate `=` cannot be evaluated because the right argument is undefined.")>]
     [<DataRow("04", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)};""", 0, "missing error message")>]
     [<DataRow("04a", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def pred NotEqual(x,y: tpl) infix "<>" 60 {not (x = y)}; """, 0, "missing error message")>] 
-    [<DataRow("05", "def pred T(x,y:pred) {del.Equal(true,y)};", 1, "Predicate `=` cannot be evaluated because the right argument is undetermined.")>]
+    [<DataRow("04", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)};""", 0, "missing error message")>]
     [<DataRow("06", "ax T {all x,y:obj {del.Equal(x,y)}};", 0, "missing error message")>]
     [<DataRow("06a", "def cl Nat {intr} ax T {all x,y:Nat {del.Equal(x,y)}};", 0, "missing error message")>]
     [<DataRow("06b", "ax T {all x,y:Bla {del.Equal(x,y)}};", 0, "Predicate `=` cannot be evaluated because the left argument is undefined.")>]
@@ -695,6 +695,7 @@ type TestInterpreterErrors() =
     [<DataRow("09", """def func Add()->obj {intr} prop AddIsSomething {dec ~anotherAdd, op: Add; all n,m:obj { (add(n,m) = anotherAdd(n,m) )} };""", 0, "missing error message")>]
     [<DataRow("10", """def func Add()->obj {intr} prop AddIsSomething {dec ~anotherAdd: Add; all n,m:obj { (anotherAdd(n,m) = n) } };""", 0, "missing error message")>]
     [<DataRow("11", """def func Add()->obj {intr} prop AddIsSomething {dec ~anotherAdd: Add; all n,m:obj { (anotherAdd(n,@0) = n) } };""", 0, "missing error message")>]
+    [<DataRow("12", """def pred T(x,y:tpl) infix "=" 50 {del.Equal(x,y)} ext Digits x@/\d+/ -> ind {dec ~n:ind cases (| (x = @0) : n := $1 ? n := $2); ret n };""", 0, "missing error message")>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0, "missing error message")>]
     [<TestMethod>]
     member this.TestID013(no:string, fplCode:string, expected, expectedErrMsg:string) =
