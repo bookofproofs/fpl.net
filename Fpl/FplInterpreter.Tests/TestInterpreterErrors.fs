@@ -2091,7 +2091,7 @@ type TestInterpreterErrors() =
     [<DataRow("03d", "lem A {true} ext U x@/\d+/ -> pred {ret A} def pred T(v:pred) {true} def pred Test() {T(@1)};", 0)>]
     [<DataRow("03e", "conj A {true} ext U x@/\d+/ -> pred {ret A} def pred T(v:pred) {true} def pred Test() {T(@1)};", 0)>]
     [<DataRow("03g", "cor A$1 {true} ext U x@/\d+/ -> pred {ret A$1} def pred T(v:pred) {true} def pred Test() {T(@1)};", 0)>]
-    
+    [<DataRow("04", """def cl Nat def func Zero() -> Nat def pred Equal(x,y: tpl) infix "=" 50 { del.Equal(x,y) } ext Digits x@/\d+/ -> Nat { ret mcases ( | (x = @0) : Zero() ? Nat() ) };""", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG03(no:string, fplCode:string, expected) =

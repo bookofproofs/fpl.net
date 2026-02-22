@@ -62,6 +62,8 @@ type TestRepresentation() =
             
     [<DataRow("00","uses Fpl.PeanoArithmetics", "n:=Zero()", """{"name":"Zero","base":[{"name":"Nat","base":[{"name":"Set","base":[],"vars":[],"prtys":[]}],"vars":[],"prtys":[]}],"vars":[],"prtys":[]}""")>]
     [<DataRow("00a","def cl Nat def cl Zero:Nat", "n:=Zero()", """{"name":"Zero","base":[{"name":"Nat","base":[],"vars":[],"prtys":[]}],"vars":[],"prtys":[]}""")>]
+    [<DataRow("01","def cl Nat", "n:=Nat()", """{"name":"Zero","base":[{"name":"Nat","base":[],"vars":[],"prtys":[]}],"vars":[],"prtys":[]}""")>]
+    [<DataRow("02","def cl Nat def func Zero() -> Nat", "n:=Zero()", """{"name":"Zero","base":[{"name":"Nat","base":[],"vars":[],"prtys":[]}],"vars":[],"prtys":[]}""")>]
     [<TestMethod>]
     member this.TestRepresentationReturn(var:string, uses:string, varVal, expected:string) =
         ad.Clear()
@@ -275,6 +277,40 @@ type TestRepresentation() =
         | None -> 
             Assert.IsTrue(false)
 
+    [<DataRow("00", "@0", """{"name":"Nat","base":[],"vars":[],"prtys":[]}""")>]
+    [<DataRow("00", "@1", "")>]
+    [<TestMethod>]
+    member this.TestRepresentationMCasesSimple(no:string, varVal, expected:string) =
+        ad.Clear()
+        let fplCode = sprintf """
+        def cl Nat
+        def func Zero() -> Nat
+        def pred Equal(x,y: tpl) infix "=" 50 
+        {
+            del.Equal(x,y)
+        }
+        
+        ext Digits x@/\d+/ -> Nat 
+        {
+            return mcases
+            (
+                | (x = @0) : Zero() 
+                ? Nat()  
+            )
+        }
+ 
+        def func T()->Nat { return %s };""" varVal
+        let filename = "TestRepresentationMCases.fpl"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let func = theory.Scope["T() -> Nat"] 
+            Assert.AreEqual<string>(expected, func.Represent())
+        | None -> 
+            Assert.IsTrue(false)
 
     [<DataRow("00","""def pred T() { dec ~v:ind; true };""", "dec ind")>]
     [<DataRow("00a","""def pred T() { dec ~v:pred; true };""", PrimUndetermined)>]

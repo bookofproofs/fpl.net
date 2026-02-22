@@ -5893,72 +5893,6 @@ let isExtension (fv:FplValue) =
     | :? FplExtension -> true
     | _ -> false
 
-
-/// Implements the return statement in FPL.
-type FplReturn(positions: Positions, parent: FplValue) as this =
-    inherit FplValue(positions, Some parent)
-
-    do
-        this.FplId <- LiteralRet
-        this.TypeId <- LiteralUndef
-
-    override this.Name = PrimReturn
-    override this.ShortName = PrimStmt
-
-    override this.Clone () =
-        let ret = new FplReturn((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.Type signatureType = this.FplId
-
-    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
-
-    override this.RunOrder = None
-
-    override this.Run variableStack =
-        this.Debug Debug.Start
-        let returnedReference = this.ArgList[0]
-        let blockOpt = this.NextBlockNode
-        match blockOpt with 
-        | Some funTerm ->
-            let mapTypeOpt = getMapping funTerm
-            match mapTypeOpt with 
-            | Some mapType ->
-                match mpwa [ returnedReference ] [ mapType ] with
-                | Some errMsg -> returnedReference.ErrorOccurred <- emitSIG03Diagnostics errMsg (returnedReference.StartPos) (returnedReference.EndPos)
-                | _ -> 
-                    match returnedReference with
-                    | :? FplIntrinsicPred 
-                    | :? FplIntrinsicTpl 
-                    | :? FplIntrinsicInd 
-                    | :? FplIntrinsicUndef ->
-                        this.SetValue returnedReference
-                    | :? FplReference when returnedReference.RefersTo.IsSome ->
-                        let refValue = returnedReference.RefersTo.Value
-                        refValue.Run variableStack
-                        match refValue with 
-                        | :? FplGenericConstructor ->
-                            this.SetValuesOf refValue
-                        | :? FplVariable as var when var.Value.IsSome ->
-                            this.SetValuesOf refValue
-                        | _ -> this.SetValue refValue
-                    | _ ->
-                        let value = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
-                        this.SetValue value
-            | _ -> 
-                // should syntactically not occur that a functional term has no mapping
-                // in this case return undef
-                let value = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
-                this.SetValue value
-        | _ -> 
-            // should syntactically not occur that a return statement occurs in something else
-            // then a functional term
-            // in this case return undef
-            let value = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
-            this.SetValue value
-        this.Debug Debug.Stop
-
 type FplMapCaseSingle(positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
     do 
@@ -6067,8 +6001,11 @@ type FplMapCases(positions: Positions, parent: FplValue) as this =
          | _ ->
             // Set the TypeId of this FplMapCases to the consistent TypeId found for all of its branches
             let typeOfAllBranches = _consistentCaseType.RefersTo.Value
-            this.TypeId <- typeOfAllBranches.TypeId
-
+            let mapOpt = getMapping typeOfAllBranches
+            this.TypeId <- 
+                match mapOpt with 
+                | Some map -> map.TypeId // if the type of all branches is a mapping, use the mapping's TypeId
+                | None -> typeOfAllBranches.TypeId
 
     member private this.CheckAllCasesForBeingReachable() =
         _reachableCases.Clear()
@@ -6116,6 +6053,75 @@ type FplMapCases(positions: Positions, parent: FplValue) as this =
             mapElse.Run variableStack
             this.SetValuesOf mapElse
         this.Debug Debug.Stop
+
+/// Implements the return statement in FPL.
+type FplReturn(positions: Positions, parent: FplValue) as this =
+    inherit FplValue(positions, Some parent)
+
+    do
+        this.FplId <- LiteralRet
+        this.TypeId <- LiteralUndef
+
+    override this.Name = PrimReturn
+    override this.ShortName = PrimStmt
+
+    override this.Clone () =
+        let ret = new FplReturn((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Type signatureType = this.FplId
+
+    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
+
+    override this.RunOrder = None
+
+    override this.Run variableStack =
+        this.Debug Debug.Start
+        let returnedReference = this.ArgList[0]
+        let blockOpt = this.NextBlockNode
+        match blockOpt with 
+        | Some funTerm ->
+            let mapTypeOpt = getMapping funTerm
+            match mapTypeOpt with 
+            | Some mapType ->
+                match mpwa [ returnedReference ] [ mapType ] with
+                | Some errMsg -> returnedReference.ErrorOccurred <- emitSIG03Diagnostics errMsg (returnedReference.StartPos) (returnedReference.EndPos)
+                | _ -> 
+                    match returnedReference with
+                    | :? FplIntrinsicPred 
+                    | :? FplIntrinsicTpl 
+                    | :? FplIntrinsicInd 
+                    | :? FplIntrinsicUndef ->
+                        this.SetValue returnedReference
+                    | :? FplReference when returnedReference.RefersTo.IsSome ->
+                        let refValue = returnedReference.RefersTo.Value
+                        refValue.Run variableStack
+                        match refValue with 
+                        | :? FplGenericConstructor ->
+                            this.SetValuesOf refValue
+                        | :? FplVariable as var when var.Value.IsSome ->
+                            this.SetValuesOf refValue
+                        | _ -> this.SetValue refValue
+                    | :? FplMapCases -> 
+                        returnedReference.Run variableStack
+                        this.SetValuesOf returnedReference
+                    | _ ->
+                        let value = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
+                        this.SetValue value
+            | _ -> 
+                // should syntactically not occur that a functional term has no mapping
+                // in this case return undef
+                let value = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
+                this.SetValue value
+        | _ -> 
+            // should syntactically not occur that a return statement occurs in something else
+            // then a functional term
+            // in this case return undef
+            let value = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
+            this.SetValue value
+        this.Debug Debug.Stop
+
 
 type FplCaseSingle(positions: Positions, parent: FplValue) as this =
     inherit FplGenericStmt(positions, parent)
