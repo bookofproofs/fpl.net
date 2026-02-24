@@ -285,6 +285,7 @@ type TestRepresentation() =
         let fplCode = sprintf """
         def cl Nat
         def func Zero() -> Nat
+        def func One() -> Nat
         def pred Equal(x,y: tpl) infix "=" 50 
         {
             del.Equal(x,y)
@@ -295,7 +296,7 @@ type TestRepresentation() =
             return mcases
             (
                 | (x = @0) : Zero() 
-                ? Nat()  
+                ? One()  
             )
         }
  

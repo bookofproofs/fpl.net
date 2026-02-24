@@ -4158,8 +4158,10 @@ type TestInterpreterErrors() =
     [<DataRow("32a", "def pred T(x:obj) {dec ~v:*ind[ind] v[$1]:=x; true};", 1)>]    
     [<DataRow("33a", "def cl A def cl B:A def pred T(v:B) {dec v:=A; true};", 1)>] // A is A but references to a class, error
     [<DataRow("33b", "def cl A def cl B:A def pred T(v:B) {dec v:=B; true};", 1)>] // B is B, but a class reference, error
+    [<DataRow("34", "def cl A def func S()->A def func T()->A {dec ~x:A x:=S(); return x};", 0)>] // mapping matching class
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
+
     member this.TestSIG05(no:string, fplCode:string, expected) =
         if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()

@@ -852,6 +852,7 @@ and FplVariableStack() =
         let replaceValues (p:FplValue) (ar:FplValue) =
             match ar.Value with 
             | Some v -> p.SetValue v
+            | None when ar.Name = PrimExtensionObj && ar.IsIntrinsic -> p.Value <- Some ar
             | None -> p.Value <- None
 
         let rec replace (pars:FplValue list) (args: FplValue list) = 
@@ -1737,7 +1738,7 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
         | _, _, None -> sprintf "%s(%s)" head pars
         | _, _, Some map -> sprintf "%s(%s) -> %s" head pars (map.Type propagate)
 
-    override this.Run _ = 
+    override this.Run _ =
         this.Debug Debug.Start
         // FplGenericVariable has nothing to run
         this.Debug Debug.Stop
@@ -3369,7 +3370,11 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
                     called.Run variableStack
                     this.SetValuesOf called
                     variableStack.RestoreState(called)
-            | PrimExtensionObj 
+            | PrimExtensionObj when not called.IsIntrinsic ->
+                called.Run variableStack
+                this.SetValuesOf called
+            | PrimExtensionObj when called.IsIntrinsic ->
+                this.SetValue called
             | PrimDelegateDecrementL
             | PrimDelegateEqualL ->
                 called.Run variableStack
@@ -4172,11 +4177,11 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
         match this.RefersTo with 
         | Some extensionDefinition ->
             let pars = variableStack.SaveState(extensionDefinition)
-            if pars.Length = 1 then
-                let extVar = pars[0]
-                extVar.SetValue this
-            else
-                () // should never occur since extensionDefinition has syntactically always only one parameters
+            let spawnedValue = this.Clone()
+            spawnedValue.RefersTo <- None // set the extensions's variable's to a copy of this FplExtensionObj, 
+            spawnedValue.IsIntrinsic <- true // but to an intrinsic one (to prevent delegating it's Represent() to a circular enclosing FplExtension definition)
+            let args = [spawnedValue]
+            variableStack.ReplaceVariables pars args
             // store the position of the caller
             variableStack.CallerStartPos <- this.StartPos
             variableStack.CallerEndPos <- this.EndPos

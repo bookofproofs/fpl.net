@@ -1005,7 +1005,7 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("00", "T()", "def pred T() {dec ~x:pred x:=false; x};",  LiteralFalse)>]
     [<DataRow("01", "T()", "def pred T() {dec ~x:ind x:=$42; x};",  "$42")>]
     [<DataRow("02", "T()", "def cl A def pred T() {dec ~x:A x:=A(); x};",  """A()""")>]
-    [<DataRow("02a", "T() -> A", "def cl A def func T()->A {dec ~x:A x:=T(); return x};",  """T()""")>]
+    [<DataRow("02a", "T() -> A", "def cl A def func S()->A def func T()->A {dec ~x:A x:=S(); return x};",  """S()""")>]
     [<TestMethod>]
     member this.TestAssignedValuePassedToEnclosingBlock(no:string, enclosing:string, fplCode, (expected:string)) =
         ad.Clear()
