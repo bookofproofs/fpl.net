@@ -278,7 +278,7 @@ type TestRepresentation() =
             Assert.IsTrue(false)
 
     [<DataRow("00", "@0", """Zero()""")>]
-    [<DataRow("00", "@1", "Nat()")>]
+    [<DataRow("00", "@1", "One()")>]
     [<TestMethod>]
     member this.TestRepresentationMCasesSimple(no:string, varVal, expected:string) =
         ad.Clear()

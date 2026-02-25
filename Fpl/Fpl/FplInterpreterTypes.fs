@@ -867,7 +867,7 @@ and FplVariableStack() =
         let replaceValues (p:FplValue) (ar:FplValue) =
             match ar.Value with 
             | Some v -> p.SetValue v
-            | None when ar.Name = PrimExtensionObj && ar.IsIntrinsic -> p.Value <- Some ar
+            | None when ar.Name = PrimExtensionObj -> p.Value <- Some ar
             | None -> p.Value <- None
 
         let rec replace (pars:FplValue list) (args: FplValue list) = 
@@ -983,7 +983,7 @@ type IHasDotted =
     abstract member DottedChild : FplValue option with get, set
 
 /// Searches for a references in node symbol table. 
-/// Will works properly only for nodes types that use their scope like FplReference, FplSelf, FplParent, FplForInStmtDomain, FplForInStmtEntity, FplVariable
+/// Will work properly only for nodes types that use their scope like FplReference, FplSelf, FplParent, FplForInStmtDomain, FplForInStmtEntity, FplVariable
 let rec referencedNodeOpt (fv:FplValue) = 
     
     let refNodeOpt = 
@@ -3400,6 +3400,8 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
             | PrimExtensionObj
             | PrimIntrinsicPred ->
                 this.SetValue called
+            | PrimVariableL when called.Value.IsSome ->
+                this.SetValuesOf called
             | _ -> ()
         | _ -> ()
         this.Debug Debug.Stop variableStack
