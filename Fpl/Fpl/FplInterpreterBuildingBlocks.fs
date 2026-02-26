@@ -1189,15 +1189,6 @@ let rec eval (st: SymbolTable) ast =
         let last = variableStack.PeekEvalStack()
         variableStack.PopEvalStack()
         match fv with
-        | :? FplTheorem  
-        | :? FplLemma  
-        | :? FplProposition  
-        | :? FplCorollary  
-        | :? FplConjecture  
-        | :? FplPredicate  
-        | :? FplAxiom 
-        | :? FplMandatoryPredicate ->
-            fv.SetValue(last)
         | :? FplReference ->
             // simplify references created due to superfluous parentheses of expressions
             // by replacing them with their single value

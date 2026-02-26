@@ -2434,6 +2434,16 @@ type FplAxiom(positions: Positions, parent: FplValue, runOrder) =
             runArgumentsOfGenericPredicateWithExpression this variableStack
             _isReady <- true
             this.ErrorOccurred <- emitLG003diagnostic (this.Type(SignatureType.Name)) this.Name (this.Represent()) this.StartPos this.EndPos
+
+            // evaluate all corollaries of the axiom
+            this.Scope.Values
+            |> Seq.filter (fun fv -> fv.Name = LiteralCorL) 
+            |> Seq.sortBy (fun block -> block.RunOrder.Value) 
+            |> Seq.iter (fun fv -> 
+                fv.Run variableStack
+            )
+
+
         this.Debug Debug.Stop variableStack
 
     override this.RunOrder = Some _runOrder
@@ -2617,6 +2627,14 @@ type FplConjecture(positions: Positions, parent: FplValue, runOrder) =
         if not _isReady then
             runArgumentsOfGenericPredicateWithExpression this variableStack
             _isReady <- true
+
+            // evaluate all corollaries of the conjecture
+            this.Scope.Values
+            |> Seq.filter (fun fv -> fv.Name = LiteralCorL) 
+            |> Seq.sortBy (fun block -> block.RunOrder.Value) 
+            |> Seq.iter (fun fv -> 
+                fv.Run variableStack
+            )
         this.Debug Debug.Stop variableStack
 
 
@@ -3363,6 +3381,7 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
             | LiteralCtorL
             | PrimDefaultConstructor
             | PrimBaseConstructorCall
+            | PrimExtensionL
             | PrimPredicateL
             | PrimFunctionalTermL
             | PrimMandatoryFunctionalTermL
