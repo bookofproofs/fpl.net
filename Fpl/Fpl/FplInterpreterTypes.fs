@@ -4557,6 +4557,7 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) =
     | PrimClassL, PrimClassL 
     | PrimClassL, PrimVariableL ->
         errMsgClassValueNotAllowed aType, Parameter.Consumed
+    | PrimVariableL, PrimMappingL
     | PrimRefL, PrimVariableL
     | PrimRefL, PrimMappingL ->
         let aIsCallByReference = isCallByReference a
@@ -4608,7 +4609,7 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) =
                 matchTwoTypes refNode p // match signatures with parameters
             | Some refNode ->
                 // a node was referenced not a predicate node
-                errWrongReturnType aIsCallByReference aName (refNode.Type SignatureType.Type) pType p, Parameter.Consumed
+                errMsgStandard aIsCallByReference aName (refNode.Type SignatureType.Type) pName pType, Parameter.Consumed
             | _ ->
                 // in all other cases, error
                 errMsgStandard aIsCallByReference aName aType pName pType, Parameter.Consumed
@@ -4657,7 +4658,7 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) =
                 matchTwoTypes a def
             | Some _, Some refNode when refNode.Name = PrimIntrinsicUndef -> 
                 None, Parameter.Consumed // definition accepting undef
-            | Some def, Some (:? FplGenericVariable as refNode) when not refNode.IsInitialized  -> 
+            | Some def, Some (:? FplGenericVariable as refNode) -> 
                 matchTwoTypes a def
             | Some def, Some (:? FplExtensionObj as extObj) -> 
                 matchTwoTypes extObj def
@@ -4665,7 +4666,7 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) =
                 matchTwoTypes pCl aCl
             | None, Some refNode when map.TypeId = LiteralObj && refNode.Name = PrimInstanceL -> 
                 None, Parameter.Consumed // obj accepting instance
-            | None, Some (:? FplGenericVariable as refNode) when map.TypeId = LiteralObj && not refNode.IsInitialized -> 
+            | None, Some (:? FplGenericVariable as refNode) when map.TypeId = LiteralObj -> 
                 let refNodeOpt1 = referencedNodeOpt refNode
                 match refNodeOpt1 with 
                 | Some (:? FplClass as cl) -> None, Parameter.Consumed // obj accepting instance
