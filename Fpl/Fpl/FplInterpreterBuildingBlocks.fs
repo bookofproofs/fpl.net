@@ -1186,25 +1186,8 @@ let rec eval (st: SymbolTable) ast =
         let refBlock = variableStack.PeekEvalStack() // if the reference was replaced, take this one
         refBlock.EndPos <- pos2
         simplifyTriviallyNestedExpressions refBlock
-        let last = variableStack.PeekEvalStack()
         variableStack.PopEvalStack()
-        match fv with
-        | :? FplReference ->
-            // simplify references created due to superfluous parentheses of expressions
-            // by replacing them with their single value
-            if prefixOpAst.IsNone && 
-                postfixOpAst.IsNone &&
-                fv.FplId = "" && 
-                fv.ArgList.Count = 1 then
-                    let subNode = fv.ArgList[0]
-                    match subNode with
-                    | :? FplReference ->
-                        variableStack.Pop() |> ignore
-                        variableStack.PushEvalStack(subNode)
-                        subNode.Parent <- fv.Parent
-                        fv.ArgList.Clear()
-                    | _ -> ()
-        | _ -> ()
+        simplifyTriviallyNestedExpressions fv
     | Ast.Cases((pos1, pos2), (caseSingleListAsts, caseElseAst)) ->
         let parent = variableStack.PeekEvalStack()
         let casesStmt = new FplCases((pos1, pos2), parent)
