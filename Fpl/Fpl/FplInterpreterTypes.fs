@@ -1350,7 +1350,9 @@ let addExpressionToReference (fplValue:FplValue) =
         | Some next when next.Name = PrimRefL && next.RefersTo.IsSome ->
             let referenced = next.RefersTo.Value
             match referenced.Name with 
-            | PrimVariableArrayL ->
+            | PrimVariableArrayL 
+            | LiteralParent 
+            | LiteralSelf ->
                 next.ArgList.Add fplValue
             | _ ->
                 next.FplId <- fplValue.FplId
@@ -1361,7 +1363,9 @@ let addExpressionToReference (fplValue:FplValue) =
                 fplValue.Name = PrimDelegateEqualL 
              || fplValue.Name = PrimDelegateDecrementL
              ) ->
-            addExpressionToParentArgList fplValue 
+            next.FplId <- fplValue.FplId
+            next.TypeId <- fplValue.TypeId
+            next.RefersTo <- Some fplValue
         | Some next when next.Name = PrimRefL ->
             next.FplId <- fplValue.FplId
             next.TypeId <- fplValue.TypeId
@@ -3548,6 +3552,7 @@ type FplReference(positions: Positions, parent: FplValue) =
             match this.RefersTo with
             | Some ret when ret.Name = LiteralSelf && ret.RefersTo.IsSome -> ret.RefersTo.Value
             | Some ret when ret.Name = LiteralParent && ret.RefersTo.IsSome -> ret.RefersTo.Value
+            | Some ret when ret.Name = PrimDelegateDecrementL && ret.RefersTo.IsSome -> ret.RefersTo.Value
             | Some ret -> ret
             | None -> this
 
@@ -3560,7 +3565,7 @@ type FplReference(positions: Positions, parent: FplValue) =
 
         let head = 
             let ret = 
-                if headObj.Name = PrimExtensionL then 
+                if headObj.Name = PrimExtensionL || headObj.Name = PrimDelegateDecrementL then 
                     headObj.Type signatureType
                 elif headObj.ExpressionType.IsNoFix then
                     getFplHead headObj signatureType 

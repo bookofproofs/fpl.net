@@ -2469,9 +2469,11 @@ type SymbolTableStructure() =
         
         match nodeType, varVal with
         | "FplDecrement", "00" ->
-            Assert.IsInstanceOfType<FplReturn>(parent)
-            Assert.AreEqual<int>(1, parent.ArgList.Count)
+            Assert.IsInstanceOfType<FplReference>(parent)
+            Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsTrue(parent.RefersTo.IsSome)
+            Assert.IsTrue(Object.ReferenceEquals(parent.RefersTo.Value, node))
             Assert.IsInstanceOfType<FplDecrement>(node)
             Assert.AreEqual<int>(1, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)

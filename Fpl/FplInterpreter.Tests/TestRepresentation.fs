@@ -239,7 +239,11 @@ type TestRepresentation() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("00", "@0", "")>]
+    [<DataRow("00", "@0", "Zero()")>]
+    [<DataRow("01", "@1", "Succ(Zero())")>]
+    [<DataRow("02", "@2", "Succ(Succ(Zero()))")>]
+    [<DataRow("03", "@3", "Succ(Succ(Succ(Zero())))")>]
+    [<DataRow("04", "@6", "Succ(Succ(Succ(Succ(Succ(Succ(Zero()))))))")>]
     [<TestMethod>]
     member this.TestRepresentationMCases(no:string, varVal, expected:string) =
         ad.Clear()
@@ -257,8 +261,6 @@ type TestRepresentation() =
             return mcases
             (
                 | (x = @0) : Zero() 
-                | (x = @1) : Succ(Zero()) 
-                | (x = @2) : Succ(Succ(Zero())) 
                 ? Succ(self(delegate.Decrement(x)))  
             )
         }
