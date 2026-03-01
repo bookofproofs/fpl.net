@@ -1187,7 +1187,10 @@ let rec eval (st: SymbolTable) ast =
         refBlock.EndPos <- pos2
         simplifyTriviallyNestedExpressions refBlock
         variableStack.PopEvalStack()
-        simplifyTriviallyNestedExpressions fv
+        match fv with 
+        | :? FplReference ->
+            simplifyTriviallyNestedExpressions fv
+        | _ -> ()
     | Ast.Cases((pos1, pos2), (caseSingleListAsts, caseElseAst)) ->
         let parent = variableStack.PeekEvalStack()
         let casesStmt = new FplCases((pos1, pos2), parent)

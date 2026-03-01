@@ -3412,7 +3412,9 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
                 this.SetValuesOf called
             | PrimExtensionObj when called.IsIntrinsic ->
                 this.SetValue called
-            | PrimDelegateDecrementL
+            | PrimDelegateDecrementL ->
+                called.Run variableStack
+                this.SetValuesOf called
             | PrimDelegateEqualL ->
                 called.Run variableStack
                 this.SetValuesOf called
@@ -4348,8 +4350,16 @@ type FplExtension(positions: Positions, parent: FplValue, runOrder) =
 
     override this.IsBlock () = true
 
+    /// Returns the (only one parameter) variable of this extension 
+    member this.ExtensionVar = 
+        let extensionVar = 
+            getParameters this
+            |> List.head
+        (extensionVar :?> FplVariable)
+
     override this.Run variableStack = 
         this.Debug Debug.Start variableStack
+        // run only if the extension variable was initialized
         _callCounter <- _callCounter + 1
         if _callCounter > maxRecursion then
             this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter variableStack.CallerStartPos variableStack.CallerEndPos
@@ -5473,6 +5483,7 @@ type FplDecrement(name, positions: Positions, parent: FplValue) as this =
             let newValue = FplExtensionObj((this.StartPos, this.EndPos), this.Parent.Value)
 
             let argPre = this.ArgList[0]
+            argPre.Run variableStack
             let numericValue = 
                 match argPre with
                 | :? FplGenericVariable -> 
