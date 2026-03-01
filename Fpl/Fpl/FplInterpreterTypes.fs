@@ -1130,6 +1130,60 @@ let private getParamTuple (fv:FplValue) (signatureType:SignatureType) =
         |> Seq.map (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.Type(propagate))
         |> String.concat ", "
 
+type FplTheory(theoryName, parent: FplValue, filePath: string, runOrder) as this =
+    inherit FplValue((Position("",0,1,1), Position("",0,1,1)), Some parent)
+    let _runOrder = runOrder
+
+    do
+        this.FilePath <- Some filePath
+        this.FplId <- theoryName
+        this.TypeId <- theoryName
+
+    override this.Name = PrimTheoryL
+    override this.ShortName = PrimTheory
+
+    override this.Clone () =
+        let ret = new FplTheory(this.FplId, this.Parent.Value, this.FilePath.Value, _runOrder)
+        this.AssignParts(ret)
+        ret
+
+    override this.Type signatureType = getFplHead this signatureType
+
+    /// The RunOrder in which this theory is to be executed.
+    override this.RunOrder = Some _runOrder
+
+    override this.EmbedInSymbolTable _ = 
+        let next = this.Parent.Value
+        // name conflicts of theories do not occur because of *.fpl file management 
+        // and file-names being namespace names
+        next.Scope.TryAdd(this.FplId, this) |> ignore
+
+    /// Returns all Fpl Building Blocks that run on their own in this theory ordered by their RunOrder ascending.
+    /// Only some of the building block run on their own in the theory, including axioms, theorems, lemmas, propositions, and conjectures.
+    /// All other building blocks (e.g. rules of inferences, definitions of classes, etc.) are run when called by the first type of blocks.
+    /// The RunOrder is set when creating the FplTheory during the parsing of the AST.
+    member private this.OrderedBlocksRunningByThemselves =
+        this.Scope.Values
+        |> Seq.choose (fun block ->
+            match block.RunOrder with
+            | Some _ -> Some block
+            | _ -> None)
+        |> Seq.sortBy (fun block -> block.RunOrder.Value) 
+        |> Seq.toList
+
+    override this.Run variableStack = 
+        this.Debug Debug.Start variableStack 
+        let blocks = this.OrderedBlocksRunningByThemselves
+        blocks
+        |> Seq.iter (fun block -> block.Run variableStack)        
+        this.Debug Debug.Stop variableStack
+
+/// Indicates if an FplValue is the root of the SymbolTable.
+let isTheory (fv:FplValue) = 
+    match fv with
+    | :? FplTheory -> true
+    | _ -> false
+
 type FplRoot() =
     inherit FplValue((Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
     override this.Name = PrimRoot
@@ -1149,8 +1203,8 @@ type FplRoot() =
     member this.OrderedTheories =
         this.Scope.Values
         |> Seq.choose (fun item ->
-            match item.Name with
-            | PrimTheoryL -> Some item
+            match item with
+            | :? FplTheory as theory -> Some theory
             | _ -> None)
         |> Seq.sortBy (fun th -> th.RunOrder.Value) 
 
@@ -5301,6 +5355,7 @@ type FplEquivalence(positions: Positions, parent: FplValue) as this =
         this.CheckConsistency()
         addExpressionToParentArgList this
 
+
 [<AbstractClass>]
 type FplGenericDelegate(name, positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
@@ -5445,61 +5500,6 @@ type FplDecrement(name, positions: Positions, parent: FplValue) as this =
                     string n'
             this.SetValue(newValue)
         this.Debug Debug.Stop variableStack
-
-type FplTheory(theoryName, parent: FplValue, filePath: string, runOrder) as this =
-    inherit FplValue((Position("",0,1,1), Position("",0,1,1)), Some parent)
-    let _runOrder = runOrder
-
-    do
-        this.FilePath <- Some filePath
-        this.FplId <- theoryName
-        this.TypeId <- theoryName
-
-    override this.Name = PrimTheoryL
-    override this.ShortName = PrimTheory
-
-    override this.Clone () =
-        let ret = new FplTheory(this.FplId, this.Parent.Value, this.FilePath.Value, _runOrder)
-        this.AssignParts(ret)
-        ret
-
-    override this.Type signatureType = getFplHead this signatureType
-
-    /// The RunOrder in which this theory is to be executed.
-    override this.RunOrder = Some _runOrder
-
-    override this.EmbedInSymbolTable _ = 
-        let next = this.Parent.Value
-        // name conflicts of theories do not occur because of *.fpl file management 
-        // and file-names being namespace names
-        next.Scope.TryAdd(this.FplId, this) |> ignore
-
-    /// Returns all Fpl Building Blocks that run on their own in this theory ordered by their RunOrder ascending.
-    /// Only some of the building block run on their own in the theory, including axioms, theorems, lemmas, propositions, and conjectures.
-    /// All other building blocks (e.g. rules of inferences, definitions of classes, etc.) are run when called by the first type of blocks.
-    /// The RunOrder is set when creating the FplTheory during the parsing of the AST.
-    member private this.OrderedBlocksRunningByThemselves =
-        this.Scope.Values
-        |> Seq.choose (fun block ->
-            match block.RunOrder with
-            | Some _ -> Some block
-            | _ -> None)
-        |> Seq.sortBy (fun block -> block.RunOrder.Value) 
-        |> Seq.toList
-
-    override this.Run variableStack = 
-        this.Debug Debug.Start variableStack 
-        let blocks = this.OrderedBlocksRunningByThemselves
-        blocks
-        |> Seq.iter (fun block -> block.Run variableStack)        
-        this.Debug Debug.Stop variableStack
-
-/// Indicates if an FplValue is the root of the SymbolTable.
-let isTheory (fv:FplValue) = 
-    match fv with
-    | :? FplTheory -> true
-    | _ -> false
-
 
 type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
