@@ -3425,6 +3425,7 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
             | PrimIntrinsicUndef
             | PrimIntrinsicTpl 
             | PrimExtensionObj
+            | PrimVariableArrayL 
             | PrimIntrinsicPred ->
                 this.SetValue called
             | PrimVariableL when called.Value.IsSome ->
