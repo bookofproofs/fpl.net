@@ -3376,6 +3376,25 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
     
     override this.Clone () = this // do not clone references to prevent stack overflow 
 
+    member private this.RunWithVariableReplacement (called:FplValue) (variableStack:FplVariableStack) =
+        match box called, this.NextBlockNode with
+        | :? ICanBeCalledRecusively as calledRecursively, Some blockNodeOfThis when 
+            Object.ReferenceEquals(blockNodeOfThis, called) && 
+            calledRecursively.CallCounter > maxRecursion -> () // stop recursion
+        | _ ->
+            let pars = variableStack.SaveState(called) 
+            let args = this.ArgList |> Seq.toList
+            // run all arguments before replacing variables with their values
+            args |> List.iter (fun arg -> arg.Run variableStack)
+            variableStack.ReplaceVariables pars args
+            // store the position of the caller
+            variableStack.CallerStartPos <- this.StartPos
+            variableStack.CallerEndPos <- this.EndPos
+            // run all statements of the called node
+            called.Run variableStack
+            this.SetValuesOf called
+            variableStack.RestoreState(called)
+
     override this.Run variableStack =
         this.Debug Debug.Start variableStack
         let calledOpt = referencedNodeOpt this
@@ -3390,26 +3409,9 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
             | PrimFunctionalTermL
             | PrimMandatoryFunctionalTermL
             | PrimMandatoryPredicateL ->
-                match box called, this.NextBlockNode with
-                | :? ICanBeCalledRecusively as calledRecursively, Some blockNodeOfThis when 
-                    Object.ReferenceEquals(blockNodeOfThis, called) && 
-                    calledRecursively.CallCounter > maxRecursion -> () // stop recursion
-                | _ ->
-                    let pars = variableStack.SaveState(called) 
-                    let args = this.ArgList |> Seq.toList
-                    // run all arguments before replacing variables with their values
-                    args |> List.iter (fun arg -> arg.Run variableStack)
-                    variableStack.ReplaceVariables pars args
-                    // store the position of the caller
-                    variableStack.CallerStartPos <- this.StartPos
-                    variableStack.CallerEndPos <- this.EndPos
-                    // run all statements of the called node
-                    called.Run variableStack
-                    this.SetValuesOf called
-                    variableStack.RestoreState(called)
+                this.RunWithVariableReplacement called variableStack
             | PrimExtensionObj when not called.IsIntrinsic ->
-                called.Run variableStack
-                this.SetValuesOf called
+                this.RunWithVariableReplacement called variableStack
             | PrimExtensionObj when called.IsIntrinsic ->
                 this.SetValue called
             | PrimDelegateDecrementL ->
@@ -5488,6 +5490,11 @@ type FplDecrement(name, positions: Positions, parent: FplValue) as this =
                 match argPre with
                 | :? FplGenericVariable -> 
                     argPre.Represent()
+                | :? FplReference when argPre.RefersTo.IsSome ->
+                    match argPre.RefersTo.Value with
+                    | :? FplGenericVariable as argPreVar -> 
+                        argPreVar.Represent()
+                    | _ -> argPre.FplId
                 | _ -> argPre.FplId
 
             let mutable n = 0
@@ -6126,15 +6133,7 @@ type FplReturn(positions: Positions, parent: FplValue) as this =
                     | :? FplIntrinsicInd 
                     | :? FplIntrinsicUndef ->
                         this.SetValue returnedReference
-                    | :? FplReference when returnedReference.RefersTo.IsSome ->
-                        let refValue = returnedReference.RefersTo.Value
-                        refValue.Run variableStack
-                        match refValue with 
-                        | :? FplGenericConstructor ->
-                            this.SetValuesOf refValue
-                        | :? FplVariable as var when var.Value.IsSome ->
-                            this.SetValuesOf refValue
-                        | _ -> this.SetValue refValue
+                    | :? FplReference 
                     | :? FplMapCases -> 
                         returnedReference.Run variableStack
                         this.SetValuesOf returnedReference
