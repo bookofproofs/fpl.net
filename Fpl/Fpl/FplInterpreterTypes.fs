@@ -1400,9 +1400,8 @@ type FplIntrinsicPred(positions: Positions, parent: FplValue) as this =
         this.FplId 
 
     override this.Run variableStack = 
-        this.Debug Debug.Start variableStack
         // FplIntrinsicPred is a value of predicate closures and has no value on its own
-        this.Debug Debug.Stop variableStack
+        ()
 
     override this.EmbedInSymbolTable _ = addExpressionToReference this
 
@@ -1757,9 +1756,8 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
         | _, _, Some map -> sprintf "%s(%s) -> %s" head pars (map.Type propagate)
 
     override this.Run variableStack =
-        this.Debug Debug.Start variableStack
         // FplGenericVariable has nothing to run
-        this.Debug Debug.Stop variableStack
+        ()
 
     override this.RunOrder = None
 
@@ -1912,9 +1910,8 @@ type FplRuleOfInference(positions: Positions, parent: FplValue, runOrder) as thi
     override this.IsBlock () = true    
 
     override this.Run variableStack = 
-        this.Debug Debug.Start variableStack
-        // FplRuleOfReference does not have any Value
-        this.Debug Debug.Stop variableStack
+        // FplRuleOfReference does not have any Value and doesn't need run
+        ()
 
     override this.EmbedInSymbolTable _ = 
         this.CheckConsistency()
@@ -1946,9 +1943,8 @@ type FplInstance(positions: Positions, parent: FplValue) as this =
         this.FplId
 
     override this.Run variableStack = 
-        this.Debug Debug.Start variableStack
         // FplInstance is a value representation and has no value on its own
-        this.Debug Debug.Stop variableStack
+        ()
 
     override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
 
@@ -1970,9 +1966,8 @@ type FplBase(positions: Positions, parent: FplValue) =
     override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
 
     override this.Run variableStack = 
-        this.Debug Debug.Start variableStack
         // FplBase no value on its own
-        this.Debug Debug.Stop variableStack
+        ()
 
     override this.RunOrder = None
 
@@ -2189,11 +2184,10 @@ and FplClass(positions: Positions, parent: FplValue, runOrder) as this =
     override this.Type signatureType = getFplHead this signatureType
 
     override this.Run variableStack = 
-        this.Debug Debug.Start variableStack
         // initialization of the stmts in the class and/or its constructors and/or properties not needed since
         // it will be done inside instances
         // FplClass has no value on their own
-        this.Debug Debug.Stop variableStack
+        ()
 
     override this.CheckConsistency () = 
         base.CheckConsistency()
@@ -3209,9 +3203,8 @@ type FplTranslation(positions: Positions, parent: FplValue) =
         this.FplId // represent according to string in the FplId of the translation term
 
     override this.Run variableStack = 
-        this.Debug Debug.Start variableStack
         // no run necessary 
-        this.Debug Debug.Stop variableStack
+        ()
 
     override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
 
@@ -3237,9 +3230,8 @@ type FplLanguage(positions: Positions, parent: FplValue) =
         representationSep " " this.ArgList 
 
     override this.Run variableStack = 
-        this.Debug Debug.Start variableStack
         // no run necessary 
-        this.Debug Debug.Stop variableStack
+        ()
 
     override this.EmbedInSymbolTable _ = 
         let parent = this.Parent.Value
@@ -3310,9 +3302,8 @@ type FplIntrinsicTpl(name, positions: Positions, parent: FplValue) as this =
             getFplHead this signatureType
 
     override this.Run variableStack = 
-        this.Debug Debug.Start variableStack
         // A template has no value
-        this.Debug Debug.Stop variableStack
+        ()
 
     /// Sets a template usage and issues a specific diagnostics if a type conflict occurs.
     /// The caller decides with specific diagnostics to issue. If the diagnostics is unhandled, 
@@ -3362,9 +3353,8 @@ type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
         LiteralUndef 
 
     override this.Run variableStack = 
-        this.Debug Debug.Start variableStack
         // FplIntrinsicUndef is a value of not defined FPL objects and has no value on its own
-        this.Debug Debug.Stop variableStack
+        ()
 
     override this.EmbedInSymbolTable _ = addExpressionToReference this
 
@@ -3410,9 +3400,9 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
             | PrimMandatoryFunctionalTermL
             | PrimMandatoryPredicateL ->
                 this.RunWithVariableReplacement called variableStack
-            | PrimExtensionObj when not called.IsIntrinsic ->
+            | PrimExtensionObj when not called.RefersTo.IsSome ->
                 this.RunWithVariableReplacement called variableStack
-            | PrimExtensionObj when called.IsIntrinsic ->
+            | PrimExtensionObj when called.RefersTo.IsNone ->
                 this.SetValue called
             | PrimDelegateDecrementL ->
                 called.Run variableStack
@@ -3813,9 +3803,8 @@ type FplMapping(positions: Positions, parent: FplValue) =
         $"dec {this.Type(SignatureType.Type)}"
 
     override this.Run variableStack = 
-        this.Debug Debug.Start variableStack
         // FplMapping has nothing to do in run
-        this.Debug Debug.Stop variableStack
+        ()
 
     override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
 
@@ -4244,9 +4233,8 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
             | _ ->
                 this.SetValuesOf extensionDefinition
             variableStack.RestoreState(extensionDefinition)
-        | _ ->
-            // this ExtensionObj is intrinsic since it does not refer to any extension definition
-            this.IsIntrinsic <- true
+        | _ -> ()
+            // this ExtensionObj is an intrinsic value with the Representation FplId, because it does not refer to any extension definition
         this.Debug Debug.Stop variableStack
 
 
@@ -4967,9 +4955,8 @@ type FplParent(positions: Positions, parent: FplValue) as this =
         | _ -> LiteralUndef
 
     override this.Run variableStack = 
-        this.Debug Debug.Start variableStack
         // FplParent has no value, unless it has a representable RefersTo
-        this.Debug Debug.Stop variableStack
+        ()
 
     override this.EmbedInSymbolTable _ = addExpressionToReference this
 
@@ -5009,9 +4996,8 @@ type FplSelf(positions: Positions, parent: FplValue) as this =
         | _ -> LiteralUndef
 
     override this.Run variableStack = 
-        this.Debug Debug.Start variableStack
         // FplSelf has no value, unless it has a representable RefersTo
-        this.Debug Debug.Stop variableStack
+        ()
 
     override this.EmbedInSymbolTable _ = addExpressionToReference this
 
@@ -5533,9 +5519,8 @@ type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
         | _ -> this.FplId
 
     override this.Run variableStack = 
-        this.Debug Debug.Start variableStack
         // no Run needed for FplIntrinsicInd
-        this.Debug Debug.Stop variableStack
+        ()
 
     override this.EmbedInSymbolTable _ = addExpressionToReference this
 
