@@ -321,7 +321,7 @@ type SignatureType =
     | Mixed
 
 /// Maximum number of calls allowed for an Fpl Node
-let maxRecursion = 5
+let maxRecursion = 15
 
 
 /// Checks if a string starts with a lower case character string
@@ -4207,8 +4207,12 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
 
     override this.Run variableStack = 
         this.Debug Debug.Start variableStack
-        match this.RefersTo with 
-        | Some extensionDefinition ->
+        match this.RefersTo, this.NextBlockNode with 
+        | Some extensionDefinition, Some enclosingBlock when Object.ReferenceEquals(extensionDefinition, enclosingBlock) ->
+            // do not run extension objects inside their own definitions
+            // (will be interpreted via FplId string Represent() instead)
+            ()
+        | Some extensionDefinition, _ ->
             let pars = variableStack.SaveState(extensionDefinition)
             let spawnedValue = this.Clone()
             spawnedValue.RefersTo <- None // set the extensions's variable's to a copy of this FplExtensionObj, 
@@ -4232,7 +4236,7 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
             | _ ->
                 this.SetValuesOf extensionDefinition
             variableStack.RestoreState(extensionDefinition)
-        | _ -> ()
+        | _, _ -> ()
             // this ExtensionObj is an intrinsic value with the Representation FplId, because it does not refer to any extension definition
         this.Debug Debug.Stop variableStack
 
