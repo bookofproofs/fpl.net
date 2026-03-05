@@ -3400,7 +3400,7 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
             | PrimMandatoryFunctionalTermL
             | PrimMandatoryPredicateL ->
                 this.RunWithVariableReplacement called variableStack
-            | PrimExtensionObj when not called.RefersTo.IsSome ->
+            | PrimExtensionObj when called.RefersTo.IsSome ->
                 this.RunWithVariableReplacement called variableStack
             | PrimExtensionObj when called.RefersTo.IsNone ->
                 this.SetValue called
@@ -3414,7 +3414,6 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
             | PrimIntrinsicInd
             | PrimIntrinsicUndef
             | PrimIntrinsicTpl 
-            | PrimExtensionObj
             | PrimVariableArrayL 
             | PrimIntrinsicPred ->
                 this.SetValue called
