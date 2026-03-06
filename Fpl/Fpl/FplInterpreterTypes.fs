@@ -3372,19 +3372,44 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
             Object.ReferenceEquals(blockNodeOfThis, called) && 
             calledRecursively.CallCounter > maxRecursion -> () // stop recursion
         | _ ->
-            let pars = variableStack.SaveState(called) 
-            let args = this.ArgList |> Seq.toList
-            // run all arguments before replacing variables with their values
-            args |> List.iter (fun arg -> arg.Run variableStack)
-            variableStack.ReplaceVariables pars args
-            // store the position of the caller
-            variableStack.CallerStartPos <- this.StartPos
-            variableStack.CallerEndPos <- this.EndPos
-            // run all statements of the called node
-            called.Run variableStack
-            this.SetValuesOf called
-            variableStack.RestoreState(called)
+            let mutable allArgumentsHaveDefinedValues = true
+            let args = 
+                this.ArgList 
+                // run all arguments before replacing parameters with argument values
+                |> Seq.map (fun arg -> 
+                    arg.Run variableStack
+                    match arg.Value with
+                    | None -> 
+                        // set the value of the argument with undef in evaluation was unsuccessfull
+                        arg.SetValue (new FplIntrinsicUndef((arg.StartPos, arg.EndPos), arg))
+                        allArgumentsHaveDefinedValues <- false
+                    | Some (:? FplIntrinsicUndef) -> 
+                        allArgumentsHaveDefinedValues <- false
+                    | Some v when v.FplId = LiteralUndef -> 
+                        allArgumentsHaveDefinedValues <- false
+                    | _ -> ()
+                    arg
+                )
+                |> Seq.toList
 
+            // run subroutines only if all arguments have defined values
+            if allArgumentsHaveDefinedValues then 
+                let pars = variableStack.SaveState(called) 
+                variableStack.ReplaceVariables pars args
+                // store the position of the caller
+                variableStack.CallerStartPos <- this.StartPos
+                variableStack.CallerEndPos <- this.EndPos
+                // run all statements of the called node
+                called.Run variableStack
+                this.SetValuesOf called
+                variableStack.RestoreState(called)
+            else
+                // TODO replace by DefaultValue
+                if called.Name = PrimPredicateL then 
+                    called.SetValue (new FplIntrinsicPred((called.StartPos, called.EndPos), called))
+                    this.SetValuesOf called
+                else
+                    ()
     override this.Run variableStack =
         this.Debug Debug.Start variableStack
         let calledOpt = referencedNodeOpt this

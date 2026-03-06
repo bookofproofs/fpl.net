@@ -536,10 +536,10 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("base33", "dec ~p: pred(c: obj); p(c)")>]
     [<DataRow("base34", "is(x, Set)")>]
     [<TestMethod>]
-    member this.TestExpression(var, varVal) =
+    member this.TestExpressionRepresent(var, varVal) =
         ad.Clear()
         let fplCode = sprintf "def pred T1() { %s };" varVal
-        let filename = "TestExpression.fpl"
+        let filename = "TestExpressionRepresent.fpl"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -572,11 +572,11 @@ type TestFplValueScopeFplRepresentation() =
             | "base13b" -> Assert.AreEqual<string>("1", base1.Represent())
             | "base10c" -> Assert.AreEqual<string>($"Test({LiteralUndef}, {LiteralUndef})", base1.Represent())
             | "base11c" -> Assert.AreEqual<string>(LiteralUndef, base1.Represent())
-            | "base12c" -> Assert.AreEqual<string>(PrimNone, base1.Represent())
+            | "base12c" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
             | "base13c" -> Assert.AreEqual<string>("1", base1.Represent())
             | "base10d" -> Assert.AreEqual<string>($"Test[{LiteralUndef}, {LiteralUndef}]", base1.Represent())
             | "base11d" -> Assert.AreEqual<string>(LiteralUndef, base1.Represent())
-            | "base12d" -> Assert.AreEqual<string>(PrimNone, base1.Represent())
+            | "base12d" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
             | "base13d" -> Assert.AreEqual<string>("1", base1.Represent())
             | "base10e" -> Assert.AreEqual<string>($"{LiteralUndef}", base1.Represent())
             | "base11e" -> Assert.AreEqual<string>($"x[{LiteralUndef}, {LiteralUndef}]", base1.Represent())
@@ -584,7 +584,7 @@ type TestFplValueScopeFplRepresentation() =
             | "base13e" -> Assert.AreEqual<string>($"T[{LiteralUndef}, {LiteralUndef}]", base1.Represent())
             | "base10f" -> Assert.AreEqual<string>($"x({LiteralUndef}, {LiteralUndef})", base1.Represent())
             | "base11f" -> Assert.AreEqual<string>($"x({LiteralUndef}, {LiteralUndef})", base1.Represent())
-            | "base12f" -> Assert.AreEqual<string>(PrimNone, base1.Represent())
+            | "base12f" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
             | "base13f" -> Assert.AreEqual<string>($"T({LiteralUndef}, {LiteralUndef})", base1.Represent())
             | "base14" -> Assert.AreEqual<string>("∅", base1.Represent())
             | "base15" -> Assert.AreEqual<string>($"-({LiteralUndef})", base1.Represent())
