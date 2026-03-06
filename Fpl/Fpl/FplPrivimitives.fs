@@ -1468,7 +1468,9 @@ let PrimTranslation = "trsl"
 [<Literal>]
 let PrimTranslationL = "translation"
 [<Literal>]
-let PrimUndetermined = "undetermined"
+let PrimUndetermined = "undet"
+[<Literal>]
+let PrimUndeterminedL = "undetermined value"
 [<Literal>]
 let PrimVariable = "var"
 [<Literal>]

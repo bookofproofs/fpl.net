@@ -1378,6 +1378,38 @@ let isRoot (fv:FplValue) =
     | :? FplRoot -> true
     | _ -> false
 
+/// Implements the semantics of a default undetermined value 
+/// that has the required type of the consumer FplValue. If this the value of this consumer cannot be determined during the interpretation, 
+/// its value will be set to this undermined value compatible with the consumer type.
+/// FplUndetermined is not to be confused with FplIntrinsicUndef that is used for declaring partial mappings in FPL.
+type FplUndetermined(typeId:string, positions: Positions, parent: FplValue) as this =
+    inherit FplGenericHasNoValue(positions, parent)
+    do 
+        this.FplId <- PrimUndetermined
+        this.TypeId <- typeId
+
+    override this.Name = PrimUndeterminedL
+    override this.ShortName = PrimUndetermined
+
+    override this.Clone () =
+        let ret = new FplUndetermined(this.TypeId, (this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Type (signatureType:SignatureType) = getFplHead this signatureType
+                    
+    override this.Represent() = // done
+        this.FplId 
+
+    override this.Run variableStack = 
+        // FplIntrinsicUndetermined is a value of predicate closures and has no value on its own
+        ()
+
+    override this.EmbedInSymbolTable _ = addExpressionToReference this
+
+    override this.RunOrder = None
+
+
 /// Implements the semantics of an FPL predicate prime predicate that is intrinsic.
 /// It serves as a value for everything in FPL that is "predicative in nature". These can be predicates, theorem-like-statements, proofs or predicative expressions. The value can have one of three values in FPL: "true", LiteralFalse, and "undetermined". 
 type FplIntrinsicPred(positions: Positions, parent: FplValue) as this =

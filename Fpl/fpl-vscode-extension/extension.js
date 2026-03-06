@@ -301,6 +301,7 @@ typeToIconMap.set('inst','output');
 typeToIconMap.set('ind','symbol-numeric');
 typeToIconMap.set('tpl','gear');
 typeToIconMap.set('undef','question');
+typeToIconMap.set('undet','question');
 
 
 
