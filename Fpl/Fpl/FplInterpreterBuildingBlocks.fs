@@ -22,8 +22,6 @@ open FplGrammarTypes
 open FplInterpreterTypes
 open FplInterpreterDiagnosticsEmitter
 
-let variableStack = FplVariableStack()
-
 let filterCandidates (candidatesPre:FplValue list) identifier qualified =
     let candidates =
         candidatesPre
