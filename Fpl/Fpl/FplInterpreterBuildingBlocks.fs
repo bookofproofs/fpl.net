@@ -22,7 +22,7 @@ open FplGrammarTypes
 open FplInterpreterTypes
 open FplInterpreterDiagnosticsEmitter
 
-let filterCandidates (candidatesPre:FplValue list) identifier qualified =
+let filterCandidates (candidatesPre:FplGenericNode list) identifier qualified =
     let candidates =
         candidatesPre
         |> List.filter (fun fv1 -> fv1.FplId = identifier)
@@ -46,7 +46,7 @@ let filterCandidates (candidatesPre:FplValue list) identifier qualified =
     (candidates, candidatesNames)
 
 /// Simplify trivially nested expressions by removing from the stack FplValue nodes that were created due to too long parsing tree and replacing them by their sub nodes 
-let rec simplifyTriviallyNestedExpressions (rb:FplValue) = 
+let rec simplifyTriviallyNestedExpressions (rb:FplGenericNode) = 
     if rb.ArgList.Count = 1 && rb.FplId = "" then
         // removable reference blocks are those with only a single argument and unset FplId 
         let subNode = rb.ArgList[0]
@@ -187,8 +187,8 @@ let rec eval (st: SymbolTable) ast =
             fv.TypeId <- extensionName
         | _ -> ()
     | Ast.Var((pos1, pos2), name) ->
-        let checkByName (fv:FplValue) = 
-            let rec IsInUpperScope (fv1: FplValue): FplGenericVariable option =
+        let checkByName (fv:FplGenericNode) = 
+            let rec IsInUpperScope (fv1: FplGenericNode): FplGenericVariable option =
                 if fv1.Name = PrimTheoryL then 
                     None
                 elif fv1.Scope.ContainsKey(name) then
@@ -511,7 +511,7 @@ let rec eval (st: SymbolTable) ast =
         let candidatesFromTheory = findCandidatesByName st identifier false false
         let candidatesLocal = findCandidatesByNameInBlock fv identifier
         let candidates, candidatesNames =  filterCandidates (candidatesFromTheory @ candidatesLocal) identifier true
-        let correctIds (fv1:FplValue) = 
+        let correctIds (fv1:FplGenericNode) = 
             match fv with 
             | :? FplBase 
             | :? FplBaseConstructorCall 
@@ -651,7 +651,7 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PopEvalStack()
     | Ast.ArgumentTuple((pos1, pos2), predicateListAst) ->
         let next = variableStack.PeekEvalStack()
-        let consumeArgumentsWithParent (parent:FplValue) =
+        let consumeArgumentsWithParent (parent:FplGenericNode) =
             if predicateListAst.Length > 0 then 
                 predicateListAst 
                 |> List.iter (fun pred -> 
@@ -702,7 +702,7 @@ let rec eval (st: SymbolTable) ast =
         eval st referencingIdentifierAst
     | Ast.PredicateWithOptSpecification((pos1, pos2), (fplIdentifierAst, optionalSpecificationAst)) ->
         let fv = variableStack.PeekEvalStack()
-        let searchForCandidatesOfReferenceBlock (refBlock:FplValue) = 
+        let searchForCandidatesOfReferenceBlock (refBlock:FplGenericNode) = 
             let candidatesFromTheory = findCandidatesByName st refBlock.FplId true false
             let candidatesFromPropertyScope = findCandidatesByNameInBlock refBlock refBlock.FplId
             let candidatesFromDottedQualification = findCandidatesByNameInDotted refBlock refBlock.FplId
@@ -711,7 +711,7 @@ let rec eval (st: SymbolTable) ast =
             @ candidatesFromDottedQualification
 
         /// parentFv is a dotted reference 
-        let getCandidatesBasedOnDottedParent (parentFv: FplValue) = 
+        let getCandidatesBasedOnDottedParent (parentFv: FplGenericNode) = 
             let referencedNodeOpt, typeRefNode, typeNameRefNode =
                 match parentFv.RefersTo with 
                 | Some parentFvRefersTo ->
@@ -836,7 +836,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.InheritedFunctionalTypeList inheritedTypeAsts 
     | Ast.InheritedClassTypeList inheritedTypeAsts -> 
         let beingCreatedNode = variableStack.PeekEvalStack()
-        let addVariablesAndPropertiesOfBaseNode (bNode:FplValue) = 
+        let addVariablesAndPropertiesOfBaseNode (bNode:FplGenericNode) = 
             match box beingCreatedNode with
             | :? FplGenericInheriting as inheritingNode -> 
                 inheritingNode.InheritVariables bNode
@@ -1097,7 +1097,7 @@ let rec eval (st: SymbolTable) ast =
 
         /// Returns the precedence of fv1 if its ExpressionType is Infix
         /// or Int32.MaxValue otherwise
-        let getPrecedence (fv1:FplValue) =
+        let getPrecedence (fv1:FplGenericNode) =
             match fv1.RefersTo with
             | None -> Int32.MaxValue
             | Some x -> 

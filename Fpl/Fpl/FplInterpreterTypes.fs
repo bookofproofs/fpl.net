@@ -395,7 +395,7 @@ type Debug =
     | Stop
 
 [<AbstractClass>]
-type FplValue(positions: Positions, parent: FplValue option) =
+type FplGenericNode(positions: Positions, parent: FplGenericNode option) =
     let mutable _expressionType = FixType.NoFix
     let mutable _argType = ArgType.Nothing
     let mutable _exprTypeAlreadySet = false
@@ -408,12 +408,12 @@ type FplValue(positions: Positions, parent: FplValue option) =
     let mutable (_filePath: string option) = None
     let mutable _isIntrinsic = false
     let mutable (_errorOccurred: string option) = None
-    let mutable (_value:FplValue option) = None
-    let mutable _refersTo:FplValue option = None
+    let mutable (_value:FplGenericNode option) = None
+    let mutable _refersTo:FplGenericNode option = None
 
     let mutable _parent = parent
-    let _scope = Dictionary<string, FplValue>()
-    let _argList = List<FplValue>()
+    let _scope = Dictionary<string, FplGenericNode>()
+    let _argList = List<FplGenericNode>()
 
     /// A scope of this FplValue
     member this.Scope = _scope
@@ -421,9 +421,9 @@ type FplValue(positions: Positions, parent: FplValue option) =
     /// An argument list of this FplValue
     member this.ArgList = _argList
 
-    abstract member Clone: unit -> FplValue
-    abstract member Copy : FplValue -> unit
-    abstract member AssignParts: FplValue -> unit
+    abstract member Clone: unit -> FplGenericNode
+    abstract member Copy : FplGenericNode -> unit
+    abstract member AssignParts: FplGenericNode -> unit
     abstract member ShortName: string
     abstract member Name: string
     abstract member Represent: unit -> string
@@ -438,7 +438,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
     abstract member Type: SignatureType -> string
 
     /// Embeds this FplValue in the SymbolTable by adding it to the Scope or as an argument of its predecessor in the SymbolTable.
-    abstract member EmbedInSymbolTable: FplValue option -> unit
+    abstract member EmbedInSymbolTable: FplGenericNode option -> unit
 
     /// Abstract member for running this FplValue. 
     abstract member Run: unit -> unit
@@ -459,10 +459,10 @@ type FplValue(positions: Positions, parent: FplValue option) =
     abstract member IsMapping: unit -> bool
 
     /// Clears the ValueList and adds the argument to it. Previous value(s), if any, get lost.
-    abstract member SetValue: FplValue -> unit
+    abstract member SetValue: FplGenericNode -> unit
 
     /// Clears the ValueList and adds the argument to it. Previous value(s), if any, get lost.
-    abstract member SetValuesOf: FplValue -> unit
+    abstract member SetValuesOf: FplGenericNode -> unit
 
     /// A method used to issue diagnostics related to this FplValue and its structure retrieved during the FPL interpreter.
     abstract member CheckConsistency: unit -> unit
@@ -482,7 +482,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
     default this.IsProof () = false
     default this.IsMapping () = false
     
-    default this.AssignParts (ret:FplValue) =
+    default this.AssignParts (ret:FplGenericNode) =
         ret.FplId <- this.FplId
         ret.TypeId <- this.TypeId
         ret.Arity <- this.Arity
@@ -494,12 +494,12 @@ type FplValue(positions: Positions, parent: FplValue option) =
         ret.RefersTo <- this.RefersTo
 
         this.Scope
-        |> Seq.iter (fun (kvp:KeyValuePair<string, FplValue>) ->
+        |> Seq.iter (fun (kvp:KeyValuePair<string, FplGenericNode>) ->
             let value = kvp.Value.Clone()
             ret.Scope.Add(kvp.Key, value))
 
         this.ArgList
-        |> Seq.iter (fun (fv1:FplValue) ->
+        |> Seq.iter (fun (fv1:FplGenericNode) ->
             let value = fv1.Clone()
             ret.ArgList.Add(value))
 
@@ -622,7 +622,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
         |> Seq.toList
 
     /// Copies other FplValue to this one without changing its reference pointer.
-    default this.Copy(other: FplValue) =
+    default this.Copy(other: FplGenericNode) =
         this.FplId <- other.FplId
         this.TypeId <- other.TypeId
         this.Arity <- other.Arity
@@ -643,7 +643,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
 
     /// Qualified starting position of this FplValue
     member this.QualifiedStartPos =
-        let rec getFullName (fv: FplValue) (first: bool) =
+        let rec getFullName (fv: FplGenericNode) (first: bool) =
             let fvType = fv.Type(SignatureType.Mixed)
 
             if fv.ShortName = PrimRoot then ""
@@ -665,7 +665,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
     /// Calculates this FplValue's ultimate block node (if such exists).
     /// The ultimate block node is the FPL building block's FplValue enclosing this FplValue (if such exists)
     member this.UltimateBlockNode = 
-        let rec ultimateBlockNode (node:FplValue) =
+        let rec ultimateBlockNode (node:FplGenericNode) =
             match node.Parent with
             | Some parent ->
                 match parent.Name with
@@ -680,7 +680,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
     /// The next block node is either an FPL property (if such exists) 
     /// or the Fpl building block's FplValue enclosing this FplValue (if such exists).
     member this.NextBlockNode = 
-        let rec nextBlockNode (node:FplValue) =
+        let rec nextBlockNode (node:FplGenericNode) =
             match node.Name with 
             | LiteralCtorL
             | PrimMandatoryFunctionalTermL
@@ -699,7 +699,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
 
     /// Checks if a block named name is in the scope of the fplValue' parent.
     member this.InScopeOfParent name =
-        let conflictInSiblingTheory (parent: FplValue) =
+        let conflictInSiblingTheory (parent: FplGenericNode) =
             // if the parent is a theory, look also for its sibling theories
             let (conflicts: ScopeSearchResult list) =
                 let root = parent.Parent.Value
@@ -734,12 +734,6 @@ type FplValue(positions: Positions, parent: FplValue option) =
                 ScopeSearchResult.NotFound
         | None -> ScopeSearchResult.NotApplicable
 
-/// a type wrapping the type of the FplValue 
-and TypeNode = 
-    | Simple of FplValue 
-    | Array of FplValue
-    | Nothing
-
 /// a type wrapping the argument type of the FplValue 
 and ArgType = 
     | Parentheses
@@ -748,27 +742,29 @@ and ArgType =
 
 /// A discriminated union type for wrapping search results in the Scope of an FplValue.
 and ScopeSearchResult =
-    | FoundAssociate of FplValue
+    | FoundAssociate of FplGenericNode
     | FoundMultiple of string
     | FoundIncorrectBlock of string
-    | Found of FplValue
+    | Found of FplGenericNode
     | NotFound
     | NotApplicable
-and State() = 
-    let _vars = Dictionary<string,FplValue option>()
-    let mutable _value: FplValue option = None
-    let mutable _refersTo: FplValue option = None
+
+
+type State() = 
+    let _vars = Dictionary<string,FplGenericNode option>()
+    let mutable _value: FplGenericNode option = None
+    let mutable _refersTo: FplGenericNode option = None
 
     /// The optional value of the called node before it was called
     member this.Value
         with get() = _value
-        and set (value:FplValue option) = _value <- value
+        and set (value:FplGenericNode option) = _value <- value
 
 
     /// The optional RefersTo of the called node before it was called
     member this.RefersTo
         with get() = _refersTo
-        and set (value:FplValue option) = _refersTo <- value
+        and set (value:FplGenericNode option) = _refersTo <- value
 
     /// The dictionary of the variable values of the called node before it was called
     member this.VarValues = _vars
@@ -780,9 +776,9 @@ and State() =
 type FplVariableStack() = 
     let mutable _inSignatureEvaluation = false
     let _stateStack = Stack<KeyValuePair<string, State>>()
-    let _valueStack = Stack<FplValue>()
+    let _valueStack = Stack<FplGenericNode>()
     let _recursionCounters = Dictionary<string, int>()
-    let _assumedArguments = Stack<FplValue>()
+    let _assumedArguments = Stack<FplGenericNode>()
     // positions of the caller to prevent some diagnostics of being shown at the wrong position 
     let mutable _callerStartPos = Position("", 0,0,0)
     let mutable _callerEndPos = Position("", 0,0,0)
@@ -839,14 +835,14 @@ type FplVariableStack() =
     /// Copy the ValueList of the variadic ar to the ValueList of the variadic p
     /// by removing the previous values (if any) and
     /// inserting the clones of the elements.
-    member this.ReplaceVariables (parameters:FplValue list) (arguments:FplValue list) =
-        let replaceValues (p:FplValue) (ar:FplValue) =
+    member this.ReplaceVariables (parameters:FplGenericNode list) (arguments:FplGenericNode list) =
+        let replaceValues (p:FplGenericNode) (ar:FplGenericNode) =
             match ar.Value with 
             | Some v -> p.SetValue v
             | None when ar.Name = PrimExtensionObj -> p.Value <- Some ar
             | None -> p.Value <- None
 
-        let rec replace (pars:FplValue list) (args: FplValue list) = 
+        let rec replace (pars:FplGenericNode list) (args: FplGenericNode list) = 
             match (pars, args) with
             | (p::ps, ar::ars) ->
                 match p.Name , ar.Name with
@@ -878,11 +874,11 @@ type FplVariableStack() =
     /// where the key is the block's FplId and the value is a dictionary of all scope variables.
     /// Returns a list of parameters of the called FplValue, i.e. its signature variables.
     /// Since the block's FplId is unique in the scope, all variables are stored in a separate scope.
-    member this.SaveState (called:FplValue) = 
+    member this.SaveState (called:FplGenericNode) = 
         // now process all scope variables and push by replacing them with their clones
         // and pushing the originals on the stack
         let toBeSavedState = new State()
-        let pars = List<FplValue>()
+        let pars = List<FplGenericNode>()
         let vars = called.GetVariables()
         vars 
         |> List.iter (fun parOriginal -> 
@@ -900,11 +896,11 @@ type FplVariableStack() =
         pars |> Seq.toList
 
     /// Restores the state of a called FplValue block it had before it was called.
-    member this.RestoreState (called:FplValue) = 
+    member this.RestoreState (called:FplGenericNode) = 
         let stateBeforeBeingCalled = _stateStack.Pop().Value
         stateBeforeBeingCalled.VarValues
         |> Seq.iter (fun kvp -> 
-            let origVariable = (called.Scope:Dictionary<string, FplValue>)[kvp.Key] 
+            let origVariable = (called.Scope:Dictionary<string, FplGenericNode>)[kvp.Key] 
             let oldValue = kvp.Value
             origVariable.Value <- oldValue
         )
@@ -949,9 +945,9 @@ type FplVariableStack() =
 let variableStack = FplVariableStack()
 
 
-let debug (fv:FplValue) (debugMode:Debug) =
+let debug (fv:FplGenericNode) (debugMode:Debug) =
     let bars n = String.replicate n "| "
-    let rec getPath (fv1:FplValue) =
+    let rec getPath (fv1:FplGenericNode) =
         match fv1.Parent with 
         | Some parent -> $"{getPath parent} # {fv1.ShortName} {fv1.Type SignatureType.Name}"
         | None -> $"{fv1.ShortName}"
@@ -973,8 +969,8 @@ let debug (fv:FplValue) (debugMode:Debug) =
         File.AppendAllText(Path.Combine(currDir, "Debug.txt"), logLine)
 
 [<AbstractClass>]
-type FplGenericHasNoValue(positions: Positions, parent: FplValue) =
-    inherit FplValue(positions, Some parent)
+type FplGenericHasNoValue(positions: Positions, parent: FplGenericNode) =
+    inherit FplGenericNode(positions, Some parent)
 
     override this.Represent() = // done
         PrimNone
@@ -982,11 +978,11 @@ type FplGenericHasNoValue(positions: Positions, parent: FplValue) =
 
 
 type IHasDotted = 
-    abstract member DottedChild : FplValue option with get, set
+    abstract member DottedChild : FplGenericNode option with get, set
 
 /// Searches for a references in node symbol table. 
 /// Will work properly only for nodes types that use their scope like FplReference, FplSelf, FplParent, FplForInStmtDomain, FplForInStmtEntity, FplVariable
-let rec referencedNodeOpt (fv:FplValue) = 
+let rec referencedNodeOpt (fv:FplGenericNode) = 
     
     let refNodeOpt = 
         match box fv with 
@@ -1002,8 +998,8 @@ let rec referencedNodeOpt (fv:FplValue) =
     | _ -> refNodeOpt
 
 // Create an FplValue list containing all Scopes of an FplNode
-let rec flattenScopes (root: FplValue) =
-    let rec helper (node: FplValue) (acc: FplValue list) =
+let rec flattenScopes (root: FplGenericNode) =
+    let rec helper (node: FplGenericNode) (acc: FplGenericNode list) =
         let newAcc = node :: acc
         node.Scope |> Seq.fold (fun acc kvp -> helper kvp.Value acc) newAcc
 
@@ -1013,13 +1009,13 @@ let stripLastDollarDigit (s: string) =
     let lastIndex = s.LastIndexOf('$')
     if lastIndex <> -1 then s.Substring(0, lastIndex) else s
 
-let isVar (fv1:FplValue) =
+let isVar (fv1:FplGenericNode) =
     match fv1.Name with
     | PrimVariableL
     | PrimVariableArrayL -> true
     | _ -> false
     
-let isDefinition (fv1:FplValue) =
+let isDefinition (fv1:FplGenericNode) =
     match fv1.Name with
     | PrimClassL
     | PrimPredicateL
@@ -1030,19 +1026,19 @@ type IHasSignature =
     abstract member SignStartPos : Position with get, set
     abstract member SignEndPos : Position with get, set
 
-let hasSignature (fv1:FplValue) =
+let hasSignature (fv1:FplGenericNode) =
     match box fv1 with
     | :? IHasSignature -> true
     | _ -> false
 
-let isSignatureVar (fv1:FplValue) = 
+let isSignatureVar (fv1:FplGenericNode) = 
     match box fv1 with 
     | :? IVariable as var when var.IsSignatureVariable -> true
     | _ -> false
 
 /// Qualified name of this FplValue
-let qualifiedName (fplValue:FplValue) determined =
-    let rec getFullName (fv: FplValue) (first: bool) =
+let qualifiedName (fplValue:FplGenericNode) determined =
+    let rec getFullName (fv: FplGenericNode) (first: bool) =
         let fplValueType =
             match fv.Name with
             | LiteralLocL
@@ -1094,7 +1090,7 @@ let qualifiedName (fplValue:FplValue) determined =
 
 /// Checks if an fv is provable. This will only be true if
 /// it is a theorem, a lemma, a proposition, or a corollary
-let isProvable (fv: FplValue) =
+let isProvable (fv: FplGenericNode) =
     match fv.Name with
     | LiteralThmL
     | LiteralLemL
@@ -1104,13 +1100,13 @@ let isProvable (fv: FplValue) =
 
 /// Checks if an fplValue is a conjecture or an axiom. This is used to decide whether or
 /// not it is not provable.
-let isAxiomOrConnjecture (fv:FplValue) = 
+let isAxiomOrConnjecture (fv:FplGenericNode) = 
     match fv.Name with
     | LiteralConjL 
     | LiteralAxL -> true
     | _ -> false
 
-let private getFplHead (fv:FplValue) (signatureType:SignatureType) =
+let private getFplHead (fv:FplGenericNode) (signatureType:SignatureType) =
     match signatureType with
             | SignatureType.Name 
             | SignatureType.Mixed -> fv.FplId
@@ -1122,18 +1118,18 @@ let private propagateSignatureType (signatureType:SignatureType) =
     | _ -> signatureType 
 
 /// Generates a string of parameters based on SignatureType
-let private getParamTuple (fv:FplValue) (signatureType:SignatureType) =
+let private getParamTuple (fv:FplGenericNode) (signatureType:SignatureType) =
         let propagate = propagateSignatureType signatureType
         fv.Scope
-        |> Seq.filter (fun (kvp: KeyValuePair<string, FplValue>) ->
+        |> Seq.filter (fun (kvp: KeyValuePair<string, FplGenericNode>) ->
             isSignatureVar kvp.Value
             || (isVar fv) && not (kvp.Value.IsClass())
             || fv.IsMapping())
-        |> Seq.map (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.Type(propagate))
+        |> Seq.map (fun (kvp: KeyValuePair<string, FplGenericNode>) -> kvp.Value.Type(propagate))
         |> String.concat ", "
 
-type FplTheory(theoryName, parent: FplValue, filePath: string, runOrder) as this =
-    inherit FplValue((Position("",0,1,1), Position("",0,1,1)), Some parent)
+type FplTheory(theoryName, parent: FplGenericNode, filePath: string, runOrder) as this =
+    inherit FplGenericNode((Position("",0,1,1), Position("",0,1,1)), Some parent)
     let _runOrder = runOrder
 
     do
@@ -1181,13 +1177,13 @@ type FplTheory(theoryName, parent: FplValue, filePath: string, runOrder) as this
         debug this Debug.Stop 
 
 /// Indicates if an FplValue is the root of the SymbolTable.
-let isTheory (fv:FplValue) = 
+let isTheory (fv:FplGenericNode) = 
     match fv with
     | :? FplTheory -> true
     | _ -> false
 
 type FplRoot() =
-    inherit FplValue((Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
+    inherit FplGenericNode((Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
     override this.Name = PrimRoot
     override this.ShortName = PrimRoot
 
@@ -1219,13 +1215,13 @@ type FplRoot() =
         debug this Debug.Stop
 
 // Returns the root node of any FplValue
-let rec getRoot (fv:FplValue) =
+let rec getRoot (fv:FplGenericNode) =
     if fv.Name = PrimRoot then 
         fv :?> FplRoot
     else getRoot fv.Parent.Value
    
 // Tries to add for statement's domain or entity to its parent's for statement
-let tryAddToParentForInStmt (fplValue:FplValue) =
+let tryAddToParentForInStmt (fplValue:FplGenericNode) =
     let identifier = fplValue.Type SignatureType.Name
     let parent = fplValue.Parent.Value
 
@@ -1239,7 +1235,7 @@ let tryAddToParentForInStmt (fplValue:FplValue) =
         parent.ArgList.Add fplValue
 
 // Tries to add a template to the ultimate block's scope, inside which it was used.
-let tryAddTemplateToParent (templateNode:FplValue) =
+let tryAddTemplateToParent (templateNode:FplGenericNode) =
     let identifier = templateNode.FplId
     let nextOpt = templateNode.UltimateBlockNode // the scope of all templates ís inside the ultimate block
     match nextOpt with 
@@ -1264,7 +1260,7 @@ let tryAddTemplateToParent (templateNode:FplValue) =
         ()
 
 // Tries to add an FPL block to its parent's scope using its FplId, or issues ID001 diagnostics if a conflict occurs
-let tryAddToParentUsingFplId (fplValue:FplValue) =
+let tryAddToParentUsingFplId (fplValue:FplGenericNode) =
     let identifier = fplValue.FplId
     let root = getRoot fplValue
     let conflicts = 
@@ -1284,7 +1280,7 @@ let tryAddToParentUsingFplId (fplValue:FplValue) =
         parent.Scope.Add(identifier, fplValue)
 
 // Tries to add an FPL block to its parent's scope using its mixed signature, or issues ID001 diagnostics if a conflict occurs
-let tryAddToParentUsingMixedSignature (fplValue:FplValue) =
+let tryAddToParentUsingMixedSignature (fplValue:FplGenericNode) =
     let identifier = fplValue.Type SignatureType.Mixed
     let root = getRoot fplValue
     let conflicts = 
@@ -1304,7 +1300,7 @@ let tryAddToParentUsingMixedSignature (fplValue:FplValue) =
         parent.Scope.Add(identifier, fplValue)
 
 // Tries to add a constructor or property to it's parent FPL block's scope using its mixed signature, or issues ID001 diagnostics if a conflict occurs
-let tryAddSubBlockToFplBlock (fplValue:FplValue) =
+let tryAddSubBlockToFplBlock (fplValue:FplGenericNode) =
     let identifier = fplValue.Type SignatureType.Mixed
     let parent = fplValue.Parent.Value
     if parent.Scope.ContainsKey(identifier) then 
@@ -1313,7 +1309,7 @@ let tryAddSubBlockToFplBlock (fplValue:FplValue) =
         parent.Scope.Add(identifier, fplValue)   
 
 // Tries to add an FPL block to its parent's scope using its typed signature, or issues ID001 diagnostics if a conflict occurs
-let tryAddToParentUsingTypedSignature (fplValue:FplValue) =
+let tryAddToParentUsingTypedSignature (fplValue:FplGenericNode) =
     let identifier = fplValue.Type SignatureType.Type
     let root = getRoot fplValue
     let conflicts = 
@@ -1332,7 +1328,7 @@ let tryAddToParentUsingTypedSignature (fplValue:FplValue) =
         parent.Scope.Add(identifier, fplValue)
 
 // Adds an expression to Parent's argument list
-let addExpressionToParentArgList (fplValue:FplValue) =
+let addExpressionToParentArgList (fplValue:FplGenericNode) =
     let parent = fplValue.Parent.Value
     match parent.Name with 
     | LiteralLocL ->
@@ -1343,7 +1339,7 @@ let addExpressionToParentArgList (fplValue:FplValue) =
     parent.ArgList.Add fplValue
 
 // Add an expression to a reference
-let addExpressionToReference (fplValue:FplValue) =
+let addExpressionToReference (fplValue:FplGenericNode) =
     let nextOpt = fplValue.Parent
     match box nextOpt with 
     | :? IHasDotted as dc when dc.DottedChild.IsSome -> ()
@@ -1375,7 +1371,7 @@ let addExpressionToReference (fplValue:FplValue) =
         | _ -> addExpressionToParentArgList fplValue 
 
 /// Indicates if an FplValue is the root of the SymbolTable.
-let isRoot (fv:FplValue) = 
+let isRoot (fv:FplGenericNode) = 
     match fv with
     | :? FplRoot -> true
     | _ -> false
@@ -1384,7 +1380,7 @@ let isRoot (fv:FplValue) =
 /// that has the required type of the consumer FplValue. If this the value of this consumer cannot be determined during the interpretation, 
 /// its value will be set to this undermined value compatible with the consumer type.
 /// FplUndetermined is not to be confused with FplIntrinsicUndef that is used for declaring partial mappings in FPL.
-type FplUndetermined(typeId:string, positions: Positions, parent: FplValue) as this =
+type FplUndetermined(typeId:string, positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericHasNoValue(positions, parent)
     do 
         this.FplId <- PrimUndetermined
@@ -1419,7 +1415,7 @@ type FplUndetermined(typeId:string, positions: Positions, parent: FplValue) as t
 /// It serves as a value for everything in FPL that is "predicative in nature". 
 /// These can be predicates, theorem-like-statements, proofs or predicative expressions. 
 /// The semantical representation can have one of two values in FPL: "true" and "false". 
-type FplIntrinsicPred(positions: Positions, parent: FplValue) as this =
+type FplIntrinsicPred(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericHasNoValue(positions, parent)
     do 
         this.FplId <- LiteralTrue
@@ -1447,8 +1443,8 @@ type FplIntrinsicPred(positions: Positions, parent: FplValue) as this =
     override this.RunOrder = None
 
 [<AbstractClass>]
-type FplGenericPredicate(positions: Positions, parent: FplValue) as this =
-    inherit FplValue(positions, Some parent)
+type FplGenericPredicate(positions: Positions, parent: FplGenericNode) as this =
+    inherit FplGenericNode(positions, Some parent)
     do 
         this.FplId <- LiteralTrue
         this.TypeId <- LiteralPred
@@ -1463,7 +1459,7 @@ type FplGenericPredicate(positions: Positions, parent: FplValue) as this =
         debug this Debug.Stop
 
 /// Tries to find a mapping of an FplValue
-let rec getMapping (fv:FplValue) =
+let rec getMapping (fv:FplGenericNode) =
     match fv.Name with
     | LiteralParent 
     | LiteralSelf -> 
@@ -1479,28 +1475,28 @@ let rec getMapping (fv:FplValue) =
 
 type IHasDimensions =
     abstract member Dimensionality : int
-    abstract member DimensionTypes : List<FplValue>
-    abstract member SetType : string -> FplValue option -> Position -> Position -> unit
+    abstract member DimensionTypes : List<FplGenericNode>
+    abstract member SetType : string -> FplGenericNode option -> Position -> Position -> unit
 
 [<AbstractClass>]
-type FplGenericInheriting(positions: Positions, parent: FplValue) =
-    inherit FplValue(positions, Some parent)
+type FplGenericInheriting(positions: Positions, parent: FplGenericNode) =
+    inherit FplGenericNode(positions, Some parent)
     // used to ensure that every clone of FplGenericInheriting will preserve reference identity of inherited variables 
-    let _inheritedVariables = Dictionary<string, List<FplValue>>()
+    let _inheritedVariables = Dictionary<string, List<FplGenericNode>>()
     // used to ensure that every clone of FplGenericInheriting will preserve reference identity of inherited properties
-    let _inheritedProperties = Dictionary<string, List<FplValue>>()
+    let _inheritedProperties = Dictionary<string, List<FplGenericNode>>()
 
     /// Wraps an inherited object in a tuple together with the newFromNode it was from and stores this tuple with the keyOfInheritedObject in mapOfInheritedObjects. 
     /// Returns (Some oldFromNode, Some newFromNode) if some other tuple existed in the map, where oldFromNode will be the old base node that was overridden by newFromNode
     /// Returns (None, None) if no other tuple yet existed in the map
-    member private this.OverrideInheritedObject keyOfInheritedObject (mapOfInheritedObjects:Dictionary<string, List<FplValue>>) (inheritedObject:FplValue) (newFromNode:FplValue) withCloning =
+    member private this.OverrideInheritedObject keyOfInheritedObject (mapOfInheritedObjects:Dictionary<string, List<FplGenericNode>>) (inheritedObject:FplGenericNode) (newFromNode:FplGenericNode) withCloning =
         let clone = 
             if withCloning then
                 inheritedObject.Clone() // create a clone of new object to override the old one
             else
                 inheritedObject
         // create a tuple (clone, fromBaseNode)
-        let tuple = List<FplValue>()
+        let tuple = List<FplGenericNode>()
         tuple.Add clone 
         tuple.Add newFromNode // and where it was from
         if mapOfInheritedObjects.ContainsKey keyOfInheritedObject then
@@ -1513,7 +1509,7 @@ type FplGenericInheriting(positions: Positions, parent: FplValue) =
             mapOfInheritedObjects.Add(keyOfInheritedObject, tuple)
             (None, None, None)
             
-    member this.InheritVariables (fromBaseNode:FplValue) = 
+    member this.InheritVariables (fromBaseNode:FplGenericNode) = 
         fromBaseNode.GetVariables()
         |> List.iter (fun var ->
             match this.OverrideInheritedObject var.FplId _inheritedVariables var fromBaseNode true with
@@ -1523,7 +1519,7 @@ type FplGenericInheriting(positions: Positions, parent: FplValue) =
                 ()
         )
 
-    member this.InheritProperties (fromBaseNode:FplValue) = 
+    member this.InheritProperties (fromBaseNode:FplGenericNode) = 
         fromBaseNode.GetProperties()
         |> List.iter (fun prty ->
             let prtyName = prty.Type SignatureType.Mixed
@@ -1545,7 +1541,7 @@ type FplGenericInheriting(positions: Positions, parent: FplValue) =
                 let newFromNode = this.Type SignatureType.Mixed
                 let typeName = oldFrom.Name
                 // override the old node
-                let tuple = List<FplValue>()
+                let tuple = List<FplGenericNode>()
                 tuple.Add var // own scope variable
                 tuple.Add this // the var is from this
                 _inheritedVariables[var.FplId] <- tuple
@@ -1562,7 +1558,7 @@ type FplGenericInheriting(positions: Positions, parent: FplValue) =
                 let newFromNode = this.Type SignatureType.Mixed
                 let typeName = oldFrom.Name
                 // override the old node
-                let tuple = List<FplValue>()
+                let tuple = List<FplGenericNode>()
                 tuple.Add prty // own scope property
                 tuple.Add this // the property is from this
                 _inheritedProperties[prtyName] <- tuple
@@ -1590,8 +1586,8 @@ type FplGenericInheriting(positions: Positions, parent: FplValue) =
 
 
 [<AbstractClass>]
-type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
-    inherit FplValue(positions, Some parent)
+type FplGenericVariable(fplId, positions: Positions, parent: FplGenericNode) as this =
+    inherit FplGenericNode(positions, Some parent)
     let mutable _isSignatureVariable = false
     let mutable _isInitialized = false
     let mutable _isBound = false
@@ -1607,7 +1603,7 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
 
     /// Sets this variable to a used one .
     member this.SetIsUsed() =
-        let rec setIsUsed (fv:FplValue) =
+        let rec setIsUsed (fv:FplGenericNode) =
             fv.GetVariables()
             |> List.map (fun var -> var :?> FplGenericVariable)
             |> List.iter (fun var -> var.SetIsUsed())
@@ -1620,7 +1616,7 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
 
     /// Sets this variable to a bound one.
     member this.SetIsBound() =
-        let rec setIsBound (fv:FplValue) =
+        let rec setIsBound (fv:FplGenericNode) =
             fv.GetVariables()
             |> List.map (fun var -> var :?> FplGenericVariable)
             |> List.iter (fun var -> var.SetIsBound())
@@ -1651,19 +1647,19 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
 
     override this.EmbedInSymbolTable nextOpt =
         this.CheckConsistency()
-        let addToRuleOfInference (block:FplValue) = 
+        let addToRuleOfInference (block:FplGenericNode) = 
             if block.Scope.ContainsKey(this.FplId) then
                 this.ErrorOccurred <- emitVAR03diagnostics this.FplId block.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos
             else
                 block.Scope.Add(this.FplId, this)
 
-        let addToSimpleFplBlocksScope (block:FplValue) = 
+        let addToSimpleFplBlocksScope (block:FplGenericNode) = 
             if block.Scope.ContainsKey(this.FplId) then
                 this.ErrorOccurred <- emitVAR03diagnostics this.FplId block.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos
             else
                 block.Scope.Add(this.FplId, this)
         
-        let addToPropertyOrConstructor (property:FplValue) = 
+        let addToPropertyOrConstructor (property:FplGenericNode) = 
             let parentOfProperty = property.Parent.Value
             if property.Scope.ContainsKey(this.FplId) then
                 this.ErrorOccurred <- emitVAR03diagnostics this.FplId property.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos
@@ -1673,8 +1669,8 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
             else
                 property.Scope.Add(this.FplId, this)
 
-        let addToProofOrCorolllary (proofOrCorollary:FplValue) = 
-            let rec conflictInScope (node:FplValue) formulaConflict =
+        let addToProofOrCorolllary (proofOrCorollary:FplGenericNode) = 
+            let rec conflictInScope (node:FplGenericNode) formulaConflict =
                 if node.Scope.ContainsKey(this.FplId) then
                     this.ErrorOccurred <- emitVAR03diagnostics this.FplId node.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos
                     true
@@ -1693,10 +1689,10 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
             if not (conflictInScope proofOrCorollary false) then
                 proofOrCorollary.Scope.Add(this.FplId, this)
 
-        let addToQuantor (quantor:FplValue) =
+        let addToQuantor (quantor:FplGenericNode) =
             // issue VAR03, if the variable to be bound by the quantor was declared 
             // in the scope the quantor is placed in.
-            let rec checkConfictInScope (node:FplValue) =
+            let rec checkConfictInScope (node:FplGenericNode) =
                 if node.Scope.ContainsKey(this.FplId) then
                     this.ErrorOccurred <- emitVAR03diagnostics this.FplId node.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos
                 else 
@@ -1710,8 +1706,8 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
             checkConfictInScope quantor
             quantor.Scope.TryAdd(this.FplId, this) |> ignore        
         
-        let addToVariableOrMapping (variableOrMapping:FplValue) =
-            let rec conflictInScope (node:FplValue) =
+        let addToVariableOrMapping (variableOrMapping:FplGenericNode) =
+            let rec conflictInScope (node:FplGenericNode) =
                 if node.Scope.ContainsKey(this.FplId) then
                     this.ErrorOccurred <- emitVAR03diagnostics this.FplId node.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos 
                     true
@@ -1807,7 +1803,7 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
 
     override this.RunOrder = None
 
-    override this.Copy(other: FplValue) = 
+    override this.Copy(other: FplGenericNode) = 
         base.Copy(other)
         let otherVar = other :?> FplGenericVariable
         if otherVar.IsBound then 
@@ -1819,7 +1815,7 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplValue) as this =
         this.IsInitialized <- otherVar.IsInitialized
         this.RefersTo <- otherVar.RefersTo
 
-let checkVAR04Diagnostics (fv:FplValue) = 
+let checkVAR04Diagnostics (fv:FplGenericNode) = 
     fv.GetVariables()
     |> List.map (fun var -> var :?> FplGenericVariable)
     |> List.filter(fun var -> not var.IsUsed)
@@ -1827,16 +1823,16 @@ let checkVAR04Diagnostics (fv:FplValue) =
         var.ErrorOccurred <- emitVAR04diagnostics var.FplId var.StartPos var.EndPos
     )
 
-let isArgPred (arg:FplValue) = 
+let isArgPred (arg:FplGenericNode) = 
     let argType = arg.Type SignatureType.Type
     (argType, argType.StartsWith(LiteralPred))
 
 /// Checks if an argument of an FplValue is a predicate and issues LG001Diagnostics if its not.
-let checkArgPred (fv:FplValue) (arg:FplValue)  = 
+let checkArgPred (fv:FplGenericNode) (arg:FplGenericNode)  = 
     match fv.UltimateBlockNode with 
     | Some node when node.Name = LiteralLocL -> () // skip this check for localizations
     | _ ->
-        let argType, isPred = isArgPred (arg:FplValue) 
+        let argType, isPred = isArgPred (arg:FplGenericNode) 
         if isPred then 
             () 
         else
@@ -1844,14 +1840,14 @@ let checkArgPred (fv:FplValue) (arg:FplValue)  =
             fv.ErrorOccurred <- emitLG001Diagnostics argType argName fv.Name arg.StartPos arg.EndPos
 
 /// Checks if a predicate expression is actually being interpreted as an predicate
-let checkPredicateExpressionReturnsPredicate (fv:FplValue) =
+let checkPredicateExpressionReturnsPredicate (fv:FplGenericNode) =
     let exprOpt = fv.ArgList |> Seq.tryLast
     match exprOpt with 
     | Some expr -> checkArgPred fv expr
     | None -> ()
 
 [<AbstractClass>]
-type FplGenericPredicateWithExpression(positions: Positions, parent: FplValue) =
+type FplGenericPredicateWithExpression(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericPredicate(positions, parent)
     let mutable _signStartPos = Position("", 0L, 0L, 0L)
     let mutable _signEndPos = Position("", 0L, 0L, 0L)
@@ -1881,18 +1877,18 @@ type FplGenericPredicateWithExpression(positions: Positions, parent: FplValue) =
         checkPredicateExpressionReturnsPredicate this
 
 /// Creates a concatenated string represenation based on a sequence of FplValues.
-let representationSep sep (coordinates:FplValue seq) =
+let representationSep sep (coordinates:FplGenericNode seq) =
     coordinates 
     |> Seq.map (fun fv -> fv.Represent())
     |> String.concat sep
 
 /// Creates a concatenated string represenation based on a sequence of FplValues.
-let signatureSep sep (coordinates:FplValue seq) signatureType =
+let signatureSep sep (coordinates:FplGenericNode seq) signatureType =
     coordinates
     |> Seq.map (fun fv -> fv.Type signatureType)
     |> String.concat sep
 
-type FplPredicateList(positions: Positions, parent: FplValue, runOrder) = 
+type FplPredicateList(positions: Positions, parent: FplGenericNode, runOrder) = 
     inherit FplGenericHasNoValue(positions, parent)
     let _runOrder = runOrder
     override this.Name = LiteralPreL
@@ -1916,7 +1912,7 @@ type FplPredicateList(positions: Positions, parent: FplValue, runOrder) =
 
     override this.RunOrder = Some _runOrder
 
-type FplRuleOfInference(positions: Positions, parent: FplValue, runOrder) as this =
+type FplRuleOfInference(positions: Positions, parent: FplGenericNode, runOrder) as this =
     inherit FplGenericHasNoValue(positions, parent)
     let _runOrder = runOrder
     let mutable _signStartPos = Position("", 0L, 0L, 0L)
@@ -1966,7 +1962,7 @@ type FplRuleOfInference(positions: Positions, parent: FplValue, runOrder) as thi
 
     override this.RunOrder = Some _runOrder
 
-type FplInstance(positions: Positions, parent: FplValue) as this =
+type FplInstance(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericInheriting(positions, parent)
 
     do
@@ -1996,8 +1992,8 @@ type FplInstance(positions: Positions, parent: FplValue) as this =
 
     override this.RunOrder = None
 
-type FplBase(positions: Positions, parent: FplValue) =
-    inherit FplValue(positions, Some parent)
+type FplBase(positions: Positions, parent: FplGenericNode) =
+    inherit FplGenericNode(positions, Some parent)
 
     override this.Name = LiteralBase
     override this.ShortName = LiteralBase
@@ -2017,7 +2013,7 @@ type FplBase(positions: Positions, parent: FplValue) =
 
     override this.RunOrder = None
 
-let signatureRepresent (fv:FplValue) = 
+let signatureRepresent (fv:FplGenericNode) = 
     let signatureVarRepresentations = 
         fv.GetVariables()
         |> List.map (fun var -> var:?>FplGenericVariable)
@@ -2027,9 +2023,9 @@ let signatureRepresent (fv:FplValue) =
     $"{fv.FplId}({signatureVarRepresentations})"
 
 [<AbstractClass>]
-type FplGenericConstructor(name, positions: Positions, parent: FplValue) as this =
-    inherit FplValue(positions, Some parent)
-    let mutable (_toBeConstructedClass:FplValue option) = None 
+type FplGenericConstructor(name, positions: Positions, parent: FplGenericNode) as this =
+    inherit FplGenericNode(positions, Some parent)
+    let mutable (_toBeConstructedClass:FplGenericNode option) = None 
     let mutable _skolemName = ""
 
     do
@@ -2061,7 +2057,7 @@ type FplGenericConstructor(name, positions: Positions, parent: FplValue) as this
     override this.Run() = 
         debug this Debug.Start
 
-        let rec createSubInstance (classDef:FplValue) (instance:FplValue) (baseInstance:FplValue)=
+        let rec createSubInstance (classDef:FplGenericNode) (instance:FplGenericNode) (baseInstance:FplGenericNode)=
             classDef.ArgList
             |> Seq.filter (fun fv -> fv.Name = LiteralBase)
             |> Seq.map (fun fv -> fv :?> FplBase)
@@ -2107,7 +2103,7 @@ type FplGenericConstructor(name, positions: Positions, parent: FplValue) as this
 /// In FPL, such classes are "intrinsic". When the default constructor calls the constructor
 /// of some base classes, it is only possible if those classes are also intrinsic or have declared constructors
 /// without parameters. 
-type FplDefaultConstructor(name, positions: Positions, parent: FplValue) =
+type FplDefaultConstructor(name, positions: Positions, parent: FplGenericNode) =
     inherit FplGenericConstructor(name, positions, parent)
 
     override this.Name = PrimDefaultConstructor
@@ -2125,7 +2121,7 @@ type FplDefaultConstructor(name, positions: Positions, parent: FplValue) =
             next.Scope.TryAdd(this.FplId, this) |> ignore
         | _ -> ()
 
-type FplConstructor(positions: Positions, parent: FplValue) as this =
+type FplConstructor(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericConstructor(parent.FplId, positions, parent)
     let mutable _signStartPos = Position("", 0L, 0L, 0L)
     let mutable _signEndPos = Position("", 0L, 0L, 0L)
@@ -2182,7 +2178,7 @@ type FplConstructor(positions: Positions, parent: FplValue) as this =
 
     member this.ParentClass = this.Parent.Value :?> FplClass
 
-and FplClass(positions: Positions, parent: FplValue, runOrder) as this =
+and FplClass(positions: Positions, parent: FplGenericNode, runOrder) as this =
     inherit FplGenericInheriting(positions, parent)
     let _runOrder = runOrder
     let mutable _signStartPos = Position("", 0L, 0L, 0L)
@@ -2260,7 +2256,7 @@ type IHasProof =
     abstract member HasProof : bool with get, set
 
 [<AbstractClass>]
-type FplGenericPredicateBlock(positions: Positions, parent: FplValue) =
+type FplGenericPredicateBlock(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericPredicateWithExpression(positions, parent)
     let mutable _isReady = false
     let mutable _callCounter = 0
@@ -2307,8 +2303,8 @@ type FplGenericPredicateBlock(positions: Positions, parent: FplValue) =
         if not this.IsIntrinsic then // if not intrinsic, check variable usage
             checkVAR04Diagnostics this
 
-let checkSIG02Diagnostics (root:FplValue) symbol precedence pos1 pos2 = 
-    let precedences = Dictionary<int, FplValue>()
+let checkSIG02Diagnostics (root:FplGenericNode) symbol precedence pos1 pos2 = 
+    let precedences = Dictionary<int, FplGenericNode>()
     let precedenceWasAlreadyThere precedence fv =
         if not (precedences.ContainsKey(precedence)) then
             precedences.Add(precedence, fv)
@@ -2328,7 +2324,7 @@ let checkSIG02Diagnostics (root:FplValue) symbol precedence pos1 pos2 =
         let conflict = precedences[precedence].QualifiedStartPos
         precedences[precedence].ErrorOccurred <- emitSIG02Diagnostics symbol precedence conflict pos1 pos2
 
-type FplPredicate(positions: Positions, parent: FplValue, runOrder) as this =
+type FplPredicate(positions: Positions, parent: FplGenericNode, runOrder) as this =
     inherit FplGenericInheriting(positions, parent)
     let _runOrder = runOrder
     let mutable _signStartPos = Position("", 0L, 0L, 0L)
@@ -2424,7 +2420,7 @@ type FplPredicate(positions: Positions, parent: FplValue, runOrder) as this =
 
     override this.RunOrder = Some _runOrder
 
-type FplMandatoryPredicate(positions: Positions, parent: FplValue) =
+type FplMandatoryPredicate(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericPredicateBlock(positions, parent)
 
     override this.Name = PrimMandatoryPredicateL
@@ -2439,7 +2435,7 @@ type FplMandatoryPredicate(positions: Positions, parent: FplValue) =
         base.CheckConsistency()
         tryAddSubBlockToFplBlock this
 
-let runArgumentsOfGenericPredicateWithExpression (fv:FplValue) variableStack = 
+let runArgumentsOfGenericPredicateWithExpression (fv:FplGenericNode) variableStack = 
     fv.ArgList
     |> Seq.iter (fun fv1 -> 
         fv1.Run()
@@ -2449,7 +2445,7 @@ let runArgumentsOfGenericPredicateWithExpression (fv:FplValue) variableStack =
             fv.SetValuesOf fv1
     )
 
-type FplAxiom(positions: Positions, parent: FplValue, runOrder) =
+type FplAxiom(positions: Positions, parent: FplGenericNode, runOrder) =
     inherit FplGenericPredicateWithExpression(positions, parent)
     let _runOrder = runOrder
     let mutable _isReady = false
@@ -2493,7 +2489,7 @@ type FplAxiom(positions: Positions, parent: FplValue, runOrder) =
     override this.RunOrder = Some _runOrder
 
 [<AbstractClass>]
-type FplGenericTheoremLikeStmt(positions: Positions, parent: FplValue, runOrder) =
+type FplGenericTheoremLikeStmt(positions: Positions, parent: FplGenericNode, runOrder) =
     inherit FplGenericPredicateWithExpression(positions, parent)
     let _runOrder = runOrder
     let mutable _isReady = false
@@ -2538,7 +2534,7 @@ type FplGenericTheoremLikeStmt(positions: Positions, parent: FplValue, runOrder)
 
     override this.RunOrder = Some _runOrder
 
-type FplTheorem(positions: Positions, parent: FplValue, runOrder) =
+type FplTheorem(positions: Positions, parent: FplGenericNode, runOrder) =
     inherit FplGenericTheoremLikeStmt(positions, parent, runOrder)
 
     override this.Name = LiteralThmL
@@ -2549,7 +2545,7 @@ type FplTheorem(positions: Positions, parent: FplValue, runOrder) =
         this.AssignParts(ret)
         ret
 
-type FplLemma(positions: Positions, parent: FplValue, runOrder) =
+type FplLemma(positions: Positions, parent: FplGenericNode, runOrder) =
     inherit FplGenericTheoremLikeStmt(positions, parent, runOrder)
 
     override this.Name = LiteralLemL
@@ -2560,7 +2556,7 @@ type FplLemma(positions: Positions, parent: FplValue, runOrder) =
         this.AssignParts(ret)
         ret
 
-type FplProposition(positions: Positions, parent: FplValue, runOrder) =
+type FplProposition(positions: Positions, parent: FplGenericNode, runOrder) =
     inherit FplGenericTheoremLikeStmt(positions, parent, runOrder)
 
     override this.Name = LiteralPropL
@@ -2571,7 +2567,7 @@ type FplProposition(positions: Positions, parent: FplValue, runOrder) =
         this.AssignParts(ret)
         ret
 
-type FplCorollary(positions: Positions, parent: FplValue, runOrder) =
+type FplCorollary(positions: Positions, parent: FplGenericNode, runOrder) =
     inherit FplGenericTheoremLikeStmt(positions, parent, runOrder)
 
     override this.Name = LiteralCorL
@@ -2585,7 +2581,7 @@ type FplCorollary(positions: Positions, parent: FplValue, runOrder) =
     override this.EmbedInSymbolTable _ =
         /// Tries to find a theorem-like statement, a conjecture, or an axiom for a corollary
         /// and returns different cases of ScopeSearchResult, depending on different semantical error situations.
-        let tryFindAssociatedBlockForCorollary (fplValue: FplValue) =
+        let tryFindAssociatedBlockForCorollary (fplValue: FplGenericNode) =
             match fplValue.Parent with
             | Some theory ->
 
@@ -2643,7 +2639,7 @@ type FplCorollary(positions: Positions, parent: FplValue, runOrder) =
         tryAddToParentUsingFplId this
 
 
-type FplConjecture(positions: Positions, parent: FplValue, runOrder) =
+type FplConjecture(positions: Positions, parent: FplGenericNode, runOrder) =
     inherit FplGenericPredicateWithExpression(positions, parent)
     let _runOrder = runOrder
     let mutable _isReady = false
@@ -2685,7 +2681,7 @@ type FplConjecture(positions: Positions, parent: FplValue, runOrder) =
     override this.RunOrder = Some _runOrder
 
 [<AbstractClass>]
-type FplGenericArgInference(positions: Positions, parent: FplValue) =
+type FplGenericArgInference(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericPredicate(positions, parent)
 
     override this.Type signatureType =
@@ -2695,7 +2691,7 @@ type FplGenericArgInference(positions: Positions, parent: FplValue) =
     override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
 
 [<AbstractClass>]
-type FplGenericJustificationItem(positions: Positions, parent: FplValue) =
+type FplGenericJustificationItem(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericPredicate(positions, parent)
 
     override this.ShortName = PrimJustification
@@ -2768,7 +2764,7 @@ type FplGenericJustificationItem(positions: Positions, parent: FplValue) =
             () // no diagnostics needed because covered by ID010, ID023, or PR001
         debug this Debug.Stop
 
-and FplJustificationItemByAx(positions: Positions, parent: FplValue) =
+and FplJustificationItemByAx(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericJustificationItem(positions, parent)
 
     override this.Name = PrimJIByAx
@@ -2778,7 +2774,7 @@ and FplJustificationItemByAx(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
-and FplJustificationItemByDef(positions: Positions, parent: FplValue) =
+and FplJustificationItemByDef(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericJustificationItem(positions, parent)
 
     override this.Name = PrimJIByDef
@@ -2788,7 +2784,7 @@ and FplJustificationItemByDef(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
-and FplJustificationItemByDefVar(positions: Positions, parent: FplValue) =
+and FplJustificationItemByDefVar(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericJustificationItem(positions, parent)
 
     override this.Name = PrimJIByDefVar
@@ -2798,7 +2794,7 @@ and FplJustificationItemByDefVar(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
-and FplJustificationItemByConj(positions: Positions, parent: FplValue) =
+and FplJustificationItemByConj(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericJustificationItem(positions, parent)
 
     override this.Name = PrimJIByConj
@@ -2808,7 +2804,7 @@ and FplJustificationItemByConj(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
-and FplJustificationItemByCor(positions: Positions, parent: FplValue) =
+and FplJustificationItemByCor(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericJustificationItem(positions, parent)
 
     override this.Name = PrimJIByCor
@@ -2818,7 +2814,7 @@ and FplJustificationItemByCor(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
-and FplJustificationItemByInf(positions: Positions, parent: FplValue) =
+and FplJustificationItemByInf(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericJustificationItem(positions, parent)
 
     override this.Name = PrimJIByInf
@@ -2828,7 +2824,7 @@ and FplJustificationItemByInf(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
-and FplJustificationItemByRefArgument(positions: Positions, parent: FplValue) =
+and FplJustificationItemByRefArgument(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericJustificationItem(positions, parent)
 
     override this.Name = PrimJIByRefArgument
@@ -2838,7 +2834,7 @@ and FplJustificationItemByRefArgument(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
-and FplJustificationItemByProofArgument(positions: Positions, parent: FplValue) =
+and FplJustificationItemByProofArgument(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericJustificationItem(positions, parent)
 
     override this.Name = PrimJIByProofArgument
@@ -2849,7 +2845,7 @@ and FplJustificationItemByProofArgument(positions: Positions, parent: FplValue) 
         ret
 
 
-and FplJustificationItemByTheoremLikeStmt(positions: Positions, parent: FplValue) =
+and FplJustificationItemByTheoremLikeStmt(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericJustificationItem(positions, parent)
 
     override this.Name = PrimJIByTheoremLikeStmt
@@ -2859,7 +2855,7 @@ and FplJustificationItemByTheoremLikeStmt(positions: Positions, parent: FplValue
         this.AssignParts(ret)
         ret
 
-and FplJustification(positions: Positions, parent: FplValue) =
+and FplJustification(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericPredicate(positions, parent)
 
     override this.Name = PrimJustificationL
@@ -2892,7 +2888,7 @@ and FplJustification(positions: Positions, parent: FplValue) =
 
     member this.ParentArgument = this.Parent.Value :?> FplArgument
 
-and FplArgInferenceAssume(positions: Positions, parent: FplValue) =
+and FplArgInferenceAssume(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericArgInference(positions, parent)
 
     override this.Name = PrimArgInfAssume
@@ -2912,7 +2908,7 @@ and FplArgInferenceAssume(positions: Positions, parent: FplValue) =
 
     member this.ParentArgument = this.Parent.Value :?> FplArgument
 
-and FplArgInferenceRevoke(positions: Positions, parent: FplValue) =
+and FplArgInferenceRevoke(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericArgInference(positions, parent)
 
     override this.Name = PrimArgInfRevoke
@@ -2932,7 +2928,7 @@ and FplArgInferenceRevoke(positions: Positions, parent: FplValue) =
 
     member this.ParentArgument = this.Parent.Value :?> FplArgument
 
-and FplArgInferenceTrivial(positions: Positions, parent: FplValue) =
+and FplArgInferenceTrivial(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericArgInference(positions, parent)
 
     override this.Name = PrimArgInfTrivial
@@ -2952,7 +2948,7 @@ and FplArgInferenceTrivial(positions: Positions, parent: FplValue) =
 
     member this.ParentArgument = this.Parent.Value :?> FplArgument
 
-and FplArgInferenceDerived(positions: Positions, parent: FplValue) =
+and FplArgInferenceDerived(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericArgInference(positions, parent)
 
     override this.Name = PrimArgInfDerive
@@ -2972,7 +2968,7 @@ and FplArgInferenceDerived(positions: Positions, parent: FplValue) =
 
     member this.ParentArgument = this.Parent.Value :?> FplArgument
 
-and FplArgument(positions: Positions, parent: FplValue, runOrder) =
+and FplArgument(positions: Positions, parent: FplGenericNode, runOrder) =
     inherit FplGenericPredicate(positions, parent)
     let _runOrder = runOrder
 
@@ -3064,7 +3060,7 @@ and FplArgument(positions: Positions, parent: FplValue, runOrder) =
     member this.ParentProof = this.Parent.Value :?> FplProof
 
 
-and FplProof(positions: Positions, parent: FplValue, runOrder) =
+and FplProof(positions: Positions, parent: FplGenericNode, runOrder) =
     inherit FplGenericPredicateWithExpression(positions, parent)
     let _runOrder = runOrder
             
@@ -3123,7 +3119,7 @@ and FplProof(positions: Positions, parent: FplValue, runOrder) =
     override this.EmbedInSymbolTable _ = 
         /// Tries to find a theorem-like statement for a proof
         /// and returns different cases of ScopeSearchResult, depending on different semantical error situations.
-        let tryFindAssociatedBlockForProof (fplValue: FplValue) =
+        let tryFindAssociatedBlockForProof (fplValue: FplGenericNode) =
             match fplValue.Parent with
             | Some theory ->
 
@@ -3195,8 +3191,8 @@ let getArgumentInProof (fv1:FplGenericJustificationItem) argName =
     else 
         None
 
-type FplLocalization(positions: Positions, parent: FplValue, runOrder) =
-    inherit FplValue(positions, Some parent)
+type FplLocalization(positions: Positions, parent: FplGenericNode, runOrder) =
+    inherit FplGenericNode(positions, Some parent)
     let _runOrder = runOrder
     let mutable _currentLanguage = ""
 
@@ -3212,7 +3208,7 @@ type FplLocalization(positions: Positions, parent: FplValue, runOrder) =
         let head = getFplHead this signatureType
         let paramT =
             this.Scope
-            |> Seq.filter (fun (kvp: KeyValuePair<string, FplValue>) -> isVar kvp.Value)
+            |> Seq.filter (fun (kvp: KeyValuePair<string, FplGenericNode>) -> isVar kvp.Value)
             |> Seq.map (fun kvp -> kvp.Value)
             |> Seq.map (fun fv -> fv.Type signatureType)
             |> String.concat ", "
@@ -3242,8 +3238,8 @@ type FplLocalization(positions: Positions, parent: FplValue, runOrder) =
 
     override this.EmbedInSymbolTable _ = tryAddToParentUsingTypedSignature this
 
-type FplTranslation(positions: Positions, parent: FplValue) =
-    inherit FplValue(positions, Some parent)
+type FplTranslation(positions: Positions, parent: FplGenericNode) =
+    inherit FplGenericNode(positions, Some parent)
 
     override this.Name = PrimTranslationL
     override this.ShortName = PrimTranslation
@@ -3269,8 +3265,8 @@ type FplTranslation(positions: Positions, parent: FplValue) =
 
     override this.RunOrder = None
 
-type FplLanguage(positions: Positions, parent: FplValue) =
-    inherit FplValue(positions, Some parent)
+type FplLanguage(positions: Positions, parent: FplGenericNode) =
+    inherit FplGenericNode(positions, Some parent)
 
     override this.Name = PrimLanguageL
     override this.ShortName = PrimLanguage
@@ -3302,13 +3298,13 @@ type FplLanguage(positions: Positions, parent: FplValue) =
 
     override this.RunOrder = None
 
-let isLanguage (fv:FplValue) =
+let isLanguage (fv:FplGenericNode) =
     match fv with
     | :? FplLanguage -> true
     | _ -> false
 
 [<AbstractClass>]
-type FplGenericStmt(positions: Positions, parent: FplValue) =
+type FplGenericStmt(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericHasNoValue(positions, parent)
 
     override this.ShortName = PrimStmt
@@ -3317,7 +3313,7 @@ type FplGenericStmt(positions: Positions, parent: FplValue) =
 
     override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
 
-type FplAssertion(positions: Positions, parent: FplValue) =
+type FplAssertion(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericStmt(positions, parent)
 
     override this.Name = PrimAssertion
@@ -3335,7 +3331,7 @@ type FplAssertion(positions: Positions, parent: FplValue) =
 
     override this.RunOrder = None
 
-type FplIntrinsicTpl(name, positions: Positions, parent: FplValue) as this =
+type FplIntrinsicTpl(name, positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericHasNoValue(positions, parent)
 
     do
@@ -3367,7 +3363,7 @@ type FplIntrinsicTpl(name, positions: Positions, parent: FplValue) as this =
     /// Sets a template usage and issues a specific diagnostics if a type conflict occurs.
     /// The caller decides with specific diagnostics to issue. If the diagnostics is unhandled, 
     /// GEN00 diagnostic will be issued as default.
-    member this.TrySetTemplateUsage (fv:FplValue) diagnostic = 
+    member this.TrySetTemplateUsage (fv:FplGenericNode) diagnostic = 
         match this.RefersTo with 
         | None -> 
             this.RefersTo <- Some fv // if this template was not used, use it
@@ -3391,7 +3387,7 @@ type FplIntrinsicTpl(name, positions: Positions, parent: FplValue) as this =
 
     override this.RunOrder = None
 
-type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
+type FplIntrinsicUndef(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericHasNoValue(positions, parent)
     do 
         this.TypeId <- LiteralUndef
@@ -3420,12 +3416,12 @@ type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
     override this.RunOrder = None
 
 [<AbstractClass>]
-type FplGenericReference(positions: Positions, parent: FplValue) =
-    inherit FplValue(positions, Some parent)
+type FplGenericReference(positions: Positions, parent: FplGenericNode) =
+    inherit FplGenericNode(positions, Some parent)
     
     override this.Clone () = this // do not clone references to prevent stack overflow 
 
-    member private this.RunWithVariableReplacement (called:FplValue) (variableStack:FplVariableStack) =
+    member private this.RunWithVariableReplacement (called:FplGenericNode) (variableStack:FplVariableStack) =
         match box called, this.NextBlockNode with
         | :? ICanBeCalledRecusively as calledRecursively, Some blockNodeOfThis when 
             Object.ReferenceEquals(blockNodeOfThis, called) && 
@@ -3513,8 +3509,8 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
 /// Issue VAR10, if the formula in an FplValue uses 
 /// quantor(s) and the variables bound by these quantor(s) are used elsewhere in the same formula
 /// VAR10 => formula should be cleaned up by renaming the bound variables
-let checkCleanedUpFormula (fv:FplValue) =
-    let formulaCreationInSymbolTableCompleted (formula:FplValue) =
+let checkCleanedUpFormula (fv:FplGenericNode) =
+    let formulaCreationInSymbolTableCompleted (formula:FplGenericNode) =
         match formula.Parent with 
         | Some parent ->
             match parent.Name with 
@@ -3532,8 +3528,8 @@ let checkCleanedUpFormula (fv:FplValue) =
             | _ -> true
         | _ -> true
 
-    let rec usedVariablesInFormula (formula:FplValue) = 
-        let extractFromSubFormula (subFormula:FplValue) =
+    let rec usedVariablesInFormula (formula:FplGenericNode) = 
+        let extractFromSubFormula (subFormula:FplGenericNode) =
             subFormula.ArgList 
             |> Seq.map (fun subF -> usedVariablesInFormula subF)
             |> List.concat
@@ -3550,8 +3546,8 @@ let checkCleanedUpFormula (fv:FplValue) =
         | _ ->
             extractFromSubFormula formula 
 
-    let rec extractQuantors (formula:FplValue) =
-        let extractFromSubFormula (subFormula:FplValue) =
+    let rec extractQuantors (formula:FplGenericNode) =
+        let extractFromSubFormula (subFormula:FplGenericNode) =
             (subFormula.ArgList |> Seq.map (fun subF -> extractQuantors subF) |> List.concat)
         match formula.Name with 
         | PrimQuantorAll
@@ -3561,8 +3557,8 @@ let checkCleanedUpFormula (fv:FplValue) =
         | _ -> 
             extractFromSubFormula formula
 
-    let rec checkQuantors (formula:FplValue) =
-        let varUsedInQuantor (varInFormula:FplValue) (quantor:FplValue) =
+    let rec checkQuantors (formula:FplGenericNode) =
+        let varUsedInQuantor (varInFormula:FplGenericNode) (quantor:FplGenericNode) =
             let varLStart = varInFormula.StartPos.Line
             let varCStart = varInFormula.StartPos.Column
             let varLEnd = varInFormula.EndPos.Line
@@ -3577,7 +3573,7 @@ let checkCleanedUpFormula (fv:FplValue) =
             || (quantorLStart = varLStart && quantorLEnd = varLEnd && quantorCStart <= varCStart && quantorCEnd >= varCEnd) // if line(q) = line(v) for start and end, compare starting and ending columns
             )
 
-        let varIsBoundByQuantor (varInFormula:FplValue) (quantor:FplValue) =
+        let varIsBoundByQuantor (varInFormula:FplGenericNode) (quantor:FplGenericNode) =
             quantor.Scope.ContainsKey(varInFormula.FplId)
 
         let quantors = extractQuantors formula
@@ -3599,11 +3595,11 @@ let checkCleanedUpFormula (fv:FplValue) =
         checkQuantors fv
 
 
-type FplReference(positions: Positions, parent: FplValue) =
+type FplReference(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericReference(positions, parent)
     let mutable _callCounter = 0 
 
-    let mutable _dottedChild : FplValue option = None
+    let mutable _dottedChild : FplGenericNode option = None
 
     override this.Name = PrimRefL
     override this.ShortName = PrimRef
@@ -3611,7 +3607,7 @@ type FplReference(positions: Positions, parent: FplValue) =
     /// The optional dotted child set when parsing a dotted reference 
     member this.DottedChild
         with get() = _dottedChild
-        and set (value:FplValue option) = _dottedChild <- value
+        and set (value:FplGenericNode option) = _dottedChild <- value
 
     interface IHasDotted with 
         member this.DottedChild 
@@ -3775,7 +3771,7 @@ type FplReference(positions: Positions, parent: FplValue) =
         | _ -> ()            
 
 /// Checks if a reference to a Symbol, Prefix, PostFix, or Infix exists
-let checkSIG01Diagnostics (fv: FplValue)  =
+let checkSIG01Diagnostics (fv: FplGenericNode)  =
     match fv with
     | :? FplReference ->
         // collect candidates to match this reference from all theories and
@@ -3807,13 +3803,13 @@ let checkSIG01Diagnostics (fv: FplValue)  =
     | _ -> ()
 
 /// Gets the list of arguments of an FplValue if any
-let getArguments (fv:FplValue) =
+let getArguments (fv:FplGenericNode) =
     fv.ArgList 
     |> Seq.toList
 
-type FplMapping(positions: Positions, parent: FplValue) =
-    inherit FplValue(positions, Some parent)
-    let _dimensionTypes = new List<FplValue>()
+type FplMapping(positions: Positions, parent: FplGenericNode) =
+    inherit FplGenericNode(positions, Some parent)
+    let _dimensionTypes = new List<FplGenericNode>()
     let mutable _dimensionTypesBeingSet = false
     let mutable _isArrayMapping = false
 
@@ -3827,7 +3823,7 @@ type FplMapping(positions: Positions, parent: FplValue) =
     /// Sets the during the symbol table construction.
     /// Because the type consists of a main type and index allowed-types, we use "Dimension being set" as a flag
     /// to decide which one to be set.
-    member this.SetType (typeId:string) (typeNodeOpt:FplValue option) pos1 pos2 = 
+    member this.SetType (typeId:string) (typeNodeOpt:FplGenericNode option) pos1 pos2 = 
         if not _dimensionTypesBeingSet then 
             this.TypeId <-
                 if _isArrayMapping then 
@@ -3894,12 +3890,12 @@ type FplMapping(positions: Positions, parent: FplValue) =
 
     override this.RunOrder = None
 
-type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
+type FplVariableArray(fplId, positions: Positions, parent: FplGenericNode) =
     inherit FplGenericVariable(fplId, positions, parent)
-    let _dimensionTypes = new List<FplValue>()
+    let _dimensionTypes = new List<FplGenericNode>()
     let mutable _dimensionTypesBeingSet = false
     let _valueKeys = new Dictionary<string,int>() // used to store the keys of all values
-    let _valueList = List<FplValue>()
+    let _valueList = List<FplGenericNode>()
 
     member this.Dimensionality = _dimensionTypes.Count
 
@@ -3910,7 +3906,7 @@ type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
     /// Sets the during the symbol table construction.
     /// Because the type consists of a main type and index allowed-types, we use "Dimension being set" as a flag
     /// to decide which one to be set.
-    member this.SetType (typeId:string) (typeNodeOpt:FplValue option) pos1 pos2 = 
+    member this.SetType (typeId:string) (typeNodeOpt:FplGenericNode option) pos1 pos2 = 
         if not _dimensionTypesBeingSet then 
             this.TypeId <- $"*{typeId}"
             // TODO prefer RefersTo over Scope when storing the type node of the variable array 
@@ -3951,7 +3947,7 @@ type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
         ret.IsInitialized <- this.IsInitialized
 
         this.DimensionTypes
-        |> Seq.iter (fun (fv1:FplValue) ->
+        |> Seq.iter (fun (fv1:FplGenericNode) ->
             let value = fv1.Clone()
             ret.DimensionTypes.Add(value))
 
@@ -3971,7 +3967,7 @@ type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
            // otherwise, spawn an undefined value
            new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
 
-    member this.AssignValueToCoordinates coordinatesKey (value:FplValue) =
+    member this.AssignValueToCoordinates coordinatesKey (value:FplGenericNode) =
         this.IsInitialized <- true
 
         if this.ValueKeys.ContainsKey coordinatesKey then 
@@ -4058,7 +4054,7 @@ type FplVariableArray(fplId, positions: Positions, parent: FplValue) =
         | :? FplVariableArray as arr -> arr.CopyValueKeys this
         | _ -> ()
 
-type FplVariable(fplId, positions: Positions, parent: FplValue) =
+type FplVariable(fplId, positions: Positions, parent: FplGenericNode) =
     inherit FplGenericVariable(fplId, positions, parent)
 
     override this.Name = PrimVariableL
@@ -4106,7 +4102,7 @@ type FplVariable(fplId, positions: Positions, parent: FplValue) =
 
 
 /// Gets the list of parameters of an FplValue if any
-let getParameters (fv:FplValue) =
+let getParameters (fv:FplGenericNode) =
     match fv.Name with
     | PrimVariableL ->
         fv.GetVariables()
@@ -4124,7 +4120,7 @@ let getParameters (fv:FplValue) =
     | _ -> []
 
 /// Checks, if an FplValue uses parentheses or brackets
-let hasBracketsOrParentheses (fv:FplValue) = 
+let hasBracketsOrParentheses (fv:FplGenericNode) = 
     match fv.Name with 
     | PrimVariableL ->
         let vars = fv.GetVariables()
@@ -4143,12 +4139,12 @@ let hasBracketsOrParentheses (fv:FplValue) =
 /// Checks if the baseClassName is contained in the classRoot's base classes (it derives from).
 /// If so, the function will produce Some path where path equals a string of base classes concatenated by ":".
 /// The classRoot is required to have an FplValueType.Class.
-let findInheritanceChains (baseNode: FplValue) =
+let findInheritanceChains (baseNode: FplGenericNode) =
     let distinctNames = HashSet<string>()
     let paths = Dictionary<string,string>() // collects all paths (keys) and errors (values)
     let predecessors = Dictionary<string,List<string>>() // inner dictionary = predecessors
 
-    let rec findChains (bNode: FplValue) predecessorName accPath =
+    let rec findChains (bNode: FplGenericNode) predecessorName accPath =
         let currName = bNode.FplId
         let newPath = 
             if accPath = String.Empty then 
@@ -4220,7 +4216,7 @@ let findInheritanceChains (baseNode: FplValue) =
 
 
 /// Checks if a node inherits from some type (or is already that type).
-let inheritsFrom (node:FplValue) someType = 
+let inheritsFrom (node:FplGenericNode) someType = 
     match node, someType with 
     | :? FplClass, "obj" -> true
     | :? FplClass, _  when node.FplId = someType -> true
@@ -4246,14 +4242,14 @@ type Parameter =
     | NotConsumed
 
 /// Determines if the FplValue has parentheses and has an upper case FplId
-let isCallByValue (fv:FplValue) =
+let isCallByValue (fv:FplGenericNode) =
     match fv.ArgType with 
     | ArgType.Parentheses when isUpper fv.FplId -> true
     | _ -> false
 
 /// Implements an object that is used to provide a representation of extensions in FPL.
-type FplExtensionObj(positions: Positions, parent: FplValue) as this =
-    inherit FplValue(positions, Some parent)
+type FplExtensionObj(positions: Positions, parent: FplGenericNode) as this =
+    inherit FplGenericNode(positions, Some parent)
 
     do 
         this.TypeId <- LiteralObj
@@ -4326,7 +4322,7 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
 
     override this.CheckConsistency () = 
         base.CheckConsistency()
-        let matchReprId (fv1:FplValue) (identifier:string) = 
+        let matchReprId (fv1:FplGenericNode) (identifier:string) = 
             let vars = fv1.GetVariables()
             if vars.Length > 0 then
                 let mainVar = vars.Head
@@ -4384,8 +4380,8 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
 
     override this.RunOrder = None
 
-type FplExtension(positions: Positions, parent: FplValue, runOrder) =
-    inherit FplValue(positions, Some parent)
+type FplExtension(positions: Positions, parent: FplGenericNode, runOrder) =
+    inherit FplGenericNode(positions, Some parent)
     let _runOrder = runOrder
     let mutable _callCounter = 0
     let mutable _signStartPos = Position("", 0L, 0L, 0L)
@@ -4471,7 +4467,7 @@ let private errMsgStandard aIsCallByReference aName aType pName pType =
 let private errMsgMissingArgument pName pType = Some $"Missing argument for the parameter `{pName}` typed `{pType}`"
 let private errMsgMissingParameter aName aType = Some $"No matching parameter for the argument `{aName}` typed `{aType}`"
 let private errMsgClassValueNotAllowed actualClassType = Some $"A class `{actualClassType}` cannot be passed directly as a value. Use a class constructor `{actualClassType}(...)` instead"
-let private errWrongReturnType aIsCallByReference aName aType pType (p:FplValue) =
+let private errWrongReturnType aIsCallByReference aName aType pType (p:FplGenericNode) =
     let pBlockOpt = p.UltimateBlockNode
     let blockName = 
         match pBlockOpt with 
@@ -4505,7 +4501,7 @@ let private errUndefined aIsCallByReference aName pName pType =
 let private errVariadic aName aType pName pType pTypeId = 
     Some $"Variadic enumeration of `{aName}` typed `{aType}` doesn't match the parameter `{pName}` typed `{pType}`, try `{aName}:{pType}` as argument or use `{pName}:{pTypeId}[{LiteralInd}]` as parameter type"
 
-let private matchClassInheritance aIsCallByReference (clOpt:FplValue option) aName aType (pName:string) (pType:string) = 
+let private matchClassInheritance aIsCallByReference (clOpt:FplGenericNode option) aName aType (pName:string) (pType:string) = 
     let pTypeSimple =
         if pType.StartsWith("*") then 
             let ret = pType.Substring(1).Split("[")
@@ -4522,7 +4518,7 @@ let private matchClassInheritance aIsCallByReference (clOpt:FplValue option) aNa
         errClassInheritanceUndetermined aIsCallByReference aName aType pName pType
 
 
-let private matchByTypeStringRepresentation aIsCallByReference (a:FplValue) aName (aType:string) aTypeName (p:FplValue) pName (pType:string) pTypeName = 
+let private matchByTypeStringRepresentation aIsCallByReference (a:FplGenericNode) aName (aType:string) aTypeName (p:FplGenericNode) pName (pType:string) pTypeName = 
 
     if aType = pType then
         None, Parameter.Consumed
@@ -4608,22 +4604,22 @@ let private matchByTypeStringRepresentation aIsCallByReference (a:FplValue) aNam
     else
         errMsgStandard aIsCallByReference aName aType pName pType, Parameter.Consumed
 
-let private isPredWithParentheses (fv:FplValue) =
+let private isPredWithParentheses (fv:FplGenericNode) =
     match fv.ArgType with 
     | ArgType.Parentheses when fv.TypeId.StartsWith(LiteralPred) -> true
     | _ -> false
 
-let private isPredWithoutParentheses (fv:FplValue) =
+let private isPredWithoutParentheses (fv:FplGenericNode) =
     match fv.ArgType with 
     | ArgType.Nothing when fv.TypeId = LiteralPred -> true
     | _ -> false
 
-let private isFuncWithParentheses (fv:FplValue) =
+let private isFuncWithParentheses (fv:FplGenericNode) =
     match fv.ArgType with 
     | ArgType.Parentheses when fv.TypeId.StartsWith(LiteralFunc) -> true
     | _ -> false
 
-let private isFuncWithoutParentheses (fv:FplValue) =
+let private isFuncWithoutParentheses (fv:FplGenericNode) =
     match fv.ArgType with 
     | ArgType.Nothing when fv.TypeId = LiteralFunc -> true
     | _ -> false
@@ -4631,7 +4627,7 @@ let private isFuncWithoutParentheses (fv:FplValue) =
 /// Checks if an FplValue is a reference to a variable that points to a class, and at the same time is marked as 'initialized' and still does not any values.
 /// (this is the convention flagging that a variable has been assigned to its class instead of the constructor of the class generating an instance value).
 /// If the function returns a non-empty string, it contains the identifier of the referenced class (that has not been instantiated).
-let private getCallByReferenceToClass (fv:FplValue) =
+let private getCallByReferenceToClass (fv:FplGenericNode) =
     match fv.RefersTo with 
     | Some refNode ->
         match refNode with 
@@ -4644,7 +4640,7 @@ let private getCallByReferenceToClass (fv:FplValue) =
     | None ->
         String.Empty
                
-let rec private isCallByReference (fv:FplValue) =
+let rec private isCallByReference (fv:FplGenericNode) =
     match fv with 
     | :? FplReference as ref when ref.DottedChild.IsSome ->
         isCallByReference ref.DottedChild.Value // evaluate dotted reference instead
@@ -4654,13 +4650,13 @@ let rec private isCallByReference (fv:FplValue) =
         | ArgType.Nothing -> true
         | _ -> false
 
-let private getNames (fv:FplValue) = 
+let private getNames (fv:FplGenericNode) = 
     let fvName = fv.Type SignatureType.Name
     let fvType = fv.Type SignatureType.Type
     let fvTypeName = fv.Name
     fvName, fvType, fvTypeName
 
-let rec private matchTwoTypes (a:FplValue) (p:FplValue) =
+let rec private matchTwoTypes (a:FplGenericNode) (p:FplGenericNode) =
     let aName, aType, aTypeName = getNames a 
     let pName, pType, pTypeName = getNames p
 
@@ -4804,10 +4800,10 @@ let rec private matchTwoTypes (a:FplValue) (p:FplValue) =
 
 /// Tries to match a list of arguments with a list of parameters by their type recursively.
 /// The comparison depends on MatchingMode.
-let rec mpwa (args: FplValue list) (pars: FplValue list) =
+let rec mpwa (args: FplGenericNode list) (pars: FplGenericNode list) =
     match (args, pars) with
     | (a :: ars, p :: prs) ->
-        match matchTwoTypes (a:FplValue) (p:FplValue) with
+        match matchTwoTypes (a:FplGenericNode) (p:FplGenericNode) with
         | Some errMsg, _ -> Some errMsg
         | None, Parameter.Consumed -> mpwa ars prs
         | None, Parameter.NotConsumed -> mpwa ars pars // handle variadic parameters
@@ -4836,7 +4832,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) =
 
 /// Tries to match the arguments of `fva` FplValue with the parameters of the `fvp` FplValue and returns
 /// Some(specific error message) or None, if the match succeeded.
-let matchArgumentsWithParameters (fva: FplValue) (fvp: FplValue) =
+let matchArgumentsWithParameters (fva: FplGenericNode) (fvp: FplGenericNode) =
     let parameters = getParameters fvp
     let arguments = getArguments fva
 
@@ -4861,7 +4857,7 @@ let matchArgumentsWithParameters (fva: FplValue) (fvp: FplValue) =
 
 /// Tries to match the signatures of toBeMatched with the signatures of all candidates and accumulates any
 /// error messages in accResultList.
-let rec checkCandidates (toBeMatched: FplValue) (candidates: FplValue list) (accResultList: string list) =
+let rec checkCandidates (toBeMatched: FplGenericNode) (candidates: FplGenericNode list) (accResultList: string list) =
     match candidates with
     | [] -> (None, accResultList)
     | candidate :: candidates ->
@@ -4870,7 +4866,7 @@ let rec checkCandidates (toBeMatched: FplValue) (candidates: FplValue list) (acc
         | Some errMsg -> checkCandidates toBeMatched candidates (accResultList @ [ errMsg ])
 
 /// Checks if there is a candidate among the candidates that matches the signature of a calling FplValue and returns this as an option.
-let checkSIG04Diagnostics (calling:FplValue) (candidates: FplValue list) = 
+let checkSIG04Diagnostics (calling:FplGenericNode) (candidates: FplGenericNode list) = 
     if candidates.Length = 0 then
         None
     else
@@ -4890,11 +4886,11 @@ let checkSIG04Diagnostics (calling:FplValue) (candidates: FplValue list) =
             None
 
 /// Checks if a reference to an array matches its dimensions (in terms of number and types)
-let checkSIG08_SIG10Diagnostics (referenceToArray:FplValue) =
+let checkSIG08_SIG10Diagnostics (referenceToArray:FplGenericNode) =
     let rec matchIndexesWithDimensions (refToArray:FplReference) =
         match refToArray.RefersTo with
         | Some (:? FplVariableArray as varArray) ->
-            let rec matchAllIndexes (indexes:FplValue list) (dims:FplValue list) dimNumber =
+            let rec matchAllIndexes (indexes:FplGenericNode list) (dims:FplGenericNode list) dimNumber =
                 match indexes, dims with
                 | i::ixs, d::dms ->
                     match mpwa [i] [d] with
@@ -4922,7 +4918,7 @@ let checkSIG08_SIG10Diagnostics (referenceToArray:FplValue) =
     | _ -> ()
 
 
-type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
+type FplBaseConstructorCall(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericReference(positions, parent)
 
     do 
@@ -4961,7 +4957,7 @@ type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
                 outerClass.ArgList 
                 |> Seq.filter (fun pc -> pc.FplId = this.FplId)
                 |> Seq.tryHead
-                |> Option.map (fun (pc:FplValue) -> pc :?> FplBase)
+                |> Option.map (fun (pc:FplGenericNode) -> pc :?> FplBase)
 
             match baseClassObjectOpt with 
             | Some baseClassObject ->
@@ -5009,8 +5005,8 @@ type FplBaseConstructorCall(positions: Positions, parent: FplValue) as this =
 
 /// Reference to "parent" using the FPL parent keyword. 
 // It will point to a parent only inside FPL properties. Otherwise, it is undefined
-type FplParent(positions: Positions, parent: FplValue) as this =
-    inherit FplValue(positions, Some parent)
+type FplParent(positions: Positions, parent: FplGenericNode) as this =
+    inherit FplGenericNode(positions, Some parent)
     let mutable _callCounter = 0
 
     do 
@@ -5050,8 +5046,8 @@ type FplParent(positions: Positions, parent: FplValue) as this =
 
 /// Reference to "self" using the FPL self keyword. 
 // It will point to the enclosing block inside FPL predicate definitions, functional terms, and properties. Otherwise, it is undefined.
-type FplSelf(positions: Positions, parent: FplValue) as this =
-    inherit FplValue(positions, Some parent)
+type FplSelf(positions: Positions, parent: FplGenericNode) as this =
+    inherit FplGenericNode(positions, Some parent)
     let mutable _callCounter = 0
 
     do 
@@ -5090,7 +5086,7 @@ type FplSelf(positions: Positions, parent: FplValue) as this =
     override this.RunOrder = None
 
 /// Checks if an argument points to a free variable and if so, issues VAR09 diagnostics.
-let checkFreeVar (arg:FplValue) = 
+let checkFreeVar (arg:FplGenericNode) = 
     match arg.RefersTo with 
     | Some ref ->
         match ref, ref.UltimateBlockNode with 
@@ -5100,7 +5096,7 @@ let checkFreeVar (arg:FplValue) =
     | _ -> ()
 
 /// Implements the semantics of an FPL conjunction compound predicate.
-type FplConjunction(positions: Positions, parent: FplValue) as this =
+type FplConjunction(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericPredicate(positions, parent)
 
     do 
@@ -5160,7 +5156,7 @@ type FplConjunction(positions: Positions, parent: FplValue) as this =
 
 
 /// Implements the semantics of an FPL disjunction compound predicate.
-type FplDisjunction(positions: Positions, parent: FplValue) as this =
+type FplDisjunction(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericPredicate(positions, parent)
 
     do 
@@ -5218,7 +5214,7 @@ type FplDisjunction(positions: Positions, parent: FplValue) as this =
         addExpressionToParentArgList this
 
 /// Implements the semantics of an FPL xor compound predicate.
-type FplExclusiveOr(positions: Positions, parent: FplValue) as this =
+type FplExclusiveOr(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericPredicate(positions, parent)
 
     do 
@@ -5280,7 +5276,7 @@ type FplExclusiveOr(positions: Positions, parent: FplValue) as this =
 
 
 /// Implements the semantics of an FPL negation compound predicate.
-type FplNegation(positions: Positions, parent: FplValue) as this =
+type FplNegation(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericPredicate(positions, parent)
 
     do 
@@ -5332,7 +5328,7 @@ type FplNegation(positions: Positions, parent: FplValue) as this =
         addExpressionToParentArgList this
 
 /// Implements the semantics of an FPL implication compound predicate.
-type FplImplication(positions: Positions, parent: FplValue) as this =
+type FplImplication(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericPredicate(positions, parent)
 
     do 
@@ -5390,7 +5386,7 @@ type FplImplication(positions: Positions, parent: FplValue) as this =
         addExpressionToParentArgList this
 
 /// Implements the semantics of an FPL equivalence compound predicate.
-type FplEquivalence(positions: Positions, parent: FplValue) as this =
+type FplEquivalence(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericPredicate(positions, parent)
 
     do 
@@ -5452,8 +5448,8 @@ type FplEquivalence(positions: Positions, parent: FplValue) as this =
 
 
 [<AbstractClass>]
-type FplGenericDelegate(name, positions: Positions, parent: FplValue) as this =
-    inherit FplValue(positions, Some parent)
+type FplGenericDelegate(name, positions: Positions, parent: FplGenericNode) as this =
+    inherit FplGenericNode(positions, Some parent)
 
     do 
         this.FplId <- name
@@ -5464,7 +5460,7 @@ type FplGenericDelegate(name, positions: Positions, parent: FplValue) as this =
 
 
 /// Implements the semantics of an FPL equality.
-type FplEquality(name, positions: Positions, parent: FplValue) as this =
+type FplEquality(name, positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericDelegate(name, positions, parent)
 
     do 
@@ -5543,7 +5539,7 @@ type FplEquality(name, positions: Positions, parent: FplValue) as this =
         debug this Debug.Stop
 
 /// Implements the semantics of an FPL decrement delegate.
-type FplDecrement(name, positions: Positions, parent: FplValue) as this =
+type FplDecrement(name, positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericDelegate(name, positions, parent)
 
     do 
@@ -5602,8 +5598,8 @@ type FplDecrement(name, positions: Positions, parent: FplValue) as this =
             this.SetValue(newValue)
         debug this Debug.Stop
 
-type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
-    inherit FplValue(positions, Some parent)
+type FplIntrinsicInd(positions: Positions, parent: FplGenericNode) as this =
+    inherit FplGenericNode(positions, Some parent)
 
     do 
         this.TypeId <- LiteralInd
@@ -5633,7 +5629,7 @@ type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
 
     override this.RunOrder = None
 
-let runIntrinsicFunction (fv:FplValue) variableStack =
+let runIntrinsicFunction (fv:FplGenericNode) variableStack =
     
     let mapOpt = getMapping fv
     match mapOpt with
@@ -5664,7 +5660,7 @@ let runIntrinsicFunction (fv:FplValue) variableStack =
         let undef = new FplIntrinsicUndef((fv.StartPos, fv.EndPos), fv)
         fv.SetValue undef
 
-let private getFunctionalTermRepresent (fv:FplValue) =
+let private getFunctionalTermRepresent (fv:FplGenericNode) =
     match fv.Value with 
     | None ->
         // since the function term has no value, it has no return statement
@@ -5676,7 +5672,7 @@ let private getFunctionalTermRepresent (fv:FplValue) =
         $"dec {mapping.Type(SignatureType.Mixed)}"
     | Some ref -> ref.Represent()    
 
-type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) as this =
+type FplFunctionalTerm(positions: Positions, parent: FplGenericNode, runOrder) as this =
     inherit FplGenericInheriting(positions, parent)
     let mutable _signStartPos = Position("", 0L, 0L, 0L)
     let mutable _signEndPos = Position("", 0L, 0L, 0L)
@@ -5793,7 +5789,7 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) as this
         debug this Debug.Stop
 
 /// Implements the semantics of the FPL is operator.
-type FplIsOperator(positions: Positions, parent: FplValue) as this =
+type FplIsOperator(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericPredicate(positions, parent)
 
     do 
@@ -5838,7 +5834,7 @@ type FplIsOperator(positions: Positions, parent: FplValue) as this =
     override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
 
 [<AbstractClass>]
-type FplGenericQuantor(positions: Positions, parent: FplValue) =
+type FplGenericQuantor(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericPredicate(positions, parent)
 
     override this.ShortName = PrimQuantor
@@ -5879,7 +5875,7 @@ type FplGenericQuantor(positions: Positions, parent: FplValue) =
         debug this Debug.Stop
 
 
-type FplQuantorAll(positions: Positions, parent: FplValue) as this =
+type FplQuantorAll(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericQuantor(positions, parent)
 
     do 
@@ -5892,7 +5888,7 @@ type FplQuantorAll(positions: Positions, parent: FplValue) as this =
             this.AssignParts(ret)
             ret
 
-type FplQuantorExists(positions: Positions, parent: FplValue) as this =
+type FplQuantorExists(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericQuantor(positions, parent)
 
     do 
@@ -5906,7 +5902,7 @@ type FplQuantorExists(positions: Positions, parent: FplValue) as this =
             ret
 
 
-type FplQuantorExistsN(positions: Positions, parent: FplValue) as this =
+type FplQuantorExistsN(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericQuantor(positions, parent)
 
     do 
@@ -5921,8 +5917,8 @@ type FplQuantorExistsN(positions: Positions, parent: FplValue) as this =
             this.AssignParts(ret)
             ret
 
-type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) as this =
-    inherit FplValue(positions, Some parent)
+type FplMandatoryFunctionalTerm(positions: Positions, parent: FplGenericNode) as this =
+    inherit FplGenericNode(positions, Some parent)
     let mutable _signStartPos = Position("", 0L, 0L, 0L)
     let mutable _signEndPos = Position("", 0L, 0L, 0L)
     let mutable _isReady = false
@@ -6025,13 +6021,13 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) as this 
             _isReady <- this.Arity = 0 
         debug this Debug.Stop
 
-let isExtension (fv:FplValue) =
+let isExtension (fv:FplGenericNode) =
     match fv with
     | :? FplExtension -> true
     | _ -> false
 
-type FplMapCaseSingle(positions: Positions, parent: FplValue) as this =
-    inherit FplValue(positions, Some parent)
+type FplMapCaseSingle(positions: Positions, parent: FplGenericNode) as this =
+    inherit FplGenericNode(positions, Some parent)
     do 
         this.FplId <- PrimMapCaseSingle
 
@@ -6066,8 +6062,8 @@ type FplMapCaseSingle(positions: Positions, parent: FplValue) as this =
         this.SetValuesOf result
         debug this Debug.Stop
 
-type FplMapCaseElse(positions: Positions, parent: FplValue) as this =
-    inherit FplValue(positions, Some parent)
+type FplMapCaseElse(positions: Positions, parent: FplGenericNode) as this =
+    inherit FplGenericNode(positions, Some parent)
     do 
         this.FplId <- PrimMapCaseElse
 
@@ -6093,8 +6089,8 @@ type FplMapCaseElse(positions: Positions, parent: FplValue) as this =
         this.SetValuesOf contentOfElsResult
         debug this Debug.Stop
 
-type FplMapCases(positions: Positions, parent: FplValue) as this =
-    inherit FplValue(positions, Some parent)
+type FplMapCases(positions: Positions, parent: FplGenericNode) as this =
+    inherit FplGenericNode(positions, Some parent)
     let _consistentCaseType = new FplIntrinsicTpl("", positions, parent)
     let _reachableCases = new HashSet<string>()
 
@@ -6192,8 +6188,8 @@ type FplMapCases(positions: Positions, parent: FplValue) as this =
         debug this Debug.Stop
 
 /// Implements the return statement in FPL.
-type FplReturn(positions: Positions, parent: FplValue) as this =
-    inherit FplValue(positions, Some parent)
+type FplReturn(positions: Positions, parent: FplGenericNode) as this =
+    inherit FplGenericNode(positions, Some parent)
 
     do
         this.FplId <- LiteralRet
@@ -6253,7 +6249,7 @@ type FplReturn(positions: Positions, parent: FplValue) as this =
         debug this Debug.Stop
 
 
-type FplCaseSingle(positions: Positions, parent: FplValue) as this =
+type FplCaseSingle(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericStmt(positions, parent)
     do 
         this.FplId <- PrimCaseSingle
@@ -6285,7 +6281,7 @@ type FplCaseSingle(positions: Positions, parent: FplValue) as this =
         |> Seq.iter (fun stmt -> stmt.Run())
         debug this Debug.Stop
 
-type FplCaseElse(positions: Positions, parent: FplValue) as this =
+type FplCaseElse(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericStmt(positions, parent)
     do 
         this.FplId <- PrimCaseElse
@@ -6306,7 +6302,7 @@ type FplCaseElse(positions: Positions, parent: FplValue) as this =
         |> Seq.iter (fun stmt -> stmt.Run())
         debug this Debug.Stop
 
-type FplCases(positions: Positions, parent: FplValue) as this =
+type FplCases(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericStmt(positions, parent)
     let _reachableCases = new HashSet<string>()
     do 
@@ -6377,7 +6373,7 @@ type FplForEnumeratorType =
     | Predicative
     | Error
 
-type FplForInStmt(positions: Positions, parent: FplValue) as this =
+type FplForInStmt(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericStmt(positions, parent)
     do 
         this.FplId <- LiteralFor
@@ -6438,7 +6434,7 @@ type FplForInStmt(positions: Positions, parent: FplValue) as this =
         | _, _ -> ()
         debug this Debug.Stop
 
-type FplForInStmtEntity(positions: Positions, parent: FplValue) as this =
+type FplForInStmtEntity(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericStmt(positions, parent)
     do 
         this.FplId <- PrimForInStmtEntity
@@ -6463,7 +6459,7 @@ type FplForInStmtEntity(positions: Positions, parent: FplValue) as this =
         debug this Debug.Start
         debug this Debug.Stop
 
-type FplForInStmtDomain(positions: Positions, parent: FplValue) as this =
+type FplForInStmtDomain(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericStmt(positions, parent)
     do 
         this.FplId <- PrimForInStmtDomain
@@ -6488,7 +6484,7 @@ type FplForInStmtDomain(positions: Positions, parent: FplValue) as this =
         debug this Debug.Stop
 
 /// Implements the assignment statement in FPL.
-type FplAssignment(positions: Positions, parent: FplValue) as this =
+type FplAssignment(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericStmt(positions, parent)
 
     do
@@ -6519,7 +6515,7 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
         else
             None
 
-    member this.Assignee:FplValue option = this.GetAssignmentArg 0
+    member this.Assignee:FplGenericNode option = this.GetAssignmentArg 0
 
     member this.AssignedValue = 
         let assignedValueOpt = this.GetAssignmentArg 1
@@ -6533,7 +6529,7 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
 
     override this.CheckConsistency () = 
         base.CheckConsistency()
-        let checkTypes (assignee:FplValue) (assignedValue:FplValue) =
+        let checkTypes (assignee:FplGenericNode) (assignedValue:FplGenericNode) =
             let nameAssignee = assignee.Type SignatureType.Name
             let nameAssignedValue = assignedValue.Type SignatureType.Name
             if nameAssignee = nameAssignedValue then
@@ -6545,7 +6541,7 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
                     this.ErrorOccurred <- emitSIG05Diagnostics errMsg this.ArgList[1].StartPos this.ArgList[1].EndPos
                 | _ -> ()
                 
-        let checkErrorOccuredInReference (fv:FplValue) = 
+        let checkErrorOccuredInReference (fv:FplGenericNode) = 
             match fv with
             | :? FplReference as ref -> 
                 this.ErrorOccurred <- ref.ErrorOccurred 
@@ -6554,15 +6550,15 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
         checkErrorOccuredInReference this.ArgList[0]
         checkErrorOccuredInReference this.ArgList[1]
         match this.Assignee, this.AssignedValue with
-        | Some (:? FplVariable as assignee), Some (assignedValue:FplValue) when assignedValue.Name = PrimClassL ->
+        | Some (:? FplVariable as assignee), Some (assignedValue:FplGenericNode) when assignedValue.Name = PrimClassL ->
             assignee.IsInitialized <- true
             checkTypes assignee assignedValue
-        | Some (:? FplVariable as assignee), Some (assignedValue:FplValue) when (assignedValue.Name = PrimFunctionalTermL || assignedValue.Name = PrimMandatoryFunctionalTermL) && isCallByValue this.ArgList[1] ->
+        | Some (:? FplVariable as assignee), Some (assignedValue:FplGenericNode) when (assignedValue.Name = PrimFunctionalTermL || assignedValue.Name = PrimMandatoryFunctionalTermL) && isCallByValue this.ArgList[1] ->
             let mapOpt = getMapping assignedValue
             match mapOpt with 
             | Some map -> checkTypes this.ArgList[0] map
             | _ -> checkTypes assignee assignedValue
-        | Some (:? FplVariable as assignee), Some (assignedValue:FplValue) -> 
+        | Some (:? FplVariable as assignee), Some (assignedValue:FplGenericNode) -> 
             checkTypes assignee this.ArgList[1] 
         | Some (:? FplVariableArray as assignee), Some assignedValue ->
            checkTypes this.ArgList[0] this.ArgList[1] 
@@ -6632,20 +6628,20 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
         debug this Debug.Stop
 
 /// A string representation of an FplValue
-let toString (fplValue:FplValue) = $"{fplValue.ShortName} {fplValue.Type(SignatureType.Name)}"
+let toString (fplValue:FplGenericNode) = $"{fplValue.ShortName} {fplValue.Type(SignatureType.Name)}"
 
 /// Checks if a variable is defined in the scope of block, if any
 /// looking for it recursively, up the symbol tree.
-let variableInBlockScopeByName (fplValue: FplValue) name withNestedVariableSearch =
-    let rec firstBlockParent (fv: FplValue) =
+let variableInBlockScopeByName (fplValue: FplGenericNode) name withNestedVariableSearch =
+    let rec firstBlockParent (fv: FplGenericNode) =
 
-        let qualifiedVar (fv1: FplValue) =
+        let qualifiedVar (fv1: FplGenericNode) =
             let allVarsInScope = fv1.GetVariables()
 
             // try out all variables in scope
             let foundList =
                 allVarsInScope
-                |> Seq.map (fun (var: FplValue) ->
+                |> Seq.map (fun (var: FplGenericNode) ->
                     if var.Scope.ContainsKey name then
                         ScopeSearchResult.Found(var.Scope[name])
                     else
@@ -6712,8 +6708,8 @@ let variableInBlockScopeByName (fplValue: FplValue) name withNestedVariableSearc
 
 /// Tries to find a theorem-like statement, an axiom or a corollary
 /// and returns different cases of ScopeSearchResult, depending on different semantical error situations.
-let tryFindAssociatedBlockForJustificationItem (fvJi: FplGenericJustificationItem) (candidates:FplValue list) =
-    let nameOfOther (fv:FplValue) = $"'{fv.Type(SignatureType.Name)} which is {getEnglishName fv.Name false}'"
+let tryFindAssociatedBlockForJustificationItem (fvJi: FplGenericJustificationItem) (candidates:FplGenericNode list) =
+    let nameOfOther (fv:FplGenericNode) = $"'{fv.Type(SignatureType.Name)} which is {getEnglishName fv.Name false}'"
     match candidates.Length with
     | 1 ->  // exactly one candidate found
         let potentialCandidate = candidates.Head
@@ -6787,7 +6783,7 @@ type SymbolTable(parsedAsts: ParsedAstList, debug: bool, offlineMode: bool) =
         let sb = StringBuilder()
         let mutable currentPath = ""
 
-        let rec createJson (root: FplValue) (sb: StringBuilder) level isLast preventInfinite =
+        let rec createJson (root: FplGenericNode) (sb: StringBuilder) level isLast preventInfinite =
             match root.FilePath with
             | Some path -> currentPath <- path
             | _ -> ()
@@ -6907,9 +6903,9 @@ type SymbolTable(parsedAsts: ParsedAstList, debug: bool, offlineMode: bool) =
 
 /// Looks for all declared building blocks with a specific name.
 let findCandidatesByName (st: SymbolTable) (name: string) withClassConstructors withCorollariesOrProofs =
-    let pm = List<FplValue>()
+    let pm = List<FplGenericNode>()
 
-    let rec flattenCorollariesAndProofs (tls:FplValue) =
+    let rec flattenCorollariesAndProofs (tls:FplGenericNode) =
         tls.Scope.Values
         |> Seq.iter (fun fv -> 
             match fv with
@@ -6941,14 +6937,14 @@ let findCandidatesByName (st: SymbolTable) (name: string) withClassConstructors 
                 fv.FplId = name 
                 || fv.FplId = nameWithoutProofOrCorRef 
                 || $"{fv.FplId}$".StartsWith nameWithProofOrCorRef)
-            |> Seq.iter (fun (block: FplValue) ->
+            |> Seq.iter (fun (block: FplGenericNode) ->
                 pm.Add(block)
 
                 if withClassConstructors && block.IsClass() then
                     block.Scope
                     |> Seq.map (fun kvp -> kvp.Value)
-                    |> Seq.filter (fun (fv: FplValue) -> (fv.Name = LiteralCtorL || fv.Name = PrimDefaultConstructor))
-                    |> Seq.iter (fun (fv: FplValue) -> pm.Add(fv))
+                    |> Seq.filter (fun (fv: FplGenericNode) -> (fv.Name = LiteralCtorL || fv.Name = PrimDefaultConstructor))
+                    |> Seq.iter (fun (fv: FplGenericNode) -> pm.Add(fv))
 
                 if withCorollariesOrProofs && (block :? FplGenericTheoremLikeStmt) then 
                     flattenCorollariesAndProofs block
@@ -6960,8 +6956,8 @@ let findCandidatesByName (st: SymbolTable) (name: string) withClassConstructors 
 
 /// Looks for all declared properties or constructors (if any) that start with
 /// the specific name within the building block, whose syntax tree the FplValue `fv` is part of.
-let findCandidatesByNameInBlock (fv: FplValue) (name: string) =
-    let rec findDefinition (fv1: FplValue) =
+let findCandidatesByNameInBlock (fv: FplGenericNode) (name: string) =
+    let rec findDefinition (fv1: FplGenericNode) =
         if isTheory fv1 then
             ScopeSearchResult.NotFound
         else
@@ -6982,8 +6978,8 @@ let findCandidatesByNameInBlock (fv: FplValue) (name: string) =
         |> Seq.toList
     | _ -> []
 
-let findCandidatesByNameInDotted (fv: FplValue) (name: string) =
-    let rec findQualifiedEntity (fv1: FplValue) =
+let findCandidatesByNameInDotted (fv: FplGenericNode) (name: string) =
+    let rec findQualifiedEntity (fv1: FplGenericNode) =
         match fv1 with
         | :? FplReference as ref when ref.DottedChild.IsSome -> 
             ScopeSearchResult.Found(ref.DottedChild.Value)
@@ -7002,7 +6998,7 @@ let findCandidatesByNameInDotted (fv: FplValue) (name: string) =
         | _ -> []
     | _ -> []
 
-let rec getParentExtension (leaf: FplValue) =
+let rec getParentExtension (leaf: FplGenericNode) =
     match leaf with
     | :? FplExtension ->
         Some leaf
@@ -7011,7 +7007,7 @@ let rec getParentExtension (leaf: FplValue) =
         | Some parent -> getParentExtension parent 
         | _ -> None
 
-let searchExtensionByName (root: FplValue) identifier =
+let searchExtensionByName (root: FplGenericNode) identifier =
     let candidates =
         root.Scope
         |> Seq.map (fun theory ->

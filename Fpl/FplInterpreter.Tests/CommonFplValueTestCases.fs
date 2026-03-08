@@ -8,7 +8,7 @@ open FParsec
 
 type CommonFplValueTestCases =
 
-    static member getScopedElement (fv:FplInterpreterTypes.FplValue) name subtype =
+    static member getScopedElement (fv:FplInterpreterTypes.FplGenericNode) name subtype =
         if subtype <> "" then
             if fv.Scope.ContainsKey(name) then 
                 fv.Scope[name]
@@ -447,7 +447,7 @@ type CommonFplValueTestCases =
         """
         let filename = "TestScopeIntrinsicPrimitives" + subtype
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
-        let getValue (varObj:FplValue) =
+        let getValue (varObj:FplGenericNode) =
             match varObj with
             | :? FplVariable as var when var.Value.IsSome -> var.Value.Value
             | _ -> new FplIntrinsicUndef((Position("",0,0,0), Position("",0,0,0) ), varObj)

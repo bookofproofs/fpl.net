@@ -23,7 +23,7 @@ type SymbolTableStructure() =
         | :? JsonReaderException -> false
         | _ -> false
 
-    let rec findNamedItem firstTypeNode identifier (infiniteLoop:HashSet<obj>) (root:FplValue) = 
+    let rec findNamedItem firstTypeNode identifier (infiniteLoop:HashSet<obj>) (root:FplGenericNode) = 
         if infiniteLoop.Contains(root) then
             None
         else
@@ -60,7 +60,7 @@ type SymbolTableStructure() =
                             | Some ref -> findNamedItem firstTypeNode identifier infiniteLoop ref
                             | _ -> None
 
-    let rec mockSymbolTableEvaluationPredicate (x:FplValue) numbOfArgs = 
+    let rec mockSymbolTableEvaluationPredicate (x:FplGenericNode) numbOfArgs = 
         if numbOfArgs > 0 then 
             let ref = new FplReference(positions, parent)
             ref.RefersTo <- Some (new FplIntrinsicPred(positions, parent))
@@ -69,7 +69,7 @@ type SymbolTableStructure() =
         else
             x.Run() 
       
-    let mockSymbolArgument (x:FplValue) = 
+    let mockSymbolArgument (x:FplGenericNode) = 
         let just = new FplJustification(positions, parent)
         let arg = new FplArgInferenceTrivial(positions, parent)
         x.ArgList.Add just
@@ -386,10 +386,10 @@ type SymbolTableStructure() =
             let infiniteLoop = new HashSet<obj>()
             let testNodeOpt = findNamedItem nodeName identifier infiniteLoop st.Root
             match testNodeOpt with 
-            | Some (node:FplValue) when node.Parent.IsSome ->
+            | Some (node:FplGenericNode) when node.Parent.IsSome ->
                 let parent = node.Parent.Value 
                 (parent, node)
-            | Some (node:FplValue) ->
+            | Some (node:FplGenericNode) ->
                 if node.Name = PrimRoot then 
                     Assert.IsInstanceOfType<FplRoot>(node)
                     Assert.AreEqual<int>(0, node.ArgList.Count)
@@ -3298,7 +3298,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsTrue(parent.RefersTo.IsSome)
             Assert.IsTrue(parent.Value.IsSome)
-            Assert.AreEqual<FplValue>(parent.Value.Value, node)
+            Assert.AreEqual<FplGenericNode>(parent.Value.Value, node)
             Assert.IsInstanceOfType<FplInstance>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
