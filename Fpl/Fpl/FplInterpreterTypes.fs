@@ -1402,7 +1402,10 @@ type FplUndetermined(typeId:string, positions: Positions, parent: FplValue) as t
         this.FplId 
 
     override this.Run variableStack = 
-        // FplIntrinsicUndetermined is a value of predicate closures and has no value on its own
+        // FplUndetermined is a value to be assumed, if 
+        // the evaluation is not possible (due to interpreter errors) 
+        // or still not determined because interpreter is evaluating a body of a node 
+        // (like a function, without requiring the closure of this function)
         ()
 
     override this.EmbedInSymbolTable _ = addExpressionToReference this
@@ -1411,11 +1414,13 @@ type FplUndetermined(typeId:string, positions: Positions, parent: FplValue) as t
 
 
 /// Implements the semantics of an FPL predicate prime predicate that is intrinsic.
-/// It serves as a value for everything in FPL that is "predicative in nature". These can be predicates, theorem-like-statements, proofs or predicative expressions. The value can have one of three values in FPL: "true", LiteralFalse, and "undetermined". 
+/// It serves as a value for everything in FPL that is "predicative in nature". 
+/// These can be predicates, theorem-like-statements, proofs or predicative expressions. 
+/// The semantical representation can have one of two values in FPL: "true" and "false". 
 type FplIntrinsicPred(positions: Positions, parent: FplValue) as this =
     inherit FplGenericHasNoValue(positions, parent)
     do 
-        this.FplId <- PrimUndetermined
+        this.FplId <- LiteralTrue
         this.TypeId <- LiteralPred
 
     override this.Name = PrimIntrinsicPred
@@ -1443,10 +1448,17 @@ type FplIntrinsicPred(positions: Positions, parent: FplValue) as this =
 type FplGenericPredicate(positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
     do 
-        this.FplId <- PrimUndetermined
+        this.FplId <- LiteralTrue
         this.TypeId <- LiteralPred
 
     override this.RunOrder = None
+
+    override this.Run variableStack = 
+        this.Debug Debug.Start variableStack 
+        // the default value of predicates is an undetermined predicate
+        let undetermined = new FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)
+        this.SetValue undetermined
+        this.Debug Debug.Stop variableStack 
 
 /// Tries to find a mapping of an FplValue
 let rec getMapping (fv:FplValue) =
@@ -2273,7 +2285,7 @@ type FplGenericPredicateBlock(positions: Positions, parent: FplValue) =
                 this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter variableStack.CallerStartPos variableStack.CallerEndPos
             else
                 if this.IsIntrinsic then 
-                    let undetermined = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+                    let undetermined = new FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)
                     this.SetValue undetermined
                 else
                     // run all statements and the last predicate in the FplPredicate
@@ -2323,7 +2335,7 @@ type FplPredicate(positions: Positions, parent: FplValue, runOrder) as this =
     let mutable _callCounter = 0
 
     do 
-        this.FplId <- PrimUndetermined
+        this.FplId <- LiteralTrue
         this.TypeId <- LiteralPred
 
     member this.SignStartPos
@@ -2392,7 +2404,7 @@ type FplPredicate(positions: Positions, parent: FplValue, runOrder) as this =
                 this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter variableStack.CallerStartPos variableStack.CallerEndPos
             else
                 if this.IsIntrinsic then 
-                    let undetermined = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+                    let undetermined = new FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)
                     this.SetValue undetermined
                 else
                     // run all statements and the last predicate in the FplPredicate
@@ -2931,8 +2943,8 @@ and FplArgInferenceTrivial(positions: Positions, parent: FplValue) =
 
     override this.Run variableStack = 
         this.Debug Debug.Start variableStack
-        let value = new FplIntrinsicPred((this.StartPos, this.EndPos), this) 
-        value.FplId <- LiteralTrue
+        // TODO - check if trivial is possible and spawn FplIntrisincPred true if possible
+        let value = new FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this) 
         this.SetValue value
         this.Debug Debug.Stop variableStack
 
@@ -2994,15 +3006,29 @@ and FplArgument(positions: Positions, parent: FplValue, runOrder) =
         let justificationOpt = this.Justification
         let argInferenceOpt = this.ArgumentInference
 
+
+
         match justificationOpt, argInferenceOpt with
         | Some justification, Some argInference -> 
             let orderdListJustifications = justification.GetOrderedJustificationItems
+            let mutable allEvaluateToTrue = (orderdListJustifications.Length > 0) // if the proof is empty, it will evaluate into undetermined
             orderdListJustifications
             |> List.iter (fun fv ->
                 fv.Run variableStack
+                let fvRepr = fv.Represent()
+                allEvaluateToTrue <- allEvaluateToTrue && fvRepr = LiteralTrue
             )
-
-        | _ -> ()
+            if not allEvaluateToTrue then
+                this.ErrorOccurred <- emitPR009Diagnostics this.StartPos this.StartPos
+                let undetermined = new FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)
+                this.SetValue undetermined
+            else
+                let v = new FplIntrinsicPred((this.StartPos, this.StartPos), this)
+                v.FplId <- LiteralTrue
+                this.SetValue v
+        | _ -> 
+            let undetermined = new FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)
+            this.SetValue undetermined
         (* TODO: Enhance variableStack by the context in which this argument is being evaluated
             Here are some preliminary considerations: 
             1) The context should include 
@@ -3019,9 +3045,6 @@ and FplArgument(positions: Positions, parent: FplValue, runOrder) =
                 c) whether or not the justification is a rule of inference
                 d) whether or not the justification is a by definition
         *)
-        let v = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
-        this.Value <- Some v
-
         this.Debug Debug.Stop variableStack
 
 
@@ -3064,6 +3087,7 @@ and FplProof(positions: Positions, parent: FplValue, runOrder) =
         |> Seq.filter (fun fv -> fv.Name = PrimArgL)
         |> Seq.map (fun fv -> fv :?> FplArgument)
         |> Seq.sortBy (fun fv -> fv.RunOrder)
+        |> Seq.toList
 
     member this.HasArgument argumentId = this.Scope.ContainsKey(argumentId)
 
@@ -3076,17 +3100,18 @@ and FplProof(positions: Positions, parent: FplValue, runOrder) =
             parentWithProof.HasProof <- true
         | _ -> ()
         // evaluate the proof by evaluating all arguments according to their order in the FPL code
-        let mutable allArgumentsEvaluateToTrue = true
+        let orderedProofArguments = this.OrderedArguments 
+        let mutable allEvaluateToTrue = (orderedProofArguments.Length > 0) // if the proof is empty, it will evaluate into undetermined
         this.OrderedArguments
-        |> Seq.iter (fun arg -> 
-            arg.Run variableStack
-            let argRepr = arg.Represent()
-            allArgumentsEvaluateToTrue <- allArgumentsEvaluateToTrue && argRepr = LiteralTrue 
+        |> Seq.iter (fun fv -> 
+            fv.Run variableStack
+            let fvRepr = fv.Represent()
+            allEvaluateToTrue <- allEvaluateToTrue && fvRepr = LiteralTrue 
         )
-        if not allArgumentsEvaluateToTrue then
+        if not allEvaluateToTrue then
             this.ErrorOccurred <- emitPR009Diagnostics this.StartPos this.StartPos
-            let v = new FplIntrinsicPred((this.SignStartPos, this.SignEndPos), this)
-            this.SetValue v
+            let undetermined = new FplUndetermined(LiteralPred, (this.SignStartPos, this.SignStartPos), this)
+            this.SetValue undetermined
         else
             let v = new FplIntrinsicPred((this.SignStartPos, this.SignEndPos), this)
             v.FplId <- LiteralTrue
@@ -3438,7 +3463,7 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
             else
                 // TODO replace by DefaultValue
                 if called.Name = PrimPredicateL then 
-                    called.SetValue (new FplIntrinsicPred((called.StartPos, called.EndPos), called))
+                    called.SetValue (new FplUndetermined(LiteralPred, (called.StartPos, called.EndPos), called))
                     this.SetValuesOf called
                 else
                     ()
@@ -3470,6 +3495,7 @@ type FplGenericReference(positions: Positions, parent: FplValue) =
             | PrimInstanceL
             | PrimIntrinsicInd
             | PrimIntrinsicUndef
+            | PrimUndetermined
             | PrimIntrinsicTpl 
             | PrimVariableArrayL 
             | PrimIntrinsicPred ->
@@ -4063,20 +4089,18 @@ type FplVariable(fplId, positions: Positions, parent: FplValue) =
             this.IsInitialized <- true
 
     override this.Represent() = // done
-        match this.Value with 
-        | None ->
+        let unsetRepresentation =
             match this.TypeId with
             | LiteralUndef -> LiteralUndef
-            | LiteralPred -> PrimUndetermined
-            | _ -> $"dec {this.Type(SignatureType.Type)}" 
+            | _ -> PrimUndetermined 
+        match this.Value with 
+        | None -> unsetRepresentation
         | Some ref ->
             let subRepr = ref.Represent()
             if this.IsInitialized || this.IsBound then 
                 subRepr
             else
-                match this.TypeId with
-                | LiteralUndef -> LiteralUndef
-                | _ -> $"dec {this.Type(SignatureType.Type)}" 
+                unsetRepresentation
 
 
 /// Gets the list of parameters of an FplValue if any
@@ -5101,17 +5125,20 @@ type FplConjunction(positions: Positions, parent: FplValue) as this =
         arg2.Run variableStack
         let arg1Repr = arg1.Represent()
         let arg2Repr = arg2.Represent()
-        let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
-        newValue.FplId <-
-            // FPL truth-table
-            match (arg1Repr, arg2Repr) with
-            | (LiteralFalse, _) 
-            | (_, LiteralFalse)  -> 
-                LiteralFalse
-            | (LiteralTrue, LiteralTrue) -> 
-                LiteralTrue
-            | _ -> PrimUndetermined
-        this.SetValue(newValue)
+        // FPL truth-table
+        match (arg1Repr, arg2Repr) with
+        | (LiteralFalse, _) 
+        | (_, LiteralFalse)  ->
+            let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+            newValue.FplId <- LiteralFalse
+            this.SetValue newValue
+        | (LiteralTrue, LiteralTrue) -> 
+            let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+            newValue.FplId <- LiteralTrue
+            this.SetValue newValue
+        | _ -> 
+            let newValue =  new FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)
+            this.SetValue newValue
         this.Debug Debug.Stop variableStack
 
     override this.CheckConsistency() = 
@@ -5158,18 +5185,20 @@ type FplDisjunction(positions: Positions, parent: FplValue) as this =
         arg2.Run variableStack
         let arg1Repr = arg1.Represent()
         let arg2Repr = arg2.Represent()
-        let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
-        newValue.FplId <-
-            // FPL truth-table
-            match (arg1Repr, arg2Repr) with
-            | (LiteralTrue, _) 
-            | (_, LiteralTrue) -> 
-                LiteralTrue
-            | (LiteralFalse, LiteralFalse) -> 
-                LiteralFalse
-            | _ -> 
-                PrimUndetermined
-        this.SetValue(newValue)  
+        // FPL truth-table
+        match (arg1Repr, arg2Repr) with
+        | (LiteralTrue, _) 
+        | (_, LiteralTrue) -> 
+            let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+            newValue.FplId <- LiteralTrue
+            this.SetValue newValue
+        | (LiteralFalse, LiteralFalse) -> 
+            let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+            newValue.FplId <- LiteralFalse
+            this.SetValue newValue
+        | _ -> 
+            let newValue =  new FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)
+            this.SetValue newValue
         this.Debug Debug.Stop variableStack
         
     override this.CheckConsistency() = 
@@ -5214,21 +5243,22 @@ type FplExclusiveOr(positions: Positions, parent: FplValue) as this =
         arg2.Run variableStack
         let arg1Repr = arg1.Represent()
         let arg2Repr = arg2.Represent()
-        let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+        // FPL truth-table
+        match (arg1Repr, arg2Repr) with
+        | (LiteralTrue, LiteralFalse) 
+        | (LiteralFalse, LiteralTrue) -> 
+            let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+            newValue.FplId <- LiteralTrue
+            this.SetValue newValue
+        | (LiteralTrue, LiteralTrue) 
+        | (LiteralFalse, LiteralFalse) -> 
+            let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+            newValue.FplId <- LiteralFalse
+            this.SetValue newValue
+        | _ -> 
+            let newValue =  new FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)
+            this.SetValue newValue
 
-        newValue.FplId <- 
-            // FPL truth-table
-            match (arg1Repr, arg2Repr) with
-            | (LiteralTrue, LiteralFalse) 
-            | (LiteralFalse, LiteralTrue) -> 
-                LiteralTrue
-            | (LiteralTrue, LiteralTrue) 
-            | (LiteralFalse, LiteralFalse) -> 
-                LiteralFalse
-            | _ -> 
-                PrimUndetermined
-
-        this.SetValue(newValue)  
         this.Debug Debug.Stop variableStack
 
     override this.CheckConsistency() = 
@@ -5272,16 +5302,20 @@ type FplNegation(positions: Positions, parent: FplValue) as this =
         let arg = this.ArgList[0]
         arg.Run variableStack
         let argRepr = arg.Represent()
-        let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+        match argRepr with 
+        // FPL truth-table
+        | LiteralFalse -> 
+            let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+            newValue.FplId <- LiteralTrue
+            this.SetValue newValue
+        | LiteralTrue -> 
+            let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+            newValue.FplId <- LiteralFalse
+            this.SetValue newValue
+        | _ -> 
+            let newValue =  new FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)
+            this.SetValue newValue
 
-        newValue.FplId <- 
-            match argRepr with 
-            // FPL truth-table
-            | LiteralFalse -> LiteralTrue
-            | LiteralTrue -> LiteralFalse
-            | _ -> PrimUndetermined  
-
-        this.SetValue newValue
         this.Debug Debug.Stop variableStack
 
     override this.CheckConsistency() = 
@@ -5321,18 +5355,23 @@ type FplImplication(positions: Positions, parent: FplValue) as this =
         let arg2 = this.ArgList[1]
         let arg1Repr = arg1.Represent()
         let arg2Repr = arg2.Represent()
-        let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
-        newValue.FplId <- 
-            match (arg1Repr, arg2Repr) with
-            // FPL truth-table
-            | (LiteralTrue, LiteralFalse) -> LiteralFalse
-            | (LiteralFalse, LiteralTrue) 
-            | (LiteralFalse, LiteralFalse) 
-            | (LiteralTrue, LiteralTrue) -> LiteralTrue
-            | _ -> PrimUndetermined
-        this.Debug Debug.Stop variableStack
+        match (arg1Repr, arg2Repr) with
+        // FPL truth-table
+        | (LiteralTrue, LiteralFalse) -> 
+            let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+            newValue.FplId <- LiteralFalse
+            this.SetValue newValue
+        | (LiteralFalse, LiteralTrue) 
+        | (LiteralFalse, LiteralFalse) 
+        | (LiteralTrue, LiteralTrue) -> 
+            let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+            newValue.FplId <- LiteralTrue
+            this.SetValue newValue
+        | _ -> 
+            let newValue =  new FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)
+            this.SetValue newValue
         
-        this.SetValue(newValue) 
+        this.Debug Debug.Stop variableStack
 
     override this.CheckConsistency() = 
         base.CheckConsistency() 
@@ -5377,17 +5416,22 @@ type FplEquivalence(positions: Positions, parent: FplValue) as this =
         arg2.Run variableStack
         let arg1Repr = arg1.Represent()
         let arg2Repr = arg2.Represent()
-        let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
-        newValue.FplId <- 
-            match (arg1Repr, arg2Repr) with
-            // FPL truth-table
-            | (LiteralTrue, LiteralTrue) 
-            | (LiteralFalse, LiteralFalse) -> LiteralTrue
-            | (LiteralFalse, LiteralTrue) 
-            | (LiteralTrue, LiteralFalse) -> LiteralFalse
-            | _ -> PrimUndetermined
-        
-        this.SetValue(newValue)
+        match (arg1Repr, arg2Repr) with
+        // FPL truth-table
+        | (LiteralTrue, LiteralTrue) 
+        | (LiteralFalse, LiteralFalse) -> 
+            let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+            newValue.FplId <- LiteralTrue
+            this.SetValue newValue
+        | (LiteralFalse, LiteralTrue) 
+        | (LiteralTrue, LiteralFalse) -> 
+            let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+            newValue.FplId <- LiteralFalse
+            this.SetValue newValue
+        | _ -> 
+            let newValue =  new FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)
+            this.SetValue newValue
+
         this.Debug Debug.Stop variableStack
 
     override this.CheckConsistency() = 
@@ -5456,43 +5500,44 @@ type FplEquality(name, positions: Positions, parent: FplValue) as this =
             let aRepr = a.Represent()
             let bRepr = b.Represent()
 
-            let newValue = new FplIntrinsicPred((variableStack.CallerStartPos, variableStack.CallerEndPos), this.Parent.Value)
+            let newPred = new FplIntrinsicPred((variableStack.CallerStartPos, variableStack.CallerEndPos), this.Parent.Value)
+            let undetermined = new FplUndetermined(LiteralPred, (variableStack.CallerStartPos, variableStack.CallerEndPos), this.Parent.Value)
             match aRepr with
             | LiteralUndef -> 
                 this.ErrorOccurred <- emitID013Diagnostics "Predicate `=` cannot be evaluated because the left argument is undefined." variableStack.CallerStartPos variableStack.CallerEndPos 
-                this.SetValue(newValue)
+                this.SetValue undetermined
             | _ -> 
                 match bRepr with
                 | LiteralUndef -> 
                     this.ErrorOccurred <- emitID013Diagnostics "Predicate `=` cannot be evaluated because the right argument is undefined." variableStack.CallerStartPos variableStack.CallerEndPos 
-                    this.SetValue(newValue)
+                    this.SetValue undetermined
                 | _ when aRepr = "dec tpl" && bRepr = "dec tpl" -> 
-                    this.SetValue(newValue) // undetermined
+                    this.SetValue undetermined // undetermined
                 | _ when aType<>bType -> 
-                    newValue.FplId <- LiteralFalse // if the compared arguments have different types, then unequal
-                    this.SetValue(newValue)
+                    newPred.FplId <- LiteralFalse // if the compared arguments have different types, then unequal
+                    this.SetValue newPred
                 | _ -> 
                     match aRepr with
                     | "dec pred"  
                     | PrimUndetermined -> 
                         this.ErrorOccurred <- emitID013Diagnostics "Predicate `=` cannot be evaluated because the left argument is undetermined." variableStack.CallerStartPos variableStack.CallerEndPos 
-                        this.SetValue(newValue)
+                        this.SetValue undetermined
                     | _ -> 
                         match bRepr with
                         | "dec pred"  
                         | PrimUndetermined -> 
                             this.ErrorOccurred <- emitID013Diagnostics "Predicate `=` cannot be evaluated because the right argument is undetermined." variableStack.CallerStartPos variableStack.CallerEndPos 
-                            this.SetValue(newValue)
+                            this.SetValue undetermined
                         | _ -> 
                             let a1IsDeclared = aRepr.Contains("dec ")
                             let b1IsDeclared = bRepr.Contains("dec ")
-                            newValue.FplId <- 
-                                match a1IsDeclared, b1IsDeclared with
-                                | false, false 
-                                | true, true ->
-                                    $"{(aRepr = bRepr)}".ToLower()
-                                | _ -> PrimUndetermined
-                            this.SetValue(newValue)
+                            match a1IsDeclared, b1IsDeclared with
+                            | false, false 
+                            | true, true ->
+                                newPred.FplId <- $"{(aRepr = bRepr)}".ToLower()
+                                this.SetValue newPred
+                            | _ -> 
+                                this.SetValue undetermined
         this.Debug Debug.Stop variableStack
 
 /// Implements the semantics of an FPL decrement delegate.
@@ -5769,18 +5814,23 @@ type FplIsOperator(positions: Positions, parent: FplValue) as this =
         this.Debug Debug.Start variableStack
         let operand = this.ArgList[0]
         let typeOfOperand = this.ArgList[1]
-        let newValue = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
-        let evaluateIsOperator =
-            // FPL truth-table
-            match operand with 
-            | :? FplReference as op ->
-                match mpwa [operand] [typeOfOperand] with
-                | Some errMsg -> LiteralFalse
-                | None -> LiteralTrue
-            | _ -> LiteralFalse
+        // FPL truth-table
+        match operand with 
+        | :? FplReference as op ->
+            match mpwa [operand] [typeOfOperand] with
+            | Some errMsg -> 
+                let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+                newValue.FplId <- LiteralFalse
+                this.SetValue newValue
+            | None -> 
+                let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+                newValue.FplId <- LiteralTrue
+                this.SetValue newValue
+        | _ -> 
+            let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+            newValue.FplId <- LiteralFalse
+            this.SetValue newValue
         
-        newValue.FplId <- evaluateIsOperator
-        this.SetValue(newValue)  
         this.Debug Debug.Stop variableStack
 
     override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
@@ -5822,7 +5872,7 @@ type FplGenericQuantor(positions: Positions, parent: FplValue) =
     override this.Run variableStack = 
         this.Debug Debug.Start variableStack
         this.ArgList[0].Run variableStack
-        let pred = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+        let pred = new FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)
         this.SetValue pred
         this.Debug Debug.Stop variableStack
 
@@ -6177,7 +6227,8 @@ type FplReturn(positions: Positions, parent: FplValue) as this =
                     | :? FplIntrinsicPred 
                     | :? FplIntrinsicTpl 
                     | :? FplIntrinsicInd 
-                    | :? FplIntrinsicUndef ->
+                    | :? FplIntrinsicUndef 
+                    | :? FplUndetermined ->
                         this.SetValue returnedReference
                     | :? FplReference 
                     | :? FplMapCases -> 
@@ -6557,6 +6608,8 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
         | None, Some (:? FplVariable as assignee), Some (:? FplIntrinsicInd as assignedValue) ->
             assignee.SetValue assignedValue
         | None, Some (:? FplVariable as assignee), Some (:? FplIntrinsicPred as assignedValue) ->
+            assignee.SetValue assignedValue
+        | None, Some (:? FplVariable as assignee), Some (:? FplUndetermined as assignedValue) ->
             assignee.SetValue assignedValue
         | None, Some (:? FplVariableArray as assignee), Some (:? FplGenericConstructor as assignedValue) when this.ArgList[0].ArgType = ArgType.Brackets ->
             assignedValue.Run variableStack

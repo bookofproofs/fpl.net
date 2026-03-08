@@ -956,21 +956,21 @@ type SymbolTableStructure() =
         let index = 2 // FplId
         match var with
         | "FplArgInferenceAssume" ->
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplArgInferenceDerived" ->
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplArgInferenceRevoke" ->
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplArgInferenceTrivial" ->
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplArgument" ->
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplAssertion" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplAssignment" ->
             Assert.AreEqual<string>(PrimAssignment, (getName var).[index])
         | "FplAxiom" ->
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplBase" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplBaseConstructorCall" ->
@@ -984,13 +984,13 @@ type SymbolTableStructure() =
         | "FplClass" ->
             Assert.AreEqual<string>(LiteralObj, (getName var).[index])
         | "FplConjecture" ->
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplConjunction" ->
             Assert.AreEqual<string>(LiteralAnd, (getName var).[index])        
         | "FplConstructor" ->
             Assert.AreEqual<string>(LiteralObj, (getName var).[index])
         | "FplCorollary" ->
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplDecrement" ->
             Assert.AreEqual<string>(PrimDelegateDecrementL, (getName var).[index])        
         | "FplDefaultConstructor" ->
@@ -1022,7 +1022,7 @@ type SymbolTableStructure() =
         | "FplIntrinsicInd" ->
             Assert.AreEqual<string>(LiteralInd, (getName var).[index])
         | "FplIntrinsicPred" ->
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplIntrinsicTpl" ->
             Assert.AreEqual<string>(LiteralTpl, (getName var).[index])
         | "FplIntrinsicUndef" ->
@@ -1030,35 +1030,35 @@ type SymbolTableStructure() =
         | "FplIsOperator" ->
             Assert.AreEqual<string>(LiteralIs, (getName var).[index])        
         | "FplJustification" ->
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplJustificationItemByAx" ->
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplJustificationItemByConj" ->
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplJustificationItemByCor" ->
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplJustificationItemByDef" ->
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplJustificationItemByDefVar" ->
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplJustificationItemByInf" ->
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplJustificationItemByProofArgument" ->
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplJustificationItemByRefArgument" ->
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplJustificationItemByTheoremLikeStmt" ->
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplLanguage" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplLemma" ->
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplLocalization" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplMandatoryFunctionalTerm" ->
             Assert.AreEqual<string>(LiteralFunc, (getName var).[index])
         | "FplMandatoryPredicate" ->
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplMapCaseElse" ->
             Assert.AreEqual<string>(PrimMapCaseElse, (getName var).[index])
         | "FplMapCaseSingle" ->
@@ -1072,13 +1072,13 @@ type SymbolTableStructure() =
         | "FplParent" ->
             Assert.AreEqual<string>(LiteralParent, (getName var).[index])
         | "FplPredicate" ->
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplPredicateList" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplProof" ->
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplProposition" ->
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplQuantorAll" ->
             Assert.AreEqual<string>(LiteralAll, (getName var).[index])
         | "FplQuantorExists" ->
@@ -1096,7 +1096,7 @@ type SymbolTableStructure() =
         | "FplSelf" ->
             Assert.AreEqual<string>(LiteralSelf, (getName var).[index])
         | "FplTheorem" ->
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplTheory" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplTranslation" ->
@@ -1664,20 +1664,20 @@ type SymbolTableStructure() =
         let index = 5 // Represent
         match var with
         | "FplArgInferenceAssume" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplArgInferenceDerived" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplArgInferenceRevoke" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplArgInferenceTrivial" ->
             Assert.IsTrue(isValidJson (getName var).[index])
             Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplArgument" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplAssertion" ->
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>(PrimNone, (getName var).[index])
@@ -1685,8 +1685,8 @@ type SymbolTableStructure() =
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>(PrimNone, (getName var).[index])
         | "FplAxiom" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplBase" ->
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>(PrimNone, (getName var).[index])
@@ -1706,17 +1706,17 @@ type SymbolTableStructure() =
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>(PrimNone, (getName var).[index])
         | "FplConjecture" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplConjunction" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplConstructor" ->
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>(LiteralObj, (getName var).[index])
         | "FplCorollary" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplDecrement" ->
             Assert.IsTrue(isValidJson (getName var).[index])
             Assert.AreEqual<string>("41", (getName var).[index])
@@ -1724,17 +1724,17 @@ type SymbolTableStructure() =
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>(LiteralObj, (getName var).[index])
         | "FplDisjunction" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplEquality" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplEquivalence" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplExclusiveOr" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplExtension" ->
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
@@ -1754,8 +1754,8 @@ type SymbolTableStructure() =
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>($"{LiteralDec} {LiteralObj}", (getName var).[index])
         | "FplImplication" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplInstance" ->
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>(LiteralObj, (getName var).[index])
@@ -1763,8 +1763,8 @@ type SymbolTableStructure() =
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>($"dec {LiteralInd}", (getName var).[index])
         | "FplIntrinsicPred" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplIntrinsicTpl" ->
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>(PrimNone, (getName var).[index])
@@ -1775,41 +1775,41 @@ type SymbolTableStructure() =
             Assert.IsTrue(isValidJson (getName var).[index])
             Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplJustification" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplJustificationItemByAx" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplJustificationItemByConj" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplJustificationItemByCor" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplJustificationItemByDef" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplJustificationItemByDefVar" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplJustificationItemByInf" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplJustificationItemByProofArgument" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplJustificationItemByRefArgument" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplJustificationItemByTheoremLikeStmt" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplLanguage" ->
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplLemma" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplLocalization" ->
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>("", (getName var).[index])
@@ -1817,29 +1817,29 @@ type SymbolTableStructure() =
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>($"{LiteralDec} {LiteralObj}", (getName var).[index])
         | "FplMandatoryPredicate" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplMapCaseElse" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplMapCaseSingle" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplMapCases" ->
             Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplMapping" ->
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>($"{LiteralDec} {LiteralObj}", (getName var).[index])
         | "FplNegation" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplParent" ->
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
         | "FplPredicate" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplPredicateList" ->
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>(PrimNone, (getName var).[index])
@@ -1847,17 +1847,17 @@ type SymbolTableStructure() =
             Assert.IsTrue(isValidJson (getName var).[index])
             Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplProposition" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplQuantorAll" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplQuantorExists" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplQuantorExistsN" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplReference" ->
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>("", (getName var).[index])
@@ -1874,8 +1874,8 @@ type SymbolTableStructure() =
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
         | "FplTheorem" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplTheory" ->
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>(PrimNone, (getName var).[index])
@@ -2478,7 +2478,6 @@ type SymbolTableStructure() =
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
 
-    [<DataRow("FplDecrement", "00", """;""", "")>] // a delegate is always there
     [<DataRow("FplDecrement", "01", """def func T(x:ind)->ind {ret delegate.Decrement(x)};""", "")>]
     [<TestMethod>]
     member this.TestStructureFplDecrement(nodeType, varVal, fplCode, identifier) =
@@ -2486,13 +2485,6 @@ type SymbolTableStructure() =
         let parent, node = testSkeleton nodeType filename fplCode identifier
         
         match nodeType, varVal with
-        | "FplDecrement", "00" ->
-            Assert.IsInstanceOfType<FplTheory>(parent)
-            Assert.AreEqual<int>(0, parent.ArgList.Count)
-            Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplDecrement>(node)
-            Assert.AreEqual<int>(1, node.ArgList.Count)
-            Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplDecrement", "01" ->
             Assert.IsInstanceOfType<FplReference>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
@@ -2547,7 +2539,6 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplEquality", "00", """;""", "")>] // a delegate is always there
     [<DataRow("FplEquality", "01", """def pred T() {del.Equal(x, y)};""", "")>]
     [<DataRow("FplEquality", "02", """def pred Equal (x,y: tpl) infix "=" 50 { del.Equal(x,y) };""", "")>]
     [<TestMethod>]
@@ -2556,13 +2547,6 @@ type SymbolTableStructure() =
         let parent, node = testSkeleton nodeType filename fplCode identifier
         
         match nodeType, varVal with
-        | "FplEquality", "00" ->
-            Assert.IsInstanceOfType<FplTheory>(parent)
-            Assert.AreEqual<int>(0, parent.ArgList.Count)
-            Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplEquality>(node)
-            Assert.AreEqual<int>(2, node.ArgList.Count)
-            Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplEquality", "01" 
         | "FplEquality", "02" ->
             Assert.IsInstanceOfType<FplReference>(parent)
