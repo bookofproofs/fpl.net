@@ -28,8 +28,7 @@ type TestExpressionEvaluation() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T()"]
-            let variableStack = new FplVariableStack()
-            pr1.Run variableStack
+            pr1.Run()
             let actual = evalTreeFplRepresentation(pr1)
             printfn "expected: %s" expected 
             printfn "actual  : %s" actual
@@ -62,8 +61,7 @@ type TestExpressionEvaluation() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T()"]
-            let variableStack = new FplVariableStack()
-            pr1.Run variableStack
+            pr1.Run()
             let actual = evalTreeFplRepresentation(pr1)
             printfn "expected: %s" expected 
             printfn "actual  : %s" actual
@@ -91,8 +89,7 @@ type TestExpressionEvaluation() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T()"]
-            let variableStack = new FplVariableStack()
-            pr1.Run variableStack
+            pr1.Run()
 
             let actual = evalTreeFplRepresentation(pr1)
             printfn "expected: %s" expected 
@@ -126,8 +123,7 @@ type TestExpressionEvaluation() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T()"]
-            let variableStack = new FplVariableStack()
-            pr1.Run variableStack
+            pr1.Run()
             let actual = evalTreeFplRepresentation(pr1)
             printfn "expected: %s" expected 
             printfn "actual  : %s" actual
@@ -164,8 +160,7 @@ type TestExpressionEvaluation() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T()"]
-            let variableStack = new FplVariableStack()
-            pr1.Run variableStack
+            pr1.Run()
 
             let actual = evalTreeFplRepresentation(pr1)
             printfn "expected: %s" expected 
@@ -196,8 +191,7 @@ type TestExpressionEvaluation() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T()"]
-            let variableStack = new FplVariableStack()
-            pr1.Run variableStack
+            pr1.Run()
 
             let actual = evalTreeFplRepresentation(pr1)
             printfn "expected: %s" expected 
@@ -228,8 +222,7 @@ type TestExpressionEvaluation() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T()"]
-            let variableStack = new FplVariableStack()
-            pr1.Run variableStack
+            pr1.Run()
 
             let actual = evalTreeFplRepresentation(pr1)
             printfn "expected: %s" expected 

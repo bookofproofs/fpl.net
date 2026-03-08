@@ -723,8 +723,7 @@ type TestFplValueScopeFplRepresentation() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T1()"] 
-            let variableStack = new FplVariableStack()
-            pr1.Run variableStack
+            pr1.Run()
             let base1 = pr1.ArgList[0]
 
             match var with
@@ -988,10 +987,9 @@ type TestFplValueScopeFplRepresentation() =
             let r = st.Root
             let theory = r.Scope[filename]
             let pred = theory.Scope["T()"]
-            let variableStack = new FplVariableStack()
             let assignPre = pred.ArgList[0]
             let assign = assignPre :?> FplAssignment
-            assign.Run variableStack
+            assign.Run()
             let assigneeVariableOpt = assign.Assignee
             match assigneeVariableOpt with
             | Some var -> 
@@ -1035,10 +1033,9 @@ type TestFplValueScopeFplRepresentation() =
             let r = st.Root
             let theory = r.Scope[filename]
             let pred = theory.Scope["T()"]
-            let variableStack = new FplVariableStack()
             let assignPre = pred.ArgList[0]
             let assign = assignPre :?> FplAssignment
-            assign.Run variableStack
+            assign.Run()
             let assigneeVariableOpt = assign.Assignee
             match assigneeVariableOpt with
             | Some varUncast ->

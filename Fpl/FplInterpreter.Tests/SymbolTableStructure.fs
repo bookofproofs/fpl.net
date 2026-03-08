@@ -67,14 +67,14 @@ type SymbolTableStructure() =
             x.ArgList.Add ref
             mockSymbolTableEvaluationPredicate x (numbOfArgs-1)
         else
-            x.Run (new FplVariableStack()) 
+            x.Run() 
       
     let mockSymbolArgument (x:FplValue) = 
         let just = new FplJustification(positions, parent)
         let arg = new FplArgInferenceTrivial(positions, parent)
         x.ArgList.Add just
         x.ArgList.Add arg
-        x.Run (new FplVariableStack()) 
+        x.Run()
 
     let getName nodeType = 
         match nodeType with
@@ -114,7 +114,7 @@ type SymbolTableStructure() =
         | "FplBaseConstructorCall" ->
             let x = new FplBaseConstructorCall(positions, parent)
             x.RefersTo <- Some (new FplDefaultConstructor("A", positions, parent)) // mock a base constructor reference
-            x.Run (new FplVariableStack())
+            x.Run()
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
         | "FplCases" ->
             let x = new FplCases(positions, parent)
@@ -150,7 +150,7 @@ type SymbolTableStructure() =
             let arg = new FplExtensionObj(positions, parent)
             arg.FplId <- "42"
             x.ArgList.Add arg
-            x.Run (new FplVariableStack())
+            x.Run()
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
         | "FplDefaultConstructor" ->
             let x = new FplDefaultConstructor(LiteralObj, positions, parent)
@@ -174,13 +174,13 @@ type SymbolTableStructure() =
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
         | "FplExtension" ->
             let x = new FplExtension(positions, parent, 0)
-            x.Run (new FplVariableStack())
+            x.Run()
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
         | "FplExtensionObj" ->
             let x = new FplExtensionObj(positions, parent)
             let ref = new FplExtension(positions, parent, 0)
             x.RefersTo <- Some ref
-            x.Run (new FplVariableStack())
+            x.Run()
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
         | "FplForInStmt" ->
             let x = new FplForInStmt(positions, parent)
@@ -317,7 +317,7 @@ type SymbolTableStructure() =
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
         | "FplProof" ->
             let x = new FplProof(positions, parent, 0)
-            x.Run (new FplVariableStack())
+            x.Run()
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
         | "FplProposition" ->
             let x = new FplProposition(positions, parent, 0)
@@ -343,7 +343,7 @@ type SymbolTableStructure() =
             let arg = new FplIntrinsicInd(positions, parent)
             arg.FplId <- "$42"
             x.ArgList.Add arg
-            x.Run (new FplVariableStack())
+            x.Run()
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
         | "FplRoot" ->
             let x = new FplRoot()

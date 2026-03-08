@@ -26,8 +26,7 @@ type TestInfixOperations() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T1()"] 
-            let variableStack = new FplVariableStack()
-            pr1.Run variableStack
+            pr1.Run()
             Assert.AreEqual<string>(expected, pr1.Represent())
         | None -> 
             Assert.IsTrue(false)
@@ -133,8 +132,7 @@ type TestInfixOperations() =
                 let theory = r.Scope[filename]
 
                 let pr1 = theory.Scope["T1()"] 
-                let variableStack = new FplVariableStack()
-                pr1.Run variableStack
+                pr1.Run()
                 Assert.AreEqual<string>(expected, pr1.Represent())
             | None -> 
                 Assert.IsTrue(false)
@@ -165,8 +163,7 @@ type TestInfixOperations() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T1()"] 
-            let variableStack = new FplVariableStack()
-            pr1.Run variableStack
+            pr1.Run()
             Assert.AreEqual<string>(expected, pr1.Represent())
         | None -> 
             Assert.IsTrue(false)

@@ -1737,6 +1737,6 @@ let evaluateSymbolTable (st: SymbolTable) =
             eval st pa.Parsing.Ast
             pa.Status <- ParsedAstStatus.Evaluated
             variableStack.PopEvalStack()
-            theoryValue.Run variableStack
+            theoryValue.Run()
         | None -> found <- false
 
