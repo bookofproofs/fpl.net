@@ -46,10 +46,11 @@ let filterCandidates (candidatesPre:FplGenericNode list) identifier qualified =
     (candidates, candidatesNames)
 
 /// Simplify trivially nested expressions by removing from the stack FplValue nodes that were created due to too long parsing tree and replacing them by their sub nodes 
-let rec simplifyTriviallyNestedExpressions (rb:FplGenericNode) = 
+let rec simplifyTriviallyNestedExpressions (rb1:FplGenericNode) = 
+    let rb = rb1 :?> FplGenericNodeWithValue
     if rb.ArgList.Count = 1 && rb.FplId = "" then
         // removable reference blocks are those with only a single argument and unset FplId 
-        let subNode = rb.ArgList[0]
+        let subNode = rb.ArgList[0] 
         variableStack.Pop() |> ignore // pop the removable reference block and ignored it
         variableStack.PushEvalStack(subNode) // push its subNode instead
         // adjust subNode's Parent, EndPos, Scope
@@ -539,8 +540,10 @@ let rec eval (st: SymbolTable) ast =
             | :? FplVariableArray as arr -> arr.SetType identifier None pos1 pos2
             | :? FplMapping as map -> map.SetType identifier None pos1 pos2
             | :? FplVariable ->
-                fv.TypeId <- identifier
-                fv.Value <- Some (new FplIntrinsicUndef((fv.StartPos, fv.EndPos), fv))
+                let fvWithValue = fv :?> FplGenericNodeWithValue
+                fvWithValue.TypeId <- identifier
+                // TODO: replace with FplUndetermined
+                fvWithValue.SetValue (new FplIntrinsicUndef((fv.StartPos, fv.EndPos), fv))
             | _ -> correctIds fv 
         | 1 ->
             let candidate = candidates.Head
@@ -1146,7 +1149,7 @@ let rec eval (st: SymbolTable) ast =
             | _ -> ()
             fv.ArgList.RemoveAt(currMinIndex+1) 
             fv.ArgList.RemoveAt(currMinIndex-1) 
-        simplifyTriviallyNestedExpressions fv
+        simplifyTriviallyNestedExpressions fv 
     | Ast.Expression((pos1, pos2), ((((prefixOpAst, predicateAst), postfixOpAst), optionalSpecificationAst), qualificationListAst)) ->
         let fv = variableStack.PeekEvalStack()
         let refBlock = new FplReference((pos1, pos2), fv) 
@@ -1183,11 +1186,11 @@ let rec eval (st: SymbolTable) ast =
         eval st qualificationListAst
         let refBlock = variableStack.PeekEvalStack() // if the reference was replaced, take this one
         refBlock.EndPos <- pos2
-        simplifyTriviallyNestedExpressions refBlock
+        simplifyTriviallyNestedExpressions refBlock 
         variableStack.PopEvalStack()
         match fv with 
         | :? FplReference ->
-            simplifyTriviallyNestedExpressions fv
+            simplifyTriviallyNestedExpressions fv 
         | _ -> ()
     | Ast.Cases((pos1, pos2), (caseSingleListAsts, caseElseAst)) ->
         let parent = variableStack.PeekEvalStack()

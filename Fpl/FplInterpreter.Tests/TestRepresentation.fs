@@ -92,7 +92,7 @@ type TestRepresentation() =
         | Some st -> 
             let r = st.Root
             let theory = r.Scope[filename]
-            let fn = theory.Scope[funcTermSignature] 
+            let fn = theory.Scope[funcTermSignature] :?> FplGenericNodeWithValue
             Assert.AreEqual<string>(expectedRepr, fn.Represent())
             match fn.Value with 
             | Some v -> Assert.AreEqual<string>(expectedType, v.Type SignatureType.Type)
