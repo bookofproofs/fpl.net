@@ -767,7 +767,15 @@ type FplGenericNodeWithValue(positions: Positions, parent: FplGenericNode) =
         | _ -> PrimNone // If there is no value, return string "None"
 
 [<AbstractClass>]
-type FplGenericNodeWithoutValue(positions: Positions, parent: FplGenericNode) =
+type FplGenericIsValue(positions: Positions, parent: FplGenericNode) =
+    inherit FplGenericNode(positions, Some parent)
+
+    override this.Represent() = // done
+        PrimNone
+    override this.RunOrder = None
+
+[<AbstractClass>]
+type FplGenericIsAction(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericNode(positions, Some parent)
 
     override this.Represent() = // done
@@ -1406,7 +1414,7 @@ let isRoot (fv:FplGenericNode) =
 /// its value will be set to this undermined value compatible with the consumer type.
 /// FplUndetermined is not to be confused with FplIntrinsicUndef that is used for declaring partial mappings in FPL.
 type FplUndetermined(typeId:string, positions: Positions, parent: FplGenericNode) as this =
-    inherit FplGenericNodeWithoutValue(positions, parent)
+    inherit FplGenericIsValue(positions, parent)
     do 
         this.FplId <- PrimUndetermined
         this.TypeId <- typeId
@@ -1441,7 +1449,7 @@ type FplUndetermined(typeId:string, positions: Positions, parent: FplGenericNode
 /// These can be predicates, theorem-like-statements, proofs or predicative expressions. 
 /// The semantical representation can have one of two values in FPL: "true" and "false". 
 type FplIntrinsicPred(positions: Positions, parent: FplGenericNode) as this =
-    inherit FplGenericNodeWithoutValue(positions, parent)
+    inherit FplGenericIsValue(positions, parent)
     do 
         this.FplId <- LiteralTrue
         this.TypeId <- LiteralPred
@@ -1914,7 +1922,7 @@ let signatureSep sep (coordinates:FplGenericNode seq) signatureType =
     |> String.concat sep
 
 type FplPredicateList(positions: Positions, parent: FplGenericNode, runOrder) = 
-    inherit FplGenericNodeWithoutValue(positions, parent)
+    inherit FplGenericIsAction(positions, parent)
     let _runOrder = runOrder
     override this.Name = LiteralPreL
     override this.ShortName = LiteralInf
@@ -1938,7 +1946,7 @@ type FplPredicateList(positions: Positions, parent: FplGenericNode, runOrder) =
     override this.RunOrder = Some _runOrder
 
 type FplRuleOfInference(positions: Positions, parent: FplGenericNode, runOrder) as this =
-    inherit FplGenericNodeWithoutValue(positions, parent)
+    inherit FplGenericIsAction(positions, parent)
     let _runOrder = runOrder
     let mutable _signStartPos = Position("", 0L, 0L, 0L)
     let mutable _signEndPos = Position("", 0L, 0L, 0L)
@@ -3335,7 +3343,7 @@ let isLanguage (fv:FplGenericNode) =
 
 [<AbstractClass>]
 type FplGenericStmt(positions: Positions, parent: FplGenericNode) =
-    inherit FplGenericNodeWithoutValue(positions, parent)
+    inherit FplGenericIsAction(positions, parent)
 
     override this.ShortName = PrimStmt
 
@@ -3362,7 +3370,7 @@ type FplAssertion(positions: Positions, parent: FplGenericNode) =
     override this.RunOrder = None
 
 type FplIntrinsicTpl(name, positions: Positions, parent: FplGenericNode) as this =
-    inherit FplGenericNodeWithoutValue(positions, parent)
+    inherit FplGenericIsValue(positions, parent)
 
     do
         this.TypeId <- name
@@ -3418,7 +3426,7 @@ type FplIntrinsicTpl(name, positions: Positions, parent: FplGenericNode) as this
     override this.RunOrder = None
 
 type FplIntrinsicUndef(positions: Positions, parent: FplGenericNode) as this =
-    inherit FplGenericNodeWithoutValue(positions, parent)
+    inherit FplGenericIsValue(positions, parent)
     do 
         this.TypeId <- LiteralUndef
         this.FplId <- LiteralUndef
@@ -3524,17 +3532,12 @@ type FplGenericReference(positions: Positions, parent: FplGenericNode) =
                 called.Run()
                 this.SetValuesOf called
             | PrimInstanceL
-            | PrimIntrinsicInd
-            | PrimIntrinsicUndef
-            | PrimUndetermined
-            | PrimIntrinsicTpl 
-            | PrimVariableArrayL 
-            | PrimIntrinsicPred ->
+            | PrimVariableArrayL ->
                 this.SetValue called
             | PrimVariableL when called.Value.IsSome ->
                 this.SetValuesOf called
             | _ -> ()
-        | Some (:? FplGenericNodeWithoutValue as called) ->
+        | Some (:? FplGenericIsValue as called) ->
             this.SetValue called
         | _ -> ()
         debug this Debug.Stop
@@ -4416,7 +4419,7 @@ type FplExtensionObj(positions: Positions, parent: FplGenericNode) as this =
     override this.RunOrder = None
 
 type FplIntrinsicInd(positions: Positions, parent: FplGenericNode) as this =
-    inherit FplGenericNode(positions, Some parent)
+    inherit FplGenericIsValue(positions, parent)
 
     do 
         this.TypeId <- LiteralInd
