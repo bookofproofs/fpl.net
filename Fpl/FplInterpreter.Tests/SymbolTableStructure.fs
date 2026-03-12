@@ -41,7 +41,7 @@ type SymbolTableStructure() =
                         | Some found -> Some found
                         | _ -> 
                             match root with 
-                            | :? FplGenericNodeWithValue as rootWithValue ->
+                            | :? FplGenericHasValue as rootWithValue ->
                                 match rootWithValue.Value with 
                                 | Some ref -> findNamedItem firstTypeNode identifier infiniteLoop ref
                                 | _ -> None
@@ -60,7 +60,7 @@ type SymbolTableStructure() =
                         | Some found -> Some found
                         | _ -> 
                             match root with 
-                            | :? FplGenericNodeWithValue as rootWithValue ->
+                            | :? FplGenericHasValue as rootWithValue ->
                                 match rootWithValue.Value with 
                                 | Some ref -> findNamedItem firstTypeNode identifier infiniteLoop ref
                                 | _ -> None
@@ -2518,7 +2518,7 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplDefaultConstructor>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(0, node.Scope.Count)
-            let nodeWithValue = node :?> FplGenericNodeWithValue
+            let nodeWithValue = node :?> FplGenericHasValue
             Assert.IsTrue(nodeWithValue.Value.IsSome) // instance
         | "FplDefaultConstructor", "01" ->
             Assert.IsInstanceOfType<FplClass>(parent)
@@ -2527,7 +2527,7 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplDefaultConstructor>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(0, node.Scope.Count)
-            let nodeWithValue = node :?> FplGenericNodeWithValue
+            let nodeWithValue = node :?> FplGenericHasValue
             Assert.IsTrue(nodeWithValue.Value.IsSome) // instance
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
@@ -2915,7 +2915,7 @@ type SymbolTableStructure() =
             match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            let nodeWithValue = node :?> FplGenericNodeWithValue
+            let nodeWithValue = node :?> FplGenericHasValue
             Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>("T()", node.Represent())  
             let fn = node :?> FplFunctionalTerm
@@ -2932,7 +2932,7 @@ type SymbolTableStructure() =
             match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            let nodeWithValue = node :?> FplGenericNodeWithValue
+            let nodeWithValue = node :?> FplGenericHasValue
             Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>("""$1""", node.Represent())
             let fn = node :?> FplFunctionalTerm
@@ -2949,7 +2949,7 @@ type SymbolTableStructure() =
             match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            let nodeWithValue = node :?> FplGenericNodeWithValue
+            let nodeWithValue = node :?> FplGenericHasValue
             Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>("""T()""", node.Represent())  
             let fn = node :?> FplFunctionalTerm
@@ -2966,7 +2966,7 @@ type SymbolTableStructure() =
             match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            let nodeWithValue = node :?> FplGenericNodeWithValue
+            let nodeWithValue = node :?> FplGenericHasValue
             Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>("""[$1]->$0, [$2]->$42""", node.Represent())  
             let fn = node :?> FplFunctionalTerm
@@ -2999,7 +2999,7 @@ type SymbolTableStructure() =
             match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            let nodeWithValue = node :?> FplGenericNodeWithValue
+            let nodeWithValue = node :?> FplGenericHasValue
             Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>("""T()""", node.Represent())  
             let fn = node :?> FplFunctionalTerm
@@ -3016,7 +3016,7 @@ type SymbolTableStructure() =
             match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            let nodeWithValue = node :?> FplGenericNodeWithValue
+            let nodeWithValue = node :?> FplGenericHasValue
             Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>("""A()""", node.Represent())
             let fn = node :?> FplFunctionalTerm
@@ -3033,7 +3033,7 @@ type SymbolTableStructure() =
             match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            let nodeWithValue = node :?> FplGenericNodeWithValue
+            let nodeWithValue = node :?> FplGenericHasValue
             Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>("""T()""", node.Represent())  
             let fn = node :?> FplFunctionalTerm
@@ -3050,7 +3050,7 @@ type SymbolTableStructure() =
             match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            let nodeWithValue = node :?> FplGenericNodeWithValue
+            let nodeWithValue = node :?> FplGenericHasValue
             Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>("""[$1]->A(), [$2]->B()""", node.Represent())  
             let fn = node :?> FplFunctionalTerm
@@ -3083,7 +3083,7 @@ type SymbolTableStructure() =
             match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            let nodeWithValue = node :?> FplGenericNodeWithValue
+            let nodeWithValue = node :?> FplGenericHasValue
             Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>("""T()""", node.Represent())  
             let fn = node :?> FplFunctionalTerm
@@ -3100,7 +3100,7 @@ type SymbolTableStructure() =
             match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            let nodeWithValue = node :?> FplGenericNodeWithValue
+            let nodeWithValue = node :?> FplGenericHasValue
             Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>("""A()""", node.Represent())
             let fn = node :?> FplFunctionalTerm
@@ -3117,7 +3117,7 @@ type SymbolTableStructure() =
             match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            let nodeWithValue = node :?> FplGenericNodeWithValue
+            let nodeWithValue = node :?> FplGenericHasValue
             Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>("""T()""", node.Represent())  
             let fn = node :?> FplFunctionalTerm
@@ -3134,7 +3134,7 @@ type SymbolTableStructure() =
             match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            let nodeWithValue = node :?> FplGenericNodeWithValue
+            let nodeWithValue = node :?> FplGenericHasValue
             Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>("""[$1]->A(), [$2]->$2, [$3]->true""", node.Represent())  
             let fn = node :?> FplFunctionalTerm
@@ -3171,7 +3171,7 @@ type SymbolTableStructure() =
             match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            let nodeWithValue = node :?> FplGenericNodeWithValue
+            let nodeWithValue = node :?> FplGenericHasValue
             Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>("T()", node.Represent())  
             let fn = node :?> FplFunctionalTerm
@@ -3188,7 +3188,7 @@ type SymbolTableStructure() =
             match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            let nodeWithValue = node :?> FplGenericNodeWithValue
+            let nodeWithValue = node :?> FplGenericHasValue
             Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>("T()", node.Represent())  
             let fn = node :?> FplFunctionalTerm
@@ -3205,7 +3205,7 @@ type SymbolTableStructure() =
             match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            let nodeWithValue = node :?> FplGenericNodeWithValue
+            let nodeWithValue = node :?> FplGenericHasValue
             Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>(LiteralTrue, node.Represent())
             let fn = node :?> FplFunctionalTerm
@@ -3222,7 +3222,7 @@ type SymbolTableStructure() =
             match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            let nodeWithValue = node :?> FplGenericNodeWithValue
+            let nodeWithValue = node :?> FplGenericHasValue
             Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>(PrimUndetermined, node.Represent())
             let fn = node :?> FplFunctionalTerm
@@ -3239,7 +3239,7 @@ type SymbolTableStructure() =
             match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            let nodeWithValue = node :?> FplGenericNodeWithValue
+            let nodeWithValue = node :?> FplGenericHasValue
             Assert.IsTrue(nodeWithValue.Value.IsNone)
             Assert.AreEqual<string>("dec pred(obj)", node.Represent())
             let fn = node :?> FplFunctionalTerm
@@ -3256,7 +3256,7 @@ type SymbolTableStructure() =
             match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            let nodeWithValue = node :?> FplGenericNodeWithValue
+            let nodeWithValue = node :?> FplGenericHasValue
             Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>(PrimUndetermined, node.Represent())
             let fn = node :?> FplFunctionalTerm
@@ -3273,7 +3273,7 @@ type SymbolTableStructure() =
             match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            let nodeWithValue = node :?> FplGenericNodeWithValue
+            let nodeWithValue = node :?> FplGenericHasValue
             Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>("""T()""", node.Represent())  
             let fn = node :?> FplFunctionalTerm
@@ -3290,7 +3290,7 @@ type SymbolTableStructure() =
             match map.RefersTo with
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
-            let nodeWithValue = node :?> FplGenericNodeWithValue
+            let nodeWithValue = node :?> FplGenericHasValue
             Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>("""[$1]->true, [$2]->false, [$3]->undef""", node.Represent())  
             let fn = node :?> FplFunctionalTerm
@@ -3325,7 +3325,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsTrue(parent.RefersTo.IsSome)
-            let parentWithValue = parent :?> FplGenericNodeWithValue
+            let parentWithValue = parent :?> FplGenericHasValue
             Assert.IsTrue(parentWithValue.Value.IsSome)
             Assert.AreEqual<FplGenericNode>(parentWithValue.Value.Value, node)
             Assert.IsInstanceOfType<FplInstance>(node)

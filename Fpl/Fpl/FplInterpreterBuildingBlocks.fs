@@ -47,7 +47,7 @@ let filterCandidates (candidatesPre:FplGenericNode list) identifier qualified =
 
 /// Simplify trivially nested expressions by removing from the stack FplValue nodes that were created due to too long parsing tree and replacing them by their sub nodes 
 let rec simplifyTriviallyNestedExpressions (rb1:FplGenericNode) = 
-    let rb = rb1 :?> FplGenericNodeWithValue
+    let rb = rb1 :?> FplGenericHasValue
     if rb.ArgList.Count = 1 && rb.FplId = "" then
         // removable reference blocks are those with only a single argument and unset FplId 
         let subNode = rb.ArgList[0] 
@@ -540,7 +540,7 @@ let rec eval (st: SymbolTable) ast =
             | :? FplVariableArray as arr -> arr.SetType identifier None pos1 pos2
             | :? FplMapping as map -> map.SetType identifier None pos1 pos2
             | :? FplVariable ->
-                let fvWithValue = fv :?> FplGenericNodeWithValue
+                let fvWithValue = fv :?> FplGenericHasValue
                 fvWithValue.TypeId <- identifier
                 // TODO: replace with FplUndetermined
                 fvWithValue.SetValue (new FplIntrinsicUndef((fv.StartPos, fv.EndPos), fv))
