@@ -47,8 +47,8 @@ let filterCandidates (candidatesPre:FplGenericNode list) identifier qualified =
 
 /// Simplify trivially nested expressions by removing from the stack FplValue nodes that were created due to too long parsing tree and replacing them by their sub nodes 
 let rec simplifyTriviallyNestedExpressions (rb1:FplGenericNode) = 
-    let rb = rb1 :?> FplGenericHasValue
-    if rb.ArgList.Count = 1 && rb.FplId = "" then
+    match rb1 with 
+    | :? FplReference as rb when rb.ArgList.Count = 1 && rb.FplId = "" ->
         // removable reference blocks are those with only a single argument and unset FplId 
         let subNode = rb.ArgList[0] 
         variableStack.Pop() |> ignore // pop the removable reference block and ignored it
@@ -61,6 +61,9 @@ let rec simplifyTriviallyNestedExpressions (rb1:FplGenericNode) =
         rb.Value <- None
         rb.Scope.Clear()
         simplifyTriviallyNestedExpressions subNode
+    | _ -> ()
+
+    
 
 let setKeywordType keywordType pos1 pos2 = 
     let fv = variableStack.PeekEvalStack()
@@ -824,7 +827,7 @@ let rec eval (st: SymbolTable) ast =
                 fv.ErrorOccurred <- checkID025Diagnostics (qualifiedName candidate false) node.Name fv.StartPos fv.EndPos
             else
                 ()
-        simplifyTriviallyNestedExpressions fv |> ignore
+        simplifyTriviallyNestedExpressions fv
     | Ast.SelfOrParent((pos1, pos2), selforParentAst) -> 
         eval st selforParentAst
     | Ast.Language((pos1, pos2),(langCode, ebnfAst)) ->
