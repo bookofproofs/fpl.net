@@ -542,8 +542,7 @@ let rec eval (st: SymbolTable) ast =
             | :? FplVariable ->
                 let fvWithValue = fv :?> FplGenericHasValue
                 fvWithValue.TypeId <- identifier
-                // TODO: replace with FplUndetermined
-                fvWithValue.SetValue (new FplIntrinsicUndef((fv.StartPos, fv.EndPos), fv))
+                fvWithValue.SetDefaultValue()
             | _ -> correctIds fv 
         | 1 ->
             let candidate = candidates.Head

@@ -742,6 +742,44 @@ type FplGenericIsAction(positions: Positions, parent: FplGenericNode) =
     override this.RunOrder = None
 
 
+/// Implements the semantics of a default undetermined value 
+/// that has the required type of the consumer FplValue. If this the value of this consumer cannot be determined during the interpretation, 
+/// its value will be set to this undermined value compatible with the consumer type.
+/// FplUndetermined is not to be confused with FplIntrinsicUndef that is used for declaring partial mappings in FPL.
+type FplUndetermined(typeId:string, positions: Positions, parent: FplGenericNode) as this =
+    inherit FplGenericIsValue(positions, parent)
+    do 
+        this.FplId <- PrimUndetermined
+        this.TypeId <- typeId
+
+    override this.Name = PrimUndeterminedL
+    override this.ShortName = PrimUndetermined
+
+    override this.Clone () =
+        let ret = new FplUndetermined(this.TypeId, (this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Type (signatureType:SignatureType) = 
+        match signatureType with 
+        | SignatureType.Type -> this.TypeId
+        | _ -> this.FplId
+                    
+    override this.Represent() = // done
+        this.FplId 
+
+    override this.Run() = 
+        // run is not neccessary, since this node is are never referenced in the FPL syntax
+        // Instead, we use them internally as default value of FplGenericHasValue
+        ()
+
+    override this.EmbedInSymbolTable _ = 
+        // the embedding is not neccessary, since this node is are never referenced in the FPL syntax
+        // Instead, we use them internally as default value of FplGenericHasValue
+        () 
+
+    override this.RunOrder = None
+
 [<AbstractClass>]
 type FplGenericHasValue(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericNode(positions, Some parent)
@@ -758,11 +796,17 @@ type FplGenericHasValue(positions: Positions, parent: FplGenericNode) =
     /// Sets the value of this FplGenericHasValue to the value of the provided node
     abstract member SetValueOf: FplGenericHasValue -> unit
 
+    /// Sets the value of this FplGenericHasValue to the default value, based on its type
+    abstract member SetDefaultValue: unit -> unit
+
     default this.SetValue fv =
         this.Value <- Some fv
 
     default this.SetValueOf fv =
         this.Value <-  fv.Value
+
+    default this.SetDefaultValue() =
+        this.Value <- Some (new FplUndetermined(this.TypeId, (this.StartPos, this.EndPos), this))
 
     override this.AssignParts (ret:FplGenericNode) = 
         base.AssignParts ret
@@ -1410,41 +1454,6 @@ let isRoot (fv:FplGenericNode) =
     | :? FplRoot -> true
     | _ -> false
 
-/// Implements the semantics of a default undetermined value 
-/// that has the required type of the consumer FplValue. If this the value of this consumer cannot be determined during the interpretation, 
-/// its value will be set to this undermined value compatible with the consumer type.
-/// FplUndetermined is not to be confused with FplIntrinsicUndef that is used for declaring partial mappings in FPL.
-type FplUndetermined(typeId:string, positions: Positions, parent: FplGenericNode) as this =
-    inherit FplGenericIsValue(positions, parent)
-    do 
-        this.FplId <- PrimUndetermined
-        this.TypeId <- typeId
-
-    override this.Name = PrimUndeterminedL
-    override this.ShortName = PrimUndetermined
-
-    override this.Clone () =
-        let ret = new FplUndetermined(this.TypeId, (this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.Type (signatureType:SignatureType) = getFplHead this signatureType
-                    
-    override this.Represent() = // done
-        this.FplId 
-
-    override this.Run() = 
-        // FplUndetermined is a value to be assumed, if 
-        // the evaluation is not possible (due to interpreter errors) 
-        // or still not determined because interpreter is evaluating a body of a node 
-        // (like a function, without requiring the closure of this function)
-        ()
-
-    override this.EmbedInSymbolTable _ = addExpressionToReference this
-
-    override this.RunOrder = None
-
-
 /// Implements the semantics of an FPL predicate prime predicate that is intrinsic.
 /// It serves as a value for everything in FPL that is "predicative in nature". 
 /// These can be predicates, theorem-like-statements, proofs or predicative expressions. 
@@ -1488,8 +1497,7 @@ type FplGenericPredicate(positions: Positions, parent: FplGenericNode) as this =
     override this.Run() = 
         debug this Debug.Start 
         // the default value of predicates is an undetermined predicate
-        let undetermined = new FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)
-        this.SetValue undetermined
+        this.SetDefaultValue()
         debug this Debug.Stop
 
 /// Tries to find a mapping of an FplValue
@@ -2317,8 +2325,7 @@ type FplGenericPredicateBlock(positions: Positions, parent: FplGenericNode) =
                 this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter variableStack.CallerStartPos variableStack.CallerEndPos
             else
                 if this.IsIntrinsic then 
-                    let undetermined = new FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)
-                    this.SetValue undetermined
+                    this.SetDefaultValue()
                 else
                     // run all statements and the last predicate in the FplPredicate
                     this.ArgList |> Seq.iter (fun fv1 -> fv1.Run()) 
@@ -2445,8 +2452,7 @@ type FplPredicate(positions: Positions, parent: FplGenericNode, runOrder) as thi
                 this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter variableStack.CallerStartPos variableStack.CallerEndPos
             else
                 if this.IsIntrinsic then 
-                    let undetermined = new FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)
-                    this.SetValue undetermined
+                    this.SetDefaultValue()
                 else
                     runArgsAndSetWithLastValue this
 
@@ -2793,14 +2799,11 @@ type FplGenericJustificationItem(positions: Positions, parent: FplGenericNode) =
                 this.ErrorOccurred <- emitLG001Diagnostics refType refName this.Name ref.StartPos ref.EndPos
         | Some (:? FplGenericHasValue as ref) when ref.Value.IsNone ->
             // set the value of "this" to undetermined
-            let value = new FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this) 
-            this.SetValue value
+            ref.SetDefaultValue()
+            this.SetValueOf ref
             // TODO issue diagnostics saying that a predicate expression was expected but has No value
         | _ -> 
-            // set the value of "this" to undetermined
-            let value = new FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this) 
-            this.SetValue value
-            () // no diagnostics needed because covered by ID010, ID023, or PR001
+            this.SetDefaultValue()
         debug this Debug.Stop
 
 and FplJustificationItemByAx(positions: Positions, parent: FplGenericNode) =
@@ -2981,8 +2984,7 @@ and FplArgInferenceTrivial(positions: Positions, parent: FplGenericNode) =
     override this.Run() = 
         debug this Debug.Start
         // TODO - check if trivial is possible and spawn FplIntrisincPred true if possible
-        let value = new FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this) 
-        this.SetValue value
+        this.SetDefaultValue()
         debug this Debug.Stop
 
     member this.ParentArgument = this.Parent.Value :?> FplArgument
@@ -3057,15 +3059,13 @@ and FplArgument(positions: Positions, parent: FplGenericNode, runOrder) =
             )
             if not allEvaluateToTrue then
                 this.ErrorOccurred <- emitPR009Diagnostics this.StartPos this.StartPos
-                let undetermined = new FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)
-                this.SetValue undetermined
+                this.SetDefaultValue()
             else
                 let v = new FplIntrinsicPred((this.StartPos, this.StartPos), this)
                 v.FplId <- LiteralTrue
                 this.SetValue v
         | _ -> 
-            let undetermined = new FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)
-            this.SetValue undetermined
+            this.SetDefaultValue()
         (* TODO: Enhance variableStack by the context in which this argument is being evaluated
             Here are some preliminary considerations: 
             1) The context should include 
@@ -3147,8 +3147,7 @@ and FplProof(positions: Positions, parent: FplGenericNode, runOrder) =
         )
         if not allEvaluateToTrue then
             this.ErrorOccurred <- emitPR009Diagnostics this.StartPos this.StartPos
-            let undetermined = new FplUndetermined(LiteralPred, (this.SignStartPos, this.SignStartPos), this)
-            this.SetValue undetermined
+            this.SetDefaultValue()
         else
             let v = new FplIntrinsicPred((this.SignStartPos, this.SignEndPos), this)
             v.FplId <- LiteralTrue
@@ -3501,12 +3500,9 @@ type FplGenericReference(positions: Positions, parent: FplGenericNode) =
                 this.SetValueOf called
                 variableStack.RestoreState(called)
             else
-                // TODO replace by DefaultValue
-                if called.Name = PrimPredicateL then 
-                    called.SetValue (new FplUndetermined(LiteralPred, (called.StartPos, called.EndPos), called))
-                    this.SetValueOf called
-                else
-                    ()
+                called.SetDefaultValue()
+                this.SetValueOf called
+
     override this.Run() =
         debug this Debug.Start
         let calledOpt = referencedNodeOpt this
@@ -5063,21 +5059,16 @@ type FplReturn(positions: Positions, parent: FplGenericNode) as this =
                         mapCases.Run()
                         this.SetValueOf mapCases
                     | _ ->
-                        // TODO: Replace by FplUndetermined
-                        let value = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
-                        this.SetValue value
+                        this.SetDefaultValue()
             | _ -> 
                 // should syntactically not occur that a functional term has no mapping
-                // in this case return undef
-                // TODO: Replace by FplUndetermined
-                let value = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
-                this.SetValue value
+                // in this case return default value
+                this.SetDefaultValue()
         | _ -> 
             // should syntactically not occur that a return statement occurs in something else
             // then a functional term
-            // in this case return undef
-            let value = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
-            this.SetValue value
+            // in this case return default value
+            this.SetDefaultValue()
         debug this Debug.Stop
 
 type FplExtension(positions: Positions, parent: FplGenericNode, runOrder) =
@@ -5435,8 +5426,7 @@ type FplConjunction(positions: Positions, parent: FplGenericNode) as this =
             newValue.FplId <- LiteralTrue
             this.SetValue newValue
         | _ -> 
-            let newValue =  new FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)
-            this.SetValue newValue
+            this.SetDefaultValue()
         debug this Debug.Stop
 
     override this.CheckConsistency() = 
@@ -5495,8 +5485,7 @@ type FplDisjunction(positions: Positions, parent: FplGenericNode) as this =
             newValue.FplId <- LiteralFalse
             this.SetValue newValue
         | _ -> 
-            let newValue =  new FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)
-            this.SetValue newValue
+            this.SetDefaultValue()
         debug this Debug.Stop
         
     override this.CheckConsistency() = 
@@ -5554,8 +5543,7 @@ type FplExclusiveOr(positions: Positions, parent: FplGenericNode) as this =
             newValue.FplId <- LiteralFalse
             this.SetValue newValue
         | _ -> 
-            let newValue =  new FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)
-            this.SetValue newValue
+            this.SetDefaultValue()
 
         debug this Debug.Stop
 
@@ -5611,8 +5599,7 @@ type FplNegation(positions: Positions, parent: FplGenericNode) as this =
             newValue.FplId <- LiteralFalse
             this.SetValue newValue
         | _ -> 
-            let newValue =  new FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)
-            this.SetValue newValue
+            this.SetDefaultValue()
 
         debug this Debug.Stop
 
@@ -5666,8 +5653,7 @@ type FplImplication(positions: Positions, parent: FplGenericNode) as this =
             newValue.FplId <- LiteralTrue
             this.SetValue newValue
         | _ -> 
-            let newValue =  new FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)
-            this.SetValue newValue
+            this.SetDefaultValue()
         
         debug this Debug.Stop
 
@@ -5727,8 +5713,7 @@ type FplEquivalence(positions: Positions, parent: FplGenericNode) as this =
             newValue.FplId <- LiteralFalse
             this.SetValue newValue
         | _ -> 
-            let newValue =  new FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)
-            this.SetValue newValue
+            this.SetDefaultValue()
 
         debug this Debug.Stop
 
@@ -5799,18 +5784,17 @@ type FplEquality(name, positions: Positions, parent: FplGenericNode) as this =
             let bRepr = b.Represent()
 
             let newPred = new FplIntrinsicPred((variableStack.CallerStartPos, variableStack.CallerEndPos), this.Parent.Value)
-            let undetermined = new FplUndetermined(LiteralPred, (variableStack.CallerStartPos, variableStack.CallerEndPos), this.Parent.Value)
             match aRepr with
             | LiteralUndef -> 
                 this.ErrorOccurred <- emitID013Diagnostics "Predicate `=` cannot be evaluated because the left argument is undefined." variableStack.CallerStartPos variableStack.CallerEndPos 
-                this.SetValue undetermined
+                this.SetDefaultValue()
             | _ -> 
                 match bRepr with
                 | LiteralUndef -> 
                     this.ErrorOccurred <- emitID013Diagnostics "Predicate `=` cannot be evaluated because the right argument is undefined." variableStack.CallerStartPos variableStack.CallerEndPos 
-                    this.SetValue undetermined
+                    this.SetDefaultValue()
                 | _ when aRepr = "dec tpl" && bRepr = "dec tpl" -> 
-                    this.SetValue undetermined // undetermined
+                    this.SetDefaultValue()
                 | _ when aType<>bType -> 
                     newPred.FplId <- LiteralFalse // if the compared arguments have different types, then unequal
                     this.SetValue newPred
@@ -5819,13 +5803,13 @@ type FplEquality(name, positions: Positions, parent: FplGenericNode) as this =
                     | "dec pred"  
                     | PrimUndetermined -> 
                         this.ErrorOccurred <- emitID013Diagnostics "Predicate `=` cannot be evaluated because the left argument is undetermined." variableStack.CallerStartPos variableStack.CallerEndPos 
-                        this.SetValue undetermined
+                        this.SetDefaultValue()
                     | _ -> 
                         match bRepr with
                         | "dec pred"  
                         | PrimUndetermined -> 
                             this.ErrorOccurred <- emitID013Diagnostics "Predicate `=` cannot be evaluated because the right argument is undetermined." variableStack.CallerStartPos variableStack.CallerEndPos 
-                            this.SetValue undetermined
+                            this.SetDefaultValue()
                         | _ -> 
                             let a1IsDeclared = aRepr.Contains("dec ")
                             let b1IsDeclared = bRepr.Contains("dec ")
@@ -5835,7 +5819,7 @@ type FplEquality(name, positions: Positions, parent: FplGenericNode) as this =
                                 newPred.FplId <- $"{(aRepr = bRepr)}".ToLower()
                                 this.SetValue newPred
                             | _ -> 
-                                this.SetValue undetermined
+                                this.SetDefaultValue()
         debug this Debug.Stop
 
 /// Implements the semantics of an FPL decrement delegate.
@@ -6135,8 +6119,7 @@ type FplGenericQuantor(positions: Positions, parent: FplGenericNode) =
     override this.Run() = 
         debug this Debug.Start
         this.ArgList[0].Run()
-        let pred = new FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)
-        this.SetValue pred
+        this.SetDefaultValue()
         debug this Debug.Stop
 
 
