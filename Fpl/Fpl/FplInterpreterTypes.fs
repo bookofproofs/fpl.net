@@ -829,20 +829,6 @@ type FplGenericHasValue(positions: Positions, parent: FplGenericNode) =
 
 type State() = 
     let _vars = Dictionary<string,FplGenericNode option>()
-    let mutable _value: FplGenericNode option = None
-    let mutable _refersTo: FplGenericNode option = None
-
-    /// The optional value of the called node before it was called
-    member this.Value
-        with get() = _value
-        and set (value:FplGenericNode option) = _value <- value
-
-
-    /// The optional RefersTo of the called node before it was called
-    member this.RefersTo
-        with get() = _refersTo
-        and set (value:FplGenericNode option) = _refersTo <- value
-
     /// The dictionary of the variable values of the called node before it was called
     member this.VarValues = _vars
 
@@ -972,8 +958,6 @@ type FplVariableStack() =
                 pars.Add(parOriginal)
             | _ -> ()
         )
-        toBeSavedState.Value <- called.Value
-        toBeSavedState.RefersTo <- called.RefersTo
         let kvp = KeyValuePair(called.FplId,toBeSavedState)
         
         _stateStack.Push(kvp)
@@ -990,8 +974,6 @@ type FplVariableStack() =
             let oldValue = kvp.Value
             origVariableWithValue.Value <- oldValue
         )
-        called.Value <- stateBeforeBeingCalled.Value 
-        called.RefersTo <- stateBeforeBeingCalled.RefersTo 
 
 
     member this.EvalStack = _valueStack
