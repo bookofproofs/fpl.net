@@ -726,6 +726,23 @@ and ScopeSearchResult =
     | NotApplicable
 
 [<AbstractClass>]
+type FplGenericIsValue(positions: Positions, parent: FplGenericNode) =
+    inherit FplGenericNode(positions, Some parent)
+
+    override this.Represent() = // done
+        PrimNone
+    override this.RunOrder = None
+
+[<AbstractClass>]
+type FplGenericIsAction(positions: Positions, parent: FplGenericNode) =
+    inherit FplGenericNode(positions, Some parent)
+
+    override this.Represent() = // done
+        PrimNone
+    override this.RunOrder = None
+
+
+[<AbstractClass>]
 type FplGenericHasValue(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericNode(positions, Some parent)
     let mutable (_value:FplGenericNode option) = None
@@ -735,16 +752,16 @@ type FplGenericHasValue(positions: Positions, parent: FplGenericNode) =
         with get () = _value
         and set (value) = _value <- value
 
-    /// Clears the ValueList and adds the argument to it. Previous value(s), if any, get lost.
+    /// Sets the value of this FplGenericHasValue to the provided value
     abstract member SetValue: FplGenericNode -> unit
 
-    /// Clears the ValueList and adds the argument to it. Previous value(s), if any, get lost.
-    abstract member SetValuesOf: FplGenericHasValue -> unit
+    /// Sets the value of this FplGenericHasValue to the value of the provided node
+    abstract member SetValueOf: FplGenericHasValue -> unit
 
     default this.SetValue fv =
         this.Value <- Some fv
 
-    default this.SetValuesOf fv =
+    default this.SetValueOf fv =
         this.Value <-  fv.Value
 
     override this.AssignParts (ret:FplGenericNode) = 
@@ -765,22 +782,6 @@ type FplGenericHasValue(positions: Positions, parent: FplGenericNode) =
         match this.Value with 
         | Some v -> v.Represent() 
         | _ -> PrimNone // If there is no value, return string "None"
-
-[<AbstractClass>]
-type FplGenericIsValue(positions: Positions, parent: FplGenericNode) =
-    inherit FplGenericNode(positions, Some parent)
-
-    override this.Represent() = // done
-        PrimNone
-    override this.RunOrder = None
-
-[<AbstractClass>]
-type FplGenericIsAction(positions: Positions, parent: FplGenericNode) =
-    inherit FplGenericNode(positions, Some parent)
-
-    override this.Represent() = // done
-        PrimNone
-    override this.RunOrder = None
 
 type State() = 
     let _vars = Dictionary<string,FplGenericNode option>()
@@ -1996,7 +1997,7 @@ type FplRuleOfInference(positions: Positions, parent: FplGenericNode, runOrder) 
     override this.RunOrder = Some _runOrder
 
 type FplInstance(positions: Positions, parent: FplGenericNode) as this =
-    inherit FplGenericInheriting(positions, parent)
+    inherit FplGenericIsValue(positions, parent)
 
     do
         this.FplId <- LiteralObj
@@ -2324,7 +2325,7 @@ type FplGenericPredicateBlock(positions: Positions, parent: FplGenericNode) =
                     // Assign the value of the FplPredicate using the last predicate
                     let lastOpt = this.ArgList |> Seq.tryLast
                     match lastOpt with 
-                    | Some (:? FplGenericHasValue as last) -> this.SetValuesOf last
+                    | Some (:? FplGenericHasValue as last) -> this.SetValueOf last
                     | _ -> ()
 
             _callCounter <- _callCounter - 1
@@ -2363,7 +2364,7 @@ let runArgsAndSetWithLastValue (fv:FplGenericHasValue) =
     // Assign the value of the FplPredicate using the last predicate
     let lastOpt = fv.ArgList |> Seq.tryLast
     match lastOpt with 
-    | Some (:? FplGenericHasValue as last) -> fv.SetValuesOf last
+    | Some (:? FplGenericHasValue as last) -> fv.SetValueOf last
     | _ -> ()
 
 type FplPredicate(positions: Positions, parent: FplGenericNode, runOrder) as this =
@@ -2477,7 +2478,7 @@ let runArgumentsOfGenericPredicateWithExpression (fv:FplGenericHasValue) =
         fv1.Run()
         match fv1 with 
         | :? FplGenericHasValue as fv1WithValue -> 
-            fv.SetValuesOf fv1WithValue
+            fv.SetValueOf fv1WithValue
         | _ ->
             // warning stmt inside predicate might cause side-effects
             fv.ErrorOccurred <- emitLG004diagnostic fv.Name fv1.StartPos fv1.EndPos
@@ -2781,7 +2782,7 @@ type FplGenericJustificationItem(positions: Positions, parent: FplGenericNode) =
             if isRefPred then 
                 // because the ref must proceed "this" in FPL Code, it was already run
                 // so we only need to copy its value into this
-                this.SetValuesOf ref
+                this.SetValueOf ref
             else
                 // if there is a value but ref is not a predicate, 
                 // set the value of "this" to undetermined
@@ -3497,13 +3498,13 @@ type FplGenericReference(positions: Positions, parent: FplGenericNode) =
                 variableStack.CallerEndPos <- this.EndPos
                 // run all statements of the called node
                 called.Run()
-                this.SetValuesOf called
+                this.SetValueOf called
                 variableStack.RestoreState(called)
             else
                 // TODO replace by DefaultValue
                 if called.Name = PrimPredicateL then 
                     called.SetValue (new FplUndetermined(LiteralPred, (called.StartPos, called.EndPos), called))
-                    this.SetValuesOf called
+                    this.SetValueOf called
                 else
                     ()
     override this.Run() =
@@ -3527,15 +3528,14 @@ type FplGenericReference(positions: Positions, parent: FplGenericNode) =
                 this.SetValue called
             | PrimDelegateDecrementL ->
                 called.Run()
-                this.SetValuesOf called
+                this.SetValueOf called
             | PrimDelegateEqualL ->
                 called.Run()
-                this.SetValuesOf called
-            | PrimInstanceL
+                this.SetValueOf called
             | PrimVariableArrayL ->
                 this.SetValue called
             | PrimVariableL when called.Value.IsSome ->
-                this.SetValuesOf called
+                this.SetValueOf called
             | _ -> ()
         | Some (:? FplGenericIsValue as called) ->
             this.SetValue called
@@ -4084,8 +4084,8 @@ type FplVariableArray(fplId, positions: Positions, parent: FplGenericNode) =
         | :? FplVariableArray as arr -> arr.CopyValueKeys this
         | _ -> ()
 
-    override this.SetValuesOf fv =
-        base.SetValuesOf fv
+    override this.SetValueOf fv =
+        base.SetValueOf fv
         if fv.FplId <> LiteralUndef then
             this.IsInitialized <- true
         match fv with 
@@ -4119,8 +4119,8 @@ type FplVariable(fplId, positions: Positions, parent: FplGenericNode) =
             | _ -> ()
                 
 
-    override this.SetValuesOf fv =
-        base.SetValuesOf fv
+    override this.SetValueOf fv =
+        base.SetValueOf fv
         if fv.FplId <> LiteralUndef then
             this.IsInitialized <- true
 
@@ -4351,7 +4351,7 @@ type FplExtensionObj(positions: Positions, parent: FplGenericNode) as this =
                 v.TypeId <- this.TypeId
                 this.SetValue v
             | _ ->
-                this.SetValuesOf extensionDefinition
+                this.SetValueOf extensionDefinition
             variableStack.RestoreState(extensionDefinition)
         | _, _ -> ()
             // this ExtensionObj is an intrinsic value with the Representation FplId, because it does not refer to any extension definition
@@ -4482,7 +4482,7 @@ type FplMapCaseSingle(positions: Positions, parent: FplGenericNode) as this =
         debug this Debug.Start
         let result = this.GetResult()
         result.Run()
-        this.SetValuesOf result
+        this.SetValueOf result
         debug this Debug.Stop
 
 type FplMapCaseElse(positions: Positions, parent: FplGenericNode) as this =
@@ -4510,7 +4510,7 @@ type FplMapCaseElse(positions: Positions, parent: FplGenericNode) as this =
         let first = this.ArgList |> Seq.head
         let contentOfElsResult = first :?> FplGenericHasValue
         contentOfElsResult.Run()
-        this.SetValuesOf contentOfElsResult
+        this.SetValueOf contentOfElsResult
         debug this Debug.Stop
 
 type FplMapCases(positions: Positions, parent: FplGenericNode) as this =
@@ -4606,10 +4606,10 @@ type FplMapCases(positions: Positions, parent: FplGenericNode) as this =
         | Some firstMapCaseWithTrueCondition -> 
             firstMapCaseWithTrueCondition.Run()
             let resOfFound = firstMapCaseWithTrueCondition.GetResult()
-            this.SetValuesOf resOfFound
+            this.SetValueOf resOfFound
         | None -> 
             mapElse.Run()
-            this.SetValuesOf mapElse
+            this.SetValueOf mapElse
         debug this Debug.Stop
 
 let private refTypeName aName =
@@ -5058,10 +5058,10 @@ type FplReturn(positions: Positions, parent: FplGenericNode) as this =
                         this.SetValue returnedReference
                     | :? FplReference as ref ->
                         ref.Run()
-                        this.SetValuesOf ref
+                        this.SetValueOf ref
                     | :? FplMapCases as mapCases -> 
                         mapCases.Run()
-                        this.SetValuesOf mapCases
+                        this.SetValueOf mapCases
                     | _ ->
                         // TODO: Replace by FplUndetermined
                         let value = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
@@ -5147,7 +5147,7 @@ type FplExtension(positions: Positions, parent: FplGenericNode, runOrder) =
             else
                 this.ArgList
                 |> Seq.iter (fun fv -> fv.Run())
-                this.SetValuesOf this.ReturnStmt
+                this.SetValueOf this.ReturnStmt
         _callCounter <- _callCounter - 1
         debug this Debug.Stop
 
@@ -6661,7 +6661,7 @@ type FplAssignment(positions: Positions, parent: FplGenericNode) as this =
             assignee.AssignValueToCoordinates coordinatesKey assignedValue // set value to the created instance 
         | None, Some (:? FplGenericHasValue as assignee), Some (:? FplGenericHasValue as assignedValue) ->
             assignedValue.Run()
-            assignee.SetValuesOf assignedValue
+            assignee.SetValueOf assignedValue
         | _ -> ()
         debug this Debug.Stop
 
