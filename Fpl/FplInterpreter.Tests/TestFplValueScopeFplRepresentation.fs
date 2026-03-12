@@ -807,33 +807,33 @@ type TestFplValueScopeFplRepresentation() =
 
 
             match var with
-            | "varIndUnset" -> Assert.AreEqual<string>("dec ind", varObj.Represent())
+            | "varIndUnset" -> Assert.AreEqual<string>(PrimUndetermined, varObj.Represent())
             | "varIndSet0" -> Assert.AreEqual<string>("$0", varObj.Represent())
             | "varIndSet1" -> Assert.AreEqual<string>("$1", varObj.Represent())
             | "varIndSet42" -> Assert.AreEqual<string>("$42", varObj.Represent())
             | "varIndSet100" -> Assert.AreEqual<string>("$100", varObj.Represent())
-            | "varFuncUnset" -> Assert.AreEqual<string>("dec func", varObj.Represent())
+            | "varFuncUnset" -> Assert.AreEqual<string>(PrimUndetermined, varObj.Represent())
             | "varPredUnset" -> Assert.AreEqual<string>(PrimUndetermined, varObj.Represent())
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("o", """def pred T() {dec ~o:obj; true};""", "dec obj")>]    // without anything
-    [<DataRow("a", """def cl A def pred T() {dec ~a:A; true};""", "dec A")>]    // without constructor, without inheritance, without instantiation
+    [<DataRow("o", """def pred T() {dec ~o:obj; true};""", PrimUndetermined)>]    // without anything
+    [<DataRow("a", """def cl A def pred T() {dec ~a:A; true};""", PrimUndetermined)>]    // without constructor, without inheritance, without instantiation
     // direct assignment of a class without a constructor, will issue ID004 diagnostics, var remains as declared
-    [<DataRow("aI1", """def cl A def pred T() {dec ~aI1:A aI1:=A; true};""", "dec A")>]  
-    [<DataRow("c", """def cl A def cl B: A def cl C {ctor C() {}} def pred T() {dec ~c:C; true};""", "dec C")>]
-    [<DataRow("bI1", """def cl A def cl B: A def pred T() {dec ~bI1:B bI1:=B; true};""", "dec B")>]  
+    [<DataRow("aI1", """def cl A def pred T() {dec ~aI1:A aI1:=A; true};""", PrimUndetermined)>]  
+    [<DataRow("c", """def cl A def cl B: A def cl C {ctor C() {}} def pred T() {dec ~c:C; true};""", PrimUndetermined)>]
+    [<DataRow("bI1", """def cl A def cl B: A def pred T() {dec ~bI1:B bI1:=B; true};""", PrimUndetermined)>]  
 
     // will create an instance using the default constructor
     [<DataRow("aI2", """def cl A def pred T() {dec ~aI2:A aI2:=A(); true};""", """A()""")>]  
     [<DataRow("bI2", """def cl A def cl B: A def pred T() {dec ~bI2:B bI2:=B(); true};""", """B()""")>]  
 
-    [<DataRow("b", """def cl A def cl B: A def pred T() {dec ~b:B; true};""", "dec B")>]    // without constructor, with inheritance, without instantiation
-    [<DataRow("cI1", """def cl A def cl B: A def cl C {ctor C() {}} def pred T() {dec ~cI1:C cI1:=C; true};""", "dec C")>]  // with constructor, without inheritance, with instantiation (without ()) -> should also trigger another error
+    [<DataRow("b", """def cl A def cl B: A def pred T() {dec ~b:B; true};""", PrimUndetermined)>]    // without constructor, with inheritance, without instantiation
+    [<DataRow("cI1", """def cl A def cl B: A def cl C {ctor C() {}} def pred T() {dec ~cI1:C cI1:=C; true};""", PrimUndetermined)>]  // with constructor, without inheritance, with instantiation (without ()) -> should also trigger another error
     [<DataRow("cI2", """def cl A def cl B: A def cl C {ctor C() {}} def pred T() {dec ~cI2:C cI2:=C(); true};""", """C()""")>]  // with constructor, without inheritance, with instantiation (with ())
-    [<DataRow("d", """def cl A def cl B: A def cl D: B {ctor D() {dec base.B(); }} def pred T() {dec ~d:D; true};""", "dec D")>]    // with constructor, with inheritance, without instantiation
-    [<DataRow("dI1", """def cl A def cl B: A def cl D: B {ctor D() {dec base.B(); }} def pred T() {dec ~dI1:D dI1:=D; true};""", "dec D")>]  // with constructor, with inheritance, with instantiation (without ())
+    [<DataRow("d", """def cl A def cl B: A def cl D: B {ctor D() {dec base.B(); }} def pred T() {dec ~d:D; true};""", PrimUndetermined)>]    // with constructor, with inheritance, without instantiation
+    [<DataRow("dI1", """def cl A def cl B: A def cl D: B {ctor D() {dec base.B(); }} def pred T() {dec ~dI1:D dI1:=D; true};""", PrimUndetermined)>]  // with constructor, with inheritance, with instantiation (without ())
     [<DataRow("dI2", """def cl A def cl B: A def cl D: B {ctor D() {dec base.B(); }} def pred T() {dec ~dI2:D dI2:=D(); true};""", """D()""")>]  
     [<TestMethod>]
     member this.TestVariableRepresentationObjects(var, fplCode:string, expected:string) =
