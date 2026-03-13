@@ -3506,10 +3506,6 @@ type FplGenericReference(positions: Positions, parent: FplGenericNode) =
             | PrimMandatoryFunctionalTermL
             | PrimMandatoryPredicateL ->
                 this.RunWithVariableReplacement called variableStack
-            | PrimExtensionObj when called.RefersTo.IsSome ->
-                this.RunWithVariableReplacement called variableStack
-            | PrimExtensionObj when called.RefersTo.IsNone ->
-                this.SetValue called
             | PrimVariableL
             | PrimDelegateEqualL
             | PrimDelegateDecrementL ->
@@ -4250,7 +4246,7 @@ let isCallByValue (fv:FplGenericNode) =
 
 /// Implements an object that is used to provide a representation of extensions in FPL.
 type FplExtensionObj(positions: Positions, parent: FplGenericNode) as this =
-    inherit FplGenericHasValue(positions, parent)
+    inherit FplGenericIsValue(positions, parent)
 
     do 
         this.TypeId <- LiteralObj
@@ -4273,53 +4269,11 @@ type FplExtensionObj(positions: Positions, parent: FplGenericNode) as this =
             let head = getFplHead this signatureType
             sprintf "%s" head
 
-    override this.Represent() = // done 
-        let enclosingBlockOpt = this.UltimateBlockNode
-        match enclosingBlockOpt, this.RefersTo with 
-        | Some enclosingBlock, Some ref when Object.ReferenceEquals(enclosingBlock, ref) ->
-            this.FplId // when this occurs inside its own extension definition, return FplId
-        | _, None ->
-            this.FplId // when this has no occurs inside its own extension definition, return FplId
-        | _, _ when this.Value.IsSome ->
-            this.Value.Value.Represent()
-        | _, _ ->
-            this.FplId // in all other cases return FplId
+    override this.Represent() = 
+        this.FplId // return FplId
 
     override this.Run() = 
-        debug this Debug.Start
-        match this.RefersTo, this.NextBlockNode with 
-        | Some extensionDefinition, Some enclosingBlock when Object.ReferenceEquals(extensionDefinition, enclosingBlock) ->
-            // do not run extension objects inside their own definitions
-            // (will be interpreted via FplId string Represent() instead)
-            ()
-        | Some (:? FplGenericHasValue as extensionDefinition), _ ->
-            let pars = variableStack.SaveState(extensionDefinition)
-            let spawnedValue = this.Clone()
-            spawnedValue.RefersTo <- None // set the extensions's variable's to a copy of this FplExtensionObj, 
-            spawnedValue.IsIntrinsic <- true // but to an intrinsic one (to prevent delegating it's Represent() to a circular enclosing FplExtension definition)
-            let args = [spawnedValue]
-            variableStack.ReplaceVariables pars args
-            // store the position of the caller
-            variableStack.CallerStartPos <- this.StartPos
-            variableStack.CallerEndPos <- this.EndPos
-            // run all statements of the called node
-            extensionDefinition.Run()
-            match extensionDefinition.Value with 
-            | Some v when Object.ReferenceEquals(this, v) -> 
-                // we have the case that an extension definition evaluated to the same FplExtensionObj 
-                // it was referred from. In this case, we have to prevent the FplExtensionObj to be set with itself as its value
-                // we create a new Extension Obj
-                let v = new FplExtensionObj((this.StartPos, this.EndPos), this)
-                v.FplId <- this.FplId
-                v.TypeId <- this.TypeId
-                this.SetValue v
-            | _ ->
-                this.SetValueOf extensionDefinition
-            variableStack.RestoreState(extensionDefinition)
-        | _, _ -> ()
-            // this ExtensionObj is an intrinsic value with the Representation FplId, because it does not refer to any extension definition
-        debug this Debug.Stop
-
+        ()
 
     override this.CheckConsistency () = 
         base.CheckConsistency()
