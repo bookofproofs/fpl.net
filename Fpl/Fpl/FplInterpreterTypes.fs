@@ -6500,7 +6500,7 @@ type FplAssignment(positions: Positions, parent: FplGenericNode) as this =
             match mapOpt with 
             | Some map -> checkTypes this.ArgList[0] map
             | _ -> checkTypes assignee assignedValue
-        | Some (:? FplVariable as assignee), Some (assignedValue:FplGenericNode) -> 
+        | Some (:? FplVariable as assignee), Some _ -> 
             checkTypes assignee this.ArgList[1] 
         | Some (:? FplVariableArray as assignee), Some assignedValue ->
            checkTypes this.ArgList[0] this.ArgList[1] 
@@ -6545,11 +6545,7 @@ type FplAssignment(positions: Positions, parent: FplGenericNode) as this =
                 // reposition the instance in symbol table
                 instance.Parent <- Some assignee
             | None -> () // TODO, issue diagnostics?
-        | None, Some (:? FplVariable as assignee), Some (:? FplIntrinsicInd as assignedValue) ->
-            assignee.SetValue assignedValue
-        | None, Some (:? FplVariable as assignee), Some (:? FplIntrinsicPred as assignedValue) ->
-            assignee.SetValue assignedValue
-        | None, Some (:? FplVariable as assignee), Some (:? FplUndetermined as assignedValue) ->
+        | None, Some (:? FplVariable as assignee), Some (:? FplGenericIsValue as assignedValue) ->
             assignee.SetValue assignedValue
         | None, Some (:? FplVariableArray as assignee), Some (:? FplGenericConstructor as assignedValue) when this.ArgList[0].ArgType = ArgType.Brackets ->
             assignedValue.Run()
