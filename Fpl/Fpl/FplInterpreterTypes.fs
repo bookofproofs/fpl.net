@@ -1836,8 +1836,18 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplGenericNode) as 
             this.SetIsUsed()
         this.IsSignatureVariable <- otherVar.IsSignatureVariable 
         this.IsInitialized <- otherVar.IsInitialized
-        this.IsInitialized <- otherVar.IsInitialized
         this.RefersTo <- otherVar.RefersTo
+
+    override this.SetValue fv =
+        base.SetValue fv
+        if fv.FplId <> LiteralUndef then
+            this.IsInitialized <- true
+
+    override this.SetValueOf fv =
+        base.SetValueOf fv
+        if fv.FplId <> LiteralUndef then
+            this.IsInitialized <- true
+
 
 let checkVAR04Diagnostics (fv:FplGenericNode) = 
     fv.GetVariables()
@@ -3632,7 +3642,7 @@ type FplReference(positions: Positions, parent: FplGenericNode) =
 
     override this.SetValue fv = 
         match this.RefersTo with
-        | Some (:? FplGenericVariable as var) ->
+        | Some (:? FplGenericVariable as var) when var.Name = PrimVariableL ->
             var.SetValue fv
             base.SetValue fv
         | _ ->
@@ -3945,12 +3955,13 @@ type FplVariableArray(fplId, positions: Positions, parent: FplGenericNode) =
 
     override this.ShortName = PrimVariableArray
 
-    member this.CopyValueKeys (ret:FplVariableArray) = 
-        this.ValueKeys.Clear()
+    /// Copies the ValueKeys field from this to target.
+    member private this.CopyValueKeys (target:FplVariableArray) = 
+        target.ValueKeys.Clear()
         this.ValueKeys
-            |> Seq.iter (fun kvp ->
-                ret.ValueKeys.Add(kvp.Key, kvp.Value)
-            )
+        |> Seq.iter (fun kvp ->
+            target.ValueKeys.Add(kvp.Key, kvp.Value)
+        )
 
     override this.Clone () =
         let ret = new FplVariableArray(this.FplId, (this.StartPos, this.EndPos), this.Parent.Value)
@@ -4053,23 +4064,7 @@ type FplVariableArray(fplId, positions: Positions, parent: FplGenericNode) =
     override this.CheckConsistency () = 
         base.CheckConsistency()
 
-    
-    override this.SetValue fv =
-        base.SetValue fv
-        if fv.FplId <> LiteralUndef then
-            this.IsInitialized <- true
-        match fv with 
-        | :? FplVariableArray as arr -> arr.CopyValueKeys this
-        | _ -> ()
-
-    override this.SetValueOf fv =
-        base.SetValueOf fv
-        if fv.FplId <> LiteralUndef then
-            this.IsInitialized <- true
-        match fv with 
-        | :? FplVariableArray as arr -> arr.CopyValueKeys this
-        | _ -> ()
-
+   
 type FplVariable(fplId, positions: Positions, parent: FplGenericNode) =
     inherit FplGenericVariable(fplId, positions, parent)
 
@@ -4090,17 +4085,9 @@ type FplVariable(fplId, positions: Positions, parent: FplGenericNode) =
 
     override this.SetValue fv =
         base.SetValue fv
-        if fv.FplId <> LiteralUndef then
-            this.IsInitialized <- true
-            match this.RefersTo with 
-            | Some (:? FplIntrinsicTpl as tpl) -> tpl.TrySetTemplateUsage fv (SIG12("", "", "", "").Code)
-            | _ -> ()
-                
-
-    override this.SetValueOf fv =
-        base.SetValueOf fv
-        if fv.FplId <> LiteralUndef then
-            this.IsInitialized <- true
+        match this.RefersTo with 
+        | Some (:? FplIntrinsicTpl as tpl) -> tpl.TrySetTemplateUsage fv (SIG12("", "", "", "").Code)
+        | _ -> ()
 
     override this.Represent() = // done
         let unsetRepresentation =
