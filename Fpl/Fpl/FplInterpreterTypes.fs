@@ -1821,10 +1821,6 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplGenericNode) as 
         | _, _, None -> sprintf "%s(%s)" head pars
         | _, _, Some map -> sprintf "%s(%s) -> %s" head pars (map.Type propagate)
 
-    override this.Run() =
-        // FplGenericVariable has nothing to run
-        ()
-
     override this.RunOrder = None
 
     override this.Copy(other: FplGenericNode) = 
@@ -3514,16 +3510,13 @@ type FplGenericReference(positions: Positions, parent: FplGenericNode) =
                 this.RunWithVariableReplacement called variableStack
             | PrimExtensionObj when called.RefersTo.IsNone ->
                 this.SetValue called
+            | PrimVariableL
+            | PrimDelegateEqualL
             | PrimDelegateDecrementL ->
-                called.Run()
-                this.SetValueOf called
-            | PrimDelegateEqualL ->
                 called.Run()
                 this.SetValueOf called
             | PrimVariableArrayL ->
                 this.SetValue called
-            | PrimVariableL when called.Value.IsSome ->
-                this.SetValueOf called
             | _ -> ()
         | Some (:? FplGenericIsValue as called) ->
             this.SetValue called
@@ -3979,7 +3972,6 @@ type FplVariableArray(fplId, positions: Positions, parent: FplGenericNode) =
             ret.DimensionTypes.Add(value))
 
         this.CopyValueKeys ret
-
         ret
 
     /// ValueList of the FplVariableArray.
@@ -4061,10 +4053,10 @@ type FplVariableArray(fplId, positions: Positions, parent: FplGenericNode) =
                 | LiteralUndef -> LiteralUndef
                 | _ -> $"dec {this.Type(SignatureType.Type)}" 
 
-    override this.CheckConsistency () = 
-        base.CheckConsistency()
+    override this.Run() =
+        () // running not necessary for arrays
 
-   
+
 type FplVariable(fplId, positions: Positions, parent: FplGenericNode) =
     inherit FplGenericVariable(fplId, positions, parent)
 
@@ -4103,6 +4095,12 @@ type FplVariable(fplId, positions: Positions, parent: FplGenericNode) =
             else
                 unsetRepresentation
 
+    override this.Run() =
+        debug this Debug.Start
+        match this.Value with 
+        | None -> this.SetDefaultValue()
+        | _ -> ()
+        debug this Debug.Stop
 
 /// Gets the list of parameters of an FplValue if any
 let getParameters (fv:FplGenericNode) =
