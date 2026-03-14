@@ -1265,7 +1265,17 @@ let rec eval (st: SymbolTable) ast =
         let parent = variableStack.PeekEvalStack()
         let fvNew = new FplAssignment((pos1, pos2), parent)
         variableStack.PushEvalStack(fvNew) // add assignment
-        let assigneeReference = new FplReference((pos1,pos2), fvNew)
+        let assigneeReference = 
+            match predicateWithQualificationAst with 
+            | Ast.PredicateWithQualification(predicateWithOptSpecificationAst, _) ->
+                match predicateWithOptSpecificationAst with 
+                | Ast.PredicateWithOptSpecification ((assigneePos1,assigneePos2),(_,_)) ->
+                    // create assigneeReference with correct positioning of the assignee (to improve related diagnostics positions)
+                    new FplReference((assigneePos1,assigneePos2), fvNew)
+                | _ ->
+                    new FplReference((pos1,pos2), fvNew)
+            | _ ->
+                new FplReference((pos1,pos2), fvNew)
         variableStack.PushEvalStack(assigneeReference) // add assignee
         eval st predicateWithQualificationAst
         variableStack.PopEvalStack() // remove assignee
