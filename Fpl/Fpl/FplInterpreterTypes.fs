@@ -6539,8 +6539,8 @@ type FplAssignment(positions: Positions, parent: FplGenericNode) as this =
     override this.Run() =
         debug this Debug.Start
         match this.ErrorOccurred, this.Assignee, this.AssignedValue with
-        | Some errCode, Some (:? FplGenericVariable as assignee), _ ->
-            emitST003diagnostics errCode this.ArgList[1].StartPos this.ArgList[1].EndPos
+        | Some errCode, _, _ ->
+            () // skip assignment, if any proceeding errors occured
         | Some errCode, Some assignee, _ ->
             emitST003diagnostics errCode this.ArgList[1].StartPos this.ArgList[1].EndPos
         | None, Some (:? FplVariable as assignee), Some (:? FplGenericConstructor as assignedValue) ->

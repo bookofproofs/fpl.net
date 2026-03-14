@@ -5015,15 +5015,6 @@ type TestInterpreterErrors() =
             let code = ST002 ""
             runTestHelper "TestST002.fpl" fplCode code expected
 
-    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
-    [<TestMethod>]
-    member this.TestST003(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
-            ()
-        else
-            let code = ST003 ""
-            runTestHelper "TestST003.fpl" fplCode code expected
-
     [<DataRow("01", """loc Equal(x,y) := !tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !pol: x " równa się " y;;""", 0)>]
     [<DataRow("02", """loc Equal(x,y) := !eng: x " equals " y !ger: x " ist gleich " y !pol: x " równa się " y;;""", 1)>] // tex implementation missing
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]

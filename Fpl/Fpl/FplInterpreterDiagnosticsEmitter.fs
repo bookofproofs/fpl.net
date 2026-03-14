@@ -921,20 +921,6 @@ let emitST002diagnostics name pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitST003diagnostics errCode pos1 pos2 =
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Warning
-            Diagnostic.StartPos = pos1
-            Diagnostic.EndPos = pos2
-            Diagnostic.Code = ST003 errCode
-            Diagnostic.Alternatives = None 
-        }
-    ad.AddDiagnostic diagnostic
-    // do not aggregate ST003 and return unit instead of Some (diagnostic.Code.Code)
-
 let emitST004diagnostics languageCode pos1 pos2 =
     let diagnostic =
         { 
