@@ -410,25 +410,6 @@ type TestDefinitionPredicates () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
-    [<TestMethod>]
-    member this.TestDefinitionPredicate21 () =
-        let result = run (definitionPredicate .>> eof) """pred TestPredicate(a:T1, b:func, c:ind, d:pred) 
-            {
-                delegate.C(Test1(a),Test2(b,c,d))
-            }"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestDefinitionPredicate22 () =
-        let result = run (definitionPredicate .>> eof) """pred TestPredicate(a:T1, b:func, c:ind, d:pred) 
-            {
-                D(self,b,c)
-            }"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
  
     [<TestMethod>]
     member this.TestDefinitionPredicate23 () =
@@ -466,33 +447,18 @@ type TestDefinitionPredicates () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
+
+    [<DataRow("00", """pred T() {dec ~dI1:D dI1:=D; true }""")>]
+    [<DataRow("01", """pred  T(x,y:obj) { @self(a,@self(b,c)) }""")>]
+    [<DataRow("02", """pred T() { A$1 }""")>]
+    [<DataRow("03", """pred T() { $1 }""")>]
+    [<DataRow("04", """pred T() { dec ~cI2:C1 cI2:=C1($2); true }""")>]
+    [<DataRow("05", """pred TestPredicate(a:T1, b:func, c:ind, d:pred) { D(self,b,c) }""")>]
+    [<DataRow("06", """pred TestPredicate(a:T1, b:func, c:ind, d:pred) { delegate.C(Test1(a),Test2(b,c,d)) }""")>]
     [<TestMethod>]
-    member this.TestDefinitionPredicate24 () =
-        let result = run (definitionPredicate .>> eof) """pred T() {dec ~cI2:C1 cI2:=C1($2); true }"""
+    member this.TestDefinitionPredicate (no:string, fplCode:string) =
+        let result = run (definitionPredicate .>> eof) fplCode
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<TestMethod>]
-    member this.TestDefinitionPredicate25 () =
-        let result = run (definitionPredicate .>> eof) """pred T() { $1 }"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestDefinitionPredicate26 () =
-        let result = run (definitionPredicate .>> eof) """pred T() {dec ~dI1:D dI1:=D; true }"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestDefinitionPredicate27 () =
-        let result = run (definitionPredicate .>> eof) """pred  T(x,y:obj)
-                {
-                    @self(a,@self(b,c)) 
-                }"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
