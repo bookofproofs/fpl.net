@@ -6496,35 +6496,43 @@ type FplAssignment(positions: Positions, parent: FplGenericNode) as this =
             | :? FplReference as ref -> 
                 this.ErrorOccurred <- ref.ErrorOccurred 
             | _ -> ()
+        match this.ArgList[0], this.Assignee with
+        | :? FplReference as ref, Some assignee when ref.ArgType = ArgType.Parentheses ->
+            this.ErrorOccurred <- emitSIG07iagnostic (ref.Type SignatureType.Name) "an expression" assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
+        | :? FplReference as ref, Some (:? FplGenericIsValue as assignee) ->
+            this.ErrorOccurred <- emitSIG07iagnostic (ref.Type SignatureType.Name) "a value" assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
+        | :? FplReference as ref, Some (:? FplReference as assignee) when assignee.RefersTo.IsNone ->
+            this.ErrorOccurred <- emitSIG07iagnostic (ref.Type SignatureType.Name) "undefined" assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
+        | _ -> ()
         // remember proceeding errors of references used in the assignment (if any)
         checkErrorOccuredInReference this.ArgList[0]
         checkErrorOccuredInReference this.ArgList[1]
-        match this.Assignee, this.AssignedValue with
-        | Some (:? FplVariable as assignee), Some (assignedValue:FplGenericNode) when assignedValue.Name = PrimClassL ->
+        match this.ErrorOccurred, this.Assignee, this.AssignedValue with
+        | None, Some (:? FplVariable as assignee), Some (assignedValue:FplGenericNode) when assignedValue.Name = PrimClassL ->
             assignee.IsInitialized <- true
             checkTypes assignee assignedValue
-        | Some (:? FplVariable as assignee), Some (assignedValue:FplGenericNode) when (assignedValue.Name = PrimFunctionalTermL || assignedValue.Name = PrimMandatoryFunctionalTermL) && isCallByValue this.ArgList[1] ->
+        | None, Some (:? FplVariable as assignee), Some (assignedValue:FplGenericNode) when (assignedValue.Name = PrimFunctionalTermL || assignedValue.Name = PrimMandatoryFunctionalTermL) && isCallByValue this.ArgList[1] ->
             let mapOpt = getMapping assignedValue
             match mapOpt with 
             | Some map -> checkTypes this.ArgList[0] map
             | _ -> checkTypes assignee assignedValue
-        | Some (:? FplVariable as assignee), Some _ -> 
+        | None, Some (:? FplVariable as assignee), Some _ -> 
             checkTypes assignee this.ArgList[1] 
-        | Some (:? FplVariableArray as assignee), Some assignedValue ->
+        | None, Some (:? FplVariableArray as assignee), Some assignedValue ->
            checkTypes this.ArgList[0] this.ArgList[1] 
-        | Some (:? FplSelf as assignee), _ ->
+        | None, Some (:? FplSelf as assignee), _ ->
             match assignee.RefersTo with 
             | Some ref -> 
                 this.ErrorOccurred <- emitSIG07iagnostic (assignee.Type SignatureType.Name) (getEnglishName ref.Name false) assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
             | None ->
                 this.ErrorOccurred <- emitSIG07iagnostic (assignee.Type SignatureType.Name) "the type of self could not be determined" assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
-        | Some (:? FplParent as assignee), _ ->
+        | None, Some (:? FplParent as assignee), _ ->
             match assignee.RefersTo with 
             | Some ref -> 
                 this.ErrorOccurred <- emitSIG07iagnostic (assignee.Type SignatureType.Name) (getEnglishName ref.Name false) assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
             | None ->
                 this.ErrorOccurred <- emitSIG07iagnostic (assignee.Type SignatureType.Name) "the type of parent could not be determined" assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
-        | Some (assignee), Some assignedValue ->
+        | None, Some (assignee), Some assignedValue ->
             let nameAssignee = assignee.Type SignatureType.Name
             let nameAssignedValue = assignedValue.Type SignatureType.Name
             if nameAssignee = nameAssignedValue then
@@ -6543,8 +6551,6 @@ type FplAssignment(positions: Positions, parent: FplGenericNode) as this =
         match this.ErrorOccurred, this.Assignee, this.AssignedValue with
         | Some errCode, _, _ ->
             () // skip assignment, if any proceeding errors occured
-        | Some errCode, Some assignee, _ ->
-            emitST003diagnostics errCode this.ArgList[1].StartPos this.ArgList[1].EndPos
         | None, Some (:? FplVariable as assignee), Some (:? FplGenericConstructor as assignedValue) ->
             assignedValue.Run()
             match assignedValue.Instance with 
