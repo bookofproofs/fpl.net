@@ -2668,7 +2668,7 @@ type FplCorollary(positions: Positions, parent: FplGenericNode, runOrder) =
         | ScopeSearchResult.FoundIncorrectBlock incorrectBlock ->
             this.ErrorOccurred <- emitID005diagnostics this.FplId incorrectBlock this.StartPos this.EndPos
         | ScopeSearchResult.NotFound ->
-            this.ErrorOccurred <- emitID006diagnostics this.FplId this.StartPos this.EndPos
+            this.ErrorOccurred <- emitID006diagnostics this.FplId this.SignStartPos this.SignEndPos
         | _ -> ()
         tryAddToParentUsingFplId this
 
