@@ -1413,6 +1413,7 @@ let addExpressionToReference (fplValue:FplGenericNode) =
         match nextOpt with
         | Some next when next.Name = PrimRefL && next.RefersTo.IsSome ->
             let referenced = next.RefersTo.Value
+            
             match referenced.Name with 
             | PrimVariableArrayL 
             | LiteralParent 
@@ -1434,6 +1435,7 @@ let addExpressionToReference (fplValue:FplGenericNode) =
             next.FplId <- fplValue.FplId
             next.TypeId <- fplValue.TypeId
             next.RefersTo <- Some fplValue 
+            next.ErrorOccurred <- fplValue.ErrorOccurred
         | _ -> addExpressionToParentArgList fplValue 
 
 /// Indicates if an FplValue is the root of the SymbolTable.
