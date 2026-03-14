@@ -838,6 +838,7 @@ type State() =
 /// replacing parameters by a calling function with arguments.
 type FplVariableStack() = 
     let mutable _inSignatureEvaluation = false
+    let mutable _inReferenceToProofOrCorollary = false
     let _stateStack = Stack<KeyValuePair<string, State>>()
     let _valueStack = Stack<FplGenericNode>()
     let _recursionCounters = Dictionary<string, int>()
@@ -892,6 +893,11 @@ type FplVariableStack() =
         with get () = _inSignatureEvaluation
         and set (value) = _inSignatureEvaluation <- value
         
+    /// Indicates if this EvalStack is evaluating a ReferenceToProofOrCorollary
+    member this.InReferenceToProofOrCorollary
+        with get () = _inReferenceToProofOrCorollary
+        and set (value) = _inReferenceToProofOrCorollary <- value
+
     // The stack memory of the runner to store the variables of all run programs
     member this.Stack = _stateStack
 

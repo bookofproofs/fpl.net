@@ -171,15 +171,15 @@ let rec eval (st: SymbolTable) ast =
         let fv = variableStack.PeekEvalStack()
         let sid = $"${s.ToString()}"
         match fv with 
-        | :? FplReference when fv.FplId = String.Empty ->
+        | :? FplReference when fv.FplId = String.Empty && not variableStack.InReferenceToProofOrCorollary ->
             let value = new FplIntrinsicInd((pos1, pos2), fv)
             value.FplId <- sid
             variableStack.PushEvalStack(value)
             variableStack.PopEvalStack()
-        | _ ->
+        | _  ->
             fv.FplId <- fv.FplId + sid
             match fv.TypeId with 
-            | "" -> fv.TypeId <- LiteralInd
+            | "" when not variableStack.InReferenceToProofOrCorollary -> fv.TypeId <- LiteralInd
             | LiteralPred -> ()
             | _ -> fv.TypeId <- fv.TypeId + sid
     | Ast.ExtensionName((pos1, pos2), s) ->
@@ -512,21 +512,27 @@ let rec eval (st: SymbolTable) ast =
         eval st ast1
     | Ast.PredicateIdentifier((pos1, pos2), identifier) ->
         let fv = variableStack.PeekEvalStack()
-        let candidatesFromTheory = findCandidatesByName st identifier false false
-        let candidatesLocal = findCandidatesByNameInBlock fv identifier
-        let candidates, candidatesNames =  filterCandidates (candidatesFromTheory @ candidatesLocal) identifier true
+        let searchIdentifier = 
+            if variableStack.InReferenceToProofOrCorollary then 
+                $"{identifier}{fv.FplId}"
+            else
+                identifier
+            
+        let candidatesFromTheory = findCandidatesByName st searchIdentifier false variableStack.InReferenceToProofOrCorollary
+        let candidatesLocal = findCandidatesByNameInBlock fv searchIdentifier
+        let candidates, candidatesNames =  filterCandidates (candidatesFromTheory @ candidatesLocal) searchIdentifier true
         let correctIds (fv1:FplGenericNode) = 
             match fv with 
             | :? FplBase 
             | :? FplBaseConstructorCall 
             | :? FplForInStmtDomain -> 
-                fv1.FplId <- identifier
-                fv1.TypeId <- identifier
+                fv1.FplId <- searchIdentifier
+                fv1.TypeId <- searchIdentifier
             | :? FplReference -> 
-                fv1.FplId <- fv1.FplId + identifier
-                fv1.TypeId <- fv1.TypeId + identifier
+                fv1.FplId <- searchIdentifier
+                fv1.TypeId <- searchIdentifier
             | :? FplGenericJustificationItem as fvJi -> 
-                fvJi.FplId <- identifier
+                fvJi.FplId <- searchIdentifier
             | _ -> ()
 
         match candidates.Length with
@@ -704,7 +710,9 @@ let rec eval (st: SymbolTable) ast =
         eval st ast1
         optAst |> Option.map (eval st) |> ignore
     | Ast.ReferenceToProofOrCorollary((pos1, pos2), (referencingIdentifierAst)) ->
+        variableStack.InReferenceToProofOrCorollary <- true
         eval st referencingIdentifierAst
+        variableStack.InReferenceToProofOrCorollary <- false
     | Ast.PredicateWithOptSpecification((pos1, pos2), (fplIdentifierAst, optionalSpecificationAst)) ->
         let fv = variableStack.PeekEvalStack()
         let searchForCandidatesOfReferenceBlock (refBlock:FplGenericNode) = 
@@ -962,8 +970,8 @@ let rec eval (st: SymbolTable) ast =
         // empty since the pattern will be matched in DefinitionPredicagte 
         // we list it her to remove FS0025 incomplete pattern warnings
     | Ast.ReferencingIdentifier((pos1, pos2), (predicateIdentifierAst, dollarDigitListAsts)) ->
-        eval st predicateIdentifierAst
         dollarDigitListAsts |> List.map (eval st) |> ignore
+        eval st predicateIdentifierAst
         let fv = variableStack.PeekEvalStack()
         match fv with 
         | :? FplReference ->
