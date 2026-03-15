@@ -145,7 +145,7 @@ type SymbolTableStructure() =
         | "FplConstructor" ->
             parent.FplId <- "obj"
             let x = new FplConstructor(positions, parent)
-            x.Value <- Some (new FplInstance(positions, x))
+            x.Value <- Some (new FplInstance(x.TypeId, positions, x))
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
         | "FplCorollary" ->
             let x = new FplCorollary(positions, parent, 0)
@@ -160,7 +160,7 @@ type SymbolTableStructure() =
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
         | "FplDefaultConstructor" ->
             let x = new FplDefaultConstructor(LiteralObj, positions, parent)
-            x.Value <- Some (new FplInstance(positions, x))
+            x.Value <- Some (new FplInstance(x.TypeId, positions, x))
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
         | "FplDisjunction" ->
             let x = new FplDisjunction(positions, parent)
@@ -209,7 +209,7 @@ type SymbolTableStructure() =
             mockSymbolTableEvaluationPredicate x 2
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
         | "FplInstance" ->
-            let x = new FplInstance(positions, parent)
+            let x = new FplInstance(LiteralObj, positions, parent)
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
         | "FplIntrinsicInd" ->
             let x = new FplIntrinsicInd(positions, parent)
