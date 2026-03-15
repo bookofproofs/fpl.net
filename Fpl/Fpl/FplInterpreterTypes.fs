@@ -382,13 +382,13 @@ type IVariable =
     abstract member IsSignatureVariable : bool with get, set
     abstract member IsInitialized : bool with get, set
 
-/// The interface ISkolem is used to implement fixed but unknown objects of some type.
+/// The interface IConstant is used to implement fixed but unknown objects of some type.
 /// In general, the equality of two fixed but unknown objects of the same type cannot be determined, 
 /// unless it is explicitly asserted (or explicitly negated) in the corresponding FPL theory.
-/// However, once a SkolemName is established, the value will be treated like a fixed constant.
-type ISkolem =
-    abstract member SkolemName : string with get
-    abstract member SetSkolemName: unit -> unit
+/// However, once a ConstantName is established, the value will be treated like a fixed constant.
+type IConstant =
+    abstract member ConstantName : string with get
+    abstract member SetConstantName: unit -> unit
 
 type Debug =
     | Start
@@ -2054,8 +2054,7 @@ type FplBase(positions: Positions, parent: FplGenericNode) =
 let signatureRepresent (fv:FplGenericNode) = 
     let signatureVarRepresentations = 
         fv.GetVariables()
-        |> List.map (fun var -> var:?>FplGenericVariable)
-        |> List.filter (fun var -> var.IsSignatureVariable) 
+        |> List.filter (fun var -> isSignatureVar var) 
         |> List.map (fun var -> var.Represent())
         |> String.concat ", "
     $"{fv.FplId}({signatureVarRepresentations})"
@@ -2064,7 +2063,7 @@ let signatureRepresent (fv:FplGenericNode) =
 type FplGenericConstructor(name, positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericHasValue(positions, parent)
     let mutable (_toBeConstructedClass:FplGenericNode option) = None 
-    let mutable _skolemName = ""
+    let mutable _constantName = ""
 
     do
         this.FplId <- name
@@ -2073,12 +2072,12 @@ type FplGenericConstructor(name, positions: Positions, parent: FplGenericNode) a
     override this.Name = PrimDefaultConstructor
     override this.ShortName = LiteralCtor
 
-    member this.SkolemName = _skolemName
-    member this.SetSkolemName() = _skolemName <- signatureRepresent this
+    member this.ConstantName = _constantName
+    member this.SetConstantName() = _constantName <- signatureRepresent this
 
-    interface ISkolem with
-        member this.SkolemName = this.SkolemName 
-        member this.SetSkolemName() = this.SetSkolemName() 
+    interface IConstant with
+        member this.ConstantName = this.ConstantName 
+        member this.SetConstantName() = this.SetConstantName() 
 
     override this.Type signatureType =
         let head = getFplHead this signatureType
@@ -2110,12 +2109,12 @@ type FplGenericConstructor(name, positions: Positions, parent: FplGenericNode) a
                     instance.ArgList.Add subInstance
                 | _ -> ()
             )
-        this.SetSkolemName()
+        this.SetConstantName()
 
         let instance = new FplInstance((this.StartPos, this.EndPos), this)
         match this.ToBeConstructedClass with
         | Some classDef -> 
-            instance.FplId <- this.SkolemName
+            instance.FplId <- this.ConstantName
             instance.TypeId <- classDef.FplId
             this.ArgList 
             |> Seq.iter (fun fv ->
@@ -5822,8 +5821,8 @@ let runIntrinsicFunction (fv:FplGenericHasValue) =
             let defaultCtor = cl.Scope.Values |> Seq.head :?> FplGenericConstructor
             defaultCtor.Run()
             match defaultCtor.Instance, box fv with 
-            | Some instance, (:? ISkolem as skolem)  ->
-                instance.FplId <- skolem.SkolemName
+            | Some instance, (:? IConstant as cnst)  ->
+                instance.FplId <- cnst.ConstantName
                 fv.SetValue instance // set value to the created instance 
                 // reposition the instance in symbol table
                 instance.Parent <- Some fv
@@ -5854,6 +5853,51 @@ let private getFunctionalTermRepresent (fv:FplGenericHasValue) =
         $"dec {mapping.Type(SignatureType.Mixed)}"
     | Some ref -> ref.Represent()    
 
+/// Implements the semantics of a Constant matching the required type and providing a symbolic representation of that constant
+type FplConstant(typeId:string, positions: Positions, parent: FplGenericNode) as this =
+    inherit FplGenericIsValue(positions, parent)
+
+    do 
+        this.TypeId <- typeId
+
+    override this.Name = 
+        PrimUndeterminedL
+    override this.ShortName = 
+        PrimUndetermined
+
+    member this.ConstantName = this.FplId
+    member this.SetConstantName() = 
+        this.FplId <- signatureRepresent this
+
+    interface IConstant with
+        member this.ConstantName = this.ConstantName 
+        member this.SetConstantName() = this.SetConstantName() 
+
+    override this.Clone () =
+        let ret = new FplConstant(this.TypeId, (this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Type (signatureType:SignatureType) = 
+        match signatureType with 
+        | SignatureType.Type -> this.TypeId
+        | _ -> this.FplId
+                    
+    override this.Represent() = // done
+        this.ConstantName 
+
+    override this.Run() = 
+        // run is not neccessary, since this node is are never referenced in the FPL syntax
+        // Instead, we use them internally as default value of FplGenericHasValue
+        ()
+
+    override this.EmbedInSymbolTable _ = 
+        // the embedding is not neccessary, since this node is are never referenced in the FPL syntax
+        // Instead, we use them internally as default value of FplGenericHasValue
+        () 
+
+    override this.RunOrder = None
+
 type FplFunctionalTerm(positions: Positions, parent: FplGenericNode, runOrder) as this =
     inherit FplGenericInheriting(positions, parent)
     let mutable _signStartPos = Position("", 0L, 0L, 0L)
@@ -5861,7 +5905,7 @@ type FplFunctionalTerm(positions: Positions, parent: FplGenericNode, runOrder) a
     let _runOrder = runOrder
     let mutable _isReady = false
     let mutable _callCounter = 0
-    let mutable _skolemName = ""
+    let mutable _constantName = ""
 
     do 
         this.FplId <- LiteralFunc
@@ -5886,12 +5930,12 @@ type FplFunctionalTerm(positions: Positions, parent: FplGenericNode, runOrder) a
     interface IReady with
         member _.IsReady = _isReady
 
-    member this.SkolemName = _skolemName
-    member this.SetSkolemName() = _skolemName <- signatureRepresent this
+    member this.ConstantName = _constantName
+    member this.SetConstantName() = _constantName <- signatureRepresent this
 
-    interface ISkolem with
-        member this.SkolemName = this.SkolemName 
-        member this.SetSkolemName() = this.SetSkolemName() 
+    interface IConstant with
+        member this.ConstantName = this.ConstantName 
+        member this.SetConstantName() = this.SetConstantName() 
 
     override this.Name = PrimFunctionalTermL
     override this.ShortName = PrimFunctionalTerm
@@ -5941,7 +5985,7 @@ type FplFunctionalTerm(positions: Positions, parent: FplGenericNode, runOrder) a
             _callCounter <- _callCounter + 1
             let result = 
                 if this.IsIntrinsic then
-                    this.SkolemName
+                    this.ConstantName
                 else
                     getFunctionalTermRepresent this
             _callCounter <- _callCounter - 1
@@ -5955,7 +5999,7 @@ type FplFunctionalTerm(positions: Positions, parent: FplGenericNode, runOrder) a
                 this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter variableStack.CallerStartPos variableStack.CallerEndPos
             else
                 if this.IsIntrinsic then 
-                    this.SetSkolemName()
+                    this.SetConstantName()
                     runIntrinsicFunction this 
                 else
                     runArgsAndSetWithLastValue this
@@ -6100,7 +6144,7 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplGenericNode) as
     let mutable _signEndPos = Position("", 0L, 0L, 0L)
     let mutable _isReady = false
     let mutable _callCounter = 0
-    let mutable _skolemName = ""
+    let mutable _constantName = ""
 
     do 
         this.FplId <- LiteralFunc
@@ -6128,12 +6172,12 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplGenericNode) as
     interface IReady with
         member _.IsReady = _isReady
 
-    member this.SkolemName = _skolemName
-    member this.SetSkolemName() = _skolemName <- signatureRepresent this
+    member this.ConstantName = _constantName
+    member this.SetConstantName() = _constantName <- signatureRepresent this
 
-    interface ISkolem with
-        member this.SkolemName = this.SkolemName 
-        member this.SetSkolemName() = this.SetSkolemName() 
+    interface IConstant with
+        member this.ConstantName = this.ConstantName 
+        member this.SetConstantName() = this.SetConstantName() 
 
     override this.Clone () =
         let ret = new FplMandatoryFunctionalTerm((this.StartPos, this.EndPos), this.Parent.Value)
@@ -6160,7 +6204,7 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplGenericNode) as
             _callCounter <- _callCounter + 1
             let result = 
                 if this.IsIntrinsic then
-                    this.SkolemName
+                    this.ConstantName
                 else
                     getFunctionalTermRepresent this
             _callCounter <- _callCounter - 1
@@ -6186,7 +6230,7 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplGenericNode) as
                 this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter variableStack.CallerStartPos variableStack.CallerEndPos
             else
                 if this.IsIntrinsic then 
-                    this.SetSkolemName()
+                    this.SetConstantName()
                     runIntrinsicFunction this 
                 else
                     runArgsAndSetWithLastValue this

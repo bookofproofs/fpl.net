@@ -2919,7 +2919,7 @@ type SymbolTableStructure() =
             Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>("T()", node.Represent())  
             let fn = node :?> FplFunctionalTerm
-            Assert.AreEqual<string>("T()", fn.SkolemName) // only for intrinsic set
+            Assert.AreEqual<string>("T()", fn.ConstantName) // only for intrinsic set
         | "FplFunctionalTerm", "MF2" -> 
             // non-intrinsic constant
             Assert.IsInstanceOfType<FplTheory>(parent) 
@@ -2936,7 +2936,7 @@ type SymbolTableStructure() =
             Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>("""$1""", node.Represent())
             let fn = node :?> FplFunctionalTerm
-            Assert.AreEqual<string>("", fn.SkolemName) // missing, since non-intrinsic
+            Assert.AreEqual<string>("", fn.ConstantName) // missing, since non-intrinsic
         | "FplFunctionalTerm", "MF3" -> 
             // intrinsic constant array
             Assert.IsInstanceOfType<FplTheory>(parent) 
@@ -2953,7 +2953,7 @@ type SymbolTableStructure() =
             Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>("""T()""", node.Represent())  
             let fn = node :?> FplFunctionalTerm
-            Assert.AreEqual<string>("T()", fn.SkolemName) // only for intrinsic set
+            Assert.AreEqual<string>("T()", fn.ConstantName) // only for intrinsic set
         | "FplFunctionalTerm", "MF4" -> 
             // non-intrinsic constant array
             Assert.IsInstanceOfType<FplTheory>(parent) 
@@ -2970,7 +2970,7 @@ type SymbolTableStructure() =
             Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>("""[$1]->$0, [$2]->$42""", node.Represent())  
             let fn = node :?> FplFunctionalTerm
-            Assert.AreEqual<string>("", fn.SkolemName) // missing, since non-intrinsic
+            Assert.AreEqual<string>("", fn.ConstantName) // missing, since non-intrinsic
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     // intrinsic constant
@@ -3003,7 +3003,7 @@ type SymbolTableStructure() =
             Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>("""T()""", node.Represent())  
             let fn = node :?> FplFunctionalTerm
-            Assert.AreEqual<string>("T()", fn.SkolemName) // only for intrinsic set
+            Assert.AreEqual<string>("T()", fn.ConstantName) // only for intrinsic set
         | "FplFunctionalTerm", "MF2" -> 
             // non-intrinsic constant
             Assert.IsInstanceOfType<FplTheory>(parent) 
@@ -3020,7 +3020,7 @@ type SymbolTableStructure() =
             Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>("""A()""", node.Represent())
             let fn = node :?> FplFunctionalTerm
-            Assert.AreEqual<string>("", fn.SkolemName) // missing, since non-intrinsic
+            Assert.AreEqual<string>("", fn.ConstantName) // missing, since non-intrinsic
         | "FplFunctionalTerm", "MF3" -> 
             // intrinsic constant array
             Assert.IsInstanceOfType<FplTheory>(parent) 
@@ -3037,7 +3037,7 @@ type SymbolTableStructure() =
             Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>("""T()""", node.Represent())  
             let fn = node :?> FplFunctionalTerm
-            Assert.AreEqual<string>("T()", fn.SkolemName) // only for intrinsic set
+            Assert.AreEqual<string>("T()", fn.ConstantName) // only for intrinsic set
         | "FplFunctionalTerm", "MF4" -> 
             // non-intrinsic constant array
             Assert.IsInstanceOfType<FplTheory>(parent) 
@@ -3054,7 +3054,7 @@ type SymbolTableStructure() =
             Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>("""[$1]->A(), [$2]->B()""", node.Represent())  
             let fn = node :?> FplFunctionalTerm
-            Assert.AreEqual<string>("", fn.SkolemName) // missing, since non-intrinsic
+            Assert.AreEqual<string>("", fn.ConstantName) // missing, since non-intrinsic
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     // intrinsic constant
@@ -3087,7 +3087,7 @@ type SymbolTableStructure() =
             Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>("""T()""", node.Represent())  
             let fn = node :?> FplFunctionalTerm
-            Assert.AreEqual<string>("T()", fn.SkolemName) // only for intrinsic set
+            Assert.AreEqual<string>("T()", fn.ConstantName) // only for intrinsic set
         | "FplFunctionalTerm", "MF2" -> 
             // non-intrinsic constant
             Assert.IsInstanceOfType<FplTheory>(parent) 
@@ -3104,7 +3104,7 @@ type SymbolTableStructure() =
             Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>("""A()""", node.Represent())
             let fn = node :?> FplFunctionalTerm
-            Assert.AreEqual<string>("", fn.SkolemName) // missing, since non-intrinsic
+            Assert.AreEqual<string>("", fn.ConstantName) // missing, since non-intrinsic
         | "FplFunctionalTerm", "MF3" -> 
             // intrinsic constant array
             Assert.IsInstanceOfType<FplTheory>(parent) 
@@ -3121,7 +3121,7 @@ type SymbolTableStructure() =
             Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>("""T()""", node.Represent())  
             let fn = node :?> FplFunctionalTerm
-            Assert.AreEqual<string>("T()", fn.SkolemName) // only for intrinsic set
+            Assert.AreEqual<string>("T()", fn.ConstantName) // only for intrinsic set
         | "FplFunctionalTerm", "MF4" -> 
             // non-intrinsic constant array
             Assert.IsInstanceOfType<FplTheory>(parent) 
@@ -3138,7 +3138,7 @@ type SymbolTableStructure() =
             Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>("""[$1]->A(), [$2]->$2, [$3]->true""", node.Represent())  
             let fn = node :?> FplFunctionalTerm
-            Assert.AreEqual<string>("", fn.SkolemName) // missing, since non-intrinsic
+            Assert.AreEqual<string>("", fn.ConstantName) // missing, since non-intrinsic
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
     
     // intrinsic constant
@@ -3175,7 +3175,7 @@ type SymbolTableStructure() =
             Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>("T()", node.Represent())  
             let fn = node :?> FplFunctionalTerm
-            Assert.AreEqual<string>("T()", fn.SkolemName) // only for intrinsic set
+            Assert.AreEqual<string>("T()", fn.ConstantName) // only for intrinsic set
         | "FplFunctionalTerm", "MF1a" -> 
             // intrinsic constant
             Assert.IsInstanceOfType<FplTheory>(parent) 
@@ -3192,7 +3192,7 @@ type SymbolTableStructure() =
             Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>("T()", node.Represent())  
             let fn = node :?> FplFunctionalTerm
-            Assert.AreEqual<string>("T()", fn.SkolemName) // only for intrinsic set
+            Assert.AreEqual<string>("T()", fn.ConstantName) // only for intrinsic set
         | "FplFunctionalTerm", "MF2" -> 
             // non-intrinsic constant
             Assert.IsInstanceOfType<FplTheory>(parent) 
@@ -3209,7 +3209,7 @@ type SymbolTableStructure() =
             Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>(LiteralTrue, node.Represent())
             let fn = node :?> FplFunctionalTerm
-            Assert.AreEqual<string>("", fn.SkolemName) // missing, since non-intrinsic
+            Assert.AreEqual<string>("", fn.ConstantName) // missing, since non-intrinsic
         | "FplFunctionalTerm", "MF2a" -> 
             // non-intrinsic constant
             Assert.IsInstanceOfType<FplTheory>(parent) 
@@ -3226,7 +3226,7 @@ type SymbolTableStructure() =
             Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>(PrimUndetermined, node.Represent())
             let fn = node :?> FplFunctionalTerm
-            Assert.AreEqual<string>("", fn.SkolemName) // missing, since non-intrinsic
+            Assert.AreEqual<string>("", fn.ConstantName) // missing, since non-intrinsic
         | "FplFunctionalTerm", "MF2b" -> 
             // still an intrinsic constant since the non-intrinsic constant does not match the expected return type
             Assert.IsInstanceOfType<FplTheory>(parent) 
@@ -3243,7 +3243,7 @@ type SymbolTableStructure() =
             Assert.IsTrue(nodeWithValue.Value.IsNone)
             Assert.AreEqual<string>("dec pred(obj)", node.Represent())
             let fn = node :?> FplFunctionalTerm
-            Assert.AreEqual<string>("", fn.SkolemName) // missing, since non-intrinsic
+            Assert.AreEqual<string>("", fn.ConstantName) // missing, since non-intrinsic
         | "FplFunctionalTerm", "MF2c" -> 
             // non-intrinsic constant
             Assert.IsInstanceOfType<FplTheory>(parent) 
@@ -3260,7 +3260,7 @@ type SymbolTableStructure() =
             Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>(PrimUndetermined, node.Represent())
             let fn = node :?> FplFunctionalTerm
-            Assert.AreEqual<string>("", fn.SkolemName) // missing, since non-intrinsic
+            Assert.AreEqual<string>("", fn.ConstantName) // missing, since non-intrinsic
         | "FplFunctionalTerm", "MF3" -> 
             // intrinsic constant array
             Assert.IsInstanceOfType<FplTheory>(parent) 
@@ -3277,7 +3277,7 @@ type SymbolTableStructure() =
             Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>("""T()""", node.Represent())  
             let fn = node :?> FplFunctionalTerm
-            Assert.AreEqual<string>("T()", fn.SkolemName) // only for intrinsic set
+            Assert.AreEqual<string>("T()", fn.ConstantName) // only for intrinsic set
         | "FplFunctionalTerm", "MF4" -> 
             // non-intrinsic constant array
             Assert.IsInstanceOfType<FplTheory>(parent) 
@@ -3294,7 +3294,7 @@ type SymbolTableStructure() =
             Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>("""[$1]->true, [$2]->false, [$3]->undef""", node.Represent())  
             let fn = node :?> FplFunctionalTerm
-            Assert.AreEqual<string>("", fn.SkolemName) // missing, since non-intrinsic
+            Assert.AreEqual<string>("", fn.ConstantName) // missing, since non-intrinsic
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     [<DataRow("FplImplication", "00", """def pred T() {impl(x,y)};""", "")>]
