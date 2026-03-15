@@ -6010,8 +6010,8 @@ type FplFunctionalTerm(positions: Positions, parent: FplGenericNode, runOrder) a
             if _callCounter > maxRecursion then
                 this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter variableStack.CallerStartPos variableStack.CallerEndPos
             else
+                this.SetConstantName()
                 if this.IsIntrinsic then 
-                    this.SetConstantName()
                     runIntrinsicFunction this 
                 else
                     runArgsAndSetWithLastValue this
@@ -6250,8 +6250,8 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplGenericNode) as
             if _callCounter > maxRecursion then
                 this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter variableStack.CallerStartPos variableStack.CallerEndPos
             else
+                this.SetConstantName()
                 if this.IsIntrinsic then 
-                    this.SetConstantName()
                     runIntrinsicFunction this 
                 else
                     runArgsAndSetWithLastValue this
