@@ -2000,22 +2000,57 @@ type FplRuleOfInference(positions: Positions, parent: FplGenericNode, runOrder) 
 
     override this.RunOrder = Some _runOrder
 
-type FplInstance(positions: Positions, parent: FplGenericNode) as this =
+let signatureRepresent (fv:FplGenericNode) = 
+    let signatureVarRepresentations = 
+        fv.GetVariables()
+        |> List.filter (fun var -> isSignatureVar var) 
+        |> List.map (fun var -> var.Represent())
+        |> String.concat ", "
+    $"{fv.FplId}({signatureVarRepresentations})"
+
+///// Implements the semantics of a Constant matching the required type and providing a symbolic representation of that constant
+//type FplConstant(typeId:string, positions: Positions, parent: FplGenericNode) as this =
+//    inherit FplGenericIsValue(positions, parent)
+
+//    do 
+//        this.TypeId <- typeId
+
+//    member this.ConstantName = this.FplId
+//    member this.SetConstantName() = 
+//        this.FplId <- signatureRepresent this
+
+//    interface IConstant with
+//        member this.ConstantName = this.ConstantName 
+//        member this.SetConstantName() = this.SetConstantName() 
+
+//    override this.Clone () =
+//        let ret = new FplConstant(this.TypeId, (this.StartPos, this.EndPos), this.Parent.Value)
+//        this.AssignParts(ret)
+//        ret
+
+//    override this.Represent() = // done
+//        this.ConstantName 
+
+
+type FplInstance(typeId:string, positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericIsValue(positions, parent)
 
     do
         this.FplId <- LiteralObj
-        this.TypeId <- LiteralObj
+        this.TypeId <- typeId
  
     override this.Name = PrimInstanceL
     override this.ShortName = PrimInstance
 
     override this.Clone () =
-        let ret = new FplInstance((this.StartPos, this.EndPos), this.Parent.Value)
+        let ret = new FplInstance(this.TypeId, (this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
 
     override this.Type signatureType = 
+        //match signatureType with 
+        //| SignatureType.Type -> this.TypeId
+        //| _ -> this.FplId
         let head = getFplHead this signatureType 
         head
 
@@ -2023,10 +2058,16 @@ type FplInstance(positions: Positions, parent: FplGenericNode) as this =
         this.FplId
 
     override this.Run() = 
+        // run is not neccessary, since this node is are never referenced in the FPL syntax
+        // Instead, we use them internally as default value of FplGenericHasValue
         // FplInstance is a value representation and has no value on its own
         ()
 
-    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
+    override this.EmbedInSymbolTable _ = 
+        //// the embedding is not neccessary, since this node is are never referenced in the FPL syntax
+        //// Instead, we use them internally as default value of FplGenericHasValue
+        //() 
+        addExpressionToParentArgList this 
 
     override this.RunOrder = None
 
@@ -2050,14 +2091,6 @@ type FplBase(positions: Positions, parent: FplGenericNode) =
         ()
 
     override this.RunOrder = None
-
-let signatureRepresent (fv:FplGenericNode) = 
-    let signatureVarRepresentations = 
-        fv.GetVariables()
-        |> List.filter (fun var -> isSignatureVar var) 
-        |> List.map (fun var -> var.Represent())
-        |> String.concat ", "
-    $"{fv.FplId}({signatureVarRepresentations})"
 
 [<AbstractClass>]
 type FplGenericConstructor(name, positions: Positions, parent: FplGenericNode) as this =
@@ -2102,7 +2135,7 @@ type FplGenericConstructor(name, positions: Positions, parent: FplGenericNode) a
             |> Seq.iter (fun baseClassOpt ->
                 match baseClassOpt with
                 | Some baseClass ->
-                    let subInstance = new FplInstance((this.StartPos, this.EndPos), this)
+                    let subInstance = new FplInstance(baseClass.TypeId, (this.StartPos, this.EndPos), this)
                     subInstance.FplId <- baseClass.FplId
                     subInstance.TypeId <- subInstance.FplId
                     createSubInstance baseClass subInstance baseInstance
@@ -2111,7 +2144,7 @@ type FplGenericConstructor(name, positions: Positions, parent: FplGenericNode) a
             )
         this.SetConstantName()
 
-        let instance = new FplInstance((this.StartPos, this.EndPos), this)
+        let instance = new FplInstance(this.TypeId, (this.StartPos, this.EndPos), this)
         match this.ToBeConstructedClass with
         | Some classDef -> 
             instance.FplId <- this.ConstantName
@@ -5852,51 +5885,6 @@ let private getFunctionalTermRepresent (fv:FplGenericHasValue) =
         let mapping = fv.ArgList[0]
         $"dec {mapping.Type(SignatureType.Mixed)}"
     | Some ref -> ref.Represent()    
-
-/// Implements the semantics of a Constant matching the required type and providing a symbolic representation of that constant
-type FplConstant(typeId:string, positions: Positions, parent: FplGenericNode) as this =
-    inherit FplGenericIsValue(positions, parent)
-
-    do 
-        this.TypeId <- typeId
-
-    override this.Name = 
-        PrimUndeterminedL
-    override this.ShortName = 
-        PrimUndetermined
-
-    member this.ConstantName = this.FplId
-    member this.SetConstantName() = 
-        this.FplId <- signatureRepresent this
-
-    interface IConstant with
-        member this.ConstantName = this.ConstantName 
-        member this.SetConstantName() = this.SetConstantName() 
-
-    override this.Clone () =
-        let ret = new FplConstant(this.TypeId, (this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.Type (signatureType:SignatureType) = 
-        match signatureType with 
-        | SignatureType.Type -> this.TypeId
-        | _ -> this.FplId
-                    
-    override this.Represent() = // done
-        this.ConstantName 
-
-    override this.Run() = 
-        // run is not neccessary, since this node is are never referenced in the FPL syntax
-        // Instead, we use them internally as default value of FplGenericHasValue
-        ()
-
-    override this.EmbedInSymbolTable _ = 
-        // the embedding is not neccessary, since this node is are never referenced in the FPL syntax
-        // Instead, we use them internally as default value of FplGenericHasValue
-        () 
-
-    override this.RunOrder = None
 
 type FplFunctionalTerm(positions: Positions, parent: FplGenericNode, runOrder) as this =
     inherit FplGenericInheriting(positions, parent)
