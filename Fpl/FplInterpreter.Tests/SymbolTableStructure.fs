@@ -3258,7 +3258,7 @@ type SymbolTableStructure() =
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             let nodeWithValue = node :?> FplGenericHasValue
             Assert.IsTrue(nodeWithValue.Value.IsSome)
-            Assert.AreEqual<string>(PrimUndetermined, node.Represent())
+            Assert.AreEqual<string>("A(undet)", node.Represent())
             let fn = node :?> FplFunctionalTerm
             Assert.AreEqual<string>("", fn.ConstantName) // missing, since non-intrinsic
         | "FplFunctionalTerm", "MF3" -> 
@@ -4671,7 +4671,7 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplPredicate>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
-            Assert.AreEqual<string>(PrimUndetermined, node.Represent())
+            Assert.AreEqual<string>("T()", node.Represent())
         | "FplPredicate", "01" -> 
             Assert.IsInstanceOfType<FplTheory>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
@@ -4679,7 +4679,7 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplPredicate>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count) // intrinsic
             Assert.AreEqual<int>(2, node.Scope.Count) // two variables
-            Assert.AreEqual<string>(PrimUndetermined, node.Represent())
+            Assert.AreEqual<string>("T(undet, undet)", node.Represent())
         | "FplPredicate", "02" -> 
             Assert.IsInstanceOfType<FplTheory>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
@@ -4687,7 +4687,7 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplPredicate>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count) // intrinsic
             Assert.AreEqual<int>(6, node.Scope.Count) // 2 variables, 4 properties
-            Assert.AreEqual<string>(PrimUndetermined, node.Represent())
+            Assert.AreEqual<string>("T(undet, undet)", node.Represent())
         | "FplPredicate", "03" -> 
             Assert.IsInstanceOfType<FplTheory>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)

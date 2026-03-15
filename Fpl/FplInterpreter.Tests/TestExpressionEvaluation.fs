@@ -14,7 +14,7 @@ type TestExpressionEvaluation() =
     [<DataRow("def pred T() { true };", LiteralTrue)>]
     [<DataRow("def pred T() { false };", LiteralFalse)>]
     [<DataRow("def pred T() { undef };", LiteralUndef)>]
-    [<DataRow("def pred T() { intr };", PrimUndetermined)>]
+    [<DataRow("def pred T() { intr };", "T()")>]
     [<TestMethod>]
     member this.TestExpressionEvaluationConstants(fplCode, expected: string) =
         ad.Clear()

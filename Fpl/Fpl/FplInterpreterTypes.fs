@@ -2409,6 +2409,7 @@ type FplPredicate(positions: Positions, parent: FplGenericNode, runOrder) as thi
     let mutable _signEndPos = Position("", 0L, 0L, 0L)
     let mutable _isReady = false
     let mutable _callCounter = 0
+    let mutable _constantName = ""
 
     do 
         this.FplId <- LiteralTrue
@@ -2432,6 +2433,14 @@ type FplPredicate(positions: Positions, parent: FplGenericNode, runOrder) as thi
 
     interface IReady with
         member _.IsReady = _isReady
+
+    member this.ConstantName = _constantName
+    member this.SetConstantName() = _constantName <- signatureRepresent this
+
+    interface IConstant with
+        member this.ConstantName = this.ConstantName 
+        member this.SetConstantName() = this.SetConstantName() 
+
 
     interface ICanBeCalledRecusively with
         member _.CallCounter = _callCounter
@@ -2472,6 +2481,11 @@ type FplPredicate(positions: Positions, parent: FplGenericNode, runOrder) as thi
         let paramT = getParamTuple this signatureType
         sprintf "%s(%s)" head paramT
 
+    override this.SetDefaultValue() =
+        let instance = new FplInstance(this.TypeId, (this.StartPos, this.EndPos), this)
+        instance.FplId <- this.ConstantName
+        this.Value <- Some instance
+
     override this.Run() = 
         debug this Debug.Start
         if not _isReady then
@@ -2479,6 +2493,7 @@ type FplPredicate(positions: Positions, parent: FplGenericNode, runOrder) as thi
             if _callCounter > maxRecursion then
                 this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter variableStack.CallerStartPos variableStack.CallerEndPos
             else
+                this.SetConstantName()
                 if this.IsIntrinsic then 
                     this.SetDefaultValue()
                 else
