@@ -1049,19 +1049,39 @@ type TestFplValueScopeFplRepresentation() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("00", """def cl Nat def func A()->Nat def pred P(x:Nat) {dec x:=A(); true}""", """A()""")>] // declared constant used
+    [<DataRow("ass00", """def cl Nat def func A()->Nat def pred P(x:Nat) {dec x:=A(); true}""", """A()""")>] // declared constant used
+    [<DataRow("ass00a", """def cl Nat def pred P(x:Nat) {dec x:=Nat(); true}""", """Nat()""")>] // declared constant used
+    [<DataRow("ass01", """def pred P(x:obj) {dec x:=@43; true}""", PrimUndetermined)>] // x is undetermined, since proceeding extension not determined error ID018
+    [<DataRow("ass01a", """ext T x@/\d+/->obj {ret x} def pred P(x:obj) {dec x:=@43; true}""", """43""")>] 
+    [<DataRow("ass02a", """def pred P(x:ind) {dec x:=$43; true}""", """$43""")>] 
+    [<DataRow("ass02b", """def func A()->ind def pred P(x:ind) {dec x:=A(); true}""", """A()""")>] // declared constant used
+    [<DataRow("ass03", """def pred P(x:pred) {dec x:=true; true}""", LiteralTrue)>] 
+    [<DataRow("ass04", """def pred P(x:pred) {dec x:=false; true}""", LiteralFalse)>] 
+    [<DataRow("ass05", """def pred P(x:pred) {dec x:=undef; true}""", LiteralUndef)>] 
+    [<DataRow("ass06a", """def func A()->pred def pred P(x:pred) {dec x:=A(); true}""", """A()""")>] // declared constant used
+    [<DataRow("ass06b", """def func A()->pred() def pred P(x:pred()) {dec x:=A(); true}""", """A()""")>] // declared constant used
+    [<DataRow("ass06c", """def func A()->pred(z:obj) def pred P(x:pred(a:obj)) {dec x:=A(); true}""", """A()""")>] // declared constant used
+    [<DataRow("ass07a", """def func A()->func def pred P(x:func) {dec x:=A(); true}""", """A()""")>] // declared constant used
+    [<DataRow("ass07b", """def func A()->func()->obj def pred P(x:func()->obj) {dec x:=A(); true}""", """A()""")>] // declared constant used
+    [<DataRow("ass07c", """def func A()->func()->ind def pred P(x:func()->ind) {dec x:=A(); true}""", """A()""")>] // declared constant used
+    [<DataRow("ass07d", """def func A()->func(z:obj)->obj def pred P(x:func(a:obj)->obj) {dec x:=A(); true}""", """A()""")>] // declared constant used
+    [<DataRow("ass07e", """def func A()->func(z:obj)->ind def pred P(x:func(a:obj)->ind) {dec x:=A(); true}""", """A()""")>] // declared constant used
     [<TestMethod>]
-    member this.TestConstants(var, input, output:string) =
+    member this.TestAssignementOfConstantsRepresent(var, input, output:string) =
         ad.Clear()
         let fplCode = sprintf """%s;""" input 
-        let filename = "TestConstants"
+        let filename = "TestAssignementOfConstantsRepresent"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
         | Some st -> 
             let r = st.Root
             let theory = r.Scope[filename]
-            let pred = theory.Scope["P(Nat)"] 
+            let pred = 
+                theory.Scope 
+                |> Seq.filter (fun kvp -> kvp.Key.StartsWith("P(")) 
+                |> Seq.map (fun kvp -> kvp.Value) 
+                |> Seq.head
             let x = pred.Scope["x"]
             Assert.AreEqual<string>(output, x.Represent())
         | None -> 

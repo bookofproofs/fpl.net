@@ -477,6 +477,7 @@ type TestInterpreterErrors() =
     [<DataRow("24", """def cl A {intr prty pred P() } def pred T() {dec ~a:A a:=A(); a.P()};""", 0)>]
     [<DataRow("25a", """proof A$1 {1. |- trivial} ext U x@/\d+/ -> pred {ret A$1} ;""", 0)>]
     [<DataRow("25b", """cor A$1 {true} ext U x@/\d+/ -> pred {ret A$1} ;""", 0)>]
+    [<DataRow("25c", """cor A$1 {true} def pred T() {A$1};""", 0)>]
     
 
 
@@ -3135,6 +3136,7 @@ type TestInterpreterErrors() =
     [<DataRow("68", """def class Set def pred In(x,y: Set) def cl SetBuilder: Set { ctor SetBuilder(x: Set, p: pred(u1: Set, o:* obj[ind])) { dec base.Set() assert all u2:Set { iif (In(u2,parent), and ( In(u2,x), p(u2,o) ) ) }; } };""", 0)>]
     [<DataRow("69", """def cl A {dec ~myX:obj; ctor A(x:obj) {dec myX:=x;}} def cl B:A { ctor B(x:obj) {dec base.A(del.Decrement(x)); } } def pred T() { dec ~v:B v:=B(@2); false};""", 0)>]
     [<DataRow("71", """def pred Equal(x,y: tpl) infix "=" 50 { del.Equal(x,y) } def cl Nat def cl Zero:Nat def func Succ(n:Nat)->Nat def pred T() {all x,y:Nat {(x = Succ(y))}};""", 0)>]    
+    [<DataRow("02d", "def pred S() {dec parent():=true; true};", 0)>] // SIG04 won't be issued due to proceeding errors (ID015)
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG04(no:string, fplCode:string, expected) =
@@ -3665,9 +3667,9 @@ type TestInterpreterErrors() =
     [<DataRow("constr_b1", """def cl A def cl B:A def cl D:B def pred T() {dec ~dI2:B dI2:=D(); true};""", 0)>]
     [<DataRow("constr_c", """def cl B { ctor B(x:obj) {dec ~y:obj x:=y; } } def pred T() {dec ~n,y:obj n:=B(y); true};""", 0)>]
     [<DataRow("constr_d", """def cl A def cl B: A def cl D: B {ctor D() {dec base.B();  }} def pred T() {dec ~dI2:obj dI2:=D(); true};""", 0)>]
-    [<DataRow("constr_inh_a", """def cl A { ctor A(x:obj) {dec base.Obj(); } } def cl B:A { ctor B(x:pred) {dec base.A(); } } def pred T() {dec ~n:A n:=B(); true};""", 1)>]
-    [<DataRow("constr_inh_b", """def cl A { ctor A(x:obj) {dec base.Obj(); } } def cl B:A { ctor B(x:pred) {dec base.A(); } } def pred T() {dec ~n:obj n:=B(); true};""", 1)>]
-    [<DataRow("constr_inh_c", """def cl A { ctor A(x:obj) {dec base.Obj(); } } def cl B:A { ctor B(x:pred) {dec base.A(); } } def pred T() {dec ~n:obj n:=A(); true};""", 1)>]
+    [<DataRow("constr_inh_a", """def cl A { ctor A(x:obj) {dec base.Obj(); } } def cl B:A { ctor B(x:pred) {dec base.A(); } } def pred T() {dec ~n:A n:=B(); true};""", 0)>] // SIG05 won't be issued due to proceedinng SIG04
+    [<DataRow("constr_inh_b", """def cl A { ctor A(x:obj) {dec base.Obj(); } } def cl B:A { ctor B(x:pred) {dec base.A(); } } def pred T() {dec ~n:obj n:=B(); true};""", 0)>] // SIG05 won't be issued due to proceedinng SIG04
+    [<DataRow("constr_inh_c", """def cl A { ctor A(x:obj) {dec base.Obj(); } } def cl B:A { ctor B(x:pred) {dec base.A(); } } def pred T() {dec ~n:obj n:=A(); true};""", 0)>] // SIG05 won't be issued due to proceedinng SIG04
     [<DataRow("constr_inh_d", """def cl A { ctor A(x:obj) {dec base.Obj(); } } def cl B:A { ctor B(x:pred) {dec base.A(); } } def pred T() {dec ~n:B ~x:obj n:=A(x); true};""", 1)>]
     [<DataRow("constr_inh_e", """def cl A { ctor A(x:obj) {dec base.Obj(); } } def cl B { ctor B(x:pred) {dec base.Obj(); } } def pred T() {dec ~n:B ~x:obj n:=A(x); true};""", 1)>]
     [<DataRow("constr_inh_f", """def cl A { ctor A(x:obj) {dec base.Obj(); } } def cl B { ctor B(x:pred) {dec base.Obj(); } } def pred T() {dec ~n:A ~x:pred n:=B(x); true};""", 1)>]
@@ -3846,7 +3848,7 @@ type TestInterpreterErrors() =
     // match with the type pred(...) 
     [<DataRow("MS1", "def pred A(z:obj) def pred T(v:pred(y:obj)) {dec v:=A; true};", 0)>] // OK: ->pred(y:obj) matches signature A(obj), whole node would be returned
     [<DataRow("MS1a", "def pred A(z:obj) def pred T(v:pred(y:obj)) {dec ~x:obj v:=A(x); true};", 1)>] // SIG05: pred(y:obj) does not match value A(obj) 
-    [<DataRow("MS1b", "def pred A(z:obj) def pred T(v:pred(y:obj)) {dec ~x:ind v:=A(x); true};", 1)>] // SIG05: pred(y:obj) does not match value A(ind) not matching A(obj)
+    [<DataRow("MS1b", "def pred A(z:obj) def pred T(v:pred(y:obj)) {dec ~x:ind v:=A(x); true};", 0)>] // SIG05 won't be issued due to proceedinng SIG04: pred(y:obj) does not match value A(ind) not matching A(obj)
     [<DataRow("MS1c", "def pred A(z:ind) def pred T(v:pred(y:obj)) {dec ~x:ind v:=A(x); true};", 1)>] // SIG05: pred(y:obj) does not match value A(ind) 
     [<DataRow("MS1d", "def pred A(z:ind) def pred T(v:pred(y:obj)) {dec v:=A; true};", 1)>] // SIG05: pred(y:obj) does not match signature A(ind)
     [<DataRow("MS1e", "ax A {true} def pred T(v:pred(y:obj)) {dec v:=A; true};", 1)>] // SIG05: pred(y:obj) does not match signature A (axiom)
@@ -3895,9 +3897,9 @@ type TestInterpreterErrors() =
     
     // match with the type pred() 
     [<DataRow("MS1_", "def pred A() def pred T(v:pred()) {dec v:=A; true};", 0)>] // OK: ->pred() matches signature A(), whole node would be returned
-    [<DataRow("MS1a_", "def pred A() def pred T(v:pred()) {dec ~x:obj v:=A(x); true};", 1)>] // SIG05: pred() does not match value A(obj) 
-    [<DataRow("MS1b_", "def pred A() def pred T(v:pred()) {dec ~x:ind v:=A(x); true};", 1)>] // SIG05: pred() does not match value A(ind) not matching A(obj)
-    [<DataRow("MS1c_", "def pred A() def pred T(v:pred()) {dec ~x:ind v:=A(x); true};", 1)>] // SIG05: pred() does not match value A(ind) 
+    [<DataRow("MS1a_", "def pred A() def pred T(v:pred()) {dec ~x:obj v:=A(x); true};", 0)>] // SIG05 won't be issued due to proceedinng SIG04: pred() does not match value A(obj) 
+    [<DataRow("MS1b_", "def pred A() def pred T(v:pred()) {dec ~x:ind v:=A(x); true};", 0)>] // SIG05 won't be issued due to proceedinng SIG04: pred() does not match value A(ind) not matching A(obj)
+    [<DataRow("MS1c_", "def pred A() def pred T(v:pred()) {dec ~x:ind v:=A(x); true};", 0)>] // SIG05 won't be issued due to proceedinng SIG04: pred() does not match value A(ind) 
     [<DataRow("MS1d_", "def pred A(x:ind) def pred T(v:pred()) {dec v:=A; true};", 1)>] // SIG05: pred() does not match signature A(ind)
     [<DataRow("MS1e_", "ax A {true} def pred T(v:pred()) {dec v:=A; true};", 1)>] // SIG05: pred() does not match signature A (axiom)
     [<DataRow("MS1f_", "thm A {true} def pred T(v:pred()) {dec v:=A; true};", 1)>] // SIG05: pred() does not match signature A (theorem)
@@ -3946,7 +3948,7 @@ type TestInterpreterErrors() =
     // match with the type pred 
     [<DataRow("MS2", "def pred A(z:obj) def pred T(v:pred) {dec v:=A; true};", 0)>] // OK: ->pred matches signature A(obj), whole node would be returned
     [<DataRow("MS2a", "def pred A(z:obj) def pred T(v:pred) {dec ~x:obj v:=A(x); true};", 0)>] // OK: ->pred matches value A(obj) 
-    [<DataRow("MS2b", "def pred A(z:obj) def pred T(v:pred) {dec ~x:ind v:=A(x); true};", 1)>] // SIG05: pred does not match value A(ind) since it does not match A(obj)
+    [<DataRow("MS2b", "def pred A(z:obj) def pred T(v:pred) {dec ~x:ind v:=A(x); true};", 0)>] // SIG05 won't be issued due to proceedinng SIG04: pred does not match value A(ind) since it does not match A(obj)
     [<DataRow("MS2c", "def pred A(z:ind) def pred T(v:pred) {dec ~x:ind v:=A(x); true};", 0)>] // OK: ->pred matches value A(ind) 
     [<DataRow("MS2d", "def pred A(z:ind) def pred T(v:pred) {dec v:=A; true};", 0)>] // OK: ->pred matches signature A(ind)
     [<DataRow("MS2e", "ax A {true} def pred T(v:pred) {dec v:=A; true};", 0)>] // OK: ->pred matches signature A (axiom)
@@ -3997,7 +3999,7 @@ type TestInterpreterErrors() =
     [<DataRow("MS3", "def func A(z:obj)->ind def pred T(v:func(y:obj)->ind) {dec v:=A; true};", 0)>] // OK: ->func(y:obj)->ind matches signature A(obj)->ind, whole node would be returned
     [<DataRow("MS3a", "def func A(z:obj)->ind def pred T(v:func(y:obj)->ind) {dec ~x:obj v:=A(x); true};", 1)>] // SIG05: func(y:obj)->ind does not match value A(obj) 
     [<DataRow("MS3b", "def func A(z:obj)->ind def pred T(v:func(y:obj)->ind) {dec ~x:obj v:=A(x); true};", 1)>] // SIG05: func(y:obj)->ind does not match value A(ind) not matching A(obj)
-    [<DataRow("MS3c", "def func A(z:ind)->ind def pred T(v:func(y:obj)->ind) {dec ~x:obj v:=A(x); true};", 1)>] // SIG05: func(y:obj)->ind does not match value A(ind) 
+    [<DataRow("MS3c", "def func A(z:ind)->ind def pred T(v:func(y:obj)->ind) {dec ~x:obj v:=A(x); true};", 0)>] // SIG05 won't be issued due to proceedinng SIG04: func(y:obj)->ind does not match value A(ind) 
     [<DataRow("MS3d", "def func A(z:ind)->ind def pred T(v:func(y:obj)->ind) {dec v:=A; true};", 1)>] // SIG05: func(y:obj)->ind does not match signature A(ind)->ind
     [<DataRow("MS3e", "ax A {true} def pred T(v:func(y:obj)->ind) {dec v:=A; true};", 1)>] // SIG05: func(y:obj)->ind does not match signature A (axiom)
     [<DataRow("MS3f", "thm A {true} def pred T(v:func(y:obj)->ind) {dec v:=A; true};", 1)>] // SIG05: func(y:obj)->ind does not match signature A (theorem)
@@ -4045,9 +4047,9 @@ type TestInterpreterErrors() =
     
     // match with the type func()->...
     [<DataRow("MS3_", "def func A()->ind def pred T(v:func()->ind) {dec v:=A; true};", 0)>] // OK: ->func()->ind matches signature A()->ind, whole node would be returned
-    [<DataRow("MS3a_", "def func A()->ind def pred T(v:func()->ind) {dec ~x:obj v:=A(x); true};", 1)>] // SIG05: func()->ind does not match value A(obj) 
+    [<DataRow("MS3a_", "def func A()->ind def pred T(v:func()->ind) {dec ~x:obj v:=A(x); true};", 0)>] // SIG05 won't be issued due to proceedinng SIG04: func()->ind does not match value A(obj) 
     [<DataRow("MS3b_", "def func A()->ind def pred T(v:func()->ind) {dec v:=A(); true};", 1)>] // SIG05: func()->ind does not match value A(ind) not matching A(obj)
-    [<DataRow("MS3c_", "def func A()->ind def pred T(v:func()->ind) {dec ~x:ind v:=A(x); true};", 1)>] // SIG05: func()->ind does not match value A(ind) 
+    [<DataRow("MS3c_", "def func A()->ind def pred T(v:func()->ind) {dec ~x:ind v:=A(x); true};", 0)>] // SIG05 won't be issued due to proceedinng SIG04: func()->ind does not match value A(ind) 
     [<DataRow("MS3d_", "def func A(z:ind)->ind def pred T(v:func()->ind) {dec v:=A; true};", 1)>] // SIG05: func()->ind does not match signature A(ind)->ind
     [<DataRow("MS3e_", "ax A {true} def pred T(v:func()->ind) {dec v:=A; true};", 1)>] // SIG05: func()->ind does not match signature A (axiom)
     [<DataRow("MS3f_", "thm A {true} def pred T(v:func()->ind) {dec v:=A; true};", 1)>] // SIG05: func()->ind does not match signature A (theorem)
@@ -4097,7 +4099,7 @@ type TestInterpreterErrors() =
     [<DataRow("MS4", "def func A(z:obj)->ind def pred T(v:func) {dec v:=A; true};", 0)>] // OK: ->func matches signature A(obj)->ind, whole node would be returned
     [<DataRow("MS4a", "def func A(z:obj)->ind def pred T(v:func) {dec ~x:obj v:=A(x); true};", 1)>] // SIG05: func does not match value A(obj) 
     [<DataRow("MS4b", "def func A(z:obj)->ind def pred T(v:func) {dec ~x:obj v:=A(x); true};", 1)>] // SIG05: func does not match value A(ind) not matching A(obj)
-    [<DataRow("MS4c", "def func A(z:ind)->ind def pred T(v:func) {dec ~x:obj v:=A(x); true};", 1)>] // SIG05: func does not match value A(ind) 
+    [<DataRow("MS4c", "def func A(z:ind)->ind def pred T(v:func) {dec ~x:obj v:=A(x); true};", 0)>] // SIG05 won't be issued due to proceedinng SIG04: func does not match value A(ind) 
     [<DataRow("MS4d", "def func A(z:ind)->func(a:obj)->ind def pred T(v:func) {dec v:=A; true};", 0)>] // OK: ->func matches signature A(ind)->func(obj)->ind
     [<DataRow("MS4e", "ax A {true} def pred T(v:func) {dec v:=A; true};", 1)>] // SIG05: func does not match signature A (axiom)
     [<DataRow("MS4f", "thm A {true} def pred T(v:func) {dec v:=A; true};", 1)>] // SIG05: func does not match signature A (theorem)
@@ -4714,7 +4716,8 @@ type TestInterpreterErrors() =
             let code = SIG06 ("","","","")
             runTestHelper "TestSIG06FunctionalTerms.fpl" fplCode code expected
 
-    [<DataRow("00a", "def pred S(x:pred) {dec T:=true; true};", 1)>]
+    [<DataRow("00a", "def pred S(x:pred) {dec T:=true; true};", 0)>] // SIG07 won't be issued due to proceeding ID010 error (T unknown)
+    [<DataRow("00a_", "def cl T def pred S(x:pred) {dec T:=true; true};", 1)>] // SIG07 won't be issued due to proceeding ID010 error (T unknown)
     [<DataRow("00b", "ax T {true} def pred S(x:pred) {dec T:=true; true};", 1)>]
     [<DataRow("00c", "thm T {true} def pred S(x:pred) {dec T:=true; true};", 1)>]
     [<DataRow("00d", "lem T {true} def pred S(x:pred) {dec T:=true; true};", 1)>]
@@ -4732,10 +4735,11 @@ type TestInterpreterErrors() =
     [<DataRow("01c", "def pred T(a:ind) {intr} def pred S(x:pred) {dec T(a):=true; true};", 1)>]
     [<DataRow("01d", "def func T(a:ind)->obj {intr} def pred S(x:pred) {dec T(a):=true; true};", 1)>]
     [<DataRow("02a", "def pred S() {dec self:=true; true};", 1)>]
-    [<DataRow("02b", "def pred S() {dec parent:=true; true};", 1)>]
+    [<DataRow("02b", "def pred S() {dec parent:=true; true};", 0)>] // SIG07 won't be issued due to proceeding errors (ID015)
     [<DataRow("02c", "def pred S() {dec self():=true; true};", 1)>]
-    [<DataRow("02d", "def pred S() {dec parent():=true; true};", 1)>]
+    [<DataRow("02d", "def pred S() {dec parent():=true; true};", 0)>] // SIG07 won't be issued due to proceeding errors (ID015)
     [<DataRow("02e", "def pred S() {dec self(a):=true; true};", 1)>]
+    [<DataRow("02e_", "def pred S() {dec ~a:obj self(a):=true; true};", 1)>]
     [<DataRow("02f", "def pred S() {dec parent(a):=true; true};", 1)>]
     [<DataRow("03a", "def pred S() {dec A:=true; true};", 1)>]
     [<DataRow("03b", "ax A {true} def pred S() {dec A:=true; true};", 1)>]

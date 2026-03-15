@@ -5869,7 +5869,7 @@ let runIntrinsicFunction (fv:FplGenericHasValue) =
         | None when map.Dimensionality > 0 ->
             fv.SetValue map // set value to the map
         | _ ->
-            fv.SetValue map // set value to the map
+            fv.SetDefaultValue() // set value default
     | _ ->
         let undef = new FplIntrinsicUndef((fv.StartPos, fv.EndPos), fv)
         fv.SetValue undef
@@ -5978,6 +5978,15 @@ type FplFunctionalTerm(positions: Positions, parent: FplGenericNode, runOrder) a
                     getFunctionalTermRepresent this
             _callCounter <- _callCounter - 1
             result
+
+    override this.SetDefaultValue() =
+        let mapOpt = getMapping this
+        match mapOpt with 
+        | Some map ->
+            let instance = new FplInstance(map.TypeId, (this.StartPos, this.EndPos), this)
+            instance.FplId <- this.ConstantName
+            this.Value <- Some instance
+        | _ -> base.SetDefaultValue()
 
     override this.Run() = 
         debug this Debug.Start
@@ -6209,6 +6218,15 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplGenericNode) as
         tryAddSubBlockToFplBlock this
 
     override this.RunOrder = None
+
+    override this.SetDefaultValue() =
+        let mapOpt = getMapping this
+        match mapOpt with 
+        | Some map ->
+            let instance = new FplInstance(map.TypeId, (this.StartPos, this.EndPos), this)
+            instance.FplId <- this.ConstantName
+            this.Value <- Some instance
+        | _ -> base.SetDefaultValue()
 
     override this.Run() = 
         debug this Debug.Start

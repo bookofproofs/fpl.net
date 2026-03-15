@@ -910,7 +910,7 @@ type TestFplValueScopeFplId() =
         | Some (i:FplGenericNode, b:FplGenericNode, p:FplGenericNode, o:FplGenericNode, u:FplGenericNode, t:FplGenericNode) -> 
             match var with 
             | "i" -> Assert.AreEqual<string>($"$1", i.FplId)
-            | "b" -> Assert.AreEqual<string>($"", b.FplId)
+            | "b" -> Assert.AreEqual<string>($"B()", b.FplId)
             | "p" -> Assert.AreEqual<string>($"{LiteralTrue}", p.FplId)
             | "o" -> Assert.AreEqual<string>($"A()", o.FplId)
             | "u" -> Assert.AreEqual<string>($"{LiteralUndef}", u.FplId)
