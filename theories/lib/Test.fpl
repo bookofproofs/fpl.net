@@ -1,1 +1,1 @@
-def pred T() {dec ~x:obj; mcases (| $1 : false | x : true ? undef) };
+def cl T def pred S(x:pred) {dec T:=true; true};

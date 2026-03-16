@@ -5794,7 +5794,7 @@ type FplEquality(name, positions: Positions, parent: FplGenericNode) as this =
                 | _ when aType<>bType -> 
                     newPred.FplId <- LiteralFalse // if the compared arguments have different types, then unequal
                     this.SetValue newPred
-                | _ when aRepr = "tpl" -> 
+                | _ when aType = "tpl" -> 
                     this.SetDefaultValue()
                 | _ -> 
                     match aRepr with
