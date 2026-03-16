@@ -3588,6 +3588,8 @@ type FplGenericReference(positions: Positions, parent: FplGenericNode) =
             | PrimDelegateDecrementL ->
                 called.Run()
                 this.SetValueOf called
+            | PrimVariableArrayL ->
+                this.SetValue called
             | _ -> ()
         | Some (:? FplGenericIsValue as called) ->
             this.SetValue called
@@ -5789,20 +5791,18 @@ type FplEquality(name, positions: Positions, parent: FplGenericNode) as this =
                 | LiteralUndef -> 
                     this.ErrorOccurred <- emitID013Diagnostics "Predicate `=` cannot be evaluated because the right argument is undefined." variableStack.CallerStartPos variableStack.CallerEndPos 
                     this.SetDefaultValue()
-                | _ when aRepr = "dec tpl" && bRepr = "dec tpl" -> 
-                    this.SetDefaultValue()
                 | _ when aType<>bType -> 
                     newPred.FplId <- LiteralFalse // if the compared arguments have different types, then unequal
                     this.SetValue newPred
+                | _ when aRepr = "tpl" -> 
+                    this.SetDefaultValue()
                 | _ -> 
                     match aRepr with
-                    | "dec pred"  
                     | PrimUndetermined -> 
                         this.ErrorOccurred <- emitID013Diagnostics "Predicate `=` cannot be evaluated because the left argument is undetermined." variableStack.CallerStartPos variableStack.CallerEndPos 
                         this.SetDefaultValue()
                     | _ -> 
                         match bRepr with
-                        | "dec pred"  
                         | PrimUndetermined -> 
                             this.ErrorOccurred <- emitID013Diagnostics "Predicate `=` cannot be evaluated because the right argument is undetermined." variableStack.CallerStartPos variableStack.CallerEndPos 
                             this.SetDefaultValue()
@@ -5816,6 +5816,7 @@ type FplEquality(name, positions: Positions, parent: FplGenericNode) as this =
                                 this.SetValue newPred
                             | _ -> 
                                 this.SetDefaultValue()
+        debug this Debug.Stop
         debug this Debug.Stop
 
 /// Implements the semantics of an FPL decrement delegate.

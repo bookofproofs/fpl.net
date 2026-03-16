@@ -2967,7 +2967,7 @@ type SymbolTableStructure() =
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             let nodeWithValue = node :?> FplGenericHasValue
-            Assert.IsTrue(nodeWithValue.Value.IsNone)
+            Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>("""[$1]->$0, [$2]->$42""", node.Represent())  
             let fn = node :?> FplFunctionalTerm
             Assert.AreEqual<string>("T()", fn.ConstantName) // missing, since non-intrinsic
@@ -3051,7 +3051,7 @@ type SymbolTableStructure() =
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             let nodeWithValue = node :?> FplGenericHasValue
-            Assert.IsTrue(nodeWithValue.Value.IsNone)
+            Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>("""[$1]->A(), [$2]->B()""", node.Represent())  
             let fn = node :?> FplFunctionalTerm
             Assert.AreEqual<string>("T()", fn.ConstantName) // missing, since non-intrinsic
@@ -3135,7 +3135,7 @@ type SymbolTableStructure() =
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             let nodeWithValue = node :?> FplGenericHasValue
-            Assert.IsTrue(nodeWithValue.Value.IsNone)
+            Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>("""[$1]->A(), [$2]->$2, [$3]->true""", node.Represent())  
             let fn = node :?> FplFunctionalTerm
             Assert.AreEqual<string>("T()", fn.ConstantName) // missing, since non-intrinsic
@@ -3291,7 +3291,7 @@ type SymbolTableStructure() =
             | None -> Assert.AreEqual<string>("no class", "no class")
             | Some _ -> Assert.IsTrue(false, "The is no to be returned class")
             let nodeWithValue = node :?> FplGenericHasValue
-            Assert.IsTrue(nodeWithValue.Value.IsNone)
+            Assert.IsTrue(nodeWithValue.Value.IsSome)
             Assert.AreEqual<string>("""[$1]->true, [$2]->false, [$3]->undef""", node.Represent())  
             let fn = node :?> FplFunctionalTerm
             Assert.AreEqual<string>("T()", fn.ConstantName) // missing, since non-intrinsic
@@ -3321,10 +3321,9 @@ type SymbolTableStructure() =
         
         match nodeType, varVal with
         | "FplInstance", "00" ->
-            Assert.IsInstanceOfType<FplVariable>(parent)
+            Assert.IsInstanceOfType<FplDefaultConstructor>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsTrue(parent.RefersTo.IsSome)
             let parentWithValue = parent :?> FplGenericHasValue
             Assert.IsTrue(parentWithValue.Value.IsSome)
             Assert.AreEqual<FplGenericNode>(parentWithValue.Value.Value, node)
