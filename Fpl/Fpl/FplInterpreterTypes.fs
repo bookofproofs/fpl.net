@@ -3496,6 +3496,32 @@ type FplIntrinsicUndef(positions: Positions, parent: FplGenericNode) as this =
 
     override this.RunOrder = None
 
+/// Indicates if fv is an FplGenericNode that is callable with parameters.
+let isCallableWithParams (fv:FplGenericNode) =
+    match fv.Name with
+    | LiteralCtorL
+    | PrimDefaultConstructor
+    | PrimBaseConstructorCall
+    | PrimExtensionL
+    | PrimPredicateL
+    | PrimFunctionalTermL
+    | PrimMandatoryFunctionalTermL
+    | PrimMandatoryPredicateL -> true
+    | _ -> false
+
+/// Indicates if fv is an FplGenericNode that is callable without parameters.
+let isCallableWithoutParams (fv:FplGenericNode) =
+    match fv.Name with
+    | LiteralAxL
+    | LiteralConjL
+    | LiteralCorL
+    | LiteralPrfL
+    | LiteralLemL
+    | LiteralPropL
+    | LiteralThmL -> true
+    | _ -> false
+
+
 [<AbstractClass>]
 type FplGenericReference(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericHasValue(positions, parent)
@@ -3550,24 +3576,18 @@ type FplGenericReference(positions: Positions, parent: FplGenericNode) =
         debug this Debug.Start
         let calledOpt = referencedNodeOpt this
         match calledOpt with 
+        | Some (:? FplGenericHasValue as called) when isCallableWithParams called ->
+            this.RunWithVariableReplacement called variableStack
+        | Some (:? FplGenericHasValue as called) when isCallableWithoutParams called ->
+            called.Run()
+            this.SetValueOf called
         | Some (:? FplGenericHasValue as called) ->
             match called.Name with
-            | LiteralCtorL
-            | PrimDefaultConstructor
-            | PrimBaseConstructorCall
-            | PrimExtensionL
-            | PrimPredicateL
-            | PrimFunctionalTermL
-            | PrimMandatoryFunctionalTermL
-            | PrimMandatoryPredicateL ->
-                this.RunWithVariableReplacement called variableStack
             | PrimVariableL
             | PrimDelegateEqualL
             | PrimDelegateDecrementL ->
                 called.Run()
                 this.SetValueOf called
-            | PrimVariableArrayL ->
-                this.SetValue called
             | _ -> ()
         | Some (:? FplGenericIsValue as called) ->
             this.SetValue called
@@ -6561,6 +6581,7 @@ type FplAssignment(positions: Positions, parent: FplGenericNode) as this =
             | :? FplReference as ref -> 
                 this.ErrorOccurred <- ref.ErrorOccurred 
             | _ -> ()
+
         match this.ArgList[0], this.Assignee with
         | :? FplReference as ref, Some assignee when ref.ArgType = ArgType.Parentheses ->
             this.ErrorOccurred <- emitSIG07iagnostic (ref.Type SignatureType.Name) "an expression" assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
@@ -6569,6 +6590,13 @@ type FplAssignment(positions: Positions, parent: FplGenericNode) as this =
         | :? FplReference as ref, Some (:? FplReference as assignee) when assignee.RefersTo.IsNone ->
             this.ErrorOccurred <- emitSIG07iagnostic (ref.Type SignatureType.Name) "undefined" assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
         | _ -> ()
+
+        let nameAssignee = this.ArgList[0].Type SignatureType.Name
+        let nameAssignedValue = this.ArgList[1].Type SignatureType.Name
+        if nameAssignee = nameAssignedValue then
+            // something has been assigned to itself
+            this.ErrorOccurred <- emitLG005Diagnostics nameAssignedValue this.ArgList[1].StartPos this.ArgList[1].EndPos
+
         // remember proceeding errors of references used in the assignment (if any)
         checkErrorOccuredInReference this.ArgList[0]
         checkErrorOccuredInReference this.ArgList[1]
@@ -6598,50 +6626,39 @@ type FplAssignment(positions: Positions, parent: FplGenericNode) as this =
             | None ->
                 this.ErrorOccurred <- emitSIG07iagnostic (assignee.Type SignatureType.Name) "the type of parent could not be determined" assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
         | None, Some (assignee), Some assignedValue ->
-            let nameAssignee = assignee.Type SignatureType.Name
-            let nameAssignedValue = assignedValue.Type SignatureType.Name
-            if nameAssignee = nameAssignedValue then
-                // something has been assigned to itself
-                this.ErrorOccurred <- emitLG005Diagnostics nameAssignedValue assignedValue.StartPos assignedValue.EndPos
-            else
-                this.ErrorOccurred <- emitSIG07iagnostic (assignee.Type SignatureType.Name) $"type `{assignee.Type SignatureType.Type}`" assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
+            this.ErrorOccurred <- emitSIG07iagnostic (assignee.Type SignatureType.Name) $"type `{assignee.Type SignatureType.Type}`" assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
         | _ -> ()
 
     override this.EmbedInSymbolTable _ = 
         this.CheckConsistency()
         addExpressionToParentArgList this
 
+    member private this.SetAssignee (fv:FplGenericNode) = 
+        match this.Assignee with
+        | Some (:? FplVariable as assignee) ->
+            assignee.SetValue fv
+        | Some (:? FplVariableArray as assignee) ->
+            let coordinatesKey = representationSep "|" (this.ArgList[0].ArgList) 
+            assignee.AssignValueToCoordinates coordinatesKey fv // set value of array
+        | _ -> ()
+
     override this.Run() =
         debug this Debug.Start
-        match this.ErrorOccurred, this.Assignee, this.AssignedValue with
-        | Some errCode, _, _ ->
+
+        match this.ErrorOccurred, this.ArgList[1], this.AssignedValue with 
+        | Some _, _, _ ->
             () // skip assignment, if any proceeding errors occured
-        | None, Some (:? FplVariable as assignee), Some (:? FplGenericConstructor as assignedValue) ->
-            assignedValue.Run()
-            match assignedValue.Instance with 
-            | Some instance ->
-                assignee.SetValue instance // set value to the created instance 
-                // reposition the instance in symbol table
-                instance.Parent <- Some assignee
-            | None -> () // TODO, issue diagnostics?
-        | None, Some (:? FplVariable as assignee), Some (:? FplGenericIsValue as assignedValue) ->
-            assignee.SetValue assignedValue
-        | None, Some (:? FplVariableArray as assignee), Some (:? FplGenericConstructor as assignedValue) when this.ArgList[0].ArgType = ArgType.Brackets ->
-            assignedValue.Run()
-            match assignedValue.Instance with 
-            | Some instance ->
-                let coordinatesKey = representationSep "|" (this.ArgList[0].ArgList) 
-                assignee.AssignValueToCoordinates coordinatesKey instance // set value to the created instance 
-                // reposition the instance in symbol table
-                instance.Parent <- Some assignee
-            | None -> () // TODO, issue diagnostics?
-        | None, Some (:? FplVariableArray as assignee), Some assignedValue when this.ArgList[0].ArgType = ArgType.Brackets ->
-            let coordinatesKey = representationSep "|" (this.ArgList[0].ArgList) 
-            assignee.AssignValueToCoordinates coordinatesKey assignedValue // set value to the created instance 
-        | None, Some (:? FplGenericHasValue as assignee), Some (:? FplGenericHasValue as assignedValue) ->
-            assignedValue.Run()
-            assignee.SetValueOf assignedValue
+        | None, (:? FplGenericHasValue as ref), Some (:? FplVariableArray as assignedValue) ->
+            this.SetAssignee assignedValue
+        | None, (:? FplGenericHasValue as ref), Some (:? FplGenericIsValue as assignedValue) ->
+            this.SetAssignee assignedValue
+        | None, (:? FplGenericHasValue as ref), _ ->
+            ref.Run()
+            this.SetAssignee (ref.Value.Value)
+        | None, (:? FplGenericIsValue as ref), _ ->
+            this.SetAssignee ref
         | _ -> ()
+
         debug this Debug.Stop
 
 /// A string representation of an FplValue

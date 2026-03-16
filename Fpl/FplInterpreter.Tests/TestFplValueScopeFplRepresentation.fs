@@ -1070,6 +1070,9 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("ass07g", """def func A()->obj def pred P(x:obj) {dec x:=A(); true}""", """A()""")>] // declared constant used
     [<DataRow("ass08a", """def pred A() def pred P(x:pred) {dec x:=A(); true}""", """A()""")>] // declared constant used
     [<DataRow("ass08b", """def pred A() def pred P(x:pred()) {dec x:=A(); true}""", PrimUndetermined)>] // pred() does not match pred, therefore assignment doesn't work
+    [<DataRow("ass08c", """def pred A(a:ind) def pred P(x:pred) {dec x:=A($42); true}""", "A($42)")>] // pred() does not match pred, therefore assignment doesn't work
+    [<DataRow("ass08d", """def pred A(a:ind) def pred P(x:pred) {dec x:=A; true}""", "A(undet)")>] // pred() does not match pred, therefore assignment doesn't work
+    [<DataRow("ass08e", """def pred A(a:ind) def pred P(x:pred(b:ind)) {dec x:=A; true}""", "A(undet)")>] // pred() does not match pred, therefore assignment doesn't work
     [<TestMethod>]
     member this.TestAssignementOfConstantsRepresent(var, input, output:string) =
         ad.Clear()
