@@ -5807,16 +5807,8 @@ type FplEquality(name, positions: Positions, parent: FplGenericNode) as this =
                             this.ErrorOccurred <- emitID013Diagnostics "Predicate `=` cannot be evaluated because the right argument is undetermined." variableStack.CallerStartPos variableStack.CallerEndPos 
                             this.SetDefaultValue()
                         | _ -> 
-                            let a1IsDeclared = aRepr.Contains("dec ")
-                            let b1IsDeclared = bRepr.Contains("dec ")
-                            match a1IsDeclared, b1IsDeclared with
-                            | false, false 
-                            | true, true ->
-                                newPred.FplId <- $"{(aRepr = bRepr)}".ToLower()
-                                this.SetValue newPred
-                            | _ -> 
-                                this.SetDefaultValue()
-        debug this Debug.Stop
+                            newPred.FplId <- $"{(aRepr = bRepr)}".ToLower()
+                            this.SetValue newPred
         debug this Debug.Stop
 
 /// Implements the semantics of an FPL decrement delegate.
