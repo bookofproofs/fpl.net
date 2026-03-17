@@ -5920,7 +5920,9 @@ let runIntrinsicFunction (fv:FplGenericHasValue) =
                 fv.SetValue instance // set value to the created instance 
                 // reposition the instance in symbol table
                 instance.Parent <- Some fv
-            | None, _ -> () // TODO, should not occur issue diagnostics?
+            | None, _ -> 
+                let v = new FplUndetermined(map.TypeId, (fv.StartPos, fv.EndPos), fv)
+                fv.SetValue v
         | Some cl when map.Dimensionality > 0 ->
             fv.SetValue map // set value to the map
         | None when map.Dimensionality > 0 ->
@@ -5928,8 +5930,8 @@ let runIntrinsicFunction (fv:FplGenericHasValue) =
         | _ ->
             fv.SetDefaultValue() // set value default
     | _ ->
-        let undef = new FplIntrinsicUndef((fv.StartPos, fv.EndPos), fv)
-        fv.SetValue undef
+        let v = new FplUndetermined(fv.TypeId, (fv.StartPos, fv.EndPos), fv)
+        fv.SetValue v
 
 let private getFunctionalTermRepresent (fv:FplGenericHasValue) =
     match fv.Value with 
@@ -6052,8 +6054,8 @@ type FplFunctionalTerm(positions: Positions, parent: FplGenericNode, runOrder) a
             if _callCounter > maxRecursion then
                 this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter variableStack.CallerStartPos variableStack.CallerEndPos
             else
-                this.SetConstantName()
                 if this.IsIntrinsic then 
+                    this.SetConstantName()
                     runIntrinsicFunction this 
                 else
                     runArgsAndSetWithLastValue this
@@ -6292,8 +6294,8 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplGenericNode) as
             if _callCounter > maxRecursion then
                 this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter variableStack.CallerStartPos variableStack.CallerEndPos
             else
-                this.SetConstantName()
                 if this.IsIntrinsic then 
+                    this.SetConstantName()
                     runIntrinsicFunction this 
                 else
                     runArgsAndSetWithLastValue this
