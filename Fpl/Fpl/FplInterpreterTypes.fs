@@ -2325,53 +2325,6 @@ type IReady =
 type IHasProof =
     abstract member HasProof : bool with get, set
 
-[<AbstractClass>]
-type FplGenericPredicateBlock(positions: Positions, parent: FplGenericNode) =
-    inherit FplGenericPredicateWithExpression(positions, parent)
-    let mutable _isReady = false
-    let mutable _callCounter = 0
-
-    interface IReady with
-        member _.IsReady = _isReady
-
-    interface ICanBeCalledRecusively with
-        member _.CallCounter = _callCounter
-
-    override this.IsBlock () = true
-
-    override this.Type signatureType = 
-        let head = getFplHead this signatureType
-
-        let paramT = getParamTuple this signatureType
-        sprintf "%s(%s)" head paramT
-
-    override this.Run() = 
-        debug this Debug.Start
-        if not _isReady then
-            _callCounter <- _callCounter + 1
-            if _callCounter > maxRecursion then
-                this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter variableStack.CallerStartPos variableStack.CallerEndPos
-            else
-                if this.IsIntrinsic then 
-                    this.SetDefaultValue()
-                else
-                    // run all statements and the last predicate in the FplPredicate
-                    this.ArgList |> Seq.iter (fun fv1 -> fv1.Run()) 
-                    // Assign the value of the FplPredicate using the last predicate
-                    let lastOpt = this.ArgList |> Seq.tryLast
-                    match lastOpt with 
-                    | Some (:? FplGenericHasValue as last) -> this.SetValueOf last
-                    | _ -> ()
-
-            _callCounter <- _callCounter - 1
-            _isReady <- this.Arity = 0
-        debug this Debug.Stop
-
-
-    override this.CheckConsistency () = 
-        if not this.IsIntrinsic then // if not intrinsic, check variable usage
-            checkVAR04Diagnostics this
-
 let checkSIG02Diagnostics (root:FplGenericNode) symbol precedence pos1 pos2 = 
     let precedences = Dictionary<int, FplGenericNode>()
     let precedenceWasAlreadyThere precedence fv =
@@ -2401,6 +2354,21 @@ let runArgsAndSetWithLastValue (fv:FplGenericHasValue) =
     match lastOpt with 
     | Some (:? FplGenericHasValue as last) -> fv.SetValueOf last
     | _ -> ()
+
+let setIConstantDefaultValue (fv:FplGenericHasValue) = 
+    if fv.IsIntrinsic then 
+        match box fv with
+        | :? IConstant as fvConstant ->
+            fvConstant.SetConstantName()
+            let instance = new FplInstance(fv.TypeId, (fv.StartPos, fv.EndPos), fv)
+            instance.FplId <- fvConstant.ConstantName
+            fv.Value <- Some instance
+        | _ ->
+            let v = new FplUndetermined(fv.TypeId, (fv.StartPos, fv.EndPos), fv)
+            fv.Value <- Some v
+    else
+        let v = new FplUndetermined(fv.TypeId, (fv.StartPos, fv.EndPos), fv)
+        fv.Value <- Some v
 
 type FplPredicate(positions: Positions, parent: FplGenericNode, runOrder) as this =
     inherit FplGenericInheriting(positions, parent)
@@ -2481,15 +2449,7 @@ type FplPredicate(positions: Positions, parent: FplGenericNode, runOrder) as thi
         let paramT = getParamTuple this signatureType
         sprintf "%s(%s)" head paramT
 
-    override this.SetDefaultValue() =
-        if this.IsIntrinsic then 
-            this.SetConstantName()
-            let instance = new FplInstance(this.TypeId, (this.StartPos, this.EndPos), this)
-            instance.FplId <- this.ConstantName
-            this.Value <- Some instance
-        else
-            let v = new FplUndetermined(this.TypeId, (this.StartPos, this.EndPos), this)
-            this.Value <- Some v
+    override this.SetDefaultValue() = setIConstantDefaultValue this
 
     override this.Run() = 
         debug this Debug.Start
@@ -2511,7 +2471,9 @@ type FplPredicate(positions: Positions, parent: FplGenericNode, runOrder) as thi
     override this.RunOrder = Some _runOrder
 
 type FplMandatoryPredicate(positions: Positions, parent: FplGenericNode) =
-    inherit FplGenericPredicateBlock(positions, parent)
+    inherit FplGenericPredicateWithExpression(positions, parent)
+    let mutable _isReady = false
+    let mutable _callCounter = 0
 
     override this.Name = PrimMandatoryPredicateL
     override this.ShortName = PrimMandatoryPredicate
@@ -2521,9 +2483,50 @@ type FplMandatoryPredicate(positions: Positions, parent: FplGenericNode) =
         this.AssignParts(ret)
         ret
 
+
+    interface IReady with
+        member _.IsReady = _isReady
+
+    interface ICanBeCalledRecusively with
+        member _.CallCounter = _callCounter
+
+    override this.IsBlock () = true
+
+    override this.Type signatureType = 
+        let head = getFplHead this signatureType
+
+        let paramT = getParamTuple this signatureType
+        sprintf "%s(%s)" head paramT
+
+    override this.CheckConsistency () = 
+        if not this.IsIntrinsic then // if not intrinsic, check variable usage
+            checkVAR04Diagnostics this
+
+
     override this.EmbedInSymbolTable _ = 
         base.CheckConsistency()
         tryAddSubBlockToFplBlock this
+
+    override this.SetDefaultValue() = setIConstantDefaultValue this
+    
+    
+    override this.Run() = 
+        debug this Debug.Start
+        if not _isReady then
+            _callCounter <- _callCounter + 1
+            if _callCounter > maxRecursion then
+                this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter variableStack.CallerStartPos variableStack.CallerEndPos
+            else
+                if this.IsIntrinsic then 
+                    this.SetDefaultValue()
+                else
+                    runArgsAndSetWithLastValue this
+
+            _callCounter <- _callCounter - 1
+            _isReady <- this.Arity = 0
+        debug this Debug.Stop
+
+
 
 let runArgumentsOfGenericPredicateWithExpression (fv:FplGenericHasValue) = 
     fv.ArgList
