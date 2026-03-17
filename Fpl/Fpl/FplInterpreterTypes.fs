@@ -2482,9 +2482,14 @@ type FplPredicate(positions: Positions, parent: FplGenericNode, runOrder) as thi
         sprintf "%s(%s)" head paramT
 
     override this.SetDefaultValue() =
-        let instance = new FplInstance(this.TypeId, (this.StartPos, this.EndPos), this)
-        instance.FplId <- this.ConstantName
-        this.Value <- Some instance
+        if this.IsIntrinsic then 
+            this.SetConstantName()
+            let instance = new FplInstance(this.TypeId, (this.StartPos, this.EndPos), this)
+            instance.FplId <- this.ConstantName
+            this.Value <- Some instance
+        else
+            let v = new FplUndetermined(this.TypeId, (this.StartPos, this.EndPos), this)
+            this.Value <- Some v
 
     override this.Run() = 
         debug this Debug.Start
@@ -2493,7 +2498,6 @@ type FplPredicate(positions: Positions, parent: FplGenericNode, runOrder) as thi
             if _callCounter > maxRecursion then
                 this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter variableStack.CallerStartPos variableStack.CallerEndPos
             else
-                this.SetConstantName()
                 if this.IsIntrinsic then 
                     this.SetDefaultValue()
                 else

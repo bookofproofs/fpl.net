@@ -1010,7 +1010,7 @@ type SymbolTableStructure() =
         | "FplExtension" ->
             Assert.AreEqual<string>("", (getName var).[index])
         | "FplExtensionObj" ->
-            Assert.AreEqual<string>("", (getName var).[index])
+            Assert.AreEqual<string>("0", (getName var).[index])
         | "FplForInStmt" ->
             Assert.AreEqual<string>(LiteralFor, (getName var).[index])
         | "FplForInStmtDomain" ->
