@@ -184,9 +184,7 @@ type SymbolTableStructure() =
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
         | "FplExtensionObj" ->
             let x = new FplExtensionObj(positions, parent)
-            let ref = new FplExtension(positions, parent, 0)
-            x.RefersTo <- Some ref
-            x.Run()
+            x.FplId <- "0"
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
         | "FplForInStmt" ->
             let x = new FplForInStmt(positions, parent)
@@ -1745,8 +1743,8 @@ type SymbolTableStructure() =
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
         | "FplExtensionObj" ->
-            Assert.IsFalse(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
+            Assert.IsTrue(isValidJson (getName var).[index])
+            Assert.AreEqual<string>("0", (getName var).[index])
         | "FplForInStmt" ->
             Assert.IsFalse(isValidJson (getName var).[index])
             Assert.AreEqual<string>(PrimNone, (getName var).[index])

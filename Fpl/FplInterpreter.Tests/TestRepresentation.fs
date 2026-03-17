@@ -157,7 +157,7 @@ type TestRepresentation() =
                 | (x = @0) : n := Zero() 
                 | (x = @1) : n := Succ(Zero()) 
                 | (x = @2) : n := Succ(Succ(Zero())) 
-                ? n := Succ(delegate.Decrement(x))  
+                ? n := Succ(self(delegate.Decrement(x)))  
             )
             ;
             return n
@@ -218,7 +218,7 @@ type TestRepresentation() =
                 | (x = @0) : Zero() 
                 | (x = @1) : Succ(Zero()) 
                 | (x = @2) : Succ(Succ(Zero())) 
-                ? Succ(delegate.Decrement(x))  
+                ? Succ(self(delegate.Decrement(x)))  
             )
         }
 
