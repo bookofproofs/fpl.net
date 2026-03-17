@@ -3528,7 +3528,7 @@ type FplGenericReference(positions: Positions, parent: FplGenericNode) =
     
     override this.Clone () = this // do not clone references to prevent stack overflow 
 
-    member private this.RunWithVariableReplacement (called:FplGenericHasValue) (variableStack:FplVariableStack) =
+    member private this.RunWithVariableReplacement (called:FplGenericHasValue) =
         match box called, this.NextBlockNode with
         | :? ICanBeCalledRecusively as calledRecursively, Some blockNodeOfThis when 
             Object.ReferenceEquals(blockNodeOfThis, called) && 
@@ -3572,12 +3572,32 @@ type FplGenericReference(positions: Positions, parent: FplGenericNode) =
                 called.SetDefaultValue()
                 this.SetValueOf called
 
+    member private this.RunExtensionWithVariableReplacement (extensionObj:FplGenericNode)=
+        match extensionObj.UltimateBlockNode, extensionObj.RefersTo with
+        | Some enclosingNode, Some (:? FplGenericHasValue as calledExtension) when not (Object.ReferenceEquals(enclosingNode, calledExtension)) ->
+            // if the extension object is called outside its own extension
+            // delegate its evaluation to this extension
+            let pars = variableStack.SaveState(calledExtension) 
+            let args = [extensionObj]
+            variableStack.ReplaceVariables pars args
+            variableStack.CallerStartPos <- extensionObj.StartPos
+            variableStack.CallerEndPos <- extensionObj.EndPos
+            calledExtension.Run()
+            
+            // and store the value of the extension to this reference
+            this.SetValueOf calledExtension
+            variableStack.RestoreState(calledExtension)
+        | _ ->
+            // otherwise (i.e., inside the extensionObj's extension), 
+            // treat the extensionObj as a value and store this value to the reference
+            this.SetValue extensionObj
+
     override this.Run() =
         debug this Debug.Start
         let calledOpt = referencedNodeOpt this
         match calledOpt with 
         | Some (:? FplGenericHasValue as called) when isCallableWithParams called ->
-            this.RunWithVariableReplacement called variableStack
+            this.RunWithVariableReplacement called 
         | Some (:? FplGenericHasValue as called) when isCallableWithoutParams called ->
             called.Run()
             this.SetValueOf called
@@ -3591,6 +3611,8 @@ type FplGenericReference(positions: Positions, parent: FplGenericNode) =
             | PrimVariableArrayL ->
                 this.SetValue called
             | _ -> ()
+        | Some (:? FplGenericIsValue as called) when called.Name = PrimExtensionObj ->
+            this.RunExtensionWithVariableReplacement (called :> FplGenericNode)
         | Some (:? FplGenericIsValue as called) ->
             this.SetValue called
         | _ -> ()
@@ -5794,7 +5816,7 @@ type FplEquality(name, positions: Positions, parent: FplGenericNode) as this =
                 | _ when aType<>bType -> 
                     newPred.FplId <- LiteralFalse // if the compared arguments have different types, then unequal
                     this.SetValue newPred
-                | _ when aType = "tpl" -> 
+                | _ when aType = "tpl" && bType = "tpl" && aRepr = PrimUndetermined && bRepr = PrimUndetermined -> 
                     this.SetDefaultValue()
                 | _ -> 
                     match aRepr with
