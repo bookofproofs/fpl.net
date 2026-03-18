@@ -2354,18 +2354,14 @@ let runArgsAndSetWithLastValue (fv:FplGenericHasValue) =
     | Some (:? FplGenericHasValue as last) -> fv.SetValueOf last
     | _ -> fv.SetDefaultValue()
 
-let setPredicateDefaultValue (fv:FplGenericHasValue) = 
-    if fv.IsIntrinsic then 
-        match box fv with
-        | :? IConstant as fvConstant ->
-            fvConstant.SetConstantName()
-            let instance = new FplInstance(fv.TypeId, (fv.StartPos, fv.EndPos), fv)
-            instance.FplId <- fvConstant.ConstantName
-            fv.SetValue instance
-        | _ ->
-            let v = new FplUndetermined(fv.TypeId, (fv.StartPos, fv.EndPos), fv)
-            fv.SetValue v
-    else
+let private runIntrinsicPredicate (fv:FplGenericHasValue) = 
+    match box fv with
+    | :? IConstant as fvConstant ->
+        fvConstant.SetConstantName()
+        let instance = new FplInstance(fv.TypeId, (fv.StartPos, fv.EndPos), fv)
+        instance.FplId <- fvConstant.ConstantName
+        fv.SetValue instance
+    | _ ->
         let v = new FplUndetermined(fv.TypeId, (fv.StartPos, fv.EndPos), fv)
         fv.SetValue v
 
@@ -2448,8 +2444,6 @@ type FplPredicate(positions: Positions, parent: FplGenericNode, runOrder) as thi
         let paramT = getParamTuple this signatureType
         sprintf "%s(%s)" head paramT
 
-    override this.SetDefaultValue() = setPredicateDefaultValue this
-
     override this.Run() = 
         debug this Debug.Start
         if not _isReady then
@@ -2458,7 +2452,7 @@ type FplPredicate(positions: Positions, parent: FplGenericNode, runOrder) as thi
                 this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter variableStack.CallerStartPos variableStack.CallerEndPos
             else
                 if this.IsIntrinsic then 
-                    this.SetDefaultValue()
+                    runIntrinsicPredicate this
                 else
                     runArgsAndSetWithLastValue this
 
@@ -2501,13 +2495,9 @@ type FplMandatoryPredicate(positions: Positions, parent: FplGenericNode) =
         if not this.IsIntrinsic then // if not intrinsic, check variable usage
             checkVAR04Diagnostics this
 
-
     override this.EmbedInSymbolTable _ = 
         base.CheckConsistency()
         tryAddSubBlockToFplBlock this
-
-    override this.SetDefaultValue() = setPredicateDefaultValue this
-    
     
     override this.Run() = 
         debug this Debug.Start
@@ -2517,15 +2507,13 @@ type FplMandatoryPredicate(positions: Positions, parent: FplGenericNode) =
                 this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter variableStack.CallerStartPos variableStack.CallerEndPos
             else
                 if this.IsIntrinsic then 
-                    this.SetDefaultValue()
+                    runIntrinsicPredicate this
                 else
                     runArgsAndSetWithLastValue this
 
             _callCounter <- _callCounter - 1
             _isReady <- this.Arity = 0
         debug this Debug.Stop
-
-
 
 let runArgumentsOfGenericPredicateWithExpression (fv:FplGenericHasValue) = 
     fv.ArgList
@@ -5900,45 +5888,31 @@ type FplDecrement(name, positions: Positions, parent: FplGenericNode) as this =
         debug this Debug.Stop
 
 let runIntrinsicFunction (fv:FplGenericHasValue) =
- 
-    let mapOpt = getMapping fv
-    match mapOpt with
-    | Some (:? FplMapping as map) ->
-        match map.RefersTo with 
-        | Some cl when map.Dimensionality = 0 ->
-            // a class type without an array
-            let defaultCtor = cl.Scope.Values |> Seq.head :?> FplGenericConstructor
-            defaultCtor.Run()
-            match defaultCtor.Instance, box fv with 
-            | Some instance, (:? IConstant as fvConstant) ->
-                instance.FplId <- fvConstant.ConstantName
-                fv.SetValue instance // set value to the created instance 
-                // reposition the instance in symbol table
-                instance.Parent <- Some fv
-            | Some instance, _ -> // should never occur
-                fv.SetValue instance // set value to the created instance 
-                // reposition the instance in symbol table
-                instance.Parent <- Some fv
-            | None, _ -> 
-                let v = new FplUndetermined(map.TypeId, (fv.StartPos, fv.EndPos), fv)
-                fv.SetValue v
-        | Some cl when map.Dimensionality > 0 ->
-            fv.SetValue map // set value to the map
-        | None when map.Dimensionality > 0 ->
-            fv.SetValue map // set value to the map
+    match box fv with
+    | :? IConstant as fvConstant ->
+        fvConstant.SetConstantName()
+        let mapOpt = getMapping fv
+        match mapOpt with
+        | Some (:? FplMapping as map) ->
+            let instance =
+                match map.RefersTo with 
+                | Some cl when map.Dimensionality = 0 ->
+                    // delegate instance building to a default class constructor if the mapping refers to a class
+                    let defaultCtor = cl.Scope.Values |> Seq.head :?> FplGenericConstructor
+                    defaultCtor.Run()
+                    match defaultCtor.Instance with 
+                    | Some inst -> 
+                        inst.Parent <- Some fv
+                        inst 
+                    | None -> 
+                        new FplInstance(map.TypeId, (fv.StartPos, fv.EndPos), fv)
+                | _ ->
+                    new FplInstance(map.TypeId, (fv.StartPos, fv.EndPos), fv)
+            instance.FplId <- fvConstant.ConstantName
+            fv.SetValue instance
         | _ ->
-            let mapOpt = getMapping fv
-            match mapOpt, box fv with 
-            | Some map, (:? IConstant as fvConstant) ->
-                let instance = new FplInstance(map.TypeId, (fv.StartPos, fv.EndPos), fv)
-                instance.FplId <- fvConstant.ConstantName
-                fv.SetValue instance
-            | Some map, _ ->
-                let instance = new FplInstance(map.TypeId, (fv.StartPos, fv.EndPos), fv)
-                fv.SetValue instance
-            | _, _ ->
-                let v = new FplUndetermined(fv.TypeId, (fv.StartPos, fv.EndPos), fv)
-                fv.SetValue v
+            let v = new FplUndetermined(fv.TypeId, (fv.StartPos, fv.EndPos), fv)
+            fv.SetValue v
     | _ ->
         let v = new FplUndetermined(fv.TypeId, (fv.StartPos, fv.EndPos), fv)
         fv.SetValue v
@@ -6073,8 +6047,6 @@ type FplFunctionalTerm(positions: Positions, parent: FplGenericNode, runOrder) a
             _callCounter <- _callCounter - 1
             result
 
-    override this.SetDefaultValue() = setFunctionalTermDefaultValue this
-
     override this.Run() = 
         debug this Debug.Start
         if not _isReady then
@@ -6083,7 +6055,6 @@ type FplFunctionalTerm(positions: Positions, parent: FplGenericNode, runOrder) a
                 this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter variableStack.CallerStartPos variableStack.CallerEndPos
             else
                 if this.IsIntrinsic then 
-                    this.SetConstantName()
                     runIntrinsicFunction this 
                 else
                     runArgsAndSetWithLastValue this
@@ -6302,8 +6273,6 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplGenericNode) as
 
     override this.RunOrder = None
 
-    override this.SetDefaultValue() = setFunctionalTermDefaultValue this
-
     override this.Run() = 
         debug this Debug.Start
         if not _isReady then
@@ -6312,7 +6281,6 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplGenericNode) as
                 this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter variableStack.CallerStartPos variableStack.CallerEndPos
             else
                 if this.IsIntrinsic then 
-                    this.SetConstantName()
                     runIntrinsicFunction this 
                 else
                     runArgsAndSetWithLastValue this
