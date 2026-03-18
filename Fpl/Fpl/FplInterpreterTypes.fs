@@ -911,7 +911,6 @@ type FplVariableStack() =
                 // set the parameter's value to the value of the argument, if argument with value
                 match arWithValue.Value with 
                 | Some v -> p.SetValue v
-                | None when ar.Name = PrimExtensionObj -> p.Value <- Some ar
                 | None -> p.Value <- None
             | _ -> 
                 // set the parameter's value to the argument itself, since it is a non-valued argument
@@ -2355,20 +2354,20 @@ let runArgsAndSetWithLastValue (fv:FplGenericHasValue) =
     | Some (:? FplGenericHasValue as last) -> fv.SetValueOf last
     | _ -> ()
 
-let setIConstantDefaultValue (fv:FplGenericHasValue) = 
+let setPredicateDefaultValue (fv:FplGenericHasValue) = 
     if fv.IsIntrinsic then 
         match box fv with
         | :? IConstant as fvConstant ->
             fvConstant.SetConstantName()
             let instance = new FplInstance(fv.TypeId, (fv.StartPos, fv.EndPos), fv)
             instance.FplId <- fvConstant.ConstantName
-            fv.Value <- Some instance
+            fv.SetValue instance
         | _ ->
             let v = new FplUndetermined(fv.TypeId, (fv.StartPos, fv.EndPos), fv)
-            fv.Value <- Some v
+            fv.SetValue v
     else
         let v = new FplUndetermined(fv.TypeId, (fv.StartPos, fv.EndPos), fv)
-        fv.Value <- Some v
+        fv.SetValue v
 
 type FplPredicate(positions: Positions, parent: FplGenericNode, runOrder) as this =
     inherit FplGenericInheriting(positions, parent)
@@ -2449,7 +2448,7 @@ type FplPredicate(positions: Positions, parent: FplGenericNode, runOrder) as thi
         let paramT = getParamTuple this signatureType
         sprintf "%s(%s)" head paramT
 
-    override this.SetDefaultValue() = setIConstantDefaultValue this
+    override this.SetDefaultValue() = setPredicateDefaultValue this
 
     override this.Run() = 
         debug this Debug.Start
@@ -2507,7 +2506,7 @@ type FplMandatoryPredicate(positions: Positions, parent: FplGenericNode) =
         base.CheckConsistency()
         tryAddSubBlockToFplBlock this
 
-    override this.SetDefaultValue() = setIConstantDefaultValue this
+    override this.SetDefaultValue() = setPredicateDefaultValue this
     
     
     override this.Run() = 
@@ -5945,6 +5944,27 @@ let private getFunctionalTermRepresent (fv:FplGenericHasValue) =
         $"dec {mapping.Type(SignatureType.Mixed)}"
     | Some ref -> ref.Represent()    
 
+let setFunctionalTermDefaultValue (fv:FplGenericHasValue) = 
+    if fv.IsIntrinsic then 
+        match box fv with
+        | :? IConstant as fvConstant ->
+            let mapOpt = getMapping fv
+            match mapOpt with 
+            | Some map ->
+                let instance = new FplInstance(map.TypeId, (fv.StartPos, fv.EndPos), fv)
+                instance.FplId <- fvConstant.ConstantName
+                fv.SetValue instance
+            | _ -> 
+                let v = new FplUndetermined(fv.TypeId, (fv.StartPos, fv.EndPos), fv)
+                fv.SetValue v
+        | _ ->
+            let v = new FplUndetermined(fv.TypeId, (fv.StartPos, fv.EndPos), fv)
+            fv.SetValue v
+    else
+        let v = new FplUndetermined(fv.TypeId, (fv.StartPos, fv.EndPos), fv)
+        fv.SetValue v
+
+
 type FplFunctionalTerm(positions: Positions, parent: FplGenericNode, runOrder) as this =
     inherit FplGenericInheriting(positions, parent)
     let mutable _signStartPos = Position("", 0L, 0L, 0L)
@@ -6038,14 +6058,7 @@ type FplFunctionalTerm(positions: Positions, parent: FplGenericNode, runOrder) a
             _callCounter <- _callCounter - 1
             result
 
-    override this.SetDefaultValue() =
-        let mapOpt = getMapping this
-        match mapOpt with 
-        | Some map ->
-            let instance = new FplInstance(map.TypeId, (this.StartPos, this.EndPos), this)
-            instance.FplId <- this.ConstantName
-            this.Value <- Some instance
-        | _ -> base.SetDefaultValue()
+    override this.SetDefaultValue() = setFunctionalTermDefaultValue this
 
     override this.Run() = 
         debug this Debug.Start
@@ -6278,14 +6291,7 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplGenericNode) as
 
     override this.RunOrder = None
 
-    override this.SetDefaultValue() =
-        let mapOpt = getMapping this
-        match mapOpt with 
-        | Some map ->
-            let instance = new FplInstance(map.TypeId, (this.StartPos, this.EndPos), this)
-            instance.FplId <- this.ConstantName
-            this.Value <- Some instance
-        | _ -> base.SetDefaultValue()
+    override this.SetDefaultValue() = setFunctionalTermDefaultValue this
 
     override this.Run() = 
         debug this Debug.Start
