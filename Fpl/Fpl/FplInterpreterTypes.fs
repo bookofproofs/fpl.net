@@ -2352,7 +2352,7 @@ let runArgsAndSetWithLastValue (fv:FplGenericHasValue) =
     let lastOpt = fv.ArgList |> Seq.tryLast
     match lastOpt with 
     | Some (:? FplGenericHasValue as last) -> fv.SetValueOf last
-    | _ -> ()
+    | _ -> fv.SetDefaultValue()
 
 let setPredicateDefaultValue (fv:FplGenericHasValue) = 
     if fv.IsIntrinsic then 
@@ -5900,7 +5900,7 @@ type FplDecrement(name, positions: Positions, parent: FplGenericNode) as this =
         debug this Debug.Stop
 
 let runIntrinsicFunction (fv:FplGenericHasValue) =
-    
+ 
     let mapOpt = getMapping fv
     match mapOpt with
     | Some (:? FplMapping as map) ->
@@ -5910,12 +5910,12 @@ let runIntrinsicFunction (fv:FplGenericHasValue) =
             let defaultCtor = cl.Scope.Values |> Seq.head :?> FplGenericConstructor
             defaultCtor.Run()
             match defaultCtor.Instance, box fv with 
-            | Some instance, (:? IConstant as cnst)  ->
-                instance.FplId <- cnst.ConstantName
+            | Some instance, (:? IConstant as fvConstant) ->
+                instance.FplId <- fvConstant.ConstantName
                 fv.SetValue instance // set value to the created instance 
                 // reposition the instance in symbol table
                 instance.Parent <- Some fv
-            | Some instance, _ ->
+            | Some instance, _ -> // should never occur
                 fv.SetValue instance // set value to the created instance 
                 // reposition the instance in symbol table
                 instance.Parent <- Some fv
@@ -5927,22 +5927,41 @@ let runIntrinsicFunction (fv:FplGenericHasValue) =
         | None when map.Dimensionality > 0 ->
             fv.SetValue map // set value to the map
         | _ ->
-            fv.SetDefaultValue() // set value default
+            let mapOpt = getMapping fv
+            match mapOpt, box fv with 
+            | Some map, (:? IConstant as fvConstant) ->
+                let instance = new FplInstance(map.TypeId, (fv.StartPos, fv.EndPos), fv)
+                instance.FplId <- fvConstant.ConstantName
+                fv.SetValue instance
+            | Some map, _ ->
+                let instance = new FplInstance(map.TypeId, (fv.StartPos, fv.EndPos), fv)
+                fv.SetValue instance
+            | _, _ ->
+                let v = new FplUndetermined(fv.TypeId, (fv.StartPos, fv.EndPos), fv)
+                fv.SetValue v
     | _ ->
         let v = new FplUndetermined(fv.TypeId, (fv.StartPos, fv.EndPos), fv)
         fv.SetValue v
 
 let private getFunctionalTermRepresent (fv:FplGenericHasValue) =
-    match fv.Value with 
-    | None ->
-        // since the function term has no value, it has no return statement
-        // And the FPL syntax ensures that this can only be the case
-        // if the Functional Term is intrinsic.
-        // In this case, the "representation" of the function is
-        // its declared mapping type
-        let mapping = fv.ArgList[0]
-        $"dec {mapping.Type(SignatureType.Mixed)}"
-    | Some ref -> ref.Represent()    
+    let defaultReprsentation (fv1:FplGenericHasValue)= 
+        match fv1.Value with 
+        | None ->
+            // since the function term has no value, it has no return statement
+            // And the FPL syntax ensures that this can only be the case
+            // if the Functional Term is intrinsic.
+            // In this case, the "representation" of the function is
+            // its declared mapping type
+            let mapping = fv1.ArgList[0]
+            $"dec {mapping.Type(SignatureType.Mixed)}"
+        | Some v -> v.Represent()
+    if fv.IsIntrinsic then
+        match box fv with
+        | :? IConstant as fvConstant ->
+            fvConstant.ConstantName
+        | _ -> defaultReprsentation fv
+    else
+        defaultReprsentation fv
 
 let setFunctionalTermDefaultValue (fv:FplGenericHasValue) = 
     if fv.IsIntrinsic then 
@@ -6050,11 +6069,7 @@ type FplFunctionalTerm(positions: Positions, parent: FplGenericNode, runOrder) a
             LiteralUndef
         else
             _callCounter <- _callCounter + 1
-            let result = 
-                if this.IsIntrinsic then
-                    this.ConstantName
-                else
-                    getFunctionalTermRepresent this
+            let result = getFunctionalTermRepresent this
             _callCounter <- _callCounter - 1
             result
 
@@ -6271,11 +6286,7 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplGenericNode) as
             LiteralUndef
         else
             _callCounter <- _callCounter + 1
-            let result = 
-                if this.IsIntrinsic then
-                    this.ConstantName
-                else
-                    getFunctionalTermRepresent this
+            let result = getFunctionalTermRepresent this
             _callCounter <- _callCounter - 1
             result
 
