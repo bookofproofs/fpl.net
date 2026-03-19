@@ -4371,15 +4371,8 @@ type FplExtensionObj(positions: Positions, parent: FplGenericNode) as this =
     override this.CheckConsistency () = 
         base.CheckConsistency()
         let matchReprId (fv1:FplGenericNode) (identifier:string) = 
-            let vars = fv1.GetVariables()
-            if vars.Length > 0 then
-                let mainVar = vars.Head
-                // starts always with "obj:", we retrieve only the regex string after it
-                let retrieveRegex = mainVar.TypeId.Substring(4) 
-                let regex = Regex(retrieveRegex)
-                regex.IsMatch(identifier)
-            else
-                false
+            let regex = Regex(fv1.TypeId)
+            regex.IsMatch(identifier)
         
         let candidatesFromScope =
             let root = getRoot this

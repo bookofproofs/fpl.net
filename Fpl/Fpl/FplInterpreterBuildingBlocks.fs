@@ -163,10 +163,7 @@ let rec eval (st: SymbolTable) ast =
         | _ -> ()
     | Ast.ExtensionRegex s -> 
         let fv = variableStack.PeekEvalStack()
-        let vars = fv.GetVariables()
-        if vars.Length > 0 then
-            let mainVar = vars.Head
-            mainVar.TypeId <- $"{LiteralObj}:{s}" // set the extensions's main variable's type to the pattern
+        fv.TypeId <- s
     | Ast.DollarDigits((pos1, pos2), s) -> 
         let fv = variableStack.PeekEvalStack()
         let sid = $"${s.ToString()}"
@@ -242,6 +239,7 @@ let rec eval (st: SymbolTable) ast =
             fv.EndPos <- pos2
         | PrimExtensionL -> 
             let newVar = new FplVariable(name, (pos1, pos2), fv)
+            newVar.TypeId <- fv.FplId
             newVar.IsSignatureVariable <- variableStack.InSignatureEvaluation
             variableStack.PushEvalStack(newVar)
             variableStack.PopEvalStack()
