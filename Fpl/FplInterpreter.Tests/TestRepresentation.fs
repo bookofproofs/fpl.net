@@ -295,7 +295,6 @@ type TestRepresentation() =
         {
             del.Equal(x,y)
         }
-        def func Decr(x:obj)->obj { ret del.Decrement(x) } 
 
         ext Digits x@/\d+/ -> Nat 
         {
@@ -306,6 +305,7 @@ type TestRepresentation() =
             )
         }
 
+        def func Decr(x:Digits)->Digits { ret del.Decrement(x) } 
  
         def func T()->Nat { return %s };""" varVal
         let filename = "TestRepresentationMCases.fpl"

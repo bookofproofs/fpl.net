@@ -1,1 +1,5 @@
-def cl T def pred S(x:pred) {dec T:=true; true};
+
+ext Digits x@/\d+/ -> Digits { ret x }
+def func Decr(x:Digits)->Digits { ret del.Decrement(x) } 
+;
+ 

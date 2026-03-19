@@ -697,6 +697,7 @@ type TestInterpreterErrors() =
     [<DataRow("10", """def func Add()->obj {intr} prop AddIsSomething {dec ~anotherAdd: Add; all n,m:obj { (anotherAdd(n,m) = n) } };""", 0, "missing error message")>]
     [<DataRow("11", """def func Add()->obj {intr} prop AddIsSomething {dec ~anotherAdd: Add; all n,m:obj { (anotherAdd(n,@0) = n) } };""", 0, "missing error message")>]
     [<DataRow("12", """def pred T(x,y:tpl) infix "=" 50 {del.Equal(x,y)} ext Digits x@/\d+/ -> ind {dec ~n:ind cases (| (x = @0) : n := $1 ? n := $2); ret n };""", 0, "missing error message")>]
+    [<DataRow("13", """def pred Equal(x,y: tpl) infix "=" 50 { del.Equal(x,y)} ext Digits x@/\d+/ -> pred {ret mcases ( | (x = @0) : true ? false ) };""", 0, "missing error message")>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0, "missing error message")>]
     [<TestMethod>]
     member this.TestID013(no:string, fplCode:string, expected, expectedErrMsg:string) =
@@ -4935,6 +4936,7 @@ type TestInterpreterErrors() =
     [<DataRow("02a", "def pred Equal(x: tpl, y:tpl1) { del.Equal(x,y) } def pred T() {dec ~x:ind ~y:pred x:=$1 y:=true; Equal(x,y)};", 0)>] // two templates in Equal accepting different types
     [<DataRow("02", "def cl A def pred T() {dec ~x:*tpl[ind] x[$1]:=true x[$2]:=false; true};", 0)>] 
     [<DataRow("02a", "def cl A def pred T() {dec ~x:*tpl[ind] x[$1]:=true x[$2]:=A(); true};", 1)>] // a template not accepting assigning different types
+    [<DataRow("03", """def pred Equal(x,y: tpl) infix "=" 50 { del.Equal(x,y)} ext Digits x@/\d+/ -> pred {ret mcases ( | (x = @0) : true ? false ) };""", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG12(no:string, fplCode:string, expected) =
