@@ -5150,9 +5150,7 @@ type FplExtension(positions: Positions, parent: FplGenericNode, runOrder) =
                 let v = FplIntrinsicUndef((this.StartPos, this.EndPos), this)
                 this.SetValue v
             else
-                this.ArgList
-                |> Seq.iter (fun fv -> fv.Run())
-                this.SetValueOf this.ReturnStmt
+                runArgsAndSetWithLastValue this
         _callCounter <- _callCounter - 1
         debug this Debug.Stop
 
@@ -5936,27 +5934,6 @@ let private getFunctionalTermRepresent (fv:FplGenericHasValue) =
         | _ -> defaultReprsentation fv
     else
         defaultReprsentation fv
-
-let setFunctionalTermDefaultValue (fv:FplGenericHasValue) = 
-    if fv.IsIntrinsic then 
-        match box fv with
-        | :? IConstant as fvConstant ->
-            let mapOpt = getMapping fv
-            match mapOpt with 
-            | Some map ->
-                let instance = new FplInstance(map.TypeId, (fv.StartPos, fv.EndPos), fv)
-                instance.FplId <- fvConstant.ConstantName
-                fv.SetValue instance
-            | _ -> 
-                let v = new FplUndetermined(fv.TypeId, (fv.StartPos, fv.EndPos), fv)
-                fv.SetValue v
-        | _ ->
-            let v = new FplUndetermined(fv.TypeId, (fv.StartPos, fv.EndPos), fv)
-            fv.SetValue v
-    else
-        let v = new FplUndetermined(fv.TypeId, (fv.StartPos, fv.EndPos), fv)
-        fv.SetValue v
-
 
 type FplFunctionalTerm(positions: Positions, parent: FplGenericNode, runOrder) as this =
     inherit FplGenericInheriting(positions, parent)
