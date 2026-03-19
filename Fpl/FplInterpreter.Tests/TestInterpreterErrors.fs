@@ -478,7 +478,8 @@ type TestInterpreterErrors() =
     [<DataRow("25a", """proof A$1 {1. |- trivial} ext U x@/\d+/ -> pred {ret A$1} ;""", 0)>]
     [<DataRow("25b", """cor A$1 {true} ext U x@/\d+/ -> pred {ret A$1} ;""", 0)>]
     [<DataRow("25c", """cor A$1 {true} def pred T() {A$1};""", 0)>]
-    
+    [<DataRow("26a", """ext Digits x@/\d+/ -> Digits { ret x };""", 0)>] // extensions allow mapping to themselves 
+    [<DataRow("26b", """def func Digits() -> Digits;""", 1)>] // functions do not allow mapping to themselves
 
 
     // array types 

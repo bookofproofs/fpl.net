@@ -518,7 +518,8 @@ let rec eval (st: SymbolTable) ast =
             
         let candidatesFromTheory = findCandidatesByName st searchIdentifier false variableStack.InReferenceToProofOrCorollary
         let candidatesLocal = findCandidatesByNameInBlock fv searchIdentifier
-        let candidates, candidatesNames =  filterCandidates (candidatesFromTheory @ candidatesLocal) searchIdentifier true
+        let candidatesOfMapping = findCandidateOfExtensionMapping fv searchIdentifier
+        let candidates, candidatesNames =  filterCandidates (candidatesFromTheory @ candidatesLocal @ candidatesOfMapping) searchIdentifier true
         let correctIds (fv1:FplGenericNode) = 
             match fv with 
             | :? FplBase 

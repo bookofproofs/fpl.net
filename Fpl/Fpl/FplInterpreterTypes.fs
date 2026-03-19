@@ -6970,7 +6970,7 @@ let findCandidatesByName (st: SymbolTable) (name: string) withClassConstructors 
 
     pm |> Seq.toList
 
-/// Looks for all declared properties or constructors (if any) that start with
+/// Looks for all declared properties or constructors (if any) that equal 
 /// the specific name within the building block, whose syntax tree the FplValue `fv` is part of.
 let findCandidatesByNameInBlock (fv: FplGenericNode) (name: string) =
     let rec findDefinition (fv1: FplGenericNode) =
@@ -6992,6 +6992,14 @@ let findCandidatesByNameInBlock (fv: FplGenericNode) (name: string) =
         |> Seq.filter (fun kvp -> kvp.Value.FplId = name)
         |> Seq.map (fun kvp -> kvp.Value)
         |> Seq.toList
+    | _ -> []
+
+let findCandidateOfExtensionMapping (fv: FplGenericNode) (name: string) =
+    match fv with 
+    | :? FplMapping -> 
+        match fv.Parent with 
+        | Some (:? FplExtension as ext) when ext.FplId = name -> [fv.Parent.Value]
+        | _ -> []
     | _ -> []
 
 let findCandidatesByNameInDotted (fv: FplGenericNode) (name: string) =
