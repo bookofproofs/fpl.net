@@ -5845,15 +5845,29 @@ type FplDecrement(name, positions: Positions, parent: FplGenericNode) as this =
             let args = signatureSep ", " this.ArgList propagate
             sprintf "%s(%s)" head args
 
-    override this.Run() = 
-        debug this Debug.Start
+
+    override this.CheckConsistency() =
         if this.ArgList.Count <> 1 then 
             this.ErrorOccurred <- emitID013Diagnostics $"Decrement takes 1 arguments, got {this.ArgList.Count}." this.StartPos this.EndPos
-            let newValue = FplIntrinsicUndef((this.StartPos, this.EndPos), this)
-            this.SetValue newValue
         else
-            let newValue = FplExtensionObj((this.StartPos, this.EndPos), this.Parent.Value)
+            let arg = this.ArgList[0]
+            let argType = arg.Type SignatureType.Type 
+            if argType <> PrimDigits then 
+                this.ErrorOccurred <- emitID013Diagnostics $"Decrement's argument requires type `{PrimDigits}`, got `{argType}`." arg.StartPos arg.EndPos
+        base.CheckConsistency()
+    
+    override this.EmbedInSymbolTable _ = 
+        this.CheckConsistency()
+        addExpressionToReference this
 
+    override this.Run() = 
+        debug this Debug.Start
+        match this.ErrorOccurred with
+        | Some err ->
+            this.SetDefaultValue()
+        | _ ->
+            let newValue = FplExtensionObj((this.StartPos, this.EndPos), this.Parent.Value)
+            newValue.TypeId <- PrimDigits
             let argPre = this.ArgList[0]
             argPre.Run()
             let numericValue = 
@@ -5870,12 +5884,12 @@ type FplDecrement(name, positions: Positions, parent: FplGenericNode) as this =
             let mutable n = 0
             System.Int32.TryParse(numericValue, &n) |> ignore
             let n' = n - 1
-            newValue.FplId <- 
-                if n' < 0 then 
-                    LiteralUndef
-                else
-                    string n'
-            this.SetValue(newValue)
+            if n' < 0 then 
+                // TODO issue diagnostics overflow Decrement
+                this.SetDefaultValue()
+            else
+                newValue.FplId <- string n'
+                this.SetValue newValue
         debug this Debug.Stop
 
 let runIntrinsicFunction (fv:FplGenericHasValue) =

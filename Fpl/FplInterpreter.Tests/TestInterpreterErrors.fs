@@ -709,6 +709,29 @@ type TestInterpreterErrors() =
             let errMsg = runTestHelperWithText "TestID013.fpl" fplCode code expected
             Assert.AreEqual<string>(expectedErrMsg, errMsg)
 
+    // the delegate Decrement should accept only "Digits" as type
+    [<DataRow("00", "ext Digits x@/\d+/ -> Digits {ret x} def pred T(x:Digits) { del.Decrement(x) };", 0)>] 
+    [<DataRow("01", "ext Digits x@/\d+/ -> pred {ret true} def pred T(x:Digits) { del.Decrement(x) };", 1)>] 
+    [<DataRow("01a", "ext Digits x@/\d+/ -> ind {ret $42} def pred T(x:Digits) { del.Decrement(x) };", 1)>] 
+    [<DataRow("02", "def pred T(x:pred) { del.Decrement(x) };", 1)>] 
+    [<DataRow("02a", "def pred T(x:pred()) { del.Decrement(x) };", 1)>] 
+    [<DataRow("02b", "def pred T(x:pred(y:obj)) { del.Decrement(x) };", 1)>] 
+    [<DataRow("03", "def pred T(x:func) { del.Decrement(x) };", 1)>] 
+    [<DataRow("03a", "def pred T(x:func()->obj) { del.Decrement(x) };", 1)>] 
+    [<DataRow("03b", "def pred T(x:func()->ind) { del.Decrement(x) };", 1)>] 
+    [<DataRow("03c", "def pred T(x:func(y:obj)->obj) { del.Decrement(x) };", 1)>] 
+    [<DataRow("03d", "def pred T(x:func(y:ind)->ind) { del.Decrement(x) };", 1)>] 
+    [<DataRow("04", "def pred T(x:obj) { del.Decrement(x) };", 1)>] 
+    [<DataRow("05", "def pred T(x:ind) { del.Decrement(x) };", 1)>] 
+    [<DataRow("06", "def cl Nat def pred T(x:Nat) { del.Decrement(x) };", 1)>] 
+    [<TestMethod>]
+    member this.TestID013DecrementType(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = ID013 ""
+            ad.Clear()
+            runTestHelper "TestID013DecrementType.fpl" fplCode code expected
 
     [<DataRow("""loc iif(x, y) := !tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;;""", 0)>]
     [<DataRow("""loc iif(x, y) := !tex: x "\Leftrightarrow" y !eng: x " if and only if " y !tex: x " dann und nur dann wenn " y;;""", 1)>]
