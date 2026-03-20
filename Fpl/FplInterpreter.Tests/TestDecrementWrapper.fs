@@ -19,7 +19,7 @@ type TestDecrementWrapper() =
     [<TestMethod>]
     member this.TestDecrementWrapperRepresent(varVal, expected:string) =
         ad.Clear()
-        let fplCode = sprintf """ext Digits x@/\d+/ -> obj {ret x} def func Decr(x:Digits)->Digits { ret del.Decrement(x) } def func T()->obj { ret Decr(%s) };""" varVal
+        let fplCode = sprintf """ext Digits x@/\d+/ -> Digits {ret x} def func Decr(x:Digits)->Digits { ret del.Decrement(x) } def func T()->obj { ret Decr(%s) };""" varVal
         let filename = "TestDecrementWrapperRepresent.fpl"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore

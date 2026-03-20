@@ -1232,7 +1232,7 @@ type SymbolTableStructure() =
         | "FplCorollary" ->
             Assert.AreEqual<string>(LiteralPred, (getName var).[index])
         | "FplDecrement" ->
-            Assert.AreEqual<string>(LiteralObj, (getName var).[index])        
+            Assert.AreEqual<string>(PrimDigits, (getName var).[index])        
         | "FplDefaultConstructor" ->
             Assert.AreEqual<string>(LiteralObj, (getName var).[index])        
         | "FplDisjunction" ->

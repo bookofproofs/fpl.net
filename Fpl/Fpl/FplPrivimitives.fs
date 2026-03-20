@@ -1336,6 +1336,8 @@ let PrimDelegateDecrement = "decr"
 [<Literal>]
 let PrimDelegateDecrementL = "Decrement"
 [<Literal>]
+let PrimDigits = "Digits"
+[<Literal>]
 let PrimDisjunction = "disjunction"
 [<Literal>]
 let PrimEquivalence = "equivalence"

@@ -5823,7 +5823,7 @@ type FplDecrement(name, positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericDelegate(name, positions, parent)
 
     do 
-        this.TypeId <- LiteralObj
+        this.TypeId <- PrimDigits
 
     override this.Name = PrimDelegateDecrementL
     override this.ShortName = PrimDelegateDecrement
