@@ -89,10 +89,10 @@ type TestDecrement() =
     [<DataRow("@100", "Decrement(Nat)")>]
     [<DataRow("@42", "Decrement(Nat)")>]
     [<TestMethod>]
-    member this.TestDecrementMixedWithExtension(varVal, expected:string) =
+    member this.TestDecrementMixedWithExtensionNat(varVal, expected:string) =
         ad.Clear()
         let fplCode = sprintf """ext Digits x@/\d+/ -> Nat {return x} def pred T() { del.Decrement(%s) };""" varVal
-        let filename = "TestDecrementMixed.fpl"
+        let filename = "TestDecrementMixedWithExtensionNat.fpl"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -105,6 +105,29 @@ type TestDecrement() =
         | None -> 
             Assert.IsTrue(false)
 
+    [<DataRow("@0", "Decrement(Digits)")>]
+    [<DataRow("@1", "Decrement(Digits)")>]
+    [<DataRow("@2", "Decrement(Digits)")>]
+    [<DataRow("@3", "Decrement(Digits)")>]
+    [<DataRow("@4", "Decrement(Digits)")>]
+    [<DataRow("@100", "Decrement(Digits)")>]
+    [<DataRow("@42", "Decrement(Digits)")>]
+    [<TestMethod>]
+    member this.TestDecrementMixedWithExtensionDigits(varVal, expected:string) =
+        ad.Clear()
+        let fplCode = sprintf """ext Digits x@/\d+/ -> Digits {return x} def pred T() { del.Decrement(%s) };""" varVal
+        let filename = "TestDecrementMixedWithExtensionDigits.fpl"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let pr = theory.Scope["T()"] 
+            let predicateValue = pr.ArgList |> Seq.toList |> List.rev |> List.head
+            Assert.AreEqual<string>(expected, predicateValue.Type SignatureType.Mixed)
+        | None -> 
+            Assert.IsTrue(false)
 
     [<DataRow("@0", "Decrement(0)")>]
     [<DataRow("@1", "Decrement(1)")>]

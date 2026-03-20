@@ -561,6 +561,7 @@ let rec eval (st: SymbolTable) ast =
                 match candidate with 
                 | :? FplFunctionalTerm 
                 | :? FplPredicate 
+                | :? FplExtension 
                 | :? FplClass -> map.SetType identifier (Some candidate) pos1 pos2
                 | _ -> fv.ErrorOccurred <- emitSIG11diagnostics (qualifiedName map false) (qualifiedName candidate false) map.StartPos map.EndPos       
             | :? FplVariable -> 
