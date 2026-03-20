@@ -2588,6 +2588,7 @@ type TestInterpreterErrors() =
     [<DataRow("01c", "ext Digits x@/\d+/ -> pred { ret true } def func T() -> pred { ret @9 };", 0)>] 
     [<DataRow("01d", "def func A()->obj ext Digits x@/\d+/ -> func { ret A } def func T() -> func { ret @9 };", 0)>] 
     [<DataRow("01e", "def cl A ext Digits x@/\d+/ -> obj { ret A() } def func T() -> obj { ret @9 };", 0)>] 
+    [<DataRow("02", "ext Digits x@/\d+/ -> Digits {ret x} def func Decr(x:Digits)->Digits { ret del.Decrement(x) };", 0)>] 
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG03Extensions(no:string, fplCode:string, expected) =

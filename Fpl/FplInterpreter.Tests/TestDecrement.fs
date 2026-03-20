@@ -9,7 +9,7 @@ open CommonTestHelpers
 type TestDecrement() =
 
 
-    [<DataRow("@0", LiteralUndef)>]
+    [<DataRow("@0", PrimUndetermined)>]
     [<DataRow("@1", "0")>]
     [<DataRow("@2", "1")>]
     [<DataRow("@3", "2")>]
@@ -19,7 +19,31 @@ type TestDecrement() =
     [<TestMethod>]
     member this.TestDecrementRepresent(varVal, expected:string) =
         ad.Clear()
-        let fplCode = sprintf """def pred T() { del.Decrement(%s) };""" varVal
+        let fplCode = sprintf """ext Digits x@/\d+/ -> Digits {ret x} def pred T() { del.Decrement(%s) };""" varVal
+        let filename = "TestDecrementRepresent.fpl"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let pr = theory.Scope["T()"] 
+            let predicateValue = pr.ArgList |> Seq.toList |> List.rev |> List.head
+            Assert.AreEqual<string>(expected, predicateValue.Represent())
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("@0", PrimUndetermined)>]
+    [<DataRow("@1", PrimUndetermined)>]
+    [<DataRow("@2", PrimUndetermined)>]
+    [<DataRow("@3", PrimUndetermined)>]
+    [<DataRow("@4", PrimUndetermined)>]
+    [<DataRow("@100", PrimUndetermined)>]
+    [<DataRow("@42", PrimUndetermined)>]
+    [<TestMethod>]
+    member this.TestDecrementRepresentWrongType(varVal, expected:string) =
+        ad.Clear()
+        let fplCode = sprintf """ext Digits x@/\d+/ -> ind {ret $100} def pred T() { del.Decrement(%s) };""" varVal
         let filename = "TestDecrementRepresent.fpl"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
