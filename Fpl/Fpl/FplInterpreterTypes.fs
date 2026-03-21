@@ -4923,6 +4923,8 @@ let rec private matchTwoTypes (a:FplGenericNode) (p:FplGenericNode) =
         elif aIsCallByReference && pTypeName = PrimMappingL then 
             let map = p :?> FplMapping
             match map.RefersTo, refNodeOpt with
+            | Some def, Some refNode when def.Name= PrimExtensionL && refNode.Name = PrimDelegateDecrementL && def.FplId = refNode.TypeId -> 
+                None, Parameter.Consumed // extension parameter accepting Decrement with same TypeId as the extension's FplId
             | Some def, Some refNode when refNode.Name = PrimInstanceL -> 
                 matchTwoTypes a def
             | Some _, Some refNode when refNode.Name = PrimIntrinsicUndef -> 
