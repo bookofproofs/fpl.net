@@ -4355,12 +4355,23 @@ type FplExtensionObj(positions: Positions, parent: FplGenericNode) as this =
         this.AssignParts(ret)
         ret
 
-    override this.Type signatureType = 
+    override this.Type signatureType =
         match signatureType with 
-        | SignatureType.Type when this.RefersTo.IsSome ->
-            let extension = this.RefersTo.Value
-            extension.Type signatureType
-        | _ ->
+        | SignatureType.Type ->
+            match this.RefersTo, this.NextBlockNode with
+            | Some ext, Some enclosingExtension when not (Object.ReferenceEquals(ext, enclosingExtension)) ->
+                // if this FplExtensionObj is being used outside the extension defining its pattern
+                this.RefersTo <- Some ext
+                // use mapping's type of the extension defining its pattern
+                let mappingOpt = getMapping ext
+                match mappingOpt with 
+                | Some mapping ->
+                    mapping.Type SignatureType.Type
+                | None ->
+                    this.TypeId
+            | _, _ ->
+                this.TypeId
+        | _ ->    
             let head = getFplHead this signatureType
             sprintf "%s" head
 
@@ -4376,46 +4387,55 @@ type FplExtensionObj(positions: Positions, parent: FplGenericNode) as this =
             let regex = Regex(fv1.TypeId)
             regex.IsMatch(identifier)
         
-        let candidatesFromScope =
+        let extensionCandidates =
             let root = getRoot this
             root.Scope
             |> Seq.map (fun theory ->
                 theory.Value.Scope
                 |> Seq.filter (fun kvp -> kvp.Value.Name = PrimExtensionL)
                 |> Seq.map (fun kvp -> kvp.Value)
-                |> Seq.filter (fun ext -> 
-                    if matchReprId ext this.FplId && not (this.Scope.ContainsKey(this.FplId)) then 
-                        // assign the reference FplValue only the first found match 
-                        // even, if there are multiple extensions that would match it 
-                        // (thus, the additional check for Scope.ContainsKey...)
-                        this.RefersTo <- Some ext
-                        let mappingOpt = getMapping ext
-                        match mappingOpt with
-                        | Some mapping -> this.TypeId <- mapping.TypeId
-                        | _ -> ()
-                        true
-                    else
-                        false
-                )
             )
-            |> Seq.concat
+            |> Seq.concat 
             |> Seq.toList
 
-        let candidates = 
-            let parentExtension = this.NextBlockNode
+        let enclosingNode = this.NextBlockNode
+        // if this FplExtensionObj happens to be used inside an FplExtension definition, 
+        // we add this one to the collection of candidates
+        let extensionCandidatesIncludingEnclosing = 
+            let parentExtension = enclosingNode
             match parentExtension with 
             | Some ext when ext.Name = PrimExtensionL -> 
-                if matchReprId ext this.FplId then
-                    // if fv is inside an extension block, we add this block to the candidates
-                    // so we can match patterns inside this extension block's definition referring to 
-                    // its own pattern even if it is not yet fully parsed and analyzed
-                    candidatesFromScope @ [ext]
-                else 
-                    candidatesFromScope
-            | _ -> candidatesFromScope
+                [ext] @ extensionCandidates
+            | _ -> 
+                extensionCandidates
 
-        if candidates.Length = 0 then 
+        let extOpt = 
+            extensionCandidatesIncludingEnclosing 
+            |> Seq.filter (fun ext -> 
+                if matchReprId ext this.FplId then 
+                    true
+                else
+                    false
+            )
+            // find the first match even, if there are multiple extensions that would match it 
+            |> Seq.tryHead
+
+        match extOpt, enclosingNode with
+        | None, _ ->
             this.ErrorOccurred <- emitID018Diagnostics this.FplId this.StartPos this.EndPos
+        | Some ext, Some enclosingExtension when Object.ReferenceEquals(ext, enclosingExtension) ->
+            // if this FplExtensionObj is being used inside the enclosingExtension (i.e., extension defining its pattern)
+            this.RefersTo <- Some enclosingExtension
+            // we set the type if this FplExtensionObj to the name (FplId) of the enclosing extension
+            this.TypeId <- enclosingExtension.FplId
+        | Some ext, _ ->
+            // if this FplExtensionObj is being used outside the extension defining its pattern
+            this.RefersTo <- Some ext
+            // we set the type if this FplExtensionObj to the mapping's type of the extension defining its pattern
+            let mappingOpt = getMapping ext
+            match mappingOpt with
+            | Some mapping -> this.TypeId <- mapping.TypeId
+            | _ -> ()
 
     override this.EmbedInSymbolTable _ = 
         this.CheckConsistency()    

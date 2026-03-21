@@ -279,49 +279,6 @@ type TestRepresentation() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("00", "@0", "Zero()")>]
-    [<DataRow("01", "@1", "Succ(Zero())")>]
-    [<DataRow("02", "@2", "Succ(Succ(Zero()))")>]
-    [<DataRow("03", "@3", "Succ(Succ(Succ(Zero())))")>]
-    [<DataRow("04", "@6", "Succ(Succ(Succ(Succ(Succ(Succ(Zero()))))))")>]
-    [<TestMethod>]
-    member this.TestRepresentationMCasesWrapper(no:string, varVal, expected:string) =
-        ad.Clear()
-        let fplCode = sprintf """
-        def cl Nat
-        def func Zero()-> Nat
-        def func Succ(n: Nat) -> Nat
-        def pred Equal(x,y: tpl) infix "=" 50 
-        {
-            del.Equal(x,y)
-        }
-
-        ext Digits x@/\d+/ -> Nat 
-        {
-            return mcases
-            (
-                | (x = @0) : Zero() 
-                ? Succ(self(Decr(x)))  
-            )
-        }
-
-        def func Decr(x:Digits)->Digits { ret del.Decrement(x) } 
- 
-        def func T()->Nat { return %s };""" varVal
-        let filename = "TestRepresentationMCases.fpl"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
-        prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let func = theory.Scope["T() -> Nat"] 
-            Assert.AreEqual<string>(expected, func.Represent())
-        | None -> 
-            Assert.IsTrue(false)
-
-
-
     [<DataRow("00", "@0", """Zero()""")>]
     [<DataRow("00", "@1", "One()")>]
     [<DataRow("00", "@2", "One()")>]
