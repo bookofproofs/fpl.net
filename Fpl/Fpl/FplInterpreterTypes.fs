@@ -4504,7 +4504,10 @@ type FplMapCaseElse(positions: Positions, parent: FplGenericNode) as this =
         ret
 
     override this.Type signatureType = 
-        getFplHead this signatureType
+        let argOpt = this.ArgList |> Seq.tryHead 
+        match argOpt with 
+        | Some arg -> arg.Type signatureType // delegate type to the argument of MapCaseElse case
+        | _ -> getFplHead this signatureType // fallback (should never occur due to FPL syntax)
 
     override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
 
