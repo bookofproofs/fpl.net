@@ -3769,6 +3769,8 @@ type FplReference(positions: Positions, parent: FplGenericNode) =
                     varMapping.Type propagate
                 | PrimMandatoryFunctionalTermL when signatureType = SignatureType.Type -> 
                     varMapping.Type propagate
+                | PrimExtensionL when signatureType = SignatureType.Type -> 
+                    varMapping.Type propagate
                 | _ -> 
                     $"{head}({args})"
             | None when signatureType = SignatureType.Type ->

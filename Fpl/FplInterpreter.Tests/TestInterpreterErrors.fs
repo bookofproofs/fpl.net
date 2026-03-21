@@ -3161,8 +3161,9 @@ type TestInterpreterErrors() =
     [<DataRow("67", """def class Set def pred In(x,y: Set) def pred IsEmpty(x: Set) { all y:Set { not In(y, x) } };""", 0)>]
     [<DataRow("68", """def class Set def pred In(x,y: Set) def cl SetBuilder: Set { ctor SetBuilder(x: Set, p: pred(u1: Set, o:* obj[ind])) { dec base.Set() assert all u2:Set { iif (In(u2,parent), and ( In(u2,x), p(u2,o) ) ) }; } };""", 0)>]
     [<DataRow("69", """def cl A {dec ~myX:obj; ctor A(x:obj) {dec myX:=x;}} def cl B:A { ctor B(x:obj) {dec base.A(del.Decrement(x)); } } def pred T() { dec ~v:B v:=B(@2); false};""", 0)>]
+    [<DataRow("70", """def cl Nat def func Succ(n: Nat) -> Nat ext Digits x@/\d+/ -> Nat {ret mcases (| true : Nat() ? Succ(self(delegate.Decrement(x))) ) };""", 0)>]    
     [<DataRow("71", """def pred Equal(x,y: tpl) infix "=" 50 { del.Equal(x,y) } def cl Nat def cl Zero:Nat def func Succ(n:Nat)->Nat def pred T() {all x,y:Nat {(x = Succ(y))}};""", 0)>]    
-    [<DataRow("02d", "def pred S() {dec parent():=true; true};", 0)>] // SIG04 won't be issued due to proceeding errors (ID015)
+    [<DataRow("72", "def pred S() {dec parent():=true; true};", 0)>] // SIG04 won't be issued due to proceeding errors (ID015)
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG04(no:string, fplCode:string, expected) =
@@ -4979,6 +4980,7 @@ type TestInterpreterErrors() =
     [<DataRow("03", """def pred T() {dec ~x:obj; mcases (| true : false | false : $42 | false : $4 ? undef) };""", 2)>] // two consecutive branches return types different from first branch
     [<DataRow("04", """def pred T() {dec ~x:obj; mcases (| true : undef | false : $42 | false : true ? false) };""", 3)>] // undef as first branch forces all other branches also to return undef
     [<DataRow("05", """def pred T() {dec ~x:obj; mcases (| true : true | false : undef | false : true ? true) };""", 0)>] // undef in the middle is allowed
+    [<DataRow("06", """def cl Nat def func Succ(n: Nat) -> Nat ext Digits x@/\d+/ -> Nat {ret mcases (| true : Nat() ? Succ(self(delegate.Decrement(x))) ) };""", 0)>]  
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG13(no:string, fplCode:string, expected) =

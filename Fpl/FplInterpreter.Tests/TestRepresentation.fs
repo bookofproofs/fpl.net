@@ -148,6 +148,10 @@ type TestRepresentation() =
         def cl Nat
         def func Zero() -> Nat
         def func Succ(n: Nat) -> Nat
+        def pred Equal(x,y: tpl) infix "=" 50 
+        {
+            del.Equal(x,y)
+        } 
         ext Digits x@/\d+/ -> Nat 
         {
             dec
@@ -163,10 +167,6 @@ type TestRepresentation() =
             return n
         }
 
-        def pred Equal(x,y: tpl) infix "=" 50 
-        {
-            del.Equal(x,y)
-        } 
         def pred T() { dec ~i,j,k:ind j:=$2 k:=$3; %s };""" varVal
         let filename = "TestRepresentationEqualityWithCases.fpl"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -211,6 +211,10 @@ type TestRepresentation() =
         def cl Nat
         def func Zero() -> Nat
         def func Succ(n: Nat) -> Nat
+        def pred Equal(x,y: tpl) infix "=" 50 
+        {
+            del.Equal(x,y)
+        } 
         ext Digits x@/\d+/ -> Nat 
         {
             return mcases
@@ -222,10 +226,6 @@ type TestRepresentation() =
             )
         }
 
-        def pred Equal(x,y: tpl) infix "=" 50 
-        {
-            del.Equal(x,y)
-        } 
         def pred T() { dec ~i,j,k:ind j:=$2 k:=$3; %s };""" varVal
         let filename = "TestRepresentationEqualityWithMCases.fpl"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
