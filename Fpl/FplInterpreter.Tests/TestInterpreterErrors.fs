@@ -2581,8 +2581,8 @@ type TestInterpreterErrors() =
     [<DataRow("MS4s7", "def func A()->obj {intr prty func X(x:obj)->ind } ext Test x@/\d+/->func {dec ~a:obj; return A.X(a)};", 1)>] // SIG03: ->func does not match by value A.X(obj) 
 
     // ... other
-    [<DataRow("00", "ext Digits x@/\d+/ -> obj { ret x };", 0)>] 
-    [<DataRow("00a", "ext Digits x@/\d+/ -> obj { ret x } def pred T() { dec ~a:obj a:=@0; true };", 0)>] 
+    [<DataRow("00", "ext Digits x@/\d+/ -> Digits { ret x };", 0)>] 
+    [<DataRow("00a", "ext Digits x@/\d+/ -> Digits { ret x } def pred T() { dec ~a:Digits a:=@0; true };", 0)>] 
     [<DataRow("01a", "def cl A ext Digits x@/\d+/ -> A { ret A() } def func T() -> A { ret @9 };", 0)>] 
     [<DataRow("01b", "ext Digits x@/\d+/ -> ind { ret $42 } def func T() -> ind { ret @9 };", 0)>] 
     [<DataRow("01c", "ext Digits x@/\d+/ -> pred { ret true } def func T() -> pred { ret @9 };", 0)>] 

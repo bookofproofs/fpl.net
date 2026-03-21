@@ -146,7 +146,7 @@ type TestRepresentation() =
         ad.Clear()
         let fplCode = sprintf """
         def cl Nat
-        def cl Zero: Nat
+        def func Zero() -> Nat
         def func Succ(n: Nat) -> Nat
         ext Digits x@/\d+/ -> Nat 
         {
@@ -209,7 +209,7 @@ type TestRepresentation() =
         ad.Clear()
         let fplCode = sprintf """
         def cl Nat
-        def cl Zero: Nat
+        def func Zero() -> Nat
         def func Succ(n: Nat) -> Nat
         ext Digits x@/\d+/ -> Nat 
         {
@@ -390,8 +390,8 @@ type TestRepresentation() =
 
     [<DataRow("00","""def pred T() { dec ~v:pred v:=true; false};""", LiteralTrue)>]
     [<DataRow("01","""def pred T() { dec ~v:pred v:=false; false};""", LiteralFalse)>]
-    [<DataRow("02","""def cl A {dec ~myX:obj; ctor A(x:obj) {dec myX:=x;}} def cl B:A { ctor B(x:obj) {dec base.A(del.Decrement(x)); } } def pred T() { dec ~v:B v:=B(@2); false};""", """{"name":"B","base":[{"name":"A","base":[],"vars":[],"prtys":[]}],"vars":[],"prtys":[]}""")>]
-    [<DataRow("03","""def cl A {dec ~myX:pred; ctor A(x:pred) {dec myX:=x;}} def cl B:A { ctor B(x:pred) {dec base.A(not x); } } def pred T() { dec ~v:B v:=B(true); false};""", """{"name":"B","base":[{"name":"A","base":[],"vars":[],"prtys":[]}],"vars":[],"prtys":[]}""")>]
+    [<DataRow("02","""def cl A {dec ~myX:obj; ctor A(x:obj) {dec myX:=x;}} def cl B:A { ctor B(x:obj) {dec base.A(del.Decrement(x)); } } def pred T() { dec ~v:B v:=B(@2); false};""", """B(2)""")>]
+    [<DataRow("03","""def cl A {dec ~myX:pred; ctor A(x:pred) {dec myX:=x;}} def cl B:A { ctor B(x:pred) {dec base.A(not x); } } def pred T() { dec ~v:B v:=B(true); false};""", """B(true)""")>]
     [<TestMethod>]
     member this.TestRepresentationItializedVars(var:string, fplCode, expected:string) =
         ad.Clear()
@@ -414,7 +414,7 @@ type TestRepresentation() =
     [<DataRow("00b","(@2 = A())", LiteralTrue)>]
     [<DataRow("01","(@0 = B())", LiteralTrue)>]
     [<DataRow("01a","(@1 = B())", LiteralFalse)>]
-    [<DataRow("01b","(@2 = A())", LiteralFalse)>]
+    [<DataRow("01b","(@2 = A())", LiteralTrue)>]
     [<DataRow("02","(@0 = C())", LiteralFalse)>]
     [<DataRow("02a","(@1 = C())", LiteralTrue)>]
     [<DataRow("02b","(@2 = C())", LiteralFalse)>]
@@ -424,9 +424,11 @@ type TestRepresentation() =
         let fplCode = sprintf """
             
             def cl X 
-            def cl A 
-            def func B() -> A 
-            def func C() -> A 
+            def cl A
+            def cl B:A
+            def cl C:B
+            def func B() -> B
+            def func C() -> C 
 
             def pred Equal(x,y: tpl) infix "=" 50 
             {

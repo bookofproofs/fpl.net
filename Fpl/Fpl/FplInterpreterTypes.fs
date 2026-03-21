@@ -4652,9 +4652,9 @@ let private errWrongClassInheritance aIsCallByReference aName aType pName pType 
         Some $"The application `{aName}` instantiating the class `{aType}` neither matches the parameter `{pName}` typed `{pType}` nor the base classes of this type."
 let private errClassInheritanceUndetermined aIsCallByReference aName aType pName pType = 
     if aIsCallByReference then 
-        Some $"The type `{aType}` of the {refTypeName aName} `{aName}` could not be determined. The parameter `{pName}` requires the type `{pType}` or some derived class"
+        Some $"The type `{aType}` of the {refTypeName aName} `{aName}` could not be determined. The parameter `{pName}` requires the type `{pType}` or any type derived from it"
     else
-        Some $"The type `{aType}` of the application `{aName}` could not be determined. The parameter `{pName}` requires the type `{pType}` or some derived class"
+        Some $"The type `{aType}` of the application `{aName}` could not be determined. The parameter `{pName}` requires the type `{pType}` or any type derived from it"
 let private errUndefined aIsCallByReference aName pName pType = 
     if aIsCallByReference then 
         Some $"The type of the {refTypeName aName} `{aName}` could not be determined. The parameter `{pName}` requires the type `{pType}"
