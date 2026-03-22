@@ -221,9 +221,8 @@ let rec eval (st: SymbolTable) ast =
                     fv.ErrorOccurred <- emitVAR01diagnostics name pos1 pos2
                 
                 let undefVar = new FplVariable(name, (pos1, pos2), fv)
-                let undefined = new FplIntrinsicUndef((pos1, pos2), undefVar)
-                undefVar.SetValue(undefined)
                 undefVar.TypeId <- LiteralUndef
+                undefVar.SetDefaultValue()
                 variableStack.PushEvalStack(undefVar)
                 variableStack.PopEvalStack()
             

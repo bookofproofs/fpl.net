@@ -1843,12 +1843,12 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplGenericNode) as 
 
     override this.SetValue fv =
         base.SetValue fv
-        if fv.FplId <> LiteralUndef then
+        if fv.FplId <> PrimUndetermined then
             this.IsInitialized <- true
 
     override this.SetValueOf fv =
         base.SetValueOf fv
-        if fv.FplId <> LiteralUndef then
+        if fv.FplId <> PrimUndetermined then
             this.IsInitialized <- true
 
 
@@ -3822,7 +3822,7 @@ type FplReference(positions: Positions, parent: FplGenericNode) =
     override this.Represent() = // done
         if _callCounter > maxRecursion then
             this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
-            LiteralUndef // fallback to undefined after infinite recursion (if any)
+            PrimUndetermined // fallback to undefined after infinite recursion (if any)
         else
             _callCounter <- _callCounter + 1
             let result = 
@@ -3842,11 +3842,11 @@ type FplReference(positions: Positions, parent: FplGenericNode) =
                         value.Represent()
                     else
                         // Otherwise, fall back with "undef" to prevent infinite loops
-                        LiteralUndef
+                        PrimUndetermined
                 | _, _, Some refTo when refTo.Name = LiteralSelf && refTo.ErrorOccurred.IsSome ->
                     // infinite loop or other error in self detected
                     // fallback to undefined
-                    LiteralUndef 
+                    PrimUndetermined 
                 | _, _, Some refTo ->
                     if not (Object.ReferenceEquals(refTo,this)) then
                         // If refTo is not identical as "this",
@@ -5376,13 +5376,13 @@ type FplParent(positions: Positions, parent: FplGenericNode) as this =
         | Some ref -> 
             if _callCounter > maxRecursion then
                 this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
-                LiteralUndef
+                PrimUndetermined
             else
                 _callCounter <- _callCounter + 1
                 let result = ref.Represent()
                 _callCounter <- _callCounter - 1
                 result
-        | _ -> LiteralUndef
+        | _ -> PrimUndetermined
 
     override this.Run() = 
         // FplParent has no value, unless it has a representable RefersTo
@@ -5417,13 +5417,13 @@ type FplSelf(positions: Positions, parent: FplGenericNode) as this =
         | Some ref -> 
             if _callCounter > maxRecursion then
                 this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
-                LiteralUndef
+                PrimUndetermined
             else
                 _callCounter <- _callCounter + 1
                 let result = ref.Represent()
                 _callCounter <- _callCounter - 1
                 result
-        | _ -> LiteralUndef
+        | _ -> PrimUndetermined
 
     override this.Run() = 
         // FplSelf has no value, unless it has a representable RefersTo
@@ -6056,7 +6056,7 @@ type FplFunctionalTerm(positions: Positions, parent: FplGenericNode, runOrder) a
     override this.Represent() = // done
         if _callCounter > maxRecursion then
             this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
-            LiteralUndef
+            PrimUndetermined
         else
             _callCounter <- _callCounter + 1
             let result = getFunctionalTermRepresent this
@@ -6068,6 +6068,8 @@ type FplFunctionalTerm(positions: Positions, parent: FplGenericNode, runOrder) a
         if not _isReady then
             _callCounter <- _callCounter + 1
             if _callCounter > maxRecursion then
+                let instance = getDefaultValueOfFunction this
+                this.SetValue instance
                 this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter variableStack.CallerStartPos variableStack.CallerEndPos
             else
                 if this.IsIntrinsic then 
@@ -6270,7 +6272,7 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplGenericNode) as
     override this.Represent() = // done
         if _callCounter > maxRecursion then
             this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
-            LiteralUndef
+            PrimUndetermined
         else
             _callCounter <- _callCounter + 1
             let result = getFunctionalTermRepresent this
@@ -6294,7 +6296,8 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplGenericNode) as
         if not _isReady then
             _callCounter <- _callCounter + 1
             if _callCounter > maxRecursion then
-                
+                let instance = getDefaultValueOfFunction this
+                this.SetValue instance
                 this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter variableStack.CallerStartPos variableStack.CallerEndPos
             else
                 if this.IsIntrinsic then 
