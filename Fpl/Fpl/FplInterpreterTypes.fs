@@ -806,7 +806,7 @@ type FplGenericHasValue(positions: Positions, parent: FplGenericNode) =
         this.Value <-  fv.Value
 
     default this.SetDefaultValue() =
-        this.Value <- Some (new FplUndetermined(this.TypeId, (this.StartPos, this.EndPos), this))
+        this.SetValue (new FplUndetermined(this.TypeId, (this.StartPos, this.EndPos), this))
 
     override this.AssignParts (ret:FplGenericNode) = 
         base.AssignParts ret
@@ -2362,8 +2362,7 @@ let private runIntrinsicPredicate (fv:FplGenericHasValue) =
         instance.FplId <- fvConstant.ConstantName
         fv.SetValue instance
     | _ ->
-        let v = new FplUndetermined(fv.TypeId, (fv.StartPos, fv.EndPos), fv)
-        fv.SetValue v
+        fv.SetDefaultValue()
 
 type FplPredicate(positions: Positions, parent: FplGenericNode, runOrder) as this =
     inherit FplGenericInheriting(positions, parent)
@@ -2449,6 +2448,7 @@ type FplPredicate(positions: Positions, parent: FplGenericNode, runOrder) as thi
         if not _isReady then
             _callCounter <- _callCounter + 1
             if _callCounter > maxRecursion then
+                this.SetDefaultValue()
                 this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter variableStack.CallerStartPos variableStack.CallerEndPos
             else
                 if this.IsIntrinsic then 
@@ -2504,6 +2504,7 @@ type FplMandatoryPredicate(positions: Positions, parent: FplGenericNode) =
         if not _isReady then
             _callCounter <- _callCounter + 1
             if _callCounter > maxRecursion then
+                this.SetDefaultValue()
                 this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter variableStack.CallerStartPos variableStack.CallerEndPos
             else
                 if this.IsIntrinsic then 
@@ -3528,7 +3529,7 @@ type FplGenericReference(positions: Positions, parent: FplGenericNode) =
             Object.ReferenceEquals(blockNodeOfThis, called) && 
             calledRecursively.CallCounter > maxRecursion -> () // stop recursion
         | _ ->
-            let mutable allArgumentsHaveDefinedValues = true
+            let mutable allArgumentsHaveTerminedValues = true
             let args = 
                 this.ArgList 
                 // run all arguments before replacing parameters with argument values
@@ -3539,12 +3540,12 @@ type FplGenericReference(positions: Positions, parent: FplGenericNode) =
                         match argWithValue.Value with
                         | None -> 
                             // set the value of the argument with undef in evaluation was unsuccessfull
-                            argWithValue.SetValue (new FplIntrinsicUndef((arg.StartPos, arg.EndPos), arg))
-                            allArgumentsHaveDefinedValues <- false
-                        | Some (:? FplIntrinsicUndef) -> 
-                            allArgumentsHaveDefinedValues <- false
-                        | Some v when v.FplId = LiteralUndef -> 
-                            allArgumentsHaveDefinedValues <- false
+                            argWithValue.SetValue (new FplUndetermined(arg.TypeId, (arg.StartPos, arg.EndPos), arg))
+                            allArgumentsHaveTerminedValues <- false
+                        | Some (:? FplUndetermined) -> 
+                            allArgumentsHaveTerminedValues <- false
+                        | Some v when v.FplId = PrimUndetermined -> 
+                            allArgumentsHaveTerminedValues <- false
                         | _ -> ()
                     | _ -> ()
                     arg
@@ -3552,7 +3553,7 @@ type FplGenericReference(positions: Positions, parent: FplGenericNode) =
                 |> Seq.toList
 
             // run subroutines only if all arguments have defined values
-            if allArgumentsHaveDefinedValues then 
+            if allArgumentsHaveTerminedValues then 
                 let pars = variableStack.SaveState(called) 
                 variableStack.ReplaceVariables pars args
                 // store the position of the caller
@@ -5105,6 +5106,28 @@ type FplReturn(positions: Positions, parent: FplGenericNode) as this =
             this.SetDefaultValue()
         debug this Debug.Stop
 
+let getDefaultValueOfFunction (fv:FplGenericHasValue) =
+    let mapOpt = getMapping fv
+    match mapOpt with
+    | Some (:? FplMapping as map) ->
+        let instance =
+            match map.RefersTo with 
+            | Some cl when map.Dimensionality = 0 ->
+                // delegate instance building to a default class constructor if the mapping refers to a class
+                let defaultCtor = cl.Scope.Values |> Seq.head :?> FplGenericConstructor
+                defaultCtor.Run()
+                match defaultCtor.Instance with 
+                | Some inst -> 
+                    inst.Parent <- Some fv
+                    inst 
+                | None -> 
+                    new FplInstance(map.TypeId, (fv.StartPos, fv.EndPos), fv)
+            | _ ->
+                new FplInstance(map.TypeId, (fv.StartPos, fv.EndPos), fv)
+        instance 
+    | _ ->
+        (new FplInstance(fv.TypeId, (fv.StartPos, fv.EndPos), fv))
+
 type FplExtension(positions: Positions, parent: FplGenericNode, runOrder) =
     inherit FplGenericHasValue(positions, parent)
     let _runOrder = runOrder
@@ -5164,11 +5187,13 @@ type FplExtension(positions: Positions, parent: FplGenericNode, runOrder) =
         // run only if the extension variable was initialized
         _callCounter <- _callCounter + 1
         if _callCounter > maxRecursion then
+            let instance = getDefaultValueOfFunction this
+            this.SetValue instance
             this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter variableStack.CallerStartPos variableStack.CallerEndPos
         else
             if this.ArgList.Count = 0 then 
-                let v = FplIntrinsicUndef((this.StartPos, this.EndPos), this)
-                this.SetValue v
+                let instance = getDefaultValueOfFunction this
+                this.SetValue instance
             else
                 runArgsAndSetWithLastValue this
         _callCounter <- _callCounter - 1
@@ -5922,32 +5947,12 @@ type FplDecrement(name, positions: Positions, parent: FplGenericNode) as this =
 let runIntrinsicFunction (fv:FplGenericHasValue) =
     match box fv with
     | :? IConstant as fvConstant ->
+        let instance = getDefaultValueOfFunction fv
         fvConstant.SetConstantName()
-        let mapOpt = getMapping fv
-        match mapOpt with
-        | Some (:? FplMapping as map) ->
-            let instance =
-                match map.RefersTo with 
-                | Some cl when map.Dimensionality = 0 ->
-                    // delegate instance building to a default class constructor if the mapping refers to a class
-                    let defaultCtor = cl.Scope.Values |> Seq.head :?> FplGenericConstructor
-                    defaultCtor.Run()
-                    match defaultCtor.Instance with 
-                    | Some inst -> 
-                        inst.Parent <- Some fv
-                        inst 
-                    | None -> 
-                        new FplInstance(map.TypeId, (fv.StartPos, fv.EndPos), fv)
-                | _ ->
-                    new FplInstance(map.TypeId, (fv.StartPos, fv.EndPos), fv)
-            instance.FplId <- fvConstant.ConstantName
-            fv.SetValue instance
-        | _ ->
-            let v = new FplUndetermined(fv.TypeId, (fv.StartPos, fv.EndPos), fv)
-            fv.SetValue v
+        instance.FplId <- fvConstant.ConstantName
+        fv.SetValue instance
     | _ ->
-        let v = new FplUndetermined(fv.TypeId, (fv.StartPos, fv.EndPos), fv)
-        fv.SetValue v
+        fv.SetValue (getDefaultValueOfFunction fv)
 
 let private getFunctionalTermRepresent (fv:FplGenericHasValue) =
     let defaultReprsentation (fv1:FplGenericHasValue)= 
@@ -6289,6 +6294,7 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplGenericNode) as
         if not _isReady then
             _callCounter <- _callCounter + 1
             if _callCounter > maxRecursion then
+                
                 this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter variableStack.CallerStartPos variableStack.CallerEndPos
             else
                 if this.IsIntrinsic then 

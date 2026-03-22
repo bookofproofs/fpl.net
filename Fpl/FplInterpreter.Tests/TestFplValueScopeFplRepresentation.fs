@@ -568,7 +568,7 @@ type TestFplValueScopeFplRepresentation() =
             | "base12a" -> Assert.AreEqual<string>($"x", base1.Represent())
             | "base10b" -> Assert.AreEqual<string>($"Test()", base1.Represent())
             | "base11b" -> Assert.AreEqual<string>(LiteralUndef, base1.Represent())
-            | "base12b" -> Assert.AreEqual<string>(PrimNone, base1.Represent())
+            | "base12b" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
             | "base13b" -> Assert.AreEqual<string>("1", base1.Represent())
             | "base10c" -> Assert.AreEqual<string>($"Test({LiteralUndef}, {LiteralUndef})", base1.Represent())
             | "base11c" -> Assert.AreEqual<string>(LiteralUndef, base1.Represent())
