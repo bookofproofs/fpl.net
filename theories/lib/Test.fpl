@@ -1,1 +1,20 @@
-def pred Equal(x,y: tpl) infix "=" 50 { del.Equal(x,y)} ext Digits x@/\d+/ -> pred {ret mcases ( | (x = @0) : true ? false ) };
+def pred Equal(x,y: tpl) infix "=" 50 
+{
+    del.Equal(x,y)
+}
+
+ext Digits x@/\d+/ -> pred 
+{
+    ret mcases
+    (
+        | (x = @0) : true
+        ? false
+    )
+}
+
+def pred T(m:obj)
+{
+    (m = @0)
+}
+
+;
