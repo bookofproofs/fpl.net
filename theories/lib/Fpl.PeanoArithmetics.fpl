@@ -81,11 +81,6 @@ axiom CompleteInduction
     }
 }
 
-
-
-
-
-
 // besides the class "Nat", we can formulate definition of the set of all natural numbers
 def class SetNat: Set
 {
@@ -225,7 +220,7 @@ def pred IsGreater(x,y:Nat) infix ">" 73
 {
     and ((x >= y), (x <> y))
 }
-
+/*
 def func Sum(from,to:Nat, addend: Addend) -> Nat
 {
     dec
@@ -243,6 +238,9 @@ def pred InRange(n,low,high:Nat)
 {
     and ((low <= n), (n <= high))
 }
+
+def func Mul(x,y:Nat) -> Nat
+def func Div(x,y:Nat) -> Nat
 
 proposition SumOfConsecutiveNumbers
 {
@@ -308,7 +306,7 @@ def func RiemannIntegral(from,to:Real, f: RealValuedFunction ) -> Real
         result:=ZeroReal()
         for x in Range(from,to)
         {
-            result:=Add(result, Mult(f(x), D(x)))
+            result:=Add(result, Mul(f(x), D(x)))
         }
     ;
     return result
@@ -328,7 +326,7 @@ def func PowerSeries(k:Nat, arr: RightOpenRange) -> Real
     return result
 }
 
-def function ContinuedFraction(k:Nat, arr: RightOpenRangeInt) -> Real
+def function ContinuedFraction(k:Nat, arr: RightOpenRangeInt) -> Nat
 {
     dec
         ~i: Nat
@@ -341,5 +339,5 @@ def function ContinuedFraction(k:Nat, arr: RightOpenRangeInt) -> Real
 
 // Example of defining a constant for the set of all natural numbers greater than 100 using the
 def class N100:SetBuilder{ctor N100(){dec ~n:Nat  base.SetBuilder(SetNat(), IsGreater(n,@100)) ;  }}
-
+*/
 ;
