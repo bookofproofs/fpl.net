@@ -1,5 +1,1 @@
-
-ext Digits x@/\d+/ -> Digits { ret x }
-def func Decr(x:Digits)->Digits { ret del.Decrement(x) } 
-;
- 
+def pred Equal(x,y: tpl) infix "=" 50 { del.Equal(x,y)} ext Digits x@/\d+/ -> pred {ret mcases ( | (x = @0) : true ? false ) };

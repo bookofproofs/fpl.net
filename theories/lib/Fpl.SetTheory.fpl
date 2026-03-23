@@ -123,7 +123,7 @@ def class SetBuilder: Set
 // Schema of separation axioms
 axiom SchemaSeparation
 {
-    all p:pred, x:Set
+    all p:pred(u1: Set, o:* obj[ind]), x:Set
     {
         ex y:Set
         {

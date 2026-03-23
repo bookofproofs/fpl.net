@@ -2,7 +2,7 @@ uses Fpl.Commons
 uses Fpl.SetTheory 
 uses Fpl.PeanoArithmetics
 
-
+/*
 // defines a fixed length tuple template using a natural-number index
 definition class Tuple 
 {
@@ -104,7 +104,7 @@ def class CartesianProduct: Set
                         all i:Nat 
                         {
                             and (
-                                ($1 <= i <= myLength),    
+                                and ((@1 <= i), (i <= myLength)),    
                                 In(tupleElem[i], parent[i]) 
                             )
                             
@@ -169,23 +169,35 @@ def class BinaryRelation: Relation
         ret myCodomain
     }
 
+    property pred AreRelated(x,y:Set) 
+    {
+        intr
+    }
+}
+
+
+def cl RightUniqueRelation:BinaryRelation 
+{
+    intr
     property pred RightUnique()
     {
-        all v,w1,w2 : Set
+        all v:Domain(), w1,w2 : CoDomain()
         {
             impl
             (
                 (
-                    In(v,Domain()) and
-                    In(w1,CoDomain()) and
-                    In(w2,CoDomain()) and
-                    AreRelated(v,w1,parent) and
-                    AreRelated(v,w2,parent)
+                    AreRelated(v,w1) and
+                    AreRelated(v,w2)
                 ),
                 ( w1 = w2 )
             )
         }
     }
+
+}
+
+
+
 
     property pred LeftUnique()
     {
@@ -256,19 +268,7 @@ def class BinaryRelation: Relation
     }
 }
 
-def pred AreRelated(u,v: Set, r: BinaryRelation)
-{
-    dec
-        ~tuple: Tuple
 
-        tuple:=Tuple(@1,@2)
-    ;
-    (
-        In(tuple,r) and
-        In(u,r.Domain()) and
-        In(v,r.CoDomain())
-    )
-}
 
 definition class Function: BinaryRelation
 {
@@ -296,5 +296,5 @@ definition class EquivalenceRelation: BinaryRelation
         
     }
 }
-
+*/
 ;

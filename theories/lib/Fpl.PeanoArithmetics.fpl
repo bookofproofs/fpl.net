@@ -24,7 +24,7 @@ ext Digits x@/\d+/ -> Nat
         | (x = @0) : n := Zero() 
         | (x = @1) : n := Succ(Zero()) 
         | (x = @2) : n := Succ(Succ(Zero())) 
-        ? n := Succ(delegate.Decrement(x))  
+        ? n := Succ(self(del.Decrement(x)))  
     )
     ;
     return n
@@ -239,6 +239,11 @@ def func Sum(from,to:Nat, addend: Addend) -> Nat
     return result
 }
 
+def pred InRange(n,low,high:Nat) 
+{
+    and ((low <= n), (n <= high))
+}
+
 proposition SumOfConsecutiveNumbers
 {
     dec
@@ -250,7 +255,7 @@ proposition SumOfConsecutiveNumbers
         all n:Nat 
         {
             and (
-                In(n, Range(@1,limit))
+                InRange(n,@1,limit) 
                 , (f(n) = n)
             )
             
