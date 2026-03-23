@@ -92,7 +92,7 @@ type TestRepresentation() =
         | Some st -> 
             let r = st.Root
             let theory = r.Scope[filename]
-            let fn = theory.Scope[funcTermSignature] 
+            let fn = theory.Scope[funcTermSignature] :?> FplGenericHasValue
             Assert.AreEqual<string>(expectedRepr, fn.Represent())
             match fn.Value with 
             | Some v -> Assert.AreEqual<string>(expectedType, v.Type SignatureType.Type)
@@ -146,8 +146,12 @@ type TestRepresentation() =
         ad.Clear()
         let fplCode = sprintf """
         def cl Nat
-        def cl Zero: Nat
+        def func Zero() -> Nat
         def func Succ(n: Nat) -> Nat
+        def pred Equal(x,y: tpl) infix "=" 50 
+        {
+            del.Equal(x,y)
+        } 
         ext Digits x@/\d+/ -> Nat 
         {
             dec
@@ -157,16 +161,12 @@ type TestRepresentation() =
                 | (x = @0) : n := Zero() 
                 | (x = @1) : n := Succ(Zero()) 
                 | (x = @2) : n := Succ(Succ(Zero())) 
-                ? n := Succ(delegate.Decrement(x))  
+                ? n := Succ(self(delegate.Decrement(x)))  
             )
             ;
             return n
         }
 
-        def pred Equal(x,y: tpl) infix "=" 50 
-        {
-            del.Equal(x,y)
-        } 
         def pred T() { dec ~i,j,k:ind j:=$2 k:=$3; %s };""" varVal
         let filename = "TestRepresentationEqualityWithCases.fpl"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -209,8 +209,12 @@ type TestRepresentation() =
         ad.Clear()
         let fplCode = sprintf """
         def cl Nat
-        def cl Zero: Nat
+        def func Zero() -> Nat
         def func Succ(n: Nat) -> Nat
+        def pred Equal(x,y: tpl) infix "=" 50 
+        {
+            del.Equal(x,y)
+        } 
         ext Digits x@/\d+/ -> Nat 
         {
             return mcases
@@ -218,14 +222,10 @@ type TestRepresentation() =
                 | (x = @0) : Zero() 
                 | (x = @1) : Succ(Zero()) 
                 | (x = @2) : Succ(Succ(Zero())) 
-                ? Succ(delegate.Decrement(x))  
+                ? Succ(self(delegate.Decrement(x)))  
             )
         }
 
-        def pred Equal(x,y: tpl) infix "=" 50 
-        {
-            del.Equal(x,y)
-        } 
         def pred T() { dec ~i,j,k:ind j:=$2 k:=$3; %s };""" varVal
         let filename = "TestRepresentationEqualityWithMCases.fpl"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -239,7 +239,11 @@ type TestRepresentation() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("00", "@0", "")>]
+    [<DataRow("00", "@0", "Zero()")>]
+    [<DataRow("01", "@1", "Succ(Zero())")>]
+    [<DataRow("02", "@2", "Succ(Succ(Zero()))")>]
+    [<DataRow("03", "@3", "Succ(Succ(Succ(Zero())))")>]
+    [<DataRow("04", "@6", "Succ(Succ(Succ(Succ(Succ(Succ(Zero()))))))")>]
     [<TestMethod>]
     member this.TestRepresentationMCases(no:string, varVal, expected:string) =
         ad.Clear()
@@ -257,9 +261,7 @@ type TestRepresentation() =
             return mcases
             (
                 | (x = @0) : Zero() 
-                | (x = @1) : Succ(Zero()) 
-                | (x = @2) : Succ(Succ(Zero())) 
-                ? Succ(self(delegate.Decrement(x)))  
+                ? Succ(self(del.Decrement(x)))  
             )
         }
 
@@ -278,13 +280,17 @@ type TestRepresentation() =
             Assert.IsTrue(false)
 
     [<DataRow("00", "@0", """Zero()""")>]
-    [<DataRow("00", "@1", "Nat()")>]
+    [<DataRow("00", "@1", "One()")>]
+    [<DataRow("00", "@2", "One()")>]
+    [<DataRow("00", "@4", "One()")>]
+    [<DataRow("00", "@100", "One()")>]
     [<TestMethod>]
     member this.TestRepresentationMCasesSimple(no:string, varVal, expected:string) =
         ad.Clear()
         let fplCode = sprintf """
         def cl Nat
         def func Zero() -> Nat
+        def func One() -> Nat
         def pred Equal(x,y: tpl) infix "=" 50 
         {
             del.Equal(x,y)
@@ -295,7 +301,7 @@ type TestRepresentation() =
             return mcases
             (
                 | (x = @0) : Zero() 
-                ? Nat()  
+                ? One()  
             )
         }
  
@@ -312,16 +318,16 @@ type TestRepresentation() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("00","""def pred T() { dec ~v:ind; true };""", "dec ind")>]
+    [<DataRow("00","""def pred T() { dec ~v:ind; true };""", PrimUndetermined)>]
     [<DataRow("00a","""def pred T() { dec ~v:pred; true };""", PrimUndetermined)>]
-    [<DataRow("00b","""def pred T() { dec ~v:obj; true };""", "dec obj")>]
-    [<DataRow("00c","""def pred T() { dec ~v:func; true };""", "dec func")>]
-    [<DataRow("00d","""def pred T() { dec ~v:tpl; true };""", "dec tpl")>]
+    [<DataRow("00b","""def pred T() { dec ~v:obj; true };""", PrimUndetermined)>]
+    [<DataRow("00c","""def pred T() { dec ~v:func; true };""", PrimUndetermined)>]
+    [<DataRow("00d","""def pred T() { dec ~v:tpl; true };""", PrimUndetermined)>]
     [<DataRow("01a","""def pred T() { dec ~v:pred(d:ind); true };""", PrimUndetermined)>]
     [<DataRow("01b","""def pred T() { dec ~v:pred(d:pred(e,f:obj)); true };""", PrimUndetermined)>]
-    [<DataRow("01c","""def pred T() { dec ~v:func(x:pred(y:obj,d,e:ind)) ->pred(i:pred(j,k:obj)); true };""", "dec func(pred(obj, ind, ind)) -> pred(pred(obj, obj))")>]
-    [<DataRow("02","""def pred T() { dec ~v:A; true };""", "dec A")>]
-    [<DataRow("02a","""def cl A {intr} def pred T() { dec ~v:A; true };""", "dec A")>]
+    [<DataRow("01c","""def pred T() { dec ~v:func(x:pred(y:obj,d,e:ind)) ->pred(i:pred(j,k:obj)); true };""", PrimUndetermined)>]
+    [<DataRow("02","""def pred T() { dec ~v:A; true };""", PrimUndetermined)>]
+    [<DataRow("02a","""def cl A {intr} def pred T() { dec ~v:A; true };""", PrimUndetermined)>]
     [<TestMethod>]
     member this.TestRepresentationUnitializedVars(var:string, fplCode, expected:string) =
         ad.Clear()
@@ -341,8 +347,8 @@ type TestRepresentation() =
 
     [<DataRow("00","""def pred T() { dec ~v:pred v:=true; false};""", LiteralTrue)>]
     [<DataRow("01","""def pred T() { dec ~v:pred v:=false; false};""", LiteralFalse)>]
-    [<DataRow("02","""def cl A {dec ~myX:obj; ctor A(x:obj) {dec myX:=x;}} def cl B:A { ctor B(x:obj) {dec base.A(del.Decrement(x)); } } def pred T() { dec ~v:B v:=B(@2); false};""", """{"name":"B","base":[{"name":"A","base":[],"vars":[],"prtys":[]}],"vars":[],"prtys":[]}""")>]
-    [<DataRow("03","""def cl A {dec ~myX:pred; ctor A(x:pred) {dec myX:=x;}} def cl B:A { ctor B(x:pred) {dec base.A(not x); } } def pred T() { dec ~v:B v:=B(true); false};""", """{"name":"B","base":[{"name":"A","base":[],"vars":[],"prtys":[]}],"vars":[],"prtys":[]}""")>]
+    [<DataRow("02","""def cl A {dec ~myX:obj; ctor A(x:obj) {dec myX:=x;}} def cl B:A { ctor B(x:obj) {dec base.A(del.Decrement(x)); } } def pred T() { dec ~v:B v:=B(@2); false};""", """B(2)""")>]
+    [<DataRow("03","""def cl A {dec ~myX:pred; ctor A(x:pred) {dec myX:=x;}} def cl B:A { ctor B(x:pred) {dec base.A(not x); } } def pred T() { dec ~v:B v:=B(true); false};""", """B(true)""")>]
     [<TestMethod>]
     member this.TestRepresentationItializedVars(var:string, fplCode, expected:string) =
         ad.Clear()
@@ -365,7 +371,7 @@ type TestRepresentation() =
     [<DataRow("00b","(@2 = A())", LiteralTrue)>]
     [<DataRow("01","(@0 = B())", LiteralTrue)>]
     [<DataRow("01a","(@1 = B())", LiteralFalse)>]
-    [<DataRow("01b","(@2 = A())", LiteralFalse)>]
+    [<DataRow("01b","(@2 = A())", LiteralTrue)>]
     [<DataRow("02","(@0 = C())", LiteralFalse)>]
     [<DataRow("02a","(@1 = C())", LiteralTrue)>]
     [<DataRow("02b","(@2 = C())", LiteralFalse)>]
@@ -375,9 +381,11 @@ type TestRepresentation() =
         let fplCode = sprintf """
             
             def cl X 
-            def cl A 
-            def func B() -> A 
-            def func C() -> A 
+            def cl A
+            def cl B:A
+            def cl C:B
+            def func B() -> B
+            def func C() -> C 
 
             def pred Equal(x,y: tpl) infix "=" 50 
             {

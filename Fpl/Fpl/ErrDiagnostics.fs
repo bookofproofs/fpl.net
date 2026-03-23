@@ -179,7 +179,6 @@ type DiagnosticCode =
     // structure-related error codes
     | ST001 of string 
     | ST002 of string 
-    | ST003 of string 
     | ST004 of string
     | ST005 of string * string
     // interpreter syntax-related error codes for error-tolerant parser productions
@@ -306,7 +305,6 @@ type DiagnosticCode =
             // structure-related error codes
             | ST001 _ -> "ST001"
             | ST002 _ -> "ST002"
-            | ST003 _ -> "ST003"
             | ST004 _ -> "ST004"
             | ST005 _ -> "ST005"
             // interpreter syntax-related error codes for error-tolerant parser
@@ -454,7 +452,6 @@ type DiagnosticCode =
             // structure-related error codes
             | ST001 nodeName -> $"The {nodeName} does nothing."
             | ST002 nodeName -> $"The {nodeName} does nothing."
-            | ST003 errCode -> $"Assignment not possible due to proceeding {errCode} error(s)."
             | ST004 langCode -> $"The language `{langCode}` not implemented."
             | ST005 (domain, nodeType) -> $"An enumerator for the domain `{domain}` being {nodeType} could not be established."
             // interpreter syntax-related error codes for error-tolerant parser

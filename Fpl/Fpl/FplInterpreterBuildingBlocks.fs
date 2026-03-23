@@ -22,9 +22,7 @@ open FplGrammarTypes
 open FplInterpreterTypes
 open FplInterpreterDiagnosticsEmitter
 
-let variableStack = FplVariableStack()
-
-let filterCandidates (candidatesPre:FplValue list) identifier qualified =
+let filterCandidates (candidatesPre:FplGenericNode list) identifier qualified =
     let candidates =
         candidatesPre
         |> List.filter (fun fv1 -> fv1.FplId = identifier)
@@ -48,10 +46,11 @@ let filterCandidates (candidatesPre:FplValue list) identifier qualified =
     (candidates, candidatesNames)
 
 /// Simplify trivially nested expressions by removing from the stack FplValue nodes that were created due to too long parsing tree and replacing them by their sub nodes 
-let rec simplifyTriviallyNestedExpressions (rb:FplValue) = 
-    if rb.ArgList.Count = 1 && rb.FplId = "" then
+let rec simplifyTriviallyNestedExpressions (rb1:FplGenericNode) = 
+    match rb1 with 
+    | :? FplReference as rb when rb.ArgList.Count = 1 && rb.FplId = "" ->
         // removable reference blocks are those with only a single argument and unset FplId 
-        let subNode = rb.ArgList[0]
+        let subNode = rb.ArgList[0] 
         variableStack.Pop() |> ignore // pop the removable reference block and ignored it
         variableStack.PushEvalStack(subNode) // push its subNode instead
         // adjust subNode's Parent, EndPos, Scope
@@ -62,6 +61,9 @@ let rec simplifyTriviallyNestedExpressions (rb:FplValue) =
         rb.Value <- None
         rb.Scope.Clear()
         simplifyTriviallyNestedExpressions subNode
+    | _ -> ()
+
+    
 
 let setKeywordType keywordType pos1 pos2 = 
     let fv = variableStack.PeekEvalStack()
@@ -161,23 +163,20 @@ let rec eval (st: SymbolTable) ast =
         | _ -> ()
     | Ast.ExtensionRegex s -> 
         let fv = variableStack.PeekEvalStack()
-        let vars = fv.GetVariables()
-        if vars.Length > 0 then
-            let mainVar = vars.Head
-            mainVar.TypeId <- $"{LiteralObj}:{s}" // set the extensions's main variable's type to the pattern
+        fv.TypeId <- s
     | Ast.DollarDigits((pos1, pos2), s) -> 
         let fv = variableStack.PeekEvalStack()
         let sid = $"${s.ToString()}"
         match fv with 
-        | :? FplReference when fv.FplId = String.Empty ->
+        | :? FplReference when fv.FplId = String.Empty && not variableStack.InReferenceToProofOrCorollary ->
             let value = new FplIntrinsicInd((pos1, pos2), fv)
             value.FplId <- sid
             variableStack.PushEvalStack(value)
             variableStack.PopEvalStack()
-        | _ ->
+        | _  ->
             fv.FplId <- fv.FplId + sid
             match fv.TypeId with 
-            | "" -> fv.TypeId <- LiteralInd
+            | "" when not variableStack.InReferenceToProofOrCorollary -> fv.TypeId <- LiteralInd
             | LiteralPred -> ()
             | _ -> fv.TypeId <- fv.TypeId + sid
     | Ast.ExtensionName((pos1, pos2), s) ->
@@ -189,8 +188,8 @@ let rec eval (st: SymbolTable) ast =
             fv.TypeId <- extensionName
         | _ -> ()
     | Ast.Var((pos1, pos2), name) ->
-        let checkByName (fv:FplValue) = 
-            let rec IsInUpperScope (fv1: FplValue): FplGenericVariable option =
+        let checkByName (fv:FplGenericNode) = 
+            let rec IsInUpperScope (fv1: FplGenericNode): FplGenericVariable option =
                 if fv1.Name = PrimTheoryL then 
                     None
                 elif fv1.Scope.ContainsKey(name) then
@@ -222,9 +221,8 @@ let rec eval (st: SymbolTable) ast =
                     fv.ErrorOccurred <- emitVAR01diagnostics name pos1 pos2
                 
                 let undefVar = new FplVariable(name, (pos1, pos2), fv)
-                let undefined = new FplIntrinsicUndef((pos1, pos2), undefVar)
-                undefVar.SetValue(undefined)
                 undefVar.TypeId <- LiteralUndef
+                undefVar.SetDefaultValue()
                 variableStack.PushEvalStack(undefVar)
                 variableStack.PopEvalStack()
             
@@ -240,6 +238,7 @@ let rec eval (st: SymbolTable) ast =
             fv.EndPos <- pos2
         | PrimExtensionL -> 
             let newVar = new FplVariable(name, (pos1, pos2), fv)
+            newVar.TypeId <- fv.FplId
             newVar.IsSignatureVariable <- variableStack.InSignatureEvaluation
             variableStack.PushEvalStack(newVar)
             variableStack.PopEvalStack()
@@ -510,21 +509,28 @@ let rec eval (st: SymbolTable) ast =
         eval st ast1
     | Ast.PredicateIdentifier((pos1, pos2), identifier) ->
         let fv = variableStack.PeekEvalStack()
-        let candidatesFromTheory = findCandidatesByName st identifier false false
-        let candidatesLocal = findCandidatesByNameInBlock fv identifier
-        let candidates, candidatesNames =  filterCandidates (candidatesFromTheory @ candidatesLocal) identifier true
-        let correctIds (fv1:FplValue) = 
+        let searchIdentifier = 
+            if variableStack.InReferenceToProofOrCorollary then 
+                $"{identifier}{fv.FplId}"
+            else
+                identifier
+            
+        let candidatesFromTheory = findCandidatesByName st searchIdentifier false variableStack.InReferenceToProofOrCorollary
+        let candidatesLocal = findCandidatesByNameInBlock fv searchIdentifier
+        let candidatesOfMapping = findCandidateOfExtensionMapping fv searchIdentifier
+        let candidates, candidatesNames =  filterCandidates (candidatesFromTheory @ candidatesLocal @ candidatesOfMapping) searchIdentifier true
+        let correctIds (fv1:FplGenericNode) = 
             match fv with 
             | :? FplBase 
             | :? FplBaseConstructorCall 
             | :? FplForInStmtDomain -> 
-                fv1.FplId <- identifier
-                fv1.TypeId <- identifier
+                fv1.FplId <- searchIdentifier
+                fv1.TypeId <- searchIdentifier
             | :? FplReference -> 
-                fv1.FplId <- fv1.FplId + identifier
-                fv1.TypeId <- fv1.TypeId + identifier
+                fv1.FplId <- searchIdentifier
+                fv1.TypeId <- searchIdentifier
             | :? FplGenericJustificationItem as fvJi -> 
-                fvJi.FplId <- identifier
+                fvJi.FplId <- searchIdentifier
             | _ -> ()
 
         match candidates.Length with
@@ -541,8 +547,9 @@ let rec eval (st: SymbolTable) ast =
             | :? FplVariableArray as arr -> arr.SetType identifier None pos1 pos2
             | :? FplMapping as map -> map.SetType identifier None pos1 pos2
             | :? FplVariable ->
-                fv.TypeId <- identifier
-                fv.Value <- Some (new FplIntrinsicUndef((fv.StartPos, fv.EndPos), fv))
+                let fvWithValue = fv :?> FplGenericHasValue
+                fvWithValue.TypeId <- identifier
+                fvWithValue.SetDefaultValue()
             | _ -> correctIds fv 
         | 1 ->
             let candidate = candidates.Head
@@ -553,6 +560,7 @@ let rec eval (st: SymbolTable) ast =
                 match candidate with 
                 | :? FplFunctionalTerm 
                 | :? FplPredicate 
+                | :? FplExtension 
                 | :? FplClass -> map.SetType identifier (Some candidate) pos1 pos2
                 | _ -> fv.ErrorOccurred <- emitSIG11diagnostics (qualifiedName map false) (qualifiedName candidate false) map.StartPos map.EndPos       
             | :? FplVariable -> 
@@ -653,7 +661,7 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PopEvalStack()
     | Ast.ArgumentTuple((pos1, pos2), predicateListAst) ->
         let next = variableStack.PeekEvalStack()
-        let consumeArgumentsWithParent (parent:FplValue) =
+        let consumeArgumentsWithParent (parent:FplGenericNode) =
             if predicateListAst.Length > 0 then 
                 predicateListAst 
                 |> List.iter (fun pred -> 
@@ -701,10 +709,12 @@ let rec eval (st: SymbolTable) ast =
         eval st ast1
         optAst |> Option.map (eval st) |> ignore
     | Ast.ReferenceToProofOrCorollary((pos1, pos2), (referencingIdentifierAst)) ->
+        variableStack.InReferenceToProofOrCorollary <- true
         eval st referencingIdentifierAst
+        variableStack.InReferenceToProofOrCorollary <- false
     | Ast.PredicateWithOptSpecification((pos1, pos2), (fplIdentifierAst, optionalSpecificationAst)) ->
         let fv = variableStack.PeekEvalStack()
-        let searchForCandidatesOfReferenceBlock (refBlock:FplValue) = 
+        let searchForCandidatesOfReferenceBlock (refBlock:FplGenericNode) = 
             let candidatesFromTheory = findCandidatesByName st refBlock.FplId true false
             let candidatesFromPropertyScope = findCandidatesByNameInBlock refBlock refBlock.FplId
             let candidatesFromDottedQualification = findCandidatesByNameInDotted refBlock refBlock.FplId
@@ -713,7 +723,7 @@ let rec eval (st: SymbolTable) ast =
             @ candidatesFromDottedQualification
 
         /// parentFv is a dotted reference 
-        let getCandidatesBasedOnDottedParent (parentFv: FplValue) = 
+        let getCandidatesBasedOnDottedParent (parentFv: FplGenericNode) = 
             let referencedNodeOpt, typeRefNode, typeNameRefNode =
                 match parentFv.RefersTo with 
                 | Some parentFvRefersTo ->
@@ -824,7 +834,7 @@ let rec eval (st: SymbolTable) ast =
                 fv.ErrorOccurred <- checkID025Diagnostics (qualifiedName candidate false) node.Name fv.StartPos fv.EndPos
             else
                 ()
-        simplifyTriviallyNestedExpressions fv |> ignore
+        simplifyTriviallyNestedExpressions fv
     | Ast.SelfOrParent((pos1, pos2), selforParentAst) -> 
         eval st selforParentAst
     | Ast.Language((pos1, pos2),(langCode, ebnfAst)) ->
@@ -838,7 +848,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.InheritedFunctionalTypeList inheritedTypeAsts 
     | Ast.InheritedClassTypeList inheritedTypeAsts -> 
         let beingCreatedNode = variableStack.PeekEvalStack()
-        let addVariablesAndPropertiesOfBaseNode (bNode:FplValue) = 
+        let addVariablesAndPropertiesOfBaseNode (bNode:FplGenericNode) = 
             match box beingCreatedNode with
             | :? FplGenericInheriting as inheritingNode -> 
                 inheritingNode.InheritVariables bNode
@@ -953,14 +963,14 @@ let rec eval (st: SymbolTable) ast =
             variableStack.PushEvalStack(deleg)
             eval st argumentTupleAst
             variableStack.PopEvalStack()
-            deleg.ErrorOccurred <- emitID013Diagnostics  $"Unknown delegate `{delegateId}`" pos1 pos2
+            deleg.ErrorOccurred <- emitID013Diagnostics $"Unknown delegate `{delegateId}`" pos1 pos2
     | Ast.PredicateSignature(((pos1, pos2), ((simpleSignatureAst, inhPredicateTypeListAstsOpt), paramTupleAst)), optUserDefinedSymbolAst) -> 
         ()
         // empty since the pattern will be matched in DefinitionPredicagte 
         // we list it her to remove FS0025 incomplete pattern warnings
     | Ast.ReferencingIdentifier((pos1, pos2), (predicateIdentifierAst, dollarDigitListAsts)) ->
-        eval st predicateIdentifierAst
         dollarDigitListAsts |> List.map (eval st) |> ignore
+        eval st predicateIdentifierAst
         let fv = variableStack.PeekEvalStack()
         match fv with 
         | :? FplReference ->
@@ -1099,7 +1109,7 @@ let rec eval (st: SymbolTable) ast =
 
         /// Returns the precedence of fv1 if its ExpressionType is Infix
         /// or Int32.MaxValue otherwise
-        let getPrecedence (fv1:FplValue) =
+        let getPrecedence (fv1:FplGenericNode) =
             match fv1.RefersTo with
             | None -> Int32.MaxValue
             | Some x -> 
@@ -1148,7 +1158,7 @@ let rec eval (st: SymbolTable) ast =
             | _ -> ()
             fv.ArgList.RemoveAt(currMinIndex+1) 
             fv.ArgList.RemoveAt(currMinIndex-1) 
-        simplifyTriviallyNestedExpressions fv
+        simplifyTriviallyNestedExpressions fv 
     | Ast.Expression((pos1, pos2), ((((prefixOpAst, predicateAst), postfixOpAst), optionalSpecificationAst), qualificationListAst)) ->
         let fv = variableStack.PeekEvalStack()
         let refBlock = new FplReference((pos1, pos2), fv) 
@@ -1185,34 +1195,11 @@ let rec eval (st: SymbolTable) ast =
         eval st qualificationListAst
         let refBlock = variableStack.PeekEvalStack() // if the reference was replaced, take this one
         refBlock.EndPos <- pos2
-        simplifyTriviallyNestedExpressions refBlock
-        let last = variableStack.PeekEvalStack()
+        simplifyTriviallyNestedExpressions refBlock 
         variableStack.PopEvalStack()
-        match fv with
-        | :? FplTheorem  
-        | :? FplLemma  
-        | :? FplProposition  
-        | :? FplCorollary  
-        | :? FplConjecture  
-        | :? FplPredicate  
-        | :? FplAxiom 
-        | :? FplMandatoryPredicate ->
-            fv.SetValue(last)
+        match fv with 
         | :? FplReference ->
-            // simplify references created due to superfluous parentheses of expressions
-            // by replacing them with their single value
-            if prefixOpAst.IsNone && 
-                postfixOpAst.IsNone &&
-                fv.FplId = "" && 
-                fv.ArgList.Count = 1 then
-                    let subNode = fv.ArgList[0]
-                    match subNode with
-                    | :? FplReference ->
-                        variableStack.Pop() |> ignore
-                        variableStack.PushEvalStack(subNode)
-                        subNode.Parent <- fv.Parent
-                        fv.ArgList.Clear()
-                    | _ -> ()
+            simplifyTriviallyNestedExpressions fv 
         | _ -> ()
     | Ast.Cases((pos1, pos2), (caseSingleListAsts, caseElseAst)) ->
         let parent = variableStack.PeekEvalStack()
@@ -1277,7 +1264,17 @@ let rec eval (st: SymbolTable) ast =
         let parent = variableStack.PeekEvalStack()
         let fvNew = new FplAssignment((pos1, pos2), parent)
         variableStack.PushEvalStack(fvNew) // add assignment
-        let assigneeReference = new FplReference((pos1,pos2), fvNew)
+        let assigneeReference = 
+            match predicateWithQualificationAst with 
+            | Ast.PredicateWithQualification(predicateWithOptSpecificationAst, _) ->
+                match predicateWithOptSpecificationAst with 
+                | Ast.PredicateWithOptSpecification ((assigneePos1,assigneePos2),(_,_)) ->
+                    // create assigneeReference with correct positioning of the assignee (to improve related diagnostics positions)
+                    new FplReference((assigneePos1,assigneePos2), fvNew)
+                | _ ->
+                    new FplReference((pos1,pos2), fvNew)
+            | _ ->
+                new FplReference((pos1,pos2), fvNew)
         variableStack.PushEvalStack(assigneeReference) // add assignee
         eval st predicateWithQualificationAst
         variableStack.PopEvalStack() // remove assignee
@@ -1762,6 +1759,6 @@ let evaluateSymbolTable (st: SymbolTable) =
             eval st pa.Parsing.Ast
             pa.Status <- ParsedAstStatus.Evaluated
             variableStack.PopEvalStack()
-            theoryValue.Run variableStack
+            theoryValue.Run()
         | None -> found <- false
 

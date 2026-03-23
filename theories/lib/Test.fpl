@@ -1,1 +1,1 @@
-def pred T() {dec ~x:obj; mcases (| $1 : false | x : true ? undef) };
+def pred Equal(x,y: tpl) infix "=" 50 { del.Equal(x,y)} ext Digits x@/\d+/ -> pred {ret mcases ( | (x = @0) : true ? false ) };

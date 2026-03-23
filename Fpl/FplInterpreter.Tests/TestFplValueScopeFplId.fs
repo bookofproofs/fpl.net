@@ -48,7 +48,7 @@ type TestFplValueScopeFplId() =
     member this.TestBlocks(var) =
         let res = CommonFplValueTestCases.ScopeBlocks("FplId") 
         match res with
-        | Some (r:FplRoot,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,fun3:FplValue,fun4:FplValue,fun5:FplValue,fun6:FplValue,fun7:FplValue,fun8:FplValue,fun9:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
+        | Some (r:FplRoot,theory:FplGenericNode,inf1:FplGenericNode,inf2:FplGenericNode,axi1:FplGenericNode,axi2:FplGenericNode,pst1:FplGenericNode,pst2:FplGenericNode,thm1:FplGenericNode,thm2:FplGenericNode,pro1:FplGenericNode,pro2:FplGenericNode,lem1:FplGenericNode,lem2:FplGenericNode,cor1:FplGenericNode,cor2:FplGenericNode,con1:FplGenericNode,con2:FplGenericNode,cla1:FplGenericNode,cla2:FplGenericNode,pre1:FplGenericNode,pre2:FplGenericNode,fun1:FplGenericNode,fun2:FplGenericNode,fun3:FplGenericNode,fun4:FplGenericNode,fun5:FplGenericNode,fun6:FplGenericNode,fun7:FplGenericNode,fun8:FplGenericNode,fun9:FplGenericNode,prf1:FplGenericNode,prf2:FplGenericNode,loc1:FplGenericNode,loc2:FplGenericNode) -> 
             match var with 
             | "r" -> Assert.AreEqual<string>("", r.FplId)
             | PrimTheoryL -> Assert.AreEqual<string>("TestScopeBlocksFplId", theory.FplId)
@@ -101,7 +101,7 @@ type TestFplValueScopeFplId() =
     member this.TestConstructors(var) =
         let res = CommonFplValueTestCases.ScopeConstructors("FplId") 
         match res with
-        | Some (r,theory,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
+        | Some (r,theory,block:FplGenericNode,t1:FplGenericNode,t2:FplGenericNode,t3:FplGenericNode,t4:FplGenericNode) -> 
             match var with 
             | "r" -> Assert.AreEqual<string>("", r.FplId)
             | PrimTheoryL -> Assert.AreEqual<string>("TestScopeConstructorsFplId", theory.FplId)
@@ -185,7 +185,7 @@ type TestFplValueScopeFplId() =
     member this.TestProperties(var) =
         let res = CommonFplValueTestCases.ScopeProperties("FplId") 
         match res with
-        | Some (r:FplRoot,theory:FplValue,block:FplValue,t1:FplValue,t3:FplValue,t5:FplValue,t7:FplValue,t9:FplValue,t11:FplValue,t13:FplValue) -> 
+        | Some (r:FplRoot,theory:FplGenericNode,block:FplGenericNode,t1:FplGenericNode,t3:FplGenericNode,t5:FplGenericNode,t7:FplGenericNode,t9:FplGenericNode,t11:FplGenericNode,t13:FplGenericNode) -> 
             match var with 
             | "r" -> Assert.AreEqual<string>("", r.FplId)
             | PrimTheoryL -> Assert.AreEqual<string>("TestScopePropertiesFplId", theory.FplId)
@@ -907,10 +907,10 @@ type TestFplValueScopeFplId() =
     member this.TestIntrinsicPrimitives(var) =
         let res = CommonFplValueTestCases.ScopeIntrinsicPrimitives("FplId") 
         match res with
-        | Some (i:FplValue, b:FplValue, p:FplValue, o:FplValue, u:FplValue, t:FplValue) -> 
+        | Some (i:FplGenericNode, b:FplGenericNode, p:FplGenericNode, o:FplGenericNode, u:FplGenericNode, t:FplGenericNode) -> 
             match var with 
             | "i" -> Assert.AreEqual<string>($"$1", i.FplId)
-            | "b" -> Assert.AreEqual<string>($"", b.FplId)
+            | "b" -> Assert.AreEqual<string>($"B()", b.FplId)
             | "p" -> Assert.AreEqual<string>($"{LiteralTrue}", p.FplId)
             | "o" -> Assert.AreEqual<string>($"A()", o.FplId)
             | "u" -> Assert.AreEqual<string>($"{LiteralUndef}", u.FplId)

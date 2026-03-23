@@ -15,7 +15,7 @@ type TestSignatureMatching() =
     [<DataRow("02", """def pred T (x,y:Nat) {true} def pred Caller() {dec ~a,b:obj; T(a,b)} ;""",
         "The variable `a` typed `obj` doesn't match the parameter `x` typed `Nat` in the predicate definition TestSignatureMatchingReferencesPlain.T(Nat, Nat)")>]
     [<DataRow("03", """def pred T (x,y:obj) {true} def pred Caller() {dec ~a,b:Nat; T(a,b)} ;""",
-        "The type `Nat` of the variable `a` could not be determined. The parameter `x` requires the type `obj` or some derived class in the predicate definition TestSignatureMatchingReferencesPlain.T(obj, obj)")>]
+        "The type `Nat` of the variable `a` could not be determined. The parameter `x` requires the type `obj` or any type derived from it in the predicate definition TestSignatureMatchingReferencesPlain.T(obj, obj)")>]
     [<DataRow("04", """def pred T () {true} def pred Caller() {T()} ;""",
         "")>]
     [<TestMethod>]
@@ -181,13 +181,13 @@ type TestSignatureMatching() =
     [<DataRow("""def pred T (x,y:Nat) {true} def pred Caller() {dec ~a,b:obj; T(a,b)} ;""",
         "The variable `a` typed `obj` doesn't match the parameter `x` typed `Nat` in the predicate definition TestSignatureMatchingReferencesClasses.T(Nat, Nat)")>]
     [<DataRow("""def pred T (x,y:obj) {true} def pred Caller() {dec ~a,b:Nat; T(a,b)} ;""",
-        "The type `Nat` of the variable `a` could not be determined. The parameter `x` requires the type `obj` or some derived class in the predicate definition TestSignatureMatchingReferencesClasses.T(obj, obj)")>]
+        "The type `Nat` of the variable `a` could not be determined. The parameter `x` requires the type `obj` or any type derived from it in the predicate definition TestSignatureMatchingReferencesClasses.T(obj, obj)")>]
     [<DataRow("""def cl Nat {intr} def pred T (x,y:obj) {true} def pred Caller() {dec ~a,b:Nat; T(a,b)} ;""",
         "")>]
     [<DataRow("""def pred T (x,y:tpl) {true} def pred Caller() {dec ~a,b:obj; T(a,b)} ;""",
         "")>]
     [<DataRow("""def cl A:B {intr} def pred T (x,y:obj) {true} def pred Caller() {dec ~a,b:NatTypo; T(a,b)} ;""",
-        "The type `NatTypo` of the variable `a` could not be determined. The parameter `x` requires the type `obj` or some derived class in the predicate definition TestSignatureMatchingReferencesClasses.T(obj, obj)")>]
+        "The type `NatTypo` of the variable `a` could not be determined. The parameter `x` requires the type `obj` or any type derived from it in the predicate definition TestSignatureMatchingReferencesClasses.T(obj, obj)")>]
         
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesClasses(varVal, var:string) =

@@ -9,10 +9,10 @@ open CommonTestHelpers
 type TestInfixOperations() =
 
     [<DataRow("""def pred T1() { dec ~x,y:obj; (x = y) }""", PrimUndetermined)>]
-    [<DataRow("""ext T x@/\d+/->obj {ret x} def pred T1() { (@1 = @2) }""", LiteralFalse)>]
-    [<DataRow("""ext T x@/\d+/->obj {ret x} def pred T1() { (@42 = @2) }""", LiteralFalse)>]
-    [<DataRow("""ext T x@/\d+/->obj {ret x} def pred T1() { (@42 = @42) }""", LiteralTrue)>]
-    [<DataRow("""def pred T1() { (@1 = @1) }""", PrimUndetermined)>]
+    [<DataRow("""ext T x@/\d+/->T {ret x} def pred T1() { (@1 = @2) }""", LiteralFalse)>]
+    [<DataRow("""ext T x@/\d+/->T {ret x} def pred T1() { (@42 = @2) }""", LiteralFalse)>]
+    [<DataRow("""ext T x@/\d+/->T {ret x} def pred T1() { (@42 = @42) }""", LiteralTrue)>]
+    [<DataRow("""def pred T1() { (@1 = @1) }""", LiteralTrue)>]
     [<TestMethod>]
     member this.TestEqualityPredicate(varVal, expected:string) =
         ad.Clear()
@@ -26,8 +26,7 @@ type TestInfixOperations() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T1()"] 
-            let variableStack = new FplVariableStack()
-            pr1.Run variableStack
+            pr1.Run()
             Assert.AreEqual<string>(expected, pr1.Represent())
         | None -> 
             Assert.IsTrue(false)
@@ -133,8 +132,7 @@ type TestInfixOperations() =
                 let theory = r.Scope[filename]
 
                 let pr1 = theory.Scope["T1()"] 
-                let variableStack = new FplVariableStack()
-                pr1.Run variableStack
+                pr1.Run()
                 Assert.AreEqual<string>(expected, pr1.Represent())
             | None -> 
                 Assert.IsTrue(false)
@@ -165,8 +163,7 @@ type TestInfixOperations() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T1()"] 
-            let variableStack = new FplVariableStack()
-            pr1.Run variableStack
+            pr1.Run()
             Assert.AreEqual<string>(expected, pr1.Represent())
         | None -> 
             Assert.IsTrue(false)

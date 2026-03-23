@@ -9,7 +9,7 @@ open CommonTestHelpers
 type TestDecrement() =
 
 
-    [<DataRow("@0", LiteralUndef)>]
+    [<DataRow("@0", PrimUndetermined)>]
     [<DataRow("@1", "0")>]
     [<DataRow("@2", "1")>]
     [<DataRow("@3", "2")>]
@@ -19,7 +19,7 @@ type TestDecrement() =
     [<TestMethod>]
     member this.TestDecrementRepresent(varVal, expected:string) =
         ad.Clear()
-        let fplCode = sprintf """def pred T() { del.Decrement(%s) };""" varVal
+        let fplCode = sprintf """ext Digits x@/\d+/ -> Digits {ret x} def pred T() { del.Decrement(%s) };""" varVal
         let filename = "TestDecrementRepresent.fpl"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
@@ -33,13 +33,37 @@ type TestDecrement() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("@0", LiteralObj)>]
-    [<DataRow("@1", LiteralObj)>]
-    [<DataRow("@2", LiteralObj)>]
-    [<DataRow("@3", LiteralObj)>]
-    [<DataRow("@4", LiteralObj)>]
-    [<DataRow("@100", LiteralObj)>]
-    [<DataRow("@42", LiteralObj)>]
+    [<DataRow("@0", PrimUndetermined)>]
+    [<DataRow("@1", PrimUndetermined)>]
+    [<DataRow("@2", PrimUndetermined)>]
+    [<DataRow("@3", PrimUndetermined)>]
+    [<DataRow("@4", PrimUndetermined)>]
+    [<DataRow("@100", PrimUndetermined)>]
+    [<DataRow("@42", PrimUndetermined)>]
+    [<TestMethod>]
+    member this.TestDecrementRepresentWrongType(varVal, expected:string) =
+        ad.Clear()
+        let fplCode = sprintf """ext Digits x@/\d+/ -> ind {ret $100} def pred T() { del.Decrement(%s) };""" varVal
+        let filename = "TestDecrementRepresent.fpl"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let pr = theory.Scope["T()"] 
+            let predicateValue = pr.ArgList |> Seq.toList |> List.rev |> List.head
+            Assert.AreEqual<string>(expected, predicateValue.Represent())
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("@0", PrimDigits)>]
+    [<DataRow("@1", PrimDigits)>]
+    [<DataRow("@2", PrimDigits)>]
+    [<DataRow("@3", PrimDigits)>]
+    [<DataRow("@4", PrimDigits)>]
+    [<DataRow("@100", PrimDigits)>]
+    [<DataRow("@42", PrimDigits)>]
     [<TestMethod>]
     member this.TestDecrementType(varVal, expected:string) =
         ad.Clear()
@@ -89,10 +113,10 @@ type TestDecrement() =
     [<DataRow("@100", "Decrement(Nat)")>]
     [<DataRow("@42", "Decrement(Nat)")>]
     [<TestMethod>]
-    member this.TestDecrementMixedWithExtension(varVal, expected:string) =
+    member this.TestDecrementMixedWithExtensionNat(varVal, expected:string) =
         ad.Clear()
         let fplCode = sprintf """ext Digits x@/\d+/ -> Nat {return x} def pred T() { del.Decrement(%s) };""" varVal
-        let filename = "TestDecrementMixed.fpl"
+        let filename = "TestDecrementMixedWithExtensionNat.fpl"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -105,6 +129,29 @@ type TestDecrement() =
         | None -> 
             Assert.IsTrue(false)
 
+    [<DataRow("@0", "Decrement(Digits)")>]
+    [<DataRow("@1", "Decrement(Digits)")>]
+    [<DataRow("@2", "Decrement(Digits)")>]
+    [<DataRow("@3", "Decrement(Digits)")>]
+    [<DataRow("@4", "Decrement(Digits)")>]
+    [<DataRow("@100", "Decrement(Digits)")>]
+    [<DataRow("@42", "Decrement(Digits)")>]
+    [<TestMethod>]
+    member this.TestDecrementMixedWithExtensionDigits(varVal, expected:string) =
+        ad.Clear()
+        let fplCode = sprintf """ext Digits x@/\d+/ -> Digits {return x} def pred T() { del.Decrement(%s) };""" varVal
+        let filename = "TestDecrementMixedWithExtensionDigits.fpl"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let pr = theory.Scope["T()"] 
+            let predicateValue = pr.ArgList |> Seq.toList |> List.rev |> List.head
+            Assert.AreEqual<string>(expected, predicateValue.Type SignatureType.Mixed)
+        | None -> 
+            Assert.IsTrue(false)
 
     [<DataRow("@0", "Decrement(0)")>]
     [<DataRow("@1", "Decrement(1)")>]
