@@ -1,4 +1,4 @@
-﻿/// This module evaluates the abstract syntax tree (AST) and interprets its semantics./// This module evaluates the abstract syntax tree (AST) and interprets its semantics.
+/// This module evaluates the abstract syntax tree (AST) and interprets its semantics./// This module evaluates the abstract syntax tree (AST) and interprets its semantics.
 /// It produces a SymbolTable object containing a current semantical representation of the AST.
 
 (* MIT License
@@ -557,12 +557,8 @@ let rec eval (st: SymbolTable) ast =
             | :? FplVariableArray as arr ->  arr.SetType identifier (Some candidate) pos1 pos2
             | :? FplMapping as map -> 
                 let candidate = candidates.Head
-                match candidate with 
-                | :? FplFunctionalTerm 
-                | :? FplPredicate 
-                | :? FplExtension 
-                | :? FplClass -> map.SetType identifier (Some candidate) pos1 pos2
-                | _ -> fv.ErrorOccurred <- emitSIG11diagnostics (qualifiedName map false) (qualifiedName candidate false) map.StartPos map.EndPos       
+                // mappings can point to classes 
+                map.SetType identifier (Some candidate) pos1 pos2
             | :? FplVariable -> 
                 fv.TypeId <- identifier
                 fv.RefersTo <- Some candidate

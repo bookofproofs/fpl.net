@@ -1,4 +1,4 @@
-﻿/// This module contains all side-effect functions necessary to emit diagnostics for the FPL language server.
+/// This module contains all side-effect functions necessary to emit diagnostics for the FPL language server.
 module FplInterpreterDiagnosticsEmitter
 
 open FParsec
@@ -837,7 +837,7 @@ let emitSIG10diagnostics arrName indexVarName indexNumber pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitSIG11diagnostics qualifiedNameMapping qualifiedWrongCandidate pos1 pos2 =
+let emitSIG11diagnostics qualifiedWrongCandidate pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -845,7 +845,7 @@ let emitSIG11diagnostics qualifiedNameMapping qualifiedWrongCandidate pos1 pos2 
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = SIG11(qualifiedNameMapping, qualifiedWrongCandidate)
+            Diagnostic.Code = SIG11 qualifiedWrongCandidate
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic

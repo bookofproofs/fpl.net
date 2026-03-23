@@ -1,4 +1,4 @@
-﻿/// This module contains all types necessary to interpret FPL code (semantics)
+/// This module contains all types necessary to interpret FPL code (semantics)
 module FplInterpreterTypes
 
 open System
@@ -3918,6 +3918,8 @@ let getArguments (fv:FplGenericNode) =
     fv.ArgList 
     |> Seq.toList
 
+
+
 type FplMapping(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericNode(positions, Some parent)
     let _dimensionTypes = new List<FplGenericNode>()
@@ -5112,7 +5114,7 @@ let getDefaultValueOfFunction (fv:FplGenericHasValue) =
     | Some (:? FplMapping as map) ->
         let instance =
             match map.RefersTo with 
-            | Some cl when map.Dimensionality = 0 ->
+            | Some cl when cl.Name = PrimClassL && map.Dimensionality = 0 ->
                 // delegate instance building to a default class constructor if the mapping refers to a class
                 let defaultCtor = cl.Scope.Values |> Seq.head :?> FplGenericConstructor
                 defaultCtor.Run()
@@ -5127,6 +5129,32 @@ let getDefaultValueOfFunction (fv:FplGenericHasValue) =
         instance 
     | _ ->
         (new FplInstance(fv.TypeId, (fv.StartPos, fv.EndPos), fv))
+
+let checkSIG11Diagnostics (fv:FplGenericNode) =
+    let mapOpt = getMapping fv
+    match mapOpt with
+    | Some map ->
+        match map.RefersTo with 
+        | Some ref ->
+            match ref.Name with 
+            | PrimClassL -> ()
+                // mappings can point to classes 
+            | PrimExtensionL ->
+                let mapOfExtOpt = getMapping ref
+                match mapOfExtOpt with
+                | Some mapOfExt when mapOfExt.RefersTo.IsSome && Object.ReferenceEquals(ref, mapOfExt.RefersTo.Value) -> 
+                // if a mapping points to an extension definition,
+                // it is only allowed, if this extension does not delegate the mapping to another type
+                // and, instead, points to itself
+                    ()
+                | _ ->
+                    map.ErrorOccurred <- emitSIG11diagnostics (qualifiedName ref false) map.StartPos map.EndPos
+            | _ ->
+                // otherwise issue SIG11
+                map.ErrorOccurred <- emitSIG11diagnostics (qualifiedName ref false) map.StartPos map.EndPos       
+        | _ -> ()
+    | _ -> ()
+
 
 type FplExtension(positions: Positions, parent: FplGenericNode, runOrder) =
     inherit FplGenericHasValue(positions, parent)
@@ -5199,7 +5227,13 @@ type FplExtension(positions: Positions, parent: FplGenericNode, runOrder) =
         _callCounter <- _callCounter - 1
         debug this Debug.Stop
 
-    override this.EmbedInSymbolTable _ = tryAddToParentUsingMixedSignature this
+    override this.CheckConsistency () = 
+        checkSIG11Diagnostics this
+        base.CheckConsistency()
+
+    override this.EmbedInSymbolTable _ =
+        this.CheckConsistency()
+        tryAddToParentUsingMixedSignature this
 
     override this.RunOrder = Some _runOrder
 
@@ -6069,6 +6103,7 @@ type FplFunctionalTerm(positions: Positions, parent: FplGenericNode, runOrder) a
         match this.ExpressionType with
         | FixType.Infix (symbol, precedence) -> checkSIG02Diagnostics (getRoot this) symbol precedence this.SignStartPos this.SignEndPos
         | _ -> ()
+        checkSIG11Diagnostics this
 
     override this.EmbedInSymbolTable _ = 
         this.CheckConsistency()
@@ -6302,9 +6337,14 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplGenericNode) as
             _callCounter <- _callCounter - 1
             result
 
-    override this.EmbedInSymbolTable _ = 
+    override this.CheckConsistency () =
         if not this.IsIntrinsic then // if not intrinsic, check variable usage
             checkVAR04Diagnostics this
+        checkSIG11Diagnostics this
+        base.CheckConsistency()
+
+    override this.EmbedInSymbolTable _ =
+        this.CheckConsistency()
         // set all signature variables of this block to bound ones
         this.GetVariables()
         |> List.map (fun var -> var :?> FplGenericVariable)

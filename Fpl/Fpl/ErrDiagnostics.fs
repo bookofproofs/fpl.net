@@ -1,4 +1,4 @@
-﻿module ErrDiagnostics
+module ErrDiagnostics
 open System
 open System.IO
 open System.Text.RegularExpressions
@@ -172,7 +172,7 @@ type DiagnosticCode =
     | SIG08 of string * string * string * string * int
     | SIG09 of string * string * int
     | SIG10 of string * string * int 
-    | SIG11 of string * string
+    | SIG11 of string 
     | SIG12 of string * string * string * string
     | SIG13 of string * string * string * string 
     | SIG14 
@@ -445,7 +445,7 @@ type DiagnosticCode =
                 $"Type mismatch in array's `{arrName}` {englishOrdinal dimNumber} dimension; expected `{dimType}`, got `{indexVarName}:{indexVarType}`."
             | SIG09 (arrName, dimType, dimNumber) -> $"Missing index for array's `{arrName}` {englishOrdinal dimNumber} dimension `{dimType}`"
             | SIG10 (arrName, indexVarName, indexNumber) -> $"Array `{arrName}` has less dimensions, {englishOrdinal indexNumber} index `{indexVarName}` not supported"
-            | SIG11 (qualifiedNameMapping, qualifiedWrongCandidate) -> $"{qualifiedNameMapping} cannot map to {qualifiedWrongCandidate}"
+            | SIG11 qualifiedWrongCandidate -> $"Mapping to {qualifiedWrongCandidate} delegates the map to another type. Map to the other type directly, instead."
             | SIG12 (templateName, secondUsage, firstUsage, firstUsagePos) -> $"The template `{templateName}` was used inconsistently with `{secondUsage}`, expecting `{firstUsage}` as it was used at `{firstUsagePos}`."
             | SIG13 (stmtName, secondUsage, firstUsage, firstUsagePos) -> $"Every branch of the {stmtName} must return a value with a type of the first case at `{firstUsagePos}`, which was `{firstUsage}`. This branch returns `{secondUsage}`."
             | SIG14 -> $"This case will never be matched."
