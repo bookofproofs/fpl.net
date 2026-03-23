@@ -1,0 +1,47 @@
+# EditorConfig is awesome: https://EditorConfig.org
+root = true
+
+[*]
+charset = utf-8
+end_of_line = crlf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+max_line_length = 120
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.json]
+trim_trailing_whitespace = false
+
+[*.yml]
+trim_trailing_whitespace = false
+
+[*.fs]
+indent_style = space
+indent_size = 4
+max_line_length = 120
+
+[*.fsx]
+indent_style = space
+indent_size = 4
+
+[*.cs]
+indent_style = space
+indent_size = 4
+csharp_indent_case_contents = true
+csharp_new_line_before_open_brace = all
+dotnet_sort_system_directives_first = true
+
+[*.sln]
+indent_style = space
+indent_size = 4
+
+[*.{cs,fs,fsx}]
+# encourage consistent trailing newlines and encoding
+insert_final_newline = true
+
+[*.{md,txt}]
+trim_trailing_whitespace = false
