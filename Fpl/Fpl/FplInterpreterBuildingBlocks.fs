@@ -63,8 +63,6 @@ let rec simplifyTriviallyNestedExpressions (rb1:FplGenericNode) =
         simplifyTriviallyNestedExpressions subNode
     | _ -> ()
 
-    
-
 let setKeywordType keywordType pos1 pos2 = 
     let fv = variableStack.PeekEvalStack()
     match fv with
