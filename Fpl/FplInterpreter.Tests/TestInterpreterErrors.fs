@@ -458,6 +458,9 @@ type TestInterpreterErrors() =
     [<DataRow("08", "def cl A {intr} thm T {true} proof T$1 {1. bydef B |- trivial };", 1)>]
     [<DataRow("09", "thm A {true} thm T {true} proof T$1 {1. A |- trivial };", 0)>]
     [<DataRow("10", "thm B {true} thm T {true} proof T$1 {1. A |- trivial };", 1)>]
+    [<DataRow("10a", "thm A {true} cor A$1 {true} thm T {true} proof T$1 {1. bycor A$1 |- trivial };", 0)>]
+    [<DataRow("10b", "ax A {true} thm T {true} proof T$1 {1. byax A |- trivial };", 0)>]
+    [<DataRow("10c", "ax A {true} thm T {true} proof T$1 {1. byax B |- trivial };", 1)>]
 
     // the following examples should not emit ID010 because this context is covered by the SIG04 diagnostics
     [<DataRow("11","def pred Test(x:Set) {intr};", 1)>]

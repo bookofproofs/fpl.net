@@ -537,7 +537,7 @@ let rec eval (st: SymbolTable) ast =
         | 0 -> 
             match fv.Parent with
             | Some (:? FplReference as parent) when parent.DottedChild.IsSome && Object.ReferenceEquals(fv, parent.DottedChild.Value) ->
-                // do not emit ID010 diagnostics, if fv is a dotted child, whose identifier we are still evaluating
+                // do not emit ID010 diagnostics, if fv is a dotted child, whose identifier we are still being evaluated
                 // only with this identifier, it will be possible in AST.PredicateWithOptSpecification to search for correct candidates 
                 () 
             | _ -> 
@@ -1590,7 +1590,7 @@ let rec eval (st: SymbolTable) ast =
                     | :? FplJustificationItemByConj ->
                         "Expected a reference to a conjecture."
                     | :? FplJustificationItemByCor ->
-                        "Expected a reference to a corollary ."
+                        "Expected a reference to a corollary."
                     | :? FplJustificationItemByDef ->
                         "Expected a reference to a definition (of a class, a predicate, or a functional term)."
                     | :? FplJustificationItemByDefVar ->
@@ -1605,8 +1605,7 @@ let rec eval (st: SymbolTable) ast =
                         "Expected a reference to a theorem, a lemma, or a proposition."
                     | _ -> "Expected another reference."
                 fvJi.ErrorOccurred <- emitPR001Diagnostics otherBlock fvJi.Name fvJi.StartPos fvJi.EndPos alternative
-            | ScopeSearchResult.NotFound ->
-                fvJi.ErrorOccurred <- emitID010Diagnostics fvJi.FplId fvJi.StartPos fvJi.EndPos
+            | ScopeSearchResult.NotFound -> ()
             | ScopeSearchResult.FoundMultiple listOfKandidates ->
                 fvJi.ErrorOccurred <- emitID023Diagnostics listOfKandidates fvJi.StartPos fvJi.EndPos
             | _ -> ()
