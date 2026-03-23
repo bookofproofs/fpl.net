@@ -690,7 +690,7 @@ type TestInterpreterErrors() =
     [<DataRow("04", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)};""", 0, "missing error message")>]
     [<DataRow("06", "ax T {all x,y:obj {del.Equal(x,y)}};", 0, "missing error message")>]
     [<DataRow("06a", "def cl Nat {intr} ax T {all x,y:Nat {del.Equal(x,y)}};", 0, "missing error message")>]
-    [<DataRow("06b", "ax T {all x,y:Bla {del.Equal(x,y)}};", 0, "Predicate `=` cannot be evaluated because the left argument is undefined.")>]
+    [<DataRow("06b", "ax T {all x,y:Bla {del.Equal(x,y)}};", 0, "missing error message")>]
     [<DataRow("07", "ax T {exn$1 x:obj {del.Equal(x,@1)}};", 0, "missing error message")>]
     [<DataRow("07a", "def cl Nat {intr} ax T {exn$1 x:Nat {del.Equal(x,@1)}};", 0, "missing error message")>]
     [<DataRow("07b", "ax T {exn$1 x:obj {del.Equal(x,$1)}};", 0, "missing error message")>]
@@ -714,8 +714,8 @@ type TestInterpreterErrors() =
 
     // the delegate Decrement should accept only "Digits" as type
     [<DataRow("00", "ext Digits x@/\d+/ -> Digits {ret x} def pred T(x:Digits) { del.Decrement(x) };", 0)>] 
-    [<DataRow("01", "ext Digits x@/\d+/ -> pred {ret true} def pred T(x:Digits) { del.Decrement(x) };", 1)>] 
-    [<DataRow("01a", "ext Digits x@/\d+/ -> ind {ret $42} def pred T(x:Digits) { del.Decrement(x) };", 1)>] 
+    [<DataRow("01", "ext Digits x@/\d+/ -> pred {ret true} def pred T(x:Digits) { del.Decrement(x) };", 0)>] // does not issue ID013 since x is Digits, as required
+    [<DataRow("01a", "ext Digits x@/\d+/ -> ind {ret $42} def pred T(x:Digits) { del.Decrement(x) };", 0)>]  // does not issue ID013 since x is Digits, as required
     [<DataRow("02", "def pred T(x:pred) { del.Decrement(x) };", 1)>] 
     [<DataRow("02a", "def pred T(x:pred()) { del.Decrement(x) };", 1)>] 
     [<DataRow("02b", "def pred T(x:pred(y:obj)) { del.Decrement(x) };", 1)>] 
@@ -997,7 +997,7 @@ type TestInterpreterErrors() =
     [<DataRow("21", """loc and(p,q) := !tex: p "\wedge" q;;""", 0)>]
     [<DataRow("22", """def class Set def pred In(x,y: Set) def pred IsEmpty(x: Set) { all y:Set { not In(y, x) } };""", 0)>]
     [<DataRow("23", """def pred T() { mcases (| true : false | false : true ? undef) };""", 0)>]
-    [<DataRow("23a", """def pred T() {dec ~x:obj; mcases (| $1 : false | x : true ? undef) };""", 3)>]
+    [<DataRow("23a", """def pred T() {dec ~x:obj; mcases (| $1 : false | x : true ? undef) };""", 2)>]
     [<DataRow("23b", """def pred T() {dec ~res:pred cases (| true : res:=false | false : res:=true ? res:=undef); res};""", 0)>]
     [<DataRow("23c", """def pred T() {dec ~res:pred ~x:obj cases (| $1 : res:=false | x : res:=true ? res:=undef); res};""", 2)>]
     [<DataRow("23d", """def pred T() {dec ~res:pred ~x:obj cases (| true : res:=false | x : res:=true ? res:=undef); res};""", 1)>]

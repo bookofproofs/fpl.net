@@ -1910,7 +1910,8 @@ type FplGenericPredicateWithExpression(positions: Positions, parent: FplGenericN
 
     override this.CheckConsistency () = 
         base.CheckConsistency()
-        checkVAR04Diagnostics this
+        if not this.IsIntrinsic then
+            checkVAR04Diagnostics this
         checkPredicateExpressionReturnsPredicate this
 
 /// Creates a concatenated string represenation based on a sequence of FplValues.
