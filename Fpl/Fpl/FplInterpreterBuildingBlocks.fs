@@ -370,8 +370,7 @@ let rec eval (st: SymbolTable) ast =
             | PrimPredicateL
             | PrimFunctionalTermL ->
                 fv.RefersTo <- Some block
-            | _ ->
-                fv.ErrorOccurred <- emitID016diagnostics $"{getEnglishName block.Name true} '{block.Type(SignatureType.Name)}'" pos1 pos2
+            | _ -> ()
         | _ -> ()
         variableStack.PushEvalStack(fv)
         variableStack.PopEvalStack()

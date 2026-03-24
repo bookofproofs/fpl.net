@@ -5441,6 +5441,8 @@ type FplParent(positions: Positions, parent: FplGenericNode) as this =
 
     override this.RunOrder = None
 
+
+
 /// Reference to "self" using the FPL self keyword. 
 // It will point to the enclosing block inside FPL predicate definitions, functional terms, and properties. Otherwise, it is undefined.
 type FplSelf(positions: Positions, parent: FplGenericNode) as this =
@@ -5478,7 +5480,37 @@ type FplSelf(positions: Positions, parent: FplGenericNode) as this =
         // FplSelf has no value, unless it has a representable RefersTo
         ()
 
-    override this.EmbedInSymbolTable _ = addExpressionToReference this
+    member this.SelfBlock = 
+        match this.NextBlockNode with
+        | Some block ->
+            match block.Name with 
+            | PrimExtensionL
+            | PrimMandatoryFunctionalTermL
+            | PrimMandatoryPredicateL
+            | PrimClassL
+            | PrimPredicateL
+            | PrimFunctionalTermL -> Some block
+            | _ -> None
+        | _ -> None
+
+    override this.CheckConsistency () =
+        match this.SelfBlock with
+        | Some block ->
+            match block.Name with 
+            | PrimExtensionL
+            | PrimMandatoryFunctionalTermL
+            | PrimMandatoryPredicateL
+            | PrimClassL
+            | PrimPredicateL
+            | PrimFunctionalTermL -> ()
+            | _ ->
+                this.ErrorOccurred <- emitID016diagnostics $"{getEnglishName block.Name true} '{block.Type(SignatureType.Name)}'" this.StartPos this.EndPos
+        | _ -> ()
+        base.CheckConsistency()
+
+    override this.EmbedInSymbolTable _ =
+        this.CheckConsistency()
+        addExpressionToReference this
 
     override this.RunOrder = None
 
