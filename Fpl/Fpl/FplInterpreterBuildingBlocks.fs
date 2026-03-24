@@ -360,36 +360,18 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Self((pos1, pos2), _) -> 
         let parent = variableStack.PeekEvalStack()
         let fv = new FplSelf((pos1, pos2), parent)
-        match fv.NextBlockNode with
-        | Some block ->
-            match block.Name with 
-            | PrimExtensionL
-            | PrimMandatoryFunctionalTermL
-            | PrimMandatoryPredicateL
-            | PrimClassL
-            | PrimPredicateL
-            | PrimFunctionalTermL ->
-                fv.RefersTo <- Some block
-            | _ -> ()
+        match fv.SelfBlock with
+        | ScopeSearchResult.Found block ->
+            fv.RefersTo <- Some block
         | _ -> ()
         variableStack.PushEvalStack(fv)
         variableStack.PopEvalStack()
     | Ast.Parent((pos1, pos2), _) -> 
         let parent = variableStack.PeekEvalStack()
         let fv = new FplParent((pos1, pos2), parent)
-        match fv.UltimateBlockNode, fv.NextBlockNode with
-        | Some block, Some nextBlock ->
-            match block.Name, nextBlock.Name with 
-            | PrimClassL, LiteralCtorL 
-            | PrimClassL, PrimMandatoryFunctionalTermL
-            | PrimClassL, PrimMandatoryPredicateL
-            | PrimPredicateL, PrimMandatoryFunctionalTermL
-            | PrimPredicateL, PrimMandatoryPredicateL
-            | PrimFunctionalTermL, PrimMandatoryFunctionalTermL
-            | PrimFunctionalTermL, PrimMandatoryPredicateL ->
-                fv.RefersTo <- Some block
-            | _ ->
-                fv.ErrorOccurred <- emitID015diagnostics $"{getEnglishName block.Name true} '{block.Type(SignatureType.Name)}'" pos1 pos2
+        match fv.ParentBlock with
+        | ScopeSearchResult.Found block ->
+            fv.RefersTo <- Some block
         | _ -> ()
         variableStack.PushEvalStack(fv)
         variableStack.PopEvalStack()

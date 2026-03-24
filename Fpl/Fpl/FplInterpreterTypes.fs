@@ -5434,7 +5434,33 @@ type FplParent(positions: Positions, parent: FplGenericNode) as this =
         // FplParent has no value, unless it has a representable RefersTo
         ()
 
-    override this.EmbedInSymbolTable _ = addExpressionToReference this
+    member this.ParentBlock =
+        match this.UltimateBlockNode, this.NextBlockNode with
+        | Some block, Some nextBlock ->
+            match block.Name, nextBlock.Name with 
+            | PrimClassL, LiteralCtorL 
+            | PrimClassL, PrimMandatoryFunctionalTermL
+            | PrimClassL, PrimMandatoryPredicateL
+            | PrimPredicateL, PrimMandatoryFunctionalTermL
+            | PrimPredicateL, PrimMandatoryPredicateL
+            | PrimFunctionalTermL, PrimMandatoryFunctionalTermL
+            | PrimFunctionalTermL, PrimMandatoryPredicateL ->
+                ScopeSearchResult.Found block
+            | _ ->
+                ScopeSearchResult.FoundIncorrectBlock block
+        | _ ->
+            ScopeSearchResult.NotFound
+
+    override this.CheckConsistency (): unit =
+        match this.ParentBlock with
+        | ScopeSearchResult.FoundIncorrectBlock block ->
+            this.ErrorOccurred <- emitID015diagnostics $"{getEnglishName block.Name true} '{block.Type(SignatureType.Name)}'" this.StartPos this.EndPos
+        | _ -> ()
+        base.CheckConsistency()
+
+    override this.EmbedInSymbolTable _ =
+        this.CheckConsistency()
+        addExpressionToReference this
 
     override this.RunOrder = None
 
@@ -5486,22 +5512,14 @@ type FplSelf(positions: Positions, parent: FplGenericNode) as this =
             | PrimMandatoryPredicateL
             | PrimClassL
             | PrimPredicateL
-            | PrimFunctionalTermL -> Some block
-            | _ -> None
-        | _ -> None
+            | PrimFunctionalTermL -> ScopeSearchResult.Found block
+            | _ -> ScopeSearchResult.FoundIncorrectBlock block
+        | _ -> ScopeSearchResult.NotFound
 
     override this.CheckConsistency () =
         match this.SelfBlock with
-        | Some block ->
-            match block.Name with 
-            | PrimExtensionL
-            | PrimMandatoryFunctionalTermL
-            | PrimMandatoryPredicateL
-            | PrimClassL
-            | PrimPredicateL
-            | PrimFunctionalTermL -> ()
-            | _ ->
-                this.ErrorOccurred <- emitID016diagnostics $"{getEnglishName block.Name true} '{block.Type(SignatureType.Name)}'" this.StartPos this.EndPos
+        | ScopeSearchResult.FoundIncorrectBlock block ->
+            this.ErrorOccurred <- emitID016diagnostics $"{getEnglishName block.Name true} '{block.Type(SignatureType.Name)}'" this.StartPos this.EndPos
         | _ -> ()
         base.CheckConsistency()
 
