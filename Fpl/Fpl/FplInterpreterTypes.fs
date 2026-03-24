@@ -3460,7 +3460,7 @@ type FplIntrinsicTpl(name, positions: Positions, parent: FplGenericNode) as this
                     // issue diagnostics, if inconsistent usage
                     match diagnostic with 
                     | "SIG12" -> this.ErrorOccurred <- emitSIG12diagnostics this.FplId firstUsage currentUsage (fv.QualifiedStartPos) templateUsage.StartPos templateUsage.EndPos
-                    | "SIG13" -> this.ErrorOccurred <- emitSIG13diagnostics this.FplId currentUsage firstUsage (templateUsage.QualifiedStartPos) this.StartPos this.EndPos
+                    | "SIG13" -> this.ErrorOccurred <- emitSIG13diagnostics this.FplId currentUsage firstUsage (templateUsage.QualifiedStartPos) fv.StartPos fv.EndPos
                     | _ -> emitUnexpectedErrorDiagnostics $"Unhandled diagnostic `{diagnostic}` in FplIntrinsicTpl.TrySetTemplateUsage."
                 | _ -> () // equal usage is accepted
             | _, _ -> () // equal usage is accepted
