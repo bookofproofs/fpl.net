@@ -1601,7 +1601,7 @@ let rec eval (st: SymbolTable) ast =
                     | :? FplJustificationItemByTheoremLikeStmt ->
                         "Expected a reference to a theorem, a lemma, or a proposition."
                     | _ -> "Expected another reference."
-                fvJi.ErrorOccurred <- emitPR001Diagnostics otherBlock fvJi.Name fvJi.StartPos fvJi.EndPos alternative
+                fvJi.ErrorOccurred <- emitPR001Diagnostics (qualifiedName otherBlock false) fvJi.Name fvJi.StartPos fvJi.EndPos alternative
             | ScopeSearchResult.NotFound -> () // ID010 is issued in evaluating AST.PredicateIdentifier
             | ScopeSearchResult.FoundMultiple listOfKandidates ->
                 fvJi.ErrorOccurred <- emitID023Diagnostics listOfKandidates fvJi.StartPos fvJi.EndPos

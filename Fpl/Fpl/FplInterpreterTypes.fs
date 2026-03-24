@@ -720,7 +720,7 @@ and ArgType =
 and ScopeSearchResult =
     | FoundAssociate of FplGenericNode
     | FoundMultiple of string
-    | FoundIncorrectBlock of string
+    | FoundIncorrectBlock of FplGenericNode
     | Found of FplGenericNode
     | NotFound
     | NotApplicable
@@ -2715,7 +2715,7 @@ type FplCorollary(positions: Positions, parent: FplGenericNode, runOrder) =
                     ScopeSearchResult.FoundAssociate potentialTheorem
                 elif notPotentialBlockList.Length > 0 then
                     let potentialOther = notPotentialBlockList.Head
-                    ScopeSearchResult.FoundIncorrectBlock (qualifiedName potentialOther false)
+                    ScopeSearchResult.FoundIncorrectBlock potentialOther
                 else
                     ScopeSearchResult.NotFound
             | None -> ScopeSearchResult.NotApplicable
@@ -2726,7 +2726,7 @@ type FplCorollary(positions: Positions, parent: FplGenericNode, runOrder) =
             // everything is OK, change the parent of the provable from theory to the found parent 
             this.Parent <- Some potentialParent
         | ScopeSearchResult.FoundIncorrectBlock incorrectBlock ->
-            this.ErrorOccurred <- emitID005diagnostics this.FplId incorrectBlock this.StartPos this.EndPos
+            this.ErrorOccurred <- emitID005diagnostics this.FplId (qualifiedName incorrectBlock false) this.StartPos this.EndPos
         | ScopeSearchResult.NotFound ->
             this.ErrorOccurred <- emitID006diagnostics this.FplId this.SignStartPos this.SignEndPos
         | _ -> ()
@@ -3240,10 +3240,7 @@ and FplProof(positions: Positions, parent: FplGenericNode, runOrder) =
                     ScopeSearchResult.FoundAssociate potentialTheorem
                 elif notProvableBlocklist.Length > 0 then
                     let potentialOther = notProvableBlocklist.Head
-
-                    ScopeSearchResult.FoundIncorrectBlock(
-                        sprintf "'%s' %s" potentialOther.Name (qualifiedName potentialOther false)
-                    )
+                    ScopeSearchResult.FoundIncorrectBlock potentialOther
                 else
                     ScopeSearchResult.NotFound
             | None -> ScopeSearchResult.NotApplicable
@@ -3254,7 +3251,7 @@ and FplProof(positions: Positions, parent: FplGenericNode, runOrder) =
             // everything is OK, change the parent of the provable from theory to the found parent 
             this.Parent <- Some potentialParent
         | ScopeSearchResult.FoundIncorrectBlock incorrectBlock ->
-            this.ErrorOccurred <- emitID002Diagnostics this.FplId incorrectBlock this.StartPos this.EndPos
+            this.ErrorOccurred <- emitID002Diagnostics this.FplId (qualifiedName incorrectBlock false) this.StartPos this.EndPos
         | ScopeSearchResult.NotFound ->
             this.ErrorOccurred <- emitID003diagnostics this.FplId this.SignStartPos this.SignEndPos
         | _ -> ()
@@ -6882,7 +6879,6 @@ let variableInBlockScopeByName (fplValue: FplGenericNode) name withNestedVariabl
 /// Tries to find a theorem-like statement, an axiom or a corollary
 /// and returns different cases of ScopeSearchResult, depending on different semantical error situations.
 let tryFindAssociatedBlockForJustificationItem (fvJi: FplGenericJustificationItem) (candidates:FplGenericNode list) =
-    let nameOfOther (fv:FplGenericNode) = $"'{fv.Type(SignatureType.Name)} which is {getEnglishName fv.Name false}'"
     match candidates.Length with
     | 1 ->  // exactly one candidate found
         let potentialCandidate = candidates.Head
@@ -6901,7 +6897,7 @@ let tryFindAssociatedBlockForJustificationItem (fvJi: FplGenericJustificationIte
         | :? FplJustificationItemByTheoremLikeStmt, :? FplLemma ->
             ScopeSearchResult.FoundAssociate potentialCandidate
         | _ ->
-            ScopeSearchResult.FoundIncorrectBlock (nameOfOther potentialCandidate)
+            ScopeSearchResult.FoundIncorrectBlock potentialCandidate
     | 0 -> ScopeSearchResult.NotFound
     | _ -> 
         // multiple candidates found
