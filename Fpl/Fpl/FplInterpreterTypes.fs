@@ -2530,6 +2530,15 @@ let runArgumentsOfGenericPredicateWithExpression (fv:FplGenericHasValue) =
             
     )
 
+/// Checks if a predicate expected to be true was evaluated to false
+let checkLG003Diagnostics (fv:FplGenericNode) =
+    match box fv with
+    | :? IHasSignature as hasSignature ->
+        let nodeRepr = fv.Represent()
+        if nodeRepr = LiteralFalse then
+            fv.ErrorOccurred <- emitLG003diagnostic (fv.Type(SignatureType.Name)) fv.Name nodeRepr hasSignature.SignStartPos hasSignature.SignEndPos
+    | _ -> ()
+
 type FplAxiom(positions: Positions, parent: FplGenericNode, runOrder) =
     inherit FplGenericPredicateWithExpression(positions, parent)
     let _runOrder = runOrder
@@ -2558,7 +2567,7 @@ type FplAxiom(positions: Positions, parent: FplGenericNode, runOrder) =
         if not _isReady then
             runArgumentsOfGenericPredicateWithExpression this 
             _isReady <- true
-            this.ErrorOccurred <- emitLG003diagnostic (this.Type(SignatureType.Name)) this.Name (this.Represent()) this.StartPos this.EndPos
+            checkLG003Diagnostics this
 
             // evaluate all corollaries of the axiom
             this.Scope.Values
@@ -2603,7 +2612,7 @@ type FplGenericTheoremLikeStmt(positions: Positions, parent: FplGenericNode, run
         if not _isReady then
             runArgumentsOfGenericPredicateWithExpression this 
             _isReady <- true
-            this.ErrorOccurred <- emitLG003diagnostic (this.Type(SignatureType.Name)) this.Name (this.Represent()) this.StartPos this.EndPos
+            checkLG003Diagnostics this
 
             // evaluate all corollaries and proofs of the theorem-like statement
             this.Scope.Values
@@ -2752,6 +2761,7 @@ type FplConjecture(positions: Positions, parent: FplGenericNode, runOrder) =
         if not _isReady then
             runArgumentsOfGenericPredicateWithExpression this 
             _isReady <- true
+            checkLG003Diagnostics this
 
             // evaluate all corollaries of the conjecture
             this.Scope.Values
