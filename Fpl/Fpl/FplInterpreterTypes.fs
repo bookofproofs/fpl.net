@@ -3444,21 +3444,26 @@ type FplIntrinsicTpl(name, positions: Positions, parent: FplGenericNode) as this
         match this.RefersTo with 
         | None -> 
             this.RefersTo <- Some fv // if this template was not used, use it
-        | Some templateUsage -> 
-            // otherwise calculate the type signatures of the very first usage  
-            let firstUsage = templateUsage.Type SignatureType.Type
-            // and the current one
-            let currentUsage = fv.Type SignatureType.Type
-            // compare both
-            match currentUsage with 
-            | LiteralUndef -> () // Usage "undef" is always accepted
-            | _  when firstUsage <> currentUsage ->
-                // issue diagnostics, if inconsistent usage
-                match diagnostic with 
-                | "SIG12" -> this.ErrorOccurred <- emitSIG12diagnostics this.FplId firstUsage currentUsage (fv.QualifiedStartPos) templateUsage.StartPos templateUsage.EndPos
-                | "SIG13" -> this.ErrorOccurred <- emitSIG13diagnostics this.FplId currentUsage firstUsage (templateUsage.QualifiedStartPos) this.StartPos this.EndPos
-                | _ -> emitUnexpectedErrorDiagnostics $"Unhandled diagnostic `{diagnostic}` in FplIntrinsicTpl.TrySetTemplateUsage."
-            | _ -> () // equal usage is accepted
+        | Some templateUsage ->
+            match templateUsage.UltimateBlockNode, fv.UltimateBlockNode with
+            | Some block1, Some block2 when Object.ReferenceEquals(block1, block2) ->
+                // test only usages within the scope of the same UltimateBlockNode
+                // (since all other usages are not usages are out ouf scope)
+                // otherwise calculate the type signatures of the very first usage  
+                let firstUsage = templateUsage.Type SignatureType.Type
+                // and the current one
+                let currentUsage = fv.Type SignatureType.Type
+                // compare both
+                match currentUsage with 
+                | LiteralUndef -> () // Usage "undef" is always accepted
+                | _  when firstUsage <> currentUsage ->
+                    // issue diagnostics, if inconsistent usage
+                    match diagnostic with 
+                    | "SIG12" -> this.ErrorOccurred <- emitSIG12diagnostics this.FplId firstUsage currentUsage (fv.QualifiedStartPos) templateUsage.StartPos templateUsage.EndPos
+                    | "SIG13" -> this.ErrorOccurred <- emitSIG13diagnostics this.FplId currentUsage firstUsage (templateUsage.QualifiedStartPos) this.StartPos this.EndPos
+                    | _ -> emitUnexpectedErrorDiagnostics $"Unhandled diagnostic `{diagnostic}` in FplIntrinsicTpl.TrySetTemplateUsage."
+                | _ -> () // equal usage is accepted
+            | _, _ -> () // equal usage is accepted
 
     override this.EmbedInSymbolTable _ = tryAddTemplateToParent this 
 
