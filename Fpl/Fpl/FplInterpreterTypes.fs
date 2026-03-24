@@ -1874,7 +1874,7 @@ let checkArgPred (fv:FplGenericNode) (arg:FplGenericNode)  =
             () 
         else
             let argName = arg.Type SignatureType.Name
-            fv.ErrorOccurred <- emitLG001Diagnostics argType argName fv.Name arg.StartPos arg.EndPos
+            fv.ErrorOccurred <- emitLG001Diagnostics argType argName fv.Name arg.StartPos arg.StartPos
 
 /// Checks if a predicate expression is actually being interpreted as an predicate
 let checkPredicateExpressionReturnsPredicate (fv:FplGenericNode) =
@@ -2831,11 +2831,10 @@ type FplGenericJustificationItem(positions: Positions, parent: FplGenericNode) =
             else
                 // if there is a value but ref is not a predicate, 
                 // set the value of "this" to undetermined
-                let value = new FplIntrinsicPred((this.StartPos, this.EndPos), this) 
-                this.SetValue value
+                this.SetDefaultValue()
                 // and issue diagnostics saying that this requires a predicate
                 let refName = ref.Type SignatureType.Name
-                this.ErrorOccurred <- emitLG001Diagnostics refType refName this.Name ref.StartPos ref.EndPos
+                this.ErrorOccurred <- emitLG001Diagnostics refType refName this.Name ref.StartPos ref.StartPos
         | Some (:? FplGenericHasValue as ref) when ref.Value.IsNone ->
             // set the value of "this" to undetermined
             ref.SetDefaultValue()
