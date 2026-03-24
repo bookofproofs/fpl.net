@@ -3346,7 +3346,7 @@ type TestInterpreterErrors() =
     [<DataRow("MS1k","proof A$1 {1. |- trivial} ext U x@/\d+/ -> pred(z:obj) {ret A$1} def pred T(v:pred(y:obj)) {true} def pred Test() {T(@1)};", 0)>] // OK, only SIG03 instead of SIG04 would be issued: pred(y:obj) does not match signature A (proof)
     [<DataRow("MS1l","inf A {pre:true con:true} ext U x@/\d+/ -> pred(z:obj) {ret A} def pred T(v:pred(y:obj)) {true} def pred Test() {T(@1)};", 0)>] // OK, only SIG03 instead of SIG04 would be issued: pred(y:obj) does not match signature A (rule of inference)
     [<DataRow("MS1m","def func A()->obj ext U x@/\d+/ -> pred(z:obj) {ret A} def pred T(v:pred(y:obj)) {true} def pred Test() {T(@1)};", 0)>] // OK, only SIG03 instead of SIG04 would be issued: pred(y:obj) does not match signature A (functional term)
-    [<DataRow("MS1n","ext A x@/\w/ -> obj {dec ~y:obj; return y} ext U x@/\d+/ -> pred(z:obj) {ret @a} def pred T(v:pred(y:obj)) {true} def pred Test() {T(@1)};", 0)>] // OK, only SIG03 instead of SIG04 would be issued: pred(y:obj) does not match signature A (extension)
+    [<DataRow("MS1n","ext U x@/\d+/ -> pred(z:ind) {dec ~u:pred(a:ind); ret u} def pred T(v:pred(y:obj)) {true} def pred Test() {T(@1)};", 1)>] // SIG04: pred(y:ind) does not match pred(y:obj)
     [<DataRow("MS1o","def cl A ext U x@/\d+/ -> pred(z:obj) {ret A} def pred T(v:pred(y:obj)) {true} def pred Test() {T(@1)};", 0)>] // OK, only SIG03 instead of SIG04 would be issued: pred(y:obj) does not match signature A (class)
     // ... using properties of classes
     [<DataRow("MS1p1","def cl A {intr prty pred X(x:obj) } ext U x@/\d+/ -> pred(h:obj) {ret A.X} def pred T(v:pred(y:obj)) {true} def pred Test() {T(@1)};", 0)>] // OK: ->pred(y:obj) matches signature A.X(obj) 
@@ -4372,7 +4372,7 @@ type TestInterpreterErrors() =
     [<DataRow("MS1k", "proof A$1 {1. |- trivial} ext U x@/\d+/ -> pred(z:obj) {ret A$1} def pred T(v:pred(y:obj)) {dec v:=@1; true};", 0)>] // OK, only SIG03 instead of SIG05 would be issued: pred(y:obj) does not match signature A (proof)
     [<DataRow("MS1l", "inf A {pre:true con:true} ext U x@/\d+/ -> pred(z:obj) {ret A} def pred T(v:pred(y:obj)) {dec v:=@1; true};", 0)>] // OK, only SIG03 instead of SIG05 would be issued: pred(y:obj) does not match signature A (rule of inference)
     [<DataRow("MS1m", "def func A()->obj ext U x@/\d+/ -> pred(z:obj) {ret A} def pred T(v:pred(y:obj)) {dec v:=@1; true};", 0)>] // OK, only SIG03 instead of SIG05 would be issued: pred(y:obj) does not match signature A (functional term)
-    [<DataRow("MS1n", "ext A x@/\w/ -> obj {dec ~y:obj; return y} ext U x@/\d+/ -> pred(z:obj) {ret @a} def pred T(v:pred(y:obj)) {dec v:=@1; true};", 0)>] // SIG05: pred(y:obj) does not match signature A (extension)
+    [<DataRow("MS1n", "ext U x@/\d+/ -> pred(z:obj) {dec ~u:pred(a:obj); ret u} def pred T(v:pred(y:ind)) {dec v:=@1; true};", 1)>] // SIG05: pred(y:obj) does not match signature pred(y:ind)
     [<DataRow("MS1o", "def cl A ext U x@/\d+/ -> pred(z:obj) {ret A} def pred T(v:pred(y:obj)) {dec v:=@1; true};", 0)>] // OK, only SIG03 instead of SIG05 would be issued: pred(y:obj) does not match signature A (class)
     // ... using properties of classes
     [<DataRow("MS1p1", "def cl A {intr prty pred X(x:obj) } ext U x@/\d+/ -> pred(h:obj) {ret A.X} def pred T(v:pred(y:obj)) {dec v:=@1; true};", 0)>] // OK: ->pred(y:obj) matches signature A.X(obj) 
