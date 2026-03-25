@@ -1,4 +1,4 @@
-﻿namespace FplInterpreter.Tests
+namespace FplInterpreter.Tests
 open System
 open System.Collections.Generic
 open Microsoft.VisualStudio.TestTools.UnitTesting
@@ -7,6 +7,7 @@ open Newtonsoft.Json.Linq
 open FParsec
 open ErrDiagnostics
 open FplPrimitives
+open FplInterpreterUtils
 open FplInterpreterTypes
 open CommonTestHelpers
 

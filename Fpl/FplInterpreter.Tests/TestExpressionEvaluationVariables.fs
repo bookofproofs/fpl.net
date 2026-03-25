@@ -1,8 +1,9 @@
-﻿namespace FplInterpreter.Tests
+namespace FplInterpreter.Tests
 
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
 open FplPrimitives
+open FplInterpreterUtils
 open FplInterpreterTypes
 open CommonTestHelpers
 
@@ -238,4 +239,3 @@ type TestExpressionEvaluationVariables() =
             Assert.AreEqual<string>(expected, actual)
         | None -> Assert.IsTrue(false)
 
-    

@@ -20,6 +20,7 @@ open ErrDiagnostics
 open FplPrimitives
 open FplGrammarTypes
 open FplInterpreterAstPreprocessing
+open FplInterpreterUtils
 open FplInterpreterTypes
 open FplInterpreterDiagnosticsEmitter
 

@@ -1,9 +1,6 @@
 namespace FplInterpreter.Tests
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
-open FParsec
-open ErrDiagnostics
-open FplInterpreterTypes
+open FplInterpreterUtils
 open CommonTestHelpers
 
 [<TestClass>]
