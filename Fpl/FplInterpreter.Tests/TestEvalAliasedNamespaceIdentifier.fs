@@ -4,6 +4,7 @@ open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open FParsec
 open ErrDiagnostics
+open FplInterpreterAstPreprocessing
 open FplInterpreterTypes
 open FplInterpreterUsesClause
 open CommonTestHelpers

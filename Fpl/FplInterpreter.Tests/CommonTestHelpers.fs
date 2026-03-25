@@ -4,6 +4,7 @@ open System
 open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
+open FplInterpreterAstPreprocessing
 open FplInterpreterTypes
 open FplInterpreterDiagnosticsEmitter
 open TestSharedConfig

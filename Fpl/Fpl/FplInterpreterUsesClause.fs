@@ -1,4 +1,4 @@
-﻿/// This module handles the the interpretation of uses clauses and implements big parts of self-containment of FPL. 
+/// This module handles the the interpretation of uses clauses and implements big parts of self-containment of FPL. 
 
 module FplInterpreterUsesClause
 open System.Text.RegularExpressions
@@ -8,6 +8,7 @@ open System.Collections.Generic
 open System
 open FParsec
 open FplGrammarTypes
+open FplInterpreterAstPreprocessing
 open FplInterpreterTypes
 open ErrDiagnostics
 

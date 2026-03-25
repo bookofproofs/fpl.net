@@ -19,6 +19,7 @@ open System.Collections.Generic
 open ErrDiagnostics
 open FplPrimitives
 open FplGrammarTypes
+open FplInterpreterAstPreprocessing
 open FplInterpreterTypes
 open FplInterpreterDiagnosticsEmitter
 

@@ -1,14 +1,12 @@
-﻿/// This console "main" program is for test/debugging purposes only.
+/// This console "main" program is for test/debugging purposes only.
 /// It is not really needed because the necessary FPL modules are run 
 /// as an FPL Language Server (see FplLS C# Project in the same solution).
 
-open FplPrimitives
 open ErrDiagnostics
 open FplParser
-open FplInterpreter
+open FplInterpreterAstPreprocessing
 open FplInterpreterTypes
 open System.IO
-open System.Runtime.CompilerServices
 
 let deleteFilesWithExtension dir extension =
     if Directory.Exists(dir) then

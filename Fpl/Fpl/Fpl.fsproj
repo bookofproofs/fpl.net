@@ -1,40 +1,41 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
-    <GenerateProgramFile>false</GenerateProgramFile>
-    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-    <PublishSingleFile>true</PublishSingleFile>
-  </PropertyGroup>
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <GenerateProgramFile>false</GenerateProgramFile>
+        <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+        <PublishSingleFile>true</PublishSingleFile>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Include="FplPrivimitives.fs" />
-    <Compile Include="FplGrammarTypes.fs" />
-    <Compile Include="ErrDiagnostics.fs" />
-    <Compile Include="FplInterpreterDiagnosticsEmitter.fs" />
-    <None Include="CHANGES.md" />
-    <None Include="DocuSymbolTable.md" />
-    <None Include="DocuFplGrammarPocShiftFromPythonToFSharp.md" />
-    <Compile Include="FplParser.fs" />
-    <Compile Include="FplInterpreterTypes.fs" />
-    <Compile Include="FplInterpreterUsesClause.fs" />
-    <Compile Include="FplInterpreterBuildingBlocks.fs" />
-    <Compile Include="FplInterpreter.fs" />
-    <Compile Include="Program.fs" />
-  </ItemGroup>
+    <ItemGroup>
+        <Compile Include="FplPrivimitives.fs" />
+        <Compile Include="FplGrammarTypes.fs" />
+        <Compile Include="ErrDiagnostics.fs" />
+        <Compile Include="FplInterpreterDiagnosticsEmitter.fs" />
+        <None Include="CHANGES.md" />
+        <None Include="DocuSymbolTable.md" />
+        <None Include="DocuFplGrammarPocShiftFromPythonToFSharp.md" />
+        <Compile Include="FplParser.fs" />
+        <Compile Include="FplInterpreterAstPreprocessing.fs" />
+        <Compile Include="FplInterpreterTypes.fs" />
+        <Compile Include="FplInterpreterUsesClause.fs" />
+        <Compile Include="FplInterpreterBuildingBlocks.fs" />
+        <Compile Include="FplInterpreter.fs" />
+        <Compile Include="Program.fs" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="FParsec" Version="1.1.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="FParsec" Version="1.1.1" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\TestSharedConfig\TestSharedConfig.fsproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\TestSharedConfig\TestSharedConfig.fsproj" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="9.0.303" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Update="FSharp.Core" Version="9.0.303" />
+    </ItemGroup>
 
 </Project>
