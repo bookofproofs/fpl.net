@@ -748,8 +748,17 @@ let rec eval (st: SymbolTable) ast =
                     // match the signatures of small-letter entities (like the self or parent entity, or variables with arguments) 
                     // with their declared types 
                     match node.RefersTo with
-                    | Some fv when (fv.Name = PrimVariableL || fv.Name = LiteralSelf || fv.Name = LiteralParent) && fv.RefersTo.IsSome -> [fv.RefersTo.Value]
-                    | Some fv -> [fv]
+                    | Some ref ->
+                        match ref.Name, ref.RefersTo with
+                        // the candidate from FplSelf is the block it points to (if any)
+                        | LiteralSelf, Some fplBlock -> [fplBlock]
+                        | LiteralSelf, None -> []
+                        // the candidate from FplParent is the block it points to (if any)
+                        | LiteralParent, Some fplBlock -> [fplBlock]
+                        | LiteralParent, None -> []
+                        // the candidate from FplVariable is the block it points to (if any)
+                        | PrimVariableL, Some fplBlock -> [fplBlock]
+                        | _, _ -> [ref]
                     | None -> []
                 else
                     searchForCandidatesOfReferenceBlock node

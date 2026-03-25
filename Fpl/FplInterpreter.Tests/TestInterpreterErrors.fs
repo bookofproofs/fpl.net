@@ -3167,6 +3167,7 @@ type TestInterpreterErrors() =
     [<DataRow("70", """def cl Nat def func Succ(n: Nat) -> Nat ext Digits x@/\d+/ -> Nat {ret mcases (| true : Nat() ? Succ(self(delegate.Decrement(x))) ) };""", 0)>]    
     [<DataRow("71", """def pred Equal(x,y: tpl) infix "=" 50 { del.Equal(x,y) } def cl Nat def cl Zero:Nat def func Succ(n:Nat)->Nat def pred T() {all x,y:Nat {(x = Succ(y))}};""", 0)>]    
     [<DataRow("72", "def pred S() {dec parent():=true; true};", 0)>] // SIG04 won't be issued due to proceeding errors (ID015)
+    [<DataRow("72a", "thm S {dec self():=true; true};", 0)>] // SIG04 won't be issued due to proceeding errors (ID015)
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG04(no:string, fplCode:string, expected) =
