@@ -1,14 +1,15 @@
-﻿namespace FplInterpreter.Tests
+namespace FplInterpreter.Tests
 
 open CommonTestHelpers
 open ErrDiagnostics
+open FplInterpreterBasicTypes
 open FplInterpreterTypes
 open FParsec
 
 
 type CommonFplValueTestCases =
 
-    static member getScopedElement (fv:FplInterpreterTypes.FplGenericNode) name subtype =
+    static member getScopedElement (fv:FplGenericNode) name subtype =
         if subtype <> "" then
             if fv.Scope.ContainsKey(name) then 
                 fv.Scope[name]

@@ -8,6 +8,7 @@ open FParsec
 open ErrDiagnostics
 open FplPrimitives
 open FplInterpreterUtils
+open FplInterpreterBasicTypes
 open FplInterpreterTypes
 open CommonTestHelpers
 
