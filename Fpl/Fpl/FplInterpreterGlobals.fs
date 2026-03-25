@@ -235,3 +235,5 @@ let debug (fv:FplGenericNode) (debugMode:Debug) =
                 $"Stop :{indent.Substring(2)}{getPath fv}:[{fv.Represent()}][{vars}]{Environment.NewLine}"
         let currDir = Directory.GetCurrentDirectory()
         File.AppendAllText(Path.Combine(currDir, "Debug.txt"), logLine)
+
+

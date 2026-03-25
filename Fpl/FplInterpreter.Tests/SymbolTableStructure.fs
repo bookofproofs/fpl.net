@@ -9,6 +9,10 @@ open ErrDiagnostics
 open FplPrimitives
 open FplInterpreterUtils
 open FplInterpreterBasicTypes
+open FplInterpreterSTEmbedding
+open FplInterpreterReferences
+open FplInterpreterIntrinsicTypes
+open FplInterpreterVariables
 open FplInterpreterTypes
 open CommonTestHelpers
 

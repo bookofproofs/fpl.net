@@ -528,3 +528,47 @@ let qualifiedName (fplValue:FplGenericNode) determined =
                 getFullName fv.Parent.Value false + "." + fplValueType
 
     $"{getEnglishName fplValue.Name determined} {getFullName fplValue true}"
+
+let getFplHead (fv:FplGenericNode) (signatureType:SignatureType) =
+    match signatureType with
+            | SignatureType.Name 
+            | SignatureType.Mixed -> fv.FplId
+            | SignatureType.Type -> fv.TypeId
+
+let propagateSignatureType (signatureType:SignatureType) =
+    match signatureType with
+    | SignatureType.Mixed -> SignatureType.Type
+    | _ -> signatureType 
+
+/// Generates a string of parameters based on SignatureType
+let getParamTuple (fv:FplGenericNode) (signatureType:SignatureType) =
+        let propagate = propagateSignatureType signatureType
+        fv.Scope
+        |> Seq.filter (fun (kvp: KeyValuePair<string, FplGenericNode>) ->
+            isSignatureVar kvp.Value
+            || (isVar fv) && not (kvp.Value.IsClass())
+            || fv.IsMapping())
+        |> Seq.map (fun (kvp: KeyValuePair<string, FplGenericNode>) -> kvp.Value.Type(propagate))
+        |> String.concat ", "
+
+/// Creates a concatenated string represenation based on a sequence of FplValues.
+let signatureSep sep (coordinates:FplGenericNode seq) signatureType =
+    coordinates
+    |> Seq.map (fun fv -> fv.Type signatureType)
+    |> String.concat sep
+
+/// Tries to find a mapping of an FplValue
+let rec getMapping (fv:FplGenericNode) =
+    match fv.Name with
+    | LiteralParent 
+    | LiteralSelf -> 
+        match fv.RefersTo with 
+        | Some ref -> getMapping ref
+        | None -> None
+    | PrimRefL when fv.RefersTo.IsSome ->
+        getMapping fv.RefersTo.Value
+    | PrimRefL ->
+        None
+    | _ ->
+        fv.ArgList |> Seq.tryFind (fun fv -> fv.Name = PrimMappingL)
+

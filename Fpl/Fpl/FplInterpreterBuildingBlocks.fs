@@ -19,12 +19,16 @@ open System.Collections.Generic
 open ErrDiagnostics
 open FplPrimitives
 open FplGrammarTypes
+open FplInterpreterDiagnosticsEmitter
 open FplInterpreterAstPreprocessing
 open FplInterpreterUtils
 open FplInterpreterBasicTypes
 open FplInterpreterGlobals
+open FplInterpreterSTEmbedding
+open FplInterpreterIntrinsicTypes
+open FplInterpreterVariables
+open FplInterpreterReferences
 open FplInterpreterTypes
-open FplInterpreterDiagnosticsEmitter
 
 let filterCandidates (candidatesPre:FplGenericNode list) identifier qualified =
     let candidates =

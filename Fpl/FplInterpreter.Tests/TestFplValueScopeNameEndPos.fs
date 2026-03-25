@@ -4,6 +4,7 @@ open FParsec
 open ErrDiagnostics
 open FplPrimitives
 open FplInterpreterBasicTypes
+open FplInterpreterSTEmbedding
 open FplInterpreterTypes
 open CommonTestHelpers
 

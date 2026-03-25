@@ -21,6 +21,10 @@
         <Compile Include="FplInterpreterUtils.fs" />
         <Compile Include="FplInterpreterBasicTypes.fs" />
         <Compile Include="FplInterpreterGlobals.fs" />
+        <Compile Include="FplInterpreterSTEmbedding.fs" />
+        <Compile Include="FplInterpreterIntrinsicTypes.fs" />
+        <Compile Include="FplInterpreterVariables.fs" />
+        <Compile Include="FplInterpreterReferences.fs" />
         <Compile Include="FplInterpreterTypes.fs" />
         <Compile Include="FplInterpreterUsesClause.fs" />
         <Compile Include="FplInterpreterBuildingBlocks.fs" />

@@ -13,19 +13,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 module FplInterpreterUtils
-
-open System
-open System.Text.RegularExpressions
-open System.Collections.Generic
-open System.Text
-open System.IO
 open FParsec
-open FplPrimitives
-open FplGrammarTypes
-open FplParser
-open ErrDiagnostics
-open FplInterpreterDiagnosticsEmitter
-open FplInterpreterAstPreprocessing
 
 type FixType =
     | Infix of string * int

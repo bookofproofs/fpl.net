@@ -1,10 +1,12 @@
 namespace FplInterpreter.Tests
 
+open FParsec
 open CommonTestHelpers
 open ErrDiagnostics
 open FplInterpreterBasicTypes
-open FplInterpreterTypes
-open FParsec
+open FplInterpreterSTEmbedding
+open FplInterpreterVariables
+open FplInterpreterIntrinsicTypes
 
 
 type CommonFplValueTestCases =
@@ -17,7 +19,7 @@ type CommonFplValueTestCases =
                 let kv = fv.Scope |> Seq.head
                 kv.Value
             else
-                new FplInterpreterTypes.FplRoot()
+                new FplRoot()
         else
             fv.Scope[name]
 

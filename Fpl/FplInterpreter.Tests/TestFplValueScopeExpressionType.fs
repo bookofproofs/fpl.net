@@ -3,7 +3,7 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
 open FplInterpreterUtils
 open FplInterpreterBasicTypes
-open FplInterpreterTypes
+open FplInterpreterSTEmbedding
 open CommonTestHelpers
 open FplPrimitives
 
