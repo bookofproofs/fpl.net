@@ -14,6 +14,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 *)
 module FplInterpreterChecks
 open System
+open System.Collections.Generic
 open ErrDiagnostics
 open FplPrimitives
 open FplInterpreterDiagnosticsEmitter
@@ -259,3 +260,113 @@ let checkSIG01Diagnostics (fv: FplGenericNode)  =
         if fv.RefersTo.IsNone then
             fv.ErrorOccurred <- emitSIG01Diagnostics expressionId fv.StartPos fv.EndPos
     | _ -> ()
+
+let checkSIG02Diagnostics (fv:FplGenericNode) symbol precedence pos1 pos2 = 
+    let precedences = Dictionary<int, FplGenericNode>()
+    let precedenceWasAlreadyThere precedence fv =
+        if not (precedences.ContainsKey(precedence)) then
+            precedences.Add(precedence, fv)
+            false
+        else
+            true
+    (root fv).Scope
+    |> Seq.map (fun kv -> kv.Value)
+    |> Seq.iter (fun theory ->
+        theory.Scope
+        |> Seq.map (fun kv1 -> kv1.Value)
+        |> Seq.iter (fun block ->
+            match block.ExpressionType with
+            | FixType.Infix(_, precedence) -> precedenceWasAlreadyThere precedence block |> ignore
+            | _ -> ()))
+    if precedences.ContainsKey(precedence) then
+        let conflict = precedences[precedence].QualifiedStartPos
+        precedences[precedence].ErrorOccurred <- emitSIG02Diagnostics symbol precedence conflict pos1 pos2
+
+/// Issue VAR10, if the formula in an FplValue uses 
+/// quantor(s) and the variables bound by these quantor(s) are used elsewhere in the same formula
+/// VAR10 => formula should be cleaned up by renaming the bound variables
+let checkCleanedUpFormula (fv:FplGenericNode) =
+    let formulaCreationInSymbolTableCompleted (formula:FplGenericNode) =
+        match formula.Parent with 
+        | Some parent ->
+            match parent.Name with 
+            | PrimConjunction
+            | PrimDisjunction
+            | PrimImplication
+            | PrimEquivalence
+            | PrimExclusiveOr
+            | PrimNegation
+            | PrimQuantorAll
+            | PrimQuantorExists
+            | PrimQuantorExistsN
+            | PrimIsOperator
+            | PrimRefL -> false
+            | _ -> true
+        | _ -> true
+
+    let rec usedVariablesInFormula (formula:FplGenericNode) = 
+        let extractFromSubFormula (subFormula:FplGenericNode) =
+            subFormula.ArgList 
+            |> Seq.map (fun subF -> usedVariablesInFormula subF)
+            |> List.concat
+        match formula.Name with 
+        | PrimRefL when formula.RefersTo.IsSome ->
+            match formula.RefersTo with
+            | Some ref when ref.Name = PrimVariableL -> [formula] 
+            | None when checkStartsWithLowerCase formula.FplId -> 
+                [formula]  
+            | _ -> extractFromSubFormula formula 
+        | PrimQuantorAll
+        | PrimQuantorExists
+        | PrimQuantorExistsN -> (formula.Scope.Values |> Seq.toList) @ extractFromSubFormula formula.ArgList[0]  
+        | _ ->
+            extractFromSubFormula formula 
+
+    let rec extractQuantors (formula:FplGenericNode) =
+        let extractFromSubFormula (subFormula:FplGenericNode) =
+            (subFormula.ArgList |> Seq.map (fun subF -> extractQuantors subF) |> List.concat)
+        match formula.Name with 
+        | PrimQuantorAll
+        | PrimQuantorExists
+        | PrimQuantorExistsN -> 
+            [formula] @ extractFromSubFormula formula
+        | _ -> 
+            extractFromSubFormula formula
+
+    let rec checkQuantors (formula:FplGenericNode) =
+        let varUsedInQuantor (varInFormula:FplGenericNode) (quantor:FplGenericNode) =
+            let varLStart = varInFormula.StartPos.Line
+            let varCStart = varInFormula.StartPos.Column
+            let varLEnd = varInFormula.EndPos.Line
+            let varCEnd = varInFormula.EndPos.Column
+            let quantorLStart = quantor.StartPos.Line
+            let quantorCStart = quantor.StartPos.Column
+            let quantorLEnd = quantor.EndPos.Line
+            let quantorCEnd = quantor.EndPos.Column
+            (
+               (quantorLStart < varLStart && quantorLEnd > varLEnd) // lines(quantor) contain lines(variable)
+            || (quantorLStart = varLStart && quantorLEnd > varLEnd && quantorCStart <= varCStart ) // if start line(q) = start line line(v) && end line(q) > end line(v), compare starting columns
+            || (quantorLStart = varLStart && quantorLEnd = varLEnd && quantorCStart <= varCStart && quantorCEnd >= varCEnd) // if line(q) = line(v) for start and end, compare starting and ending columns
+            )
+
+        let varIsBoundByQuantor (varInFormula:FplGenericNode) (quantor:FplGenericNode) =
+            quantor.Scope.ContainsKey(varInFormula.FplId)
+
+        let quantors = extractQuantors formula
+        let usedVariables = usedVariablesInFormula formula
+        if quantors.Length > 0 then 
+            usedVariables
+            |> List.iter(fun varInFormula ->
+                quantors 
+                |> List.iter (fun quantor ->
+                    if varIsBoundByQuantor varInFormula quantor && 
+                        not (varUsedInQuantor varInFormula quantor) then 
+                        let quantorVar = quantor.Scope[varInFormula.FplId]
+                        fv.ErrorOccurred <- emitVAR10diagnostics varInFormula.FplId varInFormula.QualifiedStartPos quantorVar.StartPos quantorVar.EndPos
+                )
+            )                
+            
+    if formulaCreationInSymbolTableCompleted fv then
+        // here, this reference points to a formula, which is final in the symbol table
+        checkQuantors fv
+

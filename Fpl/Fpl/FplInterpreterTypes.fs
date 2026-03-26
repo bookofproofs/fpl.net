@@ -2343,7 +2343,7 @@ type FplSelf(positions: Positions, parent: FplGenericNode) as this =
 let checkFreeVar (arg:FplGenericNode) = 
     match arg.RefersTo with 
     | Some ref ->
-        match ref, ref.UltimateBlockNode with 
+        match box ref, ref.UltimateBlockNode with 
         | :? FplGenericVariable as var, Some node when node.Name <> PrimRuleOfInference && node.Name <> LiteralLocL && not var.IsBound ->
             var.ErrorOccurred <- emitVAR09diagnostics var.FplId var.TypeId var.StartPos var.EndPos
         | _ -> ()
@@ -3559,36 +3559,6 @@ let variableInBlockScopeByName (fplValue: FplGenericNode) name withNestedVariabl
 
     firstBlockParent fplValue
 
-/// Tries to find a theorem-like statement, an axiom or a corollary
-/// and returns different cases of ScopeSearchResult, depending on different semantical error situations.
-let tryFindAssociatedBlockForJustificationItem (fvJi: FplGenericJustificationItem) (candidates:FplGenericNode list) =
-    match candidates.Length with
-    | 1 ->  // exactly one candidate found
-        let potentialCandidate = candidates.Head
-        match fvJi, potentialCandidate with
-        | :? FplJustificationItemByProofArgument, :? FplProof
-        | :? FplJustificationItemByDef, :? FplClass
-        | :? FplJustificationItemByDef, :? FplPredicate
-        | :? FplJustificationItemByDef, :? FplFunctionalTerm
-        | :? FplJustificationItemByDef, :? FplGenericVariable
-        | :? FplJustificationItemByConj, :? FplConjecture
-        | :? FplJustificationItemByCor, :? FplCorollary
-        | :? FplJustificationItemByAx, :? FplAxiom
-        | :? FplJustificationItemByInf, :? FplRuleOfInference
-        | :? FplJustificationItemByTheoremLikeStmt, :? FplTheorem 
-        | :? FplJustificationItemByTheoremLikeStmt, :? FplProposition
-        | :? FplJustificationItemByTheoremLikeStmt, :? FplLemma ->
-            ScopeSearchResult.FoundAssociate potentialCandidate
-        | _ ->
-            ScopeSearchResult.FoundIncorrectBlock potentialCandidate
-    | 0 -> ScopeSearchResult.NotFound
-    | _ -> 
-        // multiple candidates found
-        ScopeSearchResult.FoundMultiple(
-            candidates
-            |> List.map (fun fv -> sprintf "'%s' %s" fv.Name (fv.Type(SignatureType.Mixed)))
-            |> String.concat ", "
-        )
 
 type SymbolTable(parsedAsts: ParsedAstList, debug: bool, offlineMode: bool) =
     let _parsedAsts = parsedAsts

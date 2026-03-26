@@ -196,17 +196,10 @@ let rec eval (st: SymbolTable) ast =
             fv.TypeId <- extensionName
         | _ -> ()
     | Ast.Var((pos1, pos2), name) ->
-        let checkByName (fv:FplGenericNode) = 
-            let rec IsInUpperScope (fv1: FplGenericNode): FplGenericVariable option =
-                if fv1.Name = PrimTheoryL then 
-                    None
-                elif fv1.Scope.ContainsKey(name) then
-                    Some (fv1.Scope[name] :?> FplGenericVariable)
-                else
-                    IsInUpperScope fv1.Parent.Value
-            match IsInUpperScope fv with
-            | Some foundVar -> 
-                // it was declared in the scope
+        let searchVarByName (fv:FplGenericNode) = 
+            match (searchInUpperScopeByName fv name) with
+            | ScopeSearchResult.Found foundVar -> 
+                // variable was declared in the scope
                 match fv.Name with 
                 | PrimJIByDefVar 
                 | PrimRefL 
@@ -216,10 +209,12 @@ let rec eval (st: SymbolTable) ast =
                     fv.RefersTo <- Some foundVar
                 | PrimTranslationL ->
                     // for translations, use the name of the variable
-                    fv.FplId <- foundVar.Type SignatureType.Name
-                    fv.TypeId <- foundVar.Type SignatureType.Type
+                    fv.FplId <- foundVar.FplId
+                    fv.TypeId <- foundVar.TypeId 
                 | _ -> ()
-                foundVar.SetIsUsed()
+                match foundVar with
+                | :? FplGenericVariable as var -> var .SetIsUsed()
+                | _ -> ()
             | _ ->
                 match fv.UltimateBlockNode with 
                 | Some (:? FplLocalization as loc) when variableStack.InSignatureEvaluation -> 
@@ -228,6 +223,7 @@ let rec eval (st: SymbolTable) ast =
                     // otherwise emit variable not declared 
                     fv.ErrorOccurred <- emitVAR01diagnostics name pos1 pos2
                 
+                // if no variable in scope was found, spawn an undefined variable
                 let undefVar = new FplVariable(name, (pos1, pos2), fv)
                 undefVar.TypeId <- LiteralUndef
                 undefVar.SetDefaultValue()
@@ -255,10 +251,10 @@ let rec eval (st: SymbolTable) ast =
             | :? IHasDotted as dotted when dotted.DottedChild.IsSome ->
                 fv.FplId <- name
                 fv.TypeId <- LiteralUndef
-            | _ -> checkByName fv
+            | _ -> searchVarByName fv
         | _ -> 
             // in all other contexts, check by name, if this variable was declared in some scope
-            checkByName fv
+            searchVarByName fv
 
         match fv.UltimateBlockNode with 
         | Some (:? FplLocalization as loc) when loc.ArgList.Count = 0 && fv.RefersTo.IsSome -> 
@@ -1566,44 +1562,43 @@ let rec eval (st: SymbolTable) ast =
     | Ast.JustificationIdentifier((pos1, pos2), (((byModifierOption, predicateIdentifierAst), dollarDigitListAsts), refArgumentIdentifierAst)) ->
         let parent = variableStack.PeekEvalStack()
 
-        let checkDiagnostics (fvJi:FplGenericJustificationItem) candidates = 
+        let checkPR001_PR006Diagnostics (fvJi:FplGenericNode) candidates = 
             match tryFindAssociatedBlockForJustificationItem fvJi candidates with
             | ScopeSearchResult.FoundAssociate potentialCandidate -> 
                 fvJi.RefersTo <- Some potentialCandidate
                 match fvJi with 
-                | :? FplJustificationItemByProofArgument ->
+                | :? FplJustificationItemByProofArgument as fvJi1 ->
                     let split = fvJi.FplId.Split(":")
                     if split.Length > 1 then 
                         // here, argName is the argument identifier of the other proof
                         let argName = $"{split.[1]}"
-                        match getArgumentInProof fvJi argName with
+                        match getArgumentInProof fvJi1 argName with
                         | Some argument -> fvJi.ArgList.Add(argument) 
                         | _ -> fvJi.ErrorOccurred <- emitPR006Diagnostics fvJi.FplId argName fvJi.StartPos fvJi.EndPos 
                 | _ -> ()
             | ScopeSearchResult.FoundIncorrectBlock otherBlock ->
                 let alternative = 
-                    match fvJi with 
-                    | :? FplJustificationItemByAx ->
+                    match fvJi.Name with 
+                    | PrimJIByAx ->
                         "Expected a reference to an axiom."
-                    | :? FplJustificationItemByConj ->
+                    | PrimJIByConj ->
                         "Expected a reference to a conjecture."
-                    | :? FplJustificationItemByCor ->
+                    | PrimJIByCor ->
                         "Expected a reference to a corollary."
-                    | :? FplJustificationItemByDef ->
+                    | PrimJIByDef ->
                         "Expected a reference to a definition (of a class, a predicate, or a functional term)."
-                    | :? FplJustificationItemByDefVar ->
+                    | PrimJIByDefVar ->
                         "Expected a reference to a variable."
-                    | :? FplJustificationItemByInf ->
+                    | PrimJIByInf ->
                         "Expected a reference to a rule of inference."
-                    | :? FplJustificationItemByProofArgument ->
+                    | PrimJIByProofArgument ->
                         "Expected a reference to an argument in another proof."
-                    | :? FplJustificationItemByRefArgument ->
+                    | PrimJIByRefArgument ->
                         "Expected a reference to a previous argument in this proof."
-                    | :? FplJustificationItemByTheoremLikeStmt ->
+                    | PrimJIByTheoremLikeStmt ->
                         "Expected a reference to a theorem, a lemma, or a proposition."
                     | _ -> "Expected another reference."
                 fvJi.ErrorOccurred <- emitPR001Diagnostics (qualifiedName otherBlock false) fvJi.Name fvJi.StartPos fvJi.EndPos alternative
-            | ScopeSearchResult.NotFound -> () // ID010 is issued in evaluating AST.PredicateIdentifier
             | ScopeSearchResult.FoundMultiple listOfKandidates ->
                 fvJi.ErrorOccurred <- emitID023Diagnostics listOfKandidates fvJi.StartPos fvJi.EndPos
             | _ -> ()
@@ -1622,7 +1617,7 @@ let rec eval (st: SymbolTable) ast =
             eval st predicateIdentifierAst
             // check, if indeed the predicateId points to an axiom, if not issue diagnostics
             let candidates = findCandidatesByName st fvJi.FplId false false
-            checkDiagnostics fvJi candidates
+            checkPR001_PR006Diagnostics fvJi candidates
             variableStack.PopEvalStack()
         | Some LiteralByConj, Some _, None -> 
             // byconj justification cannot be used together with a proof reference
@@ -1636,7 +1631,7 @@ let rec eval (st: SymbolTable) ast =
             eval st predicateIdentifierAst
             // check, if indeed the predicateId points to a conjecture, if not issue diagnostics
             let candidates = findCandidatesByName st fvJi.FplId false false
-            checkDiagnostics fvJi candidates
+            checkPR001_PR006Diagnostics fvJi candidates
             variableStack.PopEvalStack()
         | Some LiteralByCor, Some _, _ -> 
             let fvJi = new FplJustificationItemByCor((pos1, pos2), parent)
@@ -1645,7 +1640,7 @@ let rec eval (st: SymbolTable) ast =
             dollarDigitListAsts.Value |> List.map (eval st) |> ignore
             let candidates = findCandidatesByName st fvJi.FplId false true
             // check, if indeed the predicateId points to a corollary, if not issue diagnostics
-            checkDiagnostics fvJi candidates
+            checkPR001_PR006Diagnostics fvJi candidates
             variableStack.PopEvalStack()
         | Some LiteralByCor, None, _ -> 
             // byCor justification a reference to a corollary
@@ -1662,7 +1657,7 @@ let rec eval (st: SymbolTable) ast =
             eval st predicateIdentifierAst
             // check, if indeed the predicateId points to a definition, if not issue diagnostics
             let candidates = findCandidatesByName st fvJi.FplId false false
-            checkDiagnostics fvJi candidates
+            checkPR001_PR006Diagnostics fvJi candidates
             variableStack.PopEvalStack()
         | Some LiteralByInf, Some _, None -> 
             // byInf justification cannot be used together with a proof reference
@@ -1676,7 +1671,7 @@ let rec eval (st: SymbolTable) ast =
             eval st predicateIdentifierAst
             // check, if indeed the predicateId points to a rule of inference, if not issue diagnostics
             let candidates = findCandidatesByName st fvJi.FplId false false
-            checkDiagnostics fvJi candidates
+            checkPR001_PR006Diagnostics fvJi candidates
             variableStack.PopEvalStack()
         | Some _, _, _ -> () // does not occur, because the parser byModifier choices between only two keywords LiteralByAx or LiteralByDef
         | None, Some _, None -> 
@@ -1686,7 +1681,7 @@ let rec eval (st: SymbolTable) ast =
             dollarDigitListAsts.Value |> List.map (eval st) |> ignore
             let candidates = findCandidatesByName st fvJi.FplId false true
             // check, if indeed the predicateId points to a corollary, if not issue diagnostics
-            checkDiagnostics fvJi candidates
+            checkPR001_PR006Diagnostics fvJi candidates
             // issue info diagnostics that references to a corollary need the keyword byCor to increase readability
             parent.ErrorOccurred <- emitPR013Diagnostics pos1 pos2
             variableStack.PopEvalStack()
@@ -1708,7 +1703,7 @@ let rec eval (st: SymbolTable) ast =
                     candidates
             // check, if indeed the predicateId points to another proof, if not issue diagnostics, 
             // also check if arg exists, if not issue diagnostics
-            checkDiagnostics fvJi candidatesFiltered
+            checkPR001_PR006Diagnostics fvJi candidatesFiltered
             variableStack.PopEvalStack()
         | None, None, Some _ ->  
             // issue diagnostics a theorem-like statement justification cannot be used together with a proof argument reference 
@@ -1719,7 +1714,7 @@ let rec eval (st: SymbolTable) ast =
             eval st predicateIdentifierAst
             let candidates = findCandidatesByName st fvJi.FplId false false
             // check if indeed the predicateId points to a theorem-like statement except a corollary, if not issue diagnostics
-            checkDiagnostics fvJi candidates
+            checkPR001_PR006Diagnostics fvJi candidates
             variableStack.PopEvalStack()
 
 

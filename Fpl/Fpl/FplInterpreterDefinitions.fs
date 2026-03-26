@@ -166,28 +166,6 @@ let runArgsAndSetWithLastValue (fv:FplGenericHasValue) =
     | Some (:? FplGenericHasValue as last) -> fv.SetValueOf last
     | _ -> fv.SetDefaultValue()
 
-let checkSIG02Diagnostics (root:FplGenericNode) symbol precedence pos1 pos2 = 
-    let precedences = Dictionary<int, FplGenericNode>()
-    let precedenceWasAlreadyThere precedence fv =
-        if not (precedences.ContainsKey(precedence)) then
-            precedences.Add(precedence, fv)
-            false
-        else
-            true
-    root.Scope
-    |> Seq.map (fun kv -> kv.Value)
-    |> Seq.iter (fun theory ->
-        theory.Scope
-        |> Seq.map (fun kv1 -> kv1.Value)
-        |> Seq.iter (fun block ->
-            match block.ExpressionType with
-            | FixType.Infix(_, precedence) -> precedenceWasAlreadyThere precedence block |> ignore
-            | _ -> ()))
-    if precedences.ContainsKey(precedence) then
-        let conflict = precedences[precedence].QualifiedStartPos
-        precedences[precedence].ErrorOccurred <- emitSIG02Diagnostics symbol precedence conflict pos1 pos2
-
-
 type FplPredicate(positions: Positions, parent: FplGenericNode, runOrder) as this =
     inherit FplGenericInheriting(positions, parent)
     let _runOrder = runOrder
@@ -251,7 +229,7 @@ type FplPredicate(positions: Positions, parent: FplGenericNode, runOrder) as thi
         | FixType.Postfix _ when this.Arity <> 1 -> this.ErrorOccurred <- emitSIG00Diagnostics this.ExpressionType.Type 1 this.Arity this.SignStartPos this.SignEndPos
         | _ -> ()
         match this.ExpressionType with
-        | FixType.Infix (symbol, precedence) -> checkSIG02Diagnostics (getRoot this) symbol precedence this.SignStartPos this.SignEndPos
+        | FixType.Infix (symbol, precedence) -> checkSIG02Diagnostics this symbol precedence this.SignStartPos this.SignEndPos
         | _ -> ()
         checkPredicateExpressionReturnsPredicate this
 

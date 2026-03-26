@@ -282,3 +282,43 @@ let signatureRepresent (fv:FplGenericNode) =
         |> List.map (fun var -> var.Represent())
         |> String.concat ", "
     $"{fv.FplId}({signatureVarRepresentations})"
+
+
+let rec searchInUpperScopeByName (fv1: FplGenericNode) name =
+    if fv1.Name = PrimTheoryL then 
+        ScopeSearchResult.NotFound
+    elif fv1.Scope.ContainsKey(name) then
+        ScopeSearchResult.Found fv1.Scope[name]
+    else
+        searchInUpperScopeByName fv1.Parent.Value name
+
+/// Tries to find a theorem-like statement, an axiom or a corollary
+/// and returns different cases of ScopeSearchResult, depending on different semantical error situations.
+let tryFindAssociatedBlockForJustificationItem (fvJi: FplGenericNode) (candidates:FplGenericNode list) =
+    match candidates.Length with
+    | 1 ->  // exactly one candidate found
+        let potentialCandidate = candidates.Head
+        match fvJi.Name, potentialCandidate.Name with
+        | PrimJIByProofArgument, LiteralPrfL
+        | PrimJIByDef, PrimClassL
+        | PrimJIByDef, PrimPredicateL
+        | PrimJIByDef, PrimFunctionalTermL
+        | PrimJIByDef, PrimVariableL
+        | PrimJIByConj, LiteralConjL
+        | PrimJIByCor, LiteralCorL
+        | PrimJIByAx, LiteralAxL
+        | PrimJIByInf, PrimRuleOfInference
+        | PrimJIByTheoremLikeStmt, LiteralThmL 
+        | PrimJIByTheoremLikeStmt, LiteralPropL
+        | PrimJIByTheoremLikeStmt, LiteralLemL ->
+            ScopeSearchResult.FoundAssociate potentialCandidate
+        | _ ->
+            ScopeSearchResult.FoundIncorrectBlock potentialCandidate
+    | 0 -> ScopeSearchResult.NotFound
+    | _ -> 
+        // multiple candidates found
+        ScopeSearchResult.FoundMultiple(
+            candidates
+            |> List.map (fun fv -> sprintf "'%s' %s" fv.Name (fv.Type(SignatureType.Mixed)))
+            |> String.concat ", "
+        )
