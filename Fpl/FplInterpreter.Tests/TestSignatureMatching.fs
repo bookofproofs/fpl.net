@@ -3,6 +3,7 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
 open TestSharedConfig
 open FplInterpreterUtils
+open FplInterpreterFplTypeMatching
 open FplInterpreterTypes
 open CommonTestHelpers
 

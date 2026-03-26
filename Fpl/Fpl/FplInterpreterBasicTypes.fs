@@ -495,3 +495,8 @@ let rec getMapping (fv:FplGenericNode) =
     | _ ->
         fv.ArgList |> Seq.tryFind (fun fv -> fv.Name = PrimMappingL)
 
+/// Creates a concatenated string represenation based on a sequence of FplValues.
+let representationSep sep (coordinates:FplGenericNode seq) =
+    coordinates 
+    |> Seq.map (fun fv -> fv.Represent())
+    |> String.concat sep
