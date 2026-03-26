@@ -6,6 +6,7 @@ open FplInterpreterBasicTypes
 open FplInterpreterSTEmbedding
 open FplInterpreterReferences
 open FplInterpreterVariables
+open FplInterpreterDefinitions
 open FplInterpreterTypes
 open CommonTestHelpers
 

@@ -112,10 +112,6 @@ type IConstant =
     abstract member ConstantName : string with get
     abstract member SetConstantName: unit -> unit
 
-type Debug =
-    | Start
-    | Stop
-
 type IHasSignature =
     abstract member SignStartPos : Position with get, set
     abstract member SignEndPos : Position with get, set

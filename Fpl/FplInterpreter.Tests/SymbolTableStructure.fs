@@ -13,6 +13,7 @@ open FplInterpreterSTEmbedding
 open FplInterpreterReferences
 open FplInterpreterIntrinsicTypes
 open FplInterpreterVariables
+open FplInterpreterDefinitions
 open FplInterpreterTypes
 open CommonTestHelpers
 

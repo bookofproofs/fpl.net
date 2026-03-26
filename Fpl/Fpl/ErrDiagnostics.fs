@@ -1,28 +1,3 @@
-module ErrDiagnostics
-open System
-open System.IO
-open System.Text.RegularExpressions
-open System.Collections.Generic
-open System.Security.Cryptography
-open System.Text
-open FParsec
-open FplPrimitives
-open FplGrammarTypes
-
-
-
-(* MIT License
-
-Copyright (c) 2023 bookofproofs
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
-
-*)
-
 (*
 This module provides some general functionality to emit error diagnostics in a custom language.
 
@@ -39,6 +14,28 @@ If you decide to reuse this code for your language and other IDEs, please consid
 `type DiagnosticCode`, `replaceFParsecErrMsgForFplParser`, `inputStringManipulator`, `preParsePreProcess`, and `stringMatches`.
 
 *)
+(* MIT License
+
+Copyright (c) 2023 bookofproofs
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
+
+*)
+
+module ErrDiagnostics
+open System
+open System.IO
+open System.Text.RegularExpressions
+open System.Collections.Generic
+open System.Security.Cryptography
+open System.Text
+open FParsec
+open FplPrimitives
+open FplGrammarTypes
 
 type PathEquivalentUri(uriString: string) =
     inherit Uri(PathEquivalentUri.UnescapeDataString(uriString.Replace("\\","/")))
@@ -1021,5 +1018,4 @@ let getEnglishName someString determined =
     else
         $"a {someString}"
 
-let isUpper (name:string) =  
-    name.Length > 0 && System.Char.IsUpper(name[0])
+

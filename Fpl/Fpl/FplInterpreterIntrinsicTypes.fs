@@ -172,3 +172,42 @@ type FplIntrinsicInd(positions: Positions, parent: FplGenericNode) as this =
     override this.EmbedInSymbolTable _ = addExpressionToReference this
 
     override this.RunOrder = None
+
+type FplInstance(typeId:string, positions: Positions, parent: FplGenericNode) as this =
+    inherit FplGenericIsValue(positions, parent)
+
+    do
+        this.FplId <- LiteralObj
+        this.TypeId <- typeId
+ 
+    override this.Name = PrimInstanceL
+    override this.ShortName = PrimInstance
+
+    override this.Clone () =
+        let ret = new FplInstance(this.TypeId, (this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Type signatureType = 
+        //match signatureType with 
+        //| SignatureType.Type -> this.TypeId
+        //| _ -> this.FplId
+        let head = getFplHead this signatureType 
+        head
+
+    override this.Represent() = // done
+        this.FplId
+
+    override this.Run() = 
+        // run is not neccessary, since this node is are never referenced in the FPL syntax
+        // Instead, we use them internally as default value of FplGenericHasValue
+        // FplInstance is a value representation and has no value on its own
+        ()
+
+    override this.EmbedInSymbolTable _ = 
+        //// the embedding is not neccessary, since this node is are never referenced in the FPL syntax
+        //// Instead, we use them internally as default value of FplGenericHasValue
+        //() 
+        addExpressionToParentArgList this 
+
+    override this.RunOrder = None

@@ -24,10 +24,12 @@ open FplInterpreterAstPreprocessing
 open FplInterpreterUtils
 open FplInterpreterBasicTypes
 open FplInterpreterGlobals
+open FplInterpreterChecks
 open FplInterpreterSTEmbedding
 open FplInterpreterIntrinsicTypes
 open FplInterpreterVariables
 open FplInterpreterReferences
+open FplInterpreterDefinitions
 open FplInterpreterTypes
 
 let filterCandidates (candidatesPre:FplGenericNode list) identifier qualified =

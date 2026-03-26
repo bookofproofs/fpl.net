@@ -14,14 +14,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 *)
 module FplInterpreterSTEmbedding
 open System
+open System.Collections.Generic
 open FParsec
 open FplPrimitives
 open FplInterpreterUtils
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterBasicTypes
 open FplInterpreterGlobals
-
-
+open FplInterpreterChecks
 
 
 type FplTheory(theoryName, parent: FplGenericNode, filePath: string, runOrder) as this =
@@ -72,12 +72,6 @@ type FplTheory(theoryName, parent: FplGenericNode, filePath: string, runOrder) a
         |> Seq.iter (fun block -> block.Run())        
         debug this Debug.Stop 
 
-/// Indicates if an FplValue is the root of the SymbolTable.
-let isTheory (fv:FplGenericNode) = 
-    match fv with
-    | :? FplTheory -> true
-    | _ -> false
-
 type FplRoot() =
     inherit FplGenericNode((Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
     override this.Name = PrimRoot
@@ -110,19 +104,8 @@ type FplRoot() =
         |> Seq.iter (fun theory -> theory.Run())        
         debug this Debug.Stop
 
-// Returns the root node of any FplValue
-let rec getRoot (fv:FplGenericNode) =
-    if fv.Name = PrimRoot then 
-        fv :?> FplRoot
-    else getRoot fv.Parent.Value
-   
-
-/// Indicates if an FplValue is the root of the SymbolTable.
-let isRoot (fv:FplGenericNode) = 
-    match fv with
-    | :? FplRoot -> true
-    | _ -> false
-
+// Returns the root node of any FplValue casted to FplRoot
+let rec getRoot (fv:FplGenericNode) = (root fv) :?> FplRoot
 
 // Tries to add for statement's domain or entity to its parent's for statement
 let tryAddToParentForInStmt (fplValue:FplGenericNode) =
@@ -183,25 +166,6 @@ let tryAddToParentUsingFplId (fplValue:FplGenericNode) =
         let parent = fplValue.Parent.Value
         parent.Scope.Add(identifier, fplValue)
 
-// Tries to add an FPL block to its parent's scope using its mixed signature, or issues ID001 diagnostics if a conflict occurs
-let tryAddToParentUsingMixedSignature (fplValue:FplGenericNode) =
-    let identifier = fplValue.Type SignatureType.Mixed
-    let root = getRoot fplValue
-    let conflicts = 
-        root.OrderedTheories
-        |> Seq.map (fun theory -> 
-            theory.Scope
-            |> Seq.filter (fun kvp -> kvp.Key = identifier)
-            |> Seq.map (fun kvp -> kvp.Value)
-        )
-        |> Seq.concat
-        |> Seq.toList
-
-    if conflicts.Length > 0 then 
-        fplValue.ErrorOccurred <- emitID001Diagnostics identifier (conflicts.Head.QualifiedStartPos) fplValue.StartPos fplValue.EndPos
-    else
-        let parent = fplValue.Parent.Value
-        parent.Scope.Add(identifier, fplValue)
 
 // Tries to add a constructor or property to it's parent FPL block's scope using its mixed signature, or issues ID001 diagnostics if a conflict occurs
 let tryAddSubBlockToFplBlock (fplValue:FplGenericNode) =
@@ -278,3 +242,43 @@ let addExpressionToReference (fplValue:FplGenericNode) =
             next.RefersTo <- Some fplValue 
             next.ErrorOccurred <- fplValue.ErrorOccurred
         | _ -> addExpressionToParentArgList fplValue 
+
+
+// Tries to add an FPL block to its parent's scope using its mixed signature, or issues ID001 diagnostics if a conflict occurs
+let tryAddToParentUsingMixedSignature (fplValue:FplGenericNode) =
+    let identifier = fplValue.Type SignatureType.Mixed
+    let root = getRoot fplValue
+    let conflicts = 
+        root.OrderedTheories
+        |> Seq.map (fun theory -> 
+            theory.Scope
+            |> Seq.filter (fun kvp -> kvp.Key = identifier)
+            |> Seq.map (fun kvp -> kvp.Value)
+        )
+        |> Seq.concat
+        |> Seq.toList
+
+    if conflicts.Length > 0 then 
+        fplValue.ErrorOccurred <- emitID001Diagnostics identifier (conflicts.Head.QualifiedStartPos) fplValue.StartPos fplValue.EndPos
+    else
+        let parent = fplValue.Parent.Value
+        parent.Scope.Add(identifier, fplValue)
+
+/// Generates a string of parameters based on SignatureType
+let getParamTuple (fv:FplGenericNode) (signatureType:SignatureType) =
+        let propagate = propagateSignatureType signatureType
+        fv.Scope
+        |> Seq.filter (fun (kvp: KeyValuePair<string, FplGenericNode>) ->
+            isSignatureVar kvp.Value
+            || (isVar fv) && not (kvp.Value.IsClass())
+            || fv.IsMapping())
+        |> Seq.map (fun (kvp: KeyValuePair<string, FplGenericNode>) -> kvp.Value.Type(propagate))
+        |> String.concat ", "
+
+let signatureRepresent (fv:FplGenericNode) = 
+    let signatureVarRepresentations = 
+        fv.GetVariables()
+        |> List.filter (fun var -> isSignatureVar var) 
+        |> List.map (fun var -> var.Represent())
+        |> String.concat ", "
+    $"{fv.FplId}({signatureVarRepresentations})"

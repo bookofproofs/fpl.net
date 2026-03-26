@@ -459,75 +459,7 @@ let rec flattenScopes (root: FplGenericNode) =
         node.Scope |> Seq.fold (fun acc kvp -> helper kvp.Value acc) newAcc
 
     helper root []
-
-
-let hasSignature (fv1:FplGenericNode) =
-    match box fv1 with
-    | :? IHasSignature -> true
-    | _ -> false
-
-let isSignatureVar (fv1:FplGenericNode) = 
-    match box fv1 with 
-    | :? IVariable as var when var.IsSignatureVariable -> true
-    | _ -> false
-
-
-let isVar (fv1:FplGenericNode) =
-    match fv1.Name with
-    | PrimVariableL
-    | PrimVariableArrayL -> true
-    | _ -> false
     
-/// Qualified name of this FplValue
-let qualifiedName (fplValue:FplGenericNode) determined =
-    let rec getFullName (fv: FplGenericNode) (first: bool) =
-        let fplValueType =
-            match fv.Name with
-            | LiteralLocL
-            | PrimExclusiveOr 
-            | PrimConjunction
-            | PrimDisjunction 
-            | PrimNegation
-            | PrimImplication
-            | PrimEquivalence 
-            | PrimIsOperator 
-            | PrimExtensionObj 
-            | PrimDelegateEqualL 
-            | PrimDelegateDecrementL 
-            | PrimRefL -> fv.Type(SignatureType.Name)
-            | LiteralCtorL
-            | PrimBaseConstructorCall
-            | PrimDefaultConstructor
-            | PrimQuantorAll
-            | PrimQuantorExists
-            | PrimQuantorExistsN
-            | PrimClassL
-            | PrimPredicateL
-            | PrimFunctionalTermL
-            | PrimMandatoryPredicateL
-            | PrimMandatoryFunctionalTermL -> fv.Type(SignatureType.Mixed)
-            | _ -> fv.FplId
-
-        match fv.Name with
-        | PrimRoot -> ""
-        | _ -> 
-
-
-            if first then
-                if fv.Parent.Value.Name = PrimRoot then
-                    getFullName fv.Parent.Value false + fplValueType
-                else if (isVar fv) && not (isVar fv.Parent.Value) then
-                    fplValueType
-                else
-                    getFullName fv.Parent.Value false + "." + fplValueType
-            elif fv.Parent.Value.Name = PrimRoot then
-                getFullName fv.Parent.Value false + fplValueType
-            elif (isVar fv) && not (isVar fv.Parent.Value) then
-                fplValueType
-            else
-                getFullName fv.Parent.Value false + "." + fplValueType
-
-    $"{getEnglishName fplValue.Name determined} {getFullName fplValue true}"
 
 let getFplHead (fv:FplGenericNode) (signatureType:SignatureType) =
     match signatureType with
@@ -540,16 +472,7 @@ let propagateSignatureType (signatureType:SignatureType) =
     | SignatureType.Mixed -> SignatureType.Type
     | _ -> signatureType 
 
-/// Generates a string of parameters based on SignatureType
-let getParamTuple (fv:FplGenericNode) (signatureType:SignatureType) =
-        let propagate = propagateSignatureType signatureType
-        fv.Scope
-        |> Seq.filter (fun (kvp: KeyValuePair<string, FplGenericNode>) ->
-            isSignatureVar kvp.Value
-            || (isVar fv) && not (kvp.Value.IsClass())
-            || fv.IsMapping())
-        |> Seq.map (fun (kvp: KeyValuePair<string, FplGenericNode>) -> kvp.Value.Type(propagate))
-        |> String.concat ", "
+
 
 /// Creates a concatenated string represenation based on a sequence of FplValues.
 let signatureSep sep (coordinates:FplGenericNode seq) signatureType =

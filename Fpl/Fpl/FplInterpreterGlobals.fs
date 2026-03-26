@@ -213,6 +213,10 @@ type FplVariableStack() =
 let variableStack = FplVariableStack()
 
 
+type Debug =
+    | Start
+    | Stop
+
 let debug (fv:FplGenericNode) (debugMode:Debug) =
     let bars n = String.replicate n "| "
     let rec getPath (fv1:FplGenericNode) =
@@ -236,4 +240,9 @@ let debug (fv:FplGenericNode) (debugMode:Debug) =
         let currDir = Directory.GetCurrentDirectory()
         File.AppendAllText(Path.Combine(currDir, "Debug.txt"), logLine)
 
+// Returns the root node of any FplValue
+let rec root (fv:FplGenericNode) =
+    if fv.Name = PrimRoot then 
+        fv 
+    else root fv.Parent.Value
 

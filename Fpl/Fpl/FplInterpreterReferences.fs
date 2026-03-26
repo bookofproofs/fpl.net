@@ -20,6 +20,7 @@ open FplInterpreterDiagnosticsEmitter
 open FplInterpreterUtils
 open FplInterpreterBasicTypes
 open FplInterpreterGlobals
+open FplInterpreterChecks
 open FplInterpreterSTEmbedding
 open FplInterpreterVariables
 
@@ -39,32 +40,6 @@ let rec referencedNodeOpt (fv:FplGenericNode) =
     | Some refNode when refNode.Name = LiteralSelf -> refNode.RefersTo
     | Some refNode when refNode.Name = LiteralParent -> refNode.RefersTo
     | _ -> refNodeOpt
-
-
-/// Indicates if fv is an FplGenericNode that is callable with parameters.
-let isCallableWithParams (fv:FplGenericNode) =
-    match fv.Name with
-    | LiteralCtorL
-    | PrimDefaultConstructor
-    | PrimBaseConstructorCall
-    | PrimExtensionL
-    | PrimPredicateL
-    | PrimFunctionalTermL
-    | PrimMandatoryFunctionalTermL
-    | PrimMandatoryPredicateL -> true
-    | _ -> false
-
-/// Indicates if fv is an FplGenericNode that is callable without parameters.
-let isCallableWithoutParams (fv:FplGenericNode) =
-    match fv.Name with
-    | LiteralAxL
-    | LiteralConjL
-    | LiteralCorL
-    | LiteralPrfL
-    | LiteralLemL
-    | LiteralPropL
-    | LiteralThmL -> true
-    | _ -> false
 
 [<AbstractClass>]
 type FplGenericReference(positions: Positions, parent: FplGenericNode) =
