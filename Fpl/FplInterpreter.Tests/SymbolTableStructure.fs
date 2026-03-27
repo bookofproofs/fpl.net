@@ -15,6 +15,7 @@ open FplInterpreterIntrinsicTypes
 open FplInterpreterVariables
 open FplInterpreterDefinitions
 open FplInterpreterPredicativeBlocks
+open FplInterpreterDefinitionProperties
 open FplInterpreterProofs
 open FplInterpreterTypes
 open CommonTestHelpers

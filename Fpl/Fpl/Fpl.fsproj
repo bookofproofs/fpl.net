@@ -29,6 +29,7 @@
         <Compile Include="FplInterpreterDefinitions.fs" />
         <Compile Include="FplInterpreterFplTypeMatching.fs" />
         <Compile Include="FplInterpreterPredicativeBlocks.fs" />
+        <Compile Include="FplInterpreterDefinitionProperties.fs" />
         <Compile Include="FplInterpreterProofs.fs" />
         <Compile Include="FplInterpreterTypes.fs" />
         <Compile Include="FplInterpreterUsesClause.fs" />

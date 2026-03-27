@@ -7,6 +7,7 @@ open FplInterpreterSTEmbedding
 open FplInterpreterTypes
 open FplInterpreterDefinitions
 open FplInterpreterPredicativeBlocks
+open FplInterpreterDefinitionProperties
 open FplInterpreterProofs
 open CommonTestHelpers
 
