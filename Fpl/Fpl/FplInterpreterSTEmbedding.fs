@@ -322,3 +322,50 @@ let tryFindAssociatedBlockForJustificationItem (fvJi: FplGenericNode) (candidate
             |> List.map (fun fv -> sprintf "'%s' %s" fv.Name (fv.Type(SignatureType.Mixed)))
             |> String.concat ", "
         )
+
+/// Tries to find a theorem-like statement, a conjecture, or an axiom for a corollary
+/// and returns different cases of ScopeSearchResult, depending on different semantical error situations.
+let tryFindAssociatedBlockForCorollary (fplValue: FplGenericNode) =
+    match fplValue.Parent with
+    | Some theory ->
+
+        let flattenedScopes = flattenScopes theory.Parent.Value
+
+        // The parent node of the proof is the theory. In its scope
+        // we should find the theorem we are looking for.
+        let buildingBlocksMatchingDollarDigitNameList =
+            // the potential theorem name of the corollary is the
+            // concatenated type signature of the name of the corollary
+            // without the last dollar digit
+            let potentialBlockName = stripLastDollarDigit (fplValue.Type(SignatureType.Mixed))
+
+            flattenedScopes
+            |> Seq.filter (fun fv -> fv.FplId = potentialBlockName)
+            |> Seq.toList
+
+        let potentialBlockList =
+            buildingBlocksMatchingDollarDigitNameList
+            |> List.filter (fun fv -> isProvable fv || isAxiomOrConnjecture fv)
+
+        let notPotentialBlockList =
+            buildingBlocksMatchingDollarDigitNameList
+            |> List.filter (fun fv ->
+                not (
+                    isProvable fv || isAxiomOrConnjecture fv
+                ))
+
+        if potentialBlockList.Length > 1 then
+            ScopeSearchResult.FoundMultiple(
+                potentialBlockList
+                |> List.map (fun fv -> sprintf "'%s' %s" fv.Name (fv.Type(SignatureType.Mixed)))
+                |> String.concat ", "
+            )
+        elif potentialBlockList.Length > 0 then
+            let potentialTheorem = potentialBlockList.Head
+            ScopeSearchResult.FoundAssociate potentialTheorem
+        elif notPotentialBlockList.Length > 0 then
+            let potentialOther = notPotentialBlockList.Head
+            ScopeSearchResult.FoundIncorrectBlock potentialOther
+        else
+            ScopeSearchResult.NotFound
+    | None -> ScopeSearchResult.NotApplicable

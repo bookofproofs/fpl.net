@@ -14,6 +14,7 @@ open FplInterpreterReferences
 open FplInterpreterIntrinsicTypes
 open FplInterpreterVariables
 open FplInterpreterDefinitions
+open FplInterpreterPredicativeBlocks
 open FplInterpreterTypes
 open CommonTestHelpers
 
