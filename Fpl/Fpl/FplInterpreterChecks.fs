@@ -368,3 +368,12 @@ let checkCleanedUpFormula (fv:FplGenericNode) =
         // here, this reference points to a formula, which is final in the symbol table
         checkQuantors fv
 
+let rec isInQuantor (fv:FplGenericNode) =
+    match fv.Name with 
+    | PrimQuantorAll
+    | PrimQuantorExists
+    | PrimQuantorExistsN -> true
+    | _ ->
+        match fv.Parent with 
+        | Some parent -> isInQuantor parent
+        | _ -> false

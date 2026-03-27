@@ -1350,25 +1350,13 @@ type FplEquality(name, positions: Positions, parent: FplGenericNode) as this =
         this.CheckConsistency()
         addExpressionToReference this
 
-    member private this.IsInQuantor() =
-        let rec isQuantor (fv:FplGenericNode) =
-            match fv.Name with 
-            | PrimQuantorAll
-            | PrimQuantorExists
-            | PrimQuantorExistsN -> true
-            | _ ->
-                match fv.Parent with 
-                | Some parent -> isQuantor parent
-                | _ -> false
-        isQuantor this
-
     override this.Run() = 
         debug this Debug.Start
         match this.ErrorOccurred with 
         | Some err ->
             this.SetDefaultValue()
         | _ ->
-            if this.IsInQuantor() then 
+            if isInQuantor this then 
                 this.SetDefaultValue()
             else
 
@@ -1527,89 +1515,6 @@ type FplIsOperator(positions: Positions, parent: FplGenericNode) as this =
         debug this Debug.Stop
 
     override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
-
-[<AbstractClass>]
-type FplGenericQuantor(positions: Positions, parent: FplGenericNode) =
-    inherit FplGenericPredicate(positions, parent)
-
-    override this.ShortName = PrimQuantor
-
-    override this.Type signatureType =
-        let head = getFplHead this signatureType
-
-        let paramT = signatureSep ", " (this.GetVariables()) signatureType
-
-        match paramT with
-        | "" -> head
-        | _ -> sprintf "%s(%s)" head paramT
-
-    override this.CheckConsistency () = 
-        base.CheckConsistency()
-        this.GetVariables()
-        |> List.map(fun var -> var :?> FplGenericVariable)
-        |> List.filter(fun var -> not var.IsUsed)
-        |> List.iter (fun var -> 
-            var.ErrorOccurred <- emitVAR05diagnostics var.FplId var.StartPos var.EndPos
-        )
-        checkArgPred this (this.ArgList[0])
-        checkCleanedUpFormula this
-
-    override this.EmbedInSymbolTable _ = 
-        this.CheckConsistency()
-        // set all the variables of this quantor to bound ones
-        this.GetVariables()
-        |> List.map (fun var -> var :?> FplGenericVariable)
-        |> List.iter (fun var -> var.SetIsBound())
-        addExpressionToParentArgList this
-    
-    override this.Run() = 
-        debug this Debug.Start
-        this.ArgList[0].Run()
-        this.SetDefaultValue()
-        debug this Debug.Stop
-
-
-type FplQuantorAll(positions: Positions, parent: FplGenericNode) as this =
-    inherit FplGenericQuantor(positions, parent)
-
-    do 
-        this.FplId <- LiteralAll
-
-    override this.Name = PrimQuantorAll
-
-    override this.Clone () =
-            let ret = new FplQuantorAll((this.StartPos, this.EndPos), this.Parent.Value)
-            this.AssignParts(ret)
-            ret
-
-type FplQuantorExists(positions: Positions, parent: FplGenericNode) as this =
-    inherit FplGenericQuantor(positions, parent)
-
-    do 
-        this.FplId <- LiteralEx
-
-    override this.Name = PrimQuantorExists
-
-    override this.Clone () =
-            let ret = new FplQuantorExists((this.StartPos, this.EndPos), this.Parent.Value)
-            this.AssignParts(ret)
-            ret
-
-
-type FplQuantorExistsN(positions: Positions, parent: FplGenericNode) as this =
-    inherit FplGenericQuantor(positions, parent)
-
-    do 
-        this.FplId <- LiteralExN
-        this.Arity <- 1
-
-
-    override this.Name = PrimQuantorExistsN
-
-    override this.Clone () =
-            let ret = new FplQuantorExistsN((this.StartPos, this.EndPos), this.Parent.Value)
-            this.AssignParts(ret)
-            ret
 
 
 type FplCaseSingle(positions: Positions, parent: FplGenericNode) as this =
@@ -2018,15 +1923,15 @@ let variableInBlockScopeByName (fplValue: FplGenericNode) name withNestedVariabl
         if isTheory fv then 
             ScopeSearchResult.NotFound
         else
-            match fv with 
-            | :? FplTheorem 
-            | :? FplLemma 
-            | :? FplProposition 
-            | :? FplCorollary
-            | :? FplConjecture 
-            | :? FplPredicate 
-            | :? FplAxiom 
-            | :? FplRuleOfInference -> 
+            match fv.Name with 
+            | LiteralThmL 
+            | LiteralLemL
+            | LiteralPropL 
+            | LiteralCorL
+            | LiteralConjL 
+            | PrimPredicateL
+            | LiteralAxL
+            | PrimRuleOfInference -> 
                 if fv.Scope.ContainsKey name then
                     ScopeSearchResult.Found(fv.Scope[name])
                 elif fv.Parent.IsSome then
@@ -2039,16 +1944,18 @@ let variableInBlockScopeByName (fplValue: FplGenericNode) name withNestedVariabl
                 else
                     ScopeSearchResult.NotFound
             | _ ->
-                match fv with
-                | :? FplConstructor
-                | :? FplLocalization
-                | :? FplGenericQuantor
-                | :? FplMandatoryFunctionalTerm
-                | :? FplMandatoryPredicate
-                | :? FplProof
-                | :? FplExtension
-                | :? FplFunctionalTerm
-                | :? FplClass ->
+                match fv.Name with
+                | LiteralCtorL
+                | LiteralLocL
+                | PrimQuantorAll
+                | PrimQuantorExists
+                | PrimQuantorExistsN
+                | PrimMandatoryFunctionalTermL
+                | PrimMandatoryPredicateL
+                | LiteralPrfL
+                | PrimExtensionL
+                | PrimFunctionalTermL
+                | PrimClassL ->
                     if fv.Scope.ContainsKey name then
                         ScopeSearchResult.Found(fv.Scope[name])
                     elif fv.Parent.IsSome then

@@ -34,6 +34,7 @@ open FplInterpreterFplTypeMatching
 open FplInterpreterPredicativeBlocks
 open FplInterpreterDefinitionProperties
 open FplInterpreterProofs
+open FplInterpreterQuantors
 open FplInterpreterTypes
 
 let filterCandidates (candidatesPre:FplGenericNode list) identifier qualified =

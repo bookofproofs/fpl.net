@@ -10,6 +10,7 @@ open FplInterpreterDefinitions
 open FplInterpreterPredicativeBlocks
 open FplInterpreterDefinitionProperties
 open FplInterpreterProofs
+open FplInterpreterQuantors
 open FplInterpreterTypes
 open CommonTestHelpers
 
