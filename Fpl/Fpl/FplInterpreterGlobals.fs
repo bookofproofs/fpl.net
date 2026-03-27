@@ -13,7 +13,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 module FplInterpreterGlobals
-
 open System
 open System.Collections.Generic
 open System.IO
@@ -211,7 +210,6 @@ type FplVariableStack() =
         _stateStack.Clear()
 
 let variableStack = FplVariableStack()
-
 
 type Debug =
     | Start

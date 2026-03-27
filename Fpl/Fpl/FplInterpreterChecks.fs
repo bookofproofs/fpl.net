@@ -142,7 +142,6 @@ let isExtension (fv:FplGenericNode) =
     | PrimExtensionL -> true
     | _ -> false
 
-
 /// Qualified name of this FplValue
 let qualifiedName (fplValue:FplGenericNode) determined =
     let rec getFullName (fv: FplGenericNode) (first: bool) =
@@ -193,7 +192,6 @@ let qualifiedName (fplValue:FplGenericNode) determined =
                 getFullName fv.Parent.Value false + "." + fplValueType
 
     $"{getEnglishName fplValue.Name determined} {getFullName fplValue true}"
-
 
 let checkSIG11Diagnostics (fv:FplGenericNode) =
     let mapOpt = getMapping fv

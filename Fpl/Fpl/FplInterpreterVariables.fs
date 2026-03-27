@@ -12,16 +12,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 module FplInterpreterVariables
-open System
-open System.Text.RegularExpressions
 open System.Collections.Generic
-open System.Text
 open FParsec
 open FplPrimitives
 open FplGrammarTypes
 open ErrDiagnostics
 open FplInterpreterDiagnosticsEmitter
-open FplInterpreterAstPreprocessing
 open FplInterpreterBasicTypes
 open FplInterpreterUtils
 open FplInterpreterGlobals
@@ -263,7 +259,6 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplGenericNode) as 
         if fv.FplId <> PrimUndetermined then
             this.IsInitialized <- true
 
-
 let checkVAR04Diagnostics (fv:FplGenericNode) = 
     fv.GetVariables()
     |> List.map (fun var -> var :?> FplGenericVariable)
@@ -317,15 +312,12 @@ type FplVariable(fplId, positions: Positions, parent: FplGenericNode) =
         | _ -> ()
         debug this Debug.Stop
 
-
 type IHasDimensions =
     abstract member Dimensionality : int
     abstract member DimensionTypes : List<FplGenericNode>
     abstract member SetType : string -> FplGenericNode option -> Position -> Position -> unit
 
-
-
- type FplMapping(positions: Positions, parent: FplGenericNode) =
+type FplMapping(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericNode(positions, Some parent)
     let _dimensionTypes = new List<FplGenericNode>()
     let mutable _dimensionTypesBeingSet = false
@@ -407,7 +399,6 @@ type IHasDimensions =
     override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
 
     override this.RunOrder = None
-
 
 type FplVariableArray(fplId, positions: Positions, parent: FplGenericNode) =
     inherit FplGenericVariable(fplId, positions, parent)

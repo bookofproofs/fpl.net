@@ -20,7 +20,6 @@ open FplInterpreterSTEmbedding
 open FplInterpreterUtils
 open FplInterpreterBasicTypes
 
-
 type FplIntrinsicTpl(name, positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericIsValue(positions, parent)
 
@@ -140,7 +139,6 @@ type FplIntrinsicPred(positions: Positions, parent: FplGenericNode) as this =
     override this.EmbedInSymbolTable _ = addExpressionToReference this
 
     override this.RunOrder = None
-
 
 type FplIntrinsicInd(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericIsValue(positions, parent)

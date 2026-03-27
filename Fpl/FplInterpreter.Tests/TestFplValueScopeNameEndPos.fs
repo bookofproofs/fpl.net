@@ -1,6 +1,5 @@
 namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
-open FParsec
 open ErrDiagnostics
 open FplPrimitives
 open FplInterpreterBasicTypes
@@ -8,6 +7,7 @@ open FplInterpreterSTEmbedding
 open FplInterpreterTypes
 open FplInterpreterDefinitions
 open FplInterpreterPredicativeBlocks
+open FplInterpreterProofs
 open CommonTestHelpers
 
 [<TestClass>]

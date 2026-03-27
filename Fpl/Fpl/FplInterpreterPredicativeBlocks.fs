@@ -68,7 +68,6 @@ type FplGenericPredicateWithExpression(positions: Positions, parent: FplGenericN
             checkVAR04Diagnostics this
         checkPredicateExpressionReturnsPredicate this
 
-
 type FplAxiom(positions: Positions, parent: FplGenericNode, runOrder) =
     inherit FplGenericPredicateWithExpression(positions, parent)
     let _runOrder = runOrder
@@ -212,7 +211,6 @@ type FplCorollary(positions: Positions, parent: FplGenericNode, runOrder) =
             this.ErrorOccurred <- emitID006diagnostics this.FplId this.SignStartPos this.SignEndPos
         | _ -> ()
         tryAddToParentUsingFplId this
-
 
 type FplConjecture(positions: Positions, parent: FplGenericNode, runOrder) =
     inherit FplGenericPredicateWithExpression(positions, parent)

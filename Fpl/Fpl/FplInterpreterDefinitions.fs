@@ -265,7 +265,6 @@ type FplPredicate(positions: Positions, parent: FplGenericNode, runOrder) as thi
 
     override this.RunOrder = Some _runOrder
 
-
 type FplBase(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericNode(positions, Some parent)
 
@@ -562,7 +561,6 @@ let getFunctionalTermRepresent (fv:FplGenericHasValue) =
         | _ -> defaultReprsentation fv
     else
         defaultReprsentation fv
-
 
 type FplFunctionalTerm(positions: Positions, parent: FplGenericNode, runOrder) as this =
     inherit FplGenericInheriting(positions, parent)

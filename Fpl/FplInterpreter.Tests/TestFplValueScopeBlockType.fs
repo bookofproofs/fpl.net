@@ -8,6 +8,7 @@ open FplInterpreterReferences
 open FplInterpreterVariables
 open FplInterpreterDefinitions
 open FplInterpreterPredicativeBlocks
+open FplInterpreterProofs
 open FplInterpreterTypes
 open CommonTestHelpers
 

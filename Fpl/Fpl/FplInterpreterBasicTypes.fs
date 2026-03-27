@@ -14,7 +14,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 module FplInterpreterBasicTypes
 open System
 open System.Collections.Generic
-open ErrDiagnostics
 open FplPrimitives
 open FplGrammarTypes
 open FplInterpreterUtils
@@ -460,7 +459,6 @@ let rec flattenScopes (root: FplGenericNode) =
 
     helper root []
     
-
 let getFplHead (fv:FplGenericNode) (signatureType:SignatureType) =
     match signatureType with
             | SignatureType.Name 
@@ -471,8 +469,6 @@ let propagateSignatureType (signatureType:SignatureType) =
     match signatureType with
     | SignatureType.Mixed -> SignatureType.Type
     | _ -> signatureType 
-
-
 
 /// Creates a concatenated string represenation based on a sequence of FplValues.
 let signatureSep sep (coordinates:FplGenericNode seq) signatureType =

@@ -14,22 +14,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 *)
 module FplInterpreterFplTypeMatching
 open System
-open System.Text.RegularExpressions
 open System.Collections.Generic
-open System.Text
-open FParsec
 open FplPrimitives
-open FplGrammarTypes
-open ErrDiagnostics
-open FplInterpreterDiagnosticsEmitter
-open FplInterpreterAstPreprocessing
 open FplInterpreterBasicTypes
 open FplInterpreterUtils
-open FplInterpreterGlobals
 open FplInterpreterChecks
-open FplInterpreterSTEmbedding
 open FplInterpreterReferences
-open FplInterpreterIntrinsicTypes
 open FplInterpreterVariables
 open FplInterpreterDefinitions
 
@@ -152,7 +142,6 @@ let findInheritanceChains (baseNode: FplGenericNode) =
         distinctNames |> Seq.iter (fun s -> paths.Add (s, "ok"))
     paths
 
-
 /// Checks if a node inherits from some type (or is already that type).
 let inheritsFrom (node:FplGenericNode) someType = 
     match node, someType with 
@@ -205,11 +194,6 @@ let private errWrongReturnType aIsCallByReference aName aType pType (p:FplGeneri
         Some $"The returned {refTypeName aName} `{aName}` typed `{aType}` doesn't match the type `{pType}` this {blockName} returns."
     else 
         Some $"The returned application `{aName}` typed `{aType}` doesn't match the type `{pType}` this {blockName} returns."
-let private errWrongReturnTypeUndetermined aIsCallByReference aName pType = 
-    if aIsCallByReference then 
-        Some $"The type of the returned {refTypeName aName} `{aName}` could not be determined. It has to match the type `{pType}` this function maps to."
-    else
-        Some $"The type of the returned application `{aName}` could not be determined. It has to match the type `{pType}` this function maps to."
 let private errWrongClassInheritance aIsCallByReference aName aType pName pType = 
     if aIsCallByReference then 
         Some $"The {refTypeName aName} `{aName}` to the class `{aType}` neither matches the parameter `{pName}` typed `{pType}` nor the base classes of this type."
@@ -243,7 +227,6 @@ let private matchClassInheritance aIsCallByReference (clOpt:FplGenericNode optio
             errWrongClassInheritance aIsCallByReference aName aType pName pType
     | _ -> 
         errClassInheritanceUndetermined aIsCallByReference aName aType pName pType
-
 
 let private matchByTypeStringRepresentation aIsCallByReference (a:FplGenericNode) aName (aType:string) aTypeName (p:FplGenericNode) pName (pType:string) pTypeName = 
 
@@ -532,7 +515,6 @@ let rec private matchTwoTypes (a:FplGenericNode) (p:FplGenericNode) =
     | _ ,_ -> 
         matchByTypeStringRepresentation true a aName aType aTypeName p pName pType pTypeName
 
-
 /// Tries to match a list of arguments with a list of parameters by their type recursively.
 /// The comparison depends on MatchingMode.
 let rec mpwa (args: FplGenericNode list) (pars: FplGenericNode list) =
@@ -563,7 +545,6 @@ let rec mpwa (args: FplGenericNode list) (pars: FplGenericNode list) =
         let aName, aType, aTypeName = getNames a
         errMsgMissingParameter aName aType
     | ([], []) -> None
-
 
 /// Tries to match the arguments of `fva` FplValue with the parameters of the `fvp` FplValue and returns
 /// Some(specific error message) or None, if the match succeeded.

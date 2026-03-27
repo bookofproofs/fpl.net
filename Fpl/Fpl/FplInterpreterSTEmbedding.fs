@@ -23,7 +23,6 @@ open FplInterpreterBasicTypes
 open FplInterpreterGlobals
 open FplInterpreterChecks
 
-
 type FplTheory(theoryName, parent: FplGenericNode, filePath: string, runOrder) as this =
     inherit FplGenericNode((Position("",0,1,1), Position("",0,1,1)), Some parent)
     let _runOrder = runOrder
@@ -166,7 +165,6 @@ let tryAddToParentUsingFplId (fplValue:FplGenericNode) =
         let parent = fplValue.Parent.Value
         parent.Scope.Add(identifier, fplValue)
 
-
 // Tries to add a constructor or property to it's parent FPL block's scope using its mixed signature, or issues ID001 diagnostics if a conflict occurs
 let tryAddSubBlockToFplBlock (fplValue:FplGenericNode) =
     let identifier = fplValue.Type SignatureType.Mixed
@@ -243,7 +241,6 @@ let addExpressionToReference (fplValue:FplGenericNode) =
             next.ErrorOccurred <- fplValue.ErrorOccurred
         | _ -> addExpressionToParentArgList fplValue 
 
-
 // Tries to add an FPL block to its parent's scope using its mixed signature, or issues ID001 diagnostics if a conflict occurs
 let tryAddToParentUsingMixedSignature (fplValue:FplGenericNode) =
     let identifier = fplValue.Type SignatureType.Mixed
@@ -282,7 +279,6 @@ let signatureRepresent (fv:FplGenericNode) =
         |> List.map (fun var -> var.Represent())
         |> String.concat ", "
     $"{fv.FplId}({signatureVarRepresentations})"
-
 
 let rec searchInUpperScopeByName (fv1: FplGenericNode) name =
     if fv1.Name = PrimTheoryL then 
