@@ -4,7 +4,7 @@ open ErrDiagnostics
 open FplPrimitives
 open FplInterpreterBasicTypes
 open FplInterpreterChecks
-open FplInterpreterSTEmbedding
+open FplInterpreterGlobals
 open CommonTestHelpers
 
 [<TestClass>]

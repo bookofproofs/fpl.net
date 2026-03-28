@@ -9,7 +9,7 @@ open ErrDiagnostics
 open FplPrimitives
 open FplInterpreterUtils
 open FplInterpreterBasicTypes
-open FplInterpreterSTEmbedding
+open FplInterpreterGlobals
 open FplInterpreterReferences
 open FplInterpreterIntrinsicTypes
 open FplInterpreterVariables
