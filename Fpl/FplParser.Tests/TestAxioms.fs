@@ -14,13 +14,11 @@ type TestAxioms () =
 
     [<TestMethod>]
     member this.TestAxiom01 () =
-        tokenizer.ParsedTokens.Clear()
         let result = run (axiom .>> eof) """axiom ZeroIsNat
         {
             is(Zero,Nat)
         }"""
         let actual = sprintf "%O" result
-        printf "%s" (tokenizer.ParsedTokens |> Seq.map (fun t -> t.Name + t.EndPos.ToString()) |> String.concat ", ")
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
@@ -162,4 +160,3 @@ type TestAxioms () =
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
-        

@@ -1,4 +1,4 @@
-﻿/// This module contains the FPL parser producing an abstract syntax tree out of a given FPL code 
+/// This module contains the FPL parser producing an abstract syntax tree out of a given FPL code 
 module FplParser
 open System.Text.RegularExpressions
 open FplPrimitives
@@ -32,7 +32,6 @@ let private _endingPosition p =
     >>= fun (p, pos) ->
     preturn (pos, p)
 
-let tokenizer = Tokenizer()
 
 /// Takes the parser `p` and returns a tuple of its result, together with its starting and ending position.
 let positions (tokenName:string) (p: Parser<_,_>): Parser<Positions * _,_> =
@@ -42,34 +41,20 @@ let positions (tokenName:string) (p: Parser<_,_>): Parser<Positions * _,_> =
         (fun (startPos, result) endPos -> 
             let pos1 = Position("", startPos.Index, startPos.Line, startPos.Column)
             let pos2 = Position("", endPos.Index, endPos.Line, endPos.Column)
-            let token = { Token.Name = tokenName; Token.StartPos = pos1; Token.EndPos = pos2}
-            tokenizer.Push(token)
             (Positions(pos1, pos2), result)
         )
 
-/// Takes the parser `p` and returns a result with the side effect of remembering the parsed token 
-let tokenize (tokenName:string) (p: Parser<_,_>): Parser<_,_> =
-    pipe2
-        (_position .>>. p)
-        (_position)
-        (fun (startPos, result) endPos -> 
-            let pos1 = Position("", startPos.Index, startPos.Line, startPos.Column)
-            let pos2 = Position("", endPos.Index, endPos.Line, endPos.Column)
-            let token = { Token.Name = tokenName; Token.StartPos = pos1; Token.EndPos = pos2}
-            tokenizer.Push(token)
-            result
-        )
 
 (* Literals *)
 
-let leftBrace = tokenize "LeftBrace" (skipChar '{') >>. spaces 
-let rightBrace = tokenize "RightBrace" (skipChar '}') 
-let leftParen = tokenize "LeftParen" (skipChar '(') >>. spaces 
-let rightParen = tokenize "RightParen" (skipChar ')') 
-let comma = tokenize "Comma" (skipChar ',') >>. spaces 
+let leftBrace = skipChar '{' >>. spaces 
+let rightBrace = skipChar '}' 
+let leftParen = skipChar '(' >>. spaces 
+let rightParen = skipChar ')' 
+let comma = skipChar ',' >>. spaces 
 let dot = positions "Dot" (skipChar '.') |>> Ast.Dot
 let colon = skipChar ':' .>> spaces 
-let colonEqual = tokenize ":=" (skipString ":=") >>. spaces 
+let colonEqual = skipString ":=" >>. spaces 
 let at = pchar '@'
 let case = skipChar '|' >>. spaces
 let elseCase = skipChar '?' >>. spaces
