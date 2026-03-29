@@ -304,3 +304,10 @@ let searchExtensionByName (root: FplGenericNode) identifier =
     else
         ScopeSearchResult.Found candidates.Head
 
+let findCandidateOfExtensionMapping (fv: FplGenericNode) (name: string) =
+    match fv with 
+    | :? FplMapping -> 
+        match fv.Parent with 
+        | Some (:? FplExtension as ext) when ext.FplId = name -> [fv.Parent.Value]
+        | _ -> []
+    | _ -> []

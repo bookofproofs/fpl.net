@@ -509,8 +509,8 @@ let rec eval (st: SymbolTable) ast =
             else
                 identifier
             
-        let candidatesFromTheory = findCandidatesByName st searchIdentifier false variableStack.InReferenceToProofOrCorollary
-        let candidatesLocal = findCandidatesByNameInBlock fv searchIdentifier
+        let candidatesFromTheory = findCandidatesByName fv searchIdentifier false variableStack.InReferenceToProofOrCorollary
+        let candidatesLocal = findPropertyCandidatesByNameInBlock fv searchIdentifier
         let candidatesOfMapping = findCandidateOfExtensionMapping fv searchIdentifier
         let candidates, candidatesNames =  filterCandidates (candidatesFromTheory @ candidatesLocal @ candidatesOfMapping) searchIdentifier true
         let correctIds (fv1:FplGenericNode) = 
@@ -705,8 +705,8 @@ let rec eval (st: SymbolTable) ast =
     | Ast.PredicateWithOptSpecification((pos1, pos2), (fplIdentifierAst, optionalSpecificationAst)) ->
         let fv = variableStack.PeekEvalStack()
         let searchForCandidatesOfReferenceBlock (refBlock:FplGenericNode) = 
-            let candidatesFromTheory = findCandidatesByName st refBlock.FplId true false
-            let candidatesFromPropertyScope = findCandidatesByNameInBlock refBlock refBlock.FplId
+            let candidatesFromTheory = findCandidatesByName fv refBlock.FplId true false
+            let candidatesFromPropertyScope = findPropertyCandidatesByNameInBlock refBlock refBlock.FplId
             let candidatesFromDottedQualification = findCandidatesByNameInDotted refBlock refBlock.FplId
             candidatesFromTheory  
             @ candidatesFromPropertyScope 
@@ -863,7 +863,7 @@ let rec eval (st: SymbolTable) ast =
                 variableStack.PushEvalStack(baseNode)            
                 eval st baseAst
                 variableStack.PopEvalStack() |> ignore
-                let candidates = findCandidatesByName st baseNode.FplId false true
+                let candidates = findCandidatesByName baseNode baseNode.FplId false true
                 if candidates.Length > 0 then 
                     let foundBase = candidates.Head
                     match beingCreatedNode, foundBase with
@@ -973,7 +973,7 @@ let rec eval (st: SymbolTable) ast =
         let fv = variableStack.PeekEvalStack()
         match fv with 
         | :? FplReference ->
-            let candidates = findCandidatesByName st fv.FplId false true
+            let candidates = findCandidatesByName fv fv.FplId false true
             if candidates.Length > 0 then 
                 let candidate = candidates.Head
                 fv.RefersTo <- Some candidate
@@ -1625,7 +1625,7 @@ let rec eval (st: SymbolTable) ast =
             variableStack.PushEvalStack(fvJi)
             eval st predicateIdentifierAst
             // check, if indeed the predicateId points to an axiom, if not issue diagnostics
-            let candidates = findCandidatesByName st fvJi.FplId false false
+            let candidates = findCandidatesByName fvJi fvJi.FplId false false
             checkPR001_PR006Diagnostics fvJi candidates
             variableStack.PopEvalStack()
         | Some LiteralByConj, Some _, None -> 
@@ -1639,7 +1639,7 @@ let rec eval (st: SymbolTable) ast =
             variableStack.PushEvalStack(fvJi)
             eval st predicateIdentifierAst
             // check, if indeed the predicateId points to a conjecture, if not issue diagnostics
-            let candidates = findCandidatesByName st fvJi.FplId false false
+            let candidates = findCandidatesByName fvJi fvJi.FplId false false
             checkPR001_PR006Diagnostics fvJi candidates
             variableStack.PopEvalStack()
         | Some LiteralByCor, Some _, _ -> 
@@ -1647,7 +1647,7 @@ let rec eval (st: SymbolTable) ast =
             variableStack.PushEvalStack(fvJi)
             eval st predicateIdentifierAst
             dollarDigitListAsts.Value |> List.map (eval st) |> ignore
-            let candidates = findCandidatesByName st fvJi.FplId false true
+            let candidates = findCandidatesByName fvJi fvJi.FplId false true
             // check, if indeed the predicateId points to a corollary, if not issue diagnostics
             checkPR001_PR006Diagnostics fvJi candidates
             variableStack.PopEvalStack()
@@ -1665,7 +1665,7 @@ let rec eval (st: SymbolTable) ast =
             variableStack.PushEvalStack(fvJi)
             eval st predicateIdentifierAst
             // check, if indeed the predicateId points to a definition, if not issue diagnostics
-            let candidates = findCandidatesByName st fvJi.FplId false false
+            let candidates = findCandidatesByName fvJi fvJi.FplId false false
             checkPR001_PR006Diagnostics fvJi candidates
             variableStack.PopEvalStack()
         | Some LiteralByInf, Some _, None -> 
@@ -1679,7 +1679,7 @@ let rec eval (st: SymbolTable) ast =
             variableStack.PushEvalStack(fvJi)
             eval st predicateIdentifierAst
             // check, if indeed the predicateId points to a rule of inference, if not issue diagnostics
-            let candidates = findCandidatesByName st fvJi.FplId false false
+            let candidates = findCandidatesByName fvJi fvJi.FplId false false
             checkPR001_PR006Diagnostics fvJi candidates
             variableStack.PopEvalStack()
         | Some _, _, _ -> () // does not occur, because the parser byModifier choices between only two keywords LiteralByAx or LiteralByDef
@@ -1688,7 +1688,7 @@ let rec eval (st: SymbolTable) ast =
             variableStack.PushEvalStack(fvJi)
             eval st predicateIdentifierAst
             dollarDigitListAsts.Value |> List.map (eval st) |> ignore
-            let candidates = findCandidatesByName st fvJi.FplId false true
+            let candidates = findCandidatesByName fvJi fvJi.FplId false true
             // check, if indeed the predicateId points to a corollary, if not issue diagnostics
             checkPR001_PR006Diagnostics fvJi candidates
             // issue info diagnostics that references to a corollary need the keyword byCor to increase readability
@@ -1704,7 +1704,7 @@ let rec eval (st: SymbolTable) ast =
                 let parts = input.Split(':')
                 if parts.Length > 0 then parts.[0] else ""
             let name = splitOffAnyArgumentId fvJi.FplId
-            let candidates = findCandidatesByName st name false true 
+            let candidates = findCandidatesByName fvJi name false true 
             let candidatesFiltered = 
                 if candidates.Length > 1 then 
                     candidates |> List.filter (fun fv -> fv.FplId = name)
@@ -1721,7 +1721,7 @@ let rec eval (st: SymbolTable) ast =
             let fvJi = new FplJustificationItemByTheoremLikeStmt((pos1, pos2), parent)
             variableStack.PushEvalStack(fvJi)
             eval st predicateIdentifierAst
-            let candidates = findCandidatesByName st fvJi.FplId false false
+            let candidates = findCandidatesByName fvJi fvJi.FplId false false
             // check if indeed the predicateId points to a theorem-like statement except a corollary, if not issue diagnostics
             checkPR001_PR006Diagnostics fvJi candidates
             variableStack.PopEvalStack()

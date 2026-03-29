@@ -179,3 +179,25 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplGenericNode) as
             _callCounter <- _callCounter - 1
             _isReady <- this.Arity = 0 
         debug this Debug.Stop
+
+
+/// Looks for all declared properties or constructors (if any) that equal 
+/// the specific name within the building block, whose syntax tree the FplValue `fv` is part of.
+let findPropertyCandidatesByNameInBlock (fv: FplGenericNode) (name: string) =
+    let rec findDefinition (fv1: FplGenericNode) =
+        if isTheory fv1 then
+            ScopeSearchResult.NotFound
+        elif isDefinition fv1 then 
+            ScopeSearchResult.Found fv1
+        else 
+            match fv1.Parent with
+            | Some parent -> findDefinition parent
+            | None -> ScopeSearchResult.NotFound
+
+    match findDefinition fv with
+    | ScopeSearchResult.Found candidate ->
+        candidate.Scope
+        |> Seq.filter (fun kvp -> kvp.Value.FplId = name)
+        |> Seq.map (fun kvp -> kvp.Value)
+        |> Seq.toList
+    | _ -> []

@@ -282,3 +282,60 @@ let tryFindAssociatedBlockForCorollary (fplValue: FplGenericNode) =
         else
             ScopeSearchResult.NotFound
     | None -> ScopeSearchResult.NotApplicable
+
+
+/// Looks for all declared building blocks with a specific name.
+let findCandidatesByName (node: FplGenericNode) (name: string) withClassConstructors withCorollariesOrProofs =
+    let pm = List<FplGenericNode>()
+
+    let rec flattenCorollariesAndProofs (tls:FplGenericNode) =
+        tls.Scope.Values
+        |> Seq.iter (fun fv -> 
+            match fv.Name with
+            | LiteralPrfL -> pm.Add(fv)
+            | LiteralCorL -> 
+                pm.Add(fv)
+                flattenCorollariesAndProofs fv
+            | _ -> ()
+        )
+    let nameWithoutProofOrCorRef = 
+        if withCorollariesOrProofs && name.Contains("$") then 
+            let parts = name.Split('$')
+            parts.[0] 
+        else
+            name
+    let nameWithProofOrCorRef = 
+        if withCorollariesOrProofs && not (name.Contains("$")) then 
+            $"{name}$"
+        else
+            name
+
+    if isUpper name then
+        let root = getRoot node
+        root.OrderedTheories // iterate all theories
+        |> Seq.iter (fun theory ->
+            theory.Scope
+            // filter only blocks starting with the same FplId as the reference
+            |> Seq.map (fun kvp -> kvp.Value)
+            |> Seq.filter (fun fv -> 
+                fv.FplId = name 
+                || fv.FplId = nameWithoutProofOrCorRef 
+                || $"{fv.FplId}$".StartsWith nameWithProofOrCorRef)
+            |> Seq.iter (fun (block: FplGenericNode) ->
+                pm.Add(block)
+
+                if withClassConstructors && block.IsClass() then
+                    block.Scope
+                    |> Seq.map (fun kvp -> kvp.Value)
+                    |> Seq.filter (fun (fv: FplGenericNode) -> (fv.Name = LiteralCtorL || fv.Name = PrimDefaultConstructor))
+                    |> Seq.iter (fun (fv: FplGenericNode) -> pm.Add(fv))
+
+                if withCorollariesOrProofs && (isProvable block) then 
+                    flattenCorollariesAndProofs block
+            )
+        )
+        |> ignore
+
+    pm |> Seq.toList
+
+

@@ -566,3 +566,6 @@ let representationSep sep (coordinates:FplGenericNode seq) =
     coordinates 
     |> Seq.map (fun fv -> fv.Represent())
     |> String.concat sep
+
+/// A string representation of an FplValue
+let toString (fplValue:FplGenericNode) = $"{fplValue.ShortName} {fplValue.Type(SignatureType.Name)}"

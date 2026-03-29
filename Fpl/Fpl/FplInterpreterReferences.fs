@@ -314,3 +314,25 @@ type FplReference(positions: Positions, parent: FplGenericNode) =
             addExpressionToParentArgList this
             next.EndPos <- this.EndPos
         | _ -> ()            
+
+
+let findCandidatesByNameInDotted (fv: FplGenericNode) (name: string) =
+    let rec findQualifiedEntity (fv1: FplGenericNode) =
+        match fv1 with
+        | :? FplReference as ref when ref.DottedChild.IsSome -> 
+            ScopeSearchResult.Found(ref.DottedChild.Value)
+        | :? FplReference -> 
+            match fv1.Parent with
+            | Some parent -> findQualifiedEntity parent
+            | None -> ScopeSearchResult.NotFound
+        | _ -> ScopeSearchResult.NotFound
+
+    match findQualifiedEntity fv with
+    | ScopeSearchResult.Found candidate ->
+        match candidate with
+        | :? FplVariable as var ->
+            // prefer variable value over its referred type node
+            Option.orElse var.Value var.RefersTo |> Option.toList
+        | _ -> []
+    | _ -> []
+

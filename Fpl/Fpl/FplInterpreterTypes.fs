@@ -29,9 +29,7 @@ open FplInterpreterIntrinsicTypes
 open FplInterpreterVariables
 open FplInterpreterDefinitions
 open FplInterpreterFplTypeMatching
-open FplInterpreterPredicativeBlocks
-open FplInterpreterProofs
-open FplInterpreterExtensions
+
 
 type FplLocalization(positions: Positions, parent: FplGenericNode, runOrder) =
     inherit FplGenericNode(positions, Some parent)
@@ -811,8 +809,6 @@ type FplAssignment(positions: Positions, parent: FplGenericNode) as this =
 
         debug this Debug.Stop
 
-/// A string representation of an FplValue
-let toString (fplValue:FplGenericNode) = $"{fplValue.ShortName} {fplValue.Type(SignatureType.Name)}"
 
 
 type SymbolTable(parsedAsts: ParsedAstList, debug: bool, offlineMode: bool) =
@@ -981,108 +977,4 @@ type SymbolTable(parsedAsts: ParsedAstList, debug: bool, offlineMode: bool) =
         sb.ToString()
 
 
-/// Looks for all declared building blocks with a specific name.
-let findCandidatesByName (st: SymbolTable) (name: string) withClassConstructors withCorollariesOrProofs =
-    let pm = List<FplGenericNode>()
-
-    let rec flattenCorollariesAndProofs (tls:FplGenericNode) =
-        tls.Scope.Values
-        |> Seq.iter (fun fv -> 
-            match fv with
-            | :? FplProof -> pm.Add(fv)
-            | :? FplCorollary -> 
-                pm.Add(fv)
-                flattenCorollariesAndProofs fv
-            | _ -> ()
-        )
-    let nameWithoutProofOrCorRef = 
-        if withCorollariesOrProofs && name.Contains("$") then 
-            let parts = name.Split('$')
-            parts.[0] 
-        else
-            name
-    let nameWithProofOrCorRef = 
-        if withCorollariesOrProofs && not (name.Contains("$")) then 
-            $"{name}$"
-        else
-            name
-
-    if isUpper name then 
-        st.Root.Scope // iterate all theories
-        |> Seq.iter (fun theory ->
-            theory.Value.Scope
-            // filter only blocks starting with the same FplId as the reference
-            |> Seq.map (fun kvp -> kvp.Value)
-            |> Seq.filter (fun fv -> 
-                fv.FplId = name 
-                || fv.FplId = nameWithoutProofOrCorRef 
-                || $"{fv.FplId}$".StartsWith nameWithProofOrCorRef)
-            |> Seq.iter (fun (block: FplGenericNode) ->
-                pm.Add(block)
-
-                if withClassConstructors && block.IsClass() then
-                    block.Scope
-                    |> Seq.map (fun kvp -> kvp.Value)
-                    |> Seq.filter (fun (fv: FplGenericNode) -> (fv.Name = LiteralCtorL || fv.Name = PrimDefaultConstructor))
-                    |> Seq.iter (fun (fv: FplGenericNode) -> pm.Add(fv))
-
-                if withCorollariesOrProofs && (block :? FplGenericTheoremLikeStmt) then 
-                    flattenCorollariesAndProofs block
-            )
-        )
-        |> ignore
-
-    pm |> Seq.toList
-
-/// Looks for all declared properties or constructors (if any) that equal 
-/// the specific name within the building block, whose syntax tree the FplValue `fv` is part of.
-let findCandidatesByNameInBlock (fv: FplGenericNode) (name: string) =
-    let rec findDefinition (fv1: FplGenericNode) =
-        if isTheory fv1 then
-            ScopeSearchResult.NotFound
-        else
-            match fv1 with
-            | :? FplPredicate 
-            | :? FplClass
-            | :? FplFunctionalTerm -> ScopeSearchResult.Found(fv1)
-            | _ ->
-                match fv1.Parent with
-                | Some parent -> findDefinition parent
-                | None -> ScopeSearchResult.NotFound
-
-    match findDefinition fv with
-    | ScopeSearchResult.Found candidate ->
-        candidate.Scope
-        |> Seq.filter (fun kvp -> kvp.Value.FplId = name)
-        |> Seq.map (fun kvp -> kvp.Value)
-        |> Seq.toList
-    | _ -> []
-
-let findCandidateOfExtensionMapping (fv: FplGenericNode) (name: string) =
-    match fv with 
-    | :? FplMapping -> 
-        match fv.Parent with 
-        | Some (:? FplExtension as ext) when ext.FplId = name -> [fv.Parent.Value]
-        | _ -> []
-    | _ -> []
-
-let findCandidatesByNameInDotted (fv: FplGenericNode) (name: string) =
-    let rec findQualifiedEntity (fv1: FplGenericNode) =
-        match fv1 with
-        | :? FplReference as ref when ref.DottedChild.IsSome -> 
-            ScopeSearchResult.Found(ref.DottedChild.Value)
-        | :? FplReference -> 
-            match fv1.Parent with
-            | Some parent -> findQualifiedEntity parent
-            | None -> ScopeSearchResult.NotFound
-        | _ -> ScopeSearchResult.NotFound
-
-    match findQualifiedEntity fv with
-    | ScopeSearchResult.Found candidate ->
-        match candidate with
-        | :? FplVariable as var ->
-            // prefer variable value over its referred type node
-            Option.orElse var.Value var.RefersTo |> Option.toList
-        | _ -> []
-    | _ -> []
 
