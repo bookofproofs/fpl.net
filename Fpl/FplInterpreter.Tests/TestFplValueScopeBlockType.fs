@@ -11,6 +11,7 @@ open FplInterpreterPredicativeBlocks
 open FplInterpreterDefinitionProperties
 open FplInterpreterProofs
 open FplInterpreterQuantors
+open FplInterpreterRulesOfInferences
 open FplInterpreterTypes
 open CommonTestHelpers
 

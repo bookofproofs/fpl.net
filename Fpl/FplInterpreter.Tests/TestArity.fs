@@ -3,7 +3,7 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
 open FplInterpreterUtils
 open FplInterpreterProofs
-open FplInterpreterTypes
+open FplInterpreterRulesOfInferences
 open CommonTestHelpers
 
 [<TestClass>]

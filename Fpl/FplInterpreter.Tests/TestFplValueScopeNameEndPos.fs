@@ -4,11 +4,11 @@ open ErrDiagnostics
 open FplPrimitives
 open FplInterpreterBasicTypes
 open FplInterpreterGlobals
-open FplInterpreterTypes
 open FplInterpreterDefinitions
 open FplInterpreterPredicativeBlocks
 open FplInterpreterDefinitionProperties
 open FplInterpreterProofs
+open FplInterpreterRulesOfInferences
 open CommonTestHelpers
 
 [<TestClass>]

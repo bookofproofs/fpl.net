@@ -33,85 +33,8 @@ open FplInterpreterVariables
 open FplInterpreterDefinitions
 open FplInterpreterFplTypeMatching
 open FplInterpreterPredicativeBlocks
-open FplInterpreterDefinitionProperties
 open FplInterpreterProofs
 
-
-
-
-type FplPredicateList(positions: Positions, parent: FplGenericNode, runOrder) = 
-    inherit FplGenericIsAction(positions, parent)
-    let _runOrder = runOrder
-    override this.Name = LiteralPreL
-    override this.ShortName = LiteralInf
-
-    override this.Clone () =
-        let ret = new FplPredicateList((this.StartPos, this.EndPos), this.Parent.Value, _runOrder)
-        this.AssignParts(ret)
-        ret
-
-    override this.Type signatureType = signatureSep ", " this.ArgList signatureType
-
-    override this.Run() = 
-        debug this Debug.Start
-        // this line only makes sure that all Run is called recursively
-        // FplPredicateList has no value its own
-        this.ArgList |> Seq.map (fun fv -> fv.Run()) |> ignore
-        debug this Debug.Stop
-
-    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
-
-    override this.RunOrder = Some _runOrder
-
-type FplRuleOfInference(positions: Positions, parent: FplGenericNode, runOrder) as this =
-    inherit FplGenericIsAction(positions, parent)
-    let _runOrder = runOrder
-    let mutable _signStartPos = Position("", 0L, 0L, 0L)
-    let mutable _signEndPos = Position("", 0L, 0L, 0L)
-
-    do
-        this.FplId <- LiteralUndef
-        this.TypeId <- LiteralUndef
-
-    member this.SignStartPos
-        with get() = _signStartPos
-        and set(value) = _signStartPos <- value
-
-    member this.SignEndPos
-        with get() = _signEndPos
-        and set(value) = _signEndPos <- value
-
-    interface IHasSignature with
-        member this.SignStartPos 
-            with get () = this.SignStartPos
-            and set (value) = this.SignStartPos <- value
-        member this.SignEndPos 
-            with get () = this.SignEndPos
-            and set (value) = this.SignEndPos <- value
-
-    override this.Name = PrimRuleOfInference
-    override this.ShortName = LiteralInf
-
-    override this.Clone () =
-        let ret = new FplRuleOfInference((this.StartPos, this.EndPos), this.Parent.Value, _runOrder)
-        this.AssignParts(ret)
-        ret
-
-    override this.Type signatureType = getFplHead this signatureType
-    
-    override this.IsFplBlock () = true
-    override this.IsBlock () = true    
-
-    override this.Run() = 
-        // FplRuleOfReference does not have any Value and doesn't need run
-        ()
-
-    override this.EmbedInSymbolTable _ = 
-        this.CheckConsistency()
-        checkVAR04Diagnostics this
-        tryAddToParentUsingFplId this
-
-    override this.RunOrder = Some _runOrder
 
 
 
