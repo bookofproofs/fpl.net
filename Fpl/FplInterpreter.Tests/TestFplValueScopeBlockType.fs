@@ -16,6 +16,8 @@ open FplInterpreterCompoundPredicates
 open FplInterpreterExtensions
 open FplInterpreterDelegates
 open FplInterpreterMapCases
+open FplInterpreterLocalization
+open FplInterpreterReferencesSelfParent
 open FplInterpreterTypes
 open CommonTestHelpers
 

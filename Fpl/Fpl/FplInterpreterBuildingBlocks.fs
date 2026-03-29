@@ -39,6 +39,8 @@ open FplInterpreterCompoundPredicates
 open FplInterpreterExtensions
 open FplInterpreterDelegates
 open FplInterpreterMapCases
+open FplInterpreterLocalization
+open FplInterpreterReferencesSelfParent
 open FplInterpreterTypes
 
 let filterCandidates (candidatesPre:FplGenericNode list) identifier qualified =

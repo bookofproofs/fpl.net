@@ -24,6 +24,7 @@ open FplInterpreterChecks
 open FplInterpreterSTEmbedding
 open FplInterpreterIntrinsicTypes
 open FplInterpreterVariables
+open FplInterpreterReferences
 
 [<AbstractClass>]
 type FplGenericPredicate(positions: Positions, parent: FplGenericNode) as this =

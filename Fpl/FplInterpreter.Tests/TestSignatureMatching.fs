@@ -4,7 +4,7 @@ open ErrDiagnostics
 open TestSharedConfig
 open FplInterpreterBasicTypes
 open FplInterpreterFplTypeMatching
-open FplInterpreterTypes
+open FplInterpreterReferencesSelfParent
 open CommonTestHelpers
 
 [<TestClass>]
