@@ -18,6 +18,7 @@ open FplInterpreterDefinitionProperties
 open FplInterpreterProofs
 open FplInterpreterQuantors
 open FplInterpreterRulesOfInferences
+open FplInterpreterCompoundPredicates
 open FplInterpreterTypes
 open CommonTestHelpers
 
