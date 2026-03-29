@@ -17,7 +17,6 @@ open System
 open FplGrammarTypes
 open FplPrimitives
 open FplInterpreterDiagnosticsEmitter
-open FplInterpreterUtils
 open FplInterpreterBasicTypes
 open FplInterpreterGlobals
 open FplInterpreterChecks

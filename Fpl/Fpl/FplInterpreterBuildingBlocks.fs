@@ -21,7 +21,6 @@ open FplPrimitives
 open FplGrammarTypes
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterAstPreprocessing
-open FplInterpreterUtils
 open FplInterpreterBasicTypes
 open FplInterpreterGlobals
 open FplInterpreterChecks

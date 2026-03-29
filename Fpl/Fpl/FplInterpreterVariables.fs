@@ -19,7 +19,6 @@ open FplGrammarTypes
 open ErrDiagnostics
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterBasicTypes
-open FplInterpreterUtils
 open FplInterpreterGlobals
 open FplInterpreterSTEmbedding
 open FplInterpreterIntrinsicTypes

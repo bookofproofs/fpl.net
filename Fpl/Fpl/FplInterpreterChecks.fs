@@ -18,7 +18,6 @@ open System.Collections.Generic
 open ErrDiagnostics
 open FplPrimitives
 open FplInterpreterDiagnosticsEmitter
-open FplInterpreterUtils
 open FplInterpreterBasicTypes
 open FplInterpreterGlobals
 
@@ -377,3 +376,82 @@ let rec isInQuantor (fv:FplGenericNode) =
         match fv.Parent with 
         | Some parent -> isInQuantor parent
         | _ -> false
+
+/// Checks if a variable is defined in the scope of block, if any
+/// looking for it recursively, up the symbol tree.
+let variableInBlockScopeByName (fplValue: FplGenericNode) name withNestedVariableSearch =
+    let rec firstBlockParent (fv: FplGenericNode) =
+
+        let qualifiedVar (fv1: FplGenericNode) =
+            let allVarsInScope = fv1.GetVariables()
+
+            // try out all variables in scope
+            let foundList =
+                allVarsInScope
+                |> Seq.map (fun (var: FplGenericNode) ->
+                    if var.Scope.ContainsKey name then
+                        ScopeSearchResult.Found(var.Scope[name])
+                    else
+                        ScopeSearchResult.NotFound)
+                |> Seq.filter (fun ssr -> ssr <> ScopeSearchResult.NotFound)
+                |> Seq.toList
+
+            if foundList.IsEmpty then
+                firstBlockParent fv1.Parent.Value
+            else
+                foundList.Head
+        if isTheory fv then 
+            ScopeSearchResult.NotFound
+        else
+            match fv.Name with 
+            | LiteralThmL 
+            | LiteralLemL
+            | LiteralPropL 
+            | LiteralCorL
+            | LiteralConjL 
+            | PrimPredicateL
+            | LiteralAxL
+            | PrimRuleOfInference -> 
+                if fv.Scope.ContainsKey name then
+                    ScopeSearchResult.Found(fv.Scope[name])
+                elif fv.Parent.IsSome then
+                    if withNestedVariableSearch then
+                        match qualifiedVar fv with
+                        | ScopeSearchResult.NotFound -> firstBlockParent fv.Parent.Value
+                        | s -> s
+                    else
+                        firstBlockParent fv.Parent.Value
+                else
+                    ScopeSearchResult.NotFound
+            | _ ->
+                match fv.Name with
+                | LiteralCtorL
+                | LiteralLocL
+                | PrimQuantorAll
+                | PrimQuantorExists
+                | PrimQuantorExistsN
+                | PrimMandatoryFunctionalTermL
+                | PrimMandatoryPredicateL
+                | LiteralPrfL
+                | PrimExtensionL
+                | PrimFunctionalTermL
+                | PrimClassL ->
+                    if fv.Scope.ContainsKey name then
+                        ScopeSearchResult.Found(fv.Scope[name])
+                    elif fv.Parent.IsSome then
+                        if withNestedVariableSearch then
+                            match qualifiedVar fv with
+                            | ScopeSearchResult.NotFound -> firstBlockParent fv.Parent.Value
+                            | s -> s
+                        else
+                            firstBlockParent fv.Parent.Value
+                    else
+                        ScopeSearchResult.NotFound
+                | _ ->
+                    if fv.Parent.IsSome then
+                        firstBlockParent fv.Parent.Value
+                    else
+                        ScopeSearchResult.NotFound
+
+    firstBlockParent fplValue
+

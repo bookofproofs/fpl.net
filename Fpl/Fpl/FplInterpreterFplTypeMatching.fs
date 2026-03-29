@@ -15,9 +15,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 module FplInterpreterFplTypeMatching
 open System
 open System.Collections.Generic
+open FplInterpreterDiagnosticsEmitter
 open FplPrimitives
 open FplInterpreterBasicTypes
-open FplInterpreterUtils
 open FplInterpreterChecks
 open FplInterpreterReferences
 open FplInterpreterVariables
@@ -571,3 +571,66 @@ let matchArgumentsWithParameters (fva: FplGenericNode) (fvp: FplGenericNode) =
             Some($"{aErr} in {qualifiedName fvp true}")
     | None -> None
 
+
+
+/// Tries to match the signatures of toBeMatched with the signatures of all candidates and accumulates any
+/// error messages in accResultList.
+let rec checkCandidates (toBeMatched: FplGenericNode) (candidates: FplGenericNode list) (accResultList: string list) =
+    match candidates with
+    | [] -> (None, accResultList)
+    | candidate :: candidates ->
+        match matchArgumentsWithParameters toBeMatched candidate with
+        | None -> (Some candidate, [])
+        | Some errMsg -> checkCandidates toBeMatched candidates (accResultList @ [ errMsg ])
+
+/// Checks if there is a candidate among the candidates that matches the signature of a calling FplValue and returns this as an option.
+let checkSIG04Diagnostics (calling:FplGenericNode) (candidates: FplGenericNode list) = 
+    if candidates.Length = 0 then
+        None
+    else
+        match checkCandidates calling candidates [] with
+        | (Some candidate,_) -> Some candidate // no error occurred
+        | (None, errList) -> 
+            let errListStr = 
+                errList 
+                |> List.mapi (fun i s -> 
+                    if errList.Length > 1 then 
+                        sprintf "%d) %s" (i + 1) s
+                    else
+                        sprintf "%s" s
+                )
+                |> String.concat ", "
+            calling.ErrorOccurred <- emitSIG04Diagnostics (calling.Type SignatureType.Mixed) candidates.Length errListStr calling.StartPos calling.EndPos
+            None
+
+/// Checks if a reference to an array matches its dimensions (in terms of number and types)
+let checkSIG08_SIG10Diagnostics (referenceToArray:FplGenericNode) =
+    let rec matchIndexesWithDimensions (refToArray:FplReference) =
+        match refToArray.RefersTo with
+        | Some (:? FplVariableArray as varArray) ->
+            let rec matchAllIndexes (indexes:FplGenericNode list) (dims:FplGenericNode list) dimNumber =
+                match indexes, dims with
+                | i::ixs, d::dms ->
+                    match mpwa [i] [d] with
+                    | Some errMsg ->
+                        // type mismatch between dimension and index
+                        refToArray.ErrorOccurred <- emitSIG08diagnostics varArray.FplId i.FplId (i.Type SignatureType.Type) (d.Type SignatureType.Type) dimNumber i.StartPos i.EndPos 
+                        matchAllIndexes ixs dms (dimNumber + 1) 
+                    | _ -> matchAllIndexes ixs dms (dimNumber + 1) 
+                | [], d::dms -> 
+                    // missing index for dimension dimOrdinal
+                    refToArray.ErrorOccurred <- emitSIG09diagnostics varArray.FplId (d.Type SignatureType.Type) dimNumber d.StartPos d.EndPos
+                    matchAllIndexes [] dms (dimNumber + 1) 
+                | i::ixs, [] -> 
+                    // array has less dimensions, index at dimOrdinal not supported
+                    refToArray.ErrorOccurred <- emitSIG10diagnostics varArray.FplId (i.FplId) dimNumber i.StartPos i.EndPos
+                    matchAllIndexes ixs [] (dimNumber + 1)  
+                | [], [] -> ()
+
+            let dims = varArray.DimensionTypes |> Seq.toList
+            let indexes = refToArray.ArgList |> Seq.toList
+            matchAllIndexes indexes dims 1
+        | _ -> ()
+    match referenceToArray with 
+    | :? FplReference as refToArray -> matchIndexesWithDimensions refToArray
+    | _ -> ()

@@ -16,7 +16,77 @@ open System
 open System.Collections.Generic
 open FplPrimitives
 open FplGrammarTypes
-open FplInterpreterUtils
+
+open FParsec
+
+type FixType =
+    | Infix of string * int
+    | Postfix of string
+    | Prefix of string
+    | Symbol of string
+    | NoFix
+
+    member this.Type =
+        match this with
+        | Infix(symbol, precedence) -> sprintf "infix `%s` (with precedence `%i`)" symbol precedence
+        | Postfix symbol -> sprintf "postfix `%s` " symbol
+        | Prefix symbol -> sprintf "prefix `%s` " symbol
+        | Symbol symbol -> sprintf "symbol `%s`" symbol
+        | NoFix -> "no fix"
+
+    member this.GetUserDefinedLiteral defaultSymbol =
+        match this with
+        | Infix(symbol, _) -> symbol 
+        | Postfix symbol -> symbol
+        | Prefix symbol -> symbol
+        | Symbol symbol -> symbol
+        | NoFix -> defaultSymbol
+
+type SignatureType =
+    | Name
+    | Type
+    | Mixed
+
+/// Maximum number of calls allowed for an Fpl Node
+let maxRecursion = 15
+
+/// Checks if a string starts with a lower case character string
+let checkStartsWithLowerCase (s:string) =
+    if s.Length > 0 then 
+        System.Char.IsLower(s[0])
+    else
+        false
+
+type IVariable =
+    abstract member IsSignatureVariable : bool with get, set
+    abstract member IsInitialized : bool with get, set
+
+/// The interface IConstant is used to implement fixed but unknown objects of some type.
+/// In general, the equality of two fixed but unknown objects of the same type cannot be determined, 
+/// unless it is explicitly asserted (or explicitly negated) in the corresponding FPL theory.
+/// However, once a ConstantName is established, the value will be treated like a fixed constant.
+type IConstant =
+    abstract member ConstantName : string with get
+    abstract member SetConstantName: unit -> unit
+
+type IHasSignature =
+    abstract member SignStartPos : Position with get, set
+    abstract member SignEndPos : Position with get, set
+
+type ICanBeCalledRecusively =
+    abstract member CallCounter : int
+
+type IReady =
+    abstract member IsReady : bool
+
+type IHasProof =
+    abstract member HasProof : bool with get, set
+
+let stripLastDollarDigit (s: string) =
+    let lastIndex = s.LastIndexOf('$')
+    if lastIndex <> -1 then s.Substring(0, lastIndex) else s
+
+
 
 [<AbstractClass>]
 type FplGenericNode(positions: Positions, parent: FplGenericNode option) =

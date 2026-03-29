@@ -17,7 +17,6 @@ open FplGrammarTypes
 open FplPrimitives
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterSTEmbedding
-open FplInterpreterUtils
 open FplInterpreterBasicTypes
 
 type FplIntrinsicTpl(name, positions: Positions, parent: FplGenericNode) as this =

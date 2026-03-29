@@ -13,11 +13,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 module FplInterpreterSTEmbedding
-open System
 open System.Collections.Generic
-open FParsec
 open FplPrimitives
-open FplInterpreterUtils
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterBasicTypes
 open FplInterpreterGlobals

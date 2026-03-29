@@ -7,7 +7,6 @@ open Newtonsoft.Json.Linq
 open FParsec
 open ErrDiagnostics
 open FplPrimitives
-open FplInterpreterUtils
 open FplInterpreterBasicTypes
 open FplInterpreterGlobals
 open FplInterpreterReferences

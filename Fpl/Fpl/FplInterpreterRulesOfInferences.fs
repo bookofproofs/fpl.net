@@ -17,7 +17,6 @@ open FParsec
 open FplPrimitives
 open FplGrammarTypes
 open FplInterpreterBasicTypes
-open FplInterpreterUtils
 open FplInterpreterGlobals
 open FplInterpreterSTEmbedding
 open FplInterpreterVariables
