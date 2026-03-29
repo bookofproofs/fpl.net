@@ -33,6 +33,9 @@
         <Compile Include="FplInterpreterQuantors.fs" />
         <Compile Include="FplInterpreterCompoundPredicates.fs" />
         <Compile Include="FplInterpreterRulesOfInferences.fs" />
+        <Compile Include="FplInterpreterMapCases.fs" />
+        <Compile Include="FplInterpreterExtensions.fs" />
+        <Compile Include="FplInterpreterDelegates.fs" />
         <Compile Include="FplInterpreterTypes.fs" />
         <Compile Include="FplInterpreterUsesClause.fs" />
         <Compile Include="FplInterpreterBuildingBlocks.fs" />

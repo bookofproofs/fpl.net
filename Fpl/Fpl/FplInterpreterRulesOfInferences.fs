@@ -1,5 +1,5 @@
 /// This module contains all types used by the FplInterpreter
-/// to model / interprete rules of inferences
+/// to model / interpret rules of inferences
 
 (* MIT License
 
