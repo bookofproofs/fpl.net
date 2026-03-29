@@ -4,6 +4,7 @@ open ErrDiagnostics
 open FplPrimitives
 open FplInterpreterBasicTypes
 open FplInterpreterGlobals
+open FplInterpreterIntrinsicTypes
 open FplInterpreterReferences
 open FplInterpreterVariables
 open FplInterpreterDefinitions
@@ -18,7 +19,7 @@ open FplInterpreterDelegates
 open FplInterpreterMapCases
 open FplInterpreterLocalization
 open FplInterpreterReferencesSelfParent
-open FplInterpreterTypes
+open FplInterpreterIsOperator
 open CommonTestHelpers
 
 

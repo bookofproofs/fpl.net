@@ -5,7 +5,7 @@
 open ErrDiagnostics
 open FplParser
 open FplInterpreterAstPreprocessing
-open FplInterpreterTypes
+open FplInterpreterST
 open System.IO
 
 let deleteFilesWithExtension dir extension =

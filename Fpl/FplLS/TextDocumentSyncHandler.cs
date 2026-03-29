@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server.Capabilities;
@@ -8,7 +8,7 @@ using OmniSharp.Extensions.LanguageServer.Protocol;
 using MediatR;
 using System;
 using static ErrDiagnostics;
-using static FplInterpreterTypes;
+using static FplInterpreterST;
 
 
 namespace FplLS

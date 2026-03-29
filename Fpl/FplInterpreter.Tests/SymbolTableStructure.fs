@@ -24,7 +24,11 @@ open FplInterpreterDelegates
 open FplInterpreterMapCases
 open FplInterpreterLocalization
 open FplInterpreterReferencesSelfParent
-open FplInterpreterTypes
+open FplInterpreterAssertStmt
+open FplInterpreterAssignments
+open FplInterpreterIsOperator
+open FplInterpreterForStmt
+open FplInterpreterCasesStmt
 open CommonTestHelpers
 
 [<TestClass>]

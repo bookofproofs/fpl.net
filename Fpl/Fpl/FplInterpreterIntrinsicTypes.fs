@@ -208,3 +208,13 @@ type FplInstance(typeId:string, positions: Positions, parent: FplGenericNode) as
         addExpressionToParentArgList this 
 
     override this.RunOrder = None
+
+[<AbstractClass>]
+type FplGenericStmt(positions: Positions, parent: FplGenericNode) =
+    inherit FplGenericIsAction(positions, parent)
+
+    override this.ShortName = PrimStmt
+
+    override this.Type _ = this.FplId
+
+    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this

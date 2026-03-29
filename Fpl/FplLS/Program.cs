@@ -4,7 +4,7 @@ using Newtonsoft.Json.Linq;
 using OmniSharp.Extensions.LanguageServer.Server;
 using static ErrDiagnostics;
 using static FplInterpreterAstPreprocessing;
-using static FplInterpreterTypes;
+using static FplInterpreterST;
 
 namespace FplLS
 {

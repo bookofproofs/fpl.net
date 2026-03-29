@@ -1,8 +1,8 @@
-﻿using OmniSharp.Extensions.LanguageServer.Protocol.Document;
+using OmniSharp.Extensions.LanguageServer.Protocol.Document;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
 using System.Text;
 using static ErrDiagnostics;
-using static FplInterpreterTypes;
+using static FplInterpreterST;
 using Model = OmniSharp.Extensions.LanguageServer.Protocol.Models;
 
 namespace FplLS
@@ -116,7 +116,7 @@ namespace FplLS
         /// <param name="listDiagnostics">List of diagnostics</param>
         /// <param name="origSourceCode">source code of the current file</param>
         /// <returns>Casted list</returns>
-        public UriDiagnostics CastDiagnostics(FplInterpreterTypes.SymbolTable st)
+        public UriDiagnostics CastDiagnostics(SymbolTable st)
         {
             var castedListDiagnostics = new UriDiagnostics();
             var uriTotextPositionsDict = GetTextPositionsByUri(st);

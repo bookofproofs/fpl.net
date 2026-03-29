@@ -1,7 +1,5 @@
-/// This module contains the main program of the FPL interpreter
-/// It makes sure that all uses clauses are loaded and parsed before the SymbolTable can be created out of the AST.
-/// It also catches any unexpected runtime errors to make sure that the FPL Language Server never crashes. 
-/// In case an expected runtime error is produced, the Language Server will emit a GEN00 diagnostics.
+/// This module contains all symbol table nodes used by the FplInterpreter
+/// to model the assert statement.
 
 (* MIT License
 
@@ -14,19 +12,29 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
 
 *)
-module FplInterpreter
-open System
-open ErrDiagnostics
-open FplInterpreterST
-open FplInterpreterUsesClause
-open FplInterpreterBuildingBlocks
-open FplInterpreterDiagnosticsEmitter
+module FplInterpreterAssertStmt
+open FplPrimitives
+open FplGrammarTypes
+open FplInterpreterBasicTypes
+open FplInterpreterGlobals
+open FplInterpreterIntrinsicTypes
 
-let fplInterpreter (st:SymbolTable) input (uri:PathEquivalentUri) fplLibUrl = 
-    try
-        if st.MainTheory = String.Empty then
-            st.MainTheory <- uri.TheoryName
-        loadAllUsesClauses st input uri fplLibUrl 
-        evaluateSymbolTable st 
-    with ex -> 
-        emitUnexpectedErrorDiagnostics (ex.Message + Environment.NewLine + ex.StackTrace)
+
+type FplAssertion(positions: Positions, parent: FplGenericNode) =
+    inherit FplGenericStmt(positions, parent)
+
+    override this.Name = PrimAssertion
+    override this.ShortName = LiteralAss
+
+    override this.Clone () =
+        let ret = new FplAssertion((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Run() = 
+        // TODO implement run
+        debug this Debug.Start
+        debug this Debug.Stop
+
+    override this.RunOrder = None
+

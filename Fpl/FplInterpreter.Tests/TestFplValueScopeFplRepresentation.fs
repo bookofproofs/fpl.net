@@ -5,7 +5,7 @@ open ErrDiagnostics
 open FplInterpreterBasicTypes
 open FplInterpreterGlobals
 open FplInterpreterVariables
-open FplInterpreterTypes
+open FplInterpreterAssignments
 open CommonTestHelpers
 
 [<TestClass>]

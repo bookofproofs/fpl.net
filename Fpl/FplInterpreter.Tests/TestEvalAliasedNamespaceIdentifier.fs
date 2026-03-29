@@ -5,7 +5,7 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open FParsec
 open ErrDiagnostics
 open FplInterpreterAstPreprocessing
-open FplInterpreterTypes
+open FplInterpreterST
 open FplInterpreterUsesClause
 open CommonTestHelpers
 open TestSharedConfig
