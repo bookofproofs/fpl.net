@@ -6,6 +6,7 @@ open FParsec
 open ErrDiagnostics
 open FplInterpreterAstPreprocessing
 open FplInterpreterST
+open FplInterpreter.Main
 open FplInterpreterUsesClause
 open CommonTestHelpers
 open TestSharedConfig
@@ -516,7 +517,7 @@ type TestEvalAliasedNamespaceIdentifier() =
                 let uri = PathEquivalentUri(Path.Combine(currDir,filename))
                 let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
                 // reparse the Test.fpl after removing the uses clause
-                FplInterpreter.fplInterpreter st ";" uri fplLibUrl
+                fplInterpreter st ";" uri fplLibUrl
                 Assert.AreEqual<int>(1, st.ParsedAsts.Count)
                 Assert.AreEqual<int>(1, st.Root.Scope.Count)
                 prepareFplCode(filename, "", true) |> ignore
@@ -537,7 +538,7 @@ type TestEvalAliasedNamespaceIdentifier() =
                 let uri = PathEquivalentUri(Path.Combine(currDir, filename))
                 let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
                 // reparse the file after replacing the uses clause with uses Fpl.Commons
-                FplInterpreter.fplInterpreter st "uses Fpl.Commons ;" uri fplLibUrl
+                fplInterpreter st "uses Fpl.Commons ;" uri fplLibUrl
                 Assert.AreEqual<int>(2, st.ParsedAsts.Count)
                 Assert.AreEqual<int>(2, st.Root.Scope.Count)
             | None -> Assert.IsTrue(false)
@@ -556,7 +557,7 @@ type TestEvalAliasedNamespaceIdentifier() =
                 let uri = PathEquivalentUri(Path.Combine(currDir, filename))
                 let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
                 // reparse the Test.fpl after removing the uses clause
-                FplInterpreter.fplInterpreter st "uses BlaTypo ;" uri fplLibUrl
+                fplInterpreter st "uses BlaTypo ;" uri fplLibUrl
                 Assert.AreEqual<int>(1, st.ParsedAsts.Count)
                 Assert.AreEqual<int>(1, st.Root.Scope.Count)
             | None -> Assert.IsTrue(false)
@@ -579,7 +580,7 @@ type TestEvalAliasedNamespaceIdentifier() =
                 let uri = PathEquivalentUri(Path.Combine(currDir, filename))
                 let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
                 // reparse the Test.fpl after slightly modifying the uses clause
-                FplInterpreter.fplInterpreter st (fplCode + " ") uri fplLibUrl
+                fplInterpreter st (fplCode + " ") uri fplLibUrl
                 Assert.AreEqual<int>(parsedAstsFirstTime, st.ParsedAsts.Count)
                 Assert.AreEqual<int>(scopeCountFirstTime, st.Root.Scope.Count)
                 Assert.AreEqual<int>(errorCountfirstTime, ad.CountDiagnostics)
@@ -605,7 +606,7 @@ type TestEvalAliasedNamespaceIdentifier() =
                 let fplCode = File.ReadAllText(uri.AbsolutePath)
                 let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
                 // reparse the Test.fpl after slightly modifying the uses clause
-                FplInterpreter.fplInterpreter st fplCode uri fplLibUrl
+                fplInterpreter st fplCode uri fplLibUrl
                 Assert.AreEqual<int>(parsedAstsFirstTime, st.ParsedAsts.Count)
                 Assert.AreEqual<int>(scopeCountFirstTime, st.Root.Scope.Count)
                 Assert.AreEqual<int>(errorCountfirstTime, ad.CountDiagnostics)

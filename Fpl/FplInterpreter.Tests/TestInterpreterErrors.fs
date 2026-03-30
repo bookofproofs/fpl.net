@@ -5,6 +5,7 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
 open FplInterpreterAstPreprocessing
 open FplInterpreterST
+open FplInterpreter.Main
 open CommonTestHelpers
 open TestSharedConfig
 
@@ -30,7 +31,7 @@ type TestInterpreterErrors() =
         else
             let parsedAsts = ParsedAstList()
             let st = SymbolTable(parsedAsts, true, TestConfig.OfflineMode)
-            FplInterpreter.fplInterpreter st input uri fplLibUrl |> ignore
+            fplInterpreter st input uri fplLibUrl |> ignore
             Some (st)
 
     member this.PrepareTestNSP04CircularABCA(delete:bool) =
@@ -52,7 +53,7 @@ type TestInterpreterErrors() =
         else
             let parsedAsts = ParsedAstList()
             let st = SymbolTable(parsedAsts, true, TestConfig.OfflineMode)
-            FplInterpreter.fplInterpreter st A uri fplLibUrl |> ignore
+            fplInterpreter st A uri fplLibUrl |> ignore
             Some (st)
 
     member this.PrepareTestNSP04CircularAA(delete:bool) =
@@ -70,7 +71,7 @@ type TestInterpreterErrors() =
         else
             let parsedAsts = ParsedAstList()
             let st = SymbolTable(parsedAsts, true, TestConfig.OfflineMode)
-            FplInterpreter.fplInterpreter st A uri fplLibUrl |> ignore
+            fplInterpreter st A uri fplLibUrl |> ignore
             Some (st)
 
     member this.PrepareTestNSP04NonCircular(delete:bool) =
@@ -91,7 +92,7 @@ type TestInterpreterErrors() =
         else
             let parsedAsts = ParsedAstList()
             let st = SymbolTable(parsedAsts, true, TestConfig.OfflineMode)
-            FplInterpreter.fplInterpreter st input uri fplLibUrl |> ignore
+            fplInterpreter st input uri fplLibUrl |> ignore
             Some (st)
 
     member this.PrepareTestNSP05 (delete:bool) =
@@ -110,7 +111,7 @@ type TestInterpreterErrors() =
         else
             let parsedAsts = ParsedAstList()
             let st = SymbolTable(parsedAsts, true, TestConfig.OfflineMode)
-            FplInterpreter.fplInterpreter st input uri fplLibUrl |> ignore
+            fplInterpreter st input uri fplLibUrl |> ignore
             Some (st)
 
     member this.PrepareTestNSP05CrossCheck (delete:bool) =
@@ -129,7 +130,7 @@ type TestInterpreterErrors() =
         else
             let parsedAsts = ParsedAstList()
             let st = SymbolTable(parsedAsts, true, TestConfig.OfflineMode)
-            FplInterpreter.fplInterpreter st input uri fplLibUrl |> ignore
+            fplInterpreter st input uri fplLibUrl |> ignore
             Some (st)
 
     [<TestMethod>]
@@ -148,7 +149,7 @@ type TestInterpreterErrors() =
         let uri = PathEquivalentUri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
         let parsedAsts = ParsedAstList()
         let st = SymbolTable(parsedAsts, true, TestConfig.OfflineMode)
-        FplInterpreter.fplInterpreter st input uri fplLibUrl |> ignore
+        fplInterpreter st input uri fplLibUrl |> ignore
         let result = filterByErrorCode ad code.Code
         Assert.AreEqual<int>(1, result.Length)
 
@@ -164,7 +165,7 @@ type TestInterpreterErrors() =
         let uri = PathEquivalentUri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
         let parsedAsts = ParsedAstList()
         let st = SymbolTable(parsedAsts, true, TestConfig.OfflineMode)
-        FplInterpreter.fplInterpreter st input uri fplLibUrl |> ignore 
+        fplInterpreter st input uri fplLibUrl |> ignore 
         let result = filterByErrorCode ad code.Code
         Assert.AreEqual<int>(1, result.Length)
 

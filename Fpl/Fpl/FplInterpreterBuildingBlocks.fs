@@ -47,29 +47,7 @@ open FplInterpreterAssignments
 open FplInterpreterIsOperator
 open FplInterpreterForStmt
 open FplInterpreterCasesStmt
-
-let filterCandidates (candidatesPre:FplGenericNode list) identifier qualified =
-    let candidates =
-        candidatesPre
-        |> List.filter (fun fv1 -> fv1.FplId = identifier)
-
-    let candidatesNames =
-        candidatesPre
-        |> Seq.sortBy (fun fv -> $"{fv.Name}:{fv.FplId}")
-        |> Seq.map (fun fv -> 
-            if qualified then 
-                qualifiedName fv false
-            else
-                $"`{fv.Type SignatureType.Mixed}`"
-        )
-        |> Seq.mapi (fun i s -> 
-            if candidatesPre.Length > 1 then 
-                sprintf "%d) %s" (i + 1) s
-            else
-                sprintf "%s" s
-        )
-        |> String.concat ", "
-    (candidates, candidatesNames)
+open FplInterpreter.ST
 
 /// Simplify trivially nested expressions by removing from the stack FplValue nodes that were created due to too long parsing tree and replacing them by their sub nodes 
 let rec simplifyTriviallyNestedExpressions (rb1:FplGenericNode) = 
@@ -114,6 +92,20 @@ let rec eval (st: SymbolTable) ast =
         | _ -> ()
 
     match ast with
+    // Lexical / leaf tokens
+    | Ast.Alias _
+    | Ast.Dot _
+    | Ast.Star _
+    | Ast.Digits _
+    | Ast.DollarDigits _
+    | Ast.ExtensionRegex _
+    | Ast.ExtensionName _
+    | Ast.LanguageCode _
+    | Ast.LocalizationString _
+    | Ast.PascalCaseId _
+    | Ast.PredicateIdentifier _
+        -> Lexical.eval st ast
+
     | Ast.IndexAllowedType((pos1, pos2), indexAllowedTypeAst) ->
         eval st indexAllowedTypeAst
     | Ast.SimpleVariableType((pos1, pos2), simpleVariableTypeAst) ->
@@ -144,8 +136,6 @@ let rec eval (st: SymbolTable) ast =
         | _ -> () // RefersTo's semantics in other FplValues is different, do not interfere with it
         variableStack.PushEvalStack(templateNode)
         variableStack.PopEvalStack()
-    | Ast.Star((pos1, pos2),()) -> ()
-    | Ast.Dot((pos1, pos2),()) -> ()
     | Ast.Intrinsic((pos1, pos2),()) -> 
         let fv = variableStack.PeekEvalStack()
         fv.IsIntrinsic <- true // flag that this block is intrinsic
@@ -155,62 +145,11 @@ let rec eval (st: SymbolTable) ast =
             cl.AddDefaultConstructor()
         | _ -> ()
     | Ast.Error  -> ()
-    | Ast.Digits s -> 
-        let fv = variableStack.PeekEvalStack()
-        fv.FplId <- s
-        fv.TypeId <- s
-    | Ast.PascalCaseId ((pos1, pos2), pascalCaseId) -> 
-        let fv = variableStack.PeekEvalStack()
-        match fv.Name with
-        | LiteralAxL
-        | LiteralThmL
-        | LiteralPropL
-        | LiteralLemL
-        | LiteralConjL
-        | LiteralCorL
-        | PrimFunctionalTermL
-        | PrimPredicateL
-        | LiteralPrfL
-        | PrimMandatoryFunctionalTermL
-        | PrimMandatoryPredicateL
-        | PrimPredicateL
-        | PrimFunctionalTermL
-        | PrimRuleOfInference -> 
-            fv.FplId <- pascalCaseId
-        | LiteralCtorL ->
-            fv.FplId <- pascalCaseId
-            fv.TypeId <- pascalCaseId
-            fv.ErrorOccurred <- emitID008Diagnostics pascalCaseId fv.Parent.Value.FplId pos1 pos2
-        | PrimClassL ->
-            fv.FplId <- pascalCaseId
-            fv.TypeId <- pascalCaseId
-        | _ -> ()
-    | Ast.ExtensionRegex s -> 
-        let fv = variableStack.PeekEvalStack()
-        fv.TypeId <- s
-    | Ast.DollarDigits((pos1, pos2), s) -> 
-        let fv = variableStack.PeekEvalStack()
-        let sid = $"${s.ToString()}"
-        match fv with 
-        | :? FplReference when fv.FplId = String.Empty && not variableStack.InReferenceToProofOrCorollary ->
-            let value = new FplIntrinsicInd((pos1, pos2), fv)
-            value.FplId <- sid
-            variableStack.PushEvalStack(value)
-            variableStack.PopEvalStack()
-        | _  ->
-            fv.FplId <- fv.FplId + sid
-            match fv.TypeId with 
-            | "" when not variableStack.InReferenceToProofOrCorollary -> fv.TypeId <- LiteralInd
-            | LiteralPred -> ()
-            | _ -> fv.TypeId <- fv.TypeId + sid
-    | Ast.ExtensionName((pos1, pos2), s) ->
-        let fv = variableStack.PeekEvalStack()
-        let extensionName = s
-        match fv with 
-        | :? FplExtension ->
-            fv.FplId <- extensionName
-            fv.TypeId <- extensionName
-        | _ -> ()
+
+
+
+
+
     | Ast.Var((pos1, pos2), name) ->
         let searchVarByName (fv:FplGenericNode) = 
             match (searchInUpperScopeByName fv name) with
@@ -282,17 +221,7 @@ let rec eval (st: SymbolTable) ast =
                 loc.Scope.Add(name, variable)
                 variable.Parent <- Some loc
         | _ -> ()
-    | Ast.Alias((pos1, pos2), s) -> ()
-    | Ast.LanguageCode((pos1, pos2), s) -> 
-        let fv = variableStack.PeekEvalStack()
-        fv.FplId <- s
-        fv.TypeId <- s
-        fv.StartPos <- pos1
-        fv.EndPos <- pos2
-    | Ast.LocalizationString((pos1, pos2), s) -> 
-        let fv = variableStack.PeekEvalStack()
-        fv.FplId <- s
-        fv.TypeId <- s
+
     | Ast.ObjectSymbol((pos1, pos2), symbol) -> 
         let fv = variableStack.PeekEvalStack()
         fv.FplId <- symbol
@@ -508,68 +437,7 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PopEvalStack()
     | Ast.AST((pos1, pos2), ast1) ->
         eval st ast1
-    | Ast.PredicateIdentifier((pos1, pos2), identifier) ->
-        let fv = variableStack.PeekEvalStack()
-        let searchIdentifier = 
-            if variableStack.InReferenceToProofOrCorollary then 
-                $"{identifier}{fv.FplId}"
-            else
-                identifier
-            
-        let candidatesFromTheory = findCandidatesByName fv searchIdentifier false variableStack.InReferenceToProofOrCorollary
-        let candidatesLocal = findPropertyCandidatesByNameInBlock fv searchIdentifier
-        let candidatesOfMapping = findCandidateOfExtensionMapping fv searchIdentifier
-        let candidates, candidatesNames =  filterCandidates (candidatesFromTheory @ candidatesLocal @ candidatesOfMapping) searchIdentifier true
-        let correctIds (fv1:FplGenericNode) = 
-            match fv with 
-            | :? FplBase 
-            | :? FplBaseConstructorCall 
-            | :? FplForInStmtDomain -> 
-                fv1.FplId <- searchIdentifier
-                fv1.TypeId <- searchIdentifier
-            | :? FplReference -> 
-                fv1.FplId <- searchIdentifier
-                fv1.TypeId <- searchIdentifier
-            | :? FplGenericJustificationItem as fvJi -> 
-                fvJi.FplId <- searchIdentifier
-            | _ -> ()
 
-        match candidates.Length with
-        | 0 -> 
-            match fv.Parent with
-            | Some (:? FplReference as parent) when parent.DottedChild.IsSome && Object.ReferenceEquals(fv, parent.DottedChild.Value) ->
-                // do not emit ID010 diagnostics, if fv is a dotted child, whose identifier we are still being evaluated
-                // only with this identifier, it will be possible in AST.PredicateWithOptSpecification to search for correct candidates 
-                () 
-            | _ -> 
-                // otherwise, issue ID010 diagnostics
-                fv.ErrorOccurred <- emitID010Diagnostics identifier pos1 pos2
-            match fv with 
-            | :? FplVariableArray as arr -> arr.SetType identifier None pos1 pos2
-            | :? FplMapping as map -> map.SetType identifier None pos1 pos2
-            | :? FplVariable ->
-                let fvWithValue = fv :?> FplGenericHasValue
-                fvWithValue.TypeId <- identifier
-                fvWithValue.SetDefaultValue()
-            | _ -> correctIds fv 
-        | 1 ->
-            let candidate = candidates.Head
-            match fv with 
-            | :? FplVariableArray as arr ->  arr.SetType identifier (Some candidate) pos1 pos2
-            | :? FplMapping as map -> 
-                let candidate = candidates.Head
-                // mappings can point to classes 
-                map.SetType identifier (Some candidate) pos1 pos2
-            | :? FplVariable -> 
-                fv.TypeId <- identifier
-                fv.RefersTo <- Some candidate
-            | _ -> correctIds fv
-        | _ ->
-            match fv with 
-            | :? FplMapping 
-            | :? FplVariable -> 
-                fv.ErrorOccurred <- emitID017Diagnostics identifier candidatesNames pos1 pos2
-            | _ -> correctIds fv
     | Ast.ParamTuple((pos1, pos2), namedVariableDeclarationListAsts) ->
         let fv = variableStack.PeekEvalStack()
         fv.ArgType <- ArgType.Parentheses

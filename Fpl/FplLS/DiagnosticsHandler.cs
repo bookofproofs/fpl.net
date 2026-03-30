@@ -3,6 +3,7 @@ using OmniSharp.Extensions.LanguageServer.Protocol.Server;
 using System.Text;
 using static ErrDiagnostics;
 using static FplInterpreterST;
+using static FplInterpreter.Main;
 using Model = OmniSharp.Extensions.LanguageServer.Protocol.Models;
 
 namespace FplLS
@@ -104,7 +105,7 @@ namespace FplLS
 
             var name = uri.TheoryName;
             var idAlreadyFound = st.ParsedAsts.TryFindAstById(name);
-            FplInterpreter.fplInterpreter(st, sourceCode, uri, fplLibUri);
+            fplInterpreter(st, sourceCode, uri, fplLibUri);
             var diagnostics = CastDiagnostics(st);
             return diagnostics;
         }

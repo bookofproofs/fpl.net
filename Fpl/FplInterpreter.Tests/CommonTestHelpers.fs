@@ -7,6 +7,7 @@ open ErrDiagnostics
 open FplInterpreterAstPreprocessing
 open FplInterpreterST
 open FplInterpreterDiagnosticsEmitter
+open FplInterpreter.Main
 open TestSharedConfig
 
 let rec deleteDirectory path =
@@ -69,7 +70,7 @@ let prepareFplCode (filename: string, fplCode: string, delete: bool) =
     else
         let parsedAsts = ParsedAstList()
         let st = SymbolTable(parsedAsts, true, TestConfig.OfflineMode || not (fplCodeNeedsOnline fplCode))
-        FplInterpreter.fplInterpreter st fplCode uri fplLibUrl |> ignore
+        fplInterpreter st fplCode uri fplLibUrl |> ignore
 
         let syntaxErrorFound =
             ad.Collection
@@ -139,7 +140,7 @@ let loadFplFile (path: string) =
     let parsedAsts = ParsedAstList()
     let fplCode = File.ReadAllText(path)
     let st = SymbolTable(parsedAsts, true, TestConfig.OfflineMode)
-    FplInterpreter.fplInterpreter st fplCode uri fplLibUrl
+    fplInterpreter st fplCode uri fplLibUrl
     Some(st)
 
 let loadFplFileWithTheSameSymbolTable (st:SymbolTable) (path: string) =
@@ -149,5 +150,5 @@ let loadFplFileWithTheSameSymbolTable (st:SymbolTable) (path: string) =
         "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
 
     let fplCode = File.ReadAllText(path)
-    FplInterpreter.fplInterpreter st fplCode uri fplLibUrl
+    fplInterpreter st fplCode uri fplLibUrl
     Some(st)

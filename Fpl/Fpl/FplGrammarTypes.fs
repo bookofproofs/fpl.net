@@ -1,5 +1,4 @@
 module FplGrammarTypes
-open System.Collections.Generic
 open FParsec
 
 

@@ -8,6 +8,7 @@ open FplInterpreterST
 open Newtonsoft.Json
 open Newtonsoft.Json.Linq
 open CommonTestHelpers
+open FplInterpreter.Main
 open TestSharedConfig
 
 [<TestClass>]
@@ -161,7 +162,7 @@ type SymbolTableNavigation() =
             let uri = PathEquivalentUri(Path.Combine(currentPathRepo,"Fpl.SetTheory.fpl"))
             let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
             let fplCode = File.ReadAllText(uri.AbsolutePath)
-            FplInterpreter.fplInterpreter st fplCode uri fplLibUrl
+            fplInterpreter st fplCode uri fplLibUrl
 
             // and test if the corrent number of asts in symbol table
             Assert.AreEqual<int>(2, st.ParsedAsts.Count)
@@ -170,7 +171,7 @@ type SymbolTableNavigation() =
             let st = SymbolTable(stOption.Value.ParsedAsts, false, TestConfig.OfflineMode)
             let uri = PathEquivalentUri(Path.Combine(currentPath,filename + ".fpl"))
             let fplCode = File.ReadAllText(uri.AbsolutePath)
-            FplInterpreter.fplInterpreter st fplCode uri fplLibUrl
+            fplInterpreter st fplCode uri fplLibUrl
 
             // and test if the corrent number of asts in symbol table
             Assert.AreEqual<int>(3, st.ParsedAsts.Count)
@@ -212,7 +213,7 @@ type SymbolTableNavigation() =
             let uri = PathEquivalentUri(Path.Combine(currentPath,filename + ".fpl"))
             let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
             let fplCode = File.ReadAllText(uri.AbsolutePath)
-            FplInterpreter.fplInterpreter st fplCode uri fplLibUrl
+            fplInterpreter st fplCode uri fplLibUrl
 
             // and test if the corrent number of asts in symbol table
             Assert.AreEqual<int>(3, st.ParsedAsts.Count)
@@ -248,7 +249,7 @@ type SymbolTableNavigation() =
             let uri = PathEquivalentUri(Path.Combine(currentPathRepo,"Fpl.Commons.fpl"))
             let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
             let fplCode = File.ReadAllText(uri.AbsolutePath)
-            FplInterpreter.fplInterpreter st fplCode uri fplLibUrl
+            fplInterpreter st fplCode uri fplLibUrl
 
             let post = st.ToJson()
             // and test if the corrent number of asts in symbol table
@@ -458,7 +459,7 @@ type SymbolTableNavigation() =
             let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
             let fplCodeOriginal = File.ReadAllText(pathToTestFile)
             let fplCodeManipulated = fplCodeOriginal.Substring(0,fplCodeOriginal.Length-1) + "def pred Bla() { Bla1() };"
-            FplInterpreter.fplInterpreter st fplCodeManipulated uri fplLibUrl
+            fplInterpreter st fplCodeManipulated uri fplLibUrl
 
             // do the test - check, if the diagnostics changed
             let diagnosticsOfManipulatedFile = ad.GetStreamDiagnostics(PathEquivalentUri(pathToTestFile))
@@ -503,7 +504,7 @@ type SymbolTableNavigation() =
                 let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
                 let fplCodeOriginal = File.ReadAllText(pathToTestFile)
                 let fplCodeManipulated = fplCodeOriginal.Substring(0,fplCodeOriginal.Length-1) + "def pred Bla() { Bla1() };"
-                FplInterpreter.fplInterpreter st fplCodeManipulated uri fplLibUrl
+                fplInterpreter st fplCodeManipulated uri fplLibUrl
 
                 // do the test - check, if the diagnostics changed
                 let diagnosticsOfManipulatedFile = ad.GetStreamDiagnostics(PathEquivalentUri(pathToTestFile))

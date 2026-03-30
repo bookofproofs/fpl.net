@@ -6,6 +6,7 @@ open ErrDiagnostics
 open FplParser
 open FplInterpreterAstPreprocessing
 open FplInterpreterST
+open FplInterpreter.Main
 open System.IO
 
 let deleteFilesWithExtension dir extension =
@@ -30,7 +31,7 @@ let prepareFplCode(fplCode:string, delete:bool) =
     else
         let parsedAsts = ParsedAstList()
         let st = SymbolTable(parsedAsts, true, false)
-        Some (FplInterpreter.fplInterpreter st fplCode uri fplLibUrl)
+        Some (fplInterpreter st fplCode uri fplLibUrl)
 
 let loadFplFile(path:string) = 
     let uri = PathEquivalentUri(path)
@@ -39,7 +40,7 @@ let loadFplFile(path:string) =
     let parsedAsts = ParsedAstList()
     let fplCode = File.ReadAllText(path)
     let st = SymbolTable(parsedAsts, false, true)
-    FplInterpreter.fplInterpreter st fplCode uri fplLibUrl
+    fplInterpreter st fplCode uri fplLibUrl
 
 let input = """def pred T() { intr prty pred T1() {is(parent,pred)} };"""
 

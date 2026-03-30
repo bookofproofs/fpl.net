@@ -338,4 +338,25 @@ let findCandidatesByName (node: FplGenericNode) (name: string) withClassConstruc
 
     pm |> Seq.toList
 
+let filterCandidates (candidatesPre:FplGenericNode list) identifier qualified =
+    let candidates =
+        candidatesPre
+        |> List.filter (fun fv1 -> fv1.FplId = identifier)
 
+    let candidatesNames =
+        candidatesPre
+        |> Seq.sortBy (fun fv -> $"{fv.Name}:{fv.FplId}")
+        |> Seq.map (fun fv -> 
+            if qualified then 
+                qualifiedName fv false
+            else
+                $"`{fv.Type SignatureType.Mixed}`"
+        )
+        |> Seq.mapi (fun i s -> 
+            if candidatesPre.Length > 1 then 
+                sprintf "%d) %s" (i + 1) s
+            else
+                sprintf "%s" s
+        )
+        |> String.concat ", "
+    (candidates, candidatesNames)
