@@ -67,12 +67,7 @@ let rec simplifyTriviallyNestedExpressions (rb1:FplGenericNode) =
         simplifyTriviallyNestedExpressions subNode
     | _ -> ()
 
-let setKeywordType keywordType pos1 pos2 = 
-    let fv = variableStack.PeekEvalStack()
-    match fv with
-    | :? FplVariableArray as arr -> arr.SetType keywordType None pos1 pos2 
-    | :? FplMapping as map -> map.SetType keywordType None pos1 pos2
-    | _ ->  fv.TypeId <- keywordType
+
 
 /// A recursive function evaluating an AST and returning a list of EvalAliasedNamespaceIdentifier records
 /// for each occurrence of the uses clause in the FPL code.
@@ -92,7 +87,7 @@ let rec eval (st: SymbolTable) ast =
         | _ -> ()
 
     match ast with
-    // Lexical / leaf tokens
+    // lexical / leaf tokens
     | Ast.Alias _
     | Ast.Dot _
     | Ast.Star _
@@ -106,10 +101,15 @@ let rec eval (st: SymbolTable) ast =
     | Ast.PredicateIdentifier _
         -> Lexical.eval st ast
 
-    | Ast.IndexAllowedType((pos1, pos2), indexAllowedTypeAst) ->
-        eval st indexAllowedTypeAst
-    | Ast.SimpleVariableType((pos1, pos2), simpleVariableTypeAst) ->
-        eval st simpleVariableTypeAst
+    // types and type-related constructs
+    | Ast.IndexType _
+    | Ast.FunctionalTermType _
+    | Ast.ObjectType _
+    | Ast.PredicateType _
+    | Ast.TemplateType _ 
+
+        -> Types.eval st ast
+
     | Ast.ArrayType((pos1, pos2), (mainTypeAst, indexAllowedTypeListAst)) ->
         let fv = variableStack.PeekEvalStack()
         match fv with 
@@ -117,25 +117,12 @@ let rec eval (st: SymbolTable) ast =
         | _ -> ()
         eval st mainTypeAst
         indexAllowedTypeListAst |> List.map (eval st) |> ignore
-    | Ast.IndexType((pos1, pos2),()) -> 
-        setKeywordType LiteralInd pos1 pos2
-    | Ast.ObjectType((pos1, pos2),()) -> 
-        setKeywordType LiteralObj pos1 pos2
-    | Ast.PredicateType((pos1, pos2),()) -> 
-        setKeywordType LiteralPred pos1 pos2
-    | Ast.FunctionalTermType((pos1, pos2),()) -> 
-        setKeywordType LiteralFunc pos1 pos2
-    | Ast.TemplateType((pos1, pos2), s) -> 
-        let fv = variableStack.PeekEvalStack()
-        setKeywordType s pos1 pos2
-        let templateNode = new FplIntrinsicTpl(s, (pos1, pos2), fv)
-        match fv with 
-        | :? FplGenericVariable as var -> 
-            // attach template type to declared variable 
-            var.RefersTo <- Some templateNode
-        | _ -> () // RefersTo's semantics in other FplValues is different, do not interfere with it
-        variableStack.PushEvalStack(templateNode)
-        variableStack.PopEvalStack()
+    | Ast.SimpleVariableType((pos1, pos2), simpleVariableTypeAst) ->
+        eval st simpleVariableTypeAst
+    | Ast.IndexAllowedType((pos1, pos2), indexAllowedTypeAst) ->
+        eval st indexAllowedTypeAst
+
+
     | Ast.Intrinsic((pos1, pos2),()) -> 
         let fv = variableStack.PeekEvalStack()
         fv.IsIntrinsic <- true // flag that this block is intrinsic
@@ -145,9 +132,6 @@ let rec eval (st: SymbolTable) ast =
             cl.AddDefaultConstructor()
         | _ -> ()
     | Ast.Error  -> ()
-
-
-
 
 
     | Ast.Var((pos1, pos2), name) ->

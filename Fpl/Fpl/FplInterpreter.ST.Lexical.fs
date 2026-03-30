@@ -1,5 +1,5 @@
 /// This module creates the SymbolTable
-/// and deals with exical / leaf tokens of the AST
+/// and deals with lexical / leaf tokens of the AST
 
 (* MIT License
 
@@ -15,7 +15,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 module FplInterpreter.ST.Lexical
 
 open System
-open ErrDiagnostics
 open FplPrimitives
 open FplGrammarTypes
 open FplInterpreterDiagnosticsEmitter
@@ -177,7 +176,6 @@ let eval (st: SymbolTable) (ast: Ast) =
                 fv.ErrorOccurred <- emitID017Diagnostics identifier candidatesNames pos1 pos2
             | _ -> correctIds fv
 
-
     | _ ->
         // Not a leaf lexical node — caller should route to another focused module.
-        failwith "ST.Lexical:eval: unexpected AST node"
+        failwith "FplInterpreter.ST.Lexical:eval: unexpected AST node"
