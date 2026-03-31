@@ -4,6 +4,7 @@ open System
 open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
+open FplInterpreterGlobals
 open FplInterpreterAstPreprocessing
 open FplInterpreterST
 open FplInterpreterDiagnosticsEmitter
@@ -70,6 +71,7 @@ let prepareFplCode (filename: string, fplCode: string, delete: bool) =
     else
         let parsedAsts = ParsedAstList()
         let st = SymbolTable(parsedAsts, true, TestConfig.OfflineMode || not (fplCodeNeedsOnline fplCode))
+        
         fplInterpreter st fplCode uri fplLibUrl |> ignore
 
         let syntaxErrorFound =

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using OmniSharp.Extensions.LanguageServer.Server;
 using static ErrDiagnostics;
+using static FplInterpreterGlobals;
 using static FplInterpreterAstPreprocessing;
 using static FplInterpreterST;
 
@@ -39,6 +40,8 @@ namespace FplLS
             ParsedAstList _parsedAstsList = [];
 
             var st = new SymbolTable(_parsedAstsList, false, false);
+            ad.Clear();
+            variableStack.ValidStmtStore.Clear();
 
             var server = await LanguageServer.From(options =>
                 options

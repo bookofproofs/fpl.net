@@ -59,6 +59,8 @@ type ValidStmtStore() as this =
 
     member this.Clear() = _theoremStore.Clear()
 
+    member this.Count = _theoremStore.Count
+
 type State() = 
     let _vars = Dictionary<string,FplGenericNode option>()
     /// The dictionary of the variable values of the called node before it was called

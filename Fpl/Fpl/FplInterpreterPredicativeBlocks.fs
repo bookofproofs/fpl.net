@@ -97,6 +97,9 @@ type FplAxiom(positions: Positions, parent: FplGenericNode, runOrder) =
             _isReady <- true
             checkLG003Diagnostics this
 
+            // register the axiom in the valid statement store
+            variableStack.ValidStmtStore.RegisterValidStmt this
+
             // evaluate all corollaries of the axiom
             this.Scope.Values
             |> Seq.filter (fun fv -> fv.Name = LiteralCorL) 
