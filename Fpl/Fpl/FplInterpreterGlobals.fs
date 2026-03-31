@@ -20,6 +20,45 @@ open FParsec
 open FplPrimitives
 open FplInterpreterBasicTypes
 
+
+type ValidityReason =
+    | IsAxiom of FplGenericNode
+    | IsRuleOfInference of FplGenericNode * FplGenericNode
+    | IsAsserted of FplGenericNode
+    | IsAssumed of FplGenericNode
+    | IsConcluded of FplGenericNode
+    | Error 
+
+type ValidStatement =
+    { Node: FplGenericNode
+      ValidityReason: ValidityReason
+      StatementExpression: string}
+
+type ValidStmtStore() as this =
+    let _theoremStore = Dictionary<string, ValidStatement>()
+
+    member this.RegisterValidStmt (fv: FplGenericHasValue) =
+        let validityReason = 
+            match fv.Name with
+            | LiteralAxL ->
+                let exprOpt = fv.ArgList |> Seq.tryLast
+                match exprOpt with
+                | Some expr -> ValidityReason.IsAxiom expr
+                | _ -> ValidityReason.Error // fallback if axiom node is empty
+            | _ -> ValidityReason.Error // TODO handle all other cases correctly
+
+        match validityReason with
+        | ValidityReason.IsAxiom expr ->
+            let validStmt = 
+                { ValidStatement.Node = fv
+                  ValidStatement.ValidityReason = validityReason
+                  ValidStatement.StatementExpression = expr.Type SignatureType.Mixed }
+            _theoremStore.TryAdd(validStmt.StatementExpression, validStmt) |> ignore
+        | _ ->
+            ()
+
+    member this.Clear() = _theoremStore.Clear()
+
 type State() = 
     let _vars = Dictionary<string,FplGenericNode option>()
     /// The dictionary of the variable values of the called node before it was called
@@ -34,6 +73,7 @@ type FplVariableStack() =
     let mutable _inReferenceToProofOrCorollary = false
     let _stateStack = Stack<KeyValuePair<string, State>>()
     let _valueStack = Stack<FplGenericNode>()
+    let _validStmtStore = ValidStmtStore()
     let _recursionCounters = Dictionary<string, int>()
     let _assumedArguments = Stack<FplGenericNode>()
     // positions of the caller to prevent some diagnostics of being shown at the wrong position 
@@ -175,6 +215,8 @@ type FplVariableStack() =
 
 
     member this.EvalStack = _valueStack
+
+    member this.ValidStmtStore = _validStmtStore
 
     // Pops an FplValue from stack without propagating it's name and signature to the next FplValue on the stack.
     member this.Pop() = _valueStack.Pop()
