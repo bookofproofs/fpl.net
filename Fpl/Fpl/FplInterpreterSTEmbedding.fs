@@ -17,7 +17,7 @@ open System.Collections.Generic
 open FplPrimitives
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterBasicTypes
-open FplInterpreterGlobals
+open FplInterpreter.Globals.Main
 open FplInterpreterChecks
 
 // Returns the root node of any FplValue casted to FplRoot

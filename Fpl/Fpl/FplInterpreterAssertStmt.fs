@@ -16,7 +16,7 @@ module FplInterpreterAssertStmt
 open FplPrimitives
 open FplGrammarTypes
 open FplInterpreterBasicTypes
-open FplInterpreterGlobals
+open FplInterpreter.Globals.Main
 open FplInterpreterIntrinsicTypes
 
 

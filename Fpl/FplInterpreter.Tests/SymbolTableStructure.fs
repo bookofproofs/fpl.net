@@ -8,7 +8,7 @@ open FParsec
 open ErrDiagnostics
 open FplPrimitives
 open FplInterpreterBasicTypes
-open FplInterpreterGlobals
+open FplInterpreter.Globals.Main
 open FplInterpreterReferences
 open FplInterpreterIntrinsicTypes
 open FplInterpreterVariables

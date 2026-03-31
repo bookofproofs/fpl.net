@@ -19,7 +19,7 @@ open FplPrimitives
 open ErrDiagnostics
 open FplInterpreterAstPreprocessing
 open FplInterpreterBasicTypes
-open FplInterpreterGlobals
+open FplInterpreter.Globals.Main
 
 type SymbolTable(parsedAsts: ParsedAstList, debug: bool, offlineMode: bool) =
     let _parsedAsts = parsedAsts

@@ -4,7 +4,7 @@ open ErrDiagnostics
 open FplPrimitives
 open FplInterpreterBasicTypes
 open FplInterpreterChecks
-open FplInterpreterGlobals
+open FplInterpreter.Globals.Main
 open CommonTestHelpers
 
 [<TestClass>]

@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using OmniSharp.Extensions.LanguageServer.Server;
 using static ErrDiagnostics;
-using static FplInterpreterGlobals;
+using static FplInterpreter.Globals.Main;
 using static FplInterpreterAstPreprocessing;
 using static FplInterpreterST;
 
