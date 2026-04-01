@@ -26,7 +26,7 @@
         <Compile Include="FplInterpreter.Globals.STEval.fs" />
         <Compile Include="FplInterpreter.Globals.State.fs" />
         <Compile Include="FplInterpreter.Globals.Validity.fs" />
-        <Compile Include="FplInterpreter.Globals.Main.fs" />
+        <Compile Include="FplInterpreter.Globals.Heap.fs" />
         <Compile Include="FplInterpreterChecks.fs" />
         <Compile Include="FplInterpreterSTEmbedding.fs" />
         <Compile Include="FplInterpreterIntrinsicTypes.fs" />

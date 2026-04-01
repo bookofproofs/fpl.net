@@ -22,7 +22,6 @@ type HeapMemory() =
     let _evalStack = EvalStack()
     let _helper = Helper()
     let _state = State()
-    
 
     /// A stack memory storing potential new nodes of the symbol table during its evaluation process
     member this.Eval = _evalStack

@@ -291,3 +291,17 @@ type ParsedAstList() =
 
         ret
 
+    /// Returns the string representation of all asts .
+    member this.AstsToString =
+        let res =
+            this
+            |> Seq.map (fun pa -> pa.Parsing.Ast.ToString())
+            |> String.concat Environment.NewLine
+
+        res
+
+    /// If there is a valid topological sorting, order the list descending by this ordering.
+    member this.OrderAsts() =
+        this.Sort(
+            Comparer<ParsedAst>.Create(fun b a -> compare a.Sorting.TopologicalSorting b.Sorting.TopologicalSorting)
+        )

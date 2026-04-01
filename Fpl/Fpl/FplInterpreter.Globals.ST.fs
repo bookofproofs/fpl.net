@@ -24,7 +24,6 @@ open FplInterpreter.Globals.Root
 type SymbolTable(parsedAsts: ParsedAstList, debug: bool, offlineMode: bool) =
     let _parsedAsts = parsedAsts
     let mutable _mainTheory = ""
-    let _evalLog = List<string>()
     let _root = new FplRoot()
     let _debug = debug
     let _offlineMode = offlineMode
@@ -45,21 +44,6 @@ type SymbolTable(parsedAsts: ParsedAstList, debug: bool, offlineMode: bool) =
 
     /// Returns the list of parsed asts
     member this.ParsedAsts = _parsedAsts
-
-    /// Returns the string representation of all asts .
-    member this.AstsToString =
-        let res =
-            _parsedAsts
-            |> Seq.map (fun pa -> pa.Parsing.Ast.ToString())
-            |> String.concat Environment.NewLine
-
-        res
-
-    /// If there is a valid topological sorting, order the list descending by this ordering.
-    member this.OrderAsts() =
-        _parsedAsts.Sort(
-            Comparer<ParsedAst>.Create(fun b a -> compare a.Sorting.TopologicalSorting b.Sorting.TopologicalSorting)
-        )
 
     /// Serializes the symbol table as json
     member this.ToJson() =

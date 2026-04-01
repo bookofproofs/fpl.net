@@ -1725,7 +1725,7 @@ let tryFindParsedAstUsesClausesEvaluated (parsedAsts: List<ParsedAst>) =
         None
 
 let evaluateSymbolTable (st: SymbolTable) =
-    st.OrderAsts()
+    st.ParsedAsts.OrderAsts()
 
     let mutable found = true
 
