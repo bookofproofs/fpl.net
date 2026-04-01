@@ -1,5 +1,4 @@
-/// This module contains classes used as Singletons during the interpretation
-/// by the FplInterpreter
+/// This module contains a type used as a heap memory of the FplInterpreter
 
 (* MIT License
 
@@ -12,22 +11,14 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
 
 *)
-module FplInterpreter.Globals.Main
-open System.Collections.Generic
-open FplInterpreterBasicTypes
+module FplInterpreter.Globals.Heap
 open FplInterpreter.Globals.Helpers
 open FplInterpreter.Globals.STEval
 open FplInterpreter.Globals.State
 open FplInterpreter.Globals.Validity
 
-/// This type implements the functionality needed to "run" FPL statements step-by-step
-/// while managing the storage of variables and other evaluation-related information.
-/// FPL uses a call-by-value approach when it comes to 
-/// replacing parameters by a calling function with arguments.
-type FplVariableStack() = 
+type HeapMemory() = 
     let _validStmtStore = ValidStmtStore()
-    let _recursionCounters = Dictionary<string, int>()
-    let _assumedArguments = Stack<FplGenericNode>()
     let _evalStack = EvalStack()
     let _helper = Helper()
     let _state = State()
@@ -45,23 +36,14 @@ type FplVariableStack() =
     /// A handle for the state store used as a memory separating the scope of called FPL nodes like functions or predicates
     member this.State = _state
 
-    member this.LastAssumedArgument =
-        if _assumedArguments.Count > 0 then
-            Some (_assumedArguments.Peek())
-        else 
-            None
-
-    member this.AssumeArgument assumption = _assumedArguments.Push (assumption)
-    
-    member this.RevokeLastArgument() = if _assumedArguments.Count > 0 then _assumedArguments.Pop() |> ignore
 
     // Clears the globals.
     member this.ClearEvalStack() = 
         _evalStack.Clear()
-        _assumedArguments.Clear()
+        _validStmtStore.Clear()
         _state.Clear()
 
-let variableStack = FplVariableStack()
+let heap = HeapMemory()
 
 
 

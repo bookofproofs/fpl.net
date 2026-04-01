@@ -30,6 +30,7 @@ type ValidStatement =
 
 type ValidStmtStore() =
     let _theoremStore = Dictionary<string, ValidStatement>()
+    let _assumedArguments = Stack<FplGenericNode>()
 
     member this.RegisterValidStmt (fv: FplGenericHasValue) =
         let validityReason = 
@@ -51,6 +52,19 @@ type ValidStmtStore() =
         | _ ->
             ()
 
-    member this.Clear() = _theoremStore.Clear()
+    member this.Clear() =
+        _theoremStore.Clear() // TODO unify assumed arguments with theoremStore
+        _assumedArguments.Clear()
 
     member this.Count = _theoremStore.Count
+
+    member this.LastAssumedArgument =
+        if _assumedArguments.Count > 0 then
+            Some (_assumedArguments.Peek())
+        else 
+            None
+
+    member this.AssumeArgument assumption = _assumedArguments.Push (assumption)
+    
+    member this.RevokeLastArgument() = if _assumedArguments.Count > 0 then _assumedArguments.Pop() |> ignore
+

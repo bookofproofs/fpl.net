@@ -19,7 +19,7 @@ open FplGrammarTypes
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterBasicTypes
 open FplInterpreter.Globals.Debug
-open FplInterpreter.Globals.Main
+open FplInterpreter.Globals.Heap
 open FplInterpreterChecks
 open FplInterpreterSTEmbedding
 open FplInterpreterVariables
@@ -68,7 +68,7 @@ type FplMandatoryPredicate(positions: Positions, parent: FplGenericNode) =
             _callCounter <- _callCounter + 1
             if _callCounter > maxRecursion then
                 this.SetDefaultValue()
-                this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter variableStack.Helper.CallerStartPos variableStack.Helper.CallerEndPos
+                this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter heap.Helper.CallerStartPos heap.Helper.CallerEndPos
             else
                 if this.IsIntrinsic then 
                     runIntrinsicPredicate this
@@ -171,7 +171,7 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplGenericNode) as
             if _callCounter > maxRecursion then
                 let instance = getDefaultValueOfFunction this
                 this.SetValue instance
-                this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter variableStack.Helper.CallerStartPos variableStack.Helper.CallerEndPos
+                this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter heap.Helper.CallerStartPos heap.Helper.CallerEndPos
             else
                 if this.IsIntrinsic then 
                     runIntrinsicFunction this 

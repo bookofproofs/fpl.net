@@ -19,7 +19,7 @@ open FplPrimitives
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterBasicTypes
 open FplInterpreter.Globals.Debug
-open FplInterpreter.Globals.Main
+open FplInterpreter.Globals.Heap
 open FplInterpreterChecks
 open FplInterpreterSTEmbedding
 open FplInterpreterVariables
@@ -78,15 +78,15 @@ type FplGenericReference(positions: Positions, parent: FplGenericNode) =
 
             // run subroutines only if all arguments have defined values
             if allArgumentsHaveTerminedValues then 
-                let pars = variableStack.State.SaveState(called) 
-                variableStack.State.ReplaceVariables pars args
+                let pars = heap.State.SaveState(called) 
+                heap.State.ReplaceVariables pars args
                 // store the position of the caller
-                variableStack.Helper.CallerStartPos <- this.StartPos
-                variableStack.Helper.CallerEndPos <- this.EndPos
+                heap.Helper.CallerStartPos <- this.StartPos
+                heap.Helper.CallerEndPos <- this.EndPos
                 // run all statements of the called node
                 called.Run()
                 this.SetValueOf called
-                variableStack.State.RestoreState called
+                heap.State.RestoreState called
             else
                 called.SetDefaultValue()
                 this.SetValueOf called
@@ -96,16 +96,16 @@ type FplGenericReference(positions: Positions, parent: FplGenericNode) =
         | Some enclosingNode, Some (:? FplGenericHasValue as calledExtension) when not (Object.ReferenceEquals(enclosingNode, calledExtension)) ->
             // if the extension object is called outside its own extension
             // delegate its evaluation to this extension
-            let pars = variableStack.State.SaveState(calledExtension) 
+            let pars = heap.State.SaveState(calledExtension) 
             let args = [extensionObj]
-            variableStack.State.ReplaceVariables pars args
-            variableStack.Helper.CallerStartPos <- extensionObj.StartPos
-            variableStack.Helper.CallerEndPos <- extensionObj.EndPos
+            heap.State.ReplaceVariables pars args
+            heap.Helper.CallerStartPos <- extensionObj.StartPos
+            heap.Helper.CallerEndPos <- extensionObj.EndPos
             calledExtension.Run()
             
             // and store the value of the extension to this reference
             this.SetValueOf calledExtension
-            variableStack.State.RestoreState(calledExtension)
+            heap.State.RestoreState(calledExtension)
         | _ ->
             // otherwise (i.e., inside the extensionObj's extension), 
             // treat the extensionObj as a value and store this value to the reference

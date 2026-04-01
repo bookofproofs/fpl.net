@@ -19,11 +19,15 @@ open System.Collections.Generic
 open FplPrimitives
 open FplInterpreterBasicTypes
 
-type StateDict() = 
+type private StateDict() = 
     let _vars = Dictionary<string,FplGenericNode option>()
     /// The dictionary of the variable values of the called node before it was called
     member this.VarValues = _vars
 
+/// This type implements the functionality needed to "run" FPL statements step-by-step
+/// while managing the storage of variables and other evaluation-related information.
+/// FPL uses a call-by-value approach when it comes to 
+/// replacing parameters by a calling function with arguments.
 type State() =
     let _stateStack = Stack<KeyValuePair<string, StateDict>>()
 

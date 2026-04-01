@@ -19,7 +19,7 @@ open FplGrammarTypes
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterBasicTypes
 open FplInterpreter.Globals.Debug
-open FplInterpreter.Globals.Main
+open FplInterpreter.Globals.Heap
 open FplInterpreterChecks
 open FplInterpreterSTEmbedding
 open FplInterpreterVariables
@@ -99,7 +99,7 @@ type FplAxiom(positions: Positions, parent: FplGenericNode, runOrder) =
             checkLG003Diagnostics this
 
             // register the axiom in the valid statement store
-            variableStack.ValidStmtStore.RegisterValidStmt this
+            heap.ValidStmtStore.RegisterValidStmt this
 
             // evaluate all corollaries of the axiom
             this.Scope.Values

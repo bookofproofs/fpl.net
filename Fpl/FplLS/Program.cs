@@ -1,10 +1,11 @@
+using FplInterpreter.Globals;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using OmniSharp.Extensions.LanguageServer.Server;
 using static ErrDiagnostics;
+using static FplInterpreter.Globals.Heap;
 using static FplInterpreter.Globals.ST;
-using static FplInterpreter.Globals.Main;
 using static FplInterpreterAstPreprocessing;
 
 namespace FplLS
@@ -41,7 +42,7 @@ namespace FplLS
 
             var st = new SymbolTable(_parsedAstsList, false, false);
             ad.Clear();
-            variableStack.ValidStmtStore.Clear();
+            heap.ValidStmtStore.Clear();
 
             var server = await LanguageServer.From(options =>
                 options

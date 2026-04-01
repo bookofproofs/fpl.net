@@ -4,7 +4,7 @@ open System
 open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
-open FplInterpreter.Globals.Main
+open FplInterpreter.Globals.Heap
 open FplInterpreterAstPreprocessing
 open FplInterpreter.Globals.ST
 open FplInterpreterDiagnosticsEmitter

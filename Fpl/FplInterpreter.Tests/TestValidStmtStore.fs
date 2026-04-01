@@ -2,7 +2,7 @@ namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
 open FplPrimitives
-open FplInterpreter.Globals.Main
+open FplInterpreter.Globals.Heap
 open FplInterpreterBasicTypes
 open CommonTestHelpers
 open System
@@ -25,7 +25,7 @@ type TestValidStmtStore() =
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
         | Some st -> 
-            Assert.AreEqual<int>(expected, variableStack.ValidStmtStore.Count)
-            variableStack.ValidStmtStore.Clear()
+            Assert.AreEqual<int>(expected, heap.ValidStmtStore.Count)
+            heap.ValidStmtStore.Clear()
         | _ -> Assert.IsTrue(false)
 
