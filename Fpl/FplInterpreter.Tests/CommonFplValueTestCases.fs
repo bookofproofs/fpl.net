@@ -4,7 +4,7 @@ open FParsec
 open CommonTestHelpers
 open ErrDiagnostics
 open FplInterpreterBasicTypes
-open FplInterpreter.Globals.Main
+open FplInterpreter.Globals.Root
 open FplInterpreterVariables
 open FplInterpreterIntrinsicTypes
 

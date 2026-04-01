@@ -20,6 +20,7 @@
         <Compile Include="FplInterpreterAstPreprocessing.fs" />
         <Compile Include="FplInterpreterBasicTypes.fs" />
         <Compile Include="FplInterpreter.Globals.Debug.fs" />
+        <Compile Include="FplInterpreter.Globals.Root.fs" />
         <Compile Include="FplInterpreter.Globals.Main.fs" />
         <Compile Include="FplInterpreterChecks.fs" />
         <Compile Include="FplInterpreterST.fs" />

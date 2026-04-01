@@ -19,7 +19,7 @@ open ErrDiagnostics
 open FplPrimitives
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterBasicTypes
-open FplInterpreter.Globals.Main
+open FplInterpreter.Globals.Root
 
 let isArgPred (arg:FplGenericNode) = 
     let argType = arg.Type SignatureType.Type

@@ -22,6 +22,7 @@ open FplGrammarTypes
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterAstPreprocessing
 open FplInterpreterBasicTypes
+open FplInterpreter.Globals.Root
 open FplInterpreter.Globals.Main
 open FplInterpreterChecks
 open FplInterpreterST

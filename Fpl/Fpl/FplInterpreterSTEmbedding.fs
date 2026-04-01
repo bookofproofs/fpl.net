@@ -17,11 +17,9 @@ open System.Collections.Generic
 open FplPrimitives
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterBasicTypes
-open FplInterpreter.Globals.Main
+open FplInterpreter.Globals.Root
 open FplInterpreterChecks
 
-// Returns the root node of any FplValue casted to FplRoot
-let rec getRoot (fv:FplGenericNode) = (root fv) :?> FplRoot
 
 // Tries to add for statement's domain or entity to its parent's for statement
 let tryAddToParentForInStmt (fplValue:FplGenericNode) =

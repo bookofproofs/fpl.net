@@ -1,5 +1,4 @@
-/// This module contains classes used as Singletons during the interpretation
-/// by the FplInterpreter
+/// This module contains functions used for debugging purposes (not for production)
 
 (* MIT License
 
