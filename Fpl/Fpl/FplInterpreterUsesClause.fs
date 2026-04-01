@@ -9,7 +9,7 @@ open System
 open FParsec
 open FplGrammarTypes
 open FplInterpreterAstPreprocessing
-open FplInterpreterST
+open FplInterpreter.Globals.ST
 open ErrDiagnostics
 
 (* MIT License

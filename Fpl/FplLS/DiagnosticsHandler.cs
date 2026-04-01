@@ -2,7 +2,7 @@ using OmniSharp.Extensions.LanguageServer.Protocol.Document;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
 using System.Text;
 using static ErrDiagnostics;
-using static FplInterpreterST;
+using static FplInterpreter.Globals.ST;
 using static FplInterpreter.Main;
 using Model = OmniSharp.Extensions.LanguageServer.Protocol.Models;
 

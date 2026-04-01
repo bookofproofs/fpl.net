@@ -4,7 +4,7 @@ open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open FParsec
 open ErrDiagnostics
-open FplInterpreterST
+open FplInterpreter.Globals.ST
 open Newtonsoft.Json
 open Newtonsoft.Json.Linq
 open CommonTestHelpers

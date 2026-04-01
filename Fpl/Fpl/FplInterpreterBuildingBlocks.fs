@@ -25,7 +25,7 @@ open FplInterpreterBasicTypes
 open FplInterpreter.Globals.Root
 open FplInterpreter.Globals.Main
 open FplInterpreterChecks
-open FplInterpreterST
+open FplInterpreter.Globals.ST
 open FplInterpreterSTEmbedding
 open FplInterpreterIntrinsicTypes
 open FplInterpreterVariables

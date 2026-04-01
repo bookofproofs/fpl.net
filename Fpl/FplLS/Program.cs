@@ -3,9 +3,9 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using OmniSharp.Extensions.LanguageServer.Server;
 using static ErrDiagnostics;
+using static FplInterpreter.Globals.ST;
 using static FplInterpreter.Globals.Main;
 using static FplInterpreterAstPreprocessing;
-using static FplInterpreterST;
 
 namespace FplLS
 {

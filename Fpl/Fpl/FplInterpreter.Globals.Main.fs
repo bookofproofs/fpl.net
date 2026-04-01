@@ -13,7 +13,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 module FplInterpreter.Globals.Main
-open System
 open System.Collections.Generic
 open FParsec
 open FplPrimitives

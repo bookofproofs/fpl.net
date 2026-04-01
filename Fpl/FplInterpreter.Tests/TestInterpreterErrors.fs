@@ -4,7 +4,7 @@ open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
 open FplInterpreterAstPreprocessing
-open FplInterpreterST
+open FplInterpreter.Globals.ST
 open FplInterpreter.Main
 open CommonTestHelpers
 open TestSharedConfig

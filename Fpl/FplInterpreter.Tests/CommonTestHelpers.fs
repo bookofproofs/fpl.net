@@ -6,7 +6,7 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
 open FplInterpreter.Globals.Main
 open FplInterpreterAstPreprocessing
-open FplInterpreterST
+open FplInterpreter.Globals.ST
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreter.Main
 open TestSharedConfig
