@@ -22,6 +22,7 @@
         <Compile Include="FplInterpreter.Globals.Debug.fs" />
         <Compile Include="FplInterpreter.Globals.Root.fs" />
         <Compile Include="FplInterpreter.Globals.ST.fs" />
+        <Compile Include="FplInterpreter.Globals.STEval.fs" />
         <Compile Include="FplInterpreter.Globals.Validity.fs" />
         <Compile Include="FplInterpreter.Globals.Main.fs" />
         <Compile Include="FplInterpreterChecks.fs" />

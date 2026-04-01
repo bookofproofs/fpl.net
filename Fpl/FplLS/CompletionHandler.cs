@@ -37,7 +37,7 @@ class CompletionHandler : ICompletionHandler
     private readonly BufferManager _bufferManager;
     private readonly FplAutoCompleteService _fplAutoComplService;
 
-    private readonly DocumentSelector _documentSelector = new DocumentSelector(
+    private readonly DocumentSelector _documentSelector = new(
         new DocumentFilter()
         {
             Pattern = "**/*.fpl"
@@ -72,7 +72,7 @@ class CompletionHandler : ICompletionHandler
         {
             return new CompletionList();
         }
-        var position = GetPosition(buffer.ToString().Substring(0, buffer.Length),
+        var position = GetPosition(buffer.ToString()[..buffer.Length],
         (int)request.Position.Line,
         (int)request.Position.Character);
 

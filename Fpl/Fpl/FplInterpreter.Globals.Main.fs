@@ -17,9 +17,8 @@ open System.Collections.Generic
 open FParsec
 open FplPrimitives
 open FplInterpreterBasicTypes
-open FplInterpreter.Globals.Debug
+open FplInterpreter.Globals.STEval
 open FplInterpreter.Globals.Validity
-
 
 
 type State() = 
@@ -36,12 +35,10 @@ type FplVariableStack() =
     let mutable _inSignatureEvaluation = false
     let mutable _inReferenceToProofOrCorollary = false
     let _stateStack = Stack<KeyValuePair<string, State>>()
-    let _valueStack = Stack<FplGenericNode>()
     let _validStmtStore = ValidStmtStore()
     let _recursionCounters = Dictionary<string, int>()
     let _assumedArguments = Stack<FplGenericNode>()
-    let _recursion = Recursion()
-
+    let _evalStack = EvalStack()
     // positions of the caller to prevent some diagnostics of being shown at the wrong position 
     let mutable _callerStartPos = Position("", 0,0,0)
     let mutable _callerEndPos = Position("", 0,0,0)
@@ -88,6 +85,9 @@ type FplVariableStack() =
 
     // The stack memory of the runner to store the variables of all run programs
     member this.Stack = _stateStack
+
+    // The stack memory of the runner to store the variables of all run programs
+    member this.Eval = _evalStack
 
     /// Copy the ValueList of the variadic ar to the ValueList of the variadic p
     /// by removing the previous values (if any) and
@@ -168,26 +168,7 @@ type FplVariableStack() =
             origVariableWithValue.Value <- oldValue
         )
 
-
-    member this.EvalStack = _valueStack
-
     member this.ValidStmtStore = _validStmtStore
-
-    // Pops an FplValue from stack without propagating it's name and signature to the next FplValue on the stack.
-    member this.Pop() = _valueStack.Pop()
-
-    // Pops an FplValue from stack and propagates it's name and signature to the next FplValue on the stack.
-    member this.PopEvalStack() = 
-        let fv = _valueStack.Pop()
-        if _valueStack.Count > 0 then
-            let next = _valueStack.Peek()
-            fv.EmbedInSymbolTable (Some next) 
-
-    // Pushes an FplValue to the stack.
-    member this.PushEvalStack fv = _valueStack.Push fv
-
-    // Peeks an FplValue from the stack.
-    member this.PeekEvalStack() = _valueStack.Peek()
 
     member this.LastAssumedArgument =
         if _assumedArguments.Count > 0 then
@@ -199,9 +180,9 @@ type FplVariableStack() =
     
     member this.RevokeLastArgument() = if _assumedArguments.Count > 0 then _assumedArguments.Pop() |> ignore
 
-    // Clears stack.
+    // Clears the globals.
     member this.ClearEvalStack() = 
-        _valueStack.Clear()
+        _evalStack.Clear()
         _assumedArguments.Clear()
         _stateStack.Clear()
 
