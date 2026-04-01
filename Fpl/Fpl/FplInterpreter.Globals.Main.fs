@@ -18,47 +18,9 @@ open FParsec
 open FplPrimitives
 open FplInterpreterBasicTypes
 open FplInterpreter.Globals.Debug
+open FplInterpreter.Globals.Validity
 
 
-type ValidityReason =
-    | IsAxiom of FplGenericNode
-    | IsRuleOfInference of FplGenericNode * FplGenericNode
-    | IsAsserted of FplGenericNode
-    | IsAssumed of FplGenericNode
-    | IsConcluded of FplGenericNode
-    | Error 
-
-type ValidStatement =
-    { Node: FplGenericNode
-      ValidityReason: ValidityReason
-      StatementExpression: string}
-
-type ValidStmtStore() =
-    let _theoremStore = Dictionary<string, ValidStatement>()
-
-    member this.RegisterValidStmt (fv: FplGenericHasValue) =
-        let validityReason = 
-            match fv.Name with
-            | LiteralAxL ->
-                let exprOpt = fv.ArgList |> Seq.tryLast
-                match exprOpt with
-                | Some expr -> ValidityReason.IsAxiom expr
-                | _ -> ValidityReason.Error // fallback if axiom node is empty
-            | _ -> ValidityReason.Error // TODO handle all other cases correctly
-
-        match validityReason with
-        | ValidityReason.IsAxiom expr ->
-            let validStmt = 
-                { ValidStatement.Node = fv
-                  ValidStatement.ValidityReason = validityReason
-                  ValidStatement.StatementExpression = expr.Type SignatureType.Mixed }
-            _theoremStore.TryAdd(validStmt.StatementExpression, validStmt) |> ignore
-        | _ ->
-            ()
-
-    member this.Clear() = _theoremStore.Clear()
-
-    member this.Count = _theoremStore.Count
 
 type State() = 
     let _vars = Dictionary<string,FplGenericNode option>()
