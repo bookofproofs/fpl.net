@@ -18,6 +18,7 @@ open FplPrimitives
 open FplGrammarTypes
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterBasicTypes
+open FplInterpreter.Globals.Debug
 open FplInterpreter.Globals.Main
 open FplInterpreterChecks
 open FplInterpreterSTEmbedding

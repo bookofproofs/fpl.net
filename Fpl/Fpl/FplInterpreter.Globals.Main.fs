@@ -15,10 +15,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 module FplInterpreter.Globals.Main
 open System
 open System.Collections.Generic
-open System.IO
 open FParsec
 open FplPrimitives
 open FplInterpreterBasicTypes
+open FplInterpreter.Globals.Debug
 
 
 type ValidityReason =
@@ -34,7 +34,7 @@ type ValidStatement =
       ValidityReason: ValidityReason
       StatementExpression: string}
 
-type ValidStmtStore() as this =
+type ValidStmtStore() =
     let _theoremStore = Dictionary<string, ValidStatement>()
 
     member this.RegisterValidStmt (fv: FplGenericHasValue) =
@@ -66,6 +66,7 @@ type State() =
     /// The dictionary of the variable values of the called node before it was called
     member this.VarValues = _vars
 
+
 /// This type implements the functionality needed to "run" FPL statements step-by-step
 /// while managing the storage of variables and other evaluation-related information.
 /// FPL uses a call-by-value approach when it comes to 
@@ -78,11 +79,12 @@ type FplVariableStack() =
     let _validStmtStore = ValidStmtStore()
     let _recursionCounters = Dictionary<string, int>()
     let _assumedArguments = Stack<FplGenericNode>()
+    let _recursion = Recursion()
+
     // positions of the caller to prevent some diagnostics of being shown at the wrong position 
     let mutable _callerStartPos = Position("", 0,0,0)
     let mutable _callerEndPos = Position("", 0,0,0)
     let mutable _language = "tex" // the default language is tex, otherwise, it should be set in the FPL IDE extension
-    let mutable _recursionLevel = 0
 
     let mutable _nextRunOrder = 0
 
@@ -101,16 +103,6 @@ type FplVariableStack() =
         with get () = _callerEndPos
         and set (value) = _callerEndPos <- value
 
-    /// Recursion level
-    member this.RecursionLevel = _recursionLevel
-
-    /// Increment recursion level
-    member this.RecursionInc() = 
-        _recursionLevel <- _recursionLevel + 1
-
-    /// Decrement recursion level
-    member this.RecursionDec() = 
-        _recursionLevel <- _recursionLevel - 1
 
     /// Returns the next available RunOrder to be stored, when inserting an FplValue into its parent.
     /// The need for this functionality is that sometimes, the block is inserted into the parent's scope, which is a dictionary.
@@ -254,32 +246,6 @@ type FplVariableStack() =
 
 let variableStack = FplVariableStack()
 
-type Debug =
-    | Start
-    | Stop
-
-let debug (fv:FplGenericNode) (debugMode:Debug) =
-    let bars n = String.replicate n "| "
-    let rec getPath (fv1:FplGenericNode) =
-        match fv1.Parent with 
-        | Some parent -> $"{getPath parent} # {fv1.ShortName} {fv1.Type SignatureType.Name}"
-        | None -> $"{fv1.ShortName}"
-    let vars =
-        fv.GetVariables()
-        |> List.map (fun var -> $"{var.FplId}={var.Represent()}")
-        |> String.concat ", "
-    if TestSharedConfig.TestConfig.DebugMode then 
-        let indent = bars (variableStack.RecursionLevel)
-        let logLine =
-            match debugMode with
-            | Debug.Start ->
-                variableStack.RecursionInc()
-                $"Start:{indent}{getPath fv}:[{fv.Represent()}][{vars}]{Environment.NewLine}"
-            | Debug.Stop ->
-                variableStack.RecursionDec()
-                $"Stop :{indent.Substring(2)}{getPath fv}:[{fv.Represent()}][{vars}]{Environment.NewLine}"
-        let currDir = Directory.GetCurrentDirectory()
-        File.AppendAllText(Path.Combine(currDir, "Debug.txt"), logLine)
 
 
 type FplTheory(theoryName, parent: FplGenericNode, filePath: string, runOrder) as this =

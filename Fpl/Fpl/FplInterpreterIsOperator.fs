@@ -16,7 +16,7 @@ module FplInterpreterIsOperator
 open FplPrimitives
 open FplGrammarTypes
 open FplInterpreterBasicTypes
-open FplInterpreter.Globals.Main
+open FplInterpreter.Globals.Debug
 open FplInterpreterSTEmbedding
 open FplInterpreterReferences
 open FplInterpreterIntrinsicTypes
