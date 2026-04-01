@@ -14,9 +14,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 *)
 module FplInterpreter.Globals.Main
 open System.Collections.Generic
-open FParsec
+
 open FplPrimitives
 open FplInterpreterBasicTypes
+open FplInterpreter.Globals.Helpers
 open FplInterpreter.Globals.STEval
 open FplInterpreter.Globals.Validity
 
@@ -32,62 +33,21 @@ type State() =
 /// FPL uses a call-by-value approach when it comes to 
 /// replacing parameters by a calling function with arguments.
 type FplVariableStack() = 
-    let mutable _inSignatureEvaluation = false
-    let mutable _inReferenceToProofOrCorollary = false
     let _stateStack = Stack<KeyValuePair<string, State>>()
     let _validStmtStore = ValidStmtStore()
     let _recursionCounters = Dictionary<string, int>()
     let _assumedArguments = Stack<FplGenericNode>()
     let _evalStack = EvalStack()
-    // positions of the caller to prevent some diagnostics of being shown at the wrong position 
-    let mutable _callerStartPos = Position("", 0,0,0)
-    let mutable _callerEndPos = Position("", 0,0,0)
-    let mutable _language = "tex" // the default language is tex, otherwise, it should be set in the FPL IDE extension
-
-    let mutable _nextRunOrder = 0
-
-    /// Current language choice of all localizations
-    member this.CurrentLanguage
-        with get () = _language
-        and set (value) = _language <- value
-
-    /// Starting position of the caller
-    member this.CallerStartPos
-        with get () = _callerStartPos
-        and set (value) = _callerStartPos <- value
-
-    /// End position of the caller 
-    member this.CallerEndPos
-        with get () = _callerEndPos
-        and set (value) = _callerEndPos <- value
-
-
-    /// Returns the next available RunOrder to be stored, when inserting an FplValue into its parent.
-    /// The need for this functionality is that sometimes, the block is inserted into the parent's scope, which is a dictionary.
-    /// When running the nodes in the dictionary, their run order will ensure that they are being run in the order they have bin inserted.
-    /// This order is incremented and stored when specific FplValue when they are created.
-    /// All FplValues can have either Some or None RunOrder.
-    /// Those with Some RunOrder include e.g. the following building blocks: axioms, theorems, lemmas, propositions, proofs, corollaries, arguments in proofs.
-    /// Those with None include all other types of FplValues. They do not run by their own. They are "called" by those with Some RunOrder.
-    member this.GetNextAvailableFplBlockRunOrder = 
-        _nextRunOrder <- _nextRunOrder + 1
-        _nextRunOrder
+    let _helper = Helper()
     
-    /// Indicates if this EvalStack is evaluating a signature on a FPL building block
-    member this.InSignatureEvaluation
-        with get () = _inSignatureEvaluation
-        and set (value) = _inSignatureEvaluation <- value
-        
-    /// Indicates if this EvalStack is evaluating a ReferenceToProofOrCorollary
-    member this.InReferenceToProofOrCorollary
-        with get () = _inReferenceToProofOrCorollary
-        and set (value) = _inReferenceToProofOrCorollary <- value
-
-    // The stack memory of the runner to store the variables of all run programs
+    // A stack memory storing the variables of all runing symbol table nodes
     member this.Stack = _stateStack
 
-    // The stack memory of the runner to store the variables of all run programs
+    /// A stack memory storing potential new nodes of the symbol table during its evaluation process
     member this.Eval = _evalStack
+
+    /// A handle for helper variables storing some context during the creation process of the symbol table
+    member this.Helper = _helper
 
     /// Copy the ValueList of the variadic ar to the ValueList of the variadic p
     /// by removing the previous values (if any) and

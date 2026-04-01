@@ -15,11 +15,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 module FplInterpreter.Globals.STEval
 open System.Collections.Generic
-open FParsec
 open FplPrimitives
 open FplInterpreterBasicTypes
-open FplInterpreter.Globals.Debug
 
+
+/// A stack memory storing potential new nodes of the symbol table during its evaluation process
 type EvalStack() =
     let _valueStack = Stack<FplGenericNode>()
 

@@ -81,8 +81,8 @@ type FplGenericReference(positions: Positions, parent: FplGenericNode) =
                 let pars = variableStack.SaveState(called) 
                 variableStack.ReplaceVariables pars args
                 // store the position of the caller
-                variableStack.CallerStartPos <- this.StartPos
-                variableStack.CallerEndPos <- this.EndPos
+                variableStack.Helper.CallerStartPos <- this.StartPos
+                variableStack.Helper.CallerEndPos <- this.EndPos
                 // run all statements of the called node
                 called.Run()
                 this.SetValueOf called
@@ -99,8 +99,8 @@ type FplGenericReference(positions: Positions, parent: FplGenericNode) =
             let pars = variableStack.SaveState(calledExtension) 
             let args = [extensionObj]
             variableStack.ReplaceVariables pars args
-            variableStack.CallerStartPos <- extensionObj.StartPos
-            variableStack.CallerEndPos <- extensionObj.EndPos
+            variableStack.Helper.CallerStartPos <- extensionObj.StartPos
+            variableStack.Helper.CallerEndPos <- extensionObj.EndPos
             calledExtension.Run()
             
             // and store the value of the extension to this reference

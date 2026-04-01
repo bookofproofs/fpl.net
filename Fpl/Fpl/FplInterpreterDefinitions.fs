@@ -253,7 +253,7 @@ type FplPredicate(positions: Positions, parent: FplGenericNode, runOrder) as thi
             _callCounter <- _callCounter + 1
             if _callCounter > maxRecursion then
                 this.SetDefaultValue()
-                this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter variableStack.CallerStartPos variableStack.CallerEndPos
+                this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter variableStack.Helper.CallerStartPos variableStack.Helper.CallerEndPos
             else
                 if this.IsIntrinsic then 
                     runIntrinsicPredicate this
@@ -661,7 +661,7 @@ type FplFunctionalTerm(positions: Positions, parent: FplGenericNode, runOrder) a
             if _callCounter > maxRecursion then
                 let instance = getDefaultValueOfFunction this
                 this.SetValue instance
-                this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter variableStack.CallerStartPos variableStack.CallerEndPos
+                this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter variableStack.Helper.CallerStartPos variableStack.Helper.CallerEndPos
             else
                 if this.IsIntrinsic then 
                     runIntrinsicFunction this 

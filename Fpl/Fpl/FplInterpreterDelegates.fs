@@ -62,7 +62,7 @@ type FplEquality(name, positions: Positions, parent: FplGenericNode) as this =
 
     override this.CheckConsistency (): unit = 
         if this.ArgList.Count <> 2 then 
-            this.ErrorOccurred <- emitID013Diagnostics $"Predicate `=` takes 2 arguments, got {this.ArgList.Count}." variableStack.CallerStartPos variableStack.CallerEndPos 
+            this.ErrorOccurred <- emitID013Diagnostics $"Predicate `=` takes 2 arguments, got {this.ArgList.Count}." variableStack.Helper.CallerStartPos variableStack.Helper.CallerEndPos 
         base.CheckConsistency()
     
     override this.EmbedInSymbolTable _ = 
@@ -86,15 +86,15 @@ type FplEquality(name, positions: Positions, parent: FplGenericNode) as this =
                 let aRepr = a.Represent()
                 let bRepr = b.Represent()
 
-                let newPred = new FplIntrinsicPred((variableStack.CallerStartPos, variableStack.CallerEndPos), this.Parent.Value)
+                let newPred = new FplIntrinsicPred((variableStack.Helper.CallerStartPos, variableStack.Helper.CallerEndPos), this.Parent.Value)
                 match aRepr with
                 | LiteralUndef -> 
-                    this.ErrorOccurred <- emitID013Diagnostics "Predicate `=` cannot be evaluated because the left argument is undefined." variableStack.CallerStartPos variableStack.CallerEndPos 
+                    this.ErrorOccurred <- emitID013Diagnostics "Predicate `=` cannot be evaluated because the left argument is undefined." variableStack.Helper.CallerStartPos variableStack.Helper.CallerEndPos 
                     this.SetDefaultValue()
                 | _ -> 
                     match bRepr with
                     | LiteralUndef -> 
-                        this.ErrorOccurred <- emitID013Diagnostics "Predicate `=` cannot be evaluated because the right argument is undefined." variableStack.CallerStartPos variableStack.CallerEndPos 
+                        this.ErrorOccurred <- emitID013Diagnostics "Predicate `=` cannot be evaluated because the right argument is undefined." variableStack.Helper.CallerStartPos variableStack.Helper.CallerEndPos 
                         this.SetDefaultValue()
                     | _ when aType<>bType -> 
                         newPred.FplId <- LiteralFalse // if the compared arguments have different types, then unequal
@@ -104,12 +104,12 @@ type FplEquality(name, positions: Positions, parent: FplGenericNode) as this =
                     | _ -> 
                         match aRepr with
                         | PrimUndetermined -> 
-                            this.ErrorOccurred <- emitID013Diagnostics "Predicate `=` cannot be evaluated because the left argument is undetermined." variableStack.CallerStartPos variableStack.CallerEndPos 
+                            this.ErrorOccurred <- emitID013Diagnostics "Predicate `=` cannot be evaluated because the left argument is undetermined." variableStack.Helper.CallerStartPos variableStack.Helper.CallerEndPos 
                             this.SetDefaultValue()
                         | _ -> 
                             match bRepr with
                             | PrimUndetermined -> 
-                                this.ErrorOccurred <- emitID013Diagnostics "Predicate `=` cannot be evaluated because the right argument is undetermined." variableStack.CallerStartPos variableStack.CallerEndPos 
+                                this.ErrorOccurred <- emitID013Diagnostics "Predicate `=` cannot be evaluated because the right argument is undetermined." variableStack.Helper.CallerStartPos variableStack.Helper.CallerEndPos 
                                 this.SetDefaultValue()
                             | _ -> 
                                 newPred.FplId <- $"{(aRepr = bRepr)}".ToLower()
