@@ -78,15 +78,15 @@ type FplGenericReference(positions: Positions, parent: FplGenericNode) =
 
             // run subroutines only if all arguments have defined values
             if allArgumentsHaveTerminedValues then 
-                let pars = variableStack.SaveState(called) 
-                variableStack.ReplaceVariables pars args
+                let pars = variableStack.State.SaveState(called) 
+                variableStack.State.ReplaceVariables pars args
                 // store the position of the caller
                 variableStack.Helper.CallerStartPos <- this.StartPos
                 variableStack.Helper.CallerEndPos <- this.EndPos
                 // run all statements of the called node
                 called.Run()
                 this.SetValueOf called
-                variableStack.RestoreState(called)
+                variableStack.State.RestoreState called
             else
                 called.SetDefaultValue()
                 this.SetValueOf called
@@ -96,16 +96,16 @@ type FplGenericReference(positions: Positions, parent: FplGenericNode) =
         | Some enclosingNode, Some (:? FplGenericHasValue as calledExtension) when not (Object.ReferenceEquals(enclosingNode, calledExtension)) ->
             // if the extension object is called outside its own extension
             // delegate its evaluation to this extension
-            let pars = variableStack.SaveState(calledExtension) 
+            let pars = variableStack.State.SaveState(calledExtension) 
             let args = [extensionObj]
-            variableStack.ReplaceVariables pars args
+            variableStack.State.ReplaceVariables pars args
             variableStack.Helper.CallerStartPos <- extensionObj.StartPos
             variableStack.Helper.CallerEndPos <- extensionObj.EndPos
             calledExtension.Run()
             
             // and store the value of the extension to this reference
             this.SetValueOf calledExtension
-            variableStack.RestoreState(calledExtension)
+            variableStack.State.RestoreState(calledExtension)
         | _ ->
             // otherwise (i.e., inside the extensionObj's extension), 
             // treat the extensionObj as a value and store this value to the reference
