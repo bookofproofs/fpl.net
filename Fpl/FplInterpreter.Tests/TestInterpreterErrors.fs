@@ -4,7 +4,8 @@ open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
 open FplInterpreterAstPreprocessing
-open FplInterpreter.Globals.ST
+open FplInterpreter.ST
+open FplInterpreter.Globals.Heap
 open FplInterpreter.Main
 open CommonTestHelpers
 open TestSharedConfig
@@ -29,8 +30,7 @@ type TestInterpreterErrors() =
             deleteFilesWithExtension (Path.Combine(currDir, "lib")) "fpl"
             None
         else
-            let parsedAsts = ParsedAstList()
-            let st = SymbolTable(parsedAsts, true, TestConfig.OfflineMode)
+            let st = SymbolTable(true, TestConfig.OfflineMode)
             fplInterpreter st input uri fplLibUrl |> ignore
             Some (st)
 
@@ -51,8 +51,8 @@ type TestInterpreterErrors() =
             deleteFilesWithExtension currDir "fpl"
             None
         else
-            let parsedAsts = ParsedAstList()
-            let st = SymbolTable(parsedAsts, true, TestConfig.OfflineMode)
+
+            let st = SymbolTable(true, TestConfig.OfflineMode)
             fplInterpreter st A uri fplLibUrl |> ignore
             Some (st)
 
@@ -69,8 +69,7 @@ type TestInterpreterErrors() =
             File.Delete(pathToFile)
             None
         else
-            let parsedAsts = ParsedAstList()
-            let st = SymbolTable(parsedAsts, true, TestConfig.OfflineMode)
+            let st = SymbolTable(true, TestConfig.OfflineMode)
             fplInterpreter st A uri fplLibUrl |> ignore
             Some (st)
 
@@ -90,8 +89,7 @@ type TestInterpreterErrors() =
             File.Delete(pathToFile)
             None
         else
-            let parsedAsts = ParsedAstList()
-            let st = SymbolTable(parsedAsts, true, TestConfig.OfflineMode)
+            let st = SymbolTable(true, TestConfig.OfflineMode)
             fplInterpreter st input uri fplLibUrl |> ignore
             Some (st)
 
@@ -109,8 +107,7 @@ type TestInterpreterErrors() =
             deleteFilesWithExtension currDir "fpl"
             None
         else
-            let parsedAsts = ParsedAstList()
-            let st = SymbolTable(parsedAsts, true, TestConfig.OfflineMode)
+            let st = SymbolTable(true, TestConfig.OfflineMode)
             fplInterpreter st input uri fplLibUrl |> ignore
             Some (st)
 
@@ -128,8 +125,7 @@ type TestInterpreterErrors() =
             deleteFilesWithExtension (Path.Combine(currDir, "lib")) "fpl"
             None
         else
-            let parsedAsts = ParsedAstList()
-            let st = SymbolTable(parsedAsts, true, TestConfig.OfflineMode)
+            let st = SymbolTable(true, TestConfig.OfflineMode)
             fplInterpreter st input uri fplLibUrl |> ignore
             Some (st)
 
@@ -147,8 +143,7 @@ type TestInterpreterErrors() =
         ;"""
         let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         let uri = PathEquivalentUri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
-        let parsedAsts = ParsedAstList()
-        let st = SymbolTable(parsedAsts, true, TestConfig.OfflineMode)
+        let st = SymbolTable(true, TestConfig.OfflineMode)
         fplInterpreter st input uri fplLibUrl |> ignore
         let result = filterByErrorCode ad code.Code
         Assert.AreEqual<int>(1, result.Length)
@@ -163,8 +158,7 @@ type TestInterpreterErrors() =
         ;"""
         let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         let uri = PathEquivalentUri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
-        let parsedAsts = ParsedAstList()
-        let st = SymbolTable(parsedAsts, true, TestConfig.OfflineMode)
+        let st = SymbolTable(true, TestConfig.OfflineMode)
         fplInterpreter st input uri fplLibUrl |> ignore 
         let result = filterByErrorCode ad code.Code
         Assert.AreEqual<int>(1, result.Length)

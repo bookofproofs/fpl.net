@@ -5,7 +5,7 @@ using Newtonsoft.Json.Linq;
 using OmniSharp.Extensions.LanguageServer.Server;
 using static ErrDiagnostics;
 using static FplInterpreter.Globals.Heap;
-using static FplInterpreter.Globals.ST;
+using static FplInterpreter.ST;
 using static FplInterpreterAstPreprocessing;
 
 namespace FplLS
@@ -38,9 +38,8 @@ namespace FplLS
 
         static async Task Main()
         {
-            ParsedAstList _parsedAstsList = [];
-
-            var st = new SymbolTable(_parsedAstsList, false, false);
+   
+            var st = new SymbolTable(false, false);
             ad.Clear();
             heap.ValidStmtStore.Clear();
 

@@ -9,7 +9,8 @@ open System
 open FParsec
 open FplGrammarTypes
 open FplInterpreterAstPreprocessing
-open FplInterpreter.Globals.ST
+open FplInterpreter.Globals.Heap
+open FplInterpreter.ST
 open ErrDiagnostics
 
 (* MIT License
@@ -334,14 +335,14 @@ let private rearrangeList element list =
 
 let garbageCollector (st:SymbolTable) (uriToBeReset:PathEquivalentUri) = 
     let referencedAstsOfCurrentTheory currTheory = 
-        match st.ParsedAsts.TryFindAstById(currTheory) with
+        match heap.ParsedAsts.TryFindAstById(currTheory) with
         | Some pa -> pa.Sorting.ReferencedAsts
         | _ -> []
 
     // remove the current theory from the ReferencingAsts list of each parsedAst, if they are not contained 
     // in the current theory's reference Asts
     let rec removeNotReferencedAsts currTheory = 
-        st.ParsedAsts 
+        heap.ParsedAsts 
         |> Seq.iter (fun pa ->
             match pa.Sorting.ReferencingAsts |> List.tryFindIndex (fun referencedTheory -> 
                 referencedTheory = currTheory
@@ -361,30 +362,30 @@ let garbageCollector (st:SymbolTable) (uriToBeReset:PathEquivalentUri) =
                 List.fold (findComponent parsedAsts) newVisited node.Sorting.ReferencedAsts
             | None -> visited 
 
-    match st.ParsedAsts.TryFindAstById(st.MainTheory) with
+    match heap.ParsedAsts.TryFindAstById(st.MainTheory) with
     | Some mainTheory -> 
         removeNotReferencedAsts mainTheory.Id
-        let astComponent = findComponent st.ParsedAsts Set.empty mainTheory.Id
+        let astComponent = findComponent heap.ParsedAsts Set.empty mainTheory.Id
 
         let willBeRemoved = 
-            st.ParsedAsts
+            heap.ParsedAsts
             |> Seq.filter (fun pa -> not (Set.contains pa.Id astComponent))
             |> Seq.map (fun pa -> pa.Id)
             |> Seq.toList
 
         willBeRemoved 
         |> List.map (fun theoryName ->
-            match st.ParsedAsts.TryFindAstById theoryName with
+            match heap.ParsedAsts.TryFindAstById theoryName with
             | Some pa ->
                 ad.ResetStream(pa.Parsing.Uri)
                 if st.Root.Scope.ContainsKey(theoryName) then
                     st.Root.Scope.Remove theoryName |> ignore
-                st.ParsedAsts.RemoveAll (fun pAst -> pAst.Id = theoryName) |> ignore
+                heap.ParsedAsts.RemoveAll (fun pAst -> pAst.Id = theoryName) |> ignore
             | None -> ()
         ) |> ignore
     | None -> ()
 
-    match st.ParsedAsts.TryFindAstById(uriToBeReset.TheoryName) with
+    match heap.ParsedAsts.TryFindAstById(uriToBeReset.TheoryName) with
     | Some theoryToBeReset -> 
         if st.Root.Scope.ContainsKey(theoryToBeReset.Id) then
             theoryToBeReset.Status <- ParsedAstStatus.UsesClausesEvaluated
@@ -398,12 +399,12 @@ let garbageCollector (st:SymbolTable) (uriToBeReset:PathEquivalentUri) =
 let loadAllUsesClauses (st:SymbolTable) input (uri:PathEquivalentUri) fplLibUrl = 
     ad.CurrentUri <- uri
     let sources = acquireSources uri fplLibUrl st.OfflineMode
-    let currentName = addOrUpdateParsedAst input uri st.ParsedAsts
+    let currentName = addOrUpdateParsedAst input uri heap.ParsedAsts
     emitDiagnosticsForDuplicateFiles sources (EvalAliasedNamespaceIdentifier.CreateEani(uri, st.OfflineMode))
     let mutable found = true
 
     while found do
-        let loadedParsedAst = st.ParsedAsts.TryFindLoadedAst()
+        let loadedParsedAst = heap.ParsedAsts.TryFindLoadedAst()
         match loadedParsedAst with
         | Some pa -> 
             // evaluate the EvalAliasedNamespaceIdentifier list of the ast
@@ -412,19 +413,19 @@ let loadAllUsesClauses (st:SymbolTable) input (uri:PathEquivalentUri) fplLibUrl 
             findDuplicateAliases pa.Sorting.EANIList |> ignore
             pa.Sorting.EANIList
             |> List.iter (fun (eani:EvalAliasedNamespaceIdentifier) -> 
-                getParsedAstsMatchingAliasedNamespaceIdentifier sources st.ParsedAsts eani pa 
+                getParsedAstsMatchingAliasedNamespaceIdentifier sources heap.ParsedAsts eani pa 
                 emitDiagnosticsForDuplicateFiles sources eani
             ) |> ignore
         | None -> 
             found <- false
     garbageCollector st uri
-    if isCircular st.ParsedAsts then
-        let cycle = findCycle st.ParsedAsts
+    if isCircular heap.ParsedAsts then
+        let cycle = findCycle heap.ParsedAsts
         match cycle with
         | Some lst -> 
             let lstWithCurrentAsHead = rearrangeList currentName lst @ [currentName]
             let path = String.concat " -> " lstWithCurrentAsHead
-            let parsedAstThatStartsTheCycle = st.ParsedAsts.TryFindAstById(lstWithCurrentAsHead.Head)
+            let parsedAstThatStartsTheCycle = heap.ParsedAsts.TryFindAstById(lstWithCurrentAsHead.Head)
             let circularReferencedName = List.item 1 lstWithCurrentAsHead
             match parsedAstThatStartsTheCycle with 
             | Some pa -> 

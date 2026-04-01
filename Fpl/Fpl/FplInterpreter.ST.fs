@@ -10,7 +10,7 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
 
 *)
-module FplInterpreter.Globals.ST
+module FplInterpreter.ST
 
 open System
 open System.Collections.Generic
@@ -20,9 +20,9 @@ open ErrDiagnostics
 open FplInterpreterAstPreprocessing
 open FplInterpreterBasicTypes
 open FplInterpreter.Globals.Root
+open FplInterpreter.Globals.Heap
 
-type SymbolTable(parsedAsts: ParsedAstList, debug: bool, offlineMode: bool) =
-    let _parsedAsts = parsedAsts
+type SymbolTable(debug: bool, offlineMode: bool) =
     let mutable _mainTheory = ""
     let _root = new FplRoot()
     let _debug = debug
@@ -41,9 +41,6 @@ type SymbolTable(parsedAsts: ParsedAstList, debug: bool, offlineMode: bool) =
 
     /// Returns the evaluation root node of the symbol table.
     member this.Root = _root
-
-    /// Returns the list of parsed asts
-    member this.ParsedAsts = _parsedAsts
 
     /// Serializes the symbol table as json
     member this.ToJson() =
@@ -142,7 +139,7 @@ type SymbolTable(parsedAsts: ParsedAstList, debug: bool, offlineMode: bool) =
 
         sb.AppendLine("ParsedAsts: ") |> ignore
 
-        this.ParsedAsts
+        heap.ParsedAsts
         |> Seq.map (fun pa ->
             $"[{pa.Id}, {pa.Sorting.TopologicalSorting}, {pa.Sorting.ReferencedAsts}, {pa.Sorting.ReferencingAsts}]")
         |> String.concat Environment.NewLine
@@ -155,7 +152,7 @@ type SymbolTable(parsedAsts: ParsedAstList, debug: bool, offlineMode: bool) =
     member this.TraceStatistics =
         let sb = StringBuilder()
 
-        this.ParsedAsts
+        heap.ParsedAsts
         |> Seq.iter (fun pa ->
             let paDiagnostics = ad.GetStreamDiagnostics(pa.Parsing.Uri)
 

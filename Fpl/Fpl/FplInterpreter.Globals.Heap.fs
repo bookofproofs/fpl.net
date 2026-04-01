@@ -12,6 +12,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 module FplInterpreter.Globals.Heap
+open FplInterpreterAstPreprocessing
 open FplInterpreter.Globals.Helpers
 open FplInterpreter.Globals.STEval
 open FplInterpreter.Globals.State
@@ -22,7 +23,7 @@ type HeapMemory() =
     let _evalStack = EvalStack()
     let _helper = Helper()
     let _state = State()
-
+    let _parsedAsts = ParsedAstList()
     /// A stack memory storing potential new nodes of the symbol table during its evaluation process
     member this.Eval = _evalStack
 
@@ -35,12 +36,23 @@ type HeapMemory() =
     /// A handle for the state store used as a memory separating the scope of called FPL nodes like functions or predicates
     member this.State = _state
 
+    /// A handle for the parsed asts (by theory) from the FPL parser
+    member this.ParsedAsts = _parsedAsts
 
-    // Clears the globals.
-    member this.ClearEvalStack() = 
+    // Clears the heap except parsed asts.
+    member this.ClearExceptParsedAsts() = 
         _evalStack.Clear()
         _validStmtStore.Clear()
         _state.Clear()
+
+    // Clears the heap except parsed asts.
+    member this.ClearParsedAsts() = 
+        _parsedAsts.Clear()
+
+    // Clears the heap except parsed asts.
+    member this.ClearAll() = 
+        this.ClearExceptParsedAsts()
+        this.ClearParsedAsts()
 
 let heap = HeapMemory()
 

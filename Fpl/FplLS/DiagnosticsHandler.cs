@@ -2,7 +2,8 @@ using OmniSharp.Extensions.LanguageServer.Protocol.Document;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
 using System.Text;
 using static ErrDiagnostics;
-using static FplInterpreter.Globals.ST;
+using static FplInterpreter.ST;
+using static FplInterpreter.Globals.Heap;
 using static FplInterpreter.Main;
 using Model = OmniSharp.Extensions.LanguageServer.Protocol.Models;
 
@@ -47,7 +48,7 @@ namespace FplLS
             {
                 try
                 {
-                    var allUris = st.ParsedAsts.Select(pa => pa.Parsing.Uri).ToHashSet();
+                    var allUris = heap.ParsedAsts.Select(pa => pa.Parsing.Uri).ToHashSet();
                     UriDiagnostics diagnostics = RefreshFplDiagnosticsStorage(st, uri, buffer);
                     foreach (var diagnosticsPerUri in diagnostics.Enumerator())
                     {
@@ -103,8 +104,6 @@ namespace FplLS
             var fplLibUri = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib";
             ad.CurrentUri = uri;
 
-            var name = uri.TheoryName;
-            var idAlreadyFound = st.ParsedAsts.TryFindAstById(name);
             fplInterpreter(st, sourceCode, uri, fplLibUri);
             var diagnostics = CastDiagnostics(st);
             return diagnostics;
@@ -145,7 +144,7 @@ namespace FplLS
 
         private static Dictionary<PathEquivalentUri, TextPositions> GetTextPositionsByUri(SymbolTable st)
         {
-            var sourceCodes = st.ParsedAsts.DictionaryOfSUri2FplSourceCode();
+            var sourceCodes = heap.ParsedAsts.DictionaryOfSUri2FplSourceCode();
             return sourceCodes.Select(x => new KeyValuePair<PathEquivalentUri, TextPositions>(x.Key, new TextPositions(x.Value))).ToDictionary<PathEquivalentUri, TextPositions>();
         }
 

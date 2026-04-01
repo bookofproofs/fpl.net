@@ -8,7 +8,7 @@ using OmniSharp.Extensions.LanguageServer.Protocol;
 using MediatR;
 using System;
 using static ErrDiagnostics;
-using static FplInterpreter.Globals.ST;
+using static FplInterpreter.ST;
 
 
 namespace FplLS

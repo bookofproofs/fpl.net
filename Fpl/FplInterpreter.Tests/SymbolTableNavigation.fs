@@ -4,7 +4,8 @@ open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open FParsec
 open ErrDiagnostics
-open FplInterpreter.Globals.ST
+open FplInterpreter.ST
+open FplInterpreter.Globals.Heap
 open Newtonsoft.Json
 open Newtonsoft.Json.Linq
 open CommonTestHelpers
@@ -33,7 +34,7 @@ type SymbolTableNavigation() =
             match stOption with
             | Some st -> 
                 // initial counts of parsed ast and theories in root
-                Assert.AreEqual<int>(3, st.ParsedAsts.Count)
+                Assert.AreEqual<int>(3, heap.ParsedAsts.Count)
             | None -> Assert.IsTrue(false)
 
             // remove the test file
@@ -154,27 +155,27 @@ type SymbolTableNavigation() =
             match stOption with
             | Some st -> 
                 // initial counts of parsed ast and theories in root
-                Assert.AreEqual<int>(1, st.ParsedAsts.Count)
+                Assert.AreEqual<int>(1, heap.ParsedAsts.Count)
             | None -> Assert.IsTrue(false)
         
             // now, conserve the symbol table for the test's next step and open the parent file
-            let st = SymbolTable(stOption.Value.ParsedAsts, false, TestConfig.OfflineMode)
+            let st = SymbolTable(false, TestConfig.OfflineMode)
             let uri = PathEquivalentUri(Path.Combine(currentPathRepo,"Fpl.SetTheory.fpl"))
             let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
             let fplCode = File.ReadAllText(uri.AbsolutePath)
             fplInterpreter st fplCode uri fplLibUrl
 
             // and test if the corrent number of asts in symbol table
-            Assert.AreEqual<int>(2, st.ParsedAsts.Count)
+            Assert.AreEqual<int>(2, heap.ParsedAsts.Count)
 
             // now, open the grand parent file
-            let st = SymbolTable(stOption.Value.ParsedAsts, false, TestConfig.OfflineMode)
+            let st = SymbolTable(false, TestConfig.OfflineMode)
             let uri = PathEquivalentUri(Path.Combine(currentPath,filename + ".fpl"))
             let fplCode = File.ReadAllText(uri.AbsolutePath)
             fplInterpreter st fplCode uri fplLibUrl
 
             // and test if the corrent number of asts in symbol table
-            Assert.AreEqual<int>(3, st.ParsedAsts.Count)
+            Assert.AreEqual<int>(3, heap.ParsedAsts.Count)
         
             // remove the test file
             prepareFplCode(filename, "", true) |> ignore
@@ -205,18 +206,18 @@ type SymbolTableNavigation() =
             match stOption with
             | Some st -> 
                 // initial counts of parsed ast and theories in root
-                Assert.AreEqual<int>(1, st.ParsedAsts.Count)
+                Assert.AreEqual<int>(1, heap.ParsedAsts.Count)
             | None -> Assert.IsTrue(false)
         
             // now, conserve the symbol table for the test's next step and open the grand parent file
-            let st = SymbolTable(stOption.Value.ParsedAsts, false, TestConfig.OfflineMode)
+            let st = SymbolTable(false, TestConfig.OfflineMode)
             let uri = PathEquivalentUri(Path.Combine(currentPath,filename + ".fpl"))
             let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
             let fplCode = File.ReadAllText(uri.AbsolutePath)
             fplInterpreter st fplCode uri fplLibUrl
 
             // and test if the corrent number of asts in symbol table
-            Assert.AreEqual<int>(3, st.ParsedAsts.Count)
+            Assert.AreEqual<int>(3, heap.ParsedAsts.Count)
         
             // remove the test file
             prepareFplCode(filename, "", true) |> ignore
@@ -445,7 +446,7 @@ type SymbolTableNavigation() =
             match stOption with
             | Some st -> 
                 // initial counts of parsed ast and theories in root
-                Assert.AreEqual<int>(3, st.ParsedAsts.Count)
+                Assert.AreEqual<int>(3, heap.ParsedAsts.Count)
             | None -> Assert.IsTrue(false)
 
             let pathToTestFile = Path.Combine(currentPathRepo,"Fpl.Commons.fpl")
@@ -454,7 +455,7 @@ type SymbolTableNavigation() =
             // now manipulate the file and reprocess it
         
             // now, conserve the symbol table for the test's next step and reprocess the manipulated file
-            let st = SymbolTable(stOption.Value.ParsedAsts, false, TestConfig.OfflineMode)
+            let st = SymbolTable(false, TestConfig.OfflineMode)
             let uri = PathEquivalentUri(pathToTestFile)
             let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
             let fplCodeOriginal = File.ReadAllText(pathToTestFile)
@@ -492,7 +493,7 @@ type SymbolTableNavigation() =
             match stOption with
             | Some st -> 
                 // initial counts of parsed ast and theories in root
-                Assert.AreEqual<int>(3, st.ParsedAsts.Count)
+                Assert.AreEqual<int>(3, heap.ParsedAsts.Count)
                 let pathToTestFile = Path.Combine(currentPathRepo,"Fpl.Commons.fpl")
                 let diagnosticsOfFile = ad.GetStreamDiagnostics(PathEquivalentUri(pathToTestFile))
                 let countID001 = diagnosticsOfFile |> Seq.filter (fun kvp -> kvp.Value.Code.Code = "ID001") |> Seq.toList
@@ -518,6 +519,7 @@ type SymbolTableNavigation() =
 
     [<TestMethod>]
     member this.OpeningFileInMainAndUpdatingReferencesCorrectlyRaisesSIG04Errors() =
+        heap.ClearAll()
         if not TestConfig.OfflineMode then 
             // prepare test, making sure there is an empty 
             // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.

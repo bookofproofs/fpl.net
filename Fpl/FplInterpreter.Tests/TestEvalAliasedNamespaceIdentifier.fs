@@ -5,7 +5,8 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open FParsec
 open ErrDiagnostics
 open FplInterpreterAstPreprocessing
-open FplInterpreter.Globals.ST
+open FplInterpreter.ST
+open FplInterpreter.Globals.Heap
 open FplInterpreter.Main
 open FplInterpreterUsesClause
 open CommonTestHelpers
@@ -143,7 +144,7 @@ type TestEvalAliasedNamespaceIdentifier() =
             let uri =
                 PathEquivalentUri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
             let sources = acquireSources uri fplLibUrl stOpt.Value.OfflineMode
-            let testAst = stOpt.Value.ParsedAsts.TryFindAstById("TestFindFilesInLibMapWithWildcard").Value
+            let testAst = heap.ParsedAsts.TryFindAstById("TestFindFilesInLibMapWithWildcard").Value
             let eaniList = eval_uses_clause stOpt.Value.OfflineMode testAst.Parsing.Ast 
             if eaniList.IsEmpty then 
                 Assert.AreEqual<int>(expected, 0)
@@ -165,7 +166,7 @@ type TestEvalAliasedNamespaceIdentifier() =
             let filename = "TestParsedAstsCount.fpl"
             prepareFplCode (filename, "", true) |> ignore
             let st = prepareFplCode (filename, sprintf "uses %s;" usesClause, false) 
-            let result = st.Value.ParsedAsts
+            let result = heap.ParsedAsts
             Assert.AreEqual<int>(expected, result.Count)
 
     [<DataRow("Test1")>]
@@ -217,6 +218,7 @@ type TestEvalAliasedNamespaceIdentifier() =
         Assert.AreEqual<int>(2, fplSources.FilePaths.Length)
 
     member this.PrepareTestLoadAllUsesClauses01() =
+        heap.ClearParsedAsts()
         let input = """
             uses Fpl.Commons
             ;"""
@@ -225,10 +227,9 @@ type TestEvalAliasedNamespaceIdentifier() =
         let uri = PathEquivalentUri(pathToFile)
         let fplLibUrl =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
-        let parsedAsts = ParsedAstList()
-        let st = SymbolTable(parsedAsts, true, TestConfig.OfflineMode)
+        let st = SymbolTable(true, TestConfig.OfflineMode)
         loadAllUsesClauses st input uri fplLibUrl 
-        parsedAsts
+        heap.ParsedAsts
 
 
     [<TestMethod>]
@@ -287,10 +288,10 @@ type TestEvalAliasedNamespaceIdentifier() =
         let uri = PathEquivalentUri(pathToFile)
         let fplLibUrl =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
-        let parsedAsts = ParsedAstList()
-        let st = SymbolTable(parsedAsts, false, TestConfig.OfflineMode)
+
+        let st = SymbolTable(false, TestConfig.OfflineMode)
         loadAllUsesClauses st input uri fplLibUrl 
-        parsedAsts
+        heap.ParsedAsts
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses02Number() =
@@ -369,6 +370,7 @@ type TestEvalAliasedNamespaceIdentifier() =
             Assert.AreEqual<string list>(["Test"; "Fpl.SetTheory"], actual)
 
     member this.PrepareTestLoadAllUsesClauses03() =
+        heap.ClearParsedAsts()
         let input = """
             uses Fpl * 
             ;"""
@@ -377,10 +379,9 @@ type TestEvalAliasedNamespaceIdentifier() =
         let uri = PathEquivalentUri(pathToFile)
         let fplLibUrl =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
-        let parsedAsts = ParsedAstList()
-        let st = SymbolTable(parsedAsts, false, TestConfig.OfflineMode)
+        let st = SymbolTable(false, TestConfig.OfflineMode)
         loadAllUsesClauses st input uri fplLibUrl 
-        parsedAsts
+        heap.ParsedAsts
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses03Number() =
@@ -472,6 +473,7 @@ type TestEvalAliasedNamespaceIdentifier() =
 
     [<TestMethod>]
     member this.TestLoadAllUsesClausesTopologicalSorting02() =
+        heap.ClearParsedAsts()
         if not TestConfig.OfflineMode then 
             let result = this.PrepareTestLoadAllUsesClauses02()
             let ra = result.TryFindAstById("Fpl.Commons")
@@ -511,14 +513,14 @@ type TestEvalAliasedNamespaceIdentifier() =
             match prepareFplCode(filename, "uses Fpl.SetTheory;", false) with
             | Some (st:SymbolTable) -> 
                 // initial counts of parsed ast and theories in root
-                Assert.AreEqual<int>(3, st.ParsedAsts.Count)
+                Assert.AreEqual<int>(3, heap.ParsedAsts.Count)
                 Assert.AreEqual<int>(3, st.Root.Scope.Count)
                 let currDir = Directory.GetCurrentDirectory()
                 let uri = PathEquivalentUri(Path.Combine(currDir,filename))
                 let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
                 // reparse the Test.fpl after removing the uses clause
                 fplInterpreter st ";" uri fplLibUrl
-                Assert.AreEqual<int>(1, st.ParsedAsts.Count)
+                Assert.AreEqual<int>(1, heap.ParsedAsts.Count)
                 Assert.AreEqual<int>(1, st.Root.Scope.Count)
                 prepareFplCode(filename, "", true) |> ignore
 
@@ -532,14 +534,14 @@ type TestEvalAliasedNamespaceIdentifier() =
             match prepareFplCode(filename, "uses Fpl.SetTheory;", false) with
             | Some (st:SymbolTable) -> 
                 // initial counts of parsed ast and theories in root
-                Assert.AreEqual<int>(3, st.ParsedAsts.Count)
+                Assert.AreEqual<int>(3, heap.ParsedAsts.Count)
                 Assert.AreEqual<int>(3, st.Root.Scope.Count)
                 let currDir = Directory.GetCurrentDirectory()
                 let uri = PathEquivalentUri(Path.Combine(currDir, filename))
                 let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
                 // reparse the file after replacing the uses clause with uses Fpl.Commons
                 fplInterpreter st "uses Fpl.Commons ;" uri fplLibUrl
-                Assert.AreEqual<int>(2, st.ParsedAsts.Count)
+                Assert.AreEqual<int>(2, heap.ParsedAsts.Count)
                 Assert.AreEqual<int>(2, st.Root.Scope.Count)
             | None -> Assert.IsTrue(false)
         
@@ -551,14 +553,14 @@ type TestEvalAliasedNamespaceIdentifier() =
             match prepareFplCode(filename, "uses Fpl.SetTheory;", false) with
             | Some (st:SymbolTable) -> 
                 // initial counts of parsed ast and theories in root
-                Assert.AreEqual<int>(3, st.ParsedAsts.Count)
+                Assert.AreEqual<int>(3, heap.ParsedAsts.Count)
                 Assert.AreEqual<int>(3, st.Root.Scope.Count)
                 let currDir = Directory.GetCurrentDirectory()
                 let uri = PathEquivalentUri(Path.Combine(currDir, filename))
                 let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
                 // reparse the Test.fpl after removing the uses clause
                 fplInterpreter st "uses BlaTypo ;" uri fplLibUrl
-                Assert.AreEqual<int>(1, st.ParsedAsts.Count)
+                Assert.AreEqual<int>(1, heap.ParsedAsts.Count)
                 Assert.AreEqual<int>(1, st.Root.Scope.Count)
             | None -> Assert.IsTrue(false)
 
@@ -572,7 +574,7 @@ type TestEvalAliasedNamespaceIdentifier() =
             match prepareFplCode(filename, fplCode, false) with
             | Some (st:SymbolTable) -> 
                 // initial counts of parsed ast and theories in root
-                let parsedAstsFirstTime = st.ParsedAsts.Count
+                let parsedAstsFirstTime = heap.ParsedAsts.Count
                 let scopeCountFirstTime = st.Root.Scope.Count
                 let errorCountfirstTime = ad.CountDiagnostics
 
@@ -581,7 +583,7 @@ type TestEvalAliasedNamespaceIdentifier() =
                 let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
                 // reparse the Test.fpl after slightly modifying the uses clause
                 fplInterpreter st (fplCode + " ") uri fplLibUrl
-                Assert.AreEqual<int>(parsedAstsFirstTime, st.ParsedAsts.Count)
+                Assert.AreEqual<int>(parsedAstsFirstTime, heap.ParsedAsts.Count)
                 Assert.AreEqual<int>(scopeCountFirstTime, st.Root.Scope.Count)
                 Assert.AreEqual<int>(errorCountfirstTime, ad.CountDiagnostics)
 
@@ -596,7 +598,7 @@ type TestEvalAliasedNamespaceIdentifier() =
             match prepareFplCode(filename, fplCode, false) with
             | Some (st:SymbolTable) -> 
                 // initial counts of parsed ast and theories in root
-                let parsedAstsFirstTime = st.ParsedAsts.Count
+                let parsedAstsFirstTime = heap.ParsedAsts.Count
                 let scopeCountFirstTime = st.Root.Scope.Count
                 let errorCountfirstTime = ad.CountDiagnostics
 
@@ -607,7 +609,7 @@ type TestEvalAliasedNamespaceIdentifier() =
                 let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
                 // reparse the Test.fpl after slightly modifying the uses clause
                 fplInterpreter st fplCode uri fplLibUrl
-                Assert.AreEqual<int>(parsedAstsFirstTime, st.ParsedAsts.Count)
+                Assert.AreEqual<int>(parsedAstsFirstTime, heap.ParsedAsts.Count)
                 Assert.AreEqual<int>(scopeCountFirstTime, st.Root.Scope.Count)
                 Assert.AreEqual<int>(errorCountfirstTime, ad.CountDiagnostics)
 

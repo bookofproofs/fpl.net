@@ -4,8 +4,7 @@
 
 open ErrDiagnostics
 open FplParser
-open FplInterpreterAstPreprocessing
-open FplInterpreter.Globals.ST
+open FplInterpreter.ST
 open FplInterpreter.Main
 open System.IO
 
@@ -29,17 +28,15 @@ let prepareFplCode(fplCode:string, delete:bool) =
         deleteFilesWithExtension currDir "fpl"
         None
     else
-        let parsedAsts = ParsedAstList()
-        let st = SymbolTable(parsedAsts, true, false)
+        let st = SymbolTable(true, false)
         Some (fplInterpreter st fplCode uri fplLibUrl)
 
 let loadFplFile(path:string) = 
     let uri = PathEquivalentUri(path)
     let fplLibUrl =
         "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
-    let parsedAsts = ParsedAstList()
     let fplCode = File.ReadAllText(path)
-    let st = SymbolTable(parsedAsts, false, true)
+    let st = SymbolTable(false, true)
     fplInterpreter st fplCode uri fplLibUrl
 
 let input = """def pred T() { intr prty pred T1() {is(parent,pred)} };"""

@@ -17,16 +17,18 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 module FplInterpreter.Main
 open System
 open ErrDiagnostics
-open FplInterpreter.Globals.ST
+open FplInterpreter.ST
+open FplInterpreter.Globals.Heap
 open FplInterpreterUsesClause
 open FplInterpreterBuildingBlocks
 open FplInterpreterDiagnosticsEmitter
 
 let fplInterpreter (st:SymbolTable) input (uri:PathEquivalentUri) fplLibUrl = 
     try
+        heap.ClearAll()
         if st.MainTheory = String.Empty then
             st.MainTheory <- uri.TheoryName
         loadAllUsesClauses st input uri fplLibUrl 
-        evaluateSymbolTable st 
+        evaluateSymbolTable st
     with ex -> 
         emitUnexpectedErrorDiagnostics (ex.Message + Environment.NewLine + ex.StackTrace)

@@ -22,11 +22,11 @@
         <Compile Include="FplInterpreter.Globals.Debug.fs" />
         <Compile Include="FplInterpreter.Globals.Helpers.fs" />
         <Compile Include="FplInterpreter.Globals.Root.fs" />
-        <Compile Include="FplInterpreter.Globals.ST.fs" />
         <Compile Include="FplInterpreter.Globals.STEval.fs" />
         <Compile Include="FplInterpreter.Globals.State.fs" />
         <Compile Include="FplInterpreter.Globals.Validity.fs" />
         <Compile Include="FplInterpreter.Globals.Heap.fs" />
+        <Compile Include="FplInterpreter.ST.fs" />
         <Compile Include="FplInterpreterChecks.fs" />
         <Compile Include="FplInterpreterSTEmbedding.fs" />
         <Compile Include="FplInterpreterIntrinsicTypes.fs" />

@@ -4,9 +4,8 @@ open System
 open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
-open FplInterpreter.Globals.Heap
 open FplInterpreterAstPreprocessing
-open FplInterpreter.Globals.ST
+open FplInterpreter.ST
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreter.Main
 open TestSharedConfig
@@ -69,8 +68,7 @@ let prepareFplCode (filename: string, fplCode: string, delete: bool) =
             deleteDirectory (Path.Combine(currDir,"repo"))
         None
     else
-        let parsedAsts = ParsedAstList()
-        let st = SymbolTable(parsedAsts, true, TestConfig.OfflineMode || not (fplCodeNeedsOnline fplCode))
+        let st = SymbolTable(true, TestConfig.OfflineMode || not (fplCodeNeedsOnline fplCode))
         
         fplInterpreter st fplCode uri fplLibUrl |> ignore
 
@@ -139,9 +137,8 @@ let loadFplFile (path: string) =
     let fplLibUrl =
         "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
 
-    let parsedAsts = ParsedAstList()
     let fplCode = File.ReadAllText(path)
-    let st = SymbolTable(parsedAsts, true, TestConfig.OfflineMode)
+    let st = SymbolTable(true, TestConfig.OfflineMode)
     fplInterpreter st fplCode uri fplLibUrl
     Some(st)
 

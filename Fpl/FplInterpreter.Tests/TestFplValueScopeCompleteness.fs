@@ -1,6 +1,6 @@
 namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
-open FplInterpreter.Globals.ST
+open FplInterpreter.ST
 
 [<TestClass>]
 type TestFplValueScopeCompleteness() =

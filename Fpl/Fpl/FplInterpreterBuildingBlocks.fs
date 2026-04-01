@@ -23,8 +23,8 @@ open FplInterpreterDiagnosticsEmitter
 open FplInterpreterAstPreprocessing
 open FplInterpreterBasicTypes
 open FplInterpreter.Globals.Root
-open FplInterpreter.Globals.ST
 open FplInterpreter.Globals.Heap
+open FplInterpreter.ST
 open FplInterpreterChecks
 open FplInterpreterSTEmbedding
 open FplInterpreterIntrinsicTypes
@@ -1725,17 +1725,17 @@ let tryFindParsedAstUsesClausesEvaluated (parsedAsts: List<ParsedAst>) =
         None
 
 let evaluateSymbolTable (st: SymbolTable) =
-    st.ParsedAsts.OrderAsts()
+    heap.ParsedAsts.OrderAsts()
 
     let mutable found = true
 
     while found do
         let usesClausesEvaluatedParsedAst =
-            tryFindParsedAstUsesClausesEvaluated st.ParsedAsts
+            tryFindParsedAstUsesClausesEvaluated heap.ParsedAsts
 
         match usesClausesEvaluatedParsedAst with
         | Some pa ->
-            heap.ClearEvalStack()
+            heap.ClearExceptParsedAsts()
             // evaluate the ParsedAst of a theory
             let theoryValue = new FplTheory(pa.Id, st.Root, pa.Parsing.Uri.AbsolutePath, heap.Helper.GetNextAvailableFplBlockRunOrder);
             if not (st.Root.Scope.ContainsKey(pa.Id)) then

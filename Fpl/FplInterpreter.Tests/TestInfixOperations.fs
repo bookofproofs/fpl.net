@@ -2,7 +2,7 @@ namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
 open FplPrimitives
-open FplInterpreter.Globals.ST
+open FplInterpreter.ST
 open CommonTestHelpers
 
 [<TestClass>]
