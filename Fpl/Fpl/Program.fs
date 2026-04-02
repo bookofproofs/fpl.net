@@ -28,7 +28,7 @@ let prepareFplCode(fplCode:string, delete:bool) =
         deleteFilesWithExtension currDir "fpl"
         None
     else
-        let st = SymbolTable(true, false)
+        let st = SymbolTable(false)
         Some (fplInterpreter st fplCode uri fplLibUrl)
 
 let loadFplFile(path:string) = 
@@ -36,7 +36,7 @@ let loadFplFile(path:string) =
     let fplLibUrl =
         "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
     let fplCode = File.ReadAllText(path)
-    let st = SymbolTable(false, true)
+    let st = SymbolTable(true)
     fplInterpreter st fplCode uri fplLibUrl
 
 let input = """def pred T() { intr prty pred T1() {is(parent,pred)} };"""

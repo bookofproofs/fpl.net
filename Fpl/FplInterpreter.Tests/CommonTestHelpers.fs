@@ -68,7 +68,7 @@ let prepareFplCode (filename: string, fplCode: string, delete: bool) =
             deleteDirectory (Path.Combine(currDir,"repo"))
         None
     else
-        let st = SymbolTable(true, TestConfig.OfflineMode || not (fplCodeNeedsOnline fplCode))
+        let st = SymbolTable(TestConfig.OfflineMode || not (fplCodeNeedsOnline fplCode))
         
         fplInterpreter st fplCode uri fplLibUrl |> ignore
 
@@ -138,7 +138,7 @@ let loadFplFile (path: string) =
         "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
 
     let fplCode = File.ReadAllText(path)
-    let st = SymbolTable(true, TestConfig.OfflineMode)
+    let st = SymbolTable(TestConfig.OfflineMode)
     fplInterpreter st fplCode uri fplLibUrl
     Some(st)
 

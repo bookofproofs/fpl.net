@@ -159,7 +159,7 @@ type SymbolTableNavigation() =
             | None -> Assert.IsTrue(false)
         
             // now, conserve the symbol table for the test's next step and open the parent file
-            let st = SymbolTable(false, TestConfig.OfflineMode)
+            let st = SymbolTable(TestConfig.OfflineMode)
             let uri = PathEquivalentUri(Path.Combine(currentPathRepo,"Fpl.SetTheory.fpl"))
             let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
             let fplCode = File.ReadAllText(uri.AbsolutePath)
@@ -169,7 +169,7 @@ type SymbolTableNavigation() =
             Assert.AreEqual<int>(2, heap.ParsedAsts.Count)
 
             // now, open the grand parent file
-            let st = SymbolTable(false, TestConfig.OfflineMode)
+            let st = SymbolTable(TestConfig.OfflineMode)
             let uri = PathEquivalentUri(Path.Combine(currentPath,filename + ".fpl"))
             let fplCode = File.ReadAllText(uri.AbsolutePath)
             fplInterpreter st fplCode uri fplLibUrl
@@ -210,7 +210,7 @@ type SymbolTableNavigation() =
             | None -> Assert.IsTrue(false)
         
             // now, conserve the symbol table for the test's next step and open the grand parent file
-            let st = SymbolTable(false, TestConfig.OfflineMode)
+            let st = SymbolTable(TestConfig.OfflineMode)
             let uri = PathEquivalentUri(Path.Combine(currentPath,filename + ".fpl"))
             let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
             let fplCode = File.ReadAllText(uri.AbsolutePath)
@@ -455,7 +455,7 @@ type SymbolTableNavigation() =
             // now manipulate the file and reprocess it
         
             // now, conserve the symbol table for the test's next step and reprocess the manipulated file
-            let st = SymbolTable(false, TestConfig.OfflineMode)
+            let st = SymbolTable(TestConfig.OfflineMode)
             let uri = PathEquivalentUri(pathToTestFile)
             let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
             let fplCodeOriginal = File.ReadAllText(pathToTestFile)

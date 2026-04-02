@@ -11,21 +11,17 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 module FplInterpreter.ST
-
+open TestSharedConfig
 open System
-open System.Collections.Generic
 open System.Text
 open FplPrimitives
-open ErrDiagnostics
-open FplInterpreterAstPreprocessing
 open FplInterpreterBasicTypes
 open FplInterpreter.Globals.Root
 open FplInterpreter.Globals.Heap
 
-type SymbolTable(debug: bool, offlineMode: bool) =
+type SymbolTable(offlineMode: bool) =
     let mutable _mainTheory = ""
     let _root = new FplRoot()
-    let _debug = debug
     let _offlineMode = offlineMode
 
     /// Returns the current OfflineMode, with which the SymbolTable was created. 
@@ -53,7 +49,7 @@ type SymbolTable(debug: bool, offlineMode: bool) =
             | _ -> ()
 
             let indent, indentMinusOne =
-                if _debug then
+                if TestConfig.DebugMode then
                     String(' ', level), String(' ', level - 1)
                 else
                     String.Empty, String.Empty

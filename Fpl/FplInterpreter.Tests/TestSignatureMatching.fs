@@ -582,9 +582,9 @@ type TestSignatureMatching() =
     [<DataRow("03c", """def cl A { ctor A(x:obj) {} ctor A(x:pred) {} ctor A(x:ind) {} } def pred T() {dec ~n:A ~x:ind n:=A(x); true};""", "A(ind)")>]
     [<TestMethod>]
 
-    /// Test if a reference of the assigned value gets the correct candidate 
-    /// depending on its signature and the available constructor candidates in the referenced class
-    /// regardless of the order in which the constructors in the referenced class are declared.
+    // Test if a reference of the assigned value gets the correct candidate 
+    // depending on its signature and the available constructor candidates in the referenced class
+    // regardless of the order in which the constructors in the referenced class are declared.
     member this.TestAssignmentsOfConstructorsCorrectCandidates(no:string, varVal:string, expectedCandidateSignature:string) =
         ad.Clear()
         let fplCode = sprintf """%s""" varVal
