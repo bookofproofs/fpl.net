@@ -4,6 +4,7 @@ open ErrDiagnostics
 open FplPrimitives
 open FplInterpreterBasicTypes
 open FplInterpreter.Globals.Root
+open FplInterpreter.Globals.Heap
 open FplInterpreterDefinitions
 open FplInterpreterPredicativeBlocks
 open FplInterpreterDefinitionProperties
@@ -676,80 +677,76 @@ type TestFplValueScopeNameEndPos() =
         ad.Clear()
         let fplCode = sprintf "def pred T1() { %s };" varVal
         let filename = "TestPredicateNameEndPos.fpl"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+
+        let pr1 = theory.Scope["T1()"] 
+        let base1 = pr1.ArgList[0]
+
+        match var with
+        | "base1" -> Assert.AreEqual<int64>((int64)22, base1.EndPos.Column)
+        | "base2" -> Assert.AreEqual<int64>((int64)23, base1.EndPos.Column)
+        | "base3" -> Assert.AreEqual<int64>((int64)23, base1.EndPos.Column)
+        | "base4" -> Assert.AreEqual<int64>((int64)19, base1.EndPos.Column)
+        | "base5" -> Assert.AreEqual<int64>((int64)27, base1.EndPos.Column)
+        | "base6" -> Assert.AreEqual<int64>((int64)19, base1.EndPos.Column)
+        | "base7" -> Assert.AreEqual<int64>((int64)26, base1.EndPos.Column)
+        | "base8" -> Assert.AreEqual<int64>((int64)24, base1.EndPos.Column)
+        | "base9" -> Assert.AreEqual<int64>((int64)25, base1.EndPos.Column)
+        | "base10" -> Assert.AreEqual<int64>((int64)21, base1.EndPos.Column)
+        | "base11" -> Assert.AreEqual<int64>((int64)18, base1.EndPos.Column)
+        | "base12" -> Assert.AreEqual<int64>((int64)24, base1.EndPos.Column)
+        | "base13" -> Assert.AreEqual<int64>((int64)19, base1.EndPos.Column)
+        | "base11a" -> Assert.AreEqual<int64>((int64)20, base1.EndPos.Column)
+        | "base12a" -> Assert.AreEqual<int64>((int64)23, base1.EndPos.Column)
+        | "base10b" -> Assert.AreEqual<int64>((int64)23, base1.EndPos.Column)
+        | "base11b" -> Assert.AreEqual<int64>((int64)20, base1.EndPos.Column)
+        | "base12b" -> Assert.AreEqual<int64>((int64)23, base1.EndPos.Column)
+        | "base13b" -> Assert.AreEqual<int64>((int64)21, base1.EndPos.Column)
+        | "base10c" -> Assert.AreEqual<int64>((int64)27, base1.EndPos.Column)
+        | "base11c" -> Assert.AreEqual<int64>((int64)24, base1.EndPos.Column)
+        | "base12c" -> Assert.AreEqual<int64>((int64)27, base1.EndPos.Column)
+        | "base13c" -> Assert.AreEqual<int64>((int64)25, base1.EndPos.Column)
+        | "base10d" -> Assert.AreEqual<int64>((int64)27, base1.EndPos.Column)
+        | "base11d" -> Assert.AreEqual<int64>((int64)24, base1.EndPos.Column)
+        | "base12d" -> Assert.AreEqual<int64>((int64)27, base1.EndPos.Column)
+        | "base13d" -> Assert.AreEqual<int64>((int64)24, base1.EndPos.Column)
+        | "base10e" -> Assert.AreEqual<int64>((int64)40, base1.EndPos.Column)
+        | "base11e" -> Assert.AreEqual<int64>((int64)32, base1.EndPos.Column)
+        | "base12e" -> Assert.AreEqual<int64>((int64)36, base1.EndPos.Column)
+        | "base13e" -> Assert.AreEqual<int64>((int64)33, base1.EndPos.Column)
+        | "base10f" -> Assert.AreEqual<int64>((int64)35, base1.EndPos.Column)
+        | "base11f" -> Assert.AreEqual<int64>((int64)32, base1.EndPos.Column)
+        | "base12f" -> Assert.AreEqual<int64>((int64)38, base1.EndPos.Column)
+        | "base13f" -> Assert.AreEqual<int64>((int64)32, base1.EndPos.Column)
+        | "base14" -> Assert.AreEqual<int64>((int64)18, base1.EndPos.Column)
+        | "base15" -> Assert.AreEqual<int64>((int64)19, base1.EndPos.Column)
+        | "base15a" -> Assert.AreEqual<int64>((int64)20, base1.EndPos.Column)
+        | "base15b" -> Assert.AreEqual<int64>((int64)21, base1.EndPos.Column)
+        | "base16" -> Assert.AreEqual<int64>((int64)34, base1.EndPos.Column)
+        | "base17" -> Assert.AreEqual<int64>((int64)36, base1.EndPos.Column)
+        | "base18" -> Assert.AreEqual<int64>((int64)62, base1.EndPos.Column)
+        | "base19" -> Assert.AreEqual<int64>((int64)45, base1.EndPos.Column)
+        | "base20" -> Assert.AreEqual<int64>((int64)34, base1.EndPos.Column)
+        | "base21" -> Assert.AreEqual<int64>((int64)35, base1.EndPos.Column)
+        | "base21a" -> Assert.AreEqual<int64>((int64)23, base1.EndPos.Column)
+        | "base21b" -> Assert.AreEqual<int64>((int64)25, base1.EndPos.Column)
+        | "base22" -> Assert.AreEqual<int64>((int64)35, base1.EndPos.Column)
+        | "base23" -> Assert.AreEqual<int64>((int64)33, base1.EndPos.Column)
+        | "base24" -> Assert.AreEqual<int64>((int64)27, base1.EndPos.Column)
+        | "base25" -> Assert.AreEqual<int64>((int64)28, base1.EndPos.Column)
+        | "base26" -> Assert.AreEqual<int64>((int64)28, base1.EndPos.Column)
+        | "base27" -> Assert.AreEqual<int64>((int64)20, base1.EndPos.Column)
+        | "base28" -> Assert.AreEqual<int64>((int64)27, base1.EndPos.Column)
+        | "base29" -> Assert.AreEqual<int64>((int64)28, base1.EndPos.Column)
+        | "base30" -> Assert.AreEqual<int64>((int64)25, base1.EndPos.Column)
+        | "base31" -> Assert.AreEqual<int64>((int64)41, base1.EndPos.Column)
+        | "base32" -> Assert.AreEqual<int64>((int64)38, base1.EndPos.Column)
+        | "base33" -> Assert.AreEqual<int64>((int64)43, base1.EndPos.Column)
+        | "base34" -> Assert.AreEqual<int64>((int64)27, base1.EndPos.Column)
+        | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-
-            let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ArgList[0]
-
-            match var with
-            | "base1" -> Assert.AreEqual<int64>((int64)22, base1.EndPos.Column)
-            | "base2" -> Assert.AreEqual<int64>((int64)23, base1.EndPos.Column)
-            | "base3" -> Assert.AreEqual<int64>((int64)23, base1.EndPos.Column)
-            | "base4" -> Assert.AreEqual<int64>((int64)19, base1.EndPos.Column)
-            | "base5" -> Assert.AreEqual<int64>((int64)27, base1.EndPos.Column)
-            | "base6" -> Assert.AreEqual<int64>((int64)19, base1.EndPos.Column)
-            | "base7" -> Assert.AreEqual<int64>((int64)26, base1.EndPos.Column)
-            | "base8" -> Assert.AreEqual<int64>((int64)24, base1.EndPos.Column)
-            | "base9" -> Assert.AreEqual<int64>((int64)25, base1.EndPos.Column)
-            | "base10" -> Assert.AreEqual<int64>((int64)21, base1.EndPos.Column)
-            | "base11" -> Assert.AreEqual<int64>((int64)18, base1.EndPos.Column)
-            | "base12" -> Assert.AreEqual<int64>((int64)24, base1.EndPos.Column)
-            | "base13" -> Assert.AreEqual<int64>((int64)19, base1.EndPos.Column)
-            | "base11a" -> Assert.AreEqual<int64>((int64)20, base1.EndPos.Column)
-            | "base12a" -> Assert.AreEqual<int64>((int64)23, base1.EndPos.Column)
-            | "base10b" -> Assert.AreEqual<int64>((int64)23, base1.EndPos.Column)
-            | "base11b" -> Assert.AreEqual<int64>((int64)20, base1.EndPos.Column)
-            | "base12b" -> Assert.AreEqual<int64>((int64)23, base1.EndPos.Column)
-            | "base13b" -> Assert.AreEqual<int64>((int64)21, base1.EndPos.Column)
-            | "base10c" -> Assert.AreEqual<int64>((int64)27, base1.EndPos.Column)
-            | "base11c" -> Assert.AreEqual<int64>((int64)24, base1.EndPos.Column)
-            | "base12c" -> Assert.AreEqual<int64>((int64)27, base1.EndPos.Column)
-            | "base13c" -> Assert.AreEqual<int64>((int64)25, base1.EndPos.Column)
-            | "base10d" -> Assert.AreEqual<int64>((int64)27, base1.EndPos.Column)
-            | "base11d" -> Assert.AreEqual<int64>((int64)24, base1.EndPos.Column)
-            | "base12d" -> Assert.AreEqual<int64>((int64)27, base1.EndPos.Column)
-            | "base13d" -> Assert.AreEqual<int64>((int64)24, base1.EndPos.Column)
-            | "base10e" -> Assert.AreEqual<int64>((int64)40, base1.EndPos.Column)
-            | "base11e" -> Assert.AreEqual<int64>((int64)32, base1.EndPos.Column)
-            | "base12e" -> Assert.AreEqual<int64>((int64)36, base1.EndPos.Column)
-            | "base13e" -> Assert.AreEqual<int64>((int64)33, base1.EndPos.Column)
-            | "base10f" -> Assert.AreEqual<int64>((int64)35, base1.EndPos.Column)
-            | "base11f" -> Assert.AreEqual<int64>((int64)32, base1.EndPos.Column)
-            | "base12f" -> Assert.AreEqual<int64>((int64)38, base1.EndPos.Column)
-            | "base13f" -> Assert.AreEqual<int64>((int64)32, base1.EndPos.Column)
-            | "base14" -> Assert.AreEqual<int64>((int64)18, base1.EndPos.Column)
-            | "base15" -> Assert.AreEqual<int64>((int64)19, base1.EndPos.Column)
-            | "base15a" -> Assert.AreEqual<int64>((int64)20, base1.EndPos.Column)
-            | "base15b" -> Assert.AreEqual<int64>((int64)21, base1.EndPos.Column)
-            | "base16" -> Assert.AreEqual<int64>((int64)34, base1.EndPos.Column)
-            | "base17" -> Assert.AreEqual<int64>((int64)36, base1.EndPos.Column)
-            | "base18" -> Assert.AreEqual<int64>((int64)62, base1.EndPos.Column)
-            | "base19" -> Assert.AreEqual<int64>((int64)45, base1.EndPos.Column)
-            | "base20" -> Assert.AreEqual<int64>((int64)34, base1.EndPos.Column)
-            | "base21" -> Assert.AreEqual<int64>((int64)35, base1.EndPos.Column)
-            | "base21a" -> Assert.AreEqual<int64>((int64)23, base1.EndPos.Column)
-            | "base21b" -> Assert.AreEqual<int64>((int64)25, base1.EndPos.Column)
-            | "base22" -> Assert.AreEqual<int64>((int64)35, base1.EndPos.Column)
-            | "base23" -> Assert.AreEqual<int64>((int64)33, base1.EndPos.Column)
-            | "base24" -> Assert.AreEqual<int64>((int64)27, base1.EndPos.Column)
-            | "base25" -> Assert.AreEqual<int64>((int64)28, base1.EndPos.Column)
-            | "base26" -> Assert.AreEqual<int64>((int64)28, base1.EndPos.Column)
-            | "base27" -> Assert.AreEqual<int64>((int64)20, base1.EndPos.Column)
-            | "base28" -> Assert.AreEqual<int64>((int64)27, base1.EndPos.Column)
-            | "base29" -> Assert.AreEqual<int64>((int64)28, base1.EndPos.Column)
-            | "base30" -> Assert.AreEqual<int64>((int64)25, base1.EndPos.Column)
-            | "base31" -> Assert.AreEqual<int64>((int64)41, base1.EndPos.Column)
-            | "base32" -> Assert.AreEqual<int64>((int64)38, base1.EndPos.Column)
-            | "base33" -> Assert.AreEqual<int64>((int64)43, base1.EndPos.Column)
-            | "base34" -> Assert.AreEqual<int64>((int64)27, base1.EndPos.Column)
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
 
     [<DataRow("base1", "base.B()")>]
     [<DataRow("base2", "base.C(a, b, c, d)")>]
@@ -777,32 +774,28 @@ type TestFplValueScopeNameEndPos() =
                         }
                         ;""" varVal
         let filename = "TestBaseConstructorCallNameEndPos"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
-        prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let cl = theory.Scope["A"]
-            let ctor = cl.Scope["A(T1, func, ind, pred)"]
-            let base1 = ctor.ArgList[0]
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let cl = theory.Scope["A"]
+        let ctor = cl.Scope["A(T1, func, ind, pred)"]
+        let base1 = ctor.ArgList[0]
 
-            match var with
-            | "base1" -> 
-                Assert.AreEqual<int64>((int64)33, base1.EndPos.Column)
-            | "base2" -> 
-                Assert.AreEqual<int64>((int64)54, base1.EndPos.Column)
-            | "base3" -> 
-                Assert.AreEqual<int64>((int64)54, base1.EndPos.Column)
-            | "base4" -> 
-                Assert.AreEqual<int64>((int64)49, base1.EndPos.Column)
-            | "base5" -> 
-                Assert.AreEqual<int64>((int64)68, base1.EndPos.Column)
-            | "base6" -> 
-                Assert.AreEqual<int64>((int64)62, base1.EndPos.Column)
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
+        match var with
+        | "base1" -> 
+            Assert.AreEqual<int64>((int64)33, base1.EndPos.Column)
+        | "base2" -> 
+            Assert.AreEqual<int64>((int64)54, base1.EndPos.Column)
+        | "base3" -> 
+            Assert.AreEqual<int64>((int64)54, base1.EndPos.Column)
+        | "base4" -> 
+            Assert.AreEqual<int64>((int64)49, base1.EndPos.Column)
+        | "base5" -> 
+            Assert.AreEqual<int64>((int64)68, base1.EndPos.Column)
+        | "base6" -> 
+            Assert.AreEqual<int64>((int64)62, base1.EndPos.Column)
+        | _ -> Assert.IsTrue(false)
+        prepareFplCode(filename, "", false) |> ignore
 
     [<DataRow("base1", "del.B()")>]
     [<DataRow("base2", "del.C(a,b,c,d)")>]
@@ -816,27 +809,23 @@ type TestFplValueScopeNameEndPos() =
         ad.Clear()
         let fplCode = sprintf "def pred T1() { %s };" varVal
         let filename = "TestDelegateNameEndPos"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+
+        let pr1 = theory.Scope["T1()"] 
+        let base1 = pr1.ArgList[0]
+
+        match var with
+        | "base1" -> Assert.AreEqual<int64>((int64)24, base1.EndPos.Column)
+        | "base2" -> Assert.AreEqual<int64>((int64)31, base1.EndPos.Column)
+        | "base3" -> Assert.AreEqual<int64>((int64)32, base1.EndPos.Column)
+        | "base4" -> Assert.AreEqual<int64>((int64)29, base1.EndPos.Column)
+        | "base5" -> Assert.AreEqual<int64>((int64)27, base1.EndPos.Column)
+        | "base6" -> Assert.AreEqual<int64>((int64)45, base1.EndPos.Column)
+        | "base7" -> Assert.AreEqual<int64>((int64)42, base1.EndPos.Column)
+        | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-
-            let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ArgList[0]
-
-            match var with
-            | "base1" -> Assert.AreEqual<int64>((int64)24, base1.EndPos.Column)
-            | "base2" -> Assert.AreEqual<int64>((int64)31, base1.EndPos.Column)
-            | "base3" -> Assert.AreEqual<int64>((int64)32, base1.EndPos.Column)
-            | "base4" -> Assert.AreEqual<int64>((int64)29, base1.EndPos.Column)
-            | "base5" -> Assert.AreEqual<int64>((int64)27, base1.EndPos.Column)
-            | "base6" -> Assert.AreEqual<int64>((int64)45, base1.EndPos.Column)
-            | "base7" -> Assert.AreEqual<int64>((int64)42, base1.EndPos.Column)
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
 
     [<DataRow("base1", """def pred T1() {intr};""")>]
     [<DataRow("base2", """def pred T1 () infix ">" -1 {intr};""")>]
@@ -853,54 +842,50 @@ type TestFplValueScopeNameEndPos() =
         ad.Clear()
         let fplCode = sprintf "%s;" varVal
         let filename = "TestFixNotationNameEndPos"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
-        prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let base1 = 
-                if varVal.Contains LiteralCl then 
-                    theory.Scope["T1"]
-                elif varVal.Contains LiteralFunc then 
-                    theory.Scope["T1() -> obj"]
-                else 
-                    theory.Scope["T1()"]
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let base1 = 
+            if varVal.Contains LiteralCl then 
+                theory.Scope["T1"]
+            elif varVal.Contains LiteralFunc then 
+                theory.Scope["T1() -> obj"]
+            else 
+                theory.Scope["T1()"]
 
-            match var with
-            | "base1" -> 
-                let hasSignature = base1 :?> FplPredicate
-                Assert.AreEqual<int64>((int64)14, hasSignature.SignEndPos.Column)
-            | "base2" -> 
-                let hasSignature = base1 :?> FplPredicate
-                Assert.AreEqual<int64>((int64)15, hasSignature.SignEndPos.Column)
-            | "base3" -> 
-                let hasSignature = base1 :?> FplPredicate
-                Assert.AreEqual<int64>((int64)15, hasSignature.SignEndPos.Column)
-            | "base4" -> 
-                let hasSignature = base1 :?> FplPredicate
-                Assert.AreEqual<int64>((int64)15, hasSignature.SignEndPos.Column)
-            | "base5" -> 
-                let hasSignature = base1 :?> FplClass
-                Assert.AreEqual<int64>((int64)10, hasSignature.SignEndPos.Column)
-            | "base5a" -> 
-                let hasSignature = base1 :?> FplClass
-                Assert.AreEqual<int64>((int64)10, hasSignature.SignEndPos.Column)
-            | "base6" -> 
-                let hasSignature = base1 :?> FplFunctionalTerm
-                Assert.AreEqual<int64>((int64)19, hasSignature.SignEndPos.Column)
-            | "base7" -> 
-                let hasSignature = base1 :?> FplFunctionalTerm
-                Assert.AreEqual<int64>((int64)20, hasSignature.SignEndPos.Column)
-            | "base8" -> 
-                let hasSignature = base1 :?> FplFunctionalTerm
-                Assert.AreEqual<int64>((int64)21, hasSignature.SignEndPos.Column)
-            | "base9" -> 
-                let hasSignature = base1 :?> FplFunctionalTerm
-                Assert.AreEqual<int64>((int64)20, hasSignature.SignEndPos.Column)
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
+        match var with
+        | "base1" -> 
+            let hasSignature = base1 :?> FplPredicate
+            Assert.AreEqual<int64>((int64)14, hasSignature.SignEndPos.Column)
+        | "base2" -> 
+            let hasSignature = base1 :?> FplPredicate
+            Assert.AreEqual<int64>((int64)15, hasSignature.SignEndPos.Column)
+        | "base3" -> 
+            let hasSignature = base1 :?> FplPredicate
+            Assert.AreEqual<int64>((int64)15, hasSignature.SignEndPos.Column)
+        | "base4" -> 
+            let hasSignature = base1 :?> FplPredicate
+            Assert.AreEqual<int64>((int64)15, hasSignature.SignEndPos.Column)
+        | "base5" -> 
+            let hasSignature = base1 :?> FplClass
+            Assert.AreEqual<int64>((int64)10, hasSignature.SignEndPos.Column)
+        | "base5a" -> 
+            let hasSignature = base1 :?> FplClass
+            Assert.AreEqual<int64>((int64)10, hasSignature.SignEndPos.Column)
+        | "base6" -> 
+            let hasSignature = base1 :?> FplFunctionalTerm
+            Assert.AreEqual<int64>((int64)19, hasSignature.SignEndPos.Column)
+        | "base7" -> 
+            let hasSignature = base1 :?> FplFunctionalTerm
+            Assert.AreEqual<int64>((int64)20, hasSignature.SignEndPos.Column)
+        | "base8" -> 
+            let hasSignature = base1 :?> FplFunctionalTerm
+            Assert.AreEqual<int64>((int64)21, hasSignature.SignEndPos.Column)
+        | "base9" -> 
+            let hasSignature = base1 :?> FplFunctionalTerm
+            Assert.AreEqual<int64>((int64)20, hasSignature.SignEndPos.Column)
+        | _ -> Assert.IsTrue(false)
+        prepareFplCode(filename, "", false) |> ignore
 
     [<DataRow("base1", """def func T()->obj {intr};""")>]
     [<DataRow("base2", """def func T()->ind {intr};""")>]
@@ -917,28 +902,24 @@ type TestFplValueScopeNameEndPos() =
         ad.Clear()
         let fplCode = sprintf "%s;" varVal
         let filename = "TestMappingNameEndPos"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let base1 = theory.Scope |> Seq.filter (fun kvp -> kvp.Key.StartsWith("T(")) |> Seq.map (fun kvp -> kvp.Value) |> Seq.toList |> List.head
+        let mapping = base1.ArgList[0]
+        match var with
+        | "base1" -> Assert.AreEqual<int64>((int64)18, mapping.EndPos.Column)
+        | "base2" -> Assert.AreEqual<int64>((int64)18, mapping.EndPos.Column)
+        | "base3" -> Assert.AreEqual<int64>((int64)19, mapping.EndPos.Column)
+        | "base4" -> Assert.AreEqual<int64>((int64)19, mapping.EndPos.Column)
+        | "base5" -> Assert.AreEqual<int64>((int64)32, mapping.EndPos.Column)
+        | "base6" -> Assert.AreEqual<int64>((int64)26, mapping.EndPos.Column)
+        | "base7" -> Assert.AreEqual<int64>((int64)32, mapping.EndPos.Column)
+        | "base8" -> Assert.AreEqual<int64>((int64)53, mapping.EndPos.Column)
+        | "base9" -> Assert.AreEqual<int64>((int64)41, mapping.EndPos.Column)
+        | "base10" -> Assert.AreEqual<int64>((int64)51, mapping.EndPos.Column)
+        | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let base1 = theory.Scope |> Seq.filter (fun kvp -> kvp.Key.StartsWith("T(")) |> Seq.map (fun kvp -> kvp.Value) |> Seq.toList |> List.head
-            let mapping = base1.ArgList[0]
-            match var with
-            | "base1" -> Assert.AreEqual<int64>((int64)18, mapping.EndPos.Column)
-            | "base2" -> Assert.AreEqual<int64>((int64)18, mapping.EndPos.Column)
-            | "base3" -> Assert.AreEqual<int64>((int64)19, mapping.EndPos.Column)
-            | "base4" -> Assert.AreEqual<int64>((int64)19, mapping.EndPos.Column)
-            | "base5" -> Assert.AreEqual<int64>((int64)32, mapping.EndPos.Column)
-            | "base6" -> Assert.AreEqual<int64>((int64)26, mapping.EndPos.Column)
-            | "base7" -> Assert.AreEqual<int64>((int64)32, mapping.EndPos.Column)
-            | "base8" -> Assert.AreEqual<int64>((int64)53, mapping.EndPos.Column)
-            | "base9" -> Assert.AreEqual<int64>((int64)41, mapping.EndPos.Column)
-            | "base10" -> Assert.AreEqual<int64>((int64)51, mapping.EndPos.Column)
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
 
     [<DataRow("base1", """100. |- trivial""")>]
     [<DataRow("base2", """100. ExistsByExample, 1 |- false""")>]
@@ -950,23 +931,19 @@ type TestFplValueScopeNameEndPos() =
         ad.Clear()
         let fplCode = sprintf """proof T$1 { %s };""" argExpression
         let filename = "TestArgumentNameEndPos"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let proof = theory.Scope["T$1"]
+        let arg = proof.Scope["100"]
+        match var with
+        | "base1" -> Assert.AreEqual<int64>((int64)29, arg.EndPos.Column)
+        | "base2" -> Assert.AreEqual<int64>((int64)46, arg.EndPos.Column)
+        | "base3" -> Assert.AreEqual<int64>((int64)48, arg.EndPos.Column)
+        | "base4" -> Assert.AreEqual<int64>((int64)39, arg.EndPos.Column)
+        | "base5" -> Assert.AreEqual<int64>((int64)29, arg.EndPos.Column)
+        | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let proof = theory.Scope["T$1"]
-            let arg = proof.Scope["100"]
-            match var with
-            | "base1" -> Assert.AreEqual<int64>((int64)29, arg.EndPos.Column)
-            | "base2" -> Assert.AreEqual<int64>((int64)46, arg.EndPos.Column)
-            | "base3" -> Assert.AreEqual<int64>((int64)48, arg.EndPos.Column)
-            | "base4" -> Assert.AreEqual<int64>((int64)39, arg.EndPos.Column)
-            | "base5" -> Assert.AreEqual<int64>((int64)29, arg.EndPos.Column)
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
 
     [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr";""")>]
     [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
@@ -979,25 +956,21 @@ type TestFplValueScopeNameEndPos() =
         ad.Clear()
         let fplCode = sprintf """loc %s := %s;""" predDecl trslCode
         let filename = "TestLanguageNameEndPos"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
-        prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let pred = theory.Scope[predName]
-            let lang = pred.Scope["tex"]
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pred = theory.Scope[predName]
+        let lang = pred.Scope["tex"]
 
-            match var with
-            | "base0" -> Assert.AreEqual<int64>((int64)17, lang.EndPos.Column)
-            | "base1" -> Assert.AreEqual<int64>((int64)22, lang.EndPos.Column)
-            | "base2" -> Assert.AreEqual<int64>((int64)19, lang.EndPos.Column)
-            | "base3" -> Assert.AreEqual<int64>((int64)22, lang.EndPos.Column)
-            | "base4" -> Assert.AreEqual<int64>((int64)24, lang.EndPos.Column)
-            | "base5" -> Assert.AreEqual<int64>((int64)27, lang.EndPos.Column)
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
+        match var with
+        | "base0" -> Assert.AreEqual<int64>((int64)17, lang.EndPos.Column)
+        | "base1" -> Assert.AreEqual<int64>((int64)22, lang.EndPos.Column)
+        | "base2" -> Assert.AreEqual<int64>((int64)19, lang.EndPos.Column)
+        | "base3" -> Assert.AreEqual<int64>((int64)22, lang.EndPos.Column)
+        | "base4" -> Assert.AreEqual<int64>((int64)24, lang.EndPos.Column)
+        | "base5" -> Assert.AreEqual<int64>((int64)27, lang.EndPos.Column)
+        | _ -> Assert.IsTrue(false)
+        prepareFplCode(filename, "", false) |> ignore
 
     [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr";""")>]
     [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
@@ -1010,24 +983,20 @@ type TestFplValueScopeNameEndPos() =
         ad.Clear()
         let fplCode = sprintf """loc %s := %s;""" predDecl trslCode
         let filename = "TestLocalizationNameEndPos"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
-        prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let pred = theory.Scope[predName]
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pred = theory.Scope[predName]
 
-            match var with
-            | "base0" -> Assert.AreEqual<int64>((int64)10, pred.EndPos.Column)
-            | "base1" -> Assert.AreEqual<int64>((int64)15, pred.EndPos.Column)
-            | "base2" -> Assert.AreEqual<int64>((int64)12, pred.EndPos.Column)
-            | "base3" -> Assert.AreEqual<int64>((int64)15, pred.EndPos.Column)
-            | "base4" -> Assert.AreEqual<int64>((int64)17, pred.EndPos.Column)
-            | "base5" -> Assert.AreEqual<int64>((int64)20, pred.EndPos.Column)
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
+        match var with
+        | "base0" -> Assert.AreEqual<int64>((int64)10, pred.EndPos.Column)
+        | "base1" -> Assert.AreEqual<int64>((int64)15, pred.EndPos.Column)
+        | "base2" -> Assert.AreEqual<int64>((int64)12, pred.EndPos.Column)
+        | "base3" -> Assert.AreEqual<int64>((int64)15, pred.EndPos.Column)
+        | "base4" -> Assert.AreEqual<int64>((int64)17, pred.EndPos.Column)
+        | "base5" -> Assert.AreEqual<int64>((int64)20, pred.EndPos.Column)
+        | _ -> Assert.IsTrue(false)
+        prepareFplCode(filename, "", false) |> ignore
 
     [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr";""")>]
     [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
@@ -1040,23 +1009,19 @@ type TestFplValueScopeNameEndPos() =
         ad.Clear()
         let fplCode = sprintf """loc %s := %s;""" predDecl trslCode
         let filename = "TestTranslationNameEndPos"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
-        prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let pred = theory.Scope[predName]
-            let lang = pred.Scope["tex"]
-            let trsl = lang.ArgList[0]
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pred = theory.Scope[predName]
+        let lang = pred.Scope["tex"]
+        let trsl = lang.ArgList[0]
 
-            match var with
-            | "base0" -> Assert.AreEqual<int64>((int64)23, trsl.EndPos.Column)
-            | "base1" -> Assert.AreEqual<int64>((int64)46, trsl.EndPos.Column)
-            | "base2" -> Assert.AreEqual<int64>((int64)35, trsl.EndPos.Column)
-            | "base3" -> Assert.AreEqual<int64>((int64)37, trsl.EndPos.Column)
-            | "base4" -> Assert.AreEqual<int64>((int64)34, trsl.EndPos.Column)
-            | "base5" -> Assert.AreEqual<int64>((int64)40, trsl.EndPos.Column)
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
+        match var with
+        | "base0" -> Assert.AreEqual<int64>((int64)23, trsl.EndPos.Column)
+        | "base1" -> Assert.AreEqual<int64>((int64)46, trsl.EndPos.Column)
+        | "base2" -> Assert.AreEqual<int64>((int64)35, trsl.EndPos.Column)
+        | "base3" -> Assert.AreEqual<int64>((int64)37, trsl.EndPos.Column)
+        | "base4" -> Assert.AreEqual<int64>((int64)34, trsl.EndPos.Column)
+        | "base5" -> Assert.AreEqual<int64>((int64)40, trsl.EndPos.Column)
+        | _ -> Assert.IsTrue(false)
+        prepareFplCode(filename, "", false) |> ignore

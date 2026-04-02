@@ -66,11 +66,10 @@ let prepareFplCode (filename: string, fplCode: string, delete: bool) =
         if not (offlineWatcher.OfflineMode) then
             deleteDirectory (Path.Combine(currDir,"lib"))
             deleteDirectory (Path.Combine(currDir,"repo"))
-        None
     else
         offlineWatcher.OfflineMode <- not (fplCodeNeedsOnline fplCode)
         let st = SymbolTable()
-        fplInterpreter st fplCode uri fplLibUrl |> ignore
+        fplInterpreter fplCode uri fplLibUrl |> ignore
 
         offlineWatcher.OfflineMode <- false
 
@@ -81,8 +80,6 @@ let prepareFplCode (filename: string, fplCode: string, delete: bool) =
         if syntaxErrorFound then
             if fplCode <> "" then File.AppendAllText(Path.Combine(currDir, "SyntaxErrorsLog.txt"), $"Syntax errors detected in test {filename}{Environment.NewLine}{fplCode}{Environment.NewLine}------{Environment.NewLine}")
             emitUnexpectedErrorDiagnostics "Syntax error found." |> ignore
-
-        Some(st)
 
 let checkForUnexpectedErrors (code: ErrDiagnostics.DiagnosticCode) =
     let syntaxErrors =
@@ -140,16 +137,14 @@ let loadFplFile (path: string) =
         "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
 
     let fplCode = File.ReadAllText(path)
-    let st = SymbolTable()
-    fplInterpreter st fplCode uri fplLibUrl
-    Some(st)
+    fplInterpreter fplCode uri fplLibUrl
 
-let loadFplFileWithTheSameSymbolTable (st:SymbolTable) (path: string) =
+
+let loadFplFileWithTheSameSymbolTable (path: string) =
     let uri = PathEquivalentUri(path)
 
     let fplLibUrl =
         "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
 
     let fplCode = File.ReadAllText(path)
-    fplInterpreter st fplCode uri fplLibUrl
-    Some(st)
+    fplInterpreter fplCode uri fplLibUrl

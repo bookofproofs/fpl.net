@@ -1,6 +1,7 @@
 namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open FplInterpreterBasicTypes
+open FplInterpreter.Globals.Heap
 open CommonTestHelpers
 
 [<TestClass>]
@@ -124,8 +125,8 @@ type TestFplValue() =
     [<TestMethod>]
     member this.TestTypeSignatureOfFplBlocks(fplCode:string, expectedName:string, expectedType:string) =
         let filename = "TestTypeSignatureOfFplBlocks"
-        let result = prepareFplCode(filename + ".fpl", fplCode, false) 
-        let block = result.Value.Root.Scope[filename]
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let block = heap.Root.Scope[filename]
         let fplValue = block.Scope[expectedName]
         let actualTypeSignature = fplValue.Type(SignatureType.Type)
         Assert.AreEqual<string>(expectedType, actualTypeSignature)
@@ -154,8 +155,8 @@ type TestFplValue() =
     [<TestMethod>]
     member this.TestTypeSignatureOfFplLocalizations(fplCode:string, expectedName:string) =
         let filename = "TestTypeSignatureOfFplBlocks"
-        let result = prepareFplCode(filename + ".fpl", fplCode, false) 
-        let block = result.Value.Root.Scope[filename]
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let block = heap.Root.Scope[filename]
         let fplValue = block.Scope[expectedName]
         let actualTypeSignature = fplValue.Type(SignatureType.Type)
         Assert.AreEqual<string>(expectedName, actualTypeSignature)
@@ -258,8 +259,8 @@ type TestFplValue() =
     [<TestMethod>]
     member this.TestTypeSignatureOfFplProperties(fplCode:string, expectedName:string, expectedType:string) =
         let filename = "TestTypeSignatureOfFplProperties"
-        let result = prepareFplCode(filename + ".fpl", fplCode, false) 
-        let block = result.Value.Root.Scope[filename].Scope["T"]
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let block = heap.Root.Scope[filename].Scope["T"]
         let fplValue = block.Scope[expectedName]
         let actualTypeSignature = fplValue.Type(SignatureType.Type)
         Assert.AreEqual<string>(expectedType, actualTypeSignature)
@@ -306,8 +307,8 @@ type TestFplValue() =
     [<TestMethod>]
     member this.TestTypeSignatureOfConstructors(fplCode:string, expectedName:string, expectedType:string) =
         let filename = "TestTypeSignatureOfConstructors"
-        let result = prepareFplCode(filename + ".fpl", fplCode, false) 
-        let cl = result.Value.Root.Scope[filename].Scope["T"]
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let cl = heap.Root.Scope[filename].Scope["T"]
         let fplValue = cl.Scope[expectedName]
         let actualTypeSignature = fplValue.Type(SignatureType.Type)
         match box fplValue with

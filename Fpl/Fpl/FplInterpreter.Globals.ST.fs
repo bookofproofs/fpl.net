@@ -114,7 +114,8 @@ type SymbolTable() =
         else
             res
 
-
+    member this.Clear() =
+        _root.Clear()
 
 
 

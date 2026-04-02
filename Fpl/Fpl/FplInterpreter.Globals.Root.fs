@@ -96,6 +96,10 @@ type FplRoot() =
         |> Seq.iter (fun theory -> theory.Run())        
         debug this Debug.Stop
 
+    member this.Clear() =
+        this.ArgList.Clear()
+        this.Scope.Clear()
+
 // Returns the root node of any FplValue
 let rec root (fv:FplGenericNode) =
     if fv.Name = PrimRoot then 

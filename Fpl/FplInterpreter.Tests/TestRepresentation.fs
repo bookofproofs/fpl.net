@@ -3,7 +3,9 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
 open FplPrimitives
 open FplInterpreterBasicTypes
+open FplInterpreter.Globals.Heap
 open CommonTestHelpers
+open FplInterpreter.Globals.Debug
 
 [<TestClass>]
 type TestRepresentation() =
@@ -29,38 +31,30 @@ type TestRepresentation() =
             def cl B  {intr} 
             def pred T() { dec ~x,y:obj x:=A() y:=B(); %s };""" varVal
         let filename = "TestRepresentationPredicate.fpl"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pr = theory.Scope["T()"] 
+        let predicateValue = pr.ArgList |> Seq.toList |> List.rev |> List.head
+        Assert.AreEqual<string>(expected, predicateValue.Represent())
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let pr = theory.Scope["T()"] 
-            let predicateValue = pr.ArgList |> Seq.toList |> List.rev |> List.head
-            Assert.AreEqual<string>(expected, predicateValue.Represent())
-        | None -> 
-            Assert.IsTrue(false)
 
     [<DataRow("00","n:=Zero()", """Zero()""")>]
     [<TestMethod>]
     member this.TestRepresentationAssignment(var:string, varVal, expected:string) =
         ad.Clear()
         let fplCode = sprintf """uses Fpl.PeanoArithmetics def pred T() { dec ~n:Nat %s; true };""" varVal
-        let filename = "TestRepresentationAssignment.fpl"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
-        prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
+        let filename = "TestRepresentationAssignment"
+        if not offlineWatcher.OfflineMode then 
+            prepareFplCode(filename + ".fpl", fplCode, false) |> ignore
+            let r = heap.Root
             let theory = r.Scope[filename]
             let fn = theory.Scope["T()"] 
             let assignmentStmt = fn.ArgList[0]
             let assignee = assignmentStmt.ArgList[0]
             Assert.AreEqual<string>(expected, assignee.Represent())
-        | None -> 
-            Assert.IsTrue(false)
+            prepareFplCode(filename, "", false) |> ignore
             
-    [<DataRow("00","uses Fpl.PeanoArithmetics", "n:=Zero()", """Zero()""")>]
     [<DataRow("00a","def cl Nat def cl Zero:Nat", "n:=Zero()", """Zero()""")>]
     [<DataRow("01","def cl Nat", "n:=Nat()", """Nat()""")>]
     [<DataRow("02","def cl Nat def func Zero() -> Nat", "n:=Zero()", """Zero()""")>]
@@ -68,54 +62,58 @@ type TestRepresentation() =
     member this.TestRepresentationReturn(var:string, uses:string, varVal, expected:string) =
         ad.Clear()
         let fplCode = sprintf """%s def func T()->Nat { dec ~n:Nat %s; return n };""" uses varVal
-        let filename = "TestRepresentationReturn.fpl"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        let filename = "TestRepresentationReturn"
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let fn = theory.Scope["T() -> Nat"] 
+        let retStmt = fn.ArgList |> Seq.rev |> Seq.head
+        Assert.AreEqual<string>(expected, retStmt.Represent())
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
+
+    [<DataRow("00","uses Fpl.PeanoArithmetics", "n:=Zero()", """Zero()""")>]
+    [<TestMethod>]
+    member this.TestRepresentationReturnOnline(var:string, uses:string, varVal, expected:string) =
+        ad.Clear()
+        let fplCode = sprintf """%s def func T()->Nat { dec ~n:Nat %s; return n };""" uses varVal
+        let filename = "TestRepresentationReturnOnline"
+        if not offlineWatcher.OfflineMode then 
+            prepareFplCode(filename + ".fpl", fplCode, false) 
+            let r = heap.Root
             let theory = r.Scope[filename]
             let fn = theory.Scope["T() -> Nat"] 
             let retStmt = fn.ArgList |> Seq.rev |> Seq.head
             Assert.AreEqual<string>(expected, retStmt.Represent())
-        | None -> 
-            Assert.IsTrue(false)
+            prepareFplCode(filename, "", false) |> ignore
 
     [<DataRow("00","T() -> A", "def cl A def func T() -> A;", """T()""", "A")>] // intrinsic function using Skolem representation
     [<TestMethod>]
     member this.TestRepresentationFunctionalTerms(var:string, funcTermSignature:string, fplCode, expectedRepr:string, expectedType:string) =
         ad.Clear()
         let filename = "TestRepresentationFunctionalTerms.fpl"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let fn = theory.Scope[funcTermSignature] :?> FplGenericHasValue
+        Assert.AreEqual<string>(expectedRepr, fn.Represent())
+        match fn.Value with 
+        | Some v -> Assert.AreEqual<string>(expectedType, v.Type SignatureType.Type)
+        | None -> Assert.IsTrue(false, "The functional term has no value")
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let fn = theory.Scope[funcTermSignature] :?> FplGenericHasValue
-            Assert.AreEqual<string>(expectedRepr, fn.Represent())
-            match fn.Value with 
-            | Some v -> Assert.AreEqual<string>(expectedType, v.Type SignatureType.Type)
-            | None -> Assert.IsTrue(false, "The functional term has no value")
-        | None -> 
-            Assert.IsTrue(false)
 
     [<DataRow("00","(@0 = Zero())", LiteralTrue)>]
     [<TestMethod>]
     member this.TestRepresentationCases(var:string, varVal, expected:string) =
         ad.Clear()
         let fplCode = sprintf """uses Fpl.PeanoArithmetics def pred T() { %s };""" varVal
-        let filename = "TestRepresentationCases.fpl"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
-        prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
+        let filename = "TestRepresentationCases"
+        if not offlineWatcher.OfflineMode then 
+            prepareFplCode(filename + ".fpl", fplCode, false) 
+            let r = heap.Root
             let theory = r.Scope[filename]
             let pr = theory.Scope["T()"] 
             Assert.AreEqual<string>(expected, pr.Represent())
-        | None -> 
-            Assert.IsTrue(false)
+            prepareFplCode(filename, "", false) |> ignore
 
     [<DataRow("i01", "($0 = $0)", LiteralTrue)>]
     [<DataRow("i02", "($1 = $2)", LiteralFalse)>]
@@ -169,16 +167,12 @@ type TestRepresentation() =
 
         def pred T() { dec ~i,j,k:ind j:=$2 k:=$3; %s };""" varVal
         let filename = "TestRepresentationEqualityWithCases.fpl"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pr = theory.Scope["T()"] 
+        Assert.AreEqual<string>(expected, pr.Represent())
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let pr = theory.Scope["T()"] 
-            Assert.AreEqual<string>(expected, pr.Represent())
-        | None -> 
-            Assert.IsTrue(false)
 
     [<DataRow("i01", "($0 = $0)", LiteralTrue)>]
     [<DataRow("i02", "($1 = $2)", LiteralFalse)>]
@@ -228,16 +222,12 @@ type TestRepresentation() =
 
         def pred T() { dec ~i,j,k:ind j:=$2 k:=$3; %s };""" varVal
         let filename = "TestRepresentationEqualityWithMCases.fpl"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pr = theory.Scope["T()"] 
+        Assert.AreEqual<string>(expected, pr.Represent())
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let pr = theory.Scope["T()"] 
-            Assert.AreEqual<string>(expected, pr.Represent())
-        | None -> 
-            Assert.IsTrue(false)
 
     [<DataRow("00", "@0", "Zero()")>]
     [<DataRow("01", "@1", "Succ(Zero())")>]
@@ -268,16 +258,12 @@ type TestRepresentation() =
  
         def func T()->Nat { return %s };""" varVal
         let filename = "TestRepresentationMCases.fpl"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let func = theory.Scope["T() -> Nat"] 
+        Assert.AreEqual<string>(expected, func.Represent())
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let func = theory.Scope["T() -> Nat"] 
-            Assert.AreEqual<string>(expected, func.Represent())
-        | None -> 
-            Assert.IsTrue(false)
 
     [<DataRow("00", "@0", """Zero()""")>]
     [<DataRow("00", "@1", "One()")>]
@@ -307,16 +293,12 @@ type TestRepresentation() =
  
         def func T()->Nat { return %s };""" varVal
         let filename = "TestRepresentationMCases.fpl"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let func = theory.Scope["T() -> Nat"] 
+        Assert.AreEqual<string>(expected, func.Represent())
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let func = theory.Scope["T() -> Nat"] 
-            Assert.AreEqual<string>(expected, func.Represent())
-        | None -> 
-            Assert.IsTrue(false)
 
     [<DataRow("00","""def pred T() { dec ~v:ind; true };""", PrimUndetermined)>]
     [<DataRow("00a","""def pred T() { dec ~v:pred; true };""", PrimUndetermined)>]
@@ -332,17 +314,13 @@ type TestRepresentation() =
     member this.TestRepresentationUnitializedVars(var:string, fplCode, expected:string) =
         ad.Clear()
         let filename = "TestRepresentationUnitializedVars.fpl"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pr = theory.Scope["T()"] 
+        let v = pr.Scope["v"]
+        Assert.AreEqual<string>(expected, v.Represent())
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let pr = theory.Scope["T()"] 
-            let v = pr.Scope["v"]
-            Assert.AreEqual<string>(expected, v.Represent())
-        | None -> 
-            Assert.IsTrue(false)
 
 
     [<DataRow("00","""def pred T() { dec ~v:pred v:=true; false};""", LiteralTrue)>]
@@ -353,17 +331,13 @@ type TestRepresentation() =
     member this.TestRepresentationItializedVars(var:string, fplCode, expected:string) =
         ad.Clear()
         let filename = "TestRepresentationUnitializedVars.fpl"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pr = theory.Scope["T()"] 
+        let v = pr.Scope["v"]
+        Assert.AreEqual<string>(expected, v.Represent())
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let pr = theory.Scope["T()"] 
-            let v = pr.Scope["v"]
-            Assert.AreEqual<string>(expected, v.Represent())
-        | None -> 
-            Assert.IsTrue(false)
 
 
     [<DataRow("00","(@0 = A())", LiteralFalse)>]
@@ -409,19 +383,15 @@ type TestRepresentation() =
         
         def pred T() { %s };""" varVal
         let filename = "TestRepresentationCases2.fpl"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pr = theory.Scope["T()"] 
+        let base1 = pr.ArgList[0]
+        let result = base1.Represent()
+        printf "Representation: %s\n" (result)
+        Assert.AreEqual<string>(expected, result)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let pr = theory.Scope["T()"] 
-            let base1 = pr.ArgList[0]
-            let result = base1.Represent()
-            printf "Representation: %s\n" (result)
-            Assert.AreEqual<string>(expected, result)
-        | None -> 
-            Assert.IsTrue(false)
 
     [<DataRow("00", "@0", "0")>]
     [<DataRow("01", "@42", "42")>]
@@ -435,14 +405,10 @@ type TestRepresentation() =
         }
         def pred T() { dec ~a:obj a:=%s; true };""" varVal
         let filename = "TestRepresentationExtensionObj.fpl"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pred = theory.Scope["T()"] 
+        let a = pred.Scope["a"] 
+        Assert.AreEqual<string>(expected, a.Represent())
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let pred = theory.Scope["T()"] 
-            let a = pred.Scope["a"] 
-            Assert.AreEqual<string>(expected, a.Represent())
-        | None -> 
-            Assert.IsTrue(false)

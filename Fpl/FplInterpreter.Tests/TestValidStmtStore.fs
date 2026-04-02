@@ -21,11 +21,8 @@ type TestValidStmtStore() =
         ad.Clear()
         let fplCode = sprintf "%s" varVal
         let filename = "TestStmtStoreAddsAxioms"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        Assert.AreEqual<int>(expected, heap.ValidStmtStore.Count)
+        heap.ValidStmtStore.Clear()
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            Assert.AreEqual<int>(expected, heap.ValidStmtStore.Count)
-            heap.ValidStmtStore.Clear()
-        | _ -> Assert.IsTrue(false)
 

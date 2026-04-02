@@ -31,12 +31,8 @@ type SymbolTableNavigation() =
                 uses Fpl.SetTheory;
             """
             let filename = "UsesClauseCausesDownloads"  
-            let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
-            match stOption with
-            | Some st -> 
-                // initial counts of parsed ast and theories in root
-                Assert.AreEqual<int>(3, heap.ParsedAsts.Count)
-            | None -> Assert.IsTrue(false)
+            prepareFplCode(filename + ".fpl", fplCode, false) 
+            Assert.AreEqual<int>(3, heap.ParsedAsts.Count)
 
             // remove the test file
             prepareFplCode(filename, "", true) |> ignore
@@ -151,29 +147,26 @@ type SymbolTableNavigation() =
             prepareFplCode(filename + ".fpl", fplCode, false) |> ignore
 
             // do the test - now, open a specific file in the repo subdirectory
-            let stOption = loadFplFile (Path.Combine(currentPathRepo,"Fpl.Commons.fpl")) 
+            loadFplFile (Path.Combine(currentPathRepo,"Fpl.Commons.fpl")) 
             // and test if the corrent number of asts in symbol table
-            match stOption with
-            | Some st -> 
-                // initial counts of parsed ast and theories in root
-                Assert.AreEqual<int>(1, heap.ParsedAsts.Count)
-            | None -> Assert.IsTrue(false)
+
+            // initial counts of parsed ast and theories in root
+            Assert.AreEqual<int>(1, heap.ParsedAsts.Count)
+
         
             // now, conserve the symbol table for the test's next step and open the parent file
-            let st = SymbolTable()
             let uri = PathEquivalentUri(Path.Combine(currentPathRepo,"Fpl.SetTheory.fpl"))
             let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
             let fplCode = File.ReadAllText(uri.AbsolutePath)
-            fplInterpreter st fplCode uri fplLibUrl
+            fplInterpreter fplCode uri fplLibUrl
 
             // and test if the corrent number of asts in symbol table
             Assert.AreEqual<int>(2, heap.ParsedAsts.Count)
 
             // now, open the grand parent file
-            let st = SymbolTable()
             let uri = PathEquivalentUri(Path.Combine(currentPath,filename + ".fpl"))
             let fplCode = File.ReadAllText(uri.AbsolutePath)
-            fplInterpreter st fplCode uri fplLibUrl
+            fplInterpreter fplCode uri fplLibUrl
 
             // and test if the corrent number of asts in symbol table
             Assert.AreEqual<int>(3, heap.ParsedAsts.Count)
@@ -202,20 +195,17 @@ type SymbolTableNavigation() =
             prepareFplCode(filename + ".fpl", fplCode, false) |> ignore
 
             // do the test - now, open a specific file in the repo subdirectory
-            let stOption = loadFplFile (Path.Combine(currentPathRepo,"Fpl.Commons.fpl")) 
+            loadFplFile (Path.Combine(currentPathRepo,"Fpl.Commons.fpl")) 
             // and test if the corrent number of asts in symbol table
-            match stOption with
-            | Some st -> 
-                // initial counts of parsed ast and theories in root
-                Assert.AreEqual<int>(1, heap.ParsedAsts.Count)
-            | None -> Assert.IsTrue(false)
-        
+ 
+            // initial counts of parsed ast and theories in root
+            Assert.AreEqual<int>(1, heap.ParsedAsts.Count)
+
             // now, conserve the symbol table for the test's next step and open the grand parent file
-            let st = SymbolTable()
             let uri = PathEquivalentUri(Path.Combine(currentPath,filename + ".fpl"))
             let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
             let fplCode = File.ReadAllText(uri.AbsolutePath)
-            fplInterpreter st fplCode uri fplLibUrl
+            fplInterpreter fplCode uri fplLibUrl
 
             // and test if the corrent number of asts in symbol table
             Assert.AreEqual<int>(3, heap.ParsedAsts.Count)
@@ -244,16 +234,15 @@ type SymbolTableNavigation() =
             let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
 
             // now, conserve the symbol table for the test's next step and open the grand parent file
-            let st = stOption.Value
-
-            let pre = st.ToJson()
+  
+            let pre = heap.SymbolTable.ToJson()
             // open a grand parent
             let uri = PathEquivalentUri(Path.Combine(currentPathRepo,"Fpl.Commons.fpl"))
             let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
             let fplCode = File.ReadAllText(uri.AbsolutePath)
-            fplInterpreter st fplCode uri fplLibUrl
+            fplInterpreter fplCode uri fplLibUrl
 
-            let post = st.ToJson()
+            let post = heap.SymbolTable.ToJson()
             // and test if the corrent number of asts in symbol table
             Assert.AreEqual<string>(pre, post)
         
@@ -443,12 +432,9 @@ type SymbolTableNavigation() =
             """
             let filename = "OpeningFileInRepoDoesNotCreateYetOtherSubdirsLibAndRepo"  
             // file processing creates the subdirectories
-            let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
-            match stOption with
-            | Some st -> 
-                // initial counts of parsed ast and theories in root
-                Assert.AreEqual<int>(3, heap.ParsedAsts.Count)
-            | None -> Assert.IsTrue(false)
+            prepareFplCode(filename + ".fpl", fplCode, false) 
+            // initial counts of parsed ast and theories in root
+            Assert.AreEqual<int>(3, heap.ParsedAsts.Count)
 
             let pathToTestFile = Path.Combine(currentPathRepo,"Fpl.Commons.fpl")
             let diagnosticsOfFile = ad.GetStreamDiagnostics(PathEquivalentUri(pathToTestFile))
@@ -456,12 +442,11 @@ type SymbolTableNavigation() =
             // now manipulate the file and reprocess it
         
             // now, conserve the symbol table for the test's next step and reprocess the manipulated file
-            let st = SymbolTable()
             let uri = PathEquivalentUri(pathToTestFile)
             let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
             let fplCodeOriginal = File.ReadAllText(pathToTestFile)
             let fplCodeManipulated = fplCodeOriginal.Substring(0,fplCodeOriginal.Length-1) + "def pred Bla() { Bla1() };"
-            fplInterpreter st fplCodeManipulated uri fplLibUrl
+            fplInterpreter fplCodeManipulated uri fplLibUrl
 
             // do the test - check, if the diagnostics changed
             let diagnosticsOfManipulatedFile = ad.GetStreamDiagnostics(PathEquivalentUri(pathToTestFile))
@@ -490,32 +475,29 @@ type SymbolTableNavigation() =
             """
             let filename = "OpeningFileInRepoDoesNotCreateYetOtherSubdirsLibAndRepo"  
             // file processing creates the subdirectories
-            let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
-            match stOption with
-            | Some st -> 
-                // initial counts of parsed ast and theories in root
-                Assert.AreEqual<int>(3, heap.ParsedAsts.Count)
-                let pathToTestFile = Path.Combine(currentPathRepo,"Fpl.Commons.fpl")
-                let diagnosticsOfFile = ad.GetStreamDiagnostics(PathEquivalentUri(pathToTestFile))
-                let countID001 = diagnosticsOfFile |> Seq.filter (fun kvp -> kvp.Value.Code.Code = "ID001") |> Seq.toList
-                Assert.AreEqual<int>(0,countID001.Length)
-                // now manipulate the file and reprocess it
+            prepareFplCode(filename + ".fpl", fplCode, false) 
+            // initial counts of parsed ast and theories in root
+            Assert.AreEqual<int>(3, heap.ParsedAsts.Count)
+            let pathToTestFile = Path.Combine(currentPathRepo,"Fpl.Commons.fpl")
+            let diagnosticsOfFile = ad.GetStreamDiagnostics(PathEquivalentUri(pathToTestFile))
+            let countID001 = diagnosticsOfFile |> Seq.filter (fun kvp -> kvp.Value.Code.Code = "ID001") |> Seq.toList
+            Assert.AreEqual<int>(0,countID001.Length)
+            // now manipulate the file and reprocess it
         
-                // now, conserve the symbol table for the test's next step and reprocess the manipulated file
-                let uri = PathEquivalentUri(pathToTestFile)
-                let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
-                let fplCodeOriginal = File.ReadAllText(pathToTestFile)
-                let fplCodeManipulated = fplCodeOriginal.Substring(0,fplCodeOriginal.Length-1) + "def pred Bla() { Bla1() };"
-                fplInterpreter st fplCodeManipulated uri fplLibUrl
+            // now, conserve the symbol table for the test's next step and reprocess the manipulated file
+            let uri = PathEquivalentUri(pathToTestFile)
+            let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+            let fplCodeOriginal = File.ReadAllText(pathToTestFile)
+            let fplCodeManipulated = fplCodeOriginal.Substring(0,fplCodeOriginal.Length-1) + "def pred Bla() { Bla1() };"
+            fplInterpreter fplCodeManipulated uri fplLibUrl
 
-                // do the test - check, if the diagnostics changed
-                let diagnosticsOfManipulatedFile = ad.GetStreamDiagnostics(PathEquivalentUri(pathToTestFile))
-                let countID001 = diagnosticsOfManipulatedFile |> Seq.filter (fun kvp -> kvp.Value.Code.Code = "ID001") |> Seq.toList
-                Assert.AreEqual<int>(0,countID001.Length)
+            // do the test - check, if the diagnostics changed
+            let diagnosticsOfManipulatedFile = ad.GetStreamDiagnostics(PathEquivalentUri(pathToTestFile))
+            let countID001 = diagnosticsOfManipulatedFile |> Seq.filter (fun kvp -> kvp.Value.Code.Code = "ID001") |> Seq.toList
+            Assert.AreEqual<int>(0,countID001.Length)
 
-                // remove the test file
-                prepareFplCode(filename, "", true) |> ignore
-            | None -> Assert.IsTrue(false)
+            // remove the test file
+            prepareFplCode(filename, "", true) |> ignore
 
 
     [<TestMethod>]
@@ -545,7 +527,7 @@ type SymbolTableNavigation() =
 
             let filename = "OpeningFileInMainAndUpdatingReferencesCorrectlyRaisesSIG04Errors"  
             // process the file
-            let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+            prepareFplCode(filename + ".fpl", fplCode, false) 
             // test if there is no SIG04 error
             let result = filterByErrorCode ad (SIG04 ("",0, "")).Code
             Assert.AreEqual<int>(0, result.Length)
@@ -564,7 +546,7 @@ type SymbolTableNavigation() =
             let pathToFile = Path.Combine(currentPath,filename)
             File.WriteAllText(pathToFile,fplCode)
             // reprocess file with the same symbol table
-            loadFplFileWithTheSameSymbolTable stOption.Value pathToFile |> ignore
+            loadFplFileWithTheSameSymbolTable pathToFile |> ignore
 
             // test if there is a SIG04 error (there should be 1)
             let result = filterByErrorCode ad (SIG04 ("", 0, "")).Code
@@ -582,7 +564,7 @@ type SymbolTableNavigation() =
             """
             File.WriteAllText(pathToFile,fplCode)
             // reprocess file with the same symbol table
-            loadFplFileWithTheSameSymbolTable stOption.Value pathToFile |> ignore
+            loadFplFileWithTheSameSymbolTable pathToFile |> ignore
 
             // test if there is a SIG04 error (there should be 0)
             let result = filterByErrorCode ad (SIG04 ("",0, "")).Code
@@ -598,20 +580,18 @@ type SymbolTableNavigation() =
             ()
         else
             prepareFplCode ("TestJson.fpl", "", false) |> ignore
-            match prepareFplCode ("TestJson.fpl", fplCode, false) with
-            | Some st ->
-                try
-                    use sr = new StringReader(st.ToJson())
-                    use jr = new JsonTextReader(sr)
-                    // disable the MaxDepth limit (nullable with no value)
-                    jr.MaxDepth <- System.Nullable<int>()
-                    JToken.ReadFrom(jr) |> ignore
-                with
-                | :? JsonReaderException as ex -> 
-                    let currDir = Directory.GetCurrentDirectory()
-                    File.WriteAllText(Path.Combine(currDir, "TestJson.json"), st.ToJson())
-                    Assert.IsTrue (false, ex.Message)
-                | _ -> Assert.IsTrue (false, "Other exception occurred")
+
+            prepareFplCode ("TestJson.fpl", fplCode, false)
+            try
+                use sr = new StringReader(heap.SymbolTable.ToJson())
+                use jr = new JsonTextReader(sr)
+                // disable the MaxDepth limit (nullable with no value)
+                jr.MaxDepth <- System.Nullable<int>()
+                JToken.ReadFrom(jr) |> ignore
+            with
+            | :? JsonReaderException as ex -> 
+                let currDir = Directory.GetCurrentDirectory()
+                File.WriteAllText(Path.Combine(currDir, "TestJson.json"), heap.SymbolTable.ToJson())
+                Assert.IsTrue (false, ex.Message)
+            | _ -> Assert.IsTrue (false, "Other exception occurred")
                 
-            | None ->
-                Assert.IsTrue(false, "Syntax error?")

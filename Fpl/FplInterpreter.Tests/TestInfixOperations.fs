@@ -3,6 +3,7 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
 open FplPrimitives
 open FplInterpreter.Globals.Debug
+open FplInterpreter.Globals.Heap
 open CommonTestHelpers
 
 [<TestClass>]
@@ -18,18 +19,14 @@ type TestInfixOperations() =
         ad.Clear()
         let fplCode = sprintf """def pred Equal (x,y: tpl) infix "=" 0 { del.Equal(x,y) } %s;""" varVal
         let filename = "TestEqualityPredicate"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
-        prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
 
-            let pr1 = theory.Scope["T1()"] 
-            pr1.Run()
-            Assert.AreEqual<string>(expected, pr1.Represent())
-        | None -> 
-            Assert.IsTrue(false)
+        let pr1 = theory.Scope["T1()"] 
+        pr1.Run()
+        Assert.AreEqual<string>(expected, pr1.Represent())
+        prepareFplCode(filename, "", false) |> ignore
 
     [<DataRow("00a", """def pred T1() { (true => false) };""", LiteralFalse)>]
     [<DataRow("00b", """def pred T1() { (false => false) };""", LiteralTrue)>]
@@ -43,18 +40,14 @@ type TestInfixOperations() =
         else
             let fplCode = sprintf """uses Fpl.Commons %s""" varVal
             let filename = "TestImplicationCallsFplCommons"
-            let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+            prepareFplCode(filename + ".fpl", fplCode, false) 
             checkForUnexpectedErrors VAR00
-            prepareFplCode(filename, "", false) |> ignore
-            match stOption with
-            | Some st -> 
-                let r = st.Root
-                let theory = r.Scope[filename]
+            let r = heap.Root
+            let theory = r.Scope[filename]
 
-                let pr1 = theory.Scope["T1()"] 
-                Assert.AreEqual<string>(expected, pr1.Represent())
-            | None -> 
-                Assert.IsTrue(false)
+            let pr1 = theory.Scope["T1()"] 
+            Assert.AreEqual<string>(expected, pr1.Represent())
+            prepareFplCode(filename, "", false) |> ignore
 
     [<DataRow("01a", """def pred T1() { (true <=> false) };""", LiteralFalse)>]
     [<DataRow("01b", """def pred T1() { (false <=> false) };""", LiteralTrue)>]
@@ -68,18 +61,14 @@ type TestInfixOperations() =
         else
             let fplCode = sprintf """uses Fpl.Commons %s""" varVal
             let filename = "TestEquivalenceCallsFplCommons"
-            let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+            prepareFplCode(filename + ".fpl", fplCode, false) 
             checkForUnexpectedErrors VAR00
-            prepareFplCode(filename, "", false) |> ignore
-            match stOption with
-            | Some st -> 
-                let r = st.Root
-                let theory = r.Scope[filename]
+            let r = heap.Root
+            let theory = r.Scope[filename]
 
-                let pr1 = theory.Scope["T1()"] 
-                Assert.AreEqual<string>(expected, pr1.Represent())
-            | None -> 
-                Assert.IsTrue(false)
+            let pr1 = theory.Scope["T1()"] 
+            Assert.AreEqual<string>(expected, pr1.Represent())
+            prepareFplCode(filename, "", false) |> ignore
 
     [<DataRow("00", """def pred Neg(x:pred) {not x} def pred T1() { ( Neg(true) ) };""", LiteralFalse)>]
     [<DataRow("00a", """def pred Neg(x:tpl) {not x} def pred T1() { ( Neg(true) ) };""", LiteralFalse)>]
@@ -90,18 +79,14 @@ type TestInfixOperations() =
         ad.Clear()
         let fplCode = sprintf """%s""" varVal
         let filename = "TestNegationCalls"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
         checkForUnexpectedErrors VAR00
-        prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
+        let r = heap.Root
+        let theory = r.Scope[filename]
 
-            let pr1 = theory.Scope["T1()"] 
-            Assert.AreEqual<string>(expected, pr1.Represent())
-        | None -> 
-            Assert.IsTrue(false)
+        let pr1 = theory.Scope["T1()"] 
+        Assert.AreEqual<string>(expected, pr1.Represent())
+        prepareFplCode(filename, "", false) |> ignore
 
     [<DataRow("00", """def pred T1() { (false and false and false) };""", LiteralFalse)>]
     [<DataRow("01", """def pred T1() { (true and false and false) };""", LiteralFalse)>]
@@ -123,19 +108,15 @@ type TestInfixOperations() =
         else
             let fplCode = sprintf """uses Fpl.Commons %s""" varVal
             let filename = "TestConjunctionCallsFplCommons"
-            let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+            prepareFplCode(filename + ".fpl", fplCode, false) 
             checkForUnexpectedErrors VAR00
-            prepareFplCode(filename, "", false) |> ignore
-            match stOption with
-            | Some st -> 
-                let r = st.Root
-                let theory = r.Scope[filename]
+            let r = heap.Root
+            let theory = r.Scope[filename]
 
-                let pr1 = theory.Scope["T1()"] 
-                pr1.Run()
-                Assert.AreEqual<string>(expected, pr1.Represent())
-            | None -> 
-                Assert.IsTrue(false)
+            let pr1 = theory.Scope["T1()"] 
+            pr1.Run()
+            Assert.AreEqual<string>(expected, pr1.Represent())
+            prepareFplCode(filename, "", false) |> ignore
 
     [<DataRow("00", """def pred T1() { (false and false and false) };""", LiteralFalse)>]
     [<DataRow("01", """def pred T1() { (true and false and false) };""", LiteralFalse)>]
@@ -154,19 +135,15 @@ type TestInfixOperations() =
         ad.Clear()
         let fplCode = sprintf """def pred And(x,y: pred) infix "and" 7 { and (x,y) } %s""" varVal
         let filename = "TestConjunctionCalls"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
         checkForUnexpectedErrors VAR00
-        prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
+        let r = heap.Root
+        let theory = r.Scope[filename]
 
-            let pr1 = theory.Scope["T1()"] 
-            pr1.Run()
-            Assert.AreEqual<string>(expected, pr1.Represent())
-        | None -> 
-            Assert.IsTrue(false)
+        let pr1 = theory.Scope["T1()"] 
+        pr1.Run()
+        Assert.AreEqual<string>(expected, pr1.Represent())
+        prepareFplCode(filename, "", false) |> ignore
 
     [<DataRow("00", """def pred T1() { (false or false or false) };""", LiteralFalse)>]
     [<DataRow("01", """def pred T1() { (true or false or false) };""", LiteralTrue)>]
@@ -188,18 +165,14 @@ type TestInfixOperations() =
         else
             let fplCode = sprintf """uses Fpl.Commons %s""" varVal
             let filename = "TestDisjunctionCallsFplCommons"
-            let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+            prepareFplCode(filename + ".fpl", fplCode, false) 
             checkForUnexpectedErrors VAR00
-            prepareFplCode(filename, "", false) |> ignore
-            match stOption with
-            | Some st -> 
-                let r = st.Root
-                let theory = r.Scope[filename]
+            let r = heap.Root
+            let theory = r.Scope[filename]
 
-                let pr1 = theory.Scope["T1()"] 
-                Assert.AreEqual<string>(expected, pr1.Represent())
-            | None -> 
-                Assert.IsTrue(false)
+            let pr1 = theory.Scope["T1()"] 
+            Assert.AreEqual<string>(expected, pr1.Represent())
+            prepareFplCode(filename, "", false) |> ignore
 
     [<DataRow("00", """def pred T1() { (false xor false xor false) };""", LiteralFalse)>]
     [<DataRow("01", """def pred T1() { (true xor false xor false) };""", LiteralTrue)>]
@@ -221,15 +194,11 @@ type TestInfixOperations() =
         else
             let fplCode = sprintf """uses Fpl.Commons %s""" varVal
             let filename = "TestDisjunctionCallsFplCommons"
-            let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+            prepareFplCode(filename + ".fpl", fplCode, false) 
             checkForUnexpectedErrors VAR00
-            prepareFplCode(filename, "", false) |> ignore
-            match stOption with
-            | Some st -> 
-                let r = st.Root
-                let theory = r.Scope[filename]
+            let r = heap.Root
+            let theory = r.Scope[filename]
 
-                let pr1 = theory.Scope["T1()"] 
-                Assert.AreEqual<string>(expected, pr1.Represent())
-            | None -> 
-                Assert.IsTrue(false)
+            let pr1 = theory.Scope["T1()"] 
+            Assert.AreEqual<string>(expected, pr1.Represent())
+            prepareFplCode(filename, "", false) |> ignore

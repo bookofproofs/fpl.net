@@ -28,11 +28,9 @@ type TestInterpreterErrors() =
         if delete then 
             deleteFilesWithExtension currDir "fpl"
             deleteFilesWithExtension (Path.Combine(currDir, "lib")) "fpl"
-            None
         else
-            let st = SymbolTable()
-            fplInterpreter st input uri fplLibUrl |> ignore
-            Some (st)
+            fplInterpreter input uri fplLibUrl |> ignore
+  
 
     member this.PrepareTestNSP04CircularABCA(delete:bool) =
         ad.Clear()
@@ -49,12 +47,9 @@ type TestInterpreterErrors() =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         if delete then 
             deleteFilesWithExtension currDir "fpl"
-            None
         else
 
-            let st = SymbolTable()
-            fplInterpreter st A uri fplLibUrl |> ignore
-            Some (st)
+            fplInterpreter A uri fplLibUrl |> ignore
 
     member this.PrepareTestNSP04CircularAA(delete:bool) =
         ad.Clear()
@@ -67,11 +62,8 @@ type TestInterpreterErrors() =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         if delete then 
             File.Delete(pathToFile)
-            None
         else
-            let st = SymbolTable()
-            fplInterpreter st A uri fplLibUrl |> ignore
-            Some (st)
+            fplInterpreter A uri fplLibUrl |> ignore
 
     member this.PrepareTestNSP04NonCircular(delete:bool) =
         ad.Clear()
@@ -87,11 +79,8 @@ type TestInterpreterErrors() =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         if delete then 
             File.Delete(pathToFile)
-            None
         else
-            let st = SymbolTable()
-            fplInterpreter st input uri fplLibUrl |> ignore
-            Some (st)
+            fplInterpreter input uri fplLibUrl |> ignore
 
     member this.PrepareTestNSP05 (delete:bool) =
         ad.Clear()
@@ -105,11 +94,8 @@ type TestInterpreterErrors() =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         if delete then 
             deleteFilesWithExtension currDir "fpl"
-            None
         else
-            let st = SymbolTable()
-            fplInterpreter st input uri fplLibUrl |> ignore
-            Some (st)
+            fplInterpreter input uri fplLibUrl |> ignore
 
     member this.PrepareTestNSP05CrossCheck (delete:bool) =
         ad.Clear()
@@ -123,11 +109,8 @@ type TestInterpreterErrors() =
         if delete then 
             deleteFilesWithExtension currDir "fpl"
             deleteFilesWithExtension (Path.Combine(currDir, "lib")) "fpl"
-            None
         else
-            let st = SymbolTable()
-            fplInterpreter st input uri fplLibUrl |> ignore
-            Some (st)
+            fplInterpreter input uri fplLibUrl |> ignore
 
     [<TestMethod>]
     member this.TestGEN00() =
@@ -143,8 +126,7 @@ type TestInterpreterErrors() =
         ;"""
         let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         let uri = PathEquivalentUri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
-        let st = SymbolTable()
-        fplInterpreter st input uri fplLibUrl |> ignore
+        fplInterpreter input uri fplLibUrl |> ignore
         let result = filterByErrorCode ad code.Code
         Assert.AreEqual<int>(1, result.Length)
 
@@ -158,8 +140,7 @@ type TestInterpreterErrors() =
         ;"""
         let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         let uri = PathEquivalentUri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
-        let st = SymbolTable()
-        fplInterpreter st input uri fplLibUrl |> ignore 
+        fplInterpreter input uri fplLibUrl |> ignore 
         let result = filterByErrorCode ad code.Code
         Assert.AreEqual<int>(1, result.Length)
 

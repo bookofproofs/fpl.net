@@ -4,6 +4,7 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
 open FplPrimitives
 open FplInterpreterBasicTypes
+open FplInterpreter.Globals.Heap
 open CommonTestHelpers
 
 [<TestClass>]
@@ -19,23 +20,19 @@ type TestExpressionEvaluation() =
     member this.TestExpressionEvaluationConstants(fplCode, expected: string) =
         ad.Clear()
         let filename = "TestExpressionEvaluationConstants"
-        let stOption = prepareFplCode (filename + ".fpl", fplCode, false)
+        prepareFplCode (filename + ".fpl", fplCode, false)
+        let r = heap.Root
+        let theory = r.Scope[filename]
+
+        let pr1 = theory.Scope["T()"]
+        pr1.Run()
+        let actual = evalTreeFplRepresentation(pr1)
+        printfn "expected: %s" expected 
+        printfn "actual  : %s" actual
+        printfn "%s" (pr1.Type(SignatureType.Mixed))
+        printfn "%s" (evalTreeFplId(pr1))
+        Assert.AreEqual<string>(expected, actual)
         prepareFplCode (filename, "", false) |> ignore
-
-        match stOption with
-        | Some st ->
-            let r = st.Root
-            let theory = r.Scope[filename]
-
-            let pr1 = theory.Scope["T()"]
-            pr1.Run()
-            let actual = evalTreeFplRepresentation(pr1)
-            printfn "expected: %s" expected 
-            printfn "actual  : %s" actual
-            printfn "%s" (pr1.Type(SignatureType.Mixed))
-            printfn "%s" (evalTreeFplId(pr1))
-            Assert.AreEqual<string>(expected, actual)
-        | None -> Assert.IsTrue(false)
 
     [<DataRow("def pred T() { and(and(true,true),true) };", LiteralTrue)>]
     [<DataRow("def pred T() { and(and(true,false),true) };", LiteralFalse)>]
@@ -52,23 +49,20 @@ type TestExpressionEvaluation() =
     member this.TestExpressionEvaluationConjunction(fplCode, expected: string) =
         ad.Clear()
         let filename = "TestExpressionEvaluationConjunction"
-        let stOption = prepareFplCode (filename + ".fpl", fplCode, false)
+        prepareFplCode (filename + ".fpl", fplCode, false)
+
+        let r = heap.Root
+        let theory = r.Scope[filename]
+
+        let pr1 = theory.Scope["T()"]
+        pr1.Run()
+        let actual = evalTreeFplRepresentation(pr1)
+        printfn "expected: %s" expected 
+        printfn "actual  : %s" actual
+        printfn "%s" (pr1.Type(SignatureType.Mixed))
+        printfn "%s" (evalTreeFplId(pr1))
+        Assert.AreEqual<string>(expected, actual)
         prepareFplCode (filename, "", false) |> ignore
-
-        match stOption with
-        | Some st ->
-            let r = st.Root
-            let theory = r.Scope[filename]
-
-            let pr1 = theory.Scope["T()"]
-            pr1.Run()
-            let actual = evalTreeFplRepresentation(pr1)
-            printfn "expected: %s" expected 
-            printfn "actual  : %s" actual
-            printfn "%s" (pr1.Type(SignatureType.Mixed))
-            printfn "%s" (evalTreeFplId(pr1))
-            Assert.AreEqual<string>(expected, actual)
-        | None -> Assert.IsTrue(false)
 
     [<DataRow("def pred T() { not true };", LiteralFalse)>]
     [<DataRow("def pred T() { not (true) };", LiteralFalse)>]
@@ -80,24 +74,21 @@ type TestExpressionEvaluation() =
     member this.TestExpressionEvaluationNegation(fplCode, expected: string) =
         ad.Clear()
         let filename = "TestExpressionEvaluationNegation"
-        let stOption = prepareFplCode (filename + ".fpl", fplCode, false)
+        prepareFplCode (filename + ".fpl", fplCode, false)
+
+        let r = heap.Root
+        let theory = r.Scope[filename]
+
+        let pr1 = theory.Scope["T()"]
+        pr1.Run()
+
+        let actual = evalTreeFplRepresentation(pr1)
+        printfn "expected: %s" expected 
+        printfn "actual  : %s" actual
+        printfn "%s" (pr1.Type(SignatureType.Mixed))
+        printfn "%s" (evalTreeFplId(pr1))
+        Assert.AreEqual<string>(expected, actual)
         prepareFplCode (filename, "", false) |> ignore
-
-        match stOption with
-        | Some st ->
-            let r = st.Root
-            let theory = r.Scope[filename]
-
-            let pr1 = theory.Scope["T()"]
-            pr1.Run()
-
-            let actual = evalTreeFplRepresentation(pr1)
-            printfn "expected: %s" expected 
-            printfn "actual  : %s" actual
-            printfn "%s" (pr1.Type(SignatureType.Mixed))
-            printfn "%s" (evalTreeFplId(pr1))
-            Assert.AreEqual<string>(expected, actual)
-        | None -> Assert.IsTrue(false)
 
     [<DataRow("def pred T() { or(false,or(false,false)) };", LiteralFalse)>]
     [<DataRow("def pred T() { or(false,or(true,false)) };", LiteralTrue)>]
@@ -114,23 +105,19 @@ type TestExpressionEvaluation() =
     member this.TestExpressionEvaluationDisjunction(fplCode, expected: string) =
         ad.Clear()
         let filename = "TestExpressionEvaluationDisjunction"
-        let stOption = prepareFplCode (filename + ".fpl", fplCode, false)
+        prepareFplCode (filename + ".fpl", fplCode, false)
+
+        let r = heap.Root
+        let theory = r.Scope[filename]
+
+        let pr1 = theory.Scope["T()"]
+        let actual = evalTreeFplRepresentation(pr1)
+        printfn "expected: %s" expected 
+        printfn "actual  : %s" actual
+        printfn "%s" (pr1.Type(SignatureType.Mixed))
+        printfn "%s" (evalTreeFplId(pr1))
+        Assert.AreEqual<string>(expected, actual)
         prepareFplCode (filename, "", false) |> ignore
-
-        match stOption with
-        | Some st ->
-            let r = st.Root
-            let theory = r.Scope[filename]
-
-            let pr1 = theory.Scope["T()"]
-            pr1.Run()
-            let actual = evalTreeFplRepresentation(pr1)
-            printfn "expected: %s" expected 
-            printfn "actual  : %s" actual
-            printfn "%s" (pr1.Type(SignatureType.Mixed))
-            printfn "%s" (evalTreeFplId(pr1))
-            Assert.AreEqual<string>(expected, actual)
-        | None -> Assert.IsTrue(false)
 
     [<DataRow("def pred T() { xor(false,xor(false,false)) };", LiteralFalse)>]
     [<DataRow("def pred T() { xor(xor(false,false),true) };", LiteralTrue)>]
@@ -151,24 +138,20 @@ type TestExpressionEvaluation() =
     member this.TestExpressionEvaluationExclusiveOr(fplCode, expected: string) =
         ad.Clear()
         let filename = "TestExpressionEvaluationExclusiveOr"
-        let stOption = prepareFplCode (filename + ".fpl", fplCode, false)
+        prepareFplCode (filename + ".fpl", fplCode, false)
+        let r = heap.Root
+        let theory = r.Scope[filename]
+
+        let pr1 = theory.Scope["T()"]
+        pr1.Run()
+
+        let actual = evalTreeFplRepresentation(pr1)
+        printfn "expected: %s" expected 
+        printfn "actual  : %s" actual
+        printfn "%s" (pr1.Type(SignatureType.Mixed))
+        printfn "%s" (evalTreeFplId(pr1))
+        Assert.AreEqual<string>(expected, actual)
         prepareFplCode (filename, "", false) |> ignore
-
-        match stOption with
-        | Some st ->
-            let r = st.Root
-            let theory = r.Scope[filename]
-
-            let pr1 = theory.Scope["T()"]
-            pr1.Run()
-
-            let actual = evalTreeFplRepresentation(pr1)
-            printfn "expected: %s" expected 
-            printfn "actual  : %s" actual
-            printfn "%s" (pr1.Type(SignatureType.Mixed))
-            printfn "%s" (evalTreeFplId(pr1))
-            Assert.AreEqual<string>(expected, actual)
-        | None -> Assert.IsTrue(false)
 
     [<DataRow("def pred T() { impl(true,true) };", LiteralTrue)>]
     [<DataRow("def pred T() { impl(true,false) };", LiteralFalse)>]
@@ -182,24 +165,21 @@ type TestExpressionEvaluation() =
     member this.TestExpressionEvaluationImplication(fplCode, expected: string) =
         ad.Clear()
         let filename = "TestExpressionEvaluationImplication"
-        let stOption = prepareFplCode (filename + ".fpl", fplCode, false)
+        prepareFplCode (filename + ".fpl", fplCode, false)
+
+        let r = heap.Root
+        let theory = r.Scope[filename]
+
+        let pr1 = theory.Scope["T()"]
+        pr1.Run()
+
+        let actual = evalTreeFplRepresentation(pr1)
+        printfn "expected: %s" expected 
+        printfn "actual  : %s" actual
+        printfn "%s" (pr1.Type(SignatureType.Mixed))
+        printfn "%s" (evalTreeFplId(pr1))
+        Assert.AreEqual<string>(expected, actual)
         prepareFplCode (filename, "", false) |> ignore
-
-        match stOption with
-        | Some st ->
-            let r = st.Root
-            let theory = r.Scope[filename]
-
-            let pr1 = theory.Scope["T()"]
-            pr1.Run()
-
-            let actual = evalTreeFplRepresentation(pr1)
-            printfn "expected: %s" expected 
-            printfn "actual  : %s" actual
-            printfn "%s" (pr1.Type(SignatureType.Mixed))
-            printfn "%s" (evalTreeFplId(pr1))
-            Assert.AreEqual<string>(expected, actual)
-        | None -> Assert.IsTrue(false)
 
     [<DataRow("def pred T() { iif(true,true) };", LiteralTrue)>]
     [<DataRow("def pred T() { iif(true,false) };", LiteralFalse)>]
@@ -213,24 +193,21 @@ type TestExpressionEvaluation() =
     member this.TestExpressionEvaluationEquivalence(fplCode, expected: string) =
         ad.Clear()
         let filename = "TestExpressionEvaluationEquivalence"
-        let stOption = prepareFplCode (filename + ".fpl", fplCode, false)
+        prepareFplCode (filename + ".fpl", fplCode, false)
+
+        let r = heap.Root
+        let theory = r.Scope[filename]
+
+        let pr1 = theory.Scope["T()"]
+        pr1.Run()
+
+        let actual = evalTreeFplRepresentation(pr1)
+        printfn "expected: %s" expected 
+        printfn "actual  : %s" actual
+        printfn "%s" (pr1.Type(SignatureType.Mixed))
+        printfn "%s" (evalTreeFplId(pr1))
+        Assert.AreEqual<string>(expected, actual)
         prepareFplCode (filename, "", false) |> ignore
-
-        match stOption with
-        | Some st ->
-            let r = st.Root
-            let theory = r.Scope[filename]
-
-            let pr1 = theory.Scope["T()"]
-            pr1.Run()
-
-            let actual = evalTreeFplRepresentation(pr1)
-            printfn "expected: %s" expected 
-            printfn "actual  : %s" actual
-            printfn "%s" (pr1.Type(SignatureType.Mixed))
-            printfn "%s" (evalTreeFplId(pr1))
-            Assert.AreEqual<string>(expected, actual)
-        | None -> Assert.IsTrue(false)
 
     [<DataRow("00", "def pred T() { dec ~x:obj; is(x,obj) };", LiteralTrue)>]
     [<DataRow("01", "def pred T() { dec ~x:A; is(x,A) };", LiteralFalse)>] // Type A is undefined
@@ -264,22 +241,19 @@ type TestExpressionEvaluation() =
     member this.TestExpressionEvaluationIsOperand(no:string, fplCode, expected: string) =
         ad.Clear()
         let filename = "TestExpressionEvaluationIsOperand"
-        let stOption = prepareFplCode (filename + ".fpl", fplCode, false)
+        prepareFplCode (filename + ".fpl", fplCode, false)
+
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pr1 = 
+            if fplCode.Contains("prty ") then 
+                theory.Scope["T()"].Scope["T1()"]
+            else
+                theory.Scope["T()"]         
+
+        let actual = evalTreeFplRepresentation(pr1)
+        Assert.AreEqual<string>(expected, actual)
         prepareFplCode (filename, "", false) |> ignore
-
-        match stOption with
-        | Some st ->
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let pr1 = 
-                if fplCode.Contains("prty ") then 
-                    theory.Scope["T()"].Scope["T1()"]
-                else
-                    theory.Scope["T()"]         
-
-            let actual = evalTreeFplRepresentation(pr1)
-            Assert.AreEqual<string>(expected, actual)
-        | None -> Assert.IsTrue(false)
 
     // match with simple types
     [<DataRow("ST0", "def pred Test() {dec ~x:obj; is(x, obj)};", LiteralTrue)>]
@@ -737,18 +711,15 @@ type TestExpressionEvaluation() =
     member this.TestExpressionEvaluationIsOperandEvenMore(no:string, fplCode, expected: string) =
         ad.Clear()
         let filename = "TestExpressionEvaluationIsOperand"
-        let stOption = prepareFplCode (filename + ".fpl", fplCode, false)
+        prepareFplCode (filename + ".fpl", fplCode, false)
+
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pr1 = theory.Scope.Values |> Seq.filter (fun fv -> fv.FplId = "Test") |> Seq.head         
+
+        let actual = evalTreeFplRepresentation(pr1)
+        Assert.AreEqual<string>(expected, actual)
         prepareFplCode (filename, "", false) |> ignore
-
-        match stOption with
-        | Some st ->
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let pr1 = theory.Scope.Values |> Seq.filter (fun fv -> fv.FplId = "Test") |> Seq.head         
-
-            let actual = evalTreeFplRepresentation(pr1)
-            Assert.AreEqual<string>(expected, actual)
-        | None -> Assert.IsTrue(false)
 
     // match with simple types
     [<DataRow("ST0", "def pred Test() {is(undef, obj)};", LiteralTrue)>]
@@ -799,18 +770,15 @@ type TestExpressionEvaluation() =
     member this.TestExpressionEvaluationIsOperandUndef(no:string, fplCode, expected: string) =
         ad.Clear()
         let filename = "TestExpressionEvaluationIsOperand"
-        let stOption = prepareFplCode (filename + ".fpl", fplCode, false)
+        prepareFplCode (filename + ".fpl", fplCode, false)
+
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pr1 = theory.Scope.Values |> Seq.filter (fun fv -> fv.FplId = "Test") |> Seq.head         
+
+        let actual = evalTreeFplRepresentation(pr1)
+        Assert.AreEqual<string>(expected, actual)
         prepareFplCode (filename, "", false) |> ignore
-
-        match stOption with
-        | Some st ->
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let pr1 = theory.Scope.Values |> Seq.filter (fun fv -> fv.FplId = "Test") |> Seq.head         
-
-            let actual = evalTreeFplRepresentation(pr1)
-            Assert.AreEqual<string>(expected, actual)
-        | None -> Assert.IsTrue(false)
 
     [<DataRow("def pred T() { dec ~x:pred(y:obj); is(self,pred) };", LiteralPred)>]
     [<DataRow("def pred T() { dec ~x:pred(y:func(z:obj)->obj); is(x,pred(y:func(z:obj)->Nat)) };", "pred(func(obj) -> Nat)")>]
@@ -820,15 +788,12 @@ type TestExpressionEvaluation() =
     member this.TestExpressionEvaluationIsOperandRepr(fplCode, expected: string) =
         ad.Clear()
         let filename = "TestExpressionEvaluationIsOperand"
-        let stOption = prepareFplCode (filename + ".fpl", fplCode, false)
-        prepareFplCode (filename, "", false) |> ignore
+        prepareFplCode (filename + ".fpl", fplCode, false)
 
-        match stOption with
-        | Some st ->
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let pr1 = theory.Scope["T()"]
-            let isOperand = pr1.ArgList[0]
-            let mapping = isOperand.ArgList[1]
-            Assert.AreEqual<string>(expected, mapping.Type(SignatureType.Type))
-        | None -> Assert.IsTrue(false)
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pr1 = theory.Scope["T()"]
+        let isOperand = pr1.ArgList[0]
+        let mapping = isOperand.ArgList[1]
+        Assert.AreEqual<string>(expected, mapping.Type(SignatureType.Type))
+        prepareFplCode (filename, "", false) |> ignore

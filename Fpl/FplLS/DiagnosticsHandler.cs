@@ -42,14 +42,14 @@ namespace FplLS
     {
         private readonly ILanguageServer _languageServer = languageServer;
 
-        public void PublishDiagnostics(SymbolTable st, PathEquivalentUri uri, StringBuilder? buffer)
+        public void PublishDiagnostics(PathEquivalentUri uri, StringBuilder? buffer)
         {
             if (buffer != null)
             {
                 try
                 {
                     var allUris = heap.ParsedAsts.Select(pa => pa.Parsing.Uri).ToHashSet();
-                    UriDiagnostics diagnostics = RefreshFplDiagnosticsStorage(st, uri, buffer);
+                    UriDiagnostics diagnostics = RefreshFplDiagnosticsStorage(uri, buffer);
                     foreach (var diagnosticsPerUri in diagnostics.Enumerator())
                     {
                         _languageServer.TextDocument.PublishDiagnostics(new Model.PublishDiagnosticsParams
@@ -93,7 +93,7 @@ namespace FplLS
             }
         }
 
-        private UriDiagnostics RefreshFplDiagnosticsStorage(SymbolTable st, PathEquivalentUri uri, StringBuilder? buffer)
+        private UriDiagnostics RefreshFplDiagnosticsStorage(PathEquivalentUri uri, StringBuilder? buffer)
         {
             FplLsTraceLogger.LogMsg(_languageServer, uri.AbsoluteUri, "Uri in RefreshFplDiagnosticsStorage");
             string sourceCode;
@@ -104,7 +104,7 @@ namespace FplLS
             var fplLibUri = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib";
             ad.CurrentUri = uri;
 
-            fplInterpreter(st, sourceCode, uri, fplLibUri);
+            fplInterpreter(sourceCode, uri, fplLibUri);
             var diagnostics = CastDiagnostics();
             return diagnostics;
         }

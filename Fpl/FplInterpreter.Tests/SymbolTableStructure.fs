@@ -9,6 +9,7 @@ open ErrDiagnostics
 open FplPrimitives
 open FplInterpreterBasicTypes
 open FplInterpreter.Globals.Root
+open FplInterpreter.Globals.Heap
 open FplInterpreterReferences
 open FplInterpreterIntrinsicTypes
 open FplInterpreterVariables
@@ -403,29 +404,26 @@ type SymbolTableStructure() =
 
     let testSkeleton nodeType filename fplCode identifier = 
         ad.Clear()
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
-        prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let nodeName = (getName nodeType).[0]
-            let infiniteLoop = new HashSet<obj>()
-            let testNodeOpt = findNamedItem nodeName identifier infiniteLoop st.Root
-            match testNodeOpt with 
-            | Some (node:FplGenericNode) when node.Parent.IsSome ->
-                let parent = node.Parent.Value 
-                (parent, node)
-            | Some (node:FplGenericNode) ->
-                if node.Name = PrimRoot then 
-                    Assert.IsInstanceOfType<FplRoot>(node)
-                    Assert.AreEqual<int>(0, node.ArgList.Count)
-                    Assert.AreEqual<int>(1, node.Scope.Count)
-                    (node, node)
-                else
-                    failwith($"Node type {nodeType} has unexpectedly no parent.")
-            | None ->
-                failwith($"Node type {nodeType} not found in the symbol table. Test is not implemented correctly.")
-        | None -> 
-            failwith($"FPL code could not be interpreted due to errors {Environment.NewLine}{ad.DiagnosticsToString}")
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let nodeName = (getName nodeType).[0]
+        let infiniteLoop = new HashSet<obj>()
+        let testNodeOpt = findNamedItem nodeName identifier infiniteLoop heap.Root
+        match testNodeOpt with 
+        | Some (node:FplGenericNode) when node.Parent.IsSome ->
+            let parent = node.Parent.Value 
+            prepareFplCode(filename, "", false) |> ignore
+            (parent, node)
+        | Some (node:FplGenericNode) ->
+            if node.Name = PrimRoot then 
+                Assert.IsInstanceOfType<FplRoot>(node)
+                Assert.AreEqual<int>(0, node.ArgList.Count)
+                Assert.AreEqual<int>(1, node.Scope.Count)
+                prepareFplCode(filename, "", false) |> ignore
+                (node, node)
+            else
+                failwith($"Node type {nodeType} has unexpectedly no parent.")
+        | None ->
+            failwith($"Node type {nodeType} not found in the symbol table. Test is not implemented correctly.")
 
 
 

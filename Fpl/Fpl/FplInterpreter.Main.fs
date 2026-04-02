@@ -23,12 +23,12 @@ open FplInterpreterUsesClause
 open FplInterpreterBuildingBlocks
 open FplInterpreterDiagnosticsEmitter
 
-let fplInterpreter (st:SymbolTable) input (uri:PathEquivalentUri) fplLibUrl = 
+let fplInterpreter input (uri:PathEquivalentUri) fplLibUrl = 
     try
         heap.ClearAll()
-        if st.MainTheory = String.Empty then
-            st.MainTheory <- uri.TheoryName
-        loadAllUsesClauses st input uri fplLibUrl 
-        evaluateSymbolTable st
+        if heap.SymbolTable.MainTheory = String.Empty then
+            heap.SymbolTable.MainTheory <- uri.TheoryName
+        loadAllUsesClauses heap.SymbolTable input uri fplLibUrl 
+        evaluateSymbolTable heap.SymbolTable
     with ex -> 
         emitUnexpectedErrorDiagnostics (ex.Message + Environment.NewLine + ex.StackTrace)

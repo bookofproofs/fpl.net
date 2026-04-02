@@ -47,11 +47,15 @@ type HeapMemory() =
     /// A handle for the symbol table from the FPL interpreter
     member this.SymbolTable = _symbolTable
 
+    member this.Root = _symbolTable.Root
+
+
     // Clears the heap except parsed asts.
     member this.ClearExceptParsedAsts() = 
         _evalStack.Clear()
         _validStmtStore.Clear()
         _state.Clear()
+        _symbolTable.Clear()
 
     // Clears the heap except parsed asts.
     member this.ClearParsedAsts() = 

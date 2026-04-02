@@ -511,59 +511,53 @@ type TestEvalAliasedNamespaceIdentifier() =
     member this.TestGarbageCollector() =
         if not TestConfig.IsOffline then 
             let filename = "TestGarbageCollector.fpl"
-            match prepareFplCode(filename, "uses Fpl.SetTheory;", false) with
-            | Some (st:SymbolTable) -> 
-                // initial counts of parsed ast and theories in root
-                Assert.AreEqual<int>(3, heap.ParsedAsts.Count)
-                Assert.AreEqual<int>(3, st.Root.Scope.Count)
-                let currDir = Directory.GetCurrentDirectory()
-                let uri = PathEquivalentUri(Path.Combine(currDir,filename))
-                let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
-                // reparse the Test.fpl after removing the uses clause
-                fplInterpreter st ";" uri fplLibUrl
-                Assert.AreEqual<int>(1, heap.ParsedAsts.Count)
-                Assert.AreEqual<int>(1, st.Root.Scope.Count)
-                prepareFplCode(filename, "", true) |> ignore
+            prepareFplCode(filename, "uses Fpl.SetTheory;", false) 
+            // initial counts of parsed ast and theories in root
+            Assert.AreEqual<int>(3, heap.ParsedAsts.Count)
+            Assert.AreEqual<int>(3, heap.Root.Scope.Count)
+            let currDir = Directory.GetCurrentDirectory()
+            let uri = PathEquivalentUri(Path.Combine(currDir,filename))
+            let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+            // reparse the Test.fpl after removing the uses clause
+            fplInterpreter ";" uri fplLibUrl
+            Assert.AreEqual<int>(1, heap.ParsedAsts.Count)
+            Assert.AreEqual<int>(1, heap.Root.Scope.Count)
+            prepareFplCode(filename, "", true) |> ignore
 
-            | None -> Assert.IsTrue(false)
 
     [<TestMethod>]
     member this.TestGarbageCollector01() =
         if not TestConfig.IsOffline then 
             let filename = "TestGarbageCollector01.fpl"
             prepareFplCode(filename, "", true) |> ignore
-            match prepareFplCode(filename, "uses Fpl.SetTheory;", false) with
-            | Some (st:SymbolTable) -> 
-                // initial counts of parsed ast and theories in root
-                Assert.AreEqual<int>(3, heap.ParsedAsts.Count)
-                Assert.AreEqual<int>(3, st.Root.Scope.Count)
-                let currDir = Directory.GetCurrentDirectory()
-                let uri = PathEquivalentUri(Path.Combine(currDir, filename))
-                let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
-                // reparse the file after replacing the uses clause with uses Fpl.Commons
-                fplInterpreter st "uses Fpl.Commons ;" uri fplLibUrl
-                Assert.AreEqual<int>(2, heap.ParsedAsts.Count)
-                Assert.AreEqual<int>(2, st.Root.Scope.Count)
-            | None -> Assert.IsTrue(false)
+            prepareFplCode(filename, "uses Fpl.SetTheory;", false) 
+            // initial counts of parsed ast and theories in root
+            Assert.AreEqual<int>(3, heap.ParsedAsts.Count)
+            Assert.AreEqual<int>(3, heap.Root.Scope.Count)
+            let currDir = Directory.GetCurrentDirectory()
+            let uri = PathEquivalentUri(Path.Combine(currDir, filename))
+            let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+            // reparse the file after replacing the uses clause with uses Fpl.Commons
+            fplInterpreter "uses Fpl.Commons ;" uri fplLibUrl
+            Assert.AreEqual<int>(2, heap.ParsedAsts.Count)
+            Assert.AreEqual<int>(2, heap.Root.Scope.Count)
         
     [<TestMethod>]
     member this.TestGarbageCollector02() =
         if not TestConfig.IsOffline then 
             let filename = "TestGarbageCollector02.fpl"
             prepareFplCode(filename, "", true) |> ignore
-            match prepareFplCode(filename, "uses Fpl.SetTheory;", false) with
-            | Some (st:SymbolTable) -> 
-                // initial counts of parsed ast and theories in root
-                Assert.AreEqual<int>(3, heap.ParsedAsts.Count)
-                Assert.AreEqual<int>(3, st.Root.Scope.Count)
-                let currDir = Directory.GetCurrentDirectory()
-                let uri = PathEquivalentUri(Path.Combine(currDir, filename))
-                let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
-                // reparse the Test.fpl after removing the uses clause
-                fplInterpreter st "uses BlaTypo ;" uri fplLibUrl
-                Assert.AreEqual<int>(1, heap.ParsedAsts.Count)
-                Assert.AreEqual<int>(1, st.Root.Scope.Count)
-            | None -> Assert.IsTrue(false)
+            prepareFplCode(filename, "uses Fpl.SetTheory;", false) 
+            // initial counts of parsed ast and theories in root
+            Assert.AreEqual<int>(3, heap.ParsedAsts.Count)
+            Assert.AreEqual<int>(3, heap.Root.Scope.Count)
+            let currDir = Directory.GetCurrentDirectory()
+            let uri = PathEquivalentUri(Path.Combine(currDir, filename))
+            let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+            // reparse the Test.fpl after removing the uses clause
+            fplInterpreter "uses BlaTypo ;" uri fplLibUrl
+            Assert.AreEqual<int>(1, heap.ParsedAsts.Count)
+            Assert.AreEqual<int>(1, heap.Root.Scope.Count)
 
 
     [<TestMethod>]
@@ -572,23 +566,21 @@ type TestEvalAliasedNamespaceIdentifier() =
             let filename = "TestGarbageCollector03.fpl"
             let fplCode = "uses Fpl.SetTheory;"
             prepareFplCode(filename, "", true) |> ignore
-            match prepareFplCode(filename, fplCode, false) with
-            | Some (st:SymbolTable) -> 
-                // initial counts of parsed ast and theories in root
-                let parsedAstsFirstTime = heap.ParsedAsts.Count
-                let scopeCountFirstTime = st.Root.Scope.Count
-                let errorCountfirstTime = ad.CountDiagnostics
+            prepareFplCode(filename, fplCode, false) 
+            // initial counts of parsed ast and theories in root
+            let parsedAstsFirstTime = heap.ParsedAsts.Count
+            let scopeCountFirstTime = heap.Root.Scope.Count
+            let errorCountfirstTime = ad.CountDiagnostics
 
-                let currDir = Directory.GetCurrentDirectory()
-                let uri = PathEquivalentUri(Path.Combine(currDir, filename))
-                let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
-                // reparse the Test.fpl after slightly modifying the uses clause
-                fplInterpreter st (fplCode + " ") uri fplLibUrl
-                Assert.AreEqual<int>(parsedAstsFirstTime, heap.ParsedAsts.Count)
-                Assert.AreEqual<int>(scopeCountFirstTime, st.Root.Scope.Count)
-                Assert.AreEqual<int>(errorCountfirstTime, ad.CountDiagnostics)
+            let currDir = Directory.GetCurrentDirectory()
+            let uri = PathEquivalentUri(Path.Combine(currDir, filename))
+            let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+            // reparse the Test.fpl after slightly modifying the uses clause
+            fplInterpreter (fplCode + " ") uri fplLibUrl
+            Assert.AreEqual<int>(parsedAstsFirstTime, heap.ParsedAsts.Count)
+            Assert.AreEqual<int>(scopeCountFirstTime, heap.Root.Scope.Count)
+            Assert.AreEqual<int>(errorCountfirstTime, ad.CountDiagnostics)
 
-            | None -> Assert.IsTrue(false)
 
     [<TestMethod>]
     member this.TestGarbageCollector04() =
@@ -596,25 +588,23 @@ type TestEvalAliasedNamespaceIdentifier() =
             let filename = "TestGarbageCollector04.fpl"
             let fplCode = "uses Fpl.SetTheory;"
             prepareFplCode(filename, "", true) |> ignore
-            match prepareFplCode(filename, fplCode, false) with
-            | Some (st:SymbolTable) -> 
-                // initial counts of parsed ast and theories in root
-                let parsedAstsFirstTime = heap.ParsedAsts.Count
-                let scopeCountFirstTime = st.Root.Scope.Count
-                let errorCountfirstTime = ad.CountDiagnostics
+            prepareFplCode(filename, fplCode, false) 
+            // initial counts of parsed ast and theories in root
+            let parsedAstsFirstTime = heap.ParsedAsts.Count
+            let scopeCountFirstTime = heap.Root.Scope.Count
+            let errorCountfirstTime = ad.CountDiagnostics
 
-                let currDir = Directory.GetCurrentDirectory()
-                // now, we change the uri and the source code to some referenced FPL theory
-                let uri = PathEquivalentUri(Path.Combine(currDir,"repo", "Fpl.Commons.fpl"))
-                let fplCode = File.ReadAllText(uri.AbsolutePath)
-                let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
-                // reparse the Test.fpl after slightly modifying the uses clause
-                fplInterpreter st fplCode uri fplLibUrl
-                Assert.AreEqual<int>(parsedAstsFirstTime, heap.ParsedAsts.Count)
-                Assert.AreEqual<int>(scopeCountFirstTime, st.Root.Scope.Count)
-                Assert.AreEqual<int>(errorCountfirstTime, ad.CountDiagnostics)
+            let currDir = Directory.GetCurrentDirectory()
+            // now, we change the uri and the source code to some referenced FPL theory
+            let uri = PathEquivalentUri(Path.Combine(currDir,"repo", "Fpl.Commons.fpl"))
+            let fplCode = File.ReadAllText(uri.AbsolutePath)
+            let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+            // reparse the Test.fpl after slightly modifying the uses clause
+            fplInterpreter fplCode uri fplLibUrl
+            Assert.AreEqual<int>(parsedAstsFirstTime, heap.ParsedAsts.Count)
+            Assert.AreEqual<int>(scopeCountFirstTime, heap.Root.Scope.Count)
+            Assert.AreEqual<int>(errorCountfirstTime, ad.CountDiagnostics)
 
-            | None -> Assert.IsTrue(false)
 
 module TestModule2 =
     let main () = printfn "This is a Testmodule"
