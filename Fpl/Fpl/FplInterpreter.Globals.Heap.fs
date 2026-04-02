@@ -12,8 +12,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 module FplInterpreter.Globals.Heap
+open System
+open System.Text
+open FplInterpreterBasicTypes
 open FplInterpreterAstPreprocessing
 open FplInterpreter.Globals.Helpers
+open FplInterpreter.Globals.ST
 open FplInterpreter.Globals.STEval
 open FplInterpreter.Globals.State
 open FplInterpreter.Globals.Validity
@@ -24,6 +28,7 @@ type HeapMemory() =
     let _helper = Helper()
     let _state = State()
     let _parsedAsts = ParsedAstList()
+    let _symbolTable = SymbolTable()
     /// A stack memory storing potential new nodes of the symbol table during its evaluation process
     member this.Eval = _evalStack
 
@@ -39,6 +44,9 @@ type HeapMemory() =
     /// A handle for the parsed asts (by theory) from the FPL parser
     member this.ParsedAsts = _parsedAsts
 
+    /// A handle for the symbol table from the FPL interpreter
+    member this.SymbolTable = _symbolTable
+
     // Clears the heap except parsed asts.
     member this.ClearExceptParsedAsts() = 
         _evalStack.Clear()
@@ -53,6 +61,25 @@ type HeapMemory() =
     member this.ClearAll() = 
         this.ClearExceptParsedAsts()
         this.ClearParsedAsts()
+
+    /// Returns the uses dependencies of this symbol table needed e.g. for debugging purposes in the FPL language server.
+    member this.UsesDependencies() =
+        let sb = StringBuilder()
+        sb.AppendLine() |> ignore
+        sb.AppendLine("SymbolTable: ") |> ignore
+
+        _symbolTable.Root.Scope
+        |> Seq.map (fun theory -> $"{theory.Value.Type(SignatureType.Mixed)} ({theory.Value.Scope.Count})")
+        |> String.concat Environment.NewLine
+        |> sb.AppendLine
+        |> ignore
+
+        sb.AppendLine("ParsedAsts: ") |> ignore
+
+        _parsedAsts.EnrichDependencies sb
+
+        sb.ToString()
+
 
 let heap = HeapMemory()
 

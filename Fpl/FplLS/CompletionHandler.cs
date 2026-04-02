@@ -4,7 +4,7 @@ using OmniSharp.Extensions.LanguageServer.Protocol.Document;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
 using static ErrDiagnostics;
-using static FplInterpreter.ST;
+using static FplInterpreter.Globals.ST;
 
 /*
 MIT License

@@ -4,7 +4,7 @@ open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open FParsec
 open ErrDiagnostics
-open FplInterpreter.ST
+open FplInterpreter.Globals.ST
 open FplInterpreter.Globals.Debug
 open FplInterpreter.Globals.Heap
 open Newtonsoft.Json

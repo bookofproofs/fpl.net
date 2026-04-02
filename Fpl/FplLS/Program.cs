@@ -5,7 +5,7 @@ using Newtonsoft.Json.Linq;
 using OmniSharp.Extensions.LanguageServer.Server;
 using static ErrDiagnostics;
 using static FplInterpreter.Globals.Heap;
-using static FplInterpreter.ST;
+using static FplInterpreter.Globals.ST;
 using static FplInterpreterAstPreprocessing;
 
 namespace FplLS

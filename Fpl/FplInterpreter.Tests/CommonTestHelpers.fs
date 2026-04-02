@@ -5,7 +5,7 @@ open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
 open FplInterpreter.Globals.Debug
-open FplInterpreter.ST
+open FplInterpreter.Globals.ST
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreter.Main
 open TestSharedConfig

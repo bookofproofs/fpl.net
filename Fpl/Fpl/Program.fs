@@ -4,7 +4,7 @@
 
 open ErrDiagnostics
 open FplParser
-open FplInterpreter.ST
+open FplInterpreter.Globals.ST
 open FplInterpreter.Main
 open System.IO
 

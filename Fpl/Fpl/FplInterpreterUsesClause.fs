@@ -10,8 +10,8 @@ open FParsec
 open FplGrammarTypes
 open FplInterpreterAstPreprocessing
 open FplInterpreter.Globals.Debug
+open FplInterpreter.Globals.ST
 open FplInterpreter.Globals.Heap
-open FplInterpreter.ST
 open ErrDiagnostics
 
 (* MIT License

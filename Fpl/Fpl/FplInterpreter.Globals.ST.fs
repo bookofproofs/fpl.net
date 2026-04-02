@@ -10,14 +10,13 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
 
 *)
-module FplInterpreter.ST
+module FplInterpreter.Globals.ST
 open TestSharedConfig
 open System
 open System.Text
 open FplPrimitives
 open FplInterpreterBasicTypes
 open FplInterpreter.Globals.Root
-open FplInterpreter.Globals.Heap
 
 type SymbolTable() =
     let mutable _mainTheory = ""
@@ -115,23 +114,7 @@ type SymbolTable() =
         else
             res
 
-    /// Returns the uses dependencies of this symbol table needed e.g. for debugging purposes in the FPL language server.
-    member this.UsesDependencies() =
-        let sb = StringBuilder()
-        sb.AppendLine() |> ignore
-        sb.AppendLine("SymbolTable: ") |> ignore
 
-        this.Root.Scope
-        |> Seq.map (fun theory -> $"{theory.Value.Type(SignatureType.Mixed)} ({theory.Value.Scope.Count})")
-        |> String.concat Environment.NewLine
-        |> sb.AppendLine
-        |> ignore
-
-        sb.AppendLine("ParsedAsts: ") |> ignore
-
-        heap.ParsedAsts.EnrichDependencies sb
-
-        sb.ToString()
 
 
 

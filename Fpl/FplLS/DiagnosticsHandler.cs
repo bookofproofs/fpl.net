@@ -2,7 +2,7 @@ using OmniSharp.Extensions.LanguageServer.Protocol.Document;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
 using System.Text;
 using static ErrDiagnostics;
-using static FplInterpreter.ST;
+using static FplInterpreter.Globals.ST;
 using static FplInterpreter.Globals.Heap;
 using static FplInterpreter.Main;
 using Model = OmniSharp.Extensions.LanguageServer.Protocol.Models;
@@ -105,7 +105,7 @@ namespace FplLS
             ad.CurrentUri = uri;
 
             fplInterpreter(st, sourceCode, uri, fplLibUri);
-            var diagnostics = CastDiagnostics(st);
+            var diagnostics = CastDiagnostics();
             return diagnostics;
         }
 
@@ -116,10 +116,10 @@ namespace FplLS
         /// <param name="listDiagnostics">List of diagnostics</param>
         /// <param name="origSourceCode">source code of the current file</param>
         /// <returns>Casted list</returns>
-        public UriDiagnostics CastDiagnostics(SymbolTable st)
+        public UriDiagnostics CastDiagnostics()
         {
             var castedListDiagnostics = new UriDiagnostics();
-            var uriTotextPositionsDict = GetTextPositionsByUri(st);
+            var uriTotextPositionsDict = GetTextPositionsByUri();
             FplLsTraceLogger.LogMsg(_languageServer, ad.DiagnosticsToString, "~~~~~Diagnostics Count Orig");
             FplLsTraceLogger.LogMsg(_languageServer, string.Join(", ", uriTotextPositionsDict.Keys.Select(k => k.AbsoluteUri)), $"~~~~~{uriTotextPositionsDict.Keys.Count} source code keys");
             foreach (ErrDiagnostics.Diagnostic diagnostic in ad.Collection)
@@ -142,7 +142,7 @@ namespace FplLS
 
         }
 
-        private static Dictionary<PathEquivalentUri, TextPositions> GetTextPositionsByUri(SymbolTable st)
+        private static Dictionary<PathEquivalentUri, TextPositions> GetTextPositionsByUri()
         {
             var sourceCodes = heap.ParsedAsts.DictionaryOfSUri2FplSourceCode();
             return sourceCodes.Select(x => new KeyValuePair<PathEquivalentUri, TextPositions>(x.Key, new TextPositions(x.Value))).ToDictionary<PathEquivalentUri, TextPositions>();

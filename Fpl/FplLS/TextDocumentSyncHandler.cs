@@ -6,9 +6,7 @@ using OmniSharp.Extensions.LanguageServer.Protocol.Server;
 using OmniSharp.Extensions.LanguageServer.Protocol.Document;
 using OmniSharp.Extensions.LanguageServer.Protocol;
 using MediatR;
-using System;
 using static ErrDiagnostics;
-using static FplInterpreter.ST;
 
 
 namespace FplLS

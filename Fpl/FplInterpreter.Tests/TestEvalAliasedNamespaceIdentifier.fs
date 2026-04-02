@@ -5,8 +5,8 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open FParsec
 open ErrDiagnostics
 open FplInterpreterAstPreprocessing
-open FplInterpreter.ST
 open FplInterpreter.Globals.Debug
+open FplInterpreter.Globals.ST
 open FplInterpreter.Globals.Heap
 open FplInterpreter.Main
 open FplInterpreterUsesClause
