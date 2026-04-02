@@ -18,6 +18,7 @@ open System
 open System.Text.RegularExpressions
 open System.Collections.Generic
 open System.IO
+open System.Text
 open FParsec
 open FplGrammarTypes
 open FplParser
@@ -305,3 +306,31 @@ type ParsedAstList() =
         this.Sort(
             Comparer<ParsedAst>.Create(fun b a -> compare a.Sorting.TopologicalSorting b.Sorting.TopologicalSorting)
         )
+
+    /// Creates trace statistics (not for production, use only for debugging purposes in the FPL language server.)
+    member this.TraceStatistics =
+        let sb = StringBuilder()
+
+        this
+        |> Seq.iter (fun pa ->
+            let paDiagnostics = ad.GetStreamDiagnostics(pa.Parsing.Uri)
+
+            let statsDiags =
+                paDiagnostics.Values
+                |> Seq.groupBy (fun d -> $"{d.Emitter}({d.Code.Code})")
+                |> Seq.map (fun (groupId, group) -> $"{groupId}:{Seq.length group}")
+                |> String.concat ", "
+
+            sb.AppendLine $"{pa.Id}(chksm {pa.Parsing.Checksum}): #total diags {paDiagnostics.Count}, {statsDiags}"
+            |> ignore)
+
+        sb.ToString()
+
+    /// Enriches the `uses` dependencies (not for production, use only for debugging purposes in the FPL language server).
+    member this.EnrichDependencies (sb: StringBuilder) =
+        this
+        |> Seq.map (fun pa ->
+            $"[{pa.Id}, {pa.Sorting.TopologicalSorting}, {pa.Sorting.ReferencedAsts}, {pa.Sorting.ReferencingAsts}]")
+        |> String.concat Environment.NewLine
+        |> sb.AppendLine
+        |> ignore

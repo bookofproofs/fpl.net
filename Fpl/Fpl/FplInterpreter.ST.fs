@@ -139,33 +139,11 @@ type SymbolTable(debug: bool, offlineMode: bool) =
 
         sb.AppendLine("ParsedAsts: ") |> ignore
 
-        heap.ParsedAsts
-        |> Seq.map (fun pa ->
-            $"[{pa.Id}, {pa.Sorting.TopologicalSorting}, {pa.Sorting.ReferencedAsts}, {pa.Sorting.ReferencingAsts}]")
-        |> String.concat Environment.NewLine
-        |> sb.AppendLine
-        |> ignore
+        heap.ParsedAsts.EnrichDependencies sb
 
         sb.ToString()
 
-    /// Creates trace statistics needed e.g. for debugging purposes in the FPL language server.
-    member this.TraceStatistics =
-        let sb = StringBuilder()
 
-        heap.ParsedAsts
-        |> Seq.iter (fun pa ->
-            let paDiagnostics = ad.GetStreamDiagnostics(pa.Parsing.Uri)
-
-            let statsDiags =
-                paDiagnostics.Values
-                |> Seq.groupBy (fun d -> $"{d.Emitter}({d.Code.Code})")
-                |> Seq.map (fun (groupId, group) -> $"{groupId}:{Seq.length group}")
-                |> String.concat ", "
-
-            sb.AppendLine $"{pa.Id}(chksm {pa.Parsing.Checksum}): #total diags {paDiagnostics.Count}, {statsDiags}"
-            |> ignore)
-
-        sb.ToString()
 
 
 

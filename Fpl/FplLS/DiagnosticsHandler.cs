@@ -133,7 +133,7 @@ namespace FplLS
                 castedListDiagnostics.AddDiagnostics(diagnostic.Uri, CastDiagnostic(diagnostic, tpByUri));
             }
             FplLsTraceLogger.LogMsg(_languageServer, ad.Collection.Length.ToString(), "~~~~~Diagnostics Count Orig");
-            FplLsTraceLogger.LogMsg(_languageServer, st.TraceStatistics, "~~~~~Statistics");
+            FplLsTraceLogger.LogMsg(_languageServer, heap.ParsedAsts.TraceStatistics, "~~~~~Statistics");
             foreach (var kvp in castedListDiagnostics.Enumerator())
             {
                 FplLsTraceLogger.LogMsg(_languageServer, $"{kvp.Value.Count} diagnostics in {kvp.Key.AbsolutePath}", "~~~~~Diagnostics Count VS Code");

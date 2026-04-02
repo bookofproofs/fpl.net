@@ -1,5 +1,5 @@
 namespace TestSharedConfig
 
 module TestConfig =
-    let OfflineMode = false
+    let OfflineMode = true
     let DebugMode = false
