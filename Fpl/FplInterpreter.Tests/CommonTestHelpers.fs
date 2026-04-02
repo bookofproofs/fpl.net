@@ -4,7 +4,7 @@ open System
 open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
-open FplInterpreterAstPreprocessing
+open FplInterpreter.Globals.Debug
 open FplInterpreter.ST
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreter.Main
@@ -63,14 +63,16 @@ let prepareFplCode (filename: string, fplCode: string, delete: bool) =
 
     if delete then
         deleteFiles currDir "*.fpl"
-        if not (TestConfig.OfflineMode) then
+        if not (offlineWatcher.OfflineMode) then
             deleteDirectory (Path.Combine(currDir,"lib"))
             deleteDirectory (Path.Combine(currDir,"repo"))
         None
     else
-        let st = SymbolTable(TestConfig.OfflineMode || not (fplCodeNeedsOnline fplCode))
-        
+        offlineWatcher.OfflineMode <- not (fplCodeNeedsOnline fplCode)
+        let st = SymbolTable()
         fplInterpreter st fplCode uri fplLibUrl |> ignore
+
+        offlineWatcher.OfflineMode <- false
 
         let syntaxErrorFound =
             ad.Collection
@@ -138,7 +140,7 @@ let loadFplFile (path: string) =
         "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
 
     let fplCode = File.ReadAllText(path)
-    let st = SymbolTable(TestConfig.OfflineMode)
+    let st = SymbolTable()
     fplInterpreter st fplCode uri fplLibUrl
     Some(st)
 

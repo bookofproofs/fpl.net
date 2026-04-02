@@ -9,6 +9,7 @@ open System
 open FParsec
 open FplGrammarTypes
 open FplInterpreterAstPreprocessing
+open FplInterpreter.Globals.Debug
 open FplInterpreter.Globals.Heap
 open FplInterpreter.ST
 open ErrDiagnostics
@@ -398,9 +399,9 @@ let garbageCollector (st:SymbolTable) (uriToBeReset:PathEquivalentUri) =
 /// their namespaces will also be loaded. The result is a list of ParsedAst objects.
 let loadAllUsesClauses (st:SymbolTable) input (uri:PathEquivalentUri) fplLibUrl = 
     ad.CurrentUri <- uri
-    let sources = acquireSources uri fplLibUrl st.OfflineMode
+    let sources = acquireSources uri fplLibUrl offlineWatcher.OfflineMode
     let currentName = addOrUpdateParsedAst input uri heap.ParsedAsts
-    emitDiagnosticsForDuplicateFiles sources (EvalAliasedNamespaceIdentifier.CreateEani(uri, st.OfflineMode))
+    emitDiagnosticsForDuplicateFiles sources (EvalAliasedNamespaceIdentifier.CreateEani(uri, offlineWatcher.OfflineMode))
     let mutable found = true
 
     while found do
@@ -408,7 +409,7 @@ let loadAllUsesClauses (st:SymbolTable) input (uri:PathEquivalentUri) fplLibUrl 
         match loadedParsedAst with
         | Some pa -> 
             // evaluate the EvalAliasedNamespaceIdentifier list of the ast
-            pa.Sorting.EANIList <- eval_uses_clause st.OfflineMode pa.Parsing.Ast
+            pa.Sorting.EANIList <- eval_uses_clause offlineWatcher.OfflineMode pa.Parsing.Ast
             pa.Status <- ParsedAstStatus.UsesClausesEvaluated
             findDuplicateAliases pa.Sorting.EANIList |> ignore
             pa.Sorting.EANIList

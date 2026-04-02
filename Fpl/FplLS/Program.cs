@@ -39,7 +39,7 @@ namespace FplLS
         static async Task Main()
         {
    
-            var st = new SymbolTable(false);
+            var st = new SymbolTable();
             ad.Clear();
             heap.ValidStmtStore.Clear();
 

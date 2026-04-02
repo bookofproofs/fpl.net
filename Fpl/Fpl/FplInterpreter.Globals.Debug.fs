@@ -15,6 +15,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 module FplInterpreter.Globals.Debug
 open System
 open System.IO
+open TestSharedConfig
 open FplInterpreterBasicTypes
 
 
@@ -61,4 +62,4 @@ let debug (fv:FplGenericNode) (debugMode:Debug) =
         let currDir = Directory.GetCurrentDirectory()
         File.AppendAllText(Path.Combine(currDir, "Debug.txt"), logLine)
 
-
+let offlineWatcher = TestConfig.OfflineWatcher()

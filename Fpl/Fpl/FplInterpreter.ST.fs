@@ -19,16 +19,10 @@ open FplInterpreterBasicTypes
 open FplInterpreter.Globals.Root
 open FplInterpreter.Globals.Heap
 
-type SymbolTable(offlineMode: bool) =
+type SymbolTable() =
     let mutable _mainTheory = ""
     let _root = new FplRoot()
-    let _offlineMode = offlineMode
 
-    /// Returns the current OfflineMode, with which the SymbolTable was created. 
-    /// OfflineMode=True should not be used in production. If true, the unit tests will try to 
-    /// get a local copy of Fpl libraries instead of trying to download them from the Internet.
-    member this.OfflineMode
-        with get () = _offlineMode
 
     /// Returns the current main theory.
     member this.MainTheory

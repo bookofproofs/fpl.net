@@ -5,7 +5,7 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
 open FplInterpreterAstPreprocessing
 open FplInterpreter.ST
-open FplInterpreter.Globals.Heap
+open FplInterpreter.Globals.Debug
 open FplInterpreter.Main
 open CommonTestHelpers
 open TestSharedConfig
@@ -30,7 +30,7 @@ type TestInterpreterErrors() =
             deleteFilesWithExtension (Path.Combine(currDir, "lib")) "fpl"
             None
         else
-            let st = SymbolTable(TestConfig.OfflineMode)
+            let st = SymbolTable()
             fplInterpreter st input uri fplLibUrl |> ignore
             Some (st)
 
@@ -52,7 +52,7 @@ type TestInterpreterErrors() =
             None
         else
 
-            let st = SymbolTable(TestConfig.OfflineMode)
+            let st = SymbolTable()
             fplInterpreter st A uri fplLibUrl |> ignore
             Some (st)
 
@@ -69,7 +69,7 @@ type TestInterpreterErrors() =
             File.Delete(pathToFile)
             None
         else
-            let st = SymbolTable(TestConfig.OfflineMode)
+            let st = SymbolTable()
             fplInterpreter st A uri fplLibUrl |> ignore
             Some (st)
 
@@ -89,7 +89,7 @@ type TestInterpreterErrors() =
             File.Delete(pathToFile)
             None
         else
-            let st = SymbolTable(TestConfig.OfflineMode)
+            let st = SymbolTable()
             fplInterpreter st input uri fplLibUrl |> ignore
             Some (st)
 
@@ -107,7 +107,7 @@ type TestInterpreterErrors() =
             deleteFilesWithExtension currDir "fpl"
             None
         else
-            let st = SymbolTable(TestConfig.OfflineMode)
+            let st = SymbolTable()
             fplInterpreter st input uri fplLibUrl |> ignore
             Some (st)
 
@@ -125,7 +125,7 @@ type TestInterpreterErrors() =
             deleteFilesWithExtension (Path.Combine(currDir, "lib")) "fpl"
             None
         else
-            let st = SymbolTable(TestConfig.OfflineMode)
+            let st = SymbolTable()
             fplInterpreter st input uri fplLibUrl |> ignore
             Some (st)
 
@@ -143,7 +143,7 @@ type TestInterpreterErrors() =
         ;"""
         let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         let uri = PathEquivalentUri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
-        let st = SymbolTable(TestConfig.OfflineMode)
+        let st = SymbolTable()
         fplInterpreter st input uri fplLibUrl |> ignore
         let result = filterByErrorCode ad code.Code
         Assert.AreEqual<int>(1, result.Length)
@@ -158,7 +158,7 @@ type TestInterpreterErrors() =
         ;"""
         let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         let uri = PathEquivalentUri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
-        let st = SymbolTable(TestConfig.OfflineMode)
+        let st = SymbolTable()
         fplInterpreter st input uri fplLibUrl |> ignore 
         let result = filterByErrorCode ad code.Code
         Assert.AreEqual<int>(1, result.Length)
@@ -280,7 +280,7 @@ type TestInterpreterErrors() =
     [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID001(fplCode:string, expected:int) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = ID001 ("", "")
@@ -294,7 +294,7 @@ type TestInterpreterErrors() =
     [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID001ConflictWithOtherTheories(fplCode:string, expected:int) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = ID001 ("", "")
@@ -316,7 +316,7 @@ type TestInterpreterErrors() =
     [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID002(fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = ID002 ("","")
@@ -329,7 +329,7 @@ type TestInterpreterErrors() =
     [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID003(fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = ID003 ""
@@ -349,7 +349,7 @@ type TestInterpreterErrors() =
     [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID005(fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = ID005 ("","")
@@ -361,7 +361,7 @@ type TestInterpreterErrors() =
     [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID006(fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = ID006 ""
@@ -410,7 +410,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID007(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = ID007 ("", "", "", "") 
@@ -423,7 +423,7 @@ type TestInterpreterErrors() =
     [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID008(fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = ID008 ("", "") 
@@ -436,7 +436,7 @@ type TestInterpreterErrors() =
     [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID009(fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = ID009 ""
@@ -498,7 +498,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID010(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = ID010 ""
@@ -525,7 +525,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID011(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = ID011 ("","")
@@ -614,7 +614,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID012Properties(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = ID012 ("", "", "", "")
@@ -671,7 +671,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID012Variables(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = ID012 ("", "", "", "")
@@ -701,7 +701,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0, "missing error message")>]
     [<TestMethod>]
     member this.TestID013(no:string, fplCode:string, expected, expectedErrMsg:string) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = ID013 ""
@@ -725,7 +725,7 @@ type TestInterpreterErrors() =
     [<DataRow("06", "def cl Nat def pred T(x:Nat) { del.Decrement(x) };", 1)>] 
     [<TestMethod>]
     member this.TestID013DecrementType(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = ID013 ""
@@ -737,7 +737,7 @@ type TestInterpreterErrors() =
     [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID014(fplCode:string, expected:int) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = ID014 ("", "")
@@ -773,7 +773,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID015(no:string, fplCode:string, expected:int) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = ID015 ""
@@ -809,7 +809,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID016(no: string, fplCode:string, expected:int) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = ID016 ""
@@ -834,7 +834,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID017(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = ID017 ("","")
@@ -850,7 +850,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID018(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = ID018 ""
@@ -875,7 +875,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID020(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = ID020 ""
@@ -888,7 +888,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID021(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = ID021 ""
@@ -901,7 +901,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID022(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = ID022 "" 
@@ -916,7 +916,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID023(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = ID023 ""
@@ -929,7 +929,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID024(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = ID024 ("", "")
@@ -950,7 +950,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID025(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = ID025 ("", "")
@@ -962,7 +962,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID027(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = ID027 ""
@@ -1047,7 +1047,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestLG001(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = LG001 ("", "", "")
@@ -1056,7 +1056,7 @@ type TestInterpreterErrors() =
     [<DataRow("""axiom A {dec ~x,y:Nat; impl(x,y)};""", 29)>]
     [<TestMethod>]
     member this.TestLG001Position(fplCode:string, (expected:int64)) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = LG001 ("", "", "")
@@ -1074,7 +1074,7 @@ type TestInterpreterErrors() =
     [<DataRow("06", """axiom A {impl(T,true)};""", "Cannot evaluate `implication` because its argument `T` could not be evaluated as a predicate. This issue might be subsequent to other errors to be resolved first.")>]
     [<TestMethod>]
     member this.TestLG001MsgSpecificity(no:string, fplCode:string, (expected:string)) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = LG001 ("", "", "")
@@ -1095,7 +1095,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestLG002(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = LG002 ("",0)
@@ -1118,7 +1118,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestLG003(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = LG003 ("", "")
@@ -1166,7 +1166,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestLG004(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = LG004 "" 
@@ -1187,7 +1187,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestLG005(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = LG005 "" 
@@ -1364,7 +1364,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR001(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = PR001 ("", "")
@@ -1376,7 +1376,7 @@ type TestInterpreterErrors() =
     [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR003(fplCode:string, expected:int) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = PR003 ("", "")
@@ -1390,7 +1390,7 @@ type TestInterpreterErrors() =
     [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR004(fplCode:string, expected:int) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = PR004 ("", "")
@@ -1405,7 +1405,7 @@ type TestInterpreterErrors() =
     [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR005(fplCode:string, expected:int) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = PR005 ""
@@ -1419,7 +1419,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR006(no: string, fplCode:string, expected:int) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = PR006 ("", "")
@@ -1437,7 +1437,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR007(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = PR007 ("", "") 
@@ -1449,7 +1449,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR008(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = PR008 ("", "", "") 
@@ -1463,7 +1463,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR009(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = PR009 
@@ -1483,7 +1483,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR010(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = PR010 ("", "")
@@ -1500,7 +1500,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR011(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = PR011 ("", "")
@@ -1511,7 +1511,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR012(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = PR012 
@@ -1523,7 +1523,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR013(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = PR013 
@@ -1534,7 +1534,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR014(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = PR014 
@@ -1547,7 +1547,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR015(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = PR015 ""
@@ -1559,7 +1559,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR016(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = PR016 ""
@@ -1594,7 +1594,7 @@ type TestInterpreterErrors() =
     [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG00(fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = SIG00 ("",0)
@@ -1628,7 +1628,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG01(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = SIG01 ""
@@ -1647,7 +1647,7 @@ type TestInterpreterErrors() =
     [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG02(fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = SIG02 ("",0, "")
@@ -2120,7 +2120,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG03(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = SIG03 ""
@@ -2591,7 +2591,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG03Extensions(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = SIG03 ""
@@ -2632,7 +2632,7 @@ type TestInterpreterErrors() =
 
     [<TestMethod>]
     member this.TestSIG03Undef(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = SIG03 ""
@@ -3167,7 +3167,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG04(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = SIG04 ("", 0, "")
@@ -3631,7 +3631,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG04Extensions(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = SIG04 ("", 0, "")
@@ -3670,7 +3670,7 @@ type TestInterpreterErrors() =
 
     [<TestMethod>]
     member this.TestSIG04Undef(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = SIG04 ("", 0, "")
@@ -4192,7 +4192,7 @@ type TestInterpreterErrors() =
     [<TestMethod>]
 
     member this.TestSIG05(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = SIG05 ""
@@ -4657,7 +4657,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG05Extensions(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = SIG05 ""
@@ -4702,7 +4702,7 @@ type TestInterpreterErrors() =
 
     [<TestMethod>]
     member this.TestSIG05Undef(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = SIG05 ""
@@ -4719,7 +4719,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG06Classes(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = SIG06 ("","","","")
@@ -4737,7 +4737,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG06FunctionalTerms(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = SIG06 ("","","","")
@@ -4789,7 +4789,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG07(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = SIG07 ("", "", "")
@@ -4870,7 +4870,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG08(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = SIG08 ("", "", "", "", 0)
@@ -4893,7 +4893,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG09(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = SIG09 ("", "", 0)
@@ -4923,7 +4923,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG10(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = SIG10 ("", "", 0)
@@ -4951,7 +4951,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG11(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = SIG11 ""
@@ -4972,7 +4972,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG12(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = SIG12 ("", "", "", "")
@@ -4990,7 +4990,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG13(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = SIG13 ("", "", "", "")
@@ -5012,7 +5012,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG14(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = SIG14
@@ -5036,7 +5036,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestST001(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = ST001 ""
@@ -5048,7 +5048,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestST002(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = ST002 ""
@@ -5059,7 +5059,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestST004(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = ST004 ""
@@ -5072,7 +5072,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestST005(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = ST005 ("", "")
@@ -5086,7 +5086,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSY000(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = SY000 ""
@@ -5100,7 +5100,7 @@ type TestInterpreterErrors() =
     [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestVAR00(fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = VAR00
@@ -5127,7 +5127,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestVAR01(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = VAR01 ""
@@ -5145,7 +5145,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestVAR02(no: string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = VAR02 ""
@@ -5345,7 +5345,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestVAR03(no: string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = VAR03 ("", "")
@@ -5436,7 +5436,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestVAR04(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = VAR04 ""
@@ -5451,7 +5451,7 @@ type TestInterpreterErrors() =
     [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestVAR05(fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = VAR05 ""
@@ -5462,7 +5462,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestVAR06Classes(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = VAR06 ("","","","")
@@ -5566,7 +5566,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestVAR06FunctionalTerms(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = VAR06 ("","","","")
@@ -5578,7 +5578,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestVAR07(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = VAR07 ""
@@ -5597,7 +5597,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestVAR08(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = VAR08
@@ -5648,7 +5648,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestVAR09(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = VAR09 ("","")
@@ -5686,7 +5686,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestVAR10(no: string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = VAR10 ("", "")
@@ -5698,7 +5698,7 @@ type TestInterpreterErrors() =
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestVAR11(no: string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = VAR11 ("", "")

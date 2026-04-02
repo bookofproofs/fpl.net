@@ -2,7 +2,7 @@ namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
 open FplPrimitives
-open FplInterpreter.ST
+open FplInterpreter.Globals.Debug
 open CommonTestHelpers
 
 [<TestClass>]
@@ -38,7 +38,7 @@ type TestInfixOperations() =
     [<TestMethod>]
     member this.TestImplicationCallsFplCommons(no:string, varVal, expected:string) =
         ad.Clear()
-        if TestSharedConfig.TestConfig.OfflineMode then 
+        if offlineWatcher.OfflineMode then 
             ()
         else
             let fplCode = sprintf """uses Fpl.Commons %s""" varVal
@@ -63,7 +63,7 @@ type TestInfixOperations() =
     [<TestMethod>]
     member this.TestEquivalenceCallsFplCommons(no:string, varVal, expected:string) =
         ad.Clear()
-        if TestSharedConfig.TestConfig.OfflineMode then 
+        if offlineWatcher.OfflineMode then 
             ()
         else
             let fplCode = sprintf """uses Fpl.Commons %s""" varVal
@@ -118,7 +118,7 @@ type TestInfixOperations() =
     [<TestMethod>]
     member this.TestConjunctionCallsFplCommons(no:string, varVal, expected:string) =
         ad.Clear()
-        if TestSharedConfig.TestConfig.OfflineMode then 
+        if offlineWatcher.OfflineMode then 
             ()
         else
             let fplCode = sprintf """uses Fpl.Commons %s""" varVal
@@ -183,7 +183,7 @@ type TestInfixOperations() =
     [<TestMethod>]
     member this.TestDisjunctionCallsFplCommons(no:string, varVal, expected:string) =
         ad.Clear()
-        if TestSharedConfig.TestConfig.OfflineMode then 
+        if offlineWatcher.OfflineMode then 
             ()
         else
             let fplCode = sprintf """uses Fpl.Commons %s""" varVal
@@ -216,7 +216,7 @@ type TestInfixOperations() =
     [<TestMethod>]
     member this.TestExDisjunctionCallsFplCommons(no:string, varVal, expected:string) =
         ad.Clear()
-        if TestSharedConfig.TestConfig.OfflineMode then 
+        if offlineWatcher.OfflineMode then 
             ()
         else
             let fplCode = sprintf """uses Fpl.Commons %s""" varVal

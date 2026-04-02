@@ -5,6 +5,7 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open FParsec
 open ErrDiagnostics
 open FplInterpreter.ST
+open FplInterpreter.Globals.Debug
 open FplInterpreter.Globals.Heap
 open Newtonsoft.Json
 open Newtonsoft.Json.Linq
@@ -17,7 +18,7 @@ type SymbolTableNavigation() =
 
     [<TestMethod>]
     member this.UsesClauseCausesDownloads() =
-        if not TestConfig.OfflineMode then 
+        if not offlineWatcher.OfflineMode then 
             ad.Clear()
             // first delete lib and repo subdirectories (if any)
             let currentPath = Directory.GetCurrentDirectory()
@@ -42,7 +43,7 @@ type SymbolTableNavigation() =
 
     [<TestMethod>]
     member this.UsesClauseCreatesSubdirectoriesLibAndRepo() =
-        if not TestConfig.OfflineMode then 
+        if not offlineWatcher.OfflineMode then 
             // prepare test, making sure there is an empty 
             // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
             ad.Clear()
@@ -72,7 +73,7 @@ type SymbolTableNavigation() =
 
     [<TestMethod>]
     member this.OpeningFileInRepoDoesNotCreateYetOtherSubdirsLibAndRepo() =
-        if not TestConfig.OfflineMode then 
+        if not offlineWatcher.OfflineMode then 
             // prepare test, making sure there is an empty 
             // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
             ad.Clear()
@@ -102,7 +103,7 @@ type SymbolTableNavigation() =
 
     [<TestMethod>]
     member this.OpeningFileInRepoDoesNotRaiseRuntimeErrors() =
-        if not TestConfig.OfflineMode then 
+        if not offlineWatcher.OfflineMode then 
             // prepare test, making sure there is an empty 
             // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
             ad.Clear()
@@ -131,7 +132,7 @@ type SymbolTableNavigation() =
 
     [<TestMethod>]
     member this.OpeningParentFileTheoryEnhancesSymbolTableCorrectly() =
-        if not TestConfig.OfflineMode then 
+        if not offlineWatcher.OfflineMode then 
             // prepare test, making sure there is an empty 
             // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
             ad.Clear()
@@ -159,7 +160,7 @@ type SymbolTableNavigation() =
             | None -> Assert.IsTrue(false)
         
             // now, conserve the symbol table for the test's next step and open the parent file
-            let st = SymbolTable(TestConfig.OfflineMode)
+            let st = SymbolTable()
             let uri = PathEquivalentUri(Path.Combine(currentPathRepo,"Fpl.SetTheory.fpl"))
             let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
             let fplCode = File.ReadAllText(uri.AbsolutePath)
@@ -169,7 +170,7 @@ type SymbolTableNavigation() =
             Assert.AreEqual<int>(2, heap.ParsedAsts.Count)
 
             // now, open the grand parent file
-            let st = SymbolTable(TestConfig.OfflineMode)
+            let st = SymbolTable()
             let uri = PathEquivalentUri(Path.Combine(currentPath,filename + ".fpl"))
             let fplCode = File.ReadAllText(uri.AbsolutePath)
             fplInterpreter st fplCode uri fplLibUrl
@@ -182,7 +183,7 @@ type SymbolTableNavigation() =
 
     [<TestMethod>]
     member this.OpeningGrandParentFileTheoryEnhancesSymbolTableCorrectly() =
-        if not TestConfig.OfflineMode then 
+        if not offlineWatcher.OfflineMode then 
             // prepare test, making sure there is an empty 
             // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
             ad.Clear()
@@ -210,7 +211,7 @@ type SymbolTableNavigation() =
             | None -> Assert.IsTrue(false)
         
             // now, conserve the symbol table for the test's next step and open the grand parent file
-            let st = SymbolTable(TestConfig.OfflineMode)
+            let st = SymbolTable()
             let uri = PathEquivalentUri(Path.Combine(currentPath,filename + ".fpl"))
             let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
             let fplCode = File.ReadAllText(uri.AbsolutePath)
@@ -224,7 +225,7 @@ type SymbolTableNavigation() =
 
     [<TestMethod>]
     member this.OpeningGrandParentFileTheoryEnhancesSymbolTableDeeply() =
-        if not TestConfig.OfflineMode then 
+        if not offlineWatcher.OfflineMode then 
             // prepare test, making sure there is an empty 
             // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
             ad.Clear()
@@ -261,7 +262,7 @@ type SymbolTableNavigation() =
 
     [<TestMethod>]
     member this.OpeningFileInLibAsCopyOfFileInRepoDoesRaiseNSP05Error() =
-        if not TestConfig.OfflineMode then 
+        if not offlineWatcher.OfflineMode then 
             // prepare test, making sure there is an empty 
             // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
             ad.Clear()
@@ -301,7 +302,7 @@ type SymbolTableNavigation() =
 
     [<TestMethod>]
     member this.OpeningFileInMainAsCopyOfFileInRepoDoesRaiseNSP05Error() =
-        if not TestConfig.OfflineMode then 
+        if not offlineWatcher.OfflineMode then 
             // prepare test, making sure there is an empty 
             // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
             ad.Clear()
@@ -342,7 +343,7 @@ type SymbolTableNavigation() =
 
     [<TestMethod>]
     member this.HavingRepoFileInLibDoesPreventItToBeDownloadedInRepo() =
-        if not TestConfig.OfflineMode then 
+        if not offlineWatcher.OfflineMode then 
             // prepare test, making sure there is an empty 
             // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
             ad.Clear()
@@ -383,7 +384,7 @@ type SymbolTableNavigation() =
 
     [<TestMethod>]
     member this.HavingRepoFileInMainDoesPreventItToBeDownloadedInRepo() =
-        if not TestConfig.OfflineMode then 
+        if not offlineWatcher.OfflineMode then 
             // prepare test, making sure there is an empty 
             // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
             ad.Clear()
@@ -424,7 +425,7 @@ type SymbolTableNavigation() =
 
     [<TestMethod>]
     member this.OpeningFileInRepoAndChangingItChangesAlsoTheDiagnosticsOfThisFile() =
-        if not TestConfig.OfflineMode then 
+        if not offlineWatcher.OfflineMode then 
             // prepare test, making sure there is an empty 
             // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
             ad.Clear()
@@ -455,7 +456,7 @@ type SymbolTableNavigation() =
             // now manipulate the file and reprocess it
         
             // now, conserve the symbol table for the test's next step and reprocess the manipulated file
-            let st = SymbolTable(TestConfig.OfflineMode)
+            let st = SymbolTable()
             let uri = PathEquivalentUri(pathToTestFile)
             let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
             let fplCodeOriginal = File.ReadAllText(pathToTestFile)
@@ -471,7 +472,7 @@ type SymbolTableNavigation() =
 
     [<TestMethod>]
     member this.OpeningFileInRepoAndChangingDoesNotCauseDuplicateSignatureDeclarations() =
-        if not TestConfig.OfflineMode then 
+        if not offlineWatcher.OfflineMode then 
             // prepare test, making sure there is an empty 
             // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
             ad.Clear()
@@ -520,7 +521,7 @@ type SymbolTableNavigation() =
     [<TestMethod>]
     member this.OpeningFileInMainAndUpdatingReferencesCorrectlyRaisesSIG04Errors() =
         heap.ClearAll()
-        if not TestConfig.OfflineMode then 
+        if not offlineWatcher.OfflineMode then 
             // prepare test, making sure there is an empty 
             // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
             ad.Clear()
@@ -593,7 +594,7 @@ type SymbolTableNavigation() =
     [<DataRow("uses Fpl.Commons.Structures ;")>]
     [<TestMethod>]
     member this.TestJson(fplCode:string) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCodeNeedsOnline fplCode then 
             ()
         else
             prepareFplCode ("TestJson.fpl", "", false) |> ignore

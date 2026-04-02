@@ -1,7 +1,7 @@
 namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
-open TestSharedConfig
+open FplInterpreter.Globals.Debug
 open FplInterpreterBasicTypes
 open FplInterpreterFplTypeMatching
 open FplInterpreterReferencesSelfParent
@@ -608,7 +608,7 @@ type TestSignatureMatching() =
         "No overload matching `=(ind, obj)`. The variable `x` typed `ind` doesn't match the parameter `x` typed `obj` in the predicate definition TestSIG04MsgSpecificity.Eq(obj, obj).")>]
     [<TestMethod>]
     member this.TestSIG04MsgSpecificity(fplCode:string, (expected:string)) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = SIG04 ("", 0, "" )

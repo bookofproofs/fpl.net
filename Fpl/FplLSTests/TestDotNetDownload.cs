@@ -1,5 +1,5 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using TestSharedConfig;
+using static FplInterpreter.Globals.Debug;
 
 namespace FplLSTests
 {
@@ -12,7 +12,7 @@ namespace FplLSTests
         [DataRow("https://github.com/bookofproofs/fpl.netlib/raw/refs/heads/main/dotnet-runtime-8.0.8-osx-x64.tar.gz", "osxfile.gz")]
         public async Task TestFileDownload(string url, string localFilePath)
         {
-            if (!TestConfig.OfflineMode)
+            if (!offlineWatcher.OfflineMode)
             {
                 using (HttpClient client = new HttpClient())
                 {
