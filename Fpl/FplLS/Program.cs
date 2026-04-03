@@ -50,23 +50,8 @@ namespace FplLS
                     .WithHandler<CompletionHandler>()
                     .OnRequest<JToken, string>("getTreeData", (request, cancellationToken) =>
                     {
-                        // get current symbol table JSON and attach IsEvaluating flag
-                        var json = heap.SymbolTable.ToJson();
-                        try
-                        {
-                            var obj = JObject.Parse(json);
-                            obj["IsEvaluating"] = heap.IsEvaluating;
-                            return Task.FromResult(obj.ToString(Newtonsoft.Json.Formatting.None));
-                        }
-                        catch
-                        {
-                            // fallback: return at least the evaluating flag as minimal JSON
-                            var fallback = new JObject
-                            {
-                                ["IsEvaluating"] = heap.IsEvaluating
-                            };
-                            return Task.FromResult(fallback.ToString(Newtonsoft.Json.Formatting.None));
-                        }
+                        while (heap.IsEvaluating) { }
+                        return Task.FromResult(heap.SymbolTable.ToJson());
                     })
                     .OnInitialize((s, _, _) =>
                     {

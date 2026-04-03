@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using System.Collections.Concurrent;
 using static ErrDiagnostics;
 
@@ -33,7 +33,7 @@ namespace FplLS
 
         public EventHandler<DocumentUpdatedEventArgs>? BufferUpdated;
 
-        private ConcurrentDictionary<PathEquivalentUri, StringBuilder> _buffers = new ConcurrentDictionary<PathEquivalentUri, StringBuilder>();
+        private readonly ConcurrentDictionary<PathEquivalentUri, StringBuilder> _buffers = new();
 
         public void UpdateBuffer(PathEquivalentUri uri, StringBuilder buffer)
         {

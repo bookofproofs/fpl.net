@@ -28,8 +28,7 @@ let fplInterpreter input (uri:PathEquivalentUri) fplLibUrl =
         // mark evaluation started (keeps UI informed)
         heap.IsEvaluating <- true
 
-        if heap.SymbolTable.MainTheory = String.Empty then
-            heap.SymbolTable.MainTheory <- uri.TheoryName
+        heap.SymbolTable.MainTheory <- uri.TheoryName
 
         loadAllUsesClauses input uri fplLibUrl 
         evaluateSymbolTable()

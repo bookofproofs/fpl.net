@@ -382,8 +382,6 @@ class FplTheoriesProvider {
     constructor() {
         this._onDidChangeTreeData = new vscode.EventEmitter();
         this.onDidChangeTreeData = this._onDidChangeTreeData.event;
-        this._polling = false;
-        this._pollInterval = 500; // ms
     }
 
     refresh() {
@@ -394,59 +392,13 @@ class FplTheoriesProvider {
         return element;
     }
 
-    startPolling() {
-        if (this._polling) return;
-        this._polling = true;
-        const poll = () => {
-            if (!this._polling) return;
-            // ask server for fresh status
-            client.sendRequest('getTreeData', {}).then(json => {
-                try {
-                    const obj = JSON.parse(json);
-                    if (obj.IsEvaluating === false) {
-                        // stop polling and refresh the tree
-                        this._polling = false;
-                        this.refresh();
-                        return;
-                    }
-                } catch (err) {
-                    // ignore parse errors and continue polling
-                }
-                // schedule next poll
-                setTimeout(poll, this._pollInterval);
-            }).catch(() => {
-                // on error, retry after interval
-                setTimeout(poll, this._pollInterval);
-            });
-        };
-        setTimeout(poll, this._pollInterval);
-    }
-
-    stopPolling() {
-        this._polling = false;
-    }
-
     getChildren(element) {
         if (!element) {
             // If no element is passed, return the root nodes of the tree
             return client.sendRequest('getTreeData', {}).then(json => {
                 try {
-                    log2Console("getTreeData response length: " + (json ? json.length : "null"), false);
-                    log2Console("getTreeData preview: " + (json ? json.substring(0, 1500) : "null"), false);
                     let treeData = JSON.parse(json);
                     // If evaluation still running, show a placeholder and start polling
-                    if (treeData.IsEvaluating === true) {
-                        this.startPolling();
-                        // show a single "Evaluating..." placeholder node
-                        const evaluatingNode = new MyTreeItem("th", 1, "Evaluating...", 0, 0, "", "", ""); 
-                        evaluatingNode.collapsibleState = vscode.TreeItemCollapsibleState.None;
-                        return [evaluatingNode];
-                    }
-
-                    if (!treeData.Scope) {
-                        log2Console("getTreeData: parsed object has no .Scope property", true);
-                        return [];
-                    }
                     return this.parseScope(treeData.Scope);
                 } catch (err) {
                     log2Console('Failed to parse tree data: ' + err + ' raw:' + (json ? json.substring(0, 1500) : 'null'), true);
@@ -547,13 +499,7 @@ function activate(context) {
             // Register TreeDataProvider
             vscode.window.registerTreeDataProvider('fplTheories', fplTheoriesProvider);
 
-            // refresh FPL Theories Explorer on document open event  
-            vscode.workspace.onDidOpenTextDocument((document) => {
-                log2Console("onDidOpenTextDocument", false);
-                if (document.languageId === 'fpl') {
-                    fplTheoriesProvider.refresh();
-                }
-            });
+
 
             // refresh FPL Theories Explorer on active text editor changes   
             vscode.window.onDidChangeActiveTextEditor((editor) => {
@@ -584,7 +530,7 @@ function activate(context) {
                 }
             });
 
-            let disposableClient = client.start();
+            let disposableClient = client.start(); 
 
             // The command has been defined in the package.json file
             // Now provide the implementation of the command with  registerCommand
