@@ -19,6 +19,7 @@
         <Compile Include="FplParser.fs" />
         <Compile Include="FplInterpreterAstPreprocessing.fs" />
         <Compile Include="FplInterpreterBasicTypes.fs" />
+        <Compile Include="FplInterpreterChecks.fs" />
         <Compile Include="FplInterpreter.Globals.Debug.fs" />
         <Compile Include="FplInterpreter.Globals.Helpers.fs" />
         <Compile Include="FplInterpreter.Globals.Root.fs" />
@@ -27,7 +28,6 @@
         <Compile Include="FplInterpreter.Globals.State.fs" />
         <Compile Include="FplInterpreter.Globals.Validity.fs" />
         <Compile Include="FplInterpreter.Globals.Heap.fs" />
-        <Compile Include="FplInterpreterChecks.fs" />
         <Compile Include="FplInterpreterSTEmbedding.fs" />
         <Compile Include="FplInterpreterIntrinsicTypes.fs" />
         <Compile Include="FplInterpreterVariables.fs" />

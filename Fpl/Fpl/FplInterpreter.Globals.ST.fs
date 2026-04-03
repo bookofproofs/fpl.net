@@ -16,6 +16,7 @@ open System
 open System.Text
 open FplPrimitives
 open FplInterpreterBasicTypes
+open FplInterpreterChecks
 open FplInterpreter.Globals.Root
 
 type SymbolTable() =
@@ -56,7 +57,7 @@ type SymbolTable() =
             sb.AppendLine(indentMinusOne + "{") |> ignore
             let name = $"{root.Type(SignatureType.Name)}".Replace(@"\", @"\\")
             let fplTypeName = $"{root.Type(SignatureType.Type)}".Replace(@"\", @"\\")
-            let mutable fplValueRepr = $"{root.Represent()}".Replace("\\", "\\\\")   // escape backslashes first
+            let fplValueRepr = $"{root.Represent()}".Replace("\\", "\\\\")   // escape backslashes first
                                                             .Replace("\"", "\\\"")   // then escape double quotes
 
             if name = this.MainTheory then
@@ -64,9 +65,15 @@ type SymbolTable() =
             else
                 sb.AppendLine($"{indent}\"Name\": \"{name}\",") |> ignore
 
+            let refersTo =
+                match root.RefersTo with
+                | Some ref -> $"{ref.Name} {ref.Type SignatureType.Mixed}" 
+                | None -> ""
+
             sb.AppendLine($"{indent}\"Type\": \"{root.ShortName}\",") |> ignore
             sb.AppendLine($"{indent}\"FplValueType\": \"{fplTypeName}\",") |> ignore
             sb.AppendLine($"{indent}\"FplValueRepr\": \"{fplValueRepr}\",") |> ignore
+            sb.AppendLine($"{indent}\"FplRefersTo\": \"{refersTo}\",") |> ignore
             sb.AppendLine($"{indent}\"Line\": \"{root.StartPos.Line}\",") |> ignore
             sb.AppendLine($"{indent}\"Column\": \"{root.StartPos.Column}\",") |> ignore
             sb.AppendLine($"{indent}\"FilePath\": \"{currentPath}\",") |> ignore
@@ -74,7 +81,6 @@ type SymbolTable() =
             if preventInfinite then
                 sb.AppendLine($"{indent}\"Scope\": [],") |> ignore
                 sb.AppendLine($"{indent}\"ArgList\": [],") |> ignore
-                sb.AppendLine($"{indent}\"ValueList\": []") |> ignore
             else
                 sb.AppendLine($"{indent}\"Scope\": [") |> ignore
                 let mutable counterScope = 0
@@ -95,16 +101,6 @@ type SymbolTable() =
                 |> Seq.iter (fun child ->
                     argList <- argList + 1
                     createJson child sb (level + 1) (argList = root.ArgList.Count) false)
-                sb.AppendLine($"{indent}],") |> ignore
-
-                sb.AppendLine($"{indent}\"ValueList\": [") |> ignore
-                let mutable valueList = 0
-                match root with 
-                | :? FplGenericHasValue as rootWithValue ->
-                    match rootWithValue.Value with
-                    | Some ref -> createJson ref sb (level + 1) true false
-                    | None -> ()
-                | _ -> ()
                 sb.AppendLine($"{indent}]") |> ignore
 
             if isLast then

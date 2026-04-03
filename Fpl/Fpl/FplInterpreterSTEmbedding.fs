@@ -21,6 +21,60 @@ open FplInterpreter.Globals.Heap
 open FplInterpreterChecks
 
 
+/// Checks if a reference to a Symbol, Prefix, PostFix, or Infix exists
+let checkSIG01Diagnostics (fv: FplGenericNode)  =
+    match fv.Name with
+    | PrimRefL ->
+        // collect candidates to match this reference from all theories and
+        // add them to fplValues's scope
+        let expressionId = fv.FplId
+
+        heap.Root.Scope
+        |> Seq.map (fun kv -> kv.Value)
+        |> Seq.iter (fun theory ->
+            theory.Scope
+            |> Seq.map (fun kv -> kv.Value)
+            |> Seq.filter (fun fv1 -> isDefinition fv1)
+            |> Seq.iter (fun block ->
+                match block.ExpressionType with
+                | FixType.Prefix symbol
+                | FixType.Symbol symbol
+                | FixType.Postfix symbol ->
+                    if expressionId = symbol then
+                        fv.RefersTo <- Some block 
+                        fv.TypeId <- block.TypeId
+                | FixType.Infix(symbol, precedence) ->
+                    if expressionId = symbol then
+                        fv.RefersTo <- Some block 
+                        fv.TypeId <- block.TypeId
+                | _ -> ()))
+
+        if fv.RefersTo.IsNone then
+            fv.ErrorOccurred <- emitSIG01Diagnostics expressionId fv.StartPos fv.EndPos
+    | _ -> ()
+
+let checkSIG02Diagnostics (fv:FplGenericNode) symbol precedence pos1 pos2 = 
+    let precedences = Dictionary<int, FplGenericNode>()
+    let precedenceWasAlreadyThere precedence fv =
+        if not (precedences.ContainsKey(precedence)) then
+            precedences.Add(precedence, fv)
+            false
+        else
+            true
+    heap.Root.Scope
+    |> Seq.map (fun kv -> kv.Value)
+    |> Seq.iter (fun theory ->
+        theory.Scope
+        |> Seq.map (fun kv1 -> kv1.Value)
+        |> Seq.iter (fun block ->
+            match block.ExpressionType with
+            | FixType.Infix(_, precedence) -> precedenceWasAlreadyThere precedence block |> ignore
+            | _ -> ()))
+    if precedences.ContainsKey(precedence) then
+        let conflict = precedences[precedence].QualifiedStartPos
+        precedences[precedence].ErrorOccurred <- emitSIG02Diagnostics symbol precedence conflict pos1 pos2
+
+
 // Tries to add for statement's domain or entity to its parent's for statement
 let tryAddToParentForInStmt (fplValue:FplGenericNode) =
     let identifier = fplValue.Type SignatureType.Name
