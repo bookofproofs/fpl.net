@@ -25,7 +25,6 @@ type CommonFplValueTestCases =
             fv.Scope[name]
 
     static member ScopeVariablesInSignature(subtype) =
-        ad.Clear()
         let fplCode = """
         def pred TestPredicate(x,y:pred(u,v,w:func(a,b,c:obj)->obj)) 
             {true}
@@ -69,7 +68,6 @@ type CommonFplValueTestCases =
         result
 
     static member ScopeVariablesInSignatureVariadic(subtype) =
-        ad.Clear()
         let fplCode = """
         def pred TestPredicate(x,y:*pred(u,v,w:func(a,b,c:*obj[ind])->obj)[obj]) 
             {true}
@@ -113,7 +111,6 @@ type CommonFplValueTestCases =
         result
 
     static member ScopeVariablesInBlock(subtype) =
-        ad.Clear()
         let fplCode = """
         def pred TestPredicate() 
         {   dec 
@@ -163,7 +160,6 @@ type CommonFplValueTestCases =
         result
 
     static member ScopeVariablesInBlockVariadic(subtype) =
-        ad.Clear()
         let fplCode = """
         def pred TestPredicate() 
             {dec ~x,y:*pred(u,v,w:func(a,b,c:*obj[tpl])->obj)[ind]; true}
@@ -207,7 +203,6 @@ type CommonFplValueTestCases =
         result
 
     static member ScopeProperties(subtype) =
-        ad.Clear()
         let fplCode = """
         def cl Nat
         def pred TestId() 
@@ -242,7 +237,6 @@ type CommonFplValueTestCases =
         result
 
     static member ScopeConstructors(subtype) =
-        ad.Clear()
         let fplCode = """
         def cl TestId 
         {
@@ -269,7 +263,6 @@ type CommonFplValueTestCases =
         result
 
     static member ScopeBlocks(subtype) =
-        ad.Clear()
         let fplCode = """
             inf SomeInference1 {pre:true con:true}
             inf SomeInference2 {pre:true con:true}
@@ -350,7 +343,6 @@ type CommonFplValueTestCases =
         result
 
     static member ScopeProofsAndCorollaries(subtype) =
-        ad.Clear()
         let fplCode = """
 
             theorem TestTheorem1 {true} 
@@ -417,7 +409,6 @@ type CommonFplValueTestCases =
         result
 
     static member ScopeIntrinsicPrimitives(subtype) =
-        ad.Clear()
         let fplCode = """
             def cl A {intr}
             def func B()->func {intr}

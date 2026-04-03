@@ -19,7 +19,7 @@ type TestDecrement() =
     [<DataRow("@42", "41")>]
     [<TestMethod>]
     member this.TestDecrementRepresent(varVal, expected:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """ext Digits x@/\d+/ -> Digits {ret x} def pred T() { del.Decrement(%s) };""" varVal
         let filename = "TestDecrementRepresent.fpl"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -39,7 +39,7 @@ type TestDecrement() =
     [<DataRow("@42", PrimUndetermined)>]
     [<TestMethod>]
     member this.TestDecrementRepresentWrongType(varVal, expected:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """ext Digits x@/\d+/ -> ind {ret $100} def pred T() { del.Decrement(%s) };""" varVal
         let filename = "TestDecrementRepresent.fpl"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -59,7 +59,7 @@ type TestDecrement() =
     [<DataRow("@42", PrimDigits)>]
     [<TestMethod>]
     member this.TestDecrementType(varVal, expected:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """def pred T() { del.Decrement(%s) };""" varVal
         let filename = "TestDecrementType.fpl"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -79,7 +79,7 @@ type TestDecrement() =
     [<DataRow("@42", "Decrement(obj)")>]
     [<TestMethod>]
     member this.TestDecrementMixed(varVal, expected:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """def pred T() { del.Decrement(%s) };""" varVal
         let filename = "TestDecrementMixed.fpl"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -99,7 +99,7 @@ type TestDecrement() =
     [<DataRow("@42", "Decrement(Nat)")>]
     [<TestMethod>]
     member this.TestDecrementMixedWithExtensionNat(varVal, expected:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """ext Digits x@/\d+/ -> Nat {return x} def pred T() { del.Decrement(%s) };""" varVal
         let filename = "TestDecrementMixedWithExtensionNat.fpl"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -119,7 +119,7 @@ type TestDecrement() =
     [<DataRow("@42", "Decrement(Digits)")>]
     [<TestMethod>]
     member this.TestDecrementMixedWithExtensionDigits(varVal, expected:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """ext Digits x@/\d+/ -> Digits {return x} def pred T() { del.Decrement(%s) };""" varVal
         let filename = "TestDecrementMixedWithExtensionDigits.fpl"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -139,7 +139,7 @@ type TestDecrement() =
     [<DataRow("@42", "Decrement(42)")>]
     [<TestMethod>]
     member this.TestDecrementName(varVal, expected:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """def pred T() { del.Decrement(%s) };""" varVal
         let filename = "TestDecrementName.fpl"
         prepareFplCode(filename + ".fpl", fplCode, false) 

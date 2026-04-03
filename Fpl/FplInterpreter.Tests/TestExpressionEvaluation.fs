@@ -18,7 +18,7 @@ type TestExpressionEvaluation() =
     [<DataRow("def pred T() { intr };", "T()")>]
     [<TestMethod>]
     member this.TestExpressionEvaluationConstants(fplCode, expected: string) =
-        ad.Clear()
+        
         let filename = "TestExpressionEvaluationConstants"
         prepareFplCode (filename + ".fpl", fplCode, false)
         let r = heap.Root
@@ -47,7 +47,7 @@ type TestExpressionEvaluation() =
     [<DataRow("def pred T() { and(false,false) };", LiteralFalse)>]
     [<TestMethod>]
     member this.TestExpressionEvaluationConjunction(fplCode, expected: string) =
-        ad.Clear()
+        
         let filename = "TestExpressionEvaluationConjunction"
         prepareFplCode (filename + ".fpl", fplCode, false)
 
@@ -72,7 +72,7 @@ type TestExpressionEvaluation() =
     [<DataRow("def pred T() { not ((false)) };", LiteralTrue)>]
     [<TestMethod>]
     member this.TestExpressionEvaluationNegation(fplCode, expected: string) =
-        ad.Clear()
+        
         let filename = "TestExpressionEvaluationNegation"
         prepareFplCode (filename + ".fpl", fplCode, false)
 
@@ -103,7 +103,7 @@ type TestExpressionEvaluation() =
     [<DataRow("def pred T() { or(false,false) };", LiteralFalse)>]
     [<TestMethod>]
     member this.TestExpressionEvaluationDisjunction(fplCode, expected: string) =
-        ad.Clear()
+        
         let filename = "TestExpressionEvaluationDisjunction"
         prepareFplCode (filename + ".fpl", fplCode, false)
 
@@ -136,7 +136,7 @@ type TestExpressionEvaluation() =
     [<DataRow("def pred T() { xor(false,false) };", LiteralFalse)>]
     [<TestMethod>]
     member this.TestExpressionEvaluationExclusiveOr(fplCode, expected: string) =
-        ad.Clear()
+        
         let filename = "TestExpressionEvaluationExclusiveOr"
         prepareFplCode (filename + ".fpl", fplCode, false)
         let r = heap.Root
@@ -163,7 +163,7 @@ type TestExpressionEvaluation() =
     [<DataRow("def pred T() { impl(true,x) };", PrimUndetermined)>]
     [<TestMethod>]
     member this.TestExpressionEvaluationImplication(fplCode, expected: string) =
-        ad.Clear()
+        
         let filename = "TestExpressionEvaluationImplication"
         prepareFplCode (filename + ".fpl", fplCode, false)
 
@@ -191,7 +191,7 @@ type TestExpressionEvaluation() =
     [<DataRow("def pred T() { iif(true,x) };", PrimUndetermined)>]
     [<TestMethod>]
     member this.TestExpressionEvaluationEquivalence(fplCode, expected: string) =
-        ad.Clear()
+        
         let filename = "TestExpressionEvaluationEquivalence"
         prepareFplCode (filename + ".fpl", fplCode, false)
 
@@ -239,7 +239,7 @@ type TestExpressionEvaluation() =
     [<DataRow("19", "def pred T() { dec ~x:pred(y:func(z:obj)->Nat); is(x,pred(a:func(b:obj)->Nat)) };", LiteralTrue)>]
     [<TestMethod>]
     member this.TestExpressionEvaluationIsOperand(no:string, fplCode, expected: string) =
-        ad.Clear()
+        
         let filename = "TestExpressionEvaluationIsOperand"
         prepareFplCode (filename + ".fpl", fplCode, false)
 
@@ -709,7 +709,7 @@ type TestExpressionEvaluation() =
 
     [<TestMethod>]
     member this.TestExpressionEvaluationIsOperandEvenMore(no:string, fplCode, expected: string) =
-        ad.Clear()
+        
         let filename = "TestExpressionEvaluationIsOperand"
         prepareFplCode (filename + ".fpl", fplCode, false)
 
@@ -768,7 +768,7 @@ type TestExpressionEvaluation() =
 
     [<TestMethod>]
     member this.TestExpressionEvaluationIsOperandUndef(no:string, fplCode, expected: string) =
-        ad.Clear()
+        
         let filename = "TestExpressionEvaluationIsOperand"
         prepareFplCode (filename + ".fpl", fplCode, false)
 
@@ -786,7 +786,7 @@ type TestExpressionEvaluation() =
     [<DataRow("def pred T() { dec ~x:pred(y:func()->obj); is(x,pred(y:func()->ind)) };", "pred(func() -> ind)")>]
     [<TestMethod>]
     member this.TestExpressionEvaluationIsOperandRepr(fplCode, expected: string) =
-        ad.Clear()
+        
         let filename = "TestExpressionEvaluationIsOperand"
         prepareFplCode (filename + ".fpl", fplCode, false)
 

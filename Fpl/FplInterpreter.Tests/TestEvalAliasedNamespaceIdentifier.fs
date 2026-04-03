@@ -165,10 +165,10 @@ type TestEvalAliasedNamespaceIdentifier() =
     member this.TestParsedAstsCount(usesClause: string, expected: int) =
         if not TestConfig.IsOffline then 
             let filename = "TestParsedAstsCount.fpl"
-            prepareFplCode (filename, "", true) |> ignore
-            let st = prepareFplCode (filename, sprintf "uses %s;" usesClause, false) 
+            prepareFplCode (filename, sprintf "uses %s;" usesClause, false) 
             let result = heap.ParsedAsts
             Assert.AreEqual<int>(expected, result.Count)
+            prepareFplCode (filename, "", true) |> ignore
 
     [<DataRow("Test1")>]
     [<DataRow("Test1.Test2")>]

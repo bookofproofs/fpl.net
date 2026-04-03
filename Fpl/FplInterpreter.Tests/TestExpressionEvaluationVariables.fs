@@ -16,7 +16,7 @@ type TestExpressionEvaluationVariables() =
     [<DataRow("def pred T() { dec ~x:pred x:=false; x };", LiteralFalse)>]
     [<TestMethod>]
     member this.TestExpressionEvaluationConstants(fplCode, expected: string) =
-        ad.Clear()
+        
         let filename = "TestExpressionEvaluationConstants"
         prepareFplCode (filename + ".fpl", fplCode, false)
 
@@ -48,7 +48,7 @@ type TestExpressionEvaluationVariables() =
     [<DataRow("def pred T() { dec ~x,y:pred x:=false y:=false; and(x,y) };", LiteralFalse)>]
     [<TestMethod>]
     member this.TestExpressionEvaluationConjunction(fplCode, expected: string) =
-        ad.Clear()
+        
         let filename = "TestExpressionEvaluationConjunction1"
         prepareFplCode (filename + ".fpl", fplCode, false)
 
@@ -72,7 +72,7 @@ type TestExpressionEvaluationVariables() =
     [<DataRow("def pred T() { dec ~x:pred x:=false; not ((x)) };", LiteralTrue)>]
     [<TestMethod>]
     member this.TestExpressionEvaluationNegation(fplCode, expected: string) =
-        ad.Clear()
+        
         let filename = "TestExpressionEvaluationNegation"
         prepareFplCode (filename + ".fpl", fplCode, false)
 
@@ -107,7 +107,7 @@ type TestExpressionEvaluationVariables() =
     [<DataRow("def pred T() { dec ~x,y:pred x:=false y:=false; or(x,y) };", LiteralFalse)>]
     [<TestMethod>]
     member this.TestExpressionEvaluationDisjunction(fplCode, expected: string) =
-        ad.Clear()
+        
         let filename = $"TestExpressionEvaluationDisjunction"
         prepareFplCode (filename + ".fpl", fplCode, false)
 
@@ -140,7 +140,7 @@ type TestExpressionEvaluationVariables() =
     [<DataRow("def pred T() { dec ~x,y:pred x:=false y:=false; xor(x,y) };", LiteralFalse)>]
     [<TestMethod>]
     member this.TestExpressionEvaluationExclusiveOr(fplCode, expected: string) =
-        ad.Clear()
+        
         let filename = "TestExpressionEvaluationExclusiveOr"
         prepareFplCode (filename + ".fpl", fplCode, false)
 
@@ -168,7 +168,7 @@ type TestExpressionEvaluationVariables() =
     [<DataRow("def pred T() { dec ~x,y:pred x:=true; impl(x,y) };", PrimUndetermined)>]
     [<TestMethod>]
     member this.TestExpressionEvaluationImplication(fplCode, expected: string) =
-        ad.Clear()
+        
         let filename = "TestExpressionEvaluationImplication"
         prepareFplCode (filename + ".fpl", fplCode, false)
 
@@ -196,7 +196,7 @@ type TestExpressionEvaluationVariables() =
     [<DataRow("def pred T() { dec ~x,y:pred x:=true; iif(x,y) };", PrimUndetermined)>]
     [<TestMethod>]
     member this.TestExpressionEvaluationEquivalence(fplCode, expected: string) =
-        ad.Clear()
+        
         let filename = "TestExpressionEvaluationEquivalence"
         prepareFplCode (filename + ".fpl", fplCode, false)
 

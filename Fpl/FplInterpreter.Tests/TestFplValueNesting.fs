@@ -16,7 +16,7 @@ type TestFplValueNesting() =
     [<DataRow("axiom X { true };")>]
     [<TestMethod>]
     member this.TestAxiomHasValue(varVal) =
-        ad.Clear()
+        
         let fplCode = sprintf "%s" varVal
         let filename = "TestAxiomHasValue"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -33,7 +33,7 @@ type TestFplValueNesting() =
     [<DataRow("lem Le2 { true } proof Le2$1 {  1. |- trivial  2. 1, 2, 3 |- trivial 3. |- trivial qed };")>]
     [<TestMethod>]
     member this.TestProofArgumentsInScope(varVal) =
-        ad.Clear()
+        
         let fplCode = sprintf "%s" varVal
         let filename = "TestProofArgumentsInScope"
         prepareFplCode(filename + ".fpl", fplCode, false) 

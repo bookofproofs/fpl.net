@@ -19,7 +19,7 @@ type TestDecrementWrapper() =
     [<DataRow("@42", "41")>]
     [<TestMethod>]
     member this.TestDecrementWrapperRepresent(varVal, expected:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """ext Digits x@/\d+/ -> Digits {ret x} def func Decr(x:Digits)->Digits { ret del.Decrement(x) } def func T()->Digits { ret Decr(%s) };""" varVal
         let filename = "TestDecrementWrapperRepresent.fpl"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -39,7 +39,7 @@ type TestDecrementWrapper() =
     [<DataRow("@42", LiteralObj)>]
     [<TestMethod>]
     member this.TestDecrementWrapperType(varVal, expected:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """ext Digits x@/\d+/ -> obj {ret x} def func Decr(x:obj)->obj { ret del.Decrement(x) } def func T()->obj { ret Decr(%s) };""" varVal
         let filename = "TestDecrementWrapperType.fpl"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -60,7 +60,7 @@ type TestDecrementWrapper() =
     [<DataRow("@42", "Decr(obj)")>]
     [<TestMethod>]
     member this.TestDecrementWrapperMixed(varVal, expected:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """def func Decr(x:obj)->obj { ret del.Decrement(x) } def func T()->obj { ret Decr(%s) };""" varVal
         let filename = "TestDecrementWrapperMixed.fpl"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -81,7 +81,7 @@ type TestDecrementWrapper() =
     [<DataRow("@42", "Decr(Nat)")>]
     [<TestMethod>]
     member this.TestDecrementWrapperMixedWithExtension(varVal, expected:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """ext Digits x@/\d+/ -> Nat {ret x} def func Decr(x:obj)->obj { ret del.Decrement(x) } def func T()->obj { ret Decr(%s) };""" varVal
         let filename = "TestDecrementWrapperMixedWithExtension.fpl"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -103,7 +103,7 @@ type TestDecrementWrapper() =
     [<DataRow("@42", "Decr(42)")>]
     [<TestMethod>]
     member this.TestDecrementWrapperName(varVal, expected:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """ext Digits x@/\d+/ -> obj {ret x} def func Decr(x:obj)->obj { ret del.Decrement(x) } def func T()->obj { ret Decr(%s) };""" varVal
         let filename = "TestDecrementWrapperName.fpl"
         prepareFplCode(filename + ".fpl", fplCode, false) 

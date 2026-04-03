@@ -16,7 +16,7 @@ type TestInfixOperations() =
     [<DataRow("""def pred T1() { (@1 = @1) }""", LiteralTrue)>]
     [<TestMethod>]
     member this.TestEqualityPredicate(varVal, expected:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """def pred Equal (x,y: tpl) infix "=" 0 { del.Equal(x,y) } %s;""" varVal
         let filename = "TestEqualityPredicate"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -34,7 +34,7 @@ type TestInfixOperations() =
     [<DataRow("00d", """def pred T1() { (true => true) };""", LiteralTrue)>]
     [<TestMethod>]
     member this.TestImplicationCallsFplCommons(no:string, varVal, expected:string) =
-        ad.Clear()
+        
         if offlineWatcher.OfflineMode then 
             ()
         else
@@ -55,7 +55,7 @@ type TestInfixOperations() =
     [<DataRow("01d", """def pred T1() { (true <=> true) };""", LiteralTrue)>]
     [<TestMethod>]
     member this.TestEquivalenceCallsFplCommons(no:string, varVal, expected:string) =
-        ad.Clear()
+        
         if offlineWatcher.OfflineMode then 
             ()
         else
@@ -76,7 +76,7 @@ type TestInfixOperations() =
     [<DataRow("01a", """def pred Neg(x:tpl) {not x} def pred T1() { ( Neg(false) ) };""", LiteralTrue)>]
     [<TestMethod>]
     member this.TestNegationCalls(no:string, varVal, expected:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """%s""" varVal
         let filename = "TestNegationCalls"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -102,7 +102,7 @@ type TestInfixOperations() =
     [<DataRow("08d", """def pred T1() { (false and false) };""", LiteralFalse)>]
     [<TestMethod>]
     member this.TestConjunctionCallsFplCommons(no:string, varVal, expected:string) =
-        ad.Clear()
+        
         if offlineWatcher.OfflineMode then 
             ()
         else
@@ -132,7 +132,7 @@ type TestInfixOperations() =
     [<DataRow("08d", """def pred T1() { (false and false) };""", LiteralFalse)>]
     [<TestMethod>]
     member this.TestConjunctionCalls(no:string, varVal, expected:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """def pred And(x,y: pred) infix "and" 7 { and (x,y) } %s""" varVal
         let filename = "TestConjunctionCalls"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -159,7 +159,7 @@ type TestInfixOperations() =
     [<DataRow("08d", """def pred T1() { (false or false) };""", LiteralFalse)>]
     [<TestMethod>]
     member this.TestDisjunctionCallsFplCommons(no:string, varVal, expected:string) =
-        ad.Clear()
+        
         if offlineWatcher.OfflineMode then 
             ()
         else
@@ -188,7 +188,7 @@ type TestInfixOperations() =
     [<DataRow("08d", """def pred T1() { (false xor false) };""", LiteralFalse)>]
     [<TestMethod>]
     member this.TestExDisjunctionCallsFplCommons(no:string, varVal, expected:string) =
-        ad.Clear()
+        
         if offlineWatcher.OfflineMode then 
             ()
         else

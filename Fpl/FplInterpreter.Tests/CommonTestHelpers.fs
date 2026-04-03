@@ -50,7 +50,6 @@ let filterByErrorCode (input: Diagnostics) errCode =
 let fplCodeNeedsOnline (fplCode:string) = fplCode.Contains("uses Fpl")
 
 let prepareFplCode (filename: string, fplCode: string, delete: bool) =
-    ad.Clear()
     let currDir = Directory.GetCurrentDirectory()
 
     printf "\n"

@@ -546,7 +546,7 @@ type TestFplValueScopeParent() =
     [<DataRow("base34", "is(x, Set)")>]
     [<TestMethod>]
     member this.TestPredicate(var, varVal) =
-        ad.Clear()
+        
         let fplCode = sprintf "def pred T1() { %s };" varVal
         let filename = "TestPredicateParent"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -628,7 +628,7 @@ type TestFplValueScopeParent() =
     [<DataRow("base6", "base.E(true, undef, false)")>]
     [<TestMethod>]
     member this.TestBaseConstructorCall(var, varVal) =
-        ad.Clear()
+        
         let fplCode = sprintf """
                         def cl B {intr}
                         def cl C {intr}
@@ -672,7 +672,7 @@ type TestFplValueScopeParent() =
     [<DataRow("base7", "del.E(true, undef, false)")>] 
     [<TestMethod>]
     member this.TestDelegate(var, varVal) =
-        ad.Clear()
+        
         let fplCode = sprintf "def pred T1() { %s };" varVal
         let filename = "TestDelegateParent"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -705,7 +705,7 @@ type TestFplValueScopeParent() =
     [<DataRow("base9", """def func T1 ()->obj prefix "-" {intr};""")>]
     [<TestMethod>]
     member this.TestFixNotationParent(var, varVal) =
-        ad.Clear()
+        
         let fplCode = sprintf "%s;" varVal
         let filename = "TestFixNotationParent"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -745,7 +745,7 @@ type TestFplValueScopeParent() =
     [<DataRow("base10", """def cl A {intr} def func T()->pred(f:func(x:A)->A) {intr};""")>]
     [<TestMethod>]
     member this.TestMapping(var, varVal) =
-        ad.Clear()
+        
         let fplCode = sprintf "%s;" varVal
         let filename = "TestMappingParent"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -774,7 +774,7 @@ type TestFplValueScopeParent() =
     [<DataRow("base5", """100. |- revoke 3""")>]
     [<TestMethod>]
     member this.TestArgumentParent(var, argExpression) =
-        ad.Clear()
+        
         let fplCode = sprintf """proof T$1 { %s };""" argExpression
         let filename = "TestArgumentParent"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -799,7 +799,7 @@ type TestFplValueScopeParent() =
     [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
     [<TestMethod>]
     member this.TestLanguageParent(var, predName, predDecl, trslCode) =
-        ad.Clear()
+        
         let fplCode = sprintf """loc %s := %s;""" predDecl trslCode
         let filename = "TestLanguageParent"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -826,7 +826,7 @@ type TestFplValueScopeParent() =
     [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
     [<TestMethod>]
     member this.TestLocalizationParent(var, predName, predDecl, trslCode) =
-        ad.Clear()
+        
         let fplCode = sprintf """loc %s := %s;""" predDecl trslCode
         let filename = "TestLocalizationParent"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -852,7 +852,7 @@ type TestFplValueScopeParent() =
     [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
     [<TestMethod>]
     member this.TestTranslationParent(var, predName, predDecl, trslCode) =
-        ad.Clear()
+        
         let fplCode = sprintf """loc %s := %s;""" predDecl trslCode
         let filename = "TestTranslationParent"
         prepareFplCode(filename + ".fpl", fplCode, false) 

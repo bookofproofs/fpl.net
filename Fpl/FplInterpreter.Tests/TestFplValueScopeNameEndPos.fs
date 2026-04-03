@@ -674,7 +674,7 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("base34", "is(x, Set)")>]
     [<TestMethod>]
     member this.TestPredicate(var, varVal) =
-        ad.Clear()
+        
         let fplCode = sprintf "def pred T1() { %s };" varVal
         let filename = "TestPredicateNameEndPos.fpl"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -756,7 +756,7 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("base6", "base.E(true, undef, false)")>]
     [<TestMethod>]
     member this.TestBaseConstructorCallNameEndPos(var, varVal) =
-        ad.Clear()
+        
         let fplCode = sprintf """
                         def cl B {intr}
                         def cl C {intr}
@@ -806,7 +806,7 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("base7", "del.E(true, undef, false)")>] 
     [<TestMethod>]
     member this.TestDelegate(var, varVal) =
-        ad.Clear()
+        
         let fplCode = sprintf "def pred T1() { %s };" varVal
         let filename = "TestDelegateNameEndPos"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -839,7 +839,7 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("base9", """def func T1 ()->obj prefix "-" {intr};""")>]
     [<TestMethod>]
     member this.TestFixNotationEndPos(var, varVal) =
-        ad.Clear()
+        
         let fplCode = sprintf "%s;" varVal
         let filename = "TestFixNotationNameEndPos"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -899,7 +899,7 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("base10", """def cl A {intr} def func T()->pred(f:func(x:A)->A) {intr};""")>]
     [<TestMethod>]
     member this.TestMapping(var, varVal) =
-        ad.Clear()
+        
         let fplCode = sprintf "%s;" varVal
         let filename = "TestMappingNameEndPos"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -928,7 +928,7 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("base5", """100. |- revoke 3""")>]
     [<TestMethod>]
     member this.TestArgumentNameEndPos(var, argExpression) =
-        ad.Clear()
+        
         let fplCode = sprintf """proof T$1 { %s };""" argExpression
         let filename = "TestArgumentNameEndPos"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -953,7 +953,7 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
     [<TestMethod>]
     member this.TestLanguageNameEndPos(var, predName, predDecl, trslCode) =
-        ad.Clear()
+        
         let fplCode = sprintf """loc %s := %s;""" predDecl trslCode
         let filename = "TestLanguageNameEndPos"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -980,7 +980,7 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
     [<TestMethod>]
     member this.TestLocalizationNameEndPos(var, predName, predDecl, trslCode) =
-        ad.Clear()
+        
         let fplCode = sprintf """loc %s := %s;""" predDecl trslCode
         let filename = "TestLocalizationNameEndPos"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -1006,7 +1006,7 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
     [<TestMethod>]
     member this.TestTranslationNameEndPos(var, predName, predDecl, trslCode) =
-        ad.Clear()
+        
         let fplCode = sprintf """loc %s := %s;""" predDecl trslCode
         let filename = "TestTranslationNameEndPos"
         prepareFplCode(filename + ".fpl", fplCode, false) 

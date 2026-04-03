@@ -557,7 +557,7 @@ type TestFplValueScopeBlockType() =
     [<DataRow("base34", "is(x, Set)")>]
     [<TestMethod>]
     member this.TestPredicate(var, varVal) =
-        ad.Clear()
+        
         let fplCode = sprintf "def pred T1() { %s };" varVal
         let filename = "TestPredicateBlockType"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -639,7 +639,7 @@ type TestFplValueScopeBlockType() =
     [<DataRow("base6", "base.E(true, undef, false)")>]
     [<TestMethod>]
     member this.TestBaseConstructorCallBlockType(var, varVal) =
-        ad.Clear()
+        
         let fplCode = sprintf """
                         def cl B {intr}
                         def cl C {intr}
@@ -683,7 +683,7 @@ type TestFplValueScopeBlockType() =
     [<DataRow("base7", "del.E(true, undef, false)")>] 
     [<TestMethod>]
     member this.TestDelegate(var, varVal) =
-        ad.Clear()
+        
         let fplCode = sprintf "def pred T1() { %s };" varVal
         let filename = "TestDelegateBlockType"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -716,7 +716,7 @@ type TestFplValueScopeBlockType() =
     [<DataRow("base9", """def func T1 ()->obj prefix "-" {intr};""")>]
     [<TestMethod>]
     member this.TestFixNotationBlockType(var, varVal) =
-        ad.Clear()
+        
         let fplCode = sprintf "%s;" varVal
         let filename = "TestFixNotationBlockType"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -756,7 +756,7 @@ type TestFplValueScopeBlockType() =
     [<DataRow("base10", """def cl A {intr} def func T()->pred(f:func(x:A)->A) {intr};""")>]
     [<TestMethod>]
     member this.TestMapping(var, varVal) =
-        ad.Clear()
+        
         let fplCode = sprintf "%s;" varVal
         let filename = "TestMappingBlockType"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -785,7 +785,7 @@ type TestFplValueScopeBlockType() =
     [<DataRow("base5", """100. |- revoke 3""", 0)>]
     [<TestMethod>]
     member this.TestArgumentNumberOfJustifications(var, argExpression, expNumber:int) =
-        ad.Clear()
+        
         let fplCode = sprintf """proof T$1 { %s };""" argExpression
         let filename = "TestArgumentNumberOfJustifications"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -805,7 +805,7 @@ type TestFplValueScopeBlockType() =
     [<DataRow("base5", """100. |- revoke 3""")>]
     [<TestMethod>]
     member this.TestArgumentBlockType(var, argExpression) =
-        ad.Clear()
+        
         let fplCode = sprintf """proof T$1 { %s };""" argExpression
         let filename = "TestArgumentBlockType"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -830,7 +830,7 @@ type TestFplValueScopeBlockType() =
     [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
     [<TestMethod>]
     member this.TestLanguageBlockType(var, predName, predDecl, trslCode) =
-        ad.Clear()
+        
         let fplCode = sprintf """loc %s := %s;""" predDecl trslCode
         let filename = "TestLanguageBlockType"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -857,7 +857,7 @@ type TestFplValueScopeBlockType() =
     [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
     [<TestMethod>]
     member this.TestLocalizationBlockType(var, predName, predDecl, trslCode) =
-        ad.Clear()
+        
         let fplCode = sprintf """loc %s := %s;""" predDecl trslCode
         let filename = "TestLocalizationBlockType"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -883,7 +883,7 @@ type TestFplValueScopeBlockType() =
     [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
     [<TestMethod>]
     member this.TestTranslationBlockType(var, predName, predDecl, trslCode) =
-        ad.Clear()
+        
         let fplCode = sprintf """loc %s := %s;""" predDecl trslCode
         let filename = "TestTranslationBlockType"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -912,7 +912,7 @@ type TestFplValueScopeBlockType() =
     [<DataRow("@42", "")>]
     [<TestMethod>]
     member this.TestDecrement(varVal, expected:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """def pred T() { del.Decrement(%s) };""" varVal
         let filename = "TestDecrementBlockType.fpl"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -933,7 +933,7 @@ type TestFplValueScopeBlockType() =
     [<DataRow("@42", "")>]
     [<TestMethod>]
     member this.TestExtensionObj(varVal, expected:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """def pred T() { %s };""" varVal
         let filename = "TestExtensionObjBlockType.fpl"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -952,7 +952,7 @@ type TestFplValueScopeBlockType() =
     [<DataRow("base5", "$4")>]
     [<TestMethod>]
     member this.TestMCaseStatement(var, input) =
-        ad.Clear()
+        
         let fplCode = sprintf """
                 def pred Equal (x,y: tpl) infix "=" 50 
                 {
@@ -993,7 +993,7 @@ type TestFplValueScopeBlockType() =
     [<DataRow("base5", "$4")>]
     [<TestMethod>]
     member this.TestMapCasesBlockType(var, input) =
-        ad.Clear()
+        
         let fplCode = sprintf """
                 def pred Equal (x,y: tpl) infix "=" 50 
                 {
@@ -1035,7 +1035,7 @@ type TestFplValueScopeBlockType() =
     [<DataRow("base5", "$4", 1)>]
     [<TestMethod>]
     member this.TestCaseStatement(var, input, (output:int)) =
-        ad.Clear()
+        
         let fplCode = sprintf """
                 def pred Equal (x,y: tpl) infix "=" 50 
                 {

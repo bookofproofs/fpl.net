@@ -19,7 +19,6 @@ type SymbolTableNavigation() =
     [<TestMethod>]
     member this.UsesClauseCausesDownloads() =
         if not offlineWatcher.OfflineMode then 
-            ad.Clear()
             // first delete lib and repo subdirectories (if any)
             let currentPath = Directory.GetCurrentDirectory()
             let currentPathLib = Path.Combine(currentPath,"lib")
@@ -42,7 +41,6 @@ type SymbolTableNavigation() =
         if not offlineWatcher.OfflineMode then 
             // prepare test, making sure there is an empty 
             // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
-            ad.Clear()
             // first delete lib and repo subdirectories (if any)
             let currentPath = Directory.GetCurrentDirectory()
             let currentPathLib = Path.Combine(currentPath,"lib")
@@ -72,7 +70,6 @@ type SymbolTableNavigation() =
         if not offlineWatcher.OfflineMode then 
             // prepare test, making sure there is an empty 
             // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
-            ad.Clear()
             // first delete lib and repo subdirectories (if any)
             let currentPath = Directory.GetCurrentDirectory()
             let currentPathLib = Path.Combine(currentPath,"lib")
@@ -102,7 +99,6 @@ type SymbolTableNavigation() =
         if not offlineWatcher.OfflineMode then 
             // prepare test, making sure there is an empty 
             // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
-            ad.Clear()
             // first delete lib and repo subdirectories (if any)
             let currentPath = Directory.GetCurrentDirectory()
             let currentPathLib = Path.Combine(currentPath,"lib")
@@ -131,7 +127,6 @@ type SymbolTableNavigation() =
         if not offlineWatcher.OfflineMode then 
             // prepare test, making sure there is an empty 
             // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
-            ad.Clear()
             // first delete lib and repo subdirectories (if any)
             let currentPath = Directory.GetCurrentDirectory()
             let currentPathLib = Path.Combine(currentPath,"lib")
@@ -179,7 +174,6 @@ type SymbolTableNavigation() =
         if not offlineWatcher.OfflineMode then 
             // prepare test, making sure there is an empty 
             // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
-            ad.Clear()
             // first delete lib and repo subdirectories (if any)
             let currentPath = Directory.GetCurrentDirectory()
             let currentPathLib = Path.Combine(currentPath,"lib")
@@ -218,7 +212,6 @@ type SymbolTableNavigation() =
         if not offlineWatcher.OfflineMode then 
             // prepare test, making sure there is an empty 
             // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
-            ad.Clear()
             // first delete lib and repo subdirectories (if any)
             let currentPath = Directory.GetCurrentDirectory()
             let currentPathLib = Path.Combine(currentPath,"lib")
@@ -254,7 +247,6 @@ type SymbolTableNavigation() =
         if not offlineWatcher.OfflineMode then 
             // prepare test, making sure there is an empty 
             // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
-            ad.Clear()
             // first delete lib and repo subdirectories (if any)
             let currentPath = Directory.GetCurrentDirectory()
             let currentPathLib = Path.Combine(currentPath,"lib")
@@ -294,7 +286,6 @@ type SymbolTableNavigation() =
         if not offlineWatcher.OfflineMode then 
             // prepare test, making sure there is an empty 
             // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
-            ad.Clear()
             // first delete lib and repo subdirectories (if any)
             let currentPath = Directory.GetCurrentDirectory()
             let currentPathLib = Path.Combine(currentPath,"lib")
@@ -335,7 +326,6 @@ type SymbolTableNavigation() =
         if not offlineWatcher.OfflineMode then 
             // prepare test, making sure there is an empty 
             // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
-            ad.Clear()
             // first delete lib and repo subdirectories (if any)
             let currentPath = Directory.GetCurrentDirectory()
             let currentPathLib = Path.Combine(currentPath,"lib")
@@ -376,7 +366,6 @@ type SymbolTableNavigation() =
         if not offlineWatcher.OfflineMode then 
             // prepare test, making sure there is an empty 
             // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
-            ad.Clear()
             // first delete lib and repo subdirectories (if any)
             let currentPath = Directory.GetCurrentDirectory()
             let currentPathLib = Path.Combine(currentPath,"lib")
@@ -417,7 +406,6 @@ type SymbolTableNavigation() =
         if not offlineWatcher.OfflineMode then 
             // prepare test, making sure there is an empty 
             // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
-            ad.Clear()
             // first delete lib and repo subdirectories (if any)
             let currentPath = Directory.GetCurrentDirectory()
             let currentPathLib = Path.Combine(currentPath,"lib")
@@ -460,7 +448,6 @@ type SymbolTableNavigation() =
         if not offlineWatcher.OfflineMode then 
             // prepare test, making sure there is an empty 
             // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
-            ad.Clear()
             // first delete lib and repo subdirectories (if any)
             let currentPath = Directory.GetCurrentDirectory()
             let currentPathLib = Path.Combine(currentPath,"lib")
@@ -506,7 +493,6 @@ type SymbolTableNavigation() =
         if not offlineWatcher.OfflineMode then 
             // prepare test, making sure there is an empty 
             // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
-            ad.Clear()
             // first delete lib and repo subdirectories (if any)
             let currentPath = Directory.GetCurrentDirectory()
             let currentPathLib = Path.Combine(currentPath,"lib")

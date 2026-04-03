@@ -403,7 +403,6 @@ type SymbolTableStructure() =
             failwith $"Unknown node type {nodeType}"
 
     let testSkeleton nodeType filename fplCode identifier = 
-        ad.Clear()
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let nodeName = (getName nodeType).[0]
         let infiniteLoop = new HashSet<obj>()

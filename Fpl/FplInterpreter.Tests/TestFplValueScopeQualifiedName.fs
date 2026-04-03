@@ -530,7 +530,7 @@ type TestFplValueScopeQualifiedName() =
     [<DataRow("base34", "is(x, Set)")>]
     [<TestMethod>]
     member this.TestPredicate(var, varVal) =
-        ad.Clear()
+        
         let fplCode = sprintf "def pred T1() { %s };" varVal
         let filename = "TestPredicateQualifiedName"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -612,7 +612,7 @@ type TestFplValueScopeQualifiedName() =
     [<DataRow("base6", "base.E(true, undef, false)")>]
     [<TestMethod>]
     member this.TestBaseConstructorCall(var, varVal) =
-        ad.Clear()
+        
         let fplCode = sprintf """
                         def cl B {intr}
                         def cl C {intr}
@@ -656,7 +656,7 @@ type TestFplValueScopeQualifiedName() =
     [<DataRow("base7", "del.E(true, undef, false)")>] 
     [<TestMethod>]
     member this.TestDelegate(var, varVal) =
-        ad.Clear()
+        
         let fplCode = sprintf "def pred T1() { dec ~a:T1 ~b:pred ~c:Nat ~d:ind; %s };" varVal
         let filename = "TestDelegateQualifiedName"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -689,7 +689,7 @@ type TestFplValueScopeQualifiedName() =
     [<DataRow("base9", """def func T1 ()->obj prefix "-" {intr};""")>]
     [<TestMethod>]
     member this.TestFixNotationQualifiedName(var, varVal) =
-        ad.Clear()
+        
         let fplCode = sprintf "%s;" varVal
         let filename = "TestFixNotationQualifiedName"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -729,7 +729,7 @@ type TestFplValueScopeQualifiedName() =
     [<DataRow("base10", """def cl A {intr} def func T()->pred(f:func(x:A)->A) {intr};""")>]
     [<TestMethod>]
     member this.TestMappingQualifiedName(var, varVal) =
-        ad.Clear()
+        
         let fplCode = sprintf "%s;" varVal
         let filename = "TestMappingQualifiedName"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -758,7 +758,7 @@ type TestFplValueScopeQualifiedName() =
     [<DataRow("base5", """100. |- revoke 3""")>]
     [<TestMethod>]
     member this.TestArgumentQualifiedName(var, argExpression) =
-        ad.Clear()
+        
         let fplCode = sprintf """proof T$1 { %s };""" argExpression
         let filename = "TestArgumentQualifiedName"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -783,7 +783,7 @@ type TestFplValueScopeQualifiedName() =
     [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
     [<TestMethod>]
     member this.TestLanguageQualifiedName(var, predName, predDecl, trslCode) =
-        ad.Clear()
+        
         let fplCode = sprintf """loc %s := %s;""" predDecl trslCode
         let filename = "TestLanguageQualifiedName"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -810,7 +810,7 @@ type TestFplValueScopeQualifiedName() =
     [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
     [<TestMethod>]
     member this.TestLocalizationQualifiedName(var, predName, predDecl, trslCode) =
-        ad.Clear()
+        
         let fplCode = sprintf """loc %s := %s;""" predDecl trslCode
         let filename = "TestLocalizationQualifiedName"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -836,7 +836,7 @@ type TestFplValueScopeQualifiedName() =
     [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
     [<TestMethod>]
     member this.TestTranslationQualifiedName(var, predName, predDecl, trslCode) =
-        ad.Clear()
+        
         let fplCode = sprintf """loc %s := %s;""" predDecl trslCode
         let filename = "TestTranslationQualifiedName"
         prepareFplCode(filename + ".fpl", fplCode, false) 

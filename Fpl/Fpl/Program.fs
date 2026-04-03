@@ -21,7 +21,6 @@ let prepareFplCode(fplCode:string, delete:bool) =
 
     File.WriteAllText(Path.Combine(currDir, "Test.fpl"), fplCode)
     let uri = PathEquivalentUri(Path.Combine(currDir, "Test.fpl"))
-    ad.Clear()
     let fplLibUrl =
         "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
     if delete then 

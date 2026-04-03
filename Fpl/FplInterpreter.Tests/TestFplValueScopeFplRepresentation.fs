@@ -541,7 +541,7 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("base34", "is(x, Set)")>]
     [<TestMethod>]
     member this.TestExpressionRepresent(var, varVal) =
-        ad.Clear()
+        
         let fplCode = sprintf "def pred T1() { %s };" varVal
         let filename = "TestExpressionRepresent.fpl"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -624,7 +624,7 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("base6", "base.E(true, undef, false)")>]
     [<TestMethod>]
     member this.TestBaseConstructorCall(var, varVal) =
-        ad.Clear()
+        
         let fplCode = sprintf """
                         def cl B {intr}
                         def cl C {intr}
@@ -673,7 +673,7 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("base10", """def cl A def func T()->pred(f:func(x:A)->A) {intr};""")>]
     [<TestMethod>]
     member this.TestMapping(var, varVal) =
-        ad.Clear()
+        
         let fplCode = sprintf "%s;" varVal
         let filename = "TestMappingRepresentation"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -705,7 +705,7 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("base7", "del.E(true, undef, false)")>] 
     [<TestMethod>]
     member this.TestDelegate(var, varVal) =
-        ad.Clear()
+        
         let fplCode = sprintf "def pred T1() { %s };" varVal
         let filename = "TestDelegateFplRepresentation"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -740,7 +740,7 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("base9", """def func T1 ()->obj prefix "-" {intr};""")>]
     [<TestMethod>]
     member this.TestFixNotationRepresentation(var, varVal) =
-        ad.Clear()
+        
         let fplCode = sprintf "%s;" varVal
         let filename = "TestFixNotationFplRepresentation"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -778,7 +778,7 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("varPredUnset", """def pred T1() { dec ~x:pred; true};""")>]
     [<TestMethod>]
     member this.TestVariableRepresentationOtherThanObjects(var, varVal) =
-        ad.Clear()
+        
         let fplCode = sprintf "%s;" varVal
         let filename = "TestVariableRepresentationOtherThanObjects"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -818,7 +818,7 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("dI2", """def cl A def cl B: A def cl D: B {ctor D() {dec base.B(); }} def pred T() {dec ~dI2:D dI2:=D(); true};""", """D()""")>]  
     [<TestMethod>]
     member this.TestVariableRepresentationObjects(var, fplCode:string, expected:string) =
-        ad.Clear()
+        
         let filename = "TestVariableRepresentationObjects"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -837,7 +837,7 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("base5", "$4", LiteralUndef)>]
     [<TestMethod>]
     member this.TestMCaseStatement(var, input, (output:string)) =
-        ad.Clear()
+        
         let fplCode = sprintf """
                 def pred Equal (x,y: tpl) infix "=" 50 
                 {
@@ -878,7 +878,7 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("base5", "$4", "")>]
     [<TestMethod>]
     member this.TestConditionResultStatement(var, input, (output:string)) =
-        ad.Clear()
+        
         let fplCode = sprintf """
                 def pred Equal (x,y: tpl) infix "=" 50 
                 {
@@ -920,7 +920,7 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("00", "dec ~x:pred x:=false;",  LiteralFalse)>]
     [<TestMethod>]
     member this.TestAssignmentVariableReferenceTheSame(no:string, input, (expected:string)) =
-        ad.Clear()
+        
         let fplCode = sprintf "def pred T() {%s true};" input
         let filename = "TestAssignment"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -942,7 +942,7 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("01", "dec ~x:ind x:=$42;",  "$42")>]
     [<TestMethod>]
     member this.TestAssignmentValue(no:string, input, (expected:string)) =
-        ad.Clear()
+        
         let fplCode = sprintf "def pred T() {%s true};" input
         let filename = "TestAssignment"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -967,7 +967,7 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("02a", "T() -> A", "def cl A def func S()->A def func T()->A {dec ~x:A x:=S(); return x};",  """S()""")>]
     [<TestMethod>]
     member this.TestAssignedValuePassedToEnclosingBlock(no:string, enclosing:string, fplCode, (expected:string)) =
-        ad.Clear()
+        
         let filename = "TestAssignment"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -980,7 +980,7 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("00", "dec ~x:pred x:=false;",  true)>]
     [<TestMethod>]
     member this.TestAssignmentVariableInitialized(no:string, input, (expected:bool)) =
-        ad.Clear()
+        
         let fplCode = sprintf "def pred T() {%s true};" input
         let filename = "TestAssignmentVariableInitialized"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -1028,7 +1028,7 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("ass08e", """def pred A(a:ind) def pred P(x:pred(b:ind)) {dec x:=A; true}""", "A(undet)")>] // pred() does not match pred, therefore assignment doesn't work
     [<TestMethod>]
     member this.TestAssignementOfConstantsRepresent(var, input, output:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """%s;""" input 
         let filename = "TestAssignementOfConstantsRepresent"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -1059,7 +1059,7 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("02g", "dec ~u,v:ind u:=$1 v:=$1; mcases (|(v = v): $42 ? $1)",  "$42")>]
     [<TestMethod>]
     member this.TestEquality(no:string, input, (output:string)) =
-        ad.Clear()
+        
         let fplCode = sprintf """
                 def pred Equal (x,y: tpl) infix "=" 50 
                 {
