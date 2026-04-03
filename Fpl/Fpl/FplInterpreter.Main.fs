@@ -17,7 +17,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 module FplInterpreter.Main
 open System
 open ErrDiagnostics
-open FplInterpreter.Globals.ST
 open FplInterpreter.Globals.Heap
 open FplInterpreterUsesClause
 open FplInterpreterBuildingBlocks
@@ -28,7 +27,7 @@ let fplInterpreter input (uri:PathEquivalentUri) fplLibUrl =
         heap.ClearAll()
         if heap.SymbolTable.MainTheory = String.Empty then
             heap.SymbolTable.MainTheory <- uri.TheoryName
-        loadAllUsesClauses heap.SymbolTable input uri fplLibUrl 
+        loadAllUsesClauses input uri fplLibUrl 
         evaluateSymbolTable heap.SymbolTable
     with ex -> 
         emitUnexpectedErrorDiagnostics (ex.Message + Environment.NewLine + ex.StackTrace)

@@ -8,9 +8,9 @@ open System.Collections.Generic
 open System
 open FParsec
 open FplGrammarTypes
+open FplInterpreterDiagnosticsEmitter
 open FplInterpreterAstPreprocessing
 open FplInterpreter.Globals.Debug
-open FplInterpreter.Globals.ST
 open FplInterpreter.Globals.Heap
 open ErrDiagnostics
 
@@ -334,7 +334,7 @@ let private rearrangeList element list =
     let beforeElement = list |> List.takeWhile ((<>) element)
     afterElement @ beforeElement
 
-let garbageCollector (st:SymbolTable) (uriToBeReset:PathEquivalentUri) = 
+let garbageCollector (uriToBeReset:PathEquivalentUri) = 
     let referencedAstsOfCurrentTheory currTheory = 
         match heap.ParsedAsts.TryFindAstById(currTheory) with
         | Some pa -> pa.Sorting.ReferencedAsts
@@ -363,7 +363,7 @@ let garbageCollector (st:SymbolTable) (uriToBeReset:PathEquivalentUri) =
                 List.fold (findComponent parsedAsts) newVisited node.Sorting.ReferencedAsts
             | None -> visited 
 
-    match heap.ParsedAsts.TryFindAstById(st.MainTheory) with
+    match heap.ParsedAsts.TryFindAstById(heap.SymbolTable.MainTheory) with
     | Some mainTheory -> 
         removeNotReferencedAsts mainTheory.Id
         let astComponent = findComponent heap.ParsedAsts Set.empty mainTheory.Id
@@ -379,8 +379,8 @@ let garbageCollector (st:SymbolTable) (uriToBeReset:PathEquivalentUri) =
             match heap.ParsedAsts.TryFindAstById theoryName with
             | Some pa ->
                 ad.ResetStream(pa.Parsing.Uri)
-                if st.Root.Scope.ContainsKey(theoryName) then
-                    st.Root.Scope.Remove theoryName |> ignore
+                if heap.Root.Scope.ContainsKey(theoryName) then
+                    heap.Root.Scope.Remove theoryName |> ignore
                 heap.ParsedAsts.RemoveAll (fun pAst -> pAst.Id = theoryName) |> ignore
             | None -> ()
         ) |> ignore
@@ -388,7 +388,7 @@ let garbageCollector (st:SymbolTable) (uriToBeReset:PathEquivalentUri) =
 
     match heap.ParsedAsts.TryFindAstById(uriToBeReset.TheoryName) with
     | Some theoryToBeReset -> 
-        if st.Root.Scope.ContainsKey(theoryToBeReset.Id) then
+        if heap.Root.Scope.ContainsKey(theoryToBeReset.Id) then
             theoryToBeReset.Status <- ParsedAstStatus.UsesClausesEvaluated
     | None -> ()
 
@@ -397,7 +397,7 @@ let garbageCollector (st:SymbolTable) (uriToBeReset:PathEquivalentUri) =
 /// Parses the input at Uri and loads all referenced namespaces until
 /// each of them was loaded. If a referenced namespace contains even more uses clauses,
 /// their namespaces will also be loaded. The result is a list of ParsedAst objects.
-let loadAllUsesClauses (st:SymbolTable) input (uri:PathEquivalentUri) fplLibUrl = 
+let loadAllUsesClauses input (uri:PathEquivalentUri) fplLibUrl = 
     ad.CurrentUri <- uri
     let sources = acquireSources uri fplLibUrl offlineWatcher.OfflineMode
     let currentName = addOrUpdateParsedAst input uri heap.ParsedAsts
@@ -419,7 +419,7 @@ let loadAllUsesClauses (st:SymbolTable) input (uri:PathEquivalentUri) fplLibUrl 
             ) |> ignore
         | None -> 
             found <- false
-    garbageCollector st uri
+    garbageCollector uri
     if isCircular heap.ParsedAsts then
         let cycle = findCycle heap.ParsedAsts
         match cycle with
@@ -434,17 +434,7 @@ let loadAllUsesClauses (st:SymbolTable) input (uri:PathEquivalentUri) fplLibUrl 
                         pa.Sorting.EANIList |> List.filter (fun eani -> eani.Name = circularReferencedName)
                     if circularEaniReferenceList.Length > 0 then 
                         let circularEaniReference = circularEaniReferenceList |> List.head
-                        let diagnostic =
-                                { 
-                                    Diagnostic.Uri = ad.CurrentUri
-                                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
-                                    Diagnostic.Severity = DiagnosticSeverity.Error
-                                    Diagnostic.StartPos = circularEaniReference.StartPos
-                                    Diagnostic.EndPos = circularEaniReference.EndPos
-                                    Diagnostic.Code = NSP04 path
-                                    Diagnostic.Alternatives = None
-                                }
-                        ad.AddDiagnostic diagnostic
+                        emitNSP04Diagnostics path circularEaniReference.StartPos circularEaniReference.EndPos
             | None -> ()
         | None -> ()
 

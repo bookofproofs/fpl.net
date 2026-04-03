@@ -14,6 +14,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 module FplInterpreter.Globals.Heap
 open System
 open System.Text
+open ErrDiagnostics
 open FplInterpreterBasicTypes
 open FplInterpreterAstPreprocessing
 open FplInterpreter.Globals.Helpers
@@ -65,6 +66,7 @@ type HeapMemory() =
     member this.ClearAll() = 
         this.ClearExceptParsedAsts()
         this.ClearParsedAsts()
+        ad.Clear()
 
     /// Returns the uses dependencies of this symbol table needed e.g. for debugging purposes in the FPL language server.
     member this.UsesDependencies() =

@@ -228,8 +228,7 @@ type TestEvalAliasedNamespaceIdentifier() =
         let uri = PathEquivalentUri(pathToFile)
         let fplLibUrl =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
-        let st = SymbolTable()
-        loadAllUsesClauses st input uri fplLibUrl 
+        loadAllUsesClauses input uri fplLibUrl 
         heap.ParsedAsts
 
 
@@ -291,7 +290,7 @@ type TestEvalAliasedNamespaceIdentifier() =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
 
         let st = SymbolTable()
-        loadAllUsesClauses st input uri fplLibUrl 
+        loadAllUsesClauses input uri fplLibUrl 
         heap.ParsedAsts
 
     [<TestMethod>]
@@ -381,7 +380,7 @@ type TestEvalAliasedNamespaceIdentifier() =
         let fplLibUrl =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         let st = SymbolTable()
-        loadAllUsesClauses st input uri fplLibUrl 
+        loadAllUsesClauses input uri fplLibUrl 
         heap.ParsedAsts
 
     [<TestMethod>]
