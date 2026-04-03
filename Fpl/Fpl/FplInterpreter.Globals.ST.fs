@@ -20,6 +20,7 @@ open FplInterpreter.Globals.Root
 
 type SymbolTable() =
     let mutable _mainTheory = ""
+    let mutable _evalCounter = 0
     let _root = new FplRoot()
 
 
@@ -27,6 +28,11 @@ type SymbolTable() =
     member this.MainTheory
         with get () = _mainTheory
         and set (value) = _mainTheory <- value
+
+    /// Returns the current number this symbol table was re-evaluated.
+    member this.EvalCounter
+        with get () = _evalCounter
+        and set (value) = _evalCounter <- value
 
     /// Returns the evaluation root node of the symbol table.
     member this.Root = _root
@@ -54,9 +60,9 @@ type SymbolTable() =
                                                             .Replace("\"", "\\\"")   // then escape double quotes
 
             if name = this.MainTheory then
-                sb.AppendLine($"{indent}\"Name\": \"(Main) {name}\",") |> ignore
+                sb.AppendLine($"{indent}\"Name\": \"(Main) {name}:{_evalCounter}\",") |> ignore
             else
-                sb.AppendLine($"{indent}\"Name\": \"{name}\",") |> ignore
+                sb.AppendLine($"{indent}\"Name\": \"{name}:{_evalCounter}\",") |> ignore
 
             sb.AppendLine($"{indent}\"Type\": \"{root.ShortName}\",") |> ignore
             sb.AppendLine($"{indent}\"FplValueType\": \"{fplTypeName}\",") |> ignore
@@ -117,7 +123,7 @@ type SymbolTable() =
     member this.Clear() =
         _root.Clear() 
         _mainTheory <- ""
-
+        _evalCounter <- _evalCounter + 1
 
 
 

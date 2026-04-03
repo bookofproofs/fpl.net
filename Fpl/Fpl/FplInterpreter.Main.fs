@@ -25,6 +25,7 @@ open FplInterpreterDiagnosticsEmitter
 let fplInterpreter input (uri:PathEquivalentUri) fplLibUrl = 
     try
         heap.ClearAll()
+        heap.SymbolTable.EvalCounter <- heap.SymbolTable.EvalCounter + 1
         // mark evaluation started (keeps UI informed)
         heap.IsEvaluating <- true
 

@@ -398,7 +398,7 @@ class FplTheoriesProvider {
             return client.sendRequest('getTreeData', {}).then(json => {
                 try {
                     let treeData = JSON.parse(json);
-                    // If evaluation still running, show a placeholder and start polling
+                    log2Console(json.substring(0, 1500), true);
                     return this.parseScope(treeData.Scope);
                 } catch (err) {
                     log2Console('Failed to parse tree data: ' + err + ' raw:' + (json ? json.substring(0, 1500) : 'null'), true);

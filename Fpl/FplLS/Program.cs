@@ -36,8 +36,6 @@ namespace FplLS
 
         static async Task Main()
         {
-   
-            var heap = new HeapMemory();
 
             var server = await LanguageServer.From(options =>
                 options
