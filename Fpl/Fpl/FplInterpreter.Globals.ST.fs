@@ -123,7 +123,7 @@ type SymbolTable() =
     member this.Clear() =
         _root.Clear() 
         _mainTheory <- ""
-        _evalCounter <- _evalCounter + 1
+
 
 
 
