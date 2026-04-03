@@ -1,4 +1,4 @@
-﻿namespace FplParser.Tests
+namespace FplParser.Tests
 
 open FParsec
 open FplPrimitives

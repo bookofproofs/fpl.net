@@ -82,8 +82,7 @@ type FplExtensionObj(positions: Positions, parent: FplGenericNode) as this =
             regex.IsMatch(identifier)
         
         let extensionCandidates =
-            let root = getRoot this
-            root.Scope
+            heap.Root.Scope
             |> Seq.map (fun theory ->
                 theory.Value.Scope
                 |> Seq.filter (fun kvp -> kvp.Value.Name = PrimExtensionL)

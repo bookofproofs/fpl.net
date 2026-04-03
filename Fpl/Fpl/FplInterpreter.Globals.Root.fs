@@ -100,11 +100,3 @@ type FplRoot() =
         this.ArgList.Clear()
         this.Scope.Clear()
 
-// Returns the root node of any FplValue
-let rec root (fv:FplGenericNode) =
-    if fv.Name = PrimRoot then 
-        fv 
-    else root fv.Parent.Value
-
-// Returns the root node of any FplValue casted to FplRoot
-let rec getRoot (fv:FplGenericNode) = (root fv) :?> FplRoot

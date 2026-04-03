@@ -634,7 +634,7 @@ type FplFunctionalTerm(positions: Positions, parent: FplGenericNode, runOrder) a
         | FixType.Postfix _ when this.Arity <> 1 -> this.ErrorOccurred <- emitSIG00Diagnostics this.ExpressionType.Type 1 this.Arity this.SignStartPos this.SignEndPos
         | _ -> ()
         match this.ExpressionType with
-        | FixType.Infix (symbol, precedence) -> checkSIG02Diagnostics (getRoot this) symbol precedence this.SignStartPos this.SignEndPos
+        | FixType.Infix (symbol, precedence) -> checkSIG02Diagnostics heap.Root symbol precedence this.SignStartPos this.SignEndPos
         | _ -> ()
         checkSIG11Diagnostics this
 

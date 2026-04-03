@@ -19,7 +19,7 @@ open ErrDiagnostics
 open FplPrimitives
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterBasicTypes
-open FplInterpreter.Globals.Root
+open FplInterpreter.Globals.Heap
 
 let isArgPred (arg:FplGenericNode) = 
     let argType = arg.Type SignatureType.Type
@@ -234,7 +234,7 @@ let checkSIG01Diagnostics (fv: FplGenericNode)  =
         // add them to fplValues's scope
         let expressionId = fv.FplId
 
-        (root fv).Scope
+        heap.Root.Scope
         |> Seq.map (fun kv -> kv.Value)
         |> Seq.iter (fun theory ->
             theory.Scope
@@ -266,7 +266,7 @@ let checkSIG02Diagnostics (fv:FplGenericNode) symbol precedence pos1 pos2 =
             false
         else
             true
-    (root fv).Scope
+    heap.Root.Scope
     |> Seq.map (fun kv -> kv.Value)
     |> Seq.iter (fun theory ->
         theory.Scope

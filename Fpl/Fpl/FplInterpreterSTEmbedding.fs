@@ -17,7 +17,7 @@ open System.Collections.Generic
 open FplPrimitives
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterBasicTypes
-open FplInterpreter.Globals.Root
+open FplInterpreter.Globals.Heap
 open FplInterpreterChecks
 
 
@@ -63,9 +63,8 @@ let tryAddTemplateToParent (templateNode:FplGenericNode) =
 // Tries to add an FPL block to its parent's scope using its FplId, or issues ID001 diagnostics if a conflict occurs
 let tryAddToParentUsingFplId (fplValue:FplGenericNode) =
     let identifier = fplValue.FplId
-    let root = getRoot fplValue
     let conflicts = 
-        root.OrderedTheories
+        heap.Root.OrderedTheories
         |> Seq.map (fun theory -> 
             theory.Scope
             |> Seq.filter (fun kvp -> kvp.Key = identifier)
@@ -92,9 +91,8 @@ let tryAddSubBlockToFplBlock (fplValue:FplGenericNode) =
 // Tries to add an FPL block to its parent's scope using its typed signature, or issues ID001 diagnostics if a conflict occurs
 let tryAddToParentUsingTypedSignature (fplValue:FplGenericNode) =
     let identifier = fplValue.Type SignatureType.Type
-    let root = getRoot fplValue
     let conflicts = 
-        root.OrderedTheories
+        heap.Root.OrderedTheories
         |> Seq.map (fun theory -> 
             theory.Scope.Values
             |> Seq.filter (fun fv -> fv.Type SignatureType.Type = identifier)
@@ -159,9 +157,8 @@ let addExpressionToReference (fplValue:FplGenericNode) =
 // Tries to add an FPL block to its parent's scope using its mixed signature, or issues ID001 diagnostics if a conflict occurs
 let tryAddToParentUsingMixedSignature (fplValue:FplGenericNode) =
     let identifier = fplValue.Type SignatureType.Mixed
-    let root = getRoot fplValue
     let conflicts = 
-        root.OrderedTheories
+        heap.Root.OrderedTheories
         |> Seq.map (fun theory -> 
             theory.Scope
             |> Seq.filter (fun kvp -> kvp.Key = identifier)
@@ -309,8 +306,7 @@ let findCandidatesByName (node: FplGenericNode) (name: string) withClassConstruc
             name
 
     if isUpper name then
-        let root = getRoot node
-        root.OrderedTheories // iterate all theories
+        heap.Root.OrderedTheories // iterate all theories
         |> Seq.iter (fun theory ->
             theory.Scope
             // filter only blocks starting with the same FplId as the reference
