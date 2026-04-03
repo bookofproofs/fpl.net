@@ -62,7 +62,7 @@ type SymbolTable() =
             if name = this.MainTheory then
                 sb.AppendLine($"{indent}\"Name\": \"(Main) {name}:{_evalCounter}\",") |> ignore
             else
-                sb.AppendLine($"{indent}\"Name\": \"{name}:{_evalCounter}\",") |> ignore
+                sb.AppendLine($"{indent}\"Name\": \"{name}\",") |> ignore
 
             sb.AppendLine($"{indent}\"Type\": \"{root.ShortName}\",") |> ignore
             sb.AppendLine($"{indent}\"FplValueType\": \"{fplTypeName}\",") |> ignore

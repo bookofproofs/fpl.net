@@ -332,17 +332,10 @@ class MyTreeItem extends vscode.TreeItem {
         // Create a MarkdownString for the tooltip
         const markdownTooltip = new vscode.MarkdownString();
         markdownTooltip.isTrusted = true; // Optional: allows links/images if needed
-        markdownTooltip.appendMarkdown(`📌 **Name:** ${label}\n\n`);
-        markdownTooltip.appendMarkdown(`🧩 **Type:** ${fplValueType}\n\n`);
-        try {
-            const parsedJson = JSON.parse(fplValueRepr);
-            const formattedJson = JSON.stringify(parsedJson, null, 2);
-            markdownTooltip.appendMarkdown(`🗃️ **Value:**\n`);
-            markdownTooltip.appendCodeblock(formattedJson, 'json');
-            } catch (error) {
-            markdownTooltip.appendMarkdown(`🧩 **Value:** ${fplValueRepr}\n\n`);
-        }
-
+        if (label !== "") markdownTooltip.appendMarkdown(`📌 **Name:** ${label}\n\n`);
+        if (fplValueType !== "") markdownTooltip.appendMarkdown(`🧩 **Type:** ${fplValueType}\n\n`);
+        if (fplValueRepr !== "" && fplValueRepr !=="None") markdownTooltip.appendMarkdown(`🧩 **Value:** ${fplValueRepr}\n\n`);
+        
         // tooltip showing the name, the type and the representation of a node
         this.tooltip = markdownTooltip;
         this.scope = scope;
