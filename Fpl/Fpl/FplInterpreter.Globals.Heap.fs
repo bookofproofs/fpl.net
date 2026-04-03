@@ -55,11 +55,11 @@ type HeapMemory() =
         _evalStack.Clear()
         _validStmtStore.Clear()
         _state.Clear()
-        _symbolTable.Clear()
 
     // Clears the heap except parsed asts.
     member this.ClearParsedAsts() = 
         _parsedAsts.Clear()
+        _symbolTable.Clear()
 
     // Clears the heap except parsed asts.
     member this.ClearAll() = 
