@@ -30,6 +30,8 @@ type HeapMemory() =
     let _state = State()
     let _parsedAsts = ParsedAstList()
     let _symbolTable = SymbolTable()
+    let mutable _isEvaluating = false
+
     /// A stack memory storing potential new nodes of the symbol table during its evaluation process
     member this.Eval = _evalStack
 
@@ -50,6 +52,10 @@ type HeapMemory() =
 
     member this.Root = _symbolTable.Root
 
+    /// Flag that indicates an ongoing evaluation (set by the interpreter)
+    member this.IsEvaluating
+        with get () = _isEvaluating
+        and set (value) = _isEvaluating <- value
 
     // Clears the heap except parsed asts.
     member this.ClearExceptParsedAsts() = 
@@ -61,6 +67,7 @@ type HeapMemory() =
     member this.ClearParsedAsts() = 
         _parsedAsts.Clear()
         _symbolTable.Clear()
+
 
     // Clears the heap except parsed asts.
     member this.ClearAll() = 

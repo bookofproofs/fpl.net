@@ -115,8 +115,8 @@ type SymbolTable() =
             res
 
     member this.Clear() =
-        _root.Clear()
-
+        _root.Clear() 
+        _mainTheory <- ""
 
 
 

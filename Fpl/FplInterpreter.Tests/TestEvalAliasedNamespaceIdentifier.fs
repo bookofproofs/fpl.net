@@ -219,7 +219,7 @@ type TestEvalAliasedNamespaceIdentifier() =
         Assert.AreEqual<int>(2, fplSources.FilePaths.Length)
 
     member this.PrepareTestLoadAllUsesClauses01() =
-        heap.ClearParsedAsts()
+        heap.ClearParsedAsts() 
         let input = """
             uses Fpl.Commons
             ;"""

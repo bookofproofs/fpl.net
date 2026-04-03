@@ -2,7 +2,6 @@ using OmniSharp.Extensions.LanguageServer.Protocol.Document;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
 using System.Text;
 using static ErrDiagnostics;
-using static FplInterpreter.Globals.ST;
 using static FplInterpreter.Globals.Heap;
 using static FplInterpreter.Main;
 using Model = OmniSharp.Extensions.LanguageServer.Protocol.Models;
@@ -18,13 +17,12 @@ namespace FplLS
             _diagnostics = [];
         }
 
-
         public void AddDiagnostics(PathEquivalentUri uri, Model.Diagnostic diagnostic)
         {
             var key = PathEquivalentUri.EscapedUri(uri.AbsoluteUri);
             if (!_diagnostics.TryGetValue(key, out List<Model.Diagnostic>? value))
             {
-                value = ([]);
+                value = [];
                 _diagnostics.Add(key, value);
             }
             value.Add(diagnostic);

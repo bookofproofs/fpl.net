@@ -4,7 +4,7 @@
 
 open ErrDiagnostics
 open FplParser
-open FplInterpreter.Globals.ST
+open FplInterpreter.Globals.Heap
 open FplInterpreter.Main
 open System.IO
 
@@ -25,9 +25,8 @@ let prepareFplCode(fplCode:string, delete:bool) =
         "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
     if delete then 
         deleteFilesWithExtension currDir "fpl"
-        None
     else
-        Some (fplInterpreter fplCode uri fplLibUrl)
+        fplInterpreter fplCode uri fplLibUrl
 
 let loadFplFile(path:string) = 
     let uri = PathEquivalentUri(path)
@@ -53,3 +52,4 @@ prepareFplCode(input,false) |> ignore
 
 printf "\n--------------------------------\n"
 ad.PrintDiagnostics
+printf "%s" (heap.SymbolTable.ToJson())

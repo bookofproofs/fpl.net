@@ -377,12 +377,13 @@ class MyTreeItem extends vscode.TreeItem {
     
 }
 
-
 // Define TreeDataProvider
 class FplTheoriesProvider {
     constructor() {
         this._onDidChangeTreeData = new vscode.EventEmitter();
         this.onDidChangeTreeData = this._onDidChangeTreeData.event;
+        this._polling = false;
+        this._pollInterval = 500; // ms
     }
 
     refresh() {
@@ -393,12 +394,64 @@ class FplTheoriesProvider {
         return element;
     }
 
+    startPolling() {
+        if (this._polling) return;
+        this._polling = true;
+        const poll = () => {
+            if (!this._polling) return;
+            // ask server for fresh status
+            client.sendRequest('getTreeData', {}).then(json => {
+                try {
+                    const obj = JSON.parse(json);
+                    if (obj.IsEvaluating === false) {
+                        // stop polling and refresh the tree
+                        this._polling = false;
+                        this.refresh();
+                        return;
+                    }
+                } catch (err) {
+                    // ignore parse errors and continue polling
+                }
+                // schedule next poll
+                setTimeout(poll, this._pollInterval);
+            }).catch(() => {
+                // on error, retry after interval
+                setTimeout(poll, this._pollInterval);
+            });
+        };
+        setTimeout(poll, this._pollInterval);
+    }
+
+    stopPolling() {
+        this._polling = false;
+    }
+
     getChildren(element) {
         if (!element) {
             // If no element is passed, return the root nodes of the tree
             return client.sendRequest('getTreeData', {}).then(json => {
-                let treeData = JSON.parse(json);
-                return this.parseScope(treeData.Scope);
+                try {
+                    log2Console("getTreeData response length: " + (json ? json.length : "null"), false);
+                    log2Console("getTreeData preview: " + (json ? json.substring(0, 1500) : "null"), false);
+                    let treeData = JSON.parse(json);
+                    // If evaluation still running, show a placeholder and start polling
+                    if (treeData.IsEvaluating === true) {
+                        this.startPolling();
+                        // show a single "Evaluating..." placeholder node
+                        const evaluatingNode = new MyTreeItem("th", 1, "Evaluating...", 0, 0, "", "", ""); 
+                        evaluatingNode.collapsibleState = vscode.TreeItemCollapsibleState.None;
+                        return [evaluatingNode];
+                    }
+
+                    if (!treeData.Scope) {
+                        log2Console("getTreeData: parsed object has no .Scope property", true);
+                        return [];
+                    }
+                    return this.parseScope(treeData.Scope);
+                } catch (err) {
+                    log2Console('Failed to parse tree data: ' + err + ' raw:' + (json ? json.substring(0, 1500) : 'null'), true);
+                    return [];
+                }
             }).catch(error => {
                 log2Console('Failed to get tree data ' + error, true);
                 return [];  // Return an empty array on error

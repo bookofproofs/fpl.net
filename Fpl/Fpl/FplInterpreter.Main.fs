@@ -25,9 +25,16 @@ open FplInterpreterDiagnosticsEmitter
 let fplInterpreter input (uri:PathEquivalentUri) fplLibUrl = 
     try
         heap.ClearAll()
+        // mark evaluation started (keeps UI informed)
+        heap.IsEvaluating <- true
+
         if heap.SymbolTable.MainTheory = String.Empty then
             heap.SymbolTable.MainTheory <- uri.TheoryName
+
         loadAllUsesClauses input uri fplLibUrl 
         evaluateSymbolTable()
+
+        // mark evaluation ended (keeps UI informed)
+        heap.IsEvaluating <- false
     with ex -> 
         emitUnexpectedErrorDiagnostics (ex.Message + Environment.NewLine + ex.StackTrace)
