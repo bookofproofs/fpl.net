@@ -21,7 +21,7 @@ type TestRepresentation() =
     [<DataRow("06","iif ((x = y),not (x = y))", LiteralFalse)>]
     [<TestMethod>]
     member this.TestRepresentationPredicate(var:string, varVal, expected:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """
             def pred Equal(x,y: tpl) infix "=" 50 
             {
@@ -42,7 +42,7 @@ type TestRepresentation() =
     [<DataRow("00","n:=Zero()", """Zero()""")>]
     [<TestMethod>]
     member this.TestRepresentationAssignment(var:string, varVal, expected:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """uses Fpl.PeanoArithmetics def pred T() { dec ~n:Nat %s; true };""" varVal
         let filename = "TestRepresentationAssignment"
         if not offlineWatcher.OfflineMode then 
@@ -60,7 +60,7 @@ type TestRepresentation() =
     [<DataRow("02","def cl Nat def func Zero() -> Nat", "n:=Zero()", """Zero()""")>]
     [<TestMethod>]
     member this.TestRepresentationReturn(var:string, uses:string, varVal, expected:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """%s def func T()->Nat { dec ~n:Nat %s; return n };""" uses varVal
         let filename = "TestRepresentationReturn"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -74,7 +74,7 @@ type TestRepresentation() =
     [<DataRow("00","uses Fpl.PeanoArithmetics", "n:=Zero()", """Zero()""")>]
     [<TestMethod>]
     member this.TestRepresentationReturnOnline(var:string, uses:string, varVal, expected:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """%s def func T()->Nat { dec ~n:Nat %s; return n };""" uses varVal
         let filename = "TestRepresentationReturnOnline"
         if not offlineWatcher.OfflineMode then 
@@ -89,7 +89,7 @@ type TestRepresentation() =
     [<DataRow("00","T() -> A", "def cl A def func T() -> A;", """T()""", "A")>] // intrinsic function using Skolem representation
     [<TestMethod>]
     member this.TestRepresentationFunctionalTerms(var:string, funcTermSignature:string, fplCode, expectedRepr:string, expectedType:string) =
-        ad.Clear()
+        
         let filename = "TestRepresentationFunctionalTerms.fpl"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -104,7 +104,7 @@ type TestRepresentation() =
     [<DataRow("00","(@0 = Zero())", LiteralTrue)>]
     [<TestMethod>]
     member this.TestRepresentationCases(var:string, varVal, expected:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """uses Fpl.PeanoArithmetics def pred T() { %s };""" varVal
         let filename = "TestRepresentationCases"
         if not offlineWatcher.OfflineMode then 
@@ -141,7 +141,7 @@ type TestRepresentation() =
     [<DataRow("m09", "($2 = k)", LiteralFalse)>]
     [<TestMethod>]
     member this.TestRepresentationEqualityWithCases(no:string, varVal, expected:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """
         def cl Nat
         def func Zero() -> Nat
@@ -200,7 +200,7 @@ type TestRepresentation() =
     [<DataRow("m09", "($2 = k)", LiteralFalse)>]
     [<TestMethod>]
     member this.TestRepresentationEqualityWithMCases(no:string, varVal, expected:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """
         def cl Nat
         def func Zero() -> Nat
@@ -236,7 +236,7 @@ type TestRepresentation() =
     [<DataRow("04", "@6", "Succ(Succ(Succ(Succ(Succ(Succ(Zero()))))))")>]
     [<TestMethod>]
     member this.TestRepresentationMCases(no:string, varVal, expected:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """
         def cl Nat
         def func Zero()-> Nat
@@ -272,7 +272,7 @@ type TestRepresentation() =
     [<DataRow("00", "@100", "One()")>]
     [<TestMethod>]
     member this.TestRepresentationMCasesSimple(no:string, varVal, expected:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """
         def cl Nat
         def func Zero() -> Nat
@@ -312,7 +312,7 @@ type TestRepresentation() =
     [<DataRow("02a","""def cl A {intr} def pred T() { dec ~v:A; true };""", PrimUndetermined)>]
     [<TestMethod>]
     member this.TestRepresentationUnitializedVars(var:string, fplCode, expected:string) =
-        ad.Clear()
+        
         let filename = "TestRepresentationUnitializedVars.fpl"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -329,7 +329,7 @@ type TestRepresentation() =
     [<DataRow("03","""def cl A {dec ~myX:pred; ctor A(x:pred) {dec myX:=x;}} def cl B:A { ctor B(x:pred) {dec base.A(not x); } } def pred T() { dec ~v:B v:=B(true); false};""", """B(true)""")>]
     [<TestMethod>]
     member this.TestRepresentationItializedVars(var:string, fplCode, expected:string) =
-        ad.Clear()
+        
         let filename = "TestRepresentationUnitializedVars.fpl"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -351,7 +351,7 @@ type TestRepresentation() =
     [<DataRow("02b","(@2 = C())", LiteralFalse)>]
     [<TestMethod>]
     member this.TestRepresentationCases2(var:string, varVal, expected:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """
             
             def cl X 
@@ -397,7 +397,7 @@ type TestRepresentation() =
     [<DataRow("01", "@42", "42")>]
     [<TestMethod>]
     member this.TestRepresentationExtensionObj(no:string, varVal, expected:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """
         ext Digits x@/\d+/ -> obj
         {

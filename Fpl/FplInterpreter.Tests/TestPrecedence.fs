@@ -16,7 +16,7 @@ type TestPrecedence() =
     [<DataRow("b06","(x = y * z + 1)")>]
     [<TestMethod>]
     member this.TestPrecedenceInfix(var, varVal) =
-        ad.Clear()
+        
         let fplCode = sprintf """ 
                  def pred Mul(x,y: obj) infix "*" 1 {intr}
                  def pred Add(x,y: obj)infix "+" 2  {intr} 

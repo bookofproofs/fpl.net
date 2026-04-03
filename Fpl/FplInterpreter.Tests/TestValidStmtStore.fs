@@ -18,7 +18,7 @@ type TestValidStmtStore() =
     [<DataRow("axiom X { true } axiom Y { ex x:obj { true } };", 2)>] // two axioms, two stmts 
     [<TestMethod>]
     member this.TestStmtStoreAddsAxioms(varVal, expected:int) =
-        ad.Clear()
+       
         let fplCode = sprintf "%s" varVal
         let filename = "TestStmtStoreAddsAxioms"
         prepareFplCode(filename + ".fpl", fplCode, false) 

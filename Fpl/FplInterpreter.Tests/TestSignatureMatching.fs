@@ -23,7 +23,7 @@ type TestSignatureMatching() =
         "")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesPlain(no:string, varVal, var:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """%s""" varVal
         let filename = "TestSignatureMatchingReferencesPlain"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -48,7 +48,7 @@ type TestSignatureMatching() =
         "The variable `a` typed `Nat` doesn't match the parameter `x` typed `pred` in the predicate definition TestSignatureMatchingReferencesPred.T(pred, pred)")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesPred(no:string, varVal, var:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """%s""" varVal
         let filename = "TestSignatureMatchingReferencesPred"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -69,7 +69,7 @@ type TestSignatureMatching() =
         "The variable `x` typed `func() -> obj` doesn't match the parameter `f` typed `func() -> Nat` in the predicate definition TestSignatureMatchingReferencesFunc.T(func() -> Nat)")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesFunc(no:string, varVal, var:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """%s""" varVal
         let filename = "TestSignatureMatchingReferencesFunc"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -89,7 +89,7 @@ type TestSignatureMatching() =
         "")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesFuncReturnSelf(no:string, varVal, var:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """%s""" varVal
         let filename = "TestSignatureMatchingReferencesFuncReturnSelf"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -116,7 +116,7 @@ type TestSignatureMatching() =
         "")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesFuncReturn(no:string, varVal, var:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """%s""" varVal
         let filename = "TestSignatureMatchingReferencesFuncReturn"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -138,7 +138,7 @@ type TestSignatureMatching() =
         "")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesPredNested(varVal, var:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """%s""" varVal
         let filename = "TestSignatureMatchingReferencesPredNested"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -170,7 +170,7 @@ type TestSignatureMatching() =
         
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesClasses(varVal, var:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """%s""" varVal
         let filename = "TestSignatureMatchingReferencesClasses"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -207,7 +207,7 @@ type TestSignatureMatching() =
         "")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesConstructors(no:string, varVal, var:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """%s""" varVal
         let filename = "TestSignatureMatchingReferencesConstructors"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -243,7 +243,7 @@ type TestSignatureMatching() =
         "")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesVariadicObj(no:string, varVal, var:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """%s""" varVal
         let filename = "TestSignatureMatchingReferencesVariadicObj"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -262,7 +262,7 @@ type TestSignatureMatching() =
         "")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesVariadicCoord(varVal, var:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """%s""" varVal
         let filename = "TestSignatureMatchingReferencesVariadicCoord"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -295,7 +295,7 @@ type TestSignatureMatching() =
         "")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesVariadicPred(no:string, varVal, var:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """%s""" varVal
         let filename = "TestSignatureMatchingReferencesVariadicPred"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -328,7 +328,7 @@ type TestSignatureMatching() =
         "")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesVariadicFunc(no:string, varVal, var:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """%s""" varVal
         let filename = "TestSignatureMatchingReferencesVariadicFunc"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -361,7 +361,7 @@ type TestSignatureMatching() =
         "")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesVariadicInd(no:string, varVal, var:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """%s""" varVal
         let filename = "TestSignatureMatchingReferencesVariadicInd"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -394,7 +394,7 @@ type TestSignatureMatching() =
         "")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesVariadicNat(no:string, varVal, var:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """%s""" varVal
         let filename = "TestSignatureMatchingReferencesVariadicNat"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -434,7 +434,7 @@ type TestSignatureMatching() =
     [<DataRow("29d", "def cl A:B def cl B:A def cl T:B,A;", "T:B:A:B, T:A", "cross-inheritance not supported, `B` is base for `T` and `A`.|cross-inheritance not supported, `A` is base for `B` and `T`.")>]
     [<TestMethod>]
     member this.TestBaseClassPath(no:string, varVal:string, expectedPaths:string, expectedMessages:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """%s""" varVal
         let filename = "TestBaseClassPath"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -468,7 +468,7 @@ type TestSignatureMatching() =
     [<DataRow("27", "uses Fpl.SetTheory def cl T:EmptySet {intr};", "T:EmptySet:Set", "ok")>]
     [<TestMethod>]
     member this.TestBaseClassPathOnline(no:string, varVal:string, expectedPaths:string, expectedMessages:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """%s""" varVal
         let filename = "TestBaseClassPathOnline"
         if not offlineWatcher.OfflineMode then 
@@ -514,7 +514,7 @@ type TestSignatureMatching() =
     [<DataRow("20c", "def func A:B()->obj def func B:A()->obj def func T:B,A()->obj;", "T:B:A:B, T:A", "cross-inheritance not supported, `B` is base for `T` and `A`.|cross-inheritance not supported, `A` is base for `B` and `T`.")>]
     [<TestMethod>]
     member this.TestBaseFunctionalTermPath(no:string, varVal:string, expectedPaths:string, expectedMessages:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """%s""" varVal
         let filename = "TestBaseFunctionalTermPath"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -546,7 +546,7 @@ type TestSignatureMatching() =
     // depending on its signature and the available constructor candidates in the referenced class
     // regardless of the order in which the constructors in the referenced class are declared.
     member this.TestAssignmentsOfConstructorsCorrectCandidates(no:string, varVal:string, expectedCandidateSignature:string) =
-        ad.Clear()
+        
         let fplCode = sprintf """%s""" varVal
         let filename = "TestAssignmentsOfConstructorsCorrectCandidates"
         prepareFplCode(filename + ".fpl", fplCode, false) 

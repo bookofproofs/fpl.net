@@ -14,7 +14,7 @@ open TestSharedConfig
 type TestInterpreterErrors() =
 
     member this.PrepareTestNSP05a (delete:bool) =
-        ad.Clear()
+        
         let input = """;"""
         let currDir = Directory.GetCurrentDirectory()
 
@@ -33,7 +33,7 @@ type TestInterpreterErrors() =
   
 
     member this.PrepareTestNSP04CircularABCA(delete:bool) =
-        ad.Clear()
+        
         let A = """uses Test2_B;"""
         let B = """uses Test2_C;"""
         let C = """uses Test2_A;"""
@@ -52,7 +52,7 @@ type TestInterpreterErrors() =
             fplInterpreter A uri fplLibUrl |> ignore
 
     member this.PrepareTestNSP04CircularAA(delete:bool) =
-        ad.Clear()
+        
         let A = """uses Test1_A;"""
         let pathToFile =
             Path.Combine(Directory.GetCurrentDirectory(), "Test1_A.fpl")
@@ -66,7 +66,7 @@ type TestInterpreterErrors() =
             fplInterpreter A uri fplLibUrl |> ignore
 
     member this.PrepareTestNSP04NonCircular(delete:bool) =
-        ad.Clear()
+        
         let input = """
             uses Fpl.Commons
             uses Fpl.SetTheory
@@ -83,7 +83,7 @@ type TestInterpreterErrors() =
             fplInterpreter input uri fplLibUrl |> ignore
 
     member this.PrepareTestNSP05 (delete:bool) =
-        ad.Clear()
+        
         let input = """;"""
         let currDir = Directory.GetCurrentDirectory()
 
@@ -98,7 +98,7 @@ type TestInterpreterErrors() =
             fplInterpreter input uri fplLibUrl |> ignore
 
     member this.PrepareTestNSP05CrossCheck (delete:bool) =
-        ad.Clear()
+        
         let input = """;"""
         let currDir = Directory.GetCurrentDirectory()
 
@@ -710,7 +710,7 @@ type TestInterpreterErrors() =
             ()
         else
             let code = ID013 ""
-            ad.Clear()
+            
             runTestHelper "TestID013DecrementType.fpl" fplCode code expected
 
     [<DataRow("""loc iif(x, y) := !tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;;""", 0)>]
@@ -2105,7 +2105,7 @@ type TestInterpreterErrors() =
             ()
         else
             let code = SIG03 ""
-            ad.Clear()
+            
             runTestHelper "TestSIG03.fpl" fplCode code expected
 
     // match with simple types
@@ -2576,7 +2576,7 @@ type TestInterpreterErrors() =
             ()
         else
             let code = SIG03 ""
-            ad.Clear()
+            
             runTestHelper "TestSIG03Extensions.fpl" fplCode code expected
 
     // match with simple types
@@ -2617,7 +2617,7 @@ type TestInterpreterErrors() =
             ()
         else
             let code = SIG03 ""
-            ad.Clear()
+            
             runTestHelper "TestSIG03Undef.fpl" fplCode code expected
 
     // -----------------------------
@@ -3152,7 +3152,7 @@ type TestInterpreterErrors() =
             ()
         else
             let code = SIG04 ("", 0, "")
-            ad.Clear()
+            
             runTestHelper "TestSIG04.fpl" fplCode code expected
 
     // -----------------------------
@@ -3616,7 +3616,7 @@ type TestInterpreterErrors() =
             ()
         else
             let code = SIG04 ("", 0, "")
-            ad.Clear()
+            
             runTestHelper "TestSIG04Extensions.fpl" fplCode code expected
 
 
@@ -3655,7 +3655,7 @@ type TestInterpreterErrors() =
             ()
         else
             let code = SIG04 ("", 0, "")
-            ad.Clear()
+            
             runTestHelper "TestSIG04Undef.fpl" fplCode code expected
 
 
@@ -4177,7 +4177,7 @@ type TestInterpreterErrors() =
             ()
         else
             let code = SIG05 ""
-            ad.Clear()
+            
             runTestHelper "TestSIG05.fpl" fplCode code expected
 
 
@@ -4642,7 +4642,7 @@ type TestInterpreterErrors() =
             ()
         else
             let code = SIG05 ""
-            ad.Clear()
+            
             runTestHelper "TestSIG05Extensions.fpl" fplCode code expected
 
     // -----------------------------
@@ -4687,7 +4687,7 @@ type TestInterpreterErrors() =
             ()
         else
             let code = SIG05 ""
-            ad.Clear()
+            
             runTestHelper "TestSIG05Undef.fpl" fplCode code expected
 
 
@@ -4936,7 +4936,7 @@ type TestInterpreterErrors() =
             ()
         else
             let code = SIG11 ""
-            ad.Clear()
+            
             runTestHelper "TestSIG11.fpl" fplCode code expected
 
 
@@ -4957,7 +4957,7 @@ type TestInterpreterErrors() =
             ()
         else
             let code = SIG12 ("", "", "", "")
-            ad.Clear()
+            
             runTestHelper "TestSIG12.fpl" fplCode code expected
 
 
@@ -4975,7 +4975,7 @@ type TestInterpreterErrors() =
             ()
         else
             let code = SIG13 ("", "", "", "")
-            ad.Clear()
+            
             runTestHelper "TestSIG13.fpl" fplCode code expected
 
     [<DataRow("00", """def pred T() { mcases (| true : false | false : true ? undef) };""", 0)>] 
@@ -4997,7 +4997,7 @@ type TestInterpreterErrors() =
             ()
         else
             let code = SIG14
-            ad.Clear()
+            
             runTestHelper "TestSIG14.fpl" fplCode code expected
 
     [<DataRow("00a", "def cl A {intr} ;", 1)>]

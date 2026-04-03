@@ -1,12 +1,10 @@
-using FplInterpreter.Globals;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using OmniSharp.Extensions.LanguageServer.Server;
 using static ErrDiagnostics;
 using static FplInterpreter.Globals.Heap;
-using static FplInterpreter.Globals.ST;
-using static FplInterpreterAstPreprocessing;
+
 
 namespace FplLS
 {
@@ -39,9 +37,7 @@ namespace FplLS
         static async Task Main()
         {
    
-            var st = new SymbolTable();
-            ad.Clear();
-            heap.ValidStmtStore.Clear();
+            var heap = new HeapMemory();
 
             var server = await LanguageServer.From(options =>
                 options
@@ -54,7 +50,7 @@ namespace FplLS
                     .WithHandler<CompletionHandler>()
                     .OnRequest<JToken, string>("getTreeData", (request, cancellationToken) =>
                     {
-                        return Task.FromResult(st.ToJson());
+                        return Task.FromResult(heap.SymbolTable.ToJson());
                     })
                     .OnInitialize((s, _, _) =>
                     {

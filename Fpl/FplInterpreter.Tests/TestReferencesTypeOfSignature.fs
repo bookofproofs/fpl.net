@@ -76,7 +76,7 @@ type TestReferencesTypeOfSignature() =
     
     [<TestMethod>]
     member this.TestPredicateReferenceTypeSignature(var, fplCode) =
-        ad.Clear()
+        
         let filename = "TestPredicateReferenceTypeSignature"
         prepareFplCode(filename + ".fpl", "def pred T() { " + fplCode + " };", false) 
         let r = heap.Root
@@ -160,7 +160,7 @@ type TestReferencesTypeOfSignature() =
     [<DataRow("base6", "base.E(true, undef, false)")>]
     [<TestMethod>]
     member this.TestBaseConstructorCallTypeSignature(var, varVal) =
-        ad.Clear()
+        
         let fplCode = sprintf """
                         def cl B {intr}
                         def cl C {intr}
@@ -204,7 +204,7 @@ type TestReferencesTypeOfSignature() =
     [<DataRow("base7", "del.E(true, undef, false)")>] 
     [<TestMethod>]
     member this.TestDelegateTypeSignature(var, varVal) =
-        ad.Clear()
+        
         let fplCode = sprintf "def pred T1() { %s };" varVal
         let filename = "TestDelegateTypeSignature"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -238,7 +238,7 @@ type TestReferencesTypeOfSignature() =
     [<DataRow("""inf T {pre: true con:true};""", "undef")>]
     [<TestMethod>]
     member this.TestBlockTypeSignature(varVal, name:string) =
-        ad.Clear()
+        
         let fplCode = sprintf "%s" varVal
         let filename = "TestBlockTypeSignature"
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -253,7 +253,7 @@ type TestReferencesTypeOfSignature() =
     [<DataRow("01", "mcases (| true : $1 | false : $2 ? undef)", LiteralInd)>]
     [<TestMethod>]
     member this.TestMCasesTypeSignature(no:string, varVal, expected:string) =
-        ad.Clear()
+        
         let fplCode = sprintf "def pred T1() { %s };" varVal
         let filename = "TestMCasesTypeSignature"
         prepareFplCode(filename + ".fpl", fplCode, false) 
