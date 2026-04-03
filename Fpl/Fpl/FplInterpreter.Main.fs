@@ -28,6 +28,6 @@ let fplInterpreter input (uri:PathEquivalentUri) fplLibUrl =
         if heap.SymbolTable.MainTheory = String.Empty then
             heap.SymbolTable.MainTheory <- uri.TheoryName
         loadAllUsesClauses input uri fplLibUrl 
-        evaluateSymbolTable heap.SymbolTable
+        evaluateSymbolTable()
     with ex -> 
         emitUnexpectedErrorDiagnostics (ex.Message + Environment.NewLine + ex.StackTrace)

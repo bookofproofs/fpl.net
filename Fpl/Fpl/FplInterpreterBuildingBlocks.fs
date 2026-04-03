@@ -1724,7 +1724,7 @@ let tryFindParsedAstUsesClausesEvaluated (parsedAsts: List<ParsedAst>) =
     else
         None
 
-let evaluateSymbolTable (st: SymbolTable) =
+let evaluateSymbolTable () =
     heap.ParsedAsts.OrderAsts()
 
     let mutable found = true
@@ -1737,11 +1737,11 @@ let evaluateSymbolTable (st: SymbolTable) =
         | Some pa ->
             heap.ClearExceptParsedAsts()
             // evaluate the ParsedAst of a theory
-            let theoryValue = new FplTheory(pa.Id, st.Root, pa.Parsing.Uri.AbsolutePath, heap.Helper.GetNextAvailableFplBlockRunOrder);
-            if not (st.Root.Scope.ContainsKey(pa.Id)) then
-                st.Root.Scope.Add(pa.Id, theoryValue)
+            let theoryValue = new FplTheory(pa.Id, heap.Root, pa.Parsing.Uri.AbsolutePath, heap.Helper.GetNextAvailableFplBlockRunOrder);
+            if not (heap.Root.Scope.ContainsKey(pa.Id)) then
+                heap.Root.Scope.Add(pa.Id, theoryValue)
             else
-                st.Root.Scope[pa.Id] <- theoryValue
+                heap.Root.Scope[pa.Id] <- theoryValue
             heap.Eval.PushEvalStack(theoryValue)
             ad.CurrentUri <- pa.Parsing.Uri
             eval pa.Parsing.Ast
