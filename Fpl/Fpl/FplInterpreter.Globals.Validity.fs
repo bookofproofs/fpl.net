@@ -18,19 +18,6 @@ open FplPrimitives
 open FplInterpreterBasicTypes
 open FplInterpreterCompoundPredicates
 
-type ValidityReason =
-    | IsAxiom of FplGenericNode
-    | IsAsserted of FplGenericNode
-    | IsAssumed of FplGenericNode
-    | IsInferred of FplGenericNode
-    | IsInferredFromRevocation of FplGenericNode
-    | Error 
-
-type ValidStatement =
-    { Node: FplGenericNode
-      ValidityReason: ValidityReason
-      StatementExpression: string}
-
 type ValidStmtStore() =
     let _theoremStore = Dictionary<string, ValidStatement>()
     let _assumedArguments = Stack<FplGenericHasValue>()

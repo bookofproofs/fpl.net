@@ -573,3 +573,19 @@ let toString (fplValue:FplGenericNode) = $"{fplValue.ShortName} {fplValue.Type(S
 
 type IHasDotted = 
     abstract member DottedChild : FplGenericNode option with get, set
+
+type ValidityReason =
+    | IsAxiom of FplGenericNode
+    | IsAsserted of FplGenericNode
+    | IsAssumed of FplGenericNode
+    | IsInferred of FplGenericNode
+    | IsInferredFromRevocation of FplGenericNode
+    | Error 
+
+type ValidStatement =
+    { Node: FplGenericNode
+      ValidityReason: ValidityReason
+      StatementExpression: string}
+
+type IInferrable =
+    abstract member GetInferrableExpression : ValidStatement with get
