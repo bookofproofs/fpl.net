@@ -364,33 +364,7 @@ let rec eval ast =
         let fv = heap.Eval.PeekEvalStack()
         match fv.Name with 
         | PrimJIByProofArgument -> fv.FplId <- $"{fv.FplId}:{argumentId}"
-        | PrimArgInfRevoke -> 
-            let fvAi = fv :?> FplArgInferenceRevoke
-            let arg = fvAi.ParentArgument
-            let proof = arg.ParentProof
-            if argumentId = arg.FplId then 
-                // revokes its own argument
-                fv.ErrorOccurred <- emitPR015Diagnostics argumentId pos1 pos2
-            elif proof.HasArgument argumentId then 
-                let refArg = proof.Scope[argumentId] :?> FplArgument
-                let aiOpt = refArg.ArgumentInference
-                match aiOpt with
-                | Some (:? FplArgInferenceAssume as toBeRevoked) -> 
-                    match heap.ValidStmtStore.LastAssumedArgument with 
-                    | Some (:? FplArgInferenceAssume as last) when last = toBeRevoked -> 
-                        heap.ValidStmtStore.RevokeLastArgument() 
-                    | Some (:? FplArgInferenceAssume as last) when last <> toBeRevoked -> 
-                        let lastArg = last.ParentArgument
-                        fv.ErrorOccurred <- emitPR016Diagnostics argumentId lastArg.FplId pos1 pos2
-                    | _ ->    
-                        // the referenced argument is not an assumption in the proof
-                        fv.ErrorOccurred <- emitPR015Diagnostics argumentId pos1 pos2
-                | _ -> 
-                    // the referenced argument is not an assumption in the proof
-                    fv.ErrorOccurred <- emitPR015Diagnostics argumentId pos1 pos2
-            else
-                fv.ErrorOccurred <- emitPR005Diagnostics argumentId pos1 pos2
-            fvAi.FplId <- argumentId
+        | PrimArgInfRevoke -> fv.FplId <- argumentId
         | PrimJustificationL -> 
             let fvAi = new FplJustificationItemByRefArgument((pos1, pos2), fv)
             fvAi.FplId <- argumentId
@@ -550,7 +524,6 @@ let rec eval ast =
         heap.Eval.PushEvalStack(fvNew)
         eval predicateAst
         heap.Eval.PopEvalStack()
-        heap.ValidStmtStore.AssumeArgument fvNew
     | Ast.RevokeArgument((pos1, pos2), predicateAst) ->
         let fv = heap.Eval.PeekEvalStack()
         let argInf = new FplArgInferenceRevoke((pos1, pos2), fv) 

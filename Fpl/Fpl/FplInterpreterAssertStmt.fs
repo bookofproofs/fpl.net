@@ -42,7 +42,6 @@ type FplAssertion(positions: Positions, parent: FplGenericNode) =
         member this.InferrableExpression
             with get () = this.InferrableExpression
 
-
     override this.Clone () =
         let ret = new FplAssertion((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)

@@ -21,8 +21,8 @@ open FplInterpreter.Globals.Debug
 open FplInterpreter.Globals.HelpersBasic
 open FplInterpreterChecks
 open FplInterpreter.Globals.HelpersComplex
+open FplInterpreter.Globals.Heap
 open FplInterpreterIntrinsicTypes
-open FplInterpreterDefinitions
 open FplInterpreterPredicativeBlocks
 
 [<AbstractClass>]
@@ -227,85 +227,6 @@ and FplJustification(positions: Positions, parent: FplGenericNode) =
 
     member this.ParentArgument = this.Parent.Value :?> FplArgument
 
-and FplArgInferenceAssume(positions: Positions, parent: FplGenericNode) =
-    inherit FplGenericArgInference(positions, parent)
-
-    override this.Name = PrimArgInfAssume
-    override this.ShortName = PrimArgInf
-
-    override this.Clone () =
-        let ret = new FplArgInferenceAssume((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.Run() = 
-        // TODO implement Run, assume should return true if the assumption was possible
-        debug this Debug.Start
-        let v = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
-        this.Value <- Some v
-        debug this Debug.Stop
-
-    member this.ParentArgument = this.Parent.Value :?> FplArgument
-
-and FplArgInferenceRevoke(positions: Positions, parent: FplGenericNode) =
-    inherit FplGenericArgInference(positions, parent)
-
-    override this.Name = PrimArgInfRevoke
-    override this.ShortName = PrimArgInf
-
-    override this.Clone () =
-        let ret = new FplArgInferenceRevoke((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.Run() = 
-        // TODO implement Run
-        debug this Debug.Start
-        let v = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
-        this.Value <- Some v
-        debug this Debug.Stop
-
-    member this.ParentArgument = this.Parent.Value :?> FplArgument
-
-and FplArgInferenceTrivial(positions: Positions, parent: FplGenericNode) =
-    inherit FplGenericArgInference(positions, parent)
-
-    override this.Name = PrimArgInfTrivial
-    override this.ShortName = PrimArgInf
-
-    override this.Clone () =
-        let ret = new FplArgInferenceTrivial((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.Run() = 
-        debug this Debug.Start
-        // TODO - check if trivial is possible and spawn FplIntrisincPred true if possible
-        this.SetDefaultValue()
-        debug this Debug.Stop
-
-    member this.ParentArgument = this.Parent.Value :?> FplArgument
-
-and FplArgInferenceDerived(positions: Positions, parent: FplGenericNode) =
-    inherit FplGenericArgInference(positions, parent)
-
-    override this.Name = PrimArgInfDerive
-    override this.ShortName = PrimArgInf
-
-    override this.Clone () =
-        let ret = new FplArgInferenceDerived((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.Run() = 
-        // TODO implement run
-        debug this Debug.Start
-        let v = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
-        this.Value <- Some v
-        debug this Debug.Stop
-
-    member this.ParentArgument = this.Parent.Value :?> FplArgument
-
 and FplArgument(positions: Positions, parent: FplGenericNode, runOrder) =
     inherit FplGenericPredicate(positions, parent)
     let _runOrder = runOrder
@@ -394,6 +315,144 @@ and FplArgument(positions: Positions, parent: FplGenericNode, runOrder) =
     override this.RunOrder = Some _runOrder
 
     member this.ParentProof = this.Parent.Value :?> FplProof
+
+and FplArgInferenceAssume(positions: Positions, parent: FplGenericNode) =
+    inherit FplGenericArgInference(positions, parent)
+
+    override this.Name = PrimArgInfAssume
+    override this.ShortName = PrimArgInf
+
+    member this.InferrableExpression =
+        let validityReason, exprStr = 
+            let exprOpt = this.ArgList |> Seq.tryLast
+            match exprOpt with
+            | Some expr -> ValidityReason.IsAssumed expr, expr.Type SignatureType.Mixed
+            | _ -> ValidityReason.Error, "" // fallback if axiom node is empty
+
+        { ValidStatement.Node = this
+          ValidStatement.ValidityReason = validityReason
+          ValidStatement.StatementExpression = exprStr }
+
+    interface IInferrable with
+        member this.InferrableExpression
+            with get () = this.InferrableExpression
+
+    override this.Clone () =
+        let ret = new FplArgInferenceAssume((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Run() = 
+        debug this Debug.Start
+        if heap.ValidStmtStore.AssumeArgument this then
+            let v = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+            v.FplId <- LiteralTrue
+            this.SetValue v
+        else
+            this.SetDefaultValue()
+        debug this Debug.Stop
+
+    member this.ParentArgument = this.Parent.Value :?> FplArgument
+
+and FplArgInferenceRevoke(positions: Positions, parent: FplGenericNode) =
+    inherit FplGenericArgInference(positions, parent)
+
+    override this.Name = PrimArgInfRevoke
+    override this.ShortName = PrimArgInf
+
+    override this.Clone () =
+        let ret = new FplArgInferenceRevoke((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.CheckConsistency () = 
+        let fvAi = this
+        let argumentId = fvAi.FplId
+        let (arg:FplArgument) = fvAi.ParentArgument
+        let proof = arg.ParentProof
+        if argumentId = arg.FplId then 
+            // revokes its own argument
+            this.ErrorOccurred <- emitPR015Diagnostics argumentId this.StartPos this.EndPos
+        elif proof.HasArgument argumentId then 
+            let refArg = proof.Scope[argumentId] :?> FplArgument
+            let aiOpt = refArg.ArgumentInference
+            match aiOpt with
+            | Some (:? FplArgInferenceAssume as toBeRevoked) -> 
+                match heap.ValidStmtStore.LastAssumedArgument with 
+                | Some (:? FplArgInferenceAssume as last) when last = toBeRevoked -> 
+                    ()
+                | Some (:? FplArgInferenceAssume as last) when last <> toBeRevoked -> 
+                    let lastArg = last.ParentArgument
+                    this.ErrorOccurred <- emitPR016Diagnostics argumentId lastArg.FplId this.StartPos this.EndPos
+                | _ ->    
+                    // the referenced argument is not an assumption in the proof
+                    this.ErrorOccurred <- emitPR015Diagnostics argumentId this.StartPos this.EndPos
+            | _ -> 
+                // the referenced argument is not an assumption in the proof
+                this.ErrorOccurred <- emitPR015Diagnostics argumentId this.StartPos this.EndPos
+        else
+            this.ErrorOccurred <- emitPR005Diagnostics argumentId this.StartPos this.EndPos
+
+        base.CheckConsistency()
+
+    override this.EmbedInSymbolTable _ =
+        this.CheckConsistency()
+        addExpressionToParentArgList this 
+
+    override this.Run() = 
+        debug this Debug.Start
+        match this.ErrorOccurred with
+        | Some err -> this.SetDefaultValue()
+        | _ ->
+            if heap.ValidStmtStore.RevokeLastArgument() then
+                let v = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+                v.FplId <- LiteralTrue
+                this.SetValue v
+            else
+                this.SetDefaultValue()
+        debug this Debug.Stop
+
+    member this.ParentArgument = this.Parent.Value :?> FplArgument
+
+and FplArgInferenceTrivial(positions: Positions, parent: FplGenericNode) =
+    inherit FplGenericArgInference(positions, parent)
+
+    override this.Name = PrimArgInfTrivial
+    override this.ShortName = PrimArgInf
+
+    override this.Clone () =
+        let ret = new FplArgInferenceTrivial((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Run() = 
+        debug this Debug.Start
+        // TODO - check if trivial is possible and spawn FplIntrisincPred true if possible
+        this.SetDefaultValue()
+        debug this Debug.Stop
+
+    member this.ParentArgument = this.Parent.Value :?> FplArgument
+
+and FplArgInferenceDerived(positions: Positions, parent: FplGenericNode) =
+    inherit FplGenericArgInference(positions, parent)
+
+    override this.Name = PrimArgInfDerive
+    override this.ShortName = PrimArgInf
+
+    override this.Clone () =
+        let ret = new FplArgInferenceDerived((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Run() = 
+        // TODO implement run
+        debug this Debug.Start
+        let v = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+        this.Value <- Some v
+        debug this Debug.Stop
+
+    member this.ParentArgument = this.Parent.Value :?> FplArgument
+
 
 and FplProof(positions: Positions, parent: FplGenericNode, runOrder) =
     inherit FplGenericPredicateWithExpression(positions, parent)

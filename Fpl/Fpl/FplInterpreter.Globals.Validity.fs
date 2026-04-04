@@ -19,7 +19,7 @@ open FplInterpreterCompoundPredicates
 
 type ValidStmtStore() =
     let _theoremStore = Dictionary<string, ValidStatement>()
-    let _assumedArguments = Stack<FplGenericHasValue>()
+    let _assumedArguments = Stack<FplGenericNode>()
 
     /// Registers an expression in the theorem store
     member this.RegisterExpression (st:FplGenericNode) =
@@ -28,18 +28,22 @@ type ValidStmtStore() =
             let validStmt = infer.InferrableExpression
             match validStmt.ValidityReason with
             | ValidityReason.Error -> false // do nothing if error was flagged
-            | _ -> _theoremStore.TryAdd(validStmt.StatementExpression, validStmt)
+            | ValidityReason.IsAssumed assumption ->
+                _assumedArguments.Push assumption
+                _theoremStore.TryAdd(validStmt.StatementExpression, validStmt) |> ignore
+                true
+            | _ ->
+                _theoremStore.TryAdd(validStmt.StatementExpression, validStmt) |> ignore
+                true
         | _ -> false
-
 
     /// Assumes an argument and puts it to the theorem store
     member this.AssumeArgument assumption =
-        let validStmt = 
-            { ValidStatement.Node = assumption
-              ValidStatement.ValidityReason = ValidityReason.IsAssumed assumption
-              ValidStatement.StatementExpression = assumption.Type SignatureType.Mixed }
-        _theoremStore.TryAdd(validStmt.StatementExpression, validStmt) |> ignore
-        _assumedArguments.Push assumption
+        if this.RegisterExpression assumption then 
+            _assumedArguments.Push assumption
+            true
+        else
+            false
 
     /// Revokes an argument and puts its negation to the theorem store
     member this.RevokeLastArgument() =
@@ -56,6 +60,9 @@ type ValidStmtStore() =
                   ValidStatement.ValidityReason = ValidityReason.IsInferredFromRevocation negatedRevocation
                   ValidStatement.StatementExpression = negatedRevocation.Type SignatureType.Mixed }
             _theoremStore.TryAdd(validStmt.StatementExpression, validStmt) |> ignore
+            true
+        else
+            false
 
     member this.LastAssumedArgument =
         if _assumedArguments.Count > 0 then
