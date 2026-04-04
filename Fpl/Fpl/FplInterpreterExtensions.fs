@@ -19,11 +19,11 @@ open FplPrimitives
 open FplGrammarTypes
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterBasicTypes
-open FplInterpreter.Globals.Debug
-open FplInterpreter.Globals.Helpers
-open FplInterpreter.Globals.Heap
 open FplInterpreterChecks
-open FplInterpreterSTEmbedding
+open FplInterpreter.Globals.Debug
+open FplInterpreter.Globals.HelpersBasic
+open FplInterpreter.Globals.Heap
+open FplInterpreter.Globals.HelpersComplex
 open FplInterpreterReferences
 open FplInterpreterIntrinsicTypes
 open FplInterpreterVariables

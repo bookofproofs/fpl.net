@@ -20,8 +20,7 @@ open ErrDiagnostics
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterBasicTypes
 open FplInterpreter.Globals.Debug
-open FplInterpreter.Globals.Helpers
-open FplInterpreterSTEmbedding
+open FplInterpreter.Globals.HelpersBasic
 open FplInterpreterIntrinsicTypes
 
 [<AbstractClass>]

@@ -16,9 +16,8 @@ open System
 open FplGrammarTypes
 open FplPrimitives
 open FplInterpreterDiagnosticsEmitter
-open FplInterpreterSTEmbedding
 open FplInterpreterBasicTypes
-open FplInterpreter.Globals.Helpers
+open FplInterpreter.Globals.HelpersBasic
 
 type FplIntrinsicTpl(name, positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericIsValue(positions, parent)

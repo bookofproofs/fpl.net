@@ -20,7 +20,7 @@ open FplInterpreterDiagnosticsEmitter
 open FplInterpreterBasicTypes
 open FplInterpreter.Globals.Debug
 open FplInterpreterChecks
-open FplInterpreter.Globals.Helpers
+open FplInterpreter.Globals.HelpersBasic
 open FplInterpreterReferences
 open FplInterpreterIntrinsicTypes
 open FplInterpreterVariables
