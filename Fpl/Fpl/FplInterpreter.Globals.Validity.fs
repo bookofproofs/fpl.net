@@ -14,7 +14,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 module FplInterpreter.Globals.Validity
 open System.Collections.Generic
 open System.Text.Json
-open FplPrimitives
 open FplInterpreterBasicTypes
 open FplInterpreterCompoundPredicates
 
@@ -22,25 +21,16 @@ type ValidStmtStore() =
     let _theoremStore = Dictionary<string, ValidStatement>()
     let _assumedArguments = Stack<FplGenericHasValue>()
 
-    /// Adds an axiom to the theorem store, returns true if success, false otherwise.
-    member this.AddAxiom (axiom: FplGenericHasValue) =
-        let validityReason = 
-            match axiom.Name with
-            | LiteralAxL ->
-                let exprOpt = axiom.ArgList |> Seq.tryLast
-                match exprOpt with
-                | Some expr -> ValidityReason.IsAxiom expr
-                | _ -> ValidityReason.Error // fallback if axiom node is empty
-            | _ -> ValidityReason.Error // TODO handle all other cases correctly
-
-        match validityReason with
-        | ValidityReason.IsAxiom expr ->
-            let validStmt = 
-                { ValidStatement.Node = axiom
-                  ValidStatement.ValidityReason = validityReason
-                  ValidStatement.StatementExpression = expr.Type SignatureType.Mixed }
-            _theoremStore.TryAdd(validStmt.StatementExpression, validStmt)
+    /// Registers an expression in theoremStore
+    member this.RegistorExpression (st:FplGenericNode) =
+        match box st with
+        | :? IInferrable as infer ->
+            let validStmt = infer.InferrableExpression
+            match validStmt.ValidityReason with
+            | ValidityReason.Error -> false // do nothing if error was flagged
+            | _ -> _theoremStore.TryAdd(validStmt.StatementExpression, validStmt)
         | _ -> false
+
 
     /// Assumes an argument and puts it to the theorem store
     member this.AssumeArgument assumption =

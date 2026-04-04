@@ -80,6 +80,22 @@ type FplAxiom(positions: Positions, parent: FplGenericNode, runOrder) =
     override this.Name = LiteralAxL
     override this.ShortName = LiteralAx
 
+    member this.InferrableExpression =
+        let validityReason, exprStr = 
+            let exprOpt = this.ArgList |> Seq.tryLast
+            match exprOpt with
+            | Some expr -> ValidityReason.IsAxiom expr, expr.Type SignatureType.Mixed
+            | _ -> ValidityReason.Error, "" // fallback if axiom node is empty
+
+        { ValidStatement.Node = this
+          ValidStatement.ValidityReason = validityReason
+          ValidStatement.StatementExpression = exprStr }
+
+    interface IInferrable with
+        member this.InferrableExpression
+            with get () = this.InferrableExpression
+
+
     override this.Clone () =
         let ret = new FplAxiom((this.StartPos, this.EndPos), this.Parent.Value, _runOrder)
         this.AssignParts(ret)
@@ -100,7 +116,7 @@ type FplAxiom(positions: Positions, parent: FplGenericNode, runOrder) =
             checkLG003Diagnostics this
 
             // register the axiom in the valid statement store
-            if heap.ValidStmtStore.AddAxiom this then
+            if heap.ValidStmtStore.RegistorExpression this then
                 // evaluate all corollaries of the axiom
                 this.Scope.Values
                 |> Seq.filter (fun fv -> fv.Name = LiteralCorL) 

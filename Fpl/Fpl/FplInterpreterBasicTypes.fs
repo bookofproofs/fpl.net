@@ -587,5 +587,6 @@ type ValidStatement =
       ValidityReason: ValidityReason
       StatementExpression: string}
 
+/// Implement this interface for various nodes of the symbol table to find the right expression and validity reason. 
 type IInferrable =
-    abstract member GetInferrableExpression : ValidStatement with get
+    abstract member InferrableExpression : ValidStatement with get
