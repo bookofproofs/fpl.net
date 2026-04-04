@@ -400,3 +400,12 @@ let variableInBlockScopeByName (fplValue: FplGenericNode) name withNestedVariabl
 
     firstBlockParent fplValue
 
+/// Checks if an argument points to a free variable and if so, issues VAR09 diagnostics.
+let checkFreeVar (arg:FplGenericNode) = 
+    match arg.RefersTo with 
+    | Some ref ->
+        match box ref, ref.UltimateBlockNode with 
+        | :? IVariable as var, Some node when node.Name <> PrimRuleOfInference && node.Name <> LiteralLocL && not var.IsBound ->
+            ref.ErrorOccurred <- emitVAR09diagnostics ref.FplId ref.TypeId ref.StartPos ref.EndPos
+        | _ -> ()
+    | _ -> ()

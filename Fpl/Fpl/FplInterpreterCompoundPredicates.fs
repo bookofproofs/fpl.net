@@ -16,25 +16,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 module FplInterpreterCompoundPredicates
 open FplPrimitives
 open FplGrammarTypes
-open FplInterpreterDiagnosticsEmitter
 open FplInterpreterBasicTypes
 open FplInterpreter.Globals.Debug
 open FplInterpreterChecks
 open FplInterpreterSTEmbedding
 open FplInterpreterIntrinsicTypes
-open FplInterpreterVariables
 open FplInterpreterDefinitions
-
-
-/// Checks if an argument points to a free variable and if so, issues VAR09 diagnostics.
-let checkFreeVar (arg:FplGenericNode) = 
-    match arg.RefersTo with 
-    | Some ref ->
-        match box ref, ref.UltimateBlockNode with 
-        | :? FplGenericVariable as var, Some node when node.Name <> PrimRuleOfInference && node.Name <> LiteralLocL && not var.IsBound ->
-            var.ErrorOccurred <- emitVAR09diagnostics var.FplId var.TypeId var.StartPos var.EndPos
-        | _ -> ()
-    | _ -> ()
 
 
 /// Implements the semantics of an FPL conjunction compound predicate.
