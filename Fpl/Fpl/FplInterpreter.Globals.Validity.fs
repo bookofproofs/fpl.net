@@ -67,6 +67,10 @@ type ValidStmtStore() =
     member this.RevokeLastArgument() =
         if _assumedArguments.Count > 0 then
             let revocation = _assumedArguments.Pop()
+            let assumptionId = revocation.Type SignatureType.Mixed
+            // remove assumption proved wrong from valid stmts store
+            _theoremStore.Remove assumptionId |> ignore 
+            // and replace it by its negated version
             let negatedRevocation = new FplNegation((revocation.StartPos, revocation.EndPos),revocation.Parent.Value)
             negatedRevocation.ArgList.Add revocation
             let validStmt = 
