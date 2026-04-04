@@ -33,7 +33,7 @@ type ValidStmtStore() =
     let _theoremStore = Dictionary<string, ValidStatement>()
     let _assumedArguments = Stack<FplGenericHasValue>()
 
-    /// Adds an axiom to the theorem store
+    /// Adds an axiom to the theorem store, returns true if success, false otherwise.
     member this.AddAxiom (axiom: FplGenericHasValue) =
         let validityReason = 
             match axiom.Name with

@@ -99,15 +99,14 @@ type FplAxiom(positions: Positions, parent: FplGenericNode, runOrder) =
             checkLG003Diagnostics this
 
             // register the axiom in the valid statement store
-            heap.ValidStmtStore.RegisterValidStmt this
-
-            // evaluate all corollaries of the axiom
-            this.Scope.Values
-            |> Seq.filter (fun fv -> fv.Name = LiteralCorL) 
-            |> Seq.sortBy (fun block -> block.RunOrder.Value) 
-            |> Seq.iter (fun fv -> 
-                fv.Run()
-            )
+            if heap.ValidStmtStore.AddAxiom this then
+                // evaluate all corollaries of the axiom
+                this.Scope.Values
+                |> Seq.filter (fun fv -> fv.Name = LiteralCorL) 
+                |> Seq.sortBy (fun block -> block.RunOrder.Value) 
+                |> Seq.iter (fun fv -> 
+                    fv.Run()
+                )
 
         debug this Debug.Stop
 

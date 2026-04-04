@@ -82,6 +82,8 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplGenericNode) as 
         member this.IsInitialized 
             with get () = this.IsInitialized
             and set (value) = this.IsInitialized <- value
+        member this.IsBound 
+            with get () = this.IsBound
 
     override this.EmbedInSymbolTable nextOpt =
         this.CheckConsistency()

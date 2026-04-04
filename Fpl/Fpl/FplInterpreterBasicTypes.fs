@@ -60,6 +60,7 @@ let checkStartsWithLowerCase (s:string) =
 type IVariable =
     abstract member IsSignatureVariable : bool with get, set
     abstract member IsInitialized : bool with get, set
+    abstract member IsBound : bool with get
 
 /// The interface IConstant is used to implement fixed but unknown objects of some type.
 /// In general, the equality of two fixed but unknown objects of the same type cannot be determined, 
