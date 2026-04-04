@@ -51,6 +51,11 @@ namespace FplLS
                         while (heap.IsEvaluating) { }
                         return Task.FromResult(heap.SymbolTable.ToJson());
                     })
+                    .OnRequest<JToken, string>("getValidStmts", (request, cancellationToken) =>
+                    {
+                        while (heap.IsEvaluating) { }
+                        return Task.FromResult(heap.ValidStmtStore.ToJson());
+                    })
                     .OnInitialize((s, _, _) =>
                     {
                         if (s is LanguageServer languageServer)
