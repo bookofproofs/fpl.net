@@ -17,6 +17,7 @@ open FplPrimitives
 open FplGrammarTypes
 open FplInterpreterBasicTypes
 open FplInterpreter.Globals.Debug
+open FplInterpreter.Globals.Heap
 open FplInterpreterIntrinsicTypes
 
 
@@ -32,8 +33,8 @@ type FplAssertion(positions: Positions, parent: FplGenericNode) =
         ret
 
     override this.Run() = 
-        // TODO implement run
         debug this Debug.Start
+        heap.ValidStmtStore.AddAssertion this
         debug this Debug.Stop
 
     override this.RunOrder = None

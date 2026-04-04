@@ -85,6 +85,13 @@ type ValidStmtStore() =
         else 
             None
 
+    member this.AddAssertion assertion = 
+        let validStmt = 
+            { ValidStatement.Node = assertion
+              ValidStatement.ValidityReason = ValidityReason.IsAsserted assertion
+              ValidStatement.StatementExpression = assertion.Type SignatureType.Mixed }
+        _theoremStore.TryAdd(validStmt.StatementExpression, validStmt) |> ignore
+
     member this.Clear() =
         _theoremStore.Clear() // TODO unify assumed arguments with theoremStore
         _assumedArguments.Clear()
