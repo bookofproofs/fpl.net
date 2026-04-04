@@ -20,13 +20,12 @@ open FplPrimitives
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterBasicTypes
 open FplInterpreter.Globals.Debug
-open FplInterpreter.Globals.Root
+open FplInterpreter.Globals.Helpers
 open FplInterpreter.Globals.Heap
 open FplInterpreterChecks
 open FplInterpreterSTEmbedding
 open FplInterpreterIntrinsicTypes
 open FplInterpreterVariables
-open FplInterpreterReferences
 
 [<AbstractClass>]
 type FplGenericPredicate(positions: Positions, parent: FplGenericNode) as this =

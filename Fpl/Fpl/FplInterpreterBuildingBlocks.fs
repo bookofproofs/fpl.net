@@ -23,7 +23,7 @@ open FplInterpreterDiagnosticsEmitter
 open FplInterpreterAstPreprocessing
 open FplInterpreterBasicTypes
 open FplInterpreter.Globals.Root
-open FplInterpreter.Globals.ST
+open FplInterpreter.Globals.Helpers
 open FplInterpreter.Globals.Heap
 open FplInterpreterChecks
 open FplInterpreterSTEmbedding

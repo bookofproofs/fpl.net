@@ -570,3 +570,6 @@ let representationSep sep (coordinates:FplGenericNode seq) =
 
 /// A string representation of an FplValue
 let toString (fplValue:FplGenericNode) = $"{fplValue.ShortName} {fplValue.Type(SignatureType.Name)}"
+
+type IHasDotted = 
+    abstract member DottedChild : FplGenericNode option with get, set

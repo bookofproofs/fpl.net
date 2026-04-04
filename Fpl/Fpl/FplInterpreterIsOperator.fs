@@ -17,7 +17,7 @@ open FplPrimitives
 open FplGrammarTypes
 open FplInterpreterBasicTypes
 open FplInterpreter.Globals.Debug
-open FplInterpreterSTEmbedding
+open FplInterpreter.Globals.Helpers
 open FplInterpreterReferences
 open FplInterpreterIntrinsicTypes
 open FplInterpreterDefinitions

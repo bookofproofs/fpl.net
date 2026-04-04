@@ -4,7 +4,7 @@ open FplGrammarTypes
 open ErrDiagnostics
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterBasicTypes
-open FplInterpreterSTEmbedding
+open FplInterpreter.Globals.Helpers
 open FplInterpreterReferences
 open FplInterpreterDefinitions
 open FplInterpreterFplTypeMatching

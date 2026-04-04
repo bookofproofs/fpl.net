@@ -19,7 +19,7 @@ open FplGrammarTypes
 open FplInterpreterBasicTypes
 open FplInterpreter.Globals.Debug
 open FplInterpreterChecks
-open FplInterpreterSTEmbedding
+open FplInterpreter.Globals.Helpers
 open FplInterpreterIntrinsicTypes
 open FplInterpreterDefinitions
 

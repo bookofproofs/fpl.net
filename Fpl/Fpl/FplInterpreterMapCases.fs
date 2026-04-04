@@ -19,8 +19,8 @@ open ErrDiagnostics
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterBasicTypes
 open FplInterpreter.Globals.Debug
+open FplInterpreter.Globals.Helpers
 open FplInterpreterChecks
-open FplInterpreterSTEmbedding
 open FplInterpreterIntrinsicTypes
 
 type FplMapCaseSingle(positions: Positions, parent: FplGenericNode) as this =
