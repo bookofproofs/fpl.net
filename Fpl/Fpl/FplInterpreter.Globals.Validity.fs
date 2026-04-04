@@ -128,8 +128,8 @@ type ValidStmtStore() =
 
         JsonSerializer.Serialize(groups)
 
-    member this.Clear() =
-        _theoremStore.Clear() // TODO unify assumed arguments with theoremStore
+    member this.ClearValidityStore() =
+        _theoremStore.Clear() 
         _assumedArguments.Clear()
 
     member this.Count = _theoremStore.Count

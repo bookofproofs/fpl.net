@@ -23,6 +23,6 @@ type TestValidStmtStore() =
         let filename = "TestStmtStoreAddsAxioms"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         Assert.AreEqual<int>(expected, heap.ValidStmtStore.Count)
-        heap.ValidStmtStore.Clear()
+        heap.ValidStmtStore.ClearValidityStore()
         prepareFplCode(filename, "", false) |> ignore
 

@@ -57,22 +57,22 @@ type HeapMemory() =
         with get () = _isEvaluating
         and set (value) = _isEvaluating <- value
 
-    // Clears the heap except parsed asts.
-    member this.ClearExceptParsedAsts() = 
+    // Clears the heap's working memory, including memory needed for rsymbol table evaluation and running nodes
+    member this.ClearWorkingMemory() = 
         _evalStack.Clear()
-        _validStmtStore.Clear()
         _state.Clear()
 
-    // Clears the heap except parsed asts.
-    member this.ClearParsedAsts() = 
+    // Clears the heap's result memory, including asts, symbol table, and valid statement store.
+    member this.ClearResultMemory() = 
         _parsedAsts.Clear()
         _symbolTable.Clear()
+        _validStmtStore.ClearValidityStore()
 
 
     // Clears the heap except parsed asts.
     member this.ClearAll() = 
-        this.ClearExceptParsedAsts()
-        this.ClearParsedAsts()
+        this.ClearWorkingMemory()
+        this.ClearResultMemory()
         ad.Clear()
 
     /// Returns the uses dependencies of this symbol table needed e.g. for debugging purposes in the FPL language server.

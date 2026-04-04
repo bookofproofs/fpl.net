@@ -1735,7 +1735,7 @@ let evaluateSymbolTable () =
 
         match usesClausesEvaluatedParsedAst with
         | Some pa ->
-            heap.ClearExceptParsedAsts()
+            heap.ClearWorkingMemory()
             // evaluate the ParsedAst of a theory
             let theoryValue = new FplTheory(pa.Id, heap.Root, pa.Parsing.Uri.AbsolutePath, heap.Helper.GetNextAvailableFplBlockRunOrder);
             if not (heap.Root.Scope.ContainsKey(pa.Id)) then

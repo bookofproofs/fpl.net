@@ -219,7 +219,7 @@ type TestEvalAliasedNamespaceIdentifier() =
         Assert.AreEqual<int>(2, fplSources.FilePaths.Length)
 
     member this.PrepareTestLoadAllUsesClauses01() =
-        heap.ClearParsedAsts() 
+        heap.ClearResultMemory() 
         let input = """
             uses Fpl.Commons
             ;"""
@@ -370,7 +370,7 @@ type TestEvalAliasedNamespaceIdentifier() =
             Assert.AreEqual<string list>(["Test"; "Fpl.SetTheory"], actual)
 
     member this.PrepareTestLoadAllUsesClauses03() =
-        heap.ClearParsedAsts()
+        heap.ClearResultMemory()
         let input = """
             uses Fpl * 
             ;"""
@@ -473,7 +473,7 @@ type TestEvalAliasedNamespaceIdentifier() =
 
     [<TestMethod>]
     member this.TestLoadAllUsesClausesTopologicalSorting02() =
-        heap.ClearParsedAsts()
+        heap.ClearResultMemory()
         if not TestConfig.IsOffline then 
             let result = this.PrepareTestLoadAllUsesClauses02()
             let ra = result.TryFindAstById("Fpl.Commons")
