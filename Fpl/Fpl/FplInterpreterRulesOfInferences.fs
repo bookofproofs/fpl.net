@@ -93,7 +93,7 @@ type FplRuleOfInference(positions: Positions, parent: FplGenericNode, runOrder) 
         if this.ArgList.Count >= 2 then
             // TODO: this conclusion node is wrong,
             // we need the conclusion after applying this rule of inference 
-            let conclusion = this.ArgList[2]
+            let conclusion = this.ArgList[1]
             heap.ValidStmtStore.AddInferredArgument conclusion 
         debug this Debug.Stop
 

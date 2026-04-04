@@ -20,7 +20,6 @@ open FplInterpreter.Globals.Debug
 open FplInterpreter.Globals.HelpersBasic
 open FplInterpreterReferences
 open FplInterpreterIntrinsicTypes
-open FplInterpreterDefinitions
 open FplInterpreterFplTypeMatching
 
 
