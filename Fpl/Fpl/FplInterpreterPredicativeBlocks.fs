@@ -18,13 +18,13 @@ open FplPrimitives
 open FplGrammarTypes
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterBasicTypes
+open FplInterpreterChecks
 open FplInterpreter.Globals.Debug
 open FplInterpreter.Globals.HelpersBasic
 open FplInterpreter.Globals.Heap
 open FplInterpreter.Globals.HelpersComplex
-open FplInterpreterChecks
+open FplInterpreterIntrinsicTypes
 open FplInterpreterVariables
-open FplInterpreterDefinitions
 
 let runArgumentsOfGenericPredicateWithExpression (fv:FplGenericHasValue) = 
     fv.ArgList

@@ -17,6 +17,7 @@ open FplGrammarTypes
 open FplPrimitives
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterBasicTypes
+open FplInterpreter.Globals.Debug
 open FplInterpreter.Globals.HelpersBasic
 
 type FplIntrinsicTpl(name, positions: Positions, parent: FplGenericNode) as this =
@@ -218,3 +219,18 @@ type FplGenericStmt(positions: Positions, parent: FplGenericNode) =
     override this.Type _ = this.FplId
 
     override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
+
+[<AbstractClass>]
+type FplGenericPredicate(positions: Positions, parent: FplGenericNode) as this =
+    inherit FplGenericHasValue(positions, parent)
+    do 
+        this.FplId <- LiteralTrue
+        this.TypeId <- LiteralPred
+
+    override this.RunOrder = None
+
+    override this.Run() = 
+        debug this Debug.Start 
+        // the default value of predicates is an undetermined predicate
+        this.SetDefaultValue()
+        debug this Debug.Stop

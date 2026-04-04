@@ -26,10 +26,11 @@
         <Compile Include="FplInterpreter.Globals.ST.fs" />
         <Compile Include="FplInterpreter.Globals.STEval.fs" />
         <Compile Include="FplInterpreter.Globals.State.fs" />
+        <Compile Include="FplInterpreterIntrinsicTypes.fs" />
+        <Compile Include="FplInterpreterCompoundPredicates.fs" />
         <Compile Include="FplInterpreter.Globals.Validity.fs" />
         <Compile Include="FplInterpreter.Globals.Heap.fs" />
         <Compile Include="FplInterpreter.Globals.HelpersComplex.fs" />
-        <Compile Include="FplInterpreterIntrinsicTypes.fs" />
         <Compile Include="FplInterpreterVariables.fs" />
         <Compile Include="FplInterpreterReferences.fs" />
         <Compile Include="FplInterpreterDefinitions.fs" />
@@ -39,7 +40,6 @@
         <Compile Include="FplInterpreterDefinitionProperties.fs" />
         <Compile Include="FplInterpreterProofs.fs" />
         <Compile Include="FplInterpreterQuantors.fs" />
-        <Compile Include="FplInterpreterCompoundPredicates.fs" />
         <Compile Include="FplInterpreterRulesOfInferences.fs" />
         <Compile Include="FplInterpreterMapCases.fs" />
         <Compile Include="FplInterpreterExtensions.fs" />

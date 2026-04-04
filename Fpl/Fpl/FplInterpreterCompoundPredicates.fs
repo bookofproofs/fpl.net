@@ -21,7 +21,6 @@ open FplInterpreter.Globals.Debug
 open FplInterpreterChecks
 open FplInterpreter.Globals.HelpersBasic
 open FplInterpreterIntrinsicTypes
-open FplInterpreterDefinitions
 
 
 /// Implements the semantics of an FPL conjunction compound predicate.
