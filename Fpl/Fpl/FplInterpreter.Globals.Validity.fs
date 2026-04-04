@@ -13,6 +13,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 *)
 module FplInterpreter.Globals.Validity
 open System.Collections.Generic
+open System.Text.Json
 open FplPrimitives
 open FplInterpreterBasicTypes
 open FplInterpreterCompoundPredicates
@@ -70,7 +71,7 @@ type ValidStmtStore() =
             let assumptionId = revocation.Type SignatureType.Mixed
             // remove assumption proved wrong from valid stmts store
             _theoremStore.Remove assumptionId |> ignore 
-            // and replace it by its negated version
+            // and replace it with its negated version
             let negatedRevocation = new FplNegation((revocation.StartPos, revocation.EndPos),revocation.Parent.Value)
             negatedRevocation.ArgList.Add revocation
             let validStmt = 
@@ -99,13 +100,37 @@ type ValidStmtStore() =
               ValidStatement.StatementExpression = inferredArg.Type SignatureType.Mixed }
         _theoremStore.TryAdd(validStmt.StatementExpression, validStmt) |> ignore
 
+    /// Produces a JSON string grouping stored valid statements by their ValidityReason.
+    /// The resulting JSON maps each reason name to an array of StatementExpression strings.
+    member this.ToJson() =
+        let groups = Dictionary<string, ResizeArray<string>>()
+
+        let getKey reason =
+            match reason with
+            | IsAxiom _ -> "IsAxiom"
+            | IsAsserted _ -> "IsAsserted"
+            | IsAssumed _ -> "IsAssumed"
+            | IsInferred _ -> "IsInferred"
+            | IsInferredFromRevocation _ -> "IsInferredFromRevocation"
+            | Error -> "Error"
+
+        for kvp in _theoremStore do
+            let stmt = kvp.Value
+            let key = getKey stmt.ValidityReason
+            let list =
+                match groups.TryGetValue key with
+                | true, v -> v
+                | _ ->
+                    let v = ResizeArray<string>()
+                    groups.Add(key, v)
+                    v
+            list.Add stmt.StatementExpression
+
+        JsonSerializer.Serialize(groups)
 
     member this.Clear() =
         _theoremStore.Clear() // TODO unify assumed arguments with theoremStore
         _assumedArguments.Clear()
 
     member this.Count = _theoremStore.Count
-
-
-    
 
