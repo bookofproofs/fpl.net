@@ -21,6 +21,7 @@ type ValidityReason =
     | IsAsserted of FplGenericNode
     | IsAssumed of FplGenericNode
     | IsInferred of FplGenericNode
+    | IsInferredFromRevocation of FplGenericNode
     | Error 
 
 type ValidStatement =
@@ -30,13 +31,14 @@ type ValidStatement =
 
 type ValidStmtStore() =
     let _theoremStore = Dictionary<string, ValidStatement>()
-    let _assumedArguments = Stack<FplGenericNode>()
+    let _assumedArguments = Stack<FplGenericHasValue>()
 
-    member this.RegisterValidStmt (fv: FplGenericHasValue) =
+    /// Adds an axiom to the theorem store
+    member this.AddAxiom (axiom: FplGenericHasValue) =
         let validityReason = 
-            match fv.Name with
+            match axiom.Name with
             | LiteralAxL ->
-                let exprOpt = fv.ArgList |> Seq.tryLast
+                let exprOpt = axiom.ArgList |> Seq.tryLast
                 match exprOpt with
                 | Some expr -> ValidityReason.IsAxiom expr
                 | _ -> ValidityReason.Error // fallback if axiom node is empty
@@ -45,18 +47,31 @@ type ValidStmtStore() =
         match validityReason with
         | ValidityReason.IsAxiom expr ->
             let validStmt = 
-                { ValidStatement.Node = fv
+                { ValidStatement.Node = axiom
                   ValidStatement.ValidityReason = validityReason
                   ValidStatement.StatementExpression = expr.Type SignatureType.Mixed }
+            _theoremStore.TryAdd(validStmt.StatementExpression, validStmt)
+        | _ -> false
+
+    /// Assumes an argument and puts it to the theorem store
+    member this.AssumeArgument assumption =
+        let validStmt = 
+            { ValidStatement.Node = assumption
+              ValidStatement.ValidityReason = ValidityReason.IsAssumed assumption
+              ValidStatement.StatementExpression = assumption.Type SignatureType.Mixed }
+        _theoremStore.TryAdd(validStmt.StatementExpression, validStmt) |> ignore
+        _assumedArguments.Push assumption
+
+    /// Revokes an argument and puts its negation to the theorem store
+    member this.RevokeLastArgument() =
+        if _assumedArguments.Count > 0 then
+            let revocation = _assumedArguments.Pop()
+            let negatedRevocation = revocation // TODO negate
+            let validStmt = 
+                { ValidStatement.Node = negatedRevocation
+                  ValidStatement.ValidityReason = ValidityReason.IsInferredFromRevocation negatedRevocation
+                  ValidStatement.StatementExpression = negatedRevocation.Type SignatureType.Mixed }
             _theoremStore.TryAdd(validStmt.StatementExpression, validStmt) |> ignore
-        | _ ->
-            ()
-
-    member this.Clear() =
-        _theoremStore.Clear() // TODO unify assumed arguments with theoremStore
-        _assumedArguments.Clear()
-
-    member this.Count = _theoremStore.Count
 
     member this.LastAssumedArgument =
         if _assumedArguments.Count > 0 then
@@ -64,7 +79,12 @@ type ValidStmtStore() =
         else 
             None
 
-    member this.AssumeArgument assumption = _assumedArguments.Push (assumption)
+    member this.Clear() =
+        _theoremStore.Clear() // TODO unify assumed arguments with theoremStore
+        _assumedArguments.Clear()
+
+    member this.Count = _theoremStore.Count
+
+
     
-    member this.RevokeLastArgument() = if _assumedArguments.Count > 0 then _assumedArguments.Pop() |> ignore
 
