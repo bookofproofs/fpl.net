@@ -116,7 +116,7 @@ type FplAxiom(positions: Positions, parent: FplGenericNode, runOrder) =
             checkLG003Diagnostics this
 
             // register the axiom in the valid statement store
-            if heap.ValidStmtStore.RegistorExpression this then
+            if heap.ValidStmtStore.RegisterExpression this then
                 // evaluate all corollaries of the axiom
                 this.Scope.Values
                 |> Seq.filter (fun fv -> fv.Name = LiteralCorL) 

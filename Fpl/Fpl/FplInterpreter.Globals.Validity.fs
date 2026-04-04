@@ -21,8 +21,8 @@ type ValidStmtStore() =
     let _theoremStore = Dictionary<string, ValidStatement>()
     let _assumedArguments = Stack<FplGenericHasValue>()
 
-    /// Registers an expression in theoremStore
-    member this.RegistorExpression (st:FplGenericNode) =
+    /// Registers an expression in the theorem store
+    member this.RegisterExpression (st:FplGenericNode) =
         match box st with
         | :? IInferrable as infer ->
             let validStmt = infer.InferrableExpression
@@ -62,13 +62,6 @@ type ValidStmtStore() =
             Some (_assumedArguments.Peek())
         else 
             None
-
-    member this.AddAssertion assertion = 
-        let validStmt = 
-            { ValidStatement.Node = assertion
-              ValidStatement.ValidityReason = ValidityReason.IsAsserted assertion
-              ValidStatement.StatementExpression = assertion.Type SignatureType.Mixed }
-        _theoremStore.TryAdd(validStmt.StatementExpression, validStmt) |> ignore
 
     member this.AddInferredArgument inferredArg = 
         let validStmt = 

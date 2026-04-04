@@ -27,6 +27,22 @@ type FplAssertion(positions: Positions, parent: FplGenericNode) =
     override this.Name = PrimAssertion
     override this.ShortName = LiteralAss
 
+    member this.InferrableExpression =
+        let validityReason, exprStr = 
+            let exprOpt = this.ArgList |> Seq.tryLast
+            match exprOpt with
+            | Some expr -> ValidityReason.IsAsserted expr, expr.Type SignatureType.Mixed
+            | _ -> ValidityReason.Error, "" // fallback if axiom node is empty
+
+        { ValidStatement.Node = this
+          ValidStatement.ValidityReason = validityReason
+          ValidStatement.StatementExpression = exprStr }
+
+    interface IInferrable with
+        member this.InferrableExpression
+            with get () = this.InferrableExpression
+
+
     override this.Clone () =
         let ret = new FplAssertion((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -34,7 +50,7 @@ type FplAssertion(positions: Positions, parent: FplGenericNode) =
 
     override this.Run() = 
         debug this Debug.Start
-        heap.ValidStmtStore.AddAssertion this
+        heap.ValidStmtStore.RegisterExpression this |> ignore
         debug this Debug.Stop
 
     override this.RunOrder = None
