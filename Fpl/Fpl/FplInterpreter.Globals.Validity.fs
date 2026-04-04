@@ -107,11 +107,11 @@ type ValidStmtStore() =
 
         let getKey reason =
             match reason with
-            | IsAxiom _ -> "IsAxiom"
-            | IsAsserted _ -> "IsAsserted"
-            | IsAssumed _ -> "IsAssumed"
-            | IsInferred _ -> "IsInferred"
-            | IsInferredFromRevocation _ -> "IsInferredFromRevocation"
+            | IsAxiom _ -> "Axioms"
+            | IsAsserted _ -> "Assertions"
+            | IsAssumed _ -> "Assumptions"
+            | IsInferred _ -> "Inferred Arguments"
+            | IsInferredFromRevocation _ -> "Inferred from Revocations"
             | Error -> "Error"
 
         for kvp in _theoremStore do

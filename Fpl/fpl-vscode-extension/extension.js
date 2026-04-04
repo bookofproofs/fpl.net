@@ -437,6 +437,65 @@ class FplTheoriesProvider {
 }
 
 
+// New TreeItem class for Valid Statements tree
+class ValidStmtItem extends vscode.TreeItem {
+    constructor(label, collapsibleState, children = []) {
+        super(label, collapsibleState);
+        this.children = children;
+        // tooltip helps show full statement when truncated in the tree
+        this.tooltip = label;
+    }
+}
+
+
+// Define TreeDataProvider for valid statements grouped by validity reason
+class ValidStmtsProvider {
+    constructor() {
+        this._onDidChangeTreeData = new vscode.EventEmitter();
+        this.onDidChangeTreeData = this._onDidChangeTreeData.event;
+    }
+
+    refresh() {
+        this._onDidChangeTreeData.fire();
+    }
+
+    getTreeItem(element) {
+        return element;
+    }
+
+    getChildren(element) {
+        if (!element) {
+            // request the grouped valid statements map: { "IsAxiom": ["stmt1", "stmt2"], ... }
+            return client.sendRequest('getValidStmts', {}).then(json => {
+                try {
+                    let groups = JSON.parse(json);
+                    let roots = [];
+                    for (let key in groups) {
+                        if (Object.prototype.hasOwnProperty.call(groups, key)) {
+                            const arr = groups[key] || [];
+                            // create child items for each statement expression
+                            const children = arr.map(s => new ValidStmtItem(s, vscode.TreeItemCollapsibleState.None));
+                            const label = `${key} (${children.length})`;
+                            roots.push(new ValidStmtItem(label, vscode.TreeItemCollapsibleState.Collapsed, children));
+                        }
+                    }
+                    return roots;
+                } catch (err) {
+                    log2Console('Failed to parse valid statements: ' + err + ' raw:' + (json ? json.substring(0, 1500) : 'null'), true);
+                    return [];
+                }
+            }).catch(error => {
+                log2Console('Failed to get valid statements ' + error, true);
+                return [];
+            });
+        } else {
+            // element has children property which are TreeItems already
+            return Promise.resolve(element.children || []);
+        }
+    }
+}
+
+
 const { LanguageClient } = require('vscode-languageclient');
 
 let client;
@@ -485,26 +544,29 @@ function activate(context) {
                 clientOptions
             );
 
-            // Create an instance of your TreeDataProvider
+            // Create instances of the TreeDataProviders
             const fplTheoriesProvider = new FplTheoriesProvider();
+            const fplValidStmtsProvider = new ValidStmtsProvider();
 
-            // Register TreeDataProvider
+            // Register TreeDataProviders
             vscode.window.registerTreeDataProvider('fplTheories', fplTheoriesProvider);
+            vscode.window.registerTreeDataProvider('fplValidStmts', fplValidStmtsProvider);
 
 
-
-            // refresh FPL Theories Explorer on active text editor changes   
+            // refresh both tree views on active text editor changes   
             vscode.window.onDidChangeActiveTextEditor((editor) => {
                 log2Console("onDidChangeActiveTextEditor", false);
                 if (editor && editor.document.languageId === 'fpl') {
                     fplTheoriesProvider.refresh();
+                    fplValidStmtsProvider.refresh();
                 }
             });
 
-            // refresh FPL Theories Explorer on document changes  
+            // refresh both tree views on document changes  
             vscode.workspace.onDidChangeTextDocument((event) => {
                 if (event.document.languageId === 'fpl') {
                     fplTheoriesProvider.refresh();
+                    fplValidStmtsProvider.refresh();
                 }
             });
 
@@ -538,6 +600,7 @@ function activate(context) {
             if (vscode.window.activeTextEditor && vscode.window.activeTextEditor.document.languageId === 'fpl') {
                 log2Console("initial treeview refresh", false);
                 fplTheoriesProvider.refresh();
+                fplValidStmtsProvider.refresh();
             }
 
             // Register the command
