@@ -16,7 +16,6 @@ open System
 open System.Text
 open FplPrimitives
 open FplInterpreterBasicTypes
-open FplInterpreterChecks
 open FplInterpreter.Globals.Root
 
 type SymbolTable() =
