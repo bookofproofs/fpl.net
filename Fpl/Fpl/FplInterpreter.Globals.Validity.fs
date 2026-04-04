@@ -15,6 +15,7 @@ module FplInterpreter.Globals.Validity
 open System.Collections.Generic
 open FplPrimitives
 open FplInterpreterBasicTypes
+open FplInterpreterCompoundPredicates
 
 type ValidityReason =
     | IsAxiom of FplGenericNode
@@ -66,7 +67,8 @@ type ValidStmtStore() =
     member this.RevokeLastArgument() =
         if _assumedArguments.Count > 0 then
             let revocation = _assumedArguments.Pop()
-            let negatedRevocation = revocation // TODO negate
+            let negatedRevocation = new FplNegation((revocation.StartPos, revocation.EndPos),revocation.Parent.Value)
+            negatedRevocation.ArgList.Add revocation
             let validStmt = 
                 { ValidStatement.Node = negatedRevocation
                   ValidStatement.ValidityReason = ValidityReason.IsInferredFromRevocation negatedRevocation
