@@ -20,6 +20,7 @@ open FplInterpreterBasicTypes
 open FplInterpreter.Globals.Debug
 open FplInterpreter.Globals.HelpersBasic
 open FplInterpreter.Globals.HelpersComplex
+open FplInterpreter.Globals.Heap
 open FplInterpreterVariables
 
 
@@ -88,8 +89,13 @@ type FplRuleOfInference(positions: Positions, parent: FplGenericNode, runOrder) 
     override this.IsBlock () = true    
 
     override this.Run() = 
-        // FplRuleOfReference does not have any Value and doesn't need run
-        ()
+        debug this Debug.Start
+        if this.ArgList.Count >= 2 then
+            // TODO: this conclusion node is wrong,
+            // we need the conclusion after applying this rule of inference 
+            let conclusion = this.ArgList[2]
+            heap.ValidStmtStore.AddInferredArgument conclusion 
+        debug this Debug.Stop
 
     override this.EmbedInSymbolTable _ = 
         this.CheckConsistency()

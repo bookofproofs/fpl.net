@@ -92,6 +92,14 @@ type ValidStmtStore() =
               ValidStatement.StatementExpression = assertion.Type SignatureType.Mixed }
         _theoremStore.TryAdd(validStmt.StatementExpression, validStmt) |> ignore
 
+    member this.AddInferredArgument inferredArg = 
+        let validStmt = 
+            { ValidStatement.Node = inferredArg
+              ValidStatement.ValidityReason = ValidityReason.IsInferred inferredArg
+              ValidStatement.StatementExpression = inferredArg.Type SignatureType.Mixed }
+        _theoremStore.TryAdd(validStmt.StatementExpression, validStmt) |> ignore
+
+
     member this.Clear() =
         _theoremStore.Clear() // TODO unify assumed arguments with theoremStore
         _assumedArguments.Clear()
