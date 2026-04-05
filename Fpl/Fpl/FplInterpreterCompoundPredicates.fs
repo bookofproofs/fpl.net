@@ -162,10 +162,7 @@ type FplExclusiveOr(positions: Positions, parent: FplGenericNode) as this =
         this.AssignParts(ret)
         ret
 
-    override this.Type signatureType = 
-        let head = getFplHead this signatureType
-        let args = signatureSep ", " this.ArgList signatureType
-        sprintf "%s(%s)" head args
+    override this.Type signatureType = getNotationTwoArgs this "⩡" signatureType
 
     override this.Run() = 
         debug this Debug.Start
