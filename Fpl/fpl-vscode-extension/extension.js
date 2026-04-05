@@ -391,6 +391,7 @@ class FplTheoriesProvider {
             return client.sendRequest('getTreeData', {}).then(json => {
                 try {
                     let treeData = JSON.parse(json);
+                    log2Console(json.substring(0, 1500), true);
                     return this.parseScope(treeData.Scope);
                 } catch (err) {
                     log2Console('Failed to parse tree data: ' + err + ' raw:' + (json ? json.substring(0, 1500) : 'null'), true);
@@ -465,16 +466,34 @@ class ValidStmtsProvider {
 
     getChildren(element) {
         if (!element) {
-            // request the grouped valid statements map: { "IsAxiom": ["stmt1", "stmt2"], ... }
+            // request the grouped valid statements map:
+            // { "Axioms": [ { "statementExpression": "∀Ǝ..." , ... }, ... ], ... }
             return client.sendRequest('getValidStmts', {}).then(json => {
                 try {
                     let groups = JSON.parse(json);
                     let roots = [];
                     for (let key in groups) {
                         if (Object.prototype.hasOwnProperty.call(groups, key)) {
-                            const arr = groups[key] || [];
-                            // create child items for each statement expression
-                            const children = arr.map(s => new ValidStmtItem(s, vscode.TreeItemCollapsibleState.None));
+                            const arr = Array.isArray(groups[key]) ? groups[key] : [];
+                            // create child items for each statement object
+                            const children = arr.map(obj => {
+                                let label = '';
+                                if (obj && typeof obj === 'object') {
+                                    // prefer the explicit property produced by the server
+                                    if (typeof obj.statementExpression === 'string') {
+                                        label = obj.statementExpression;
+                                    } else {
+                                        // fallback: stringify the object if property missing
+                                        label = JSON.stringify(obj);
+                                    }
+                                } else {
+                                    label = String(obj);
+                                }
+                                const item = new ValidStmtItem(label, vscode.TreeItemCollapsibleState.None);
+                                // show full object in tooltip for later extension/debugging
+                                item.tooltip = (obj && typeof obj === 'object') ? JSON.stringify(obj) : String(obj);
+                                return item;
+                            });
                             const label = `${key} (${children.length})`;
                             roots.push(new ValidStmtItem(label, vscode.TreeItemCollapsibleState.Collapsed, children));
                         }
