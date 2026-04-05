@@ -589,7 +589,7 @@ type TestFplValueScopeQualifiedName() =
         | "base21a" -> Assert.AreEqual<string>("a negation TestPredicateQualifiedName.T1().not(x)", qualifiedName base1 false) 
         | "base21b" -> Assert.AreEqual<string>("a negation TestPredicateQualifiedName.T1().not(x)", qualifiedName base1 false) 
         | "base22" -> Assert.AreEqual<string>("an exclusive disjunction TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1 false) 
-        | "base23" -> Assert.AreEqual<string>("a disjunction TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1 false) 
+        | "base23" -> Assert.AreEqual<string>("a disjunction TestPredicateQualifiedName.T1().x ∨ (y ∨ z)", qualifiedName base1 false) 
         | "base24" -> Assert.AreEqual<string>("an equivalence TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1 false) 
         | "base25" -> Assert.AreEqual<string>("an implication TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1 false) 
         | "base26" -> Assert.AreEqual<string>("an is operator TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1 false) 

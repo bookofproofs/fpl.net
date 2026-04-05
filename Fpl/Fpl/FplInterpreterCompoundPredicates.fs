@@ -22,6 +22,21 @@ open FplInterpreterChecks
 open FplInterpreter.Globals.HelpersBasic
 open FplInterpreterIntrinsicTypes
 
+
+let private getNotationTwoArgs (fv:FplGenericNode) symbol signatureType = 
+    let separator = $" {symbol} "
+    match signatureType with
+    | SignatureType.Type -> LiteralPred
+    | _ ->
+        fv.ArgList
+        |> Seq.map (fun arg ->
+            if isSimpleExpression arg then
+                $"{arg.Type signatureType}"
+            else
+                $"({arg.Type signatureType})"
+        )
+        |> String.concat separator
+
 /// Implements the semantics of an FPL conjunction compound predicate.
 type FplConjunction(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericPredicate(positions, parent)
@@ -37,18 +52,7 @@ type FplConjunction(positions: Positions, parent: FplGenericNode) as this =
         this.AssignParts(ret)
         ret
 
-    override this.Type signatureType =
-        match signatureType with
-        | SignatureType.Type -> LiteralPred
-        | _ ->
-            this.ArgList
-            |> Seq.map (fun arg ->
-                if isSimpleExpression arg then
-                    $"{arg.Type signatureType}"
-                else
-                    $"({arg.Type signatureType})"
-            )
-            |> String.concat " ∧ "
+    override this.Type signatureType = getNotationTwoArgs this "∧" signatureType
 
     override this.Run() =
         debug this Debug.Start
@@ -104,10 +108,7 @@ type FplDisjunction(positions: Positions, parent: FplGenericNode) as this =
         this.AssignParts(ret)
         ret
 
-    override this.Type signatureType = 
-        let head = getFplHead this signatureType
-        let args = signatureSep ", " this.ArgList signatureType
-        sprintf "%s(%s)" head args
+    override this.Type signatureType = getNotationTwoArgs this "∨" signatureType
 
     override this.Run() =
         debug this Debug.Start

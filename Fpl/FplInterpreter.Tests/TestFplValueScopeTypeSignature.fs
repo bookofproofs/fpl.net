@@ -595,7 +595,7 @@ type TestFplValueScopeTypeSignature() =
         | "base21a" -> Assert.AreEqual<string>("pred(undef)", base1.Type(SignatureType.Type))
         | "base21b" -> Assert.AreEqual<string>("pred(undef)", base1.Type(SignatureType.Type))
         | "base22" -> Assert.AreEqual<string>("pred(undef, pred(undef, undef))", base1.Type(SignatureType.Type))
-        | "base23" -> Assert.AreEqual<string>("pred(undef, pred(undef, undef))", base1.Type(SignatureType.Type))
+        | "base23" -> Assert.AreEqual<string>("pred", base1.Type(SignatureType.Type))
         | "base24" -> Assert.AreEqual<string>("pred(undef, undef)", base1.Type(SignatureType.Type))
         | "base25" -> Assert.AreEqual<string>("pred(undef, undef)", base1.Type(SignatureType.Type))
         | "base26" -> Assert.AreEqual<string>("pred(undef, Nat)", base1.Type(SignatureType.Type))
