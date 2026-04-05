@@ -409,3 +409,15 @@ let checkFreeVar (arg:FplGenericNode) =
             ref.ErrorOccurred <- emitVAR09diagnostics ref.FplId ref.TypeId ref.StartPos ref.EndPos
         | _ -> ()
     | _ -> ()
+
+let rec isSimpleExpression (fv:FplGenericNode) =
+    match fv.Name with
+    | PrimVariableL
+    | PrimVariableArrayL
+    | PrimIntrinsicInd -> true
+    | PrimIntrinsicPred when (fv.FplId = LiteralTrue || fv.FplId = LiteralFalse) -> true
+    | PrimRefL ->
+        match fv.RefersTo with
+        | Some ref -> isSimpleExpression ref
+        | _ -> false
+    | _ -> false

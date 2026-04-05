@@ -1,4 +1,4 @@
-﻿module FplPrimitives
+module FplPrimitives
 
 open System
 open System.Collections.Generic
@@ -448,8 +448,8 @@ let mathSymbols = dict [
         ('∤', (2, "Does Not Divide", "U+2224"))
         ('∥', (2, "Parallel To", "U+2225"))
         ('∦', (2, "Not Parallel To", "U+2226"))
-        ('∧', (2, "Logical And", "U+2227"))
-        ('∨', (2, "Logical Or", "U+2228"))
+        //('∧', (2, "Logical And", "U+2227")) is reserved
+        //('∨', (2, "Logical Or", "U+2228")) is reserved
         ('∩', (2, "Intersection", "U+2229"))
         ('∪', (2, "Union", "U+222A"))
         ('∫', (4, "Integral", "U+222B"))

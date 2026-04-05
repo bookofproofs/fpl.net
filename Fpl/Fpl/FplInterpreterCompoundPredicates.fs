@@ -22,7 +22,6 @@ open FplInterpreterChecks
 open FplInterpreter.Globals.HelpersBasic
 open FplInterpreterIntrinsicTypes
 
-
 /// Implements the semantics of an FPL conjunction compound predicate.
 type FplConjunction(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericPredicate(positions, parent)
@@ -38,10 +37,18 @@ type FplConjunction(positions: Positions, parent: FplGenericNode) as this =
         this.AssignParts(ret)
         ret
 
-    override this.Type signatureType = 
-        let head = getFplHead this signatureType
-        let args = signatureSep ", " this.ArgList signatureType
-        sprintf "%s(%s)" head args
+    override this.Type signatureType =
+        match signatureType with
+        | SignatureType.Type -> LiteralPred
+        | _ ->
+            this.ArgList
+            |> Seq.map (fun arg ->
+                if isSimpleExpression arg then
+                    $"{arg.Type signatureType}"
+                else
+                    $"({arg.Type signatureType})"
+            )
+            |> String.concat " ∧ "
 
     override this.Run() =
         debug this Debug.Start
