@@ -91,7 +91,7 @@ type ValidStmtStore() =
             | IsInferred _ -> "Inferred Arguments"
             | IsInferredFromRevocation _ -> "Inferred from Revocations"
             | Error -> "Error"
-
+         
         // Build the groups storing per-statement object dictionaries
         for kvp in _theoremStore do
             let stmt = kvp.Value
@@ -105,8 +105,21 @@ type ValidStmtStore() =
                     v
             // create a small object for the statement; first pair is statementExpression
             let obj = Dictionary<string,string>()
-            obj.Add("statementExpression", $"∀Ǝ{stmt.StatementExpression}")
-            obj.Add("nodeName", $"{stmt.Node.Name} {stmt.Node.Type SignatureType.Mixed}")
+            obj.Add("statementExpression", $"{stmt.StatementExpression}")
+            let parentNodeOpt = stmt.Node.UltimateBlockNode
+            match parentNodeOpt with
+            | Some parent ->
+                obj.Add("nodeName", $"{parent.Name} {parent.Type SignatureType.Mixed}")
+                obj.Add("Line", $"{stmt.Node.StartPos.Line}")
+                obj.Add("Column", $"{stmt.Node.StartPos.Column}")
+                match parent.Parent with
+                | Some theory ->
+                    match theory.FilePath with
+                    | Some filePath ->
+                        obj.Add("FilePath", filePath)
+                    | _ -> ()
+                | _ -> ()
+            | _ -> ()
             // additional key/value pairs can be added to `obj` here in future
             list.Add(obj)
 

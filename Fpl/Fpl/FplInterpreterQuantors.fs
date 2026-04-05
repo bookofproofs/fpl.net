@@ -31,13 +31,40 @@ type FplGenericQuantor(positions: Positions, parent: FplGenericNode) =
     override this.ShortName = PrimQuantor
 
     override this.Type signatureType =
-        let head = getFplHead this signatureType
+        match signatureType with
+        | SignatureType.Type ->
+            let head = LiteralPred
+            let paramT =
+                this.GetVariables()
+                |> List.filter (fun var -> box var :? FplVariable)
+                |> List.map (fun var -> box var :?> FplVariable)
+                |> List.filter (fun var -> not var.IsBound)
+                |> List.map (fun var -> $"{var.Type SignatureType.Type}")
+                |> String.concat ", "
 
-        let paramT = signatureSep ", " (this.GetVariables()) signatureType
-
-        match paramT with
-        | "" -> head
-        | _ -> sprintf "%s(%s)" head paramT
+            match paramT with
+            | "" -> head
+            | _ -> sprintf "%s(%s)" head paramT
+        | _ ->
+            let head =
+                match this.Name with
+                | PrimQuantorAll -> "∀"
+                | PrimQuantorExists -> "Ǝ"
+                | PrimQuantorExistsN -> $"{this.FplId}".Replace("exn$1","Ǝ!").Replace("exn$","Ǝ!")
+                | _ -> ""
+            let boundVars =
+                this.GetVariables()
+                |> List.filter (fun var -> box var :? FplVariable)
+                |> List.map (fun var -> box var :?> FplVariable)
+                |> List.filter (fun var -> var.IsBound)
+                |> List.map (fun var -> $"{var.FplId}:{var.Type SignatureType.Type}")
+                |> String.concat ", "
+            let body =
+                if this.ArgList.Count>=0 then
+                    this.ArgList[0].Type signatureType
+                else
+                    ""
+            $"{head}{boundVars} ({body})"
 
     override this.CheckConsistency () = 
         base.CheckConsistency()

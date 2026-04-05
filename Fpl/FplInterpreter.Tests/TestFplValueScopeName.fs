@@ -540,6 +540,8 @@ type TestFplValueScopeName() =
     [<DataRow("base17", "(y + x' = @2 * x)'")>]
     [<DataRow("base18", "ex x:pred(a:obj,b:T), y:C, z:ind {and (a,abc(b,c))}")>]
     [<DataRow("base19", "exn$1 x:obj {all y:N {true}}")>]
+    [<DataRow("base19a", "exn$2 x:obj {ex y:N {true}}")>]
+    [<DataRow("base19b", "exn$3 x:obj {exn$2 y:N {true}}")>]
     [<DataRow("base20", "all x:obj {not x}")>]
     [<DataRow("base21", "and(x, abc(y, z))")>]
     [<DataRow("base21a", "not x")>]
@@ -558,7 +560,7 @@ type TestFplValueScopeName() =
     [<DataRow("base33", "dec ~p: pred(c: obj); p(c)")>]
     [<DataRow("base34", "is(x, Set)")>]
     [<TestMethod>]
-    member this.TestPredicate(var, varVal) =
+    member this.TestPredicateName(var, varVal) =
         
         let fplCode = sprintf "def pred T1() { %s };" varVal
         let filename = "TestPredicateName"
@@ -611,9 +613,11 @@ type TestFplValueScopeName() =
         | "base15b" -> Assert.AreEqual<string>("'(-(x))", base1.Type(SignatureType.Name))
         | "base16" -> Assert.AreEqual<string>("-(*(=(+(y, x), 2), x))", base1.Type(SignatureType.Name))
         | "base17" -> Assert.AreEqual<string>("'(*(=(+(y, '(x)), 2), x))", base1.Type(SignatureType.Name))
-        | "base18" -> Assert.AreEqual<string>("ex(x(a, b), y, z)", base1.Type(SignatureType.Name))
-        | "base19" -> Assert.AreEqual<string>("exn$1(x)", base1.Type(SignatureType.Name))
-        | "base20" -> Assert.AreEqual<string>("all(x)", base1.Type(SignatureType.Name))
+        | "base18" -> Assert.AreEqual<string>("Ǝx:pred(obj, T), y:C, z:ind (and(a, abc(b, c)))", base1.Type(SignatureType.Name))
+        | "base19" -> Assert.AreEqual<string>("Ǝ!x:obj (∀y:N (true))", base1.Type(SignatureType.Name))
+        | "base19a" -> Assert.AreEqual<string>("Ǝ!2x:obj (Ǝy:N (true))", base1.Type(SignatureType.Name))
+        | "base19b" -> Assert.AreEqual<string>("Ǝ!3x:obj (Ǝ!2y:N (true))", base1.Type(SignatureType.Name))
+        | "base20" -> Assert.AreEqual<string>("∀x:obj (not(x))", base1.Type(SignatureType.Name))
         | "base21" -> Assert.AreEqual<string>("and(x, abc(y, z))", base1.Type(SignatureType.Name))
         | "base21a" -> Assert.AreEqual<string>("not(x)", base1.Type(SignatureType.Name))
         | "base21b" -> Assert.AreEqual<string>("not(x)", base1.Type(SignatureType.Name))
