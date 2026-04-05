@@ -1,603 +1,52 @@
-let outputChannel;
+'use strict';
 
-/**
- * @param {string} message
- * @param {boolean} isError
- */
-function log2Console(message, isError) {
-    var timestamp = new Date().toISOString();
-    var newMessage = timestamp + ": " + message;
-    if (isError) {
-        outputChannel.appendLine("Error: " + newMessage);
-        // log in red
-        console.error(newMessage);
-    }
-    else {
-        outputChannel.appendLine("Info: " + newMessage);
-        // log in green
-        console.info(newMessage);
-    }
-}
-
-/**
- * @param {string} path
- */
-function directoryOrFileExists(path) {
-    const fs = require('fs');
-    return fs.existsSync(path);
-}
-
-
-function removeDirectorySync(path) {
-    return new Promise((resolve, reject) => {
-        try {
-            if (directoryOrFileExists(path)) {
-                const fs = require('fs');
-                fs.rmSync(path, { recursive: true });
-            }
-            resolve("directory removed");
-        }
-        catch (err) {
-            reject(err);
-        }
-    });
-}
-
-/**
- * @param {string} path
- */
-function makeDirectory(path) {
-    return new Promise((resolve, reject) => {
-        const fs = require('fs');
-        fs.mkdir(path, (err) => {
-            if (err) { reject(err.message); }
-            else {
-                log2Console("Directory " + path + " created successfully", false);
-                resolve("directory created");
-            }
-        });
-    });
-}
-
-/**
- * @param {string} pathToFile
- */
-function deleteFile(pathToFile) {
-    const fs = require('fs');
-    fs.unlink(pathToFile, (err) => {
-        if (err) { throw err; }
-    });
-    log2Console("File " + pathToFile + " deleted successfully", false);
-}
-
-
-
-/**
- * Downloads a file from the given URL to the specified destination path,
- * following redirects (e.g., 302) if necessary.
- * @param {string} url - The URL to download from.
- * @param {string} dest - The local file path to save to.
- * @param {number} [maxRedirects=5] - Maximum number of redirects to follow.
- * @returns {Promise<void>}
- */
-function downloadFile(url, dest, maxRedirects = 5) {
-    const https = require('https');
-    const fs = require('fs');
-    const urlModule = require('url');
-
-    return new Promise((resolve, reject) => {
-        const doRequest = (url, redirectsLeft) => {
-            const file = fs.createWriteStream(dest);
-            https.get(url, (response) => {
-                if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
-                    // Handle redirect
-                    if (redirectsLeft === 0) {
-                        reject(new Error('Too many redirects'));
-                        return;
-                    }
-                    // Clean up the file stream before redirecting
-                    file.close(() => {});
-                    const redirectUrl = urlModule.resolve(url, response.headers.location);
-                    doRequest(redirectUrl, redirectsLeft - 1);
-                    return;
-                }
-                if (response.statusCode !== 200) {
-                    reject(new Error(`Failed to get '${url}' (${response.statusCode})`));
-                    response.resume();
-                    return;
-                }
-                response.pipe(file);
-                // @ts-ignore
-                file.on('finish', () => file.close(resolve));
-            }).on('error', (err) => {
-                fs.unlink(dest, () => reject(err));
-            });
-            file.on('error', (err) => {
-                fs.unlink(dest, () => reject(err));
-            });
-        };
-        doRequest(url, maxRedirects);
-    });
-}
-
-
-
-/**
- * @param {string} runtimeName
- * @param {string} downloadPath
- * @param {string} fileUrlDir
- * @param {string} fileUrlName
- */
-function installRuntime(runtimeName, downloadPath, fileUrlDir, fileUrlName) {
-    return new Promise((resolve, reject) => {
-    
-        log2Console('trying to download ' + runtimeName + ' to ' + downloadPath + ' from ' + fileUrlDir + '/' + fileUrlName, false);
-        
-        
-        const path = require('path');
-        const tar = require('tar');
-        const AdmZip = require('adm-zip');
-
-        // URL of the file to download
-        let fileUrl = fileUrlDir + '/' + fileUrlName;
-
-        // Path to save the downloaded file
-        let pathToDownloadedFile = downloadPath + '/' + fileUrlName;
-
-        // Usage example:
-        downloadFile(fileUrl, pathToDownloadedFile)
-            .then(() => {
-                log2Console('Runtime ' + runtimeName + ' downloaded successfully', false);
-
-                    if (path.extname(pathToDownloadedFile) == '.gz') {
-                        log2Console('Trying to unmpack using tar node.js: ' + pathToDownloadedFile, false);
-                        tar.x({
-                            file: pathToDownloadedFile,
-                            cwd: downloadPath
-                        });
-                        // remove the tar.gz file
-                        deleteFile(pathToDownloadedFile);
-                        log2Console('runtime ' + runtimeName + ' installed successfully', false);
-                        resolve('runtime ' + runtimeName + ' installed successfully');
-                    }
-                    else if (path.extname(pathToDownloadedFile) == '.zip') {
-                        log2Console('Trying to unpack file using adm-zip node.js: ' + pathToDownloadedFile, false);
-                        var zip = new AdmZip(pathToDownloadedFile);
-                        zip.extractAllTo(downloadPath, true)
-                        deleteFile(pathToDownloadedFile);
-                        log2Console('runtime ' + runtimeName + ' installed successfully', false);
-                        resolve('runtime ' + runtimeName + ' installed successfully');
-                    }
-                    else {
-                        reject("no decompression algorithm found for downloaded file " + pathToDownloadedFile);
-                    }
-
-            }
-            )
-            .catch(err => {
-                log2Console('Automatic download failed:' + err, true);
-                log2Console('To resolve this issue and finish installing the FPL extension:', false);
-                log2Console('1) Try to manually download the file: ' + fileUrl , false);
-                log2Console('2) Unpack its contents to this folder: ' + downloadPath, false);
-                log2Console('3) Close and open VS Code again.', false);
-            });
-
-    });
-}
-
-/**
- * @param {string} runtimeName
- */
-function dispatchRuntime(runtimeName) {
-    if (runtimeName == 'win32-x64') {
-        return ['https://github.com/bookofproofs/fpl.netlib/raw/refs/heads/main', 'dotnet-runtime-8.0.8-win-x64.zip'];
-    }
-    else if (runtimeName == "linux-x64") {
-        return ['https://github.com/bookofproofs/fpl.netlib/raw/refs/heads/main', 'dotnet-runtime-8.0.8-linux-x64.tar.gz'];
-    }
-    else if (runtimeName == "darwin-x64") {
-        return ['https://github.com/bookofproofs/fpl.netlib/raw/refs/heads/main', 'dotnet-runtime-8.0.8-osx-x64.tar.gz'];
-    }
-    else {
-        let errorMsg = "Unfortunately, no runtime found for your system " + runtimeName;
-        log2Console(errorMsg, true);
-        throw new Error(errorMsg);
-    }
-}
-
-
- /**
- * @param {string} runtimeName
- * @param {string} relPathToDotnetRuntime
- */
-function acquireDotnetRuntime(runtimeName, relPathToDotnetRuntime) {
-    return new Promise((resolve, reject) => {
-        let condition;
-        const path = require('path');
-        var pathToDotNetExe = path.join(relPathToDotnetRuntime, 'dotnet.exe');
-        if (directoryOrFileExists(pathToDotNetExe)) {
-            // We have a dotnet.exe runtime for this platform / architecture already in the directory relPathToDotnetRuntime
-            resolve('dotnet runtime acquired successfully');
-        }
-        else {
-            // try to find the runtime 
-            const [fileUrlDir, fileUrlName] = dispatchRuntime(runtimeName);
-            const removeDirectoryPromise = removeDirectorySync(relPathToDotnetRuntime);
-            // drop the old directory (if any, for instance, the last download did not succeeded)        
-            removeDirectoryPromise.then((message) => {
-                // if no exception was thrown, create the download/installation directory, because it now does not exist
-                const makeDirectoryPromise = makeDirectory(relPathToDotnetRuntime);
-                makeDirectoryPromise.then((message) => {
-                    // and install the runtime there
-                    const installRuntimePromice = installRuntime(runtimeName, relPathToDotnetRuntime, fileUrlDir, fileUrlName);
-                    installRuntimePromice.then((message) => {
-
-                        resolve('dotnet runtime acquired properly');
-                    }).catch((message) => {
-                        reject(message);
-                    });
-                }).catch((message) => {
-                    reject(message);
-                });
-            }).catch((message) => {
-                reject(message);
-            });
-        }
-    });
-}
-
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 const vscode = require('vscode');
-
-
-// a map of the types
-const typeToIconMap = new Map();
-typeToIconMap.set('th','library');
-typeToIconMap.set('var','variable');
-typeToIconMap.set('*var','bracket-error');
-typeToIconMap.set('+var','bracket-dot');
-typeToIconMap.set('mpred','symbol-boolean');
-typeToIconMap.set('opred','symbol-boolean');
-typeToIconMap.set('and','symbol-boolean');
-typeToIconMap.set('or','symbol-boolean');
-typeToIconMap.set('xor','symbol-boolean');
-typeToIconMap.set('impl','symbol-boolean');
-typeToIconMap.set('iif','symbol-boolean');
-typeToIconMap.set('not','symbol-boolean');
-typeToIconMap.set('=','symbol-boolean');
-typeToIconMap.set('is','symbol-boolean');
-typeToIconMap.set('mfunc','symbol-interface');
-typeToIconMap.set('ofunc','symbol-interface');
-typeToIconMap.set('ctor','symbol-constructor');
-typeToIconMap.set('def cl','symbol-class');
-typeToIconMap.set('obj','primitive-square');
-typeToIconMap.set('loc','location');
-typeToIconMap.set('thm','layout-panel-justify');
-typeToIconMap.set('lem','layout-panel-center');
-typeToIconMap.set('prop','layout-panel-right');
-typeToIconMap.set('cor','layout-sidebar-right');
-typeToIconMap.set('prf','testing-passed-icon');
-typeToIconMap.set('conj','workspace-unknown');
-typeToIconMap.set('ax','layout');
-typeToIconMap.set('inf','symbol-structure');
-typeToIconMap.set('qtr','symbol-boolean');
-typeToIconMap.set('def pred','symbol-boolean');
-typeToIconMap.set('pred','symbol-boolean');
-typeToIconMap.set('def func','symbol-interface');
-typeToIconMap.set('func','symbol-interface');
-typeToIconMap.set('ref','link');
-typeToIconMap.set('arg','indent');
-typeToIconMap.set('just','kebab-horizontal');
-typeToIconMap.set('ainf','kebab-vertical');
-typeToIconMap.set('lang','globe');
-typeToIconMap.set('trsl','symbol-text');
-typeToIconMap.set('map','preview');
-typeToIconMap.set('stmt','symbol-event');
-typeToIconMap.set('decr','symbol-event');
-typeToIconMap.set('ass','target');
-typeToIconMap.set('def ext','extensions');
-typeToIconMap.set('inst','output');
-typeToIconMap.set('ind','symbol-numeric');
-typeToIconMap.set('tpl','gear');
-typeToIconMap.set('undef','question');
-typeToIconMap.set('undet','question');
-
-
-
-// A custom TreeItem
-class MyTreeItem extends vscode.TreeItem {
-    constructor(typ, inScope, label, lineNumber, columnNumber, filePath, fplValueType, fplValueRepr, fplRefersTo, scope = [], arglist = []) {
-        super(label, scope.length > 0 || arglist.length > 0 ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None);
-        this.typ = typ;
-        this.lineNumber = lineNumber;
-        this.columnNumber = columnNumber;
-        this.filePath = filePath;
-        if (typ == "mpred") 
-        {
-            this.label = "pred prop " + label;
-        }
-        else if (typ == "mfunc") 
-        {
-            this.label = "func prop " + label;
-        }
-        else 
-        {
-            this.label = typ + " " + label;
-        }
-
-        const markdown = new vscode.MarkdownString();
-
-        // Create a MarkdownString for the tooltip
-        const markdownTooltip = new vscode.MarkdownString();
-        markdownTooltip.isTrusted = true; // Optional: allows links/images if needed
-        if (label !== "") markdownTooltip.appendMarkdown(`📌 **Name:** ${label}\n\n`);
-        if (fplValueType !== "") markdownTooltip.appendMarkdown(`🧩 **Type:** ${fplValueType}\n\n`);
-        if (fplRefersTo !== "") markdownTooltip.appendMarkdown(`👉 **Refers to:** ${fplRefersTo}\n\n`);
-        if (fplValueRepr !== "" && fplValueRepr !=="None") markdownTooltip.appendMarkdown(`🧩 **Value:** ${fplValueRepr}\n\n`);
-        
-        // tooltip showing the name, the type and the representation of a node
-        this.tooltip = markdownTooltip;
-        this.scope = scope;
-        if (this.typ == "th") log2Console(this.label + " " + scope.length, false);
-        this.arglist = arglist;
-
-        if (inScope == 1) {
-            this.iconPath = this.getIconPathWithColor(typeToIconMap.get(typ) || 'default-view-icon', 'textPreformat.foreground');
-        }
-        else if (inScope == 2) {
-            this.iconPath = this.getIconPathWithColor(typeToIconMap.get(typ) || 'default-view-icon', 'focusBorder');
-        }
-        else {
-            this.iconPath = this.getIconPathWithColor(typeToIconMap.get(typ) || 'default-view-icon', 'textSeparator.foreground');
-        }
-
-        // Set the command to open the file and navigate to the line number
-        this.command = {
-            command: 'extension.openFileAtPosition',
-            title: 'Open File',
-            arguments: [this.filePath, this.lineNumber, this.columnNumber]
-        };
-
-    }
-
-    // Method to get the colorized icon
-    getIconPathWithColor(iconId, color) {
-        return new vscode.ThemeIcon(iconId, new vscode.ThemeColor(color));
-    }
-
-    
-}
-
-// Define TreeDataProvider
-class FplTheoriesProvider {
-    constructor() {
-        this._onDidChangeTreeData = new vscode.EventEmitter();
-        this.onDidChangeTreeData = this._onDidChangeTreeData.event;
-    }
-
-    refresh() {
-        this._onDidChangeTreeData.fire();
-    }
-
-    getTreeItem(element) {
-        return element;
-    }
-
-    getChildren(element) {
-        if (!element) {
-            // If no element is passed, return the root nodes of the tree
-            return client.sendRequest('getTreeData', {}).then(json => {
-                try {
-                    let treeData = JSON.parse(json);
-                    log2Console(json.substring(0, 1500), true);
-                    return this.parseScope(treeData.Scope);
-                } catch (err) {
-                    log2Console('Failed to parse tree data: ' + err + ' raw:' + (json ? json.substring(0, 1500) : 'null'), true);
-                    return [];
-                }
-            }).catch(error => {
-                log2Console('Failed to get tree data ' + error, true);
-                return [];  // Return an empty array on error
-            });
-        } else if (element.isVirtual) {
-            // Handle virtual nodes
-            return Promise.resolve(this.parseScope(element.scope));
-        } else {
-            // Create virtual child elements for Scope and ArgList if they are not empty
-            let children = [];
-            if (element.scope && element.scope.length > 0) {
-                children.push(...this.parseScope(element.scope));
-            }
-            if (element.arglist && element.arglist.length > 0) {
-                children.push(...this.parseArgList(element.arglist));
-            }
-            if (element.valuelist && element.valuelist.length > 0) {
-                children.push(...this.parseValueList(element.valuelist));
-            }
-            return Promise.resolve(children);
-        }
-    }
-
-    parseScope(scope) {
-        // Convert each item in the scope to a MyTreeItem
-
-        return scope.map(item => new MyTreeItem(item.Type, 1, item.Name, item.Line, item.Column, item.FilePath, item.FplValueType, item.FplValueRepr, item.FplRefersTo, item.Scope, item.ArgList));
-    }
-
-    parseArgList(arglist) {
-        // Convert each item in the arglist to a MyTreeItem
-        return arglist.map(item => new MyTreeItem(item.Type, 2, item.Name, item.Line, item.Column, item.FilePath, item.FplValueType, item.FplValueRepr, item.FplRefersTo, item.Scope, item.ArgList));
-    }
-
-    parseValueList(valueList) {
-        // Convert each item in the valueList to a MyTreeItem
-        return valueList.map(item => new MyTreeItem(item.Type, 3, item.Name, item.Line, item.Column, item.FilePath, item.FplValueType, item.FplValueRepr, item.FplRefersTo, item.Scope, item.ArgList));
-    }
-}
-
-
-// New TreeItem class for Valid Statements tree
-class ValidStmtItem extends vscode.TreeItem {
-    constructor(label, collapsibleState, children = [], rawObj = null) {
-        super(label, collapsibleState);
-        this.children = children;
-        // If a raw object is provided (the server-produced object), build a markdown tooltip
-        if (rawObj && typeof rawObj === 'object') {
-            const markdownTooltip = new vscode.MarkdownString();
-            markdownTooltip.isTrusted = true;
-            // Prefer the explicit keys produced by the server
-            if (typeof rawObj.statementExpression === 'string') {
-                markdownTooltip.appendMarkdown(`📜 **Statement:** ${rawObj.statementExpression}\n\n`);
-            }
-            if (typeof rawObj.nodeName === 'string') {
-                markdownTooltip.appendMarkdown(`🧩 **Node:** ${rawObj.nodeName}\n\n`);
-            }
-            // If neither of the expected keys exists, fallback to full JSON
-            if (!markdownTooltip.value || markdownTooltip.value.trim() === '') {
-                markdownTooltip.appendMarkdown('```\n' + JSON.stringify(rawObj, null, 2) + '\n```\n');
-            }
-            this.tooltip = markdownTooltip;
-        } else {
-            // tooltip helps show full statement when truncated in the tree
-            this.tooltip = label;
-        }
-    }
-}
-
-
-// Define TreeDataProvider for valid statements grouped by validity reason
-class ValidStmtsProvider {
-    constructor() {
-        this._onDidChangeTreeData = new vscode.EventEmitter();
-        this.onDidChangeTreeData = this._onDidChangeTreeData.event;
-    }
-
-    refresh() {
-        this._onDidChangeTreeData.fire();
-    }
-
-    getTreeItem(element) {
-        return element;
-    }
-
-    getChildren(element) {
-        if (!element) {
-            // request the grouped valid statements map:
-            // { "Axioms": [ { "statementExpression": "∀Ǝ..." , ... }, ... ], ... }
-            return client.sendRequest('getValidStmts', {}).then(json => {
-                try {
-                    let groups = JSON.parse(json);
-                    let roots = [];
-                    for (let key in groups) {
-                        if (Object.prototype.hasOwnProperty.call(groups, key)) {
-                            const arr = Array.isArray(groups[key]) ? groups[key] : [];
-                            // create child items for each statement object
-                            const children = arr.map(obj => {
-                                let label = '';
-                                if (obj && typeof obj === 'object') {
-                                    // prefer the explicit property produced by the server
-                                    if (typeof obj.statementExpression === 'string') {
-                                        label = obj.statementExpression;
-                                    } else {
-                                        // fallback: stringify the object if property missing
-                                        label = JSON.stringify(obj);
-                                    }
-                                } else {
-                                    label = String(obj);
-                                }
-                                // Pass the original object to ValidStmtItem so it can build a markdown tooltip
-                                const item = new ValidStmtItem(label, vscode.TreeItemCollapsibleState.None, [], obj);
-                                return item;
-                            });
-                            const label = `${key} (${children.length})`;
-                            roots.push(new ValidStmtItem(label, vscode.TreeItemCollapsibleState.Collapsed, children));
-                        }
-                    }
-                    return roots;
-                } catch (err) {
-                    log2Console('Failed to parse valid statements: ' + err + ' raw:' + (json ? json.substring(0, 1500) : 'null'), true);
-                    return [];
-                }
-            }).catch(error => {
-                log2Console('Failed to get valid statements ' + error, true);
-                return [];
-            });
-        } else {
-            // element has children property which are TreeItems already
-            return Promise.resolve(element.children || []);
-        }
-    }
-}
-
-
 const { LanguageClient } = require('vscode-languageclient');
+const utils = require('./utils');
+const { createFplTheoriesProvider, createValidStmtsProvider } = require('./providers');
 
 let client;
 
-// This method is called when your extension is activated
-// The extension is configured to be activated via the onLanguage event in package.json
-
-/**
- * @param {vscode.ExtensionContext} context
- */
 function activate(context) {
-    outputChannel = vscode.window.createOutputChannel('FPL Log');
+    const outputChannel = vscode.window.createOutputChannel('FPL Log');
+    utils.init(outputChannel);
     try {
-
-        // Use the console to output diagnostic information (console.log) and errors (console.error)
-        // This line of code will only be executed once when your extension is activated
-
-        // check the platform and architecture
-        let platform = process.platform;
-        let arch = process.arch;
-        let runtimeName = platform + '-' + arch;
-        log2Console("running on " + runtimeName, false);
-
+        const platform = process.platform;
+        const arch = process.arch;
+        const runtimeName = platform + '-' + arch;
+        utils.log2Console('running on ' + runtimeName, false);
 
         const path = require('path');
-        let relPathToServerDll = path.join(__dirname, 'dotnet-runtimes', 'FplLsDll', 'FplLS.dll');
-        let relPathToDotnetRuntime = path.join(__dirname, 'dotnet-runtimes', runtimeName);
-        let relPathToDotnet = path.join(relPathToDotnetRuntime, 'dotnet');
+        const relPathToServerDll = path.join(__dirname, 'dotnet-runtimes', 'FplLsDll', 'FplLS.dll');
+        const relPathToDotnetRuntime = path.join(__dirname, 'dotnet-runtimes', runtimeName);
+        const relPathToDotnet = path.join(relPathToDotnetRuntime, 'dotnet');
 
-        const acquireDotNetRuntimePromise = acquireDotnetRuntime(runtimeName, relPathToDotnetRuntime);
+        const acquirePromise = utils.acquireDotnetRuntime(runtimeName, relPathToDotnetRuntime);
 
-        acquireDotNetRuntimePromise.then(() => {
-            let serverOptions = {
+        acquirePromise.then(() => {
+            const serverOptions = {
                 run: { command: relPathToDotnet, args: [relPathToServerDll] },
                 debug: { command: relPathToDotnet, args: [relPathToServerDll] }
             };
 
-            let clientOptions = {
-                documentSelector: [{ scheme: 'file', language: 'fpl' }]
-            };
+            const clientOptions = { documentSelector: [{ scheme: 'file', language: 'fpl' }] };
 
-            client = new LanguageClient(
-                'fpl-vscode-extension',
-                'FPL Language Server',
-                serverOptions,
-                clientOptions
-            );
+            client = new LanguageClient('fpl-vscode-extension', 'FPL Language Server', serverOptions, clientOptions);
 
-            // Create instances of the TreeDataProviders
-            const fplTheoriesProvider = new FplTheoriesProvider();
-            const fplValidStmtsProvider = new ValidStmtsProvider();
+            const fplTheoriesProvider = createFplTheoriesProvider(client);
+            const fplValidStmtsProvider = createValidStmtsProvider(client);
 
-            // Register TreeDataProviders
             vscode.window.registerTreeDataProvider('fplTheories', fplTheoriesProvider);
             vscode.window.registerTreeDataProvider('fplValidStmts', fplValidStmtsProvider);
 
-
-            // refresh both tree views on active text editor changes   
             vscode.window.onDidChangeActiveTextEditor((editor) => {
-                log2Console("onDidChangeActiveTextEditor", false);
+                utils.log2Console('onDidChangeActiveTextEditor', false);
                 if (editor && editor.document.languageId === 'fpl') {
                     fplTheoriesProvider.refresh();
                     fplValidStmtsProvider.refresh();
                 }
             });
 
-            // refresh both tree views on document changes  
             vscode.workspace.onDidChangeTextDocument((event) => {
                 if (event.document.languageId === 'fpl') {
                     fplTheoriesProvider.refresh();
@@ -605,45 +54,31 @@ function activate(context) {
                 }
             });
 
-            let config = vscode.workspace.getConfiguration('fplExtension');
-
-            // Convert the configuration to a JSON string.
-            let configJson = JSON.stringify(config, null, 2);
-
-            // Write the configuration to a file.
-            let fs = require('fs');
-            let relPathToConfig = path.join(__dirname, 'dotnet-runtimes', 'FplLsDll', 'vsfplconfig.json');
+            const config = vscode.workspace.getConfiguration('fplExtension');
+            const configJson = JSON.stringify(config, null, 2);
+            const fs = require('fs');
+            const relPathToConfig = path.join(__dirname, 'dotnet-runtimes', 'FplLsDll', 'vsfplconfig.json');
             fs.writeFile(relPathToConfig, configJson, (err) => {
-                if (err) {
-                    log2Console('Error writing file:' + err.message, true);
-                }
+                if (err) utils.log2Console('Error writing file:' + err.message, true);
             });
 
-            let disposableClient = client.start(); 
+            const disposableClient = client.start();
 
-            // The command has been defined in the package.json file
-            // Now provide the implementation of the command with  registerCommand
-            // The commandId parameter must match the command field in package.json
-            let disposableCommand = vscode.commands.registerCommand('fpl-vscode-extension.helloWorld', function () {
-
-                // The code you place here will be executed every time your command is executed
-                // Display a message box to the user
+            const disposableCommand = vscode.commands.registerCommand('fpl-vscode-extension.helloWorld', function () {
                 vscode.window.showInformationMessage('Hello World from "Formal Proving Language"!');
             });
 
-            // initial tree view refresh if there is already an active text editor
             if (vscode.window.activeTextEditor && vscode.window.activeTextEditor.document.languageId === 'fpl') {
-                log2Console("initial treeview refresh", false);
+                utils.log2Console('initial treeview refresh', false);
                 fplTheoriesProvider.refresh();
                 fplValidStmtsProvider.refresh();
             }
 
-            // Register the command
-            let disposableCommand2 = vscode.commands.registerCommand('extension.openFileAtPosition', (filePath, lineNumber, columnNumber) => {
+            const disposableCommand2 = vscode.commands.registerCommand('extension.openFileAtPosition', (filePath, lineNumber, columnNumber) => {
                 const openPath = vscode.Uri.file(filePath);
                 vscode.workspace.openTextDocument(openPath).then(doc => {
                     vscode.window.showTextDocument(doc).then(editor => {
-                        const position = new vscode.Position(lineNumber-1, columnNumber-1);
+                        const position = new vscode.Position(lineNumber - 1, columnNumber - 1);
                         const range = new vscode.Range(position, position);
                         editor.selection = new vscode.Selection(position, position);
                         editor.revealRange(range);
@@ -655,27 +90,22 @@ function activate(context) {
             context.subscriptions.push(disposableCommand);
             context.subscriptions.push(disposableCommand2);
 
-            log2Console('Launching "Formal Proving Language", enjoy!', false);
+            utils.log2Console('Launching "Formal Proving Language", enjoy!', false);
         });
 
-    }
-    catch (error) {
-        let errorMsg = 'Installing "Formal Proving Language" failed :-(, report issue on https://github.com/bookofproofs/fpl.net';
-        log2Console(errorMsg, true);
+    } catch (error) {
+        const errorMsg = 'Installing "Formal Proving Language" failed :-(, report issue on https://github.com/bookofproofs/fpl.net';
+        utils.log2Console(errorMsg, true);
         throw new Error(errorMsg);
     }
-
 }
-// This method is called when your extension is deactivated
+
 function deactivate() {
-    if (!client) {
-        return undefined;
-    }
+    if (!client) return undefined;
     return client.stop();
 }
 
 module.exports = {
     activate,
     deactivate
-}
-
+};
