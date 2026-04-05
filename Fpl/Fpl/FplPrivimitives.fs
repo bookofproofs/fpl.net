@@ -360,7 +360,7 @@ let mathSymbols = dict [
         ('=', (2, "Equals Sign", "U+003D"))
         ('>', (2, "Greater-Than Sign", "U+003E"))
         ('|', (0, "Vertical Line", "U+007C"))
-        ('¬', (4, "Not Sign", "U+00AC"))
+        //('¬', (4, "Not Sign", "U+00AC")) reserved for the FPL not operator
         ('±', (2, "Plus-Minus Sign", "U+00B1"))
         ('×', (2, "Multiplication Sign", "U+00D7"))
         ('÷', (2, "Division Sign", "U+00F7"))
@@ -448,8 +448,8 @@ let mathSymbols = dict [
         ('∤', (2, "Does Not Divide", "U+2224"))
         ('∥', (2, "Parallel To", "U+2225"))
         ('∦', (2, "Not Parallel To", "U+2226"))
-        //('∧', (2, "Logical And", "U+2227")) reserved for FPL and-operator
-        //('∨', (2, "Logical Or", "U+2228")) reserved for FPL or-operator
+        //('∧', (2, "Logical And", "U+2227")) reserved for FPL and operator
+        //('∨', (2, "Logical Or", "U+2228")) reserved for FPL or operator
         ('∩', (2, "Intersection", "U+2229"))
         ('∪', (2, "Union", "U+222A"))
         ('∫', (4, "Integral", "U+222B"))
@@ -1047,7 +1047,7 @@ let mathSymbols = dict [
         ('⩞', (2, "Logical and with Double Overbar", "U+2A5E"))
         ('⩟', (2, "Logical and with Underbar", "U+2A5F"))
         ('⩠', (2, "Logical and with Double Underbar", "U+2A60"))
-        //('⩡', (2, "Small Vee with Underbar", "U+2A61")) reserved for FPL xor-operator
+        //('⩡', (2, "Small Vee with Underbar", "U+2A61")) reserved for FPL xor operator
         ('⩢', (2, "Logical or with Double Overbar", "U+2A62"))
         ('⩣', (2, "Logical or with Double Underbar", "U+2A63"))
         ('⩤', (2, "Z Notation Domain Antirestriction", "U+2A64"))

@@ -220,10 +220,20 @@ type FplNegation(positions: Positions, parent: FplGenericNode) as this =
         this.AssignParts(ret)
         ret
 
-    override this.Type signatureType = 
-        let head = getFplHead this signatureType
-        let args = signatureSep ", " this.ArgList signatureType
-        sprintf "%s(%s)" head args
+    override this.Type signatureType =
+        match signatureType with
+        | SignatureType.Type -> LiteralPred
+        | _ ->
+            let argRepr =
+                if this.ArgList.Count>0 then
+                    let arg = this.ArgList[0]
+                    if isSimpleExpression arg then
+                        $"{arg.Type signatureType}"
+                    else
+                        $"({arg.Type signatureType})"
+                else
+                    $"({PrimUndetermined})"
+            $"¬{argRepr}"
 
     override this.Run() =
         debug this Debug.Start
