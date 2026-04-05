@@ -1,3 +1,5 @@
+// hooks up the functionality of the extension and activates / deactivates it 
+
 'use strict';
 
 const vscode = require('vscode');

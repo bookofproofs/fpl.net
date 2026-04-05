@@ -1,3 +1,5 @@
+// Defines tree view items for the extension
+
 'use strict';
 
 const vscode = require('vscode');

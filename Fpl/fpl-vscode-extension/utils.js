@@ -1,3 +1,5 @@
+// centralizes logging, file operations, and runtime installation
+
 'use strict';
 
 const fs = require('fs');

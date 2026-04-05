@@ -1,3 +1,5 @@
+// Defines tree view providers for the extension
+
 'use strict';
 
 const vscode = require('vscode');
@@ -19,7 +21,6 @@ function createFplTheoriesProvider(client) {
                 return client.sendRequest('getTreeData', {}).then(json => {
                     try {
                         let treeData = JSON.parse(json);
-                        utils.log2Console(json.substring(0, 1500), true);
                         return this.parseScope(treeData.Scope);
                     } catch (err) {
                         utils.log2Console('Failed to parse tree data: ' + err + ' raw:' + (json ? json.substring(0, 1500) : 'null'), true);
@@ -35,7 +36,6 @@ function createFplTheoriesProvider(client) {
                 let children = [];
                 if (element.scope && element.scope.length > 0) children.push(...this.parseScope(element.scope));
                 if (element.arglist && element.arglist.length > 0) children.push(...this.parseArgList(element.arglist));
-                if (element.valuelist && element.valuelist.length > 0) children.push(...this.parseValueList(element.valuelist));
                 return Promise.resolve(children);
             }
         }
@@ -44,9 +44,6 @@ function createFplTheoriesProvider(client) {
         }
         parseArgList(arglist) {
             return arglist.map(item => new MyTreeItem(item.Type, 2, item.Name, item.Line, item.Column, item.FilePath, item.FplValueType, item.FplValueRepr, item.FplRefersTo, item.Scope, item.ArgList));
-        }
-        parseValueList(valueList) {
-            return valueList.map(item => new MyTreeItem(item.Type, 3, item.Name, item.Line, item.Column, item.FilePath, item.FplValueType, item.FplValueRepr, item.FplRefersTo, item.Scope, item.ArgList));
         }
     }
     return new FplTheoriesProvider();
