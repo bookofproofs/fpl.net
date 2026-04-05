@@ -58,7 +58,7 @@ type ValidStmtStore() =
             let validStmt = 
                 { ValidStatement.Node = negatedRevocation
                   ValidStatement.ValidityReason = ValidityReason.IsInferredFromRevocation negatedRevocation
-                  ValidStatement.StatementExpression = negatedRevocation.Type SignatureType.Mixed }
+                  ValidStatement.StatementExpression = negatedRevocation.Type SignatureType.Name }
             _theoremStore.TryAdd(validStmt.StatementExpression, validStmt) |> ignore
             true
         else

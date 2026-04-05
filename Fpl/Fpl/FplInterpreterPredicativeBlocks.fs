@@ -84,7 +84,7 @@ type FplAxiom(positions: Positions, parent: FplGenericNode, runOrder) =
         let validityReason, exprStr = 
             let exprOpt = this.ArgList |> Seq.tryLast
             match exprOpt with
-            | Some expr -> ValidityReason.IsAxiom expr, expr.Type SignatureType.Mixed
+            | Some expr -> ValidityReason.IsAxiom expr, expr.Type SignatureType.Name
             | _ -> ValidityReason.Error, "" // fallback if axiom node is empty
 
         { ValidStatement.Node = this
