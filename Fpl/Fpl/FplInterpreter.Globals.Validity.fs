@@ -13,8 +13,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 *)
 module FplInterpreter.Globals.Validity
 open System.Collections.Generic
-open System.Text.Json
+open System.Text
 open FplInterpreterBasicTypes
+open FplInterpreter.Globals.HelpersBasic
 open FplInterpreterCompoundPredicates
 
 type ValidStmtStore() =
@@ -79,7 +80,9 @@ type ValidStmtStore() =
 
     /// Produces a JSON string grouping stored valid statements by their ValidityReason.
     /// The resulting JSON maps each reason name to an array of StatementExpression strings.
+    /// NOTE: This implementation builds JSON with a StringBuilder and performs necessary escaping.
     member this.ToJson() =
+        // group statements by human-friendly category label
         let groups = Dictionary<string, ResizeArray<string>>()
 
         let getKey reason =
@@ -101,9 +104,28 @@ type ValidStmtStore() =
                     let v = ResizeArray<string>()
                     groups.Add(key, v)
                     v
-            list.Add stmt.StatementExpression
+            // keep the original marker used previously
+            list.Add $"∀Ǝ{stmt.StatementExpression}"
 
-        JsonSerializer.Serialize(groups)
+        // build JSON with StringBuilder to avoid System.Text.Json allocations
+        let sb = StringBuilder()
+        sb.Append('{') |> ignore
+        let mutable firstGroup = true
+        for kv in groups do
+            if not firstGroup then sb.Append(',') |> ignore
+            firstGroup <- false
+            sb.Append('"') |> ignore
+            sb.Append(escape kv.Key) |> ignore
+            sb.Append("\":[") |> ignore
+            let arr = kv.Value
+            for i = 0 to arr.Count - 1 do
+                if i > 0 then sb.Append(',') |> ignore
+                sb.Append('"') |> ignore
+                sb.Append(escape arr.[i]) |> ignore
+                sb.Append('"') |> ignore
+            sb.Append(']') |> ignore
+        sb.Append('}') |> ignore
+        sb.ToString()
 
     member this.ClearValidityStore() =
         _theoremStore.Clear() 
