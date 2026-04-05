@@ -49,8 +49,8 @@ type FplGenericQuantor(positions: Positions, parent: FplGenericNode) =
             let head =
                 match this.Name with
                 | PrimQuantorAll -> "∀"
-                | PrimQuantorExists -> "Ǝ"
-                | PrimQuantorExistsN -> $"{this.FplId}".Replace("exn$1","Ǝ!").Replace("exn$","Ǝ!")
+                | PrimQuantorExists -> "∃"
+                | PrimQuantorExistsN -> $"{this.FplId}".Replace("exn$1","∃!").Replace("exn$","∃!")
                 | _ -> ""
             let boundVars =
                 this.GetVariables()

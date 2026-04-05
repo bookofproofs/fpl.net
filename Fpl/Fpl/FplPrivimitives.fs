@@ -308,6 +308,16 @@ let removeFplComments (input:string) =
 /// Code 1 = postfix
 /// (sums like 8 + 2 + 1 are allowed).
 let mathSymbols = dict [
+        // reserved FPL math symbols
+        //('¬', (4, "Not Sign", "U+00AC")) FPL not operator
+        //('⇒', (2, "Rightwards Double Arrow", "U+21D2")) FPL impl operator
+        //('⇔', (2, "Left Right Double Arrow", "U+21D4")) FPL iif operator
+        //('∧', (2, "Logical And", "U+2227"))  FPL and operator
+        //('∨', (2, "Logical Or", "U+2228")) FPL or operator
+        //('⩡', (2, "Small Vee with Underbar", "U+2A61")) xor operator
+        //('∀', (4, "For All", "U+2200")) FPL all quantor
+        //('∃', (2, "There Exists", "U+2203")) FPL exists quantor
+
         ('a', (2, "Latin Letter a", "U+0041"))
         ('b', (2, "Latin Letter b", "U+0042"))
         ('c', (2, "Latin Letter c", "U+0043"))
@@ -360,7 +370,6 @@ let mathSymbols = dict [
         ('=', (2, "Equals Sign", "U+003D"))
         ('>', (2, "Greater-Than Sign", "U+003E"))
         ('|', (0, "Vertical Line", "U+007C"))
-        //('¬', (4, "Not Sign", "U+00AC")) reserved for the FPL not operator
         ('±', (2, "Plus-Minus Sign", "U+00B1"))
         ('×', (2, "Multiplication Sign", "U+00D7"))
         ('÷', (2, "Division Sign", "U+00F7"))
@@ -396,8 +405,6 @@ let mathSymbols = dict [
         ('↮', (2, "Left Right Arrow with Stroke", "U+21AE"))
         ('⇎', (2, "Left Right Double Arrow with Stroke", "U+21CE"))
         ('⇏', (2, "Rightwards Double Arrow with Stroke", "U+21CF"))
-        ('⇒', (2, "Rightwards Double Arrow", "U+21D2"))
-        ('⇔', (2, "Left Right Double Arrow", "U+21D4"))
         ('⇴', (2, "Right Arrow with Small Circle", "U+21F4"))
         ('⇵', (2, "Downwards Arrow Leftwards of Upwards Arrow", "U+21F5"))
         ('⇶', (2, "Three Rightwards Arrows", "U+21F6"))
@@ -410,10 +417,8 @@ let mathSymbols = dict [
         ('⇽', (2, "Leftwards Open-Headed Arrow", "U+21FD"))
         ('⇾', (2, "Rightwards Open-Headed Arrow", "U+21FE"))
         ('⇿', (2, "Left Right Open-Headed Arrow", "U+21FF"))
-        ('∀', (4, "For All", "U+2200"))
         ('∁', (4, "Complement", "U+2201"))
         ('∂', (4, "Partial Differential", "U+2202"))
-        ('∃', (2, "There Exists", "U+2203"))
         ('∄', (2, "There Does Not Exist", "U+2204"))
         ('∅', (8, "Empty Set", "U+2205"))
         ('∆', (6, "Increment", "U+2206"))
@@ -448,8 +453,6 @@ let mathSymbols = dict [
         ('∤', (2, "Does Not Divide", "U+2224"))
         ('∥', (2, "Parallel To", "U+2225"))
         ('∦', (2, "Not Parallel To", "U+2226"))
-        //('∧', (2, "Logical And", "U+2227")) reserved for FPL and operator
-        //('∨', (2, "Logical Or", "U+2228")) reserved for FPL or operator
         ('∩', (2, "Intersection", "U+2229"))
         ('∪', (2, "Union", "U+222A"))
         ('∫', (4, "Integral", "U+222B"))
@@ -1047,7 +1050,6 @@ let mathSymbols = dict [
         ('⩞', (2, "Logical and with Double Overbar", "U+2A5E"))
         ('⩟', (2, "Logical and with Underbar", "U+2A5F"))
         ('⩠', (2, "Logical and with Double Underbar", "U+2A60"))
-        //('⩡', (2, "Small Vee with Underbar", "U+2A61")) reserved for FPL xor operator
         ('⩢', (2, "Logical or with Double Overbar", "U+2A62"))
         ('⩣', (2, "Logical or with Double Underbar", "U+2A63"))
         ('⩤', (2, "Z Notation Domain Antirestriction", "U+2A64"))
