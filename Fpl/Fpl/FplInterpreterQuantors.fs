@@ -64,7 +64,7 @@ type FplGenericQuantor(positions: Positions, parent: FplGenericNode) =
                     this.ArgList[0].Type signatureType
                 else
                     ""
-            $"{head}{boundVars} ({body})"
+            $"{head} {boundVars} ({body})"
 
     override this.CheckConsistency () = 
         base.CheckConsistency()
