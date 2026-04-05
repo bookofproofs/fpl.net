@@ -14,6 +14,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 module FplInterpreter.Globals.HelpersBasic
 open System.Collections.Generic
+open System
+open System.Text
 open FParsec
 open FplPrimitives
 open FplInterpreterDiagnosticsEmitter
@@ -290,3 +292,22 @@ let filterCandidates (candidatesPre:FplGenericNode list) identifier qualified =
         )
         |> String.concat ", "
     (candidates, candidatesNames)
+
+
+/// helper to escape JSON string content
+let escape (s: string) =
+    if isNull s then String.Empty
+    else
+        let sb = StringBuilder()
+        for c in s do
+            match c with
+            | '"'  -> sb.Append("\\\"") |> ignore
+            | '\\' -> sb.Append("\\\\") |> ignore
+            | '\b' -> sb.Append("\\b") |> ignore
+            | '\f' -> sb.Append("\\f") |> ignore
+            | '\n' -> sb.Append("\\n") |> ignore
+            | '\r' -> sb.Append("\\r") |> ignore
+            | '\t' -> sb.Append("\\t") |> ignore
+            | c when System.Char.IsControl c -> sb.Append(sprintf "\\u%04x" (int c)) |> ignore
+            | _    -> sb.Append(c) |> ignore
+        sb.ToString()
