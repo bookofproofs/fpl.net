@@ -15,7 +15,6 @@ module FplInterpreter.Globals.Validity
 open System.Collections.Generic
 open System.Text.Json
 open FplInterpreterBasicTypes
-open FplInterpreter.Globals.HelpersBasic
 open FplInterpreterCompoundPredicates
 
 type ValidStmtStore() =
@@ -107,6 +106,7 @@ type ValidStmtStore() =
             // create a small object for the statement; first pair is statementExpression
             let obj = Dictionary<string,string>()
             obj.Add("statementExpression", $"∀Ǝ{stmt.StatementExpression}")
+            obj.Add("nodeName", $"{stmt.Node.Name} {stmt.Node.Type SignatureType.Mixed}")
             // additional key/value pairs can be added to `obj` here in future
             list.Add(obj)
 

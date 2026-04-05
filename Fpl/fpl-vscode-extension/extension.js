@@ -206,7 +206,7 @@ function dispatchRuntime(runtimeName) {
 }
 
 
-/**
+ /**
  * @param {string} runtimeName
  * @param {string} relPathToDotnetRuntime
  */
@@ -302,7 +302,6 @@ typeToIconMap.set('ind','symbol-numeric');
 typeToIconMap.set('tpl','gear');
 typeToIconMap.set('undef','question');
 typeToIconMap.set('undet','question');
-
 
 
 
@@ -440,11 +439,29 @@ class FplTheoriesProvider {
 
 // New TreeItem class for Valid Statements tree
 class ValidStmtItem extends vscode.TreeItem {
-    constructor(label, collapsibleState, children = []) {
+    constructor(label, collapsibleState, children = [], rawObj = null) {
         super(label, collapsibleState);
         this.children = children;
-        // tooltip helps show full statement when truncated in the tree
-        this.tooltip = label;
+        // If a raw object is provided (the server-produced object), build a markdown tooltip
+        if (rawObj && typeof rawObj === 'object') {
+            const markdownTooltip = new vscode.MarkdownString();
+            markdownTooltip.isTrusted = true;
+            // Prefer the explicit keys produced by the server
+            if (typeof rawObj.statementExpression === 'string') {
+                markdownTooltip.appendMarkdown(`📜 **Statement:** ${rawObj.statementExpression}\n\n`);
+            }
+            if (typeof rawObj.nodeName === 'string') {
+                markdownTooltip.appendMarkdown(`🧩 **Node:** ${rawObj.nodeName}\n\n`);
+            }
+            // If neither of the expected keys exists, fallback to full JSON
+            if (!markdownTooltip.value || markdownTooltip.value.trim() === '') {
+                markdownTooltip.appendMarkdown('```\n' + JSON.stringify(rawObj, null, 2) + '\n```\n');
+            }
+            this.tooltip = markdownTooltip;
+        } else {
+            // tooltip helps show full statement when truncated in the tree
+            this.tooltip = label;
+        }
     }
 }
 
@@ -489,9 +506,8 @@ class ValidStmtsProvider {
                                 } else {
                                     label = String(obj);
                                 }
-                                const item = new ValidStmtItem(label, vscode.TreeItemCollapsibleState.None);
-                                // show full object in tooltip for later extension/debugging
-                                item.tooltip = (obj && typeof obj === 'object') ? JSON.stringify(obj) : String(obj);
+                                // Pass the original object to ValidStmtItem so it can build a markdown tooltip
+                                const item = new ValidStmtItem(label, vscode.TreeItemCollapsibleState.None, [], obj);
                                 return item;
                             });
                             const label = `${key} (${children.length})`;
