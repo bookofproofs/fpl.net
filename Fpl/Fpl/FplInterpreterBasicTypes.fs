@@ -575,19 +575,20 @@ type IHasDotted =
     abstract member DottedChild : FplGenericNode option with get, set
 
 type ValidityReason =
-    | IsAxiom of FplGenericNode
-    | IsAxiomAssertion of FplGenericNode
-    | IsRuleOfInference of FplGenericNode 
-    | IsTheorem of FplGenericNode
-    | IsDerived of FplGenericNode
-    | IsDerivedRevoke of FplGenericNode
-    | IsDerivedAssumed of FplGenericNode
+    | IsAxiom of string
+    | IsAxiomAssertion of string
+    | IsRuleOfInference of string * string
+    | IsTheorem of string
+    | IsDerived of string
+    | IsDerivedRevoke of string * string
+    | IsDerivedAssumed of string
     | Error 
 
 type ValidStatement =
-    { Node: FplGenericNode
-      ValidityReason: ValidityReason
-      StatementExpression: string}
+    {
+        Node: FplGenericNode
+        ValidityReason: ValidityReason
+    }
 
 /// Implement this interface for various nodes of the symbol table to find the right expression and validity reason. 
 type IInferrable =

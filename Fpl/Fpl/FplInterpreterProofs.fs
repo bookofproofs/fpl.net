@@ -23,6 +23,7 @@ open FplInterpreterChecks
 open FplInterpreter.Globals.HelpersComplex
 open FplInterpreter.Globals.Heap
 open FplInterpreterIntrinsicTypes
+open FplInterpreterCompoundPredicates
 open FplInterpreterPredicativeBlocks
 
 [<AbstractClass>]
@@ -323,15 +324,16 @@ and FplArgInferenceAssume(positions: Positions, parent: FplGenericNode) =
     override this.ShortName = PrimArgInf
 
     member this.InferrableExpression =
-        let validityReason, exprStr = 
+        let validityReason = 
             let exprOpt = this.ArgList |> Seq.tryLast
             match exprOpt with
-            | Some expr -> ValidityReason.IsDerivedAssumed expr, expr.Type SignatureType.Name
-            | _ -> ValidityReason.Error, "" // fallback if axiom node is empty
+            | Some expr -> ValidityReason.IsDerivedAssumed (expr.Type SignatureType.Name)
+            | _ -> ValidityReason.Error // fallback if axiom node is empty
 
-        { ValidStatement.Node = this
-          ValidStatement.ValidityReason = validityReason
-          ValidStatement.StatementExpression = exprStr }
+        {
+            ValidStatement.Node = this
+            ValidStatement.ValidityReason = validityReason
+        }
 
     interface IInferrable with
         member this.InferrableExpression
@@ -344,7 +346,7 @@ and FplArgInferenceAssume(positions: Positions, parent: FplGenericNode) =
 
     override this.Run() = 
         debug this Debug.Start
-        if heap.ValidStmtStore.AssumeArgument this then
+        if heap.ValidStmtStore.RegisterExpression this then
             let v = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
             v.FplId <- LiteralTrue
             this.SetValue v
@@ -359,6 +361,31 @@ and FplArgInferenceRevoke(positions: Positions, parent: FplGenericNode) =
 
     override this.Name = PrimArgInfRevoke
     override this.ShortName = PrimArgInf
+
+    member this.InferrableExpression =
+        match heap.ValidStmtStore.LastAssumedArgument with
+        | Some assumption -> 
+            let assumptionId = assumption.Type SignatureType.Mixed
+            // and replace it with its negated version
+            let negatedAssumption = new FplNegation((this.StartPos, this.EndPos), this.Parent.Value)
+            negatedAssumption.ArgList.Add assumption
+            let revokedExpr = negatedAssumption.Type SignatureType.Name
+            {
+                ValidStatement.Node = this
+                ValidStatement.ValidityReason = ValidityReason.IsDerivedRevoke(assumptionId, revokedExpr)
+            }
+        | _ ->
+            {
+                ValidStatement.Node = this
+                ValidStatement.ValidityReason = ValidityReason.Error
+            }
+
+
+    interface IInferrable with
+        member this.InferrableExpression
+            with get () = this.InferrableExpression
+
+
 
     override this.Clone () =
         let ret = new FplArgInferenceRevoke((this.StartPos, this.EndPos), this.Parent.Value)
@@ -404,7 +431,7 @@ and FplArgInferenceRevoke(positions: Positions, parent: FplGenericNode) =
         match this.ErrorOccurred with
         | Some err -> this.SetDefaultValue()
         | _ ->
-            if heap.ValidStmtStore.RevokeLastArgument() then
+            if heap.ValidStmtStore.RegisterExpression this then
                 let v = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
                 v.FplId <- LiteralTrue
                 this.SetValue v

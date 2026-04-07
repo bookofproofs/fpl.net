@@ -28,15 +28,16 @@ type FplAssertion(positions: Positions, parent: FplGenericNode) =
     override this.ShortName = LiteralAss
 
     member this.InferrableExpression =
-        let validityReason, exprStr = 
+        let validityReason = 
             let exprOpt = this.ArgList |> Seq.tryLast
             match exprOpt with
-            | Some expr -> ValidityReason.IsAxiomAssertion expr, expr.Type SignatureType.Name
-            | _ -> ValidityReason.Error, "" // fallback if axiom node is empty
+            | Some expr -> ValidityReason.IsAxiomAssertion (expr.Type SignatureType.Name)
+            | _ -> ValidityReason.Error // fallback if axiom node is empty
 
-        { ValidStatement.Node = this
-          ValidStatement.ValidityReason = validityReason
-          ValidStatement.StatementExpression = exprStr }
+        {
+            ValidStatement.Node = this
+            ValidStatement.ValidityReason = validityReason
+        }
 
     interface IInferrable with
         member this.InferrableExpression

@@ -81,15 +81,16 @@ type FplAxiom(positions: Positions, parent: FplGenericNode, runOrder) =
     override this.ShortName = LiteralAx
 
     member this.InferrableExpression =
-        let validityReason, exprStr = 
+        let validityReason = 
             let exprOpt = this.ArgList |> Seq.tryLast
             match exprOpt with
-            | Some expr -> ValidityReason.IsAxiom expr, expr.Type SignatureType.Name
-            | _ -> ValidityReason.Error, "" // fallback if axiom node is empty
+            | Some expr -> ValidityReason.IsAxiom (expr.Type SignatureType.Name)
+            | _ -> ValidityReason.Error // fallback if axiom node is empty
 
-        { ValidStatement.Node = this
-          ValidStatement.ValidityReason = validityReason
-          ValidStatement.StatementExpression = exprStr }
+        {
+            ValidStatement.Node = this
+            ValidStatement.ValidityReason = validityReason
+        }
 
     interface IInferrable with
         member this.InferrableExpression
@@ -148,15 +149,16 @@ type FplGenericTheoremLikeStmt(positions: Positions, parent: FplGenericNode, run
             and set (value) = _hasProof <- value
 
     member this.InferrableExpression =
-        let validityReason, exprStr = 
+        let validityReason = 
             let exprOpt = this.ArgList |> Seq.tryLast
             match exprOpt with
-            | Some expr -> ValidityReason.IsRuleOfInference expr, expr.Type SignatureType.Name
-            | _ -> ValidityReason.Error, "" // fallback if theorem-like statement node is empty
+            | Some expr -> ValidityReason.IsDerived (expr.Type SignatureType.Name)
+            | _ -> ValidityReason.Error // fallback if theorem-like statement node is empty
 
-        { ValidStatement.Node = this
-          ValidStatement.ValidityReason = validityReason
-          ValidStatement.StatementExpression = exprStr }
+        {
+            ValidStatement.Node = this
+            ValidStatement.ValidityReason = validityReason
+        }
 
     interface IInferrable with
         member this.InferrableExpression

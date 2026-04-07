@@ -29,48 +29,30 @@ type ValidStmtStore() =
             let validStmt = infer.InferrableExpression
             match validStmt.ValidityReason with
             | ValidityReason.Error -> false // do nothing if error was flagged
+            | ValidityReason.IsRuleOfInference(pre, con) ->
+                _theoremStore.TryAdd($"{pre}|{con}", validStmt)
             | ValidityReason.IsDerivedAssumed assumption ->
-                _assumedArguments.Push assumption
-                _theoremStore.TryAdd(validStmt.StatementExpression, validStmt) |> ignore
+                _assumedArguments.Push st
+                _theoremStore.TryAdd(assumption, validStmt) |> ignore
                 true
-            | _ ->
-                _theoremStore.TryAdd(validStmt.StatementExpression, validStmt) |> ignore
+            | ValidityReason.IsAxiom expr 
+            | ValidityReason.IsAxiomAssertion expr 
+            | ValidityReason.IsTheorem expr 
+            | ValidityReason.IsDerived expr ->
+                _theoremStore.TryAdd(expr, validStmt) 
+            | ValidityReason.IsDerivedRevoke (assumedExpr,revokedExpr) ->
+                if _assumedArguments.Count > 0 then
+                    _assumedArguments.Pop() |> ignore
+                    _theoremStore.Remove assumedExpr |> ignore 
+                _theoremStore.TryAdd(revokedExpr, validStmt) |> ignore
                 true
         | _ -> false
-
-    /// Assumes an argument and puts it to the theorem store
-    member this.AssumeArgument assumption =
-        if this.RegisterExpression assumption then 
-            _assumedArguments.Push assumption
-            true
-        else
-            false
-
-    /// Revokes an argument and puts its negation to the theorem store
-    member this.RevokeLastArgument() =
-        if _assumedArguments.Count > 0 then
-            let revocation = _assumedArguments.Pop()
-            let assumptionId = revocation.Type SignatureType.Mixed
-            // remove assumption proved wrong from valid stmts store
-            _theoremStore.Remove assumptionId |> ignore 
-            // and replace it with its negated version
-            let negatedRevocation = new FplNegation((revocation.StartPos, revocation.EndPos),revocation.Parent.Value)
-            negatedRevocation.ArgList.Add revocation
-            let validStmt = 
-                { ValidStatement.Node = negatedRevocation
-                  ValidStatement.ValidityReason = ValidityReason.IsDerivedRevoke negatedRevocation
-                  ValidStatement.StatementExpression = negatedRevocation.Type SignatureType.Name }
-            _theoremStore.TryAdd(validStmt.StatementExpression, validStmt) |> ignore
-            true
-        else
-            false
 
     member this.LastAssumedArgument =
         if _assumedArguments.Count > 0 then
             Some (_assumedArguments.Peek())
         else 
             None
-
 
     /// Produces a JSON string grouping stored valid statements by their ValidityReason.
     /// Each group's value is an array of JSON objects. Objects may contain multiple key/value pairs.
@@ -100,6 +82,17 @@ type ValidStmtStore() =
             | ValidityReason.IsDerivedRevoke _ -> PrimArgInfRevoke
             | ValidityReason.Error -> "Error"
 
+        let getExpr reason =
+            match reason with
+            | ValidityReason.IsAxiom expr 
+            | ValidityReason.IsAxiomAssertion expr
+            | ValidityReason.IsTheorem expr
+            | ValidityReason.IsDerived expr
+            | ValidityReason.IsDerivedAssumed expr -> expr
+            | ValidityReason.IsRuleOfInference (preExpr,conExpr) -> $"{preExpr}/{conExpr}"
+            | ValidityReason.IsDerivedRevoke (_,revokedExpr) -> revokedExpr
+            | ValidityReason.Error -> "Error"
+
         // Build the groups storing per-statement object dictionaries
         for kvp in _theoremStore do
             let stmt = kvp.Value
@@ -113,18 +106,19 @@ type ValidStmtStore() =
                     v
             // create a small object for the statement; first pair is statementExpression
             let obj = Dictionary<string,string>()
-            obj.Add("statementExpression", $"{stmt.StatementExpression}")
-            let parentNodeOpt = stmt.Node.UltimateBlockNode
-            match parentNodeOpt with
-            | Some parent ->
-                obj.Add("nodeName", $"{parent.Name} {parent.Type SignatureType.Mixed}")
-                obj.Add("Line", $"{stmt.Node.StartPos.Line}")
-                obj.Add("Column", $"{stmt.Node.StartPos.Column}")
-                match parent.Parent with
+            obj.Add("statementExpression", getExpr stmt.ValidityReason)
+            obj.Add("reason", getReason stmt.ValidityReason)
+            let ultimateNodeOpt = stmt.Node.UltimateBlockNode
+            match ultimateNodeOpt with
+            | Some ultimateNode when ultimateNode.Parent.IsSome ->
+                match ultimateNode.Parent with
                 | Some theory ->
+                    obj.Add("nodeName", $"**{ultimateNode.Type SignatureType.Mixed}** (in {theory.FplId})")
                     match theory.FilePath with
                     | Some filePath ->
                         obj.Add("FilePath", filePath)
+                        obj.Add("Line", $"{stmt.Node.StartPos.Line}")
+                        obj.Add("Column", $"{stmt.Node.StartPos.Column}")
                     | _ -> ()
                 | _ -> ()
             | _ -> ()

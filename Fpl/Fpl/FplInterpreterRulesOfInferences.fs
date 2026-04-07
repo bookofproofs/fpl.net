@@ -88,14 +88,18 @@ type FplRuleOfInference(positions: Positions, parent: FplGenericNode, runOrder) 
             None
 
     member this.InferrableExpression =
-        let validityReason, exprStr =
+        let validityReason =
             match this.Premise, this.Conclusion with
-            | Some pre, Some con -> ValidityReason.IsRuleOfInference con, $"{pre.Type SignatureType.Name}|{con.Type SignatureType.Name}"
-            | _ -> ValidityReason.Error, "" // fallback if premise/conclusion are empty
+            | Some pre, Some con ->
+                let preExpr = pre.Type SignatureType.Name
+                let conExpr = con.Type SignatureType.Name
+                ValidityReason.IsRuleOfInference (preExpr,conExpr)
+            | _ -> ValidityReason.Error // fallback if premise/conclusion are empty
 
-        { ValidStatement.Node = this
-          ValidStatement.ValidityReason = validityReason
-          ValidStatement.StatementExpression = exprStr }
+        {
+            ValidStatement.Node = this
+            ValidStatement.ValidityReason = validityReason
+        }
 
     interface IInferrable with
         member this.InferrableExpression
