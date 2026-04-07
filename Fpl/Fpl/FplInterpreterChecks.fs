@@ -412,6 +412,7 @@ let checkFreeVar (arg:FplGenericNode) =
 
 let rec isSimpleExpression (fv:FplGenericNode) =
     match fv.Name with
+    | PrimExtensionObj
     | PrimVariableL
     | PrimVariableArrayL
     | PrimIntrinsicInd -> true
@@ -419,5 +420,5 @@ let rec isSimpleExpression (fv:FplGenericNode) =
     | PrimRefL ->
         match fv.RefersTo with
         | Some ref -> isSimpleExpression ref
-        | _ -> false
+        | _ -> true
     | _ -> false

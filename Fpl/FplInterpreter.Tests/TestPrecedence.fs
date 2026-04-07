@@ -19,7 +19,7 @@ type TestPrecedence() =
         
         let fplCode = sprintf """ 
                  def pred Mul(x,y: obj) infix "*" 1 {intr}
-                 def pred Add(x,y: obj)infix "+" 2  {intr} 
+                 def pred Add(x,y: obj) infix "+" 2  {intr} 
                  def pred Eq(x,y: obj) infix "=" 1000{intr} 
                  def pred T1() { %s };""" varVal
         let filename = "TestPrecedenceInfix.fpl"
@@ -29,12 +29,12 @@ type TestPrecedence() =
         let pr1 = theory.Scope["T1()"] 
         let base1 = pr1.ArgList[0]
         match var with
-        | "b01" -> Assert.AreEqual<string>("=(+(x, *(y, z)), 1)", base1.Type(SignatureType.Name))
-        | "b02" -> Assert.AreEqual<string>("=(+(*(x, y), z), 1)", base1.Type(SignatureType.Name))
-        | "b03" -> Assert.AreEqual<string>("=(+(x, y), *(z, 1))", base1.Type(SignatureType.Name))
-        | "b04" -> Assert.AreEqual<string>("=(*(x, y), +(z, 1))", base1.Type(SignatureType.Name))
-        | "b05" -> Assert.AreEqual<string>("=(x, +(y, *(z, 1)))", base1.Type(SignatureType.Name))
-        | "b06" -> Assert.AreEqual<string>("=(x, +(*(y, z), 1))", base1.Type(SignatureType.Name))
+        | "b01" -> Assert.AreEqual<string>("(x + (y * z)) = 1", base1.Type(SignatureType.Name))
+        | "b02" -> Assert.AreEqual<string>("((x * y) + z) = 1", base1.Type(SignatureType.Name))
+        | "b03" -> Assert.AreEqual<string>("(x + y) = (z * 1)", base1.Type(SignatureType.Name))
+        | "b04" -> Assert.AreEqual<string>("(x * y) = (z + 1)", base1.Type(SignatureType.Name))
+        | "b05" -> Assert.AreEqual<string>("x = (y + (z * 1))", base1.Type(SignatureType.Name))
+        | "b06" -> Assert.AreEqual<string>("x = ((y * z) + 1)", base1.Type(SignatureType.Name))
         | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
 

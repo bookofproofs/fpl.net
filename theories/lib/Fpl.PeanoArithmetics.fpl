@@ -12,7 +12,7 @@ def func Zero() -> Nat
 
 
 // definition of a functional term denoting the successor of a natural number
-def func Succ(n: Nat) -> Nat
+def func Succ(n: Nat) -> Nat postfix "'"
 
 
 ext Digits x@/\d+/ -> Nat 

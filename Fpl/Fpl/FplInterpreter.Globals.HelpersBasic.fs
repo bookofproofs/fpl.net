@@ -311,3 +311,17 @@ let escape (s: string) =
             | c when System.Char.IsControl c -> sb.Append(sprintf "\\u%04x" (int c)) |> ignore
             | _    -> sb.Append(c) |> ignore
         sb.ToString()
+
+let getNotationTwoArgs (fv:FplGenericNode) symbol signatureType defaultVal = 
+    let separator = $" {symbol} "
+    match signatureType with
+    | SignatureType.Type -> defaultVal
+    | _ ->
+        fv.ArgList
+        |> Seq.map (fun arg ->
+            if isSimpleExpression arg then
+                $"{arg.Type signatureType}"
+            else
+                $"({arg.Type signatureType})"
+        )
+        |> String.concat separator

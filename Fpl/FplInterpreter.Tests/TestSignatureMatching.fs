@@ -561,7 +561,7 @@ type TestSignatureMatching() =
         prepareFplCode(filename, "", false) |> ignore
 
     [<DataRow("""def pred Eq(x,y: obj) infix "=" 1000 axiom A {dec ~x:ind ~y:obj; (x = y) };""", 
-        "No overload matching `=(ind, obj)`. The variable `x` typed `ind` doesn't match the parameter `x` typed `obj` in the predicate definition TestSIG04MsgSpecificity.Eq(obj, obj).")>]
+        "No overload matching `x = y`. The variable `x` typed `ind` doesn't match the parameter `x` typed `obj` in the predicate definition TestSIG04MsgSpecificity.Eq(obj, obj).")>]
     [<TestMethod>]
     member this.TestSIG04MsgSpecificity(fplCode:string, (expected:string)) =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 

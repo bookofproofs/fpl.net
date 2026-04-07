@@ -214,45 +214,65 @@ type FplReference(positions: Positions, parent: FplGenericNode) =
             | _ ->
                 $"{head}({args})"
 
-        match argsCount, this.ArgType, this.DottedChild with
-            | 0, ArgType.Nothing, Some qualification when propagate = SignatureType.Type ->
-                qualification.Type propagate
-            | 0, ArgType.Nothing, Some qualification ->
-                $"{head}.{qualification.Type propagate}"
-            | 0, ArgType.Brackets, Some qualification ->
-                $"{head}[].{qualification.Type propagate}"
-            | 0, ArgType.Parentheses, Some qualification ->
-                $"{head}().{qualification.Type propagate}"
-            | 0, ArgType.Nothing, None -> 
-                match headObj.Name with 
-                | PrimVariableArrayL 
-                | PrimPredicateL 
-                | PrimMandatoryPredicateL 
-                | PrimFunctionalTermL 
-                | PrimExtensionObj 
-                | PrimMandatoryFunctionalTermL -> $"{headObj.Type signatureType}"
-                | _ -> head
-            | 0, ArgType.Brackets, None ->
-                $"{head}[]"
-            | 0, ArgType.Parentheses, None ->
-                fallBackValueClosure
-            | 1, ArgType.Nothing, None -> 
-                if head <> String.Empty then 
+        let prefixNotation() =
+            match argsCount, this.ArgType, this.DottedChild with
+                | 0, ArgType.Nothing, Some qualification when propagate = SignatureType.Type ->
+                    qualification.Type propagate
+                | 0, ArgType.Nothing, Some qualification ->
+                    $"{head}.{qualification.Type propagate}"
+                | 0, ArgType.Brackets, Some qualification ->
+                    $"{head}[].{qualification.Type propagate}"
+                | 0, ArgType.Parentheses, Some qualification ->
+                    $"{head}().{qualification.Type propagate}"
+                | 0, ArgType.Nothing, None -> 
+                    match headObj.Name with 
+                    | PrimVariableArrayL 
+                    | PrimPredicateL 
+                    | PrimMandatoryPredicateL 
+                    | PrimFunctionalTermL 
+                    | PrimExtensionObj 
+                    | PrimMandatoryFunctionalTermL -> $"{headObj.Type signatureType}"
+                    | _ -> head
+                | 0, ArgType.Brackets, None ->
+                    $"{head}[]"
+                | 0, ArgType.Parentheses, None ->
+                    fallBackValueClosure
+                | 1, ArgType.Nothing, None -> 
+                    if head <> String.Empty then 
+                        $"{head}({args})"
+                    else
+                        args
+                | _, ArgType.Nothing, Some qualification -> 
+                    $"{head}({args}).{qualification.Type propagate}"
+                | _, ArgType.Brackets, Some qualification ->
+                    $"{head}[{args}].{qualification.Type propagate}"
+                | _, ArgType.Parentheses, Some qualification ->
+                    $"{head}({args}).{qualification.Type propagate}"
+                | _, ArgType.Nothing, None -> 
                     $"{head}({args})"
-                else
-                    args
-            | _, ArgType.Nothing, Some qualification -> 
-                $"{head}({args}).{qualification.Type propagate}"
-            | _, ArgType.Brackets, Some qualification ->
-                $"{head}[{args}].{qualification.Type propagate}"
-            | _, ArgType.Parentheses, Some qualification ->
-                $"{head}({args}).{qualification.Type propagate}"
-            | _, ArgType.Nothing, None -> 
-                $"{head}({args})"
-            | _, ArgType.Brackets, None ->
-                $"{head}[{args}]"
-            | _, ArgType.Parentheses, None ->
-                fallBackValueClosure
+                | _, ArgType.Brackets, None ->
+                    $"{head}[{args}]"
+                | _, ArgType.Parentheses, None ->
+                    fallBackValueClosure
+
+        match signatureType, headObj.ExpressionType with
+        | SignatureType.Type, _ ->
+            prefixNotation()
+        | _, FixType.Infix (symbol, _) ->
+            getNotationTwoArgs this symbol signatureType (headObj.Type SignatureType.Type)
+        | _, FixType.Symbol symbol -> symbol
+        | _, FixType.Prefix symbol ->
+            if isSimpleExpression this.ArgList[0] then
+                $"{symbol}{args}"
+            else
+                $"{symbol}({args})"
+        | _, FixType.Postfix symbol ->
+            if isSimpleExpression this.ArgList[0] then
+                $"{args}{symbol}"
+            else
+                $"({args}){symbol}"
+        | _, _ ->
+            prefixNotation()
 
     override this.Represent() = // done
         if _callCounter > maxRecursion then

@@ -23,20 +23,6 @@ open FplInterpreter.Globals.HelpersBasic
 open FplInterpreterIntrinsicTypes
 
 
-let private getNotationTwoArgs (fv:FplGenericNode) symbol signatureType defaultVal = 
-    let separator = $" {symbol} "
-    match signatureType with
-    | SignatureType.Type -> defaultVal
-    | _ ->
-        fv.ArgList
-        |> Seq.map (fun arg ->
-            if isSimpleExpression arg then
-                $"{arg.Type signatureType}"
-            else
-                $"({arg.Type signatureType})"
-        )
-        |> String.concat separator
-
 /// Implements the semantics of an FPL conjunction compound predicate.
 type FplConjunction(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericPredicate(positions, parent)
