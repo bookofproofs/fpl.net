@@ -577,7 +577,7 @@ type IHasDotted =
 type ValidityReason =
     | IsAxiom of FplGenericNode
     | IsAxiomAssertion of FplGenericNode
-    | IsRuleOfInference of FplGenericNode
+    | IsRuleOfInference of FplGenericNode 
     | IsTheorem of FplGenericNode
     | IsDerived of FplGenericNode
     | IsDerivedRevoke of FplGenericNode

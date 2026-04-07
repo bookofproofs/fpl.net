@@ -71,12 +71,6 @@ type ValidStmtStore() =
         else 
             None
 
-    member this.AddInferredArgument inferredArg = 
-        let validStmt = 
-            { ValidStatement.Node = inferredArg
-              ValidStatement.ValidityReason = ValidityReason.IsRuleOfInference inferredArg
-              ValidStatement.StatementExpression = inferredArg.Type SignatureType.Mixed }
-        _theoremStore.TryAdd(validStmt.StatementExpression, validStmt) |> ignore
 
     /// Produces a JSON string grouping stored valid statements by their ValidityReason.
     /// Each group's value is an array of JSON objects. Objects may contain multiple key/value pairs.

@@ -75,6 +75,33 @@ type FplRuleOfInference(positions: Positions, parent: FplGenericNode, runOrder) 
             with get () = this.SignEndPos
             and set (value) = this.SignEndPos <- value
 
+    member this.Premise =
+        if this.ArgList.Count>0 then
+            Some this.ArgList[0] 
+        else
+            None
+
+    member this.Conclusion =
+        if this.ArgList.Count>1 then
+            Some this.ArgList[1]
+        else
+            None
+
+    member this.InferrableExpression =
+        let validityReason, exprStr =
+            match this.Premise, this.Conclusion with
+            | Some pre, Some con -> ValidityReason.IsRuleOfInference con, $"{pre.Type SignatureType.Name}|{con.Type SignatureType.Name}"
+            | _ -> ValidityReason.Error, "" // fallback if premise/conclusion are empty
+
+        { ValidStatement.Node = this
+          ValidStatement.ValidityReason = validityReason
+          ValidStatement.StatementExpression = exprStr }
+
+    interface IInferrable with
+        member this.InferrableExpression
+            with get () = this.InferrableExpression
+
+
     override this.Name = PrimRuleOfInference
     override this.ShortName = LiteralInf
 
@@ -90,11 +117,7 @@ type FplRuleOfInference(positions: Positions, parent: FplGenericNode, runOrder) 
 
     override this.Run() = 
         debug this Debug.Start
-        if this.ArgList.Count >= 2 then
-            // TODO: this conclusion node is wrong,
-            // we need the conclusion after applying this rule of inference 
-            let conclusion = this.ArgList[1]
-            heap.ValidStmtStore.AddInferredArgument conclusion 
+        heap.ValidStmtStore.RegisterExpression this |> ignore
         debug this Debug.Stop
 
     override this.EmbedInSymbolTable _ = 
