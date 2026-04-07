@@ -415,6 +415,9 @@ let rec isSimpleExpression (fv:FplGenericNode) =
     | PrimExtensionObj
     | PrimVariableL
     | PrimVariableArrayL
+    | PrimQuantorAll
+    | PrimQuantorExists
+    | PrimQuantorExistsN
     | PrimIntrinsicInd -> true
     | PrimIntrinsicPred when (fv.FplId = LiteralTrue || fv.FplId = LiteralFalse) -> true
     | PrimRefL ->

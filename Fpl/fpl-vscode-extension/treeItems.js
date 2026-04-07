@@ -111,8 +111,13 @@ function makeTooltip(statement) {
     const indent = " ".repeat(4);
 
     const [num, den] = statement.split("/");
-    if (!den) return `\n\`\`\`\n${indent}${statement}\n\`\`\``;        
-
+    
+    if (!den) {
+        // insert new lines for quantor expressions
+        const readableStmt = statement.replace(/∃/g, "\n" + indent + "∃");
+        const readableStmt1 = readableStmt.replace(/∀/g, "\n" + indent + "∀").trim();
+        return `\n\`\`\`\n${indent}${readableStmt1}\n\`\`\``;   
+    }
     const width = Math.max(num.length, den.length);
     const line = "─".repeat(width);
 
