@@ -23,10 +23,10 @@ open FplInterpreter.Globals.HelpersBasic
 open FplInterpreterIntrinsicTypes
 
 
-let private getNotationTwoArgs (fv:FplGenericNode) symbol signatureType = 
+let private getNotationTwoArgs (fv:FplGenericNode) symbol signatureType defaultVal = 
     let separator = $" {symbol} "
     match signatureType with
-    | SignatureType.Type -> LiteralPred
+    | SignatureType.Type -> defaultVal
     | _ ->
         fv.ArgList
         |> Seq.map (fun arg ->
@@ -52,7 +52,7 @@ type FplConjunction(positions: Positions, parent: FplGenericNode) as this =
         this.AssignParts(ret)
         ret
 
-    override this.Type signatureType = getNotationTwoArgs this "∧" signatureType
+    override this.Type signatureType = getNotationTwoArgs this "∧" signatureType LiteralPred
 
     override this.Run() =
         debug this Debug.Start
@@ -108,7 +108,7 @@ type FplDisjunction(positions: Positions, parent: FplGenericNode) as this =
         this.AssignParts(ret)
         ret
 
-    override this.Type signatureType = getNotationTwoArgs this "∨" signatureType
+    override this.Type signatureType = getNotationTwoArgs this "∨" signatureType LiteralPred
 
     override this.Run() =
         debug this Debug.Start
@@ -162,7 +162,7 @@ type FplExclusiveOr(positions: Positions, parent: FplGenericNode) as this =
         this.AssignParts(ret)
         ret
 
-    override this.Type signatureType = getNotationTwoArgs this "⩡" signatureType
+    override this.Type signatureType = getNotationTwoArgs this "⩡" signatureType LiteralPred
 
     override this.Run() = 
         debug this Debug.Start
@@ -281,7 +281,7 @@ type FplImplication(positions: Positions, parent: FplGenericNode) as this =
         this.AssignParts(ret)
         ret
 
-    override this.Type signatureType = getNotationTwoArgs this "⇒" signatureType
+    override this.Type signatureType = getNotationTwoArgs this "⇒" signatureType LiteralPred
 
     override this.Run() = 
         debug this Debug.Start
@@ -335,7 +335,7 @@ type FplEquivalence(positions: Positions, parent: FplGenericNode) as this =
         this.AssignParts(ret)
         ret
 
-    override this.Type signatureType = getNotationTwoArgs this "⇔" signatureType
+    override this.Type signatureType = getNotationTwoArgs this "⇔" signatureType LiteralPred
 
     override this.Run() = 
         debug this Debug.Start

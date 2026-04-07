@@ -16,7 +16,6 @@ open System.Collections.Generic
 open System.Text.Json
 open FplPrimitives
 open FplInterpreterBasicTypes
-open FplInterpreterCompoundPredicates
 
 type ValidStmtStore() =
     let _theoremStore = Dictionary<string, ValidStatement>()
@@ -30,7 +29,8 @@ type ValidStmtStore() =
             match validStmt.ValidityReason with
             | ValidityReason.Error -> false // do nothing if error was flagged
             | ValidityReason.IsRuleOfInference(pre, con) ->
-                _theoremStore.TryAdd($"{pre}|{con}", validStmt)
+                _theoremStore.TryAdd($"{pre}|{con}", validStmt) |> ignore
+                true
             | ValidityReason.IsDerivedAssumed assumption ->
                 _assumedArguments.Push st
                 _theoremStore.TryAdd(assumption, validStmt) |> ignore
@@ -39,7 +39,8 @@ type ValidStmtStore() =
             | ValidityReason.IsAxiomAssertion expr 
             | ValidityReason.IsTheorem expr 
             | ValidityReason.IsDerived expr ->
-                _theoremStore.TryAdd(expr, validStmt) 
+                _theoremStore.TryAdd(expr, validStmt) |> ignore
+                true
             | ValidityReason.IsDerivedRevoke (assumedExpr,revokedExpr) ->
                 if _assumedArguments.Count > 0 then
                     _assumedArguments.Pop() |> ignore

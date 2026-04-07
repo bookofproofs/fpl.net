@@ -126,12 +126,11 @@ prop AddIsUnique
     (
         all n, m:Nat
         {
-            (
-                ( Add(n,@0) = n ) and
-                ( anotherAdd(n,@0) = n ) and
-                ( Add(n,Succ(m)) = Succ(Add(n,m)) ) and
-                ( anotherAdd(n,Succ(m)) = Succ(anotherAdd(n,m)) )
-            )
+            and (and (
+                and (( Add(n,@0) = n ), ( anotherAdd(n,@0) = n )),
+                ( Add(n,Succ(m)) = Succ(Add(n,m)) )
+            ) , 
+            ( anotherAdd(n,Succ(m)) = Succ(anotherAdd(n,m)) ))
         }
         ,
         all n1, m1:Nat
