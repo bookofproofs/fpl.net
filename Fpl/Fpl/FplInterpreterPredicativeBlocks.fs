@@ -146,7 +146,22 @@ type FplGenericTheoremLikeStmt(positions: Positions, parent: FplGenericNode, run
         member this.HasProof
             with get (): bool = _hasProof
             and set (value) = _hasProof <- value
-    
+
+    member this.InferrableExpression =
+        let validityReason, exprStr = 
+            let exprOpt = this.ArgList |> Seq.tryLast
+            match exprOpt with
+            | Some expr -> ValidityReason.IsInferred expr, expr.Type SignatureType.Name
+            | _ -> ValidityReason.Error, "" // fallback if theorem-like statement node is empty
+
+        { ValidStatement.Node = this
+          ValidStatement.ValidityReason = validityReason
+          ValidStatement.StatementExpression = exprStr }
+
+    interface IInferrable with
+        member this.InferrableExpression
+            with get () = this.InferrableExpression
+
     override this.IsFplBlock () = true
     override this.IsBlock () = true
 
@@ -161,13 +176,15 @@ type FplGenericTheoremLikeStmt(positions: Positions, parent: FplGenericNode, run
             _isReady <- true
             checkLG003Diagnostics this
 
+            // register the theorem-like stmtmt in the valid statement store
+            if heap.ValidStmtStore.RegisterExpression this then
             // evaluate all corollaries and proofs of the theorem-like statement
-            this.Scope.Values
-            |> Seq.filter (fun fv -> fv.Name = LiteralPrfL || fv.Name = LiteralCorL) 
-            |> Seq.sortBy (fun block -> block.RunOrder.Value) 
-            |> Seq.iter (fun fv -> 
-                fv.Run()
-            )
+                this.Scope.Values
+                |> Seq.filter (fun fv -> fv.Name = LiteralPrfL || fv.Name = LiteralCorL) 
+                |> Seq.sortBy (fun block -> block.RunOrder.Value) 
+                |> Seq.iter (fun fv -> 
+                    fv.Run()
+                )
 
         if not _hasProof then 
            this.ErrorOccurred <- emitPR007Diagnostics (this.Type(SignatureType.Name)) this.Name this.SignStartPos this.SignEndPos
