@@ -1302,13 +1302,13 @@ let PrimAssignment = "assign"
 [<Literal>]
 let PrimAssignmentL = "assignment statement"
 [<Literal>]
-let PrimArgInfAssume = "assume argument inference"
+let PrimArgInfAssume = "assumption"
 [<Literal>]
-let PrimArgInfDerive = "derived argument inference"
+let PrimArgInfDerive = "derived argument"
 [<Literal>]
-let PrimArgInfRevoke = "revoke argument inference"
+let PrimArgInfRevoke = "revocation"
 [<Literal>]
-let PrimArgInfTrivial = "trivial argument inference"
+let PrimArgInfTrivial = "trivial argument"
 [<Literal>]
 let PrimBaseConstructorCall = "base constructor call"
 [<Literal>]
@@ -1461,6 +1461,14 @@ let PrimRoot = "root"
 let PrimStmt = "stmt"
 [<Literal>]
 let PrimStmtL = "statement"
+[<Literal>]
+let PrimTitleAxioms = "Axioms"
+[<Literal>]
+let PrimTitleDerived = "Derived Arguments"
+[<Literal>]
+let PrimTitleRuleOfInference = "Inference Rules"
+[<Literal>]
+let PrimTitleTheorems = "Theorems"
 [<Literal>]
 let PrimTheory = "th"
 [<Literal>]

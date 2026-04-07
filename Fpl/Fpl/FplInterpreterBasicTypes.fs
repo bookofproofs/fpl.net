@@ -576,10 +576,12 @@ type IHasDotted =
 
 type ValidityReason =
     | IsAxiom of FplGenericNode
-    | IsAsserted of FplGenericNode
-    | IsAssumed of FplGenericNode
-    | IsInferred of FplGenericNode
-    | IsInferredFromRevocation of FplGenericNode
+    | IsAxiomAssertion of FplGenericNode
+    | IsRuleOfInference of FplGenericNode
+    | IsTheorem of FplGenericNode
+    | IsDerived of FplGenericNode
+    | IsDerivedRevoke of FplGenericNode
+    | IsDerivedAssumed of FplGenericNode
     | Error 
 
 type ValidStatement =

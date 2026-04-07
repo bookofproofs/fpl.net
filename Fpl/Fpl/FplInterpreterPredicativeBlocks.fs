@@ -151,7 +151,7 @@ type FplGenericTheoremLikeStmt(positions: Positions, parent: FplGenericNode, run
         let validityReason, exprStr = 
             let exprOpt = this.ArgList |> Seq.tryLast
             match exprOpt with
-            | Some expr -> ValidityReason.IsInferred expr, expr.Type SignatureType.Name
+            | Some expr -> ValidityReason.IsRuleOfInference expr, expr.Type SignatureType.Name
             | _ -> ValidityReason.Error, "" // fallback if theorem-like statement node is empty
 
         { ValidStatement.Node = this

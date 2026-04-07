@@ -14,6 +14,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 module FplInterpreter.Globals.Validity
 open System.Collections.Generic
 open System.Text.Json
+open FplPrimitives
 open FplInterpreterBasicTypes
 open FplInterpreterCompoundPredicates
 
@@ -28,7 +29,7 @@ type ValidStmtStore() =
             let validStmt = infer.InferrableExpression
             match validStmt.ValidityReason with
             | ValidityReason.Error -> false // do nothing if error was flagged
-            | ValidityReason.IsAssumed assumption ->
+            | ValidityReason.IsDerivedAssumed assumption ->
                 _assumedArguments.Push assumption
                 _theoremStore.TryAdd(validStmt.StatementExpression, validStmt) |> ignore
                 true
@@ -57,7 +58,7 @@ type ValidStmtStore() =
             negatedRevocation.ArgList.Add revocation
             let validStmt = 
                 { ValidStatement.Node = negatedRevocation
-                  ValidStatement.ValidityReason = ValidityReason.IsInferredFromRevocation negatedRevocation
+                  ValidStatement.ValidityReason = ValidityReason.IsDerivedRevoke negatedRevocation
                   ValidStatement.StatementExpression = negatedRevocation.Type SignatureType.Name }
             _theoremStore.TryAdd(validStmt.StatementExpression, validStmt) |> ignore
             true
@@ -73,7 +74,7 @@ type ValidStmtStore() =
     member this.AddInferredArgument inferredArg = 
         let validStmt = 
             { ValidStatement.Node = inferredArg
-              ValidStatement.ValidityReason = ValidityReason.IsInferred inferredArg
+              ValidStatement.ValidityReason = ValidityReason.IsRuleOfInference inferredArg
               ValidStatement.StatementExpression = inferredArg.Type SignatureType.Mixed }
         _theoremStore.TryAdd(validStmt.StatementExpression, validStmt) |> ignore
 
@@ -85,13 +86,26 @@ type ValidStmtStore() =
 
         let getKey reason =
             match reason with
-            | IsAxiom _ -> "Axioms"
-            | IsAsserted _ -> "Assertions"
-            | IsAssumed _ -> "Assumptions"
-            | IsInferred _ -> "Inferred Arguments"
-            | IsInferredFromRevocation _ -> "Inferred from Revocations"
-            | Error -> "Error"
+            | ValidityReason.IsAxiom _ -> PrimTitleAxioms
+            | ValidityReason.IsAxiomAssertion _ -> PrimTitleAxioms
+            | ValidityReason.IsRuleOfInference _ -> PrimTitleRuleOfInference
+            | ValidityReason.IsTheorem _ -> PrimTitleTheorems
+            | ValidityReason.IsDerived _ -> PrimTitleDerived
+            | ValidityReason.IsDerivedAssumed _ -> PrimTitleDerived
+            | ValidityReason.IsDerivedRevoke _ -> PrimTitleDerived
+            | ValidityReason.Error -> "Error"
          
+        let getReason reason =
+            match reason with
+            | ValidityReason.IsAxiom _ -> LiteralAxL
+            | ValidityReason.IsAxiomAssertion _ -> PrimAssertion
+            | ValidityReason.IsRuleOfInference _ -> PrimRuleOfInference
+            | ValidityReason.IsTheorem _ -> PrimTitleTheorems
+            | ValidityReason.IsDerived _ -> PrimArgInfDerive
+            | ValidityReason.IsDerivedAssumed _ -> PrimArgInfAssume
+            | ValidityReason.IsDerivedRevoke _ -> PrimArgInfRevoke
+            | ValidityReason.Error -> "Error"
+
         // Build the groups storing per-statement object dictionaries
         for kvp in _theoremStore do
             let stmt = kvp.Value
