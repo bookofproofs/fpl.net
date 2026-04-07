@@ -102,18 +102,45 @@ class MyTreeItem extends vscode.TreeItem {
     }
 }
 
+function centerRelativeToLine(text, width) {
+    const pad = Math.floor((width - text.length) / 2);
+    return " ".repeat(pad) + text;
+}
+
+function makeTooltip(statement) {
+    const indent = " ".repeat(4);
+
+    const [num, den] = statement.split("/");
+    if (!den) return `\n\`\`\`\n${indent}${statement}\n\`\`\``;        
+
+    const width = Math.max(num.length, den.length);
+    const line = "─".repeat(width);
+
+
+    const numCentered = centerRelativeToLine(num, width);
+    const denCentered = centerRelativeToLine(den, width);
+
+    return `\n\`\`\`\n${indent}${numCentered}\n${indent}${line}\n${indent}${denCentered}\n\`\`\``;
+
+}
+
 class ValidStmtItem extends vscode.TreeItem {
+    
     constructor(label, collapsibleState, children = [], rawObj = null) {
         super(label, collapsibleState);
         this.children = children;
         if (rawObj && typeof rawObj === 'object') {
             const markdownTooltip = new vscode.MarkdownString();
             markdownTooltip.isTrusted = true;
-            if (typeof rawObj.statementExpression === 'string') {
-                markdownTooltip.appendMarkdown(`📜 **Statement:** ${rawObj.statementExpression}\n\n`);
-            }
+            markdownTooltip.supportHtml = true;
             if (typeof rawObj.nodeName === 'string') {
-                markdownTooltip.appendMarkdown(`🧩 **Node:** ${rawObj.nodeName}\n\n`);
+                markdownTooltip.appendMarkdown(`📜 ${rawObj.nodeName}\n\n`);
+            }
+            if (typeof rawObj.reason === 'string') {
+                markdownTooltip.appendMarkdown(`🧩 ${rawObj.reason}\n\n`);
+            }
+            if (typeof rawObj.statementExpression === 'string') {
+                markdownTooltip.appendMarkdown(`${makeTooltip(rawObj.statementExpression)}\n\n`);
             }
             if (!markdownTooltip.value || markdownTooltip.value.trim() === '') {
                 markdownTooltip.appendMarkdown('```\n' + JSON.stringify(rawObj, null, 2) + '\n```\n');
