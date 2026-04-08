@@ -60,7 +60,7 @@ type FplGenericQuantor(positions: Positions, parent: FplGenericNode) =
                 |> List.map (fun var -> $"{var.FplId}:{var.Type SignatureType.Type}")
                 |> String.concat ", "
             let body =
-                if this.ArgList.Count>=0 then
+                if this.ArgList.Count>0 then
                     this.ArgList[0].Type signatureType
                 else
                     ""

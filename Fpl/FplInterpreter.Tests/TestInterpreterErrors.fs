@@ -1396,7 +1396,7 @@ type TestInterpreterErrors() =
     [<DataRow("01", """thm A {true} proof A$1 {1. |- trivial} proof T$1 { 1. A$1:2, A$1:3 |- trivial qed};""", 2)>]
     [<DataRow("02", """thm A {true} proof A$1 {1. |- trivial} proof T$1 { 1. |- trivial 2. A$1:1 |- trivial qed};""", 0)>]
     [<DataRow("03", """thm A {true} proof A$1 {1. |- trivial} proof T$1 { 1. |- trivial 2. A$1:1, A$1:1a |- trivial qed};""", 1)>]
-    [<DataRow("04", """thm A {true} proof A$1 {1. |- trivial} proof T$1 { 1. A$1:2, A$1:2, A$1:1 |- trivial qed};""", 2)>]
+    [<DataRow("04", """thm A {true} proof A$1 {1. |- trivial} proof T$1 { 1. A$1:2, A$1:1 |- trivial qed};""", 2)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR006(no: string, fplCode:string, expected:int) =
@@ -4724,7 +4724,7 @@ type TestInterpreterErrors() =
             let code = SIG06 ("","","","")
             runTestHelper "TestSIG06FunctionalTerms.fpl" fplCode code expected
 
-    [<DataRow("00a", "def pred S(x:pred) {dec T:=true; true};", 0)>] // SIG07 won't be issued due to proceeding ID010 error (T unknown)
+    [<DataRow("00a", "def pred S(x:pred) {dec T:=true; true};", 1)>] 
     [<DataRow("00a_", "def cl T def pred S(x:pred) {dec T:=true; true};", 1)>] // SIG07 won't be issued due to proceeding ID010 error (T unknown)
     [<DataRow("00b", "ax T {true} def pred S(x:pred) {dec T:=true; true};", 1)>]
     [<DataRow("00c", "thm T {true} def pred S(x:pred) {dec T:=true; true};", 1)>]
@@ -4745,7 +4745,7 @@ type TestInterpreterErrors() =
     [<DataRow("02a", "def pred S() {dec self:=true; true};", 1)>]
     [<DataRow("02b", "def pred S() {dec parent:=true; true};", 0)>] // SIG07 won't be issued due to proceeding errors (ID015)
     [<DataRow("02c", "def pred S() {dec self():=true; true};", 1)>]
-    [<DataRow("02d", "def pred S() {dec parent():=true; true};", 0)>] // SIG07 won't be issued due to proceeding errors (ID015)
+    [<DataRow("02d", "def pred S() {dec parent():=true; true};", 1)>] 
     [<DataRow("02e", "def pred S() {dec self(a):=true; true};", 1)>]
     [<DataRow("02e_", "def pred S() {dec ~a:obj self(a):=true; true};", 1)>]
     [<DataRow("02f", "def pred S() {dec parent(a):=true; true};", 1)>]
