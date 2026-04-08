@@ -3794,36 +3794,56 @@ type SymbolTableStructure() =
             Assert.IsTrue(node.RefersTo.IsNone)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplJustificationItemByProofArgument", "00", """;""", "")>]
+    [<DataRow("FplJustificationItemByProofArgument", "00", """thm A {true} proof A$1 {1. |- trivial} proof T$1 { 1. |- trivial 2. A$1:1 |- trivial qed};""", "")>]
+    [<DataRow("FplJustificationItemByProofArgument", "01", """thm A {true} proof A$1 {1. |- trivial} proof T$1 { 1. A$1:2, A$1:3 |- trivial qed};""", "")>]
     [<TestMethod>]
     member this.TestStructureFplJustificationItemByProofArgument(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplJustificationItemByProofArgument.fpl"
         let parent, node = testSkeleton nodeType filename fplCode identifier
         
         match nodeType, varVal with
-        | "FplReturn", "00" ->
-            Assert.IsInstanceOfType<FplRoot>(parent)
-            Assert.AreEqual<int>(0, parent.ArgList.Count)
+        | "FplJustificationItemByProofArgument", "00" ->
+            Assert.IsInstanceOfType<FplJustification>(parent)
+            Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplReturn>(node)
+            Assert.IsInstanceOfType<FplJustificationItemByProofArgument>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsSome) // the referenced proof argument exists
+        | "FplJustificationItemByProofArgument", "01" ->
+            Assert.IsInstanceOfType<FplJustification>(parent)
+            Assert.AreEqual<int>(2, parent.ArgList.Count)
+            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplJustificationItemByProofArgument>(node)
+            Assert.AreEqual<int>(0, node.ArgList.Count)
+            Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsNone) // the referenced proof argument does not exist
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplJustificationItemByRefArgument", "00", """;""", "")>]
+    [<DataRow("FplJustificationItemByRefArgument", "00", """proof T$1 { 1. |- trivial 2. 1 |- trivial qed};""", "")>]
+    [<DataRow("FplJustificationItemByRefArgument", "01", """proof T$1 { 1. |- trivial 2. 3 |- trivial qed};""", "")>]
     [<TestMethod>]
     member this.TestStructureFplJustificationItemByRefArgument(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplJustificationItemByRefArgument.fpl"
         let parent, node = testSkeleton nodeType filename fplCode identifier
         
         match nodeType, varVal with
-        | "FplReturn", "00" ->
-            Assert.IsInstanceOfType<FplRoot>(parent)
-            Assert.AreEqual<int>(0, parent.ArgList.Count)
+        | "FplJustificationItemByRefArgument", "00" ->
+            Assert.IsInstanceOfType<FplJustification>(parent)
+            Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplReturn>(node)
+            Assert.IsInstanceOfType<FplJustificationItemByRefArgument>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsSome) // the referred argument is not missing
+        | "FplJustificationItemByRefArgument", "01" ->
+            Assert.IsInstanceOfType<FplJustification>(parent)
+            Assert.AreEqual<int>(1, parent.ArgList.Count)
+            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsInstanceOfType<FplJustificationItemByRefArgument>(node)
+            Assert.AreEqual<int>(0, node.ArgList.Count)
+            Assert.AreEqual<int>(0, node.Scope.Count)
+            Assert.IsTrue(node.RefersTo.IsNone) // the referred argument is missing
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     [<DataRow("FplJustificationItemByTheoremLikeStmt", "00a", """thm A {true} proof T$1 { 100. A, 1 |- false };""", "")>]

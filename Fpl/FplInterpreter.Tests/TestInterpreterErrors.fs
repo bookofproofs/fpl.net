@@ -3140,7 +3140,7 @@ type TestInterpreterErrors() =
     [<DataRow("66", """def cl Set def pred In(x,y: Set) def cl SetRoster:Set { ctor SetRoster(list:* Set[ind]) { dec ~e:Set base.Set() for e in list {assert In(e, parent)}; } };""", 0)>]
     [<DataRow("67", """def class Set def pred In(x,y: Set) def pred IsEmpty(x: Set) { all y:Set { not In(y, x) } };""", 0)>]
     [<DataRow("68", """def class Set def pred In(x,y: Set) def cl SetBuilder: Set { ctor SetBuilder(x: Set, p: pred(u1: Set, o:* obj[ind])) { dec base.Set() assert all u2:Set { iif (In(u2,parent), and ( In(u2,x), p(u2,o) ) ) }; } };""", 0)>]
-    [<DataRow("69", """def cl A {dec ~myX:obj; ctor A(x:obj) {dec myX:=x;}} def cl B:A { ctor B(x:obj) {dec base.A(del.Decrement(x)); } } def pred T() { dec ~v:B v:=B(@2); false};""", 0)>]
+    [<DataRow("69", """ext Digits x@/\d+/ -> Digits {ret x} def cl A {dec ~myX:Digits; ctor A(x:Digits) {dec myX:=x;}} def cl B:A { ctor B(x:Digits) {dec base.A(del.Decrement(x)); } } def pred T() { dec ~v:B v:=B(@2); false};""", 0)>]
     [<DataRow("70", """def cl Nat def func Succ(n: Nat) -> Nat ext Digits x@/\d+/ -> Nat {ret mcases (| true : Nat() ? Succ(self(delegate.Decrement(x))) ) };""", 0)>]    
     [<DataRow("71", """def pred Equal(x,y: tpl) infix "=" 50 { del.Equal(x,y) } def cl Nat def cl Zero:Nat def func Succ(n:Nat)->Nat def pred T() {all x,y:Nat {(x = Succ(y))}};""", 0)>]    
     [<DataRow("72", "def pred S() {dec parent():=true; true};", 0)>] // SIG04 won't be issued due to proceeding errors (ID015)

@@ -372,7 +372,9 @@ let rec eval ast =
             let arg = just.ParentArgument
             let proof = arg.ParentProof
             if not (proof.HasArgument argumentId) then
-                fv.ErrorOccurred <- emitPR005Diagnostics argumentId pos1 pos2
+                fvAi.ErrorOccurred <- emitPR005Diagnostics argumentId pos1 pos2
+            else
+                fvAi.RefersTo <- Some proof.Scope[argumentId]
             heap.Eval.PushEvalStack(fvAi)
             heap.Eval.PopEvalStack()
         | _ -> ()
@@ -1538,7 +1540,6 @@ let rec eval ast =
         let checkPR001_PR006Diagnostics (fvJi:FplGenericNode) candidates = 
             match tryFindAssociatedBlockForJustificationItem fvJi candidates with
             | ScopeSearchResult.FoundAssociate potentialCandidate -> 
-                fvJi.RefersTo <- Some potentialCandidate
                 match fvJi with 
                 | :? FplJustificationItemByProofArgument as fvJi1 ->
                     let split = fvJi.FplId.Split(":")
@@ -1546,9 +1547,9 @@ let rec eval ast =
                         // here, argName is the argument identifier of the other proof
                         let argName = $"{split.[1]}"
                         match getArgumentInProof fvJi1 argName with
-                        | Some argument -> fvJi.ArgList.Add(argument) 
+                        | Some argument -> fvJi.RefersTo <- Some argument 
                         | _ -> fvJi.ErrorOccurred <- emitPR006Diagnostics fvJi.FplId argName fvJi.StartPos fvJi.EndPos 
-                | _ -> ()
+                | _ -> fvJi.RefersTo <- Some potentialCandidate
             | ScopeSearchResult.FoundIncorrectBlock otherBlock ->
                 let alternative = 
                     match fvJi.Name with 
