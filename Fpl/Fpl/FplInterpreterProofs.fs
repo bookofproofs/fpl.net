@@ -536,7 +536,7 @@ and FplProof(positions: Positions, parent: FplGenericNode, runOrder) =
             this.SetValue v
         debug this Debug.Stop
 
-    override this.EmbedInSymbolTable _ = 
+    override this.CheckConsistency () = 
         /// Tries to find a theorem-like statement for a proof
         /// and returns different cases of ScopeSearchResult, depending on different semantical error situations.
         let tryFindAssociatedBlockForProof (fplValue: FplGenericNode) =
@@ -589,6 +589,10 @@ and FplProof(positions: Positions, parent: FplGenericNode, runOrder) =
         | ScopeSearchResult.NotFound ->
             this.ErrorOccurred <- emitID003diagnostics this.FplId this.SignStartPos this.SignEndPos
         | _ -> ()
+        base.CheckConsistency()
+
+    override this.EmbedInSymbolTable _ = 
+        this.CheckConsistency()
         tryAddToParentUsingFplId this
 
     override this.RunOrder = Some _runOrder
