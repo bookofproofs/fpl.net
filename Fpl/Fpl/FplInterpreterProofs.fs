@@ -220,8 +220,7 @@ and FplJustification(positions: Positions, parent: FplGenericNode) =
 
 
     member this.GetOrderedJustificationItems =
-        this.Scope.Values
-            |> Seq.sortBy (fun fv -> fv.RunOrder)
+        this.ArgList
             |> Seq.map (fun fv -> fv :?> FplGenericJustificationItem)
             |> Seq.toList
 
@@ -264,8 +263,6 @@ and FplArgument(positions: Positions, parent: FplGenericNode, runOrder) =
         // the argument has two elements, the justification and an argument inference
         let justificationOpt = this.Justification
         let argInferenceOpt = this.ArgumentInference
-
-
 
         match justificationOpt, argInferenceOpt with
         | Some justification, Some argInference -> 
@@ -579,6 +576,24 @@ and FplProof(positions: Positions, parent: FplGenericNode, runOrder) =
                 ScopeSearchResult.NotFound
         | None -> ScopeSearchResult.NotApplicable
 
+    /// Issue PR017 for all "trivial" arguments that are not the last one in the proof 
+    member private this.CheckTrivialArgumentsPR017 (trivialArgs:FplArgument list) lastArg =
+        trivialArgs
+        |> List.filter (fun trivialArg -> not (Object.ReferenceEquals(trivialArg, lastArg)))
+        |> List.iter (fun trivialArg ->
+            this.ErrorOccurred <- emitPR017Diagnostics trivialArg.StartPos trivialArg.EndPos
+        )
+
+    /// Issue PR018 for all "trivial" arguments that have not exactly one justification
+    member private this.CheckTrivialArgumentsPR018 (trivialArgs:FplArgument list) =
+        trivialArgs
+        |> List.filter (fun trivialArg -> trivialArg.Justification.IsSome)
+        |> List.map (fun trivialArg -> trivialArg.Justification.Value)
+        |> List.filter (fun justification -> justification.GetOrderedJustificationItems.Length <> 1)
+        |> List.iter (fun justification ->
+            this.ErrorOccurred <- emitPR018Diagnostics justification.StartPos justification.EndPos
+        )
+
     member private this.CheckTrivialArguments() =
         let orderedArgs = this.OrderedArguments
         if orderedArgs.Length > 0 then
@@ -590,15 +605,10 @@ and FplProof(positions: Positions, parent: FplGenericNode, runOrder) =
                 |> List.map (fun argInf -> argInf.Value)
                 |> List.filter (fun argInf -> argInf.Parent.IsSome && argInf.Name = PrimArgInfTrivial)
                 |> List.map (fun argInf -> argInf.Parent.Value)
+                |> List.map (fun arg -> arg :?> FplArgument)
 
-            // issue PR017 for all "trivial" arguments that are not the last one in the proof 
-            trivialArgs
-            |> List.filter (fun trivialArg -> not (Object.ReferenceEquals(trivialArg, lastArg)))
-            |> List.iter (fun trivialArg ->
-                this.ErrorOccurred <- emitPR017Diagnostics trivialArg.StartPos trivialArg.EndPos
-            )
-        else
-            ()
+            this.CheckTrivialArgumentsPR017 trivialArgs lastArg
+            this.CheckTrivialArgumentsPR018 trivialArgs
 
     override this.CheckConsistency () = 
         match this.TryFindAssociatedBlockForProof this with
