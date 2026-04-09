@@ -157,6 +157,7 @@ type DiagnosticCode =
     | PR014
     | PR015 of string
     | PR016 of string
+    | PR017
     // signature-related error codes
     | SIG00 of string * int
     | SIG01 of string 
@@ -283,6 +284,7 @@ type DiagnosticCode =
             | PR014 -> "PR014"
             | PR015 _ -> "PR015"
             | PR016 _ -> "PR016"
+            | PR017 -> "PR017"
             // signature-related error codes
             | SIG00 _ -> "SIG00"
             | SIG01 _ -> "SIG01"
@@ -421,6 +423,7 @@ type DiagnosticCode =
             | PR014 -> "Justification expects a reference to a theorem-like statement without any more specific references."
             | PR015 argId -> $"Cannot revoke the argument `{argId}` because it wasn't assumed."
             | PR016 argId -> $"Cannot revoke the argument `{argId}` because it wasn't the last assumed one."
+            | PR017 -> $"Do not use `{LiteralTrivial}` if the argument is not the last one the proof."
             // signature-related error codes
             | SIG00 (fixType, arity) -> sprintf $"Illegal arity `{arity}` using `{fixType}` notation."
             | SIG01 symbol -> $"The symbol `{symbol}` was not declared." 

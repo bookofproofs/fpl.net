@@ -1545,7 +1545,18 @@ type TestInterpreterErrors() =
         else
             let code = PR016 ""
             runTestHelper "TestPR016.fpl" fplCode code expected
-           
+
+    [<DataRow("01", """thm T { true } proof T$1 {1. |- trivial};""", 0)>]
+    [<DataRow("02", """ax A { true } thm T {true} proof T$1 {1. byax A |- true 2. |- trivial};""", 1)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestPR017(no:string, fplCode:string, expected) =
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = PR017 
+            runTestHelper "TestPR017.fpl" fplCode code expected
+
     [<DataRow("""def pred Or (x,y:*pred[obj]) infix "or" 0 {true};""", 0)>]
     [<DataRow("""def pred Or (x:* pred[ind]) infix "or" 0 {true};""", 1)>]
     [<DataRow("""def pred Or (x,y,z:* pred[ind]) infix "or" 0 {true};""", 1)>]
