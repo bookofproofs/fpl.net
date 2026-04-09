@@ -258,6 +258,21 @@ and FplArgument(positions: Positions, parent: FplGenericNode, runOrder) =
         else
             None
 
+    override this.CheckConsistency () = 
+        let (proof:FplProof) = this.ParentProof
+        if proof.HasArgument (this.FplId) then 
+            let conflict = proof.Scope[this.FplId]
+            this.ErrorOccurred <- emitPR003Diagnostics this.FplId conflict.QualifiedStartPos this.StartPos this.EndPos 
+        base.CheckConsistency()
+
+    override this.EmbedInSymbolTable _ =
+        this.CheckConsistency()
+        match this.ErrorOccurred with
+        | Some err -> ()
+        | _ ->
+            let proof = this.ParentProof
+            proof.Scope.Add(this.FplId, this)
+
     override this.Run() =
         debug this Debug.Start
         // the argument has two elements, the justification and an argument inference
@@ -267,21 +282,28 @@ and FplArgument(positions: Positions, parent: FplGenericNode, runOrder) =
         match justificationOpt, argInferenceOpt with
         | Some justification, Some argInference -> 
             let orderdListJustifications = justification.GetOrderedJustificationItems
-            let mutable allEvaluateToTrue = (orderdListJustifications.Length > 0) // if the proof is empty, it will evaluate into undetermined
-            orderdListJustifications
-            |> List.iter (fun fv ->
-                fv.Run()
-                let fvRepr = fv.Represent()
-                allEvaluateToTrue <- allEvaluateToTrue && fvRepr = LiteralTrue
-            )
-            if not allEvaluateToTrue then
-                this.ErrorOccurred <- emitPR009Diagnostics this.StartPos this.StartPos
-                this.SetDefaultValue()
+            if orderdListJustifications.Length = 0 then
+                argInference.Run()
+                this.SetValueOf argInference
             else
-                let v = new FplIntrinsicPred((this.StartPos, this.StartPos), this)
-                v.FplId <- LiteralTrue
-                this.SetValue v
-        | _ -> 
+                let allEvaluateToTrue = 
+                    orderdListJustifications
+                    |> List.forall (fun fv ->
+                        fv.Run()
+                        let fvRepr = fv.Represent()
+                        fvRepr = LiteralTrue
+                    )
+                if not allEvaluateToTrue then
+                    this.SetDefaultValue()
+                else
+                    let v = new FplIntrinsicPred((this.StartPos, this.StartPos), this)
+                    v.FplId <- LiteralTrue
+                    this.SetValue v
+        | Some justification, None -> 
+            this.SetDefaultValue()
+        | None, Some argInference -> 
+            this.SetDefaultValue()
+        | None, None -> 
             this.SetDefaultValue()
         (* TODO: Enhance variableStack by the context in which this argument is being evaluated
             Here are some preliminary considerations: 
@@ -300,16 +322,6 @@ and FplArgument(positions: Positions, parent: FplGenericNode, runOrder) =
                 d) whether or not the justification is a by definition
         *)
         debug this Debug.Stop
-
-
-
-    override this.EmbedInSymbolTable _ = 
-        let (proof:FplProof) = this.ParentProof
-        if proof.HasArgument (this.FplId) then 
-            let conflict = proof.Scope[this.FplId]
-            this.ErrorOccurred <- emitPR003Diagnostics this.FplId conflict.QualifiedStartPos this.StartPos this.EndPos 
-        else 
-            proof.Scope.Add(this.FplId, this)
 
     override this.RunOrder = Some _runOrder
 
@@ -452,8 +464,9 @@ and FplArgInferenceTrivial(positions: Positions, parent: FplGenericNode) =
 
     override this.Run() = 
         debug this Debug.Start
-        // TODO - check if trivial is possible and spawn FplIntrisincPred true if possible
-        this.SetDefaultValue()
+        let v = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+        v.FplId <- LiteralTrue
+        this.SetValue v
         debug this Debug.Stop
 
     member this.ParentArgument = this.Parent.Value :?> FplArgument
@@ -518,13 +531,13 @@ and FplProof(positions: Positions, parent: FplGenericNode, runOrder) =
         | _ -> ()
         // evaluate the proof by evaluating all arguments according to their order in the FPL code
         let orderedProofArguments = this.OrderedArguments 
-        let mutable allEvaluateToTrue = (orderedProofArguments.Length > 0) // if the proof is empty, it will evaluate into undetermined
-        this.OrderedArguments
-        |> Seq.iter (fun fv -> 
-            fv.Run()
-            let fvRepr = fv.Represent()
-            allEvaluateToTrue <- allEvaluateToTrue && fvRepr = LiteralTrue 
-        )
+        let allEvaluateToTrue =
+            orderedProofArguments
+            |> Seq.forall (fun fv -> 
+                fv.Run()
+                let fvRepr = fv.Represent()
+                fvRepr = LiteralTrue 
+            )
         if not allEvaluateToTrue then
             this.ErrorOccurred <- emitPR009Diagnostics this.StartPos this.StartPos
             this.SetDefaultValue()
