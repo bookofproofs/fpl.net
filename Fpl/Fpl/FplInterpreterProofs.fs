@@ -13,6 +13,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 module FplInterpreterProofs
+open System
 open FplPrimitives
 open FplGrammarTypes
 open FplInterpreterDiagnosticsEmitter
@@ -536,51 +537,71 @@ and FplProof(positions: Positions, parent: FplGenericNode, runOrder) =
             this.SetValue v
         debug this Debug.Stop
 
+    /// Tries to find a theorem-like statement for a proof
+    /// and returns different cases of ScopeSearchResult, depending on different semantical error situations.
+    member private this.TryFindAssociatedBlockForProof (fplValue: FplGenericNode) =
+        match fplValue.Parent with
+        | Some theory ->
+
+            let flattenedScopes = flattenScopes theory.Parent.Value
+
+            let potentialProvableName = stripLastDollarDigit (fplValue.FplId)
+
+            // The parent node of the proof is the theory. In its scope
+            // we should find the theorem we are looking for.
+            let buildingBlocksMatchingDollarDigitNameList =
+                // the potential block name of the proof is the
+                // concatenated type signature of the name of the proof
+                // without the last dollar digit
+                flattenedScopes |> List.filter (fun fv -> fv.FplId = potentialProvableName)
+
+            let provableBlocklist =
+                buildingBlocksMatchingDollarDigitNameList
+                |> List.filter (fun fv -> isProvable fv)
+
+            let notProvableBlocklist =
+                buildingBlocksMatchingDollarDigitNameList
+                |> List.filter (fun fv -> not (isProvable fv ))
+
+            if provableBlocklist.Length > 1 then
+                ScopeSearchResult.FoundMultiple(
+                    provableBlocklist
+                    |> List.map (fun fv -> sprintf "'%s' %s" fv.Name (fv.Type(SignatureType.Mixed)))
+                    |> String.concat ", "
+                )
+            elif provableBlocklist.Length > 0 then
+                let potentialTheorem = provableBlocklist.Head
+                ScopeSearchResult.FoundAssociate potentialTheorem
+            elif notProvableBlocklist.Length > 0 then
+                let potentialOther = notProvableBlocklist.Head
+                ScopeSearchResult.FoundIncorrectBlock potentialOther
+            else
+                ScopeSearchResult.NotFound
+        | None -> ScopeSearchResult.NotApplicable
+
+    member private this.CheckTrivialArguments() =
+        let orderedArgs = this.OrderedArguments
+        if orderedArgs.Length > 0 then
+            let lastArg = orderedArgs |> List.last
+            let trivialArgs = 
+                this.OrderedArguments
+                |> List.map (fun arg -> arg.ArgumentInference)
+                |> List.filter (fun argInf -> argInf.IsSome)
+                |> List.map (fun argInf -> argInf.Value)
+                |> List.filter (fun argInf -> argInf.Parent.IsSome && argInf.Name = PrimArgInfTrivial)
+                |> List.map (fun argInf -> argInf.Parent.Value)
+
+            // issue PR017 for all "trivial" arguments that are not the last one in the proof 
+            trivialArgs
+            |> List.filter (fun trivialArg -> not (Object.ReferenceEquals(trivialArg, lastArg)))
+            |> List.iter (fun trivialArg ->
+                this.ErrorOccurred <- emitPR017Diagnostics trivialArg.StartPos trivialArg.EndPos
+            )
+        else
+            ()
+
     override this.CheckConsistency () = 
-        /// Tries to find a theorem-like statement for a proof
-        /// and returns different cases of ScopeSearchResult, depending on different semantical error situations.
-        let tryFindAssociatedBlockForProof (fplValue: FplGenericNode) =
-            match fplValue.Parent with
-            | Some theory ->
-
-                let flattenedScopes = flattenScopes theory.Parent.Value
-
-                let potentialProvableName = stripLastDollarDigit (fplValue.FplId)
-
-                // The parent node of the proof is the theory. In its scope
-                // we should find the theorem we are looking for.
-                let buildingBlocksMatchingDollarDigitNameList =
-                    // the potential block name of the proof is the
-                    // concatenated type signature of the name of the proof
-                    // without the last dollar digit
-                    flattenedScopes |> List.filter (fun fv -> fv.FplId = potentialProvableName)
-
-                let provableBlocklist =
-                    buildingBlocksMatchingDollarDigitNameList
-                    |> List.filter (fun fv -> isProvable fv)
-
-                let notProvableBlocklist =
-                    buildingBlocksMatchingDollarDigitNameList
-                    |> List.filter (fun fv -> not (isProvable fv ))
-
-                if provableBlocklist.Length > 1 then
-                    ScopeSearchResult.FoundMultiple(
-                        provableBlocklist
-                        |> List.map (fun fv -> sprintf "'%s' %s" fv.Name (fv.Type(SignatureType.Mixed)))
-                        |> String.concat ", "
-                    )
-                elif provableBlocklist.Length > 0 then
-                    let potentialTheorem = provableBlocklist.Head
-                    ScopeSearchResult.FoundAssociate potentialTheorem
-                elif notProvableBlocklist.Length > 0 then
-                    let potentialOther = notProvableBlocklist.Head
-                    ScopeSearchResult.FoundIncorrectBlock potentialOther
-                else
-                    ScopeSearchResult.NotFound
-            | None -> ScopeSearchResult.NotApplicable
-
-
-        match tryFindAssociatedBlockForProof this with
+        match this.TryFindAssociatedBlockForProof this with
         | ScopeSearchResult.FoundAssociate potentialParent -> 
             // everything is OK, change the parent of the provable from theory to the found parent 
             this.Parent <- Some potentialParent
@@ -589,6 +610,7 @@ and FplProof(positions: Positions, parent: FplGenericNode, runOrder) =
         | ScopeSearchResult.NotFound ->
             this.ErrorOccurred <- emitID003diagnostics this.FplId this.SignStartPos this.SignEndPos
         | _ -> ()
+        this.CheckTrivialArguments()
         base.CheckConsistency()
 
     override this.EmbedInSymbolTable _ = 

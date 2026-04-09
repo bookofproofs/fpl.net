@@ -1547,7 +1547,8 @@ type TestInterpreterErrors() =
             runTestHelper "TestPR016.fpl" fplCode code expected
 
     [<DataRow("01", """thm T { true } proof T$1 {1. |- trivial};""", 0)>]
-    [<DataRow("02", """ax A { true } thm T {true} proof T$1 {1. byax A |- true 2. |- trivial};""", 1)>]
+    [<DataRow("02", """ax A { true } thm T {true} proof T$1 {1. |- trivial 2. byax A |- true};""", 1)>] // trivial is not the last one in proof
+    [<DataRow("03", """ax A { true } thm T {true} proof T$1 {1. byax A |- true 2. |- trivial};""", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR017(no:string, fplCode:string, expected) =
