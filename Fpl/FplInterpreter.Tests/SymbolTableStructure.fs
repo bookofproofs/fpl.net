@@ -115,7 +115,9 @@ type SymbolTableStructure() =
             mockSymbolTableEvaluationPredicate x 1
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
         | "FplArgInferenceRevoke" ->
-            let x = new FplArgInferenceRevoke(positions, parent)
+            let proof = new FplProof(positions, parent, 0)
+            let arg = new FplArgument(positions, proof, 0)
+            let x = new FplArgInferenceRevoke(positions, arg)
             mockSymbolTableEvaluationPredicate x 1
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
         | "FplArgInferenceTrivial" ->
@@ -1692,8 +1694,8 @@ type SymbolTableStructure() =
             Assert.IsTrue(isValidJson (getName var).[index])
             Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplArgInferenceRevoke" ->
-            Assert.IsTrue(isValidJson (getName var).[index])
-            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
+            Assert.IsFalse(isValidJson (getName var).[index])
+            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
         | "FplArgInferenceTrivial" ->
             Assert.IsTrue(isValidJson (getName var).[index])
             Assert.AreEqual<string>(LiteralTrue, (getName var).[index])

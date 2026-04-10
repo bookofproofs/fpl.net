@@ -402,14 +402,18 @@ and FplArgInferenceRevoke(positions: Positions, parent: FplGenericNode) =
         this.AssignParts(ret)
         ret
 
-    override this.CheckConsistency () = 
+    override this.EmbedInSymbolTable _ =
+        addExpressionToParentArgList this 
+
+    member private this.IsRevokable() =
         let fvAi = this
         let argumentId = fvAi.FplId
         let (arg:FplArgument) = fvAi.ParentArgument
         let proof = arg.ParentProof
         if argumentId = arg.FplId then 
-            // revokes its own argument
+            // revokes itself (circular)
             this.ErrorOccurred <- emitPR015Diagnostics argumentId this.StartPos this.EndPos
+            false
         elif proof.HasArgument argumentId then 
             let refArg = proof.Scope[argumentId] :?> FplArgument
             let aiOpt = refArg.ArgumentInference
@@ -417,36 +421,31 @@ and FplArgInferenceRevoke(positions: Positions, parent: FplGenericNode) =
             | Some (:? FplArgInferenceAssume as toBeRevoked) -> 
                 match heap.ValidStmtStore.LastAssumedArgument with 
                 | Some (:? FplArgInferenceAssume as last) when last = toBeRevoked -> 
-                    ()
+                    true // is revocable
                 | Some (:? FplArgInferenceAssume as last) when last <> toBeRevoked -> 
                     let lastArg = last.ParentArgument
                     this.ErrorOccurred <- emitPR016Diagnostics argumentId lastArg.FplId this.StartPos this.EndPos
+                    false // not revocable
                 | _ ->    
-                    // the referenced argument is not an assumption in the proof
+                    // the revoked argument was not assumed in the proof
                     this.ErrorOccurred <- emitPR015Diagnostics argumentId this.StartPos this.EndPos
+                    false
             | _ -> 
-                // the referenced argument is not an assumption in the proof
+                // the revoked argument was not assumed in the proof
                 this.ErrorOccurred <- emitPR015Diagnostics argumentId this.StartPos this.EndPos
+                false
         else
             this.ErrorOccurred <- emitPR005Diagnostics argumentId this.StartPos this.EndPos
-
-        base.CheckConsistency()
-
-    override this.EmbedInSymbolTable _ =
-        this.CheckConsistency()
-        addExpressionToParentArgList this 
+            false
 
     override this.Run() = 
         debug this Debug.Start
-        match this.ErrorOccurred with
-        | Some err -> this.SetDefaultValue()
-        | _ ->
-            if heap.ValidStmtStore.RegisterExpression this then
-                let v = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
-                v.FplId <- LiteralTrue
-                this.SetValue v
-            else
-                this.SetDefaultValue()
+        if this.IsRevokable() && heap.ValidStmtStore.RegisterExpression this then
+            let v = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+            v.FplId <- LiteralTrue
+            this.SetValue v
+        else
+            this.SetDefaultValue()
         debug this Debug.Stop
 
     member this.ParentArgument = this.Parent.Value :?> FplArgument
