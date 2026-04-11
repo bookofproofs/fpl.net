@@ -172,12 +172,13 @@ type TestInterpreterErrors() =
 
     [<TestMethod>]
     member this.TestNSP05() =
-        let code = NSP05 ( ["./"; "https"], "Fpl.Commons", "./")
-        printf "Trying %s" code.Message
-        this.PrepareTestNSP05(false) |> ignore
-        let result = filterByErrorCode ad code.Code
-        Assert.AreEqual<int>(1, result.Length)
-        this.PrepareTestNSP05(true) |> ignore
+        if not TestConfig.IsOffline then 
+            let code = NSP05 ( ["./"; "https"], "Fpl.Commons", "./")
+            printf "Trying %s" code.Message
+            this.PrepareTestNSP05(false) |> ignore
+            let result = filterByErrorCode ad code.Code
+            Assert.AreEqual<int>(1, result.Length)
+            this.PrepareTestNSP05(true) |> ignore
 
     [<TestMethod>]
     member this.TestNSP05a() =
