@@ -85,6 +85,12 @@ type FplGenericReference(positions: Positions, parent: FplGenericNode) =
                 heap.Helper.CallerEndPos <- this.EndPos
                 // run all statements of the called node
                 called.Run()
+                // Correct the during the Run() created value of called (if any) has the same parent as this (i.e., the reference pointing to called).
+                // This ensures that checks (like those for SIG12 diagnostics) work correctly, since they depend on the UltimateBlockNode,
+                // in which a value is embedded in the symbol table. The UltimateBlockNode of the value changes with the its correct parent.
+                match called.Value with
+                | Some v -> v.Parent <- this.Parent
+                | _ -> ()
                 this.SetValueOf called
                 heap.State.RestoreState called
             else

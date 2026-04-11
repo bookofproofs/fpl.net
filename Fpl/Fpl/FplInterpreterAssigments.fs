@@ -147,6 +147,9 @@ type FplAssignment(positions: Positions, parent: FplGenericNode) as this =
         | Some (:? FplVariable as assignee) ->
             assignee.SetValue fv
         | Some (:? FplVariableArray as assignee) ->
+            match assignee.RefersTo with 
+            | Some (:? FplIntrinsicTpl as tpl) -> tpl.TrySetTemplateUsage fv (SIG12("", "", "", "").Code)
+            | _ -> ()
             let coordinatesKey = representationSep "|" (this.ArgList[0].ArgList) 
             assignee.AssignValueToCoordinates coordinatesKey fv // set value of array
         | _ -> ()

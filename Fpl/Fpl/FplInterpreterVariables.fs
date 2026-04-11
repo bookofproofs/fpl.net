@@ -288,6 +288,7 @@ type FplVariable(fplId, positions: Positions, parent: FplGenericNode) =
 
     override this.SetValue fv =
         base.SetValue fv
+        // if the type of a variable is a template, check for SIG12 consistency of all assigned values (if any)
         match this.RefersTo with 
         | Some (:? FplIntrinsicTpl as tpl) -> tpl.TrySetTemplateUsage fv (SIG12("", "", "", "").Code)
         | _ -> ()
