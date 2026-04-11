@@ -425,3 +425,16 @@ let rec isSimpleExpression (fv:FplGenericNode) =
         | Some ref -> isSimpleExpression ref
         | _ -> true
     | _ -> false
+
+
+/// Decides whether the argument is or has a determined value.
+let isDetermined (arg: FplGenericNode) : bool =
+    match arg with
+    | :? FplGenericHasValue as argWithValue ->
+        match argWithValue.Value with
+        | None -> false
+        | Some (:? FplUndetermined) -> false
+        | Some v when v.FplId = PrimUndetermined -> false
+        | _ -> true
+    | _ ->
+        true

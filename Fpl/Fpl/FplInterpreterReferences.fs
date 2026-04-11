@@ -53,31 +53,22 @@ type FplGenericReference(positions: Positions, parent: FplGenericNode) =
             Object.ReferenceEquals(blockNodeOfThis, called) && 
             calledRecursively.CallCounter > maxRecursion -> () // stop recursion
         | _ ->
-            let mutable allArgumentsHaveTerminedValues = true
-            let args = 
-                this.ArgList 
-                // run all arguments before replacing parameters with argument values
-                |> Seq.map (fun arg -> 
-                    arg.Run()
-                    match arg with 
-                    | :? FplGenericHasValue as argWithValue ->
-                        match argWithValue.Value with
-                        | None -> 
-                            // set the value of the argument with undef in evaluation was unsuccessfull
-                            argWithValue.SetValue (new FplUndetermined(arg.TypeId, (arg.StartPos, arg.EndPos), arg))
-                            allArgumentsHaveTerminedValues <- false
-                        | Some (:? FplUndetermined) -> 
-                            allArgumentsHaveTerminedValues <- false
-                        | Some v when v.FplId = PrimUndetermined -> 
-                            allArgumentsHaveTerminedValues <- false
-                        | _ -> ()
-                    | _ -> ()
-                    arg
-                )
-                |> Seq.toList
+            let allArgumentsHaveDeterminedValues, args =
+                let args = ResizeArray()
+
+                let allOk =
+                    this.ArgList
+                    // lazy: stops as soon as one argument is not determined
+                    |> Seq.forall (fun arg ->
+                        arg.Run()
+                        args.Add arg
+                        isDetermined arg
+                    )
+
+                allOk, List.ofSeq args
 
             // run subroutines only if all arguments have defined values
-            if allArgumentsHaveTerminedValues then 
+            if allArgumentsHaveDeterminedValues then 
                 let pars = heap.State.SaveState(called) 
                 heap.State.ReplaceVariables pars args
                 // store the position of the caller
