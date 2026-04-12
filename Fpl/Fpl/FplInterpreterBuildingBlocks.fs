@@ -178,7 +178,7 @@ let rec eval ast =
             else
                 identifier
             
-        let candidatesFromTheory = findCandidatesByName fv searchIdentifier false heap.Helper.InReferenceToProofOrCorollary
+        let candidatesFromTheory = findCandidatesByName searchIdentifier false heap.Helper.InReferenceToProofOrCorollary
         let candidatesLocal = findPropertyCandidatesByNameInBlock fv searchIdentifier
         let candidatesOfMapping = findCandidateOfExtensionMapping fv searchIdentifier
         let candidates, candidatesNames =  filterCandidates (candidatesFromTheory @ candidatesLocal @ candidatesOfMapping) searchIdentifier true
@@ -671,7 +671,7 @@ let rec eval ast =
     | Ast.PredicateWithOptSpecification((pos1, pos2), (fplIdentifierAst, optionalSpecificationAst)) ->
         let fv = heap.Eval.PeekEvalStack()
         let searchForCandidatesOfReferenceBlock (refBlock:FplGenericNode) = 
-            let candidatesFromTheory = findCandidatesByName fv refBlock.FplId true false
+            let candidatesFromTheory = findCandidatesByName refBlock.FplId true false
             let candidatesFromPropertyScope = findPropertyCandidatesByNameInBlock refBlock refBlock.FplId
             let candidatesFromDottedQualification = findCandidatesByNameInDotted refBlock refBlock.FplId
             candidatesFromTheory  
@@ -829,7 +829,7 @@ let rec eval ast =
                 heap.Eval.PushEvalStack(baseNode)            
                 eval baseAst
                 heap.Eval.PopEvalStack() |> ignore
-                let candidates = findCandidatesByName baseNode baseNode.FplId false true
+                let candidates = findCandidatesByName baseNode.FplId false true
                 if candidates.Length > 0 then 
                     let foundBase = candidates.Head
                     match beingCreatedNode, foundBase with
@@ -939,7 +939,7 @@ let rec eval ast =
         let fv = heap.Eval.PeekEvalStack()
         match fv with 
         | :? FplReference ->
-            let candidates = findCandidatesByName fv fv.FplId false true
+            let candidates = findCandidatesByName fv.FplId false true
             if candidates.Length > 0 then 
                 let candidate = candidates.Head
                 fv.RefersTo <- Some candidate
@@ -1590,7 +1590,7 @@ let rec eval ast =
             heap.Eval.PushEvalStack(fvJi)
             eval predicateIdentifierAst
             // check, if indeed the predicateId points to an axiom, if not issue diagnostics
-            let candidates = findCandidatesByName fvJi fvJi.FplId false false
+            let candidates = findCandidatesByName fvJi.FplId false false
             checkPR001_PR006Diagnostics fvJi candidates
             heap.Eval.PopEvalStack()
         | Some LiteralByConj, Some _, None -> 
@@ -1604,7 +1604,7 @@ let rec eval ast =
             heap.Eval.PushEvalStack(fvJi)
             eval predicateIdentifierAst
             // check, if indeed the predicateId points to a conjecture, if not issue diagnostics
-            let candidates = findCandidatesByName fvJi fvJi.FplId false false
+            let candidates = findCandidatesByName fvJi.FplId false false
             checkPR001_PR006Diagnostics fvJi candidates
             heap.Eval.PopEvalStack()
         | Some LiteralByCor, Some _, _ -> 
@@ -1612,7 +1612,7 @@ let rec eval ast =
             heap.Eval.PushEvalStack(fvJi)
             eval predicateIdentifierAst
             dollarDigitListAsts.Value |> List.map eval |> ignore
-            let candidates = findCandidatesByName fvJi fvJi.FplId false true
+            let candidates = findCandidatesByName fvJi.FplId false true
             // check, if indeed the predicateId points to a corollary, if not issue diagnostics
             checkPR001_PR006Diagnostics fvJi candidates
             heap.Eval.PopEvalStack()
@@ -1630,7 +1630,7 @@ let rec eval ast =
             heap.Eval.PushEvalStack(fvJi)
             eval predicateIdentifierAst
             // check, if indeed the predicateId points to a definition, if not issue diagnostics
-            let candidates = findCandidatesByName fvJi fvJi.FplId false false
+            let candidates = findCandidatesByName fvJi.FplId false false
             checkPR001_PR006Diagnostics fvJi candidates
             heap.Eval.PopEvalStack()
         | Some LiteralByInf, Some _, None -> 
@@ -1644,7 +1644,7 @@ let rec eval ast =
             heap.Eval.PushEvalStack(fvJi)
             eval predicateIdentifierAst
             // check, if indeed the predicateId points to a rule of inference, if not issue diagnostics
-            let candidates = findCandidatesByName fvJi fvJi.FplId false false
+            let candidates = findCandidatesByName fvJi.FplId false false
             checkPR001_PR006Diagnostics fvJi candidates
             heap.Eval.PopEvalStack()
         | Some _, _, _ -> () // does not occur, because the parser byModifier choices between only two keywords LiteralByAx or LiteralByDef
@@ -1653,7 +1653,7 @@ let rec eval ast =
             heap.Eval.PushEvalStack(fvJi)
             eval predicateIdentifierAst
             dollarDigitListAsts.Value |> List.map eval |> ignore
-            let candidates = findCandidatesByName fvJi fvJi.FplId false true
+            let candidates = findCandidatesByName fvJi.FplId false true
             // check, if indeed the predicateId points to a corollary, if not issue diagnostics
             checkPR001_PR006Diagnostics fvJi candidates
             // issue info diagnostics that references to a corollary need the keyword byCor to increase readability
@@ -1669,7 +1669,7 @@ let rec eval ast =
                 let parts = input.Split(':')
                 if parts.Length > 0 then parts.[0] else ""
             let name = splitOffAnyArgumentId fvJi.FplId
-            let candidates = findCandidatesByName fvJi name false true 
+            let candidates = findCandidatesByName name false true 
             let candidatesFiltered = 
                 if candidates.Length > 1 then 
                     candidates |> List.filter (fun fv -> fv.FplId = name)
@@ -1686,7 +1686,7 @@ let rec eval ast =
             let fvJi = new FplJustificationItemByTheoremLikeStmt((pos1, pos2), parent)
             heap.Eval.PushEvalStack(fvJi)
             eval predicateIdentifierAst
-            let candidates = findCandidatesByName fvJi fvJi.FplId false false
+            let candidates = findCandidatesByName fvJi.FplId false false
             // check if indeed the predicateId points to a theorem-like statement except a corollary, if not issue diagnostics
             checkPR001_PR006Diagnostics fvJi candidates
             heap.Eval.PopEvalStack()

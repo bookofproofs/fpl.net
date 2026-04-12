@@ -14,6 +14,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 *)
 module FplInterpreterProofs
 open System
+open System.Collections.Generic
 open FplPrimitives
 open FplGrammarTypes
 open FplInterpreterDiagnosticsEmitter
@@ -224,7 +225,18 @@ and FplJustification(positions: Positions, parent: FplGenericNode) =
             |> Seq.map (fun fv -> fv :?> FplGenericJustificationItem)
             |> Seq.toList
 
-    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
+    override this.CheckConsistency () =
+        match findTwoDifferentNames (this.ArgList |> Seq.toList) with
+        | Choice1Of2 _ -> ()
+            // all justification item types are identical → OK
+        | Choice2Of2 (justificationType1, justificationType2) ->
+            // issue diagnostics if ordered justification items mix types of justification items
+            this.ErrorOccurred <- emitPR019Diagnostics justificationType1 justificationType2 this.StartPos this.EndPos
+        base.CheckConsistency()
+
+    override this.EmbedInSymbolTable _ =
+        this.CheckConsistency()
+        addExpressionToParentArgList this
 
     member this.ParentArgument = this.Parent.Value :?> FplArgument
 

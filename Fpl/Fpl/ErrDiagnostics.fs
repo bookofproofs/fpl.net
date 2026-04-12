@@ -159,6 +159,7 @@ type DiagnosticCode =
     | PR016 of string
     | PR017
     | PR018
+    | PR019 of string * string
     // signature-related error codes
     | SIG00 of string * int
     | SIG01 of string 
@@ -287,6 +288,7 @@ type DiagnosticCode =
             | PR016 _ -> "PR016"
             | PR017 -> "PR017"
             | PR018 -> "PR018"
+            | PR019 _ -> "PR019"
             // signature-related error codes
             | SIG00 _ -> "SIG00"
             | SIG01 _ -> "SIG01"
@@ -427,6 +429,7 @@ type DiagnosticCode =
             | PR016 argId -> $"Cannot revoke the argument `{argId}` because it wasn't the last assumed one."
             | PR017 -> $"Do not use `{LiteralTrivial}` if the argument is not the last one the proof."
             | PR018 -> $"A `{LiteralTrivial}` argument missing exactly one justification."
+            | PR019 (justificationType1, justificationType2) -> $"FPL doesn't support mixing justification types in a single proof argument (here, for instance, `{justificationType1}` with `{justificationType2}`."
             // signature-related error codes
             | SIG00 (fixType, arity) -> sprintf $"Illegal arity `{arity}` using `{fixType}` notation."
             | SIG01 symbol -> $"The symbol `{symbol}` was not declared." 

@@ -438,3 +438,17 @@ let isDetermined (arg: FplGenericNode) : bool =
         | _ -> true
     | _ ->
         true
+
+/// In a list of FplGenericNode, finds two examples with different node types (by node Name property)
+let findTwoDifferentNames (items:FplGenericNode list) =
+    match items with
+    | [] -> Choice1Of2 ""
+    | first :: rest ->
+        rest
+        |> Seq.tryPick (fun ji ->
+            if ji.Name = first.Name then None
+            else Some (first.Name, ji.Name)
+        )
+        |> function
+            | None -> Choice1Of2 first.Name
+            | Some pair -> Choice2Of2 pair
