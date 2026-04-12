@@ -112,7 +112,7 @@ let tryAddToParentUsingMixedSignature (fplValue:FplGenericNode) =
         parent.Scope.Add(identifier, fplValue)
 
 /// Looks for all declared building blocks with a specific name.
-let findCandidatesByName (node: FplGenericNode) (name: string) withClassConstructors withCorollariesOrProofs =
+let findCandidatesByName (name: string) withClassConstructors withCorollariesOrProofs =
     let pm = List<FplGenericNode>()
 
     let rec flattenCorollariesAndProofs (tls:FplGenericNode) =
