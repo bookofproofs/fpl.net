@@ -74,25 +74,6 @@ let checkSIG02Diagnostics (fv:FplGenericNode) symbol precedence pos1 pos2 =
         let conflict = precedences[precedence].QualifiedStartPos
         precedences[precedence].ErrorOccurred <- emitSIG02Diagnostics symbol precedence conflict pos1 pos2
 
-// Tries to add an FPL block to its parent's scope using its FplId, or issues ID001 diagnostics if a conflict occurs
-let tryAddToParentUsingFplId (fplValue:FplGenericNode) =
-    let identifier = fplValue.FplId
-    let conflicts = 
-        heap.Root.OrderedTheories
-        |> Seq.map (fun theory -> 
-            theory.Scope
-            |> Seq.filter (fun kvp -> kvp.Key = identifier)
-            |> Seq.map (fun kvp -> kvp.Value)
-        )
-        |> Seq.concat
-        |> Seq.toList
-
-    if conflicts.Length > 0 then 
-        fplValue.ErrorOccurred <- emitID001Diagnostics identifier (conflicts.Head.QualifiedStartPos) fplValue.StartPos fplValue.EndPos
-    else
-        let parent = fplValue.Parent.Value
-        parent.Scope.Add(identifier, fplValue)
-
 // Tries to add an FPL block to its parent's scope using its typed signature, or issues ID001 diagnostics if a conflict occurs
 let tryAddToParentUsingTypedSignature (fplValue:FplGenericNode) =
     let identifier = fplValue.Type SignatureType.Type
@@ -183,3 +164,22 @@ let findCandidatesByName (node: FplGenericNode) (name: string) withClassConstruc
 
     pm |> Seq.toList
 
+// Tries to add an FPL block to its parent's scope using its FplId, or issues ID001 diagnostics if a conflict occurs
+let tryAddToParentUsingFplId (fplValue:FplGenericNode) =
+    let identifier = fplValue.FplId
+    let conflictsPre =
+        heap.Root.OrderedTheories
+        |> Seq.map (fun theory -> 
+            theory.Scope
+            |> Seq.filter (fun kvp -> kvp.Key = identifier)
+            |> Seq.map (fun kvp -> kvp.Value)
+        )
+        |> Seq.concat
+        |> Seq.toList
+
+    let parent = fplValue.Parent.Value
+    let conflicts = conflictsPre @ (parent.Scope.Values |> Seq.filter (fun fv -> (fv.Type SignatureType.Name) = identifier) |> Seq.toList)
+    if conflicts.Length > 0 then 
+        fplValue.ErrorOccurred <- emitID001Diagnostics identifier (conflicts.Head.QualifiedStartPos) fplValue.StartPos fplValue.EndPos
+    else
+        parent.Scope.Add(identifier, fplValue)
