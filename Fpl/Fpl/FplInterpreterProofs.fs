@@ -27,6 +27,8 @@ open FplInterpreter.Globals.Heap
 open FplInterpreterIntrinsicTypes
 open FplInterpreterCompoundPredicates
 open FplInterpreterPredicativeBlocks
+open FplInterpreterExpressionMatching
+open FplInterpreterRulesOfInferences
 
 [<AbstractClass>]
 type FplGenericArgInference(positions: Positions, parent: FplGenericNode) =
@@ -167,6 +169,32 @@ and FplJustificationItemByInf(positions: Positions, parent: FplGenericNode) =
         this.AssignParts(ret)
         ret
 
+    override this.Run() =
+        debug this Debug.Start
+        match this.RefersTo, this.Parent with
+        | Some (:? FplRuleOfInference as ruleOfInference), Some (:? FplJustification as just) ->
+            // (all justification items but the first one, which is the "byinf" one)
+            let proceedingJustificationItems = just.GetOrderedJustificationItems |> List.rev |> List.tail |> List.rev
+            let (arg:FplArgument) = just.ParentArgument
+            match arg.ArgumentInference with
+            | Some argInference ->
+                match ruleOfInference.Premise, ruleOfInference.Conclusion with
+                | Some premisePredicateList, Some conclusion ->
+                    if checkExpressions proceedingJustificationItems (premisePredicateList.ArgList |> Seq.toList) this &&
+                        // premisePredicateList matches proceedingJustificationItems
+                        // now check, if the argument inference corresponds to the conclusion
+                        checkExpressions [argInference] [conclusion] argInference then
+                        let v = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+                        v.FplId <- LiteralTrue
+                        this.SetValue v
+                    else
+                        this.SetDefaultValue()
+                | _, _ -> this.SetDefaultValue()
+            | _ -> this.SetDefaultValue()
+        | _, _ -> this.SetDefaultValue()
+        debug this Debug.Stop
+
+
 and FplJustificationItemByRefArgument(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericJustificationItem(positions, parent)
 
@@ -221,9 +249,7 @@ and FplJustification(positions: Positions, parent: FplGenericNode) =
 
 
     member this.GetOrderedJustificationItems =
-        this.ArgList
-            |> Seq.map (fun fv -> fv :?> FplGenericJustificationItem)
-            |> Seq.toList
+        this.ArgList |> Seq.toList
 
     override this.CheckConsistency () =
         match findTwoDifferentNames (this.ArgList |> Seq.toList) with
@@ -256,19 +282,13 @@ and FplArgument(positions: Positions, parent: FplGenericNode, runOrder) =
         let head = getFplHead this signatureType
         head
 
-    member this.Justification = 
-        if this.ArgList.Count>0 then 
-            let justification = this.ArgList[0]
-            Some (justification :?> FplJustification)
-        else
-            None
+    member this.Justification =
+        this.ArgList
+        |> Seq.tryFind (fun fv -> fv :? FplJustification)
 
     member this.ArgumentInference = 
-        if this.ArgList.Count>1 then 
-            let argInference = this.ArgList[1]
-            Some (argInference :?> FplGenericArgInference)
-        else
-            None
+        this.ArgList
+        |> Seq.tryFind (fun fv -> fv :? FplGenericArgInference)
 
     override this.CheckConsistency () = 
         let (proof:FplProof) = this.ParentProof
@@ -293,10 +313,13 @@ and FplArgument(positions: Positions, parent: FplGenericNode, runOrder) =
 
         match justificationOpt, argInferenceOpt with
         | Some justification, Some argInference -> 
-            let orderdListJustifications = justification.GetOrderedJustificationItems
+            let orderdListJustifications = justification.ArgList |> Seq.toList
             if orderdListJustifications.Length = 0 then
                 argInference.Run()
-                this.SetValueOf argInference
+                match argInference with
+                | :? FplGenericHasValue as hasV -> this.SetValueOf hasV
+                | :? FplGenericIsValue as isV -> this.SetValue isV
+                | _ -> this.SetDefaultValue()
             else
                 let allEvaluateToTrue = 
                     orderdListJustifications
@@ -613,7 +636,7 @@ and FplProof(positions: Positions, parent: FplGenericNode, runOrder) =
         trivialArgs
         |> List.filter (fun trivialArg -> trivialArg.Justification.IsSome)
         |> List.map (fun trivialArg -> trivialArg.Justification.Value)
-        |> List.filter (fun justification -> justification.GetOrderedJustificationItems.Length <> 1)
+        |> List.filter (fun justification -> justification.ArgList.Count <> 1)
         |> List.iter (fun justification ->
             this.ErrorOccurred <- emitPR018Diagnostics justification.StartPos justification.EndPos
         )

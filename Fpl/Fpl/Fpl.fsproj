@@ -38,9 +38,10 @@
         <Compile Include="FplInterpreterReferencesSelfParent.fs" />
         <Compile Include="FplInterpreterPredicativeBlocks.fs" />
         <Compile Include="FplInterpreterDefinitionProperties.fs" />
-        <Compile Include="FplInterpreterProofs.fs" />
         <Compile Include="FplInterpreterQuantors.fs" />
+        <Compile Include="FplInterpreterExpressionMatching.fs" />
         <Compile Include="FplInterpreterRulesOfInferences.fs" />
+        <Compile Include="FplInterpreterProofs.fs" />
         <Compile Include="FplInterpreterMapCases.fs" />
         <Compile Include="FplInterpreterExtensions.fs" />
         <Compile Include="FplInterpreterDelegates.fs" />

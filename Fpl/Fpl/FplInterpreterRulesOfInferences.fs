@@ -76,16 +76,11 @@ type FplRuleOfInference(positions: Positions, parent: FplGenericNode, runOrder) 
             and set (value) = this.SignEndPos <- value
 
     member this.Premise =
-        if this.ArgList.Count>0 then
-            Some this.ArgList[0] 
-        else
-            None
+        this.ArgList
+        |> Seq.tryFind (fun fv -> fv :? FplPredicateList)
 
     member this.Conclusion =
-        if this.ArgList.Count>1 then
-            Some this.ArgList[1]
-        else
-            None
+        this.ArgList |> Seq.tryLast 
 
     member this.InferrableExpression =
         let validityReason =
