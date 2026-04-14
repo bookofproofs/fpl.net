@@ -581,7 +581,7 @@ type TestFplValueScopeQualifiedName() =
         | "base15b" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1().'(-(x))", qualifiedName base1 false) 
         | "base16" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1().-(*(=(+(y, x), 2), x))", qualifiedName base1 false) 
         | "base17" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1().'(*(=(+(y, '(x)), 2), x))", qualifiedName base1 false) 
-        | "base18" -> Assert.AreEqual<string>("an exists quantor TestPredicateQualifiedName.T1().∃ x:pred(T), y:C, z:obj {a ∧ (b ∧ c)}", qualifiedName base1 false) 
+        | "base18" -> Assert.AreEqual<string>("an exists quantor TestPredicateQualifiedName.T1().∃ y:C, z:obj, x:pred(T) {a ∧ (b ∧ c)}", qualifiedName base1 false) 
         | "base19" -> Assert.AreEqual<string>("an exists n times quantor TestPredicateQualifiedName.T1().∃! x:obj {∀ y:N {true}}" , qualifiedName base1 false) 
         | "base20" -> Assert.AreEqual<string>("an all quantor TestPredicateQualifiedName.T1().∀ x:obj {¬x}", qualifiedName base1 false) 
         | "base21" -> Assert.AreEqual<string>("a conjunction TestPredicateQualifiedName.T1().x ∧ abc(y, z)", qualifiedName base1 false) 

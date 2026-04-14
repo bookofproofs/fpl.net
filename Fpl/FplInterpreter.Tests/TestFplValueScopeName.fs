@@ -613,7 +613,7 @@ type TestFplValueScopeName() =
         | "base15b" -> Assert.AreEqual<string>("'(-(x))", base1.Type(SignatureType.Name))
         | "base16" -> Assert.AreEqual<string>("-(*(=(+(y, x), 2), x))", base1.Type(SignatureType.Name))
         | "base17" -> Assert.AreEqual<string>("'(*(=(+(y, '(x)), 2), x))", base1.Type(SignatureType.Name))
-        | "base18" -> Assert.AreEqual<string>("∃ x:pred(obj, T), y:C, z:ind {a ∧ abc(b, c)}", base1.Type(SignatureType.Name))
+        | "base18" -> Assert.AreEqual<string>("∃ y:C, z:ind, x:pred(obj, T) {a ∧ abc(b, c)}", base1.Type(SignatureType.Name))
         | "base19" -> Assert.AreEqual<string>("∃! x:obj {∀ y:N {true}}", base1.Type(SignatureType.Name))
         | "base19a" -> Assert.AreEqual<string>("∃!2 x:obj {∃ y:N {true}}", base1.Type(SignatureType.Name))
         | "base19b" -> Assert.AreEqual<string>("∃!3 x:obj {∃!2 y:N {true}}", base1.Type(SignatureType.Name))

@@ -54,11 +54,20 @@ type FplGenericQuantor(positions: Positions, parent: FplGenericNode) =
                 | _ -> ""
             let boundVars =
                 this.GetVariables()
-                |> List.filter (fun var -> box var :? FplVariable)
-                |> List.map (fun var -> box var :?> FplVariable)
-                |> List.filter (fun var -> var.IsBound)
-                |> List.map (fun var -> $"{var.FplId}:{var.Type SignatureType.Type}")
+                |> List.choose (function
+                    | :? FplVariable as v when v.IsBound -> Some v
+                    | _ -> None)
+                |> List.groupBy (fun v -> v.Type SignatureType.Type)
+                |> List.sortBy fst   // sort groups by type
+                |> List.map (fun (typ, vars) ->
+                    let names =
+                        vars
+                        |> List.sortBy (fun v -> v.FplId)   // sort names inside each group
+                        |> List.map (fun v -> v.FplId)
+                        |> String.concat ", "
+                    $"{names}:{typ}")
                 |> String.concat ", "
+
             let body =
                 if this.ArgList.Count>0 then
                     this.ArgList[0].Type signatureType
