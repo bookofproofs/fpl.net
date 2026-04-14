@@ -67,6 +67,20 @@ let englishOrdinal dimNumber =
     | 3 -> "3rd"
     | _ -> $"{dimNumber}th"
 
+/// A helper function for checking if a string starts with any of some string prefixes.
+let startsWithAny (prefixes:string list) (input:string) = 
+    prefixes |> List.exists input.StartsWith
+
+/// A helper function adding an English article to a string 
+let getEnglishName someString determined = 
+    let isEnglishAn = startsWithAny ["a"; "e"; "i"; "o"; "u"] someString
+    if determined then 
+        $"the {someString}"
+    elif isEnglishAn then 
+        $"an {someString}"
+    else
+        $"a {someString}"
+
 type DiagnosticCode = 
     // parser error codes
     | SYN000
@@ -160,6 +174,7 @@ type DiagnosticCode =
     | PR017
     | PR018
     | PR019 of string * string
+    | PR020 of int * int
     // signature-related error codes
     | SIG00 of string * int
     | SIG01 of string 
@@ -289,6 +304,7 @@ type DiagnosticCode =
             | PR017 -> "PR017"
             | PR018 -> "PR018"
             | PR019 _ -> "PR019"
+            | PR020 _ -> "PR020"
             // signature-related error codes
             | SIG00 _ -> "SIG00"
             | SIG01 _ -> "SIG01"
@@ -430,6 +446,7 @@ type DiagnosticCode =
             | PR017 -> $"Do not use `{LiteralTrivial}` if the argument is not the last one the proof."
             | PR018 -> $"A `{LiteralTrivial}` argument missing exactly one justification."
             | PR019 (justificationType1, justificationType2) -> $"FPL doesn't support mixing justification types in a single proof argument (here, for instance, `{justificationType1}` with `{justificationType2}`."
+            | PR020 (expectedNum, actualNum) -> $"This {PrimJIByInf} requires {expectedNum} proceeding expressions, got {actualNum}."
             // signature-related error codes
             | SIG00 (fixType, arity) -> sprintf $"Illegal arity `{arity}` using `{fixType}` notation."
             | SIG01 symbol -> $"The symbol `{symbol}` was not declared." 
@@ -1013,18 +1030,8 @@ let stringMatches (input: string) (pattern: string) =
     list.Add(input.Length)
     list
 
-/// A helper function for checking if a string starts with any of some string prefixes.
-let startsWithAny (prefixes:string list) (input:string) = 
-    prefixes |> List.exists input.StartsWith
 
-/// A helper function adding an English article to a string 
-let getEnglishName someString determined = 
-    let isEnglishAn = startsWithAny ["a"; "e"; "i"; "o"; "u"] someString
-    if determined then 
-        $"the {someString}"
-    elif isEnglishAn then 
-        $"an {someString}"
-    else
-        $"a {someString}"
+
+
 
 

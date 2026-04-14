@@ -14,7 +14,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 *)
 module FplInterpreterProofs
 open System
-open System.Collections.Generic
+open FParsec
 open FplPrimitives
 open FplGrammarTypes
 open FplInterpreterDiagnosticsEmitter
@@ -38,7 +38,9 @@ type FplGenericArgInference(positions: Positions, parent: FplGenericNode) =
         let head = getFplHead this signatureType
         head
 
-    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this 
+    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
+
+    abstract member ProceedingExpression: FplGenericNode with get
 
 [<AbstractClass>]
 type FplGenericJustificationItem(positions: Positions, parent: FplGenericNode) =
@@ -64,25 +66,6 @@ type FplGenericJustificationItem(positions: Positions, parent: FplGenericNode) =
         addExpressionToParentArgList this
 
     member this.ParentJustification = this.Parent.Value :?> FplJustification
-
-    /// Returns a) Some expression inferred by the proceeding JustificationItem in the same proof argument.
-    /// b) If there is no proceeding JustificationItem in the same proof argument, but there is a proceeding argument proof,
-    ///    the function will return Some expression parsed from that proceeding proof argument. 
-    ///    Note that this parsed expression might differ from the InferredExpression of the proceeding proof arguments last JustificationItem.
-    /// c) If there is no proceeding JustificationItem and even no proceeding proof argument, the function will return None.
-    member this.PreviousExpression = 
-        if this.ArgList.Count > 0 then 
-            Some this.ArgList[0]
-        else
-            None
-
-    /// Returns Some expression that could be inferred by this JustificationItem based on its PreviousExpression and its ReferencedJustification.
-    /// None will be returned if Such an InferredExpression could not be inferred
-    member this.InferredExpression = 
-        if this.ArgList.Count > 1 then 
-            Some this.ArgList[1]
-        else
-            None
 
     override this.Run() = 
         debug this Debug.Start
@@ -174,21 +157,26 @@ and FplJustificationItemByInf(positions: Positions, parent: FplGenericNode) =
         match this.RefersTo, this.Parent with
         | Some (:? FplRuleOfInference as ruleOfInference), Some (:? FplJustification as just) ->
             // (all justification items but the first one, which is the "byinf" one)
-            let proceedingJustificationItems = just.GetOrderedJustificationItems |> List.rev |> List.tail |> List.rev
             let (arg:FplArgument) = just.ParentArgument
             match arg.ArgumentInference with
-            | Some argInference ->
+            | Some (argInference: FplGenericArgInference) ->
+                let argInferenceExpr = argInference.ProceedingExpression
                 match ruleOfInference.Premise, ruleOfInference.Conclusion with
                 | Some premisePredicateList, Some conclusion ->
-                    if checkExpressions proceedingJustificationItems (premisePredicateList.ArgList |> Seq.toList) this &&
-                        // premisePredicateList matches proceedingJustificationItems
-                        // now check, if the argument inference corresponds to the conclusion
-                        checkExpressions [argInference] [conclusion] argInference then
-                        let v = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
-                        v.FplId <- LiteralTrue
-                        this.SetValue v
+                    let (proceedingJustificationItems: FplGenericNode list) = just.GetOrderedJustificationItems |> List.rev |> List.tail |> List.rev
+                    if premisePredicateList.ArgList.Count <> proceedingJustificationItems.Length then
+                        just.ErrorOccurred <- emitPR020Diagnostics (premisePredicateList.ArgList.Count) (proceedingJustificationItems.Length) just.StartPos just.EndPos
                     else
-                        this.SetDefaultValue()
+
+                        if checkExpressions proceedingJustificationItems (premisePredicateList.ArgList |> Seq.toList) this &&
+                            // premisePredicateList matches proceedingJustificationItems
+                            // now check, if the argument inference corresponds to the conclusion
+                            checkExpressions [argInferenceExpr] [conclusion] argInferenceExpr then
+                            let v = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+                            v.FplId <- LiteralTrue
+                            this.SetValue v
+                        else
+                            this.SetDefaultValue()
                 | _, _ -> this.SetDefaultValue()
             | _ -> this.SetDefaultValue()
         | _, _ -> this.SetDefaultValue()
@@ -287,8 +275,9 @@ and FplArgument(positions: Positions, parent: FplGenericNode, runOrder) =
         |> Seq.tryFind (fun fv -> fv :? FplJustification)
 
     member this.ArgumentInference = 
-        this.ArgList
-        |> Seq.tryFind (fun fv -> fv :? FplGenericArgInference)
+            this.ArgList
+            |> Seq.tryFind (fun fv -> fv :? FplGenericArgInference)
+            |> Option.map (fun fv -> fv :?> FplGenericArgInference)
 
     override this.CheckConsistency () = 
         let (proof:FplProof) = this.ParentProof
@@ -316,10 +305,7 @@ and FplArgument(positions: Positions, parent: FplGenericNode, runOrder) =
             let orderdListJustifications = justification.ArgList |> Seq.toList
             if orderdListJustifications.Length = 0 then
                 argInference.Run()
-                match argInference with
-                | :? FplGenericHasValue as hasV -> this.SetValueOf hasV
-                | :? FplGenericIsValue as isV -> this.SetValue isV
-                | _ -> this.SetDefaultValue()
+                this.SetValueOf argInference
             else
                 let allEvaluateToTrue = 
                     orderdListJustifications
@@ -383,6 +369,9 @@ and FplArgInferenceAssume(positions: Positions, parent: FplGenericNode) =
     interface IInferrable with
         member this.InferrableExpression
             with get () = this.InferrableExpression
+
+    override this.ProceedingExpression =
+        raise (NotImplementedException())
 
     override this.Clone () =
         let ret = new FplArgInferenceAssume((this.StartPos, this.EndPos), this.Parent.Value)
@@ -473,6 +462,10 @@ and FplArgInferenceRevoke(positions: Positions, parent: FplGenericNode) =
             this.ErrorOccurred <- emitPR005Diagnostics argumentId this.StartPos this.EndPos
             false
 
+    override this.ProceedingExpression =
+        raise (NotImplementedException())
+
+
     override this.Run() = 
         debug this Debug.Start
         if this.IsRevokable() && heap.ValidStmtStore.RegisterExpression this then
@@ -503,6 +496,9 @@ and FplArgInferenceTrivial(positions: Positions, parent: FplGenericNode) =
         this.SetValue v
         debug this Debug.Stop
 
+    override this.ProceedingExpression =
+        raise (NotImplementedException())
+
     member this.ParentArgument = this.Parent.Value :?> FplArgument
 
 and FplArgInferenceDerived(positions: Positions, parent: FplGenericNode) =
@@ -524,6 +520,13 @@ and FplArgInferenceDerived(positions: Positions, parent: FplGenericNode) =
         debug this Debug.Stop
 
     member this.ParentArgument = this.Parent.Value :?> FplArgument
+
+    override this.ProceedingExpression =
+        let exprOpt = this.ArgList |> Seq.tryHead
+        match exprOpt with
+        | Some expr -> expr
+        | _ -> new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+
 
 
 and FplProof(positions: Positions, parent: FplGenericNode, runOrder) =
