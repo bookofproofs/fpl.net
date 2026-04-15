@@ -45,6 +45,39 @@ type TestProceedingExpressions() =
 
         prepareFplCode(filename, "", false) |> ignore
 
+    [<DataRow("00", """def cl N thm T {true} prf T$1 { 1. |- ex x:obj {is(x,N)} 2. 1 |- trivial};""", "∃ x:obj {is(x, N)}", 1)>]
+    [<DataRow("01", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" ax A {true} thm T {true} prf T$1 { 1. byax A |- all x,y:Set {impl ( is(x, N), ( x = y ))} 2. 1 |- true };""", "∀ x, y:Set {(is(x, N)) ⇒ (x = y)}", 1)>]
+    [<TestMethod>]
+    member this.TestProceedingExpressionJustByArgRef(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
+        
+        let filename = "TestProceedingExpressionJustByArgRef"
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+
+        let candidates = findCandidatesByName "T" false true
+        let prf = candidates |> List.filter (fun fv -> fv.FplId = "T$1") |> List.map (fun fv -> fv :?> FplProof) |> List.head
+        let fjByAxOpt =
+            prf.OrderedArguments
+            |> List.map (fun fv -> fv.Justification)
+            |> List.filter (fun fv -> fv.IsSome)
+            |> List.map (fun fv -> fv.Value)
+            |> List.map (fun fv -> fv :?> FplJustification)
+            |> List.map (fun fv -> fv.GetOrderedJustificationItems)
+            |> List.concat 
+            |> List.tryFind (fun fv -> fv.Name = PrimJIByRefArgument)
+
+        match fjByAxOpt with
+        | Some (:? FplJustificationItemByRefArgument as fjbyAx) ->
+            let result = fjbyAx.ProceedingExprCandidates
+            Assert.AreEqual<int>(expectedNumbExpr, result.Length)
+            Assert.AreEqual<string>(expectedExpr, result.Head.Type SignatureType.Name)
+        | Some ref ->
+            Assert.IsInstanceOfType<FplJustificationItemByRefArgument>(ref)
+        | None ->
+            failwith $"expected FplJustificationItemByRefArgument, found none"
+
+        prepareFplCode(filename, "", false) |> ignore
 
     [<DataRow("00", """thm T {true} proof T$1 {1. |- trivial };""", "true", 1)>]
     [<DataRow("01", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" thm T {all n,m:Nat { impl( ( Succ(n) = Succ(m) ), ( n = m ) ) }} thm T {true} prf T$1 { 1. |- trivial };""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 1)>]
@@ -71,8 +104,6 @@ type TestProceedingExpressions() =
             let result = infTrivial.ProceedingExprCandidates
             Assert.AreEqual<int>(expectedNumbExpr, result.Length)
             Assert.AreEqual<string>(expectedExpr, result.Head.Type SignatureType.Name)
-        | Some ref ->
-            Assert.IsInstanceOfType<FplJustificationItemByAx>(ref)
         | None ->
             failwith $"expected FplJustificationItemByAx, found none"
 

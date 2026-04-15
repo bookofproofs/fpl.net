@@ -227,8 +227,18 @@ and FplJustificationItemByRefArgument(positions: Positions, parent: FplGenericNo
         this.AssignParts(ret)
         ret
 
-    override this.ProceedingExprCandidates =
-        raise (NotImplementedException())
+    override this.ProceedingExprCandidates 
+        // identify the expression referred by this "argument reference" justification in a proof
+        with get (): FplGenericNode list =
+            match this.RefersTo with
+            | Some (:? FplArgument as argument) ->
+                match argument.ArgumentInference with
+                | Some argInference ->
+                    // delegate 
+                    argInference.ProceedingExprCandidates
+                | _ -> [FplIntrinsicPred((this.StartPos, this.EndPos), this)]
+            | _ ->
+                [FplIntrinsicPred((this.StartPos, this.EndPos), this)]
 
 and FplJustificationItemByProofArgument(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericJustificationItem(positions, parent)
