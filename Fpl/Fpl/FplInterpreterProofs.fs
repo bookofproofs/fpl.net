@@ -156,8 +156,18 @@ and FplJustificationItemByConj(positions: Positions, parent: FplGenericNode) =
         this.AssignParts(ret)
         ret
 
-    override this.ProceedingExprCandidates =
-        raise (NotImplementedException())
+    override this.ProceedingExprCandidates
+        // identify the expression contained in the conjecture
+        // referred by this "byconj" justification in a proof
+        with get (): FplGenericNode list =
+            match this.RefersTo with
+            | Some ax ->
+                if ax.ArgList.Count > 0 then
+                    [ax.ArgList |> Seq.last]
+                else
+                    [FplIntrinsicPred((this.StartPos, this.EndPos), this)]
+            | None ->
+                [FplIntrinsicPred((this.StartPos, this.EndPos), this)]
 
 and FplJustificationItemByCor(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericJustificationItem(positions, parent)
@@ -595,6 +605,7 @@ and FplArgInferenceDerived(positions: Positions, parent: FplGenericNode) =
     member this.ParentArgument = this.Parent.Value :?> FplArgument
 
     override this.ProceedingExprCandidates
+        // the argument of this FplArgInferenceDerived is the expression we need as a candidate
         with get (): FplGenericNode list =
             let exprOpt = this.ArgList |> Seq.tryHead
             match exprOpt with
