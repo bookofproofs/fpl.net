@@ -1539,16 +1539,22 @@ let rec eval ast =
 
         let checkPR001_PR006Diagnostics (fvJi:FplGenericNode) candidates = 
             match tryFindAssociatedBlockForJustificationItem fvJi candidates with
-            | ScopeSearchResult.FoundAssociate potentialCandidate -> 
+            | ScopeSearchResult.FoundAssociate potentialCandidate ->
                 match fvJi with 
                 | :? FplJustificationItemByProofArgument as fvJi1 ->
                     let split = fvJi.FplId.Split(":")
                     if split.Length > 1 then 
                         // here, argName is the argument identifier of the other proof
+                        let proofName = $"{split.[0]}"
                         let argName = $"{split.[1]}"
+                        fvJi.RefersTo <- Some potentialCandidate // first stage - set the potential other proof to refers to 
                         match getArgumentInProof fvJi1 argName with
-                        | Some argument -> fvJi.RefersTo <- Some argument 
-                        | _ -> fvJi.ErrorOccurred <- emitPR006Diagnostics fvJi.FplId argName fvJi.StartPos fvJi.EndPos 
+                        | Some argument ->
+                            fvJi.RefersTo <- Some argument // second stage - refine the found argument 
+                        | _ ->
+                            fvJi.ErrorOccurred <- emitPR006Diagnostics proofName argName fvJi.StartPos fvJi.EndPos
+                            // remove the first stage, since the no argument was found in other proof
+                            fvJi.RefersTo <- None
                 | _ -> fvJi.RefersTo <- Some potentialCandidate
             | ScopeSearchResult.FoundIncorrectBlock otherBlock ->
                 let alternative = 
