@@ -82,6 +82,40 @@ type TestProceedingExpressions() =
         prepareFplCode(filename, "", false) |> ignore
 
 
+    [<DataRow("00thm", """thm A {true} thm T {true} prf T$1 { 1. A |- true };""", "true", 1)>]
+    [<DataRow("01thm", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" thm A {all n,m:Nat { impl( ( Succ(n) = Succ(m) ), ( n = m ) ) }} thm T {true} prf T$1 { 1. A |- true };""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 1)>]
+    [<DataRow("02thm", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" thm A {all n,m:Nat { impl( ( n' = m' ), ( n = m ) ) }} thm T {true} prf T$1 { 1. A |- true };""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 1)>]
+    [<DataRow("00lem", """lem A {true} thm T {true} prf T$1 { 1. A |- true };""", "true", 1)>]
+    [<DataRow("01lem", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" thm A {all n,m:Nat { impl( ( Succ(n) = Succ(m) ), ( n = m ) ) }} lem T {true} prf T$1 { 1. A |- true };""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 1)>]
+    [<DataRow("02lem", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" thm A {all n,m:Nat { impl( ( n' = m' ), ( n = m ) ) }} lem T {true} prf T$1 { 1. A |- true };""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 1)>]
+    [<DataRow("00prop", """prop A {true} thm T {true} prf T$1 { 1. A |- true };""", "true", 1)>]
+    [<DataRow("01prop", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" thm A {all n,m:Nat { impl( ( Succ(n) = Succ(m) ), ( n = m ) ) }} prop T {true} prf T$1 { 1. A |- true };""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 1)>]
+    [<DataRow("02prop", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" thm A {all n,m:Nat { impl( ( n' = m' ), ( n = m ) ) }} prop T {true} prf T$1 { 1. A |- true };""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 1)>]
+    [<TestMethod>]
+    member this.TestProceedingExpressionJustByTheoremLikeStmt(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
+        
+        let filename = "TestProceedingExpressionJustByTheoremLikeStmt"
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+
+        let candidates = findCandidatesByName "T" false true
+        let prf = candidates |> List.filter (fun fv -> fv.FplId = "T$1") |> List.map (fun fv -> fv :?> FplProof) |> List.head
+
+        let fvJiOpt = tryFindJustification prf PrimJIByTheoremLikeStmt
+
+        match fvJiOpt with
+        | Some (:? FplJustificationItemByTheoremLikeStmt as fvJi) ->
+            let result = fvJi.ProceedingExprCandidates
+            Assert.AreEqual<int>(expectedNumbExpr, result.Length)
+            Assert.AreEqual<string>(expectedExpr, result.Head.Type SignatureType.Name)
+        | Some ref ->
+            Assert.IsInstanceOfType<FplJustificationItemByTheoremLikeStmt>(ref)
+        | None ->
+            failwith $"expected FplJustificationItemByTheoremLikeStmt, found none"
+
+        prepareFplCode(filename, "", false) |> ignore
+
+
     [<DataRow("00", """def cl N thm T {true} prf T$1 { 1. |- ex x:obj {is(x,N)} 2. 1 |- trivial};""", "∃ x:obj {is(x, N)}", 1)>]
     [<DataRow("01", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" ax A {true} thm T {true} prf T$1 { 1. byax A |- all x,y:Set {impl ( is(x, N), ( x = y ))} 2. 1 |- true };""", "∀ x, y:Set {(is(x, N)) ⇒ (x = y)}", 1)>]
     [<TestMethod>]

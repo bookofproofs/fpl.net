@@ -283,8 +283,18 @@ and FplJustificationItemByTheoremLikeStmt(positions: Positions, parent: FplGener
         this.AssignParts(ret)
         ret
 
-    override this.ProceedingExprCandidates =
-        raise (NotImplementedException())
+    override this.ProceedingExprCandidates
+        // identify the expression contained in the theorem-like stmt
+        // referred by this justification in a proof
+        with get (): FplGenericNode list =
+            match this.RefersTo with
+            | Some ax ->
+                if ax.ArgList.Count > 0 then
+                    [ax.ArgList |> Seq.last]
+                else
+                    [FplIntrinsicPred((this.StartPos, this.EndPos), this)]
+            | None ->
+                [FplIntrinsicPred((this.StartPos, this.EndPos), this)]
 
 and FplJustification(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericPredicate(positions, parent)
