@@ -116,6 +116,32 @@ type TestProceedingExpressions() =
         prepareFplCode(filename, "", false) |> ignore
 
 
+    [<DataRow("00cl0", """def cl A thm T {true} prf T$1 { 1. bydef A |- true };""", "pred", 1)>]
+    [<DataRow("00cl0", """def cl A thm T {true} prf T$1 { 1. bydef A |- true };""", "pred", 1)>]
+    [<TestMethod>]
+    member this.TestProceedingExpressionJustByDef(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
+        
+        let filename = "TestProceedingExpressionJustByDef"
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+
+        let candidates = findCandidatesByName "T" false true
+        let prf = candidates |> List.filter (fun fv -> fv.FplId = "T$1") |> List.map (fun fv -> fv :?> FplProof) |> List.head
+
+        let fvJiOpt = tryFindJustification prf PrimJIByDef
+
+        match fvJiOpt with
+        | Some (:? FplJustificationItemByDef as fvJi) ->
+            let result = fvJi.ProceedingExprCandidates
+            Assert.AreEqual<int>(expectedNumbExpr, result.Length)
+            Assert.AreEqual<string>(expectedExpr, result.Head.Type SignatureType.Name)
+        | Some ref ->
+            Assert.IsInstanceOfType<FplJustificationItemByDef>(ref)
+        | None ->
+            failwith $"expected FplJustificationItemByDef, found none"
+
+        prepareFplCode(filename, "", false) |> ignore
+
     [<DataRow("00", """def cl N thm T {true} prf T$1 { 1. |- ex x:obj {is(x,N)} 2. 1 |- trivial};""", "∃ x:obj {is(x, N)}", 1)>]
     [<DataRow("01", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" ax A {true} thm T {true} prf T$1 { 1. byax A |- all x,y:Set {impl ( is(x, N), ( x = y ))} 2. 1 |- true };""", "∀ x, y:Set {(is(x, N)) ⇒ (x = y)}", 1)>]
     [<TestMethod>]

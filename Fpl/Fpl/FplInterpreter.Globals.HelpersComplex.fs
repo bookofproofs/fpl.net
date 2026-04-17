@@ -183,3 +183,35 @@ let tryAddToParentUsingFplId (fplValue:FplGenericNode) =
         fplValue.ErrorOccurred <- emitID001Diagnostics identifier (conflicts.Head.QualifiedStartPos) fplValue.StartPos fplValue.EndPos
     else
         parent.Scope.Add(identifier, fplValue)
+
+/// Extracts a list of all assertions made in a definition.
+/// Otherwise, an empty list is returned.
+let extractAssertionExpressions (def:FplGenericNode) =
+    def.ArgList
+    |> Seq.filter (fun fv -> fv.Name = PrimAssertion) // extract assertions
+    |> Seq.map (fun fv -> fv.ArgList |> Seq.tryHead) // extract expressions of the assertions
+    |> Seq.filter (fun fv -> fv.IsSome)
+    |> Seq.map (fun fv -> fv.Value)
+    |> Seq.toList // returns list of expressions of assertions in the definition
+
+/// Extracts a list of all expressions of all predicative properties in a definition.
+/// Otherwise, an empty list is returned.
+let extractPredicativePropertiesExpressions (def:FplGenericNode) =
+    def.ArgList
+    |> Seq.filter (fun fv -> fv.Name = PrimMandatoryPredicateL) // extract predicative property
+    |> Seq.map (fun fv -> fv.ArgList |> Seq.tryLast) // extract expressions of the properties
+    |> Seq.filter (fun fv -> fv.IsSome)
+    |> Seq.map (fun fv -> fv.Value)
+    |> Seq.toList // returns list of expressions of predicative properties in the definition
+
+/// Extracts the expression of the predicate definition and returns it in a list with one element.
+/// Otherwise, an empty list is returned.
+let extractPredicateDefinitionExpressions (def:FplGenericNode) =
+    match def.Name with
+    | PrimPredicateL ->
+        let lastExprOpt = def.ArgList |> Seq.tryLast 
+        match lastExprOpt with
+        | Some lastExpr ->
+            [lastExpr]
+        | _ -> []
+    | _ -> []
