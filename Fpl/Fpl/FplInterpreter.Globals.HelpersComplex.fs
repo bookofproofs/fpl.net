@@ -131,8 +131,9 @@ let findCandidatesByName (name: string) withClassConstructors withCorollariesOrP
             parts.[0] 
         else
             name
+
     let nameWithProofOrCorRef = 
-        if withCorollariesOrProofs && not (name.Contains("$")) then 
+        if not (name.Contains("$")) then
             $"{name}$"
         else
             name
@@ -146,7 +147,7 @@ let findCandidatesByName (name: string) withClassConstructors withCorollariesOrP
             |> Seq.filter (fun fv -> 
                 fv.FplId = name 
                 || fv.FplId = nameWithoutProofOrCorRef 
-                || $"{fv.FplId}$".StartsWith nameWithProofOrCorRef)
+                || $"{fv.FplId}$".StartsWith nameWithProofOrCorRef) 
             |> Seq.iter (fun (block: FplGenericNode) ->
                 pm.Add(block)
 

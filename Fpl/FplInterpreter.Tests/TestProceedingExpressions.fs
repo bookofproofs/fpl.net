@@ -116,8 +116,8 @@ type TestProceedingExpressions() =
         prepareFplCode(filename, "", false) |> ignore
 
 
-    [<DataRow("00cl0", """def cl A thm T {true} prf T$1 { 1. bydef A |- true };""", "pred", 1)>]
-    [<DataRow("00cl0", """def cl A thm T {true} prf T$1 { 1. bydef A |- true };""", "pred", 1)>]
+    [<DataRow("00cl0", """def cl A thm T {true} prf T$1 { 1. bydef A |- true };""", "undet", 1)>]
+    [<DataRow("00cl1", """ddef cl A1 def cl A { dec assert is(self, A1); ctor A() {} } thm T {true} prf T$1 { 1. bydef A |- true };""", "is(A, A1)", 1)>]
     [<TestMethod>]
     member this.TestProceedingExpressionJustByDef(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
         

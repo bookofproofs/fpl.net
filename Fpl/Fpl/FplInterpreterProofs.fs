@@ -116,9 +116,9 @@ and FplJustificationItemByAx(positions: Positions, parent: FplGenericNode) =
                 if ax.ArgList.Count > 0 then
                     [ax.ArgList |> Seq.last]
                 else
-                    [FplIntrinsicPred((this.StartPos, this.EndPos), this)]
+                    [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
             | None ->
-                [FplIntrinsicPred((this.StartPos, this.EndPos), this)]
+                [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
 
 and FplJustificationItemByDef(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericJustificationItem(positions, parent)
@@ -143,9 +143,9 @@ and FplJustificationItemByDef(positions: Positions, parent: FplGenericNode) =
                 if total.Length > 0 then
                     total
                 else
-                    [FplIntrinsicPred((this.StartPos, this.EndPos), this)]
+                    [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
             | None ->
-                [FplIntrinsicPred((this.StartPos, this.EndPos), this)]
+                [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
 
 and FplJustificationItemByDefVar(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericJustificationItem(positions, parent)
@@ -179,9 +179,9 @@ and FplJustificationItemByConj(positions: Positions, parent: FplGenericNode) =
                 if ax.ArgList.Count > 0 then
                     [ax.ArgList |> Seq.last]
                 else
-                    [FplIntrinsicPred((this.StartPos, this.EndPos), this)]
+                    [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
             | None ->
-                [FplIntrinsicPred((this.StartPos, this.EndPos), this)]
+                [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
 
 and FplJustificationItemByCor(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericJustificationItem(positions, parent)
@@ -260,9 +260,9 @@ and FplJustificationItemByRefArgument(positions: Positions, parent: FplGenericNo
                 | Some argInference ->
                     // delegate to the argInference of the referenced argument
                     argInference.ProceedingExprCandidates
-                | _ -> [FplIntrinsicPred((this.StartPos, this.EndPos), this)]
+                | _ -> [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
             | _ ->
-                [FplIntrinsicPred((this.StartPos, this.EndPos), this)]
+                [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
 
 and FplJustificationItemByProofArgument(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericJustificationItem(positions, parent)
@@ -283,9 +283,9 @@ and FplJustificationItemByProofArgument(positions: Positions, parent: FplGeneric
                 | Some argInference ->
                     // delegate to the argInference of the referenced argument
                     argInference.ProceedingExprCandidates
-                | _ -> [FplIntrinsicPred((this.StartPos, this.EndPos), this)]
+                | _ -> [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
             | _ ->
-                [FplIntrinsicPred((this.StartPos, this.EndPos), this)]
+                [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
 
 and FplJustificationItemByTheoremLikeStmt(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericJustificationItem(positions, parent)
@@ -306,9 +306,9 @@ and FplJustificationItemByTheoremLikeStmt(positions: Positions, parent: FplGener
                 if ax.ArgList.Count > 0 then
                     [ax.ArgList |> Seq.last]
                 else
-                    [FplIntrinsicPred((this.StartPos, this.EndPos), this)]
+                    [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
             | None ->
-                [FplIntrinsicPred((this.StartPos, this.EndPos), this)]
+                [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
 
 and FplJustification(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericPredicate(positions, parent)
@@ -634,7 +634,7 @@ and FplArgInferenceDerived(positions: Positions, parent: FplGenericNode) =
             let exprOpt = this.ArgList |> Seq.tryHead
             match exprOpt with
             | Some expr -> [expr]
-            | _ -> [FplIntrinsicPred((this.StartPos, this.EndPos), this)]
+            | _ -> [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
 
 
 
