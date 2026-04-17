@@ -591,7 +591,7 @@ type TestFplValueScopeQualifiedName() =
         | "base23" -> Assert.AreEqual<string>("a disjunction TestPredicateQualifiedName.T1().x ∨ (y ∨ z)", qualifiedName base1 false) 
         | "base24" -> Assert.AreEqual<string>("an equivalence TestPredicateQualifiedName.T1().x ⇔ y", qualifiedName base1 false) 
         | "base25" -> Assert.AreEqual<string>("an implication TestPredicateQualifiedName.T1().x ⇒ y", qualifiedName base1 false) 
-        | "base26" -> Assert.AreEqual<string>("an is operator TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1 false) 
+        | "base26" -> Assert.AreEqual<string>("an is operator TestPredicateQualifiedName.T1().x is Nat", qualifiedName base1 false) 
         | "base27" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1 false) 
         | "base28" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1 false) 
         | "base29" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1 false) 
@@ -599,7 +599,7 @@ type TestFplValueScopeQualifiedName() =
         | "base31" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1 false) 
         | "base32" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1 false) 
         | "base33" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1().p(c)", qualifiedName base1 false) 
-        | "base34" -> Assert.AreEqual<string>("an is operator TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1 false) 
+        | "base34" -> Assert.AreEqual<string>("an is operator TestPredicateQualifiedName.T1().x is Set", qualifiedName base1 false) 
         | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
 

@@ -117,7 +117,7 @@ type TestProceedingExpressions() =
 
 
     [<DataRow("00cl0", """def cl A thm T {true} prf T$1 { 1. bydef A |- true };""", "undet", 1)>]
-    [<DataRow("00cl1", """ddef cl A1 def cl A { dec assert is(self, A1); ctor A() {} } thm T {true} prf T$1 { 1. bydef A |- true };""", "is(A, A1)", 1)>]
+    [<DataRow("00cl1", """ddef cl A1 def cl A { dec assert is(self, A1); ctor A() {} } thm T {true} prf T$1 { 1. bydef A |- true };""", "A is A1", 1)>]
     [<TestMethod>]
     member this.TestProceedingExpressionJustByDef(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
         
@@ -142,8 +142,8 @@ type TestProceedingExpressions() =
 
         prepareFplCode(filename, "", false) |> ignore
 
-    [<DataRow("00", """def cl N thm T {true} prf T$1 { 1. |- ex x:obj {is(x,N)} 2. 1 |- trivial};""", "∃ x:obj {is(x, N)}", 1)>]
-    [<DataRow("01", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" ax A {true} thm T {true} prf T$1 { 1. byax A |- all x,y:Set {impl ( is(x, N), ( x = y ))} 2. 1 |- true };""", "∀ x, y:Set {(is(x, N)) ⇒ (x = y)}", 1)>]
+    [<DataRow("00", """def cl N thm T {true} prf T$1 { 1. |- ex x:obj {is(x,N)} 2. 1 |- trivial};""", "∃ x:obj {x is N}", 1)>]
+    [<DataRow("01", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" ax A {true} thm T {true} prf T$1 { 1. byax A |- all x,y:Set {impl ( is(x, N), ( x = y ))} 2. 1 |- true };""", "∀ x, y:Set {(x is N) ⇒ (x = y)}", 1)>]
     [<TestMethod>]
     member this.TestProceedingExpressionJustByArgRef(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
         
@@ -167,8 +167,8 @@ type TestProceedingExpressions() =
 
         prepareFplCode(filename, "", false) |> ignore
 
-    [<DataRow("00", """def cl N thm T {true} prf T$1 { 1. |- ex x:obj {is(x,N)} 2. 1 |- trivial} thm T1 {true} prf T1$1 { 1. T$1:1 |- trivial };""", "∃ x:obj {is(x, N)}", 1)>]
-    [<DataRow("01", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" ax A {true} thm T {true} prf T$1 { 1. byax A |- all x,y:Set {impl ( is(x, N), ( x = y ))} 2. 1 |- true } thm T1 {true} proof T1$1 {1. T$1:1 |- true};""", "∀ x, y:Set {(is(x, N)) ⇒ (x = y)}", 1)>]
+    [<DataRow("00", """def cl N thm T {true} prf T$1 { 1. |- ex x:obj {is(x,N)} 2. 1 |- trivial} thm T1 {true} prf T1$1 { 1. T$1:1 |- trivial };""", "∃ x:obj {x is N}", 1)>]
+    [<DataRow("01", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" ax A {true} thm T {true} prf T$1 { 1. byax A |- all x,y:Set {impl ( is(x, N), ( x = y ))} 2. 1 |- true } thm T1 {true} proof T1$1 {1. T$1:1 |- true};""", "∀ x, y:Set {(x is N) ⇒ (x = y)}", 1)>]
     [<TestMethod>]
     member this.TestProceedingExpressionJustByProofArgument(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
         

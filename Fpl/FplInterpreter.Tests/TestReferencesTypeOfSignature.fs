@@ -139,7 +139,7 @@ type TestReferencesTypeOfSignature() =
         | "base23" -> Assert.AreEqual<string>("pred", base1.Type(SignatureType.Type))
         | "base24" -> Assert.AreEqual<string>("pred", base1.Type(SignatureType.Type))
         | "base25" -> Assert.AreEqual<string>("pred", base1.Type(SignatureType.Type))
-        | "base26" -> Assert.AreEqual<string>("pred(undef, Nat)", base1.Type(SignatureType.Type))
+        | "base26" -> Assert.AreEqual<string>("pred", base1.Type(SignatureType.Type))
         | "base27" -> Assert.AreEqual<string>("B", base1.Type(SignatureType.Type))
         | "base28" -> Assert.AreEqual<string>("C", base1.Type(SignatureType.Type))
         | "base29" -> Assert.AreEqual<string>("D", base1.Type(SignatureType.Type))
@@ -147,7 +147,7 @@ type TestReferencesTypeOfSignature() =
         | "base31" -> Assert.AreEqual<string>("C", base1.Type(SignatureType.Type))
         | "base32" -> Assert.AreEqual<string>("E", base1.Type(SignatureType.Type))
         | "base33" -> Assert.AreEqual<string>("pred", base1.Type(SignatureType.Type))
-        | "base34" -> Assert.AreEqual<string>("pred(undef, Set)", base1.Type(SignatureType.Type))
+        | "base34" -> Assert.AreEqual<string>("pred", base1.Type(SignatureType.Type))
         | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
 

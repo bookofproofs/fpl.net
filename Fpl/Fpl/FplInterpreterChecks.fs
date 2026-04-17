@@ -418,8 +418,12 @@ let rec isSimpleExpression (fv:FplGenericNode) =
     | PrimQuantorAll
     | PrimQuantorExists
     | PrimQuantorExistsN
+    | PrimClassL 
     | PrimIntrinsicInd -> true
     | PrimIntrinsicPred when (fv.FplId = LiteralTrue || fv.FplId = LiteralFalse) -> true
+    | PrimMappingL when (fv.Scope.Count = 0) -> true
+    | LiteralParent 
+    | LiteralSelf 
     | PrimRefL ->
         match fv.RefersTo with
         | Some ref -> isSimpleExpression ref

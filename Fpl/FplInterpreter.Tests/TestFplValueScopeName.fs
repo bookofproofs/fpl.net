@@ -625,7 +625,7 @@ type TestFplValueScopeName() =
         | "base23" -> Assert.AreEqual<string>("x ∨ (y ∨ z)", base1.Type(SignatureType.Name))
         | "base24" -> Assert.AreEqual<string>("x ⇔ y", base1.Type(SignatureType.Name))
         | "base25" -> Assert.AreEqual<string>("x ⇒ y", base1.Type(SignatureType.Name))
-        | "base26" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
+        | "base26" -> Assert.AreEqual<string>("x is Nat", base1.Type(SignatureType.Name))
         | "base27" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
         | "base28" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
         | "base29" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
@@ -633,7 +633,7 @@ type TestFplValueScopeName() =
         | "base31" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
         | "base32" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
         | "base33" -> Assert.AreEqual<string>("p(c)", base1.Type(SignatureType.Name))
-        | "base34" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
+        | "base34" -> Assert.AreEqual<string>("x is Set", base1.Type(SignatureType.Name))
         | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
 
