@@ -211,8 +211,18 @@ and FplJustificationItemByCor(positions: Positions, parent: FplGenericNode) =
         this.AssignParts(ret)
         ret
 
-    override this.ProceedingExprCandidates =
-        raise (NotImplementedException())
+    override this.ProceedingExprCandidates
+        // identify the expression contained in the corollary
+        // referred by this "bycor" justification in a proof
+        with get (): FplGenericNode list =
+            match this.RefersTo with
+            | Some cor ->
+                if cor.ArgList.Count > 0 then
+                    [cor.ArgList |> Seq.last]
+                else
+                    [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
+            | None ->
+                [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
 
 and FplJustificationItemByInf(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericJustificationItem(positions, parent)
@@ -611,18 +621,19 @@ and FplArgInferenceTrivial(positions: Positions, parent: FplGenericNode) =
         this.SetValue v
         debug this Debug.Stop
 
-    override this.ProceedingExprCandidates =
+    override this.ProceedingExprCandidates 
         // identify the expression contained in the theorem-like statement belonging to the proof,
         // in which this "trivial" argument reference occurs
-        let themLikeStmtOpt = this.UltimateBlockNode
-        match themLikeStmtOpt with
-        | Some thmLikeStmt ->
-            if thmLikeStmt.ArgList.Count > 0 then
-                [thmLikeStmt.ArgList |> Seq.last]
-            else
-                [FplIntrinsicPred((this.StartPos, this.EndPos), this)]
-        | None ->
-            [FplIntrinsicPred((this.StartPos, this.EndPos), this)]
+        with get (): FplGenericNode list =
+            let themLikeStmtOpt = this.UltimateBlockNode
+            match themLikeStmtOpt with
+            | Some thmLikeStmt ->
+                if thmLikeStmt.ArgList.Count > 0 then
+                    [thmLikeStmt.ArgList |> Seq.last]
+                else
+                    [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
+            | None ->
+                [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
 
     member this.ParentArgument = this.Parent.Value :?> FplArgument
 

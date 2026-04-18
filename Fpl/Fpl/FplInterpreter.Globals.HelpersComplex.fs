@@ -157,13 +157,16 @@ let findCandidatesByName (name: string) withClassConstructors withCorollariesOrP
                     |> Seq.filter (fun (fv: FplGenericNode) -> (fv.Name = LiteralCtorL || fv.Name = PrimDefaultConstructor))
                     |> Seq.iter (fun (fv: FplGenericNode) -> pm.Add(fv))
 
-                if withCorollariesOrProofs && (isProvable block) then 
+                if withCorollariesOrProofs && (isProvable block || isAxiomOrConnjecture block) then 
                     flattenCorollariesAndProofs block
             )
         )
         |> ignore
 
-    pm |> Seq.toList
+
+    pm
+    |> Seq.toList
+
 
 // Tries to add an FPL block to its parent's scope using its FplId, or issues ID001 diagnostics if a conflict occurs
 let tryAddToParentUsingFplId (fplValue:FplGenericNode) =

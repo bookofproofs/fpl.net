@@ -1618,7 +1618,12 @@ let rec eval ast =
             heap.Eval.PushEvalStack(fvJi)
             eval predicateIdentifierAst
             dollarDigitListAsts.Value |> List.map eval |> ignore
-            let candidates = findCandidatesByName fvJi.FplId false true
+            let candidatesPre = findCandidatesByName fvJi.FplId false true
+            let candidates =
+                if candidatesPre.Length > 1 then 
+                    candidatesPre |> List.filter (fun fv -> fv.FplId = fvJi.FplId)
+                else
+                    candidatesPre
             // check, if indeed the predicateId points to a corollary, if not issue diagnostics
             checkPR001_PR006Diagnostics fvJi candidates
             heap.Eval.PopEvalStack()
