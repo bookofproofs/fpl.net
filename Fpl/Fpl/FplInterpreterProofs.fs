@@ -135,11 +135,11 @@ and FplJustificationItemByDef(positions: Positions, parent: FplGenericNode) =
         with get (): FplGenericNode list =
             match this.RefersTo with
             | Some def ->
+                let predicateDefIfAny = extractPredicateDefinitionExpressions def
                 let assertions = extractAssertionExpressions def
                 let predicativeProperties = extractPredicativePropertiesExpressions def
-                let predicateDefIfAny = extractPredicateDefinitionExpressions def
                 let total =
-                    assertions @ predicativeProperties @ predicateDefIfAny
+                    predicateDefIfAny @ assertions @ predicativeProperties
                 if total.Length > 0 then
                     total
                 else
