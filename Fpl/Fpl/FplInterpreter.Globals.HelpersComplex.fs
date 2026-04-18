@@ -198,7 +198,7 @@ let extractAssertionExpressions (def:FplGenericNode) =
 /// Extracts a list of all expressions of all predicative properties in a definition.
 /// Otherwise, an empty list is returned.
 let extractPredicativePropertiesExpressions (def:FplGenericNode) =
-    def.ArgList
+    def.Scope.Values
     |> Seq.filter (fun fv -> fv.Name = PrimMandatoryPredicateL) // extract predicative property
     |> Seq.map (fun fv -> fv.ArgList |> Seq.tryLast) // extract expressions of the properties
     |> Seq.filter (fun fv -> fv.IsSome)
