@@ -155,6 +155,45 @@ type TestProceedingExpressions() =
 
         prepareFplCode(filename, "", false) |> ignore
 
+    [<DataRow("00cl0", """def cl A thm T {dec ~v:A; true} prf T$1 { 1. bydef v |- true };""", "undet", 1)>]
+    [<DataRow("00cl1", """def cl A1 def cl A { dec assert is(self, A1); ctor A() {} } thm T {dec ~v:A; true} prf T$1 { 1. bydef v |- true };""", "A is A1", 1)>] // one assertion
+    [<DataRow("00cl2", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" def cl A1 def cl A { dec assert is(self, A1) assert all n,m:Nat { impl( ( n' = m' ), ( n = m ) ) }; ctor A() {} } thm T {dec ~v:A; true} prf T$1 { 1. bydef v |- true };""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 2)>] // two assertions
+    [<DataRow("00cl3", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" def cl A1 def cl A { dec assert is(self, A1) assert all n,m:Nat { impl( ( n' = m' ), ( n = m ) ) }; ctor A() {} prty pred J() {ex x:obj {is(x,Nat)}} } thm T {dec ~v:A; true} prf T$1 { 1. bydef v |- true };""", "∃ x:obj {x is Nat}", 3)>] // two assertions + predicative property
+    [<DataRow("00pr0", """def pred A() thm T {dec ~v:A; true} prf T$1 { 1. bydef v |- true };""", "undet", 1)>]
+    [<DataRow("00pr0a", """def cl Nat def pred A() {ex x:obj {is(x,Nat)}} thm T {dec ~v:A; true} prf T$1 { 1. bydef v |- true };""", "∃ x:obj {x is Nat}", 1)>]
+    [<DataRow("00pr1", """def cl A1 def pred A() { dec assert is(self, A1); true} thm T {dec ~v:A; true} prf T$1 { 1. bydef v |- true };""", "A() is A1", 2)>] // one assertion + predicate itself
+    [<DataRow("00pr2", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" def cl A1 def pred A() { dec assert is(self, A1) assert all n,m:Nat { impl( ( n' = m' ), ( n = m ) ) }; true } thm T {dec ~v:A; true} prf T$1 { 1. bydef v |- true };""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 3)>] // two assertions + predicate itself
+    [<DataRow("00pr3", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" def cl A1 def pred A() { dec assert is(self, A1) assert all n,m:Nat { impl( ( n' = m' ), ( n = m ) ) }; true prty pred J() {ex x:obj {is(x,Nat)}} } thm T {dec ~v:A; true} prf T$1 { 1. bydef v |- true };""", "∃ x:obj {x is Nat}", 4)>] // two assertions + predicate itself + predicative property
+    [<DataRow("00fu0", """def func A()->obj thm T {dec ~v:A; true} prf T$1 { 1. bydef v |- true };""", "undet", 1)>]
+    [<DataRow("00fu0a", """def cl Nat def func A()->ind {dec assert ex x:obj {is(x,Nat)}; ret $1} thm T {dec ~v:A; true} prf T$1 { 1. bydef v |- true };""", "∃ x:obj {x is Nat}", 1)>]
+    [<DataRow("00fu1", """def cl A1 def func A()->ind { dec assert is(self, A1); ret $1} thm T {dec ~v:A; true} prf T$1 { 1. bydef v |- true };""", "(A() -> ind) is A1", 1)>] // one assertion 
+    [<DataRow("00fu2", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" def cl A1 def func A()->obj { dec assert is(self, A1) assert all n,m:Nat { impl( ( n' = m' ), ( n = m ) ) }; ret $1 } thm T {dec ~v:A; true} prf T$1 { 1. bydef v |- true };""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 2)>] // two assertions 
+    [<DataRow("00fu3", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" def cl A1 def func A()->obj { dec assert is(self, A1) assert all n,m:Nat { impl( ( n' = m' ), ( n = m ) ) }; ret $1 prty pred J() {ex x:obj {is(x,Nat)}} } thm T {dec ~v:A; true} prf T$1 { 1. bydef v |- true };""", "∃ x:obj {x is Nat}", 3)>] // two assertions + predicative property
+    [<TestMethod>]
+    member this.TestProceedingExpressionJustByDefVar(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
+        
+        let filename = "TestProceedingExpressionJustByDefVar"
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+
+        let candidates = findCandidatesByName "T" false true
+        let prf = candidates |> List.filter (fun fv -> fv.FplId = "T$1") |> List.map (fun fv -> fv :?> FplProof) |> List.head
+
+        let fvJiOpt = tryFindJustification prf PrimJIByDefVar
+
+        match fvJiOpt with
+        | Some (:? FplJustificationItemByDefVar as fvJi) ->
+            let result = fvJi.ProceedingExprCandidates
+            Assert.AreEqual<int>(expectedNumbExpr, result.Length)
+            let expr = result |> List.rev |> List.head
+            Assert.AreEqual<string>(expectedExpr, expr.Type SignatureType.Name)
+        | Some ref ->
+            Assert.IsInstanceOfType<FplJustificationItemByDefVar>(ref)
+        | None ->
+            failwith $"expected FplJustificationItemByDefVar, found none"
+
+        prepareFplCode(filename, "", false) |> ignore
+
     [<DataRow("00", """def cl N thm T {true} prf T$1 { 1. |- ex x:obj {is(x,N)} 2. 1 |- trivial};""", "∃ x:obj {x is N}", 1)>]
     [<DataRow("01", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" ax A {true} thm T {true} prf T$1 { 1. byax A |- all x,y:Set {impl ( is(x, N), ( x = y ))} 2. 1 |- true };""", "∀ x, y:Set {(x is N) ⇒ (x = y)}", 1)>]
     [<TestMethod>]

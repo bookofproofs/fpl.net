@@ -157,8 +157,26 @@ and FplJustificationItemByDefVar(positions: Positions, parent: FplGenericNode) =
         this.AssignParts(ret)
         ret
 
-    override this.ProceedingExprCandidates =
-        raise (NotImplementedException())
+    override this.ProceedingExprCandidates 
+        // identify the expressions contained in the variable definition
+        with get (): FplGenericNode list =
+            match this.RefersTo with
+            | Some var ->
+                match var.RefersTo with 
+                | Some def ->
+                    let predicateDefIfAny = extractPredicateDefinitionExpressions def
+                    let assertions = extractAssertionExpressions def
+                    let predicativeProperties = extractPredicativePropertiesExpressions def
+                    let total =
+                        predicateDefIfAny @ assertions @ predicativeProperties
+                    if total.Length > 0 then
+                        total
+                    else
+                        [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
+                | None ->
+                    [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
+            | _ ->
+                [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
 
 and FplJustificationItemByConj(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericJustificationItem(positions, parent)
