@@ -30,6 +30,7 @@ open FplInterpreterPredicativeBlocks
 open FplInterpreterExpressionMatching
 open FplInterpreterRulesOfInferences
 
+
 [<AbstractClass>]
 type FplGenericWithProceedingExpression(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericPredicate(positions, parent)
@@ -234,40 +235,73 @@ and FplJustificationItemByInf(positions: Positions, parent: FplGenericNode) =
         this.AssignParts(ret)
         ret
 
+    override this.ProceedingExprCandidates
+        with get (): FplGenericNode list =
+            match this.RefersTo, this.Parent with
+            | Some (:? FplRuleOfInference as ruleOfInference), Some (:? FplJustification as just) ->
+                match ruleOfInference.Premise, ruleOfInference.Conclusion with
+                | Some premisePredicateListNode, Some conclusion ->
+                    let premisePredicateList = premisePredicateListNode.ArgList |> Seq.toList
+                    // (all justification items but the first one, which is the "byinf" one)
+                    let (proceedingJustificationItems: FplGenericNode list) = just.GetOrderedJustificationItems |> List.rev |> List.tail |> List.rev
+                    let proceedingExpressionLists =
+                        proceedingJustificationItems
+                        |> List.filter (fun fv -> fv :? FplGenericJustificationItem)
+                        |> List.map (fun fv -> fv :?> FplGenericJustificationItem)
+                        |> List.map (fun fv -> fv.ProceedingExprCandidates)
+                    // Here, we have for each element of premisePredicateList a whole list of proceeding expressions.
+                    // We have to pair each premise (from the list of premises of the rule of inference) with the expressions that match it (if any).
+                    // The resulting data structure is a dictionary of key-Value pairs where key = premise expression, value = list of expressions that matched the premise expression.
+                    let listOfPairs = matchInputJustificationItemsWithPremiseList proceedingExpressionLists premisePredicateList this
+                    match this.ErrorOccurred with
+                    | Some _ -> () // error occured while matching input justificationItems with premise list
+                    | None ->
+                        () // TODO: now, we can 
+                    [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
+                | _ ->
+                    [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
+            | _ ->
+                [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
+
     override this.Run() =
         debug this Debug.Start
-        match this.RefersTo, this.Parent with
-        | Some (:? FplRuleOfInference as ruleOfInference), Some (:? FplJustification as just) ->
-            // (all justification items but the first one, which is the "byinf" one)
-            let (arg:FplArgument) = just.ParentArgument
-            match arg.ArgumentInference with
-            | Some (argInference: FplGenericArgInference) ->
-                let argInferenceExprCandidates = argInference.ProceedingExprCandidates
-                match ruleOfInference.Premise, ruleOfInference.Conclusion with
-                | Some premisePredicateList, Some conclusion ->
-                    let (proceedingJustificationItems: FplGenericNode list) = just.GetOrderedJustificationItems |> List.rev |> List.tail |> List.rev
-                    if premisePredicateList.ArgList.Count <> proceedingJustificationItems.Length then
-                        just.ErrorOccurred <- emitPR020Diagnostics (premisePredicateList.ArgList.Count) (proceedingJustificationItems.Length) just.StartPos just.EndPos
-                    else
-                        if checkExpressions proceedingJustificationItems (premisePredicateList.ArgList |> Seq.toList) this then
-                            // premisePredicateList matches proceedingJustificationItems
-                            // now check, if the argument inference corresponds to the conclusion
-                            let argInferenceExpr = argInferenceExprCandidates.Head
-                            if checkExpressions [argInferenceExpr] [conclusion] argInferenceExpr then
-                                let v = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
-                                v.FplId <- LiteralTrue
-                                this.SetValue v
-                            else
-                                this.SetDefaultValue()
-                        else
-                            this.SetDefaultValue()
-                | _, _ -> this.SetDefaultValue()
-            | _ -> this.SetDefaultValue()
-        | _, _ -> this.SetDefaultValue()
+        match this.ErrorOccurred with
+        | Some _ -> this.SetDefaultValue()
+        | None ->
+            if this.ProceedingExprCandidates.Length <> 1 then
+                this.SetDefaultValue()
+            else
+                match this.ProceedingExprCandidates.Head with
+                | :? FplUndetermined -> this.SetDefaultValue()
+                | candidate -> this.SetValue candidate
         debug this Debug.Stop
 
-    override this.ProceedingExprCandidates =
-        raise (NotImplementedException())
+
+            //        if premisePredicateList.Length <> proceedingJustificationItems.Length then
+            //            just.ErrorOccurred <- emitPR020Diagnostics (premisePredicateListNode.ArgList.Count) (proceedingJustificationItems.Length) just.StartPos just.EndPos
+            //            [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
+            //        else
+            //            let dictPremise2MatchingExpressionListPairs = getDictOfPremise2MatchingExpressionListPairs proceedingExpressionLists premisePredicateList
+            //            if checkExpressions proceedingExpressionLists (premisePredicateListNode.ArgList |> Seq.toList) this then
+            //                // premisePredicateList matches proceedingJustificationItems
+            //                // now check, if the argument inference corresponds to the conclusion
+            //                let argInferenceExpr = argInferenceExprCandidates.Head
+            //                if checkExpressions [argInferenceExpr] [conclusion] argInferenceExpr then
+            //                    let v = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+            //                    v.FplId <- LiteralTrue
+            //                    this.SetValue v
+            //                else
+            //                    this.SetDefaultValue()
+            //            else
+            //                this.SetDefaultValue()
+            //    | _, _ -> this.SetDefaultValue()
+            //    let (arg:FplArgument) = just.ParentArgument
+
+            //    match arg.ArgumentInference with
+            //    | Some (argInference: FplGenericArgInference) ->
+            //        let argInferenceExprCandidates = argInference.ProceedingExprCandidates
+            //    | _ -> this.SetDefaultValue()
+            //| _, _ -> this.SetDefaultValue()
 
 and FplJustificationItemByRefArgument(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericJustificationItem(positions, parent)
@@ -285,7 +319,7 @@ and FplJustificationItemByRefArgument(positions: Positions, parent: FplGenericNo
             match this.RefersTo with
             | Some (:? FplArgument as argument) ->
                 match argument.ArgumentInference with
-                | Some argInference ->
+                | Some (argInference: FplGenericArgInference) ->
                     // delegate to the argInference of the referenced argument
                     argInference.ProceedingExprCandidates
                 | _ -> [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
@@ -664,8 +698,6 @@ and FplArgInferenceDerived(positions: Positions, parent: FplGenericNode) =
             match exprOpt with
             | Some expr -> [expr]
             | _ -> [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
-
-
 
 and FplProof(positions: Positions, parent: FplGenericNode, runOrder) =
     inherit FplGenericPredicateWithExpression(positions, parent)

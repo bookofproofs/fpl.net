@@ -13,15 +13,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 module FplInterpreterExpressionMatching
+open System.Text
+open System.Collections.Generic
 open FplPrimitives
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterBasicTypes
 
-
-type MatchExprType =
-    | MatchWith2Args
-    | MatchWith1Arg
-    | Mismatch
 
 let checkExpr (a:FplGenericNode) (p:FplGenericNode) =
     match a.Name, p.Name with
@@ -29,20 +26,20 @@ let checkExpr (a:FplGenericNode) (p:FplGenericNode) =
     | PrimDisjunction, PrimDisjunction
     | PrimImplication, PrimImplication
     | PrimEquivalence, PrimEquivalence
-    | PrimExclusiveOr, PrimExclusiveOr -> MatchExprType.MatchWith2Args
-    | PrimNegation, PrimNegation -> MatchExprType.MatchWith1Arg
-    | _, _ -> MatchExprType.Mismatch
+    | PrimExclusiveOr, PrimExclusiveOr 
+    | PrimNegation, PrimNegation -> true
+    | _, _ -> false
+
+
 
 let rec checkExpressions (args:FplGenericNode list) (pars:FplGenericNode list) (fvJi:FplGenericNode) =
     match args, pars with
     | a::ars, p::prs ->
         match checkExpr a p with
-        | MatchExprType.Mismatch ->
+        | false ->
             fvJi.ErrorOccurred <- emitPR008Diagnostics "nodeName" "expectedInput" "expectedOutput" fvJi.StartPos fvJi.EndPos
             false
-        | MatchExprType.MatchWith2Args ->
-            (checkExpressions (a.ArgList |> Seq.toList) (p.ArgList |> Seq.toList) fvJi && checkExpressions ars prs fvJi)
-        | MatchExprType.MatchWith1Arg ->
+        | true ->
             (checkExpressions (a.ArgList |> Seq.toList) (p.ArgList |> Seq.toList) fvJi && checkExpressions ars prs fvJi)
     | a::_, [] ->
         fvJi.ErrorOccurred <- emitPR008Diagnostics "nodeName" "expectedInput" "expectedOutput" fvJi.StartPos fvJi.EndPos
@@ -52,3 +49,32 @@ let rec checkExpressions (args:FplGenericNode list) (pars:FplGenericNode list) (
         false
     | [], [] ->
         true
+
+/// Tries to match a premise with expressions from a list and returns as a result
+/// a list of matched expressions and a string of concatenated failed candidate expressions
+let matchPremiseWithSomeExpressions (exprList:FplGenericNode list) (pre:FplGenericNode) =
+    let result = List<FplGenericNode>()
+    let failedCandidates = List<string>()
+    exprList
+    |> List.iter (fun expr ->
+        if checkExpr expr pre then
+            result.Add expr
+        else
+            failedCandidates.Add ($"`{expr.Type SignatureType.Name}`")
+    )
+    result |> Seq.toList, failedCandidates |> String.concat ", "
+
+let matchInputJustificationItemsWithPremiseList (inputJustificationExpressionLists:FplGenericNode list list) (premiseList:FplGenericNode list) (fvJi:FplGenericNode) =
+    let result = List<FplGenericNode list>()
+    match inputJustificationExpressionLists, premiseList with
+    | iJel::iJels, pre::pres ->
+        match matchPremiseWithSomeExpressions iJel pre with
+        | [], errList ->
+            () // TODO: emit diagnostics at iJel's position that there was no matching candidate for a premise, listing all tried-out candidates (contained in errList)
+        | matchedExprList, _ ->
+            result.Add matchedExprList
+    | [], _ ->
+        () // TODO: emit diagnostitics at (pos1, pos2) that there are less input justification expression lists as premises
+    | _, [] ->
+        () // TODO: emit diagnostitics at (pos1, pos2) that there are more input justification expression lists as premises
+    result |> Seq.toList
