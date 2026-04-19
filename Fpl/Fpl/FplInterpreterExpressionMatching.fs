@@ -66,15 +66,20 @@ let matchPremiseWithSomeExpressions (exprList:FplGenericNode list) (pre:FplGener
 
 let matchInputJustificationItemsWithPremiseList (inputJustificationExpressionLists:FplGenericNode list list) (premiseList:FplGenericNode list) (fvJi:FplGenericNode) =
     let result = List<FplGenericNode list>()
-    match inputJustificationExpressionLists, premiseList with
-    | iJel::iJels, pre::pres ->
-        match matchPremiseWithSomeExpressions iJel pre with
-        | [], errList ->
-            () // TODO: emit diagnostics at iJel's position that there was no matching candidate for a premise, listing all tried-out candidates (contained in errList)
-        | matchedExprList, _ ->
-            result.Add matchedExprList
-    | [], _ ->
-        () // TODO: emit diagnostitics at (pos1, pos2) that there are less input justification expression lists as premises
-    | _, [] ->
-        () // TODO: emit diagnostitics at (pos1, pos2) that there are more input justification expression lists as premises
+    let rec matchInputJustificationItemsWithPremiseListRec (iJeLists:FplGenericNode list list) (preList:FplGenericNode list) =
+        match iJeLists, preList with
+        | iJel::iJels, pre::pres ->
+            match matchPremiseWithSomeExpressions iJel pre with
+            | [], errList ->
+                () // TODO: emit diagnostics at iJel's position that there was no matching candidate for a premise, listing all tried-out candidates (contained in errList)
+                matchInputJustificationItemsWithPremiseListRec iJels pres 
+            | matchedExprList, _ ->
+                result.Add matchedExprList
+                matchInputJustificationItemsWithPremiseListRec iJels pres 
+        | [], _::_ ->
+            fvJi.ErrorOccurred <- emitPR020Diagnostics premiseList.Length inputJustificationExpressionLists.Length fvJi.StartPos fvJi.EndPos
+        | _::_, [] ->
+            fvJi.ErrorOccurred <- emitPR020Diagnostics premiseList.Length inputJustificationExpressionLists.Length fvJi.StartPos fvJi.EndPos
+        | [], [] -> ()
+    matchInputJustificationItemsWithPremiseListRec inputJustificationExpressionLists premiseList
     result |> Seq.toList
