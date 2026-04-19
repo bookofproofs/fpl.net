@@ -341,3 +341,7 @@ let allBefore searchItem xs =
 
     loop [] xs
 
+let numbered inputLst =
+    inputLst
+    |> Seq.mapi (fun i cand -> sprintf "%d) %s" (i + 1) cand)
+    |> String.concat ", "

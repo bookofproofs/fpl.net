@@ -13,57 +13,50 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 module FplInterpreterExpressionMatching
-open System.Text
 open System.Collections.Generic
 open FplPrimitives
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterBasicTypes
 open FplInterpreterIntrinsicTypes
+open FplInterpreter.Globals.HelpersBasic
 
 
-let checkExpr (a:FplGenericNode) (p:FplGenericNode) =
+let rec checkExpr (a:FplGenericNode) (p:FplGenericNode) (iJel:FplGenericNode) =
+    let rec checkExpressions (args:FplGenericNode list) (pars:FplGenericNode list) =
+        match args, pars with
+        | a::ars, p::prs -> checkExpr a p iJel
+        | a::_, [] ->
+            iJel.ErrorOccurred <- emitPR008Diagnostics "nodeName" "expectedInput" "expectedOutput" iJel.StartPos iJel.EndPos
+            false, $"`{a.Type SignatureType.Name}` != <end of formula>"
+        | [], p::_ ->
+            false, $"<end of formula> != `{a.Type SignatureType.Name}`"
+        | [], [] ->
+            true, ""
+
     match a.Name, p.Name with
     | PrimConjunction, PrimConjunction
     | PrimDisjunction, PrimDisjunction
     | PrimImplication, PrimImplication
     | PrimEquivalence, PrimEquivalence
     | PrimExclusiveOr, PrimExclusiveOr 
-    | PrimNegation, PrimNegation -> true
-    | _, _ -> false
+    | PrimNegation, PrimNegation -> checkExpressions (a.ArgList |> Seq.toList) (p.ArgList |> Seq.toList) 
+    | _, _ -> false, $"found `{a.Type SignatureType.Name}`, expected `{p.Type SignatureType.Name}`"
 
-
-
-let rec checkExpressions (args:FplGenericNode list) (pars:FplGenericNode list) (fvJi:FplGenericNode) =
-    match args, pars with
-    | a::ars, p::prs ->
-        match checkExpr a p with
-        | false ->
-            fvJi.ErrorOccurred <- emitPR008Diagnostics "nodeName" "expectedInput" "expectedOutput" fvJi.StartPos fvJi.EndPos
-            false
-        | true ->
-            (checkExpressions (a.ArgList |> Seq.toList) (p.ArgList |> Seq.toList) fvJi && checkExpressions ars prs fvJi)
-    | a::_, [] ->
-        fvJi.ErrorOccurred <- emitPR008Diagnostics "nodeName" "expectedInput" "expectedOutput" fvJi.StartPos fvJi.EndPos
-        false
-    | [], p::_ ->
-        fvJi.ErrorOccurred <- emitPR008Diagnostics "nodeName" "expectedInput" "expectedOutput" fvJi.StartPos fvJi.EndPos
-        false
-    | [], [] ->
-        true
 
 /// Tries to match a premise with expressions from a list and returns as a result
-/// a list of matched expressions and a string of concatenated failed candidate expressions
-let matchPremiseWithSomeExpressions (exprList:FplGenericNode list) (pre:FplGenericNode) =
+/// a list of matched expressions and a  string of concatenated failed candidate expressions
+let matchPremiseWithSomeExpressions (exprList:FplGenericNode list) (pre:FplGenericNode) (iJel:FplGenericNode) =
     let result = List<FplGenericNode>()
     let failedCandidates = List<string>()
     exprList
     |> List.iter (fun expr ->
-        if checkExpr expr pre then
+        match checkExpr expr pre iJel with
+        | true, _ ->
             result.Add expr
-        else
-            failedCandidates.Add ($"`{expr.Type SignatureType.Name}`")
+        | false, err ->
+            failedCandidates.Add ($"`{expr.Type SignatureType.Name}` [{err}]")
     )
-    result |> Seq.toList, failedCandidates |> String.concat ", "
+    result |> Seq.toList, (numbered failedCandidates)
 
 let matchJustItemsExpressionsAgainstPremiseList (tuplesJustItemWithProceedingExpressionsList:(FplGenericJustificationItem * FplGenericNode list) list) (premiseList:FplGenericNode list) (byInferenceNode:FplGenericNode) =
     let result = List<FplGenericNode list>()
@@ -72,10 +65,10 @@ let matchJustItemsExpressionsAgainstPremiseList (tuplesJustItemWithProceedingExp
         | iJel::iJels, pre::pres ->
             let just = fst iJel
             let proceedingExpressionsOfJust = snd iJel
-            match matchPremiseWithSomeExpressions proceedingExpressionsOfJust pre with
+            match matchPremiseWithSomeExpressions proceedingExpressionsOfJust pre just with
             | [], errList ->
                 // emit diagnostics at just's position that there was no matching candidate for a premise, listing all tried-out candidates (contained in errList)
-                just.ErrorOccurred <- emitPR021Diagnostics (byInferenceNode.Type SignatureType.Name) (pre.Type SignatureType.Name) errList just.StartPos just.EndPos
+                just.ErrorOccurred <- emitPR008Diagnostics (byInferenceNode.Type SignatureType.Name) (pre.Type SignatureType.Name) errList just.StartPos just.EndPos
                 matchJustItemsExpressionsAgainstPremiseListRec iJels pres 
             | matchedExprList, _ ->
                 result.Add matchedExprList

@@ -1429,10 +1429,9 @@ type TestInterpreterErrors() =
             let code = PR007 ("", "") 
             runTestHelper "TestPR007.fpl" fplCode code expected
 
-    [<DataRow("01", """inference ModusPonens { dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q } theorem T {dec ~x,z:pred; true } proof T$1 {1. |- and (x, impl(x,z)) 2. byinf ModusPonens |- z };""", 0)>]
-    [<DataRow("01a", """inference ModusPonens { dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q } theorem T {dec ~x,z:pred; true } proof T$1 {1. |- and (x, impl(x,z)) 2. 1, byinf ModusPonens |- z };""", 0)>]
-    [<DataRow("01b", """inference ModusPonens { dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q } theorem T {dec ~x,z:pred; true } proof T$1 {1. |- or (x, z) 2. byinf ModusPonens |- z };""", 1)>]
-    [<DataRow("01c", """inference ModusPonens { dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q } theorem T {dec ~x,z:pred; true } proof T$1 {1. |- and (x, impl(y,z)) 2. byinf ModusPonens |- z };""", 1)>]
+    [<DataRow("01", """inf M { dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q } thm T {true} proof T$1 {1. |- and(true, impl(true, false)) 2. 1, byinf M |- false };""", 0)>]
+    [<DataRow("01a", """inf M { dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q } thm T {true} proof T$1 {1. |- or(true, impl(true, false)) 2. 1, byinf M |- false };""", 1)>]
+    [<DataRow("01b", """inf M { dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q } thm T {true} proof T$1 {1. |- and(true, xor(true, false)) 2. 1, byinf M |- false };""", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR008(no:string, fplCode:string, expected) =
@@ -1747,7 +1746,6 @@ type TestInterpreterErrors() =
         else
             let code = PR020 (0, 0) 
             runTestHelper "TestPR020.fpl" fplCode code expected
-
 
     [<DataRow("""def pred Or (x,y:*pred[obj]) infix "or" 0 {true};""", 0)>]
     [<DataRow("""def pred Or (x:* pred[ind]) infix "or" 0 {true};""", 1)>]

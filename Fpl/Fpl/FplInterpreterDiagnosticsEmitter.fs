@@ -564,16 +564,16 @@ let emitPR007Diagnostics nodeTypeName nodeName pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitPR008Diagnostics nodeName expectedInput actualInput pos1 pos2 = 
+let emitPR008Diagnostics byInfName expectedPremise mismatchingCandidates pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Warning
+            Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = PR008 (nodeName, expectedInput, actualInput)
-            Diagnostic.Alternatives = None 
+            Diagnostic.Code = PR008 (byInfName, expectedPremise, mismatchingCandidates)
+            Diagnostic.Alternatives = None
         }
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
@@ -741,20 +741,6 @@ let emitPR020Diagnostics expectedNum actualNum pos1 pos2 =
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = PR020 (expectedNum, actualNum)
-            Diagnostic.Alternatives = None
-        }
-    ad.AddDiagnostic diagnostic
-    Some (diagnostic.Code.Code)
-
-let emitPR021Diagnostics byInfName expectedPremise mismatchingCandidates pos1 pos2 =
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = pos1
-            Diagnostic.EndPos = pos2
-            Diagnostic.Code = PR021 (byInfName, expectedPremise, mismatchingCandidates)
             Diagnostic.Alternatives = None
         }
     ad.AddDiagnostic diagnostic
