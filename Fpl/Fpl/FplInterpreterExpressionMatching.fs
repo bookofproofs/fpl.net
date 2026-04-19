@@ -18,6 +18,7 @@ open System.Collections.Generic
 open FplPrimitives
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterBasicTypes
+open FplInterpreterIntrinsicTypes
 
 
 let checkExpr (a:FplGenericNode) (p:FplGenericNode) =
@@ -64,22 +65,26 @@ let matchPremiseWithSomeExpressions (exprList:FplGenericNode list) (pre:FplGener
     )
     result |> Seq.toList, failedCandidates |> String.concat ", "
 
-let matchInputJustificationItemsWithPremiseList (inputJustificationExpressionLists:FplGenericNode list list) (premiseList:FplGenericNode list) (fvJi:FplGenericNode) =
+let matchJustItemsExpressionsAgainstPremiseList (tuplesJustItemWithProceedingExpressionsList:(FplGenericJustificationItem * FplGenericNode list) list) (premiseList:FplGenericNode list) (byInferenceNode:FplGenericNode) =
     let result = List<FplGenericNode list>()
-    let rec matchInputJustificationItemsWithPremiseListRec (iJeLists:FplGenericNode list list) (preList:FplGenericNode list) =
+    let rec matchJustItemsExpressionsAgainstPremiseListRec (iJeLists:(FplGenericJustificationItem * FplGenericNode list) list) (preList:FplGenericNode list) =
         match iJeLists, preList with
         | iJel::iJels, pre::pres ->
-            match matchPremiseWithSomeExpressions iJel pre with
+            let just = fst iJel
+            let proceedingExpressionsOfJust = snd iJel
+            match matchPremiseWithSomeExpressions proceedingExpressionsOfJust pre with
             | [], errList ->
-                () // TODO: emit diagnostics at iJel's position that there was no matching candidate for a premise, listing all tried-out candidates (contained in errList)
-                matchInputJustificationItemsWithPremiseListRec iJels pres 
+                // emit diagnostics at just's position that there was no matching candidate for a premise, listing all tried-out candidates (contained in errList)
+                just.ErrorOccurred <- emitPR021Diagnostics (byInferenceNode.Type SignatureType.Name) (pre.Type SignatureType.Name) errList just.StartPos just.EndPos
+                matchJustItemsExpressionsAgainstPremiseListRec iJels pres 
             | matchedExprList, _ ->
                 result.Add matchedExprList
-                matchInputJustificationItemsWithPremiseListRec iJels pres 
+                matchJustItemsExpressionsAgainstPremiseListRec iJels pres 
         | [], _::_ ->
-            fvJi.ErrorOccurred <- emitPR020Diagnostics premiseList.Length inputJustificationExpressionLists.Length fvJi.StartPos fvJi.EndPos
+            byInferenceNode.ErrorOccurred <- emitPR020Diagnostics preList.Length iJeLists.Length byInferenceNode.StartPos byInferenceNode.EndPos
         | _::_, [] ->
-            fvJi.ErrorOccurred <- emitPR020Diagnostics premiseList.Length inputJustificationExpressionLists.Length fvJi.StartPos fvJi.EndPos
+            byInferenceNode.ErrorOccurred <- emitPR020Diagnostics preList.Length iJeLists.Length byInferenceNode.StartPos byInferenceNode.EndPos
         | [], [] -> ()
-    matchInputJustificationItemsWithPremiseListRec inputJustificationExpressionLists premiseList
+            
+    matchJustItemsExpressionsAgainstPremiseListRec tuplesJustItemWithProceedingExpressionsList premiseList
     result |> Seq.toList

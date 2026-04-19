@@ -188,15 +188,15 @@ and FplJustificationItemByInf(positions: Positions, parent: FplGenericNode) =
                     let premisePredicateList = premisePredicateListNode.ArgList |> Seq.toList
                     // (all justification items but the first one, which is the "byinf" one)
                     let (proceedingJustificationItems: FplGenericNode list) = allBefore this just.GetOrderedJustificationItems
-                    let proceedingExpressionLists = 
+                    let (proceedingExpressionLists : (FplGenericJustificationItem * FplGenericNode list) list) = 
                         proceedingJustificationItems
                         |> List.filter (fun fv -> fv :? FplGenericJustificationItem)
                         |> List.map (fun fv -> fv :?> FplGenericJustificationItem)
-                        |> List.map (fun fv -> fv.ProceedingExprCandidates)
+                        |> List.map (fun fv -> fv, fv.ProceedingExprCandidates)
                     // Here, we have for each element of premisePredicateList a whole list of proceeding expressions.
                     // We have to pair each premise (from the list of premises of the rule of inference) with the expressions that match it (if any).
                     // The resulting data structure is a dictionary of key-Value pairs where key = premise expression, value = list of expressions that matched the premise expression.
-                    let listOfPairs = matchInputJustificationItemsWithPremiseList proceedingExpressionLists premisePredicateList this
+                    let listOfPairs = matchJustItemsExpressionsAgainstPremiseList proceedingExpressionLists premisePredicateList this
                     match this.ErrorOccurred with
                     | Some _ -> () // error occured while matching input justificationItems with premise list
                     | None ->

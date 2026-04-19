@@ -746,6 +746,20 @@ let emitPR020Diagnostics expectedNum actualNum pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
+let emitPR021Diagnostics byInfName expectedPremise mismatchingCandidates pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = PR021 (byInfName, expectedPremise, mismatchingCandidates)
+            Diagnostic.Alternatives = None
+        }
+    ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
+
 let emitSIG00Diagnostics exprType expectedArity actualArity pos1 pos2 =
     let diagnostic =
         { 

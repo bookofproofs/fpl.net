@@ -175,6 +175,7 @@ type DiagnosticCode =
     | PR018
     | PR019 of string * string
     | PR020 of int * int
+    | PR021 of string * string * string 
     // signature-related error codes
     | SIG00 of string * int
     | SIG01 of string 
@@ -305,6 +306,7 @@ type DiagnosticCode =
             | PR018 -> "PR018"
             | PR019 _ -> "PR019"
             | PR020 _ -> "PR020"
+            | PR021 _ -> "PR021"
             // signature-related error codes
             | SIG00 _ -> "SIG00"
             | SIG01 _ -> "SIG01"
@@ -447,6 +449,7 @@ type DiagnosticCode =
             | PR018 -> $"A `{LiteralTrivial}` argument missing exactly one justification."
             | PR019 (justificationType1, justificationType2) -> $"FPL doesn't support mixing justification types in a single proof argument (here, for instance, `{justificationType1}` with `{justificationType2}`."
             | PR020 (expectedNum, actualNum) -> $"This {PrimJIByInf} requires {expectedNum} proceeding expressions, got {actualNum}."
+            | PR021 (byInfName, expectedPremise, mismatchingCandidates) -> $"The `{byInfName}` justification item found later this proof argument requires at this point a premise matching `{expectedPremise}`. This input justification item returned mismatching candidate(s): {mismatchingCandidates}."
             // signature-related error codes
             | SIG00 (fixType, arity) -> sprintf $"Illegal arity `{arity}` using `{fixType}` notation."
             | SIG01 symbol -> $"The symbol `{symbol}` was not declared." 
