@@ -30,75 +30,7 @@ open FplInterpreterPredicativeBlocks
 open FplInterpreterExpressionMatching
 open FplInterpreterRulesOfInferences
 
-
-[<AbstractClass>]
-type FplGenericWithProceedingExpression(positions: Positions, parent: FplGenericNode) =
-    inherit FplGenericPredicate(positions, parent)
-
-    abstract member ProceedingExprCandidates: FplGenericNode list with get
-
-[<AbstractClass>]
-type FplGenericArgInference(positions: Positions, parent: FplGenericNode) =
-    inherit FplGenericWithProceedingExpression(positions, parent)
-
-    override this.Type signatureType =
-        let head = getFplHead this signatureType
-        head
-
-    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
-
-
-[<AbstractClass>]
-type FplGenericJustificationItem(positions: Positions, parent: FplGenericNode) =
-    inherit FplGenericWithProceedingExpression(positions, parent)
-
-    override this.ShortName = PrimJustification
-
-    override this.Type signatureType =
-        let head = getFplHead this signatureType
-        head
-
-    override this.EmbedInSymbolTable _ = 
-        let thisJustificationItemId = this.Type(SignatureType.Mixed)
-
-        let alreadyAddedIdOpt = 
-            this.Parent.Value.ArgList
-            |> Seq.map (fun argJi -> argJi.Type(SignatureType.Mixed))
-            |> Seq.tryFind (fun otherId -> otherId = thisJustificationItemId)
-        match alreadyAddedIdOpt with
-        | Some otherId ->
-            this.ErrorOccurred <- emitPR004Diagnostics thisJustificationItemId otherId this.StartPos this.EndPos 
-        | _ -> ()
-        addExpressionToParentArgList this
-
-    member this.ParentJustification = this.Parent.Value :?> FplJustification
-
-    override this.Run() = 
-        debug this Debug.Start
-        match this.RefersTo with 
-        | Some (:? FplGenericHasValue as ref) when ref.Value.IsSome ->
-            let refType, isRefPred = isArgPred ref
-            if isRefPred then 
-                // because the ref must proceed "this" in FPL Code, it was already run
-                // so we only need to copy its value into this
-                this.SetValueOf ref
-            else
-                // if there is a value but ref is not a predicate, 
-                // set the value of "this" to undetermined
-                this.SetDefaultValue()
-                // and issue diagnostics saying that this requires a predicate
-                let refName = ref.Type SignatureType.Name
-                this.ErrorOccurred <- emitLG001Diagnostics refType refName this.Name ref.StartPos ref.StartPos
-        | Some (:? FplGenericHasValue as ref) when ref.Value.IsNone ->
-            // set the value of "this" to undetermined
-            ref.SetDefaultValue()
-            this.SetValueOf ref
-            // TODO issue diagnostics saying that a predicate expression was expected but has No value
-        | _ -> 
-            this.SetDefaultValue()
-        debug this Debug.Stop
-
-and FplJustificationItemByAx(positions: Positions, parent: FplGenericNode) =
+type FplJustificationItemByAx(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericJustificationItem(positions, parent)
 
     override this.Name = PrimJIByAx
@@ -107,6 +39,8 @@ and FplJustificationItemByAx(positions: Positions, parent: FplGenericNode) =
         let ret = new FplJustificationItemByAx((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
+
+    member this.ParentJustification = this.Parent.Value :?> FplJustification
 
     override this.ProceedingExprCandidates
         // identify the expression contained in the axiom
@@ -130,6 +64,8 @@ and FplJustificationItemByDef(positions: Positions, parent: FplGenericNode) =
         let ret = new FplJustificationItemByDef((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
+
+    member this.ParentJustification = this.Parent.Value :?> FplJustification
 
     override this.ProceedingExprCandidates
         // identify the expressions contained in the definition
@@ -157,6 +93,8 @@ and FplJustificationItemByDefVar(positions: Positions, parent: FplGenericNode) =
         let ret = new FplJustificationItemByDefVar((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
+
+    member this.ParentJustification = this.Parent.Value :?> FplJustification
 
     override this.ProceedingExprCandidates 
         // identify the expressions contained in the variable definition
@@ -189,6 +127,8 @@ and FplJustificationItemByConj(positions: Positions, parent: FplGenericNode) =
         this.AssignParts(ret)
         ret
 
+    member this.ParentJustification = this.Parent.Value :?> FplJustification
+
     override this.ProceedingExprCandidates
         // identify the expression contained in the conjecture
         // referred by this "byconj" justification in a proof
@@ -212,6 +152,8 @@ and FplJustificationItemByCor(positions: Positions, parent: FplGenericNode) =
         this.AssignParts(ret)
         ret
 
+    member this.ParentJustification = this.Parent.Value :?> FplJustification
+
     override this.ProceedingExprCandidates
         // identify the expression contained in the corollary
         // referred by this "bycor" justification in a proof
@@ -234,6 +176,8 @@ and FplJustificationItemByInf(positions: Positions, parent: FplGenericNode) =
         let ret = new FplJustificationItemByInf((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
+
+    member this.ParentJustification = this.Parent.Value :?> FplJustification
 
     override this.ProceedingExprCandidates
         with get (): FplGenericNode list =
@@ -313,6 +257,8 @@ and FplJustificationItemByRefArgument(positions: Positions, parent: FplGenericNo
         this.AssignParts(ret)
         ret
 
+    member this.ParentJustification = this.Parent.Value :?> FplJustification
+
     override this.ProceedingExprCandidates 
         // identify the expression referred by this "argument reference" justification in a proof
         with get (): FplGenericNode list =
@@ -336,6 +282,8 @@ and FplJustificationItemByProofArgument(positions: Positions, parent: FplGeneric
         this.AssignParts(ret)
         ret
 
+    member this.ParentJustification = this.Parent.Value :?> FplJustification
+
     override this.ProceedingExprCandidates 
         // identify the expression referred by this "argument reference" justification in a proof
         with get (): FplGenericNode list =
@@ -358,6 +306,8 @@ and FplJustificationItemByTheoremLikeStmt(positions: Positions, parent: FplGener
         let ret = new FplJustificationItemByTheoremLikeStmt((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
+
+    member this.ParentJustification = this.Parent.Value :?> FplJustification
 
     override this.ProceedingExprCandidates
         // identify the expression contained in the theorem-like stmt
@@ -855,9 +805,9 @@ let getArgumentInProof (fv1:FplGenericJustificationItem) argName =
         | :? FplJustificationItemByProofArgument when fv1.RefersTo.IsSome ->
             fv1.RefersTo.Value :?> FplProof
         | _ ->
-            let parent = fv1.ParentJustification
-            let arg = parent.ParentArgument
-            arg.ParentProof
+            let parent = fv1.Parent.Value
+            let arg = parent.Parent.Value
+            arg.Parent.Value :?> FplProof
     if proof.HasArgument argName then 
         Some proof.Scope[argName]
     else 
