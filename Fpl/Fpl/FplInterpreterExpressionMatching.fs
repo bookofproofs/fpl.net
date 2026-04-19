@@ -21,15 +21,19 @@ open FplInterpreterIntrinsicTypes
 open FplInterpreter.Globals.HelpersBasic
 
 
-let rec checkExpr (a:FplGenericNode) (p:FplGenericNode) (iJel:FplGenericNode) =
+let rec checkExpr (a:FplGenericNode) (p:FplGenericNode) =
     let rec checkExpressions (args:FplGenericNode list) (pars:FplGenericNode list) =
         match args, pars with
-        | a::ars, p::prs -> checkExpr a p iJel
+        | a::ars, p::prs ->
+            let ok, msg = checkExpr a p 
+            if ok then
+                checkExpressions ars prs
+            else
+                false, msg
         | a::_, [] ->
-            iJel.ErrorOccurred <- emitPR008Diagnostics "nodeName" "expectedInput" "expectedOutput" iJel.StartPos iJel.EndPos
-            false, $"`{a.Type SignatureType.Name}` != <end of formula>"
+            false, $"`found {a.Type SignatureType.Name}`, expected end of formula"
         | [], p::_ ->
-            false, $"<end of formula> != `{a.Type SignatureType.Name}`"
+            false, $"found end of formula, expected `{p.Type SignatureType.Name}`"
         | [], [] ->
             true, ""
 
@@ -50,7 +54,7 @@ let matchPremiseWithSomeExpressions (exprList:FplGenericNode list) (pre:FplGener
     let failedCandidates = List<string>()
     exprList
     |> List.iter (fun expr ->
-        match checkExpr expr pre iJel with
+        match checkExpr expr pre with
         | true, _ ->
             result.Add expr
         | false, err ->
