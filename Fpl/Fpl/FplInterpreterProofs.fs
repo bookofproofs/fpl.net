@@ -243,8 +243,8 @@ and FplJustificationItemByInf(positions: Positions, parent: FplGenericNode) =
                 | Some premisePredicateListNode, Some conclusion ->
                     let premisePredicateList = premisePredicateListNode.ArgList |> Seq.toList
                     // (all justification items but the first one, which is the "byinf" one)
-                    let (proceedingJustificationItems: FplGenericNode list) = just.GetOrderedJustificationItems |> List.rev |> List.tail |> List.rev
-                    let proceedingExpressionLists =
+                    let (proceedingJustificationItems: FplGenericNode list) = allBefore this just.GetOrderedJustificationItems
+                    let proceedingExpressionLists = 
                         proceedingJustificationItems
                         |> List.filter (fun fv -> fv :? FplGenericJustificationItem)
                         |> List.map (fun fv -> fv :?> FplGenericJustificationItem)

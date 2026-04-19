@@ -325,3 +325,19 @@ let getNotationTwoArgs (fv:FplGenericNode) symbol signatureType defaultVal =
                 $"({arg.Type signatureType})"
         )
         |> String.concat separator
+
+/// returns a list of all items before search item (using reference equality).
+let allBefore searchItem xs =
+    let rec loop acc = function
+        | [] ->
+            // item not found → return []
+            []
+        | x :: _ when Object.ReferenceEquals(x, searchItem) ->
+            // found the item → return reversed accumulator
+            List.rev acc
+        | x :: rest ->
+            // keep collecting until we find the item
+            loop (x :: acc) rest
+
+    loop [] xs
+
