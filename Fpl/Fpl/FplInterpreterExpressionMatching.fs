@@ -16,36 +16,56 @@ module FplInterpreterExpressionMatching
 open System.Collections.Generic
 open FplPrimitives
 open FplInterpreterDiagnosticsEmitter
+open FplInterpreter.Globals.HelpersBasic
 open FplInterpreterBasicTypes
 open FplInterpreterIntrinsicTypes
-open FplInterpreter.Globals.HelpersBasic
+open FplInterpreterFplTypeMatching
 
+let checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) =
+    // When p is a variable, the dict stores the variable names and their usage in a first matched a.
+    // The dictionary is used to check the consistency of the usage of the same variable p in the whole formula
+    // during the matching process. Moreover, the dict is used generate the
+    // conclusion of the rule of inference after all variables declared in its premise were used.
+    let dictParameterUsage = Dictionary<string, FplGenericNode>()
+    let rec checkExpr (a:FplGenericNode) (p:FplGenericNode) =
+        let rec checkExpressions (args:FplGenericNode list) (pars:FplGenericNode list) =
+            match args, pars with
+            | a::ars, p::prs ->
+                let ok, msg = checkExpr a p 
+                if ok then
+                    checkExpressions ars prs
+                else
+                    false, msg
+            | a::_, [] ->
+                false, $"`found {a.Type SignatureType.Name}`, expected end of formula"
+            | [], p::_ ->
+                false, $"found end of formula, expected `{p.Type SignatureType.Name}`"
+            | [], [] ->
+                true, ""
 
-let rec checkExpr (a:FplGenericNode) (p:FplGenericNode) =
-    let rec checkExpressions (args:FplGenericNode list) (pars:FplGenericNode list) =
-        match args, pars with
-        | a::ars, p::prs ->
-            let ok, msg = checkExpr a p 
-            if ok then
-                checkExpressions ars prs
-            else
-                false, msg
-        | a::_, [] ->
-            false, $"`found {a.Type SignatureType.Name}`, expected end of formula"
-        | [], p::_ ->
-            false, $"found end of formula, expected `{p.Type SignatureType.Name}`"
-        | [], [] ->
-            true, ""
-
-    match a.Name, p.Name with
-    | PrimConjunction, PrimConjunction
-    | PrimDisjunction, PrimDisjunction
-    | PrimImplication, PrimImplication
-    | PrimEquivalence, PrimEquivalence
-    | PrimExclusiveOr, PrimExclusiveOr 
-    | PrimNegation, PrimNegation -> checkExpressions (a.ArgList |> Seq.toList) (p.ArgList |> Seq.toList) 
-    | _, _ -> false, $"found `{a.Type SignatureType.Name}`, expected `{p.Type SignatureType.Name}`"
-
+        match a.Name, p.Name with
+        | PrimConjunction, PrimConjunction
+        | PrimDisjunction, PrimDisjunction
+        | PrimImplication, PrimImplication
+        | PrimEquivalence, PrimEquivalence
+        | PrimExclusiveOr, PrimExclusiveOr 
+        | PrimNegation, PrimNegation -> checkExpressions (a.ArgList |> Seq.toList) (p.ArgList |> Seq.toList) 
+        | PrimRefL, PrimRefL ->
+            match matchArgumentsWithParameters a p with
+            | Some err ->
+                false, err
+            | None ->
+                match a.RefersTo, p.RefersTo with
+                | Some aRef, Some pRef ->
+                    checkExpr aRef pRef
+                | Some aRef, None ->
+                    false, $"found `{aRef.Type SignatureType.Name}`, expected end of formula"
+                | None, Some pRef ->
+                    false, $"found end of formular, expected `{pRef.Type SignatureType.Name}`"
+                | None, None ->
+                    true, ""
+        | _, _ -> false, $"found `{a.Type SignatureType.Name}`, expected `{p.Type SignatureType.Name}`"
+    checkExpr a p, dictParameterUsage
 
 /// Tries to match a premise with expressions from a list and returns as a result
 /// a list of matched expressions and a  string of concatenated failed candidate expressions
@@ -54,7 +74,8 @@ let matchPremiseWithSomeExpressions (exprList:FplGenericNode list) (pre:FplGener
     let failedCandidates = List<string>()
     exprList
     |> List.iter (fun expr ->
-        match checkExpr expr pre with
+        let ((ok, err), varUsageDict) = checkExprWrapper expr pre
+        match ok, err with
         | true, _ ->
             result.Add expr
         | false, err ->
