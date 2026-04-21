@@ -568,10 +568,11 @@ let matchArgumentsWithParameters (fva: FplGenericNode) (fvp: FplGenericNode) =
         | PrimVariableArrayL ->
             Some($"{aErr} in {qualifiedName fvp true}:{fvp.Type SignatureType.Type}")
         | PrimVariableL ->
-            // if the paramater is a variable (with possibly some arguments), fallback matchin it with fva
+            // if the paramater fvp is a variable (with possibly mismatching arguments as compared to fva),
+            // fallback matching it directly with fva
             match mpwa [fva] [fvp] with
             | Some err ->
-                Some($"{aErr} (fallback error {err}) in {qualifiedName fvp true}")
+                Some($"{err} in {qualifiedName fvp true}")
             | None -> None
         | _ -> 
             Some($"{aErr} in {qualifiedName fvp true}")
