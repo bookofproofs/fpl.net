@@ -1515,21 +1515,6 @@ let rec eval ast =
         proofArgumentListAst |> List.map eval |> ignore
         optQedAst |> Option.map eval |> Option.defaultValue ()
         fv.CheckConsistency()
-        let value = new FplIntrinsicPred((pos1,pos1), fv)
-        value.FplId <- LiteralTrue
-        // check if all arguments could be correctly inferred
-        fv.OrderedArguments
-        |> Seq.iter (fun fv1 -> 
-            let argInferenceOpt = fv1.ArgumentInference
-            match argInferenceOpt with
-            | Some argInference ->
-                let argInferenceResult = argInference.Represent()
-                match argInferenceResult with
-                | LiteralTrue -> ()
-                | _ -> value.FplId <- LiteralFalse // TODO all other arguments that are either undetermined or false should issue an error
-            | _ -> () // TODO argumentInference not found
-        )
-        fv.Value <- Some value
         heap.Eval.Pop() |> ignore // pop without embedding in theorem (already done)
     | Ast.Precedence((pos1, pos2), precedence) ->
         let fv = heap.Eval.PeekEvalStack()
