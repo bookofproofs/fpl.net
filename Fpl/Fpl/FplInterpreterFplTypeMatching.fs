@@ -404,7 +404,9 @@ let rec private matchTwoTypes (a:FplGenericNode) (p:FplGenericNode) =
         elif aIsCallByReference && isPredWithoutParentheses p then
             // match a not-by-value-reference with pred mapping without parameters
             match refNodeOpt with 
-            | Some refNode when refNode.Name = PrimIntrinsicPred ->
+            | Some refNode when refNode.Name = PrimTrue ->
+                None, Parameter.Consumed // pred accepting intrinsic predicates
+            | Some refNode when refNode.Name = PrimFalse ->
                 None, Parameter.Consumed // pred accepting intrinsic predicates
             | Some refNode when refNode.Name = PrimIntrinsicUndef -> 
                 None, Parameter.Consumed // mapping pred accepting undef

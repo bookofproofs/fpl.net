@@ -52,12 +52,10 @@ type FplConjunction(positions: Positions, parent: FplGenericNode) as this =
         match (arg1Repr, arg2Repr) with
         | (LiteralFalse, _) 
         | (_, LiteralFalse)  ->
-            let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
-            newValue.FplId <- LiteralFalse
+            let newValue =  new FplIntrinsicFalse((this.StartPos, this.EndPos), this)
             this.SetValue newValue
         | (LiteralTrue, LiteralTrue) -> 
-            let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
-            newValue.FplId <- LiteralTrue
+            let newValue =  new FplIntrinsicTrue((this.StartPos, this.EndPos), this)
             this.SetValue newValue
         | _ -> 
             this.SetDefaultValue()
@@ -108,12 +106,10 @@ type FplDisjunction(positions: Positions, parent: FplGenericNode) as this =
         match (arg1Repr, arg2Repr) with
         | (LiteralTrue, _) 
         | (_, LiteralTrue) -> 
-            let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
-            newValue.FplId <- LiteralTrue
+            let newValue =  new FplIntrinsicTrue((this.StartPos, this.EndPos), this)
             this.SetValue newValue
         | (LiteralFalse, LiteralFalse) -> 
-            let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
-            newValue.FplId <- LiteralFalse
+            let newValue =  new FplIntrinsicFalse((this.StartPos, this.EndPos), this)
             this.SetValue newValue
         | _ -> 
             this.SetDefaultValue()
@@ -162,13 +158,11 @@ type FplExclusiveOr(positions: Positions, parent: FplGenericNode) as this =
         match (arg1Repr, arg2Repr) with
         | (LiteralTrue, LiteralFalse) 
         | (LiteralFalse, LiteralTrue) -> 
-            let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
-            newValue.FplId <- LiteralTrue
+            let newValue =  new FplIntrinsicTrue((this.StartPos, this.EndPos), this)
             this.SetValue newValue
         | (LiteralTrue, LiteralTrue) 
         | (LiteralFalse, LiteralFalse) -> 
-            let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
-            newValue.FplId <- LiteralFalse
+            let newValue =  new FplIntrinsicFalse((this.StartPos, this.EndPos), this)
             this.SetValue newValue
         | _ -> 
             this.SetDefaultValue()
@@ -229,12 +223,10 @@ type FplNegation(positions: Positions, parent: FplGenericNode) as this =
         match argRepr with 
         // FPL truth-table
         | LiteralFalse -> 
-            let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
-            newValue.FplId <- LiteralTrue
+            let newValue =  new FplIntrinsicTrue((this.StartPos, this.EndPos), this)
             this.SetValue newValue
         | LiteralTrue -> 
-            let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
-            newValue.FplId <- LiteralFalse
+            let newValue =  new FplIntrinsicFalse((this.StartPos, this.EndPos), this)
             this.SetValue newValue
         | _ -> 
             this.SetDefaultValue()
@@ -278,14 +270,12 @@ type FplImplication(positions: Positions, parent: FplGenericNode) as this =
         match (arg1Repr, arg2Repr) with
         // FPL truth-table
         | (LiteralTrue, LiteralFalse) -> 
-            let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
-            newValue.FplId <- LiteralFalse
+            let newValue =  new FplIntrinsicFalse((this.StartPos, this.EndPos), this)
             this.SetValue newValue
         | (LiteralFalse, LiteralTrue) 
         | (LiteralFalse, LiteralFalse) 
         | (LiteralTrue, LiteralTrue) -> 
-            let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
-            newValue.FplId <- LiteralTrue
+            let newValue =  new FplIntrinsicTrue((this.StartPos, this.EndPos), this)
             this.SetValue newValue
         | _ -> 
             this.SetDefaultValue()
@@ -335,13 +325,11 @@ type FplEquivalence(positions: Positions, parent: FplGenericNode) as this =
         // FPL truth-table
         | (LiteralTrue, LiteralTrue) 
         | (LiteralFalse, LiteralFalse) -> 
-            let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
-            newValue.FplId <- LiteralTrue
+            let newValue =  new FplIntrinsicTrue((this.StartPos, this.EndPos), this)
             this.SetValue newValue
         | (LiteralFalse, LiteralTrue) 
         | (LiteralTrue, LiteralFalse) -> 
-            let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
-            newValue.FplId <- LiteralFalse
+            let newValue =  new FplIntrinsicFalse((this.StartPos, this.EndPos), this)
             this.SetValue newValue
         | _ -> 
             this.SetDefaultValue()

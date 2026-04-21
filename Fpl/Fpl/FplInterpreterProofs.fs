@@ -340,8 +340,7 @@ and FplJustification(positions: Positions, parent: FplGenericNode) =
     override this.Run() = 
         // TODO implement Run
         debug this Debug.Start
-        let v = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
-        this.Value <- Some v
+        this.SetDefaultValue()
         debug this Debug.Stop
 
 
@@ -426,8 +425,7 @@ and FplArgument(positions: Positions, parent: FplGenericNode, runOrder) =
                 if not allEvaluateToTrue then
                     this.SetDefaultValue()
                 else
-                    let v = new FplIntrinsicPred((this.StartPos, this.StartPos), this)
-                    v.FplId <- LiteralTrue
+                    let v = new FplIntrinsicTrue((this.StartPos, this.StartPos), this)
                     this.SetValue v
         | Some justification, None -> 
             this.SetDefaultValue()
@@ -490,8 +488,7 @@ and FplArgInferenceAssume(positions: Positions, parent: FplGenericNode) =
     override this.Run() = 
         debug this Debug.Start
         if heap.ValidStmtStore.RegisterExpression this then
-            let v = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
-            v.FplId <- LiteralTrue
+            let v = new FplIntrinsicTrue((this.StartPos, this.EndPos), this)
             this.SetValue v
         else
             this.SetDefaultValue()
@@ -578,8 +575,7 @@ and FplArgInferenceRevoke(positions: Positions, parent: FplGenericNode) =
     override this.Run() = 
         debug this Debug.Start
         if this.IsRevokable() && heap.ValidStmtStore.RegisterExpression this then
-            let v = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
-            v.FplId <- LiteralTrue
+            let v = new FplIntrinsicTrue((this.StartPos, this.EndPos), this)
             this.SetValue v
         else
             this.SetDefaultValue()
@@ -600,8 +596,7 @@ and FplArgInferenceTrivial(positions: Positions, parent: FplGenericNode) =
 
     override this.Run() = 
         debug this Debug.Start
-        let v = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
-        v.FplId <- LiteralTrue
+        let v = new FplIntrinsicTrue((this.StartPos, this.EndPos), this)
         this.SetValue v
         debug this Debug.Stop
 
@@ -635,8 +630,7 @@ and FplArgInferenceDerived(positions: Positions, parent: FplGenericNode) =
     override this.Run() = 
         // TODO implement run
         debug this Debug.Start
-        let v = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
-        this.Value <- Some v
+        this.SetDefaultValue()
         debug this Debug.Stop
 
     member this.ParentArgument = this.Parent.Value :?> FplArgument
@@ -699,8 +693,7 @@ and FplProof(positions: Positions, parent: FplGenericNode, runOrder) =
             this.ErrorOccurred <- emitPR009Diagnostics this.StartPos this.StartPos
             this.SetDefaultValue()
         else
-            let v = new FplIntrinsicPred((this.SignStartPos, this.SignEndPos), this)
-            v.FplId <- LiteralTrue
+            let v = new FplIntrinsicTrue((this.SignStartPos, this.SignEndPos), this)
             this.SetValue v
         debug this Debug.Stop
 

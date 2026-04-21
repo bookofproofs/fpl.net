@@ -225,11 +225,14 @@ type SymbolTableStructure() =
         | "FplIntrinsicInd" ->
             let x = new FplIntrinsicInd(positions, parent)
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
-        | "FplIntrinsicPred" ->
-            let x = new FplIntrinsicPred(positions, parent)
+        | "FplIntrinsicFalse" ->
+            let x = new FplIntrinsicFalse(positions, parent)
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
         | "FplIntrinsicTpl" ->
             let x = new FplIntrinsicTpl(LiteralTpl, positions, parent)
+            [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
+        | "FplIntrinsicTrue" ->
+            let x = new FplIntrinsicTrue(positions, parent)
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
         | "FplIntrinsicUndef" ->
             let x = new FplIntrinsicUndef(positions, parent)
@@ -325,12 +328,12 @@ type SymbolTableStructure() =
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
         | "FplPredicate" ->
             let x = new FplPredicate(positions, parent, 0)
-            x.Value <- Some (new FplIntrinsicPred(positions, x))
+            x.Value <- Some (new FplIntrinsicTrue(positions, x))
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
         | "FplPredicateList" ->
             let x = new FplPredicateList(positions, parent, 0)
-            x.ArgList.Add (new FplIntrinsicPred(positions, parent))
-            x.ArgList.Add (new FplIntrinsicPred(positions, parent))
+            x.ArgList.Add (new FplIntrinsicTrue(positions, parent))
+            x.ArgList.Add (new FplIntrinsicTrue(positions, parent))
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
         | "FplProof" ->
             let x = new FplProof(positions, parent, 0)
@@ -450,8 +453,9 @@ type SymbolTableStructure() =
     [<DataRow("FplImplication")>]
     [<DataRow("FplInstance")>]
     [<DataRow("FplIntrinsicInd")>]
-    [<DataRow("FplIntrinsicPred")>]
+    [<DataRow("FplIntrinsicFalse")>]
     [<DataRow("FplIntrinsicTpl")>]
+    [<DataRow("FplIntrinsicTrue")>]
     [<DataRow("FplIntrinsicUndef")>]
     [<DataRow("FplIsOperator")>]
     [<DataRow("FplJustification")>]
@@ -563,10 +567,12 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>(PrimInstanceL, (getName var).[index])
         | "FplIntrinsicInd" ->
             Assert.AreEqual<string>(PrimIntrinsicInd, (getName var).[index])
-        | "FplIntrinsicPred" ->
-            Assert.AreEqual<string>(PrimIntrinsicPred, (getName var).[index])
+        | "FplIntrinsicFalse" ->
+            Assert.AreEqual<string>(PrimFalse, (getName var).[index])
         | "FplIntrinsicTpl" ->
             Assert.AreEqual<string>(PrimIntrinsicTpl, (getName var).[index])
+        | "FplIntrinsicTrue" ->
+            Assert.AreEqual<string>(PrimTrue, (getName var).[index])
         | "FplIntrinsicUndef" ->
             Assert.AreEqual<string>(PrimIntrinsicUndef, (getName var).[index])
         | "FplIsOperator" ->
@@ -685,8 +691,9 @@ type SymbolTableStructure() =
     [<DataRow("FplImplication")>]
     [<DataRow("FplInstance")>]
     [<DataRow("FplIntrinsicInd")>]
-    [<DataRow("FplIntrinsicPred")>]
+    [<DataRow("FplIntrinsicFalse")>]
     [<DataRow("FplIntrinsicTpl")>]
+    [<DataRow("FplIntrinsicTrue")>]
     [<DataRow("FplIntrinsicUndef")>]
     [<DataRow("FplIsOperator")>]
     [<DataRow("FplJustification")>]
@@ -799,10 +806,12 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>(PrimInstance, (getName var).[index])
         | "FplIntrinsicInd" ->
             Assert.AreEqual<string>(LiteralInd, (getName var).[index])
-        | "FplIntrinsicPred" ->
+        | "FplIntrinsicFalse" ->
             Assert.AreEqual<string>(LiteralPred, (getName var).[index])
         | "FplIntrinsicTpl" ->
             Assert.AreEqual<string>(LiteralTpl, (getName var).[index])
+        | "FplIntrinsicTrue" ->
+            Assert.AreEqual<string>(LiteralPred, (getName var).[index])
         | "FplIntrinsicUndef" ->
             Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
         | "FplIsOperator" ->
@@ -921,8 +930,9 @@ type SymbolTableStructure() =
     [<DataRow("FplImplication")>]
     [<DataRow("FplInstance")>]
     [<DataRow("FplIntrinsicInd")>]
-    [<DataRow("FplIntrinsicPred")>]
+    [<DataRow("FplIntrinsicFalse")>]
     [<DataRow("FplIntrinsicTpl")>]
+    [<DataRow("FplIntrinsicTrue")>]
     [<DataRow("FplIntrinsicUndef")>]
     [<DataRow("FplIsOperator")>]
     [<DataRow("FplJustification")>]
@@ -1034,10 +1044,12 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>(LiteralObj, (getName var).[index])
         | "FplIntrinsicInd" ->
             Assert.AreEqual<string>(LiteralInd, (getName var).[index])
-        | "FplIntrinsicPred" ->
-            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
+        | "FplIntrinsicFalse" ->
+            Assert.AreEqual<string>(LiteralFalse, (getName var).[index])
         | "FplIntrinsicTpl" ->
             Assert.AreEqual<string>(LiteralTpl, (getName var).[index])
+        | "FplIntrinsicTrue" ->
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplIntrinsicUndef" ->
             Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
         | "FplIsOperator" ->
@@ -1157,8 +1169,9 @@ type SymbolTableStructure() =
     [<DataRow("FplImplication")>]
     [<DataRow("FplInstance")>]
     [<DataRow("FplIntrinsicInd")>]
-    [<DataRow("FplIntrinsicPred")>]
+    [<DataRow("FplIntrinsicFalse")>]
     [<DataRow("FplIntrinsicTpl")>]
+    [<DataRow("FplIntrinsicTrue")>]
     [<DataRow("FplIntrinsicUndef")>]
     [<DataRow("FplIsOperator")>]
     [<DataRow("FplJustification")>]
@@ -1270,10 +1283,12 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>(LiteralObj, (getName var).[index])
         | "FplIntrinsicInd" ->
             Assert.AreEqual<string>(LiteralInd, (getName var).[index])
-        | "FplIntrinsicPred" ->
+        | "FplIntrinsicFalse" ->
             Assert.AreEqual<string>(LiteralPred, (getName var).[index])
         | "FplIntrinsicTpl" ->
             Assert.AreEqual<string>(LiteralTpl, (getName var).[index])
+        | "FplIntrinsicTrue" ->
+            Assert.AreEqual<string>(LiteralPred, (getName var).[index])
         | "FplIntrinsicUndef" ->
             Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
         | "FplIsOperator" ->
@@ -1392,8 +1407,9 @@ type SymbolTableStructure() =
     [<DataRow("FplImplication")>]
     [<DataRow("FplInstance")>]
     [<DataRow("FplIntrinsicInd")>]
-    [<DataRow("FplIntrinsicPred")>]
+    [<DataRow("FplIntrinsicFalse")>]
     [<DataRow("FplIntrinsicTpl")>]
+    [<DataRow("FplIntrinsicTrue")>]
     [<DataRow("FplIntrinsicUndef")>]
     [<DataRow("FplIsOperator")>]
     [<DataRow("FplJustification")>]
@@ -1505,9 +1521,11 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>(PrimNone, (getName var).[index])
         | "FplIntrinsicInd" ->
             Assert.AreEqual<string>(PrimNone, (getName var).[index])
-        | "FplIntrinsicPred" ->
+        | "FplIntrinsicFalse" ->
             Assert.AreEqual<string>(PrimNone, (getName var).[index])
         | "FplIntrinsicTpl" ->
+            Assert.AreEqual<string>(PrimNone, (getName var).[index])
+        | "FplIntrinsicTrue" ->
             Assert.AreEqual<string>(PrimNone, (getName var).[index])
         | "FplIntrinsicUndef" ->
             Assert.AreEqual<string>(PrimNone, (getName var).[index])
@@ -1628,8 +1646,9 @@ type SymbolTableStructure() =
     [<DataRow("FplImplication")>]
     [<DataRow("FplInstance")>]
     [<DataRow("FplIntrinsicInd")>]
-    [<DataRow("FplIntrinsicPred")>]
+    [<DataRow("FplIntrinsicFalse")>]
     [<DataRow("FplIntrinsicTpl")>]
+    [<DataRow("FplIntrinsicTrue")>]
     [<DataRow("FplIntrinsicUndef")>]
     [<DataRow("FplIsOperator")>]
     [<DataRow("FplJustification")>]
@@ -1679,7 +1698,7 @@ type SymbolTableStructure() =
         | "FplArgInferenceAssume" ->
             Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplArgInferenceDerived" ->
-            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
+            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
         | "FplArgInferenceRevoke" ->
             Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
         | "FplArgInferenceTrivial" ->
@@ -1742,16 +1761,18 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>(LiteralObj, (getName var).[index])
         | "FplIntrinsicInd" ->
             Assert.AreEqual<string>($"dec {LiteralInd}", (getName var).[index])
-        | "FplIntrinsicPred" ->
-            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
+        | "FplIntrinsicFalse" ->
+            Assert.AreEqual<string>(LiteralFalse, (getName var).[index])
         | "FplIntrinsicTpl" ->
             Assert.AreEqual<string>(PrimNone, (getName var).[index])
+        | "FplIntrinsicTrue" ->
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplIntrinsicUndef" ->
             Assert.AreEqual<string>(LiteralUndef, (getName var).[index])
         | "FplIsOperator" ->
             Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplJustification" ->
-            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
+            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
         | "FplJustificationItemByAx" ->
             Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
         | "FplJustificationItemByConj" ->
@@ -1988,7 +2009,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
             let assignment = node :?> FplAssignment
             Assert.IsInstanceOfType<FplVariable>(assignment.Assignee.Value)
-            Assert.IsInstanceOfType<FplIntrinsicPred>(assignment.AssignedValue.Value)
+            Assert.IsInstanceOfType<FplIntrinsicFalse>(assignment.AssignedValue.Value)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
 
@@ -3279,47 +3300,80 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplIntrinsicPred", "00", """ax A {true};""", "")>]
-    [<DataRow("FplIntrinsicPred", "01", """ax A {false};""", "")>]
-    // reference to intrinsic pred
-    [<DataRow("FplIntrinsicPred", "03a", """def pred A() {dec ~x:pred x:=true; x};""", "true")>]
-    [<DataRow("FplIntrinsicPred", "03b", """def pred A() {D(true)};""", "true")>]
-    [<DataRow("FplIntrinsicPred", "03c", """def pred A() {dec ~x:pred x:=false; x};""", "false")>]
-    [<DataRow("FplIntrinsicPred", "03d", """def pred A() {D(false)};""", "false")>]
+    [<DataRow("FplIntrinsicFalse", "01", """ax A {false};""", "")>]
+    // reference to intrinsic false
+    [<DataRow("FplIntrinsicFalse", "03c", """def pred A() {dec ~x:pred x:=false; x};""", "false")>]
+    [<DataRow("FplIntrinsicFalse", "03d", """def pred A() {D(false)};""", "false")>]
     [<TestMethod>]
-    member this.TestStructureFplIntrinsicPred(nodeType, varVal, fplCode, identifier) =
-        let filename = "TestStructureFplIntrinsicPred.fpl"
+    member this.TestStructureFplIntrinsicFalse(nodeType, varVal, fplCode, identifier) =
+        let filename = "TestStructureFplIntrinsicFalse.fpl"
         let parent, node = testSkeleton nodeType filename fplCode identifier
         
         match nodeType, varVal with
-        | "FplIntrinsicPred", "00" 
-        | "FplIntrinsicPred", "01" ->
+        | "FplIntrinsicFalse", "01" ->
             Assert.IsInstanceOfType<FplReference>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsTrue(parent.RefersTo.IsSome)
             Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
-            Assert.IsInstanceOfType<FplIntrinsicPred>(node)
+            Assert.IsInstanceOfType<FplIntrinsicFalse>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
-        | "FplIntrinsicPred", "03a" 
-        | "FplIntrinsicPred", "03c" ->
+        | "FplIntrinsicFalse", "03c" ->
             Assert.IsInstanceOfType<FplReference>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsTrue(parent.RefersTo.IsSome)
             Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
-            Assert.IsInstanceOfType<FplIntrinsicPred>(node)
+            Assert.IsInstanceOfType<FplIntrinsicFalse>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
-        | "FplIntrinsicPred", "03b" 
-        | "FplIntrinsicPred", "03d" ->
+        | "FplIntrinsicFalse", "03d" ->
             Assert.IsInstanceOfType<FplReference>(parent)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsTrue(parent.RefersTo.IsSome)
             Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
-            Assert.IsInstanceOfType<FplIntrinsicPred>(node)
+            Assert.IsInstanceOfType<FplIntrinsicFalse>(node)
+            Assert.AreEqual<int>(0, node.ArgList.Count)
+            Assert.AreEqual<int>(0, node.Scope.Count)
+        | _ -> failwith($"unmatched test {nodeType} {varVal}")
+
+    [<DataRow("FplIntrinsicTrue", "00", """ax A {true};""", "")>]
+    // reference to intrinsic true
+    [<DataRow("FplIntrinsicTrue", "03a", """def pred A() {dec ~x:pred x:=true; x};""", "true")>]
+    [<DataRow("FplIntrinsicTrue", "03b", """def pred A() {D(true)};""", "true")>]
+    [<TestMethod>]
+    member this.TestStructureFplIntrinsicTrue(nodeType, varVal, fplCode, identifier) =
+        let filename = "TestStructureFplIntrinsicTrue.fpl"
+        let parent, node = testSkeleton nodeType filename fplCode identifier
+        
+        match nodeType, varVal with
+        | "FplIntrinsicTrue", "00" ->
+            Assert.IsInstanceOfType<FplReference>(parent)
+            Assert.AreEqual<int>(0, parent.ArgList.Count)
+            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsTrue(parent.RefersTo.IsSome)
+            Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
+            Assert.IsInstanceOfType<FplIntrinsicTrue>(node)
+            Assert.AreEqual<int>(0, node.ArgList.Count)
+            Assert.AreEqual<int>(0, node.Scope.Count)
+        | "FplIntrinsicTrue", "03a" ->
+            Assert.IsInstanceOfType<FplReference>(parent)
+            Assert.AreEqual<int>(0, parent.ArgList.Count)
+            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsTrue(parent.RefersTo.IsSome)
+            Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
+            Assert.IsInstanceOfType<FplIntrinsicTrue>(node)
+            Assert.AreEqual<int>(0, node.ArgList.Count)
+            Assert.AreEqual<int>(0, node.Scope.Count)
+        | "FplIntrinsicTrue", "03b" ->
+            Assert.IsInstanceOfType<FplReference>(parent)
+            Assert.AreEqual<int>(0, parent.ArgList.Count)
+            Assert.AreEqual<int>(0, parent.Scope.Count)
+            Assert.IsTrue(parent.RefersTo.IsSome)
+            Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
+            Assert.IsInstanceOfType<FplIntrinsicTrue>(node)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")

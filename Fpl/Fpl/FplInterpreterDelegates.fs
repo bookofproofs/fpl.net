@@ -86,7 +86,6 @@ type FplEquality(name, positions: Positions, parent: FplGenericNode) as this =
                 let aRepr = a.Represent()
                 let bRepr = b.Represent()
 
-                let newPred = new FplIntrinsicPred((heap.Helper.CallerStartPos, heap.Helper.CallerEndPos), this.Parent.Value)
                 match aRepr with
                 | LiteralUndef -> 
                     this.ErrorOccurred <- emitID013Diagnostics "Predicate `=` cannot be evaluated because the left argument is undefined." heap.Helper.CallerStartPos heap.Helper.CallerEndPos 
@@ -97,8 +96,8 @@ type FplEquality(name, positions: Positions, parent: FplGenericNode) as this =
                         this.ErrorOccurred <- emitID013Diagnostics "Predicate `=` cannot be evaluated because the right argument is undefined." heap.Helper.CallerStartPos heap.Helper.CallerEndPos 
                         this.SetDefaultValue()
                     | _ when aType<>bType -> 
-                        newPred.FplId <- LiteralFalse // if the compared arguments have different types, then unequal
-                        this.SetValue newPred
+                        // if the compared arguments have different types, then unequal
+                        this.SetValue (new FplIntrinsicFalse((heap.Helper.CallerStartPos, heap.Helper.CallerEndPos), this.Parent.Value))
                     | _ when aType = "tpl" && bType = "tpl" && aRepr = PrimUndetermined && bRepr = PrimUndetermined -> 
                         this.SetDefaultValue()
                     | _ -> 
@@ -111,9 +110,10 @@ type FplEquality(name, positions: Positions, parent: FplGenericNode) as this =
                             | PrimUndetermined -> 
                                 this.ErrorOccurred <- emitID013Diagnostics "Predicate `=` cannot be evaluated because the right argument is undetermined." heap.Helper.CallerStartPos heap.Helper.CallerEndPos 
                                 this.SetDefaultValue()
+                            | _ when aRepr = bRepr -> 
+                                this.SetValue (new FplIntrinsicTrue((heap.Helper.CallerStartPos, heap.Helper.CallerEndPos), this.Parent.Value))
                             | _ -> 
-                                newPred.FplId <- $"{(aRepr = bRepr)}".ToLower()
-                                this.SetValue newPred
+                                this.SetValue (new FplIntrinsicFalse((heap.Helper.CallerStartPos, heap.Helper.CallerEndPos), this.Parent.Value))
         debug this Debug.Stop
 
 /// Implements the semantics of an FPL decrement delegate.

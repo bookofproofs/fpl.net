@@ -110,21 +110,20 @@ type FplIntrinsicUndef(positions: Positions, parent: FplGenericNode) as this =
 
     override this.RunOrder = None
 
-/// Implements the semantics of an FPL predicate prime predicate that is intrinsic.
+/// Implements the semantics of an FPL prime predicate "true".
 /// It serves as a value for everything in FPL that is "predicative in nature". 
 /// These can be predicates, theorem-like-statements, proofs or predicative expressions. 
-/// The semantical representation can have one of two values in FPL: "true" and "false". 
-type FplIntrinsicPred(positions: Positions, parent: FplGenericNode) as this =
+type FplIntrinsicTrue(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericIsValue(positions, parent)
     do 
         this.FplId <- LiteralTrue
         this.TypeId <- LiteralPred
 
-    override this.Name = PrimIntrinsicPred
+    override this.Name = PrimTrue
     override this.ShortName = LiteralPred
 
     override this.Clone () =
-        let ret = new FplIntrinsicPred((this.StartPos, this.EndPos), this.Parent.Value)
+        let ret = new FplIntrinsicTrue((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
 
@@ -134,7 +133,37 @@ type FplIntrinsicPred(positions: Positions, parent: FplGenericNode) as this =
         this.FplId 
 
     override this.Run() = 
-        // FplIntrinsicPred is a value of predicate closures and has no value on its own
+        // FplIntrinsicTrue is a value of predicate closures and has no value on its own
+        ()
+
+    override this.EmbedInSymbolTable _ = addExpressionToReference this
+
+    override this.RunOrder = None
+
+/// Implements the semantics of an FPL prime predicate "false".
+/// It serves as a value for everything in FPL that is "predicative in nature". 
+/// These can be predicates, theorem-like-statements, proofs or predicative expressions. 
+type FplIntrinsicFalse(positions: Positions, parent: FplGenericNode) as this =
+    inherit FplGenericIsValue(positions, parent)
+    do 
+        this.FplId <- LiteralFalse
+        this.TypeId <- LiteralPred
+
+    override this.Name = PrimFalse
+    override this.ShortName = LiteralPred
+
+    override this.Clone () =
+        let ret = new FplIntrinsicTrue((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Type (signatureType:SignatureType) = getFplHead this signatureType
+                    
+    override this.Represent() = // done
+        this.FplId 
+
+    override this.Run() = 
+        // FplIntrinsicFalse is a value of predicate closures and has no value on its own
         ()
 
     override this.EmbedInSymbolTable _ = addExpressionToReference this

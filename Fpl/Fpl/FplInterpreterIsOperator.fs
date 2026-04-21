@@ -49,16 +49,13 @@ type FplIsOperator(positions: Positions, parent: FplGenericNode) as this =
         | :? FplReference as op ->
             match mpwa [operand] [typeOfOperand] with
             | Some errMsg -> 
-                let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
-                newValue.FplId <- LiteralFalse
+                let newValue =  new FplIntrinsicFalse((this.StartPos, this.EndPos), this)
                 this.SetValue newValue
             | None -> 
-                let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
-                newValue.FplId <- LiteralTrue
+                let newValue =  new FplIntrinsicTrue((this.StartPos, this.EndPos), this)
                 this.SetValue newValue
         | _ -> 
-            let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
-            newValue.FplId <- LiteralFalse
+            let newValue =  new FplIntrinsicFalse((this.StartPos, this.EndPos), this)
             this.SetValue newValue
         
         debug this Debug.Stop

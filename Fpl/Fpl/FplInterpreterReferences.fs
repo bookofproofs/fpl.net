@@ -32,7 +32,8 @@ let rec referencedNodeOpt (fv:FplGenericNode) =
         match box fv with 
         | :? IHasDotted as dotted when dotted.DottedChild.IsSome -> referencedNodeOpt dotted.DottedChild.Value
         | _ when fv.Name = PrimInstanceL -> Some fv
-        | _ when fv.Name = PrimIntrinsicPred -> Some fv
+        | _ when fv.Name = PrimTrue -> Some fv
+        | _ when fv.Name = PrimFalse -> Some fv
         | _ when fv.Name = PrimIntrinsicInd -> Some fv
         | _ when fv.Name = PrimVariableL -> fv.RefersTo
         | _ -> fv.RefersTo

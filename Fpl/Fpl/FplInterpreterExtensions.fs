@@ -172,7 +172,8 @@ type FplReturn(positions: Positions, parent: FplGenericNode) as this =
                 | Some errMsg -> returnedReference.ErrorOccurred <- emitSIG03Diagnostics errMsg (returnedReference.StartPos) (returnedReference.EndPos)
                 | _ -> 
                     match returnedReference with
-                    | :? FplIntrinsicPred 
+                    | :? FplIntrinsicTrue 
+                    | :? FplIntrinsicFalse
                     | :? FplIntrinsicTpl 
                     | :? FplIntrinsicInd 
                     | :? FplIntrinsicUndef 

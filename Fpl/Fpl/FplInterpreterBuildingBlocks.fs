@@ -432,16 +432,12 @@ let rec eval ast =
         heap.Eval.PopEvalStack()
     | Ast.True((pos1, pos2), _) -> 
         let fv = heap.Eval.PeekEvalStack()
-        let value = new FplIntrinsicPred((pos1, pos2), fv)
-        value.FplId <- LiteralTrue
+        let value = new FplIntrinsicTrue((pos1, pos2), fv)
         heap.Eval.PushEvalStack(value)
         heap.Eval.PopEvalStack()
     | Ast.False((pos1, pos2), _) -> 
         let fv = heap.Eval.PeekEvalStack()
-        let value = new FplIntrinsicPred((pos1, pos2), fv)
-        value.StartPos <- pos1
-        value.EndPos <- pos2
-        value.FplId <- LiteralFalse
+        let value = new FplIntrinsicFalse((pos1, pos2), fv)
         value.TypeId <- LiteralPred
         heap.Eval.PushEvalStack(value)
         heap.Eval.PopEvalStack()

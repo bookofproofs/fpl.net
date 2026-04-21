@@ -1352,6 +1352,8 @@ let PrimExtensionL = "extension definition"
 [<Literal>]
 let PrimExtensionObj = "extension object"
 [<Literal>]
+let PrimFalse = "false value"
+[<Literal>]
 let PrimForInStmtL = "for in statement"
 [<Literal>]
 let PrimForInStmtDomain = "fordomain"
@@ -1371,8 +1373,6 @@ let PrimInstance = "inst"
 let PrimInstanceL = "instance"
 [<Literal>]
 let PrimIntrinsicInd = "intrinsic index"
-[<Literal>]
-let PrimIntrinsicPred = "intrinsic predicate"
 [<Literal>]
 let PrimIntrinsicTpl = "intrinsic template"
 [<Literal>]
@@ -1469,6 +1469,8 @@ let PrimTitleDerived = "Derived Arguments"
 let PrimTitleRuleOfInference = "Inference Rules"
 [<Literal>]
 let PrimTitleTheorems = "Theorems"
+[<Literal>]
+let PrimTrue = "true value"
 [<Literal>]
 let PrimTheory = "th"
 [<Literal>]
