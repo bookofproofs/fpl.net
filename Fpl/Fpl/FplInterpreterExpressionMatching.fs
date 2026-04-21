@@ -51,18 +51,32 @@ let checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) =
         | PrimExclusiveOr, PrimExclusiveOr 
         | PrimNegation, PrimNegation -> checkExpressions (a.ArgList |> Seq.toList) (p.ArgList |> Seq.toList) 
         | PrimRefL, PrimRefL ->
+            match a.RefersTo, p.RefersTo with
+            | Some aRef, Some pRef ->
+                checkExpr aRef pRef
+            | Some aRef, None ->
+                false, $"found `{aRef.Type SignatureType.Name}`, expected end of formula"
+            | None, Some pRef ->
+                false, $"found end of formular, expected `{pRef.Type SignatureType.Name}`"
+            | None, None ->
+                true, ""
+        | _, PrimRefL when p.RefersTo.IsSome && p.RefersTo.Value.Name = PrimVariableL ->
+            checkExpr a p.RefersTo.Value
+        | _, PrimVariableL ->
             match matchArgumentsWithParameters a p with
             | Some err ->
                 false, err
             | None ->
-                match a.RefersTo, p.RefersTo with
-                | Some aRef, Some pRef ->
-                    checkExpr aRef pRef
-                | Some aRef, None ->
-                    false, $"found `{aRef.Type SignatureType.Name}`, expected end of formula"
-                | None, Some pRef ->
-                    false, $"found end of formular, expected `{pRef.Type SignatureType.Name}`"
-                | None, None ->
+                let varName = p.FplId
+                if dictParameterUsage.ContainsKey varName then
+                    let expectedExpr = (dictParameterUsage[varName].Type SignatureType.Name)
+                    let actualExpr = (a.Type SignatureType.Name)
+                    if expectedExpr<>actualExpr then
+                        false, $"variable `{varName}` matched with different formulas `{expectedExpr}` and `{actualExpr}`"
+                    else
+                        true, "" 
+                else
+                    dictParameterUsage.Add (varName, a) // add usage of variable
                     true, ""
         | _, _ -> false, $"found `{a.Type SignatureType.Name}`, expected `{p.Type SignatureType.Name}`"
     checkExpr a p, dictParameterUsage

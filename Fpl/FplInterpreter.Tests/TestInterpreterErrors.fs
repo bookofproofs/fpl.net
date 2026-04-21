@@ -1432,6 +1432,8 @@ type TestInterpreterErrors() =
     [<DataRow("01", """inf M { dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q } thm T {true} proof T$1 {1. |- and(true, impl(true, false)) 2. 1, byinf M |- false };""", 0)>]
     [<DataRow("01a", """inf M { dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q } thm T {true} proof T$1 {1. |- or(true, impl(true, false)) 2. 1, byinf M |- false };""", 1)>]
     [<DataRow("01b", """inf M { dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q } thm T {true} proof T$1 {1. |- and(true, xor(true, false)) 2. 1, byinf M |- false };""", 1)>]
+    [<DataRow("01c", """inf M { dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q } thm T {true} proof T$1 {1. |- and(is(x,K), impl(ex x:obj {is(x,N)}, false)) 2. 1, byinf M |- false };""", 1)>]
+    [<DataRow("01d", """inf M { dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q } thm T {true} proof T$1 {1. |- and(ex x:obj {is(x,N)}, impl(ex x:obj {is(x,N)}, false)) 2. 1, byinf M |- false };""", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR008(no:string, fplCode:string, expected) =
