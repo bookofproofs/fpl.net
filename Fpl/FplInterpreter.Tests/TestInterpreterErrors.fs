@@ -3292,7 +3292,7 @@ type TestInterpreterErrors() =
     [<DataRow("17", """def pred T1() {true} def pred Test() { dec ~x:obj; T1(x) };""", 1)>]
     [<DataRow("19", """def pred T (x:obj) {true} def pred Caller() {dec ~x:obj; T(x)} ;""", 0)>]
     [<DataRow("20", """def pred T (x:obj) {true} def pred Caller() {dec ~x:ind; T(x)} ;""", 1)>]
-    [<DataRow("21", "inf ExistsByExample {dec ~p: pred(c: obj) ~x: obj; pre: p(c) con: ex x:obj {p(x)}};", 0)>]
+    [<DataRow("21", "inf ExistsByExample {dec ~p: pred(c: obj) ~x: obj; pre: p(c) con: ex y:obj {p(y)}};", 0)>]
     [<DataRow("22", """loc NotEqual(x,y) := !tex: x "\neq" y; ;""", 0)>]
     [<DataRow("23", """def pred Eq(x,y: obj) infix "=" 1000 {intr} axiom A {dec ~x,y:obj; (x = y) };""", 0)>]
     [<DataRow("24", """def pred Eq(x,y: obj) infix "=" 1000 {intr} axiom A {dec ~x,y:obj; Eq(x,y) };""", 0)>]
