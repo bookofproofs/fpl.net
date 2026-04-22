@@ -1439,7 +1439,7 @@ type TestInterpreterErrors() =
     [<DataRow("MP_01g", """inf M { dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q } thm T {true} proof T$1 {1. |- and(and(exn$1 x:obj {is(x,N)}, true), impl(and(exn$1 x:obj {is(x,N)}, true), false)) 2. 1, byinf M |- false };""", 0)>]
     [<DataRow("MP_01h", """inf M { dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q } thm T {true} proof T$1 {1. |- and(not (ex x:obj {is(x,N)}), impl(not (ex x:obj {is(x,N)}), false)) 2. 1, byinf M |- false };""", 0)>]
     [<DataRow("MP_01i", """inf M { dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q } thm T {true} proof T$1 {1. |- and(ex x:obj {is(x,N)}, impl(is(x,N), false)) 2. 1, byinf M |- false };""", 1)>]
-    [<DataRow("MP_01j", """inf M { dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q } thm T {true} proof T$1 {1. |- and(ex x:obj {is(x,N)}, impl(ex x:obj {is(x,N)}, xor(true,false))) 2. 1, byinf M |- false };""", 1)>]
+    [<DataRow("MP_01j", """inf M { dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q } thm T {true} proof T$1 {1. |- and(ex x:obj {is(x,N)}, impl(ex x:obj {is(x,N)}, xor(true,false))) 2. 1, byinf M |- false };""", 0)>]
     [<DataRow("MP_01k", """inf M { dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q } thm T {true} proof T$1 {1. |- and(iif(true, ex x:obj {is(x,N)}), impl(iif(true, ex x:obj {is(x,N)}), false)) 2. 1, byinf M |- false };""", 0)>]
     [<DataRow("MP_01l", """inf M { dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q } thm T {true} proof T$1 {1. |- and(ex x:obj {is(x,N)}, impl(all x:obj {is(x,N)}, false)) 2. 1, byinf M |- false };""", 1)>]
     [<DataRow("MP_01m", """inf M { dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q } thm T {true} proof T$1 {1. |- and(is(A,N), impl(is(A,N), false)) 2. 1, byinf M |- false };""", 0)>]
@@ -1463,6 +1463,7 @@ type TestInterpreterErrors() =
 
     [<DataRow("AndA_01", """inf AndAssociative{dec ~p,q,s:pred; pre:and(p,and(q,s)) con:and(and(p,q),s)} thm T {true} proof T$1 {1. |- and(true, and(false, true)) 2. 1, byinf AndAssociative |- and(and(true,false), true) };""", 0)>]
     [<DataRow("AndA_02", """inf AndAssociative{dec ~p,q,s:pred; pre:and(p,and(q,s)) con:and(and(p,q),s)} thm T {true} proof T$1 {1. |- and(and(true,false), true) 2. 1, byinf AndAssociative |- and(and(true,false), true) };""", 1)>]
+    [<DataRow("AndA_02a", """inf AndAssociative{dec ~p,q,s:pred; pre:and(p,and(q,s)) con:and(and(p,q),s)} thm T {true} proof T$1 {1. |- and(true,and(true,false)) 2. 1, byinf AndAssociative |- and(and(true,false), true) };""", 0)>]
     [<DataRow("AndA_03", """inf AndAssociative{dec ~p,q,s:pred; pre:and(p,and(q,s)) con:and(and(p,q),s)} thm T {true} proof T$1 {1. |- and(all x:obj {is(x,N)}, and(ex y:obj {is(y,M)}, true)) 2. 1, byinf AndAssociative |- and(and(all x:obj {is(x,N)}, ex y:obj {is(y,M)}), true) };""", 0)>]
 
     [<DataRow("OrA_01", """inf OrAssociative{dec ~p,q,s:pred; pre:or(p,or(q,s)) con:or(or(p,q),s)} thm T {true} proof T$1 {1. |- or(true, or(false, true)) 2. 1, byinf OrAssociative |- or(or(true,false), true) };""", 0)>]

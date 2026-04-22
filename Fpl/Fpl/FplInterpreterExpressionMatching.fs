@@ -50,6 +50,9 @@ let checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) =
         | PrimEquivalence, PrimEquivalence
         | PrimExclusiveOr, PrimExclusiveOr 
         | PrimNegation, PrimNegation -> checkExpressions (a.ArgList |> Seq.toList) (p.ArgList |> Seq.toList) 
+        | PrimFalse, PrimFalse 
+        | PrimTrue, PrimTrue ->
+            true, ""
         | PrimRefL, PrimRefL ->
             match a.RefersTo, p.RefersTo with
             | Some aRef, Some pRef ->

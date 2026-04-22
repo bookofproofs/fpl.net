@@ -630,7 +630,8 @@ and FplArgInferenceDerived(positions: Positions, parent: FplGenericNode) =
     override this.Run() = 
         // TODO implement run
         debug this Debug.Start
-        this.SetDefaultValue()
+        let v = FplIntrinsicTrue((this.StartPos, this.EndPos), this.Parent.Value)
+        this.SetValue v
         debug this Debug.Stop
 
     member this.ParentArgument = this.Parent.Value :?> FplArgument

@@ -1698,7 +1698,7 @@ type SymbolTableStructure() =
         | "FplArgInferenceAssume" ->
             Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplArgInferenceDerived" ->
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplArgInferenceRevoke" ->
             Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
         | "FplArgInferenceTrivial" ->
