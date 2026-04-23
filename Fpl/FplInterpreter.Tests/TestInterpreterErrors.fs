@@ -1638,7 +1638,7 @@ type TestInterpreterErrors() =
     [<DataRow("byax_bydef_func", "prf P$1 {1. byax A1, bydef D2 |- true};", 1)>]
     [<DataRow("byax_bydef_cl", "prf P$1 {1. byax A1, bydef D3 |- true};", 1)>]
     [<DataRow("byax_bydef_var", "prf P$1 {1. byax A1, bydef x |- true};", 1)>]
-    [<DataRow("byax_byinf", "prf P$1 {1. byax A1, byinf I1 |- true};", 1)>]
+    [<DataRow("byax_byinf", "prf P$1 {1. byax A1, byinf I1 |- true};", 0)>] // last byinf allows mixing
     [<DataRow("byax_byprfarg", "prf P$1 {1. byax A1, T1$3:1  |- true};", 1)>]
     [<DataRow("byax_byarg", "prf P$1 {1. |- true 2. byax A1, 1 |- true};", 1)>]
 
@@ -1650,7 +1650,7 @@ type TestInterpreterErrors() =
     [<DataRow("byconj_bydef_func", "prf P$1 {1. byconj C1, bydef D2 |- true};", 1)>]
     [<DataRow("byconj_bydef_cl", "prf P$1 {1. byconj C1, bydef D3 |- true};", 1)>]
     [<DataRow("byconj_bydef_var", "prf P$1 {1. byconj C1, bydef x |- true};", 1)>]
-    [<DataRow("byconj_byinf", "prf P$1 {1. byconj C1, byinf I1 |- true};", 1)>]
+    [<DataRow("byconj_byinf", "prf P$1 {1. byconj C1, byinf I1 |- true};", 0)>] // last byinf allows mixing
     [<DataRow("byconj_byprfarg", "prf P$1 {1. byconj C1, T1$3:1  |- true};", 1)>]
     [<DataRow("byconj_byarg", "prf P$1 {1. |- true 2. byconj C1, 1 |- true};", 1)>]
 
@@ -1662,7 +1662,7 @@ type TestInterpreterErrors() =
     [<DataRow("bythm_bydef_func", "prf P$1 {1. T1, bydef D2 |- true};", 1)>]
     [<DataRow("bythm_bydef_cl", "prf P$1 {1. T1, bydef D3 |- true};", 1)>]
     [<DataRow("bythm_bydef_var", "prf P$1 {1. T1, bydef x |- true};", 1)>]
-    [<DataRow("bythm_byinf", "prf P$1 {1. T1, byinf I1 |- true};", 1)>]
+    [<DataRow("bythm_byinf", "prf P$1 {1. T1, byinf I1 |- true};", 0)>] // last byinf allows mixing
     [<DataRow("bythm_byprfarg", "prf P$1 {1. T1, T1$3:1  |- true};", 1)>]
     [<DataRow("bythm_byarg", "prf P$1 {1. |- true 2. T1, 1 |- true};", 1)>]
 
@@ -1674,7 +1674,7 @@ type TestInterpreterErrors() =
     [<DataRow("bycor_bydef_func", "prf P$1 {1. bycor T$1, bydef D2 |- true};", 1)>]
     [<DataRow("bycor_bydef_cl", "prf P$1 {1. bycor T$1, bydef D3 |- true};", 1)>]
     [<DataRow("bycor_bydef_var", "prf P$1 {1. bycor T$1, bydef x |- true};", 1)>]
-    [<DataRow("bycor_byinf", "prf P$1 {1. bycor T$1, byinf I1 |- true};", 1)>]
+    [<DataRow("bycor_byinf", "prf P$1 {1. bycor T$1, byinf I1 |- true};", 0)>] // last byinf allows mixing
     [<DataRow("bycor_byprfarg", "prf P$1 {1. bycor T$1, T1$3:1  |- true};", 1)>]
     [<DataRow("bycor_byarg", "prf P$1 {1. |- true 2. bycor T$1, 1 |- true};", 1)>]
 
@@ -1686,7 +1686,7 @@ type TestInterpreterErrors() =
     [<DataRow("bydef_pred_bydef_func", "prf P$1 {1. bydef D1, bydef D2 |- true};", 0)>]
     [<DataRow("bydef_pred_bydef_cl", "prf P$1 {1. bydef D1, bydef D3 |- true};", 0)>]
     [<DataRow("bydef_pred_bydef_var", "prf P$1 {1. bydef D1, bydef x |- true};", 1)>]
-    [<DataRow("bydef_pred_byinf", "prf P$1 {1. bydef D1, byinf I1 |- true};", 1)>]
+    [<DataRow("bydef_pred_byinf", "prf P$1 {1. bydef D1, byinf I1 |- true};", 0)>] // last byinf allows mixing
     [<DataRow("bydef_pred_byprfarg", "prf P$1 {1. bydef D1, T1$3:1  |- true};", 1)>]
     [<DataRow("bydef_pred_byarg", "prf P$1 {1. |- true 2. bydef D1, 1 |- true};", 1)>]
 
@@ -1698,7 +1698,7 @@ type TestInterpreterErrors() =
     [<DataRow("bydef_func_bydef_func", "prf P$1 {1. bydef D2, bydef D2 |- true};", 0)>]
     [<DataRow("bydef_func_bydef_cl", "prf P$1 {1. bydef D2, bydef D3 |- true};", 0)>]
     [<DataRow("bydef_func_bydef_var", "prf P$1 {1. bydef D2, bydef x |- true};", 1)>]
-    [<DataRow("bydef_func_byinf", "prf P$1 {1. bydef D2, byinf I1 |- true};", 1)>]
+    [<DataRow("bydef_func_byinf", "prf P$1 {1. bydef D2, byinf I1 |- true};", 0)>] // last byinf allows mixing
     [<DataRow("bydef_func_byprfarg", "prf P$1 {1. bydef D2, T1$3:1  |- true};", 1)>]
     [<DataRow("bydef_func_byarg", "prf P$1 {1. |- true 2. bydef D2, 1 |- true};", 1)>]
 
@@ -1710,7 +1710,7 @@ type TestInterpreterErrors() =
     [<DataRow("bydef_cl_bydef_func", "prf P$1 {1. bydef D3, bydef D2 |- true};", 0)>]
     [<DataRow("bydef_cl_bydef_cl", "prf P$1 {1. bydef D3, bydef D3 |- true};", 0)>]
     [<DataRow("bydef_cl_bydef_var", "prf P$1 {1. bydef D3, bydef x |- true};", 1)>]
-    [<DataRow("bydef_cl_byinf", "prf P$1 {1. bydef D3, byinf I1 |- true};", 1)>]
+    [<DataRow("bydef_cl_byinf", "prf P$1 {1. bydef D3, byinf I1 |- true};", 0)>] // last byinf allows mixing
     [<DataRow("bydef_cl_byprfarg", "prf P$1 {1. bydef D3, T1$3:1  |- true};", 1)>]
     [<DataRow("bydef_cl_byarg", "prf P$1 {1. |- true 2. bydef D3, 1 |- true};", 1)>]
 
@@ -1722,7 +1722,7 @@ type TestInterpreterErrors() =
     [<DataRow("bydef_var_bydef_func", "prf P$1 {1. bydef x, bydef D2 |- true};", 1)>]
     [<DataRow("bydef_var_bydef_cl", "prf P$1 {1. bydef x, bydef D3 |- true};", 1)>]
     [<DataRow("bydef_var_bydef_var", "prf P$1 {1. bydef x, bydef x |- true};", 0)>]
-    [<DataRow("bydef_var_byinf", "prf P$1 {1. bydef x, byinf I1 |- true};", 1)>]
+    [<DataRow("bydef_var_byinf", "prf P$1 {1. bydef x, byinf I1 |- true};", 0)>] // last byinf allows mixing
     [<DataRow("bydef_var_byprfarg", "prf P$1 {1. bydef x, T1$3:1  |- true};", 1)>]
     [<DataRow("bydef_var_byarg", "prf P$1 {1. |- true 2. bydef x, 1 |- true};", 1)>]
 
@@ -1746,7 +1746,7 @@ type TestInterpreterErrors() =
     [<DataRow("byprfarg_bydef_func", "prf P$1 {1. T1$3:1, bydef D2 |- true};", 1)>]
     [<DataRow("byprfarg_bydef_cl", "prf P$1 {1. T1$3:1, bydef D3 |- true};", 1)>]
     [<DataRow("byprfarg_bydef_var", "prf P$1 {1. T1$3:1, bydef x |- true};", 1)>]
-    [<DataRow("byprfarg_byinf", "prf P$1 {1. T1$3:1, byinf I1 |- true};", 1)>]
+    [<DataRow("byprfarg_byinf", "prf P$1 {1. T1$3:1, byinf I1 |- true};", 0)>] // last byinf allows mixing
     [<DataRow("byprfarg_byprfarg", "prf P$1 {1. T1$3:1, T1$3:1  |- true};", 0)>]
     [<DataRow("byprfarg_byarg", "prf P$1 {1. |- true 2. T1$3:1, 1 |- true};", 1)>]
 
@@ -1758,7 +1758,7 @@ type TestInterpreterErrors() =
     [<DataRow("byarg_bydef_func", "prf P$1 {1. |- true 2. 1, bydef D2 |- true};", 1)>]
     [<DataRow("byarg_bydef_cl", "prf P$1 {1. |- true 2. 1, bydef D3 |- true};", 1)>]
     [<DataRow("byarg_bydef_var", "prf P$1 {1. |- true 2. 1, bydef x |- true};", 1)>]
-    [<DataRow("byarg_byinf", "prf P$1 {1. |- true 2. 1, byinf I1 |- true};", 1)>]
+    [<DataRow("byarg_byinf", "prf P$1 {1. |- true 2. 1, byinf I1 |- true};", 0)>] // last byinf allows mixing
     [<DataRow("byarg_byprfarg", "prf P$1 {1. |- true 2. 1, T1$3:1  |- true};", 1)>]
     [<DataRow("byarg_byarg", "prf P$1 {1. |- true 2. |- true 3. 2, 1 |- true};", 0)>]
 

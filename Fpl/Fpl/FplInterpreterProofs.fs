@@ -348,10 +348,18 @@ and FplJustification(positions: Positions, parent: FplGenericNode) =
         this.ArgList |> Seq.toList
 
     override this.CheckConsistency () =
-        match findTwoDifferentNames (this.ArgList |> Seq.toList) with
+        let justItems = (this.ArgList |> Seq.toList)
+        match justItems |> List.tryLast with
+        | Some lastJustItem when lastJustItem.Name = PrimJIByInf ->
+            () // only when the last justification item in a row is a "byinf" item, users can mex different justification types proceeding it
+        | _ ->
+            // else (i.e. last just item is different from a "byinf" item)
+            match findTwoDifferentNames justItems with
         | Choice1Of2 _ -> ()
             // all justification item types are identical → OK
-        | Choice2Of2 (justificationType1, justificationType2) ->
+            | Choice2Of2 (justificationType1Pre, justificationType2Pre) ->
+                let justificationType1 = justificationType1Pre.Replace("justification ", "")
+                let justificationType2 = justificationType2Pre.Replace("justification ", "")
             // issue diagnostics if ordered justification items mix types of justification items
             this.ErrorOccurred <- emitPR019Diagnostics justificationType1 justificationType2 this.StartPos this.EndPos
         base.CheckConsistency()
