@@ -116,9 +116,9 @@ let matchJustItemsExpressionsAgainstPremiseList (tuplesJustItemWithProceedingExp
                 result.Add matchedExprList
                 matchJustItemsExpressionsAgainstPremiseListRec iJels pres 
         | [], _::_ ->
-            byInferenceNode.ErrorOccurred <- emitPR020Diagnostics preList.Length iJeLists.Length byInferenceNode.StartPos byInferenceNode.EndPos
+            byInferenceNode.ErrorOccurred <- emitPR020Diagnostics (preList.Length + 1) (iJeLists.Length + 1) byInferenceNode.StartPos byInferenceNode.EndPos
         | _::_, [] ->
-            byInferenceNode.ErrorOccurred <- emitPR020Diagnostics preList.Length iJeLists.Length byInferenceNode.StartPos byInferenceNode.EndPos
+            byInferenceNode.ErrorOccurred <- emitPR020Diagnostics (preList.Length + 1) (iJeLists.Length + 1) byInferenceNode.StartPos byInferenceNode.EndPos
         | [], [] -> ()
             
     matchJustItemsExpressionsAgainstPremiseListRec tuplesJustItemWithProceedingExpressionsList premiseList
