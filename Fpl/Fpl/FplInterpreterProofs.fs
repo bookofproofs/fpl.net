@@ -355,13 +355,13 @@ and FplJustification(positions: Positions, parent: FplGenericNode) =
         | _ ->
             // else (i.e. last just item is different from a "byinf" item)
             match findTwoDifferentNames justItems with
-        | Choice1Of2 _ -> ()
-            // all justification item types are identical → OK
+            | Choice1Of2 _ -> ()
+                // all justification item types are identical → OK
             | Choice2Of2 (justificationType1Pre, justificationType2Pre) ->
                 let justificationType1 = justificationType1Pre.Replace("justification ", "")
                 let justificationType2 = justificationType2Pre.Replace("justification ", "")
-            // issue diagnostics if ordered justification items mix types of justification items
-            this.ErrorOccurred <- emitPR019Diagnostics justificationType1 justificationType2 this.StartPos this.EndPos
+                // issue diagnostics if ordered justification items mix types of justification items
+                this.ErrorOccurred <- emitPR019Diagnostics justificationType1 justificationType2 this.StartPos this.EndPos
         base.CheckConsistency()
 
     override this.EmbedInSymbolTable _ =
@@ -399,7 +399,7 @@ and FplArgument(positions: Positions, parent: FplGenericNode, runOrder) =
         let (proof:FplProof) = this.ParentProof
         if proof.HasArgument (this.FplId) then 
             let conflict = proof.Scope[this.FplId]
-            this.ErrorOccurred <- emitPR003Diagnostics this.FplId conflict.QualifiedStartPos this.StartPos this.EndPos 
+            this.ErrorOccurred <- emitPR003Diagnostics this.FplId conflict.QualifiedStartPos this.StartPos this.StartPos 
         base.CheckConsistency()
 
     override this.EmbedInSymbolTable _ =
