@@ -446,7 +446,7 @@ type DiagnosticCode =
             | PR016 argId -> $"Cannot revoke the argument `{argId}` because it wasn't the last assumed one."
             | PR017 -> $"Do not use `{LiteralTrivial}` if the argument is not the last one the proof."
             | PR018 -> $"A `{LiteralTrivial}` argument missing exactly one justification."
-            | PR019 (justificationType1, justificationType2) -> $"FPL doesn't support mixing justification types in a single proof argument (here, for instance, `{justificationType1}` with `{justificationType2}`."
+            | PR019 (justificationType1, justificationType2) -> $"Unsupported mix of justifications in a single argument (`{justificationType1}` with `{justificationType2}`)."
             | PR020 (expectedNum, actualNum) -> $"This {PrimJIByInf} requires {expectedNum} proceeding expressions, got {actualNum}."
             // signature-related error codes
             | SIG00 (fixType, arity) -> sprintf $"Illegal arity `{arity}` using `{fixType}` notation."
