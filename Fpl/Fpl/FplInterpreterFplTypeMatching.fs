@@ -508,6 +508,11 @@ let rec private matchTwoTypes (a:FplGenericNode) (p:FplGenericNode) =
                 errMsgStandard aIsCallByReference aName aType pName pType, Parameter.Consumed
         else 
             matchByTypeStringRepresentation aIsCallByReference a aName aType aTypeName p pName pType pTypeName
+    | _, PrimVariableL when p.Scope.Count>0 ->
+        // TODO: implement matching expressions having variables with variable-parameterized variables
+        failwith "Not implmented"
+        matchByTypeStringRepresentation true a aName aType aTypeName p pName pType pTypeName
+
     | _ ,_ -> 
         matchByTypeStringRepresentation true a aName aType aTypeName p pName pType pTypeName
 

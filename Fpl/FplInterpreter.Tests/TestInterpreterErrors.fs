@@ -1609,7 +1609,7 @@ type TestInterpreterErrors() =
     [<DataRow("OrPack2Iif_03", "inf OrPack2Iif{dec ~p,q:pred; pre:or(and(not p,not q),and(p,q)) con:iif(p,q)} thm T {true} proof T$1 {1. |- or(and(not (impl(true, false)), not (and(true, false))), and(impl(true, false), and(true, false))) 2. 1, byinf OrPack2Iif |- true };", 0)>]
 
     // AndPack2Iif: pre: and(or(not p, q), or(p, not q))
-    [<DataRow("AndPack2Iif_01", "inf AndPack2Iif{dec ~p,q:pred; pre:and(or(not p,q),or(p,not q)) con:iif(p,q)} thm T {true} proof T$1 {1. |- and(or(not all x:obj { is(x, N) }, ex y:obj { is(y, M) }), or(all x:obj { is(x, N) }, not ex z:obj { is(z, K) })) 2. 1, byinf AndPack2Iif |- true };", 0)>]
+    [<DataRow("AndPack2Iif_01", "inf AndPack2Iif{dec ~p,q:pred; pre:and(or(not p,q),or(p,not q)) con:iif(p,q)} thm T {true} proof T$1 {1. |- and(or(not all x:obj { is(x, N) }, ex y:obj { is(y, M) }), or(all x:obj { is(x, N) }, not ex z:obj { is(z, K) })) 2. 1, byinf AndPack2Iif |- true };", 1)>]
     [<DataRow("AndPack2Iif_02", "inf AndPack2Iif{dec ~p,q:pred; pre:and(or(not p,q),or(p,not q)) con:iif(p,q)} thm T {true} proof T$1 {1. |- and(or(not iif(true, false), xor(true, false)), or(iif(true, false), not xor(true, false))) 2. 1, byinf AndPack2Iif |- true };", 0)>]
     [<DataRow("AndPack2Iif_03", "inf AndPack2Iif{dec ~p,q:pred; pre:and(or(not p,q),or(p,not q)) con:iif(p,q)} thm T {true} proof T$1 {1. |- and(or(not (impl(true, false)), and(true, false)), or(impl(true, false), not and(true, false))) 2. 1, byinf AndPack2Iif |- true };", 0)>]
 
@@ -1629,7 +1629,7 @@ type TestInterpreterErrors() =
     [<DataRow("AndPack2Xor_03", "inf AndPack2Xor{dec ~p,q:pred; pre:and(or(not p,not q),or(p,q)) con:xor(p,q)} thm T {true} proof T$1 {1. |- and(or(not (impl(true, false)), not (and(true, false))), or(impl(true, false), and(true, false))) 2. 1, byinf AndPack2Xor |- true };", 0)>]
 
     // OrPack2Xor: pre: or(and(not p, q), and(p, not q))
-    [<DataRow("OrPack2Xor_01", "inf OrPack2Xor{dec ~p,q:pred; pre:or(and(not p,q),and(p,not q)) con:xor(p,q)} thm T {true} proof T$1 {1. |- or(and(not all x:obj { is(x, N) }, ex y:obj { is(y, M) }), and(all x:obj { is(x, N) }, not ex z:obj { is(z, K) })) 2. 1, byinf OrPack2Xor |- true };", 0)>]
+    [<DataRow("OrPack2Xor_01", "inf OrPack2Xor{dec ~p,q:pred; pre:or(and(not p,q),and(p,not q)) con:xor(p,q)} thm T {true} proof T$1 {1. |- or(and(not all x:obj { is(x, N) }, ex y:obj { is(y, M) }), and(all x:obj { is(x, N) }, not ex z:obj { is(z, K) })) 2. 1, byinf OrPack2Xor |- true };", 1)>]
     [<DataRow("OrPack2Xor_02", "inf OrPack2Xor{dec ~p,q:pred; pre:or(and(not p,q),and(p,not q)) con:xor(p,q)} thm T {true} proof T$1 {1. |- or(and(not iif(true, false), xor(true, false)), and(iif(true, false), not xor(true, false))) 2. 1, byinf OrPack2Xor |- true };", 0)>]
     [<DataRow("OrPack2Xor_03", "inf OrPack2Xor{dec ~p,q:pred; pre:or(and(not p,q),and(p,not q)) con:xor(p,q)} thm T {true} proof T$1 {1. |- or(and(not (impl(true, false)), and(true, false)), and(impl(true, false), not and(true, false))) 2. 1, byinf OrPack2Xor |- true };", 0)>]
 

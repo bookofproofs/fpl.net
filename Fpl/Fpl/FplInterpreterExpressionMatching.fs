@@ -49,7 +49,10 @@ let checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) =
         | PrimImplication, PrimImplication
         | PrimEquivalence, PrimEquivalence
         | PrimExclusiveOr, PrimExclusiveOr 
+        | PrimQuantorAll, PrimQuantorAll 
+        | PrimQuantorExists, PrimQuantorExists 
         | PrimNegation, PrimNegation -> checkExpressions (a.ArgList |> Seq.toList) (p.ArgList |> Seq.toList) 
+        | PrimQuantorExistsN, PrimQuantorExistsN when a.FplId = p.FplId -> checkExpressions (a.ArgList |> Seq.toList) (p.ArgList |> Seq.toList) 
         | PrimFalse, PrimFalse 
         | PrimTrue, PrimTrue ->
             true, ""
