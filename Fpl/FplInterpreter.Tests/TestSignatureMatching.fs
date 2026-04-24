@@ -16,9 +16,9 @@ type TestSignatureMatching() =
     [<DataRow("01", """def pred T (x,y:obj) {true} def pred Caller() {dec ~a,b:obj; T(a,b)} ;""",
         "")>]
     [<DataRow("02", """def pred T (x,y:Nat) {true} def pred Caller() {dec ~a,b:obj; T(a,b)} ;""",
-        "The variable `a` typed `obj` doesn't match the parameter `x` typed `Nat` in the predicate definition TestSignatureMatchingReferencesPlain.T(Nat, Nat)")>]
+        "The expression `a` typed `obj` doesn't match the parameter `x` typed `Nat` in the predicate definition TestSignatureMatchingReferencesPlain.T(Nat, Nat)")>]
     [<DataRow("03", """def pred T (x,y:obj) {true} def pred Caller() {dec ~a,b:Nat; T(a,b)} ;""",
-        "The type `Nat` of the variable `a` could not be determined. The parameter `x` requires the type `obj` or any type derived from it in the predicate definition TestSignatureMatchingReferencesPlain.T(obj, obj)")>]
+        "The type `Nat` of the expression `a` could not be determined. The parameter `x` requires the type `obj` or any type derived from it in the predicate definition TestSignatureMatchingReferencesPlain.T(obj, obj)")>]
     [<DataRow("04", """def pred T () {true} def pred Caller() {T()} ;""",
         "")>]
     [<TestMethod>]
@@ -43,9 +43,9 @@ type TestSignatureMatching() =
     [<DataRow("02", """def pred T (x,y:pred) {true} def pred Caller() {dec ~a,b:pred; T(a,b)} ;""",
         "")>]
     [<DataRow("03", """def pred T (x,y:Nat) {true} def pred Caller() {dec ~a,b:pred; T(a,b)} ;""",
-        "The variable `a` typed `pred` doesn't match the parameter `x` typed `Nat` in the predicate definition TestSignatureMatchingReferencesPred.T(Nat, Nat)")>]
+        "The expression `a` typed `pred` doesn't match the parameter `x` typed `Nat` in the predicate definition TestSignatureMatchingReferencesPred.T(Nat, Nat)")>]
     [<DataRow("04", """def pred T (x,y:pred) {true} def pred Caller() {dec ~a,b:Nat; T(a,b)} ;""",
-        "The variable `a` typed `Nat` doesn't match the parameter `x` typed `pred` in the predicate definition TestSignatureMatchingReferencesPred.T(pred, pred)")>]
+        "The expression `a` typed `Nat` doesn't match the parameter `x` typed `pred` in the predicate definition TestSignatureMatchingReferencesPred.T(pred, pred)")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesPred(no:string, varVal, var:string) =
         
@@ -66,7 +66,7 @@ type TestSignatureMatching() =
     [<DataRow("00", """def pred T(f:func()->obj) {intr} def pred Caller() {dec ~x:func()->obj; T(x)} ;""",
         "")>]
     [<DataRow("01", """def pred T(f:func()->Nat) {intr} def pred Caller() {dec ~x:func()->obj; T(x)} ;""",
-        "The variable `x` typed `func() -> obj` doesn't match the parameter `f` typed `func() -> Nat` in the predicate definition TestSignatureMatchingReferencesFunc.T(func() -> Nat)")>]
+        "The expression `x` typed `func() -> obj` doesn't match the parameter `f` typed `func() -> Nat` in the predicate definition TestSignatureMatchingReferencesFunc.T(func() -> Nat)")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesFunc(no:string, varVal, var:string) =
         
@@ -158,15 +158,15 @@ type TestSignatureMatching() =
     [<DataRow("""def pred T (x,y:obj) {true} def pred Caller() {dec ~a,b:obj; T(a,b)} ;""",
         "")>]
     [<DataRow("""def pred T (x,y:Nat) {true} def pred Caller() {dec ~a,b:obj; T(a,b)} ;""",
-        "The variable `a` typed `obj` doesn't match the parameter `x` typed `Nat` in the predicate definition TestSignatureMatchingReferencesClasses.T(Nat, Nat)")>]
+        "The expression `a` typed `obj` doesn't match the parameter `x` typed `Nat` in the predicate definition TestSignatureMatchingReferencesClasses.T(Nat, Nat)")>]
     [<DataRow("""def pred T (x,y:obj) {true} def pred Caller() {dec ~a,b:Nat; T(a,b)} ;""",
-        "The type `Nat` of the variable `a` could not be determined. The parameter `x` requires the type `obj` or any type derived from it in the predicate definition TestSignatureMatchingReferencesClasses.T(obj, obj)")>]
+        "The type `Nat` of the expression `a` could not be determined. The parameter `x` requires the type `obj` or any type derived from it in the predicate definition TestSignatureMatchingReferencesClasses.T(obj, obj)")>]
     [<DataRow("""def cl Nat {intr} def pred T (x,y:obj) {true} def pred Caller() {dec ~a,b:Nat; T(a,b)} ;""",
         "")>]
     [<DataRow("""def pred T (x,y:tpl) {true} def pred Caller() {dec ~a,b:obj; T(a,b)} ;""",
         "")>]
     [<DataRow("""def cl A:B {intr} def pred T (x,y:obj) {true} def pred Caller() {dec ~a,b:NatTypo; T(a,b)} ;""",
-        "The type `NatTypo` of the variable `a` could not be determined. The parameter `x` requires the type `obj` or any type derived from it in the predicate definition TestSignatureMatchingReferencesClasses.T(obj, obj)")>]
+        "The type `NatTypo` of the expression `a` could not be determined. The parameter `x` requires the type `obj` or any type derived from it in the predicate definition TestSignatureMatchingReferencesClasses.T(obj, obj)")>]
         
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesClasses(varVal, var:string) =
@@ -290,7 +290,7 @@ type TestSignatureMatching() =
     [<DataRow("05", """def pred T (x:*pred[obj]) {true} def pred Caller() {T()} ;""",
         "Missing argument for `x:*pred[ind]` in the predicate definition TestSignatureMatchingReferencesVariadicPred.T(+pred)")>]
     [<DataRow("06", """def pred T (x:*pred[obj]) {true} def pred Caller() {dec ~a,b:*pred[ind]; T(a,b)} ;""",
-        "The variable `a` typed `*pred[ind]` doesn't match the parameter `x` typed `*pred[obj]` in the predicate definition TestSignatureMatchingReferencesVariadicPred.T(*pred[obj])")>]
+        "The expression `a` typed `*pred[ind]` doesn't match the parameter `x` typed `*pred[obj]` in the predicate definition TestSignatureMatchingReferencesVariadicPred.T(*pred[obj])")>]
     [<DataRow("07", """def pred T (x:*pred[ind]) {true} def pred Caller() {dec ~a:*pred[ind]; T(a)} ;""",
         "")>]
     [<TestMethod>]
@@ -323,7 +323,7 @@ type TestSignatureMatching() =
     [<DataRow("05", """def pred T (x:*func[obj]) {true} def pred Caller() {T()} ;""",
         "Missing argument for `x:*func` in the predicate definition TestSignatureMatchingReferencesVariadicFunc.T(+func)")>]
     [<DataRow("06", """def pred T (x:*func[obj]) {true} def pred Caller() {dec ~a,b:*func[ind]; T(a,b)} ;""",
-        "The variable `a` typed `*func[ind]` doesn't match the parameter `x` typed `*func[obj]` in the predicate definition TestSignatureMatchingReferencesVariadicFunc.T(*func[obj])")>]
+        "The expression `a` typed `*func[ind]` doesn't match the parameter `x` typed `*func[obj]` in the predicate definition TestSignatureMatchingReferencesVariadicFunc.T(*func[obj])")>]
     [<DataRow("07", """def pred T (x:*func[ind]) {true} def pred Caller() {dec ~a:*func[ind]; T(a)} ;""",
         "")>]
     [<TestMethod>]
@@ -356,7 +356,7 @@ type TestSignatureMatching() =
     [<DataRow("05", """def pred T (x:*ind[obj]) {true} def pred Caller() {T()} ;""",
         "Missing argument for `x:*ind[ind]` in the predicate definition TestSignatureMatchingReferencesVariadicInd.T(*ind[ind])")>]
     [<DataRow("06", """def pred T (x:*ind[obj]) {true} def pred Caller() {dec ~a,b:*ind[ind]; T(a,b)} ;""",
-        "The variable `a` typed `*ind[ind]` doesn't match the parameter `x` typed `*ind[obj]` in the predicate definition TestSignatureMatchingReferencesVariadicInd.T(*ind[obj])")>]
+        "The expression `a` typed `*ind[ind]` doesn't match the parameter `x` typed `*ind[obj]` in the predicate definition TestSignatureMatchingReferencesVariadicInd.T(*ind[obj])")>]
     [<DataRow("07", """def pred T (x:*ind[ind]) {true} def pred Caller() {dec ~a:*ind[ind]; T(a)} ;""",
         "")>]
     [<TestMethod>]
@@ -389,7 +389,7 @@ type TestSignatureMatching() =
     [<DataRow("05", """def pred T (x:*Nat[obj]) {true} def pred Caller() {T()} ;""",
         "Missing argument for `x:*Nat[ind]` in the predicate definition TestSignatureMatchingReferencesVariadicNat.T(+Nat)")>]
     [<DataRow("06", """def pred T (x:*Nat[obj]) {true} def pred Caller() {dec ~a,b:*Nat[ind]; T(a,b)} ;""",
-        "The variable `a` typed `*Nat[ind]` doesn't match the parameter `x` typed `*Nat[obj]` in the predicate definition TestSignatureMatchingReferencesVariadicNat.T(*Nat[obj])")>]
+        "The expression `a` typed `*Nat[ind]` doesn't match the parameter `x` typed `*Nat[obj]` in the predicate definition TestSignatureMatchingReferencesVariadicNat.T(*Nat[obj])")>]
     [<DataRow("07", """def pred T (x:*Nat[ind]) {true} def pred Caller() {dec ~a:*Nat[ind]; T(a)} ;""",
         "")>]
     [<TestMethod>]
@@ -561,7 +561,7 @@ type TestSignatureMatching() =
         prepareFplCode(filename, "", false) |> ignore
 
     [<DataRow("""def pred Eq(x,y: obj) infix "=" 1000 axiom A {dec ~x:ind ~y:obj; (x = y) };""", 
-        "No overload matching `x = y`. The variable `x` typed `ind` doesn't match the parameter `x` typed `obj` in the predicate definition TestSIG04MsgSpecificity.Eq(obj, obj).")>]
+        "No overload matching `x = y`. The expression `x` typed `ind` doesn't match the parameter `x` typed `obj` in the predicate definition TestSIG04MsgSpecificity.Eq(obj, obj).")>]
     [<TestMethod>]
     member this.TestSIG04MsgSpecificity(fplCode:string, (expected:string)) =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 

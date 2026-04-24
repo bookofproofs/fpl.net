@@ -168,15 +168,9 @@ type Parameter =
     | Consumed
     | NotConsumed
 
-let private refTypeName aName =
-    if isUpper aName then 
-        "reference"
-    else 
-        "variable"
-
 let private errMsgStandard aIsCallByReference aName aType pName pType = 
     if aIsCallByReference then 
-        Some $"The {refTypeName aName} `{aName}` typed `{aType}` doesn't match the parameter `{pName}` typed `{pType}`"
+        Some $"The expression `{aName}` typed `{aType}` doesn't match the parameter `{pName}` typed `{pType}`"
     else
         Some $"The application `{aName}` typed `{aType}` doesn't match the parameter `{pName}` typed `{pType}`"
 
@@ -191,22 +185,22 @@ let private errWrongReturnType aIsCallByReference aName aType pType (p:FplGeneri
         | _ -> "undentified block" // should never occur
     
     if aIsCallByReference then 
-        Some $"The returned {refTypeName aName} `{aName}` typed `{aType}` doesn't match the type `{pType}` this {blockName} returns."
+        Some $"The returned expression `{aName}` typed `{aType}` doesn't match the type `{pType}` this {blockName} returns."
     else 
         Some $"The returned application `{aName}` typed `{aType}` doesn't match the type `{pType}` this {blockName} returns."
 let private errWrongClassInheritance aIsCallByReference aName aType pName pType = 
     if aIsCallByReference then 
-        Some $"The {refTypeName aName} `{aName}` to the class `{aType}` neither matches the parameter `{pName}` typed `{pType}` nor the base classes of this type."
+        Some $"The expression `{aName}` to the class `{aType}` neither matches the parameter `{pName}` typed `{pType}` nor the base classes of this type."
     else
         Some $"The application `{aName}` instantiating the class `{aType}` neither matches the parameter `{pName}` typed `{pType}` nor the base classes of this type."
 let private errClassInheritanceUndetermined aIsCallByReference aName aType pName pType = 
     if aIsCallByReference then 
-        Some $"The type `{aType}` of the {refTypeName aName} `{aName}` could not be determined. The parameter `{pName}` requires the type `{pType}` or any type derived from it"
+        Some $"The type `{aType}` of the expression `{aName}` could not be determined. The parameter `{pName}` requires the type `{pType}` or any type derived from it"
     else
         Some $"The type `{aType}` of the application `{aName}` could not be determined. The parameter `{pName}` requires the type `{pType}` or any type derived from it"
 let private errUndefined aIsCallByReference aName pName pType = 
     if aIsCallByReference then 
-        Some $"The type of the {refTypeName aName} `{aName}` could not be determined. The parameter `{pName}` requires the type `{pType}"
+        Some $"The type of the expression `{aName}` could not be determined. The parameter `{pName}` requires the type `{pType}"
     else
         Some $"The type of application `{aName}` could not be determined. The parameter `{pName}` requires the type `{pType}"
 let private errVariadic aName aType pName pType pTypeId = 
