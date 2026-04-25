@@ -24,11 +24,6 @@ open FplInterpreterVariables
 open FplInterpreterDefinitions
 
 
-/// Gets the list of arguments of an FplValue if any
-let getArguments (fv:FplGenericNode) =
-    fv.ArgList 
-    |> Seq.toList
-
 /// Gets the list of parameters of an FplValue if any
 let getParameters (fv:FplGenericNode) =
     match fv.Name with
@@ -46,6 +41,18 @@ let getParameters (fv:FplGenericNode) =
     | PrimMandatoryFunctionalTermL ->
         fv.Scope.Values |> Seq.filter (fun fv -> isSignatureVar fv) |> Seq.toList
     | _ -> []
+
+/// Gets the list of arguments of an FplValue if any
+let getArguments (fv:FplGenericNode) =
+    match fv.Name, fv.RefersTo with
+    | PrimRefL, Some var when var.Name = PrimVariableL && fv.ArgList.Count = 0 ->
+        // fallback to variable parameters,
+        // if reference points to a variable and has no own arguments
+        getParameters var
+    | _ ->
+        fv.ArgList 
+        |> Seq.toList
+
 
 /// Checks, if an FplValue uses parentheses or brackets
 let hasBracketsOrParentheses (fv:FplGenericNode) = 
@@ -556,30 +563,32 @@ let matchArgumentsWithParameters (fva: FplGenericNode) (fvp: FplGenericNode) =
     let aHasBracketsOrParentheses = hasBracketsOrParentheses fva
     let pHasBracketsOrParentheses = hasBracketsOrParentheses fvp
         
-
-    let argResult = 
+    // Compute the initial result: either the special parentheses/brackets mismatch error
+    // or the recursive arguments-vs-parameters match.
+    let baseResult = 
         if aHasBracketsOrParentheses <> pHasBracketsOrParentheses && arguments.Length = 0 && parameters.Length = 0 then 
             Some $"calling `{fva.Type SignatureType.Name}` and called `{fvp.Type SignatureType.Name}` nodes have mismatching use of parentheses"
         else
             mpwa arguments parameters 
 
-    match argResult with
-    | Some aErr -> 
-        match fvp.Name with 
+    // Helper to attach location/context to an error and to handle the special
+    // fallback used when the parameter is a variable: try matching the whole
+    // caller `fva` against the variable parameter `fvp`.
+    let formatErrorWithContext err =
+        match fvp.Name with
         | PrimVariableArrayL ->
-            Some($"{aErr} in {qualifiedName fvp true}:{fvp.Type SignatureType.Type}")
+            Some($"{err} in {qualifiedName fvp true}:{fvp.Type SignatureType.Type}")
         | PrimVariableL ->
-            // if the paramater fvp is a variable (with possibly mismatching arguments as compared to fva),
-            // fallback matching it directly with fva
-            match mpwa [fva] [fvp] with
-            | Some err ->
-                Some($"{err} in {qualifiedName fvp true}")
+            // Fallback: attempt to match `fva` directly as a single argument against the variable parameter.
+            match mpwa [ fva ] [ fvp ] with
+            | Some fallbackErr -> Some $"{err}; {fallbackErr}"
             | None -> None
-        | _ -> 
-            Some($"{aErr} in {qualifiedName fvp true}")
+        | _ ->
+            Some($"{err} in {qualifiedName fvp true}")
+
+    match baseResult with
+    | Some err -> formatErrorWithContext err
     | None -> None
-
-
 
 /// Tries to match the signatures of toBeMatched with the signatures of all candidates and accumulates any
 /// error messages in accResultList.
