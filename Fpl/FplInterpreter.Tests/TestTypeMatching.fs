@@ -1,6 +1,7 @@
 namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open FplInterpreter.Globals.Heap
+open FplInterpreterBasicTypes
 open FplInterpreterFplTypeMatching
 open CommonTestHelpers
 
@@ -68,3 +69,19 @@ type TestTypeMatching() =
         | None, _ ->
             Assert.IsFalse(true, $"wrong test parameters errNo:{errNo} for no error")
         prepareFplCode(filename, "", false) |> ignore
+
+    [<DataRow("pred_01", "def pred T(a:pred()) {dec ~x:pred(y:ind); x};", "pred(ind)")>]
+    [<DataRow("pred_02", "def pred T(a:pred()) {a};", "pred()")>]
+    [<TestMethod>]
+    member this.TestGetOpenFormulaOfExpression(no:string, fplCode, errStr:string) =
+        let filename = "TestMatchingParameterizedVariables.fpl"
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pred = theory.Scope.Values |> Seq.toList |> List.head
+        let arg = pred.ArgList |> Seq.last
+        match FplTypeMatcher.GetOpenFormulaOfExpression arg with
+        | Some result ->
+            Assert.AreEqual<string>(errStr, result.Type SignatureType.Type)
+        | None ->
+            Assert.IsFalse(true, $"wrong test parameters:{arg.Type SignatureType.Mixed} is neither a predicate, nor a functional term")

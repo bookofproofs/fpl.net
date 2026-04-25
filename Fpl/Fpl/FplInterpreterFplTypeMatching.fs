@@ -368,6 +368,7 @@ let private getNames (fv:FplGenericNode) =
     let fvTypeName = fv.Name
     fvName, fvType, fvTypeName
 
+
 /// Type matching in FPL is complex and requires referencing functions declared later in code.
 /// Since top‑level let bindings of pure functions does not allow this,
 /// we use a class to match types in FPL. Inside an F# class,
@@ -599,6 +600,37 @@ type FplTypeMatcher() =
             | _ ,_ -> 
                 matchByTypeStringRepresentation true a aName aType aTypeName p pName pType pTypeName
         matchTwoTypes a p
+
+    /// Transforms a given expression to its open formula - a named
+    /// formula that contains only the distinct free variables of the expression
+    /// while preserving the expression's input FPL type (being either pred or func)
+    /// The function returns None, if the input type is not pred or func.
+    static member GetOpenFormulaOfExpression (expr:FplGenericNode) =
+        let outputType = 
+            match isArgPred expr with
+            | _, true -> LiteralPred
+            | argType, false when argType.StartsWith(LiteralFunc) -> LiteralFunc
+            | _, _ -> PrimNone
+
+        match outputType with
+        | PrimNone -> None
+        | _ ->
+            let topLevel = new FplVariable ("_",(expr.StartPos, expr.EndPos), expr)
+            topLevel.TypeId <- outputType
+            let rec extractDistinctFreeVariables (fv:FplGenericNode) =
+                fv.GetVariables()
+                |> List.map (fun v -> v :?> FplVariable)
+                |> List.filter (fun v -> not v.IsBound)
+                |> List.map (fun v -> topLevel.Scope.TryAdd(v.FplId,v))
+                |> ignore
+                if not (isSimpleExpression fv) then
+                    fv.ArgList
+                    |> Seq.iter (fun arg -> extractDistinctFreeVariables arg)
+                else
+                    ()
+            extractDistinctFreeVariables expr
+            Some topLevel
+
 
 /// Tries to match the signatures of toBeMatched with the signatures of all candidates and accumulates any
 /// error messages in accResultList.
