@@ -332,7 +332,14 @@ type FplReference(positions: Positions, parent: FplGenericNode) =
         | Some next -> 
             addExpressionToParentArgList this
             next.EndPos <- this.EndPos
-        | _ -> ()            
+        | _ -> ()
+
+    override this.GetVariables () =
+        match this.RefersTo with
+        | Some ref when ref.Name = PrimVariableL -> ref.GetVariables()
+        | Some ref when ref.Name = PrimVariableArrayL -> ref.GetVariables()
+        //| Some ref -> getSignatureVars ref
+        | _ -> []
 
 
 let findCandidatesByNameInDotted (fv: FplGenericNode) (name: string) =

@@ -611,12 +611,13 @@ type FplTypeMatcher() =
             | _, true -> LiteralPred
             | argType, false when argType.StartsWith(LiteralFunc) -> LiteralFunc
             | _, _ -> PrimNone
-
+            
         match outputType with
         | PrimNone -> None
         | _ ->
             let topLevel = new FplVariable ("_",(expr.StartPos, expr.EndPos), expr)
             topLevel.TypeId <- outputType
+            topLevel.ArgType <- ArgType.Parentheses
             let rec extractDistinctFreeVariables (fv:FplGenericNode) =
                 fv.GetVariables()
                 |> List.map (fun v -> v :?> FplVariable)
