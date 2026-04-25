@@ -157,6 +157,20 @@ type FplGenericNode(positions: Positions, parent: FplGenericNode option) =
 
     (* Default implementations = everything is false, only the trues are overridden in derived classes *)
     default this.CheckConsistency() = ()
+
+    abstract member GetVariables: unit -> FplGenericNode list
+
+    /// Create a (possibly empty) list of all variables in the scope of this FplValue.
+    default this.GetVariables() =
+        this.Scope.Values
+        |> Seq.filter (fun fv -> 
+            fv.Name = PrimVariableL 
+            || fv.Name = PrimVariableArrayL 
+        )
+        |> Seq.sortBy(fun fv -> fv.RunOrder)
+        |> Seq.toList
+
+
     
     default this.IsFplBlock () = false
     default this.IsBlock () = false
@@ -273,16 +287,6 @@ type FplGenericNode(positions: Positions, parent: FplGenericNode option) =
     /// otherwise a string representation depending on type of the FPL node and its specific value.
     override this.Represent() = // done
         PrimNone
-
-    /// Create a (possibly empty) list of all variables in the scope of this FplValue.
-    member this.GetVariables() =
-        this.Scope.Values
-        |> Seq.filter (fun fv -> 
-            fv.Name = PrimVariableL 
-            || fv.Name = PrimVariableArrayL 
-        )
-        |> Seq.sortBy(fun fv -> fv.RunOrder)
-        |> Seq.toList
 
     /// Create a (possibly empty) list of all properties in the scope of this FplValue.
     member this.GetProperties() =
