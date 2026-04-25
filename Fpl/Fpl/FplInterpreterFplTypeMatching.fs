@@ -50,9 +50,10 @@ let getParameters (fv:FplGenericNode) =
 /// Checks, if an FplValue uses parentheses or brackets
 let hasBracketsOrParentheses (fv:FplGenericNode) = 
     match fv.Name with 
-    | PrimVariableL ->
+    | PrimVariableL when fv.ArgType = ArgType.Nothing ->
         let vars = fv.GetVariables()
         vars.Length > 0
+    | PrimVariableL when fv.ArgType <> ArgType.Nothing -> true
     | PrimFunctionalTermL 
     | PrimPredicateL 
     | LiteralCtorL 
@@ -389,8 +390,8 @@ let rec private matchTwoTypes (a:FplGenericNode) (p:FplGenericNode) =
                 matchTwoTypes refNode p // match signatures with parameters
             | Some refNode when refNode.Name = PrimExtensionObj ->
                 matchTwoTypes refNode p // match signatures with parameters
-            | Some refNode ->
-                // a node was referenced but is not a predicate
+            | Some refNode when pTypeName = PrimMappingL ->
+                // a node was referenced but is not matching return 
                 errWrongReturnType aIsCallByReference aName (refNode.Type SignatureType.Type) pType p, Parameter.Consumed
             | _ ->
                 // in all other cases, 
@@ -426,9 +427,9 @@ let rec private matchTwoTypes (a:FplGenericNode) (p:FplGenericNode) =
                 None, Parameter.Consumed // pred accepting pred variables
             | Some refNode when refNode.Name = PrimExtensionObj ->
                 matchTwoTypes refNode p // match signatures with parameters
-            | Some refNode ->
-                // a node was referenced not a predicate node
-                errMsgStandard aIsCallByReference aName (refNode.Type SignatureType.Type) pName pType, Parameter.Consumed
+            | Some refNode when pTypeName = PrimMappingL ->
+                // a node was referenced but is not matching return 
+                errWrongReturnType aIsCallByReference aName (refNode.Type SignatureType.Type) pType p, Parameter.Consumed
             | _ ->
                 // in all other cases, error
                 errMsgStandard aIsCallByReference aName aType pName pType, Parameter.Consumed
@@ -445,7 +446,7 @@ let rec private matchTwoTypes (a:FplGenericNode) (p:FplGenericNode) =
                 matchTwoTypes refNode p // match signatures with parameters
             | Some refNode when refNode.Name = PrimExtensionObj ->
                 matchTwoTypes refNode p // match signatures with parameters
-            | Some refNode ->
+            | Some refNode when pTypeName = PrimMappingL ->
                 // a node was referenced but is not a functional term block
                 errWrongReturnType aIsCallByReference aName (refNode.Type SignatureType.Type) pType p, Parameter.Consumed
             | _ ->
@@ -464,7 +465,7 @@ let rec private matchTwoTypes (a:FplGenericNode) (p:FplGenericNode) =
                 None, Parameter.Consumed // func accepting func variables
             | Some refNode when refNode.Name = PrimExtensionObj ->
                 matchTwoTypes refNode p // match signatures with parameters
-            | Some refNode ->
+            | Some refNode when pTypeName = PrimMappingL ->
                 // a node was referenced but is not a functional term block
                 errWrongReturnType aIsCallByReference aName (refNode.Type SignatureType.Type) pType p, Parameter.Consumed
             | _ ->
@@ -510,7 +511,6 @@ let rec private matchTwoTypes (a:FplGenericNode) (p:FplGenericNode) =
             matchByTypeStringRepresentation aIsCallByReference a aName aType aTypeName p pName pType pTypeName
     | _, PrimVariableL when p.Scope.Count>0 ->
         // TODO: implement matching expressions having variables with variable-parameterized variables
-        failwith "Not implmented"
         matchByTypeStringRepresentation true a aName aType aTypeName p pName pType pTypeName
 
     | _ ,_ -> 

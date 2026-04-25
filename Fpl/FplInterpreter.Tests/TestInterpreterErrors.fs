@@ -4770,6 +4770,8 @@ type TestInterpreterErrors() =
     [<DataRow("MS4s6", "def func A()->obj {intr prty func X(x:ind)->obj } def pred T(v:func) {dec v:=A.X; true};", 0)>] // OK: ->func matches signature A.X(ind)->obj
     [<DataRow("MS4s7", "def func A()->obj {intr prty func X(x:obj)->ind } def pred T(v:func) {dec ~a:obj v:=A.X(a); true};", 1)>] // SIG05: func does not match by value A.X(obj) 
 
+    [<DataRow("Expr01", "def pred T(v:pred(x:tpl)) {dec ~y:obj v:=is(y,obj); true};", 0)>] 
+
     [<DataRow("24a", "def cl A {dec ~myX:obj; ctor A(x:obj) {dec myX:=x;}} def cl B:A { ctor B(x:obj) {dec base.A(del.Decrement(x)); } } def pred T() { dec ~v:B v:=B(@2); false};", 0)>]    
     [<DataRow("24b", "def cl A {dec ~myX:ind; ctor A(x:obj) {dec myX:=x;}} def cl B:A { ctor B(x:obj) {dec base.A(del.Decrement(x)); } } def pred T() { dec ~v:B v:=B(@2); false};", 1)>]    
     [<DataRow("25", "def cl Nat def func Succ(x:Nat)->Nat def cl A {dec ~myX:Nat; ctor A(i:Nat) {dec myX:=Succ(i);}};", 0)>]    
