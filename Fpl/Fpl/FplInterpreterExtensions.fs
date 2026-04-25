@@ -168,7 +168,7 @@ type FplReturn(positions: Positions, parent: FplGenericNode) as this =
             let mapTypeOpt = getMapping funTerm
             match mapTypeOpt with 
             | Some mapType ->
-                match mpwa [ returnedReference ] [ mapType ] with
+                match FplTypeMatcher.MatchPwA [ returnedReference ] [ mapType ] with
                 | Some errMsg -> returnedReference.ErrorOccurred <- emitSIG03Diagnostics errMsg (returnedReference.StartPos) (returnedReference.EndPos)
                 | _ -> 
                     match returnedReference with

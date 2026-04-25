@@ -47,7 +47,7 @@ type FplIsOperator(positions: Positions, parent: FplGenericNode) as this =
         // FPL truth-table
         match operand with 
         | :? FplReference as op ->
-            match mpwa [operand] [typeOfOperand] with
+            match FplTypeMatcher.MatchPwA [operand] [typeOfOperand] with
             | Some errMsg -> 
                 let newValue =  new FplIntrinsicFalse((this.StartPos, this.EndPos), this)
                 this.SetValue newValue

@@ -80,7 +80,7 @@ type FplAssignment(positions: Positions, parent: FplGenericNode) as this =
                 this.ErrorOccurred <- emitLG005Diagnostics nameAssignedValue assignedValue.StartPos assignedValue.EndPos
             else
                 // assignee is to be treated as parameter, the assignedValue as argument
-                match mpwa [assignedValue] [assignee] with
+                match FplTypeMatcher.MatchPwA [assignedValue] [assignee] with
                 | Some errMsg ->
                     this.ErrorOccurred <- emitSIG05Diagnostics errMsg this.ArgList[1].StartPos this.ArgList[1].EndPos
                 | _ -> ()

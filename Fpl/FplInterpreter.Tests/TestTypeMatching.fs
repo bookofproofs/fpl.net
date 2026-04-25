@@ -33,7 +33,7 @@ type TestTypeMatching() =
         let pred = theory.Scope.Values |> Seq.toList |> List.head
         let par = pred.Scope["a"]
         let arg = pred.ArgList |> Seq.last
-        match matchArgumentsWithParameters arg par, errNo with
+        match FplTypeMatcher.MatchArgumentsWithParameters arg par, errNo with
         | None, 0 -> ()
         | Some err, 1 ->
             printf "%s" err
@@ -58,7 +58,7 @@ type TestTypeMatching() =
         let pred = theory.Scope.Values |> Seq.toList |> List.head
         let par = pred.Scope["a"]
         let arg = pred.ArgList |> Seq.last
-        match matchArgumentsWithParameters arg par, errNo with
+        match FplTypeMatcher.MatchArgumentsWithParameters arg par, errNo with
         | None, 0 -> ()
         | Some err, 1 ->
             printf "%s" err

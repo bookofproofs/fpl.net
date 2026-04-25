@@ -368,227 +368,237 @@ let private getNames (fv:FplGenericNode) =
     let fvTypeName = fv.Name
     fvName, fvType, fvTypeName
 
-let rec private matchTwoTypes (a:FplGenericNode) (p:FplGenericNode) =
-    let aName, aType, aTypeName = getNames a 
-    let pName, pType, pTypeName = getNames p
+/// Type matching in FPL is complex and requires referencing functions declared later in code.
+/// Since top‑level let bindings of pure functions does not allow this,
+/// we use a class to match types in FPL. Inside an F# class,
+/// members can freely reference other members that are declared later.
+type FplTypeMatcher() =
 
-    match aTypeName, pTypeName with 
-    | PrimClassL, PrimClassL 
-    | PrimClassL, PrimVariableL ->
-        errMsgClassValueNotAllowed aType, Parameter.Consumed
-    | PrimVariableL, PrimMappingL
-    | PrimRefL, PrimVariableL
-    | PrimRefL, PrimMappingL ->
-        let aIsCallByReference = isCallByReference a
-        let callByReferenceToClass = getCallByReferenceToClass a
-        let refNodeOpt = referencedNodeOpt a
-        if callByReferenceToClass <> String.Empty then 
-            errMsgClassValueNotAllowed callByReferenceToClass, Parameter.Consumed
-        elif aIsCallByReference && isPredWithParentheses p then 
-            // match a call by reference with pred with parameters
-            match refNodeOpt with 
-            | Some refNode when refNode.Name = PrimPredicateL ->
-                matchTwoTypes refNode p // match signatures with parameters
-            | Some refNode when refNode.Name = PrimIntrinsicUndef -> 
-                None, Parameter.Consumed // mapping pred(...) accepting undef
-            | Some refNode when refNode.Name = PrimMandatoryPredicateL ->
-                matchTwoTypes refNode p // match signatures with parameters
-            | Some refNode when refNode.Name = PrimVariableL && refNode.TypeId = LiteralPred ->
-                matchTwoTypes refNode p // match signatures with parameters
-            | Some refNode when refNode.Name = PrimExtensionObj ->
-                matchTwoTypes refNode p // match signatures with parameters
-            | Some refNode when pTypeName = PrimMappingL ->
-                // a node was referenced but is not matching return 
-                errWrongReturnType aIsCallByReference aName (refNode.Type SignatureType.Type) pType p, Parameter.Consumed
-            | _ ->
-                // in all other cases, 
-                errMsgStandard aIsCallByReference aName aType pName pType, Parameter.Consumed
-        elif aIsCallByReference && isPredWithoutParentheses p then
-            // match a not-by-value-reference with pred mapping without parameters
-            match refNodeOpt with 
-            | Some refNode when refNode.Name = PrimTrue ->
-                None, Parameter.Consumed // pred accepting intrinsic predicates
-            | Some refNode when refNode.Name = PrimFalse ->
-                None, Parameter.Consumed // pred accepting intrinsic predicates
-            | Some refNode when refNode.Name = PrimIntrinsicUndef -> 
-                None, Parameter.Consumed // mapping pred accepting undef
-            | Some refNode when refNode.Name = PrimPredicateL ->
-                None, Parameter.Consumed // pred accepting predicate nodes
-            | Some refNode when refNode.Name = PrimMandatoryPredicateL ->
-                None, Parameter.Consumed // pred accepting predicate properties
-            | Some refNode when refNode.Name = LiteralPrfL ->
-                None, Parameter.Consumed // pred accepting proofs
-            | Some refNode when refNode.Name = LiteralAxL ->
-                None, Parameter.Consumed // pred accepting axioms
-            | Some refNode when refNode.Name = LiteralThmL ->
-                None, Parameter.Consumed // pred accepting theorems
-            | Some refNode when refNode.Name = LiteralLemL ->
-                None, Parameter.Consumed // pred accepting lemmas
-            | Some refNode when refNode.Name = LiteralPropL ->
-                None, Parameter.Consumed // pred accepting propositions
-            | Some refNode when refNode.Name = LiteralCorL ->
-                None, Parameter.Consumed // pred accepting corollaries
-            | Some refNode when refNode.Name = LiteralConjL ->
-                None, Parameter.Consumed // pred accepting conjectures
-            | Some refNode when refNode.Name = PrimVariableL && refNode.TypeId = LiteralPred ->
-                None, Parameter.Consumed // pred accepting pred variables
-            | Some refNode when refNode.Name = PrimExtensionObj ->
-                matchTwoTypes refNode p // match signatures with parameters
-            | Some refNode when pTypeName = PrimMappingL ->
-                // a node was referenced but is not matching return 
-                errWrongReturnType aIsCallByReference aName (refNode.Type SignatureType.Type) pType p, Parameter.Consumed
-            | _ ->
-                // in all other cases, error
-                errMsgStandard aIsCallByReference aName aType pName pType, Parameter.Consumed
-        elif aIsCallByReference && isFuncWithParentheses p then
-            // match a not-by-value-reference with func mapping with parameters
-            match refNodeOpt with 
-            | Some refNode when refNode.Name = PrimIntrinsicUndef -> 
-                None, Parameter.Consumed // mapping func(...)->.. accepting undef
-            | Some refNode when refNode.Name = PrimFunctionalTermL ->
-                matchTwoTypes refNode p // match signatures with parameters
-            | Some refNode when refNode.Name = PrimMandatoryFunctionalTermL ->
-                matchTwoTypes refNode p // match signatures with parameters
-            | Some refNode when refNode.Name = PrimVariableL && refNode.TypeId = LiteralFunc ->
-                matchTwoTypes refNode p // match signatures with parameters
-            | Some refNode when refNode.Name = PrimExtensionObj ->
-                matchTwoTypes refNode p // match signatures with parameters
-            | Some refNode when pTypeName = PrimMappingL ->
-                // a node was referenced but is not a functional term block
-                errWrongReturnType aIsCallByReference aName (refNode.Type SignatureType.Type) pType p, Parameter.Consumed
-            | _ ->
-                // in all other cases, error
-                errMsgStandard aIsCallByReference aName aType pName pType, Parameter.Consumed
-        elif aIsCallByReference && isFuncWithoutParentheses p then 
-            // match a not-by-value-reference with func mapping with parameters
-            match refNodeOpt with 
-            | Some refNode when refNode.Name = PrimIntrinsicUndef -> 
-                None, Parameter.Consumed // mapping func accepting undef
-            | Some refNode when refNode.Name = PrimFunctionalTermL ->
-                None, Parameter.Consumed // func accepting functional term nodes
-            | Some refNode when refNode.Name = PrimMandatoryFunctionalTermL ->
-                None, Parameter.Consumed // func accepting functional term properties
-            | Some refNode when refNode.Name = PrimVariableL && refNode.TypeId = LiteralFunc ->
-                None, Parameter.Consumed // func accepting func variables
-            | Some refNode when refNode.Name = PrimExtensionObj ->
-                matchTwoTypes refNode p // match signatures with parameters
-            | Some refNode when pTypeName = PrimMappingL ->
-                // a node was referenced but is not a functional term block
-                errWrongReturnType aIsCallByReference aName (refNode.Type SignatureType.Type) pType p, Parameter.Consumed
-            | _ ->
-                // in all other cases, error
-                errWrongReturnType aIsCallByReference aName aType pType p, Parameter.Consumed
-        elif aIsCallByReference && pTypeName = PrimMappingL then 
-            let map = p :?> FplMapping
-            match map.RefersTo, refNodeOpt with
-            | Some def, Some refNode when def.Name= PrimExtensionL && refNode.Name = PrimDelegateDecrementL && def.FplId = refNode.TypeId -> 
-                None, Parameter.Consumed // extension parameter accepting Decrement with same TypeId as the extension's FplId
-            | Some def, Some refNode when refNode.Name = PrimInstanceL -> 
-                matchTwoTypes a def
-            | Some _, Some refNode when refNode.Name = PrimIntrinsicUndef -> 
-                None, Parameter.Consumed // definition accepting undef
-            | Some def, Some (:? FplGenericVariable as refNode) -> 
-                matchTwoTypes a def
-            | Some def, Some extObj when extObj.Name = PrimExtensionObj -> 
-                matchTwoTypes extObj def
-            | Some (:? FplClass as pCl), Some (:? FplClass as aCl) -> 
-                matchTwoTypes pCl aCl
-            | None, Some refNode when map.TypeId = LiteralObj && refNode.Name = PrimInstanceL -> 
-                None, Parameter.Consumed // obj accepting instance
-            | None, Some (:? FplGenericVariable as refNode) when map.TypeId = LiteralObj -> 
-                let refNodeOpt1 = referencedNodeOpt refNode
-                match refNodeOpt1 with 
-                | Some (:? FplClass as cl) -> None, Parameter.Consumed // obj accepting instance
-                | _ when refNode.TypeId = LiteralObj && aType = pType -> None, Parameter.Consumed // obj accepting obj variable
-                | _ when pType = LiteralObj && refNode.TypeId.StartsWith($"{pType}:") -> None, Parameter.Consumed // obj accepting obj:<some regex> (relevant for FplExtension and FplExtensionObj only)
-                | _ -> errMsgStandard aIsCallByReference aName aType pName pType, Parameter.Consumed
-            | None, Some refNode when refNode.Name = PrimIntrinsicUndef -> 
-                None, Parameter.Consumed // anything accepting undef
-            | None, Some refNode -> 
-                matchTwoTypes refNode map
-            | None, None when aType = pType && isUpper aType -> 
-                Some $"`{aName}:{aType}` matches the expected type `{pType}` but the type is undefined.", Parameter.Consumed
-            | None, None when pType = LiteralObj && aType.StartsWith($"{pType}:") -> 
-                None, Parameter.Consumed // obj accepting obj:<some regex> (relevant for FplExtension and FplExtensionObj only)
-            | None, None when aType = pType -> 
-                None, Parameter.Consumed // obj accepting obj, ind accepting ind, pred accepting pred, func accepting func
-            | _, _ -> 
-                errMsgStandard aIsCallByReference aName aType pName pType, Parameter.Consumed
-        else 
-            matchByTypeStringRepresentation aIsCallByReference a aName aType aTypeName p pName pType pTypeName
-    | _, PrimVariableL when p.Scope.Count>0 ->
-        // TODO: implement matching expressions having variables with variable-parameterized variables
-        matchByTypeStringRepresentation true a aName aType aTypeName p pName pType pTypeName
+    /// Tries to match the arguments of `fva` FplValue with the parameters of the `fvp` FplValue and returns
+    /// Some(specific error message) or None, if the match succeeded.
+    static member MatchArgumentsWithParameters (fva: FplGenericNode) (fvp: FplGenericNode) =
+        let parameters = getParameters fvp
+        let arguments = getArguments fva
 
-    | _ ,_ -> 
-        matchByTypeStringRepresentation true a aName aType aTypeName p pName pType pTypeName
-
-/// Tries to match a list of arguments with a list of parameters by their type recursively.
-/// The comparison depends on MatchingMode.
-let rec mpwa (args: FplGenericNode list) (pars: FplGenericNode list) =
-    match (args, pars) with
-    | (a :: ars, p :: prs) ->
-        match matchTwoTypes (a:FplGenericNode) (p:FplGenericNode) with
-        | Some errMsg, _ -> Some errMsg
-        | None, Parameter.Consumed -> mpwa ars prs
-        | None, Parameter.NotConsumed -> mpwa ars pars // handle variadic parameters
-    | ([], p :: prs) ->  
-        let pName, pType, pTypeName = getNames p
-        match p with 
-        | :? FplClass as cl ->
-            let constructors = cl.GetConstructors()
-            if constructors.Length = 0 then
-                None
-            else
-                errMsgMissingArgument pName pType
-        | _ when pTypeName = PrimVariableArrayL ->
-            None
-        | _ when p.ArgType = ArgType.Brackets ->
-            // when p is an indexed array and being assigned a value, 
-            // do not expect missing arguments
-            None
-        | _ -> 
-            errMsgMissingArgument pName pType
-    | (a :: _, []) ->
-        let aName, aType, aTypeName = getNames a
-        errMsgMissingParameter aName aType
-    | ([], []) -> None
-
-/// Tries to match the arguments of `fva` FplValue with the parameters of the `fvp` FplValue and returns
-/// Some(specific error message) or None, if the match succeeded.
-let matchArgumentsWithParameters (fva: FplGenericNode) (fvp: FplGenericNode) =
-    let parameters = getParameters fvp
-    let arguments = getArguments fva
-
-    let aHasBracketsOrParentheses = hasBracketsOrParentheses fva
-    let pHasBracketsOrParentheses = hasBracketsOrParentheses fvp
+        let aHasBracketsOrParentheses = hasBracketsOrParentheses fva
+        let pHasBracketsOrParentheses = hasBracketsOrParentheses fvp
         
-    // Compute the initial result: either the special parentheses/brackets mismatch error
-    // or the recursive arguments-vs-parameters match.
-    let baseResult = 
-        if aHasBracketsOrParentheses <> pHasBracketsOrParentheses && arguments.Length = 0 && parameters.Length = 0 then 
-            Some $"calling `{fva.Type SignatureType.Name}` and called `{fvp.Type SignatureType.Name}` nodes have mismatching use of parentheses"
-        else
-            mpwa arguments parameters 
+        // Compute the initial result: either the special parentheses/brackets mismatch error
+        // or the recursive arguments-vs-parameters match.
+        let baseResult = 
+            if aHasBracketsOrParentheses <> pHasBracketsOrParentheses && arguments.Length = 0 && parameters.Length = 0 then 
+                Some $"calling `{fva.Type SignatureType.Name}` and called `{fvp.Type SignatureType.Name}` nodes have mismatching use of parentheses"
+            else
+                FplTypeMatcher.MatchPwA arguments parameters 
 
-    // Helper to attach location/context to an error and to handle the special
-    // fallback used when the parameter is a variable: try matching the whole
-    // caller `fva` against the variable parameter `fvp`.
-    let formatErrorWithContext err =
-        match fvp.Name with
-        | PrimVariableArrayL ->
-            Some($"{err} in {qualifiedName fvp true}:{fvp.Type SignatureType.Type}")
-        | PrimVariableL ->
-            // Fallback: attempt to match `fva` directly as a single argument against the variable parameter.
-            match mpwa [ fva ] [ fvp ] with
-            | Some fallbackErr -> Some $"{err}; {fallbackErr}"
-            | None -> None
-        | _ ->
-            Some($"{err} in {qualifiedName fvp true}")
+        // Helper to attach location/context to an error and to handle the special
+        // fallback used when the parameter is a variable: try matching the whole
+        // caller `fva` against the variable parameter `fvp`.
+        let formatErrorWithContext err =
+            match fvp.Name with
+            | PrimVariableArrayL ->
+                Some($"{err} in {qualifiedName fvp true}:{fvp.Type SignatureType.Type}")
+            | PrimVariableL ->
+                // Fallback: attempt to match `fva` directly as a single argument against the variable parameter.
+                match FplTypeMatcher.MatchPwA [ fva ] [ fvp ] with
+                | Some fallbackErr -> Some $"{err}; {fallbackErr}"
+                | None -> None
+            | _ ->
+                Some($"{err} in {qualifiedName fvp true}")
 
-    match baseResult with
-    | Some err -> formatErrorWithContext err
-    | None -> None
+        match baseResult with
+        | Some err -> formatErrorWithContext err
+        | None -> None
+
+    /// Tries to match a list of arguments with a list of parameters by their type recursively.
+    /// The comparison depends on MatchingMode.
+    static member MatchPwA (args: FplGenericNode list) (pars: FplGenericNode list) =
+        let rec mpwa (args: FplGenericNode list) (pars: FplGenericNode list) =
+            match (args, pars) with
+            | (a :: ars, p :: prs) ->
+                match FplTypeMatcher.MatchTwoTypes (a:FplGenericNode) (p:FplGenericNode) with
+                | Some errMsg, _ -> Some errMsg
+                | None, Parameter.Consumed -> mpwa ars prs
+                | None, Parameter.NotConsumed -> mpwa ars pars // handle variadic parameters
+            | ([], p :: prs) ->  
+                let pName, pType, pTypeName = getNames p
+                match p with 
+                | :? FplClass as cl ->
+                    let constructors = cl.GetConstructors()
+                    if constructors.Length = 0 then
+                        None
+                    else
+                        errMsgMissingArgument pName pType
+                | _ when pTypeName = PrimVariableArrayL ->
+                    None
+                | _ when p.ArgType = ArgType.Brackets ->
+                    // when p is an indexed array and being assigned a value, 
+                    // do not expect missing arguments
+                    None
+                | _ -> 
+                    errMsgMissingArgument pName pType
+            | (a :: _, []) ->
+                let aName, aType, aTypeName = getNames a
+                errMsgMissingParameter aName aType
+            | ([], []) -> None
+        mpwa args pars
+
+    static member private MatchTwoTypes (a:FplGenericNode) (p:FplGenericNode) =
+        let rec matchTwoTypes (a:FplGenericNode) (p:FplGenericNode) =
+            let aName, aType, aTypeName = getNames a 
+            let pName, pType, pTypeName = getNames p
+
+            match aTypeName, pTypeName with 
+            | PrimClassL, PrimClassL 
+            | PrimClassL, PrimVariableL ->
+                errMsgClassValueNotAllowed aType, Parameter.Consumed
+            | PrimVariableL, PrimMappingL
+            | PrimRefL, PrimVariableL
+            | PrimRefL, PrimMappingL ->
+                let aIsCallByReference = isCallByReference a
+                let callByReferenceToClass = getCallByReferenceToClass a
+                let refNodeOpt = referencedNodeOpt a
+                if callByReferenceToClass <> String.Empty then 
+                    errMsgClassValueNotAllowed callByReferenceToClass, Parameter.Consumed
+                elif aIsCallByReference && isPredWithParentheses p then 
+                    // match a call by reference with pred with parameters
+                    match refNodeOpt with 
+                    | Some refNode when refNode.Name = PrimPredicateL ->
+                        matchTwoTypes refNode p // match signatures with parameters
+                    | Some refNode when refNode.Name = PrimIntrinsicUndef -> 
+                        None, Parameter.Consumed // mapping pred(...) accepting undef
+                    | Some refNode when refNode.Name = PrimMandatoryPredicateL ->
+                        matchTwoTypes refNode p // match signatures with parameters
+                    | Some refNode when refNode.Name = PrimVariableL && refNode.TypeId = LiteralPred ->
+                        matchTwoTypes refNode p // match signatures with parameters
+                    | Some refNode when refNode.Name = PrimExtensionObj ->
+                        matchTwoTypes refNode p // match signatures with parameters
+                    | Some refNode when pTypeName = PrimMappingL ->
+                        // a node was referenced but is not matching return 
+                        errWrongReturnType aIsCallByReference aName (refNode.Type SignatureType.Type) pType p, Parameter.Consumed
+                    | _ ->
+                        // in all other cases, 
+                        errMsgStandard aIsCallByReference aName aType pName pType, Parameter.Consumed
+                elif aIsCallByReference && isPredWithoutParentheses p then
+                    // match a not-by-value-reference with pred mapping without parameters
+                    match refNodeOpt with 
+                    | Some refNode when refNode.Name = PrimTrue ->
+                        None, Parameter.Consumed // pred accepting intrinsic predicates
+                    | Some refNode when refNode.Name = PrimFalse ->
+                        None, Parameter.Consumed // pred accepting intrinsic predicates
+                    | Some refNode when refNode.Name = PrimIntrinsicUndef -> 
+                        None, Parameter.Consumed // mapping pred accepting undef
+                    | Some refNode when refNode.Name = PrimPredicateL ->
+                        None, Parameter.Consumed // pred accepting predicate nodes
+                    | Some refNode when refNode.Name = PrimMandatoryPredicateL ->
+                        None, Parameter.Consumed // pred accepting predicate properties
+                    | Some refNode when refNode.Name = LiteralPrfL ->
+                        None, Parameter.Consumed // pred accepting proofs
+                    | Some refNode when refNode.Name = LiteralAxL ->
+                        None, Parameter.Consumed // pred accepting axioms
+                    | Some refNode when refNode.Name = LiteralThmL ->
+                        None, Parameter.Consumed // pred accepting theorems
+                    | Some refNode when refNode.Name = LiteralLemL ->
+                        None, Parameter.Consumed // pred accepting lemmas
+                    | Some refNode when refNode.Name = LiteralPropL ->
+                        None, Parameter.Consumed // pred accepting propositions
+                    | Some refNode when refNode.Name = LiteralCorL ->
+                        None, Parameter.Consumed // pred accepting corollaries
+                    | Some refNode when refNode.Name = LiteralConjL ->
+                        None, Parameter.Consumed // pred accepting conjectures
+                    | Some refNode when refNode.Name = PrimVariableL && refNode.TypeId = LiteralPred ->
+                        None, Parameter.Consumed // pred accepting pred variables
+                    | Some refNode when refNode.Name = PrimExtensionObj ->
+                        matchTwoTypes refNode p // match signatures with parameters
+                    | Some refNode when pTypeName = PrimMappingL ->
+                        // a node was referenced but is not matching return 
+                        errWrongReturnType aIsCallByReference aName (refNode.Type SignatureType.Type) pType p, Parameter.Consumed
+                    | _ ->
+                        // in all other cases, error
+                        errMsgStandard aIsCallByReference aName aType pName pType, Parameter.Consumed
+                elif aIsCallByReference && isFuncWithParentheses p then
+                    // match a not-by-value-reference with func mapping with parameters
+                    match refNodeOpt with 
+                    | Some refNode when refNode.Name = PrimIntrinsicUndef -> 
+                        None, Parameter.Consumed // mapping func(...)->.. accepting undef
+                    | Some refNode when refNode.Name = PrimFunctionalTermL ->
+                        matchTwoTypes refNode p // match signatures with parameters
+                    | Some refNode when refNode.Name = PrimMandatoryFunctionalTermL ->
+                        matchTwoTypes refNode p // match signatures with parameters
+                    | Some refNode when refNode.Name = PrimVariableL && refNode.TypeId = LiteralFunc ->
+                        matchTwoTypes refNode p // match signatures with parameters
+                    | Some refNode when refNode.Name = PrimExtensionObj ->
+                        matchTwoTypes refNode p // match signatures with parameters
+                    | Some refNode when pTypeName = PrimMappingL ->
+                        // a node was referenced but is not a functional term block
+                        errWrongReturnType aIsCallByReference aName (refNode.Type SignatureType.Type) pType p, Parameter.Consumed
+                    | _ ->
+                        // in all other cases, error
+                        errMsgStandard aIsCallByReference aName aType pName pType, Parameter.Consumed
+                elif aIsCallByReference && isFuncWithoutParentheses p then 
+                    // match a not-by-value-reference with func mapping with parameters
+                    match refNodeOpt with 
+                    | Some refNode when refNode.Name = PrimIntrinsicUndef -> 
+                        None, Parameter.Consumed // mapping func accepting undef
+                    | Some refNode when refNode.Name = PrimFunctionalTermL ->
+                        None, Parameter.Consumed // func accepting functional term nodes
+                    | Some refNode when refNode.Name = PrimMandatoryFunctionalTermL ->
+                        None, Parameter.Consumed // func accepting functional term properties
+                    | Some refNode when refNode.Name = PrimVariableL && refNode.TypeId = LiteralFunc ->
+                        None, Parameter.Consumed // func accepting func variables
+                    | Some refNode when refNode.Name = PrimExtensionObj ->
+                        matchTwoTypes refNode p // match signatures with parameters
+                    | Some refNode when pTypeName = PrimMappingL ->
+                        // a node was referenced but is not a functional term block
+                        errWrongReturnType aIsCallByReference aName (refNode.Type SignatureType.Type) pType p, Parameter.Consumed
+                    | _ ->
+                        // in all other cases, error
+                        errWrongReturnType aIsCallByReference aName aType pType p, Parameter.Consumed
+                elif aIsCallByReference && pTypeName = PrimMappingL then 
+                    let map = p :?> FplMapping
+                    match map.RefersTo, refNodeOpt with
+                    | Some def, Some refNode when def.Name= PrimExtensionL && refNode.Name = PrimDelegateDecrementL && def.FplId = refNode.TypeId -> 
+                        None, Parameter.Consumed // extension parameter accepting Decrement with same TypeId as the extension's FplId
+                    | Some def, Some refNode when refNode.Name = PrimInstanceL -> 
+                        matchTwoTypes a def
+                    | Some _, Some refNode when refNode.Name = PrimIntrinsicUndef -> 
+                        None, Parameter.Consumed // definition accepting undef
+                    | Some def, Some (:? FplGenericVariable as refNode) -> 
+                        matchTwoTypes a def
+                    | Some def, Some extObj when extObj.Name = PrimExtensionObj -> 
+                        matchTwoTypes extObj def
+                    | Some (:? FplClass as pCl), Some (:? FplClass as aCl) -> 
+                        matchTwoTypes pCl aCl
+                    | None, Some refNode when map.TypeId = LiteralObj && refNode.Name = PrimInstanceL -> 
+                        None, Parameter.Consumed // obj accepting instance
+                    | None, Some (:? FplGenericVariable as refNode) when map.TypeId = LiteralObj -> 
+                        let refNodeOpt1 = referencedNodeOpt refNode
+                        match refNodeOpt1 with 
+                        | Some (:? FplClass as cl) -> None, Parameter.Consumed // obj accepting instance
+                        | _ when refNode.TypeId = LiteralObj && aType = pType -> None, Parameter.Consumed // obj accepting obj variable
+                        | _ when pType = LiteralObj && refNode.TypeId.StartsWith($"{pType}:") -> None, Parameter.Consumed // obj accepting obj:<some regex> (relevant for FplExtension and FplExtensionObj only)
+                        | _ -> errMsgStandard aIsCallByReference aName aType pName pType, Parameter.Consumed
+                    | None, Some refNode when refNode.Name = PrimIntrinsicUndef -> 
+                        None, Parameter.Consumed // anything accepting undef
+                    | None, Some refNode -> 
+                        matchTwoTypes refNode map
+                    | None, None when aType = pType && isUpper aType -> 
+                        Some $"`{aName}:{aType}` matches the expected type `{pType}` but the type is undefined.", Parameter.Consumed
+                    | None, None when pType = LiteralObj && aType.StartsWith($"{pType}:") -> 
+                        None, Parameter.Consumed // obj accepting obj:<some regex> (relevant for FplExtension and FplExtensionObj only)
+                    | None, None when aType = pType -> 
+                        None, Parameter.Consumed // obj accepting obj, ind accepting ind, pred accepting pred, func accepting func
+                    | _, _ -> 
+                        errMsgStandard aIsCallByReference aName aType pName pType, Parameter.Consumed
+                else 
+                    matchByTypeStringRepresentation aIsCallByReference a aName aType aTypeName p pName pType pTypeName
+            | _, PrimVariableL when p.ArgType = ArgType.Parentheses ->
+                // TODO: implement matching expressions having variables with variable-parameterized variables
+                matchByTypeStringRepresentation true a aName aType aTypeName p pName pType pTypeName
+
+            | _ ,_ -> 
+                matchByTypeStringRepresentation true a aName aType aTypeName p pName pType pTypeName
+        matchTwoTypes a p
 
 /// Tries to match the signatures of toBeMatched with the signatures of all candidates and accumulates any
 /// error messages in accResultList.
@@ -596,7 +606,7 @@ let rec checkCandidates (toBeMatched: FplGenericNode) (candidates: FplGenericNod
     match candidates with
     | [] -> (None, accResultList)
     | candidate :: candidates ->
-        match matchArgumentsWithParameters toBeMatched candidate with
+        match FplTypeMatcher.MatchArgumentsWithParameters toBeMatched candidate with
         | None -> (Some candidate, [])
         | Some errMsg -> checkCandidates toBeMatched candidates (accResultList @ [ errMsg ])
 
@@ -628,7 +638,7 @@ let checkSIG08_SIG10Diagnostics (referenceToArray:FplGenericNode) =
             let rec matchAllIndexes (indexes:FplGenericNode list) (dims:FplGenericNode list) dimNumber =
                 match indexes, dims with
                 | i::ixs, d::dms ->
-                    match mpwa [i] [d] with
+                    match FplTypeMatcher.MatchPwA [i] [d] with
                     | Some errMsg ->
                         // type mismatch between dimension and index
                         refToArray.ErrorOccurred <- emitSIG08diagnostics varArray.FplId i.FplId (i.Type SignatureType.Type) (d.Type SignatureType.Type) dimNumber i.StartPos i.EndPos 
@@ -651,3 +661,6 @@ let checkSIG08_SIG10Diagnostics (referenceToArray:FplGenericNode) =
     match referenceToArray with 
     | :? FplReference as refToArray -> matchIndexesWithDimensions refToArray
     | _ -> ()
+
+
+

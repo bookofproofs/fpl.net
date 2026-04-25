@@ -69,7 +69,7 @@ let checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) =
         | _, PrimRefL when p.RefersTo.IsSome && p.RefersTo.Value.Name = PrimVariableL ->
             checkExpr a p.RefersTo.Value
         | _, PrimVariableL ->
-            match matchArgumentsWithParameters a p with
+            match FplTypeMatcher.MatchArgumentsWithParameters a p with
             | Some err ->
                 false, err
             | None ->
