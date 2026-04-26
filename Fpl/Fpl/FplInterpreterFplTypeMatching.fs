@@ -182,6 +182,12 @@ let private errMsgStandard aIsCallByReference aName aType pName pType =
     else
         Some $"The application `{aName}` typed `{aType}` doesn't match the parameter `{pName}` typed `{pType}`"
 
+let private errMsgFormula isOpen formula formulaType pName pType = 
+    if isOpen then 
+        Some $"The expression `{formula}` is an open formula typed `{formulaType}` doesn't match the parameter `{pName}` typed `{pType}`"
+    else
+        Some $"The expression `{formula}` is a closed formula typed `{formulaType}` doesn't match the parameter `{pName}` typed `{pType}`"
+
 let private errMsgMissingArgument pName pType = Some $"Missing argument for the parameter `{pName}` typed `{pType}`"
 let private errMsgMissingParameter aName aType = Some $"No matching parameter for the argument `{aName}` typed `{aType}`"
 let private errMsgClassValueNotAllowed actualClassType = Some $"A class `{actualClassType}` cannot be passed directly as a value. Use a class constructor `{actualClassType}(...)` instead"
@@ -593,10 +599,26 @@ type FplTypeMatcher() =
                         errMsgStandard aIsCallByReference aName aType pName pType, Parameter.Consumed
                 else 
                     matchByTypeStringRepresentation aIsCallByReference a aName aType aTypeName p pName pType pTypeName
-            | _, PrimVariableL when p.ArgType = ArgType.Parentheses ->
-                // TODO: implement matching expressions having variables with variable-parameterized variables
-                matchByTypeStringRepresentation true a aName aType aTypeName p pName pType pTypeName
-
+            //| PrimPredicateL , _ 
+            //| PrimFunctionalTermL , _ 
+            //| PrimMandatoryFunctionalTermL , _
+            //| PrimMandatoryPredicateL , _ ->
+            //    matchByTypeStringRepresentation true a aName aType aTypeName p pName pType pTypeName
+            //| _, PrimVariableL when p.ArgType = ArgType.Parentheses ->
+            //    match FplTypeMatcher.GetOpenFormulaOfExpression a with
+            //    | Some formula ->
+            //        let freeVarsOfFormula = getParameters formula
+            //        let pars = getParameters p
+            //        let formulaType = formula.Type SignatureType.Type
+            //        match FplTypeMatcher.MatchPwA freeVarsOfFormula pars with
+            //        | Some err when p.TypeId = formula.TypeId ->
+            //            errMsgFormula (freeVarsOfFormula.Length > 0) formula formulaType pName pType, Parameter.Consumed
+            //        | Some err when p.TypeId <> formula.TypeId ->
+            //            errMsgFormula (freeVarsOfFormula.Length > 0) formula formulaType pName pType, Parameter.Consumed
+            //        | _ -> 
+            //            None, Parameter.Consumed
+            //    | None->
+            //        matchByTypeStringRepresentation true a aName aType aTypeName p pName pType pTypeName
             | _ ,_ -> 
                 matchByTypeStringRepresentation true a aName aType aTypeName p pName pType pTypeName
         matchTwoTypes a p
