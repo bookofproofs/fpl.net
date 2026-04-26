@@ -421,9 +421,10 @@ let rec isSimpleExpression (fv:FplGenericNode) =
     | PrimQuantorExists
     | PrimQuantorExistsN
     | PrimClassL 
-    | PrimIntrinsicInd -> true
+    | PrimIntrinsicInd
+    | PrimFalse
+    | PrimTrue -> true
     | PrimPredicateL when fv.ExpressionType = FixType.NoFix -> true
-    | PrimIntrinsicPred when (fv.FplId = LiteralTrue || fv.FplId = LiteralFalse) -> true
     | PrimMappingL when (fv.Scope.Count = 0) -> true
     | LiteralParent 
     | LiteralSelf 

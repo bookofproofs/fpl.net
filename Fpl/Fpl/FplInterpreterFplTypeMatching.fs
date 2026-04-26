@@ -618,18 +618,30 @@ type FplTypeMatcher() =
             let topLevel = new FplVariable ("_",(expr.StartPos, expr.EndPos), expr)
             topLevel.TypeId <- outputType
             topLevel.ArgType <- ArgType.Parentheses
-            let rec extractDistinctFreeVariables (fv:FplGenericNode) =
-                fv.GetVariables()
-                |> List.map (fun v -> v :?> FplVariable)
-                |> List.filter (fun v -> not v.IsBound)
-                |> List.map (fun v -> topLevel.Scope.TryAdd(v.FplId,v))
-                |> ignore
+            match getMapping expr with
+            | Some mapping -> topLevel.ArgList.Add mapping
+            | _ -> ()
+            let rec extractDistinctFreeVariables (fv:FplGenericNode) rootRecursion =
+                match fv.Name with
+                | PrimRefL when fv.RefersTo.IsSome ->
+                    match fv.RefersTo with
+                    | Some var when var.Name = PrimVariableL ->
+                        if rootRecursion then 
+                            fv.GetVariables()
+                            |> List.map (fun v -> v :?> FplVariable)
+                            |> List.filter (fun v -> not v.IsBound)
+                            |> List.map (fun v -> topLevel.Scope.TryAdd(v.FplId,v))
+                            |> ignore
+                        else                        
+                            topLevel.Scope.TryAdd(var.FplId,var) |> ignore
+                    | _ -> ()
+                | _ -> ()
                 if not (isSimpleExpression fv) then
                     fv.ArgList
-                    |> Seq.iter (fun arg -> extractDistinctFreeVariables arg)
+                    |> Seq.iter (fun arg -> extractDistinctFreeVariables arg false)
                 else
                     ()
-            extractDistinctFreeVariables expr
+            extractDistinctFreeVariables expr true
             Some topLevel
 
 
