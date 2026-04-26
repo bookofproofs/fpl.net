@@ -561,6 +561,7 @@ let rec getMapping (fv:FplGenericNode) =
         | None -> None
     | PrimRefL when fv.RefersTo.IsSome ->
         getMapping fv.RefersTo.Value
+    | PrimIsOperator 
     | PrimRefL ->
         None
     | _ ->
