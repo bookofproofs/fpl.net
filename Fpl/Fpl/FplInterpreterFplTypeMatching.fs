@@ -405,6 +405,11 @@ type FplTypeMatcher() =
             match fvp.Name with
             | PrimVariableArrayL ->
                 Some($"{err} in {qualifiedName fvp true}:{fvp.Type SignatureType.Type}")
+            | PrimVariableL when fvp.ArgType = ArgType.Parentheses ->
+                // Fallback: attempt to match `fva` directly as a single argument against the variable parameter.
+                match FplTypeMatcher.MatchPwA [ fva ] [ fvp ] with
+                | Some fallbackErr -> Some fallbackErr
+                | None -> None
             | PrimVariableL ->
                 // Fallback: attempt to match `fva` directly as a single argument against the variable parameter.
                 match FplTypeMatcher.MatchPwA [ fva ] [ fvp ] with
@@ -608,10 +613,10 @@ type FplTypeMatcher() =
                     let pars = getParameters p
                     let formulaType = formula.Type SignatureType.Type
                     match FplTypeMatcher.MatchPwA freeVarsOfFormula pars with
-                    | Some err when p.TypeId = formula.TypeId ->
-                        errMsgFormula (freeVarsOfFormula.Length > 0) formula formulaType pName pType, Parameter.Consumed
-                    | Some err when p.TypeId <> formula.TypeId ->
-                        errMsgFormula (freeVarsOfFormula.Length > 0) formula formulaType pName pType, Parameter.Consumed
+                    | Some _ when p.TypeId = formula.TypeId ->
+                        errMsgFormula (freeVarsOfFormula.Length > 0) aName formulaType pName pType, Parameter.Consumed
+                    | Some _ when p.TypeId <> formula.TypeId ->
+                        errMsgFormula (freeVarsOfFormula.Length > 0) aName formulaType pName pType, Parameter.Consumed
                     | _ -> 
                         None, Parameter.Consumed
                 | None->
