@@ -155,11 +155,6 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplGenericNode) as
 
     override this.EmbedInSymbolTable _ =
         this.CheckConsistency()
-        // set all signature variables of this block to bound ones
-        this.GetVariables()
-        |> List.map (fun var -> var :?> FplGenericVariable)
-        |> List.filter (fun var -> var.IsSignatureVariable)
-        |> List.iter (fun var -> var.SetIsBound())
         tryAddSubBlockToFplBlock this
 
     override this.RunOrder = None
