@@ -1740,8 +1740,10 @@ type TestInterpreterErrors() =
 
     // ExistsByExample: pre: p(c)
     [<DataRow("ExistsByExample_01", "inf ExistsByExample{dec ~p:pred(c:tpl); pre:p(c) con:ex x:tpl{p(x)}} thm T {true} proof T$1 {1. |- iif(is(c,N), true) 2. 1, byinf ExistsByExample |- true };", 0)>]
-    [<DataRow("ExistsByExample_02", "inf ExistsByExample{dec ~p:pred(c:tpl); pre:p(c) con:ex x:tpl{p(x)}} thm T {true} proof T$1 {1. |- and(ex x:obj { is(x,M) }, iif(true,false)) 2. 1, byinf ExistsByExample |- true };", 0)>]
-    [<DataRow("ExistsByExample_03", "inf ExistsByExample{dec ~p:pred(c:tpl); pre:p(c) con:ex x:tpl{p(x)}} thm T {true} proof T$1 {1. |- xor(all z:obj { is(z,K) }, not (xor(true,false))) 2. 1, byinf ExistsByExample |- true };", 0)>]
+    [<DataRow("ExistsByExample_02", "inf ExistsByExample{dec ~p:pred(c:tpl); pre:p(c) con:ex x:tpl{p(x)}} thm T {true} proof T$1 {1. |- and(ex x:obj { is(x,M) }, iif(true,false)) 2. 1, byinf ExistsByExample |- true };", 1)>]
+    [<DataRow("ExistsByExample_02a", "inf ExistsByExample{dec ~p:pred(); pre:p() con:ex x:tpl{p(x)}} thm T {true} proof T$1 {1. |- and(ex x:obj { is(x,M) }, iif(true,false)) 2. 1, byinf ExistsByExample |- true };", 0)>]
+    [<DataRow("ExistsByExample_03", "inf ExistsByExample{dec ~p:pred(c:tpl); pre:p(c) con:ex x:tpl{p(x)}} thm T {true} proof T$1 {1. |- xor(all z:obj { is(z,K) }, not (xor(true,false))) 2. 1, byinf ExistsByExample |- true };", 1)>]
+    [<DataRow("ExistsByExample_03a", "inf ExistsByExample{dec ~p:pred(); pre:p() con:ex x:tpl{p(x)}} thm T {true} proof T$1 {1. |- xor(all z:obj { is(z,K) }, not (xor(true,false))) 2. 1, byinf ExistsByExample |- true };", 0)>]
 
     // Contraposition: pre: impl(not p, not q)
     [<DataRow("Contraposition_01", "inf Contraposition{dec ~p,q:pred; pre:impl(not p,not q) con:impl(q,p)} thm T {true} proof T$1 {1. |- impl(not all x:obj { is(x,N) }, not (ex y:obj { is(y,M) })) 2. 1, byinf Contraposition |- true };", 0)>]

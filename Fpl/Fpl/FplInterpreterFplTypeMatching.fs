@@ -184,9 +184,9 @@ let private errMsgStandard aIsCallByReference aName aType pName pType =
 
 let private errMsgFormula isOpen formula formulaType pName pType = 
     if isOpen then 
-        Some $"The expression `{formula}` is an open formula typed `{formulaType}` doesn't match the parameter `{pName}` typed `{pType}`"
+        Some $"The expression `{formula}` is an open formula typed `{formulaType}` that doesn't match the parameter `{pName}` typed `{pType}`"
     else
-        Some $"The expression `{formula}` is a closed formula typed `{formulaType}` doesn't match the parameter `{pName}` typed `{pType}`"
+        Some $"The expression `{formula}` is a closed formula typed `{formulaType}` that doesn't match the parameter `{pName}` typed `{pType}`"
 
 let private errMsgMissingArgument pName pType = Some $"Missing argument for the parameter `{pName}` typed `{pType}`"
 let private errMsgMissingParameter aName aType = Some $"No matching parameter for the argument `{aName}` typed `{aType}`"
@@ -635,16 +635,23 @@ type FplTypeMatcher() =
             | _, true -> LiteralPred
             | argType, false when argType.StartsWith(LiteralFunc) -> LiteralFunc
             | _, _ -> PrimNone
-            
+
         match outputType with
         | PrimNone -> None
         | _ ->
-            let topLevel = new FplVariable ("_",(expr.StartPos, expr.EndPos), expr)
-            topLevel.TypeId <- outputType
-            topLevel.ArgType <- ArgType.Parentheses
-            match getMapping expr with
-            | Some mapping -> topLevel.ArgList.Add mapping
-            | _ -> ()
+            let topLevel =
+                match expr.Name with
+                | PrimVariableL ->
+                    expr // do not mock expressions being variables as variables
+                | _ ->
+                    let topLevelVar = new FplVariable ("_",(expr.StartPos, expr.EndPos), expr)
+                    topLevelVar.TypeId <- outputType
+                    topLevelVar.ArgType <- ArgType.Parentheses
+                    match getMapping expr with
+                    | Some mapping -> topLevelVar.ArgList.Add mapping
+                    | _ -> ()
+                    topLevelVar
+
             let rec extractDistinctFreeVariables (fv:FplGenericNode) rootRecursion =
                 match fv.Name with
                 | PrimRefL when fv.RefersTo.IsSome ->
@@ -656,15 +663,12 @@ type FplTypeMatcher() =
                             |> List.filter (fun v -> not v.IsBound)
                             |> List.map (fun v -> topLevel.Scope.TryAdd(v.FplId,v))
                             |> ignore
-                        else                        
+                        else
                             topLevel.Scope.TryAdd(var.FplId,var) |> ignore
                     | _ -> ()
                 | _ -> ()
-                if not (isSimpleExpression fv) then
-                    fv.ArgList
-                    |> Seq.iter (fun arg -> extractDistinctFreeVariables arg false)
-                else
-                    ()
+                fv.ArgList
+                |> Seq.iter (fun arg -> extractDistinctFreeVariables arg false)
             extractDistinctFreeVariables expr true
             Some topLevel
 

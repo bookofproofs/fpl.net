@@ -95,6 +95,13 @@ type TestTypeMatching() =
     [<DataRow("disjunction_02", "def pred T() {or(true,false)};", "pred()")>]
     [<DataRow("disjunction_03", "def pred T() {or(x,or(y,z))};", "pred(undef, undef, undef)")>]
     [<DataRow("disjunction_04", "def pred T(x:ind, y:obj) {or(x,y)};", "pred(ind, obj)")>]
+    [<DataRow("ex_01", "def pred T() { ex x:obj { is(x,M) } };", "pred()")>]
+    [<DataRow("ex_02", "def pred T(a:pred) { ex x:obj { and (a, is(x,M)) } };", "pred(pred)")>]
+    [<DataRow("exn_01", "def pred T() { exn$1 x:obj { is(x,M) } };", "pred()")>]
+    [<DataRow("exn_02", "def pred T(a:pred) { exn$1 x:obj { and (a, is(x,M)) } };", "pred(pred)")>]
+    [<DataRow("all_01", "def pred T() { all x:obj { is(x,M) } };", "pred()")>]
+    [<DataRow("all_02", "def pred T(a:pred) { all x:obj { and (a, is(x,M)) } };", "pred(pred)")>]
+    
     [<TestMethod>]
     member this.TestGetOpenFormulaOfExpression(no:string, fplCode, errStr:string) =
         let filename = "TestGetOpenFormulaOfExpression.fpl"
