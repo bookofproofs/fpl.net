@@ -21,6 +21,33 @@ open FplInterpreterBasicTypes
 open FplInterpreterIntrinsicTypes
 open FplInterpreterFplTypeMatching
 
+
+let private compareQuantorVariables (a:FplGenericNode) (p:FplGenericNode) (dictParameterUsage:Dictionary<string, FplGenericNode>) =
+    let pVars = p.GetVariables()
+    let aVars = a.GetVariables()
+    let rec loop l1 l2 index =
+        match l1, l2 with
+        | [], [] ->
+            match a.Name with
+            | PrimQuantorExistsN when a.Name = p.Name && a.FplId <> p.FplId ->
+                false, $"found mismatching exists `{a.FplId}` in `{a.Type SignatureType.Name}`, expecting type `{p.FplId}` in `{p.Type SignatureType.Name}`"
+            | _ ->
+                true, ""   // no mismatches
+        | (x:FplGenericNode)::xs, (y:FplGenericNode)::ys ->
+            match FplTypeMatcher.MatchArgumentsWithParameters x y with
+            | Some _ ->
+                let xType = x.Type SignatureType.Type
+                let yType = y.Type SignatureType.Type
+                false, $"found mismatching type `{x.FplId}:{xType}` at {ordinalPostfix index} quantor variable in `{a.Type SignatureType.Name}`, expecting type `{y.FplId}:{yType}` in `{p.Type SignatureType.Name}`"
+            | _ ->
+                // remember corresponding quantor variables of the matched quantors 
+                dictParameterUsage.TryAdd (y.FplId, x) |> ignore 
+                loop xs ys (index + 1)
+        | _ ->
+            // Should not happen if lengths are equal, but included for safety
+            false, $"found {aVars.Length} quantor variables in `{a.Type SignatureType.Name}`, expected {pVars.Length} in `{p.Type SignatureType.Name}`" 
+    loop aVars pVars 0
+
 let checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) =
     // When p is a variable, the dict stores the variable names and their usage in a first matched a.
     // The dictionary is used to check the consistency of the usage of the same variable p in the whole formula
@@ -51,18 +78,14 @@ let checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) =
         | PrimExclusiveOr, PrimExclusiveOr
         | PrimNegation, PrimNegation -> checkExpressions (a.ArgList |> Seq.toList) (p.ArgList |> Seq.toList) 
         | PrimQuantorAll, PrimQuantorAll 
-        | PrimQuantorExists, PrimQuantorExists ->
-            // match number of quantor variables
-            if a.Scope.Count <> p.Scope.Count then
-                false, $"found {a.Scope.Count} quantor variables in `{a.Type SignatureType.Name}`, expected {p.Scope.Count} in `{p.Type SignatureType.Name}`" 
-            else
-                // remember corresponding quantor variables in the matched quantors
-                p.GetVariables()
-                |> List.map2 (fun (pVar:FplGenericNode) aVar -> dictParameterUsage.TryAdd(pVar.FplId, aVar)) (a.GetVariables())
-                |> ignore
+        | PrimQuantorExists, PrimQuantorExists 
+        | PrimQuantorExistsN, PrimQuantorExistsN ->
+        // match number of quantor variables
+            match compareQuantorVariables a p dictParameterUsage with
+            | true, "" ->
                 // and now check the expressions inside the quantors
                 checkExpressions (a.ArgList |> Seq.toList) (p.ArgList |> Seq.toList) 
-        | PrimQuantorExistsN, PrimQuantorExistsN when a.FplId = p.FplId -> checkExpressions (a.ArgList |> Seq.toList) (p.ArgList |> Seq.toList) 
+            | _, err -> false, err
         | PrimFalse, PrimFalse 
         | PrimTrue, PrimTrue ->
             true, ""

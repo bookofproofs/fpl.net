@@ -1860,6 +1860,18 @@ type TestInterpreterErrors() =
     [<DataRow("numb_exn_2_2", "inf X { pre:exn$2 x:pred { false } con:false } thm T {true} proof T$1 {1. |- exn$2 a:pred { false } 2. 1, byinf X |- true };", 0)>] 
     [<DataRow("numb_exn_2_1", "inf X { pre:exn$2 x:pred { false } con:false } thm T {true} proof T$1 {1. |- exn$1 a:pred { false } 2. 1, byinf X |- true };", 1)>] 
     [<DataRow("numb_exn_2_3", "inf X { pre:exn$2 x:pred { false } con:false } thm T {true} proof T$1 {1. |- exn$3 a:pred { false } 2. 1, byinf X |- true };", 1)>] 
+
+    // correct matching of the types of quantor variables
+    [<DataRow("type_ex_2_2", "inf X { pre:ex x,y:pred { false } con:false } thm T {true} proof T$1 {1. |- ex a,b:pred { false } 2. 1, byinf X |- true };", 0)>] 
+    [<DataRow("type_ex_2_1", "inf X { pre:ex x,y:pred { false } con:false } thm T {true} proof T$1 {1. |- ex a:A,b:pred { false } 2. 1, byinf X |- true };", 1)>] 
+    [<DataRow("type_ex_2_3", "inf X { pre:ex x,y:pred { false } con:false } thm T {true} proof T$1 {1. |- ex a:pred,b:ind { false } 2. 1, byinf X |- true };", 1)>] 
+    [<DataRow("type_all_2_2", "inf X { pre:all x,y:pred { false } con:false } thm T {true} proof T$1 {1. |- all a,b:pred { false } 2. 1, byinf X |- true };", 0)>] 
+    [<DataRow("type_all_2_1", "inf X { pre:all x,y:pred { false } con:false } thm T {true} proof T$1 {1. |- all a:ind,b:pred { false } 2. 1, byinf X |- true };", 1)>] 
+    [<DataRow("type_all_2_3", "inf X { pre:all x,y:pred { false } con:false } thm T {true} proof T$1 {1. |- all a:pred,b:ind { false } 2. 1, byinf X |- true };", 1)>] 
+    [<DataRow("type_exn_2_2", "inf X { pre:exn$2 x:pred { false } con:false } thm T {true} proof T$1 {1. |- exn$2 a:pred { false } 2. 1, byinf X |- true };", 0)>] 
+    [<DataRow("type_exn_2_1", "inf X { pre:exn$2 x:pred { false } con:false } thm T {true} proof T$1 {1. |- exn$2 a:obj { false } 2. 1, byinf X |- true };", 1)>] 
+    [<DataRow("type_exn_2_3", "inf X { pre:exn$2 x:pred { false } con:false } thm T {true} proof T$1 {1. |- exn$2 a:func { false } 2. 1, byinf X |- true };", 1)>] 
+
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR008(no:string, fplCode:string, expected) =

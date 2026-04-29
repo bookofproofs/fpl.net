@@ -345,3 +345,10 @@ let numbered inputLst =
     inputLst
     |> Seq.mapi (fun i cand -> sprintf "%d) %s" (i + 1) cand)
     |> String.concat ", "
+
+let ordinalPostfix n =
+    match n with
+    | 1 -> "st"
+    | 2 -> "nd"
+    | 3 -> "rd"
+    | _ -> "th"

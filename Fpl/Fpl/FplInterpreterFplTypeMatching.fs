@@ -389,7 +389,7 @@ type FplTypeMatcher() =
 
         let aHasBracketsOrParentheses = hasBracketsOrParentheses fva
         let pHasBracketsOrParentheses = hasBracketsOrParentheses fvp
-        
+
         // Compute the initial result: either the special parentheses/brackets mismatch error
         // or the recursive arguments-vs-parameters match.
         let baseResult = 
