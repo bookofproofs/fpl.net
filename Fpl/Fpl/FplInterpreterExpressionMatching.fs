@@ -34,7 +34,7 @@ let private compareQuantorVariables (a:FplGenericNode) (p:FplGenericNode) (dictP
             | _ ->
                 true, ""   // no mismatches
         | (x:FplGenericNode)::xs, (y:FplGenericNode)::ys ->
-            match FplTypeMatcher.MatchArgumentsWithParameters x y with
+            match FplTypeMatcher.MatchPwA [x] [y] with
             | Some _ ->
                 let xType = x.Type SignatureType.Type
                 let yType = y.Type SignatureType.Type
