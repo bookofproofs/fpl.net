@@ -48,10 +48,20 @@ let checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) =
         | PrimDisjunction, PrimDisjunction
         | PrimImplication, PrimImplication
         | PrimEquivalence, PrimEquivalence
-        | PrimExclusiveOr, PrimExclusiveOr 
-        | PrimQuantorAll, PrimQuantorAll 
-        | PrimQuantorExists, PrimQuantorExists 
+        | PrimExclusiveOr, PrimExclusiveOr
         | PrimNegation, PrimNegation -> checkExpressions (a.ArgList |> Seq.toList) (p.ArgList |> Seq.toList) 
+        | PrimQuantorAll, PrimQuantorAll 
+        | PrimQuantorExists, PrimQuantorExists ->
+            // match number of quantor variables
+            if a.Scope.Count <> p.Scope.Count then
+                false, $"found {a.Scope.Count} quantor variables in `{a.Type SignatureType.Name}`, expected {p.Scope.Count} in `{p.Type SignatureType.Name}`" 
+            else
+                // remember corresponding quantor variables in the matched quantors
+                p.GetVariables()
+                |> List.map2 (fun (pVar:FplGenericNode) aVar -> dictParameterUsage.TryAdd(pVar.FplId, aVar)) (a.GetVariables())
+                |> ignore
+                // and now check the expressions inside the quantors
+                checkExpressions (a.ArgList |> Seq.toList) (p.ArgList |> Seq.toList) 
         | PrimQuantorExistsN, PrimQuantorExistsN when a.FplId = p.FplId -> checkExpressions (a.ArgList |> Seq.toList) (p.ArgList |> Seq.toList) 
         | PrimFalse, PrimFalse 
         | PrimTrue, PrimTrue ->

@@ -1850,6 +1850,16 @@ type TestInterpreterErrors() =
     [<DataRow("PrenexUnpackXorAll_02", "inf PrenexUnpackXorAll{dec ~p:pred~q:pred(z:tpl); pre:xor(p,all x:tpl{q(x)}) con:all x:tpl{xor(p,q(x))}} thm T {true} proof T$1 {1. |- xor(all y:obj { is(y,M) }, all z:obj { xor(is(z,K), true) }) 2. 1, byinf PrenexUnpackXorAll |- true };", 0)>]
     [<DataRow("PrenexUnpackXorAll_03", "inf PrenexUnpackXorAll{dec ~p:pred~q:pred(z:tpl); pre:xor(p,all x:tpl{q(x)}) con:all x:tpl{xor(p,q(x))}} thm T {true} proof T$1 {1. |- xor(not (xor(true,false)), all x:obj { impl(is(x,N), false) }) 2. 1, byinf PrenexUnpackXorAll |- true };", 0)>]
 
+    // correct matching of the number of quantor variables
+    [<DataRow("numb_ex_2_2", "inf X { pre:ex x,y:pred { false } con:false } thm T {true} proof T$1 {1. |- ex a,b:pred { false } 2. 1, byinf X |- true };", 0)>] 
+    [<DataRow("numb_ex_2_1", "inf X { pre:ex x,y:pred { false } con:false } thm T {true} proof T$1 {1. |- ex a:pred { false } 2. 1, byinf X |- true };", 1)>] 
+    [<DataRow("numb_ex_2_3", "inf X { pre:ex x,y:pred { false } con:false } thm T {true} proof T$1 {1. |- ex a,b,c:pred { false } 2. 1, byinf X |- true };", 1)>] 
+    [<DataRow("numb_all_2_2", "inf X { pre:all x,y:pred { false } con:false } thm T {true} proof T$1 {1. |- all a,b:pred { false } 2. 1, byinf X |- true };", 0)>] 
+    [<DataRow("numb_all_2_1", "inf X { pre:all x,y:pred { false } con:false } thm T {true} proof T$1 {1. |- all a:pred { false } 2. 1, byinf X |- true };", 1)>] 
+    [<DataRow("numb_all_2_3", "inf X { pre:all x,y:pred { false } con:false } thm T {true} proof T$1 {1. |- all a,b,c:pred { false } 2. 1, byinf X |- true };", 1)>] 
+    [<DataRow("numb_exn_2_2", "inf X { pre:exn$2 x:pred { false } con:false } thm T {true} proof T$1 {1. |- exn$2 a:pred { false } 2. 1, byinf X |- true };", 0)>] 
+    [<DataRow("numb_exn_2_1", "inf X { pre:exn$2 x:pred { false } con:false } thm T {true} proof T$1 {1. |- exn$1 a:pred { false } 2. 1, byinf X |- true };", 1)>] 
+    [<DataRow("numb_exn_2_3", "inf X { pre:exn$2 x:pred { false } con:false } thm T {true} proof T$1 {1. |- exn$3 a:pred { false } 2. 1, byinf X |- true };", 1)>] 
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR008(no:string, fplCode:string, expected) =
