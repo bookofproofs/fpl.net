@@ -88,10 +88,6 @@ type FplGenericQuantor(positions: Positions, parent: FplGenericNode) =
 
     override this.EmbedInSymbolTable _ = 
         this.CheckConsistency()
-        // set all the variables of this quantor to bound ones
-        this.GetVariables()
-        |> List.map (fun var -> var :?> FplGenericVariable)
-        |> List.iter (fun var -> var.SetIsBound())
         addExpressionToParentArgList this
     
     override this.Run() = 
