@@ -664,7 +664,10 @@ type FplTypeMatcher() =
                             |> List.map (fun v -> topLevel.Scope.TryAdd(v.FplId,v))
                             |> ignore
                         else
-                            topLevel.Scope.TryAdd(var.FplId,var) |> ignore
+                            match var with
+                            | :? FplVariable as varCast when (not varCast.IsBound) ->
+                                topLevel.Scope.TryAdd(var.FplId,var) |> ignore
+                            | _ -> ()
                     | _ -> ()
                 | _ -> ()
                 fv.ArgList
