@@ -52,7 +52,7 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplGenericNode) as 
     member this.IsBound
         with get () = _isBound
 
-    /// Sets this variable to a bound one.
+    /// Sets this variable to a bound one, including nested variable
     member this.SetIsBound() =
         let rec setIsBound (fv:FplGenericNode) =
             fv.GetVariables()
@@ -66,7 +66,6 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplGenericNode) as 
         with get () = _isSignatureVariable
         and set (value) = 
             _isSignatureVariable <- value
-            _isBound <- value // all signature variables are also bound
 
     /// Indicates if this FplValue is an initialized variable
     member this.IsInitialized

@@ -67,8 +67,8 @@ type FplConjunction(positions: Positions, parent: FplGenericNode) as this =
         let arg2 = this.ArgList[1]
         checkArgPred this arg1
         checkArgPred this arg2
-        checkFreeVar arg1
-        checkFreeVar arg2
+        checkFreeAndNotSignatureVar arg1
+        checkFreeAndNotSignatureVar arg2
         checkCleanedUpFormula this
 
 
@@ -121,8 +121,8 @@ type FplDisjunction(positions: Positions, parent: FplGenericNode) as this =
         let arg2 = this.ArgList[1]
         checkArgPred this arg1
         checkArgPred this arg2
-        checkFreeVar arg1
-        checkFreeVar arg2
+        checkFreeAndNotSignatureVar arg1
+        checkFreeAndNotSignatureVar arg2
         checkCleanedUpFormula this
 
     override this.EmbedInSymbolTable _ = 
@@ -175,8 +175,8 @@ type FplExclusiveOr(positions: Positions, parent: FplGenericNode) as this =
         let arg2 = this.ArgList[1]
         checkArgPred this arg1
         checkArgPred this arg2
-        checkFreeVar arg1
-        checkFreeVar arg2
+        checkFreeAndNotSignatureVar arg1
+        checkFreeAndNotSignatureVar arg2
         checkCleanedUpFormula this
 
 
@@ -237,7 +237,7 @@ type FplNegation(positions: Positions, parent: FplGenericNode) as this =
         base.CheckConsistency()
         let arg = this.ArgList[0]
         checkArgPred this arg
-        checkFreeVar arg
+        checkFreeAndNotSignatureVar arg
         checkCleanedUpFormula this
 
     override this.EmbedInSymbolTable _ = 
@@ -288,8 +288,8 @@ type FplImplication(positions: Positions, parent: FplGenericNode) as this =
         let arg2 = this.ArgList[1]
         checkArgPred this arg1
         checkArgPred this arg2
-        checkFreeVar arg1
-        checkFreeVar arg2
+        checkFreeAndNotSignatureVar arg1
+        checkFreeAndNotSignatureVar arg2
         checkCleanedUpFormula this
 
     override this.EmbedInSymbolTable _ = 
@@ -342,8 +342,8 @@ type FplEquivalence(positions: Positions, parent: FplGenericNode) as this =
         let arg2 = this.ArgList[1]
         checkArgPred this arg1
         checkArgPred this arg2
-        checkFreeVar arg1
-        checkFreeVar arg2
+        checkFreeAndNotSignatureVar arg1
+        checkFreeAndNotSignatureVar arg2
         checkCleanedUpFormula this
 
     override this.EmbedInSymbolTable _ = 
