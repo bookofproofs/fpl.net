@@ -56,6 +56,9 @@ let private errMsgVarMatchedDifferently varName expectedExpr actualExpr =
 let private errMsgStandard (a:FplGenericNode) (p:FplGenericNode) = 
     false, $"found `{a.Type SignatureType.Name}`, expected `{p.Type SignatureType.Name}`"
 
+let private noErr = 
+    true, ""
+
 let private compareQuantorVariables (a:FplGenericNode) (p:FplGenericNode) (dictParameterUsage:Dictionary<string, FplGenericNode>) =
     let pVars = p.GetVariables()
     let aVars = a.GetVariables()
@@ -66,7 +69,7 @@ let private compareQuantorVariables (a:FplGenericNode) (p:FplGenericNode) (dictP
             | PrimQuantorExistsN when a.Name = p.Name && a.FplId <> p.FplId ->
                 errMsgMismatchingExistsN a p
             | _ ->
-                true, ""   // no mismatches
+                noErr   // no mismatches
         | (x:FplGenericNode)::xs, (y:FplGenericNode)::ys ->
             match FplTypeMatcher.MatchPwA [x] [y] with
             | Some _ ->
@@ -82,14 +85,32 @@ let private compareQuantorVariables (a:FplGenericNode) (p:FplGenericNode) (dictP
 
 let private checkMismatchingUsageOfVars varName (a:FplGenericNode) (dictParameterUsage:Dictionary<string, FplGenericNode>) = 
     if dictParameterUsage.TryAdd (varName, a) then
-        true, ""
+        noErr
     else
         let expectedExpr = (dictParameterUsage[varName].Type SignatureType.Name)
         let actualExpr = (a.Type SignatureType.Name)
         if expectedExpr<>actualExpr then
             errMsgVarMatchedDifferently varName expectedExpr actualExpr
         else
-            true, "" 
+            noErr
+
+let private comparisonBasedOnOpenFormulas (a:FplGenericNode) (p:FplGenericNode) = 
+    let aOpenFormulaOpt = FplTypeMatcher.GetOpenFormulaOfExpression a
+    let pOpenFormulaOpt = FplTypeMatcher.GetOpenFormulaOfExpression p
+
+    match aOpenFormulaOpt, pOpenFormulaOpt with
+    | Some aOpenFormula, Some pOpenFormula ->
+        let aFreeVars = getParameters aOpenFormula
+        let pFreeVars = getParameters pOpenFormula
+        match FplTypeMatcher.MatchPwA aFreeVars pFreeVars with
+        | Some _ ->
+            errMsgMismatchingOpenFormulas a aOpenFormula aFreeVars p pOpenFormula pFreeVars
+        | None when aOpenFormula.TypeId <> pOpenFormula.TypeId ->
+            errMsgMismatchingOpenFormulas a aOpenFormula aFreeVars p pOpenFormula pFreeVars
+        | _ -> 
+            noErr
+    | _, _ ->
+        errMsgStandard a p // fallback, should never happen unless open formula calculation somehow fails
 
 let private checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) =
     // When p is a variable, the dict stores the variable names and their usage in a first matched a.
@@ -111,7 +132,7 @@ let private checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) =
             | [], p::_ ->
                 errMsgFoundEndOfFormula p
             | [], [] ->
-                true, ""
+                noErr
 
         match a.Name, p.Name with
         | PrimConjunction, PrimConjunction
@@ -131,7 +152,7 @@ let private checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) =
             | _, err -> false, err
         | PrimFalse, PrimFalse 
         | PrimTrue, PrimTrue ->
-            true, ""
+            noErr
         | PrimRefL, PrimRefL ->
             match a.RefersTo, p.RefersTo with
             | Some aRef, Some pRef ->
@@ -141,24 +162,9 @@ let private checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) =
             | None, Some pRef ->
                 errMsgFoundEndOfFormula pRef
             | None, None ->
-                true, ""
+                noErr
         | _, PrimRefL when p.RefersTo.IsSome && p.RefersTo.Value.Name = PrimVariableL ->
-            let aOpenFormulaOpt = FplTypeMatcher.GetOpenFormulaOfExpression a
-            let pOpenFormulaOpt = FplTypeMatcher.GetOpenFormulaOfExpression p
-
-            match aOpenFormulaOpt, pOpenFormulaOpt with
-            | Some aOpenFormula, Some pOpenFormula ->
-                let aFreeVars = getParameters aOpenFormula
-                let pFreeVars = getParameters pOpenFormula
-                match FplTypeMatcher.MatchPwA aFreeVars pFreeVars with
-                | Some _ ->
-                    errMsgMismatchingOpenFormulas a aOpenFormula aFreeVars p pOpenFormula pFreeVars
-                | None when aOpenFormula.TypeId <> pOpenFormula.TypeId ->
-                    errMsgMismatchingOpenFormulas a aOpenFormula aFreeVars p pOpenFormula pFreeVars
-                | _ -> 
-                    true, ""
-            | _, _ ->
-                true, ""
+            comparisonBasedOnOpenFormulas a p 
         | _, PrimVariableL ->
             match FplTypeMatcher.MatchArgumentsWithParameters a p with
             | Some err ->
