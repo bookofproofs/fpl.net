@@ -809,7 +809,7 @@ let emitSIG03Diagnostics errMsg pos1 pos2 =
 /// 3: A dotted reference uses a signature for call-by-value that doesn't match. 
 /// 4: A reference uses a signature for call-by-value that doesn't match. 
 /// 5: A reference uses a type reference that doesn't exist.
-let emitSIG04Diagnostics mixedName candidateCount errList pos1 pos2 = 
+let emitSIG04Diagnostics mixedName errList pos1 pos2 = 
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -817,7 +817,7 @@ let emitSIG04Diagnostics mixedName candidateCount errList pos1 pos2 =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = SIG04(mixedName,candidateCount, errList)
+            Diagnostic.Code = SIG04(mixedName, errList)
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic

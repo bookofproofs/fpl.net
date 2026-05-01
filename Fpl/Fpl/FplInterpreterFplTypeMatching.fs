@@ -18,6 +18,7 @@ open System.Collections.Generic
 open FplInterpreterDiagnosticsEmitter
 open FplPrimitives
 open FplInterpreterBasicTypes
+open FplInterpreter.Globals.HelpersBasic
 open FplInterpreterChecks
 open FplInterpreterReferences
 open FplInterpreterVariables
@@ -638,6 +639,9 @@ type FplTypeMatcher() =
                         | :? FplVariable as varCast when (not varCast.IsBound) && not rootRecursion ->
                             topLevel.Scope.TryAdd(var.FplId,var) |> ignore
                         | _ -> ()
+                        if fv.ArgList.Count = 0 then
+                            var.GetVariables()
+                            |> List.map (fun v -> topLevel.Scope.TryAdd(v.FplId,v)) |> ignore
                     | _ -> ()
                 | _ -> ()
                 fv.ArgList
@@ -664,16 +668,8 @@ let checkSIG04Diagnostics (calling:FplGenericNode) (candidates: FplGenericNode l
         match checkCandidates calling candidates [] with
         | (Some candidate,_) -> Some candidate // no error occurred
         | (None, errList) -> 
-            let errListStr = 
-                errList 
-                |> List.mapi (fun i s -> 
-                    if errList.Length > 1 then 
-                        sprintf "%d) %s" (i + 1) s
-                    else
-                        sprintf "%s" s
-                )
-                |> String.concat ", "
-            calling.ErrorOccurred <- emitSIG04Diagnostics (calling.Type SignatureType.Mixed) candidates.Length errListStr calling.StartPos calling.EndPos
+            let errListStr = numbered errList
+            calling.ErrorOccurred <- emitSIG04Diagnostics (calling.Type SignatureType.Mixed) errListStr calling.StartPos calling.EndPos
             None
 
 /// Checks if a reference to an array matches its dimensions (in terms of number and types)

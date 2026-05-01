@@ -1,4 +1,5 @@
 namespace FplInterpreter.Tests
+open System
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
 open FplInterpreter.Globals.Debug
@@ -561,13 +562,13 @@ type TestSignatureMatching() =
         prepareFplCode(filename, "", false) |> ignore
 
     [<DataRow("""def pred Eq(x,y: obj) infix "=" 1000 axiom A {dec ~x:ind ~y:obj; (x = y) };""", 
-        "No overload matching `x = y`. The expression `x` typed `ind` doesn't match the parameter `x` typed `obj` in the predicate definition TestSIG04MsgSpecificity.Eq(obj, obj).")>]
+        "No overload matching `x = y`. Candidate(s) tried:\r\nThe expression `x` typed `ind` doesn't match the parameter `x` typed `obj` in the predicate definition TestSIG04MsgSpecificity.Eq(obj, obj).")>]
     [<TestMethod>]
     member this.TestSIG04MsgSpecificity(fplCode:string, (expected:string)) =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = SIG04 ("", 0, "" )
+            let code = SIG04 ("", "" )
             prepareFplCode ("TestSIG04MsgSpecificity.fpl", fplCode, false) |> ignore
             checkForUnexpectedErrors code
             let result = filterByErrorCode ad code.Code

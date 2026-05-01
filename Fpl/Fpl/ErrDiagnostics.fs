@@ -180,7 +180,7 @@ type DiagnosticCode =
     | SIG01 of string 
     | SIG02 of string * int * string
     | SIG03 of string 
-    | SIG04 of string * int * string
+    | SIG04 of string * string
     | SIG05 of string 
     | SIG06 of string * string * string * string
     | SIG07 of string * string * string 
@@ -399,21 +399,21 @@ type DiagnosticCode =
                 if candidates = String.Empty then 
                     $"The {varName} `{varType}` does not define the variable or property `{prtyName}`. No candidates found."  
                 else
-                    $"The {varName} `{varType}` does not define the variable or property `{prtyName}`. Candidates: {candidates}."  
+                    $"The {varName} `{varType}` does not define the variable or property `{prtyName}`. Candidate(s) tried:{Environment.NewLine}{candidates}."  
             | ID013 delegateDiagnostic -> sprintf "%s" delegateDiagnostic // just emit the delegate's diagnostic
             | ID014 (signature, conflict) -> sprintf "Language code `%s` was already declared at %s." signature conflict
             | ID015 signature -> $"`parent` cannot be referenced from {signature}." 
             | ID016 signature -> $"`self` cannot be referenced from {signature}." 
             | ID017 (name, candidates) -> 
                 if candidates.Length > 0 then
-                   $"The type `{name}` could not be determined, candidates were {candidates}."  
+                   $"The type `{name}` could not be determined. Candidate(s) tried:{Environment.NewLine}{candidates}."  
                 else
                    $"The type `{name}` not found, no candidates found."  
             | ID018 name -> sprintf "The extension `%s` could not be matched. Declare an extension with this pattern." name
             | ID020 name -> $"Missing call of base constructor `{name}`." 
             | ID021 name -> $"Duplicate call of base constructor `{name}`."
             | ID022 name -> $"`{name}` is intrinsic, it has no parameterized constructors. This call uses parameters."
-            | ID023 candidates  -> $"Cannot associate a justification with a single block. Found more candidates: {candidates}." 
+            | ID023 candidates  -> $"Cannot associate a justification with a single block. Found more candidate(s):{Environment.NewLine}{candidates}." 
             | ID024 (signature, conflict) -> sprintf "Expression `%s` was already localized at %s." signature conflict
             | ID025 (candidate, nodeType)  -> $"Cannot reference to `{candidate}` inside {nodeType}." 
             | ID027 name -> $"Illegal recursion in for statement. The entity `{name}` cannot be used as its own domain." 
@@ -434,7 +434,7 @@ type DiagnosticCode =
             | PR005 name ->  $"Argument identifier `{name}` not declared in this proof."
             | PR006 (proofName, argumentName)->  $"A proof {proofName} was found, but it has no argument with the identifier `{argumentName}`."
             | PR007 (nodeTypeName, nodeName) ->  $"{nodeTypeName} is {nodeName} and is missing a proof."
-            | PR008 (byInfName, expectedPremise, mismatchingCandidates) -> $"The subsequent `{LiteralByInf} {byInfName}` step requires a premise of the form `{expectedPremise}`.{Environment.NewLine}The provided justification does not match this structure. Candidate(s) tried: {mismatchingCandidates}."
+            | PR008 (byInfName, expectedPremise, mismatchingCandidates) -> $"The subsequent `{LiteralByInf} {byInfName}` step requires a premise of the form `{expectedPremise}`.{Environment.NewLine}The provided justification does not match this structure. Candidate(s) tried:{Environment.NewLine}{mismatchingCandidates}."
 
             | PR009 -> "Not all arguments of the proof could be verified."
             | PR010 (keyword, expectedRef) -> $"Justification `{keyword}` expects a reference to {expectedRef}, not to a proof or corollary."
@@ -453,11 +453,7 @@ type DiagnosticCode =
             | SIG01 symbol -> $"The symbol `{symbol}` was not declared." 
             | SIG02 (symbol, precedence, conflict) -> $"The symbol `{symbol}` was declared with the same precedence of `{precedence}` in {conflict}." 
             | SIG03 errMsg -> errMsg // Returned type is mismatching the mapping type
-            | SIG04 (signature, numbOfcandidates, candidates) -> 
-                if numbOfcandidates = 1 then
-                    $"No overload matching `{signature}`. {candidates}." 
-                else 
-                    $"No overload matching `{signature}`. Checked candidates: {candidates}." 
+            | SIG04 (signature, candidates) -> $"No overload matching `{signature}`. Candidate(s) tried:{Environment.NewLine}{candidates}." 
             | SIG05 errMsg -> $"Cannot execute assignment; {errMsg}"
             | SIG06 (name, oldFromNode, newFromNode, typeName) -> 
                 match typeName with 

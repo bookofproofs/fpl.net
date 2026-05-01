@@ -515,7 +515,7 @@ type SymbolTableNavigation() =
             // process the file
             prepareFplCode(filename + ".fpl", fplCode, false) 
             // test if there is no SIG04 error
-            let result = filterByErrorCode ad (SIG04 ("",0, "")).Code
+            let result = filterByErrorCode ad (SIG04 ("", "")).Code
             Assert.AreEqual<int>(0, result.Length)
 
 
@@ -535,7 +535,7 @@ type SymbolTableNavigation() =
             loadFplFileWithTheSameSymbolTable pathToFile |> ignore
 
             // test if there is a SIG04 error (there should be 1)
-            let result = filterByErrorCode ad (SIG04 ("", 0, "")).Code
+            let result = filterByErrorCode ad (SIG04 ("", "")).Code
             Assert.AreEqual<int>(1, result.Length)
 
             // now, correct the typo to make SIG04 diagnostics disappear
@@ -553,7 +553,7 @@ type SymbolTableNavigation() =
             loadFplFileWithTheSameSymbolTable pathToFile |> ignore
 
             // test if there is a SIG04 error (there should be 0)
-            let result = filterByErrorCode ad (SIG04 ("",0, "")).Code
+            let result = filterByErrorCode ad (SIG04 ("", "")).Code
             Assert.AreEqual<int>(0, result.Length)
 
             // remove the test file

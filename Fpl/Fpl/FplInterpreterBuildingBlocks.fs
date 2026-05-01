@@ -1105,12 +1105,12 @@ let rec eval ast =
                     match FplTypeMatcher.MatchPwA [firstOp] [pars[0]] with
                     | Some errMsg -> 
                         let extendedErrMsg = $"{errMsg} in {qualifiedName refNode true}"
-                        firstOp.ErrorOccurred <- emitSIG04Diagnostics (currentOp.Type SignatureType.Mixed) 1 extendedErrMsg firstOp.StartPos firstOp.EndPos
+                        firstOp.ErrorOccurred <- emitSIG04Diagnostics (currentOp.Type SignatureType.Mixed) extendedErrMsg firstOp.StartPos firstOp.EndPos
                     | _ -> ()
                     match FplTypeMatcher.MatchPwA [secondOp] [pars[1]] with
                     | Some errMsg -> 
                         let extendedErrMsg = $"{errMsg} in {qualifiedName refNode true}"
-                        secondOp.ErrorOccurred <- emitSIG04Diagnostics (currentOp.Type SignatureType.Mixed) 1 extendedErrMsg secondOp.StartPos secondOp.EndPos
+                        secondOp.ErrorOccurred <- emitSIG04Diagnostics (currentOp.Type SignatureType.Mixed) extendedErrMsg secondOp.StartPos secondOp.EndPos
                     | _ -> ()
                 else
                     // if something went wrong (for instance, wrong arity), issue SIG04 with fallback using the operand 

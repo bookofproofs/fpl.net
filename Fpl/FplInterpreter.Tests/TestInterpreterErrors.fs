@@ -3792,7 +3792,7 @@ type TestInterpreterErrors() =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = SIG04 ("", 0, "")
+            let code = SIG04 ("", "")
             
             runTestHelper "TestSIG04.fpl" fplCode code expected
 
@@ -4256,7 +4256,7 @@ type TestInterpreterErrors() =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = SIG04 ("", 0, "")
+            let code = SIG04 ("", "")
             
             runTestHelper "TestSIG04Extensions.fpl" fplCode code expected
 
@@ -4295,7 +4295,7 @@ type TestInterpreterErrors() =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = SIG04 ("", 0, "")
+            let code = SIG04 ("", "")
             
             runTestHelper "TestSIG04Undef.fpl" fplCode code expected
 
