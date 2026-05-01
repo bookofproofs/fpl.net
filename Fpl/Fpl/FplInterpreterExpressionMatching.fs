@@ -101,6 +101,21 @@ let checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) =
                 true, ""
         | _, PrimRefL when p.RefersTo.IsSome && p.RefersTo.Value.Name = PrimVariableL ->
             checkExpr a p.RefersTo.Value
+
+            //match FplTypeMatcher.GetOpenFormulaOfExpression a with
+            //| Some formula ->
+            //    let freeVarsOfFormula = getParameters formula
+            //    let pars = getParameters p
+            //    let formulaType = formula.Type SignatureType.Type
+            //    match FplTypeMatcher.MatchPwA freeVarsOfFormula pars with
+            //    | Some _ when p.TypeId = formula.TypeId ->
+            //        errMsgFormula (freeVarsOfFormula.Length > 0) aName formulaType pName pType, Parameter.Consumed
+            //    | Some _ when p.TypeId <> formula.TypeId ->
+            //        errMsgFormula (freeVarsOfFormula.Length > 0) aName formulaType pName pType, Parameter.Consumed
+            //    | _ -> 
+            //        None, Parameter.Consumed
+            //| None->
+
         | _, PrimVariableL ->
             match FplTypeMatcher.MatchArgumentsWithParameters a p with
             | Some err ->

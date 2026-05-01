@@ -604,23 +604,6 @@ type FplTypeMatcher() =
                         errMsgStandard aIsCallByReference aName aType pName pType, Parameter.Consumed
                 else 
                     matchByTypeStringRepresentation aIsCallByReference a aName aType aTypeName p pName pType pTypeName
-            | _, PrimVariableL when p.ArgType = ArgType.Parentheses && (a.IsBlock() || a.Name = PrimExtensionObj) ->
-                matchByTypeStringRepresentation true a aName aType aTypeName p pName pType pTypeName
-            | _, PrimVariableL when p.ArgType = ArgType.Parentheses ->
-                match FplTypeMatcher.GetOpenFormulaOfExpression a with
-                | Some formula ->
-                    let freeVarsOfFormula = getParameters formula
-                    let pars = getParameters p
-                    let formulaType = formula.Type SignatureType.Type
-                    match FplTypeMatcher.MatchPwA freeVarsOfFormula pars with
-                    | Some _ when p.TypeId = formula.TypeId ->
-                        errMsgFormula (freeVarsOfFormula.Length > 0) aName formulaType pName pType, Parameter.Consumed
-                    | Some _ when p.TypeId <> formula.TypeId ->
-                        errMsgFormula (freeVarsOfFormula.Length > 0) aName formulaType pName pType, Parameter.Consumed
-                    | _ -> 
-                        None, Parameter.Consumed
-                | None->
-                    matchByTypeStringRepresentation true a aName aType aTypeName p pName pType pTypeName
             | _ ,_ -> 
                 matchByTypeStringRepresentation true a aName aType aTypeName p pName pType pTypeName
         matchTwoTypes a p
@@ -657,17 +640,16 @@ type FplTypeMatcher() =
                 | PrimRefL when fv.RefersTo.IsSome ->
                     match fv.RefersTo with
                     | Some var when var.Name = PrimVariableL ->
-                        if rootRecursion then 
-                            fv.GetVariables()
-                            |> List.map (fun v -> v :?> FplVariable)
-                            |> List.filter (fun v -> not v.IsBound)
-                            |> List.map (fun v -> topLevel.Scope.TryAdd(v.FplId,v))
-                            |> ignore
-                        else
-                            match var with
-                            | :? FplVariable as varCast when (not varCast.IsBound) ->
-                                topLevel.Scope.TryAdd(var.FplId,var) |> ignore
-                            | _ -> ()
+                        let varArgs = var.GetVariables()
+                        varArgs
+                        |> List.map (fun a -> a :?> FplVariable) 
+                        |> List.filter (fun v -> not v.IsBound)
+                        |> List.map (fun v -> topLevel.Scope.TryAdd(v.FplId,v))
+                        |> ignore
+                        match var with
+                        | :? FplVariable as varCast when (not varCast.IsBound) && not rootRecursion ->
+                            topLevel.Scope.TryAdd(var.FplId,var) |> ignore
+                        | _ -> ()
                     | _ -> ()
                 | _ -> ()
                 fv.ArgList

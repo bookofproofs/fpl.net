@@ -76,6 +76,7 @@ type TestTypeMatching() =
     [<DataRow("pred_vars_01", "def pred T() {dec ~x:pred(y:ind); x};", "pred(ind)")>]
     [<DataRow("pred_vars_02", "def pred T(a:pred()) {a};", "pred()")>]
     [<DataRow("pred_vars_03", "def pred T(a:pred(b:ind, c:pred(d:func))) {a};", "pred(ind, pred(func))")>]
+    [<DataRow("pred_vars_04", "def pred T() {dec ~a:ind ~x:pred(y:ind); x(a)};", "pred(ind)")>]
     [<DataRow("func_vars_01", "def pred T() {dec ~x:func(y:ind)->obj; x};", "func(ind) -> obj")>]
     [<DataRow("func_vars_02", "def pred T(a:func()->ind) {a};", "func() -> ind")>]
     [<DataRow("func_vars_03", "def pred T(a:func(b:ind, c:pred(d:func))->func) {a};", "func(ind, pred(func)) -> func")>]
