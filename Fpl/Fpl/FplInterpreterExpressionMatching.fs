@@ -13,6 +13,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 module FplInterpreterExpressionMatching
+open System
 open System.Collections.Generic
 open FplPrimitives
 open FplInterpreterDiagnosticsEmitter
@@ -94,7 +95,7 @@ let private checkMismatchingUsageOfVars varName (a:FplGenericNode) (dictParamete
         else
             noErr
 
-let private comparisonBasedOnOpenFormulas (a:FplGenericNode) (p:FplGenericNode) = 
+let private comparisonBasedOnOpenFormulas (a:FplGenericNode) (p:FplGenericNode) (dictParameterUsage:Dictionary<string, FplGenericNode>) = 
     let aOpenFormulaOpt = FplTypeMatcher.GetOpenFormulaOfExpression a
     let pOpenFormulaOpt = FplTypeMatcher.GetOpenFormulaOfExpression p
 
@@ -107,6 +108,11 @@ let private comparisonBasedOnOpenFormulas (a:FplGenericNode) (p:FplGenericNode) 
             errMsgMismatchingOpenFormulas a aOpenFormula aFreeVars p pOpenFormula pFreeVars
         | None when aOpenFormula.TypeId <> pOpenFormula.TypeId ->
             errMsgMismatchingOpenFormulas a aOpenFormula aFreeVars p pOpenFormula pFreeVars
+        | _ when p.Name = PrimRefL ->
+            match p.RefersTo with
+            | Some var when var.Name = PrimVariableL ->
+                checkMismatchingUsageOfVars p.FplId a dictParameterUsage
+            | _ -> noErr
         | _ -> 
             noErr
     | _, _ ->
@@ -164,7 +170,7 @@ let private checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) =
             | None, None ->
                 noErr
         | _, PrimRefL when p.RefersTo.IsSome && p.RefersTo.Value.Name = PrimVariableL ->
-            comparisonBasedOnOpenFormulas a p 
+            comparisonBasedOnOpenFormulas a p dictParameterUsage
         | _, PrimVariableL ->
             match FplTypeMatcher.MatchArgumentsWithParameters a p with
             | Some err ->
@@ -187,7 +193,7 @@ let private matchPremiseWithSomeExpressions (exprList:FplGenericNode list) (pre:
         | true, _ ->
             result.Add expr
         | false, err ->
-            failedCandidates.Add ($"`{expr.Type SignatureType.Name}` [{err}]")
+            failedCandidates.Add ($"`{expr.Type SignatureType.Name}`{Environment.NewLine}  ⚡{err}")
     )
     result |> Seq.toList, (numbered failedCandidates)
 

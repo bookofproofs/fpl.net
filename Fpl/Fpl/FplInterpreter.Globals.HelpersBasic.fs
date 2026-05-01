@@ -349,7 +349,7 @@ let allBefore searchItem xs =
 
 let numbered inputLst =
     inputLst
-    |> Seq.mapi (fun i cand -> sprintf "%d) %s" (i + 1) cand)
+    |> Seq.mapi (fun i cand -> sprintf "%s%d) %s" Environment.NewLine (i + 1) cand)
     |> String.concat ", "
 
 let ordinalPostfix n =

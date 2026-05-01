@@ -434,7 +434,7 @@ type DiagnosticCode =
             | PR005 name ->  $"Argument identifier `{name}` not declared in this proof."
             | PR006 (proofName, argumentName)->  $"A proof {proofName} was found, but it has no argument with the identifier `{argumentName}`."
             | PR007 (nodeTypeName, nodeName) ->  $"{nodeTypeName} is {nodeName} and is missing a proof."
-            | PR008 (byInfName, expectedPremise, mismatchingCandidates) -> $"The subsequent `{LiteralByInf} {byInfName}` step requires a premise of the form `{expectedPremise}`. The provided justification does not match this structure. Candidate(s) tried: {mismatchingCandidates}."
+            | PR008 (byInfName, expectedPremise, mismatchingCandidates) -> $"The subsequent `{LiteralByInf} {byInfName}` step requires a premise of the form `{expectedPremise}`.{Environment.NewLine}The provided justification does not match this structure. Candidate(s) tried: {mismatchingCandidates}."
 
             | PR009 -> "Not all arguments of the proof could be verified."
             | PR010 (keyword, expectedRef) -> $"Justification `{keyword}` expects a reference to {expectedRef}, not to a proof or corollary."
