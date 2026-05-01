@@ -48,6 +48,13 @@ let private compareQuantorVariables (a:FplGenericNode) (p:FplGenericNode) (dictP
             false, $"found {aVars.Length} quantor variables in `{a.Type SignatureType.Name}`, expected {pVars.Length} in `{p.Type SignatureType.Name}`" 
     loop aVars pVars 0
 
+let private errMsgFormula isOpen formula formulaType pName pType = 
+    if isOpen then 
+        false, $"The expression `{formula}` is an open formula typed `{formulaType}` that doesn't match the parameter `{pName}` typed `{pType}`"
+    else
+        false, $"The expression `{formula}` is a closed formula typed `{formulaType}` that doesn't match the parameter `{pName}` typed `{pType}`"
+
+
 let checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) =
     // When p is a variable, the dict stores the variable names and their usage in a first matched a.
     // The dictionary is used to check the consistency of the usage of the same variable p in the whole formula
@@ -100,22 +107,24 @@ let checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) =
             | None, None ->
                 true, ""
         | _, PrimRefL when p.RefersTo.IsSome && p.RefersTo.Value.Name = PrimVariableL ->
-            checkExpr a p.RefersTo.Value
+            let aOpenFormula = FplTypeMatcher.GetOpenFormulaOfExpression a
+            let aType = aOpenFormula.Value.Type SignatureType.Type
+            let aName = a.Type SignatureType.Name
+            let pOpenFormula = FplTypeMatcher.GetOpenFormulaOfExpression p
+            let pType = pOpenFormula.Value.Type SignatureType.Type
+            let pName = p.Type SignatureType.Name
 
-            //match FplTypeMatcher.GetOpenFormulaOfExpression a with
-            //| Some formula ->
-            //    let freeVarsOfFormula = getParameters formula
-            //    let pars = getParameters p
-            //    let formulaType = formula.Type SignatureType.Type
-            //    match FplTypeMatcher.MatchPwA freeVarsOfFormula pars with
-            //    | Some _ when p.TypeId = formula.TypeId ->
-            //        errMsgFormula (freeVarsOfFormula.Length > 0) aName formulaType pName pType, Parameter.Consumed
-            //    | Some _ when p.TypeId <> formula.TypeId ->
-            //        errMsgFormula (freeVarsOfFormula.Length > 0) aName formulaType pName pType, Parameter.Consumed
-            //    | _ -> 
-            //        None, Parameter.Consumed
-            //| None->
-
+            match aOpenFormula, pOpenFormula with
+            | Some aFormula, Some pFormula ->
+                let freeVarsOfAFormula = getParameters aFormula
+                let freeVarsOfPFormula = getParameters pFormula
+                match FplTypeMatcher.MatchPwA freeVarsOfAFormula freeVarsOfPFormula with
+                | Some _ ->
+                    errMsgFormula (freeVarsOfAFormula.Length > 0) aName aType pName pType
+                | _ -> 
+                    true, ""
+            | _, _ ->
+                true, ""
         | _, PrimVariableL ->
             match FplTypeMatcher.MatchArgumentsWithParameters a p with
             | Some err ->

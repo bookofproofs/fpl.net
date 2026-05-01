@@ -182,12 +182,6 @@ let private errMsgStandard aIsCallByReference aName aType pName pType =
     else
         Some $"The application `{aName}` typed `{aType}` doesn't match the parameter `{pName}` typed `{pType}`"
 
-let private errMsgFormula isOpen formula formulaType pName pType = 
-    if isOpen then 
-        Some $"The expression `{formula}` is an open formula typed `{formulaType}` that doesn't match the parameter `{pName}` typed `{pType}`"
-    else
-        Some $"The expression `{formula}` is a closed formula typed `{formulaType}` that doesn't match the parameter `{pName}` typed `{pType}`"
-
 let private errMsgMissingArgument pName pType = Some $"Missing argument for the parameter `{pName}` typed `{pType}`"
 let private errMsgMissingParameter aName aType = Some $"No matching parameter for the argument `{aName}` typed `{aType}`"
 let private errMsgClassValueNotAllowed actualClassType = Some $"A class `{actualClassType}` cannot be passed directly as a value. Use a class constructor `{actualClassType}(...)` instead"
@@ -640,12 +634,6 @@ type FplTypeMatcher() =
                 | PrimRefL when fv.RefersTo.IsSome ->
                     match fv.RefersTo with
                     | Some var when var.Name = PrimVariableL ->
-                        let varArgs = var.GetVariables()
-                        varArgs
-                        |> List.map (fun a -> a :?> FplVariable) 
-                        |> List.filter (fun v -> not v.IsBound)
-                        |> List.map (fun v -> topLevel.Scope.TryAdd(v.FplId,v))
-                        |> ignore
                         match var with
                         | :? FplVariable as varCast when (not varCast.IsBound) && not rootRecursion ->
                             topLevel.Scope.TryAdd(var.FplId,var) |> ignore
