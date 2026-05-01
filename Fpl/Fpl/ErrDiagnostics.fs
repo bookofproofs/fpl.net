@@ -495,7 +495,7 @@ type DiagnosticCode =
             | VAR07 name -> $"The {PrimQuantorExistsN} accepts only one bound variable `{name}`."
             | VAR08 -> "Variadic variables cannot be bound in a quantor."
             | VAR09 (varName,varType) -> $"The variable {varName}:{varType} is free and cannot be used to evaluate this expression."
-            | VAR10 (identifier, conflict) -> $"This bound quantor variable `{identifier}` was used in the same formula at {conflict}."  
+            | VAR10 (identifier, formulaName) -> $"The variable `{identifier}` is bound more than once in the formula `{formulaName}`."  
             | VAR11 (identifier, conflict) -> $"All variables in a {LiteralLocL} have to be different. The `{identifier}` was used at {conflict}."
 
 /// Computes an MD5 checksum of a string

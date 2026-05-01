@@ -297,18 +297,20 @@ let checkCleanedUpFormula (fv:FplGenericNode) =
             quantor.Scope.ContainsKey(varInFormula.FplId)
 
         let quantors = extractQuantors formula
+        let formulaName = formula.Type SignatureType.Name
         let usedVariables = usedVariablesInFormula formula
-        if quantors.Length > 0 then 
+        quantors 
+        |> List.map (fun quantor ->
             usedVariables
-            |> List.iter(fun varInFormula ->
-                quantors 
-                |> List.iter (fun quantor ->
-                    if varIsBoundByQuantor varInFormula quantor && 
-                        not (varUsedInQuantor varInFormula quantor) then 
-                        let quantorVar = quantor.Scope[varInFormula.FplId]
-                        fv.ErrorOccurred <- emitVAR10diagnostics varInFormula.FplId varInFormula.QualifiedStartPos quantorVar.StartPos quantorVar.EndPos
-                )
-            )                
+            |> List.tryFind (fun varInFormula ->
+                varIsBoundByQuantor varInFormula quantor && not (varUsedInQuantor varInFormula quantor)
+            )
+            |> Option.map (fun uncleanedUpVariableInFormula ->
+                let quantorVar = quantor.Scope[uncleanedUpVariableInFormula.FplId]
+                fv.ErrorOccurred <- emitVAR10diagnostics uncleanedUpVariableInFormula.FplId formulaName quantorVar.StartPos quantorVar.EndPos
+            )
+        )
+        |> ignore
             
     if formulaCreationInSymbolTableCompleted fv then
         // here, this reference points to a formula, which is final in the symbol table

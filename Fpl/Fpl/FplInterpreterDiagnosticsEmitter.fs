@@ -1176,7 +1176,7 @@ let emitVAR09diagnostics varName varType pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitVAR10diagnostics varName conflictStartPos pos1 pos2 =
+let emitVAR10diagnostics varName formulaName pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -1184,8 +1184,8 @@ let emitVAR10diagnostics varName conflictStartPos pos1 pos2 =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = VAR10(varName, conflictStartPos)
-            Diagnostic.Alternatives = Some "Clean up the formula by renaming the bound quantor variable."
+            Diagnostic.Code = VAR10(varName, formulaName)
+            Diagnostic.Alternatives = Some $"Rename one of the bound occurrences of `{varName}` to avoid duplicate bindings."
                     
         }
     ad.AddDiagnostic diagnostic
