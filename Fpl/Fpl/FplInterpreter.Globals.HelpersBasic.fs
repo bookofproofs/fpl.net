@@ -164,6 +164,12 @@ let tryAddSubBlockToFplBlock (fplValue:FplGenericNode) =
     else
         parent.Scope.Add(identifier, fplValue)
 
+/// Generates a string of a FplGenericNode list based on their SignatureType.
+let lstToString (lst:FplGenericNode list) (signatureType:SignatureType) =
+    lst
+    |> List.map (fun fv -> fv.Type SignatureType.Name)
+    |> String.concat ", "
+
 /// Generates a string of parameters based on SignatureType
 let getParamTuple (fv:FplGenericNode) (signatureType:SignatureType) =
         let propagate = propagateSignatureType signatureType

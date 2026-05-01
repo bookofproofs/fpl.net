@@ -21,6 +21,40 @@ open FplInterpreterBasicTypes
 open FplInterpreterIntrinsicTypes
 open FplInterpreterFplTypeMatching
 
+let private errMsgMismatchingExistsN (a:FplGenericNode) (p:FplGenericNode) =
+    false, $"found mismatching exists `{a.FplId}` in `{a.Type SignatureType.Name}`, expecting type `{p.FplId}` in `{p.Type SignatureType.Name}`"
+
+let private errMsgMismatchingQuantorVariableTypes (a:FplGenericNode) (p:FplGenericNode) (x:FplGenericNode) (y:FplGenericNode) index =
+    let xType = x.Type SignatureType.Type
+    let yType = y.Type SignatureType.Type
+    false, $"found mismatching type `{x.FplId}:{xType}` at {ordinalPostfix index} quantor variable in `{a.Type SignatureType.Name}`, expecting type `{y.FplId}:{yType}` in `{p.Type SignatureType.Name}`"
+
+let private errMsgMismatchingQuantorVariableCounts (a:FplGenericNode) (p:FplGenericNode) aVarsCount pVarsCount =
+    false, $"found {aVarsCount} quantor variables in `{a.Type SignatureType.Name}`, expected {pVarsCount} in `{p.Type SignatureType.Name}`" 
+
+let private errMsgMismatchingOpenFormulas (aOriginal:FplGenericNode) (aOpenFormula:FplGenericNode) (aFreeVars:FplGenericNode list) (pOriginal:FplGenericNode) (pOpenFormula:FplGenericNode) (pFreeVars:FplGenericNode list) = 
+    let aName = aOriginal.Type SignatureType.Name
+    let aOpenFormulaType = aOpenFormula.Type SignatureType.Type
+    let pName = pOriginal.Type SignatureType.Name
+    let pOpenFormulaType = pOpenFormula.Type SignatureType.Type
+    let openClosedStr (lstFreeVars:FplGenericNode list) =
+        if lstFreeVars.Length > 0 then
+            $"an open formula with the free variables {lstToString lstFreeVars SignatureType.Name}"
+        else
+            "a closed formula"
+    false, $"found expression `{aName}` ({openClosedStr aFreeVars} typed `{aOpenFormulaType}`), expected `{pName}` typed `{openClosedStr pFreeVars} typed {pOpenFormulaType}`"
+
+let private errMsgExpectedEndOfFormula (a:FplGenericNode) =
+    false, $"`found {a.Type SignatureType.Name}`, expected end of formula"
+
+let private errMsgFoundEndOfFormula (p:FplGenericNode) =
+    false, $"found end of formula, expected `{p.Type SignatureType.Name}`"
+
+let private errMsgVarMatchedDifferently varName expectedExpr actualExpr = 
+    false, $"variable `{varName}` matched with different formulas `{expectedExpr}` and `{actualExpr}`"
+
+let private errMsgStandard (a:FplGenericNode) (p:FplGenericNode) = 
+    false, $"found `{a.Type SignatureType.Name}`, expected `{p.Type SignatureType.Name}`"
 
 let private compareQuantorVariables (a:FplGenericNode) (p:FplGenericNode) (dictParameterUsage:Dictionary<string, FplGenericNode>) =
     let pVars = p.GetVariables()
@@ -30,32 +64,34 @@ let private compareQuantorVariables (a:FplGenericNode) (p:FplGenericNode) (dictP
         | [], [] ->
             match a.Name with
             | PrimQuantorExistsN when a.Name = p.Name && a.FplId <> p.FplId ->
-                false, $"found mismatching exists `{a.FplId}` in `{a.Type SignatureType.Name}`, expecting type `{p.FplId}` in `{p.Type SignatureType.Name}`"
+                errMsgMismatchingExistsN a p
             | _ ->
                 true, ""   // no mismatches
         | (x:FplGenericNode)::xs, (y:FplGenericNode)::ys ->
             match FplTypeMatcher.MatchPwA [x] [y] with
             | Some _ ->
-                let xType = x.Type SignatureType.Type
-                let yType = y.Type SignatureType.Type
-                false, $"found mismatching type `{x.FplId}:{xType}` at {ordinalPostfix index} quantor variable in `{a.Type SignatureType.Name}`, expecting type `{y.FplId}:{yType}` in `{p.Type SignatureType.Name}`"
+                errMsgMismatchingQuantorVariableTypes a p x y index
             | _ ->
                 // remember corresponding quantor variables of the matched quantors 
                 dictParameterUsage.TryAdd (y.FplId, x) |> ignore 
                 loop xs ys (index + 1)
         | _ ->
             // Should not happen if lengths are equal, but included for safety
-            false, $"found {aVars.Length} quantor variables in `{a.Type SignatureType.Name}`, expected {pVars.Length} in `{p.Type SignatureType.Name}`" 
+            errMsgMismatchingQuantorVariableCounts a p aVars.Length pVars.Length
     loop aVars pVars 0
 
-let private errMsgFormula isOpen formula formulaType pName pType = 
-    if isOpen then 
-        false, $"The expression `{formula}` is an open formula typed `{formulaType}` that doesn't match the parameter `{pName}` typed `{pType}`"
+let private checkMismatchingUsageOfVars varName (a:FplGenericNode) (dictParameterUsage:Dictionary<string, FplGenericNode>) = 
+    if dictParameterUsage.TryAdd (varName, a) then
+        true, ""
     else
-        false, $"The expression `{formula}` is a closed formula typed `{formulaType}` that doesn't match the parameter `{pName}` typed `{pType}`"
+        let expectedExpr = (dictParameterUsage[varName].Type SignatureType.Name)
+        let actualExpr = (a.Type SignatureType.Name)
+        if expectedExpr<>actualExpr then
+            errMsgVarMatchedDifferently varName expectedExpr actualExpr
+        else
+            true, "" 
 
-
-let checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) =
+let private checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) =
     // When p is a variable, the dict stores the variable names and their usage in a first matched a.
     // The dictionary is used to check the consistency of the usage of the same variable p in the whole formula
     // during the matching process. Moreover, the dict is used generate the
@@ -71,9 +107,9 @@ let checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) =
                 else
                     false, msg
             | a::_, [] ->
-                false, $"`found {a.Type SignatureType.Name}`, expected end of formula"
+                errMsgExpectedEndOfFormula a
             | [], p::_ ->
-                false, $"found end of formula, expected `{p.Type SignatureType.Name}`"
+                errMsgFoundEndOfFormula p
             | [], [] ->
                 true, ""
 
@@ -101,26 +137,24 @@ let checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) =
             | Some aRef, Some pRef ->
                 checkExpr aRef pRef
             | Some aRef, None ->
-                false, $"found `{aRef.Type SignatureType.Name}`, expected end of formula"
+                errMsgExpectedEndOfFormula aRef
             | None, Some pRef ->
-                false, $"found end of formular, expected `{pRef.Type SignatureType.Name}`"
+                errMsgFoundEndOfFormula pRef
             | None, None ->
                 true, ""
         | _, PrimRefL when p.RefersTo.IsSome && p.RefersTo.Value.Name = PrimVariableL ->
-            let aOpenFormula = FplTypeMatcher.GetOpenFormulaOfExpression a
-            let aType = aOpenFormula.Value.Type SignatureType.Type
-            let aName = a.Type SignatureType.Name
-            let pOpenFormula = FplTypeMatcher.GetOpenFormulaOfExpression p
-            let pType = pOpenFormula.Value.Type SignatureType.Type
-            let pName = p.Type SignatureType.Name
+            let aOpenFormulaOpt = FplTypeMatcher.GetOpenFormulaOfExpression a
+            let pOpenFormulaOpt = FplTypeMatcher.GetOpenFormulaOfExpression p
 
-            match aOpenFormula, pOpenFormula with
-            | Some aFormula, Some pFormula ->
-                let freeVarsOfAFormula = getParameters aFormula
-                let freeVarsOfPFormula = getParameters pFormula
-                match FplTypeMatcher.MatchPwA freeVarsOfAFormula freeVarsOfPFormula with
+            match aOpenFormulaOpt, pOpenFormulaOpt with
+            | Some aOpenFormula, Some pOpenFormula ->
+                let aFreeVars = getParameters aOpenFormula
+                let pFreeVars = getParameters pOpenFormula
+                match FplTypeMatcher.MatchPwA aFreeVars pFreeVars with
                 | Some _ ->
-                    errMsgFormula (freeVarsOfAFormula.Length > 0) aName aType pName pType
+                    errMsgMismatchingOpenFormulas a aOpenFormula aFreeVars p pOpenFormula pFreeVars
+                | None when aOpenFormula.TypeId <> pOpenFormula.TypeId ->
+                    errMsgMismatchingOpenFormulas a aOpenFormula aFreeVars p pOpenFormula pFreeVars
                 | _ -> 
                     true, ""
             | _, _ ->
@@ -130,23 +164,14 @@ let checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) =
             | Some err ->
                 false, err
             | None ->
-                let varName = p.FplId
-                if dictParameterUsage.ContainsKey varName then
-                    let expectedExpr = (dictParameterUsage[varName].Type SignatureType.Name)
-                    let actualExpr = (a.Type SignatureType.Name)
-                    if expectedExpr<>actualExpr then
-                        false, $"variable `{varName}` matched with different formulas `{expectedExpr}` and `{actualExpr}`"
-                    else
-                        true, "" 
-                else
-                    dictParameterUsage.Add (varName, a) // add usage of variable
-                    true, ""
-        | _, _ -> false, $"found `{a.Type SignatureType.Name}`, expected `{p.Type SignatureType.Name}`"
+                checkMismatchingUsageOfVars p.FplId a dictParameterUsage
+        | _, _ ->
+            errMsgStandard a p 
     checkExpr a p, dictParameterUsage
 
 /// Tries to match a premise with expressions from a list and returns as a result
 /// a list of matched expressions and a  string of concatenated failed candidate expressions
-let matchPremiseWithSomeExpressions (exprList:FplGenericNode list) (pre:FplGenericNode) (iJel:FplGenericNode) =
+let private matchPremiseWithSomeExpressions (exprList:FplGenericNode list) (pre:FplGenericNode) (iJel:FplGenericNode) =
     let result = List<FplGenericNode>()
     let failedCandidates = List<string>()
     exprList
