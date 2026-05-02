@@ -635,12 +635,24 @@ type FplTypeMatcher() =
                 | PrimRefL when fv.RefersTo.IsSome ->
                     match fv.RefersTo with
                     | Some var when var.Name = PrimVariableL ->
+                        let varVars = var.GetVariables()
                         match var with
-                        | :? FplVariable as varCast when (not varCast.IsBound) && not rootRecursion ->
+                        // only free variables
+                        | :? FplVariable as varCast when (not varCast.IsBound)
+                        // not the top-level-ones
+                            && not rootRecursion 
+                        // and not variables with params - in this case, 
+                        // they syntactically stand for complex formulas, not for free variables 
+                            && not (varVars.Length > 0)
+                        // and not variables with the type pred or func - in this case, 
+                        // they syntactically stand for complex formulas, not for free variables 
+                            && (var.TypeId <> LiteralPred)
+                            && (var.TypeId <> LiteralFunc)
+                            ->
                             topLevel.Scope.TryAdd(var.FplId,var) |> ignore
                         | _ -> ()
                         if fv.ArgList.Count = 0 then
-                            var.GetVariables()
+                            varVars
                             |> List.map (fun v -> topLevel.Scope.TryAdd(v.FplId,v)) |> ignore
                     | _ -> ()
                 | _ -> ()

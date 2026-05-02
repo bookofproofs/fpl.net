@@ -19,6 +19,7 @@ open FplPrimitives
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterBasicTypes
 
+/// Returns a tuple of a string representation of arg's type and a bool, which is true only if arg is a predicate.
 let isArgPred (arg:FplGenericNode) = 
     let argType = arg.Type SignatureType.Type
     (argType, argType.StartsWith(LiteralPred))
@@ -34,8 +35,6 @@ let checkArgPred (fv:FplGenericNode) (arg:FplGenericNode)  =
         else
             let argName = arg.Type SignatureType.Name
             fv.ErrorOccurred <- emitLG001Diagnostics argType argName fv.Name arg.StartPos arg.StartPos
-
-
 
 /// Checks if a predicate expression is actually being interpreted as an predicate
 let checkPredicateExpressionReturnsPredicate (fv:FplGenericNode) =
