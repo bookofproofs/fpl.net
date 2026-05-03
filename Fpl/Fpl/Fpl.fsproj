@@ -11,6 +11,7 @@
     <ItemGroup>
         <Compile Include="FplPrivimitives.fs" />
         <Compile Include="FplGrammarTypes.fs" />
+        <Compile Include="ErrMessages.fs" />
         <Compile Include="ErrDiagnostics.fs" />
         <Compile Include="FplInterpreterDiagnosticsEmitter.fs" />
         <None Include="CHANGES.md" />

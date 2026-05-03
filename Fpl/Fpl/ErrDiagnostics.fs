@@ -36,6 +36,7 @@ open System.Text
 open FParsec
 open FplPrimitives
 open FplGrammarTypes
+open ErrMessages
 
 type PathEquivalentUri(uriString: string) =
     inherit Uri(PathEquivalentUri.UnescapeDataString(uriString.Replace("\\","/")))
@@ -58,14 +59,6 @@ type PathEquivalentUri(uriString: string) =
         PathEquivalentUri($"{pathNew}")
 
     member this.TheoryName = Path.GetFileNameWithoutExtension(this.AbsolutePath)
-
-/// Transforms a whole number into English ordinal
-let englishOrdinal dimNumber = 
-    match dimNumber with
-    | 1 -> "1st"
-    | 2 -> "2nd"
-    | 3 -> "3rd"
-    | _ -> $"{dimNumber}th"
 
 /// A helper function for checking if a string starts with any of some string prefixes.
 let startsWithAny (prefixes:string list) (input:string) = 
@@ -344,155 +337,133 @@ type DiagnosticCode =
     member this.Message = 
         match this with
             // parser error messages
-            | SYN000 -> "Other syntax error"
-            | SYN001 -> "Characters found after namespace"
-            | DEF000 -> "Syntax error in definition"
-            | PRP000 -> "Syntax error in property"
-            | AXI000 -> "Syntax error in axiom"
-            | THM000 -> "Syntax error in theorem"
-            | COR000 -> "Syntax error in corollary"
-            | LEM000 -> "Syntax error in lemma"
-            | PPS000 -> "Syntax error in proposition"
-            | CNJ000 -> "Syntax error in conjecture"
-            | VAR000 -> "Syntax error in variable declaration and/or specification"
-            | CTR000 -> "Syntax error in constructor"
-            | PRF000 -> "Syntax error in proof"
-            | INF000 -> "Syntax error in rule of inference"
-            | LOC000 -> "Syntax error in localization"
-            | EXT000 -> "Syntax error in extension"
-            | USE000 -> "Syntax error in uses clause"
-            | PRD000 -> "Syntax error in predicate definition"
-            | STMASE -> "Syntax error in assertion"
-            | STMASU -> "Syntax error in assumption"
-            | STMCAL -> "Syntax error in call to a constructor"
-            | STMCAS -> "Syntax error in cases statement"
-            | STMDEL -> "Syntax error in delegate"
-            | STMFOI -> "Syntax error in domain"
-            | STMFOR -> "Syntax error in for statement"
-            | STMMAP -> "Syntax error in mcases statement"
-            | STMREV -> "Syntax error in revocation"
-            | STMRET -> "Syntax error in return statement"
-            | AGI000 -> "Syntax error in proof argument"
-            | PRE000 -> "Syntax error in premise"
-            | CON000 -> "Syntax error in conclusion"
-            | TYD000 -> "Syntax error in type declaration"
+            | SYN000 -> errSYN000
+            | SYN001 -> errSYN001 
+            | DEF000 -> errDEF000
+            | PRP000 -> errPRP000
+            | AXI000 -> errAXI000
+            | THM000 -> errTHM000
+            | COR000 -> errCOR000
+            | LEM000 -> errLEM000
+            | PPS000 -> errPPS000
+            | CNJ000 -> errCNJ000
+            | VAR000 -> errVAR000
+            | CTR000 -> errCTR000
+            | PRF000 -> errPRF000
+            | INF000 -> errINF000
+            | LOC000 -> errLOC000
+            | EXT000 -> errEXT000
+            | USE000 -> errUSE000
+            | PRD000 -> errPRD000
+            | STMASE -> errSTMASE
+            | STMASU -> errSTMASU
+            | STMCAL -> errSTMCAL
+            | STMCAS -> errSTMCAS
+            | STMDEL -> errSTMDEL
+            | STMFOI -> errSTMFOI
+            | STMFOR -> errSTMFOR
+            | STMMAP -> errSTMMAP
+            | STMREV -> errSTMREV
+            | STMRET -> errSTMRET
+            | AGI000 -> errAGI000
+            | PRE000 -> errPRE000
+            | CON000 -> errCON000
+            | TYD000 -> errTYD000
             // interpreter error messages
-            | GEN00 message -> sprintf "Unexpected error occurred: %s" message
-            | NSP00 fileNamePattern -> sprintf "The theory `%s` could not be found" fileNamePattern
-            | NSP01 (fileName, innerErrMsg) -> sprintf "The theory `%s` was found but could not be loaded: %s" fileName innerErrMsg
-            | NSP02 (url, innerErrMsg) -> sprintf "The theory `%s` was found but could not be downloaded: %s" url innerErrMsg
-            | NSP03 alias -> sprintf "Alias `%s` appeared previously in this namespace" alias
-            | NSP04 path -> sprintf "Circular theory reference detected: `%s`" path
-            | NSP05 (pathTypes, theory, chosenSource) -> sprintf "Multiple sources %A for theory %s detected (%s was chosen)." pathTypes theory chosenSource
+            | GEN00 message -> errGEN00 message
+            | NSP00 fileNamePattern -> errNSP00 fileNamePattern
+            | NSP01 (fileName, innerErrMsg) -> errNSP01 fileName innerErrMsg
+            | NSP02 (url, innerErrMsg) -> errNSP02 url innerErrMsg
+            | NSP03 alias -> errNSP03 alias
+            | NSP04 path -> errNSP04 path
+            | NSP05 (pathTypes, theory, chosenSource) -> errNSP05 pathTypes theory chosenSource
              // identifier-related error codes 
-            | ID001 (signature, conflict) -> $"Signature `{signature}` was already declared at {conflict}."  
-            | ID002 (signature, incorrectBlockType) -> $"Cannot find a block to be associated with the proof `{signature}`, found only {incorrectBlockType}."  
-            | ID003 signature -> $"The proof `{signature}` is missing a block to be associated with."  
-            | ID005 (signature, incorrectBlockType) -> $"Cannot find a block to be associated with the corollary `{signature}`, found only {incorrectBlockType}."  
-            | ID006 signature -> $"The corollary `{signature}` is missing a block to be associated with."  
-            | ID007 (nodeType, signatureNode, baseType, signatureBase) -> $"The {nodeType} `{signatureNode}` cannot inherit from {baseType} `{signatureBase}`."  
-            | ID008 (constructorId, classId)  -> $"Misspelled constructor name `{constructorId}`, expecting `{classId}`."  
-            | ID009 name -> $"Circular base type dependency involving `{name}`." 
-            | ID010 name -> $"The type `{name}` could not be found. Are you missing a uses clause?" 
-            | ID011 (chain, errorMsg) -> $"The inheritance chain `{chain}` causes the following error: {errorMsg}."  
-            | ID012 (prtyName, varName, varType, candidates) -> 
-                if candidates = String.Empty then 
-                    $"The {varName} `{varType}` does not define the variable or property `{prtyName}`. No candidates found."  
-                else
-                    $"The {varName} `{varType}` does not define the variable or property `{prtyName}`. Candidate(s) tried:{Environment.NewLine}{candidates}."  
-            | ID013 delegateDiagnostic -> sprintf "%s" delegateDiagnostic // just emit the delegate's diagnostic
-            | ID014 (signature, conflict) -> sprintf "Language code `%s` was already declared at %s." signature conflict
-            | ID015 signature -> $"`parent` cannot be referenced from {signature}." 
-            | ID016 signature -> $"`self` cannot be referenced from {signature}." 
-            | ID017 (name, candidates) -> 
-                if candidates.Length > 0 then
-                   $"The type `{name}` could not be determined. Candidate(s) tried:{Environment.NewLine}{candidates}."  
-                else
-                   $"The type `{name}` not found, no candidates found."  
-            | ID018 name -> sprintf "The extension `%s` could not be matched. Declare an extension with this pattern." name
-            | ID020 name -> $"Missing call of base constructor `{name}`." 
-            | ID021 name -> $"Duplicate call of base constructor `{name}`."
-            | ID022 name -> $"`{name}` is intrinsic, it has no parameterized constructors. This call uses parameters."
-            | ID023 candidates  -> $"Cannot associate a justification with a single block. Found more candidate(s):{Environment.NewLine}{candidates}." 
-            | ID024 (signature, conflict) -> sprintf "Expression `%s` was already localized at %s." signature conflict
-            | ID025 (candidate, nodeType)  -> $"Cannot reference to `{candidate}` inside {nodeType}." 
-            | ID027 name -> $"Illegal recursion in for statement. The entity `{name}` cannot be used as its own domain." 
+            | ID001 (signature, conflict) -> errID001 signature conflict 
+            | ID002 (signature, incorrectBlockType) -> errID002 signature incorrectBlockType 
+            | ID003 signature -> errID003 signature
+            | ID005 (signature, incorrectBlockType) -> errID005 signature incorrectBlockType
+            | ID006 signature -> errID006 signature  
+            | ID007 (nodeType, signatureNode, baseType, signatureBase) -> errID007 nodeType signatureNode baseType signatureBase 
+            | ID008 (constructorId, classId)  -> errID008 constructorId classId
+            | ID009 name -> errID009 name 
+            | ID010 name -> errID010 name 
+            | ID011 (chain, errorMsg) -> errID011 chain errorMsg
+            | ID012 (prtyName, varName, varType, candidates) -> errID012 prtyName varName varType candidates
+            | ID013 delegateDiagnostic -> errID013 delegateDiagnostic
+            | ID014 (signature, conflict) -> errID014 signature conflict
+            | ID015 signature -> errID015 signature
+            | ID016 signature -> errID016 signature
+            | ID017 (name, candidates) -> errID017 name candidates
+            | ID018 name -> errID018 name
+            | ID020 name -> errID020 name 
+            | ID021 name -> errID021 name
+            | ID022 name -> errID022 name
+            | ID023 candidates  -> errID023 candidates
+            | ID024 (signature, conflict) -> errID024 signature conflict
+            | ID025 (candidate, nodeType)  -> errID025 candidate nodeType
+            | ID027 name -> errID027 name
             // logic-related error codes
-            | LG001 (typeOfPredicate,argument,typeOfExpression) -> 
-                if argument = typeOfExpression then 
-                    $"Cannot evaluate `{typeOfPredicate}` because its argument `{argument}` could not be evaluated as a predicate."
-                else
-                    $"Cannot evaluate `{typeOfPredicate}` because its argument `{argument}` typed `{typeOfExpression}` could not be evaluated as a predicate."
-            | LG002 (nodeTypeName, times) -> $"Possible infinite recursion detected, `{nodeTypeName}` was called for more than {times} times.`."
-            | LG003 (nodeTypeName, nodeName) -> $"`{nodeTypeName}` evaluates to `false` and cannot be {nodeName}."
-            | LG004 nodeType -> $"`Statement inside {nodeType} might cause side effects."
-            | LG005 name -> $"Unnecessary assignment of `{name}` detected (will be implicitly ignored)."
+            | LG001 (typeOfPredicate,argument,typeOfExpression) -> errLG001 typeOfPredicate argument typeOfExpression
+            | LG002 (nodeTypeName, times) -> errLG002 nodeTypeName times
+            | LG003 (nodeTypeName, nodeName) -> errLG003 nodeTypeName nodeName 
+            | LG004 nodeType -> errLG004 nodeType 
+            | LG005 name -> errLG005 name
             // proof-related error codes
-            | PR001 (incorrectBlockType, justificatinItemName) -> $"Cannot find a `{justificatinItemName}`, found {incorrectBlockType} instead."
-            | PR003 (name, conflict) -> $"Argument identifier `{name}` was already declared at {conflict}."  
-            | PR004 (name, conflict)  -> $"Justification `{name}` was already declared at {conflict}." 
-            | PR005 name ->  $"Argument identifier `{name}` not declared in this proof."
-            | PR006 (proofName, argumentName)->  $"A proof {proofName} was found, but it has no argument with the identifier `{argumentName}`."
-            | PR007 (nodeTypeName, nodeName) ->  $"{nodeTypeName} is {nodeName} and is missing a proof."
-            | PR008 (byInfName, expectedPremise, mismatchingCandidates) -> $"The subsequent `{LiteralByInf} {byInfName}` step requires a premise of the form `{expectedPremise}`.{Environment.NewLine}The provided justification does not match this structure. Candidate(s) tried:{Environment.NewLine}{mismatchingCandidates}."
-
-            | PR009 -> "Not all arguments of the proof could be verified."
-            | PR010 (keyword, expectedRef) -> $"Justification `{keyword}` expects a reference to {expectedRef}, not to a proof or corollary."
-            | PR011 (keyword, expectedRef) -> $"Justification `{keyword}` expects a reference to {expectedRef}, not to an argument in some proof."
-            | PR012 -> $"Justification `{LiteralByCor}` expects a reference to a corollary."
-            | PR013 -> $"Add the keyword `{LiteralByCor}` when referencing to corollaries to increase readability."
-            | PR014 -> "Justification expects a reference to a theorem-like statement without any more specific references."
-            | PR015 argId -> $"Cannot revoke the argument `{argId}` because it wasn't assumed."
-            | PR016 argId -> $"Cannot revoke the argument `{argId}` because it wasn't the last assumed one."
-            | PR017 -> $"Do not use `{LiteralTrivial}` if the argument is not the last one the proof."
-            | PR018 -> $"A `{LiteralTrivial}` argument missing exactly one justification."
-            | PR019 (justificationType1, justificationType2) -> $"Unsupported mix of justifications in a single argument (`{justificationType1}` with `{justificationType2}`)."
-            | PR020 (expectedNum, actualNum) -> $"This {PrimJIByInf} requires {expectedNum} proceeding expressions, got {actualNum}."
+            | PR001 (incorrectBlockType, justificatinItemName) -> errPR001 incorrectBlockType justificatinItemName
+            | PR003 (name, conflict) -> errPR003 name conflict
+            | PR004 (name, conflict)  -> errPR004 name conflict
+            | PR005 name ->  errPR005 name
+            | PR006 (proofName, argumentName) -> errPR006 proofName argumentName
+            | PR007 (nodeTypeName, nodeName) -> errPR007 nodeTypeName nodeName
+            | PR008 (byInfName, expectedPremise, mismatchingCandidates) -> errPR008 byInfName expectedPremise mismatchingCandidates
+            | PR009 -> errPR009 
+            | PR010 (keyword, expectedRef) -> errPR010 keyword expectedRef
+            | PR011 (keyword, expectedRef) -> errPR011 keyword expectedRef
+            | PR012 -> errPR012
+            | PR013 -> errPR013
+            | PR014 -> errPR014
+            | PR015 argId -> errPR015 argId
+            | PR016 argId -> errPR016 argId
+            | PR017 -> errPR017
+            | PR018 -> errPR018
+            | PR019 (justificationType1, justificationType2) -> errPR019 justificationType1 justificationType2
+            | PR020 (expectedNum, actualNum) -> errPR020 expectedNum actualNum
             // signature-related error codes
-            | SIG00 (fixType, arity) -> sprintf $"Illegal arity `{arity}` using `{fixType}` notation."
-            | SIG01 symbol -> $"The symbol `{symbol}` was not declared." 
-            | SIG02 (symbol, precedence, conflict) -> $"The symbol `{symbol}` was declared with the same precedence of `{precedence}` in {conflict}." 
-            | SIG03 errMsg -> errMsg // Returned type is mismatching the mapping type
-            | SIG04 (signature, candidates) -> $"No overload matching `{signature}`. Candidate(s) tried:{Environment.NewLine}{candidates}." 
-            | SIG05 errMsg -> $"Cannot execute assignment; {errMsg}"
-            | SIG06 (name, oldFromNode, newFromNode, typeName) -> 
-                match typeName with 
-                | PrimClassL -> $"Property `{name}` of base class `{oldFromNode} will be overshadowed by `{newFromNode}`."
-                | PrimFunctionalTermL -> $"Property `{name}` of base functional term `{oldFromNode} will be overshadowed by `{newFromNode}`."
-                | _ -> $"Property `{name}` of (unknown type) `{oldFromNode} will be overshadowed by `{newFromNode}`."
-            | SIG07 (assigneeName, assigneeType, nodeType) -> $"`{assigneeName}` is {nodeType} ({assigneeType}) and is not assignable."
-            | SIG08 (arrName, indexVarName, indexVarType, dimType, dimNumber) -> 
-                $"Type mismatch in array's `{arrName}` {englishOrdinal dimNumber} dimension; expected `{dimType}`, got `{indexVarName}:{indexVarType}`."
-            | SIG09 (arrName, dimType, dimNumber) -> $"Missing index for array's `{arrName}` {englishOrdinal dimNumber} dimension `{dimType}`"
-            | SIG10 (arrName, indexVarName, indexNumber) -> $"Array `{arrName}` has less dimensions, {englishOrdinal indexNumber} index `{indexVarName}` not supported"
-            | SIG11 qualifiedWrongCandidate -> $"Mapping to {qualifiedWrongCandidate} delegates the map to another type. Map to the other type directly, instead."
-            | SIG12 (templateName, secondUsage, firstUsage, firstUsagePos) -> $"The template `{templateName}` was inconsistently used with `{secondUsage}`, expecting `{firstUsage}` as it was used at `{firstUsagePos}`."
-            | SIG13 (stmtName, secondUsage, firstUsage, firstUsagePos) -> $"Every branch of the {stmtName} must return a value with a type of the first case at `{firstUsagePos}`, which was `{firstUsage}`. This branch returns `{secondUsage}`."
-            | SIG14 -> $"This case will never be matched."
+            | SIG00 (fixType, arity) -> errSIG00 fixType arity
+            | SIG01 symbol -> errSIG01 symbol
+            | SIG02 (symbol, precedence, conflict) -> errSIG02 symbol precedence conflict
+            | SIG03 errMsg -> errSIG03 errMsg
+            | SIG04 (signature, candidates) -> errSIG04 signature candidates
+            | SIG05 errMsg -> errSIG05 errMsg
+            | SIG06 (name, oldFromNode, newFromNode, typeName) -> errSIG06 name oldFromNode newFromNode typeName
+            | SIG07 (assigneeName, assigneeType, nodeType) -> errSIG07 assigneeName assigneeType nodeType
+            | SIG08 (arrName, indexVarName, indexVarType, dimType, dimNumber) -> errSIG08 arrName indexVarName indexVarType dimType dimNumber
+            | SIG09 (arrName, dimType, dimNumber) -> errSIG09 arrName dimType dimNumber
+            | SIG10 (arrName, indexVarName, indexNumber) -> errSIG10 arrName indexVarName indexNumber
+            | SIG11 qualifiedWrongCandidate -> errSIG11 qualifiedWrongCandidate
+            | SIG12 (templateName, secondUsage, firstUsage, firstUsagePos) -> errSIG12 templateName secondUsage firstUsage firstUsagePos
+            | SIG13 (stmtName, secondUsage, firstUsage, firstUsagePos) -> errSIG13 stmtName secondUsage firstUsage firstUsagePos
+            | SIG14 -> errSIG14
             // structure-related error codes
-            | ST001 nodeName -> $"The {nodeName} does nothing."
-            | ST002 nodeName -> $"The {nodeName} does nothing."
-            | ST004 langCode -> $"The language `{langCode}` not implemented."
-            | ST005 (domain, nodeType) -> $"An enumerator for the domain `{domain}` being {nodeType} could not be established."
+            | ST001 nodeName -> errST001 nodeName
+            | ST002 nodeName -> errST002 nodeName
+            | ST004 langCode -> errST004 langCode
+            | ST005 (domain, nodeType) -> errST005 domain nodeType
             // interpreter syntax-related error codes for error-tolerant parser
-            | SY000 infixOp -> $"The infix operator `{infixOp}` is missing a second operand."
+            | SY000 infixOp -> errSY000 infixOp
             // variable-related error codes
-            | VAR00 ->  "Declaring multiple arrays at once may cause ambiguities."
-            | VAR01 name -> $"Variable `{name}` not declared in this scope."
-            | VAR02 name -> $"Variable `{name}` was already bound in this quantor."
-            | VAR03 (identifier, conflict) -> $"Variable `{identifier}` was already declared at {conflict}."  
-            | VAR04 name -> $"Declared variable `{name}` not used in this scope."
-            | VAR05 name -> $"Bound variable `{name}` was not used in this quantor."
-            | VAR06 (name, oldFromNode, newFromNode, typeName) -> 
-                match typeName with 
-                | PrimClassL -> $"Variable `{name}` of base class `{oldFromNode} will be overshadowed by `{newFromNode}`."
-                | PrimFunctionalTermL -> $"Variable `{name}` of base functional term `{oldFromNode} will be overshadowed by `{newFromNode}`."
-                | _ -> $"Variable `{name}` of (unknown type) `{oldFromNode} will be overshadowed by `{newFromNode}`."
-            | VAR07 name -> $"The {PrimQuantorExistsN} accepts only one bound variable `{name}`."
-            | VAR08 -> "Variadic variables cannot be bound in a quantor."
-            | VAR09 (varName,varType) -> $"The variable {varName}:{varType} is free and cannot be used to evaluate this expression."
-            | VAR10 (identifier, formulaName) -> $"The variable `{identifier}` is bound more than once in the formula `{formulaName}`."  
-            | VAR11 (identifier, conflict) -> $"All variables in a {LiteralLocL} have to be different. The `{identifier}` was used at {conflict}."
+            | VAR00 -> errVAR00
+            | VAR01 name -> errVAR01 name
+            | VAR02 name -> errVAR02 name
+            | VAR03 (identifier, conflict) -> errVAR03 identifier conflict
+            | VAR04 name -> errVAR04 name
+            | VAR05 name -> errVAR05 name
+            | VAR06 (name, oldFromNode, newFromNode, typeName) -> errVAR06 name oldFromNode newFromNode typeName
+            | VAR07 name -> errVAR07 name
+            | VAR08 -> errVAR08
+            | VAR09 (varName,varType) -> errVAR09 varName varType
+            | VAR10 (identifier, formulaName) -> errVAR10 identifier formulaName
+            | VAR11 (identifier, conflict) -> errVAR11 identifier conflict
 
 /// Computes an MD5 checksum of a string
 let computeMD5Checksum (input: string) =
