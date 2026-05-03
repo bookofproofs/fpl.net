@@ -29,13 +29,6 @@ let numbered inputLst =
     |> Seq.mapi (fun i cand -> sprintf "%s%d) %s" Environment.NewLine (i + 1) cand)
     |> String.concat ", "
 
-let ordinalPostfix n =
-    match n with
-    | 1 -> "st"
-    | 2 -> "nd"
-    | 3 -> "rd"
-    | _ -> "th"
-
 // Diagnostics related-errors
 // -----------------------------------------------------------------
 // parser error messages
@@ -231,7 +224,7 @@ let errTypeMismatchVariadic aName aType pName pType pTypeId =
 let errExprMismatchExistsN aFplId aName pFplId pName = Some $"found mismatching exists `{aFplId}` in `{aName}`, expecting type `{pFplId}` in `{pName}`"
 
 
-let errExprMismatchQuantorVariableTypes aName pName xName yName index = Some $"found mismatching type `{xName}` at {ordinalPostfix index} quantor variable in `{aName}`, expecting type `{yName}` in `{pName}`"
+let errExprMismatchQuantorVariableTypes aName pName xName yName index = Some $"found mismatching type `{xName}` at {englishOrdinal index} quantor variable in `{aName}`, expecting type `{yName}` in `{pName}`"
 
 let errExprMismatchQuantorVariableCounts aName pName aVarsCount pVarsCount = Some $"found {aVarsCount} quantor variables in `{aName}`, expected {pVarsCount} in `{pName}`" 
 

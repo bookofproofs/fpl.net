@@ -595,6 +595,8 @@ type FplTypeMatcher() =
                         errTypeMismatchStandard aIsCallByReference aName aType pName pType, Parameter.Consumed
                 else 
                     matchByTypeStringRepresentation aIsCallByReference a aName aType aTypeName p pName pType pTypeName
+            | PrimIsOperator, PrimVariableL ->
+                FplTypeMatcher.ComparisonBasedOnOpenFormulas a p
             | _ ,_ -> 
                 matchByTypeStringRepresentation true a aName aType aTypeName p pName pType pTypeName
         matchTwoTypes a p
@@ -667,14 +669,14 @@ type FplTypeMatcher() =
             let pFreeVars = getParameters pOpenFormula
             match FplTypeMatcher.MatchPwA aFreeVars pFreeVars with
             | Some _ ->
-                errExprMismatchOpenFormulasWrapper a aOpenFormula aFreeVars p pOpenFormula pFreeVars
+                errExprMismatchOpenFormulasWrapper a aOpenFormula aFreeVars p pOpenFormula pFreeVars, Parameter.Consumed
             | None when aOpenFormula.TypeId <> pOpenFormula.TypeId ->
-                errExprMismatchOpenFormulasWrapper a aOpenFormula aFreeVars p pOpenFormula pFreeVars
+                errExprMismatchOpenFormulasWrapper a aOpenFormula aFreeVars p pOpenFormula pFreeVars, Parameter.Consumed
             | _ -> 
-                errExprMismatchOK
+                errExprMismatchOK, Parameter.Consumed
         | _, _ ->
             // fallback, should never happen unless open formula calculation somehow fails
-            errExprMismatchMsgStandard (a.Type SignatureType.Name) (p.Type SignatureType.Name)
+            errExprMismatchMsgStandard (a.Type SignatureType.Name) (p.Type SignatureType.Name), Parameter.Consumed
 
 
 /// Tries to match the signatures of toBeMatched with the signatures of all candidates and accumulates any

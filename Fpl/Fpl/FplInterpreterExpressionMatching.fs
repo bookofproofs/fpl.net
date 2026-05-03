@@ -116,7 +116,7 @@ let private checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) =
             | None, None ->
                 errExprMismatchOK
         | _, PrimRefL when p.RefersTo.IsSome && p.RefersTo.Value.Name = PrimVariableL ->
-            let errMsgOpt = FplTypeMatcher.ComparisonBasedOnOpenFormulas a p
+            let (errMsgOpt,_) = FplTypeMatcher.ComparisonBasedOnOpenFormulas a p
             match errMsgOpt, p.RefersTo with
             | None, Some var when var.Name = PrimVariableL ->
                 checkMismatchingUsageOfVars p.FplId a dictParameterUsage
