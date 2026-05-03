@@ -75,11 +75,10 @@ let private checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) =
         let rec checkExpressions (args:FplGenericNode list) (pars:FplGenericNode list) =
             match args, pars with
             | a::ars, p::prs ->
-                let ok, msg = checkExpr a p 
-                if ok then
-                    checkExpressions ars prs
-                else
-                    false, msg
+                let msgOpt = checkExpr a p 
+                match msgOpt with
+                | None -> checkExpressions ars prs
+                | Some msg -> Some msg
             | a::_, [] ->
                 errExprMismatchExpectedEndOfFormula (a.Type SignatureType.Name)
             | [], p::_ ->
@@ -99,10 +98,10 @@ let private checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) =
         | PrimQuantorExistsN, PrimQuantorExistsN ->
         // match number of quantor variables
             match compareQuantorVariables a p dictParameterUsage with
-            | true, "" ->
+            | None ->
                 // and now check the expressions inside the quantors
                 checkExpressions (a.ArgList |> Seq.toList) (p.ArgList |> Seq.toList) 
-            | _, err -> false, err
+            | Some err -> Some err
         | PrimFalse, PrimFalse 
         | PrimTrue, PrimTrue ->
             errExprMismatchOK
@@ -117,20 +116,17 @@ let private checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) =
             | None, None ->
                 errExprMismatchOK
         | _, PrimRefL when p.RefersTo.IsSome && p.RefersTo.Value.Name = PrimVariableL ->
-            let ok, errMsg = FplTypeMatcher.ComparisonBasedOnOpenFormulas a p
-            match ok, p.RefersTo with
-            | true, Some var when var.Name = PrimVariableL ->
+            let errMsgOpt = FplTypeMatcher.ComparisonBasedOnOpenFormulas a p
+            match errMsgOpt, p.RefersTo with
+            | None, Some var when var.Name = PrimVariableL ->
                 checkMismatchingUsageOfVars p.FplId a dictParameterUsage
-            | false, _ ->
-                false, errMsg
+            | Some errMsg, _ -> Some errMsg
             | _,_ ->
                 errExprMismatchOK
         | _, PrimVariableL ->
             match FplTypeMatcher.MatchArgumentsWithParameters a p with
-            | Some err ->
-                false, err
-            | None ->
-                checkMismatchingUsageOfVars p.FplId a dictParameterUsage
+            | Some err -> Some err
+            | None -> checkMismatchingUsageOfVars p.FplId a dictParameterUsage
         | _, _ ->
             errExprMismatchMsgStandard (a.Type SignatureType.Name) (p.Type SignatureType.Name)
     checkExpr a p, dictParameterUsage
@@ -142,12 +138,10 @@ let private matchPremiseWithSomeExpressions (exprList:FplGenericNode list) (pre:
     let failedCandidates = List<string>()
     exprList
     |> List.iter (fun expr ->
-        let ((ok, err), varUsageDict) = checkExprWrapper expr pre
-        match ok, err with
-        | true, _ ->
-            result.Add expr
-        | false, err ->
-            failedCandidates.Add ($"`{expr.Type SignatureType.Name}`{Environment.NewLine}  ⚡{err}")
+        let (errOpt, varUsageDict) = checkExprWrapper expr pre
+        match errOpt with
+        | None -> result.Add expr
+        | Some err -> failedCandidates.Add ($"`{expr.Type SignatureType.Name}`{Environment.NewLine}  ⚡{err}")
     )
     result |> Seq.toList, (numbered failedCandidates)
 

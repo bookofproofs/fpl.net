@@ -228,19 +228,19 @@ let errTypeMismatchVariadic aName aType pName pType pTypeId =
 
 // expression-matching-related errors
 // -----------------------------------------------------------------
-let errExprMismatchExistsN aFplId aName pFplId pName = false, $"found mismatching exists `{aFplId}` in `{aName}`, expecting type `{pFplId}` in `{pName}`"
+let errExprMismatchExistsN aFplId aName pFplId pName = Some $"found mismatching exists `{aFplId}` in `{aName}`, expecting type `{pFplId}` in `{pName}`"
 
 
-let errExprMismatchQuantorVariableTypes aName pName xName yName index = false, $"found mismatching type `{xName}` at {ordinalPostfix index} quantor variable in `{aName}`, expecting type `{yName}` in `{pName}`"
+let errExprMismatchQuantorVariableTypes aName pName xName yName index = Some $"found mismatching type `{xName}` at {ordinalPostfix index} quantor variable in `{aName}`, expecting type `{yName}` in `{pName}`"
 
-let errExprMismatchQuantorVariableCounts aName pName aVarsCount pVarsCount = false, $"found {aVarsCount} quantor variables in `{aName}`, expected {pVarsCount} in `{pName}`" 
+let errExprMismatchQuantorVariableCounts aName pName aVarsCount pVarsCount = Some $"found {aVarsCount} quantor variables in `{aName}`, expected {pVarsCount} in `{pName}`" 
 
-let errExprMismatchOpenFormulas aName aVarsOpenClosedStr aOpenFormulaType pName pVarsOpenClosedStr pOpenFormulaType = false, $"found expression `{aName}` ({aVarsOpenClosedStr} typed `{aOpenFormulaType}`), expected `{pName}` typed `{pVarsOpenClosedStr} typed {pOpenFormulaType}`"
+let errExprMismatchOpenFormulas aName aVarsOpenClosedStr aOpenFormulaType pName pVarsOpenClosedStr pOpenFormulaType = Some $"found expression `{aName}` ({aVarsOpenClosedStr} typed `{aOpenFormulaType}`), expected `{pName}` typed `{pVarsOpenClosedStr} typed {pOpenFormulaType}`"
 
-let errExprMismatchExpectedEndOfFormula (aName) = false, $"`found {aName}`, expected end of formula"
-let errExprMismatchFoundEndOfFormula pName = false, $"found end of formula, expected `{pName}`"
-let errExprMismatchVarMatchedDifferently varName expectedExpr actualExpr = false, $"variable `{varName}` matched with different formulas `{expectedExpr}` and `{actualExpr}`"
-let errExprMismatchMsgStandard aName pName = false, $"found `{aName}`, expected `{pName}`"
+let errExprMismatchExpectedEndOfFormula (aName) = Some $"`found {aName}`, expected end of formula"
+let errExprMismatchFoundEndOfFormula pName = Some $"found end of formula, expected `{pName}`"
+let errExprMismatchVarMatchedDifferently varName expectedExpr actualExpr = Some $"variable `{varName}` matched with different formulas `{expectedExpr}` and `{actualExpr}`"
+let errExprMismatchMsgStandard aName pName = Some $"found `{aName}`, expected `{pName}`"
 
-let errExprMismatchOK = true, ""
+let (errExprMismatchOK:string option) = None
 
