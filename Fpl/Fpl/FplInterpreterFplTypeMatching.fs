@@ -19,7 +19,6 @@ open FplInterpreterDiagnosticsEmitter
 open FplPrimitives
 open ErrMessages
 open FplInterpreterBasicTypes
-open FplInterpreter.Globals.HelpersBasic
 open FplInterpreterChecks
 open FplInterpreterReferences
 open FplInterpreterVariables
@@ -595,7 +594,7 @@ type FplTypeMatcher() =
                         errTypeMismatchStandard aIsCallByReference aName aType pName pType, Parameter.Consumed
                 else 
                     matchByTypeStringRepresentation aIsCallByReference a aName aType aTypeName p pName pType pTypeName
-            | PrimIsOperator, PrimVariableL ->
+            | _, PrimVariableL when isCompoundPredicate a ->
                 FplTypeMatcher.ComparisonBasedOnOpenFormulas a p
             | _ ,_ -> 
                 matchByTypeStringRepresentation true a aName aType aTypeName p pName pType pTypeName

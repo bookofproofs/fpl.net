@@ -4794,8 +4794,6 @@ type TestInterpreterErrors() =
     [<DataRow("MS4s6", "def func A()->obj {intr prty func X(x:ind)->obj } def pred T(v:func) {dec v:=A.X; true};", 0)>] // OK: ->func matches signature A.X(ind)->obj
     [<DataRow("MS4s7", "def func A()->obj {intr prty func X(x:obj)->ind } def pred T(v:func) {dec ~a:obj v:=A.X(a); true};", 1)>] // SIG05: func does not match by value A.X(obj) 
 
-    [<DataRow("Expr01", "def pred T(v:pred(x:tpl)) {dec ~y:obj v:=is(y,obj); true};", 0)>] 
-
     [<DataRow("24a", "def cl A {dec ~myX:obj; ctor A(x:obj) {dec myX:=x;}} def cl B:A { ctor B(x:obj) {dec base.A(del.Decrement(x)); } } def pred T() { dec ~v:B v:=B(@2); false};", 0)>]    
     [<DataRow("24b", "def cl A {dec ~myX:ind; ctor A(x:obj) {dec myX:=x;}} def cl B:A { ctor B(x:obj) {dec base.A(del.Decrement(x)); } } def pred T() { dec ~v:B v:=B(@2); false};", 1)>]    
     [<DataRow("25", "def cl Nat def func Succ(x:Nat)->Nat def cl A {dec ~myX:Nat; ctor A(i:Nat) {dec myX:=Succ(i);}};", 0)>]    
@@ -4822,6 +4820,53 @@ type TestInterpreterErrors() =
             let code = SIG05 ""
             
             runTestHelper "TestSIG05.fpl" fplCode code expected
+
+
+    // ... matching based on open formulas
+    [<DataRow("is_01", "def pred T(v:pred(a:obj)) {dec ~y:obj v:=is(y,obj); true};", 0)>] 
+    [<DataRow("is_01a", "def pred T(v:pred()) {dec ~y:obj v:=is(y,obj); true};", 1)>] 
+    [<DataRow("ex_01", "def pred T(v:pred()) {dec v:=ex x:obj { is(x,obj) } ; true};", 0)>] 
+    [<DataRow("ex_01a", "def pred T(v:pred(a:obj)) {dec v:=ex x:obj { is(x,obj) } ; true};", 1)>] 
+    [<DataRow("ex_02", "def pred T(v:pred()) {dec ~y:obj v:=ex x:obj { and(is(y,obj), is(x,obj)) } ; true};", 1)>] 
+    [<DataRow("ex_02a", "def pred T(v:pred(a:obj)) {dec ~y:obj v:=ex x:obj { or(is(y,obj), is(x,obj)) } ; true};", 0)>] 
+    [<DataRow("ex_03", "def pred T(v:pred(a:obj)) {dec ~y:obj v:=ex x:obj { and(is(y,obj), is(x,obj)) } ; true};", 0)>] 
+    [<DataRow("ex_03a", "def pred T(v:pred()) {dec v:=ex x:obj { and(is(x,obj), is(x,obj)) } ; true};", 0)>] 
+    [<DataRow("ex_04", "def pred T(v:pred(a:obj)) {dec ~y:obj v:=ex x:obj { and(is(y,obj), is(x,obj)) } ; true};", 0)>] 
+    [<DataRow("ex_04a", "def pred T(v:pred()) {dec ~y:obj v:=ex x:obj { and(is(y,obj), is(x,obj)) } ; true};", 1)>] 
+    [<DataRow("exn_01", "def pred T(v:pred(a:obj)) {dec ~y:obj v:=exn$1 x:obj { impl(is(y,obj), (x = y)) }; true};", 0)>] 
+    [<DataRow("exn_01a", "def pred T(v:pred()) {dec v:=exn$1 x:obj { impl(is(x,obj), (x = x)) }; true};", 0)>] 
+    [<DataRow("all_06", "def pred T(v:pred()) {dec v:=all x:obj { not true } ; true};", 0)>] 
+    [<DataRow("all_07", "def pred T(v:pred(a:obj)) {dec ~y:obj v:=all x:obj { not (x = @1) } ; true};", 1)>] 
+    [<DataRow("all_07a", "def pred T(v:pred(a:obj)) {dec ~y:obj v:=all x:obj { not (x = @1) } ; true};", 1)>] 
+    [<DataRow("and_01", "def pred T(v:pred(a:obj)) {dec ~x,y:obj v:=and(is(y,obj), is(x,obj)) ; true};", 1)>] 
+    [<DataRow("and_01a", "def pred T(v:pred(a,b:obj)) {dec ~x,y:obj v:=and(is(y,obj), is(x,obj)) ; true};", 0)>] 
+    [<DataRow("and_01b", "def pred T(v:pred(a:obj)) {dec ~y:obj v:=and(is(y,obj), ex x:obj { is(x,obj) }) ; true};", 0)>] 
+    [<DataRow("or_01", "def pred T(v:pred(a:obj)) {dec ~x,y:obj v:=or(is(y,obj), is(x,obj)) ; true};", 1)>] 
+    [<DataRow("or_01a", "def pred T(v:pred(a,b:obj)) {dec ~x,y:obj v:=or(is(y,obj), is(x,obj)) ; true};", 0)>] 
+    [<DataRow("or_01b", "def pred T(v:pred(a:obj)) {dec ~y:obj v:=or(is(y,obj), ex x:obj { is(x,obj) }) ; true};", 0)>] 
+    [<DataRow("xor_01", "def pred T(v:pred(a:obj)) {dec ~x,y:obj v:=xor(is(y,obj), is(x,obj)) ; true};", 1)>] 
+    [<DataRow("xor_01a", "def pred T(v:pred(a,b:obj)) {dec ~x,y:obj v:=xor(is(y,obj), is(x,obj)) ; true};", 0)>] 
+    [<DataRow("xor_01b", "def pred T(v:pred(a:obj)) {dec ~y:obj v:=xor(is(y,obj), ex x:obj { is(x,obj) }) ; true};", 0)>] 
+    [<DataRow("impl_01", "def pred T(v:pred(a:obj)) {dec ~x,y:obj v:=impl(is(y,obj), is(x,obj)) ; true};", 1)>] 
+    [<DataRow("impl_01a", "def pred T(v:pred(a,b:obj)) {dec ~x,y:obj v:=impl(is(y,obj), is(x,obj)) ; true};", 0)>] 
+    [<DataRow("impl_01b", "def pred T(v:pred(a:obj)) {dec ~y:obj v:=impl(is(y,obj), ex x:obj { is(x,obj) }) ; true};", 0)>] 
+    [<DataRow("iif_01", "def pred T(v:pred(a:obj)) {dec ~x,y:obj v:=iif(is(y,obj), is(x,obj)) ; true};", 1)>] 
+    [<DataRow("iif_01a", "def pred T(v:pred(a,b:obj)) {dec ~x,y:obj v:=iif(is(y,obj), is(x,obj)) ; true};", 0)>] 
+    [<DataRow("iif_01b", "def pred T(v:pred(a:obj)) {dec ~y:obj v:=iif(is(y,obj), ex x:obj { is(x,obj) }) ; true};", 0)>] 
+    [<DataRow("not_01", "def pred T(v:pred(a:obj)) {dec ~x,y:obj v:=not iif(is(y,obj), is(x,obj)) ; true};", 1)>] 
+    [<DataRow("not_01a", "def pred T(v:pred(a,b:obj)) {dec ~x,y:obj v:=not iif(is(y,obj), is(x,obj)) ; true};", 0)>] 
+    [<DataRow("not_01b", "def pred T(v:pred(a:obj)) {dec ~y:obj v:=not iif(is(y,obj), ex x:obj { is(x,obj) }) ; true};", 0)>] 
+    [<DataRow("=01", """def pred Equal(x,y: tpl) infix "=" 50 { del.Equal(x,y)} def pred T(v:pred(a:obj)) {dec ~x,y:obj v:=(x = y) ; true};""", 1)>] 
+    [<DataRow("=02", """def pred Equal(x,y: tpl) infix "=" 50 { del.Equal(x,y)} def pred T(v:pred(a,b:obj)) {dec ~x,y:obj v:=(x = y) ; true};""", 0)>] 
+    [<DataRow("=03", """def pred Equal(x,y: tpl) infix "=" 50 { del.Equal(x,y)} def pred T(v:pred(a:obj)) {dec ~y:obj v:=(x = y) ; true};""", 0)>] 
+    [<TestMethod>]
+    member this.TestSIG05OpenFormulas(no:string, fplCode:string, expected) =
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = SIG05 ""
+            
+            runTestHelper "TestSIG05OpenFormulas.fpl" fplCode code expected
 
 
     // -----------------------------

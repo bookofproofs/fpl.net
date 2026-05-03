@@ -36,6 +36,20 @@ let checkArgPred (fv:FplGenericNode) (arg:FplGenericNode)  =
             let argName = arg.Type SignatureType.Name
             fv.ErrorOccurred <- emitLG001Diagnostics argType argName fv.Name arg.StartPos arg.StartPos
 
+let isCompoundPredicate (arg:FplGenericNode) =
+    match arg.Name with 
+    | PrimExclusiveOr
+    | PrimDisjunction
+    | PrimNegation
+    | PrimImplication
+    | PrimEquivalence
+    | PrimConjunction
+    | PrimQuantorAll
+    | PrimQuantorExists
+    | PrimQuantorExistsN
+    | PrimIsOperator -> true
+    | _ -> false
+
 /// Checks if a predicate expression is actually being interpreted as an predicate
 let checkPredicateExpressionReturnsPredicate (fv:FplGenericNode) =
     let exprOpt = fv.ArgList |> Seq.tryLast
