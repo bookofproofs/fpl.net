@@ -535,6 +535,51 @@ type TestSignatureMatching() =
         Assert.AreEqual<string>(expectedMessages, messages)
         prepareFplCode(filename, "", false) |> ignore
 
+    [<DataRow("00", "def pred T() {intr};", "T", "ok")>]
+    [<DataRow("01", "def pred T:Test() {intr};", "T:Test", "ok")>]
+    [<DataRow("02", "def pred T:Test1, Test3() {intr};", "T:Test1, T:Test3", "ok|ok")>]
+    [<DataRow("03", "def pred T:Test1, Test2, Test3() {intr};", "T:Test1, T:Test2, T:Test3", "ok|ok|ok")>]
+    [<DataRow("04", "def pred A() {intr} def pred B() {intr} def pred C() {intr} def pred T:A,B,C,E() ;", "T:A, T:B, T:C, T:E", "ok|ok|ok|ok")>]
+    [<DataRow("05", "def pred A() {intr} def pred T:A() ;", "T:A", "ok")>]
+    [<DataRow("06", "def pred A() {intr} def pred T:B() ;", "T:B", "ok")>]
+    [<DataRow("07", "def pred T(a:pred) ;", "T", "ok")>]
+    [<DataRow("08", "def pred T(x,y:ind) ;", "T", "ok")>]
+    [<DataRow("09", "def pred T:C(a,b,c:pred);", "T:C", "ok")>]
+    [<DataRow("10", "def pred A() {intr} def pred B:A () {intr} def pred T:B,A() {intr};", "T:B:A, T:A", "ok|cross-inheritance not supported, `A` is base for `B` and `T`.")>]
+    [<DataRow("11", "def pred Set() def pred EmptySet:Set() def pred T:EmptySet();", "T:EmptySet:Set", "ok")>]
+    [<DataRow("12", "def pred A() {intr} def pred B:A() {intr} def pred T:A,B() {intr};", "T:A, T:B:A", "ok|cross-inheritance not supported, `A` is base for `T` and `B`.")>]
+    [<DataRow("13", "def pred A() {intr} def pred B:A() {intr} def pred T:B() {intr};", "T:B:A", "ok")>]
+    [<DataRow("14", "def pred A() {intr} def pred B:A() {intr} def pred T:A() {intr};", "T:A", "ok")>]
+    [<DataRow("15", "def pred A() {intr} def pred B:A() {intr} def pred T:A,A() {intr};", "T:A", "duplicate inheritance from `A` detected.")>]
+    [<DataRow("16", "def pred A() {intr} def pred B:A() {intr} def pred T:A,C,A() {intr};", "T:A, T:C", "duplicate inheritance from `A` detected.|ok")>]
+    [<DataRow("17", "def pred A() {intr} def pred B:A() {intr} def pred T() {intr};", "T", "ok")>]
+    [<DataRow("18", "def pred A() {intr} def pred B:A() {intr} def pred T:D,E() {intr};", "T:D, T:E", "ok|ok")>]
+    [<DataRow("19", "def pred A:B() def pred B:A() def pred T:A();", "T:A:B", "ok")>]
+    [<DataRow("20a", "def pred A:B() def pred B:A() def pred T:B();", "T:B:A:B", "cross-inheritance not supported, `B` is base for `T` and `A`.")>]
+    [<DataRow("20b", "def pred A:B() def pred B:A() def pred T:A,B();", "T:A:B, T:B", "ok|cross-inheritance not supported, `B` is base for `A` and `T`.")>]
+    [<DataRow("20c", "def pred A:B() def pred B:A() def pred T:B,A();", "T:B:A:B, T:A", "cross-inheritance not supported, `B` is base for `T` and `A`.|cross-inheritance not supported, `A` is base for `B` and `T`.")>]
+    [<TestMethod>]
+    member this.TestBasePredicatePath(no:string, varVal:string, expectedPaths:string, expectedMessages:string) =
+        
+        let fplCode = sprintf """%s""" varVal
+        let filename = "TestBasePredicatePath"
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let blocks = theory.Scope.Values |> Seq.toList 
+        let cl = blocks |> List.filter(fun fv -> fv.FplId = "T") |> List.head
+        let paths = 
+            findInheritanceChains cl 
+            |> Seq.map (fun kvp -> kvp.Key) 
+            |> String.concat ", "
+        Assert.AreEqual<string>(expectedPaths, paths)
+        let messages = 
+            findInheritanceChains cl 
+            |> Seq.map (fun kvp -> kvp.Value) 
+            |> String.concat "|"
+        Assert.AreEqual<string>(expectedMessages, messages)
+        prepareFplCode(filename, "", false) |> ignore
+
     [<DataRow("00", """def cl A { intr } def pred T() {dec ~n:A n:=A; true};""", "A")>]
     [<DataRow("01", """def cl A { ctor A(x:obj) {} } def pred T() {dec ~n:A ~x:obj n:=A(x); true};""", "A(obj)")>]
     [<DataRow("02", """def cl A { ctor A(x:pred) {} } def pred T() {dec ~n:A ~x:pred n:=A(x); true};""", "A(pred)")>]
