@@ -164,12 +164,6 @@ let tryAddSubBlockToFplBlock (fplValue:FplGenericNode) =
     else
         parent.Scope.Add(identifier, fplValue)
 
-/// Generates a string of a FplGenericNode list based on their SignatureType.
-let lstToString (lst:FplGenericNode list) (signatureType:SignatureType) =
-    lst
-    |> List.map (fun fv -> fv.Type SignatureType.Name)
-    |> String.concat ", "
-
 /// Generates a string of parameters based on SignatureType
 let getParamTuple (fv:FplGenericNode) (signatureType:SignatureType) =
         let propagate = propagateSignatureType signatureType
@@ -346,15 +340,3 @@ let allBefore searchItem xs =
             loop (x :: acc) rest
 
     loop [] xs
-
-let numbered inputLst =
-    inputLst
-    |> Seq.mapi (fun i cand -> sprintf "%s%d) %s" Environment.NewLine (i + 1) cand)
-    |> String.concat ", "
-
-let ordinalPostfix n =
-    match n with
-    | 1 -> "st"
-    | 2 -> "nd"
-    | 3 -> "rd"
-    | _ -> "th"

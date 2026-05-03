@@ -24,6 +24,18 @@ let englishOrdinal dimNumber =
     | 3 -> "3rd"
     | _ -> $"{dimNumber}th"
 
+let numbered inputLst =
+    inputLst
+    |> Seq.mapi (fun i cand -> sprintf "%s%d) %s" Environment.NewLine (i + 1) cand)
+    |> String.concat ", "
+
+let ordinalPostfix n =
+    match n with
+    | 1 -> "st"
+    | 2 -> "nd"
+    | 3 -> "rd"
+    | _ -> "th"
+
 // Diagnostics related-errors
 // -----------------------------------------------------------------
 // parser error messages
@@ -214,5 +226,21 @@ let errTypeMismatchUndefined aIsCallByReference aName pName pType =
 let errTypeMismatchVariadic aName aType pName pType pTypeId = 
     Some $"Variadic enumeration of `{aName}` typed `{aType}` doesn't match the parameter `{pName}` typed `{pType}`, try `{aName}:{pType}` as argument or use `{pName}:{pTypeId}[{LiteralInd}]` as parameter type"
 
+// expression-matching-related errors
+// -----------------------------------------------------------------
+let errExprMismatchExistsN aFplId aName pFplId pName = false, $"found mismatching exists `{aFplId}` in `{aName}`, expecting type `{pFplId}` in `{pName}`"
 
+
+let errExprMismatchQuantorVariableTypes aName pName xName yName index = false, $"found mismatching type `{xName}` at {ordinalPostfix index} quantor variable in `{aName}`, expecting type `{yName}` in `{pName}`"
+
+let errExprMismatchQuantorVariableCounts aName pName aVarsCount pVarsCount = false, $"found {aVarsCount} quantor variables in `{aName}`, expected {pVarsCount} in `{pName}`" 
+
+let errExprMismatchOpenFormulas aName aVarsOpenClosedStr aOpenFormulaType pName pVarsOpenClosedStr pOpenFormulaType = false, $"found expression `{aName}` ({aVarsOpenClosedStr} typed `{aOpenFormulaType}`), expected `{pName}` typed `{pVarsOpenClosedStr} typed {pOpenFormulaType}`"
+
+let errExprMismatchExpectedEndOfFormula (aName) = false, $"`found {aName}`, expected end of formula"
+let errExprMismatchFoundEndOfFormula pName = false, $"found end of formula, expected `{pName}`"
+let errExprMismatchVarMatchedDifferently varName expectedExpr actualExpr = false, $"variable `{varName}` matched with different formulas `{expectedExpr}` and `{actualExpr}`"
+let errExprMismatchMsgStandard aName pName = false, $"found `{aName}`, expected `{pName}`"
+
+let errExprMismatchOK = true, ""
 
