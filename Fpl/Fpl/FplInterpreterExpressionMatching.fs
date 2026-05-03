@@ -30,29 +30,6 @@ let private errExprMismatchQuantorVariableTypesWrapper (a:FplGenericNode) (p:Fpl
     let pName = p.Type SignatureType.Name
     errExprMismatchQuantorVariableTypes aName pName xName yName index  
 
-
-let private errExprMismatchOpenFormulasWrapper (aOriginal:FplGenericNode) (aOpenFormula:FplGenericNode) (aFreeVars:FplGenericNode list) (pOriginal:FplGenericNode) (pOpenFormula:FplGenericNode) (pFreeVars:FplGenericNode list) = 
-    let aName = aOriginal.Type SignatureType.Name
-    let aOpenFormulaType = aOpenFormula.Type SignatureType.Type
-    let pName = pOriginal.Type SignatureType.Name
-    let pOpenFormulaType = pOpenFormula.Type SignatureType.Type
-
-    /// Generates a string of a FplGenericNode list based on their SignatureType.
-    let lstToString (lst:FplGenericNode list) (signatureType:SignatureType) =
-        lst
-        |> List.map (fun fv -> fv.Type SignatureType.Name)
-        |> String.concat ", "
-
-    let openClosedStr (lstFreeVars:FplGenericNode list) =
-        if lstFreeVars.Length > 0 then
-            $"an open formula with the free variables {lstToString lstFreeVars SignatureType.Name}"
-        else
-            "a closed formula"
-    let aVarsOpenClosedStr = openClosedStr aFreeVars
-    let pVarsOpenClosedStr = openClosedStr pFreeVars
-    errExprMismatchOpenFormulas aName aVarsOpenClosedStr aOpenFormulaType pName pVarsOpenClosedStr pOpenFormulaType 
-
-
 let private compareQuantorVariables (a:FplGenericNode) (p:FplGenericNode) (dictParameterUsage:Dictionary<string, FplGenericNode>) =
     let pVars = p.GetVariables()
     let aVars = a.GetVariables()
@@ -87,30 +64,6 @@ let private checkMismatchingUsageOfVars varName (a:FplGenericNode) (dictParamete
             errExprMismatchVarMatchedDifferently varName expectedExpr actualExpr
         else
             errExprMismatchOK
-
-let private comparisonBasedOnOpenFormulas (a:FplGenericNode) (p:FplGenericNode) (dictParameterUsage:Dictionary<string, FplGenericNode>) = 
-    let aOpenFormulaOpt = FplTypeMatcher.GetOpenFormulaOfExpression a
-    let pOpenFormulaOpt = FplTypeMatcher.GetOpenFormulaOfExpression p
-
-    match aOpenFormulaOpt, pOpenFormulaOpt with
-    | Some aOpenFormula, Some pOpenFormula ->
-        let aFreeVars = getParameters aOpenFormula
-        let pFreeVars = getParameters pOpenFormula
-        match FplTypeMatcher.MatchPwA aFreeVars pFreeVars with
-        | Some _ ->
-            errExprMismatchOpenFormulasWrapper a aOpenFormula aFreeVars p pOpenFormula pFreeVars
-        | None when aOpenFormula.TypeId <> pOpenFormula.TypeId ->
-            errExprMismatchOpenFormulasWrapper a aOpenFormula aFreeVars p pOpenFormula pFreeVars
-        | _ when p.Name = PrimRefL ->
-            match p.RefersTo with
-            | Some var when var.Name = PrimVariableL ->
-                checkMismatchingUsageOfVars p.FplId a dictParameterUsage
-            | _ -> errExprMismatchOK
-        | _ -> 
-            errExprMismatchOK
-    | _, _ ->
-        // fallback, should never happen unless open formula calculation somehow fails
-        errExprMismatchMsgStandard (a.Type SignatureType.Name) (p.Type SignatureType.Name)
 
 let private checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) =
     // When p is a variable, the dict stores the variable names and their usage in a first matched a.
@@ -164,7 +117,14 @@ let private checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) =
             | None, None ->
                 errExprMismatchOK
         | _, PrimRefL when p.RefersTo.IsSome && p.RefersTo.Value.Name = PrimVariableL ->
-            comparisonBasedOnOpenFormulas a p dictParameterUsage
+            let ok, errMsg = FplTypeMatcher.ComparisonBasedOnOpenFormulas a p
+            match ok, p.RefersTo with
+            | true, Some var when var.Name = PrimVariableL ->
+                checkMismatchingUsageOfVars p.FplId a dictParameterUsage
+            | false, _ ->
+                false, errMsg
+            | _,_ ->
+                errExprMismatchOK
         | _, PrimVariableL ->
             match FplTypeMatcher.MatchArgumentsWithParameters a p with
             | Some err ->

@@ -74,6 +74,28 @@ let hasBracketsOrParentheses (fv:FplGenericNode) =
         (refFv.ArgType = ArgType.Parentheses || refFv.ArgType = ArgType.Brackets)
     | _ -> false
 
+let private errExprMismatchOpenFormulasWrapper (aOriginal:FplGenericNode) (aOpenFormula:FplGenericNode) (aFreeVars:FplGenericNode list) (pOriginal:FplGenericNode) (pOpenFormula:FplGenericNode) (pFreeVars:FplGenericNode list) = 
+    let aName = aOriginal.Type SignatureType.Name
+    let aOpenFormulaType = aOpenFormula.Type SignatureType.Type
+    let pName = pOriginal.Type SignatureType.Name
+    let pOpenFormulaType = pOpenFormula.Type SignatureType.Type
+
+    /// Generates a string of a FplGenericNode list based on their SignatureType.
+    let lstToString (lst:FplGenericNode list) (signatureType:SignatureType) =
+        lst
+        |> List.map (fun fv -> fv.Type SignatureType.Name)
+        |> String.concat ", "
+
+    let openClosedStr (lstFreeVars:FplGenericNode list) =
+        if lstFreeVars.Length > 0 then
+            $"an open formula with the free variables {lstToString lstFreeVars SignatureType.Name}"
+        else
+            "a closed formula"
+    let aVarsOpenClosedStr = openClosedStr aFreeVars
+    let pVarsOpenClosedStr = openClosedStr pFreeVars
+    errExprMismatchOpenFormulas aName aVarsOpenClosedStr aOpenFormulaType pName pVarsOpenClosedStr pOpenFormulaType 
+
+
 /// Checks if the baseNode is contained in the roots's base nodes (it derives from).
 /// If so, the function will produce Some path where path equals a string of base nodes concatenated by ":".
 /// The baseNode is required to be a definition (i.e., FplClass, FplFunctionalTerm, or FplPredicate)
@@ -634,6 +656,25 @@ type FplTypeMatcher() =
                 |> Seq.iter (fun arg -> extractDistinctFreeVariables arg false)
             extractDistinctFreeVariables expr true
             Some topLevel
+
+    static member ComparisonBasedOnOpenFormulas (a:FplGenericNode) (p:FplGenericNode) = 
+        let aOpenFormulaOpt = FplTypeMatcher.GetOpenFormulaOfExpression a
+        let pOpenFormulaOpt = FplTypeMatcher.GetOpenFormulaOfExpression p
+
+        match aOpenFormulaOpt, pOpenFormulaOpt with
+        | Some aOpenFormula, Some pOpenFormula ->
+            let aFreeVars = getParameters aOpenFormula
+            let pFreeVars = getParameters pOpenFormula
+            match FplTypeMatcher.MatchPwA aFreeVars pFreeVars with
+            | Some _ ->
+                errExprMismatchOpenFormulasWrapper a aOpenFormula aFreeVars p pOpenFormula pFreeVars
+            | None when aOpenFormula.TypeId <> pOpenFormula.TypeId ->
+                errExprMismatchOpenFormulasWrapper a aOpenFormula aFreeVars p pOpenFormula pFreeVars
+            | _ -> 
+                errExprMismatchOK
+        | _, _ ->
+            // fallback, should never happen unless open formula calculation somehow fails
+            errExprMismatchMsgStandard (a.Type SignatureType.Name) (p.Type SignatureType.Name)
 
 
 /// Tries to match the signatures of toBeMatched with the signatures of all candidates and accumulates any
