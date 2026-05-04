@@ -4856,9 +4856,9 @@ type TestInterpreterErrors() =
     [<DataRow("not_01", "def pred T(v:pred(a:obj)) {dec ~x,y:obj v:=not iif(is(y,obj), is(x,obj)) ; true};", 1)>] 
     [<DataRow("not_01a", "def pred T(v:pred(a,b:obj)) {dec ~x,y:obj v:=not iif(is(y,obj), is(x,obj)) ; true};", 0)>] 
     [<DataRow("not_01b", "def pred T(v:pred(a:obj)) {dec ~y:obj v:=not iif(is(y,obj), ex x:obj { is(x,obj) }) ; true};", 0)>] 
-    [<DataRow("=01", """def pred Equal(x,y: tpl) infix "=" 50 { del.Equal(x,y)} def pred T(v:pred(a:obj)) {dec ~x,y:obj v:=(x = y) ; true};""", 1)>] 
-    [<DataRow("=02", """def pred Equal(x,y: tpl) infix "=" 50 { del.Equal(x,y)} def pred T(v:pred(a,b:obj)) {dec ~x,y:obj v:=(x = y) ; true};""", 0)>] 
-    [<DataRow("=03", """def pred Equal(x,y: tpl) infix "=" 50 { del.Equal(x,y)} def pred T(v:pred(a:obj)) {dec ~y:obj v:=(x = y) ; true};""", 0)>] 
+    [<DataRow("=01", """def pred Equal(x,y: obj) infix "=" 50 { del.Equal(x,y)} def pred T(v:pred(a:obj)) {dec ~x,y:obj v:=(x = y) ; true};""", 1)>] 
+    [<DataRow("=02", """def pred Equal(x,y: obj) infix "=" 50 { del.Equal(x,y)} def pred T(v:pred(a,b:obj)) {dec ~x,y:obj v:=(x = y) ; true};""", 0)>] 
+    [<DataRow("=03", """def pred Equal(x,y: obj) infix "=" 50 { del.Equal(x,y)} def pred T(v:pred(a,b:obj)) {dec ~y:obj v:=(x = y) ; true};""", 0)>] 
     [<TestMethod>]
     member this.TestSIG05OpenFormulas(no:string, fplCode:string, expected) =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 

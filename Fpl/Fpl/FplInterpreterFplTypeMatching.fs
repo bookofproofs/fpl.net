@@ -596,6 +596,8 @@ type FplTypeMatcher() =
                     matchByTypeStringRepresentation aIsCallByReference a aName aType aTypeName p pName pType pTypeName
             | _, PrimVariableL when isCompoundPredicate a ->
                 FplTypeMatcher.ComparisonBasedOnOpenFormulas a p
+            | PrimPredicateL, PrimVariableL ->
+                FplTypeMatcher.ComparisonBasedOnOpenFormulas a p
             | _ ,_ -> 
                 matchByTypeStringRepresentation true a aName aType aTypeName p pName pType pTypeName
         matchTwoTypes a p
@@ -640,21 +642,25 @@ type FplTypeMatcher() =
                             && not rootRecursion 
                         // and not variables with params - in this case, 
                         // they syntactically stand for complex formulas, not for free variables 
-                            && not (varVars.Length > 0)
-                        // and not variables with the type pred or func - in this case, 
-                        // they syntactically stand for complex formulas, not for free variables 
-                            && (var.TypeId <> LiteralPred)
-                            && (var.TypeId <> LiteralFunc)
-                            ->
-                            topLevel.Scope.TryAdd(var.FplId,var) |> ignore
-                        | _ -> ()
+                                && not (varVars.Length > 0)
+                            // and not variables with the type pred or func - in this case, 
+                            // they syntactically stand for complex formulas, not for free variables 
+                                && (var.TypeId <> LiteralPred)
+                                && (var.TypeId <> LiteralFunc)
+                                ->
+                                topLevel.Scope.TryAdd(var.FplId,var) |> ignore
+                            | _ -> ()
                         if fv.ArgList.Count = 0 then
                             varVars
                             |> List.map (fun v -> topLevel.Scope.TryAdd(v.FplId,v)) |> ignore
                     | _ -> ()
+                | PrimPredicateL ->
+                    fv.GetVariables()
+                    |> List.filter (fun v -> isSignatureVar v)
+                    |> List.map (fun v -> topLevel.Scope.TryAdd(v.FplId,v)) |> ignore
+                | _ when isCompoundPredicate fv -> fv.ArgList |> Seq.iter (fun arg -> extractDistinctFreeVariables arg false)
                 | _ -> ()
-                fv.ArgList
-                |> Seq.iter (fun arg -> extractDistinctFreeVariables arg false)
+
             extractDistinctFreeVariables expr true
             Some topLevel
 
