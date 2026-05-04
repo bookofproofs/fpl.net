@@ -80,14 +80,14 @@ let private errExprMismatchOpenFormulasWrapper (aOriginal:FplGenericNode) (aOpen
     let pOpenFormulaType = pOpenFormula.Type SignatureType.Type
 
     /// Generates a string of a FplGenericNode list based on their SignatureType.
-    let lstToString (lst:FplGenericNode list) (signatureType:SignatureType) =
+    let lstToString (lst:FplGenericNode list) =
         lst
         |> List.map (fun fv -> fv.Type SignatureType.Name)
         |> String.concat ", "
 
     let openClosedStr (lstFreeVars:FplGenericNode list) =
         if lstFreeVars.Length > 0 then
-            $"an open formula with the free variables {lstToString lstFreeVars SignatureType.Name}"
+            $"an open formula with the free variables `{lstToString lstFreeVars}`"
         else
             "a closed formula"
     let aVarsOpenClosedStr = openClosedStr aFreeVars

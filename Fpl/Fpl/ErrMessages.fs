@@ -228,7 +228,7 @@ let errExprMismatchQuantorVariableTypes aName pName xName yName index = Some $"f
 
 let errExprMismatchQuantorVariableCounts aName pName aVarsCount pVarsCount = Some $"found {aVarsCount} quantor variables in `{aName}`, expected {pVarsCount} in `{pName}`" 
 
-let errExprMismatchOpenFormulas aName aVarsOpenClosedStr aOpenFormulaType pName pVarsOpenClosedStr pOpenFormulaType = Some $"found expression `{aName}` ({aVarsOpenClosedStr} typed `{aOpenFormulaType}`), expected `{pName}` typed `{pVarsOpenClosedStr} typed {pOpenFormulaType}`"
+let errExprMismatchOpenFormulas aName aVarsOpenClosedStr aOpenFormulaType pName pVarsOpenClosedStr pOpenFormulaType = Some $"found expression `{aName}` ({aVarsOpenClosedStr} typed `{aOpenFormulaType}`), expected `{pName}` which is {pVarsOpenClosedStr} typed `{pOpenFormulaType}`"
 
 let errExprMismatchExpectedEndOfFormula (aName) = Some $"`found {aName}`, expected end of formula"
 let errExprMismatchFoundEndOfFormula pName = Some $"found end of formula, expected `{pName}`"
