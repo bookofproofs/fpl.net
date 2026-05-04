@@ -629,8 +629,12 @@ type FplTypeMatcher() =
                     | _ -> ()
                     topLevelVar
 
-            let rec extractDistinctFreeVariables (fv:FplGenericNode) rootRecursion =
+            let isRoot (fv:FplGenericNode) =
+                match fv.Parent with
+                | Some parent when isCompoundPredicate parent -> false
+                | _ -> true
 
+            let rec extractDistinctFreeVariables (fv:FplGenericNode) rootRecursion =
                 match fv.Name with
                 | PrimRefL when fv.RefersTo.IsSome ->
                     match fv.RefersTo with
@@ -655,15 +659,20 @@ type FplTypeMatcher() =
                             if fv.ArgList.Count = 0 then
                                 varCast.GetVariables()
                                 |> List.map (fun v -> topLevel.Scope.TryAdd(v.FplId,v)) |> ignore
+                    | Some (:? FplPredicate) 
+                    | Some (:? FplFunctionalTerm) ->
+                        fv.ArgList |> Seq.iter (fun arg -> extractDistinctFreeVariables arg false)
                     | _ -> ()
                 | PrimPredicateL ->
                     fv.GetVariables()
                     |> List.filter (fun v -> isSignatureVar v)
                     |> List.map (fun v -> topLevel.Scope.TryAdd(v.FplId,v)) |> ignore
-                | _ when isCompoundPredicate fv -> fv.ArgList |> Seq.iter (fun arg -> extractDistinctFreeVariables arg false)
+                | _ when isCompoundPredicate fv ->
+                    fv.ArgList |> Seq.iter (fun arg -> extractDistinctFreeVariables arg false)
                 | _ -> ()
 
-            extractDistinctFreeVariables expr true
+            let rootRecursion = isRoot expr
+            extractDistinctFreeVariables expr rootRecursion
             Some topLevel
 
     static member ComparisonBasedOnOpenFormulas (a:FplGenericNode) (p:FplGenericNode) = 
