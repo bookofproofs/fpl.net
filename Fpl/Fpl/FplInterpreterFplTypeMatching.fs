@@ -634,11 +634,15 @@ type FplTypeMatcher() =
                 match fv.Name with
                 | PrimRefL when fv.RefersTo.IsSome ->
                     match fv.RefersTo with
-                    | Some (:? FplVariable as varCast) when
+                    | Some (:? FplVariable as varCast) when rootRecursion ->
+                        varCast.GetVariables()
+                        |> List.map (fun v -> v :?> FplVariable)
+                        |> List.filter(fun v -> not v.IsBound)
+                        |> List.map (fun v -> topLevel.Scope.TryAdd(v.FplId, v))
+                        |> ignore
+                    | Some (:? FplVariable as varCast) when not rootRecursion
                         // only free variables
-                        (not varCast.IsBound) 
-                        // not the top-level-ones
-                        && not rootRecursion 
+                        && (not varCast.IsBound) 
                         // and not variables with the type pred or func - in this case, 
                         // they syntactically stand for complex formulas, not for free variables 
                         && (varCast.TypeId <> LiteralPred)
