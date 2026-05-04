@@ -630,29 +630,27 @@ type FplTypeMatcher() =
                     topLevelVar
 
             let rec extractDistinctFreeVariables (fv:FplGenericNode) rootRecursion =
+
                 match fv.Name with
                 | PrimRefL when fv.RefersTo.IsSome ->
                     match fv.RefersTo with
-                    | Some var when var.Name = PrimVariableL ->
-                        let varVars = var.GetVariables()
-                        match var with
+                    | Some (:? FplVariable as varCast) when
                         // only free variables
-                        | :? FplVariable as varCast when (not varCast.IsBound)
+                        (not varCast.IsBound) 
                         // not the top-level-ones
-                            && not rootRecursion 
+                        && not rootRecursion 
+                        // and not variables with the type pred or func - in this case, 
+                        // they syntactically stand for complex formulas, not for free variables 
+                        && (varCast.TypeId <> LiteralPred)
+                        && (varCast.TypeId <> LiteralFunc)
                         // and not variables with params - in this case, 
                         // they syntactically stand for complex formulas, not for free variables 
-                                && not (varVars.Length > 0)
-                            // and not variables with the type pred or func - in this case, 
-                            // they syntactically stand for complex formulas, not for free variables 
-                                && (var.TypeId <> LiteralPred)
-                                && (var.TypeId <> LiteralFunc)
-                                ->
-                                topLevel.Scope.TryAdd(var.FplId,var) |> ignore
-                            | _ -> ()
-                        if fv.ArgList.Count = 0 then
-                            varVars
-                            |> List.map (fun v -> topLevel.Scope.TryAdd(v.FplId,v)) |> ignore
+                        && not (varCast.Scope.Count > 0)
+                        ->
+                            topLevel.Scope.TryAdd(varCast.FplId, varCast) |> ignore
+                            if fv.ArgList.Count = 0 then
+                                varCast.GetVariables()
+                                |> List.map (fun v -> topLevel.Scope.TryAdd(v.FplId,v)) |> ignore
                     | _ -> ()
                 | PrimPredicateL ->
                     fv.GetVariables()
