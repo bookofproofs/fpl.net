@@ -65,12 +65,11 @@ let private checkMismatchingUsageOfVars varName (a:FplGenericNode) (dictParamete
         else
             errExprMismatchOK
 
-let private checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) =
+let private checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) (dictParameterUsage: Dictionary<string, FplGenericNode>) =
     // When p is a variable, the dict stores the variable names and their usage in a first matched a.
     // The dictionary is used to check the consistency of the usage of the same variable p in the whole formula
     // during the matching process. Moreover, the dict is used generate the
     // conclusion of the rule of inference after all variables declared in its premise were used.
-    let dictParameterUsage = Dictionary<string, FplGenericNode>()
     let rec checkExpr (a:FplGenericNode) (p:FplGenericNode) =
         let rec checkExpressions (args:FplGenericNode list) (pars:FplGenericNode list) =
             match args, pars with
@@ -131,22 +130,25 @@ let private checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) =
             errExprMismatchMsgStandard (a.Type SignatureType.Name) (p.Type SignatureType.Name)
     checkExpr a p, dictParameterUsage
 
-/// Tries to match a premise with expressions from a list and returns as a result
-/// a list of matched expressions and a  string of concatenated failed candidate expressions
+/// Tries to match a premise with expressions from a list and returns 
+/// a list of matched expressions and a string of concatenated failed candidate expressions
 let private matchPremiseWithSomeExpressions (exprList:FplGenericNode list) (pre:FplGenericNode) (iJel:FplGenericNode) =
-    let result = List<FplGenericNode>()
+
+    let result = List<FplGenericNode * Dictionary<string, FplGenericNode>>()
     let failedCandidates = List<string>()
+
     exprList
     |> List.iter (fun expr ->
-        let (errOpt, varUsageDict) = checkExprWrapper expr pre
+        let dictParameterUsage = Dictionary<string, FplGenericNode>()
+        let (errOpt, varUsageDict) = checkExprWrapper expr pre dictParameterUsage
         match errOpt with
-        | None -> result.Add expr
+        | None -> result.Add (expr, varUsageDict)
         | Some err -> failedCandidates.Add ($"`{expr.Type SignatureType.Name}`{Environment.NewLine}  ⚡{err}")
     )
     result |> Seq.toList, (numbered failedCandidates)
 
 let matchJustItemsExpressionsAgainstPremiseList (tuplesJustItemWithProceedingExpressionsList:(FplGenericJustificationItem * FplGenericNode list) list) (premiseList:FplGenericNode list) (byInferenceNode:FplGenericNode) =
-    let result = List<FplGenericNode list>()
+    let result = List<(FplGenericNode * Dictionary<string, FplGenericNode>) list>()
     let rec matchJustItemsExpressionsAgainstPremiseListRec (iJeLists:(FplGenericJustificationItem * FplGenericNode list) list) (preList:FplGenericNode list) =
         match iJeLists, preList with
         | iJel::iJels, pre::pres ->
