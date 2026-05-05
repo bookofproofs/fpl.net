@@ -14,7 +14,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 *)
 module FplInterpreterProofs
 open System
-open FParsec
+open System.Collections.Generic
 open FplPrimitives
 open FplGrammarTypes
 open FplInterpreterDiagnosticsEmitter
@@ -179,6 +179,32 @@ and FplJustificationItemByInf(positions: Positions, parent: FplGenericNode) =
 
     member this.ParentJustification = this.Parent.Value :?> FplJustification
 
+    /// Replaces the variables in the conclusion of the rule of inference
+    /// by expressions matched to these variables from the premise of the rule of inference
+    /// when it was structurally matched to some expression.
+    member private this.ReplaceVarsByVarUsages (conclusionExpression:FplGenericNode) (varUsageDict:Dictionary<string, FplGenericNode>) =
+        let rec replaceVarsByUsages (expr:FplGenericNode) =
+            let newArgList = List<FplGenericNode>()
+            expr.ArgList
+            |> Seq.iter (fun arg ->
+                match arg.Name with
+                | PrimRefL when arg.RefersTo.IsSome ->
+                    match arg.RefersTo with
+                    | Some var when var.Name = PrimVariableL ->
+                        if varUsageDict.ContainsKey(var.FplId) then
+                            newArgList.Add varUsageDict[var.FplId]
+                        else
+                            newArgList.Add (replaceVarsByUsages arg)
+                    | _ ->  newArgList.Add (replaceVarsByUsages arg)
+                | _ ->  newArgList.Add (replaceVarsByUsages arg)
+            )
+            // replace expression arguments by new expressions where variables were replaced by their usages
+            newArgList
+            |> Seq.iteri (fun i arg -> expr.ArgList[i] <- arg)
+            expr
+
+        replaceVarsByUsages conclusionExpression
+
     override this.ProceedingExprCandidates
         with get (): FplGenericNode list =
             match this.RefersTo, this.Parent with
@@ -198,10 +224,16 @@ and FplJustificationItemByInf(positions: Positions, parent: FplGenericNode) =
                     // The resulting data structure is a dictionary of key-Value pairs where key = premise expression, value = list of expressions that matched the premise expression.
                     let listOfPairs = matchJustItemsExpressionsAgainstPremiseList proceedingExpressionLists premisePredicateList this
                     match this.ErrorOccurred with
-                    | Some _ -> () // error occured while matching input justificationItems with premise list
+                    | Some _ ->
+                        // error occured while matching input justificationItems with premise list
+                        [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
                     | None ->
-                        () // TODO: now, we can 
-                    [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
+                        listOfPairs
+                        |> List.map (fun tuple ->
+                            let varUsageDict = snd tuple
+                            let expr = conclusion.Clone()
+                            this.ReplaceVarsByVarUsages expr varUsageDict
+                        )
                 | _ ->
                     [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
             | _ ->

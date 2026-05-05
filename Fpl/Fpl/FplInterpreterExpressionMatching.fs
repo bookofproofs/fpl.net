@@ -169,4 +169,4 @@ let matchJustItemsExpressionsAgainstPremiseList (tuplesJustItemWithProceedingExp
         | [], [] -> ()
             
     matchJustItemsExpressionsAgainstPremiseListRec tuplesJustItemWithProceedingExpressionsList premiseList
-    result |> Seq.toList
+    result |> List.concat
