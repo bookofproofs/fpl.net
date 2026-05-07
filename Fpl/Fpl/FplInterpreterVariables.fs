@@ -72,7 +72,8 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplGenericNode) as 
         with get () = _isInitialized
         and set (value) = 
             _isInitialized <- value
-            _isBound <- value // all initialized variables are also bound
+            if _isInitialized then 
+                _isBound <- value // all initialized variables are also bound
 
     interface IVariable with
         member this.IsSignatureVariable 
