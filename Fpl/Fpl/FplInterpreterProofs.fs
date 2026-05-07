@@ -198,6 +198,21 @@ and FplJustificationItemByInf(positions: Positions, parent: FplGenericNode) =
                     | _ ->  newArgList.Add (replaceVarsByUsages arg)
                 | _ ->  newArgList.Add (replaceVarsByUsages arg)
             )
+            let exprVarList = expr.GetVariables()
+            exprVarList
+            |> Seq.iter (fun var ->
+                if varUsageDict.ContainsKey(var.FplId) then
+                    // correct the TypeId and FplId of any cloned conclusion variables (like those of cloned quantors in the conclusion of the rule of reference)
+                    // to the TypeId of the mached variable of the matched premise of the rule of reference
+                    var.TypeId <- varUsageDict[var.FplId].TypeId
+                    // Note: The corrected FplId stems from the matched premise of the rule of reference, while the original FplId stems from its cloned conclusion
+                    // The corrected FplId might, therefore, differ from the cloned Key (being the original FplId), where this variable resides in expr.Scope dictionary
+                    // This difference is OK, since we only need the dictionaries value of the variable. This is used here a dummy for expression matching based on expression syntax (.Type SignatureType.Name)
+                    // of the expression. The correct Key-Value correspondence was only needed when embedding the variable into the SymbolTable
+                    // which at this point is only the input, not the output of the FplInterpreter.
+                    var.FplId <- varUsageDict[var.FplId].FplId 
+            )
+            
             // replace expression arguments by new expressions where variables were replaced by their usages
             newArgList
             |> Seq.iteri (fun i arg -> expr.ArgList[i] <- arg)
