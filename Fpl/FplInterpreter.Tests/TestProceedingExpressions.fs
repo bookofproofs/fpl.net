@@ -484,7 +484,7 @@ type TestProceedingExpressions() =
     [<DataRow("NotImpl2And_03", "inf NotImpl2And{dec ~p,q:pred; pre:not (impl(p,q)) con:and(p,not q)} thm T {true} proof T$1 {1. |- not (impl(and(true, false), not (ex x:obj {is(x, N)}))) 2. 1, byinf NotImpl2And |- true};", "(true ∧ false) ∧ ¬(∃ x:obj {x is N})", 1)>]
 
     // And2NotImpl: pre: and(p, not q)
-    [<DataRow("And2NotImpl_01", "inf And2NotImpl{dec ~p,q:pred; pre:and(p,not q) con:not (impl(p,q))} thm T {true} proof T$1 {1. |- and(all x:obj {is(x, N)}, not ex y:obj {is(y, M)}) 2. 1, byinf And2NotImpl |- true};", "¬((∀ x:obj {x is N}) ⇒ (∃ y:obj {y is M}))", 1)>]
+    [<DataRow("And2NotImpl_01", "inf And2NotImpl{dec ~p,q:pred; pre:and(p,not q) con:not (impl(p,q))} thm T {true} proof T$1 {1. |- and(all x:obj {is(x, N)}, not ex y:obj {is(y, M)}) 2. 1, byinf And2NotImpl |- true};", "¬(∀ x:obj {x is N} ⇒ ∃ y:obj {y is M})", 1)>]
     [<DataRow("And2NotImpl_02", "inf And2NotImpl{dec ~p,q:pred; pre:and(p,not q) con:not (impl(p,q))} thm T {true} proof T$1 {1. |- and(iif(true, false), not xor(true, false)) 2. 1, byinf And2NotImpl |- true};", "¬((true ⇔ false) ⇒ (true ⩡ false))", 1)>]
     [<DataRow("And2NotImpl_03", "inf And2NotImpl{dec ~p,q:pred; pre:and(p,not q) con:not (impl(p,q))} thm T {true} proof T$1 {1. |- and(not (impl(true, false)), not all z:obj {is(z, K)}) 2. 1, byinf And2NotImpl |- true};", "¬((¬(true ⇒ false)) ⇒ (∀ z:obj {z is K}))", 1)>]
 
