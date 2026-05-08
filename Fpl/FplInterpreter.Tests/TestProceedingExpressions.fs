@@ -1,6 +1,4 @@
 namespace FplInterpreter.Tests
-open System
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open FplInterpreterBasicTypes
 open FplPrimitives

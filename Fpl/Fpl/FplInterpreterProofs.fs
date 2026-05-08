@@ -183,20 +183,23 @@ and FplJustificationItemByInf(positions: Positions, parent: FplGenericNode) =
     /// by expressions matched to these variables from the premise of the rule of inference
     /// when it was structurally matched to some expression.
     member private this.ReplaceVarsByVarUsages (conclusionExpression:FplGenericNode) (varUsageDict:Dictionary<string, FplGenericNode>) =
+        let isVariableWithMatchedExpression (arg:FplGenericNode) =
+            match arg.Name with
+            | PrimRefL when arg.RefersTo.IsSome ->
+                match arg.RefersTo with
+                | Some var when var.Name = PrimVariableL ->
+                    varUsageDict.ContainsKey(var.FplId) 
+                | _ ->  false
+            | _ ->  false
+
         let rec replaceVarsByUsages (expr:FplGenericNode) =
             let newArgList = List<FplGenericNode>()
             expr.ArgList
             |> Seq.iter (fun arg ->
-                match arg.Name with
-                | PrimRefL when arg.RefersTo.IsSome ->
-                    match arg.RefersTo with
-                    | Some var when var.Name = PrimVariableL ->
-                        if varUsageDict.ContainsKey(var.FplId) then
-                            newArgList.Add varUsageDict[var.FplId]
-                        else
-                            newArgList.Add (replaceVarsByUsages arg)
-                    | _ ->  newArgList.Add (replaceVarsByUsages arg)
-                | _ ->  newArgList.Add (replaceVarsByUsages arg)
+                if isVariableWithMatchedExpression arg then
+                    newArgList.Add varUsageDict[arg.FplId]
+                else 
+                    newArgList.Add (replaceVarsByUsages arg)
             )
             let exprVarList = expr.GetVariables()
             exprVarList
@@ -217,8 +220,15 @@ and FplJustificationItemByInf(positions: Positions, parent: FplGenericNode) =
             newArgList
             |> Seq.iteri (fun i arg -> expr.ArgList[i] <- arg)
             expr
-
-        replaceVarsByUsages conclusionExpression
+        if isVariableWithMatchedExpression conclusionExpression then
+            // If the conclusion of the rule of reference is a single variable
+            // and this variable was matched with some expression,
+            // we replace the whole conclusion with this matched expression
+            varUsageDict[conclusionExpression.FplId]
+        else
+            // otherwise we replace it with the conclusionExpression in which
+            // we recursively replace all variables by matched expressions
+            replaceVarsByUsages conclusionExpression
 
     override this.ProceedingExprCandidates
         with get (): FplGenericNode list =
