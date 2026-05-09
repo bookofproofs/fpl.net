@@ -1,4 +1,6 @@
 namespace FplInterpreter.Tests
+open System
+open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open FplInterpreterBasicTypes
 open FplPrimitives
@@ -348,7 +350,7 @@ type TestProceedingExpressions() =
 
     // AndTrueNeutral: pre: and(true, p)
     [<DataRow("AndTrueNeutral_01", "inf AndTrueNeutral{dec ~p:pred; pre:and(true,p) con:p} thm T {true} proof T$1 {1. |- and(true, and(xor(true, false), not(false))) 2. 1, byinf AndTrueNeutral |- true};", "(true ⩡ false) ∧ ¬false", 1)>]
-    [<DataRow("AndTrueNeutral_02", "inf AndTrueNeutral{dec ~p:pred; pre:and(true,p) con:p} thm T {true} proof T$1 {1. |- and(true, ex n:obj {is(n, N)}) 2. 1, byinf AndTrueNeutral |- true};", "∃ n:obj {(x is N)}", 1)>]
+    [<DataRow("AndTrueNeutral_02", "inf AndTrueNeutral{dec ~p:pred; pre:and(true,p) con:p} thm T {true} proof T$1 {1. |- and(true, ex n:obj {is(n, N)}) 2. 1, byinf AndTrueNeutral |- true};", "∃ n:obj {(n is N)}", 1)>]
     [<DataRow("AndTrueNeutral_03", "inf AndTrueNeutral{dec ~p:pred; pre:and(true,p) con:p} thm T {true} proof T$1 {1. |- and(true, iif(or(true, false), not(false))) 2. 1, byinf AndTrueNeutral |- true};", "(true ∨ false) ⇔ ¬false", 1)>]
 
     // OrFalseNeutral: pre: or(false, p)
@@ -397,7 +399,7 @@ type TestProceedingExpressions() =
     [<DataRow("OrAndDistributivePack_03", "inf OrAndDistributivePack{dec ~p,q,s:pred; pre:or(and(p,q),and(p,s)) con:and(p,or(q,s))} thm T {true} proof T$1 {1. |- or(and(ex x:obj {is(x, N)}, or(true, false)), and(ex x:obj {is(x, N)}, xor(true, false))) 2. 1, byinf OrAndDistributivePack |- true};", "(∃ x:obj {x is N}) ∧ ((true ∨ false) ∨ (true ⩡ false))", 1)>]
 
     // DeMorganAndUnpack: pre: not and(p, q)
-    [<DataRow("DeMorganAndUnpack_01", "inf DeMorganAndUnpack{dec ~p,q:pred; pre:not and(p,q) con:or(not p,not q)} thm T {true} proof T$1 {1. |- not and(not(true), xor(true, false)) 2. 1, byinf DeMorganAndUnpack |- true};", "true ∨ ¬(true ⩡ false)", 1)>]
+    [<DataRow("DeMorganAndUnpack_01", "inf DeMorganAndUnpack{dec ~p,q:pred; pre:not and(p,q) con:or(not p,not q)} thm T {true} proof T$1 {1. |- not and(not(true), xor(true, false)) 2. 1, byinf DeMorganAndUnpack |- true};", "¬¬true ∨ ¬(true ⩡ false)", 1)>]
     [<DataRow("DeMorganAndUnpack_02", "inf DeMorganAndUnpack{dec ~p,q:pred; pre:not and(p,q) con:or(not p,not q)} thm T {true} proof T$1 {1. |- not and(all x:obj {is(x, N)}, ex y:obj {not is(y, M)}) 2. 1, byinf DeMorganAndUnpack |- true};", "¬(∀ x:obj {x is N}) ∨ ¬(∃ y:obj {¬(y is M)})", 1)>]
     [<DataRow("DeMorganAndUnpack_03", "inf DeMorganAndUnpack{dec ~p,q:pred; pre:not and(p,q) con:or(not p,not q)} thm T {true} proof T$1 {1. |- not and(iif(true, false), impl(true, false)) 2. 1, byinf DeMorganAndUnpack |- true};", "¬(true ⇔ false) ∨ ¬(true ⇒ false)", 1)>]
 
@@ -459,7 +461,7 @@ type TestProceedingExpressions() =
     // AndUnpack2NotOr: pre: and(p, q)
     [<DataRow("AndUnpack2NotOr_01", "inf AndUnpack2NotOr{dec ~p,q:pred; pre:and(p,q) con:not (or(not p,not q))} thm T {true} proof T$1 {1. |- and(all x:obj {is(x, N)}, ex y:obj {is(y, M)}) 2. 1, byinf AndUnpack2NotOr |- true};", "¬(¬(∀ x:obj {x is N}) ∨ ¬(∃ y:obj {y is M}))", 1)>]
     [<DataRow("AndUnpack2NotOr_02", "inf AndUnpack2NotOr{dec ~p,q:pred; pre:and(p,q) con:not (or(not p,not q))} thm T {true} proof T$1 {1. |- and(iif(true, false), xor(true, false)) 2. 1, byinf AndUnpack2NotOr |- true};", "¬(¬(true ⇔ false) ∨ ¬(true ⩡ false))", 1)>]
-    [<DataRow("AndUnpack2NotOr_03", "inf AndUnpack2NotOr{dec ~p,q:pred; pre:and(p,q) con:not (or(not p,not q))} thm T {true} proof T$1 {1. |- and(not (ex x:obj {is(x, N)}), impl(true, false)) 2. 1, byinf AndUnpack2NotOr |- true};", "¬((∃ x:obj {x is N}) ∨ ¬(true ⇒ false))", 1)>]
+    [<DataRow("AndUnpack2NotOr_03", "inf AndUnpack2NotOr{dec ~p,q:pred; pre:and(p,q) con:not (or(not p,not q))} thm T {true} proof T$1 {1. |- and(not (ex x:obj {is(x, N)}), impl(true, false)) 2. 1, byinf AndUnpack2NotOr |- true};", "¬(¬¬∃ x:obj {x is N} ∨ ¬(true ⇒ false))", 1)>]
 
     // NotOrPack2And: pre: not (or(not p, not q))
     [<DataRow("NotOrPack2And_01", "inf NotOrPack2And{dec ~p,q:pred; pre:not (or(not p,not q)) con:and(p,q)} thm T {true} proof T$1 {1. |- not (or(not all x:obj {is(x, N)}, not ex y:obj {is(y, M)})) 2. 1, byinf NotOrPack2And |- true};", "(∀ x:obj {x is N}) ∧ (∃ y:obj {y is M})", 1)>]
@@ -547,16 +549,16 @@ type TestProceedingExpressions() =
     [<DataRow("DisjunctiveSyllogism_03", "inf DisjunctiveSyllogism{dec ~p,q:pred; pre:not p,or(p,q) con:q} thm T {true} proof T$1 {1. |- not (and(is(A,N), false)) 2. |- or(not (iif(true,false)), impl(true,false)) 3. 1, 2, byinf DisjunctiveSyllogism |- true};", "¬((A is N) ∧ false)", 1)>]
 
     // ExistsByExample: pre: p(c)
-    [<DataRow("ExistsByExample_01", "inf ExistsByExample{dec ~p:pred(c:obj); pre:p(c) con:ex x:tpl{p(x)}} thm T {dec ~a:obj; true} proof T$1 {1. |- iif(is(a,N), true) 2. 1, byinf ExistsByExample |- true};", "(a is N) ⇔ true", 1)>]
+    [<DataRow("ExistsByExample_01", "inf ExistsByExample{dec ~p:pred(x:obj); pre:p(x) con:ex x:tpl{p(x)}} thm T {dec ~a:obj; true} proof T$1 {1. |- iif(is(a,N), true) 2. 1, byinf ExistsByExample |- true};", "∃ a:obj {a is N ⇔ true}", 1)>]
     [<DataRow("ExistsByExample_02", "inf ExistsByExample{dec ~p:pred(); pre:p con:ex x:tpl{p(x)}} thm T {true} proof T$1 {1. |- and(ex x:obj {is(x,M)}, iif(true,false)) 2. 1, byinf ExistsByExample |- true};", "(∃ x:obj {x is M}) ∧ (true ⇔ false)", 1)>]
     [<DataRow("ExistsByExample_02a", "inf ExistsByExample{dec ~p:pred(c:tpl); pre:p con:ex x:tpl{p(x)}} thm T {true} proof T$1 {dec ~a:tpl; 1. |- and(is(a,M) , (a = $1)) 2. 1, byinf ExistsByExample |- true};", "(a is M) ∧ (a = $1)", 1)>]
     [<DataRow("ExistsByExample_02b", """def pred Equal(x,y:tpl) infix "=" 0 {delegate.Equal(x,y)} inf ExistsByExample{dec ~p:pred(d:obj, c:tpl); pre:p con:ex x:tpl{p(x)}} thm T {true} proof T$1 {dec ~a:tpl, ~x:obj; 1. |- and(is(x,M) , (a = $1)) 2. 1, byinf ExistsByExample |- true};""", "(x is M) ∧ (a = $1)", 1)>]
     [<DataRow("ExistsByExample_03", "inf ExistsByExample{dec ~p:pred(); pre:p con:ex x:tpl{p(x)}} thm T {true} proof T$1 {1. |- xor(all z:obj {is(z,K)}, not (xor(true,false))) 2. 1, byinf ExistsByExample |- true};", "(∀ z:obj {z is K}) ⩡ ¬(true ⩡ false)", 1)>]
 
     // Contraposition: pre: impl(not p, not q)
-    [<DataRow("Contraposition_01", "inf Contraposition{dec ~p,q:pred; pre:impl(not p,not q) con:impl(q,p)} thm T {true} proof T$1 {1. |- impl(not all x:obj {is(x,N)}, not (ex y:obj {is(y,M)})) 2. 1, byinf Contraposition |- true};", "¬(∀ x:obj {x is N}) ⇒ ¬(∃ y:obj {y is M})", 1)>]
-    [<DataRow("Contraposition_02", "inf Contraposition{dec ~p,q:pred; pre:impl(not p,not q) con:impl(q,p)} thm T {true} proof T$1 {1. |- impl(not (iif(true,false)), not (xor(true,false))) 2. 1, byinf Contraposition |- true};", "¬(true ⇔ false) ⇒ ¬(true ⩡ false)", 1)>]
-    [<DataRow("Contraposition_03", "inf Contraposition{dec ~p,q:pred; pre:impl(not p,not q) con:impl(q,p)} thm T {true} proof T$1 {1. |- impl(not (and(is(A,N), true)), not (iif(true,false))) 2. 1, byinf Contraposition |- true};", "¬((A is N) ∧ true) ⇒ ¬(true ⇔ false)", 1)>]
+    [<DataRow("Contraposition_01", "inf Contraposition{dec ~p,q:pred; pre:impl(not p,not q) con:impl(q,p)} thm T {true} proof T$1 {1. |- impl(not all x:obj {is(x,N)}, not (ex y:obj {is(y,M)})) 2. 1, byinf Contraposition |- true};", "∃ y:obj {y is M} ⇒ ∀ x:obj {x is N}", 1)>]
+    [<DataRow("Contraposition_02", "inf Contraposition{dec ~p,q:pred; pre:impl(not p,not q) con:impl(q,p)} thm T {true} proof T$1 {1. |- impl(not (iif(true,false)), not (xor(true,false))) 2. 1, byinf Contraposition |- true};", "(true ⩡ false) ⇒ (true ⇔ false)", 1)>]
+    [<DataRow("Contraposition_03", "inf Contraposition{dec ~p,q:pred; pre:impl(not p,not q) con:impl(q,p)} thm T {true} proof T$1 {1. |- impl(not (and(is(A,N), true)), not (iif(true,false))) 2. 1, byinf Contraposition |- true};", "(true ⇔ false) ⇒ (A is N) ∧ true)", 1)>]
 
     // OrPack2Xor: pre: or(and(not p, q), and(p, not q))
     [<DataRow("OrPack2Xor_01", "inf OrPack2Xor{dec ~p,q:pred; pre:or(and(not p,q),and(p,not q)) con:xor(p,q)} thm T {true} proof T$1 {1. |- or(and(not all x:obj {is(x, N)}, ex y:obj {is(y, M)}), and(all x:obj {is(x, N)}, not ex z:obj {is(z, K)})) 2. 1, byinf OrPack2Xor |- true};", "(∀ x:obj {x is N}) ⩡ (∃ y:obj {y is M})", 1)>]
@@ -723,7 +725,10 @@ type TestProceedingExpressions() =
             // do not check position / existence of parentheses in the formula, since it might change
             // the test is supposed to succeed if significant parts of the formula match
             let expExprWithoutParens = expectedExpr.Replace("(","").Replace(")", "")
-            let actExprWithoutParens = (result.Head.Type SignatureType.Name).Replace("(","").Replace(")", "")
+            let actualExpr = result.Head.Type SignatureType.Name
+            let actExprWithoutParens = actualExpr.Replace("(","").Replace(")", "")
+            //if actExprWithoutParens <> expExprWithoutParens then
+            //    File.AppendAllText("log.txt", $"{no}\t{fplCode}\t{expectedExpr}\t{expectedNumbExpr}{Environment.NewLine}")
             Assert.AreEqual<string>(expExprWithoutParens, actExprWithoutParens)
         | Some ref ->
             Assert.IsInstanceOfType<FplJustificationItemByInf>(ref)

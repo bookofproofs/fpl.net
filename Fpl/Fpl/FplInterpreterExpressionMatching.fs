@@ -118,7 +118,22 @@ let private checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) (dictParamete
             let (errMsgOpt,_) = FplTypeMatcher.ComparisonBasedOnOpenFormulas a p
             match errMsgOpt, p.RefersTo with
             | None, Some var when var.Name = PrimVariableL ->
-                checkMismatchingUsageOfVars p.FplId a dictParameterUsage
+                let firstResult = checkMismatchingUsageOfVars p.FplId a dictParameterUsage
+                match firstResult with
+                | Some errMsg -> Some errMsg
+                | None ->
+                    let pPars = getArguments p
+                    let aPars = getDistinctVarsOfExpression a
+                    if aPars.Length <> pPars.Length then
+                        errExprMismatchOK
+                    else
+                        let lstOfErrMessages =
+                            List.zip pPars aPars
+                            |> List.map (fun (pArg, aArg) ->
+                                checkMismatchingUsageOfVars pArg.FplId aArg dictParameterUsage
+                            ) 
+                        let secondResult = lstOfErrMessages |> List.tryPick (fun errMsgOpt -> errMsgOpt)
+                        secondResult
             | Some errMsg, _ -> Some errMsg
             | _,_ ->
                 errExprMismatchOK

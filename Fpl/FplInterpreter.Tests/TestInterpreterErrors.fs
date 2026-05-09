@@ -1701,17 +1701,20 @@ type TestInterpreterErrors() =
     // ExNot2NotAll: pre: ex x:tpl{not p(x)}
     [<DataRow("ExNot2NotAll_01", "inf ExNot2NotAll{dec ~p:pred(y:tpl); pre:ex x:tpl{not p(x)} con:not all x:tpl{p(x)}} thm T {true} proof T$1 {1. |- ex x:obj { not iif(is(x,N), true) } 2. 1, byinf ExNot2NotAll |- true };", 0)>]
     [<DataRow("ExNot2NotAll_02", "inf ExNot2NotAll{dec ~p:pred(y:tpl); pre:ex x:tpl{not p(x)} con:not all x:tpl{p(x)}} thm T {true} proof T$1 {1. |- ex n:Nat { not and(is(n,N), xor(true,false)) } 2. 1, byinf ExNot2NotAll |- true };", 0)>]
-    [<DataRow("ExNot2NotAll_03", "inf ExNot2NotAll{dec ~p:pred(y:tpl); pre:ex x:tpl{not p(x)} con:not all x:tpl{p(x)}} thm T {true} proof T$1 {1. |- ex y:obj { not (all z:obj { impl(is(z,N), false) }) } 2. 1, byinf ExNot2NotAll |- true };", 0)>]
+    [<DataRow("ExNot2NotAll_03", "inf ExNot2NotAll{dec ~p:pred(y:tpl); pre:ex x:tpl{not p(x)} con:not all x:tpl{p(x)}} thm T {true} proof T$1 {1. |- ex y:obj { not (all z:obj { impl(is(z,N), false) }) } 2. 1, byinf ExNot2NotAll |- true };", 1)>]
+    [<DataRow("ExNot2NotAll_03a", "inf ExNot2NotAll{dec ~p:pred(y:tpl); pre:ex x:tpl{not p(x)} con:not all x:tpl{p(x)}} thm T {true} proof T$1 {1. |- ex y:obj { not impl(is(y,N), false) } 2. 1, byinf ExNot2NotAll |- true };", 0)>]
 
     // NotEx2AllNot: pre: not ex x:tpl{p(x)}
     [<DataRow("NotEx2AllNot_01", "inf NotEx2AllNot{dec ~p:pred(y:tpl); pre:not ex x:tpl{p(x)} con:all x:tpl{not p(x)}} thm T {true} proof T$1 {1. |- not ex x:obj { iif(is(x,N), false) } 2. 1, byinf NotEx2AllNot |- true };", 0)>]
     [<DataRow("NotEx2AllNot_02", "inf NotEx2AllNot{dec ~p:pred(y:tpl); pre:not ex x:tpl{p(x)} con:all x:tpl{not p(x)}} thm T {true} proof T$1 {1. |- not ex n:Nat { and(not is(n,N), xor(true,false)) } 2. 1, byinf NotEx2AllNot |- true };", 0)>]
-    [<DataRow("NotEx2AllNot_03", "inf NotEx2AllNot{dec ~p:pred(y:tpl); pre:not ex x:tpl{p(x)} con:all x:tpl{not p(x)}} thm T {true} proof T$1 {1. |- not ex y:obj { not (ex z:obj { is(z,M) }) } 2. 1, byinf NotEx2AllNot |- true };", 0)>]
+    [<DataRow("NotEx2AllNot_03", "inf NotEx2AllNot{dec ~p:pred(y:tpl); pre:not ex x:tpl{p(x)} con:all x:tpl{not p(x)}} thm T {true} proof T$1 {1. |- not ex y:obj { not (ex z:obj { is(z,M) }) } 2. 1, byinf NotEx2AllNot |- true };", 1)>]
+    [<DataRow("NotEx2AllNot_03a", "inf NotEx2AllNot{dec ~p:pred(y:tpl); pre:not ex x:tpl{p(x)} con:all x:tpl{not p(x)}} thm T {true} proof T$1 {1. |- not ex y:obj { not is(y,M) } 2. 1, byinf NotEx2AllNot |- true };", 0)>]
 
     // AllNot2ExNot: pre: all x:tpl{not p(x)}
     [<DataRow("AllNot2ExNot_01", "inf AllNot2ExNot{dec ~p:pred(y:tpl); pre:all x:tpl{not p(x)} con:not ex x:tpl{p(x)}} thm T {true} proof T$1 {1. |- all x:obj { not iif(is(x,N), true) } 2. 1, byinf AllNot2ExNot |- true };", 0)>]
     [<DataRow("AllNot2ExNot_02", "inf AllNot2ExNot{dec ~p:pred(y:tpl); pre:all x:tpl{not p(x)} con:not ex x:tpl{p(x)}} thm T {true} proof T$1 {1. |- all n:Nat { not (and(is(n,N), xor(true,false))) } 2. 1, byinf AllNot2ExNot |- true };", 0)>]
-    [<DataRow("AllNot2ExNot_03", "inf AllNot2ExNot{dec ~p:pred(y:tpl); pre:all x:tpl{not p(x)} con:not ex x:tpl{p(x)}} thm T {true} proof T$1 {1. |- all y:obj { not (ex z:obj { is(z,M) }) } 2. 1, byinf AllNot2ExNot |- true };", 0)>]
+    [<DataRow("AllNot2ExNot_03", "inf AllNot2ExNot{dec ~p:pred(y:tpl); pre:all x:tpl{not p(x)} con:not ex x:tpl{p(x)}} thm T {true} proof T$1 {1. |- all y:obj { not (ex z:obj { is(z,M) }) } 2. 1, byinf AllNot2ExNot |- true };", 1)>]
+    [<DataRow("AllNot2ExNot_03a", "inf AllNot2ExNot{dec ~p:pred(y:tpl); pre:all x:tpl{not p(x)} con:not ex x:tpl{p(x)}} thm T {true} proof T$1 {1. |- all y:obj { not is(y,M) } 2. 1, byinf AllNot2ExNot |- true };", 0)>]
 
     // OrUnpack2Impl: pre: or(p,q)
     [<DataRow("OrUnpack2Impl_01", "inf OrUnpack2Impl{dec ~p,q:pred; pre:or(p,q) con:impl(not p,q)} thm T {true} proof T$1 {1. |- or(iif(is(A,N), true), ex x:obj { is(x,M) }) 2. 1, byinf OrUnpack2Impl |- true };", 0)>]

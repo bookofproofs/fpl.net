@@ -54,6 +54,26 @@ let getArguments (fv:FplGenericNode) =
         fv.ArgList 
         |> Seq.toList
 
+/// Gets the list of distinct variables used in an expression 
+let getDistinctVarsOfExpression (expr:FplGenericNode) =
+    let seen = new HashSet<string>()
+    let rec getDVoE (expr1:FplGenericNode) acc = 
+        match expr1.Name with
+        | PrimRefL when expr1.RefersTo.IsSome ->
+            match expr1.RefersTo with
+            | Some (:? FplVariable as var) ->
+                if seen.Contains var.FplId then
+                    acc
+                else
+                    seen.Add var.FplId |> ignore
+                    acc @ [var]
+            | _ -> acc
+        | _ -> 
+            let args = getArguments expr1
+            args
+            |> List.map (fun arg -> getDVoE arg acc)
+            |> List.concat
+    getDVoE expr []
 
 /// Checks, if an FplValue uses parentheses or brackets
 let hasBracketsOrParentheses (fv:FplGenericNode) = 
