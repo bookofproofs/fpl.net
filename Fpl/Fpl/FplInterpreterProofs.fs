@@ -253,12 +253,12 @@ and FplJustificationItemByInf(positions: Positions, parent: FplGenericNode) =
                         // error occured while matching input justificationItems with premise list
                         [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
                     | None ->
-                        listOfPairs
-                        |> List.map (fun tuple ->
-                            let varUsageDict = snd tuple
+                        if listOfPairs.Length > 0 then
+                            let varUsageDict = snd listOfPairs.Head
                             let expr = conclusion.Clone()
-                            this.ReplaceVarsByVarUsages expr varUsageDict
-                        )
+                            [this.ReplaceVarsByVarUsages expr varUsageDict]
+                        else
+                            []
                 | _ ->
                     [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
             | _ ->
