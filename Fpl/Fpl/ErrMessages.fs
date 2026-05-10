@@ -233,6 +233,7 @@ let errExprMismatchOpenFormulas aName aVarsOpenClosedStr aOpenFormulaType pName 
 let errExprMismatchExpectedEndOfFormula (aName) = Some $"`found {aName}`, expected end of formula"
 let errExprMismatchFoundEndOfFormula pName = Some $"found end of formula, expected `{pName}`"
 let errExprMismatchVarMatchedDifferently varName expectedExpr actualExpr = Some $"variable `{varName}` matched with different formulas `{expectedExpr}` and `{actualExpr}`"
+let errExprMismatchVarMatchedDifferentlyQuantor varName expectedExpr actualExpr = Some $"variable `{varName}` matched with different quantor formulas `{expectedExpr}` and `{actualExpr}`.{Environment.NewLine}Both formulas were different even using placeholders for bound variables."
 let errExprMismatchMsgStandard aName pName = Some $"found `{aName}`, expected `{pName}`"
 let errExprMismatchVarNumbDifferent numA varsA numP pName =
     let plural = if numA > 1 then "variables" else "variable"

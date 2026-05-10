@@ -18,8 +18,10 @@ open System.Collections.Generic
 open FplPrimitives
 open ErrMessages
 open FplInterpreterDiagnosticsEmitter
+open FplInterpreterChecks
 open FplInterpreterBasicTypes
 open FplInterpreterIntrinsicTypes
+open FplInterpreterVariables
 open FplInterpreterFplTypeMatching
 
 
@@ -54,16 +56,51 @@ let private compareQuantorVariables (a:FplGenericNode) (p:FplGenericNode) (dictP
             errExprMismatchQuantorVariableCounts (a.Type SignatureType.Name) (p.Type SignatureType.Name) aVars.Length pVars.Length
     loop aVars pVars 0
 
+/// Creates a string representation of a quantor formula in which its bound variables are replaced by
+/// placeholders numbered according to the order of the bound variables
+let private getNameOfQuantorFormulaModuloBoundVarNames (fv:FplGenericNode) =
+    let originalNames = HashSet<string>()
+    fv.Scope
+    |> Seq.filter (fun kvp ->
+        match kvp.Value with
+        | :? FplVariable as var when var.IsBound -> true
+        | _ -> false
+    )
+    |> Seq.iteri (fun i kvp ->
+        let dummyVarname = $"[{i}]" // a numbered placeholder of the bound variable
+        originalNames.Add kvp.Key |> ignore
+        kvp.Value.FplId <- dummyVarname
+    )
+    let result = fv.Type SignatureType.Name // create a formula representation with the placeholders
+    // restore the original names of the bound variables to prevent side effects
+    originalNames
+    |> Seq.iter(fun originalVarName ->
+        let var = fv.Scope[originalVarName] 
+        var.FplId <- originalVarName // restore original
+    )
+    result
+
 let private checkMismatchingUsageOfVars varName (a:FplGenericNode) (dictParameterUsage:Dictionary<string, FplGenericNode>) = 
     if dictParameterUsage.TryAdd (varName, a) then
         errExprMismatchOK
     else
-        let expectedExpr = (dictParameterUsage[varName].Type SignatureType.Name)
-        let actualExpr = (a.Type SignatureType.Name)
-        if expectedExpr<>actualExpr then
-            errExprMismatchVarMatchedDifferently varName expectedExpr actualExpr
+        let previouslyMatchedFormula = dictParameterUsage[varName]
+        if a.Name = previouslyMatchedFormula.Name && isQuantor a && isQuantor previouslyMatchedFormula then
+            let expectedExprModVarNames = getNameOfQuantorFormulaModuloBoundVarNames previouslyMatchedFormula
+            let actualExprModVarNames = getNameOfQuantorFormulaModuloBoundVarNames a
+            if expectedExprModVarNames<>actualExprModVarNames then
+                let expectedExpr = previouslyMatchedFormula.Type SignatureType.Name
+                let actualExpr = (a.Type SignatureType.Name)
+                errExprMismatchVarMatchedDifferentlyQuantor varName expectedExpr actualExpr
+            else
+                errExprMismatchOK
         else
-            errExprMismatchOK
+            let expectedExpr = previouslyMatchedFormula.Type SignatureType.Name
+            let actualExpr = (a.Type SignatureType.Name)
+            if expectedExpr<>actualExpr then
+                errExprMismatchVarMatchedDifferently varName expectedExpr actualExpr
+            else
+                errExprMismatchOK
 
 let private checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) (dictParameterUsage: Dictionary<string, FplGenericNode>) =
     // When p is a variable, the dict stores the variable names and their usage in a first matched a.
