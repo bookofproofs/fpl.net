@@ -1875,6 +1875,7 @@ type TestInterpreterErrors() =
     [<DataRow("type_exn_2_1", "inf X { pre:exn$2 x:pred { false } con:false } thm T {true} proof T$1 {1. |- exn$2 a:obj { false } 2. 1, byinf X |- true };", 1)>] 
     [<DataRow("type_exn_2_3", "inf X { pre:exn$2 x:pred { false } con:false } thm T {true} proof T$1 {1. |- exn$2 a:func { false } 2. 1, byinf X |- true };", 1)>] 
 
+    [<DataRow("00", "inf AllNot2ExNot{dec ~p:pred(y:tpl); pre:all x:tpl{not p(x)} con:not ex x:tpl{p(x)}} thm T {true} proof T$1 {1. |- all y:obj {not ex a:obj { (y = a)}  } 2. 1, byinf AllNot2ExNot |- true };", 1)>] // specific for the error type with the message defined in errExprMismatchVarNumbDifferent
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR008(no:string, fplCode:string, expected) =

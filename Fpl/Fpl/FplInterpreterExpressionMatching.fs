@@ -108,11 +108,11 @@ let private checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) (dictParamete
             match a.RefersTo, p.RefersTo with
             | Some aRef, Some pRef ->
                 checkExpr aRef pRef
-            | Some aRef, None ->
-                errExprMismatchExpectedEndOfFormula (aRef.Type SignatureType.Name)
-            | None, Some pRef ->
-                errExprMismatchFoundEndOfFormula (pRef.Type SignatureType.Name)
-            | None, None ->
+            | Some aRef, None when p.ArgList.Count > 0 ->
+                checkExpr aRef p
+            | None, Some pRef when a.ArgList.Count > 0 ->
+                checkExpr a pRef
+            | _, _ ->
                 errExprMismatchOK
         | _, PrimRefL when p.RefersTo.IsSome && p.RefersTo.Value.Name = PrimVariableL ->
             let (errMsgOpt,_) = FplTypeMatcher.ComparisonBasedOnOpenFormulas a p
@@ -125,9 +125,9 @@ let private checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) (dictParamete
                     let pPars = getArguments p
                     let aPars = getDistinctVarsOfExpression a
                     if aPars.Length <> pPars.Length then
-                        let aVars = aPars |> List.map (fun v -> $"`{v.FplId}`") |> String.concat ", "
-                        let pVars = pPars |> List.map (fun v -> $"`{v.FplId}`") |> String.concat ", "
-                        errExprMismatchVarNumbDifferent aPars.Length aVars pPars.Length pVars
+                        let aVars = aPars |> List.map (fun v -> $"{v.FplId}") |> String.concat ", "
+                        let pName = p.Type SignatureType.Name
+                        errExprMismatchVarNumbDifferent aPars.Length aVars pPars.Length pName
                     else
                         let lstOfErrMessages =
                             List.zip pPars aPars
