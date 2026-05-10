@@ -1733,8 +1733,11 @@ type TestInterpreterErrors() =
 
     // HypotheticalSyllogism: pre: impl(p,q), impl(q,s)
     [<DataRow("HypotheticalSyllogism_01", "inf HypotheticalSyllogism{dec ~p,q,s:pred; pre:impl(p,q),impl(q,s) con:impl(p,s)} thm T {true} proof T$1 {1. |- impl(all x:obj { is(x,N) }, ex y:obj { is(y,M) }) 2. |- impl(ex z:obj { is(z,M) }, xor(true,false)) 3. 1, 2, byinf HypotheticalSyllogism |- true };", 0)>]
-    [<DataRow("HypotheticalSyllogism_02", "inf HypotheticalSyllogism{dec ~p,q,s:pred; pre:impl(p,q),impl(q,s) con:impl(p,s)} thm T {true} proof T$1 {1. |- impl(iif(true,false), iif(iif(true,false), true)) 2. |- impl(all u:obj { is(u,K) }, iif(true,false)) 3. 1, 2, byinf HypotheticalSyllogism |- true };", 0)>]
-    [<DataRow("HypotheticalSyllogism_03", "inf HypotheticalSyllogism{dec ~p,q,s:pred; pre:impl(p,q),impl(q,s) con:impl(p,s)} thm T {true} proof T$1 {1. |- impl(iif(true,false), iif(iif(true,false), true)) 2. |- impl(all u:obj { is(u,K) }, iif(true,false)) 3. 1, 2, byinf HypotheticalSyllogism |- true };", 0)>]
+    [<DataRow("HypotheticalSyllogism_02", "inf HypotheticalSyllogism{dec ~p,q,s:pred; pre:impl(p,q),impl(q,s) con:impl(p,s)} thm T {true} proof T$1 {1. |- impl(iif(true,false), iif(iif(true,false), true)) 2. |- impl(all u:obj { is(u,K) }, iif(true,false)) 3. 1, 2, byinf HypotheticalSyllogism |- true };", 1)>]
+    [<DataRow("HypotheticalSyllogism_02a", "inf HypotheticalSyllogism{dec ~p,q,s:pred; pre:impl(p,q),impl(q,s) con:impl(p,s)} thm T {true} proof T$1 {1. |- impl(iif(true,false), iif(iif(true,false), true)) 2. |- impl(iif(iif(true,false), true), all u:obj { is(u,K) }) 3. 1, 2, byinf HypotheticalSyllogism |- true };", 0)>]
+    [<DataRow("HypotheticalSyllogism_03", "inf HypotheticalSyllogism{dec ~p,q,s:pred; pre:impl(p,q),impl(q,s) con:impl(p,s)} thm T {true} proof T$1 {1. |- impl(iif(true,false), iif(iif(true,false), true)) 2. |- impl(all u:obj { is(u,K) }, iif(true,false)) 3. 1, 2, byinf HypotheticalSyllogism |- true };", 1)>]
+    [<DataRow("HypotheticalSyllogism_03a", "inf HypotheticalSyllogism{dec ~p,q,s:pred; pre:impl(p,q),impl(q,s) con:impl(p,s)} thm T {true} proof T$1 {1. |- impl(iif(true,false), all u:obj { is(u,K) }) 2. |- impl(all u:obj { is(u,K) }, iif(true,false)) 3. 1, 2, byinf HypotheticalSyllogism |- true };", 0)>]
+
 
     // DisjunctiveSyllogism: pre: not p, or(p,q)
     [<DataRow("DisjunctiveSyllogism_01", "inf DisjunctiveSyllogism{dec ~p,q:pred; pre:not p,or(p,q) con:q} thm T {true} proof T$1 {1. |- not (iif(true,false)) 2. |- or(all x:obj { is(x,N) }, ex y:obj { is(y,M) }) 3. 1, 2, byinf DisjunctiveSyllogism |- true };", 0)>]
