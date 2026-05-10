@@ -234,6 +234,6 @@ let errExprMismatchExpectedEndOfFormula (aName) = Some $"`found {aName}`, expect
 let errExprMismatchFoundEndOfFormula pName = Some $"found end of formula, expected `{pName}`"
 let errExprMismatchVarMatchedDifferently varName expectedExpr actualExpr = Some $"variable `{varName}` matched with different formulas `{expectedExpr}` and `{actualExpr}`"
 let errExprMismatchMsgStandard aName pName = Some $"found `{aName}`, expected `{pName}`"
-
+let errExprMismatchVarNumbDifferent numA varsA numP varsP = Some $"found different number {numA} of variables {varsA}, expected {numP} to-be-mached variables {varsP}"
 let (errExprMismatchOK:string option) = None
 

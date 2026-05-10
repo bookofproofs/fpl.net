@@ -121,11 +121,13 @@ let private checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) (dictParamete
                 let firstResult = checkMismatchingUsageOfVars p.FplId a dictParameterUsage
                 match firstResult with
                 | Some errMsg -> Some errMsg
-                | None ->
+                | None when var.Scope.Count > 0 ->
                     let pPars = getArguments p
                     let aPars = getDistinctVarsOfExpression a
                     if aPars.Length <> pPars.Length then
-                        errExprMismatchOK
+                        let aVars = aPars |> List.map (fun v -> $"`{v.FplId}`") |> String.concat ", "
+                        let pVars = pPars |> List.map (fun v -> $"`{v.FplId}`") |> String.concat ", "
+                        errExprMismatchVarNumbDifferent aPars.Length aVars pPars.Length pVars
                     else
                         let lstOfErrMessages =
                             List.zip pPars aPars
@@ -134,6 +136,7 @@ let private checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) (dictParamete
                             ) 
                         let secondResult = lstOfErrMessages |> List.tryPick (fun errMsgOpt -> errMsgOpt)
                         secondResult
+                | _ -> errExprMismatchOK
             | Some errMsg, _ -> Some errMsg
             | _,_ ->
                 errExprMismatchOK
