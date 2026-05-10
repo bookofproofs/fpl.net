@@ -146,33 +146,33 @@ let private checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) (dictParamete
             | None -> checkMismatchingUsageOfVars p.FplId a dictParameterUsage
         | _, _ ->
             errExprMismatchMsgStandard (a.Type SignatureType.Name) (p.Type SignatureType.Name)
-    checkExpr a p, dictParameterUsage
+    checkExpr a p
 
 /// Tries to match a premise with expressions from a list and returns 
 /// a list of matched expressions and a string of concatenated failed candidate expressions
-let private matchPremiseWithSomeExpressions (exprList:FplGenericNode list) (pre:FplGenericNode) (iJel:FplGenericNode) =
+let private matchPremiseWithSomeExpressions (exprList:FplGenericNode list) (pre:FplGenericNode) (dictParameterUsage:Dictionary<string, FplGenericNode>)=
 
     let result = List<FplGenericNode * Dictionary<string, FplGenericNode>>()
     let failedCandidates = List<string>()
 
     exprList
     |> List.iter (fun expr ->
-        let dictParameterUsage = Dictionary<string, FplGenericNode>()
-        let (errOpt, varUsageDict) = checkExprWrapper expr pre dictParameterUsage
+        let errOpt = checkExprWrapper expr pre dictParameterUsage
         match errOpt with
-        | None -> result.Add (expr, varUsageDict)
+        | None -> result.Add (expr, dictParameterUsage)
         | Some err -> failedCandidates.Add ($"`{expr.Type SignatureType.Name}`{Environment.NewLine}  ⚡{err}")
     )
     result |> Seq.toList, (numbered failedCandidates)
 
 let matchJustItemsExpressionsAgainstPremiseList (tuplesJustItemWithProceedingExpressionsList:(FplGenericJustificationItem * FplGenericNode list) list) (premiseList:FplGenericNode list) (byInferenceNode:FplGenericNode) =
+    let varUsageDict = Dictionary<string, FplGenericNode>()
     let result = List<(FplGenericNode * Dictionary<string, FplGenericNode>) list>()
     let rec matchJustItemsExpressionsAgainstPremiseListRec (iJeLists:(FplGenericJustificationItem * FplGenericNode list) list) (preList:FplGenericNode list) =
         match iJeLists, preList with
         | iJel::iJels, pre::pres ->
             let just = fst iJel
             let proceedingExpressionsOfJust = snd iJel
-            match matchPremiseWithSomeExpressions proceedingExpressionsOfJust pre just with
+            match matchPremiseWithSomeExpressions proceedingExpressionsOfJust pre varUsageDict with
             | [], errList ->
                 // emit diagnostics at just's position that there was no matching candidate for a premise, listing all tried-out candidates (contained in errList)
                 just.ErrorOccurred <- emitPR008Diagnostics (byInferenceNode.Type SignatureType.Name) (pre.Type SignatureType.Name) errList just.StartPos just.EndPos
@@ -188,3 +188,4 @@ let matchJustItemsExpressionsAgainstPremiseList (tuplesJustItemWithProceedingExp
             
     matchJustItemsExpressionsAgainstPremiseListRec tuplesJustItemWithProceedingExpressionsList premiseList
     result |> List.concat
+
