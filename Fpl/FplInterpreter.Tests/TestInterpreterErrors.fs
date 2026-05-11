@@ -1728,8 +1728,10 @@ type TestInterpreterErrors() =
 
     // ModusTollens: pre: not q, impl(p,q)
     [<DataRow("ModusTollens_01", "inf ModusTollens{dec ~p,q:pred; pre:not q,impl(p,q) con:not (p)} thm T {true} proof T$1 {1. |- not (iif(true,false)) 2. |- impl(all x:obj { is(x,N) }, iif(true,false)) 3. 1, 2, byinf ModusTollens |- true };", 0)>]
-    [<DataRow("ModusTollens_02", "inf ModusTollens{dec ~p,q:pred; pre:not q,impl(p,q) con:not (p)} thm T {true} proof T$1 {1. |- not ex x:obj { is(x,N) } 2. |- impl(xor(true,false), all y:obj { is(y,M) }) 3. 1, 2, byinf ModusTollens |- true };", 0)>]
-    [<DataRow("ModusTollens_03", "inf ModusTollens{dec ~p,q:pred; pre:not q,impl(p,q) con:not (p)} thm T {true} proof T$1 {1. |- not (and(is(A,N), false)) 2. |- impl(iif(true,false), xor(true,false)) 3. 1, 2, byinf ModusTollens |- true };", 0)>]
+    [<DataRow("ModusTollens_02", "inf ModusTollens{dec ~p,q:pred; pre:not q,impl(p,q) con:not (p)} thm T {true} proof T$1 {1. |- not ex x:obj { is(x,N) } 2. |- impl(xor(true,false), all y:obj { is(y,M) }) 3. 1, 2, byinf ModusTollens |- true };", 1)>]
+    [<DataRow("ModusTollens_02a", "inf ModusTollens{dec ~p,q:pred; pre:not q,impl(p,q) con:not (p)} thm T {true} proof T$1 {1. |- not ex x:obj { is(x,N) } 2. |- impl(xor(true,false), ex x:obj { is(x,N) }) 3. 1, 2, byinf ModusTollens |- true };", 0)>]
+    [<DataRow("ModusTollens_03", "inf ModusTollens{dec ~p,q:pred; pre:not q,impl(p,q) con:not (p)} thm T {true} proof T$1 {1. |- not (and(is(A,N), false)) 2. |- impl(iif(true,false), xor(true,false)) 3. 1, 2, byinf ModusTollens |- true };", 1)>]
+    [<DataRow("ModusTollens_03a", "inf ModusTollens{dec ~p,q:pred; pre:not q,impl(p,q) con:not (p)} thm T {true} proof T$1 {1. |- not (and(is(A,N), false)) 2. |- impl(iif(true,false), and(is(A,N), false)) 3. 1, 2, byinf ModusTollens |- true };", 0)>]
 
     // HypotheticalSyllogism: pre: impl(p,q), impl(q,s)
     [<DataRow("HypotheticalSyllogism_01", "inf HypotheticalSyllogism{dec ~p,q,s:pred; pre:impl(p,q),impl(q,s) con:impl(p,s)} thm T {true} proof T$1 {1. |- impl(all x:obj { is(x,N) }, ex y:obj { is(y,M) }) 2. |- impl(ex z:obj { is(z,M) }, xor(true,false)) 3. 1, 2, byinf HypotheticalSyllogism |- true };", 0)>]
