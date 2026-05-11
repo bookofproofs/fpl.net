@@ -444,6 +444,7 @@ let rec isSimpleExpression (fv:FplGenericNode) =
     | PrimQuantorAll
     | PrimQuantorExists
     | PrimQuantorExistsN
+    | PrimNegation
     | PrimClassL 
     | PrimIntrinsicInd
     | PrimFalse
