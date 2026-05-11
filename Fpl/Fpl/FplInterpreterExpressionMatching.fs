@@ -212,7 +212,11 @@ let matchJustItemsExpressionsAgainstPremiseList (tuplesJustItemWithProceedingExp
             match matchPremiseWithSomeExpressions proceedingExpressionsOfJust pre varUsageDict with
             | [], errList ->
                 // emit diagnostics at just's position that there was no matching candidate for a premise, listing all tried-out candidates (contained in errList)
-                just.ErrorOccurred <- emitPR008Diagnostics (byInferenceNode.Type SignatureType.Name) (pre.Type SignatureType.Name) errList just.StartPos just.EndPos
+                let premises =
+                    premiseList
+                    |> List.map (fun prem -> prem.Type SignatureType.Name)
+                    |> numbered
+                just.ErrorOccurred <- emitPR008Diagnostics (byInferenceNode.Type SignatureType.Name) premiseList.Length premises errList just.StartPos just.EndPos
                 matchJustItemsExpressionsAgainstPremiseListRec iJels pres 
             | matchedExprList, _ ->
                 result.Add matchedExprList

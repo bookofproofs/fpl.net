@@ -529,9 +529,11 @@ type TestProceedingExpressions() =
     [<DataRow("HypotheticalSyllogism_03a", "inf HypotheticalSyllogism{dec ~p,q,s:pred; pre:impl(p,q),impl(q,s) con:impl(p,s)} thm T {true} proof T$1 {1. |- impl(iif(true,false), all u:obj { is(u,K) }) 2. |- impl(all u:obj { is(u,K) }, iif(true,false)) 3. 1, 2, byinf HypotheticalSyllogism |- true };", "(true ⇔ false) ⇒ (true ⇔ false)", 1)>]
 
     // DisjunctiveSyllogism: pre: not p, or(p,q)
-    [<DataRow("DisjunctiveSyllogism_01", "inf DisjunctiveSyllogism{dec ~p,q:pred; pre:not p,or(p,q) con:q} thm T {true} proof T$1 {1. |- not (iif(true,false)) 2. |- or(all x:obj {is(x,N)}, ex y:obj {is(y,M)}) 3. 1, 2, byinf DisjunctiveSyllogism |- true};", "¬(true ⇔ false)", 1)>]
-    [<DataRow("DisjunctiveSyllogism_02", "inf DisjunctiveSyllogism{dec ~p,q:pred; pre:not p,or(p,q) con:q} thm T {true} proof T$1 {1. |- not ex x:obj {is(x,N)} 2. |- or(iif(true,false), xor(true,false)) 2. 1, 2, byinf DisjunctiveSyllogism |- true};", "¬(∃ x:obj {x is N})", 1)>]
-    [<DataRow("DisjunctiveSyllogism_03", "inf DisjunctiveSyllogism{dec ~p,q:pred; pre:not p,or(p,q) con:q} thm T {true} proof T$1 {1. |- not (and(is(A,N), false)) 2. |- or(not (iif(true,false)), impl(true,false)) 3. 1, 2, byinf DisjunctiveSyllogism |- true};", "¬((A is N) ∧ false)", 1)>]
+    [<DataRow("DisjunctiveSyllogism_01a", "inf DisjunctiveSyllogism{dec ~p,q:pred; pre:not p,or(p,q) con:q} thm T {true} proof T$1 {1. |- not (iif(true,false)) 2. |- or(iif(true,false), ex y:obj { is(y,M) }) 3. 1, 2, byinf DisjunctiveSyllogism |- true };", "∃ y:obj {y is M}", 1)>]
+    [<DataRow("DisjunctiveSyllogism_02", "inf DisjunctiveSyllogism{dec ~p,q:pred; pre:not p,or(p,q) con:q} thm T {true} proof T$1 {1. |- not iif(true,false) 2. |- or(iif(true,false), xor(true,false)) 3. 1, 2, byinf DisjunctiveSyllogism |- true };", "(true ⩡ false)", 1)>]
+    [<DataRow("DisjunctiveSyllogism_03a", "inf DisjunctiveSyllogism{dec ~p,q:pred; pre:not p,or(p,q) con:q} thm T {true} proof T$1 {1. |- not (and(is(A,N), false)) 2. |- or(and(is(A,N), false), impl(true,false)) 3. 1, 2, byinf DisjunctiveSyllogism |- true };", "(true ⇒ false)", 1)>]
+
+
 
     // ExistsByExample: pre: p(c)
     [<DataRow("ExistsByExample_01", "inf ExistsByExample{dec ~p:pred(x:obj); pre:p(x) con:ex x:tpl{p(x)}} thm T {dec ~a:obj; true} proof T$1 {1. |- iif(is(a,N), true) 2. 1, byinf ExistsByExample |- true};", "∃ a:obj {a is N ⇔ true}", 1)>]

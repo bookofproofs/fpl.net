@@ -155,7 +155,7 @@ type DiagnosticCode =
     | PR005 of string
     | PR006 of string * string
     | PR007 of string * string
-    | PR008 of string * string * string
+    | PR008 of string * int * string * string
     | PR009 
     | PR010 of string * string 
     | PR011 of string * string
@@ -415,7 +415,7 @@ type DiagnosticCode =
             | PR005 name ->  errPR005 name
             | PR006 (proofName, argumentName) -> errPR006 proofName argumentName
             | PR007 (nodeTypeName, nodeName) -> errPR007 nodeTypeName nodeName
-            | PR008 (byInfName, expectedPremise, mismatchingCandidates) -> errPR008 byInfName expectedPremise mismatchingCandidates
+            | PR008 (byInfName, numbPrem, expectedPremise, mismatchingCandidates) -> errPR008 byInfName numbPrem expectedPremise mismatchingCandidates
             | PR009 -> errPR009 
             | PR010 (keyword, expectedRef) -> errPR010 keyword expectedRef
             | PR011 (keyword, expectedRef) -> errPR011 keyword expectedRef

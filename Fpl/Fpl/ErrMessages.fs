@@ -122,7 +122,11 @@ let errPR004 name conflict  = $"Justification `{name}` was already declared at {
 let errPR005 name =  $"Argument identifier `{name}` not declared in this proof."
 let errPR006 proofName argumentName =  $"A proof {proofName} was found, but it has no argument with the identifier `{argumentName}`."
 let errPR007 nodeTypeName nodeName =  $"{nodeTypeName} is {nodeName} and is missing a proof."
-let errPR008 byInfName expectedPremise mismatchingCandidates = $"The subsequent `{LiteralByInf} {byInfName}` step requires a premise of the form `{expectedPremise}`. The provided justification does not match this structure. Candidate(s) tried:{mismatchingCandidates}."
+let errPR008 byInfName numbPrem expectedPremise mismatchingCandidates =
+    if numbPrem = 1 then 
+        $"The subsequent `{LiteralByInf} {byInfName}` step requires a premise of the form `{expectedPremise}`. The provided justification does not match this structure. Candidate(s) tried:{mismatchingCandidates}."
+    else
+        $"The subsequent `{LiteralByInf} {byInfName}` step requires {numbPrem} premises of the form `{expectedPremise}`.{Environment.NewLine}The provided justification does not match this structure. Candidate(s) tried:{mismatchingCandidates}."
 
 let errPR009 = "Not all arguments of the proof could be verified."
 let errPR010 keyword expectedRef = $"Justification `{keyword}` expects a reference to {expectedRef}, not to a proof or corollary."

@@ -1740,10 +1740,13 @@ type TestInterpreterErrors() =
 
 
     // DisjunctiveSyllogism: pre: not p, or(p,q)
-    [<DataRow("DisjunctiveSyllogism_01", "inf DisjunctiveSyllogism{dec ~p,q:pred; pre:not p,or(p,q) con:q} thm T {true} proof T$1 {1. |- not (iif(true,false)) 2. |- or(all x:obj { is(x,N) }, ex y:obj { is(y,M) }) 3. 1, 2, byinf DisjunctiveSyllogism |- true };", 0)>]
-    [<DataRow("DisjunctiveSyllogism_02", "inf DisjunctiveSyllogism{dec ~p,q:pred; pre:not p,or(p,q) con:q} thm T {true} proof T$1 {1. |- not ex x:obj { is(x,N) } 2. |- or(iif(true,false), xor(true,false)) 2. 1, 2, byinf DisjunctiveSyllogism |- true };", 0)>]
-    [<DataRow("DisjunctiveSyllogism_03", "inf DisjunctiveSyllogism{dec ~p,q:pred; pre:not p,or(p,q) con:q} thm T {true} proof T$1 {1. |- not (and(is(A,N), false)) 2. |- or(not (iif(true,false)), impl(true,false)) 3. 1, 2, byinf DisjunctiveSyllogism |- true };", 0)>]
-
+    [<DataRow("DisjunctiveSyllogism_01", "inf DisjunctiveSyllogism{dec ~p,q:pred; pre:not p,or(p,q) con:q} thm T {true} proof T$1 {1. |- not (iif(true,false)) 2. |- or(all x:obj { is(x,N) }, ex y:obj { is(y,M) }) 3. 1, 2, byinf DisjunctiveSyllogism |- true };", 1)>]
+    [<DataRow("DisjunctiveSyllogism_01a", "inf DisjunctiveSyllogism{dec ~p,q:pred; pre:not p,or(p,q) con:q} thm T {true} proof T$1 {1. |- not (iif(true,false)) 2. |- or(iif(true,false), ex y:obj { is(y,M) }) 3. 1, 2, byinf DisjunctiveSyllogism |- true };", 0)>]
+    [<DataRow("DisjunctiveSyllogism_02", "inf DisjunctiveSyllogism{dec ~p,q:pred; pre:not p,or(p,q) con:q} thm T {true} proof T$1 {1. |- not iif(true,false) 2. |- or(iif(true,false), xor(true,false)) 3. 1, 3, byinf DisjunctiveSyllogism |- true };", 0)>]
+    [<DataRow("DisjunctiveSyllogism_02a", "inf DisjunctiveSyllogism{dec ~p,q:pred; pre:not p,or(p,q) con:q} thm T {true} proof T$1 {1. |- not ex x:obj { is(x,N) } 2. |- or(iif(true,false), xor(true,false)) 3. 1, 2, byinf DisjunctiveSyllogism |- true };", 1)>]
+    [<DataRow("DisjunctiveSyllogism_03", "inf DisjunctiveSyllogism{dec ~p,q:pred; pre:not p,or(p,q) con:q} thm T {true} proof T$1 {1. |- not (and(is(A,N), false)) 2. |- or(not (iif(true,false)), impl(true,false)) 3. 1, 2, byinf DisjunctiveSyllogism |- true };", 1)>]
+    [<DataRow("DisjunctiveSyllogism_03a", "inf DisjunctiveSyllogism{dec ~p,q:pred; pre:not p,or(p,q) con:q} thm T {true} proof T$1 {1. |- not (and(is(A,N), false)) 2. |- or(and(is(A,N), false), impl(true,false)) 3. 1, 2, byinf DisjunctiveSyllogism |- true };", 0)>]
+    
     // ExistsByExample: pre: p(c)
     [<DataRow("ExistsByExample_01", "inf ExistsByExample{dec ~p:pred(c:tpl); pre:p(c) con:ex x:tpl{p(x)}} thm T {true} proof T$1 {1. |- iif(is(c,N), true) 2. 1, byinf ExistsByExample |- true };", 0)>]
     [<DataRow("ExistsByExample_02", "inf ExistsByExample{dec ~p:pred(c:tpl); pre:p(c) con:ex x:tpl{p(x)}} thm T {true} proof T$1 {1. |- and(ex x:obj { is(x,M) }, iif(true,false)) 2. 1, byinf ExistsByExample |- true };", 1)>]
@@ -1885,7 +1888,7 @@ type TestInterpreterErrors() =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = PR008 ("", "", "") 
+            let code = PR008 ("", 0, "", "") 
             runTestHelper "TestPR008.fpl" fplCode code expected
 
     [<DataRow("01", """thm T { true } proof T$1 {1. |- trivial};""", 0)>]

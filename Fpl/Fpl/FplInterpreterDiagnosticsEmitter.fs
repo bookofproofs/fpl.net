@@ -564,7 +564,7 @@ let emitPR007Diagnostics nodeTypeName nodeName pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitPR008Diagnostics byInfName expectedPremise mismatchingCandidates pos1 pos2 =
+let emitPR008Diagnostics byInfName numbPrem expectedPremise mismatchingCandidates pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -572,7 +572,7 @@ let emitPR008Diagnostics byInfName expectedPremise mismatchingCandidates pos1 po
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = PR008 (byInfName, expectedPremise, mismatchingCandidates)
+            Diagnostic.Code = PR008 (byInfName, numbPrem, expectedPremise, mismatchingCandidates)
             Diagnostic.Alternatives = None
         }
     ad.AddDiagnostic diagnostic
