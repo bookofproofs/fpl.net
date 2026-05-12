@@ -140,6 +140,7 @@ let errPR017 = $"Do not use `{LiteralTrivial}` if the argument is not the last o
 let errPR018 = $"A `{LiteralTrivial}` argument missing exactly one justification."
 let errPR019 justificationType1 justificationType2 = $"Unsupported mix of justifications in a single argument (`{justificationType1}` with `{justificationType2}`)."
 let errPR020 expectedNum actualNum = $"This {PrimJIByInf} requires {expectedNum} proceeding expressions, got {actualNum}."
+let errPR021 expectedFormula foundFormula = $"Proof argument mismatches the inferred one: Expected `{expectedFormula}`, found `{foundFormula}`."
 // signature-related error codes
 let errSIG00 fixType arity = sprintf $"Illegal arity `{arity}` using `{fixType}` notation."
 let errSIG01 symbol = $"The symbol `{symbol}` was not declared." 
