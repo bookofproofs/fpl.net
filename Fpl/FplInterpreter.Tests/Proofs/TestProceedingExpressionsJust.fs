@@ -1,4 +1,4 @@
-namespace FplInterpreter.Tests
+namespace FplInterpreter.Tests.Proofs
 open System
 open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
@@ -10,7 +10,7 @@ open FplInterpreter.Globals.HelpersComplex
 open CommonTestHelpers
 
 [<TestClass>]
-type TestProceedingExpressions() =
+type TestProceedingExpressionsJust() =
 
     let tryFindJustification (prf:FplProof) justType = 
         prf.OrderedArguments
@@ -22,13 +22,6 @@ type TestProceedingExpressions() =
         |> List.concat 
         |> List.tryFind (fun fv -> fv.Name = justType)
 
-
-    let tryFindInference (prf:FplProof) infType = 
-        prf.OrderedArguments
-        |> List.map (fun fv -> fv.ArgumentInference)
-        |> List.filter (fun fv -> fv.IsSome)
-        |> List.map (fun fv -> fv.Value)
-        |> List.tryFind (fun fv -> fv.Name = infType)
 
     [<DataRow("00", """ax A {true} thm T {true} prf T$1 { 1. byax A |- true };""", "true", 1)>]
     [<DataRow("01", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" ax A {all n,m:Nat { impl( ( Succ(n) = Succ(m) ), ( n = m ) ) }} thm T {true} prf T$1 { 1. byax A |- true };""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 1)>]
@@ -531,8 +524,6 @@ type TestProceedingExpressions() =
     [<DataRow("DisjunctiveSyllogism_02", "inf DisjunctiveSyllogism{dec ~p,q:pred; pre:not p,or(p,q) con:q} thm T {true} proof T$1 {1. |- not iif(true,false) 2. |- or(iif(true,false), xor(true,false)) 3. 1, 2, byinf DisjunctiveSyllogism |- true };", "true ⩡ false", 1)>]
     [<DataRow("DisjunctiveSyllogism_03a", "inf DisjunctiveSyllogism{dec ~p,q:pred; pre:not p,or(p,q) con:q} thm T {true} proof T$1 {1. |- not (and(is(A,N), false)) 2. |- or(and(is(A,N), false), impl(true,false)) 3. 1, 2, byinf DisjunctiveSyllogism |- true };", "true ⇒ false", 1)>]
 
-
-
     // ExistsByExample: pre: p(c)
     [<DataRow("ExistsByExample_01", "inf ExistsByExample{dec ~p:pred(x:obj); pre:p(x) con:ex x:tpl{p(x)}} thm T {dec ~a:obj; true} proof T$1 {1. |- iif(is(a,N), true) 2. 1, byinf ExistsByExample |- true};", "∃ a:obj {(a is N) ⇔ true}", 1)>]
     [<DataRow("ExistsByExample_02", "inf ExistsByExample{dec ~p:pred(); pre:p con:ex x:tpl{p(x)}} thm T {true} proof T$1 {1. |- and(ex x:obj {is(x,M)}, iif(true,false)) 2. 1, byinf ExistsByExample |- true};", "∃ x:tpl {∃ x:obj {x is M} ∧ (true ⇔ false)}", 1)>]
@@ -683,8 +674,6 @@ type TestProceedingExpressions() =
     [<DataRow("XorUnpack2Or_01", "inf XorUnpack2Or{dec ~p,q:pred; pre:xor(p,q) con:or(and(not p,q),and(p,not q))} thm T {true} proof T$1 {1. |- xor(all x:obj {is(x, N)}, ex y:obj {is(y, M)}) 2. 1, byinf XorUnpack2Or |- true};", "(¬∀ x:obj {x is N} ∧ ∃ y:obj {y is M}) ∨ (∀ x:obj {x is N} ∧ ¬∃ y:obj {y is M})", 1)>]
     [<DataRow("XorUnpack2Or_02", "inf XorUnpack2Or{dec ~p,q:pred; pre:xor(p,q) con:or(and(not p,q),and(p,not q))} thm T {true} proof T$1 {1. |- xor(not iif(true, false), and(true, false)) 2. 1, byinf XorUnpack2Or |- true};", "(¬¬(true ⇔ false) ∧ (true ∧ false)) ∨ (¬(true ⇔ false) ∧ ¬(true ∧ false))", 1)>]
     [<DataRow("XorUnpack2Or_03", "inf XorUnpack2Or{dec ~p,q:pred; pre:xor(p,q) con:or(and(not p,q),and(p,not q))} thm T {true} proof T$1 {1. |- xor(iif(true, false), xor(true, false)) 2. 1, byinf XorUnpack2Or |- true};", "(¬(true ⇔ false) ∧ (true ⩡ false)) ∨ ((true ⇔ false) ∧ ¬(true ⩡ false))", 1)>]
-
-
     [<TestMethod>]
     member this.TestProceedingExpressionJustByInf(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
         
@@ -711,30 +700,5 @@ type TestProceedingExpressions() =
 
         prepareFplCode(filename, "", false) |> ignore
 
-    [<DataRow("00", """thm T {true} proof T$1 {1. |- trivial };""", "true", 1)>]
-    [<DataRow("01", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" thm T {all n,m:Nat { impl( ( Succ(n) = Succ(m) ), ( n = m ) ) }} thm T {true} prf T$1 { 1. |- trivial };""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 1)>]
-    [<DataRow("02", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" thm T {all n,m:Nat { impl( ( n' = m' ), ( n = m ) ) }} thm T {true} prf T$1 { 1. |- trivial };""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 1)>]
-    [<TestMethod>]
-    member this.TestProceedingExpressionArgInfTrivial(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
-        
-        let filename = "TestProceedingExpressionArgInfTrivial"
-        prepareFplCode(filename + ".fpl", fplCode, false) 
-        let r = heap.Root
-
-        let candidates = findCandidatesByName "T" false true
-        let prf = candidates |> List.filter (fun fv -> fv.FplId = "T$1") |> List.map (fun fv -> fv :?> FplProof) |> List.head
-        let fvJiOpt = tryFindInference (prf:FplProof) PrimArgInfTrivial 
-
-        match fvJiOpt with
-        | Some (:? FplArgInferenceTrivial as infTrivial) ->
-            let result = infTrivial.ProceedingExprCandidates
-            Assert.AreEqual<int>(expectedNumbExpr, result.Length)
-            Assert.AreEqual<string>(expectedExpr, result.Head.Type SignatureType.Name)
-        | Some ref ->
-            Assert.IsInstanceOfType<FplArgInferenceTrivial>(ref)
-        | None ->
-            failwith $"expected FplArgInferenceTrivial, found none"
-
-        prepareFplCode(filename, "", false) |> ignore
 
 

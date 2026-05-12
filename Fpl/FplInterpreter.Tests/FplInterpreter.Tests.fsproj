@@ -40,7 +40,8 @@
         <Compile Include="TestInterpreterErrors.fs" />
         <Compile Include="TestEvalAliasedNamespaceIdentifier.fs" />
         <Compile Include="TestValidity.fs" />
-        <Compile Include="TestProceedingExpressions.fs" />
+        <Compile Include="Proofs\TestProceedingExpressionsJust.fs" />
+        <Compile Include="Proofs\TestProceedingExpressionsArgInf.fs" />
     </ItemGroup>
 
     <ItemGroup>
