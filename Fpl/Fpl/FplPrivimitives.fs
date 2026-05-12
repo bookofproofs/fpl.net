@@ -75,6 +75,8 @@ let LiteralDelL = "delegate"
 [<Literal>]
 let LiteralEx = "ex"
 [<Literal>]
+let LiteralExSymbol = "∃"
+[<Literal>]
 let LiteralExN = "exn"
 [<Literal>]
 let LiteralExt = "ext"

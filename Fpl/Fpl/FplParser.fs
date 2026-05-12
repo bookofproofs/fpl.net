@@ -157,7 +157,7 @@ let keywordIif = skipString LiteralIif .>> IW
 let keywordXor = skipString LiteralXor .>> IW 
 let keywordNot = choice [skipString LiteralNot .>> attemptSW; skipString LiteralNotSymbol .>> IW]  
 let keywordAll = choice [skipString LiteralAll .>> SW; skipString LiteralAllSymbol .>> IW]  
-let keywordEx = skipString LiteralEx .>> SW
+let keywordEx = choice [skipString LiteralEx .>> SW; skipString LiteralExSymbol .>> IW]
 let keywordExN = skipString LiteralExN .>> IW
 let keywordIs = skipString LiteralIs .>> attemptSW 
 
