@@ -121,6 +121,8 @@ let LiteralMapCases = "mcases"
 [<Literal>]
 let LiteralNot = "not"
 [<Literal>]
+let LiteralNotSymbol = "¬"
+[<Literal>]
 let LiteralObj = "obj"
 [<Literal>]
 let LiteralObjL = "object"

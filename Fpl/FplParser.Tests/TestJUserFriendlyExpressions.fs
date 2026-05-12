@@ -8,11 +8,22 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 type TestUserFriendlyExpressions() =
 
 
-    [<DataRow("00", "true")>]
-    [<DataRow("01", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}")>]
-    [<DataRow("02", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}")>]
+    [<DataRow("not00", "true")>]
+    [<DataRow("not01", "not true")>]
+    [<DataRow("not02", "¬true")>]
+    [<DataRow("not03", "¬¬true")>]
+    [<DataRow("not04", "¬¬¬true")>]
+    [<DataRow("not05", "¬ ¬¬true")>]
+    [<DataRow("not06", "¬ ¬ ¬true")>]
+    [<DataRow("not07", "¬ ¬ ¬ true")>]
+    [<DataRow("not02a", "¬(true)")>]
+    [<DataRow("not03a", "¬¬(true)")>]
+    [<DataRow("not04a", "¬(¬¬(true))")>]
+    [<DataRow("not05a", "¬ (¬¬true)")>]
+    [<DataRow("not06a", "¬ ¬ ¬(true)")>]
+    [<DataRow("not07a", "¬ ¬ ¬ ( true)")>]
     [<TestMethod>]
-    member this.TextExprAx(no:string, fplCode) =
+    member this.TextExprNot(no:string, fplCode) =
         let result = run (predicate .>> eof) fplCode
         let actual = sprintf "%O" result
         printf "%O" actual
