@@ -30,11 +30,11 @@ type TestUserFriendlyExpressions() =
         Assert.IsTrue(actual.StartsWith("Success:"))
         
 
-    [<DataRow("00", "true")>]
-    [<DataRow("01", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}")>]
-    [<DataRow("02", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}")>]
+    [<DataRow("00", "∀ m, n:Nat {((n') = (m'))}")>]
+    [<DataRow("01", "∀ m, n:Nat { true }")>]
+    [<DataRow("02", "∀ m:Nat { true }")>]
     [<TestMethod>]
-    member this.TextExprConj(no:string, fplCode) =
+    member this.TextExprAll(no:string, fplCode) =
         let result = run (predicate .>> eof) fplCode
         let actual = sprintf "%O" result
         printf "%O" actual

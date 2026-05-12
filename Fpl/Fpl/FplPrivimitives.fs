@@ -13,6 +13,8 @@ let LiteralAlias = "alias"
 [<Literal>]
 let LiteralAll = "all"
 [<Literal>]
+let LiteralAllSymbol = "∀"
+[<Literal>]
 let LiteralAnd = "and"
 [<Literal>]
 let LiteralAss = "ass"
