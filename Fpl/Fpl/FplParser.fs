@@ -151,7 +151,7 @@ let keywordByConj = pstring LiteralByConj
 let keywordByCor = pstring LiteralByCor
 let byModifier = choice [keywordByAx; keywordByConj; keywordByCor; keywordByDef; keywordByInf] .>> SW 
 let keywordAnd = choice [skipString LiteralAnd; skipString LiteralAndSymbol] .>> IW 
-let keywordOr = skipString LiteralOr .>> IW 
+let keywordOr = choice  [skipString LiteralOr; skipString LiteralOrSymbol] .>> IW 
 let keywordImpl = skipString LiteralImpl .>> IW 
 let keywordIif = skipString LiteralIif .>> IW 
 let keywordXor = skipString LiteralXor .>> IW 
@@ -348,12 +348,16 @@ let justificationReference = choice [
 
 let twoPredicatesInParens = (leftParen >>. predicate) .>>. (comma >>. predicate) .>> rightParen 
 let twoPredicatesWithInfix p = (dot >>. (predicate .>> p) .>>. predicate)
-let conj = (choice [
+let conj = choice [
         attempt (twoPredicatesWithInfix keywordAnd)
         keywordAnd >>. twoPredicatesInParens
-    ])
+    ]
 let conjunction = positions conj  |>> Ast.And
-let disjunction = positions (keywordOr >>. twoPredicatesInParens) |>> Ast.Or
+let disj = choice [
+        attempt (twoPredicatesWithInfix keywordOr)
+        keywordOr >>. twoPredicatesInParens
+    ]
+let disjunction = positions disj |>> Ast.Or
 let exclusiveOr = positions (keywordXor >>. twoPredicatesInParens) |>> Ast.Xor
 let implication = positions (keywordImpl >>. twoPredicatesInParens) |>> Ast.Impl
 let equivalence = positions (keywordIif >>. twoPredicatesInParens) |>> Ast.Iif

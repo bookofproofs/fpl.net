@@ -29,12 +29,13 @@ type TestUserFriendlyExpressions() =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
         
-    [<DataRow("00", ".n is N")>]
-    [<DataRow("01", "¬¬.n is N")>]
-    [<DataRow("02", "..x is N is X")>]
-    [<DataRow("03", "is(n,N)")>]
-    [<DataRow("04", "¬¬is(n, N)")>]
-    [<DataRow("05", "is(is(x , N), X)")>]
+    [<DataRow("is00", ".n is N")>]
+    [<DataRow("is01", "¬¬.n is N")>]
+    [<DataRow("is02", "..x is N is X")>]
+    [<DataRow("is03", "is(n,N)")>]
+    [<DataRow("is04", "¬¬is(n, N)")>]
+    [<DataRow("is05", "is(is(x , N), X)")>]
+    [<DataRow("is06", "is(.x is N, X)")>]
     [<TestMethod>]
     member this.TestIsOperator(no:string, fplCode) =
         let result = run (predicate .>> eof) fplCode
@@ -42,14 +43,29 @@ type TestUserFriendlyExpressions() =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<DataRow("00", ".x ∧ y")>]
-    [<DataRow("01", "¬¬.n ∧ x")>]
-    [<DataRow("02", "..x ∧ y ∧ z")>]
-    [<DataRow("03", "∧(x,y)")>]
-    [<DataRow("04", "¬¬∧(x, y)")>]
-    [<DataRow("05", "∧(∧(x , y), z)")>]
+    [<DataRow("and00", ".x ∧ y")>]
+    [<DataRow("and01", "¬¬.n ∧ x")>]
+    [<DataRow("and02", "..x ∧ y ∧ z")>]
+    [<DataRow("and03", "∧(x,y)")>]
+    [<DataRow("and04", "¬¬∧(x, y)")>]
+    [<DataRow("and05", "∧(∧(x , y), z)")>]
+    [<DataRow("and06", "∧(.x ∧ y, z)")>]
     [<TestMethod>]
     member this.TestConjunction(no:string, fplCode) =
+        let result = run (predicate .>> eof) fplCode
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<DataRow("or00", ".x ∨ y")>]
+    [<DataRow("or01", "¬¬.n ∨ x")>]
+    [<DataRow("or02", "..x ∨ y ∨ z")>]
+    [<DataRow("or03", "∨(x,y)")>]
+    [<DataRow("or04", "¬¬∨(x, y)")>]
+    [<DataRow("or05", "∨(∨(x , y), z)")>]
+    [<DataRow("or06", "∨(.x ∨ y, z)")>]
+    [<TestMethod>]
+    member this.TestDisjunction(no:string, fplCode) =
         let result = run (predicate .>> eof) fplCode
         let actual = sprintf "%O" result
         printf "%O" actual

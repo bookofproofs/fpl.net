@@ -135,6 +135,8 @@ let LiteralObjL = "object"
 [<Literal>]
 let LiteralOr = "or"
 [<Literal>]
+let LiteralOrSymbol = "∨"
+[<Literal>]
 let LiteralParent = "parent"
 [<Literal>]
 let LiteralPost = "post"
