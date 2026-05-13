@@ -204,6 +204,8 @@ let LiteralUndefL = "undefined"
 let LiteralUses = "uses"
 [<Literal>]
 let LiteralXor = "xor"
+[<Literal>]
+let LiteralXorSymbol = "⩡"
 
 let keyWordSet =
     HashSet<_>(

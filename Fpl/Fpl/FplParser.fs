@@ -154,7 +154,7 @@ let keywordAnd = choice [skipString LiteralAnd; skipString LiteralAndSymbol] .>>
 let keywordOr = choice  [skipString LiteralOr; skipString LiteralOrSymbol] .>> IW 
 let keywordImpl = choice [skipString LiteralImpl; skipString LiteralImplSymbol] .>> IW 
 let keywordIif = choice [skipString LiteralIif; skipString LiteralIifSymbol] .>> IW 
-let keywordXor = skipString LiteralXor .>> IW 
+let keywordXor = choice [skipString LiteralXor; skipString LiteralXorSymbol] .>> IW 
 let keywordNot = choice [skipString LiteralNot .>> attemptSW; skipString LiteralNotSymbol .>> IW]  
 let keywordAll = choice [skipString LiteralAll .>> SW; skipString LiteralAllSymbol .>> IW]  
 let keywordEx = choice [skipString LiteralEx .>> SW; skipString LiteralExSymbol .>> IW]
@@ -352,9 +352,10 @@ let chooseBinaryOp p = choice [
         attempt (twoPredicatesWithInfix p)
         p >>. twoPredicatesInParens
     ]
+
 let conjunction = positions (chooseBinaryOp keywordAnd)  |>> Ast.And
 let disjunction = positions (chooseBinaryOp keywordOr) |>> Ast.Or
-let exclusiveOr = positions (keywordXor >>. twoPredicatesInParens) |>> Ast.Xor
+let exclusiveOr = positions (chooseBinaryOp keywordXor) |>> Ast.Xor
 let implication = positions (chooseBinaryOp keywordImpl) |>> Ast.Impl
 let equivalence = positions (chooseBinaryOp keywordIif) |>> Ast.Iif
 let negation = positions (keywordNot >>. predicate) |>> Ast.Not
