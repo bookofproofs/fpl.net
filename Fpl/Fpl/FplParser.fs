@@ -358,7 +358,11 @@ let all = positions ((keywordAll >>. namedVariableDeclarationList) .>>. (leftBra
 let exists = positions ((keywordEx >>. namedVariableDeclarationList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.Exists
 
 let existsTimesN = positions (((keywordExN >>. dollarDigits .>> SW) .>>. namedVariableDeclarationList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.ExistsN
-let isOperator = positions ((keywordIs >>. leftParen >>. predicate .>> IW) .>>. (comma >>. variableType) .>> rightParen) |>> Ast.IsOperator
+let isOp = choice [
+    (dot >>. (predicate .>> keywordIs) .>>. variableType) 
+    (keywordIs >>. leftParen >>. predicate .>> IW) .>>. (comma >>. variableType) .>> rightParen
+    ]
+let isOperator = positions isOp |>> Ast.IsOperator
 
 // infix operators like the equality operator 
 let infixOp = positions ( infixMathSymbols ) .>> attemptSW |>> Ast.InfixOperator
