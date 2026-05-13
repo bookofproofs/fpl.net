@@ -71,6 +71,20 @@ type TestUserFriendlyExpressions() =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
+    [<DataRow("impl00", ".x ⇒ y")>]
+    [<DataRow("impl01", "¬¬.n ⇒ x")>]
+    [<DataRow("impl02", "..x ⇒ y ⇒ z")>]
+    [<DataRow("impl03", "⇒(x,y)")>]
+    [<DataRow("impl04", "¬¬⇒(x, y)")>]
+    [<DataRow("impl05", "⇒(⇒(x , y), z)")>]
+    [<DataRow("impl06", "⇒(.x ⇒ y, z)")>]
+    [<TestMethod>]
+    member this.TestImplication(no:string, fplCode) =
+        let result = run (predicate .>> eof) fplCode
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
     [<DataRow("all00", "∀ m, n:Nat {((n') = (m'))}")>]
     [<DataRow("all01", "∀ m, n:Nat { true }")>]
     [<DataRow("all02", "∀ m:Nat { true }")>]
@@ -293,16 +307,16 @@ type TestUserFriendlyExpressions() =
     [<DataRow("00", "false")>]
     [<DataRow("00", "q ⇒ (¬(true ⩡ false) ∧ .true ⇔ false)")>]
     [<DataRow("00", "q ⇒ ∀ x:obj {.x is N}")>]
-    [<DataRow("00", "true ⩡ false")>]
-    [<DataRow("00", "true ∧ (false ⩡ true)")>]
-    [<DataRow("00", "true ∧ ¬false")>]
-    [<DataRow("00", "true ∧ false")>]
-    [<DataRow("00", "true ∨ false")>]
-    [<DataRow("00", "true ⇒ false")>]
-    [<DataRow("00", "true ⇔ .false ⩡ true")>]
-    [<DataRow("00", "true ⇔ ∃ y:obj {.y is M}")>]
-    [<DataRow("00", "true ⇔ ¬false")>]
-    [<DataRow("00", "true ⇔ false")>]
+    [<DataRow("00", ".true ⩡ false")>]
+    [<DataRow("00", ".true ∧ (false ⩡ true)")>]
+    [<DataRow("00", ".true ∧ ¬false")>]
+    [<DataRow("00", ".true ∧ false")>]
+    [<DataRow("00", ".true ∨ false")>]
+    [<DataRow("00", ".true ⇒ false")>]
+    [<DataRow("00", ".true ⇔ .false ⩡ true")>]
+    [<DataRow("00", ".true ⇔ ∃ y:obj {.y is M}")>]
+    [<DataRow("00", ".true ⇔ ¬false")>]
+    [<DataRow("00", ".true ⇔ false")>]
     [<DataRow("00", "true")>]
     [<DataRow("00", "undet")>]
     [<TestMethod>]

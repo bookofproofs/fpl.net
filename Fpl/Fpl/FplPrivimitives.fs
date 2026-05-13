@@ -97,6 +97,8 @@ let LiteralIif = "iif"
 [<Literal>]
 let LiteralImpl = "impl"
 [<Literal>]
+let LiteralImplSymbol = "⇒"
+[<Literal>]
 let LiteralIn = "in"
 [<Literal>]
 let LiteralInd = "ind"

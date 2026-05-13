@@ -152,7 +152,7 @@ let keywordByCor = pstring LiteralByCor
 let byModifier = choice [keywordByAx; keywordByConj; keywordByCor; keywordByDef; keywordByInf] .>> SW 
 let keywordAnd = choice [skipString LiteralAnd; skipString LiteralAndSymbol] .>> IW 
 let keywordOr = choice  [skipString LiteralOr; skipString LiteralOrSymbol] .>> IW 
-let keywordImpl = skipString LiteralImpl .>> IW 
+let keywordImpl = choice [skipString LiteralImpl; skipString LiteralImplSymbol] .>> IW 
 let keywordIif = skipString LiteralIif .>> IW 
 let keywordXor = skipString LiteralXor .>> IW 
 let keywordNot = choice [skipString LiteralNot .>> attemptSW; skipString LiteralNotSymbol .>> IW]  
@@ -348,18 +348,14 @@ let justificationReference = choice [
 
 let twoPredicatesInParens = (leftParen >>. predicate) .>>. (comma >>. predicate) .>> rightParen 
 let twoPredicatesWithInfix p = (dot >>. (predicate .>> p) .>>. predicate)
-let conj = choice [
-        attempt (twoPredicatesWithInfix keywordAnd)
-        keywordAnd >>. twoPredicatesInParens
+let chooseBinaryOp p = choice [
+        attempt (twoPredicatesWithInfix p)
+        p >>. twoPredicatesInParens
     ]
-let conjunction = positions conj  |>> Ast.And
-let disj = choice [
-        attempt (twoPredicatesWithInfix keywordOr)
-        keywordOr >>. twoPredicatesInParens
-    ]
-let disjunction = positions disj |>> Ast.Or
+let conjunction = positions (chooseBinaryOp keywordAnd)  |>> Ast.And
+let disjunction = positions (chooseBinaryOp keywordOr) |>> Ast.Or
 let exclusiveOr = positions (keywordXor >>. twoPredicatesInParens) |>> Ast.Xor
-let implication = positions (keywordImpl >>. twoPredicatesInParens) |>> Ast.Impl
+let implication = positions (chooseBinaryOp keywordImpl) |>> Ast.Impl
 let equivalence = positions (keywordIif >>. twoPredicatesInParens) |>> Ast.Iif
 let negation = positions (keywordNot >>. predicate) |>> Ast.Not
 
