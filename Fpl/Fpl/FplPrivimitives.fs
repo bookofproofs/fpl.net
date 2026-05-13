@@ -95,6 +95,8 @@ let LiteralFuncL = "function"
 [<Literal>]
 let LiteralIif = "iif"
 [<Literal>]
+let LiteralIifSymbol = "⇔"
+[<Literal>]
 let LiteralImpl = "impl"
 [<Literal>]
 let LiteralImplSymbol = "⇒"

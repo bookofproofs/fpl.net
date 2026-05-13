@@ -85,16 +85,30 @@ type TestUserFriendlyExpressions() =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
+    [<DataRow("iif00", ".x ⇔ y")>]
+    [<DataRow("iif01", "¬¬.n ⇔ x")>]
+    [<DataRow("iif02", "..x ⇔ y ⇔ z")>]
+    [<DataRow("iif03", "⇔(x,y)")>]
+    [<DataRow("iif04", "¬¬⇔(x, y)")>]
+    [<DataRow("iif05", "⇔(⇔(x , y), z)")>]
+    [<DataRow("iif06", "⇔(.x ⇔ y, z)")>]
+    [<TestMethod>]
+    member this.TestEquivalence(no:string, fplCode) =
+        let result = run (predicate .>> eof) fplCode
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
     [<DataRow("all00", "∀ m, n:Nat {((n') = (m'))}")>]
     [<DataRow("all01", "∀ m, n:Nat { true }")>]
     [<DataRow("all02", "∀ m:Nat { true }")>]
-    [<DataRow("00", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}")>]
-    [<DataRow("00", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}")>]
+    [<DataRow("00", "∀ m, n:Nat {.((n') = (m')) ⇒ (n = m)}")>]
+    [<DataRow("00", "∀ m, n:Nat {.((n') = (m')) ⇒ (n = m)}")>]
     [<DataRow("00", "∀ n:Nat {.true ⇔ false ⩡ (.n is N ⇔ true)}")>]
     [<DataRow("00", "∀ n:Nat {.true ⇔ false ∧ (.n is N ⇔ true)}")>]
     [<DataRow("00", "∀ n:Nat {.true ⇔ false ∨ (.n is N ⇔ true)}")>]
-    [<DataRow("00", "∀ n:Nat {.true ⇔ false ⇒ (.n is N ⇔ true)}")>]
-    [<DataRow("00", "∀ n:Nat {.true ⇔ false ⇔ (.n is N ⇔ true)}")>]
+    [<DataRow("00", "∀ n:Nat {..true ⇔ false ⇒ (..n is N ⇔ true)}")>]
+    [<DataRow("00", "∀ n:Nat {..true ⇔ false ⇔ (..n is N ⇔ true)}")>]
     [<DataRow("00", "∀ n:Nat {¬(¬.n is N ∧ .true ⩡ false)}")>]
     [<DataRow("00", "∀ x, y:Set {.x is N ⇒ (x = y)}")>]
     [<DataRow("00", "∀ x:obj {¬(.x is N ⇔ false)}")>]
@@ -117,11 +131,11 @@ type TestUserFriendlyExpressions() =
     [<DataRow("00", "∀ y:obj {.y is M} ∨ ∃ n:Nat {.n is K ⩡ true}")>]
     [<DataRow("00", "∀ y:obj {.y is M} ⇒ ∀ n:Nat {.n is K ⩡ true}")>]
     [<DataRow("00", "∀ y:obj {.y is M} ⇒ ∃ n:Nat {.n is K ⩡ true}")>]
-    [<DataRow("00", "∀ y:obj {.y is M} ⇔ ∀ n:Nat {.n is K ⩡ true}")>]
-    [<DataRow("00", "∀ y:obj {.y is M} ⇔ ∃ n:Nat {.n is K ⩡ true}")>]
+    [<DataRow("00", ".∀ y:obj {.y is M} ⇔ ∀ n:Nat {.n is K ⩡ true}")>]
+    [<DataRow("00", ".∀ y:obj {.y is M} ⇔ ∃ n:Nat {.n is K ⩡ true}")>]
     [<DataRow("00", "∀ z:obj {∀ y:obj {.y is M} ⩡ (.z is K ⩡ true)}")>]
     [<DataRow("00", "∀ z:obj {∀ y:obj {.y is M} ⇒ (.z is K ⩡ true)}")>]
-    [<DataRow("00", "∀ z:obj {∀ y:obj {.y is M} ⇔ (.z is K ⩡ true)}")>]
+    [<DataRow("00", "∀ z:obj {.∀ y:obj {.y is M} ⇔ (.z is K ⩡ true)}")>]
     [<DataRow("00", "∀ z:obj {∃ y:obj {.y is M} ∧ (.z is K ⩡ true)}")>]
     [<DataRow("00", "∀ z:obj {∃ y:obj {.y is M} ∨ (.z is K ⩡ true)}")>]
     [<TestMethod>]

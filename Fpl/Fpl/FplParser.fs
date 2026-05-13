@@ -153,7 +153,7 @@ let byModifier = choice [keywordByAx; keywordByConj; keywordByCor; keywordByDef;
 let keywordAnd = choice [skipString LiteralAnd; skipString LiteralAndSymbol] .>> IW 
 let keywordOr = choice  [skipString LiteralOr; skipString LiteralOrSymbol] .>> IW 
 let keywordImpl = choice [skipString LiteralImpl; skipString LiteralImplSymbol] .>> IW 
-let keywordIif = skipString LiteralIif .>> IW 
+let keywordIif = choice [skipString LiteralIif; skipString LiteralIifSymbol] .>> IW 
 let keywordXor = skipString LiteralXor .>> IW 
 let keywordNot = choice [skipString LiteralNot .>> attemptSW; skipString LiteralNotSymbol .>> IW]  
 let keywordAll = choice [skipString LiteralAll .>> SW; skipString LiteralAllSymbol .>> IW]  
@@ -356,7 +356,7 @@ let conjunction = positions (chooseBinaryOp keywordAnd)  |>> Ast.And
 let disjunction = positions (chooseBinaryOp keywordOr) |>> Ast.Or
 let exclusiveOr = positions (keywordXor >>. twoPredicatesInParens) |>> Ast.Xor
 let implication = positions (chooseBinaryOp keywordImpl) |>> Ast.Impl
-let equivalence = positions (keywordIif >>. twoPredicatesInParens) |>> Ast.Iif
+let equivalence = positions (chooseBinaryOp keywordIif) |>> Ast.Iif
 let negation = positions (keywordNot >>. predicate) |>> Ast.Not
 
 let all = positions ((keywordAll >>. namedVariableDeclarationList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.All
