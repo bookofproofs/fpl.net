@@ -94,9 +94,9 @@ let rec eval ast =
 
     match ast with
     // lexical / leaf tokens
-    | Ast.Alias((pos1, pos2), s) -> ()
-    | Ast.Dot((pos1, pos2),()) -> ()
-    | Ast.Star((pos1, pos2),()) -> ()
+    | Ast.Alias((_, _), _) -> ()
+    | Ast.Dot() -> ()
+    | Ast.Star((_, _),()) -> ()
 
     | Ast.Digits s -> 
         let fv = heap.Eval.PeekEvalStack()

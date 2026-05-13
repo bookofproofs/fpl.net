@@ -52,7 +52,7 @@ let rightBrace = skipChar '}'
 let leftParen = skipChar '(' >>. spaces 
 let rightParen = skipChar ')' 
 let comma = skipChar ',' >>. spaces 
-let dot = positions (skipChar '.') |>> Ast.Dot
+let dot = skipChar '.' |>> Ast.Dot
 let colon = skipChar ':' .>> spaces 
 let colonEqual = skipString ":=" >>. spaces 
 let at = pchar '@'

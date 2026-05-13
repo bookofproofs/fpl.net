@@ -11,7 +11,7 @@ type Positions = Position * Position
 type Ast = 
     // Literals
     | Star of Positions * unit
-    | Dot of Positions * unit
+    | Dot of unit
     // Identifiers
     | Digits of string
     | Extension of Positions * string
