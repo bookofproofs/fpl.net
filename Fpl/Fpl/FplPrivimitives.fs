@@ -17,6 +17,8 @@ let LiteralAllSymbol = "∀"
 [<Literal>]
 let LiteralAnd = "and"
 [<Literal>]
+let LiteralAndSymbol = "∧"
+[<Literal>]
 let LiteralAss = "ass"
 [<Literal>]
 let LiteralAssL = "assume"

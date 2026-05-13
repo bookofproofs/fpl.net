@@ -150,7 +150,7 @@ let keywordByInf = pstring LiteralByInf
 let keywordByConj = pstring LiteralByConj
 let keywordByCor = pstring LiteralByCor
 let byModifier = choice [keywordByAx; keywordByConj; keywordByCor; keywordByDef; keywordByInf] .>> SW 
-let keywordAnd = skipString LiteralAnd .>> IW 
+let keywordAnd = choice [skipString LiteralAnd; skipString LiteralAndSymbol] .>> IW 
 let keywordOr = skipString LiteralOr .>> IW 
 let keywordImpl = skipString LiteralImpl .>> IW 
 let keywordIif = skipString LiteralIif .>> IW 
@@ -347,7 +347,12 @@ let justificationReference = choice [
 ]
 
 let twoPredicatesInParens = (leftParen >>. predicate) .>>. (comma >>. predicate) .>> rightParen 
-let conjunction = positions (keywordAnd >>. twoPredicatesInParens)  |>> Ast.And
+let twoPredicatesWithInfix p = (dot >>. (predicate .>> p) .>>. predicate)
+let conj = (choice [
+        attempt (twoPredicatesWithInfix keywordAnd)
+        keywordAnd >>. twoPredicatesInParens
+    ])
+let conjunction = positions conj  |>> Ast.And
 let disjunction = positions (keywordOr >>. twoPredicatesInParens) |>> Ast.Or
 let exclusiveOr = positions (keywordXor >>. twoPredicatesInParens) |>> Ast.Xor
 let implication = positions (keywordImpl >>. twoPredicatesInParens) |>> Ast.Impl
@@ -359,7 +364,7 @@ let exists = positions ((keywordEx >>. namedVariableDeclarationList) .>>. (leftB
 
 let existsTimesN = positions (((keywordExN >>. dollarDigits .>> SW) .>>. namedVariableDeclarationList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.ExistsN
 let isOp = choice [
-    (dot >>. (predicate .>> keywordIs) .>>. variableType) 
+    attempt (dot >>. (predicate .>> keywordIs) .>>. variableType) 
     (keywordIs >>. leftParen >>. predicate .>> IW) .>>. (comma >>. variableType) .>> rightParen
     ]
 let isOperator = positions isOp |>> Ast.IsOperator
