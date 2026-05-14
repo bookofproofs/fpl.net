@@ -440,7 +440,7 @@ let keywordProposition = (skipString LiteralPropL <|> skipString LiteralProp) .>
 let keywordCorollary = (skipString LiteralCorL <|> skipString LiteralCor) .>> SW
 let keywordConjecture = (skipString LiteralConjL <|> skipString LiteralConj) .>> SW
 
-let theoremLikeBlock = leftBrace >>. varDeclOrSpecList .>>. spacesPredicate .>> spacesRightBrace
+let theoremLikeBlock = leftBracePos .>>. (varDeclOrSpecList .>>. spacesPredicate) .>>. spacesRightBrace
 
 let theoremSignature = positions (keywordTheorem >>. pascalCaseId) .>> IW |>> Ast.TheoremSignature
 let theorem = positions (theoremSignature .>>. theoremLikeBlock) |>> Ast.Theorem

@@ -112,20 +112,20 @@ type Ast =
     | RuleOfInference of Positions * (Ast * Ast)
     | Localization of (Positions * Ast) * Ast list
     | TheoremSignature of Positions * Ast
-    | Theorem of Positions * (Ast * (Ast list option * Ast))
+    | Theorem of Positions * (Ast * ((Ast * (Ast list option * Ast)) * Ast))
     | LemmaSignature of Positions * Ast
-    | Lemma of Positions * (Ast *(Ast list option * Ast))
+    | Lemma of Positions * (Ast * ((Ast * (Ast list option * Ast)) * Ast))
     | PropositionSignature of Positions * Ast
-    | Proposition of Positions * (Ast *(Ast list option * Ast))
-    | Corollary of Positions * (Ast * (Ast list option * Ast))
+    | Proposition of Positions * (Ast * ((Ast * (Ast list option * Ast)) * Ast))
+    | Corollary of Positions * (Ast * ((Ast * (Ast list option * Ast)) * Ast))
     | CorollarySignature of Positions * (Ast * Ast list)
     | ConjectureSignature of Positions * Ast
-    | Conjecture of Positions * (Ast *(Ast list option * Ast))
+    | Conjecture of Positions * (Ast * ((Ast * (Ast list option * Ast)) * Ast))
     | NamedVarDecl of Positions * (Ast list * Ast)
     | ParamTuple of Positions * Ast list
     | Mapping of Positions * Ast
     | AxiomSignature of Positions * Ast
-    | Axiom of Positions * (Ast * (Ast list option * Ast))
+    | Axiom of Positions * (Ast * ((Ast * (Ast list option * Ast)) * Ast))
     | BaseConstructorCall of Positions * (Ast * Ast)
     | ConstructorSignature of Positions * (Ast * Ast)
     | PredicateInstanceSignature of Positions * (Ast * Ast)
