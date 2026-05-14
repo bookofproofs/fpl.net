@@ -493,7 +493,7 @@ let extensionRegex = regex "[^\/]+" <?> "<extension regex>" |>> Ast.ExtensionReg
 let extensionAssignment = positions ((variable .>> IW .>> at .>> IW) .>>. (slash >>. extensionRegex .>> slash)) |>> Ast.ExtensionAssignment
 
 let extensionSignature = positions ((extensionAssignment .>> IW) .>>. mapping) .>> IW |>> Ast.ExtensionSignature
-let extensionTerm = leftBrace >>. (funcContent <|> mapCases) .>> spacesRightBrace
+let extensionTerm = leftBracePos .>>. ((funcContent <|> mapCases) .>>. spacesRightBrace)
 let definitionExtension = positions (keywordExtension >>. (extensionName .>> SW) .>>. extensionSignature .>>. extensionTerm) |>> Ast.DefinitionExtension
 
 let definitionProperty = choice [

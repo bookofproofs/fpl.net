@@ -889,7 +889,8 @@ let rec eval ast =
     | Ast.ExtensionSignature((pos1, pos2), (extensionAssignmentAst, extensionMappingAst)) ->
         eval extensionAssignmentAst
         eval extensionMappingAst
-    | Ast.DefinitionExtension((pos1, pos2), ((extensionNameAst,extensionSignatureAst), extensionTermAst)) ->
+    | Ast.DefinitionExtension((pos1, pos2), ((leftBrace, extensionNameAst), (extensionSignatureAst, (extensionTermAst, rightBrace)))) ->
+        eval leftBrace
         let parent = heap.Eval.PeekEvalStack()
         let fv = new FplExtension((pos1,pos2), parent, heap.Helper.GetNextAvailableFplBlockRunOrder)
         heap.Eval.PushEvalStack(fv)
@@ -897,6 +898,7 @@ let rec eval ast =
         eval extensionSignatureAst
         eval extensionTermAst
         heap.Eval.PopEvalStack()
+        eval rightBrace
     | Ast.Impl((pos1, pos2), (predicateAst1, predicateAst2)) ->
         let fv = heap.Eval.PeekEvalStack()
         let fvNew = new FplImplication((pos1, pos2), fv)

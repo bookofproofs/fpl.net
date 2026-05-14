@@ -36,7 +36,7 @@ type Ast =
     | ExtensionRegex of string
     | ExtensionAssignment of Positions * (Ast * Ast) 
     | ExtensionSignature of Positions * (Ast * Ast)
-    | DefinitionExtension of Positions * ((Ast * Ast) * Ast)
+    | DefinitionExtension of Positions * ((Ast * Ast) * (Ast * (Ast * Ast)))
     | UsesClause of Positions * Ast
     | BrackedCoordList of Positions * Ast list
     | ReferencingIdentifier of Positions * (Ast * Ast list)
