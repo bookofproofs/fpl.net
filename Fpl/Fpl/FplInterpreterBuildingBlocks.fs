@@ -102,7 +102,9 @@ let rec eval ast =
         let fv = heap.Eval.PeekEvalStack()
         fv.FplId <- s
         fv.TypeId <- s
-
+    | Ast.Exists1() ->
+        let fv = heap.Eval.PeekEvalStack()
+        fv.FplId <- fv.FplId + "$1"
     | Ast.DollarDigits((pos1, pos2), s) -> 
         let fv = heap.Eval.PeekEvalStack()
         let sid = $"${s.ToString()}"

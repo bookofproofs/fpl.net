@@ -16,6 +16,7 @@ type Ast =
     | Digits of string
     | Extension of Positions * string
     | DollarDigits of Positions * uint
+    | Exists1 of unit
     | PascalCaseId of Positions * string
     | NamespaceIdentifier of Positions * Ast list
     | AliasedNamespaceIdentifier of Positions * (Ast * Ast option)

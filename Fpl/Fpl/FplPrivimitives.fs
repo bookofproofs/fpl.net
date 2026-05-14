@@ -81,6 +81,8 @@ let LiteralExSymbol = "∃"
 [<Literal>]
 let LiteralExN = "exn"
 [<Literal>]
+let LiteralExNSymbol = "∃!"
+[<Literal>]
 let LiteralExt = "ext"
 [<Literal>]
 let LiteralExtL = "extension"

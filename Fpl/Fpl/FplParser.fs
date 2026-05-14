@@ -159,6 +159,7 @@ let keywordNot = choice [skipString LiteralNot .>> attemptSW; skipString Literal
 let keywordAll = choice [skipString LiteralAll .>> SW; skipString LiteralAllSymbol .>> IW]  
 let keywordEx = choice [skipString LiteralEx .>> SW; skipString LiteralExSymbol .>> IW]
 let keywordExN = skipString LiteralExN .>> IW
+let keywordExNSymbolic = skipString LiteralExNSymbol 
 let keywordIs = skipString LiteralIs .>> attemptSW 
 
 
@@ -363,7 +364,17 @@ let negation = positions (keywordNot >>. predicate) |>> Ast.Not
 let all = positions ((keywordAll >>. namedVariableDeclarationList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.All
 let exists = positions ((keywordEx >>. namedVariableDeclarationList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.Exists
 
-let existsTimesN = positions (((keywordExN >>. dollarDigits .>> SW) .>>. namedVariableDeclarationList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.ExistsN
+let existsNTimes = choice [
+        attempt (keywordExNSymbolic .>> SW) |>> Ast.Exists1 
+        keywordExNSymbolic >>. positions puint32 .>> SW |>> Ast.DollarDigits 
+    ] 
+
+let existsTimeNQuantifier = choice [
+    (keywordExN >>. dollarDigits .>> SW)
+    existsNTimes
+]
+
+let existsTimesN = positions ((existsTimeNQuantifier .>>. namedVariableDeclarationList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.ExistsN
 let isOp = choice [
     attempt (dot >>. (predicate .>> keywordIs) .>>. variableType) 
     (keywordIs >>. leftParen >>. predicate .>> IW) .>>. (comma >>. variableType) .>> rightParen

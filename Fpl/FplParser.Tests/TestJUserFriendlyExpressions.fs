@@ -179,7 +179,7 @@ type TestUserFriendlyExpressions() =
     [<DataRow("ex17", "∃ x:obj {¬.x is N}")>]
     [<DataRow("ex18", ".∃ x:obj {.x is N} ∧ (..true ∨ false ∨ .true ⩡ false)")>]
     [<DataRow("ex19", "∃ x:obj {.x is Nat}")>]
-    [<DataRow("ex20", "∃ x:tpl {..a is M ∧ =(a, $1)}")>]
+    [<DataRow("ex20", "∃ x:tpl {..a is M ∧ (a = $1)}")>]
     [<DataRow("ex21", "∃ x:tpl {.∀ z:obj {.z is K} ⩡ ¬.true ⩡ false}")>]
     [<DataRow("ex22", "∃ x:tpl {.∃ x:obj {.x is M} ∧ .true ⇔ false}")>]
     [<DataRow("ex23", "∃ x1:obj {¬(.x1 is N)}")>]
@@ -201,6 +201,17 @@ type TestUserFriendlyExpressions() =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
 
+    [<DataRow("exn00", "∃! z:obj {true}")>]
+    [<DataRow("exn01", "∃!0 z:obj {true}")>]
+    [<DataRow("exn02", "∃!1 z:obj {true}")>]
+    [<DataRow("exn03", "∃!2 z:obj {true}")>]
+    [<TestMethod>]
+    member this.TestExprExistsN(no:string, fplCode) =
+        let result = run (predicate .>> eof) fplCode
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
     [<DataRow("00", ".(..A is N ∧ true) ∨ ∃ x:obj {.x is M}")>]
     [<DataRow("01", ".(..true ∧ ¬false ∧ .true ⩡ false) ∧ ∀ z:obj {.z is K}")>]
     [<DataRow("02", ".(.(.true ⇔ ∃ x:obj {.x is N}) ⩡ .true ⩡ false) ⩡ true")>]
@@ -217,8 +228,8 @@ type TestUserFriendlyExpressions() =
     [<DataRow("0d", ".(.∃ x:obj {.x is N} ∨ .true ⇔ false) ∨ true")>]
     [<DataRow("0e", ".(.∃ x:obj {.x is N} ⇔ .true ⇔ false) ⇔ ∃ y:obj {.y is M}")>]
     [<DataRow("0f", ".(.¬(.∃ x:obj {.x is N} ∧ true) ∨ ¬(.true ⇔ false)) ∧ (.(.∃ x:obj {.x is N} ∧ true) ∨ .true ⇔ false)")>]
-    [<DataRow("10", ".(.¬(.true ⩡ false) ∧ .true ⇒ false) ∧ ∃! u:obj {.u is L}")>]
-    [<DataRow("11", ".(.¬(.true ⩡ false) ∧ (.true ⇔ false)) ∨ (.¬.true ⩡ false ∧ (∃! z:obj {.z is N} ∧ true))")>]
+    [<DataRow("10", ".(.¬(.true ⩡ false) ∧ .true ⇒ false) ∧ ∃!3 u:obj {.u is L}")>]
+    [<DataRow("11", ".(.¬(.true ⩡ false) ∧ (.true ⇔ false)) ∨ (.¬.true ⩡ false ∧ (.∃! z:obj {.z is N} ∧ true))")>]
     [<DataRow("12", ".(.¬(.true ⩡ false) ∨ (.true ⇔ true)) ∧ (.¬.true ⩡ false ∨ ∀ z:obj {.z is N})")>]
     [<DataRow("13", ".(.¬(.true ∧ false) ∧ ¬(.true ⇒ false)) ∨ (.¬¬(.true ∧ false) ∧ .true ⇒ false)")>]
     [<DataRow("14", ".(.¬(.true ⇒ false) ∧ (.true ⩡ false)) ∨ (.¬¬(.true ⇒ false) ∧ ¬.true ⩡ false)")>]
