@@ -1306,10 +1306,12 @@ let rec eval ast =
         eval inDomainAst
         statementListAst |> List.map (fun stmtAst -> eval stmtAst) |> ignore
         heap.Eval.PopEvalStack() // remove ForInStmt
-    | Ast.PremiseConclusionBlock((pos1, pos2), ((optVarDeclOrSpecList, premiseAst), conclusionAst)) ->
+    | Ast.PremiseConclusionBlock((leftBrace, (optVarDeclOrSpecList, (premiseAst, conclusionAst))), rightBrace) ->
+        eval leftBrace
         optVarDeclOrSpecList |> Option.map (List.map eval >> ignore) |> Option.defaultValue ()
         eval premiseAst
         eval conclusionAst
+        eval rightBrace
     | Ast.TheoremSignature((pos1, pos2), simpleSignatureAst) ->
         heap.Helper.InSignatureEvaluation <- true
         eval simpleSignatureAst

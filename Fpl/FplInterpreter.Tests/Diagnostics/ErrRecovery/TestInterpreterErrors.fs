@@ -65,6 +65,8 @@ type TestInterpreterErrors() =
     [<DataRow("conj01", "conj T  true } ;", 1)>]
     [<DataRow("cor00", "cor T$1 { true } ;", 0)>]
     [<DataRow("cor01", "cor T$1  true } ;", 1)>]
+    [<DataRow("inf00", "inf T { pre: true con: true} ;", 0)>]
+    [<DataRow("inf01", "inf T  pre: true con: true} ;", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSY003(no:string, fplCode:string, expected) =
@@ -91,6 +93,8 @@ type TestInterpreterErrors() =
     [<DataRow("conj01", "conj T { true  ;", 1)>]
     [<DataRow("cor00", "cor T$1 { true } ;", 0)>]
     [<DataRow("cor01", "cor T$1 { true  ;", 1)>]
+    [<DataRow("inf00", "inf T { pre: true con: true} ;", 0)>]
+    [<DataRow("inf01", "inf T {pre: true con: true ;", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSY004(no:string, fplCode:string, expected) =

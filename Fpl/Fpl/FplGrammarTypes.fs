@@ -107,7 +107,7 @@ type Ast =
     | VarDeclBlock of Positions * Ast list 
     | StatementList of Positions * Ast list
     | PremiseList of Positions * Ast list
-    | PremiseConclusionBlock of Positions * ((Ast list option * Ast) * Ast)
+    | PremiseConclusionBlock of ((Ast * (Ast list option * (Ast * Ast))) * Ast)
     | RuleOfInferenceSignature of Positions * Ast
     | RuleOfInference of Positions * (Ast * Ast)
     | Localization of (Positions * Ast) * Ast list

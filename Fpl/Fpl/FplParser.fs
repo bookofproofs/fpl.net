@@ -425,8 +425,9 @@ let varDeclBlock = positions (IW >>. keywordDeclaration >>. (many ((varDecl <|> 
 let varDeclOrSpecList = opt (many1 (varDeclBlock)) 
 let spacesPredicate = IW >>. predicate
 let premiseList = positions (IW >>. (keywordPremise >>. colon >>. predicateList)) |>> Ast.PremiseList
-let conclusion = IW >>. (keywordConclusion >>. colon >>. predicate) 
-let premiseConclusionBlock = positions (leftBrace >>. varDeclOrSpecList .>>. premiseList .>>. conclusion .>> spacesRightBrace) |>> Ast.PremiseConclusionBlock
+let conclusion = IW >>. (keywordConclusion >>. colon >>. predicate)
+let insideRuleOfOnference = (varDeclOrSpecList .>>. (premiseList .>>. conclusion))
+let premiseConclusionBlock = leftBracePos .>>. insideRuleOfOnference .>>. spacesRightBrace |>> Ast.PremiseConclusionBlock
 
 (* FPL building blocks - rules of reference *)
 let keywordInference = (skipString LiteralInfL <|> skipString LiteralInf) .>> SW 
