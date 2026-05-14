@@ -50,6 +50,8 @@ type TestInterpreterErrors() =
 
     [<DataRow("all00", "ax T { ∀ x:obj {true} } ;", 0)>]
     [<DataRow("all01", "ax T { ∀ x:obj true} } ;", 1)>]
+    [<DataRow("ex00", "ax T { ∃ x:obj {true} } ;", 0)>]
+    [<DataRow("ex01", "ax T { ∃ x:obj true} } ;", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSY003(no:string, fplCode:string, expected) =
@@ -61,6 +63,8 @@ type TestInterpreterErrors() =
 
     [<DataRow("all00", "ax T { ∀ x:obj {true} } ;", 0)>]
     [<DataRow("all01", "ax T { ∀ x:obj {true } ;", 1)>]
+    [<DataRow("ex00", "ax T { ∃ x:obj {true } };", 0)>]
+    [<DataRow("ex01", "ax T { ∃ x:obj {true  };", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSY004(no:string, fplCode:string, expected) =

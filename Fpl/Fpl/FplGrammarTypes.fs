@@ -72,7 +72,7 @@ type Ast =
     | Not of Positions * Ast
     | InEntity of Positions * Ast
     | All of Positions * (Ast list * ((Ast * Ast) * Ast))
-    | Exists of Positions * (Ast list * Ast) 
+    | Exists of Positions * (Ast list * ((Ast * Ast) * Ast))
     | ExistsN of Positions * ((Ast * Ast list) * Ast)
     | IsOperator of Positions * (Ast * Ast)
     | Delegate of Positions * (string * Ast)

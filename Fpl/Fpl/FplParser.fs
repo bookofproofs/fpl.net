@@ -363,7 +363,7 @@ let equivalence = positions (chooseBinaryOp keywordIif) |>> Ast.Iif
 let negation = positions (keywordNot >>. predicate) |>> Ast.Not
 
 let all = positions ((keywordAll >>. namedVariableDeclarationList) .>>. (leftBracePos .>>. predicate .>>. rightBrace)) |>> Ast.All
-let exists = positions ((keywordEx >>. namedVariableDeclarationList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.Exists
+let exists = positions ((keywordEx >>. namedVariableDeclarationList) .>>. (leftBracePos .>>. predicate .>>. rightBrace)) |>> Ast.Exists
 
 let existsNTimes = choice [
         attempt (keywordExNSymbolic .>> SW) |>> Ast.Exists1 

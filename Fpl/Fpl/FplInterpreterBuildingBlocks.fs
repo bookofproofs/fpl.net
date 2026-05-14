@@ -1028,7 +1028,8 @@ let rec eval ast =
         eval predicateAst
         heap.Eval.PopEvalStack() // remove all quantor
         eval rightBrace
-    | Ast.Exists((pos1, pos2), (namedVarDeclAstList, predicateAst)) ->
+    | Ast.Exists((pos1, pos2), (namedVarDeclAstList, ((leftBrace, predicateAst), rightBrace))) ->
+        eval leftBrace
         let parent = heap.Eval.PeekEvalStack()
         let fv = new FplQuantorExists((pos1, pos2), parent)
         heap.Eval.PushEvalStack(fv) // add exists quantor
@@ -1040,6 +1041,7 @@ let rec eval ast =
         |> ignore
         eval predicateAst
         heap.Eval.PopEvalStack() // remove exists quantor
+        eval rightBrace
     | Ast.ExistsN((pos1, pos2), ((dollarDigitsAst, namedVarDeclListAst), predicateAst)) ->
         let parent = heap.Eval.PeekEvalStack()
         let fv = new FplQuantorExistsN((pos1, pos2), parent)
