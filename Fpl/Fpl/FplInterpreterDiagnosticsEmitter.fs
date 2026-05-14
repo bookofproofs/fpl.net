@@ -1033,6 +1033,20 @@ let emitSY001diagnostics pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
+let emitSY002diagnostics pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Warning
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = SY002
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
+
 let emitST005diagnostics domain nodeType pos1 pos2 =
     let diagnostic =
         { 

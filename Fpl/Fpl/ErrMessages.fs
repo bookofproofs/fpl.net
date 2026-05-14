@@ -169,6 +169,7 @@ let errST005 domain nodeType = $"An enumerator for the domain `{domain}` being {
 // interpreter syntax-related error codes for error-tolerant parser
 let errSY000 infixOp = $"The infix operator `{infixOp}` is missing a second operand."
 let errSY001 = $"Replace `∃!0` by `¬∃` quantor."
+let errSY002 = $"Expression `∃!1` can be simplified with `∃!`."
 // variable-related error codes
 let errVAR00 =  "Declaring multiple arrays at once may cause ambiguities."
 let errVAR01 name = $"Variable `{name}` not declared in this scope."

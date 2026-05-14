@@ -115,8 +115,12 @@ let rec eval ast =
             heap.Eval.PushEvalStack(value)
             heap.Eval.PopEvalStack()
         | :? FplQuantorExistsN ->
-            if s = (uint)0 then
+            match (int)s with
+            | 0 ->
                 fv.ErrorOccurred <- emitSY001diagnostics pos1 pos2
+            | 1 ->
+                fv.ErrorOccurred <- emitSY002diagnostics pos1 pos2
+            | _ -> ()
             fv.FplId <- fv.FplId + sid
         | _  ->
             fv.FplId <- fv.FplId + sid

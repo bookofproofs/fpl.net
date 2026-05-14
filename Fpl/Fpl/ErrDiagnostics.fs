@@ -193,6 +193,7 @@ type DiagnosticCode =
     // interpreter syntax-related error codes for error-tolerant parser productions
     | SY000 of string
     | SY001 
+    | SY002 
     // variable-related error codes
     | VAR00 
     | VAR01 of string 
@@ -325,6 +326,7 @@ type DiagnosticCode =
             // interpreter syntax-related error codes for error-tolerant parser
             | SY000 _ -> "SY000"
             | SY001 -> "SY001"
+            | SY002 -> "SY002"
             // variable-related error codes
             | VAR00 -> "VAR00"
             | VAR01 _  -> "VAR01"
@@ -457,6 +459,7 @@ type DiagnosticCode =
             // interpreter syntax-related error codes for error-tolerant parser
             | SY000 infixOp -> errSY000 infixOp
             | SY001 -> errSY001
+            | SY002 -> errSY002
             // variable-related error codes
             | VAR00 -> errVAR00
             | VAR01 name -> errVAR01 name
