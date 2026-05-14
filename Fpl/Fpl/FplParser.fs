@@ -375,7 +375,7 @@ let existsTimeNQuantifier = choice [
     existsNTimes
 ]
 
-let existsTimesN = positions ((existsTimeNQuantifier .>>. namedVariableDeclarationList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.ExistsN
+let existsTimesN = positions ((existsTimeNQuantifier .>>. namedVariableDeclarationList) .>>. (leftBracePos .>>. predicate .>>. rightBrace)) |>> Ast.ExistsN
 let isOp = choice [
     attempt (dot >>. (predicate .>> keywordIs) .>>. variableType) 
     (keywordIs >>. leftParen >>. predicate .>> IW) .>>. (comma >>. variableType) .>> rightParen

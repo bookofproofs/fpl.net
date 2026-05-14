@@ -1042,7 +1042,8 @@ let rec eval ast =
         eval predicateAst
         heap.Eval.PopEvalStack() // remove exists quantor
         eval rightBrace
-    | Ast.ExistsN((pos1, pos2), ((dollarDigitsAst, namedVarDeclListAst), predicateAst)) ->
+    | Ast.ExistsN((pos1, pos2), ((dollarDigitsAst, namedVarDeclListAst), ((leftBrace, predicateAst), rightBrace))) ->
+        eval leftBrace
         let parent = heap.Eval.PeekEvalStack()
         let fv = new FplQuantorExistsN((pos1, pos2), parent)
         heap.Eval.PushEvalStack(fv) // add exists n quantor
@@ -1054,6 +1055,7 @@ let rec eval ast =
         |> ignore
         eval predicateAst
         heap.Eval.PopEvalStack() // remove exists n quantor
+        eval rightBrace
     | Ast.FunctionalTermSignature(((pos1, pos2), (((simpleSignatureAst, inhFunctionalTypeListAstsOpt), paramTupleAst), mappingAst)), optUserDefinedSymbolAst) -> 
         ()
         // empty since the pattern will be matched in DefinitionFunctionalTerm 

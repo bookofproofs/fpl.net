@@ -73,7 +73,7 @@ type Ast =
     | InEntity of Positions * Ast
     | All of Positions * (Ast list * ((Ast * Ast) * Ast))
     | Exists of Positions * (Ast list * ((Ast * Ast) * Ast))
-    | ExistsN of Positions * ((Ast * Ast list) * Ast)
+    | ExistsN of Positions * ((Ast * Ast list) * ((Ast * Ast) * Ast))
     | IsOperator of Positions * (Ast * Ast)
     | Delegate of Positions * (string * Ast)
     | ArgumentTuple of Positions * Ast list
