@@ -365,3 +365,13 @@ type TestUserFriendlyExpressions() =
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<DataRow("00", "def pred T() {true};")>]
+    [<DataRow("01", "ax T true};")>]
+    [<DataRow("02", "inf T  pre: true con:true};")>]
+    [<TestMethod>]
+    member this.TestMissingOpeningBrace(no:string, fplCode) =
+        let result = run (stdParser .>> eof) fplCode
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))

@@ -10,6 +10,8 @@ type Positions = Position * Position
 
 type Ast = 
     // Literals
+    | LeftBraceOpt of Positions * unit option
+    | RightBraceOpt of Positions * unit option
     | Star of Positions * unit
     | Dot of unit
     // Identifiers
@@ -69,7 +71,7 @@ type Ast =
     | Iif of Positions * (Ast * Ast)
     | Not of Positions * Ast
     | InEntity of Positions * Ast
-    | All of Positions * (Ast list * Ast)
+    | All of Positions * (Ast list * ((Ast * Ast) * Ast))
     | Exists of Positions * (Ast list * Ast) 
     | ExistsN of Positions * ((Ast * Ast list) * Ast)
     | IsOperator of Positions * (Ast * Ast)

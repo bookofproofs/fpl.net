@@ -47,8 +47,8 @@ let positions (p: Parser<_,_>): Parser<Positions * _,_> =
 
 (* Literals *)
 
-let leftBrace = skipChar '{' >>. spaces 
-let rightBrace = skipChar '}' 
+let leftBrace = positions (opt (skipChar '{' >>. spaces)) |>> Ast.LeftBraceOpt
+let rightBrace = positions (opt (skipChar '}')) |>> Ast.RightBraceOpt
 let leftParen = skipChar '(' >>. spaces 
 let rightParen = skipChar ')' 
 let comma = skipChar ',' >>. spaces 
@@ -270,7 +270,7 @@ let argumentTuple = positions ((leftParen >>. predicateList) .>> (IW .>> rightPa
 
 let fplDelegate = positions (keywordDel >>. dot >>. idStartsWithCap .>>. (IW >>. argumentTuple)) |>> Ast.Delegate
 
-let spacesRightBrace = (IW .>> rightBrace) 
+let spacesRightBrace = (IW >>. rightBrace) 
 
 let keywordReturn = IW >>. (skipString LiteralRetL <|> skipString LiteralRet) .>> SW 
 
@@ -361,7 +361,7 @@ let implication = positions (chooseBinaryOp keywordImpl) |>> Ast.Impl
 let equivalence = positions (chooseBinaryOp keywordIif) |>> Ast.Iif
 let negation = positions (keywordNot >>. predicate) |>> Ast.Not
 
-let all = positions ((keywordAll >>. namedVariableDeclarationList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.All
+let all = positions ((keywordAll >>. namedVariableDeclarationList) .>>. (leftBrace .>>. predicate .>>. rightBrace)) |>> Ast.All
 let exists = positions ((keywordEx >>. namedVariableDeclarationList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.Exists
 
 let existsNTimes = choice [
@@ -537,7 +537,7 @@ let proof = positions (proofSignature .>>. proofBlock) |>> Ast.Proof
 
 (* FPL building blocks - Definitions *)
 
-// Predicate building blocks can be defined similarly to classes, they can have properties but they cannot be derived any parent type 
+// Predicate building blocks can be defined similarly to classes, they can have properties but they cannot be derived any parent type
 let predicateDefinitionBlock = opt (leftBrace  >>. ((keywordIntrinsic <|> predContent) .>> IW) .>>. propertyList .>> spacesRightBrace)
 let inheritedPredicateType = predicateIdentifier
 let inheritedPredicateTypeList = sepBy1 (inheritedPredicateType) (attempt (IW >>. comma)) |>> Ast.InheritedPredicateTypeList

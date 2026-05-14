@@ -39,6 +39,7 @@
         <Compile Include="TestFplValue.fs" />
         <Compile Include="TestEvalAliasedNamespaceIdentifier.fs" />
         <Compile Include="TestValidity.fs" />
+        <Compile Include="Diagnostics\ErrRecovery\TestInterpreterErrors.fs" />
         <Compile Include="Diagnostics\TestInterpreterErrors.fs" />
         <Compile Include="Proofs\TestProceedingExpressionsJust.fs" />
         <Compile Include="Proofs\TestProceedingExpressionsArgInf.fs" />

@@ -97,7 +97,18 @@ let rec eval ast =
     | Ast.Alias((_, _), _) -> ()
     | Ast.Dot() -> ()
     | Ast.Star((_, _),()) -> ()
-
+    | Ast.LeftBraceOpt ((pos1, pos2), openingBraceOpt) ->
+        match openingBraceOpt with
+        | None ->
+            let fv = heap.Eval.PeekEvalStack()
+            fv.ErrorOccurred <- emitSY003diagnostics pos1 pos2
+        | _ -> ()
+    | Ast.RightBraceOpt ((pos1, pos2), closingBraceOpt) ->
+        match closingBraceOpt with
+        | None ->
+            let fv = heap.Eval.PeekEvalStack()
+            fv.ErrorOccurred <- emitSY004diagnostics pos1 pos2
+        | _ -> ()
     | Ast.Digits s -> 
         let fv = heap.Eval.PeekEvalStack()
         fv.FplId <- s
@@ -1003,7 +1014,8 @@ let rec eval ast =
             eval functionalTermInstanceBlockAst
         | None -> fvNew.IsIntrinsic <- true
         heap.Eval.PopEvalStack()
-    | Ast.All((pos1, pos2), (namedVarDeclAstList, predicateAst)) ->
+    | Ast.All((pos1, pos2), (namedVarDeclAstList, ((leftBrace, predicateAst), rightBrace))) ->
+        eval leftBrace
         let parent = heap.Eval.PeekEvalStack()
         let fv = new FplQuantorAll((pos1, pos2), parent)
         heap.Eval.PushEvalStack(fv) // add all quantor
@@ -1015,6 +1027,7 @@ let rec eval ast =
         |> ignore
         eval predicateAst
         heap.Eval.PopEvalStack() // remove all quantor
+        eval rightBrace
     | Ast.Exists((pos1, pos2), (namedVarDeclAstList, predicateAst)) ->
         let parent = heap.Eval.PeekEvalStack()
         let fv = new FplQuantorExists((pos1, pos2), parent)
