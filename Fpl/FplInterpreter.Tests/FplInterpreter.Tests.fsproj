@@ -37,9 +37,9 @@
         <Compile Include="TestFplValueScopeParent.fs" />
         <Compile Include="TestFplValueScopeCompleteness.fs" />
         <Compile Include="TestFplValue.fs" />
-        <Compile Include="TestInterpreterErrors.fs" />
         <Compile Include="TestEvalAliasedNamespaceIdentifier.fs" />
         <Compile Include="TestValidity.fs" />
+        <Compile Include="Diagnostics\TestInterpreterErrors.fs" />
         <Compile Include="Proofs\TestProceedingExpressionsJust.fs" />
         <Compile Include="Proofs\TestProceedingExpressionsArgInf.fs" />
     </ItemGroup>

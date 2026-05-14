@@ -1,10 +1,8 @@
-namespace FplInterpreter.Tests
+namespace FplInterpreter.Tests.Diagnostics
 
 open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
-open FplInterpreterAstPreprocessing
-open FplInterpreter.Globals.ST
 open FplInterpreter.Globals.Debug
 open FplInterpreter.Main
 open CommonTestHelpers
@@ -5772,6 +5770,17 @@ type TestInterpreterErrors() =
         else
             let code = SY000 ""
             runTestHelper "TestSY000.fpl" fplCode code expected
+
+    [<DataRow("00", "def pred T() { ∃!0 x:obj{true} } ;", 1)>] 
+    [<DataRow("01", "def pred T() { ∃!1 x:obj{true} } ;", 0)>] 
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestSY001(no:string, fplCode:string, expected) =
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = SY001 
+            runTestHelper "TestSY001.fpl" fplCode code expected
 
     [<DataRow("def predicate Test(x,y:* pred[ind]) {true};", 1)>]
     [<DataRow("def predicate Test(x,y:* pred[obj]) {true};", 1)>]

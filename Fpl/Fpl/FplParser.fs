@@ -765,7 +765,7 @@ let getParserChoicesAtPosition (input:string) index =
         let newErrMsg, choices = mapErrMsgToRecText input errorMsg restInput.Position
         choices, restInput.Position.Index
 
-/// Used to test FplLS CompletionItems correct syntax
+/// Used only to test FplLS CompletionItems correct syntax, which is written in C# and requires this module to run
 let testParser (parserType:string) (input:string) =
     let trimmed = preParsePreProcess (input.Trim())
     match parserType with 
