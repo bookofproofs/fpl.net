@@ -455,6 +455,7 @@ type TestDefinitionPredicates () =
     [<DataRow("04", """pred T() { dec ~cI2:C1 cI2:=C1($2); true }""")>]
     [<DataRow("05", """pred TestPredicate(a:T1, b:func, c:ind, d:pred) { D(self,b,c) }""")>]
     [<DataRow("06", """pred TestPredicate(a:T1, b:func, c:ind, d:pred) { delegate.C(Test1(a),Test2(b,c,d)) }""")>]
+    [<DataRow("07", """pred A()""")>]
     [<TestMethod>]
     member this.TestDefinitionPredicate (no:string, fplCode:string) =
         let result = run (definitionPredicate .>> eof) fplCode

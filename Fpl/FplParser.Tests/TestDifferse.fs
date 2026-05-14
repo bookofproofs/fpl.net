@@ -13,11 +13,12 @@ type TestDiverse () =
             |> String.concat ""
 
 
+    [<DataRow("00", """def pred Neg(x:pred) {not x} def pred T1() { ( Neg(true) ) };""")>]
+    [<DataRow("00", """def pred A() ext Test x@/\d+/->pred() {return A};""")>]
     [<TestMethod>]
-    member this.TestDiverse00 () =
-        let result = run (ast .>> eof) """def pred Neg(x:pred) {not x} def pred T1() { ( Neg(true) ) };"""
-        let actual = sprintf "%O" result
+    member this.TestDiverse00 (no:string, fplCode:string) =
+        let result = run (ast .>> eof) fplCode
+        let actual = sprintf "%O" result 
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
-    

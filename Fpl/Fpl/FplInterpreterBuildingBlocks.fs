@@ -97,14 +97,14 @@ let rec eval ast =
     | Ast.Alias((_, _), _) -> ()
     | Ast.Dot() -> ()
     | Ast.Star((_, _),()) -> ()
-    | Ast.LeftBraceOpt ((pos1, pos2), openingBraceOpt) ->
-        match openingBraceOpt with
+    | Ast.LeftBraceOpt ((pos1, pos2), leftBraceOpt) ->
+        match leftBraceOpt with
         | None ->
             let fv = heap.Eval.PeekEvalStack()
             fv.ErrorOccurred <- emitSY003diagnostics pos1 pos2
         | _ -> ()
-    | Ast.RightBraceOpt ((pos1, pos2), closingBraceOpt) ->
-        match closingBraceOpt with
+    | Ast.RightBraceOpt ((pos1, pos2), rightBraceOpt) ->
+        match rightBraceOpt with
         | None ->
             let fv = heap.Eval.PeekEvalStack()
             fv.ErrorOccurred <- emitSY004diagnostics pos1 pos2

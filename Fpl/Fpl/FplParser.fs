@@ -47,7 +47,8 @@ let positions (p: Parser<_,_>): Parser<Positions * _,_> =
 
 (* Literals *)
 
-let leftBrace = positions (opt (skipChar '{' >>. spaces)) |>> Ast.LeftBraceOpt
+let leftBrace = skipChar '{' >>. spaces
+let leftBracePos = positions (opt (skipChar '{')) .>> spaces |>> Ast.LeftBraceOpt
 let rightBrace = positions (opt (skipChar '}')) |>> Ast.RightBraceOpt
 let leftParen = skipChar '(' >>. spaces 
 let rightParen = skipChar ')' 
@@ -361,7 +362,7 @@ let implication = positions (chooseBinaryOp keywordImpl) |>> Ast.Impl
 let equivalence = positions (chooseBinaryOp keywordIif) |>> Ast.Iif
 let negation = positions (keywordNot >>. predicate) |>> Ast.Not
 
-let all = positions ((keywordAll >>. namedVariableDeclarationList) .>>. (leftBrace .>>. predicate .>>. rightBrace)) |>> Ast.All
+let all = positions ((keywordAll >>. namedVariableDeclarationList) .>>. (leftBracePos .>>. predicate .>>. rightBrace)) |>> Ast.All
 let exists = positions ((keywordEx >>. namedVariableDeclarationList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.Exists
 
 let existsNTimes = choice [

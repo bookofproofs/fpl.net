@@ -474,4 +474,3 @@ type TestPredicates () =
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
-           

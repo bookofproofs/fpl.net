@@ -48,6 +48,7 @@
         <Compile Include="TestTheoremLikeStatements.fs" />
         <Compile Include="TestVariableTypes.fs" />
         <Compile Include="TestJUserFriendlyExpressions.fs" />
+        <Compile Include="ErrRecovery\TestJUserFriendlyExpressions.fs" />
     </ItemGroup>
 
     <ItemGroup>
