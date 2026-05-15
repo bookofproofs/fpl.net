@@ -33,6 +33,7 @@ type Ast =
     | TranslationTermList of Positions * Ast list
     | Language of Positions * (Ast * Ast)
     | ExtensionName of Positions * string
+    | ExtensionNameErr of Positions * unit
     | ExtensionRegex of string
     | ExtensionAssignment of Positions * (Ast * Ast) 
     | ExtensionSignature of Positions * (Ast * Ast)

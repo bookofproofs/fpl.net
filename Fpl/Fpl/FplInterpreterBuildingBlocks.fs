@@ -143,16 +143,16 @@ let rec eval ast =
     | Ast.ExtensionRegex s -> 
         let fv = heap.Eval.PeekEvalStack()
         fv.TypeId <- s
-
-    | Ast.ExtensionName((pos1, pos2), s) ->
+    | Ast.ExtensionName((pos1, pos2), extensionName) ->
         let fv = heap.Eval.PeekEvalStack()
-        let extensionName = s
         match fv with 
         | :? FplExtension ->
             fv.FplId <- extensionName
             fv.TypeId <- extensionName
         | _ -> ()
-
+    | Ast.ExtensionNameErr((pos1, pos2), ()) ->
+        let fv = heap.Eval.PeekEvalStack()
+        fv.ErrorOccurred <- emitSY005diagnostics pos1 pos2
     | Ast.LanguageCode((pos1, pos2), s) -> 
         let fv = heap.Eval.PeekEvalStack()
         fv.FplId <- s

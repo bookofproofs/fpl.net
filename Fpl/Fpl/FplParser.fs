@@ -220,7 +220,11 @@ let namedVariableDeclarationList, namedVariableDeclarationListRef = createParser
 
 let keywordExtension = (skipString LiteralExtL <|> skipString LiteralExt) .>> SW
 
-let extensionName = positions (idStartsWithCap) |>> Ast.ExtensionName
+
+let extensionName = choice [
+    attempt (positions (idStartsWithCap) .>> SW) |>> Ast.ExtensionName
+    positions (skipString "") |>> Ast.ExtensionNameErr
+    ]
 
 
 // The classType is the last type in FPL we can derive FPL classes from.
@@ -494,7 +498,7 @@ let extensionAssignment = positions ((variable .>> IW .>> at .>> IW) .>>. (slash
 
 let extensionSignature = positions ((extensionAssignment .>> IW) .>>. mapping) .>> IW |>> Ast.ExtensionSignature
 let extensionTerm = leftBracePos .>>. ((funcContent <|> mapCases) .>>. spacesRightBrace)
-let definitionExtension = positions (keywordExtension >>. (extensionName .>> SW) .>>. extensionSignature .>>. extensionTerm) |>> Ast.DefinitionExtension
+let definitionExtension = positions (keywordExtension >>. extensionName .>>. extensionSignature .>>. extensionTerm) |>> Ast.DefinitionExtension
 
 let definitionProperty = choice [
     attempt predicateInstance
