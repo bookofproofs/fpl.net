@@ -220,12 +220,10 @@ let namedVariableDeclarationList, namedVariableDeclarationListRef = createParser
 
 let keywordExtension = (skipString LiteralExtL <|> skipString LiteralExt) .>> SW
 
-
 let extensionName = choice [
     attempt (positions (idStartsWithCap) .>> SW) |>> Ast.ExtensionName
     positions (skipString "") |>> Ast.ExtensionNameErr
     ]
-
 
 // The classType is the last type in FPL we can derive FPL classes from.
 // It therefore excludes the in-built FPL-types keywordPredicate, keywordFunction, and keywordIndex
@@ -273,7 +271,12 @@ let userDefinedSymbol = opt (attempt (IW >>. choice [userDefinedPrefix; userDefi
 (* Statements *)
 let argumentTuple = positions ((leftParen >>. predicateList) .>> (IW .>> rightParen)) |>> Ast.ArgumentTuple 
 
-let fplDelegate = positions (keywordDel >>. dot >>. idStartsWithCap .>>. (IW >>. argumentTuple)) |>> Ast.Delegate
+let delegateName = choice [
+    attempt (positions (idStartsWithCap) .>> IW) |>> Ast.DelegateName
+    positions (IW) |>> Ast.DelegateNameErr
+    ]
+
+let fplDelegate = positions (keywordDel >>. dot >>. delegateName .>>. argumentTuple) |>> Ast.Delegate
 
 let spacesRightBrace = (IW >>. rightBrace) 
 

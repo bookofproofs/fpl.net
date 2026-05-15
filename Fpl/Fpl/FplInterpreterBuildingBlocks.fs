@@ -931,27 +931,30 @@ let rec eval ast =
         eval variableTypeAst
         heap.Eval.PopEvalStack()
         heap.Eval.PopEvalStack()
-    | Ast.Delegate((pos1, pos2), (delegateId, argumentTupleAst)) ->
+    | Ast.Delegate((pos1, pos2), (delegateNameAst, argumentTupleAst)) ->
+        eval delegateNameAst
+        eval argumentTupleAst
+        heap.Eval.PopEvalStack()
+    | Ast.DelegateName((pos1, pos2), delegateId) ->
         let fv = heap.Eval.PeekEvalStack()
         match delegateId with 
         | PrimDelegateEqualL -> 
             let deleg = new FplEquality(delegateId, (pos1, pos2), fv)
             heap.Eval.PushEvalStack(deleg)
-            eval argumentTupleAst
-            heap.Eval.PopEvalStack()
         | PrimDelegateDecrementL -> 
             let deleg = new FplDecrement(delegateId, (pos1, pos2), fv)
             heap.Eval.PushEvalStack(deleg)
-            eval argumentTupleAst
-            heap.Eval.PopEvalStack()
         | _ -> 
             let deleg = new FplReference((pos1, pos2), fv)
             deleg.FplId <- delegateId
             deleg.TypeId <- delegateId
             heap.Eval.PushEvalStack(deleg)
-            eval argumentTupleAst
-            heap.Eval.PopEvalStack()
             deleg.ErrorOccurred <- emitID013Diagnostics $"Unknown delegate `{delegateId}`" pos1 pos2
+    | Ast.DelegateNameErr((pos1, pos2), ()) ->
+        let fv = heap.Eval.PeekEvalStack()
+        let deleg = new FplReference((pos1, pos2), fv)
+        heap.Eval.PushEvalStack(deleg)
+        fv.ErrorOccurred <- emitSY005diagnostics pos1 pos2
     | Ast.PredicateSignature(((pos1, pos2), ((simpleSignatureAst, inhPredicateTypeListAstsOpt), paramTupleAst)), optUserDefinedSymbolAst) -> 
         ()
         // empty since the pattern will be matched in DefinitionPredicagte 

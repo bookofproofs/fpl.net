@@ -142,6 +142,8 @@ type TestInterpreterErrors() =
     [<DataRow("inf01", """inf {pre:true con:true};""", 1)>]
     [<DataRow("ext01", """ext T x@/\d+/ -> X {ret x};""", 0)>]
     [<DataRow("ext02", """ext  x@/\d+/ -> X {ret x};""", 1)>]
+    [<DataRow("del01", """def pred T() {del.T()};""", 0)>]
+    [<DataRow("del02", """def pred T() {del. ()};""", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSY005(no:string, fplCode:string, expected) =

@@ -34,6 +34,8 @@ type Ast =
     | Language of Positions * (Ast * Ast)
     | ExtensionName of Positions * string
     | ExtensionNameErr of Positions * unit
+    | DelegateName of Positions * string
+    | DelegateNameErr of Positions * unit
     | ExtensionRegex of string
     | ExtensionAssignment of Positions * (Ast * Ast) 
     | ExtensionSignature of Positions * (Ast * Ast)
@@ -76,7 +78,7 @@ type Ast =
     | Exists of Positions * (Ast list * ((Ast * Ast) * Ast))
     | ExistsN of Positions * ((Ast * Ast list) * ((Ast * Ast) * Ast))
     | IsOperator of Positions * (Ast * Ast)
-    | Delegate of Positions * (string * Ast)
+    | Delegate of Positions * (Ast * Ast)
     | ArgumentTuple of Positions * Ast list
     | PredicateWithOptSpecification of Positions * (Ast * Ast option)
     | DottedPredicate of Positions * Ast 

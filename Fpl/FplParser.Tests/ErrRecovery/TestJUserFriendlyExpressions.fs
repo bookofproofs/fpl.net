@@ -62,6 +62,7 @@ type TestRecovery() =
     [<DataRow("cor01", """cor {true};""")>]
     [<DataRow("proof01", """proof {1. |- trivial};""")>]
     [<DataRow("ext01", """ext  x@/\d+/ -> X {ret x};""")>]
+    [<DataRow("del01", """def pred T() {del. ()};""")>]
     [<TestMethod>]
     member this.TestMissingPascalCaseId(no:string, fplCode) =
         let result = run (stdParser .>> eof) fplCode
