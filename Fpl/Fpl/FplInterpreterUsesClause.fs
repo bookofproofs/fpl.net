@@ -38,25 +38,34 @@ let rec eval_uses_clause debugMode = function
         eval_uses_clause debugMode ast 
     | Ast.AliasedNamespaceIdentifier ((pos1, pos2), (ast, optAst)) -> 
         let evalAlias = match optAst with
-                          | Some (Ast.Alias ((p1, p2), s)) -> 
-                                    { 
-                                        StartPos = p1
-                                        EndPos = p2
-                                        AliasOrStar = s
-                                    }
-                          | Some (Ast.Star ((p1,p2),())) -> 
-                                    { 
-                                        StartPos = p1
-                                        EndPos = p2
-                                        AliasOrStar = "*"
-                                    }
+                        | Some (Ast.Alias ((p1, p2), sOpt)) ->
+                            match sOpt with
+                            | Some s ->
+                                { 
+                                    StartPos = p1
+                                    EndPos = p2
+                                    AliasOrStar = s
+                                }
+                            | None ->
+                                emitSY005diagnostics p1 p2 |> ignore
+                                { 
+                                    StartPos = pos1
+                                    EndPos = pos2
+                                    AliasOrStar = ""
+                                }
+                        | Some (Ast.Star ((p1,p2),())) -> 
+                            { 
+                                StartPos = p1
+                                EndPos = p2
+                                AliasOrStar = "*"
+                            }
 
-                          | _ -> 
-                                    { 
-                                        StartPos = pos1
-                                        EndPos = pos2
-                                        AliasOrStar = ""
-                                    }
+                        | _ -> 
+                            { 
+                                StartPos = pos1
+                                EndPos = pos2
+                                AliasOrStar = ""
+                            }
 
         match ast with
         | Ast.NamespaceIdentifier ((p1, p2), asts) -> 

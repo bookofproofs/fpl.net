@@ -95,7 +95,7 @@ let pascalCaseId = positions (opt idStartsWithCap) |>> Ast.PascalCaseId
 let namespaceIdentifier = positions (sepBy1 pascalCaseId dot) .>> IW |>> Ast.NamespaceIdentifier
 let predicateIdentifier = positions (idStartsWithCap) |>> Ast.PredicateIdentifier 
 
-let alias = positions (skipString LiteralAlias >>. SW >>. idStartsWithCap) |>> Ast.Alias
+let alias = positions (skipString LiteralAlias >>. SW >>. opt idStartsWithCap) |>> Ast.Alias
 let star = positions (skipChar '*') |>> Ast.Star
 
 let aliasedNamespaceIdentifier = positions (namespaceIdentifier .>>. opt (alias <|> star)) |>> Ast.AliasedNamespaceIdentifier

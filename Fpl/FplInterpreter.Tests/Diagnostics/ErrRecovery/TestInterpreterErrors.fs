@@ -112,6 +112,8 @@ type TestInterpreterErrors() =
 
     [<DataRow("uses00", """uses Fpl.Test;""", 0)>]
     [<DataRow("uses01", """uses Fpl.Test.;""", 1)>]
+    [<DataRow("uses02", """uses Fpl.Test alias A;""", 0)>]
+    [<DataRow("uses03", """uses Fpl.Test alias ;""", 1)>]
     [<DataRow("cl00", """def cl T ;""", 0)>]
     [<DataRow("cl01", """def cl ;""", 1)>]
     [<DataRow("cl02", """def cl T {intr};""", 0)>]

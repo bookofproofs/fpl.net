@@ -45,6 +45,7 @@ type TestRecovery() =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<DataRow("uses00", """uses Fpl.Test.;""")>]
+    [<DataRow("uses01", """uses Fpl.Test alias ;""")>]
     [<DataRow("cl01", """def cl ;""")>]
     [<DataRow("cl01a", """def cl {intr};""")>]
     [<DataRow("thm01", """thm {true};""")>]

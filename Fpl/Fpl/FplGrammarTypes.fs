@@ -24,7 +24,7 @@ type Ast =
     | AliasedNamespaceIdentifier of Positions * (Ast * Ast option)
     | PredicateIdentifier of Positions * string
     | LanguageCode of Positions * string
-    | Alias of Positions * string
+    | Alias of Positions * string option
     | SelfOrParent of Positions * Ast
     | Self of Positions * unit
     | Parent of Positions * unit
