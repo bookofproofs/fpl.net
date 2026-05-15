@@ -108,3 +108,41 @@ type TestInterpreterErrors() =
         else
             let code = SY004
             runTestHelper "TestSY004.fpl" fplCode code expected
+
+
+    [<DataRow("uses00", """uses Fpl.Test;""", 0)>]
+    [<DataRow("uses01", """uses Fpl.Test.;""", 1)>]
+    [<DataRow("cl00", """def cl T ;""", 0)>]
+    [<DataRow("cl01", """def cl ;""", 1)>]
+    [<DataRow("cl02", """def cl T {intr};""", 0)>]
+    [<DataRow("cl03", """def cl {intr};""", 1)>]
+    [<DataRow("cl04", """def cl T:S ;""", 0)>]
+    [<DataRow("cl05", """def cl T:;""", 1)>]
+    [<DataRow("thm00", """thm T {true};""", 0)>]
+    [<DataRow("thm01", """thm {true};""", 1)>]
+    [<DataRow("lem00", """lem T{true};""", 0)>]
+    [<DataRow("lem01", """lem {true};""", 1)>]
+    [<DataRow("prop00", """prop T{true};""", 0)>]
+    [<DataRow("prop01", """prop {true};""", 1)>]
+    [<DataRow("conj00", """conj T{true};""", 0)>]
+    [<DataRow("conj01", """conj {true};""", 1)>]
+    [<DataRow("ax00", """ax T{true};""", 0)>]
+    [<DataRow("ax01", """ax {true};""", 1)>]
+    [<DataRow("pred00", """def pred T();""", 0)>]
+    [<DataRow("pred01", """def pred ();""", 1)>]
+    [<DataRow("pred02", """def pred T:S();""", 0)>]
+    [<DataRow("pred03", """def pred T:();""", 1)>]
+    [<DataRow("func00", """def func T()->obj ;""", 0)>]
+    [<DataRow("func01", """def func ()->obj ;""", 1)>]
+    [<DataRow("func02", """def func T:S()->obj ;""", 0)>]
+    [<DataRow("func03", """def func T:()->obj ;""", 1)>]
+    [<DataRow("inf00", """inf T{pre:true con:true};""", 0)>]
+    [<DataRow("inf01", """inf {pre:true con:true};""", 1)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestSY005(no:string, fplCode:string, expected) =
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = SY005
+            runTestHelper "TestSY005.fpl" fplCode code expected

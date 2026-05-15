@@ -164,32 +164,36 @@ let rec eval ast =
         fv.FplId <- s
         fv.TypeId <- s
 
-    | Ast.PascalCaseId ((pos1, pos2), pascalCaseId) -> 
+    | Ast.PascalCaseId ((pos1, pos2), pascalCaseIdOpt) ->
         let fv = heap.Eval.PeekEvalStack()
-        match fv.Name with
-        | LiteralAxL
-        | LiteralThmL
-        | LiteralPropL
-        | LiteralLemL
-        | LiteralConjL
-        | LiteralCorL
-        | PrimFunctionalTermL
-        | PrimPredicateL
-        | LiteralPrfL
-        | PrimMandatoryFunctionalTermL
-        | PrimMandatoryPredicateL
-        | PrimPredicateL
-        | PrimFunctionalTermL
-        | PrimRuleOfInference -> 
-            fv.FplId <- pascalCaseId
-        | LiteralCtorL ->
-            fv.FplId <- pascalCaseId
-            fv.TypeId <- pascalCaseId
-            fv.ErrorOccurred <- emitID008Diagnostics pascalCaseId fv.Parent.Value.FplId pos1 pos2
-        | PrimClassL ->
-            fv.FplId <- pascalCaseId
-            fv.TypeId <- pascalCaseId
-        | _ -> ()
+        match pascalCaseIdOpt with
+        | None ->
+            fv.ErrorOccurred <- emitSY005diagnostics pos1 pos2
+        | Some pascalCaseId -> 
+            match fv.Name with
+            | LiteralAxL
+            | LiteralThmL
+            | LiteralPropL
+            | LiteralLemL
+            | LiteralConjL
+            | LiteralCorL
+            | PrimFunctionalTermL
+            | PrimPredicateL
+            | LiteralPrfL
+            | PrimMandatoryFunctionalTermL
+            | PrimMandatoryPredicateL
+            | PrimPredicateL
+            | PrimFunctionalTermL
+            | PrimRuleOfInference -> 
+                fv.FplId <- pascalCaseId
+            | LiteralCtorL ->
+                fv.FplId <- pascalCaseId
+                fv.TypeId <- pascalCaseId
+                fv.ErrorOccurred <- emitID008Diagnostics pascalCaseId fv.Parent.Value.FplId pos1 pos2
+            | PrimClassL ->
+                fv.FplId <- pascalCaseId
+                fv.TypeId <- pascalCaseId
+            | _ -> ()
 
     | Ast.PredicateIdentifier((pos1, pos2), identifier) ->
         let fv = heap.Eval.PeekEvalStack()
@@ -889,13 +893,13 @@ let rec eval ast =
     | Ast.ExtensionSignature((pos1, pos2), (extensionAssignmentAst, extensionMappingAst)) ->
         eval extensionAssignmentAst
         eval extensionMappingAst
-    | Ast.DefinitionExtension((pos1, pos2), ((leftBrace, extensionNameAst), (extensionSignatureAst, (extensionTermAst, rightBrace)))) ->
-        eval leftBrace
+    | Ast.DefinitionExtension((pos1, pos2), ((extensionNameAst, extensionSignatureAst), (leftBrace, (extensionTermAst, rightBrace)))) ->
         let parent = heap.Eval.PeekEvalStack()
         let fv = new FplExtension((pos1,pos2), parent, heap.Helper.GetNextAvailableFplBlockRunOrder)
         heap.Eval.PushEvalStack(fv)
         eval extensionNameAst
         eval extensionSignatureAst
+        eval leftBrace
         eval extensionTermAst
         heap.Eval.PopEvalStack()
         eval rightBrace

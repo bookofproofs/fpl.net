@@ -19,10 +19,10 @@ type Ast =
     | Extension of Positions * string
     | DollarDigits of Positions * uint
     | Exists1 of unit
-    | PascalCaseId of Positions * string
+    | PascalCaseId of Positions * string option
     | NamespaceIdentifier of Positions * Ast list
     | AliasedNamespaceIdentifier of Positions * (Ast * Ast option)
-    | PredicateIdentifier of Positions * string 
+    | PredicateIdentifier of Positions * string
     | LanguageCode of Positions * string
     | Alias of Positions * string
     | SelfOrParent of Positions * Ast

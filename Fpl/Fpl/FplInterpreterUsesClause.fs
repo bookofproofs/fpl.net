@@ -60,7 +60,20 @@ let rec eval_uses_clause debugMode = function
 
         match ast with
         | Ast.NamespaceIdentifier ((p1, p2), asts) -> 
-            let pascalCaseIdList = asts |> List.collect (function Ast.PascalCaseId (_,s) -> [s] | _ -> [])
+            let pascalCaseIdList =
+                asts
+                |> List.collect (
+                    function Ast.PascalCaseId ((p_1, p_2),sOpt)
+                            ->
+                                match sOpt with
+                                | Some s ->
+                                    [s]
+                                | _ ->
+                                    emitSY005diagnostics p_1 p_2 |> ignore
+                                    []
+                            | _ -> []
+                )
+
             [EvalAliasedNamespaceIdentifier.CreateEani(pascalCaseIdList, evalAlias, p1, p2, debugMode)]
         | _ -> []
     | _ -> []
