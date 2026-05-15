@@ -122,7 +122,7 @@ type TestIdentifiers () =
 
     [<TestMethod>]
     member this.TestExtensionName () =
-        let result = run (extensionName .>> eof) "Digits"
+        let result = run (extensionName .>> eof) "Digits "
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

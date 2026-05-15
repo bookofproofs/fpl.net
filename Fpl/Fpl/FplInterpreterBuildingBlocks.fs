@@ -830,9 +830,7 @@ let rec eval ast =
         eval langCode
         eval ebnfAst
         heap.Eval.PopEvalStack() // remove language
-    | Ast.InheritedPredicateTypeList inheritedTypeAsts 
-    | Ast.InheritedFunctionalTypeList inheritedTypeAsts 
-    | Ast.InheritedClassTypeList inheritedTypeAsts -> 
+    | Ast.InheritedTypeList inheritedTypeAsts -> 
         let beingCreatedNode = heap.Eval.PeekEvalStack()
         let addVariablesAndPropertiesOfBaseNode (bNode:FplGenericNode) = 
             match box beingCreatedNode with

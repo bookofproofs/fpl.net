@@ -306,8 +306,9 @@ let forStatement = positions (keywordFor >>. forInBody) |>> Ast.ForIn
 //// the scope of a definition. An assertion uses a predicate referring to existing identifiers in the whole theory
 //// Difference of assertion to assume: the latter will be used only in the scope of proofs
 let assertionStatement = positions (keywordAssert >>. predicate) |>> Ast.Assertion
-let inheritedClassType = predicateIdentifier
-let baseConstructorCall = positions (keywordBaseClassReference >>. dot >>. (inheritedClassType .>> IW).>>. argumentTuple .>> IW) |>> Ast.BaseConstructorCall
+let inheritedType = predicateIdentifier
+
+let baseConstructorCall = positions (keywordBaseClassReference >>. dot >>. (inheritedType .>> IW).>>. argumentTuple .>> IW) |>> Ast.BaseConstructorCall
 
 let statement = 
     IW >>. (choice [
@@ -548,17 +549,14 @@ let proof = positions (proofSignature .>>. proofBlock) |>> Ast.Proof
 
 // Predicate building blocks can be defined similarly to classes, they can have properties but they cannot be derived any parent type
 let predicateDefinitionBlock = opt (leftBrace  >>. ((keywordIntrinsic <|> predContent) .>> IW) .>>. propertyList .>> spacesRightBrace)
-let inheritedPredicateType = predicateIdentifier
-let inheritedPredicateTypeList = sepBy1 (inheritedPredicateType) (attempt (IW >>. comma)) |>> Ast.InheritedPredicateTypeList
-let predicateSignature = positions (keywordPredicate >>. SW >>. (simpleSignature .>>. opt (colon >>. inheritedPredicateTypeList) .>> IW) .>>. paramTuple) .>>. userDefinedSymbol .>> IW |>> Ast.PredicateSignature
+let inheritedTypeList = sepBy1 (inheritedType) (attempt (IW >>. comma)) |>> Ast.InheritedTypeList
+let predicateSignature = positions (keywordPredicate >>. SW >>. (simpleSignature .>>. opt (colon >>. inheritedTypeList) .>> IW) .>>. paramTuple) .>>. userDefinedSymbol .>> IW |>> Ast.PredicateSignature
 let definitionPredicate = positions (predicateSignature .>>. predicateDefinitionBlock) |>> Ast.DefinitionPredicate
 
 // Functional term building blocks can be defined similarly to classes, they can have properties but they cannot be derived any parent type 
 let functionalTermDefinitionBlock = positions (opt (leftBrace  >>. ((keywordIntrinsic <|> funcContent) .>> IW) .>>. propertyList .>> spacesRightBrace))  |>> Ast.FunctionalTermDefinitionBlock
 
-let inheritedFunctionalType = predicateIdentifier
-let inheritedFunctionalTypeList = sepBy1 (inheritedFunctionalType) (attempt (IW >>. comma)) |>> Ast.InheritedFunctionalTypeList
-let functionalTermSignature = positions (keywordFunction >>. SW >>. (simpleSignature .>>. opt (colon >>. inheritedFunctionalTypeList) .>> IW) .>>. paramTuple .>>. (IW >>. mapping)) .>>. userDefinedSymbol .>> IW |>> Ast.FunctionalTermSignature
+let functionalTermSignature = positions (keywordFunction >>. SW >>. (simpleSignature .>>. opt (colon >>. inheritedTypeList) .>> IW) .>>. paramTuple .>>. (IW >>. mapping)) .>>. userDefinedSymbol .>> IW |>> Ast.FunctionalTermSignature
 let definitionFunctionalTerm = positions (functionalTermSignature .>>. functionalTermDefinitionBlock) |>> Ast.DefinitionFunctionalTerm
 
 // Class definitions
@@ -567,10 +565,9 @@ let keywordClass = (skipString LiteralClL <|> skipString LiteralCl)
 let constructorList = many1 (constructor .>> IW)
 let classCompleteContent = varDeclOrSpecList .>>. constructorList|>> Ast.DefClassCompleteContent
 let classDefinitionBlock = positions (opt (leftBrace  >>. ((keywordIntrinsic <|> classCompleteContent) .>> IW) .>>. propertyList .>> spacesRightBrace)) |>> Ast.ClassDefinitionBlock
-let inheritedClassTypeList = sepBy1 (inheritedClassType) (attempt (IW >>. comma)) |>> Ast.InheritedClassTypeList
 
 let classSignature = positions (keywordClass >>. SW >>. pascalCaseId) .>> IW |>> Ast.ClassSignature
-let classSignatureExtended = classSignature .>>. opt (colon >>. inheritedClassTypeList) .>>. opt (attempt (IW >>. userDefinedObjSym)) .>> IW
+let classSignatureExtended = classSignature .>>. opt (colon >>. inheritedTypeList) .>>. opt (attempt (IW >>. userDefinedObjSym)) .>> IW
 let definitionClass = positions (classSignatureExtended .>>. classDefinitionBlock) |>> Ast.DefinitionClass 
 
 let keywordDefinition = (skipString LiteralDefL <|> skipString LiteralDef) >>. SW

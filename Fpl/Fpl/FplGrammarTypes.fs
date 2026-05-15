@@ -55,9 +55,7 @@ type Ast =
     | SimpleVariableType of Positions * Ast 
     | IndexAllowedType of Positions * Ast 
     | ArrayType of Positions * (Ast * Ast list)
-    | InheritedClassTypeList of Ast list
-    | InheritedPredicateTypeList of Ast list
-    | InheritedFunctionalTypeList of Ast list
+    | InheritedTypeList of Ast list
     | CompoundPredicateType of Positions * (Ast * Ast option)
     | CompoundFunctionalTermType of Positions * (Ast * (Ast * Ast) option)
     // Variables
