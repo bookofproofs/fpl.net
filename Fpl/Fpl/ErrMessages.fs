@@ -172,6 +172,7 @@ let errSY001 = $"Replace `∃!0` by `¬∃` quantor."
 let errSY002 = $"Expression `∃!1` can be simplified with `∃!`."
 let errSY003 = "{ expected."
 let errSY004 = "} expected."
+let errSY005 = "FPL type expected, must be PascalCase (starts with a capital letter, no spaces, hyphens, or underscores)."
 // variable-related error codes
 let errVAR00 =  "Declaring multiple arrays at once may cause ambiguities."
 let errVAR01 name = $"Variable `{name}` not declared in this scope."

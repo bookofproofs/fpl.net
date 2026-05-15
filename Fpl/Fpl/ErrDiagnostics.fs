@@ -196,6 +196,7 @@ type DiagnosticCode =
     | SY002 
     | SY003 
     | SY004
+    | SY005
     // variable-related error codes
     | VAR00 
     | VAR01 of string 
@@ -331,6 +332,7 @@ type DiagnosticCode =
             | SY002 -> "SY002"
             | SY003 -> "SY003"
             | SY004 -> "SY004"
+            | SY005 -> "SY005"
             // variable-related error codes
             | VAR00 -> "VAR00"
             | VAR01 _  -> "VAR01"
@@ -466,6 +468,7 @@ type DiagnosticCode =
             | SY002 -> errSY002
             | SY003 -> errSY003
             | SY004 -> errSY004
+            | SY005 -> errSY005
             // variable-related error codes
             | VAR00 -> errVAR00
             | VAR01 name -> errVAR01 name
