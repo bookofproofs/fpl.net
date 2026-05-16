@@ -754,7 +754,7 @@ def pred NotEqual(x,y: tpl) infix "<>" 60
     not (x = y) 
 }
 
-def pred Implies(x,y: pred) infix "=>" 70 
+def pred Implies(x,y: pred) infix "⇒" 70 
 {
     impl
     (
@@ -764,7 +764,7 @@ def pred Implies(x,y: pred) infix "=>" 70
     )
 }
 
-def pred IfAndOnlyIf(x,y: pred) infix "<=>" 80
+def pred IfAndOnlyIf(x,y: pred) infix "⇔" 80
 {
     iif
     (
@@ -774,17 +774,17 @@ def pred IfAndOnlyIf(x,y: pred) infix "<=>" 80
     )
 }
 
-def pred And(x,y: pred) infix "and" 7 
+def pred And(x,y: pred) infix "∧" 7 
 {
     and(x,y)
 }
 
-def pred Or(x,y: pred) infix "or" 10 
+def pred Or(x,y: pred) infix "∨" 10 
 {
     or(x,y)
 }
 
-def pred Xor(x,y: pred) infix "xor" 20 
+def pred Xor(x,y: pred) infix "⩡" 20 
 {
     xor(x,y)
 }

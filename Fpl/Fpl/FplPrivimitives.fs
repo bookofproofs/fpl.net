@@ -316,6 +316,7 @@ let removeFplComments (input:string) =
     let r1 = replaceLinesWithSpaces input "\/\/[^\n]*" // replace inline comments
     replaceLinesWithSpaces r1 "\/\*((?:.|\n)*?)\*\/" // replace block comments
 
+
 /// Special math symbols that can be used as infix, postfix, prefix operators, or other mathematical symbols;
 /// based on source: https://www.classe.cornell.edu/~dms79/LectureNotes/formulae/list-of-math-symbols-extended.htm
 /// Code 0 = symbol is excluded from FPL unused
@@ -325,16 +326,17 @@ let removeFplComments (input:string) =
 /// Code 2 = infix
 /// Code 1 = postfix
 /// (sums like 8 + 2 + 1 are allowed).
+
 let mathSymbols = dict [
         // reserved FPL math symbols
-        //('¬', (4, "Not Sign", "U+00AC")) FPL not operator
-        //('⇒', (2, "Rightwards Double Arrow", "U+21D2")) FPL impl operator
-        //('⇔', (2, "Left Right Double Arrow", "U+21D4")) FPL iif operator
-        //('∧', (2, "Logical And", "U+2227"))  FPL and operator
-        //('∨', (2, "Logical Or", "U+2228")) FPL or operator
-        //('⩡', (2, "Small Vee with Underbar", "U+2A61")) xor operator
-        //('∀', (4, "For All", "U+2200")) FPL all quantor
-        //('∃', (2, "There Exists", "U+2203")) FPL exists quantor
+        //('¬', (4, "Not Sign", "U+00AC")) // FPL not operator
+        ('⇒', (2, "Rightwards Double Arrow", "U+21D2")) // FPL impl operator
+        ('⇔', (2, "Left Right Double Arrow", "U+21D4")) // FPL iif operator
+        ('∧', (2, "Logical And", "U+2227"))  // FPL and operator
+        ('∨', (2, "Logical Or", "U+2228")) // FPL or operator
+        ('⩡', (2, "Small Vee with Underbar", "U+2A61")) // xor operator
+        //('∀', (4, "For All", "U+2200")) // FPL all quantor
+        //('∃', (2, "There Exists", "U+2203")) // FPL exists quantor
 
         ('a', (2, "Latin Letter a", "U+0041"))
         ('b', (2, "Latin Letter b", "U+0042"))
