@@ -95,6 +95,8 @@ type TestRecovery() =
     [<DataRow("ctor01", """def cl S def cl T {ctor T) {dec base.S(); }};""")>]
     [<DataRow("propPred01", """def cl S def cl T {intr prty pred T) };""")>]
     [<DataRow("propFunc01", """def cl S def cl T {intr prty func T)->obj };""")>]
+    [<DataRow("del01", """def pred T() {del.T)};""")>]
+    [<DataRow("base01", """def cl S def cl T {ctor T() {dec base.T); }};""")>]
     [<TestMethod>]
     member this.TestMissingOpeningParen(no:string, fplCode) =
         let result = run (stdParser .>> eof) fplCode
@@ -107,6 +109,9 @@ type TestRecovery() =
     [<DataRow("ctor01", """def cl S def cl T {ctor T( {dec base.S(); }};""")>]
     [<DataRow("propPred01", """def cl S def cl T {intr prty pred T( };""")>]
     [<DataRow("propFunc01", """def cl S def cl T {intr prty func T(->obj };""")>]
+    [<DataRow("del01", """def pred T() {del.T(};""")>]
+    [<DataRow("base01", """def cl S def cl T {ctor T() {dec base.T(; }};""")>]
+    [<DataRow("ref01", """def pred T() {S(};""")>]
     [<TestMethod>]
     member this.TestMissingClosingParen(no:string, fplCode) =
         let result = run (stdParser .>> eof) fplCode

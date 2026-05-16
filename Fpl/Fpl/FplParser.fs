@@ -274,7 +274,8 @@ let userDefinedPrefix = positions (keywordPrefix >>. prefixString) .>> IW |>> As
 let userDefinedSymbol = opt (attempt (IW >>. choice [userDefinedPrefix; userDefinedInfix; userDefinedPostfix ]))
 
 (* Statements *)
-let argumentTuple = positions ((leftParen >>. predicateList) .>> (IW .>> rightParenOpt)) |>> Ast.ArgumentTuple 
+let argumentTupleWithOptLeftParen = positions ((leftParenOpt .>>. predicateList) .>>. (IW >>. rightParenOpt)) |>> Ast.ArgumentTupleWithOptLeftParen
+let argumentTuple = positions ((leftParen >>. predicateList) .>>. (IW >>. rightParenOpt)) |>> Ast.ArgumentTuple 
 
 let delegateName = choice [
     attempt (positions (idStartsWithCap) .>> IW) |>> Ast.DelegateName
@@ -286,7 +287,7 @@ let dotWithErr = choice [
     positions (IW) |>> Ast.DotErr
     ]
 
-let fplDelegate = keywordDel >>. (dotWithErr .>>. delegateName .>>. argumentTuple .>> IW) |>> Ast.Delegate
+let fplDelegate = keywordDel >>. (dotWithErr .>>. delegateName .>>. argumentTupleWithOptLeftParen .>> IW) |>> Ast.Delegate
 
 let spacesRightBrace = (IW >>. rightBraceOpt) 
 
@@ -323,7 +324,7 @@ let baseClassName = choice [
     positions (IW) |>> Ast.BaseClassNameErr
     ]
 
-let baseConstructorCall = positions (keywordBaseClassReference >>. dotWithErr .>>. baseClassName .>>. argumentTuple .>> IW) |>> Ast.BaseConstructorCall
+let baseConstructorCall = positions (keywordBaseClassReference >>. dotWithErr .>>. baseClassName .>>. argumentTupleWithOptLeftParen .>> IW) |>> Ast.BaseConstructorCall
 
 let statement = 
     IW >>. (choice [

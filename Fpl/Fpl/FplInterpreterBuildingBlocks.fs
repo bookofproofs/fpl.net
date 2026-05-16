@@ -92,6 +92,32 @@ let rec eval ast =
             withSignature.SignEndPos <- pos2
         | _ -> ()
 
+
+    let evalArgumentTuple (next:FplGenericNode) (predicateListAst:Ast list) pos1 pos2 =
+        let consumeArgumentsWithParent (parent:FplGenericNode) =
+            if predicateListAst.Length > 0 then 
+                predicateListAst 
+                |> List.iter (fun pred -> 
+                    let ref = new FplReference((pos1, pos2), parent)
+                    heap.Eval.PushEvalStack(ref)
+                    eval pred
+                    heap.Eval.PopEvalStack()
+                )
+        
+        let getProceedingReference = heap.Eval.GetProceedingReference()
+            
+        match next with 
+        | :? FplEquality 
+        | :? FplDecrement
+        | :? FplBaseConstructorCall -> 
+            consumeArgumentsWithParent next
+        | _ -> 
+            match getProceedingReference with 
+            | Some ref ->
+                ref.ArgType <- ArgType.Parentheses
+                consumeArgumentsWithParent ref
+            | _ -> ()
+
     match ast with
     // lexical / leaf tokens
     | Ast.Alias((_, _), _) -> ()
@@ -676,31 +702,15 @@ let rec eval ast =
         heap.Eval.PushEvalStack(just)
         justificationItemAsts |> List.map eval |> ignore
         heap.Eval.PopEvalStack()
-    | Ast.ArgumentTuple((pos1, pos2), predicateListAst) ->
+    | Ast.ArgumentTupleWithOptLeftParen ((pos1, pos2), ((leftParen, predicateListAst), rightParen)) ->
+        eval leftParen
         let next = heap.Eval.PeekEvalStack()
-        let consumeArgumentsWithParent (parent:FplGenericNode) =
-            if predicateListAst.Length > 0 then 
-                predicateListAst 
-                |> List.iter (fun pred -> 
-                    let ref = new FplReference((pos1, pos2), parent)
-                    heap.Eval.PushEvalStack(ref)
-                    eval pred
-                    heap.Eval.PopEvalStack()
-                )
-        
-        let getProceedingReference = heap.Eval.GetProceedingReference()
-            
-        match next with 
-        | :? FplEquality 
-        | :? FplDecrement
-        | :? FplBaseConstructorCall -> 
-            consumeArgumentsWithParent next
-        | _ -> 
-            match getProceedingReference with 
-            | Some ref ->
-                ref.ArgType <- ArgType.Parentheses
-                consumeArgumentsWithParent ref
-            | _ -> ()
+        evalArgumentTuple next predicateListAst pos1 pos2
+        eval rightParen
+    | Ast.ArgumentTuple((pos1, pos2), (predicateListAst, rightParen)) ->
+        let next = heap.Eval.PeekEvalStack()
+        evalArgumentTuple next predicateListAst pos1 pos2
+        eval rightParen
     | Ast.QualificationList((pos1, pos2), asts) ->
         asts |> List.map eval |> ignore
     | Ast.Namespace(asts) ->

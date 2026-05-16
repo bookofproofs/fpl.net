@@ -83,7 +83,8 @@ type Ast =
     | ExistsN of Positions * ((Ast * Ast list) * ((Ast * Ast) * Ast))
     | IsOperator of Positions * (Ast * Ast)
     | Delegate of (Ast * Ast) * Ast
-    | ArgumentTuple of Positions * Ast list
+    | ArgumentTupleWithOptLeftParen of Positions * ((Ast * Ast list) * Ast)
+    | ArgumentTuple of Positions * (Ast list * Ast)
     | PredicateWithOptSpecification of Positions * (Ast * Ast option)
     | DottedPredicate of Positions * Ast 
     | QualificationList of Positions * Ast list

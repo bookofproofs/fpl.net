@@ -193,6 +193,10 @@ type TestInterpreterErrors() =
     [<DataRow("propPred01", """def cl S def cl T {intr prty pred T) };""", 1)>]
     [<DataRow("propFunc00", """def cl S def cl T {intr prty func T()->obj };""", 0)>]
     [<DataRow("propFunc01", """def cl S def cl T {intr prty func T)->obj };""", 1)>]
+    [<DataRow("del00", """def pred T() {del.T()};""", 0)>]
+    [<DataRow("del01", """def pred T() {del.T)};""", 1)>]
+    [<DataRow("base00", """def cl S def cl T {ctor T() {dec base.T(); }};""", 0)>]
+    [<DataRow("base01", """def cl S def cl T {ctor T() {dec base.T); }};""", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSY006(no:string, fplCode:string, expected) =
@@ -213,6 +217,12 @@ type TestInterpreterErrors() =
     [<DataRow("propPred01", """def cl S def cl T {intr prty pred T( };""", 1)>]
     [<DataRow("propFunc00", """def cl S def cl T {intr prty func T()->obj };""", 0)>]
     [<DataRow("propFunc01", """def cl S def cl T {intr prty func T(->obj };""", 1)>]
+    [<DataRow("del00", """def pred T() {del.T()};""", 0)>]
+    [<DataRow("del01", """def pred T() {del.T(};""", 1)>]
+    [<DataRow("base00", """def cl S def cl T {ctor T() {dec base.T(); }};""", 0)>]
+    [<DataRow("base01", """def cl S def cl T {ctor T() {dec base.T(; }};""", 1)>]
+    [<DataRow("ref00", """def pred T() {S()};""", 0)>]
+    [<DataRow("ref01", """def pred T() {S(};""", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSY007(no:string, fplCode:string, expected) =
