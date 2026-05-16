@@ -135,20 +135,20 @@ type Ast =
     | ConstructorSignature of Positions * (Ast * Ast)
     | PredicateInstanceSignature of Positions * (Ast * Ast)
     | FunctionalTermInstanceSignature of Positions * ((Ast * Ast) * Ast)
-    | ConstructorBlock of Positions * (Ast list option)
+    | ConstructorBlock of (Ast * Ast list option) * Ast
     | Constructor of Positions * (Ast * Ast) 
     | PredicateInstance of Positions * (Ast * Ast option)
     | FunctionalTermInstance of Positions * (Ast * Ast option)
     | DefPredicateContent of Ast list option * Ast
-    | DefinitionPredicate of Positions * (Ast * (Ast * Ast list option) option)
+    | DefinitionPredicate of Positions * (Ast * ((Ast * Ast list option) * Ast) option)
     | DefFunctionContent of Ast list option * Ast
     | PredicateSignature of (Positions * ((Ast * Ast option) * Ast)) * Ast option
     | ClassSignature of Positions * Ast
     | FunctionalTermSignature of (Positions * (((Ast * Ast option) * Ast) * Ast)) * Ast option
-    | FunctionalTermDefinitionBlock of Positions * ((Ast * Ast list option) option)
+    | FunctionalTermDefinitionBlock of Positions * ((Ast * Ast list option) * Ast) option
     | DefinitionFunctionalTerm of Positions * (Ast * Ast)
     | DefClassCompleteContent of Ast list option * Ast list
-    | ClassDefinitionBlock of Positions * ((Ast * Ast list option) option) 
+    | ClassDefinitionBlock of Positions * ((Ast * Ast list option) * Ast) option
     | DefinitionClass of Positions * (((Ast * Ast option) * Ast option) * Ast) 
     | Prefix of Positions * string
     | Precedence of Positions * int

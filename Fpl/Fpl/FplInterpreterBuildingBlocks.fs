@@ -1460,7 +1460,8 @@ let rec eval ast =
                 | _ -> ()
             | _ -> ()
         ) |> ignore 
-    | Ast.ConstructorBlock((pos1, pos2), optVarDeclOrSpecListAst) ->
+    | Ast.ConstructorBlock ((leftBrace, optVarDeclOrSpecListAst), rightBrace) ->
+        eval leftBrace
         let parent = heap.Eval.PeekEvalStack()
         // evaluate the construction block 
         match optVarDeclOrSpecListAst with
@@ -1469,6 +1470,7 @@ let rec eval ast =
         | None -> ()
         if parent.ArgList.Count = 0 then
             parent.ErrorOccurred <- emitST002diagnostics parent.Name parent.StartPos parent.EndPos
+        eval rightBrace
     | Ast.Constructor((pos1, pos2), (signatureAst, constructorBlockAst)) ->
         let parent = heap.Eval.PeekEvalStack()
         let fv = new FplConstructor((pos1, pos2), parent)
@@ -1503,9 +1505,10 @@ let rec eval ast =
             heap.Helper.InSignatureEvaluation <- false
             optUserDefinedSymbolAst |> Option.map eval |> Option.defaultValue () |> ignore
             match optDefBlock with 
-            | Some (predicateContentAst, optPropertyListAsts) ->
+            | Some ((predicateContentAst, optPropertyListAsts), rightBrace) ->
                 eval predicateContentAst
                 optPropertyListAsts |> Option.map (List.map eval >> ignore) |> Option.defaultValue ()
+                eval rightBrace
             | None -> fv.IsIntrinsic <- true
             inhPredicateTypeListAstsOpt |> Option.map eval |> Option.defaultValue ()
             setSignaturePositions pos1 pos2
@@ -1514,12 +1517,13 @@ let rec eval ast =
     | Ast.FunctionalTermDefinitionBlock((pos1, pos2), optDefBlock) ->
         let functionaTermBlock = heap.Eval.PeekEvalStack()
         match optDefBlock with 
-        | Some (funcContentAst, optPropertyListAsts) ->
+        | Some ((funcContentAst, optPropertyListAsts), rightBrace) ->
             eval funcContentAst
             optPropertyListAsts |> Option.map (List.map eval >> ignore) |> Option.defaultValue ()
             let properties = functionaTermBlock.GetProperties()
             if properties.IsEmpty && functionaTermBlock.ArgList.Count = 1 then
                 functionaTermBlock.ErrorOccurred <- emitST001diagnostics functionaTermBlock.Name pos1 pos2
+            eval rightBrace
         | None -> functionaTermBlock.IsIntrinsic <- true
     | Ast.DefinitionFunctionalTerm((pos1, pos2), (functionalTermSignatureAst, functionalTermDefBlockAst)) ->
         let parent = heap.Eval.PeekEvalStack()
@@ -1547,7 +1551,7 @@ let rec eval ast =
         let classBlock = heap.Eval.PeekEvalStack()
         let cl = classBlock :?> FplClass
         match optDefBlock with 
-        | Some (classContentAst, optPropertyListAsts) ->
+        | Some ((classContentAst, optPropertyListAsts), rightBrace) ->
             eval classContentAst
             optPropertyListAsts |> Option.map (List.map eval >> ignore) |> Option.defaultValue ()
             let properties = cl.GetProperties()
@@ -1555,6 +1559,7 @@ let rec eval ast =
             let classContent =  cl.ArgList |> Seq.filter (fun node -> node.Name <> LiteralBase) |> Seq.toList
             if properties.IsEmpty && classContent.Length = 0 && constructors.IsEmpty then
                 classBlock.ErrorOccurred <- emitST001diagnostics classBlock.Name pos1 pos2
+            eval rightBrace
         | None -> 
             cl.IsIntrinsic <- true
             cl.AddDefaultConstructor()
