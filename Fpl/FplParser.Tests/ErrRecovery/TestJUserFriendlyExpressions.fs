@@ -59,13 +59,16 @@ type TestRecovery() =
     [<DataRow("func01a", """def func ()->obj {intr};""")>]
     [<DataRow("func01b", """def func T ()-> {intr};""")>]
     [<DataRow("inf01", """inf {pre:true con:true};""")>]
-    [<DataRow("cor01", """cor {true};""")>]
-    [<DataRow("proof01", """proof {1. |- trivial};""")>]
+    [<DataRow("cor01", """cor $1 {true};""")>]
+    [<DataRow("proof01", """proof $1 {1. |- trivial};""")>]
     [<DataRow("ext01", """ext  x@/\d+/ -> X {ret x};""")>]
     [<DataRow("del01", """def pred T() {del. ()};""")>]
     [<DataRow("del02", """def pred T() {del.()};""")>]
     [<DataRow("base01", """def cl S def cl T {ctor T() {dec base. (); }};""")>]
     [<DataRow("base02", """def cl S def cl T {ctor T() {dec base. (); }};""")>]
+    [<DataRow("cl05", """def cl T:;""")>]
+    [<DataRow("func03", """def func T:()->obj ;""")>]
+    [<DataRow("pred03", """def pred T:();""")>]
     [<TestMethod>]
     member this.TestMissingPascalCaseId(no:string, fplCode) =
         let result = run (stdParser .>> eof) fplCode

@@ -120,6 +120,7 @@ type TestInterpreterErrors() =
     [<DataRow("cl03", """def cl {intr};""", 1)>]
     [<DataRow("cl04", """def cl T:S ;""", 0)>]
     [<DataRow("cl05", """def cl T:;""", 1)>]
+    [<DataRow("cl06", """def cl T: ;""", 1)>]
     [<DataRow("thm00", """thm T {true};""", 0)>]
     [<DataRow("thm01", """thm {true};""", 1)>]
     [<DataRow("lem00", """lem T{true};""", 0)>]
@@ -148,6 +149,10 @@ type TestInterpreterErrors() =
     [<DataRow("base01", """def cl S def cl T {ctor T() {dec base.T();}};""", 0)>]
     [<DataRow("base02", """def cl S def cl T {ctor T() {dec base. ();}};""", 1)>]
     [<DataRow("base03", """def cl S def cl T {ctor T() {dec base.();}};""", 1)>]
+    [<DataRow("cor00", """cor T$1 {true};""", 0)>]
+    [<DataRow("cor01", """cor $1 {true};""", 1)>]
+    [<DataRow("prf00", """prf T$1 {1. |- trivial};""", 0)>]
+    [<DataRow("prf01", """prf $1 {1. |- trivial};""", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSY005(no:string, fplCode:string, expected) =
