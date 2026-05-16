@@ -12,6 +12,7 @@ type Ast =
     // Literals
     | LeftBraceOpt of Positions * unit option
     | RightBraceOpt of Positions * unit option
+    | RightParenOpt of Positions * unit option
     | Star of Positions * unit
     | Dot of unit
     // Identifiers

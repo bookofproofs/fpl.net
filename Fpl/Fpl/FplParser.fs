@@ -48,10 +48,10 @@ let positions (p: Parser<_,_>): Parser<Positions * _,_> =
 (* Literals *)
 
 let leftBrace = skipChar '{' >>. spaces
-let leftBracePos = positions (opt (skipChar '{')) .>> spaces |>> Ast.LeftBraceOpt
+let leftBraceOpt = positions (opt (skipChar '{')) .>> spaces |>> Ast.LeftBraceOpt
 let rightBrace = positions (opt (skipChar '}')) |>> Ast.RightBraceOpt
 let leftParen = skipChar '(' >>. spaces 
-let rightParen = skipChar ')' 
+let rightParen = positions (opt (skipChar ')') ) |>> Ast.RightBraceOpt
 let comma = skipChar ',' >>. spaces 
 let dot = skipChar '.' |>> Ast.Dot
 let colon = skipChar ':' .>> spaces 
@@ -376,8 +376,8 @@ let implication = positions (chooseBinaryOp keywordImpl) |>> Ast.Impl
 let equivalence = positions (chooseBinaryOp keywordIif) |>> Ast.Iif
 let negation = positions (keywordNot >>. predicate) |>> Ast.Not
 
-let all = positions ((keywordAll >>. namedVariableDeclarationList) .>>. (leftBracePos .>>. predicate .>>. rightBrace)) |>> Ast.All
-let exists = positions ((keywordEx >>. namedVariableDeclarationList) .>>. (leftBracePos .>>. predicate .>>. rightBrace)) |>> Ast.Exists
+let all = positions ((keywordAll >>. namedVariableDeclarationList) .>>. (leftBraceOpt .>>. predicate .>>. rightBrace)) |>> Ast.All
+let exists = positions ((keywordEx >>. namedVariableDeclarationList) .>>. (leftBraceOpt .>>. predicate .>>. rightBrace)) |>> Ast.Exists
 
 let existsNTimes = choice [
         attempt (keywordExNSymbolic .>> SW) |>> Ast.Exists1 
@@ -389,7 +389,7 @@ let existsTimeNQuantifier = choice [
     existsNTimes
 ]
 
-let existsTimesN = positions ((existsTimeNQuantifier .>>. namedVariableDeclarationList) .>>. (leftBracePos .>>. predicate .>>. rightBrace)) |>> Ast.ExistsN
+let existsTimesN = positions ((existsTimeNQuantifier .>>. namedVariableDeclarationList) .>>. (leftBraceOpt .>>. predicate .>>. rightBrace)) |>> Ast.ExistsN
 let isOp = choice [
     attempt (dot >>. (predicate .>> keywordIs) .>>. variableType) 
     (keywordIs >>. leftParen >>. predicate .>> IW) .>>. (comma >>. variableType) .>> rightParen
@@ -441,7 +441,7 @@ let spacesPredicate = IW >>. predicate
 let premiseList = positions (IW >>. (keywordPremise >>. colon >>. predicateList)) |>> Ast.PremiseList
 let conclusion = IW >>. (keywordConclusion >>. colon >>. predicate)
 let insideRuleOfOnference = (varDeclOrSpecList .>>. (premiseList .>>. conclusion))
-let premiseConclusionBlock = leftBracePos .>>. insideRuleOfOnference .>>. spacesRightBrace |>> Ast.PremiseConclusionBlock
+let premiseConclusionBlock = leftBraceOpt .>>. insideRuleOfOnference .>>. spacesRightBrace |>> Ast.PremiseConclusionBlock
 
 (* FPL building blocks - rules of reference *)
 let keywordInference = (skipString LiteralInfL <|> skipString LiteralInf) .>> SW 
@@ -455,7 +455,7 @@ let keywordProposition = (skipString LiteralPropL <|> skipString LiteralProp) .>
 let keywordCorollary = (skipString LiteralCorL <|> skipString LiteralCor) .>> SW
 let keywordConjecture = (skipString LiteralConjL <|> skipString LiteralConj) .>> SW
 
-let theoremLikeBlock = leftBracePos .>>. (varDeclOrSpecList .>>. spacesPredicate) .>>. spacesRightBrace
+let theoremLikeBlock = leftBraceOpt .>>. (varDeclOrSpecList .>>. spacesPredicate) .>>. spacesRightBrace
 
 let theoremSignature = positions (keywordTheorem >>. pascalCaseId) .>> IW |>> Ast.TheoremSignature
 let theorem = positions (theoremSignature .>>. theoremLikeBlock) |>> Ast.Theorem
@@ -507,7 +507,7 @@ let extensionRegex = regex "[^\/]+" <?> "<extension regex>" |>> Ast.ExtensionReg
 let extensionAssignment = positions ((variable .>> IW .>> at .>> IW) .>>. (slash >>. extensionRegex .>> slash)) |>> Ast.ExtensionAssignment
 
 let extensionSignature = positions ((extensionAssignment .>> IW) .>>. mapping) .>> IW |>> Ast.ExtensionSignature
-let extensionTerm = leftBracePos .>>. ((funcContent <|> mapCases) .>>. spacesRightBrace)
+let extensionTerm = leftBraceOpt .>>. ((funcContent <|> mapCases) .>>. spacesRightBrace)
 let definitionExtension = positions (keywordExtension >>. extensionName .>>. extensionSignature .>>. extensionTerm) |>> Ast.DefinitionExtension
 
 let definitionProperty = choice [
