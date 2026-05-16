@@ -109,6 +109,12 @@ let rec eval ast =
             let fv = heap.Eval.PeekEvalStack()
             fv.ErrorOccurred <- emitSY004diagnostics pos1 pos2
         | _ -> ()
+    | Ast.RightParenOpt ((pos1, pos2), rightParentOpt) ->
+        match rightParentOpt with
+        | None ->
+            let fv = heap.Eval.PeekEvalStack()
+            fv.ErrorOccurred <- emitSY007diagnostics pos1 pos2
+        | _ -> ()
     | Ast.Digits s -> 
         let fv = heap.Eval.PeekEvalStack()
         fv.FplId <- s
@@ -570,7 +576,7 @@ let rec eval ast =
     | Ast.AST((pos1, pos2), ast1) ->
         eval ast1
 
-    | Ast.ParamTuple((pos1, pos2), namedVariableDeclarationListAsts) ->
+    | Ast.ParamTuple (namedVariableDeclarationListAsts, rightParen) ->
         let fv = heap.Eval.PeekEvalStack()
         fv.ArgType <- ArgType.Parentheses
         namedVariableDeclarationListAsts |> List.map (fun child ->
@@ -579,6 +585,7 @@ let rec eval ast =
             | _ -> ()
             eval child
         ) |> ignore
+        eval rightParen
     | Ast.NamespaceIdentifier((pos1, pos2), asts) ->
         asts |> List.map eval |> ignore
     | Ast.TranslationTerm((pos1, pos2), asts) ->

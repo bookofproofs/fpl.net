@@ -76,8 +76,8 @@ let getEnglishName someString determined =
 
 type DiagnosticCode = 
     // parser error codes
-    | SYN000
-    | SYN001
+    | SXN000
+    | SXN001
     | DEF000
     | PRP000
     | AXI000
@@ -215,8 +215,8 @@ type DiagnosticCode =
     member this.Code = 
         match this with
             // parser error messages
-            | SYN000 -> "SYN000"
-            | SYN001 -> "SYN001"
+            | SXN000 -> "SXN000"
+            | SXN001 -> "SXN001"
             | DEF000 -> "DEF000"
             | PRP000 -> "PRP000"
             | AXI000 -> "AXI000"
@@ -353,8 +353,8 @@ type DiagnosticCode =
     member this.Message = 
         match this with
             // parser error messages
-            | SYN000 -> errSYN000
-            | SYN001 -> errSYN001 
+            | SXN000 -> errSYN000
+            | SXN001 -> errSYN001 
             | DEF000 -> errDEF000
             | PRP000 -> errPRP000
             | AXI000 -> errAXI000

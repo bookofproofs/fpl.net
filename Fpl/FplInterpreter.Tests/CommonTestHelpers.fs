@@ -74,7 +74,7 @@ let prepareFplCode (filename: string, fplCode: string, delete: bool) =
 
         let syntaxErrorFound =
             ad.Collection
-            |> Seq.exists (fun d -> d.Emitter = DiagnosticEmitter.FplParser)
+            |> Seq.exists (fun d -> d.Emitter = DiagnosticEmitter.FplParser && not (d.Code.Code.StartsWith("SY")))
 
         if syntaxErrorFound then
             if fplCode <> "" then File.AppendAllText(Path.Combine(currDir, "SyntaxErrorsLog.txt"), $"Syntax errors detected in test {filename}{Environment.NewLine}{fplCode}{Environment.NewLine}------{Environment.NewLine}")
@@ -83,9 +83,9 @@ let prepareFplCode (filename: string, fplCode: string, delete: bool) =
 let checkForUnexpectedErrors (code: ErrDiagnostics.DiagnosticCode) =
     let syntaxErrors =
         ad.Collection
-        |> List.filter (fun d -> d.Emitter = DiagnosticEmitter.FplParser || d.Code.Code = "GEN00")
+        |> List.filter (fun d -> d.Emitter = DiagnosticEmitter.FplParser && not (d.Code.Code.StartsWith("SY")) || d.Code.Code = "GEN00")
 
-    if syntaxErrors.Length > 0 && code.Code <> "GEN00" then
+    if syntaxErrors.Length > 0 && code.Code <> "GEN00" && not (code.Code.StartsWith("SY")) then
         failwithf $"Syntax or other errors detected. {syntaxErrors.Head}"
 
     let contextErrors =
@@ -111,7 +111,7 @@ let runTestHelperWithText filename fplCode (code: ErrDiagnostics.DiagnosticCode)
 
     let syntaxErrors =
         ad.Collection
-        |> List.filter (fun d -> d.Emitter = DiagnosticEmitter.FplParser)
+        |> List.filter (fun d -> d.Emitter = DiagnosticEmitter.FplParser && not (d.Code.Code.StartsWith("SY")))
 
     if syntaxErrors.Length > 0 then
         failwithf "Syntax errors detected."

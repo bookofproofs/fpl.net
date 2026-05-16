@@ -49,9 +49,10 @@ let positions (p: Parser<_,_>): Parser<Positions * _,_> =
 
 let leftBrace = skipChar '{' >>. spaces
 let leftBraceOpt = positions (opt (skipChar '{')) .>> spaces |>> Ast.LeftBraceOpt
-let rightBrace = positions (opt (skipChar '}')) |>> Ast.RightBraceOpt
+let rightBraceOpt = positions (opt (skipChar '}')) |>> Ast.RightBraceOpt
 let leftParen = skipChar '(' >>. spaces 
-let rightParen = positions (opt (skipChar ')') ) |>> Ast.RightBraceOpt
+//let leftParenOpt = positions (opt (skipChar '{')) .>> spaces |>> Ast.LeftParenOpt
+let rightParenOpt = positions (opt (skipChar ')') ) |>> Ast.RightParenOpt
 let comma = skipChar ',' >>. spaces 
 let dot = skipChar '.' |>> Ast.Dot
 let colon = skipChar ':' .>> spaces 
@@ -248,7 +249,7 @@ let variableType = choice [ simpleVariableType; arrayType ]
 let namedVariableDeclaration = positions ((variableList .>> colon) .>>. variableType .>> IW) |>> Ast.NamedVarDecl
 namedVariableDeclarationListRef.Value <- sepBy namedVariableDeclaration comma
 
-paramTupleRef.Value <- positions ((leftParen >>. IW >>. namedVariableDeclarationList) .>> (IW .>> rightParen)) |>> Ast.ParamTuple
+paramTupleRef.Value <- (leftParen >>. namedVariableDeclarationList) .>>. (IW >>. rightParenOpt) |>> Ast.ParamTuple
 let simpleSignature = pascalCaseId .>> IW 
 
 let localizationString = positions (regex "[^\"\n]*") <?> "<language-specific string>" |>> Ast.LocalizationString
@@ -270,7 +271,7 @@ let userDefinedPrefix = positions (keywordPrefix >>. prefixString) .>> IW |>> As
 let userDefinedSymbol = opt (attempt (IW >>. choice [userDefinedPrefix; userDefinedInfix; userDefinedPostfix ]))
 
 (* Statements *)
-let argumentTuple = positions ((leftParen >>. predicateList) .>> (IW .>> rightParen)) |>> Ast.ArgumentTuple 
+let argumentTuple = positions ((leftParen >>. predicateList) .>> (IW .>> rightParenOpt)) |>> Ast.ArgumentTuple 
 
 let delegateName = choice [
     attempt (positions (idStartsWithCap) .>> IW) |>> Ast.DelegateName
@@ -279,7 +280,7 @@ let delegateName = choice [
 
 let fplDelegate = positions (keywordDel >>. dot >>. delegateName .>>. argumentTuple) |>> Ast.Delegate
 
-let spacesRightBrace = (IW >>. rightBrace) 
+let spacesRightBrace = (IW >>. rightBraceOpt) 
 
 let keywordReturn = IW >>. (skipString LiteralRetL <|> skipString LiteralRet) .>> SW 
 
@@ -287,19 +288,19 @@ let keywordReturn = IW >>. (skipString LiteralRetL <|> skipString LiteralRet) .>
 let caseElse = positions (elseCase >>. IW >>. statementList .>> IW)  |>> Ast.CaseElse
 let caseSingle = positions ((case >>. predicate .>> colon) .>>. statementList) |>> Ast.CaseSingle
 let caseSingleList = many1 (IW >>. caseSingle)
-let casesStatement = positions (((keywordCases >>. leftParen >>. IW >>. caseSingleList .>>. caseElse .>> rightParen))) |>> Ast.Cases
+let casesStatement = positions (((keywordCases >>. leftParen >>. IW >>. caseSingleList .>>. caseElse .>> rightParenOpt))) |>> Ast.Cases
 
 let mapCaseElse = positions (elseCase >>. IW >>. predicate .>> IW) |>> Ast.MapCaseElse
 let mapCaseSingle = positions ((case >>. predicate .>> colon) .>>. (IW >>. predicate)) |>> Ast.MapCaseSingle
 let mapCaseSingleList = many1 (IW >>. mapCaseSingle)
-let mapCases = positions (((keywordMapCases >>. leftParen >>. IW >>. mapCaseSingleList .>>. mapCaseElse .>> rightParen))) |>> Ast.MapCases
+let mapCases = positions (((keywordMapCases >>. leftParen >>. IW >>. mapCaseSingleList .>>. mapCaseElse .>> rightParenOpt))) |>> Ast.MapCases
 
 let assignmentStatement = positions ((predicateWithQualification .>> IW .>> colonEqual) .>>. predicate) |>> Ast.Assignment
 
 let inEntity = keywordIn >>. positions (predicateWithQualification) .>> IW |>> Ast.InEntity
 
 let entityInDomain = ( variable .>> IW .>>. inEntity ) .>> IW
-let forInBody = (entityInDomain .>> IW) .>>. (leftBraceOpt .>>. statementList) .>>. (IW >>. rightBrace)
+let forInBody = (entityInDomain .>> IW) .>>. (leftBraceOpt .>>. statementList) .>>. (IW >>. rightBraceOpt)
 let forStatement = positions (keywordFor >>. forInBody) |>> Ast.ForIn
 
 //// Difference of assertion to an axiom: axiom is named predicate, while an assertion uses a predicated to assert it.
@@ -362,7 +363,7 @@ let justificationReference = choice [
     refArgumentIdentifier
 ]
 
-let twoPredicatesInParens = (leftParen >>. predicate) .>>. (comma >>. predicate) .>> rightParen 
+let twoPredicatesInParens = (leftParen >>. predicate) .>>. (comma >>. predicate) .>> rightParenOpt 
 let twoPredicatesWithInfix p = (dot >>. (predicate .>> p) .>>. predicate)
 let chooseBinaryOp p = choice [
         attempt (twoPredicatesWithInfix p)
@@ -376,8 +377,8 @@ let implication = positions (chooseBinaryOp keywordImpl) |>> Ast.Impl
 let equivalence = positions (chooseBinaryOp keywordIif) |>> Ast.Iif
 let negation = positions (keywordNot >>. predicate) |>> Ast.Not
 
-let all = positions ((keywordAll >>. namedVariableDeclarationList) .>>. (leftBraceOpt .>>. predicate .>>. rightBrace)) |>> Ast.All
-let exists = positions ((keywordEx >>. namedVariableDeclarationList) .>>. (leftBraceOpt .>>. predicate .>>. rightBrace)) |>> Ast.Exists
+let all = positions ((keywordAll >>. namedVariableDeclarationList) .>>. (leftBraceOpt .>>. predicate .>>. rightBraceOpt)) |>> Ast.All
+let exists = positions ((keywordEx >>. namedVariableDeclarationList) .>>. (leftBraceOpt .>>. predicate .>>. rightBraceOpt)) |>> Ast.Exists
 
 let existsNTimes = choice [
         attempt (keywordExNSymbolic .>> SW) |>> Ast.Exists1 
@@ -389,10 +390,10 @@ let existsTimeNQuantifier = choice [
     existsNTimes
 ]
 
-let existsTimesN = positions ((existsTimeNQuantifier .>>. namedVariableDeclarationList) .>>. (leftBraceOpt .>>. predicate .>>. rightBrace)) |>> Ast.ExistsN
+let existsTimesN = positions ((existsTimeNQuantifier .>>. namedVariableDeclarationList) .>>. (leftBraceOpt .>>. predicate .>>. rightBraceOpt)) |>> Ast.ExistsN
 let isOp = choice [
     attempt (dot >>. (predicate .>> keywordIs) .>>. variableType) 
-    (keywordIs >>. leftParen >>. predicate .>> IW) .>>. (comma >>. variableType) .>> rightParen
+    (keywordIs >>. leftParen >>. predicate .>> IW) .>>. (comma >>. variableType) .>> rightParenOpt
     ]
 let isOperator = positions isOp |>> Ast.IsOperator
 
@@ -403,7 +404,7 @@ let pWithSep p separator =
     let combinedParser = pipe2 p (opt separator) (fun a b -> (a, b))
     combinedParser |> many
 
-let infixOperation = positions (leftParen >>. pWithSep predicate infixOp .>> rightParen) |>> Ast.InfixOperation
+let infixOperation = positions (leftParen >>. pWithSep predicate infixOp .>> rightParenOpt) |>> Ast.InfixOperation
 
 // A compound Predicate has its own boolean expressions to avoid mixing up with Pl0Propositions
 let compoundPredicate = choice [
@@ -592,7 +593,7 @@ let keywordLocalization = (skipString LiteralLocL <|> skipString LiteralLoc) >>.
 let localizationLanguageCode = positions (regex @"[a-z]{3}" <?> "<ISO 639 language code>") |>> Ast.LanguageCode
 
 let ebnfTransl, ebnfTranslRef = createParserForwardedToRef()
-let ebnfTranslTuple = (leftParen >>. IW >>. ebnfTransl) .>> (IW .>> rightParen) 
+let ebnfTranslTuple = (leftParen >>. IW >>. ebnfTransl) .>> (IW .>> rightParenOpt) 
 let ebnfFactor = choice [
     variable
     quote >>. localizationString .>> quote
@@ -627,8 +628,8 @@ let fplNamespace = buildingBlockList .>> IW .>> semiColon |>> Ast.Namespace
 (* Final Parser *)
 let ast =  positions (IW >>. fplNamespace) |>> Ast.AST
 let stdParser = ast
-let stdCode = SYN000
-let stdCode1 = SYN001
+let stdCode = SXN000
+let stdCode1 = SXN001
 let stdParser1 = ast
 
 let calculateCurrentContext (matchList:System.Collections.Generic.List<int>) i = 

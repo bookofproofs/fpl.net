@@ -182,3 +182,21 @@ type TestInterpreterErrors() =
         else
             let code = SY005
             runTestHelper "TestSY005.fpl" fplCode code expected
+
+    [<DataRow("pred00", """def pred T();""", 0)>]
+    [<DataRow("pred01", """def pred T(;""", 1)>]
+    [<DataRow("func00", """def func T()->obj ;""", 0)>]
+    [<DataRow("func01", """def func T(->obj ;""", 1)>]
+    [<DataRow("ctor00", """def cl S def cl T {ctor T() {dec base.S(); }};""", 0)>]
+    [<DataRow("ctor01", """def cl S def cl T {ctor T( {dec base.S(); }};""", 1)>]
+    [<DataRow("propPred00", """def cl S def cl T {intr prty pred T() };""", 0)>]
+    [<DataRow("propPred01", """def cl S def cl T {intr prty pred T( };""", 1)>]
+    [<DataRow("propFunc00", """def cl S def cl T {intr prty func T()->obj };""", 0)>]
+    [<DataRow("propFunc01", """def cl S def cl T {intr prty func T(->obj };""", 1)>]
+    [<TestMethod>]
+    member this.TestSY007(no:string, fplCode:string, expected) =
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = SY007
+            runTestHelper "TestSY007.fpl" fplCode code expected

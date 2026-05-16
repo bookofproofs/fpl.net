@@ -12,6 +12,7 @@ type Ast =
     // Literals
     | LeftBraceOpt of Positions * unit option
     | RightBraceOpt of Positions * unit option
+    | LeftParenOpt of Positions * unit option
     | RightParenOpt of Positions * unit option
     | Star of Positions * unit
     | Dot of unit
@@ -127,7 +128,8 @@ type Ast =
     | ConjectureSignature of Positions * Ast
     | Conjecture of Positions * (Ast * ((Ast * (Ast list option * Ast)) * Ast))
     | NamedVarDecl of Positions * (Ast list * Ast)
-    | ParamTuple of Positions * Ast list
+    | ParamTuple of Ast list * Ast
+
     | Mapping of Positions * Ast
     | AxiomSignature of Positions * Ast
     | Axiom of Positions * (Ast * ((Ast * (Ast list option * Ast)) * Ast))

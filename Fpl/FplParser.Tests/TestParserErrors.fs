@@ -13,8 +13,8 @@ type TestParserErrors() =
         |> List.filter (fun d -> d.Code = errCode)
 
     [<TestMethod>]
-    member this.TestSYN000() =
-        let code = SYN000
+    member this.TestSXN000() =
+        let code = SXN000
         printf "Trying %s" code.Message
         let input = """
         def pred T()
@@ -31,7 +31,7 @@ type TestParserErrors() =
 
     [<TestMethod>]
     member this.TestSYN001() =
-        let code = SYN001
+        let code = SXN001
         printf "Trying %s" code.Message
         let input = """
         ;

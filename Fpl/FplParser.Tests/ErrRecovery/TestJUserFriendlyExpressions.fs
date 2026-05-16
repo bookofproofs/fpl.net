@@ -89,3 +89,16 @@ type TestRecovery() =
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<DataRow("pred01", """def pred T(;""")>]
+    [<DataRow("func01", """def func T(->obj ;""")>]
+    [<DataRow("ctor01", """def cl S def cl T {ctor T( {dec base.S(); }};""")>]
+    [<DataRow("propPred01", """def cl S def cl T {intr prty pred T( };""")>]
+    [<DataRow("propFunc01", """def cl S def cl T {intr prty func T(->obj };""")>]
+    [<TestMethod>]
+    member this.TestMissingClosingParen(no:string, fplCode) =
+        let result = run (stdParser .>> eof) fplCode
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
