@@ -222,3 +222,15 @@ type TestInterpreterErrors() =
             let code = SY007
             runTestHelper "TestSY007.fpl" fplCode code expected
 
+    [<DataRow("del00", """def pred T() {del.T()};""", 0)>]
+    [<DataRow("del01", """def pred T() {del T()};""", 1)>]
+    [<DataRow("base00", """def cl S def cl T {ctor T() {dec base.T(); }};""", 0)>]
+    [<DataRow("base01", """def cl S def cl T {ctor T() {dec base T(); }};""", 1)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestSY008(no:string, fplCode:string, expected) =
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = SY008
+            runTestHelper "TestSY008.fpl" fplCode code expected

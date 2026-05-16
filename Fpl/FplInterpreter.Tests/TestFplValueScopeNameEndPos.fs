@@ -689,7 +689,7 @@ type TestFplValueScopeNameEndPos() =
         | "base2" -> Assert.AreEqual<int64>((int64)23, base1.EndPos.Column)
         | "base3" -> Assert.AreEqual<int64>((int64)23, base1.EndPos.Column)
         | "base4" -> Assert.AreEqual<int64>((int64)19, base1.EndPos.Column)
-        | "base5" -> Assert.AreEqual<int64>((int64)27, base1.EndPos.Column)
+        | "base5" -> Assert.AreEqual<int64>((int64)28, base1.EndPos.Column)
         | "base6" -> Assert.AreEqual<int64>((int64)19, base1.EndPos.Column)
         | "base7" -> Assert.AreEqual<int64>((int64)26, base1.EndPos.Column)
         | "base8" -> Assert.AreEqual<int64>((int64)24, base1.EndPos.Column)
@@ -817,13 +817,13 @@ type TestFplValueScopeNameEndPos() =
         let base1 = pr1.ArgList[0]
 
         match var with
-        | "base1" -> Assert.AreEqual<int64>((int64)24, base1.EndPos.Column)
-        | "base2" -> Assert.AreEqual<int64>((int64)31, base1.EndPos.Column)
-        | "base3" -> Assert.AreEqual<int64>((int64)32, base1.EndPos.Column)
-        | "base4" -> Assert.AreEqual<int64>((int64)29, base1.EndPos.Column)
-        | "base5" -> Assert.AreEqual<int64>((int64)27, base1.EndPos.Column)
-        | "base6" -> Assert.AreEqual<int64>((int64)45, base1.EndPos.Column)
-        | "base7" -> Assert.AreEqual<int64>((int64)42, base1.EndPos.Column)
+        | "base1" -> Assert.AreEqual<int64>((int64)25, base1.EndPos.Column)
+        | "base2" -> Assert.AreEqual<int64>((int64)32, base1.EndPos.Column)
+        | "base3" -> Assert.AreEqual<int64>((int64)33, base1.EndPos.Column)
+        | "base4" -> Assert.AreEqual<int64>((int64)30, base1.EndPos.Column)
+        | "base5" -> Assert.AreEqual<int64>((int64)28, base1.EndPos.Column)
+        | "base6" -> Assert.AreEqual<int64>((int64)46, base1.EndPos.Column)
+        | "base7" -> Assert.AreEqual<int64>((int64)43, base1.EndPos.Column)
         | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
 

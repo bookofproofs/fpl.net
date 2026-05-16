@@ -281,7 +281,12 @@ let delegateName = choice [
     positions (IW) |>> Ast.DelegateNameErr
     ]
 
-let fplDelegate = positions (keywordDel >>. dot >>. delegateName .>>. argumentTuple) |>> Ast.Delegate
+let dotWithErr = choice [
+    attempt dot
+    positions (IW) |>> Ast.DotErr
+    ]
+
+let fplDelegate = keywordDel >>. (dotWithErr .>>. delegateName .>>. argumentTuple .>> IW) |>> Ast.Delegate
 
 let spacesRightBrace = (IW >>. rightBraceOpt) 
 
@@ -318,7 +323,7 @@ let baseClassName = choice [
     positions (IW) |>> Ast.BaseClassNameErr
     ]
 
-let baseConstructorCall = positions (keywordBaseClassReference >>. dot >>. baseClassName .>>. argumentTuple .>> IW) |>> Ast.BaseConstructorCall
+let baseConstructorCall = positions (keywordBaseClassReference >>. dotWithErr .>>. baseClassName .>>. argumentTuple .>> IW) |>> Ast.BaseConstructorCall
 
 let statement = 
     IW >>. (choice [

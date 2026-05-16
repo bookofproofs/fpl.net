@@ -114,3 +114,11 @@ type TestRecovery() =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
+    [<DataRow("del01", """def pred T() {del T()};""")>]
+    [<DataRow("base01", """def cl S def cl T {ctor T() {dec base T(); }};""")>]
+    [<TestMethod>]
+    member this.TestMissingDot(no:string, fplCode) =
+        let result = run (stdParser .>> eof) fplCode
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))

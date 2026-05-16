@@ -15,6 +15,7 @@ type Ast =
     | LeftParenOpt of Positions * unit option
     | RightParenOpt of Positions * unit option
     | Star of Positions * unit
+    | DotErr of Positions * unit
     | Dot of unit
     // Identifiers
     | Digits of string
@@ -81,7 +82,7 @@ type Ast =
     | Exists of Positions * (Ast list * ((Ast * Ast) * Ast))
     | ExistsN of Positions * ((Ast * Ast list) * ((Ast * Ast) * Ast))
     | IsOperator of Positions * (Ast * Ast)
-    | Delegate of Positions * (Ast * Ast)
+    | Delegate of (Ast * Ast) * Ast
     | ArgumentTuple of Positions * Ast list
     | PredicateWithOptSpecification of Positions * (Ast * Ast option)
     | DottedPredicate of Positions * Ast 
@@ -134,7 +135,7 @@ type Ast =
     | Mapping of Positions * Ast
     | AxiomSignature of Positions * Ast
     | Axiom of Positions * (Ast * ((Ast * (Ast list option * Ast)) * Ast))
-    | BaseConstructorCall of Positions * (Ast * Ast)
+    | BaseConstructorCall of Positions * ((Ast * Ast) * Ast)
     | ConstructorSignature of Positions * (Ast * Ast)
     | PredicateInstanceSignature of Positions * (Ast * Ast)
     | FunctionalTermInstanceSignature of Positions * ((Ast * Ast) * Ast)
