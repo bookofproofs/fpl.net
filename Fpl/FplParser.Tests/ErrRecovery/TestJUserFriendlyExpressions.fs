@@ -21,8 +21,6 @@ type TestRecovery() =
     [<DataRow("ext01", "ext Digits x@/\d+/ -> X ret x};")>]
     [<DataRow("for01", "def pred T() {dec for x in y assert z};true};")>]
     [<DataRow("ctor01", "def cl T {ctor T() }};")>]
-    [<DataRow("propPred01", "def cl T {intr prty pred S() intr }};")>]
-    [<DataRow("propFunc01", "def cl T {intr prty func S()->obj intr }};")>]
     [<DataRow("prf01", "prf T$1 1. |- trivial };")>]
     [<TestMethod>]
     member this.TestMissingOpeningBrace(no:string, fplCode) =

@@ -1578,15 +1578,25 @@ let rec eval ast =
         heap.Eval.PushEvalStack(argInf)
         eval predicateAst
         heap.Eval.PopEvalStack()
-    | Ast.Proof((pos1, pos2), (referencingIdentifierAst, (proofArgumentListAst, optQedAst))) ->
+
+    | Ast.ProofContent (proofArgumentListAst, optQedAst) ->
+
+        //    (referencingIdentifierAst * ((Ast * Ast list) * Ast option))
+        //eval referencingIdentifierAst
+        proofArgumentListAst |> List.map eval |> ignore
+        optQedAst |> Option.map eval |> Option.defaultValue ()
+    | Ast.ProofBlock ((leftBrace, proofContent), rightBrace) ->
+        eval leftBrace
+        eval proofContent
+        eval rightBrace
+    | Ast.Proof((pos1, pos2), (proofSignatureAst, proofBlockAst)) ->
         let parent = heap.Eval.PeekEvalStack()
         let fv = new FplProof((pos1, pos2), parent, heap.Helper.GetNextAvailableFplBlockRunOrder)
         heap.Eval.PushEvalStack(fv)
-        eval referencingIdentifierAst
+        eval proofSignatureAst
         heap.Eval.PopEvalStack() // add to parent theorem (if any)
         heap.Eval.PushEvalStack(fv) // push again
-        proofArgumentListAst |> List.map eval |> ignore
-        optQedAst |> Option.map eval |> Option.defaultValue ()
+        eval proofBlockAst
         fv.CheckConsistency()
         heap.Eval.Pop() |> ignore // pop without embedding in theorem (already done)
     | Ast.Precedence((pos1, pos2), precedence) ->

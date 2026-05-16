@@ -46,7 +46,7 @@ type Ast =
     | UsesClause of Positions * Ast
     | BrackedCoordList of Positions * Ast list
     | ReferencingIdentifier of Positions * (Ast * Ast list)
-    | ProofSignature of Positions * (Ast * Ast list)
+
 
     // Types
     | TemplateType of Positions * string
@@ -171,7 +171,11 @@ type Ast =
     | RevokeArgument of Positions * Ast
     | JustArgInf of Positions * (Ast * Ast)
     | Argument of Positions * (Ast * Ast)
-    | Proof of Positions * (Ast * (Ast list * Ast option))
+    | ProofContent of Ast list * Ast option
+    | ProofBlock of (Ast * Ast) * Ast
+    | ProofSignature of Positions * (Ast * Ast list)
+    | Proof of Positions * (Ast * Ast)
+
     | Namespace of Ast list
 
     | AST of Positions * Ast

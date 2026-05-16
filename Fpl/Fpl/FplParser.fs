@@ -545,8 +545,9 @@ let justification = positions (justificationItemList .>> IW) |>> Ast.Justificati
 let justifiedArgument = positions (justification .>>. argumentInference) |>> Ast.JustArgInf
 let proofArgument = positions ((argumentIdentifier .>> IW) .>>. justifiedArgument) .>> IW |>> Ast.Argument
 let proofArgumentList = many1 (IW >>. (proofArgument <|> varDeclBlock))
-let keywordProof = (skipString LiteralPrfL <|> skipString LiteralPrf) .>> SW 
-let proofBlock = leftBrace >>. proofArgumentList .>>. opt keywordQed .>> spacesRightBrace
+let keywordProof = (skipString LiteralPrfL <|> skipString LiteralPrf) .>> SW
+let proofContent = proofArgumentList .>>. opt keywordQed |>> Ast.ProofContent
+let proofBlock = (leftBraceOpt .>>. proofContent) .>>. spacesRightBrace |>> Ast.ProofBlock
 let proofSignature = positions (keywordProof >>. simpleSignature .>>. dollarDigitList) .>> IW |>> Ast.ProofSignature
 
 let proof = positions (proofSignature .>>. proofBlock) |>> Ast.Proof

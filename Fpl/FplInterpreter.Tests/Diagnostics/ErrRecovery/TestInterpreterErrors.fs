@@ -74,6 +74,8 @@ type TestInterpreterErrors() =
     [<DataRow("for01", "def pred T() {dec for x in y assert z};true};", 1)>]
     [<DataRow("ctor00", "def cl T {ctor T() {}};", 0)>]
     [<DataRow("ctor01", "def cl T {ctor T() }};", 1)>]
+    [<DataRow("prf00", "prf T$1 {1. |- trivial };", 0)>]
+    [<DataRow("prf01", "prf T$1 1. |- trivial };", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSY003(no:string, fplCode:string, expected) =
@@ -114,6 +116,8 @@ type TestInterpreterErrors() =
     [<DataRow("pred01", "def pred T() {intr;", 1)>]
     [<DataRow("func00", "def func T()->obj {intr};", 0)>]
     [<DataRow("func01", "def func T()->obj {intr;", 1)>]
+    [<DataRow("prf00", "prf T$1 {1. |- trivial };", 0)>]
+    [<DataRow("prf01", "prf T$1 {1. |- trivial ;", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSY004(no:string, fplCode:string, expected) =
