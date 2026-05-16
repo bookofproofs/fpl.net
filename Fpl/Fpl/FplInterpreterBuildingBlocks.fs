@@ -219,7 +219,6 @@ let rec eval ast =
         let candidates, candidatesNames =  filterCandidates (candidatesFromTheory @ candidatesLocal @ candidatesOfMapping) searchIdentifier true
         let correctIds (fv1:FplGenericNode) = 
             match fv with 
-            | :? FplBase 
             | :? FplForInStmtDomain -> 
                 fv1.FplId <- searchIdentifier
                 fv1.TypeId <- searchIdentifier
@@ -839,6 +838,16 @@ let rec eval ast =
         eval langCode
         eval ebnfAst
         heap.Eval.PopEvalStack() // remove language
+    | Ast.InheritedType ((pos1, pos2), identifierOpt) -> 
+        match identifierOpt with
+        | Some identifier ->
+            let fv = heap.Eval.PeekEvalStack()
+            fv.FplId <- identifier
+            fv.TypeId <- identifier
+            let candidates = findCandidatesByName identifier false true
+            if candidates.Length = 0 then 
+                fv.ErrorOccurred <- emitID010Diagnostics identifier pos1 pos2
+        | _ -> ()
     | Ast.InheritedTypeList inheritedTypeAsts -> 
         let beingCreatedNode = heap.Eval.PeekEvalStack()
         let addVariablesAndPropertiesOfBaseNode (bNode:FplGenericNode) = 
@@ -849,41 +858,45 @@ let rec eval ast =
             | _ -> ()
 
         inheritedTypeAsts
-        |> List.iter (fun baseAst ->
-            match baseAst with
-            | Ast.PredicateIdentifier((pos1, pos2), _) ->
-                // retrieve the name of the class and the class (if it exists)
-                let baseNode = new FplBase((pos1, pos2), beingCreatedNode)
-                heap.Eval.PushEvalStack(baseNode)            
-                eval baseAst
-                heap.Eval.PopEvalStack() |> ignore
-                let candidates = findCandidatesByName baseNode.FplId false true
-                if candidates.Length > 0 then 
-                    let foundBase = candidates.Head
-                    match beingCreatedNode, foundBase with
-                    | :? FplPredicate, :? FplPredicate 
-                    | :? FplFunctionalTerm, :? FplFunctionalTerm ->
-                        let nodeType = beingCreatedNode.Type SignatureType.Type
-                        let baseType = foundBase.Type SignatureType.Type
-                        if nodeType <> baseType then 
-                            baseNode.ErrorOccurred <- emitID007diagnostics beingCreatedNode.Name nodeType foundBase.Name baseType pos1 pos2
-                        else 
+        |> List.iter (fun inheritedType ->
+            match inheritedType with
+            | Ast.InheritedType((pos1, pos2), identifierOpt) ->
+                match identifierOpt with
+                | None ->
+                    beingCreatedNode.ErrorOccurred <- emitSY005diagnostics pos1 pos2
+                | _ ->
+                    // retrieve the name of the class and the class (if it exists)
+                    let baseNode = new FplBase((pos1, pos2), beingCreatedNode)
+                    heap.Eval.PushEvalStack(baseNode)            
+                    eval inheritedType
+                    heap.Eval.PopEvalStack() |> ignore
+                    let candidates = findCandidatesByName baseNode.FplId false true
+                    if candidates.Length > 0 then 
+                        let foundBase = candidates.Head
+                        match beingCreatedNode, foundBase with
+                        | :? FplPredicate, :? FplPredicate 
+                        | :? FplFunctionalTerm, :? FplFunctionalTerm ->
+                            let nodeType = beingCreatedNode.Type SignatureType.Type
+                            let baseType = foundBase.Type SignatureType.Type
+                            if nodeType <> baseType then 
+                                baseNode.ErrorOccurred <- emitID007diagnostics beingCreatedNode.Name nodeType foundBase.Name baseType pos1 pos2
+                            else 
+                                baseNode.RefersTo <- Some foundBase // add found base class to base
+                                addVariablesAndPropertiesOfBaseNode foundBase
+                        | :? FplClass, :? FplClass -> 
                             baseNode.RefersTo <- Some foundBase // add found base class to base
                             addVariablesAndPropertiesOfBaseNode foundBase
-                    | :? FplClass, :? FplClass -> 
-                        baseNode.RefersTo <- Some foundBase // add found base class to base
-                        addVariablesAndPropertiesOfBaseNode foundBase
-                    | :? FplPredicate, _
-                    | :? FplFunctionalTerm, _
-                    | :? FplClass, _ ->
-                        let nodeType = beingCreatedNode.Type SignatureType.Type
-                        let baseType = foundBase.Type SignatureType.Type
-                        baseNode.ErrorOccurred <- emitID007diagnostics beingCreatedNode.Name nodeType foundBase.Name baseType pos1 pos2
-                    | _ -> () // does not occur, since syntax of inherited base is not supported from non-classes, non-functional terms, and non-predicates
-                else
-                    baseNode.ErrorOccurred <- emitID010Diagnostics baseNode.FplId pos1 pos2
-                if baseNode.FplId = beingCreatedNode.FplId then 
-                    baseNode.ErrorOccurred <- emitID009Diagnostics baseNode.FplId pos1 pos2
+                        | :? FplPredicate, _
+                        | :? FplFunctionalTerm, _
+                        | :? FplClass, _ ->
+                            let nodeType = beingCreatedNode.Type SignatureType.Type
+                            let baseType = foundBase.Type SignatureType.Type
+                            baseNode.ErrorOccurred <- emitID007diagnostics beingCreatedNode.Name nodeType foundBase.Name baseType pos1 pos2
+                        | _ -> () // does not occur, since syntax of inherited base is not supported from non-classes, non-functional terms, and non-predicates
+                    else
+                        baseNode.ErrorOccurred <- emitID010Diagnostics baseNode.FplId pos1 pos2
+                    if baseNode.FplId = beingCreatedNode.FplId then 
+                        baseNode.ErrorOccurred <- emitID009Diagnostics baseNode.FplId pos1 pos2
             | _ -> ()
         )
         let classInheritanceChains = findInheritanceChains beingCreatedNode 
