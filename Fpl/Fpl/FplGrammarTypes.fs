@@ -129,6 +129,7 @@ type Ast =
     | Conjecture of Positions * (Ast * ((Ast * (Ast list option * Ast)) * Ast))
     | NamedVarDecl of Positions * (Ast list * Ast)
     | ParamTuple of Ast list * Ast
+    | ParamTupleWithOptLeftParen of (Ast * Ast list) * Ast
 
     | Mapping of Positions * Ast
     | AxiomSignature of Positions * Ast

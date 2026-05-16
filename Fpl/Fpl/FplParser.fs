@@ -51,7 +51,7 @@ let leftBrace = skipChar '{' >>. spaces
 let leftBraceOpt = positions (opt (skipChar '{')) .>> spaces |>> Ast.LeftBraceOpt
 let rightBraceOpt = positions (opt (skipChar '}')) |>> Ast.RightBraceOpt
 let leftParen = skipChar '(' >>. spaces 
-//let leftParenOpt = positions (opt (skipChar '{')) .>> spaces |>> Ast.LeftParenOpt
+let leftParenOpt = positions (opt (skipChar '(')) .>> spaces |>> Ast.LeftParenOpt
 let rightParenOpt = positions (opt (skipChar ')') ) |>> Ast.RightParenOpt
 let comma = skipChar ',' >>. spaces 
 let dot = skipChar '.' |>> Ast.Dot
@@ -206,6 +206,7 @@ let predicate, predicateRef = createParserForwardedToRef()
 let predicateList, predicateListRef = createParserForwardedToRef()
 let predicateWithQualification, predicateWithQualificationRef = createParserForwardedToRef()
 let paramTuple, paramTupleRef = createParserForwardedToRef()
+let paramTupleWithOptLeftParen, paramTupleWithOptLeftParenRef = createParserForwardedToRef()
 
 let coord = choice [ predicateWithQualification; dollarDigits ] .>> IW 
 
@@ -250,6 +251,8 @@ let namedVariableDeclaration = positions ((variableList .>> colon) .>>. variable
 namedVariableDeclarationListRef.Value <- sepBy namedVariableDeclaration comma
 
 paramTupleRef.Value <- (leftParen >>. namedVariableDeclarationList) .>>. (IW >>. rightParenOpt) |>> Ast.ParamTuple
+paramTupleWithOptLeftParenRef.Value <- (leftParenOpt .>>. namedVariableDeclarationList) .>>. (IW >>. rightParenOpt) |>> Ast.ParamTupleWithOptLeftParen
+
 let simpleSignature = pascalCaseId .>> IW 
 
 let localizationString = positions (regex "[^\"\n]*") <?> "<language-specific string>" |>> Ast.LocalizationString
@@ -484,14 +487,14 @@ let predContent = varDeclOrSpecList .>>. spacesPredicate |>> Ast.DefPredicateCon
 
 let keywordConstructor = (skipString LiteralCtorL <|> skipString LiteralCtor) .>> SW
 let constructorBlock = leftBraceOpt .>>. varDeclOrSpecList .>>. spacesRightBrace |>> Ast.ConstructorBlock
-let constructorSignature = positions (keywordConstructor >>. simpleSignature .>>. paramTuple) .>> IW |>> Ast.ConstructorSignature
+let constructorSignature = positions (keywordConstructor >>. simpleSignature .>>. paramTupleWithOptLeftParen) .>> IW |>> Ast.ConstructorSignature
 let constructor = positions (constructorSignature .>>. constructorBlock) |>> Ast.Constructor
 
 (* FPL building blocks - Properties *)
 let keywordProperty = (skipString LiteralPrtyL <|> skipString LiteralPrty) .>> SW 
 
 let predicateInstanceBlock = opt (leftBrace >>. (keywordIntrinsic <|> predContent) .>> spacesRightBrace)
-let predicateInstanceSignature = positions (keywordPredicate >>. SW >>. simpleSignature .>>. paramTuple) .>> IW |>> Ast.PredicateInstanceSignature
+let predicateInstanceSignature = positions (keywordPredicate >>. SW >>. simpleSignature .>>. paramTupleWithOptLeftParen) .>> IW |>> Ast.PredicateInstanceSignature
 let predicateInstance = positions (keywordProperty >>. predicateInstanceSignature .>>. predicateInstanceBlock) |>> Ast.PredicateInstance
 
 mappingRef.Value <- toArrow >>. IW >>. positions (keywordUndefined <|> variableType) |>> Ast.Mapping
@@ -499,7 +502,7 @@ mappingRef.Value <- toArrow >>. IW >>. positions (keywordUndefined <|> variableT
 let returnStatement = positions (keywordReturn >>. predicate) .>> IW |>> Ast.Return
 let funcContent = varDeclOrSpecList .>>. returnStatement |>> Ast.DefFunctionContent
 let functionalTermInstanceBlock = opt (leftBrace >>. (keywordIntrinsic <|> funcContent) .>> spacesRightBrace)
-let functionalTermInstanceSignature = positions (keywordFunction >>. SW >>. simpleSignature .>>. paramTuple .>>. (IW >>. mapping)) .>> IW |>> Ast.FunctionalTermInstanceSignature
+let functionalTermInstanceSignature = positions (keywordFunction >>. SW >>. simpleSignature .>>. paramTupleWithOptLeftParen .>>. (IW >>. mapping)) .>> IW |>> Ast.FunctionalTermInstanceSignature
 let functionalTermInstance = positions (keywordProperty >>. functionalTermInstanceSignature .>>. functionalTermInstanceBlock) |>> Ast.FunctionalTermInstance
 
 
@@ -559,13 +562,13 @@ let proof = positions (proofSignature .>>. proofBlock) |>> Ast.Proof
 let predicateDefinitionBlock = opt (leftBrace  >>. ((keywordIntrinsic <|> predContent) .>> IW) .>>. propertyList .>>. spacesRightBrace)
 let inheritedType = positions (opt idStartsWithCap) .>> IW |>> Ast.InheritedType 
 let inheritedTypeList = sepBy1 inheritedType comma |>> Ast.InheritedTypeList
-let predicateSignature = positions (keywordPredicate >>. SW >>. (simpleSignature .>>. opt (colon >>. inheritedTypeList) .>> IW) .>>. paramTuple) .>>. userDefinedSymbol .>> IW |>> Ast.PredicateSignature
+let predicateSignature = positions (keywordPredicate >>. SW >>. (simpleSignature .>>. opt (colon >>. inheritedTypeList) .>> IW) .>>. paramTupleWithOptLeftParen) .>>. userDefinedSymbol .>> IW |>> Ast.PredicateSignature
 let definitionPredicate = positions (predicateSignature .>>. predicateDefinitionBlock) |>> Ast.DefinitionPredicate
 
 // Functional term building blocks can be defined similarly to classes, they can have properties but they cannot be derived any parent type 
 let functionalTermDefinitionBlock = positions (opt (leftBrace  >>. ((keywordIntrinsic <|> funcContent) .>> IW) .>>. propertyList .>>. spacesRightBrace))  |>> Ast.FunctionalTermDefinitionBlock
 
-let functionalTermSignature = positions (keywordFunction >>. SW >>. (simpleSignature .>>. opt (colon >>. inheritedTypeList) .>> IW) .>>. paramTuple .>>. (IW >>. mapping)) .>>. userDefinedSymbol .>> IW |>> Ast.FunctionalTermSignature
+let functionalTermSignature = positions (keywordFunction >>. SW >>. (simpleSignature .>>. opt (colon >>. inheritedTypeList) .>> IW) .>>. paramTupleWithOptLeftParen .>>. (IW >>. mapping)) .>>. userDefinedSymbol .>> IW |>> Ast.FunctionalTermSignature
 let definitionFunctionalTerm = positions (functionalTermSignature .>>. functionalTermDefinitionBlock) |>> Ast.DefinitionFunctionalTerm
 
 // Class definitions
