@@ -195,6 +195,16 @@ let rec eval ast =
                 fv.TypeId <- pascalCaseId
             | _ -> ()
 
+    | Ast.BaseClassName((pos1, pos2), identifier) ->
+        let fv = heap.Eval.PeekEvalStack()
+        fv.FplId <- identifier
+        fv.TypeId <- identifier
+        let candidates = findCandidatesByName identifier false true
+        if candidates.Length = 0 then 
+            fv.ErrorOccurred <- emitID010Diagnostics identifier pos1 pos2
+    | Ast.BaseClassNameErr((pos1, pos2), ()) ->
+        let fv = heap.Eval.PeekEvalStack()
+        fv.ErrorOccurred <- emitSY005diagnostics pos1 pos2
     | Ast.PredicateIdentifier((pos1, pos2), identifier) ->
         let fv = heap.Eval.PeekEvalStack()
         let searchIdentifier = 
@@ -210,7 +220,6 @@ let rec eval ast =
         let correctIds (fv1:FplGenericNode) = 
             match fv with 
             | :? FplBase 
-            | :? FplBaseConstructorCall 
             | :? FplForInStmtDomain -> 
                 fv1.FplId <- searchIdentifier
                 fv1.TypeId <- searchIdentifier

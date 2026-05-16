@@ -36,6 +36,8 @@ type Ast =
     | ExtensionNameErr of Positions * unit
     | DelegateName of Positions * string
     | DelegateNameErr of Positions * unit
+    | BaseClassName of Positions * string
+    | BaseClassNameErr of Positions * unit
     | ExtensionRegex of string
     | ExtensionAssignment of Positions * (Ast * Ast) 
     | ExtensionSignature of Positions * (Ast * Ast)

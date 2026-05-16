@@ -93,6 +93,7 @@ let idStartsWithCap = (regex @"[A-Z]\w*") <?> "<PascalCaseId>"
 let pascalCaseId = positions (opt idStartsWithCap) |>> Ast.PascalCaseId
 
 let namespaceIdentifier = positions (sepBy1 pascalCaseId dot) .>> IW |>> Ast.NamespaceIdentifier
+
 let predicateIdentifier = positions (idStartsWithCap) |>> Ast.PredicateIdentifier 
 
 let alias = positions (skipString LiteralAlias >>. SW >>. opt idStartsWithCap) |>> Ast.Alias
@@ -306,9 +307,14 @@ let forStatement = positions (keywordFor >>. forInBody) |>> Ast.ForIn
 //// the scope of a definition. An assertion uses a predicate referring to existing identifiers in the whole theory
 //// Difference of assertion to assume: the latter will be used only in the scope of proofs
 let assertionStatement = positions (keywordAssert >>. predicate) |>> Ast.Assertion
-let inheritedType = predicateIdentifier
 
-let baseConstructorCall = positions (keywordBaseClassReference >>. dot >>. (inheritedType .>> IW).>>. argumentTuple .>> IW) |>> Ast.BaseConstructorCall
+
+let baseClassName = choice [
+    attempt (positions (idStartsWithCap) .>> IW) |>> Ast.BaseClassName
+    positions (IW) |>> Ast.BaseClassNameErr
+    ]
+
+let baseConstructorCall = positions (keywordBaseClassReference >>. dot >>. baseClassName .>>. argumentTuple .>> IW) |>> Ast.BaseConstructorCall
 
 let statement = 
     IW >>. (choice [
@@ -549,6 +555,7 @@ let proof = positions (proofSignature .>>. proofBlock) |>> Ast.Proof
 
 // Predicate building blocks can be defined similarly to classes, they can have properties but they cannot be derived any parent type
 let predicateDefinitionBlock = opt (leftBrace  >>. ((keywordIntrinsic <|> predContent) .>> IW) .>>. propertyList .>> spacesRightBrace)
+let inheritedType = predicateIdentifier
 let inheritedTypeList = sepBy1 (inheritedType) (attempt (IW >>. comma)) |>> Ast.InheritedTypeList
 let predicateSignature = positions (keywordPredicate >>. SW >>. (simpleSignature .>>. opt (colon >>. inheritedTypeList) .>> IW) .>>. paramTuple) .>>. userDefinedSymbol .>> IW |>> Ast.PredicateSignature
 let definitionPredicate = positions (predicateSignature .>>. predicateDefinitionBlock) |>> Ast.DefinitionPredicate
