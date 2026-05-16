@@ -70,6 +70,8 @@ type TestInterpreterErrors() =
     [<DataRow("inf00", "inf T { pre: true con: true} ;", 0)>]
     [<DataRow("ext00", "ext Digits x@/\d+/ -> X {ret x};", 0)>]
     [<DataRow("ext01", "ext Digits x@/\d+/ -> X ret x};", 1)>]
+    [<DataRow("for00", "def pred T() {dec for x in y {assert z};true};", 0)>]
+    [<DataRow("for01", "def pred T() {dec for x in y assert z};true};", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSY003(no:string, fplCode:string, expected) =
@@ -100,6 +102,8 @@ type TestInterpreterErrors() =
     [<DataRow("inf01", "inf T {pre: true con: true ;", 1)>]
     [<DataRow("ext00", "ext Digits x@/\d+/ -> X {ret x};", 0)>]
     [<DataRow("ext01", "ext Digits x@/\d+/ -> X {ret x;", 1)>]
+    [<DataRow("for00", "def pred T() {dec for x in y {assert z;true};", 0)>]
+    [<DataRow("for01", "def pred T() {dec for x in y {assert z;true};", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSY004(no:string, fplCode:string, expected) =

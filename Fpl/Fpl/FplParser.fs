@@ -299,7 +299,7 @@ let assignmentStatement = positions ((predicateWithQualification .>> IW .>> colo
 let inEntity = keywordIn >>. positions (predicateWithQualification) .>> IW |>> Ast.InEntity
 
 let entityInDomain = ( variable .>> IW .>>. inEntity ) .>> IW
-let forInBody = (entityInDomain .>> IW) .>>. (leftBrace >>. IW >>. statementList) .>> (IW >>. rightBrace)
+let forInBody = (entityInDomain .>> IW) .>>. (leftBraceOpt .>>. statementList) .>>. (IW >>. rightBrace)
 let forStatement = positions (keywordFor >>. forInBody) |>> Ast.ForIn
 
 //// Difference of assertion to an axiom: axiom is named predicate, while an assertion uses a predicated to assert it.

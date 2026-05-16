@@ -104,7 +104,7 @@ type Ast =
     | MapCaseSingle of Positions * (Ast * Ast)
     | MapCaseElse of Positions * Ast  
     | Assignment of Positions * (Ast * Ast)
-    | ForIn of Positions * ((Ast * Ast) * Ast list)
+    | ForIn of Positions * (((Ast * Ast) * (Ast * Ast list)) * Ast)
     | Return of Positions * Ast
 
     // FPL Blocks

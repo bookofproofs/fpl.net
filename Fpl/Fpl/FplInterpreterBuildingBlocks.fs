@@ -1324,7 +1324,8 @@ let rec eval ast =
         eval argIdAst
         eval argAst
         heap.Eval.PopEvalStack()
-    | Ast.ForIn((pos1, pos2), ((entityAst, inDomainAst), statementListAst)) ->
+    | Ast.ForIn((pos1, pos2), (((entityAst, inDomainAst), (leftBrace, statementListAst)), rightBrace)) ->
+        eval leftBrace
         let parent = heap.Eval.PeekEvalStack()
         let forStmt = new FplForInStmt((pos1, pos2), parent)
         heap.Eval.PushEvalStack(forStmt) // add ForInStmt
@@ -1335,6 +1336,7 @@ let rec eval ast =
         eval inDomainAst
         statementListAst |> List.map (fun stmtAst -> eval stmtAst) |> ignore
         heap.Eval.PopEvalStack() // remove ForInStmt
+        eval rightBrace
     | Ast.PremiseConclusionBlock((leftBrace, (optVarDeclOrSpecList, (premiseAst, conclusionAst))), rightBrace) ->
         eval leftBrace
         optVarDeclOrSpecList |> Option.map (List.map eval >> ignore) |> Option.defaultValue ()
