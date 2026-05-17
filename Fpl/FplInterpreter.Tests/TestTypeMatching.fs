@@ -80,9 +80,9 @@ type TestTypeMatching() =
     [<DataRow("func_vars_01", "def pred T() {dec ~x:func(y:ind)->obj; x};", "func(ind) -> obj")>]
     [<DataRow("func_vars_02", "def pred T(a:func()->ind) {a};", "func() -> ind")>]
     [<DataRow("func_vars_03", "def pred T(a:func(b:ind, c:pred(d:func))->func) {a};", "func(ind, pred(func)) -> func")>]
-    [<DataRow("isop_01", "def pred T(a:obj)->func) {is(a,ind)};", "pred(obj)")>]
-    [<DataRow("isop_02", "dec cl A def pred T(a:obj)->func) {is(a,A)};", "pred(obj)")>]
-    [<DataRow("isop_03", "dec cl A def pred T(a:A)->func) {is(a,ind)};", "pred(A)")>]
+    [<DataRow("isop_01", "def pred T(a:obj) {is(a,ind)};", "pred(obj)")>]
+    [<DataRow("isop_02", "def cl A def pred T(a:obj) {is(a,A)};", "pred(obj)")>]
+    [<DataRow("isop_03", "def cl A def pred T(a:A) {is(a,ind)};", "pred(A)")>]
     [<DataRow("pred_val_01", "def pred T() {true};", "pred()")>]
     [<DataRow("pred_val_02", "def pred T() {false};", "pred()")>]
     [<DataRow("pred_val_03", "def pred T() {dec ~x:pred x:=false; x};", "pred()")>]
@@ -436,7 +436,7 @@ type TestTypeMatching() =
     [<DataRow("ExistsByExample_01", "inf ExistsByExample{dec ~p:pred(c:obj); pre:p(c) con:ex x:tpl{p(x)}} thm T {dec ~a:obj; true} proof T$1 {1. |- iif(is(a,N), true) 2. 1, byinf ExistsByExample |- true };")>]
     [<DataRow("ExistsByExample_02", "inf ExistsByExample{dec ~p:pred(); pre:p con:ex x:tpl{p(x)}} thm T {true} proof T$1 {1. |- and(ex x:obj { is(x,M) }, iif(true,false)) 2. 1, byinf ExistsByExample |- true };")>]
     [<DataRow("ExistsByExample_02a", "inf ExistsByExample{dec ~p:pred(c:tpl); pre:p con:ex x:tpl{p(x)}} thm T {true} proof T$1 {dec ~a:tpl; 1. |- and(is(a,M) , (a = $1)) 2. 1, byinf ExistsByExample |- true };")>]
-    [<DataRow("ExistsByExample_02b", """def pred Equal(x,y:tpl) infix "=" 0 { delegate.Equal(x,y) } inf ExistsByExample{dec ~p:pred(d:obj, c:tpl); pre:p con:ex x:tpl{p(x)}} thm T {true} proof T$1 {dec ~a:tpl, ~x:obj; 1. |- and(is(x,M) , (a = $1)) 2. 1, byinf ExistsByExample |- true };""")>]
+    [<DataRow("ExistsByExample_02b", """def pred Equal(x,y:tpl) infix "=" 0 { delegate.Equal(x,y) } inf ExistsByExample{dec ~p:pred(d:obj, c:tpl); pre:p con:ex x:tpl{p(x)}} thm T {true} proof T$1 {dec ~a:tpl ~x:obj; 1. |- and(is(x,M) , (a = $1)) 2. 1, byinf ExistsByExample |- true };""")>]
     [<DataRow("ExistsByExample_03", "inf ExistsByExample{dec ~p:pred(); pre:p con:ex x:tpl{p(x)}} thm T {true} proof T$1 {1. |- xor(all z:obj { is(z,K) }, not (xor(true,false))) 2. 1, byinf ExistsByExample |- true };")>]
 
     // Contraposition: pre: impl(not p, not q)
