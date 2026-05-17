@@ -15,6 +15,8 @@ type Ast =
     | LeftParenOpt of Positions * unit option
     | RightParenOpt of Positions * unit option
     | SemicolonOpt of Positions * unit option
+    | LeftBracketOpt of Positions * unit option
+    | RightBracketOpt of Positions * unit option
     | Star of Positions * unit
     | DotErr of Positions * unit
     | Dot of unit
@@ -47,7 +49,7 @@ type Ast =
     | ExtensionSignature of Positions * (Ast * Ast)
     | DefinitionExtension of Positions * ((Ast * Ast) * (Ast * (Ast * Ast)))
     | UsesClause of Positions * Ast
-    | BrackedCoordList of Positions * Ast list
+    | BrackedCoordList of Positions * (Ast list * Ast)
     | ReferencingIdentifier of Positions * (Ast * Ast list)
 
 
@@ -60,7 +62,7 @@ type Ast =
     | IndexType of Positions * unit
     | SimpleVariableType of Positions * Ast 
     | IndexAllowedType of Positions * Ast 
-    | ArrayType of Positions * (Ast * Ast list)
+    | ArrayType of Positions * (Ast * ((Ast * Ast list) * Ast))
     | InheritedType of Positions * string option 
     | InheritedTypeList of Ast list
     | CompoundPredicateType of Positions * (Ast * Ast option)

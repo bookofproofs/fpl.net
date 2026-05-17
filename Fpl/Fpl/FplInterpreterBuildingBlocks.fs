@@ -123,6 +123,16 @@ let rec eval ast =
     | Ast.Alias((_, _), _) -> ()
     | Ast.Dot() -> ()
     | Ast.Star((_, _),()) -> ()
+    | Ast.LeftBracketOpt ((pos1, pos2), leftBracketOpt) ->
+        match leftBracketOpt with
+        | None ->
+            emitSY010diagnostics pos1 pos2 |> ignore
+        | _ -> ()
+    | Ast.RightBracketOpt ((pos1, pos2), rightBracketOpt) ->
+        match rightBracketOpt with
+        | None ->
+            emitSY011diagnostics pos1 pos2 |> ignore
+        | _ -> ()
     | Ast.SemicolonOpt ((pos1, pos2), semicolonOpt) ->
         match semicolonOpt with
         | None ->
@@ -333,13 +343,15 @@ let rec eval ast =
         heap.Eval.PushEvalStack(templateNode)
         heap.Eval.PopEvalStack()
 
-    | Ast.ArrayType((pos1, pos2), (mainTypeAst, indexAllowedTypeListAst)) ->
+    | Ast.ArrayType((pos1, pos2), (mainTypeAst, ((leftBracket, indexAllowedTypeListAst), rightBracket))) ->
+        eval leftBracket
         let fv = heap.Eval.PeekEvalStack()
         match fv with 
         | :? FplMapping as mapping -> mapping.SetIsArray()
         | _ -> ()
         eval mainTypeAst
         indexAllowedTypeListAst |> List.map eval |> ignore
+        eval rightBracket
     | Ast.SimpleVariableType((pos1, pos2), simpleVariableTypeAst) ->
         eval simpleVariableTypeAst
     | Ast.IndexAllowedType((pos1, pos2), indexAllowedTypeAst) ->
@@ -652,7 +664,7 @@ let rec eval ast =
             let index = rnd.Next(lst.Length)
             lst.[index]
         eval (chooseRandomMember ebnfTermAsts)
-    | Ast.BrackedCoordList((pos1, pos2), coordListAst) ->
+    | Ast.BrackedCoordList((pos1, pos2), (coordListAst, rightBracket)) ->
         let getProceedingReference = heap.Eval.GetProceedingReference()
 
         match getProceedingReference with 
@@ -667,6 +679,7 @@ let rec eval ast =
                     heap.Eval.PopEvalStack()
                 ) 
         | _ -> ()
+        eval rightBracket
     | Ast.And((pos1, pos2), (predicateAst1, predicateAst2)) ->
         let fv = heap.Eval.PeekEvalStack()
         let fvNew = new FplConjunction((pos1, pos2), fv)
@@ -1484,8 +1497,11 @@ let rec eval ast =
         // create all variables of the named variable declaration in the current scope
         variableListAst |> List.iter (fun varAst ->
             match variableTypeAst with 
-            | Ast.ArrayType((posMan1, posMan2),(mainTypeAst, indexAllowedTypeListAst)) ->
-                parent.ErrorOccurred <- emitVAR00Diagnostics parent.AuxiliaryInfo posMan1 posMan2        
+            | Ast.ArrayType((posMan1, posMan2),(mainTypeAst, ((leftBracket, indexAllowedTypeListAst), rightBracket))) ->
+                eval leftBracket
+                let numberOfVariadicVars = parent.AuxiliaryInfo
+                if numberOfVariadicVars > 1 then
+                    parent.ErrorOccurred <- emitVAR00Diagnostics posMan1 posMan2        
                 match varAst with 
                 | Ast.Var((varPos1, varPos2), varName) ->
                     let newVar = new FplVariableArray(varName, (varPos1, varPos2), parent)
@@ -1495,6 +1511,7 @@ let rec eval ast =
                     indexAllowedTypeListAst |> List.map eval |> ignore
                     heap.Eval.PopEvalStack()
                 | _ -> ()
+                eval rightBracket
             | Ast.SimpleVariableType((_, _),simplVariableTypeAst) ->
                 match varAst with 
                 | Ast.Var((varPos1, varPos2), varName) ->

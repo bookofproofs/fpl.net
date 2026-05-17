@@ -262,3 +262,34 @@ type TestInterpreterErrors() =
         else
             let code = SY009
             runTestHelper "TestSY009.fpl" fplCode code expected
+
+
+    [<DataRow("arrType00", """def pred T(a:*ind[obj]);""", 0)>]
+    [<DataRow("arrType01", """def pred T(a:*ind obj]);""", 1)>]
+    [<DataRow("arrType02", """def pred T(a:*ind obj);""", 1)>]
+    [<DataRow("arrType03", """def pred T() {dec ~a:*ind[obj]; true};""", 0)>]
+    [<DataRow("arrType04", """def pred T() {dec ~a:*ind obj]; true};""", 1)>]
+    [<DataRow("arrType05", """def pred T() {dec ~a:*ind obj; true};""", 1)>]
+    [<TestMethod>]
+    member this.TestSY010(no:string, fplCode:string, expected) =
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = SY010
+            runTestHelper "TestSY010.fpl" fplCode code expected
+
+    [<DataRow("arrType00", """def pred T(a:*ind[obj]);""", 0)>]
+    [<DataRow("arrType01", """def pred T(a:*ind[obj);""", 1)>]
+    [<DataRow("arrType02", """def pred T(a:*ind obj);""", 1)>]
+    [<DataRow("arrType03", """def pred T() {dec ~a:*ind[obj]; true};""", 0)>]
+    [<DataRow("arrType04", """def pred T() {dec ~a:*ind[obj; true};""", 1)>]
+    [<DataRow("arrType05", """def pred T() {dec ~a:*ind obj; true};""", 1)>]
+    [<DataRow("arrUsage00", """def pred T() {dec a:=x[b]; true};""", 0)>]
+    [<DataRow("arrUsage01", """def pred T() {dec a:=x[b; true};""", 1)>]
+    [<TestMethod>]
+    member this.TestSY011(no:string, fplCode:string, expected) =
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = SY011
+            runTestHelper "TestSY011.fpl" fplCode code expected

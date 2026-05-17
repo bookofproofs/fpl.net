@@ -52,7 +52,7 @@ let leftBraceOpt = positions (opt (skipChar '{')) .>> spaces |>> Ast.LeftBraceOp
 let rightBraceOpt = positions (opt (skipChar '}')) |>> Ast.RightBraceOpt
 let leftParen = skipChar '(' >>. spaces 
 let leftParenOpt = positions (opt (skipChar '(')) .>> spaces |>> Ast.LeftParenOpt
-let rightParenOpt = positions (opt (skipChar ')') ) |>> Ast.RightParenOpt
+let rightParenOpt = positions (opt (skipChar ')')) |>> Ast.RightParenOpt
 let comma = skipChar ',' >>. spaces 
 let dot = skipChar '.' |>> Ast.Dot
 let colon = skipChar ':' .>> spaces 
@@ -61,7 +61,8 @@ let at = pchar '@'
 let case = skipChar '|' >>. spaces
 let elseCase = skipChar '?' >>. spaces
 let leftBracket = skipChar '[' >>. spaces 
-let rightBracket = skipChar ']'
+let leftBracketOpt = positions (opt (skipChar '[')) .>> spaces |>> Ast.LeftBracketOpt
+let rightBracketOpt = positions (opt (skipChar ']')) |>> Ast.RightBracketOpt
 let tilde = skipChar '~' .>> spaces
 let semiColonOpt = positions (opt (skipChar ';')) .>> spaces |>> Ast.SemicolonOpt
 let exclamationMark = skipChar '!' 
@@ -217,7 +218,7 @@ let fplIdentifier = choice [ selfOrParent ; variable ; predicateIdentifier; exte
 
 let coordList = (sepBy1 coord comma) .>> IW
 
-let bracketedCoords = positions (leftBracket >>. coordList .>> rightBracket) |>> Ast.BrackedCoordList
+let bracketedCoords = positions (leftBracket >>. coordList .>>. rightBracketOpt) |>> Ast.BrackedCoordList
 
 let namedVariableDeclarationList, namedVariableDeclarationListRef = createParserForwardedToRef()
 
@@ -244,7 +245,7 @@ let indexAllowedType = positions (choice [ keywordIndex; keywordObject; predicat
 
 let indexAllowedTypeList = (sepBy1 (indexAllowedType .>> IW) comma) .>> IW
 // arrayType is used to define arrays in Fpl
-let arrayType = positions (star >>. IW >>. simpleVariableType .>>. (IW >>. leftBracket >>. indexAllowedTypeList .>> rightBracket)) |>> Ast.ArrayType
+let arrayType = positions (star >>. IW >>. simpleVariableType .>>. (IW >>. leftBracketOpt .>>. indexAllowedTypeList .>>. rightBracketOpt)) |>> Ast.ArrayType
 let variableType = choice [ simpleVariableType; arrayType ]
 
 let namedVariableDeclaration = positions ((variableList .>> colon) .>>. variableType .>> IW) |>> Ast.NamedVarDecl

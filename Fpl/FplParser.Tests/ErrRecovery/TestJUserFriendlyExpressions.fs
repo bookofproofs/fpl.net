@@ -140,3 +140,26 @@ type TestRecovery() =
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<DataRow("arrType01", """def pred T(a:*ind obj]);""")>]
+    [<DataRow("arrType02", """def pred T(a:*ind obj);""")>]
+    [<DataRow("arrType03", """def pred T() {dec ~a:*ind obj]; true};""")>]
+    [<DataRow("arrType04", """def pred T() {dec ~a:*ind obj; true};""")>]
+    [<TestMethod>]
+    member this.TestMissingOpeningBracket(no:string, fplCode) =
+        let result = run (stdParser .>> eof) fplCode
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<DataRow("arrType01", """def pred T(a:*ind[obj);""")>]
+    [<DataRow("arrType02", """def pred T(a:*ind obj);""")>]
+    [<DataRow("arrType03", """def pred T() {dec ~a:*ind[obj; true};""")>]
+    [<DataRow("arrType04", """def pred T() {dec ~a:*ind obj; true};""")>]
+    [<DataRow("arrUsage01", """def pred T() {dec a:=x[b; true};""")>]
+    [<TestMethod>]
+    member this.TestMissingClosingBracket(no:string, fplCode) =
+        let result = run (stdParser .>> eof) fplCode
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
