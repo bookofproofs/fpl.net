@@ -188,4 +188,5 @@ type Ast =
 
     | AST of Positions * Ast
     | Error // used to replace the whole AST (at the root level) for severe errors the parser cannot recover from
-
+    // Building block error: contains start/end Positions and parser error message
+    | BuildingBlockError of Positions * string 

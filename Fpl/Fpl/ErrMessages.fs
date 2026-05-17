@@ -179,6 +179,7 @@ let errSY008 = "`.` expected."
 let errSY009 = "`;` expected."
 let errSY010 = "`[` expected."
 let errSY011 = "`]` expected."
+let errSY999 errMsg = errMsg
 // variable-related error codes
 let errVAR00 =  "Declaring multiple arrays at once may cause ambiguities."
 let errVAR01 name = $"Variable `{name}` not declared in this scope."

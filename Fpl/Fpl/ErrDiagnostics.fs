@@ -203,6 +203,7 @@ type DiagnosticCode =
     | SY009
     | SY010
     | SY011
+    | SY999 of string
     // variable-related error codes
     | VAR00 
     | VAR01 of string 
@@ -345,6 +346,7 @@ type DiagnosticCode =
             | SY009 -> "SY009"
             | SY010 -> "SY010"
             | SY011 -> "SY011"
+            | SY999 _ -> "SY999"
             // variable-related error codes
             | VAR00 -> "VAR00"
             | VAR01 _  -> "VAR01"
@@ -487,6 +489,7 @@ type DiagnosticCode =
             | SY009 -> errSY009
             | SY010 -> errSY010
             | SY011 -> errSY011
+            | SY999 errMsg -> errSY999 errMsg
             // variable-related error codes
             | VAR00 -> errVAR00
             | VAR01 name -> errVAR01 name
@@ -958,6 +961,18 @@ let rec tryGetAst someParser input lastCorrectedIndex =
         // In the success case, we always return the current parser position in the input
         result
     | Failure(errorMsg, restInput, userState) ->
+        let diagnostic =
+            { 
+                Diagnostic.Uri = ad.CurrentUri
+                Diagnostic.Emitter = DiagnosticEmitter.FplParser 
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = restInput.Position
+                Diagnostic.EndPos = restInput.Position
+                Diagnostic.Code = SY999 errorMsg
+                Diagnostic.Alternatives = None
+            }
+        ad.AddDiagnostic diagnostic
+
         // replace the input by manipulating the input string depending on the error position
         let newInput = inputStringManipulator input (int restInput.Position.Index)
         if restInput.Position.Index < input.Length && restInput.Position.Index <> lastCorrectedIndex then 
@@ -966,8 +981,7 @@ let rec tryGetAst someParser input lastCorrectedIndex =
             // only if the error occurs at the end of the input, the ast generation fails
             Ast.Error 
 
-
-/// A simple helper function for printing trace information to the console (taken from FParsec Docs)
+// A simple helper function for printing trace information to the console (taken from FParsec Docs)
 let (<!>) (p: Parser<_,_>) label : Parser<_,_> =
     fun stream ->
         printfn "%A: Entering %s" stream.Position label
@@ -986,14 +1000,6 @@ let resultSatisfies predicate msg (p: Parser<_,_>) : Parser<_,_> =
       else
           stream.BacktrackTo(state) // backtrack to beginning
           Reply(Primitives.Error, error)
-
-/// Replaces all comments and strings in a FPL source code by spaces with as many line breaks as in the replacements.
-/// This significantly simplifies the grammar because we do not have to parse comments and inject them everywhere in the grammar the could be possible.
-/// The string replacement, on the other hand, prevents false positives in the error recovery mechanism in user-defined 
-/// localization strings that would otherwise emit diagnostics for regex matches inside those user-defined strings.
-let preParsePreProcess (input:string) = 
-    input
-    |> removeFplComments 
 
 
 /// Returns a list of tuples with (position,regexMmatch) of string matches based on an error-recovery regex pattern 

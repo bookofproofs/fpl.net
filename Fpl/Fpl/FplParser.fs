@@ -1,5 +1,7 @@
 /// This module contains the FPL parser producing an abstract syntax tree out of a given FPL code 
 module FplParser
+open System
+open System.Text
 open System.Text.RegularExpressions
 open FplPrimitives
 open FplGrammarTypes
@@ -638,6 +640,120 @@ let buildingBlockList = many (buildingBlock .>> IW)
 let fplNamespace = buildingBlockList .>>. (IW >>. semiColonOpt) |>> Ast.Namespace
 (* Final Parser *)
 let ast =  positions (IW >>. fplNamespace) |>> Ast.AST
+
+//------------
+
+let errRecoveryBlocks = $"({LiteralDefL}|{LiteralDef}|{LiteralAxL}|{LiteralAx}|{LiteralPostL}|{LiteralPost}|{LiteralThmL}|{LiteralThm}|{LiteralPropL}|{LiteralProp}|{LiteralLemL}|{LiteralLem}|{LiteralCorL}|{LiteralCor}|{LiteralConjL}|{LiteralConj}|{LiteralPrfL}|{LiteralPrf}|{LiteralInfL}|{LiteralInf}|{LiteralLocL}|{LiteralLoc}|{LiteralExtL}|{LiteralExt}|{LiteralUses})"
+
+let masked (input:String) =
+    input
+    |> Seq.map (fun ch -> if Char.IsWhiteSpace(ch) then ch else ' ')
+    |> Seq.toArray
+    |> fun arr -> System.String(arr)
+
+let keepOnlyRange (startIdx: int) (endIdx: int) (input: string) =
+    input
+    |> Seq.mapi (fun i c ->
+        if i >= startIdx && i < endIdx then
+            // inside visible range: keep everything
+            c
+        else
+            // outside: keep whitespace, mask non-whitespace
+            if System.Char.IsWhiteSpace c then c else ' ')
+    |> Seq.toArray
+    |> System.String
+
+let getMatches (pattern: string) (input: string) =
+    Regex.Matches(input, pattern)
+    |> Seq.cast<Match>
+    |> Seq.toList
+
+let maskAroundIndex (matches: Match list) (i: int) (input: string) =
+
+    match matches with
+    | [] ->
+        // no matches → nothing to do
+        input
+
+    | _ when i = 0 && matches.Length <= 1 ->
+        input
+    | _ when i = 0 && matches.Length > 1 ->
+        input.Substring(0, matches[1].Index)
+    | ms when i >= ms.Length - 1 ->
+        // i >= last index: mask everything up to this match
+        let m = ms[min i (ms.Length - 1)]
+        keepOnlyRange m.Index input.Length input
+
+    | ms ->
+        // middle case: keep only the i-th match visible
+        let m = ms.[i]
+        let startIdx = m.Index
+        let endIdx   = m.Index + m.Length
+        keepOnlyRange startIdx endIdx input
+
+
+/// Tries to parse all chunks of input of FPL building blocks. If a chunk produces a syntax error,
+/// a diagnosics will be issued and the chunk will be replaced by a masked chunk, where
+/// all non-whitespace characters are replaced with spaces while preserving line breaks and line lengths.
+/// The syntax error is generated using an input starting with the chunk, so syntax error messages
+/// realistically reflect the remaining code after the chunk.
+let cleanUpInputAndIssueSyntaxErrors fplCode =
+    let input = fplCode |> removeFplComments 
+    let matches = getMatches errRecoveryBlocks input
+    let sb = StringBuilder()
+
+    let rec tryGetAst1 someParser (input:string) i =
+        let chunk, remainder = 
+            if i < matches.Length-1 then
+                let pos = matches[i].Index
+                let length = matches[i+1].Index - matches[i].Index
+                input.Substring(pos, length), input.Substring(pos)
+            elif i = matches.Length-1 then
+                let pos = matches[i].Index
+                input.Substring(pos), input.Substring(pos)
+            else
+                "", ""
+        if i = matches.Length then
+            ()
+        else
+            let cleanUpInput = (maskAroundIndex matches i input).Trim()
+            match run someParser cleanUpInput with
+            | Success(_, _, _) ->
+                sb.Append(chunk) |> ignore
+            | Failure(_, _, _) ->
+                let maskedChunk = masked chunk 
+                sb.Append(maskedChunk) |> ignore
+                match run someParser remainder with 
+                | Failure(errorMsg, restInput, userState) ->
+                    let diagnostic =
+                        { 
+                            Diagnostic.Uri = ad.CurrentUri
+                            Diagnostic.Emitter = DiagnosticEmitter.FplParser 
+                            Diagnostic.Severity = DiagnosticSeverity.Error
+                            Diagnostic.StartPos = restInput.Position
+                            Diagnostic.EndPos = restInput.Position
+                            Diagnostic.Code = SY999 errorMsg 
+                            Diagnostic.Alternatives = None
+                        }
+                    ad.AddDiagnostic diagnostic
+                | _ -> ()
+            tryGetAst1 someParser input (i + 1)
+
+    tryGetAst1 buildingBlock input 0
+    sb.ToString()
+//-----------------
+
+
+
+
+
+
+
+
+
+
+
+
 let stdParser = ast
 let stdCode = SXN000
 let stdCode1 = SXN001
@@ -726,7 +842,7 @@ let maxIntervalBound (intervals:System.Collections.Generic.List<Interval>) =
     maxBound
 
 let fplParser (input:string) = 
-    let preProcessedInput = preParsePreProcess input
+    let preProcessedInput = input |> removeFplComments
     let matchList = stringMatches preProcessedInput errRecPattern
 
     let intervals = new System.Collections.Generic.List<Interval>()
@@ -782,7 +898,7 @@ let parserDiagnostics = ad
 
 /// Returns the parser choices at position (if any).
 let getParserChoicesAtPosition (input:string) index =
-    let newInput = preParsePreProcess input
+    let newInput = input |> removeFplComments
     match run ast (newInput.Substring(0, index)) with
     | Success(result, restInput, userState) -> 
         // In the success case, we always return the current parser position in the input
@@ -793,7 +909,7 @@ let getParserChoicesAtPosition (input:string) index =
 
 /// Used only to test FplLS CompletionItems correct syntax, which is written in C# and requires this module to run
 let testParser (parserType:string) (input:string) =
-    let trimmed = preParsePreProcess (input.Trim())
+    let trimmed = (input.Trim()) |> removeFplComments
     match parserType with 
     | LiteralLoc -> 
         let result = run (localization .>> eof) trimmed

@@ -1,6 +1,7 @@
 namespace FplParser.Tests.ErrRecovery
 open FParsec
 open FplParser
+open ErrDiagnostics
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
 
@@ -164,3 +165,18 @@ type TestRecovery() =
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<DataRow("bb01", """loc  ;""", 1)>]
+    [<DataRow("bb01", """def pred T() loc  def cl T;""", 1)>]
+    [<DataRow("bb01", """def pred T();""", 0)>]
+    [<TestMethod>]
+    member this.TestErrorRecoveryBuildingBlock(no:string, fplCode:string, numbErr:int) =
+        ad.Clear()
+        let cleanUpInput = cleanUpInputAndIssueSyntaxErrors fplCode
+        let result = run (stdParser .>> eof) cleanUpInput
+        let actual = sprintf "%O" result
+        if ad.CountDiagnostics > 0 then
+            ad.PrintDiagnostics
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.AreEqual<int>(numbErr, ad.CountDiagnostics)
