@@ -1,4 +1,4 @@
-﻿using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 
 namespace FplLS
 {
@@ -273,7 +273,7 @@ namespace FplLS
                 $"\t// Revoking the assumption proves the argument.{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\tdec {Environment.NewLine}" +
-                $"\t\t ~c:obj{Environment.NewLine}" +
+                $"\t\t c:obj{Environment.NewLine}" +
                 $"\t\t // construct a counterexample c := ... {Environment.NewLine}" +
                 $"\t;{Environment.NewLine}" +
                 $"\t100. |- {TokenAssume} not somePremise{Environment.NewLine}" +
@@ -351,7 +351,7 @@ namespace FplLS
                 $"\t// Then do the \"inductive step\": Prove that if exists n for which `p(m)` is true is for all `m <= n`, then also `p( (n + 1) )` is true.{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\tdec {Environment.NewLine}" +
-                $"\t\t ~n, m : N{Environment.NewLine}" +
+                $"\t\t n, m : N{Environment.NewLine}" +
                 $"\t;{Environment.NewLine}" +
                 $"\t// \"base cases\" {Environment.NewLine}" +
                 $"\t100. |- trivial{Environment.NewLine}" +
@@ -386,8 +386,8 @@ namespace FplLS
                 $"\t// Then seek the contradiction for the expression `and ( p( (k - 1) ) , not p(k) )`.{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\tdec {Environment.NewLine}" +
-                $"\t\t ~n, k : N{Environment.NewLine}" +
-                $"\t\t ~kFails, p : {TokenPredicate}{Environment.NewLine}" +
+                $"\t\t n, k : N{Environment.NewLine}" +
+                $"\t\t kFails, p : {TokenPredicate}{Environment.NewLine}" +
                 $"\t\t // p(n) := ... // set to your predicate about n here and uncomment the line{Environment.NewLine}" +
                 $"\t\t pFailsFor_k := ex k:N {TokenLeftBrace} not p(k) {TokenRightBrace}{Environment.NewLine}" +
                 $"\t;{Environment.NewLine}" +

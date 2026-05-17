@@ -143,7 +143,7 @@ type TestKeywordSpaces() =
         let result = run (varDeclBlock .>> eof) """declaration a:obj ;"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:"))
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSpacesDec () =
@@ -157,7 +157,7 @@ type TestKeywordSpaces() =
         let result = run (varDeclBlock .>> eof) """dec a:obj ;"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:"))
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSpacesDelegate () =
@@ -192,7 +192,7 @@ type TestKeywordSpaces() =
         let result = run (fplDelegate .>> eof) """del .Test()"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestSpacesDelB () =
