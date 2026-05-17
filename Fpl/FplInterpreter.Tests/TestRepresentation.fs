@@ -29,7 +29,7 @@ type TestRepresentation() =
             }           
             def cl A  {intr} 
             def cl B  {intr} 
-            def pred T() { dec ~x,y:obj x:=A() y:=B(); %s };""" varVal
+            def pred T() { dec x,y:obj x:=A() y:=B(); %s };""" varVal
         let filename = "TestRepresentationPredicate.fpl"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -43,7 +43,7 @@ type TestRepresentation() =
     [<TestMethod>]
     member this.TestRepresentationAssignment(var:string, varVal, expected:string) =
         
-        let fplCode = sprintf """uses Fpl.PeanoArithmetics def pred T() { dec ~n:Nat %s; true };""" varVal
+        let fplCode = sprintf """uses Fpl.PeanoArithmetics def pred T() { dec n:Nat %s; true };""" varVal
         let filename = "TestRepresentationAssignment"
         if not offlineWatcher.OfflineMode then 
             prepareFplCode(filename + ".fpl", fplCode, false) |> ignore
@@ -61,7 +61,7 @@ type TestRepresentation() =
     [<TestMethod>]
     member this.TestRepresentationReturn(var:string, uses:string, varVal, expected:string) =
         
-        let fplCode = sprintf """%s def func T()->Nat { dec ~n:Nat %s; return n };""" uses varVal
+        let fplCode = sprintf """%s def func T()->Nat { dec n:Nat %s; return n };""" uses varVal
         let filename = "TestRepresentationReturn"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -75,7 +75,7 @@ type TestRepresentation() =
     [<TestMethod>]
     member this.TestRepresentationReturnOnline(var:string, uses:string, varVal, expected:string) =
         
-        let fplCode = sprintf """%s def func T()->Nat { dec ~n:Nat %s; return n };""" uses varVal
+        let fplCode = sprintf """%s def func T()->Nat { dec n:Nat %s; return n };""" uses varVal
         let filename = "TestRepresentationReturnOnline"
         if not offlineWatcher.OfflineMode then 
             prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -153,7 +153,7 @@ type TestRepresentation() =
         ext Digits x@/\d+/ -> Nat 
         {
             dec
-            ~n:Nat
+            n:Nat
             cases
             (
                 | (x = @0) : n := Zero() 
@@ -165,7 +165,7 @@ type TestRepresentation() =
             return n
         }
 
-        def pred T() { dec ~i,j,k:ind j:=$2 k:=$3; %s };""" varVal
+        def pred T() { dec i,j,k:ind j:=$2 k:=$3; %s };""" varVal
         let filename = "TestRepresentationEqualityWithCases.fpl"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -220,7 +220,7 @@ type TestRepresentation() =
             )
         }
 
-        def pred T() { dec ~i,j,k:ind j:=$2 k:=$3; %s };""" varVal
+        def pred T() { dec i,j,k:ind j:=$2 k:=$3; %s };""" varVal
         let filename = "TestRepresentationEqualityWithMCases.fpl"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -300,16 +300,16 @@ type TestRepresentation() =
         Assert.AreEqual<string>(expected, func.Represent())
         prepareFplCode(filename, "", false) |> ignore
 
-    [<DataRow("00","""def pred T() { dec ~v:ind; true };""", PrimUndetermined)>]
-    [<DataRow("00a","""def pred T() { dec ~v:pred; true };""", PrimUndetermined)>]
-    [<DataRow("00b","""def pred T() { dec ~v:obj; true };""", PrimUndetermined)>]
-    [<DataRow("00c","""def pred T() { dec ~v:func; true };""", PrimUndetermined)>]
-    [<DataRow("00d","""def pred T() { dec ~v:tpl; true };""", PrimUndetermined)>]
-    [<DataRow("01a","""def pred T() { dec ~v:pred(d:ind); true };""", PrimUndetermined)>]
-    [<DataRow("01b","""def pred T() { dec ~v:pred(d:pred(e,f:obj)); true };""", PrimUndetermined)>]
-    [<DataRow("01c","""def pred T() { dec ~v:func(x:pred(y:obj,d,e:ind)) ->pred(i:pred(j,k:obj)); true };""", PrimUndetermined)>]
-    [<DataRow("02","""def pred T() { dec ~v:A; true };""", PrimUndetermined)>]
-    [<DataRow("02a","""def cl A {intr} def pred T() { dec ~v:A; true };""", PrimUndetermined)>]
+    [<DataRow("00","""def pred T() { dec v:ind; true };""", PrimUndetermined)>]
+    [<DataRow("00a","""def pred T() { dec v:pred; true };""", PrimUndetermined)>]
+    [<DataRow("00b","""def pred T() { dec v:obj; true };""", PrimUndetermined)>]
+    [<DataRow("00c","""def pred T() { dec v:func; true };""", PrimUndetermined)>]
+    [<DataRow("00d","""def pred T() { dec v:tpl; true };""", PrimUndetermined)>]
+    [<DataRow("01a","""def pred T() { dec v:pred(d:ind); true };""", PrimUndetermined)>]
+    [<DataRow("01b","""def pred T() { dec v:pred(d:pred(e,f:obj)); true };""", PrimUndetermined)>]
+    [<DataRow("01c","""def pred T() { dec v:func(x:pred(y:obj,d,e:ind)) ->pred(i:pred(j,k:obj)); true };""", PrimUndetermined)>]
+    [<DataRow("02","""def pred T() { dec v:A; true };""", PrimUndetermined)>]
+    [<DataRow("02a","""def cl A {intr} def pred T() { dec v:A; true };""", PrimUndetermined)>]
     [<TestMethod>]
     member this.TestRepresentationUnitializedVars(var:string, fplCode, expected:string) =
         
@@ -323,10 +323,10 @@ type TestRepresentation() =
         prepareFplCode(filename, "", false) |> ignore
 
 
-    [<DataRow("00","""def pred T() { dec ~v:pred v:=true; false};""", LiteralTrue)>]
-    [<DataRow("01","""def pred T() { dec ~v:pred v:=false; false};""", LiteralFalse)>]
-    [<DataRow("02","""def cl A {dec ~myX:obj; ctor A(x:obj) {dec myX:=x;}} def cl B:A { ctor B(x:obj) {dec base.A(del.Decrement(x)); } } def pred T() { dec ~v:B v:=B(@2); false};""", """B(2)""")>]
-    [<DataRow("03","""def cl A {dec ~myX:pred; ctor A(x:pred) {dec myX:=x;}} def cl B:A { ctor B(x:pred) {dec base.A(not x); } } def pred T() { dec ~v:B v:=B(true); false};""", """B(true)""")>]
+    [<DataRow("00","""def pred T() { dec v:pred v:=true; false};""", LiteralTrue)>]
+    [<DataRow("01","""def pred T() { dec v:pred v:=false; false};""", LiteralFalse)>]
+    [<DataRow("02","""def cl A {dec myX:obj; ctor A(x:obj) {dec myX:=x;}} def cl B:A { ctor B(x:obj) {dec base.A(del.Decrement(x)); } } def pred T() { dec v:B v:=B(@2); false};""", """B(2)""")>]
+    [<DataRow("03","""def cl A {dec myX:pred; ctor A(x:pred) {dec myX:=x;}} def cl B:A { ctor B(x:pred) {dec base.A(not x); } } def pred T() { dec v:B v:=B(true); false};""", """B(true)""")>]
     [<TestMethod>]
     member this.TestRepresentationItializedVars(var:string, fplCode, expected:string) =
         
@@ -369,7 +369,7 @@ type TestRepresentation() =
             ext Digits x@/\d+/ -> A 
             {
                 dec
-                ~n:A
+                n:A
                 cases
                 (
                     | (x = @0) : n := B() 
@@ -403,7 +403,7 @@ type TestRepresentation() =
         {
             return x
         }
-        def pred T() { dec ~a:obj a:=%s; true };""" varVal
+        def pred T() { dec a:obj a:=%s; true };""" varVal
         let filename = "TestRepresentationExtensionObj.fpl"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root

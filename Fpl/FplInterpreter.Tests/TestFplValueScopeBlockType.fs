@@ -553,7 +553,7 @@ type TestFplValueScopeBlockType() =
     [<DataRow("base30", "B(In(x))")>]
     [<DataRow("base31", "C(Test1(a),Test2(b,c,d))")>]
     [<DataRow("base32", "E(true, undef, false)")>]
-    [<DataRow("base33", "dec ~p: pred(c: obj); p(c)")>]
+    [<DataRow("base33", "dec p: pred(c: obj); p(c)")>]
     [<DataRow("base34", "is(x, Set)")>]
     [<TestMethod>]
     member this.TestPredicate(var, varVal) =
@@ -960,7 +960,7 @@ type TestFplValueScopeBlockType() =
                 }
                 
                 def pred Test(x:ind) { dec 
-                ~n:pred
+                n:pred
                 n:= mcases
                 (
                     | (x = $1) : false 
@@ -1001,7 +1001,7 @@ type TestFplValueScopeBlockType() =
                 }              
                 
                 def pred Test(x:ind) { dec 
-                ~n:pred
+                n:pred
                 n:= mcases
                 (
                     | (x = $1) : false 
@@ -1043,7 +1043,7 @@ type TestFplValueScopeBlockType() =
                 }              
         
                 def pred Test(x:ind) { dec 
-                ~n:pred
+                n:pred
                 cases
                 (
                     | (x = $1) : n:=false 

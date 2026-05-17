@@ -1,4 +1,4 @@
-﻿namespace FplParser.Tests
+namespace FplParser.Tests
 
 open FParsec
 open FplPrimitives
@@ -151,7 +151,7 @@ The parser backtracked after:
             SetNat()
             {
                 dec 
-                    ~n: Nat
+                    n: Nat
                     // Assert that elements of class "Nat" can be collected to a bigger object of class "SetNat"
                     // This requires that we can apply the "In" predicate defined in Fpl.Set.ZermeloFraenkel
                     // to object of the class "Nat". This becomes possible when we assert that every variable of the class
@@ -179,7 +179,7 @@ The parser backtracked after:
         function T() -> Real { intr }
 
         // Example of defining a constant for the natural number 100 using the
-        class N100:Set{N100(){dec ~n:Nat  base.Set() base.SetBuilder(SetNat(),IsGreater(n,100)); }}""", 1595, 46)>]
+        class N100:Set{N100(){dec n:Nat  base.Set() base.SetBuilder(SetNat(),IsGreater(n,100)); }}""", 1593, 46)>]
     [<DataRow("",0,1)>]
     member this.TestReplaceFplComments
         (

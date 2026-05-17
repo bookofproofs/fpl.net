@@ -114,8 +114,8 @@ type CommonFplValueTestCases =
         let fplCode = """
         def pred TestPredicate() 
         {   dec 
-                ~x,y:pred(u,v,w:func(a,b,c:obj)->obj)
-                ~s:Set
+                x,y:pred(u,v,w:func(a,b,c:obj)->obj)
+                s:Set
             ; 
             true
         }
@@ -162,7 +162,7 @@ type CommonFplValueTestCases =
     static member ScopeVariablesInBlockVariadic(subtype) =
         let fplCode = """
         def pred TestPredicate() 
-            {dec ~x,y:*pred(u,v,w:func(a,b,c:*obj[tpl])->obj)[ind]; true}
+            {dec x,y:*pred(u,v,w:func(a,b,c:*obj[tpl])->obj)[ind]; true}
         ;
         """
         let filename = "TestScopeVariablesInBlockVariadic" + subtype
@@ -286,13 +286,13 @@ type CommonFplValueTestCases =
             def pred SomePredicate2() {true}
             def func SomeFunctionalTerm1()->obj {intr}
             def func SomeFunctionalTerm2()->obj {intr}
-            def func SomeFunctionalTerm3()->obj {dec ~v:obj v:=v; return v}
-            def func SomeFunctionalTerm4()->tpl {dec ~v:tpl v:=v; return v}
-            def func SomeFunctionalTerm5()->SomeClass1 {dec ~v:SomeClass1; return v}
-            def func SomeFunctionalTerm6()->SomeClass1 {dec ~v:SomeClass1 v:=SomeClass1; return v}
-            def func SomeFunctionalTerm7()->SomeClass1 {dec ~v:SomeClass1 v:=SomeClass1(); return v}
+            def func SomeFunctionalTerm3()->obj {dec v:obj v:=v; return v}
+            def func SomeFunctionalTerm4()->tpl {dec v:tpl v:=v; return v}
+            def func SomeFunctionalTerm5()->SomeClass1 {dec v:SomeClass1; return v}
+            def func SomeFunctionalTerm6()->SomeClass1 {dec v:SomeClass1 v:=SomeClass1; return v}
+            def func SomeFunctionalTerm7()->SomeClass1 {dec v:SomeClass1 v:=SomeClass1(); return v}
             def func SomeFunctionalTerm8()->ind {return $112}
-            def func SomeFunctionalTerm9()->ind {dec ~v:ind v:=$13; return v}
+            def func SomeFunctionalTerm9()->ind {dec v:ind v:=$13; return v}
             proof SomeTheorem1$1 {1. |- trivial}
             proof SomeTheorem2$1 {1. |- trivial}
             loc not(x) := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;
@@ -414,12 +414,12 @@ type CommonFplValueTestCases =
             def func B()->func {intr}
             def pred T() {
                 dec 
-                    ~i:ind i:=$1 
-                    ~b:func b:=B()  
-                    ~p:pred p:=true 
-                    ~o:obj o:=A()
-                    ~u:obj u:=undef
-                    ~t:tpl t:=$2
+                    i:ind i:=$1 
+                    b:func b:=B()  
+                    p:pred p:=true 
+                    o:obj o:=A()
+                    u:obj u:=undef
+                    t:tpl t:=$2
                 ;
                 true 
             };

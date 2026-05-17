@@ -132,8 +132,8 @@ type TestRecovery() =
     [<DataRow("endOfFile02", """ """)>]
     [<DataRow("loc01", """loc not (x) := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x ;""")>]
     [<DataRow("loc02", """loc not (x) := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x def cl A""")>]
-    [<DataRow("dec01", """def pred T() {dec ~x:obj true};""")>]
-    [<DataRow("dec02", """def pred T() {dec ~x:obj true}""")>]
+    [<DataRow("dec01", """def pred T() {dec x:obj true};""")>]
+    [<DataRow("dec02", """def pred T() {dec x:obj true}""")>]
     [<TestMethod>]
     member this.TestMissingSemicolon(no:string, fplCode) =
         let result = run (stdParser .>> eof) fplCode
@@ -143,8 +143,8 @@ type TestRecovery() =
 
     [<DataRow("arrType01", """def pred T(a:*ind obj]);""")>]
     [<DataRow("arrType02", """def pred T(a:*ind obj);""")>]
-    [<DataRow("arrType03", """def pred T() {dec ~a:*ind obj]; true};""")>]
-    [<DataRow("arrType04", """def pred T() {dec ~a:*ind obj; true};""")>]
+    [<DataRow("arrType03", """def pred T() {dec a:*ind obj]; true};""")>]
+    [<DataRow("arrType04", """def pred T() {dec a:*ind obj; true};""")>]
     [<TestMethod>]
     member this.TestMissingOpeningBracket(no:string, fplCode) =
         let result = run (stdParser .>> eof) fplCode
@@ -154,8 +154,9 @@ type TestRecovery() =
 
     [<DataRow("arrType01", """def pred T(a:*ind[obj);""")>]
     [<DataRow("arrType02", """def pred T(a:*ind obj);""")>]
-    [<DataRow("arrType03", """def pred T() {dec ~a:*ind[obj; true};""")>]
-    [<DataRow("arrType04", """def pred T() {dec ~a:*ind obj; true};""")>]
+    [<DataRow("arrType03", """def pred T() {dec a:*ind[obj; true};""")>]
+    [<DataRow("arrType03", """def pred T() {dec a:ind a:=1; true};""")>]
+    [<DataRow("arrType04", """def pred T() {dec a:*ind obj; true};""")>]
     [<DataRow("arrUsage01", """def pred T() {dec a:=x[b; true};""")>]
     [<TestMethod>]
     member this.TestMissingClosingBracket(no:string, fplCode) =

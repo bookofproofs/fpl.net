@@ -557,7 +557,7 @@ type TestFplValueScopeName() =
     [<DataRow("base30", "B(In(x))")>]
     [<DataRow("base31", "C(Test1(a), Test2(b, c, d))")>]
     [<DataRow("base32", "E(true, undef, false)")>]
-    [<DataRow("base33", "dec ~p: pred(c: obj); p(c)")>]
+    [<DataRow("base33", "dec p: pred(c: obj); p(c)")>]
     [<DataRow("base34", "is(x, Set)")>]
     [<TestMethod>]
     member this.TestPredicateName(var, varVal) =
@@ -795,7 +795,7 @@ type TestFplValueScopeName() =
     [<TestMethod>]
     member this.TestDelegateName(var, varVal) =
         
-        let fplCode = sprintf "def pred T1() { dec ~a:T1 ~b:ind ~c:ind;  %s };" varVal
+        let fplCode = sprintf "def pred T1() { dec a:T1 b:ind c:ind;  %s };" varVal
         let filename = "TestDelegateName"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root

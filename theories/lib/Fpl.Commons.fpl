@@ -1,6 +1,6 @@
 inf AndCummutative
 {
-    dec ~p, q: pred;
+    dec p, q: pred;
     pre:
         and(p, q)
     con:
@@ -9,7 +9,7 @@ inf AndCummutative
 
 inf OrCummutative
 {
-    dec ~p, q: pred;
+    dec p, q: pred;
     pre:
         or(p, q)
     con:
@@ -18,7 +18,7 @@ inf OrCummutative
 
 inf XorCummutative
 {
-    dec ~p, q: pred;
+    dec p, q: pred;
     pre:
         xor(p, q)
     con:
@@ -27,7 +27,7 @@ inf XorCummutative
 
 inf IifCummutative
 {
-    dec ~p, q: pred;
+    dec p, q: pred;
     pre:
         iif(p, q)
     con:
@@ -36,7 +36,7 @@ inf IifCummutative
 
 inf AndAssociative
 {
-    dec ~p, q, s: pred;
+    dec p, q, s: pred;
     pre:
         and(p, and(q, s))
     con:
@@ -45,7 +45,7 @@ inf AndAssociative
 
 inf OrAssociative
 {
-    dec ~p, q, s: pred;
+    dec p, q, s: pred;
     pre:
         or(p, or(q, s))
     con:
@@ -54,7 +54,7 @@ inf OrAssociative
 
 inf XorAssociative
 {
-    dec ~p, q, s: pred;
+    dec p, q, s: pred;
     pre:
         xor(p, xor(q, s))
     con:
@@ -63,7 +63,7 @@ inf XorAssociative
 
 inf IifAssociative
 {
-    dec ~p, q, s: pred;
+    dec p, q, s: pred;
     pre:
         iif(p, iif(q, s))
     con:
@@ -72,7 +72,7 @@ inf IifAssociative
 
 inf FalseAndAbsorbing
 {
-    dec ~p: pred;
+    dec p: pred;
     pre:
         and(false, p)
     con:
@@ -81,7 +81,7 @@ inf FalseAndAbsorbing
 
 inf TrueOrAbsorbing
 {
-    dec ~p: pred;
+    dec p: pred;
     pre:
         or(true, p)
     con:
@@ -90,7 +90,7 @@ inf TrueOrAbsorbing
 
 inf OrAndAbsorbing
 {
-    dec ~p, q: pred;
+    dec p, q: pred;
     pre:
         or(p, and(p, q))
     con:
@@ -99,7 +99,7 @@ inf OrAndAbsorbing
 
 inf AndOrAbsorbing
 {
-    dec ~p, q: pred;
+    dec p, q: pred;
     pre:
         and(p, or(p, q))
     con:
@@ -108,7 +108,7 @@ inf AndOrAbsorbing
 
 inf AndTrueNeutral
 {
-    dec ~p: pred;
+    dec p: pred;
     pre:
         and(true, p)
     con:
@@ -117,7 +117,7 @@ inf AndTrueNeutral
 
 inf OrFalseNeutral
 {
-    dec ~p: pred;
+    dec p: pred;
     pre:
         or(false, p)
     con:
@@ -126,7 +126,7 @@ inf OrFalseNeutral
 
 inf AndInversion
 {
-    dec ~p: pred;
+    dec p: pred;
     pre:
         and(p, not p)
     con:
@@ -135,7 +135,7 @@ inf AndInversion
 
 inf OrInversion
 {
-    dec ~p: pred;
+    dec p: pred;
     pre:
         or(p, not p)
     con:
@@ -144,7 +144,7 @@ inf OrInversion
 
 inf AndIdempotence
 {
-    dec ~p: pred;
+    dec p: pred;
     pre:
         and(p, p)
     con:
@@ -153,7 +153,7 @@ inf AndIdempotence
 
 inf OrIdempotence
 {
-    dec ~p: pred;
+    dec p: pred;
     pre:
         or(p, p)
     con:
@@ -162,7 +162,7 @@ inf OrIdempotence
 
 inf OrAndDistributiveUnpack
 {
-    dec ~p, q, s: pred;
+    dec p, q, s: pred;
     pre:
         or(p, and(q, s))
     con:
@@ -171,7 +171,7 @@ inf OrAndDistributiveUnpack
 
 inf AndOrDistributivePack
 {
-    dec ~p, q, s: pred;
+    dec p, q, s: pred;
     pre:
         and(or(p, q), or(p, s))
     con:
@@ -180,7 +180,7 @@ inf AndOrDistributivePack
 
 inf AndOrDistributiveUnpack
 {
-    dec ~p, q, s: pred;
+    dec p, q, s: pred;
     pre:
         and(p, or(q, s))
     con:
@@ -189,7 +189,7 @@ inf AndOrDistributiveUnpack
 
 inf OrAndDistributivePack
 {
-    dec ~p, q, s: pred;
+    dec p, q, s: pred;
     pre:
         or(and(p, q), and(p, s))
     con:
@@ -198,7 +198,7 @@ inf OrAndDistributivePack
 
 inf DeMorganAndUnpack
 {
-    dec ~p, q: pred;
+    dec p, q: pred;
     pre:
         not and(p, q)
     con:
@@ -207,7 +207,7 @@ inf DeMorganAndUnpack
 
 inf DeMorganOrPack
 {
-    dec ~p, q: pred;
+    dec p, q: pred;
     pre:
         or(not p, not q)
     con:
@@ -216,7 +216,7 @@ inf DeMorganOrPack
 
 inf DeMorganOrUnpack
 {
-    dec ~p, q: pred;
+    dec p, q: pred;
     pre:
         not or(p, q)
     con:
@@ -225,7 +225,7 @@ inf DeMorganOrUnpack
 
 inf DeMorganAndPack
 {
-    dec ~p, q: pred;
+    dec p, q: pred;
     pre:
         and(not p, not q)
     con:
@@ -235,7 +235,7 @@ inf DeMorganAndPack
 // Useful forNormalizeNeg 
 inf NotDouble
 {
-    dec ~p: pred;
+    dec p: pred;
     pre:
         not not p
     con:
@@ -245,7 +245,7 @@ inf NotDouble
 // elimination of implication
 inf ImplUnpack2Or
 {
-    dec ~p, q: pred;
+    dec p, q: pred;
     pre:
         impl (p, q)
     con:
@@ -254,7 +254,7 @@ inf ImplUnpack2Or
 
 inf OrPack2Impl
 {
-    dec ~p, q: pred;
+    dec p, q: pred;
     pre:
         or(not p, q)
     con:
@@ -264,7 +264,7 @@ inf OrPack2Impl
 // elimination of equivalence to or
 inf IifUnpack2Or
 {
-    dec ~p, q: pred;
+    dec p, q: pred;
     pre:
         iif(p, q)        
     con:
@@ -274,7 +274,7 @@ inf IifUnpack2Or
 // elimination of equivalence to and
 inf IifUnpack2And
 {
-    dec ~p, q: pred;
+    dec p, q: pred;
     pre:
         iif(p, q)        
     con:
@@ -283,7 +283,7 @@ inf IifUnpack2And
 
 inf OrPack2Iif
 {
-    dec ~p, q: pred;
+    dec p, q: pred;
     pre:
         or(and(not p, not q), and(p, q))
     con:
@@ -292,7 +292,7 @@ inf OrPack2Iif
 
 inf AndPack2Iif
 {
-    dec ~p, q: pred;
+    dec p, q: pred;
     pre:
         and(or(not p, q), or(p, not q))
     con:
@@ -302,7 +302,7 @@ inf AndPack2Iif
 // elimination of xorto or
 inf XorUnpack2Or
 {
-    dec ~p, q: pred;
+    dec p, q: pred;
     pre:
         xor(p, q)        
     con:
@@ -312,7 +312,7 @@ inf XorUnpack2Or
 // elimination of xorto and
 inf XorUnpack2And
 {
-    dec ~p, q: pred;
+    dec p, q: pred;
     pre:
         xor(p, q)        
     con:
@@ -321,7 +321,7 @@ inf XorUnpack2And
 
 inf AndPack2Xor
 {
-    dec ~p, q: pred;
+    dec p, q: pred;
     pre:
         and(or(not p, not q), or(p, q))
     con:
@@ -330,7 +330,7 @@ inf AndPack2Xor
 
 inf OrPack2Xor
 {
-    dec ~p, q: pred;
+    dec p, q: pred;
     pre:
         or(and(not p, q), and(p, not q))
     con:
@@ -339,7 +339,7 @@ inf OrPack2Xor
 
 inf Proceeding2Results
 {
-    dec ~p, q: pred;
+    dec p, q: pred;
     pre:
         p, q
     con:
@@ -348,7 +348,7 @@ inf Proceeding2Results
 
 inf Proceeding3Results
 {
-    dec ~p, q, s: pred;
+    dec p, q, s: pred;
     pre:
         p, q, s
     con:
@@ -357,7 +357,7 @@ inf Proceeding3Results
 
 inf AndUnpack2NotOr
 {
-    dec ~p, q: pred;
+    dec p, q: pred;
     pre:
         and(p, q)
     con:
@@ -366,7 +366,7 @@ inf AndUnpack2NotOr
 
 inf NotOrPack2And
 {
-    dec ~p, q: pred;
+    dec p, q: pred;
     pre:
         not(or(not p, not q))        
     con:
@@ -375,7 +375,7 @@ inf NotOrPack2And
 
 inf AndUnpack2NotImpl
 {
-    dec ~p, q: pred;
+    dec p, q: pred;
     pre:
         and(p, q)
     con:
@@ -384,7 +384,7 @@ inf AndUnpack2NotImpl
 
 inf NotImplPack2And
 {
-    dec ~p, q: pred;
+    dec p, q: pred;
     pre:
         not(impl(p, not q))        
     con:
@@ -393,7 +393,7 @@ inf NotImplPack2And
 
 inf NotImpl2And
 {
-    dec ~p, q: pred;
+    dec p, q: pred;
     pre:
         not(impl(p, q))        
     con:
@@ -402,7 +402,7 @@ inf NotImpl2And
 
 inf And2NotImpl
 {
-    dec ~p, q: pred;
+    dec p, q: pred;
     pre:
         and(p, not q)    
     con:
@@ -411,7 +411,7 @@ inf And2NotImpl
 
 inf NotIif2Or
 {
-    dec ~p, q: pred;
+    dec p, q: pred;
     pre:
         not(iif(p, q))        
     con:
@@ -420,7 +420,7 @@ inf NotIif2Or
 
 inf Or2NotIif
 {
-    dec ~p, q: pred;
+    dec p, q: pred;
     pre:
         or(and(p, not q), and(not p, q))    
     con:
@@ -429,7 +429,7 @@ inf Or2NotIif
 
 inf NotXor2Or
 {
-    dec ~p, q: pred;
+    dec p, q: pred;
     pre:
         not(xor(p, q))        
     con:
@@ -438,7 +438,7 @@ inf NotXor2Or
 
 inf Or2NotXor
 {
-    dec ~p, q: pred;
+    dec p, q: pred;
     pre:
         or(and(p, q), and(not p, not q))    
     con:
@@ -447,7 +447,7 @@ inf Or2NotXor
 
 inf NotAll2ExNot
 {
-    dec ~p: pred(x:tpl);
+    dec p: pred(x:tpl);
     pre:
         not all x1:tpl {p(x1)}
     con:
@@ -456,7 +456,7 @@ inf NotAll2ExNot
 
 inf ExNot2NotAll
 {
-    dec ~p: pred(y:tpl);
+    dec p: pred(y:tpl);
     pre:
         ex x:tpl {not p(x)}    
     con:
@@ -465,7 +465,7 @@ inf ExNot2NotAll
 
 inf NotEx2AllNot
 {
-    dec ~p: pred(y:tpl);
+    dec p: pred(y:tpl);
     pre:
         not ex x:tpl {p(x)}
     con:
@@ -474,7 +474,7 @@ inf NotEx2AllNot
 
 inf AllNot2ExNot
 {
-    dec ~p: pred(y:tpl);
+    dec p: pred(y:tpl);
     pre:
         all x:tpl {not p(x)}    
     con:
@@ -483,7 +483,7 @@ inf AllNot2ExNot
 
 inf OrUnpack2Impl
 {
-    dec ~p, q: pred;
+    dec p, q: pred;
     pre:
         or(p, q)        
     con:
@@ -492,7 +492,7 @@ inf OrUnpack2Impl
 
 inf ImplPack2Or
 {
-    dec ~p, q: pred;
+    dec p, q: pred;
     pre:
         impl(not p, q)
     con:
@@ -501,7 +501,7 @@ inf ImplPack2Or
 
 inf ModusPonens
 {
-    dec ~p, q: pred;
+    dec p, q: pred;
 
     pre:
         p, impl (p, q)
@@ -511,7 +511,7 @@ inf ModusPonens
 
 inf ModusTollens
 {
-    dec ~p, q: pred;
+    dec p, q: pred;
 
     pre:
         not q, impl(p, q)
@@ -521,7 +521,7 @@ inf ModusTollens
 
 inf HypotheticalSyllogism
 {
-    dec ~p ,q, s: pred;
+    dec p ,q, s: pred;
     pre:
         impl(p, q), impl(q, s)
     con:
@@ -530,7 +530,7 @@ inf HypotheticalSyllogism
 
 inf DisjunctiveSyllogism
 {
-    dec ~p, q: pred;
+    dec p, q: pred;
     pre:
         not p, or(p, q)
     con:
@@ -539,7 +539,7 @@ inf DisjunctiveSyllogism
 
 inf ExistsByExample
 {
-    dec ~p: pred(c: tpl) ;
+    dec p: pred(c: tpl) ;
     pre:  
         p(c)
     con: 
@@ -548,7 +548,7 @@ inf ExistsByExample
 
 inf Contraposition
 {
-    dec ~p, q: pred;
+    dec p, q: pred;
     pre:
         impl(not p, not q)
     con:
@@ -557,7 +557,7 @@ inf Contraposition
 
 inf WeakeningRule
 {
-    dec ~p, q: pred;
+    dec p, q: pred;
     pre:
         p
     con:
@@ -566,7 +566,7 @@ inf WeakeningRule
 
 inf PrenexUnpackAndEx
 {
-    dec ~p: pred ~q:pred(z:tpl);
+    dec p: pred q:pred(z:tpl);
     pre:
         and(p, ex x:tpl { q(x)} )
     con:
@@ -575,7 +575,7 @@ inf PrenexUnpackAndEx
 
 inf PrenexPackExAnd
 {
-    dec ~p: pred ~q:pred(z:tpl);
+    dec p: pred q:pred(z:tpl);
     pre:
         ex x:tpl {and(p, q(x))}
     con:
@@ -584,7 +584,7 @@ inf PrenexPackExAnd
 
 inf PrenexUnpackAndAll
 {
-    dec ~p: pred ~q:pred(z:tpl);
+    dec p: pred q:pred(z:tpl);
     pre:
         and(p, all x:tpl { q(x)} )
     con:
@@ -593,7 +593,7 @@ inf PrenexUnpackAndAll
 
 inf PrenexPackAllAnd
 {
-    dec ~p: pred ~q:pred(z:tpl);
+    dec p: pred q:pred(z:tpl);
     pre:
         all x:tpl {and(p, q(x))}
     con:
@@ -602,7 +602,7 @@ inf PrenexPackAllAnd
 
 inf PrenexUnpackOrEx
 {
-    dec ~p: pred ~q:pred(z:tpl);
+    dec p: pred q:pred(z:tpl);
     pre:
         or(p, ex x:tpl { q(x)} )
     con:
@@ -611,7 +611,7 @@ inf PrenexUnpackOrEx
 
 inf PrenexPackExOr
 {
-    dec ~p: pred ~q:pred(z:tpl);
+    dec p: pred q:pred(z:tpl);
     pre:
         ex x:tpl {or(p, q(x))}
     con:
@@ -620,7 +620,7 @@ inf PrenexPackExOr
 
 inf PrenexUnpackOrAll
 {
-    dec ~p: pred ~q:pred(z:tpl);
+    dec p: pred q:pred(z:tpl);
     pre:
         or(p, all x:tpl { q(x)} )
     con:
@@ -629,7 +629,7 @@ inf PrenexUnpackOrAll
 
 inf PrenexPackAllOr
 {
-    dec ~p: pred ~q:pred(z:tpl);
+    dec p: pred q:pred(z:tpl);
     pre:
         all x:tpl {or(p, q(x))}
     con:
@@ -638,7 +638,7 @@ inf PrenexPackAllOr
 
 inf PrenexUnpackImplEx
 {
-    dec ~p: pred ~q:pred(z:tpl);
+    dec p: pred q:pred(z:tpl);
     pre:
         impl(p, ex x:tpl { q(x)} )
     con:
@@ -647,7 +647,7 @@ inf PrenexUnpackImplEx
 
 inf PrenexPackExImpl
 {
-    dec ~p: pred ~q:pred(z:tpl);
+    dec p: pred q:pred(z:tpl);
     pre:
         ex x:tpl {impl(p, q(x))}
     con:
@@ -656,7 +656,7 @@ inf PrenexPackExImpl
 
 inf PrenexUnpackImplAll
 {
-    dec ~p: pred ~q:pred(z:tpl);
+    dec p: pred q:pred(z:tpl);
     pre:
         impl(p, all x:tpl { q(x)} )
     con:
@@ -665,7 +665,7 @@ inf PrenexUnpackImplAll
 
 inf PrenexPackAllImpl
 {
-    dec ~p: pred ~q:pred(z:tpl);
+    dec p: pred q:pred(z:tpl);
     pre:
         all x:tpl {impl(p, q(x))}
     con:
@@ -674,7 +674,7 @@ inf PrenexPackAllImpl
 
 inf PrenexUnpackIifEx
 {
-    dec ~p: pred ~q:pred(z:tpl);
+    dec p: pred q:pred(z:tpl);
     pre:
         iif(p, ex x:tpl { q(x)} )
     con:
@@ -683,7 +683,7 @@ inf PrenexUnpackIifEx
 
 inf PrenexPackExIif
 {
-    dec ~p: pred ~q:pred(z:tpl);
+    dec p: pred q:pred(z:tpl);
     pre:
         ex x:tpl {iif(p, q(x))}
     con:
@@ -692,7 +692,7 @@ inf PrenexPackExIif
 
 inf PrenexUnpackIifAll
 {
-    dec ~p: pred ~q:pred(z:tpl);
+    dec p: pred q:pred(z:tpl);
     pre:
         iif(p, all x:tpl { q(x)} )
     con:
@@ -701,7 +701,7 @@ inf PrenexUnpackIifAll
 
 inf PrenexPackAllIif
 {
-    dec ~p: pred ~q:pred(z:tpl);
+    dec p: pred q:pred(z:tpl);
     pre:
         all x:tpl {iif(p, q(x))}
     con:
@@ -710,7 +710,7 @@ inf PrenexPackAllIif
 
 inf PrenexUnpackXorEx
 {
-    dec ~p: pred ~q:pred(z:tpl);
+    dec p: pred q:pred(z:tpl);
     pre:
         xor(p, ex x:tpl { q(x)} )
     con:
@@ -719,7 +719,7 @@ inf PrenexUnpackXorEx
 
 inf PrenexPackExXor
 {
-    dec ~p: pred ~q:pred(z:tpl);
+    dec p: pred q:pred(z:tpl);
     pre:
         ex x:tpl {xor(p, q(x))}
     con:
@@ -728,7 +728,7 @@ inf PrenexPackExXor
 
 inf PrenexUnpackXorAll
 {
-    dec ~p: pred ~q:pred(z:tpl);
+    dec p: pred q:pred(z:tpl);
     pre:
         xor(p, all x:tpl { q(x)} )
     con:
@@ -737,7 +737,7 @@ inf PrenexUnpackXorAll
 
 inf PrenexPackAllXor
 {
-    dec ~p: pred ~q:pred(z:tpl);
+    dec p: pred q:pred(z:tpl);
     pre:
         all x:tpl {xor(p, q(x))}
     con:
@@ -749,7 +749,7 @@ def pred Equal(x,y: tpl) infix "=" 50
     del.Equal(x,y)
 }
 
-def pred NotEqual(x,y: tpl) infix "<>" 60 
+def pred NotEqual(x,y: tpl) infix "≠" 60 
 {
     not (x = y) 
 }

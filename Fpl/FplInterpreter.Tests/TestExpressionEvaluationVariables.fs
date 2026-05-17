@@ -12,8 +12,8 @@ type TestExpressionEvaluationVariables() =
     let evalTreeFplId (fplValue: FplGenericNode) = fplValue.Type(SignatureType.Name)
     let evalTreeFplRepresentation (fplValue: FplGenericNode) = fplValue.Represent()
 
-    [<DataRow("def pred T() { dec ~x:pred x:=true; x };", LiteralTrue)>]
-    [<DataRow("def pred T() { dec ~x:pred x:=false; x };", LiteralFalse)>]
+    [<DataRow("def pred T() { dec x:pred x:=true; x };", LiteralTrue)>]
+    [<DataRow("def pred T() { dec x:pred x:=false; x };", LiteralFalse)>]
     [<TestMethod>]
     member this.TestExpressionEvaluationConstants(fplCode, expected: string) =
         
@@ -31,21 +31,21 @@ type TestExpressionEvaluationVariables() =
         printfn "%s" (evalTreeFplId(pr1))
         Assert.AreEqual<string>(expected, actual)
 
-    [<DataRow("def pred T() { dec ~x,y,z:pred x:=true y:=true z:=true; and(and(x,y),z) };", LiteralTrue)>]
-    [<DataRow("def pred T() { dec ~x,y,z:pred x:=true y:=false z:=true; and(and(x,y),z) };", LiteralFalse)>]
-    [<DataRow("def pred T() { dec ~x,y,z:pred x:=true y:=true z:=false; and(and(x,y),z) };", LiteralFalse)>]
-    [<DataRow("def pred T() { dec ~x,y,z:pred x:=false y:=true z:=true; and(and(x,y),z) };", LiteralFalse)>]
-    [<DataRow("def pred T() { dec ~x,y,z:pred x:=true z:=true; and(x,and(y,z)) };", PrimUndetermined)>]
-    [<DataRow("def pred T() { dec ~x,y,z:pred x:=true y:=true; and(x,and(y,z)) };", PrimUndetermined)>]
-    [<DataRow("def pred T() { dec ~x,y,z:pred y:=true z:=true; and(x,and(y,z)) };", PrimUndetermined)>]
-    [<DataRow("def pred T() { dec ~x,y,z:pred x:=false z:=true; and(x,and(y,z)) };", LiteralFalse)>]
-    [<DataRow("def pred T() { dec ~x,y,z:pred x:=false y:=true; and(x,and(y,z)) };", LiteralFalse)>]
-    [<DataRow("def pred T() { dec ~x,y,z:pred y:=false z:=true; and(x,and(y,z)) };", LiteralFalse)>]
-    [<DataRow("def pred T() { dec ~x,y,z:pred y:=true z:=false; and(x,and(y,z)) };", LiteralFalse)>]
-    [<DataRow("def pred T() { dec ~x,y:pred x:=true y:=true; and(x,y) };", LiteralTrue)>]
-    [<DataRow("def pred T() { dec ~x,y:pred x:=true y:=false; and(x,y) };", LiteralFalse)>]
-    [<DataRow("def pred T() { dec ~x,y:pred x:=false y:=true; and(x,y) };", LiteralFalse)>]
-    [<DataRow("def pred T() { dec ~x,y:pred x:=false y:=false; and(x,y) };", LiteralFalse)>]
+    [<DataRow("def pred T() { dec x,y,z:pred x:=true y:=true z:=true; and(and(x,y),z) };", LiteralTrue)>]
+    [<DataRow("def pred T() { dec x,y,z:pred x:=true y:=false z:=true; and(and(x,y),z) };", LiteralFalse)>]
+    [<DataRow("def pred T() { dec x,y,z:pred x:=true y:=true z:=false; and(and(x,y),z) };", LiteralFalse)>]
+    [<DataRow("def pred T() { dec x,y,z:pred x:=false y:=true z:=true; and(and(x,y),z) };", LiteralFalse)>]
+    [<DataRow("def pred T() { dec x,y,z:pred x:=true z:=true; and(x,and(y,z)) };", PrimUndetermined)>]
+    [<DataRow("def pred T() { dec x,y,z:pred x:=true y:=true; and(x,and(y,z)) };", PrimUndetermined)>]
+    [<DataRow("def pred T() { dec x,y,z:pred y:=true z:=true; and(x,and(y,z)) };", PrimUndetermined)>]
+    [<DataRow("def pred T() { dec x,y,z:pred x:=false z:=true; and(x,and(y,z)) };", LiteralFalse)>]
+    [<DataRow("def pred T() { dec x,y,z:pred x:=false y:=true; and(x,and(y,z)) };", LiteralFalse)>]
+    [<DataRow("def pred T() { dec x,y,z:pred y:=false z:=true; and(x,and(y,z)) };", LiteralFalse)>]
+    [<DataRow("def pred T() { dec x,y,z:pred y:=true z:=false; and(x,and(y,z)) };", LiteralFalse)>]
+    [<DataRow("def pred T() { dec x,y:pred x:=true y:=true; and(x,y) };", LiteralTrue)>]
+    [<DataRow("def pred T() { dec x,y:pred x:=true y:=false; and(x,y) };", LiteralFalse)>]
+    [<DataRow("def pred T() { dec x,y:pred x:=false y:=true; and(x,y) };", LiteralFalse)>]
+    [<DataRow("def pred T() { dec x,y:pred x:=false y:=false; and(x,y) };", LiteralFalse)>]
     [<TestMethod>]
     member this.TestExpressionEvaluationConjunction(fplCode, expected: string) =
         
@@ -64,12 +64,12 @@ type TestExpressionEvaluationVariables() =
         Assert.AreEqual<string>(expected, actual)
         prepareFplCode (filename, "", false) |> ignore
 
-    [<DataRow("def pred T() { dec ~x:pred x:=true; not x };", LiteralFalse)>]
-    [<DataRow("def pred T() { dec ~x:pred x:=true; not (x) };", LiteralFalse)>]
-    [<DataRow("def pred T() { dec ~x:pred x:=true; not ((x)) };", LiteralFalse)>]
-    [<DataRow("def pred T() { dec ~x:pred x:=false; not x };", LiteralTrue)>]
-    [<DataRow("def pred T() { dec ~x:pred x:=false; not (x) };", LiteralTrue)>]
-    [<DataRow("def pred T() { dec ~x:pred x:=false; not ((x)) };", LiteralTrue)>]
+    [<DataRow("def pred T() { dec x:pred x:=true; not x };", LiteralFalse)>]
+    [<DataRow("def pred T() { dec x:pred x:=true; not (x) };", LiteralFalse)>]
+    [<DataRow("def pred T() { dec x:pred x:=true; not ((x)) };", LiteralFalse)>]
+    [<DataRow("def pred T() { dec x:pred x:=false; not x };", LiteralTrue)>]
+    [<DataRow("def pred T() { dec x:pred x:=false; not (x) };", LiteralTrue)>]
+    [<DataRow("def pred T() { dec x:pred x:=false; not ((x)) };", LiteralTrue)>]
     [<TestMethod>]
     member this.TestExpressionEvaluationNegation(fplCode, expected: string) =
         
@@ -90,21 +90,21 @@ type TestExpressionEvaluationVariables() =
         Assert.AreEqual<string>(expected, actual)
         prepareFplCode (filename, "", false) |> ignore
 
-    [<DataRow("def pred T() { dec ~x,y,z:pred x:=false y:=false z:=false; or(x,or(y,z)) };", LiteralFalse)>]
-    [<DataRow("def pred T() { dec ~x,y,z:pred x:=false y:=true z:=false; or(x,or(y,z)) };", LiteralTrue)>]
-    [<DataRow("def pred T() { dec ~x,y,z:pred x:=false y:=false z:=true; or(or(x,y),z) };", LiteralTrue)>]
-    [<DataRow("def pred T() { dec ~x,y,z:pred x:=true y:=false z:=false; or(or(x,y),z) };", LiteralTrue)>]
-    [<DataRow("def pred T() { dec ~x,y,z:pred x:=false z:=false; or(x,or(y,z)) };", PrimUndetermined)>]
-    [<DataRow("def pred T() { dec ~x,y,z:pred x:=false y:=false; or(or(x,y),z) };", PrimUndetermined)>]
-    [<DataRow("def pred T() { dec ~x,y,z:pred y:=false z:=false; or(x,or(y,z)) };", PrimUndetermined)>]
-    [<DataRow("def pred T() { dec ~x,y,z:pred x:=false z:=true; or(x,or(y,z)) };", LiteralTrue)>]
-    [<DataRow("def pred T() { dec ~x,y,z:pred x:=false y:=true; or(x,or(y,z)) };", LiteralTrue)>]
-    [<DataRow("def pred T() { dec ~x,y,z:pred y:=false z:=true; or(x,or(y,z)) };", LiteralTrue)>]
-    [<DataRow("def pred T() { dec ~x,y,z:pred y:=true z:=false; or(x,or(y,z)) };", LiteralTrue)>]
-    [<DataRow("def pred T() { dec ~x,y:pred x:=true y:=true; or(x,y) };", LiteralTrue)>]
-    [<DataRow("def pred T() { dec ~x,y:pred x:=true y:=false; or(x,y) };", LiteralTrue)>]
-    [<DataRow("def pred T() { dec ~x,y:pred x:=false y:=true; or(x,y) };", LiteralTrue)>]
-    [<DataRow("def pred T() { dec ~x,y:pred x:=false y:=false; or(x,y) };", LiteralFalse)>]
+    [<DataRow("def pred T() { dec x,y,z:pred x:=false y:=false z:=false; or(x,or(y,z)) };", LiteralFalse)>]
+    [<DataRow("def pred T() { dec x,y,z:pred x:=false y:=true z:=false; or(x,or(y,z)) };", LiteralTrue)>]
+    [<DataRow("def pred T() { dec x,y,z:pred x:=false y:=false z:=true; or(or(x,y),z) };", LiteralTrue)>]
+    [<DataRow("def pred T() { dec x,y,z:pred x:=true y:=false z:=false; or(or(x,y),z) };", LiteralTrue)>]
+    [<DataRow("def pred T() { dec x,y,z:pred x:=false z:=false; or(x,or(y,z)) };", PrimUndetermined)>]
+    [<DataRow("def pred T() { dec x,y,z:pred x:=false y:=false; or(or(x,y),z) };", PrimUndetermined)>]
+    [<DataRow("def pred T() { dec x,y,z:pred y:=false z:=false; or(x,or(y,z)) };", PrimUndetermined)>]
+    [<DataRow("def pred T() { dec x,y,z:pred x:=false z:=true; or(x,or(y,z)) };", LiteralTrue)>]
+    [<DataRow("def pred T() { dec x,y,z:pred x:=false y:=true; or(x,or(y,z)) };", LiteralTrue)>]
+    [<DataRow("def pred T() { dec x,y,z:pred y:=false z:=true; or(x,or(y,z)) };", LiteralTrue)>]
+    [<DataRow("def pred T() { dec x,y,z:pred y:=true z:=false; or(x,or(y,z)) };", LiteralTrue)>]
+    [<DataRow("def pred T() { dec x,y:pred x:=true y:=true; or(x,y) };", LiteralTrue)>]
+    [<DataRow("def pred T() { dec x,y:pred x:=true y:=false; or(x,y) };", LiteralTrue)>]
+    [<DataRow("def pred T() { dec x,y:pred x:=false y:=true; or(x,y) };", LiteralTrue)>]
+    [<DataRow("def pred T() { dec x,y:pred x:=false y:=false; or(x,y) };", LiteralFalse)>]
     [<TestMethod>]
     member this.TestExpressionEvaluationDisjunction(fplCode, expected: string) =
         
@@ -123,21 +123,21 @@ type TestExpressionEvaluationVariables() =
         Assert.AreEqual<string>(expected, actual)
         prepareFplCode (filename, "", false) |> ignore
 
-    [<DataRow("def pred T() { dec ~x,y,z:pred x:=false y:=false z:=false; xor(x,xor(y,z)) };", LiteralFalse)>]
-    [<DataRow("def pred T() { dec ~x,y,z:pred x:=false y:=false z:=true; xor(xor(x,y),z) };", LiteralTrue)>]
-    [<DataRow("def pred T() { dec ~x,y,z:pred x:=false y:=true z:=false; xor(xor(x,y),z) };", LiteralTrue)>]
-    [<DataRow("def pred T() { dec ~x,y,z:pred x:=true y:=false z:=false; xor(xor(x,y),z) };", LiteralTrue)>]
-    [<DataRow("def pred T() { dec ~x,y,z:pred x:=false y:=true z:=true; xor(x,xor(y,z)) };", LiteralFalse)>]
-    [<DataRow("def pred T() { dec ~x,y,z:pred x:=true y:=false z:=true; xor(xor(x,y),z) };", LiteralFalse)>]
-    [<DataRow("def pred T() { dec ~x,y,z:pred x:=true y:=true z:=false; xor(x,xor(y,z)) };", LiteralFalse)>]
-    [<DataRow("def pred T() { dec ~x,y,z:pred x:=true y:=true z:=true; xor(x,xor(y,z)) };", LiteralTrue)>]
-    [<DataRow("def pred T() { dec ~x,y,z:pred x:=false y:=true; xor(xor(x,y),z) };", PrimUndetermined)>]
-    [<DataRow("def pred T() { dec ~x,y,z:pred y:=false z:=true; xor(x,xor(y,z)) };", PrimUndetermined)>]
-    [<DataRow("def pred T() { dec ~x,y,z:pred x:=true z:=false; xor(x,xor(y,z)) };", PrimUndetermined)>]
-    [<DataRow("def pred T() { dec ~x,y:pred x:=true y:=true; xor(x,y) };", LiteralFalse)>]
-    [<DataRow("def pred T() { dec ~x,y:pred x:=true y:=false; xor(x,y) };", LiteralTrue)>]
-    [<DataRow("def pred T() { dec ~x,y:pred x:=false y:=true; xor(x,y) };", LiteralTrue)>]
-    [<DataRow("def pred T() { dec ~x,y:pred x:=false y:=false; xor(x,y) };", LiteralFalse)>]
+    [<DataRow("def pred T() { dec x,y,z:pred x:=false y:=false z:=false; xor(x,xor(y,z)) };", LiteralFalse)>]
+    [<DataRow("def pred T() { dec x,y,z:pred x:=false y:=false z:=true; xor(xor(x,y),z) };", LiteralTrue)>]
+    [<DataRow("def pred T() { dec x,y,z:pred x:=false y:=true z:=false; xor(xor(x,y),z) };", LiteralTrue)>]
+    [<DataRow("def pred T() { dec x,y,z:pred x:=true y:=false z:=false; xor(xor(x,y),z) };", LiteralTrue)>]
+    [<DataRow("def pred T() { dec x,y,z:pred x:=false y:=true z:=true; xor(x,xor(y,z)) };", LiteralFalse)>]
+    [<DataRow("def pred T() { dec x,y,z:pred x:=true y:=false z:=true; xor(xor(x,y),z) };", LiteralFalse)>]
+    [<DataRow("def pred T() { dec x,y,z:pred x:=true y:=true z:=false; xor(x,xor(y,z)) };", LiteralFalse)>]
+    [<DataRow("def pred T() { dec x,y,z:pred x:=true y:=true z:=true; xor(x,xor(y,z)) };", LiteralTrue)>]
+    [<DataRow("def pred T() { dec x,y,z:pred x:=false y:=true; xor(xor(x,y),z) };", PrimUndetermined)>]
+    [<DataRow("def pred T() { dec x,y,z:pred y:=false z:=true; xor(x,xor(y,z)) };", PrimUndetermined)>]
+    [<DataRow("def pred T() { dec x,y,z:pred x:=true z:=false; xor(x,xor(y,z)) };", PrimUndetermined)>]
+    [<DataRow("def pred T() { dec x,y:pred x:=true y:=true; xor(x,y) };", LiteralFalse)>]
+    [<DataRow("def pred T() { dec x,y:pred x:=true y:=false; xor(x,y) };", LiteralTrue)>]
+    [<DataRow("def pred T() { dec x,y:pred x:=false y:=true; xor(x,y) };", LiteralTrue)>]
+    [<DataRow("def pred T() { dec x,y:pred x:=false y:=false; xor(x,y) };", LiteralFalse)>]
     [<TestMethod>]
     member this.TestExpressionEvaluationExclusiveOr(fplCode, expected: string) =
         
@@ -158,14 +158,14 @@ type TestExpressionEvaluationVariables() =
         Assert.AreEqual<string>(expected, actual)
         prepareFplCode (filename, "", false) |> ignore
 
-    [<DataRow("def pred T() { dec ~x,y:pred x:=true y:=true; impl(x,y) };", LiteralTrue)>]
-    [<DataRow("def pred T() { dec ~x,y:pred x:=true y:=false; impl(x,y) };", LiteralFalse)>]
-    [<DataRow("def pred T() { dec ~x,y:pred x:=false y:=true; impl(x,y) };", LiteralTrue)>]
-    [<DataRow("def pred T() { dec ~x,y:pred x:=false y:=false; impl(x,y) };", LiteralTrue)>]
-    [<DataRow("def pred T() { dec ~x,y:pred y:=false; impl(x,y) };", PrimUndetermined)>]
-    [<DataRow("def pred T() { dec ~x,y:pred x:=false; impl(x,y) };", PrimUndetermined)>]
-    [<DataRow("def pred T() { dec ~x,y:pred y:=true; impl(x,y) };", PrimUndetermined)>]
-    [<DataRow("def pred T() { dec ~x,y:pred x:=true; impl(x,y) };", PrimUndetermined)>]
+    [<DataRow("def pred T() { dec x,y:pred x:=true y:=true; impl(x,y) };", LiteralTrue)>]
+    [<DataRow("def pred T() { dec x,y:pred x:=true y:=false; impl(x,y) };", LiteralFalse)>]
+    [<DataRow("def pred T() { dec x,y:pred x:=false y:=true; impl(x,y) };", LiteralTrue)>]
+    [<DataRow("def pred T() { dec x,y:pred x:=false y:=false; impl(x,y) };", LiteralTrue)>]
+    [<DataRow("def pred T() { dec x,y:pred y:=false; impl(x,y) };", PrimUndetermined)>]
+    [<DataRow("def pred T() { dec x,y:pred x:=false; impl(x,y) };", PrimUndetermined)>]
+    [<DataRow("def pred T() { dec x,y:pred y:=true; impl(x,y) };", PrimUndetermined)>]
+    [<DataRow("def pred T() { dec x,y:pred x:=true; impl(x,y) };", PrimUndetermined)>]
     [<TestMethod>]
     member this.TestExpressionEvaluationImplication(fplCode, expected: string) =
         
@@ -186,14 +186,14 @@ type TestExpressionEvaluationVariables() =
         Assert.AreEqual<string>(expected, actual)
         prepareFplCode (filename, "", false) |> ignore
 
-    [<DataRow("def pred T() { dec ~x,y:pred x:=true y:=true; iif(x,y) };", LiteralTrue)>]
-    [<DataRow("def pred T() { dec ~x,y:pred x:=true y:=false; iif(x,y) };", LiteralFalse)>]
-    [<DataRow("def pred T() { dec ~x,y:pred x:=false y:=true; iif(x,y) };", LiteralFalse)>]
-    [<DataRow("def pred T() { dec ~x,y:pred x:=false y:=false; iif(x,y) };", LiteralTrue)>]
-    [<DataRow("def pred T() { dec ~x,y:pred y:=false; iif(x,y) };", PrimUndetermined)>]
-    [<DataRow("def pred T() { dec ~x,y:pred x:=false; iif(x,y) };", PrimUndetermined)>]
-    [<DataRow("def pred T() { dec ~x,y:pred y:=true; iif(x,y) };", PrimUndetermined)>]
-    [<DataRow("def pred T() { dec ~x,y:pred x:=true; iif(x,y) };", PrimUndetermined)>]
+    [<DataRow("def pred T() { dec x,y:pred x:=true y:=true; iif(x,y) };", LiteralTrue)>]
+    [<DataRow("def pred T() { dec x,y:pred x:=true y:=false; iif(x,y) };", LiteralFalse)>]
+    [<DataRow("def pred T() { dec x,y:pred x:=false y:=true; iif(x,y) };", LiteralFalse)>]
+    [<DataRow("def pred T() { dec x,y:pred x:=false y:=false; iif(x,y) };", LiteralTrue)>]
+    [<DataRow("def pred T() { dec x,y:pred y:=false; iif(x,y) };", PrimUndetermined)>]
+    [<DataRow("def pred T() { dec x,y:pred x:=false; iif(x,y) };", PrimUndetermined)>]
+    [<DataRow("def pred T() { dec x,y:pred y:=true; iif(x,y) };", PrimUndetermined)>]
+    [<DataRow("def pred T() { dec x,y:pred x:=true; iif(x,y) };", PrimUndetermined)>]
     [<TestMethod>]
     member this.TestExpressionEvaluationEquivalence(fplCode, expected: string) =
         

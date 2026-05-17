@@ -335,6 +335,8 @@ let mathSymbols = dict [
         ('∧', (2, "Logical And", "U+2227"))  // FPL and operator
         ('∨', (2, "Logical Or", "U+2228")) // FPL or operator
         ('⩡', (2, "Small Vee with Underbar", "U+2A61")) // xor operator
+        ('=', (2, "Equals Sign", "U+003D"))
+        ('≠', (2, "Not Equal To", "U+2260"))
         //('∀', (4, "For All", "U+2200")) // FPL all quantor
         //('∃', (2, "There Exists", "U+2203")) // FPL exists quantor
 
@@ -387,7 +389,6 @@ let mathSymbols = dict [
         ('^', (2, "Circumflex", "U+005E"))
         ('+', (7, "Plus Sign", "U+002B"))
         ('<', (2, "Less-Than Sign", "U+003C"))
-        ('=', (2, "Equals Sign", "U+003D"))
         ('>', (2, "Greater-Than Sign", "U+003E"))
         ('|', (0, "Vertical Line", "U+007C"))
         ('±', (2, "Plus-Minus Sign", "U+00B1"))
@@ -525,7 +526,6 @@ let mathSymbols = dict [
         ('≜', (2, "Delta Equal To", "U+225C"))
         ('≞', (2, "Measured By", "U+225E"))
         ('≟', (2, "Questioned Equal To", "U+225F"))
-        ('≠', (2, "Not Equal To", "U+2260"))
         ('≡', (2, "Identical To", "U+2261"))
         ('≢', (2, "Not Identical To", "U+2262"))
         ('≣', (2, "Strictly Equivalent To", "U+2263"))

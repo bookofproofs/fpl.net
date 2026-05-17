@@ -19,7 +19,7 @@ type TestParserErrors() =
         let input = """
         def pred T()
         {
-            dec ~x:tpl[! ;
+            dec x:tpl[! ;
             true
         }
         y
@@ -131,7 +131,7 @@ type TestParserErrors() =
         let input = """
         def pred T()
         {
-            dec~x:ind: ;
+            dec x:ind: ;
             true
         }
         ;
@@ -338,7 +338,7 @@ type TestParserErrors() =
         let input = """
         inf D()
         {
-            dec ~x ;
+            dec x ;
             pre:true
             con:true
         }

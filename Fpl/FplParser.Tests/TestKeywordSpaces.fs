@@ -133,28 +133,28 @@ type TestKeywordSpaces() =
 
     [<TestMethod>]
     member this.TestSpacesDeclaration () =
-        let result = run (varDeclBlock .>> eof) """declaration ~a:obj ;"""
+        let result = run (varDeclBlock .>> eof) """declaration a:obj ;"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSpacesDeclarationA () =
-        let result = run (varDeclBlock .>> eof) """declaration~a:obj ;"""
+        let result = run (varDeclBlock .>> eof) """declaration a:obj ;"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestSpacesDec () =
-        let result = run (varDeclBlock .>> eof) """dec ~a:obj ;"""
+        let result = run (varDeclBlock .>> eof) """dec a:obj ;"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSpacesDecA () =
-        let result = run (varDeclBlock .>> eof) """dec~a:obj ;"""
+        let result = run (varDeclBlock .>> eof) """dec a:obj ;"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
@@ -178,7 +178,7 @@ type TestKeywordSpaces() =
         let result = run (fplDelegate .>> eof) """delegate. Test()"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:"))
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSpacesDel () =
@@ -192,14 +192,14 @@ type TestKeywordSpaces() =
         let result = run (fplDelegate .>> eof) """del .Test()"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:"))
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSpacesDelB () =
         let result = run (fplDelegate .>> eof) """del. Test()"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:"))
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSpacesExt () =
@@ -488,7 +488,7 @@ type TestKeywordSpaces() =
     [<DataRow(LiteralInd)>]
     [<TestMethod>]
     member this.TestSpacesSimpleType (word:string) =
-        let result = run (varDecl .>> eof) ("~a:" + word + "x")
+        let result = run (varDecl .>> eof) ("a:" + word + "x")
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("<whitespace>"))

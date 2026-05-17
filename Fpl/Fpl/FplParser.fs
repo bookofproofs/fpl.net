@@ -63,7 +63,7 @@ let elseCase = skipChar '?' >>. spaces
 let leftBracket = skipChar '[' >>. spaces 
 let leftBracketOpt = positions (opt (skipChar '[')) .>> spaces |>> Ast.LeftBracketOpt
 let rightBracketOpt = positions (opt (skipChar ']')) |>> Ast.RightBracketOpt
-let tilde = skipChar '~' .>> spaces
+//let tilde = skipChar '~' .>> spaces
 let semiColonOpt = positions (opt (skipChar ';')) .>> spaces |>> Ast.SemicolonOpt
 let exclamationMark = skipChar '!' 
 let toArrow = skipString "->"
@@ -445,8 +445,8 @@ predicateListRef.Value <- sepBy predicate comma
 (* FPL building blocks *)
 let keywordDeclaration = (skipString LiteralDecL <|> skipString LiteralDec) .>> SW 
 
-let varDecl = tilde >>. namedVariableDeclaration
-let varDeclBlock = IW >>. keywordDeclaration >>. (many ((varDecl <|> statement) .>> IW)) .>>. semiColonOpt .>> IW |>> Ast.VarDeclBlock 
+let varDecl = namedVariableDeclaration
+let varDeclBlock = IW >>. keywordDeclaration >>. (many ((attempt statement <|> varDecl) .>> IW)) .>>. semiColonOpt .>> IW |>> Ast.VarDeclBlock 
 
 let varDeclOrSpecList = opt (many1 (varDeclBlock)) 
 let spacesPredicate = IW >>. predicate

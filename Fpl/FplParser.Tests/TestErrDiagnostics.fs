@@ -1075,7 +1075,7 @@ type TestErrDiagnostics() =
         let input = """
     inf D()
         {
-            dec ~x ;
+            dec x ;
             pre:true
             con:true
         }
@@ -1400,7 +1400,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred T()
         {
-            dec ~x, ; 
+            dec x, ; 
             true
         }
         y
@@ -1418,7 +1418,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred T()
         {
-            dec ~x: ;
+            dec x: ;
             true
         }
         y
@@ -1436,7 +1436,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred T()
         {
-            dec ~x:*
+            dec x:*
             ; 
             true
         }
@@ -1455,7 +1455,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred T()
         {
-            dec ~x:, ; 
+            dec x:, ; 
             true
         }
         y
@@ -1473,7 +1473,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred T()
         {
-            dec ~x:* ;
+            dec x:* ;
             true
         }
         y
@@ -1492,7 +1492,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred T()
         {
-            dec ~x:func: 
+            dec x:func: 
             ;
             true
         }
@@ -1511,7 +1511,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred T()
         {
-            dec~x:ind: ;
+            dec x:ind: ;
             true
         }
         y
@@ -1529,7 +1529,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred T()
         {
-            dec~x:obj: ;
+            dec x:obj: ;
             true
         }
         y
@@ -1547,7 +1547,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred T()
         {
-            dec~ x:pred: ;
+            dec x:pred: ;
             true
         }
         y
@@ -1565,7 +1565,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred T()
         {
-            dec ~x:tpl: ;
+            dec x:tpl: ;
             true
         }
         y
@@ -1583,7 +1583,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred T()
         {
-            dec ~x:T: ;
+            dec x:T: ;
             true
         }
         y
@@ -1601,7 +1601,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred T()
         {
-            dec ~x:tpl. ;
+            dec x:tpl. ;
             true
         }
         y
@@ -1619,7 +1619,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred T()
         {
-            dec ~x:pred( ;
+            dec x:pred( ;
             true
         }
         y
@@ -1637,7 +1637,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred T()
         {
-            dec ~x:pred(func( ;
+            dec x:pred(func( ;
             true
         }
         y
@@ -1655,7 +1655,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred T()
         {
-            dec ~x:func( ;
+            dec x:func( ;
             true
         }
         y
@@ -2059,7 +2059,7 @@ type TestErrDiagnostics() =
         let input = """
         def cl A 
         {
-            dec ~a:obj ;
+            dec a:obj ;
         }
     y
 ;"""
@@ -2292,7 +2292,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred A() 
         {
-            dec ~a:obj ;
+            dec a:obj ;
         }
     y
 ;"""
@@ -2328,7 +2328,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred A() 
         {
-            dec ~a:obj ;
+            dec a:obj ;
         }
     y
 ;"""
@@ -2346,7 +2346,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred A() 
         {
-            dec ~a:obj ;
+            dec a:obj ;
         }
     y
 ;"""
@@ -2364,7 +2364,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred A() 
         {
-            dec ~a: obj ;
+            dec a: obj ;
             true
         }
     y
