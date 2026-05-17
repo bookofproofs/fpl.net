@@ -127,3 +127,16 @@ type TestRecovery() =
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<DataRow("endOfFile01", """""")>]
+    [<DataRow("endOfFile02", """ """)>]
+    [<DataRow("loc01", """loc not (x) := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x ;""")>]
+    [<DataRow("loc02", """loc not (x) := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x def cl A""")>]
+    [<DataRow("dec01", """def pred T() {dec ~x:obj true};""")>]
+    [<DataRow("dec02", """def pred T() {dec ~x:obj true}""")>]
+    [<TestMethod>]
+    member this.TestMissingSemicolon(no:string, fplCode) =
+        let result = run (stdParser .>> eof) fplCode
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))

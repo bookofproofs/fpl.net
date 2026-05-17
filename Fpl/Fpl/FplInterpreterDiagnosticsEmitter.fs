@@ -1005,6 +1005,20 @@ let emitST004diagnostics languageCode pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
+let emitST005diagnostics domain nodeType pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Information
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ST005 (domain, nodeType)
+            Diagnostic.Alternatives = None
+        }
+    ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
+
 let emitSY000diagnostics infixOp pos1 pos2 =
     let diagnostic =
         { 
@@ -1131,16 +1145,16 @@ let emitSY008diagnostics pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitST005diagnostics domain nodeType pos1 pos2 =
+let emitSY009diagnostics pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Information
+            Diagnostic.Emitter = DiagnosticEmitter.FplParser
+            Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = ST005 (domain, nodeType)
-            Diagnostic.Alternatives = None
+            Diagnostic.Code = SY009
+            Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)

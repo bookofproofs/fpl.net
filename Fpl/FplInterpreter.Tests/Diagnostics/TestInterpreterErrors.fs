@@ -113,7 +113,7 @@ type TestInterpreterErrors() =
     [<TestMethod>]
     member this.TestGEN00() =
         let code = GEN00 ""
-        runTestHelper "TestGEN00.fpl" """x;""" code 1
+        runTestHelper "TestGEN00.fpl" """~testGEN00~""" code 1
 
     [<TestMethod>]
     member this.TestNSP00() =

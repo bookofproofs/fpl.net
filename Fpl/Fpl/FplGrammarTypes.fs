@@ -14,6 +14,7 @@ type Ast =
     | RightBraceOpt of Positions * unit option
     | LeftParenOpt of Positions * unit option
     | RightParenOpt of Positions * unit option
+    | SemicolonOpt of Positions * unit option
     | Star of Positions * unit
     | DotErr of Positions * unit
     | Dot of unit
@@ -88,7 +89,7 @@ type Ast =
     | PredicateWithOptSpecification of Positions * (Ast * Ast option)
     | DottedPredicate of Positions * Ast 
     | QualificationList of Positions * Ast list
-    | PredicateWithQualification of (Ast * Ast) 
+    | PredicateWithQualification of (Ast * Ast)
         
     // Expressions
     | ObjectSymbol of Positions * string
@@ -112,13 +113,13 @@ type Ast =
 
     // FPL Blocks
     | Intrinsic of Positions * unit
-    | VarDeclBlock of Positions * Ast list 
+    | VarDeclBlock of Ast list * Ast
     | StatementList of Positions * Ast list
     | PremiseList of Positions * Ast list
     | PremiseConclusionBlock of ((Ast * (Ast list option * (Ast * Ast))) * Ast)
     | RuleOfInferenceSignature of Positions * Ast
     | RuleOfInference of Positions * (Ast * Ast)
-    | Localization of (Positions * Ast) * Ast list
+    | Localization of (Positions * Ast) * (Ast list * Ast)
     | TheoremSignature of Positions * Ast
     | Theorem of Positions * (Ast * ((Ast * (Ast list option * Ast)) * Ast))
     | LemmaSignature of Positions * Ast
@@ -181,7 +182,7 @@ type Ast =
     | ProofSignature of Positions * (Ast * Ast list)
     | Proof of Positions * (Ast * Ast)
 
-    | Namespace of Ast list
+    | Namespace of Ast list * Ast
 
     | AST of Positions * Ast
     | Error // used to replace the whole AST (at the root level) for severe errors the parser cannot recover from

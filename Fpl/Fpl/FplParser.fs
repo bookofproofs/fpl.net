@@ -63,7 +63,7 @@ let elseCase = skipChar '?' >>. spaces
 let leftBracket = skipChar '[' >>. spaces 
 let rightBracket = skipChar ']'
 let tilde = skipChar '~' .>> spaces
-let semiColon = skipChar ';' >>. spaces
+let semiColonOpt = positions (opt (skipChar ';')) .>> spaces |>> Ast.SemicolonOpt
 let exclamationMark = skipChar '!' 
 let toArrow = skipString "->"
 let vDash = skipString "|-"
@@ -294,12 +294,13 @@ let spacesRightBrace = (IW >>. rightBraceOpt)
 let keywordReturn = IW >>. (skipString LiteralRetL <|> skipString LiteralRet) .>> SW 
 
 
+
 let caseElse = positions (elseCase >>. IW >>. statementList .>> IW)  |>> Ast.CaseElse
 let caseSingle = positions ((case >>. predicate .>> colon) .>>. statementList) |>> Ast.CaseSingle
 let caseSingleList = many1 (IW >>. caseSingle)
 let casesStatement = positions (((keywordCases >>. leftParen >>. IW >>. caseSingleList .>>. caseElse .>> rightParenOpt))) |>> Ast.Cases
 
-let mapCaseElse = positions (elseCase >>. IW >>. predicate .>> IW) |>> Ast.MapCaseElse
+let mapCaseElse = positions (elseCase >>. predicate .>> IW) |>> Ast.MapCaseElse
 let mapCaseSingle = positions ((case >>. predicate .>> colon) .>>. (IW >>. predicate)) |>> Ast.MapCaseSingle
 let mapCaseSingleList = many1 (IW >>. mapCaseSingle)
 let mapCases = positions (((keywordMapCases >>. leftParen >>. IW >>. mapCaseSingleList .>>. mapCaseElse .>> rightParenOpt))) |>> Ast.MapCases
@@ -444,7 +445,7 @@ predicateListRef.Value <- sepBy predicate comma
 let keywordDeclaration = (skipString LiteralDecL <|> skipString LiteralDec) .>> SW 
 
 let varDecl = tilde >>. namedVariableDeclaration
-let varDeclBlock = positions (IW >>. keywordDeclaration >>. (many ((varDecl <|> statement) .>> IW)) .>> semiColon) .>> IW |>> Ast.VarDeclBlock 
+let varDeclBlock = IW >>. keywordDeclaration >>. (many ((varDecl <|> statement) .>> IW)) .>>. semiColonOpt .>> IW |>> Ast.VarDeclBlock 
 
 let varDeclOrSpecList = opt (many1 (varDeclBlock)) 
 let spacesPredicate = IW >>. predicate
@@ -581,7 +582,7 @@ let definitionFunctionalTerm = positions (functionalTermSignature .>>. functiona
 let keywordClass = (skipString LiteralClL <|> skipString LiteralCl)
 
 let constructorList = many1 (constructor .>> IW)
-let classCompleteContent = varDeclOrSpecList .>>. constructorList|>> Ast.DefClassCompleteContent
+let classCompleteContent = varDeclOrSpecList .>>. constructorList |>> Ast.DefClassCompleteContent
 let classDefinitionBlock = positions (opt (leftBrace  >>. ((keywordIntrinsic <|> classCompleteContent) .>> IW) .>>. propertyList .>>. spacesRightBrace)) |>> Ast.ClassDefinitionBlock
 
 let classSignature = positions (keywordClass >>. SW >>. pascalCaseId) .>> IW |>> Ast.ClassSignature
@@ -612,7 +613,7 @@ let ebnfTerm = positions (sepEndBy1 ebnfFactor SW) |>> Ast.TranslationTerm
 ebnfTranslRef.Value <-  positions (sepBy1 ebnfTerm (IW >>. case >>. IW)) |>> Ast.TranslationTermList
 let language = positions ((exclamationMark >>. localizationLanguageCode .>> IW .>> colon) .>>. ebnfTransl) |>> Ast.Language
 let languageList = many1 (IW >>. language .>> IW)
-let localization = positions (keywordLocalization >>. predicate) .>> (IW .>> colonEqual) .>>. (languageList .>> IW .>> semiColon) .>> IW |>> Ast.Localization
+let localization = positions (keywordLocalization >>. predicate) .>> (IW .>> colonEqual) .>>. (languageList .>>. (IW >>. semiColonOpt)) .>> IW |>> Ast.Localization
 
 // FPL building blocks can be definitions, axioms, Theorem-proof blocks and conjectures
 let buildingBlock = choice [
@@ -633,7 +634,7 @@ let buildingBlock = choice [
 let buildingBlockList = many (buildingBlock .>> IW)
 
 (* Namespaces *)
-let fplNamespace = buildingBlockList .>> IW .>> semiColon |>> Ast.Namespace
+let fplNamespace = buildingBlockList .>>. (IW >>. semiColonOpt) |>> Ast.Namespace
 (* Final Parser *)
 let ast =  positions (IW >>. fplNamespace) |>> Ast.AST
 let stdParser = ast
