@@ -1187,6 +1187,19 @@ let emitSY011diagnostics pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
+let emitSY999diagnostics errMsg pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplParser
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = SY999 errMsg
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
 let emitVAR00Diagnostics startPos endPos =
     let diagnostic =
         { 

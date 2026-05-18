@@ -642,8 +642,8 @@ let fplNamespace = buildingBlockList .>>. (IW >>. semiColonOpt) |>> Ast.Namespac
 let ast =  positions (IW >>. fplNamespace) |>> Ast.AST
 
 //------------
-
-let errRecoveryBlocks = $"({LiteralDefL}|{LiteralDef}|{LiteralAxL}|{LiteralAx}|{LiteralPostL}|{LiteralPost}|{LiteralThmL}|{LiteralThm}|{LiteralPropL}|{LiteralProp}|{LiteralLemL}|{LiteralLem}|{LiteralCorL}|{LiteralCor}|{LiteralConjL}|{LiteralConj}|{LiteralPrfL}|{LiteralPrf}|{LiteralInfL}|{LiteralInf}|{LiteralLocL}|{LiteralLoc}|{LiteralExtL}|{LiteralExt}|{LiteralUses})"
+/// Regex used for the error recovery of FPL blocks using their keywords to be matched as whole words (\b option), followed by space (\s+ option)
+let errRecoveryBlocks = $"\\b({LiteralDefL}|{LiteralDef}|{LiteralAxL}|{LiteralAx}|{LiteralPostL}|{LiteralPost}|{LiteralThmL}|{LiteralThm}|{LiteralPropL}|{LiteralProp}|{LiteralLemL}|{LiteralLem}|{LiteralCorL}|{LiteralCor}|{LiteralConjL}|{LiteralConj}|{LiteralPrfL}|{LiteralPrf}|{LiteralInfL}|{LiteralInf}|{LiteralLocL}|{LiteralLoc}|{LiteralExtL}|{LiteralExt}|{LiteralUses})\\s+"
 
 let masked (input:String) =
     input
@@ -697,50 +697,99 @@ let maskAroundIndex (matches: Match list) (i: int) (input: string) =
 /// all non-whitespace characters are replaced with spaces while preserving line breaks and line lengths.
 /// The syntax error is generated using an input starting with the chunk, so syntax error messages
 /// realistically reflect the remaining code after the chunk.
-let cleanUpInputAndIssueSyntaxErrors fplCode =
+let cleanInputAndIssueSyntaxErrors fplCode =
     let input = fplCode |> removeFplComments 
     let matches = getMatches errRecoveryBlocks input
-    let sb = StringBuilder()
+    let errorFreeInput = StringBuilder()
+    let maskedPrefix = StringBuilder()
 
-    let rec tryGetAst1 someParser (input:string) i =
-        let chunk, remainder = 
-            if i < matches.Length-1 then
+    let rec tryGetAst1 i =
+        let remainder = StringBuilder()
+        let chunk, maskedChunk = 
+            if i = 0 && matches.Length>0 && matches[i].Index>0 then
+                let chuPrefix = input.Substring(0, matches[i].Index)
+                let mChuPrefix = masked chuPrefix
+                errorFreeInput.Append(mChuPrefix) |> ignore
+                let pos = matches[i].Index
+                let length =
+                    if i < matches.Length - 1 then
+                        matches[i+1].Index - matches[i].Index
+                    else
+                        input.Length - matches[i].Index
+                let chu = input.Substring(pos, length)
+                let mChu = masked chu
+                maskedPrefix.Append(mChu) |> ignore
+                remainder.Append(maskedPrefix) |> ignore
+                remainder.Append(chu) |> ignore
+                chu, mChu 
+            elif i < matches.Length-1 then
                 let pos = matches[i].Index
                 let length = matches[i+1].Index - matches[i].Index
-                input.Substring(pos, length), input.Substring(pos)
+                let chu = input.Substring(pos, length)
+                let mChu = masked chu
+                maskedPrefix.Append(mChu) |> ignore
+                remainder.Append(maskedPrefix) |> ignore
+                remainder.Append(chu) |> ignore
+                chu, mChu
             elif i = matches.Length-1 then
                 let pos = matches[i].Index
-                input.Substring(pos), input.Substring(pos)
+                let chu = input.Substring(pos)
+                let mChu = masked chu
+                remainder.Append(input.Substring(pos)) |> ignore
+                chu, mChu
             else
                 "", ""
         if i = matches.Length then
             ()
         else
-            let cleanUpInput = (maskAroundIndex matches i input).Trim()
-            match run someParser cleanUpInput with
-            | Success(_, _, _) ->
-                sb.Append(chunk) |> ignore
-            | Failure(_, _, _) ->
-                let maskedChunk = masked chunk 
-                sb.Append(maskedChunk) |> ignore
-                match run someParser remainder with 
-                | Failure(errorMsg, restInput, userState) ->
+            let trimedInput = chunk.Trim()
+            // run buildingBlock parser until eof of trimedInput
+            match run (buildingBlock .>> eof) trimedInput with
+            | Success(_, _, _) when trimedInput.Length > 0 ->
+                // if successed when trimed not empty, add chunk to error-free input
+                errorFreeInput.Append(chunk) |> ignore
+            | _ ->
+                // in all other cases (trimedInput empty or syntax error in building block)
+                // try the buildingBlock parser without eof
+                let posSuccess, successButNotTheEndOfChunk =
+                    match run buildingBlock trimedInput with
+                    | Success(_, _, userState) when trimedInput.Length > 0 -> (int)userState.Index, true
+                    | _ -> -1, false
+                if successButNotTheEndOfChunk then
+                    // add maskedChunk up to the parsed position to the error-free input
+                    errorFreeInput.Append(trimedInput.Substring(0, posSuccess)) |> ignore
+                    if maskedChunk.Length > posSuccess then
+
+                            errorFreeInput.Append(maskedChunk.Substring(posSuccess)) |> ignore
+                    else
+                        errorFreeInput.Append(maskedChunk) |> ignore
+                else
+                    // add maskedChunk to error-free input
+                    errorFreeInput.Append(maskedChunk) |> ignore
+                // now, run the whole "ast" parser on the remainer
+                // that starts ends the chunk we found to be faulty in the outer match,
+                // possibly prefixed with whitespaces from masked previous chunks
+
+                let rest = remainder.ToString()
+                match run (ast .>> eof) rest with 
+                | Failure(errorMsg, originalErrPos, _) ->
+                    // in case of syntax error, issue diagnostics
                     let diagnostic =
                         { 
                             Diagnostic.Uri = ad.CurrentUri
                             Diagnostic.Emitter = DiagnosticEmitter.FplParser 
                             Diagnostic.Severity = DiagnosticSeverity.Error
-                            Diagnostic.StartPos = restInput.Position
-                            Diagnostic.EndPos = restInput.Position
+                            Diagnostic.StartPos = originalErrPos.Position
+                            Diagnostic.EndPos = originalErrPos.Position
                             Diagnostic.Code = SY999 errorMsg 
                             Diagnostic.Alternatives = None
                         }
                     ad.AddDiagnostic diagnostic
-                | _ -> ()
-            tryGetAst1 someParser input (i + 1)
+                | _ -> () // if success, all good
+            tryGetAst1 (i + 1)
 
-    tryGetAst1 buildingBlock input 0
-    sb.ToString()
+    tryGetAst1 0
+    errorFreeInput.ToString()
 //-----------------
 
 
@@ -841,7 +890,18 @@ let maxIntervalBound (intervals:System.Collections.Generic.List<Interval>) =
             maxBound <- interval.Start
     maxBound
 
-let fplParser (input:string) = 
+let fplParser (input:string) =
+
+    let cleanUpInput = cleanInputAndIssueSyntaxErrors input
+    match run (stdParser .>> eof) cleanUpInput with
+    | Success(result, restInput, userState) ->
+        result
+    | Failure(errMsg, restInput, _) ->
+        Ast.BuildingBlockError((restInput.Position, restInput.Position), errMsg)
+
+
+
+let fplParserOld (input:string) = 
     let preProcessedInput = input |> removeFplComments
     let matchList = stringMatches preProcessedInput errRecPattern
 

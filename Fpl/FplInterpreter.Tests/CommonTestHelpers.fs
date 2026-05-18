@@ -67,7 +67,6 @@ let prepareFplCode (filename: string, fplCode: string, delete: bool) =
             deleteDirectory (Path.Combine(currDir,"repo"))
     else
         offlineWatcher.OfflineMode <- not (fplCodeNeedsOnline fplCode)
-        let st = SymbolTable()
         fplInterpreter fplCode uri fplLibUrl |> ignore
 
         offlineWatcher.OfflineMode <- false

@@ -169,10 +169,12 @@ type TestRecovery() =
     [<DataRow("bb01", """loc  ;""", 1)>]
     [<DataRow("bb01", """def pred T() loc  def cl T;""", 1)>]
     [<DataRow("bb01", """def pred T();""", 0)>]
+    [<DataRow("bb01", """def cl TestId {ctor TestId() {} ctor TestId(x:obj) {} ctor TestId(x:pred) {} };""", 0)>]
+
     [<TestMethod>]
     member this.TestErrorRecoveryBuildingBlock(no:string, fplCode:string, numbErr:int) =
         ad.Clear()
-        let cleanUpInput = cleanUpInputAndIssueSyntaxErrors fplCode
+        let cleanUpInput = cleanInputAndIssueSyntaxErrors fplCode
         let result = run (stdParser .>> eof) cleanUpInput
         let actual = sprintf "%O" result
         if ad.CountDiagnostics > 0 then

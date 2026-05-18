@@ -72,7 +72,7 @@ type TestFplValueScopeNameEndPos() =
                 Assert.AreEqual<int64>(29L, hasSignature.SignEndPos.Column) 
             | "pst1" -> 
                 let hasSignature = pst1 :?> FplAxiom
-                Assert.AreEqual<int64>(37L, hasSignature.SignEndPos.Column) 
+                Assert.AreEqual<int64>(38L, hasSignature.SignEndPos.Column) 
             | "pst2" -> 
                 let hasSignature = pst2 :?> FplAxiom
                 Assert.AreEqual<int64>(37L, hasSignature.SignEndPos.Column) 

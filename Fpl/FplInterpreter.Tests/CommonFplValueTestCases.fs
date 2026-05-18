@@ -2,7 +2,6 @@ namespace FplInterpreter.Tests
 
 open FParsec
 open CommonTestHelpers
-open ErrDiagnostics
 open FplInterpreterBasicTypes
 open FplInterpreter.Globals.Root
 open FplInterpreter.Globals.Heap
@@ -268,7 +267,7 @@ type CommonFplValueTestCases =
             inf SomeInference2 {pre:true con:true}
             axiom SomeAxiom1 {true}
             axiom SomeAxiom2 {true}
-            postulate SomePostulate1 {true}
+            postulate  SomePostulate1 {true}
             postulate SomePostulate2 {true}
             theorem SomeTheorem1 {true}
             theorem SomeTheorem2 {true}
