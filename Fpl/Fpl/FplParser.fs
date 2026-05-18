@@ -737,9 +737,13 @@ let cleanInputAndIssueSyntaxErrors fplCode =
                 let mChu = masked chu
                 remainder.Append(input.Substring(pos)) |> ignore
                 chu, mChu
+            elif matches.Length = 0 then
+                let chu = input
+                let mChu = masked chu
+                chu, mChu
             else
                 "", ""
-        if i = matches.Length then
+        if i > matches.Length && i > 0 then
             ()
         else
             let trimedInput = chunk.Trim()
@@ -759,10 +763,17 @@ let cleanInputAndIssueSyntaxErrors fplCode =
                     // add maskedChunk up to the parsed position to the error-free input
                     errorFreeInput.Append(trimedInput.Substring(0, posSuccess)) |> ignore
                     if maskedChunk.Length > posSuccess then
-
+                        if matches.Length = 1 then
+                            // handle the special case when we have only one building block with a closing ";"
+                            let rest = chunk.Substring(posSuccess).Trim()
+                            if rest=";" then 
+                                errorFreeInput.Append(chunk.Substring(posSuccess)) |> ignore
+                        else
                             errorFreeInput.Append(maskedChunk.Substring(posSuccess)) |> ignore
                     else
                         errorFreeInput.Append(maskedChunk) |> ignore
+                elif i = 0 && matches.Length=0 then
+                    errorFreeInput.Append(chunk) |> ignore
                 else
                     // add maskedChunk to error-free input
                     errorFreeInput.Append(maskedChunk) |> ignore
