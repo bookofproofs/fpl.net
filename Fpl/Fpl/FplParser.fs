@@ -703,7 +703,7 @@ let private splitByBacktrackMarker (input: string) =
     |> Array.mapi (fun i s ->
         match i with
         | 0 -> s.Replace("Error in ", "FPL syntax error in ")
-        | _ -> $"The parser backtracked after FPL syntax error{s}")
+        | _ -> $"Backtracking syntax error{s}")
     |> Array.toList
 
 /// Takes the string list output of splitByBacktrackMarker and extracts FParsec positions from the error messages producing a list of tuples (Position, error string).
@@ -791,7 +791,7 @@ let private insertLightning (input: string) =
                 let updatedPrev =
                     if caretCol < prevLen then
                         // insert ⚡ at caretCol
-                        prev.[0..caretCol-1] + "⚡" + prev.[caretCol..]
+                        prev.[0..caretCol-2] + "⚡" + prev.[caretCol-1..]
                     else
                         // previous line too short → append ⚡
                         prev + "⚡"
@@ -849,7 +849,10 @@ let private collapseExpectingBlock (input: string) : string =
                     |> List.map (fun s -> s.Replace("' or '", ", "))
                     |> String.concat " "
                 )
-            String.concat Environment.NewLine [l1; "    " + l2; merged]
+            if l1.StartsWith("FPL ") then
+                $"Syntax error: `{l2}`{Environment.NewLine}{merged}"
+            else
+                $"Backtracking syntax error: `{l2}`{Environment.NewLine}{merged}"
         else
             // No special rule → return unchanged
             String.concat Environment.NewLine lines
@@ -875,11 +878,13 @@ let cleanInputAndIssueSyntaxErrors fplCode =
 
     let rec tryGetAst1 i =
         let remainder = StringBuilder()
-        let chunk, maskedChunk = 
+        let chunk, maskedChunk =
             if i = 0 && matches.Length>0 && matches[i].Index>0 then
                 let chuPrefix = input.Substring(0, matches[i].Index)
                 let mChuPrefix = masked chuPrefix
                 errorFreeInput.Append(mChuPrefix) |> ignore
+                remainder.Append(mChuPrefix) |> ignore
+            if i = 0 && matches.Length>0 && matches[i].Index>0 then
                 let pos = matches[i].Index
                 let length =
                     if i < matches.Length - 1 then
@@ -889,7 +894,6 @@ let cleanInputAndIssueSyntaxErrors fplCode =
                 let chu = input.Substring(pos, length)
                 let mChu = masked chu
                 maskedPrefix.Append(mChu) |> ignore
-                remainder.Append(mChuPrefix) |> ignore
                 remainder.Append(chu) |> ignore
                 chu, mChu 
             elif i < matches.Length-1 then
@@ -898,7 +902,6 @@ let cleanInputAndIssueSyntaxErrors fplCode =
                 let chu = input.Substring(pos, length)
                 let mChu = masked chu
                 maskedPrefix.Append(mChu) |> ignore
-                remainder.Append(maskedPrefix) |> ignore
                 remainder.Append(chu) |> ignore
                 chu, mChu
             elif i = matches.Length-1 then
