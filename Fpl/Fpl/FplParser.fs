@@ -695,10 +695,39 @@ let maskAroundIndex (matches: Match list) (i: int) (input: string) =
         let endIdx   = m.Index + m.Length
         keepOnlyRange startIdx endIdx input
 
+/// Splits an FParsec error message to sub-errors (if it contains many)
+let private splitByBacktrackMarker (input: string) =
+    let pattern = @"\s*The parser backtracked after:\s*Error"
+    let split = Regex.Split(input, pattern, RegexOptions.Multiline)
+    split
+    |> Array.mapi (fun i s ->
+        match i with
+        | 0 -> s.Replace("Error in ", "FPL syntax error in ")
+        | _ -> $"The parser backtracked after FPL syntax error{s}")
+    |> Array.toList
+
+/// Takes the string list output of splitByBacktrackMarker and extracts FParsec positions from the error messages producing a list of tuples (Position, error string).
+let private extractPositions (lines: string list) =
+    let pattern = @"syntax error in Ln:\s*(\d+)\s*Col:\s*(\d+)\s*"
+
+    lines
+    |> List.map (fun line ->
+        let m = Regex.Match(line, pattern)
+        if m.Success then
+            let ln  = int m.Groups.[1].Value
+            let col = int m.Groups.[2].Value - 1   // one less than reported
+            let pos = Position("", 0L, int64 ln, int64 col)
+            pos, line
+        else
+            // no match → default position
+            let pos = Position("", 0L, 0L, 0L)
+            pos, line
+    )
+
 /// Scans input line‑by‑line, detecting a line that trims to "^",
 /// and inserts ⚡ into the preceding line at the same column,
 /// skipping the caret‑line, and preserving all other lines unchanged.
-let insertLightning (input: string) =
+let private insertLightning (input: string) =
     let lines = input.Split('\n') |> Array.toList
 
     // Process line-by-line with access to previous output line
@@ -829,18 +858,24 @@ let cleanInputAndIssueSyntaxErrors fplCode =
                 match run (ast .>> eof) rest with 
                 | Failure(errorMsg, originalErrPos, _) ->
                     // in case of syntax error, issue diagnostics
-                    let ideFriendlyMsg = insertLightning errorMsg
-                    let diagnostic =
-                        { 
-                            Diagnostic.Uri = ad.CurrentUri
-                            Diagnostic.Emitter = DiagnosticEmitter.FplParser 
-                            Diagnostic.Severity = DiagnosticSeverity.Error
-                            Diagnostic.StartPos = originalErrPos.Position
-                            Diagnostic.EndPos = originalErrPos.Position
-                            Diagnostic.Code = SY999 ideFriendlyMsg 
-                            Diagnostic.Alternatives = None
-                        }
-                    ad.AddDiagnostic diagnostic
+                    errorMsg
+                    |> insertLightning
+                    |> splitByBacktrackMarker
+                    |> extractPositions
+                    |> List.map (fun (pos, errMsg) ->
+                        let diagnostic =
+                            { 
+                                Diagnostic.Uri = ad.CurrentUri
+                                Diagnostic.Emitter = DiagnosticEmitter.FplParser 
+                                Diagnostic.Severity = DiagnosticSeverity.Error
+                                Diagnostic.StartPos = pos
+                                Diagnostic.EndPos = pos
+                                Diagnostic.Code = SY999 errMsg 
+                                Diagnostic.Alternatives = None
+                            }
+                        ad.AddDiagnostic diagnostic
+                    )
+                    |> ignore
                 | _ -> () // if success, all good
             tryGetAst1 (i + 1)
 
