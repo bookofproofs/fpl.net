@@ -800,8 +800,8 @@ let private insertLightning (input: string) =
                 loop (updatedPrev :: (List.tail acc)) rest
 
             else
-                // normal line → append unchanged
-                loop (line :: acc) rest
+                // normal line → append, but trimmed
+                loop (trimmed :: acc) rest
 
     loop [] lines
 
@@ -827,6 +827,32 @@ let private computeIndex (pos: Position) (lines: string array) inputLength =
             int64 inputLength
     else
         int64 inputLength
+
+/// Transforms an error message of FParserc preserving the first two lines, and if the third line starts with "Expecting:",
+/// then flattening all remaining lines into that third line by concatenating them without line breaks.
+let private collapseExpectingBlock (input: string) : string =
+    let lines = input.Split(Environment.NewLine) |> Array.toList
+
+    match lines with
+    | [] -> ""
+    | [l1] -> l1
+    | [l1; l2] -> l1 + Environment.NewLine + l2
+    | l1 :: l2 :: l3 :: rest ->
+        if l3.TrimStart().StartsWith("Expecting:") then
+            // Concatenate line 3 with all remaining lines (no newlines)
+            let merged =
+                l3 + (
+                    rest
+                    |> List.map (fun s -> s.Trim())
+                    |> List.map (fun s -> s.Replace("Other error messages:", ""))
+                    |> List.map (fun s -> s.Replace("Expecting:", ", "))
+                    |> List.map (fun s -> s.Replace("' or '", ", "))
+                    |> String.concat " "
+                )
+            String.concat Environment.NewLine [l1; "    " + l2; merged]
+        else
+            // No special rule → return unchanged
+            String.concat Environment.NewLine lines
 
 let correctPositionIndexBasedOnLineAndColumn (lines:string array) length (items: (Position * string) list) =
     items
@@ -942,7 +968,7 @@ let cleanInputAndIssueSyntaxErrors fplCode =
                                 Diagnostic.Severity = DiagnosticSeverity.Error
                                 Diagnostic.StartPos = pos
                                 Diagnostic.EndPos = pos
-                                Diagnostic.Code = SY999 errMsg 
+                                Diagnostic.Code = SY999 (collapseExpectingBlock errMsg)
                                 Diagnostic.Alternatives = None
                             }
                         ad.AddDiagnostic diagnostic

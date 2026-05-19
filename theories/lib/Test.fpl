@@ -1,1 +1,1 @@
-def pred T() {del.T()};
+def pred T() { .(.¬∃ x:obj {.x is N} ∨ (.true ⇔ false)) ∧ .(.∃ x:obj {.x is N} ∨ ¬.true ⇔ false) } ;

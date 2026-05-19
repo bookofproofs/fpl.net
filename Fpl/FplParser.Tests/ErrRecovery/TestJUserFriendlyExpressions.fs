@@ -174,6 +174,7 @@ type TestRecovery() =
     [<DataRow("bb06", """ def cl TestId { s };""", 1)>]
     [<DataRow("bb07", """def pred T() { .(.∀ x:obj {.x is N} ∧ ¬∃ y:obj {y is M}) ∨ (.¬∀ x:obj {.x is N} ∧ ∃ y:obj {.y is M}) };""", 2)>]
     [<DataRow("bb08", """def pred T() { .(.¬∃ x:obj {.x is N} ∨ (.true ⇔ false)) ∧ .(.∃ x:obj {.x is N} ∨ ¬.true ⇔ false) };""", 4)>]
+    [<DataRow("bb09", """def pred T() { .(.¬∃ x:obj {.x is N} ∨ (.true ⇔ false)) ∧ .(.∃ x:obj {.x is N} ∨ ¬.true ⇔ false) } def cl A;""", 4)>]
     
     [<TestMethod>]
     member this.TestErrorRecoveryBuildingBlock(no:string, fplCode:string, numbErr:int) =
