@@ -695,6 +695,46 @@ let maskAroundIndex (matches: Match list) (i: int) (input: string) =
         let endIdx   = m.Index + m.Length
         keepOnlyRange startIdx endIdx input
 
+/// Scans input line‑by‑line, detecting a line that trims to "^",
+/// and inserts ⚡ into the preceding line at the same column,
+/// skipping the caret‑line, and preserving all other lines unchanged.
+let insertLightning (input: string) =
+    let lines = input.Split('\n') |> Array.toList
+
+    // Process line-by-line with access to previous output line
+    let rec loop acc remaining =
+        match remaining with
+        | [] ->
+            acc |> List.rev |> String.concat "\n"
+
+        | (line:string) :: rest ->
+            let trimmed = line.Trim()
+
+            if trimmed = "^" && acc <> [] then
+                // caret-line: determine caret column in the *original* line
+                let caretCol = line.IndexOf("^")
+
+                // modify the previous line
+                let prev = List.head acc
+                let prevLen = prev.Length
+
+                let updatedPrev =
+                    if caretCol < prevLen then
+                        // insert ⚡ at caretCol
+                        prev.[0..caretCol-1] + "⚡" + prev.[caretCol+1..]
+                    else
+                        // previous line too short → append ⚡
+                        prev + "⚡"
+
+                // replace previous line, skip caret-line
+                loop (updatedPrev :: (List.tail acc)) rest
+
+            else
+                // normal line → append unchanged
+                loop (line :: acc) rest
+
+    loop [] lines
+
 
 /// Tries to parse all chunks of input of FPL building blocks. If a chunk produces a syntax error,
 /// a diagnosics will be issued and the chunk will be replaced by a masked chunk, where
@@ -789,6 +829,7 @@ let cleanInputAndIssueSyntaxErrors fplCode =
                 match run (ast .>> eof) rest with 
                 | Failure(errorMsg, originalErrPos, _) ->
                     // in case of syntax error, issue diagnostics
+                    let ideFriendlyMsg = insertLightning errorMsg
                     let diagnostic =
                         { 
                             Diagnostic.Uri = ad.CurrentUri
@@ -796,7 +837,7 @@ let cleanInputAndIssueSyntaxErrors fplCode =
                             Diagnostic.Severity = DiagnosticSeverity.Error
                             Diagnostic.StartPos = originalErrPos.Position
                             Diagnostic.EndPos = originalErrPos.Position
-                            Diagnostic.Code = SY999 errorMsg 
+                            Diagnostic.Code = SY999 ideFriendlyMsg 
                             Diagnostic.Alternatives = None
                         }
                     ad.AddDiagnostic diagnostic

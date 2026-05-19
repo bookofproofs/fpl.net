@@ -172,6 +172,9 @@ type TestRecovery() =
     [<DataRow("bb04", """def cl TestId {ctor TestId() {} ctor TestId(x:obj) {} ctor TestId(x:pred) {} };""", 0)>]
     [<DataRow("bb05", """def cl TestId { s };""", 1)>]
     [<DataRow("bb06", """ def cl TestId { s };""", 1)>]
+    [<DataRow("bb06", """def pred T() { .(.∀ x:obj {.x is N} ∧ ¬∃ y:obj {y is M}) ∨ (.¬∀ x:obj {.x is N} ∧ ∃ y:obj {.y is M}) };""", 1)>]
+
+    
     [<TestMethod>]
     member this.TestErrorRecoveryBuildingBlock(no:string, fplCode:string, numbErr:int) =
         ad.Clear()
