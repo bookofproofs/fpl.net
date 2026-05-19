@@ -1034,7 +1034,7 @@ type TestInterpreterErrors() =
             let code = LG001 ("", "", "")
             runTestHelper "TestLG001.fpl" fplCode code expected
 
-    [<DataRow("""axiom A {dec x,y:Nat; impl(x,y)};""", 28)>]
+    [<DataRow("""axiom A {dec x,y:Nat; impl(x,y)};""", 27)>]
     [<TestMethod>]
     member this.TestLG001Position(fplCode:string, (expected:int64)) =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 

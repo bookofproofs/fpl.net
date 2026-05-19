@@ -807,7 +807,7 @@ let private insertLightning (input: string) =
 
 /// Computes FParsec’s Position.Index based on Line and Column in an input string.
 let private computeIndex (pos: Position) (lines: string array) inputLength =
-    
+    let lengthNewLine = Environment.NewLine.Length
     // FParsec Position.Line and Column are 1-based
     let lineIdx  = int pos.Line - 1
     let colIdx   = int pos.Column
@@ -820,7 +820,7 @@ let private computeIndex (pos: Position) (lines: string array) inputLength =
             let prefixLength =
                 lines
                 |> Seq.take lineIdx
-                |> Seq.sumBy (fun l -> l.Length + 1)   // +1 for '\n'
+                |> Seq.sumBy (fun l -> l.Length + lengthNewLine)   // +1 for '\n'
 
             int64 prefixLength + int64 colIdx
         else
@@ -864,9 +864,10 @@ let correctPositionIndexBasedOnLineAndColumn (lines:string array) length (items:
     )
 
 /// Tries to parse all chunks of input of FPL building blocks. If a chunk produces a syntax error,
-/// a diagnosics will be issued and the chunk will be replaced by a masked chunk, where
-/// all non-whitespace characters are replaced with spaces while preserving line breaks and line lengths.
-/// The syntax error is generated using an input starting with the chunk, so syntax error messages
+/// a diagnosics will be issued and the chunk will (at least at its faulty end) be replaced by a masked chunk, where
+/// all non-whitespace characters will be replaced with spaces while preserving line breaks and line lengths.
+/// Preserving line sizes is necessary to keep other diagnostics well-positioned.
+/// The syntax errors are generated using an input starting with the chunk, so syntax error messages
 /// realistically reflect the remaining code after the chunk.
 let private cleanInputAndIssueSyntaxErrors fplCode =
     let input = fplCode |> removeFplComments
