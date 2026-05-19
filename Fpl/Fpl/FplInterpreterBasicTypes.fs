@@ -324,7 +324,12 @@ type FplGenericNode(positions: Positions, parent: FplGenericNode option) =
             if fv.ShortName = PrimRoot then ""
             elif first then
                 let starPosWithoutFileName =
-                    $"(Ln: {fv.StartPos.Line}, Col: {fv.StartPos.Column})"
+                    // the column positioning is 0-based, we want to print it 1-based
+                    let col =
+                        match fv.Name with
+                        | PrimTheoryL -> fv.StartPos.Column
+                        | _ -> fv.StartPos.Column + (int64)1 
+                    $"(Ln: {fv.StartPos.Line}, Col: {col})"
 
                 if fv.ShortName = PrimTheory then
                     getFullName fv.Parent.Value false + fvType + starPosWithoutFileName

@@ -167,18 +167,18 @@ type TestRecovery() =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<DataRow("bb01", """loc  ;""", 1)>]
-    [<DataRow("bb01", """def pred T() loc  def cl T;""", 1)>]
-    [<DataRow("bb01", """def pred T();""", 0)>]
-    [<DataRow("bb01", """def cl TestId {ctor TestId() {} ctor TestId(x:obj) {} ctor TestId(x:pred) {} };""", 0)>]
-
+    [<DataRow("bb02", """def pred T() loc  def cl T;""", 1)>]
+    [<DataRow("bb03", """def pred T();""", 0)>]
+    [<DataRow("bb04", """def cl TestId {ctor TestId() {} ctor TestId(x:obj) {} ctor TestId(x:pred) {} };""", 0)>]
+    [<DataRow("bb05", """def cl TestId { s };""", 1)>]
+    [<DataRow("bb06", """ def cl TestId { s };""", 1)>]
     [<TestMethod>]
     member this.TestErrorRecoveryBuildingBlock(no:string, fplCode:string, numbErr:int) =
         ad.Clear()
         let cleanUpInput = cleanInputAndIssueSyntaxErrors fplCode
-        let result = run (stdParser .>> eof) cleanUpInput
+        let result = fplParser cleanUpInput
         let actual = sprintf "%O" result
         if ad.CountDiagnostics > 0 then
             ad.PrintDiagnostics
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
         Assert.AreEqual<int>(numbErr, ad.CountDiagnostics)

@@ -60,101 +60,101 @@ type TestFplValueScopeNameEndPos() =
             | PrimTheoryL -> Assert.AreEqual<int64>(1L, theory.EndPos.Column)
             | "inf1" -> 
                 let hasSignature = inf1 :?> FplRuleOfInference
-                Assert.AreEqual<int64>(31L, hasSignature.SignEndPos.Column)
+                Assert.AreEqual<int64>(30L, hasSignature.SignEndPos.Column)
             | "inf2" -> 
                 let hasSignature = inf2 :?> FplRuleOfInference
-                Assert.AreEqual<int64>(31L, hasSignature.SignEndPos.Column) 
+                Assert.AreEqual<int64>(30L, hasSignature.SignEndPos.Column) 
             | "axi1" -> 
                 let hasSignature = axi1 :?> FplAxiom
-                Assert.AreEqual<int64>(29L, hasSignature.SignEndPos.Column) 
+                Assert.AreEqual<int64>(28L, hasSignature.SignEndPos.Column) 
             | "axi2" -> 
                 let hasSignature = axi2 :?> FplAxiom
-                Assert.AreEqual<int64>(29L, hasSignature.SignEndPos.Column) 
+                Assert.AreEqual<int64>(28L, hasSignature.SignEndPos.Column) 
             | "pst1" -> 
                 let hasSignature = pst1 :?> FplAxiom
-                Assert.AreEqual<int64>(38L, hasSignature.SignEndPos.Column) 
+                Assert.AreEqual<int64>(37L, hasSignature.SignEndPos.Column) 
             | "pst2" -> 
                 let hasSignature = pst2 :?> FplAxiom
-                Assert.AreEqual<int64>(37L, hasSignature.SignEndPos.Column) 
+                Assert.AreEqual<int64>(36L, hasSignature.SignEndPos.Column) 
             | "thm1" -> 
                 let hasSignature = thm1 :?> FplTheorem
-                Assert.AreEqual<int64>(33L, hasSignature.SignEndPos.Column) 
+                Assert.AreEqual<int64>(32L, hasSignature.SignEndPos.Column) 
             | "thm2" -> 
                 let hasSignature = thm2 :?> FplTheorem
-                Assert.AreEqual<int64>(33L, hasSignature.SignEndPos.Column) 
+                Assert.AreEqual<int64>(32L, hasSignature.SignEndPos.Column) 
             | "pro1" -> 
                 let hasSignature = pro1 :?> FplProposition
-                Assert.AreEqual<int64>(41L, hasSignature.SignEndPos.Column) 
+                Assert.AreEqual<int64>(40L, hasSignature.SignEndPos.Column) 
             | "pro2" -> 
                 let hasSignature = pro2 :?> FplProposition
-                Assert.AreEqual<int64>(41L, hasSignature.SignEndPos.Column) 
+                Assert.AreEqual<int64>(40L, hasSignature.SignEndPos.Column) 
             | "lem1" -> 
                 let hasSignature = lem1 :?> FplLemma
-                Assert.AreEqual<int64>(29L, hasSignature.SignEndPos.Column) 
+                Assert.AreEqual<int64>(28L, hasSignature.SignEndPos.Column) 
             | "lem2" -> 
                 let hasSignature = lem2 :?> FplLemma
-                Assert.AreEqual<int64>(29L, hasSignature.SignEndPos.Column) 
+                Assert.AreEqual<int64>(28L, hasSignature.SignEndPos.Column) 
             | "cor1" -> 
                 let hasSignature = cor1 :?> FplCorollary
-                Assert.AreEqual<int64>(35L, hasSignature.SignEndPos.Column) 
+                Assert.AreEqual<int64>(34L, hasSignature.SignEndPos.Column) 
             | "cor2" -> 
                 let hasSignature = cor2 :?> FplCorollary
-                Assert.AreEqual<int64>(35L, hasSignature.SignEndPos.Column) 
+                Assert.AreEqual<int64>(34L, hasSignature.SignEndPos.Column) 
             | "con1" -> 
                 let hasSignature = con1 :?> FplConjecture
-                Assert.AreEqual<int64>(39L, hasSignature.SignEndPos.Column) 
+                Assert.AreEqual<int64>(38L, hasSignature.SignEndPos.Column) 
             | "con2" -> 
                 let hasSignature = con2 :?> FplConjecture
-                Assert.AreEqual<int64>(39L, hasSignature.SignEndPos.Column) 
+                Assert.AreEqual<int64>(38L, hasSignature.SignEndPos.Column) 
             | "cla1" -> 
                 let hasSignature = cla1 :?> FplClass
-                Assert.AreEqual<int64>(30L, hasSignature.SignEndPos.Column) 
+                Assert.AreEqual<int64>(29L, hasSignature.SignEndPos.Column) 
             | "cla2" -> 
                 let hasSignature = cla2 :?> FplClass
-                Assert.AreEqual<int64>(30L, hasSignature.SignEndPos.Column) 
+                Assert.AreEqual<int64>(29L, hasSignature.SignEndPos.Column) 
             | "pre1" -> 
                 let hasSignature = pre1 :?> FplPredicate
-                Assert.AreEqual<int64>(38L, hasSignature.SignEndPos.Column) 
+                Assert.AreEqual<int64>(37L, hasSignature.SignEndPos.Column) 
             | "pre2" -> 
                 let hasSignature = pre2 :?> FplPredicate
-                Assert.AreEqual<int64>(38L, hasSignature.SignEndPos.Column) 
+                Assert.AreEqual<int64>(37L, hasSignature.SignEndPos.Column) 
             | "fun1" -> 
                 let hasSignature = fun1 :?> FplFunctionalTerm
-                Assert.AreEqual<int64>(48L, hasSignature.SignEndPos.Column) 
+                Assert.AreEqual<int64>(47L, hasSignature.SignEndPos.Column) 
             | "fun2" -> 
                 let hasSignature = fun2 :?> FplFunctionalTerm
-                Assert.AreEqual<int64>(48L, hasSignature.SignEndPos.Column) 
+                Assert.AreEqual<int64>(47L, hasSignature.SignEndPos.Column) 
             | "fun3" ->     
                 let hasSignature = fun3 :?> FplFunctionalTerm
-                Assert.AreEqual<int64>(48L, hasSignature.SignEndPos.Column) 
+                Assert.AreEqual<int64>(47L, hasSignature.SignEndPos.Column) 
             | "fun4" -> 
                 let hasSignature = fun4 :?> FplFunctionalTerm
-                Assert.AreEqual<int64>(48L, hasSignature.SignEndPos.Column) 
+                Assert.AreEqual<int64>(47L, hasSignature.SignEndPos.Column) 
             | "fun5" -> 
                 let hasSignature = fun5 :?> FplFunctionalTerm
-                Assert.AreEqual<int64>(55L, hasSignature.SignEndPos.Column) 
+                Assert.AreEqual<int64>(54L, hasSignature.SignEndPos.Column) 
             | "fun6" -> 
                 let hasSignature = fun6 :?> FplFunctionalTerm
-                Assert.AreEqual<int64>(55L, hasSignature.SignEndPos.Column) 
+                Assert.AreEqual<int64>(54L, hasSignature.SignEndPos.Column) 
             | "fun7" -> 
                 let hasSignature = fun7 :?> FplFunctionalTerm
-                Assert.AreEqual<int64>(55L, hasSignature.SignEndPos.Column) 
+                Assert.AreEqual<int64>(54L, hasSignature.SignEndPos.Column) 
             | "fun8" -> 
                 let hasSignature = fun8 :?> FplFunctionalTerm
-                Assert.AreEqual<int64>(48L, hasSignature.SignEndPos.Column) 
+                Assert.AreEqual<int64>(47L, hasSignature.SignEndPos.Column) 
             | "fun9" -> 
                 let hasSignature = fun9 :?> FplFunctionalTerm
-                Assert.AreEqual<int64>(48L, hasSignature.SignEndPos.Column) 
+                Assert.AreEqual<int64>(47L, hasSignature.SignEndPos.Column) 
             | "prf1" -> 
                 let hasSignature = prf1 :?> FplProof
-                Assert.AreEqual<int64>(33L, hasSignature.SignEndPos.Column)
+                Assert.AreEqual<int64>(32L, hasSignature.SignEndPos.Column)
             | "prf2" -> 
                 let hasSignature = prf2 :?> FplProof
-                Assert.AreEqual<int64>(33L, hasSignature.SignEndPos.Column)
+                Assert.AreEqual<int64>(32L, hasSignature.SignEndPos.Column)
             | "loc1" -> 
-                Assert.AreEqual<int64>(24L, loc1.EndPos.Column) 
+                Assert.AreEqual<int64>(23L, loc1.EndPos.Column) 
             | "loc2" -> 
-                Assert.AreEqual<int64>(28L, loc2.EndPos.Column) 
+                Assert.AreEqual<int64>(27L, loc2.EndPos.Column) 
             | _ -> Assert.IsTrue(false, "hier1")
         | _ -> 
             Assert.IsTrue(false, "hier2")
@@ -177,19 +177,19 @@ type TestFplValueScopeNameEndPos() =
             | PrimTheoryL -> Assert.AreEqual<int64>(1L, theory.EndPos.Column)
             | "block" -> 
                 let hasSignature = block :?> FplClass
-                Assert.AreEqual<int64>(22L, hasSignature.SignEndPos.Column)
+                Assert.AreEqual<int64>(21L, hasSignature.SignEndPos.Column)
             | "t1" -> 
                 let hasSignature = t1 :?> FplConstructor
-                Assert.AreEqual<int64>(26L, hasSignature.SignEndPos.Column)
+                Assert.AreEqual<int64>(25L, hasSignature.SignEndPos.Column)
             | "t2" -> 
                 let hasSignature = t2 :?> FplConstructor
-                Assert.AreEqual<int64>(31L, hasSignature.SignEndPos.Column)
+                Assert.AreEqual<int64>(30L, hasSignature.SignEndPos.Column)
             | "t3" -> 
                 let hasSignature = t3 :?> FplConstructor
-                Assert.AreEqual<int64>(32L, hasSignature.SignEndPos.Column)
+                Assert.AreEqual<int64>(31L, hasSignature.SignEndPos.Column)
             | "t4" -> 
                 let hasSignature = t4 :?> FplConstructor
-                Assert.AreEqual<int64>(31L, hasSignature.SignEndPos.Column)
+                Assert.AreEqual<int64>(30L, hasSignature.SignEndPos.Column)
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
@@ -228,64 +228,64 @@ type TestFplValueScopeNameEndPos() =
                 | PrimTheoryL -> Assert.AreEqual<int64>(1L, theory.EndPos.Column)
                 | "thm1" -> 
                     let hasSignature = thm1 :?> FplTheorem
-                    Assert.AreEqual<int64>(33L, hasSignature.SignEndPos.Column)
+                    Assert.AreEqual<int64>(32L, hasSignature.SignEndPos.Column)
                 | "proofThm1" -> 
                     let hasSignature = proofThm1 :?> FplProof
-                    Assert.AreEqual<int64>(33L, hasSignature.SignEndPos.Column)
+                    Assert.AreEqual<int64>(32L, hasSignature.SignEndPos.Column)
                 | "lem1" -> 
                     let hasSignature = lem1 :?> FplLemma
-                    Assert.AreEqual<int64>(29L, hasSignature.SignEndPos.Column)
+                    Assert.AreEqual<int64>(28L, hasSignature.SignEndPos.Column)
                 | "proofLem1" -> 
                     let hasSignature = proofLem1 :?> FplProof
-                    Assert.AreEqual<int64>(31L, hasSignature.SignEndPos.Column)
+                    Assert.AreEqual<int64>(30L, hasSignature.SignEndPos.Column)
                 | "prp1" -> 
                     let hasSignature = prp1 :?> FplProposition
-                    Assert.AreEqual<int64>(41L, hasSignature.SignEndPos.Column)
+                    Assert.AreEqual<int64>(40L, hasSignature.SignEndPos.Column)
                 | "proofPrp1" -> 
                     let hasSignature = proofPrp1 :?> FplProof
-                    Assert.AreEqual<int64>(37L, hasSignature.SignEndPos.Column)
+                    Assert.AreEqual<int64>(36L, hasSignature.SignEndPos.Column)
                 | "cor1" -> 
                     let hasSignature = cor1 :?> FplCorollary
-                    Assert.AreEqual<int64>(39L, hasSignature.SignEndPos.Column)
+                    Assert.AreEqual<int64>(38L, hasSignature.SignEndPos.Column)
                 | "proofCor1" -> 
                     let hasSignature = proofCor1 :?> FplProof
-                    Assert.AreEqual<int64>(37L, hasSignature.SignEndPos.Column)
+                    Assert.AreEqual<int64>(36L, hasSignature.SignEndPos.Column)
                 | "thm2" -> 
                     let hasSignature = thm2 :?> FplTheorem
-                    Assert.AreEqual<int64>(33L, hasSignature.SignEndPos.Column)
+                    Assert.AreEqual<int64>(32L, hasSignature.SignEndPos.Column)
                 | "corThm2" -> 
                     let hasSignature = corThm2 :?> FplCorollary
-                    Assert.AreEqual<int64>(37L, hasSignature.SignEndPos.Column)
+                    Assert.AreEqual<int64>(36L, hasSignature.SignEndPos.Column)
                 | "lem2" -> 
                     let hasSignature = lem2 :?> FplLemma
-                    Assert.AreEqual<int64>(29L, hasSignature.SignEndPos.Column)
+                    Assert.AreEqual<int64>(28L, hasSignature.SignEndPos.Column)
                 | "corLem2" -> 
                     let hasSignature = corLem2 :?> FplCorollary
-                    Assert.AreEqual<int64>(35L, hasSignature.SignEndPos.Column)
+                    Assert.AreEqual<int64>(34L, hasSignature.SignEndPos.Column)
                 | "prp2" -> 
                     let hasSignature = prp2 :?> FplProposition
-                    Assert.AreEqual<int64>(41L, hasSignature.SignEndPos.Column)
+                    Assert.AreEqual<int64>(40L, hasSignature.SignEndPos.Column)
                 | "corPrp2" -> 
                     let hasSignature = corPrp2 :?> FplCorollary
-                    Assert.AreEqual<int64>(41L, hasSignature.SignEndPos.Column)
+                    Assert.AreEqual<int64>(40L, hasSignature.SignEndPos.Column)
                 | "cor2" -> 
                     let hasSignature = cor2 :?> FplCorollary
-                    Assert.AreEqual<int64>(39L, hasSignature.SignEndPos.Column)
+                    Assert.AreEqual<int64>(38L, hasSignature.SignEndPos.Column)
                 | "corCor2" -> 
                     let hasSignature = corCor2 :?> FplCorollary
-                    Assert.AreEqual<int64>(41L, hasSignature.SignEndPos.Column)
+                    Assert.AreEqual<int64>(40L, hasSignature.SignEndPos.Column)
                 | "con1" -> 
                     let hasSignature = con1 :?> FplConjecture
-                    Assert.AreEqual<int64>(38L, hasSignature.SignEndPos.Column)
+                    Assert.AreEqual<int64>(37L, hasSignature.SignEndPos.Column)
                 | "corCon1" -> 
                     let hasSignature = corCon1 :?> FplCorollary
-                    Assert.AreEqual<int64>(39L, hasSignature.SignEndPos.Column)
+                    Assert.AreEqual<int64>(38L, hasSignature.SignEndPos.Column)
                 | "axi1" -> 
                     let hasSignature = axi1 :?> FplAxiom
-                    Assert.AreEqual<int64>(28L, hasSignature.SignEndPos.Column)
+                    Assert.AreEqual<int64>(27L, hasSignature.SignEndPos.Column)
                 | "corAxi1"  -> 
                     let hasSignature = corAxi1 :?> FplCorollary
-                    Assert.AreEqual<int64>(34L, hasSignature.SignEndPos.Column) 
+                    Assert.AreEqual<int64>(33L, hasSignature.SignEndPos.Column) 
                 | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
@@ -311,28 +311,28 @@ type TestFplValueScopeNameEndPos() =
             | PrimTheoryL -> Assert.AreEqual<int64>(1L, theory.EndPos.Column)
             | "block" -> 
                 let hasSignature = block :?> FplPredicate
-                Assert.AreEqual<int64>(26L, hasSignature.SignEndPos.Column)
+                Assert.AreEqual<int64>(25L, hasSignature.SignEndPos.Column)
             | "t1" -> 
                 let hasSignature = t1 :?> FplMandatoryPredicate
-                Assert.AreEqual<int64>(27L, hasSignature.SignEndPos.Column)
+                Assert.AreEqual<int64>(26L, hasSignature.SignEndPos.Column)
             | "t3" -> 
                 let hasSignature = t3 :?> FplMandatoryFunctionalTerm
-                Assert.AreEqual<int64>(32L, hasSignature.SignEndPos.Column)
+                Assert.AreEqual<int64>(31L, hasSignature.SignEndPos.Column)
             | "t5" -> 
                 let hasSignature = t5 :?> FplMandatoryFunctionalTerm
-                Assert.AreEqual<int64>(32L, hasSignature.SignEndPos.Column)
+                Assert.AreEqual<int64>(31L, hasSignature.SignEndPos.Column)
             | "t7" -> 
                 let hasSignature = t7 :?> FplMandatoryFunctionalTerm
-                Assert.AreEqual<int64>(33L, hasSignature.SignEndPos.Column)
+                Assert.AreEqual<int64>(32L, hasSignature.SignEndPos.Column)
             | "t9" -> 
                 let hasSignature = t9 :?> FplMandatoryFunctionalTerm
-                Assert.AreEqual<int64>(32L, hasSignature.SignEndPos.Column)
+                Assert.AreEqual<int64>(31L, hasSignature.SignEndPos.Column)
             | "t11" -> 
                 let hasSignature = t11 :?> FplMandatoryFunctionalTerm
-                Assert.AreEqual<int64>(33L, hasSignature.SignEndPos.Column)
+                Assert.AreEqual<int64>(32L, hasSignature.SignEndPos.Column)
             | "t13" -> 
                 let hasSignature = t13 :?> FplMandatoryFunctionalTerm
-                Assert.AreEqual<int64>(34L, hasSignature.SignEndPos.Column)
+                Assert.AreEqual<int64>(33L, hasSignature.SignEndPos.Column)
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
@@ -375,34 +375,34 @@ type TestFplValueScopeNameEndPos() =
             match var with
             | "r" -> Assert.AreEqual<int64>(1L, r.EndPos.Column)
             | PrimTheoryL -> Assert.AreEqual<int64>(1L, theory.EndPos.Column)
-            | "block" -> Assert.AreEqual<int64>(10L, block.EndPos.Column); 
-            | "x" -> Assert.AreEqual<int64>(18L, x.EndPos.Column)
-            | "y" -> Assert.AreEqual<int64>(20L, y.EndPos.Column)
-            | "s" -> Assert.AreEqual<int64>(18L, s.EndPos.Column)
-            | "xu" -> Assert.AreEqual<int64>(27L, xu.EndPos.Column)
-            | "xv" -> Assert.AreEqual<int64>(29L, xv.EndPos.Column)
-            | "xw" -> Assert.AreEqual<int64>(31L, xw.EndPos.Column)
-            | "yu" -> Assert.AreEqual<int64>(27L, yu.EndPos.Column)
-            | "yv" -> Assert.AreEqual<int64>(29L, yv.EndPos.Column)
-            | "yw" -> Assert.AreEqual<int64>(31L, yw.EndPos.Column)
-            | "xua" -> Assert.AreEqual<int64>(38L, xua.EndPos.Column)
-            | "xub" -> Assert.AreEqual<int64>(40L, xub.EndPos.Column)
-            | "xuc" -> Assert.AreEqual<int64>(42L, xuc.EndPos.Column)
-            | "xva" -> Assert.AreEqual<int64>(38L, xva.EndPos.Column)
-            | "xvb" -> Assert.AreEqual<int64>(40L, xvb.EndPos.Column)
-            | "xvc" -> Assert.AreEqual<int64>(42L, xvc.EndPos.Column)
-            | "xwa" -> Assert.AreEqual<int64>(38L, xwa.EndPos.Column)
-            | "xwb" -> Assert.AreEqual<int64>(40L, xwb.EndPos.Column)
-            | "xwc" -> Assert.AreEqual<int64>(42L, xwc.EndPos.Column)
-            | "yua" -> Assert.AreEqual<int64>(38L, yua.EndPos.Column)
-            | "yub" -> Assert.AreEqual<int64>(40L, yub.EndPos.Column)
-            | "yuc" -> Assert.AreEqual<int64>(42L, yuc.EndPos.Column)
-            | "yva" -> Assert.AreEqual<int64>(38L, yva.EndPos.Column)
-            | "yvb" -> Assert.AreEqual<int64>(40L, yvb.EndPos.Column)
-            | "yvc" -> Assert.AreEqual<int64>(42L, yvc.EndPos.Column)
-            | "ywa" -> Assert.AreEqual<int64>(38L, ywa.EndPos.Column)
-            | "ywb" -> Assert.AreEqual<int64>(40L, ywb.EndPos.Column)
-            | "ywc" -> Assert.AreEqual<int64>(42L, ywc.EndPos.Column)
+            | "block" -> Assert.AreEqual<int64>(9L, block.EndPos.Column); 
+            | "x" -> Assert.AreEqual<int64>(17L, x.EndPos.Column)
+            | "y" -> Assert.AreEqual<int64>(19L, y.EndPos.Column)
+            | "s" -> Assert.AreEqual<int64>(17L, s.EndPos.Column)
+            | "xu" -> Assert.AreEqual<int64>(26L, xu.EndPos.Column)
+            | "xv" -> Assert.AreEqual<int64>(28L, xv.EndPos.Column)
+            | "xw" -> Assert.AreEqual<int64>(30L, xw.EndPos.Column)
+            | "yu" -> Assert.AreEqual<int64>(26L, yu.EndPos.Column)
+            | "yv" -> Assert.AreEqual<int64>(28L, yv.EndPos.Column)
+            | "yw" -> Assert.AreEqual<int64>(30L, yw.EndPos.Column)
+            | "xua" -> Assert.AreEqual<int64>(37L, xua.EndPos.Column)
+            | "xub" -> Assert.AreEqual<int64>(39L, xub.EndPos.Column)
+            | "xuc" -> Assert.AreEqual<int64>(41L, xuc.EndPos.Column)
+            | "xva" -> Assert.AreEqual<int64>(37L, xva.EndPos.Column)
+            | "xvb" -> Assert.AreEqual<int64>(39L, xvb.EndPos.Column)
+            | "xvc" -> Assert.AreEqual<int64>(41L, xvc.EndPos.Column)
+            | "xwa" -> Assert.AreEqual<int64>(37L, xwa.EndPos.Column)
+            | "xwb" -> Assert.AreEqual<int64>(39L, xwb.EndPos.Column)
+            | "xwc" -> Assert.AreEqual<int64>(41L, xwc.EndPos.Column)
+            | "yua" -> Assert.AreEqual<int64>(37L, yua.EndPos.Column)
+            | "yub" -> Assert.AreEqual<int64>(39L, yub.EndPos.Column)
+            | "yuc" -> Assert.AreEqual<int64>(41L, yuc.EndPos.Column)
+            | "yva" -> Assert.AreEqual<int64>(37L, yva.EndPos.Column)
+            | "yvb" -> Assert.AreEqual<int64>(39L, yvb.EndPos.Column)
+            | "yvc" -> Assert.AreEqual<int64>(41L, yvc.EndPos.Column)
+            | "ywa" -> Assert.AreEqual<int64>(37L, ywa.EndPos.Column)
+            | "ywb" -> Assert.AreEqual<int64>(39L, ywb.EndPos.Column)
+            | "ywc" -> Assert.AreEqual<int64>(41L, ywc.EndPos.Column)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
@@ -444,33 +444,33 @@ type TestFplValueScopeNameEndPos() =
             match var with
             | "r" -> Assert.AreEqual<int64>(1L, r.EndPos.Column)
             | PrimTheoryL -> Assert.AreEqual<int64>(1L, theory.EndPos.Column)
-            | "block" -> Assert.AreEqual<int64>(73L, block.EndPos.Column); 
-            | "x" -> Assert.AreEqual<int64>(19L, x.EndPos.Column)
-            | "y" -> Assert.AreEqual<int64>(21L, y.EndPos.Column)
-            | "xu" -> Assert.AreEqual<int64>(29L, xu.EndPos.Column)
-            | "xv" -> Assert.AreEqual<int64>(31L, xv.EndPos.Column)
-            | "xw" -> Assert.AreEqual<int64>(33L, xw.EndPos.Column)
-            | "yu" -> Assert.AreEqual<int64>(29L, yu.EndPos.Column)
-            | "yv" -> Assert.AreEqual<int64>(31L, yv.EndPos.Column)
-            | "yw" -> Assert.AreEqual<int64>(33L, yw.EndPos.Column)
-            | "xua" -> Assert.AreEqual<int64>(40L, xua.EndPos.Column)
-            | "xub" -> Assert.AreEqual<int64>(42L, xub.EndPos.Column)
-            | "xuc" -> Assert.AreEqual<int64>(44L, xuc.EndPos.Column)
-            | "xva" -> Assert.AreEqual<int64>(40L, xva.EndPos.Column)
-            | "xvb" -> Assert.AreEqual<int64>(42L, xvb.EndPos.Column)
-            | "xvc" -> Assert.AreEqual<int64>(44L, xvc.EndPos.Column)
-            | "xwa" -> Assert.AreEqual<int64>(40L, xwa.EndPos.Column)
-            | "xwb" -> Assert.AreEqual<int64>(42L, xwb.EndPos.Column)
-            | "xwc" -> Assert.AreEqual<int64>(44L, xwc.EndPos.Column)
-            | "yua" -> Assert.AreEqual<int64>(40L, yua.EndPos.Column)
-            | "yub" -> Assert.AreEqual<int64>(42L, yub.EndPos.Column)
-            | "yuc" -> Assert.AreEqual<int64>(44L, yuc.EndPos.Column)
-            | "yva" -> Assert.AreEqual<int64>(40L, yva.EndPos.Column)
-            | "yvb" -> Assert.AreEqual<int64>(42L, yvb.EndPos.Column)
-            | "yvc" -> Assert.AreEqual<int64>(44L, yvc.EndPos.Column)
-            | "ywa" -> Assert.AreEqual<int64>(40L, ywa.EndPos.Column)
-            | "ywb" -> Assert.AreEqual<int64>(42L, ywb.EndPos.Column)
-            | "ywc" -> Assert.AreEqual<int64>(44L, ywc.EndPos.Column)
+            | "block" -> Assert.AreEqual<int64>(72L, block.EndPos.Column); 
+            | "x" -> Assert.AreEqual<int64>(18L, x.EndPos.Column)
+            | "y" -> Assert.AreEqual<int64>(20L, y.EndPos.Column)
+            | "xu" -> Assert.AreEqual<int64>(28L, xu.EndPos.Column)
+            | "xv" -> Assert.AreEqual<int64>(30L, xv.EndPos.Column)
+            | "xw" -> Assert.AreEqual<int64>(32L, xw.EndPos.Column)
+            | "yu" -> Assert.AreEqual<int64>(28L, yu.EndPos.Column)
+            | "yv" -> Assert.AreEqual<int64>(30L, yv.EndPos.Column)
+            | "yw" -> Assert.AreEqual<int64>(32L, yw.EndPos.Column)
+            | "xua" -> Assert.AreEqual<int64>(39L, xua.EndPos.Column)
+            | "xub" -> Assert.AreEqual<int64>(41L, xub.EndPos.Column)
+            | "xuc" -> Assert.AreEqual<int64>(43L, xuc.EndPos.Column)
+            | "xva" -> Assert.AreEqual<int64>(39L, xva.EndPos.Column)
+            | "xvb" -> Assert.AreEqual<int64>(41L, xvb.EndPos.Column)
+            | "xvc" -> Assert.AreEqual<int64>(43L, xvc.EndPos.Column)
+            | "xwa" -> Assert.AreEqual<int64>(39L, xwa.EndPos.Column)
+            | "xwb" -> Assert.AreEqual<int64>(41L, xwb.EndPos.Column)
+            | "xwc" -> Assert.AreEqual<int64>(43L, xwc.EndPos.Column)
+            | "yua" -> Assert.AreEqual<int64>(39L, yua.EndPos.Column)
+            | "yub" -> Assert.AreEqual<int64>(41L, yub.EndPos.Column)
+            | "yuc" -> Assert.AreEqual<int64>(43L, yuc.EndPos.Column)
+            | "yva" -> Assert.AreEqual<int64>(39L, yva.EndPos.Column)
+            | "yvb" -> Assert.AreEqual<int64>(41L, yvb.EndPos.Column)
+            | "yvc" -> Assert.AreEqual<int64>(43L, yvc.EndPos.Column)
+            | "ywa" -> Assert.AreEqual<int64>(39L, ywa.EndPos.Column)
+            | "ywb" -> Assert.AreEqual<int64>(41L, ywb.EndPos.Column)
+            | "ywc" -> Assert.AreEqual<int64>(43L, ywc.EndPos.Column)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
@@ -512,33 +512,33 @@ type TestFplValueScopeNameEndPos() =
             match var with
             | "r" -> Assert.AreEqual<int64>(1L, r.EndPos.Column)
             | PrimTheoryL -> Assert.AreEqual<int64>(1L, theory.EndPos.Column)
-            | "block" -> Assert.AreEqual<int64>(19L, block.EndPos.Column); 
-            | "x" -> Assert.AreEqual<int64>(33L, x.EndPos.Column)
-            | "y" -> Assert.AreEqual<int64>(35L, y.EndPos.Column)
-            | "xu" -> Assert.AreEqual<int64>(42L, xu.EndPos.Column)
-            | "xv" -> Assert.AreEqual<int64>(44L, xv.EndPos.Column)
-            | "xw" -> Assert.AreEqual<int64>(46L, xw.EndPos.Column)
-            | "yu" -> Assert.AreEqual<int64>(42L, yu.EndPos.Column)
-            | "yv" -> Assert.AreEqual<int64>(44L, yv.EndPos.Column)
-            | "yw" -> Assert.AreEqual<int64>(46L, yw.EndPos.Column)
-            | "xua" -> Assert.AreEqual<int64>(53L, xua.EndPos.Column)
-            | "xub" -> Assert.AreEqual<int64>(55L, xub.EndPos.Column)
-            | "xuc" -> Assert.AreEqual<int64>(57L, xuc.EndPos.Column)
-            | "xva" -> Assert.AreEqual<int64>(53L, xva.EndPos.Column)
-            | "xvb" -> Assert.AreEqual<int64>(55L, xvb.EndPos.Column)
-            | "xvc" -> Assert.AreEqual<int64>(57L, xvc.EndPos.Column)
-            | "xwa" -> Assert.AreEqual<int64>(53L, xwa.EndPos.Column)
-            | "xwb" -> Assert.AreEqual<int64>(55L, xwb.EndPos.Column)
-            | "xwc" -> Assert.AreEqual<int64>(57L, xwc.EndPos.Column)
-            | "yua" -> Assert.AreEqual<int64>(53L, yua.EndPos.Column)
-            | "yub" -> Assert.AreEqual<int64>(55L, yub.EndPos.Column)
-            | "yuc" -> Assert.AreEqual<int64>(57L, yuc.EndPos.Column)
-            | "yva" -> Assert.AreEqual<int64>(53L, yva.EndPos.Column)
-            | "yvb" -> Assert.AreEqual<int64>(55L, yvb.EndPos.Column)
-            | "yvc" -> Assert.AreEqual<int64>(57L, yvc.EndPos.Column)
-            | "ywa" -> Assert.AreEqual<int64>(53L, ywa.EndPos.Column)
-            | "ywb" -> Assert.AreEqual<int64>(55L, ywb.EndPos.Column)
-            | "ywc" -> Assert.AreEqual<int64>(57L, ywc.EndPos.Column)
+            | "block" -> Assert.AreEqual<int64>(18L, block.EndPos.Column); 
+            | "x" -> Assert.AreEqual<int64>(32L, x.EndPos.Column)
+            | "y" -> Assert.AreEqual<int64>(34L, y.EndPos.Column)
+            | "xu" -> Assert.AreEqual<int64>(41L, xu.EndPos.Column)
+            | "xv" -> Assert.AreEqual<int64>(43L, xv.EndPos.Column)
+            | "xw" -> Assert.AreEqual<int64>(45L, xw.EndPos.Column)
+            | "yu" -> Assert.AreEqual<int64>(41L, yu.EndPos.Column)
+            | "yv" -> Assert.AreEqual<int64>(43L, yv.EndPos.Column)
+            | "yw" -> Assert.AreEqual<int64>(45L, yw.EndPos.Column)
+            | "xua" -> Assert.AreEqual<int64>(52L, xua.EndPos.Column)
+            | "xub" -> Assert.AreEqual<int64>(54L, xub.EndPos.Column)
+            | "xuc" -> Assert.AreEqual<int64>(56L, xuc.EndPos.Column)
+            | "xva" -> Assert.AreEqual<int64>(52L, xva.EndPos.Column)
+            | "xvb" -> Assert.AreEqual<int64>(54L, xvb.EndPos.Column)
+            | "xvc" -> Assert.AreEqual<int64>(56L, xvc.EndPos.Column)
+            | "xwa" -> Assert.AreEqual<int64>(52L, xwa.EndPos.Column)
+            | "xwb" -> Assert.AreEqual<int64>(54L, xwb.EndPos.Column)
+            | "xwc" -> Assert.AreEqual<int64>(56L, xwc.EndPos.Column)
+            | "yua" -> Assert.AreEqual<int64>(52L, yua.EndPos.Column)
+            | "yub" -> Assert.AreEqual<int64>(54L, yub.EndPos.Column)
+            | "yuc" -> Assert.AreEqual<int64>(56L, yuc.EndPos.Column)
+            | "yva" -> Assert.AreEqual<int64>(52L, yva.EndPos.Column)
+            | "yvb" -> Assert.AreEqual<int64>(54L, yvb.EndPos.Column)
+            | "yvc" -> Assert.AreEqual<int64>(56L, yvc.EndPos.Column)
+            | "ywa" -> Assert.AreEqual<int64>(52L, ywa.EndPos.Column)
+            | "ywb" -> Assert.AreEqual<int64>(54L, ywb.EndPos.Column)
+            | "ywc" -> Assert.AreEqual<int64>(56L, ywc.EndPos.Column)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
@@ -581,33 +581,33 @@ type TestFplValueScopeNameEndPos() =
             match var with
             | "r" -> Assert.AreEqual<int64>(1L, r.EndPos.Column)
             | PrimTheoryL -> Assert.AreEqual<int64>(1L, theory.EndPos.Column)
-            | "block" -> Assert.AreEqual<int64>(19L, block.EndPos.Column); 
-            | "x" -> Assert.AreEqual<int64>(33L, x.EndPos.Column)
-            | "y" -> Assert.AreEqual<int64>(35L, y.EndPos.Column)
-            | "xu" -> Assert.AreEqual<int64>(43L, xu.EndPos.Column)
-            | "xv" -> Assert.AreEqual<int64>(45L, xv.EndPos.Column)
-            | "xw" -> Assert.AreEqual<int64>(47L, xw.EndPos.Column)
-            | "yu" -> Assert.AreEqual<int64>(43L, yu.EndPos.Column)
-            | "yv" -> Assert.AreEqual<int64>(45L, yv.EndPos.Column)
-            | "yw" -> Assert.AreEqual<int64>(47L, yw.EndPos.Column)
-            | "xua" -> Assert.AreEqual<int64>(54L, xua.EndPos.Column)
-            | "xub" -> Assert.AreEqual<int64>(56L, xub.EndPos.Column)
-            | "xuc" -> Assert.AreEqual<int64>(58L, xuc.EndPos.Column)
-            | "xva" -> Assert.AreEqual<int64>(54L, xva.EndPos.Column)
-            | "xvb" -> Assert.AreEqual<int64>(56L, xvb.EndPos.Column)
-            | "xvc" -> Assert.AreEqual<int64>(58L, xvc.EndPos.Column)
-            | "xwa" -> Assert.AreEqual<int64>(54L, xwa.EndPos.Column)
-            | "xwb" -> Assert.AreEqual<int64>(56L, xwb.EndPos.Column)
-            | "xwc" -> Assert.AreEqual<int64>(58L, xwc.EndPos.Column)
-            | "yua" -> Assert.AreEqual<int64>(54L, yua.EndPos.Column)
-            | "yub" -> Assert.AreEqual<int64>(56L, yub.EndPos.Column)
-            | "yuc" -> Assert.AreEqual<int64>(58L, yuc.EndPos.Column)
-            | "yva" -> Assert.AreEqual<int64>(54L, yva.EndPos.Column)
-            | "yvb" -> Assert.AreEqual<int64>(56L, yvb.EndPos.Column)
-            | "yvc" -> Assert.AreEqual<int64>(58L, yvc.EndPos.Column)
-            | "ywa" -> Assert.AreEqual<int64>(54L, ywa.EndPos.Column)
-            | "ywb" -> Assert.AreEqual<int64>(56L, ywb.EndPos.Column)
-            | "ywc" -> Assert.AreEqual<int64>(58L, ywc.EndPos.Column)
+            | "block" -> Assert.AreEqual<int64>(18L, block.EndPos.Column); 
+            | "x" -> Assert.AreEqual<int64>(32L, x.EndPos.Column)
+            | "y" -> Assert.AreEqual<int64>(34L, y.EndPos.Column)
+            | "xu" -> Assert.AreEqual<int64>(42L, xu.EndPos.Column)
+            | "xv" -> Assert.AreEqual<int64>(44L, xv.EndPos.Column)
+            | "xw" -> Assert.AreEqual<int64>(46L, xw.EndPos.Column)
+            | "yu" -> Assert.AreEqual<int64>(42L, yu.EndPos.Column)
+            | "yv" -> Assert.AreEqual<int64>(44L, yv.EndPos.Column)
+            | "yw" -> Assert.AreEqual<int64>(46L, yw.EndPos.Column)
+            | "xua" -> Assert.AreEqual<int64>(53L, xua.EndPos.Column)
+            | "xub" -> Assert.AreEqual<int64>(55L, xub.EndPos.Column)
+            | "xuc" -> Assert.AreEqual<int64>(57L, xuc.EndPos.Column)
+            | "xva" -> Assert.AreEqual<int64>(53L, xva.EndPos.Column)
+            | "xvb" -> Assert.AreEqual<int64>(55L, xvb.EndPos.Column)
+            | "xvc" -> Assert.AreEqual<int64>(57L, xvc.EndPos.Column)
+            | "xwa" -> Assert.AreEqual<int64>(53L, xwa.EndPos.Column)
+            | "xwb" -> Assert.AreEqual<int64>(55L, xwb.EndPos.Column)
+            | "xwc" -> Assert.AreEqual<int64>(57L, xwc.EndPos.Column)
+            | "yua" -> Assert.AreEqual<int64>(53L, yua.EndPos.Column)
+            | "yub" -> Assert.AreEqual<int64>(55L, yub.EndPos.Column)
+            | "yuc" -> Assert.AreEqual<int64>(57L, yuc.EndPos.Column)
+            | "yva" -> Assert.AreEqual<int64>(53L, yva.EndPos.Column)
+            | "yvb" -> Assert.AreEqual<int64>(55L, yvb.EndPos.Column)
+            | "yvc" -> Assert.AreEqual<int64>(57L, yvc.EndPos.Column)
+            | "ywa" -> Assert.AreEqual<int64>(53L, ywa.EndPos.Column)
+            | "ywb" -> Assert.AreEqual<int64>(55L, ywb.EndPos.Column)
+            | "ywc" -> Assert.AreEqual<int64>(57L, ywc.EndPos.Column)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
@@ -685,66 +685,66 @@ type TestFplValueScopeNameEndPos() =
         let base1 = pr1.ArgList[0]
 
         match var with
-        | "base1" -> Assert.AreEqual<int64>((int64)22, base1.EndPos.Column)
-        | "base2" -> Assert.AreEqual<int64>((int64)23, base1.EndPos.Column)
-        | "base3" -> Assert.AreEqual<int64>((int64)23, base1.EndPos.Column)
-        | "base4" -> Assert.AreEqual<int64>((int64)19, base1.EndPos.Column)
-        | "base5" -> Assert.AreEqual<int64>((int64)28, base1.EndPos.Column)
-        | "base6" -> Assert.AreEqual<int64>((int64)19, base1.EndPos.Column)
-        | "base7" -> Assert.AreEqual<int64>((int64)26, base1.EndPos.Column)
-        | "base8" -> Assert.AreEqual<int64>((int64)24, base1.EndPos.Column)
-        | "base9" -> Assert.AreEqual<int64>((int64)25, base1.EndPos.Column)
-        | "base10" -> Assert.AreEqual<int64>((int64)21, base1.EndPos.Column)
-        | "base11" -> Assert.AreEqual<int64>((int64)18, base1.EndPos.Column)
-        | "base12" -> Assert.AreEqual<int64>((int64)24, base1.EndPos.Column)
-        | "base13" -> Assert.AreEqual<int64>((int64)19, base1.EndPos.Column)
-        | "base11a" -> Assert.AreEqual<int64>((int64)20, base1.EndPos.Column)
-        | "base12a" -> Assert.AreEqual<int64>((int64)23, base1.EndPos.Column)
-        | "base10b" -> Assert.AreEqual<int64>((int64)23, base1.EndPos.Column)
-        | "base11b" -> Assert.AreEqual<int64>((int64)20, base1.EndPos.Column)
-        | "base12b" -> Assert.AreEqual<int64>((int64)23, base1.EndPos.Column)
-        | "base13b" -> Assert.AreEqual<int64>((int64)21, base1.EndPos.Column)
-        | "base10c" -> Assert.AreEqual<int64>((int64)27, base1.EndPos.Column)
-        | "base11c" -> Assert.AreEqual<int64>((int64)24, base1.EndPos.Column)
-        | "base12c" -> Assert.AreEqual<int64>((int64)27, base1.EndPos.Column)
-        | "base13c" -> Assert.AreEqual<int64>((int64)25, base1.EndPos.Column)
-        | "base10d" -> Assert.AreEqual<int64>((int64)27, base1.EndPos.Column)
-        | "base11d" -> Assert.AreEqual<int64>((int64)24, base1.EndPos.Column)
-        | "base12d" -> Assert.AreEqual<int64>((int64)27, base1.EndPos.Column)
-        | "base13d" -> Assert.AreEqual<int64>((int64)24, base1.EndPos.Column)
-        | "base10e" -> Assert.AreEqual<int64>((int64)40, base1.EndPos.Column)
-        | "base11e" -> Assert.AreEqual<int64>((int64)32, base1.EndPos.Column)
-        | "base12e" -> Assert.AreEqual<int64>((int64)36, base1.EndPos.Column)
-        | "base13e" -> Assert.AreEqual<int64>((int64)33, base1.EndPos.Column)
-        | "base10f" -> Assert.AreEqual<int64>((int64)35, base1.EndPos.Column)
-        | "base11f" -> Assert.AreEqual<int64>((int64)32, base1.EndPos.Column)
-        | "base12f" -> Assert.AreEqual<int64>((int64)38, base1.EndPos.Column)
-        | "base13f" -> Assert.AreEqual<int64>((int64)32, base1.EndPos.Column)
-        | "base14" -> Assert.AreEqual<int64>((int64)18, base1.EndPos.Column)
-        | "base15" -> Assert.AreEqual<int64>((int64)19, base1.EndPos.Column)
-        | "base15a" -> Assert.AreEqual<int64>((int64)20, base1.EndPos.Column)
-        | "base15b" -> Assert.AreEqual<int64>((int64)21, base1.EndPos.Column)
-        | "base16" -> Assert.AreEqual<int64>((int64)34, base1.EndPos.Column)
-        | "base17" -> Assert.AreEqual<int64>((int64)36, base1.EndPos.Column)
-        | "base18" -> Assert.AreEqual<int64>((int64)62, base1.EndPos.Column)
-        | "base19" -> Assert.AreEqual<int64>((int64)45, base1.EndPos.Column)
-        | "base20" -> Assert.AreEqual<int64>((int64)34, base1.EndPos.Column)
-        | "base21" -> Assert.AreEqual<int64>((int64)35, base1.EndPos.Column)
-        | "base21a" -> Assert.AreEqual<int64>((int64)23, base1.EndPos.Column)
-        | "base21b" -> Assert.AreEqual<int64>((int64)25, base1.EndPos.Column)
-        | "base22" -> Assert.AreEqual<int64>((int64)35, base1.EndPos.Column)
-        | "base23" -> Assert.AreEqual<int64>((int64)33, base1.EndPos.Column)
-        | "base24" -> Assert.AreEqual<int64>((int64)27, base1.EndPos.Column)
-        | "base25" -> Assert.AreEqual<int64>((int64)28, base1.EndPos.Column)
-        | "base26" -> Assert.AreEqual<int64>((int64)28, base1.EndPos.Column)
-        | "base27" -> Assert.AreEqual<int64>((int64)20, base1.EndPos.Column)
-        | "base28" -> Assert.AreEqual<int64>((int64)27, base1.EndPos.Column)
-        | "base29" -> Assert.AreEqual<int64>((int64)28, base1.EndPos.Column)
-        | "base30" -> Assert.AreEqual<int64>((int64)25, base1.EndPos.Column)
-        | "base31" -> Assert.AreEqual<int64>((int64)41, base1.EndPos.Column)
-        | "base32" -> Assert.AreEqual<int64>((int64)38, base1.EndPos.Column)
-        | "base33" -> Assert.AreEqual<int64>((int64)42, base1.EndPos.Column)
-        | "base34" -> Assert.AreEqual<int64>((int64)27, base1.EndPos.Column)
+        | "base1" -> Assert.AreEqual<int64>((int64)21, base1.EndPos.Column)
+        | "base2" -> Assert.AreEqual<int64>((int64)22, base1.EndPos.Column)
+        | "base3" -> Assert.AreEqual<int64>((int64)22, base1.EndPos.Column)
+        | "base4" -> Assert.AreEqual<int64>((int64)18, base1.EndPos.Column)
+        | "base5" -> Assert.AreEqual<int64>((int64)27, base1.EndPos.Column)
+        | "base6" -> Assert.AreEqual<int64>((int64)18, base1.EndPos.Column)
+        | "base7" -> Assert.AreEqual<int64>((int64)25, base1.EndPos.Column)
+        | "base8" -> Assert.AreEqual<int64>((int64)23, base1.EndPos.Column)
+        | "base9" -> Assert.AreEqual<int64>((int64)24, base1.EndPos.Column)
+        | "base10" -> Assert.AreEqual<int64>((int64)20, base1.EndPos.Column)
+        | "base11" -> Assert.AreEqual<int64>((int64)17, base1.EndPos.Column)
+        | "base12" -> Assert.AreEqual<int64>((int64)23, base1.EndPos.Column)
+        | "base13" -> Assert.AreEqual<int64>((int64)18, base1.EndPos.Column)
+        | "base11a" -> Assert.AreEqual<int64>((int64)19, base1.EndPos.Column)
+        | "base12a" -> Assert.AreEqual<int64>((int64)22, base1.EndPos.Column)
+        | "base10b" -> Assert.AreEqual<int64>((int64)22, base1.EndPos.Column)
+        | "base11b" -> Assert.AreEqual<int64>((int64)19, base1.EndPos.Column)
+        | "base12b" -> Assert.AreEqual<int64>((int64)22, base1.EndPos.Column)
+        | "base13b" -> Assert.AreEqual<int64>((int64)20, base1.EndPos.Column)
+        | "base10c" -> Assert.AreEqual<int64>((int64)26, base1.EndPos.Column)
+        | "base11c" -> Assert.AreEqual<int64>((int64)23, base1.EndPos.Column)
+        | "base12c" -> Assert.AreEqual<int64>((int64)26, base1.EndPos.Column)
+        | "base13c" -> Assert.AreEqual<int64>((int64)24, base1.EndPos.Column)
+        | "base10d" -> Assert.AreEqual<int64>((int64)26, base1.EndPos.Column)
+        | "base11d" -> Assert.AreEqual<int64>((int64)23, base1.EndPos.Column)
+        | "base12d" -> Assert.AreEqual<int64>((int64)26, base1.EndPos.Column)
+        | "base13d" -> Assert.AreEqual<int64>((int64)23, base1.EndPos.Column)
+        | "base10e" -> Assert.AreEqual<int64>((int64)39, base1.EndPos.Column)
+        | "base11e" -> Assert.AreEqual<int64>((int64)31, base1.EndPos.Column)
+        | "base12e" -> Assert.AreEqual<int64>((int64)35, base1.EndPos.Column)
+        | "base13e" -> Assert.AreEqual<int64>((int64)32, base1.EndPos.Column)
+        | "base10f" -> Assert.AreEqual<int64>((int64)34, base1.EndPos.Column)
+        | "base11f" -> Assert.AreEqual<int64>((int64)31, base1.EndPos.Column)
+        | "base12f" -> Assert.AreEqual<int64>((int64)37, base1.EndPos.Column)
+        | "base13f" -> Assert.AreEqual<int64>((int64)31, base1.EndPos.Column)
+        | "base14" -> Assert.AreEqual<int64>((int64)17, base1.EndPos.Column)
+        | "base15" -> Assert.AreEqual<int64>((int64)18, base1.EndPos.Column)
+        | "base15a" -> Assert.AreEqual<int64>((int64)19, base1.EndPos.Column)
+        | "base15b" -> Assert.AreEqual<int64>((int64)20, base1.EndPos.Column)
+        | "base16" -> Assert.AreEqual<int64>((int64)33, base1.EndPos.Column)
+        | "base17" -> Assert.AreEqual<int64>((int64)35, base1.EndPos.Column)
+        | "base18" -> Assert.AreEqual<int64>((int64)61, base1.EndPos.Column)
+        | "base19" -> Assert.AreEqual<int64>((int64)44, base1.EndPos.Column)
+        | "base20" -> Assert.AreEqual<int64>((int64)33, base1.EndPos.Column)
+        | "base21" -> Assert.AreEqual<int64>((int64)34, base1.EndPos.Column)
+        | "base21a" -> Assert.AreEqual<int64>((int64)22, base1.EndPos.Column)
+        | "base21b" -> Assert.AreEqual<int64>((int64)24, base1.EndPos.Column)
+        | "base22" -> Assert.AreEqual<int64>((int64)34, base1.EndPos.Column)
+        | "base23" -> Assert.AreEqual<int64>((int64)32, base1.EndPos.Column)
+        | "base24" -> Assert.AreEqual<int64>((int64)26, base1.EndPos.Column)
+        | "base25" -> Assert.AreEqual<int64>((int64)27, base1.EndPos.Column)
+        | "base26" -> Assert.AreEqual<int64>((int64)27, base1.EndPos.Column)
+        | "base27" -> Assert.AreEqual<int64>((int64)19, base1.EndPos.Column)
+        | "base28" -> Assert.AreEqual<int64>((int64)26, base1.EndPos.Column)
+        | "base29" -> Assert.AreEqual<int64>((int64)27, base1.EndPos.Column)
+        | "base30" -> Assert.AreEqual<int64>((int64)24, base1.EndPos.Column)
+        | "base31" -> Assert.AreEqual<int64>((int64)40, base1.EndPos.Column)
+        | "base32" -> Assert.AreEqual<int64>((int64)37, base1.EndPos.Column)
+        | "base33" -> Assert.AreEqual<int64>((int64)41, base1.EndPos.Column)
+        | "base34" -> Assert.AreEqual<int64>((int64)26, base1.EndPos.Column)
         | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
 
@@ -783,17 +783,17 @@ type TestFplValueScopeNameEndPos() =
 
         match var with
         | "base1" -> 
-            Assert.AreEqual<int64>((int64)33, base1.EndPos.Column)
+            Assert.AreEqual<int64>((int64)32, base1.EndPos.Column)
         | "base2" -> 
-            Assert.AreEqual<int64>((int64)54, base1.EndPos.Column)
+            Assert.AreEqual<int64>((int64)53, base1.EndPos.Column)
         | "base3" -> 
-            Assert.AreEqual<int64>((int64)54, base1.EndPos.Column)
+            Assert.AreEqual<int64>((int64)53, base1.EndPos.Column)
         | "base4" -> 
-            Assert.AreEqual<int64>((int64)49, base1.EndPos.Column)
+            Assert.AreEqual<int64>((int64)48, base1.EndPos.Column)
         | "base5" -> 
-            Assert.AreEqual<int64>((int64)68, base1.EndPos.Column)
+            Assert.AreEqual<int64>((int64)67, base1.EndPos.Column)
         | "base6" -> 
-            Assert.AreEqual<int64>((int64)62, base1.EndPos.Column)
+            Assert.AreEqual<int64>((int64)61, base1.EndPos.Column)
         | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
 
@@ -817,13 +817,13 @@ type TestFplValueScopeNameEndPos() =
         let base1 = pr1.ArgList[0]
 
         match var with
-        | "base1" -> Assert.AreEqual<int64>((int64)25, base1.EndPos.Column)
-        | "base2" -> Assert.AreEqual<int64>((int64)32, base1.EndPos.Column)
-        | "base3" -> Assert.AreEqual<int64>((int64)33, base1.EndPos.Column)
-        | "base4" -> Assert.AreEqual<int64>((int64)30, base1.EndPos.Column)
-        | "base5" -> Assert.AreEqual<int64>((int64)28, base1.EndPos.Column)
-        | "base6" -> Assert.AreEqual<int64>((int64)46, base1.EndPos.Column)
-        | "base7" -> Assert.AreEqual<int64>((int64)43, base1.EndPos.Column)
+        | "base1" -> Assert.AreEqual<int64>((int64)24, base1.EndPos.Column)
+        | "base2" -> Assert.AreEqual<int64>((int64)31, base1.EndPos.Column)
+        | "base3" -> Assert.AreEqual<int64>((int64)32, base1.EndPos.Column)
+        | "base4" -> Assert.AreEqual<int64>((int64)29, base1.EndPos.Column)
+        | "base5" -> Assert.AreEqual<int64>((int64)27, base1.EndPos.Column)
+        | "base6" -> Assert.AreEqual<int64>((int64)45, base1.EndPos.Column)
+        | "base7" -> Assert.AreEqual<int64>((int64)42, base1.EndPos.Column)
         | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
 
@@ -856,34 +856,34 @@ type TestFplValueScopeNameEndPos() =
         match var with
         | "base1" -> 
             let hasSignature = base1 :?> FplPredicate
-            Assert.AreEqual<int64>((int64)14, hasSignature.SignEndPos.Column)
+            Assert.AreEqual<int64>((int64)13, hasSignature.SignEndPos.Column)
         | "base2" -> 
             let hasSignature = base1 :?> FplPredicate
-            Assert.AreEqual<int64>((int64)15, hasSignature.SignEndPos.Column)
+            Assert.AreEqual<int64>((int64)14, hasSignature.SignEndPos.Column)
         | "base3" -> 
             let hasSignature = base1 :?> FplPredicate
-            Assert.AreEqual<int64>((int64)15, hasSignature.SignEndPos.Column)
+            Assert.AreEqual<int64>((int64)14, hasSignature.SignEndPos.Column)
         | "base4" -> 
             let hasSignature = base1 :?> FplPredicate
-            Assert.AreEqual<int64>((int64)15, hasSignature.SignEndPos.Column)
+            Assert.AreEqual<int64>((int64)14, hasSignature.SignEndPos.Column)
         | "base5" -> 
             let hasSignature = base1 :?> FplClass
-            Assert.AreEqual<int64>((int64)10, hasSignature.SignEndPos.Column)
+            Assert.AreEqual<int64>((int64)9, hasSignature.SignEndPos.Column)
         | "base5a" -> 
             let hasSignature = base1 :?> FplClass
-            Assert.AreEqual<int64>((int64)10, hasSignature.SignEndPos.Column)
+            Assert.AreEqual<int64>((int64)9, hasSignature.SignEndPos.Column)
         | "base6" -> 
             let hasSignature = base1 :?> FplFunctionalTerm
-            Assert.AreEqual<int64>((int64)19, hasSignature.SignEndPos.Column)
+            Assert.AreEqual<int64>((int64)18, hasSignature.SignEndPos.Column)
         | "base7" -> 
             let hasSignature = base1 :?> FplFunctionalTerm
-            Assert.AreEqual<int64>((int64)20, hasSignature.SignEndPos.Column)
+            Assert.AreEqual<int64>((int64)19, hasSignature.SignEndPos.Column)
         | "base8" -> 
             let hasSignature = base1 :?> FplFunctionalTerm
-            Assert.AreEqual<int64>((int64)21, hasSignature.SignEndPos.Column)
+            Assert.AreEqual<int64>((int64)20, hasSignature.SignEndPos.Column)
         | "base9" -> 
             let hasSignature = base1 :?> FplFunctionalTerm
-            Assert.AreEqual<int64>((int64)20, hasSignature.SignEndPos.Column)
+            Assert.AreEqual<int64>((int64)19, hasSignature.SignEndPos.Column)
         | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
 
@@ -908,16 +908,16 @@ type TestFplValueScopeNameEndPos() =
         let base1 = theory.Scope |> Seq.filter (fun kvp -> kvp.Key.StartsWith("T(")) |> Seq.map (fun kvp -> kvp.Value) |> Seq.toList |> List.head
         let mapping = base1.ArgList[0]
         match var with
-        | "base1" -> Assert.AreEqual<int64>((int64)18, mapping.EndPos.Column)
-        | "base2" -> Assert.AreEqual<int64>((int64)18, mapping.EndPos.Column)
-        | "base3" -> Assert.AreEqual<int64>((int64)19, mapping.EndPos.Column)
-        | "base4" -> Assert.AreEqual<int64>((int64)19, mapping.EndPos.Column)
-        | "base5" -> Assert.AreEqual<int64>((int64)32, mapping.EndPos.Column)
-        | "base6" -> Assert.AreEqual<int64>((int64)26, mapping.EndPos.Column)
-        | "base7" -> Assert.AreEqual<int64>((int64)32, mapping.EndPos.Column)
-        | "base8" -> Assert.AreEqual<int64>((int64)53, mapping.EndPos.Column)
-        | "base9" -> Assert.AreEqual<int64>((int64)41, mapping.EndPos.Column)
-        | "base10" -> Assert.AreEqual<int64>((int64)51, mapping.EndPos.Column)
+        | "base1" -> Assert.AreEqual<int64>((int64)17, mapping.EndPos.Column)
+        | "base2" -> Assert.AreEqual<int64>((int64)17, mapping.EndPos.Column)
+        | "base3" -> Assert.AreEqual<int64>((int64)18, mapping.EndPos.Column)
+        | "base4" -> Assert.AreEqual<int64>((int64)18, mapping.EndPos.Column)
+        | "base5" -> Assert.AreEqual<int64>((int64)31, mapping.EndPos.Column)
+        | "base6" -> Assert.AreEqual<int64>((int64)25, mapping.EndPos.Column)
+        | "base7" -> Assert.AreEqual<int64>((int64)31, mapping.EndPos.Column)
+        | "base8" -> Assert.AreEqual<int64>((int64)52, mapping.EndPos.Column)
+        | "base9" -> Assert.AreEqual<int64>((int64)40, mapping.EndPos.Column)
+        | "base10" -> Assert.AreEqual<int64>((int64)50, mapping.EndPos.Column)
         | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
 
@@ -937,11 +937,11 @@ type TestFplValueScopeNameEndPos() =
         let proof = theory.Scope["T$1"]
         let arg = proof.Scope["100"]
         match var with
-        | "base1" -> Assert.AreEqual<int64>((int64)29, arg.EndPos.Column)
-        | "base2" -> Assert.AreEqual<int64>((int64)46, arg.EndPos.Column)
-        | "base3" -> Assert.AreEqual<int64>((int64)48, arg.EndPos.Column)
-        | "base4" -> Assert.AreEqual<int64>((int64)39, arg.EndPos.Column)
-        | "base5" -> Assert.AreEqual<int64>((int64)29, arg.EndPos.Column)
+        | "base1" -> Assert.AreEqual<int64>((int64)28, arg.EndPos.Column)
+        | "base2" -> Assert.AreEqual<int64>((int64)45, arg.EndPos.Column)
+        | "base3" -> Assert.AreEqual<int64>((int64)47, arg.EndPos.Column)
+        | "base4" -> Assert.AreEqual<int64>((int64)38, arg.EndPos.Column)
+        | "base5" -> Assert.AreEqual<int64>((int64)28, arg.EndPos.Column)
         | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
 
@@ -963,12 +963,12 @@ type TestFplValueScopeNameEndPos() =
         let lang = pred.Scope["tex"]
 
         match var with
-        | "base0" -> Assert.AreEqual<int64>((int64)17, lang.EndPos.Column)
-        | "base1" -> Assert.AreEqual<int64>((int64)22, lang.EndPos.Column)
-        | "base2" -> Assert.AreEqual<int64>((int64)19, lang.EndPos.Column)
-        | "base3" -> Assert.AreEqual<int64>((int64)22, lang.EndPos.Column)
-        | "base4" -> Assert.AreEqual<int64>((int64)24, lang.EndPos.Column)
-        | "base5" -> Assert.AreEqual<int64>((int64)27, lang.EndPos.Column)
+        | "base0" -> Assert.AreEqual<int64>((int64)16, lang.EndPos.Column)
+        | "base1" -> Assert.AreEqual<int64>((int64)21, lang.EndPos.Column)
+        | "base2" -> Assert.AreEqual<int64>((int64)18, lang.EndPos.Column)
+        | "base3" -> Assert.AreEqual<int64>((int64)21, lang.EndPos.Column)
+        | "base4" -> Assert.AreEqual<int64>((int64)23, lang.EndPos.Column)
+        | "base5" -> Assert.AreEqual<int64>((int64)26, lang.EndPos.Column)
         | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
 
@@ -989,12 +989,12 @@ type TestFplValueScopeNameEndPos() =
         let pred = theory.Scope[predName]
 
         match var with
-        | "base0" -> Assert.AreEqual<int64>((int64)10, pred.EndPos.Column)
-        | "base1" -> Assert.AreEqual<int64>((int64)15, pred.EndPos.Column)
-        | "base2" -> Assert.AreEqual<int64>((int64)12, pred.EndPos.Column)
-        | "base3" -> Assert.AreEqual<int64>((int64)15, pred.EndPos.Column)
-        | "base4" -> Assert.AreEqual<int64>((int64)17, pred.EndPos.Column)
-        | "base5" -> Assert.AreEqual<int64>((int64)20, pred.EndPos.Column)
+        | "base0" -> Assert.AreEqual<int64>((int64)9, pred.EndPos.Column)
+        | "base1" -> Assert.AreEqual<int64>((int64)14, pred.EndPos.Column)
+        | "base2" -> Assert.AreEqual<int64>((int64)11, pred.EndPos.Column)
+        | "base3" -> Assert.AreEqual<int64>((int64)14, pred.EndPos.Column)
+        | "base4" -> Assert.AreEqual<int64>((int64)16, pred.EndPos.Column)
+        | "base5" -> Assert.AreEqual<int64>((int64)19, pred.EndPos.Column)
         | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
 
@@ -1017,11 +1017,11 @@ type TestFplValueScopeNameEndPos() =
         let trsl = lang.ArgList[0]
 
         match var with
-        | "base0" -> Assert.AreEqual<int64>((int64)23, trsl.EndPos.Column)
-        | "base1" -> Assert.AreEqual<int64>((int64)46, trsl.EndPos.Column)
-        | "base2" -> Assert.AreEqual<int64>((int64)35, trsl.EndPos.Column)
-        | "base3" -> Assert.AreEqual<int64>((int64)37, trsl.EndPos.Column)
-        | "base4" -> Assert.AreEqual<int64>((int64)34, trsl.EndPos.Column)
-        | "base5" -> Assert.AreEqual<int64>((int64)40, trsl.EndPos.Column)
+        | "base0" -> Assert.AreEqual<int64>((int64)22, trsl.EndPos.Column)
+        | "base1" -> Assert.AreEqual<int64>((int64)45, trsl.EndPos.Column)
+        | "base2" -> Assert.AreEqual<int64>((int64)34, trsl.EndPos.Column)
+        | "base3" -> Assert.AreEqual<int64>((int64)36, trsl.EndPos.Column)
+        | "base4" -> Assert.AreEqual<int64>((int64)33, trsl.EndPos.Column)
+        | "base5" -> Assert.AreEqual<int64>((int64)39, trsl.EndPos.Column)
         | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore

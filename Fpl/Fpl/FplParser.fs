@@ -40,9 +40,13 @@ let positions (p: Parser<_,_>): Parser<Positions * _,_> =
     pipe2
         (_position .>>. p)
         (_position)
-        (fun (startPos, result) endPos -> 
-            let pos1 = Position("", startPos.Index, startPos.Line, startPos.Column)
-            let pos2 = Position("", endPos.Index, endPos.Line, endPos.Column)
+        (
+            // correct columns to keep the convention of jumping to
+            // the beginning and not to the end of a diagnostics in an IDE
+            let offset = (int64)1
+            fun (startPos, result) endPos ->
+            let pos1 = Position("", startPos.Index, startPos.Line, startPos.Column-offset)
+            let pos2 = Position("", endPos.Index, endPos.Line, endPos.Column-offset)
             (Positions(pos1, pos2), result)
         )
 
@@ -719,7 +723,7 @@ let cleanInputAndIssueSyntaxErrors fplCode =
                 let chu = input.Substring(pos, length)
                 let mChu = masked chu
                 maskedPrefix.Append(mChu) |> ignore
-                remainder.Append(maskedPrefix) |> ignore
+                remainder.Append(mChuPrefix) |> ignore
                 remainder.Append(chu) |> ignore
                 chu, mChu 
             elif i < matches.Length-1 then
@@ -743,7 +747,7 @@ let cleanInputAndIssueSyntaxErrors fplCode =
                 chu, mChu
             else
                 "", ""
-        if i > matches.Length && i > 0 then
+        if i >= matches.Length && i > 0 then
             ()
         else
             let trimedInput = chunk.Trim()
