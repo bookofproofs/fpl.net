@@ -179,8 +179,7 @@ type TestRecovery() =
     [<TestMethod>]
     member this.TestErrorRecoveryBuildingBlock(no:string, fplCode:string, numbErr:int) =
         ad.Clear()
-        let cleanUpInput = cleanInputAndIssueSyntaxErrors fplCode
-        let result = fplParser cleanUpInput
+        let result = fplParser fplCode
         let actual = sprintf "%O" result
         if ad.CountDiagnostics > 0 then
             ad.PrintDiagnostics

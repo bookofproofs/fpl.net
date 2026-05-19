@@ -868,129 +868,105 @@ let correctPositionIndexBasedOnLineAndColumn (lines:string array) length (items:
 /// all non-whitespace characters are replaced with spaces while preserving line breaks and line lengths.
 /// The syntax error is generated using an input starting with the chunk, so syntax error messages
 /// realistically reflect the remaining code after the chunk.
-let cleanInputAndIssueSyntaxErrors fplCode =
-    let input = fplCode |> removeFplComments 
+let private cleanInputAndIssueSyntaxErrors fplCode =
+    let input = fplCode |> removeFplComments
     let matches = getMatches errRecoveryBlocks input
     let errorFreeInput = StringBuilder()
-    let maskedPrefix = StringBuilder()
     let lines = input.Split(Environment.NewLine)
     let length = input.Length
 
-    let rec tryGetAst1 i =
-        let remainder = StringBuilder()
-        let chunk, maskedChunk =
-            if i = 0 && matches.Length>0 && matches[i].Index>0 then
-                let chuPrefix = input.Substring(0, matches[i].Index)
-                let mChuPrefix = masked chuPrefix
-                errorFreeInput.Append(mChuPrefix) |> ignore
-                remainder.Append(mChuPrefix) |> ignore
-            if i = 0 && matches.Length>0 && matches[i].Index>0 then
-                let pos = matches[i].Index
-                let length =
-                    if i < matches.Length - 1 then
-                        matches[i+1].Index - matches[i].Index
-                    else
-                        input.Length - matches[i].Index
-                let chu = input.Substring(pos, length)
-                let mChu = masked chu
-                maskedPrefix.Append(mChu) |> ignore
-                remainder.Append(chu) |> ignore
-                chu, mChu 
-            elif i < matches.Length-1 then
-                let pos = matches[i].Index
-                let length = matches[i+1].Index - matches[i].Index
-                let chu = input.Substring(pos, length)
-                let mChu = masked chu
-                maskedPrefix.Append(mChu) |> ignore
-                remainder.Append(chu) |> ignore
-                chu, mChu
-            elif i = matches.Length-1 then
-                let pos = matches[i].Index
-                let chu = input.Substring(pos)
-                let mChu = masked chu
-                remainder.Append(input.Substring(pos)) |> ignore
-                chu, mChu
-            elif matches.Length = 0 then
-                let chu = input
-                let mChu = masked chu
-                chu, mChu
-            else
-                "", ""
-        if i >= matches.Length && i > 0 then
-            ()
+    // Helper to produce chunk, maskedChunk and the 'remainder' used for diagnostics
+    let getChunkMaskedAndRemainder i =
+        if matches.Length = 0 then
+            let chu = input
+            let mChu = masked chu
+            chu, mChu, chu
         else
-            let trimedInput = chunk.Trim()
-            // run buildingBlock parser until eof of trimedInput
-            match run (buildingBlock .>> eof) trimedInput with
-            | Success(_, _, _) when trimedInput.Length > 0 ->
-                // if successed when trimed not empty, add chunk to error-free input
-                errorFreeInput.Append(chunk) |> ignore
-            | _ ->
-                // in all other cases (trimedInput empty or syntax error in building block)
-                // try the buildingBlock parser without eof
-                let posSuccess, successButNotTheEndOfChunk =
-                    match run buildingBlock trimedInput with
-                    | Success(_, _, userState) when trimedInput.Length > 0 -> (int)userState.Index, true
-                    | _ -> -1, false
-                if successButNotTheEndOfChunk then
-                    // add maskedChunk up to the parsed position to the error-free input
-                    errorFreeInput.Append(trimedInput.Substring(0, posSuccess)) |> ignore
-                    if maskedChunk.Length > posSuccess then
-                        if matches.Length = 1 then
-                            // handle the special case when we have only one building block with a closing ";"
-                            let rest = chunk.Substring(posSuccess).Trim()
-                            if rest=";" then 
-                                errorFreeInput.Append(chunk.Substring(posSuccess)) |> ignore
+            let pos = matches[i].Index
+            let len =
+                if i < matches.Length - 1 then
+                    matches[i + 1].Index - matches[i].Index
+                else
+                    input.Length - matches[i].Index
+            let chu = input.Substring(pos, len)
+            let mChu = masked chu
+            let remainder =
+                if i = 0 && matches[0].Index > 0 then
+                    // when there is a prefix before the first match, diagnostics should see the masked prefix + the chunk
+                    let prefix = input.Substring(0, matches[0].Index)
+                    (masked prefix) + chu
+                else
+                    chu
+            chu, mChu, remainder
+
+    // Iterate once for each relevant chunk (if no matches, still run once)
+    let upper =
+        if matches.Length = 0 then 0 else matches.Length - 1
+
+    for i in [0..upper] do
+        // If there is a non-matching prefix before the first recovery match, preserve its masked form
+        if i = 0 && matches.Length > 0 && matches[0].Index > 0 then
+            let prefix = input.Substring(0, matches[0].Index)
+            errorFreeInput.Append(masked prefix) |> ignore
+
+        let chunk, maskedChunk, remainder = getChunkMaskedAndRemainder i
+        let trimedInput = chunk.Trim()
+
+        // Try a strict parse of the building block (must consume all of the trimmed chunk)
+        match run (buildingBlock .>> eof) trimedInput with
+        | Success(_, _, _) when trimedInput.Length > 0 ->
+            errorFreeInput.Append(chunk) |> ignore
+        | _ ->
+            // Try parsing without eof to see how far we can get
+            match run buildingBlock trimedInput with
+            | Success(_, _, userState) when trimedInput.Length > 0 ->
+                let posSuccess = int userState.Index
+                // keep the successfully parsed prefix from the trimmed input
+                errorFreeInput.Append(trimedInput.Substring(0, posSuccess)) |> ignore
+
+                // Append masked remainder of this chunk (special-case single match with trailing ';')
+                if maskedChunk.Length > posSuccess then
+                    if matches.Length = 1 then
+                        let rest = chunk.Substring(posSuccess).Trim()
+                        if rest = ";" then
+                            errorFreeInput.Append(chunk.Substring(posSuccess)) |> ignore
                         else
                             errorFreeInput.Append(maskedChunk.Substring(posSuccess)) |> ignore
                     else
-                        errorFreeInput.Append(maskedChunk) |> ignore
-                elif i = 0 && matches.Length=0 then
+                        errorFreeInput.Append(maskedChunk.Substring(posSuccess)) |> ignore
+                else
+                    errorFreeInput.Append(maskedChunk) |> ignore
+
+            | _ ->
+                // If there were no recovery matches at all, keep the whole chunk,
+                // otherwise mask it entirely
+                if i = 0 && matches.Length = 0 then
                     errorFreeInput.Append(chunk) |> ignore
                 else
-                    // add maskedChunk to error-free input
                     errorFreeInput.Append(maskedChunk) |> ignore
-                // now, run the whole "ast" parser on the remainer
-                // that starts ends the chunk we found to be faulty in the outer match,
-                // possibly prefixed with whitespaces from masked previous chunks
-                let rest = remainder.ToString()
-                match run (ast .>> eof) rest with 
-                | Failure(errorMsg, originalErrPos, _) ->
-                    // in case of syntax error, issue diagnostics
-                    errorMsg
-                    |> insertLightning
-                    |> splitByBacktrackMarker
-                    |> extractPositions
-                    |> aggregateExpecting
-                    |> correctPositionIndexBasedOnLineAndColumn lines length 
-                    |> List.map (fun (pos, errMsg) ->
-                        let diagnostic =
-                            { 
-                                Diagnostic.Uri = ad.CurrentUri
-                                Diagnostic.Emitter = DiagnosticEmitter.FplParser 
-                                Diagnostic.Severity = DiagnosticSeverity.Error
-                                Diagnostic.StartPos = pos
-                                Diagnostic.EndPos = pos
-                                Diagnostic.Code = SY999 (collapseExpectingBlock errMsg)
-                                Diagnostic.Alternatives = None
-                            }
-                        ad.AddDiagnostic diagnostic
-                    )
-                    |> ignore
-                | _ -> () // if success, all good
-            tryGetAst1 (i + 1)
 
-    tryGetAst1 0
+            // Run the full AST parser on the remainder to produce diagnostics for the chunk
+            match run (ast .>> eof) remainder with
+            | Failure(errorMsg, _, _) ->
+                errorMsg
+                |> insertLightning
+                |> splitByBacktrackMarker
+                |> extractPositions
+                |> aggregateExpecting
+                |> correctPositionIndexBasedOnLineAndColumn lines length
+                |> List.iter (fun (pos, errMsg) ->
+                    let diagnostic =
+                        { Diagnostic.Uri = ad.CurrentUri
+                          Diagnostic.Emitter = DiagnosticEmitter.FplParser
+                          Diagnostic.Severity = DiagnosticSeverity.Error
+                          Diagnostic.StartPos = pos
+                          Diagnostic.EndPos = pos
+                          Diagnostic.Code = SY999 (collapseExpectingBlock errMsg)
+                          Diagnostic.Alternatives = None }
+                    ad.AddDiagnostic diagnostic
+                )
+            | _ -> ()
     errorFreeInput.ToString()
-//-----------------
-
-
-
-
-
-
-
-
 
 
 
