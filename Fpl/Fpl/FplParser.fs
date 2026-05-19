@@ -724,17 +724,58 @@ let private extractPositions (lines: string list) =
             pos, line
     )
 
+/// Groups the output list of tuples from the extractPositions function
+/// by identical Position, but only aggregates those whose message ends with an 'Expecting:' clause,
+/// and then merges all the expectation‑tails into one combined message.
+let private aggregateExpecting (items: (Position * string) list) =
+    let expectingKey = "Expecting:"
+
+    // Helper: split a message into (prefix, tail) if it contains "Expecting:"
+    let trySplitExpecting (s: string) =
+        let idx = s.IndexOf(expectingKey)
+        if idx >= 0 then
+            let prefix = s.Substring(0, idx + expectingKey.Length)
+            let tail   = s.Substring(idx + expectingKey.Length).Trim()
+            Some(prefix, tail)
+        else None
+
+    items
+    |> List.groupBy fst
+    |> List.collect (fun (pos, group) ->
+        // Extract only those with an Expecting: clause
+        let withExp =
+            group
+            |> List.choose (fun (p, s) ->
+                match trySplitExpecting s with
+                | Some(prefix, tail) -> Some(prefix, tail)
+                | None -> None)
+
+        match withExp with
+        | [] ->
+            // No aggregatable entries → keep original group unchanged
+            group
+
+        | (prefix, _) :: _ ->
+            // Aggregate all tails
+            let tails =
+                withExp
+                |> List.map snd
+                |> String.concat ", "
+
+            let combined = prefix + " " + tails
+            [pos, combined])
+
 /// Scans input line‑by‑line, detecting a line that trims to "^",
 /// and inserts ⚡ into the preceding line at the same column,
 /// skipping the caret‑line, and preserving all other lines unchanged.
 let private insertLightning (input: string) =
-    let lines = input.Split('\n') |> Array.toList
+    let lines = input.Split(Environment.NewLine) |> Array.toList
 
     // Process line-by-line with access to previous output line
     let rec loop acc remaining =
         match remaining with
         | [] ->
-            acc |> List.rev |> String.concat "\n"
+            acc |> List.rev |> String.concat Environment.NewLine
 
         | (line:string) :: rest ->
             let trimmed = line.Trim()
@@ -750,7 +791,7 @@ let private insertLightning (input: string) =
                 let updatedPrev =
                     if caretCol < prevLen then
                         // insert ⚡ at caretCol
-                        prev.[0..caretCol-1] + "⚡" + prev.[caretCol+1..]
+                        prev.[0..caretCol-1] + "⚡" + prev.[caretCol..]
                     else
                         // previous line too short → append ⚡
                         prev + "⚡"
@@ -764,6 +805,34 @@ let private insertLightning (input: string) =
 
     loop [] lines
 
+/// Computes FParsec’s Position.Index based on Line and Column in an input string.
+let private computeIndex (pos: Position) (lines: string array) inputLength =
+    
+    // FParsec Position.Line and Column are 1-based
+    let lineIdx  = int pos.Line - 1
+    let colIdx   = int pos.Column
+
+    if lineIdx >= 0 && lineIdx < lines.Length then
+        let line = lines.[lineIdx]
+
+        if colIdx >= 0 && colIdx <= line.Length then
+            // sum of lengths of all previous lines + newline characters
+            let prefixLength =
+                lines
+                |> Seq.take lineIdx
+                |> Seq.sumBy (fun l -> l.Length + 1)   // +1 for '\n'
+
+            int64 prefixLength + int64 colIdx
+        else
+            int64 inputLength
+    else
+        int64 inputLength
+
+let correctPositionIndexBasedOnLineAndColumn (lines:string array) length (items: (Position * string) list) =
+    items
+    |> List.map (fun (pos, errMsg) ->
+        (Position("", computeIndex pos lines length, pos.Line, pos.Column), errMsg)
+    )
 
 /// Tries to parse all chunks of input of FPL building blocks. If a chunk produces a syntax error,
 /// a diagnosics will be issued and the chunk will be replaced by a masked chunk, where
@@ -775,6 +844,8 @@ let cleanInputAndIssueSyntaxErrors fplCode =
     let matches = getMatches errRecoveryBlocks input
     let errorFreeInput = StringBuilder()
     let maskedPrefix = StringBuilder()
+    let lines = input.Split(Environment.NewLine)
+    let length = input.Length
 
     let rec tryGetAst1 i =
         let remainder = StringBuilder()
@@ -853,7 +924,6 @@ let cleanInputAndIssueSyntaxErrors fplCode =
                 // now, run the whole "ast" parser on the remainer
                 // that starts ends the chunk we found to be faulty in the outer match,
                 // possibly prefixed with whitespaces from masked previous chunks
-
                 let rest = remainder.ToString()
                 match run (ast .>> eof) rest with 
                 | Failure(errorMsg, originalErrPos, _) ->
@@ -862,6 +932,8 @@ let cleanInputAndIssueSyntaxErrors fplCode =
                     |> insertLightning
                     |> splitByBacktrackMarker
                     |> extractPositions
+                    |> aggregateExpecting
+                    |> correctPositionIndexBasedOnLineAndColumn lines length 
                     |> List.map (fun (pos, errMsg) ->
                         let diagnostic =
                             { 
