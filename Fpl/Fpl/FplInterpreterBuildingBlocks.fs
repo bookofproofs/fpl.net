@@ -1862,7 +1862,8 @@ let evaluateSymbolTable () =
                 heap.Root.Scope[pa.Id] <- theoryValue
             heap.Eval.PushEvalStack(theoryValue)
             ad.CurrentUri <- pa.Parsing.Uri
-            eval pa.Parsing.Ast
+            pa.Parsing.BuildingBlockAsts
+            |> List.map (fun buildinBlockAst -> eval buildinBlockAst) |> ignore
             pa.Status <- ParsedAstStatus.Evaluated
             heap.Eval.PopEvalStack()
             theoryValue.Run()

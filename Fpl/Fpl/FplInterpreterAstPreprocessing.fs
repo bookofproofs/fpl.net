@@ -223,7 +223,7 @@ type FplSources(paths: PathEquivalentUri list, pathToLocalRegistry: string) =
 type ParsingProperties =
     { mutable Uri: PathEquivalentUri // source of the ast
       mutable FplSourceCode: string // source code of the ast
-      mutable Ast: Ast // parsed ast
+      mutable BuildingBlockAsts: Ast list // parsed asts of all building blocks
       mutable Checksum: string } // checksum of the parsed ast
 
     /// Reset this ParsingProperties to its new location
@@ -236,7 +236,7 @@ type ParsingProperties =
             // then replace the ast, checksum, location, source code, the
             this.Uri <- uri
             ad.ResetStream(uri)
-            this.Ast <- fplParser fplCode
+            this.BuildingBlockAsts <- fplParser fplCode
             this.FplSourceCode <- fplCode
             this.Checksum <- checksum
             true
@@ -248,7 +248,7 @@ type ParsingProperties =
 
         { ParsingProperties.Uri = uri
           ParsingProperties.FplSourceCode = fplCode
-          ParsingProperties.Ast = FplParser.fplParser fplCode
+          ParsingProperties.BuildingBlockAsts = FplParser.fplParser fplCode
           ParsingProperties.Checksum = computeMD5Checksum fplCode }
 
 type FplBlockProperties =
@@ -296,9 +296,9 @@ type ParsedAstList() =
     member this.AstsToString =
         let res =
             this
-            |> Seq.map (fun pa -> pa.Parsing.Ast.ToString())
+            |> Seq.map (fun pa -> pa.Parsing.BuildingBlockAsts)
+            |> Seq.map (fun ast ->ast.ToString())
             |> String.concat Environment.NewLine
-
         res
 
     /// If there is a valid topological sorting, order the list descending by this ordering.

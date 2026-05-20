@@ -146,7 +146,10 @@ type TestEvalAliasedNamespaceIdentifier() =
                 PathEquivalentUri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
             let sources = acquireSources uri fplLibUrl offlineWatcher.OfflineMode
             let testAst = heap.ParsedAsts.TryFindAstById("TestFindFilesInLibMapWithWildcard").Value
-            let eaniList = eval_uses_clause offlineWatcher.OfflineMode testAst.Parsing.Ast 
+            let eaniList = 
+                testAst.Parsing.BuildingBlockAsts
+                |> List.map (fun buildingBlock -> eval_uses_clause offlineWatcher.OfflineMode buildingBlock)
+                |> List.concat
             if eaniList.IsEmpty then 
                 Assert.AreEqual<int>(expected, 0)
             else

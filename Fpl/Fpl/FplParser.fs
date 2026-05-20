@@ -968,12 +968,43 @@ let private cleanInputAndIssueSyntaxErrors fplCode =
                     ad.AddDiagnostic diagnostic
                 )
             | _ -> ()
+    if not (input.TrimEnd().EndsWith(';')) then
+        let pos = Position("", (int64)input.Length, 1L, 1L)
+        let diagnostic =
+                        { Diagnostic.Uri = ad.CurrentUri
+                          Diagnostic.Emitter = DiagnosticEmitter.FplParser
+                          Diagnostic.Severity = DiagnosticSeverity.Error
+                          Diagnostic.StartPos = pos
+                          Diagnostic.EndPos = pos
+                          Diagnostic.Code = SY009 
+                          Diagnostic.Alternatives = None }
+        ad.AddDiagnostic diagnostic
     errorFreeInput.ToString()
 
-
-
+let private getBuildingBlockAsts (topAst:Ast) =
+    let rec getBlocks (subAst:Ast) = 
+        match subAst with 
+        | Ast.AST ((pos1, pos2), ast) -> 
+            getBlocks ast
+        | Ast.Namespace (buildingBlocksAsts, _) ->
+            buildingBlocksAsts 
+        | _ -> []
+    getBlocks topAst
 
 let stdParser = ast
+
+let fplParser (input:string) =
+
+    let cleanUpInput = cleanInputAndIssueSyntaxErrors input
+    let topAst = 
+        match run (stdParser .>> eof) cleanUpInput with
+        | Success(result, restInput, userState) ->
+            result
+        | Failure(errMsg, restInput, _) ->
+            Ast.BuildingBlockError((restInput.Position, restInput.Position), errMsg)
+    getBuildingBlockAsts topAst
+
+
 let stdCode = SXN000
 let stdCode1 = SXN001
 let stdParser1 = ast
@@ -1059,17 +1090,6 @@ let maxIntervalBound (intervals:System.Collections.Generic.List<Interval>) =
         if interval.End = -1 && interval.Start > maxBound then
             maxBound <- interval.Start
     maxBound
-
-let fplParser (input:string) =
-
-    let cleanUpInput = cleanInputAndIssueSyntaxErrors input
-    match run (stdParser .>> eof) cleanUpInput with
-    | Success(result, restInput, userState) ->
-        result
-    | Failure(errMsg, restInput, _) ->
-        Ast.BuildingBlockError((restInput.Position, restInput.Position), errMsg)
-
-
 
 let fplParserOld (input:string) = 
     let preProcessedInput = input |> removeFplComments
