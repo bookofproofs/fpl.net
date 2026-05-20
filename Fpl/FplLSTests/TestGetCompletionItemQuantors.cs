@@ -79,7 +79,7 @@ namespace FplLSTests
             {
                 if (item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice))
                 {
-                    Assert.IsTrue(item.InsertText.EndsWith(" "));
+                    Assert.IsTrue(item.InsertText.EndsWith(' '));
                 }
             }
         }
@@ -128,12 +128,12 @@ namespace FplLSTests
             foreach (var item in actual)
             {
                 Assert.IsTrue(item.InsertText.Contains(choice));
-                if (item.InsertText.Contains("{"))
+                if (item.InsertText.Contains('{'))
                 {
                     var res = FplParser.testParser(PrimQuantor, item.InsertText);
                     if (!res.StartsWith("Success:"))
                     {
-                        Assert.IsTrue(false, res);
+                        Assert.Fail(res);
                     }
                 }
             }
