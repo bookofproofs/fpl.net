@@ -12,7 +12,6 @@
         <Compile Include="TestDifferse.fs" />
         <Compile Include="TestExtensions.fs" />
         <Compile Include="TestQuantors.fs" />
-        <Compile Include="TestParserErrors.fs" />
         <Compile Include="TestExpressions.fs" />
         <Compile Include="TestUsesClause.fs" />
         <Compile Include="TestAxioms.fs" />
@@ -22,7 +21,6 @@
         <Compile Include="TestDefinitionClasses.fs" />
         <Compile Include="TestDefinitionFunctionalTerms.fs" />
         <Compile Include="TestDefinitionPredicates.fs" />
-        <Compile Include="TestErrDiagnostics.fs" />
         <Compile Include="TestErrDiagnosticsLowLevel.fs" />
         <Compile Include="TestFplBlockComponents.fs" />
         <Compile Include="TestFunctionalTermInstanceProperties.fs" />

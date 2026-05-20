@@ -31,39 +31,6 @@ let numbered inputLst =
 
 // Diagnostics related-errors
 // -----------------------------------------------------------------
-// parser error messages
-let errSYN000 = "Other syntax error"
-let errSYN001 = "Characters found after namespace"
-let errDEF000 = "Syntax error in definition"
-let errPRP000 = "Syntax error in property"
-let errAXI000 = "Syntax error in axiom"
-let errTHM000 = "Syntax error in theorem"
-let errCOR000 = "Syntax error in corollary"
-let errLEM000 = "Syntax error in lemma"
-let errPPS000 = "Syntax error in proposition"
-let errCNJ000 = "Syntax error in conjecture"
-let errVAR000 = "Syntax error in variable declaration and/or specification"
-let errCTR000 = "Syntax error in constructor"
-let errPRF000 = "Syntax error in proof"
-let errINF000 = "Syntax error in rule of inference"
-let errLOC000 = "Syntax error in localization"
-let errEXT000 = "Syntax error in extension"
-let errUSE000 = "Syntax error in uses clause"
-let errPRD000 = "Syntax error in predicate definition"
-let errSTMASE = "Syntax error in assertion"
-let errSTMASU = "Syntax error in assumption"
-let errSTMCAL = "Syntax error in call to a constructor"
-let errSTMCAS = "Syntax error in cases statement"
-let errSTMDEL = "Syntax error in delegate"
-let errSTMFOI = "Syntax error in domain"
-let errSTMFOR = "Syntax error in for statement"
-let errSTMMAP = "Syntax error in mcases statement"
-let errSTMREV = "Syntax error in revocation"
-let errSTMRET = "Syntax error in return statement"
-let errAGI000 = "Syntax error in proof argument"
-let errPRE000 = "Syntax error in premise"
-let errCON000 = "Syntax error in conclusion"
-let errTYD000 = "Syntax error in type declaration"
 // interpreter error messages
 let errGEN00 message = sprintf "Unexpected error occurred: %s" message
 let errNSP00 fileNamePattern = sprintf "The theory `%s` could not be found" fileNamePattern

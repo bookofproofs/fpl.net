@@ -75,39 +75,6 @@ let getEnglishName someString determined =
         $"a {someString}"
 
 type DiagnosticCode = 
-    // parser error codes
-    | SXN000
-    | SXN001
-    | DEF000
-    | PRP000
-    | AXI000
-    | THM000
-    | COR000
-    | LEM000
-    | PPS000
-    | CNJ000
-    | VAR000
-    | CTR000
-    | PRF000
-    | INF000
-    | LOC000
-    | EXT000
-    | USE000
-    | PRD000
-    | AGI000
-    | STMASE
-    | STMASU
-    | STMCAL
-    | STMCAS
-    | STMDEL
-    | STMFOI
-    | STMFOR
-    | STMMAP
-    | STMREV
-    | STMRET
-    | PRE000
-    | CON000
-    | TYD000
     // interpreter error codes
     | GEN00 of string
     | NSP00 of string
@@ -219,39 +186,6 @@ type DiagnosticCode =
     | VAR11 of string * string
     member this.Code = 
         match this with
-            // parser error messages
-            | SXN000 -> "SXN000"
-            | SXN001 -> "SXN001"
-            | DEF000 -> "DEF000"
-            | PRP000 -> "PRP000"
-            | AXI000 -> "AXI000"
-            | THM000 -> "THM000"
-            | COR000 -> "COR000"
-            | LEM000 -> "LEM000"
-            | PPS000 -> "PPS000"
-            | CNJ000 -> "CNJ000"
-            | VAR000 -> "VAR000"
-            | CTR000 -> "CTR000"
-            | PRF000 -> "PRF000"
-            | INF000 -> "INF000"
-            | LOC000 -> "LOC000"
-            | EXT000 -> "EXT000"
-            | USE000 -> "USE000"
-            | PRD000 -> "PRD000"
-            | STMASE -> "STMASE"
-            | STMASU -> "STMASU"
-            | STMCAL -> "STMCAL"
-            | STMCAS -> "STMCAS"
-            | STMDEL -> "STMDEL"
-            | STMFOI -> "STMFOI"
-            | STMFOR -> "STMFOR"
-            | STMMAP -> "STMMAP"
-            | STMREV -> "STMREV"
-            | STMRET -> "STMRET"
-            | AGI000 -> "AGI000"
-            | PRE000 -> "PRE000"
-            | CON000 -> "CON000"
-            | TYD000 -> "TYD000"
             // interpreter error messages
             | GEN00 _ -> "GEN00"
             | NSP00 _ -> "NSP00"
@@ -362,39 +296,6 @@ type DiagnosticCode =
             | VAR11 _ -> "VAR11"
     member this.Message = 
         match this with
-            // parser error messages
-            | SXN000 -> errSYN000
-            | SXN001 -> errSYN001 
-            | DEF000 -> errDEF000
-            | PRP000 -> errPRP000
-            | AXI000 -> errAXI000
-            | THM000 -> errTHM000
-            | COR000 -> errCOR000
-            | LEM000 -> errLEM000
-            | PPS000 -> errPPS000
-            | CNJ000 -> errCNJ000
-            | VAR000 -> errVAR000
-            | CTR000 -> errCTR000
-            | PRF000 -> errPRF000
-            | INF000 -> errINF000
-            | LOC000 -> errLOC000
-            | EXT000 -> errEXT000
-            | USE000 -> errUSE000
-            | PRD000 -> errPRD000
-            | STMASE -> errSTMASE
-            | STMASU -> errSTMASU
-            | STMCAL -> errSTMCAL
-            | STMCAS -> errSTMCAS
-            | STMDEL -> errSTMDEL
-            | STMFOI -> errSTMFOI
-            | STMFOR -> errSTMFOR
-            | STMMAP -> errSTMMAP
-            | STMREV -> errSTMREV
-            | STMRET -> errSTMRET
-            | AGI000 -> errAGI000
-            | PRE000 -> errPRE000
-            | CON000 -> errCON000
-            | TYD000 -> errTYD000
             // interpreter error messages
             | GEN00 message -> errGEN00 message
             | NSP00 fileNamePattern -> errNSP00 fileNamePattern

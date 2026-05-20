@@ -30,28 +30,28 @@ type TestIdentifiers () =
 
     [<TestMethod>]
     member this.TestUsesClause () =
-        let result = run (buildingBlockList .>> eof) "uses  Fpl.Test alias MyAlias uses Fpl.Test uses Fpl.Test.Test1 "
+        let result = run (fplNamespace .>> eof) "uses  Fpl.Test alias MyAlias uses Fpl.Test uses Fpl.Test.Test1 "
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestUsesClause01 () =
-        let result = run (buildingBlockList .>> eof) "uses Fpl.Commons uses Fpl.SetTheory.ZermeloFraenkel"
+        let result = run (fplNamespace .>> eof) "uses Fpl.Commons uses Fpl.SetTheory.ZermeloFraenkel"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestUsesClause02 () =
-        let result = run (buildingBlockList .>> eof) "uses Fpl.Commons uses Fpl.SetTheory.ZermeloFraenkel alias ZF uses  Fpl.Arithmetics.Peano alias A"
+        let result = run (fplNamespace .>> eof) "uses Fpl.Commons uses Fpl.SetTheory.ZermeloFraenkel alias ZF uses  Fpl.Arithmetics.Peano alias A"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestUsesClause03 () =
-        let result = run (buildingBlockList .>> eof) "uses Fpl.Commons *"
+        let result = run (fplNamespace .>> eof) "uses Fpl.Commons *"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

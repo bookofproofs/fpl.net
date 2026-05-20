@@ -948,123 +948,6 @@ let fplParser fplCode =
 
         prefixError @ tryParseChunk 0 [] clearedPrefix
 
-/// Tries to parse all chunks of input of FPL building blocks. If a chunk produces a syntax error,
-/// a diagnosics will be issued and the chunk will (at least at its faulty end) be replaced by a masked chunk, where
-/// all non-whitespace characters will be replaced with spaces while preserving line breaks and line lengths.
-/// Preserving line sizes is necessary to keep other diagnostics well-positioned.
-/// The syntax errors are generated using an input starting with the chunk, so syntax error messages
-/// realistically reflect the remaining code after the chunk.
-let private cleanInputAndIssueSyntaxErrors fplCode =
-    let input = fplCode |> removeFplComments
-    let matches = getMatches errRecoveryBlocks input
-    let errorFreeInput = StringBuilder()
-    let lines = input.Split(Environment.NewLine)
-    let length = input.Length
-
-    // Helper to produce chunk, maskedChunk and the 'remainder' used for diagnostics
-    let getChunkMaskedAndRemainder i =
-        if matches.Length = 0 then
-            let chu = input
-            let mChu = masked chu
-            chu, mChu, chu
-        else
-            let pos = matches[i].Index
-            let len =
-                if i < matches.Length - 1 then
-                    matches[i + 1].Index - matches[i].Index
-                else
-                    input.Length - matches[i].Index
-            let chu = input.Substring(pos, len)
-            let mChu = masked chu
-            let remainder =
-                if i = 0 && matches[0].Index > 0 then
-                    // when there is a prefix before the first match, diagnostics should see the masked prefix + the chunk
-                    let prefix = input.Substring(0, matches[0].Index)
-                    (masked prefix) + chu
-                else
-                    chu
-            chu, mChu, remainder
-
-    // Iterate once for each relevant chunk (if no matches, still run once)
-    let upper =
-        if matches.Length = 0 then 0 else matches.Length - 1
-
-    for i in [0..upper] do
-        // If there is a non-matching prefix before the first recovery match, preserve its masked form
-        if i = 0 && matches.Length > 0 && matches[0].Index > 0 then
-            let prefix = input.Substring(0, matches[0].Index)
-            errorFreeInput.Append(masked prefix) |> ignore
-
-        let chunk, maskedChunk, remainder = getChunkMaskedAndRemainder i
-        let trimedInput = chunk.Trim()
-
-        // Try a strict parse of the building block (must consume all of the trimmed chunk)
-        match run (buildingBlock .>> eof) trimedInput with
-        | Success(_, _, _) when trimedInput.Length > 0 ->
-            errorFreeInput.Append(chunk) |> ignore
-        | _ ->
-            // Try parsing without eof to see how far we can get
-            match run buildingBlock trimedInput with
-            | Success(_, _, userState) when trimedInput.Length > 0 ->
-                let posSuccess = int userState.Index
-                // keep the successfully parsed prefix from the trimmed input
-                errorFreeInput.Append(trimedInput.Substring(0, posSuccess)) |> ignore
-
-                // Append masked remainder of this chunk (special-case single match with trailing ';')
-                if maskedChunk.Length > posSuccess then
-                    if matches.Length = 1 then
-                        let rest = chunk.Substring(posSuccess).Trim()
-                        if rest = ";" then
-                            errorFreeInput.Append(chunk.Substring(posSuccess)) |> ignore
-                        else
-                            errorFreeInput.Append(maskedChunk.Substring(posSuccess)) |> ignore
-                    else
-                        errorFreeInput.Append(maskedChunk.Substring(posSuccess)) |> ignore
-                else
-                    errorFreeInput.Append(maskedChunk) |> ignore
-
-            | _ ->
-                // If there were no recovery matches at all, keep the whole chunk,
-                // otherwise mask it entirely
-                if i = 0 && matches.Length = 0 then
-                    errorFreeInput.Append(chunk) |> ignore
-                else
-                    errorFreeInput.Append(maskedChunk) |> ignore
-
-            // Run the full AST parser on the remainder to produce diagnostics for the chunk
-            match run (ast .>> eof) remainder with
-            | Failure(errorMsg, _, _) ->
-                errorMsg
-                |> insertLightning
-                |> splitByBacktrackMarker
-                |> extractPositions
-                |> aggregateExpecting
-                |> correctPositionIndexBasedOnLineAndColumn lines length
-                |> List.iter (fun (pos, errMsg) ->
-                    let diagnostic =
-                        { Diagnostic.Uri = ad.CurrentUri
-                          Diagnostic.Emitter = DiagnosticEmitter.FplParser
-                          Diagnostic.Severity = DiagnosticSeverity.Error
-                          Diagnostic.StartPos = pos
-                          Diagnostic.EndPos = pos
-                          Diagnostic.Code = SY999 (collapseExpectingBlock errMsg)
-                          Diagnostic.Alternatives = None }
-                    ad.AddDiagnostic diagnostic
-                )
-            | _ -> ()
-    if not (input.TrimEnd().EndsWith(';')) then
-        let pos = Position("", (int64)input.Length, 1L, 1L)
-        let diagnostic =
-                        { Diagnostic.Uri = ad.CurrentUri
-                          Diagnostic.Emitter = DiagnosticEmitter.FplParser
-                          Diagnostic.Severity = DiagnosticSeverity.Error
-                          Diagnostic.StartPos = pos
-                          Diagnostic.EndPos = pos
-                          Diagnostic.Code = SY009 
-                          Diagnostic.Alternatives = None }
-        ad.AddDiagnostic diagnostic
-    errorFreeInput.ToString()
-
 let private getBuildingBlockAsts (topAst:Ast) =
     let rec getBlocks (subAst:Ast) = 
         match subAst with 
@@ -1077,22 +960,6 @@ let private getBuildingBlockAsts (topAst:Ast) =
 
 let stdParser = ast
 
-let fplParserOld1 (input:string) =
-
-    let cleanUpInput = cleanInputAndIssueSyntaxErrors input
-    let topAst = 
-        match run (stdParser .>> eof) cleanUpInput with
-        | Success(result, restInput, userState) ->
-            result
-        | Failure(errMsg, restInput, _) ->
-            Ast.BuildingBlockError((restInput.Position, restInput.Position), errMsg)
-    getBuildingBlockAsts topAst
-
-
-let stdCode = SXN000
-let stdCode1 = SXN001
-let stdParser1 = ast
-
 let calculateCurrentContext (matchList:System.Collections.Generic.List<int>) i = 
     let index = matchList[i]
     if i + 1 < matchList.Count then
@@ -1100,59 +967,6 @@ let calculateCurrentContext (matchList:System.Collections.Generic.List<int>) i =
         index, nextIndex
     else
         index, index
-
-let errRecPattern = $"({LiteralDefL}|{LiteralDef}|{LiteralPrtyL}|{LiteralPrty}|{LiteralAxL}|{LiteralAx}|{LiteralPostL}|{LiteralPost}|{LiteralThmL}|{LiteralThm}|{LiteralPropL}|{LiteralProp}|{LiteralLemL}|{LiteralLem}|{LiteralCorL}|{LiteralCor}|{LiteralConjL}|{LiteralConj}|{LiteralDecL}|{LiteralDec}|{LiteralCtorL}|{LiteralCtor}|{LiteralPrfL}|{LiteralPrf}|{LiteralInfL}|{LiteralInf}|{LiteralLocL}|{LiteralLoc}|{LiteralExtL}|{LiteralExt}|{LiteralUses}|{LiteralAnd}|{LiteralOr}|{LiteralImpl}|{LiteralIif}|{LiteralXor}|{LiteralNot}|{LiteralAll}|{LiteralExN}|{LiteralEx}|{LiteralIs}|{LiteralAssert}|{LiteralAssL}|{LiteralAss}|{LiteralBase}|{LiteralCases}|{LiteralMapCases}|{LiteralFor}|{LiteralIn}|{LiteralDelL}|{LiteralDel}|\|\-|{LiteralRevL}|{LiteralRev}|{LiteralRetL}|{LiteralRet})\W|({LiteralConL}|{LiteralCon}|{LiteralPreL}|{LiteralPre})\s*\:|~[a-z]+"
-
-let errInformation = [
-    (DEF000, [LiteralDefL; LiteralDef], definition)
-    (PRP000, [LiteralPrtyL; LiteralPrty], definitionProperty)
-    (AXI000, [LiteralAxL; LiteralAx; LiteralPostL; LiteralPost], axiom)
-    (THM000, [LiteralThmL; LiteralThm], theorem)
-    (COR000, [LiteralCorL; LiteralCor], corollary)
-    (LEM000, [LiteralLemL; LiteralLem], lemma)
-    (PPS000, [LiteralPropL; LiteralProp], proposition)
-    (CNJ000, [LiteralConjL; LiteralConj], conjecture)
-    (VAR000, [LiteralDecL; LiteralDec], varDeclBlock)
-    (CTR000, [LiteralCtorL; LiteralCtor], constructor)
-    (PRF000, [LiteralPrfL; LiteralPrf], proof)
-    (INF000, [LiteralInfL; LiteralInf], ruleOfInference)
-    (LOC000, [LiteralLocL; LiteralLoc], localization)
-    (EXT000, [LiteralExtL; LiteralExt], extension)
-    (USE000, [LiteralUses], usesClause)
-    (PRD000, [LiteralAnd], conjunction)
-    (PRD000, [LiteralOr], disjunction)
-    (PRD000, [LiteralImpl], implication)
-    (PRD000, [LiteralIif], equivalence)
-    (PRD000, [LiteralXor], exclusiveOr)
-    (PRD000, [LiteralNot], negation)
-    (PRD000, [LiteralAll], all)
-    (PRD000, [LiteralEx], exists)
-    (PRD000, [LiteralExN], existsTimesN)
-    (PRD000, [LiteralIs], isOperator)
-    (STMASE, [LiteralAssert], assertionStatement)
-    (STMCAL, [LiteralBase], baseConstructorCall)
-    (STMCAS, [LiteralCases], casesStatement)
-    (STMMAP, [LiteralMapCases], mapCases)
-    (STMFOI, [LiteralIn], inEntity)
-    (STMFOR, [LiteralFor], forStatement)
-    (STMDEL, [LiteralDelL; LiteralDel], fplDelegate)
-    (STMASU, [LiteralAssL; LiteralAss], assumeArgument)
-    (STMREV, [LiteralRevL; LiteralRev], revokeArgument)
-    (STMRET, [LiteralRetL; LiteralRet], returnStatement)
-    (AGI000, ["|-"], argumentInference)
-    (PRE000, [LiteralPreL; LiteralPre], premiseList)
-    (CON000, [LiteralConL; LiteralCon], conclusion)
-    (TYD000, ["~"], varDecl)
-]
-/// Finds the error information tuple based on a prefix of a string from the errInformation list. 
-/// If no prefix matches than the SYN000 tuple will be returned.
-let findErrInfoTuple (str:string) =
-    match List.tryFind (fun (_, prefixes, _) -> List.exists (fun prefix -> str.StartsWith(prefix : string)) prefixes) errInformation with
-    | Some tuple -> 
-        tuple
-    | None -> 
-        (stdCode, [], stdParser)
-
 
 let findFirstIndexInMatches (matchList:System.Collections.Generic.List<int>) pIndex kMax =
     let rec loop i last =
@@ -1174,59 +988,6 @@ let maxIntervalBound (intervals:System.Collections.Generic.List<Interval>) =
         if interval.End = -1 && interval.Start > maxBound then
             maxBound <- interval.Start
     maxBound
-
-let fplParserOld (input:string) = 
-    let preProcessedInput = input |> removeFplComments
-    let matchList = stringMatches preProcessedInput errRecPattern
-
-    let intervals = new System.Collections.Generic.List<Interval>()
-
-    let parseResult, pIndex = tryParseFirstError stdParser preProcessedInput stdCode  
-    intervals.Add(Interval(0, pIndex))
-
-    let mutable lastParserIndex = 0
-    let mutable lastParser = stdParser
-    let mutable lastCode = stdCode
-    let mutable lastMsg = stdCode.Message
-    if parseResult = Ast.Error then
-        let mutable lastSuccess = false
-        // skip parsing any matches until the first error index (stored in pIndex)
-        let firstIndex = findFirstIndexInMatches matchList (int pIndex) preProcessedInput.Length
-        for i in [firstIndex..matchList.Count-1] do
-            let index, nextIndex = calculateCurrentContext matchList i
-            let subString = preProcessedInput.Substring(index)
-            if (-1 < lastParserIndex) && (lastParserIndex < index) && not lastSuccess && lastCode <> stdCode then
-                // the last parsing process hasn't consumed all the input between lastParserIndex and index
-                let remainingChunk = preProcessedInput.Substring(int lastParserIndex, (index - int lastParserIndex))
-                // emit error messages for this chunk of input string using the last parser  
-                tryParseRemainingChunk lastParser remainingChunk lastParserIndex index lastCode -1 ""
-                intervals.Add(Interval(lastParserIndex, nextIndex))
-                lastParserIndex <- nextIndex
-            else
-                // otherwise, find the next error info tuple based on the current substring
-                let code, prefixList, errRecParser = findErrInfoTuple subString
-                // try to parse substring using the parser from the error info and emitting diagnostics (if any)
-                let pResult, pIndex, pSuccess = tryParse errRecParser subString index nextIndex code -1 ""
-                intervals.Add(Interval(index, pIndex))
-                lastParserIndex <- pIndex
-                lastParser <- errRecParser
-                lastCode <- code
-                lastMsg <- code.Message
-                lastSuccess <- pSuccess
-
-    // emit diagnostics for any error positions that are not overlayed by the intervals
-    tryParseRemainingOnly stdParser preProcessedInput stdCode intervals -1 ""
-    // Return an ast on a best effort basis even if there were some errors 
-    let resultingAst = tryGetAst stdParser preProcessedInput -1
-
-    let maxBound = maxIntervalBound intervals
-    let remaingString = preProcessedInput.Substring(maxBound).TrimEnd()
-    if not (remaingString.EndsWith("}") && Regex.Matches(preProcessedInput, "\}").Count = Regex.Matches(preProcessedInput, "\{").Count) then
-        // prevent emitting "false-positive" errors of characters found after namespace using the heuristic that 
-        // the last character of a namespace is "}" and then looks "good"
-        tryParseRemainingChunk stdParser1 (preProcessedInput.Substring(maxBound)) maxBound (preProcessedInput.Length) stdCode1 -1 ""
-    resultingAst
-
 
 let parserDiagnostics = ad
 

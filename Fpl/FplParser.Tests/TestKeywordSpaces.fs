@@ -589,7 +589,7 @@ type TestKeywordSpaces() =
     [<DataRow(LiteralLoc)>]
     [<TestMethod>]
     member this.TestSpacesLocalization (word:string) =
-        let result = run (localization .>> eof) ($"{word}x" + " T() := !tex: x;")
+        let result = run (localization .>> eof) ($"{word}x" + " T() := !tex: x")
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("<significant whitespace>"))
