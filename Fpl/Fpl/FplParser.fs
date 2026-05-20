@@ -847,6 +847,7 @@ let private collapseExpectingBlock (input: string) : string =
                     |> List.map (fun s -> s.Replace("Other error messages:", ""))
                     |> List.map (fun s -> s.Replace("Expecting:", ", "))
                     |> List.map (fun s -> s.Replace("' or '", ", "))
+                    |> List.map (fun s -> s.Replace("end of input", "<end of theory>"))
                     |> String.concat " "
                 )
             if l1.StartsWith("FPL ") then

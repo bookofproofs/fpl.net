@@ -26,6 +26,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 
+let rec getBuildingBlockAsts (topAst:Ast) =
+    match topAst with 
+    | Ast.AST ((pos1, pos2), ast) -> 
+        getBuildingBlockAsts ast
+    | Ast.Namespace (buildingBlocksAsts, _) ->
+        buildingBlocksAsts 
+    | _ -> []
+
 /// A recursive function evaluating an AST and returning a list of EvalAliasedNamespaceIdentifier records
 /// for each occurrence of the uses clause in the FPL code.
 let rec eval_uses_clause debugMode = function 
@@ -86,6 +94,9 @@ let rec eval_uses_clause debugMode = function
             [EvalAliasedNamespaceIdentifier.CreateEani(pascalCaseIdList, evalAlias, p1, p2, debugMode)]
         | _ -> []
     | _ -> []
+
+
+    
 
 let private downloadFile url (e:EvalAliasedNamespaceIdentifier) =
     if not (e.DebugMode) then
@@ -431,7 +442,12 @@ let loadAllUsesClauses input (uri:PathEquivalentUri) fplLibUrl =
         match loadedParsedAst with
         | Some pa -> 
             // evaluate the EvalAliasedNamespaceIdentifier list of the ast
-            pa.Sorting.EANIList <- eval_uses_clause offlineWatcher.OfflineMode pa.Parsing.Ast
+            let buildingBlockAsts = getBuildingBlockAsts pa.Parsing.Ast
+            let eaniList = 
+                buildingBlockAsts
+                |> List.map (fun buildingBlock -> eval_uses_clause offlineWatcher.OfflineMode buildingBlock)
+                |> List.concat
+            pa.Sorting.EANIList <- eaniList
             pa.Status <- ParsedAstStatus.UsesClausesEvaluated
             findDuplicateAliases pa.Sorting.EANIList |> ignore
             pa.Sorting.EANIList
