@@ -734,9 +734,8 @@ let rec eval ast =
         eval rightParen
     | Ast.QualificationList((pos1, pos2), asts) ->
         asts |> List.map eval |> ignore
-    | Ast.Namespace(theoryAst, semicolon ) ->
+    | Ast.Namespace(theoryAst) ->
         theoryAst |> List.map eval |> ignore
-        eval semicolon
     | Ast.CompoundFunctionalTermType((pos1, pos2), (ast1, astTupleOption)) ->
         eval ast1
         match astTupleOption with 

@@ -246,13 +246,10 @@ type TestInterpreterErrors() =
             runTestHelper "TestSY008.fpl" fplCode code expected
 
     [<DataRow("endOfFile01", """;""", 0)>]
-    [<DataRow("endOfFile01", """""", 1)>]
-    [<DataRow("endOfFile02", """ """, 1)>]
-    [<DataRow("loc01", """loc not (x) := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x ;;""", 0)>]
-    [<DataRow("loc01", """loc not (x) := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x ;""", 1)>]
-    [<DataRow("loc02", """loc not (x) := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x def cl A""", 2)>]
-    [<DataRow("dec01", """def pred T() {dec x:obj true};""", 1)>]
-    [<DataRow("dec02", """def pred T() {dec x:obj true}""", 2)>]
+    [<DataRow("loc01", """loc not (x) := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x ;""", 0)>]
+    [<DataRow("loc02", """loc not (x) := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x def cl A""", 1)>]
+    [<DataRow("dec01", """def pred T() {dec x:obj; true}""", 0)>]
+    [<DataRow("dec02", """def pred T() {dec x:obj true}""", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSY009(no:string, fplCode:string, expected) =

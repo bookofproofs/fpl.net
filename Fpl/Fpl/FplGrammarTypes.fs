@@ -184,7 +184,7 @@ type Ast =
     | ProofSignature of Positions * (Ast * Ast list)
     | Proof of Positions * (Ast * Ast)
 
-    | Namespace of Ast list * Ast
+    | Namespace of Ast list
 
     | AST of Positions * Ast
     | Error // used to replace the whole AST (at the root level) for severe errors the parser cannot recover from

@@ -638,10 +638,9 @@ let buildingBlock = choice [
     definitionExtension
 ]
 
-let buildingBlockList = many (buildingBlock .>> IW)
 
 (* Namespaces *)
-let fplNamespace = buildingBlockList .>>. (IW >>. semiColonOpt) |>> Ast.Namespace
+let fplNamespace = many (buildingBlock .>> IW) |>> Ast.Namespace
 (* Final Parser *)
 let ast =  positions (IW >>. fplNamespace) |>> Ast.AST
 
@@ -1071,7 +1070,7 @@ let private getBuildingBlockAsts (topAst:Ast) =
         match subAst with 
         | Ast.AST ((pos1, pos2), ast) -> 
             getBlocks ast
-        | Ast.Namespace (buildingBlocksAsts, _) ->
+        | Ast.Namespace (buildingBlocksAsts) ->
             buildingBlocksAsts 
         | _ -> []
     getBlocks topAst

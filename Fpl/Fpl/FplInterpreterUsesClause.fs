@@ -31,8 +31,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 let rec eval_uses_clause debugMode = function 
     | Ast.AST ((pos1, pos2), ast) -> 
         eval_uses_clause debugMode ast
-    | Ast.Namespace (asts, _) ->
-        let results = asts |> List.collect (eval_uses_clause debugMode)
+    | Ast.Namespace (buildingBlockAsts) ->
+        let results = buildingBlockAsts |> List.collect (eval_uses_clause debugMode)
         results
     | Ast.UsesClause ((pos1, pos2), ast) -> 
         eval_uses_clause debugMode ast 
