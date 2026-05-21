@@ -1,7 +1,5 @@
-(*
-This module provides some functionality to emit error diagnostics in a custom language.
+/// This module provides some functionality to emit error diagnostics in FPL.
 
-*)
 (* MIT License
 
 Copyright (c) 2023 bookofproofs
@@ -23,7 +21,6 @@ open System.Security.Cryptography
 open System.Text
 open FParsec
 open FplPrimitives
-open FplGrammarTypes
 open ErrMessages
 
 type PathEquivalentUri(uriString: string) =
@@ -158,6 +155,7 @@ type DiagnosticCode =
     | SY009
     | SY010
     | SY011
+    | SY998 of string
     | SY999 of string
     // variable-related error codes
     | VAR00 
@@ -268,6 +266,7 @@ type DiagnosticCode =
             | SY009 -> "SY009"
             | SY010 -> "SY010"
             | SY011 -> "SY011"
+            | SY998 _ -> "SY998"
             | SY999 _ -> "SY999"
             // variable-related error codes
             | VAR00 -> "VAR00"
@@ -378,6 +377,7 @@ type DiagnosticCode =
             | SY009 -> errSY009
             | SY010 -> errSY010
             | SY011 -> errSY011
+            | SY998 errMsg -> errSY998 errMsg
             | SY999 errMsg -> errSY999 errMsg
             // variable-related error codes
             | VAR00 -> errVAR00
@@ -441,9 +441,12 @@ type Diagnostic =
         this.Code.Code + ":" +
         this.Message
 
-
+type ParsingMode =
+    | Strict
+    | Recovery
 
 type Diagnostics() =
+    let mutable _parsingMode = ParsingMode.Recovery
     let mutable _currentUri = new PathEquivalentUri("about:blank")
     let _diagnosticStorageTotal = new Dictionary<PathEquivalentUri,Dictionary<string, Diagnostic>>()
     member this.Collection = 
@@ -458,6 +461,10 @@ type Diagnostics() =
     member this.CurrentUri 
         with get() = _currentUri
         and set (value) = _currentUri <- value
+
+    member this.ParsingMode 
+        with get() = _parsingMode
+        and set (value) = _parsingMode <- value
 
     member this.AddDiagnostic (d:Diagnostic) =
         let keyOfd = d.DiagnosticID

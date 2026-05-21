@@ -1,0 +1,192 @@
+module FplGrammarTypes
+open FParsec
+
+
+
+/// our FPL grammar needs starting and ending position for each Ast node since we
+/// will need these information for the diagnostics of the interpreter even after the 
+/// parsing was done
+type Positions = Position * Position 
+
+type Ast = 
+    // Literals
+    | LeftBraceOpt of Positions * unit option
+    | RightBraceOpt of Positions * unit option
+    | LeftParenOpt of Positions * unit option
+    | RightParenOpt of Positions * unit option
+    | SemicolonOpt of Positions * unit option
+    | LeftBracketOpt of Positions * unit option
+    | RightBracketOpt of Positions * unit option
+    | Star of Positions * unit
+    | DotErr of Positions * unit
+    | Dot of unit
+    // Identifiers
+    | Digits of string
+    | Extension of Positions * string
+    | DollarDigits of Positions * uint
+    | Exists1 of unit
+    | PascalCaseId of Positions * string option
+    | NamespaceIdentifier of Positions * Ast list
+    | AliasedNamespaceIdentifier of Positions * (Ast * Ast option)
+    | PredicateIdentifier of Positions * string
+    | LanguageCode of Positions * string
+    | Alias of Positions * string option
+    | SelfOrParent of Positions * Ast
+    | Self of Positions * unit
+    | Parent of Positions * unit
+    | LocalizationString of Positions * string
+    | TranslationTerm of Positions * Ast list
+    | TranslationTermList of Positions * Ast list
+    | Language of Positions * (Ast * Ast)
+    | ExtensionName of Positions * string
+    | ExtensionNameErr of Positions * unit
+    | DelegateName of Positions * string
+    | DelegateNameErr of Positions * unit
+    | BaseClassName of Positions * string
+    | BaseClassNameErr of Positions * unit
+    | ExtensionRegex of string
+    | ExtensionAssignment of Positions * (Ast * Ast) 
+    | ExtensionSignature of Positions * (Ast * Ast)
+    | DefinitionExtension of Positions * ((Ast * Ast) * (Ast * (Ast * Ast)))
+    | UsesClause of Positions * Ast
+    | BrackedCoordList of Positions * (Ast list * Ast)
+    | ReferencingIdentifier of Positions * (Ast * Ast list)
+
+
+    // Types
+    | TemplateType of Positions * string
+    | ObjectType of Positions * unit
+    | ClassIdentifier of Positions * Ast
+    | PredicateType of Positions * unit
+    | FunctionalTermType of Positions * unit
+    | IndexType of Positions * unit
+    | SimpleVariableType of Positions * Ast 
+    | IndexAllowedType of Positions * Ast 
+    | ArrayType of Positions * (Ast * ((Ast * Ast list) * Ast))
+    | InheritedType of Positions * string option 
+    | InheritedTypeList of Ast list
+    | CompoundPredicateType of Positions * (Ast * Ast option)
+    | CompoundFunctionalTermType of Positions * (Ast * (Ast * Ast) option)
+    // Variables
+    | Var of Positions * string
+
+    // Predicates
+    | True of Positions * unit
+    | False of Positions * unit 
+    | Undefined of Positions * unit
+    | And of Positions * (Ast * Ast)
+    | Or of Positions * (Ast * Ast)
+    | Xor of Positions * (Ast * Ast)
+    | Impl of Positions * (Ast * Ast)
+    | Iif of Positions * (Ast * Ast)
+    | Not of Positions * Ast
+    | InEntity of Positions * Ast
+    | All of Positions * (Ast list * ((Ast * Ast) * Ast))
+    | Exists of Positions * (Ast list * ((Ast * Ast) * Ast))
+    | ExistsN of Positions * ((Ast * Ast list) * ((Ast * Ast) * Ast))
+    | IsOperator of Positions * (Ast * Ast)
+    | Delegate of (Ast * Ast) * Ast
+    | ArgumentTupleWithOptLeftParen of Positions * ((Ast * Ast list) * Ast)
+    | ArgumentTuple of Positions * (Ast list * Ast)
+    | PredicateWithOptSpecification of Positions * (Ast * Ast option)
+    | DottedPredicate of Positions * Ast 
+    | QualificationList of Positions * Ast list
+    | PredicateWithQualification of (Ast * Ast)
+        
+    // Expressions
+    | ObjectSymbol of Positions * string
+    | InfixOperator of Positions * string
+    | PostfixOperator of Positions * string
+    | PrefixOperator of Positions * string
+    | InfixOperation of Positions * (Ast * Ast option) list
+    | Expression of Positions * ((((Ast option * Ast) * Ast option) * Ast option) * Ast)
+
+    // Statements
+    | Assertion of Positions * Ast
+    | Cases of Positions * (Ast list * Ast)
+    | CaseSingle of Positions * (Ast * Ast list)
+    | CaseElse of Positions * Ast list 
+    | MapCases of Positions * (Ast list * Ast)
+    | MapCaseSingle of Positions * (Ast * Ast)
+    | MapCaseElse of Positions * Ast  
+    | Assignment of Positions * (Ast * Ast)
+    | ForIn of Positions * (((Ast * Ast) * (Ast * Ast list)) * Ast)
+    | Return of Positions * Ast
+
+    // FPL Blocks
+    | Intrinsic of Positions * unit
+    | VarDeclBlock of Ast list * Ast
+    | StatementList of Positions * Ast list
+    | PremiseList of Positions * Ast list
+    | PremiseConclusionBlock of ((Ast * (Ast list option * (Ast * Ast))) * Ast)
+    | RuleOfInferenceSignature of Positions * Ast
+    | RuleOfInference of Positions * (Ast * Ast)
+    | Localization of (Positions * Ast) * (Ast list * Ast)
+    | TheoremSignature of Positions * Ast
+    | Theorem of Positions * (Ast * ((Ast * (Ast list option * Ast)) * Ast))
+    | LemmaSignature of Positions * Ast
+    | Lemma of Positions * (Ast * ((Ast * (Ast list option * Ast)) * Ast))
+    | PropositionSignature of Positions * Ast
+    | Proposition of Positions * (Ast * ((Ast * (Ast list option * Ast)) * Ast))
+    | Corollary of Positions * (Ast * ((Ast * (Ast list option * Ast)) * Ast))
+    | CorollarySignature of Positions * (Ast * Ast list)
+    | ConjectureSignature of Positions * Ast
+    | Conjecture of Positions * (Ast * ((Ast * (Ast list option * Ast)) * Ast))
+    | NamedVarDecl of Positions * (Ast list * Ast)
+    | ParamTuple of Ast list * Ast
+    | ParamTupleWithOptLeftParen of (Ast * Ast list) * Ast
+
+    | Mapping of Positions * Ast
+    | AxiomSignature of Positions * Ast
+    | Axiom of Positions * (Ast * ((Ast * (Ast list option * Ast)) * Ast))
+    | BaseConstructorCall of Positions * ((Ast * Ast) * Ast)
+    | ConstructorSignature of Positions * (Ast * Ast)
+    | PredicateInstanceSignature of Positions * (Ast * Ast)
+    | FunctionalTermInstanceSignature of Positions * ((Ast * Ast) * Ast)
+    | ConstructorBlock of (Ast * Ast list option) * Ast
+    | Constructor of Positions * (Ast * Ast) 
+    | PredicateInstance of Positions * (Ast * Ast option)
+    | FunctionalTermInstance of Positions * (Ast * Ast option)
+    | DefPredicateContent of Ast list option * Ast
+    | DefinitionPredicate of Positions * (Ast * ((Ast * Ast list option) * Ast) option)
+    | DefFunctionContent of Ast list option * Ast
+    | PredicateSignature of (Positions * ((Ast * Ast option) * Ast)) * Ast option
+    | ClassSignature of Positions * Ast
+    | FunctionalTermSignature of (Positions * (((Ast * Ast option) * Ast) * Ast)) * Ast option
+    | FunctionalTermDefinitionBlock of Positions * ((Ast * Ast list option) * Ast) option
+    | DefinitionFunctionalTerm of Positions * (Ast * Ast)
+    | DefClassCompleteContent of Ast list option * Ast list
+    | ClassDefinitionBlock of Positions * ((Ast * Ast list option) * Ast) option
+    | DefinitionClass of Positions * (((Ast * Ast option) * Ast option) * Ast) 
+    | Prefix of Positions * string
+    | Precedence of Positions * int
+    | Infix of Positions * (string * Ast)
+    | Postfix of Positions * string
+    | Symbol of Positions * string
+
+    // Proofs
+    | ArgumentIdentifier of Positions * string
+    | RefArgumentIdentifier of Positions * string
+    | ReferenceToProofOrCorollary of Positions * Ast
+    | JustificationItem of Positions * Ast 
+    | Justification of Positions * Ast list
+    | ByDef of Positions * Ast 
+    | JustificationIdentifier of Positions * (((string option * Ast) * Ast list option) * Ast option) 
+    | Trivial of Positions * unit
+    | Qed of Positions * unit
+    | DerivedPredicate of Positions * Ast
+    | AssumeArgument of Positions * Ast
+    | RevokeArgument of Positions * Ast
+    | JustArgInf of Positions * (Ast * Ast)
+    | Argument of Positions * (Ast * Ast)
+    | ProofContent of Ast list * Ast option
+    | ProofBlock of (Ast * Ast) * Ast
+    | ProofSignature of Positions * (Ast * Ast list)
+    | Proof of Positions * (Ast * Ast)
+
+    | Namespace of Ast list
+
+    | AST of Positions * Ast
+    | BuildingBlock of Positions * Ast
+    | ErrorSyntax of Positions * string 
+    | ErrorSyntaxBacktracking of Positions * string 

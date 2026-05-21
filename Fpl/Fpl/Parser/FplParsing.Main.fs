@@ -147,7 +147,7 @@ let fplParser fplCode =
             |> List.sortBy (fun buildingBlockAst ->
                 match buildingBlockAst with
                 | Ast.BuildingBlock((pos1,_),_) 
-                | Ast.BuildingBlockError((pos1,_),_) -> pos1.Index
+                | Ast.ErrorSyntax((pos1,_),_) -> pos1.Index
                 | _ -> Int64.MaxValue
             ), false
         | Failure(errorMsg, _, _) ->

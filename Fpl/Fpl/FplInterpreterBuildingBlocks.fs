@@ -125,8 +125,10 @@ let rec eval ast =
     | Ast.Star((_, _),()) -> ()
     | Ast.BuildingBlock((_, _),buidlingBlockAst) ->
         eval buidlingBlockAst
-    | Ast.BuildingBlockError((pos1, pos2), errMsg) ->
+    | Ast.ErrorSyntax((pos1, pos2), errMsg) ->
         emitSY999diagnostics errMsg pos1 pos2 
+    | Ast.ErrorSyntaxBacktracking((pos1, pos2), errMsg) ->
+        emitSY998diagnostics errMsg pos1 pos2 
     | Ast.LeftBracketOpt ((pos1, pos2), leftBracketOpt) ->
         match leftBracketOpt with
         | None ->
@@ -370,7 +372,6 @@ let rec eval ast =
             let cl = fv :?> FplClass
             cl.AddDefaultConstructor()
         | _ -> ()
-    | Ast.Error  -> ()
 
 
     | Ast.Var((pos1, pos2), name) ->

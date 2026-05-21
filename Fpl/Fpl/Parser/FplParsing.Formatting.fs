@@ -189,9 +189,9 @@ let private collapseExpectingBlock (input: string) : string =
                     |> String.concat " "
                 )
             if l1.StartsWith("FPL ") then
-                $"Syntax error: `{l2}`{Environment.NewLine}{merged}"
+                $"SY999`{l2}`{Environment.NewLine}{merged}"
             else
-                $"Backtracking syntax error: `{l2}`{Environment.NewLine}{merged}"
+                $"SY998`{l2}`{Environment.NewLine}{merged}"
         else
             // No special rule → return unchanged
             String.concat Environment.NewLine lines
@@ -221,6 +221,9 @@ let getErrorNodes (errorMsg:string) origLines origLength =
     |> aggregateExpecting
     |> correctPositionIndexBasedOnLineAndColumn origLines origLength
     |> List.map (fun (pos, errMsg) ->
-        Ast.BuildingBlockError((pos, pos), collapseExpectingBlock errMsg)
+        if errMsg.StartsWith("SY999:") then
+            Ast.ErrorSyntax((pos, pos), collapseExpectingBlock (errMsg.Substring(7)))
+        else
+            Ast.ErrorSyntaxBacktracking((pos, pos), collapseExpectingBlock (errMsg.Substring(6)))
     )
 
