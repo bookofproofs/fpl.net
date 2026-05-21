@@ -133,7 +133,7 @@ let private getBuildingBlockAsts (topAst:Ast) =
 
 let fplParser fplCode =
     let input = fplCode |> removeFplComments
-    match run stdParser input with
+    match run (stdParser .>> eof) input with
     | Success(ast, _, _) ->
         getBuildingBlockAsts ast, true
     | _ ->
@@ -158,7 +158,7 @@ let parserDiagnostics = ad
 /// Returns the parser choices at position (if any).
 let getParserChoicesAtPosition (input:string) index =
     let newInput = input |> removeFplComments
-    match run stdParser (newInput.Substring(0, index)) with
+    match run (stdParser .>> eof) (newInput.Substring(0, index))  with
     | Success(result, restInput, userState) -> 
         // In the success case, we always return the current parser position in the input
         List.empty, userState.Index

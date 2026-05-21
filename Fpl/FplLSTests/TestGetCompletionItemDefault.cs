@@ -26,8 +26,6 @@ namespace FplLSTests
         [DataRow(")")]
         [DataRow("<")]
         [DataRow(">")]
-        [DataRow(":ext")]
-        [DataRow(":end")]
         [DataRow("blabla")]
         [TestMethod]
         public void TestAddDefaultChoicesNumber(string choice)
@@ -57,8 +55,6 @@ namespace FplLSTests
         [DataRow(")")]
         [DataRow("<")]
         [DataRow(">")]
-        [DataRow(":ext")]
-        [DataRow(":end")]
         [DataRow("blabla")]
         [TestMethod]
         public void TestAddDefaultTextCounts(string choice)
@@ -93,8 +89,6 @@ namespace FplLSTests
         [DataRow(")")]
         [DataRow("<")]
         [DataRow(">")]
-        [DataRow(":ext")]
-        [DataRow(":end")]
         [DataRow("blabla")]
         [TestMethod]
         public void TestAddChoicesSortText(string choice)
@@ -127,8 +121,6 @@ namespace FplLSTests
         [DataRow(")")]
         [DataRow("<")]
         [DataRow(">")]
-        [DataRow(":ext")]
-        [DataRow(":end")]
         [DataRow("blabla")]
         [TestMethod]
         public void TestAddDefaultChoicesLabel(string choice)
