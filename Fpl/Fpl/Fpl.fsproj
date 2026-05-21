@@ -14,10 +14,12 @@
         <Compile Include="ErrMessages.fs" />
         <Compile Include="ErrDiagnostics.fs" />
         <Compile Include="FplInterpreterDiagnosticsEmitter.fs" />
+        <None Include="Parser\DocuFplGrammarPocShiftFromPythonToFSharp.md" />
+        <Compile Include="Parser\FplParsing.Combinators.fs" />
+        <Compile Include="Parser\FplParsing.Formatting.fs" />
+        <Compile Include="Parser\FplParsing.Main.fs" />
         <None Include="CHANGES.md" />
         <None Include="DocuSymbolTable.md" />
-        <None Include="DocuFplGrammarPocShiftFromPythonToFSharp.md" />
-        <Compile Include="FplParser.fs" />
         <Compile Include="FplInterpreterAstPreprocessing.fs" />
         <Compile Include="FplInterpreterBasicTypes.fs" />
         <Compile Include="FplInterpreterChecks.fs" />

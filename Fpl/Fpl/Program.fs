@@ -3,7 +3,7 @@
 // as an FPL Language Server (see FplLS C# Project in the same solution).
 
 open ErrDiagnostics
-open FplParser
+open FplParsing.Main
 open FplInterpreter.Globals.Heap
 open FplInterpreter.Main
 open System.IO

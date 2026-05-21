@@ -21,7 +21,7 @@ open System.IO
 open System.Text
 open FParsec
 open FplGrammarTypes
-open FplParser
+open FplParsing.Main
 open ErrDiagnostics
 open Newtonsoft.Json
 

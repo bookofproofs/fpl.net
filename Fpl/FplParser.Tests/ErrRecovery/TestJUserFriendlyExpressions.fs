@@ -1,6 +1,7 @@
 namespace FplParser.Tests.ErrRecovery
 open FParsec
-open FplParser
+open FplParsing.Combinators
+open FplParsing.Main
 open ErrDiagnostics
 open Microsoft.VisualStudio.TestTools.UnitTesting
 

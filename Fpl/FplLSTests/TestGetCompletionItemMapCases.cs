@@ -2,6 +2,7 @@
 
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using static FplPrimitives;
+using static FplParsing.Main;
 
 namespace FplLSTests
 {
@@ -80,7 +81,7 @@ namespace FplLSTests
                 if (item.InsertText.Contains(choice)) { counterSnippets++; }
                 if (item.InsertText.Contains(' '))
                 {
-                    var res = FplParser.testParser(LiteralMapCases, item.InsertText);
+                    var res = testParser(LiteralMapCases, item.InsertText);
                     if (!res.StartsWith("Success:"))
                     {
                         Assert.Fail(res);

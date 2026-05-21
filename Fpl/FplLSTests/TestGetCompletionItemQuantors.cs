@@ -1,6 +1,6 @@
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using static FplPrimitives;
-
+using static FplParsing.Main;
 
 namespace FplLSTests
 {
@@ -130,7 +130,7 @@ namespace FplLSTests
                 Assert.IsTrue(item.InsertText.Contains(choice));
                 if (item.InsertText.Contains('{'))
                 {
-                    var res = FplParser.testParser(PrimQuantor, item.InsertText);
+                    var res = testParser(PrimQuantor, item.InsertText);
                     if (!res.StartsWith("Success:"))
                     {
                         Assert.Fail(res);
