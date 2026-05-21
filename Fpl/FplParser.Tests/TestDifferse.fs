@@ -21,7 +21,7 @@ type TestDiverse () =
     [<DataRow("05", """def cl TestId {ctor TestId() {} ctor TestId(x:obj) {} ctor TestId(x:pred) {} }""")>]
     [<TestMethod>]
     member this.TestDiverseSuccess (no:string, fplCode:string) =
-        let result = run (ast .>> eof) fplCode
+        let result = run (stdParser .>> eof) fplCode
         let actual = sprintf "%O" result 
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

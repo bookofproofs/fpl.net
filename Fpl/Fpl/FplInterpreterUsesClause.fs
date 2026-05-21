@@ -34,6 +34,8 @@ let rec eval_uses_clause debugMode = function
     | Ast.Namespace (buildingBlockAsts) ->
         let results = buildingBlockAsts |> List.collect (eval_uses_clause debugMode)
         results
+    | Ast.BuildingBlock((_, _),buidlingBlockAst) ->
+        eval_uses_clause debugMode buidlingBlockAst
     | Ast.UsesClause ((pos1, pos2), ast) -> 
         eval_uses_clause debugMode ast 
     | Ast.AliasedNamespaceIdentifier ((pos1, pos2), (ast, optAst)) -> 

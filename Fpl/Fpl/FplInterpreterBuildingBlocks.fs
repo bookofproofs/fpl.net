@@ -123,6 +123,8 @@ let rec eval ast =
     | Ast.Alias((_, _), _) -> ()
     | Ast.Dot() -> ()
     | Ast.Star((_, _),()) -> ()
+    | Ast.BuildingBlock((_, _),buidlingBlockAst) ->
+        eval buidlingBlockAst
     | Ast.BuildingBlockError((pos1, pos2), errMsg) ->
         emitSY999diagnostics errMsg pos1 pos2 
     | Ast.LeftBracketOpt ((pos1, pos2), leftBracketOpt) ->

@@ -236,7 +236,8 @@ type ParsingProperties =
             // then replace the ast, checksum, location, source code, the
             this.Uri <- uri
             ad.ResetStream(uri)
-            this.BuildingBlockAsts <- fplParser fplCode
+            let buildingBlocks, success = fplParser fplCode
+            this.BuildingBlockAsts <- buildingBlocks
             this.FplSourceCode <- fplCode
             this.Checksum <- checksum
             true
@@ -245,10 +246,10 @@ type ParsingProperties =
 
     static member Create (fplCode: string) (uri: PathEquivalentUri) =
         ad.ResetStream(uri)
-
+        let buildingBlockAsts, success = fplParser fplCode
         { ParsingProperties.Uri = uri
           ParsingProperties.FplSourceCode = fplCode
-          ParsingProperties.BuildingBlockAsts = FplParser.fplParser fplCode
+          ParsingProperties.BuildingBlockAsts = buildingBlockAsts
           ParsingProperties.Checksum = computeMD5Checksum fplCode }
 
 type FplBlockProperties =

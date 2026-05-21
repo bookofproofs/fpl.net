@@ -440,19 +440,10 @@ type Diagnostic =
                 s
             | None -> 
                 ""
-        let tranlatedMsg = 
-            // improves the error message for a special case in FPL, return this.StdMsg in your case
-            match this.Code with 
-            | DEF000 -> 
-                if alternatives.StartsWith("':'") then 
-                    (this.Code.Message + " " + alternatives).Replace("Expecting:", "Missing '~' before the variable(s) or expecting:")
-                else
-                    this.Code.Message 
-            | _ -> this.Code.Message
         if alternatives = "" then   
-            tranlatedMsg
+            this.Code.Message
         else
-            tranlatedMsg + " " + alternatives 
+            this.Code.Message + " " + alternatives 
 
     member this.DiagnosticID = 
         computeMD5Checksum (sprintf "%07d" this.StartPos.Index + this.Emitter.ToString() + this.Code.Code + this.Message)

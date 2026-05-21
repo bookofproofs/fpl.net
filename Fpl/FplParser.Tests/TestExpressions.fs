@@ -16,7 +16,7 @@ type TestExpressions () =
 
     [<TestMethod>]
     member this.TestExpressions () =
-        let result = run (ast .>> eof) """
+        let result = run (stdParser .>> eof) """
             def pred T1() 
             {
                 true
@@ -288,7 +288,7 @@ type TestExpressions () =
            
     [<TestMethod>]
     member this.TestPredecence () =
-        let result = run (ast .>> eof) """def pred T1() { (x = y * z + 1) }"""
+        let result = run (stdParser .>> eof) """def pred T1() { (x = y * z + 1) }"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

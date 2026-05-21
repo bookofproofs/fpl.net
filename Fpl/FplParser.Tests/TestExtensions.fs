@@ -49,7 +49,7 @@ type TestExtensions () =
     [<DataRow(@"ext Alpha x@/\d+/ -> obj {ret x} def pred T() {dec a:obj a:=@1; true}")>]
     [<TestMethod>]
     member this.TestExtensionMultiple (ext:string) =
-        let result = run (ast .>> eof) ext
+        let result = run (stdParser .>> eof) ext
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

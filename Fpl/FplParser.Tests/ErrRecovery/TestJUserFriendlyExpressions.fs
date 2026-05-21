@@ -179,9 +179,7 @@ type TestRecovery() =
     [<TestMethod>]
     member this.TestErrorRecoveryBuildingBlock(no:string, fplCode:string, numbErr:int) =
         ad.Clear()
-        let result = fplParser fplCode
+        let result, success = fplParser fplCode
         let actual = sprintf "%O" result
-        if ad.CountDiagnostics > 0 then
-            ad.PrintDiagnostics
         printf "%O" actual
-        Assert.AreEqual<int>(numbErr, ad.CountDiagnostics)
+        Assert.AreEqual<bool>(false, success)

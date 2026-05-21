@@ -1,6 +1,7 @@
 /// This module contains the FPL parser producing an abstract syntax tree out of a given FPL code 
 module FplParser
 open System
+open System.Collections.Generic
 open System.Text
 open System.Text.RegularExpressions
 open FplPrimitives
@@ -623,27 +624,12 @@ let languageList = many1 (IW >>. language .>> IW)
 let localization = positions (keywordLocalization >>. predicate) .>> (IW .>> colonEqual) .>>. (languageList .>>. (IW >>. semiColonOpt)) .>> IW |>> Ast.Localization
 
 // FPL building blocks can be definitions, axioms, Theorem-proof blocks and conjectures
-let buildingBlock =
-    choice [
-        definition
-        axiom
-        theorem
-        lemma
-        proposition
-        corollary
-        conjecture
-        proof
-        ruleOfInference
-        localization
-        usesClause
-        definitionExtension
-        ] .>> IW
-
+let buildingBlock = positions(choice [definition; axiom; theorem; lemma; proposition; corollary; conjecture; proof; ruleOfInference; localization; usesClause; definitionExtension]) .>> IW |>> Ast.BuildingBlock
 
 (* Namespaces *)
 let fplNamespace = many buildingBlock |>> Ast.Namespace
 (* Final Parser *)
-let ast =  positions (IW >>. fplNamespace) |>> Ast.AST
+let stdParser =  positions (IW >>. fplNamespace) |>> Ast.AST
 
 //------------
 /// Regex used for the error recovery of FPL blocks using their keywords to be matched as whole words (\b option), followed by space (\s+ option)
@@ -865,42 +851,15 @@ let correctPositionIndexBasedOnLineAndColumn (lines:string array) length (items:
     )
 
 let private getErrorNodes (errorMsg:string) origLines origLength = 
-    let errors = 
-        errorMsg
-        |> insertLightning
-        |> splitByBacktrackMarker
-        |> extractPositions
-        |> aggregateExpecting
-        |> correctPositionIndexBasedOnLineAndColumn origLines origLength
-    errors
+    errorMsg
+    |> insertLightning
+    |> splitByBacktrackMarker
+    |> extractPositions
+    |> aggregateExpecting
+    |> correctPositionIndexBasedOnLineAndColumn origLines origLength
     |> List.map (fun (pos, errMsg) ->
         Ast.BuildingBlockError((pos, pos), collapseExpectingBlock errMsg)
     )
-
-let private parseChunkBestEffort (chunk:string) origLines origLength =
-    match run (IW >>. buildingBlock .>> eof) chunk with
-    | Success(ast, _, _) when chunk.Length > 0 ->
-        [ast]
-    | _ ->
-        // Try parsing without eof to see how far we can get
-        match run (IW >>. buildingBlock) chunk with
-        | Success(bestEffortAst, _, userState) when chunk.Length > 0 ->
-            let posSuccess = int userState.Index
-            let maskedConsumed = masked (chunk.Substring(0, posSuccess)) 
-            let remainingCode = maskedConsumed + chunk.Substring(posSuccess).Trim()
-            // collect syntax errors for remainingCode
-            match run (IW >>. buildingBlock .>> eof) remainingCode with
-            | Failure(errorMsg, _, _) ->
-                // (there must be some failure, otherwise, because outer match parser already failed)
-                [bestEffortAst] @ getErrorNodes errorMsg origLines origLength
-            | _ ->
-                [bestEffortAst] // should never happen, but for clarity
-        | Failure(errorMsg, _, _) ->
-            // even parsing without eof to see how far we can get failed, therefore
-            // collect syntax errors
-            getErrorNodes errorMsg origLines origLength
-        | _ ->
-            [] // should never happen, but for clarity
 
 /// Tries to parse all chunks of input of FPL building blocks. If a chunk produces a syntax error,
 /// a diagnosics will be issued and the chunk will (at least at its faulty end) be replaced by a masked chunk, where
@@ -908,46 +867,89 @@ let private parseChunkBestEffort (chunk:string) origLines origLength =
 /// Preserving line sizes is necessary to keep other diagnostics well-positioned.
 /// The syntax errors are generated using an input starting with the chunk, so syntax error messages
 /// realistically reflect the remaining code after the chunk.
-let fplParser fplCode =
-    let input = fplCode |> removeFplComments
+let private fplParserInner input =
     let matches = getMatches errRecoveryBlocks input
+    let parseAbleInput = StringBuilder()
+    let errorList = List<Ast list>()
     let origLines = input.Split(Environment.NewLine)
     let origLength = input.Length
-    if matches.Length = 0 then
-        parseChunkBestEffort input origLines origLength
-    else 
-        let prefix = input.Substring(0, matches[0].Index)
-        let clearedPrefix = masked prefix
-        // if there is some code before the first building block chunk
-        // we remember the first errors of this prefix
-        let prefixError =
-            if prefix.Trim() = String.Empty then
-                [] 
-            else 
-                parseChunkBestEffort prefix origLines origLength
-        let rec tryParseChunk i acc maskedPrefix =
-            if i < matches.Length - 1 then
-                // there are multiple chunks
-                let pos = matches[i].Index
-                let len =
-                    if i < matches.Length - 1 then
-                        matches[i + 1].Index - matches[i].Index
-                    else
-                        input.Length - matches[i].Index
-                let chunk = input.Substring(pos, len)
-                let clearedChunk = masked chunk
-                let chunkAsts = parseChunkBestEffort (maskedPrefix + chunk.Trim()) origLines origLength
-                acc @ chunkAsts @ tryParseChunk (i+1) acc (maskedPrefix + clearedChunk)
-            elif i = matches.Length - 1 then
-                // there is only one chunk or last chunk
-                let pos = matches[i].Index
-                let chunk = input.Substring(pos)
-                let chunkAsts = parseChunkBestEffort (maskedPrefix + chunk.Trim()) origLines origLength
-                acc @ chunkAsts
-            else 
-                acc
 
-        prefixError @ tryParseChunk 0 [] clearedPrefix
+    // Helper to produce chunk, maskedChunk and the 'remainder' used for diagnostics
+    let getChunkMaskedAndRemainder i =
+        if matches.Length = 0 then
+            let chu = input
+            let mChu = masked chu
+            chu, mChu, chu
+        else
+            let pos = matches[i].Index
+            let len =
+                if i < matches.Length - 1 then
+                    matches[i + 1].Index - matches[i].Index
+                else
+                    input.Length - matches[i].Index
+            let chu = input.Substring(pos, len)
+            let mChu = masked chu
+            let remainder =
+                if i = 0 && matches[0].Index > 0 then
+                    // when there is a prefix before the first match, diagnostics should see the masked prefix + the chunk
+                    let prefix = input.Substring(0, matches[0].Index)
+                    (masked prefix) + chu
+                else
+                    chu
+            chu, mChu, remainder
+
+    // Iterate once for each relevant chunk (if no matches, still run once)
+    let upper =
+        if matches.Length = 0 then 0 else matches.Length - 1
+
+    for i in [0..upper] do
+        // If there is a non-matching prefix before the first recovery match, preserve its masked form
+        if i = 0 && matches.Length > 0 && matches[0].Index > 0 then
+            let prefix = input.Substring(0, matches[0].Index)
+            parseAbleInput.Append(masked prefix) |> ignore
+
+        let chunk, maskedChunk, remainder = getChunkMaskedAndRemainder i
+        let trimedInput = chunk.Trim()
+
+        // Try a strict parse of the building block (must consume all of the trimmed chunk)
+        match run (buildingBlock .>> eof) trimedInput with
+        | Success(_, _, _) when trimedInput.Length > 0 ->
+            parseAbleInput.Append(chunk) |> ignore
+        | _ ->
+            // Try parsing without eof to see how far we can get
+            match run buildingBlock trimedInput with
+            | Success(_, _, userState) when trimedInput.Length > 0 ->
+                let posSuccess = int userState.Index
+                // keep the successfully parsed prefix from the trimmed input
+                parseAbleInput.Append(trimedInput.Substring(0, posSuccess)) |> ignore
+
+                // Append masked remainder of this chunk (special-case single match with trailing ';')
+                if maskedChunk.Length > posSuccess then
+                    if matches.Length = 1 then
+                        let rest = chunk.Substring(posSuccess).Trim()
+                        if rest = ";" then
+                            parseAbleInput.Append(chunk.Substring(posSuccess)) |> ignore
+                        else
+                            parseAbleInput.Append(maskedChunk.Substring(posSuccess)) |> ignore
+                    else
+                        parseAbleInput.Append(maskedChunk.Substring(posSuccess)) |> ignore
+                else
+                    parseAbleInput.Append(maskedChunk) |> ignore
+
+            | _ ->
+                // If there were no recovery matches at all, keep the whole chunk,
+                // otherwise mask it entirely
+                if i = 0 && matches.Length = 0 then
+                    parseAbleInput.Append(chunk) |> ignore
+                else
+                    parseAbleInput.Append(maskedChunk) |> ignore
+
+            // Run the full AST parser on the remainder to produce diagnostics for the chunk
+            match run (stdParser .>> eof) remainder with
+            | Failure(errorMsg, _, _) ->
+                errorList.Add (getErrorNodes errorMsg origLines origLength)
+            | _ -> ()
+    parseAbleInput.ToString(), errorList |> Seq.toList |> List.concat
 
 let private getBuildingBlockAsts (topAst:Ast) =
     let rec getBlocks (subAst:Ast) = 
@@ -959,7 +961,24 @@ let private getBuildingBlockAsts (topAst:Ast) =
         | _ -> []
     getBlocks topAst
 
-let stdParser = ast
+let fplParser fplCode =
+    let input = fplCode |> removeFplComments
+    match run stdParser input with
+    | Success(ast, _, _) ->
+        getBuildingBlockAsts ast, true
+    | _ ->
+        let parseAbleInput, errorList = fplParserInner input
+        match run stdParser parseAbleInput with 
+        | Success(ast, _, _) ->
+            let resultWithSyntaxErrors = errorList @ getBuildingBlockAsts ast
+            resultWithSyntaxErrors
+            |> List.sortBy (fun buildingBlockAst ->
+                match buildingBlockAst with
+                | Ast.BuildingBlock((pos1,_),_) 
+                | Ast.BuildingBlockError((pos1,_),_) -> pos1.Index
+                | _ -> Int64.MaxValue
+            ), false
+        | _ -> [], false
 
 let calculateCurrentContext (matchList:System.Collections.Generic.List<int>) i = 
     let index = matchList[i]
@@ -995,7 +1014,7 @@ let parserDiagnostics = ad
 /// Returns the parser choices at position (if any).
 let getParserChoicesAtPosition (input:string) index =
     let newInput = input |> removeFplComments
-    match run ast (newInput.Substring(0, index)) with
+    match run stdParser (newInput.Substring(0, index)) with
     | Success(result, restInput, userState) -> 
         // In the success case, we always return the current parser position in the input
         List.empty, userState.Index
