@@ -513,7 +513,7 @@ type TestEvalAliasedNamespaceIdentifier() =
     member this.TestGarbageCollector() =
         if not TestConfig.IsOffline then 
             let filename = "TestGarbageCollector.fpl"
-            prepareFplCode(filename, "uses Fpl.SetTheory;", false) 
+            prepareFplCode(filename, "uses Fpl.SetTheory", false) 
             // initial counts of parsed ast and theories in root
             Assert.AreEqual<int>(3, heap.ParsedAsts.Count)
             Assert.AreEqual<int>(3, heap.Root.Scope.Count)
@@ -532,7 +532,7 @@ type TestEvalAliasedNamespaceIdentifier() =
         if not TestConfig.IsOffline then 
             let filename = "TestGarbageCollector01.fpl"
             prepareFplCode(filename, "", true) |> ignore
-            prepareFplCode(filename, "uses Fpl.SetTheory;", false) 
+            prepareFplCode(filename, "uses Fpl.SetTheory", false) 
             // initial counts of parsed ast and theories in root
             Assert.AreEqual<int>(3, heap.ParsedAsts.Count)
             Assert.AreEqual<int>(3, heap.Root.Scope.Count)
@@ -549,7 +549,7 @@ type TestEvalAliasedNamespaceIdentifier() =
         if not TestConfig.IsOffline then 
             let filename = "TestGarbageCollector02.fpl"
             prepareFplCode(filename, "", true) |> ignore
-            prepareFplCode(filename, "uses Fpl.SetTheory;", false) 
+            prepareFplCode(filename, "uses Fpl.SetTheory", false) 
             // initial counts of parsed ast and theories in root
             Assert.AreEqual<int>(3, heap.ParsedAsts.Count)
             Assert.AreEqual<int>(3, heap.Root.Scope.Count)

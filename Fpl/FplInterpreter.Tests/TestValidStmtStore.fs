@@ -13,9 +13,9 @@ type TestValidStmtStore() =
 
 
 
-    [<DataRow("axiom X { true };", 1)>] // one axiom, one stmt
-    [<DataRow("axiom X { true } axiom Y { true };", 1)>] // single stmt, two axioms
-    [<DataRow("axiom X { true } axiom Y { ex x:obj { true } };", 2)>] // two axioms, two stmts 
+    [<DataRow("axiom X { true }", 1)>] // one axiom, one stmt
+    [<DataRow("axiom X { true } axiom Y { true }", 1)>] // single stmt, two axioms
+    [<DataRow("axiom X { true } axiom Y { ex x:obj { true } }", 2)>] // two axioms, two stmts 
     [<TestMethod>]
     member this.TestStmtStoreAddsAxioms(varVal, expected:int) =
        

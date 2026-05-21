@@ -86,7 +86,7 @@ type TestRepresentation() =
             Assert.AreEqual<string>(expected, retStmt.Represent())
             prepareFplCode(filename, "", false) |> ignore
 
-    [<DataRow("00","T() -> A", "def cl A def func T() -> A;", """T()""", "A")>] // intrinsic function using Skolem representation
+    [<DataRow("00","T() -> A", "def cl A def func T() -> A", """T()""", "A")>] // intrinsic function using Skolem representation
     [<TestMethod>]
     member this.TestRepresentationFunctionalTerms(var:string, funcTermSignature:string, fplCode, expectedRepr:string, expectedType:string) =
         
@@ -300,16 +300,16 @@ type TestRepresentation() =
         Assert.AreEqual<string>(expected, func.Represent())
         prepareFplCode(filename, "", false) |> ignore
 
-    [<DataRow("00","""def pred T() { dec v:ind; true };""", PrimUndetermined)>]
-    [<DataRow("00a","""def pred T() { dec v:pred; true };""", PrimUndetermined)>]
-    [<DataRow("00b","""def pred T() { dec v:obj; true };""", PrimUndetermined)>]
-    [<DataRow("00c","""def pred T() { dec v:func; true };""", PrimUndetermined)>]
-    [<DataRow("00d","""def pred T() { dec v:tpl; true };""", PrimUndetermined)>]
-    [<DataRow("01a","""def pred T() { dec v:pred(d:ind); true };""", PrimUndetermined)>]
-    [<DataRow("01b","""def pred T() { dec v:pred(d:pred(e,f:obj)); true };""", PrimUndetermined)>]
-    [<DataRow("01c","""def pred T() { dec v:func(x:pred(y:obj,d,e:ind)) ->pred(i:pred(j,k:obj)); true };""", PrimUndetermined)>]
-    [<DataRow("02","""def pred T() { dec v:A; true };""", PrimUndetermined)>]
-    [<DataRow("02a","""def cl A {intr} def pred T() { dec v:A; true };""", PrimUndetermined)>]
+    [<DataRow("00","""def pred T() { dec v:ind; true }""", PrimUndetermined)>]
+    [<DataRow("00a","""def pred T() { dec v:pred; true }""", PrimUndetermined)>]
+    [<DataRow("00b","""def pred T() { dec v:obj; true }""", PrimUndetermined)>]
+    [<DataRow("00c","""def pred T() { dec v:func; true }""", PrimUndetermined)>]
+    [<DataRow("00d","""def pred T() { dec v:tpl; true }""", PrimUndetermined)>]
+    [<DataRow("01a","""def pred T() { dec v:pred(d:ind); true }""", PrimUndetermined)>]
+    [<DataRow("01b","""def pred T() { dec v:pred(d:pred(e,f:obj)); true }""", PrimUndetermined)>]
+    [<DataRow("01c","""def pred T() { dec v:func(x:pred(y:obj,d,e:ind)) ->pred(i:pred(j,k:obj)); true }""", PrimUndetermined)>]
+    [<DataRow("02","""def pred T() { dec v:A; true }""", PrimUndetermined)>]
+    [<DataRow("02a","""def cl A {intr} def pred T() { dec v:A; true }""", PrimUndetermined)>]
     [<TestMethod>]
     member this.TestRepresentationUnitializedVars(var:string, fplCode, expected:string) =
         
@@ -323,10 +323,10 @@ type TestRepresentation() =
         prepareFplCode(filename, "", false) |> ignore
 
 
-    [<DataRow("00","""def pred T() { dec v:pred v:=true; false};""", LiteralTrue)>]
-    [<DataRow("01","""def pred T() { dec v:pred v:=false; false};""", LiteralFalse)>]
-    [<DataRow("02","""def cl A {dec myX:obj; ctor A(x:obj) {dec myX:=x;}} def cl B:A { ctor B(x:obj) {dec base.A(del.Decrement(x)); } } def pred T() { dec v:B v:=B(@2); false};""", """B(2)""")>]
-    [<DataRow("03","""def cl A {dec myX:pred; ctor A(x:pred) {dec myX:=x;}} def cl B:A { ctor B(x:pred) {dec base.A(not x); } } def pred T() { dec v:B v:=B(true); false};""", """B(true)""")>]
+    [<DataRow("00","""def pred T() { dec v:pred v:=true; false}""", LiteralTrue)>]
+    [<DataRow("01","""def pred T() { dec v:pred v:=false; false}""", LiteralFalse)>]
+    [<DataRow("02","""def cl A {dec myX:obj; ctor A(x:obj) {dec myX:=x;}} def cl B:A { ctor B(x:obj) {dec base.A(del.Decrement(x)); } } def pred T() { dec v:B v:=B(@2); false}""", """B(2)""")>]
+    [<DataRow("03","""def cl A {dec myX:pred; ctor A(x:pred) {dec myX:=x;}} def cl B:A { ctor B(x:pred) {dec base.A(not x); } } def pred T() { dec v:B v:=B(true); false}""", """B(true)""")>]
     [<TestMethod>]
     member this.TestRepresentationItializedVars(var:string, fplCode, expected:string) =
         

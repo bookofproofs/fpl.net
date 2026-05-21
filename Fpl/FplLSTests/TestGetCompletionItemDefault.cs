@@ -152,7 +152,7 @@ namespace FplLSTests
         [DataRow("~", "type declaration '~'")]
         [DataRow("|-", "follows logically '|-'")]
         [DataRow("->", "map '->'")]
-        [DataRow(";", "closing ';'")]
+        [DataRow("", "closing ';'")]
         [DataRow("{", "opening '{'")]
         [DataRow("}", "closing '}'")]
         [DataRow("(", "opening '('")]

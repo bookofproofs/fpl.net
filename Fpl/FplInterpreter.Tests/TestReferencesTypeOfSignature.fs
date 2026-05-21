@@ -78,7 +78,7 @@ type TestReferencesTypeOfSignature() =
     member this.TestPredicateReferenceTypeSignature(var, fplCode) =
         
         let filename = "TestPredicateReferenceTypeSignature"
-        prepareFplCode(filename + ".fpl", "def pred T() { " + fplCode + " };", false) 
+        prepareFplCode(filename + ".fpl", "def pred T() { " + fplCode + " }", false) 
         let r = heap.Root
         let theory = r.Scope[filename]
 
@@ -225,17 +225,17 @@ type TestReferencesTypeOfSignature() =
         | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
 
-    [<DataRow("""loc and(p,q) := !tex: x "=" y;;""", "and(undef, undef)")>]
+    [<DataRow("""loc and(p,q) := !tex: x "=" y;""", "and(undef, undef)")>]
     [<DataRow("""thm T {true};""","pred")>]
-    [<DataRow("""ax T {true};""", "pred")>]
-    [<DataRow("""lem T {true};""", "pred")>]
-    [<DataRow("""prop T {true};""", "pred")>]
-    [<DataRow("""conj T {true};""", "pred")>]
-    [<DataRow("""cor T$1 {true};""", "pred")>]
+    [<DataRow("""ax T {true}""", "pred")>]
+    [<DataRow("""lem T {true}""", "pred")>]
+    [<DataRow("""prop T {true}""", "pred")>]
+    [<DataRow("""conj T {true}""", "pred")>]
+    [<DataRow("""cor T$1 {true}""", "pred")>]
     [<DataRow("""proof T$1 {1. |- trivial};""","pred")>]
     [<DataRow("""def pred T(p:obj) {true};""","pred(obj)")>]
-    [<DataRow("""def pred T() {true};""", "pred()")>]
-    [<DataRow("""inf T {pre: true con:true};""", "undef")>]
+    [<DataRow("""def pred T() {true}""", "pred()")>]
+    [<DataRow("""inf T {pre: true con:true}""", "undef")>]
     [<TestMethod>]
     member this.TestBlockTypeSignature(varVal, name:string) =
         

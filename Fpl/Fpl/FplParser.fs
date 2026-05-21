@@ -623,24 +623,25 @@ let languageList = many1 (IW >>. language .>> IW)
 let localization = positions (keywordLocalization >>. predicate) .>> (IW .>> colonEqual) .>>. (languageList .>>. (IW >>. semiColonOpt)) .>> IW |>> Ast.Localization
 
 // FPL building blocks can be definitions, axioms, Theorem-proof blocks and conjectures
-let buildingBlock = choice [
-    definition
-    axiom
-    theorem
-    lemma
-    proposition
-    corollary
-    conjecture
-    proof
-    ruleOfInference
-    localization
-    usesClause
-    definitionExtension
-]
+let buildingBlock =
+    choice [
+        definition
+        axiom
+        theorem
+        lemma
+        proposition
+        corollary
+        conjecture
+        proof
+        ruleOfInference
+        localization
+        usesClause
+        definitionExtension
+        ] .>> IW
 
 
 (* Namespaces *)
-let fplNamespace = many (buildingBlock .>> IW) |>> Ast.Namespace
+let fplNamespace = many buildingBlock |>> Ast.Namespace
 (* Final Parser *)
 let ast =  positions (IW >>. fplNamespace) |>> Ast.AST
 
