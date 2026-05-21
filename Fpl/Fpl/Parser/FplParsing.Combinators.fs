@@ -18,6 +18,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 
+// A simple helper function for printing trace information to the console (taken from FParsec Docs)
+let (<!>) (p: Parser<_,_>) label : Parser<_,_> =
+    fun stream ->
+        printfn "%A: Entering %s" stream.Position label
+        let reply = p stream
+        printfn "%A: Leaving %s (%A)" stream.Position label reply.Status
+        reply
+
 /// A helper parser that consume any input and can be combined with existing parsers to enrich them with 
 /// the parsing position.
 let private _position: Parser<_,_> = fun stream -> Reply stream.Position
@@ -117,6 +125,17 @@ let withBacktrackedError p: Parser<_,_> =
             Reply(result, restInput)
         | _ ->
             Reply(oldState)
+
+/// Taken from https://www.quanttec.com/fparsec/users-guide/looking-ahead-and-backtracking.html#parser-predicates
+let resultSatisfies predicate msg (p: Parser<_,_>) : Parser<_,_> =
+    let error = messageError msg
+    fun stream ->
+      let state = stream.State
+      let reply = p stream
+      if reply.Status <> Ok || predicate reply.Result then reply
+      else
+          stream.BacktrackTo(state) // backtrack to beginning
+          Reply(Primitives.Error, error)
 
 let variableX: Parser<string,unit> = 
     IdStartsWithSmallCase 

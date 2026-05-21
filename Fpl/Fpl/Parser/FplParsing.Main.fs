@@ -152,36 +152,6 @@ let fplParser fplCode =
             ), false
         | Failure(errorMsg, _, _) ->
                 getErrorNodes errorMsg origLines origLength, false
-        | _ -> [], false
-
-let calculateCurrentContext (matchList:System.Collections.Generic.List<int>) i = 
-    let index = matchList[i]
-    if i + 1 < matchList.Count then
-        let nextIndex = matchList[i+1]
-        index, nextIndex
-    else
-        index, index
-
-let findFirstIndexInMatches (matchList:System.Collections.Generic.List<int>) pIndex kMax =
-    let rec loop i last =
-        if i >= matchList.Count then 
-            kMax
-        else 
-            let index = matchList[i]
-            if index > pIndex then 
-                last
-            else 
-                loop (i + 1) i
-    loop 0 0
-
-let maxIntervalBound (intervals:System.Collections.Generic.List<Interval>) =
-    let mutable maxBound = -1
-    for interval in intervals do
-        if interval.End > maxBound then
-            maxBound <- interval.End
-        if interval.End = -1 && interval.Start > maxBound then
-            maxBound <- interval.Start
-    maxBound
 
 let parserDiagnostics = ad
 
