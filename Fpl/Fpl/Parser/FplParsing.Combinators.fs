@@ -60,8 +60,7 @@ let positions (p: Parser<_,_>): Parser<Positions * _,_> =
 (* Literals *)
 
 let leftBrace = skipChar '{' >>. spaces
-let leftBraceOpt = positions (opt (skipChar '{')) .>> spaces |>> Ast.LeftBraceOpt
-let rightBraceOpt = positions (opt (skipChar '}')) |>> Ast.RightBraceOpt
+let rightBrace = skipChar '}'
 let leftParen = skipChar '(' >>. spaces 
 let leftParenOpt = positions (opt (skipChar '(')) .>> spaces |>> Ast.LeftParenOpt
 let rightParenOpt = positions (opt (skipChar ')')) |>> Ast.RightParenOpt
@@ -307,7 +306,7 @@ let dotWithErr = choice [
 
 let fplDelegate = keywordDel >>. (dotWithErr .>>. delegateName .>>. argumentTupleWithOptLeftParen .>> IW) |>> Ast.Delegate
 
-let spacesRightBrace = (IW >>. rightBraceOpt) 
+let spacesRightBrace = (IW >>. rightBrace) 
 
 let keywordReturn = IW >>. (skipString LiteralRetL <|> skipString LiteralRet) .>> SW 
 
@@ -328,7 +327,7 @@ let assignmentStatement = positions ((predicateWithQualification .>> IW .>> colo
 let inEntity = keywordIn >>. positions (predicateWithQualification) .>> IW |>> Ast.InEntity
 
 let entityInDomain = ( variable .>> IW .>>. inEntity ) .>> IW
-let forInBody = (entityInDomain .>> IW) .>>. (leftBraceOpt .>>. statementList) .>>. (IW >>. rightBraceOpt)
+let forInBody = (entityInDomain .>> IW) .>>. (leftBrace >>. statementList) .>> IW .>> rightBrace
 let forStatement = positions (keywordFor >>. forInBody) |>> Ast.ForIn
 
 //// Difference of assertion to an axiom: axiom is named predicate, while an assertion uses a predicated to assert it.
@@ -402,8 +401,8 @@ let implication = positions (chooseBinaryOp keywordImpl) |>> Ast.Impl
 let equivalence = positions (chooseBinaryOp keywordIif) |>> Ast.Iif
 let negation = positions (keywordNot >>. predicate) |>> Ast.Not
 
-let all = positions ((keywordAll >>. namedVariableDeclarationList) .>>. (leftBraceOpt .>>. predicate .>>. rightBraceOpt)) |>> Ast.All
-let exists = positions ((keywordEx >>. namedVariableDeclarationList) .>>. (leftBraceOpt .>>. predicate .>>. rightBraceOpt)) |>> Ast.Exists
+let all = positions ((keywordAll >>. namedVariableDeclarationList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.All
+let exists = positions ((keywordEx >>. namedVariableDeclarationList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.Exists
 
 let existsNTimes = choice [
         attempt (keywordExNSymbolic .>> SW) |>> Ast.Exists1 
@@ -415,7 +414,7 @@ let existsTimeNQuantifier = choice [
     existsNTimes
 ]
 
-let existsTimesN = positions ((existsTimeNQuantifier .>>. namedVariableDeclarationList) .>>. (leftBraceOpt .>>. predicate .>>. rightBraceOpt)) |>> Ast.ExistsN
+let existsTimesN = positions ((existsTimeNQuantifier .>>. namedVariableDeclarationList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.ExistsN
 let isOp = choice [
     attempt (dot >>. (predicate .>> keywordIs) .>>. variableType) 
     (keywordIs >>. leftParen >>. predicate .>> IW) .>>. (comma >>. variableType) .>> rightParenOpt
@@ -467,7 +466,7 @@ let spacesPredicate = IW >>. predicate
 let premiseList = positions (IW >>. (keywordPremise >>. colon >>. predicateList)) |>> Ast.PremiseList
 let conclusion = IW >>. (keywordConclusion >>. colon >>. predicate)
 let insideRuleOfOnference = (varDeclOrSpecList .>>. (premiseList .>>. conclusion))
-let premiseConclusionBlock = leftBraceOpt .>>. insideRuleOfOnference .>>. spacesRightBrace |>> Ast.PremiseConclusionBlock
+let premiseConclusionBlock = leftBrace >>. insideRuleOfOnference .>> spacesRightBrace |>> Ast.PremiseConclusionBlock
 
 (* FPL building blocks - rules of reference *)
 let keywordInference = (skipString LiteralInfL <|> skipString LiteralInf) .>> SW 
@@ -481,7 +480,7 @@ let keywordProposition = (skipString LiteralPropL <|> skipString LiteralProp) .>
 let keywordCorollary = (skipString LiteralCorL <|> skipString LiteralCor) .>> SW
 let keywordConjecture = (skipString LiteralConjL <|> skipString LiteralConj) .>> SW
 
-let theoremLikeBlock = leftBraceOpt .>>. (varDeclOrSpecList .>>. spacesPredicate) .>>. spacesRightBrace
+let theoremLikeBlock = leftBrace >>. (varDeclOrSpecList .>>. spacesPredicate) .>> spacesRightBrace
 
 let theoremSignature = positions (keywordTheorem >>. pascalCaseId) .>> IW |>> Ast.TheoremSignature
 let theorem = positions (theoremSignature .>>. theoremLikeBlock) |>> Ast.Theorem
@@ -508,7 +507,7 @@ let keywordIntrinsic = positions (skipString LiteralIntrL <|> skipString Literal
 let predContent = varDeclOrSpecList .>>. spacesPredicate |>> Ast.DefPredicateContent
 
 let keywordConstructor = (skipString LiteralCtorL <|> skipString LiteralCtor) .>> SW
-let constructorBlock = leftBraceOpt .>>. varDeclOrSpecList .>>. spacesRightBrace |>> Ast.ConstructorBlock
+let constructorBlock = leftBrace >>. varDeclOrSpecList .>> spacesRightBrace |>> Ast.ConstructorBlock
 let constructorSignature = positions (keywordConstructor >>. simpleSignature .>>. paramTupleWithOptLeftParen) .>> IW |>> Ast.ConstructorSignature
 let constructor = positions (constructorSignature .>>. constructorBlock) |>> Ast.Constructor
 
@@ -533,7 +532,7 @@ let extensionRegex = regex "[^\/]+" <?> "<extension regex>" |>> Ast.ExtensionReg
 let extensionAssignment = positions ((variable .>> IW .>> at .>> IW) .>>. (slash >>. extensionRegex .>> slash)) |>> Ast.ExtensionAssignment
 
 let extensionSignature = positions ((extensionAssignment .>> IW) .>>. mapping) .>> IW |>> Ast.ExtensionSignature
-let extensionTerm = leftBraceOpt .>>. ((funcContent <|> mapCases) .>>. spacesRightBrace)
+let extensionTerm = leftBrace >>. ((funcContent <|> mapCases) .>> spacesRightBrace)
 let definitionExtension = positions (keywordExtension >>. extensionName .>>. extensionSignature .>>. extensionTerm) |>> Ast.DefinitionExtension
 
 let definitionProperty = choice [
@@ -573,7 +572,7 @@ let proofArgument = positions ((argumentIdentifier .>> IW) .>>. justifiedArgumen
 let proofArgumentList = many1 (IW >>. (proofArgument <|> varDeclBlock))
 let keywordProof = (skipString LiteralPrfL <|> skipString LiteralPrf) .>> SW
 let proofContent = proofArgumentList .>>. opt keywordQed |>> Ast.ProofContent
-let proofBlock = (leftBraceOpt .>>. proofContent) .>>. spacesRightBrace |>> Ast.ProofBlock
+let proofBlock = leftBrace >>. proofContent .>> spacesRightBrace |>> Ast.ProofBlock
 let proofSignature = positions (keywordProof >>. simpleSignature .>>. dollarDigitList) .>> IW |>> Ast.ProofSignature
 
 let proof = positions (proofSignature .>>. proofBlock) |>> Ast.Proof
@@ -581,14 +580,14 @@ let proof = positions (proofSignature .>>. proofBlock) |>> Ast.Proof
 (* FPL building blocks - Definitions *)
 
 // Predicate building blocks can be defined similarly to classes, they can have properties but they cannot be derived any parent type
-let predicateDefinitionBlock = opt (leftBrace  >>. ((keywordIntrinsic <|> predContent) .>> IW) .>>. propertyList .>>. spacesRightBrace)
+let predicateDefinitionBlock = opt (leftBrace  >>. ((keywordIntrinsic <|> predContent) .>> IW) .>>. propertyList .>> spacesRightBrace)
 let inheritedType = positions (opt idStartsWithCap) .>> IW |>> Ast.InheritedType 
 let inheritedTypeList = sepBy1 inheritedType comma |>> Ast.InheritedTypeList
 let predicateSignature = positions (keywordPredicate >>. SW >>. (simpleSignature .>>. opt (colon >>. inheritedTypeList) .>> IW) .>>. paramTupleWithOptLeftParen) .>>. userDefinedSymbol .>> IW |>> Ast.PredicateSignature
 let definitionPredicate = positions (predicateSignature .>>. predicateDefinitionBlock) |>> Ast.DefinitionPredicate
 
 // Functional term building blocks can be defined similarly to classes, they can have properties but they cannot be derived any parent type 
-let functionalTermDefinitionBlock = positions (opt (leftBrace  >>. ((keywordIntrinsic <|> funcContent) .>> IW) .>>. propertyList .>>. spacesRightBrace))  |>> Ast.FunctionalTermDefinitionBlock
+let functionalTermDefinitionBlock = positions (opt (leftBrace  >>. ((keywordIntrinsic <|> funcContent) .>> IW) .>>. propertyList .>> spacesRightBrace))  |>> Ast.FunctionalTermDefinitionBlock
 
 let functionalTermSignature = positions (keywordFunction >>. SW >>. (simpleSignature .>>. opt (colon >>. inheritedTypeList) .>> IW) .>>. paramTupleWithOptLeftParen .>>. (IW >>. mapping)) .>>. userDefinedSymbol .>> IW |>> Ast.FunctionalTermSignature
 let definitionFunctionalTerm = positions (functionalTermSignature .>>. functionalTermDefinitionBlock) |>> Ast.DefinitionFunctionalTerm
@@ -598,7 +597,7 @@ let keywordClass = (skipString LiteralClL <|> skipString LiteralCl)
 
 let constructorList = many1 (constructor .>> IW)
 let classCompleteContent = varDeclOrSpecList .>>. constructorList |>> Ast.DefClassCompleteContent
-let classDefinitionBlock = positions (opt (leftBrace  >>. ((keywordIntrinsic <|> classCompleteContent) .>> IW) .>>. propertyList .>>. spacesRightBrace)) |>> Ast.ClassDefinitionBlock
+let classDefinitionBlock = positions (opt (leftBrace  >>. ((keywordIntrinsic <|> classCompleteContent) .>> IW) .>>. propertyList .>> spacesRightBrace)) |>> Ast.ClassDefinitionBlock
 
 let classSignature = positions (keywordClass >>. SW >>. pascalCaseId) .>> IW |>> Ast.ClassSignature
 let classSignatureExtended = classSignature .>>. opt (colon >>. inheritedTypeList) .>>. opt (attempt (IW >>. userDefinedObjSym)) .>> IW

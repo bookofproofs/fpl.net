@@ -328,7 +328,7 @@ type TestPredicates () =
         let result = run (predicate .>> eof) """exn$0 x,y,z:obj(true)"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestPredicate44 () =

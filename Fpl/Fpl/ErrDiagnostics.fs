@@ -146,8 +146,6 @@ type DiagnosticCode =
     | SY000 of string
     | SY001 
     | SY002 
-    | SY003 
-    | SY004
     | SY006
     | SY007
     | SY008
@@ -256,8 +254,6 @@ type DiagnosticCode =
             | SY000 _ -> "SY000"
             | SY001 -> "SY001"
             | SY002 -> "SY002"
-            | SY003 -> "SY003"
-            | SY004 -> "SY004"
             | SY006 -> "SY006"
             | SY007 -> "SY007"
             | SY008 -> "SY008"
@@ -366,8 +362,6 @@ type DiagnosticCode =
             | SY000 infixOp -> errSY000 infixOp
             | SY001 -> errSY001
             | SY002 -> errSY002
-            | SY003 -> errSY003
-            | SY004 -> errSY004
             | SY006 -> errSY006
             | SY007 -> errSY007
             | SY008 -> errSY008

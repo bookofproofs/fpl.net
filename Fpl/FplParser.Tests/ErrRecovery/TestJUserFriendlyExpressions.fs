@@ -9,51 +9,6 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 [<TestClass>]
 type TestRecovery() =
 
-
-
-    [<DataRow("ax01", "ax T true}")>]
-    [<DataRow("thm01", "thm T true}")>]
-    [<DataRow("lem01", "lem T true}")>]
-    [<DataRow("prop01", "prop T true}")>]
-    [<DataRow("conj01", "conj T true}")>]
-    [<DataRow("cor01", "cor T$1 true}")>]
-    [<DataRow("ax01", "ax T true}")>]
-    [<DataRow("inf01", "inf T  pre: true con:true}")>]
-    [<DataRow("all01", "ax T { all x:obj  true } }")>]
-    [<DataRow("ext01", "ext Digits x@/\d+/ -> X ret x}")>]
-    [<DataRow("for01", "def pred T() {dec for x in y assert z};true}")>]
-    [<DataRow("ctor01", "def cl T {ctor T() }}")>]
-    [<DataRow("prf01", "prf T$1 1. |- trivial }")>]
-    [<TestMethod>]
-    member this.TestMissingOpeningBrace(no:string, fplCode) =
-        let result = run (stdParser .>> eof) fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<DataRow("ax01", "ax T {true")>]
-    [<DataRow("thm01", "thm T {true")>]
-    [<DataRow("lem01", "lem T {true")>]
-    [<DataRow("prop01", "prop T {true")>]
-    [<DataRow("conj01", "conj T {true")>]
-    [<DataRow("cor01", "cor T$1 {true")>]
-    [<DataRow("inf01", "inf T { pre: true con:true")>]
-    [<DataRow("all01", "ax T { all x:obj  { true  }")>]
-    [<DataRow("ex01", "ax T { ex x:obj { true  }")>]
-    [<DataRow("exn01", "ax T { exn$1 x:obj { true  }")>]
-    [<DataRow("ext01", "ext Digits x@/\d+/ -> X {ret x")>]
-    [<DataRow("for01", "def pred T() {dec for x in y {assert z;true}")>]
-    [<DataRow("ctor01", "def cl T {ctor T() {}")>]
-    [<DataRow("propPred01", "def cl T {intr prty pred S() {intr }")>]
-    [<DataRow("propFunc01", "def cl T {intr prty func S()->obj {intr }")>]
-    [<DataRow("prf01", "prf T$1 {1. |- trivial ")>]
-    [<TestMethod>]
-    member this.TestMissingClosingBrace(no:string, fplCode) =
-        let result = run (stdParser .>> eof) fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
     [<DataRow("pred01", """def pred T)""")>]
     [<DataRow("func01", """def func T)->obj """)>]
     [<DataRow("ctor01", """def cl S def cl T {ctor T) {dec base.S(); }}""")>]
