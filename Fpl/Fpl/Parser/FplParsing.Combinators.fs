@@ -130,12 +130,12 @@ let withBacktrackedError p: Parser<_,_> =
 let resultSatisfies predicate msg (p: Parser<_,_>) : Parser<_,_> =
     let error = messageError msg
     fun stream ->
-      let state = stream.State
-      let reply = p stream
-      if reply.Status <> Ok || predicate reply.Result then reply
-      else
-          stream.BacktrackTo(state) // backtrack to beginning
-          Reply(Primitives.Error, error)
+        let state = stream.State
+        let reply = p stream
+        if reply.Status <> Ok || predicate reply.Result then reply
+        else
+            stream.BacktrackTo(state) // backtrack to beginning
+            Reply(Primitives.Error, error)
 
 let variableX: Parser<string,unit> = 
     IdStartsWithSmallCase 
@@ -644,5 +644,6 @@ let buildingBlock = positions(choice [definition; axiom; theorem; lemma; proposi
 
 (* Namespaces *)
 let fplNamespace = many buildingBlock |>> Ast.Namespace
+
 (* Final Parser *)
-let stdParser =  positions (IW >>. fplNamespace) |>> Ast.AST
+let stdParser = positions (IW >>. fplNamespace) |>> Ast.AST

@@ -189,9 +189,9 @@ let private collapseExpectingBlock (input: string) : string =
                     |> String.concat " "
                 )
             if l1.StartsWith("FPL ") then
-                $"SY999`{l2}`{Environment.NewLine}{merged}"
+                $"SY999:`{l2}`{Environment.NewLine}{merged}"
             else
-                $"SY998`{l2}`{Environment.NewLine}{merged}"
+                $"SY998:`{l2}`{Environment.NewLine}{merged}"
         else
             // No special rule → return unchanged
             String.concat Environment.NewLine lines
