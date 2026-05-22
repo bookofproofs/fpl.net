@@ -212,9 +212,6 @@ let rec eval ast =
             fv.FplId <- extensionName
             fv.TypeId <- extensionName
         | _ -> ()
-    | Ast.ExtensionNameErr((pos1, pos2), ()) ->
-        let fv = heap.Eval.PeekEvalStack()
-        fv.ErrorOccurred <- emitSY005diagnostics pos1 pos2
     | Ast.LanguageCode((pos1, pos2), s) -> 
         let fv = heap.Eval.PeekEvalStack()
         fv.FplId <- s
@@ -226,36 +223,32 @@ let rec eval ast =
         fv.FplId <- s
         fv.TypeId <- s
 
-    | Ast.PascalCaseId ((pos1, pos2), pascalCaseIdOpt) ->
+    | Ast.PascalCaseId ((pos1, pos2), pascalCaseId) ->
         let fv = heap.Eval.PeekEvalStack()
-        match pascalCaseIdOpt with
-        | None ->
-            fv.ErrorOccurred <- emitSY005diagnostics pos1 pos2
-        | Some pascalCaseId -> 
-            match fv.Name with
-            | LiteralAxL
-            | LiteralThmL
-            | LiteralPropL
-            | LiteralLemL
-            | LiteralConjL
-            | LiteralCorL
-            | PrimFunctionalTermL
-            | PrimPredicateL
-            | LiteralPrfL
-            | PrimMandatoryFunctionalTermL
-            | PrimMandatoryPredicateL
-            | PrimPredicateL
-            | PrimFunctionalTermL
-            | PrimRuleOfInference -> 
-                fv.FplId <- pascalCaseId
-            | LiteralCtorL ->
-                fv.FplId <- pascalCaseId
-                fv.TypeId <- pascalCaseId
-                fv.ErrorOccurred <- emitID008Diagnostics pascalCaseId fv.Parent.Value.FplId pos1 pos2
-            | PrimClassL ->
-                fv.FplId <- pascalCaseId
-                fv.TypeId <- pascalCaseId
-            | _ -> ()
+        match fv.Name with
+        | LiteralAxL
+        | LiteralThmL
+        | LiteralPropL
+        | LiteralLemL
+        | LiteralConjL
+        | LiteralCorL
+        | PrimFunctionalTermL
+        | PrimPredicateL
+        | LiteralPrfL
+        | PrimMandatoryFunctionalTermL
+        | PrimMandatoryPredicateL
+        | PrimPredicateL
+        | PrimFunctionalTermL
+        | PrimRuleOfInference -> 
+            fv.FplId <- pascalCaseId
+        | LiteralCtorL ->
+            fv.FplId <- pascalCaseId
+            fv.TypeId <- pascalCaseId
+            fv.ErrorOccurred <- emitID008Diagnostics pascalCaseId fv.Parent.Value.FplId pos1 pos2
+        | PrimClassL ->
+            fv.FplId <- pascalCaseId
+            fv.TypeId <- pascalCaseId
+        | _ -> ()
 
     | Ast.BaseClassName((pos1, pos2), identifier) ->
         let fv = heap.Eval.PeekEvalStack()
@@ -264,9 +257,6 @@ let rec eval ast =
         let candidates = findCandidatesByName identifier false true
         if candidates.Length = 0 then 
             fv.ErrorOccurred <- emitID010Diagnostics identifier pos1 pos2
-    | Ast.BaseClassNameErr((pos1, pos2), ()) ->
-        let fv = heap.Eval.PeekEvalStack()
-        fv.ErrorOccurred <- emitSY005diagnostics pos1 pos2
     | Ast.PredicateIdentifier((pos1, pos2), identifier) ->
         let fv = heap.Eval.PeekEvalStack()
         let searchIdentifier = 
@@ -920,43 +910,39 @@ let rec eval ast =
         inheritedTypeAsts
         |> List.iter (fun inheritedType ->
             match inheritedType with
-            | Ast.InheritedType((pos1, pos2), identifierOpt) ->
-                match identifierOpt with
-                | None ->
-                    beingCreatedNode.ErrorOccurred <- emitSY005diagnostics pos1 pos2
-                | _ ->
-                    // retrieve the name of the class and the class (if it exists)
-                    let baseNode = new FplBase((pos1, pos2), beingCreatedNode)
-                    heap.Eval.PushEvalStack(baseNode)            
-                    eval inheritedType
-                    heap.Eval.PopEvalStack() |> ignore
-                    let candidates = findCandidatesByName baseNode.FplId false true
-                    if candidates.Length > 0 then 
-                        let foundBase = candidates.Head
-                        match beingCreatedNode, foundBase with
-                        | :? FplPredicate, :? FplPredicate 
-                        | :? FplFunctionalTerm, :? FplFunctionalTerm ->
-                            let nodeType = beingCreatedNode.Type SignatureType.Type
-                            let baseType = foundBase.Type SignatureType.Type
-                            if nodeType <> baseType then 
-                                baseNode.ErrorOccurred <- emitID007diagnostics beingCreatedNode.Name nodeType foundBase.Name baseType pos1 pos2
-                            else 
-                                baseNode.RefersTo <- Some foundBase // add found base class to base
-                                addVariablesAndPropertiesOfBaseNode foundBase
-                        | :? FplClass, :? FplClass -> 
+            | Ast.InheritedType((pos1, pos2), _) ->
+                // retrieve the name of the class and the class (if it exists)
+                let baseNode = new FplBase((pos1, pos2), beingCreatedNode)
+                heap.Eval.PushEvalStack(baseNode)            
+                eval inheritedType
+                heap.Eval.PopEvalStack() |> ignore
+                let candidates = findCandidatesByName baseNode.FplId false true
+                if candidates.Length > 0 then 
+                    let foundBase = candidates.Head
+                    match beingCreatedNode, foundBase with
+                    | :? FplPredicate, :? FplPredicate 
+                    | :? FplFunctionalTerm, :? FplFunctionalTerm ->
+                        let nodeType = beingCreatedNode.Type SignatureType.Type
+                        let baseType = foundBase.Type SignatureType.Type
+                        if nodeType <> baseType then 
+                            baseNode.ErrorOccurred <- emitID007diagnostics beingCreatedNode.Name nodeType foundBase.Name baseType pos1 pos2
+                        else 
                             baseNode.RefersTo <- Some foundBase // add found base class to base
                             addVariablesAndPropertiesOfBaseNode foundBase
-                        | :? FplPredicate, _
-                        | :? FplFunctionalTerm, _
-                        | :? FplClass, _ ->
-                            let nodeType = beingCreatedNode.Type SignatureType.Type
-                            let baseType = foundBase.Type SignatureType.Type
-                            baseNode.ErrorOccurred <- emitID007diagnostics beingCreatedNode.Name nodeType foundBase.Name baseType pos1 pos2
-                        | _ -> () // does not occur, since syntax of inherited base is not supported from non-classes, non-functional terms, and non-predicates
-                    else
-                        baseNode.ErrorOccurred <- emitID010Diagnostics baseNode.FplId pos1 pos2
-                    if baseNode.FplId = beingCreatedNode.FplId then 
-                        baseNode.ErrorOccurred <- emitID009Diagnostics baseNode.FplId pos1 pos2
+                    | :? FplClass, :? FplClass -> 
+                        baseNode.RefersTo <- Some foundBase // add found base class to base
+                        addVariablesAndPropertiesOfBaseNode foundBase
+                    | :? FplPredicate, _
+                    | :? FplFunctionalTerm, _
+                    | :? FplClass, _ ->
+                        let nodeType = beingCreatedNode.Type SignatureType.Type
+                        let baseType = foundBase.Type SignatureType.Type
+                        baseNode.ErrorOccurred <- emitID007diagnostics beingCreatedNode.Name nodeType foundBase.Name baseType pos1 pos2
+                    | _ -> () // does not occur, since syntax of inherited base is not supported from non-classes, non-functional terms, and non-predicates
+                else
+                    baseNode.ErrorOccurred <- emitID010Diagnostics baseNode.FplId pos1 pos2
+                if baseNode.FplId = beingCreatedNode.FplId then 
+                    baseNode.ErrorOccurred <- emitID009Diagnostics baseNode.FplId pos1 pos2
             | _ -> ()
         )
         let classInheritanceChains = findInheritanceChains beingCreatedNode 
@@ -1031,11 +1017,6 @@ let rec eval ast =
             deleg.TypeId <- delegateId
             heap.Eval.PushEvalStack(deleg)
             deleg.ErrorOccurred <- emitID013Diagnostics $"Unknown delegate `{delegateId}`" pos1 pos2
-    | Ast.DelegateNameErr((pos1, pos2), ()) ->
-        let fv = heap.Eval.PeekEvalStack()
-        let deleg = new FplReference((pos1, pos2), fv)
-        heap.Eval.PushEvalStack(deleg)
-        fv.ErrorOccurred <- emitSY005diagnostics pos1 pos2
     | Ast.PredicateSignature(((pos1, pos2), ((simpleSignatureAst, inhPredicateTypeListAstsOpt), paramTupleAst)), optUserDefinedSymbolAst) -> 
         ()
         // empty since the pattern will be matched in DefinitionPredicagte 

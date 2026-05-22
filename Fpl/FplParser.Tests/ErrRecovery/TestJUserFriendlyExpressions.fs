@@ -54,44 +54,6 @@ type TestRecovery() =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<DataRow("uses00", """uses Fpl.Test.""")>]
-    [<DataRow("uses01", """uses Fpl.Test alias """)>]
-    [<DataRow("cl01", """def cl """)>]
-    [<DataRow("cl01a", """def cl {intr}""")>]
-    [<DataRow("cl02", """def cl T:""")>]
-    [<DataRow("cl03", """def cl T: ,""")>]
-    [<DataRow("cl04", """def cl T:,,""")>]
-    [<DataRow("cl05", """def cl T:, ,""")>]
-    [<DataRow("cl06", """def cl T: , , """)>]
-    [<DataRow("thm01", """thm {true}""")>]
-    [<DataRow("lem01", """lem {true}""")>]
-    [<DataRow("prop01", """prop {true}""")>]
-    [<DataRow("conj01", """conj {true}""")>]
-    [<DataRow("ax01", """ax {true}""")>]
-    [<DataRow("pred01", """def pred ()""")>]
-    [<DataRow("pred01a", """def pred () {intr}""")>]
-    [<DataRow("pred02", """def pred T:()""")>]
-    [<DataRow("pred03", """def pred T:,()""")>]
-    [<DataRow("func01", """def func ()->obj """)>]
-    [<DataRow("func01a", """def func ()->obj {intr}""")>]
-    [<DataRow("func01b", """def func T ()-> {intr}""")>]
-    [<DataRow("func02", """def func T:()->obj """)>]
-    [<DataRow("func03", """def func T:,()->obj """)>]
-    [<DataRow("inf01", """inf {pre:true con:true}""")>]
-    [<DataRow("cor01", """cor $1 {true}""")>]
-    [<DataRow("proof01", """proof $1 {1. |- trivial}""")>]
-    [<DataRow("ext01", """ext  x@/\d+/ -> X {ret x}""")>]
-    [<DataRow("del01", """def pred T() {del. ()}""")>]
-    [<DataRow("del02", """def pred T() {del.()}""")>]
-    [<DataRow("base01", """def cl S def cl T {ctor T() {dec base. (); }}""")>]
-    [<DataRow("base02", """def cl S def cl T {ctor T() {dec base. (); }}""")>]
-    [<TestMethod>]
-    member this.TestMissingPascalCaseId(no:string, fplCode) =
-        let result = run (stdParser .>> eof) fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
     [<DataRow("pred01", """def pred T)""")>]
     [<DataRow("func01", """def func T)->obj """)>]
     [<DataRow("ctor01", """def cl S def cl T {ctor T) {dec base.S(); }}""")>]
@@ -184,4 +146,3 @@ type TestRecovery() =
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.AreEqual<bool>(false, success)
-

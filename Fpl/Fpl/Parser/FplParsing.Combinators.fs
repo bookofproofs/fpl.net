@@ -104,13 +104,13 @@ let extension = positions (at >>. extensionString) |>> Ast.Extension
 
 let IdStartsWithSmallCase = regex @"[a-z]\w*" 
 let idStartsWithCap = (regex @"[A-Z]\w*") <?> "<PascalCaseId>"
-let pascalCaseId = positions (opt idStartsWithCap) |>> Ast.PascalCaseId
+let pascalCaseId = positions (idStartsWithCap) |>> Ast.PascalCaseId
 
 let namespaceIdentifier = positions (sepBy1 pascalCaseId dot) .>> IW |>> Ast.NamespaceIdentifier
 
 let predicateIdentifier = positions (idStartsWithCap) |>> Ast.PredicateIdentifier 
 
-let alias = positions (skipString LiteralAlias >>. SW >>. opt idStartsWithCap) |>> Ast.Alias
+let alias = positions (skipString LiteralAlias >>. SW >>. idStartsWithCap) |>> Ast.Alias
 let star = positions (skipChar '*') |>> Ast.Star
 
 let aliasedNamespaceIdentifier = positions (namespaceIdentifier .>>. opt (alias <|> star)) |>> Ast.AliasedNamespaceIdentifier
@@ -247,10 +247,7 @@ let namedVariableDeclarationList, namedVariableDeclarationListRef = createParser
 
 let keywordExtension = (skipString LiteralExtL <|> skipString LiteralExt) .>> SW
 
-let extensionName = choice [
-    attempt (positions (idStartsWithCap) .>> SW) |>> Ast.ExtensionName
-    positions (skipString "") |>> Ast.ExtensionNameErr
-    ]
+let extensionName = positions (idStartsWithCap) .>> SW |>> Ast.ExtensionName
 
 // The classType is the last type in FPL we can derive FPL classes from.
 // It therefore excludes the in-built FPL-types keywordPredicate, keywordFunction, and keywordIndex
@@ -301,10 +298,7 @@ let userDefinedSymbol = opt (attempt (IW >>. choice [userDefinedPrefix; userDefi
 let argumentTupleWithOptLeftParen = positions ((leftParenOpt .>>. predicateList) .>>. (IW >>. rightParenOpt)) |>> Ast.ArgumentTupleWithOptLeftParen
 let argumentTuple = positions ((leftParen >>. predicateList) .>>. (IW >>. rightParenOpt)) |>> Ast.ArgumentTuple 
 
-let delegateName = choice [
-    attempt (positions (idStartsWithCap) .>> IW) |>> Ast.DelegateName
-    positions (IW) |>> Ast.DelegateNameErr
-    ]
+let delegateName = positions (idStartsWithCap) .>> IW |>> Ast.DelegateName
 
 let dotWithErr = choice [
     attempt dot
@@ -344,10 +338,7 @@ let forStatement = positions (keywordFor >>. forInBody) |>> Ast.ForIn
 let assertionStatement = positions (keywordAssert >>. predicate) |>> Ast.Assertion
 
 
-let baseClassName = choice [
-    attempt (positions (idStartsWithCap) .>> IW) |>> Ast.BaseClassName
-    positions (IW) |>> Ast.BaseClassNameErr
-    ]
+let baseClassName = positions (idStartsWithCap) .>> IW |>> Ast.BaseClassName
 
 let baseConstructorCall = positions (keywordBaseClassReference >>. dotWithErr .>>. baseClassName .>>. argumentTupleWithOptLeftParen .>> IW) |>> Ast.BaseConstructorCall
 

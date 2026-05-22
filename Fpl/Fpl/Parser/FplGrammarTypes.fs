@@ -25,12 +25,12 @@ type Ast =
     | Extension of Positions * string
     | DollarDigits of Positions * uint
     | Exists1 of unit
-    | PascalCaseId of Positions * string option
+    | PascalCaseId of Positions * string
     | NamespaceIdentifier of Positions * Ast list
     | AliasedNamespaceIdentifier of Positions * (Ast * Ast option)
     | PredicateIdentifier of Positions * string
     | LanguageCode of Positions * string
-    | Alias of Positions * string option
+    | Alias of Positions * string
     | SelfOrParent of Positions * Ast
     | Self of Positions * unit
     | Parent of Positions * unit
@@ -39,11 +39,8 @@ type Ast =
     | TranslationTermList of Positions * Ast list
     | Language of Positions * (Ast * Ast)
     | ExtensionName of Positions * string
-    | ExtensionNameErr of Positions * unit
     | DelegateName of Positions * string
-    | DelegateNameErr of Positions * unit
     | BaseClassName of Positions * string
-    | BaseClassNameErr of Positions * unit
     | ExtensionRegex of string
     | ExtensionAssignment of Positions * (Ast * Ast) 
     | ExtensionSignature of Positions * (Ast * Ast)

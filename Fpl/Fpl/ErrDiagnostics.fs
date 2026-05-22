@@ -148,7 +148,6 @@ type DiagnosticCode =
     | SY002 
     | SY003 
     | SY004
-    | SY005
     | SY006
     | SY007
     | SY008
@@ -259,7 +258,6 @@ type DiagnosticCode =
             | SY002 -> "SY002"
             | SY003 -> "SY003"
             | SY004 -> "SY004"
-            | SY005 -> "SY005"
             | SY006 -> "SY006"
             | SY007 -> "SY007"
             | SY008 -> "SY008"
@@ -370,7 +368,6 @@ type DiagnosticCode =
             | SY002 -> errSY002
             | SY003 -> errSY003
             | SY004 -> errSY004
-            | SY005 -> errSY005
             | SY006 -> errSY006
             | SY007 -> errSY007
             | SY008 -> errSY008
