@@ -72,7 +72,7 @@ let elseCase = skipChar '?' >>. spaces
 let leftBracket = skipChar '[' >>. spaces 
 let rightBracket = skipChar ']' 
 //let tilde = skipChar '~' .>> spaces
-let semiColonOpt = positions (opt (skipChar ';')) .>> spaces |>> Ast.SemicolonOpt
+let semiColon = skipChar ';' .>> spaces 
 let exclamationMark = skipChar '!' 
 let toArrow = skipString "->"
 let vDash = skipString "|-"
@@ -448,7 +448,7 @@ predicateListRef.Value <- sepBy predicate comma
 let keywordDeclaration = (skipString LiteralDecL <|> skipString LiteralDec) .>> SW 
 
 let varDecl = namedVariableDeclaration
-let varDeclBlock = IW >>. keywordDeclaration >>. (many ((attempt statement <|> varDecl) .>> IW)) .>>. semiColonOpt .>> IW |>> Ast.VarDeclBlock 
+let varDeclBlock = IW >>. keywordDeclaration >>. (many ((attempt statement <|> varDecl) .>> IW)) .>> semiColon .>> IW |>> Ast.VarDeclBlock 
 
 let varDeclOrSpecList = opt (many1 (varDeclBlock)) 
 let spacesPredicate = IW >>. predicate
@@ -616,7 +616,7 @@ let ebnfTerm = positions (sepEndBy1 ebnfFactor SW) |>> Ast.TranslationTerm
 ebnfTranslRef.Value <-  positions (sepBy1 ebnfTerm (IW >>. case >>. IW)) |>> Ast.TranslationTermList
 let language = positions ((exclamationMark >>. localizationLanguageCode .>> IW .>> colon) .>>. ebnfTransl) |>> Ast.Language
 let languageList = many1 (IW >>. language .>> IW)
-let localization = positions (keywordLocalization >>. predicate) .>> (IW .>> colonEqual) .>>. (languageList .>>. (IW >>. semiColonOpt)) .>> IW |>> Ast.Localization
+let localization = positions (keywordLocalization >>. predicate) .>> (IW .>> colonEqual) .>>. (languageList .>> (IW .>> semiColon)) .>> IW |>> Ast.Localization
 
 // FPL building blocks can be definitions, axioms, Theorem-proof blocks and conjectures
 let buildingBlock = positions(choice [definition; axiom; theorem; lemma; proposition; corollary; conjecture; proof; ruleOfInference; localization; usesClause; definitionExtension]) .>> IW |>> Ast.BuildingBlock

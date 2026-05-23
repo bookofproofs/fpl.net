@@ -129,11 +129,6 @@ let rec eval ast =
         emitSY999diagnostics errMsg pos1 pos2 
     | Ast.ErrorSyntaxBacktracking((pos1, pos2), errMsg) ->
         emitSY998diagnostics errMsg pos1 pos2 
-    | Ast.SemicolonOpt ((pos1, pos2), semicolonOpt) ->
-        match semicolonOpt with
-        | None ->
-            emitSY009diagnostics pos1 pos2 |> ignore
-        | _ -> ()
     | Ast.Digits s -> 
         let fv = heap.Eval.PeekEvalStack()
         fv.FplId <- s
@@ -644,10 +639,9 @@ let rec eval ast =
         eval predicateAst1
         eval predicateAst2
         heap.Eval.PopEvalStack()
-    | Ast.VarDeclBlock(varDeclOrStmtAstList, semicolon) ->
+    | Ast.VarDeclBlock varDeclOrStmtAstList ->
         varDeclOrStmtAstList 
         |> List.map (fun subAst -> eval subAst) |> ignore
-        eval semicolon
     | Ast.StatementList((pos1, pos2), asts) ->
         asts |> List.map eval |> ignore
     | Ast.PremiseList((pos1, pos2), predicateListAsts) ->
@@ -981,7 +975,7 @@ let rec eval ast =
         dollarDigitListAsts |> List.map eval |> ignore
         setSignaturePositions pos1 pos2
         heap.Helper.InSignatureEvaluation <- false
-    | Ast.Localization(((pos1, pos2), predicateAst), (translationListAsts, semicolon)) ->
+    | Ast.Localization(((pos1, pos2), predicateAst), translationListAsts) ->
         let parent = heap.Eval.PeekEvalStack()
         let fv = new FplLocalization((pos1, pos2), parent, heap.Helper.GetNextAvailableFplBlockRunOrder)
         let var04List = List<KeyValuePair<string, Positions>>()
@@ -1014,7 +1008,6 @@ let rec eval ast =
         |> Seq.iter (fun kvp -> 
             fv.ErrorOccurred <- emitVAR04diagnostics kvp.Key (fst kvp.Value) (snd kvp.Value)
         )
-        eval semicolon
     | Ast.FunctionalTermInstance((pos1, pos2), (functionalTermInstanceSignatureAst, functionalTermInstanceBlockOptAst)) ->
         let parent = heap.Eval.PeekEvalStack()
         let fvNew = new FplMandatoryFunctionalTerm((pos1, pos2), parent)

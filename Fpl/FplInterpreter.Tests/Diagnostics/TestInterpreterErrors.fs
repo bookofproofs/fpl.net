@@ -443,11 +443,11 @@ type TestInterpreterErrors() =
     [<DataRow("12","def class Set def pred IsEmpty(x: Set) {true}", 0)>]
     [<DataRow("13", "def pred Test(x:Set) {intr}", 1)>]
     [<DataRow("14", "def cl Set {intr} def pred Test(x:SetTypo) {intr}", 1)>]
-    [<DataRow("15", "def cl Set {intr} axiom Test {dec x:SetTypo true}", 1)>]
-    [<DataRow("16", "def cl Set {intr} axiom Test {dec x:SetTypo true}", 1)>]
-    [<DataRow("17", "def pred Test() {dec x:Set true}", 1)>]
+    [<DataRow("15", "def cl Set {intr} axiom Test {dec x:SetTypo; true}", 1)>]
+    [<DataRow("16", "def cl Set {intr} axiom Test {dec x:SetTypo; true}", 1)>]
+    [<DataRow("17", "def pred Test() {dec x:Set; true}", 1)>]
     [<DataRow("18", "axiom A { all x:Nat {true} }", 1)>]
-    [<DataRow("19", "def pred Test() {dec x:object is(x,Set)}", 1)>]
+    [<DataRow("19", "def pred Test() {dec x:object; is(x,Set)}", 1)>]
     [<DataRow("20", """def pred T1() {true} def pred Test() { OtherTest() }""", 1)>]    
     [<DataRow("21", """def func Succ(n:Nat) -> obj {intr}""", 1)>]
     [<DataRow("22", """def cl A def pred T() { is (self,ATypo) }""", 1)>]
@@ -462,10 +462,10 @@ type TestInterpreterErrors() =
 
 
     // array types 
-    [<DataRow("AR1", "def cl A def pred T() {dec arr:*ind[A] true}", 0)>]  
-    [<DataRow("AR1a", "def cl A def pred T() {dec arr:*ind[ATypo] true}", 1)>]  
-    [<DataRow("AR2", "def cl A def pred T() {dec arr:*A[ind] true}", 0)>]  
-    [<DataRow("AR2a", "def cl A def pred T() {dec arr:*ATypo[ind] true}", 1)>]  
+    [<DataRow("AR1", "def cl A def pred T() {dec arr:*ind[A]; true}", 0)>]  
+    [<DataRow("AR1a", "def cl A def pred T() {dec arr:*ind[ATypo]; true}", 1)>]  
+    [<DataRow("AR2", "def cl A def pred T() {dec arr:*A[ind]; true}", 0)>]  
+    [<DataRow("AR2a", "def cl A def pred T() {dec arr:*ATypo[ind]; true}", 1)>]  
 
     [<DataRow("MAP1", """def func T()->A {intr}""", 1)>]
     [<DataRow("MAP1a", """def cl A def func T()->A {intr}""", 0)>]
@@ -5733,8 +5733,8 @@ type TestInterpreterErrors() =
             let code = ST002 ""
             runTestHelper "TestST002.fpl" fplCode code expected
 
-    [<DataRow("01", """loc Equal(x,y) := !tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !pol: x " równa się " y""", 0)>]
-    [<DataRow("02", """loc Equal(x,y) := !eng: x " equals " y !ger: x " ist gleich " y !pol: x " równa się " y""", 1)>] // tex implementation missing
+    [<DataRow("01", """loc Equal(x,y) := !tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !pol: x " równa się " y;""", 0)>]
+    [<DataRow("02", """loc Equal(x,y) := !eng: x " equals " y !ger: x " ist gleich " y !pol: x " równa się " y;""", 1)>] // tex implementation missing
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestST004(no:string, fplCode:string, expected) =
@@ -5792,9 +5792,9 @@ type TestInterpreterErrors() =
     [<DataRow("03", "axiom A { all x:obj {y} }", 1)>]
     [<DataRow("04", "axiom A { dec x:obj; true }", 0)>]
     [<DataRow("05", "axiom A { dec x:obj; true }", 0)>]
-    [<DataRow("06", """loc and(p,q) := !tex: p "\wedge" q""", 0)>]
-    [<DataRow("07", """loc and(p,q) := !tex: x "\wedge" q""", 1)>]
-    [<DataRow("08", """loc and(p,q) := !tex: x "\wedge" y""", 2)>]
+    [<DataRow("06", """loc and(p,q) := !tex: p "\wedge" q;""", 0)>]
+    [<DataRow("07", """loc and(p,q) := !tex: x "\wedge" q;""", 1)>]
+    [<DataRow("08", """loc and(p,q) := !tex: x "\wedge" y;""", 2)>]
     [<DataRow("09", """def pred Add(x,y: obj) infix "+" 2 {intr} loc (x + y) := !tex: x "+" y !eng: x "plus" y !ger: x "plus" y""", 0)>]
     [<DataRow("10", """def pred Add(x,y: obj) infix "+" 2 {intr} axiom A {(x + y * z = 1)}""", 3)>]
     [<DataRow("11", "axiom A {dec arr: tpl; x }", 1)>]
@@ -6371,9 +6371,9 @@ type TestInterpreterErrors() =
             let code = VAR10 ("", "")
             runTestHelper "TestVAR10.fpl" fplCode code expected
 
-    [<DataRow("01", """loc and(p,q) := !tex: p "\wedge" q""", 0)>]
-    [<DataRow("02", """loc and(q,q) := !tex: p "\wedge" q""", 1)>]
-    [<DataRow("03", """loc ex q:pred { and(q,q) } := !tex: p "\wedge" q""", 1)>]
+    [<DataRow("01", """loc and(p,q) := !tex: p "\wedge" q;""", 0)>]
+    [<DataRow("02", """loc and(q,q) := !tex: p "\wedge" q;""", 1)>]
+    [<DataRow("03", """loc ex q:pred { and(q,q) } := !tex: p "\wedge" q;""", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestVAR11(no: string, fplCode:string, expected) =

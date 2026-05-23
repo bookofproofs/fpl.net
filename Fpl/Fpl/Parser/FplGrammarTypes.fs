@@ -10,7 +10,6 @@ type Positions = Position * Position
 
 type Ast = 
     // Literals
-    | SemicolonOpt of Positions * unit option
     | Star of Positions * unit
     | Dot of unit
     // Identifiers
@@ -107,14 +106,14 @@ type Ast =
 
     // FPL Blocks
     | Intrinsic of Positions * unit
-    | VarDeclBlock of Ast list * Ast
+    | VarDeclBlock of Ast list
     | StatementList of Positions * Ast list
     | PremiseList of Positions * Ast list
     | PremiseConclusionBlock of Ast list option * (Ast * Ast)
 
     | RuleOfInferenceSignature of Positions * Ast
     | RuleOfInference of Positions * (Ast * Ast)
-    | Localization of (Positions * Ast) * (Ast list * Ast)
+    | Localization of (Positions * Ast) * Ast list
     | TheoremSignature of Positions * Ast
     | Theorem of Positions * (Ast * (Ast list option * Ast))
 

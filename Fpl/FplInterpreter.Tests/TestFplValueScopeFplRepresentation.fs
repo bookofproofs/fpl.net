@@ -917,7 +917,7 @@ type TestFplValueScopeFplRepresentation() =
         | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
 
-    [<DataRow("00", "dec x:pred x:=false",  LiteralFalse)>]
+    [<DataRow("00", "dec x:pred x:=false;",  LiteralFalse)>]
     [<TestMethod>]
     member this.TestAssignmentVariableReferenceTheSame(no:string, input, (expected:string)) =
         
@@ -938,8 +938,8 @@ type TestFplValueScopeFplRepresentation() =
             Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
 
-    [<DataRow("00", "dec x:pred x:=false",  LiteralFalse)>]
-    [<DataRow("01", "dec x:ind x:=$42",  "$42")>]
+    [<DataRow("00", "dec x:pred x:=false;",  LiteralFalse)>]
+    [<DataRow("01", "dec x:ind x:=$42;",  "$42")>]
     [<TestMethod>]
     member this.TestAssignmentValue(no:string, input, (expected:string)) =
         
@@ -977,7 +977,7 @@ type TestFplValueScopeFplRepresentation() =
         Assert.AreEqual<string>(expected, actual)
         prepareFplCode(filename, "", false) |> ignore
 
-    [<DataRow("00", "dec x:pred x:=false",  true)>]
+    [<DataRow("00", "dec x:pred x:=false;",  true)>]
     [<TestMethod>]
     member this.TestAssignmentVariableInitialized(no:string, input, (expected:bool)) =
         
