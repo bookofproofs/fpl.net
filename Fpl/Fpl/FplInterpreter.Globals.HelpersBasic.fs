@@ -159,8 +159,12 @@ let tryAddTemplateToParent (templateNode:FplGenericNode) =
 let tryAddSubBlockToFplBlock (fplValue:FplGenericNode) =
     let identifier = fplValue.Type SignatureType.Mixed
     let parent = fplValue.Parent.Value
-    if parent.Scope.ContainsKey(identifier) then 
-        fplValue.ErrorOccurred <- emitID001Diagnostics identifier (parent.Scope[identifier].QualifiedStartPos) fplValue.StartPos fplValue.EndPos
+    if parent.Scope.ContainsKey(identifier) then
+        match box fplValue with
+        | :? IHasSignature as hasSignature ->
+            fplValue.ErrorOccurred <- emitID001Diagnostics identifier (parent.Scope[identifier].QualifiedStartPos) hasSignature.SignStartPos hasSignature.SignEndPos
+        | _ ->
+            fplValue.ErrorOccurred <- emitID001Diagnostics identifier (parent.Scope[identifier].QualifiedStartPos) fplValue.StartPos fplValue.EndPos
     else
         parent.Scope.Add(identifier, fplValue)
 
