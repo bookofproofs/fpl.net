@@ -448,9 +448,10 @@ predicateListRef.Value <- sepBy predicate comma
 let keywordDeclaration = (skipString LiteralDecL <|> skipString LiteralDec) .>> SW 
 
 let varDecl = namedVariableDeclaration
-let varDeclBlock = IW >>. keywordDeclaration >>. (many ((attempt statement <|> varDecl) .>> IW)) .>> semiColon .>> IW |>> Ast.VarDeclBlock 
+let varDeclBlock = (attempt statement <|> varDecl) .>> IW 
 
-let varDeclOrSpecList = opt (many1 (varDeclBlock)) 
+let varDeclOrSpecList = IW >>. opt (keywordDeclaration >>. many1 varDeclBlock .>> semiColon) .>> IW |>> Ast.VarDeclBlock 
+
 let spacesPredicate = IW >>. predicate
 let premiseList = positions (IW >>. (keywordPremise >>. colon >>. predicateList)) |>> Ast.PremiseList
 let conclusion = IW >>. (keywordConclusion >>. colon >>. predicate)
@@ -558,9 +559,9 @@ let justificationItemList = sepBy justificationItem comma
 let justification = positions (justificationItemList .>> IW) |>> Ast.Justification
 let justifiedArgument = positions (justification .>>. argumentInference) |>> Ast.JustArgInf
 let proofArgument = positions ((argumentIdentifier .>> IW) .>>. justifiedArgument) .>> IW |>> Ast.Argument
-let proofArgumentList = many1 (IW >>. (proofArgument <|> varDeclBlock))
+let proofArgumentList = many1 (IW >>. proofArgument)
 let keywordProof = (skipString LiteralPrfL <|> skipString LiteralPrf) .>> SW
-let proofContent = proofArgumentList .>>. opt keywordQed |>> Ast.ProofContent
+let proofContent = varDeclOrSpecList .>>. proofArgumentList .>>. opt keywordQed |>> Ast.ProofContent
 let proofBlock = leftBrace >>. proofContent .>> spacesRightBrace |>> Ast.ProofBlock
 let proofSignature = positions (keywordProof >>. simpleSignature .>>. dollarDigitList) .>> IW |>> Ast.ProofSignature
 

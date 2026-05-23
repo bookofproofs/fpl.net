@@ -78,10 +78,8 @@ let setKeywordType keywordType pos1 pos2 =
 /// A recursive function evaluating an AST and returning a list of EvalAliasedNamespaceIdentifier records
 /// for each occurrence of the uses clause in the FPL code.
 let rec eval ast =
-    let evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst =
-        match optVarDeclOrSpecList with
-        | Some astList -> astList |> List.map eval |> ignore
-        | None -> ()
+    let evalCommonStepsVarDeclPredicate varDeclBlock predicateAst =
+        eval varDeclBlock
         eval predicateAst
 
     let setSignaturePositions pos1 pos2 = 
@@ -640,8 +638,7 @@ let rec eval ast =
         eval predicateAst2
         heap.Eval.PopEvalStack()
     | Ast.VarDeclBlock varDeclOrStmtAstList ->
-        varDeclOrStmtAstList 
-        |> List.map (fun subAst -> eval subAst) |> ignore
+        varDeclOrStmtAstList |> Option.map (List.map eval >> ignore) |> Option.defaultValue ()
     | Ast.StatementList((pos1, pos2), asts) ->
         asts |> List.map eval |> ignore
     | Ast.PremiseList((pos1, pos2), predicateListAsts) ->
@@ -1304,8 +1301,8 @@ let rec eval ast =
         eval inDomainAst
         statementListAst |> List.map (fun stmtAst -> eval stmtAst) |> ignore
         heap.Eval.PopEvalStack() // remove ForInStmt
-    | Ast.PremiseConclusionBlock (optVarDeclOrSpecList, (premiseAst, conclusionAst)) ->
-        optVarDeclOrSpecList |> Option.map (List.map eval >> ignore) |> Option.defaultValue ()
+    | Ast.PremiseConclusionBlock (varDeclBlock, (premiseAst, conclusionAst)) ->
+        eval varDeclBlock 
         eval premiseAst
         eval conclusionAst
     | Ast.TheoremSignature((pos1, pos2), simpleSignatureAst) ->
@@ -1415,13 +1412,10 @@ let rec eval ast =
                 | _ -> ()
             | _ -> ()
         ) |> ignore 
-    | Ast.ConstructorBlock optVarDeclOrSpecListAst ->
+    | Ast.ConstructorBlock varDeclBlock ->
         let parent = heap.Eval.PeekEvalStack()
         // evaluate the construction block 
-        match optVarDeclOrSpecListAst with
-        | Some astList -> 
-            astList |> List.map eval |> ignore
-        | None -> ()
+        eval varDeclBlock
         if parent.ArgList.Count = 0 then
             parent.ErrorOccurred <- emitST002diagnostics parent.Name parent.StartPos parent.EndPos
     | Ast.Constructor((pos1, pos2), (signatureAst, constructorBlockAst)) ->
@@ -1431,20 +1425,14 @@ let rec eval ast =
         eval signatureAst
         eval constructorBlockAst
         heap.Eval.PopEvalStack()
-    | Ast.DefPredicateContent(optAsts, ast1) ->
-        optAsts
-        |> Option.map (List.map eval >> ignore)
-        |> Option.defaultValue ()
-        |> ignore
-        eval ast1
-    | Ast.DefFunctionContent(optAsts, ast1) ->
-        optAsts
-        |> Option.map (List.map eval >> ignore)
-        |> Option.defaultValue ()
-        |> ignore
-        eval ast1
-    | Ast.DefClassCompleteContent(optVarDeclOrSpecListAsts, constructorListAsts) ->
-        optVarDeclOrSpecListAsts |> Option.map (List.map eval >> ignore) |> Option.defaultValue ()
+    | Ast.DefPredicateContent(varDeclBlock, predicateAst) ->
+        eval varDeclBlock
+        eval predicateAst
+    | Ast.DefFunctionContent(varDeclBlock, retStmtAst) ->
+        eval varDeclBlock
+        eval retStmtAst
+    | Ast.DefClassCompleteContent(varDeclBlock, constructorListAsts) ->
+        eval varDeclBlock 
         constructorListAsts |> List.map eval |> ignore
     | Ast.DefinitionPredicate((pos1, pos2), (predicateSignatureAst, optDefBlock)) ->
         let parent = heap.Eval.PeekEvalStack()
@@ -1529,10 +1517,8 @@ let rec eval ast =
         eval predicateAst
         heap.Eval.PopEvalStack()
 
-    | Ast.ProofContent (proofArgumentListAst, optQedAst) ->
-
-        //    (referencingIdentifierAst * ((Ast * Ast list) * Ast option))
-        //eval referencingIdentifierAst
+    | Ast.ProofContent ((varDeclBlock, proofArgumentListAst), optQedAst) ->
+        eval varDeclBlock
         proofArgumentListAst |> List.map eval |> ignore
         optQedAst |> Option.map eval |> Option.defaultValue ()
     | Ast.ProofBlock proofContent ->
