@@ -25,12 +25,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 let private splitByBacktrackMarker (input: string) =
     let pattern = @"\s*The parser backtracked after:\s*Error"
     let split = Regex.Split(input, pattern, RegexOptions.Multiline)
-    split
-    |> Array.mapi (fun i s ->
-        match i with
-        | 0 -> s.Replace("Error in ", "FPL syntax error in ")
-        | _ -> $"Backtracking syntax error{s}")
-    |> Array.toList
+    let result = 
+        split
+        |> Array.mapi (fun i s ->
+            match i with
+            | 0 -> s.Replace("Error in ", "FPL syntax error in ")
+            | _ -> $"Backtracking syntax error{s}")
+        |> Array.toList
+    result 
 
 /// Takes the string list output of splitByBacktrackMarker and extracts FParsec positions from the error messages producing a list of tuples (Position, error string).
 let private extractPositions (lines: string list) =
@@ -90,6 +92,24 @@ let private aggregateExpecting (items: (Position * string) list) =
 
             let combined = prefix + " " + tails
             [pos, combined])
+
+let private distinguishSyntaxFromBacktrickingErrors (items: (Position * string) list) =
+    items
+    |> List.map (fun (pos, errMsg) ->
+        let lineSplit = errMsg.Split(Environment.NewLine)
+        let modifiedErrMsg = 
+            lineSplit
+            |> Array.map (fun line ->
+                if line.StartsWith("FPL syntax error") then
+                    "SY999:"
+                elif line.StartsWith("Backtracking syntax error") then
+                    "SY998:"
+                else line
+            )
+            |> String.concat Environment.NewLine
+        let result = modifiedErrMsg.Replace($"SY999:{Environment.NewLine}", "SY999:").Replace($"SY998:{Environment.NewLine}", "SY998:")
+        pos, result
+    )
 
 /// Scans input line‑by‑line, detecting a line that trims to "^",
 /// and inserts ⚡ into the preceding line at the same column,
@@ -176,10 +196,7 @@ let private collapseExpectingBlock (input: string) : string =
                     |> List.map (fun s -> s.Replace("end of input", "<end of theory>"))
                     |> String.concat " "
                 )
-            if l1.StartsWith("FPL ") then
-                $"SY999:`{l2}`{Environment.NewLine}{merged}"
-            else
-                $"SY998:`{l2}`{Environment.NewLine}{merged}"
+            $"{l1}`{l2}`{Environment.NewLine}{merged}"
         else
             // No special rule → return unchanged
             String.concat Environment.NewLine lines
@@ -208,10 +225,11 @@ let getErrorNodes (errorMsg:string) origLines origLength =
     |> extractPositions
     |> aggregateExpecting
     |> correctPositionIndexBasedOnLineAndColumn origLines origLength
+    |> distinguishSyntaxFromBacktrickingErrors 
     |> List.map (fun (pos, errMsg) ->
         if errMsg.StartsWith("SY999:") then
-            Ast.ErrorSyntax((pos, pos), collapseExpectingBlock (errMsg.Substring(7)))
+            Ast.ErrorSyntax((pos, pos), (collapseExpectingBlock errMsg).Substring(6))
         else
-            Ast.ErrorSyntaxBacktracking((pos, pos), collapseExpectingBlock (errMsg.Substring(6)))
+            Ast.ErrorSyntaxBacktracking((pos, pos), (collapseExpectingBlock errMsg).Substring(6))
     )
 
