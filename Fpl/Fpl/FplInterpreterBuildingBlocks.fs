@@ -129,16 +129,6 @@ let rec eval ast =
         emitSY999diagnostics errMsg pos1 pos2 
     | Ast.ErrorSyntaxBacktracking((pos1, pos2), errMsg) ->
         emitSY998diagnostics errMsg pos1 pos2 
-    | Ast.LeftBracketOpt ((pos1, pos2), leftBracketOpt) ->
-        match leftBracketOpt with
-        | None ->
-            emitSY010diagnostics pos1 pos2 |> ignore
-        | _ -> ()
-    | Ast.RightBracketOpt ((pos1, pos2), rightBracketOpt) ->
-        match rightBracketOpt with
-        | None ->
-            emitSY011diagnostics pos1 pos2 |> ignore
-        | _ -> ()
     | Ast.SemicolonOpt ((pos1, pos2), semicolonOpt) ->
         match semicolonOpt with
         | None ->
@@ -147,18 +137,6 @@ let rec eval ast =
     | Ast.DotErr ((pos1, pos2), _) ->
         let fv = heap.Eval.PeekEvalStack()
         fv.ErrorOccurred <- emitSY008diagnostics pos1 pos2
-    | Ast.LeftParenOpt ((pos1, pos2), leftParentOpt) ->
-        match leftParentOpt with
-        | None ->
-            let fv = heap.Eval.PeekEvalStack()
-            fv.ErrorOccurred <- emitSY006diagnostics pos1 pos2
-        | _ -> ()
-    | Ast.RightParenOpt ((pos1, pos2), rightParentOpt) ->
-        match rightParentOpt with
-        | None ->
-            let fv = heap.Eval.PeekEvalStack()
-            fv.ErrorOccurred <- emitSY007diagnostics pos1 pos2
-        | _ -> ()
     | Ast.Digits s -> 
         let fv = heap.Eval.PeekEvalStack()
         fv.FplId <- s
@@ -327,15 +305,13 @@ let rec eval ast =
         heap.Eval.PushEvalStack(templateNode)
         heap.Eval.PopEvalStack()
 
-    | Ast.ArrayType((pos1, pos2), (mainTypeAst, ((leftBracket, indexAllowedTypeListAst), rightBracket))) ->
-        eval leftBracket
+    | Ast.ArrayType((pos1, pos2), (mainTypeAst,  indexAllowedTypeListAst)) ->
         let fv = heap.Eval.PeekEvalStack()
         match fv with 
         | :? FplMapping as mapping -> mapping.SetIsArray()
         | _ -> ()
         eval mainTypeAst
         indexAllowedTypeListAst |> List.map eval |> ignore
-        eval rightBracket
     | Ast.SimpleVariableType((pos1, pos2), simpleVariableTypeAst) ->
         eval simpleVariableTypeAst
     | Ast.IndexAllowedType((pos1, pos2), indexAllowedTypeAst) ->
@@ -610,7 +586,7 @@ let rec eval ast =
         heap.Eval.PopEvalStack()
     | Ast.AST((pos1, pos2), ast1) ->
         eval ast1
-    | Ast.ParamTuple (namedVariableDeclarationListAsts, rightParen) ->
+    | Ast.ParamTuple namedVariableDeclarationListAsts ->
         let fv = heap.Eval.PeekEvalStack()
         fv.ArgType <- ArgType.Parentheses
         namedVariableDeclarationListAsts |> List.map (fun child ->
@@ -619,18 +595,6 @@ let rec eval ast =
             | _ -> ()
             eval child
         ) |> ignore
-        eval rightParen
-    | Ast.ParamTupleWithOptLeftParen ((leftParen, namedVariableDeclarationListAsts), rightParen) ->
-        eval leftParen
-        let fv = heap.Eval.PeekEvalStack()
-        fv.ArgType <- ArgType.Parentheses
-        namedVariableDeclarationListAsts |> List.map (fun child ->
-            match child with 
-            | Ast.NamedVarDecl(_,(varList,_)) -> fv.Arity <- fv.Arity + varList.Length
-            | _ -> ()
-            eval child
-        ) |> ignore
-        eval rightParen
     | Ast.NamespaceIdentifier((pos1, pos2), asts) ->
         asts |> List.map eval |> ignore
     | Ast.TranslationTerm((pos1, pos2), asts) ->
@@ -647,7 +611,7 @@ let rec eval ast =
             let index = rnd.Next(lst.Length)
             lst.[index]
         eval (chooseRandomMember ebnfTermAsts)
-    | Ast.BrackedCoordList((pos1, pos2), (coordListAst, rightBracket)) ->
+    | Ast.BrackedCoordList((pos1, pos2), coordListAst) ->
         let getProceedingReference = heap.Eval.GetProceedingReference()
 
         match getProceedingReference with 
@@ -662,7 +626,6 @@ let rec eval ast =
                     heap.Eval.PopEvalStack()
                 ) 
         | _ -> ()
-        eval rightBracket
     | Ast.And((pos1, pos2), (predicateAst1, predicateAst2)) ->
         let fv = heap.Eval.PeekEvalStack()
         let fvNew = new FplConjunction((pos1, pos2), fv)
@@ -704,15 +667,9 @@ let rec eval ast =
         heap.Eval.PushEvalStack(just)
         justificationItemAsts |> List.map eval |> ignore
         heap.Eval.PopEvalStack()
-    | Ast.ArgumentTupleWithOptLeftParen ((pos1, pos2), ((leftParen, predicateListAst), rightParen)) ->
-        eval leftParen
+    | Ast.ArgumentTuple((pos1, pos2), predicateListAst) ->
         let next = heap.Eval.PeekEvalStack()
         evalArgumentTuple next predicateListAst pos1 pos2
-        eval rightParen
-    | Ast.ArgumentTuple((pos1, pos2), (predicateListAst, rightParen)) ->
-        let next = heap.Eval.PeekEvalStack()
-        evalArgumentTuple next predicateListAst pos1 pos2
-        eval rightParen
     | Ast.QualificationList((pos1, pos2), asts) ->
         asts |> List.map eval |> ignore
     | Ast.Namespace(theoryAst) ->
@@ -1446,8 +1403,7 @@ let rec eval ast =
         // create all variables of the named variable declaration in the current scope
         variableListAst |> List.iter (fun varAst ->
             match variableTypeAst with 
-            | Ast.ArrayType((posMan1, posMan2),(mainTypeAst, ((leftBracket, indexAllowedTypeListAst), rightBracket))) ->
-                eval leftBracket
+            | Ast.ArrayType((posMan1, posMan2),(mainTypeAst,  indexAllowedTypeListAst)) ->
                 let numberOfVariadicVars = parent.AuxiliaryInfo
                 if numberOfVariadicVars > 1 then
                     parent.ErrorOccurred <- emitVAR00Diagnostics posMan1 posMan2        
@@ -1460,7 +1416,6 @@ let rec eval ast =
                     indexAllowedTypeListAst |> List.map eval |> ignore
                     heap.Eval.PopEvalStack()
                 | _ -> ()
-                eval rightBracket
             | Ast.SimpleVariableType((_, _),simplVariableTypeAst) ->
                 match varAst with 
                 | Ast.Var((varPos1, varPos2), varName) ->

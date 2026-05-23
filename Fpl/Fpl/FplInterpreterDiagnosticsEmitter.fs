@@ -1061,34 +1061,6 @@ let emitSY002diagnostics pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitSY006diagnostics pos1 pos2 =
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplParser
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = pos1
-            Diagnostic.EndPos = pos2
-            Diagnostic.Code = SY006
-            Diagnostic.Alternatives = None 
-        }
-    ad.AddDiagnostic diagnostic
-    Some (diagnostic.Code.Code)
-
-let emitSY007diagnostics pos1 pos2 =
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplParser
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = pos1
-            Diagnostic.EndPos = pos2
-            Diagnostic.Code = SY007
-            Diagnostic.Alternatives = None 
-        }
-    ad.AddDiagnostic diagnostic
-    Some (diagnostic.Code.Code)
-
 let emitSY008diagnostics pos1 pos2 =
     let diagnostic =
         { 
@@ -1112,34 +1084,6 @@ let emitSY009diagnostics pos1 pos2 =
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = SY009
-            Diagnostic.Alternatives = None 
-        }
-    ad.AddDiagnostic diagnostic
-    Some (diagnostic.Code.Code)
-
-let emitSY010diagnostics pos1 pos2 =
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplParser
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = pos1
-            Diagnostic.EndPos = pos2
-            Diagnostic.Code = SY010
-            Diagnostic.Alternatives = None 
-        }
-    ad.AddDiagnostic diagnostic
-    Some (diagnostic.Code.Code)
-
-let emitSY011diagnostics pos1 pos2 =
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplParser
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = pos1
-            Diagnostic.EndPos = pos2
-            Diagnostic.Code = SY011
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic

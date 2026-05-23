@@ -9,35 +9,6 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 [<TestClass>]
 type TestRecovery() =
 
-    [<DataRow("pred01", """def pred T)""")>]
-    [<DataRow("func01", """def func T)->obj """)>]
-    [<DataRow("ctor01", """def cl S def cl T {ctor T) {dec base.S(); }}""")>]
-    [<DataRow("propPred01", """def cl S def cl T {intr prty pred T) }""")>]
-    [<DataRow("propFunc01", """def cl S def cl T {intr prty func T)->obj }""")>]
-    [<DataRow("del01", """def pred T() {del.T)}""")>]
-    [<DataRow("base01", """def cl S def cl T {ctor T() {dec base.T); }}""")>]
-    [<TestMethod>]
-    member this.TestMissingOpeningParen(no:string, fplCode) =
-        let result = run (stdParser .>> eof) fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<DataRow("pred01", """def pred T(""")>]
-    [<DataRow("func01", """def func T(->obj """)>]
-    [<DataRow("ctor01", """def cl S def cl T {ctor T( {dec base.S(); }}""")>]
-    [<DataRow("propPred01", """def cl S def cl T {intr prty pred T( }""")>]
-    [<DataRow("propFunc01", """def cl S def cl T {intr prty func T(->obj }""")>]
-    [<DataRow("del01", """def pred T() {del.T(}""")>]
-    [<DataRow("base01", """def cl S def cl T {ctor T() {dec base.T(; }}""")>]
-    [<DataRow("ref01", """def pred T() {S(}""")>]
-    [<TestMethod>]
-    member this.TestMissingClosingParen(no:string, fplCode) =
-        let result = run (stdParser .>> eof) fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
     [<DataRow("del01", """def pred T() {del T()}""")>]
     [<DataRow("base01", """def cl S def cl T {ctor T() {dec base T(); }}""")>]
     [<TestMethod>]
@@ -55,30 +26,6 @@ type TestRecovery() =
     [<DataRow("dec02", """def pred T() {dec x:obj true}""")>]
     [<TestMethod>]
     member this.TestMissingSemicolon(no:string, fplCode) =
-        let result = run (stdParser .>> eof) fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<DataRow("arrType01", """def pred T(a:*ind obj])""")>]
-    [<DataRow("arrType02", """def pred T(a:*ind obj)""")>]
-    [<DataRow("arrType03", """def pred T() {dec a:*ind obj]; true}""")>]
-    [<DataRow("arrType04", """def pred T() {dec a:*ind obj; true}""")>]
-    [<TestMethod>]
-    member this.TestMissingOpeningBracket(no:string, fplCode) =
-        let result = run (stdParser .>> eof) fplCode
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<DataRow("arrType01", """def pred T(a:*ind[obj)""")>]
-    [<DataRow("arrType02", """def pred T(a:*ind obj)""")>]
-    [<DataRow("arrType03", """def pred T() {dec a:*ind[obj; true}""")>]
-    [<DataRow("arrType03", """def pred T() {dec a:ind a:=1; true}""")>]
-    [<DataRow("arrType04", """def pred T() {dec a:*ind obj; true}""")>]
-    [<DataRow("arrUsage01", """def pred T() {dec a:=x[b; true}""")>]
-    [<TestMethod>]
-    member this.TestMissingClosingBracket(no:string, fplCode) =
         let result = run (stdParser .>> eof) fplCode
         let actual = sprintf "%O" result
         printf "%O" actual

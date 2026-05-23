@@ -10,11 +10,7 @@ type Positions = Position * Position
 
 type Ast = 
     // Literals
-    | LeftParenOpt of Positions * unit option
-    | RightParenOpt of Positions * unit option
     | SemicolonOpt of Positions * unit option
-    | LeftBracketOpt of Positions * unit option
-    | RightBracketOpt of Positions * unit option
     | Star of Positions * unit
     | DotErr of Positions * unit
     | Dot of unit
@@ -45,7 +41,7 @@ type Ast =
     | DefinitionExtension of Positions * ((Ast * Ast) * Ast)
 
     | UsesClause of Positions * Ast
-    | BrackedCoordList of Positions * (Ast list * Ast)
+    | BrackedCoordList of Positions * Ast list
     | ReferencingIdentifier of Positions * (Ast * Ast list)
 
 
@@ -58,7 +54,7 @@ type Ast =
     | IndexType of Positions * unit
     | SimpleVariableType of Positions * Ast 
     | IndexAllowedType of Positions * Ast 
-    | ArrayType of Positions * (Ast * ((Ast * Ast list) * Ast))
+    | ArrayType of Positions * (Ast * Ast list)
     | InheritedType of Positions * string option 
     | InheritedTypeList of Ast list
     | CompoundPredicateType of Positions * (Ast * Ast option)
@@ -83,8 +79,7 @@ type Ast =
 
     | IsOperator of Positions * (Ast * Ast)
     | Delegate of (Ast * Ast) * Ast
-    | ArgumentTupleWithOptLeftParen of Positions * ((Ast * Ast list) * Ast)
-    | ArgumentTuple of Positions * (Ast list * Ast)
+    | ArgumentTuple of Positions * Ast list 
     | PredicateWithOptSpecification of Positions * (Ast * Ast option)
     | DottedPredicate of Positions * Ast 
     | QualificationList of Positions * Ast list
@@ -133,8 +128,7 @@ type Ast =
     | ConjectureSignature of Positions * Ast
     | Conjecture of Positions * (Ast * (Ast list option * Ast))
     | NamedVarDecl of Positions * (Ast list * Ast)
-    | ParamTuple of Ast list * Ast
-    | ParamTupleWithOptLeftParen of (Ast * Ast list) * Ast
+    | ParamTuple of Ast list 
 
     | Mapping of Positions * Ast
     | AxiomSignature of Positions * Ast

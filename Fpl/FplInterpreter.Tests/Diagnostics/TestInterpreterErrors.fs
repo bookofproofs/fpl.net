@@ -97,7 +97,7 @@ type TestInterpreterErrors() =
 
     member this.PrepareTestNSP05CrossCheck (delete:bool) =
         
-        let input = """;"""
+        let input = """ """
         let currDir = Directory.GetCurrentDirectory()
 
         File.WriteAllText(Path.Combine(currDir, "Test.fpl"), input)

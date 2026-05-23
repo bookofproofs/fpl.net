@@ -137,12 +137,8 @@ let errST005 domain nodeType = $"An enumerator for the domain `{domain}` being {
 let errSY000 infixOp = $"The infix operator `{infixOp}` is missing a second operand."
 let errSY001 = $"Replace `∃!0` by `¬∃` quantor."
 let errSY002 = $"Expression `∃!1` can be simplified with `∃!`."
-let errSY006 = "`(` expected."
-let errSY007 = "`)` expected."
 let errSY008 = "`.` expected."
 let errSY009 = "`;` expected."
-let errSY010 = "`[` expected."
-let errSY011 = "`]` expected."
 let errSY998 errMsg = $"Parser backtracked error: {errMsg}"
 let errSY999 errMsg = $"Syntax error: {errMsg}"
 // variable-related error codes

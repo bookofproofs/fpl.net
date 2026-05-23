@@ -146,12 +146,8 @@ type DiagnosticCode =
     | SY000 of string
     | SY001 
     | SY002 
-    | SY006
-    | SY007
     | SY008
     | SY009
-    | SY010
-    | SY011
     | SY998 of string
     | SY999 of string
     // variable-related error codes
@@ -254,12 +250,8 @@ type DiagnosticCode =
             | SY000 _ -> "SY000"
             | SY001 -> "SY001"
             | SY002 -> "SY002"
-            | SY006 -> "SY006"
-            | SY007 -> "SY007"
             | SY008 -> "SY008"
             | SY009 -> "SY009"
-            | SY010 -> "SY010"
-            | SY011 -> "SY011"
             | SY998 _ -> "SY998"
             | SY999 _ -> "SY999"
             // variable-related error codes
@@ -362,12 +354,8 @@ type DiagnosticCode =
             | SY000 infixOp -> errSY000 infixOp
             | SY001 -> errSY001
             | SY002 -> errSY002
-            | SY006 -> errSY006
-            | SY007 -> errSY007
             | SY008 -> errSY008
             | SY009 -> errSY009
-            | SY010 -> errSY010
-            | SY011 -> errSY011
             | SY998 errMsg -> errSY998 errMsg
             | SY999 errMsg -> errSY999 errMsg
             // variable-related error codes
