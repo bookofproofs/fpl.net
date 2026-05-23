@@ -134,9 +134,6 @@ let rec eval ast =
         | None ->
             emitSY009diagnostics pos1 pos2 |> ignore
         | _ -> ()
-    | Ast.DotErr ((pos1, pos2), _) ->
-        let fv = heap.Eval.PeekEvalStack()
-        fv.ErrorOccurred <- emitSY008diagnostics pos1 pos2
     | Ast.Digits s -> 
         let fv = heap.Eval.PeekEvalStack()
         fv.FplId <- s
@@ -940,8 +937,7 @@ let rec eval ast =
         eval variableTypeAst
         heap.Eval.PopEvalStack()
         heap.Eval.PopEvalStack()
-    | Ast.Delegate((dot, delegateNameAst), argumentTupleAst) ->
-        eval dot 
+    | Ast.Delegate(delegateNameAst, argumentTupleAst) ->
         eval delegateNameAst
         eval argumentTupleAst
         heap.Eval.PopEvalStack()
@@ -1287,8 +1283,7 @@ let rec eval ast =
             eval predInstanceBlockAst
         | None -> fvNew.IsIntrinsic <- true
         heap.Eval.PopEvalStack()
-    | Ast.BaseConstructorCall((pos1, pos2), ((dot,inheritedClassTypeAst), argumentTupleAst)) ->
-        eval dot
+    | Ast.BaseConstructorCall((pos1, pos2), (inheritedClassTypeAst, argumentTupleAst)) ->
         let parent = heap.Eval.PeekEvalStack()
         let fvNew = new FplBaseConstructorCall((pos1, pos2), parent) 
         heap.Eval.PushEvalStack(fvNew)

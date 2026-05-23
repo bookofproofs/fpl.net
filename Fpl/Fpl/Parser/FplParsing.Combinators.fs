@@ -4,7 +4,6 @@ open System.Text.RegularExpressions
 open FParsec
 open FplPrimitives
 open FplGrammarTypes
-open ErrDiagnostics
 
 (* MIT License
 
@@ -294,12 +293,7 @@ let argumentTuple = positions ((leftParen >>. predicateList) .>> (IW >>. rightPa
 
 let delegateName = positions (idStartsWithCap) .>> IW |>> Ast.DelegateName
 
-let dotWithErr = choice [
-    attempt dot
-    positions (IW) |>> Ast.DotErr
-    ]
-
-let fplDelegate = keywordDel >>. (dotWithErr .>>. delegateName .>>. argumentTuple .>> IW) |>> Ast.Delegate
+let fplDelegate = keywordDel >>. (dot >>. delegateName .>>. argumentTuple .>> IW) |>> Ast.Delegate
 
 let spacesRightBrace = (IW >>. rightBrace) 
 
@@ -334,7 +328,7 @@ let assertionStatement = positions (keywordAssert >>. predicate) |>> Ast.Asserti
 
 let baseClassName = positions (idStartsWithCap) .>> IW |>> Ast.BaseClassName
 
-let baseConstructorCall = positions (keywordBaseClassReference >>. dotWithErr .>>. baseClassName .>>. argumentTuple .>> IW) |>> Ast.BaseConstructorCall
+let baseConstructorCall = positions (keywordBaseClassReference >>. dot >>. baseClassName .>>. argumentTuple .>> IW) |>> Ast.BaseConstructorCall
 
 let statement = 
     IW >>. (choice [

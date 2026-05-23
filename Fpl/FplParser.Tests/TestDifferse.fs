@@ -27,6 +27,14 @@ type TestDiverse () =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
 
+    [<DataRow("01", """def cl S                       def cl T {ctor T() {dec base. (); }}""")>]
+    [<TestMethod>]
+    member this.TestDiverseFail (no:string, fplCode:string) =
+        let result = run (stdParser .>> eof) fplCode
+        let actual = sprintf "%O" result 
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
+
     [<DataRow("01", """axiom s SomeAxiom2 {true}""")>]
     [<DataRow("02", """def cl T {ctor T() {dec base. (); }}""")>]
     [<TestMethod>]

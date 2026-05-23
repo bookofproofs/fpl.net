@@ -41,7 +41,7 @@ let private extractPositions (lines: string list) =
         let m = Regex.Match(line, pattern)
         if m.Success then
             let ln  = int m.Groups.[1].Value
-            let col = int m.Groups.[2].Value 
+            let col = int m.Groups.[2].Value - 1   // one less than reported (because FParsec 1-based instead of 0-based)
             let pos = Position("", 0L, int64 ln, int64 col)
             pos, line
         else
