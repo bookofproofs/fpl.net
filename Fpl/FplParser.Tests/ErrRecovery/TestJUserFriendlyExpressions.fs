@@ -82,6 +82,7 @@ type TestRecovery() =
     [<DataRow("del02", """def pred T() {del.()}""")>]
     [<DataRow("base01", """def cl S def cl T {ctor T() {dec base. (); }}""")>]
     [<DataRow("base02", """def cl S def cl T {ctor T() {dec base. (); }}""")>]
+    [<DataRow("base03", """def cl S                       def cl T {ctor T() {dec base. (); }}""")>]
     [<TestMethod>]
     member this.TestMissingPascalCaseId(no:string, fplCode) =
         ad.Clear()

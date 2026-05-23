@@ -1052,7 +1052,7 @@ let emitSY002diagnostics pos1 pos2 =
         { 
             Diagnostic.Uri = ad.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplParser
-            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.Severity = DiagnosticSeverity.Warning
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = SY002
@@ -1094,7 +1094,7 @@ let emitSY998diagnostics errMsg pos1 pos2 =
         { 
             Diagnostic.Uri = ad.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplParser
-            Diagnostic.Severity = DiagnosticSeverity.Warning
+            Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = SY998 errMsg

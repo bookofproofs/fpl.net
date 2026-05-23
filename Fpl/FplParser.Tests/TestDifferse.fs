@@ -26,7 +26,9 @@ type TestDiverse () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<DataRow("02", """axiom s SomeAxiom2 {true}""")>]
+
+    [<DataRow("01", """axiom s SomeAxiom2 {true}""")>]
+    [<DataRow("02", """def cl T {ctor T() {dec base. (); }}""")>]
     [<TestMethod>]
     member this.TestDiverseBuildingBlockFail (no:string, fplCode:string) =
         let result = run (buildingBlock .>> eof) fplCode

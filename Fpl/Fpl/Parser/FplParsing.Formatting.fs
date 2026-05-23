@@ -21,18 +21,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 //------------
 
-let private keepOnlyRange (startIdx: int) (endIdx: int) (input: string) =
-    input
-    |> Seq.mapi (fun i c ->
-        if i >= startIdx && i < endIdx then
-            // inside visible range: keep everything
-            c
-        else
-            // outside: keep whitespace, mask non-whitespace
-            if System.Char.IsWhiteSpace c then c else ' ')
-    |> Seq.toArray
-    |> System.String
-
 /// Splits an FParsec error message to sub-errors (if it contains many)
 let private splitByBacktrackMarker (input: string) =
     let pattern = @"\s*The parser backtracked after:\s*Error"
@@ -53,7 +41,7 @@ let private extractPositions (lines: string list) =
         let m = Regex.Match(line, pattern)
         if m.Success then
             let ln  = int m.Groups.[1].Value
-            let col = int m.Groups.[2].Value - 1   // one less than reported
+            let col = int m.Groups.[2].Value 
             let pos = Position("", 0L, int64 ln, int64 col)
             pos, line
         else
@@ -158,7 +146,7 @@ let private computeIndex (pos: Position) (lines: string array) inputLength =
             let prefixLength =
                 lines
                 |> Seq.take lineIdx
-                |> Seq.sumBy (fun l -> l.Length + lengthNewLine)   // +1 for '\n'
+                |> Seq.sumBy (fun l -> l.Length + lengthNewLine)   // +1 for line brack
 
             int64 prefixLength + int64 colIdx
         else

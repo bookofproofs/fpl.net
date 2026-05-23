@@ -41,6 +41,7 @@ let private getMatches (pattern: string) (input: string) =
 let private getParseableInputAndErrorNodes input origLines origLength =
     let matches = getMatches errRecoveryBlocks input
     let parseAbleInput = StringBuilder()
+    let maskedPrefix = StringBuilder()
     let errorList = List<Ast list>()
 
 
@@ -59,13 +60,7 @@ let private getParseableInputAndErrorNodes input origLines origLength =
                     input.Length - matches[i].Index
             let chu = input.Substring(pos, len)
             let mChu = masked chu
-            let remainder =
-                if i = 0 && matches[0].Index > 0 then
-                    // when there is a prefix before the first match, diagnostics should see the masked prefix + the chunk
-                    let prefix = input.Substring(0, matches[0].Index)
-                    (masked prefix) + chu
-                else
-                    chu
+            let remainder = maskedPrefix.ToString() + chu
             chu, mChu, remainder
 
     // Iterate once for each relevant chunk (if no matches, still run once)
@@ -80,7 +75,6 @@ let private getParseableInputAndErrorNodes input origLines origLength =
 
         let chunk, maskedChunk, remainder = getChunkMaskedAndRemainder i
         let trimedInput = chunk.Trim()
-
         // Try a strict parse of the building block (must consume all of the trimmed chunk)
         match run (buildingBlock .>> eof) trimedInput with
         | Success(_, _, _) when trimedInput.Length > 0 ->
@@ -119,6 +113,8 @@ let private getParseableInputAndErrorNodes input origLines origLength =
             | Failure(errorMsg, _, _) ->
                 errorList.Add (getErrorNodes errorMsg origLines origLength)
             | _ -> ()
+        maskedPrefix.Append(maskedChunk) |> ignore
+
     parseAbleInput.ToString(), errorList |> Seq.toList |> List.concat
 
 let private getBuildingBlockAsts (topAst:Ast) =
