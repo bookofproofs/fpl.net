@@ -1027,7 +1027,7 @@ let emitSY000diagnostics infixOp pos1 pos2 =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = SY000 infixOp
+            Diagnostic.Code = SY002 infixOp
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
@@ -1041,7 +1041,7 @@ let emitSY001diagnostics pos1 pos2 =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = SY001
+            Diagnostic.Code = SY003
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
@@ -1055,7 +1055,7 @@ let emitSY002diagnostics pos1 pos2 =
             Diagnostic.Severity = DiagnosticSeverity.Warning
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = SY002
+            Diagnostic.Code = SY004
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic

@@ -1,8 +1,5 @@
-using FParsec;
-using Microsoft.FSharp.Core;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
-using static FplPrimitives;
 using System.Text;
 
 

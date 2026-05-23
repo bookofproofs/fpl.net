@@ -143,11 +143,11 @@ type DiagnosticCode =
     | ST004 of string
     | ST005 of string * string
     // interpreter syntax-related error codes for error-tolerant parser productions
-    | SY000 of string
-    | SY001 
-    | SY002 
     | SY998 of string
     | SY999 of string
+    | SY002 of string
+    | SY003 
+    | SY004
     // variable-related error codes
     | VAR00 
     | VAR01 of string 
@@ -245,11 +245,11 @@ type DiagnosticCode =
             | ST004 _ -> "ST004"
             | ST005 _ -> "ST005"
             // interpreter syntax-related error codes for error-tolerant parser
-            | SY000 _ -> "SY000"
-            | SY001 -> "SY001"
-            | SY002 -> "SY002"
             | SY998 _ -> "SY998"
             | SY999 _ -> "SY999"
+            | SY002 _ -> "SY000"
+            | SY003 -> "SY003"
+            | SY004 -> "SY004"
             // variable-related error codes
             | VAR00 -> "VAR00"
             | VAR01 _  -> "VAR01"
@@ -347,11 +347,11 @@ type DiagnosticCode =
             | ST004 langCode -> errST004 langCode
             | ST005 (domain, nodeType) -> errST005 domain nodeType
             // interpreter syntax-related error codes for error-tolerant parser
-            | SY000 infixOp -> errSY000 infixOp
-            | SY001 -> errSY001
-            | SY002 -> errSY002
             | SY998 errMsg -> errSY998 errMsg
             | SY999 errMsg -> errSY999 errMsg
+            | SY002 infixOp -> errSY002 infixOp
+            | SY003 -> errSY003
+            | SY004 -> errSY004
             // variable-related error codes
             | VAR00 -> errVAR00
             | VAR01 name -> errVAR01 name

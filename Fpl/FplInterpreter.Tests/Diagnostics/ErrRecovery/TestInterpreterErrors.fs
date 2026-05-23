@@ -23,7 +23,7 @@ type TestInterpreterErrors() =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = SY000 ""
+            let code = SY002 ""
             runTestHelper "TestSY000.fpl" fplCode code expected
 
     [<DataRow("00", "def pred T() { ∃!0 x:obj{true} } ", 1)>] 
@@ -34,7 +34,7 @@ type TestInterpreterErrors() =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = SY001 
+            let code = SY003 
             runTestHelper "TestSY001.fpl" fplCode code expected
 
     [<DataRow("00", "def pred T() { ∃!1 x:obj{true} } ", 1)>] 
@@ -45,6 +45,6 @@ type TestInterpreterErrors() =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = SY002
+            let code = SY004
             runTestHelper "TestSY002.fpl" fplCode code expected
 

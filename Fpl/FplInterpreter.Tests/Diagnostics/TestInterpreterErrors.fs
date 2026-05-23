@@ -5768,7 +5768,7 @@ type TestInterpreterErrors() =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = SY000 ""
+            let code = SY002 ""
             runTestHelper "TestSY000.fpl" fplCode code expected
 
     [<DataRow("def predicate Test(x,y:* pred[ind]) {true}", 1)>]
