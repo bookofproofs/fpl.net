@@ -107,9 +107,9 @@ let private distinguishSyntaxFromBacktrickingErrors (items: (Position * string) 
                     |> List.map (fun s -> s.Trim())
                     |> String.concat ""
                 if l1.StartsWith("FPL syntax error") then
-                    $"SY999:`{l2.Trim()}`{Environment.NewLine}{restConcatenated}" 
+                    $"SY000:`{l2.Trim()}`{Environment.NewLine}{restConcatenated}" 
                 elif l1.StartsWith("Backtracking syntax error") then 
-                    $"SY998:`{l2.Trim()}`{Environment.NewLine}{restConcatenated}" 
+                    $"SY001:`{l2.Trim()}`{Environment.NewLine}{restConcatenated}" 
                 else 
                     $"{l1}{l2}{rest}" 
         pos, modifiedErrMsg
@@ -235,7 +235,7 @@ let getErrorNodes (errorMsg:string) origLines origLength =
     |> correctPositionIndexBasedOnLineAndColumn origLines origLength
     |> distinguishSyntaxFromBacktrickingErrors 
     |> List.map (fun (pos, errMsg) ->
-        if errMsg.StartsWith("SY999:") then
+        if errMsg.StartsWith("SY000:") then
             Ast.ErrorSyntax((pos, pos), collapseExpectingBlock errMsg)
         else
             Ast.ErrorSyntaxBacktracking((pos, pos), collapseExpectingBlock errMsg)
