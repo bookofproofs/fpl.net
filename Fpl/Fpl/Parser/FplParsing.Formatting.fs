@@ -96,19 +96,23 @@ let private aggregateExpecting (items: (Position * string) list) =
 let private distinguishSyntaxFromBacktrickingErrors (items: (Position * string) list) =
     items
     |> List.map (fun (pos, errMsg) ->
-        let lineSplit = errMsg.Split(Environment.NewLine)
-        let modifiedErrMsg = 
-            lineSplit
-            |> Array.map (fun line ->
-                if line.StartsWith("FPL syntax error") then
-                    "SY999:"
-                elif line.StartsWith("Backtracking syntax error") then
-                    "SY998:"
-                else line
-            )
-            |> String.concat Environment.NewLine
-        let result = modifiedErrMsg.Replace($"SY999:{Environment.NewLine}", "SY999:").Replace($"SY998:{Environment.NewLine}", "SY998:")
-        pos, result
+        let lines = errMsg.Split(Environment.NewLine) |> Array.toList
+        let modifiedErrMsg =
+            match lines with
+            | [] -> ""
+            | [l1] -> l1 
+            | l1 :: l2 :: rest ->
+                let restConcatenated =
+                    rest
+                    |> List.map (fun s -> s.Trim())
+                    |> String.concat ""
+                if l1.StartsWith("FPL syntax error") then
+                    $"SY999:`{l2.Trim()}`{Environment.NewLine}{restConcatenated}" 
+                elif l1.StartsWith("Backtracking syntax error") then 
+                    $"SY998:`{l2.Trim()}`{Environment.NewLine}{restConcatenated}" 
+                else 
+                    $"{l1}{l2}{rest}" 
+        pos, modifiedErrMsg
     )
 
 /// Scans input line‑by‑line, detecting a line that trims to "^",
@@ -137,7 +141,7 @@ let private insertLightning (input: string) =
                 let updatedPrev =
                     if caretCol < prevLen then
                         // insert ⚡ at caretCol
-                        prev.[0..caretCol-2] + "⚡" + prev.[caretCol-1..]
+                        prev.[0..caretCol-1] + "⚡" + prev.[caretCol..]
                     else
                         // previous line too short → append ⚡
                         prev + "⚡"
@@ -146,8 +150,8 @@ let private insertLightning (input: string) =
                 loop (updatedPrev :: (List.tail acc)) rest
 
             else
-                // normal line → append, but trimmed
-                loop (trimmed :: acc) rest
+                // normal line → append
+                loop (line :: acc) rest
 
     loop [] lines
 
@@ -174,32 +178,36 @@ let private computeIndex (pos: Position) (lines: string array) inputLength =
     else
         int64 inputLength
 
+let private replaceLine (line:string) =
+    line
+        .Trim()
+        .Replace("Other error messages:", "")
+        .Replace("Expecting:", "")
+        .Replace("' or '", ", ")
+        .Replace("end of input", "<end of theory>")
+
 /// Transforms an error message of FParserc preserving the first two lines, and if the third line starts with "Expecting:",
 /// then flattening all remaining lines into that third line by concatenating them without line breaks.
 let private collapseExpectingBlock (input: string) : string =
     let lines = input.Split(Environment.NewLine) |> Array.toList
 
-    match lines with
-    | [] -> ""
-    | [l1] -> l1
-    | [l1; l2] -> l1 + Environment.NewLine + l2
-    | l1 :: l2 :: l3 :: rest ->
-        if l3.TrimStart().StartsWith("Expecting:") then
-            // Concatenate line 3 with all remaining lines (no newlines)
-            let merged =
-                l3 + (
+    let res = 
+        match lines with
+        | [] -> ""
+        | [l1] -> l1
+        | [l1; l2] -> l1 + Environment.NewLine + $"Expecting:{replaceLine l2}"
+        | l1 :: l2 :: rest ->
+            if l2.TrimStart().StartsWith("Expecting:") then
+                // Concatenate line 2 with all remaining lines (no newlines)
+                let merged =
                     rest
-                    |> List.map (fun s -> s.Trim())
-                    |> List.map (fun s -> s.Replace("Other error messages:", ""))
-                    |> List.map (fun s -> s.Replace("Expecting:", ", "))
-                    |> List.map (fun s -> s.Replace("' or '", ", "))
-                    |> List.map (fun s -> s.Replace("end of input", "<end of theory>"))
+                    |> List.map (fun s -> replaceLine s)
                     |> String.concat " "
-                )
-            $"{l1}`{l2}`{Environment.NewLine}{merged}"
-        else
-            // No special rule → return unchanged
-            String.concat Environment.NewLine lines
+                $"{l1}{Environment.NewLine}{l2}{merged}"
+            else
+                // No special rule → return unchanged
+                String.concat Environment.NewLine lines
+    res.Substring(6).Trim()
 
 /// Calculates the index Position based on line and column and replaces Positions missing index
 /// with some having them.
@@ -228,8 +236,8 @@ let getErrorNodes (errorMsg:string) origLines origLength =
     |> distinguishSyntaxFromBacktrickingErrors 
     |> List.map (fun (pos, errMsg) ->
         if errMsg.StartsWith("SY999:") then
-            Ast.ErrorSyntax((pos, pos), (collapseExpectingBlock errMsg).Substring(6))
+            Ast.ErrorSyntax((pos, pos), collapseExpectingBlock errMsg)
         else
-            Ast.ErrorSyntaxBacktracking((pos, pos), (collapseExpectingBlock errMsg).Substring(6))
+            Ast.ErrorSyntaxBacktracking((pos, pos), collapseExpectingBlock errMsg)
     )
 
