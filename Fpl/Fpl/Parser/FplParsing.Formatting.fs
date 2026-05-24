@@ -5,6 +5,7 @@ module FplParsing.Formatting
 open System
 open System.Text.RegularExpressions
 open FplGrammarTypes
+open ErrDiagnostics
 open FParsec
 
 (* MIT License
@@ -273,19 +274,33 @@ let masked (input:String) =
 /// Transforms an FParsec syntax error message (including the complex ones with parser backtracking)
 /// into a list of BuildingBlockError ast nodes that are aggregated by error position they occur.
 let getErrorNodes (errorMsg:string) origLines origLength = 
-    errorMsg
-    |> insertLightning
-    |> splitByBacktrackMarker
-    |> extractPositions
-    |> aggregateExpecting
-    |> correctPositionIndexBasedOnLineAndColumn origLines origLength
-    |> distinguishSyntaxFromBacktrickingErrors 
+    let firstResult = 
+        errorMsg
+        |> insertLightning
+        |> splitByBacktrackMarker
+        |> extractPositions
+        |> aggregateExpecting
+        |> correctPositionIndexBasedOnLineAndColumn origLines origLength
+        |> distinguishSyntaxFromBacktrickingErrors 
+        |> List.rev // affects only SY002 errors with more than one position
+
+    let chainId =
+        if firstResult.Length > 1 then
+            sprintf "%0*d" 3 (ad.NextChainId)
+        else
+            ""
+
+    let maxPos =
+        firstResult
+        |> List.map (fun (pos, errMsg) -> pos)
+        |> List.maxBy (fun pos -> pos.Index)
+
+    firstResult
     |> List.mapi (fun i (pos, errMsg) ->
         if errMsg.StartsWith("SY000:") then
             Ast.ErrorSyntax((pos, pos), collapseExpectingBlock errMsg)
         elif errMsg.StartsWith("SY001:") then
             Ast.ErrorSyntaxBacktracking((pos, pos), collapseExpectingBlock errMsg)
         else
-            Ast.ErrorSyntaxChain((pos, pos), (collapseExpectingBlock errMsg, i.ToString()))
+            Ast.ErrorSyntaxChain(((pos, pos), maxPos), (collapseExpectingBlock errMsg, $"{chainId}.{(i+1).ToString()}"))
     )
-    |> List.rev

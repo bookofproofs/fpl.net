@@ -5,10 +5,8 @@ open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
 open FplInterpreter.Globals.Debug
-open FplInterpreter.Globals.ST
-open FplInterpreterDiagnosticsEmitter
 open FplInterpreter.Main
-open TestSharedConfig
+
 
 let rec deleteDirectory path =
     if Directory.Exists(path) then
@@ -96,6 +94,15 @@ let runTestHelperWithoutSyntaxChecking filename fplCode (code: ErrDiagnostics.Di
     let result = filterByErrorCode ad code.Code
     Assert.AreEqual<int>(expected, result.Length)
     prepareFplCode (filename, "", true) |> ignore
+
+let runTestHelperWithoutSyntaxCheckingGetResult filename fplCode (code: ErrDiagnostics.DiagnosticCode) (expected: int) =
+    printf "Trying %s" code.Message
+    prepareFplCode (filename, fplCode, false) |> ignore
+
+    let result = filterByErrorCode ad code.Code
+    Assert.AreEqual<int>(expected, result.Length)
+    prepareFplCode (filename, "", true) |> ignore
+    result 
 
 let runTestHelper filename fplCode (code: ErrDiagnostics.DiagnosticCode) (expected: int) =
     printf "Trying %s" code.Message

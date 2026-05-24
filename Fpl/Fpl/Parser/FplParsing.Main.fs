@@ -13,7 +13,7 @@ open FplParsing.Combinators
 open FplParsing.Formatting
 (* MIT License
 
-Copyright (c) 2024+ bookofproofs
+Copyright (c) 2026+ bookofproofs
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
@@ -139,13 +139,16 @@ let fplParser fplCode =
         match run stdParser parseAbleInput with 
         | Success(ast, _, _) ->
             let resultWithSyntaxErrors = errorList @ getBuildingBlockAsts ast
+            let sortingComparer group subGroup = $"{group} {subGroup}" 
+            let indexFormat (pos:Position) = sprintf "%0*d" 10 (pos.Index)
             resultWithSyntaxErrors
             |> List.sortBy (fun buildingBlockAst ->
                 match buildingBlockAst with
-                | Ast.BuildingBlock((pos1,_),_) 
-                | Ast.ErrorSyntax((pos1,_),_) 
-                | Ast.ErrorSyntaxBacktracking((pos1,_),_) -> pos1.Index
-                | _ -> Int64.MaxValue
+                | Ast.BuildingBlock((pos1,_),_) -> sortingComparer (indexFormat pos1) ""
+                | Ast.ErrorSyntax((pos1,_),_) -> sortingComparer (indexFormat pos1) ""
+                | Ast.ErrorSyntaxBacktracking((pos1,_),_) -> sortingComparer (indexFormat pos1) ""
+                | Ast.ErrorSyntaxChain(((pos1,_),maxPos),(_, chain)) -> sortingComparer (indexFormat maxPos) chain
+                | _ -> sortingComparer "ZZZ" ""
             ), false
         | Failure(errorMsg, _, _) ->
             getErrorNodes errorMsg origLines origLength, false

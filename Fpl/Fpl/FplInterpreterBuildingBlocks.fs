@@ -127,7 +127,7 @@ let rec eval ast =
         emitSY000diagnostics errMsg pos1 pos2 
     | Ast.ErrorSyntaxBacktracking((pos1, pos2), errMsg) ->
         emitSY001diagnostics errMsg pos1 pos2 
-    | Ast.ErrorSyntaxChain((pos1, pos2), (errMsg, chain)) ->
+    | Ast.ErrorSyntaxChain(((pos1, pos2),_), (errMsg, chain)) ->
         emitSY002diagnostics errMsg chain pos1 pos2 
     | Ast.Digits s -> 
         let fv = heap.Eval.PeekEvalStack()

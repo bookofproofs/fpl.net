@@ -417,12 +417,8 @@ type Diagnostic =
         this.Code.Code + ":" +
         this.Message
 
-type ParsingMode =
-    | Strict
-    | Recovery
-
 type Diagnostics() =
-    let mutable _parsingMode = ParsingMode.Recovery
+    let mutable _errorChainId = 0
     let mutable _currentUri = new PathEquivalentUri("about:blank")
     let _diagnosticStorageTotal = new Dictionary<PathEquivalentUri,Dictionary<string, Diagnostic>>()
     member this.Collection = 
@@ -438,9 +434,10 @@ type Diagnostics() =
         with get() = _currentUri
         and set (value) = _currentUri <- value
 
-    member this.ParsingMode 
-        with get() = _parsingMode
-        and set (value) = _parsingMode <- value
+    member this.NextChainId 
+        with get() =
+            _errorChainId <- _errorChainId + 1
+            _errorChainId
 
     member this.AddDiagnostic (d:Diagnostic) =
         let keyOfd = d.DiagnosticID
@@ -471,11 +468,13 @@ type Diagnostics() =
         this.CurrentUri <- uri
         if (_diagnosticStorageTotal.ContainsKey(uri)) then
             _diagnosticStorageTotal[uri].Clear() |> ignore
+        _errorChainId <- 0
 
     member this.Clear() = 
         _diagnosticStorageTotal.Values
         |> Seq.iter (fun dict -> dict.Clear())
         _diagnosticStorageTotal.Clear()
+        _errorChainId <- 0
 
     member this.GetStreamDiagnostics(uri:PathEquivalentUri) =
         if (_diagnosticStorageTotal.ContainsKey(uri)) then
