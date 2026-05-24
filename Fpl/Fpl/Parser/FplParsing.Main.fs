@@ -143,11 +143,12 @@ let fplParser fplCode =
             |> List.sortBy (fun buildingBlockAst ->
                 match buildingBlockAst with
                 | Ast.BuildingBlock((pos1,_),_) 
-                | Ast.ErrorSyntax((pos1,_),_) -> pos1.Index
+                | Ast.ErrorSyntax((pos1,_),_) 
+                | Ast.ErrorSyntaxBacktracking((pos1,_),_) -> pos1.Index
                 | _ -> Int64.MaxValue
             ), false
         | Failure(errorMsg, _, _) ->
-                getErrorNodes errorMsg origLines origLength, false
+            getErrorNodes errorMsg origLines origLength, false
 
 let parserDiagnostics = ad
 

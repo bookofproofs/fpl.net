@@ -1045,7 +1045,7 @@ let emitSY001diagnostics errMsg pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
 
-let emitSY002diagnostics infixOp pos1 pos2 =
+let emitSY002diagnostics errMsg chain pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -1053,13 +1053,12 @@ let emitSY002diagnostics infixOp pos1 pos2 =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = SY002 infixOp
+            Diagnostic.Code = SY002(errMsg, chain)
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
-    Some (diagnostic.Code.Code)
 
-let emitSY003diagnostics pos1 pos2 =
+let emitSY010diagnostics infixOp pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -1067,13 +1066,27 @@ let emitSY003diagnostics pos1 pos2 =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = SY003
+            Diagnostic.Code = SY010 infixOp
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitSY004diagnostics pos1 pos2 =
+let emitSY011diagnostics pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplParser
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = SY011
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
+
+let emitSY012diagnostics pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -1081,7 +1094,7 @@ let emitSY004diagnostics pos1 pos2 =
             Diagnostic.Severity = DiagnosticSeverity.Warning
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = SY004
+            Diagnostic.Code = SY012
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic

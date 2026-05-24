@@ -1,17 +1,37 @@
 namespace FplInterpreter.Tests.Diagnostics.ErrRecovery
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
 open FplInterpreter.Globals.Debug
-open FplInterpreter.Main
 open CommonTestHelpers
-open TestSharedConfig
+
 
 [<TestClass>]
 type TestInterpreterErrors() =
 
- 
+
+    [<DataRow("00", "def pred T() {true} ", 0)>] 
+    [<DataRow("01", "def pred T( {true} ", 1)>] 
+    [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
+    [<TestMethod>]
+    member this.TestSY000(no:string, fplCode:string, expected) =
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = SY000 ""
+            runTestHelperWithoutSyntaxChecking "TestSY000.fpl" fplCode code expected
+
+    [<DataRow("00", "def cl T {ctor T() {dec base.T(); }}", 0)>] 
+    [<DataRow("01", "def cl T {ctor T() {dec base. (); }}", 1)>] 
+    [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
+    [<TestMethod>]
+    member this.TestSY002(no:string, fplCode:string, expected) =
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = SY002 ("","")
+            runTestHelperWithoutSyntaxChecking "TestSY002.fpl" fplCode code expected
+
     [<DataRow("00", "def pred T() { (1 = x) } ", 0)>] // parser does infix operator, no operand missing
     [<DataRow("01", "def pred T() { (1 = ) } ", 1)>] // parser does infix operator, missing second operand
     [<DataRow("02", "def pred T() { (1 =) } ", 1)>] // parser does infix operator, missing second operand
@@ -19,32 +39,32 @@ type TestInterpreterErrors() =
     [<DataRow("03", "def pred T() { (1=) } ", 1)>] // parser does infix operator, missing second operand
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
-    member this.TestSY000(no:string, fplCode:string, expected) =
+    member this.TestSY010(no:string, fplCode:string, expected) =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = SY002 ""
-            runTestHelper "TestSY000.fpl" fplCode code expected
+            let code = SY010 ""
+            runTestHelper "TestSY010.fpl" fplCode code expected
 
     [<DataRow("00", "def pred T() { ∃!0 x:obj{true} } ", 1)>] 
     [<DataRow("01", "def pred T() { ∃!1 x:obj{true} } ", 0)>] 
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
-    member this.TestSY001(no:string, fplCode:string, expected) =
+    member this.TestSY011(no:string, fplCode:string, expected) =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = SY003 
-            runTestHelper "TestSY001.fpl" fplCode code expected
+            let code = SY011
+            runTestHelper "TestSY011.fpl" fplCode code expected
 
     [<DataRow("00", "def pred T() { ∃!1 x:obj{true} } ", 1)>] 
     [<DataRow("01", "def pred T() { ∃!2 x:obj{true} } ", 0)>] 
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
-    member this.TestSY002(no:string, fplCode:string, expected) =
+    member this.TestSY012(no:string, fplCode:string, expected) =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = SY004
-            runTestHelper "TestSY002.fpl" fplCode code expected
+            let code = SY012
+            runTestHelper "TestSY012.fpl" fplCode code expected
 

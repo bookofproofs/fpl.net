@@ -614,7 +614,8 @@ type TestSignatureMatching() =
             ()
         else
             let code = SIG04 ("", "" )
-            prepareFplCode ("TestSIG04MsgSpecificity.fpl", fplCode, false) |> ignore
-            checkForUnexpectedErrors code
+            let filename = "TestSIG04MsgSpecificity.fpl"
+            prepareFplCode (filename, fplCode, false) |> ignore
+            checkForUnexpectedErrors filename fplCode
             let result = filterByErrorCode ad code.Code
             Assert.AreEqual<string>(expected, result.Head.Message)

@@ -41,7 +41,7 @@ type TestInfixOperations() =
             let fplCode = sprintf """uses Fpl.Commons %s""" varVal
             let filename = "TestImplicationCallsFplCommons"
             prepareFplCode(filename + ".fpl", fplCode, false) 
-            checkForUnexpectedErrors VAR00
+            checkForUnexpectedErrors filename fplCode
             let r = heap.Root
             let theory = r.Scope[filename]
 
@@ -62,7 +62,7 @@ type TestInfixOperations() =
             let fplCode = sprintf """uses Fpl.Commons %s""" varVal
             let filename = "TestEquivalenceCallsFplCommons"
             prepareFplCode(filename + ".fpl", fplCode, false) 
-            checkForUnexpectedErrors VAR00
+            checkForUnexpectedErrors filename fplCode
             let r = heap.Root
             let theory = r.Scope[filename]
 
@@ -80,7 +80,7 @@ type TestInfixOperations() =
         let fplCode = sprintf """%s""" varVal
         let filename = "TestNegationCalls"
         prepareFplCode(filename + ".fpl", fplCode, false) 
-        checkForUnexpectedErrors VAR00
+        checkForUnexpectedErrors filename fplCode
         let r = heap.Root
         let theory = r.Scope[filename]
 
@@ -109,7 +109,7 @@ type TestInfixOperations() =
             let fplCode = sprintf """uses Fpl.Commons %s""" varVal
             let filename = "TestConjunctionCallsFplCommons"
             prepareFplCode(filename + ".fpl", fplCode, false) 
-            checkForUnexpectedErrors VAR00
+            checkForUnexpectedErrors filename fplCode 
             let r = heap.Root
             let theory = r.Scope[filename]
 
@@ -136,7 +136,7 @@ type TestInfixOperations() =
         let fplCode = sprintf """def pred And(x,y: pred) infix "and" 7 { and (x,y) } %s""" varVal
         let filename = "TestConjunctionCalls"
         prepareFplCode(filename + ".fpl", fplCode, false) 
-        checkForUnexpectedErrors VAR00
+        checkForUnexpectedErrors filename fplCode
         let r = heap.Root
         let theory = r.Scope[filename]
 
@@ -166,7 +166,7 @@ type TestInfixOperations() =
             let fplCode = sprintf """uses Fpl.Commons %s""" varVal
             let filename = "TestDisjunctionCallsFplCommons"
             prepareFplCode(filename + ".fpl", fplCode, false) 
-            checkForUnexpectedErrors VAR00
+            checkForUnexpectedErrors filename fplCode
             let r = heap.Root
             let theory = r.Scope[filename]
 
@@ -195,7 +195,7 @@ type TestInfixOperations() =
             let fplCode = sprintf """uses Fpl.Commons %s""" varVal
             let filename = "TestDisjunctionCallsFplCommons"
             prepareFplCode(filename + ".fpl", fplCode, false) 
-            checkForUnexpectedErrors VAR00
+            checkForUnexpectedErrors filename fplCode
             let r = heap.Root
             let theory = r.Scope[filename]
 

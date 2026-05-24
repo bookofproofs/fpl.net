@@ -111,8 +111,15 @@ let private distinguishSyntaxFromBacktrickingErrors (items: (Position * string) 
                 elif l1.StartsWith("Backtracking syntax error") then 
                     $"SY001:`{l2.Trim()}`{Environment.NewLine}{restConcatenated}" 
                 else 
-                    $"{l1}{l2}{rest}" 
-        pos, modifiedErrMsg
+                    $"{l1}{l2}{rest}"
+        let errNummbersChangedToSY002IfMixedSY000andSY001 =
+            if modifiedErrMsg.Contains("SY000:") && modifiedErrMsg.Contains("SY001:") then
+                // replace mixed by SY002
+                modifiedErrMsg.Replace("SY000:", "SY002:").Replace("SY001:", "SY002:")
+            else
+                modifiedErrMsg // leave unchanged
+            
+        pos, errNummbersChangedToSY002IfMixedSY000andSY001
     )
 
 /// Scans input line‑by‑line, detecting a line that trims to "^",
@@ -155,9 +162,9 @@ let private insertLightning (input: string) =
 
     loop [] lines
 
+let private lengthNewLine = Environment.NewLine.Length
 /// Computes FParsec’s Position.Index based on Line and Column in an input string.
 let private computeIndex (pos: Position) (lines: string array) inputLength =
-    let lengthNewLine = Environment.NewLine.Length
     // FParsec Position.Line and Column are 1-based
     let lineIdx  = int pos.Line - 1
     let colIdx   = int pos.Column
@@ -170,7 +177,7 @@ let private computeIndex (pos: Position) (lines: string array) inputLength =
             let prefixLength =
                 lines
                 |> Seq.take lineIdx
-                |> Seq.sumBy (fun l -> l.Length + lengthNewLine)   // +1 for line brack
+                |> Seq.sumBy (fun l -> l.Length + lengthNewLine)   
 
             int64 prefixLength + int64 colIdx
         else
@@ -178,13 +185,41 @@ let private computeIndex (pos: Position) (lines: string array) inputLength =
     else
         int64 inputLength
 
-let private replaceLine (line:string) =
+/// Compute line and column 
+let private computLineAndColumnOfIndex (index: int) (lines: string array) inputLength =
+    // Clamp index to valid range
+    let idx = max 0 (min index (inputLength))
+
+    // Walk through lines until we find the one containing the index
+    let rec loop lineNumber remainingIndex =
+        if lineNumber >= lines.Length then
+            // Index beyond last line → return last line
+            lines.Length, remainingIndex
+        else
+            let line = lines.[lineNumber]
+            let lineLength = line.Length + lengthNewLine   
+
+            if remainingIndex < lineLength then
+                // Index is inside this line
+                let col =
+                    if remainingIndex < line.Length then remainingIndex
+                    else line.Length   // index at newline → column = end of line
+                lineNumber + 1, col
+            else
+                loop (lineNumber + 1) (remainingIndex - lineLength)
+
+    loop 0 idx
+
+/// Removes from an FParsec error message line substrings in the process of preparing a line of an FPL diagnostic message.
+let private removeFParsecErrorStringsFromFplDiagnostics (line:string) =
     line
-        .Trim()
+        .Trim() // trim the line 
+        .Replace("' or '", ", ") // replace ors by commas
+        // remove unwanted strings
         .Replace("Other error messages:", "")
         .Replace("Expecting:", "")
-        .Replace("' or '", ", ")
-        .Replace("end of input", "<end of theory>")
+        .Replace("end of input", "")
+        .Replace("Note: The error occurred at the end of the input stream.", "")
 
 /// Transforms an error message of FParserc preserving the first two lines, and if the third line starts with "Expecting:",
 /// then flattening all remaining lines into that third line by concatenating them without line breaks.
@@ -195,13 +230,13 @@ let private collapseExpectingBlock (input: string) : string =
         match lines with
         | [] -> ""
         | [l1] -> l1
-        | [l1; l2] -> l1 + Environment.NewLine + $"Expecting:{replaceLine l2}"
+        | [l1; l2] -> l1 + Environment.NewLine + $"Expecting:{removeFParsecErrorStringsFromFplDiagnostics l2}"
         | l1 :: l2 :: rest ->
             if l2.TrimStart().StartsWith("Expecting:") then
                 // Concatenate line 2 with all remaining lines (no newlines)
                 let merged =
                     rest
-                    |> List.map (fun s -> replaceLine s)
+                    |> List.map (fun s -> removeFParsecErrorStringsFromFplDiagnostics s)
                     |> String.concat " "
                 $"{l1}{Environment.NewLine}{l2}{merged}"
             else
@@ -212,6 +247,14 @@ let private collapseExpectingBlock (input: string) : string =
 /// Calculates the index Position based on line and column and replaces Positions missing index
 /// with some having them.
 let private correctPositionIndexBasedOnLineAndColumn (lines:string array) length (items: (Position * string) list) =
+    items
+    |> List.map (fun (pos, errMsg) ->
+        (Position("", computeIndex pos lines length, pos.Line, pos.Column), errMsg)
+    )
+
+/// Replaces the Positions witcolumn based on index Position and replaces Positions line and index with
+/// with some having them.
+let private correctPositionLineAndColumnBasedOnIndex (lines:string array) length (items: (Position * string) list) =
     items
     |> List.map (fun (pos, errMsg) ->
         (Position("", computeIndex pos lines length, pos.Line, pos.Column), errMsg)
@@ -234,10 +277,12 @@ let getErrorNodes (errorMsg:string) origLines origLength =
     |> aggregateExpecting
     |> correctPositionIndexBasedOnLineAndColumn origLines origLength
     |> distinguishSyntaxFromBacktrickingErrors 
-    |> List.map (fun (pos, errMsg) ->
+    |> List.mapi (fun i (pos, errMsg) ->
         if errMsg.StartsWith("SY000:") then
             Ast.ErrorSyntax((pos, pos), collapseExpectingBlock errMsg)
-        else
+        elif errMsg.StartsWith("SY001:") then
             Ast.ErrorSyntaxBacktracking((pos, pos), collapseExpectingBlock errMsg)
+        else
+            Ast.ErrorSyntaxChain((pos, pos), (collapseExpectingBlock errMsg, i.ToString()))
     )
-
+    |> List.rev

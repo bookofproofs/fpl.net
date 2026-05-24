@@ -145,9 +145,10 @@ type DiagnosticCode =
     // interpreter syntax-related error codes for error-tolerant parser productions
     | SY000 of string
     | SY001 of string
-    | SY002 of string
-    | SY003 
-    | SY004
+    | SY002 of string * string
+    | SY010 of string
+    | SY011 
+    | SY012
     // variable-related error codes
     | VAR00 
     | VAR01 of string 
@@ -248,8 +249,9 @@ type DiagnosticCode =
             | SY000 _ -> "SY000"
             | SY001 _ -> "SY001"
             | SY002 _ -> "SY002"
-            | SY003 -> "SY003"
-            | SY004 -> "SY004"
+            | SY010 _ -> "SY010"
+            | SY011 -> "SY011"
+            | SY012 -> "SY012"
             // variable-related error codes
             | VAR00 -> "VAR00"
             | VAR01 _  -> "VAR01"
@@ -349,9 +351,10 @@ type DiagnosticCode =
             // interpreter syntax-related error codes for error-tolerant parser
             | SY000 errMsg -> errSY000 errMsg
             | SY001 errMsg -> errSY001 errMsg
-            | SY002 infixOp -> errSY002 infixOp
-            | SY003 -> errSY003
-            | SY004 -> errSY004
+            | SY002 (errMsg, chain) -> errSY002 errMsg chain
+            | SY010 infixOp -> errSY010 infixOp
+            | SY011 -> errSY011
+            | SY012 -> errSY012
             // variable-related error codes
             | VAR00 -> errVAR00
             | VAR01 name -> errVAR01 name

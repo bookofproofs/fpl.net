@@ -127,6 +127,8 @@ let rec eval ast =
         emitSY000diagnostics errMsg pos1 pos2 
     | Ast.ErrorSyntaxBacktracking((pos1, pos2), errMsg) ->
         emitSY001diagnostics errMsg pos1 pos2 
+    | Ast.ErrorSyntaxChain((pos1, pos2), (errMsg, chain)) ->
+        emitSY002diagnostics errMsg chain pos1 pos2 
     | Ast.Digits s -> 
         let fv = heap.Eval.PeekEvalStack()
         fv.FplId <- s
@@ -146,9 +148,9 @@ let rec eval ast =
         | :? FplQuantorExistsN ->
             match (int)s with
             | 0 ->
-                fv.ErrorOccurred <- emitSY003diagnostics pos1 pos2
+                fv.ErrorOccurred <- emitSY011diagnostics pos1 pos2
             | 1 ->
-                fv.ErrorOccurred <- emitSY004diagnostics pos1 pos2
+                fv.ErrorOccurred <- emitSY012diagnostics pos1 pos2
             | _ -> ()
             fv.FplId <- fv.FplId + sid
         | _  ->
@@ -1086,7 +1088,7 @@ let rec eval ast =
         if fv.ArgList.Count % 2 = 0 then
             let trailingOp = fv.ArgList.[fv.ArgList.Count - 1]
             // record diagnostic on the trailing operator
-            trailingOp.ErrorOccurred <- emitSY002diagnostics trailingOp.FplId fv.EndPos fv.EndPos
+            trailingOp.ErrorOccurred <- emitSY010diagnostics trailingOp.FplId fv.EndPos fv.EndPos
             // remove the trailing operator so further processing won't index out of range
             fv.ArgList.RemoveAt(fv.ArgList.Count - 1)
 
