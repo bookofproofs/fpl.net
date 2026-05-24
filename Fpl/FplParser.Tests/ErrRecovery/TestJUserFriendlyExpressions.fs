@@ -21,8 +21,8 @@ type TestRecovery() =
     [<DataRow("bb07", """def pred T() { .(.∀ x:obj {.x is N} ∧ ¬∃ y:obj {y is M}) ∨ (.¬∀ x:obj {.x is N} ∧ ∃ y:obj {.y is M}) }""")>]
     [<DataRow("bb08", """def pred T() { .(.¬∃ x:obj {.x is N} ∨ (.true ⇔ false)) ∧ .(.∃ x:obj {.x is N} ∨ ¬.true ⇔ false) }""")>]
     [<DataRow("bb09", """def pred T() { .(.¬∃ x:obj {.x is N} ∨ (.true ⇔ false)) ∧ .(.∃ x:obj {.x is N} ∨ ¬.true ⇔ false) } def cl A""")>]
-    [<DataRow("bb09", """ext  x@/\d+/ -> A {return x}""", 4)>]
-    
+    [<DataRow("bb09", """ext  x@/\d+/ -> A {return x}""")>]
+    [<DataRow("bb10", """proof T$1 {100. assume true}""")>]
     [<TestMethod>]
     member this.TestErrorRecoveryBuildingBlock(no:string, fplCode:string) =
         ad.Clear()

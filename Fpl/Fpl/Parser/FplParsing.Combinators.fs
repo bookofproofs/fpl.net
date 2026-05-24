@@ -365,16 +365,18 @@ primePredicateRef.Value <- choice [
     objectSymbol
 ]
 
+let argIdX: Parser<string,unit> = 
+    regex @"\w+" <?> "<referenced argument identifier>" 
+    |> resultSatisfies (fun s -> keyWordSet.Contains(s) |> not) "Expecting: <referenced argument identifier (got keyword)>" 
+    |> resultSatisfies (fun s -> tplRegex.IsMatch(s) |> not) "Expecting: <referenced argument identifier (got template)>"
+    >>= (fun s -> preturn s) 
+
 let argumentIdentifier = positions (regex @"\w+\.") <?> "<argument identifier>" |>> Ast.ArgumentIdentifier
-let refArgumentIdentifier = positions (regex @"\w+") <?> "<refargument identifier>" |>> Ast.RefArgumentIdentifier
+let refArgumentIdentifier = positions argIdX |>> Ast.RefArgumentIdentifier
 let justificationIdentifier = positions (opt byModifier .>>. predicateIdentifier .>>. opt dollarDigitList .>>. opt (colon >>. refArgumentIdentifier)) |>> Ast.JustificationIdentifier
 let byDef = positions (keywordByDef >>. SW >>. variable) |>> Ast.ByDef
 
-let justificationReference = choice [
-    attempt byDef
-    justificationIdentifier
-    refArgumentIdentifier
-]
+let justificationItem = positions (choice [attempt byDef ; justificationIdentifier ; refArgumentIdentifier ]) |>> Ast.JustificationItem
 
 let twoPredicatesInParens = (leftParen >>. predicate) .>>. (comma >>. predicate) .>> rightParen 
 let twoPredicatesWithInfix p = (dot >>. (predicate .>> p) .>>. predicate)
@@ -553,10 +555,9 @@ let derivedArgument = choice [
     derivedPredicate
 ]
 
-let argumentInference = vDash >>. IW >>. (assumeArgument <|> revokeArgument <|> derivedArgument)
-let justificationItem = positions justificationReference |>> Ast.JustificationItem
+let argumentInference = (assumeArgument <|> revokeArgument <|> derivedArgument)
 let justificationItemList = sepBy justificationItem comma
-let justification = positions (justificationItemList .>> IW) |>> Ast.Justification
+let justification = positions (opt (justificationItemList .>> IW .>> vDash .>> IW)) |>> Ast.Justification
 let justifiedArgument = positions (justification .>>. argumentInference) |>> Ast.JustArgInf
 let proofArgument = positions ((argumentIdentifier .>> IW) .>>. justifiedArgument) .>> IW |>> Ast.Argument
 let proofArgumentList = many1 (IW >>. proofArgument)

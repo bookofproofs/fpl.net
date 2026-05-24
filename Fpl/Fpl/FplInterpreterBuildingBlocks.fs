@@ -651,11 +651,13 @@ let rec eval ast =
         heap.Eval.PopEvalStack()
     | Ast.JustificationItem((pos1, pos2), justificationReferenceAst) ->
         eval justificationReferenceAst 
-    | Ast.Justification((pos1, pos2), justificationItemAsts) ->
+    | Ast.Justification((pos1, pos2), justificationItemAstsOpt) ->
         let fv = heap.Eval.PeekEvalStack()
         let just = new FplJustification((pos1, pos2), fv) 
         heap.Eval.PushEvalStack(just)
-        justificationItemAsts |> List.map eval |> ignore
+        match justificationItemAstsOpt with
+        | Some justificationItemAsts -> justificationItemAsts |> List.map eval |> ignore
+        | None -> ()
         heap.Eval.PopEvalStack()
     | Ast.ArgumentTuple((pos1, pos2), predicateListAst) ->
         let next = heap.Eval.PeekEvalStack()

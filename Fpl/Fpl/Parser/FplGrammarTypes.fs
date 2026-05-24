@@ -164,7 +164,7 @@ type Ast =
     | RefArgumentIdentifier of Positions * string
     | ReferenceToProofOrCorollary of Positions * Ast
     | JustificationItem of Positions * Ast 
-    | Justification of Positions * Ast list
+    | Justification of Positions * Ast list option
     | ByDef of Positions * Ast 
     | JustificationIdentifier of Positions * (((string option * Ast) * Ast list option) * Ast option) 
     | Trivial of Positions * unit
