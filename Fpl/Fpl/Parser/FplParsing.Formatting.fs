@@ -94,6 +94,8 @@ let private aggregateExpecting (items: (Position * string) list) =
             [pos, combined])
 
 let private distinguishSyntaxFromBacktrickingErrors (items: (Position * string) list) =
+    let hasFPL = items |> List.exists (fun (_, errMsg) -> errMsg.Contains("FPL syntax error"))    
+    let hasBacktracking = items |> List.exists (fun (_, errMsg) -> errMsg.Contains("Backtracking syntax error"))    
     items
     |> List.map (fun (pos, errMsg) ->
         let lines = errMsg.Split(Environment.NewLine) |> Array.toList
@@ -113,8 +115,9 @@ let private distinguishSyntaxFromBacktrickingErrors (items: (Position * string) 
                 else 
                     $"{l1}{l2}{rest}"
         let errNummbersChangedToSY002IfMixedSY000andSY001 =
-            if modifiedErrMsg.Contains("SY000:") && modifiedErrMsg.Contains("SY001:") then
-                // replace mixed by SY002
+            if hasFPL && hasBacktracking then
+                // replace the line's error number by SY002,
+                // if all lines have mixed error types (SY000 and SY001)
                 modifiedErrMsg.Replace("SY000:", "SY002:").Replace("SY001:", "SY002:")
             else
                 modifiedErrMsg // leave unchanged

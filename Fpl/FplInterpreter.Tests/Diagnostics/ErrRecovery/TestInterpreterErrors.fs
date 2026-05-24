@@ -22,7 +22,7 @@ type TestInterpreterErrors() =
             runTestHelperWithoutSyntaxChecking "TestSY000.fpl" fplCode code expected
 
     [<DataRow("00", "def cl T {ctor T() {dec base.T(); }}", 0)>] 
-    [<DataRow("01", "def cl T {ctor T() {dec base. (); }}", 1)>] 
+    [<DataRow("01", "def cl T {ctor T() {dec base. (); }}", 2)>] 
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestSY002(no:string, fplCode:string, expected) =
