@@ -218,7 +218,7 @@ let private computLineAndColumnOfIndex (index: int) (lines: string array) inputL
 let private removeFParsecErrorStringsFromFplDiagnostics (line:string) =
     line
         .Trim() // trim the line 
-        .Replace("' or '", ", ") // replace ors by commas
+        .Replace(" or ", ", ") // replace ors by commas
         // remove unwanted strings
         .Replace("Other error messages:", "")
         .Replace("Expecting:", "")
