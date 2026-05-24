@@ -558,7 +558,7 @@ type TestFplValueScopeBlockType() =
     [<TestMethod>]
     member this.TestPredicate(var, varVal) =
         
-        let fplCode = sprintf "def pred T1() { %s };" varVal
+        let fplCode = sprintf "def pred T1() { %s }" varVal
         let filename = "TestPredicateBlockType"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -655,7 +655,7 @@ type TestFplValueScopeBlockType() =
                                 
                             }
                         }
-                        ;""" varVal
+                        """ varVal
         let filename = "TestBaseConstructorCallBlockType"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -684,7 +684,7 @@ type TestFplValueScopeBlockType() =
     [<TestMethod>]
     member this.TestDelegate(var, varVal) =
         
-        let fplCode = sprintf "def pred T1() { %s };" varVal
+        let fplCode = sprintf "def pred T1() { %s }" varVal
         let filename = "TestDelegateBlockType"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -704,20 +704,20 @@ type TestFplValueScopeBlockType() =
         | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
 
-    [<DataRow("base1", """def pred T1() {intr};""")>]
-    [<DataRow("base2", """def pred T1() infix ">" -1 {intr};""")>]
-    [<DataRow("base3", """def pred T1 () postfix "'" {intr};""")>]
-    [<DataRow("base4", """def pred T1 () prefix "-" {intr};""")>]
-    [<DataRow("base5", """def cl T1 symbol "∅" {intr};""")>]
-    [<DataRow("base5a", """def cl T1 {intr};""")>]
-    [<DataRow("base6", """def func T1()->obj {intr};""")>]
-    [<DataRow("base7", """def func T1 ()->obj infix ">" -1 {intr};""")>]
-    [<DataRow("base8", """def func T1 ()->obj postfix "'" {intr};""")>]
-    [<DataRow("base9", """def func T1 ()->obj prefix "-" {intr};""")>]
+    [<DataRow("base1", """def pred T1() {intr}""")>]
+    [<DataRow("base2", """def pred T1() infix ">" -1 {intr}""")>]
+    [<DataRow("base3", """def pred T1 () postfix "'" {intr}""")>]
+    [<DataRow("base4", """def pred T1 () prefix "-" {intr}""")>]
+    [<DataRow("base5", """def cl T1 symbol "∅" {intr}""")>]
+    [<DataRow("base5a", """def cl T1 {intr}""")>]
+    [<DataRow("base6", """def func T1()->obj {intr}""")>]
+    [<DataRow("base7", """def func T1 ()->obj infix ">" -1 {intr}""")>]
+    [<DataRow("base8", """def func T1 ()->obj postfix "'" {intr}""")>]
+    [<DataRow("base9", """def func T1 ()->obj prefix "-" {intr}""")>]
     [<TestMethod>]
     member this.TestFixNotationBlockType(var, varVal) =
         
-        let fplCode = sprintf "%s;" varVal
+        let fplCode = sprintf "%s" varVal
         let filename = "TestFixNotationBlockType"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -744,20 +744,20 @@ type TestFplValueScopeBlockType() =
         | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
 
-    [<DataRow("base1", """def func T()->obj {intr};""")>]
-    [<DataRow("base2", """def func T()->ind {intr};""")>]
-    [<DataRow("base3", """def func T()->func {intr};""")>]
-    [<DataRow("base4", """def func T()->pred {intr};""")>]
-    [<DataRow("base5", """def cl A {intr} def func T()->A {intr};""")>]
-    [<DataRow("base6", """def func T()->tpl {intr};""")>]
-    [<DataRow("base7", """def func T()->pred(z:*obj[ind]) {intr};""")>]
-    [<DataRow("base8", """def func T()->func(p:*pred(x:obj)[ind])->pred(x:ind) {intr};""")>]
-    [<DataRow("base9", """def func T()->pred(f:*func(x:A)->A[ind]) {intr};""")>]
-    [<DataRow("base10", """def cl A {intr} def func T()->pred(f:func(x:A)->A) {intr};""")>]
+    [<DataRow("base1", """def func T()->obj {intr}""")>]
+    [<DataRow("base2", """def func T()->ind {intr}""")>]
+    [<DataRow("base3", """def func T()->func {intr}""")>]
+    [<DataRow("base4", """def func T()->pred {intr}""")>]
+    [<DataRow("base5", """def cl A {intr} def func T()->A {intr}""")>]
+    [<DataRow("base6", """def func T()->tpl {intr}""")>]
+    [<DataRow("base7", """def func T()->pred(z:*obj[ind]) {intr}""")>]
+    [<DataRow("base8", """def func T()->func(p:*pred(x:obj)[ind])->pred(x:ind) {intr}""")>]
+    [<DataRow("base9", """def func T()->pred(f:*func(x:A)->A[ind]) {intr}""")>]
+    [<DataRow("base10", """def cl A {intr} def func T()->pred(f:func(x:A)->A) {intr}""")>]
     [<TestMethod>]
     member this.TestMapping(var, varVal) =
         
-        let fplCode = sprintf "%s;" varVal
+        let fplCode = sprintf "%s" varVal
         let filename = "TestMappingBlockType"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -786,7 +786,7 @@ type TestFplValueScopeBlockType() =
     [<TestMethod>]
     member this.TestArgumentNumberOfJustifications(var, argExpression, expNumber:int) =
         
-        let fplCode = sprintf """proof T$1 { %s };""" argExpression
+        let fplCode = sprintf """proof T$1 { %s }""" argExpression
         let filename = "TestArgumentNumberOfJustifications"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -806,7 +806,7 @@ type TestFplValueScopeBlockType() =
     [<TestMethod>]
     member this.TestArgumentBlockType(var, argExpression) =
         
-        let fplCode = sprintf """proof T$1 { %s };""" argExpression
+        let fplCode = sprintf """proof T$1 { %s }""" argExpression
         let filename = "TestArgumentBlockType"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -822,12 +822,12 @@ type TestFplValueScopeBlockType() =
         | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
 
-    [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr";""")>]
-    [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
-    [<DataRow("base2", "not(undef)", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
-    [<DataRow("base3", "and(undef, undef)", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q;""")>]
-    [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""")>]
-    [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
+    [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr" """)>]
+    [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y""")>]
+    [<DataRow("base2", "not(undef)", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x""")>]
+    [<DataRow("base3", "and(undef, undef)", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q""")>]
+    [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y""")>]
+    [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y""")>]
     [<TestMethod>]
     member this.TestLanguageBlockType(var, predName, predDecl, trslCode) =
         
@@ -849,12 +849,12 @@ type TestFplValueScopeBlockType() =
         | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
 
-    [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr";""")>]
-    [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
-    [<DataRow("base2", "not(undef)", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
-    [<DataRow("base3", "and(undef, undef)", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q;""")>]
-    [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""")>]
-    [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
+    [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr" """)>]
+    [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y""")>]
+    [<DataRow("base2", "not(undef)", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x""")>]
+    [<DataRow("base3", "and(undef, undef)", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q""")>]
+    [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y""")>]
+    [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y""")>]
     [<TestMethod>]
     member this.TestLocalizationBlockType(var, predName, predDecl, trslCode) =
         
@@ -875,12 +875,12 @@ type TestFplValueScopeBlockType() =
         | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
 
-    [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr";""")>]
-    [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
-    [<DataRow("base2", "not(undef)", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
-    [<DataRow("base3", "and(undef, undef)", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q;""")>]
-    [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""")>]
-    [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
+    [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr" """)>]
+    [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y""")>]
+    [<DataRow("base2", "not(undef)", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x""")>]
+    [<DataRow("base3", "and(undef, undef)", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q""")>]
+    [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y""")>]
+    [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y""")>]
     [<TestMethod>]
     member this.TestTranslationBlockType(var, predName, predDecl, trslCode) =
         
@@ -913,8 +913,8 @@ type TestFplValueScopeBlockType() =
     [<TestMethod>]
     member this.TestDecrement(varVal, expected:string) =
         
-        let fplCode = sprintf """def pred T() { del.Decrement(%s) };""" varVal
-        let filename = "TestDecrementBlockType.fpl"
+        let fplCode = sprintf """def pred T() { del.Decrement(%s) }""" varVal
+        let filename = "TestDecrementBlockType"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
         let theory = r.Scope[filename]
@@ -934,7 +934,7 @@ type TestFplValueScopeBlockType() =
     [<TestMethod>]
     member this.TestExtensionObj(varVal, expected:string) =
         
-        let fplCode = sprintf """def pred T() { %s };""" varVal
+        let fplCode = sprintf """def pred T() { %s }""" varVal
         let filename = "TestExtensionObjBlockType.fpl"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -968,7 +968,7 @@ type TestFplValueScopeBlockType() =
                     | (x = $3) : false 
                     ? undef  
                 )
-                ;n } def pred T() {Test(%s)};""" input 
+                ;n } def pred T() {Test(%s)}""" input 
         let filename = "TestMCaseStatement"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -1009,7 +1009,7 @@ type TestFplValueScopeBlockType() =
                     | (x = $3) : false 
                     ? undef  
                 )
-                ;n } def pred T() {Test(%s)};""" input 
+                ;n } def pred T() {Test(%s)}""" input 
         let filename = "TestMapCasesBlockType"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -1051,7 +1051,7 @@ type TestFplValueScopeBlockType() =
                     | (x = $3) : n:=false 
                     ? n:=undef  
                 )
-                ;n } def pred T() {Test(%s)};""" input 
+                ;n } def pred T() {Test(%s)}""" input 
         let filename = "TestMCaseStatement"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root

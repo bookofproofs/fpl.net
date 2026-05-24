@@ -29,8 +29,8 @@ type TestArity() =
     [<DataRow("inf T {pre: true con:true}", 0)>]
     [<TestMethod>]
     member this.TestArityBlocks(varVal, (arity:int)) =
-        let fplCode = sprintf "%s;" varVal
-        let filename = "TestArityBlocks.fpl"
+        let fplCode = sprintf "%s" varVal
+        let filename = "TestArityBlocks"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
         let theory = r.Scope[filename]
@@ -57,7 +57,7 @@ type TestArity() =
     [<DataRow("inf T {pre: true con:true}", 0)>]
     [<TestMethod>]
     member this.TestIsReadyBlocks(varVal, (arity:int)) =
-        let fplCode = sprintf "%s;" varVal
+        let fplCode = sprintf "%s" varVal
         let filename = "TestIsReadyBlocks.fpl"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root

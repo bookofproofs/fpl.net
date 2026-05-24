@@ -542,8 +542,8 @@ type TestFplValueScopeFplRepresentation() =
     [<TestMethod>]
     member this.TestExpressionRepresent(var, varVal) =
         
-        let fplCode = sprintf "def pred T1() { %s };" varVal
-        let filename = "TestExpressionRepresent.fpl"
+        let fplCode = sprintf "def pred T1() { %s }" varVal
+        let filename = "TestExpressionRepresent"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
         let theory = r.Scope[filename]
@@ -641,7 +641,7 @@ type TestFplValueScopeFplRepresentation() =
                             }
                         }
                         def pred Test() {A()}
-                        ;""" varVal
+                        """ varVal
         let filename = "TestBaseConstructorCallFplRepresentation"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -661,20 +661,20 @@ type TestFplValueScopeFplRepresentation() =
         prepareFplCode(filename, "", false) |> ignore
 
 
-    [<DataRow("base1", """def func T()->obj {intr};""")>]
-    [<DataRow("base2", """def func T()->ind {intr};""")>]
-    [<DataRow("base3", """def func T()->func {intr};""")>]
-    [<DataRow("base4", """def func T()->pred {intr};""")>]
-    [<DataRow("base5", """def cl A def func T()->A {intr};""")>]
-    [<DataRow("base6", """def func T()->pred(z:ind) {intr};""")>]
-    [<DataRow("base7", """def func T()->pred(z:*obj[ind]) {intr};""")>]
-    [<DataRow("base8", """def func T()->func(p:*pred(x:obj)[ind])->pred(x:ind) {intr};""")>]
-    [<DataRow("base9", """def func T()->pred(f:*func(x:A)->A[ind]) {intr};""")>]
-    [<DataRow("base10", """def cl A def func T()->pred(f:func(x:A)->A) {intr};""")>]
+    [<DataRow("base1", """def func T()->obj {intr}""")>]
+    [<DataRow("base2", """def func T()->ind {intr}""")>]
+    [<DataRow("base3", """def func T()->func {intr}""")>]
+    [<DataRow("base4", """def func T()->pred {intr}""")>]
+    [<DataRow("base5", """def cl A def func T()->A {intr}""")>]
+    [<DataRow("base6", """def func T()->pred(z:ind) {intr}""")>]
+    [<DataRow("base7", """def func T()->pred(z:*obj[ind]) {intr}""")>]
+    [<DataRow("base8", """def func T()->func(p:*pred(x:obj)[ind])->pred(x:ind) {intr}""")>]
+    [<DataRow("base9", """def func T()->pred(f:*func(x:A)->A[ind]) {intr}""")>]
+    [<DataRow("base10", """def cl A def func T()->pred(f:func(x:A)->A) {intr}""")>]
     [<TestMethod>]
     member this.TestMapping(var, varVal) =
         
-        let fplCode = sprintf "%s;" varVal
+        let fplCode = sprintf "%s" varVal
         let filename = "TestMappingRepresentation"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -706,7 +706,7 @@ type TestFplValueScopeFplRepresentation() =
     [<TestMethod>]
     member this.TestDelegate(var, varVal) =
         
-        let fplCode = sprintf "def pred T1() { %s };" varVal
+        let fplCode = sprintf "def pred T1() { %s }" varVal
         let filename = "TestDelegateFplRepresentation"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -728,20 +728,20 @@ type TestFplValueScopeFplRepresentation() =
         | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
 
-    [<DataRow("base1", """def pred T1() {intr};""")>]
-    [<DataRow("base2", """def pred T1 () infix ">" -1 {intr};""")>]
-    [<DataRow("base3", """def pred T1 () postfix "'" {intr};""")>]
-    [<DataRow("base4", """def pred T1 () prefix "-" {intr};""")>]
-    [<DataRow("base5", """def cl T1 symbol "∅" {intr};""")>]
-    [<DataRow("base5a", """def cl T1 {intr};""")>]
-    [<DataRow("base6", """def func T1()->obj {intr};""")>]
-    [<DataRow("base7", """def func T1 ()->obj infix ">" -1 {intr};""")>]
-    [<DataRow("base8", """def func T1  ()->obj postfix "'"{intr};""")>]
-    [<DataRow("base9", """def func T1 ()->obj prefix "-" {intr};""")>]
+    [<DataRow("base1", """def pred T1() {intr}""")>]
+    [<DataRow("base2", """def pred T1 () infix ">" -1 {intr}""")>]
+    [<DataRow("base3", """def pred T1 () postfix "'" {intr}""")>]
+    [<DataRow("base4", """def pred T1 () prefix "-" {intr}""")>]
+    [<DataRow("base5", """def cl T1 symbol "∅" {intr}""")>]
+    [<DataRow("base5a", """def cl T1 {intr}""")>]
+    [<DataRow("base6", """def func T1()->obj {intr}""")>]
+    [<DataRow("base7", """def func T1 ()->obj infix ">" -1 {intr}""")>]
+    [<DataRow("base8", """def func T1  ()->obj postfix "'"{intr}""")>]
+    [<DataRow("base9", """def func T1 ()->obj prefix "-" {intr}""")>]
     [<TestMethod>]
     member this.TestFixNotationRepresentation(var, varVal) =
         
-        let fplCode = sprintf "%s;" varVal
+        let fplCode = sprintf "%s" varVal
         let filename = "TestFixNotationFplRepresentation"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -769,17 +769,17 @@ type TestFplValueScopeFplRepresentation() =
         prepareFplCode(filename, "", false) |> ignore
 
 
-    [<DataRow("varIndUnset", """def pred T1() { dec x:ind; true};""")>]
-    [<DataRow("varIndSet0", """def pred T1() { dec x:ind x:=$0; true};""")>]
-    [<DataRow("varIndSet1", """def pred T1() { dec x:ind x:=$1; true};""")>]
-    [<DataRow("varIndSet42", """def pred T1() { dec x:ind x:=$42; true};""")>]
-    [<DataRow("varIndSet100", """def pred T1() { dec x:ind x:=$100; true};""")>]
-    [<DataRow("varFuncUnset", """def pred T1() { dec x:func; true};""")>]
-    [<DataRow("varPredUnset", """def pred T1() { dec x:pred; true};""")>]
+    [<DataRow("varIndUnset", """def pred T1() { dec x:ind; true}""")>]
+    [<DataRow("varIndSet0", """def pred T1() { dec x:ind x:=$0; true}""")>]
+    [<DataRow("varIndSet1", """def pred T1() { dec x:ind x:=$1; true}""")>]
+    [<DataRow("varIndSet42", """def pred T1() { dec x:ind x:=$42; true}""")>]
+    [<DataRow("varIndSet100", """def pred T1() { dec x:ind x:=$100; true}""")>]
+    [<DataRow("varFuncUnset", """def pred T1() { dec x:func; true}""")>]
+    [<DataRow("varPredUnset", """def pred T1() { dec x:pred; true}""")>]
     [<TestMethod>]
     member this.TestVariableRepresentationOtherThanObjects(var, varVal) =
         
-        let fplCode = sprintf "%s;" varVal
+        let fplCode = sprintf "%s" varVal
         let filename = "TestVariableRepresentationOtherThanObjects"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -853,7 +853,7 @@ type TestFplValueScopeFplRepresentation() =
                     | (x = $3) : false 
                     ? undef  
                 )
-                ;n } def pred T() {Test(%s)};""" input 
+                ;n } def pred T() {Test(%s)}""" input 
         let filename = "TestMCaseStatementFplRepresentation"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -894,7 +894,7 @@ type TestFplValueScopeFplRepresentation() =
                     | (x = $3) : false 
                     ? undef  
                 )
-                ;n } def pred T() {Test(%s)};""" input 
+                ;n } def pred T() {Test(%s)}""" input 
         let filename = "TestConditionResultStatementFplRepresentation"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -921,7 +921,7 @@ type TestFplValueScopeFplRepresentation() =
     [<TestMethod>]
     member this.TestAssignmentVariableReferenceTheSame(no:string, input, (expected:string)) =
         
-        let fplCode = sprintf "def pred T() {%s true};" input
+        let fplCode = sprintf "def pred T() {%s true}" input
         let filename = "TestAssignment"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -943,7 +943,7 @@ type TestFplValueScopeFplRepresentation() =
     [<TestMethod>]
     member this.TestAssignmentValue(no:string, input, (expected:string)) =
         
-        let fplCode = sprintf "def pred T() {%s true};" input
+        let fplCode = sprintf "def pred T() {%s true}" input
         let filename = "TestAssignment"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -981,7 +981,7 @@ type TestFplValueScopeFplRepresentation() =
     [<TestMethod>]
     member this.TestAssignmentVariableInitialized(no:string, input, (expected:bool)) =
         
-        let fplCode = sprintf "def pred T() {%s true};" input
+        let fplCode = sprintf "def pred T() {%s true}" input
         let filename = "TestAssignmentVariableInitialized"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -1029,7 +1029,7 @@ type TestFplValueScopeFplRepresentation() =
     [<TestMethod>]
     member this.TestAssignementOfConstantsRepresent(var, input, output:string) =
         
-        let fplCode = sprintf """%s;""" input 
+        let fplCode = sprintf """%s""" input 
         let filename = "TestAssignementOfConstantsRepresent"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -1065,7 +1065,7 @@ type TestFplValueScopeFplRepresentation() =
                 {
                     del.Equal(x,y)
                 }              
-                def pred T() {%s};""" input 
+                def pred T() {%s}""" input 
         let filename = "TestMCaseStatementFplRepresentation"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root

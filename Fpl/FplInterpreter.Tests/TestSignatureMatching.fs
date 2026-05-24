@@ -12,15 +12,15 @@ open CommonTestHelpers
 [<TestClass>]
 type TestSignatureMatching() =
 
-    [<DataRow("00", """def pred T (x,y:obj) {true} def pred Caller() {dec a,b:obj c:ind; T(a,b,c)} ;""",
+    [<DataRow("00", """def pred T (x,y:obj) {true} def pred Caller() {dec a,b:obj c:ind; T(a,b,c)} """,
         "No matching parameter for the argument `c` typed `ind` in the predicate definition TestSignatureMatchingReferencesPlain.T(obj, obj)")>]
-    [<DataRow("01", """def pred T (x,y:obj) {true} def pred Caller() {dec a,b:obj; T(a,b)} ;""",
+    [<DataRow("01", """def pred T (x,y:obj) {true} def pred Caller() {dec a,b:obj; T(a,b)} """,
         "")>]
-    [<DataRow("02", """def pred T (x,y:Nat) {true} def pred Caller() {dec a,b:obj; T(a,b)} ;""",
+    [<DataRow("02", """def pred T (x,y:Nat) {true} def pred Caller() {dec a,b:obj; T(a,b)} """,
         "The expression `a` typed `obj` doesn't match the parameter `x` typed `Nat` in the predicate definition TestSignatureMatchingReferencesPlain.T(Nat, Nat)")>]
-    [<DataRow("03", """def pred T (x,y:obj) {true} def pred Caller() {dec a,b:Nat; T(a,b)} ;""",
+    [<DataRow("03", """def pred T (x,y:obj) {true} def pred Caller() {dec a,b:Nat; T(a,b)} """,
         "The type `Nat` of the expression `a` could not be determined. The parameter `x` requires the type `obj` or any type derived from it in the predicate definition TestSignatureMatchingReferencesPlain.T(obj, obj)")>]
-    [<DataRow("04", """def pred T () {true} def pred Caller() {T()} ;""",
+    [<DataRow("04", """def pred T () {true} def pred Caller() {T()} """,
         "")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesPlain(no:string, varVal, var:string) =
@@ -39,13 +39,13 @@ type TestSignatureMatching() =
         | None -> Assert.AreEqual<string>("no error","no error")
         prepareFplCode(filename, "", false) |> ignore
 
-    [<DataRow("01", """def pred T (x,y:pred) {true} def pred Caller() {dec a,b:pred c:ind; T(a,b,c)} ;""",
+    [<DataRow("01", """def pred T (x,y:pred) {true} def pred Caller() {dec a,b:pred c:ind; T(a,b,c)} """,
         "No matching parameter for the argument `c` typed `ind` in the predicate definition TestSignatureMatchingReferencesPred.T(pred, pred)")>]
-    [<DataRow("02", """def pred T (x,y:pred) {true} def pred Caller() {dec a,b:pred; T(a,b)} ;""",
+    [<DataRow("02", """def pred T (x,y:pred) {true} def pred Caller() {dec a,b:pred; T(a,b)} """,
         "")>]
-    [<DataRow("03", """def pred T (x,y:Nat) {true} def pred Caller() {dec a,b:pred; T(a,b)} ;""",
+    [<DataRow("03", """def pred T (x,y:Nat) {true} def pred Caller() {dec a,b:pred; T(a,b)} """,
         "The expression `a` typed `pred` doesn't match the parameter `x` typed `Nat` in the predicate definition TestSignatureMatchingReferencesPred.T(Nat, Nat)")>]
-    [<DataRow("04", """def pred T (x,y:pred) {true} def pred Caller() {dec a,b:Nat; T(a,b)} ;""",
+    [<DataRow("04", """def pred T (x,y:pred) {true} def pred Caller() {dec a,b:Nat; T(a,b)} """,
         "The expression `a` typed `Nat` doesn't match the parameter `x` typed `pred` in the predicate definition TestSignatureMatchingReferencesPred.T(pred, pred)")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesPred(no:string, varVal, var:string) =
@@ -64,9 +64,9 @@ type TestSignatureMatching() =
         | None -> Assert.AreEqual<string>("no error","no error")
         prepareFplCode(filename, "", false) |> ignore
 
-    [<DataRow("00", """def pred T(f:func()->obj) {intr} def pred Caller() {dec x:func()->obj; T(x)} ;""",
+    [<DataRow("00", """def pred T(f:func()->obj) {intr} def pred Caller() {dec x:func()->obj; T(x)} """,
         "")>]
-    [<DataRow("01", """def pred T(f:func()->Nat) {intr} def pred Caller() {dec x:func()->obj; T(x)} ;""",
+    [<DataRow("01", """def pred T(f:func()->Nat) {intr} def pred Caller() {dec x:func()->obj; T(x)} """,
         "The expression `x` typed `func() -> obj` doesn't match the parameter `f` typed `func() -> Nat` in the predicate definition TestSignatureMatchingReferencesFunc.T(func() -> Nat)")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesFunc(no:string, varVal, var:string) =
@@ -86,7 +86,7 @@ type TestSignatureMatching() =
         prepareFplCode(filename, "", false) |> ignore
 
 
-    [<DataRow("00", """def func T(n,m:obj)->obj {return self(n,m)};""",
+    [<DataRow("00", """def func T(n,m:obj)->obj {return self(n,m)}""",
         "")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesFuncReturnSelf(no:string, varVal, var:string) =
@@ -105,15 +105,15 @@ type TestSignatureMatching() =
         | None -> Assert.AreEqual<string>("no error","no error")
         prepareFplCode(filename, "", false) |> ignore
 
-    [<DataRow("00", """def func T(y:obj)->obj { intr } def func Caller()->obj {dec x:obj; return T(x)} ;""",
+    [<DataRow("00", """def func T(y:obj)->obj { intr } def func Caller()->obj {dec x:obj; return T(x)} """,
         "")>]
-    [<DataRow("01", """def func T(y:obj)->obj { return y } def func Caller()->obj {dec x:obj; return T(x)} ;""",
+    [<DataRow("01", """def func T(y:obj)->obj { return y } def func Caller()->obj {dec x:obj; return T(x)} """,
         "")>]
-    [<DataRow("02", """def func T(y:obj)->obj { intr } def func Caller()->obj {return T(x)} ;""",
+    [<DataRow("02", """def func T(y:obj)->obj { intr } def func Caller()->obj {return T(x)} """,
         "`x:undef` doesn't match `y:obj` in the functional term definition TestSignatureMatchingReferencesFuncReturn.T(obj) -> obj")>]
-    [<DataRow("03", """def func T(y:obj)->obj { return y } def func Caller()->obj {return T(x)} ;""",
+    [<DataRow("03", """def func T(y:obj)->obj { return y } def func Caller()->obj {return T(x)} """,
         "`x:undef` doesn't match `y:obj` in the functional term definition TestSignatureMatchingReferencesFuncReturn.T(obj) -> obj")>]
-    [<DataRow("04", """def func T(y:obj)->obj { return y } def func Caller(x:obj)->obj {return T(x)};""",
+    [<DataRow("04", """def func T(y:obj)->obj { return y } def func Caller(x:obj)->obj {return T(x)}""",
         "")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesFuncReturn(no:string, varVal, var:string) =
@@ -133,9 +133,9 @@ type TestSignatureMatching() =
         | None -> Assert.AreEqual<string>("no error","no error")
         prepareFplCode(filename, "", false) |> ignore
 
-    [<DataRow("""def pred T (x,y:pred) {true} def pred T3() {true} def pred Caller() {T(T3(),T3())} ;""",
+    [<DataRow("""def pred T (x,y:pred) {true} def pred T3() {true} def pred Caller() {T(T3(),T3())} """,
         "")>]
-    [<DataRow("""def pred T (x,y:pred) {true} def pred T1() {true} def pred T2(x:obj) {true} def pred Caller() {dec a:obj; T(T1(),T2(a))} ;""",
+    [<DataRow("""def pred T (x,y:pred) {true} def pred T1() {true} def pred T2(x:obj) {true} def pred Caller() {dec a:obj; T(T1(),T2(a))} """,
         "")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesPredNested(varVal, var:string) =
@@ -154,19 +154,19 @@ type TestSignatureMatching() =
         | None -> Assert.AreEqual<string>("no error","no error")
         prepareFplCode(filename, "", false) |> ignore
 
-    [<DataRow("""def pred T (x,y:obj) {true} def pred Caller() {dec a,b:obj c:ind; T(a,b,c)} ;""",
+    [<DataRow("""def pred T (x,y:obj) {true} def pred Caller() {dec a,b:obj c:ind; T(a,b,c)} """,
         "No matching parameter for the argument `c` typed `ind` in the predicate definition TestSignatureMatchingReferencesClasses.T(obj, obj)")>]
-    [<DataRow("""def pred T (x,y:obj) {true} def pred Caller() {dec a,b:obj; T(a,b)} ;""",
+    [<DataRow("""def pred T (x,y:obj) {true} def pred Caller() {dec a,b:obj; T(a,b)} """,
         "")>]
-    [<DataRow("""def pred T (x,y:Nat) {true} def pred Caller() {dec a,b:obj; T(a,b)} ;""",
+    [<DataRow("""def pred T (x,y:Nat) {true} def pred Caller() {dec a,b:obj; T(a,b)} """,
         "The expression `a` typed `obj` doesn't match the parameter `x` typed `Nat` in the predicate definition TestSignatureMatchingReferencesClasses.T(Nat, Nat)")>]
-    [<DataRow("""def pred T (x,y:obj) {true} def pred Caller() {dec a,b:Nat; T(a,b)} ;""",
+    [<DataRow("""def pred T (x,y:obj) {true} def pred Caller() {dec a,b:Nat; T(a,b)} """,
         "The type `Nat` of the expression `a` could not be determined. The parameter `x` requires the type `obj` or any type derived from it in the predicate definition TestSignatureMatchingReferencesClasses.T(obj, obj)")>]
-    [<DataRow("""def cl Nat {intr} def pred T (x,y:obj) {true} def pred Caller() {dec a,b:Nat; T(a,b)} ;""",
+    [<DataRow("""def cl Nat {intr} def pred T (x,y:obj) {true} def pred Caller() {dec a,b:Nat; T(a,b)} """,
         "")>]
-    [<DataRow("""def pred T (x,y:tpl) {true} def pred Caller() {dec a,b:obj; T(a,b)} ;""",
+    [<DataRow("""def pred T (x,y:tpl) {true} def pred Caller() {dec a,b:obj; T(a,b)} """,
         "")>]
-    [<DataRow("""def cl A:B {intr} def pred T (x,y:obj) {true} def pred Caller() {dec a,b:NatTypo; T(a,b)} ;""",
+    [<DataRow("""def cl A:B {intr} def pred T (x,y:obj) {true} def pred Caller() {dec a,b:NatTypo; T(a,b)} """,
         "The type `NatTypo` of the expression `a` could not be determined. The parameter `x` requires the type `obj` or any type derived from it in the predicate definition TestSignatureMatchingReferencesClasses.T(obj, obj)")>]
         
     [<TestMethod>]
@@ -188,23 +188,23 @@ type TestSignatureMatching() =
 
     [<DataRow("00", """def cl A {ctor A(){}} 
                  def cl B:A {ctor B(x:obj){dec base.A(); }} 
-                 def cl C:B {ctor C(){dec base.B(true); }};;""",
+                 def cl C:B {ctor C(){dec base.B(true); }}""",
         "No matching parameter for `true:pred` in the class definition TestSignatureMatchingReferencesConstructors.B")>]
     [<DataRow("01", """def cl A {ctor A(){}} 
                  def cl B:A {ctor B(x:obj){dec base.A(); }} 
-                 def cl C:B {ctor C(){dec x:ind base.B(x); }};;""",
+                 def cl C:B {ctor C(){dec x:ind base.B(x); }}""",
         "`x:ind` doesn't match `x:obj` in TestSignatureMatchingReferencesConstructors.B.B(obj)")>]
     [<DataRow("02", """def cl A {ctor A(){}} 
                  def cl B:A {ctor B(x:obj){dec base.A(); }} 
-                 def cl C:B {ctor C(){dec x:obj base.B(x); }};;""",
+                 def cl C:B {ctor C(){dec x:obj base.B(x); }}""",
         "")>]
     [<DataRow("03", """def cl A {ctor A(){}} 
                  def cl B:A {ctor B(x:A){dec base.A(); }} 
-                 def cl C:B {ctor C(){dec x:obj base.B(x); }};;""",
+                 def cl C:B {ctor C(){dec x:obj base.B(x); }}""",
         "`x:obj` doesn't match `x:A` in TestSignatureMatchingReferencesConstructors.B.B(A)")>]
     [<DataRow("04", """def cl A {ctor A(){}} 
                  def cl B:A {ctor B(x:A){dec base.A(); }} 
-                 def cl C:B {ctor C(){dec x:A base.B(x); }};;""",
+                 def cl C:B {ctor C(){dec x:A base.B(x); }}""",
         "")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesConstructors(no:string, varVal, var:string) =
@@ -226,21 +226,21 @@ type TestSignatureMatching() =
         | None -> Assert.AreEqual<string>("no error","no error")
         prepareFplCode(filename, "", false) |> ignore
 
-    [<DataRow("00", """def pred T (x:*obj[ind]) {true} def pred Caller() {dec a,b:obj; T(a,b)} ;""",
+    [<DataRow("00", """def pred T (x:*obj[ind]) {true} def pred Caller() {dec a,b:obj; T(a,b)} """,
         "")>]
-    [<DataRow("01", """def pred T (x:*obj[ind]) {true} def pred Caller() {dec a:obj; T(a)} ;""",
+    [<DataRow("01", """def pred T (x:*obj[ind]) {true} def pred Caller() {dec a:obj; T(a)} """,
         "")>]
-    [<DataRow("02", """def pred T (x:*obj[ind]) {true} def pred Caller() {T()} ;""",
+    [<DataRow("02", """def pred T (x:*obj[ind]) {true} def pred Caller() {T()} """,
         "")>]
-    [<DataRow("03", """def pred T (x:*obj[obj]) {true} def pred Caller() {dec a,b:obj; T(a,b)} ;""",
+    [<DataRow("03", """def pred T (x:*obj[obj]) {true} def pred Caller() {dec a,b:obj; T(a,b)} """,
         "Variadic enumeration of `a` typed `obj` doesn't match the parameter `x` typed `*obj[obj]`, try `a:*obj[obj]` as argument or use `x:*obj[ind]` as parameter type in the predicate definition TestSignatureMatchingReferencesVariadicObj.T(*obj[obj])")>]
-    [<DataRow("04", """def pred T (x:*obj[obj]) {true} def pred Caller() {dec a:obj; T(a)} ;""",
+    [<DataRow("04", """def pred T (x:*obj[obj]) {true} def pred Caller() {dec a:obj; T(a)} """,
         "Variadic enumeration of `a` typed `obj` doesn't match the parameter `x` typed `*obj[obj]`, try `a:*obj[obj]` as argument or use `x:*obj[ind]` as parameter type in the predicate definition TestSignatureMatchingReferencesVariadicObj.T(*obj[obj])")>]
-    [<DataRow("05", """def pred T (x:*obj[obj]) {true} def pred Caller() {T()} ;""",
+    [<DataRow("05", """def pred T (x:*obj[obj]) {true} def pred Caller() {T()} """,
         "Missing argument for `x:*obj[ind]` in the predicate definition TestSignatureMatchingReferencesVariadicObj.T(+obj[ind])")>]
-    [<DataRow("06", """def pred T (x:*obj[ind]) {true} def pred Caller() {dec a,b:*obj[ind]; T(a,b)} ;""",
+    [<DataRow("06", """def pred T (x:*obj[ind]) {true} def pred Caller() {dec a,b:*obj[ind]; T(a,b)} """,
         "No matching parameter for the argument `b` typed `*obj[ind]` in the predicate definition TestSignatureMatchingReferencesVariadicObj.T(*obj[ind])")>]
-    [<DataRow("07", """def pred T (x:*obj[ind]) {true} def pred Caller() {dec a:*obj[ind]; T(a)} ;""",
+    [<DataRow("07", """def pred T (x:*obj[ind]) {true} def pred Caller() {dec a:*obj[ind]; T(a)} """,
         "")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesVariadicObj(no:string, varVal, var:string) =
@@ -278,21 +278,21 @@ type TestSignatureMatching() =
         | None -> Assert.AreEqual<string>(var,"")
         prepareFplCode(filename, "", false) |> ignore
 
-    [<DataRow("00", """def pred T (x:*pred[ind]) {true} def pred Caller() {dec a,b:pred; T(a,b)} ;""",
+    [<DataRow("00", """def pred T (x:*pred[ind]) {true} def pred Caller() {dec a,b:pred; T(a,b)} """,
         "")>]
-    [<DataRow("01", """def pred T (x:*pred[ind]) {true} def pred Caller() {dec a:pred; T(a)} ;""",
+    [<DataRow("01", """def pred T (x:*pred[ind]) {true} def pred Caller() {dec a:pred; T(a)} """,
         "")>]
-    [<DataRow("02", """def pred T (x:*pred[ind]) {true} def pred Caller() {T()} ;""",
+    [<DataRow("02", """def pred T (x:*pred[ind]) {true} def pred Caller() {T()} """,
         "")>]
-    [<DataRow("03", """def pred T (x:*pred[obj]) {true} def pred Caller() {dec a,b:pred; T(a,b)} ;""",
+    [<DataRow("03", """def pred T (x:*pred[obj]) {true} def pred Caller() {dec a,b:pred; T(a,b)} """,
         "Variadic enumeration of `a` typed `pred` doesn't match the parameter `x` typed `*pred[obj]`, try `a:*pred[obj]` as argument or use `x:*pred[ind]` as parameter type in the predicate definition TestSignatureMatchingReferencesVariadicPred.T(*pred[obj])")>]
-    [<DataRow("04", """def pred T (x:*pred[obj]) {true} def pred Caller() {dec a:pred; T(a)} ;""",
+    [<DataRow("04", """def pred T (x:*pred[obj]) {true} def pred Caller() {dec a:pred; T(a)} """,
         "Variadic enumeration of `a` typed `pred` doesn't match the parameter `x` typed `*pred[obj]`, try `a:*pred[obj]` as argument or use `x:*pred[ind]` as parameter type in the predicate definition TestSignatureMatchingReferencesVariadicPred.T(*pred[obj])")>]
-    [<DataRow("05", """def pred T (x:*pred[obj]) {true} def pred Caller() {T()} ;""",
+    [<DataRow("05", """def pred T (x:*pred[obj]) {true} def pred Caller() {T()} """,
         "Missing argument for `x:*pred[ind]` in the predicate definition TestSignatureMatchingReferencesVariadicPred.T(+pred)")>]
-    [<DataRow("06", """def pred T (x:*pred[obj]) {true} def pred Caller() {dec a,b:*pred[ind]; T(a,b)} ;""",
+    [<DataRow("06", """def pred T (x:*pred[obj]) {true} def pred Caller() {dec a,b:*pred[ind]; T(a,b)} """,
         "The expression `a` typed `*pred[ind]` doesn't match the parameter `x` typed `*pred[obj]` in the predicate definition TestSignatureMatchingReferencesVariadicPred.T(*pred[obj])")>]
-    [<DataRow("07", """def pred T (x:*pred[ind]) {true} def pred Caller() {dec a:*pred[ind]; T(a)} ;""",
+    [<DataRow("07", """def pred T (x:*pred[ind]) {true} def pred Caller() {dec a:*pred[ind]; T(a)} """,
         "")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesVariadicPred(no:string, varVal, var:string) =
@@ -311,21 +311,21 @@ type TestSignatureMatching() =
         | None -> Assert.AreEqual<string>("no error","no error")
         prepareFplCode(filename, "", false) |> ignore
 
-    [<DataRow("00", """def pred T (x:*func[ind]) {true} def pred Caller() {dec a,b:func; T(a,b)} ;""",
+    [<DataRow("00", """def pred T (x:*func[ind]) {true} def pred Caller() {dec a,b:func; T(a,b)} """,
         "")>]
-    [<DataRow("01", """def pred T (x:*func[ind]) {true} def pred Caller() {dec a:func; T(a)} ;""",
+    [<DataRow("01", """def pred T (x:*func[ind]) {true} def pred Caller() {dec a:func; T(a)} """,
         "")>]
-    [<DataRow("02", """def pred T (x:*func[ind]) {true} def pred Caller() {T()} ;""",
+    [<DataRow("02", """def pred T (x:*func[ind]) {true} def pred Caller() {T()} """,
         "")>]
-    [<DataRow("03", """def pred T (x:*func[obj]) {true} def pred Caller() {dec a,b:func; T(a,b)} ;""",
+    [<DataRow("03", """def pred T (x:*func[obj]) {true} def pred Caller() {dec a,b:func; T(a,b)} """,
         "Variadic enumeration of `a` typed `func` doesn't match the parameter `x` typed `*func[obj]`, try `a:*func[obj]` as argument or use `x:*func[ind]` as parameter type in the predicate definition TestSignatureMatchingReferencesVariadicFunc.T(*func[obj])")>]
-    [<DataRow("04", """def pred T (x:*func[obj]) {true} def pred Caller() {dec a:func; T(a)} ;""",
+    [<DataRow("04", """def pred T (x:*func[obj]) {true} def pred Caller() {dec a:func; T(a)} """,
         "Variadic enumeration of `a` typed `func` doesn't match the parameter `x` typed `*func[obj]`, try `a:*func[obj]` as argument or use `x:*func[ind]` as parameter type in the predicate definition TestSignatureMatchingReferencesVariadicFunc.T(*func[obj])")>]
-    [<DataRow("05", """def pred T (x:*func[obj]) {true} def pred Caller() {T()} ;""",
+    [<DataRow("05", """def pred T (x:*func[obj]) {true} def pred Caller() {T()} """,
         "Missing argument for `x:*func` in the predicate definition TestSignatureMatchingReferencesVariadicFunc.T(+func)")>]
-    [<DataRow("06", """def pred T (x:*func[obj]) {true} def pred Caller() {dec a,b:*func[ind]; T(a,b)} ;""",
+    [<DataRow("06", """def pred T (x:*func[obj]) {true} def pred Caller() {dec a,b:*func[ind]; T(a,b)} """,
         "The expression `a` typed `*func[ind]` doesn't match the parameter `x` typed `*func[obj]` in the predicate definition TestSignatureMatchingReferencesVariadicFunc.T(*func[obj])")>]
-    [<DataRow("07", """def pred T (x:*func[ind]) {true} def pred Caller() {dec a:*func[ind]; T(a)} ;""",
+    [<DataRow("07", """def pred T (x:*func[ind]) {true} def pred Caller() {dec a:*func[ind]; T(a)} """,
         "")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesVariadicFunc(no:string, varVal, var:string) =
@@ -344,21 +344,21 @@ type TestSignatureMatching() =
         | None -> Assert.AreEqual<string>("no error","no error")
         prepareFplCode(filename, "", false) |> ignore
             
-    [<DataRow("00", """def pred T (x:*ind[ind]) {true} def pred Caller() {dec a,b:ind; T(a,b)} ;""",
+    [<DataRow("00", """def pred T (x:*ind[ind]) {true} def pred Caller() {dec a,b:ind; T(a,b)} """,
         "")>]
-    [<DataRow("01", """def pred T (x:*ind[ind]) {true} def pred Caller() {dec a:ind; T(a)} ;""",
+    [<DataRow("01", """def pred T (x:*ind[ind]) {true} def pred Caller() {dec a:ind; T(a)} """,
         "")>]
-    [<DataRow("02", """def pred T (x:*ind[ind]) {true} def pred Caller() {T()} ;""",
+    [<DataRow("02", """def pred T (x:*ind[ind]) {true} def pred Caller() {T()} """,
         "")>]
-    [<DataRow("03", """def pred T (x:*ind[obj]) {true} def pred Caller() {dec a,b:ind; T(a,b)} ;""",
+    [<DataRow("03", """def pred T (x:*ind[obj]) {true} def pred Caller() {dec a,b:ind; T(a,b)} """,
         "Variadic enumeration of `a` typed `ind` doesn't match the parameter `x` typed `*ind[obj]`, try `a:*ind[obj]` as argument or use `x:*ind[ind]` as parameter type in the predicate definition TestSignatureMatchingReferencesVariadicInd.T(*ind[obj])")>]
-    [<DataRow("04", """def pred T (x:*ind[obj]) {true} def pred Caller() {dec a:ind; T(a)} ;""",
+    [<DataRow("04", """def pred T (x:*ind[obj]) {true} def pred Caller() {dec a:ind; T(a)} """,
         "Variadic enumeration of `a` typed `ind` doesn't match the parameter `x` typed `*ind[obj]`, try `a:*ind[obj]` as argument or use `x:*ind[ind]` as parameter type in the predicate definition TestSignatureMatchingReferencesVariadicInd.T(*ind[obj])")>]
-    [<DataRow("05", """def pred T (x:*ind[obj]) {true} def pred Caller() {T()} ;""",
+    [<DataRow("05", """def pred T (x:*ind[obj]) {true} def pred Caller() {T()} """,
         "Missing argument for `x:*ind[ind]` in the predicate definition TestSignatureMatchingReferencesVariadicInd.T(*ind[ind])")>]
-    [<DataRow("06", """def pred T (x:*ind[obj]) {true} def pred Caller() {dec a,b:*ind[ind]; T(a,b)} ;""",
+    [<DataRow("06", """def pred T (x:*ind[obj]) {true} def pred Caller() {dec a,b:*ind[ind]; T(a,b)} """,
         "The expression `a` typed `*ind[ind]` doesn't match the parameter `x` typed `*ind[obj]` in the predicate definition TestSignatureMatchingReferencesVariadicInd.T(*ind[obj])")>]
-    [<DataRow("07", """def pred T (x:*ind[ind]) {true} def pred Caller() {dec a:*ind[ind]; T(a)} ;""",
+    [<DataRow("07", """def pred T (x:*ind[ind]) {true} def pred Caller() {dec a:*ind[ind]; T(a)} """,
         "")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesVariadicInd(no:string, varVal, var:string) =
@@ -377,21 +377,21 @@ type TestSignatureMatching() =
         | None -> Assert.AreEqual<string>("no error","no error")
         prepareFplCode(filename, "", false) |> ignore
 
-    [<DataRow("00", """def pred T (x:*Nat[ind]) {true} def pred Caller() {dec a,b:Nat; T(a,b)} ;""",
+    [<DataRow("00", """def pred T (x:*Nat[ind]) {true} def pred Caller() {dec a,b:Nat; T(a,b)} """,
         "")>]
-    [<DataRow("01", """def pred T (x:*Nat[ind]) {true} def pred Caller() {dec a:Nat; T(a)} ;""",
+    [<DataRow("01", """def pred T (x:*Nat[ind]) {true} def pred Caller() {dec a:Nat; T(a)} """,
         "")>]
-    [<DataRow("02", """def pred T (x:*Nat[ind]) {true} def pred Caller() {T()} ;""",
+    [<DataRow("02", """def pred T (x:*Nat[ind]) {true} def pred Caller() {T()} """,
         "")>]
-    [<DataRow("03", """def pred T (x:*Nat[obj]) {true} def pred Caller() {dec a,b:Nat; T(a,b)} ;""",
+    [<DataRow("03", """def pred T (x:*Nat[obj]) {true} def pred Caller() {dec a,b:Nat; T(a,b)} """,
         "Variadic enumeration of `a` typed `Nat` doesn't match the parameter `x` typed `*Nat[obj]`, try `a:*Nat[obj]` as argument or use `x:*Nat[ind]` as parameter type in the predicate definition TestSignatureMatchingReferencesVariadicNat.T(*Nat[obj])")>]
-    [<DataRow("04", """def pred T (x:*Nat[obj]) {true} def pred Caller() {dec a:Nat; T(a)} ;""",
+    [<DataRow("04", """def pred T (x:*Nat[obj]) {true} def pred Caller() {dec a:Nat; T(a)} """,
         "Variadic enumeration of `a` typed `Nat` doesn't match the parameter `x` typed `*Nat[obj]`, try `a:*Nat[obj]` as argument or use `x:*Nat[ind]` as parameter type in the predicate definition TestSignatureMatchingReferencesVariadicNat.T(*Nat[obj])")>]
-    [<DataRow("05", """def pred T (x:*Nat[obj]) {true} def pred Caller() {T()} ;""",
+    [<DataRow("05", """def pred T (x:*Nat[obj]) {true} def pred Caller() {T()} """,
         "Missing argument for `x:*Nat[ind]` in the predicate definition TestSignatureMatchingReferencesVariadicNat.T(+Nat)")>]
-    [<DataRow("06", """def pred T (x:*Nat[obj]) {true} def pred Caller() {dec a,b:*Nat[ind]; T(a,b)} ;""",
+    [<DataRow("06", """def pred T (x:*Nat[obj]) {true} def pred Caller() {dec a,b:*Nat[ind]; T(a,b)} """,
         "The expression `a` typed `*Nat[ind]` doesn't match the parameter `x` typed `*Nat[obj]` in the predicate definition TestSignatureMatchingReferencesVariadicNat.T(*Nat[obj])")>]
-    [<DataRow("07", """def pred T (x:*Nat[ind]) {true} def pred Caller() {dec a:*Nat[ind]; T(a)} ;""",
+    [<DataRow("07", """def pred T (x:*Nat[ind]) {true} def pred Caller() {dec a:*Nat[ind]; T(a)} """,
         "")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesVariadicNat(no:string, varVal, var:string) =

@@ -27,7 +27,7 @@ type CommonFplValueTestCases =
         let fplCode = """
         def pred TestPredicate(x,y:pred(u,v,w:func(a,b,c:obj)->obj)) 
             {true}
-        ;
+        
         """
         let filename = "TestScopeVariablesInSignature" + subtype
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -70,7 +70,7 @@ type CommonFplValueTestCases =
         let fplCode = """
         def pred TestPredicate(x,y:*pred(u,v,w:func(a,b,c:*obj[ind])->obj)[obj]) 
             {true}
-        ;
+        
         """
         let filename = "TestScopeVariablesInSignatureVariadic" + subtype
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -118,7 +118,7 @@ type CommonFplValueTestCases =
             ; 
             true
         }
-        ;
+        
         """
         let filename = "TestScopeVariablesInBlock" + subtype
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -162,7 +162,7 @@ type CommonFplValueTestCases =
         let fplCode = """
         def pred TestPredicate() 
             {dec x,y:*pred(u,v,w:func(a,b,c:*obj[tpl])->obj)[ind]; true}
-        ;
+        
         """
         let filename = "TestScopeVariablesInBlockVariadic" + subtype
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -215,7 +215,7 @@ type CommonFplValueTestCases =
             prty func T11()->Nat {intr}
             prty func T13()->func {intr}
         }
-        ;
+        
         """
         let filename = "TestScopeProperties" + subtype
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -244,7 +244,7 @@ type CommonFplValueTestCases =
             ctor TestId(x:pred) {} 
             ctor TestId(x:ind) {} 
         }
-        ;
+        
         """
         let filename = "TestScopeConstructors" + subtype
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -296,7 +296,7 @@ type CommonFplValueTestCases =
             proof SomeTheorem2$1 {1. |- trivial}
             loc not(x) := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;
             loc Equal(x,y) := !tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;
-        ;
+        
         """
         let filename = "TestScopeBlocks" + subtype
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -373,7 +373,7 @@ type CommonFplValueTestCases =
 
             axiom TestAxiom {true} 
             corollary TestAxiom$1 {true}  
-        ;
+        
         """
         let filename = "TestScopeProofsAndCorollaries" + subtype
 
@@ -421,7 +421,7 @@ type CommonFplValueTestCases =
                     t:tpl t:=$2
                 ;
                 true 
-            };
+            }
         """
         let filename = "TestScopeIntrinsicPrimitives" + subtype
         prepareFplCode(filename + ".fpl", fplCode, false) 

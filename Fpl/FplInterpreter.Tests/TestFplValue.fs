@@ -150,7 +150,7 @@ type TestFplValue() =
         prepareFplCode(filename, "", true) |> ignore
 
     [<DataRow("""loc not(x) := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""", "not(undef)")>]
-    [<DataRow("""loc Equal(x,y) := !tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y;;""","Equal(undef, undef)")>]
+    [<DataRow("""loc Equal(x,y) := !tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y;""","Equal(undef, undef)")>]
 
     [<TestMethod>]
     member this.TestTypeSignatureOfFplLocalizations(fplCode:string, expectedName:string) =

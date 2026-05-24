@@ -17,7 +17,7 @@ type TestInfixOperations() =
     [<TestMethod>]
     member this.TestEqualityPredicate(varVal, expected:string) =
         
-        let fplCode = sprintf """def pred Equal (x,y: tpl) infix "=" 0 { del.Equal(x,y) } %s;""" varVal
+        let fplCode = sprintf """def pred Equal (x,y: tpl) infix "=" 0 { del.Equal(x,y) } %s""" varVal
         let filename = "TestEqualityPredicate"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root

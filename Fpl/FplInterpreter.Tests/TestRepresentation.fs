@@ -1,6 +1,5 @@
 namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
-open ErrDiagnostics
 open FplPrimitives
 open FplInterpreterBasicTypes
 open FplInterpreter.Globals.Heap
@@ -29,7 +28,7 @@ type TestRepresentation() =
             }           
             def cl A  {intr} 
             def cl B  {intr} 
-            def pred T() { dec x,y:obj x:=A() y:=B(); %s };""" varVal
+            def pred T() { dec x,y:obj x:=A() y:=B(); %s }""" varVal
         let filename = "TestRepresentationPredicate.fpl"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -43,7 +42,7 @@ type TestRepresentation() =
     [<TestMethod>]
     member this.TestRepresentationAssignment(var:string, varVal, expected:string) =
         
-        let fplCode = sprintf """uses Fpl.PeanoArithmetics def pred T() { dec n:Nat %s; true };""" varVal
+        let fplCode = sprintf """uses Fpl.PeanoArithmetics def pred T() { dec n:Nat %s; true }""" varVal
         let filename = "TestRepresentationAssignment"
         if not offlineWatcher.OfflineMode then 
             prepareFplCode(filename + ".fpl", fplCode, false) |> ignore
@@ -61,7 +60,7 @@ type TestRepresentation() =
     [<TestMethod>]
     member this.TestRepresentationReturn(var:string, uses:string, varVal, expected:string) =
         
-        let fplCode = sprintf """%s def func T()->Nat { dec n:Nat %s; return n };""" uses varVal
+        let fplCode = sprintf """%s def func T()->Nat { dec n:Nat %s; return n }""" uses varVal
         let filename = "TestRepresentationReturn"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -75,7 +74,7 @@ type TestRepresentation() =
     [<TestMethod>]
     member this.TestRepresentationReturnOnline(var:string, uses:string, varVal, expected:string) =
         
-        let fplCode = sprintf """%s def func T()->Nat { dec n:Nat %s; return n };""" uses varVal
+        let fplCode = sprintf """%s def func T()->Nat { dec n:Nat %s; return n }""" uses varVal
         let filename = "TestRepresentationReturnOnline"
         if not offlineWatcher.OfflineMode then 
             prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -105,7 +104,7 @@ type TestRepresentation() =
     [<TestMethod>]
     member this.TestRepresentationCases(var:string, varVal, expected:string) =
         
-        let fplCode = sprintf """uses Fpl.PeanoArithmetics def pred T() { %s };""" varVal
+        let fplCode = sprintf """uses Fpl.PeanoArithmetics def pred T() { %s }""" varVal
         let filename = "TestRepresentationCases"
         if not offlineWatcher.OfflineMode then 
             prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -165,7 +164,7 @@ type TestRepresentation() =
             return n
         }
 
-        def pred T() { dec i,j,k:ind j:=$2 k:=$3; %s };""" varVal
+        def pred T() { dec i,j,k:ind j:=$2 k:=$3; %s }""" varVal
         let filename = "TestRepresentationEqualityWithCases.fpl"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -220,8 +219,8 @@ type TestRepresentation() =
             )
         }
 
-        def pred T() { dec i,j,k:ind j:=$2 k:=$3; %s };""" varVal
-        let filename = "TestRepresentationEqualityWithMCases.fpl"
+        def pred T() { dec i,j,k:ind j:=$2 k:=$3; %s }""" varVal
+        let filename = "TestRepresentationEqualityWithMCases"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
         let theory = r.Scope[filename]
@@ -256,8 +255,8 @@ type TestRepresentation() =
         }
 
  
-        def func T()->Nat { return %s };""" varVal
-        let filename = "TestRepresentationMCases.fpl"
+        def func T()->Nat { return %s }""" varVal
+        let filename = "TestRepresentationMCases"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
         let theory = r.Scope[filename]
@@ -291,8 +290,8 @@ type TestRepresentation() =
             )
         }
  
-        def func T()->Nat { return %s };""" varVal
-        let filename = "TestRepresentationMCases.fpl"
+        def func T()->Nat { return %s }""" varVal
+        let filename = "TestRepresentationMCases"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
         let theory = r.Scope[filename]
@@ -330,7 +329,7 @@ type TestRepresentation() =
     [<TestMethod>]
     member this.TestRepresentationItializedVars(var:string, fplCode, expected:string) =
         
-        let filename = "TestRepresentationUnitializedVars.fpl"
+        let filename = "TestRepresentationUnitializedVars"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
         let theory = r.Scope[filename]
@@ -381,8 +380,8 @@ type TestRepresentation() =
             }        
         
         
-        def pred T() { %s };""" varVal
-        let filename = "TestRepresentationCases2.fpl"
+        def pred T() { %s }""" varVal
+        let filename = "TestRepresentationCases2"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
         let theory = r.Scope[filename]
@@ -403,8 +402,8 @@ type TestRepresentation() =
         {
             return x
         }
-        def pred T() { dec a:obj a:=%s; true };""" varVal
-        let filename = "TestRepresentationExtensionObj.fpl"
+        def pred T() { dec a:obj a:=%s; true }""" varVal
+        let filename = "TestRepresentationExtensionObj"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
         let theory = r.Scope[filename]

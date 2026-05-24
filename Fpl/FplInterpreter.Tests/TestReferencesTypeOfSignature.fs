@@ -176,7 +176,7 @@ type TestReferencesTypeOfSignature() =
                                 
                             }
                         }
-                        ;""" varVal
+                        """ varVal
         let filename = "TestBaseConstructorCallTypeSignature"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -205,7 +205,7 @@ type TestReferencesTypeOfSignature() =
     [<TestMethod>]
     member this.TestDelegateTypeSignature(var, varVal) =
         
-        let fplCode = sprintf "def pred T1() { %s };" varVal
+        let fplCode = sprintf "def pred T1() { %s }" varVal
         let filename = "TestDelegateTypeSignature"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -226,14 +226,14 @@ type TestReferencesTypeOfSignature() =
         prepareFplCode(filename, "", false) |> ignore
 
     [<DataRow("""loc and(p,q) := !tex: x "=" y;""", "and(undef, undef)")>]
-    [<DataRow("""thm T {true};""","pred")>]
+    [<DataRow("""thm T {true}""","pred")>]
     [<DataRow("""ax T {true}""", "pred")>]
     [<DataRow("""lem T {true}""", "pred")>]
     [<DataRow("""prop T {true}""", "pred")>]
     [<DataRow("""conj T {true}""", "pred")>]
     [<DataRow("""cor T$1 {true}""", "pred")>]
-    [<DataRow("""proof T$1 {1. |- trivial};""","pred")>]
-    [<DataRow("""def pred T(p:obj) {true};""","pred(obj)")>]
+    [<DataRow("""proof T$1 {1. |- trivial}""","pred")>]
+    [<DataRow("""def pred T(p:obj) {true}""","pred(obj)")>]
     [<DataRow("""def pred T() {true}""", "pred()")>]
     [<DataRow("""inf T {pre: true con:true}""", "undef")>]
     [<TestMethod>]
@@ -254,7 +254,7 @@ type TestReferencesTypeOfSignature() =
     [<TestMethod>]
     member this.TestMCasesTypeSignature(no:string, varVal, expected:string) =
         
-        let fplCode = sprintf "def pred T1() { %s };" varVal
+        let fplCode = sprintf "def pred T1() { %s }" varVal
         let filename = "TestMCasesTypeSignature"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root

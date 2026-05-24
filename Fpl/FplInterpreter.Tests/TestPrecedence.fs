@@ -21,7 +21,7 @@ type TestPrecedence() =
                  def pred Mul(x,y: obj) infix "*" 1 {intr}
                  def pred Add(x,y: obj) infix "+" 2  {intr} 
                  def pred Eq(x,y: obj) infix "=" 1000{intr} 
-                 def pred T1() { %s };""" varVal
+                 def pred T1() { %s }""" varVal
         let filename = "TestPrecedenceInfix.fpl"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
