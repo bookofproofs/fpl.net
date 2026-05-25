@@ -1,4 +1,4 @@
-﻿/// This module handles the the interpretation of uses clauses and implements big parts of self-containment of FPL. 
+/// This module handles the the interpretation of uses clauses and implements big parts of self-containment of FPL. 
 
 module FplInterpreterUsesClause
 open System.Text.RegularExpressions
@@ -8,7 +8,10 @@ open System.Collections.Generic
 open System
 open FParsec
 open FplGrammarTypes
-open FplInterpreterTypes
+open FplInterpreterDiagnosticsEmitter
+open FplInterpreterAstPreprocessing
+open FplInterpreter.Globals.Debug
+open FplInterpreter.Globals.Heap
 open ErrDiagnostics
 
 (* MIT License
@@ -28,39 +31,51 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 let rec eval_uses_clause debugMode = function 
     | Ast.AST ((pos1, pos2), ast) -> 
         eval_uses_clause debugMode ast
-    | Ast.Namespace (asts) ->
-        let results = asts |> List.collect (eval_uses_clause debugMode)
+    | Ast.Namespace (buildingBlockAsts) ->
+        let results = buildingBlockAsts |> List.collect (eval_uses_clause debugMode)
         results
+    | Ast.BuildingBlock((_, _),buidlingBlockAst) ->
+        eval_uses_clause debugMode buidlingBlockAst
     | Ast.UsesClause ((pos1, pos2), ast) -> 
         eval_uses_clause debugMode ast 
     | Ast.AliasedNamespaceIdentifier ((pos1, pos2), (ast, optAst)) -> 
         let evalAlias = match optAst with
-                          | Some (Ast.Alias ((p1, p2), s)) -> 
-                                    { 
-                                        StartPos = p1
-                                        EndPos = p2
-                                        AliasOrStar = s
-                                    }
-                          | Some (Ast.Star ((p1,p2),())) -> 
-                                    { 
-                                        StartPos = p1
-                                        EndPos = p2
-                                        AliasOrStar = "*"
-                                    }
+                        | Some (Ast.Alias ((p1, p2), s)) ->
+                            { 
+                                StartPos = p1
+                                EndPos = p2
+                                AliasOrStar = s
+                            }
+                        | Some (Ast.Star ((p1,p2),())) -> 
+                            { 
+                                StartPos = p1
+                                EndPos = p2
+                                AliasOrStar = "*"
+                            }
 
-                          | _ -> 
-                                    { 
-                                        StartPos = pos1
-                                        EndPos = pos2
-                                        AliasOrStar = ""
-                                    }
+                        | _ -> 
+                            { 
+                                StartPos = pos1
+                                EndPos = pos2
+                                AliasOrStar = ""
+                            }
 
         match ast with
         | Ast.NamespaceIdentifier ((p1, p2), asts) -> 
-            let pascalCaseIdList = asts |> List.collect (function Ast.PascalCaseId (_,s) -> [s] | _ -> [])
+            let pascalCaseIdList =
+                asts
+                |> List.collect (
+                    function Ast.PascalCaseId ((p_1, p_2),s)
+                            -> [s]
+                            | _ -> []
+                )
+
             [EvalAliasedNamespaceIdentifier.CreateEani(pascalCaseIdList, evalAlias, p1, p2, debugMode)]
         | _ -> []
     | _ -> []
+
+
+    
 
 let private downloadFile url (e:EvalAliasedNamespaceIdentifier) =
     if not (e.DebugMode) then
@@ -331,16 +346,16 @@ let private rearrangeList element list =
     let beforeElement = list |> List.takeWhile ((<>) element)
     afterElement @ beforeElement
 
-let garbageCollector (st:SymbolTable) (uriToBeReset:PathEquivalentUri) = 
+let garbageCollector (uriToBeReset:PathEquivalentUri) = 
     let referencedAstsOfCurrentTheory currTheory = 
-        match st.ParsedAsts.TryFindAstById(currTheory) with
+        match heap.ParsedAsts.TryFindAstById(currTheory) with
         | Some pa -> pa.Sorting.ReferencedAsts
         | _ -> []
 
     // remove the current theory from the ReferencingAsts list of each parsedAst, if they are not contained 
     // in the current theory's reference Asts
     let rec removeNotReferencedAsts currTheory = 
-        st.ParsedAsts 
+        heap.ParsedAsts 
         |> Seq.iter (fun pa ->
             match pa.Sorting.ReferencingAsts |> List.tryFindIndex (fun referencedTheory -> 
                 referencedTheory = currTheory
@@ -360,32 +375,32 @@ let garbageCollector (st:SymbolTable) (uriToBeReset:PathEquivalentUri) =
                 List.fold (findComponent parsedAsts) newVisited node.Sorting.ReferencedAsts
             | None -> visited 
 
-    match st.ParsedAsts.TryFindAstById(st.MainTheory) with
+    match heap.ParsedAsts.TryFindAstById(heap.SymbolTable.MainTheory) with
     | Some mainTheory -> 
         removeNotReferencedAsts mainTheory.Id
-        let astComponent = findComponent st.ParsedAsts Set.empty mainTheory.Id
+        let astComponent = findComponent heap.ParsedAsts Set.empty mainTheory.Id
 
         let willBeRemoved = 
-            st.ParsedAsts
+            heap.ParsedAsts
             |> Seq.filter (fun pa -> not (Set.contains pa.Id astComponent))
             |> Seq.map (fun pa -> pa.Id)
             |> Seq.toList
 
         willBeRemoved 
         |> List.map (fun theoryName ->
-            match st.ParsedAsts.TryFindAstById theoryName with
+            match heap.ParsedAsts.TryFindAstById theoryName with
             | Some pa ->
                 ad.ResetStream(pa.Parsing.Uri)
-                if st.Root.Scope.ContainsKey(theoryName) then
-                    st.Root.Scope.Remove theoryName |> ignore
-                st.ParsedAsts.RemoveAll (fun pAst -> pAst.Id = theoryName) |> ignore
+                if heap.Root.Scope.ContainsKey(theoryName) then
+                    heap.Root.Scope.Remove theoryName |> ignore
+                heap.ParsedAsts.RemoveAll (fun pAst -> pAst.Id = theoryName) |> ignore
             | None -> ()
         ) |> ignore
     | None -> ()
 
-    match st.ParsedAsts.TryFindAstById(uriToBeReset.TheoryName) with
+    match heap.ParsedAsts.TryFindAstById(uriToBeReset.TheoryName) with
     | Some theoryToBeReset -> 
-        if st.Root.Scope.ContainsKey(theoryToBeReset.Id) then
+        if heap.Root.Scope.ContainsKey(theoryToBeReset.Id) then
             theoryToBeReset.Status <- ParsedAstStatus.UsesClausesEvaluated
     | None -> ()
 
@@ -394,36 +409,40 @@ let garbageCollector (st:SymbolTable) (uriToBeReset:PathEquivalentUri) =
 /// Parses the input at Uri and loads all referenced namespaces until
 /// each of them was loaded. If a referenced namespace contains even more uses clauses,
 /// their namespaces will also be loaded. The result is a list of ParsedAst objects.
-let loadAllUsesClauses (st:SymbolTable) input (uri:PathEquivalentUri) fplLibUrl = 
+let loadAllUsesClauses input (uri:PathEquivalentUri) fplLibUrl = 
     ad.CurrentUri <- uri
-    let sources = acquireSources uri fplLibUrl st.OfflineMode
-    let currentName = addOrUpdateParsedAst input uri st.ParsedAsts
-    emitDiagnosticsForDuplicateFiles sources (EvalAliasedNamespaceIdentifier.CreateEani(uri, st.OfflineMode))
+    let sources = acquireSources uri fplLibUrl offlineWatcher.OfflineMode
+    let currentName = addOrUpdateParsedAst input uri heap.ParsedAsts
+    emitDiagnosticsForDuplicateFiles sources (EvalAliasedNamespaceIdentifier.CreateEani(uri, offlineWatcher.OfflineMode))
     let mutable found = true
 
     while found do
-        let loadedParsedAst = st.ParsedAsts.TryFindLoadedAst()
+        let loadedParsedAst = heap.ParsedAsts.TryFindLoadedAst()
         match loadedParsedAst with
         | Some pa -> 
             // evaluate the EvalAliasedNamespaceIdentifier list of the ast
-            pa.Sorting.EANIList <- eval_uses_clause st.OfflineMode pa.Parsing.Ast
+            let eaniList = 
+                pa.Parsing.BuildingBlockAsts
+                |> List.map (fun buildingBlock -> eval_uses_clause offlineWatcher.OfflineMode buildingBlock)
+                |> List.concat
+            pa.Sorting.EANIList <- eaniList
             pa.Status <- ParsedAstStatus.UsesClausesEvaluated
             findDuplicateAliases pa.Sorting.EANIList |> ignore
             pa.Sorting.EANIList
             |> List.iter (fun (eani:EvalAliasedNamespaceIdentifier) -> 
-                getParsedAstsMatchingAliasedNamespaceIdentifier sources st.ParsedAsts eani pa 
+                getParsedAstsMatchingAliasedNamespaceIdentifier sources heap.ParsedAsts eani pa 
                 emitDiagnosticsForDuplicateFiles sources eani
             ) |> ignore
         | None -> 
             found <- false
-    garbageCollector st uri
-    if isCircular st.ParsedAsts then
-        let cycle = findCycle st.ParsedAsts
+    garbageCollector uri
+    if isCircular heap.ParsedAsts then
+        let cycle = findCycle heap.ParsedAsts
         match cycle with
         | Some lst -> 
             let lstWithCurrentAsHead = rearrangeList currentName lst @ [currentName]
             let path = String.concat " -> " lstWithCurrentAsHead
-            let parsedAstThatStartsTheCycle = st.ParsedAsts.TryFindAstById(lstWithCurrentAsHead.Head)
+            let parsedAstThatStartsTheCycle = heap.ParsedAsts.TryFindAstById(lstWithCurrentAsHead.Head)
             let circularReferencedName = List.item 1 lstWithCurrentAsHead
             match parsedAstThatStartsTheCycle with 
             | Some pa -> 
@@ -431,17 +450,7 @@ let loadAllUsesClauses (st:SymbolTable) input (uri:PathEquivalentUri) fplLibUrl 
                         pa.Sorting.EANIList |> List.filter (fun eani -> eani.Name = circularReferencedName)
                     if circularEaniReferenceList.Length > 0 then 
                         let circularEaniReference = circularEaniReferenceList |> List.head
-                        let diagnostic =
-                                { 
-                                    Diagnostic.Uri = ad.CurrentUri
-                                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
-                                    Diagnostic.Severity = DiagnosticSeverity.Error
-                                    Diagnostic.StartPos = circularEaniReference.StartPos
-                                    Diagnostic.EndPos = circularEaniReference.EndPos
-                                    Diagnostic.Code = NSP04 path
-                                    Diagnostic.Alternatives = None
-                                }
-                        ad.AddDiagnostic diagnostic
+                        emitNSP04Diagnostics path circularEaniReference.StartPos circularEaniReference.EndPos
             | None -> ()
         | None -> ()
 

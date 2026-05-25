@@ -63,7 +63,7 @@ namespace FplLSTests
             {
                 if (item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice) && choice!=LiteralBase)
                 {
-                    Assert.IsTrue(item.InsertText.EndsWith(" "));
+                    Assert.IsTrue(item.InsertText.EndsWith(' '));
                 }
             }
         }

@@ -7,14 +7,14 @@ uses Fpl.PeanoArithmetics
 definition class Tuple 
 {
     dec 
-        ~myLength: Nat
-        ~myArr:*tpl[Nat]
+        myLength: Nat
+        myArr:*tpl[Nat]
     ;
     ctor Tuple(listOfTpl:*tpl[Nat])
     {
         dec 
-            ~elem: tpl
-            ~i: Nat 
+            elem: tpl
+            i: Nat 
             i:= Zero() 
             for elem in listOfTpl
             {
@@ -38,8 +38,8 @@ definition class Tuple
 definition class UnlimitedTupleFrom
 {
     dec 
-        ~myX:* tpl[index]
-        ~myFrom:index
+        myX:* tpl[index]
+        myFrom:index
     ; 
 
     constructor UnlimitedTupleFrom(from:index, x:* tpl[index])
@@ -61,16 +61,16 @@ def class CartesianProduct: Set
 {
 
     dec
-        ~myLength: Nat
-        ~myFrom: Nat
-        ~mySetArray: *Set[Nat]
+        myLength: Nat
+        myFrom: Nat
+        mySetArray: *Set[Nat]
     ;
 
     constructor CartesianProduct(setList:* Set[Nat])
     {
         dec
-            ~setItem: Set
-            ~i: Nat
+            setItem: Set
+            i: Nat
             i:= Zero()
             for setItem in setList
             {
@@ -120,14 +120,14 @@ def class CartesianProduct: Set
 def class Relation: Set
 {
     dec 
-        ~myArity: Nat
-        ~mySubset: Subset
+        myArity: Nat
+        mySubset: Subset
     ;
 
     ctor Relation(setList:*Set[Nat])
     {
         dec
-            ~cartProd : CartesianProduct
+            cartProd : CartesianProduct
             base.Set()
             cartProd := CartesianProduct(setList)
             myArity := cartProd.Length()
@@ -145,7 +145,7 @@ def class Relation: Set
 def class BinaryRelation: Relation
 {
     dec 
-        ~myDomain, myCodomain: Set
+        myDomain, myCodomain: Set
     ;
 
 

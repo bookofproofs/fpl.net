@@ -1,4 +1,4 @@
-﻿module FplPrimitives
+module FplPrimitives
 
 open System
 open System.Collections.Generic
@@ -13,7 +13,11 @@ let LiteralAlias = "alias"
 [<Literal>]
 let LiteralAll = "all"
 [<Literal>]
+let LiteralAllSymbol = "∀"
+[<Literal>]
 let LiteralAnd = "and"
+[<Literal>]
+let LiteralAndSymbol = "∧"
 [<Literal>]
 let LiteralAss = "ass"
 [<Literal>]
@@ -73,7 +77,11 @@ let LiteralDelL = "delegate"
 [<Literal>]
 let LiteralEx = "ex"
 [<Literal>]
+let LiteralExSymbol = "∃"
+[<Literal>]
 let LiteralExN = "exn"
+[<Literal>]
+let LiteralExNSymbol = "∃!"
 [<Literal>]
 let LiteralExt = "ext"
 [<Literal>]
@@ -89,7 +97,11 @@ let LiteralFuncL = "function"
 [<Literal>]
 let LiteralIif = "iif"
 [<Literal>]
+let LiteralIifSymbol = "⇔"
+[<Literal>]
 let LiteralImpl = "impl"
+[<Literal>]
+let LiteralImplSymbol = "⇒"
 [<Literal>]
 let LiteralIn = "in"
 [<Literal>]
@@ -121,11 +133,15 @@ let LiteralMapCases = "mcases"
 [<Literal>]
 let LiteralNot = "not"
 [<Literal>]
+let LiteralNotSymbol = "¬"
+[<Literal>]
 let LiteralObj = "obj"
 [<Literal>]
 let LiteralObjL = "object"
 [<Literal>]
 let LiteralOr = "or"
+[<Literal>]
+let LiteralOrSymbol = "∨"
 [<Literal>]
 let LiteralParent = "parent"
 [<Literal>]
@@ -190,6 +206,8 @@ let LiteralUndefL = "undefined"
 let LiteralUses = "uses"
 [<Literal>]
 let LiteralXor = "xor"
+[<Literal>]
+let LiteralXorSymbol = "⩡"
 
 let keyWordSet =
     HashSet<_>(
@@ -295,8 +313,9 @@ let replaceLinesWithSpaces (input: string) (pattern: string) =
 
 /// Replaces in the `input` all FPL comments by spaces while preserving new lines
 let removeFplComments (input:string) = 
-    let r1 = replaceLinesWithSpaces input "\/\/[^\n]*" // replace inline comments
-    replaceLinesWithSpaces r1 "\/\*((?:.|\n)*?)\*\/" // replace block comments
+    let r1 = replaceLinesWithSpaces input $"\/\/[^{Environment.NewLine}]*" // replace inline comments
+    replaceLinesWithSpaces r1 $"\/\*((?:.|{Environment.NewLine})*?)\*\/" // replace block comments
+
 
 /// Special math symbols that can be used as infix, postfix, prefix operators, or other mathematical symbols;
 /// based on source: https://www.classe.cornell.edu/~dms79/LectureNotes/formulae/list-of-math-symbols-extended.htm
@@ -307,7 +326,20 @@ let removeFplComments (input:string) =
 /// Code 2 = infix
 /// Code 1 = postfix
 /// (sums like 8 + 2 + 1 are allowed).
+
 let mathSymbols = dict [
+        // reserved FPL math symbols
+        //('¬', (4, "Not Sign", "U+00AC")) // FPL not operator
+        ('⇒', (2, "Rightwards Double Arrow", "U+21D2")) // FPL impl operator
+        ('⇔', (2, "Left Right Double Arrow", "U+21D4")) // FPL iif operator
+        ('∧', (2, "Logical And", "U+2227"))  // FPL and operator
+        ('∨', (2, "Logical Or", "U+2228")) // FPL or operator
+        ('⩡', (2, "Small Vee with Underbar", "U+2A61")) // xor operator
+        ('=', (2, "Equals Sign", "U+003D"))
+        ('≠', (2, "Not Equal To", "U+2260"))
+        //('∀', (4, "For All", "U+2200")) // FPL all quantor
+        //('∃', (2, "There Exists", "U+2203")) // FPL exists quantor
+
         ('a', (2, "Latin Letter a", "U+0041"))
         ('b', (2, "Latin Letter b", "U+0042"))
         ('c', (2, "Latin Letter c", "U+0043"))
@@ -357,10 +389,8 @@ let mathSymbols = dict [
         ('^', (2, "Circumflex", "U+005E"))
         ('+', (7, "Plus Sign", "U+002B"))
         ('<', (2, "Less-Than Sign", "U+003C"))
-        ('=', (2, "Equals Sign", "U+003D"))
         ('>', (2, "Greater-Than Sign", "U+003E"))
         ('|', (0, "Vertical Line", "U+007C"))
-        ('¬', (4, "Not Sign", "U+00AC"))
         ('±', (2, "Plus-Minus Sign", "U+00B1"))
         ('×', (2, "Multiplication Sign", "U+00D7"))
         ('÷', (2, "Division Sign", "U+00F7"))
@@ -396,8 +426,6 @@ let mathSymbols = dict [
         ('↮', (2, "Left Right Arrow with Stroke", "U+21AE"))
         ('⇎', (2, "Left Right Double Arrow with Stroke", "U+21CE"))
         ('⇏', (2, "Rightwards Double Arrow with Stroke", "U+21CF"))
-        ('⇒', (2, "Rightwards Double Arrow", "U+21D2"))
-        ('⇔', (2, "Left Right Double Arrow", "U+21D4"))
         ('⇴', (2, "Right Arrow with Small Circle", "U+21F4"))
         ('⇵', (2, "Downwards Arrow Leftwards of Upwards Arrow", "U+21F5"))
         ('⇶', (2, "Three Rightwards Arrows", "U+21F6"))
@@ -410,10 +438,8 @@ let mathSymbols = dict [
         ('⇽', (2, "Leftwards Open-Headed Arrow", "U+21FD"))
         ('⇾', (2, "Rightwards Open-Headed Arrow", "U+21FE"))
         ('⇿', (2, "Left Right Open-Headed Arrow", "U+21FF"))
-        ('∀', (4, "For All", "U+2200"))
         ('∁', (4, "Complement", "U+2201"))
         ('∂', (4, "Partial Differential", "U+2202"))
-        ('∃', (2, "There Exists", "U+2203"))
         ('∄', (2, "There Does Not Exist", "U+2204"))
         ('∅', (8, "Empty Set", "U+2205"))
         ('∆', (6, "Increment", "U+2206"))
@@ -448,8 +474,6 @@ let mathSymbols = dict [
         ('∤', (2, "Does Not Divide", "U+2224"))
         ('∥', (2, "Parallel To", "U+2225"))
         ('∦', (2, "Not Parallel To", "U+2226"))
-        ('∧', (2, "Logical And", "U+2227"))
-        ('∨', (2, "Logical Or", "U+2228"))
         ('∩', (2, "Intersection", "U+2229"))
         ('∪', (2, "Union", "U+222A"))
         ('∫', (4, "Integral", "U+222B"))
@@ -502,7 +526,6 @@ let mathSymbols = dict [
         ('≜', (2, "Delta Equal To", "U+225C"))
         ('≞', (2, "Measured By", "U+225E"))
         ('≟', (2, "Questioned Equal To", "U+225F"))
-        ('≠', (2, "Not Equal To", "U+2260"))
         ('≡', (2, "Identical To", "U+2261"))
         ('≢', (2, "Not Identical To", "U+2262"))
         ('≣', (2, "Strictly Equivalent To", "U+2263"))
@@ -593,7 +616,7 @@ let mathSymbols = dict [
         ('⊸', (2, "Multimap", "U+22B8"))
         ('⊹', (7, "Hermitian Conjugate Matrix", "U+22B9"))
         ('⊺', (7, "Intercalate", "U+22BA"))
-        ('⊻', (2, "Xor", "U+22BB"))
+        ('⊻', (2, "Xor", "U+22BB")) 
         ('⊼', (2, "Nand", "U+22BC"))
         ('⊽', (2, "Nor", "U+22BD"))
         ('⊾', (8, "Right Angle with Arc", "U+22BE"))
@@ -1047,7 +1070,6 @@ let mathSymbols = dict [
         ('⩞', (2, "Logical and with Double Overbar", "U+2A5E"))
         ('⩟', (2, "Logical and with Underbar", "U+2A5F"))
         ('⩠', (2, "Logical and with Double Underbar", "U+2A60"))
-        ('⩡', (2, "Small Vee with Underbar", "U+2A61"))
         ('⩢', (2, "Logical or with Double Overbar", "U+2A62"))
         ('⩣', (2, "Logical or with Double Underbar", "U+2A63"))
         ('⩤', (2, "Z Notation Domain Antirestriction", "U+2A64"))
@@ -1300,13 +1322,13 @@ let PrimAssignment = "assign"
 [<Literal>]
 let PrimAssignmentL = "assignment statement"
 [<Literal>]
-let PrimArgInfAssume = "assume argument inference"
+let PrimArgInfAssume = "assumption"
 [<Literal>]
-let PrimArgInfDerive = "derived argument inference"
+let PrimArgInfDerive = "derived argument"
 [<Literal>]
-let PrimArgInfRevoke = "revoke argument inference"
+let PrimArgInfRevoke = "revocation"
 [<Literal>]
-let PrimArgInfTrivial = "trivial argument inference"
+let PrimArgInfTrivial = "trivial argument"
 [<Literal>]
 let PrimBaseConstructorCall = "base constructor call"
 [<Literal>]
@@ -1350,6 +1372,8 @@ let PrimExtensionL = "extension definition"
 [<Literal>]
 let PrimExtensionObj = "extension object"
 [<Literal>]
+let PrimFalse = "false value"
+[<Literal>]
 let PrimForInStmtL = "for in statement"
 [<Literal>]
 let PrimForInStmtDomain = "fordomain"
@@ -1369,8 +1393,6 @@ let PrimInstance = "inst"
 let PrimInstanceL = "instance"
 [<Literal>]
 let PrimIntrinsicInd = "intrinsic index"
-[<Literal>]
-let PrimIntrinsicPred = "intrinsic predicate"
 [<Literal>]
 let PrimIntrinsicTpl = "intrinsic template"
 [<Literal>]
@@ -1459,6 +1481,16 @@ let PrimRoot = "root"
 let PrimStmt = "stmt"
 [<Literal>]
 let PrimStmtL = "statement"
+[<Literal>]
+let PrimTitleAxioms = "Axioms"
+[<Literal>]
+let PrimTitleDerived = "Derived Arguments"
+[<Literal>]
+let PrimTitleRuleOfInference = "Inference Rules"
+[<Literal>]
+let PrimTitleTheorems = "Theorems"
+[<Literal>]
+let PrimTrue = "true value"
 [<Literal>]
 let PrimTheory = "th"
 [<Literal>]

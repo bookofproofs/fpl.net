@@ -1,7 +1,7 @@
-﻿namespace FplParser.Tests
+namespace FplParser.Tests
 
 open FParsec
-open FplParser
+open FplParsing.Combinators
 open FplPrimitives
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
@@ -16,7 +16,7 @@ type TestExpressions () =
 
     [<TestMethod>]
     member this.TestExpressions () =
-        let result = run (ast .>> eof) """
+        let result = run (stdParser .>> eof) """
             def pred T1() 
             {
                 true
@@ -279,7 +279,7 @@ type TestExpressions () =
             }
 
             def cl T27 {ctor T27() {dec base.C(a, b, c, d); } }
-            ; 
+            
         """
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -288,7 +288,7 @@ type TestExpressions () =
            
     [<TestMethod>]
     member this.TestPredecence () =
-        let result = run (ast .>> eof) """def pred T1() { (x = y * z + 1) };"""
+        let result = run (stdParser .>> eof) """def pred T1() { (x = y * z + 1) }"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

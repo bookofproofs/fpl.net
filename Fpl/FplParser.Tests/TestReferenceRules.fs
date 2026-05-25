@@ -1,7 +1,7 @@
 namespace FplParser.Tests
 
 open FParsec
-open FplParser
+open FplParsing.Combinators
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
 [<TestClass>]
@@ -15,7 +15,7 @@ type TestReferenceRules() =
     member this.TestReferenceRule01 () =
         let result = run (ruleOfInference .>> eof) """inf ModusPonens
         {
-            dec ~a:obj ~p,q: pred;
+            dec a:obj p,q: pred;
 
             premise:
                 and (p, impl (p,q) )
@@ -30,7 +30,7 @@ type TestReferenceRules() =
     member this.TestReferenceRule02 () =
         let result = run (ruleOfInference .>> eof) """inference ModusTollens
         {
-            dec ~a:obj ~p,q: pred;
+            dec a:obj p,q: pred;
 
             premise:
                 and (not (q), impl(p,q) )
@@ -45,7 +45,7 @@ type TestReferenceRules() =
     member this.TestReferenceRule03 () =
         let result = run (ruleOfInference .>> eof) """inf HypotheticalSyllogism
         {
-            dec ~a:obj ~ p,q,r: pred;
+            dec a:obj  p,q,r: pred;
             premise:
                 and (impl(p,q), impl(q,r))
             conclusion:
@@ -59,7 +59,7 @@ type TestReferenceRules() =
     member this.TestReferenceRule04 () =
         let result = run (ruleOfInference .>> eof) """inference DisjunctiveSyllogism
         {
-            dec ~a:obj ~p,q: pred;
+            dec a:obj p,q: pred;
             premise:
                 and (not (p), or(p,q))
             conclusion:
@@ -73,7 +73,7 @@ type TestReferenceRules() =
     member this.TestReferenceRule05 () =
         let result = run (ruleOfInference .>> eof) """inf ProceedingResults2
         {
-            dec ~a,b: pred;
+            dec a,b: pred;
             premise: a, b
             conclusion: and (a,b)
         }"""
@@ -85,7 +85,7 @@ type TestReferenceRules() =
     member this.TestReferenceRule05a () =
         let result = run (ruleOfInference .>> eof) """inference ProceedingResults3
         {
-            dec ~a,b,c: pred;
+            dec a,b,c: pred;
             premise: a,b,c
             conclusion: and(and(a,b),c)
         }"""
@@ -97,7 +97,7 @@ type TestReferenceRules() =
     member this.TestReferenceRule06 () =
         let result = run (ruleOfInference .>> eof) """inf ExistsByExample
         {
-            dec ~p:pred(c:obj);
+            dec p:pred(c:obj);
             premise:
                 p(c)
             conclusion:
@@ -120,15 +120,14 @@ type TestReferenceRules() =
 
     [<TestMethod>]
     member this.TestVarsInReferenceRule() =
-        let result = run (ruleOfInference .>> eof) """inf ExistsByExample {dec ~c: obj; pre: true con: true}"""
+        let result = run (ruleOfInference .>> eof) """inf ExistsByExample {dec c: obj; pre: true con: true}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestReferenceRule08() =
-        let result = run (ruleOfInference .>> eof) """inf ProceedingResults {dec ~a,b: pred; pre: a, b con: and(a,b)}"""
+        let result = run (ruleOfInference .>> eof) """inf ProceedingResults {dec a,b: pred; pre: a, b con: and(a,b)}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
-        

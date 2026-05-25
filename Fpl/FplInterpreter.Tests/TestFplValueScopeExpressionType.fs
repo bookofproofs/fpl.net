@@ -1,7 +1,9 @@
-﻿namespace FplInterpreter.Tests
+namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
-open FplInterpreterTypes
+open FplInterpreterBasicTypes
+open FplInterpreter.Globals.Root
+open FplInterpreter.Globals.Heap
 open CommonTestHelpers
 open FplPrimitives
 
@@ -533,87 +535,83 @@ type TestFplValueScopeExpressionType() =
     [<DataRow("base30", "B(In(x))")>]
     [<DataRow("base31", "C(Test1(a),Test2(b,c,d))")>]
     [<DataRow("base32", "E(true, undef, false)")>]
-    [<DataRow("base33", "dec ~p: pred(c: obj); p(c)")>]
+    [<DataRow("base33", "dec p: pred(c: obj); p(c)")>]
     [<DataRow("base34", "is(x, Set)")>]
     [<TestMethod>]
     member this.TestPredicate(var, varVal) =
-        ad.Clear()
-        let fplCode = sprintf "def pred T1() { %s };" varVal
+        
+        let fplCode = sprintf "def pred T1() { %s }" varVal
         let filename = "TestPredicateExpressionType"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+
+        let pr1 = theory.Scope["T1()"] 
+        let base1 = pr1.ArgList[0]
+
+        match var with
+        | "base1" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base2" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base3" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base4" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base5" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base6" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base7" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base8" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base9" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base10" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base11" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base12" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base13" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base11a" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base12a" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base10b" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base11b" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base12b" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base13b" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base10c" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base11c" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base12c" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base13c" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base10d" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base11d" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base12d" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base13d" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base10e" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base11e" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base12e" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base13e" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base10f" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base11f" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base12f" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base13f" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base14" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base15" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base15a" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base15b" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base16" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base17" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base18" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base19" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base20" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base21" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base21a" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base21b" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base22" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base23" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base24" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base25" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base26" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base27" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base28" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base29" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base30" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base31" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base32" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base33" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base34" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-
-            let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ArgList[0]
-
-            match var with
-            | "base1" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base2" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base3" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base4" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base5" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base6" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base7" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base8" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base9" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base10" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base11" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base12" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base13" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base11a" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base12a" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base10b" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base11b" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base12b" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base13b" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base10c" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base11c" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base12c" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base13c" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base10d" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base11d" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base12d" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base13d" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base10e" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base11e" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base12e" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base13e" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base10f" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base11f" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base12f" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base13f" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base14" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base15" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base15a" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base15b" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base16" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base17" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base18" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base19" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base20" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base21" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base21a" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base21b" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base22" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base23" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base24" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base25" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base26" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base27" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base28" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base29" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base30" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base31" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base32" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base33" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base34" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
 
     [<DataRow("base1", "base.B()")>]
     [<DataRow("base2", "base.C(a, b, c, d)")>]
@@ -623,7 +621,7 @@ type TestFplValueScopeExpressionType() =
     [<DataRow("base6", "base.E(true, undef, false)")>]
     [<TestMethod>]
     member this.TestBaseConstructorCall(var, varVal) =
-        ad.Clear()
+        
         let fplCode = sprintf """
                         def cl B {intr}
                         def cl C {intr}
@@ -639,28 +637,24 @@ type TestFplValueScopeExpressionType() =
                                 
                             }
                         }
-                        ;""" varVal
+                        """ varVal
         let filename = "TestBaseConstructorCallExpressionType"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
-        prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let cl = theory.Scope["A"]
-            let ctor = cl.Scope["A(T1, func, ind, pred)"]
-            let base1 = ctor.ArgList[0]
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let cl = theory.Scope["A"]
+        let ctor = cl.Scope["A(T1, func, ind, pred)"]
+        let base1 = ctor.ArgList[0]
 
-            match var with
-            | "base1" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base2" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base3" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base4" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base5" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base6" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
+        match var with
+        | "base1" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base2" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base3" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base4" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base5" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base6" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | _ -> Assert.IsTrue(false)
+        prepareFplCode(filename, "", false) |> ignore
 
     [<DataRow("base1", "del.B()")>]
     [<DataRow("base2", "del.C(a,b,c,d)")>]
@@ -671,230 +665,202 @@ type TestFplValueScopeExpressionType() =
     [<DataRow("base7", "del.E(true, undef, false)")>] 
     [<TestMethod>]
     member this.TestDelegate(var, varVal) =
-        ad.Clear()
-        let fplCode = sprintf "def pred T1() { %s };" varVal
+        
+        let fplCode = sprintf "def pred T1() { %s }" varVal
         let filename = "TestDelegateExpressionType"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+
+        let pr1 = theory.Scope["T1()"] 
+        let base1 = pr1.ArgList[0]
+
+        match var with
+        | "base1" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base2" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base3" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base4" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base5" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base6" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base7" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
 
-            let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ArgList[0]
-
-            match var with
-            | "base1" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base2" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base3" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base4" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base5" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base6" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base7" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
-
-    [<DataRow("base1", """def pred T1() {intr};""")>]
-    [<DataRow("base2", """def pred T1 () infix ">" -1 {intr};""")>]
-    [<DataRow("base3", """def pred T1 () postfix "'" {intr};""")>]
-    [<DataRow("base4", """def pred T1 () prefix "-" {intr};""")>]
-    [<DataRow("base5", """def cl T1 symbol "∅" {intr};""")>]
-    [<DataRow("base5a", """def cl T1 {intr};""")>]
-    [<DataRow("base6", """def func T1()->obj {intr};""")>]
-    [<DataRow("base7", """def func T1 ()->obj infix ">" -1 {intr};""")>]
-    [<DataRow("base8", """def func T1  ()->obj postfix "'"{intr};""")>]
-    [<DataRow("base9", """def func T1 ()->obj prefix "-" {intr};""")>]
+    [<DataRow("base1", """def pred T1() {intr}""")>]
+    [<DataRow("base2", """def pred T1 () infix ">" -1 {intr}""")>]
+    [<DataRow("base3", """def pred T1 () postfix "'" {intr}""")>]
+    [<DataRow("base4", """def pred T1 () prefix "-" {intr}""")>]
+    [<DataRow("base5", """def cl T1 symbol "∅" {intr}""")>]
+    [<DataRow("base5a", """def cl T1 {intr}""")>]
+    [<DataRow("base6", """def func T1()->obj {intr}""")>]
+    [<DataRow("base7", """def func T1 ()->obj infix ">" -1 {intr}""")>]
+    [<DataRow("base8", """def func T1  ()->obj postfix "'"{intr}""")>]
+    [<DataRow("base9", """def func T1 ()->obj prefix "-" {intr}""")>]
     [<TestMethod>]
     member this.TestFixNotationExpressionType(var, varVal) =
-        ad.Clear()
-        let fplCode = sprintf "%s;" varVal
+        
+        let fplCode = sprintf "%s" varVal
         let filename = "TestFixNotationExpressionType"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let base1 = 
+            if varVal.Contains LiteralCl then 
+                theory.Scope["T1"]
+            elif varVal.Contains LiteralFunc then 
+                theory.Scope["T1() -> obj"]
+            else 
+                theory.Scope["T1()"]
+
+        match var with
+        | "base1" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base2" -> Assert.AreEqual<FixType>(FixType.Infix(">", -1), base1.ExpressionType)
+        | "base3" -> Assert.AreEqual<FixType>(FixType.Postfix "'", base1.ExpressionType)
+        | "base4" -> Assert.AreEqual<FixType>(FixType.Prefix "-", base1.ExpressionType)
+        | "base5" -> Assert.AreEqual<FixType>(FixType.Symbol "∅", base1.ExpressionType)
+        | "base5a" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base6" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+        | "base7" -> Assert.AreEqual<FixType>(FixType.Infix(">", -1), base1.ExpressionType)
+        | "base8" -> Assert.AreEqual<FixType>(FixType.Postfix "'", base1.ExpressionType)
+        | "base9" -> Assert.AreEqual<FixType>(FixType.Prefix "-", base1.ExpressionType)
+        | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let base1 = 
-                if varVal.Contains LiteralCl then 
-                    theory.Scope["T1"]
-                elif varVal.Contains LiteralFunc then 
-                    theory.Scope["T1() -> obj"]
-                else 
-                    theory.Scope["T1()"]
 
-            match var with
-            | "base1" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base2" -> Assert.AreEqual<FixType>(FixType.Infix(">", -1), base1.ExpressionType)
-            | "base3" -> Assert.AreEqual<FixType>(FixType.Postfix "'", base1.ExpressionType)
-            | "base4" -> Assert.AreEqual<FixType>(FixType.Prefix "-", base1.ExpressionType)
-            | "base5" -> Assert.AreEqual<FixType>(FixType.Symbol "∅", base1.ExpressionType)
-            | "base5a" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base6" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base7" -> Assert.AreEqual<FixType>(FixType.Infix(">", -1), base1.ExpressionType)
-            | "base8" -> Assert.AreEqual<FixType>(FixType.Postfix "'", base1.ExpressionType)
-            | "base9" -> Assert.AreEqual<FixType>(FixType.Prefix "-", base1.ExpressionType)
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
-
-    [<DataRow("base1", """def func T()->obj {intr};""")>]
-    [<DataRow("base2", """def func T()->ind {intr};""")>]
-    [<DataRow("base3", """def func T()->func {intr};""")>]
-    [<DataRow("base4", """def func T()->pred {intr};""")>]
-    [<DataRow("base5", """def cl A {intr} def func T()->A {intr};""")>]
-    [<DataRow("base6", """def func T()->pred(z:ind) {intr};""")>]
-    [<DataRow("base7", """def func T()->pred(z:*obj[ind]) {intr};""")>]
-    [<DataRow("base8", """def func T()->func(p:*pred(x:obj)[ind])->pred(x:ind) {intr};""")>]
-    [<DataRow("base9", """def func T()->pred(f:*func(x:A)->A[ind]) {intr};""")>]
-    [<DataRow("base10", """def cl A {intr} def func T()->pred(f:func(x:A)->A) {intr};""")>]
+    [<DataRow("base1", """def func T()->obj {intr}""")>]
+    [<DataRow("base2", """def func T()->ind {intr}""")>]
+    [<DataRow("base3", """def func T()->func {intr}""")>]
+    [<DataRow("base4", """def func T()->pred {intr}""")>]
+    [<DataRow("base5", """def cl A {intr} def func T()->A {intr}""")>]
+    [<DataRow("base6", """def func T()->pred(z:ind) {intr}""")>]
+    [<DataRow("base7", """def func T()->pred(z:*obj[ind]) {intr}""")>]
+    [<DataRow("base8", """def func T()->func(p:*pred(x:obj)[ind])->pred(x:ind) {intr}""")>]
+    [<DataRow("base9", """def func T()->pred(f:*func(x:A)->A[ind]) {intr}""")>]
+    [<DataRow("base10", """def cl A {intr} def func T()->pred(f:func(x:A)->A) {intr}""")>]
     [<TestMethod>]
     member this.TestMapping(var, varVal) =
-        ad.Clear()
-        let fplCode = sprintf "%s;" varVal
+        
+        let fplCode = sprintf "%s" varVal
         let filename = "TestMappingExpressionType"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let base1 = theory.Scope |> Seq.filter (fun kvp -> kvp.Key.StartsWith("T(")) |> Seq.map (fun kvp -> kvp.Value) |> Seq.toList |> List.head
+        let mapping = base1.ArgList[0]
+        match var with
+        | "base1" -> Assert.AreEqual<FixType>(FixType.NoFix, mapping.ExpressionType)
+        | "base2" -> Assert.AreEqual<FixType>(FixType.NoFix, mapping.ExpressionType)
+        | "base3" -> Assert.AreEqual<FixType>(FixType.NoFix, mapping.ExpressionType)
+        | "base4" -> Assert.AreEqual<FixType>(FixType.NoFix, mapping.ExpressionType)
+        | "base5" -> Assert.AreEqual<FixType>(FixType.NoFix, mapping.ExpressionType)
+        | "base6" -> Assert.AreEqual<FixType>(FixType.NoFix, mapping.ExpressionType)
+        | "base7" -> Assert.AreEqual<FixType>(FixType.NoFix, mapping.ExpressionType)
+        | "base8" -> Assert.AreEqual<FixType>(FixType.NoFix, mapping.ExpressionType)
+        | "base9" -> Assert.AreEqual<FixType>(FixType.NoFix, mapping.ExpressionType)
+        | "base10" -> Assert.AreEqual<FixType>(FixType.NoFix, mapping.ExpressionType)
+        | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let base1 = theory.Scope |> Seq.filter (fun kvp -> kvp.Key.StartsWith("T(")) |> Seq.map (fun kvp -> kvp.Value) |> Seq.toList |> List.head
-            let mapping = base1.ArgList[0]
-            match var with
-            | "base1" -> Assert.AreEqual<FixType>(FixType.NoFix, mapping.ExpressionType)
-            | "base2" -> Assert.AreEqual<FixType>(FixType.NoFix, mapping.ExpressionType)
-            | "base3" -> Assert.AreEqual<FixType>(FixType.NoFix, mapping.ExpressionType)
-            | "base4" -> Assert.AreEqual<FixType>(FixType.NoFix, mapping.ExpressionType)
-            | "base5" -> Assert.AreEqual<FixType>(FixType.NoFix, mapping.ExpressionType)
-            | "base6" -> Assert.AreEqual<FixType>(FixType.NoFix, mapping.ExpressionType)
-            | "base7" -> Assert.AreEqual<FixType>(FixType.NoFix, mapping.ExpressionType)
-            | "base8" -> Assert.AreEqual<FixType>(FixType.NoFix, mapping.ExpressionType)
-            | "base9" -> Assert.AreEqual<FixType>(FixType.NoFix, mapping.ExpressionType)
-            | "base10" -> Assert.AreEqual<FixType>(FixType.NoFix, mapping.ExpressionType)
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
 
-    [<DataRow("base1", """100. |- trivial""")>]
+    [<DataRow("base1", """100: trivial""")>]
     [<DataRow("base2", """100. ExistsByExample, 1 |- false""")>]
     [<DataRow("base3", """100. T1 |- assume not somePremise """)>]
     [<DataRow("base4", """100. 2, 3, 5 |- iif (a,b)""")>]
-    [<DataRow("base5", """100. |- revoke 3""")>]
+    [<DataRow("base5", """100: revoke 3""")>]
     [<TestMethod>]
     member this.TestArgumentExpressionType(var, argExpression) =
-        ad.Clear()
-        let fplCode = sprintf """proof T$1 { %s };""" argExpression
+        
+        let fplCode = sprintf """proof T$1 { %s }""" argExpression
         let filename = "TestArgumentExpressionType"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let proof = theory.Scope["T$1"]
+        let arg = proof.Scope["100"]
+        match var with
+        | "base1" -> Assert.AreEqual<FixType>(FixType.NoFix, arg.ExpressionType)
+        | "base2" -> Assert.AreEqual<FixType>(FixType.NoFix, arg.ExpressionType)
+        | "base3" -> Assert.AreEqual<FixType>(FixType.NoFix, arg.ExpressionType)
+        | "base4" -> Assert.AreEqual<FixType>(FixType.NoFix, arg.ExpressionType)
+        | "base5" -> Assert.AreEqual<FixType>(FixType.NoFix, arg.ExpressionType)
+        | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let proof = theory.Scope["T$1"]
-            let arg = proof.Scope["100"]
-            match var with
-            | "base1" -> Assert.AreEqual<FixType>(FixType.NoFix, arg.ExpressionType)
-            | "base2" -> Assert.AreEqual<FixType>(FixType.NoFix, arg.ExpressionType)
-            | "base3" -> Assert.AreEqual<FixType>(FixType.NoFix, arg.ExpressionType)
-            | "base4" -> Assert.AreEqual<FixType>(FixType.NoFix, arg.ExpressionType)
-            | "base5" -> Assert.AreEqual<FixType>(FixType.NoFix, arg.ExpressionType)
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
 
-    [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr";""")>]
-    [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
-    [<DataRow("base2", "not(undef)", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
-    [<DataRow("base3", "and(undef, undef)", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q;""")>]
-    [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""")>]
-    [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
+    [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr" """)>]
+    [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y""")>]
+    [<DataRow("base2", "not(undef)", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x""")>]
+    [<DataRow("base3", "and(undef, undef)", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q""")>]
+    [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y""")>]
+    [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y""")>]
     [<TestMethod>]
     member this.TestLanguageExpressionType(var, predName, predDecl, trslCode) =
-        ad.Clear()
+        
         let fplCode = sprintf """loc %s := %s;""" predDecl trslCode
         let filename = "TestLanguageExpressionType.Column"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pred = theory.Scope[predName]
+        let lang = pred.Scope["tex"]
+
+        match var with
+        | "base0" -> Assert.AreEqual<FixType>(FixType.NoFix, lang.ExpressionType)
+        | "base1" -> Assert.AreEqual<FixType>(FixType.NoFix, lang.ExpressionType)
+        | "base2" -> Assert.AreEqual<FixType>(FixType.NoFix, lang.ExpressionType)
+        | "base3" -> Assert.AreEqual<FixType>(FixType.NoFix, lang.ExpressionType)
+        | "base4" -> Assert.AreEqual<FixType>(FixType.NoFix, lang.ExpressionType)
+        | "base5" -> Assert.AreEqual<FixType>(FixType.NoFix, lang.ExpressionType)
+        | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let pred = theory.Scope[predName]
-            let lang = pred.Scope["tex"]
 
-            match var with
-            | "base0" -> Assert.AreEqual<FixType>(FixType.NoFix, lang.ExpressionType)
-            | "base1" -> Assert.AreEqual<FixType>(FixType.NoFix, lang.ExpressionType)
-            | "base2" -> Assert.AreEqual<FixType>(FixType.NoFix, lang.ExpressionType)
-            | "base3" -> Assert.AreEqual<FixType>(FixType.NoFix, lang.ExpressionType)
-            | "base4" -> Assert.AreEqual<FixType>(FixType.NoFix, lang.ExpressionType)
-            | "base5" -> Assert.AreEqual<FixType>(FixType.NoFix, lang.ExpressionType)
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
-
-    [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr";""")>]
-    [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
-    [<DataRow("base2", "not(undef)", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
-    [<DataRow("base3", "and(undef, undef)", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q;""")>]
-    [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""")>]
-    [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
+    [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr" """)>]
+    [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y""")>]
+    [<DataRow("base2", "not(undef)", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x""")>]
+    [<DataRow("base3", "and(undef, undef)", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q""")>]
+    [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y""")>]
+    [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y""")>]
     [<TestMethod>]
     member this.TestLocalizationExpressionType(var, predName, predDecl, trslCode) =
-        ad.Clear()
+        
         let fplCode = sprintf """loc %s := %s;""" predDecl trslCode
         let filename = "TestLocalizationExpressionType.Column"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pred = theory.Scope[predName]
+
+        match var with
+        | "base0" -> Assert.AreEqual<FixType>(FixType.NoFix, pred.ExpressionType)
+        | "base1" -> Assert.AreEqual<FixType>(FixType.NoFix, pred.ExpressionType)
+        | "base2" -> Assert.AreEqual<FixType>(FixType.NoFix, pred.ExpressionType)
+        | "base3" -> Assert.AreEqual<FixType>(FixType.NoFix, pred.ExpressionType)
+        | "base4" -> Assert.AreEqual<FixType>(FixType.NoFix, pred.ExpressionType)
+        | "base5" -> Assert.AreEqual<FixType>(FixType.NoFix, pred.ExpressionType)
+        | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let pred = theory.Scope[predName]
 
-            match var with
-            | "base0" -> Assert.AreEqual<FixType>(FixType.NoFix, pred.ExpressionType)
-            | "base1" -> Assert.AreEqual<FixType>(FixType.NoFix, pred.ExpressionType)
-            | "base2" -> Assert.AreEqual<FixType>(FixType.NoFix, pred.ExpressionType)
-            | "base3" -> Assert.AreEqual<FixType>(FixType.NoFix, pred.ExpressionType)
-            | "base4" -> Assert.AreEqual<FixType>(FixType.NoFix, pred.ExpressionType)
-            | "base5" -> Assert.AreEqual<FixType>(FixType.NoFix, pred.ExpressionType)
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
-
-    [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr";""")>]
-    [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
-    [<DataRow("base2", "not(undef)", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
-    [<DataRow("base3", "and(undef, undef)", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q;""")>]
-    [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""")>]
-    [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
+    [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr" """)>]
+    [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y""")>]
+    [<DataRow("base2", "not(undef)", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x""")>]
+    [<DataRow("base3", "and(undef, undef)", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q""")>]
+    [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y""")>]
+    [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y""")>]
     [<TestMethod>]
     member this.TestTranslationExpressionType(var, predName, predDecl, trslCode) =
-        ad.Clear()
+        
         let fplCode = sprintf """loc %s := %s;""" predDecl trslCode
         let filename = "TestTranslationExpressionType.Column"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
-        prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let pred = theory.Scope[predName]
-            let lang = pred.Scope["tex"]
-            let trsl = lang.ArgList[0]
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pred = theory.Scope[predName]
+        let lang = pred.Scope["tex"]
+        let trsl = lang.ArgList[0]
 
-            match var with
-            | "base0" -> Assert.AreEqual<FixType>(FixType.NoFix, trsl.ExpressionType)
-            | "base1" -> Assert.AreEqual<FixType>(FixType.NoFix, trsl.ExpressionType)
-            | "base2" -> Assert.AreEqual<FixType>(FixType.NoFix, trsl.ExpressionType)
-            | "base3" -> Assert.AreEqual<FixType>(FixType.NoFix, trsl.ExpressionType)
-            | "base4" -> Assert.AreEqual<FixType>(FixType.NoFix, trsl.ExpressionType)
-            | "base5" -> Assert.AreEqual<FixType>(FixType.NoFix, trsl.ExpressionType)
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
+        match var with
+        | "base0" -> Assert.AreEqual<FixType>(FixType.NoFix, trsl.ExpressionType)
+        | "base1" -> Assert.AreEqual<FixType>(FixType.NoFix, trsl.ExpressionType)
+        | "base2" -> Assert.AreEqual<FixType>(FixType.NoFix, trsl.ExpressionType)
+        | "base3" -> Assert.AreEqual<FixType>(FixType.NoFix, trsl.ExpressionType)
+        | "base4" -> Assert.AreEqual<FixType>(FixType.NoFix, trsl.ExpressionType)
+        | "base5" -> Assert.AreEqual<FixType>(FixType.NoFix, trsl.ExpressionType)
+        | _ -> Assert.IsTrue(false)
+        prepareFplCode(filename, "", false) |> ignore

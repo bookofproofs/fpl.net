@@ -1,8 +1,26 @@
-﻿namespace FplInterpreter.Tests
+namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
 open FplPrimitives
-open FplInterpreterTypes
+open FplInterpreterBasicTypes
+open FplInterpreter.Globals.Root
+open FplInterpreter.Globals.Heap
+open FplInterpreterIntrinsicTypes
+open FplInterpreterReferences
+open FplInterpreterVariables
+open FplInterpreterDefinitions
+open FplInterpreterPredicativeBlocks
+open FplInterpreterDefinitionProperties
+open FplInterpreterProofs
+open FplInterpreterQuantors
+open FplInterpreterRulesOfInferences
+open FplInterpreterCompoundPredicates
+open FplInterpreterExtensions
+open FplInterpreterDelegates
+open FplInterpreterMapCases
+open FplInterpreterLocalization
+open FplInterpreterReferencesSelfParent
+open FplInterpreterIsOperator
 open CommonTestHelpers
 
 
@@ -535,87 +553,83 @@ type TestFplValueScopeBlockType() =
     [<DataRow("base30", "B(In(x))")>]
     [<DataRow("base31", "C(Test1(a),Test2(b,c,d))")>]
     [<DataRow("base32", "E(true, undef, false)")>]
-    [<DataRow("base33", "dec ~p: pred(c: obj); p(c)")>]
+    [<DataRow("base33", "dec p: pred(c: obj); p(c)")>]
     [<DataRow("base34", "is(x, Set)")>]
     [<TestMethod>]
     member this.TestPredicate(var, varVal) =
-        ad.Clear()
-        let fplCode = sprintf "def pred T1() { %s };" varVal
+        
+        let fplCode = sprintf "def pred T1() { %s }" varVal
         let filename = "TestPredicateBlockType"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+
+        let pr1 = theory.Scope["T1()"] 
+        let base1 = pr1.ArgList[0]
+
+        match var with
+        | "base1" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base2" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base3" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base4" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base5" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base6" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base7" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base8" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base9" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base10" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base11" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base12" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base13" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base11a" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base12a" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base10b" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base11b" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base12b" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base13b" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base10c" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base11c" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base12c" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base13c" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base10d" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base11d" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base12d" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base13d" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base10e" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base11e" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base12e" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base13e" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base10f" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base11f" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base12f" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base13f" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base14" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base15" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base15a" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base15b" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base16" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base17" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base18" -> Assert.IsInstanceOfType<FplGenericQuantor>(base1) 
+        | "base19" -> Assert.IsInstanceOfType<FplGenericQuantor>(base1)  
+        | "base20" -> Assert.IsInstanceOfType<FplGenericQuantor>(base1) 
+        | "base21" -> Assert.IsInstanceOfType<FplConjunction>(base1)
+        | "base21a" -> Assert.IsInstanceOfType<FplNegation>(base1)
+        | "base21b" -> Assert.IsInstanceOfType<FplNegation>(base1)
+        | "base22" -> Assert.IsInstanceOfType<FplExclusiveOr>(base1)
+        | "base23" -> Assert.IsInstanceOfType<FplDisjunction>(base1)
+        | "base24" -> Assert.IsInstanceOfType<FplEquivalence>(base1)
+        | "base25" -> Assert.IsInstanceOfType<FplImplication>(base1)
+        | "base26" -> Assert.IsInstanceOfType<FplIsOperator>(base1)
+        | "base27" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base28" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base29" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base30" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base31" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base32" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base33" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base34" -> Assert.IsInstanceOfType<FplIsOperator>(base1)
+        | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-
-            let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ArgList[0]
-
-            match var with
-            | "base1" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base2" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base3" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base4" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base5" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base6" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base7" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base8" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base9" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base10" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base11" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base12" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base13" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base11a" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base12a" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base10b" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base11b" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base12b" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base13b" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base10c" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base11c" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base12c" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base13c" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base10d" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base11d" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base12d" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base13d" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base10e" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base11e" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base12e" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base13e" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base10f" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base11f" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base12f" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base13f" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base14" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base15" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base15a" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base15b" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base16" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base17" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base18" -> Assert.IsInstanceOfType<FplGenericQuantor>(base1) 
-            | "base19" -> Assert.IsInstanceOfType<FplGenericQuantor>(base1)  
-            | "base20" -> Assert.IsInstanceOfType<FplGenericQuantor>(base1) 
-            | "base21" -> Assert.IsInstanceOfType<FplConjunction>(base1)
-            | "base21a" -> Assert.IsInstanceOfType<FplNegation>(base1)
-            | "base21b" -> Assert.IsInstanceOfType<FplNegation>(base1)
-            | "base22" -> Assert.IsInstanceOfType<FplExclusiveOr>(base1)
-            | "base23" -> Assert.IsInstanceOfType<FplDisjunction>(base1)
-            | "base24" -> Assert.IsInstanceOfType<FplEquivalence>(base1)
-            | "base25" -> Assert.IsInstanceOfType<FplImplication>(base1)
-            | "base26" -> Assert.IsInstanceOfType<FplIsOperator>(base1)
-            | "base27" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base28" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base29" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base30" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base31" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base32" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base33" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base34" -> Assert.IsInstanceOfType<FplIsOperator>(base1)
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
 
     [<DataRow("base1", "base.B()")>]
     [<DataRow("base2", "base.C(a, b, c, d)")>]
@@ -625,7 +639,7 @@ type TestFplValueScopeBlockType() =
     [<DataRow("base6", "base.E(true, undef, false)")>]
     [<TestMethod>]
     member this.TestBaseConstructorCallBlockType(var, varVal) =
-        ad.Clear()
+        
         let fplCode = sprintf """
                         def cl B {intr}
                         def cl C {intr}
@@ -641,28 +655,24 @@ type TestFplValueScopeBlockType() =
                                 
                             }
                         }
-                        ;""" varVal
+                        """ varVal
         let filename = "TestBaseConstructorCallBlockType"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
-        prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let cl = theory.Scope["A"]
-            let ctor = cl.Scope["A(T1, func, ind, pred)"]
-            let base1 = ctor.ArgList[0]
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let cl = theory.Scope["A"]
+        let ctor = cl.Scope["A(T1, func, ind, pred)"]
+        let base1 = ctor.ArgList[0]
 
-            match var with
-            | "base1" -> Assert.IsInstanceOfType<FplBaseConstructorCall>(base1)
-            | "base2" -> Assert.IsInstanceOfType<FplBaseConstructorCall>(base1)
-            | "base3" -> Assert.IsInstanceOfType<FplBaseConstructorCall>(base1)
-            | "base4" -> Assert.IsInstanceOfType<FplBaseConstructorCall>(base1)
-            | "base5" -> Assert.IsInstanceOfType<FplBaseConstructorCall>(base1)
-            | "base6" -> Assert.IsInstanceOfType<FplBaseConstructorCall>(base1)
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
+        match var with
+        | "base1" -> Assert.IsInstanceOfType<FplBaseConstructorCall>(base1)
+        | "base2" -> Assert.IsInstanceOfType<FplBaseConstructorCall>(base1)
+        | "base3" -> Assert.IsInstanceOfType<FplBaseConstructorCall>(base1)
+        | "base4" -> Assert.IsInstanceOfType<FplBaseConstructorCall>(base1)
+        | "base5" -> Assert.IsInstanceOfType<FplBaseConstructorCall>(base1)
+        | "base6" -> Assert.IsInstanceOfType<FplBaseConstructorCall>(base1)
+        | _ -> Assert.IsTrue(false)
+        prepareFplCode(filename, "", false) |> ignore
 
     [<DataRow("base1", "del.B()")>]
     [<DataRow("base2", "del.C(a,b,c,d)")>]
@@ -673,257 +683,225 @@ type TestFplValueScopeBlockType() =
     [<DataRow("base7", "del.E(true, undef, false)")>] 
     [<TestMethod>]
     member this.TestDelegate(var, varVal) =
-        ad.Clear()
-        let fplCode = sprintf "def pred T1() { %s };" varVal
+        
+        let fplCode = sprintf "def pred T1() { %s }" varVal
         let filename = "TestDelegateBlockType"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+
+        let pr1 = theory.Scope["T1()"] 
+        let base1 = pr1.ArgList[0]
+
+        match var with
+        | "base1" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base2" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base3" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base4" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base5" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base6" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | "base7" -> Assert.IsInstanceOfType<FplReference>(base1)
+        | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
 
-            let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ArgList[0]
-
-            match var with
-            | "base1" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base2" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base3" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base4" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base5" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base6" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base7" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
-
-    [<DataRow("base1", """def pred T1() {intr};""")>]
-    [<DataRow("base2", """def pred T1() infix ">" -1 {intr};""")>]
-    [<DataRow("base3", """def pred T1 () postfix "'" {intr};""")>]
-    [<DataRow("base4", """def pred T1 () prefix "-" {intr};""")>]
-    [<DataRow("base5", """def cl T1 symbol "∅" {intr};""")>]
-    [<DataRow("base5a", """def cl T1 {intr};""")>]
-    [<DataRow("base6", """def func T1()->obj {intr};""")>]
-    [<DataRow("base7", """def func T1 ()->obj infix ">" -1 {intr};""")>]
-    [<DataRow("base8", """def func T1 ()->obj postfix "'" {intr};""")>]
-    [<DataRow("base9", """def func T1 ()->obj prefix "-" {intr};""")>]
+    [<DataRow("base1", """def pred T1() {intr}""")>]
+    [<DataRow("base2", """def pred T1() infix ">" -1 {intr}""")>]
+    [<DataRow("base3", """def pred T1 () postfix "'" {intr}""")>]
+    [<DataRow("base4", """def pred T1 () prefix "-" {intr}""")>]
+    [<DataRow("base5", """def cl T1 symbol "∅" {intr}""")>]
+    [<DataRow("base5a", """def cl T1 {intr}""")>]
+    [<DataRow("base6", """def func T1()->obj {intr}""")>]
+    [<DataRow("base7", """def func T1 ()->obj infix ">" -1 {intr}""")>]
+    [<DataRow("base8", """def func T1 ()->obj postfix "'" {intr}""")>]
+    [<DataRow("base9", """def func T1 ()->obj prefix "-" {intr}""")>]
     [<TestMethod>]
     member this.TestFixNotationBlockType(var, varVal) =
-        ad.Clear()
-        let fplCode = sprintf "%s;" varVal
+        
+        let fplCode = sprintf "%s" varVal
         let filename = "TestFixNotationBlockType"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let base1 = 
+            if varVal.Contains LiteralCl then 
+                theory.Scope["T1"]
+            elif varVal.Contains LiteralFunc then 
+                theory.Scope["T1() -> obj"]
+            else 
+                theory.Scope["T1()"]
+
+        match var with
+        | "base1" -> Assert.IsInstanceOfType<FplPredicate>(base1)
+        | "base2" -> Assert.IsInstanceOfType<FplPredicate>(base1)
+        | "base3" -> Assert.IsInstanceOfType<FplPredicate>(base1)
+        | "base4" -> Assert.IsInstanceOfType<FplPredicate>(base1)
+        | "base5" -> Assert.IsInstanceOfType<FplClass>(base1)
+        | "base5a" -> Assert.IsInstanceOfType<FplClass>(base1)
+        | "base6" -> Assert.IsInstanceOfType<FplFunctionalTerm>(base1) 
+        | "base7" -> Assert.IsInstanceOfType<FplFunctionalTerm>(base1) 
+        | "base8" -> Assert.IsInstanceOfType<FplFunctionalTerm>(base1) 
+        | "base9" -> Assert.IsInstanceOfType<FplFunctionalTerm>(base1) 
+        | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let base1 = 
-                if varVal.Contains LiteralCl then 
-                    theory.Scope["T1"]
-                elif varVal.Contains LiteralFunc then 
-                    theory.Scope["T1() -> obj"]
-                else 
-                    theory.Scope["T1()"]
 
-            match var with
-            | "base1" -> Assert.IsInstanceOfType<FplPredicate>(base1)
-            | "base2" -> Assert.IsInstanceOfType<FplPredicate>(base1)
-            | "base3" -> Assert.IsInstanceOfType<FplPredicate>(base1)
-            | "base4" -> Assert.IsInstanceOfType<FplPredicate>(base1)
-            | "base5" -> Assert.IsInstanceOfType<FplClass>(base1)
-            | "base5a" -> Assert.IsInstanceOfType<FplClass>(base1)
-            | "base6" -> Assert.IsInstanceOfType<FplFunctionalTerm>(base1) 
-            | "base7" -> Assert.IsInstanceOfType<FplFunctionalTerm>(base1) 
-            | "base8" -> Assert.IsInstanceOfType<FplFunctionalTerm>(base1) 
-            | "base9" -> Assert.IsInstanceOfType<FplFunctionalTerm>(base1) 
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
-
-    [<DataRow("base1", """def func T()->obj {intr};""")>]
-    [<DataRow("base2", """def func T()->ind {intr};""")>]
-    [<DataRow("base3", """def func T()->func {intr};""")>]
-    [<DataRow("base4", """def func T()->pred {intr};""")>]
-    [<DataRow("base5", """def cl A {intr} def func T()->A {intr};""")>]
-    [<DataRow("base6", """def func T()->tpl {intr};""")>]
-    [<DataRow("base7", """def func T()->pred(z:*obj[ind]) {intr};""")>]
-    [<DataRow("base8", """def func T()->func(p:*pred(x:obj)[ind])->pred(x:ind) {intr};""")>]
-    [<DataRow("base9", """def func T()->pred(f:*func(x:A)->A[ind]) {intr};""")>]
-    [<DataRow("base10", """def cl A {intr} def func T()->pred(f:func(x:A)->A) {intr};""")>]
+    [<DataRow("base1", """def func T()->obj {intr}""")>]
+    [<DataRow("base2", """def func T()->ind {intr}""")>]
+    [<DataRow("base3", """def func T()->func {intr}""")>]
+    [<DataRow("base4", """def func T()->pred {intr}""")>]
+    [<DataRow("base5", """def cl A {intr} def func T()->A {intr}""")>]
+    [<DataRow("base6", """def func T()->tpl {intr}""")>]
+    [<DataRow("base7", """def func T()->pred(z:*obj[ind]) {intr}""")>]
+    [<DataRow("base8", """def func T()->func(p:*pred(x:obj)[ind])->pred(x:ind) {intr}""")>]
+    [<DataRow("base9", """def func T()->pred(f:*func(x:A)->A[ind]) {intr}""")>]
+    [<DataRow("base10", """def cl A {intr} def func T()->pred(f:func(x:A)->A) {intr}""")>]
     [<TestMethod>]
     member this.TestMapping(var, varVal) =
-        ad.Clear()
-        let fplCode = sprintf "%s;" varVal
+        
+        let fplCode = sprintf "%s" varVal
         let filename = "TestMappingBlockType"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let base1 = theory.Scope |> Seq.filter (fun kvp -> kvp.Key.StartsWith("T(")) |> Seq.map (fun kvp -> kvp.Value) |> Seq.toList |> List.head
+        let mapping = base1.ArgList[0]
+        match var with
+        | "base1" -> Assert.IsInstanceOfType<FplMapping>(mapping)
+        | "base2" -> Assert.IsInstanceOfType<FplMapping>(mapping)
+        | "base3" -> Assert.IsInstanceOfType<FplMapping>(mapping)
+        | "base4" -> Assert.IsInstanceOfType<FplMapping>(mapping)
+        | "base5" -> Assert.IsInstanceOfType<FplMapping>(mapping)
+        | "base6" -> Assert.IsInstanceOfType<FplMapping>(mapping)
+        | "base7" -> Assert.IsInstanceOfType<FplMapping>(mapping)
+        | "base8" -> Assert.IsInstanceOfType<FplMapping>(mapping)
+        | "base9" -> Assert.IsInstanceOfType<FplMapping>(mapping)
+        | "base10" -> Assert.IsInstanceOfType<FplMapping>(mapping)
+        | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let base1 = theory.Scope |> Seq.filter (fun kvp -> kvp.Key.StartsWith("T(")) |> Seq.map (fun kvp -> kvp.Value) |> Seq.toList |> List.head
-            let mapping = base1.ArgList[0]
-            match var with
-            | "base1" -> Assert.IsInstanceOfType<FplMapping>(mapping)
-            | "base2" -> Assert.IsInstanceOfType<FplMapping>(mapping)
-            | "base3" -> Assert.IsInstanceOfType<FplMapping>(mapping)
-            | "base4" -> Assert.IsInstanceOfType<FplMapping>(mapping)
-            | "base5" -> Assert.IsInstanceOfType<FplMapping>(mapping)
-            | "base6" -> Assert.IsInstanceOfType<FplMapping>(mapping)
-            | "base7" -> Assert.IsInstanceOfType<FplMapping>(mapping)
-            | "base8" -> Assert.IsInstanceOfType<FplMapping>(mapping)
-            | "base9" -> Assert.IsInstanceOfType<FplMapping>(mapping)
-            | "base10" -> Assert.IsInstanceOfType<FplMapping>(mapping)
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
 
-    [<DataRow("base1", """100. |- trivial""", 0)>]
+    [<DataRow("base1", """100: trivial""", 0)>]
     [<DataRow("base2", """100. ExistsByExample, 1 |- false""", 2)>]
     [<DataRow("base3", """100. T1 |- assume not somePremise """, 1)>]
     [<DataRow("base4", """100. 2, 3, 5 |- iif (a,b)""", 3)>]
-    [<DataRow("base5", """100. |- revoke 3""", 0)>]
+    [<DataRow("base5", """100: revoke 3""", 0)>]
     [<TestMethod>]
     member this.TestArgumentNumberOfJustifications(var, argExpression, expNumber:int) =
-        ad.Clear()
-        let fplCode = sprintf """proof T$1 { %s };""" argExpression
+        
+        let fplCode = sprintf """proof T$1 { %s }""" argExpression
         let filename = "TestArgumentNumberOfJustifications"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let proof = theory.Scope["T$1"]
+        let arg = proof.Scope["100"]
+        let just = arg.ArgList[0]
+        let numbOfJustifications = just.ArgList.Count
+        Assert.AreEqual<int>(expNumber, numbOfJustifications)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let proof = theory.Scope["T$1"]
-            let arg = proof.Scope["100"]
-            let just = arg.ArgList[0]
-            let numbOfJustifications = just.ArgList.Count
-            Assert.AreEqual<int>(expNumber, numbOfJustifications)
-        | None -> 
-            Assert.IsTrue(false)
 
-    [<DataRow("base1", """100. |- trivial""")>]
+    [<DataRow("base1", """100: trivial""")>]
     [<DataRow("base2", """100. ExistsByExample, 1 |- false""")>]
     [<DataRow("base3", """100. T1 |- assume not somePremise """)>]
     [<DataRow("base4", """100. 2, 3, 5 |- iif (a,b)""")>]
-    [<DataRow("base5", """100. |- revoke 3""")>]
+    [<DataRow("base5", """100: revoke 3""")>]
     [<TestMethod>]
     member this.TestArgumentBlockType(var, argExpression) =
-        ad.Clear()
-        let fplCode = sprintf """proof T$1 { %s };""" argExpression
+        
+        let fplCode = sprintf """proof T$1 { %s }""" argExpression
         let filename = "TestArgumentBlockType"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let proof = theory.Scope["T$1"]
+        let arg = proof.Scope["100"]
+        match var with
+        | "base1" -> Assert.IsInstanceOfType<FplArgument>(arg)
+        | "base2" -> Assert.IsInstanceOfType<FplArgument>(arg)
+        | "base3" -> Assert.IsInstanceOfType<FplArgument>(arg)
+        | "base4" -> Assert.IsInstanceOfType<FplArgument>(arg)
+        | "base5" -> Assert.IsInstanceOfType<FplArgument>(arg)
+        | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let proof = theory.Scope["T$1"]
-            let arg = proof.Scope["100"]
-            match var with
-            | "base1" -> Assert.IsInstanceOfType<FplArgument>(arg)
-            | "base2" -> Assert.IsInstanceOfType<FplArgument>(arg)
-            | "base3" -> Assert.IsInstanceOfType<FplArgument>(arg)
-            | "base4" -> Assert.IsInstanceOfType<FplArgument>(arg)
-            | "base5" -> Assert.IsInstanceOfType<FplArgument>(arg)
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
 
-    [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr";""")>]
-    [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
-    [<DataRow("base2", "not(undef)", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
-    [<DataRow("base3", "and(undef, undef)", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q;""")>]
-    [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""")>]
-    [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
+    [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr" """)>]
+    [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y""")>]
+    [<DataRow("base2", "not(undef)", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x""")>]
+    [<DataRow("base3", "and(undef, undef)", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q""")>]
+    [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y""")>]
+    [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y""")>]
     [<TestMethod>]
     member this.TestLanguageBlockType(var, predName, predDecl, trslCode) =
-        ad.Clear()
+        
         let fplCode = sprintf """loc %s := %s;""" predDecl trslCode
         let filename = "TestLanguageBlockType"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pred = theory.Scope[predName]
+        let lang = pred.Scope["tex"]
+
+        match var with
+        | "base0" -> Assert.IsInstanceOfType<FplLanguage>(lang)
+        | "base1" -> Assert.IsInstanceOfType<FplLanguage>(lang)
+        | "base2" -> Assert.IsInstanceOfType<FplLanguage>(lang)
+        | "base3" -> Assert.IsInstanceOfType<FplLanguage>(lang)
+        | "base4" -> Assert.IsInstanceOfType<FplLanguage>(lang)
+        | "base5" -> Assert.IsInstanceOfType<FplLanguage>(lang)
+        | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let pred = theory.Scope[predName]
-            let lang = pred.Scope["tex"]
 
-            match var with
-            | "base0" -> Assert.IsInstanceOfType<FplLanguage>(lang)
-            | "base1" -> Assert.IsInstanceOfType<FplLanguage>(lang)
-            | "base2" -> Assert.IsInstanceOfType<FplLanguage>(lang)
-            | "base3" -> Assert.IsInstanceOfType<FplLanguage>(lang)
-            | "base4" -> Assert.IsInstanceOfType<FplLanguage>(lang)
-            | "base5" -> Assert.IsInstanceOfType<FplLanguage>(lang)
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
-
-    [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr";""")>]
-    [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
-    [<DataRow("base2", "not(undef)", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
-    [<DataRow("base3", "and(undef, undef)", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q;""")>]
-    [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""")>]
-    [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
+    [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr" """)>]
+    [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y""")>]
+    [<DataRow("base2", "not(undef)", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x""")>]
+    [<DataRow("base3", "and(undef, undef)", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q""")>]
+    [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y""")>]
+    [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y""")>]
     [<TestMethod>]
     member this.TestLocalizationBlockType(var, predName, predDecl, trslCode) =
-        ad.Clear()
+        
         let fplCode = sprintf """loc %s := %s;""" predDecl trslCode
         let filename = "TestLocalizationBlockType"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pred = theory.Scope[predName]
+
+        match var with
+        | "base0" -> Assert.IsInstanceOfType<FplLocalization>(pred)
+        | "base1" -> Assert.IsInstanceOfType<FplLocalization>(pred)
+        | "base2" -> Assert.IsInstanceOfType<FplLocalization>(pred)
+        | "base3" -> Assert.IsInstanceOfType<FplLocalization>(pred)
+        | "base4" -> Assert.IsInstanceOfType<FplLocalization>(pred)
+        | "base5" -> Assert.IsInstanceOfType<FplLocalization>(pred)
+        | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let pred = theory.Scope[predName]
 
-            match var with
-            | "base0" -> Assert.IsInstanceOfType<FplLocalization>(pred)
-            | "base1" -> Assert.IsInstanceOfType<FplLocalization>(pred)
-            | "base2" -> Assert.IsInstanceOfType<FplLocalization>(pred)
-            | "base3" -> Assert.IsInstanceOfType<FplLocalization>(pred)
-            | "base4" -> Assert.IsInstanceOfType<FplLocalization>(pred)
-            | "base5" -> Assert.IsInstanceOfType<FplLocalization>(pred)
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
-
-    [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr";""")>]
-    [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
-    [<DataRow("base2", "not(undef)", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
-    [<DataRow("base3", "and(undef, undef)", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q;""")>]
-    [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""")>]
-    [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
+    [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr" """)>]
+    [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y""")>]
+    [<DataRow("base2", "not(undef)", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x""")>]
+    [<DataRow("base3", "and(undef, undef)", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q""")>]
+    [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y""")>]
+    [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y""")>]
     [<TestMethod>]
     member this.TestTranslationBlockType(var, predName, predDecl, trslCode) =
-        ad.Clear()
+        
         let fplCode = sprintf """loc %s := %s;""" predDecl trslCode
         let filename = "TestTranslationBlockType"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
-        prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let pred = theory.Scope[predName]
-            let lang = pred.Scope["tex"]
-            let trsl = lang.ArgList[0]
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pred = theory.Scope[predName]
+        let lang = pred.Scope["tex"]
+        let trsl = lang.ArgList[0]
 
-            match var with
-            | "base0" -> Assert.IsInstanceOfType<FplTranslation>(trsl)
-            | "base1" -> Assert.IsInstanceOfType<FplTranslation>(trsl)
-            | "base2" -> Assert.IsInstanceOfType<FplTranslation>(trsl)
-            | "base3" -> Assert.IsInstanceOfType<FplTranslation>(trsl)
-            | "base4" -> Assert.IsInstanceOfType<FplTranslation>(trsl)
-            | "base5" -> Assert.IsInstanceOfType<FplTranslation>(trsl)
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
+        match var with
+        | "base0" -> Assert.IsInstanceOfType<FplTranslation>(trsl)
+        | "base1" -> Assert.IsInstanceOfType<FplTranslation>(trsl)
+        | "base2" -> Assert.IsInstanceOfType<FplTranslation>(trsl)
+        | "base3" -> Assert.IsInstanceOfType<FplTranslation>(trsl)
+        | "base4" -> Assert.IsInstanceOfType<FplTranslation>(trsl)
+        | "base5" -> Assert.IsInstanceOfType<FplTranslation>(trsl)
+        | _ -> Assert.IsTrue(false)
+        prepareFplCode(filename, "", false) |> ignore
 
     [<DataRow("@0", "")>]
     [<DataRow("@1", "")>]
@@ -934,21 +912,17 @@ type TestFplValueScopeBlockType() =
     [<DataRow("@42", "")>]
     [<TestMethod>]
     member this.TestDecrement(varVal, expected:string) =
-        ad.Clear()
-        let fplCode = sprintf """def pred T() { del.Decrement(%s) };""" varVal
-        let filename = "TestDecrementBlockType.fpl"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        
+        let fplCode = sprintf """def pred T() { del.Decrement(%s) }""" varVal
+        let filename = "TestDecrementBlockType"
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pr = theory.Scope["T()"] 
+        let pre = pr.ArgList |> Seq.toList |> List.rev |> List.head
+        let dec = pre.RefersTo.Value
+        Assert.IsInstanceOfType<FplDecrement>(dec)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let pr = theory.Scope["T()"] 
-            let pre = pr.ArgList |> Seq.toList |> List.rev |> List.head
-            let dec = pre.RefersTo.Value
-            Assert.IsInstanceOfType<FplDecrement>(dec)
-        | None -> 
-            Assert.IsTrue(false)
 
     [<DataRow("@0", "")>]
     [<DataRow("@1", "")>]
@@ -959,21 +933,17 @@ type TestFplValueScopeBlockType() =
     [<DataRow("@42", "")>]
     [<TestMethod>]
     member this.TestExtensionObj(varVal, expected:string) =
-        ad.Clear()
-        let fplCode = sprintf """def pred T() { %s };""" varVal
+        
+        let fplCode = sprintf """def pred T() { %s }""" varVal
         let filename = "TestExtensionObjBlockType.fpl"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pr = theory.Scope["T()"] 
+        let basePre = pr.ArgList |> Seq.head
+        let base1 = basePre.RefersTo.Value 
+        Assert.IsInstanceOfType<FplExtensionObj>(base1)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let pr = theory.Scope["T()"] 
-            let basePre = pr.ArgList |> Seq.head
-            let base1 = basePre.RefersTo.Value 
-            Assert.IsInstanceOfType<FplExtensionObj>(base1)
-        | None -> 
-            Assert.IsTrue(false)
 
     [<DataRow("base1", "$1")>]
     [<DataRow("base2", "$2")>]
@@ -982,7 +952,7 @@ type TestFplValueScopeBlockType() =
     [<DataRow("base5", "$4")>]
     [<TestMethod>]
     member this.TestMCaseStatement(var, input) =
-        ad.Clear()
+        
         let fplCode = sprintf """
                 def pred Equal (x,y: tpl) infix "=" 50 
                 {
@@ -990,7 +960,7 @@ type TestFplValueScopeBlockType() =
                 }
                 
                 def pred Test(x:ind) { dec 
-                ~n:pred
+                n:pred
                 n:= mcases
                 (
                     | (x = $1) : false 
@@ -998,27 +968,23 @@ type TestFplValueScopeBlockType() =
                     | (x = $3) : false 
                     ? undef  
                 )
-                ;n } def pred T() {Test(%s)};""" input 
+                ;n } def pred T() {Test(%s)}""" input 
         let filename = "TestMCaseStatement"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
-        prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let pred = theory.Scope["Test(ind)"]
-            let assignment = pred.ArgList[0]
-            let res = assignment.ArgList[1]
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pred = theory.Scope["Test(ind)"]
+        let assignment = pred.ArgList[0]
+        let res = assignment.ArgList[1]
  
-            match var with
-            | "base1" -> Assert.IsInstanceOfType<FplMapCases>(res)
-            | "base2" -> Assert.IsInstanceOfType<FplMapCases>(res)
-            | "base3" -> Assert.IsInstanceOfType<FplMapCases>(res)
-            | "base4" -> Assert.IsInstanceOfType<FplMapCases>(res)
-            | "base5" -> Assert.IsInstanceOfType<FplMapCases>(res)
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
+        match var with
+        | "base1" -> Assert.IsInstanceOfType<FplMapCases>(res)
+        | "base2" -> Assert.IsInstanceOfType<FplMapCases>(res)
+        | "base3" -> Assert.IsInstanceOfType<FplMapCases>(res)
+        | "base4" -> Assert.IsInstanceOfType<FplMapCases>(res)
+        | "base5" -> Assert.IsInstanceOfType<FplMapCases>(res)
+        | _ -> Assert.IsTrue(false)
+        prepareFplCode(filename, "", false) |> ignore
 
     [<DataRow("base1", "$1")>]
     [<DataRow("base2", "$2")>]
@@ -1027,7 +993,7 @@ type TestFplValueScopeBlockType() =
     [<DataRow("base5", "$4")>]
     [<TestMethod>]
     member this.TestMapCasesBlockType(var, input) =
-        ad.Clear()
+        
         let fplCode = sprintf """
                 def pred Equal (x,y: tpl) infix "=" 50 
                 {
@@ -1035,7 +1001,7 @@ type TestFplValueScopeBlockType() =
                 }              
                 
                 def pred Test(x:ind) { dec 
-                ~n:pred
+                n:pred
                 n:= mcases
                 (
                     | (x = $1) : false 
@@ -1043,28 +1009,24 @@ type TestFplValueScopeBlockType() =
                     | (x = $3) : false 
                     ? undef  
                 )
-                ;n } def pred T() {Test(%s)};""" input 
+                ;n } def pred T() {Test(%s)}""" input 
         let filename = "TestMapCasesBlockType"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
-        prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let pred = theory.Scope["Test(ind)"]
-            let assignment = pred.ArgList[0]
-            let res = assignment.ArgList[1]
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pred = theory.Scope["Test(ind)"]
+        let assignment = pred.ArgList[0]
+        let res = assignment.ArgList[1]
 
  
-            match var with
-            | "base1" -> Assert.IsInstanceOfType<FplMapCases>(res)
-            | "base2" -> Assert.IsInstanceOfType<FplMapCases>(res)
-            | "base3" -> Assert.IsInstanceOfType<FplMapCases>(res)
-            | "base4" -> Assert.IsInstanceOfType<FplMapCases>(res)
-            | "base5" -> Assert.IsInstanceOfType<FplMapCases>(res)
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
+        match var with
+        | "base1" -> Assert.IsInstanceOfType<FplMapCases>(res)
+        | "base2" -> Assert.IsInstanceOfType<FplMapCases>(res)
+        | "base3" -> Assert.IsInstanceOfType<FplMapCases>(res)
+        | "base4" -> Assert.IsInstanceOfType<FplMapCases>(res)
+        | "base5" -> Assert.IsInstanceOfType<FplMapCases>(res)
+        | _ -> Assert.IsTrue(false)
+        prepareFplCode(filename, "", false) |> ignore
 
     [<DataRow("base1", "$1",  0)>]
     [<DataRow("base2", "$2",  2)>]
@@ -1073,7 +1035,7 @@ type TestFplValueScopeBlockType() =
     [<DataRow("base5", "$4", 1)>]
     [<TestMethod>]
     member this.TestCaseStatement(var, input, (output:int)) =
-        ad.Clear()
+        
         let fplCode = sprintf """
                 def pred Equal (x,y: tpl) infix "=" 50 
                 {
@@ -1081,7 +1043,7 @@ type TestFplValueScopeBlockType() =
                 }              
         
                 def pred Test(x:ind) { dec 
-                ~n:pred
+                n:pred
                 cases
                 (
                     | (x = $1) : n:=false 
@@ -1089,23 +1051,19 @@ type TestFplValueScopeBlockType() =
                     | (x = $3) : n:=false 
                     ? n:=undef  
                 )
-                ;n } def pred T() {Test(%s)};""" input 
+                ;n } def pred T() {Test(%s)}""" input 
         let filename = "TestMCaseStatement"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
-        prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let pred = theory.Scope["Test(ind)"]
-            let cases = pred.ArgList[0]
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pred = theory.Scope["Test(ind)"]
+        let cases = pred.ArgList[0]
  
-            match var with
-            | "base1" -> Assert.IsInstanceOfType<FplGenericStmt>(cases)
-            | "base2" -> Assert.IsInstanceOfType<FplGenericStmt>(cases)
-            | "base3" -> Assert.IsInstanceOfType<FplGenericStmt>(cases)
-            | "base4" -> Assert.IsInstanceOfType<FplGenericStmt>(cases)
-            | "base5" -> Assert.IsInstanceOfType<FplGenericStmt>(cases)
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
+        match var with
+        | "base1" -> Assert.IsInstanceOfType<FplGenericStmt>(cases)
+        | "base2" -> Assert.IsInstanceOfType<FplGenericStmt>(cases)
+        | "base3" -> Assert.IsInstanceOfType<FplGenericStmt>(cases)
+        | "base4" -> Assert.IsInstanceOfType<FplGenericStmt>(cases)
+        | "base5" -> Assert.IsInstanceOfType<FplGenericStmt>(cases)
+        | _ -> Assert.IsTrue(false)
+        prepareFplCode(filename, "", false) |> ignore

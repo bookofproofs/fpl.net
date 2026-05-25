@@ -1,4 +1,4 @@
-﻿# Changes in FPL 
+# Changes in FPL 
 ## Amendments to the FPL grammar, major change of the FPL parser   
 The original grammar until version 1.2.1 was the EBNF input for an FPL parser implemented using Python and the **tatsu** parser generator.
 
@@ -448,7 +448,7 @@ The following changes have been made:
         5. /4, /ModusPonens |- Greater(a,c)
         6. /ProceedingResults(/5,/1) |- and (Greater(a,c), Greater(a,b))
         7. /6, /ExistsByExample(and(Greater(a,c), Greater(a,b))) |- ex x ( and (Greater(x,y), Greater(x,z)) )
-	8. |- qed
+	8: qed
     }
 ```
 *Now*
@@ -463,10 +463,10 @@ The following changes have been made:
         ;
         1. GreaterAB |- (a > b) 
         2. GreaterBC |- (b > c) 
-        3. 1., 2. |- and ((a > b), (b > c)) 
+        3. 1., 2: and ((a > b), (b > c)) 
         4. 3., GreaterTransitive |- ( and ((a > b), (b > c)) => (a > c) ) 
         5. 4., ModusPonens |- (a > c)
-        6. 5., 1. |- and ((a > c), (a > b)) 
+        6. 5., 1: and ((a > c), (a > b)) 
         7. 6., ExistsByExample(and((a > c), (a > b))) |- 
             ex x:obj  
                 and ((x > y), (x > z)) 

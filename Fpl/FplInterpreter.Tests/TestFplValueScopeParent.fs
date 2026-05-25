@@ -1,8 +1,10 @@
-﻿namespace FplInterpreter.Tests
+namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
 open FplPrimitives
-open FplInterpreterTypes
+open FplInterpreterBasicTypes
+open FplInterpreter.Globals.Root
+open FplInterpreter.Globals.Heap
 open CommonTestHelpers
 
 [<TestClass>]
@@ -540,87 +542,83 @@ type TestFplValueScopeParent() =
     [<DataRow("base30", "B(In(x))")>]
     [<DataRow("base31", "C(Test1(a),Test2(b,c,d))")>]
     [<DataRow("base32", "E(pr1, undef, false)")>]
-    [<DataRow("base33", "dec ~p: pred(c: obj); p(c)")>]
+    [<DataRow("base33", "dec p: pred(c: obj); p(c)")>]
     [<DataRow("base34", "is(x, Set)")>]
     [<TestMethod>]
     member this.TestPredicate(var, varVal) =
-        ad.Clear()
-        let fplCode = sprintf "def pred T1() { %s };" varVal
+        
+        let fplCode = sprintf "def pred T1() { %s }" varVal
         let filename = "TestPredicateParent"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+
+        let pr1 = theory.Scope["T1()"] 
+        let base1 = pr1.ArgList[0]
+
+        match var with
+        | "base1" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base2" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base3" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base4" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base5" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base6" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base7" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base8" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base9" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base10" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base11" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base12" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base13" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base11a" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base12a" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base10b" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base11b" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base12b" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base13b" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base10c" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base11c" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base12c" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base13c" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base10d" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base11d" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base12d" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base13d" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base10e" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base11e" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base12e" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base13e" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base10f" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base11f" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base12f" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base13f" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base14" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base15" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base15a" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base15b" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base16" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base17" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base18" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base19" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base20" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base21" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base21a" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base21b" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base22" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base23" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base24" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base25" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base26" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base27" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base28" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base29" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base30" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base31" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base32" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base33" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base34" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-
-            let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ArgList[0]
-
-            match var with
-            | "base1" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base2" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base3" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base4" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base5" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base6" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base7" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base8" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base9" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base10" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base11" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base12" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base13" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base11a" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base12a" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base10b" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base11b" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base12b" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base13b" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base10c" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base11c" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base12c" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base13c" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base10d" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base11d" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base12d" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base13d" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base10e" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base11e" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base12e" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base13e" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base10f" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base11f" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base12f" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base13f" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base14" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base15" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base15a" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base15b" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base16" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base17" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base18" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base19" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base20" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base21" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base21a" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base21b" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base22" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base23" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base24" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base25" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base26" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base27" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base28" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base29" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base30" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base31" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base32" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base33" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base34" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
 
     [<DataRow("base1", "base.B()")>]
     [<DataRow("base2", "base.C(a, b, c, d)")>]
@@ -630,7 +628,7 @@ type TestFplValueScopeParent() =
     [<DataRow("base6", "base.E(true, undef, false)")>]
     [<TestMethod>]
     member this.TestBaseConstructorCall(var, varVal) =
-        ad.Clear()
+        
         let fplCode = sprintf """
                         def cl B {intr}
                         def cl C {intr}
@@ -646,28 +644,24 @@ type TestFplValueScopeParent() =
                                 
                             }
                         }
-                        ;""" varVal
+                        """ varVal
         let filename = "TestBaseConstructorCallParent"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
-        prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let cl = theory.Scope["A"]
-            let ctor = cl.Scope["A(T1, func, ind, pred)"]
-            let base1 = ctor.ArgList[0]
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let cl = theory.Scope["A"]
+        let ctor = cl.Scope["A(T1, func, ind, pred)"]
+        let base1 = ctor.ArgList[0]
 
-            match var with
-            | "base1" -> Assert.AreEqual<FplGenericNode>(ctor, base1.Parent.Value)
-            | "base2" -> Assert.AreEqual<FplGenericNode>(ctor, base1.Parent.Value)
-            | "base3" -> Assert.AreEqual<FplGenericNode>(ctor, base1.Parent.Value)
-            | "base4" -> Assert.AreEqual<FplGenericNode>(ctor, base1.Parent.Value)
-            | "base5" -> Assert.AreEqual<FplGenericNode>(ctor, base1.Parent.Value)
-            | "base6" -> Assert.AreEqual<FplGenericNode>(ctor, base1.Parent.Value)
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
+        match var with
+        | "base1" -> Assert.AreEqual<FplGenericNode>(ctor, base1.Parent.Value)
+        | "base2" -> Assert.AreEqual<FplGenericNode>(ctor, base1.Parent.Value)
+        | "base3" -> Assert.AreEqual<FplGenericNode>(ctor, base1.Parent.Value)
+        | "base4" -> Assert.AreEqual<FplGenericNode>(ctor, base1.Parent.Value)
+        | "base5" -> Assert.AreEqual<FplGenericNode>(ctor, base1.Parent.Value)
+        | "base6" -> Assert.AreEqual<FplGenericNode>(ctor, base1.Parent.Value)
+        | _ -> Assert.IsTrue(false)
+        prepareFplCode(filename, "", false) |> ignore
 
     [<DataRow("base1", "del.B()")>]
     [<DataRow("base2", "del.C(a,b,c,d)")>]
@@ -678,230 +672,202 @@ type TestFplValueScopeParent() =
     [<DataRow("base7", "del.E(true, undef, false)")>] 
     [<TestMethod>]
     member this.TestDelegate(var, varVal) =
-        ad.Clear()
-        let fplCode = sprintf "def pred T1() { %s };" varVal
+        
+        let fplCode = sprintf "def pred T1() { %s }" varVal
         let filename = "TestDelegateParent"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+
+        let pr1 = theory.Scope["T1()"] 
+        let base1 = pr1.ArgList[0]
+
+        match var with
+        | "base1" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base2" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base3" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base4" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base5" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base6" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | "base7" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
+        | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
 
-            let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ArgList[0]
-
-            match var with
-            | "base1" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base2" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base3" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base4" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base5" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base6" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | "base7" -> Assert.AreEqual<FplGenericNode>(pr1, base1.Parent.Value)
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
-
-    [<DataRow("base1", """def pred T1() {intr};""")>]
-    [<DataRow("base2", """def pred T1 () infix ">" -1 {intr};""")>]
-    [<DataRow("base3", """def pred T1 () postfix "'" {intr};""")>]
-    [<DataRow("base4", """def pred T1 () prefix "-" {intr};""")>]
-    [<DataRow("base5", """def cl T1 symbol "∅" {intr};""")>]
-    [<DataRow("base5a", """def cl T1 {intr};""")>]
-    [<DataRow("base6", """def func T1()->obj {intr};""")>]
-    [<DataRow("base7", """def func T1 ()->obj infix ">" -1 {intr};""")>]
-    [<DataRow("base8", """def func T1  ()->obj postfix "'"{intr};""")>]
-    [<DataRow("base9", """def func T1 ()->obj prefix "-" {intr};""")>]
+    [<DataRow("base1", """def pred T1() {intr}""")>]
+    [<DataRow("base2", """def pred T1 () infix ">" -1 {intr}""")>]
+    [<DataRow("base3", """def pred T1 () postfix "'" {intr}""")>]
+    [<DataRow("base4", """def pred T1 () prefix "-" {intr}""")>]
+    [<DataRow("base5", """def cl T1 symbol "∅" {intr}""")>]
+    [<DataRow("base5a", """def cl T1 {intr}""")>]
+    [<DataRow("base6", """def func T1()->obj {intr}""")>]
+    [<DataRow("base7", """def func T1 ()->obj infix ">" -1 {intr}""")>]
+    [<DataRow("base8", """def func T1  ()->obj postfix "'"{intr}""")>]
+    [<DataRow("base9", """def func T1 ()->obj prefix "-" {intr}""")>]
     [<TestMethod>]
     member this.TestFixNotationParent(var, varVal) =
-        ad.Clear()
-        let fplCode = sprintf "%s;" varVal
+        
+        let fplCode = sprintf "%s" varVal
         let filename = "TestFixNotationParent"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let base1 = 
+            if varVal.Contains LiteralCl then 
+                theory.Scope["T1"]
+            elif varVal.Contains LiteralFunc then 
+                theory.Scope["T1() -> obj"]
+            else 
+                theory.Scope["T1()"]
+
+        match var with
+        | "base1" -> Assert.AreEqual<FplGenericNode>(theory, base1.Parent.Value)
+        | "base2" -> Assert.AreEqual<FplGenericNode>(theory, base1.Parent.Value)
+        | "base3" -> Assert.AreEqual<FplGenericNode>(theory, base1.Parent.Value)
+        | "base4" -> Assert.AreEqual<FplGenericNode>(theory, base1.Parent.Value)
+        | "base5" -> Assert.AreEqual<FplGenericNode>(theory, base1.Parent.Value)
+        | "base5a" -> Assert.AreEqual<FplGenericNode>(theory, base1.Parent.Value)
+        | "base6" -> Assert.AreEqual<FplGenericNode>(theory, base1.Parent.Value)
+        | "base7" -> Assert.AreEqual<FplGenericNode>(theory, base1.Parent.Value)
+        | "base8" -> Assert.AreEqual<FplGenericNode>(theory, base1.Parent.Value)
+        | "base9" -> Assert.AreEqual<FplGenericNode>(theory, base1.Parent.Value)
+        | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let base1 = 
-                if varVal.Contains LiteralCl then 
-                    theory.Scope["T1"]
-                elif varVal.Contains LiteralFunc then 
-                    theory.Scope["T1() -> obj"]
-                else 
-                    theory.Scope["T1()"]
 
-            match var with
-            | "base1" -> Assert.AreEqual<FplGenericNode>(theory, base1.Parent.Value)
-            | "base2" -> Assert.AreEqual<FplGenericNode>(theory, base1.Parent.Value)
-            | "base3" -> Assert.AreEqual<FplGenericNode>(theory, base1.Parent.Value)
-            | "base4" -> Assert.AreEqual<FplGenericNode>(theory, base1.Parent.Value)
-            | "base5" -> Assert.AreEqual<FplGenericNode>(theory, base1.Parent.Value)
-            | "base5a" -> Assert.AreEqual<FplGenericNode>(theory, base1.Parent.Value)
-            | "base6" -> Assert.AreEqual<FplGenericNode>(theory, base1.Parent.Value)
-            | "base7" -> Assert.AreEqual<FplGenericNode>(theory, base1.Parent.Value)
-            | "base8" -> Assert.AreEqual<FplGenericNode>(theory, base1.Parent.Value)
-            | "base9" -> Assert.AreEqual<FplGenericNode>(theory, base1.Parent.Value)
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
-
-    [<DataRow("base1", """def func T()->obj {intr};""")>]
-    [<DataRow("base2", """def func T()->ind {intr};""")>]
-    [<DataRow("base3", """def func T()->func {intr};""")>]
-    [<DataRow("base4", """def func T()->pred {intr};""")>]
-    [<DataRow("base5", """def cl A {intr} def func T()->A {intr};""")>]
-    [<DataRow("base6", """def func T()->pred(z:ind) {intr};""")>]
-    [<DataRow("base7", """def func T()->pred(z:*obj[ind]) {intr};""")>]
-    [<DataRow("base8", """def func T()->func(p:*pred(x:obj)[ind])->pred(x:ind) {intr};""")>]
-    [<DataRow("base9", """def func T()->pred(f:*func(x:A)->A[ind]) {intr};""")>]
-    [<DataRow("base10", """def cl A {intr} def func T()->pred(f:func(x:A)->A) {intr};""")>]
+    [<DataRow("base1", """def func T()->obj {intr}""")>]
+    [<DataRow("base2", """def func T()->ind {intr}""")>]
+    [<DataRow("base3", """def func T()->func {intr}""")>]
+    [<DataRow("base4", """def func T()->pred {intr}""")>]
+    [<DataRow("base5", """def cl A {intr} def func T()->A {intr}""")>]
+    [<DataRow("base6", """def func T()->pred(z:ind) {intr}""")>]
+    [<DataRow("base7", """def func T()->pred(z:*obj[ind]) {intr}""")>]
+    [<DataRow("base8", """def func T()->func(p:*pred(x:obj)[ind])->pred(x:ind) {intr}""")>]
+    [<DataRow("base9", """def func T()->pred(f:*func(x:A)->A[ind]) {intr}""")>]
+    [<DataRow("base10", """def cl A {intr} def func T()->pred(f:func(x:A)->A) {intr}""")>]
     [<TestMethod>]
     member this.TestMapping(var, varVal) =
-        ad.Clear()
-        let fplCode = sprintf "%s;" varVal
+        
+        let fplCode = sprintf "%s" varVal
         let filename = "TestMappingParent"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let base1 = theory.Scope |> Seq.filter (fun kvp -> kvp.Key.StartsWith("T(")) |> Seq.map (fun kvp -> kvp.Value) |> Seq.toList |> List.head
+        let mapping = base1.ArgList[0]
+        match var with
+        | "base1" -> Assert.AreEqual<FplGenericNode>(base1, mapping.Parent.Value)
+        | "base2" -> Assert.AreEqual<FplGenericNode>(base1, mapping.Parent.Value)
+        | "base3" -> Assert.AreEqual<FplGenericNode>(base1, mapping.Parent.Value)
+        | "base4" -> Assert.AreEqual<FplGenericNode>(base1, mapping.Parent.Value)
+        | "base5" -> Assert.AreEqual<FplGenericNode>(base1, mapping.Parent.Value)
+        | "base6" -> Assert.AreEqual<FplGenericNode>(base1, mapping.Parent.Value)
+        | "base7" -> Assert.AreEqual<FplGenericNode>(base1, mapping.Parent.Value)
+        | "base8" -> Assert.AreEqual<FplGenericNode>(base1, mapping.Parent.Value)
+        | "base9" -> Assert.AreEqual<FplGenericNode>(base1, mapping.Parent.Value)
+        | "base10" -> Assert.AreEqual<FplGenericNode>(base1, mapping.Parent.Value)
+        | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let base1 = theory.Scope |> Seq.filter (fun kvp -> kvp.Key.StartsWith("T(")) |> Seq.map (fun kvp -> kvp.Value) |> Seq.toList |> List.head
-            let mapping = base1.ArgList[0]
-            match var with
-            | "base1" -> Assert.AreEqual<FplGenericNode>(base1, mapping.Parent.Value)
-            | "base2" -> Assert.AreEqual<FplGenericNode>(base1, mapping.Parent.Value)
-            | "base3" -> Assert.AreEqual<FplGenericNode>(base1, mapping.Parent.Value)
-            | "base4" -> Assert.AreEqual<FplGenericNode>(base1, mapping.Parent.Value)
-            | "base5" -> Assert.AreEqual<FplGenericNode>(base1, mapping.Parent.Value)
-            | "base6" -> Assert.AreEqual<FplGenericNode>(base1, mapping.Parent.Value)
-            | "base7" -> Assert.AreEqual<FplGenericNode>(base1, mapping.Parent.Value)
-            | "base8" -> Assert.AreEqual<FplGenericNode>(base1, mapping.Parent.Value)
-            | "base9" -> Assert.AreEqual<FplGenericNode>(base1, mapping.Parent.Value)
-            | "base10" -> Assert.AreEqual<FplGenericNode>(base1, mapping.Parent.Value)
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
 
-    [<DataRow("base1", """100. |- trivial""")>]
+    [<DataRow("base1", """100: trivial""")>]
     [<DataRow("base2", """100. ExistsByExample, 1 |- false""")>]
     [<DataRow("base3", """100. T1 |- assume not somePremise """)>]
     [<DataRow("base4", """100. 2, 3, 5 |- iif (a,b)""")>]
-    [<DataRow("base5", """100. |- revoke 3""")>]
+    [<DataRow("base5", """100: revoke 3""")>]
     [<TestMethod>]
     member this.TestArgumentParent(var, argExpression) =
-        ad.Clear()
-        let fplCode = sprintf """proof T$1 { %s };""" argExpression
+        
+        let fplCode = sprintf """proof T$1 { %s }""" argExpression
         let filename = "TestArgumentParent"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let proof = theory.Scope["T$1"]
+        let arg = proof.Scope["100"]
+        match var with
+        | "base1" -> Assert.AreEqual<FplGenericNode>(proof, arg.Parent.Value)
+        | "base2" -> Assert.AreEqual<FplGenericNode>(proof, arg.Parent.Value)
+        | "base3" -> Assert.AreEqual<FplGenericNode>(proof, arg.Parent.Value)
+        | "base4" -> Assert.AreEqual<FplGenericNode>(proof, arg.Parent.Value)
+        | "base5" -> Assert.AreEqual<FplGenericNode>(proof, arg.Parent.Value)
+        | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let proof = theory.Scope["T$1"]
-            let arg = proof.Scope["100"]
-            match var with
-            | "base1" -> Assert.AreEqual<FplGenericNode>(proof, arg.Parent.Value)
-            | "base2" -> Assert.AreEqual<FplGenericNode>(proof, arg.Parent.Value)
-            | "base3" -> Assert.AreEqual<FplGenericNode>(proof, arg.Parent.Value)
-            | "base4" -> Assert.AreEqual<FplGenericNode>(proof, arg.Parent.Value)
-            | "base5" -> Assert.AreEqual<FplGenericNode>(proof, arg.Parent.Value)
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
 
-    [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr";""")>]
-    [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
-    [<DataRow("base2", "not(undef)", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
-    [<DataRow("base3", "and(undef, undef)", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q;""")>]
-    [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""")>]
-    [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
+    [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr" """)>]
+    [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y""")>]
+    [<DataRow("base2", "not(undef)", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x""")>]
+    [<DataRow("base3", "and(undef, undef)", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q""")>]
+    [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y""")>]
+    [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y""")>]
     [<TestMethod>]
     member this.TestLanguageParent(var, predName, predDecl, trslCode) =
-        ad.Clear()
+        
         let fplCode = sprintf """loc %s := %s;""" predDecl trslCode
         let filename = "TestLanguageParent"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pred = theory.Scope[predName]
+        let lang = pred.Scope["tex"]
+
+        match var with
+        | "base0" -> Assert.AreEqual<FplGenericNode>(pred, lang.Parent.Value)
+        | "base1" -> Assert.AreEqual<FplGenericNode>(pred, lang.Parent.Value)
+        | "base2" -> Assert.AreEqual<FplGenericNode>(pred, lang.Parent.Value)
+        | "base3" -> Assert.AreEqual<FplGenericNode>(pred, lang.Parent.Value)
+        | "base4" -> Assert.AreEqual<FplGenericNode>(pred, lang.Parent.Value)
+        | "base5" -> Assert.AreEqual<FplGenericNode>(pred, lang.Parent.Value)
+        | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let pred = theory.Scope[predName]
-            let lang = pred.Scope["tex"]
 
-            match var with
-            | "base0" -> Assert.AreEqual<FplGenericNode>(pred, lang.Parent.Value)
-            | "base1" -> Assert.AreEqual<FplGenericNode>(pred, lang.Parent.Value)
-            | "base2" -> Assert.AreEqual<FplGenericNode>(pred, lang.Parent.Value)
-            | "base3" -> Assert.AreEqual<FplGenericNode>(pred, lang.Parent.Value)
-            | "base4" -> Assert.AreEqual<FplGenericNode>(pred, lang.Parent.Value)
-            | "base5" -> Assert.AreEqual<FplGenericNode>(pred, lang.Parent.Value)
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
-
-    [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr";""")>]
-    [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
-    [<DataRow("base2", "not(undef)", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
-    [<DataRow("base3", "and(undef, undef)", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q;""")>]
-    [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""")>]
-    [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
+    [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr" """)>]
+    [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y""")>]
+    [<DataRow("base2", "not(undef)", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x""")>]
+    [<DataRow("base3", "and(undef, undef)", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q""")>]
+    [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y""")>]
+    [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y""")>]
     [<TestMethod>]
     member this.TestLocalizationParent(var, predName, predDecl, trslCode) =
-        ad.Clear()
+        
         let fplCode = sprintf """loc %s := %s;""" predDecl trslCode
         let filename = "TestLocalizationParent"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pred = theory.Scope[predName]
+
+        match var with
+        | "base0" -> Assert.AreEqual<FplGenericNode>(theory, pred.Parent.Value)
+        | "base1" -> Assert.AreEqual<FplGenericNode>(theory, pred.Parent.Value)
+        | "base2" -> Assert.AreEqual<FplGenericNode>(theory, pred.Parent.Value)
+        | "base3" -> Assert.AreEqual<FplGenericNode>(theory, pred.Parent.Value)
+        | "base4" -> Assert.AreEqual<FplGenericNode>(theory, pred.Parent.Value)
+        | "base5" -> Assert.AreEqual<FplGenericNode>(theory, pred.Parent.Value)
+        | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let pred = theory.Scope[predName]
 
-            match var with
-            | "base0" -> Assert.AreEqual<FplGenericNode>(theory, pred.Parent.Value)
-            | "base1" -> Assert.AreEqual<FplGenericNode>(theory, pred.Parent.Value)
-            | "base2" -> Assert.AreEqual<FplGenericNode>(theory, pred.Parent.Value)
-            | "base3" -> Assert.AreEqual<FplGenericNode>(theory, pred.Parent.Value)
-            | "base4" -> Assert.AreEqual<FplGenericNode>(theory, pred.Parent.Value)
-            | "base5" -> Assert.AreEqual<FplGenericNode>(theory, pred.Parent.Value)
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
-
-    [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr";""")>]
-    [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
-    [<DataRow("base2", "not(undef)", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
-    [<DataRow("base3", "and(undef, undef)", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q;""")>]
-    [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""")>]
-    [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
+    [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr" """)>]
+    [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y""")>]
+    [<DataRow("base2", "not(undef)", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x""")>]
+    [<DataRow("base3", "and(undef, undef)", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q""")>]
+    [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y""")>]
+    [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y""")>]
     [<TestMethod>]
     member this.TestTranslationParent(var, predName, predDecl, trslCode) =
-        ad.Clear()
+        
         let fplCode = sprintf """loc %s := %s;""" predDecl trslCode
         let filename = "TestTranslationParent"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
-        prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let pred = theory.Scope[predName]
-            let lang = pred.Scope["tex"]
-            let trsl = lang.ArgList[0]
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pred = theory.Scope[predName]
+        let lang = pred.Scope["tex"]
+        let trsl = lang.ArgList[0]
 
-            match var with
-            | "base0" -> Assert.AreEqual<FplGenericNode>(lang, trsl.Parent.Value)
-            | "base1" -> Assert.AreEqual<FplGenericNode>(lang, trsl.Parent.Value)
-            | "base2" -> Assert.AreEqual<FplGenericNode>(lang, trsl.Parent.Value)
-            | "base3" -> Assert.AreEqual<FplGenericNode>(lang, trsl.Parent.Value)
-            | "base4" -> Assert.AreEqual<FplGenericNode>(lang, trsl.Parent.Value)
-            | "base5" -> Assert.AreEqual<FplGenericNode>(lang, trsl.Parent.Value)
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
+        match var with
+        | "base0" -> Assert.AreEqual<FplGenericNode>(lang, trsl.Parent.Value)
+        | "base1" -> Assert.AreEqual<FplGenericNode>(lang, trsl.Parent.Value)
+        | "base2" -> Assert.AreEqual<FplGenericNode>(lang, trsl.Parent.Value)
+        | "base3" -> Assert.AreEqual<FplGenericNode>(lang, trsl.Parent.Value)
+        | "base4" -> Assert.AreEqual<FplGenericNode>(lang, trsl.Parent.Value)
+        | "base5" -> Assert.AreEqual<FplGenericNode>(lang, trsl.Parent.Value)
+        | _ -> Assert.IsTrue(false)
+        prepareFplCode(filename, "", false) |> ignore

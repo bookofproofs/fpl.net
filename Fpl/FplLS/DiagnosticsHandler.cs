@@ -1,8 +1,9 @@
-﻿using OmniSharp.Extensions.LanguageServer.Protocol.Document;
+using OmniSharp.Extensions.LanguageServer.Protocol.Document;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
 using System.Text;
 using static ErrDiagnostics;
-using static FplInterpreterTypes;
+using static FplInterpreter.Globals.Heap;
+using static FplInterpreter.Main;
 using Model = OmniSharp.Extensions.LanguageServer.Protocol.Models;
 
 namespace FplLS
@@ -16,13 +17,12 @@ namespace FplLS
             _diagnostics = [];
         }
 
-
         public void AddDiagnostics(PathEquivalentUri uri, Model.Diagnostic diagnostic)
         {
             var key = PathEquivalentUri.EscapedUri(uri.AbsoluteUri);
             if (!_diagnostics.TryGetValue(key, out List<Model.Diagnostic>? value))
             {
-                value = ([]);
+                value = [];
                 _diagnostics.Add(key, value);
             }
             value.Add(diagnostic);
@@ -40,14 +40,14 @@ namespace FplLS
     {
         private readonly ILanguageServer _languageServer = languageServer;
 
-        public void PublishDiagnostics(SymbolTable st, PathEquivalentUri uri, StringBuilder? buffer)
+        public void PublishDiagnostics(PathEquivalentUri uri, StringBuilder? buffer)
         {
             if (buffer != null)
             {
                 try
                 {
-                    var allUris = st.ParsedAsts.Select(pa => pa.Parsing.Uri).ToHashSet();
-                    UriDiagnostics diagnostics = RefreshFplDiagnosticsStorage(st, uri, buffer);
+                    var allUris = heap.ParsedAsts.Select(pa => pa.Parsing.Uri).ToHashSet();
+                    UriDiagnostics diagnostics = RefreshFplDiagnosticsStorage(uri, buffer);
                     foreach (var diagnosticsPerUri in diagnostics.Enumerator())
                     {
                         _languageServer.TextDocument.PublishDiagnostics(new Model.PublishDiagnosticsParams
@@ -91,7 +91,7 @@ namespace FplLS
             }
         }
 
-        private UriDiagnostics RefreshFplDiagnosticsStorage(SymbolTable st, PathEquivalentUri uri, StringBuilder? buffer)
+        private UriDiagnostics RefreshFplDiagnosticsStorage(PathEquivalentUri uri, StringBuilder? buffer)
         {
             FplLsTraceLogger.LogMsg(_languageServer, uri.AbsoluteUri, "Uri in RefreshFplDiagnosticsStorage");
             string sourceCode;
@@ -102,10 +102,8 @@ namespace FplLS
             var fplLibUri = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib";
             ad.CurrentUri = uri;
 
-            var name = uri.TheoryName;
-            var idAlreadyFound = st.ParsedAsts.TryFindAstById(name);
-            FplInterpreter.fplInterpreter(st, sourceCode, uri, fplLibUri);
-            var diagnostics = CastDiagnostics(st);
+            fplInterpreter(sourceCode, uri, fplLibUri);
+            var diagnostics = CastDiagnostics();
             return diagnostics;
         }
 
@@ -116,10 +114,10 @@ namespace FplLS
         /// <param name="listDiagnostics">List of diagnostics</param>
         /// <param name="origSourceCode">source code of the current file</param>
         /// <returns>Casted list</returns>
-        public UriDiagnostics CastDiagnostics(FplInterpreterTypes.SymbolTable st)
+        public UriDiagnostics CastDiagnostics()
         {
             var castedListDiagnostics = new UriDiagnostics();
-            var uriTotextPositionsDict = GetTextPositionsByUri(st);
+            var uriTotextPositionsDict = GetTextPositionsByUri();
             FplLsTraceLogger.LogMsg(_languageServer, ad.DiagnosticsToString, "~~~~~Diagnostics Count Orig");
             FplLsTraceLogger.LogMsg(_languageServer, string.Join(", ", uriTotextPositionsDict.Keys.Select(k => k.AbsoluteUri)), $"~~~~~{uriTotextPositionsDict.Keys.Count} source code keys");
             foreach (ErrDiagnostics.Diagnostic diagnostic in ad.Collection)
@@ -133,7 +131,7 @@ namespace FplLS
                 castedListDiagnostics.AddDiagnostics(diagnostic.Uri, CastDiagnostic(diagnostic, tpByUri));
             }
             FplLsTraceLogger.LogMsg(_languageServer, ad.Collection.Length.ToString(), "~~~~~Diagnostics Count Orig");
-            FplLsTraceLogger.LogMsg(_languageServer, st.TraceStatistics, "~~~~~Statistics");
+            FplLsTraceLogger.LogMsg(_languageServer, heap.ParsedAsts.TraceStatistics, "~~~~~Statistics");
             foreach (var kvp in castedListDiagnostics.Enumerator())
             {
                 FplLsTraceLogger.LogMsg(_languageServer, $"{kvp.Value.Count} diagnostics in {kvp.Key.AbsolutePath}", "~~~~~Diagnostics Count VS Code");
@@ -142,9 +140,9 @@ namespace FplLS
 
         }
 
-        private static Dictionary<PathEquivalentUri, TextPositions> GetTextPositionsByUri(SymbolTable st)
+        private static Dictionary<PathEquivalentUri, TextPositions> GetTextPositionsByUri()
         {
-            var sourceCodes = st.ParsedAsts.DictionaryOfSUri2FplSourceCode();
+            var sourceCodes = heap.ParsedAsts.DictionaryOfSUri2FplSourceCode();
             return sourceCodes.Select(x => new KeyValuePair<PathEquivalentUri, TextPositions>(x.Key, new TextPositions(x.Value))).ToDictionary<PathEquivalentUri, TextPositions>();
         }
 

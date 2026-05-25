@@ -1,8 +1,5 @@
-﻿using FParsec;
-using Microsoft.FSharp.Core;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
-using static FplPrimitives;
 using System.Text;
 
 
@@ -26,7 +23,7 @@ namespace FplLS
             var modChoices = new List<FplCompletionItem>();
             try
             {
-                var choicesTuple = FplParser.getParserChoicesAtPosition(s, index);
+                var choicesTuple = FplParsing.Main.getParserChoicesAtPosition(s, index);
                 var choices = choicesTuple.Item1;
                 HashSet<string> uniqueSymbols = [];
                 foreach (var choice in choices)

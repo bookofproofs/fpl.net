@@ -2,7 +2,7 @@ namespace FplParser.Tests
 
 open FParsec
 open FplPrimitives
-open FplParser
+open FplParsing.Combinators
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
 [<TestClass>]
@@ -14,104 +14,104 @@ type TestClassInheritanceTypes () =
 
     [<TestMethod>]
     member this.TestSpecificType3 () =
-        let result = run (inheritedClassType .>> eof) """object """
+        let result = run (inheritedType .>> eof) """object """
         let actual = sprintf "%O" result
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestSpecificType4 () =
-        let result = run (inheritedClassType .>> eof) LiteralTpl
+        let result = run (inheritedType .>> eof) LiteralTpl
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestSpecificType5 () =
-        let result = run (inheritedClassType .>> eof) """tplSetElem"""
+        let result = run (inheritedType .>> eof) """tplSetElem"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
 
     member this.TestSpecificType7 () =
-        let result = run (inheritedClassType .>> eof) """@extNat"""
+        let result = run (inheritedType .>> eof) """@extNat"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSpecificType8 () =
-        let result = run (inheritedClassType .>> eof) """SomeClass"""
+        let result = run (inheritedType .>> eof) """SomeClass"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSpecificType9 () =
-        let result = run (inheritedClassType .>> eof) """bla"""
+        let result = run (inheritedType .>> eof) """bla"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestClassType3 () =
-        let result = run (inheritedClassType .>> eof) """object[self,]"""
+        let result = run (inheritedType .>> eof) """object[self,]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestClassType3a () =
-        let result = run (inheritedClassType .>> eof) """object[x:SomeObject1, y:SomeObject2, a,b,c:SomeObject3]"""
+        let result = run (inheritedType .>> eof) """object[x:SomeObject1, y:SomeObject2, a,b,c:SomeObject3]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestClassType4 () =
-        let result = run (inheritedClassType .>> eof) """tpl[a:Nat,b:func]"""
+        let result = run (inheritedType .>> eof) """tpl[a:Nat,b:func]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestClassType4a () =
-        let result = run (inheritedClassType .>> eof) """tpl[a:pred , b:index]"""
+        let result = run (inheritedType .>> eof) """tpl[a:pred , b:index]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestClassType4b () =
-        let result = run (inheritedClassType .>> eof) """tpl[a:tpl ,b:tplA]"""
+        let result = run (inheritedType .>> eof) """tpl[a:tpl ,b:tplA]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestClassType5 () =
-        let result = run (inheritedClassType .>> eof) """Set[x:ind , a,b:Nat]"""
+        let result = run (inheritedType .>> eof) """Set[x:ind , a,b:Nat]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestClassType5a () =
-        let result = run (inheritedClassType .>> eof) """Set[x:index , y:func]"""
+        let result = run (inheritedType .>> eof) """Set[x:index , y:func]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestClassType5a1 () =
-        let result = run (inheritedClassType .>> eof) """Set[x:index , y:func()->obj]"""
+        let result = run (inheritedType .>> eof) """Set[x:index , y:func()->obj]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestClassType5b () =
-        let result = run (inheritedClassType .>> eof) """Set[a:func()]"""
+        let result = run (inheritedType .>> eof) """Set[a:func()]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
@@ -119,35 +119,35 @@ type TestClassInheritanceTypes () =
 
     [<TestMethod>]
     member this.TestClassType7 () =
-        let result = run (inheritedClassType .>> eof) """+Nat"""
+        let result = run (inheritedType .>> eof) """+Nat"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestClassType8 () =
-        let result = run (inheritedClassType .>> eof) """SomeClass"""
+        let result = run (inheritedType .>> eof) """SomeClass"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestClassType9 () =
-        let result = run (inheritedClassType .>> eof) """bla"""
+        let result = run (inheritedType .>> eof) """bla"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestClassType10 () =
-        let result = run (inheritedClassType .>> eof) """object[x:ind,y:index]"""
+        let result = run (inheritedType .>> eof) """object[x:ind,y:index]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestClassType10a () =
-        let result = run (inheritedClassType .>> eof) """object[x:obj,y:Nat]"""
+        let result = run (inheritedType .>> eof) """object[x:obj,y:Nat]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))

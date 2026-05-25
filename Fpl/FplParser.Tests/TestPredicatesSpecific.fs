@@ -1,7 +1,7 @@
 namespace FplParser.Tests
 
 open FParsec
-open FplParser
+open FplParsing.Combinators
 open FplPrimitives
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
@@ -526,4 +526,3 @@ type TestPredicatesSpecific () =
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
- 

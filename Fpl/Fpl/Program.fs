@@ -1,14 +1,12 @@
-﻿/// This console "main" program is for test/debugging purposes only.
-/// It is not really needed because the necessary FPL modules are run 
-/// as an FPL Language Server (see FplLS C# Project in the same solution).
+// This console "main" program is for test/debugging purposes only.
+// It is not really needed because the necessary FPL modules are run 
+// as an FPL Language Server (see FplLS C# Project in the same solution).
 
-open FplPrimitives
 open ErrDiagnostics
-open FplParser
-open FplInterpreter
-open FplInterpreterTypes
+open FplParsing.Main
+open FplInterpreter.Globals.Heap
+open FplInterpreter.Main
 open System.IO
-open System.Runtime.CompilerServices
 
 let deleteFilesWithExtension dir extension =
     if Directory.Exists(dir) then
@@ -23,25 +21,19 @@ let prepareFplCode(fplCode:string, delete:bool) =
 
     File.WriteAllText(Path.Combine(currDir, "Test.fpl"), fplCode)
     let uri = PathEquivalentUri(Path.Combine(currDir, "Test.fpl"))
-    ad.Clear()
     let fplLibUrl =
         "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
     if delete then 
         deleteFilesWithExtension currDir "fpl"
-        None
     else
-        let parsedAsts = ParsedAstList()
-        let st = SymbolTable(parsedAsts, true, false)
-        Some (FplInterpreter.fplInterpreter st fplCode uri fplLibUrl)
+        fplInterpreter fplCode uri fplLibUrl
 
 let loadFplFile(path:string) = 
     let uri = PathEquivalentUri(path)
     let fplLibUrl =
         "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
-    let parsedAsts = ParsedAstList()
     let fplCode = File.ReadAllText(path)
-    let st = SymbolTable(parsedAsts, false, true)
-    FplInterpreter.fplInterpreter st fplCode uri fplLibUrl
+    fplInterpreter fplCode uri fplLibUrl
 
 let input = """def pred T() { intr prty pred T1() {is(parent,pred)} };"""
 
@@ -60,3 +52,4 @@ prepareFplCode(input,false) |> ignore
 
 printf "\n--------------------------------\n"
 ad.PrintDiagnostics
+printf "%s" (heap.SymbolTable.ToJson())

@@ -1,4 +1,4 @@
-﻿/// This module contains all side-effect functions necessary to emit diagnostics for the FPL language server.
+/// This module contains all side-effect functions necessary to emit diagnostics for the FPL language server.
 module FplInterpreterDiagnosticsEmitter
 
 open FParsec
@@ -466,6 +466,20 @@ let emitLG005Diagnostics name pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
+let emitNSP04Diagnostics path pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = NSP04 path
+            Diagnostic.Alternatives = None
+        }
+    ad.AddDiagnostic diagnostic
+
+
 let emitPR001Diagnostics incorrectBlockType justificationItemName pos1 pos2 alternative =
     let diagnostic =
         { 
@@ -550,16 +564,16 @@ let emitPR007Diagnostics nodeTypeName nodeName pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitPR008Diagnostics nodeName expectedInput actualInput pos1 pos2 = 
+let emitPR008Diagnostics byInfName numbPrem expectedPremise mismatchingCandidates pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Warning
+            Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = PR008 (nodeName, expectedInput, actualInput)
-            Diagnostic.Alternatives = None 
+            Diagnostic.Code = PR008 (byInfName, numbPrem, expectedPremise, mismatchingCandidates)
+            Diagnostic.Alternatives = None
         }
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
@@ -676,6 +690,62 @@ let emitPR016Diagnostics argumentID lastAssumedArgumentId pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
+let emitPR017Diagnostics pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = PR017 
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
+
+let emitPR018Diagnostics pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = PR018
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
+
+let emitPR019Diagnostics justificationType1 justificationType2 pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = PR019 (justificationType1, justificationType2)
+            Diagnostic.Alternatives = Some "Split the argument into different arguments using only one justification type per argument."
+        }
+    ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
+
+let emitPR020Diagnostics expectedNum actualNum pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = PR020 (expectedNum, actualNum)
+            Diagnostic.Alternatives = None
+        }
+    ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
+
 let emitSIG00Diagnostics exprType expectedArity actualArity pos1 pos2 =
     let diagnostic =
         { 
@@ -739,7 +809,7 @@ let emitSIG03Diagnostics errMsg pos1 pos2 =
 /// 3: A dotted reference uses a signature for call-by-value that doesn't match. 
 /// 4: A reference uses a signature for call-by-value that doesn't match. 
 /// 5: A reference uses a type reference that doesn't exist.
-let emitSIG04Diagnostics mixedName candidateCount errList pos1 pos2 = 
+let emitSIG04Diagnostics mixedName errList pos1 pos2 = 
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -747,7 +817,7 @@ let emitSIG04Diagnostics mixedName candidateCount errList pos1 pos2 =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = SIG04(mixedName,candidateCount, errList)
+            Diagnostic.Code = SIG04(mixedName, errList)
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
@@ -837,7 +907,7 @@ let emitSIG10diagnostics arrName indexVarName indexNumber pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitSIG11diagnostics qualifiedNameMapping qualifiedWrongCandidate pos1 pos2 =
+let emitSIG11diagnostics qualifiedWrongCandidate pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -845,7 +915,7 @@ let emitSIG11diagnostics qualifiedNameMapping qualifiedWrongCandidate pos1 pos2 
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = SIG11(qualifiedNameMapping, qualifiedWrongCandidate)
+            Diagnostic.Code = SIG11 qualifiedWrongCandidate
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
@@ -935,20 +1005,6 @@ let emitST004diagnostics languageCode pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitSY000diagnostics infixOp pos1 pos2 =
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = pos1
-            Diagnostic.EndPos = pos2
-            Diagnostic.Code = SY000 infixOp
-            Diagnostic.Alternatives = None 
-        }
-    ad.AddDiagnostic diagnostic
-    Some (diagnostic.Code.Code)
-
 let emitST005diagnostics domain nodeType pos1 pos2 =
     let diagnostic =
         { 
@@ -963,23 +1019,100 @@ let emitST005diagnostics domain nodeType pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
+let emitSY000diagnostics errMsg pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplParser
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = SY000 errMsg
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
 
-let emitVAR00Diagnostics numberOfVariadicVars startPos endPos =
-    if numberOfVariadicVars > 1 then
-        let diagnostic =
-            { 
-                Diagnostic.Uri = ad.CurrentUri
-                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                Diagnostic.Severity = DiagnosticSeverity.Error
-                Diagnostic.StartPos = startPos
-                Diagnostic.EndPos = endPos
-                Diagnostic.Code = VAR00
-                Diagnostic.Alternatives = None 
-            }
-        ad.AddDiagnostic diagnostic
-        Some (diagnostic.Code.Code)
-    else
-        None
+let emitSY001diagnostics errMsg pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplParser
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = SY001 errMsg
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
+let emitSY002diagnostics errMsg chain pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplParser
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = SY002(errMsg, chain)
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
+let emitSY010diagnostics infixOp pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplParser
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = SY010 infixOp
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
+
+let emitSY011diagnostics pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplParser
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = SY011
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
+
+let emitSY012diagnostics pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplParser
+            Diagnostic.Severity = DiagnosticSeverity.Warning
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = SY012
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
+
+let emitVAR00Diagnostics startPos endPos =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = startPos
+            Diagnostic.EndPos = endPos
+            Diagnostic.Code = VAR00
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
 
 let emitVAR01diagnostics name pos1 pos2 =
     let diagnostic =
@@ -1028,7 +1161,7 @@ let emitVAR04diagnostics name pos1 pos2 =
     let diagnostic = { 
         Diagnostic.Uri = ad.CurrentUri
         Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-        Diagnostic.Severity = DiagnosticSeverity.Error
+        Diagnostic.Severity = DiagnosticSeverity.Warning
         Diagnostic.StartPos = pos1
         Diagnostic.EndPos = pos2
         Diagnostic.Code = VAR04 name
@@ -1106,7 +1239,7 @@ let emitVAR09diagnostics varName varType pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitVAR10diagnostics varName conflictStartPos pos1 pos2 =
+let emitVAR10diagnostics varName formulaName pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -1114,8 +1247,8 @@ let emitVAR10diagnostics varName conflictStartPos pos1 pos2 =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = VAR10(varName, conflictStartPos)
-            Diagnostic.Alternatives = Some "Clean up the formula by renaming the bound quantor variable."
+            Diagnostic.Code = VAR10(varName, formulaName)
+            Diagnostic.Alternatives = Some $"Rename one of the bound occurrences of `{varName}` to avoid duplicate bindings."
                     
         }
     ad.AddDiagnostic diagnostic

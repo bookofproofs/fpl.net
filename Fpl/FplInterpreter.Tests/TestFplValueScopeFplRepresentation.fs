@@ -1,8 +1,12 @@
-﻿namespace FplInterpreter.Tests
+namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open FplPrimitives
 open ErrDiagnostics
-open FplInterpreterTypes
+open FplInterpreterBasicTypes
+open FplInterpreter.Globals.Root
+open FplInterpreter.Globals.Heap
+open FplInterpreterVariables
+open FplInterpreterAssignments
 open CommonTestHelpers
 
 [<TestClass>]
@@ -80,8 +84,8 @@ type TestFplValueScopeFplRepresentation() =
             | "fun7" -> Assert.AreEqual<string>("""SomeClass1()""", fun7.Represent())
             | "fun8" -> Assert.AreEqual<string>("$112", fun8.Represent())
             | "fun9" -> Assert.AreEqual<string>("$13", fun9.Represent())
-            | "prf1" -> Assert.AreEqual<string>(PrimUndetermined, prf1.Represent())
-            | "prf2" -> Assert.AreEqual<string>(PrimUndetermined, prf2.Represent())
+            | "prf1" -> Assert.AreEqual<string>(LiteralTrue, prf1.Represent())
+            | "prf2" -> Assert.AreEqual<string>(LiteralTrue, prf2.Represent())
             | "loc1" -> Assert.AreEqual<string>("""\neg( x )""", loc1.Represent())
             | "loc2" -> Assert.AreEqual<string>("x = y", loc2.Represent())
             | _ -> Assert.IsTrue(false)
@@ -146,13 +150,13 @@ type TestFplValueScopeFplRepresentation() =
                 | "r" -> Assert.AreEqual<string>(PrimNone, r.Represent())
                 | PrimTheoryL -> Assert.AreEqual<string>(PrimNone, theory.Represent())
                 | "thm1" -> Assert.AreEqual<string>(LiteralTrue, thm1.Represent())
-                | "proofThm1" -> Assert.AreEqual<string>(PrimUndetermined, proofThm1.Represent())
+                | "proofThm1" -> Assert.AreEqual<string>(LiteralTrue, proofThm1.Represent())
                 | "lem1" -> Assert.AreEqual<string>(LiteralTrue, lem1.Represent())
-                | "proofLem1" -> Assert.AreEqual<string>(PrimUndetermined, proofLem1.Represent())
+                | "proofLem1" -> Assert.AreEqual<string>(LiteralTrue, proofLem1.Represent())
                 | "prp1" -> Assert.AreEqual<string>(LiteralTrue, prp1.Represent())
-                | "proofPrp1" -> Assert.AreEqual<string>(PrimUndetermined, proofPrp1.Represent())
+                | "proofPrp1" -> Assert.AreEqual<string>(LiteralTrue, proofPrp1.Represent())
                 | "cor1" -> Assert.AreEqual<string>(LiteralTrue, cor1.Represent())
-                | "proofCor1" -> Assert.AreEqual<string>(PrimUndetermined, proofCor1.Represent())
+                | "proofCor1" -> Assert.AreEqual<string>(LiteralTrue, proofCor1.Represent())
                 | "thm2" -> Assert.AreEqual<string>(LiteralTrue, thm2.Represent())
                 | "corThm2" -> Assert.AreEqual<string>(LiteralTrue, corThm2.Represent())
                 | "lem2" -> Assert.AreEqual<string>(LiteralTrue, lem2.Represent())
@@ -533,87 +537,84 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("base30", "B(In(x))")>]
     [<DataRow("base31", "C(Test1(a),Test2(b,c,d))")>]
     [<DataRow("base32", "E(true, undef, false)")>]
-    [<DataRow("base33", "dec ~p: pred(c: obj); p(c)")>]
+    [<DataRow("base33", "dec p: pred(c: obj); p(c)")>]
     [<DataRow("base34", "is(x, Set)")>]
     [<TestMethod>]
     member this.TestExpressionRepresent(var, varVal) =
-        ad.Clear()
-        let fplCode = sprintf "def pred T1() { %s };" varVal
-        let filename = "TestExpressionRepresent.fpl"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        
+        let fplCode = sprintf "def pred T1() { %s }" varVal
+        let filename = "TestExpressionRepresent"
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+
+        let pr1 = theory.Scope["T1()"] 
+        let base1 = pr1.ArgList[0]
+
+        match var with
+        | "base1" -> Assert.AreEqual<string>(LiteralTrue, base1.Represent())
+        | "base2" -> Assert.AreEqual<string>(LiteralFalse, base1.Represent())
+        | "base3" -> Assert.AreEqual<string>(LiteralUndef, base1.Represent())
+        | "base4" -> Assert.AreEqual<string>($"-(1)", base1.Represent())
+        | "base5" -> Assert.AreEqual<string>($"Test()", base1.Represent())
+        | "base6" -> Assert.AreEqual<string>($"$1", base1.Represent())
+        | "base7" -> Assert.AreEqual<string>("Test$1", base1.Represent())
+        | "base8" -> Assert.AreEqual<string>("Test$1", base1.Represent())
+        | "base9" -> Assert.AreEqual<string>("Test$1", base1.Represent())
+        | "base10" -> Assert.AreEqual<string>("Test", base1.Represent())
+        | "base11" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
+        | "base12" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
+        | "base13" -> Assert.AreEqual<string>("1", base1.Represent())
+        | "base11a" -> Assert.AreEqual<string>($"x", base1.Represent())
+        | "base12a" -> Assert.AreEqual<string>($"x", base1.Represent())
+        | "base10b" -> Assert.AreEqual<string>($"Test()", base1.Represent())
+        | "base11b" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
+        | "base12b" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
+        | "base13b" -> Assert.AreEqual<string>("1", base1.Represent())
+        | "base10c" -> Assert.AreEqual<string>($"Test({LiteralUndef}, {LiteralUndef})", base1.Represent())
+        | "base11c" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
+        | "base12c" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
+        | "base13c" -> Assert.AreEqual<string>("1", base1.Represent())
+        | "base10d" -> Assert.AreEqual<string>($"Test[{LiteralUndef}, {LiteralUndef}]", base1.Represent())
+        | "base11d" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
+        | "base12d" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
+        | "base13d" -> Assert.AreEqual<string>("1", base1.Represent())
+        | "base10e" -> Assert.AreEqual<string>($"{PrimUndetermined}", base1.Represent())
+        | "base11e" -> Assert.AreEqual<string>($"x[{LiteralUndef}, {LiteralUndef}]", base1.Represent())
+        | "base12e" -> Assert.AreEqual<string>("3", base1.Represent())
+        | "base13e" -> Assert.AreEqual<string>($"T[{LiteralUndef}, {LiteralUndef}]", base1.Represent())
+        | "base10f" -> Assert.AreEqual<string>($"x({LiteralUndef}, {LiteralUndef})", base1.Represent())
+        | "base11f" -> Assert.AreEqual<string>($"x({LiteralUndef}, {LiteralUndef})", base1.Represent())
+        | "base12f" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
+        | "base13f" -> Assert.AreEqual<string>($"T({LiteralUndef}, {LiteralUndef})", base1.Represent())
+        | "base14" -> Assert.AreEqual<string>("∅", base1.Represent())
+        | "base15" -> Assert.AreEqual<string>($"-({LiteralUndef})", base1.Represent())
+        | "base15a" -> Assert.AreEqual<string>($"'({LiteralUndef})", base1.Represent())
+        | "base15b" -> Assert.AreEqual<string>($"'(-({LiteralUndef}))", base1.Represent())
+        | "base16" -> Assert.AreEqual<string>($"-(*(=(+({LiteralUndef}, {LiteralUndef}), {LiteralObj}), {LiteralUndef}))", base1.Represent())
+        | "base17" -> Assert.AreEqual<string>($"'(*(=(+({LiteralUndef}, '({LiteralUndef})), {LiteralObj}), {LiteralUndef}))", base1.Represent())
+        | "base18" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
+        | "base19" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
+        | "base20" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
+        | "base21" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
+        | "base21a" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
+        | "base21b" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
+        | "base22" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
+        | "base23" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
+        | "base24" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
+        | "base25" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
+        | "base26" -> Assert.AreEqual<string>(LiteralFalse, base1.Represent())
+        | "base27" -> Assert.AreEqual<string>($"B()", base1.Represent())
+        | "base28" -> Assert.AreEqual<string>($"C({LiteralUndef}, {LiteralUndef}, {LiteralUndef}, {LiteralUndef})", base1.Represent())
+        | "base29" -> Assert.AreEqual<string>($"D({LiteralPred}(), {LiteralUndef}, {LiteralUndef})", base1.Represent())
+        | "base30" -> Assert.AreEqual<string>($"B(In)", base1.Represent())
+        | "base31" -> Assert.AreEqual<string>($"C(Test1, Test2)", base1.Represent())
+        | "base32" -> Assert.AreEqual<string>($"E({LiteralPred}, {LiteralUndef}, {LiteralPred})", base1.Represent())
+        | "base33" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
+        | "base34" -> Assert.AreEqual<string>(LiteralFalse, base1.Represent())
+        | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
 
-            let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ArgList[0]
-
-            match var with
-            | "base1" -> Assert.AreEqual<string>(LiteralTrue, base1.Represent())
-            | "base2" -> Assert.AreEqual<string>(LiteralFalse, base1.Represent())
-            | "base3" -> Assert.AreEqual<string>(LiteralUndef, base1.Represent())
-            | "base4" -> Assert.AreEqual<string>($"-(1)", base1.Represent())
-            | "base5" -> Assert.AreEqual<string>($"Test()", base1.Represent())
-            | "base6" -> Assert.AreEqual<string>($"$1", base1.Represent())
-            | "base7" -> Assert.AreEqual<string>("Test$1", base1.Represent())
-            | "base8" -> Assert.AreEqual<string>("Test$1", base1.Represent())
-            | "base9" -> Assert.AreEqual<string>("Test$1", base1.Represent())
-            | "base10" -> Assert.AreEqual<string>("Test", base1.Represent())
-            | "base11" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
-            | "base12" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
-            | "base13" -> Assert.AreEqual<string>("1", base1.Represent())
-            | "base11a" -> Assert.AreEqual<string>($"x", base1.Represent())
-            | "base12a" -> Assert.AreEqual<string>($"x", base1.Represent())
-            | "base10b" -> Assert.AreEqual<string>($"Test()", base1.Represent())
-            | "base11b" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
-            | "base12b" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
-            | "base13b" -> Assert.AreEqual<string>("1", base1.Represent())
-            | "base10c" -> Assert.AreEqual<string>($"Test({LiteralUndef}, {LiteralUndef})", base1.Represent())
-            | "base11c" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
-            | "base12c" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
-            | "base13c" -> Assert.AreEqual<string>("1", base1.Represent())
-            | "base10d" -> Assert.AreEqual<string>($"Test[{LiteralUndef}, {LiteralUndef}]", base1.Represent())
-            | "base11d" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
-            | "base12d" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
-            | "base13d" -> Assert.AreEqual<string>("1", base1.Represent())
-            | "base10e" -> Assert.AreEqual<string>($"{PrimUndetermined}", base1.Represent())
-            | "base11e" -> Assert.AreEqual<string>($"x[{LiteralUndef}, {LiteralUndef}]", base1.Represent())
-            | "base12e" -> Assert.AreEqual<string>("3", base1.Represent())
-            | "base13e" -> Assert.AreEqual<string>($"T[{LiteralUndef}, {LiteralUndef}]", base1.Represent())
-            | "base10f" -> Assert.AreEqual<string>($"x({LiteralUndef}, {LiteralUndef})", base1.Represent())
-            | "base11f" -> Assert.AreEqual<string>($"x({LiteralUndef}, {LiteralUndef})", base1.Represent())
-            | "base12f" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
-            | "base13f" -> Assert.AreEqual<string>($"T({LiteralUndef}, {LiteralUndef})", base1.Represent())
-            | "base14" -> Assert.AreEqual<string>("∅", base1.Represent())
-            | "base15" -> Assert.AreEqual<string>($"-({LiteralUndef})", base1.Represent())
-            | "base15a" -> Assert.AreEqual<string>($"'({LiteralUndef})", base1.Represent())
-            | "base15b" -> Assert.AreEqual<string>($"'(-({LiteralUndef}))", base1.Represent())
-            | "base16" -> Assert.AreEqual<string>($"-(*(=(+({LiteralUndef}, {LiteralUndef}), {LiteralObj}), {LiteralUndef}))", base1.Represent())
-            | "base17" -> Assert.AreEqual<string>($"'(*(=(+({LiteralUndef}, '({LiteralUndef})), {LiteralObj}), {LiteralUndef}))", base1.Represent())
-            | "base18" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
-            | "base19" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
-            | "base20" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
-            | "base21" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
-            | "base21a" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
-            | "base21b" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
-            | "base22" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
-            | "base23" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
-            | "base24" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
-            | "base25" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
-            | "base26" -> Assert.AreEqual<string>(LiteralFalse, base1.Represent())
-            | "base27" -> Assert.AreEqual<string>($"B()", base1.Represent())
-            | "base28" -> Assert.AreEqual<string>($"C({LiteralUndef}, {LiteralUndef}, {LiteralUndef}, {LiteralUndef})", base1.Represent())
-            | "base29" -> Assert.AreEqual<string>($"D({LiteralPred}(), {LiteralUndef}, {LiteralUndef})", base1.Represent())
-            | "base30" -> Assert.AreEqual<string>($"B(In)", base1.Represent())
-            | "base31" -> Assert.AreEqual<string>($"C(Test1, Test2)", base1.Represent())
-            | "base32" -> Assert.AreEqual<string>($"E({LiteralPred}, {LiteralUndef}, {LiteralPred})", base1.Represent())
-            | "base33" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
-            | "base34" -> Assert.AreEqual<string>(LiteralFalse, base1.Represent())
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
 
     [<DataRow("base1", "base.B()")>]
     [<DataRow("base2", "base.C(a, b, c, d)")>]
@@ -623,7 +624,7 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("base6", "base.E(true, undef, false)")>]
     [<TestMethod>]
     member this.TestBaseConstructorCall(var, varVal) =
-        ad.Clear()
+        
         let fplCode = sprintf """
                         def cl B {intr}
                         def cl C {intr}
@@ -640,69 +641,61 @@ type TestFplValueScopeFplRepresentation() =
                             }
                         }
                         def pred Test() {A()}
-                        ;""" varVal
+                        """ varVal
         let filename = "TestBaseConstructorCallFplRepresentation"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let cl = theory.Scope["A"]
+        let ctor = cl.Scope["A()"]
+        let base1 = ctor.ArgList[0]
+
+        match var with
+        | "base1" -> Assert.AreEqual<string>(PrimNone, base1.Represent())
+        | "base2" -> Assert.AreEqual<string>(PrimNone, base1.Represent())
+        | "base3" -> Assert.AreEqual<string>(PrimNone, base1.Represent())
+        | "base4" -> Assert.AreEqual<string>(PrimNone, base1.Represent())
+        | "base5" -> Assert.AreEqual<string>(PrimNone, base1.Represent())
+        | "base6" -> Assert.AreEqual<string>(PrimNone, base1.Represent())
+        | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let cl = theory.Scope["A"]
-            let ctor = cl.Scope["A()"]
-            let base1 = ctor.ArgList[0]
-
-            match var with
-            | "base1" -> Assert.AreEqual<string>(PrimNone, base1.Represent())
-            | "base2" -> Assert.AreEqual<string>(PrimNone, base1.Represent())
-            | "base3" -> Assert.AreEqual<string>(PrimNone, base1.Represent())
-            | "base4" -> Assert.AreEqual<string>(PrimNone, base1.Represent())
-            | "base5" -> Assert.AreEqual<string>(PrimNone, base1.Represent())
-            | "base6" -> Assert.AreEqual<string>(PrimNone, base1.Represent())
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
 
 
-    [<DataRow("base1", """def func T()->obj {intr};""")>]
-    [<DataRow("base2", """def func T()->ind {intr};""")>]
-    [<DataRow("base3", """def func T()->func {intr};""")>]
-    [<DataRow("base4", """def func T()->pred {intr};""")>]
-    [<DataRow("base5", """def cl A def func T()->A {intr};""")>]
-    [<DataRow("base6", """def func T()->pred(z:ind) {intr};""")>]
-    [<DataRow("base7", """def func T()->pred(z:*obj[ind]) {intr};""")>]
-    [<DataRow("base8", """def func T()->func(p:*pred(x:obj)[ind])->pred(x:ind) {intr};""")>]
-    [<DataRow("base9", """def func T()->pred(f:*func(x:A)->A[ind]) {intr};""")>]
-    [<DataRow("base10", """def cl A def func T()->pred(f:func(x:A)->A) {intr};""")>]
+    [<DataRow("base1", """def func T()->obj {intr}""")>]
+    [<DataRow("base2", """def func T()->ind {intr}""")>]
+    [<DataRow("base3", """def func T()->func {intr}""")>]
+    [<DataRow("base4", """def func T()->pred {intr}""")>]
+    [<DataRow("base5", """def cl A def func T()->A {intr}""")>]
+    [<DataRow("base6", """def func T()->pred(z:ind) {intr}""")>]
+    [<DataRow("base7", """def func T()->pred(z:*obj[ind]) {intr}""")>]
+    [<DataRow("base8", """def func T()->func(p:*pred(x:obj)[ind])->pred(x:ind) {intr}""")>]
+    [<DataRow("base9", """def func T()->pred(f:*func(x:A)->A[ind]) {intr}""")>]
+    [<DataRow("base10", """def cl A def func T()->pred(f:func(x:A)->A) {intr}""")>]
     [<TestMethod>]
     member this.TestMapping(var, varVal) =
-        ad.Clear()
-        let fplCode = sprintf "%s;" varVal
+        
+        let fplCode = sprintf "%s" varVal
         let filename = "TestMappingRepresentation"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let base1 = theory.Scope |> Seq.filter (fun kvp -> kvp.Key.StartsWith("T(")) |> Seq.map (fun kvp -> kvp.Value) |> Seq.toList |> List.head
+        let mapping = base1.ArgList[0]
+        match var with
+        | "base1" -> Assert.AreEqual<string>($"dec {LiteralObj}", mapping.Represent())
+        | "base2" -> Assert.AreEqual<string>($"dec {LiteralInd}", mapping.Represent())
+        | "base3" -> Assert.AreEqual<string>($"dec {LiteralFunc}", mapping.Represent())
+        | "base4" -> Assert.AreEqual<string>($"dec {LiteralPred}", mapping.Represent())
+        | "base5" -> Assert.AreEqual<string>("dec A", mapping.Represent())
+        | "base6" -> Assert.AreEqual<string>($"dec {LiteralPred}({LiteralInd})", mapping.Represent())
+        | "base7" -> Assert.AreEqual<string>($"dec {LiteralPred}(*{LiteralObj}[{LiteralInd}])", mapping.Represent())
+        | "base8" -> Assert.AreEqual<string>($"dec {LiteralFunc}(*{LiteralPred}({LiteralObj})[{LiteralInd}]) -> {LiteralPred}({LiteralInd})", mapping.Represent())
+        | "base9" -> Assert.AreEqual<string>($"dec {LiteralPred}(*{LiteralFunc}(A) -> A[{LiteralInd}])", mapping.Represent())
+        | "base10" -> Assert.AreEqual<string>($"dec {LiteralPred}({LiteralFunc}(A) -> A)", mapping.Represent())
+        | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let base1 = theory.Scope |> Seq.filter (fun kvp -> kvp.Key.StartsWith("T(")) |> Seq.map (fun kvp -> kvp.Value) |> Seq.toList |> List.head
-            let mapping = base1.ArgList[0]
-            match var with
-            | "base1" -> Assert.AreEqual<string>($"dec {LiteralObj}", mapping.Represent())
-            | "base2" -> Assert.AreEqual<string>($"dec {LiteralInd}", mapping.Represent())
-            | "base3" -> Assert.AreEqual<string>($"dec {LiteralFunc}", mapping.Represent())
-            | "base4" -> Assert.AreEqual<string>($"dec {LiteralPred}", mapping.Represent())
-            | "base5" -> Assert.AreEqual<string>("dec A", mapping.Represent())
-            | "base6" -> Assert.AreEqual<string>($"dec {LiteralPred}({LiteralInd})", mapping.Represent())
-            | "base7" -> Assert.AreEqual<string>($"dec {LiteralPred}(*{LiteralObj}[{LiteralInd}])", mapping.Represent())
-            | "base8" -> Assert.AreEqual<string>($"dec {LiteralFunc}(*{LiteralPred}({LiteralObj})[{LiteralInd}]) -> {LiteralPred}({LiteralInd})", mapping.Represent())
-            | "base9" -> Assert.AreEqual<string>($"dec {LiteralPred}(*{LiteralFunc}(A) -> A[{LiteralInd}])", mapping.Represent())
-            | "base10" -> Assert.AreEqual<string>($"dec {LiteralPred}({LiteralFunc}(A) -> A)", mapping.Represent())
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
 
-    [<DataRow("base0", "dec ~x,y:pred; del.Equal(x,y)")>]
+    [<DataRow("base0", "dec x,y:pred; del.Equal(x,y)")>]
     [<DataRow("base1", "del.Equal(x,y)")>]
     [<DataRow("base2", "del.C(a,b,c,d)")>]
     [<DataRow("base3", "del.D(self,b,c)")>]
@@ -712,145 +705,129 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("base7", "del.E(true, undef, false)")>] 
     [<TestMethod>]
     member this.TestDelegate(var, varVal) =
-        ad.Clear()
-        let fplCode = sprintf "def pred T1() { %s };" varVal
+        
+        let fplCode = sprintf "def pred T1() { %s }" varVal
         let filename = "TestDelegateFplRepresentation"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+
+        let pr1 = theory.Scope["T1()"] 
+        pr1.Run()
+        let base1 = pr1.ArgList[0]
+
+        match var with
+        | "base0" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
+        | "base1" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
+        | "base2" -> Assert.AreEqual<string>("C(undef, undef, undef, undef)", base1.Represent())
+        | "base3" -> Assert.AreEqual<string>("D(pred(), undef, undef)", base1.Represent())
+        | "base4" -> Assert.AreEqual<string>("B(In)", base1.Represent())
+        | "base5" -> Assert.AreEqual<string>("Test()", base1.Represent())
+        | "base6" -> Assert.AreEqual<string>("C(Test1, Test2)", base1.Represent())
+        | "base7" -> Assert.AreEqual<string>("E(pred, undef, pred)", base1.Represent())
+        | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
 
-            let pr1 = theory.Scope["T1()"] 
-            pr1.Run()
-            let base1 = pr1.ArgList[0]
-
-            match var with
-            | "base0" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
-            | "base1" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
-            | "base2" -> Assert.AreEqual<string>("C(undef, undef, undef, undef)", base1.Represent())
-            | "base3" -> Assert.AreEqual<string>("D(pred(), undef, undef)", base1.Represent())
-            | "base4" -> Assert.AreEqual<string>("B(In)", base1.Represent())
-            | "base5" -> Assert.AreEqual<string>("Test()", base1.Represent())
-            | "base6" -> Assert.AreEqual<string>("C(Test1, Test2)", base1.Represent())
-            | "base7" -> Assert.AreEqual<string>("E(pred, undef, pred)", base1.Represent())
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
-
-    [<DataRow("base1", """def pred T1() {intr};""")>]
-    [<DataRow("base2", """def pred T1 () infix ">" -1 {intr};""")>]
-    [<DataRow("base3", """def pred T1 () postfix "'" {intr};""")>]
-    [<DataRow("base4", """def pred T1 () prefix "-" {intr};""")>]
-    [<DataRow("base5", """def cl T1 symbol "∅" {intr};""")>]
-    [<DataRow("base5a", """def cl T1 {intr};""")>]
-    [<DataRow("base6", """def func T1()->obj {intr};""")>]
-    [<DataRow("base7", """def func T1 ()->obj infix ">" -1 {intr};""")>]
-    [<DataRow("base8", """def func T1  ()->obj postfix "'"{intr};""")>]
-    [<DataRow("base9", """def func T1 ()->obj prefix "-" {intr};""")>]
+    [<DataRow("base1", """def pred T1() {intr}""")>]
+    [<DataRow("base2", """def pred T1 () infix ">" -1 {intr}""")>]
+    [<DataRow("base3", """def pred T1 () postfix "'" {intr}""")>]
+    [<DataRow("base4", """def pred T1 () prefix "-" {intr}""")>]
+    [<DataRow("base5", """def cl T1 symbol "∅" {intr}""")>]
+    [<DataRow("base5a", """def cl T1 {intr}""")>]
+    [<DataRow("base6", """def func T1()->obj {intr}""")>]
+    [<DataRow("base7", """def func T1 ()->obj infix ">" -1 {intr}""")>]
+    [<DataRow("base8", """def func T1  ()->obj postfix "'"{intr}""")>]
+    [<DataRow("base9", """def func T1 ()->obj prefix "-" {intr}""")>]
     [<TestMethod>]
     member this.TestFixNotationRepresentation(var, varVal) =
-        ad.Clear()
-        let fplCode = sprintf "%s;" varVal
+        
+        let fplCode = sprintf "%s" varVal
         let filename = "TestFixNotationFplRepresentation"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let base1 = 
+            if varVal.Contains LiteralCl then 
+                theory.Scope["T1"]
+            elif varVal.Contains LiteralFunc then 
+                theory.Scope["T1() -> obj"]
+            else 
+                theory.Scope["T1()"]
+
+        match var with
+        | "base1" -> Assert.AreEqual<string>("T1()", base1.Represent())
+        | "base2" -> Assert.AreEqual<string>("T1()", base1.Represent())
+        | "base3" -> Assert.AreEqual<string>("T1()", base1.Represent())
+        | "base4" -> Assert.AreEqual<string>("T1()", base1.Represent())
+        | "base5" -> Assert.AreEqual<string>(PrimNone, base1.Represent())
+        | "base5a" -> Assert.AreEqual<string>(PrimNone, base1.Represent())
+        | "base6" -> Assert.AreEqual<string>("T1()", base1.Represent())
+        | "base7" -> Assert.AreEqual<string>("T1()", base1.Represent())
+        | "base8" -> Assert.AreEqual<string>("T1()", base1.Represent())
+        | "base9" -> Assert.AreEqual<string>("T1()", base1.Represent())
+        | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let base1 = 
-                if varVal.Contains LiteralCl then 
-                    theory.Scope["T1"]
-                elif varVal.Contains LiteralFunc then 
-                    theory.Scope["T1() -> obj"]
-                else 
-                    theory.Scope["T1()"]
-
-            match var with
-            | "base1" -> Assert.AreEqual<string>("T1()", base1.Represent())
-            | "base2" -> Assert.AreEqual<string>("T1()", base1.Represent())
-            | "base3" -> Assert.AreEqual<string>("T1()", base1.Represent())
-            | "base4" -> Assert.AreEqual<string>("T1()", base1.Represent())
-            | "base5" -> Assert.AreEqual<string>(PrimNone, base1.Represent())
-            | "base5a" -> Assert.AreEqual<string>(PrimNone, base1.Represent())
-            | "base6" -> Assert.AreEqual<string>("T1()", base1.Represent())
-            | "base7" -> Assert.AreEqual<string>("T1()", base1.Represent())
-            | "base8" -> Assert.AreEqual<string>("T1()", base1.Represent())
-            | "base9" -> Assert.AreEqual<string>("T1()", base1.Represent())
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
 
 
-    [<DataRow("varIndUnset", """def pred T1() { dec ~x:ind; true};""")>]
-    [<DataRow("varIndSet0", """def pred T1() { dec ~x:ind x:=$0; true};""")>]
-    [<DataRow("varIndSet1", """def pred T1() { dec ~x:ind x:=$1; true};""")>]
-    [<DataRow("varIndSet42", """def pred T1() { dec ~x:ind x:=$42; true};""")>]
-    [<DataRow("varIndSet100", """def pred T1() { dec ~x:ind x:=$100; true};""")>]
-    [<DataRow("varFuncUnset", """def pred T1() { dec ~x:func; true};""")>]
-    [<DataRow("varPredUnset", """def pred T1() { dec ~x:pred; true};""")>]
+    [<DataRow("varIndUnset", """def pred T1() { dec x:ind; true}""")>]
+    [<DataRow("varIndSet0", """def pred T1() { dec x:ind x:=$0; true}""")>]
+    [<DataRow("varIndSet1", """def pred T1() { dec x:ind x:=$1; true}""")>]
+    [<DataRow("varIndSet42", """def pred T1() { dec x:ind x:=$42; true}""")>]
+    [<DataRow("varIndSet100", """def pred T1() { dec x:ind x:=$100; true}""")>]
+    [<DataRow("varFuncUnset", """def pred T1() { dec x:func; true}""")>]
+    [<DataRow("varPredUnset", """def pred T1() { dec x:pred; true}""")>]
     [<TestMethod>]
     member this.TestVariableRepresentationOtherThanObjects(var, varVal) =
-        ad.Clear()
-        let fplCode = sprintf "%s;" varVal
+        
+        let fplCode = sprintf "%s" varVal
         let filename = "TestVariableRepresentationOtherThanObjects"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let base1 = theory.Scope["T1()"]
+        let varObj = base1.Scope["x"]
+
+
+        match var with
+        | "varIndUnset" -> Assert.AreEqual<string>(PrimUndetermined, varObj.Represent())
+        | "varIndSet0" -> Assert.AreEqual<string>("$0", varObj.Represent())
+        | "varIndSet1" -> Assert.AreEqual<string>("$1", varObj.Represent())
+        | "varIndSet42" -> Assert.AreEqual<string>("$42", varObj.Represent())
+        | "varIndSet100" -> Assert.AreEqual<string>("$100", varObj.Represent())
+        | "varFuncUnset" -> Assert.AreEqual<string>(PrimUndetermined, varObj.Represent())
+        | "varPredUnset" -> Assert.AreEqual<string>(PrimUndetermined, varObj.Represent())
+        | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let base1 = theory.Scope["T1()"]
-            let varObj = base1.Scope["x"]
 
-
-            match var with
-            | "varIndUnset" -> Assert.AreEqual<string>(PrimUndetermined, varObj.Represent())
-            | "varIndSet0" -> Assert.AreEqual<string>("$0", varObj.Represent())
-            | "varIndSet1" -> Assert.AreEqual<string>("$1", varObj.Represent())
-            | "varIndSet42" -> Assert.AreEqual<string>("$42", varObj.Represent())
-            | "varIndSet100" -> Assert.AreEqual<string>("$100", varObj.Represent())
-            | "varFuncUnset" -> Assert.AreEqual<string>(PrimUndetermined, varObj.Represent())
-            | "varPredUnset" -> Assert.AreEqual<string>(PrimUndetermined, varObj.Represent())
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
-
-    [<DataRow("o", """def pred T() {dec ~o:obj; true};""", PrimUndetermined)>]    // without anything
-    [<DataRow("a", """def cl A def pred T() {dec ~a:A; true};""", PrimUndetermined)>]    // without constructor, without inheritance, without instantiation
+    [<DataRow("o", """def pred T() {dec o:obj; true}""", PrimUndetermined)>]    // without anything
+    [<DataRow("a", """def cl A def pred T() {dec a:A; true}""", PrimUndetermined)>]    // without constructor, without inheritance, without instantiation
     // direct assignment of a class without a constructor, will issue ID004 diagnostics, var remains as declared
-    [<DataRow("aI1", """def cl A def pred T() {dec ~aI1:A aI1:=A; true};""", PrimUndetermined)>]  
-    [<DataRow("c", """def cl A def cl B: A def cl C {ctor C() {}} def pred T() {dec ~c:C; true};""", PrimUndetermined)>]
-    [<DataRow("bI1", """def cl A def cl B: A def pred T() {dec ~bI1:B bI1:=B; true};""", PrimUndetermined)>]  
+    [<DataRow("aI1", """def cl A def pred T() {dec aI1:A aI1:=A; true}""", PrimUndetermined)>]  
+    [<DataRow("c", """def cl A def cl B: A def cl C {ctor C() {}} def pred T() {dec c:C; true}""", PrimUndetermined)>]
+    [<DataRow("bI1", """def cl A def cl B: A def pred T() {dec bI1:B bI1:=B; true}""", PrimUndetermined)>]  
 
     // will create an instance using the default constructor
-    [<DataRow("aI2", """def cl A def pred T() {dec ~aI2:A aI2:=A(); true};""", """A()""")>]  
-    [<DataRow("bI2", """def cl A def cl B: A def pred T() {dec ~bI2:B bI2:=B(); true};""", """B()""")>]  
+    [<DataRow("aI2", """def cl A def pred T() {dec aI2:A aI2:=A(); true}""", """A()""")>]  
+    [<DataRow("bI2", """def cl A def cl B: A def pred T() {dec bI2:B bI2:=B(); true}""", """B()""")>]  
 
-    [<DataRow("b", """def cl A def cl B: A def pred T() {dec ~b:B; true};""", PrimUndetermined)>]    // without constructor, with inheritance, without instantiation
-    [<DataRow("cI1", """def cl A def cl B: A def cl C {ctor C() {}} def pred T() {dec ~cI1:C cI1:=C; true};""", PrimUndetermined)>]  // with constructor, without inheritance, with instantiation (without ()) -> should also trigger another error
-    [<DataRow("cI2", """def cl A def cl B: A def cl C {ctor C() {}} def pred T() {dec ~cI2:C cI2:=C(); true};""", """C()""")>]  // with constructor, without inheritance, with instantiation (with ())
-    [<DataRow("d", """def cl A def cl B: A def cl D: B {ctor D() {dec base.B(); }} def pred T() {dec ~d:D; true};""", PrimUndetermined)>]    // with constructor, with inheritance, without instantiation
-    [<DataRow("dI1", """def cl A def cl B: A def cl D: B {ctor D() {dec base.B(); }} def pred T() {dec ~dI1:D dI1:=D; true};""", PrimUndetermined)>]  // with constructor, with inheritance, with instantiation (without ())
-    [<DataRow("dI2", """def cl A def cl B: A def cl D: B {ctor D() {dec base.B(); }} def pred T() {dec ~dI2:D dI2:=D(); true};""", """D()""")>]  
+    [<DataRow("b", """def cl A def cl B: A def pred T() {dec b:B; true}""", PrimUndetermined)>]    // without constructor, with inheritance, without instantiation
+    [<DataRow("cI1", """def cl A def cl B: A def cl C {ctor C() {}} def pred T() {dec cI1:C cI1:=C; true}""", PrimUndetermined)>]  // with constructor, without inheritance, with instantiation (without ()) -> should also trigger another error
+    [<DataRow("cI2", """def cl A def cl B: A def cl C {ctor C() {}} def pred T() {dec cI2:C cI2:=C(); true}""", """C()""")>]  // with constructor, without inheritance, with instantiation (with ())
+    [<DataRow("d", """def cl A def cl B: A def cl D: B {ctor D() {dec base.B(); }} def pred T() {dec d:D; true}""", PrimUndetermined)>]    // with constructor, with inheritance, without instantiation
+    [<DataRow("dI1", """def cl A def cl B: A def cl D: B {ctor D() {dec base.B(); }} def pred T() {dec dI1:D dI1:=D; true}""", PrimUndetermined)>]  // with constructor, with inheritance, with instantiation (without ())
+    [<DataRow("dI2", """def cl A def cl B: A def cl D: B {ctor D() {dec base.B(); }} def pred T() {dec dI2:D dI2:=D(); true}""", """D()""")>]  
     [<TestMethod>]
     member this.TestVariableRepresentationObjects(var, fplCode:string, expected:string) =
-        ad.Clear()
+        
         let filename = "TestVariableRepresentationObjects"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
-        prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let base1 = theory.Scope["T()"]
-            let varObj = base1.Scope[var]
-            Assert.AreEqual<string>(expected, varObj.Represent())
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let base1 = theory.Scope["T()"]
+        let varObj = base1.Scope[var]
+        Assert.AreEqual<string>(expected, varObj.Represent())
 
-        | None -> 
-            Assert.IsTrue(false)
+        prepareFplCode(filename, "", false) |> ignore
 
 
     [<DataRow("base1", "$1",  LiteralFalse)>]
@@ -860,7 +837,7 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("base5", "$4", LiteralUndef)>]
     [<TestMethod>]
     member this.TestMCaseStatement(var, input, (output:string)) =
-        ad.Clear()
+        
         let fplCode = sprintf """
                 def pred Equal (x,y: tpl) infix "=" 50 
                 {
@@ -868,7 +845,7 @@ type TestFplValueScopeFplRepresentation() =
                 }              
         
                 def pred Test(x:ind) { dec 
-                ~n:pred
+                n:pred
                 n:= mcases
                 (
                     | (x = $1) : false 
@@ -876,27 +853,23 @@ type TestFplValueScopeFplRepresentation() =
                     | (x = $3) : false 
                     ? undef  
                 )
-                ;n } def pred T() {Test(%s)};""" input 
+                ;n } def pred T() {Test(%s)}""" input 
         let filename = "TestMCaseStatementFplRepresentation"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
-        prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let pred = theory.Scope["Test(ind)"]
-            let assignment = pred.ArgList[0]
-            let res = assignment.ArgList[1]
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pred = theory.Scope["Test(ind)"]
+        let assignment = pred.ArgList[0]
+        let res = assignment.ArgList[1]
  
-            match var with
-            | "base1" -> Assert.AreEqual<string>(output, res.Represent())
-            | "base2" -> Assert.AreEqual<string>(output, res.Represent())
-            | "base3" -> Assert.AreEqual<string>(output, res.Represent())
-            | "base4" -> Assert.AreEqual<string>(output, res.Represent())
-            | "base5" -> Assert.AreEqual<string>(output, res.Represent())
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
+        match var with
+        | "base1" -> Assert.AreEqual<string>(output, res.Represent())
+        | "base2" -> Assert.AreEqual<string>(output, res.Represent())
+        | "base3" -> Assert.AreEqual<string>(output, res.Represent())
+        | "base4" -> Assert.AreEqual<string>(output, res.Represent())
+        | "base5" -> Assert.AreEqual<string>(output, res.Represent())
+        | _ -> Assert.IsTrue(false)
+        prepareFplCode(filename, "", false) |> ignore
 
     [<DataRow("base1", "$1",  LiteralFalse)>]
     [<DataRow("base2", "$2",  LiteralTrue)>]
@@ -905,7 +878,7 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("base5", "$4", "")>]
     [<TestMethod>]
     member this.TestConditionResultStatement(var, input, (output:string)) =
-        ad.Clear()
+        
         let fplCode = sprintf """
                 def pred Equal (x,y: tpl) infix "=" 50 
                 {
@@ -913,7 +886,7 @@ type TestFplValueScopeFplRepresentation() =
                 }
                 
                 def pred Test(x:ind) { dec 
-                ~n:pred
+                n:pred
                 n:= mcases
                 (
                     | (x = $1) : false 
@@ -921,133 +894,113 @@ type TestFplValueScopeFplRepresentation() =
                     | (x = $3) : false 
                     ? undef  
                 )
-                ;n } def pred T() {Test(%s)};""" input 
+                ;n } def pred T() {Test(%s)}""" input 
         let filename = "TestConditionResultStatementFplRepresentation"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pred = theory.Scope["Test(ind)"]
+        let assignment = pred.ArgList[0]
+        let res = assignment.ArgList[1]
+        match var with
+        | "base1" -> 
+            let cr = res.ArgList[0] 
+            Assert.AreEqual<string>(output, cr.Represent())
+        | "base2" -> 
+            let cr = res.ArgList[1] 
+            Assert.AreEqual<string>(output, cr.Represent())
+        | "base3" -> 
+            let cr = res.ArgList[2] 
+            Assert.AreEqual<string>(output, cr.Represent())
+        | "base4" -> () 
+        | "base5" -> ()
+        | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let pred = theory.Scope["Test(ind)"]
-            let assignment = pred.ArgList[0]
-            let res = assignment.ArgList[1]
-            match var with
-            | "base1" -> 
-                let cr = res.ArgList[0] 
-                Assert.AreEqual<string>(output, cr.Represent())
-            | "base2" -> 
-                let cr = res.ArgList[1] 
-                Assert.AreEqual<string>(output, cr.Represent())
-            | "base3" -> 
-                let cr = res.ArgList[2] 
-                Assert.AreEqual<string>(output, cr.Represent())
-            | "base4" -> () 
-            | "base5" -> ()
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
 
-    [<DataRow("00", "dec ~x:pred x:=false;",  LiteralFalse)>]
+    [<DataRow("00", "dec x:pred x:=false;",  LiteralFalse)>]
     [<TestMethod>]
     member this.TestAssignmentVariableReferenceTheSame(no:string, input, (expected:string)) =
-        ad.Clear()
-        let fplCode = sprintf "def pred T() {%s true};" input
+        
+        let fplCode = sprintf "def pred T() {%s true}" input
         let filename = "TestAssignment"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
-        prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let pred = theory.Scope["T()"]
-            let assignPre = pred.ArgList[0]
-            let assign = assignPre :?> FplAssignment
-            let assigneeVariableOpt = assign.Assignee
-            match assigneeVariableOpt with
-            | Some var -> 
-                let xVar = pred.Scope["x"]
-                Assert.AreEqual<bool>(true, LanguagePrimitives.PhysicalEquality xVar var)
-            | None -> 
-                Assert.IsTrue(false)
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pred = theory.Scope["T()"]
+        let assignPre = pred.ArgList[0]
+        let assign = assignPre :?> FplAssignment
+        let assigneeVariableOpt = assign.Assignee
+        match assigneeVariableOpt with
+        | Some var -> 
+            let xVar = pred.Scope["x"]
+            Assert.AreEqual<bool>(true, LanguagePrimitives.PhysicalEquality xVar var)
         | None -> 
             Assert.IsTrue(false)
+        prepareFplCode(filename, "", false) |> ignore
 
-    [<DataRow("00", "dec ~x:pred x:=false;",  LiteralFalse)>]
-    [<DataRow("01", "dec ~x:ind x:=$42;",  "$42")>]
+    [<DataRow("00", "dec x:pred x:=false;",  LiteralFalse)>]
+    [<DataRow("01", "dec x:ind x:=$42;",  "$42")>]
     [<TestMethod>]
     member this.TestAssignmentValue(no:string, input, (expected:string)) =
-        ad.Clear()
-        let fplCode = sprintf "def pred T() {%s true};" input
+        
+        let fplCode = sprintf "def pred T() {%s true}" input
         let filename = "TestAssignment"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
-        prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let pred = theory.Scope["T()"]
-            let assignPre = pred.ArgList[0]
-            let assign = assignPre :?> FplAssignment
-            assign.Run()
-            let assigneeVariableOpt = assign.Assignee
-            match assigneeVariableOpt with
-            | Some var -> 
-                let actual = var.Represent()
-                Assert.AreEqual<string>(expected, actual)
-            | None -> 
-                Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
-
-    [<DataRow("00", "T()", "def pred T() {dec ~x:pred x:=false; x};",  LiteralFalse)>]
-    [<DataRow("01", "T()", "def pred T() {dec ~x:ind x:=$42; x};",  "$42")>]
-    [<DataRow("02", "T()", "def cl A def pred T() {dec ~x:A x:=A(); x};",  """A()""")>]
-    [<DataRow("02a", "T() -> A", "def cl A def func S()->A def func T()->A {dec ~x:A x:=S(); return x};",  """S()""")>]
-    [<TestMethod>]
-    member this.TestAssignedValuePassedToEnclosingBlock(no:string, enclosing:string, fplCode, (expected:string)) =
-        ad.Clear()
-        let filename = "TestAssignment"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
-        prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let block = theory.Scope[enclosing]
-            let actual = block.Represent()
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pred = theory.Scope["T()"]
+        let assignPre = pred.ArgList[0]
+        let assign = assignPre :?> FplAssignment
+        assign.Run()
+        let assigneeVariableOpt = assign.Assignee
+        match assigneeVariableOpt with
+        | Some var -> 
+            let actual = var.Represent()
             Assert.AreEqual<string>(expected, actual)
         | None -> 
             Assert.IsTrue(false)
+        prepareFplCode(filename, "", false) |> ignore
 
-    [<DataRow("00", "dec ~x:pred x:=false;",  true)>]
+    [<DataRow("00", "T()", "def pred T() {dec x:pred x:=false; x}",  LiteralFalse)>]
+    [<DataRow("01", "T()", "def pred T() {dec x:ind x:=$42; x}",  "$42")>]
+    [<DataRow("02", "T()", "def cl A def pred T() {dec x:A x:=A(); x}",  """A()""")>]
+    [<DataRow("02a", "T() -> A", "def cl A def func S()->A def func T()->A {dec x:A x:=S(); return x}",  """S()""")>]
+    [<TestMethod>]
+    member this.TestAssignedValuePassedToEnclosingBlock(no:string, enclosing:string, fplCode, (expected:string)) =
+        
+        let filename = "TestAssignment"
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let block = theory.Scope[enclosing]
+        let actual = block.Represent()
+        Assert.AreEqual<string>(expected, actual)
+        prepareFplCode(filename, "", false) |> ignore
+
+    [<DataRow("00", "dec x:pred x:=false;",  true)>]
     [<TestMethod>]
     member this.TestAssignmentVariableInitialized(no:string, input, (expected:bool)) =
-        ad.Clear()
-        let fplCode = sprintf "def pred T() {%s true};" input
+        
+        let fplCode = sprintf "def pred T() {%s true}" input
         let filename = "TestAssignmentVariableInitialized"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
-        prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let pred = theory.Scope["T()"]
-            let assignPre = pred.ArgList[0]
-            let assign = assignPre :?> FplAssignment
-            assign.Run()
-            let assigneeVariableOpt = assign.Assignee
-            match assigneeVariableOpt with
-            | Some varUncast ->
-                match varUncast with
-                | :? FplGenericVariable as var ->
-                    let actual = var.IsInitialized
-                    Assert.AreEqual<bool>(expected, actual)
-                | _ -> Assert.IsTrue(false)
-            | None -> 
-                Assert.IsTrue(false)
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pred = theory.Scope["T()"]
+        let assignPre = pred.ArgList[0]
+        let assign = assignPre :?> FplAssignment
+        assign.Run()
+        let assigneeVariableOpt = assign.Assignee
+        match assigneeVariableOpt with
+        | Some varUncast ->
+            match varUncast with
+            | :? FplGenericVariable as var ->
+                let actual = var.IsInitialized
+                Assert.AreEqual<bool>(expected, actual)
+            | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
+        prepareFplCode(filename, "", false) |> ignore
 
     [<DataRow("ass00", """def cl Nat def func A()->Nat def pred P(x:Nat) {dec x:=A(); true}""", """A()""")>] // declared constant used
     [<DataRow("ass00a", """def cl Nat def pred P(x:Nat) {dec x:=Nat(); true}""", """Nat()""")>] // declared constant used
@@ -1075,56 +1028,48 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("ass08e", """def pred A(a:ind) def pred P(x:pred(b:ind)) {dec x:=A; true}""", "A(undet)")>] // pred() does not match pred, therefore assignment doesn't work
     [<TestMethod>]
     member this.TestAssignementOfConstantsRepresent(var, input, output:string) =
-        ad.Clear()
-        let fplCode = sprintf """%s;""" input 
+        
+        let fplCode = sprintf """%s""" input 
         let filename = "TestAssignementOfConstantsRepresent"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pred = 
+            theory.Scope 
+            |> Seq.filter (fun kvp -> kvp.Key.StartsWith("P(")) 
+            |> Seq.map (fun kvp -> kvp.Value) 
+            |> Seq.head
+        let x = pred.Scope["x"]
+        Assert.AreEqual<string>(output, x.Represent())
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let pred = 
-                theory.Scope 
-                |> Seq.filter (fun kvp -> kvp.Key.StartsWith("P(")) 
-                |> Seq.map (fun kvp -> kvp.Value) 
-                |> Seq.head
-            let x = pred.Scope["x"]
-            Assert.AreEqual<string>(output, x.Represent())
-        | None -> 
-            Assert.IsTrue(false)
 
     [<DataRow("01a", "($1 = $1)",  LiteralTrue)>]
     [<DataRow("01b", "($1 = $2)",  LiteralFalse)>]
     [<DataRow("01c", "($2 = $1)",  LiteralFalse)>]
-    [<DataRow("01d", "dec ~u:ind u:=$2; (u = $1)",  LiteralFalse)>]
-    [<DataRow("01e", "dec ~u:ind u:=$1; (u = $1)",  LiteralTrue)>]
-    [<DataRow("01f", "dec ~u,v:ind u:=$2 v:=$1; (u = v)",  LiteralFalse)>]
-    [<DataRow("01g", "dec ~u,v:ind u:=$1 v:=$1; (v = v)",  LiteralTrue)>]
+    [<DataRow("01d", "dec u:ind u:=$2; (u = $1)",  LiteralFalse)>]
+    [<DataRow("01e", "dec u:ind u:=$1; (u = $1)",  LiteralTrue)>]
+    [<DataRow("01f", "dec u,v:ind u:=$2 v:=$1; (u = v)",  LiteralFalse)>]
+    [<DataRow("01g", "dec u,v:ind u:=$1 v:=$1; (v = v)",  LiteralTrue)>]
     [<DataRow("02a", "mcases (|($1 = $1) : $42 ? $1)",  "$42")>]
     [<DataRow("02b", "mcases (|($1 = $2) : $42 ? $1)",  "$1")>]
     [<DataRow("02c", "mcases (|($2 = $1) : $42 ? $1)",  "$1")>]
-    [<DataRow("02d", "dec ~u:ind u:=$2; mcases (|(u = $1): $42 ? $1)",  "$1")>]
-    [<DataRow("02e", "dec ~u:ind u:=$1; mcases (|(u = $1): $42 ? $1)",  "$42")>]
-    [<DataRow("02f", "dec ~u,v:ind u:=$2 v:=$1; mcases (|(u = v): $42 ? $1)",  "$1")>]
-    [<DataRow("02g", "dec ~u,v:ind u:=$1 v:=$1; mcases (|(v = v): $42 ? $1)",  "$42")>]
+    [<DataRow("02d", "dec u:ind u:=$2; mcases (|(u = $1): $42 ? $1)",  "$1")>]
+    [<DataRow("02e", "dec u:ind u:=$1; mcases (|(u = $1): $42 ? $1)",  "$42")>]
+    [<DataRow("02f", "dec u,v:ind u:=$2 v:=$1; mcases (|(u = v): $42 ? $1)",  "$1")>]
+    [<DataRow("02g", "dec u,v:ind u:=$1 v:=$1; mcases (|(v = v): $42 ? $1)",  "$42")>]
     [<TestMethod>]
     member this.TestEquality(no:string, input, (output:string)) =
-        ad.Clear()
+        
         let fplCode = sprintf """
                 def pred Equal (x,y: tpl) infix "=" 50 
                 {
                     del.Equal(x,y)
                 }              
-                def pred T() {%s};""" input 
+                def pred T() {%s}""" input 
         let filename = "TestMCaseStatementFplRepresentation"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pred = theory.Scope["T()"]
+        Assert.AreEqual<string>(output, pred.Represent())
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let pred = theory.Scope["T()"]
-            Assert.AreEqual<string>(output, pred.Represent())
-        | None -> 
-            Assert.IsTrue(false)

@@ -2,7 +2,7 @@ namespace FplParser.Tests
 
 open FParsec
 open FplPrimitives
-open FplParser
+open FplParsing.Combinators
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
 
@@ -133,31 +133,31 @@ type TestKeywordSpaces() =
 
     [<TestMethod>]
     member this.TestSpacesDeclaration () =
-        let result = run (varDeclBlock .>> eof) """declaration ~a:obj ;"""
+        let result = run (varDeclOrSpecList .>> eof) """declaration a:obj ;"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSpacesDeclarationA () =
-        let result = run (varDeclBlock .>> eof) """declaration~a:obj ;"""
+        let result = run (varDeclOrSpecList .>> eof) """declaration a:obj ;"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:"))
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSpacesDec () =
-        let result = run (varDeclBlock .>> eof) """dec ~a:obj ;"""
+        let result = run (varDeclOrSpecList .>> eof) """dec a:obj ;"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSpacesDecA () =
-        let result = run (varDeclBlock .>> eof) """dec~a:obj ;"""
+        let result = run (varDeclOrSpecList .>> eof) """dec a:obj ;"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:"))
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSpacesDelegate () =
@@ -488,35 +488,35 @@ type TestKeywordSpaces() =
     [<DataRow(LiteralInd)>]
     [<TestMethod>]
     member this.TestSpacesSimpleType (word:string) =
-        let result = run (varDecl .>> eof) ("~a:" + word + "x")
+        let result = run (varDecl .>> eof) ("a:" + word + "x")
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("<whitespace>"))
 
     [<TestMethod>]
     member this.TestSpacesQed () =
-        let result = run (proof .>> eof) "proof T$1{1.|- trivial qed}"
+        let result = run (proof .>> eof) "proof T$1{1: trivial qed}"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSpacesQedA () =
-        let result = run (proof .>> eof) "proof T$1{1.|- trivial qedx}"
+        let result = run (proof .>> eof) "proof T$1{1: trivial qedx}"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("<whitespace>"))
 
     [<TestMethod>]
     member this.TestSpacesTrivial () =
-        let result = run (proof .>> eof) "proof T$1{1.|- trivial qed}"
+        let result = run (proof .>> eof) "proof T$1{1: trivial qed}"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSpacesTrivialA () =
-        let result = run (proof .>> eof) "proof T$1{1.|- trivialx qed}"
+        let result = run (proof .>> eof) "proof T$1{1: trivialx qed}"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("<whitespace>"))
@@ -562,7 +562,7 @@ type TestKeywordSpaces() =
     [<DataRow(LiteralPrf)>]
     [<TestMethod>]
     member this.TestSpacesProof (word:string) =
-        let result = run (proof .>> eof) ($"{word}x" + " T$1 {1. |- true }")
+        let result = run (proof .>> eof) ($"{word}x" + " T$1 {1: true }")
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("<significant whitespace>"))
@@ -589,7 +589,7 @@ type TestKeywordSpaces() =
     [<DataRow(LiteralLoc)>]
     [<TestMethod>]
     member this.TestSpacesLocalization (word:string) =
-        let result = run (localization .>> eof) ($"{word}x" + " T() := !tex: x;")
+        let result = run (localization .>> eof) ($"{word}x" + " T() := !tex: x")
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("<significant whitespace>"))

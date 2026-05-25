@@ -1,8 +1,10 @@
-﻿namespace FplInterpreter.Tests
+namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
 open FplPrimitives
-open FplInterpreterTypes
+open FplInterpreterBasicTypes
+open FplInterpreter.Globals.Root
+open FplInterpreter.Globals.Heap
 open CommonTestHelpers
 
 [<TestClass>]
@@ -238,33 +240,33 @@ type TestFplValueScopeQualifiedStartPos() =
             | "r" -> Assert.AreEqual<string>("", r.QualifiedStartPos)
             | PrimTheoryL -> Assert.IsTrue((theory.QualifiedStartPos).Contains("Ln: 1, Col: 1)"))
             | "block" -> Assert.IsTrue((block.QualifiedStartPos).Contains("Ln: 2, Col: 13)")); 
-            | "x" -> Assert.IsTrue((x.QualifiedStartPos).Contains("Ln: 4, Col: 18)"))
-            | "y" -> Assert.IsTrue((y.QualifiedStartPos).Contains("Ln: 4, Col: 20)"))
-            | "s" -> Assert.IsTrue((s.QualifiedStartPos).Contains("Ln: 5, Col: 18)"))
-            | "xu" -> Assert.IsTrue((xu.QualifiedStartPos).Contains("Ln: 4, Col: 27)"))
-            | "xv" -> Assert.IsTrue((xv.QualifiedStartPos).Contains("Ln: 4, Col: 29)"))
-            | "xw" -> Assert.IsTrue((xw.QualifiedStartPos).Contains("Ln: 4, Col: 31)"))
-            | "yu" -> Assert.IsTrue((yu.QualifiedStartPos).Contains("Ln: 4, Col: 27)"))
-            | "yv" -> Assert.IsTrue((yv.QualifiedStartPos).Contains("Ln: 4, Col: 29)"))
-            | "yw" -> Assert.IsTrue((yw.QualifiedStartPos).Contains("Ln: 4, Col: 31)"))
-            | "xua" -> Assert.IsTrue((xua.QualifiedStartPos).Contains("Ln: 4, Col: 38)"))
-            | "xub" -> Assert.IsTrue((xub.QualifiedStartPos).Contains("Ln: 4, Col: 40)"))
-            | "xuc" -> Assert.IsTrue((xuc.QualifiedStartPos).Contains("Ln: 4, Col: 42)"))
-            | "xva" -> Assert.IsTrue((xva.QualifiedStartPos).Contains("Ln: 4, Col: 38)"))
-            | "xvb" -> Assert.IsTrue((xvb.QualifiedStartPos).Contains("Ln: 4, Col: 40)"))
-            | "xvc" -> Assert.IsTrue((xvc.QualifiedStartPos).Contains("Ln: 4, Col: 42)"))
-            | "xwa" -> Assert.IsTrue((xwa.QualifiedStartPos).Contains("Ln: 4, Col: 38)"))
-            | "xwb" -> Assert.IsTrue((xwb.QualifiedStartPos).Contains("Ln: 4, Col: 40)"))
-            | "xwc" -> Assert.IsTrue((xwc.QualifiedStartPos).Contains("Ln: 4, Col: 42)"))
-            | "yua" -> Assert.IsTrue((yua.QualifiedStartPos).Contains("Ln: 4, Col: 38)"))
-            | "yub" -> Assert.IsTrue((yub.QualifiedStartPos).Contains("Ln: 4, Col: 40)"))
-            | "yuc" -> Assert.IsTrue((yuc.QualifiedStartPos).Contains("Ln: 4, Col: 42)"))
-            | "yva" -> Assert.IsTrue((yva.QualifiedStartPos).Contains("Ln: 4, Col: 38)"))
-            | "yvb" -> Assert.IsTrue((yvb.QualifiedStartPos).Contains("Ln: 4, Col: 40)"))
-            | "yvc" -> Assert.IsTrue((yvc.QualifiedStartPos).Contains("Ln: 4, Col: 42)"))
-            | "ywa" -> Assert.IsTrue((ywa.QualifiedStartPos).Contains("Ln: 4, Col: 38)"))
-            | "ywb" -> Assert.IsTrue((ywb.QualifiedStartPos).Contains("Ln: 4, Col: 40)"))
-            | "ywc" -> Assert.IsTrue((ywc.QualifiedStartPos).Contains("Ln: 4, Col: 42)"))
+            | "x" -> Assert.IsTrue((x.QualifiedStartPos).Contains("Ln: 4, Col: 17)"))
+            | "y" -> Assert.IsTrue((y.QualifiedStartPos).Contains("Ln: 4, Col: 19)"))
+            | "s" -> Assert.IsTrue((s.QualifiedStartPos).Contains("Ln: 5, Col: 17)"))
+            | "xu" -> Assert.IsTrue((xu.QualifiedStartPos).Contains("Ln: 4, Col: 26)"))
+            | "xv" -> Assert.IsTrue((xv.QualifiedStartPos).Contains("Ln: 4, Col: 28)"))
+            | "xw" -> Assert.IsTrue((xw.QualifiedStartPos).Contains("Ln: 4, Col: 30)"))
+            | "yu" -> Assert.IsTrue((yu.QualifiedStartPos).Contains("Ln: 4, Col: 26)"))
+            | "yv" -> Assert.IsTrue((yv.QualifiedStartPos).Contains("Ln: 4, Col: 28)"))
+            | "yw" -> Assert.IsTrue((yw.QualifiedStartPos).Contains("Ln: 4, Col: 30)"))
+            | "xua" -> Assert.IsTrue((xua.QualifiedStartPos).Contains("Ln: 4, Col: 37)"))
+            | "xub" -> Assert.IsTrue((xub.QualifiedStartPos).Contains("Ln: 4, Col: 39)"))
+            | "xuc" -> Assert.IsTrue((xuc.QualifiedStartPos).Contains("Ln: 4, Col: 41)"))
+            | "xva" -> Assert.IsTrue((xva.QualifiedStartPos).Contains("Ln: 4, Col: 37)"))
+            | "xvb" -> Assert.IsTrue((xvb.QualifiedStartPos).Contains("Ln: 4, Col: 39)"))
+            | "xvc" -> Assert.IsTrue((xvc.QualifiedStartPos).Contains("Ln: 4, Col: 41)"))
+            | "xwa" -> Assert.IsTrue((xwa.QualifiedStartPos).Contains("Ln: 4, Col: 37)"))
+            | "xwb" -> Assert.IsTrue((xwb.QualifiedStartPos).Contains("Ln: 4, Col: 39)"))
+            | "xwc" -> Assert.IsTrue((xwc.QualifiedStartPos).Contains("Ln: 4, Col: 41)"))
+            | "yua" -> Assert.IsTrue((yua.QualifiedStartPos).Contains("Ln: 4, Col: 37)"))
+            | "yub" -> Assert.IsTrue((yub.QualifiedStartPos).Contains("Ln: 4, Col: 39)"))
+            | "yuc" -> Assert.IsTrue((yuc.QualifiedStartPos).Contains("Ln: 4, Col: 41)"))
+            | "yva" -> Assert.IsTrue((yva.QualifiedStartPos).Contains("Ln: 4, Col: 37)"))
+            | "yvb" -> Assert.IsTrue((yvb.QualifiedStartPos).Contains("Ln: 4, Col: 39)"))
+            | "yvc" -> Assert.IsTrue((yvc.QualifiedStartPos).Contains("Ln: 4, Col: 41)"))
+            | "ywa" -> Assert.IsTrue((ywa.QualifiedStartPos).Contains("Ln: 4, Col: 37)"))
+            | "ywb" -> Assert.IsTrue((ywb.QualifiedStartPos).Contains("Ln: 4, Col: 39)"))
+            | "ywc" -> Assert.IsTrue((ywc.QualifiedStartPos).Contains("Ln: 4, Col: 41)"))
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
@@ -307,32 +309,32 @@ type TestFplValueScopeQualifiedStartPos() =
             | "r" -> Assert.AreEqual<string>("", r.QualifiedStartPos)
             | PrimTheoryL -> Assert.IsTrue((theory.QualifiedStartPos).Contains("Ln: 1, Col: 1)"))
             | "block" -> Assert.IsTrue((block.QualifiedStartPos).Contains("Ln: 2, Col: 13)")); 
-            | "x" -> Assert.IsTrue((x.QualifiedStartPos).Contains("Ln: 3, Col: 19)"))
-            | "y" -> Assert.IsTrue((y.QualifiedStartPos).Contains("Ln: 3, Col: 21)"))
-            | "xu" -> Assert.IsTrue((xu.QualifiedStartPos).Contains("Ln: 3, Col: 29)"))
-            | "xv" -> Assert.IsTrue((xv.QualifiedStartPos).Contains("Ln: 3, Col: 31)"))
-            | "xw" -> Assert.IsTrue((xw.QualifiedStartPos).Contains("Ln: 3, Col: 33)"))
-            | "yu" -> Assert.IsTrue((yu.QualifiedStartPos).Contains("Ln: 3, Col: 29)"))
-            | "yv" -> Assert.IsTrue((yv.QualifiedStartPos).Contains("Ln: 3, Col: 31)"))
-            | "yw" -> Assert.IsTrue((yw.QualifiedStartPos).Contains("Ln: 3, Col: 33)"))
-            | "xua" -> Assert.IsTrue((xua.QualifiedStartPos).Contains("Ln: 3, Col: 40)"))
-            | "xub" -> Assert.IsTrue((xub.QualifiedStartPos).Contains("Ln: 3, Col: 42)"))
-            | "xuc" -> Assert.IsTrue((xuc.QualifiedStartPos).Contains("Ln: 3, Col: 44)"))
-            | "xva" -> Assert.IsTrue((xva.QualifiedStartPos).Contains("Ln: 3, Col: 40)"))
-            | "xvb" -> Assert.IsTrue((xvb.QualifiedStartPos).Contains("Ln: 3, Col: 42)"))
-            | "xvc" -> Assert.IsTrue((xvc.QualifiedStartPos).Contains("Ln: 3, Col: 44)"))
-            | "xwa" -> Assert.IsTrue((xwa.QualifiedStartPos).Contains("Ln: 3, Col: 40)"))
-            | "xwb" -> Assert.IsTrue((xwb.QualifiedStartPos).Contains("Ln: 3, Col: 42)"))
-            | "xwc" -> Assert.IsTrue((xwc.QualifiedStartPos).Contains("Ln: 3, Col: 44)"))
-            | "yua" -> Assert.IsTrue((yua.QualifiedStartPos).Contains("Ln: 3, Col: 40)"))
-            | "yub" -> Assert.IsTrue((yub.QualifiedStartPos).Contains("Ln: 3, Col: 42)"))
-            | "yuc" -> Assert.IsTrue((yuc.QualifiedStartPos).Contains("Ln: 3, Col: 44)"))
-            | "yva" -> Assert.IsTrue((yva.QualifiedStartPos).Contains("Ln: 3, Col: 40)"))
-            | "yvb" -> Assert.IsTrue((yvb.QualifiedStartPos).Contains("Ln: 3, Col: 42)"))
-            | "yvc" -> Assert.IsTrue((yvc.QualifiedStartPos).Contains("Ln: 3, Col: 44)"))
-            | "ywa" -> Assert.IsTrue((ywa.QualifiedStartPos).Contains("Ln: 3, Col: 40)"))
-            | "ywb" -> Assert.IsTrue((ywb.QualifiedStartPos).Contains("Ln: 3, Col: 42)"))
-            | "ywc" -> Assert.IsTrue((ywc.QualifiedStartPos).Contains("Ln: 3, Col: 44)"))
+            | "x" -> Assert.IsTrue((x.QualifiedStartPos).Contains("Ln: 3, Col: 18)"))
+            | "y" -> Assert.IsTrue((y.QualifiedStartPos).Contains("Ln: 3, Col: 20)"))
+            | "xu" -> Assert.IsTrue((xu.QualifiedStartPos).Contains("Ln: 3, Col: 28)"))
+            | "xv" -> Assert.IsTrue((xv.QualifiedStartPos).Contains("Ln: 3, Col: 30)"))
+            | "xw" -> Assert.IsTrue((xw.QualifiedStartPos).Contains("Ln: 3, Col: 32)"))
+            | "yu" -> Assert.IsTrue((yu.QualifiedStartPos).Contains("Ln: 3, Col: 28)"))
+            | "yv" -> Assert.IsTrue((yv.QualifiedStartPos).Contains("Ln: 3, Col: 30)"))
+            | "yw" -> Assert.IsTrue((yw.QualifiedStartPos).Contains("Ln: 3, Col: 32)"))
+            | "xua" -> Assert.IsTrue((xua.QualifiedStartPos).Contains("Ln: 3, Col: 39)"))
+            | "xub" -> Assert.IsTrue((xub.QualifiedStartPos).Contains("Ln: 3, Col: 41)"))
+            | "xuc" -> Assert.IsTrue((xuc.QualifiedStartPos).Contains("Ln: 3, Col: 43)"))
+            | "xva" -> Assert.IsTrue((xva.QualifiedStartPos).Contains("Ln: 3, Col: 39)"))
+            | "xvb" -> Assert.IsTrue((xvb.QualifiedStartPos).Contains("Ln: 3, Col: 41)"))
+            | "xvc" -> Assert.IsTrue((xvc.QualifiedStartPos).Contains("Ln: 3, Col: 43)"))
+            | "xwa" -> Assert.IsTrue((xwa.QualifiedStartPos).Contains("Ln: 3, Col: 39)"))
+            | "xwb" -> Assert.IsTrue((xwb.QualifiedStartPos).Contains("Ln: 3, Col: 41)"))
+            | "xwc" -> Assert.IsTrue((xwc.QualifiedStartPos).Contains("Ln: 3, Col: 43)"))
+            | "yua" -> Assert.IsTrue((yua.QualifiedStartPos).Contains("Ln: 3, Col: 39)"))
+            | "yub" -> Assert.IsTrue((yub.QualifiedStartPos).Contains("Ln: 3, Col: 41)"))
+            | "yuc" -> Assert.IsTrue((yuc.QualifiedStartPos).Contains("Ln: 3, Col: 43)"))
+            | "yva" -> Assert.IsTrue((yva.QualifiedStartPos).Contains("Ln: 3, Col: 39)"))
+            | "yvb" -> Assert.IsTrue((yvb.QualifiedStartPos).Contains("Ln: 3, Col: 41)"))
+            | "yvc" -> Assert.IsTrue((yvc.QualifiedStartPos).Contains("Ln: 3, Col: 43)"))
+            | "ywa" -> Assert.IsTrue((ywa.QualifiedStartPos).Contains("Ln: 3, Col: 39)"))
+            | "ywb" -> Assert.IsTrue((ywb.QualifiedStartPos).Contains("Ln: 3, Col: 41)"))
+            | "ywc" -> Assert.IsTrue((ywc.QualifiedStartPos).Contains("Ln: 3, Col: 43)"))
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
@@ -529,87 +531,83 @@ type TestFplValueScopeQualifiedStartPos() =
     [<DataRow("base30", "B(In(x))")>]
     [<DataRow("base31", "C(Test1(a),Test2(b,c,d))")>]
     [<DataRow("base32", "E(true, undef, false)")>]
-    [<DataRow("base33", "dec ~p: pred(c: obj); p(c)")>]
+    [<DataRow("base33", "dec p: pred(c: obj); p(c)")>]
     [<DataRow("base34", "is(x, Set)")>]
     [<TestMethod>]
     member this.TestPredicate(var, varVal) =
-        ad.Clear()
-        let fplCode = sprintf "def pred T1() { %s };" varVal
+        
+        let fplCode = sprintf "def pred T1() { %s }" varVal
         let filename = "TestPredicateQualifiedStartPos"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+
+        let pr1 = theory.Scope["T1()"] 
+        let base1 = pr1.ArgList[0]
+
+        match var with
+        | "base1" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base2" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base3" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base4" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base5" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 21)"))
+        | "base6" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base7" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base8" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base9" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base10" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base11" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base12" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base13" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base11a" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base12a" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base10b" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base11b" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base12b" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base13b" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base10c" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base11c" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base12c" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base13c" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base10d" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base11d" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base12d" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base13d" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base10e" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base11e" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base12e" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base13e" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base10f" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base11f" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base12f" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base13f" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base14" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base15" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base15a" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 18)"))
+        | "base15b" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 19)"))
+        | "base16" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base17" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 34)"))
+        | "base18" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base19" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base20" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base21" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base21a" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base21b" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base22" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base23" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base24" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base25" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base26" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base27" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base28" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base29" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base30" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base31" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base32" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | "base33" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 38)"))
+        | "base34" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
+        | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-
-            let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ArgList[0]
-
-            match var with
-            | "base1" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base2" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base3" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base4" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base5" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base6" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base7" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base8" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base9" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base10" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base11" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base12" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base13" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base11a" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base12a" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base10b" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base11b" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base12b" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base13b" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base10c" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base11c" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base12c" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base13c" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base10d" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base11d" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base12d" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base13d" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base10e" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base11e" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base12e" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base13e" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base10f" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base11f" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base12f" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base13f" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base14" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base15" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base15a" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 18)"))
-            | "base15b" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 19)"))
-            | "base16" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base17" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 34)"))
-            | "base18" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base19" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base20" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base21" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base21a" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base21b" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base22" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base23" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base24" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base25" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base26" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base27" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base28" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base29" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base30" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base31" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base32" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base33" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 39)"))
-            | "base34" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
 
     [<DataRow("base1", "base.B()")>]
     [<DataRow("base2", "base.C(a, b, c, d)")>]
@@ -619,7 +617,7 @@ type TestFplValueScopeQualifiedStartPos() =
     [<DataRow("base6", "base.E(true, undef, false)")>]
     [<TestMethod>]
     member this.TestBaseConstructorCall(var, varVal) =
-        ad.Clear()
+        
         let fplCode = sprintf """
                         def cl B {intr}
                         def cl C {intr}
@@ -635,28 +633,24 @@ type TestFplValueScopeQualifiedStartPos() =
                                 
                             }
                         }
-                        ;""" varVal
+                        """ varVal
         let filename = "TestBaseConstructorCallQualifiedStartPos"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
-        prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let cl = theory.Scope["A"]
-            let ctor = cl.Scope["A(T1, func, ind, pred)"]
-            let base1 = ctor.ArgList[0]
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let cl = theory.Scope["A"]
+        let ctor = cl.Scope["A(T1, func, ind, pred)"]
+        let base1 = ctor.ArgList[0]
 
-            match var with
-            | "base1" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 11, Col: 37)"))
-            | "base2" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 11, Col: 37)"))
-            | "base3" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 11, Col: 37)"))
-            | "base4" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 11, Col: 37)"))
-            | "base5" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 11, Col: 37)"))
-            | "base6" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 11, Col: 37)"))
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
+        match var with
+        | "base1" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 11, Col: 37)"))
+        | "base2" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 11, Col: 37)"))
+        | "base3" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 11, Col: 37)"))
+        | "base4" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 11, Col: 37)"))
+        | "base5" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 11, Col: 37)"))
+        | "base6" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 11, Col: 37)"))
+        | _ -> Assert.IsTrue(false)
+        prepareFplCode(filename, "", false) |> ignore
 
     [<DataRow("base1", "del.B()")>]
     [<DataRow("base2", "del.C(a,b,c,d)")>]
@@ -667,230 +661,202 @@ type TestFplValueScopeQualifiedStartPos() =
     [<DataRow("base7", "del.E(true, undef, false)")>] 
     [<TestMethod>]
     member this.TestDelegate(var, varVal) =
-        ad.Clear()
-        let fplCode = sprintf "def pred T1() { %s };" varVal
+        
+        let fplCode = sprintf "def pred T1() { %s }" varVal
         let filename = "TestDelegateQualifiedStartPos"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+
+        let pr1 = theory.Scope["T1()"] 
+        let base1 = pr1.ArgList[0]
+
+        match var with
+        | "base1" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 21)"))
+        | "base2" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 21)"))
+        | "base3" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 21)"))
+        | "base4" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 21)"))
+        | "base5" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 21)"))
+        | "base6" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 21)"))
+        | "base7" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 21)"))
+        | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
 
-            let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ArgList[0]
-
-            match var with
-            | "base1" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base2" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base3" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base4" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base5" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base6" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | "base7" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
-
-    [<DataRow("base1", """def pred T1() {intr};""")>]
-    [<DataRow("base2", """def pred T1() infix ">" -1 {intr};""")>]
-    [<DataRow("base3", """def pred T1 () postfix "'" {intr};""")>]
-    [<DataRow("base4", """def pred T1 () prefix "-" {intr};""")>]
-    [<DataRow("base5", """def cl T1 symbol "∅" {intr};""")>]
-    [<DataRow("base5a", """def cl T1 {intr};""")>]
-    [<DataRow("base6", """def func T1()->obj {intr};""")>]
-    [<DataRow("base7", """def func T1 ()->obj infix ">" -1 {intr};""")>]
-    [<DataRow("base8", """def func T1 ()->obj postfix "'" {intr};""")>]
-    [<DataRow("base9", """def func T1 ()->obj prefix "-" {intr};""")>]
+    [<DataRow("base1", """def pred T1() {intr}""")>]
+    [<DataRow("base2", """def pred T1() infix ">" -1 {intr}""")>]
+    [<DataRow("base3", """def pred T1 () postfix "'" {intr}""")>]
+    [<DataRow("base4", """def pred T1 () prefix "-" {intr}""")>]
+    [<DataRow("base5", """def cl T1 symbol "∅" {intr}""")>]
+    [<DataRow("base5a", """def cl T1 {intr}""")>]
+    [<DataRow("base6", """def func T1()->obj {intr}""")>]
+    [<DataRow("base7", """def func T1 ()->obj infix ">" -1 {intr}""")>]
+    [<DataRow("base8", """def func T1 ()->obj postfix "'" {intr}""")>]
+    [<DataRow("base9", """def func T1 ()->obj prefix "-" {intr}""")>]
     [<TestMethod>]
     member this.TestFixNotationQualifiedStartPos(var, varVal) =
-        ad.Clear()
-        let fplCode = sprintf "%s;" varVal
+        
+        let fplCode = sprintf "%s" varVal
         let filename = "TestFixNotationQualifiedStartPos"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let base1 = 
+            if varVal.Contains LiteralCl then 
+                theory.Scope["T1"]
+            elif varVal.Contains LiteralFunc then 
+                theory.Scope["T1() -> obj"]
+            else 
+                theory.Scope["T1()"]
+
+        match var with
+        | "base1" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 5)"))
+        | "base2" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 5)"))
+        | "base3" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 5)"))
+        | "base4" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 5)"))
+        | "base5" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 5)"))
+        | "base5a" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 5)"))
+        | "base6" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 5)"))
+        | "base7" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 5)"))
+        | "base8" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 5)"))
+        | "base9" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 5)"))
+        | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let base1 = 
-                if varVal.Contains LiteralCl then 
-                    theory.Scope["T1"]
-                elif varVal.Contains LiteralFunc then 
-                    theory.Scope["T1() -> obj"]
-                else 
-                    theory.Scope["T1()"]
 
-            match var with
-            | "base1" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 5)"))
-            | "base2" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 5)"))
-            | "base3" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 5)"))
-            | "base4" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 5)"))
-            | "base5" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 5)"))
-            | "base5a" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 5)"))
-            | "base6" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 5)"))
-            | "base7" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 5)"))
-            | "base8" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 5)"))
-            | "base9" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 5)"))
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
-
-    [<DataRow("base1", """def func T()->obj {intr};""")>]
-    [<DataRow("base2", """def func T()->ind {intr};""")>]
-    [<DataRow("base3", """def func T()->func {intr};""")>]
-    [<DataRow("base4", """def func T()->pred {intr};""")>]
-    [<DataRow("base5", """def cl A {intr} def func T()->A {intr};""")>]
-    [<DataRow("base6", """def func T()->pred(z:ind) {intr};""")>]
-    [<DataRow("base7", """def func T()->pred(z:*obj[ind]) {intr};""")>]
-    [<DataRow("base8", """def func T()->func(p:*pred(x:obj)[ind])->pred(x:ind) {intr};""")>]
-    [<DataRow("base9", """def func T()->pred(f:*func(x:A)->A[ind]) {intr};""")>]
-    [<DataRow("base10", """def cl A {intr} def func T()->pred(f:func(x:A)->A) {intr};""")>]
+    [<DataRow("base1", """def func T()->obj {intr}""")>]
+    [<DataRow("base2", """def func T()->ind {intr}""")>]
+    [<DataRow("base3", """def func T()->func {intr}""")>]
+    [<DataRow("base4", """def func T()->pred {intr}""")>]
+    [<DataRow("base5", """def cl A {intr} def func T()->A {intr}""")>]
+    [<DataRow("base6", """def func T()->pred(z:ind) {intr}""")>]
+    [<DataRow("base7", """def func T()->pred(z:*obj[ind]) {intr}""")>]
+    [<DataRow("base8", """def func T()->func(p:*pred(x:obj)[ind])->pred(x:ind) {intr}""")>]
+    [<DataRow("base9", """def func T()->pred(f:*func(x:A)->A[ind]) {intr}""")>]
+    [<DataRow("base10", """def cl A {intr} def func T()->pred(f:func(x:A)->A) {intr}""")>]
     [<TestMethod>]
     member this.TestMapping(var, varVal) =
-        ad.Clear()
-        let fplCode = sprintf "%s;" varVal
+        
+        let fplCode = sprintf "%s" varVal
         let filename = "TestMappingQualifiedStartPos"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let base1 = theory.Scope |> Seq.filter (fun kvp -> kvp.Key.StartsWith("T(")) |> Seq.map (fun kvp -> kvp.Value) |> Seq.toList |> List.head
+        let mapping = base1.ArgList[0]
+        match var with
+        | "base1" -> Assert.AreEqual<string>("TestMappingQualifiedStartPos(Ln: 1, Col: 15)", (mapping.QualifiedStartPos).ToString())
+        | "base2" -> Assert.AreEqual<string>("TestMappingQualifiedStartPos(Ln: 1, Col: 15)", (mapping.QualifiedStartPos).ToString())
+        | "base3" -> Assert.AreEqual<string>("TestMappingQualifiedStartPos(Ln: 1, Col: 15)", (mapping.QualifiedStartPos).ToString())
+        | "base4" -> Assert.AreEqual<string>("TestMappingQualifiedStartPos(Ln: 1, Col: 15)", (mapping.QualifiedStartPos).ToString())
+        | "base5" -> Assert.AreEqual<string>("TestMappingQualifiedStartPos(Ln: 1, Col: 31)", (mapping.QualifiedStartPos).ToString())
+        | "base6" -> Assert.AreEqual<string>("TestMappingQualifiedStartPos(Ln: 1, Col: 15)", (mapping.QualifiedStartPos).ToString())
+        | "base7" -> Assert.AreEqual<string>("TestMappingQualifiedStartPos(Ln: 1, Col: 15)", (mapping.QualifiedStartPos).ToString())
+        | "base8" -> Assert.AreEqual<string>("TestMappingQualifiedStartPos(Ln: 1, Col: 15)", (mapping.QualifiedStartPos).ToString())
+        | "base9" -> Assert.AreEqual<string>("TestMappingQualifiedStartPos(Ln: 1, Col: 15)", (mapping.QualifiedStartPos).ToString())
+        | "base10" -> Assert.AreEqual<string>("TestMappingQualifiedStartPos(Ln: 1, Col: 31)", (mapping.QualifiedStartPos).ToString())
+        | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let base1 = theory.Scope |> Seq.filter (fun kvp -> kvp.Key.StartsWith("T(")) |> Seq.map (fun kvp -> kvp.Value) |> Seq.toList |> List.head
-            let mapping = base1.ArgList[0]
-            match var with
-            | "base1" -> Assert.AreEqual<string>("TestMappingQualifiedStartPos(Ln: 1, Col: 15)", (mapping.QualifiedStartPos).ToString())
-            | "base2" -> Assert.AreEqual<string>("TestMappingQualifiedStartPos(Ln: 1, Col: 15)", (mapping.QualifiedStartPos).ToString())
-            | "base3" -> Assert.AreEqual<string>("TestMappingQualifiedStartPos(Ln: 1, Col: 15)", (mapping.QualifiedStartPos).ToString())
-            | "base4" -> Assert.AreEqual<string>("TestMappingQualifiedStartPos(Ln: 1, Col: 15)", (mapping.QualifiedStartPos).ToString())
-            | "base5" -> Assert.AreEqual<string>("TestMappingQualifiedStartPos(Ln: 1, Col: 31)", (mapping.QualifiedStartPos).ToString())
-            | "base6" -> Assert.AreEqual<string>("TestMappingQualifiedStartPos(Ln: 1, Col: 15)", (mapping.QualifiedStartPos).ToString())
-            | "base7" -> Assert.AreEqual<string>("TestMappingQualifiedStartPos(Ln: 1, Col: 15)", (mapping.QualifiedStartPos).ToString())
-            | "base8" -> Assert.AreEqual<string>("TestMappingQualifiedStartPos(Ln: 1, Col: 15)", (mapping.QualifiedStartPos).ToString())
-            | "base9" -> Assert.AreEqual<string>("TestMappingQualifiedStartPos(Ln: 1, Col: 15)", (mapping.QualifiedStartPos).ToString())
-            | "base10" -> Assert.AreEqual<string>("TestMappingQualifiedStartPos(Ln: 1, Col: 31)", (mapping.QualifiedStartPos).ToString())
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
 
-    [<DataRow("base1", """100. |- trivial""")>]
+    [<DataRow("base1", """100: trivial""")>]
     [<DataRow("base2", """100. ExistsByExample, 1 |- false""")>]
     [<DataRow("base3", """100. T1 |- assume not somePremise """)>]
     [<DataRow("base4", """100. 2, 3, 5 |- iif (a,b)""")>]
-    [<DataRow("base5", """100. |- revoke 3""")>]
+    [<DataRow("base5", """100: revoke 3""")>]
     [<TestMethod>]
     member this.TestArgumentQualifiedStartPos(var, argExpression) =
-        ad.Clear()
-        let fplCode = sprintf """proof T$1 { %s };""" argExpression
+        
+        let fplCode = sprintf """proof T$1 { %s }""" argExpression
         let filename = "TestArgumentQualifiedStartPos"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let proof = theory.Scope["T$1"]
+        let arg = proof.Scope["100"]
+        match var with
+        | "base1" -> Assert.AreEqual<string>("TestArgumentQualifiedStartPos(Ln: 1, Col: 13)", (arg.QualifiedStartPos).ToString())
+        | "base2" -> Assert.AreEqual<string>("TestArgumentQualifiedStartPos(Ln: 1, Col: 13)", (arg.QualifiedStartPos).ToString())
+        | "base3" -> Assert.AreEqual<string>("TestArgumentQualifiedStartPos(Ln: 1, Col: 13)", (arg.QualifiedStartPos).ToString())
+        | "base4" -> Assert.AreEqual<string>("TestArgumentQualifiedStartPos(Ln: 1, Col: 13)", (arg.QualifiedStartPos).ToString())
+        | "base5" -> Assert.AreEqual<string>("TestArgumentQualifiedStartPos(Ln: 1, Col: 13)", (arg.QualifiedStartPos).ToString())
+        | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let proof = theory.Scope["T$1"]
-            let arg = proof.Scope["100"]
-            match var with
-            | "base1" -> Assert.AreEqual<string>("TestArgumentQualifiedStartPos(Ln: 1, Col: 13)", (arg.QualifiedStartPos).ToString())
-            | "base2" -> Assert.AreEqual<string>("TestArgumentQualifiedStartPos(Ln: 1, Col: 13)", (arg.QualifiedStartPos).ToString())
-            | "base3" -> Assert.AreEqual<string>("TestArgumentQualifiedStartPos(Ln: 1, Col: 13)", (arg.QualifiedStartPos).ToString())
-            | "base4" -> Assert.AreEqual<string>("TestArgumentQualifiedStartPos(Ln: 1, Col: 13)", (arg.QualifiedStartPos).ToString())
-            | "base5" -> Assert.AreEqual<string>("TestArgumentQualifiedStartPos(Ln: 1, Col: 13)", (arg.QualifiedStartPos).ToString())
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
 
-    [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr";""")>]
-    [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
-    [<DataRow("base2", "not(undef)", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
-    [<DataRow("base3", "and(undef, undef)", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q;""")>]
-    [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""")>]
-    [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
+    [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr" """)>]
+    [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y""")>]
+    [<DataRow("base2", "not(undef)", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x""")>]
+    [<DataRow("base3", "and(undef, undef)", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q""")>]
+    [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y""")>]
+    [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y""")>]
     [<TestMethod>]
     member this.TestLanguageQualifiedStartPos(var, predName, predDecl, trslCode) =
-        ad.Clear()
+        
         let fplCode = sprintf """loc %s := %s;""" predDecl trslCode
         let filename = "TestLanguageQualifiedStartPos"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pred = theory.Scope[predName]
+        let lang = pred.Scope["tex"]
+
+        match var with
+        | "base0" -> Assert.AreEqual<string>("TestLanguageQualifiedStartPos(Ln: 1, Col: 14)", (lang.QualifiedStartPos).ToString())
+        | "base1" -> Assert.AreEqual<string>("TestLanguageQualifiedStartPos(Ln: 1, Col: 19)", (lang.QualifiedStartPos).ToString())
+        | "base2" -> Assert.AreEqual<string>("TestLanguageQualifiedStartPos(Ln: 1, Col: 16)", (lang.QualifiedStartPos).ToString())
+        | "base3" -> Assert.AreEqual<string>("TestLanguageQualifiedStartPos(Ln: 1, Col: 19)", (lang.QualifiedStartPos).ToString())
+        | "base4" -> Assert.AreEqual<string>("TestLanguageQualifiedStartPos(Ln: 1, Col: 21)", (lang.QualifiedStartPos).ToString())
+        | "base5" -> Assert.AreEqual<string>("TestLanguageQualifiedStartPos(Ln: 1, Col: 24)", (lang.QualifiedStartPos).ToString())
+        | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let pred = theory.Scope[predName]
-            let lang = pred.Scope["tex"]
 
-            match var with
-            | "base0" -> Assert.AreEqual<string>("TestLanguageQualifiedStartPos(Ln: 1, Col: 14)", (lang.QualifiedStartPos).ToString())
-            | "base1" -> Assert.AreEqual<string>("TestLanguageQualifiedStartPos(Ln: 1, Col: 19)", (lang.QualifiedStartPos).ToString())
-            | "base2" -> Assert.AreEqual<string>("TestLanguageQualifiedStartPos(Ln: 1, Col: 16)", (lang.QualifiedStartPos).ToString())
-            | "base3" -> Assert.AreEqual<string>("TestLanguageQualifiedStartPos(Ln: 1, Col: 19)", (lang.QualifiedStartPos).ToString())
-            | "base4" -> Assert.AreEqual<string>("TestLanguageQualifiedStartPos(Ln: 1, Col: 21)", (lang.QualifiedStartPos).ToString())
-            | "base5" -> Assert.AreEqual<string>("TestLanguageQualifiedStartPos(Ln: 1, Col: 24)", (lang.QualifiedStartPos).ToString())
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
-
-    [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr";""")>]
-    [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
-    [<DataRow("base2", "not(undef)", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
-    [<DataRow("base3", "and(undef, undef)", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q;""")>]
-    [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""")>]
-    [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
+    [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr" """)>]
+    [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y""")>]
+    [<DataRow("base2", "not(undef)", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x""")>]
+    [<DataRow("base3", "and(undef, undef)", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q""")>]
+    [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y""")>]
+    [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y""")>]
     [<TestMethod>]
     member this.TestLocalizationQualifiedStartPos(var, predName, predDecl, trslCode) =
-        ad.Clear()
+        
         let fplCode = sprintf """loc %s := %s;""" predDecl trslCode
         let filename = "TestLocalizationQualifiedStartPos"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pred = theory.Scope[predName]
+
+        match var with
+        | "base0" -> Assert.AreEqual<string>("TestLocalizationQualifiedStartPos(Ln: 1, Col: 1)", (pred.QualifiedStartPos).ToString())
+        | "base1" -> Assert.AreEqual<string>("TestLocalizationQualifiedStartPos(Ln: 1, Col: 1)", (pred.QualifiedStartPos).ToString())
+        | "base2" -> Assert.AreEqual<string>("TestLocalizationQualifiedStartPos(Ln: 1, Col: 1)", (pred.QualifiedStartPos).ToString())
+        | "base3" -> Assert.AreEqual<string>("TestLocalizationQualifiedStartPos(Ln: 1, Col: 1)", (pred.QualifiedStartPos).ToString())
+        | "base4" -> Assert.AreEqual<string>("TestLocalizationQualifiedStartPos(Ln: 1, Col: 1)", (pred.QualifiedStartPos).ToString())
+        | "base5" -> Assert.AreEqual<string>("TestLocalizationQualifiedStartPos(Ln: 1, Col: 1)", (pred.QualifiedStartPos).ToString())
+        | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let pred = theory.Scope[predName]
 
-            match var with
-            | "base0" -> Assert.AreEqual<string>("TestLocalizationQualifiedStartPos(Ln: 1, Col: 1)", (pred.QualifiedStartPos).ToString())
-            | "base1" -> Assert.AreEqual<string>("TestLocalizationQualifiedStartPos(Ln: 1, Col: 1)", (pred.QualifiedStartPos).ToString())
-            | "base2" -> Assert.AreEqual<string>("TestLocalizationQualifiedStartPos(Ln: 1, Col: 1)", (pred.QualifiedStartPos).ToString())
-            | "base3" -> Assert.AreEqual<string>("TestLocalizationQualifiedStartPos(Ln: 1, Col: 1)", (pred.QualifiedStartPos).ToString())
-            | "base4" -> Assert.AreEqual<string>("TestLocalizationQualifiedStartPos(Ln: 1, Col: 1)", (pred.QualifiedStartPos).ToString())
-            | "base5" -> Assert.AreEqual<string>("TestLocalizationQualifiedStartPos(Ln: 1, Col: 1)", (pred.QualifiedStartPos).ToString())
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
-
-    [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr";""")>]
-    [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
-    [<DataRow("base2", "not(undef)", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
-    [<DataRow("base3", "and(undef, undef)", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q;""")>]
-    [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""")>]
-    [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
+    [<DataRow("base0", LiteralTrue, LiteralTrue, """!tex: "1" !eng: "true" !ger: "wahr" """)>]
+    [<DataRow("base1", "iif(undef, undef)", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y""")>]
+    [<DataRow("base2", "not(undef)", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x""")>]
+    [<DataRow("base3", "and(undef, undef)", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q""")>]
+    [<DataRow("base4", "Equal(undef, undef)", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y""")>]
+    [<DataRow("base5", "NotEqual(undef, undef)", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y""")>]
     [<TestMethod>]
     member this.TestTranslationQualifiedStartPos(var, predName, predDecl, trslCode) =
-        ad.Clear()
+        
         let fplCode = sprintf """loc %s := %s;""" predDecl trslCode
         let filename = "TestTranslationQualifiedStartPos"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
-        prepareFplCode(filename, "", false) |> ignore
-        match stOption with
-        | Some st -> 
-            let r = st.Root
-            let theory = r.Scope[filename]
-            let pred = theory.Scope[predName]
-            let lang = pred.Scope["tex"]
-            let trsl = lang.ArgList[0]
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pred = theory.Scope[predName]
+        let lang = pred.Scope["tex"]
+        let trsl = lang.ArgList[0]
 
-            match var with
-            | "base0" -> Assert.AreEqual<string>("TestTranslationQualifiedStartPos(Ln: 1, Col: 19)", (trsl.QualifiedStartPos).ToString())
-            | "base1" -> Assert.AreEqual<string>("TestTranslationQualifiedStartPos(Ln: 1, Col: 24)", (trsl.QualifiedStartPos).ToString())
-            | "base2" -> Assert.AreEqual<string>("TestTranslationQualifiedStartPos(Ln: 1, Col: 21)", (trsl.QualifiedStartPos).ToString())
-            | "base3" -> Assert.AreEqual<string>("TestTranslationQualifiedStartPos(Ln: 1, Col: 24)", (trsl.QualifiedStartPos).ToString())
-            | "base4" -> Assert.AreEqual<string>("TestTranslationQualifiedStartPos(Ln: 1, Col: 26)", (trsl.QualifiedStartPos).ToString())
-            | "base5" -> Assert.AreEqual<string>("TestTranslationQualifiedStartPos(Ln: 1, Col: 29)", (trsl.QualifiedStartPos).ToString())
-            | _ -> Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
+        match var with
+        | "base0" -> Assert.AreEqual<string>("TestTranslationQualifiedStartPos(Ln: 1, Col: 19)", (trsl.QualifiedStartPos).ToString())
+        | "base1" -> Assert.AreEqual<string>("TestTranslationQualifiedStartPos(Ln: 1, Col: 24)", (trsl.QualifiedStartPos).ToString())
+        | "base2" -> Assert.AreEqual<string>("TestTranslationQualifiedStartPos(Ln: 1, Col: 21)", (trsl.QualifiedStartPos).ToString())
+        | "base3" -> Assert.AreEqual<string>("TestTranslationQualifiedStartPos(Ln: 1, Col: 24)", (trsl.QualifiedStartPos).ToString())
+        | "base4" -> Assert.AreEqual<string>("TestTranslationQualifiedStartPos(Ln: 1, Col: 26)", (trsl.QualifiedStartPos).ToString())
+        | "base5" -> Assert.AreEqual<string>("TestTranslationQualifiedStartPos(Ln: 1, Col: 29)", (trsl.QualifiedStartPos).ToString())
+        | _ -> Assert.IsTrue(false)
+        prepareFplCode(filename, "", false) |> ignore

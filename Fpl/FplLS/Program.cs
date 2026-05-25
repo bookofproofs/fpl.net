@@ -1,9 +1,10 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using OmniSharp.Extensions.LanguageServer.Server;
 using static ErrDiagnostics;
-using static FplInterpreterTypes;
+using static FplInterpreter.Globals.Heap;
+
 
 namespace FplLS
 {
@@ -35,9 +36,6 @@ namespace FplLS
 
         static async Task Main()
         {
-            ParsedAstList _parsedAstsList = [];
-
-            var st = new SymbolTable(_parsedAstsList, false, false);
 
             var server = await LanguageServer.From(options =>
                 options
@@ -50,7 +48,13 @@ namespace FplLS
                     .WithHandler<CompletionHandler>()
                     .OnRequest<JToken, string>("getTreeData", (request, cancellationToken) =>
                     {
-                        return Task.FromResult(st.ToJson());
+                        while (heap.IsEvaluating) { }
+                        return Task.FromResult(heap.SymbolTable.ToJson());
+                    })
+                    .OnRequest<JToken, string>("getValidStmts", (request, cancellationToken) =>
+                    {
+                        while (heap.IsEvaluating) { }
+                        return Task.FromResult(heap.ValidStmtStore.ToJson());
                     })
                     .OnInitialize((s, _, _) =>
                     {
@@ -62,7 +66,7 @@ namespace FplLS
 
                             // Hook up diagnostics
                             bufferManager.BufferUpdated += (__, x) =>
-                                diagnosticsHandler.PublishDiagnostics(st,
+                                diagnosticsHandler.PublishDiagnostics(
                                     new PathEquivalentUri(x.Uri.AbsoluteUri),
                                     bufferManager.GetBuffer(x.Uri));
 
