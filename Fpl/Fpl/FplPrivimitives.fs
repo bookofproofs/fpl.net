@@ -314,7 +314,7 @@ let replaceLinesWithSpaces (input: string) (pattern: string) =
 /// Replaces in the `input` all FPL comments by spaces while preserving new lines
 let removeFplComments (input:string) = 
     let r1 = replaceLinesWithSpaces input $"\/\/[^{Environment.NewLine}]*" // replace inline comments
-    replaceLinesWithSpaces r1 $"\/\*((?:.|{Environment.NewLine})*?)\*\/" // replace block comments
+    replaceLinesWithSpaces r1 $"\/\*((?:.|\n)*?)\*\/" // replace block comments
 
 
 /// Special math symbols that can be used as infix, postfix, prefix operators, or other mathematical symbols;
