@@ -400,8 +400,10 @@ let rec eval ast =
         fv.EndPos <- pos2
         checkSIG01Diagnostics fv
     | Ast.ArgumentIdentifier((pos1, pos2), argumentId) -> 
-        let fv = heap.Eval.PeekEvalStack()
-        fv.FplId <- argumentId.Substring(0,argumentId.Length-1) // argument id without the "." at the end
+        let justification = heap.Eval.PeekEvalStack()
+        match justification.Parent with
+        | Some argument -> argument.FplId <- argumentId.Substring(0,argumentId.Length-1) // argument id without the "." at the end
+        | _ -> ()
     | Ast.RefArgumentIdentifier((pos1, pos2), argumentId) -> 
         let fv = heap.Eval.PeekEvalStack()
         match fv.Name with 
@@ -651,13 +653,16 @@ let rec eval ast =
         heap.Eval.PopEvalStack()
     | Ast.JustificationItem((pos1, pos2), justificationReferenceAst) ->
         eval justificationReferenceAst 
-    | Ast.Justification((pos1, pos2), justificationItemAstsOpt) ->
+    | Ast.StartArgument argumentIdentifier ->
+        eval argumentIdentifier
+    | Ast.StartArgumentStictly (argumentIdentifier, justificationItemListAsts) ->
+        eval argumentIdentifier
+        justificationItemListAsts |> List.map eval |> ignore
+    | Ast.Justification((pos1, pos2), justificationItemAst) ->
         let fv = heap.Eval.PeekEvalStack()
-        let just = new FplJustification((pos1, pos2), fv) 
+        let just = new FplJustification((pos1, pos2), fv)
         heap.Eval.PushEvalStack(just)
-        match justificationItemAstsOpt with
-        | Some justificationItemAsts -> justificationItemAsts |> List.map eval |> ignore
-        | None -> ()
+        eval justificationItemAst
         heap.Eval.PopEvalStack()
     | Ast.ArgumentTuple((pos1, pos2), predicateListAst) ->
         let next = heap.Eval.PeekEvalStack()
@@ -1287,12 +1292,11 @@ let rec eval ast =
     | Ast.JustArgInf((pos1, pos2), (justificationAst, argumentInferenceAst)) ->
         eval justificationAst
         eval argumentInferenceAst
-    | Ast.Argument((pos1, pos2), (argIdAst, argAst)) ->
+    | Ast.Argument((pos1, pos2), (justifiedArgumentAst)) ->
         let fv = heap.Eval.PeekEvalStack()
         let arg = new FplArgument((pos1, pos2), fv, heap.Helper.GetNextAvailableFplBlockRunOrder) 
         heap.Eval.PushEvalStack(arg)
-        eval argIdAst
-        eval argAst
+        eval justifiedArgumentAst
         heap.Eval.PopEvalStack()
     | Ast.ForIn((pos1, pos2), (((entityAst, inDomainAst), statementListAst))) ->
         let parent = heap.Eval.PeekEvalStack()

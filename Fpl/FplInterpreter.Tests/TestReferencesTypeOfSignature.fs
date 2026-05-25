@@ -232,7 +232,7 @@ type TestReferencesTypeOfSignature() =
     [<DataRow("""prop T {true}""", "pred")>]
     [<DataRow("""conj T {true}""", "pred")>]
     [<DataRow("""cor T$1 {true}""", "pred")>]
-    [<DataRow("""proof T$1 {1. |- trivial}""","pred")>]
+    [<DataRow("""proof T$1 {1: trivial}""","pred")>]
     [<DataRow("""def pred T(p:obj) {true}""","pred(obj)")>]
     [<DataRow("""def pred T() {true}""", "pred()")>]
     [<DataRow("""inf T {pre: true con:true}""", "undef")>]

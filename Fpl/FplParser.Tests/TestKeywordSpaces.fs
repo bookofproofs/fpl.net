@@ -495,28 +495,28 @@ type TestKeywordSpaces() =
 
     [<TestMethod>]
     member this.TestSpacesQed () =
-        let result = run (proof .>> eof) "proof T$1{1.|- trivial qed}"
+        let result = run (proof .>> eof) "proof T$1{1: trivial qed}"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSpacesQedA () =
-        let result = run (proof .>> eof) "proof T$1{1.|- trivial qedx}"
+        let result = run (proof .>> eof) "proof T$1{1: trivial qedx}"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("<whitespace>"))
 
     [<TestMethod>]
     member this.TestSpacesTrivial () =
-        let result = run (proof .>> eof) "proof T$1{1.|- trivial qed}"
+        let result = run (proof .>> eof) "proof T$1{1: trivial qed}"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSpacesTrivialA () =
-        let result = run (proof .>> eof) "proof T$1{1.|- trivialx qed}"
+        let result = run (proof .>> eof) "proof T$1{1: trivialx qed}"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("<whitespace>"))
@@ -562,7 +562,7 @@ type TestKeywordSpaces() =
     [<DataRow(LiteralPrf)>]
     [<TestMethod>]
     member this.TestSpacesProof (word:string) =
-        let result = run (proof .>> eof) ($"{word}x" + " T$1 {1. |- true }")
+        let result = run (proof .>> eof) ($"{word}x" + " T$1 {1: true }")
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("<significant whitespace>"))

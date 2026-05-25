@@ -57,7 +57,7 @@ type TestRecovery() =
     [<DataRow("func03", """def func T:,()->obj """)>]
     [<DataRow("inf01", """inf {pre:true con:true}""")>]
     [<DataRow("cor01", """cor $1 {true}""")>]
-    [<DataRow("proof01", """proof $1 {1. |- trivial}""")>]
+    [<DataRow("proof01", """proof $1 {1: trivial}""")>]
     [<DataRow("ext01", """ext  x@/\d+/ -> X {ret x}""")>]
     [<DataRow("del01", """def pred T() {del. ()}""")>]
     [<DataRow("del02", """def pred T() {del.()}""")>]
@@ -84,7 +84,7 @@ type TestRecovery() =
     [<DataRow("ext01", "ext Digits x@/\d+/ -> X ret x}")>]
     [<DataRow("for01", "def pred T() {dec for x in y assert z};true}")>]
     [<DataRow("ctor01", "def cl T {ctor T() }}")>]
-    [<DataRow("prf01", "prf T$1 1. |- trivial }")>]
+    [<DataRow("prf01", "prf T$1 1: trivial }")>]
     [<TestMethod>]
     member this.TestMissingOpeningBrace(no:string, fplCode) =
         ad.Clear()
@@ -108,7 +108,7 @@ type TestRecovery() =
     [<DataRow("ctor01", "def cl T {ctor T() {}")>]
     [<DataRow("propPred01", "def cl T {intr prty pred S() {intr }")>]
     [<DataRow("propFunc01", "def cl T {intr prty func S()->obj {intr }")>]
-    [<DataRow("prf01", "prf T$1 {1. |- trivial ")>]
+    [<DataRow("prf01", "prf T$1 {1: trivial ")>]
     [<TestMethod>]
     member this.TestMissingClosingBrace(no:string, fplCode) =
         ad.Clear()
@@ -173,8 +173,6 @@ type TestRecovery() =
         printf "%O" actual
         Assert.AreEqual<bool>(false, success)
 
-    [<DataRow("endOfFile01", """""")>]
-    [<DataRow("endOfFile02", """ """)>]
     [<DataRow("loc01", """loc not (x) := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x """)>]
     [<DataRow("loc02", """loc not (x) := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x def cl A""")>]
     [<DataRow("dec01", """def pred T() {dec x:obj true}""")>]

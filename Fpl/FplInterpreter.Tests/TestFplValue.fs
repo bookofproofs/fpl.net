@@ -18,12 +18,12 @@ type TestFplValue() =
     [<DataRow("corollary TestId$1$2 {true}", "TestId$1$2", "pred")>]
     [<DataRow("corollary TestId$1$2$3 {true}", "TestId$1$2$3", "pred")>]
 
-    [<DataRow("proof TestId$1 {1. |- trivial} ", "TestId$1", "pred")>]
-    [<DataRow("proof TestId$1$2 {1. |- trivial} ", "TestId$1$2", "pred")>]
-    [<DataRow("proof TestId$1$2$3 {1. |- trivial} ", "TestId$1$2$3", "pred")>]
+    [<DataRow("proof TestId$1 {1: trivial}", "TestId$1", "pred")>]
+    [<DataRow("proof TestId$1$2 {1: trivial}", "TestId$1$2", "pred")>]
+    [<DataRow("proof TestId$1$2$3 {1: trivial}", "TestId$1$2$3", "pred")>]
 
     
-    [<DataRow("def class Test:Obj proof Test$1 {1. |- trivial}", "Test", "Test")>]
+    [<DataRow("def class Test:Obj proof Test$1 {1: trivial}", "Test", "Test")>]
     [<DataRow("def class TestId:Obj", "TestId", "TestId")>]
     [<DataRow("def class TestId:Nat1, Nat2, Nat3, Nat4 {intrinsic} ", "TestId", "TestId")>]
     [<DataRow("def class TestId:Nat3 {intrinsic} ", "TestId", "TestId")>]

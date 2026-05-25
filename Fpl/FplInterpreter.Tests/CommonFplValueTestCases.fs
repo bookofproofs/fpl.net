@@ -292,8 +292,8 @@ type CommonFplValueTestCases =
             def func SomeFunctionalTerm7()->SomeClass1 {dec v:SomeClass1 v:=SomeClass1(); return v}
             def func SomeFunctionalTerm8()->ind {return $112}
             def func SomeFunctionalTerm9()->ind {dec v:ind v:=$13; return v}
-            proof SomeTheorem1$1 {1. |- trivial}
-            proof SomeTheorem2$1 {1. |- trivial}
+            proof SomeTheorem1$1 {1: trivial}
+            proof SomeTheorem2$1 {1: trivial}
             loc not(x) := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;
             loc Equal(x,y) := !tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;
         
@@ -345,16 +345,16 @@ type CommonFplValueTestCases =
         let fplCode = """
 
             theorem TestTheorem1 {true} 
-            proof TestTheorem1$1 {1. |- trivial} 
+            proof TestTheorem1$1 {1: trivial}
             
             lemma TestLemma1 {true} 
-            proof TestLemma1$1 {1. |- trivial} 
+            proof TestLemma1$1 {1: trivial}
             
             proposition TestProposition1 {true} 
-            proof TestProposition1$1 {1. |- trivial} 
+            proof TestProposition1$1 {1: trivial}
             
             corollary TestCorollary1$2 {true} 
-            proof TestCorollary1$2$1 {1. |- trivial} 
+            proof TestCorollary1$2$1 {1: trivial}
 
             theorem TestTheorem2 {true} 
             corollary TestTheorem2$1 {true}  

@@ -14,20 +14,11 @@ type TestProofs () =
         input.Split(whiteSpaceChars)
             |> String.concat ""
 
-    [<DataRow("""GreaterAB |-""")>]
-    [<DataRow("""ProceedingResults, 1 |-""")>]    
-    [<DataRow("""GreaterAB |-""")>]
-    [<DataRow("""GreaterAB |-""")>]
-    [<DataRow("""GreaterAB |-""")>]
-    [<DataRow("""GreaterAB |-""")>]
-    [<DataRow("""GreaterAB |-""")>]
-    [<DataRow("""GreaterAB |-""")>]
-    [<DataRow("""GreaterAB |-""")>]
-    [<DataRow("""3, GreaterTransitive  |-""")>]
-    [<DataRow("""4, byinf ModusPonens |- """)>]
-    [<DataRow(""" |- """)>]
-    [<DataRow("""1,2,  3 |- """)>]
-    [<DataRow("""|-""")>]
+    [<DataRow("""1. GreaterAB |-""")>]
+    [<DataRow("""1. ProceedingResults, 1 |-""")>]    
+    [<DataRow("""1. 3, GreaterTransitive  |-""")>]
+    [<DataRow("""1. 4, byinf ModusPonens |- """)>]
+    [<DataRow("""1. 1,2,  3 |- """)>]
      
     [<TestMethod>]
     member this.TestJustificationSuccess (fplCode:string) =
@@ -36,7 +27,13 @@ type TestProofs () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
+    [<DataRow("""3, GreaterTransitive  |-""")>]
+    [<DataRow("""4, byinf ModusPonens |- """)>]
+    [<DataRow("""1,2,  3 |- """)>]
+    [<DataRow("""ProceedingResults, 1 |-""")>]    
     [<DataRow("""GreaterAB""")>]
+    [<DataRow("""|-""")>]
+    [<DataRow(""" |- """)>]
     [<TestMethod>]
     member this.TestJustificationFailure (fplCode:string) =
         let result = run (justification .>> eof) fplCode
@@ -103,35 +100,35 @@ type TestProofs () =
 
     [<TestMethod>]
     member this.TestArgumentInference01 () =
-        let result = run (argumentInference .>> eof) """|- qed"""
+        let result = run (argumentInference .>> eof) """qed"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestArgumentInference02 () =
-        let result = run (argumentInference .>> eof) """|- trivial"""
+        let result = run (argumentInference .>> eof) """trivial"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestArgumentInference03 () =
-        let result = run (argumentInference .>> eof) """|- con"""
+        let result = run (argumentInference .>> eof) """con"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestArgumentInference04 () =
-        let result = run (argumentInference .>> eof) """|- conclusion"""
+        let result = run (argumentInference .>> eof) """conclusion"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestArgumentInference05 () =
-        let result = run (argumentInference .>> eof) """|- and(a,b)"""
+        let result = run (argumentInference .>> eof) """and(a,b)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -141,92 +138,54 @@ type TestProofs () =
         let result = run (argumentInference .>> eof) """|- revoke 2"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
-    [<DataRow("|-and(a,b)")>]
-    [<DataRow("|- revoke 2")>]
-    [<DataRow("bydef A, 1, C |- revoke 2")>]
-    [<DataRow("T$1:1 |- revoke 2")>]
-    [<DataRow("T$1:1, T$1:2, T$1: 3 |- revoke 2")>]
-    [<DataRow("|- assume and(a,b)")>]
-    [<DataRow("assume true")>]
-    [<DataRow("revoke 2")>]
+    [<DataRow("1: and(a,b)")>]
+    [<DataRow("1: revoke 2")>]
+    [<DataRow("1. bydef A, 1, C |- revoke 2")>]
+    [<DataRow("1. T$1:1 |- revoke 2")>]
+    [<DataRow("1. T$1:1, T$1:2, T$1: 3 |- revoke 2")>]
+    [<DataRow("1: assume and(a,b)")>]
+    [<DataRow("1: assume true")>]
+    [<DataRow("1: revoke 2")>]
     [<TestMethod>]
-    member this.TestArgument (test:string) =
+    member this.TestArgumentSuccess (test:string) =
         let result = run (justifiedArgument .>> eof) test
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
 
+    [<DataRow("1: B, C |- revoke 2")>]
+    [<DataRow("1. |- revoke 2")>]
+    [<DataRow("1: qed")>]
+    [<DataRow("1: |- trivial")>]
+    [<DataRow("1. |- trivial")>]
+    [<DataRow("2, 3 |- trivial")>]
     [<TestMethod>]
-    member this.TestArgument02 () =
-        let result = run (justifiedArgument .>> eof) """B, C |- revoke 2"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestArgument03 () =
-        let result = run (justifiedArgument .>> eof) """|- revoke 2"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestArgument04 () =
-        let result = run (justifiedArgument .>> eof) """|- qed"""
+    member this.TestArgumentFailure (test:string) =
+        let result = run (justifiedArgument .>> eof) test
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
+    [<DataRow("""proof Example4$1 {1. GreaterAB |- Greater(a,b) qed}""")>]
+    [<DataRow("""prf AddIsUnique$1 {1: assume and(x,b) 2: trivial qed}""")>]
     [<TestMethod>]
-    member this.TestArgument05 () =
-        let result = run (justifiedArgument .>> eof) """|- trivial"""
+    member this.TestProofSuccess (test:string) =
+        let result = run (proof .>> eof) test
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<TestMethod>]
-    member this.TestArgument06 () =
-        let result = run (justifiedArgument .>> eof) """2, 3 |- trivial"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
 
+    [<DataRow("""prf AddIsUnique$1 {1: assume pre 2: trivial}""")>]
     [<TestMethod>]
-    member this.TestProof01 () =
-        let result = run (proof .>> eof) """proof Example4$1
-        {
-            1. GreaterAB |- Greater(a,b)
-            qed
-        }"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestProof02 () =
-        let result = run (proof .>> eof) """prf AddIsUnique$1
-        {
-            1. |- assume pre
-            2. |- trivial
-        }"""
+    member this.TestProofFailure (test:string) =
+        let result = run (proof .>> eof) test
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
-
-    [<TestMethod>]
-    member this.TestProof03 () =
-        let result = run (proof .>> eof) """prf AddIsUnique$1
-        {
-            1. |- assume and(x,b)
-            2. |- trivial
-            qed
-        }"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestProof04 () =

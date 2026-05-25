@@ -921,11 +921,11 @@ type TestFplValueScopeNameEndPos() =
         | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
 
-    [<DataRow("base1", """100. |- trivial""")>]
+    [<DataRow("base1", """100: trivial""")>]
     [<DataRow("base2", """100. ExistsByExample, 1 |- false""")>]
     [<DataRow("base3", """100. T1 |- assume not somePremise """)>]
     [<DataRow("base4", """100. 2, 3, 5 |- iif (a,b)""")>]
-    [<DataRow("base5", """100. |- revoke 3""")>]
+    [<DataRow("base5", """100: revoke 3""")>]
     [<TestMethod>]
     member this.TestArgumentNameEndPos(var, argExpression) =
         
@@ -937,11 +937,11 @@ type TestFplValueScopeNameEndPos() =
         let proof = theory.Scope["T$1"]
         let arg = proof.Scope["100"]
         match var with
-        | "base1" -> Assert.AreEqual<int64>((int64)28, arg.EndPos.Column)
+        | "base1" -> Assert.AreEqual<int64>((int64)25, arg.EndPos.Column)
         | "base2" -> Assert.AreEqual<int64>((int64)45, arg.EndPos.Column)
         | "base3" -> Assert.AreEqual<int64>((int64)47, arg.EndPos.Column)
         | "base4" -> Assert.AreEqual<int64>((int64)38, arg.EndPos.Column)
-        | "base5" -> Assert.AreEqual<int64>((int64)28, arg.EndPos.Column)
+        | "base5" -> Assert.AreEqual<int64>((int64)25, arg.EndPos.Column)
         | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
 

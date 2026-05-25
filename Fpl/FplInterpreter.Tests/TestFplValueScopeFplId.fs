@@ -764,11 +764,11 @@ type TestFplValueScopeFplId() =
         | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
 
-    [<DataRow("base1", """base1. |- trivial""")>]
+    [<DataRow("base1", """base1: trivial""")>]
     [<DataRow("base2", """base2. ExistsByExample, 1 |- false""")>]
     [<DataRow("base3", """base3. T1 |- assume not somePremise """)>]
     [<DataRow("base4", """base4. 2, 3, 5 |- iif (a,b)""")>]
-    [<DataRow("base5", """base5. |- revoke 3""")>]
+    [<DataRow("base5", """base5: revoke 3""")>]
     [<TestMethod>]
     member this.TestArgumentFplId(var:string, argExpression) =
         

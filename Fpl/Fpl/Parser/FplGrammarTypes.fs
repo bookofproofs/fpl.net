@@ -164,7 +164,9 @@ type Ast =
     | RefArgumentIdentifier of Positions * string
     | ReferenceToProofOrCorollary of Positions * Ast
     | JustificationItem of Positions * Ast 
-    | Justification of Positions * Ast list option
+    | StartArgument of Ast 
+    | StartArgumentStictly of Ast * Ast list
+    | Justification of Positions * Ast
     | ByDef of Positions * Ast 
     | JustificationIdentifier of Positions * (((string option * Ast) * Ast list option) * Ast option) 
     | Trivial of Positions * unit
@@ -173,7 +175,7 @@ type Ast =
     | AssumeArgument of Positions * Ast
     | RevokeArgument of Positions * Ast
     | JustArgInf of Positions * (Ast * Ast)
-    | Argument of Positions * (Ast * Ast)
+    | Argument of Positions * Ast
     | ProofContent of (Ast * Ast list) * Ast option
     | ProofBlock of Ast
     | ProofSignature of Positions * (Ast * Ast list)

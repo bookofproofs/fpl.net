@@ -136,8 +136,8 @@ let resultSatisfies predicate msg (p: Parser<_,_>) : Parser<_,_> =
 let variableX: Parser<string,unit> = 
     IdStartsWithSmallCase 
     <?> "<variable>" 
-    |> resultSatisfies (fun s -> keyWordSet.Contains(s) |> not) "Expecting: <variable (got keyword)>" 
-    |> resultSatisfies (fun s -> tplRegex.IsMatch(s) |> not) "Expecting: <variable (got template)>"
+    |> resultSatisfies (fun s -> keyWordSet.Contains(s) |> not) "<variable> (got <keyword>)>" 
+    |> resultSatisfies (fun s -> tplRegex.IsMatch(s) |> not) "<variable> (got <template>)>"
     >>= (fun s -> preturn s) 
 
 let variable = positions variableX |>> Ast.Var 
@@ -194,7 +194,7 @@ let keywordTemplate = (pstring LiteralTplL <|> pstring LiteralTpl)
 
 let templateTail = choice [ idStartsWithCap; (regex @"\d+") ]
 
-let templateWithTail = (many1Strings2 (pstring "template" <|> pstring LiteralTpl) templateTail) 
+let templateWithTail = (many1Strings2 (pstring LiteralTplL <|> pstring LiteralTpl) templateTail) 
 
 let keywordObject = positions (skipString LiteralObjL <|> skipString LiteralObj) |>> Ast.ObjectType 
 
@@ -366,12 +366,37 @@ primePredicateRef.Value <- choice [
 ]
 
 let argIdX: Parser<string,unit> = 
-    regex @"\w+" <?> "<referenced argument identifier>" 
-    |> resultSatisfies (fun s -> keyWordSet.Contains(s) |> not) "Expecting: <referenced argument identifier (got keyword)>" 
-    |> resultSatisfies (fun s -> tplRegex.IsMatch(s) |> not) "Expecting: <referenced argument identifier (got template)>"
+    regex @"\w+" <?> "<argument ID>" 
+    |> resultSatisfies (fun s -> keyWordSet.Contains(s) |> not) "<argument ID> (got <keyword>)" 
+    |> resultSatisfies (fun s -> tplRegex.IsMatch(s) |> not) "<argument ID> (got <template>)"
     >>= (fun s -> preturn s) 
 
-let argumentIdentifier = positions (regex @"\w+\.") <?> "<argument identifier>" |>> Ast.ArgumentIdentifier
+let argIdDottedX: Parser<string,unit> = 
+    regex @"\w+\." <?> "<argument ID> '.'" 
+    |> resultSatisfies (fun s ->
+        let s1 = s.Substring(0, s.Length-1)
+        keyWordSet.Contains(s1) |> not
+        ) "<argument ID> '.' (got <keyword> '.')" 
+    |> resultSatisfies (fun s ->
+        let s1 = s.Substring(0, s.Length-1)
+        tplRegex.IsMatch(s1) |> not
+        ) "<argument ID> '.' (got <template> '.')"
+    >>= (fun s -> preturn s) 
+
+let argIdColonX: Parser<string,unit> = 
+    regex @"\w+:" <?> "<argument ID> ':'" 
+    |> resultSatisfies (fun s ->
+        let s1 = s.Substring(0, s.Length-1)
+        keyWordSet.Contains(s1) |> not
+        ) "<argument ID> ':' (got <keyword> ':')" 
+    |> resultSatisfies (fun s ->
+        let s1 = s.Substring(0, s.Length-1)
+        tplRegex.IsMatch(s1) |> not
+        ) "<argument ID> ':' (got <template> ':')"
+    >>= (fun s -> preturn s) 
+
+let argumentIdentifierDotted = positions (argIdDottedX) |>> Ast.ArgumentIdentifier
+let argumentIdentifierColon = positions (argIdColonX) |>> Ast.ArgumentIdentifier
 let refArgumentIdentifier = positions argIdX |>> Ast.RefArgumentIdentifier
 let justificationIdentifier = positions (opt byModifier .>>. predicateIdentifier .>>. opt dollarDigitList .>>. opt (colon >>. refArgumentIdentifier)) |>> Ast.JustificationIdentifier
 let byDef = positions (keywordByDef >>. SW >>. variable) |>> Ast.ByDef
@@ -556,10 +581,15 @@ let derivedArgument = choice [
 ]
 
 let argumentInference = (assumeArgument <|> revokeArgument <|> derivedArgument)
-let justificationItemList = sepBy justificationItem comma
-let justification = positions (opt (justificationItemList .>> IW .>> vDash .>> IW)) |>> Ast.Justification
+let justificationItemList = sepBy1 justificationItem comma
+
+let proofArgumentBeginningStrict = (argumentIdentifierDotted .>> IW) .>>. (justificationItemList .>> IW .>> vDash .>> IW) |>> Ast.StartArgumentStictly
+let proofArgumentBeginningNoJust = (argumentIdentifierColon .>> IW) |>> Ast.StartArgument
+
+let justification = positions (choice [proofArgumentBeginningStrict; proofArgumentBeginningNoJust]) |>> Ast.Justification
 let justifiedArgument = positions (justification .>>. argumentInference) |>> Ast.JustArgInf
-let proofArgument = positions ((argumentIdentifier .>> IW) .>>. justifiedArgument) .>> IW |>> Ast.Argument
+
+let proofArgument = positions (justifiedArgument) .>> IW |>> Ast.Argument
 let proofArgumentList = many1 (IW >>. proofArgument)
 let keywordProof = (skipString LiteralPrfL <|> skipString LiteralPrf) .>> SW
 let proofContent = varDeclOrSpecList .>>. proofArgumentList .>>. opt keywordQed |>> Ast.ProofContent

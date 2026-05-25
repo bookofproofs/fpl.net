@@ -778,11 +778,11 @@ type TestFplValueScopeBlockType() =
         | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
 
-    [<DataRow("base1", """100. |- trivial""", 0)>]
+    [<DataRow("base1", """100: trivial""", 0)>]
     [<DataRow("base2", """100. ExistsByExample, 1 |- false""", 2)>]
     [<DataRow("base3", """100. T1 |- assume not somePremise """, 1)>]
     [<DataRow("base4", """100. 2, 3, 5 |- iif (a,b)""", 3)>]
-    [<DataRow("base5", """100. |- revoke 3""", 0)>]
+    [<DataRow("base5", """100: revoke 3""", 0)>]
     [<TestMethod>]
     member this.TestArgumentNumberOfJustifications(var, argExpression, expNumber:int) =
         
@@ -798,11 +798,11 @@ type TestFplValueScopeBlockType() =
         Assert.AreEqual<int>(expNumber, numbOfJustifications)
         prepareFplCode(filename, "", false) |> ignore
 
-    [<DataRow("base1", """100. |- trivial""")>]
+    [<DataRow("base1", """100: trivial""")>]
     [<DataRow("base2", """100. ExistsByExample, 1 |- false""")>]
     [<DataRow("base3", """100. T1 |- assume not somePremise """)>]
     [<DataRow("base4", """100. 2, 3, 5 |- iif (a,b)""")>]
-    [<DataRow("base5", """100. |- revoke 3""")>]
+    [<DataRow("base5", """100: revoke 3""")>]
     [<TestMethod>]
     member this.TestArgumentBlockType(var, argExpression) =
         
