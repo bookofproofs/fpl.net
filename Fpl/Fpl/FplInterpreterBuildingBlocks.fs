@@ -830,16 +830,13 @@ let rec eval ast =
         eval langCode
         eval ebnfAst
         heap.Eval.PopEvalStack() // remove language
-    | Ast.InheritedType ((pos1, pos2), identifierOpt) -> 
-        match identifierOpt with
-        | Some identifier ->
-            let fv = heap.Eval.PeekEvalStack()
-            fv.FplId <- identifier
-            fv.TypeId <- identifier
-            let candidates = findCandidatesByName identifier false true
-            if candidates.Length = 0 then 
-                fv.ErrorOccurred <- emitID010Diagnostics identifier pos1 pos2
-        | _ -> ()
+    | Ast.InheritedType ((pos1, pos2), identifier) -> 
+        let fv = heap.Eval.PeekEvalStack()
+        fv.FplId <- identifier
+        fv.TypeId <- identifier
+        let candidates = findCandidatesByName identifier false true
+        if candidates.Length = 0 then 
+            fv.ErrorOccurred <- emitID010Diagnostics identifier pos1 pos2
     | Ast.InheritedTypeList inheritedTypeAsts -> 
         let beingCreatedNode = heap.Eval.PeekEvalStack()
         let addVariablesAndPropertiesOfBaseNode (bNode:FplGenericNode) = 
