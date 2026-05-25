@@ -189,7 +189,7 @@ let testParser (parserType:string) (input:string) =
         let result = run (corollary .>> eof) trimmed 
         sprintf "%O" result
     | LiteralDec ->
-        let result = run (varDeclBlock .>> eof) trimmed 
+        let result = run (varDeclOrSpecList .>> eof) trimmed 
         sprintf "%O" result
     | LiteralDef ->
         let result = run (definition .>> eof) trimmed 
