@@ -150,8 +150,7 @@ proof AddIsUnique$1
             ( anotherAdd(n,Succ(m)) = Succ(anotherAdd(n,m)) ))
             
         }
-    2: trivial
-    3: all n, m:Nat
+    2: all n, m:Nat
             {
                 ( Add(n,m) = anotherAdd(n,m) )
             }
