@@ -1,6 +1,5 @@
 namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
-open ErrDiagnostics
 open FplPrimitives
 open FplInterpreterBasicTypes
 open FplInterpreter.Globals.Heap
@@ -20,7 +19,7 @@ type TestDecrement() =
     [<TestMethod>]
     member this.TestDecrementRepresent(varVal, expected:string) =
         
-        let fplCode = sprintf """ext Digits x@/\d+/ -> Digits {ret x} def pred T() { del.Decrement(%s) };""" varVal
+        let fplCode = sprintf """ext Digits x@/\d+/ -> Digits {ret x} def pred T() { del.Decrement(%s) }""" varVal
         let filename = "TestDecrementRepresent.fpl"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -40,7 +39,7 @@ type TestDecrement() =
     [<TestMethod>]
     member this.TestDecrementRepresentWrongType(varVal, expected:string) =
         
-        let fplCode = sprintf """ext Digits x@/\d+/ -> ind {ret $100} def pred T() { del.Decrement(%s) };""" varVal
+        let fplCode = sprintf """ext Digits x@/\d+/ -> ind {ret $100} def pred T() { del.Decrement(%s) }""" varVal
         let filename = "TestDecrementRepresent.fpl"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -60,7 +59,7 @@ type TestDecrement() =
     [<TestMethod>]
     member this.TestDecrementType(varVal, expected:string) =
         
-        let fplCode = sprintf """def pred T() { del.Decrement(%s) };""" varVal
+        let fplCode = sprintf """def pred T() { del.Decrement(%s) }""" varVal
         let filename = "TestDecrementType.fpl"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -80,8 +79,8 @@ type TestDecrement() =
     [<TestMethod>]
     member this.TestDecrementMixed(varVal, expected:string) =
         
-        let fplCode = sprintf """def pred T() { del.Decrement(%s) };""" varVal
-        let filename = "TestDecrementMixed.fpl"
+        let fplCode = sprintf """def pred T() { del.Decrement(%s) }""" varVal
+        let filename = "TestDecrementMixed"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
         let theory = r.Scope[filename]
@@ -100,7 +99,7 @@ type TestDecrement() =
     [<TestMethod>]
     member this.TestDecrementMixedWithExtensionNat(varVal, expected:string) =
         
-        let fplCode = sprintf """ext Digits x@/\d+/ -> Nat {return x} def pred T() { del.Decrement(%s) };""" varVal
+        let fplCode = sprintf """ext Digits x@/\d+/ -> Nat {return x} def pred T() { del.Decrement(%s) }""" varVal
         let filename = "TestDecrementMixedWithExtensionNat.fpl"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -120,7 +119,7 @@ type TestDecrement() =
     [<TestMethod>]
     member this.TestDecrementMixedWithExtensionDigits(varVal, expected:string) =
         
-        let fplCode = sprintf """ext Digits x@/\d+/ -> Digits {return x} def pred T() { del.Decrement(%s) };""" varVal
+        let fplCode = sprintf """ext Digits x@/\d+/ -> Digits {return x} def pred T() { del.Decrement(%s) }""" varVal
         let filename = "TestDecrementMixedWithExtensionDigits.fpl"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -140,7 +139,7 @@ type TestDecrement() =
     [<TestMethod>]
     member this.TestDecrementName(varVal, expected:string) =
         
-        let fplCode = sprintf """def pred T() { del.Decrement(%s) };""" varVal
+        let fplCode = sprintf """def pred T() { del.Decrement(%s) }""" varVal
         let filename = "TestDecrementName.fpl"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root

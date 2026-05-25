@@ -2,6 +2,7 @@
 
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using static FplPrimitives;
+using static FplParsing.Main;
 
 namespace FplLSTests
 {
@@ -162,12 +163,12 @@ namespace FplLSTests
             foreach (var item in actual)
             {
                 if (item.InsertText.Contains(choice) && item.InsertText.Contains(subType)) { counterSnippets++; }
-                if (item.InsertText.Contains("{"))
+                if (item.InsertText.Contains('{'))
                 {
-                    var res = FplParser.testParser(LiteralPrty, item.InsertText);
+                    var res = testParser(LiteralPrty, item.InsertText);
                     if (!res.StartsWith("Success:"))
                     {
-                        Assert.IsTrue(false, res);
+                        Assert.Fail(res);
                     }
                 }
             }

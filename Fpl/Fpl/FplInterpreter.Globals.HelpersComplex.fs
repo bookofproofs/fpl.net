@@ -105,8 +105,12 @@ let tryAddToParentUsingMixedSignature (fplValue:FplGenericNode) =
         |> Seq.concat
         |> Seq.toList
 
-    if conflicts.Length > 0 then 
-        fplValue.ErrorOccurred <- emitID001Diagnostics identifier (conflicts.Head.QualifiedStartPos) fplValue.StartPos fplValue.EndPos
+    if conflicts.Length > 0 then
+        match box fplValue with
+        | :? IHasSignature as hasSignature ->
+            fplValue.ErrorOccurred <- emitID001Diagnostics identifier (conflicts.Head.QualifiedStartPos) hasSignature.SignStartPos hasSignature.SignEndPos
+        | _ ->
+            fplValue.ErrorOccurred <- emitID001Diagnostics identifier (conflicts.Head.QualifiedStartPos) fplValue.StartPos fplValue.EndPos
     else
         let parent = fplValue.Parent.Value
         parent.Scope.Add(identifier, fplValue)
@@ -184,7 +188,11 @@ let tryAddToParentUsingFplId (fplValue:FplGenericNode) =
     let parent = fplValue.Parent.Value
     let conflicts = conflictsPre @ (parent.Scope.Values |> Seq.filter (fun fv -> (fv.Type SignatureType.Name) = identifier) |> Seq.toList)
     if conflicts.Length > 0 then 
-        fplValue.ErrorOccurred <- emitID001Diagnostics identifier (conflicts.Head.QualifiedStartPos) fplValue.StartPos fplValue.EndPos
+        match box fplValue with
+        | :? IHasSignature as hasSignature ->
+            fplValue.ErrorOccurred <- emitID001Diagnostics identifier (conflicts.Head.QualifiedStartPos) hasSignature.SignStartPos hasSignature.SignEndPos
+        | _ ->
+            fplValue.ErrorOccurred <- emitID001Diagnostics identifier (conflicts.Head.QualifiedStartPos) fplValue.StartPos fplValue.EndPos
     else
         parent.Scope.Add(identifier, fplValue)
 

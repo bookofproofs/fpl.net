@@ -1857,8 +1857,8 @@ type SymbolTableStructure() =
     // TODO: issue diagnostics restricting assumptions only to non-compound predicates and to references to definitions of predicates
     // TODO: issue diagnostics if proving an implication impl(a,b) and the first argument is not the assumption of a, and the last derived argument is not b.
     // TODO: issue diagnostics if proving an equivalence iif(a,b) and the proof does not consist of two blocks, each starting with the assumption of a (resp. b) and ending with the derivation of b (resp. a)
-    [<DataRow("FplArgInferenceAssume", "00", """proof T$1 {1. |- assume and(x,y) };""", "")>]
-    [<DataRow("FplArgInferenceAssume", "01", """proof T$1 {1. |- assume is(x,Nat) };""", "")>]
+    [<DataRow("FplArgInferenceAssume", "00", """proof T$1 {1: assume and(x,y) }""", "")>]
+    [<DataRow("FplArgInferenceAssume", "01", """proof T$1 {1: assume is(x,Nat) }""", "")>]
     [<TestMethod>]
     member this.TestStructureFplArgInferenceAssume(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplArgInferenceAssume.fpl"
@@ -1883,8 +1883,8 @@ type SymbolTableStructure() =
 
     // TODO: issue diagnostics if the first argument of the proof starts with a derived argument without providing a justification
     // TODO: issue diagnostics if the derived predicate is neither one of the prime predicates 'true' and 'false', nor a compound predicate, nor a reference to a definition of a predicate
-    [<DataRow("FplArgInferenceDerived", "00", """proof T$1 {1. byax A |- and(x,y)};""", "")>]
-    [<DataRow("FplArgInferenceDerived", "01", """proof T$1 {1. |- and(x,y)};""", "")>]
+    [<DataRow("FplArgInferenceDerived", "00", """proof T$1 {1. byax A |- and(x,y)}""", "")>]
+    [<DataRow("FplArgInferenceDerived", "01", """proof T$1 {1: and(x,y)}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplArgInferenceDerived(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplArgInferenceDerived.fpl"
@@ -1907,7 +1907,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplArgInferenceRevoke", "00", """proof T$1 {1. |- revoke 1};""", "")>]
+    [<DataRow("FplArgInferenceRevoke", "00", """proof T$1 {1: revoke 1}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplArgInferenceRevoke(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplArgInferenceRevoke.fpl"
@@ -1923,7 +1923,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplArgInferenceTrivial", "00", """proof T$1 {1. |- trivial};""", "")>]
+    [<DataRow("FplArgInferenceTrivial", "00", """proof T$1 {1: trivial}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplArgInferenceTrivial(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplArgInferenceTrivial.fpl"
@@ -1939,16 +1939,16 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplArgument", "00", """proof T$1 {1. |- trivial};""", "")>]
-    [<DataRow("FplArgument", "01", """proof T$1 {1. A |- trivial};""", "")>]
-    [<DataRow("FplArgument", "02", """proof T$1 {1. byax A, 2 |- trivial};""", "")>]
-    [<DataRow("FplArgument", "03", """proof T$1 {1. bycor A$1 |- trivial};""", "")>]
-    [<DataRow("FplArgument", "04", """proof T$1 {1. bydef A |- trivial};""", "")>]
-    [<DataRow("FplArgument", "05", """proof T$1 {1. A$1:2, bydef y |- trivial};""", "")>]
-    [<DataRow("FplArgument", "06", """proof T$1 {1. byinf A |- revoke 2};""", "")>]
-    [<DataRow("FplArgument", "07", """proof T$1 {1. 2 |- trivial};""", "")>]
-    [<DataRow("FplArgument", "08", """proof T$1 {1. bydef x |- assume and(x,y)};""", "")>]
-    [<DataRow("FplArgument", "09", """proof T$1 {1.  A, byax B, bycor C$1, bydef D, E$1:2, byinf F, 2, bydef x |- trivial};""", "")>]
+    [<DataRow("FplArgument", "00", """proof T$1 {1: trivial}""", "")>]
+    [<DataRow("FplArgument", "01", """proof T$1 {1. A |- trivial}""", "")>]
+    [<DataRow("FplArgument", "02", """proof T$1 {1. byax A, 2 |- trivial}""", "")>]
+    [<DataRow("FplArgument", "03", """proof T$1 {1. bycor A$1 |- trivial}""", "")>]
+    [<DataRow("FplArgument", "04", """proof T$1 {1. bydef A |- trivial}""", "")>]
+    [<DataRow("FplArgument", "05", """proof T$1 {1. A$1:2, bydef y |- trivial}""", "")>]
+    [<DataRow("FplArgument", "06", """proof T$1 {1. byinf A |- revoke 2}""", "")>]
+    [<DataRow("FplArgument", "07", """proof T$1 {1. 2 |- trivial}""", "")>]
+    [<DataRow("FplArgument", "08", """proof T$1 {1. bydef x |- assume and(x,y)}""", "")>]
+    [<DataRow("FplArgument", "09", """proof T$1 {1.  A, byax B, bycor C$1, bydef D, E$1:2, byinf F, 2, bydef x |- trivial}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplArgument(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplArgument.fpl"
@@ -1977,7 +1977,7 @@ type SymbolTableStructure() =
     // TODO: issue diagnostics if assertions are made outside the definitions of functional terms and definitions of classes
     // TODO: issue diagnostics if assertions are made inside the definitions of functional terms and definitions of classes but do not involve the self keyword
     // TODO: issue diagnostics if assertions involve the is operator
-    [<DataRow("FplAssertion", "00", """def cl A {ctor A(){dec assert all x:A,y:obj {In(y,x)};}};""", "")>]
+    [<DataRow("FplAssertion", "00", """def cl A {ctor A(){dec assert all x:A,y:obj {In(y,x)};}}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplAssertion(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplAssertion.fpl"
@@ -1993,7 +1993,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplAssignment", "00", """def pred T() {dec ~x:pred x:=false; true};""", "")>]
+    [<DataRow("FplAssignment", "00", """def pred T() {dec x:pred x:=false; true}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplAssignment(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplAssignment.fpl"
@@ -2013,7 +2013,7 @@ type SymbolTableStructure() =
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
 
-    [<DataRow("FplAxiom", "00", """ax T {true};""", "")>]
+    [<DataRow("FplAxiom", "00", """ax T {true}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplAxiom(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplAxiom.fpl"
@@ -2030,9 +2030,9 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplBase", "00", """def cl A:B,C {intr};""", "")>] 
-    [<DataRow("FplBase", "01", """def cl A {intr} def cl B:A {intr} def cl C:B {intr} def cl D:A,B,C {intr};""", "C")>]
-    [<DataRow("FplBase", "02", """def cl A {intr} def cl B:A {intr} def cl C:B {intr} def cl D:C,E {intr};""", "E")>]
+    [<DataRow("FplBase", "00", """def cl A:B,C {intr}""", "")>] 
+    [<DataRow("FplBase", "01", """def cl A {intr} def cl B:A {intr} def cl C:B {intr} def cl D:A,B,C {intr}""", "C")>]
+    [<DataRow("FplBase", "02", """def cl A {intr} def cl B:A {intr} def cl C:B {intr} def cl D:C,E {intr}""", "E")>]
     [<TestMethod>]
     member this.TestStructureFplBase(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplBase.fpl"
@@ -2066,7 +2066,7 @@ type SymbolTableStructure() =
             Assert.IsTrue(node.RefersTo.IsNone)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplBaseConstructorCall", "00", """def cl A { ctor A() {dec base.Obj(); } };""", "")>]
+    [<DataRow("FplBaseConstructorCall", "00", """def cl A { ctor A() {dec base.Obj(); } }""", "")>]
     [<TestMethod>]
     member this.TestStructureFplBaseConstructorCall(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplBaseConstructorCall.fpl"
@@ -2082,9 +2082,9 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count) 
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplCaseElse", "00", """def pred T(x:ind) { dec ~n:pred cases (| (x = $1) : n:=false | (x = $2) : n:=true | (x = $3) : n:=false ? n:=undef ); n };""", "")>]
-    [<DataRow("FplCaseElse", "01", """def pred T(x:ind) { dec ~n:pred cases (| (x = $1) : n:=false | (x = $2) : n:=true | (x = $3) : n:=false ? n:=false n:=undef ); n };""", "")>]
-    [<DataRow("FplCaseElse", "02", """def pred T(x:ind) { dec ~n:pred cases (| (x = $1) : n:=false | (x = $2) : n:=true | (x = $3) : n:=false ? n:=true n:=false n:=undef ); n };""", "")>]
+    [<DataRow("FplCaseElse", "00", """def pred T(x:ind) { dec n:pred cases (| (x = $1) : n:=false | (x = $2) : n:=true | (x = $3) : n:=false ? n:=undef ); n }""", "")>]
+    [<DataRow("FplCaseElse", "01", """def pred T(x:ind) { dec n:pred cases (| (x = $1) : n:=false | (x = $2) : n:=true | (x = $3) : n:=false ? n:=false n:=undef ); n }""", "")>]
+    [<DataRow("FplCaseElse", "02", """def pred T(x:ind) { dec n:pred cases (| (x = $1) : n:=false | (x = $2) : n:=true | (x = $3) : n:=false ? n:=true n:=false n:=undef ); n }""", "")>]
     [<TestMethod>]
     member this.TestStructureFplCaseElse(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplCaseElse.fpl"
@@ -2114,7 +2114,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplCases", "00", """def pred T(x:ind) { dec ~n:pred cases (| (x = $1) : n:=false | (x = $2) : n:=true | (x = $3) : n:=false ? n:=undef ); n };""", "")>]
+    [<DataRow("FplCases", "00", """def pred T(x:ind) { dec n:pred cases (| (x = $1) : n:=false | (x = $2) : n:=true | (x = $3) : n:=false ? n:=undef ); n }""", "")>]
     [<TestMethod>]
     member this.TestStructureFplCases(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplCases.fpl"
@@ -2131,9 +2131,9 @@ type SymbolTableStructure() =
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     
-    [<DataRow("FplCaseSingle", "00", """def pred T(x:ind) { dec ~n:pred cases (| (x = $1) : n:=false | (x = $2) : n:=true | (x = $3) : n:=false ? n:=undef ); n };""", "")>]
-    [<DataRow("FplCaseSingle", "01", """def pred T(x:ind) { dec ~n:pred cases (| (x = $1) : n:=true n:=true n:=false | (x = $2) : n:=true | (x = $3) : n:=false ? n:=undef ); n };""", "")>]
-    [<DataRow("FplCaseSingle", "02", """def pred T(x:ind) { dec ~n:pred cases (| (x = $1) : n:=true n:=false | (x = $2) : n:=true | (x = $3) : n:=false ? n:=undef ); n };""", "")>]
+    [<DataRow("FplCaseSingle", "00", """def pred T(x:ind) { dec n:pred cases (| (x = $1) : n:=false | (x = $2) : n:=true | (x = $3) : n:=false ? n:=undef ); n }""", "")>]
+    [<DataRow("FplCaseSingle", "01", """def pred T(x:ind) { dec n:pred cases (| (x = $1) : n:=true n:=true n:=false | (x = $2) : n:=true | (x = $3) : n:=false ? n:=undef ); n }""", "")>]
+    [<DataRow("FplCaseSingle", "02", """def pred T(x:ind) { dec n:pred cases (| (x = $1) : n:=true n:=false | (x = $2) : n:=true | (x = $3) : n:=false ? n:=undef ); n }""", "")>]
     [<TestMethod>]
     member this.TestStructureFplCaseSingle(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplCaseSingle.fpl"
@@ -2163,21 +2163,21 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplClass", "00", """def cl A {intr};""", "")>]
+    [<DataRow("FplClass", "00", """def cl A {intr}""", "")>]
     // base classed not declared
-    [<DataRow("FplClass", "00a", """def cl A:B,C {intr};""", "")>] 
+    [<DataRow("FplClass", "00a", """def cl A:B,C {intr}""", "")>] 
     // base classed declared
-    [<DataRow("FplClass", "01", """def cl A {intr} def cl B {intr} def cl C {intr} def cl D:A,B,C {intr};""", "D")>]
+    [<DataRow("FplClass", "01", """def cl A {intr} def cl B {intr} def cl C {intr} def cl D:A,B,C {intr}""", "D")>]
     // one constructor
-    [<DataRow("FplClass", "02", """def cl A { ctor A() {} };""", "")>]
+    [<DataRow("FplClass", "02", """def cl A { ctor A() {} }""", "")>]
     // two constructors
-    [<DataRow("FplClass", "02a", """def cl A { ctor A() {} ctor A(x,y,z:obj) {} };""", "")>]
+    [<DataRow("FplClass", "02a", """def cl A { ctor A() {} ctor A(x,y,z:obj) {} }""", "")>]
     // intrinsic (without constructor), but with properties
-    [<DataRow("FplClass", "03", """def cl A { intr prty func MandF()->obj {intr} prty func OptF()->obj {intr} prty pred MandP() {true} prty pred OptP() {true} };""", "")>]
+    [<DataRow("FplClass", "03", """def cl A { intr prty func MandF()->obj {intr} prty func OptF()->obj {intr} prty pred MandP() {true} prty pred OptP() {true} }""", "")>]
     // with constructor and properties
-    [<DataRow("FplClass", "04", """def cl A { ctor A() {} prty func MandF()->obj {intr} prty func OptF()->obj {intr} prty pred MandP() {true} prty pred OptP() {true} };""", "")>]
+    [<DataRow("FplClass", "04", """def cl A { ctor A() {} prty func MandF()->obj {intr} prty func OptF()->obj {intr} prty pred MandP() {true} prty pred OptP() {true} }""", "")>]
     // with variables constructor and properties
-    [<DataRow("FplClass", "05", """def cl A { dec ~x,y:obj; ctor A() {} prty func MandF()->obj {intr} prty func OptF()->obj {intr} prty pred MandP() {true} prty pred OptP() {true} };""", "")>]
+    [<DataRow("FplClass", "05", """def cl A { dec x,y:obj; ctor A() {} prty func MandF()->obj {intr} prty func OptF()->obj {intr} prty pred MandP() {true} prty pred OptP() {true} }""", "")>]
     [<TestMethod>]
     member this.TestStructureFplClass(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplClass.fpl"
@@ -2245,7 +2245,7 @@ type SymbolTableStructure() =
 
 
     // conjecture
-    [<DataRow("FplConjecture", "00", """conj T {true};""", "")>]
+    [<DataRow("FplConjecture", "00", """conj T {true}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplConjecture(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplConjecture.fpl"
@@ -2262,7 +2262,7 @@ type SymbolTableStructure() =
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
 
-    [<DataRow("FplConjunction", "00", """def pred T() {and (x,y)};""", "")>]
+    [<DataRow("FplConjunction", "00", """def pred T() {and (x,y)}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplConjunction(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplConjunction.fpl"
@@ -2280,15 +2280,15 @@ type SymbolTableStructure() =
 
 
     // one constructor
-    [<DataRow("FplConstructor", "00", """def cl A { ctor A() {} };""", "")>]
-    [<DataRow("FplConstructor", "00a", """def cl B def cl A:B { ctor A() {} };""", "")>]
-    [<DataRow("FplConstructor", "00b", """def cl A:B,C { ctor A() {} };""", "")>]
+    [<DataRow("FplConstructor", "00", """def cl A { ctor A() {} }""", "")>]
+    [<DataRow("FplConstructor", "00a", """def cl B def cl A:B { ctor A() {} }""", "")>]
+    [<DataRow("FplConstructor", "00b", """def cl A:B,C { ctor A() {} }""", "")>]
     // two constructors
-    [<DataRow("FplConstructor", "01", """def cl A { ctor A() {} ctor A(x,y,z:obj) {} };""", "A(x, y, z)")>]
+    [<DataRow("FplConstructor", "01", """def cl A { ctor A() {} ctor A(x,y,z:obj) {} }""", "A(x, y, z)")>]
     // one constructor with variables 
-    [<DataRow("FplConstructor", "02", """def cl A { ctor A(x:obj) {dec ~y:obj; } };""", "")>]
+    [<DataRow("FplConstructor", "02", """def cl A { ctor A(x:obj) {dec y:obj; } }""", "")>]
     // with with shared variables and stmts
-    [<DataRow("FplConstructor", "03", """def cl A { dec ~x,y:obj; ctor A(z:obj) {dec z:=x; } };""", "")>]
+    [<DataRow("FplConstructor", "03", """def cl A { dec x,y:obj; ctor A(z:obj) {dec z:=x; } }""", "")>]
     [<TestMethod>]
     member this.TestStructureFplConstructor(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplConstructor.fpl"
@@ -2342,26 +2342,26 @@ type SymbolTableStructure() =
 
 
     // corollary with wrong parent
-    [<DataRow("FplCorollary", "00a", """cor T$1 {true};""", "")>]
-    [<DataRow("FplCorollary", "00b", """inf T {pre:true con:true} cor T$1 {true};""", "")>]
-    [<DataRow("FplCorollary", "00c", """def cl T {intr} cor T$1 {true};""", "")>]
-    [<DataRow("FplCorollary", "00d", """def pred T() {true} cor T$1 {true};""", "")>]
-    [<DataRow("FplCorollary", "00e", """def func T()->obj {intr} cor T$1 {true};""", "")>]
-    [<DataRow("FplCorollary", "00f", """loc T := !tex: "T"; cor T$1 {true};""", "")>]
-    [<DataRow("FplCorollary", "00g", """ext T x@/\d+/->obj {ret x} cor T$1 {true};""", "")>]
-    [<DataRow("FplCorollary", "00h", """proof T$1 {1. |- trivial} cor T$1$1 {true};""", "")>]
+    [<DataRow("FplCorollary", "00a", """cor T$1 {true}""", "")>]
+    [<DataRow("FplCorollary", "00b", """inf T {pre:true con:true} cor T$1 {true}""", "")>]
+    [<DataRow("FplCorollary", "00c", """def cl T {intr} cor T$1 {true}""", "")>]
+    [<DataRow("FplCorollary", "00d", """def pred T() {true} cor T$1 {true}""", "")>]
+    [<DataRow("FplCorollary", "00e", """def func T()->obj {intr} cor T$1 {true}""", "")>]
+    [<DataRow("FplCorollary", "00f", """loc T := !tex: "T"; cor T$1 {true}""", "")>]
+    [<DataRow("FplCorollary", "00g", """ext T x@/\d+/->obj {ret x} cor T$1 {true}""", "")>]
+    [<DataRow("FplCorollary", "00h", """proof T$1 {1: trivial}cor T$1$1 {true}""", "")>]
     // corollary with conjecture
-    [<DataRow("FplCorollary", "01a", """conj T {true} cor T$1 {true};""", "")>]
+    [<DataRow("FplCorollary", "01a", """conj T {true} cor T$1 {true}""", "")>]
     // corollary with axiom
-    [<DataRow("FplCorollary", "01b", """ax T {true} cor T$1 {true};""", "")>]
+    [<DataRow("FplCorollary", "01b", """ax T {true} cor T$1 {true}""", "")>]
     // corollary with theorem
-    [<DataRow("FplCorollary", "01c", """thm T {true} cor T$1 {true};""", "")>]
+    [<DataRow("FplCorollary", "01c", """thm T {true} cor T$1 {true}""", "")>]
     // corollary with lemma
-    [<DataRow("FplCorollary", "01d", """lem T {true} cor T$1 {true};""", "")>]
+    [<DataRow("FplCorollary", "01d", """lem T {true} cor T$1 {true}""", "")>]
     // corollary with proposition
-    [<DataRow("FplCorollary", "01e", """prop T {true} cor T$1 {true};""", "")>]
+    [<DataRow("FplCorollary", "01e", """prop T {true} cor T$1 {true}""", "")>]
     // corollary with corollary
-    [<DataRow("FplCorollary", "01f", """thm T {true} cor T$1 {true} cor T$1$1 {true};""", "T$1$1")>]
+    [<DataRow("FplCorollary", "01f", """thm T {true} cor T$1 {true} cor T$1$1 {true}""", "T$1$1")>]
     [<TestMethod>]
     member this.TestStructureFplCorollary(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplCorollary.fpl"
@@ -2436,7 +2436,7 @@ type SymbolTableStructure() =
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
 
-    [<DataRow("FplDecrement", "01", """def func T(x:ind)->ind {ret delegate.Decrement(x)};""", "")>]
+    [<DataRow("FplDecrement", "01", """def func T(x:ind)->ind {ret delegate.Decrement(x)}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplDecrement(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplDecrement.fpl"
@@ -2455,8 +2455,8 @@ type SymbolTableStructure() =
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
 
-    [<DataRow("FplDefaultConstructor", "00", """def cl A def pred T() {dec ~x:A x:=A(); true};""", "")>]
-    [<DataRow("FplDefaultConstructor", "01", """def cl A def func T()->A { return A() };""", "")>]
+    [<DataRow("FplDefaultConstructor", "00", """def cl A def pred T() {dec x:A x:=A(); true}""", "")>]
+    [<DataRow("FplDefaultConstructor", "01", """def cl A def func T()->A { return A() }""", "")>]
     [<TestMethod>]
     member this.TestStructureFplDefaultConstructor(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplDefaultConstructor.fpl"
@@ -2483,7 +2483,7 @@ type SymbolTableStructure() =
             Assert.IsTrue(nodeWithValue.Value.IsSome) // instance
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplDisjunction", "00", """def pred T() {or (x,y)};""", "")>]
+    [<DataRow("FplDisjunction", "00", """def pred T() {or (x,y)}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplDisjunction(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplDisjunction.fpl"
@@ -2499,8 +2499,8 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplEquality", "01", """def pred T() {del.Equal(x, y)};""", "")>]
-    [<DataRow("FplEquality", "02", """def pred Equal (x,y: tpl) infix "=" 50 { del.Equal(x,y) };""", "")>]
+    [<DataRow("FplEquality", "01", """def pred T() {del.Equal(x, y)}""", "")>]
+    [<DataRow("FplEquality", "02", """def pred Equal (x,y: tpl) infix "=" 50 { del.Equal(x,y) }""", "")>]
     [<TestMethod>]
     member this.TestStructureFplEquality(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplEquality.fpl"
@@ -2519,7 +2519,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplEquivalence", "00", """def pred T() {iif (x,y)};""", "")>]
+    [<DataRow("FplEquivalence", "00", """def pred T() {iif (x,y)}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplEquivalence(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplEquivalence.fpl"
@@ -2535,7 +2535,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplExclusiveOr", "00", """def pred T() {xor(x,y)};""", "")>]
+    [<DataRow("FplExclusiveOr", "00", """def pred T() {xor(x,y)}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplExclusiveOr(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplExclusiveOr.fpl"
@@ -2552,8 +2552,8 @@ type SymbolTableStructure() =
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
 
-    [<DataRow("FplExtension", "00", """ext Digits x@/\d+/ -> obj {ret x};""", "")>]
-    [<DataRow("FplExtension", "01", """ext Digits x@/\d+/ -> obj {dec ~y:obj; ret x};""", "")>]
+    [<DataRow("FplExtension", "00", """ext Digits x@/\d+/ -> obj {ret x}""", "")>]
+    [<DataRow("FplExtension", "01", """ext Digits x@/\d+/ -> obj {dec y:obj; ret x}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplExtension(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplExtension.fpl"
@@ -2580,11 +2580,11 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(1, signatureVars.Length)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplExtensionObj", "00", """ax A {@1};""", "")>]
-    [<DataRow("FplExtensionObj", "00a", """def cl Nat ext D x@/\d+/ -> Nat {dec ~n:Nat; return n } ax A {@1};""", "")>]
-    [<DataRow("FplExtensionObj", "00b", """def cl Nat ext D x@/\d+/ -> Nat {dec ~n:Nat; return n } ax A {and(@1,@0)};""", "")>]
-    [<DataRow("FplExtensionObj", "00c", """def cl Nat ext D x@/\d+/ -> Nat {dec ~n:Nat; return n } def func Add(x,y:Nat)->obj prop K {dec ~op:Add ~n:Nat; ( op(n,@0) = n ) } ;""", "")>]
-    [<DataRow("FplExtensionObj", "00d", """ax A {and(@1,@0)};""", "")>]
+    [<DataRow("FplExtensionObj", "00", """ax A {@1}""", "")>]
+    [<DataRow("FplExtensionObj", "00a", """def cl Nat ext D x@/\d+/ -> Nat {dec n:Nat; return n } ax A {@1}""", "")>]
+    [<DataRow("FplExtensionObj", "00b", """def cl Nat ext D x@/\d+/ -> Nat {dec n:Nat; return n } ax A {and(@1,@0)}""", "")>]
+    [<DataRow("FplExtensionObj", "00c", """def cl Nat ext D x@/\d+/ -> Nat {dec n:Nat; return n } def func Add(x,y:Nat)->obj prop K {dec op:Add n:Nat; ( op(n,@0) = n ) } """, "")>]
+    [<DataRow("FplExtensionObj", "00d", """ax A {and(@1,@0)}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplExtensionObj(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplExtensionObj.fpl"
@@ -2643,10 +2643,10 @@ type SymbolTableStructure() =
             Assert.IsTrue(node.RefersTo.IsNone)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplForInStmt", "01", """def cl Nat def func Sum(list:* Nat[ind])->Nat { dec ~a:obj ~result, addend: Nat result:=Zero() for addend in list { result:=Add(result,addend) }; return result };""", "")>]
-    [<DataRow("FplForInStmt", "02", """def cl Nat def func Sum(from, to: Nat, arr:*Nat[Nat]) -> Nat { dec ~a:obj ~i, result: Nat result:=Zero() for i in ClosedRange(from,to) { result:=Add(result,arr[i]) }; return result };""", "")>]
-    [<DataRow("FplForInStmt", "03", """def cl Nat def func Sum() -> Nat { dec ~addend, result: Nat result:=Zero() for addend in Nat { result:=Add(result,addend) }; return result };""", "")>]
-    [<DataRow("FplForInStmt", "04", """def cl Nat def func Add(x,y:Nat)->Nat def func Sum()->Nat {dec ~addend, result: Nat for addend in Nat() { result:=Add(result,addend) }; ret result };""", "")>]
+    [<DataRow("FplForInStmt", "01", """def cl Nat def func Sum(list:* Nat[ind])->Nat { dec a:obj result, addend: Nat result:=Zero() for addend in list { result:=Add(result,addend) }; return result }""", "")>]
+    [<DataRow("FplForInStmt", "02", """def cl Nat def func Sum(from, to: Nat, arr:*Nat[Nat]) -> Nat { dec a:obj i, result: Nat result:=Zero() for i in ClosedRange(from,to) { result:=Add(result,arr[i]) }; return result }""", "")>]
+    [<DataRow("FplForInStmt", "03", """def cl Nat def func Sum() -> Nat { dec addend, result: Nat result:=Zero() for addend in Nat { result:=Add(result,addend) }; return result }""", "")>]
+    [<DataRow("FplForInStmt", "04", """def cl Nat def func Add(x,y:Nat)->Nat def func Sum()->Nat {dec addend, result: Nat for addend in Nat() { result:=Add(result,addend) }; ret result }""", "")>]
     [<TestMethod>]
     member this.TestStructureFplForInStmt(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplForInStmt.fpl"
@@ -2691,10 +2691,10 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplForInStmtDomain", "01", """def cl Nat def func Sum(list:* Nat[ind])->Nat { dec ~a:obj ~result, addend: Nat result:=Zero() for addend in list { result:=Add(result,addend) }; return result };""", "")>]
-    [<DataRow("FplForInStmtDomain", "02", """def cl Nat def func Sum(from, to: Nat, arr:*Nat[Nat]) -> Nat { dec ~a:obj ~i, result: Nat result:=Zero() for i in ClosedRange(from,to) { result:=Add(result,arr[i]) }; return result };""", "")>]
-    [<DataRow("FplForInStmtDomain", "03", """def cl Nat def func Sum() -> Nat { dec ~addend, result: Nat result:=Zero() for addend in Nat { result:=Add(result,addend) }; return result };""", "")>]
-    [<DataRow("FplForInStmtDomain", "04", """def cl Nat def func Add(x,y:Nat)->Nat def func Sum()->Nat {dec ~addend, result: Nat for addend in Nat() { result:=Add(result,addend) }; ret result };""", "")>]
+    [<DataRow("FplForInStmtDomain", "01", """def cl Nat def func Sum(list:* Nat[ind])->Nat { dec a:obj result, addend: Nat result:=Zero() for addend in list { result:=Add(result,addend) }; return result }""", "")>]
+    [<DataRow("FplForInStmtDomain", "02", """def cl Nat def func Sum(from, to: Nat, arr:*Nat[Nat]) -> Nat { dec a:obj i, result: Nat result:=Zero() for i in ClosedRange(from,to) { result:=Add(result,arr[i]) }; return result }""", "")>]
+    [<DataRow("FplForInStmtDomain", "03", """def cl Nat def func Sum() -> Nat { dec addend, result: Nat result:=Zero() for addend in Nat { result:=Add(result,addend) }; return result }""", "")>]
+    [<DataRow("FplForInStmtDomain", "04", """def cl Nat def func Add(x,y:Nat)->Nat def func Sum()->Nat {dec addend, result: Nat for addend in Nat() { result:=Add(result,addend) }; ret result }""", "")>]
     [<TestMethod>]
     member this.TestStructureFplForInStmtDomain(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplForInStmtDomain.fpl"
@@ -2739,10 +2739,10 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplReference>(node.RefersTo.Value)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplForInStmtEntity", "01", """def cl Nat def func Sum(list:* Nat[ind])->Nat { dec ~a:obj ~result, addend: Nat result:=Zero() for addend in list { result:=Add(result,addend) }; return result };""", "")>]
-    [<DataRow("FplForInStmtEntity", "02", """def cl Nat def func Sum(from, to: Nat, arr:*Nat[Nat]) -> Nat { dec ~a:obj ~i, result: Nat result:=Zero() for i in ClosedRange(from,to) { result:=Add(result,arr[i]) }; return result };""", "")>]
-    [<DataRow("FplForInStmtEntity", "03", """def cl Nat def func Sum() -> Nat { dec ~addend, result: Nat result:=Zero() for addend in Nat { result:=Add(result,addend) }; return result };""", "")>]
-    [<DataRow("FplForInStmtEntity", "04", """def cl Nat def func Add(x,y:Nat)->Nat def func Sum()->Nat {dec ~addend, result: Nat for addend in Nat() { result:=Add(result,addend) }; ret result };""", "")>]
+    [<DataRow("FplForInStmtEntity", "01", """def cl Nat def func Sum(list:* Nat[ind])->Nat { dec a:obj result, addend: Nat result:=Zero() for addend in list { result:=Add(result,addend) }; return result }""", "")>]
+    [<DataRow("FplForInStmtEntity", "02", """def cl Nat def func Sum(from, to: Nat, arr:*Nat[Nat]) -> Nat { dec a:obj i, result: Nat result:=Zero() for i in ClosedRange(from,to) { result:=Add(result,arr[i]) }; return result }""", "")>]
+    [<DataRow("FplForInStmtEntity", "03", """def cl Nat def func Sum() -> Nat { dec addend, result: Nat result:=Zero() for addend in Nat { result:=Add(result,addend) }; return result }""", "")>]
+    [<DataRow("FplForInStmtEntity", "04", """def cl Nat def func Add(x,y:Nat)->Nat def func Sum()->Nat {dec addend, result: Nat for addend in Nat() { result:=Add(result,addend) }; ret result }""", "")>]
     [<TestMethod>]
     member this.TestStructureFplForInStmtEntity(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplForInStmtEntity.fpl"
@@ -2765,18 +2765,18 @@ type SymbolTableStructure() =
 
     
     // intrinsic functional term
-    [<DataRow("FplFunctionalTerm", "00", """def func T()->obj {intr};""", "")>]
-    [<DataRow("FplFunctionalTerm", "00a", """def func T()->obj;""", "")>]
-    [<DataRow("FplFunctionalTerm", "00b", """def func T:A()->obj;""", "")>]
-    [<DataRow("FplFunctionalTerm", "00c", """def func T:A,B,C()->obj;""", "")>]
+    [<DataRow("FplFunctionalTerm", "00", """def func T()->obj {intr}""", "")>]
+    [<DataRow("FplFunctionalTerm", "00a", """def func T()->obj""", "")>]
+    [<DataRow("FplFunctionalTerm", "00b", """def func T:A()->obj""", "")>]
+    [<DataRow("FplFunctionalTerm", "00c", """def func T:A,B,C()->obj""", "")>]
     // intrinsic functional term with variables
-    [<DataRow("FplFunctionalTerm", "01", """def func T(x,y:obj)->obj {intr};""", "")>]
+    [<DataRow("FplFunctionalTerm", "01", """def func T(x,y:obj)->obj {intr}""", "")>]
     // intrinsic functional term with variables and properties
-    [<DataRow("FplFunctionalTerm", "02", """def func T(x,y:obj)->obj {intr prty func MandF()->obj {intr} prty func OptF()->obj {intr} prty pred MandP() {true} prty pred OptP() {true} };""", "")>]
+    [<DataRow("FplFunctionalTerm", "02", """def func T(x,y:obj)->obj {intr prty func MandF()->obj {intr} prty func OptF()->obj {intr} prty pred MandP() {true} prty pred OptP() {true} }""", "")>]
     // non-intrinsic functional term with variables and properties
-    [<DataRow("FplFunctionalTerm", "03", """def func T(x,y:obj)->obj {dec ~z:obj; return z prty func MandF()->obj {intr} prty func OptF()->obj {intr} prty pred MandP() {true} prty pred OptP() {true} };""", "")>]
+    [<DataRow("FplFunctionalTerm", "03", """def func T(x,y:obj)->obj {dec z:obj; return z prty func MandF()->obj {intr} prty func OptF()->obj {intr} prty pred MandP() {true} prty pred OptP() {true} }""", "")>]
     // non-intrinsic functional term with some statements 
-    [<DataRow("FplFunctionalTerm", "04", """def func T(x,y:obj)->obj {dec ~z:obj z:=x y:=z; return z };""", "")>]
+    [<DataRow("FplFunctionalTerm", "04", """def func T(x,y:obj)->obj {dec z:obj z:=x y:=z; return z }""", "")>]
     [<TestMethod>]
     member this.TestStructureFplFunctionalTerm(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplFunctionalTerm.fpl"
@@ -2842,13 +2842,13 @@ type SymbolTableStructure() =
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     // intrinsic constant
-    [<DataRow("FplFunctionalTerm", "MF1", """def func T()->ind;""", "")>]
+    [<DataRow("FplFunctionalTerm", "MF1", """def func T()->ind""", "")>]
     // non-intrinsic constant
-    [<DataRow("FplFunctionalTerm", "MF2", """def func T()->ind {return $1};""", "")>]
+    [<DataRow("FplFunctionalTerm", "MF2", """def func T()->ind {return $1}""", "")>]
     // intrinsic constant array
-    [<DataRow("FplFunctionalTerm", "MF3", """def func T()->*ind[ind];""", "")>]
+    [<DataRow("FplFunctionalTerm", "MF3", """def func T()->*ind[ind]""", "")>]
     // non-intrinsic constant array
-    [<DataRow("FplFunctionalTerm", "MF4", """def func T()->*ind[ind] {dec ~x:*ind[ind] x[$1]:=$0 x[$2]:=$42; return x};""", "")>]
+    [<DataRow("FplFunctionalTerm", "MF4", """def func T()->*ind[ind] {dec x:*ind[ind] x[$1]:=$0 x[$2]:=$42; return x}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplFunctionalTermIndexMapping(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplFunctionalTermIndexMapping.fpl"
@@ -2926,13 +2926,13 @@ type SymbolTableStructure() =
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     // intrinsic constant
-    [<DataRow("FplFunctionalTerm", "MF1", """def func T()->obj;""", "")>]
+    [<DataRow("FplFunctionalTerm", "MF1", """def func T()->obj""", "")>]
     // non-intrinsic constant
-    [<DataRow("FplFunctionalTerm", "MF2", """def cl A def func T()->obj {return A()};""", "")>]
+    [<DataRow("FplFunctionalTerm", "MF2", """def cl A def func T()->obj {return A()}""", "")>]
     // intrinsic constant array
-    [<DataRow("FplFunctionalTerm", "MF3", """def func T()->*obj[ind];""", "")>]
+    [<DataRow("FplFunctionalTerm", "MF3", """def func T()->*obj[ind]""", "")>]
     // non-intrinsic constant array
-    [<DataRow("FplFunctionalTerm", "MF4", """def cl A def cl B def func T()->*obj[ind] {dec ~x:*obj[ind] x[$1]:=A() x[$2]:=B(); return x};""", "")>]
+    [<DataRow("FplFunctionalTerm", "MF4", """def cl A def cl B def func T()->*obj[ind] {dec x:*obj[ind] x[$1]:=A() x[$2]:=B(); return x}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplFunctionalTermObjectMapping(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplFunctionalTermObjectMapping.fpl"
@@ -3010,13 +3010,13 @@ type SymbolTableStructure() =
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     // intrinsic constant
-    [<DataRow("FplFunctionalTerm", "MF1", """def func T()->tpl;""", "")>]
+    [<DataRow("FplFunctionalTerm", "MF1", """def func T()->tpl""", "")>]
     // non-intrinsic constant
-    [<DataRow("FplFunctionalTerm", "MF2", """def cl A def func T()->tpl {return A()};""", "")>]
+    [<DataRow("FplFunctionalTerm", "MF2", """def cl A def func T()->tpl {return A()}""", "")>]
     // intrinsic constant array
-    [<DataRow("FplFunctionalTerm", "MF3", """def func T()->*tpl[ind];""", "")>]
+    [<DataRow("FplFunctionalTerm", "MF3", """def func T()->*tpl[ind]""", "")>]
     // non-intrinsic constant array
-    [<DataRow("FplFunctionalTerm", "MF4", """def cl A def cl B def func T()->*tpl[ind] {dec ~x:*tpl[ind] x[$1]:=A() x[$2]:=$2 x[$3]:=true; return x};""", "")>]
+    [<DataRow("FplFunctionalTerm", "MF4", """def cl A def cl B def func T()->*tpl[ind] {dec x:*tpl[ind] x[$1]:=A() x[$2]:=$2 x[$3]:=true; return x}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplFunctionalTermTemplateMapping(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplFunctionalTermTemplateMapping.fpl"
@@ -3094,17 +3094,17 @@ type SymbolTableStructure() =
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
     
     // intrinsic constant
-    [<DataRow("FplFunctionalTerm", "MF1", """def func T()->pred;""", "")>]
-    [<DataRow("FplFunctionalTerm", "MF1a", """def func T()->pred(x:obj);""", "")>]
+    [<DataRow("FplFunctionalTerm", "MF1", """def func T()->pred""", "")>]
+    [<DataRow("FplFunctionalTerm", "MF1a", """def func T()->pred(x:obj)""", "")>]
     // non-intrinsic constant
-    [<DataRow("FplFunctionalTerm", "MF2", """def func T()->pred {return true};""", "")>]
-    [<DataRow("FplFunctionalTerm", "MF2a", """def func T()->pred(x:obj) {dec ~y:pred(z:obj); return y};""", "")>]
-    [<DataRow("FplFunctionalTerm", "MF2b", """def pred A(z:obj) def func T()->pred(x:obj) {return A(x)};""", "")>]
-    [<DataRow("FplFunctionalTerm", "MF2c", """def pred A(z:obj) def func T()->pred(x:obj) {return A};""", "")>]
+    [<DataRow("FplFunctionalTerm", "MF2", """def func T()->pred {return true}""", "")>]
+    [<DataRow("FplFunctionalTerm", "MF2a", """def func T()->pred(x:obj) {dec y:pred(z:obj); return y}""", "")>]
+    [<DataRow("FplFunctionalTerm", "MF2b", """def pred A(z:obj) def func T()->pred(x:obj) {return A(x)}""", "")>]
+    [<DataRow("FplFunctionalTerm", "MF2c", """def pred A(z:obj) def func T()->pred(x:obj) {return A}""", "")>]
     // intrinsic constant array
-    [<DataRow("FplFunctionalTerm", "MF3", """def func T()->*pred[ind];""", "")>]
+    [<DataRow("FplFunctionalTerm", "MF3", """def func T()->*pred[ind]""", "")>]
     // non-intrinsic constant array
-    [<DataRow("FplFunctionalTerm", "MF4", """def func T()->*pred[ind] {dec ~x:*pred[ind] x[$1]:=true x[$2]:=false x[$3]:=undef; return x};""", "")>]
+    [<DataRow("FplFunctionalTerm", "MF4", """def func T()->*pred[ind] {dec x:*pred[ind] x[$1]:=true x[$2]:=false x[$3]:=undef; return x}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplFunctionalTermPredMapping(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplFunctionalTermPredMapping.fpl"
@@ -3249,7 +3249,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>("", fn.ConstantName) // missing, since non-intrinsic
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplImplication", "00", """def pred T() {impl(x,y)};""", "")>]
+    [<DataRow("FplImplication", "00", """def pred T() {impl(x,y)}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplImplication(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplImplication.fpl"
@@ -3265,7 +3265,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplInstance", "00", """def cl A {intr} def pred T() {dec ~x:A x:=A(); x};""", "")>]
+    [<DataRow("FplInstance", "00", """def cl A {intr} def pred T() {dec x:A x:=A(); x}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplInstance(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplInstance.fpl"
@@ -3282,7 +3282,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<string>("""A()""", node.Represent())
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
     
-    [<DataRow("FplIntrinsicInd", "00", """ax A {$1};""", "")>]
+    [<DataRow("FplIntrinsicInd", "00", """ax A {$1}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplIntrinsicInd(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplIntrinsicInd.fpl"
@@ -3300,10 +3300,10 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplIntrinsicFalse", "01", """ax A {false};""", "")>]
+    [<DataRow("FplIntrinsicFalse", "01", """ax A {false}""", "")>]
     // reference to intrinsic false
-    [<DataRow("FplIntrinsicFalse", "03c", """def pred A() {dec ~x:pred x:=false; x};""", "false")>]
-    [<DataRow("FplIntrinsicFalse", "03d", """def pred A() {D(false)};""", "false")>]
+    [<DataRow("FplIntrinsicFalse", "03c", """def pred A() {dec x:pred x:=false; x}""", "false")>]
+    [<DataRow("FplIntrinsicFalse", "03d", """def pred A() {D(false)}""", "false")>]
     [<TestMethod>]
     member this.TestStructureFplIntrinsicFalse(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplIntrinsicFalse.fpl"
@@ -3339,10 +3339,10 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplIntrinsicTrue", "00", """ax A {true};""", "")>]
+    [<DataRow("FplIntrinsicTrue", "00", """ax A {true}""", "")>]
     // reference to intrinsic true
-    [<DataRow("FplIntrinsicTrue", "03a", """def pred A() {dec ~x:pred x:=true; x};""", "true")>]
-    [<DataRow("FplIntrinsicTrue", "03b", """def pred A() {D(true)};""", "true")>]
+    [<DataRow("FplIntrinsicTrue", "03a", """def pred A() {dec x:pred x:=true; x}""", "true")>]
+    [<DataRow("FplIntrinsicTrue", "03b", """def pred A() {D(true)}""", "true")>]
     [<TestMethod>]
     member this.TestStructureFplIntrinsicTrue(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplIntrinsicTrue.fpl"
@@ -3378,12 +3378,12 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplIntrinsicTpl", "00", """def pred TestId(x:tplTest) {true};""", "")>]
-    [<DataRow("FplIntrinsicTpl", "01", """def func T()->tpl;""", "")>]
-    [<DataRow("FplIntrinsicTpl", "02", """def func T()->*tpl[ind];""", "")>]
-    [<DataRow("FplIntrinsicTpl", "03", """def cl T {ctor T(x:tpl) {}};""", "")>]
-    [<DataRow("FplIntrinsicTpl", "04", """def pred NotEqual (x,y: tpl) { not (x = y) };""", "")>]
-    [<DataRow("FplIntrinsicTpl", "05", """def pred NotEqual (x,y: tpl) { dec ~u,w: tpl1; not (x = y) };""", "")>]
+    [<DataRow("FplIntrinsicTpl", "00", """def pred TestId(x:tplTest) {true}""", "")>]
+    [<DataRow("FplIntrinsicTpl", "01", """def func T()->tpl""", "")>]
+    [<DataRow("FplIntrinsicTpl", "02", """def func T()->*tpl[ind]""", "")>]
+    [<DataRow("FplIntrinsicTpl", "03", """def cl T {ctor T(x:tpl) {}}""", "")>]
+    [<DataRow("FplIntrinsicTpl", "04", """def pred NotEqual (x,y: tpl) { not (x = y) }""", "")>]
+    [<DataRow("FplIntrinsicTpl", "05", """def pred NotEqual (x,y: tpl) { dec u,w: tpl1; not (x = y) }""", "")>]
     
     [<TestMethod>]
     member this.TestStructureFplIntrinsicTpl(nodeType, varVal, fplCode, identifier) =
@@ -3435,7 +3435,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplIntrinsicUndef", "00", """ax A {undef};""", "")>]
+    [<DataRow("FplIntrinsicUndef", "00", """ax A {undef}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplIntrinsicUndef(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplIntrinsicUndef.fpl"
@@ -3453,7 +3453,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplIsOperator", "00", """def pred T() {is(x,pred)};""", "")>]
+    [<DataRow("FplIsOperator", "00", """def pred T() {is(x,pred)}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplIsOperator(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplIsOperator.fpl"
@@ -3470,25 +3470,25 @@ type SymbolTableStructure() =
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     // no justification    
-    [<DataRow("FplJustification", "00", """proof T$1 {1. |- trivial};""", "")>]
+    [<DataRow("FplJustification", "00", """proof T$1 {1: trivial}""", "")>]
     // justification by theorem-like stmt  
-    [<DataRow("FplJustification", "01", """proof T$1 {1. A |- trivial};""", "")>]
+    [<DataRow("FplJustification", "01", """proof T$1 {1. A |- trivial}""", "")>]
     // justification byax   
-    [<DataRow("FplJustification", "02", """proof T$1 {1. byax A |- trivial};""", "")>]
+    [<DataRow("FplJustification", "02", """proof T$1 {1. byax A |- trivial}""", "")>]
     // justification bycor   
-    [<DataRow("FplJustification", "03", """proof T$1 {1. bycor A$1 |- trivial};""", "")>]
+    [<DataRow("FplJustification", "03", """proof T$1 {1. bycor A$1 |- trivial}""", "")>]
     // justification bydef   
-    [<DataRow("FplJustification", "04", """proof T$1 {1. bydef A |- trivial};""", "")>]
+    [<DataRow("FplJustification", "04", """proof T$1 {1. bydef A |- trivial}""", "")>]
     // justification by proof argument (other proof)
-    [<DataRow("FplJustification", "05", """proof T$1 {1. A$1:2 |- trivial};""", "")>]
+    [<DataRow("FplJustification", "05", """proof T$1 {1. A$1:2 |- trivial}""", "")>]
     // justification byinf
-    [<DataRow("FplJustification", "06", """proof T$1 {1. byinf A |- trivial};""", "")>]
+    [<DataRow("FplJustification", "06", """proof T$1 {1. byinf A |- trivial}""", "")>]
     // justification by proof argument (this proof)
-    [<DataRow("FplJustification", "07", """proof T$1 {1. 2 |- trivial};""", "")>]
+    [<DataRow("FplJustification", "07", """proof T$1 {1. 2 |- trivial}""", "")>]
     // justification bydef var  
-    [<DataRow("FplJustification", "08", """proof T$1 {1. bydef x |- trivial};""", "")>]
+    [<DataRow("FplJustification", "08", """proof T$1 {1. bydef x |- trivial}""", "")>]
     // all kinds
-    [<DataRow("FplJustification", "09", """proof T$1 {1.  A, byax B, bycor C$1, bydef D, E$1:2, byinf F, 2, bydef x |- trivial};""", "")>]
+    [<DataRow("FplJustification", "09", """proof T$1 {1.  A, byax B, bycor C$1, bydef D, E$1:2, byinf F, 2, bydef x |- trivial}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplJustification(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplJustification.fpl"
@@ -3527,19 +3527,19 @@ type SymbolTableStructure() =
 
 
     // byax without reference
-    [<DataRow("FplJustificationItemByAx", "00", """proof T$1 {1. byax A |- trivial};""", "")>]
+    [<DataRow("FplJustificationItemByAx", "00", """proof T$1 {1. byax A |- trivial}""", "")>]
     // byax with reference to an axiom
-    [<DataRow("FplJustificationItemByAx", "00a", """ax A {true} proof T$1 {1. byax A |- trivial};""", "")>]
+    [<DataRow("FplJustificationItemByAx", "00a", """ax A {true} proof T$1 {1. byax A |- trivial}""", "")>]
     // byax with reference to a non-axiom
-    [<DataRow("FplJustificationItemByAx", "00b", """inf A {pre:true con:true} proof T$1 {1. byax A |- trivial};""", "")>]
-    [<DataRow("FplJustificationItemByAx", "00c", """thm A {true} proof T$1 {1. byax A |- trivial};""", "")>]
-    [<DataRow("FplJustificationItemByAx", "00d", """prop A {true} proof T$1 {1. byax A |- trivial};""", "")>]
-    [<DataRow("FplJustificationItemByAx", "00e", """lem A {true} proof T$1 {1. byax A |- trivial};""", "")>]
-    [<DataRow("FplJustificationItemByAx", "00f", """conj A {true} proof T$1 {1. byax A |- trivial};""", "")>]
-    [<DataRow("FplJustificationItemByAx", "00g", """def pred A() {true} proof T$1 {1. byax A |- trivial};""", "")>]
-    [<DataRow("FplJustificationItemByAx", "00h", """def func A()->pred {intr} proof T$1 {1. byax A |- trivial};""", "")>]
-    [<DataRow("FplJustificationItemByAx", "00i", """def cl A {intr} proof T$1 {1. byax A |- trivial};""", "")>]
-    [<DataRow("FplJustificationItemByAx", "00j", """ext A x@/\d+/->pred(a:obj) {ret x} proof T$1 {1. byax A |- trivial};""", "")>]
+    [<DataRow("FplJustificationItemByAx", "00b", """inf A {pre:true con:true} proof T$1 {1. byax A |- trivial}""", "")>]
+    [<DataRow("FplJustificationItemByAx", "00c", """thm A {true} proof T$1 {1. byax A |- trivial}""", "")>]
+    [<DataRow("FplJustificationItemByAx", "00d", """prop A {true} proof T$1 {1. byax A |- trivial}""", "")>]
+    [<DataRow("FplJustificationItemByAx", "00e", """lem A {true} proof T$1 {1. byax A |- trivial}""", "")>]
+    [<DataRow("FplJustificationItemByAx", "00f", """conj A {true} proof T$1 {1. byax A |- trivial}""", "")>]
+    [<DataRow("FplJustificationItemByAx", "00g", """def pred A() {true} proof T$1 {1. byax A |- trivial}""", "")>]
+    [<DataRow("FplJustificationItemByAx", "00h", """def func A()->pred {intr} proof T$1 {1. byax A |- trivial}""", "")>]
+    [<DataRow("FplJustificationItemByAx", "00i", """def cl A {intr} proof T$1 {1. byax A |- trivial}""", "")>]
+    [<DataRow("FplJustificationItemByAx", "00j", """ext A x@/\d+/->pred(a:obj) {ret x} proof T$1 {1. byax A |- trivial}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplJustificationItemByAx(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplJustificationItemByAx.fpl"
@@ -3580,15 +3580,15 @@ type SymbolTableStructure() =
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
         
-    [<DataRow("FplJustificationItemByConj", "00a", """conj A {true} proof T$1 { 100. byconj A, 1 |- false };""", "")>]
-    [<DataRow("FplJustificationItemByConj", "00b", """thm A {true} proof T$1 { 100. byconj A, 1 |- false };""", "")>]
-    [<DataRow("FplJustificationItemByConj", "00c", """prop A {true} proof T$1 { 100. byconj A, 1 |- false };""", "")>]
-    [<DataRow("FplJustificationItemByConj", "00d", """lem A {true} proof T$1 { 100. byconj A, 1 |- false };""", "")>]
-    [<DataRow("FplJustificationItemByConj", "00e", """inf A {pre:true con:true} proof T$1 { 100. byconj A, 1 |- false };""", "")>]
-    [<DataRow("FplJustificationItemByConj", "00f", """ax A {true} proof T$1 { 100. byconj A, 1 |- false };""", "")>]
-    [<DataRow("FplJustificationItemByConj", "00g", """def cl A {intr} proof T$1 { 100. byconj A, 1 |- false };""", "")>]
-    [<DataRow("FplJustificationItemByConj", "00h", """def pred A() {true} proof T$1 {1. byconj A, 1 |- trivial};""", "")>]
-    [<DataRow("FplJustificationItemByConj", "00i", """def func A()->pred {intr} proof T$1 {1. byconj A, 1 |- trivial};""", "")>]
+    [<DataRow("FplJustificationItemByConj", "00a", """conj A {true} proof T$1 { 100. byconj A, 1 |- false }""", "")>]
+    [<DataRow("FplJustificationItemByConj", "00b", """thm A {true} proof T$1 { 100. byconj A, 1 |- false }""", "")>]
+    [<DataRow("FplJustificationItemByConj", "00c", """prop A {true} proof T$1 { 100. byconj A, 1 |- false }""", "")>]
+    [<DataRow("FplJustificationItemByConj", "00d", """lem A {true} proof T$1 { 100. byconj A, 1 |- false }""", "")>]
+    [<DataRow("FplJustificationItemByConj", "00e", """inf A {pre:true con:true} proof T$1 { 100. byconj A, 1 |- false }""", "")>]
+    [<DataRow("FplJustificationItemByConj", "00f", """ax A {true} proof T$1 { 100. byconj A, 1 |- false }""", "")>]
+    [<DataRow("FplJustificationItemByConj", "00g", """def cl A {intr} proof T$1 { 100. byconj A, 1 |- false }""", "")>]
+    [<DataRow("FplJustificationItemByConj", "00h", """def pred A() {true} proof T$1 {1. byconj A, 1 |- trivial}""", "")>]
+    [<DataRow("FplJustificationItemByConj", "00i", """def func A()->pred {intr} proof T$1 {1. byconj A, 1 |- trivial}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplJustificationItemByConj(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplJustificationItemByConj.fpl"
@@ -3621,8 +3621,8 @@ type SymbolTableStructure() =
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
 
-    [<DataRow("FplJustificationItemByCor", "00", """cor A$1 {true} proof T$1 { 100. bycor A$1 |- false };""", "")>]
-    [<DataRow("FplJustificationItemByCor", "01", """cor A$1 {true} proof T$1 { 100. bycor ATypo$1 |- false };""", "")>]
+    [<DataRow("FplJustificationItemByCor", "00", """cor A$1 {true} proof T$1 { 100. bycor A$1 |- false }""", "")>]
+    [<DataRow("FplJustificationItemByCor", "01", """cor A$1 {true} proof T$1 { 100. bycor ATypo$1 |- false }""", "")>]
     [<TestMethod>]
     member this.TestStructureFplJustificationItemByCor(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplJustificationItemByCor.fpl"
@@ -3648,15 +3648,15 @@ type SymbolTableStructure() =
             Assert.IsTrue(node.RefersTo.IsNone)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplJustificationItemByDef", "00a", """conj A {true} proof T$1 { 100. bydef A, 1 |- false };""", "")>]
-    [<DataRow("FplJustificationItemByDef", "00b", """thm A {true} proof T$1 { 100. bydef A, 1 |- false };""", "")>]
-    [<DataRow("FplJustificationItemByDef", "00c", """prop A {true} proof T$1 { 100. bydef A, 1 |- false };""", "")>]
-    [<DataRow("FplJustificationItemByDef", "00d", """lem A {true} proof T$1 { 100. bydef A, 1 |- false };""", "")>]
-    [<DataRow("FplJustificationItemByDef", "00e", """inf A {pre:true con:true} proof T$1 { 100. bydef A, 1 |- false };""", "")>]
-    [<DataRow("FplJustificationItemByDef", "00f", """ax A {true} proof T$1 { 100. bydef A, 1 |- false };""", "")>]
-    [<DataRow("FplJustificationItemByDef", "00g", """def cl A {intr} proof T$1 { 100. bydef A, 1 |- false };""", "")>]
-    [<DataRow("FplJustificationItemByDef", "00h", """def pred A() {true} proof T$1 {1. bydef A, 1 |- trivial};""", "")>]
-    [<DataRow("FplJustificationItemByDef", "00i", """def func A()->pred {intr} proof T$1 {1. bydef A, 1 |- trivial};""", "")>]
+    [<DataRow("FplJustificationItemByDef", "00a", """conj A {true} proof T$1 { 100. bydef A, 1 |- false }""", "")>]
+    [<DataRow("FplJustificationItemByDef", "00b", """thm A {true} proof T$1 { 100. bydef A, 1 |- false }""", "")>]
+    [<DataRow("FplJustificationItemByDef", "00c", """prop A {true} proof T$1 { 100. bydef A, 1 |- false }""", "")>]
+    [<DataRow("FplJustificationItemByDef", "00d", """lem A {true} proof T$1 { 100. bydef A, 1 |- false }""", "")>]
+    [<DataRow("FplJustificationItemByDef", "00e", """inf A {pre:true con:true} proof T$1 { 100. bydef A, 1 |- false }""", "")>]
+    [<DataRow("FplJustificationItemByDef", "00f", """ax A {true} proof T$1 { 100. bydef A, 1 |- false }""", "")>]
+    [<DataRow("FplJustificationItemByDef", "00g", """def cl A {intr} proof T$1 { 100. bydef A, 1 |- false }""", "")>]
+    [<DataRow("FplJustificationItemByDef", "00h", """def pred A() {true} proof T$1 {1. bydef A, 1 |- trivial}""", "")>]
+    [<DataRow("FplJustificationItemByDef", "00i", """def func A()->pred {intr} proof T$1 {1. bydef A, 1 |- trivial}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplJustificationItemByDef(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplJustificationItemByDef.fpl"
@@ -3705,8 +3705,8 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplFunctionalTerm>(node.RefersTo.Value)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplJustificationItemByDefVar", "00", """def cl A thm T {dec ~x:A; true} proof T$1 { 100. bydef x |- is(x, A) };""", "")>]
-    [<DataRow("FplJustificationItemByDefVar", "01", """def cl A thm T {true} proof T$1 {dec ~x:A; 100. bydef x |- is(x, A) };""", "")>]
+    [<DataRow("FplJustificationItemByDefVar", "00", """def cl A thm T {dec x:A; true} proof T$1 { 100. bydef x |- is(x, A) }""", "")>]
+    [<DataRow("FplJustificationItemByDefVar", "01", """def cl A thm T {true} proof T$1 {dec x:A; 100. bydef x |- is(x, A) }""", "")>]
     [<TestMethod>]
     member this.TestStructureFplJustificationItemByDefVar(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplJustificationItemByDefVar.fpl"
@@ -3725,12 +3725,12 @@ type SymbolTableStructure() =
             Assert.IsInstanceOfType<FplVariable>(node.RefersTo.Value)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplJustificationItemByInf", "00a", """inf A {pre:true con:true} proof T$1 { 100. byinf A, 1 |- false };""", "")>]
-    [<DataRow("FplJustificationItemByInf", "00b", """conj A {true} proof T$1 { 100. byinf A, 1 |- false };""", "")>]
-    [<DataRow("FplJustificationItemByInf", "00c", """thm A {true} proof T$1 { 100. byinf A, 1 |- false };""", "")>]
-    [<DataRow("FplJustificationItemByInf", "00d", """prop A {true} proof T$1 { 100. byinf A, 1 |- false };""", "")>]
-    [<DataRow("FplJustificationItemByInf", "00e", """lem A {true} proof T$1 { 100. byinf A, 1 |- false };""", "")>]
-    [<DataRow("FplJustificationItemByInf", "00f", """ax A {true} proof T$1 { 100. byinf A, 1 |- false };""", "")>]
+    [<DataRow("FplJustificationItemByInf", "00a", """inf A {pre:true con:true} proof T$1 { 100. byinf A, 1 |- false }""", "")>]
+    [<DataRow("FplJustificationItemByInf", "00b", """conj A {true} proof T$1 { 100. byinf A, 1 |- false }""", "")>]
+    [<DataRow("FplJustificationItemByInf", "00c", """thm A {true} proof T$1 { 100. byinf A, 1 |- false }""", "")>]
+    [<DataRow("FplJustificationItemByInf", "00d", """prop A {true} proof T$1 { 100. byinf A, 1 |- false }""", "")>]
+    [<DataRow("FplJustificationItemByInf", "00e", """lem A {true} proof T$1 { 100. byinf A, 1 |- false }""", "")>]
+    [<DataRow("FplJustificationItemByInf", "00f", """ax A {true} proof T$1 { 100. byinf A, 1 |- false }""", "")>]
     [<TestMethod>]
     member this.TestStructureFplJustificationItemByInf(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplJustificationItemByInf.fpl"
@@ -3760,8 +3760,8 @@ type SymbolTableStructure() =
             Assert.IsTrue(node.RefersTo.IsNone)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplJustificationItemByProofArgument", "00", """thm A {true} proof A$1 {1. |- trivial} proof T$1 { 1. |- trivial 2. A$1:1 |- trivial qed};""", "")>]
-    [<DataRow("FplJustificationItemByProofArgument", "01", """thm A {true} proof A$1 {1. |- trivial} proof T$1 { 1. A$1:2, A$1:3 |- trivial qed};""", "")>]
+    [<DataRow("FplJustificationItemByProofArgument", "00", """thm A {true} proof A$1 {1: trivial}proof T$1 { 1: trivial 2. A$1:1 |- trivial qed}""", "")>]
+    [<DataRow("FplJustificationItemByProofArgument", "01", """thm A {true} proof A$1 {1: trivial}proof T$1 { 1. A$1:2, A$1:3 |- trivial qed}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplJustificationItemByProofArgument(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplJustificationItemByProofArgument.fpl"
@@ -3786,8 +3786,8 @@ type SymbolTableStructure() =
             Assert.IsTrue(node.RefersTo.IsNone) // the referenced proof argument does not exist
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplJustificationItemByRefArgument", "00", """proof T$1 { 1. |- trivial 2. 1 |- trivial qed};""", "")>]
-    [<DataRow("FplJustificationItemByRefArgument", "01", """proof T$1 { 1. |- trivial 2. 3 |- trivial qed};""", "")>]
+    [<DataRow("FplJustificationItemByRefArgument", "00", """proof T$1 { 1: trivial 2. 1 |- trivial qed}""", "")>]
+    [<DataRow("FplJustificationItemByRefArgument", "01", """proof T$1 { 1: trivial 2. 3 |- trivial qed}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplJustificationItemByRefArgument(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplJustificationItemByRefArgument.fpl"
@@ -3812,12 +3812,12 @@ type SymbolTableStructure() =
             Assert.IsTrue(node.RefersTo.IsNone) // the referred argument is missing
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplJustificationItemByTheoremLikeStmt", "00a", """thm A {true} proof T$1 { 100. A, 1 |- false };""", "")>]
-    [<DataRow("FplJustificationItemByTheoremLikeStmt", "00b", """prop A {true} proof T$1 { 100. A, 1 |- false };""", "")>]
-    [<DataRow("FplJustificationItemByTheoremLikeStmt", "00c", """lem A {true} proof T$1 { 100. A, 1 |- false };""", "")>]
-    [<DataRow("FplJustificationItemByTheoremLikeStmt", "00d", """conj A {true} proof T$1 { 100. A, 1 |- false };""", "")>]
-    [<DataRow("FplJustificationItemByTheoremLikeStmt", "00e", """ax A {true} proof T$1 { 100. A, 1 |- false };""", "")>]
-    [<DataRow("FplJustificationItemByTheoremLikeStmt", "00f", """inf A {pre:true con:true} proof T$1 { 100. A, 1 |- false };""", "")>]
+    [<DataRow("FplJustificationItemByTheoremLikeStmt", "00a", """thm A {true} proof T$1 { 100. A, 1 |- false }""", "")>]
+    [<DataRow("FplJustificationItemByTheoremLikeStmt", "00b", """prop A {true} proof T$1 { 100. A, 1 |- false }""", "")>]
+    [<DataRow("FplJustificationItemByTheoremLikeStmt", "00c", """lem A {true} proof T$1 { 100. A, 1 |- false }""", "")>]
+    [<DataRow("FplJustificationItemByTheoremLikeStmt", "00d", """conj A {true} proof T$1 { 100. A, 1 |- false }""", "")>]
+    [<DataRow("FplJustificationItemByTheoremLikeStmt", "00e", """ax A {true} proof T$1 { 100. A, 1 |- false }""", "")>]
+    [<DataRow("FplJustificationItemByTheoremLikeStmt", "00f", """inf A {pre:true con:true} proof T$1 { 100. A, 1 |- false }""", "")>]
     [<TestMethod>]
     member this.TestStructureFplJustificationItemByTheoremLikeStmt(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplJustificationItemByTheoremLikeStmt.fpl"
@@ -3861,8 +3861,8 @@ type SymbolTableStructure() =
             Assert.IsTrue(node.RefersTo.IsNone)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplLanguage", "01", """loc not x := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;;""", "")>]
-    [<DataRow("FplLanguage", "02", """loc and (x,y) := !eng: x " and " y !ger: x " und " y;;""", "")>]
+    [<DataRow("FplLanguage", "01", """loc not x := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""", "")>]
+    [<DataRow("FplLanguage", "02", """loc and (x,y) := !eng: x " and " y !ger: x " und " y;""", "")>]
     [<TestMethod>]
     member this.TestStructureFplLanguage(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplLanguage.fpl"
@@ -3886,9 +3886,9 @@ type SymbolTableStructure() =
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     // lemma 
-    [<DataRow("FplLemma", "00", """lem T {true};""", "")>]
+    [<DataRow("FplLemma", "00", """lem T {true}""", "")>]
     // lemma with two variables
-    [<DataRow("FplLemma", "01", """lem T {dec ~x,y:pred; true};""", "")>]
+    [<DataRow("FplLemma", "01", """lem T {dec x,y:pred; true}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplLemma(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplLemma.fpl"
@@ -3911,10 +3911,10 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(2, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplLocalization", "01", """loc not x := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;;""", "")>]
-    [<DataRow("FplLocalization", "02", """loc not(x) := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;;""", "")>]
-    [<DataRow("FplLocalization", "03", """loc Equal(x,y) := !tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;;""", "")>]
-    [<DataRow("FplLocalization", "04", """loc and(p,q) := !tex: p "\wedge" q !eng: p " and" q !ger: p " und " q;;""", "")>]
+    [<DataRow("FplLocalization", "01", """loc not x := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""", "")>]
+    [<DataRow("FplLocalization", "02", """loc not(x) := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""", "")>]
+    [<DataRow("FplLocalization", "03", """loc Equal(x,y) := !tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""", "")>]
+    [<DataRow("FplLocalization", "04", """loc and(p,q) := !tex: p "\wedge" q !eng: p " and" q !ger: p " und " q;""", "")>]
     [<TestMethod>]
     member this.TestStructureFplLocalization(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplLocalization.fpl"
@@ -3954,23 +3954,23 @@ type SymbolTableStructure() =
 
 
     // intrinsic mandatory functional term with predicate parent
-    [<DataRow("FplMandatoryFunctionalTerm", "00",  """def pred T() {intr prty func MandF(x:obj)->obj {intr} };""", "")>]
+    [<DataRow("FplMandatoryFunctionalTerm", "00",  """def pred T() {intr prty func MandF(x:obj)->obj {intr} }""", "")>]
     // intrinsic mandatory functional term with functional term parent
-    [<DataRow("FplMandatoryFunctionalTerm", "01",  """def func T()->obj {intr prty func MandF(x:obj)->obj {intr} };""", "")>]
+    [<DataRow("FplMandatoryFunctionalTerm", "01",  """def func T()->obj {intr prty func MandF(x:obj)->obj {intr} }""", "")>]
     // intrinsic mandatory functional term with class parent
-    [<DataRow("FplMandatoryFunctionalTerm", "02",  """def cl T {intr prty func MandF(x:obj)->obj {intr} };""", "")>]
+    [<DataRow("FplMandatoryFunctionalTerm", "02",  """def cl T {intr prty func MandF(x:obj)->obj {intr} }""", "")>]
     // non-intrinsic mandatory functional term with predicate parent
-    [<DataRow("FplMandatoryFunctionalTerm", "03",  """def pred T() {intr prty func MandF(x:obj)->obj {return x} };""", "")>]
+    [<DataRow("FplMandatoryFunctionalTerm", "03",  """def pred T() {intr prty func MandF(x:obj)->obj {return x} }""", "")>]
     // non-intrinsic mandatory functional term with functional term parent
-    [<DataRow("FplMandatoryFunctionalTerm", "04",  """def func T()->obj {intr prty func MandF(x:obj)->obj {return x} };""", "")>]
+    [<DataRow("FplMandatoryFunctionalTerm", "04",  """def func T()->obj {intr prty func MandF(x:obj)->obj {return x} }""", "")>]
     // non-intrinsic mandatory functional term with class parent
-    [<DataRow("FplMandatoryFunctionalTerm", "05",  """def cl T {intr prty func MandF(x:obj)->obj {return x} };""", "")>]
+    [<DataRow("FplMandatoryFunctionalTerm", "05",  """def cl T {intr prty func MandF(x:obj)->obj {return x} }""", "")>]
     // non-intrinsic mandatory functional term with predicate parent, shared variables and one statement
-    [<DataRow("FplMandatoryFunctionalTerm", "06",  """def pred T() {dec ~y:obj; true prty func MandF(x:obj)->obj {dec x:=y; return x} };""", "")>]
+    [<DataRow("FplMandatoryFunctionalTerm", "06",  """def pred T() {dec y:obj; true prty func MandF(x:obj)->obj {dec x:=y; return x} }""", "")>]
     // non-intrinsic mandatory functional term with functional term parent, shared variables and one statement
-    [<DataRow("FplMandatoryFunctionalTerm", "07",  """def func T()->obj {dec ~y:obj; return y prty func MandF(x:obj)->obj {dec x:=y; return x} };""", "")>]
+    [<DataRow("FplMandatoryFunctionalTerm", "07",  """def func T()->obj {dec y:obj; return y prty func MandF(x:obj)->obj {dec x:=y; return x} }""", "")>]
     // non-intrinsic mandatory functional term with class parent, shared variables and one statement
-    [<DataRow("FplMandatoryFunctionalTerm", "08",  """def cl T {dec ~y:obj; ctor T() {} prty func MandF(x:obj)->obj {dec x:=y; return x} };""", "")>]
+    [<DataRow("FplMandatoryFunctionalTerm", "08",  """def cl T {dec y:obj; ctor T() {} prty func MandF(x:obj)->obj {dec x:=y; return x} }""", "")>]
     [<TestMethod>]
     member this.TestStructureFplMandatoryFunctionalTerm(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplMandatoryFunctionalTerm.fpl"
@@ -4044,23 +4044,23 @@ type SymbolTableStructure() =
 
 
     // intrinsic predicate with predicate parent
-    [<DataRow("FplMandatoryPredicate", "00",  """def pred T() {intr prty pred MandF(x:obj) {intr} };""", "")>]
+    [<DataRow("FplMandatoryPredicate", "00",  """def pred T() {intr prty pred MandF(x:obj) {intr} }""", "")>]
     // intrinsic predicate with functional term parent
-    [<DataRow("FplMandatoryPredicate", "01",  """def func T()->obj {intr prty pred MandF(x:obj) {intr} };""", "")>]
+    [<DataRow("FplMandatoryPredicate", "01",  """def func T()->obj {intr prty pred MandF(x:obj) {intr} }""", "")>]
     // intrinsic predicate with class parent
-    [<DataRow("FplMandatoryPredicate", "02",  """def cl T {intr prty pred MandF(x:obj) {intr} };""", "")>]
+    [<DataRow("FplMandatoryPredicate", "02",  """def cl T {intr prty pred MandF(x:obj) {intr} }""", "")>]
     // non-intrinsic predicate with predicate parent
-    [<DataRow("FplMandatoryPredicate", "03",  """def pred T() {intr prty pred MandF(x:obj) {true} };""", "")>]
+    [<DataRow("FplMandatoryPredicate", "03",  """def pred T() {intr prty pred MandF(x:obj) {true} }""", "")>]
     // non-intrinsic predicate with functional term parent
-    [<DataRow("FplMandatoryPredicate", "04",  """def func T()->obj {intr prty pred MandF(x:obj) {true} };""", "")>]
+    [<DataRow("FplMandatoryPredicate", "04",  """def func T()->obj {intr prty pred MandF(x:obj) {true} }""", "")>]
     // non-intrinsic predicate with class parent
-    [<DataRow("FplMandatoryPredicate", "05",  """def cl T {intr prty pred MandF(x:obj) {true} };""", "")>]
+    [<DataRow("FplMandatoryPredicate", "05",  """def cl T {intr prty pred MandF(x:obj) {true} }""", "")>]
     // non-intrinsic predicate with predicate parent, shared variables and one statement
-    [<DataRow("FplMandatoryPredicate", "06",  """def pred T() {dec ~y:obj; true prty pred MandF(x:obj) {dec x:=y; true} };""", "")>]
+    [<DataRow("FplMandatoryPredicate", "06",  """def pred T() {dec y:obj; true prty pred MandF(x:obj) {dec x:=y; true} }""", "")>]
     // non-intrinsic predicate with functional term parent, shared variables and one statement
-    [<DataRow("FplMandatoryPredicate", "07",  """def func T()->obj {dec ~y:obj; return y prty pred MandF(x:obj) {dec x:=y; true} };""", "")>]
+    [<DataRow("FplMandatoryPredicate", "07",  """def func T()->obj {dec y:obj; return y prty pred MandF(x:obj) {dec x:=y; true} }""", "")>]
     // non-intrinsic predicate with class parent, shared variables and one statement
-    [<DataRow("FplMandatoryPredicate", "08",  """def cl T {dec ~y:obj; ctor T() {} prty pred MandF(x:obj) {dec x:=y; true} };""", "")>]
+    [<DataRow("FplMandatoryPredicate", "08",  """def cl T {dec y:obj; ctor T() {} prty pred MandF(x:obj) {dec x:=y; true} }""", "")>]
     [<TestMethod>]
     member this.TestStructureFplMandatoryPredicate(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplMandatoryPredicate.fpl"
@@ -4133,9 +4133,9 @@ type SymbolTableStructure() =
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
 
-    [<DataRow("FplMapCaseElse", "00", """def pred T(x:ind) { dec ~n:pred n:= mcases (| (x = $1) : false | (x = $2) : true | (x = $3) : false ? undef ); n };""", "")>]
-    [<DataRow("FplMapCaseElse", "01", """def pred T() { mcases (| true : false | false : true ? undef )};""", "")>]
-    [<DataRow("FplMapCaseElse", "02", """def func T()->pred { return mcases (| true : false | false : true ? undef )};""", "")>]
+    [<DataRow("FplMapCaseElse", "00", """def pred T(x:ind) { dec n:pred n:= mcases (| (x = $1) : false | (x = $2) : true | (x = $3) : false ? undef ); n }""", "")>]
+    [<DataRow("FplMapCaseElse", "01", """def pred T() { mcases (| true : false | false : true ? undef )}""", "")>]
+    [<DataRow("FplMapCaseElse", "02", """def func T()->pred { return mcases (| true : false | false : true ? undef )}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplMapCaseElse(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplMapCaseElse.fpl"
@@ -4165,9 +4165,9 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplMapCases", "00", """def pred T(x:ind) { dec ~n:pred n:= mcases (| (x = $1) : false | (x = $2) : true | (x = $3) : false ? undef ); n };""", "")>]
-    [<DataRow("FplMapCases", "01", """def pred T() { mcases (| true : false | false : true ? undef )};""", "")>]
-    [<DataRow("FplMapCases", "02", """def func T()->pred { return mcases (| true : false | false : true ? undef )};""", "")>]
+    [<DataRow("FplMapCases", "00", """def pred T(x:ind) { dec n:pred n:= mcases (| (x = $1) : false | (x = $2) : true | (x = $3) : false ? undef ); n }""", "")>]
+    [<DataRow("FplMapCases", "01", """def pred T() { mcases (| true : false | false : true ? undef )}""", "")>]
+    [<DataRow("FplMapCases", "02", """def func T()->pred { return mcases (| true : false | false : true ? undef )}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplMapCases(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplMapCases.fpl"
@@ -4197,9 +4197,9 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplMapCaseSingle", "00", """def pred T(x:ind) { dec ~n:pred n:= mcases (| (x = $1) : false | (x = $2) : true | (x = $3) : false ? undef ); n };""", "")>]
-    [<DataRow("FplMapCaseSingle", "01", """def pred T() { mcases (| true : false | false : true ? undef )};""", "")>]
-    [<DataRow("FplMapCaseSingle", "02", """def func T()->pred { return mcases (| true : false | false : true ? undef )};""", "")>]
+    [<DataRow("FplMapCaseSingle", "00", """def pred T(x:ind) { dec n:pred n:= mcases (| (x = $1) : false | (x = $2) : true | (x = $3) : false ? undef ); n }""", "")>]
+    [<DataRow("FplMapCaseSingle", "01", """def pred T() { mcases (| true : false | false : true ? undef )}""", "")>]
+    [<DataRow("FplMapCaseSingle", "02", """def func T()->pred { return mcases (| true : false | false : true ? undef )}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplMapCaseSingle(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplMapCaseSingle.fpl"
@@ -4230,40 +4230,40 @@ type SymbolTableStructure() =
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     // mapping of functional terms
-    [<DataRow("FplMapping", "00a", """def func T()->pred(a:obj) {intr};""", "")>]
-    [<DataRow("FplMapping", "00b", """def func T()->func()->pred(a,b:obj) {intr};""", "")>]
-    [<DataRow("FplMapping", "00c", """def func T()->func()->pred(a,b:obj) {intr};""", "pred(a, b)")>]
-    [<DataRow("FplMapping", "00d", """def func T()->func(x,y,z:obj)->obj {intr};""", "")>]
+    [<DataRow("FplMapping", "00a", """def func T()->pred(a:obj) {intr}""", "")>]
+    [<DataRow("FplMapping", "00b", """def func T()->func()->pred(a,b:obj) {intr}""", "")>]
+    [<DataRow("FplMapping", "00c", """def func T()->func()->pred(a,b:obj) {intr}""", "pred(a, b)")>]
+    [<DataRow("FplMapping", "00d", """def func T()->func(x,y,z:obj)->obj {intr}""", "")>]
     // mapping of mandatory properties
-    [<DataRow("FplMapping", "01a", """def pred T1() {intr prty func T()->pred(a:obj) {intr}};""", "")>]
-    [<DataRow("FplMapping", "01b", """def pred T1() {intr prty func T()->func()->pred(a,b:obj) {intr}};""", "")>]
-    [<DataRow("FplMapping", "01c", """def pred T1() {intr prty func T()->func()->pred(a,b:obj) {intr}};""", "pred(a, b)")>]
-    [<DataRow("FplMapping", "01d", """def pred T1() {intr prty func T()->func(a,b,c:obj)->obj {intr}};""", "")>]
+    [<DataRow("FplMapping", "01a", """def pred T1() {intr prty func T()->pred(a:obj) {intr}}""", "")>]
+    [<DataRow("FplMapping", "01b", """def pred T1() {intr prty func T()->func()->pred(a,b:obj) {intr}}""", "")>]
+    [<DataRow("FplMapping", "01c", """def pred T1() {intr prty func T()->func()->pred(a,b:obj) {intr}}""", "pred(a, b)")>]
+    [<DataRow("FplMapping", "01d", """def pred T1() {intr prty func T()->func(a,b,c:obj)->obj {intr}}""", "")>]
     // mapping of extensions
-    [<DataRow("FplMapping", "03a", """ext Digits x@/\d+/->pred(a:obj) {ret x};""", "")>]
-    [<DataRow("FplMapping", "03b", """ext Digits x@/\d+/->func()->pred(a,b:obj) {ret x};""", "")>]
-    [<DataRow("FplMapping", "03c", """ext Digits x@/\d+/->func()->pred(a,b:obj) {ret x};""", "pred(a, b)")>]
-    [<DataRow("FplMapping", "03d", """ext Digits x@/\d+/->func(a,b,c:obj)->obj {ret x};""", "")>]
+    [<DataRow("FplMapping", "03a", """ext Digits x@/\d+/->pred(a:obj) {ret x}""", "")>]
+    [<DataRow("FplMapping", "03b", """ext Digits x@/\d+/->func()->pred(a,b:obj) {ret x}""", "")>]
+    [<DataRow("FplMapping", "03c", """ext Digits x@/\d+/->func()->pred(a,b:obj) {ret x}""", "pred(a, b)")>]
+    [<DataRow("FplMapping", "03d", """ext Digits x@/\d+/->func(a,b,c:obj)->obj {ret x}""", "")>]
     // mapping of with and without references types
-    [<DataRow("FplMapping", "MF1", """def cl A def func T()->A;""", "")>]
-    [<DataRow("FplMapping", "MF1a", """def func T()->A;""", "")>]
-    [<DataRow("FplMapping", "MF2", """def cl A def func T()->*A[ind];""", "")>]
-    [<DataRow("FplMapping", "MF2a", """def func T()->*A[ind];""", "")>]
-    [<DataRow("FplMapping", "MF4", """def func T()->pred;""", "")>]
-    [<DataRow("FplMapping", "MF4a", """def func T()->*pred[ind];""", "")>]
-    [<DataRow("FplMapping", "MF4b", """def func T()->pred(x:obj);""", "")>]
-    [<DataRow("FplMapping", "MF4c", """def func T()->*pred(x:obj)[ind];""", "")>]
-    [<DataRow("FplMapping", "MF5", """def func T()->func;""", "")>]
-    [<DataRow("FplMapping", "MF5a", """def func T()->*func[ind];""", "")>]
-    [<DataRow("FplMapping", "MF5b", """def func T()->func(x:obj)->obj;""", "")>]
-    [<DataRow("FplMapping", "MF5c", """def func T()->*func(x:obj)->obj[ind];""", "")>]
-    [<DataRow("FplMapping", "MF6", """def func T()->tpl;""", "")>]
-    [<DataRow("FplMapping", "MF6a", """def func T()->*tpl[ind];""", "")>]
+    [<DataRow("FplMapping", "MF1", """def cl A def func T()->A""", "")>]
+    [<DataRow("FplMapping", "MF1a", """def func T()->A""", "")>]
+    [<DataRow("FplMapping", "MF2", """def cl A def func T()->*A[ind]""", "")>]
+    [<DataRow("FplMapping", "MF2a", """def func T()->*A[ind]""", "")>]
+    [<DataRow("FplMapping", "MF4", """def func T()->pred""", "")>]
+    [<DataRow("FplMapping", "MF4a", """def func T()->*pred[ind]""", "")>]
+    [<DataRow("FplMapping", "MF4b", """def func T()->pred(x:obj)""", "")>]
+    [<DataRow("FplMapping", "MF4c", """def func T()->*pred(x:obj)[ind]""", "")>]
+    [<DataRow("FplMapping", "MF5", """def func T()->func""", "")>]
+    [<DataRow("FplMapping", "MF5a", """def func T()->*func[ind]""", "")>]
+    [<DataRow("FplMapping", "MF5b", """def func T()->func(x:obj)->obj""", "")>]
+    [<DataRow("FplMapping", "MF5c", """def func T()->*func(x:obj)->obj[ind]""", "")>]
+    [<DataRow("FplMapping", "MF6", """def func T()->tpl""", "")>]
+    [<DataRow("FplMapping", "MF6a", """def func T()->*tpl[ind]""", "")>]
 
-    [<DataRow("FplMapping", "ME1", """def cl A ext Digits x@/\d+/->A {ret x};""", "")>]
-    [<DataRow("FplMapping", "ME1a", """ext Digits x@/\d+/->A {ret x};""", "")>]
-    [<DataRow("FplMapping", "ME2", """def cl A ext Digits x@/\d+/->*A[ind] {ret x};""", "")>]
-    [<DataRow("FplMapping", "ME2a", """ext Digits x@/\d+/->*A[ind] {ret x};""", "")>]
+    [<DataRow("FplMapping", "ME1", """def cl A ext Digits x@/\d+/->A {ret x}""", "")>]
+    [<DataRow("FplMapping", "ME1a", """ext Digits x@/\d+/->A {ret x}""", "")>]
+    [<DataRow("FplMapping", "ME2", """def cl A ext Digits x@/\d+/->*A[ind] {ret x}""", "")>]
+    [<DataRow("FplMapping", "ME2a", """ext Digits x@/\d+/->*A[ind] {ret x}""", "")>]
 
     [<TestMethod>]
     member this.TestStructureFplMapping(nodeType, varVal, fplCode, identifier) =
@@ -4528,7 +4528,7 @@ type SymbolTableStructure() =
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
 
-    [<DataRow("FplNegation", "00", """def pred T() {not x};""", "")>]
+    [<DataRow("FplNegation", "00", """def pred T() {not x}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplNegation(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplNegation.fpl"
@@ -4544,40 +4544,40 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplParent", "00", """def pred T() {intr property pred T1() {parent} };""", "")>]
-    [<DataRow("FplParent", "00_1", """def pred T() {intr property pred T1() {parent()} };""", "")>]
-    [<DataRow("FplParent", "00_2", """def pred T() {intr property pred T1() {parent($1)} };""", "")>]
-    [<DataRow("FplParent", "00_3", """def func T()->obj {intr property func T1()->obj {return parent} };""", "")>]
-    [<DataRow("FplParent", "00_4", """def func T()->obj {intr property func T1()->obj {return parent()} };""", "")>]
-    [<DataRow("FplParent", "00_5", """def func T()->obj {intr property func T1()->obj {return parent($1)} };""", "")>]
+    [<DataRow("FplParent", "00", """def pred T() {intr property pred T1() {parent} }""", "")>]
+    [<DataRow("FplParent", "00_1", """def pred T() {intr property pred T1() {parent()} }""", "")>]
+    [<DataRow("FplParent", "00_2", """def pred T() {intr property pred T1() {parent($1)} }""", "")>]
+    [<DataRow("FplParent", "00_3", """def func T()->obj {intr property func T1()->obj {return parent} }""", "")>]
+    [<DataRow("FplParent", "00_4", """def func T()->obj {intr property func T1()->obj {return parent()} }""", "")>]
+    [<DataRow("FplParent", "00_5", """def func T()->obj {intr property func T1()->obj {return parent($1)} }""", "")>]
 
-    [<DataRow("FplParent", "00a", """def cl A {dec ~x:obj x:=parent; ctor A() {}};""", "")>]
-    [<DataRow("FplParent", "00b", """def cl A {ctor A() {dec ~x:obj x:=parent;}};""", "")>]
-    [<DataRow("FplParent", "00c", """def cl A {intr property pred T() { is(parent,A) } };""", "")>]
-    [<DataRow("FplParent", "00d", """def cl A {intr property func T()->obj {dec ~x:obj x:=parent; return x } };""", "")>]
-    [<DataRow("FplParent", "00e", """def cl A {intr property pred T() { is(parent,A) } };""", "")>]
-    [<DataRow("FplParent", "00f", """def cl A {intr property func T()->obj {dec ~x:obj x:=parent; return x } };""", "")>]
-    [<DataRow("FplParent", "01a", """def pred A() {dec assert is(parent,A); true };""", "")>]
-    [<DataRow("FplParent", "01b", """def pred A() {intr property pred T() { is(parent,A) } };""", "")>]
-    [<DataRow("FplParent", "01c", """def pred A() {intr property pred T() { is(parent,A) } };""", "")>]
-    [<DataRow("FplParent", "01d", """def pred A() {intr property pred T() { is(parent,A) } };""", "")>]
-    [<DataRow("FplParent", "01e", """def pred A() {intr property pred T() { is(parent,A) } };""", "")>]
-    [<DataRow("FplParent", "02a", """def func A()->obj {dec ~x:obj assert is(parent,A); return x};""", "")>]
-    [<DataRow("FplParent", "02b", """def func A()->obj {intr property pred T() { is(parent,A) } };""", "")>]
-    [<DataRow("FplParent", "02c", """def func A()->obj {intr property pred T() { is(parent,A) } };""", "")>]
-    [<DataRow("FplParent", "02d", """def func A()->obj {intr property pred T() { is(parent,A) } };""", "")>]
-    [<DataRow("FplParent", "02e", """def func A()->obj {intr property pred T() { is(parent,A) } };""", "")>]
-    [<DataRow("FplParent",  "03", """axiom A {parent};""", "")>]
-    [<DataRow("FplParent",  "04", """theorem A {parent};""", "")>]
-    [<DataRow("FplParent",  "05", """lemma A {parent};""", "")>]
-    [<DataRow("FplParent",  "06", """prop A {parent};""", "")>]
-    [<DataRow("FplParent",  "08", """conj A {parent};""", "")>]
-    [<DataRow("FplParent",  "09", """cor A$1 {parent};""", "")>]
-    [<DataRow("FplParent",  "10", """prf A$1 {1. |- parent qed};""", "")>]
-    [<DataRow("FplParent",  "11", """inf A {pre: true con: parent};""", "")>]
-    [<DataRow("FplParent",  "12", """inf A {pre: parent con: true};""", "")>]
-    [<DataRow("FplParent",  "13", """loc not(parent) := !tex: "\neg(" x ")";;""", "")>]
-    [<DataRow("FplParent",  "14", """ext A x@/\d+/ -> obj {dec assert is(parent,A); ret x};""", "")>]
+    [<DataRow("FplParent", "00a", """def cl A {dec x:obj x:=parent; ctor A() {}}""", "")>]
+    [<DataRow("FplParent", "00b", """def cl A {ctor A() {dec x:obj x:=parent;}}""", "")>]
+    [<DataRow("FplParent", "00c", """def cl A {intr property pred T() { is(parent,A) } }""", "")>]
+    [<DataRow("FplParent", "00d", """def cl A {intr property func T()->obj {dec x:obj x:=parent; return x } }""", "")>]
+    [<DataRow("FplParent", "00e", """def cl A {intr property pred T() { is(parent,A) } }""", "")>]
+    [<DataRow("FplParent", "00f", """def cl A {intr property func T()->obj {dec x:obj x:=parent; return x } }""", "")>]
+    [<DataRow("FplParent", "01a", """def pred A() {dec assert is(parent,A); true }""", "")>]
+    [<DataRow("FplParent", "01b", """def pred A() {intr property pred T() { is(parent,A) } }""", "")>]
+    [<DataRow("FplParent", "01c", """def pred A() {intr property pred T() { is(parent,A) } }""", "")>]
+    [<DataRow("FplParent", "01d", """def pred A() {intr property pred T() { is(parent,A) } }""", "")>]
+    [<DataRow("FplParent", "01e", """def pred A() {intr property pred T() { is(parent,A) } }""", "")>]
+    [<DataRow("FplParent", "02a", """def func A()->obj {dec x:obj assert is(parent,A); return x}""", "")>]
+    [<DataRow("FplParent", "02b", """def func A()->obj {intr property pred T() { is(parent,A) } }""", "")>]
+    [<DataRow("FplParent", "02c", """def func A()->obj {intr property pred T() { is(parent,A) } }""", "")>]
+    [<DataRow("FplParent", "02d", """def func A()->obj {intr property pred T() { is(parent,A) } }""", "")>]
+    [<DataRow("FplParent", "02e", """def func A()->obj {intr property pred T() { is(parent,A) } }""", "")>]
+    [<DataRow("FplParent",  "03", """axiom A {parent}""", "")>]
+    [<DataRow("FplParent",  "04", """theorem A {parent}""", "")>]
+    [<DataRow("FplParent",  "05", """lemma A {parent}""", "")>]
+    [<DataRow("FplParent",  "06", """prop A {parent}""", "")>]
+    [<DataRow("FplParent",  "08", """conj A {parent}""", "")>]
+    [<DataRow("FplParent",  "09", """cor A$1 {parent}""", "")>]
+    [<DataRow("FplParent",  "10", """prf A$1 {1: parent qed}""", "")>]
+    [<DataRow("FplParent",  "11", """inf A {pre: true con: parent}""", "")>]
+    [<DataRow("FplParent",  "12", """inf A {pre: parent con: true}""", "")>]
+    [<DataRow("FplParent",  "13", """loc not(parent) := !tex: "\neg(" x ")";""", "")>]
+    [<DataRow("FplParent",  "14", """ext A x@/\d+/ -> obj {dec assert is(parent,A); ret x}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplParent(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplParent.fpl"
@@ -4650,15 +4650,15 @@ type SymbolTableStructure() =
 
 
     // intrinsic predicate
-    [<DataRow("FplPredicate", "00", """def pred T() {intr};""", "")>]
+    [<DataRow("FplPredicate", "00", """def pred T() {intr}""", "")>]
     // intrinsic predicate with variables
-    [<DataRow("FplPredicate", "01", """def pred T(x,y:obj) {intr};""", "")>]
+    [<DataRow("FplPredicate", "01", """def pred T(x,y:obj) {intr}""", "")>]
     // intrinsic predicate with variables and properties
-    [<DataRow("FplPredicate", "02", """def pred T(x,y:obj) {intr prty func MandF()->obj {intr} prty func OptF()->obj {intr} prty pred MandP() {true} prty pred OptP() {true} };""", "")>]
+    [<DataRow("FplPredicate", "02", """def pred T(x,y:obj) {intr prty func MandF()->obj {intr} prty func OptF()->obj {intr} prty pred MandP() {true} prty pred OptP() {true} }""", "")>]
     // non-intrinsic predicate with variables and properties
-    [<DataRow("FplPredicate", "03", """def pred T(x,y:obj) {dec ~z:obj; true prty func MandF()->obj {intr} prty func OptF()->obj {intr} prty pred MandP() {true} prty pred OptP() {true} };""", "")>]
+    [<DataRow("FplPredicate", "03", """def pred T(x,y:obj) {dec z:obj; true prty func MandF()->obj {intr} prty func OptF()->obj {intr} prty pred MandP() {true} prty pred OptP() {true} }""", "")>]
     // non-intrinsic predicate with some statements 
-    [<DataRow("FplPredicate", "04", """def pred T(x,y:obj) {dec ~z:obj z:=x y:=z; false };""", "")>]
+    [<DataRow("FplPredicate", "04", """def pred T(x,y:obj) {dec z:obj z:=x y:=z; false }""", "")>]
     [<TestMethod>]
     member this.TestStructureFplPredicate(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplPredicate.fpl"
@@ -4708,8 +4708,8 @@ type SymbolTableStructure() =
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
 
-    [<DataRow("FplPredicateList", "00", """inf T {pre: true con: true};""", "")>]
-    [<DataRow("FplPredicateList", "01", """inf T {pre: true, true, true con: true};""", "")>]
+    [<DataRow("FplPredicateList", "00", """inf T {pre: true con: true}""", "")>]
+    [<DataRow("FplPredicateList", "01", """inf T {pre: true, true, true con: true}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplPredicateList(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplPredicateList.fpl"
@@ -4733,29 +4733,29 @@ type SymbolTableStructure() =
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     // proof 
-    [<DataRow("FplProof", "00", """proof T$1 {1. |- trivial};""", "")>]
+    [<DataRow("FplProof", "00", """proof T$1 {1: trivial}""", "")>]
     // proof with qed
-    [<DataRow("FplProof", "00x", """proof T$1 {1. |- trivial qed};""", "")>]
+    [<DataRow("FplProof", "00x", """proof T$1 {1: trivial qed}""", "")>]
     // proof with wrong parent
-    [<DataRow("FplProof", "00a", """ax T {true} proof T$1 {1. |- trivial};""", "")>]
-    [<DataRow("FplProof", "00b", """conj T {true} proof T$1 {1. |- trivial};""", "")>]
-    [<DataRow("FplProof", "00c", """inf T {pre:true con:true} proof T$1 {1. |- trivial};""", "")>]
-    [<DataRow("FplProof", "00d", """def cl T {intr} proof T$1 {1. |- trivial};""", "")>]
-    [<DataRow("FplProof", "00e", """def pred T() {true} proof T$1 {1. |- trivial};""", "")>]
-    [<DataRow("FplProof", "00f", """def func T()->obj {intr} proof T$1 {1. |- trivial};""", "")>]
-    [<DataRow("FplProof", "00g", """loc T := !tex: "T"; proof T$1 {1. |- trivial};""", "")>]
-    [<DataRow("FplProof", "00h", """ext T x@/\d+/->obj {ret x} proof T$1 {1. |- trivial};""", "")>]
-    [<DataRow("FplProof", "00i", """proof T$1 {1. |- trivial} proof T$1$1 {1. |- trivial};""", "T$1$1")>]
+    [<DataRow("FplProof", "00a", """ax T {true} proof T$1 {1: trivial}""", "")>]
+    [<DataRow("FplProof", "00b", """conj T {true} proof T$1 {1: trivial}""", "")>]
+    [<DataRow("FplProof", "00c", """inf T {pre:true con:true} proof T$1 {1: trivial}""", "")>]
+    [<DataRow("FplProof", "00d", """def cl T {intr} proof T$1 {1: trivial}""", "")>]
+    [<DataRow("FplProof", "00e", """def pred T() {true} proof T$1 {1: trivial}""", "")>]
+    [<DataRow("FplProof", "00f", """def func T()->obj {intr} proof T$1 {1: trivial}""", "")>]
+    [<DataRow("FplProof", "00g", """loc T := !tex: "T"; proof T$1 {1: trivial}""", "")>]
+    [<DataRow("FplProof", "00h", """ext T x@/\d+/->obj {ret x} proof T$1 {1: trivial}""", "")>]
+    [<DataRow("FplProof", "00i", """proof T$1 {1: trivial}proof T$1$1 {1: trivial}""", "T$1$1")>]
     // proof with theorem
-    [<DataRow("FplProof", "01a", """thm T {true} proof T$1 {1. |- trivial};""", "")>]
+    [<DataRow("FplProof", "01a", """thm T {true} proof T$1 {1: trivial}""", "")>]
     // proof with lem
-    [<DataRow("FplProof", "01b", """lem T {true} proof T$1 {1. |- trivial};""", "")>]
+    [<DataRow("FplProof", "01b", """lem T {true} proof T$1 {1: trivial}""", "")>]
     // proof with proposition
-    [<DataRow("FplProof", "01c", """prop T {true} proof T$1 {1. |- trivial};""", "")>]
+    [<DataRow("FplProof", "01c", """prop T {true} proof T$1 {1: trivial}""", "")>]
     // proof with corollary
-    [<DataRow("FplProof", "02", """thm T {true} cor T$1 {true} proof T$1$1 {1. |- trivial};""", "")>]
+    [<DataRow("FplProof", "02", """thm T {true} cor T$1 {true} proof T$1$1 {1: trivial}""", "")>]
     // proof with two arguments
-    [<DataRow("FplProof", "03", """proof T$1$1 {1. byax A |- trivial 2. |- trivial};""", "")>]
+    [<DataRow("FplProof", "03", """proof T$1$1 {1. byax A |- trivial 2: trivial}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplProof(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplProof.fpl"
@@ -4828,7 +4828,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(2, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplProposition", "00", """prop T {true};""", "")>]
+    [<DataRow("FplProposition", "00", """prop T {true}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplProposition(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplProposition.fpl"
@@ -4844,8 +4844,8 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplQuantorAll", "00", """inf T {pre: true con: all x:pred {and (x,x)}};""", "")>]
-    [<DataRow("FplQuantorAll", "01", """inf T {dec ~p: pred(c: obj); pre: p(c) con: all x:obj {p(x)}};""", "")>]
+    [<DataRow("FplQuantorAll", "00", """inf T {pre: true con: all x:pred {and (x,x)}}""", "")>]
+    [<DataRow("FplQuantorAll", "01", """inf T {dec p: pred(c: obj); pre: p(c) con: all x:obj {p(x)}}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplQuantorAll(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplQuantorAll.fpl"
@@ -4869,9 +4869,9 @@ type SymbolTableStructure() =
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
 
-    [<DataRow("FplQuantorExists", "00", """inf T {pre: ex x:tpl {or(p, q(x))} con: true};""", "")>]
-    [<DataRow("FplQuantorExists", "01", """inf T {dec ~p: pred ~q:pred(z:tpl); pre: ex x:pred { p(z) } con: true};""", "")>]
-    [<DataRow("FplQuantorExists", "02", """inf T {pre: ex x,y:pred { and(x,y) }, true con: true};""", "")>]
+    [<DataRow("FplQuantorExists", "00", """inf T {pre: ex x:tpl {or(p, q(x))} con: true}""", "")>]
+    [<DataRow("FplQuantorExists", "01", """inf T {dec p: pred q:pred(z:tpl); pre: ex x:pred { p(z) } con: true}""", "")>]
+    [<DataRow("FplQuantorExists", "02", """inf T {pre: ex x,y:pred { and(x,y) }, true con: true}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplQuantorExists(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplQuantorExists.fpl"
@@ -4902,9 +4902,9 @@ type SymbolTableStructure() =
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
 
-    [<DataRow("FplQuantorExistsN", "00", """ax T {exn$1 x:tpl {and(p, q(x))} };""", "")>]
-    [<DataRow("FplQuantorExistsN", "01", """conj T {dec ~p: pred ~q:pred(z:tpl); exn$1 x:pred { p(z) } };""", "")>]
-    [<DataRow("FplQuantorExistsN", "02", """lem T {exn$1 x:pred { x } };""", "")>]
+    [<DataRow("FplQuantorExistsN", "00", """ax T {exn$1 x:tpl {and(p, q(x))} }""", "")>]
+    [<DataRow("FplQuantorExistsN", "01", """conj T {dec p: pred q:pred(z:tpl); exn$1 x:pred { p(z) } }""", "")>]
+    [<DataRow("FplQuantorExistsN", "02", """lem T {exn$1 x:pred { x } }""", "")>]
     [<TestMethod>]
     member this.TestStructureFplQuantorExistsN(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplQuantorExistsN.fpl"
@@ -4935,29 +4935,29 @@ type SymbolTableStructure() =
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     // references to variables
-    [<DataRow("FplReference", "00a", """ax T {x};""", "")>]
-    [<DataRow("FplReference", "00b", """ax T {dec ~x:pred; x};""", "")>]
+    [<DataRow("FplReference", "00a", """ax T {x}""", "")>]
+    [<DataRow("FplReference", "00b", """ax T {dec x:pred; x}""", "")>]
     // references to blocks
-    [<DataRow("FplReference", "01a", """ax T {dec ~x,y:obj; A(x,y) };""", "A(x, y)")>]
-    [<DataRow("FplReference", "01b", """def pred A(x,y:obj) {intr} ax T {dec ~x,y:obj; A(x,y) };""", "A(x, y)")>]
-    [<DataRow("FplReference", "01c", """def func A(x,y:obj)->obj {intr} ax T {dec ~x,y:obj; A(x,y) };""", "A(x, y)")>]
-    [<DataRow("FplReference", "01d", """ax T { A };""", "A")>]
-    [<DataRow("FplReference", "01e", """def cl A {intr} ax T { A };""", "A")>]
-    [<DataRow("FplReference", "01f", """inf A {pre:true con:true} ax T { A };""", "A")>]
-    [<DataRow("FplReference", "01g", """ax A {true} ax T { A };""", "A")>]
-    [<DataRow("FplReference", "01h", """thm A {true} ax T { A };""", "A")>]
-    [<DataRow("FplReference", "01i", """lem A {true} ax T { A };""", "A")>]
-    [<DataRow("FplReference", "01j", """prop A {true} ax T { A };""", "A")>]
-    [<DataRow("FplReference", "01k", """conj A {true} ax T { A };""", "A")>]
-    [<DataRow("FplReference", "01l", """cor A$1 {true} ax T { A$1 };""", "A$1")>]
-    [<DataRow("FplReference", "01m", """proof A$1 {1. |- trivial} ax T { A$1 };""", "")>]
-    [<DataRow("FplReference", "01n", """ext A x@/\d+/ -> obj {ret x} ax T { A };""", "A -> obj")>]
-    [<DataRow("FplReference", "01o", """loc A := !tex: "\alpha" ; ax T { A };""", "")>]
+    [<DataRow("FplReference", "01a", """ax T {dec x,y:obj; A(x,y) }""", "A(x, y)")>]
+    [<DataRow("FplReference", "01b", """def pred A(x,y:obj) {intr} ax T {dec x,y:obj; A(x,y) }""", "A(x, y)")>]
+    [<DataRow("FplReference", "01c", """def func A(x,y:obj)->obj {intr} ax T {dec x,y:obj; A(x,y) }""", "A(x, y)")>]
+    [<DataRow("FplReference", "01d", """ax T { A }""", "A")>]
+    [<DataRow("FplReference", "01e", """def cl A {intr} ax T { A }""", "A")>]
+    [<DataRow("FplReference", "01f", """inf A {pre:true con:true} ax T { A }""", "A")>]
+    [<DataRow("FplReference", "01g", """ax A {true} ax T { A }""", "A")>]
+    [<DataRow("FplReference", "01h", """thm A {true} ax T { A }""", "A")>]
+    [<DataRow("FplReference", "01i", """lem A {true} ax T { A }""", "A")>]
+    [<DataRow("FplReference", "01j", """prop A {true} ax T { A }""", "A")>]
+    [<DataRow("FplReference", "01k", """conj A {true} ax T { A }""", "A")>]
+    [<DataRow("FplReference", "01l", """cor A$1 {true} ax T { A$1 }""", "A$1")>]
+    [<DataRow("FplReference", "01m", """proof A$1 {1: trivial}ax T { A$1 }""", "")>]
+    [<DataRow("FplReference", "01n", """ext A x@/\d+/ -> obj {ret x} ax T { A }""", "A -> obj")>]
+    [<DataRow("FplReference", "01o", """loc A := !tex: "\alpha" ; ax T { A }""", "")>]
     // return reference
-    [<DataRow("FplReference", "02a", """def func A(x:obj)->obj {ret x};""", "")>]
+    [<DataRow("FplReference", "02a", """def func A(x:obj)->obj {ret x}""", "")>]
     // reference to named predicate
-    [<DataRow("FplReference", "04a", """def pred A() {D()};""", "D()")>]
-    [<DataRow("FplReference", "04b", """def pred D() {true} def pred A() {D()};""", "D()")>]
+    [<DataRow("FplReference", "04a", """def pred A() {D()}""", "D()")>]
+    [<DataRow("FplReference", "04b", """def pred D() {true} def pred A() {D()}""", "D()")>]
     [<TestMethod>]
     member this.TestStructureFplReference(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplReference.fpl"
@@ -5164,16 +5164,16 @@ type SymbolTableStructure() =
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
 
-    [<DataRow("FplReturn", "00", """def func A(x:obj)->obj {ret x};""", "")>]
-    [<DataRow("FplReturn", "00a", """def func T()->obj {dec ~v:obj v:=v; return v};""", "")>]
-    [<DataRow("FplReturn", "00b", """def func T()->tpl {dec ~v:tpl v:=v; return v};""", "")>]
-    [<DataRow("FplReturn", "00c", """def func T()->SomeClass1 {dec ~v:SomeClass1; return v};""", "")>]
-    [<DataRow("FplReturn", "00d", """def func T()->SomeClass1 {dec ~v:SomeClass1 v:=SomeClass1; return v};""", "")>]
-    [<DataRow("FplReturn", "00e", """def func T()->SomeClass1 {dec ~v:SomeClass1 v:=SomeClass1(); return v};""", "")>]
-    [<DataRow("FplReturn", "00f", """def func T()->ind {return $112};""", "")>]
-    [<DataRow("FplReturn", "00g", """def func T()->ind {dec ~v:ind v:=$13; return v};""", "")>]
-    [<DataRow("FplReturn", "01", """ext Digits x@/\d+/ -> obj {ret x};""", "")>]
-    [<DataRow("FplReturn", "02", """def cl A {intr prty func A(x:obj)->obj {ret x}};""", "")>]
+    [<DataRow("FplReturn", "00", """def func A(x:obj)->obj {ret x}""", "")>]
+    [<DataRow("FplReturn", "00a", """def func T()->obj {dec v:obj v:=v; return v}""", "")>]
+    [<DataRow("FplReturn", "00b", """def func T()->tpl {dec v:tpl v:=v; return v}""", "")>]
+    [<DataRow("FplReturn", "00c", """def func T()->SomeClass1 {dec v:SomeClass1; return v}""", "")>]
+    [<DataRow("FplReturn", "00d", """def func T()->SomeClass1 {dec v:SomeClass1 v:=SomeClass1; return v}""", "")>]
+    [<DataRow("FplReturn", "00e", """def func T()->SomeClass1 {dec v:SomeClass1 v:=SomeClass1(); return v}""", "")>]
+    [<DataRow("FplReturn", "00f", """def func T()->ind {return $112}""", "")>]
+    [<DataRow("FplReturn", "00g", """def func T()->ind {dec v:ind v:=$13; return v}""", "")>]
+    [<DataRow("FplReturn", "01", """ext Digits x@/\d+/ -> obj {ret x}""", "")>]
+    [<DataRow("FplReturn", "02", """def cl A {intr prty func A(x:obj)->obj {ret x}}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplReturn(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplReturn.fpl"
@@ -5252,7 +5252,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count) 
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplRoot", "00", """;""", "")>]
+    [<DataRow("FplRoot", "00", """""", "")>]
     [<TestMethod>]
     member this.TestStructureFplRoot(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplRoot.fpl"
@@ -5263,9 +5263,9 @@ type SymbolTableStructure() =
 
 
     // rule of inference with one premise
-    [<DataRow("FplRuleOfInference", "00", """inf T {pre:true con:false};""", "")>]
+    [<DataRow("FplRuleOfInference", "00", """inf T {pre:true con:false}""", "")>]
     // rule of inference with three premises
-    [<DataRow("FplRuleOfInference", "01", """inf T {pre:true, true, true con:false};""", "")>]
+    [<DataRow("FplRuleOfInference", "01", """inf T {pre:true, true, true con:false}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplRuleOfInference(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplRuleOfInference.fpl"
@@ -5290,36 +5290,36 @@ type SymbolTableStructure() =
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
 
-    [<DataRow("FplSelf", "00", """def pred T() {self};""", "")>]
-    [<DataRow("FplSelf", "00_1", """def pred T() {self()};""", "")>]
-    [<DataRow("FplSelf", "00_2", """def pred T() {self($1)};""", "")>]
-    [<DataRow("FplSelf", "00a", """def cl A {dec ~x:obj x:=self; ctor A() {}};""", "")>]
-    [<DataRow("FplSelf", "00b", """def cl A {ctor A() {dec ~x:obj x:=self;}};""", "")>]
-    [<DataRow("FplSelf", "00c", """def cl A {intr property pred T() { is(self,A) } };""", "")>]
-    [<DataRow("FplSelf", "00d", """def cl A {intr property func T()->obj {dec ~x:obj x:=self; return x } };""", "")>]
-    [<DataRow("FplSelf", "00e", """def cl A {intr property pred T() { is(self,A) } };""", "")>]
-    [<DataRow("FplSelf", "00f", """def cl A {intr property func T()->obj {dec ~x:obj x:=self; return x } };""", "")>]
-    [<DataRow("FplSelf", "01a", """def pred A() {dec assert is(self,A); true };""", "")>]
-    [<DataRow("FplSelf", "01b", """def pred A() {intr property pred T() { is(self,A) } };""", "")>]
-    [<DataRow("FplSelf", "01c", """def pred A() {intr property pred T() { is(self,A) } };""", "")>]
-    [<DataRow("FplSelf", "01d", """def pred A() {intr property pred T() { is(self,A) } };""", "")>]
-    [<DataRow("FplSelf", "01e", """def pred A() {intr property pred T() { is(self,A) } };""", "")>]
-    [<DataRow("FplSelf", "02a", """def func A()->obj {dec ~x:obj assert is(self,A); return x};""", "")>]
-    [<DataRow("FplSelf", "02b", """def func A()->obj {intr property pred T() { is(self,A) } };""", "")>]
-    [<DataRow("FplSelf", "02c", """def func A()->obj {intr property pred T() { is(self,A) } };""", "")>]
-    [<DataRow("FplSelf", "02d", """def func A()->obj {intr property pred T() { is(self,A) } };""", "")>]
-    [<DataRow("FplSelf", "02e", """def func A()->obj {intr property pred T() { is(self,A) } };""", "")>]
-    [<DataRow("FplSelf", "03", """axiom A {self};""", "")>]
-    [<DataRow("FplSelf", "04", """theorem A {self};""", "")>]
-    [<DataRow("FplSelf", "05", """lemma A {self};""", "")>]
-    [<DataRow("FplSelf", "06", """prop A {self};""", "")>]
-    [<DataRow("FplSelf", "08", """conj A {self};""", "")>]
-    [<DataRow("FplSelf", "09", """cor A$1 {self};""", "")>]
-    [<DataRow("FplSelf", "10", """prf A$1 {1. |- self qed};""", "")>]
-    [<DataRow("FplSelf", "11", """inf A {pre: true con: self};""", "")>]
-    [<DataRow("FplSelf", "12", """inf A {pre: self con: true};""", "")>]
-    [<DataRow("FplSelf", "13", """loc not(self) := !tex: "\neg(" x ")";;""", "")>]
-    [<DataRow("FplSelf", "14", """ext A x@/\d+/ -> obj {dec assert is(self,A); ret x};""", "")>]
+    [<DataRow("FplSelf", "00", """def pred T() {self}""", "")>]
+    [<DataRow("FplSelf", "00_1", """def pred T() {self()}""", "")>]
+    [<DataRow("FplSelf", "00_2", """def pred T() {self($1)}""", "")>]
+    [<DataRow("FplSelf", "00a", """def cl A {dec x:obj x:=self; ctor A() {}}""", "")>]
+    [<DataRow("FplSelf", "00b", """def cl A {ctor A() {dec x:obj x:=self;}}""", "")>]
+    [<DataRow("FplSelf", "00c", """def cl A {intr property pred T() { is(self,A) } }""", "")>]
+    [<DataRow("FplSelf", "00d", """def cl A {intr property func T()->obj {dec x:obj x:=self; return x } }""", "")>]
+    [<DataRow("FplSelf", "00e", """def cl A {intr property pred T() { is(self,A) } }""", "")>]
+    [<DataRow("FplSelf", "00f", """def cl A {intr property func T()->obj {dec x:obj x:=self; return x } }""", "")>]
+    [<DataRow("FplSelf", "01a", """def pred A() {dec assert is(self,A); true }""", "")>]
+    [<DataRow("FplSelf", "01b", """def pred A() {intr property pred T() { is(self,A) } }""", "")>]
+    [<DataRow("FplSelf", "01c", """def pred A() {intr property pred T() { is(self,A) } }""", "")>]
+    [<DataRow("FplSelf", "01d", """def pred A() {intr property pred T() { is(self,A) } }""", "")>]
+    [<DataRow("FplSelf", "01e", """def pred A() {intr property pred T() { is(self,A) } }""", "")>]
+    [<DataRow("FplSelf", "02a", """def func A()->obj {dec x:obj assert is(self,A); return x}""", "")>]
+    [<DataRow("FplSelf", "02b", """def func A()->obj {intr property pred T() { is(self,A) } }""", "")>]
+    [<DataRow("FplSelf", "02c", """def func A()->obj {intr property pred T() { is(self,A) } }""", "")>]
+    [<DataRow("FplSelf", "02d", """def func A()->obj {intr property pred T() { is(self,A) } }""", "")>]
+    [<DataRow("FplSelf", "02e", """def func A()->obj {intr property pred T() { is(self,A) } }""", "")>]
+    [<DataRow("FplSelf", "03", """axiom A {self}""", "")>]
+    [<DataRow("FplSelf", "04", """theorem A {self}""", "")>]
+    [<DataRow("FplSelf", "05", """lemma A {self}""", "")>]
+    [<DataRow("FplSelf", "06", """prop A {self}""", "")>]
+    [<DataRow("FplSelf", "08", """conj A {self}""", "")>]
+    [<DataRow("FplSelf", "09", """cor A$1 {self}""", "")>]
+    [<DataRow("FplSelf", "10", """prf A$1 {1: self qed}""", "")>]
+    [<DataRow("FplSelf", "11", """inf A {pre: true con: self}""", "")>]
+    [<DataRow("FplSelf", "12", """inf A {pre: self con: true}""", "")>]
+    [<DataRow("FplSelf", "13", """loc not(self) := !tex: "\neg(" x ")";""", "")>]
+    [<DataRow("FplSelf", "14", """ext A x@/\d+/ -> obj {dec assert is(self,A); ret x}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplSelf(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplSelf.fpl"
@@ -5388,7 +5388,7 @@ type SymbolTableStructure() =
             Assert.IsTrue(node.RefersTo.IsNone)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplTheorem", "00", """thm T {true};""", "")>]
+    [<DataRow("FplTheorem", "00", """thm T {true}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplTheorem(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplTheorem.fpl"
@@ -5405,7 +5405,7 @@ type SymbolTableStructure() =
 
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplTheory", "00", """;""", "")>]
+    [<DataRow("FplTheory", "00", """""", "")>]
     [<TestMethod>]
     member this.TestStructureFplTheory(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplTheory.fpl"
@@ -5422,10 +5422,10 @@ type SymbolTableStructure() =
 
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplTranslation", "01", """loc not x := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;;""", "")>]
-    [<DataRow("FplTranslation", "02", """loc not x := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;;""", "x")>]
-    [<DataRow("FplTranslation", "03", """loc not x := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;;""", ")")>]
-    [<DataRow("FplTranslation", "04", """loc not x := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;;""", "nicht ")>]
+    [<DataRow("FplTranslation", "01", """loc not x := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""", "")>]
+    [<DataRow("FplTranslation", "02", """loc not x := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""", "x")>]
+    [<DataRow("FplTranslation", "03", """loc not x := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""", ")")>]
+    [<DataRow("FplTranslation", "04", """loc not x := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""", "nicht ")>]
     [<TestMethod>]
     member this.TestStructureFplTranslation(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplTranslation.fpl"
@@ -5466,46 +5466,46 @@ type SymbolTableStructure() =
 
 
     // variable simple blocks
-    [<DataRow("FplVariable", "00a", """ax T {dec ~x:obj; true};""", "")>]
-    [<DataRow("FplVariable", "00b", """thm T {dec ~x:obj; true};""", "")>]
-    [<DataRow("FplVariable", "00c", """lem T {dec ~x:obj; true};""", "")>]
-    [<DataRow("FplVariable", "00d", """prop T {dec ~x:obj; true};""", "")>]
-    [<DataRow("FplVariable", "00e", """conj T {dec ~x:obj; true};""", "")>]
-    [<DataRow("FplVariable", "00f", """def cl T {dec ~x:obj; ctor T(){}};""", "")>]
-    [<DataRow("FplVariable", "00g", """def pred T() {dec ~x:obj; true};""", "")>]
-    [<DataRow("FplVariable", "00h", """def pred T(x:obj) {true};""", "")>]
-    [<DataRow("FplVariable", "00i", """def func T()->obj {dec ~x:obj; ret x};""", "")>]
-    [<DataRow("FplVariable", "00j", """def func T(x:obj)->obj {intr};""", "")>]
-    [<DataRow("FplVariable", "00k", """inf T {dec ~x:obj; pre:true con:true};""", "")>]
-    [<DataRow("FplVariable", "00l", """ext Digits x@/\d+/ -> obj {ret x};""", "")>]
-    [<DataRow("FplVariable", "00m", """cor T$1 {dec ~x:obj; true};""", "")>]
-    [<DataRow("FplVariable", "00n", """prf T$1 {dec ~x:obj; 1. |- trivial};""", "")>]
-    [<DataRow("FplVariable", "00o", """loc not x := !tex: "\neg(" y ")";;""", "")>]
+    [<DataRow("FplVariable", "00a", """ax T {dec x:obj; true}""", "")>]
+    [<DataRow("FplVariable", "00b", """thm T {dec x:obj; true}""", "")>]
+    [<DataRow("FplVariable", "00c", """lem T {dec x:obj; true}""", "")>]
+    [<DataRow("FplVariable", "00d", """prop T {dec x:obj; true}""", "")>]
+    [<DataRow("FplVariable", "00e", """conj T {dec x:obj; true}""", "")>]
+    [<DataRow("FplVariable", "00f", """def cl T {dec x:obj; ctor T(){}}""", "")>]
+    [<DataRow("FplVariable", "00g", """def pred T() {dec x:obj; true}""", "")>]
+    [<DataRow("FplVariable", "00h", """def pred T(x:obj) {true}""", "")>]
+    [<DataRow("FplVariable", "00i", """def func T()->obj {dec x:obj; ret x}""", "")>]
+    [<DataRow("FplVariable", "00j", """def func T(x:obj)->obj {intr}""", "")>]
+    [<DataRow("FplVariable", "00k", """inf T {dec x:obj; pre:true con:true}""", "")>]
+    [<DataRow("FplVariable", "00l", """ext Digits x@/\d+/ -> obj {ret x}""", "")>]
+    [<DataRow("FplVariable", "00m", """cor T$1 {dec x:obj; true}""", "")>]
+    [<DataRow("FplVariable", "00n", """prf T$1 {dec x:obj; 1: trivial}""", "")>]
+    [<DataRow("FplVariable", "00o", """loc not x := !tex: "\neg(" y ")";""", "")>]
     // variable sub blocks
-    [<DataRow("FplVariable", "01a", """def cl T {ctor T() {dec ~x:obj;}};""", "")>]
-    [<DataRow("FplVariable", "01b", """def cl T {ctor T(x:obj) {}};""", "")>]
-    [<DataRow("FplVariable", "01c", """def cl T {intr prty pred T() {dec ~x:obj; true}};""", "")>]
-    [<DataRow("FplVariable", "01d", """def cl T {intr prty pred T(x:obj) {true}};""", "")>]
-    [<DataRow("FplVariable", "01g", """def cl T {intr prty func T()->obj {dec ~x:obj; ret x}};""", "")>]
-    [<DataRow("FplVariable", "01h", """def cl T {intr prty func T(x:obj)->obj {intr}};""", "")>]
+    [<DataRow("FplVariable", "01a", """def cl T {ctor T() {dec x:obj;}}""", "")>]
+    [<DataRow("FplVariable", "01b", """def cl T {ctor T(x:obj) {}}""", "")>]
+    [<DataRow("FplVariable", "01c", """def cl T {intr prty pred T() {dec x:obj; true}}""", "")>]
+    [<DataRow("FplVariable", "01d", """def cl T {intr prty pred T(x:obj) {true}}""", "")>]
+    [<DataRow("FplVariable", "01g", """def cl T {intr prty func T()->obj {dec x:obj; ret x}}""", "")>]
+    [<DataRow("FplVariable", "01h", """def cl T {intr prty func T(x:obj)->obj {intr}}""", "")>]
     // variable to variable 
-    [<DataRow("FplVariable", "02a", """def pred T() {dec ~p:pred(x:obj); true};""", "x")>]
-    [<DataRow("FplVariable", "02b", """def pred T(p:pred(x:obj)) {true};""", "x")>]
-    [<DataRow("FplVariable", "02c", """def pred T() {dec ~p:*pred(x:obj)[ind]; true};""", "x")>]
-    [<DataRow("FplVariable", "02d", """def pred T(p:*pred(x:obj)[ind]) {true};""", "x")>]
-    [<DataRow("FplVariable", "02e", """def pred T() {dec ~p:*pred(x:obj)[tpl,Nat]; true};""", "x")>]
-    [<DataRow("FplVariable", "02f", """def pred T(p:*pred(x:obj)[ind,obj]) {true};""", "x")>]
+    [<DataRow("FplVariable", "02a", """def pred T() {dec p:pred(x:obj); true}""", "x")>]
+    [<DataRow("FplVariable", "02b", """def pred T(p:pred(x:obj)) {true}""", "x")>]
+    [<DataRow("FplVariable", "02c", """def pred T() {dec p:*pred(x:obj)[ind]; true}""", "x")>]
+    [<DataRow("FplVariable", "02d", """def pred T(p:*pred(x:obj)[ind]) {true}""", "x")>]
+    [<DataRow("FplVariable", "02e", """def pred T() {dec p:*pred(x:obj)[tpl,Nat]; true}""", "x")>]
+    [<DataRow("FplVariable", "02f", """def pred T(p:*pred(x:obj)[ind,obj]) {true}""", "x")>]
     // variable in mapping
-    [<DataRow("FplVariable", "03a", """def func T()->pred(x:obj) {intr};""", "")>]
-    [<DataRow("FplVariable", "03b", """def func T()->func()->pred(a,b:obj) {intr};""", "b")>]
-    [<DataRow("FplVariable", "03c", """def func T()->func(a,b,c:obj)->obj {intr};""", "c")>]
+    [<DataRow("FplVariable", "03a", """def func T()->pred(x:obj) {intr}""", "")>]
+    [<DataRow("FplVariable", "03b", """def func T()->func()->pred(a,b:obj) {intr}""", "b")>]
+    [<DataRow("FplVariable", "03c", """def func T()->func(a,b,c:obj)->obj {intr}""", "c")>]
     // variable in localization
-    [<DataRow("FplVariable", "04a", """loc not x := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;;""", "")>]
-    [<DataRow("FplVariable", "04b", """loc not(x) := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;;""", "")>]
-    [<DataRow("FplVariable", "04c", """loc Equal(x,y) := !tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;;""", "")>]
-    [<DataRow("FplVariable", "04d", """loc and(p,q) := !tex: p "\wedge" q !eng: p " and" q !ger: p " und " q;;""", "")>]
+    [<DataRow("FplVariable", "04a", """loc not x := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""", "")>]
+    [<DataRow("FplVariable", "04b", """loc not(x) := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""", "")>]
+    [<DataRow("FplVariable", "04c", """loc Equal(x,y) := !tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""", "")>]
+    [<DataRow("FplVariable", "04d", """loc and(p,q) := !tex: p "\wedge" q !eng: p " and" q !ger: p " und " q;""", "")>]
     // variable in translation
-    [<DataRow("FplVariable", "05a", """loc not x := !tex: "\neg(" y ")";;""", "y")>]
+    [<DataRow("FplVariable", "05a", """loc not x := !tex: "\neg(" y ")";""", "y")>]
     [<TestMethod>]
     member this.TestStructureFplVariable(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplVariable.fpl"
@@ -5885,9 +5885,9 @@ type SymbolTableStructure() =
 
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplVariableArray", "00", """def pred T(x:*pred[ind]) {true} ;""", "")>]
-    [<DataRow("FplVariableArray", "00a", """def pred T(x:*pred[ind,obj]) {true} ;""", "")>]
-    [<DataRow("FplVariableArray", "01", """def pred T(x:*pred(u,v,w:func(a,b,c:obj)->obj)[Nat] ) {true} ;""", "")>]
+    [<DataRow("FplVariableArray", "00", """def pred T(x:*pred[ind]) {true} """, "")>]
+    [<DataRow("FplVariableArray", "00a", """def pred T(x:*pred[ind,obj]) {true} """, "")>]
+    [<DataRow("FplVariableArray", "01", """def pred T(x:*pred(u,v,w:func(a,b,c:obj)->obj)[Nat] ) {true} """, "")>]
     [<TestMethod>]
     member this.TestStructureFplVariableArray(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplVariableArray.fpl"

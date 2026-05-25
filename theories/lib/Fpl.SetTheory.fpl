@@ -84,7 +84,7 @@ def class SetRoster: Set
     ctor SetRoster(listOfSets:* Set[ind])
     {
         dec 
-            ~elem: Set
+            elem: Set
             base.Set()
             for elem in listOfSets
             {
@@ -188,7 +188,7 @@ def pred IsPowerSet(ofSet, potentialPowerSet: Set)
 def func PowerSet(x: Set) -> Set
 {
     dec 
-        ~y: Set
+        y: Set
         assert IsPowerSet(x,y)
     ;
     return y
@@ -210,7 +210,7 @@ axiom PowerSetExistsForAllSets
 def func SetUnion(x,y: Set) -> Set
 {
     dec 
-        ~union: Set
+        union: Set
         assert
             all z:Set
             {

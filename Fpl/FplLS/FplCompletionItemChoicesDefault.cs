@@ -1,4 +1,4 @@
-﻿using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using static FplPrimitives;
 
 namespace FplLS
@@ -9,67 +9,27 @@ namespace FplLS
         {
             var ret = new List<FplCompletionItem>();
             var ci = defaultCi.Clone();
-            switch (defaultCi.Word)
+            ci.Detail = defaultCi.Word switch
             {
-                case "?":
-                    ci.Detail = "else case '?'";
-                    break;
-                case "|":
-                    ci.Detail = "new case '|'";
-                    break;
-                case PrimDelegateEqual:
-                    ci.Detail = "equal sign '='";
-                    break;
-                case ":=":
-                    ci.Detail = "assignment sign ':='";
-                    break;
-                case ":*":
-                    ci.Detail = "zero or more '*'";
-                    break;
-                case ":":
-                    ci.Detail = "colon ':'";
-                    break;
-                case ".":
-                    ci.Detail = "dot '.'";
-                    break;
-                case ",":
-                    ci.Detail = "enumeration ','";
-                    break;
-                case "~":
-                    ci.Detail = "type declaration '~'";
-                    break;
-                case "|-":
-                    ci.Detail = "follows logically '|-'";
-                    break;
-                case "->":
-                    ci.Detail = "map '->'";
-                    break;
-                case ";":
-                    ci.Detail = "closing ';'";
-                    break;
-                case "{":
-                    ci.Detail = "opening '{'";
-                    break;
-                case "}":
-                    ci.Detail = "closing '}'";
-                    break;
-                case "(":
-                    ci.Detail = "opening '('";
-                    break;
-                case ")":
-                    ci.Detail = "closing '('";
-                    break;
-                case "[":
-                    ci.Detail = "opening '['";
-                    break;
-                case "]":
-                    ci.Detail = "closing ']'";
-                    break;
-                default:
-                    ci.Detail = "unknown";
-                    break;
-            }
-
+                "?" => "else case '?'",
+                "|" => "new case '|'",
+                PrimDelegateEqual => "equal sign '='",
+                ":=" => "assignment sign ':='",
+                ":*" => "zero or more '*'",
+                ":" => "colon ':'",
+                "." => "dot '.'",
+                "," => "enumeration ','",
+                "~" => "type declaration '~'",
+                "|-" => "follows logically '|-'",
+                "->" => "map '->'",
+                "{" => "opening '{'",
+                "}" => "closing '}'",
+                "(" => "opening '('",
+                ")" => "closing '('",
+                "[" => "opening '['",
+                "]" => "closing ']'",
+                _ => "unknown",
+            };
             ci.Kind = CompletionItemKind.Text;
             ret.Add(ci);
             return ret;

@@ -21,9 +21,9 @@ type TestReferencesTypeOfSignature() =
     [<DataRow("base9", "Test$1()")>]
     [<DataRow("base10", "Test")>]
     [<DataRow("base11", "v")>]
-    [<DataRow("base11v1", "dec ~v:obj; v")>]
-    [<DataRow("base11v2", "dec ~v:ind; v")>]
-    [<DataRow("base11v3", "dec ~v:Nat; v")>]
+    [<DataRow("base11v1", "dec v:obj; v")>]
+    [<DataRow("base11v2", "dec v:ind; v")>]
+    [<DataRow("base11v3", "dec v:Nat; v")>]
     [<DataRow("base12", LiteralParent)>]
     [<DataRow("base13", "@1")>]
     [<DataRow("base11a", "v.x")>]
@@ -32,7 +32,7 @@ type TestReferencesTypeOfSignature() =
     [<DataRow("base11b", "v()")>]
     [<DataRow("base12b", "parent()")>]
     [<DataRow("base13b", "@1()")>]
-    [<DataRow("base10c", "dec ~x,y:Nat; Test(x, y)")>]
+    [<DataRow("base10c", "dec x,y:Nat; Test(x, y)")>]
     [<DataRow("base11c", "v(x, y)")>]
     [<DataRow("base12c", "parent(x, y)")>]
     [<DataRow("base13c", "@1(x, y)")>]
@@ -71,14 +71,14 @@ type TestReferencesTypeOfSignature() =
     [<DataRow("base30", "B(In(x))")>]
     [<DataRow("base31", "C(Test1(a),Test2(b,c,d))")>]
     [<DataRow("base32", "E(true, undef, false)")>]
-    [<DataRow("base33", "dec ~p: pred(c: obj); p(c)")>]
+    [<DataRow("base33", "dec p: pred(c: obj); p(c)")>]
     [<DataRow("base34", "is(x, Set)")>]
     
     [<TestMethod>]
     member this.TestPredicateReferenceTypeSignature(var, fplCode) =
         
         let filename = "TestPredicateReferenceTypeSignature"
-        prepareFplCode(filename + ".fpl", "def pred T() { " + fplCode + " };", false) 
+        prepareFplCode(filename + ".fpl", "def pred T() { " + fplCode + " }", false) 
         let r = heap.Root
         let theory = r.Scope[filename]
 
@@ -176,7 +176,7 @@ type TestReferencesTypeOfSignature() =
                                 
                             }
                         }
-                        ;""" varVal
+                        """ varVal
         let filename = "TestBaseConstructorCallTypeSignature"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -205,7 +205,7 @@ type TestReferencesTypeOfSignature() =
     [<TestMethod>]
     member this.TestDelegateTypeSignature(var, varVal) =
         
-        let fplCode = sprintf "def pred T1() { %s };" varVal
+        let fplCode = sprintf "def pred T1() { %s }" varVal
         let filename = "TestDelegateTypeSignature"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
@@ -225,17 +225,17 @@ type TestReferencesTypeOfSignature() =
         | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
 
-    [<DataRow("""loc and(p,q) := !tex: x "=" y;;""", "and(undef, undef)")>]
-    [<DataRow("""thm T {true};""","pred")>]
-    [<DataRow("""ax T {true};""", "pred")>]
-    [<DataRow("""lem T {true};""", "pred")>]
-    [<DataRow("""prop T {true};""", "pred")>]
-    [<DataRow("""conj T {true};""", "pred")>]
-    [<DataRow("""cor T$1 {true};""", "pred")>]
-    [<DataRow("""proof T$1 {1. |- trivial};""","pred")>]
-    [<DataRow("""def pred T(p:obj) {true};""","pred(obj)")>]
-    [<DataRow("""def pred T() {true};""", "pred()")>]
-    [<DataRow("""inf T {pre: true con:true};""", "undef")>]
+    [<DataRow("""loc and(p,q) := !tex: x "=" y;""", "and(undef, undef)")>]
+    [<DataRow("""thm T {true}""","pred")>]
+    [<DataRow("""ax T {true}""", "pred")>]
+    [<DataRow("""lem T {true}""", "pred")>]
+    [<DataRow("""prop T {true}""", "pred")>]
+    [<DataRow("""conj T {true}""", "pred")>]
+    [<DataRow("""cor T$1 {true}""", "pred")>]
+    [<DataRow("""proof T$1 {1: trivial}""","pred")>]
+    [<DataRow("""def pred T(p:obj) {true}""","pred(obj)")>]
+    [<DataRow("""def pred T() {true}""", "pred()")>]
+    [<DataRow("""inf T {pre: true con:true}""", "undef")>]
     [<TestMethod>]
     member this.TestBlockTypeSignature(varVal, name:string) =
         
@@ -254,7 +254,7 @@ type TestReferencesTypeOfSignature() =
     [<TestMethod>]
     member this.TestMCasesTypeSignature(no:string, varVal, expected:string) =
         
-        let fplCode = sprintf "def pred T1() { %s };" varVal
+        let fplCode = sprintf "def pred T1() { %s }" varVal
         let filename = "TestMCasesTypeSignature"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root

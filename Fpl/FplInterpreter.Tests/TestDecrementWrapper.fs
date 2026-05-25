@@ -20,8 +20,8 @@ type TestDecrementWrapper() =
     [<TestMethod>]
     member this.TestDecrementWrapperRepresent(varVal, expected:string) =
         
-        let fplCode = sprintf """ext Digits x@/\d+/ -> Digits {ret x} def func Decr(x:Digits)->Digits { ret del.Decrement(x) } def func T()->Digits { ret Decr(%s) };""" varVal
-        let filename = "TestDecrementWrapperRepresent.fpl"
+        let fplCode = sprintf """ext Digits x@/\d+/ -> Digits {ret x} def func Decr(x:Digits)->Digits { ret del.Decrement(x) } def func T()->Digits { ret Decr(%s) }""" varVal
+        let filename = "TestDecrementWrapperRepresent"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
         let theory = r.Scope[filename]
@@ -40,8 +40,8 @@ type TestDecrementWrapper() =
     [<TestMethod>]
     member this.TestDecrementWrapperType(varVal, expected:string) =
         
-        let fplCode = sprintf """ext Digits x@/\d+/ -> obj {ret x} def func Decr(x:obj)->obj { ret del.Decrement(x) } def func T()->obj { ret Decr(%s) };""" varVal
-        let filename = "TestDecrementWrapperType.fpl"
+        let fplCode = sprintf """ext Digits x@/\d+/ -> obj {ret x} def func Decr(x:obj)->obj { ret del.Decrement(x) } def func T()->obj { ret Decr(%s) }""" varVal
+        let filename = "TestDecrementWrapperType"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
         let theory = r.Scope[filename]
@@ -61,8 +61,8 @@ type TestDecrementWrapper() =
     [<TestMethod>]
     member this.TestDecrementWrapperMixed(varVal, expected:string) =
         
-        let fplCode = sprintf """def func Decr(x:obj)->obj { ret del.Decrement(x) } def func T()->obj { ret Decr(%s) };""" varVal
-        let filename = "TestDecrementWrapperMixed.fpl"
+        let fplCode = sprintf """def func Decr(x:obj)->obj { ret del.Decrement(x) } def func T()->obj { ret Decr(%s) }""" varVal
+        let filename = "TestDecrementWrapperMixed"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
         let theory = r.Scope[filename]
@@ -82,8 +82,8 @@ type TestDecrementWrapper() =
     [<TestMethod>]
     member this.TestDecrementWrapperMixedWithExtension(varVal, expected:string) =
         
-        let fplCode = sprintf """ext Digits x@/\d+/ -> Nat {ret x} def func Decr(x:obj)->obj { ret del.Decrement(x) } def func T()->obj { ret Decr(%s) };""" varVal
-        let filename = "TestDecrementWrapperMixedWithExtension.fpl"
+        let fplCode = sprintf """ext Digits x@/\d+/ -> Nat {ret x} def func Decr(x:obj)->obj { ret del.Decrement(x) } def func T()->obj { ret Decr(%s) }""" varVal
+        let filename = "TestDecrementWrapperMixedWithExtension"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
         let theory = r.Scope[filename]
@@ -104,8 +104,8 @@ type TestDecrementWrapper() =
     [<TestMethod>]
     member this.TestDecrementWrapperName(varVal, expected:string) =
         
-        let fplCode = sprintf """ext Digits x@/\d+/ -> obj {ret x} def func Decr(x:obj)->obj { ret del.Decrement(x) } def func T()->obj { ret Decr(%s) };""" varVal
-        let filename = "TestDecrementWrapperName.fpl"
+        let fplCode = sprintf """ext Digits x@/\d+/ -> obj {ret x} def func Decr(x:obj)->obj { ret del.Decrement(x) } def func T()->obj { ret Decr(%s) }""" varVal
+        let filename = "TestDecrementWrapperName"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
         let theory = r.Scope[filename]

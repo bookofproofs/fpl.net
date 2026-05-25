@@ -18,7 +18,7 @@ def func Succ(n: Nat) -> Nat postfix "'"
 ext Digits x@/\d+/ -> Nat 
 {
     dec
-    ~n:Nat
+    n:Nat
     cases
     (
         | (x = @0) : n := Zero() 
@@ -39,7 +39,7 @@ axiom SuccessorExistsAndIsUnique
 {
     all n:Nat
     {
-        exn$1 successor:Nat
+        ∃! successor:Nat
         {
             and
             (
@@ -52,10 +52,7 @@ axiom SuccessorExistsAndIsUnique
 
 axiom ZeroIsNotSuccessor
 {
-    all n:Nat
-    {
-        NotEqual(Zero(), Succ(n))
-    }
+    ∀ n:Nat { (n' ≠ @0) }
 }
 
 axiom SuccessorIsInjective
@@ -64,7 +61,7 @@ axiom SuccessorIsInjective
     {
         impl
         (
-            ( Succ(n) = Succ(m) ),
+            ( n' = m' ),
             ( n = m )
         )
     }
@@ -101,7 +98,7 @@ def class SetNat: Set
 def func Add(n,m: Nat)->Nat infix "+" 30
 {
     dec
-        ~result, k: Nat
+        result, k: Nat
         cases
         (
             | (m = @0): result:= n
@@ -120,7 +117,7 @@ def pred IsGreaterOrEqual(n,m: Nat)
 prop AddIsUnique
 {
     dec
-        ~anotherAdd: Add
+        anotherAdd: Add
     ;
     impl
     (
@@ -164,7 +161,7 @@ proof AddIsUnique$1
 def func Sum(list:*Nat[ind])->Nat
 {
     dec 
-        ~result, addend: Nat
+        result, addend: Nat
         result:=Zero()
         for addend in list
         {
@@ -177,7 +174,7 @@ def func Sum(list:*Nat[ind])->Nat
 def func Sum2(list:* Nat[ind])->Nat
 {
     dec
-        ~elem,result: Nat
+        elem,result: Nat
         result:=Zero()
         for elem in list
         {
@@ -191,7 +188,7 @@ def func Sum2(list:* Nat[ind])->Nat
 def func Sum3(arr:*Nat[ind]) -> Nat
 {
     dec
-        ~addend, result: Nat
+        addend, result: Nat
         result:=Zero()
         for addend in arr
         {
@@ -217,13 +214,13 @@ def pred GreaterEqual(x,y:Nat) infix ">=" 72
 
 def pred IsGreater(x,y:Nat) infix ">" 73
 {
-    and ((x >= y), (x <> y))
+    and ((x >= y), (x ≠ y))
 }
 /*
 def func Sum(from,to:Nat, addend: Addend) -> Nat
 {
     dec
-        ~i, result: Nat
+        i, result: Nat
         result:=Zero()
         for i in Range(from, to)
         {
@@ -244,8 +241,8 @@ def func Div(x,y:Nat) -> Nat
 proposition SumOfConsecutiveNumbers
 {
     dec
-        ~limit: Nat
-        ~f: Addend
+        limit: Nat
+        f: Addend
     ;
     impl
     (
@@ -300,7 +297,7 @@ def pred IsBounded(f: RealValuedFunction)
 def func RiemannIntegral(from,to:Real, f: RealValuedFunction ) -> Real
 {
     dec
-        ~x, result: Real
+        x, result: Real
         assert IsBounded(f)
         result:=ZeroReal()
         for x in Range(from,to)
@@ -314,8 +311,8 @@ def func RiemannIntegral(from,to:Real, f: RealValuedFunction ) -> Real
 def func PowerSeries(k:Nat, arr: RightOpenRange) -> Real
 {
     dec
-        ~result: Real
-        ~i: Nat
+        result: Real
+        i: Nat
         result:=ZeroReal()
         for i in RightOpenRange(k)
         {
@@ -328,8 +325,8 @@ def func PowerSeries(k:Nat, arr: RightOpenRange) -> Real
 def function ContinuedFraction(k:Nat, arr: RightOpenRangeInt) -> Nat
 {
     dec
-        ~i: Nat
-        ~cf: Real
+        i: Nat
+        cf: Real
         cf:=Real(arr[k])
         i:=Succ(k)
     ;
@@ -337,6 +334,6 @@ def function ContinuedFraction(k:Nat, arr: RightOpenRangeInt) -> Nat
 }
 
 // Example of defining a constant for the set of all natural numbers greater than 100 using the
-def class N100:SetBuilder{ctor N100(){dec ~n:Nat  base.SetBuilder(SetNat(), IsGreater(n,@100)) ;  }}
+def class N100:SetBuilder{ctor N100(){dec n:Nat  base.SetBuilder(SetNat(), IsGreater(n,@100)) ;  }}
 */
 ;

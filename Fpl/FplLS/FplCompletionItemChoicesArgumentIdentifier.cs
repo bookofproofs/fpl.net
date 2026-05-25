@@ -1,4 +1,4 @@
-﻿using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 
 namespace FplLS
 {
@@ -8,7 +8,7 @@ namespace FplLS
         {
             var ret = new List<FplCompletionItem>();
             defaultCi.Detail = defaultCi.Word;
-            defaultCi.InsertText = "100.";
+            defaultCi.InsertText = "100:";
             defaultCi.Label = TokenPrefix + defaultCi.InsertText;
             defaultCi.Kind = CompletionItemKind.Unit;
             ret.Add(defaultCi);

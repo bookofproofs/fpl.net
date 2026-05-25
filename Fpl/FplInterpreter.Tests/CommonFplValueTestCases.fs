@@ -2,7 +2,6 @@ namespace FplInterpreter.Tests
 
 open FParsec
 open CommonTestHelpers
-open ErrDiagnostics
 open FplInterpreterBasicTypes
 open FplInterpreter.Globals.Root
 open FplInterpreter.Globals.Heap
@@ -28,7 +27,7 @@ type CommonFplValueTestCases =
         let fplCode = """
         def pred TestPredicate(x,y:pred(u,v,w:func(a,b,c:obj)->obj)) 
             {true}
-        ;
+        
         """
         let filename = "TestScopeVariablesInSignature" + subtype
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -71,7 +70,7 @@ type CommonFplValueTestCases =
         let fplCode = """
         def pred TestPredicate(x,y:*pred(u,v,w:func(a,b,c:*obj[ind])->obj)[obj]) 
             {true}
-        ;
+        
         """
         let filename = "TestScopeVariablesInSignatureVariadic" + subtype
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -114,12 +113,12 @@ type CommonFplValueTestCases =
         let fplCode = """
         def pred TestPredicate() 
         {   dec 
-                ~x,y:pred(u,v,w:func(a,b,c:obj)->obj)
-                ~s:Set
+                x,y:pred(u,v,w:func(a,b,c:obj)->obj)
+                s:Set
             ; 
             true
         }
-        ;
+        
         """
         let filename = "TestScopeVariablesInBlock" + subtype
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -162,8 +161,8 @@ type CommonFplValueTestCases =
     static member ScopeVariablesInBlockVariadic(subtype) =
         let fplCode = """
         def pred TestPredicate() 
-            {dec ~x,y:*pred(u,v,w:func(a,b,c:*obj[tpl])->obj)[ind]; true}
-        ;
+            {dec x,y:*pred(u,v,w:func(a,b,c:*obj[tpl])->obj)[ind]; true}
+        
         """
         let filename = "TestScopeVariablesInBlockVariadic" + subtype
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -216,7 +215,7 @@ type CommonFplValueTestCases =
             prty func T11()->Nat {intr}
             prty func T13()->func {intr}
         }
-        ;
+        
         """
         let filename = "TestScopeProperties" + subtype
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -245,7 +244,7 @@ type CommonFplValueTestCases =
             ctor TestId(x:pred) {} 
             ctor TestId(x:ind) {} 
         }
-        ;
+        
         """
         let filename = "TestScopeConstructors" + subtype
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -268,7 +267,7 @@ type CommonFplValueTestCases =
             inf SomeInference2 {pre:true con:true}
             axiom SomeAxiom1 {true}
             axiom SomeAxiom2 {true}
-            postulate SomePostulate1 {true}
+            postulate  SomePostulate1 {true}
             postulate SomePostulate2 {true}
             theorem SomeTheorem1 {true}
             theorem SomeTheorem2 {true}
@@ -286,18 +285,18 @@ type CommonFplValueTestCases =
             def pred SomePredicate2() {true}
             def func SomeFunctionalTerm1()->obj {intr}
             def func SomeFunctionalTerm2()->obj {intr}
-            def func SomeFunctionalTerm3()->obj {dec ~v:obj v:=v; return v}
-            def func SomeFunctionalTerm4()->tpl {dec ~v:tpl v:=v; return v}
-            def func SomeFunctionalTerm5()->SomeClass1 {dec ~v:SomeClass1; return v}
-            def func SomeFunctionalTerm6()->SomeClass1 {dec ~v:SomeClass1 v:=SomeClass1; return v}
-            def func SomeFunctionalTerm7()->SomeClass1 {dec ~v:SomeClass1 v:=SomeClass1(); return v}
+            def func SomeFunctionalTerm3()->obj {dec v:obj v:=v; return v}
+            def func SomeFunctionalTerm4()->tpl {dec v:tpl v:=v; return v}
+            def func SomeFunctionalTerm5()->SomeClass1 {dec v:SomeClass1; return v}
+            def func SomeFunctionalTerm6()->SomeClass1 {dec v:SomeClass1 v:=SomeClass1; return v}
+            def func SomeFunctionalTerm7()->SomeClass1 {dec v:SomeClass1 v:=SomeClass1(); return v}
             def func SomeFunctionalTerm8()->ind {return $112}
-            def func SomeFunctionalTerm9()->ind {dec ~v:ind v:=$13; return v}
-            proof SomeTheorem1$1 {1. |- trivial}
-            proof SomeTheorem2$1 {1. |- trivial}
+            def func SomeFunctionalTerm9()->ind {dec v:ind v:=$13; return v}
+            proof SomeTheorem1$1 {1: trivial}
+            proof SomeTheorem2$1 {1: trivial}
             loc not(x) := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;
             loc Equal(x,y) := !tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;
-        ;
+        
         """
         let filename = "TestScopeBlocks" + subtype
         prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -346,16 +345,16 @@ type CommonFplValueTestCases =
         let fplCode = """
 
             theorem TestTheorem1 {true} 
-            proof TestTheorem1$1 {1. |- trivial} 
+            proof TestTheorem1$1 {1: trivial}
             
             lemma TestLemma1 {true} 
-            proof TestLemma1$1 {1. |- trivial} 
+            proof TestLemma1$1 {1: trivial}
             
             proposition TestProposition1 {true} 
-            proof TestProposition1$1 {1. |- trivial} 
+            proof TestProposition1$1 {1: trivial}
             
             corollary TestCorollary1$2 {true} 
-            proof TestCorollary1$2$1 {1. |- trivial} 
+            proof TestCorollary1$2$1 {1: trivial}
 
             theorem TestTheorem2 {true} 
             corollary TestTheorem2$1 {true}  
@@ -374,7 +373,7 @@ type CommonFplValueTestCases =
 
             axiom TestAxiom {true} 
             corollary TestAxiom$1 {true}  
-        ;
+        
         """
         let filename = "TestScopeProofsAndCorollaries" + subtype
 
@@ -414,15 +413,15 @@ type CommonFplValueTestCases =
             def func B()->func {intr}
             def pred T() {
                 dec 
-                    ~i:ind i:=$1 
-                    ~b:func b:=B()  
-                    ~p:pred p:=true 
-                    ~o:obj o:=A()
-                    ~u:obj u:=undef
-                    ~t:tpl t:=$2
+                    i:ind i:=$1 
+                    b:func b:=B()  
+                    p:pred p:=true 
+                    o:obj o:=A()
+                    u:obj u:=undef
+                    t:tpl t:=$2
                 ;
                 true 
-            };
+            }
         """
         let filename = "TestScopeIntrinsicPrimitives" + subtype
         prepareFplCode(filename + ".fpl", fplCode, false) 

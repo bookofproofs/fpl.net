@@ -78,10 +78,8 @@ let setKeywordType keywordType pos1 pos2 =
 /// A recursive function evaluating an AST and returning a list of EvalAliasedNamespaceIdentifier records
 /// for each occurrence of the uses clause in the FPL code.
 let rec eval ast =
-    let evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst =
-        match optVarDeclOrSpecList with
-        | Some astList -> astList |> List.map eval |> ignore
-        | None -> ()
+    let evalCommonStepsVarDeclPredicate varDeclBlock predicateAst =
+        eval varDeclBlock
         eval predicateAst
 
     let setSignaturePositions pos1 pos2 = 
@@ -92,17 +90,52 @@ let rec eval ast =
             withSignature.SignEndPos <- pos2
         | _ -> ()
 
+
+    let evalArgumentTuple (next:FplGenericNode) (predicateListAst:Ast list) pos1 pos2 =
+        let consumeArgumentsWithParent (parent:FplGenericNode) =
+            if predicateListAst.Length > 0 then 
+                predicateListAst 
+                |> List.iter (fun pred -> 
+                    let ref = new FplReference((pos1, pos2), parent)
+                    heap.Eval.PushEvalStack(ref)
+                    eval pred
+                    heap.Eval.PopEvalStack()
+                )
+        
+        let getProceedingReference = heap.Eval.GetProceedingReference()
+            
+        match next with 
+        | :? FplEquality 
+        | :? FplDecrement
+        | :? FplBaseConstructorCall -> 
+            consumeArgumentsWithParent next
+        | _ -> 
+            match getProceedingReference with 
+            | Some ref ->
+                ref.ArgType <- ArgType.Parentheses
+                consumeArgumentsWithParent ref
+            | _ -> ()
+
     match ast with
     // lexical / leaf tokens
-    | Ast.Alias((pos1, pos2), s) -> ()
-    | Ast.Dot((pos1, pos2),()) -> ()
-    | Ast.Star((pos1, pos2),()) -> ()
-
+    | Ast.Alias((_, _), _) -> ()
+    | Ast.Dot() -> ()
+    | Ast.Star((_, _),()) -> ()
+    | Ast.BuildingBlock((_, _),buidlingBlockAst) ->
+        eval buidlingBlockAst
+    | Ast.ErrorSyntax((pos1, pos2), errMsg) ->
+        emitSY000diagnostics errMsg pos1 pos2 
+    | Ast.ErrorSyntaxBacktracking((pos1, pos2), errMsg) ->
+        emitSY001diagnostics errMsg pos1 pos2 
+    | Ast.ErrorSyntaxChain(((pos1, pos2),_), (errMsg, chain)) ->
+        emitSY002diagnostics errMsg chain pos1 pos2 
     | Ast.Digits s -> 
         let fv = heap.Eval.PeekEvalStack()
         fv.FplId <- s
         fv.TypeId <- s
-
+    | Ast.Exists1() ->
+        let fv = heap.Eval.PeekEvalStack()
+        fv.FplId <- fv.FplId + "$1"
     | Ast.DollarDigits((pos1, pos2), s) -> 
         let fv = heap.Eval.PeekEvalStack()
         let sid = $"${s.ToString()}"
@@ -112,6 +145,14 @@ let rec eval ast =
             value.FplId <- sid
             heap.Eval.PushEvalStack(value)
             heap.Eval.PopEvalStack()
+        | :? FplQuantorExistsN ->
+            match (int)s with
+            | 0 ->
+                fv.ErrorOccurred <- emitSY011diagnostics pos1 pos2
+            | 1 ->
+                fv.ErrorOccurred <- emitSY012diagnostics pos1 pos2
+            | _ -> ()
+            fv.FplId <- fv.FplId + sid
         | _  ->
             fv.FplId <- fv.FplId + sid
             match fv.TypeId with 
@@ -122,16 +163,13 @@ let rec eval ast =
     | Ast.ExtensionRegex s -> 
         let fv = heap.Eval.PeekEvalStack()
         fv.TypeId <- s
-
-    | Ast.ExtensionName((pos1, pos2), s) ->
+    | Ast.ExtensionName((pos1, pos2), extensionName) ->
         let fv = heap.Eval.PeekEvalStack()
-        let extensionName = s
         match fv with 
         | :? FplExtension ->
             fv.FplId <- extensionName
             fv.TypeId <- extensionName
         | _ -> ()
-
     | Ast.LanguageCode((pos1, pos2), s) -> 
         let fv = heap.Eval.PeekEvalStack()
         fv.FplId <- s
@@ -143,7 +181,7 @@ let rec eval ast =
         fv.FplId <- s
         fv.TypeId <- s
 
-    | Ast.PascalCaseId ((pos1, pos2), pascalCaseId) -> 
+    | Ast.PascalCaseId ((pos1, pos2), pascalCaseId) ->
         let fv = heap.Eval.PeekEvalStack()
         match fv.Name with
         | LiteralAxL
@@ -170,6 +208,13 @@ let rec eval ast =
             fv.TypeId <- pascalCaseId
         | _ -> ()
 
+    | Ast.BaseClassName((pos1, pos2), identifier) ->
+        let fv = heap.Eval.PeekEvalStack()
+        fv.FplId <- identifier
+        fv.TypeId <- identifier
+        let candidates = findCandidatesByName identifier false true
+        if candidates.Length = 0 then 
+            fv.ErrorOccurred <- emitID010Diagnostics identifier pos1 pos2
     | Ast.PredicateIdentifier((pos1, pos2), identifier) ->
         let fv = heap.Eval.PeekEvalStack()
         let searchIdentifier = 
@@ -184,8 +229,6 @@ let rec eval ast =
         let candidates, candidatesNames =  filterCandidates (candidatesFromTheory @ candidatesLocal @ candidatesOfMapping) searchIdentifier true
         let correctIds (fv1:FplGenericNode) = 
             match fv with 
-            | :? FplBase 
-            | :? FplBaseConstructorCall 
             | :? FplForInStmtDomain -> 
                 fv1.FplId <- searchIdentifier
                 fv1.TypeId <- searchIdentifier
@@ -254,7 +297,7 @@ let rec eval ast =
         heap.Eval.PushEvalStack(templateNode)
         heap.Eval.PopEvalStack()
 
-    | Ast.ArrayType((pos1, pos2), (mainTypeAst, indexAllowedTypeListAst)) ->
+    | Ast.ArrayType((pos1, pos2), (mainTypeAst,  indexAllowedTypeListAst)) ->
         let fv = heap.Eval.PeekEvalStack()
         match fv with 
         | :? FplMapping as mapping -> mapping.SetIsArray()
@@ -275,7 +318,6 @@ let rec eval ast =
             let cl = fv :?> FplClass
             cl.AddDefaultConstructor()
         | _ -> ()
-    | Ast.Error  -> ()
 
 
     | Ast.Var((pos1, pos2), name) ->
@@ -358,8 +400,10 @@ let rec eval ast =
         fv.EndPos <- pos2
         checkSIG01Diagnostics fv
     | Ast.ArgumentIdentifier((pos1, pos2), argumentId) -> 
-        let fv = heap.Eval.PeekEvalStack()
-        fv.FplId <- argumentId.Substring(0,argumentId.Length-1) // argument id without the "." at the end
+        let justification = heap.Eval.PeekEvalStack()
+        match justification.Parent with
+        | Some argument -> argument.FplId <- argumentId.Substring(0,argumentId.Length-1) // argument id without the "." at the end
+        | _ -> ()
     | Ast.RefArgumentIdentifier((pos1, pos2), argumentId) -> 
         let fv = heap.Eval.PeekEvalStack()
         match fv.Name with 
@@ -536,8 +580,7 @@ let rec eval ast =
         heap.Eval.PopEvalStack()
     | Ast.AST((pos1, pos2), ast1) ->
         eval ast1
-
-    | Ast.ParamTuple((pos1, pos2), namedVariableDeclarationListAsts) ->
+    | Ast.ParamTuple namedVariableDeclarationListAsts ->
         let fv = heap.Eval.PeekEvalStack()
         fv.ArgType <- ArgType.Parentheses
         namedVariableDeclarationListAsts |> List.map (fun child ->
@@ -598,9 +641,8 @@ let rec eval ast =
         eval predicateAst1
         eval predicateAst2
         heap.Eval.PopEvalStack()
-    | Ast.VarDeclBlock((pos1, pos2), varDeclOrStmtAstList) ->
-        varDeclOrStmtAstList 
-        |> List.map (fun subAst -> eval subAst) |> ignore
+    | Ast.VarDeclBlock varDeclOrStmtAstList ->
+        varDeclOrStmtAstList |> Option.map (List.map eval >> ignore) |> Option.defaultValue ()
     | Ast.StatementList((pos1, pos2), asts) ->
         asts |> List.map eval |> ignore
     | Ast.PremiseList((pos1, pos2), predicateListAsts) ->
@@ -611,41 +653,24 @@ let rec eval ast =
         heap.Eval.PopEvalStack()
     | Ast.JustificationItem((pos1, pos2), justificationReferenceAst) ->
         eval justificationReferenceAst 
-    | Ast.Justification((pos1, pos2), justificationItemAsts) ->
+    | Ast.StartArgument argumentIdentifier ->
+        eval argumentIdentifier
+    | Ast.StartArgumentStictly (argumentIdentifier, justificationItemListAsts) ->
+        eval argumentIdentifier
+        justificationItemListAsts |> List.map eval |> ignore
+    | Ast.Justification((pos1, pos2), justificationItemAst) ->
         let fv = heap.Eval.PeekEvalStack()
-        let just = new FplJustification((pos1, pos2), fv) 
+        let just = new FplJustification((pos1, pos2), fv)
         heap.Eval.PushEvalStack(just)
-        justificationItemAsts |> List.map eval |> ignore
+        eval justificationItemAst
         heap.Eval.PopEvalStack()
     | Ast.ArgumentTuple((pos1, pos2), predicateListAst) ->
         let next = heap.Eval.PeekEvalStack()
-        let consumeArgumentsWithParent (parent:FplGenericNode) =
-            if predicateListAst.Length > 0 then 
-                predicateListAst 
-                |> List.iter (fun pred -> 
-                    let ref = new FplReference((pos1, pos2), parent)
-                    heap.Eval.PushEvalStack(ref)
-                    eval pred
-                    heap.Eval.PopEvalStack()
-                )
-        
-        let getProceedingReference = heap.Eval.GetProceedingReference()
-            
-        match next with 
-        | :? FplEquality 
-        | :? FplDecrement
-        | :? FplBaseConstructorCall -> 
-            consumeArgumentsWithParent next
-        | _ -> 
-            match getProceedingReference with 
-            | Some ref ->
-                ref.ArgType <- ArgType.Parentheses
-                consumeArgumentsWithParent ref
-            | _ -> ()
+        evalArgumentTuple next predicateListAst pos1 pos2
     | Ast.QualificationList((pos1, pos2), asts) ->
         asts |> List.map eval |> ignore
-    | Ast.Namespace(asts) ->
-        asts |> List.map eval |> ignore
+    | Ast.Namespace(theoryAst) ->
+        theoryAst |> List.map eval |> ignore
     | Ast.CompoundFunctionalTermType((pos1, pos2), (ast1, astTupleOption)) ->
         eval ast1
         match astTupleOption with 
@@ -805,9 +830,14 @@ let rec eval ast =
         eval langCode
         eval ebnfAst
         heap.Eval.PopEvalStack() // remove language
-    | Ast.InheritedPredicateTypeList inheritedTypeAsts 
-    | Ast.InheritedFunctionalTypeList inheritedTypeAsts 
-    | Ast.InheritedClassTypeList inheritedTypeAsts -> 
+    | Ast.InheritedType ((pos1, pos2), identifier) -> 
+        let fv = heap.Eval.PeekEvalStack()
+        fv.FplId <- identifier
+        fv.TypeId <- identifier
+        let candidates = findCandidatesByName identifier false true
+        if candidates.Length = 0 then 
+            fv.ErrorOccurred <- emitID010Diagnostics identifier pos1 pos2
+    | Ast.InheritedTypeList inheritedTypeAsts -> 
         let beingCreatedNode = heap.Eval.PeekEvalStack()
         let addVariablesAndPropertiesOfBaseNode (bNode:FplGenericNode) = 
             match box beingCreatedNode with
@@ -817,13 +847,13 @@ let rec eval ast =
             | _ -> ()
 
         inheritedTypeAsts
-        |> List.iter (fun baseAst ->
-            match baseAst with
-            | Ast.PredicateIdentifier((pos1, pos2), _) ->
+        |> List.iter (fun inheritedType ->
+            match inheritedType with
+            | Ast.InheritedType((pos1, pos2), _) ->
                 // retrieve the name of the class and the class (if it exists)
                 let baseNode = new FplBase((pos1, pos2), beingCreatedNode)
                 heap.Eval.PushEvalStack(baseNode)            
-                eval baseAst
+                eval inheritedType
                 heap.Eval.PopEvalStack() |> ignore
                 let candidates = findCandidatesByName baseNode.FplId false true
                 if candidates.Length > 0 then 
@@ -868,7 +898,7 @@ let rec eval ast =
     | Ast.ExtensionSignature((pos1, pos2), (extensionAssignmentAst, extensionMappingAst)) ->
         eval extensionAssignmentAst
         eval extensionMappingAst
-    | Ast.DefinitionExtension((pos1, pos2), ((extensionNameAst,extensionSignatureAst), extensionTermAst)) ->
+    | Ast.DefinitionExtension((pos1, pos2), ((extensionNameAst, extensionSignatureAst), extensionTermAst)) ->
         let parent = heap.Eval.PeekEvalStack()
         let fv = new FplExtension((pos1,pos2), parent, heap.Helper.GetNextAvailableFplBlockRunOrder)
         heap.Eval.PushEvalStack(fv)
@@ -904,26 +934,24 @@ let rec eval ast =
         eval variableTypeAst
         heap.Eval.PopEvalStack()
         heap.Eval.PopEvalStack()
-    | Ast.Delegate((pos1, pos2), (delegateId, argumentTupleAst)) ->
+    | Ast.Delegate(delegateNameAst, argumentTupleAst) ->
+        eval delegateNameAst
+        eval argumentTupleAst
+        heap.Eval.PopEvalStack()
+    | Ast.DelegateName((pos1, pos2), delegateId) ->
         let fv = heap.Eval.PeekEvalStack()
         match delegateId with 
         | PrimDelegateEqualL -> 
             let deleg = new FplEquality(delegateId, (pos1, pos2), fv)
             heap.Eval.PushEvalStack(deleg)
-            eval argumentTupleAst
-            heap.Eval.PopEvalStack()
         | PrimDelegateDecrementL -> 
             let deleg = new FplDecrement(delegateId, (pos1, pos2), fv)
             heap.Eval.PushEvalStack(deleg)
-            eval argumentTupleAst
-            heap.Eval.PopEvalStack()
         | _ -> 
             let deleg = new FplReference((pos1, pos2), fv)
             deleg.FplId <- delegateId
             deleg.TypeId <- delegateId
             heap.Eval.PushEvalStack(deleg)
-            eval argumentTupleAst
-            heap.Eval.PopEvalStack()
             deleg.ErrorOccurred <- emitID013Diagnostics $"Unknown delegate `{delegateId}`" pos1 pos2
     | Ast.PredicateSignature(((pos1, pos2), ((simpleSignatureAst, inhPredicateTypeListAstsOpt), paramTupleAst)), optUserDefinedSymbolAst) -> 
         ()
@@ -1064,7 +1092,7 @@ let rec eval ast =
         if fv.ArgList.Count % 2 = 0 then
             let trailingOp = fv.ArgList.[fv.ArgList.Count - 1]
             // record diagnostic on the trailing operator
-            trailingOp.ErrorOccurred <- emitSY000diagnostics trailingOp.FplId fv.EndPos fv.EndPos
+            trailingOp.ErrorOccurred <- emitSY010diagnostics trailingOp.FplId fv.EndPos fv.EndPos
             // remove the trailing operator so further processing won't index out of range
             fv.ArgList.RemoveAt(fv.ArgList.Count - 1)
 
@@ -1261,14 +1289,13 @@ let rec eval ast =
     | Ast.JustArgInf((pos1, pos2), (justificationAst, argumentInferenceAst)) ->
         eval justificationAst
         eval argumentInferenceAst
-    | Ast.Argument((pos1, pos2), (argIdAst, argAst)) ->
+    | Ast.Argument((pos1, pos2), (justifiedArgumentAst)) ->
         let fv = heap.Eval.PeekEvalStack()
         let arg = new FplArgument((pos1, pos2), fv, heap.Helper.GetNextAvailableFplBlockRunOrder) 
         heap.Eval.PushEvalStack(arg)
-        eval argIdAst
-        eval argAst
+        eval justifiedArgumentAst
         heap.Eval.PopEvalStack()
-    | Ast.ForIn((pos1, pos2), ((entityAst, inDomainAst), statementListAst)) ->
+    | Ast.ForIn((pos1, pos2), (((entityAst, inDomainAst), statementListAst))) ->
         let parent = heap.Eval.PeekEvalStack()
         let forStmt = new FplForInStmt((pos1, pos2), parent)
         heap.Eval.PushEvalStack(forStmt) // add ForInStmt
@@ -1279,8 +1306,8 @@ let rec eval ast =
         eval inDomainAst
         statementListAst |> List.map (fun stmtAst -> eval stmtAst) |> ignore
         heap.Eval.PopEvalStack() // remove ForInStmt
-    | Ast.PremiseConclusionBlock((pos1, pos2), ((optVarDeclOrSpecList, premiseAst), conclusionAst)) ->
-        optVarDeclOrSpecList |> Option.map (List.map eval >> ignore) |> Option.defaultValue ()
+    | Ast.PremiseConclusionBlock (varDeclBlock, (premiseAst, conclusionAst)) ->
+        eval varDeclBlock 
         eval premiseAst
         eval conclusionAst
     | Ast.TheoremSignature((pos1, pos2), simpleSignatureAst) ->
@@ -1312,7 +1339,7 @@ let rec eval ast =
         eval simpleSignatureAst
         setSignaturePositions pos1 pos2
         heap.Helper.InSignatureEvaluation <- false
-    | Ast.Proposition((pos1, pos2), (signatureAst, (optVarDeclOrSpecList, predicateAst))) ->
+    | Ast.Proposition((pos1, pos2), (signatureAst, ((optVarDeclOrSpecList, predicateAst)))) ->
         let parent = heap.Eval.PeekEvalStack()
         let fv = new FplProposition((pos1, pos2), parent, heap.Helper.GetNextAvailableFplBlockRunOrder)
         heap.Eval.PushEvalStack(fv)
@@ -1349,7 +1376,7 @@ let rec eval ast =
         dollarDigitListAsts |> List.map eval |> ignore
         setSignaturePositions pos1 pos2
         heap.Helper.InSignatureEvaluation <- false
-    | Ast.Corollary((pos1, pos2), (corollarySignatureAst, (optVarDeclOrSpecList, predicateAst))) ->
+    | Ast.Corollary ((pos1, pos2), (corollarySignatureAst, (optVarDeclOrSpecList, predicateAst))) ->
         let parent = heap.Eval.PeekEvalStack()
         let fv = new FplCorollary((pos1, pos2), parent, heap.Helper.GetNextAvailableFplBlockRunOrder)
         heap.Eval.PushEvalStack(fv)
@@ -1359,15 +1386,17 @@ let rec eval ast =
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
         // now, we are ready to emit VAR04 diagnostics for all variables declared in the signature of the corollary.
         fv.CheckConsistency()
-        heap.Eval.Pop() |> ignore // pop without 
+        heap.Eval.Pop() |> ignore // pop 
     | Ast.NamedVarDecl((pos1, pos2), (variableListAst, variableTypeAst)) ->
         let parent = heap.Eval.PeekEvalStack()
         parent.AuxiliaryInfo <- variableListAst |> List.length // remember how many variables to create
         // create all variables of the named variable declaration in the current scope
         variableListAst |> List.iter (fun varAst ->
             match variableTypeAst with 
-            | Ast.ArrayType((posMan1, posMan2),(mainTypeAst, indexAllowedTypeListAst)) ->
-                parent.ErrorOccurred <- emitVAR00Diagnostics parent.AuxiliaryInfo posMan1 posMan2        
+            | Ast.ArrayType((posMan1, posMan2),(mainTypeAst,  indexAllowedTypeListAst)) ->
+                let numberOfVariadicVars = parent.AuxiliaryInfo
+                if numberOfVariadicVars > 1 then
+                    parent.ErrorOccurred <- emitVAR00Diagnostics posMan1 posMan2        
                 match varAst with 
                 | Ast.Var((varPos1, varPos2), varName) ->
                     let newVar = new FplVariableArray(varName, (varPos1, varPos2), parent)
@@ -1388,13 +1417,10 @@ let rec eval ast =
                 | _ -> ()
             | _ -> ()
         ) |> ignore 
-    | Ast.ConstructorBlock((pos1, pos2), optVarDeclOrSpecListAst) ->
+    | Ast.ConstructorBlock varDeclBlock ->
         let parent = heap.Eval.PeekEvalStack()
         // evaluate the construction block 
-        match optVarDeclOrSpecListAst with
-        | Some astList -> 
-            astList |> List.map eval |> ignore
-        | None -> ()
+        eval varDeclBlock
         if parent.ArgList.Count = 0 then
             parent.ErrorOccurred <- emitST002diagnostics parent.Name parent.StartPos parent.EndPos
     | Ast.Constructor((pos1, pos2), (signatureAst, constructorBlockAst)) ->
@@ -1404,20 +1430,14 @@ let rec eval ast =
         eval signatureAst
         eval constructorBlockAst
         heap.Eval.PopEvalStack()
-    | Ast.DefPredicateContent(optAsts, ast1) ->
-        optAsts
-        |> Option.map (List.map eval >> ignore)
-        |> Option.defaultValue ()
-        |> ignore
-        eval ast1
-    | Ast.DefFunctionContent(optAsts, ast1) ->
-        optAsts
-        |> Option.map (List.map eval >> ignore)
-        |> Option.defaultValue ()
-        |> ignore
-        eval ast1
-    | Ast.DefClassCompleteContent(optVarDeclOrSpecListAsts, constructorListAsts) ->
-        optVarDeclOrSpecListAsts |> Option.map (List.map eval >> ignore) |> Option.defaultValue ()
+    | Ast.DefPredicateContent(varDeclBlock, predicateAst) ->
+        eval varDeclBlock
+        eval predicateAst
+    | Ast.DefFunctionContent(varDeclBlock, retStmtAst) ->
+        eval varDeclBlock
+        eval retStmtAst
+    | Ast.DefClassCompleteContent(varDeclBlock, constructorListAsts) ->
+        eval varDeclBlock 
         constructorListAsts |> List.map eval |> ignore
     | Ast.DefinitionPredicate((pos1, pos2), (predicateSignatureAst, optDefBlock)) ->
         let parent = heap.Eval.PeekEvalStack()
@@ -1501,15 +1521,21 @@ let rec eval ast =
         heap.Eval.PushEvalStack(argInf)
         eval predicateAst
         heap.Eval.PopEvalStack()
-    | Ast.Proof((pos1, pos2), (referencingIdentifierAst, (proofArgumentListAst, optQedAst))) ->
+
+    | Ast.ProofContent ((varDeclBlock, proofArgumentListAst), optQedAst) ->
+        eval varDeclBlock
+        proofArgumentListAst |> List.map eval |> ignore
+        optQedAst |> Option.map eval |> Option.defaultValue ()
+    | Ast.ProofBlock proofContent ->
+        eval proofContent
+    | Ast.Proof((pos1, pos2), (proofSignatureAst, proofBlockAst)) ->
         let parent = heap.Eval.PeekEvalStack()
         let fv = new FplProof((pos1, pos2), parent, heap.Helper.GetNextAvailableFplBlockRunOrder)
         heap.Eval.PushEvalStack(fv)
-        eval referencingIdentifierAst
+        eval proofSignatureAst
         heap.Eval.PopEvalStack() // add to parent theorem (if any)
         heap.Eval.PushEvalStack(fv) // push again
-        proofArgumentListAst |> List.map eval |> ignore
-        optQedAst |> Option.map eval |> Option.defaultValue ()
+        eval proofBlockAst
         fv.CheckConsistency()
         heap.Eval.Pop() |> ignore // pop without embedding in theorem (already done)
     | Ast.Precedence((pos1, pos2), precedence) ->
@@ -1710,7 +1736,8 @@ let evaluateSymbolTable () =
                 heap.Root.Scope[pa.Id] <- theoryValue
             heap.Eval.PushEvalStack(theoryValue)
             ad.CurrentUri <- pa.Parsing.Uri
-            eval pa.Parsing.Ast
+            pa.Parsing.BuildingBlockAsts
+            |> List.map (fun buildinBlockAst -> eval buildinBlockAst) |> ignore
             pa.Status <- ParsedAstStatus.Evaluated
             heap.Eval.PopEvalStack()
             theoryValue.Run()

@@ -1,7 +1,7 @@
 namespace FplParser.Tests
 
 open FParsec
-open FplParser
+open FplParsing.Combinators
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
 [<TestClass>]
@@ -46,7 +46,7 @@ type TestClasses () =
         let result = run (definitionClass .>> eof) """class FieldPowerN: Set
         {
             // intrinsic classes with declarations or specifications not allowed
-            dec ~a:obj ;
+            dec a:obj ;
             intr
         }"""
         let actual = sprintf "%O" result
@@ -58,7 +58,7 @@ type TestClasses () =
         let result = run (definitionClass .>> eof) """class FieldPowerN: Set
         {
             // intrinsic classes with declarations or specifications not allowed
-            dec ~d:Nat 
+            dec d:Nat 
             d:=1
             ;
             intr
@@ -97,7 +97,7 @@ type TestClasses () =
         // A class with a constructor and a self reference
         let result = run (definitionClass .>> eof) """class FieldPowerN: Set
         {
-            dec ~x: obj ;
+            dec x: obj ;
             constructor FieldPowerN() 
             {
                 dec base.Obj() ;
@@ -127,7 +127,7 @@ type TestClasses () =
         // A class with a constructor
         let result = run (definitionClass .>> eof) """class FieldPowerN: Set
         {
-            dec ~a:obj ;
+            dec a:obj ;
             ctor FieldPowerN() 
             {
                 dec base.Obj() ;
@@ -142,7 +142,7 @@ type TestClasses () =
         let result = run (definitionClass .>> eof) """class FieldPowerN: Set
         {
             // A class with a constructor but without self
-            dec ~a:obj ;
+            dec a:obj ;
             FieldPowerN() 
             {
                 dec base.Obj() ;
@@ -215,7 +215,7 @@ type TestClasses () =
 
             property func T() -> obj
 	        {
-	            dec ~a:obj ;
+	            dec a:obj ;
                 return x
 	        } 
 
@@ -237,7 +237,7 @@ type TestClasses () =
             FieldPowerN() 
             {
                 dec 
-                    ~a:obj
+                    a:obj
                     base.Obj()
                     ;
                 self
@@ -258,7 +258,7 @@ type TestClasses () =
 
             mand func T() -> obj
 	        {
-	            dec ~a:obj ;
+	            dec a:obj ;
                 return x
 	        } 
 
@@ -303,7 +303,7 @@ type TestClasses () =
             FieldPowerN() 
             {
                 dec 
-                    ~a:obj
+                    a:obj
                     self.T1()
                 ;
                 self
@@ -345,7 +345,7 @@ type TestClasses () =
 
             property func T() -> obj
 	        {
-	            dec ~a:obj ;
+	            dec a:obj ;
                 return x
 	        } 
 
@@ -394,4 +394,3 @@ type TestClasses () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))       
 
-        

@@ -2,16 +2,13 @@ namespace FplInterpreter.Tests
 
 open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
-open FParsec
 open ErrDiagnostics
-open FplInterpreter.Globals.ST
 open FplInterpreter.Globals.Debug
 open FplInterpreter.Globals.Heap
 open Newtonsoft.Json
 open Newtonsoft.Json.Linq
 open CommonTestHelpers
 open FplInterpreter.Main
-open TestSharedConfig
 
 [<TestClass>]
 type SymbolTableNavigation() =
@@ -27,7 +24,7 @@ type SymbolTableNavigation() =
             deleteDirectory currentPathRepo
 
             let fplCode = """
-                uses Fpl.SetTheory;
+                uses Fpl.SetTheory
             """
             let filename = "UsesClauseCausesDownloads"  
             prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -49,7 +46,7 @@ type SymbolTableNavigation() =
             deleteDirectory currentPathRepo
 
             let fplCode = """
-                uses Fpl.SetTheory;
+                uses Fpl.SetTheory
             """
             let filename = "UsesClauseCreatesSubdirectoriesLibAndRepo"  
             // file processing creates the subdirectories
@@ -78,7 +75,7 @@ type SymbolTableNavigation() =
             deleteDirectory currentPathRepo
 
             let fplCode = """
-                uses Fpl.SetTheory;
+                uses Fpl.SetTheory
             """
             let filename = "OpeningFileInRepoDoesNotCreateYetOtherSubdirsLibAndRepo"  
             // file processing creates the subdirectories
@@ -107,7 +104,7 @@ type SymbolTableNavigation() =
             deleteDirectory currentPathRepo
 
             let fplCode = """
-                uses Fpl.SetTheory;
+                uses Fpl.SetTheory
             """
             let filename = "OpeningFileInRepoDoesNotRaiseRuntimeErrors"  
             // file processing creates the subdirectories
@@ -135,7 +132,7 @@ type SymbolTableNavigation() =
             deleteDirectory currentPathRepo
 
             let fplCode = """
-                uses Fpl.SetTheory;
+                uses Fpl.SetTheory
             """
             let filename = "OpeningParentFileTheoryEnhancesSymbolTableCorrectly"  
             // file processing creates the subdirectories
@@ -182,7 +179,7 @@ type SymbolTableNavigation() =
             deleteDirectory currentPathRepo
 
             let fplCode = """
-                uses Fpl.SetTheory;
+                uses Fpl.SetTheory
             """
             let filename = "OpeningGrandParentFileTheoryEnhancesSymbolTableCorrectly"  
             // file processing creates the subdirectories
@@ -220,7 +217,7 @@ type SymbolTableNavigation() =
             deleteDirectory currentPathRepo
 
             let fplCode = """
-                uses Fpl.SetTheory;
+                uses Fpl.SetTheory
             """
             let filename = "OpeningGrandParentFileTheoryEnhancesSymbolTableDeeply"  
             // file processing creates the subdirectories
@@ -256,7 +253,7 @@ type SymbolTableNavigation() =
             deleteFiles currentPath "*.fpl"
 
             let fplCode = """
-                uses Fpl.SetTheory;
+                uses Fpl.SetTheory
             """
             let filename = "OpeningFileInLibAsCopyOfFileInRepoDoesRaiseNSP05Error"  
             // file processing creates the subdirectories lib and repo
@@ -296,7 +293,7 @@ type SymbolTableNavigation() =
             deleteFiles currentPath "Fpl.SetTheory.fpl"
 
             let fplCode = """
-                uses Fpl.SetTheory;
+                uses Fpl.SetTheory
             """
             let filename = "OpeningFileInMainAsCopyOfFileInRepoDoesRaiseNSP05Error"  
             // file processing creates the subdirectories lib and repo
@@ -336,7 +333,7 @@ type SymbolTableNavigation() =
             deleteFiles currentPath "Fpl.SetTheory.fpl"
 
             let fplCode = """
-                uses Fpl.SetTheory;
+                uses Fpl.SetTheory
             """
             let filename = "HavingRepoFileInLibDoesNotPreventItToBeDownloadedInRepo"  
             // file processing creates the subdirectories lib and repo
@@ -376,7 +373,7 @@ type SymbolTableNavigation() =
             deleteFiles currentPath "Fpl.SetTheory.fpl"
 
             let fplCode = """
-                uses Fpl.SetTheory;
+                uses Fpl.SetTheory
             """
             let filename = "HavingRepoFileInMainDoesPreventItToBeDownloadedInRepo"  
             // file processing creates the subdirectories lib and repo
@@ -416,7 +413,7 @@ type SymbolTableNavigation() =
             deleteFiles currentPath "Fpl.SetTheory.fpl"
 
             let fplCode = """
-                uses Fpl.SetTheory;
+                uses Fpl.SetTheory
             """
             let filename = "OpeningFileInRepoDoesNotCreateYetOtherSubdirsLibAndRepo"  
             // file processing creates the subdirectories
@@ -433,7 +430,7 @@ type SymbolTableNavigation() =
             let uri = PathEquivalentUri(pathToTestFile)
             let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
             let fplCodeOriginal = File.ReadAllText(pathToTestFile)
-            let fplCodeManipulated = fplCodeOriginal.Substring(0,fplCodeOriginal.Length-1) + "def pred Bla() { Bla1() };"
+            let fplCodeManipulated = fplCodeOriginal.Substring(0,fplCodeOriginal.Length-1) + "def pred Bla() { Bla1() }"
             fplInterpreter fplCodeManipulated uri fplLibUrl
 
             // do the test - check, if the diagnostics changed
@@ -458,7 +455,7 @@ type SymbolTableNavigation() =
             deleteFiles currentPath "Fpl.SetTheory.fpl"
 
             let fplCode = """
-                uses Fpl.SetTheory;
+                uses Fpl.SetTheory
             """
             let filename = "OpeningFileInRepoDoesNotCreateYetOtherSubdirsLibAndRepo"  
             // file processing creates the subdirectories
@@ -475,7 +472,7 @@ type SymbolTableNavigation() =
             let uri = PathEquivalentUri(pathToTestFile)
             let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
             let fplCodeOriginal = File.ReadAllText(pathToTestFile)
-            let fplCodeManipulated = fplCodeOriginal.Substring(0,fplCodeOriginal.Length-1) + "def pred Bla() { Bla1() };"
+            let fplCodeManipulated = fplCodeOriginal.Substring(0,fplCodeOriginal.Length-1) + "def pred Bla() { Bla1() }"
             fplInterpreter fplCodeManipulated uri fplLibUrl
 
             // do the test - check, if the diagnostics changed
@@ -508,7 +505,7 @@ type SymbolTableNavigation() =
                 axiom Axiom1
                 {
                     is(1,Natural)
-                };
+                }
             """
 
             let filename = "OpeningFileInMainAndUpdatingReferencesCorrectlyRaisesSIG04Errors"  
@@ -527,7 +524,7 @@ type SymbolTableNavigation() =
                 axiom Axiom1
                 {
                     is(1,NaturalTypo)
-                };
+                }
             """
             let pathToFile = Path.Combine(currentPath,filename)
             File.WriteAllText(pathToFile,fplCode)
@@ -546,7 +543,7 @@ type SymbolTableNavigation() =
                 axiom Axiom1
                 {
                     is(1,Natural)
-                };
+                }
             """
             File.WriteAllText(pathToFile,fplCode)
             // reprocess file with the same symbol table
@@ -559,7 +556,7 @@ type SymbolTableNavigation() =
             // remove the test file
             prepareFplCode(filename, "", true) |> ignore
 
-    [<DataRow("uses Fpl.Commons.Structures ;")>]
+    [<DataRow("uses Fpl.Commons.Structures ")>]
     [<TestMethod>]
     member this.TestJson(fplCode:string) =
         if offlineWatcher.OfflineMode && fplCodeNeedsOnline fplCode then 

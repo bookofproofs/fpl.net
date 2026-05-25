@@ -13,7 +13,11 @@ let LiteralAlias = "alias"
 [<Literal>]
 let LiteralAll = "all"
 [<Literal>]
+let LiteralAllSymbol = "∀"
+[<Literal>]
 let LiteralAnd = "and"
+[<Literal>]
+let LiteralAndSymbol = "∧"
 [<Literal>]
 let LiteralAss = "ass"
 [<Literal>]
@@ -73,7 +77,11 @@ let LiteralDelL = "delegate"
 [<Literal>]
 let LiteralEx = "ex"
 [<Literal>]
+let LiteralExSymbol = "∃"
+[<Literal>]
 let LiteralExN = "exn"
+[<Literal>]
+let LiteralExNSymbol = "∃!"
 [<Literal>]
 let LiteralExt = "ext"
 [<Literal>]
@@ -89,7 +97,11 @@ let LiteralFuncL = "function"
 [<Literal>]
 let LiteralIif = "iif"
 [<Literal>]
+let LiteralIifSymbol = "⇔"
+[<Literal>]
 let LiteralImpl = "impl"
+[<Literal>]
+let LiteralImplSymbol = "⇒"
 [<Literal>]
 let LiteralIn = "in"
 [<Literal>]
@@ -121,11 +133,15 @@ let LiteralMapCases = "mcases"
 [<Literal>]
 let LiteralNot = "not"
 [<Literal>]
+let LiteralNotSymbol = "¬"
+[<Literal>]
 let LiteralObj = "obj"
 [<Literal>]
 let LiteralObjL = "object"
 [<Literal>]
 let LiteralOr = "or"
+[<Literal>]
+let LiteralOrSymbol = "∨"
 [<Literal>]
 let LiteralParent = "parent"
 [<Literal>]
@@ -190,6 +206,8 @@ let LiteralUndefL = "undefined"
 let LiteralUses = "uses"
 [<Literal>]
 let LiteralXor = "xor"
+[<Literal>]
+let LiteralXorSymbol = "⩡"
 
 let keyWordSet =
     HashSet<_>(
@@ -295,8 +313,9 @@ let replaceLinesWithSpaces (input: string) (pattern: string) =
 
 /// Replaces in the `input` all FPL comments by spaces while preserving new lines
 let removeFplComments (input:string) = 
-    let r1 = replaceLinesWithSpaces input "\/\/[^\n]*" // replace inline comments
-    replaceLinesWithSpaces r1 "\/\*((?:.|\n)*?)\*\/" // replace block comments
+    let r1 = replaceLinesWithSpaces input $"\/\/[^{Environment.NewLine}]*" // replace inline comments
+    replaceLinesWithSpaces r1 $"\/\*((?:.|{Environment.NewLine})*?)\*\/" // replace block comments
+
 
 /// Special math symbols that can be used as infix, postfix, prefix operators, or other mathematical symbols;
 /// based on source: https://www.classe.cornell.edu/~dms79/LectureNotes/formulae/list-of-math-symbols-extended.htm
@@ -307,16 +326,19 @@ let removeFplComments (input:string) =
 /// Code 2 = infix
 /// Code 1 = postfix
 /// (sums like 8 + 2 + 1 are allowed).
+
 let mathSymbols = dict [
         // reserved FPL math symbols
-        //('¬', (4, "Not Sign", "U+00AC")) FPL not operator
-        //('⇒', (2, "Rightwards Double Arrow", "U+21D2")) FPL impl operator
-        //('⇔', (2, "Left Right Double Arrow", "U+21D4")) FPL iif operator
-        //('∧', (2, "Logical And", "U+2227"))  FPL and operator
-        //('∨', (2, "Logical Or", "U+2228")) FPL or operator
-        //('⩡', (2, "Small Vee with Underbar", "U+2A61")) xor operator
-        //('∀', (4, "For All", "U+2200")) FPL all quantor
-        //('∃', (2, "There Exists", "U+2203")) FPL exists quantor
+        //('¬', (4, "Not Sign", "U+00AC")) // FPL not operator
+        ('⇒', (2, "Rightwards Double Arrow", "U+21D2")) // FPL impl operator
+        ('⇔', (2, "Left Right Double Arrow", "U+21D4")) // FPL iif operator
+        ('∧', (2, "Logical And", "U+2227"))  // FPL and operator
+        ('∨', (2, "Logical Or", "U+2228")) // FPL or operator
+        ('⩡', (2, "Small Vee with Underbar", "U+2A61")) // xor operator
+        ('=', (2, "Equals Sign", "U+003D"))
+        ('≠', (2, "Not Equal To", "U+2260"))
+        //('∀', (4, "For All", "U+2200")) // FPL all quantor
+        //('∃', (2, "There Exists", "U+2203")) // FPL exists quantor
 
         ('a', (2, "Latin Letter a", "U+0041"))
         ('b', (2, "Latin Letter b", "U+0042"))
@@ -367,7 +389,6 @@ let mathSymbols = dict [
         ('^', (2, "Circumflex", "U+005E"))
         ('+', (7, "Plus Sign", "U+002B"))
         ('<', (2, "Less-Than Sign", "U+003C"))
-        ('=', (2, "Equals Sign", "U+003D"))
         ('>', (2, "Greater-Than Sign", "U+003E"))
         ('|', (0, "Vertical Line", "U+007C"))
         ('±', (2, "Plus-Minus Sign", "U+00B1"))
@@ -505,7 +526,6 @@ let mathSymbols = dict [
         ('≜', (2, "Delta Equal To", "U+225C"))
         ('≞', (2, "Measured By", "U+225E"))
         ('≟', (2, "Questioned Equal To", "U+225F"))
-        ('≠', (2, "Not Equal To", "U+2260"))
         ('≡', (2, "Identical To", "U+2261"))
         ('≢', (2, "Not Identical To", "U+2262"))
         ('≣', (2, "Strictly Equivalent To", "U+2263"))

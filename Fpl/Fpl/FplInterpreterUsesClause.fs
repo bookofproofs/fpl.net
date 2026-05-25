@@ -31,39 +31,51 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 let rec eval_uses_clause debugMode = function 
     | Ast.AST ((pos1, pos2), ast) -> 
         eval_uses_clause debugMode ast
-    | Ast.Namespace (asts) ->
-        let results = asts |> List.collect (eval_uses_clause debugMode)
+    | Ast.Namespace (buildingBlockAsts) ->
+        let results = buildingBlockAsts |> List.collect (eval_uses_clause debugMode)
         results
+    | Ast.BuildingBlock((_, _),buidlingBlockAst) ->
+        eval_uses_clause debugMode buidlingBlockAst
     | Ast.UsesClause ((pos1, pos2), ast) -> 
         eval_uses_clause debugMode ast 
     | Ast.AliasedNamespaceIdentifier ((pos1, pos2), (ast, optAst)) -> 
         let evalAlias = match optAst with
-                          | Some (Ast.Alias ((p1, p2), s)) -> 
-                                    { 
-                                        StartPos = p1
-                                        EndPos = p2
-                                        AliasOrStar = s
-                                    }
-                          | Some (Ast.Star ((p1,p2),())) -> 
-                                    { 
-                                        StartPos = p1
-                                        EndPos = p2
-                                        AliasOrStar = "*"
-                                    }
+                        | Some (Ast.Alias ((p1, p2), s)) ->
+                            { 
+                                StartPos = p1
+                                EndPos = p2
+                                AliasOrStar = s
+                            }
+                        | Some (Ast.Star ((p1,p2),())) -> 
+                            { 
+                                StartPos = p1
+                                EndPos = p2
+                                AliasOrStar = "*"
+                            }
 
-                          | _ -> 
-                                    { 
-                                        StartPos = pos1
-                                        EndPos = pos2
-                                        AliasOrStar = ""
-                                    }
+                        | _ -> 
+                            { 
+                                StartPos = pos1
+                                EndPos = pos2
+                                AliasOrStar = ""
+                            }
 
         match ast with
         | Ast.NamespaceIdentifier ((p1, p2), asts) -> 
-            let pascalCaseIdList = asts |> List.collect (function Ast.PascalCaseId (_,s) -> [s] | _ -> [])
+            let pascalCaseIdList =
+                asts
+                |> List.collect (
+                    function Ast.PascalCaseId ((p_1, p_2),s)
+                            -> [s]
+                            | _ -> []
+                )
+
             [EvalAliasedNamespaceIdentifier.CreateEani(pascalCaseIdList, evalAlias, p1, p2, debugMode)]
         | _ -> []
     | _ -> []
+
+
+    
 
 let private downloadFile url (e:EvalAliasedNamespaceIdentifier) =
     if not (e.DebugMode) then
@@ -409,7 +421,11 @@ let loadAllUsesClauses input (uri:PathEquivalentUri) fplLibUrl =
         match loadedParsedAst with
         | Some pa -> 
             // evaluate the EvalAliasedNamespaceIdentifier list of the ast
-            pa.Sorting.EANIList <- eval_uses_clause offlineWatcher.OfflineMode pa.Parsing.Ast
+            let eaniList = 
+                pa.Parsing.BuildingBlockAsts
+                |> List.map (fun buildingBlock -> eval_uses_clause offlineWatcher.OfflineMode buildingBlock)
+                |> List.concat
+            pa.Sorting.EANIList <- eaniList
             pa.Status <- ParsedAstStatus.UsesClausesEvaluated
             findDuplicateAliases pa.Sorting.EANIList |> ignore
             pa.Sorting.EANIList

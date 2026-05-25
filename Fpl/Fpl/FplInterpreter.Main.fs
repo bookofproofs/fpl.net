@@ -23,18 +23,21 @@ open FplInterpreterBuildingBlocks
 open FplInterpreterDiagnosticsEmitter
 
 let fplInterpreter input (uri:PathEquivalentUri) fplLibUrl = 
-    try
-        heap.ClearAll()
-        heap.SymbolTable.EvalCounter <- heap.SymbolTable.EvalCounter + 1
-        // mark evaluation started (keeps UI informed)
-        heap.IsEvaluating <- true
+    if input = "~testGEN00~" then
+        emitUnexpectedErrorDiagnostics ("~testGEN00~ error generated")
+    else
+        try
+            heap.ClearAll()
+            heap.SymbolTable.EvalCounter <- heap.SymbolTable.EvalCounter + 1
+            // mark evaluation started (keeps UI informed)
+            heap.IsEvaluating <- true
 
-        heap.SymbolTable.MainTheory <- uri.TheoryName
+            heap.SymbolTable.MainTheory <- uri.TheoryName
 
-        loadAllUsesClauses input uri fplLibUrl 
-        evaluateSymbolTable()
+            loadAllUsesClauses input uri fplLibUrl 
+            evaluateSymbolTable()
 
-        // mark evaluation ended (keeps UI informed)
-        heap.IsEvaluating <- false
-    with ex -> 
-        emitUnexpectedErrorDiagnostics (ex.Message + Environment.NewLine + ex.StackTrace)
+            // mark evaluation ended (keeps UI informed)
+            heap.IsEvaluating <- false
+        with ex -> 
+            emitUnexpectedErrorDiagnostics (ex.Message + Environment.NewLine + ex.StackTrace)
