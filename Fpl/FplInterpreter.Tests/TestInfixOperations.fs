@@ -88,18 +88,18 @@ type TestInfixOperations() =
         Assert.AreEqual<string>(expected, pr1.Represent())
         prepareFplCode(filename, "", false) |> ignore
 
-    [<DataRow("00", """def pred T1() { (false and false and false) }""", LiteralFalse)>]
-    [<DataRow("01", """def pred T1() { (true and false and false) }""", LiteralFalse)>]
-    [<DataRow("02", """def pred T1() { (false and true and false) }""", LiteralFalse)>]
-    [<DataRow("03", """def pred T1() { (true and true and false) }""", LiteralFalse)>]
-    [<DataRow("04", """def pred T1() { (false and false and true) }""", LiteralFalse)>]
-    [<DataRow("05", """def pred T1() { (true and false and true) }""", LiteralFalse)>]
-    [<DataRow("06", """def pred T1() { (false and true and true) }""", LiteralFalse)>]
-    [<DataRow("07", """def pred T1() { (true and true and true) }""", LiteralTrue)>]
-    [<DataRow("08a", """def pred T1() { (true and true) }""", LiteralTrue)>]
-    [<DataRow("08b", """def pred T1() { (true and false) }""", LiteralFalse)>]
-    [<DataRow("08c", """def pred T1() { (false and true) }""", LiteralFalse)>]
-    [<DataRow("08d", """def pred T1() { (false and false) }""", LiteralFalse)>]
+    [<DataRow("00", """def pred T1() { (false ∧ false ∧ false) }""", LiteralFalse)>]
+    [<DataRow("01", """def pred T1() { (true ∧ false ∧ false) }""", LiteralFalse)>]
+    [<DataRow("02", """def pred T1() { (false ∧ true ∧ false) }""", LiteralFalse)>]
+    [<DataRow("03", """def pred T1() { (true ∧ true ∧ false) }""", LiteralFalse)>]
+    [<DataRow("04", """def pred T1() { (false ∧ false ∧ true) }""", LiteralFalse)>]
+    [<DataRow("05", """def pred T1() { (true ∧ false ∧ true) }""", LiteralFalse)>]
+    [<DataRow("06", """def pred T1() { (false ∧ true ∧ true) }""", LiteralFalse)>]
+    [<DataRow("07", """def pred T1() { (true ∧ true ∧ true) }""", LiteralTrue)>]
+    [<DataRow("08a", """def pred T1() { (true ∧ true) }""", LiteralTrue)>]
+    [<DataRow("08b", """def pred T1() { (true ∧ false) }""", LiteralFalse)>]
+    [<DataRow("08c", """def pred T1() { (false ∧ true) }""", LiteralFalse)>]
+    [<DataRow("08d", """def pred T1() { (false ∧ false) }""", LiteralFalse)>]
     [<TestMethod>]
     member this.TestConjunctionCallsFplCommons(no:string, varVal, expected:string) =
         

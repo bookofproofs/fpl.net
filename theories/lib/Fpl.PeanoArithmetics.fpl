@@ -336,4 +336,3 @@ def function ContinuedFraction(k:Nat, arr: RightOpenRangeInt) -> Nat
 // Example of defining a constant for the set of all natural numbers greater than 100 using the
 def class N100:SetBuilder{ctor N100(){dec n:Nat  base.SetBuilder(SetNat(), IsGreater(n,@100)) ;  }}
 */
-;

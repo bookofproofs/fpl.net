@@ -822,4 +822,3 @@ loc NotEqual(x,y) :=
     !pol: x ( "nie równa się" | "nie równe" ) y 
     ;
 
-;
