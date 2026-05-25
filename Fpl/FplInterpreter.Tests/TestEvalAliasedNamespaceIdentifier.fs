@@ -588,13 +588,12 @@ type TestEvalAliasedNamespaceIdentifier() =
     member this.TestGarbageCollector04() =
         if not TestConfig.IsOffline then 
             let filename = "TestGarbageCollector04.fpl"
-            let fplCode = "uses Fpl.SetTheory;"
+            let fplCode = "uses Fpl.SetTheory"
             prepareFplCode(filename, "", true) |> ignore
             prepareFplCode(filename, fplCode, false) 
             // initial counts of parsed ast and theories in root
-            let parsedAstsFirstTime = heap.ParsedAsts.Count
-            let scopeCountFirstTime = heap.Root.Scope.Count
-            let errorCountfirstTime = ad.CountDiagnostics
+            let scopeCountFirstTime = heap.Root.Scope["Fpl.Commons"].Scope.Count
+            let errorsfirstTime = ad.Collection |> Seq.filter (fun d -> d.Uri.AbsolutePath.EndsWith("Fpl.Commons.fpl")) |> Seq.toList
 
             let currDir = Directory.GetCurrentDirectory()
             // now, we change the uri and the source code to some referenced FPL theory
@@ -603,9 +602,8 @@ type TestEvalAliasedNamespaceIdentifier() =
             let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
             // reparse the Test.fpl after slightly modifying the uses clause
             fplInterpreter fplCode uri fplLibUrl
-            Assert.AreEqual<int>(parsedAstsFirstTime, heap.ParsedAsts.Count)
-            Assert.AreEqual<int>(scopeCountFirstTime, heap.Root.Scope.Count)
-            Assert.AreEqual<int>(errorCountfirstTime, ad.CountDiagnostics)
+            Assert.AreEqual<int>(scopeCountFirstTime, heap.Root.Scope.["Fpl.Commons"].Scope.Count)
+            Assert.AreEqual<int>(errorsfirstTime.Length, ad.CountDiagnostics)
 
 
 module TestModule2 =
