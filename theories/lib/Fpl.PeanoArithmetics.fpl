@@ -140,7 +140,7 @@ prop AddIsUnique
 
 proof AddIsUnique$1
 {
-    1. |- assume 
+    1: assume 
         all n, m:Nat
         {
             and (and (
@@ -150,8 +150,8 @@ proof AddIsUnique$1
             ( anotherAdd(n,Succ(m)) = Succ(anotherAdd(n,m)) ))
             
         }
-    2. |- trivial
-    3. |- all n, m:Nat
+    2: trivial
+    3: all n, m:Nat
             {
                 ( Add(n,m) = anotherAdd(n,m) )
             }
