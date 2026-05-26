@@ -281,6 +281,10 @@ type TestProceedingExpressionsJust() =
         prepareFplCode(filename, "", false) |> ignore
 
 
+    // AndCummutative and(p,q) 
+    [<DataRow("AndC_01", "inf AndCummutative{dec p,q:pred; pre:and(p,q) con:and(q,p)} thm T {true} proof T$1 {1: and(true,false) 2. 1, byinf AndCummutative |- and(false,true)}", "false ∧ true", 1)>]
+    [<DataRow("AndC_03", "inf AndCummutative{dec p,q:pred; pre:and(p,q) con:and(q,p)} thm T {true} proof T$1 {1: and(all x:obj {is(x,N)}, not(all x:obj {is(x,N)})) 2. 1, byinf AndCummutative |- and(not(all x:obj {is(x,N)}), all x:obj {is(x,N)})}", "¬∀ x:obj {x is N} ∧ ∀ x:obj {x is N}", 1)>]
+
     // ModusPonens and (p, impl (p,q) )
     [<DataRow("MP_01", "inf M {dec p,q: pred; pre: and (p, impl (p,q) ) con: q} thm T {true} proof T$1 {1: and(true, impl(true, false)) 2. 1, byinf M |- false}", "false", 1)>]
     [<DataRow("MP_01d", "inf M {dec p,q: pred; pre: and (p, impl (p,q) ) con: q} thm T {true} proof T$1 {1: and(ex x:obj {is(x,N)}, impl(ex x:obj {is(x,N)}, false)) 2. 1, byinf M |- false}", "false", 1)>]
@@ -292,9 +296,6 @@ type TestProceedingExpressionsJust() =
     [<DataRow("MP_01k", "inf M {dec p,q: pred; pre: and (p, impl (p,q) ) con: q} thm T {true} proof T$1 {1: and(iif(true, ex x:obj {is(x,N)}), impl(iif(true, ex x:obj {is(x,N)}), false)) 2. 1, byinf M |- false}", "false", 1)>]
     [<DataRow("MP_01m", "inf M {dec p,q: pred; pre: and (p, impl (p,q) ) con: q} thm T {true} proof T$1 {1: and(is(A,N), impl(is(A,N), false)) 2. 1, byinf M |- false}", "false", 1)>]
 
-    // AndCummutative and(p,q) 
-    [<DataRow("AndC_01", "inf AndCummutative{dec p,q:pred; pre:and(p,q) con:and(q,p)} thm T {true} proof T$1 {1: and(true,false) 2. 1, byinf AndCummutative |- and(false,true)}", "false ∧ true", 1)>]
-    [<DataRow("AndC_03", "inf AndCummutative{dec p,q:pred; pre:and(p,q) con:and(q,p)} thm T {true} proof T$1 {1: and(all x:obj {is(x,N)}, not(all x:obj {is(x,N)})) 2. 1, byinf AndCummutative |- and(not(all x:obj {is(x,N)}), all x:obj {is(x,N)})}", "¬∀ x:obj {x is N} ∧ ∀ x:obj {x is N}", 1)>]
 
     // OrCummutative or(p,q) 
     [<DataRow("OrC_01", "inf OrCummutative{dec p,q:pred; pre:or(p,q) con:or(q,p)} thm T {true} proof T$1 {1: or(true,false) 2. 1, byinf OrCummutative |- or(false,true)}", "false ∨ true", 1)>]
