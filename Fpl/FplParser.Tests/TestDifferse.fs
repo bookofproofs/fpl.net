@@ -21,6 +21,7 @@ type TestDiverse () =
     [<DataRow("05", """def cl TestId {ctor TestId() {} ctor TestId(x:obj) {} ctor TestId(x:pred) {} }""")>]
     [<DataRow("06", """proof SomeFplTheorem$1 {1: trivial}""")>]
     [<DataRow("07", """proof SomeFplTheorem$1 {1. 3 |- trivial}""")>]
+    [<DataRow("08", """def pred A() {false ∧ true}""")>]
     [<TestMethod>]
     member this.TestDiverseSuccess (no:string, fplCode:string) =
         let result = run (stdParser .>> eof) fplCode

@@ -352,7 +352,9 @@ type TestExpressions () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<DataRow("02", "1")>]
+    [<DataRow("01", "1")>]
+    [<DataRow("02", "x ∧ y")>]
+    [<DataRow("03", "false ∧ true")>]
     [<TestMethod>]
     member this.TestPredicateSyntax (no:string, expr:string) =
         let result = run (predicate .>> eof) expr
