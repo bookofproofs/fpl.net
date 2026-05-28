@@ -64,12 +64,12 @@ type TestExpressions () =
 
             def pred T8() 
             {
-                Test$2$1()
+                Test$2$1
             }
             
             def pred T9() 
             {
-                Test$1()
+                Test$1
             }
             
             def pred T10() 
@@ -353,8 +353,15 @@ type TestExpressions () =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<DataRow("01", "1")>]
+    [<DataRow("01", "f()")>]
     [<DataRow("02", "x ∧ y")>]
     [<DataRow("03", "false ∧ true")>]
+    [<DataRow("01d", "-false")>]
+    [<DataRow("01e", "false'")>]
+    [<DataRow("02d", "-and(a,b)")>]
+    [<DataRow("02e", "and(a,b)'")>]
+    [<DataRow("03d", "-mcases ( | true : true ? false )")>]
+    [<DataRow("03e", "mcases ( | true : true ? false )'")>]
     [<TestMethod>]
     member this.TestPredicateSyntaxSuccess (no:string, expr:string) =
         let result = run (predicate .>> eof) expr
@@ -363,23 +370,18 @@ type TestExpressions () =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<DataRow("01", "false()")>]
+    [<DataRow("01_", "false ()")>]
     [<DataRow("01a", "false().x[2]")>]
     [<DataRow("01b", "false[2]")>]
     [<DataRow("01c", "false.F().x[2]")>]
-    [<DataRow("01d", "-false")>]
-    [<DataRow("01e", "false'")>]
     [<DataRow("02", "and(a,b)()")>]
     [<DataRow("02a", "and(a,b)().x[2]")>]
     [<DataRow("02b", "and(a,b).x[2]")>]
     [<DataRow("02c", "and(a,b).F().x[2]")>]
-    [<DataRow("02d", "-and(a,b)")>]
-    [<DataRow("02e", "and(a,b)'")>]
     [<DataRow("03", "mcases ( | true : true ? false )()")>]
     [<DataRow("03a", "mcases ( | true : true ? false )().x[2]")>]
     [<DataRow("03b", "mcases ( | true : true ? false )[2]")>]
     [<DataRow("03c", "mcases ( | true : true ? false ).F().x[2]")>]
-    [<DataRow("03d", "-mcases ( | true : true ? false )")>]
-    [<DataRow("03e", "mcases ( | true : true ? false )'")>]
     [<TestMethod>]
     member this.TestPredicateSyntaxFailure (no:string, expr:string) =
         let result = run (predicate .>> eof) expr

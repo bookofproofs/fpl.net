@@ -89,7 +89,7 @@ type Ast =
     | PostfixOperator of Positions * string
     | PrefixOperator of Positions * string
     | InfixOperation of Positions * (Ast * Ast option) list
-    | Expression of Positions * ((((Ast option * Ast) * Ast option) * Ast option) * Ast)
+    | Expression of Positions * ((Ast option * Ast) * Ast option)
 
     // Statements
     | Assertion of Positions * Ast

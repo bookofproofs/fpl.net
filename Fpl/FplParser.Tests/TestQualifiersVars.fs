@@ -9,75 +9,36 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 type TestQualifiersVars () =
     (* Tests the specification in DocuFplGrammarPocShiftFromPythonToFSharp.md #### 23 *)
 
-    [<TestMethod>]
-    member this.TestDottedBoth () =
-        let result = run (predicate .>> eof) """x.y"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
 
+    [<DataRow("00", """x'(y)""")>]
+    [<DataRow("01", """x'( y )""")>]
+    [<DataRow("02", """x'[y]""")>]
+    [<DataRow("03", """x'[ y ]""")>]
+    [<DataRow("04", """x'.y""")>]
+    [<DataRow("04", """x. y""")>]
     [<TestMethod>]
-    member this.TestDottedBothA () =
-        let result = run (predicate .>> eof) """x'.y"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestDottedBothB () =
-        let result = run (predicate .>> eof) """x. y"""
+    member this.TestArgumentsFailure (no:string, fplCode:string) =
+        let result = run (predicate .>> eof) fplCode
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
+    [<DataRow("00", """x( y )""")>]
+    [<DataRow("01", """x(y)""")>]
+    [<DataRow("02", """x[y]""")>]
+    [<DataRow("03", """x[y]'""")>]
+    [<DataRow("04", """x.y'""")>]
+    [<DataRow("05", """x.y""")>]
+    
     [<TestMethod>]
-    member this.TestDottedBothC () =
-        let result = run (predicate .>> eof) """x'.y"""
+    member this.TestArgumentsSuccess (no:string, fplCode:string) =
+        let result = run (predicate .>> eof) fplCode
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<TestMethod>]
-    member this.TestArgumentsBoth () =
-        let result = run (predicate .>> eof) """x(y)"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<TestMethod>]
-    member this.TestArgumentsBothA () =
-        let result = run (predicate .>> eof) """x'(y)"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<TestMethod>]
-    member this.TestArgumentsBothB () =
-        let result = run (predicate .>> eof) """x( y )"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestArgumentsBothC () =
-        let result = run (predicate .>> eof) """x'( y )"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestCoordinatesBoth () =
-        let result = run (predicate .>> eof) """x[y]"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestCoordinatesBothA () =
-        let result = run (predicate .>> eof) """x'[y]"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestCoordinatesBothB () =
@@ -86,12 +47,7 @@ type TestQualifiersVars () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<TestMethod>]
-    member this.TestCoordinatesBothC () =
-        let result = run (predicate .>> eof) """x'[ y ]"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+
 
     [<TestMethod>]
     member this.TestCoordsBoth () =

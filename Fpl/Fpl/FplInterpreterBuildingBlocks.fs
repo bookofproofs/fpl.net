@@ -1148,7 +1148,7 @@ let rec eval ast =
             fv.ArgList.RemoveAt(currMinIndex+1) 
             fv.ArgList.RemoveAt(currMinIndex-1) 
         simplifyTriviallyNestedExpressions fv 
-    | Ast.Expression((pos1, pos2), ((((prefixOpAst, predicateAst), postfixOpAst), optionalSpecificationAst), qualificationListAst)) ->
+    | Ast.Expression((pos1, pos2), ((prefixOpAst, predicateAst), postfixOpAst)) ->
         let fv = heap.Eval.PeekEvalStack()
         let refBlock = new FplReference((pos1, pos2), fv) 
         heap.Eval.PushEvalStack(refBlock)
@@ -1180,8 +1180,6 @@ let rec eval ast =
             else
                 eval predicateAst
         ensureReversedPolishNotation
-        optionalSpecificationAst |> Option.map eval |> Option.defaultValue ()
-        eval qualificationListAst
         let refBlock = heap.Eval.PeekEvalStack() // if the reference was replaced, take this one
         refBlock.EndPos <- pos2
         simplifyTriviallyNestedExpressions refBlock 

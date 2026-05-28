@@ -105,12 +105,6 @@ type TestInfixPostfixPrefix () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<TestMethod>]
-    member this.TestPostfixUsage07 () =
-        let result = run (predicate .>> eof) """f'(x)"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPostfixUsage08 () =
@@ -254,26 +248,28 @@ type TestInfixPostfixPrefix () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
+    [<DataRow("01", """-(x + y).Test()""")>]
+    [<DataRow("02", """(f -∘ g)(x)""")>]
+    [<DataRow("03", """(f + g)'(x)""")>]
+    [<DataRow("04", """f'(x)""")>]
     [<TestMethod>]
-    member this.TestCombinedUsage07 () =
-        let result = run (predicate .>> eof) """-(x + y).Test()"""
+    member this.TestCombinedUsageFail (no:string, fplCode:string) =
+        let result = run (predicate .>> eof) fplCode
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
+
+    [<DataRow("02", """(f(x) -∘ g(x))""")>]
+    [<DataRow("03", """(f(x)' + g(x)')""")>]
+    [<DataRow("03a", """(f(x) + g(x))'""")>]
+    [<DataRow("04", """f(x)'""")>]
+    [<TestMethod>]
+    member this.TestCombinedUsageSuccess (no:string, fplCode:string) =
+        let result = run (predicate .>> eof) fplCode
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<TestMethod>]
-    member this.TestCombinedUsage08 () =
-        let result = run (predicate .>> eof) """(f -∘ g)(x)"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestCombinedUsage09 () =
-        let result = run (predicate .>> eof) """(f + g)'(x)"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestCombinedUsage10 () =

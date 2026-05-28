@@ -37,89 +37,8 @@ type TestQualifiersDollarDigits () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
-    [<TestMethod>]
-    member this.TestArgumentsBoth () =
-        let result = run (predicate .>> eof) """$1($1)"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<TestMethod>]
-    member this.TestArgumentsBothA () =
-        let result = run (predicate .>> eof) """$1'($1)"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<TestMethod>]
-    member this.TestArgumentsBothB () =
-        let result = run (predicate .>> eof) """$1( $1 )"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestArgumentsBothC () =
-        let result = run (predicate .>> eof) """$1'( $1 )"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestCoordinatesBoth () =
-        let result = run (predicate .>> eof) """$1[$1]"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestCoordinatesBothA () =
-        let result = run (predicate .>> eof) """$1'[$1]"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestCoordinatesBothB () =
-        let result = run (predicate .>> eof) """$1[ $1 ]"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestCoordinatesBothC () =
-        let result = run (predicate .>> eof) """$1'[ $1 ]"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestCoordsBoth () =
-        let result = run (predicate .>> eof) """$1[$1]"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestCoordsBothA () =
-        let result = run (predicate .>> eof) """$1'[$1]"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestCoordsBothB () =
-        let result = run (predicate .>> eof) """$1[$1 ]"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestCoordsBothC () =
-        let result = run (predicate .>> eof) """$1'[ $1 ]"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSubscriptsBoth () =
@@ -128,26 +47,10 @@ type TestQualifiersDollarDigits () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
-    [<TestMethod>]
-    member this.TestSubscriptsBothD () =
-        let result = run (predicate .>> eof) """$1!.Test(1)"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<TestMethod>]
-    member this.TestSubscriptsBothA () =
-        let result = run (predicate .>> eof) """$1'!.Test(1)"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<TestMethod>]
-    member this.TestSubscriptsBothB () =
-        let result = run (predicate .>> eof) """$1!'.Test(1)"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+
+
 
     [<TestMethod>]
     member this.TestSubscriptsBothC () =
@@ -277,12 +180,6 @@ type TestQualifiersDollarDigits () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<TestMethod>]
-    member this.TestSCoordsAsA1 () =
-        let result = run (predicate .>> eof) """x'[$1]"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestCoordsAsB1 () =
@@ -291,11 +188,39 @@ type TestQualifiersDollarDigits () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
+    [<DataRow("00", """x [ $1]""")>]
+    [<DataRow("01", """$1!.Test(1)""")>]
+    [<DataRow("02", """$1($1)""")>]
+    [<DataRow("02a", """$1( $1 )""")>]
+    [<DataRow("03", """$1'($1)""")>]
+    [<DataRow("04", """$1'( $1 )""")>]
+    [<DataRow("05", """$1[$1]""")>]
+    [<DataRow("06", """$1'[$1]""")>]
+    [<DataRow("07", """$1[ $1 ]""")>]
+    [<DataRow("08", """$1'[ $1 ]""")>]
+    [<DataRow("09", """$1[$1]""")>]
+    [<DataRow("10", """$1'[$1]""")>]
+    [<DataRow("11", """$1[$1 ]""")>]
+    [<DataRow("12", """$1'[ $1 ]""")>]
+    [<DataRow("13", """x'[$1]""")>]
+    [<DataRow("14", """$1'!.Test(1)""")>]
+    [<DataRow("15", """$1!'.Test(1)""")>]
     [<TestMethod>]
-    member this.TestCoordsAsC1 () =
-        let result = run (predicate .>> eof) """x [ $1]"""
+    member this.TestFailure (no:string, fplCode:string) =
+        let result = run (predicate .>> eof) fplCode
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
+    [<DataRow("00", """x[ $1]""")>]
+    [<DataRow("01", """$1!""")>]
+    [<DataRow("02", """$1""")>]
+    [<DataRow("03", """$1'""")>]
+    [<DataRow("05", """-$1""")>]
+    [<TestMethod>]
+    member this.TestSuccess (no:string, fplCode:string) =
+        let result = run (predicate .>> eof) fplCode
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
 

@@ -23,6 +23,7 @@ type TestDiverse () =
     [<DataRow("07", """proof SomeFplTheorem$1 {1. 3 |- trivial}""")>]
     [<DataRow("08", """def pred A() {false ∧ true}""")>]
     [<DataRow("09", """inf AndCummutative{dec p,q:pred; pre:and(p,q) con:and(q,p)} thm T {true} proof T$1 {1: and(true,false) 2. 1, byinf AndCummutative |- false ∧ true}""")>]
+    [<DataRow("10", """def pred A() {f()}""")>]
     [<TestMethod>]
     member this.TestDiverseSuccess (no:string, fplCode:string) =
         let result = run (stdParser .>> eof) fplCode

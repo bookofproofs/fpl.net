@@ -465,7 +465,7 @@ let compoundPredicate = choice [
 
 let postfixOp = positions ( postfixMathSymbols ) .>> IW |>> Ast.PostfixOperator
 let prefixOp = positions ( prefixMathSymbols ) .>> IW |>> Ast.PrefixOperator
-let expression = positions (opt prefixOp .>>. choice [compoundPredicate; primePredicate; mapCases] .>>. opt postfixOp .>>. optionalSpecification .>>. qualificationList) .>> IW |>> Ast.Expression
+let expression = positions (opt prefixOp .>>. choice [compoundPredicate; primePredicate; mapCases] .>>. opt postfixOp) .>> IW |>> Ast.Expression
 
 predicateRef.Value <- expression
 
