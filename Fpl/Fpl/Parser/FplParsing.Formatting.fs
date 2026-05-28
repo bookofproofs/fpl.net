@@ -222,7 +222,7 @@ let private removeFParsecErrorStringsFromFplDiagnostics (line:string) =
         // remove unwanted strings
         .Replace("Other error messages:", "")
         .Replace("Expecting:", "")
-        .Replace("end of input", "")
+        .Replace("end of input", "<end of input>")
         .Replace("Note: The error occurred at the end of the input stream.", "")
 
 /// Transforms an error message of FParserc preserving the first two lines, and if the third line starts with "Expecting:",

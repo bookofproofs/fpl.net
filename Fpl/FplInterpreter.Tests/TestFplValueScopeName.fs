@@ -564,7 +564,8 @@ type TestFplValueScopeName() =
         
         let fplCode = sprintf "def pred T1() { %s }" varVal
         let filename = "TestPredicateName"
-        prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename + ".fpl", fplCode, false)
+        checkForUnexpectedErrors filename fplCode
         let r = heap.Root
         let theory = r.Scope[filename]
 

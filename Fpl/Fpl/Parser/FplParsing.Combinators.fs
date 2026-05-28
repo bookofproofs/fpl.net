@@ -227,13 +227,14 @@ let predicateList, predicateListRef = createParserForwardedToRef()
 let predicateWithQualification, predicateWithQualificationRef = createParserForwardedToRef()
 let paramTuple, paramTupleRef = createParserForwardedToRef()
 
-let coord = choice [ predicateWithQualification; dollarDigits ] .>> IW 
+
 
 // infix operators like the equality operator 
 let objectSymbol = positions ( objectMathSymbols ) |>> Ast.ObjectSymbol
 
 let fplIdentifier = choice [ selfOrParent ; variable ; predicateIdentifier; extension; objectSymbol ] 
 
+let coord = predicate .>> IW
 let coordList = (sepBy1 coord comma) .>> IW
 
 let bracketedCoords = positions (leftBracket >>. coordList .>> rightBracket) |>> Ast.BrackedCoordList
@@ -363,6 +364,7 @@ primePredicateRef.Value <- choice [
     attempt referenceToProofOrCorollary
     predicateWithQualification
     objectSymbol
+    extension
 ]
 
 let argIdX: Parser<string,unit> = 
