@@ -263,6 +263,8 @@ type TestInfixPostfixPrefix () =
     [<DataRow("03", """(f(x)' + g(x)')""")>]
     [<DataRow("03a", """(f(x) + g(x))'""")>]
     [<DataRow("04", """f(x)'""")>]
+    [<DataRow("05", """(x + y)""")>]
+    [<DataRow("06", """x + y""")>]
     [<TestMethod>]
     member this.TestCombinedUsageSuccess (no:string, fplCode:string) =
         let result = run (predicate .>> eof) fplCode
