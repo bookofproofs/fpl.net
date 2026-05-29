@@ -1064,25 +1064,29 @@ let rec eval ast =
     | Ast.PredicateWithQualification(predicateWithOptSpecificationAst, qualificationListAst) ->
         eval predicateWithOptSpecificationAst
         eval qualificationListAst
-    | Ast.InfixOperation((pos1, pos2), separatedPredicateListAst) ->
+    | Ast.InfixOperation infixSequenceAst ->
+        eval infixSequenceAst
+    | Ast.InfixSequence (predicateAst, restInOpPredicateAstList) ->
         let fv = heap.Eval.PeekEvalStack()
-        separatedPredicateListAst
-        |> List.map (fun (predAst, optOperandAst) -> 
-            // evaluate the operand
+        let pos1 = fv.StartPos
+        let pos2 = fv.EndPos
+        let firstPred = new FplReference((pos1,pos2), fv)
+        heap.Eval.PushEvalStack(firstPred)
+        eval predicateAst
+        fv.ArgList.Add(heap.Eval.Pop()) // pop the stack element (same reference as pred) and store it in a list
+        restInOpPredicateAstList
+        |> List.map (fun (opAst, predAst) -> 
+            // evaluate the operator by trying to find a definition for the operator
+            let infixOperator = new FplReference((pos1,pos2), fv)
+            heap.Eval.PushEvalStack(infixOperator)
+            eval opAst
+            // store the index of the infix operator, so we still know it after sorting the list by precedence later
+            fv.ArgList.Add(heap.Eval.Pop()) // pop the stack element (same reference as infixOperator) and store it in a list
+            // followed by the operand
             let pred = new FplReference((pos1,pos2), fv)
             heap.Eval.PushEvalStack(pred)
             eval predAst
             fv.ArgList.Add(heap.Eval.Pop()) // pop the stack element (same reference as pred) and store it in a list
-            // followed by the operator
-            match optOperandAst with
-            | Some opAst -> 
-                let infixOperator = new FplReference((pos1,pos2), fv)
-                heap.Eval.PushEvalStack(infixOperator)
-                // evaluate the operator by trying to find a definition for the operator
-                eval opAst
-                // store the index of the infix operator, so we still know it after sorting the list by precedence later
-                fv.ArgList.Add(heap.Eval.Pop()) // pop the stack element (same reference as infixOperator) and store it in a list
-            | None -> () // in this case, we consumed and evaluated all operators in the infix operation (due to FPL parser Ast structure)
         )
         |> ignore
 

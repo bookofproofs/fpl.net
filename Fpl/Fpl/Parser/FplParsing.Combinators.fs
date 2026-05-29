@@ -436,11 +436,11 @@ let isOperator = positions isOp |>> Ast.IsOperator <!> "IsOperator"
 // infix operators like the equality operator 
 let infixOp = positions ( infixMathSymbols ) .>> attemptSW |>> Ast.InfixOperator <!> "InfixOperator"
 
-let pWithSep p separator =
-    let combinedParser = pipe2 p (opt separator) (fun a b -> (a, b))
-    combinedParser |> many
+let infixSequence =
+    pipe2 predicate (many (infixOp .>>. predicate))
+        (fun pred rest -> Ast.InfixSequence(pred, rest)) <!> "InfixSequence"
 
-let infixOperation = positions (leftParen >>. pWithSep predicate infixOp .>> rightParen) |>> Ast.InfixOperation
+let infixOperation = (leftParen >>. infixSequence .>> rightParen) |>> Ast.InfixOperation
 
 // A compound Predicate has its own boolean expressions to avoid mixing up with Pl0Propositions
 let compoundPredicate = choice [
