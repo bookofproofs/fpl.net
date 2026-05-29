@@ -440,7 +440,7 @@ let infixSequence =
     pipe2 predicate (many (infixOp .>>. predicate))
         (fun pred rest -> Ast.InfixSequence(pred, rest)) <!> "InfixSequence"
 
-let infixOperation = (leftParen >>. infixSequence .>> rightParen) |>> Ast.InfixOperation
+let infixOperation = (leftParen >>. infixSequence .>> rightParen) |>> Ast.InfixOperation <!> "InfixOperation"
 
 // A compound Predicate has its own boolean expressions to avoid mixing up with Pl0Propositions
 let compoundPredicate = choice [
