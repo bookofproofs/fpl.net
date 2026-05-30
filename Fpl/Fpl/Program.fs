@@ -62,118 +62,200 @@ open FplParsing.Combinators
 // term   ::= "a" | "(" expr ")"
 // whitespace is ignored
 
-type Expr = 
+open FParsec
+
+// ============================================================================
+// AST
+// ============================================================================
+
+type Expr =
     | A
     | B
-    | Add of Expr list
-    | Sub of Expr list
     | Parens of Expr
+    | Prefix of string * Expr
+    | Postfix of Expr * string
+    | Infix of Expr * string * Expr
+    | Call of Expr * Expr list      // a(...)
+    | Coord of Expr * Expr list     // a[...]
 
-let ws = spaces
+// ============================================================================
+// Whitespace control
+// ============================================================================
 
-// --- literals -------------------------------------------------------------
+// No whitespace allowed at this point
+let pNoSpace : Parser<unit,unit> =
+    notFollowedBy (skipMany1 (anyOf " \t"))
 
-let pLiteral : Parser<Expr, unit> =
-    ws >>. (
-        (pchar 'a' >>% A)
-        <|>
-        (pchar 'b' >>% B)
-    ) .>> ws
+// At least one whitespace required
+let pSpace : Parser<unit,unit> =
+    skipMany1 (anyOf " \t") >>% ()
 
-// --- forward declaration --------------------------------------------------
+// Optional whitespace (for comma lists etc.)
+let pOptSpace : Parser<unit,unit> =
+    skipMany (anyOf " \t") >>% ()
 
-let pExpr, pExprRef = createParserForwardedToRef<Expr, unit>()
+// ============================================================================
+// Operator sets
+// ============================================================================
 
-// --- parentheses ----------------------------------------------------------
+// Prefix operators: - ~ #
+let pPrefixOp : Parser<string,unit> =
+    many1Satisfy (fun c -> "-~#".Contains(c))
 
-let pParens : Parser<Expr, unit> =
-    between
-        (ws >>. pchar '(' >>. ws)
-        (ws >>. pchar ')' >>. ws)
-        pExpr
-    |>> Parens
+// Postfix operators: ! ' /
+let pPostfixOp : Parser<string,unit> =
+    many1Satisfy (fun c -> "!'/".Contains(c))
 
-// --- term -----------------------------------------------------------------
+// Infix operators: + - * /
+let pInfixOp : Parser<string,unit> =
+    many1Satisfy (fun c -> "+-*/".Contains(c))
 
-let pTerm : Parser<Expr, unit> =
-    pLiteral <|> pParens
+// ============================================================================
+// Forward declaration
+// ============================================================================
 
-// --- operators ------------------------------------------------------------
+let pExpr, pExprRef = createParserForwardedToRef<Expr,unit>()
 
-let pPlus  = ws >>. pchar '+' .>> ws
-let pMinus = ws >>. pchar '-' .>> ws
+// ============================================================================
+// Literals and base atoms
+// ============================================================================
 
-// --- full expression ------------------------------------------------------
+let pLiteral : Parser<Expr,unit> =
+    (pchar 'a' >>% A)
+    <|>
+    (pchar 'b' >>% B)
 
-let pFullExpr : Parser<Expr, unit> =
+// Parenthesized expression
+let pParens : Parser<Expr,unit> =
+    between (pchar '(') (pchar ')') pExpr |>> Parens
+
+// ============================================================================
+// Expr list for arguments / coordinates
+// ============================================================================
+
+let pExprList : Parser<Expr list,unit> =
+    sepBy pExpr (pOptSpace >>. pchar ',' >>. pOptSpace)
+
+// ============================================================================
+// Call / Coord suffixes on literals (no space allowed before '(' or '[')
+// ============================================================================
+
+let pCallOrCoordSuffix : Parser<(Expr -> Expr),unit> =
+    pNoSpace >>.
+    choice [
+        // a(expr, ...)
+        pchar '(' >>. pExprList .>> pchar ')' 
+        |>> fun args -> fun basis -> Call(basis, args)
+
+        // a[expr, ...]
+        pchar '[' >>. pExprList .>> pchar ']' 
+        |>> fun coords -> fun basis -> Coord(basis, coords)
+    ]
+
+// Literal extended by optional call/coord chains
+let pOperandAtom : Parser<Expr,unit> =
     pipe2
-        pTerm
-        (many ( (pPlus <|> pMinus) .>>. pTerm ))
-        (fun first rest ->
-            match rest with
-            | [] -> first
-            | _ ->
-                // Partition by operator
-                let plusTerms  = rest |> List.choose (function ('+', t) -> Some t | _ -> None)
-                let minusTerms = rest |> List.choose (function ('-', t) -> Some t | _ -> None)
-
-                match plusTerms, minusTerms with
-                | [], [] ->
-                    first
-
-                | _ , [] ->
-                    // Only additions
-                    Add (first :: plusTerms)
-
-                | [], _ ->
-                    // Only subtractions
-                    Sub (first :: minusTerms)
-
-                | _ , _ ->
-                    // Mixed + and -: preserve exact sequence
-                    // Example: a + b - c + d
-                    // becomes: Add [a; b] and Sub [c; d]
-                    // but we must preserve order, so we build a combined AST:
-                    let rec buildSeq acc currentOp currentList = function
-                        | [] ->
-                            match currentOp with
-                            | '+' -> Add (List.rev currentList) :: acc |> List.rev
-                            | '-' -> Sub (List.rev currentList) :: acc |> List.rev
-                            | _   -> failwith "Unexpected operator"
-
-                        | (op, term)::xs ->
-                            if op = currentOp then
-                                buildSeq acc currentOp (term :: currentList) xs
-                            else
-                                let node =
-                                    match currentOp with
-                                    | '+' -> Add (List.rev currentList)
-                                    | '-' -> Sub (List.rev currentList)
-                                    | _   -> failwith "Unexpected operator"
-
-                                buildSeq (node :: acc) op [term] xs
-
-                    let seq = buildSeq [] '+' [first] rest
-
-                    // If the sequence has only one node, return it directly
-                    match seq with
-                    | [single] -> single
-                    | many     -> Add many // top-level grouping
+        pLiteral
+        (many (attempt pCallOrCoordSuffix))
+        (fun lit suffixes ->
+            List.fold (fun acc f -> f acc) lit suffixes
         )
 
-do pExprRef := pFullExpr
+// Atom: either extended literal or parenthesized expression
+let pAtom : Parser<Expr,unit> =
+    pOperandAtom
+    <|> pParens
 
-// --- entry point ----------------------------------------------------------
+// ============================================================================
+// Precedence: prefix > postfix > infix
+// (calls/coords are part of the atom, i.e. tighter than prefix/postfix)
+// ============================================================================
+
+// PREFIX: prefix* atom
+let pPrefixExpr : Parser<Expr,unit> =
+    pipe2
+        (many (attempt (pPrefixOp .>> pNoSpace)))
+        pAtom
+        (fun prefixes atom ->
+            List.foldBack (fun op acc -> Prefix(op, acc)) prefixes atom
+        )
+
+// POSTFIX: prefixExpr postfix*
+let pPostfixExpr : Parser<Expr,unit> =
+    pipe2
+        pPrefixExpr
+        (many (attempt (pNoSpace >>. pPostfixOp)))
+        (fun expr postfixes ->
+            List.fold (fun acc op -> Postfix(acc, op)) expr postfixes
+        )
+
+// INFIX: postfixExpr (space infixOp space postfixExpr)*
+let pInfixExpr : Parser<Expr,unit> =
+    pipe2
+        pPostfixExpr
+        // We wrap the infix tail in attempt so that if we see a space
+        // that is not followed by a valid infix operator,
+        // we roll back and let the comma separator handle that space (allowing productions like "a(b ,a)"):
+        (many (attempt (pSpace >>. pInfixOp .>> pSpace .>>. pPostfixExpr)))
+        (fun first rest ->
+            List.fold (fun acc (op, rhs) -> Infix(acc, op, rhs)) first rest
+        )
+
+pExprRef.Value <- pInfixExpr
+
+// ============================================================================
+// Entry point
+// ============================================================================
 
 let parse input =
     run (pExpr .>> eof) input
 
-let res = parse "(a + b) - (a - b)"
+// ============================================================================
+// Some example inputs you can try:
+//
+//parse "a"
+//parse "a(b,a)"
+//parse "a[b,a]"
+//parse "b[(a + b!)   ,   -b',a(b) ,b, a]"
+//parse "a(-b ,~a)"
+//parse "~-a(b)[a, b!]/ b"
+// ============================================================================```
 
+let res = parse "(a + b)! - -(a - b)"
 printfn "%O" res
 
-let res1 = parse "a + b - a + b"
+let resa = parse "(a + b)! --(a - b)"
+printfn "%O" resa
+
+let resb = parse "(a + b)!! -- (a - b)"
+printfn "%O" resb
+
+let res1 = parse "a! + ~b - a + b"
 printfn "%O" res1
 
-let res2 = parse "(a + b - a + b)"
+let res2 = parse "-(a + b - a + b)'"
 printfn "%O" res2
+
+let res2a = parse "a"
+printfn "%O" res2a
+
+let res2b = parse "a(b,a)"
+printfn "%O" res2b
+
+let res2c = parse "a[b,a]"
+printfn "%O" res2c
+
+let res2d = parse "b[(a + b!)   ,   -b',a(b) ,b, a]"
+printfn "%O" res2d
+
+let res2e = parse "a(-b ,~a)"
+printfn "%O" res2e
+
+let res2e_ = parse "a(-b, ~a)"
+printfn "%O" res2e_
+
+let res2f = parse "~-a(b)[a, b!]/ b"
+printfn "%O" res2f
+
+let res2f_ = parse "~-a(b)[a, b!]/ + b"
+printfn "%O" res2f_
