@@ -54,16 +54,16 @@ let positions (p: Parser<_,_>): Parser<Positions * _,_> =
 // old literals TODO
 let leftBrace = skipChar '{' >>. spaces
 let rightBrace = skipChar '}'
-let leftParen = skipChar '(' >>. spaces 
+let leftParen = skipChar '(' >>. IW 
 let rightParen = skipChar ')' 
-let comma = skipChar ',' >>. spaces 
+let comma = skipChar ',' >>. IW 
 let dot = skipChar '.' |>> Ast.Dot <!> "Dot"
 let colon = skipChar ':' .>> spaces 
 let colonEqual = skipString ":=" >>. spaces 
 let at = pchar '@'
 let case = skipChar '|' >>. spaces
 let elseCase = skipChar '?' >>. spaces
-let leftBracket = skipChar '[' >>. spaces 
+let leftBracket = skipChar '[' >>. IW
 let rightBracket = skipChar ']' 
 //let tilde = skipChar '~' .>> spaces
 let semiColon = skipChar ';' .>> spaces 
@@ -437,14 +437,14 @@ let infixOperation = (leftParen >>. infixSequence .>> rightParen) |>> Ast.InfixO
 // ------------------------------------------------------------
 // Parenthesized expression
 let pParens : Parser<Ast,unit> =
-    between leftPar rightPar predicate |>> Ast.Parens
+    between leftParen rightParen predicate |>> Ast.Parens
 
 // ============================================================================
 // Expr list for arguments / coordinates
 // ============================================================================
 
 let pExprList : Parser<Ast list,unit> =
-    sepBy predicate (IW >>. com >>. IW)
+    sepBy predicate (IW >>. comma)
 // ------------------------------------------------------------
 
 

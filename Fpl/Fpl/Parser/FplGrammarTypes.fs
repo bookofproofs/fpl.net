@@ -89,6 +89,7 @@ type Ast =
     | PostfixOperator of Positions * string
     | PrefixOperator of Positions * string
     | Parens of Ast
+    | Coord of Ast * Ast list     // a[...]
     | InfixSequence of Ast * (Ast * Ast) list
     | InfixOperation of Ast
     | Expression of Positions * ((Ast option * Ast) * Ast option)

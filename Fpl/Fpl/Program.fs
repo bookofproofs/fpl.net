@@ -62,10 +62,10 @@ let pExpr, pExprRef = createParserForwardedToRef<Expr,unit>()
 // Literals and base atoms
 // ============================================================================
 
-let leftPar = skipChar '('
+let leftPar = skipChar '(' .>> IW
 let rightPar = skipChar ')'
 let com = skipChar ','
-let leftBra = skipChar '['
+let leftBra = skipChar '[' .>> IW
 let rightBra = skipChar ']'
 
 
@@ -221,5 +221,15 @@ printfn "%O" res2f_
 let res2g = parse "a/ b"
 printfn "%O" res2g
 
+let res3 = parse "a[]"
+printfn "%O" res3
 
+let res3a = parse "a[ ]"
+printfn "%O" res3a
+
+let res4 = parse "a()"
+printfn "%O" res4
+
+let res4a = parse "a( )"
+printfn "%O" res4a
 

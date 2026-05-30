@@ -60,9 +60,3 @@ let objectMathSymbols : Parser<string,unit> =
 // ============================================================================
 // Literals and base atoms
 // ============================================================================
-
-let leftPar : Parser<unit,unit> = skipChar '('
-let rightPar : Parser<unit,unit> = skipChar ')'
-let com : Parser<unit,unit> = skipChar ','
-let leftBra : Parser<unit,unit> = skipChar '['
-let rightBra : Parser<unit,unit> = skipChar ']'
