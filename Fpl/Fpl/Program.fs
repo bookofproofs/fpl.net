@@ -41,7 +41,7 @@ let IW : Parser<unit,unit> =
 // ============================================================================
 
 // Prefix operators: - ~ #
-let pPrefixOp : Parser<string,unit> =
+let prefixMathSymbols : Parser<string,unit> =
     many1Satisfy (fun c -> "-~#".Contains(c))
 
 // Postfix operators: ! ' /
@@ -117,7 +117,7 @@ let pAtom : Parser<Expr,unit> =
 let pPrefixExpr : Parser<Expr,unit> =
     pipe2
         (many (attempt (
-            pPrefixOp .>> NW
+            prefixMathSymbols .>> NW
             )) <?> "<prefix operator>" // suppress low-level backtracking errors with a label
         )
         pAtom
@@ -214,12 +214,5 @@ printfn "%O" res2f_
 let res2g = parse "a/ b"
 printfn "%O" res2g
 
-let pre = 
-    mathSymbols.Keys
-    |> Seq.filter ( fun c -> isPrefix c)
-    |> Seq.map (fun c -> c.ToString())
-    |> Seq.distinct
-    |> Seq.sort
-    |> String.concat ""
 
 

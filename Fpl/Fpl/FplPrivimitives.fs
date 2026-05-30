@@ -1273,17 +1273,6 @@ let mathSymbols = dict [
         ('￬', (2, "Half-width Downwards Arrow", "U+FFEC"))
     ]
 
-let isPrefix c =
-    match mathSymbols.TryGetValue(c) with
-    | (true, (a,_,_)) -> (a &&& 4) = 4
-    | _ -> false
-
-let fixChar fixType expected = 
-    let prefixChar = 
-        satisfy fixType <|> fail ("Expecting: " + expected)
-    many1Chars prefixChar
-
-let prefixMathSymbols: Parser<string,unit> = fixChar isPrefix "<prefix symbol>"
 
 (* String primitives *)
 [<Literal>]
