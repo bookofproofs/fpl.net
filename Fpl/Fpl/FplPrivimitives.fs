@@ -1278,18 +1278,10 @@ let isPrefix c =
     | (true, (a,_,_)) -> (a &&& 4) = 4
     | _ -> false
 
-let isPostfix c =
-    match mathSymbols.TryGetValue(c) with
-    | (true, (a,_,_)) -> (a &&& 1) = 1
-    | _ -> false
-
 let fixChar fixType expected = 
     let prefixChar = 
         satisfy fixType <|> fail ("Expecting: " + expected)
     many1Chars prefixChar
-
-
-let postfixMathSymbols: Parser<string,unit> = fixChar isPostfix "<postfix symbol>" 
 
 let prefixMathSymbols: Parser<string,unit> = fixChar isPrefix "<prefix symbol>"
 

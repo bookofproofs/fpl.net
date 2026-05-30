@@ -45,7 +45,7 @@ let pPrefixOp : Parser<string,unit> =
     many1Satisfy (fun c -> "-~#".Contains(c))
 
 // Postfix operators: ! ' /
-let pPostfixOp : Parser<string,unit> =
+let postfixMathSymbols : Parser<string,unit> =
     many1Satisfy (fun c -> "!'/".Contains(c))
 
 // Infix operators: + - * /
@@ -130,7 +130,7 @@ let pPostfixExpr : Parser<Expr,unit> =
     pipe2
         pPrefixExpr
         (many (attempt (
-            NW >>. pPostfixOp
+            NW >>. postfixMathSymbols
             )) <?> "<postfix operator>" // suppress low-level backtracking errors with a label
         )
         (fun expr postfixes ->
@@ -222,11 +222,4 @@ let pre =
     |> Seq.sort
     |> String.concat ""
 
-let pst = 
-    mathSymbols.Keys
-    |> Seq.filter ( fun c -> isPostfix c)
-    |> Seq.map (fun c -> c.ToString())
-    |> Seq.distinct
-    |> Seq.sort
-    |> String.concat ""
 
