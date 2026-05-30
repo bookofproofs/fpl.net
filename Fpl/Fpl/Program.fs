@@ -1,8 +1,9 @@
 // This console "main" program is for test/debugging purposes only.
 // It is not really needed because the necessary FPL modules are run 
 // as an FPL Language Server (see FplLS C# Project in the same solution).
-
+open System
 open FParsec
+open FplPrimitives
 
 // ============================================================================
 // AST
@@ -49,7 +50,7 @@ let pPostfixOp : Parser<string,unit> =
     many1Satisfy (fun c -> "!'/".Contains(c))
 
 // Infix operators: + - * /
-let pInfixOp : Parser<string,unit> =
+let infixMathSymbols : Parser<string,unit> =
     many1Satisfy (fun c -> "+-*/".Contains(c))
 
 // ============================================================================
@@ -145,7 +146,7 @@ let pInfixExpr : Parser<Expr,unit> =
         // that is not followed by a valid infix operator,
         // we roll back and let the comma separator handle that space (allowing productions like "a(b ,a)"):
         (many (attempt (
-            SW >>. pInfixOp .>> SW .>>. pPostfixExpr
+            SW >>. infixMathSymbols .>> SW .>>. pPostfixExpr
             )) <?> "<infix operator>" // suppress low-level backtracking errors with a label
         )
         (fun first rest ->
@@ -214,8 +215,26 @@ printfn "%O" res2f_
 let res2g = parse "a/ b"
 printfn "%O" res2g
 
-let d = ['+'; '-'; '*'; '/']
-let isPrefix c =
-    match d.TryGetValue(c) with
-    | true, c -> true
-    | _ -> false
+let pre = 
+    mathSymbols.Keys
+    |> Seq.filter ( fun c -> isPrefix c)
+    |> Seq.map (fun c -> c.ToString())
+    |> Seq.distinct
+    |> Seq.sort
+    |> String.concat ""
+
+let pst = 
+    mathSymbols.Keys
+    |> Seq.filter ( fun c -> isPostfix c)
+    |> Seq.map (fun c -> c.ToString())
+    |> Seq.distinct
+    |> Seq.sort
+    |> String.concat ""
+
+let ob = 
+    mathSymbols.Keys
+    |> Seq.filter ( fun c -> isObject c)
+    |> Seq.map (fun c -> c.ToString())
+    |> Seq.distinct
+    |> Seq.sort
+    |> String.concat ""

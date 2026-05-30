@@ -351,7 +351,7 @@ let mathSymbols = dict [
         ('i', (2, "Latin Letter I", "U+0049"))
         ('j', (2, "Latin Letter j", "U+004A"))
         ('k', (2, "Latin Letter k", "U+004B"))
-        ('I', (2, "Latin Letter l", "U+004C"))
+        ('l', (2, "Latin Letter l", "U+004C"))
         ('m', (2, "Latin Letter m", "U+004D"))
         ('n', (2, "Latin Letter n", "U+004E"))
         ('o', (2, "Latin Letter o", "U+004F"))
@@ -1273,11 +1273,6 @@ let mathSymbols = dict [
         ('￬', (2, "Half-width Downwards Arrow", "U+FFEC"))
     ]
 
-let isInfix c =
-    match mathSymbols.TryGetValue(c) with
-    | (true, (a,_,_)) -> (a &&& 2) = 2
-    | _ -> false
-
 let isPrefix c =
     match mathSymbols.TryGetValue(c) with
     | (true, (a,_,_)) -> (a &&& 4) = 4
@@ -1299,7 +1294,6 @@ let fixChar fixType expected =
         satisfy fixType <|> fail ("Expecting: " + expected)
     many1Chars prefixChar
 
-let infixMathSymbols: Parser<string,unit> = fixChar isInfix "<infix symbol>"
 
 let postfixMathSymbols: Parser<string,unit> = fixChar isPostfix "<postfix symbol>" 
 
