@@ -1,4 +1,4 @@
-﻿using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using static FplPrimitives;
 
 namespace FplLS
@@ -94,8 +94,6 @@ namespace FplLS
                 LiteralPrf or LiteralPrfL => new FplCompletionItemChoicesProof().GetChoices(this),
                 LiteralLoc or LiteralLocL => new FplCompletionItemChoicesLocalization().GetChoices(this),
                 LiteralUses => new FplCompletionItemChoicesUses().GetChoices(this),
-                LiteralPrefix or LiteralPostFix or LiteralSymbol or LiteralInfix => new FplCompletionItemChoicesSymbol(Word, true).GetChoices(this),
-                "prefix symbol" or "postfix symbol" or "object symbol" or "infix symbol" => new FplCompletionItemChoicesSymbol(Word, false).GetChoices(this),
                 _ => new FplCompletionItemChoicesDefault().GetChoices(this),
             };
         }

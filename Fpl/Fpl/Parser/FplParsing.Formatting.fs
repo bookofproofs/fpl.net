@@ -22,6 +22,22 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 //------------
 
+/// Replaces in the `input` all regex pattern matches by spaces while preserving the new lines
+let replaceLinesWithSpaces (input: string) (pattern: string) =
+    let regex = new Regex(pattern, RegexOptions.Multiline)
+    let evaluator = MatchEvaluator(fun (m: Match) -> 
+        m.Value.Split(Environment.NewLine)
+        |> Array.map (fun line -> String.replicate line.Length " ")
+        |> String.concat Environment.NewLine
+    )
+    regex.Replace(input, evaluator)
+
+/// Replaces in the `input` all FPL comments by spaces while preserving new lines
+let removeFplComments (input:string) = 
+    let r1 = replaceLinesWithSpaces input $"\/\/[^{Environment.NewLine}]*" // replace inline comments
+    replaceLinesWithSpaces r1 $"\/\*((?:.|\n)*?)\*\/" // replace block comments
+
+
 /// Splits an FParsec error message to sub-errors (if it contains many)
 let private splitByBacktrackMarker (input: string) =
     let pattern = @"\s*The parser backtracked after:\s*Error"
