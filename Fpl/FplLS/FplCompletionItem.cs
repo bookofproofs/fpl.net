@@ -46,7 +46,7 @@ namespace FplLS
             if (Kind == CompletionItemKind.Keyword)
             {
                 this.SortText = "zzz" + this.SortText;
-                this.InsertText = this.Label.Substring(2);
+                this.InsertText = this.Label[2..];
                 if (this.InsertText.Split(' ').Length > 1)
                 {
                     this.Detail = $"keywords '{this.InsertText}'";
@@ -123,7 +123,7 @@ namespace FplLS
             if (str.StartsWith('\'') && str.EndsWith('\'') || str.StartsWith('<') && str.EndsWith('>'))
             {
                 // strip quotes or brackets from label
-                return str.Substring(1, str.Length - 2);
+                return str[1..^1];
             }
             else
             {

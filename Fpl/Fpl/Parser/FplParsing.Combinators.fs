@@ -51,8 +51,7 @@ let positions (p: Parser<_,_>): Parser<Positions * _,_> =
         )
 
 
-(* Literals *)
-
+// old literals TODO
 let leftBrace = skipChar '{' >>. spaces
 let rightBrace = skipChar '}'
 let leftParen = skipChar '(' >>. spaces 
@@ -72,7 +71,7 @@ let exclamationMark = skipChar '!'
 let toArrow = skipString "->"
 let vDash = skipString "|-"
 let quote = skipChar '"' 
-let slash = skipChar '/' 
+let slash = skipChar '/'
 
 // -----------------------------------------------------
 // Extensions of the FPL language allow syntax injections as long as they match the following regex expression.
@@ -435,6 +434,20 @@ let infixSequence =
 
 let infixOperation = (leftParen >>. infixSequence .>> rightParen) |>> Ast.InfixOperation <!> "InfixOperation"
 
+// ------------------------------------------------------------
+// Parenthesized expression
+let pParens : Parser<Ast,unit> =
+    between leftPar rightPar predicate |>> Ast.Parens
+
+// ============================================================================
+// Expr list for arguments / coordinates
+// ============================================================================
+
+let pExprList : Parser<Ast list,unit> =
+    sepBy predicate (IW >>. com >>. IW)
+// ------------------------------------------------------------
+
+
 // A compound Predicate has its own boolean expressions to avoid mixing up with Pl0Propositions
 let compoundPredicate = choice [
     infixOperation
@@ -456,7 +469,7 @@ let expression = positions (opt prefixOp .>>. choice [compoundPredicate; primePr
 
 predicateRef.Value <- expression
 
-predicateListRef.Value <- sepBy predicate comma
+predicateListRef.Value <- pExprList // sepBy predicate comma
 
 
 

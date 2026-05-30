@@ -62,6 +62,13 @@ let pExpr, pExprRef = createParserForwardedToRef<Expr,unit>()
 // Literals and base atoms
 // ============================================================================
 
+let leftPar = skipChar '('
+let rightPar = skipChar ')'
+let com = skipChar ','
+let leftBra = skipChar '['
+let rightBra = skipChar ']'
+
+
 let pLiteral : Parser<Expr,unit> =
     (pchar 'a' >>% A)
     <|>
@@ -69,14 +76,14 @@ let pLiteral : Parser<Expr,unit> =
 
 // Parenthesized expression
 let pParens : Parser<Expr,unit> =
-    between (pchar '(') (pchar ')') pExpr |>> Parens
+    between leftPar rightPar pExpr |>> Parens
 
 // ============================================================================
 // Expr list for arguments / coordinates
 // ============================================================================
 
 let pExprList : Parser<Expr list,unit> =
-    sepBy pExpr (IW >>. pchar ',' >>. IW)
+    sepBy pExpr (IW >>. com >>. IW)
 
 // ============================================================================
 // Call / Coord suffixes on literals (no space allowed before '(' or '[')
@@ -86,11 +93,11 @@ let pCallOrCoordSuffix : Parser<(Expr -> Expr),unit> =
     NW >>.
     choice [
         // a(expr, ...)
-        pchar '(' >>. pExprList .>> pchar ')' 
+        leftPar >>. pExprList .>> rightPar 
         |>> fun args -> fun basis -> Call(basis, args)
 
         // a[expr, ...]
-        pchar '[' >>. pExprList .>> pchar ']' 
+        leftBra >>. pExprList .>> rightBra 
         |>> fun coords -> fun basis -> Coord(basis, coords)
     ]
 

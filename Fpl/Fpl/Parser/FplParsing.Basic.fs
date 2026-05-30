@@ -55,3 +55,14 @@ let infixMathSymbols : Parser<string,unit> =
 
 let objectMathSymbols : Parser<string,unit> =
     many1Satisfy (fun c -> "0123456789⅁⅂⅃⅄∅∞∟∠∡∢∿⊾⊿⍼⦛⦜⦝⦞⦟⦠⦡⧜⧝".Contains(c))
+
+
+// ============================================================================
+// Literals and base atoms
+// ============================================================================
+
+let leftPar : Parser<unit,unit> = skipChar '('
+let rightPar : Parser<unit,unit> = skipChar ')'
+let com : Parser<unit,unit> = skipChar ','
+let leftBra : Parser<unit,unit> = skipChar '['
+let rightBra : Parser<unit,unit> = skipChar ']'
