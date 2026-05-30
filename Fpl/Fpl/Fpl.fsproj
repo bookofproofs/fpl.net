@@ -16,6 +16,7 @@
         <None Include="Parser\DocuFplGrammarPocShiftFromPythonToFSharp.md" />
         <Compile Include="Parser\FplParsing.Debug.fs" />
         <Compile Include="Parser\FplGrammarTypes.fs" />
+        <Compile Include="Parser\FplParsing.Basic.fs" />
         <Compile Include="Parser\FplParsing.Combinators.fs" />
         <Compile Include="Parser\FplParsing.Formatting.fs" />
         <Compile Include="Parser\FplParsing.Main.fs" />

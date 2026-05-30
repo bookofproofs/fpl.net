@@ -2,6 +2,7 @@
 module FplParsing.Combinators
 open System.Text.RegularExpressions
 open FParsec
+open FplParsing.Basic
 open FplPrimitives
 open FplGrammarTypes
 open FplParsing.Debug
@@ -72,14 +73,6 @@ let toArrow = skipString "->"
 let vDash = skipString "|-"
 let quote = skipChar '"' 
 let slash = skipChar '/' 
-
-(* Whitespaces and Comments *)
-
-let IW = spaces <?> "<whitespace>" <!> "IW"
-
-let SW = spaces1 <?> "<significant whitespace>" <!> "SW"
-
-let attemptSW = SW <|> (IW .>> attempt (lookAhead (choice [skipChar '('; skipChar ')'; skipChar '{'; skipChar ','; skipChar ';'; skipChar '[' ]))) <!> "IW"
 
 // -----------------------------------------------------
 // Extensions of the FPL language allow syntax injections as long as they match the following regex expression.

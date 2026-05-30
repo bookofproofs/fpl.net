@@ -3,66 +3,6 @@
 // as an FPL Language Server (see FplLS C# Project in the same solution).
 
 open FParsec
-open FplParsing.Combinators
-//open ErrDiagnostics
-//open FplParsing.Main
-//open FplInterpreter.Globals.Heap
-//open FplInterpreter.Main
-//open System.IO
-
-//let deleteFilesWithExtension dir extension =
-//    if Directory.Exists(dir) then
-//        Directory.GetFiles(dir, "*." + extension)
-//        |> Array.iter File.Delete
-//    else
-//        printfn "Directory %s does not exist." dir
-
-
-//let prepareFplCode(fplCode:string, delete:bool) =
-//    let currDir = Directory.GetCurrentDirectory()
-
-//    File.WriteAllText(Path.Combine(currDir, "Test.fpl"), fplCode)
-//    let uri = PathEquivalentUri(Path.Combine(currDir, "Test.fpl"))
-//    let fplLibUrl =
-//        "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
-//    if delete then 
-//        deleteFilesWithExtension currDir "fpl"
-//    else
-//        fplInterpreter fplCode uri fplLibUrl
-
-//let loadFplFile(path:string) = 
-//    let uri = PathEquivalentUri(path)
-//    let fplLibUrl =
-//        "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
-//    let fplCode = File.ReadAllText(path)
-//    fplInterpreter fplCode uri fplLibUrl
-
-//let input = """def pred T() { intr prty pred T1() {is(parent,pred)} };"""
-
-
-//let result = fplParser input
-
-//printf "%O" result
-
-//ad.PrintDiagnostics
-
-//prepareFplCode(input,false) |> ignore
-
-
-//// loadFplFile(@"C:\Users\Peaq\source\repos\bookofproofs\fpl.net\theories\FoundationsOfAnalysisLandau\Landau.1.1.Axioms.fpl")
-//// loadFplFile(@"D:\Forschung\fpl.net\theories\FoundationsOfAnalysisLandau\Landau.1.1.Axioms.fpl")
-
-//printf "\n--------------------------------\n"
-//ad.PrintDiagnostics
-//printf "%s" (heap.SymbolTable.ToJson())
-
-// run (expression .>> eof) "false ∧ true"
-
-// expr   ::= term ( "+" term )*
-// term   ::= "a" | "(" expr ")"
-// whitespace is ignored
-
-open FParsec
 
 // ============================================================================
 // AST
@@ -82,17 +22,19 @@ type Expr =
 // Whitespace control
 // ============================================================================
 
+let whiteSpaces = anyOf " \t\r\n"
+
 // No whitespace allowed at this point
-let pNoSpace : Parser<unit,unit> =
-    notFollowedBy (skipMany1 (anyOf " \t"))
+let NW : Parser<unit,unit> =
+    notFollowedBy (skipMany1 whiteSpaces) <?> "<no whitespace>"
 
 // At least one whitespace required
-let pSpace : Parser<unit,unit> =
-    skipMany1 (anyOf " \t") >>% ()
+let SW : Parser<unit,unit> =
+    skipMany1 whiteSpaces >>% () <?> "<significant whitespace>"
 
 // Optional whitespace (for comma lists etc.)
-let pOptSpace : Parser<unit,unit> =
-    skipMany (anyOf " \t") >>% ()
+let IW : Parser<unit,unit> =
+    skipMany whiteSpaces >>% () <?> "<whitespace>"
 
 // ============================================================================
 // Operator sets
@@ -134,14 +76,14 @@ let pParens : Parser<Expr,unit> =
 // ============================================================================
 
 let pExprList : Parser<Expr list,unit> =
-    sepBy pExpr (pOptSpace >>. pchar ',' >>. pOptSpace)
+    sepBy pExpr (IW >>. pchar ',' >>. IW)
 
 // ============================================================================
 // Call / Coord suffixes on literals (no space allowed before '(' or '[')
 // ============================================================================
 
 let pCallOrCoordSuffix : Parser<(Expr -> Expr),unit> =
-    pNoSpace >>.
+    NW >>.
     choice [
         // a(expr, ...)
         pchar '(' >>. pExprList .>> pchar ')' 
@@ -174,7 +116,10 @@ let pAtom : Parser<Expr,unit> =
 // PREFIX: prefix* atom
 let pPrefixExpr : Parser<Expr,unit> =
     pipe2
-        (many (attempt (pPrefixOp .>> pNoSpace)))
+        (many (attempt (
+            pPrefixOp .>> NW
+            )) <?> "<prefix operator>" // suppress low-level backtracking errors with a label
+        )
         pAtom
         (fun prefixes atom ->
             List.foldBack (fun op acc -> Prefix(op, acc)) prefixes atom
@@ -184,7 +129,10 @@ let pPrefixExpr : Parser<Expr,unit> =
 let pPostfixExpr : Parser<Expr,unit> =
     pipe2
         pPrefixExpr
-        (many (attempt (pNoSpace >>. pPostfixOp)))
+        (many (attempt (
+            NW >>. pPostfixOp
+            )) <?> "<postfix operator>" // suppress low-level backtracking errors with a label
+        )
         (fun expr postfixes ->
             List.fold (fun acc op -> Postfix(acc, op)) expr postfixes
         )
@@ -196,7 +144,10 @@ let pInfixExpr : Parser<Expr,unit> =
         // We wrap the infix tail in attempt so that if we see a space
         // that is not followed by a valid infix operator,
         // we roll back and let the comma separator handle that space (allowing productions like "a(b ,a)"):
-        (many (attempt (pSpace >>. pInfixOp .>> pSpace .>>. pPostfixExpr)))
+        (many (attempt (
+            SW >>. pInfixOp .>> SW .>>. pPostfixExpr
+            )) <?> "<infix operator>" // suppress low-level backtracking errors with a label
+        )
         (fun first rest ->
             List.fold (fun acc (op, rhs) -> Infix(acc, op, rhs)) first rest
         )
@@ -259,3 +210,12 @@ printfn "%O" res2f
 
 let res2f_ = parse "~-a(b)[a, b!]/ + b"
 printfn "%O" res2f_
+
+let res2g = parse "a/ b"
+printfn "%O" res2g
+
+let d = ['+'; '-'; '*'; '/']
+let isPrefix c =
+    match d.TryGetValue(c) with
+    | true, c -> true
+    | _ -> false
