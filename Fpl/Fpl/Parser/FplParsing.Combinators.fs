@@ -211,9 +211,19 @@ let objectSymbol = positions ( objectMathSymbols ) |>> Ast.ObjectSymbol <!> "Obj
 
 let fplIdentifier = choice [ selfOrParent ; variable ; predicateIdentifier; extension; objectSymbol ] 
 
-let coordList = (sepBy1 predicate comma) .>> IW
 
-let bracketedCoords = positions (leftBracket >>. coordList .>> rightBracket) |>> Ast.BrackedCoordList <!> "BrackedCoordList"
+let pExprList : Parser<Ast list,unit> =
+    (pipe2
+        predicate
+        (many (attempt (comma >>. predicate)))
+        (fun first rest -> first :: rest))
+    <|> preturn [] <!> "pExprList"
+
+
+let pCoords : Parser<Ast list,unit> =
+    leftBracket >>. pExprList .>> rightBracket 
+
+let bracketedCoords = positions pCoords |>> Ast.BrackedCoordList <!> "bracketedCoords"
 
 let namedVariableDeclarationList, namedVariableDeclarationListRef = createParserForwardedToRef()
 
@@ -266,7 +276,10 @@ let userDefinedPrefix = positions (keywordPrefix >>. prefixString) .>> IW |>> As
 let userDefinedSymbol = opt (attempt (IW >>. choice [userDefinedPrefix; userDefinedInfix; userDefinedPostfix ]))
 
 (* Statements *)
-let argumentTuple = positions ((leftParen >>. predicateList) .>> rightParen) |>> Ast.ArgumentTuple <!> "ArgumentTuple" 
+let pArgs : Parser<Ast list,unit> =
+    leftParen >>. pExprList .>> rightParen <!> "pArgs"
+
+let argumentTuple = positions pArgs |>> Ast.ArgumentTuple <!> "ArgumentTuple" 
 
 let delegateName = positions (idStartsWithCap) .>> IW |>> Ast.DelegateName <!> "DelegateName"
 
@@ -319,6 +332,13 @@ let statement =
 statementListRef.Value <- many statement
 
 (* Predicates *)
+let pCallOrCoordSuffix : Parser<(Ast -> Ast),unit> =
+    NW >>.
+    choice [
+        pArgs   |>> fun args   -> fun calling -> Call(calling, args)
+        pCoords |>> fun coords -> fun withCoords -> Coord(withCoords, coords)
+    ] <!> "pCallOrCoordSuffix"
+
 let optionalSpecification = opt (choice [bracketedCoords; argumentTuple])
 let predicateWithOptSpecification = positions (fplIdentifier .>>. optionalSpecification) |>> Ast.PredicateWithOptSpecification <!> "PredicateWithOptSpecification"
 let dottedPredicate = positions (dot >>. predicateWithOptSpecification) |>> Ast.DottedPredicate <!> "DottedPredicate"
@@ -427,19 +447,6 @@ let infixOperation = (leftParen >>. infixSequence .>> rightParen) |>> Ast.InfixO
 // Parenthesized expression
 let pParens : Parser<Ast,unit> =
     between leftParen rightParen predicate |>> Ast.Parens
-
-// ============================================================================
-// Expr list for arguments / coordinates
-// ============================================================================
-
-let pExprList : Parser<Ast list,unit> =
-    (pipe2
-        predicate
-        (many (attempt (comma >>. predicate)))
-        (fun first rest -> first :: rest))
-    <|> preturn [] <!> "pExprList"
-// ------------------------------------------------------------
-
 
 // A compound Predicate has its own boolean expressions to avoid mixing up with Pl0Propositions
 let compoundPredicate = choice [

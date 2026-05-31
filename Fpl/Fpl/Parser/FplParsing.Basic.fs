@@ -24,6 +24,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 let whiteSpaces = anyOf " \t\r\n"
 // No whitespace allowed at this point
+
 let NW : Parser<unit,unit> =
     notFollowedBy (skipMany1 whiteSpaces) <?> "<no whitespace>" <!> "NW"
 
