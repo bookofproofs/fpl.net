@@ -66,3 +66,9 @@ let leftParen : Parser<unit,unit> =
 
 let rightParen : Parser<unit,unit> = 
     IW >>. skipChar ')' <!> "rightParen"
+
+let leftBrace : Parser<unit,unit> = 
+    skipChar '{' >>. IW <!> "leftBrace"
+
+let rightBrace : Parser<unit,unit> = 
+    IW >>. skipChar '}' <!> "rightBrace"

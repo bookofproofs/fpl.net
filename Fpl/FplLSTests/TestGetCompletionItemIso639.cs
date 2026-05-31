@@ -49,7 +49,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesIso639().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.Detail != "");
+                Assert.AreNotEqual<string>("", item.Detail);
             }
         }
 
