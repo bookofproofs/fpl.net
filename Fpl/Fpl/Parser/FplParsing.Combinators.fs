@@ -119,7 +119,7 @@ let variableX: Parser<string,unit> =
 
 let variable = positions variableX |>> Ast.Var <!> "Var" 
 
-let variableList = (sepBy1 variable IWcomma) .>> IW
+let variableList = (sepBy1 variable comma) .>> IW
 
 let keywordSelf = positions (skipString LiteralSelf) .>> IW |>> Ast.Self <!> "Self"
 let keywordParent = positions (skipString LiteralParent) .>> IW |>> Ast.Parent <!> "Parent"
@@ -211,7 +211,7 @@ let objectSymbol = positions ( objectMathSymbols ) |>> Ast.ObjectSymbol <!> "Obj
 
 let fplIdentifier = choice [ selfOrParent ; variable ; predicateIdentifier; extension; objectSymbol ] 
 
-let coordList = (sepBy1 predicate IWcomma) .>> IW
+let coordList = (sepBy1 predicate comma) .>> IW
 
 let bracketedCoords = positions (leftBracket >>. coordList .>> rightBracket) |>> Ast.BrackedCoordList <!> "BrackedCoordList"
 
@@ -235,7 +235,7 @@ let simpleVariableType = positions (choice [ keywordIndex; keywordObject; predic
 // indexAllowedType is used to restrict Fpl types allowed to be used as indexes in arrayType
 let indexAllowedType = positions (choice [ keywordIndex; keywordObject; predicateIdentifier; templateType; keywordPredicate; keywordFunction]) |>> Ast.IndexAllowedType <!> "IndexAllowedType"
 
-let indexAllowedTypeList = (sepBy1 (indexAllowedType .>> IW) comma) .>> IW
+let indexAllowedTypeList = (sepBy1 indexAllowedType comma) .>> IW
 // arrayType is used to define arrays in Fpl
 let arrayType = positions (star >>. IW >>. simpleVariableType .>>. (IW >>. leftBracket >>. indexAllowedTypeList .>> rightBracket)) |>> Ast.ArrayType <!> "ArrayType"
 let variableType = choice [ simpleVariableType; arrayType ]
@@ -410,7 +410,7 @@ let existsTimeNQuantifier = choice [
 let existsTimesN = positions ((existsTimeNQuantifier .>>. namedVariableDeclarationList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.ExistsN <!> "ExistsN"
 let isOp = choice [
     attempt (dot >>. (predicate .>> keywordIs) .>>. variableType) 
-    (keywordIs >>. leftParen >>. predicate .>> IW) .>>. (comma >>. variableType) .>> rightParen
+    (keywordIs >>. leftParen >>. predicate) .>>. (comma >>. variableType) .>> rightParen
     ]
 let isOperator = positions isOp |>> Ast.IsOperator <!> "IsOperator"
 
@@ -433,12 +433,11 @@ let pParens : Parser<Ast,unit> =
 // ============================================================================
 
 let pExprList : Parser<Ast list,unit> =
-    sepBy predicate IWcomma
-    //(pipe2
-    //    predicate
-    //    (many (attempt (noWhitespaceComma >>. predicate)))
-    //    (fun first rest -> first :: rest))
-    //<|> preturn [] <!> "pExprList"
+    (pipe2
+        predicate
+        (many (attempt (comma >>. predicate)))
+        (fun first rest -> first :: rest))
+    <|> preturn [] <!> "pExprList"
 // ------------------------------------------------------------
 
 
@@ -463,7 +462,7 @@ let expression = positions (opt prefixOp .>>. choice [compoundPredicate; primePr
 
 predicateRef.Value <- expression
 
-predicateListRef.Value <- pExprList // sepBy predicate comma
+predicateListRef.Value <- pExprList 
 
 
 

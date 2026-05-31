@@ -80,7 +80,5 @@ let rightBracket : Parser<unit,unit> =
     IW >>. skipChar ']' <!> "rightBracket"
 
 let comma : Parser<unit,unit> =
-    skipChar ',' >>. IW <!> "comma"
+    attempt (IW >>. skipChar ',' >>. IW) <!> "comma"
 
-let IWcomma : Parser<unit,unit> =
-    IW >>. skipChar ',' >>. IW <!> "IWcomma"
