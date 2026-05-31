@@ -51,16 +51,13 @@ let positions (p: Parser<_,_>): Parser<Positions * _,_> =
         )
 
 
-let comma = skipChar ',' >>. IW 
 let dot = skipChar '.' |>> Ast.Dot <!> "Dot"
 let colon = skipChar ':' .>> IW 
 let colonEqual = skipString ":=" >>. IW 
 let at = pchar '@'
 let case = skipChar '|' >>. IW
 let elseCase = skipChar '?' >>. IW
-let leftBracket = skipChar '[' >>. IW
-let rightBracket = IW >>. skipChar ']' 
-let semiColon = skipChar ';' .>> spaces 
+let semiColon = skipChar ';' .>> IW 
 let exclamationMark = skipChar '!' 
 let toArrow = skipString "->"
 let vDash = skipString "|-"
@@ -122,7 +119,7 @@ let variableX: Parser<string,unit> =
 
 let variable = positions variableX |>> Ast.Var <!> "Var" 
 
-let variableList = (sepBy1 (variable .>> IW) comma) .>> IW
+let variableList = (sepBy1 variable IWcomma) .>> IW
 
 let keywordSelf = positions (skipString LiteralSelf) .>> IW |>> Ast.Self <!> "Self"
 let keywordParent = positions (skipString LiteralParent) .>> IW |>> Ast.Parent <!> "Parent"
@@ -214,8 +211,7 @@ let objectSymbol = positions ( objectMathSymbols ) |>> Ast.ObjectSymbol <!> "Obj
 
 let fplIdentifier = choice [ selfOrParent ; variable ; predicateIdentifier; extension; objectSymbol ] 
 
-let coord = predicate .>> IW
-let coordList = (sepBy1 coord comma) .>> IW
+let coordList = (sepBy1 predicate IWcomma) .>> IW
 
 let bracketedCoords = positions (leftBracket >>. coordList .>> rightBracket) |>> Ast.BrackedCoordList <!> "BrackedCoordList"
 
@@ -437,7 +433,12 @@ let pParens : Parser<Ast,unit> =
 // ============================================================================
 
 let pExprList : Parser<Ast list,unit> =
-    sepBy predicate (IW >>. comma)
+    sepBy predicate IWcomma
+    //(pipe2
+    //    predicate
+    //    (many (attempt (noWhitespaceComma >>. predicate)))
+    //    (fun first rest -> first :: rest))
+    //<|> preturn [] <!> "pExprList"
 // ------------------------------------------------------------
 
 

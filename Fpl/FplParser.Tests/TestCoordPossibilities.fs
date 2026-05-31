@@ -12,70 +12,70 @@ type TestCoordPossibilities () =
 
     [<TestMethod>]
     member this.TestExtensionDigit () =
-        let result = run (coord .>> eof) """@1"""
+        let result = run (predicate .>> eof) """@1"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestDollarDigit () =
-        let result = run (coord .>> eof) """$1"""
+        let result = run (predicate .>> eof) """$1"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestVariable () =
-        let result = run (coord .>> eof) """xyz"""
+        let result = run (predicate .>> eof) """xyz"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestVariable2 () =
-        let result = run (coord .>> eof) """x.y().z()"""
+        let result = run (predicate .>> eof) """x.y().z()"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSelf () =
-        let result = run (coord .>> eof) LiteralSelf
+        let result = run (predicate .>> eof) LiteralSelf
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSelf1 () =
-        let result = run (coord .>> eof) LiteralParent
+        let result = run (predicate .>> eof) LiteralParent
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPascalCaseId () =
-        let result = run (coord .>> eof) PrimPascalCaseId
+        let result = run (predicate .>> eof) PrimPascalCaseId
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPascalCaseId1 () =
-        let result = run (coord .>> eof) """PascalCaseId()"""
+        let result = run (predicate .>> eof) """PascalCaseId()"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPascalCaseId2 () =
-        let result = run (coord .>> eof) """PascalCaseId.PascalCaseId()"""
+        let result = run (predicate .>> eof) """PascalCaseId.PascalCaseId()"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPascalCaseId3 () =
-        let result = run (coord .>> eof) """PascalCaseId.PascalCaseId().PascalCaseId()"""
+        let result = run (predicate .>> eof) """PascalCaseId.PascalCaseId().PascalCaseId()"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
