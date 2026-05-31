@@ -52,20 +52,17 @@ let positions (p: Parser<_,_>): Parser<Positions * _,_> =
 
 
 // old literals TODO
-let leftBrace = skipChar '{' >>. spaces
+let leftBrace = skipChar '{' >>. IW
 let rightBrace = skipChar '}'
-let leftParen = skipChar '(' >>. IW 
-let rightParen = skipChar ')' 
 let comma = skipChar ',' >>. IW 
 let dot = skipChar '.' |>> Ast.Dot <!> "Dot"
-let colon = skipChar ':' .>> spaces 
-let colonEqual = skipString ":=" >>. spaces 
+let colon = skipChar ':' .>> IW 
+let colonEqual = skipString ":=" >>. IW 
 let at = pchar '@'
-let case = skipChar '|' >>. spaces
-let elseCase = skipChar '?' >>. spaces
+let case = skipChar '|' >>. IW
+let elseCase = skipChar '?' >>. IW
 let leftBracket = skipChar '[' >>. IW
-let rightBracket = skipChar ']' 
-//let tilde = skipChar '~' .>> spaces
+let rightBracket = IW >>. skipChar ']' 
 let semiColon = skipChar ';' .>> spaces 
 let exclamationMark = skipChar '!' 
 let toArrow = skipString "->"
@@ -253,7 +250,7 @@ let variableType = choice [ simpleVariableType; arrayType ]
 let namedVariableDeclaration = positions ((variableList .>> colon) .>>. variableType .>> IW) |>> Ast.NamedVarDecl <!> "NamedVarDecl"
 namedVariableDeclarationListRef.Value <- sepBy namedVariableDeclaration comma
 
-paramTupleRef.Value <- (leftParen >>. namedVariableDeclarationList) .>> (IW >>. rightParen) |>> Ast.ParamTuple <!> "ParamTuple"
+paramTupleRef.Value <- (leftParen >>. namedVariableDeclarationList) .>> rightParen |>> Ast.ParamTuple <!> "ParamTuple"
 
 let simpleSignature = pascalCaseId .>> IW 
 
@@ -276,7 +273,7 @@ let userDefinedPrefix = positions (keywordPrefix >>. prefixString) .>> IW |>> As
 let userDefinedSymbol = opt (attempt (IW >>. choice [userDefinedPrefix; userDefinedInfix; userDefinedPostfix ]))
 
 (* Statements *)
-let argumentTuple = positions ((leftParen >>. predicateList) .>> (IW >>. rightParen)) |>> Ast.ArgumentTuple <!> "ArgumentTuple" 
+let argumentTuple = positions ((leftParen >>. predicateList) .>> rightParen) |>> Ast.ArgumentTuple <!> "ArgumentTuple" 
 
 let delegateName = positions (idStartsWithCap) .>> IW |>> Ast.DelegateName <!> "DelegateName"
 
@@ -288,12 +285,12 @@ let keywordReturn = IW >>. (skipString LiteralRetL <|> skipString LiteralRet) .>
 
 
 
-let caseElse = positions (elseCase >>. IW >>. statementList .>> IW)  |>> Ast.CaseElse <!> "CaseElse"
+let caseElse = positions (elseCase >>. IW >>. statementList)  |>> Ast.CaseElse <!> "CaseElse"
 let caseSingle = positions ((case >>. predicate .>> colon) .>>. statementList) |>> Ast.CaseSingle <!> "CaseSingle"
 let caseSingleList = many1 (IW >>. caseSingle)
 let casesStatement = positions (((keywordCases >>. leftParen >>. IW >>. caseSingleList .>>. caseElse .>> rightParen))) |>> Ast.Cases <!> "Cases"
 
-let mapCaseElse = positions (elseCase >>. predicate .>> IW) |>> Ast.MapCaseElse <!> "MapCaseElse"
+let mapCaseElse = positions (elseCase >>. predicate) |>> Ast.MapCaseElse <!> "MapCaseElse"
 let mapCaseSingle = positions ((case >>. predicate .>> colon) .>>. (IW >>. predicate)) |>> Ast.MapCaseSingle <!> "MapCaseSingle"
 let mapCaseSingleList = many1 (IW >>. mapCaseSingle)
 let mapCases = positions (((keywordMapCases >>. leftParen >>. IW >>. mapCaseSingleList .>>. mapCaseElse .>> rightParen))) |>> Ast.MapCases <!> "MapCases"
@@ -640,7 +637,7 @@ let keywordLocalization = (skipString LiteralLocL <|> skipString LiteralLoc) >>.
 let localizationLanguageCode = positions (regex @"[a-z]{3}" <?> "<ISO 639 language code>") |>> Ast.LanguageCode <!> "LanguageCode"
 
 let ebnfTransl, ebnfTranslRef = createParserForwardedToRef()
-let ebnfTranslTuple = (leftParen >>. IW >>. ebnfTransl) .>> (IW .>> rightParen) 
+let ebnfTranslTuple = (leftParen >>. IW >>. ebnfTransl) .>> rightParen
 let ebnfFactor = choice [
     variable
     quote >>. localizationString .>> quote
