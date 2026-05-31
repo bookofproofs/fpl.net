@@ -508,7 +508,7 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestOperator03 () =
-        let result = run (infixOperation .>> eof) """( x b y c z )"""
+        let result = run (infixOperation .>> eof) """( x ∈ y ∈ z )"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

@@ -12,6 +12,11 @@ type TestDefinitionFunctionalTerms01 () =
     [<DataRow("func A()->obj")>]
     [<DataRow("func A()->pred")>]
     [<DataRow("func A()->func")>]
+    [<DataRow("func Sum(list:* Nat[ind,ind])->Nat")>]
+    [<DataRow("func A()->obj { return x }")>]
+    [<DataRow("func A()->obj { dec for addend in list {x:=x}; return x }")>]
+    [<DataRow("func A()->obj { dec for addend in list {y:=Add(result,addend)}; return y }")>]
+    [<DataRow("func A()->obj { dec a:obj result, addend: Nat for addend in list {y:=Add(result,addend)}; return y }")>]
     [<TestMethod>]
     member this.TestDefinitionFunctionalTerm00 (fplCode:string) =
         let result = run (definitionFunctionalTerm .>> eof) fplCode

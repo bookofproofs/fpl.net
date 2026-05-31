@@ -344,8 +344,8 @@ type TestExpressions () =
     [<DataRow("01e", "false'")>]
     [<DataRow("02d", "-and(a,b)")>]
     [<DataRow("02e", "and(a,b)'")>]
-    [<DataRow("03d", "-mcases ( | true : true ? false )")>]
-    [<DataRow("03e", "mcases ( | true : true ? false )'")>]
+    [<DataRow("03d", "-mcases ( | true: true ? false )")>]
+    [<DataRow("03e", "mcases ( | true: true ? false )'")>]
     [<TestMethod>]
     member this.TestPredicateSyntaxSuccess (no:string, expr:string) =
         let result = run (predicate .>> eof) expr

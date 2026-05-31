@@ -1,4 +1,4 @@
-﻿using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 
 namespace FplLS
 {
@@ -23,8 +23,8 @@ namespace FplLS
             ci.InsertText =
                 $"mcases{Environment.NewLine}" +
                 $"({Environment.NewLine}" +
-                $"\t| p(x) : a{Environment.NewLine}" +
-                $"\t| q(x) : b{Environment.NewLine}" +
+                $"\t| p(x): a{Environment.NewLine}" +
+                $"\t| q(x): b{Environment.NewLine}" +
                 $"\t? c{Environment.NewLine}" +
                 $"){Environment.NewLine}";
         }

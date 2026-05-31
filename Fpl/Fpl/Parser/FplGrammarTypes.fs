@@ -159,6 +159,10 @@ type Ast =
     | DefinitionClass of Positions * (((Ast * Ast option) * Ast option) * Ast) 
     | Prefix of Positions * string
     | Precedence of Positions * int
+    | PrefixOp of string * Ast
+    | PostfixOp of string * Ast 
+    | InfixOp of string * Ast * Ast
+
     | Infix of Positions * (string * Ast)
     | Postfix of Positions * string
     | Symbol of Positions * string
