@@ -8,7 +8,7 @@ namespace FplLS
         {
             var ret = new List<FplCompletionItem>();
             // snippets
-            var ci = defaultCi.Clone(); SetCasesStatement(ci, true); ret.Add(ci);
+            var ci = defaultCi.Clone(); SetCasesStatement(ci); ret.Add(ci);
             // keywords
             defaultCi.Kind = CompletionItemKind.Keyword;
             defaultCi.AdjustToKeyword();
@@ -17,7 +17,7 @@ namespace FplLS
 
         }
 
-        private void SetCasesStatement(FplCompletionItem ci, bool withRange)
+        private void SetCasesStatement(FplCompletionItem ci)
         {
             ci.Label += " ...";
             ci.InsertText =
