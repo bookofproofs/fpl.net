@@ -1074,7 +1074,9 @@ let rec eval ast =
             let operand = new FplReference((pos1,pos2), fv)
             heap.Eval.PushEvalStack(operand)
             eval predAst
+            simplifyTriviallyNestedExpressions operand
             fv.ArgList.Add(heap.Eval.Pop()) // pop the stack element (same reference as pred) and store it in a list
+            
             match opAstOpt with
             | Some opAst ->
                 // followed by the operator
@@ -1088,58 +1090,62 @@ let rec eval ast =
         )
         |> ignore
 
-        /// Returns the precedence of fv1 if its ExpressionType is Infix
-        /// or Int32.MaxValue otherwise
-        let getPrecedence (fv1:FplGenericNode) =
-            match fv1.RefersTo with
-            | None -> Int32.MaxValue
-            | Some x -> 
-                match x.ExpressionType with
-                |  FixType.Infix (symb, prec) -> prec
-                | _ -> Int32.MaxValue
+        // if there was at least one infix operator transform the symbol table according to precedence
+        if fv.ArgList.Count > 2 then
+            /// Returns the precedence of fv1 if its ExpressionType is Infix
+            /// or Int32.MaxValue otherwise
+            let getPrecedence (fv1:FplGenericNode) =
+                match fv1.RefersTo with
+                | None -> Int32.MaxValue
+                | Some x -> 
+                    match x.ExpressionType with
+                    |  FixType.Infix (symb, prec) -> prec
+                    | _ -> Int32.MaxValue
 
-        // This while loop will evaluate multiple non-parenthesized infix operations
-        // according to their precedence by grouping them into binary operations and leave fv with only one binary operation
-        while fv.ArgList.Count > 1 do
-            let mutable currentMinimalPrecedence = Int32.MaxValue
-            let mutable currMinIndex = 1
-            for i in 1 .. 2 .. fv.ArgList.Count - 1 do
-                let currPrecedence = getPrecedence fv.ArgList[i]
-                if currentMinimalPrecedence > currPrecedence then
-                    currentMinimalPrecedence <- currPrecedence
-                    currMinIndex <- i
-            let currentOp = fv.ArgList[currMinIndex]
-            let firstOp = fv.ArgList[currMinIndex-1]
-            let secondOp = fv.ArgList[currMinIndex+1]
-            currentOp.ArgList.Add(firstOp)
-            currentOp.ArgList.Add(secondOp)
-            let refNodeOpt = referencedNodeOpt currentOp
-            match refNodeOpt with 
-            | Some refNode when refNode.Arity = 2 ->
-                let pars = 
-                    refNode.GetVariables() 
-                    |> List.map (fun var -> var :?> FplGenericVariable)
-                    |> List.filter (fun var -> var.IsSignatureVariable)
-                // try to issue SIG04 diagnostics per argument of the binary operator
-                if pars.Length = 2 then 
-                    match FplTypeMatcher.MatchPwA [firstOp] [pars[0]] with
-                    | Some errMsg -> 
-                        let extendedErrMsg = $"{errMsg} in {qualifiedName refNode true}"
-                        firstOp.ErrorOccurred <- emitSIG04Diagnostics (currentOp.Type SignatureType.Mixed) extendedErrMsg firstOp.StartPos firstOp.EndPos
-                    | _ -> ()
-                    match FplTypeMatcher.MatchPwA [secondOp] [pars[1]] with
-                    | Some errMsg -> 
-                        let extendedErrMsg = $"{errMsg} in {qualifiedName refNode true}"
-                        secondOp.ErrorOccurred <- emitSIG04Diagnostics (currentOp.Type SignatureType.Mixed) extendedErrMsg secondOp.StartPos secondOp.EndPos
-                    | _ -> ()
-                else
-                    // if something went wrong (for instance, wrong arity), issue SIG04 with fallback using the operand 
-                    // together with its referenced node
-                    checkSIG04Diagnostics currentOp [refNode] |> ignore
-            | _ -> ()
-            fv.ArgList.RemoveAt(currMinIndex+1) 
-            fv.ArgList.RemoveAt(currMinIndex-1) 
-        simplifyTriviallyNestedExpressions fv 
+            // This while loop will evaluate multiple non-parenthesized infix operations
+            // according to their precedence by grouping them into binary operations and leave fv with only one binary operation
+            while fv.ArgList.Count > 1 do
+                let mutable currentMinimalPrecedence = Int32.MaxValue
+                let mutable currMinIndex = 1
+                for i in 1 .. 2 .. fv.ArgList.Count - 1 do
+                    let currPrecedence = getPrecedence fv.ArgList[i]
+                    if currentMinimalPrecedence > currPrecedence then
+                        currentMinimalPrecedence <- currPrecedence
+                        currMinIndex <- i
+                let currentOp = fv.ArgList[currMinIndex]
+                let firstOp = fv.ArgList[currMinIndex-1]
+                let secondOp = fv.ArgList[currMinIndex+1]
+                currentOp.ArgList.Add(firstOp)
+                currentOp.ArgList.Add(secondOp)
+                let refNodeOpt = referencedNodeOpt currentOp
+                match refNodeOpt with 
+                | Some refNode when refNode.Arity = 2 ->
+                    let pars = 
+                        refNode.GetVariables() 
+                        |> List.map (fun var -> var :?> FplGenericVariable)
+                        |> List.filter (fun var -> var.IsSignatureVariable)
+                    // try to issue SIG04 diagnostics per argument of the binary operator
+                    if pars.Length = 2 then 
+                        match FplTypeMatcher.MatchPwA [firstOp] [pars[0]] with
+                        | Some errMsg -> 
+                            let extendedErrMsg = $"{errMsg} in {qualifiedName refNode true}"
+                            firstOp.ErrorOccurred <- emitSIG04Diagnostics (currentOp.Type SignatureType.Mixed) extendedErrMsg firstOp.StartPos firstOp.EndPos
+                        | _ -> ()
+                        match FplTypeMatcher.MatchPwA [secondOp] [pars[1]] with
+                        | Some errMsg -> 
+                            let extendedErrMsg = $"{errMsg} in {qualifiedName refNode true}"
+                            secondOp.ErrorOccurred <- emitSIG04Diagnostics (currentOp.Type SignatureType.Mixed) extendedErrMsg secondOp.StartPos secondOp.EndPos
+                        | _ -> ()
+                    else
+                        // if something went wrong (for instance, wrong arity), issue SIG04 with fallback using the operand 
+                        // together with its referenced node
+                        checkSIG04Diagnostics currentOp [refNode] |> ignore
+                | _ -> ()
+                fv.ArgList.RemoveAt(currMinIndex+1) 
+                fv.ArgList.RemoveAt(currMinIndex-1) 
+        simplifyTriviallyNestedExpressions fv
+
+
     | Ast.PrefixOp(operatorAst, predicateAst) 
     | Ast.PostfixOp(operatorAst, predicateAst) -> 
         let fv = heap.Eval.PeekEvalStack()
@@ -1148,6 +1154,7 @@ let rec eval ast =
         eval predicateAst
         eval operatorAst
         heap.Eval.PopEvalStack()
+        simplifyTriviallyNestedExpressions fv
     | Ast.Parens ((pos1, pos2), expressionAst) ->
         let fv = heap.Eval.PeekEvalStack()
         let refBlock = new FplReference((pos1, pos2), fv)

@@ -848,9 +848,9 @@ type TestFplValueScopeFplRepresentation() =
                 n:pred
                 n:= mcases
                 (
-                    | (x = $1) : false 
-                    | (x = $2) : true 
-                    | (x = $3) : false 
+                    | (x = $1): false 
+                    | (x = $2): true 
+                    | (x = $3): false 
                     ? undef  
                 )
                 ;n } def pred T() {Test(%s)}""" input 
@@ -889,9 +889,9 @@ type TestFplValueScopeFplRepresentation() =
                 n:pred
                 n:= mcases
                 (
-                    | (x = $1) : false 
-                    | (x = $2) : true 
-                    | (x = $3) : false 
+                    | (x = $1): false 
+                    | (x = $2): true 
+                    | (x = $3): false 
                     ? undef  
                 )
                 ;n } def pred T() {Test(%s)}""" input 

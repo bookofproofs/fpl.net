@@ -17,7 +17,7 @@ namespace FplLS
 
         }
 
-        private void SetCasesStatement(FplCompletionItem ci)
+        private static void SetCasesStatement(FplCompletionItem ci)
         {
             ci.Label += " ...";
             ci.InsertText =

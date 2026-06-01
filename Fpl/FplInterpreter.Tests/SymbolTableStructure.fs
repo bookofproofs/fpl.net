@@ -2082,9 +2082,9 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count) 
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplCaseElse", "00", """def pred T(x:ind) { dec n:pred cases (| (x = $1) : n:=false | (x = $2) : n:=true | (x = $3) : n:=false ? n:=undef ); n }""", "")>]
-    [<DataRow("FplCaseElse", "01", """def pred T(x:ind) { dec n:pred cases (| (x = $1) : n:=false | (x = $2) : n:=true | (x = $3) : n:=false ? n:=false n:=undef ); n }""", "")>]
-    [<DataRow("FplCaseElse", "02", """def pred T(x:ind) { dec n:pred cases (| (x = $1) : n:=false | (x = $2) : n:=true | (x = $3) : n:=false ? n:=true n:=false n:=undef ); n }""", "")>]
+    [<DataRow("FplCaseElse", "00", """def pred T(x:ind) { dec n:pred cases (| (x = $1): n:=false | (x = $2): n:=true | (x = $3): n:=false ? n:=undef ); n }""", "")>]
+    [<DataRow("FplCaseElse", "01", """def pred T(x:ind) { dec n:pred cases (| (x = $1): n:=false | (x = $2): n:=true | (x = $3): n:=false ? n:=false n:=undef ); n }""", "")>]
+    [<DataRow("FplCaseElse", "02", """def pred T(x:ind) { dec n:pred cases (| (x = $1): n:=false | (x = $2): n:=true | (x = $3): n:=false ? n:=true n:=false n:=undef ); n }""", "")>]
     [<TestMethod>]
     member this.TestStructureFplCaseElse(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplCaseElse.fpl"
@@ -2114,7 +2114,7 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplCases", "00", """def pred T(x:ind) { dec n:pred cases (| (x = $1) : n:=false | (x = $2) : n:=true | (x = $3) : n:=false ? n:=undef ); n }""", "")>]
+    [<DataRow("FplCases", "00", """def pred T(x:ind) { dec n:pred cases (| (x = $1): n:=false | (x = $2): n:=true | (x = $3): n:=false ? n:=undef ); n }""", "")>]
     [<TestMethod>]
     member this.TestStructureFplCases(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplCases.fpl"
@@ -2131,9 +2131,9 @@ type SymbolTableStructure() =
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     
-    [<DataRow("FplCaseSingle", "00", """def pred T(x:ind) { dec n:pred cases (| (x = $1) : n:=false | (x = $2) : n:=true | (x = $3) : n:=false ? n:=undef ); n }""", "")>]
-    [<DataRow("FplCaseSingle", "01", """def pred T(x:ind) { dec n:pred cases (| (x = $1) : n:=true n:=true n:=false | (x = $2) : n:=true | (x = $3) : n:=false ? n:=undef ); n }""", "")>]
-    [<DataRow("FplCaseSingle", "02", """def pred T(x:ind) { dec n:pred cases (| (x = $1) : n:=true n:=false | (x = $2) : n:=true | (x = $3) : n:=false ? n:=undef ); n }""", "")>]
+    [<DataRow("FplCaseSingle", "00", """def pred T(x:ind) { dec n:pred cases (| (x = $1): n:=false | (x = $2): n:=true | (x = $3): n:=false ? n:=undef ); n }""", "")>]
+    [<DataRow("FplCaseSingle", "01", """def pred T(x:ind) { dec n:pred cases (| (x = $1): n:=true n:=true n:=false | (x = $2): n:=true | (x = $3): n:=false ? n:=undef ); n }""", "")>]
+    [<DataRow("FplCaseSingle", "02", """def pred T(x:ind) { dec n:pred cases (| (x = $1): n:=true n:=false | (x = $2): n:=true | (x = $3): n:=false ? n:=undef ); n }""", "")>]
     [<TestMethod>]
     member this.TestStructureFplCaseSingle(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplCaseSingle.fpl"
@@ -4133,9 +4133,9 @@ type SymbolTableStructure() =
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
 
-    [<DataRow("FplMapCaseElse", "00", """def pred T(x:ind) { dec n:pred n:= mcases (| (x = $1) : false | (x = $2) : true | (x = $3) : false ? undef ); n }""", "")>]
-    [<DataRow("FplMapCaseElse", "01", """def pred T() { mcases (| true : false | false : true ? undef )}""", "")>]
-    [<DataRow("FplMapCaseElse", "02", """def func T()->pred { return mcases (| true : false | false : true ? undef )}""", "")>]
+    [<DataRow("FplMapCaseElse", "00", """def pred T(x:ind) { dec n:pred n:= mcases (| (x = $1): false | (x = $2): true | (x = $3): false ? undef ); n }""", "")>]
+    [<DataRow("FplMapCaseElse", "01", """def pred T() { mcases (| true: false | false: true ? undef )}""", "")>]
+    [<DataRow("FplMapCaseElse", "02", """def func T()->pred { return mcases (| true: false | false: true ? undef )}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplMapCaseElse(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplMapCaseElse.fpl"
@@ -4165,9 +4165,9 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplMapCases", "00", """def pred T(x:ind) { dec n:pred n:= mcases (| (x = $1) : false | (x = $2) : true | (x = $3) : false ? undef ); n }""", "")>]
-    [<DataRow("FplMapCases", "01", """def pred T() { mcases (| true : false | false : true ? undef )}""", "")>]
-    [<DataRow("FplMapCases", "02", """def func T()->pred { return mcases (| true : false | false : true ? undef )}""", "")>]
+    [<DataRow("FplMapCases", "00", """def pred T(x:ind) { dec n:pred n:= mcases (| (x = $1): false | (x = $2): true | (x = $3): false ? undef ); n }""", "")>]
+    [<DataRow("FplMapCases", "01", """def pred T() { mcases (| true: false | false: true ? undef )}""", "")>]
+    [<DataRow("FplMapCases", "02", """def func T()->pred { return mcases (| true: false | false: true ? undef )}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplMapCases(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplMapCases.fpl"
@@ -4197,9 +4197,9 @@ type SymbolTableStructure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplMapCaseSingle", "00", """def pred T(x:ind) { dec n:pred n:= mcases (| (x = $1) : false | (x = $2) : true | (x = $3) : false ? undef ); n }""", "")>]
-    [<DataRow("FplMapCaseSingle", "01", """def pred T() { mcases (| true : false | false : true ? undef )}""", "")>]
-    [<DataRow("FplMapCaseSingle", "02", """def func T()->pred { return mcases (| true : false | false : true ? undef )}""", "")>]
+    [<DataRow("FplMapCaseSingle", "00", """def pred T(x:ind) { dec n:pred n:= mcases (| (x = $1): false | (x = $2): true | (x = $3): false ? undef ); n }""", "")>]
+    [<DataRow("FplMapCaseSingle", "01", """def pred T() { mcases (| true: false | false: true ? undef )}""", "")>]
+    [<DataRow("FplMapCaseSingle", "02", """def func T()->pred { return mcases (| true: false | false: true ? undef )}""", "")>]
     [<TestMethod>]
     member this.TestStructureFplMapCaseSingle(nodeType, varVal, fplCode, identifier) =
         let filename = "TestStructureFplMapCaseSingle.fpl"

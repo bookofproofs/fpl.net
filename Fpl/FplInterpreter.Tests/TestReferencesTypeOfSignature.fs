@@ -249,8 +249,8 @@ type TestReferencesTypeOfSignature() =
         Assert.AreEqual<string>(name, loc.Type(SignatureType.Type))
         prepareFplCode(filename, "", false) |> ignore
 
-    [<DataRow("00", "mcases (| true : false | false : true ? undef)", LiteralPred)>]
-    [<DataRow("01", "mcases (| true : $1 | false : $2 ? undef)", LiteralInd)>]
+    [<DataRow("00", "mcases (| true: false | false: true ? undef)", LiteralPred)>]
+    [<DataRow("01", "mcases (| true: $1 | false: $2 ? undef)", LiteralInd)>]
     [<TestMethod>]
     member this.TestMCasesTypeSignature(no:string, varVal, expected:string) =
         

@@ -24,6 +24,9 @@ type TestDiverse () =
     [<DataRow("08", """def pred A() {false ∧ true}""")>]
     [<DataRow("09", """inf AndCummutative{dec p,q:pred; pre:and(p,q) con:and(q,p)} thm T {true} proof T$1 {1: and(true,false) 2. 1, byinf AndCummutative |- false ∧ true}""")>]
     [<DataRow("10", """def pred A() {f()}""")>]
+    [<DataRow("11", """proof T$1 {1: iif (a,b)}""")>]
+    [<DataRow("12", """loc not(x) := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
+    [<DataRow("13", """def pred A() {y is M}""")>]
     [<TestMethod>]
     member this.TestDiverseSuccess (no:string, fplCode:string) =
         let result = run (stdParser .>> eof) fplCode

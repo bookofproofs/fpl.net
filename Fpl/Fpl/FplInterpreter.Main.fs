@@ -26,7 +26,7 @@ let fplInterpreter input (uri:PathEquivalentUri) fplLibUrl =
     if input = "~testGEN00~" then
         emitUnexpectedErrorDiagnostics ("~testGEN00~ error generated")
     else
-        //try
+        try
             heap.ClearAll()
             heap.SymbolTable.EvalCounter <- heap.SymbolTable.EvalCounter + 1
             // mark evaluation started (keeps UI informed)
@@ -39,5 +39,5 @@ let fplInterpreter input (uri:PathEquivalentUri) fplLibUrl =
 
             // mark evaluation ended (keeps UI informed)
             heap.IsEvaluating <- false
-        //with ex -> 
-        //    emitUnexpectedErrorDiagnostics (ex.Message + Environment.NewLine + ex.StackTrace)
+        with ex -> 
+            emitUnexpectedErrorDiagnostics (ex.Message + Environment.NewLine + ex.StackTrace)
