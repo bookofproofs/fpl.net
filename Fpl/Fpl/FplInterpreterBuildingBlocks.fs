@@ -422,7 +422,7 @@ let rec eval ast =
             heap.Eval.PushEvalStack(fvAi)
             heap.Eval.PopEvalStack()
         | _ -> ()
-    | Ast.Prefix((pos1, pos2), symbol) -> 
+    | Ast.PrefixDecl((pos1, pos2), symbol) -> 
         let fv = heap.Eval.PeekEvalStack()
         fv.ExpressionType <- FixType.Prefix symbol
     | Ast.InfixDeclWithPrecedence((pos1, pos2), (symbol, precedenceAsts)) -> 
@@ -1142,6 +1142,13 @@ let rec eval ast =
             fv.ArgList.RemoveAt(currMinIndex+1) 
             fv.ArgList.RemoveAt(currMinIndex-1) 
         simplifyTriviallyNestedExpressions fv 
+    | Ast.PrefixOp(prefixOpAst, predicateAst) -> 
+        let fv = heap.Eval.PeekEvalStack()
+        let refBlock = new FplReference((fv.StartPos, fv.EndPos), fv) 
+        heap.Eval.PushEvalStack(refBlock)
+        eval predicateAst
+        eval prefixOpAst
+        heap.Eval.PopEvalStack()
     | Ast.Expression((pos1, pos2), ((prefixOpAst, predicateAst), postfixOpAst)) ->
         let fv = heap.Eval.PeekEvalStack()
         let refBlock = new FplReference((pos1, pos2), fv) 

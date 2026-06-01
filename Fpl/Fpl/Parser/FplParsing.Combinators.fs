@@ -230,7 +230,7 @@ let precedence = positions (pint32) .>> IW |>> Ast.Precedence <!> "Precedence"
 
 let userDefinedInfix = positions (keywordInfix >>. (infixString .>>. (IW >>. precedence))) .>> IW |>> Ast.InfixDeclWithPrecedence <!> "Infix"
 let userDefinedPostfix = positions (keywordPostfix >>. postfixString) .>> IW |>> Ast.PostfixDecl <!> "Postfix"
-let userDefinedPrefix = positions (keywordPrefix >>. prefixString) .>> IW |>> Ast.Prefix <!> "Prefix"
+let userDefinedPrefix = positions (keywordPrefix >>. prefixString) .>> IW |>> Ast.PrefixDecl <!> "Prefix"
 let userDefinedSymbol = opt (attempt (IW >>. choice [userDefinedPrefix; userDefinedInfix; userDefinedPostfix ]))
 
 (* Statements *)

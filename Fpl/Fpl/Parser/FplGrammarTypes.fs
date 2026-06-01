@@ -157,13 +157,13 @@ type Ast =
     | ClassDefinitionBlock of Positions * (Ast * Ast list option) option
 
     | DefinitionClass of Positions * (((Ast * Ast option) * Ast option) * Ast) 
-    | Prefix of Positions * string
     | Precedence of Positions * int
     | PrefixOp of Ast * Ast
     | PostfixOp of Ast * Ast 
     | InfixOp of Ast * Ast * Ast
 
     | InfixDeclWithPrecedence of Positions * (string * Ast) // infix symbol with precedence
+    | PrefixDecl of Positions * string
     | PostfixDecl of Positions * string
     | SymbolDecl of Positions * string
 
