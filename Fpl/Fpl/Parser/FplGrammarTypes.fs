@@ -158,9 +158,9 @@ type Ast =
 
     | DefinitionClass of Positions * (((Ast * Ast option) * Ast option) * Ast) 
     | Precedence of Positions * int
-    | PrefixOp of Ast * Ast
-    | PostfixOp of Ast * Ast 
-    | InfixOp of Ast * Ast * Ast
+    | PrefixOp of Ast * Ast // operator * operand
+    | PostfixOp of Ast * Ast // operator * operand
+    | InfixOp of Ast * Ast * Ast // operator * firstOperand * SecondOperand
 
     | InfixDeclWithPrecedence of Positions * (string * Ast) // infix symbol with precedence
     | PrefixDecl of Positions * string
