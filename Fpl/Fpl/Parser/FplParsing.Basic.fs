@@ -2,7 +2,7 @@
 module FplParsing.Basic
 open System.Text.RegularExpressions
 open FParsec
-open FplPrimitives
+open FplGrammarTypes
 open FplParsing.Debug
 (* MIT License
 
@@ -100,3 +100,37 @@ let rightBracket : Parser<unit,unit> =
 let comma : Parser<unit,unit> =
     attempt (IW >>. skipChar ',' >>. IW) <!> "comma"
 
+
+// ============================================================================
+// Helpers
+// ============================================================================
+
+/// A helper parser that consumes any input and can be combined with existing parsers to enrich them with 
+/// the parsing position.
+let private _position: Parser<_,_> = fun stream -> Reply stream.Position
+
+/// Takes the parser `p` and returns a tuple with it starting parsing position
+let private _startingPosition p = _position .>>. p
+
+/// Takes the parser `p` and returns a tuple with it starting parsing position
+let private _endingPosition p = 
+    let result = p .>>. _position
+    result 
+    >>= fun (p, pos) ->
+    preturn (pos, p)
+
+
+/// Takes the parser `p` and returns a tuple of its result, together with its starting and ending position.
+let positions (p: Parser<_,_>): Parser<Positions * _,_> =
+    pipe2
+        (_position .>>. p)
+        (_position)
+        (
+            // correct columns to keep the convention of jumping to
+            // the beginning and not to the end of a diagnostics in an IDE
+            let offset = (int64)1
+            fun (startPos, result) endPos ->
+            let pos1 = Position("", startPos.Index, startPos.Line, startPos.Column-offset)
+            let pos2 = Position("", endPos.Index, endPos.Line, endPos.Column-offset)
+            (Positions(pos1, pos2), result)
+        )

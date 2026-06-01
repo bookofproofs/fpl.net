@@ -392,7 +392,7 @@ let rec eval ast =
                 variable.Parent <- Some loc
         | _ -> ()
 
-    | Ast.ObjectSymbol((pos1, pos2), symbol) -> 
+    | Ast.ObjectSymbolWithPos((pos1, pos2), symbol) -> 
         let fv = heap.Eval.PeekEvalStack()
         fv.FplId <- symbol
         fv.TypeId <- symbol
@@ -425,31 +425,31 @@ let rec eval ast =
     | Ast.Prefix((pos1, pos2), symbol) -> 
         let fv = heap.Eval.PeekEvalStack()
         fv.ExpressionType <- FixType.Prefix symbol
-    | Ast.Infix((pos1, pos2), (symbol, precedenceAsts)) -> 
+    | Ast.InfixDeclWithPrecedence((pos1, pos2), (symbol, precedenceAsts)) -> 
         let fv = heap.Eval.PeekEvalStack()
         eval precedenceAsts
         fv.ExpressionType <- FixType.Infix (symbol, fv.AuxiliaryInfo)
-    | Ast.Postfix((pos1, pos2), symbol) -> 
+    | Ast.PostfixDecl((pos1, pos2), symbol) -> 
         let fv = heap.Eval.PeekEvalStack()
         fv.ExpressionType <- FixType.Postfix symbol
-    | Ast.Symbol((pos1, pos2), symbol) -> 
+    | Ast.SymbolDecl((pos1, pos2), symbol) -> 
         let fv = heap.Eval.PeekEvalStack()
         fv.ExpressionType <- FixType.Symbol symbol
-    | Ast.InfixOperator((pos1, pos2), symbol) -> 
+    | Ast.InfixSymbolWithPos((pos1, pos2), symbol) -> 
         let fv = heap.Eval.PeekEvalStack()
         fv.FplId <- symbol
         fv.TypeId <- symbol
         fv.StartPos <- pos1
         fv.EndPos <- pos2
         checkSIG01Diagnostics fv
-    | Ast.PostfixOperator((pos1, pos2), symbol) -> 
+    | Ast.PostFixSymbolWithPos((pos1, pos2), symbol) -> 
         let fv = heap.Eval.PeekEvalStack()
         fv.FplId <- symbol
         fv.TypeId <- symbol
         fv.StartPos <- pos1
         fv.EndPos <- pos2
         checkSIG01Diagnostics fv
-    | Ast.PrefixOperator((pos1, pos2), symbol) -> 
+    | Ast.PrefixSymbolWithPos((pos1, pos2), symbol) -> 
         let fv = heap.Eval.PeekEvalStack()
         fv.FplId <- symbol
         fv.TypeId <- symbol

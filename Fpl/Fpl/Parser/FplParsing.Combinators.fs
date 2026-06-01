@@ -19,38 +19,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 
-
-/// A helper parser that consume any input and can be combined with existing parsers to enrich them with 
-/// the parsing position.
-let private _position: Parser<_,_> = fun stream -> Reply stream.Position
-
-/// Takes the parser `p` and returns a tuple with it starting parsing position
-let private _startingPosition p = _position .>>. p
-
-/// Takes the parser `p` and returns a tuple with it starting parsing position
-let private _endingPosition p = 
-    let result = p .>>. _position
-    result 
-    >>= fun (p, pos) ->
-    preturn (pos, p)
-
-
-/// Takes the parser `p` and returns a tuple of its result, together with its starting and ending position.
-let positions (p: Parser<_,_>): Parser<Positions * _,_> =
-    pipe2
-        (_position .>>. p)
-        (_position)
-        (
-            // correct columns to keep the convention of jumping to
-            // the beginning and not to the end of a diagnostics in an IDE
-            let offset = (int64)1
-            fun (startPos, result) endPos ->
-            let pos1 = Position("", startPos.Index, startPos.Line, startPos.Column-offset)
-            let pos2 = Position("", endPos.Index, endPos.Line, endPos.Column-offset)
-            (Positions(pos1, pos2), result)
-        )
-
-
 let dot = skipChar '.' |>> Ast.Dot <!> "Dot"
 let colon = skipChar ':' .>> IW 
 let colonEqual = skipString ":=" >>. IW 
@@ -197,7 +165,7 @@ let paramTuple, paramTupleRef = createParserForwardedToRef()
 
 
 // infix operators like the equality operator 
-let objectSymbol = positions ( objectMathSymbols ) |>> Ast.ObjectSymbol <!> "ObjectSymbol"
+let objectSymbol = positions ( objectMathSymbols ) |>> Ast.ObjectSymbolWithPos <!> "ObjectSymbol"
 
 let fplIdentifier = choice [ selfOrParent ; variable ; predicateIdentifier; extension; objectSymbol ] 
 
@@ -257,11 +225,11 @@ let postfixString = pchar '"' >>. postfixMathSymbols .>> pchar '"'
 let keywordPostfix = pstring LiteralPostFix >>. IW
 let prefixString = pchar '"' >>. prefixMathSymbols .>> pchar '"' 
 let keywordPrefix = pstring LiteralPrefix >>. IW
-let userDefinedObjSym = positions (keywordSymbol >>. objectSymbolString) .>> IW |>> Ast.Symbol <!> "Symbol"
+let userDefinedObjSym = positions (keywordSymbol >>. objectSymbolString) .>> IW |>> Ast.SymbolDecl <!> "Symbol"
 let precedence = positions (pint32) .>> IW |>> Ast.Precedence <!> "Precedence"
 
-let userDefinedInfix = positions (keywordInfix >>. (infixString .>>. (IW >>. precedence))) .>> IW |>> Ast.Infix <!> "Infix"
-let userDefinedPostfix = positions (keywordPostfix >>. postfixString) .>> IW |>> Ast.Postfix <!> "Postfix"
+let userDefinedInfix = positions (keywordInfix >>. (infixString .>>. (IW >>. precedence))) .>> IW |>> Ast.InfixDeclWithPrecedence <!> "Infix"
+let userDefinedPostfix = positions (keywordPostfix >>. postfixString) .>> IW |>> Ast.PostfixDecl <!> "Postfix"
 let userDefinedPrefix = positions (keywordPrefix >>. prefixString) .>> IW |>> Ast.Prefix <!> "Prefix"
 let userDefinedSymbol = opt (attempt (IW >>. choice [userDefinedPrefix; userDefinedInfix; userDefinedPostfix ]))
 
@@ -406,9 +374,9 @@ let all = positions ((keywordAll >>. namedVariableDeclarationList) .>>. (leftBra
 let exists = positions ((keywordEx >>. namedVariableDeclarationList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.Exists <!> "Exists"
 
 let existsNTimes = choice [
-        attempt (keywordExNSymbolic .>> SW) |>> Ast.Exists1 <!> "Exists1" 
-        keywordExNSymbolic >>. positions puint32 .>> SW |>> Ast.DollarDigits <!> "DollarDigits" 
-    ] 
+                        attempt (keywordExNSymbolic .>> SW) |>> Ast.Exists1  
+                        keywordExNSymbolic >>. positions puint32 .>> SW |>> Ast.DollarDigits 
+                    ] <!> "existsNTimes"
 
 let existsTimeNQuantifier = choice [
     (keywordExN >>. dollarDigits .>> SW)
@@ -420,13 +388,13 @@ let isOp = (keywordIs >>. leftParen >>. predicate) .>>. (comma >>. variableType)
 let isOperator = positions isOp |>> Ast.IsOperator <!> "IsOperator"
 
 // infix operators like the equality operator 
-let infixOp = positions ( infixMathSymbols ) .>> attemptSW |>> Ast.InfixOperator <!> "InfixOperator"
+let infixSymbolWithPos = positions ( infixMathSymbols ) |>> Ast.InfixSymbolWithPos <!> "infixSymbolWithPos"
 
 let infixSequence =
-    pipe2 predicate (many (infixOp .>>. predicate))
-        (fun pred rest -> Ast.InfixSequence(pred, rest)) <!> "InfixSequence"
+    pipe2 predicate (many (infixSymbolWithPos .>>. predicate))
+        (fun pred rest -> Ast.InfixSequence(pred, rest)) <!> "infixSequence"
 
-let infixOperation = (leftParen >>. infixSequence .>> rightParen) |>> Ast.InfixOperation <!> "InfixOperation"
+let infixOperation = (leftParen >>. infixSequence .>> rightParen) |>> Ast.InfixOperation <!> "infixOperation"
 
 // ------------------------------------------------------------
 // Parenthesized expression
@@ -448,8 +416,8 @@ let compoundPredicate = choice [
     isOperator
 ]
 
-let postfixOp = positions ( postfixMathSymbols ) .>> IW |>> Ast.PostfixOperator <!> "PostfixOperator" 
-let prefixOp = positions ( prefixMathSymbols ) .>> IW |>> Ast.PrefixOperator <!> "PrefixOperator"
+let postfixSymbolWithPos = positions ( postfixMathSymbols ) |>> Ast.PostFixSymbolWithPos <!> "PostFixSymbolWithPos" 
+let prefixSymbolWithPos = positions ( prefixMathSymbols ) |>> Ast.PrefixSymbolWithPos <!> "PrefixSymbolWithPos"
 
 
 let pAtom : Parser<Ast,unit> =
@@ -460,14 +428,14 @@ let pAtom : Parser<Ast,unit> =
 let pPostfixExpr : Parser<Ast,unit> =
     pipe2
         pAtom
-        (many (attempt (NW >>. postfixMathSymbols)) <?> "<postfix symbol>")
+        (many (attempt (NW >>. postfixSymbolWithPos)) <?> "<postfix symbol>")
         (fun expr postfixes ->
             List.fold (fun acc op -> Ast.PostfixOp(op, acc)) expr postfixes
         ) <!> "pPostfixExpr"
 
 let pPrefixExpr : Parser<Ast,unit> =
     pipe2
-        (many (attempt (prefixMathSymbols .>> NW)) <?> "<prefix symbol>")
+        (many (attempt (prefixSymbolWithPos .>> NW)) <?> "<prefix symbol>")
         pPostfixExpr
         (fun prefixes expr ->
             List.foldBack (fun op acc -> Ast.PrefixOp(op, acc)) prefixes expr
@@ -477,7 +445,7 @@ let pPrefixExpr : Parser<Ast,unit> =
 let pInfixExpr : Parser<Ast,unit> =
     pipe2
         pPrefixExpr
-        (many (attempt (attemptSW >>. infixMathSymbols .>> SW .>>. pPrefixExpr)))
+        (many (attempt (SW >>. infixSymbolWithPos .>> SW .>>. pPrefixExpr)))
         (fun first rest ->
             List.fold (fun oper1 (op, oper2) -> Ast.InfixOp(op, oper1, oper2)) first rest
         ) <!> "pInfixExpr" 
