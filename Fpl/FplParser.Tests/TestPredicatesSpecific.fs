@@ -494,35 +494,35 @@ type TestPredicatesSpecific () =
  
     [<TestMethod>]
     member this.TestOperator01 () =
-        let result = run (infixOperation .>> eof) """( x = 1 )"""
+        let result = run (pInfixExpr .>> eof) """( x = 1 )"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestOperator02 () =
-        let result = run (infixOperation .>> eof) """( x = y = z )"""
+        let result = run (pInfixExpr .>> eof) """( x = y = z )"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestOperator03 () =
-        let result = run (infixOperation .>> eof) """( x ∈ y ∈ z )"""
+        let result = run (pInfixExpr .>> eof) """( x ∈ y ∈ z )"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestOperator04 () =
-        let result = run (infixOperation .>> eof) """( x + y / z = abc )"""
+        let result = run (pInfixExpr .>> eof) """( x + y / z = abc )"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestOperator05 () =
-        let result = run (infixOperation .>> eof) """( ((x) + y) / z = abc )"""
+        let result = run (pInfixExpr .>> eof) """( ((x) + y) / z = abc )"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

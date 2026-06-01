@@ -289,14 +289,6 @@ let statement =
 
 statementListRef.Value <- many statement
 
-(* Predicates *)
-let pCallOrCoordSuffix : Parser<(Ast -> Ast),unit> =
-    NW >>.
-    choice [
-        pArgs   |>> fun args   -> fun calling -> Call(calling, args)
-        pCoords |>> fun coords -> fun withCoords -> Coord(withCoords, coords)
-    ] <!> "pCallOrCoordSuffix"
-
 let optionalSpecification = opt (choice [bracketedCoords; argumentTuple])
 let predicateWithOptSpecification = positions (fplIdentifier .>>. optionalSpecification) |>> Ast.PredicateWithOptSpecification <!> "PredicateWithOptSpecification"
 let dottedPredicate = positions (dot >>. predicateWithOptSpecification) |>> Ast.DottedPredicate <!> "DottedPredicate"
@@ -390,16 +382,11 @@ let isOperator = positions isOp |>> Ast.IsOperator <!> "IsOperator"
 // infix operators like the equality operator 
 let infixSymbolWithPos = positions ( infixMathSymbols ) |>> Ast.InfixSymbolWithPos <!> "infixSymbolWithPos"
 
-let infixSequence =
-    pipe2 predicate (many (infixSymbolWithPos .>>. predicate))
-        (fun pred rest -> Ast.InfixSequence(pred, rest)) <!> "infixSequence"
-
-let infixOperation = (leftParen >>. infixSequence .>> rightParen) |>> Ast.InfixOperation <!> "infixOperation"
-
 // ------------------------------------------------------------
 // Parenthesized expression
 let pParens : Parser<Ast,unit> =
-    between leftParen rightParen predicate |>> Ast.Parens
+    positions (leftParen >>. predicate .>> rightParen) 
+    |>> Ast.Parens <!> "<pParens>"
 
 // A compound Predicate has its own boolean expressions to avoid mixing up with Pl0Propositions
 let compoundPredicate = choice [
@@ -447,12 +434,23 @@ let pInfixExpr : Parser<Ast,unit> =
         pPrefixExpr
         (many (attempt (SW >>. infixSymbolWithPos .>> SW .>>. pPrefixExpr)))
         (fun first rest ->
-            List.fold (fun oper1 (op, oper2) -> Ast.InfixOp(op, oper1, oper2)) first rest
-        ) <!> "pInfixExpr" 
+            // rest = [("+", B); ("-", C); ("*", D)]
+
+            let operands =
+                first :: (rest |> List.map snd)
+                // [A; B; C; D]
+
+            let ops =
+                (rest |> List.map (fun (op, _) -> Some op))
+                @ [None]
+                // [Some "+"; Some "-"; Some "*"; None]
+
+            Ast.InfixOp (List.zip operands ops)
+            // InfixOp [ (A, Some "+"); (B, Some "-"); (C, Some "*"); (D, None) ]
+        ) <!> "pInfixExpr"
 
 
 let expression = pInfixExpr
-// let expression = positions (opt prefixOp .>>. choice [compoundPredicate; primePredicate; mapCases] .>>. opt postfixOp) .>> IW |>> Ast.Expression <!> "Expression"
 
 predicateRef.Value <- expression
 

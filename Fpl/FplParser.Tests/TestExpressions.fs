@@ -331,7 +331,7 @@ type TestExpressions () =
     [<DataRow("05b", "(x)")>]
     [<TestMethod>]
     member this.TestInfixOperationSyntax (no:string, expr:string) =
-        let result = run (infixOperation .>> eof) expr
+        let result = run (pInfixExpr .>> eof) expr
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

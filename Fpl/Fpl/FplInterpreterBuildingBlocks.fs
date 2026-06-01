@@ -1064,29 +1064,27 @@ let rec eval ast =
     | Ast.PredicateWithQualification(predicateWithOptSpecificationAst, qualificationListAst) ->
         eval predicateWithOptSpecificationAst
         eval qualificationListAst
-    | Ast.InfixOperation infixSequenceAst ->
-        eval infixSequenceAst
-    | Ast.InfixSequence (predicateAst, restInOpPredicateAstList) ->
+    | Ast.InfixOp operandOperatorOptList ->
         let fv = heap.Eval.PeekEvalStack()
         let pos1 = fv.StartPos
         let pos2 = fv.EndPos
-        let firstPred = new FplReference((pos1,pos2), fv)
-        heap.Eval.PushEvalStack(firstPred)
-        eval predicateAst
-        fv.ArgList.Add(heap.Eval.Pop()) // pop the stack element (same reference as pred) and store it in a list
-        restInOpPredicateAstList
-        |> List.map (fun (opAst, predAst) -> 
-            // evaluate the operator by trying to find a definition for the operator
-            let infixOperator = new FplReference((pos1,pos2), fv)
-            heap.Eval.PushEvalStack(infixOperator)
-            eval opAst
-            // store the index of the infix operator, so we still know it after sorting the list by precedence later
-            fv.ArgList.Add(heap.Eval.Pop()) // pop the stack element (same reference as infixOperator) and store it in a list
-            // followed by the operand
-            let pred = new FplReference((pos1,pos2), fv)
-            heap.Eval.PushEvalStack(pred)
+        operandOperatorOptList
+        |> List.map (fun (predAst, opAstOpt) -> 
+            // operand
+            let operand = new FplReference((pos1,pos2), fv)
+            heap.Eval.PushEvalStack(operand)
             eval predAst
             fv.ArgList.Add(heap.Eval.Pop()) // pop the stack element (same reference as pred) and store it in a list
+            match opAstOpt with
+            | Some opAst ->
+                // followed by the operator
+                // evaluate the operator by trying to find a definition for the operator
+                let infixOperator = new FplReference((pos1,pos2), fv)
+                heap.Eval.PushEvalStack(infixOperator)
+                eval opAst
+                // store the index of the infix operator, so we still know it after sorting the list by precedence later
+                fv.ArgList.Add(heap.Eval.Pop()) // pop the stack element (same reference as infixOperator) and store it in a list
+            | None -> ()
         )
         |> ignore
 
@@ -1150,38 +1148,11 @@ let rec eval ast =
         eval predicateAst
         eval operatorAst
         heap.Eval.PopEvalStack()
-    | Ast.Expression((pos1, pos2), ((prefixOpAst, predicateAst), postfixOpAst)) ->
+    | Ast.Parens ((pos1, pos2), expressionAst) ->
         let fv = heap.Eval.PeekEvalStack()
-        let refBlock = new FplReference((pos1, pos2), fv) 
+        let refBlock = new FplReference((pos1, pos2), fv)
         heap.Eval.PushEvalStack(refBlock)
-        let ensureReversedPolishNotation = 
-            if prefixOpAst.IsSome && postfixOpAst.IsSome then 
-                // for heuristic reasons, we choose a precedence of postfix ...
-                postfixOpAst |> Option.map eval |> Option.defaultValue () 
-                let postfixedInnerPred = new FplReference((pos1,pos2), heap.Eval.PeekEvalStack())
-                heap.Eval.PushEvalStack(postfixedInnerPred)
-                // ... over prefix notation in mathematics
-                prefixOpAst |> Option.map eval |> Option.defaultValue ()
-                let prefixedInnerPred = new FplReference((pos1,pos2), heap.Eval.PeekEvalStack())
-                heap.Eval.PushEvalStack(prefixedInnerPred)
-                eval predicateAst
-                heap.Eval.PopEvalStack()
-                heap.Eval.PopEvalStack()
-            elif prefixOpAst.IsSome then 
-                prefixOpAst |> Option.map eval |> Option.defaultValue ()
-                let innerPred = new FplReference((pos1,pos2), heap.Eval.PeekEvalStack())
-                heap.Eval.PushEvalStack(innerPred)
-                eval predicateAst
-                heap.Eval.PopEvalStack()
-            elif postfixOpAst.IsSome then 
-                postfixOpAst |> Option.map eval |> Option.defaultValue ()
-                let innerPred = new FplReference((pos1,pos2), heap.Eval.PeekEvalStack())
-                heap.Eval.PushEvalStack(innerPred)
-                eval predicateAst
-                heap.Eval.PopEvalStack()
-            else
-                eval predicateAst
-        ensureReversedPolishNotation
+        eval expressionAst
         let refBlock = heap.Eval.PeekEvalStack() // if the reference was replaced, take this one
         refBlock.EndPos <- pos2
         simplifyTriviallyNestedExpressions refBlock 

@@ -88,12 +88,7 @@ type Ast =
     | InfixSymbolWithPos of Positions * string
     | PostFixSymbolWithPos of Positions * string
     | PrefixSymbolWithPos of Positions * string
-    | Parens of Ast // (a)
-    | Call of Ast * Ast list     // a(...)
-    | Coord of Ast * Ast list     // a[...]
-    | InfixSequence of Ast * (Ast * Ast) list
-    | InfixOperation of Ast
-    | Expression of Positions * ((Ast option * Ast) * Ast option)
+    | Parens of Positions * Ast // (a)
 
     // Statements
     | Assertion of Positions * Ast
@@ -160,7 +155,7 @@ type Ast =
     | Precedence of Positions * int
     | PrefixOp of Ast * Ast // operator * operand
     | PostfixOp of Ast * Ast // operator * operand
-    | InfixOp of Ast * Ast * Ast // operator * firstOperand * SecondOperand
+    | InfixOp of (Ast * Ast option) list // (operarand * operator option) list
 
     | InfixDeclWithPrecedence of Positions * (string * Ast) // infix symbol with precedence
     | PrefixDecl of Positions * string
