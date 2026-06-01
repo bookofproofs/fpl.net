@@ -118,7 +118,7 @@ let keywordAll = choice [skipString LiteralAll .>> SW; skipString LiteralAllSymb
 let keywordEx = choice [skipString LiteralEx .>> SW; skipString LiteralExSymbol .>> IW]
 let keywordExN = skipString LiteralExN .>> IW
 let keywordExNSymbolic = skipString LiteralExNSymbol 
-let keywordIs = skipString LiteralIs .>> attemptSW 
+let keywordIs = skipString LiteralIs 
 
 
 // Via templates, FPL supports generic types, which make it possible to define abstract mathematical
@@ -376,7 +376,10 @@ let existsTimeNQuantifier = choice [
 ]
 
 let existsTimesN = positions ((existsTimeNQuantifier .>>. namedVariableDeclarationList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.ExistsN <!> "ExistsN"
-let isOp = (keywordIs >>. leftParen >>. predicate) .>>. (comma >>. variableType) .>> rightParen
+let isOp = choice [
+        attempt ((predicateWithQualification .>> SW .>> keywordIs) .>>. (SW >>. variableType))
+        (keywordIs >>. attemptSW >>. leftParen >>. predicate) .>>. (comma >>. variableType) .>> rightParen
+    ]
 let isOperator = positions isOp |>> Ast.IsOperator <!> "IsOperator"
 
 // infix operators like the equality operator 

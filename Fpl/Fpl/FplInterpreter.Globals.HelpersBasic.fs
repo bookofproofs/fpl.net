@@ -336,10 +336,10 @@ let allBefore searchItem xs =
         | [] ->
             // item not found → return []
             []
-        | x:: _ when Object.ReferenceEquals(x, searchItem) ->
+        | x :: _ when Object.ReferenceEquals(x, searchItem) ->
             // found the item → return reversed accumulator
             List.rev acc
-        | x:: rest ->
+        | x :: rest ->
             // keep collecting until we find the item
             loop (x :: acc) rest
 
