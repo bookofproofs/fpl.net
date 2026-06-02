@@ -1064,10 +1064,8 @@ let rec eval ast =
     | Ast.PredicateWithQualification(predicateWithOptSpecificationAst, qualificationListAst) ->
         eval predicateWithOptSpecificationAst
         eval qualificationListAst
-    | Ast.InfixOp operandOperatorOptList ->
+    | Ast.InfixOp ((pos1, pos2), operandOperatorOptList) ->
         let fv = heap.Eval.PeekEvalStack()
-        let pos1 = fv.StartPos
-        let pos2 = fv.EndPos
         operandOperatorOptList
         |> List.map (fun (predAst, opAstOpt) -> 
             // operand
@@ -1091,7 +1089,7 @@ let rec eval ast =
         |> ignore
 
         // if there was at least one infix operator transform the symbol table according to precedence
-        if fv.ArgList.Count > 2 then
+        if fv.ArgList.Count > 1 && fv.Name = PrimRefL then
             /// Returns the precedence of fv1 if its ExpressionType is Infix
             /// or Int32.MaxValue otherwise
             let getPrecedence (fv1:FplGenericNode) =
@@ -1144,8 +1142,6 @@ let rec eval ast =
                 fv.ArgList.RemoveAt(currMinIndex+1) 
                 fv.ArgList.RemoveAt(currMinIndex-1) 
         simplifyTriviallyNestedExpressions fv
-
-
     | Ast.PrefixOp(operatorAst, predicateAst) 
     | Ast.PostfixOp(operatorAst, predicateAst) -> 
         let fv = heap.Eval.PeekEvalStack()

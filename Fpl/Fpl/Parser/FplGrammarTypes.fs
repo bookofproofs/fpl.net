@@ -155,7 +155,7 @@ type Ast =
     | Precedence of Positions * int
     | PrefixOp of Ast * Ast // operator * operand
     | PostfixOp of Ast * Ast // operator * operand
-    | InfixOp of (Ast * Ast option) list // (operarand * operator option) list
+    | InfixOp of Positions * ((Ast * Ast option) list) // (operarand * operator option) list
 
     | InfixDeclWithPrecedence of Positions * (string * Ast) // infix symbol with precedence
     | PrefixDecl of Positions * string

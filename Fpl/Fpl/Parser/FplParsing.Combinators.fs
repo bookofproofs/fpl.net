@@ -433,10 +433,12 @@ let pPrefixExpr : Parser<Ast,unit> =
 
 // INFIX: prefixExpr (space infixOp space prefixExpr)*
 let pInfixExpr : Parser<Ast,unit> =
+    positions(
     pipe2
         pPrefixExpr
         (many (attempt (SW >>. infixSymbolWithPos .>> SW .>>. pPrefixExpr)))
         (fun first rest ->
+            // first = [(A, "+"); ("-", C); ("*", D)]
             // rest = [("+", B); ("-", C); ("*", D)]
 
             let operands =
@@ -447,11 +449,12 @@ let pInfixExpr : Parser<Ast,unit> =
                 (rest |> List.map (fun (op, _) -> Some op))
                 @ [None]
                 // [Some "+"; Some "-"; Some "*"; None]
-
-            Ast.InfixOp (List.zip operands ops)
-            // InfixOp [ (A, Some "+"); (B, Some "-"); (C, Some "*"); (D, None) ]
+            
+            List.zip operands ops
+            // [ (A, Some "+"); (B, Some "-"); (C, Some "*"); (D, None) ]
         ) <!> "pInfixExpr"
-
+    )
+    |>> fun (pos,chain) -> Ast.InfixOp(pos, chain)
 
 let expression = pInfixExpr
 
