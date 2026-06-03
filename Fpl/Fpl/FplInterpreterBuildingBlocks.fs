@@ -1068,7 +1068,9 @@ let rec eval ast =
         eval predicateWithOptSpecificationAst
         eval qualificationListAst
     | Ast.InfixOp ((pos1, pos2), operandOperatorOptList) ->
-        let fv = heap.Eval.PeekEvalStack()
+        let parent = heap.Eval.PeekEvalStack()
+        let fv = new FplReference((pos1, pos2), parent)
+        heap.Eval.PushEvalStack(fv)
         operandOperatorOptList
         |> List.map (fun (predAst, opAstOpt) -> 
             // operand
@@ -1144,7 +1146,13 @@ let rec eval ast =
                 | _ -> ()
                 fv.ArgList.RemoveAt(currMinIndex+1) 
                 fv.ArgList.RemoveAt(currMinIndex-1) 
-        simplifyTriviallyNestedExpressions fv
+        let fv = heap.Eval.PeekEvalStack() // if the reference was replaced, take this one
+        simplifyTriviallyNestedExpressions fv 
+        heap.Eval.PopEvalStack()
+        match parent with 
+        | :? FplReference ->
+            simplifyTriviallyNestedExpressions parent 
+        | _ -> ()
     | Ast.PrefixOp(operatorAst, operandAst) 
     | Ast.PostfixOp(operatorAst, operandAst) -> 
         let fv = heap.Eval.PeekEvalStack()

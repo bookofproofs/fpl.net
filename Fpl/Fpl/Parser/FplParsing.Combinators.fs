@@ -241,7 +241,7 @@ let argumentTuple = positions pArgs |>> Ast.ArgumentTuple <!> "ArgumentTuple"
 
 let delegateName = positions (idStartsWithCap) .>> IW |>> Ast.DelegateName <!> "DelegateName"
 
-let fplDelegate = keywordDel >>. (dot >>. delegateName .>>. argumentTuple .>> IW) |>> Ast.Delegate <!> "Delegate"
+let fplDelegate = keywordDel >>. (dot >>. delegateName .>>. argumentTuple) .>> IW |>> Ast.Delegate <!> "Delegate"
 
 
 let keywordReturn = IW >>. (skipString LiteralRetL <|> skipString LiteralRet) .>> SW 
