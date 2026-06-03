@@ -592,7 +592,7 @@ type TestFplValueScopeFplId() =
         | "base14" -> Assert.AreEqual<string>(varVal, base1.FplId)
         | "base15" -> Assert.AreEqual<string>("-", base1.FplId)
         | "base15a" -> Assert.AreEqual<string>("'", base1.FplId)
-        | "base15b" -> Assert.AreEqual<string>("'", base1.FplId)
+        | "base15b" -> Assert.AreEqual<string>("-", base1.FplId)
         | "base16" -> Assert.AreEqual<string>("-", base1.FplId)
         | "base17" -> Assert.AreEqual<string>("'", base1.FplId)
         | "base18" -> Assert.AreEqual<string>(LiteralEx, base1.FplId)

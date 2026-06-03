@@ -1145,13 +1145,16 @@ let rec eval ast =
                 fv.ArgList.RemoveAt(currMinIndex+1) 
                 fv.ArgList.RemoveAt(currMinIndex-1) 
         simplifyTriviallyNestedExpressions fv
-    | Ast.PrefixOp(operatorAst, predicateAst) 
-    | Ast.PostfixOp(operatorAst, predicateAst) -> 
+    | Ast.PrefixOp(operatorAst, operandAst) 
+    | Ast.PostfixOp(operatorAst, operandAst) -> 
         let fv = heap.Eval.PeekEvalStack()
-        let refBlock = new FplReference((fv.StartPos, fv.EndPos), fv) 
-        heap.Eval.PushEvalStack(refBlock)
-        eval predicateAst
+        let operator = new FplReference((fv.StartPos, fv.EndPos), fv) 
+        heap.Eval.PushEvalStack(operator)
         eval operatorAst
+        let operand = new FplReference((operator.StartPos, operator.EndPos), operator) 
+        heap.Eval.PushEvalStack(operand)
+        eval operandAst
+        heap.Eval.PopEvalStack()
         heap.Eval.PopEvalStack()
         simplifyTriviallyNestedExpressions fv
     | Ast.Parens ((pos1, pos2), expressionAst) ->

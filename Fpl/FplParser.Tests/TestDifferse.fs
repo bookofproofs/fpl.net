@@ -29,6 +29,8 @@ type TestDiverse () =
     [<DataRow("13", """def pred A() {y is M}""")>]
     [<DataRow("14", """def pred T() { dec x,y,z:pred x:=true y:=true z:=true; and(and(x,y),z) }""")>]
     [<DataRow("15", """loc true := !tex: "1" !eng: "true";""")>]
+    [<DataRow("16", """def pred A() {-(y + x' = @2 * x)'}""")>]
+    
     [<TestMethod>]
     member this.TestDiverseSuccess (no:string, fplCode:string) =
         let result = run (stdParser .>> eof) fplCode
