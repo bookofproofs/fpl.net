@@ -1006,6 +1006,9 @@ let rec eval ast =
                     var04List.Add kvp
             )
         ) |> ignore
+        let identifier = fv.ArgList |> Seq.map (fun arg -> arg.FplId) |> String.concat ""
+        fv.FplId <- identifier
+        fv.TypeId <- identifier
         heap.Eval.PopEvalStack()
         var04List
         |> Seq.iter (fun kvp -> 
