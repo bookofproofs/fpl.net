@@ -249,12 +249,12 @@ let keywordReturn = IW >>. (skipString LiteralRetL <|> skipString LiteralRet) .>
 
 
 let caseElse = positions (IW >>. elseCase >>. IW >>. statementList)  |>> Ast.CaseElse <!> "CaseElse"
-let caseSingle = positions ((case >>. predicate .>> colon) .>>. statementList) .>> IW |>> Ast.CaseSingle <!> "CaseSingle"
+let caseSingle = positions ((case >>. predicate .>> IW .>> colon) .>>. statementList) .>> IW |>> Ast.CaseSingle <!> "CaseSingle"
 let caseSingleList = many1 caseSingle
 let casesStatement = positions (((keywordCases >>. leftParen >>. IW >>. caseSingleList .>>. caseElse .>> rightParen))) |>> Ast.Cases <!> "Cases"
 
 let mapCaseElse = positions (IW >>. elseCase >>. predicate) |>> Ast.MapCaseElse <!> "MapCaseElse"
-let mapCaseSingle = positions ((case >>. predicate .>> colon) .>>. (IW >>. predicate)) .>> IW |>> Ast.MapCaseSingle <!> "MapCaseSingle"
+let mapCaseSingle = positions ((case >>. predicate .>> IW .>> colon) .>>. (IW >>. predicate)) .>> IW |>> Ast.MapCaseSingle <!> "MapCaseSingle"
 let mapCaseSingleList = many1 mapCaseSingle
 let mapCases = positions (((keywordMapCases >>. leftParen >>. IW >>. mapCaseSingleList .>>. mapCaseElse .>> rightParen))) |>> Ast.MapCases <!> "MapCases"
 

@@ -590,7 +590,7 @@ type TestFplValueScopeFplRepresentation() =
         | "base14" -> Assert.AreEqual<string>("∅", base1.Represent())
         | "base15" -> Assert.AreEqual<string>($"-({LiteralUndef})", base1.Represent())
         | "base15a" -> Assert.AreEqual<string>($"'({LiteralUndef})", base1.Represent())
-        | "base15b" -> Assert.AreEqual<string>($"'(-({LiteralUndef}))", base1.Represent())
+        | "base15b" -> Assert.AreEqual<string>($"-('({LiteralUndef}))", base1.Represent())
         | "base16" -> Assert.AreEqual<string>($"-(*(=(+({LiteralUndef}, {LiteralUndef}), {LiteralObj}), {LiteralUndef}))", base1.Represent())
         | "base17" -> Assert.AreEqual<string>($"'(*(=(+({LiteralUndef}, '({LiteralUndef})), {LiteralObj}), {LiteralUndef}))", base1.Represent())
         | "base18" -> Assert.AreEqual<string>(PrimUndetermined, base1.Represent())
