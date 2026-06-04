@@ -19,19 +19,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 
-let dot = skipChar '.' |>> Ast.Dot <!> "Dot"
-let colon = skipChar ':' .>> IW 
-let colonEqual = skipString ":=" >>. IW 
-let at = pchar '@'
-let case = skipChar '|' >>. IW
-let elseCase = skipChar '?' >>. IW
-let semiColon = skipChar ';' .>> IW 
-let exclamationMark = skipChar '!' 
-let toArrow = skipString "->"
-let vDash = skipString "|-"
-let quote = skipChar '"' 
-let slash = skipChar '/'
-
 // -----------------------------------------------------
 // Extensions of the FPL language allow syntax injections as long as they match the following regex expression.
 // The FPL interpreter will try to match extensionString after the @ Literal
@@ -83,7 +70,6 @@ let keywordSelf = positions (skipString LiteralSelf) .>> IW |>> Ast.Self <!> "Se
 let keywordParent = positions (skipString LiteralParent) .>> IW |>> Ast.Parent <!> "Parent"
 let keywordBaseClassReference = skipString LiteralBase .>> IW
 let keywordIndex = positions (skipString LiteralIndL <|> skipString LiteralInd) |>> Ast.IndexType <!> "IndexType"
-
 
 (* FplBlock-related Keywords *)
 let keywordPremise = (skipString LiteralPreL <|> skipString LiteralPre) >>. IW 
@@ -240,6 +226,7 @@ let pArgs : Parser<Ast list,unit> =
 let argumentTuple = positions pArgs |>> Ast.ArgumentTuple <!> "ArgumentTuple" 
 
 let delegateName = positions (idStartsWithCap) .>> IW |>> Ast.DelegateName <!> "DelegateName"
+
 
 let fplDelegate = keywordDel >>. (dot >>. delegateName .>>. argumentTuple) .>> IW |>> Ast.Delegate <!> "Delegate"
 
