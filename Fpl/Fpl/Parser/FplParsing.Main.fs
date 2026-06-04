@@ -65,7 +65,15 @@ let private getParseableInputAndErrorNodes input origLines origLength =
 
     // Iterate once for each relevant chunk (if no matches, still run once)
     let upper =
-        if matches.Length = 0 then 0 else matches.Length - 1
+        if matches.Length = 0 then
+            0
+        else
+            matches.Length - 1
+        
+    if matches.Length > 0 && matches[0].Index>0 then
+        let prefix1 = input.Substring(0,matches[0].Index)
+        let maskedPrefix1 = masked prefix1
+        maskedPrefix.Append(maskedPrefix1) |> ignore
 
     for i in [0..upper] do
         // If there is a non-matching prefix before the first recovery match, preserve its masked form
@@ -109,7 +117,7 @@ let private getParseableInputAndErrorNodes input origLines origLength =
                     parseAbleInput.Append(maskedChunk) |> ignore
 
             // Run the full AST parser on the remainder to produce diagnostics for the chunk
-            match run (stdParser .>> eof) remainder with
+            match run (stdParser .>> eof) (remainder) with
             | Failure(errorMsg, _, _) ->
                 errorList.Add (getErrorNodes errorMsg origLines origLength)
             | _ -> ()
