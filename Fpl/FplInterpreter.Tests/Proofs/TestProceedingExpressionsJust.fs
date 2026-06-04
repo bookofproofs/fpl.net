@@ -531,7 +531,7 @@ type TestProceedingExpressionsJust() =
     // ExistsByExample: pre: p(c)
     [<DataRow("ExistsByExample_01", "inf ExistsByExample{dec p:pred(x:obj); pre:p(x) con:ex x:tpl{p(x)}} thm T {dec a:obj; true} proof T$1 {1: iif(is(a,N), true) 2. 1, byinf ExistsByExample |- true}", "∃ a:obj {(a is N) ⇔ true}", 1)>]
     [<DataRow("ExistsByExample_02", "inf ExistsByExample{dec p:pred(); pre:p con:ex x:tpl{p(x)}} thm T {true} proof T$1 {1: and(ex x:obj {is(x,M)}, iif(true,false)) 2. 1, byinf ExistsByExample |- true}", "∃ x:tpl {∃ x:obj {x is M} ∧ (true ⇔ false)}", 1)>]
-    [<DataRow("ExistsByExample_02a", "inf ExistsByExample{dec p:pred(c:tpl); pre:p con:ex x:tpl{p(x)}} thm T {true} proof T$1 {dec a:tpl; 1: and(is(a,M) , (a = $1)) 2. 1, byinf ExistsByExample |- true}", "∃ x:tpl {(a is M) ∧ =(a, $1)}", 1)>]
+    [<DataRow("ExistsByExample_02a", "inf ExistsByExample{dec p:pred(c:tpl); pre:p con:ex x:tpl{p(x)}} thm T {true} proof T$1 {dec a:tpl; 1: and(is(a,M) , (a = $1)) 2. 1, byinf ExistsByExample |- true}", "∃ x:tpl {(a is M) ∧ a = $1}", 1)>]
     [<DataRow("ExistsByExample_03", "inf ExistsByExample{dec p:pred(); pre:p con:ex x:tpl{p(x)}} thm T {true} proof T$1 {1: xor(all z:obj {is(z,K)}, not (xor(true,false))) 2. 1, byinf ExistsByExample |- true}", "∃ x:tpl {∀ z:obj {z is K} ⩡ ¬(true ⩡ false)}", 1)>]
 
     // Contraposition: pre: impl(not p, not q)

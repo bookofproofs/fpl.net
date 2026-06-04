@@ -542,7 +542,7 @@ type TestFplValueScopeFplId() =
     [<DataRow("base34", "is(x, Set)")>]
     [<TestMethod>]
     member this.TestPredicate(var, varVal) =
-        
+        ad.Clear()
         let fplCode = sprintf "def pred T1() { %s }" varVal
         let filename = "TestPredicateName"
         prepareFplCode(filename + ".fpl", fplCode, false) 

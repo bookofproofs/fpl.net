@@ -441,6 +441,7 @@ let rec eval ast =
         fv.TypeId <- symbol
         fv.StartPos <- pos1
         fv.EndPos <- pos2
+        fv.ExpressionType <- FixType.Infix(symbol,-1)
         checkSIG01Diagnostics fv
     | Ast.PostFixSymbolWithPos((pos1, pos2), symbol) -> 
         let fv = heap.Eval.PeekEvalStack()
@@ -448,6 +449,7 @@ let rec eval ast =
         fv.TypeId <- symbol
         fv.StartPos <- pos1
         fv.EndPos <- pos2
+        fv.ExpressionType <- FixType.Postfix symbol
         checkSIG01Diagnostics fv
     | Ast.PrefixSymbolWithPos((pos1, pos2), symbol) -> 
         let fv = heap.Eval.PeekEvalStack()
@@ -455,6 +457,7 @@ let rec eval ast =
         fv.TypeId <- symbol
         fv.StartPos <- pos1
         fv.EndPos <- pos2
+        fv.ExpressionType <- FixType.Prefix symbol
         checkSIG01Diagnostics fv
     | Ast.Self((pos1, pos2), _) -> 
         let parent = heap.Eval.PeekEvalStack()
@@ -1176,7 +1179,7 @@ let rec eval ast =
         heap.Eval.PopEvalStack()
         match fv with 
         | :? FplReference ->
-            simplifyTriviallyNestedExpressions fv 
+            simplifyTriviallyNestedExpressions fv
         | _ -> ()
     | Ast.Cases((pos1, pos2), (caseSingleListAsts, caseElseAst)) ->
         let parent = heap.Eval.PeekEvalStack()

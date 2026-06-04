@@ -228,11 +228,12 @@ type FplGenericNode(positions: Positions, parent: FplGenericNode option) =
             elif _expressionType.Type = value.Type then
                 ()
             else
-                raise (
-                    ArgumentException(
-                        $"Type was already initialized with `{_expressionType.Type}`, cannot set it again with {value.Type}."
-                    )
-                )
+                _expressionType <- value
+                //raise (
+                //    ArgumentException(
+                //        $"Type was already initialized with `{_expressionType.Type}`, cannot set it again with {value.Type}."
+                //    )
+                //)
 
     /// Indicates if this FplValue has bracketed arguments or parameters, 
     /// parenthesized arguments or parameters, or no arguments or parameters
