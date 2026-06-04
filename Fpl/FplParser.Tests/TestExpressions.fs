@@ -403,10 +403,30 @@ type TestExpressions () =
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<DataRow("01", "a * b + (c d)")>]
+    [<DataRow("02", "a ∧ ∀ x:obj {x  N}")>]
     [<TestMethod>]
     member this.TestPredicateContentFailure (no:string, expr:string) =
         let result = run (predContent .>> eof) expr
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
+
+    [<DataRow("01", "{a * b + (c d)}")>]
+    [<DataRow("02", "{a ∧ ∀ x:obj {x  N}}")>]
+    [<TestMethod>]
+    member this.TestPredicateInstanceBlocktFailure (no:string, expr:string) =
+        let result = run (predicateInstanceBlock .>> eof) expr
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
+
+    [<DataRow("01", "{a * b + (c d)}")>]
+    [<DataRow("02", "{a ∧ ∀ x:obj {x  N}}")>]
+    [<TestMethod>]
+    member this.TestPredicateDefinitionBlocktFailure (no:string, expr:string) =
+        let result = run (predicateDefinitionBlock .>> eof) expr
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
+
 

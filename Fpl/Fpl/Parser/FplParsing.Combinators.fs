@@ -499,7 +499,7 @@ let axiom = positions (axiomSignature .>>. theoremLikeBlock) |>> Ast.Axiom <!> "
 
 (* FPL building blocks - Constructors *)
 
-let keywordIntrinsic = positions (skipString LiteralIntrL <|> skipString LiteralIntr) .>> IW |>> Ast.Intrinsic <!> "Intrinsic"
+let keywordIntrinsic = positions (skipString LiteralIntrL <|> skipString LiteralIntr) |>> Ast.Intrinsic <!> "Intrinsic"
 
 let predContent = varDeclOrSpecList .>>. spacesPredicate |>> Ast.DefPredicateContent <!> "DefPredicateContent"
 
@@ -536,7 +536,7 @@ let definitionProperty = choice [
     attempt predicateInstance
     functionalTermInstance
 ]
-let propertyList = opt (many1 (definitionProperty .>> IW)) 
+let propertyList = opt (many1 (safeProceedingSpace definitionProperty)) 
 
 (* FPL building blocks - Proofs 
 
@@ -582,7 +582,7 @@ let proof = positions (proofSignature .>>. proofBlock) |>> Ast.Proof <!> "Proof"
 
 // Predicate building blocks can be defined similarly to classes, they can have properties but they cannot be derived any parent type
 
-let predicateDefinitionBlock = opt (leftBrace  >>. ((keywordIntrinsic <|> predContent) .>> IW) .>>. propertyList .>> rightBrace)
+let predicateDefinitionBlock = opt (leftBrace  >>. (keywordIntrinsic <|> predContent) .>>. propertyList .>> rightBrace)
 let inheritedType = positions idStartsWithCap |>> Ast.InheritedType <!> "InheritedType" 
 let inheritedTypeList = sepBy1 inheritedType comma |>> Ast.InheritedTypeList <!> "InheritedTypeList"
 let predicateSignature = positions (keywordPredicate >>. SW >>. (simpleSignature .>>. opt (colon >>. inheritedTypeList) .>> IW) .>>. paramTuple) .>>. userDefinedSymbol .>> IW |>> Ast.PredicateSignature <!> "PredicateSignature"

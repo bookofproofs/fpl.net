@@ -328,7 +328,7 @@ type TestKeywordSpaces() =
         let result = run (keywordIntrinsic .>> eof) $"""{word} """
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestSpacesIs () =

@@ -51,6 +51,7 @@ let positions (p: Parser<_,_>): Parser<Positions * _,_> =
             (Positions(pos1, pos2), result)
         )
 
+
 // ============================================================================
 // Whitespace control
 // ============================================================================
@@ -70,6 +71,14 @@ let IW : Parser<unit,unit> =
     skipMany whiteSpaces >>% () <?> "<whitespace>" <!> "IW"
 
 let attemptSW = SW <|> (IW .>> attempt (lookAhead (choice [skipChar '('; skipChar ')'; skipChar '{'; skipChar ','; skipChar ';'; skipChar '[' ]))) <!> "atemptSW"
+
+// Prevents parsers like skipChar ')', skipChar '}', skipChar ']', or definitionProperty
+// that can be proceeded by whitespaces to interfer with infix operators in a way
+// that would break FParsec backtracking error reporting needed for improved FPL diagnostics.
+let safeProceedingSpace p =
+    lookAhead (IW >>. p)
+    >>. IW
+    >>. p
 
 // ============================================================================
 // Operator sets
@@ -110,27 +119,20 @@ let objectMathSymbols : Parser<string,unit> =
 // Literals and base atoms
 // ============================================================================
 
-// Prevents closing characters ')', '}', or ']' being proceeded with whitespaces to interfer with infix operators in a way
-// that would break FParsec backtracking error reporting needed for improved FPL diagnostics.
-let safeClosing c =
-    lookAhead (IW >>. skipChar c)
-    >>. IW
-    >>. skipChar c
-
 let leftParen : Parser<unit,unit> = 
     skipChar '(' >>. IW <!> "leftParen"
 
-let rightParen : Parser<unit,unit> = safeClosing ')' <!> "rightParen"
+let rightParen : Parser<unit,unit> = safeProceedingSpace (skipChar ')') <!> "rightParen"
 
 let leftBrace : Parser<unit,unit> = 
     skipChar '{' >>. IW <!> "leftBrace"
 
-let rightBrace : Parser<unit,unit> = safeClosing '}' <!> "rightBrace"
+let rightBrace : Parser<unit,unit> = safeProceedingSpace (skipChar '}') <!> "rightBrace"
 
 let leftBracket : Parser<unit,unit> =
     skipChar '[' >>. IW <!> "leftBracket"
 
-let rightBracket : Parser<unit,unit> = safeClosing ']' <!> "rightBracket"
+let rightBracket : Parser<unit,unit> = safeProceedingSpace (skipChar ']') <!> "rightBracket"
 
 let comma : Parser<unit,unit> =
     attempt (IW >>. skipChar ',' >>. IW) <!> "comma"
