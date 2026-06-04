@@ -110,23 +110,27 @@ let objectMathSymbols : Parser<string,unit> =
 // Literals and base atoms
 // ============================================================================
 
+// Prevents closing characters ')', '}', or ']' being proceeded with whitespaces to interfer with infix operators in a way
+// that would break FParsec backtracking error reporting needed for improved FPL diagnostics.
+let safeClosing c =
+    lookAhead (IW >>. skipChar c)
+    >>. IW
+    >>. skipChar c
+
 let leftParen : Parser<unit,unit> = 
     skipChar '(' >>. IW <!> "leftParen"
 
-let rightParen : Parser<unit,unit> = 
-    IW >>. skipChar ')' <!> "rightParen"
+let rightParen : Parser<unit,unit> = safeClosing ')' <!> "rightParen"
 
 let leftBrace : Parser<unit,unit> = 
     skipChar '{' >>. IW <!> "leftBrace"
 
-let rightBrace : Parser<unit,unit> = 
-    IW >>. skipChar '}' <!> "rightBrace"
+let rightBrace : Parser<unit,unit> = safeClosing '}' <!> "rightBrace"
 
 let leftBracket : Parser<unit,unit> =
     skipChar '[' >>. IW <!> "leftBracket"
 
-let rightBracket : Parser<unit,unit> =
-    IW >>. skipChar ']' <!> "rightBracket"
+let rightBracket : Parser<unit,unit> = safeClosing ']' <!> "rightBracket"
 
 let comma : Parser<unit,unit> =
     attempt (IW >>. skipChar ',' >>. IW) <!> "comma"

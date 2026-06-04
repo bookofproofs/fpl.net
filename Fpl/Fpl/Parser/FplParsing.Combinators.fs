@@ -581,6 +581,7 @@ let proof = positions (proofSignature .>>. proofBlock) |>> Ast.Proof <!> "Proof"
 (* FPL building blocks - Definitions *)
 
 // Predicate building blocks can be defined similarly to classes, they can have properties but they cannot be derived any parent type
+
 let predicateDefinitionBlock = opt (leftBrace  >>. ((keywordIntrinsic <|> predContent) .>> IW) .>>. propertyList .>> rightBrace)
 let inheritedType = positions idStartsWithCap |>> Ast.InheritedType <!> "InheritedType" 
 let inheritedTypeList = sepBy1 inheritedType comma |>> Ast.InheritedTypeList <!> "InheritedTypeList"

@@ -1,6 +1,7 @@
 namespace FplParser.Tests
 
 open FParsec
+open FplParsing.Basic
 open FplParsing.Combinators
 open FplPrimitives
 open Microsoft.VisualStudio.TestTools.UnitTesting
@@ -382,6 +383,7 @@ type TestExpressions () =
     [<DataRow("05e", "(x =)")>]
     [<DataRow("05d", "(x= )")>]
     [<DataRow("05f", "(x=)")>]
+    [<DataRow("06", "a * b + (c d)")>]
     [<TestMethod>]
     member this.TestPredicateSyntaxFailure (no:string, expr:string) =
         let result = run (predicate .>> eof) expr
@@ -399,3 +401,12 @@ type TestExpressions () =
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
+
+    [<DataRow("01", "a * b + (c d)")>]
+    [<TestMethod>]
+    member this.TestPredicateContentFailure (no:string, expr:string) =
+        let result = run (predContent .>> eof) expr
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
+

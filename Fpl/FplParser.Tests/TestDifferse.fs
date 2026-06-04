@@ -60,6 +60,8 @@ type TestDiverse () =
 
     [<DataRow("01", """axiom s SomeAxiom2 {true}""")>]
     [<DataRow("02", """def cl T {ctor T() {dec base. (); }}""")>]
+    [<DataRow("03", """def pred T() { (∀ x:obj {x is N} ∧ ¬∃ y:obj {y is M}) ∨ (¬∀ x:obj {x  N} ∧ ∃ y:obj {y is M}) }""")>]
+    [<DataRow("04", """def pred T() { a * b + (c d) }""")>]
     [<TestMethod>]
     member this.TestDiverseBuildingBlockFail (no:string, fplCode:string) =
         let result = run (buildingBlock .>> eof) fplCode
