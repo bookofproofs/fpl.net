@@ -99,7 +99,7 @@ let keywordMapCases = skipString LiteralMapCases .>> IW
 let keywordAssert = (skipString LiteralAssert <|> skipString LiteralAss) .>> SW
 
 (* Predicate-related Keywords *)
-let keywordUndefined = positions (skipString LiteralUndefL <|> skipString LiteralUndef) .>> IW |>> Ast.Undefined <!> "Undefined"
+let keywordUndefined = positions (skipString LiteralUndefL <|> skipString LiteralUndef) |>> Ast.Undefined <!> "Undefined"
 let keywordTrue = positions (skipString LiteralTrue) |>> Ast.True <!> "True"  
 let keywordFalse = positions (skipString LiteralFalse) |>>  Ast.False  
 let keywordByDef = pstring LiteralByDef 
