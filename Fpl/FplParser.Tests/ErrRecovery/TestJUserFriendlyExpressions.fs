@@ -58,6 +58,25 @@ def pred T() {}""", 2L, 14L)>]
         | _ ->
             Assert.Fail("No error block found")
 
+    [<DataRow("01", """def pred T() {}""", 1)>]
+    [<DataRow("02", """xxxx def pred T() {}""", 2)>]
+    [<DataRow("02a", """ xxxx def pred T() {}""", 2)>]
+    [<DataRow("03", """xxxx def pred T() {true} yyyyy""", 3)>]
+    [<DataRow("03a", """ xxxx def pred T() {true} yyyyy""", 3)>]
+    [<DataRow("03b", """xxxx def pred T() {true} yyyyy """, 3)>]
+    [<DataRow("03c", """ xxxx def pred T() {true} yyyyy """, 3)>]
+    [<DataRow("04", """def pred T() {true} yyyyy""", 2)>]
+    [<DataRow("04a", """ def pred T() {true} yyyyy""", 2)>]
+    [<TestMethod>]
+    member this.TestErrorRecoveryBeforeOrAfterCode(no:string, fplCode:string, numbOfBlocks: int) =
+        ad.Clear()
+        let result, success = fplParser fplCode
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.AreEqual<int>(numbOfBlocks, result.Length)
+
+
+
     [<DataRow("uses00", """uses Fpl.Test.""")>]
     [<DataRow("uses01", """uses Fpl.Test alias """)>]
     [<DataRow("cl01", """def cl """)>]
