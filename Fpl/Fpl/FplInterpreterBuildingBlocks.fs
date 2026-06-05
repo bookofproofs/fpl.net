@@ -52,7 +52,7 @@ open FplInterpreterCasesStmt
 /// Simplify trivially nested expressions by removing from the stack FplValue nodes that were created due to too long parsing tree and replacing them by their sub nodes 
 let rec simplifyTriviallyNestedExpressions (rb1:FplGenericNode) = 
     match rb1 with 
-    | :? FplReference as rb when rb.ArgList.Count = 1 && rb.FplId = "" ->
+    | :? FplReference as rb when rb.ArgList.Count = 1 && rb.FplId = "" && rb.ExpressionType <> FixType.Paren ->
         // removable reference blocks are those with only a single argument and unset FplId 
         let subNode = rb.ArgList[0] 
         heap.Eval.Pop() |> ignore // pop the removable reference block and ignored it
@@ -1170,13 +1170,19 @@ let rec eval ast =
         simplifyTriviallyNestedExpressions fv
     | Ast.Parens ((pos1, pos2), expressionAst) ->
         let fv = heap.Eval.PeekEvalStack()
-        let refBlock = new FplReference((pos1, pos2), fv)
-        heap.Eval.PushEvalStack(refBlock)
+        let mutable newNodeAdded = false
+        match fv.Parent with
+        | Some (:? FplReference as ref) when ref.ExpressionType.IsNoFix ->
+            ref.ExpressionType <- FixType.Paren
+        | Some (:? FplReference as ref) when ref.ExpressionType.IsPostfix || ref.ExpressionType.IsPrefix ->
+            let refBlock = new FplReference ((pos1,pos2), fv)
+            refBlock.ExpressionType <- FixType.Paren
+            heap.Eval.PushEvalStack(refBlock)
+            newNodeAdded <- true
+        | _ -> ()
         eval expressionAst
-        let refBlock = heap.Eval.PeekEvalStack() // if the reference was replaced, take this one
-        refBlock.EndPos <- pos2
-        simplifyTriviallyNestedExpressions refBlock 
-        heap.Eval.PopEvalStack()
+        if newNodeAdded then
+            heap.Eval.PopEvalStack()
         match fv with 
         | :? FplReference ->
             simplifyTriviallyNestedExpressions fv

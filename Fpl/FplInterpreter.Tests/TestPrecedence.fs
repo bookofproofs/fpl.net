@@ -8,12 +8,12 @@ open CommonTestHelpers
 [<TestClass>]
 type TestPrecedence() =
 
-    [<DataRow("b01","(x + y * z = 1)")>]
-    [<DataRow("b02","(x * y + z = 1)")>]
-    [<DataRow("b03","(x + y = z * 1)")>]
-    [<DataRow("b04","(x * y = z + 1)")>]
-    [<DataRow("b05","(x = y + z * 1)")>]
-    [<DataRow("b06","(x = y * z + 1)")>]
+    [<DataRow("b01","x + y * z = 1")>]
+    [<DataRow("b02","x * y + z = 1")>]
+    [<DataRow("b03","x + y = z * 1")>]
+    [<DataRow("b04","x * y = z + 1")>]
+    [<DataRow("b05","x = y + z * 1")>]
+    [<DataRow("b06","x = y * z + 1")>]
     [<TestMethod>]
     member this.TestPrecedenceInfix(var, varVal) =
         

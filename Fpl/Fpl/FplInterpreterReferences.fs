@@ -132,6 +132,13 @@ type FplGenericReference(positions: Positions, parent: FplGenericNode) =
             this.RunExtensionWithVariableReplacement (called :> FplGenericNode)
         | Some (:? FplGenericIsValue as called) ->
             this.SetValue called
+        | None when this.ExpressionType = FixType.Paren ->
+            let arg = this.ArgList[0]
+            match arg with
+            | :? FplGenericHasValue as arg1 ->
+                arg1.Run()
+                this.SetValueOf arg1
+            | _ -> ()
         | _ -> ()
         debug this Debug.Stop
 
@@ -253,24 +260,31 @@ type FplReference(positions: Positions, parent: FplGenericNode) =
                 | _, ArgType.Parentheses, None ->
                     fallBackValueClosure
 
-        match signatureType, headObj.ExpressionType with
+        let argExpr = 
+            match signatureType, headObj.ExpressionType with
+            | SignatureType.Type, _ ->
+                prefixNotation()
+            | _, FixType.Infix (symbol, _) ->
+                getNotationTwoArgs this symbol signatureType (headObj.Type SignatureType.Type)
+            | _, FixType.Symbol symbol -> symbol
+            | _, FixType.Prefix symbol ->
+                if isSimpleExpression this.ArgList[0] then
+                    $"{symbol}{args}"
+                else
+                    $"{symbol}({args})"
+            | _, FixType.Postfix symbol ->
+                if isSimpleExpression this.ArgList[0] then
+                    $"{args}{symbol}"
+                else
+                    $"({args}){symbol}"
+            | _, _ ->
+                prefixNotation()
+        match signatureType, this.ExpressionType with
         | SignatureType.Type, _ ->
-            prefixNotation()
-        | _, FixType.Infix (symbol, _) ->
-            getNotationTwoArgs this symbol signatureType (headObj.Type SignatureType.Type)
-        | _, FixType.Symbol symbol -> symbol
-        | _, FixType.Prefix symbol ->
-            if isSimpleExpression this.ArgList[0] then
-                $"{symbol}{args}"
-            else
-                $"{symbol}({args})"
-        | _, FixType.Postfix symbol ->
-            if isSimpleExpression this.ArgList[0] then
-                $"{args}{symbol}"
-            else
-                $"({args}){symbol}"
-        | _, _ ->
-            prefixNotation()
+            argExpr
+        | _, FixType.Paren ->
+            $"({argExpr})"
+        | _, _ -> argExpr
 
     override this.Represent() = // done
         if _callCounter > maxRecursion then
@@ -278,37 +292,40 @@ type FplReference(positions: Positions, parent: FplGenericNode) =
             PrimUndetermined // fallback to undefined after infinite recursion (if any)
         else
             _callCounter <- _callCounter + 1
-            let result = 
-                match this.Value, this.DottedChild, this.RefersTo with 
-                | _, Some dc, _ -> 
-                    if not (Object.ReferenceEquals(dc, this)) then
-                        // If the dotted child is not identical as "this",
-                        // delegate the representation to dotted.
-                        dc.Represent()
-                    else
-                        // Otherwise, fall back with dotted's "type representation" to prevent infinite loops
-                        dc.Type SignatureType.Mixed
-                | Some value, _, _ ->
-                    if not (Object.ReferenceEquals(value,this)) then
-                        // If the value is not identical as "this",
-                        // delegate the representation to value.
-                        value.Represent()
-                    else
-                        // Otherwise, fall back with "undef" to prevent infinite loops
-                        PrimUndetermined
-                | _, _, Some refTo when refTo.Name = LiteralSelf && refTo.ErrorOccurred.IsSome ->
-                    // infinite loop or other error in self detected
-                    // fallback to undefined
-                    PrimUndetermined 
-                | _, _, Some refTo ->
-                    if not (Object.ReferenceEquals(refTo,this)) then
-                        // If refTo is not identical as "this",
-                        // delegate the representation to refTo.
-                        refTo.Represent()
-                    else
-                        refTo.Type SignatureType.Mixed
-                | _, _, _ ->
-                    this.Type SignatureType.Mixed
+            let result =
+                if this.ExpressionType = FixType.Paren then
+                    this.ArgList[0].Represent()
+                else
+                    match this.Value, this.DottedChild, this.RefersTo with 
+                    | _, Some dc, _ -> 
+                        if not (Object.ReferenceEquals(dc, this)) then
+                            // If the dotted child is not identical as "this",
+                            // delegate the representation to dotted.
+                            dc.Represent()
+                        else
+                            // Otherwise, fall back with dotted's "type representation" to prevent infinite loops
+                            dc.Type SignatureType.Mixed
+                    | Some value, _, _ ->
+                        if not (Object.ReferenceEquals(value,this)) then
+                            // If the value is not identical as "this",
+                            // delegate the representation to value.
+                            value.Represent()
+                        else
+                            // Otherwise, fall back with "undef" to prevent infinite loops
+                            PrimUndetermined
+                    | _, _, Some refTo when refTo.Name = LiteralSelf && refTo.ErrorOccurred.IsSome ->
+                        // infinite loop or other error in self detected
+                        // fallback to undefined
+                        PrimUndetermined 
+                    | _, _, Some refTo ->
+                        if not (Object.ReferenceEquals(refTo,this)) then
+                            // If refTo is not identical as "this",
+                            // delegate the representation to refTo.
+                            refTo.Represent()
+                        else
+                            refTo.Type SignatureType.Mixed
+                    | _, _, _ ->
+                        this.Type SignatureType.Mixed
             _callCounter <- _callCounter - 1
             result
 

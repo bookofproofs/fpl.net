@@ -118,7 +118,7 @@ type TestInfixOperations() =
             Assert.AreEqual<string>(expected, pr1.Represent())
             prepareFplCode(filename, "", false) |> ignore
 
-    [<DataRow("00", """def pred T1() { (false ∧ false ∧ false) }""", LiteralFalse)>]
+    [<DataRow("00", """def pred T1() { false ∧ false ∧ false }""", LiteralFalse)>]
     [<DataRow("01", """def pred T1() { (true ∧ false ∧ false) }""", LiteralFalse)>]
     [<DataRow("02", """def pred T1() { (false ∧ true ∧ false) }""", LiteralFalse)>]
     [<DataRow("03", """def pred T1() { (true ∧ true ∧ false) }""", LiteralFalse)>]
@@ -141,7 +141,6 @@ type TestInfixOperations() =
         let theory = r.Scope[filename]
 
         let pr1 = theory.Scope["T1()"] 
-        pr1.Run()
         Assert.AreEqual<string>(expected, pr1.Represent())
         prepareFplCode(filename, "", false) |> ignore
 
