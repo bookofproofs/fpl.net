@@ -84,12 +84,11 @@ type Ast =
     | PredicateWithQualification of (Ast * Ast)
         
     // Expressions
-    | ObjectSymbol of Positions * string
-    | InfixOperator of Positions * string
-    | PostfixOperator of Positions * string
-    | PrefixOperator of Positions * string
-    | InfixOperation of Positions * (Ast * Ast option) list
-    | Expression of Positions * ((((Ast option * Ast) * Ast option) * Ast option) * Ast)
+    | ObjectSymbolWithPos of Positions * string
+    | InfixSymbolWithPos of Positions * string
+    | PostFixSymbolWithPos of Positions * string
+    | PrefixSymbolWithPos of Positions * string
+    | Parens of Positions * Ast // (a)
 
     // Statements
     | Assertion of Positions * Ast
@@ -153,11 +152,15 @@ type Ast =
     | ClassDefinitionBlock of Positions * (Ast * Ast list option) option
 
     | DefinitionClass of Positions * (((Ast * Ast option) * Ast option) * Ast) 
-    | Prefix of Positions * string
     | Precedence of Positions * int
-    | Infix of Positions * (string * Ast)
-    | Postfix of Positions * string
-    | Symbol of Positions * string
+    | PrefixOp of Ast * Ast // operator * operand
+    | PostfixOp of Ast * Ast // operator * operand
+    | InfixOp of Positions * ((Ast * Ast option) list) // (operarand * operator option) list
+
+    | InfixDeclWithPrecedence of Positions * (string * Ast) // infix symbol with precedence
+    | PrefixDecl of Positions * string
+    | PostfixDecl of Positions * string
+    | SymbolDecl of Positions * string
 
     // Proofs
     | ArgumentIdentifier of Positions * string

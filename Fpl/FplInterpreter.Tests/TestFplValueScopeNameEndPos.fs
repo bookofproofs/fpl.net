@@ -152,9 +152,9 @@ type TestFplValueScopeNameEndPos() =
                 let hasSignature = prf2 :?> FplProof
                 Assert.AreEqual<int64>(32L, hasSignature.SignEndPos.Column)
             | "loc1" -> 
-                Assert.AreEqual<int64>(23L, loc1.EndPos.Column) 
+                Assert.AreEqual<int64>(22L, loc1.EndPos.Column) 
             | "loc2" -> 
-                Assert.AreEqual<int64>(27L, loc2.EndPos.Column) 
+                Assert.AreEqual<int64>(26L, loc2.EndPos.Column) 
             | _ -> Assert.IsTrue(false, "hier1")
         | _ -> 
             Assert.IsTrue(false, "hier2")
@@ -618,9 +618,9 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("base4", "-1")>]
     [<DataRow("base5", "del.Test()")>]
     [<DataRow("base6", "$1")>]
-    [<DataRow("base7", "Test$1(x)")>] 
+    [<DataRow("base7", "Test1(x)")>] 
     [<DataRow("base8", "Test$1")>]
-    [<DataRow("base9", "Test$1()")>]
+    [<DataRow("base9", "Test1()")>]
     [<DataRow("base10", "Test")>]
     [<DataRow("base11", "v")>]
     [<DataRow("base12", LiteralParent)>]
@@ -685,15 +685,15 @@ type TestFplValueScopeNameEndPos() =
         let base1 = pr1.ArgList[0]
 
         match var with
-        | "base1" -> Assert.AreEqual<int64>((int64)21, base1.EndPos.Column)
-        | "base2" -> Assert.AreEqual<int64>((int64)22, base1.EndPos.Column)
-        | "base3" -> Assert.AreEqual<int64>((int64)22, base1.EndPos.Column)
+        | "base1" -> Assert.AreEqual<int64>((int64)20, base1.EndPos.Column)
+        | "base2" -> Assert.AreEqual<int64>((int64)21, base1.EndPos.Column)
+        | "base3" -> Assert.AreEqual<int64>((int64)21, base1.EndPos.Column)
         | "base4" -> Assert.AreEqual<int64>((int64)18, base1.EndPos.Column)
         | "base5" -> Assert.AreEqual<int64>((int64)27, base1.EndPos.Column)
         | "base6" -> Assert.AreEqual<int64>((int64)18, base1.EndPos.Column)
-        | "base7" -> Assert.AreEqual<int64>((int64)25, base1.EndPos.Column)
+        | "base7" -> Assert.AreEqual<int64>((int64)24, base1.EndPos.Column)
         | "base8" -> Assert.AreEqual<int64>((int64)23, base1.EndPos.Column)
-        | "base9" -> Assert.AreEqual<int64>((int64)24, base1.EndPos.Column)
+        | "base9" -> Assert.AreEqual<int64>((int64)23, base1.EndPos.Column)
         | "base10" -> Assert.AreEqual<int64>((int64)20, base1.EndPos.Column)
         | "base11" -> Assert.AreEqual<int64>((int64)17, base1.EndPos.Column)
         | "base12" -> Assert.AreEqual<int64>((int64)23, base1.EndPos.Column)
@@ -722,16 +722,16 @@ type TestFplValueScopeNameEndPos() =
         | "base13f" -> Assert.AreEqual<int64>((int64)31, base1.EndPos.Column)
         | "base14" -> Assert.AreEqual<int64>((int64)17, base1.EndPos.Column)
         | "base15" -> Assert.AreEqual<int64>((int64)18, base1.EndPos.Column)
-        | "base15a" -> Assert.AreEqual<int64>((int64)19, base1.EndPos.Column)
-        | "base15b" -> Assert.AreEqual<int64>((int64)20, base1.EndPos.Column)
+        | "base15a" -> Assert.AreEqual<int64>((int64)18, base1.EndPos.Column)
+        | "base15b" -> Assert.AreEqual<int64>((int64)19, base1.EndPos.Column)
         | "base16" -> Assert.AreEqual<int64>((int64)33, base1.EndPos.Column)
-        | "base17" -> Assert.AreEqual<int64>((int64)35, base1.EndPos.Column)
+        | "base17" -> Assert.AreEqual<int64>((int64)34, base1.EndPos.Column)
         | "base18" -> Assert.AreEqual<int64>((int64)61, base1.EndPos.Column)
         | "base19" -> Assert.AreEqual<int64>((int64)44, base1.EndPos.Column)
         | "base20" -> Assert.AreEqual<int64>((int64)33, base1.EndPos.Column)
         | "base21" -> Assert.AreEqual<int64>((int64)34, base1.EndPos.Column)
-        | "base21a" -> Assert.AreEqual<int64>((int64)22, base1.EndPos.Column)
-        | "base21b" -> Assert.AreEqual<int64>((int64)24, base1.EndPos.Column)
+        | "base21a" -> Assert.AreEqual<int64>((int64)21, base1.EndPos.Column)
+        | "base21b" -> Assert.AreEqual<int64>((int64)23, base1.EndPos.Column)
         | "base22" -> Assert.AreEqual<int64>((int64)34, base1.EndPos.Column)
         | "base23" -> Assert.AreEqual<int64>((int64)32, base1.EndPos.Column)
         | "base24" -> Assert.AreEqual<int64>((int64)26, base1.EndPos.Column)
@@ -938,9 +938,9 @@ type TestFplValueScopeNameEndPos() =
         let arg = proof.Scope["100"]
         match var with
         | "base1" -> Assert.AreEqual<int64>((int64)25, arg.EndPos.Column)
-        | "base2" -> Assert.AreEqual<int64>((int64)45, arg.EndPos.Column)
-        | "base3" -> Assert.AreEqual<int64>((int64)47, arg.EndPos.Column)
-        | "base4" -> Assert.AreEqual<int64>((int64)38, arg.EndPos.Column)
+        | "base2" -> Assert.AreEqual<int64>((int64)44, arg.EndPos.Column)
+        | "base3" -> Assert.AreEqual<int64>((int64)45, arg.EndPos.Column)
+        | "base4" -> Assert.AreEqual<int64>((int64)37, arg.EndPos.Column)
         | "base5" -> Assert.AreEqual<int64>((int64)25, arg.EndPos.Column)
         | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
@@ -989,12 +989,12 @@ type TestFplValueScopeNameEndPos() =
         let pred = theory.Scope[predName]
 
         match var with
-        | "base0" -> Assert.AreEqual<int64>((int64)9, pred.EndPos.Column)
-        | "base1" -> Assert.AreEqual<int64>((int64)14, pred.EndPos.Column)
-        | "base2" -> Assert.AreEqual<int64>((int64)11, pred.EndPos.Column)
-        | "base3" -> Assert.AreEqual<int64>((int64)14, pred.EndPos.Column)
-        | "base4" -> Assert.AreEqual<int64>((int64)16, pred.EndPos.Column)
-        | "base5" -> Assert.AreEqual<int64>((int64)19, pred.EndPos.Column)
+        | "base0" -> Assert.AreEqual<int64>((int64)8, pred.EndPos.Column)
+        | "base1" -> Assert.AreEqual<int64>((int64)13, pred.EndPos.Column)
+        | "base2" -> Assert.AreEqual<int64>((int64)10, pred.EndPos.Column)
+        | "base3" -> Assert.AreEqual<int64>((int64)13, pred.EndPos.Column)
+        | "base4" -> Assert.AreEqual<int64>((int64)15, pred.EndPos.Column)
+        | "base5" -> Assert.AreEqual<int64>((int64)18, pred.EndPos.Column)
         | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
 

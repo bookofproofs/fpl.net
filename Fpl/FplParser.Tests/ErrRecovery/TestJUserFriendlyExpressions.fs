@@ -1,5 +1,6 @@
 namespace FplParser.Tests.ErrRecovery
-open FParsec
+open System
+open FplGrammarTypes
 open FplParsing.Combinators
 open FplParsing.Main
 open ErrDiagnostics
@@ -23,6 +24,8 @@ type TestRecovery() =
     [<DataRow("bb09", """def pred T() { .(.¬∃ x:obj {.x is N} ∨ (.true ⇔ false)) ∧ .(.∃ x:obj {.x is N} ∨ ¬.true ⇔ false) } def cl A""")>]
     [<DataRow("bb09", """ext  x@/\d+/ -> A {return x}""")>]
     [<DataRow("bb10", """proof T$1 {100. assume true}""")>]
+    [<DataRow("bb11", """def pred A() {dec n:ind cases (|($2 = $1) : n:=$42 ? n:=); true}""")>]
+    [<DataRow("bb12", """def pred T() {}""")>]
     [<TestMethod>]
     member this.TestErrorRecoveryBuildingBlock(no:string, fplCode:string) =
         ad.Clear()
@@ -30,6 +33,48 @@ type TestRecovery() =
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.AreEqual<bool>(false, success)
+
+
+    [<DataRow("01", """def pred T() {}""", 1L, 14L)>]
+    [<DataRow("01a", """ def pred T() {}""", 1L, 15L)>]
+    [<DataRow("01b", """  def pred T() {}""", 1L, 16L)>]
+    [<DataRow("01c", """   def pred T() {}""", 1L, 17L)>]
+    [<DataRow("02a", """
+def pred T() {}""", 2L, 14L)>]
+    [<DataRow("02a", """
+ def pred T() {}""", 2L, 15L)>]
+    [<DataRow("02b", """
+
+  def pred T() {}""", 3L, 16L)>]
+    [<TestMethod>]
+    member this.TestErrorRecoveryPositions(no:string, fplCode:string, errLin: int64, errCol: int64) =
+        ad.Clear()
+        let result, _ = fplParser fplCode
+        let errBlock = result.Head
+        match errBlock with
+        | Ast.ErrorSyntax((pos1,_),_) ->
+            Assert.AreEqual<uint>((uint)errLin, (uint)pos1.Line)
+            Assert.AreEqual<uint>((uint)errCol, (uint)pos1.Column)
+        | _ ->
+            Assert.Fail("No error block found")
+
+    [<DataRow("01", """def pred T() {}""", 1)>]
+    [<DataRow("02", """xxxx def pred T() {}""", 2)>]
+    [<DataRow("02a", """ xxxx def pred T() {}""", 2)>]
+    [<DataRow("03", """xxxx def pred T() {true} yyyyy""", 3)>]
+    [<DataRow("03a", """ xxxx def pred T() {true} yyyyy""", 3)>]
+    [<DataRow("03b", """xxxx def pred T() {true} yyyyy """, 3)>]
+    [<DataRow("03c", """ xxxx def pred T() {true} yyyyy """, 3)>]
+    [<DataRow("04", """def pred T() {true} yyyyy""", 2)>]
+    [<DataRow("04a", """ def pred T() {true} yyyyy""", 2)>]
+    [<TestMethod>]
+    member this.TestErrorRecoveryBeforeOrAfterCode(no:string, fplCode:string, numbOfBlocks: int) =
+        ad.Clear()
+        let result, success = fplParser fplCode
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.AreEqual<int>(numbOfBlocks, result.Length)
+
 
 
     [<DataRow("uses00", """uses Fpl.Test.""")>]

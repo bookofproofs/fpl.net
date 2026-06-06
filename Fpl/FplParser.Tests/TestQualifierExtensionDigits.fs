@@ -132,12 +132,6 @@ type TestQualifiersExtensionDigits () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<TestMethod>]
-    member this.TestDottedAsA1 () =
-        let result = run (predicate .>> eof) """x'.@1"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestDottedAsB1 () =
@@ -160,12 +154,17 @@ type TestQualifiersExtensionDigits () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
+    [<DataRow("01", """x'(@1)""")>]
+    [<DataRow("02", """s'( @1 )""")>]
+    [<DataRow("03", """x'[@1]""")>]
+    [<DataRow("04", """x'[ @1 ]""")>]
+    [<DataRow("05", """x'.@1""")>]
     [<TestMethod>]
-    member this.TestArgumentsAsA1 () =
-        let result = run (predicate .>> eof) """x'(@1)"""
+    member this.TestFail (no:string, fplCode:string) =
+        let result = run (predicate .>> eof) fplCode
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestArgumentsAsB1 () =
@@ -174,12 +173,6 @@ type TestQualifiersExtensionDigits () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<TestMethod>]
-    member this.TestArgumentsAsC1 () =
-        let result = run (predicate .>> eof) """s'( @1 )"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestCoordinatesAs1 () =
@@ -188,12 +181,6 @@ type TestQualifiersExtensionDigits () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<TestMethod>]
-    member this.TestCoordinatesAsA1 () =
-        let result = run (predicate .>> eof) """x'[@1]"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestCoordinatesAsB1 () =
@@ -202,12 +189,6 @@ type TestQualifiersExtensionDigits () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<TestMethod>]
-    member this.TestCoordinatesAsC1 () =
-        let result = run (predicate .>> eof) """x'[ @1 ]"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
 
 
 

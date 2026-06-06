@@ -20,7 +20,6 @@ open System.Collections.Generic
 open System.Security.Cryptography
 open System.Text
 open FParsec
-open FplPrimitives
 open ErrMessages
 
 type PathEquivalentUri(uriString: string) =
@@ -146,7 +145,6 @@ type DiagnosticCode =
     | SY000 of string
     | SY001 of string
     | SY002 of string * string
-    | SY010 of string
     | SY011 
     | SY012
     // variable-related error codes
@@ -249,7 +247,6 @@ type DiagnosticCode =
             | SY000 _ -> "SY000"
             | SY001 _ -> "SY001"
             | SY002 _ -> "SY002"
-            | SY010 _ -> "SY010"
             | SY011 -> "SY011"
             | SY012 -> "SY012"
             // variable-related error codes
@@ -352,7 +349,6 @@ type DiagnosticCode =
             | SY000 errMsg -> errSY000 errMsg
             | SY001 errMsg -> errSY001 errMsg
             | SY002 (errMsg, chain) -> errSY002 errMsg chain
-            | SY010 infixOp -> errSY010 infixOp
             | SY011 -> errSY011
             | SY012 -> errSY012
             // variable-related error codes
@@ -508,7 +504,7 @@ let replaceFParsecErrMsgForFplParser (errMsg: string) (choices:string) (pos: Pos
     else
         errMsg
 
-let split = [|" or "; LiteralOr + Environment.NewLine ; "or\r" ; "or "; " Other error"; Environment.NewLine + "Other error"; ", "; "," + Environment.NewLine; Environment.NewLine + Environment.NewLine; Environment.NewLine|]
+let split = [|" or "; "or" + Environment.NewLine ; "or\r" ; "or "; " Other error"; Environment.NewLine + "Other error"; ", "; "," + Environment.NewLine; Environment.NewLine + Environment.NewLine; Environment.NewLine|]
 let groupRegex = "(?<=Expecting: )(.+?)(?=(Expecting|(\n.+)+|$))"
 let retrieveExpectedParserChoices (errMsg:string) =
     // replace accidental new lines injected by FParsec into FPL parser labels that start by "<" and end by ">"

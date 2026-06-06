@@ -501,9 +501,9 @@ type TestFplValueScopeBlockType() =
     [<DataRow("base4", "-1")>]
     [<DataRow("base5", "del.Test()")>]
     [<DataRow("base6", "$1")>]
-    [<DataRow("base7", "Test$1(x)")>] 
+    [<DataRow("base7", "Test1(x)")>] 
     [<DataRow("base8", "Test$1")>]
-    [<DataRow("base9", "Test$1()")>]
+    [<DataRow("base9", "Test1()")>]
     [<DataRow("base10", "Test")>]
     [<DataRow("base11", "v")>]
     [<DataRow("base12", LiteralSelf)>]
@@ -963,9 +963,9 @@ type TestFplValueScopeBlockType() =
                 n:pred
                 n:= mcases
                 (
-                    | (x = $1) : false 
-                    | (x = $2) : true 
-                    | (x = $3) : false 
+                    | (x = $1): false 
+                    | (x = $2): true 
+                    | (x = $3): false 
                     ? undef  
                 )
                 ;n } def pred T() {Test(%s)}""" input 
@@ -1004,9 +1004,9 @@ type TestFplValueScopeBlockType() =
                 n:pred
                 n:= mcases
                 (
-                    | (x = $1) : false 
-                    | (x = $2) : true 
-                    | (x = $3) : false 
+                    | (x = $1): false 
+                    | (x = $2): true 
+                    | (x = $3): false 
                     ? undef  
                 )
                 ;n } def pred T() {Test(%s)}""" input 
@@ -1046,9 +1046,9 @@ type TestFplValueScopeBlockType() =
                 n:pred
                 cases
                 (
-                    | (x = $1) : n:=false 
-                    | (x = $2) : n:=true 
-                    | (x = $3) : n:=false 
+                    | (x = $1): n:=false 
+                    | (x = $2): n:=true 
+                    | (x = $3): n:=false 
                     ? n:=undef  
                 )
                 ;n } def pred T() {Test(%s)}""" input 

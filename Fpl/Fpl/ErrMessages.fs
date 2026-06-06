@@ -137,7 +137,6 @@ let errST005 domain nodeType = $"An enumerator for the domain `{domain}` being {
 let errSY000 errMsg = $"Syntax error: {errMsg}"
 let errSY001 errMsg = $"Syntax error (backtracked): {errMsg}"
 let errSY002 errMsg chain = $"Syntax error chain {chain}: {errMsg}"
-let errSY010 infixOp = $"The infix operator `{infixOp}` is missing a second operand."
 let errSY011 = $"Replace `∃!0` by `¬∃` quantor."
 let errSY012 = $"Expression `∃!1` can be simplified with `∃!`."
 // variable-related error codes
@@ -212,6 +211,8 @@ let errExprMismatchFoundEndOfFormula pName = Some $"found end of formula, expect
 let errExprMismatchVarMatchedDifferently varName expectedExpr actualExpr = Some $"variable `{varName}` matched with different formulas `{expectedExpr}` and `{actualExpr}`"
 let errExprMismatchVarMatchedDifferentlyQuantor varName expectedExpr actualExpr = Some $"variable `{varName}` matched with different quantor formulas `{expectedExpr}` and `{actualExpr}`.{Environment.NewLine}Both formulas were different even using placeholders for bound variables."
 let errExprMismatchMsgStandard aName pName = Some $"found `{aName}`, expected `{pName}`"
+let errExprMismatchMsgParensOnlyLeft aName pName = Some $"found `{aName}` in parens, expected `{pName}` without parens"
+let errExprMismatchMsgParensOnlyRight aName pName = Some $"found `{aName}` without parens, expected `{pName}` in parens"
 let errExprMismatchVarNumbDifferent numA varsA numP pName =
     let plural = if numA > 1 then "variables" else "variable"
     Some $"found {numA} {plural} ({varsA}), expected {numP} in {pName}"

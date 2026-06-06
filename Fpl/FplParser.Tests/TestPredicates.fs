@@ -210,12 +210,21 @@ type TestPredicates () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
+    [<DataRow("00", """ProceedingResults1(x,y)""")>]
     [<TestMethod>]
-    member this.TestPredicate27 () =
-        let result = run (predicate .>> eof) """ProceedingResults$1(x,y)"""
+    member this.TestPredicateSuccess (no:string, fplCode:string) =
+        let result = run (predicate .>> eof) fplCode
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<DataRow("00", """ProceedingResults$1(x,y)""")>]
+    [<TestMethod>]
+    member this.TestPredicateFailure (no:string, fplCode:string) =
+        let result = run (predicate .>> eof) fplCode
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestPredicate28 () =

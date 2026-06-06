@@ -746,6 +746,20 @@ let emitPR020Diagnostics expectedNum actualNum pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
+let emitPR021Diagnostics expectedFormula foundFormula pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = PR021 (expectedFormula, foundFormula)
+            Diagnostic.Alternatives = None
+        }
+    ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
+
 let emitSIG00Diagnostics exprType expectedArity actualArity pos1 pos2 =
     let diagnostic =
         { 
@@ -1057,20 +1071,6 @@ let emitSY002diagnostics errMsg chain pos1 pos2 =
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
-
-let emitSY010diagnostics infixOp pos1 pos2 =
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplParser
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = pos1
-            Diagnostic.EndPos = pos2
-            Diagnostic.Code = SY010 infixOp
-            Diagnostic.Alternatives = None 
-        }
-    ad.AddDiagnostic diagnostic
-    Some (diagnostic.Code.Code)
 
 let emitSY011diagnostics pos1 pos2 =
     let diagnostic =

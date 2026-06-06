@@ -103,6 +103,33 @@ let private checkMismatchingUsageOfVars varName (a:FplGenericNode) (dictParamete
                 errExprMismatchOK
 
 let private checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) (dictParameterUsage: Dictionary<string, FplGenericNode>) =
+
+    // When a reference refQ refers to a variable q and the variable q has parameter variables q(a,b,...), we need to mark which parameter variables are bound and which are not
+    // The information is in the arguments x,y, of the original refQ(x,y, ...)
+    // The best way to do replace q by a cloned version of q and replace its declared parameters with used ones.
+    let mockVariableWithParams (refQ:FplGenericNode) (q:FplGenericNode) =
+        if refQ.Name = PrimRefL && q.Name = PrimVariableL then
+            let qMocked = q.Clone()
+            let pars = getParameters q
+            let args = getArguments refQ
+            qMocked.Scope.Clear()
+            Seq.zip pars args
+            |> Seq.map (fun (p, a) -> (p, a.RefersTo))
+            |> Seq.iteri (fun i (p, aRefOpt) ->
+                match aRefOpt, p with
+                | Some (:? FplVariable as aVar), (:? FplVariable as pVar) when aVar.IsBound ->
+                    pVar.SetIsBound() // set cloned parameter variable bound if the argument variable is bound
+                    // for better mismatch error reporting, replace declared parameter names/types with used parameter names/types 
+                    pVar.FplId <- aVar.FplId 
+                    pVar.TypeId <- aVar.TypeId 
+                    qMocked.Scope.Add(i.ToString(), pVar)
+                | _ -> ()
+            )
+            qMocked // replace var q(...) with ... being set to 
+        else
+            // in all other cases leave q unchanged
+            q
+
     // When p is a variable, the dict stores the variable names and their usage in a first matched a.
     // The dictionary is used to check the consistency of the usage of the same variable p in the whole formula
     // during the matching process. Moreover, the dict is used generate the
@@ -144,11 +171,24 @@ let private checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) (dictParamete
         | PrimRefL, PrimRefL ->
             match a.RefersTo, p.RefersTo with
             | Some aRef, Some pRef ->
-                checkExpr aRef pRef
-            | Some aRef, None when p.ArgList.Count > 0 ->
-                checkExpr aRef p
-            | None, Some pRef when a.ArgList.Count > 0 ->
-                checkExpr a pRef
+                checkExpr (mockVariableWithParams a aRef) (mockVariableWithParams p pRef)
+            | Some aRef, None when p.ArgList.Count > 0 && not p.ExpressionType.IsParen ->
+                checkExpr (mockVariableWithParams a aRef) p
+            | None, Some pRef when a.ArgList.Count > 0 && not a.ExpressionType.IsParen ->
+                checkExpr a (mockVariableWithParams p pRef)
+            | None, Some pRef when a.ExpressionType.IsParen ->
+                // delegate parenthesized (a) to a
+                checkExpr a.ArgList[0] p
+            | Some aRef, None when p.ExpressionType.IsParen ->
+                // delegate parenthesized (p) to p
+                checkExpr a p.ArgList[0]
+            | None, None when a.ExpressionType.IsParen && p.ExpressionType.IsParen ->
+                // delegate parenthesized (a) (p) to a p
+                checkExpr a.ArgList[0] p.ArgList[0]
+            | None, None when a.ExpressionType.IsParen && not p.ExpressionType.IsParen ->
+                errExprMismatchMsgParensOnlyLeft (a.Type SignatureType.Name) (p.Type SignatureType.Name)
+            | None, None when not a.ExpressionType.IsParen && p.ExpressionType.IsParen ->
+                errExprMismatchMsgParensOnlyRight (a.Type SignatureType.Name) (p.Type SignatureType.Name)
             | _, _ ->
                 errExprMismatchOK
         | _, PrimRefL when p.RefersTo.IsSome && p.RefersTo.Value.Name = PrimVariableL ->
@@ -212,10 +252,14 @@ let matchJustItemsExpressionsAgainstPremiseList (tuplesJustItemWithProceedingExp
             match matchPremiseWithSomeExpressions proceedingExpressionsOfJust pre varUsageDict with
             | [], errList ->
                 // emit diagnostics at just's position that there was no matching candidate for a premise, listing all tried-out candidates (contained in errList)
-                let premises =
+                let premisesPre =
                     premiseList
                     |> List.map (fun prem -> prem.Type SignatureType.Name)
-                    |> numbered
+                let premises =
+                    if premiseList.Length > 1 then
+                        premisesPre |> numbered
+                    else
+                        premisesPre |> String.concat ""
                 just.ErrorOccurred <- emitPR008Diagnostics (byInferenceNode.Type SignatureType.Name) premiseList.Length premises errList just.StartPos just.EndPos
                 matchJustItemsExpressionsAgainstPremiseListRec iJels pres 
             | matchedExprList, _ ->

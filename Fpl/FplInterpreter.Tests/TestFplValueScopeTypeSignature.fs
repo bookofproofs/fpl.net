@@ -481,9 +481,9 @@ type TestFplValueScopeTypeSignature() =
     [<DataRow("base4", "-1")>]
     [<DataRow("base5", "del.Test()")>]
     [<DataRow("base6", "$1")>]
-    [<DataRow("base7", "Test$1(x)")>] 
+    [<DataRow("base7", "Test1(x)")>] 
     [<DataRow("base8", "Test$1")>]
-    [<DataRow("base9", "Test$1()")>]
+    [<DataRow("base9", "Test1()")>]
     [<DataRow("base10", "Test")>]
     [<DataRow("base11", "v")>]
     [<DataRow("base12", LiteralParent)>]
@@ -553,9 +553,9 @@ type TestFplValueScopeTypeSignature() =
         | "base4" -> Assert.AreEqual<string>("-(1)", base1.Type(SignatureType.Type))
         | "base5" -> Assert.AreEqual<string>("Test", base1.Type(SignatureType.Type))
         | "base6" -> Assert.AreEqual<string>(LiteralInd, base1.Type(SignatureType.Type))
-        | "base7" -> Assert.AreEqual<string>("Test$1", base1.Type(SignatureType.Type))
+        | "base7" -> Assert.AreEqual<string>("Test1", base1.Type(SignatureType.Type))
         | "base8" -> Assert.AreEqual<string>("Test$1", base1.Type(SignatureType.Type))
-        | "base9" -> Assert.AreEqual<string>("Test$1", base1.Type(SignatureType.Type))
+        | "base9" -> Assert.AreEqual<string>("Test1", base1.Type(SignatureType.Type))
         | "base10" -> Assert.AreEqual<string>("Test", base1.Type(SignatureType.Type))
         | "base11" -> Assert.AreEqual<string>(LiteralUndef, base1.Type(SignatureType.Type))
         | "base12" -> Assert.AreEqual<string>(LiteralUndef, base1.Type(SignatureType.Type))
@@ -585,7 +585,7 @@ type TestFplValueScopeTypeSignature() =
         | "base14" -> Assert.AreEqual<string>("∅", base1.Type(SignatureType.Type))
         | "base15" -> Assert.AreEqual<string>("-(undef)", base1.Type(SignatureType.Type))
         | "base15a" -> Assert.AreEqual<string>("'(undef)", base1.Type(SignatureType.Type))
-        | "base15b" -> Assert.AreEqual<string>("'(-(undef))", base1.Type(SignatureType.Type))
+        | "base15b" -> Assert.AreEqual<string>("-('(undef))", base1.Type(SignatureType.Type))
         | "base16" -> Assert.AreEqual<string>("-(*(=(+(undef, undef), obj), undef))", base1.Type(SignatureType.Type))
         | "base17" -> Assert.AreEqual<string>("'(*(=(+(undef, '(undef)), obj), undef))", base1.Type(SignatureType.Type))
         | "base18" -> Assert.AreEqual<string>("pred", base1.Type(SignatureType.Type))

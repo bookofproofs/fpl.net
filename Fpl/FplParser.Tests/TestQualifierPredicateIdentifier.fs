@@ -23,12 +23,6 @@ type TestQualifiersPredicateIdentifier () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<TestMethod>]
-    member this.TestDottedBothA () =
-        let result = run (predicate .>> eof) """PascalId'.PascalId"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestDottedBothAa () =
@@ -37,12 +31,6 @@ type TestQualifiersPredicateIdentifier () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
-    [<TestMethod>]
-    member this.TestDottedBothAb () =
-        let result = run (predicate .>> eof) """Xx'.Yy().Zz"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestDottedBothB () =
@@ -65,9 +53,35 @@ type TestQualifiersPredicateIdentifier () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
+    [<DataRow("00", """PascalId'(PascalId)""")>]
+    [<DataRow("01", """PascalId'( PascalId )""")>]
+    [<DataRow("02", """PascalId'[PascalId]""")>]
+    [<DataRow("03", """PascalId'[ PascalId ]""")>]
+    [<DataRow("04", """Xx'.Yy().Zz""")>]
+    [<DataRow("05", """PascalId'[PascalId,Nat]""")>]
+    [<DataRow("06", """PascalId'[PascalId,Nat]""")>]
+    [<DataRow("07", """PascalId'.PascalId""")>]
     [<TestMethod>]
-    member this.TestArgumentsBothA () =
-        let result = run (predicate .>> eof) """PascalId'(PascalId)"""
+    member this.TestFail (no:string, fplCode:string) =
+        let result = run (predicate .>> eof) fplCode
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
+
+    [<DataRow("00", """PascalId(PascalId)'""")>]
+    [<DataRow("01", """PascalId( PascalId )'""")>]
+    [<DataRow("02", """PascalId[PascalId]'""")>]
+    [<DataRow("03", """PascalId[ PascalId ]'""")>]
+    [<DataRow("04", """Xx'""")>]
+    [<DataRow("04a", """Xx.Yy().Zz'""")>]
+    [<DataRow("04b", """(Xx.Yy().Zz)'""")>]
+    [<DataRow("05", """PascalId[PascalId,Nat]'""")>]
+    [<DataRow("06", """(PascalId[PascalId,Nat])'""")>]
+    [<DataRow("07", """PascalId.PascalId'""")>]
+    [<DataRow("07a", """(PascalId.PascalId)'""")>]
+    [<TestMethod>]
+    member this.TestSuccess (no:string, fplCode:string) =
+        let result = run (predicate .>> eof) fplCode
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -79,23 +93,10 @@ type TestQualifiersPredicateIdentifier () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<TestMethod>]
-    member this.TestArgumentsBothC () =
-        let result = run (predicate .>> eof) """PascalId'( PascalId )"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestCoordinatesBoth () =
         let result = run (predicate .>> eof) """PascalId[PascalId]"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestCoordinatesBothA () =
-        let result = run (predicate .>> eof) """PascalId'[PascalId]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -108,22 +109,8 @@ type TestQualifiersPredicateIdentifier () =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestCoordinatesBothC () =
-        let result = run (predicate .>> eof) """PascalId'[ PascalId ]"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
     member this.TestCoordsBoth () =
         let result = run (predicate .>> eof) """PascalId[PascalId,Nat]"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestCoordsBothA () =
-        let result = run (predicate .>> eof) """PascalId'[PascalId,Nat]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -135,10 +122,5 @@ type TestQualifiersPredicateIdentifier () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<TestMethod>]
-    member this.TestCoordsBothC () =
-        let result = run (predicate .>> eof) """PascalId'[PascalId,Nat]"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+
 

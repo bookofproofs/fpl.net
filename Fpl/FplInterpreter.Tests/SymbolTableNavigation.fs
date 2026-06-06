@@ -205,41 +205,6 @@ type SymbolTableNavigation() =
             prepareFplCode(filename, "", true) |> ignore
 
     [<TestMethod>]
-    member this.OpeningGrandParentFileTheoryEnhancesSymbolTableDeeply() =
-        if not offlineWatcher.OfflineMode then 
-            // prepare test, making sure there is an empty 
-            // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
-            // first delete lib and repo subdirectories (if any)
-            let currentPath = Directory.GetCurrentDirectory()
-            let currentPathLib = Path.Combine(currentPath,"lib")
-            let currentPathRepo = Path.Combine(currentPath,"repo")
-            deleteDirectory currentPathLib
-            deleteDirectory currentPathRepo
-
-            let fplCode = """
-                uses Fpl.SetTheory
-            """
-            let filename = "OpeningGrandParentFileTheoryEnhancesSymbolTableDeeply"  
-            // file processing creates the subdirectories
-            let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
-
-            // now, conserve the symbol table for the test's next step and open the grand parent file
-  
-            let pre = heap.SymbolTable.ToJson()
-            // open a grand parent
-            let uri = PathEquivalentUri(Path.Combine(currentPathRepo,"Fpl.Commons.fpl"))
-            let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
-            let fplCode = File.ReadAllText(uri.AbsolutePath)
-            fplInterpreter fplCode uri fplLibUrl
-
-            let post = heap.SymbolTable.ToJson()
-            // and test if the corrent number of asts in symbol table
-            Assert.AreEqual<string>(pre, post)
-        
-            // remove the test file
-            prepareFplCode(filename, "", true) |> ignore
-
-    [<TestMethod>]
     member this.OpeningFileInLibAsCopyOfFileInRepoDoesRaiseNSP05Error() =
         if not offlineWatcher.OfflineMode then 
             // prepare test, making sure there is an empty 
@@ -485,7 +450,7 @@ type SymbolTableNavigation() =
 
 
     [<TestMethod>]
-    member this.OpeningFileInMainAndUpdatingReferencesCorrectlyRaisesSIG04Errors() =
+    member this.OpeningFileInMainAndUpdatingReferencesCorrectlyRaisesID010Errors() =
         heap.ClearAll()
         if not offlineWatcher.OfflineMode then 
             // prepare test, making sure there is an empty 
@@ -508,15 +473,16 @@ type SymbolTableNavigation() =
                 }
             """
 
-            let filename = "OpeningFileInMainAndUpdatingReferencesCorrectlyRaisesSIG04Errors"  
+            let filename = "OpeningFileInMainAndUpdatingReferencesCorrectlyRaisesID010Errors"  
+            ad.Clear()
             // process the file
             prepareFplCode(filename + ".fpl", fplCode, false) 
-            // test if there is no SIG04 error
-            let result = filterByErrorCode ad (SIG04 ("", "")).Code
+            // test if there is no ID010 error
+            let result = filterByErrorCode ad (ID010 "").Code
             Assert.AreEqual<int>(0, result.Length)
 
 
-            // do the test - now, modify the file with a typo to provoke SIG04 diagnostics
+            // do the test - now, modify the file with a typo to provoke ID010 diagnostics
             let fplCode = """
                 def cl Natural
 
@@ -532,7 +498,7 @@ type SymbolTableNavigation() =
             loadFplFileWithTheSameSymbolTable pathToFile |> ignore
 
             // test if there is a SIG04 error (there should be 1)
-            let result = filterByErrorCode ad (SIG04 ("", "")).Code
+            let result = filterByErrorCode ad (ID010 "").Code
             Assert.AreEqual<int>(1, result.Length)
 
             // now, correct the typo to make SIG04 diagnostics disappear

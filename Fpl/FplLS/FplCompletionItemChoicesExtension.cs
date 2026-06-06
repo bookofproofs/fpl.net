@@ -1,4 +1,4 @@
-﻿using FParsec;
+using FParsec;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 
 namespace FplLS
@@ -14,9 +14,9 @@ namespace FplLS
             ci.InsertText += $"\t{TokenLeftBrace}{Environment.NewLine}";
             ci.InsertText += $"\t\tmcases{Environment.NewLine}";
             ci.InsertText += $"\t\t({Environment.NewLine}";
-            ci.InsertText += $"\t\t\t| (x = @0) : Zero{Environment.NewLine}";
-            ci.InsertText += $"\t\t\t| (x = @1) : One{Environment.NewLine}";
-            ci.InsertText += $"\t\t\t| (x = @2) : Two{Environment.NewLine}";
+            ci.InsertText += $"\t\t\t| (x = @0): Zero{Environment.NewLine}";
+            ci.InsertText += $"\t\t\t| (x = @1): One{Environment.NewLine}";
+            ci.InsertText += $"\t\t\t| (x = @2): Two{Environment.NewLine}";
             ci.InsertText += $"\t\t\t? undef{Environment.NewLine}";
             ci.InsertText += $"\t\t){Environment.NewLine}";
             ci.InsertText += $"\t{TokenRightBrace}{Environment.NewLine}";

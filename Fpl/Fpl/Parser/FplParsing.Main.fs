@@ -32,6 +32,13 @@ let private getMatches (pattern: string) (input: string) =
     |> Seq.cast<Match>
     |> Seq.toList
 
+/// Run the full AST parser on the remainder to produce diagnostics for the chunk
+let private collectErrorsIfAny input (errorList:List<Ast list>) origLines origLength =
+    match run (stdParser .>> eof) (input) with
+    | Failure(errorMsg, _, _) ->
+        errorList.Add (getErrorNodes errorMsg origLines origLength)
+    | _ -> ()
+
 /// Tries to parse all chunks of input of FPL building blocks. If a chunk produces a syntax error,
 /// a diagnosics will be issued and the chunk will (at least at its faulty end) be replaced by a masked chunk, where
 /// all non-whitespace characters will be replaced with spaces while preserving line breaks and line lengths.
@@ -43,6 +50,7 @@ let private getParseableInputAndErrorNodes input origLines origLength =
     let parseAbleInput = StringBuilder()
     let maskedPrefix = StringBuilder()
     let errorList = List<Ast list>()
+
 
 
     // Helper to produce chunk, maskedChunk and the 'remainder' used for diagnostics
@@ -65,13 +73,23 @@ let private getParseableInputAndErrorNodes input origLines origLength =
 
     // Iterate once for each relevant chunk (if no matches, still run once)
     let upper =
-        if matches.Length = 0 then 0 else matches.Length - 1
+        if matches.Length = 0 then
+            0
+        else
+            matches.Length - 1
+        
+    if matches.Length > 0 && matches[0].Index>0 then
+        let prefix1 = input.Substring(0,matches[0].Index)
+        collectErrorsIfAny prefix1 errorList origLines origLength
+        let maskedPrefix1 = masked prefix1
+        maskedPrefix.Append(maskedPrefix1) |> ignore
 
     for i in [0..upper] do
         // If there is a non-matching prefix before the first recovery match, preserve its masked form
         if i = 0 && matches.Length > 0 && matches[0].Index > 0 then
             let prefix = input.Substring(0, matches[0].Index)
             parseAbleInput.Append(masked prefix) |> ignore
+
 
         let chunk, maskedChunk, remainder = getChunkMaskedAndRemainder i
         let trimedInput = chunk.Trim()
@@ -107,12 +125,7 @@ let private getParseableInputAndErrorNodes input origLines origLength =
                     parseAbleInput.Append(chunk) |> ignore
                 else
                     parseAbleInput.Append(maskedChunk) |> ignore
-
-            // Run the full AST parser on the remainder to produce diagnostics for the chunk
-            match run (stdParser .>> eof) remainder with
-            | Failure(errorMsg, _, _) ->
-                errorList.Add (getErrorNodes errorMsg origLines origLength)
-            | _ -> ()
+            collectErrorsIfAny remainder errorList origLines origLength
         maskedPrefix.Append(maskedChunk) |> ignore
 
     parseAbleInput.ToString(), errorList |> Seq.toList |> List.concat

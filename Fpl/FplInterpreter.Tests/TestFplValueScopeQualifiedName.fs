@@ -473,9 +473,9 @@ type TestFplValueScopeQualifiedName() =
     [<DataRow("base4", "-1")>]
     [<DataRow("base5", "del.Test()")>]
     [<DataRow("base6", "$1")>]
-    [<DataRow("base7", "Test$1(x)")>] 
+    [<DataRow("base7", "Test1(x)")>] 
     [<DataRow("base8", "Test$1")>]
-    [<DataRow("base9", "Test$1()")>]
+    [<DataRow("base9", "Test1()")>]
     [<DataRow("base10", "Test")>]
     [<DataRow("base11", "v")>]
     [<DataRow("base12", LiteralParent)>]
@@ -543,10 +543,10 @@ type TestFplValueScopeQualifiedName() =
         | "base1" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1 false) 
         | "base2" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1 false) 
         | "base3" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1 false) 
-        | "base4" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1().-(1)", qualifiedName base1 false) 
+        | "base4" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1().-1", qualifiedName base1 false) 
         | "base5" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1().Test()", qualifiedName base1 false) 
         | "base6" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1 false) 
-        | "base7" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1().Test$1(x)", qualifiedName base1 false) 
+        | "base7" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1().Test1(x)", qualifiedName base1 false) 
         | "base8" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1 false) 
         | "base9" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1 false) 
         | "base10" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1().Test", qualifiedName base1 false) 
@@ -576,17 +576,17 @@ type TestFplValueScopeQualifiedName() =
         | "base12f" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1 false) 
         | "base13f" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1().1[x.y].T(a, b)", qualifiedName base1 false) 
         | "base14" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1 false) 
-        | "base15" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1().-(x)", qualifiedName base1 false) 
-        | "base15a" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1().'(x)", qualifiedName base1 false) 
-        | "base15b" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1().'(-(x))", qualifiedName base1 false) 
-        | "base16" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1().-(*(=(+(y, x), 2), x))", qualifiedName base1 false) 
-        | "base17" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1().'(*(=(+(y, '(x)), 2), x))", qualifiedName base1 false) 
+        | "base15" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1().-x", qualifiedName base1 false) 
+        | "base15a" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1().x'", qualifiedName base1 false) 
+        | "base15b" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1().-x'", qualifiedName base1 false) 
+        | "base16" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1().-(y + x = 2 * x)", qualifiedName base1 false) 
+        | "base17" -> Assert.AreEqual<string>("a reference TestPredicateQualifiedName.T1().(y + x' = 2 * x)'", qualifiedName base1 false) 
         | "base18" -> Assert.AreEqual<string>("an exists quantor TestPredicateQualifiedName.T1().∃ y:C, z:obj, x:pred(T) {a ∧ (b ∧ c)}", qualifiedName base1 false) 
         | "base19" -> Assert.AreEqual<string>("an exists n times quantor TestPredicateQualifiedName.T1().∃! x:obj {∀ y:N {true}}" , qualifiedName base1 false) 
         | "base20" -> Assert.AreEqual<string>("an all quantor TestPredicateQualifiedName.T1().∀ x:obj {¬x}", qualifiedName base1 false) 
         | "base21" -> Assert.AreEqual<string>("a conjunction TestPredicateQualifiedName.T1().x ∧ abc(y, z)", qualifiedName base1 false) 
         | "base21a" -> Assert.AreEqual<string>("a negation TestPredicateQualifiedName.T1().¬x", qualifiedName base1 false) 
-        | "base21b" -> Assert.AreEqual<string>("a negation TestPredicateQualifiedName.T1().¬x", qualifiedName base1 false) 
+        | "base21b" -> Assert.AreEqual<string>("a negation TestPredicateQualifiedName.T1().¬(x)", qualifiedName base1 false) 
         | "base22" -> Assert.AreEqual<string>("an exclusive disjunction TestPredicateQualifiedName.T1().(x ⩡ y) ⩡ z", qualifiedName base1 false) 
         | "base23" -> Assert.AreEqual<string>("a disjunction TestPredicateQualifiedName.T1().x ∨ (y ∨ z)", qualifiedName base1 false) 
         | "base24" -> Assert.AreEqual<string>("an equivalence TestPredicateQualifiedName.T1().x ⇔ y", qualifiedName base1 false) 

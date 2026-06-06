@@ -132,6 +132,15 @@ type FplGenericReference(positions: Positions, parent: FplGenericNode) =
             this.RunExtensionWithVariableReplacement (called :> FplGenericNode)
         | Some (:? FplGenericIsValue as called) ->
             this.SetValue called
+        | None when this.ExpressionType.IsParen ->
+            // delegate parenthesized arguments to the contents of the parentheses
+            // this has always a single argument due to symbol table structure of Ast.Parens
+            let arg = this.ArgList[0]
+            match arg with
+            | :? FplGenericHasValue as arg1 ->
+                arg1.Run()
+                this.SetValueOf arg1
+            | _ -> ()
         | _ -> ()
         debug this Debug.Stop
 
@@ -171,7 +180,7 @@ type FplReference(positions: Positions, parent: FplGenericNode) =
             | Some ret when ret.Name = LiteralParent && ret.RefersTo.IsSome -> ret.RefersTo.Value
             | Some ret when ret.Name = PrimDelegateDecrementL && ret.RefersTo.IsSome -> ret.RefersTo.Value
             | Some ret -> ret
-            | None -> this
+            | _ -> this
 
         let propagate = propagateSignatureType signatureType
 
@@ -269,8 +278,11 @@ type FplReference(positions: Positions, parent: FplGenericNode) =
                 $"{args}{symbol}"
             else
                 $"({args}){symbol}"
+        | _, FixType.Paren ->
+            $"({args})"
         | _, _ ->
             prefixNotation()
+
 
     override this.Represent() = // done
         if _callCounter > maxRecursion then
@@ -278,37 +290,42 @@ type FplReference(positions: Positions, parent: FplGenericNode) =
             PrimUndetermined // fallback to undefined after infinite recursion (if any)
         else
             _callCounter <- _callCounter + 1
-            let result = 
-                match this.Value, this.DottedChild, this.RefersTo with 
-                | _, Some dc, _ -> 
-                    if not (Object.ReferenceEquals(dc, this)) then
-                        // If the dotted child is not identical as "this",
-                        // delegate the representation to dotted.
-                        dc.Represent()
-                    else
-                        // Otherwise, fall back with dotted's "type representation" to prevent infinite loops
-                        dc.Type SignatureType.Mixed
-                | Some value, _, _ ->
-                    if not (Object.ReferenceEquals(value,this)) then
-                        // If the value is not identical as "this",
-                        // delegate the representation to value.
-                        value.Represent()
-                    else
-                        // Otherwise, fall back with "undef" to prevent infinite loops
-                        PrimUndetermined
-                | _, _, Some refTo when refTo.Name = LiteralSelf && refTo.ErrorOccurred.IsSome ->
-                    // infinite loop or other error in self detected
-                    // fallback to undefined
-                    PrimUndetermined 
-                | _, _, Some refTo ->
-                    if not (Object.ReferenceEquals(refTo,this)) then
-                        // If refTo is not identical as "this",
-                        // delegate the representation to refTo.
-                        refTo.Represent()
-                    else
-                        refTo.Type SignatureType.Mixed
-                | _, _, _ ->
-                    this.Type SignatureType.Mixed
+            let result =
+                if this.ExpressionType.IsParen then
+                    // delegate parenthesized arguments to the contents of the parentheses
+                    // this has always a single argument due to symbol table structure of Ast.Parens
+                    this.ArgList[0].Represent() 
+                else
+                    match this.Value, this.DottedChild, this.RefersTo with 
+                    | _, Some dc, _ -> 
+                        if not (Object.ReferenceEquals(dc, this)) then
+                            // If the dotted child is not identical as "this",
+                            // delegate the representation to dotted.
+                            dc.Represent()
+                        else
+                            // Otherwise, fall back with dotted's "type representation" to prevent infinite loops
+                            dc.Type SignatureType.Mixed
+                    | Some value, _, _ ->
+                        if not (Object.ReferenceEquals(value,this)) then
+                            // If the value is not identical as "this",
+                            // delegate the representation to value.
+                            value.Represent()
+                        else
+                            // Otherwise, fall back with "undef" to prevent infinite loops
+                            PrimUndetermined
+                    | _, _, Some refTo when refTo.Name = LiteralSelf && refTo.ErrorOccurred.IsSome ->
+                        // infinite loop or other error in self detected
+                        // fallback to undefined
+                        PrimUndetermined 
+                    | _, _, Some refTo ->
+                        if not (Object.ReferenceEquals(refTo,this)) then
+                            // If refTo is not identical as "this",
+                            // delegate the representation to refTo.
+                            refTo.Represent()
+                        else
+                            refTo.Type SignatureType.Name // default to the name of the expression
+                    | _, _, _ ->
+                        this.Type SignatureType.Name // default to the name of the expression
             _callCounter <- _callCounter - 1
             result
 

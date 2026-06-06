@@ -155,9 +155,9 @@ type TestRepresentation() =
             n:Nat
             cases
             (
-                | (x = @0) : n := Zero() 
-                | (x = @1) : n := Succ(Zero()) 
-                | (x = @2) : n := Succ(Succ(Zero())) 
+                | (x = @0): n := Zero() 
+                | (x = @1): n := Succ(Zero()) 
+                | (x = @2): n := Succ(Succ(Zero())) 
                 ? n := Succ(self(delegate.Decrement(x)))  
             )
             ;
@@ -212,9 +212,9 @@ type TestRepresentation() =
         {
             return mcases
             (
-                | (x = @0) : Zero() 
-                | (x = @1) : Succ(Zero()) 
-                | (x = @2) : Succ(Succ(Zero())) 
+                | (x = @0): Zero() 
+                | (x = @1): Succ(Zero()) 
+                | (x = @2): Succ(Succ(Zero())) 
                 ? Succ(self(delegate.Decrement(x)))  
             )
         }
@@ -249,7 +249,7 @@ type TestRepresentation() =
         {
             return mcases
             (
-                | (x = @0) : Zero() 
+                | (x = @0): Zero() 
                 ? Succ(self(del.Decrement(x)))  
             )
         }
@@ -285,7 +285,7 @@ type TestRepresentation() =
         {
             return mcases
             (
-                | (x = @0) : Zero() 
+                | (x = @0): Zero() 
                 ? One()  
             )
         }
@@ -371,8 +371,8 @@ type TestRepresentation() =
                 n:A
                 cases
                 (
-                    | (x = @0) : n := B() 
-                    | (x = @1) : n := C() 
+                    | (x = @0): n := B() 
+                    | (x = @1): n := C() 
                     ? n := A()  
                 )
                 ;

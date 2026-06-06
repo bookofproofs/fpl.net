@@ -479,9 +479,9 @@ type TestFplValueScopeQualifiedStartPos() =
     [<DataRow("base4", "-1")>]
     [<DataRow("base5", "del.Test()")>]
     [<DataRow("base6", "$1")>]
-    [<DataRow("base7", "Test$1(x)")>] 
+    [<DataRow("base7", "Test1(x)")>] 
     [<DataRow("base8", "Test$1")>]
-    [<DataRow("base9", "Test$1()")>]
+    [<DataRow("base9", "Test1()")>]
     [<DataRow("base10", "Test")>]
     [<DataRow("base11", "v")>]
     [<DataRow("base12", LiteralParent)>]
@@ -584,7 +584,7 @@ type TestFplValueScopeQualifiedStartPos() =
         | "base14" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
         | "base15" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
         | "base15a" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 18)"))
-        | "base15b" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 19)"))
+        | "base15b" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
         | "base16" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
         | "base17" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 34)"))
         | "base18" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))

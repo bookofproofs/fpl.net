@@ -1,4 +1,4 @@
-﻿using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using static FplPrimitives;
 
 namespace FplLS
@@ -46,7 +46,7 @@ namespace FplLS
             if (Kind == CompletionItemKind.Keyword)
             {
                 this.SortText = "zzz" + this.SortText;
-                this.InsertText = this.Label.Substring(2);
+                this.InsertText = this.Label[2..];
                 if (this.InsertText.Split(' ').Length > 1)
                 {
                     this.Detail = $"keywords '{this.InsertText}'";
@@ -94,8 +94,6 @@ namespace FplLS
                 LiteralPrf or LiteralPrfL => new FplCompletionItemChoicesProof().GetChoices(this),
                 LiteralLoc or LiteralLocL => new FplCompletionItemChoicesLocalization().GetChoices(this),
                 LiteralUses => new FplCompletionItemChoicesUses().GetChoices(this),
-                LiteralPrefix or LiteralPostFix or LiteralSymbol or LiteralInfix => new FplCompletionItemChoicesSymbol(Word, true).GetChoices(this),
-                "prefix symbol" or "postfix symbol" or "object symbol" or "infix symbol" => new FplCompletionItemChoicesSymbol(Word, false).GetChoices(this),
                 _ => new FplCompletionItemChoicesDefault().GetChoices(this),
             };
         }
@@ -125,7 +123,7 @@ namespace FplLS
             if (str.StartsWith('\'') && str.EndsWith('\'') || str.StartsWith('<') && str.EndsWith('>'))
             {
                 // strip quotes or brackets from label
-                return str.Substring(1, str.Length - 2);
+                return str[1..^1];
             }
             else
             {

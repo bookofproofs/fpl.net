@@ -55,7 +55,7 @@ type TestFplBlockComponentes () =
 
     [<TestMethod>]
     member this.TestSignature07 () =
-        let result = run (predicateSignature .>> eof) """pred IsSubset(subset,superset: Set) infix "in" 2"""
+        let result = run (predicateSignature .>> eof) """pred IsSubset(subset,superset: Set) infix "∈" 2"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

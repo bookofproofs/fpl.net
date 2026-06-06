@@ -24,6 +24,7 @@ type FixType =
     | Postfix of string
     | Prefix of string
     | Symbol of string
+    | Paren
     | NoFix
 
     member this.Type =
@@ -32,6 +33,7 @@ type FixType =
         | Postfix symbol -> sprintf "postfix `%s` " symbol
         | Prefix symbol -> sprintf "prefix `%s` " symbol
         | Symbol symbol -> sprintf "symbol `%s`" symbol
+        | Paren -> "paren"
         | NoFix -> "no fix"
 
     member this.GetUserDefinedLiteral defaultSymbol =
@@ -40,6 +42,7 @@ type FixType =
         | Postfix symbol -> symbol
         | Prefix symbol -> symbol
         | Symbol symbol -> symbol
+        | Paren -> defaultSymbol
         | NoFix -> defaultSymbol
 
 type SignatureType =
@@ -228,6 +231,7 @@ type FplGenericNode(positions: Positions, parent: FplGenericNode option) =
             elif _expressionType.Type = value.Type then
                 ()
             else
+                _expressionType <- value
                 raise (
                     ArgumentException(
                         $"Type was already initialized with `{_expressionType.Type}`, cannot set it again with {value.Type}."

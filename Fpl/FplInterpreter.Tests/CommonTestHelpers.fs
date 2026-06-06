@@ -118,12 +118,7 @@ let runTestHelperWithText filename fplCode (code: ErrDiagnostics.DiagnosticCode)
     printf "Trying %s" code.Message
     prepareFplCode (filename, fplCode, false) |> ignore
 
-    let syntaxErrors =
-        ad.Collection
-        |> List.filter (fun d -> d.Emitter = DiagnosticEmitter.FplParser && not (d.Code.Code.StartsWith("SY")))
-
-    if syntaxErrors.Length > 0 then
-        failwithf "Syntax errors detected."
+    checkForUnexpectedErrors filename fplCode
 
     let result = filterByErrorCode ad code.Code
     if result.Length <> expected then 
