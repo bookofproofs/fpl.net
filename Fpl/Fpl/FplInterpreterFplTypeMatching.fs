@@ -472,7 +472,7 @@ type FplTypeMatcher() =
 
             match aTypeName, pTypeName with 
             | PrimRefL, _ when a.ExpressionType = FixType.Paren ->
-                // if an argument is put in parentheses, check the argument itelf, not the enclosing parentheses 
+                // delegate parenthesized arguments to the contents of the parentheses
                 // a has always a single argument due to symbol table structure of Ast.Parens
                 matchTwoTypes a.ArgList[0] p 
             | PrimClassL, PrimClassL 
@@ -661,6 +661,7 @@ type FplTypeMatcher() =
             let rec extractDistinctFreeVariables (fv:FplGenericNode) rootRecursion =
                 match fv.Name with
                 | PrimRefL when fv.ExpressionType = FixType.Paren ->
+                    // delegate parenthesized arguments to the contents of the parentheses
                     // fv has always a single argument due to symbol table structure of Ast.Parens
                     extractDistinctFreeVariables fv.ArgList[0] false
                 | PrimRefL when fv.RefersTo.IsSome ->

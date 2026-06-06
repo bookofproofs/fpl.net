@@ -149,6 +149,13 @@ let private checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) (dictParamete
                 checkExpr aRef p
             | None, Some pRef when a.ArgList.Count > 0 ->
                 checkExpr a pRef
+            | None, None when a.ExpressionType.IsParen && p.ExpressionType.IsParen ->
+                // delegate parenthesized (a) (p) to a p
+                checkExpr a.ArgList[0] p.ArgList[0]
+            | None, None when a.ExpressionType.IsParen && not p.ExpressionType.IsParen ->
+                errExprMismatchMsgParensOnlyLeft (a.Type SignatureType.Name) (p.Type SignatureType.Name)
+            | None, None when not a.ExpressionType.IsParen && p.ExpressionType.IsParen ->
+                errExprMismatchMsgParensOnlyRight (a.Type SignatureType.Name) (p.Type SignatureType.Name)
             | _, _ ->
                 errExprMismatchOK
         | _, PrimRefL when p.RefersTo.IsSome && p.RefersTo.Value.Name = PrimVariableL ->
@@ -212,10 +219,14 @@ let matchJustItemsExpressionsAgainstPremiseList (tuplesJustItemWithProceedingExp
             match matchPremiseWithSomeExpressions proceedingExpressionsOfJust pre varUsageDict with
             | [], errList ->
                 // emit diagnostics at just's position that there was no matching candidate for a premise, listing all tried-out candidates (contained in errList)
-                let premises =
+                let premisesPre =
                     premiseList
                     |> List.map (fun prem -> prem.Type SignatureType.Name)
-                    |> numbered
+                let premises =
+                    if premiseList.Length > 1 then
+                        premisesPre |> numbered
+                    else
+                        premisesPre |> String.concat ""
                 just.ErrorOccurred <- emitPR008Diagnostics (byInferenceNode.Type SignatureType.Name) premiseList.Length premises errList just.StartPos just.EndPos
                 matchJustItemsExpressionsAgainstPremiseListRec iJels pres 
             | matchedExprList, _ ->
