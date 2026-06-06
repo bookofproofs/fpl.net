@@ -634,7 +634,8 @@ type FplTypeMatcher() =
         let outputType = 
             match isArgPred expr with
             | _, true -> LiteralPred
-            | argType, false when argType.StartsWith(LiteralFunc) -> LiteralFunc
+            | argType, false when argType.StartsWith(LiteralFunc) || argType.StartsWith(LiteralFuncL) -> LiteralFunc
+            | argType, false when argType.StartsWith(LiteralTpl) || argType.StartsWith(LiteralTplL) -> argType
             | _, _ -> PrimNone
 
         match outputType with

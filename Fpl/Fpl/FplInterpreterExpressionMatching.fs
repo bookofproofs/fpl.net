@@ -103,6 +103,33 @@ let private checkMismatchingUsageOfVars varName (a:FplGenericNode) (dictParamete
                 errExprMismatchOK
 
 let private checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) (dictParameterUsage: Dictionary<string, FplGenericNode>) =
+
+    // When a reference refQ refers to a variable q and the variable q has parameter variables q(a,b,...), we need to mark which parameter variables are bound and which are not
+    // The information is in the arguments x,y, of the original refQ(x,y, ...)
+    // The best way to do replace q by a cloned version of q and replace its declared parameters with used ones.
+    let mockVariableWithParams (refQ:FplGenericNode) (q:FplGenericNode) =
+        if refQ.Name = PrimRefL && q.Name = PrimVariableL then
+            let qMocked = q.Clone()
+            let pars = getParameters q
+            let args = getArguments refQ
+            qMocked.Scope.Clear()
+            Seq.zip pars args
+            |> Seq.map (fun (p, a) -> (p, a.RefersTo))
+            |> Seq.iteri (fun i (p, aRefOpt) ->
+                match aRefOpt, p with
+                | Some (:? FplVariable as aVar), (:? FplVariable as pVar) when aVar.IsBound ->
+                    pVar.SetIsBound() // set cloned parameter variable bound if the argument variable is bound
+                    // for better mismatch error reporting, replace declared parameter names/types with used parameter names/types 
+                    pVar.FplId <- aVar.FplId 
+                    pVar.TypeId <- aVar.TypeId 
+                    qMocked.Scope.Add(i.ToString(), pVar)
+                | _ -> ()
+            )
+            qMocked // replace var q(...) with ... being set to 
+        else
+            // in all other cases leave q unchanged
+            q
+
     // When p is a variable, the dict stores the variable names and their usage in a first matched a.
     // The dictionary is used to check the consistency of the usage of the same variable p in the whole formula
     // during the matching process. Moreover, the dict is used generate the
@@ -144,17 +171,17 @@ let private checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) (dictParamete
         | PrimRefL, PrimRefL ->
             match a.RefersTo, p.RefersTo with
             | Some aRef, Some pRef ->
-                checkExpr aRef pRef
+                checkExpr (mockVariableWithParams a aRef) (mockVariableWithParams p pRef)
             | Some aRef, None when p.ArgList.Count > 0 && not p.ExpressionType.IsParen ->
-                checkExpr aRef p
+                checkExpr (mockVariableWithParams a aRef) p
             | None, Some pRef when a.ArgList.Count > 0 && not a.ExpressionType.IsParen ->
-                checkExpr a pRef
+                checkExpr a (mockVariableWithParams p pRef)
             | None, Some pRef when a.ExpressionType.IsParen ->
                 // delegate parenthesized (a) to a
-                checkExpr a.ArgList[0] pRef
+                checkExpr a.ArgList[0] p
             | Some aRef, None when p.ExpressionType.IsParen ->
                 // delegate parenthesized (p) to p
-                checkExpr aRef p.ArgList[0]
+                checkExpr a p.ArgList[0]
             | None, None when a.ExpressionType.IsParen && p.ExpressionType.IsParen ->
                 // delegate parenthesized (a) (p) to a p
                 checkExpr a.ArgList[0] p.ArgList[0]
