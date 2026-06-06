@@ -449,7 +449,7 @@ let rec isSimpleExpression (fv:FplGenericNode) =
     | PrimIntrinsicInd
     | PrimFalse
     | PrimTrue -> true
-    | PrimPredicateL when fv.ExpressionType = FixType.NoFix -> true
+    | PrimPredicateL when fv.ExpressionType.IsNoFix -> true
     | PrimMappingL when (fv.Scope.Count = 0) -> true
     | LiteralParent 
     | LiteralSelf 

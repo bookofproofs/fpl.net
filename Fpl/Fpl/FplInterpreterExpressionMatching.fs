@@ -145,9 +145,9 @@ let private checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) (dictParamete
             match a.RefersTo, p.RefersTo with
             | Some aRef, Some pRef ->
                 checkExpr aRef pRef
-            | Some aRef, None when p.ArgList.Count > 0 ->
+            | Some aRef, None when p.ArgList.Count > 0 && not p.ExpressionType.IsParen ->
                 checkExpr aRef p
-            | None, Some pRef when a.ArgList.Count > 0 ->
+            | None, Some pRef when a.ArgList.Count > 0 && not a.ExpressionType.IsParen ->
                 checkExpr a pRef
             | None, None when a.ExpressionType.IsParen && p.ExpressionType.IsParen ->
                 // delegate parenthesized (a) (p) to a p

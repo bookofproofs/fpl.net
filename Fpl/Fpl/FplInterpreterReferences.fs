@@ -132,7 +132,7 @@ type FplGenericReference(positions: Positions, parent: FplGenericNode) =
             this.RunExtensionWithVariableReplacement (called :> FplGenericNode)
         | Some (:? FplGenericIsValue as called) ->
             this.SetValue called
-        | None when this.ExpressionType = FixType.Paren ->
+        | None when this.ExpressionType.IsParen ->
             // delegate parenthesized arguments to the contents of the parentheses
             // this has always a single argument due to symbol table structure of Ast.Parens
             let arg = this.ArgList[0]
@@ -291,7 +291,7 @@ type FplReference(positions: Positions, parent: FplGenericNode) =
         else
             _callCounter <- _callCounter + 1
             let result =
-                if this.ExpressionType = FixType.Paren then
+                if this.ExpressionType.IsParen then
                     // delegate parenthesized arguments to the contents of the parentheses
                     // this has always a single argument due to symbol table structure of Ast.Parens
                     this.ArgList[0].Represent() 
