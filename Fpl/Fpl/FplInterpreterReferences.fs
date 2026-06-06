@@ -178,7 +178,7 @@ type FplReference(positions: Positions, parent: FplGenericNode) =
             | Some ret when ret.Name = LiteralParent && ret.RefersTo.IsSome -> ret.RefersTo.Value
             | Some ret when ret.Name = PrimDelegateDecrementL && ret.RefersTo.IsSome -> ret.RefersTo.Value
             | Some ret -> ret
-            | None -> this
+            | _ -> this
 
         let propagate = propagateSignatureType signatureType
 
@@ -260,31 +260,27 @@ type FplReference(positions: Positions, parent: FplGenericNode) =
                 | _, ArgType.Parentheses, None ->
                     fallBackValueClosure
 
-        let argExpr = 
-            match signatureType, headObj.ExpressionType with
-            | SignatureType.Type, _ ->
-                prefixNotation()
-            | _, FixType.Infix (symbol, _) ->
-                getNotationTwoArgs this symbol signatureType (headObj.Type SignatureType.Type)
-            | _, FixType.Symbol symbol -> symbol
-            | _, FixType.Prefix symbol ->
-                if isSimpleExpression this.ArgList[0] then
-                    $"{symbol}{args}"
-                else
-                    $"{symbol}({args})"
-            | _, FixType.Postfix symbol ->
-                if isSimpleExpression this.ArgList[0] then
-                    $"{args}{symbol}"
-                else
-                    $"({args}){symbol}"
-            | _, _ ->
-                prefixNotation()
-        match signatureType, this.ExpressionType with
+        match signatureType, headObj.ExpressionType with
         | SignatureType.Type, _ ->
-            argExpr
+            prefixNotation()
+        | _, FixType.Infix (symbol, _) ->
+            getNotationTwoArgs this symbol signatureType (headObj.Type SignatureType.Type)
+        | _, FixType.Symbol symbol -> symbol
+        | _, FixType.Prefix symbol ->
+            if isSimpleExpression this.ArgList[0] then
+                $"{symbol}{args}"
+            else
+                $"{symbol}({args})"
+        | _, FixType.Postfix symbol ->
+            if isSimpleExpression this.ArgList[0] then
+                $"{args}{symbol}"
+            else
+                $"({args}){symbol}"
         | _, FixType.Paren ->
-            $"({argExpr})"
-        | _, _ -> argExpr
+            $"({args})"
+        | _, _ ->
+            prefixNotation()
+
 
     override this.Represent() = // done
         if _callCounter > maxRecursion then

@@ -1149,7 +1149,6 @@ let rec eval ast =
                 | _ -> ()
                 fv.ArgList.RemoveAt(currMinIndex+1) 
                 fv.ArgList.RemoveAt(currMinIndex-1) 
-        let fv = heap.Eval.PeekEvalStack() // if the reference was replaced, take this one
         simplifyTriviallyNestedExpressions fv 
         heap.Eval.PopEvalStack()
         match parent with 
@@ -1170,23 +1169,11 @@ let rec eval ast =
         simplifyTriviallyNestedExpressions fv
     | Ast.Parens ((pos1, pos2), expressionAst) ->
         let fv = heap.Eval.PeekEvalStack()
-        let mutable newNodeAdded = false
-        match fv.Parent with
-        | Some (:? FplReference as ref) when ref.ExpressionType.IsNoFix ->
-            ref.ExpressionType <- FixType.Paren
-        | Some (:? FplReference as ref) when ref.ExpressionType.IsPostfix || ref.ExpressionType.IsPrefix ->
-            let refBlock = new FplReference ((pos1,pos2), fv)
-            refBlock.ExpressionType <- FixType.Paren
-            heap.Eval.PushEvalStack(refBlock)
-            newNodeAdded <- true
-        | _ -> ()
+        let refBlock = new FplReference ((pos1,pos2), fv)
+        refBlock.ExpressionType <- FixType.Paren
+        heap.Eval.PushEvalStack(refBlock)
         eval expressionAst
-        if newNodeAdded then
-            heap.Eval.PopEvalStack()
-        match fv with 
-        | :? FplReference ->
-            simplifyTriviallyNestedExpressions fv
-        | _ -> ()
+        heap.Eval.PopEvalStack()
     | Ast.Cases((pos1, pos2), (caseSingleListAsts, caseElseAst)) ->
         let parent = heap.Eval.PeekEvalStack()
         let casesStmt = new FplCases((pos1, pos2), parent)

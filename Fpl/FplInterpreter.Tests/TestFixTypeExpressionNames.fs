@@ -35,9 +35,9 @@ type TestFixTypeExpressionNames() =
     [<DataRow("07a", """def pred T() {(-(x)')}""", "(-(x)')")>]
     [<DataRow("07b", """def pred T() {((-(x)'))}""", "((-(x)'))")>]
     [<TestMethod>]
-    member this.TestExpressionParen(var, fplCode:string, expectedFormula:string) =
+    member this.TestExpressionParenSimple(var, fplCode:string, expectedFormula:string) =
         
-        let filename = "TestExpressionParen"
+        let filename = "TestExpressionParenSimple"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
         let theory = r.Scope[filename]
@@ -46,3 +46,46 @@ type TestFixTypeExpressionNames() =
         Assert.AreEqual<string>(expectedFormula, base1.Type SignatureType.Name)
         prepareFplCode(filename, "", false) |> ignore
 
+
+
+    [<DataRow("01", """def pred T() {∀ x:obj {x is N}}""", "∀ x:obj {x is N}")>]
+    [<DataRow("01a", """def pred T() {(∀ x:obj {x is N})}""", "(∀ x:obj {x is N})")>]
+    [<DataRow("01b", """def pred T() {((∀ x:obj {x is N}))}""", "((∀ x:obj {x is N}))")>]
+    [<DataRow("02", """def pred T() {∀ x:obj {x is N}}""", "∀ x:obj {x is N}")>]
+    [<DataRow("02a", """def pred T() {∀ x:obj {(x is N)}}""", "∀ x:obj {(x is N)}")>]
+    [<DataRow("02b", """def pred T() {∀ x:obj {((x is N))}}""", "∀ x:obj {((x is N))}")>]
+    [<DataRow("03", """def pred T() {x + y * z}""", "x + y * z")>]
+    [<DataRow("03a", """def pred T() {(x + y) * z}""", "(x + y) * z")>]
+    [<DataRow("03b", """def pred T() {(x) + (y * z)}""", "(x) + (y * z)")>]
+    [<TestMethod>]
+    member this.TestExpressionParenMixed(var, fplCode:string, expectedFormula:string) =
+        
+        let filename = "TestExpressionParenMixed"
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pr1 = theory.Scope["T()"] 
+        let base1 = pr1.ArgList[0]
+        Assert.AreEqual<string>(expectedFormula, base1.Type SignatureType.Name)
+        prepareFplCode(filename, "", false) |> ignore
+
+    [<DataRow("01", """def pred T() {x + y}""", "x + y")>]
+    [<DataRow("01a", """def pred T() {(x + y)}""", "(x + y)")>]
+    [<DataRow("01b", """def pred T() {((x + y))}""", "((x + y))")>]
+    [<DataRow("02", """def pred T() {(x) + y}""", "(x) + y")>]
+    [<DataRow("02a", """def pred T() {((x) + y)}""", "((x) + y)")>]
+    [<DataRow("02b", """def pred T() {(((x) + y))}""", "(((x) + y))")>]
+    [<DataRow("03", """def pred T() {x + (y)}""", "x + (y)")>]
+    [<DataRow("03a", """def pred T() {(x + (y))}""", "(x + (y))")>]
+    [<DataRow("03b", """def pred T() {((x + (y)))}""", "((x + (y)))")>]
+    [<TestMethod>]
+    member this.TestExpressionParenInfix(var, fplCode:string, expectedFormula:string) =
+        
+        let filename = "TestExpressionParenInfix"
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pr1 = theory.Scope["T()"] 
+        let base1 = pr1.ArgList[0]
+        Assert.AreEqual<string>(expectedFormula, base1.Type SignatureType.Name)
+        prepareFplCode(filename, "", false) |> ignore
