@@ -133,6 +133,7 @@ type FplGenericReference(positions: Positions, parent: FplGenericNode) =
         | Some (:? FplGenericIsValue as called) ->
             this.SetValue called
         | None when this.ExpressionType = FixType.Paren ->
+            // this has always a single argument due to symbol table structure of Ast.Parens
             let arg = this.ArgList[0]
             match arg with
             | :? FplGenericHasValue as arg1 ->
@@ -290,7 +291,8 @@ type FplReference(positions: Positions, parent: FplGenericNode) =
             _callCounter <- _callCounter + 1
             let result =
                 if this.ExpressionType = FixType.Paren then
-                    this.ArgList[0].Represent()
+                    // this has always a single argument due to symbol table structure of Ast.Parens
+                    this.ArgList[0].Represent() 
                 else
                     match this.Value, this.DottedChild, this.RefersTo with 
                     | _, Some dc, _ -> 
