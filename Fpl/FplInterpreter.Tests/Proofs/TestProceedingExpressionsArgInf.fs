@@ -53,7 +53,7 @@ type TestProceedingExpressionsArgInf() =
 
     //// AndCummutative and(p,q) 
     //[<DataRow("AndC_01", "inf AndCummutative{dec p,q:pred; pre:and(p,q) con:and(q,p)} thm T {true} proof T$1 {1: and(true,false) 2. 1, byinf AndCummutative |- and(false,true)}", "false ∧ true", 1)>]
-    //[<DataRow("AndC_03", "inf AndCummutative{dec p,q:pred; pre:and(p,q) con:and(q,p)} thm T {true} proof T$1 {1: and(all x:obj {is(x,N)}, not(all x:obj {is(x,N)})) 2. 1, byinf AndCummutative |- and(not(all x:obj {is(x,N)}), all x:obj {is(x,N)})}", "¬∀ x:obj {x is N} ∧ ∀ x:obj {x is N}", 1)>]
+    //[<DataRow("AndC_03", "inf AndCummutative{dec p,q:pred; pre:and(p,q) con:and(q,p)} thm T {true} proof T$1 {1: and(all x:obj {is(x,N)}, not(all x:obj {is(x,N)})) 2. 1, byinf AndCummutative |- and(not(all x:obj {is(x,N)}), all x:obj {is(x,N)})}", "¬∀ x:obj {x is N} ∧ ∀ x:obj {x is N}}", 1)>]
 
     //// ModusPonens and (p, impl (p,q) )
     //[<DataRow("MP_01", "inf M {dec p,q: pred; pre: and (p, impl (p,q) ) con: q} thm T {true} proof T$1 {1: and(true, impl(true, false)) 2. 1, byinf M |- false}", "false", 1)>]
@@ -275,7 +275,7 @@ type TestProceedingExpressionsArgInf() =
     //[<DataRow("NotEx2AllNot_02", "inf NotEx2AllNot{dec p:pred(y:tpl); pre:not ex x:tpl{p(x)} con:all x:tpl{not p(x)}} thm T {true} proof T$1 {1: not ex n:Nat {and(not is(n,N), xor(true,false))} 2. 1, byinf NotEx2AllNot |- true}", "∀ n:Nat {¬(¬(n is N) ∧ (true ⩡ false))}", 1)>]
 
     // AllNot2ExNot: pre: all x:tpl{not p(x)}
-    [<DataRow("AllNot2ExNot_01", "inf AllNot2ExNot{dec p:pred(y:tpl); pre:all x:tpl{not p(x)} con:not ex x:tpl{p(x)}} thm T {true} proof T$1 {1: all x:obj {not iif(is(x,N), true)} 2. 1, byinf AllNot2ExNot |- ¬∃ x:obj {.(.x is N) ⇔ true}}", "¬∃ x:obj {(x is N) ⇔ true}", 1)>]
+    [<DataRow("AllNot2ExNot_01", "inf AllNot2ExNot{dec p:pred(y:tpl); pre:all x:tpl{not p(x)} con:not ex x:tpl{p(x)}} thm T {true} proof T$1 {1: all x:obj {not iif(is(x,N), true)} 2. 1, byinf AllNot2ExNot |- ¬∃ x:obj {(x is N) ⇔ true}}", "¬∃ x:obj {(x is N) ⇔ true}", 1)>]
     //[<DataRow("AllNot2ExNot_02", "inf AllNot2ExNot{dec p:pred(y:tpl); pre:all x:tpl{not p(x)} con:not ex x:tpl{p(x)}} thm T {true} proof T$1 {1: all n:Nat {not (and(is(n,N), xor(true,false)))} 2. 1, byinf AllNot2ExNot |- true}", "¬∃ n:Nat {(n is N) ∧ (true ⩡ false)}", 1)>]
 
     //// ImplPack2Or: pre: impl(not p,q)

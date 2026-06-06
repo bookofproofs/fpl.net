@@ -22,6 +22,22 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 //------------
 
+/// Replaces in the `input` all regex pattern matches by spaces while preserving the new lines
+let replaceLinesWithSpaces (input: string) (pattern: string) =
+    let regex = new Regex(pattern, RegexOptions.Multiline)
+    let evaluator = MatchEvaluator(fun (m: Match) -> 
+        m.Value.Split(Environment.NewLine)
+        |> Array.map (fun line -> String.replicate line.Length " ")
+        |> String.concat Environment.NewLine
+    )
+    regex.Replace(input, evaluator)
+
+/// Replaces in the `input` all FPL comments by spaces while preserving new lines
+let removeFplComments (input:string) = 
+    let r1 = replaceLinesWithSpaces input $"\/\/[^{Environment.NewLine}]*" // replace inline comments
+    replaceLinesWithSpaces r1 $"\/\*((?:.|\n)*?)\*\/" // replace block comments
+
+
 /// Splits an FParsec error message to sub-errors (if it contains many)
 let private splitByBacktrackMarker (input: string) =
     let pattern = @"\s*The parser backtracked after:\s*Error"
@@ -99,7 +115,16 @@ let private distinguishSyntaxFromBacktrickingErrors (items: (Position * string) 
     let hasBacktracking = items |> List.exists (fun (_, errMsg) -> errMsg.Contains("Backtracking syntax error"))    
     items
     |> List.map (fun (pos, errMsg) ->
-        let lines = errMsg.Split(Environment.NewLine) |> Array.toList
+        let lines =
+            errMsg.Split(Environment.NewLine)
+            |> Array.map (fun s ->
+                if s.Contains("any char in ") then
+                    s.Replace("any char in ", "<any char in ") + ">"
+                else
+                    s
+            )
+            |> Array.toList
+
         let modifiedErrMsg =
             match lines with
             | [] -> ""
@@ -189,38 +214,13 @@ let private computeIndex (pos: Position) (lines: string array) inputLength =
     else
         int64 inputLength
 
-/// Compute line and column 
-let private computLineAndColumnOfIndex (index: int) (lines: string array) inputLength =
-    // Clamp index to valid range
-    let idx = max 0 (min index (inputLength))
-
-    // Walk through lines until we find the one containing the index
-    let rec loop lineNumber remainingIndex =
-        if lineNumber >= lines.Length then
-            // Index beyond last line → return last line
-            lines.Length, remainingIndex
-        else
-            let line = lines.[lineNumber]
-            let lineLength = line.Length + lengthNewLine   
-
-            if remainingIndex < lineLength then
-                // Index is inside this line
-                let col =
-                    if remainingIndex < line.Length then remainingIndex
-                    else line.Length   // index at newline → column = end of line
-                lineNumber + 1, col
-            else
-                loop (lineNumber + 1) (remainingIndex - lineLength)
-
-    loop 0 idx
-
 /// Removes from an FParsec error message line substrings in the process of preparing a line of an FPL diagnostic message.
 let private removeFParsecErrorStringsFromFplDiagnostics (line:string) =
     line
         .Trim() // trim the line 
         .Replace(" or ", ", ") // replace ors by commas
         // remove unwanted strings
-        .Replace("Other error messages:", "")
+        .Replace("Other error messages:", ", ")
         .Replace("Expecting:", "")
         .Replace("end of input", "<end of input>")
         .Replace("Note: The error occurred at the end of the input stream.", "")
@@ -251,14 +251,6 @@ let private collapseExpectingBlock (input: string) : string =
 /// Calculates the index Position based on line and column and replaces Positions missing index
 /// with some having them.
 let private correctPositionIndexBasedOnLineAndColumn (lines:string array) length (items: (Position * string) list) =
-    items
-    |> List.map (fun (pos, errMsg) ->
-        (Position("", computeIndex pos lines length, pos.Line, pos.Column), errMsg)
-    )
-
-/// Replaces the Positions witcolumn based on index Position and replaces Positions line and index with
-/// with some having them.
-let private correctPositionLineAndColumnBasedOnIndex (lines:string array) length (items: (Position * string) list) =
     items
     |> List.map (fun (pos, errMsg) ->
         (Position("", computeIndex pos lines length, pos.Line, pos.Column), errMsg)

@@ -54,6 +54,14 @@ type TestStatements () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
         
+
+    [<TestMethod>]
+    member this.TestAssignment01a () =
+        let result = run (assignmentStatement .>> eof) """result:=Zero()"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
     [<TestMethod>]
     member this.TestAssignment01 () =
         let result = run (assignmentStatement .>> eof) """a:= 1"""
@@ -99,11 +107,11 @@ type TestStatements () =
         // else case addressed using a python delegate
         let result = run (casesStatement .>> eof) """cases
                 (
-                    | Equal(x,0) :
+                    | Equal(x,0):
                         self := Zero()
-                    | Equal(x,1) :
+                    | Equal(x,1):
                         self := Succ(Zero())
-                    | Equal(x,2) :
+                    | Equal(x,2):
                         self := Succ(Succ(Zero()))
                     ? self := Succ(del.Decrement(x))
                 )"""
@@ -130,9 +138,9 @@ type TestStatements () =
     member this.TestCases03 () =
         let result = run (casesStatement .>> eof) """cases
                     (
-                        | (x = 0) : self := Zero() 
-                        | (x = 1) : self := Succ(Zero())
-                        | (x = 2) : self := Succ(Succ(Zero()))
+                        | (x = 0): self := Zero() 
+                        | (x = 1): self := Succ(Zero())
+                        | (x = 2): self := Succ(Succ(Zero()))
                         ? self := Succ(delegate.Decrement(x))  
                     )"""
         let actual = sprintf "%O" result
@@ -167,9 +175,9 @@ type TestStatements () =
     member this.TestCases06 () =
         let result = run (assignmentStatement .>> eof) """n:=mcases
                 (
-                    | (x = $1) : false 
-                    | (x = $2) : true 
-                    | (x = $3) : false 
+                    | (x = $1): false 
+                    | (x = $2): true 
+                    | (x = $3): false 
                     ? undef  
                 )"""
         let actual = sprintf "%O" result
@@ -181,9 +189,9 @@ type TestStatements () =
     member this.TestCases07 () =
         let result = run (mapCases .>> eof) """mcases
                 (
-                    | (x = $1) : false 
-                    | (x = $2) : true 
-                    | (x = $3) : false 
+                    | (x = $1): false 
+                    | (x = $2): true 
+                    | (x = $3): false 
                     ? undef  
                 )"""
         let actual = sprintf "%O" result

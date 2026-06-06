@@ -1,4 +1,4 @@
-﻿using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 
 namespace FplLS
 {
@@ -8,7 +8,7 @@ namespace FplLS
         {
             var ret = new List<FplCompletionItem>();
             // snippets
-            var ci = defaultCi.Clone(); SetCasesStatement(ci, true); ret.Add(ci);
+            var ci = defaultCi.Clone(); SetCasesStatement(ci); ret.Add(ci);
             // keywords
             defaultCi.Kind = CompletionItemKind.Keyword;
             defaultCi.AdjustToKeyword();
@@ -17,14 +17,14 @@ namespace FplLS
 
         }
 
-        private void SetCasesStatement(FplCompletionItem ci, bool withRange)
+        private static void SetCasesStatement(FplCompletionItem ci)
         {
             ci.Label += " ...";
             ci.InsertText =
                 $"cases{Environment.NewLine}" +
                 $"({Environment.NewLine}" +
-                $"\t| p(x) : y := a{Environment.NewLine}" +
-                $"\t| q(x) : y := b{Environment.NewLine}" +
+                $"\t| p(x): y := a{Environment.NewLine}" +
+                $"\t| q(x): y := b{Environment.NewLine}" +
                 $"\t? y := c{Environment.NewLine}" +
                 $"){Environment.NewLine}";
         }

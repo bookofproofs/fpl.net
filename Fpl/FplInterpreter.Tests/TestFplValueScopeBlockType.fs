@@ -963,9 +963,9 @@ type TestFplValueScopeBlockType() =
                 n:pred
                 n:= mcases
                 (
-                    | (x = $1) : false 
-                    | (x = $2) : true 
-                    | (x = $3) : false 
+                    | (x = $1): false 
+                    | (x = $2): true 
+                    | (x = $3): false 
                     ? undef  
                 )
                 ;n } def pred T() {Test(%s)}""" input 
@@ -1004,9 +1004,9 @@ type TestFplValueScopeBlockType() =
                 n:pred
                 n:= mcases
                 (
-                    | (x = $1) : false 
-                    | (x = $2) : true 
-                    | (x = $3) : false 
+                    | (x = $1): false 
+                    | (x = $2): true 
+                    | (x = $3): false 
                     ? undef  
                 )
                 ;n } def pred T() {Test(%s)}""" input 
@@ -1046,9 +1046,9 @@ type TestFplValueScopeBlockType() =
                 n:pred
                 cases
                 (
-                    | (x = $1) : n:=false 
-                    | (x = $2) : n:=true 
-                    | (x = $3) : n:=false 
+                    | (x = $1): n:=false 
+                    | (x = $2): n:=true 
+                    | (x = $3): n:=false 
                     ? n:=undef  
                 )
                 ;n } def pred T() {Test(%s)}""" input 

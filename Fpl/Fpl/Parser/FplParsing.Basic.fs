@@ -1,6 +1,9 @@
-/// This module contains the FPL parser conbinators producing an abstract syntax tree out of a given FPL code.
+/// This module contains the basic FPL parser helpers and combinators
+/// producing an abstract syntax tree out of a given FPL code.
 module FplParsing.Basic
+open System.Text.RegularExpressions
 open FParsec
+open FplGrammarTypes
 open FplParsing.Debug
 (* MIT License
 
@@ -15,8 +18,39 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 *)
 
 // ============================================================================
-// Whitespace control
+// Helpers
 // ============================================================================
+
+/// A helper parser that consumes any input and can be combined with existing parsers to enrich them with 
+/// the parsing position.
+let private _position: Parser<_,_> = fun stream -> Reply stream.Position
+
+/// Takes the parser `p` and returns a tuple with it starting parsing position
+let private _startingPosition p = _position .>>. p
+
+/// Takes the parser `p` and returns a tuple with it starting parsing position
+let private _endingPosition p = 
+    let result = p .>>. _position
+    result 
+    >>= fun (p, pos) ->
+    preturn (pos, p)
+
+
+/// Takes the parser `p` and returns a tuple of its result, together with its starting and ending position.
+let positions (p: Parser<_,_>): Parser<Positions * _,_> =
+    pipe2
+        (_position .>>. p)
+        (_position)
+        (
+            // correct columns to keep the convention of jumping to
+            // the beginning and not to the end of a diagnostics in an IDE
+            let offset = (int64)1
+            fun (startPos, result) endPos ->
+            let pos1 = Position("", startPos.Index, startPos.Line, startPos.Column-offset)
+            let pos2 = Position("", endPos.Index, endPos.Line, endPos.Column-offset)
+            (Positions(pos1, pos2), result)
+        )
+
 
 // ============================================================================
 // Whitespace control
@@ -24,6 +58,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 let whiteSpaces = anyOf " \t\r\n"
 // No whitespace allowed at this point
+
 let NW : Parser<unit,unit> =
     notFollowedBy (skipMany1 whiteSpaces) <?> "<no whitespace>" <!> "NW"
 
@@ -35,23 +70,106 @@ let SW : Parser<unit,unit> =
 let IW : Parser<unit,unit> =
     skipMany whiteSpaces >>% () <?> "<whitespace>" <!> "IW"
 
-let attemptSW = SW <|> (IW .>> attempt (lookAhead (choice [skipChar '('; skipChar ')'; skipChar '{'; skipChar ','; skipChar ';'; skipChar '[' ]))) <!> "IW"
+let attemptSW = SW <|> (IW .>> attempt (lookAhead (choice [skipChar '('; skipChar ')'; skipChar '{'; skipChar ','; skipChar ';'; skipChar '[' ]))) <!> "atemptSW"
+
+// Prevents parsers like skipChar ')', skipChar '}', skipChar ']', or definitionProperty
+// that can be proceeded by whitespaces to interfer with infix operators in a way
+// that would break FParsec backtracking error reporting needed for improved FPL diagnostics.
+let safeProceedingSpace p =
+    lookAhead (IW >>. p)
+    >>. IW
+    >>. p
 
 // ============================================================================
 // Operator sets
 // ============================================================================
 
 // Prefix operators: - ~ #
-let pPrefixOp : Parser<string,unit> =
+let prefixMathSymbols : Parser<string,unit> =
     many1Satisfy (fun c -> "%&'*+-/؆؇℘⅀⅋∁∂∆∇∏∐∑−√∛∜∫∬∭∮∯∰∱∲∳∸∺∻∼∽∾≁⊢⊣⊤⊥⊦⊧⊨⊩⊪⊫⊬⊭⊮⊯⊰⊱⊹⊺⋀⋁⋂⋃⋄⋅⋆⋇⋈⋉⋊⋋⋌◸◹◺◻◼◽◾◿♯⟀⟁⟉⟊⟋⟌⟍⟐⟑⟓⟔⟕⟖⟗⟘⟙⟚⟛⟜⟝⟞⟟⟠⟡⟲⟳⤫⤬⥊⥋⥌⥍⥎⥏⥐⥑⥼⥽⥾⥿⦀⦁⦂⦙⦚⦢⦣⦤⦥⦦⦧⦰⦱⦲⦵⦶⦷⦸⦹⦺⦻⦼⦾⦿⧂⧃⧄⧅⧆⧇⧈⧉⧊⧋⧌⧍⧖⧗⧠⧨⧩⧫⧮⧯⧰⧱⧲⧳⧵⧶⧷⧸⧹⨀⨁⨂⨃⨄⨅⨆⨉⨊⨋⨌⨍⨎⨏⨐⨑⨒⨓⨔⨕⨖⨘⨙⨚⨛⨜⨼⨽⨿⩊⩋⩎⩏⫚⫝̸⫝⫞⫟⫠⫡⫢⫣⫤⫥⫦⫧⫨⫩⫪⫫⫬⫭⫯⫰⫱⫿｜～￢".Contains(c))
 
 // Postfix operators: ! ' /
-let pPostfixOp : Parser<string,unit> =
+let postfixMathSymbols : Parser<string,unit> =
     many1Satisfy (fun c -> "!%&'*+-/⁺⁻⁼₊₋₌⅋∸∺∻∼∽∾≁⊹⊺⋄⋅⋆⋇⋈⋉⋊⋋⋌◸◹◺◻◼◽◾◿♯⟀⟁⟉⟊⟋⟌⟍⟐⟑⟓⟔⟕⟖⟗⟘⟙⟚⟛⟜⟝⟞⟟⟠⟡⟲⟳⤫⤬⥊⥋⥌⥍⥎⥏⥐⥑⥼⥽⥾⥿⦀⦁⦂⦙⦚⦢⦣⦤⦥⦦⦧⦰⦱⦲⦵⦶⦷⦸⦹⦺⦻⦼⦾⦿⧂⧃⧄⧅⧆⧇⧈⧉⧊⧋⧌⧍⧖⧗⧠⧨⧩⧫⧮⧯⧰⧱⧲⧳⧵⧶⧷⧸⧹⨼⨽⩊⩋⫝̸⫝⫞⫟⫠⫡⫢⫣⫤⫥⫦⫧⫨⫩⫪⫫⫯⫰⫱｜～".Contains(c))
+
+/// Taken from https://www.quanttec.com/fparsec/users-guide/looking-ahead-and-backtracking.html#parser-predicates
+let resultSatisfies predicate msg (p: Parser<_,_>) : Parser<_,_> =
+    let error = messageError msg
+    fun stream ->
+        let state = stream.State
+        let reply = p stream
+        if reply.Status <> Ok || predicate reply.Result then reply
+        else
+            stream.BacktrackTo(state) // backtrack to beginning
+            Reply(Primitives.Error, error)
+
+let tplRegex = Regex(@"^(tpl|template)(([A-Z]\w*)|\d*)$", RegexOptions.Compiled)
+
 
 // Infix operators: + - * /
 let infixMathSymbols : Parser<string,unit> =
-    many1Satisfy (fun c -> "*+-/<=>@\^_abcdefghijklmnopqrstuvwxyz±×÷϶؈⁄⁒⁺⁼₊₌⅋←↑→↓↔↚↛↠↣↦↮⇎⇏⇒⇔⇴⇵⇶⇷⇸⇹⇺⇻⇼⇽⇾⇿∄∆∈∉∊∋∌∍−∓∔∕∖∗∘∙∝∣∤∥∦∧∨∩∪∴∵∶∷∸∹∺∻∼∽∾≀≁≂≃≄≅≆≇≈≉≊≋≌≍≎≏≐≑≒≓≖≗≘≙≚≛≜≞≟≠≡≢≣≤≥≦≧≨≩≪≫≬≭≮≯≰≱≲≳≴≵≶≷≸≹≺≻≼≽≾≿⊀⊁⊂⊃⊄⊅⊆⊇⊈⊉⊊⊋⊌⊍⊎⊏⊐⊑⊒⊓⊔⊕⊖⊗⊘⊙⊚⊛⊜⊝⊞⊟⊠⊡⊢⊣⊤⊥⊦⊧⊨⊩⊪⊫⊬⊭⊮⊯⊰⊱⊲⊳⊴⊵⊶⊷⊸⊹⊺⊻⊼⊽⋄⋅⋆⋇⋈⋉⋊⋋⋌⋍⋎⋏⋐⋑⋒⋓⋔⋕⋖⋗⋘⋙⋚⋛⋜⋝⋞⋟⋠⋡⋢⋣⋤⋥⋦⋧⋨⋩⋪⋫⋬⋭⋲⋳⋴⋵⋶⋷⋸⋹⋺⋻⋼⋽⋾⋿▷◁◸◹◺◻◼◽◾◿♯⟀⟁⟂⟃⟄⟇⟈⟉⟊⟋⟌⟍⟎⟏⟐⟑⟒⟓⟔⟕⟖⟗⟘⟙⟚⟛⟜⟝⟞⟟⟠⟡⟢⟣⟤⟥⟰⟱⟲⟳⟴⟵⟶⟷⟸⟹⟺⟻⟼⟽⟾⟿⤀⤁⤂⤃⤄⤅⤆⤇⤈⤉⤊⤋⤌⤍⤎⤏⤐⤑⤒⤓⤔⤕⤖⤗⤘⤙⤚⤛⤜⤝⤞⤟⤠⤡⤢⤣⤤⤥⤦⤧⤨⤩⤪⤫⤬⤭⤮⤯⤰⤱⤲⤳⤴⤵⤶⤷⤸⤹⤺⤻⤼⤽⤾⤿⥀⥁⥂⥃⥄⥅⥆⥇⥈⥉⥊⥋⥌⥍⥎⥏⥐⥑⥒⥓⥔⥕⥖⥗⥘⥙⥚⥛⥜⥝⥞⥟⥠⥡⥢⥣⥤⥥⥦⥧⥨⥩⥪⥫⥬⥭⥮⥯⥰⥱⥲⥳⥴⥵⥶⥷⥸⥹⥺⥻⥼⥽⥾⥿⦀⦁⦂⦙⦚⦢⦣⦤⦥⦦⦧⦨⦩⦪⦫⦬⦭⦮⦯⦰⦱⦲⦳⦴⦵⦶⦷⦸⦹⦺⦻⦼⦽⦾⦿⧀⧁⧂⧃⧄⧅⧆⧇⧈⧉⧊⧋⧌⧍⧎⧏⧐⧑⧒⧓⧔⧕⧖⧗⧞⧟⧠⧡⧢⧣⧤⧥⧦⧧⧨⧩⧪⧫⧬⧭⧮⧯⧰⧱⧲⧳⧴⧵⧶⧷⧸⧹⧺⧻⧾⧿⨁⨄⨇⨈⨗⨝⨞⨟⨠⨡⨢⨣⨤⨥⨦⨧⨨⨩⨪⨫⨬⨭⨮⨯⨰⨱⨲⨳⨴⨵⨶⨷⨸⨹⨺⨻⨼⨽⨾⨿⩀⩁⩂⩃⩄⩅⩆⩇⩈⩉⩊⩋⩌⩍⩎⩏⩐⩑⩒⩓⩔⩕⩖⩗⩘⩙⩚⩛⩜⩝⩞⩟⩠⩡⩢⩣⩤⩥⩦⩧⩨⩩⩪⩫⩬⩭⩮⩯⩰⩱⩲⩳⩴⩷⩸⩹⩺⩻⩼⩽⩾⩿⪀⪁⪂⪃⪄⪅⪆⪇⪈⪉⪊⪋⪌⪍⪎⪏⪐⪑⪒⪓⪔⪕⪖⪗⪘⪙⪚⪛⪜⪝⪞⪟⪠⪡⪢⪣⪤⪥⪦⪧⪨⪩⪪⪫⪬⪭⪮⪯⪰⪱⪲⪳⪴⪵⪶⪷⪸⪹⪺⪻⪼⪽⪾⪿⫀⫁⫂⫃⫄⫅⫆⫇⫈⫉⫊⫋⫌⫍⫎⫏⫐⫑⫒⫓⫔⫕⫖⫗⫘⫙⫚⫛⫝̸⫝⫞⫟⫠⫡⫢⫣⫤⫥⫦⫧⫨⫩⫪⫫⫮⫯⫰⫱⫲⫳⫴⫵⫶⫷⫸⫹⫺⫻⫼⫽⫾⬰⬱⬲⬳⬴⬵⬶⬷⬸⬹⬺⬻⬼⬽⬾⬿⭀⭁⭂⭃⭄⭇⭈⭉⭊⭋⭌﬩﹢﹤﹥﹦＋＜＝＞｜～￩￪￫￬".Contains(c))
+    many1Satisfy (fun c -> "*+-/<=>@\^_v±×÷϶؈⁄⁒⁺⁼₊₌⅋←↑→↓↔↚↛↠↣↦↮⇎⇏⇒⇔⇴⇵⇶⇷⇸⇹⇺⇻⇼⇽⇾⇿∄∆∈∉∊∋∌∍−∓∔∕∖∗∘∙∝∣∤∥∦∧∨∩∪∴∵∶∷∸∹∺∻∼∽∾≀≁≂≃≄≅≆≇≈≉≊≋≌≍≎≏≐≑≒≓≖≗≘≙≚≛≜≞≟≠≡≢≣≤≥≦≧≨≩≪≫≬≭≮≯≰≱≲≳≴≵≶≷≸≹≺≻≼≽≾≿⊀⊁⊂⊃⊄⊅⊆⊇⊈⊉⊊⊋⊌⊍⊎⊏⊐⊑⊒⊓⊔⊕⊖⊗⊘⊙⊚⊛⊜⊝⊞⊟⊠⊡⊢⊣⊤⊥⊦⊧⊨⊩⊪⊫⊬⊭⊮⊯⊰⊱⊲⊳⊴⊵⊶⊷⊸⊹⊺⊻⊼⊽⋄⋅⋆⋇⋈⋉⋊⋋⋌⋍⋎⋏⋐⋑⋒⋓⋔⋕⋖⋗⋘⋙⋚⋛⋜⋝⋞⋟⋠⋡⋢⋣⋤⋥⋦⋧⋨⋩⋪⋫⋬⋭⋲⋳⋴⋵⋶⋷⋸⋹⋺⋻⋼⋽⋾⋿▷◁◸◹◺◻◼◽◾◿♯⟀⟁⟂⟃⟄⟇⟈⟉⟊⟋⟌⟍⟎⟏⟐⟑⟒⟓⟔⟕⟖⟗⟘⟙⟚⟛⟜⟝⟞⟟⟠⟡⟢⟣⟤⟥⟰⟱⟲⟳⟴⟵⟶⟷⟸⟹⟺⟻⟼⟽⟾⟿⤀⤁⤂⤃⤄⤅⤆⤇⤈⤉⤊⤋⤌⤍⤎⤏⤐⤑⤒⤓⤔⤕⤖⤗⤘⤙⤚⤛⤜⤝⤞⤟⤠⤡⤢⤣⤤⤥⤦⤧⤨⤩⤪⤫⤬⤭⤮⤯⤰⤱⤲⤳⤴⤵⤶⤷⤸⤹⤺⤻⤼⤽⤾⤿⥀⥁⥂⥃⥄⥅⥆⥇⥈⥉⥊⥋⥌⥍⥎⥏⥐⥑⥒⥓⥔⥕⥖⥗⥘⥙⥚⥛⥜⥝⥞⥟⥠⥡⥢⥣⥤⥥⥦⥧⥨⥩⥪⥫⥬⥭⥮⥯⥰⥱⥲⥳⥴⥵⥶⥷⥸⥹⥺⥻⥼⥽⥾⥿⦀⦁⦂⦙⦚⦢⦣⦤⦥⦦⦧⦨⦩⦪⦫⦬⦭⦮⦯⦰⦱⦲⦳⦴⦵⦶⦷⦸⦹⦺⦻⦼⦽⦾⦿⧀⧁⧂⧃⧄⧅⧆⧇⧈⧉⧊⧋⧌⧍⧎⧏⧐⧑⧒⧓⧔⧕⧖⧗⧞⧟⧠⧡⧢⧣⧤⧥⧦⧧⧨⧩⧪⧫⧬⧭⧮⧯⧰⧱⧲⧳⧴⧵⧶⧷⧸⧹⧺⧻⧾⧿⨁⨄⨇⨈⨗⨝⨞⨟⨠⨡⨢⨣⨤⨥⨦⨧⨨⨩⨪⨫⨬⨭⨮⨯⨰⨱⨲⨳⨴⨵⨶⨷⨸⨹⨺⨻⨼⨽⨾⨿⩀⩁⩂⩃⩄⩅⩆⩇⩈⩉⩊⩋⩌⩍⩎⩏⩐⩑⩒⩓⩔⩕⩖⩗⩘⩙⩚⩛⩜⩝⩞⩟⩠⩡⩢⩣⩤⩥⩦⩧⩨⩩⩪⩫⩬⩭⩮⩯⩰⩱⩲⩳⩴⩷⩸⩹⩺⩻⩼⩽⩾⩿⪀⪁⪂⪃⪄⪅⪆⪇⪈⪉⪊⪋⪌⪍⪎⪏⪐⪑⪒⪓⪔⪕⪖⪗⪘⪙⪚⪛⪜⪝⪞⪟⪠⪡⪢⪣⪤⪥⪦⪧⪨⪩⪪⪫⪬⪭⪮⪯⪰⪱⪲⪳⪴⪵⪶⪷⪸⪹⪺⪻⪼⪽⪾⪿⫀⫁⫂⫃⫄⫅⫆⫇⫈⫉⫊⫋⫌⫍⫎⫏⫐⫑⫒⫓⫔⫕⫖⫗⫘⫙⫚⫛⫝̸⫝⫞⫟⫠⫡⫢⫣⫤⫥⫦⫧⫨⫩⫪⫫⫮⫯⫰⫱⫲⫳⫴⫵⫶⫷⫸⫹⫺⫻⫼⫽⫾⬰⬱⬲⬳⬴⬵⬶⬷⬸⬹⬺⬻⬼⬽⬾⬿⭀⭁⭂⭃⭄⭇⭈⭉⭊⭋⭌﬩﹢﹤﹥﹦＋＜＝＞｜～￩￪￫￬".Contains(c))
+    <?> "<infix symbol>"
 
-let pObj : Parser<string,unit> =
+let objectMathSymbols : Parser<string,unit> =
     many1Satisfy (fun c -> "0123456789⅁⅂⅃⅄∅∞∟∠∡∢∿⊾⊿⍼⦛⦜⦝⦞⦟⦠⦡⧜⧝".Contains(c))
+
+
+// ============================================================================
+// Literals and base atoms
+// ============================================================================
+
+let leftParen : Parser<unit,unit> = 
+    skipChar '(' >>. IW <!> "leftParen"
+
+let rightParen : Parser<unit,unit> = safeProceedingSpace (skipChar ')') <!> "rightParen"
+
+let leftBrace : Parser<unit,unit> = 
+    skipChar '{' >>. IW <!> "leftBrace"
+
+let rightBrace : Parser<unit,unit> = safeProceedingSpace (skipChar '}') <!> "rightBrace"
+
+let leftBracket : Parser<unit,unit> =
+    skipChar '[' >>. IW <!> "leftBracket"
+
+let rightBracket : Parser<unit,unit> = safeProceedingSpace (skipChar ']') <!> "rightBracket"
+
+let comma : Parser<unit,unit> =
+    attempt (IW >>. skipChar ',' >>. IW) <!> "comma"
+
+let colon : Parser<unit,unit> =
+    skipChar ':' .>> IW
+
+let colonEqual : Parser<unit,unit> =
+    skipString ":=" >>. IW 
+
+let at : Parser<unit,unit> =
+    skipChar '@'
+
+let case : Parser<unit,unit> =
+    skipChar '|' >>. IW
+
+let elseCase : Parser<unit,unit> =
+    skipChar '?' >>. IW
+
+let semiColon : Parser<unit,unit> =
+    skipChar ';' .>> IW 
+
+let exclamationMark : Parser<unit,unit> =
+    skipChar '!'
+
+let toArrow : Parser<unit,unit> =
+    skipString "->"
+
+let vDash : Parser<unit,unit> =
+    skipString "|-"
+
+let quote : Parser<unit,unit> =
+    skipChar '"' 
+
+let slash : Parser<unit,unit> =
+    skipChar '/'
+
+let dot : Parser<Ast,unit> =
+    skipChar '.' |>> Ast.Dot <!> "Dot"
+

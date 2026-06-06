@@ -427,13 +427,17 @@ let variableInBlockScopeByName (fplValue: FplGenericNode) name withNestedVariabl
 
 /// Checks if an argument points to a free variable that is not in the signature of the predicagte,
 /// and if so, issues VAR09 diagnostics.
-let checkFreeAndNotSignatureVar (arg:FplGenericNode) = 
+let rec checkFreeAndNotSignatureVar (arg:FplGenericNode) = 
     match arg.RefersTo with 
     | Some ref ->
         match box ref, ref.UltimateBlockNode with 
         | :? IVariable as var, Some node when node.Name <> PrimRuleOfInference && node.Name <> LiteralLocL && not var.IsBound && not var.IsSignatureVariable ->
             ref.ErrorOccurred <- emitVAR09diagnostics ref.FplId ref.TypeId ref.StartPos ref.EndPos
         | _ -> ()
+    | None when arg.ExpressionType.IsParen ->
+        // delegate parenthesized (arg) to a
+        // arg has always a single argument due to symbol table structure of Ast.Parens
+        checkFreeAndNotSignatureVar arg.ArgList[0]
     | _ -> ()
 
 let rec isSimpleExpression (fv:FplGenericNode) =
@@ -449,7 +453,7 @@ let rec isSimpleExpression (fv:FplGenericNode) =
     | PrimIntrinsicInd
     | PrimFalse
     | PrimTrue -> true
-    | PrimPredicateL when fv.ExpressionType = FixType.NoFix -> true
+    | PrimPredicateL when fv.ExpressionType.IsNoFix -> true
     | PrimMappingL when (fv.Scope.Count = 0) -> true
     | LiteralParent 
     | LiteralSelf 

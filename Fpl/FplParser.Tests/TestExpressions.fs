@@ -1,6 +1,7 @@
 namespace FplParser.Tests
 
 open FParsec
+open FplParsing.Basic
 open FplParsing.Combinators
 open FplPrimitives
 open Microsoft.VisualStudio.TestTools.UnitTesting
@@ -331,7 +332,7 @@ type TestExpressions () =
     [<DataRow("05b", "(x)")>]
     [<TestMethod>]
     member this.TestInfixOperationSyntax (no:string, expr:string) =
-        let result = run (infixOperation .>> eof) expr
+        let result = run (pInfixExpr .>> eof) expr
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -344,8 +345,8 @@ type TestExpressions () =
     [<DataRow("01e", "false'")>]
     [<DataRow("02d", "-and(a,b)")>]
     [<DataRow("02e", "and(a,b)'")>]
-    [<DataRow("03d", "-mcases ( | true : true ? false )")>]
-    [<DataRow("03e", "mcases ( | true : true ? false )'")>]
+    [<DataRow("03d", "-mcases ( | true: true ? false )")>]
+    [<DataRow("03e", "mcases ( | true: true ? false )'")>]
     [<TestMethod>]
     member this.TestPredicateSyntaxSuccess (no:string, expr:string) =
         let result = run (predicate .>> eof) expr
@@ -368,10 +369,10 @@ type TestExpressions () =
     [<DataRow("02c", "and(a,b).F().x[2]")>]
     [<DataRow("02c_", "(x + )")>]
     [<DataRow("02e", "(x +)")>]
-    [<DataRow("03", "mcases ( | true : true ? false )()")>]
-    [<DataRow("03a", "mcases ( | true : true ? false )().x[2]")>]
-    [<DataRow("03b", "mcases ( | true : true ? false )[2]")>]
-    [<DataRow("03c", "mcases ( | true : true ? false ).F().x[2]")>]
+    [<DataRow("03", "mcases ( | true: true ? false )()")>]
+    [<DataRow("03a", "mcases ( | true: true ? false )().x[2]")>]
+    [<DataRow("03b", "mcases ( | true: true ? false )[2]")>]
+    [<DataRow("03c", "mcases ( | true: true ? false ).F().x[2]")>]
     [<DataRow("03c_", "(1 = )")>]
     [<DataRow("03d", "(1= )")>]
     [<DataRow("03e", "(1 =)")>]
@@ -382,6 +383,7 @@ type TestExpressions () =
     [<DataRow("05e", "(x =)")>]
     [<DataRow("05d", "(x= )")>]
     [<DataRow("05f", "(x=)")>]
+    [<DataRow("06", "a * b + (c d)")>]
     [<TestMethod>]
     member this.TestPredicateSyntaxFailure (no:string, expr:string) =
         let result = run (predicate .>> eof) expr
@@ -399,3 +401,32 @@ type TestExpressions () =
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
+
+    [<DataRow("01", "a * b + (c d)")>]
+    [<DataRow("02", "a ∧ ∀ x:obj {x  N}")>]
+    [<TestMethod>]
+    member this.TestPredicateContentFailure (no:string, expr:string) =
+        let result = run (predContent .>> eof) expr
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
+
+    [<DataRow("01", "{a * b + (c d)}")>]
+    [<DataRow("02", "{a ∧ ∀ x:obj {x  N}}")>]
+    [<TestMethod>]
+    member this.TestPredicateInstanceBlocktFailure (no:string, expr:string) =
+        let result = run (predicateInstanceBlock .>> eof) expr
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
+
+    [<DataRow("01", "{a * b + (c d)}")>]
+    [<DataRow("02", "{a ∧ ∀ x:obj {x  N}}")>]
+    [<TestMethod>]
+    member this.TestPredicateDefinitionBlocktFailure (no:string, expr:string) =
+        let result = run (predicateDefinitionBlock .>> eof) expr
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
+
+

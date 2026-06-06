@@ -3,7 +3,7 @@ uses Fpl.Commons
 def class Set
 
 // "in relation" ("is element of") relation
-def pred In(x,y: Set) infix "in" 5 
+def pred In(x,y: Set) infix "∈" 5 
 {
     intr
 }

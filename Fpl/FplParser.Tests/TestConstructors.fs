@@ -183,7 +183,7 @@ type TestConstructors () =
     member this.TestConstructor06 () =
         let result = run (constructor .>> eof) """ctor FieldPowerN
             (
-                field : Field,
+                field: Field,
                 n: Nat
             )
             {

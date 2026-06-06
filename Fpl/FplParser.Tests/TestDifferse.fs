@@ -24,6 +24,15 @@ type TestDiverse () =
     [<DataRow("08", """def pred A() {false ∧ true}""")>]
     [<DataRow("09", """inf AndCummutative{dec p,q:pred; pre:and(p,q) con:and(q,p)} thm T {true} proof T$1 {1: and(true,false) 2. 1, byinf AndCummutative |- false ∧ true}""")>]
     [<DataRow("10", """def pred A() {f()}""")>]
+    [<DataRow("11", """proof T$1 {1: iif (a,b)}""")>]
+    [<DataRow("12", """loc not(x) := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
+    [<DataRow("13", """def pred A() {y is M}""")>]
+    [<DataRow("14", """def pred T() { dec x,y,z:pred x:=true y:=true z:=true; and(and(x,y),z) }""")>]
+    [<DataRow("15", """loc true := !tex: "1" !eng: "true";""")>]
+    [<DataRow("16", """def pred A() {-(y + x' = @2 * x)'}""")>]
+    [<DataRow("17", """def pred A() {mcases (|($2 = $1) : $42 ? $1)}""")>]
+    [<DataRow("18", """def pred A() {dec n:ind cases (|($2 = $1) : n:=$42 ? n:=$1); true}""")>]
+    [<DataRow("19", """def pred T() { undef = undef }""")>]
     [<TestMethod>]
     member this.TestDiverseSuccess (no:string, fplCode:string) =
         let result = run (stdParser .>> eof) fplCode
@@ -51,6 +60,8 @@ type TestDiverse () =
 
     [<DataRow("01", """axiom s SomeAxiom2 {true}""")>]
     [<DataRow("02", """def cl T {ctor T() {dec base. (); }}""")>]
+    [<DataRow("03", """def pred T() { (∀ x:obj {x is N} ∧ ¬∃ y:obj {y is M}) ∨ (¬∀ x:obj {x  N} ∧ ∃ y:obj {y is M}) }""")>]
+    [<DataRow("04", """def pred T() { a * b + (c d) }""")>]
     [<TestMethod>]
     member this.TestDiverseBuildingBlockFail (no:string, fplCode:string) =
         let result = run (buildingBlock .>> eof) fplCode

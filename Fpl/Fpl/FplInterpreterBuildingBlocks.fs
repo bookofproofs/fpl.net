@@ -52,7 +52,7 @@ open FplInterpreterCasesStmt
 /// Simplify trivially nested expressions by removing from the stack FplValue nodes that were created due to too long parsing tree and replacing them by their sub nodes 
 let rec simplifyTriviallyNestedExpressions (rb1:FplGenericNode) = 
     match rb1 with 
-    | :? FplReference as rb when rb.ArgList.Count = 1 && rb.FplId = "" ->
+    | :? FplReference as rb when rb.ArgList.Count = 1 && rb.FplId = "" && rb.ExpressionType <> FixType.Paren ->
         // removable reference blocks are those with only a single argument and unset FplId 
         let subNode = rb.ArgList[0] 
         heap.Eval.Pop() |> ignore // pop the removable reference block and ignored it
@@ -392,7 +392,7 @@ let rec eval ast =
                 variable.Parent <- Some loc
         | _ -> ()
 
-    | Ast.ObjectSymbol((pos1, pos2), symbol) -> 
+    | Ast.ObjectSymbolWithPos((pos1, pos2), symbol) -> 
         let fv = heap.Eval.PeekEvalStack()
         fv.FplId <- symbol
         fv.TypeId <- symbol
@@ -422,39 +422,42 @@ let rec eval ast =
             heap.Eval.PushEvalStack(fvAi)
             heap.Eval.PopEvalStack()
         | _ -> ()
-    | Ast.Prefix((pos1, pos2), symbol) -> 
+    | Ast.PrefixDecl((pos1, pos2), symbol) -> 
         let fv = heap.Eval.PeekEvalStack()
         fv.ExpressionType <- FixType.Prefix symbol
-    | Ast.Infix((pos1, pos2), (symbol, precedenceAsts)) -> 
+    | Ast.InfixDeclWithPrecedence((pos1, pos2), (symbol, precedenceAsts)) -> 
         let fv = heap.Eval.PeekEvalStack()
         eval precedenceAsts
         fv.ExpressionType <- FixType.Infix (symbol, fv.AuxiliaryInfo)
-    | Ast.Postfix((pos1, pos2), symbol) -> 
+    | Ast.PostfixDecl((pos1, pos2), symbol) -> 
         let fv = heap.Eval.PeekEvalStack()
         fv.ExpressionType <- FixType.Postfix symbol
-    | Ast.Symbol((pos1, pos2), symbol) -> 
+    | Ast.SymbolDecl((pos1, pos2), symbol) -> 
         let fv = heap.Eval.PeekEvalStack()
         fv.ExpressionType <- FixType.Symbol symbol
-    | Ast.InfixOperator((pos1, pos2), symbol) -> 
+    | Ast.InfixSymbolWithPos((pos1, pos2), symbol) -> 
         let fv = heap.Eval.PeekEvalStack()
         fv.FplId <- symbol
         fv.TypeId <- symbol
         fv.StartPos <- pos1
         fv.EndPos <- pos2
+        fv.ExpressionType <- FixType.Infix(symbol,-1)
         checkSIG01Diagnostics fv
-    | Ast.PostfixOperator((pos1, pos2), symbol) -> 
+    | Ast.PostFixSymbolWithPos((pos1, pos2), symbol) -> 
         let fv = heap.Eval.PeekEvalStack()
         fv.FplId <- symbol
         fv.TypeId <- symbol
         fv.StartPos <- pos1
         fv.EndPos <- pos2
+        fv.ExpressionType <- FixType.Postfix symbol
         checkSIG01Diagnostics fv
-    | Ast.PrefixOperator((pos1, pos2), symbol) -> 
+    | Ast.PrefixSymbolWithPos((pos1, pos2), symbol) -> 
         let fv = heap.Eval.PeekEvalStack()
         fv.FplId <- symbol
         fv.TypeId <- symbol
         fv.StartPos <- pos1
         fv.EndPos <- pos2
+        fv.ExpressionType <- FixType.Prefix symbol
         checkSIG01Diagnostics fv
     | Ast.Self((pos1, pos2), _) -> 
         let parent = heap.Eval.PeekEvalStack()
@@ -1006,6 +1009,9 @@ let rec eval ast =
                     var04List.Add kvp
             )
         ) |> ignore
+        let identifier = fv.ArgList |> Seq.map (fun arg -> arg.FplId) |> String.concat ""
+        fv.FplId <- identifier
+        fv.TypeId <- identifier
         heap.Eval.PopEvalStack()
         var04List
         |> Seq.iter (fun kvp -> 
@@ -1064,124 +1070,110 @@ let rec eval ast =
     | Ast.PredicateWithQualification(predicateWithOptSpecificationAst, qualificationListAst) ->
         eval predicateWithOptSpecificationAst
         eval qualificationListAst
-    | Ast.InfixOperation infixSequenceAst ->
-        eval infixSequenceAst
-    | Ast.InfixSequence (predicateAst, restInOpPredicateAstList) ->
-        let fv = heap.Eval.PeekEvalStack()
-        let pos1 = fv.StartPos
-        let pos2 = fv.EndPos
-        let firstPred = new FplReference((pos1,pos2), fv)
-        heap.Eval.PushEvalStack(firstPred)
-        eval predicateAst
-        fv.ArgList.Add(heap.Eval.Pop()) // pop the stack element (same reference as pred) and store it in a list
-        restInOpPredicateAstList
-        |> List.map (fun (opAst, predAst) -> 
-            // evaluate the operator by trying to find a definition for the operator
-            let infixOperator = new FplReference((pos1,pos2), fv)
-            heap.Eval.PushEvalStack(infixOperator)
-            eval opAst
-            // store the index of the infix operator, so we still know it after sorting the list by precedence later
-            fv.ArgList.Add(heap.Eval.Pop()) // pop the stack element (same reference as infixOperator) and store it in a list
-            // followed by the operand
-            let pred = new FplReference((pos1,pos2), fv)
-            heap.Eval.PushEvalStack(pred)
+    | Ast.InfixOp ((pos1, pos2), operandOperatorOptList) ->
+        let parent = heap.Eval.PeekEvalStack()
+        let fv = new FplReference((pos1, pos2), parent)
+        heap.Eval.PushEvalStack(fv)
+        operandOperatorOptList
+        |> List.map (fun (predAst, opAstOpt) -> 
+            // operand
+            let operand = new FplReference((pos1,pos2), fv)
+            heap.Eval.PushEvalStack(operand)
             eval predAst
+            simplifyTriviallyNestedExpressions operand
             fv.ArgList.Add(heap.Eval.Pop()) // pop the stack element (same reference as pred) and store it in a list
+            
+            match opAstOpt with
+            | Some opAst ->
+                // followed by the operator
+                // evaluate the operator by trying to find a definition for the operator
+                let infixOperator = new FplReference((pos1,pos2), fv)
+                heap.Eval.PushEvalStack(infixOperator)
+                eval opAst
+                // store the index of the infix operator, so we still know it after sorting the list by precedence later
+                fv.ArgList.Add(heap.Eval.Pop()) // pop the stack element (same reference as infixOperator) and store it in a list
+            | None -> ()
         )
         |> ignore
 
-        /// Returns the precedence of fv1 if its ExpressionType is Infix
-        /// or Int32.MaxValue otherwise
-        let getPrecedence (fv1:FplGenericNode) =
-            match fv1.RefersTo with
-            | None -> Int32.MaxValue
-            | Some x -> 
-                match x.ExpressionType with
-                |  FixType.Infix (symb, prec) -> prec
-                | _ -> Int32.MaxValue
+        // if there was at least one infix operator transform the symbol table according to precedence
+        if fv.ArgList.Count > 1 && fv.Name = PrimRefL then
+            /// Returns the precedence of fv1 if its ExpressionType is Infix
+            /// or Int32.MaxValue otherwise
+            let getPrecedence (fv1:FplGenericNode) =
+                match fv1.RefersTo with
+                | None -> Int32.MaxValue
+                | Some x -> 
+                    match x.ExpressionType with
+                    |  FixType.Infix (symb, prec) -> prec
+                    | _ -> Int32.MaxValue
 
-        // This while loop will evaluate multiple non-parenthesized infix operations
-        // according to their precedence by grouping them into binary operations and leave fv with only one binary operation
-        while fv.ArgList.Count > 1 do
-            let mutable currentMinimalPrecedence = Int32.MaxValue
-            let mutable currMinIndex = 1
-            for i in 1 .. 2 .. fv.ArgList.Count - 1 do
-                let currPrecedence = getPrecedence fv.ArgList[i]
-                if currentMinimalPrecedence > currPrecedence then
-                    currentMinimalPrecedence <- currPrecedence
-                    currMinIndex <- i
-            let currentOp = fv.ArgList[currMinIndex]
-            let firstOp = fv.ArgList[currMinIndex-1]
-            let secondOp = fv.ArgList[currMinIndex+1]
-            currentOp.ArgList.Add(firstOp)
-            currentOp.ArgList.Add(secondOp)
-            let refNodeOpt = referencedNodeOpt currentOp
-            match refNodeOpt with 
-            | Some refNode when refNode.Arity = 2 ->
-                let pars = 
-                    refNode.GetVariables() 
-                    |> List.map (fun var -> var :?> FplGenericVariable)
-                    |> List.filter (fun var -> var.IsSignatureVariable)
-                // try to issue SIG04 diagnostics per argument of the binary operator
-                if pars.Length = 2 then 
-                    match FplTypeMatcher.MatchPwA [firstOp] [pars[0]] with
-                    | Some errMsg -> 
-                        let extendedErrMsg = $"{errMsg} in {qualifiedName refNode true}"
-                        firstOp.ErrorOccurred <- emitSIG04Diagnostics (currentOp.Type SignatureType.Mixed) extendedErrMsg firstOp.StartPos firstOp.EndPos
-                    | _ -> ()
-                    match FplTypeMatcher.MatchPwA [secondOp] [pars[1]] with
-                    | Some errMsg -> 
-                        let extendedErrMsg = $"{errMsg} in {qualifiedName refNode true}"
-                        secondOp.ErrorOccurred <- emitSIG04Diagnostics (currentOp.Type SignatureType.Mixed) extendedErrMsg secondOp.StartPos secondOp.EndPos
-                    | _ -> ()
-                else
-                    // if something went wrong (for instance, wrong arity), issue SIG04 with fallback using the operand 
-                    // together with its referenced node
-                    checkSIG04Diagnostics currentOp [refNode] |> ignore
-            | _ -> ()
-            fv.ArgList.RemoveAt(currMinIndex+1) 
-            fv.ArgList.RemoveAt(currMinIndex-1) 
+            // This while loop will evaluate multiple non-parenthesized infix operations
+            // according to their precedence by grouping them into binary operations and leave fv with only one binary operation
+            while fv.ArgList.Count > 1 do
+                let mutable currentMinimalPrecedence = Int32.MaxValue
+                let mutable currMinIndex = 1
+                for i in 1 .. 2 .. fv.ArgList.Count - 1 do
+                    let currPrecedence = getPrecedence fv.ArgList[i]
+                    if currentMinimalPrecedence > currPrecedence then
+                        currentMinimalPrecedence <- currPrecedence
+                        currMinIndex <- i
+                let currentOp = fv.ArgList[currMinIndex]
+                let firstOp = fv.ArgList[currMinIndex-1]
+                let secondOp = fv.ArgList[currMinIndex+1]
+                currentOp.ArgList.Add(firstOp)
+                currentOp.ArgList.Add(secondOp)
+                let refNodeOpt = referencedNodeOpt currentOp
+                match refNodeOpt with 
+                | Some refNode when refNode.Arity = 2 ->
+                    let pars = 
+                        refNode.GetVariables() 
+                        |> List.map (fun var -> var :?> FplGenericVariable)
+                        |> List.filter (fun var -> var.IsSignatureVariable)
+                    // try to issue SIG04 diagnostics per argument of the binary operator
+                    if pars.Length = 2 then 
+                        match FplTypeMatcher.MatchPwA [firstOp] [pars[0]] with
+                        | Some errMsg -> 
+                            let extendedErrMsg = $"{errMsg} in {qualifiedName refNode true}"
+                            firstOp.ErrorOccurred <- emitSIG04Diagnostics (currentOp.Type SignatureType.Mixed) extendedErrMsg firstOp.StartPos firstOp.EndPos
+                        | _ -> ()
+                        match FplTypeMatcher.MatchPwA [secondOp] [pars[1]] with
+                        | Some errMsg -> 
+                            let extendedErrMsg = $"{errMsg} in {qualifiedName refNode true}"
+                            secondOp.ErrorOccurred <- emitSIG04Diagnostics (currentOp.Type SignatureType.Mixed) extendedErrMsg secondOp.StartPos secondOp.EndPos
+                        | _ -> ()
+                    else
+                        // if something went wrong (for instance, wrong arity), issue SIG04 with fallback using the operand 
+                        // together with its referenced node
+                        checkSIG04Diagnostics currentOp [refNode] |> ignore
+                | _ -> ()
+                fv.ArgList.RemoveAt(currMinIndex+1) 
+                fv.ArgList.RemoveAt(currMinIndex-1) 
         simplifyTriviallyNestedExpressions fv 
-    | Ast.Expression((pos1, pos2), ((prefixOpAst, predicateAst), postfixOpAst)) ->
-        let fv = heap.Eval.PeekEvalStack()
-        let refBlock = new FplReference((pos1, pos2), fv) 
-        heap.Eval.PushEvalStack(refBlock)
-        let ensureReversedPolishNotation = 
-            if prefixOpAst.IsSome && postfixOpAst.IsSome then 
-                // for heuristic reasons, we choose a precedence of postfix ...
-                postfixOpAst |> Option.map eval |> Option.defaultValue () 
-                let postfixedInnerPred = new FplReference((pos1,pos2), heap.Eval.PeekEvalStack())
-                heap.Eval.PushEvalStack(postfixedInnerPred)
-                // ... over prefix notation in mathematics
-                prefixOpAst |> Option.map eval |> Option.defaultValue ()
-                let prefixedInnerPred = new FplReference((pos1,pos2), heap.Eval.PeekEvalStack())
-                heap.Eval.PushEvalStack(prefixedInnerPred)
-                eval predicateAst
-                heap.Eval.PopEvalStack()
-                heap.Eval.PopEvalStack()
-            elif prefixOpAst.IsSome then 
-                prefixOpAst |> Option.map eval |> Option.defaultValue ()
-                let innerPred = new FplReference((pos1,pos2), heap.Eval.PeekEvalStack())
-                heap.Eval.PushEvalStack(innerPred)
-                eval predicateAst
-                heap.Eval.PopEvalStack()
-            elif postfixOpAst.IsSome then 
-                postfixOpAst |> Option.map eval |> Option.defaultValue ()
-                let innerPred = new FplReference((pos1,pos2), heap.Eval.PeekEvalStack())
-                heap.Eval.PushEvalStack(innerPred)
-                eval predicateAst
-                heap.Eval.PopEvalStack()
-            else
-                eval predicateAst
-        ensureReversedPolishNotation
-        let refBlock = heap.Eval.PeekEvalStack() // if the reference was replaced, take this one
-        refBlock.EndPos <- pos2
-        simplifyTriviallyNestedExpressions refBlock 
         heap.Eval.PopEvalStack()
-        match fv with 
+        match parent with 
         | :? FplReference ->
-            simplifyTriviallyNestedExpressions fv 
+            simplifyTriviallyNestedExpressions parent 
         | _ -> ()
+    | Ast.PrefixOp(operatorAst, operandAst) 
+    | Ast.PostfixOp(operatorAst, operandAst) -> 
+        let fv = heap.Eval.PeekEvalStack()
+        let operator = new FplReference((fv.StartPos, fv.EndPos), fv) 
+        heap.Eval.PushEvalStack(operator)
+        eval operatorAst
+        let operand = new FplReference((operator.StartPos, operator.EndPos), operator) 
+        heap.Eval.PushEvalStack(operand)
+        eval operandAst
+        heap.Eval.PopEvalStack()
+        heap.Eval.PopEvalStack()
+        simplifyTriviallyNestedExpressions fv
+    | Ast.Parens ((pos1, pos2), expressionAst) ->
+        let fv = heap.Eval.PeekEvalStack()
+        let refBlock = new FplReference ((pos1,pos2), fv)
+        refBlock.ExpressionType <- FixType.Paren
+        heap.Eval.PushEvalStack(refBlock)
+        eval expressionAst
+        heap.Eval.PopEvalStack()
     | Ast.Cases((pos1, pos2), (caseSingleListAsts, caseElseAst)) ->
         let parent = heap.Eval.PeekEvalStack()
         let casesStmt = new FplCases((pos1, pos2), parent)

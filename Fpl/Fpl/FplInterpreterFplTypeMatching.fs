@@ -471,6 +471,10 @@ type FplTypeMatcher() =
             let pName, pType, pTypeName = getNames p
 
             match aTypeName, pTypeName with 
+            | PrimRefL, _ when a.ExpressionType.IsParen ->
+                // delegate parenthesized arguments to the contents of the parentheses
+                // a has always a single argument due to symbol table structure of Ast.Parens
+                matchTwoTypes a.ArgList[0] p 
             | PrimClassL, PrimClassL 
             | PrimClassL, PrimVariableL ->
                 errTypeMismatchClassValueNotAllowed aType, Parameter.Consumed
@@ -630,7 +634,8 @@ type FplTypeMatcher() =
         let outputType = 
             match isArgPred expr with
             | _, true -> LiteralPred
-            | argType, false when argType.StartsWith(LiteralFunc) -> LiteralFunc
+            | argType, false when argType.StartsWith(LiteralFunc) || argType.StartsWith(LiteralFuncL) -> LiteralFunc
+            | argType, false when argType.StartsWith(LiteralTpl) || argType.StartsWith(LiteralTplL) -> argType
             | _, _ -> PrimNone
 
         match outputType with
@@ -656,6 +661,10 @@ type FplTypeMatcher() =
 
             let rec extractDistinctFreeVariables (fv:FplGenericNode) rootRecursion =
                 match fv.Name with
+                | PrimRefL when fv.ExpressionType.IsParen ->
+                    // delegate parenthesized arguments to the contents of the parentheses
+                    // fv has always a single argument due to symbol table structure of Ast.Parens
+                    extractDistinctFreeVariables fv.ArgList[0] false
                 | PrimRefL when fv.RefersTo.IsSome ->
                     match fv.RefersTo with
                     | Some (:? FplVariable as varCast) when rootRecursion ->

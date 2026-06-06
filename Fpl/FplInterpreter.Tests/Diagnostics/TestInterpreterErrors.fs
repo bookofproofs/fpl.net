@@ -676,8 +676,8 @@ type TestInterpreterErrors() =
     [<DataRow("09", """def func Add()->obj {intr} prop AddIsSomething {dec anotherAdd, op: Add; all n,m:obj { (add(n,m) = anotherAdd(n,m) )} }""", 0, "missing error message")>]
     [<DataRow("10", """def func Add()->obj {intr} prop AddIsSomething {dec anotherAdd: Add; all n,m:obj { (anotherAdd(n,m) = n) } }""", 0, "missing error message")>]
     [<DataRow("11", """def func Add()->obj {intr} prop AddIsSomething {dec anotherAdd: Add; all n,m:obj { (anotherAdd(n,@0) = n) } }""", 0, "missing error message")>]
-    [<DataRow("12", """def pred T(x,y:tpl) infix "=" 50 {del.Equal(x,y)} ext Digits x@/\d+/ -> ind {dec n:ind cases (| (x = @0) : n := $1 ? n := $2); ret n }""", 0, "missing error message")>]
-    [<DataRow("13", """def pred Equal(x,y: tpl) infix "=" 50 { del.Equal(x,y)} ext Digits x@/\d+/ -> pred {ret mcases ( | (x = @0) : true ? false ) }""", 0, "missing error message")>]
+    [<DataRow("12", """def pred T(x,y:tpl) infix "=" 50 {del.Equal(x,y)} ext Digits x@/\d+/ -> ind {dec n:ind cases (| (x = @0): n := $1 ? n := $2); ret n }""", 0, "missing error message")>]
+    [<DataRow("13", """def pred Equal(x,y: tpl) infix "=" 50 { del.Equal(x,y)} ext Digits x@/\d+/ -> pred {ret mcases ( | (x = @0): true ? false ) }""", 0, "missing error message")>]
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0, "missing error message")>]
     [<TestMethod>]
     member this.TestID013(no:string, fplCode:string, expected, expectedErrMsg:string) =
@@ -749,7 +749,7 @@ type TestInterpreterErrors() =
     [<DataRow("13", """loc not(parent) := !tex: "\neg(" x ")";""", 1)>]
     // TODO: issue diagnostics when asserting is(parent, ...), only asserting is(self,...) inside classes is allowed
     [<DataRow("14a", """ext A x@/\d+/ -> obj {dec assert is(parent,A); ret x}""", 1)>]
-    [<DataRow("14b", """def cl Nat def func Zero() -> Nat def func Succ(n: Nat) -> Nat def pred Equal(x,y: tpl) infix "=" 50 { del.Equal(x,y) } ext Digits x@/\d+/ -> Nat { return mcases (| (x = @0) : Zero() | (x = @1) : Succ(Zero()) | (x = @2) : Succ(Succ(Zero())) ? Succ(parent(delegate.Decrement(x))) )}""", 1)>]
+    [<DataRow("14b", """def cl Nat def func Zero() -> Nat def func Succ(n: Nat) -> Nat def pred Equal(x,y: tpl) infix "=" 50 { del.Equal(x,y) } ext Digits x@/\d+/ -> Nat { return mcases (| (x = @0): Zero() | (x = @1): Succ(Zero()) | (x = @2): Succ(Succ(Zero())) ? Succ(parent(delegate.Decrement(x))) )}""", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestID015(no:string, fplCode:string, expected:int) =
@@ -785,7 +785,7 @@ type TestInterpreterErrors() =
     [<DataRow("13", """loc not(self) := !tex: "\neg(" x ")";""", 1)>]
     // TODO: issue diagnostics when asserting is(self,...) outside classes
     [<DataRow("14a", """ext A x@/\d+/ -> obj {dec assert is(self,A); ret x}""", 0)>]
-    [<DataRow("14b", """def cl Nat def func Zero() -> Nat def func Succ(n: Nat) -> Nat def pred Equal(x,y: tpl) infix "=" 50 { del.Equal(x,y) } ext Digits x@/\d+/ -> Nat { return mcases (| (x = @0) : Zero() | (x = @1) : Succ(Zero()) | (x = @2) : Succ(Succ(Zero())) ? Succ(self(delegate.Decrement(x))) )}""", 0)>]
+    [<DataRow("14b", """def cl Nat def func Zero() -> Nat def func Succ(n: Nat) -> Nat def pred Equal(x,y: tpl) infix "=" 50 { del.Equal(x,y) } ext Digits x@/\d+/ -> Nat { return mcases (| (x = @0): Zero() | (x = @1): Succ(Zero()) | (x = @2): Succ(Succ(Zero())) ? Succ(self(delegate.Decrement(x))) )}""", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestID016(no: string, fplCode:string, expected:int) =
@@ -973,11 +973,11 @@ type TestInterpreterErrors() =
     [<DataRow("20", """def pred T() { dec x,y:pred; xor(y,xor(x,z)) }""", 1)>]
     [<DataRow("21", """loc and(p,q) := !tex: p "\wedge" q;""", 0)>]
     [<DataRow("22", """def class Set def pred In(x,y: Set) def pred IsEmpty(x: Set) { all y:Set { not In(y, x) } }""", 0)>]
-    [<DataRow("23", """def pred T() { mcases (| true : false | false : true ? undef) }""", 0)>]
-    [<DataRow("23a", """def pred T() {dec x:obj; mcases (| $1 : false | x : true ? undef) }""", 2)>]
-    [<DataRow("23b", """def pred T() {dec res:pred cases (| true : res:=false | false : res:=true ? res:=undef); res}""", 0)>]
-    [<DataRow("23c", """def pred T() {dec res:pred x:obj cases (| $1 : res:=false | x : res:=true ? res:=undef); res}""", 2)>]
-    [<DataRow("23d", """def pred T() {dec res:pred x:obj cases (| true : res:=false | x : res:=true ? res:=undef); res}""", 1)>]
+    [<DataRow("23", """def pred T() { mcases (| true: false | false: true ? undef) }""", 0)>]
+    [<DataRow("23a", """def pred T() {dec x:obj; mcases (| $1: false | x: true ? undef) }""", 2)>]
+    [<DataRow("23b", """def pred T() {dec res:pred cases (| true: res:=false | false: res:=true ? res:=undef); res}""", 0)>]
+    [<DataRow("23c", """def pred T() {dec res:pred x:obj cases (| $1: res:=false | x: res:=true ? res:=undef); res}""", 2)>]
+    [<DataRow("23d", """def pred T() {dec res:pred x:obj cases (| true: res:=false | x: res:=true ? res:=undef); res}""", 1)>]
     [<DataRow("24", """def pred T() { true }""", 0)>]
     [<DataRow("24a", """def pred T() { $1 }""", 1)>]
     [<DataRow("24b", """def pred T() { undef }""", 1)>]
@@ -1024,7 +1024,7 @@ type TestInterpreterErrors() =
     [<DataRow("38a", """def pred T() { iif ( true, $1 ) }""", 1)>]
     [<DataRow("38b", """def pred T() { iif ( $1, undef ) }""", 2)>]  
     [<DataRow("39", """def pred Equal(x,y:tpl) infix "=" 0 { delegate.Equal(x,y) } def cl A def pred EqualA (a,b: A) { (a = b) }""", 0)>]
-    [<DataRow("40", """def pred T() {mcases (| true : false | false : true ? false) }""", 0)>]
+    [<DataRow("40", """def pred T() {mcases (| true: false | false: true ? false) }""", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestLG001(no:string, fplCode:string, expected) =
@@ -2199,9 +2199,9 @@ type TestInterpreterErrors() =
             let code = PR020 (0, 0) 
             runTestHelper "TestPR020.fpl" fplCode code expected
 
-    [<DataRow("""def pred Or (x,y:*pred[obj]) infix "or" 0 {true}""", 0)>]
-    [<DataRow("""def pred Or (x:* pred[ind]) infix "or" 0 {true}""", 1)>]
-    [<DataRow("""def pred Or (x,y,z:* pred[ind]) infix "or" 0 {true}""", 1)>]
+    [<DataRow("""def pred Or (x,y:*pred[obj]) infix "∨" 0 {true}""", 0)>]
+    [<DataRow("""def pred Or (x:* pred[ind]) infix "∨" 0 {true}""", 1)>]
+    [<DataRow("""def pred Or (x,y,z:* pred[ind]) infix "∨" 0 {true}""", 1)>]
     [<DataRow("""def pred T() {true}""", 0)>]
     [<DataRow("""def pred T(x:obj) infix "+" 0 {true}""", 1)>]
     [<DataRow("""def pred T(x,y:obj) infix "+" 0{true}""", 0)>]
@@ -2222,9 +2222,9 @@ type TestInterpreterErrors() =
     [<DataRow("""def func T()->obj postfix "+" {intr}""", 1)>]
     [<DataRow("""def func T(x:obj)->obj postfix "+" {intr}""", 0)>]
     [<DataRow("""def func T(x,y:obj)->obj postfix "+" {intr}""", 1)>]
-    [<DataRow("""def func T(x,y:*pred[obj])->obj  infix "or" 0 {intr}""", 0)>]
-    [<DataRow("""def func T(x:* pred[ind])->obj  infix "or" 0 {intr}""", 1)>]
-    [<DataRow("""def func T(x,y,z:* pred[ind])->obj infix "or" 0 {intr}""", 1)>]
+    [<DataRow("""def func T(x,y:*pred[obj])->obj  infix "∨" 0 {intr}""", 0)>]
+    [<DataRow("""def func T(x:* pred[ind])->obj  infix "∨" 0 {intr}""", 1)>]
+    [<DataRow("""def func T(x,y,z:* pred[ind])->obj infix "∨" 0 {intr}""", 1)>]
     [<DataRow("uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestSIG00(fplCode:string, expected) =
@@ -2750,7 +2750,7 @@ type TestInterpreterErrors() =
     [<DataRow("03d", "lem A {true} ext U x@/\d+/ -> pred {ret A} def pred T(v:pred) {true} def pred Test() {T(@1)}", 0)>]
     [<DataRow("03e", "conj A {true} ext U x@/\d+/ -> pred {ret A} def pred T(v:pred) {true} def pred Test() {T(@1)}", 0)>]
     [<DataRow("03g", "cor A$1 {true} ext U x@/\d+/ -> pred {ret A$1} def pred T(v:pred) {true} def pred Test() {T(@1)}", 0)>]
-    [<DataRow("04", """def cl Nat def func Zero() -> Nat def pred Equal(x,y: tpl) infix "=" 50 { del.Equal(x,y) } ext Digits x@/\d+/ -> Nat { ret mcases ( | (x = @0) : Zero() ? Nat() ) }""", 0)>]
+    [<DataRow("04", """def cl Nat def func Zero() -> Nat def pred Equal(x,y: tpl) infix "=" 50 { del.Equal(x,y) } ext Digits x@/\d+/ -> Nat { ret mcases ( | (x = @0): Zero() ? Nat() ) }""", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestSIG03(no:string, fplCode:string, expected) =
@@ -3776,7 +3776,7 @@ type TestInterpreterErrors() =
     [<DataRow("50", """def cl A {intr property pred T() {true}} def cl B:A {ctor B() {dec base.A() assert self.T(); }}""", 0)>]
     [<DataRow("51", """def func A(n,m:obj)->obj {intr} prop T {dec op:A x,y:obj; (op(x,y) = x)}""", 0)>]
     [<DataRow("52", """def cl T { dec x:*tpl[ind]; ctor T(y:*tpl[ind]) {dec x:=y; } property func C(i:ind) -> tpl {return x[i]}}""", 0)>]
-    [<DataRow("53", """def cl Nat ext D x@/\d+/ -> Nat {dec n,m:Nat cases ( | (x = @0) : n:=m ? m:=n ); return n } def func Add(x,y:Nat)->obj {intr} prop K {dec op:Add n:Nat; ( op(n,@0) = n ) } """, 0)>]
+    [<DataRow("53", """def cl Nat ext D x@/\d+/ -> Nat {dec n,m:Nat cases ( | (x = @0): n:=m ? m:=n ); return n } def func Add(x,y:Nat)->obj {intr} prop K {dec op:Add n:Nat; ( op(n,@0) = n ) } """, 0)>]
     [<DataRow("54", """def cl C {ctor C() {}} def pred T() {dec cI1:C cI1:=C; true } """, 1)>]
     [<DataRow("54a", """def cl C {ctor C() {}} def pred T() {dec cI1:C cI1:=C(); true } """, 0)>]
     [<DataRow("54b", """def cl C {ctor C(x:obj) {}} def pred T() {dec cI1:C cI1:=C(); true } """, 1)>]
@@ -3794,7 +3794,7 @@ type TestInterpreterErrors() =
     [<DataRow("67", """def class Set def pred In(x,y: Set) def pred IsEmpty(x: Set) { all y:Set { not In(y, x) } }""", 0)>]
     [<DataRow("68", """def class Set def pred In(x,y: Set) def cl SetBuilder: Set { ctor SetBuilder(x: Set, p: pred(u1: Set, o:* obj[ind])) { dec base.Set() assert all u2:Set { iif (In(u2,parent), and ( In(u2,x), p(u2,o) ) ) }; } }""", 0)>]
     [<DataRow("69", """ext Digits x@/\d+/ -> Digits {ret x} def cl A {dec myX:Digits; ctor A(x:Digits) {dec myX:=x;}} def cl B:A { ctor B(x:Digits) {dec base.A(del.Decrement(x)); } } def pred T() { dec v:B v:=B(@2); false}""", 0)>]
-    [<DataRow("70", """def cl Nat def func Succ(n: Nat) -> Nat ext Digits x@/\d+/ -> Nat {ret mcases (| true : Nat() ? Succ(self(delegate.Decrement(x))) ) }""", 0)>]    
+    [<DataRow("70", """def cl Nat def func Succ(n: Nat) -> Nat ext Digits x@/\d+/ -> Nat {ret mcases (| true: Nat() ? Succ(self(delegate.Decrement(x))) ) }""", 0)>]    
     [<DataRow("71", """def pred Equal(x,y: tpl) infix "=" 50 { del.Equal(x,y) } def cl Nat def cl Zero:Nat def func Succ(n:Nat)->Nat def pred T() {all x,y:Nat {(x = Succ(y))}}""", 0)>]    
     [<DataRow("72", "def pred S() {dec parent():=true; true}", 0)>] // SIG04 won't be issued due to proceeding errors (ID015)
     [<DataRow("72a", "thm S {dec self():=true; true}", 0)>] // SIG04 won't be issued due to proceeding errors (ID015)
@@ -5648,8 +5648,8 @@ type TestInterpreterErrors() =
     [<DataRow("02a", "def pred Equal(x: tpl, y:tpl1) { del.Equal(x,y) } def pred T() {dec x:ind y:pred x:=$1 y:=true; Equal(x,y)}", 0)>] // two templates in Equal accepting different types
     [<DataRow("02", "def cl A def pred T() {dec x:*tpl[ind] x[$1]:=true x[$2]:=false; true}", 0)>] 
     [<DataRow("02a", "def cl A def pred T() {dec x:*tpl[ind] x[$1]:=true x[$2]:=A(); true}", 1)>] // a template not accepting assigning different types
-    [<DataRow("03", """def pred Equal(x,y: tpl) infix "=" 50 { del.Equal(x,y)} ext Digits x@/\d+/ -> pred {ret mcases ( | (x = @0) : true ? false ) }""", 0)>]
-    [<DataRow("04", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} ext Digits x@/\d+/ -> pred {ret mcases (| (x = @0) : true ? false)} def pred T(m:obj) { (m = @0) }""", 0)>]
+    [<DataRow("03", """def pred Equal(x,y: tpl) infix "=" 50 { del.Equal(x,y)} ext Digits x@/\d+/ -> pred {ret mcases ( | (x = @0): true ? false ) }""", 0)>]
+    [<DataRow("04", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} ext Digits x@/\d+/ -> pred {ret mcases (| (x = @0): true ? false)} def pred T(m:obj) { (m = @0) }""", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestSIG12(no:string, fplCode:string, expected) =
@@ -5661,13 +5661,13 @@ type TestInterpreterErrors() =
             runTestHelper "TestSIG12.fpl" fplCode code expected
 
 
-    [<DataRow("00", """def pred T() { mcases (| true : false | false : true ? undef) }""", 0)>] // undef as else case is allowed, all other cases return the same type as the first branch
-    [<DataRow("01", """def pred T() {dec x:obj; mcases (| true : $1 | false : x ? undef) }""", 1)>] // second branch returns type different from first branch
-    [<DataRow("02", """def pred T() {dec x:obj; mcases (| true : false | false : $42 ? undef) }""", 1)>] // second branch returns type different from first branch
-    [<DataRow("03", """def pred T() {dec x:obj; mcases (| true : false | false : $42 | false : $4 ? undef) }""", 2)>] // two consecutive branches return types different from first branch
-    [<DataRow("04", """def pred T() {dec x:obj; mcases (| true : undef | false : $42 | false : true ? false) }""", 3)>] // undef as first branch forces all other branches also to return undef
-    [<DataRow("05", """def pred T() {dec x:obj; mcases (| true : true | false : undef | false : true ? true) }""", 0)>] // undef in the middle is allowed
-    [<DataRow("06", """def cl Nat def func Succ(n: Nat) -> Nat ext Digits x@/\d+/ -> Nat {ret mcases (| true : Nat() ? Succ(self(delegate.Decrement(x))) ) }""", 0)>]  
+    [<DataRow("00", """def pred T() { mcases (| true: false | false: true ? undef) }""", 0)>] // undef as else case is allowed, all other cases return the same type as the first branch
+    [<DataRow("01", """def pred T() {dec x:obj; mcases (| true: $1 | false: x ? undef) }""", 1)>] // second branch returns type different from first branch
+    [<DataRow("02", """def pred T() {dec x:obj; mcases (| true: false | false: $42 ? undef) }""", 1)>] // second branch returns type different from first branch
+    [<DataRow("03", """def pred T() {dec x:obj; mcases (| true: false | false: $42 | false: $4 ? undef) }""", 2)>] // two consecutive branches return types different from first branch
+    [<DataRow("04", """def pred T() {dec x:obj; mcases (| true: undef | false: $42 | false: true ? false) }""", 3)>] // undef as first branch forces all other branches also to return undef
+    [<DataRow("05", """def pred T() {dec x:obj; mcases (| true: true | false: undef | false: true ? true) }""", 0)>] // undef in the middle is allowed
+    [<DataRow("06", """def cl Nat def func Succ(n: Nat) -> Nat ext Digits x@/\d+/ -> Nat {ret mcases (| true: Nat() ? Succ(self(delegate.Decrement(x))) ) }""", 0)>]  
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestSIG13(no:string, fplCode:string, expected) =
@@ -5678,18 +5678,18 @@ type TestInterpreterErrors() =
             
             runTestHelper "TestSIG13.fpl" fplCode code expected
 
-    [<DataRow("00", """def pred T() { mcases (| true : false | false : true ? undef) }""", 0)>] 
-    [<DataRow("01", """def pred T() { mcases (| true : $1 | true : $2 ? undef) }""", 1)>] // second condition will never be reached
-    [<DataRow("02", """def pred T() { mcases (| (x + 1 = 2) : $1 | true : $2 ? undef) }""", 0)>] 
-    [<DataRow("03", """def pred T() { mcases (| (x + 1 = 2) : $1 | (x + 1 = 3) : $2 ? undef) }""", 0)>] 
-    [<DataRow("04", """def pred T() { mcases (| (x + 1 = 2) : $1 | (x + 1 = 2) : $2 ? undef) }""", 1)>] // second condition will never be reached
-    [<DataRow("05", """def pred T() { mcases (| ex x:obj { (x = 2) } : $1 | (x + 1 = 2) : $2 | ex x:obj { (x = 2) } : $3 | ex x:obj { (x = 2) } : $4 ? undef) }""", 2)>] // third and forth condition will never be reached
-    [<DataRow("06", """def pred T() { dec res:pred cases (| true : res:=true | false : res:=true ? res:=undef); res }""", 0)>] 
-    [<DataRow("07", """def pred T() { dec res:pred cases (| true : res:=$1 | true : res:=$2 ? res:=undef); res }""", 1)>] // second condition will never be reached
-    [<DataRow("08", """def pred T() { dec res:pred cases (| (x + 1 = 2) : res:=$1 | true : res:=$2 ? res:=undef); res }""", 0)>] 
-    [<DataRow("09", """def pred T() { dec res:pred cases (| (x + 1 = 2) : res:=$1 | (x + 1 = 3) : res:=$2 ? res:=undef); res }""", 0)>] 
-    [<DataRow("10", """def pred T() { dec res:pred cases (| (x + 1 = 2) : res:=$1 | (x + 1 = 2) : res:=$2 ? res:=undef); res }""", 1)>] // second condition will never be reached
-    [<DataRow("11", """def pred T() { dec res:pred cases (| ex x:obj { (x = 2) } : res:=$1 | (x + 1 = 2) : res:=$2 | ex x:obj { (x = 2) } : res:=$3 | ex x:obj { (x = 2) } : res:=$4 ? res:=undef); res }""", 2)>] // third and forth condition will never be reached
+    [<DataRow("00", """def pred T() { mcases (| true: false | false: true ? undef) }""", 0)>] 
+    [<DataRow("01", """def pred T() { mcases (| true: $1 | true: $2 ? undef) }""", 1)>] // second condition will never be reached
+    [<DataRow("02", """def pred T() { mcases (| (x + 1 = 2): $1 | true: $2 ? undef) }""", 0)>] 
+    [<DataRow("03", """def pred T() { mcases (| (x + 1 = 2): $1 | (x + 1 = 3): $2 ? undef) }""", 0)>] 
+    [<DataRow("04", """def pred T() { mcases (| (x + 1 = 2): $1 | (x + 1 = 2): $2 ? undef) }""", 1)>] // second condition will never be reached
+    [<DataRow("05", """def pred T() { mcases (| ex x:obj { (x = 2) }: $1 | (x + 1 = 2): $2 | ex x:obj { (x = 2) }: $3 | ex x:obj { (x = 2) }: $4 ? undef) }""", 2)>] // third and forth condition will never be reached
+    [<DataRow("06", """def pred T() { dec res:pred cases (| true: res:=true | false: res:=true ? res:=undef); res }""", 0)>] 
+    [<DataRow("07", """def pred T() { dec res:pred cases (| true: res:=$1 | true: res:=$2 ? res:=undef); res }""", 1)>] // second condition will never be reached
+    [<DataRow("08", """def pred T() { dec res:pred cases (| (x + 1 = 2): res:=$1 | true: res:=$2 ? res:=undef); res }""", 0)>] 
+    [<DataRow("09", """def pred T() { dec res:pred cases (| (x + 1 = 2): res:=$1 | (x + 1 = 3): res:=$2 ? res:=undef); res }""", 0)>] 
+    [<DataRow("10", """def pred T() { dec res:pred cases (| (x + 1 = 2): res:=$1 | (x + 1 = 2): res:=$2 ? res:=undef); res }""", 1)>] // second condition will never be reached
+    [<DataRow("11", """def pred T() { dec res:pred cases (| ex x:obj { (x = 2) }: res:=$1 | (x + 1 = 2): res:=$2 | ex x:obj { (x = 2) }: res:=$3 | ex x:obj { (x = 2) }: res:=$4 ? res:=undef); res }""", 2)>] // third and forth condition will never be reached
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestSIG14(no:string, fplCode:string, expected) =

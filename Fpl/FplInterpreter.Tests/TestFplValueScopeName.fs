@@ -544,6 +544,7 @@ type TestFplValueScopeName() =
     [<DataRow("base19b", "exn$3 x:obj {exn$2 y:N {true}}")>]
     [<DataRow("base20", "all x:obj {not x}")>]
     [<DataRow("base21", "and(x, abc(y, z))")>]
+    [<DataRow("base21_", "x ∧ abc(y, z)")>]
     [<DataRow("base21a", "not x")>]
     [<DataRow("base21b", "not (x)")>]
     [<DataRow("base22", "xor(xor(x, y), z)")>]
@@ -576,7 +577,7 @@ type TestFplValueScopeName() =
         | "base1" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
         | "base2" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
         | "base3" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
-        | "base4" -> Assert.AreEqual<string>("-(1)", base1.Type(SignatureType.Name))
+        | "base4" -> Assert.AreEqual<string>("-1", base1.Type(SignatureType.Name))
         | "base5" -> Assert.AreEqual<string>("Test()", base1.Type(SignatureType.Name))
         | "base6" -> Assert.AreEqual<string>("$1", base1.Type(SignatureType.Name))
         | "base7" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
@@ -609,19 +610,20 @@ type TestFplValueScopeName() =
         | "base12f" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
         | "base13f" -> Assert.AreEqual<string>("1[x.y].T(a, b)", base1.Type(SignatureType.Name))
         | "base14" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
-        | "base15" -> Assert.AreEqual<string>("-(x)", base1.Type(SignatureType.Name))
-        | "base15a" -> Assert.AreEqual<string>("'(x)", base1.Type(SignatureType.Name))
-        | "base15b" -> Assert.AreEqual<string>("'(-(x))", base1.Type(SignatureType.Name))
-        | "base16" -> Assert.AreEqual<string>("-(*(=(+(y, x), 2), x))", base1.Type(SignatureType.Name))
-        | "base17" -> Assert.AreEqual<string>("'(*(=(+(y, '(x)), 2), x))", base1.Type(SignatureType.Name))
+        | "base15" -> Assert.AreEqual<string>("-x", base1.Type(SignatureType.Name))
+        | "base15a" -> Assert.AreEqual<string>("x'", base1.Type(SignatureType.Name))
+        | "base15b" -> Assert.AreEqual<string>("-x'", base1.Type(SignatureType.Name))
+        | "base16" -> Assert.AreEqual<string>("-(y + x = 2 * x)", base1.Type(SignatureType.Name))
+        | "base17" -> Assert.AreEqual<string>("(y + x' = 2 * x)'", base1.Type(SignatureType.Name))
         | "base18" -> Assert.AreEqual<string>("∃ y:C, z:ind, x:pred(obj, T) {a ∧ abc(b, c)}", base1.Type(SignatureType.Name))
         | "base19" -> Assert.AreEqual<string>("∃! x:obj {∀ y:N {true}}", base1.Type(SignatureType.Name))
         | "base19a" -> Assert.AreEqual<string>("∃!2 x:obj {∃ y:N {true}}", base1.Type(SignatureType.Name))
         | "base19b" -> Assert.AreEqual<string>("∃!3 x:obj {∃!2 y:N {true}}", base1.Type(SignatureType.Name))
         | "base20" -> Assert.AreEqual<string>("∀ x:obj {¬x}", base1.Type(SignatureType.Name))
         | "base21" -> Assert.AreEqual<string>("x ∧ abc(y, z)", base1.Type(SignatureType.Name))
+        | "base21_" -> Assert.AreEqual<string>("x ∧ abc(y, z)", base1.Type(SignatureType.Name))
         | "base21a" -> Assert.AreEqual<string>("¬x", base1.Type(SignatureType.Name))
-        | "base21b" -> Assert.AreEqual<string>("¬x", base1.Type(SignatureType.Name))
+        | "base21b" -> Assert.AreEqual<string>("¬(x)", base1.Type(SignatureType.Name))
         | "base22" -> Assert.AreEqual<string>("(x ⩡ y) ⩡ z", base1.Type(SignatureType.Name))
         | "base23" -> Assert.AreEqual<string>("x ∨ (y ∨ z)", base1.Type(SignatureType.Name))
         | "base24" -> Assert.AreEqual<string>("x ⇔ y", base1.Type(SignatureType.Name))

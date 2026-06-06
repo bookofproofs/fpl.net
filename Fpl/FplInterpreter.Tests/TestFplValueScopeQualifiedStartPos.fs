@@ -584,7 +584,7 @@ type TestFplValueScopeQualifiedStartPos() =
         | "base14" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
         | "base15" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
         | "base15a" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 18)"))
-        | "base15b" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 19)"))
+        | "base15b" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
         | "base16" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
         | "base17" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 34)"))
         | "base18" -> Assert.IsTrue((base1.QualifiedStartPos).ToString().Contains("Ln: 1, Col: 17)"))
