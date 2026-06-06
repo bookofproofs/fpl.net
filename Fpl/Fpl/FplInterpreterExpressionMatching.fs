@@ -149,6 +149,10 @@ let private checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) (dictParamete
                 checkExpr aRef p
             | None, Some pRef when a.ArgList.Count > 0 && not a.ExpressionType.IsParen ->
                 checkExpr a pRef
+            | None, Some pRef when a.ExpressionType.IsParen ->
+                checkExpr a.ArgList[0] pRef
+            | Some aRef, None when p.ExpressionType.IsParen ->
+                checkExpr aRef p.ArgList[0]
             | None, None when a.ExpressionType.IsParen && p.ExpressionType.IsParen ->
                 // delegate parenthesized (a) (p) to a p
                 checkExpr a.ArgList[0] p.ArgList[0]
