@@ -319,9 +319,9 @@ type FplReference(positions: Positions, parent: FplGenericNode) =
                             // delegate the representation to refTo.
                             refTo.Represent()
                         else
-                            refTo.Type SignatureType.Mixed
+                            refTo.Type SignatureType.Name // default to the name of the expression
                     | _, _, _ ->
-                        this.Type SignatureType.Mixed
+                        this.Type SignatureType.Name // default to the name of the expression
             _callCounter <- _callCounter - 1
             result
 
