@@ -15,6 +15,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 module FplInterpreterProofs
 open System
 open System.Collections.Generic
+open ErrMessages
 open FplPrimitives
 open FplGrammarTypes
 open FplInterpreterDiagnosticsEmitter
@@ -273,36 +274,13 @@ and FplJustificationItemByInf(positions: Positions, parent: FplGenericNode) =
                 this.SetDefaultValue()
             else
                 match this.ProceedingExprCandidates.Head with
-                | :? FplUndetermined -> this.SetDefaultValue()
-                | candidate -> this.SetValue candidate
+                | :? FplUndetermined ->
+                    this.SetDefaultValue()
+                | candidate ->
+                    // since a candidate was found, the justification inference succeeded and we set its value to true to flag this
+                    let v = new FplIntrinsicTrue((this.StartPos, this.EndPos), this)
+                    this.SetValue v
         debug this Debug.Stop
-
-
-            //        if premisePredicateList.Length <> proceedingJustificationItems.Length then
-            //            just.ErrorOccurred <- emitPR020Diagnostics (premisePredicateListNode.ArgList.Count) (proceedingJustificationItems.Length) just.StartPos just.EndPos
-            //            [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
-            //        else
-            //            let dictPremise2MatchingExpressionListPairs = getDictOfPremise2MatchingExpressionListPairs proceedingExpressionLists premisePredicateList
-            //            if checkExpressions proceedingExpressionLists (premisePredicateListNode.ArgList |> Seq.toList) this then
-            //                // premisePredicateList matches proceedingJustificationItems
-            //                // now check, if the argument inference corresponds to the conclusion
-            //                let argInferenceExpr = argInferenceExprCandidates.Head
-            //                if checkExpressions [argInferenceExpr] [conclusion] argInferenceExpr then
-            //                    let v = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
-            //                    v.FplId <- LiteralTrue
-            //                    this.SetValue v
-            //                else
-            //                    this.SetDefaultValue()
-            //            else
-            //                this.SetDefaultValue()
-            //    | _, _ -> this.SetDefaultValue()
-            //    let (arg:FplArgument) = just.ParentArgument
-
-            //    match arg.ArgumentInference with
-            //    | Some (argInference: FplGenericArgInference) ->
-            //        let argInferenceExprCandidates = argInference.ProceedingExprCandidates
-            //    | _ -> this.SetDefaultValue()
-            //| _, _ -> this.SetDefaultValue()
 
 and FplJustificationItemByRefArgument(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericJustificationItem(positions, parent)
@@ -487,8 +465,26 @@ and FplArgument(positions: Positions, parent: FplGenericNode, runOrder) =
             if not allEvaluateToTrue then
                 this.SetDefaultValue()
             else
-                let v = new FplIntrinsicTrue((this.StartPos, this.StartPos), this)
-                this.SetValue v
+                // at this point, all justification items of the justification evaluate to true.
+                let inferredFormulaOpt = argInference.ProceedingExprCandidates |> List.tryHead
+                let lastJustificationOfArgumentOpt = orderdListJustifications |> List.tryLast
+
+                match inferredFormulaOpt, lastJustificationOfArgumentOpt with
+                | Some inferredFormula, Some (:? FplGenericJustificationItem as lastJustificationOfArgument) ->
+                    let inferredExpr = inferredFormula.Type SignatureType.Name
+                    let proceedingCandidates = lastJustificationOfArgument.ProceedingExprCandidates |> List.map (fun expr -> expr.Type SignatureType.Name)
+                    let derivedInferenceIsCorrect = proceedingCandidates |> List.contains inferredExpr
+
+                    if derivedInferenceIsCorrect then 
+                        let v = new FplIntrinsicTrue((this.StartPos, this.StartPos), this)
+                        this.SetValue v
+                    else
+                        let mismatchingCandidates = numbered proceedingCandidates
+                        this.ErrorOccurred <- emitPR021Diagnostics mismatchingCandidates inferredExpr argInference.StartPos argInference.EndPos
+                        this.SetDefaultValue()
+                | _, _ ->
+                    this.ErrorOccurred <- emitGEN01Diagnostics $"Evaluating argument {this.Type SignatureType.Name} was not possible." this.StartPos this.EndPos
+                    this.SetDefaultValue()
         | None, Some argInference -> // Case B: no justification was given. An argument inference stands alone in the proof argument.
             // The behaviour of the FplInterpreter will on purpose assume the "correctness" of the proof argument in this case.
             // This is because checking the "correctness" of a proof argument (Case A) is experimental, can be very tricky, and will almost always produce some diagnostics.

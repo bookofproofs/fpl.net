@@ -29,6 +29,20 @@ let emitUnexpectedErrorDiagnostics errMsg =
     ad.AddDiagnostic(diagnostic)
     // do not aggregate GEN00 and return unit instead of Some (diagnostic.Code.Code)
 
+let emitGEN01Diagnostics errMsg pos1 pos2 =
+    let diagnostic =
+        {
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = GEN01 errMsg
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic(diagnostic)
+    Some (diagnostic.Code.Code)
+
 let emitID001Diagnostics alreadyDeclaredTypeStr qualifiedStartPosConflictStr pos1 pos2 =
     let diagnostic =
         { 
@@ -746,7 +760,7 @@ let emitPR020Diagnostics expectedNum actualNum pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitPR021Diagnostics expectedFormula foundFormula pos1 pos2 =
+let emitPR021Diagnostics mismatchingCandidates inferredFormula pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -754,7 +768,7 @@ let emitPR021Diagnostics expectedFormula foundFormula pos1 pos2 =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = PR021 (expectedFormula, foundFormula)
+            Diagnostic.Code = PR021 (mismatchingCandidates, inferredFormula)
             Diagnostic.Alternatives = None
         }
     ad.AddDiagnostic diagnostic

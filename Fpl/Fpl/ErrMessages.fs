@@ -33,6 +33,7 @@ let numbered inputLst =
 // -----------------------------------------------------------------
 // interpreter error messages
 let errGEN00 message = sprintf "Unexpected error occurred: %s" message
+let errGEN01 message = sprintf "Unexpected error occurred: %s" message
 let errNSP00 fileNamePattern = sprintf "The theory `%s` could not be found" fileNamePattern
 let errNSP01 fileName innerErrMsg = sprintf "The theory `%s` was found but could not be loaded: %s" fileName innerErrMsg
 let errNSP02 url innerErrMsg = sprintf "The theory `%s` was found but could not be downloaded: %s" url innerErrMsg
@@ -107,7 +108,8 @@ let errPR017 = $"Do not use `{LiteralTrivial}` if the argument is not the last o
 let errPR018 = $"A `{LiteralTrivial}` argument is missing exactly one justification."
 let errPR019 justificationType1 justificationType2 = $"Unsupported mix of justifications in a single argument (`{justificationType1}` with `{justificationType2}`)."
 let errPR020 expectedNum actualNum = $"This {PrimJIByInf} requires {expectedNum} proceeding expressions, got {actualNum}."
-let errPR021 expectedFormula foundFormula = $"Proof argument mismatches the inferred one: Expected `{expectedFormula}`, found `{foundFormula}`."
+let errPR021 mismatchingCandidates inferredFormula = $"The argument `{inferredFormula}` cannot be inferred from the proceeding results. Expected the following inferred candidate(s):{mismatchingCandidates}."
+
 // signature-related error codes
 let errSIG00 fixType arity = sprintf $"Illegal arity `{arity}` using `{fixType}` notation."
 let errSIG01 symbol = $"The symbol `{symbol}` was not declared." 

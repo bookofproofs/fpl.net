@@ -1704,7 +1704,7 @@ type SymbolTableStructure() =
         | "FplArgInferenceTrivial" ->
             Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplArgument" ->
-            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
+            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
         | "FplAssertion" ->
             Assert.AreEqual<string>(PrimNone, (getName var).[index])
         | "FplAssignment" ->
