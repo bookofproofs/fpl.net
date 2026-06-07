@@ -701,8 +701,10 @@ and FplArgInferenceDerived(positions: Positions, parent: FplGenericNode) =
 
     member this.ParentArgument = this.Parent.Value :?> FplArgument
 
+    /// As a list of proceeding expresssions candidates of a derived argument reference a list with a single
+    /// element is produced that corresponds to the very expression that is contained in the FPL code
+    /// of proof argument. As a fallback (syntax errors something else), a list with an undetermined predicate is produced.
     override this.ProceedingExprCandidates
-        // the argument of this FplArgInferenceDerived is the expression we need as a candidate
         with get (): FplGenericNode list =
             let exprOpt = this.ArgList |> Seq.tryHead
             match exprOpt with
