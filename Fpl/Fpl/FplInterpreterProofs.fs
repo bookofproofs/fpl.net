@@ -483,7 +483,6 @@ and FplArgument(positions: Positions, parent: FplGenericNode, runOrder) =
                         this.ErrorOccurred <- emitPR021Diagnostics mismatchingCandidates inferredExpr argInference.StartPos argInference.EndPos
                         this.SetDefaultValue()
                 | _, _ ->
-                    this.ErrorOccurred <- emitGEN01Diagnostics $"Evaluating argument {this.Type SignatureType.Name} was not possible." this.StartPos this.EndPos
                     this.SetDefaultValue()
         | None, Some argInference -> // Case B: no justification was given. An argument inference stands alone in the proof argument.
             // The behaviour of the FplInterpreter will on purpose assume the "correctness" of the proof argument in this case.

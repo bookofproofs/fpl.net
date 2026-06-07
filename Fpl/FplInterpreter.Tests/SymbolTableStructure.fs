@@ -1710,7 +1710,7 @@ type SymbolTableStructure() =
         | "FplAssignment" ->
             Assert.AreEqual<string>(PrimNone, (getName var).[index])
         | "FplAxiom" ->
-            Assert.AreEqual<string>(PrimUndetermined, (getName var).[index])
+            Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplBase" ->
             Assert.AreEqual<string>(PrimNone, (getName var).[index])
         | "FplBaseConstructorCall" ->

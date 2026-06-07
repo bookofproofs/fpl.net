@@ -125,6 +125,12 @@ type FplAxiom(positions: Positions, parent: FplGenericNode, runOrder) =
                 |> Seq.iter (fun fv -> 
                     fv.Run()
                 )
+            match this.ErrorOccurred with
+            | Some err -> () // the value of the axiom remains as it is
+            | _ ->
+                // if no error occured, we wet the truth value of the axiom to "true" as default
+                let v = FplIntrinsicTrue((this.StartPos, this.EndPos), this)
+                this.SetValue v
 
         debug this Debug.Stop
 

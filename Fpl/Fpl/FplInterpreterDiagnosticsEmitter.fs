@@ -29,20 +29,6 @@ let emitUnexpectedErrorDiagnostics errMsg =
     ad.AddDiagnostic(diagnostic)
     // do not aggregate GEN00 and return unit instead of Some (diagnostic.Code.Code)
 
-let emitGEN01Diagnostics errMsg pos1 pos2 =
-    let diagnostic =
-        {
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = pos1
-            Diagnostic.EndPos = pos2
-            Diagnostic.Code = GEN01 errMsg
-            Diagnostic.Alternatives = None 
-        }
-    ad.AddDiagnostic(diagnostic)
-    Some (diagnostic.Code.Code)
-
 let emitID001Diagnostics alreadyDeclaredTypeStr qualifiedStartPosConflictStr pos1 pos2 =
     let diagnostic =
         { 

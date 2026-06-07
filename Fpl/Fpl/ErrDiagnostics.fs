@@ -61,7 +61,6 @@ let getEnglishName someString determined =
 type DiagnosticCode = 
     // interpreter error codes
     | GEN00 of string
-    | GEN01 of string
     | NSP00 of string
     | NSP01 of string * string
     | NSP02 of string * string
@@ -165,7 +164,6 @@ type DiagnosticCode =
         match this with
             // interpreter error messages
             | GEN00 _ -> "GEN00"
-            | GEN01 _ -> "GEN01"
             | NSP00 _ -> "NSP00"
             | NSP01 _ -> "NSP01"
             | NSP02 _ -> "NSP02"
@@ -268,7 +266,6 @@ type DiagnosticCode =
         match this with
             // interpreter error messages
             | GEN00 message -> errGEN00 message
-            | GEN01 message -> errGEN01 message
             | NSP00 fileNamePattern -> errNSP00 fileNamePattern
             | NSP01 (fileName, innerErrMsg) -> errNSP01 fileName innerErrMsg
             | NSP02 (url, innerErrMsg) -> errNSP02 url innerErrMsg

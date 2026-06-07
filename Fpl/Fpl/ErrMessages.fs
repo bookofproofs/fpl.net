@@ -33,7 +33,6 @@ let numbered inputLst =
 // -----------------------------------------------------------------
 // interpreter error messages
 let errGEN00 message = sprintf "Unexpected error occurred: %s" message
-let errGEN01 message = sprintf "Unexpected error occurred: %s" message
 let errNSP00 fileNamePattern = sprintf "The theory `%s` could not be found" fileNamePattern
 let errNSP01 fileName innerErrMsg = sprintf "The theory `%s` was found but could not be loaded: %s" fileName innerErrMsg
 let errNSP02 url innerErrMsg = sprintf "The theory `%s` was found but could not be downloaded: %s" url innerErrMsg
