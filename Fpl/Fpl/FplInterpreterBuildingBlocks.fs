@@ -32,6 +32,7 @@ open FplInterpreterVariables
 open FplInterpreterReferences
 open FplInterpreterDefinitions
 open FplInterpreterFplTypeMatching
+open FplInterpreterExpressionMatching
 open FplInterpreterPredicativeBlocks
 open FplInterpreterDefinitionProperties
 open FplInterpreterProofs

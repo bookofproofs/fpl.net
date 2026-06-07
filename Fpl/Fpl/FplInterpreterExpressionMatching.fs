@@ -16,10 +16,13 @@ module FplInterpreterExpressionMatching
 open System
 open System.Collections.Generic
 open FplPrimitives
+open FplGrammarTypes
 open ErrMessages
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterChecks
 open FplInterpreterBasicTypes
+open FplInterpreter.Globals.Debug
+open FplInterpreter.Globals.HelpersBasic
 open FplInterpreterIntrinsicTypes
 open FplInterpreterVariables
 open FplInterpreterFplTypeMatching
@@ -240,6 +243,79 @@ let private matchPremiseWithSomeExpressions (exprList:FplGenericNode list) (pre:
         | Some err -> failedCandidates.Add ($"`{expr.Type SignatureType.Name}`{Environment.NewLine}  ⚡{err}")
     )
     result |> Seq.toList, (numbered failedCandidates)
+
+
+
+[<AbstractClass>]
+type FplGenericWithProceedingExpression(positions: Positions, parent: FplGenericNode) =
+    inherit FplGenericPredicate(positions, parent)
+
+    abstract member ProceedingExprCandidates: FplGenericNode list with get
+
+
+/// This functions checs if ref is a predicate expression and assumes that it was already run (evaluated)
+/// so and its value can be copied into fv. If ref is not a predicate expression, fv's value will be set to default and a diagnostics will be issued.
+let checkIfIsPredicateAndSetDefaultValueIfNot (fv:FplGenericHasValue) (ref:FplGenericHasValue) = 
+    let refType, isRefPred = isArgPred ref
+    if isRefPred then 
+        // copy the value value into fv
+        fv.SetValueOf ref
+    else
+        // if there is a value but ref is not a predicate, 
+        // set the value of "this" to undetermined
+        fv.SetDefaultValue()
+        // and issue diagnostics saying that this requires a predicate
+        let refName = ref.Type SignatureType.Name
+        fv.ErrorOccurred <- emitLG001Diagnostics refType refName fv.Name ref.StartPos ref.StartPos
+
+[<AbstractClass>]
+type FplGenericJustificationItem(positions: Positions, parent: FplGenericNode) =
+    inherit FplGenericWithProceedingExpression(positions, parent)
+
+    override this.ShortName = PrimJustification
+
+    override this.Type signatureType =
+        let head = getFplHead this signatureType
+        head
+
+    override this.EmbedInSymbolTable _ = 
+        let thisJustificationItemId = this.Type(SignatureType.Mixed)
+
+        let alreadyAddedIdOpt = 
+            this.Parent.Value.ArgList
+            |> Seq.map (fun argJi -> argJi.Type(SignatureType.Mixed))
+            |> Seq.tryFind (fun otherId -> otherId = thisJustificationItemId)
+        match alreadyAddedIdOpt with
+        | Some otherId ->
+            this.ErrorOccurred <- emitPR004Diagnostics thisJustificationItemId otherId this.StartPos this.EndPos 
+        | _ -> ()
+        addExpressionToParentArgList this
+
+    override this.Run() = 
+        debug this Debug.Start
+        match this.RefersTo with 
+        | Some (:? FplGenericHasValue as ref) when ref.Value.IsSome ->
+            checkIfIsPredicateAndSetDefaultValueIfNot this ref
+        | Some (:? FplGenericHasValue as ref) when ref.Value.IsNone ->
+            // set the value of "this" to undetermined
+            ref.SetDefaultValue()
+            this.SetValueOf ref
+            // TODO issue diagnostics saying that a predicate expression was expected but has No value
+        | _ -> 
+            this.SetDefaultValue()
+        debug this Debug.Stop
+
+[<AbstractClass>]
+type FplGenericArgInference(positions: Positions, parent: FplGenericNode) =
+    inherit FplGenericWithProceedingExpression(positions, parent)
+
+    override this.Type signatureType =
+        let head = getFplHead this signatureType
+        head
+
+    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
+
+
 
 let matchJustItemsExpressionsAgainstPremiseList (tuplesJustItemWithProceedingExpressionsList:(FplGenericJustificationItem * FplGenericNode list) list) (premiseList:FplGenericNode list) (byInferenceNode:FplGenericNode) =
     let varUsageDict = Dictionary<string, FplGenericNode>()
