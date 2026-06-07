@@ -2015,8 +2015,8 @@ type TestInterpreterErrors() =
             let code = PR017 
             runTestHelper "TestPR017.fpl" fplCode code expected
 
-    [<DataRow("01", """thm T { true } proof T$1 {1: trivial}""", 1)>] // no justification
-    [<DataRow("02", """ax A { true } thm T {true} proof T$1 {1. byax A |- trivial}""", 0)>] // exactly one justification for trivial
+    [<DataRow("01", """thm T { true } proof T$1 {1: trivial}""", 0)>] // no justification given - no PR018 will should be issued anyway since we want to suppress any justification checks in this case
+    [<DataRow("02", """ax A { true } thm T {true} proof T$1 {1. byax A |- trivial}""", 0)>] // if a justification is given, exactly one justification for trivial
     [<DataRow("03", """ax A { true } ax B { true } thm T {true} proof T$1 {1. byax A, byax B |- trivial}""", 1)>] // more than one justification
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]

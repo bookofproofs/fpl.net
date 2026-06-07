@@ -474,7 +474,7 @@ and FplArgument(positions: Positions, parent: FplGenericNode, runOrder) =
         let argInferenceOpt = this.ArgumentInference
 
         match justificationOpt, argInferenceOpt with
-        | Some justification, Some argInference -> 
+        | Some justification, Some argInference -> // Case A: justification is given and a resulting argument inference is given (experimental)
             let orderdListJustifications = justification.ArgList |> Seq.toList
             if orderdListJustifications.Length = 0 then
                 argInference.Run()
@@ -492,10 +492,17 @@ and FplArgument(positions: Positions, parent: FplGenericNode, runOrder) =
                 else
                     let v = new FplIntrinsicTrue((this.StartPos, this.StartPos), this)
                     this.SetValue v
-        | Some justification, None -> 
-            this.SetDefaultValue()
-        | None, Some argInference -> 
-            this.SetDefaultValue()
+        | None, Some argInference -> // Case B: no justification was given. An argument inference stands alone in the proof argument.
+            // The behaviour of the FplInterpreter will on purpose assume the "correctness" of the proof argument in this case.
+            // This is because checking the "correctness" of a proof argument (Case A) is experimental, can be very tricky, and will almost always produce some diagnostics.
+            // Case B provides a way for a user that he/she can be used as "default" to avoid unjustified diagnostics in Case A produced by the experimental FplInterpreter engine.
+            // As the engine gets more and more s
+            argInference.Run()
+            this.SetValueOf argInference
+        | Some justification, None -> // Case C: justification is given but an argument inference is missing
+            // The, should never occur due to the syntax and symbol table structure.
+            // This is only a fall back.
+            this.SetDefaultValue() 
         | None, None -> 
             this.SetDefaultValue()
         (* TODO: Enhance variableStack by the context in which this argument is being evaluated

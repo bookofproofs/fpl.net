@@ -400,9 +400,14 @@ let rec eval ast =
         fv.EndPos <- pos2
         checkSIG01Diagnostics fv
     | Ast.ArgumentIdentifier((pos1, pos2), argumentId) -> 
-        let justification = heap.Eval.PeekEvalStack()
-        match justification.Parent with
-        | Some argument -> argument.FplId <- argumentId.Substring(0,argumentId.Length-1) // argument id without the "." at the end
+        let testNode = heap.Eval.PeekEvalStack()
+        match testNode with
+        | :? FplJustification as justification ->
+            match justification.Parent with
+            | Some argument -> argument.FplId <- argumentId.Substring(0,argumentId.Length-1) // argument id without the "." at the end
+            | _ -> ()
+        | :? FplArgument as argument ->
+            argument.FplId <- argumentId.Substring(0,argumentId.Length-1)
         | _ -> ()
     | Ast.RefArgumentIdentifier((pos1, pos2), argumentId) -> 
         let fv = heap.Eval.PeekEvalStack()
@@ -662,11 +667,17 @@ let rec eval ast =
         eval argumentIdentifier
         justificationItemListAsts |> List.map eval |> ignore
     | Ast.Justification((pos1, pos2), justificationItemAst) ->
-        let fv = heap.Eval.PeekEvalStack()
-        let just = new FplJustification((pos1, pos2), fv)
-        heap.Eval.PushEvalStack(just)
-        eval justificationItemAst
-        heap.Eval.PopEvalStack()
+        match justificationItemAst with
+        | Ast.StartArgument _ ->
+            eval justificationItemAst // symbol table will be missing justification because it was omitted in FPL code
+        | Ast.StartArgumentStictly _ 
+        | _ ->
+            // otherwise, we create a justification node
+            let fv = heap.Eval.PeekEvalStack()
+            let just = new FplJustification((pos1, pos2), fv)
+            heap.Eval.PushEvalStack(just)
+            eval justificationItemAst
+            heap.Eval.PopEvalStack()
     | Ast.ArgumentTuple((pos1, pos2), predicateListAst) ->
         let next = heap.Eval.PeekEvalStack()
         evalArgumentTuple next predicateListAst pos1 pos2
