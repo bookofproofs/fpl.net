@@ -1025,6 +1025,10 @@ type TestInterpreterErrors() =
     [<DataRow("38b", """def pred T() { iif ( $1, undef ) }""", 2)>]  
     [<DataRow("39", """def pred Equal(x,y:tpl) infix "=" 0 { delegate.Equal(x,y) } def cl A def pred EqualA (a,b: A) { (a = b) }""", 0)>]
     [<DataRow("40", """def pred T() {mcases (| true: false | false: true ? false) }""", 0)>]
+    [<DataRow("41", """proof T$1 {1: true }""", 0)>]
+    [<DataRow("41a", """proof T$1 {1: undef }""", 1)>]
+    [<DataRow("41b", """proof T$1 {1: undef 2. 1 |- true}""", 1)>]
+    [<DataRow("41c", """proof T$1 {1: false 2. 1 |- true}""", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestLG001(no:string, fplCode:string, expected) =
@@ -1744,7 +1748,7 @@ type TestInterpreterErrors() =
     // DisjunctiveSyllogism: pre: not p, or(p,q)
     [<DataRow("DisjunctiveSyllogism_01", "inf DisjunctiveSyllogism{dec p,q:pred; pre:not p,or(p,q) con:q} thm T {true} proof T$1 {1: not (iif(true,false)) 2: or(all x:obj { is(x,N) }, ex y:obj { is(y,M) }) 3. 1, 2, byinf DisjunctiveSyllogism |- true }", 1)>]
     [<DataRow("DisjunctiveSyllogism_01a", "inf DisjunctiveSyllogism{dec p,q:pred; pre:not p,or(p,q) con:q} thm T {true} proof T$1 {1: not (iif(true,false)) 2: or(iif(true,false), ex y:obj { is(y,M) }) 3. 1, 2, byinf DisjunctiveSyllogism |- true }", 0)>]
-    [<DataRow("DisjunctiveSyllogism_02", "inf DisjunctiveSyllogism{dec p,q:pred; pre:not p,or(p,q) con:q} thm T {true} proof T$1 {1: not iif(true,false) 2: or(iif(true,false), xor(true,false)) 3. 1, 3, byinf DisjunctiveSyllogism |- true }", 0)>]
+    [<DataRow("DisjunctiveSyllogism_02", "inf DisjunctiveSyllogism{dec p,q:pred; pre:not p,or(p,q) con:q} thm T {true} proof T$1 {1: not iif(true,false) 2: or(iif(true,false), xor(true,false)) 3. 1, 2, byinf DisjunctiveSyllogism |- true }", 0)>]
     [<DataRow("DisjunctiveSyllogism_02a", "inf DisjunctiveSyllogism{dec p,q:pred; pre:not p,or(p,q) con:q} thm T {true} proof T$1 {1: not ex x:obj { is(x,N) } 2: or(iif(true,false), xor(true,false)) 3. 1, 2, byinf DisjunctiveSyllogism |- true }", 1)>]
     [<DataRow("DisjunctiveSyllogism_03", "inf DisjunctiveSyllogism{dec p,q:pred; pre:not p,or(p,q) con:q} thm T {true} proof T$1 {1: not (and(is(A,N), false)) 2: or(not (iif(true,false)), impl(true,false)) 3. 1, 2, byinf DisjunctiveSyllogism |- true }", 1)>]
     [<DataRow("DisjunctiveSyllogism_03a", "inf DisjunctiveSyllogism{dec p,q:pred; pre:not p,or(p,q) con:q} thm T {true} proof T$1 {1: not (and(is(A,N), false)) 2: or(and(is(A,N), false), impl(true,false)) 3. 1, 2, byinf DisjunctiveSyllogism |- true }", 0)>]

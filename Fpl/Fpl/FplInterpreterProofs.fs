@@ -476,27 +476,25 @@ and FplArgument(positions: Positions, parent: FplGenericNode, runOrder) =
         match justificationOpt, argInferenceOpt with
         | Some justification, Some argInference -> // Case A: justification is given and a resulting argument inference is given (experimental)
             let orderdListJustifications = justification.ArgList |> Seq.toList
-            if orderdListJustifications.Length = 0 then
-                argInference.Run()
-                this.SetValueOf argInference
+            let justificationResults = 
+                orderdListJustifications
+                |> List.map (fun fv ->
+                    fv.Run()
+                    fv.Represent()
+                )
+
+            let allEvaluateToTrue = justificationResults |> List.forall (fun result -> result = LiteralTrue)
+            if not allEvaluateToTrue then
+                this.SetDefaultValue()
             else
-                let allEvaluateToTrue = 
-                    orderdListJustifications
-                    |> List.forall (fun fv ->
-                        fv.Run()
-                        let fvRepr = fv.Represent()
-                        fvRepr = LiteralTrue
-                    )
-                if not allEvaluateToTrue then
-                    this.SetDefaultValue()
-                else
-                    let v = new FplIntrinsicTrue((this.StartPos, this.StartPos), this)
-                    this.SetValue v
+                let v = new FplIntrinsicTrue((this.StartPos, this.StartPos), this)
+                this.SetValue v
         | None, Some argInference -> // Case B: no justification was given. An argument inference stands alone in the proof argument.
             // The behaviour of the FplInterpreter will on purpose assume the "correctness" of the proof argument in this case.
             // This is because checking the "correctness" of a proof argument (Case A) is experimental, can be very tricky, and will almost always produce some diagnostics.
             // Case B provides a way for a user that he/she can be used as "default" to avoid unjustified diagnostics in Case A produced by the experimental FplInterpreter engine.
-            // As the engine gets more and more s
+            // As the engine gets more and more sophisticated, users can gradually replace arguments without justification by those with a justification,
+            // and switch from Case B to Case A
             argInference.Run()
             this.SetValueOf argInference
         | Some justification, None -> // Case C: justification is given but an argument inference is missing
@@ -700,10 +698,22 @@ and FplArgInferenceDerived(positions: Positions, parent: FplGenericNode) =
         ret
 
     override this.Run() = 
-        // TODO implement run
         debug this Debug.Start
-        let v = FplIntrinsicTrue((this.StartPos, this.EndPos), this.Parent.Value)
-        this.SetValue v
+        let arg = this.ArgList[0]
+        let refType, isRefPred = isArgPred arg
+        if isRefPred then
+            // derived arguments must be predicative in nature
+            // and we always evaluate them then to "true" if this is the case
+            let v = FplIntrinsicTrue((this.StartPos, this.EndPos), this.Parent.Value)
+            this.SetValue v
+        else
+            // if the expression is not predicative
+            // we swt the value of "this" FplArgInferenceDerived to undetermined
+            this.SetDefaultValue()
+            // and issue diagnostics saying that this requires a predicate
+            let refName = arg.Type SignatureType.Name
+            this.ErrorOccurred <- emitLG001Diagnostics refType refName this.Name arg.StartPos arg.StartPos
+
         debug this Debug.Stop
 
     member this.ParentArgument = this.Parent.Value :?> FplArgument
@@ -758,11 +768,16 @@ and FplProof(positions: Positions, parent: FplGenericNode, runOrder) =
         // evaluate the proof by evaluating all arguments according to their order in the FPL code
         let orderedProofArguments = this.OrderedArguments 
         let allEvaluateToTrue =
-            orderedProofArguments
-            |> Seq.forall (fun fv -> 
-                fv.Run()
-                let fvRepr = fv.Represent()
-                fvRepr = LiteralTrue 
+            let argumentResults = 
+                orderedProofArguments
+                |> Seq.map (fun fv ->
+                    fv.Run()
+                    fv.Represent()
+                )
+                |> Seq.toList
+
+            argumentResults
+            |> List.forall (fun result -> result = LiteralTrue 
             )
         if not allEvaluateToTrue then
             this.ErrorOccurred <- emitPR009Diagnostics this.StartPos this.StartPos

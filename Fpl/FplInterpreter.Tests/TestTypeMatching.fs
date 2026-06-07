@@ -429,7 +429,7 @@ type TestTypeMatching() =
 
     // DisjunctiveSyllogism: pre: not p, or(p,q)
     [<DataRow("DisjunctiveSyllogism_01", "inf DisjunctiveSyllogism{dec p,q:pred; pre:not p,or(p,q) con:q} thm T {true} proof T$1 {1: not (iif(true,false)) 2: or(all x:obj { is(x,N) }, ex y:obj { is(y,M) }) 3. 1, 2, byinf DisjunctiveSyllogism |- true }")>]
-    [<DataRow("DisjunctiveSyllogism_02", "inf DisjunctiveSyllogism{dec p,q:pred; pre:not p,or(p,q) con:q} thm T {true} proof T$1 {1: not ex x:obj { is(x,N) } 2: or(iif(true,false), xor(true,false)) 2. 1, 3, byinf DisjunctiveSyllogism |- true }")>]
+    [<DataRow("DisjunctiveSyllogism_02", "inf DisjunctiveSyllogism{dec p,q:pred; pre:not p,or(p,q) con:q} thm T {true} proof T$1 {1: not ex x:obj { is(x,N) } 2: or(iif(true,false), xor(true,false)) 3. 1, 2, byinf DisjunctiveSyllogism |- true }")>]
     [<DataRow("DisjunctiveSyllogism_03", "inf DisjunctiveSyllogism{dec p,q:pred; pre:not p,or(p,q) con:q} thm T {true} proof T$1 {1: not (and(is(A,N), false)) 2: or(not (iif(true,false)), impl(true,false)) 3. 1, 2, byinf DisjunctiveSyllogism |- true }")>]
 
     // ExistsByExample: pre: p(c)

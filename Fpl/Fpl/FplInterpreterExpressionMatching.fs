@@ -253,21 +253,6 @@ type FplGenericWithProceedingExpression(positions: Positions, parent: FplGeneric
     abstract member ProceedingExprCandidates: FplGenericNode list with get
 
 
-/// This functions checs if ref is a predicate expression and assumes that it was already run (evaluated)
-/// so and its value can be copied into fv. If ref is not a predicate expression, fv's value will be set to default and a diagnostics will be issued.
-let checkIfIsPredicateAndSetDefaultValueIfNot (fv:FplGenericHasValue) (ref:FplGenericHasValue) = 
-    let refType, isRefPred = isArgPred ref
-    if isRefPred then 
-        // copy the value value into fv
-        fv.SetValueOf ref
-    else
-        // if there is a value but ref is not a predicate, 
-        // set the value of "this" to undetermined
-        fv.SetDefaultValue()
-        // and issue diagnostics saying that this requires a predicate
-        let refName = ref.Type SignatureType.Name
-        fv.ErrorOccurred <- emitLG001Diagnostics refType refName fv.Name ref.StartPos ref.StartPos
-
 [<AbstractClass>]
 type FplGenericJustificationItem(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericWithProceedingExpression(positions, parent)
@@ -295,12 +280,14 @@ type FplGenericJustificationItem(positions: Positions, parent: FplGenericNode) =
         debug this Debug.Start
         match this.RefersTo with 
         | Some (:? FplGenericHasValue as ref) when ref.Value.IsSome ->
-            checkIfIsPredicateAndSetDefaultValueIfNot this ref
+            this.SetValueOf ref
         | Some (:? FplGenericHasValue as ref) when ref.Value.IsNone ->
             // set the value of "this" to undetermined
             ref.SetDefaultValue()
             this.SetValueOf ref
-            // TODO issue diagnostics saying that a predicate expression was expected but has No value
+            let refName = ref.Type SignatureType.Name
+            let refType = ref.Type SignatureType.Type
+            this.ErrorOccurred <- emitLG001Diagnostics refType refName this.Name ref.StartPos ref.StartPos
         | _ -> 
             this.SetDefaultValue()
         debug this Debug.Stop
