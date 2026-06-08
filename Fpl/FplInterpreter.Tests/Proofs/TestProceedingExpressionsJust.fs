@@ -272,7 +272,8 @@ type TestProceedingExpressionsJust() =
         | Some (:? FplJustificationItemByProofArgument as fvJi) ->
             let result = fvJi.ProceedingExprCandidates
             Assert.AreEqual<int>(expectedNumbExpr, result.Length)
-            Assert.AreEqual<string>(expectedExpr, result.Head.Type SignatureType.Name)
+            let actualExpr = result.Head.Type SignatureType.Name
+            Assert.AreEqual<string>(expectedExpr, actualExpr)
         | Some ref ->
             Assert.IsInstanceOfType<FplJustificationItemByProofArgument>(ref)
         | None ->

@@ -15,6 +15,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 module FplInterpreterExpressionMatching
 open System
 open System.Collections.Generic
+open ErrDiagnostics
 open FplPrimitives
 open FplGrammarTypes
 open ErrMessages
@@ -244,6 +245,27 @@ let private matchPremiseWithSomeExpressions (exprList:FplGenericNode list) (pre:
     )
     result |> Seq.toList, (numbered failedCandidates)
 
+/// Flag that a proof justification or inference cannot collect proceeding results
+let issuePR022AndSetDefault (fv:FplGenericHasValue) (nodeOpt:FplGenericNode option) (varOpt:FplGenericNode option) =
+    match nodeOpt, varOpt with
+    | Some node, Some var ->
+        let reason = $"The {var.Name} `{var.FplId}` was found and its {node.Name} `{node.Type SignatureType.Name}' was also found. However, the definition does not contain any predicative expressions on which this argument inference could be based on."
+        fv.ErrorOccurred <- emitPR022Diagnostics reason fv.StartPos fv.EndPos
+    | None, Some var ->
+        let reason = $"The {var.Name} `{var.FplId}` was found but no definition block was found that would contain some predicative expressions on which this argument inference could be based on."
+        fv.ErrorOccurred <- emitPR022Diagnostics reason fv.StartPos fv.EndPos
+    | Some node, None ->
+        let reason = $"The {node.Name} `{node.Type SignatureType.Name}' was found but its declaration does not contain any predicative expressions on which this argument inference could be based on."
+        fv.ErrorOccurred <- emitPR022Diagnostics reason fv.StartPos fv.EndPos
+    | None, None ->
+        let reason = $"No reference for `{fv.FplId}' was found that would contain some predicative expressions on which this argument inference could be based on."
+        fv.ErrorOccurred <- emitPR022Diagnostics reason fv.StartPos fv.EndPos
+    fv.SetDefaultValue()
+
+/// Flag that a proof justification or inference cannot collect proceeding results with a special reason
+let issuePR022SpecialReasonAndSetDefault (fv:FplGenericHasValue) reason =
+    fv.ErrorOccurred <- emitPR022Diagnostics reason fv.StartPos fv.EndPos
+    fv.SetDefaultValue()
 
 
 [<AbstractClass>]
@@ -279,17 +301,14 @@ type FplGenericJustificationItem(positions: Positions, parent: FplGenericNode) =
     override this.Run() = 
         debug this Debug.Start
         match this.RefersTo with 
-        | Some (:? FplGenericHasValue as ref) when ref.Value.IsSome ->
-            this.SetValueOf ref
-        | Some (:? FplGenericHasValue as ref) when ref.Value.IsNone ->
-            // set the value of "this" to undetermined
-            ref.SetDefaultValue()
-            this.SetValueOf ref
-            let refName = ref.Type SignatureType.Name
-            let refType = ref.Type SignatureType.Type
-            this.ErrorOccurred <- emitLG001Diagnostics refType refName this.Name ref.StartPos ref.StartPos
-        | _ -> 
-            this.SetDefaultValue()
+        | Some _ ->
+            // a justification item is to be evaluated to "true" if
+            // its RefersTo node was assigned successfully (it refers to something that
+            // could be successfully referred to in the remaining Fpl Code)
+            let v = new FplIntrinsicTrue((this.StartPos, this.EndPos), this)
+            this.SetValue v 
+        | _ ->
+            issuePR022AndSetDefault this None None
         debug this Debug.Stop
 
 [<AbstractClass>]

@@ -108,6 +108,7 @@ let errPR018 = $"A `{LiteralTrivial}` argument is missing exactly one justificat
 let errPR019 justificationType1 justificationType2 = $"Unsupported mix of justifications in a single argument (`{justificationType1}` with `{justificationType2}`)."
 let errPR020 expectedNum actualNum = $"This {PrimJIByInf} requires {expectedNum} proceeding expressions, got {actualNum}."
 let errPR021 mismatchingCandidates inferredFormula = $"The argument `{inferredFormula}` cannot be inferred from the proceeding results. Expected the following inferred candidate(s):{mismatchingCandidates}."
+let errPR022 reason = $"The argument inference was prevented. Reason: {reason}."
 
 // signature-related error codes
 let errSIG00 fixType arity = sprintf $"Illegal arity `{arity}` using `{fixType}` notation."

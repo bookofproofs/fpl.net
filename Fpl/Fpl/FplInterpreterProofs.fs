@@ -52,8 +52,10 @@ type FplJustificationItemByAx(positions: Positions, parent: FplGenericNode) =
                 if ax.ArgList.Count > 0 then
                     [ax.ArgList |> Seq.last]
                 else
+                    issuePR022AndSetDefault this (Some ax) None 
                     [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
             | None ->
+                issuePR022AndSetDefault this None None 
                 [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
 
 and FplJustificationItemByDef(positions: Positions, parent: FplGenericNode) =
@@ -81,8 +83,10 @@ and FplJustificationItemByDef(positions: Positions, parent: FplGenericNode) =
                 if total.Length > 0 then
                     total
                 else
+                    issuePR022AndSetDefault this (Some def) None 
                     [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
             | None ->
+                issuePR022AndSetDefault this None None 
                 [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
 
 and FplJustificationItemByDefVar(positions: Positions, parent: FplGenericNode) =
@@ -112,10 +116,13 @@ and FplJustificationItemByDefVar(positions: Positions, parent: FplGenericNode) =
                     if total.Length > 0 then
                         total
                     else
+                        issuePR022AndSetDefault this (Some def) (Some var) 
                         [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
                 | None ->
+                    issuePR022AndSetDefault this None (Some var) 
                     [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
             | _ ->
+                issuePR022AndSetDefault this None None 
                 [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
 
 and FplJustificationItemByConj(positions: Positions, parent: FplGenericNode) =
@@ -135,12 +142,14 @@ and FplJustificationItemByConj(positions: Positions, parent: FplGenericNode) =
         // referred by this "byconj" justification in a proof
         with get (): FplGenericNode list =
             match this.RefersTo with
-            | Some ax ->
-                if ax.ArgList.Count > 0 then
-                    [ax.ArgList |> Seq.last]
+            | Some conj ->
+                if conj.ArgList.Count > 0 then
+                    [conj.ArgList |> Seq.last]
                 else
+                    issuePR022AndSetDefault this (Some conj) None 
                     [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
             | None ->
+                issuePR022AndSetDefault this None None 
                 [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
 
 and FplJustificationItemByCor(positions: Positions, parent: FplGenericNode) =
@@ -164,8 +173,10 @@ and FplJustificationItemByCor(positions: Positions, parent: FplGenericNode) =
                 if cor.ArgList.Count > 0 then
                     [cor.ArgList |> Seq.last]
                 else
+                    issuePR022AndSetDefault this (Some cor) None 
                     [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
             | None ->
+                issuePR022AndSetDefault this None None 
                 [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
 
 and FplJustificationItemByInf(positions: Positions, parent: FplGenericNode) =
@@ -207,7 +218,7 @@ and FplJustificationItemByInf(positions: Positions, parent: FplGenericNode) =
             |> Seq.iter (fun var ->
                 if varUsageDict.ContainsKey(var.FplId) then
                     // correct the TypeId and FplId of any cloned conclusion variables (like those of cloned quantors in the conclusion of the rule of reference)
-                    // to the TypeId of the mached variable of the matched premise of the rule of reference
+                    // to the TypeId of the matched variable of the matched premise of the rule of reference
                     var.TypeId <- varUsageDict[var.FplId].TypeId
                     // Note: The corrected FplId stems from the matched premise of the rule of reference, while the original FplId stems from its cloned conclusion
                     // The corrected FplId might, therefore, differ from the cloned Key (being the original FplId), where this variable resides in expr.Scope dictionary
@@ -251,7 +262,8 @@ and FplJustificationItemByInf(positions: Positions, parent: FplGenericNode) =
                     let listOfPairs = matchJustItemsExpressionsAgainstPremiseList proceedingExpressionLists premisePredicateList this
                     match this.ErrorOccurred with
                     | Some _ ->
-                        // error occured while matching input justificationItems with premise list
+                        // error occurred while matching input justificationItems with premise list
+                        issuePR022SpecialReasonAndSetDefault this "An error occurred while matching input justificationItems with premise list."
                         [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
                     | None ->
                         if listOfPairs.Length > 0 then
@@ -259,23 +271,28 @@ and FplJustificationItemByInf(positions: Positions, parent: FplGenericNode) =
                             let expr = conclusion.Clone()
                             [this.ReplaceVarsByVarUsages expr varUsageDict]
                         else
+                            issuePR022SpecialReasonAndSetDefault this "No proceeding results were found while matching input justificationItems with premise list."
                             []
                 | _ ->
+                    issuePR022AndSetDefault this (Some ruleOfInference) None 
                     [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
             | _ ->
+                issuePR022AndSetDefault this None None 
                 [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
 
     override this.Run() =
         debug this Debug.Start
         match this.ErrorOccurred with
-        | Some _ -> this.SetDefaultValue()
+        | Some _ ->
+            issuePR022SpecialReasonAndSetDefault this "No proceeding results were found because of previous errors."
         | None ->
-            if this.ProceedingExprCandidates.Length <> 1 then
-                this.SetDefaultValue()
+            let proceedingResults = this.ProceedingExprCandidates
+            if this.ProceedingExprCandidates.Length > 1 then
+                let candidates = numbered (proceedingResults |> List.map (fun fv -> fv.Type SignatureType.Name))
+                issuePR022SpecialReasonAndSetDefault this $"The {this.Name} was expected to have in a single result but returned more candidates:{candidates}."
             else
                 match this.ProceedingExprCandidates.Head with
-                | :? FplUndetermined ->
-                    this.SetDefaultValue()
+                | :? FplUndetermined -> ()
                 | candidate ->
                     // since a candidate was found, the justification inference succeeded and we set its value to true to flag this
                     let v = new FplIntrinsicTrue((this.StartPos, this.EndPos), this)
@@ -303,8 +320,11 @@ and FplJustificationItemByRefArgument(positions: Positions, parent: FplGenericNo
                 | Some (argInference: FplGenericArgInference) ->
                     // delegate to the argInference of the referenced argument
                     argInference.ProceedingExprCandidates
-                | _ -> [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
+                | _ ->
+                    issuePR022AndSetDefault this (Some argument) None 
+                    [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
             | _ ->
+                issuePR022AndSetDefault this None None 
                 [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
 
 and FplJustificationItemByProofArgument(positions: Positions, parent: FplGenericNode) =
@@ -328,8 +348,11 @@ and FplJustificationItemByProofArgument(positions: Positions, parent: FplGeneric
                 | Some argInference ->
                     // delegate to the argInference of the referenced argument
                     argInference.ProceedingExprCandidates
-                | _ -> [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
+                | _ ->
+                    issuePR022AndSetDefault this (Some argument) None 
+                    [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
             | _ ->
+                issuePR022AndSetDefault this None None 
                 [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
 
 and FplJustificationItemByTheoremLikeStmt(positions: Positions, parent: FplGenericNode) =
@@ -349,12 +372,14 @@ and FplJustificationItemByTheoremLikeStmt(positions: Positions, parent: FplGener
         // referred by this justification in a proof
         with get (): FplGenericNode list =
             match this.RefersTo with
-            | Some ax ->
-                if ax.ArgList.Count > 0 then
-                    [ax.ArgList |> Seq.last]
+            | Some thm ->
+                if thm.ArgList.Count > 0 then
+                    [thm.ArgList |> Seq.last]
                 else
+                    issuePR022AndSetDefault this (Some thm) None 
                     [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
             | None ->
+                issuePR022AndSetDefault this None None 
                 [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
 
 and FplJustification(positions: Positions, parent: FplGenericNode) =
@@ -386,7 +411,7 @@ and FplJustification(positions: Positions, parent: FplGenericNode) =
         let justItems = (this.ArgList |> Seq.toList)
         match justItems |> List.tryLast with
         | Some lastJustItem when lastJustItem.Name = PrimJIByInf ->
-            () // only when the last justification item in a row is a "byinf" item, users can mex different justification types proceeding it
+            () // only when the last justification item in a row is a "byinf" item, users can match different justification types proceeding it
         | _ ->
             // else (i.e. last just item is different from a "byinf" item)
             match findTwoDifferentNames justItems with
@@ -453,9 +478,9 @@ and FplArgument(positions: Positions, parent: FplGenericNode, runOrder) =
 
         match justificationOpt, argInferenceOpt with
         | Some justification, Some argInference -> // Case A: justification is given and a resulting argument inference is given (experimental)
-            let orderdListJustifications = justification.ArgList |> Seq.toList
+            let orderedListJustifications = justification.ArgList |> Seq.toList
             let justificationResults = 
-                orderdListJustifications
+                orderedListJustifications
                 |> List.map (fun fv ->
                     fv.Run()
                     fv.Represent()
@@ -467,7 +492,7 @@ and FplArgument(positions: Positions, parent: FplGenericNode, runOrder) =
             else
                 // at this point, all justification items of the justification evaluate to true.
                 let inferredFormulaOpt = argInference.ProceedingExprCandidates |> List.tryHead
-                let lastJustificationOfArgumentOpt = orderdListJustifications |> List.tryLast
+                let lastJustificationOfArgumentOpt = orderedListJustifications |> List.tryLast
 
                 match inferredFormulaOpt, lastJustificationOfArgumentOpt with
                 | Some inferredFormula, Some (:? FplGenericJustificationItem as lastJustificationOfArgument) ->
@@ -485,7 +510,7 @@ and FplArgument(positions: Positions, parent: FplGenericNode, runOrder) =
                 | _, _ ->
                     this.SetDefaultValue()
         | None, Some argInference -> // Case B: no justification was given. An argument inference stands alone in the proof argument.
-            // The behaviour of the FplInterpreter will on purpose assume the "correctness" of the proof argument in this case.
+            // The behavior of the FplInterpreter will on purpose assume the "correctness" of the proof argument in this case.
             // This is because checking the "correctness" of a proof argument (Case A) is experimental, can be very tricky, and will almost always produce some diagnostics.
             // Case B provides a way for a user that he/she can be used as "default" to avoid unjustified diagnostics in Case A produced by the experimental FplInterpreter engine.
             // As the engine gets more and more sophisticated, users can gradually replace arguments without justification by those with a justification,
@@ -675,8 +700,10 @@ and FplArgInferenceTrivial(positions: Positions, parent: FplGenericNode) =
                 if thmLikeStmt.ArgList.Count > 0 then
                     [thmLikeStmt.ArgList |> Seq.last]
                 else
+                    issuePR022SpecialReasonAndSetDefault this $"The {this.Name} refers to a {thmLikeStmt.Name} `{thmLikeStmt.FplId}`, but no predicative expression was found in it."
                     [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
             | None ->
+                issuePR022SpecialReasonAndSetDefault this $"The {this.Name} is contained in a proof without a related theorem-like statement. Therefore, no predicative expression was found to be declared `{LiteralTrivial}`."
                 [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
 
     member this.ParentArgument = this.Parent.Value :?> FplArgument
@@ -703,7 +730,7 @@ and FplArgInferenceDerived(positions: Positions, parent: FplGenericNode) =
             this.SetValue v
         else
             // if the expression is not predicative
-            // we swt the value of "this" FplArgInferenceDerived to undetermined
+            // we set the value of "this" FplArgInferenceDerived to undetermined
             this.SetDefaultValue()
             // and issue diagnostics saying that this requires a predicate
             let refName = arg.Type SignatureType.Name
@@ -713,15 +740,18 @@ and FplArgInferenceDerived(positions: Positions, parent: FplGenericNode) =
 
     member this.ParentArgument = this.Parent.Value :?> FplArgument
 
-    /// As a list of proceeding expresssions candidates of a derived argument reference a list with a single
+    /// As a list of proceeding expressions candidates of a derived argument reference a list with a single
     /// element is produced that corresponds to the very expression that is contained in the FPL code
     /// of proof argument. As a fallback (syntax errors something else), a list with an undetermined predicate is produced.
     override this.ProceedingExprCandidates
         with get (): FplGenericNode list =
             let exprOpt = this.ArgList |> Seq.tryHead
             match exprOpt with
-            | Some expr -> [expr]
-            | _ -> [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
+            | Some expr ->
+                [expr]
+            | _ ->
+                issuePR022SpecialReasonAndSetDefault this $"The {this.Name} does not specify a predicative expression that could be used in the proof."
+                [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
 
 and FplProof(positions: Positions, parent: FplGenericNode, runOrder) =
     inherit FplGenericPredicateWithExpression(positions, parent)

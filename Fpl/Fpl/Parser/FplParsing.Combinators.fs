@@ -43,9 +43,6 @@ let star = positions (skipChar '*') |>> Ast.Star <!> "Star"
 
 let aliasedNamespaceIdentifier = positions (namespaceIdentifier .>>. opt (alias <|> star)) |>> Ast.AliasedNamespaceIdentifier <!> "AliasedNamespaceIdentifier"
 
-
-
-
 let variableX: Parser<string,unit> = 
     IdStartsWithSmallCase 
     <?> "<variable>" 
