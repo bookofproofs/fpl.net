@@ -9,7 +9,7 @@ open CommonTestHelpers
 type TestDecrement() =
 
 
-    [<DataRow("@0", PrimUndetermined)>]
+    [<DataRow("@0", LiteralUndet)>]
     [<DataRow("@1", "0")>]
     [<DataRow("@2", "1")>]
     [<DataRow("@3", "2")>]
@@ -29,13 +29,13 @@ type TestDecrement() =
         Assert.AreEqual<string>(expected, predicateValue.Represent())
         prepareFplCode(filename, "", false) |> ignore
 
-    [<DataRow("@0", PrimUndetermined)>]
-    [<DataRow("@1", PrimUndetermined)>]
-    [<DataRow("@2", PrimUndetermined)>]
-    [<DataRow("@3", PrimUndetermined)>]
-    [<DataRow("@4", PrimUndetermined)>]
-    [<DataRow("@100", PrimUndetermined)>]
-    [<DataRow("@42", PrimUndetermined)>]
+    [<DataRow("@0", LiteralUndet)>]
+    [<DataRow("@1", LiteralUndet)>]
+    [<DataRow("@2", LiteralUndet)>]
+    [<DataRow("@3", LiteralUndet)>]
+    [<DataRow("@4", LiteralUndet)>]
+    [<DataRow("@100", LiteralUndet)>]
+    [<DataRow("@42", LiteralUndet)>]
     [<TestMethod>]
     member this.TestDecrementRepresentWrongType(varVal, expected:string) =
         

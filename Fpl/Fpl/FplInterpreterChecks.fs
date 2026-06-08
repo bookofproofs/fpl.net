@@ -471,7 +471,7 @@ let isDetermined (arg: FplGenericNode) : bool =
         match argWithValue.Value with
         | None -> false
         | Some (:? FplUndetermined) -> false
-        | Some v when v.FplId = PrimUndetermined -> false
+        | Some v when v.FplId = LiteralUndet -> false
         | _ -> true
     | _ ->
         true

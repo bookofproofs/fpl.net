@@ -10,7 +10,7 @@ open CommonTestHelpers
 type TestDecrementWrapper() =
 
 
-    [<DataRow("@0", PrimUndetermined)>]
+    [<DataRow("@0", LiteralUndet)>]
     [<DataRow("@1", "0")>]
     [<DataRow("@2", "1")>]
     [<DataRow("@3", "2")>]

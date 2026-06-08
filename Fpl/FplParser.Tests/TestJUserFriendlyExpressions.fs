@@ -358,7 +358,6 @@ type TestUserFriendlyExpressions() =
     [<DataRow("8d", "true ⇔ ¬false")>]
     [<DataRow("8e", "true ⇔ false")>]
     [<DataRow("8f", "true")>]
-    [<DataRow("90", "undet")>]
     [<TestMethod>]
     member this.TestExprMixed(no:string, fplCode) =
         let result = run (predicate .>> eof) fplCode

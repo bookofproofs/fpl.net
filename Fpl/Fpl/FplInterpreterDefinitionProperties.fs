@@ -140,7 +140,7 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplGenericNode) as
     override this.Represent() = // done
         if _callCounter > maxRecursion then
             this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
-            PrimUndetermined
+            LiteralUndet
         else
             _callCounter <- _callCounter + 1
             let result = getFunctionalTermRepresent this

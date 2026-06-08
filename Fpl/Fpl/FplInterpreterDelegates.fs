@@ -98,16 +98,16 @@ type FplEquality(name, positions: Positions, parent: FplGenericNode) as this =
                     | _ when aType<>bType -> 
                         // if the compared arguments have different types, then unequal
                         this.SetValue (new FplIntrinsicFalse((heap.Helper.CallerStartPos, heap.Helper.CallerEndPos), this.Parent.Value))
-                    | _ when aType = "tpl" && bType = "tpl" && aRepr = PrimUndetermined && bRepr = PrimUndetermined -> 
+                    | _ when aType = "tpl" && bType = "tpl" && aRepr = LiteralUndet && bRepr = LiteralUndet -> 
                         this.SetDefaultValue()
                     | _ -> 
                         match aRepr with
-                        | PrimUndetermined -> 
+                        | LiteralUndet -> 
                             this.ErrorOccurred <- emitID013Diagnostics "Predicate `=` cannot be evaluated because the left argument is undetermined." heap.Helper.CallerStartPos heap.Helper.CallerEndPos 
                             this.SetDefaultValue()
                         | _ -> 
                             match bRepr with
-                            | PrimUndetermined -> 
+                            | LiteralUndet -> 
                                 this.ErrorOccurred <- emitID013Diagnostics "Predicate `=` cannot be evaluated because the right argument is undetermined." heap.Helper.CallerStartPos heap.Helper.CallerEndPos 
                                 this.SetDefaultValue()
                             | _ when aRepr = bRepr -> 

@@ -51,7 +51,15 @@ let positions (p: Parser<_,_>): Parser<Positions * _,_> =
             (Positions(pos1, pos2), result)
         )
 
-
+/// Is used to prevent keywords being parsed as variable names and similar productions.
+let withBacktrackedError p: Parser<_,_> =
+    fun stream ->
+        let mutable oldState = stream.State
+        match p stream with
+        | Success(result, restInput, userState) ->
+            Reply(result, restInput)
+        | _ ->
+            Reply(oldState)
 // ============================================================================
 // Whitespace control
 // ============================================================================

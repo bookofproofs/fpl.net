@@ -457,11 +457,11 @@ type FplGenericIsAction(positions: Positions, parent: FplGenericNode) =
 type FplUndetermined(typeId:string, positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericIsValue(positions, parent)
     do 
-        this.FplId <- PrimUndetermined
+        this.FplId <- LiteralUndet
         this.TypeId <- typeId
 
-    override this.Name = PrimUndeterminedL
-    override this.ShortName = PrimUndetermined
+    override this.Name = LiteralUndetL
+    override this.ShortName = LiteralUndet
 
     override this.Clone () =
         let ret = new FplUndetermined(this.TypeId, (this.StartPos, this.EndPos), this.Parent.Value)

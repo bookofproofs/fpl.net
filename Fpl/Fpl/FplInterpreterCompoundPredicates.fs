@@ -212,7 +212,7 @@ type FplNegation(positions: Positions, parent: FplGenericNode) as this =
                     else
                         $"({arg.Type signatureType})"
                 else
-                    $"({PrimUndetermined})"
+                    LiteralUndet
             $"¬{argRepr}"
 
     override this.Run() =

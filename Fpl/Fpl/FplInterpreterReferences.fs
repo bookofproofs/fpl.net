@@ -287,7 +287,7 @@ type FplReference(positions: Positions, parent: FplGenericNode) =
     override this.Represent() = // done
         if _callCounter > maxRecursion then
             this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
-            PrimUndetermined // fallback to undefined after infinite recursion (if any)
+            LiteralUndet // fallback to undefined after infinite recursion (if any)
         else
             _callCounter <- _callCounter + 1
             let result =
@@ -312,11 +312,11 @@ type FplReference(positions: Positions, parent: FplGenericNode) =
                             value.Represent()
                         else
                             // Otherwise, fall back with "undef" to prevent infinite loops
-                            PrimUndetermined
+                            LiteralUndet
                     | _, _, Some refTo when refTo.Name = LiteralSelf && refTo.ErrorOccurred.IsSome ->
                         // infinite loop or other error in self detected
                         // fallback to undefined
-                        PrimUndetermined 
+                        LiteralUndet 
                     | _, _, Some refTo ->
                         if not (Object.ReferenceEquals(refTo,this)) then
                             // If refTo is not identical as "this",

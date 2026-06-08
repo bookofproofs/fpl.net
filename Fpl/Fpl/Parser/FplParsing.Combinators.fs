@@ -44,15 +44,6 @@ let star = positions (skipChar '*') |>> Ast.Star <!> "Star"
 let aliasedNamespaceIdentifier = positions (namespaceIdentifier .>>. opt (alias <|> star)) |>> Ast.AliasedNamespaceIdentifier <!> "AliasedNamespaceIdentifier"
 
 
-let withBacktrackedError p: Parser<_,_> =
-    fun stream ->
-        let mutable oldState = stream.State
-        match p stream with
-        | Success(result, restInput, userState) ->
-            Reply(result, restInput)
-        | _ ->
-            Reply(oldState)
-
 
 
 let variableX: Parser<string,unit> = 

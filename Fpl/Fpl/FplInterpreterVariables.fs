@@ -252,12 +252,12 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplGenericNode) as 
 
     override this.SetValue fv =
         base.SetValue fv
-        if fv.FplId <> PrimUndetermined then
+        if fv.FplId <> LiteralUndet then
             this.IsInitialized <- true
 
     override this.SetValueOf fv =
         base.SetValueOf fv
-        if fv.FplId <> PrimUndetermined then
+        if fv.FplId <> LiteralUndet then
             this.IsInitialized <- true
 
 let checkVAR04Diagnostics (fv:FplGenericNode) = 
@@ -297,7 +297,7 @@ type FplVariable(fplId, positions: Positions, parent: FplGenericNode) =
         let unsetRepresentation =
             match this.TypeId with
             | LiteralUndef -> LiteralUndef
-            | _ -> PrimUndetermined 
+            | _ -> LiteralUndet 
         match this.Value with 
         | None -> unsetRepresentation
         | Some ref ->

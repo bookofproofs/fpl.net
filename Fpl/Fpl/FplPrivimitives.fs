@@ -1,9 +1,6 @@
 module FplPrimitives
 
-open System
 open System.Collections.Generic
-open System.Text.RegularExpressions
-open FParsec
 
 (* This module contains information needed by both, the error recovery module and the parser *)
 
@@ -203,6 +200,10 @@ let LiteralUndef = "undef"
 [<Literal>]
 let LiteralUndefL = "undefined"
 [<Literal>]
+let LiteralUndet = "undet"
+[<Literal>]
+let LiteralUndetL = "undetermined"
+[<Literal>]
 let LiteralUses = "uses"
 [<Literal>]
 let LiteralXor = "xor"
@@ -297,6 +298,8 @@ let keyWordSet =
            LiteralTrue
            LiteralUndef
            LiteralUndefL
+           LiteralUndet
+           LiteralUndetL
            LiteralUses
            LiteralXor |]
     )
@@ -494,10 +497,6 @@ let PrimTheoremLike = "thmlike"
 let PrimTranslation = "trsl"
 [<Literal>]
 let PrimTranslationL = "translation"
-[<Literal>]
-let PrimUndetermined = "undet"
-[<Literal>]
-let PrimUndeterminedL = "undetermined value"
 [<Literal>]
 let PrimVariable = "var"
 [<Literal>]

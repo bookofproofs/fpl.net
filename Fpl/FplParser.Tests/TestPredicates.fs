@@ -219,6 +219,7 @@ type TestPredicates () =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<DataRow("00", """ProceedingResults$1(x,y)""")>]
+    [<DataRow("01", "undet")>]
     [<TestMethod>]
     member this.TestPredicateFailure (no:string, fplCode:string) =
         let result = run (predicate .>> eof) fplCode

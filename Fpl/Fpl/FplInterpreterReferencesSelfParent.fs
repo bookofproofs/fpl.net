@@ -118,13 +118,13 @@ type FplParent(positions: Positions, parent: FplGenericNode) as this =
         | Some ref -> 
             if _callCounter > maxRecursion then
                 this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
-                PrimUndetermined
+                LiteralUndet
             else
                 _callCounter <- _callCounter + 1
                 let result = ref.Represent()
                 _callCounter <- _callCounter - 1
                 result
-        | _ -> PrimUndetermined
+        | _ -> LiteralUndet
 
     override this.Run() = 
         // FplParent has no value, unless it has a representable RefersTo
@@ -187,13 +187,13 @@ type FplSelf(positions: Positions, parent: FplGenericNode) as this =
         | Some ref -> 
             if _callCounter > maxRecursion then
                 this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
-                PrimUndetermined
+                LiteralUndet
             else
                 _callCounter <- _callCounter + 1
                 let result = ref.Represent()
                 _callCounter <- _callCounter - 1
                 result
-        | _ -> PrimUndetermined
+        | _ -> LiteralUndet
 
     override this.Run() = 
         // FplSelf has no value, unless it has a representable RefersTo
