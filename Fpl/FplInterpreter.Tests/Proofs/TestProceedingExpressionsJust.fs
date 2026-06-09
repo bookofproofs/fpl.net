@@ -1,6 +1,4 @@
 namespace FplInterpreter.Tests.Proofs
-open System
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open FplInterpreterBasicTypes
 open FplPrimitives
@@ -11,17 +9,6 @@ open CommonTestHelpers
 
 [<TestClass>]
 type TestProceedingExpressionsJust() =
-
-    let tryFindJustification (prf:FplProof) justType = 
-        prf.OrderedArguments
-        |> List.map (fun fv -> fv.Justification)
-        |> List.filter (fun fv -> fv.IsSome)
-        |> List.map (fun fv -> fv.Value)
-        |> List.map (fun fv -> fv :?> FplJustification)
-        |> List.map (fun fv -> fv.GetOrderedJustificationItems)
-        |> List.concat 
-        |> List.tryFind (fun fv -> fv.Name = justType)
-
 
     [<DataRow("00", """ax A {true} thm T {true} prf T$1 { 1. byax A |- true }""", "true", 1)>]
     [<DataRow("01", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" ax A {all n,m:Nat { impl( ( Succ(n) = Succ(m) ), ( n = m ) ) }} thm T {true} prf T$1 { 1. byax A |- true }""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 1)>]

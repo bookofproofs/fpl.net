@@ -5,6 +5,10 @@ open ErrDiagnostics
 open FplInterpreter.Globals.Debug
 open CommonTestHelpers
 
+(*
+The PR021 diagnostic indicates that the given argument inference (part of code after the argument justification)
+is different from the derived one (i.e., was inferred by the justification).
+*)
 
 [<TestClass>]
 type TestPR021() =
@@ -27,7 +31,7 @@ type TestPR021() =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = PR021 ("", "")
+            let code = PR021 ("", "", "")
             runTestHelper "TestPR021InferenceByAx.fpl" fplCode code expected
 
 
@@ -42,7 +46,7 @@ type TestPR021() =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = PR021 ("", "")
+            let code = PR021 ("", "", "")
             runTestHelper "TestPR021InferenceByConj.fpl" fplCode code expected
 
 
@@ -69,7 +73,7 @@ type TestPR021() =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = PR021 ("", "")
+            let code = PR021 ("", "", "")
             runTestHelper "TestPR021InferenceByTheoremLikeStmt.fpl" fplCode code expected
 
 
@@ -104,7 +108,7 @@ type TestPR021() =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = PR021 ("", "")
+            let code = PR021 ("", "", "")
             runTestHelper "TestPR021InferenceByCor.fpl" fplCode code expected
 
     [<DataRow("cl0_a", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" def cl A1 def cl A { dec assert is(self, A1) assert all n,m:Nat { impl( ( n' = m' ), ( n = m ) ) }; ctor A() {} prty pred J() {ex x:obj {is(x,Nat)}} } thm T {true} prf T$1 { 1. bydef A |- A is A1 }""", 0)>] // two assertions + predicative property
@@ -148,7 +152,7 @@ type TestPR021() =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = PR021 ("", "")
+            let code = PR021 ("", "", "")
             runTestHelper "TestPR021InferenceByDef.fpl" fplCode code expected
 
     [<DataRow("cl0_a", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" def cl A1 def cl A { dec assert is(self, A1) assert all n,m:Nat { impl( ( n' = m' ), ( n = m ) ) }; ctor A() {} prty pred J() {ex x:obj {is(x,Nat)}} } thm T {true} prf T$1 {dec v:A; 1. bydef v |- A is A1 }""", 0)>] // two assertions + predicative property
@@ -192,7 +196,7 @@ type TestPR021() =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = PR021 ("", "")
+            let code = PR021 ("", "", "")
             runTestHelper "TestPR021InferenceByDefVar.fpl" fplCode code expected
 
     [<DataRow("00", """def cl N thm T {true} prf T$1 { 1: ex x:obj {is(x,N)} 2. 1 |- ∃ x:obj {x is N}}""", 0)>]
@@ -204,19 +208,24 @@ type TestPR021() =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = PR021 ("", "")
+            let code = PR021 ("", "", "")
             runTestHelper "TestPR021InferenceByArgRef.fpl" fplCode code expected
 
-    [<DataRow("00", """def cl N thm T {true} prf T$1 { 1: ex x:obj {is(x,N)} 2. 1 |- trivial} thm T1 {true} prf T1$1 { 1. T$1:1 |- ∃ x:obj {x is N} }""", 0)>]
-    [<DataRow("00a", """def cl N thm T {true} prf T$1 { 1: ex x:obj {is(x,N)} 2. 1 |- trivial} thm T1 {true} prf T1$1 { 1. T$1:1 |- false }""", 1)>]
-    [<DataRow("01", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" ax A {true} thm T {true} prf T$1 { 1. byax A |- all x,y:Set {impl ( is(x, N), ( x = y ))} 2. 1 |- true } thm T1 {true} proof T1$1 {1. T$1:1 |- ∀ x, y:Set {(x is N) ⇒ (x = y)} }""", 0)>]
-    [<DataRow("01a", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" ax A {true} thm T {true} prf T$1 { 1. byax A |- all x,y:Set {impl ( is(x, N), ( x = y ))} 2. 1 |- true } thm T1 {true} proof T1$1 {1. T$1:1 |- false}""", 1)>]
+    [<DataRow("00", """def cl N thm T {true} prf T$1 { a: ex x:obj {is(x,N)} 2. 1 |- trivial} thm T1 {true} prf T1$1 { 1. T$1:a |- ∃ x:obj {x is N} }""", 0)>]
+    [<DataRow("00a", """def cl N thm T {true} prf T$1 { a: ex x:obj {is(x,N)} 2. 1 |- trivial} thm T1 {true} prf T1$1 { 1. T$1:a |- false }""", 1)>]
+    [<DataRow("01", """ax A {not false} thm T {true} prf T$1 { a. byax A |- not false 2. 1 |- not false } thm T1 {true} proof T1$1 {1. T$1:a |- not false }""", 0)>]
+    [<DataRow("01a", """ax A {not false} thm T {true} prf T$1 { a. byax A |- not false 2. 1 |- not false } thm T1 {true} proof T1$1 {1. T$1:a |- false}""", 1)>]
+    // conflicting identifiers in both proofs do not cause the error (would be a false positive)
+    [<DataRow("c0", """def cl N thm T {true} prf T$1 { 1: ex x:obj {is(x,N)} 2. 1 |- ∃ x:obj {x is N}} thm T1 {true} prf T1$1 { 1. T$1:1 |- ∃ x:obj {x is N} }""", 0)>]
+    [<DataRow("c0a", """def cl N thm T {true} prf T$1 { 1: ex x:obj {is(x,N)} 2. 1 |- ∃ x:obj {x is N}} thm T1 {true} prf T1$1 { 1. T$1:1 |- false }""", 1)>]
+    [<DataRow("c1", """ax A {not false} thm T {true} prf T$1 { 1. byax A |- not false 2. 1 |- not false } thm T1 {true} proof T1$1 {1. T$1:1 |- not false }""", 0)>]
+    [<DataRow("c1a", """ax A {not false} thm T {true} prf T$1 { 1. byax A |- not false 2. 1 |- not false } thm T1 {true} proof T1$1 {1. T$1:1 |- false}""", 1)>]
     [<TestMethod>]
     member this.TestPR021InferenceByProofArgument(no:string, fplCode:string, expected) =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = PR021 ("", "")
+            let code = PR021 ("", "", "")
             runTestHelper "TestPR021InferenceByProofArgument.fpl" fplCode code expected
 
 
@@ -230,7 +239,7 @@ type TestPR021() =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = PR021 ("", "")
+            let code = PR021 ("", "", "")
             runTestHelper "TestPR021InferenceByInf.fpl" fplCode code expected
 
     

@@ -746,7 +746,7 @@ let emitPR020Diagnostics expectedNum actualNum pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitPR021Diagnostics mismatchingCandidates inferredFormula pos1 pos2 =
+let emitPR021Diagnostics mismatchingCandidates inferredFormula justificationName pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -754,7 +754,7 @@ let emitPR021Diagnostics mismatchingCandidates inferredFormula pos1 pos2 =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = PR021 (mismatchingCandidates, inferredFormula)
+            Diagnostic.Code = PR021 (mismatchingCandidates, inferredFormula, justificationName)
             Diagnostic.Alternatives = None
         }
     ad.AddDiagnostic diagnostic

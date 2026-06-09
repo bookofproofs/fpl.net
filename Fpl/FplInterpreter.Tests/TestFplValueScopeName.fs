@@ -1,12 +1,12 @@
 namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open FplPrimitives
-open ErrDiagnostics
 open FplInterpreterBasicTypes
 open FplInterpreter.Globals.Root
 open FplInterpreter.Globals.Heap
+open FplInterpreter.Globals.HelpersComplex
 open CommonTestHelpers
-
+open FplInterpreterProofs
 
 [<TestClass>]
 type TestFplValueScopeName() =
@@ -787,6 +787,52 @@ type TestFplValueScopeName() =
         | "base5" -> Assert.AreEqual<string>("100", arg.Type(SignatureType.Mixed))
         | _ -> Assert.IsTrue(false)
         prepareFplCode(filename, "", false) |> ignore
+
+
+
+    [<DataRow("01", PrimJIByAx, "A", """ax A {true} thm T {true} prf T$1 { 1. byax A |- true }""")>]
+    [<DataRow("02", PrimJIByTheoremLikeStmt, "B", """thm B {true} thm T {true} prf T$1 { 1. B |- true }""")>]
+    [<DataRow("03", PrimJIByConj, "C", """conj C {true} thm T {true} prf T$1 { 1. byconj C |- true }""")>]
+    [<DataRow("04", PrimJIByCor, "A$1", """cor A$1 {true} thm T {true} prf T$1 { 1. bycor A$1 |- true }""")>]
+    [<DataRow("05", PrimJIByDef, "A",  """def cl A thm T {true} prf T$1 { 1. bydef A |- true }""")>]
+    [<DataRow("06", PrimJIByDefVar, "v", """def cl A thm T {dec v:A; true} prf T$1 { 1. bydef v |- true }""")>]
+    [<DataRow("07", PrimJIByRefArgument, "1", """def cl N thm T {true} prf T$1 { 1: ex x:obj {is(x,N)} 2. 1 |- trivial}""")>]
+    [<DataRow("08", PrimJIByProofArgument, "S$1:1", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" ax A {true} thm S {true} prf S$1 { 1. byax A |- all x,y:Set {impl ( is(x, N), ( x = y ))} 2. 1 |- true } thm T {true} proof T$1 {1. S$1:1 |- true}""")>]
+    [<DataRow("09", PrimJIByInf, "AndCummutative", "inf AndCummutative{dec p,q:pred; pre:and(p,q) con:and(q,p)} thm T {true} proof T$1 {1: and(true,false) 2. 1, byinf AndCummutative |- and(false,true)}")>]
+    [<TestMethod>]
+    member this.TestJustificationName(var, typeOfNode, expected:string, fplCode) =
+        
+        let filename = "TestJustificationName"
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+
+        let candidates = findCandidatesByName "T" false true
+        let prf = candidates |> List.filter (fun fv -> fv.FplId = "T$1") |> List.map (fun fv -> fv :?> FplProof) |> List.head
+
+        let fvJiOpt = tryFindJustification prf typeOfNode
+        match fvJiOpt with
+        | Some fvJi -> Assert.AreEqual<string>(expected, fvJi.Type(SignatureType.Mixed))
+        | _ -> Assert.Fail($"{typeOfNode} not found in test case")
+        prepareFplCode(filename, "", false) |> ignore
+
+    [<DataRow("01", PrimArgInfTrivial, "trivial", """thm T {true} proof T$1 {1: trivial }""")>]
+    [<DataRow("02", PrimArgInfDerive, "true", "thm T {true} proof T$1 {1: false ∧ true}")>]
+    [<DataRow("03", PrimArgInfAssume, "true", "thm T {true} proof T$1 {1: assume false}")>]
+    [<DataRow("04", PrimArgInfRevoke, "2", "thm T {true} proof T$1 {1: revoke 2}")>]
+    [<TestMethod>]
+    member this.TestArgInferenceName(var, typeOfNode, expected:string, fplCode) =
+        
+        let filename = "TestArgInferenceName"
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+
+        let candidates = findCandidatesByName "T" false true
+        let prf = candidates |> List.filter (fun fv -> fv.FplId = "T$1") |> List.map (fun fv -> fv :?> FplProof) |> List.head
+
+        let fvJiOpt = tryFindInference prf typeOfNode 
+        match fvJiOpt with
+        | Some fvJi -> Assert.AreEqual<string>(expected, fvJi.Type(SignatureType.Mixed))
+        | _ -> Assert.Fail($"{typeOfNode} not found in test case")
+        prepareFplCode(filename, "", false) |> ignore
+
 
     [<DataRow("base1", "del.B()")>]
     [<DataRow("base2", "del.C(a,b,c,d)")>]

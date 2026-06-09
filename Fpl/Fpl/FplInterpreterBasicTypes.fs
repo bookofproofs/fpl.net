@@ -33,7 +33,7 @@ type FixType =
         | Postfix symbol -> sprintf "postfix `%s` " symbol
         | Prefix symbol -> sprintf "prefix `%s` " symbol
         | Symbol symbol -> sprintf "symbol `%s`" symbol
-        | Paren -> "paren"
+        | Paren -> "parens"
         | NoFix -> "no fix"
 
     member this.GetUserDefinedLiteral defaultSymbol =
@@ -477,12 +477,12 @@ type FplUndetermined(typeId:string, positions: Positions, parent: FplGenericNode
         this.FplId 
 
     override this.Run() = 
-        // run is not neccessary, since this node is are never referenced in the FPL syntax
+        // run is not necessary, since this node is are never referenced in the FPL syntax
         // Instead, we use them internally as default value of FplGenericHasValue
         ()
 
     override this.EmbedInSymbolTable _ = 
-        // the embedding is not neccessary, since this node is are never referenced in the FPL syntax
+        // the embedding is not necessary, since this node is are never referenced in the FPL syntax
         // Instead, we use them internally as default value of FplGenericHasValue
         () 
 
@@ -554,7 +554,7 @@ let propagateSignatureType (signatureType:SignatureType) =
     | SignatureType.Mixed -> SignatureType.Type
     | _ -> signatureType 
 
-/// Creates a concatenated string represenation based on a sequence of FplValues.
+/// Creates a concatenated string representation based on a sequence of FplValues.
 let signatureSep sep (coordinates:FplGenericNode seq) signatureType =
     coordinates
     |> Seq.map (fun fv -> fv.Type signatureType)
@@ -576,7 +576,7 @@ let rec getMapping (fv:FplGenericNode) =
     | _ ->
         fv.ArgList |> Seq.tryFind (fun fv -> fv.Name = PrimMappingL)
 
-/// Creates a concatenated string represenation based on a sequence of FplValues.
+/// Creates a concatenated string representation based on a sequence of FplValues.
 let representationSep sep (coordinates:FplGenericNode seq) =
     coordinates 
     |> Seq.map (fun fv -> fv.Represent())

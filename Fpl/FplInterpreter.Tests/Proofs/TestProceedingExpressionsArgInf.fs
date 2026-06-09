@@ -10,20 +10,6 @@ open CommonTestHelpers
 [<TestClass>]
 type TestProceedingExpressionsArgInf() =
 
-    let tryFindInference (prf:FplProof) infType = 
-        prf.OrderedArguments
-        |> List.map (fun fv -> fv.ArgumentInference)
-        |> List.filter (fun fv -> fv.IsSome)
-        |> List.map (fun fv -> fv.Value)
-        |> List.tryFind (fun fv -> fv.Name = infType)
-
-    let tryFindLastInference (prf:FplProof) infType = 
-        prf.OrderedArguments
-        |> List.map (fun fv -> fv.ArgumentInference)
-        |> List.filter (fun fv -> fv.IsSome)
-        |> List.map (fun fv -> fv.Value)
-        |> List.tryLast 
-
     [<DataRow("00", """thm T {true} proof T$1 {1: trivial }""", "true", 1)>]
     [<DataRow("01", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" thm T {all n,m:Nat { impl( ( Succ(n) = Succ(m) ), ( n = m ) ) }} thm T {true} prf T$1 { 1: trivial }""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 1)>]
     [<DataRow("02", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" thm T {all n,m:Nat { impl( ( n' = m' ), ( n = m ) ) }} thm T {true} prf T$1 { 1: trivial }""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 1)>]

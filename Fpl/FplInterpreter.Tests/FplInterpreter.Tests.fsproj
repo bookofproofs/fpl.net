@@ -44,6 +44,7 @@
         <Compile Include="Diagnostics\TestInterpreterErrors.fs" />
         <Compile Include="Proofs\TestPR001.fs" />
         <Compile Include="Proofs\TestPR021.fs" />
+        <Compile Include="Proofs\TestPR022.fs" />
         <Compile Include="Proofs\TestProceedingExpressionsJust.fs" />
         <Compile Include="Proofs\TestProceedingExpressionsArgInf.fs" />
     </ItemGroup>

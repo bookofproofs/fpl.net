@@ -119,7 +119,7 @@ type DiagnosticCode =
     | PR018
     | PR019 of string * string
     | PR020 of int * int
-    | PR021 of string * string
+    | PR021 of string * string * string 
     | PR022 of string 
     // signature-related error codes
     | SIG00 of string * int
@@ -325,7 +325,7 @@ type DiagnosticCode =
             | PR018 -> errPR018
             | PR019 (justificationType1, justificationType2) -> errPR019 justificationType1 justificationType2
             | PR020 (expectedNum, actualNum) -> errPR020 expectedNum actualNum
-            | PR021 (mismatchingCandidates, inferredFormula) -> errPR021 mismatchingCandidates inferredFormula
+            | PR021 (mismatchingCandidates, inferredFormula, justificationName) -> errPR021 mismatchingCandidates inferredFormula justificationName
             | PR022 reason -> errPR022 reason
             // signature-related error codes
             | SIG00 (fixType, arity) -> errSIG00 fixType arity

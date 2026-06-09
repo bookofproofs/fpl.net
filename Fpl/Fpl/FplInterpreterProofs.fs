@@ -505,7 +505,13 @@ and FplArgument(positions: Positions, parent: FplGenericNode, runOrder) =
                         this.SetValue v
                     else
                         let mismatchingCandidates = numbered proceedingCandidates
-                        this.ErrorOccurred <- emitPR021Diagnostics mismatchingCandidates inferredExpr argInference.StartPos argInference.EndPos
+                        let prettyJustificationName =
+                            let justNames = lastJustificationOfArgument.FplId.Split(':')
+                            if justNames.Length = 2 then 
+                                $"The justification by argument `{justNames[1]}` in another proof `{justNames[0]}`"
+                            else
+                                $"The {lastJustificationOfArgument.Name}` `{lastJustificationOfArgument.Type SignatureType.Name}`"
+                        this.ErrorOccurred <- emitPR021Diagnostics mismatchingCandidates inferredExpr prettyJustificationName argInference.StartPos argInference.EndPos
                         this.SetDefaultValue()
                 | _, _ ->
                     this.SetDefaultValue()

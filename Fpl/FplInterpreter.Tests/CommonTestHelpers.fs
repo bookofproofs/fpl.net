@@ -4,6 +4,7 @@ open System
 open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
+open FplInterpreterProofs
 open FplInterpreter.Globals.Debug
 open FplInterpreter.Main
 
@@ -151,3 +152,27 @@ let loadFplFileWithTheSameSymbolTable (path: string) =
 
     let fplCode = File.ReadAllText(path)
     fplInterpreter fplCode uri fplLibUrl
+
+let tryFindInference (prf:FplProof) infType = 
+    prf.OrderedArguments
+    |> List.map (fun fv -> fv.ArgumentInference)
+    |> List.filter (fun fv -> fv.IsSome)
+    |> List.map (fun fv -> fv.Value)
+    |> List.tryFind (fun fv -> fv.Name = infType)
+
+let tryFindLastInference (prf:FplProof) infType = 
+    prf.OrderedArguments
+    |> List.map (fun fv -> fv.ArgumentInference)
+    |> List.filter (fun fv -> fv.IsSome)
+    |> List.map (fun fv -> fv.Value)
+    |> List.tryLast 
+
+let tryFindJustification (prf:FplProof) justType = 
+    prf.OrderedArguments
+    |> List.map (fun fv -> fv.Justification)
+    |> List.filter (fun fv -> fv.IsSome)
+    |> List.map (fun fv -> fv.Value)
+    |> List.map (fun fv -> fv :?> FplJustification)
+    |> List.map (fun fv -> fv.GetOrderedJustificationItems)
+    |> List.concat 
+    |> List.tryFind (fun fv -> fv.Name = justType)

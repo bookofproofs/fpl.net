@@ -107,7 +107,7 @@ let errPR017 = $"Do not use `{LiteralTrivial}` if the argument is not the last o
 let errPR018 = $"A `{LiteralTrivial}` argument is missing exactly one justification."
 let errPR019 justificationType1 justificationType2 = $"Unsupported mix of justifications in a single argument (`{justificationType1}` with `{justificationType2}`)."
 let errPR020 expectedNum actualNum = $"This {PrimJIByInf} requires {expectedNum} proceeding expressions, got {actualNum}."
-let errPR021 mismatchingCandidates inferredFormula = $"The argument `{inferredFormula}` cannot be inferred from the proceeding results. Expected the following inferred candidate(s):{mismatchingCandidates}."
+let errPR021 mismatchingCandidates inferredFormula justificationName = $"The argument `{inferredFormula}` cannot be inferred from the proceeding results. {justificationName} found following candidate(s):{mismatchingCandidates}."
 let errPR022 reason = $"The argument inference was prevented. Reason: {reason}."
 
 // signature-related error codes
