@@ -489,3 +489,7 @@ let findTwoDifferentNames (items:FplGenericNode list) =
         |> function
             | None -> Choice1Of2 first.Name
             | Some pair -> Choice2Of2 pair
+
+let checkSY010 (arg:FplGenericNode) =
+    if arg.ExpressionType.IsParen then
+        arg.ErrorOccurred <- emitSY010diagnostics arg.StartPos arg.EndPos

@@ -1086,6 +1086,20 @@ let emitSY002diagnostics errMsg chain pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
 
+let emitSY010diagnostics pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplParser
+            Diagnostic.Severity = DiagnosticSeverity.Warning
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = SY010
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
+
 let emitSY011diagnostics pos1 pos2 =
     let diagnostic =
         { 

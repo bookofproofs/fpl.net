@@ -34,7 +34,7 @@ let checkSIG01Diagnostics (fv: FplGenericNode) =
         |> Seq.iter (fun theory ->
             theory.Scope
             |> Seq.map (fun kv -> kv.Value)
-            |> Seq.filter (fun fv1 -> isDefinition fv1)
+            |> Seq.filter isDefinition 
             |> Seq.iter (fun block ->
                 match block.ExpressionType with
                 | FixType.Prefix symbol
@@ -227,3 +227,4 @@ let extractPredicateDefinitionExpressions (def:FplGenericNode) =
             [lastExpr]
         | _ -> []
     | _ -> []
+

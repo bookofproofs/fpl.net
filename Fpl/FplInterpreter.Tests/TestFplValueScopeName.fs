@@ -814,7 +814,7 @@ type TestFplValueScopeName() =
         | _ -> Assert.Fail($"{typeOfNode} not found in test case")
         prepareFplCode(filename, "", false) |> ignore
 
-    [<DataRow("01", PrimArgInfTrivial, "trivial", """thm T {true} proof T$1 {1: trivial }""")>]
+    [<DataRow("01", PrimArgInfTrivial, "true", """thm T {true} proof T$1 {1: trivial }""")>]
     [<DataRow("02", PrimArgInfDerive, "true", "thm T {true} proof T$1 {1: false ∧ true}")>]
     [<DataRow("03", PrimArgInfAssume, "true", "thm T {true} proof T$1 {1: assume false}")>]
     [<DataRow("04", PrimArgInfRevoke, "2", "thm T {true} proof T$1 {1: revoke 2}")>]

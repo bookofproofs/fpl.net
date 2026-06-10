@@ -53,7 +53,7 @@ open FplInterpreterCasesStmt
 /// Simplify trivially nested expressions by removing from the stack FplValue nodes that were created due to too long parsing tree and replacing them by their sub nodes 
 let rec simplifyTriviallyNestedExpressions (rb1:FplGenericNode) = 
     match rb1 with 
-    | :? FplReference as rb when rb.ArgList.Count = 1 && rb.FplId = "" && rb.ExpressionType <> FixType.Paren ->
+    | :? FplReference as rb when rb.ArgList.Count = 1 && rb.FplId = "" && not rb.ExpressionType.IsParen ->
         // removable reference blocks are those with only a single argument and unset FplId 
         let subNode = rb.ArgList[0] 
         heap.Eval.Pop() |> ignore // pop the removable reference block and ignored it
@@ -944,6 +944,7 @@ let rec eval ast =
         heap.Eval.PushEvalStack(operand)
         eval isOpArgAst
         heap.Eval.PopEvalStack()
+        fvNew.ArgList |> Seq.iter checkSY010 
         let typeOfOperand = new FplMapping((pos1, pos2), fvNew) 
         heap.Eval.PushEvalStack(typeOfOperand)
         eval variableTypeAst
@@ -1082,6 +1083,7 @@ let rec eval ast =
     | Ast.PredicateWithQualification(predicateWithOptSpecificationAst, qualificationListAst) ->
         eval predicateWithOptSpecificationAst
         eval qualificationListAst
+
     | Ast.InfixOp ((pos1, pos2), operandOperatorOptList) ->
         let parent = heap.Eval.PeekEvalStack()
         let fv = new FplReference((pos1, pos2), parent)
@@ -1166,6 +1168,12 @@ let rec eval ast =
         match parent with 
         | :? FplReference ->
             simplifyTriviallyNestedExpressions parent 
+        | _ when parent.IsBlock() ->
+            // parens top level in { block }
+            parent.ArgList |> Seq.iter checkSY010  
+        | _ when isCompoundPredicate parent  ->
+            // parens in compound predicate top level
+            parent.ArgList |> Seq.iter checkSY010
         | _ -> ()
     | Ast.PrefixOp(operatorAst, operandAst) 
     | Ast.PostfixOp(operatorAst, operandAst) -> 
@@ -1184,8 +1192,17 @@ let rec eval ast =
         let refBlock = new FplReference ((pos1,pos2), fv)
         refBlock.ExpressionType <- FixType.Paren
         heap.Eval.PushEvalStack(refBlock)
+        match expressionAst with
+        | Ast.InfixOp((_,_), listInsideInfix) when listInsideInfix.Length = 1 ->
+            // if an InfixOp is inside the Parens and it contains only one element
+            // (i.e. the infix Operation is actually not an infix operation having at least two operands but a single one).
+            // then flag that the parentheses can be safely removed.
+            refBlock.ErrorOccurred <- emitSY010diagnostics pos1 pos2
+        | _ -> ()
         eval expressionAst
         heap.Eval.PopEvalStack()
+        // parens in parens 
+        refBlock.ArgList |> Seq.iter checkSY010
     | Ast.Cases((pos1, pos2), (caseSingleListAsts, caseElseAst)) ->
         let parent = heap.Eval.PeekEvalStack()
         let casesStmt = new FplCases((pos1, pos2), parent)
