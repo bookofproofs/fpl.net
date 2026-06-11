@@ -1089,14 +1089,14 @@ let rec eval ast =
         let fv = new FplReference((pos1, pos2), parent)
         heap.Eval.PushEvalStack(fv)
         operandOperatorOptList
-        |> List.map (fun (predAst, opAstOpt) -> 
+        |> List.map (fun (predAst, opAstOpt) ->
             // operand
             let operand = new FplReference((pos1,pos2), fv)
             heap.Eval.PushEvalStack(operand)
             eval predAst
             simplifyTriviallyNestedExpressions operand
             fv.ArgList.Add(heap.Eval.Pop()) // pop the stack element (same reference as pred) and store it in a list
-            
+
             match opAstOpt with
             | Some opAst ->
                 // followed by the operator
@@ -1113,64 +1113,62 @@ let rec eval ast =
         // if there was at least one infix operator transform the symbol table according to precedence
         if fv.ArgList.Count > 1 && fv.Name = PrimRefL then
             /// Returns the precedence of fv1 if its ExpressionType is Infix
-            /// or Int32.MaxValue otherwise
+            /// or Int32.MinValue otherwise
             let getPrecedence (fv1:FplGenericNode) =
                 match fv1.RefersTo with
-                | None -> Int32.MaxValue
-                | Some x -> 
+                | None -> Int32.MinValue
+                | Some x ->
                     match x.ExpressionType with
                     | FixType.Infix (symb, prec) -> prec
-                    | _ -> Int32.MaxValue
+                    | _ -> Int32.MinValue
 
-            // This while loop will evaluate multiple non-parenthesized infix operations
-            // according to their precedence by grouping them into binary operations and leave fv with only one binary operation
-            while fv.ArgList.Count > 1 do
-                let mutable currentMinimalPrecedence = Int32.MaxValue
-                let mutable currMinIndex = 1
-                for i in 1 .. 2 .. fv.ArgList.Count - 1 do
-                    let currPrecedence = getPrecedence fv.ArgList[i]
-                    if currentMinimalPrecedence > currPrecedence then
-                        currentMinimalPrecedence <- currPrecedence
-                        currMinIndex <- i
-                let currentOp = fv.ArgList[currMinIndex]
-                let firstOp = fv.ArgList[currMinIndex-1]
-                let secondOp = fv.ArgList[currMinIndex+1]
-                currentOp.ArgList.Add(firstOp)
-                currentOp.ArgList.Add(secondOp)
-                let refNodeOpt = referencedNodeOpt currentOp
-                match refNodeOpt with 
-                | Some refNode when refNode.Arity = 2 ->
-                    let pars = 
-                        refNode.GetVariables() 
-                        |> List.map (fun var -> var :?> FplGenericVariable)
-                        |> List.filter (fun var -> var.IsSignatureVariable)
-                    // try to issue SIG04 diagnostics per argument of the binary operator
-                    if pars.Length = 2 then 
-                        match FplTypeMatcher.MatchPwA [firstOp] [pars[0]] with
-                        | Some errMsg -> 
-                            let extendedErrMsg = $"{errMsg} in {qualifiedName refNode true}"
-                            firstOp.ErrorOccurred <- emitSIG04Diagnostics (currentOp.Type SignatureType.Mixed) extendedErrMsg firstOp.StartPos firstOp.EndPos
-                        | _ -> ()
-                        match FplTypeMatcher.MatchPwA [secondOp] [pars[1]] with
-                        | Some errMsg -> 
-                            let extendedErrMsg = $"{errMsg} in {qualifiedName refNode true}"
-                            secondOp.ErrorOccurred <- emitSIG04Diagnostics (currentOp.Type SignatureType.Mixed) extendedErrMsg secondOp.StartPos secondOp.EndPos
-                        | _ -> ()
-                    else
-                        // if something went wrong (for instance, wrong arity), issue SIG04 with fallback using the operand 
-                        // together with its referenced node
-                        checkSIG04Diagnostics currentOp [refNode] |> ignore
-                | _ -> ()
-                fv.ArgList.RemoveAt(currMinIndex+1) 
-                fv.ArgList.RemoveAt(currMinIndex-1) 
-        simplifyTriviallyNestedExpressions fv 
+            // This function will transform a list of [operand; op; operand; ...; op ; operand] 
+            // by grouping them into binary operations op(operand, operand)
+            // and sort all ops according to their precedence, starting with the highest and ending with the lowest
+            let rec reduce (operandOperatorList: FplGenericNode list) =
+                match operandOperatorList with
+                | []
+                | [_] -> operandOperatorList // items with zero or one 
+                | _ ->
+                    // operators are stored at odd indices (1,3,...). collect (index, precedence)
+                    let operatorIndices =
+                        operandOperatorList
+                        |> List.mapi (fun i it -> (i, getPrecedence it))
+                        |> List.filter (fun (i, _) -> i % 2 = 1)
+
+                    // pick the operator with maximal precedence
+                    let (maxIdx, _) = operatorIndices |> List.maxBy snd
+
+                    let left = operandOperatorList.[maxIdx - 1]
+                    let op = operandOperatorList.[maxIdx]
+                    let right = operandOperatorList.[maxIdx + 1]
+
+                    // mutate the operator node to attach its operand children (this is domain-necessary;
+                    // the control flow itself is immutable/functional)
+                    op.ArgList.Add(left)
+                    op.ArgList.Add(right)
+                    checkSIG04DiagnosticsForInfixOperator op left right
+
+                    let before = operandOperatorList |> List.take (maxIdx - 1)
+                    let after = operandOperatorList |> List.skip (maxIdx + 2)
+                    let newItems = before @ [op] @ after
+                    reduce newItems
+
+            // run reduction on a snapshot list, then replace fv.ArgList with the reduced result
+            let snapshot = fv.ArgList |> Seq.toList
+            let reducedTree = reduce snapshot // the tree has the binary op with the lowest precedence at the root
+            // replace contents of fv.ArgList with reduced result (typically a single binary op with the lowest precedence)
+            fv.ArgList.Clear()
+            reducedTree |> List.iter fv.ArgList.Add
+
+        simplifyTriviallyNestedExpressions fv
         heap.Eval.PopEvalStack()
-        match parent with 
+        match parent with
         | :? FplReference ->
-            simplifyTriviallyNestedExpressions parent 
+            simplifyTriviallyNestedExpressions parent
         | _ when parent.IsBlock() ->
             // parens top level in { block }
-            parent.ArgList |> Seq.iter checkSY010  
+            parent.ArgList |> Seq.iter checkSY010
         | _ when isCompoundPredicate parent  ->
             // parens in compound predicate top level
             parent.ArgList |> Seq.iter checkSY010
@@ -1755,4 +1753,5 @@ let evaluateSymbolTable () =
             heap.Eval.PopEvalStack()
             theoryValue.Run()
         | None -> found <- false
+
 

@@ -746,6 +746,34 @@ let checkSIG04Diagnostics (calling:FplGenericNode) (candidates: FplGenericNode l
             calling.ErrorOccurred <- emitSIG04Diagnostics (calling.Type SignatureType.Mixed) errListStr calling.StartPos calling.EndPos
             None
 
+/// Checks type consistency of an infix operation with respect to its operands
+let checkSIG04DiagnosticsForInfixOperator (infixOp:FplGenericNode) (firstOp:FplGenericNode) (secondOp:FplGenericNode) = 
+    let refNodeOpt = referencedNodeOpt infixOp
+    match refNodeOpt with 
+    | Some refNode when refNode.Arity = 2 ->
+        let pars = 
+            refNode.GetVariables() 
+            |> List.map (fun var -> var :?> FplGenericVariable)
+            |> List.filter (fun var -> var.IsSignatureVariable)
+        // try to issue SIG04 diagnostics per argument of the binary operator
+        if pars.Length = 2 then 
+            match FplTypeMatcher.MatchPwA [firstOp] [pars[0]] with
+            | Some errMsg -> 
+                let extendedErrMsg = $"{errMsg} in {qualifiedName refNode true}"
+                firstOp.ErrorOccurred <- emitSIG04Diagnostics (infixOp.Type SignatureType.Mixed) extendedErrMsg firstOp.StartPos firstOp.EndPos
+            | _ -> ()
+            match FplTypeMatcher.MatchPwA [secondOp] [pars[1]] with
+            | Some errMsg -> 
+                let extendedErrMsg = $"{errMsg} in {qualifiedName refNode true}"
+                secondOp.ErrorOccurred <- emitSIG04Diagnostics (infixOp.Type SignatureType.Mixed) extendedErrMsg secondOp.StartPos secondOp.EndPos
+            | _ -> ()
+        else
+            // if something went wrong (for instance, wrong arity), issue SIG04 with fallback using the operand 
+            // together with its referenced node
+            checkSIG04Diagnostics infixOp [refNode] |> ignore
+    | _ -> ()
+
+
 /// Checks if a reference to an array matches its dimensions (in terms of number and types)
 let checkSIG08_SIG10Diagnostics (referenceToArray:FplGenericNode) =
     let rec matchIndexesWithDimensions (refToArray:FplReference) =
