@@ -139,9 +139,11 @@ let errST005 domain nodeType = $"An enumerator for the domain `{domain}` being {
 let errSY000 errMsg = $"Syntax error: {errMsg}"
 let errSY001 errMsg = $"Syntax error (backtracked): {errMsg}"
 let errSY002 errMsg chain = $"Syntax error chain {chain}: {errMsg}"
+
 let errSY010 = $"These parentheses can be safely removed."
 let errSY011 = $"Replace `∃!0` by `¬∃` quantor."
 let errSY012 = $"Expression `∃!1` can be simplified with `∃!`."
+let errSY013 precedence1st symbol1st precedence2nd symbol2nd = $"These parentheses can be safely removed because the symbol's `{symbol1st}` precedence {precedence1st} is higher than the symbol's `{symbol2nd}` precedence {precedence2nd}."
 // variable-related error codes
 let errVAR00 =  "Declaring multiple arrays at once may cause ambiguities."
 let errVAR01 name = $"Variable `{name}` not declared in this scope."

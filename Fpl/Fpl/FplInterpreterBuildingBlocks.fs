@@ -1119,7 +1119,7 @@ let rec eval ast =
                 | None -> Int32.MaxValue
                 | Some x -> 
                     match x.ExpressionType with
-                    |  FixType.Infix (symb, prec) -> prec
+                    | FixType.Infix (symb, prec) -> prec
                     | _ -> Int32.MaxValue
 
             // This while loop will evaluate multiple non-parenthesized infix operations
