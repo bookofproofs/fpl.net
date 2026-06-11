@@ -40,11 +40,16 @@
         <Compile Include="TestEvalAliasedNamespaceIdentifier.fs" />
         <Compile Include="TestFixTypeExpressionNames.fs" />
         <Compile Include="TestValidity.fs" />
-        <Compile Include="Diagnostics\SyntaxRelatedErrors\TestInterpreterErrors.fs" />
+        <Compile Include="Diagnostics\SyntaxRelatedErrors\TestSY000.fs" />
+        <Compile Include="Diagnostics\SyntaxRelatedErrors\TestSY002.fs" />
+        <Compile Include="Diagnostics\SyntaxRelatedErrors\TestSY010.fs" />
+        <Compile Include="Diagnostics\SyntaxRelatedErrors\TestSY011.fs" />
+        <Compile Include="Diagnostics\SyntaxRelatedErrors\TestSY012.fs" />
+        <Compile Include="Diagnostics\SyntaxRelatedErrors\TestSY013.fs" />
         <Compile Include="Diagnostics\TestInterpreterErrors.fs" />
-        <Compile Include="Proofs\TestPR001.fs" />
-        <Compile Include="Proofs\TestPR021.fs" />
-        <Compile Include="Proofs\TestPR022.fs" />
+        <Compile Include="Diagnostics\Proofs\TestPR001.fs" />
+        <Compile Include="Diagnostics\Proofs\TestPR021.fs" />
+        <Compile Include="Diagnostics\Proofs\TestPR022.fs" />
         <Compile Include="Proofs\TestProceedingExpressionsJust.fs" />
         <Compile Include="Proofs\TestProceedingExpressionsArgInf.fs" />
     </ItemGroup>
