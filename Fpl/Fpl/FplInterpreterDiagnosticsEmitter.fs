@@ -1128,7 +1128,7 @@ let emitSY012diagnostics pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitSY013diagnostics precedence1st symbol1st precedence2nd symbol2nd pos1 pos2 = 
+let emitSY013diagnostics innerInfixSymbol innerPrecedence outerInfixSymbol outerPrecedence pos1 pos2 = 
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -1136,7 +1136,7 @@ let emitSY013diagnostics precedence1st symbol1st precedence2nd symbol2nd pos1 po
             Diagnostic.Severity = DiagnosticSeverity.Warning
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = SY013 (precedence1st, symbol1st, precedence2nd, symbol2nd)
+            Diagnostic.Code = SY013 (innerInfixSymbol, innerPrecedence, outerInfixSymbol, outerPrecedence)
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic

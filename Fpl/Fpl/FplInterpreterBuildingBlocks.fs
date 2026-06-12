@@ -1110,57 +1110,71 @@ let rec eval ast =
         )
         |> ignore
 
-        // if there was at least one infix operator transform the symbol table according to precedence
-        if fv.ArgList.Count > 1 && fv.Name = PrimRefL then
-            /// Returns the precedence of fv1 if its ExpressionType is Infix
-            /// or Int32.MinValue otherwise
-            let getPrecedence (fv1:FplGenericNode) =
-                match fv1.RefersTo with
-                | None -> Int32.MinValue
-                | Some x ->
-                    match x.ExpressionType with
-                    | FixType.Infix (symb, prec) -> prec
-                    | _ -> Int32.MinValue
+        /// Returns the precedence of fv1 if its ExpressionType is Infix
+        /// or Int32.MinValue otherwise
+        let getPrecedence (fv1:FplGenericNode) =
+            match fv1.RefersTo with
+            | None -> Int32.MinValue
+            | Some x ->
+                match x.ExpressionType with
+                | FixType.Infix (symb, prec) -> prec
+                | _ -> Int32.MinValue
 
-            // This function will transform a list of [operand; op; operand; ...; op ; operand] 
-            // by grouping them into binary operations op(operand, operand)
-            // and sort all ops according to their precedence, starting with the highest and ending with the lowest
-            let rec reduce (operandOperatorList: FplGenericNode list) =
-                match operandOperatorList with
-                | []
-                | [_] -> operandOperatorList // items with zero or one 
-                | _ ->
-                    // operators are stored at odd indices (1,3,...). collect (index, precedence)
-                    let operatorIndices =
-                        operandOperatorList
-                        |> List.mapi (fun i it -> (i, getPrecedence it))
-                        |> List.filter (fun (i, _) -> i % 2 = 1)
+        /// Checks if the operand of some outerInfixOperator is itself a parenthesized infix operator and, if so, compares the precedences
+        /// of both infix operations with each other. If the inner precedence is higher than the outer,
+        /// a diagnostics will be issued that the parentheses of the inner infix operation can be omitted.
+        let checkSY013ForOperand (operand:FplGenericNode) (outerInfixOperator:FplGenericNode) =
+            match outerInfixOperator.ExpressionType with
+            | FixType.Infix(outerInfixSymbol, outerPrecedence) ->
+                match (operand.ArgList |> Seq.tryHead) with
+                | Some arg when arg.ExpressionType.IsInfix ->
+                    match arg.ExpressionType with
+                    | FixType.Infix(innerInfixSymbol, innerPrecedence) when innerPrecedence > outerPrecedence ->
+                        operand.ErrorOccurred <- emitSY013diagnostics innerInfixSymbol innerPrecedence outerInfixSymbol outerPrecedence operand.StartPos operand.EndPos
+                    | _ -> ()
+                | _ -> ()
+            | _ -> ()
 
-                    // pick the operator with maximal precedence
-                    let (maxIdx, _) = operatorIndices |> List.maxBy snd
+        // This function will transform a list of [operand; op; operand; ...; op ; operand] 
+        // by grouping them into binary operations op(operand, operand)
+        // and sort all ops according to their precedence, starting with the highest and ending with the lowest
+        let rec reduce (operandOperatorList: FplGenericNode list) =
+            match operandOperatorList with
+            | []
+            | [_] -> operandOperatorList // items with zero or one 
+            | _ ->
+                // operators are stored at odd indices (1,3,...). collect (index, precedence)
+                let operatorIndices =
+                    operandOperatorList
+                    |> List.mapi (fun i it -> (i, getPrecedence it))
+                    |> List.filter (fun (i, _) -> i % 2 = 1)
 
-                    let left = operandOperatorList.[maxIdx - 1]
-                    let op = operandOperatorList.[maxIdx]
-                    let right = operandOperatorList.[maxIdx + 1]
+                // pick the operator with maximal precedence
+                let (maxIdx, _) = operatorIndices |> List.maxBy snd
 
-                    // mutate the operator node to attach its operand children (this is domain-necessary;
-                    // the control flow itself is immutable/functional)
-                    op.ArgList.Add(left)
-                    op.ArgList.Add(right)
-                    checkSIG04DiagnosticsForInfixOperator op left right
+                let left = operandOperatorList.[maxIdx - 1]
+                let op = operandOperatorList.[maxIdx]
+                let right = operandOperatorList.[maxIdx + 1]
 
-                    let before = operandOperatorList |> List.take (maxIdx - 1)
-                    let after = operandOperatorList |> List.skip (maxIdx + 2)
-                    let newItems = before @ [op] @ after
-                    reduce newItems
+                // mutate the operator node to attach its operand children (this is domain-necessary;
+                // the control flow itself is immutable/functional)
+                op.ArgList.Add(left)
+                op.ArgList.Add(right)
+                checkSY013ForOperand left op
+                checkSY013ForOperand right op
+                checkSIG04DiagnosticsForInfixOperator op left right
 
-            // run reduction on a snapshot list, then replace fv.ArgList with the reduced result
-            let snapshot = fv.ArgList |> Seq.toList
-            let reducedTree = reduce snapshot // the tree has the binary op with the lowest precedence at the root
-            // replace contents of fv.ArgList with reduced result (typically a single binary op with the lowest precedence)
-            fv.ArgList.Clear()
-            reducedTree |> List.iter fv.ArgList.Add
+                let before = operandOperatorList |> List.take (maxIdx - 1)
+                let after = operandOperatorList |> List.skip (maxIdx + 2)
+                let newItems = before @ [op] @ after
+                reduce newItems
 
+        // run reduction on a snapshot list, then replace fv.ArgList with the reduced result
+        let snapshot = fv.ArgList |> Seq.toList
+        let reducedTree = reduce snapshot // the tree has the binary op with the lowest precedence at the root
+        // replace contents of fv.ArgList with reduced result (typically a single binary op with the lowest precedence)
+        fv.ArgList.Clear()
+        reducedTree |> List.iter fv.ArgList.Add
         simplifyTriviallyNestedExpressions fv
         heap.Eval.PopEvalStack()
         match parent with

@@ -359,7 +359,7 @@ type DiagnosticCode =
             | SY010 -> errSY010
             | SY011 -> errSY011
             | SY012 -> errSY012
-            | SY013 (precedence1st, symbol1st, precedence2nd, symbol2nd) -> errSY013 precedence1st symbol1st precedence2nd symbol2nd
+            | SY013 (innerInfixSymbol, innerPrecedence, outerInfixSymbol, outerPrecedence) -> errSY013 innerInfixSymbol innerPrecedence outerInfixSymbol outerPrecedence 
             // variable-related error codes
             | VAR00 -> errVAR00
             | VAR01 name -> errVAR01 name

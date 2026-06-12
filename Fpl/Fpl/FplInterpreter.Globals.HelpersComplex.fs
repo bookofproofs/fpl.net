@@ -25,6 +25,7 @@ open FplInterpreterChecks
 let checkSIG01Diagnostics (fv: FplGenericNode) =
     match fv.Name with
     | PrimRefL ->
+
         // collect candidates to match this reference from all theories and
         // add them to fplValues's scope
         let expressionId = fv.FplId
@@ -45,7 +46,10 @@ let checkSIG01Diagnostics (fv: FplGenericNode) =
                         fv.TypeId <- block.TypeId
                 | FixType.Infix(symbol, precedence) ->
                     if expressionId = symbol then
-                        fv.RefersTo <- Some block 
+                        fv.RefersTo <- Some block
+                        // replace the syntax infix operator by the semantics of the infix operator
+                        // (including actual precedence)
+                        fv.ExpressionType <- block.ExpressionType 
                         fv.TypeId <- block.TypeId
                 | _ -> ()))
 

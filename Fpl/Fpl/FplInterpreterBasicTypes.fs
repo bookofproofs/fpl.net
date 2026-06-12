@@ -96,7 +96,6 @@ let stripLastDollarDigit (s: string) =
 type FplGenericNode(positions: Positions, parent: FplGenericNode option) =
     let mutable _expressionType = FixType.NoFix
     let mutable _argType = ArgType.Nothing
-    let mutable _exprTypeAlreadySet = false
     let mutable _startPos = fst positions
     let mutable _endPos = snd positions
     let mutable _auxiliaryInfo = 0
@@ -224,19 +223,7 @@ type FplGenericNode(positions: Positions, parent: FplGenericNode option) =
     /// Type of the Expr
     member this.ExpressionType
         with get () = _expressionType
-        and set (value) =
-            if not _exprTypeAlreadySet then
-                _expressionType <- value
-                _exprTypeAlreadySet <- true
-            elif _expressionType.Type = value.Type then
-                ()
-            else
-                _expressionType <- value
-                raise (
-                    ArgumentException(
-                        $"Type was already initialized with `{_expressionType.Type}`, cannot set it again with {value.Type}."
-                    )
-                )
+        and set (value) = _expressionType <- value
 
     /// Indicates if this FplValue has bracketed arguments or parameters, 
     /// parenthesized arguments or parameters, or no arguments or parameters
