@@ -1112,13 +1112,26 @@ let rec eval ast =
 
         /// Returns the precedence of fv1 if its ExpressionType is Infix
         /// or Int32.MinValue otherwise
-        let getPrecedence (fv1:FplGenericNode) =
+        let getSymbolWithPrecedence (fv1:FplGenericNode) =
             match fv1.RefersTo with
-            | None -> Int32.MinValue
+            | None ->
+                match fv1.ExpressionType with
+                | FixType.Infix (symb, prec) -> (symb, prec)
+                | _ -> ("", Int32.MinValue)
             | Some x ->
                 match x.ExpressionType with
-                | FixType.Infix (symb, prec) -> prec
-                | _ -> Int32.MinValue
+                | FixType.Infix (symb, prec) -> (symb, prec)
+                | _ -> ("", Int32.MinValue)
+
+        let getArgumentsSymbolWithPrecedence (node:FplGenericNode) =
+            match (node.ArgList |> Seq.tryHead) with
+            | Some arg ->
+                let (infixSymbol, precedence) = getSymbolWithPrecedence arg
+                if infixSymbol = String.Empty then
+                    None
+                else
+                    Some (infixSymbol, precedence)
+            | _ -> None
 
         /// Checks if the operand of some outerInfixOperator is itself an parenthesized infix operator and, if so, compares the precedences
         /// of both infix operations with each other. If the inner precedence is higher than the outer,
@@ -1128,15 +1141,33 @@ let rec eval ast =
             | FixType.Infix(outerInfixSymbol, outerPrecedence) ->
                 match operand.ExpressionType with
                 | FixType.Paren ->
-                    match (operand.ArgList |> Seq.tryHead) with
-                    | Some arg ->
-                        match arg.ExpressionType with
-                        | FixType.Infix(innerInfixSymbol, innerPrecedence) when innerPrecedence > outerPrecedence ->
-                            operand.ErrorOccurred <- emitSY013diagnostics innerInfixSymbol innerPrecedence outerInfixSymbol outerPrecedence operand.StartPos operand.EndPos
-                        | _ -> ()
+                    match getArgumentsSymbolWithPrecedence(operand) with 
+                    | Some (innerInfixSymbol, innerPrecedence) when innerPrecedence > outerPrecedence ->
+                        operand.ErrorOccurred <- emitSY013diagnostics innerInfixSymbol innerPrecedence outerInfixSymbol outerPrecedence operand.StartPos operand.EndPos
                     | _ -> ()
                 | _ -> ()
             | _ -> ()
+
+        /// Checks if two infix operations with the same precedence are involved and issues a diagnostic.
+        let checkSY014ForOperand (operatorIndices:(int * (string * int)) list) (operandOperatorList: FplGenericNode list) =
+            /// detect two different symbols that share the same precedence
+            let tryPickConflictingSymbols =
+                operatorIndices
+                |> List.groupBy (fun (_, (_, prec)) -> prec)
+                |> List.tryPick (fun (prec, group) ->
+                    match group with
+                    | (_, (s1, _)) :: (i2, (s2, _)) :: _ when s1 <> s2 ->
+                        // i2 is the index of the second symbol with conflicting precedence
+                        // we need only one index to reduce the number of
+                        // issued SY014 diagnostics to the significant ones
+                        Some (i2, s1, s2, prec) 
+                    | _ ->
+                        None)
+            match tryPickConflictingSymbols with
+            | Some (i, firstSymbol, secondSymbol, precedence) ->
+                let operand = operandOperatorList[i]
+                operand.ErrorOccurred <- emitSY014diagnostics firstSymbol secondSymbol precedence operand.StartPos operand.EndPos
+            | None -> ()
 
         // This function will transform a list of [operand; op; operand; ...; op ; operand] 
         // by grouping them into binary operations op(operand, operand)
@@ -1149,11 +1180,12 @@ let rec eval ast =
                 // operators are stored at odd indices (1,3,...). collect (index, precedence)
                 let operatorIndices =
                     operandOperatorList
-                    |> List.mapi (fun i it -> (i, getPrecedence it))
+                    |> List.mapi (fun i it -> (i, getSymbolWithPrecedence it))
                     |> List.filter (fun (i, _) -> i % 2 = 1)
+                checkSY014ForOperand operatorIndices operandOperatorList
 
                 // pick the operator with maximal precedence
-                let (maxIdx, _) = operatorIndices |> List.maxBy snd
+                let (maxIdx, _) = operatorIndices |> List.maxBy (fun (_, (_, prec)) -> prec)
 
                 let left = operandOperatorList.[maxIdx - 1]
                 let op = operandOperatorList.[maxIdx]

@@ -144,6 +144,12 @@ let errSY010 = $"These parentheses can be safely removed."
 let errSY011 = $"Replace `∃!0` by `¬∃` quantor."
 let errSY012 = $"Expression `∃!1` can be simplified with `∃!`."
 let errSY013 innerInfixSymbol innerPrecedence outerInfixSymbol outerPrecedence = $"These parentheses can be safely removed because the symbol's `{innerInfixSymbol}` precedence {innerPrecedence} is higher than the symbol's `{outerInfixSymbol}` precedence {outerPrecedence}."
+let errSY014 infixSymbol1 infixSymbol2 precedence =
+    match precedence with
+    | -1 -> 
+        $"This expression is ambiguous. The infix operators `{infixSymbol1}` and `{infixSymbol2}` are not defined. To resolve the ambiguity, either use parentheses to indicate the intended grouping or define binary operations (either a function or a predicate) for these symbols and assign them a precedence."
+    | _ -> 
+        $"This expression is ambiguous. The infix operators `{infixSymbol1}` and `{infixSymbol2}` have the same precedence {precedence}. To resolve the ambiguity, either use parentheses to indicate the intended grouping or assign different precedences to the symbols."
 // variable-related error codes
 let errVAR00 =  "Declaring multiple arrays at once may cause ambiguities."
 let errVAR01 name = $"Variable `{name}` not declared in this scope."

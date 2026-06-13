@@ -22,16 +22,22 @@ For non-precedence-based parenthesis diagnostics: see SY010 diagnostic.
 type TestSY013() =
 
     
+    // (tests for false positives)
     // precedence defined
     [<DataRow("00", """def pred T(x,y:obj) infix "+" 1 {true} def pred S(x,y:obj) infix "*" 2 {true} def pred T() { (x + y) * z } """, 0)>]  // * has higher precedence, parens are ok, because they cannot be safely removed
     [<DataRow("00a", """def pred T(x,y:obj) infix "+" 1 {true} def pred S(x,y:obj) infix "*" 2 {true} def pred T() { z * (x + y) } """, 0)>]  // * has higher precedence, parens are ok, because they cannot be safely removed
+
+    // (tests for positives)
+    // precedence defined
     [<DataRow("01", """def pred T(x,y:obj) infix "+" 1 {true} def pred S(x,y:obj) infix "*" 2 {true} def pred T() { x + (y * z) } """, 1)>]  // * has higher precedence, parens can be safely removed
     [<DataRow("01a", """def pred T(x,y:obj) infix "+" 1 {true} def pred S(x,y:obj) infix "*" 2 {true} def pred T() { (y * z) + x } """, 1)>]  // * has higher precedence, parens can be safely removed
+
+    // (tests for false positives)
     // no precedence defined
     [<DataRow("02", """def pred T() { (x + y) * z } """, 0)>] 
     [<DataRow("02a", """def pred T() { z * (x + y) } """, 0)>] 
     [<DataRow("03", """def pred T() { x + (y * z) } """, 0)>] 
-    [<DataRow("03a", """def pred T() { (y * z) * x } """, 0)>] 
+    [<DataRow("03a", """def pred T() { (y * z) + x } """, 0)>] 
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestSY013(no:string, fplCode:string, expected) =

@@ -150,6 +150,7 @@ type DiagnosticCode =
     | SY011 
     | SY012
     | SY013 of string * int * string * int
+    | SY014 of string * string * int
     // variable-related error codes
     | VAR00 
     | VAR01 of string 
@@ -255,6 +256,7 @@ type DiagnosticCode =
             | SY011 -> "SY011"
             | SY012 -> "SY012"
             | SY013 _ -> "SY013"
+            | SY014 _ -> "SY014"
             // variable-related error codes
             | VAR00 -> "VAR00"
             | VAR01 _  -> "VAR01"
@@ -360,6 +362,7 @@ type DiagnosticCode =
             | SY011 -> errSY011
             | SY012 -> errSY012
             | SY013 (innerInfixSymbol, innerPrecedence, outerInfixSymbol, outerPrecedence) -> errSY013 innerInfixSymbol innerPrecedence outerInfixSymbol outerPrecedence 
+            | SY014 (infixSymbol1, infixSymbol2, precedence) -> errSY014 infixSymbol1 infixSymbol2 precedence
             // variable-related error codes
             | VAR00 -> errVAR00
             | VAR01 name -> errVAR01 name

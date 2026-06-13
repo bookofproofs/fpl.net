@@ -1142,6 +1142,20 @@ let emitSY013diagnostics innerInfixSymbol innerPrecedence outerInfixSymbol outer
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
+let emitSY014diagnostics infixSymbol1 infixSymbol2 precedence pos1 pos2 = 
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Warning
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = SY014 (infixSymbol1, infixSymbol2, precedence)
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+    Some (diagnostic.Code.Code)
+
 let emitVAR00Diagnostics startPos endPos =
     let diagnostic =
         { 
