@@ -19,7 +19,7 @@ open System
 open ErrDiagnostics
 open FplInterpreter.Globals.Heap
 open FplInterpreterUsesClause
-open FplInterpreterBuildingBlocks
+open FplInterpreter.EvalAst.Main
 open FplInterpreterDiagnosticsEmitter
 
 let fplInterpreter input (uri:PathEquivalentUri) fplLibUrl = 
