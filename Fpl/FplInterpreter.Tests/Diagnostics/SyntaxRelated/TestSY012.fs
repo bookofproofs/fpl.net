@@ -1,4 +1,4 @@
-namespace FplInterpreter.Tests.Diagnostics.ErrRecovery
+namespace FplInterpreter.Tests.Diagnostics.SyntaxRelated
 
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics

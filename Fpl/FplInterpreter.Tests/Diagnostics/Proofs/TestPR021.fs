@@ -1,4 +1,4 @@
-namespace FplInterpreter.Tests.Proofs
+namespace FplInterpreter.Tests.Diagnostics.Proofs
 
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
