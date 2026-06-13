@@ -57,6 +57,8 @@
         <Compile Include="FplInterpreterIsOperator.fs" />
         <Compile Include="FplInterpreterForStmt.fs" />
         <Compile Include="FplInterpreterUsesClause.fs" />
+        <Compile Include="FplInterpreter.EvalAst.Forward.fs" />
+        <Compile Include="FplInterpreter.EvalAst.Expressions.fs" />
         <Compile Include="FplInterpreter.EvalAst.Main.fs" />
         <Compile Include="FplInterpreter.Main.fs" />
         <Compile Include="Program.fs" />
