@@ -1120,17 +1120,20 @@ let rec eval ast =
                 | FixType.Infix (symb, prec) -> prec
                 | _ -> Int32.MinValue
 
-        /// Checks if the operand of some outerInfixOperator is itself a parenthesized infix operator and, if so, compares the precedences
+        /// Checks if the operand of some outerInfixOperator is itself an parenthesized infix operator and, if so, compares the precedences
         /// of both infix operations with each other. If the inner precedence is higher than the outer,
         /// a diagnostics will be issued that the parentheses of the inner infix operation can be omitted.
         let checkSY013ForOperand (operand:FplGenericNode) (outerInfixOperator:FplGenericNode) =
             match outerInfixOperator.ExpressionType with
             | FixType.Infix(outerInfixSymbol, outerPrecedence) ->
-                match (operand.ArgList |> Seq.tryHead) with
-                | Some arg when arg.ExpressionType.IsInfix ->
-                    match arg.ExpressionType with
-                    | FixType.Infix(innerInfixSymbol, innerPrecedence) when innerPrecedence > outerPrecedence ->
-                        operand.ErrorOccurred <- emitSY013diagnostics innerInfixSymbol innerPrecedence outerInfixSymbol outerPrecedence operand.StartPos operand.EndPos
+                match operand.ExpressionType with
+                | FixType.Paren ->
+                    match (operand.ArgList |> Seq.tryHead) with
+                    | Some arg ->
+                        match arg.ExpressionType with
+                        | FixType.Infix(innerInfixSymbol, innerPrecedence) when innerPrecedence > outerPrecedence ->
+                            operand.ErrorOccurred <- emitSY013diagnostics innerInfixSymbol innerPrecedence outerInfixSymbol outerPrecedence operand.StartPos operand.EndPos
+                        | _ -> ()
                     | _ -> ()
                 | _ -> ()
             | _ -> ()
