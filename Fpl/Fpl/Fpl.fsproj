@@ -9,10 +9,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="FplPrivimitives.fs" />
-        <Compile Include="ErrMessages.fs" />
-        <Compile Include="ErrDiagnostics.fs" />
-        <Compile Include="FplInterpreterDiagnosticsEmitter.fs" />
+        <Compile Include="Primitives\FplPrivimitives.fs" />
+        <Compile Include="Errors\ErrMessages.fs" />
+        <Compile Include="Errors\ErrDiagnostics.fs" />
+        <Compile Include="Errors\FplInterpreterDiagnosticsEmitter.fs" />
         <None Include="Parser\CHANGES.md" />
         <None Include="Parser\DocuFplGrammarPocShiftFromPythonToFSharp.md" />
         <Compile Include="Parser\FplParsing.Debug.fs" />
