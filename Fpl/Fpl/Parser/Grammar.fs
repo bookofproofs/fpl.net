@@ -1,8 +1,8 @@
 /// This module contains the FPL parser conbinators producing an abstract syntax tree out of a given FPL code.
-module FplParsing.Combinators
+module Fpl.Parser.Grammar
 
 open FParsec
-open FplParsing.Basic
+open Fpl.Parser.Basic
 open Fpl.Primitives
 open Fpl.Parser.Types
 open Fpl.Parser.Debug

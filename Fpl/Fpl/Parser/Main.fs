@@ -1,6 +1,6 @@
 /// This module contains the final FPL parser including error recovery
 // producing an abstract syntax tree out of a given FPL code 
-module FplParsing.Main
+module Fpl.Parser.Main
 open System
 open System.Collections.Generic
 open System.Text
@@ -9,8 +9,8 @@ open Fpl.Primitives
 open Fpl.Parser.Types
 open Fpl.Errors.Diagnostics
 open FParsec
-open FplParsing.Combinators
-open FplParsing.Formatting
+open Fpl.Parser.Grammar
+open Fpl.Parser.Formatting
 (* MIT License
 
 Copyright (c) 2026+ bookofproofs

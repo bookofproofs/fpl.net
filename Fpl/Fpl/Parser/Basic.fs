@@ -1,6 +1,6 @@
 /// This module contains the basic FPL parser helpers and combinators
 /// producing an abstract syntax tree out of a given FPL code.
-module FplParsing.Basic
+module Fpl.Parser.Basic
 open System.Text.RegularExpressions
 open FParsec
 open Fpl.Parser.Types

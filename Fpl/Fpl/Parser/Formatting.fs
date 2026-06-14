@@ -1,7 +1,7 @@
 /// This module contains the formatting functions and helpers to re-format
 /// FParsec-based syntax error messages to make them more suitable for diagnostics
-/// error messages in language serverss and IDEs.
-module FplParsing.Formatting
+/// error messages in language servers and IDEs.
+module Fpl.Parser.Formatting
 open System
 open System.Text.RegularExpressions
 open Fpl.Parser.Types

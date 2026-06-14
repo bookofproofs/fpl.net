@@ -23,7 +23,7 @@ namespace FplLS
             var modChoices = new List<FplCompletionItem>();
             try
             {
-                var choicesTuple = FplParsing.Main.getParserChoicesAtPosition(s, index);
+                var choicesTuple = Fpl.Parser.Main.getParserChoicesAtPosition(s, index);
                 var choices = choicesTuple.Item1;
                 HashSet<string> uniqueSymbols = [];
                 foreach (var choice in choices)

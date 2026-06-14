@@ -16,11 +16,11 @@
         <None Include="Parser\CHANGES.md" />
         <None Include="Parser\DocuFplGrammarPocShiftFromPythonToFSharp.md" />
         <Compile Include="Parser\Debug.fs" />
-        <Compile Include="Parser\FplGrammarTypes.fs" />
-        <Compile Include="Parser\FplParsing.Basic.fs" />
-        <Compile Include="Parser\FplParsing.Combinators.fs" />
-        <Compile Include="Parser\FplParsing.Formatting.fs" />
-        <Compile Include="Parser\FplParsing.Main.fs" />
+        <Compile Include="Parser\Types.fs" />
+        <Compile Include="Parser\Basic.fs" />
+        <Compile Include="Parser\Grammar.fs" />
+        <Compile Include="Parser\Formatting.fs" />
+        <Compile Include="Parser\Main.fs" />
         <None Include="Interpreter\DocuSymbolTable.md" />
         <Compile Include="Interpreter\Helpers\FplInterpreterBasicTypes.fs" />
         <Compile Include="Interpreter\Helpers\FplInterpreterChecks.fs" />
