@@ -43,7 +43,7 @@ type StaticDebug =
     /// Calls to this static member are omitted when the DEBUG symbol is not defined.
     [<System.Diagnostics.Conditional("DEBUG")>]
     static member Debug(fv: FplGenericNode, debugMode: Debug) : unit =
-        if TestSharedConfig.TestConfig.DebugMode then
+        if TestSharedConfig.TestConfig.DebugModeInterpreter then
             let bars n = String.replicate n "| "
             let rec getPath (fv1:FplGenericNode) =
                 match fv1.Parent with

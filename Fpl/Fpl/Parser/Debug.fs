@@ -32,7 +32,7 @@ open TestSharedConfig
 /// run pExpr "(12)"
 let debugWrapper (p: Parser<_,_>) label : Parser<_,_> =
     fun stream ->
-        if TestConfig.DebugMode then
+        if TestConfig.DebugModeParser then
             let currDir =  Directory.GetCurrentDirectory()
             let logLine = sprintf "%A: Entering %s%s" stream.Position label Environment.NewLine
             File.AppendAllText(Path.Combine(currDir, "Debug.txt"), logLine)

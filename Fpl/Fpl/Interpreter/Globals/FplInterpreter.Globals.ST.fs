@@ -48,7 +48,7 @@ type SymbolTable() =
             | _ -> ()
 
             let indent, indentMinusOne =
-                if TestConfig.DebugMode then
+                if TestConfig.DebugModeInterpreter then
                     String(' ', level), String(' ', level - 1)
                 else
                     String.Empty, String.Empty
