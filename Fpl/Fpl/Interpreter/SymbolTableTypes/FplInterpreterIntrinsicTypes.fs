@@ -17,8 +17,8 @@ open Fpl.Parser.Types
 open Fpl.Primitives
 open Fpl.Errors.Emitter
 open Fpl.Interpreter.BasicTypes
-open FplInterpreter.Globals.Debug
 open Fpl.Interpreter.Helpers.Basic
+open Fpl.Interpreter.Helpers.Debug
 
 type FplIntrinsicTpl(name, positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericIsValue(positions, parent)

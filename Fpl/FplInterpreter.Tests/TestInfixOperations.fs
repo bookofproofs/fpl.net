@@ -1,7 +1,7 @@
 namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Primitives
-open FplInterpreter.Globals.Debug
+open Fpl.Interpreter.Helpers.Debug
 open FplInterpreter.Globals.Heap
 open CommonTestHelpers
 

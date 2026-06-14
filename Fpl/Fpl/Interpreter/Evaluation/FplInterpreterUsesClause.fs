@@ -10,7 +10,7 @@ open FParsec
 open Fpl.Parser.Types
 open Fpl.Errors.Emitter
 open FplInterpreterAstPreprocessing
-open FplInterpreter.Globals.Debug
+open Fpl.Interpreter.Helpers.Debug
 open FplInterpreter.Globals.Heap
 open Fpl.Errors.Diagnostics
 

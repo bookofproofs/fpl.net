@@ -17,7 +17,7 @@ open System
 open FParsec
 open Fpl.Primitives
 open Fpl.Interpreter.BasicTypes
-open FplInterpreter.Globals.Debug
+open Fpl.Interpreter.Helpers.Debug
 
 type FplTheory(theoryName, parent: FplGenericNode, filePath: string, runOrder) as this =
     inherit FplGenericNode((Position("",0,1,1), Position("",0,1,1)), Some parent)

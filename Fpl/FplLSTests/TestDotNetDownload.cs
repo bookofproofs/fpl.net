@@ -1,5 +1,5 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using static FplInterpreter.Globals.Debug;
+using static Fpl.Interpreter.Helpers.Debug;
 
 namespace FplLSTests
 {

@@ -4,7 +4,7 @@ open Fpl.Primitives
 open Fpl.Interpreter.BasicTypes
 open FplInterpreter.Globals.Heap
 open CommonTestHelpers
-open FplInterpreter.Globals.Debug
+open Fpl.Interpreter.Helpers.Debug
 
 [<TestClass>]
 type TestRepresentation() =

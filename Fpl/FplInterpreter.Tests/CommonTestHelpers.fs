@@ -5,7 +5,7 @@ open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open FplInterpreterProofs
-open FplInterpreter.Globals.Debug
+open Fpl.Interpreter.Helpers.Debug
 open FplInterpreter.Main
 
 

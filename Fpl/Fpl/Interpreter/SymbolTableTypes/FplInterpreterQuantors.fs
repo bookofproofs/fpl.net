@@ -18,8 +18,8 @@ open Fpl.Parser.Types
 open Fpl.Errors.Emitter
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Checks
-open FplInterpreter.Globals.Debug
 open Fpl.Interpreter.Helpers.Basic
+open Fpl.Interpreter.Helpers.Debug
 open FplInterpreterIntrinsicTypes
 open FplInterpreterVariables
 
