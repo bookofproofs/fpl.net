@@ -3,8 +3,8 @@
 module FplParsing.Basic
 open System.Text.RegularExpressions
 open FParsec
-open FplGrammarTypes
-open FplParsing.Debug
+open Fpl.Parser.Types
+open Fpl.Parser.Debug
 (* MIT License
 
 Copyright (c) 2026+ bookofproofs

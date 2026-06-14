@@ -4,7 +4,7 @@
 module FplParsing.Formatting
 open System
 open System.Text.RegularExpressions
-open FplGrammarTypes
+open Fpl.Parser.Types
 open Fpl.Errors.Diagnostics
 open FParsec
 

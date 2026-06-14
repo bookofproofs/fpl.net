@@ -4,8 +4,8 @@ module FplParsing.Combinators
 open FParsec
 open FplParsing.Basic
 open Fpl.Primitives
-open FplGrammarTypes
-open FplParsing.Debug
+open Fpl.Parser.Types
+open Fpl.Parser.Debug
 
 (* MIT License
 

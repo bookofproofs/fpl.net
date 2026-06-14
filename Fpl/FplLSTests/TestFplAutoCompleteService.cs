@@ -2,7 +2,7 @@
 
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using FplLS;
-using static FplGrammarTypes.Ast;
+using static Fpl.Parser.Types;
 using static Fpl.Primitives;
 
 namespace FplLSTests

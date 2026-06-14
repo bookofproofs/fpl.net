@@ -15,7 +15,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 module FplInterpreterPredicativeBlocks
 open FParsec
 open Fpl.Primitives
-open FplGrammarTypes
+open Fpl.Parser.Types
 open Fpl.Errors.Emitter
 open FplInterpreterBasicTypes
 open FplInterpreterChecks

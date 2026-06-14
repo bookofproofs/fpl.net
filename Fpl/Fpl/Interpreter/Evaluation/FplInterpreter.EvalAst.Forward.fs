@@ -17,7 +17,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 module FplInterpreter.EvalAst.Forward
 
-open FplGrammarTypes
+open Fpl.Parser.Types
 
 let evalRef : (Ast -> unit) ref = ref (fun _ ->
     failwith "evalRef not initialized")

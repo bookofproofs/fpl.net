@@ -15,7 +15,7 @@ module FplInterpreterVariables
 open System.Collections.Generic
 open FParsec
 open Fpl.Primitives
-open FplGrammarTypes
+open Fpl.Parser.Types
 open Fpl.Errors.Diagnostics
 open Fpl.Errors.Emitter
 open FplInterpreterBasicTypes

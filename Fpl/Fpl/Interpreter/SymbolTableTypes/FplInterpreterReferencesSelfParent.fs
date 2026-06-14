@@ -1,6 +1,6 @@
 module FplInterpreterReferencesSelfParent
 open Fpl.Primitives
-open FplGrammarTypes
+open Fpl.Parser.Types
 open Fpl.Errors.Diagnostics
 open Fpl.Errors.Emitter
 open FplInterpreterBasicTypes

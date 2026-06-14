@@ -17,7 +17,7 @@ open System
 open System.Collections.Generic
 open Fpl.Errors.Diagnostics
 open Fpl.Primitives
-open FplGrammarTypes
+open Fpl.Parser.Types
 open Fpl.Errors.Messages
 open Fpl.Errors.Emitter
 open FplInterpreterChecks

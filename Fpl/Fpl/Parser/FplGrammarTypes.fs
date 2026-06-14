@@ -1,4 +1,4 @@
-module FplGrammarTypes
+module Fpl.Parser.Types
 open FParsec
 
 

@@ -1,5 +1,5 @@
 /// This module contains functions used for debugging purposes (not for production)
-module FplParsing.Debug
+module Fpl.Parser.Debug
 
 (* MIT License
 

@@ -1,6 +1,6 @@
 namespace FplParser.Tests.ErrRecovery
 open System
-open FplGrammarTypes
+open Fpl.Parser.Types
 open FplParsing.Combinators
 open FplParsing.Main
 open Fpl.Errors.Diagnostics

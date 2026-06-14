@@ -16,7 +16,7 @@ open System
 open System.Text.RegularExpressions
 open FParsec
 open Fpl.Primitives
-open FplGrammarTypes
+open Fpl.Parser.Types
 open Fpl.Errors.Emitter
 open FplInterpreterBasicTypes
 open FplInterpreterChecks

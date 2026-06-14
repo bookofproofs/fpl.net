@@ -6,7 +6,7 @@ open System.Collections.Generic
 open System.Text
 open System.Text.RegularExpressions
 open Fpl.Primitives
-open FplGrammarTypes
+open Fpl.Parser.Types
 open Fpl.Errors.Diagnostics
 open FParsec
 open FplParsing.Combinators

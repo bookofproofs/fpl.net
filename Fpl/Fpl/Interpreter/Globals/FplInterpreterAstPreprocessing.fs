@@ -20,7 +20,7 @@ open System.Collections.Generic
 open System.IO
 open System.Text
 open FParsec
-open FplGrammarTypes
+open Fpl.Parser.Types
 open FplParsing.Main
 open Fpl.Errors.Diagnostics
 open Newtonsoft.Json
