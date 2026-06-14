@@ -20,7 +20,7 @@ open Fpl.Errors.Diagnostics
 open Fpl.Errors.Emitter
 open Fpl.Interpreter.BasicTypes
 open FplInterpreter.Globals.Debug
-open FplInterpreter.Globals.HelpersBasic
+open Fpl.Interpreter.Helpers.Basic
 open FplInterpreterIntrinsicTypes
 
 [<AbstractClass>]

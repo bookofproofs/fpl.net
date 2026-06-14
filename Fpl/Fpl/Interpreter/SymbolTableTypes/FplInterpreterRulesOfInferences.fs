@@ -18,7 +18,7 @@ open Fpl.Primitives
 open Fpl.Parser.Types
 open Fpl.Interpreter.BasicTypes
 open FplInterpreter.Globals.Debug
-open FplInterpreter.Globals.HelpersBasic
+open Fpl.Interpreter.Helpers.Basic
 open FplInterpreter.Globals.HelpersComplex
 open FplInterpreter.Globals.Heap
 open FplInterpreterVariables

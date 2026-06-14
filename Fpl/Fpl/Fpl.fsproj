@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
@@ -22,9 +22,9 @@
         <Compile Include="Parser\Formatting.fs" />
         <Compile Include="Parser\Main.fs" />
         <None Include="Interpreter\DocuSymbolTable.md" />
-        <Compile Include="Interpreter\Helpers\BasicTypes.fs" />
-        <Compile Include="Interpreter\Helpers\FplInterpreterChecks.fs" />
-        <Compile Include="Interpreter\Helpers\FplInterpreter.Globals.HelpersBasic.fs" />
+        <Compile Include="Interpreter\BasicTypes.fs" />
+        <Compile Include="Interpreter\Helpers\Checks.fs" />
+        <Compile Include="Interpreter\Helpers\Basic.fs" />
         <Compile Include="Interpreter\Helpers\FplInterpreter.Globals.Debug.fs" />
         <Compile Include="Interpreter\Globals\FplInterpreter.Globals.Root.fs" />
         <Compile Include="Interpreter\Globals\FplInterpreter.Globals.ST.fs" />

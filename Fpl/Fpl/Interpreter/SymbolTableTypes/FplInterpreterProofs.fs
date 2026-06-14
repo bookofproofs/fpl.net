@@ -21,8 +21,8 @@ open Fpl.Parser.Types
 open Fpl.Errors.Emitter
 open Fpl.Interpreter.BasicTypes
 open FplInterpreter.Globals.Debug
-open FplInterpreter.Globals.HelpersBasic
-open FplInterpreterChecks
+open Fpl.Interpreter.Helpers.Basic
+open Fpl.Interpreter.Helpers.Checks
 open FplInterpreter.Globals.HelpersComplex
 open FplInterpreter.Globals.Heap
 open FplInterpreterIntrinsicTypes

@@ -19,9 +19,9 @@ open Fpl.Primitives
 open Fpl.Errors.Emitter
 open Fpl.Interpreter.BasicTypes
 open FplInterpreter.Globals.Debug
-open FplInterpreter.Globals.HelpersBasic
+open Fpl.Interpreter.Helpers.Basic
 open FplInterpreter.Globals.Heap
-open FplInterpreterChecks
+open Fpl.Interpreter.Helpers.Checks
 open FplInterpreterVariables
 
 /// Searches for a references in node symbol table. 

@@ -17,8 +17,8 @@ open System.Collections.Generic
 open Fpl.Primitives
 open Fpl.Errors.Emitter
 open Fpl.Interpreter.BasicTypes
+open Fpl.Interpreter.Helpers.Checks
 open FplInterpreter.Globals.Heap
-open FplInterpreterChecks
 
 
 /// Checks if a reference to a Symbol, Prefix, PostFix, or Infix exists

@@ -17,9 +17,9 @@ module FplInterpreterCompoundPredicates
 open Fpl.Primitives
 open Fpl.Parser.Types
 open Fpl.Interpreter.BasicTypes
+open Fpl.Interpreter.Helpers.Checks
 open FplInterpreter.Globals.Debug
-open FplInterpreterChecks
-open FplInterpreter.Globals.HelpersBasic
+open Fpl.Interpreter.Helpers.Basic
 open FplInterpreterIntrinsicTypes
 
 

@@ -18,13 +18,13 @@ open System
 open Fpl.Primitives
 open Fpl.Parser.Types
 open FplInterpreter.Globals.Heap
-open FplInterpreter.Globals.HelpersBasic
+open Fpl.Interpreter.Helpers.Basic
 open FplInterpreter.Globals.HelpersComplex
 open Fpl.Interpreter.BasicTypes
 open FplInterpreterReferences
 open FplInterpreterDefinitions
 open FplInterpreterDefinitionProperties
-open FplInterpreterChecks
+open Fpl.Interpreter.Helpers.Checks
 open FplInterpreterFplTypeMatching
 open FplInterpreter.EvalAst.Forward
 open Fpl.Errors.Emitter

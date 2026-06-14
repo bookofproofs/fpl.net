@@ -17,7 +17,7 @@ open System.Text
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.BasicTypes
 open FplInterpreterAstPreprocessing
-open FplInterpreter.Globals.HelpersBasic
+open Fpl.Interpreter.Helpers.Basic
 open FplInterpreter.Globals.ST
 open FplInterpreter.Globals.STEval
 open FplInterpreter.Globals.State

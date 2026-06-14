@@ -19,7 +19,7 @@ open Fpl.Errors.Emitter
 open Fpl.Primitives
 open Fpl.Errors.Messages
 open Fpl.Interpreter.BasicTypes
-open FplInterpreterChecks
+open Fpl.Interpreter.Helpers.Checks
 open FplInterpreterReferences
 open FplInterpreterVariables
 open FplInterpreterDefinitions

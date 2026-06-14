@@ -17,9 +17,9 @@ open Fpl.Primitives
 open Fpl.Parser.Types
 open Fpl.Errors.Emitter
 open Fpl.Interpreter.BasicTypes
-open FplInterpreterChecks
+open Fpl.Interpreter.Helpers.Checks
+open Fpl.Interpreter.Helpers.Basic
 open FplInterpreter.Globals.Debug
-open FplInterpreter.Globals.HelpersBasic
 open FplInterpreter.Globals.Heap
 open FplInterpreter.Globals.HelpersComplex
 

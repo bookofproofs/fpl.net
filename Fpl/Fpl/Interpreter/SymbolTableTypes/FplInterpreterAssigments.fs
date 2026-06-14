@@ -19,8 +19,8 @@ open Fpl.Errors.Diagnostics
 open Fpl.Errors.Emitter
 open Fpl.Interpreter.BasicTypes
 open FplInterpreter.Globals.Debug
-open FplInterpreterChecks
-open FplInterpreter.Globals.HelpersBasic
+open Fpl.Interpreter.Helpers.Checks
+open Fpl.Interpreter.Helpers.Basic
 open FplInterpreterReferences
 open FplInterpreterIntrinsicTypes
 open FplInterpreterVariables

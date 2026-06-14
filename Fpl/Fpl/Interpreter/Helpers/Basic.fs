@@ -12,7 +12,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 
-module FplInterpreter.Globals.HelpersBasic
+module Fpl.Interpreter.Helpers.Basic
 open System.Collections.Generic
 open System
 open System.Text
@@ -20,7 +20,7 @@ open FParsec
 open Fpl.Primitives
 open Fpl.Errors.Emitter
 open Fpl.Interpreter.BasicTypes
-open FplInterpreterChecks
+open Fpl.Interpreter.Helpers.Checks
 
 /// A type with helper variables storing some context during the creation process of the symbol table
 type Helper() =

@@ -4,7 +4,7 @@ open Fpl.Parser.Types
 open Fpl.Errors.Diagnostics
 open Fpl.Errors.Emitter
 open Fpl.Interpreter.BasicTypes
-open FplInterpreter.Globals.HelpersBasic
+open Fpl.Interpreter.Helpers.Basic
 open FplInterpreterReferences
 open FplInterpreterDefinitions
 open FplInterpreterFplTypeMatching

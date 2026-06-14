@@ -19,10 +19,10 @@ open Fpl.Primitives
 open Fpl.Parser.Types
 open Fpl.Errors.Messages
 open Fpl.Errors.Emitter
-open FplInterpreterChecks
+open Fpl.Interpreter.Helpers.Checks
 open Fpl.Interpreter.BasicTypes
 open FplInterpreter.Globals.Debug
-open FplInterpreter.Globals.HelpersBasic
+open Fpl.Interpreter.Helpers.Basic
 open FplInterpreterIntrinsicTypes
 open FplInterpreterVariables
 open FplInterpreterFplTypeMatching

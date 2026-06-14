@@ -23,10 +23,10 @@ open Fpl.Errors.Emitter
 open FplInterpreterAstPreprocessing
 open Fpl.Interpreter.BasicTypes
 open FplInterpreter.Globals.Root
-open FplInterpreter.Globals.HelpersBasic
+open Fpl.Interpreter.Helpers.Basic
 open FplInterpreter.Globals.Heap
 open FplInterpreter.Globals.HelpersComplex
-open FplInterpreterChecks
+open Fpl.Interpreter.Helpers.Checks
 open FplInterpreterIntrinsicTypes
 open FplInterpreterVariables
 open FplInterpreterReferences
