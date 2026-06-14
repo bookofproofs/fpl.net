@@ -6,7 +6,7 @@ open FParsec
 open Fpl.Errors.Diagnostics
 open FplInterpreterAstPreprocessing
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Globals.ST
+open Fpl.Interpreter.SymbolTable.TopLevel
 open FplInterpreter.Globals.Heap
 open FplInterpreter.Main
 open FplInterpreterUsesClause

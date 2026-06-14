@@ -18,7 +18,7 @@ open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.BasicTypes
 open FplInterpreterAstPreprocessing
 open Fpl.Interpreter.Helpers.Basic
-open FplInterpreter.Globals.ST
+open Fpl.Interpreter.SymbolTable.TopLevel
 open FplInterpreter.Globals.STEval
 open FplInterpreter.Globals.State
 open FplInterpreter.Globals.Validity
