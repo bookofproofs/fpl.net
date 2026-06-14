@@ -15,7 +15,7 @@ module FplInterpreterIntrinsicTypes
 open System
 open FplGrammarTypes
 open Fpl.Primitives
-open FplInterpreterDiagnosticsEmitter
+open Fpl.Errors.Emitter
 open FplInterpreterBasicTypes
 open FplInterpreterChecks
 open FplInterpreter.Globals.Debug

@@ -1,5 +1,5 @@
 /// This module contains all side-effect functions necessary to emit diagnostics for the FPL language server.
-module FplInterpreterDiagnosticsEmitter
+module Fpl.Errors.Emitter
 
 open FParsec
 open Fpl.Primitives

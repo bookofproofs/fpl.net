@@ -16,7 +16,7 @@ module FplInterpreterChecks
 open System
 open Fpl.Errors.Diagnostics
 open Fpl.Primitives
-open FplInterpreterDiagnosticsEmitter
+open Fpl.Errors.Emitter
 open FplInterpreterBasicTypes
 
 /// Returns a tuple of a string representation of arg's type and a bool, which is true only if arg is a predicate.

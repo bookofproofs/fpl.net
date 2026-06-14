@@ -15,7 +15,7 @@ module FplInterpreterLocalization
 open System.Collections.Generic
 open Fpl.Primitives
 open FplGrammarTypes
-open FplInterpreterDiagnosticsEmitter
+open Fpl.Errors.Emitter
 open FplInterpreterBasicTypes
 open FplInterpreterChecks
 open FplInterpreter.Globals.Debug

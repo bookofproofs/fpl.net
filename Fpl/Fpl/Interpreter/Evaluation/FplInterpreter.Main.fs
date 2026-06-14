@@ -20,7 +20,7 @@ open Fpl.Errors.Diagnostics
 open FplInterpreter.Globals.Heap
 open FplInterpreterUsesClause
 open FplInterpreter.EvalAst.Main
-open FplInterpreterDiagnosticsEmitter
+open Fpl.Errors.Emitter
 
 let fplInterpreter input (uri:PathEquivalentUri) fplLibUrl = 
     if input = "~testGEN00~" then

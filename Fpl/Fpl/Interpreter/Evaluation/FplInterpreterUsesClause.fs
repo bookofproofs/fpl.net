@@ -8,7 +8,7 @@ open System.Collections.Generic
 open System
 open FParsec
 open FplGrammarTypes
-open FplInterpreterDiagnosticsEmitter
+open Fpl.Errors.Emitter
 open FplInterpreterAstPreprocessing
 open FplInterpreter.Globals.Debug
 open FplInterpreter.Globals.Heap

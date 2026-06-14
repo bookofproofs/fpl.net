@@ -18,7 +18,7 @@ open System
 open System.Text
 open FParsec
 open Fpl.Primitives
-open FplInterpreterDiagnosticsEmitter
+open Fpl.Errors.Emitter
 open FplInterpreterBasicTypes
 open FplInterpreterChecks
 

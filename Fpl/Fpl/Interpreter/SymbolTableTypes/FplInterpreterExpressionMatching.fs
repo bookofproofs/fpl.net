@@ -19,7 +19,7 @@ open Fpl.Errors.Diagnostics
 open Fpl.Primitives
 open FplGrammarTypes
 open Fpl.Errors.Messages
-open FplInterpreterDiagnosticsEmitter
+open Fpl.Errors.Emitter
 open FplInterpreterChecks
 open FplInterpreterBasicTypes
 open FplInterpreter.Globals.Debug

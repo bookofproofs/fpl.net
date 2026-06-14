@@ -16,7 +16,7 @@ module FplInterpreterCasesStmt
 open System.Collections.Generic
 open Fpl.Primitives
 open FplGrammarTypes
-open FplInterpreterDiagnosticsEmitter
+open Fpl.Errors.Emitter
 open FplInterpreterBasicTypes
 open FplInterpreter.Globals.Debug
 open FplInterpreter.Globals.HelpersBasic

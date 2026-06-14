@@ -27,7 +27,7 @@ open FplInterpreterDefinitionProperties
 open FplInterpreterChecks
 open FplInterpreterFplTypeMatching
 open FplInterpreter.EvalAst.Forward
-open FplInterpreterDiagnosticsEmitter
+open Fpl.Errors.Emitter
 
 /// Simplify trivially nested expressions by removing from the stack FplValue nodes that were created due to too long parsing tree and replacing them by their sub nodes 
 let rec private simplifyTriviallyNestedExpressions (rb1:FplGenericNode) = 

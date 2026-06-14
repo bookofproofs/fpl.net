@@ -15,7 +15,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 module FplInterpreterFplTypeMatching
 open System
 open System.Collections.Generic
-open FplInterpreterDiagnosticsEmitter
+open Fpl.Errors.Emitter
 open Fpl.Primitives
 open Fpl.Errors.Messages
 open FplInterpreterBasicTypes

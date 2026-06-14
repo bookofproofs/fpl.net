@@ -19,7 +19,7 @@ open System.Collections.Generic
 open Fpl.Errors.Diagnostics
 open Fpl.Primitives
 open FplGrammarTypes
-open FplInterpreterDiagnosticsEmitter
+open Fpl.Errors.Emitter
 open FplInterpreterAstPreprocessing
 open FplInterpreterBasicTypes
 open FplInterpreter.Globals.Root
