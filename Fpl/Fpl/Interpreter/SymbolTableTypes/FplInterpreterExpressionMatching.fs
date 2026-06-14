@@ -15,10 +15,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 module FplInterpreterExpressionMatching
 open System
 open System.Collections.Generic
-open ErrDiagnostics
+open Fpl.Errors.Diagnostics
 open Fpl.Primitives
 open FplGrammarTypes
-open ErrMessages
+open Fpl.Errors.Messages
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterChecks
 open FplInterpreterBasicTypes

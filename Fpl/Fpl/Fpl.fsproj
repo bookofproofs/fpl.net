@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
@@ -9,9 +9,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="Primitives\FplPrivimitives.fs" />
-        <Compile Include="Errors\ErrMessages.fs" />
-        <Compile Include="Errors\ErrDiagnostics.fs" />
+        <Compile Include="Primitives\Privimitives.fs" />
+        <Compile Include="Errors\Messages.fs" />
+        <Compile Include="Errors\Diagnostics.fs" />
         <Compile Include="Errors\FplInterpreterDiagnosticsEmitter.fs" />
         <None Include="Parser\CHANGES.md" />
         <None Include="Parser\DocuFplGrammarPocShiftFromPythonToFSharp.md" />

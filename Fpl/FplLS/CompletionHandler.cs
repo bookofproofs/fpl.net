@@ -3,7 +3,7 @@ using OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities;
 using OmniSharp.Extensions.LanguageServer.Protocol.Document;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
-using static ErrDiagnostics;
+using static Fpl.Errors.Diagnostics;
 using static FplInterpreter.Globals.ST;
 
 /*

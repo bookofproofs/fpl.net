@@ -12,7 +12,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 
-module ErrDiagnostics
+module Fpl.Errors.Diagnostics
 open System
 open System.IO
 open System.Text.RegularExpressions
@@ -20,7 +20,7 @@ open System.Collections.Generic
 open System.Security.Cryptography
 open System.Text
 open FParsec
-open ErrMessages
+open Fpl.Errors.Messages
 
 type PathEquivalentUri(uriString: string) =
     inherit Uri(PathEquivalentUri.UnescapeDataString(uriString.Replace("\\","/")))

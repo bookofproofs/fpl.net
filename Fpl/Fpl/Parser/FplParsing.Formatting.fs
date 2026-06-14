@@ -5,7 +5,7 @@ module FplParsing.Formatting
 open System
 open System.Text.RegularExpressions
 open FplGrammarTypes
-open ErrDiagnostics
+open Fpl.Errors.Diagnostics
 open FParsec
 
 (* MIT License

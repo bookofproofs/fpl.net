@@ -3,7 +3,7 @@ namespace FplInterpreter.Tests
 open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open FParsec
-open ErrDiagnostics
+open Fpl.Errors.Diagnostics
 open FplInterpreterAstPreprocessing
 open FplInterpreter.Globals.Debug
 open FplInterpreter.Globals.ST

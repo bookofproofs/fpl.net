@@ -3,7 +3,7 @@ open System
 open FplGrammarTypes
 open FplParsing.Combinators
 open FplParsing.Main
-open ErrDiagnostics
+open Fpl.Errors.Diagnostics
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
 

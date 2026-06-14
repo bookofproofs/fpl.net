@@ -3,7 +3,7 @@ module CommonTestHelpers
 open System
 open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
-open ErrDiagnostics
+open Fpl.Errors.Diagnostics
 open FplInterpreterProofs
 open FplInterpreter.Globals.Debug
 open FplInterpreter.Main
@@ -88,7 +88,7 @@ let checkForUnexpectedErrors (filename:string) fplCode =
     if contextErrors.Length > 0 then
         failwithf $"Context errors detected. {contextErrors.Head}"
 
-let runTestHelperWithoutSyntaxChecking filename fplCode (code: ErrDiagnostics.DiagnosticCode) (expected: int) =
+let runTestHelperWithoutSyntaxChecking filename fplCode (code: Fpl.Errors.Diagnostics.DiagnosticCode) (expected: int) =
     printf "Trying %s" code.Message
     prepareFplCode (filename, fplCode, false) |> ignore
 
@@ -96,7 +96,7 @@ let runTestHelperWithoutSyntaxChecking filename fplCode (code: ErrDiagnostics.Di
     Assert.AreEqual<int>(expected, result.Length)
     prepareFplCode (filename, "", true) |> ignore
 
-let runTestHelperWithoutSyntaxCheckingGetResult filename fplCode (code: ErrDiagnostics.DiagnosticCode) (expected: int) =
+let runTestHelperWithoutSyntaxCheckingGetResult filename fplCode (code: Fpl.Errors.Diagnostics.DiagnosticCode) (expected: int) =
     printf "Trying %s" code.Message
     prepareFplCode (filename, fplCode, false) |> ignore
 
@@ -105,7 +105,7 @@ let runTestHelperWithoutSyntaxCheckingGetResult filename fplCode (code: ErrDiagn
     prepareFplCode (filename, "", true) |> ignore
     result 
 
-let runTestHelper filename fplCode (code: ErrDiagnostics.DiagnosticCode) (expected: int) =
+let runTestHelper filename fplCode (code: Fpl.Errors.Diagnostics.DiagnosticCode) (expected: int) =
     printf "Trying %s" code.Message
     prepareFplCode (filename, fplCode, false) |> ignore
 
@@ -115,7 +115,7 @@ let runTestHelper filename fplCode (code: ErrDiagnostics.DiagnosticCode) (expect
     Assert.AreEqual<int>(expected, result.Length)
     prepareFplCode (filename, "", true) |> ignore
 
-let runTestHelperWithText filename fplCode (code: ErrDiagnostics.DiagnosticCode) expected =
+let runTestHelperWithText filename fplCode (code: Fpl.Errors.Diagnostics.DiagnosticCode) expected =
     printf "Trying %s" code.Message
     prepareFplCode (filename, fplCode, false) |> ignore
 

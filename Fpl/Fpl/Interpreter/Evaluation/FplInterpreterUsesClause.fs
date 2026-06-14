@@ -12,7 +12,7 @@ open FplInterpreterDiagnosticsEmitter
 open FplInterpreterAstPreprocessing
 open FplInterpreter.Globals.Debug
 open FplInterpreter.Globals.Heap
-open ErrDiagnostics
+open Fpl.Errors.Diagnostics
 
 (* MIT License
 

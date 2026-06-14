@@ -2,7 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using OmniSharp.Extensions.LanguageServer.Server;
-using static ErrDiagnostics;
+using static Fpl.Errors.Diagnostics;
 using static FplInterpreter.Globals.Heap;
 
 

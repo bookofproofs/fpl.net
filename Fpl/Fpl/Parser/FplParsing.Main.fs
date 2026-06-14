@@ -7,7 +7,7 @@ open System.Text
 open System.Text.RegularExpressions
 open Fpl.Primitives
 open FplGrammarTypes
-open ErrDiagnostics
+open Fpl.Errors.Diagnostics
 open FParsec
 open FplParsing.Combinators
 open FplParsing.Formatting

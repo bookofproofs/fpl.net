@@ -2,7 +2,7 @@ namespace FplInterpreter.Tests
 
 open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
-open ErrDiagnostics
+open Fpl.Errors.Diagnostics
 open FplInterpreter.Globals.Debug
 open FplInterpreter.Globals.Heap
 open Newtonsoft.Json

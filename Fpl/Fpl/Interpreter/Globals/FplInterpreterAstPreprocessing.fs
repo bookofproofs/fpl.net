@@ -22,7 +22,7 @@ open System.Text
 open FParsec
 open FplGrammarTypes
 open FplParsing.Main
-open ErrDiagnostics
+open Fpl.Errors.Diagnostics
 open Newtonsoft.Json
 
 

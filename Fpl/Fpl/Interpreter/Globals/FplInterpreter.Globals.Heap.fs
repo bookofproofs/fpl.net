@@ -14,7 +14,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 module FplInterpreter.Globals.Heap
 open System
 open System.Text
-open ErrDiagnostics
+open Fpl.Errors.Diagnostics
 open FplInterpreterBasicTypes
 open FplInterpreterAstPreprocessing
 open FplInterpreter.Globals.HelpersBasic

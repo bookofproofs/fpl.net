@@ -1,7 +1,7 @@
 module FplInterpreterReferencesSelfParent
 open Fpl.Primitives
 open FplGrammarTypes
-open ErrDiagnostics
+open Fpl.Errors.Diagnostics
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterBasicTypes
 open FplInterpreter.Globals.HelpersBasic

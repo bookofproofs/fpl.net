@@ -16,7 +16,7 @@ open System.Collections.Generic
 open FParsec
 open Fpl.Primitives
 open FplGrammarTypes
-open ErrDiagnostics
+open Fpl.Errors.Diagnostics
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterBasicTypes
 open FplInterpreter.Globals.Debug

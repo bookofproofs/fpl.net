@@ -3,7 +3,7 @@ module FplInterpreterDiagnosticsEmitter
 
 open FParsec
 open Fpl.Primitives
-open ErrDiagnostics
+open Fpl.Errors.Diagnostics
 (* MIT License
 
 Copyright (c) 2024+ bookofproofs

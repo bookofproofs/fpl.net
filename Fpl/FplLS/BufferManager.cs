@@ -1,6 +1,6 @@
 using System.Text;
 using System.Collections.Concurrent;
-using static ErrDiagnostics;
+using static Fpl.Errors.Diagnostics;
 
 namespace FplLS
 {

@@ -11,7 +11,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 
-module ErrMessages
+module Fpl.Errors.Messages
 open System
 open Fpl.Primitives
 
