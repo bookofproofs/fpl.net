@@ -259,7 +259,7 @@ type FplGenericPredicate(positions: Positions, parent: FplGenericNode) as this =
     override this.RunOrder = None
 
     override this.Run() = 
-        debug this Debug.Start 
+        StaticDebug.Debug(this,Debug.Start) 
         // the default value of predicates is an undetermined predicate
         this.SetDefaultValue()
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)

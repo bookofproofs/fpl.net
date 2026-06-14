@@ -39,11 +39,11 @@ type FplPredicateList(positions: Positions, parent: FplGenericNode, runOrder) =
     override this.Type signatureType = signatureSep ", " this.ArgList signatureType
 
     override this.Run() = 
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         // this line only makes sure that all Run is called recursively
         // FplPredicateList has no value its own
         this.ArgList |> Seq.map (fun fv -> fv.Run()) |> ignore
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 
     override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
 
@@ -115,9 +115,9 @@ type FplRuleOfInference(positions: Positions, parent: FplGenericNode, runOrder) 
     override this.IsBlock () = true    
 
     override this.Run() = 
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         heap.ValidStmtStore.RegisterExpression this |> ignore
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 
     override this.EmbedInSymbolTable _ = 
         this.CheckConsistency()

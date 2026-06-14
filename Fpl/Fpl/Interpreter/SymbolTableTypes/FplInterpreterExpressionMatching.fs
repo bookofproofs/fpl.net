@@ -298,7 +298,7 @@ type FplGenericJustificationItem(positions: Positions, parent: FplGenericNode) =
         addExpressionToParentArgList this
 
     override this.Run() = 
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         match this.RefersTo with 
         | Some _ ->
             // a justification item is to be evaluated to "true" if
@@ -308,7 +308,7 @@ type FplGenericJustificationItem(positions: Positions, parent: FplGenericNode) =
             this.SetValue v 
         | _ ->
             issuePR022AndSetDefault this None None
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 
 [<AbstractClass>]
 type FplGenericArgInference(positions: Positions, parent: FplGenericNode) =

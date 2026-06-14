@@ -41,7 +41,7 @@ type FplConjunction(positions: Positions, parent: FplGenericNode) as this =
     override this.Type signatureType = getNotationTwoArgs this "∧" signatureType LiteralPred
 
     override this.Run() =
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         let arg1 = this.ArgList[0]
         let arg2 = this.ArgList[1]
         arg1.Run()
@@ -59,7 +59,7 @@ type FplConjunction(positions: Positions, parent: FplGenericNode) as this =
             this.SetValue newValue
         | _ -> 
             this.SetDefaultValue()
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 
     override this.CheckConsistency() = 
         base.CheckConsistency() 
@@ -95,7 +95,7 @@ type FplDisjunction(positions: Positions, parent: FplGenericNode) as this =
     override this.Type signatureType = getNotationTwoArgs this "∨" signatureType LiteralPred
 
     override this.Run() =
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         let arg1 = this.ArgList[0]
         let arg2 = this.ArgList[1]
         arg1.Run()
@@ -113,7 +113,7 @@ type FplDisjunction(positions: Positions, parent: FplGenericNode) as this =
             this.SetValue newValue
         | _ -> 
             this.SetDefaultValue()
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
         
     override this.CheckConsistency() = 
         base.CheckConsistency() 
@@ -147,7 +147,7 @@ type FplExclusiveOr(positions: Positions, parent: FplGenericNode) as this =
     override this.Type signatureType = getNotationTwoArgs this "⩡" signatureType LiteralPred
 
     override this.Run() = 
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         let arg1 = this.ArgList[0]
         let arg2 = this.ArgList[1]
         arg1.Run()
@@ -167,7 +167,7 @@ type FplExclusiveOr(positions: Positions, parent: FplGenericNode) as this =
         | _ -> 
             this.SetDefaultValue()
 
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 
     override this.CheckConsistency() = 
         base.CheckConsistency() 
@@ -216,7 +216,7 @@ type FplNegation(positions: Positions, parent: FplGenericNode) as this =
             $"¬{argRepr}"
 
     override this.Run() =
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         let arg = this.ArgList[0]
         arg.Run()
         let argRepr = arg.Represent()
@@ -231,7 +231,7 @@ type FplNegation(positions: Positions, parent: FplGenericNode) as this =
         | _ -> 
             this.SetDefaultValue()
 
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 
     override this.CheckConsistency() = 
         base.CheckConsistency()
@@ -262,7 +262,7 @@ type FplImplication(positions: Positions, parent: FplGenericNode) as this =
     override this.Type signatureType = getNotationTwoArgs this "⇒" signatureType LiteralPred
 
     override this.Run() = 
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         let arg1 = this.ArgList[0]
         let arg2 = this.ArgList[1]
         let arg1Repr = arg1.Represent()
@@ -280,7 +280,7 @@ type FplImplication(positions: Positions, parent: FplGenericNode) as this =
         | _ -> 
             this.SetDefaultValue()
         
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 
     override this.CheckConsistency() = 
         base.CheckConsistency() 
@@ -314,7 +314,7 @@ type FplEquivalence(positions: Positions, parent: FplGenericNode) as this =
     override this.Type signatureType = getNotationTwoArgs this "⇔" signatureType LiteralPred
 
     override this.Run() = 
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         let arg1 = this.ArgList[0]
         let arg2 = this.ArgList[1]
         arg1.Run()
@@ -334,7 +334,7 @@ type FplEquivalence(positions: Positions, parent: FplGenericNode) as this =
         | _ -> 
             this.SetDefaultValue()
 
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 
     override this.CheckConsistency() = 
         base.CheckConsistency() 

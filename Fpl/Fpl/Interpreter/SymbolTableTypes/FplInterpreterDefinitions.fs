@@ -232,7 +232,7 @@ type FplPredicate(positions: Positions, parent: FplGenericNode, runOrder) as thi
         sprintf "%s(%s)" head paramT
 
     override this.Run() = 
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         if not _isReady then
             _callCounter <- _callCounter + 1
             if _callCounter > maxRecursion then
@@ -247,7 +247,7 @@ type FplPredicate(positions: Positions, parent: FplGenericNode, runOrder) as thi
             _callCounter <- _callCounter - 1
             _isReady <- this.Arity = 0        
             this.GetProperties() |> List.iter (fun fv -> fv.Run())
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 
     override this.RunOrder = Some _runOrder
 
@@ -305,7 +305,7 @@ type FplGenericConstructor(name, positions: Positions, parent: FplGenericNode) a
         and set (value) = _toBeConstructedClass <- value
 
     override this.Run() = 
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
 
         let rec createSubInstance (classDef:FplGenericNode) (instance:FplGenericNode) (baseInstance:FplGenericNode)=
             classDef.ArgList
@@ -339,7 +339,7 @@ type FplGenericConstructor(name, positions: Positions, parent: FplGenericNode) a
             instance.TypeId <- LiteralUndef
         // the value of FplGenericConstructor is the created instance
         this.SetValue instance 
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 
 
     member this.Instance =
@@ -639,7 +639,7 @@ type FplFunctionalTerm(positions: Positions, parent: FplGenericNode, runOrder) a
             result
 
     override this.Run() = 
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         if not _isReady then
             _callCounter <- _callCounter + 1
             if _callCounter > maxRecursion then
@@ -656,5 +656,5 @@ type FplFunctionalTerm(positions: Positions, parent: FplGenericNode, runOrder) a
                 |> List.iter (fun fv -> fv.Run())
             _callCounter <- _callCounter - 1
             _isReady <- this.Arity = 0 
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 

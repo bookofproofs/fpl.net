@@ -41,7 +41,7 @@ type FplIsOperator(positions: Positions, parent: FplGenericNode) as this =
     override this.Type signatureType = getNotationTwoArgs this "is" signatureType LiteralPred
         
     override this.Run() = 
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         let operand = this.ArgList[0]
         let typeOfOperand = this.ArgList[1]
         // FPL truth-table
@@ -58,6 +58,6 @@ type FplIsOperator(positions: Positions, parent: FplGenericNode) as this =
             let newValue =  new FplIntrinsicFalse((this.StartPos, this.EndPos), this)
             this.SetValue newValue
         
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 
     override this.EmbedInSymbolTable _ = addExpressionToParentArgList this

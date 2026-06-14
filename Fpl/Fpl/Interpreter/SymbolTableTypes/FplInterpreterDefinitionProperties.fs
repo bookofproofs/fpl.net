@@ -63,7 +63,7 @@ type FplMandatoryPredicate(positions: Positions, parent: FplGenericNode) =
         tryAddSubBlockToFplBlock this
     
     override this.Run() = 
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         if not _isReady then
             _callCounter <- _callCounter + 1
             if _callCounter > maxRecursion then
@@ -77,7 +77,7 @@ type FplMandatoryPredicate(positions: Positions, parent: FplGenericNode) =
 
             _callCounter <- _callCounter - 1
             _isReady <- this.Arity = 0
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 
 type FplMandatoryFunctionalTerm(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericHasValue(positions, parent)
@@ -160,7 +160,7 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplGenericNode) as
     override this.RunOrder = None
 
     override this.Run() = 
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         if not _isReady then
             _callCounter <- _callCounter + 1
             if _callCounter > maxRecursion then
@@ -174,7 +174,7 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplGenericNode) as
                     runArgsAndSetWithLastValue this
             _callCounter <- _callCounter - 1
             _isReady <- this.Arity = 0 
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 
 
 /// Looks for all declared properties or constructors (if any) that equal 

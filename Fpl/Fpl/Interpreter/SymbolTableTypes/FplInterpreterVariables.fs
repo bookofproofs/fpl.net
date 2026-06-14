@@ -308,11 +308,11 @@ type FplVariable(fplId, positions: Positions, parent: FplGenericNode) =
                 unsetRepresentation
 
     override this.Run() =
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         match this.Value with 
         | None -> this.SetDefaultValue()
         | _ -> ()
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 
 type IHasDimensions =
     abstract member Dimensionality : int

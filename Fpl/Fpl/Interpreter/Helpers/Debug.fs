@@ -39,27 +39,30 @@ type Debug =
     | Start
     | Stop
 
-let debug (fv:FplGenericNode) (debugMode:Debug) =
-    let bars n = String.replicate n "| "
-    let rec getPath (fv1:FplGenericNode) =
-        match fv1.Parent with 
-        | Some parent -> $"{getPath parent} # {fv1.ShortName} {fv1.Type SignatureType.Name}"
-        | None -> $"{fv1.ShortName}"
-    let vars =
-        fv.GetVariables()
-        |> List.map (fun var -> $"{var.FplId}={var.Represent()}")
-        |> String.concat ", "
-    if TestSharedConfig.TestConfig.DebugMode then 
-        let indent = bars (debugRec.RecursionLevel)
-        let logLine =
-            match debugMode with
-            | Debug.Start ->
-                debugRec.RecursionInc()
-                $"Start:{indent}{getPath fv}:[{fv.Represent()}][{vars}]{Environment.NewLine}"
-            | Debug.Stop ->
-                debugRec.RecursionDec()
-                $"Stop :{indent.Substring(2)}{getPath fv}:[{fv.Represent()}][{vars}]{Environment.NewLine}"
-        let currDir = Directory.GetCurrentDirectory()
-        File.AppendAllText(Path.Combine(currDir, "Debug.txt"), logLine)
+type StaticDebug =
+    /// Calls to this static member are omitted when the DEBUG symbol is not defined.
+    [<System.Diagnostics.Conditional("DEBUG")>]
+    static member Debug(fv: FplGenericNode, debugMode: Debug) : unit =
+        if TestSharedConfig.TestConfig.DebugMode then
+            let bars n = String.replicate n "| "
+            let rec getPath (fv1:FplGenericNode) =
+                match fv1.Parent with
+                | Some parent -> $"{getPath parent} # {fv1.ShortName} {fv1.Type SignatureType.Name}"
+                | None -> $"{fv1.ShortName}"
+            let vars =
+                fv.GetVariables()
+                |> List.map (fun var -> $"{var.FplId}={var.Represent()}")
+                |> String.concat ", "
+            let indent = bars (debugRec.RecursionLevel)
+            let logLine =
+                match debugMode with
+                | Debug.Start ->
+                    debugRec.RecursionInc()
+                    $"Start:{indent}{getPath fv}:[{fv.Represent()}][{vars}]{Environment.NewLine}"
+                | Debug.Stop ->
+                    debugRec.RecursionDec()
+                    $"Stop :{indent.Substring(2)}{getPath fv}:[{fv.Represent()}][{vars}]{Environment.NewLine}"
+            let currDir = Directory.GetCurrentDirectory()
+            File.AppendAllText(Path.Combine(currDir, "Debug.txt"), logLine)
 
 let offlineWatcher = TestConfig.OfflineWatcher()

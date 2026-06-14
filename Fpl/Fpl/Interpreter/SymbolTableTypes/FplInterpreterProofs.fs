@@ -281,7 +281,7 @@ and FplJustificationItemByInf(positions: Positions, parent: FplGenericNode) =
                 [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
 
     override this.Run() =
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         match this.ErrorOccurred with
         | Some _ ->
             issuePR022SpecialReasonAndSetDefault this "No proceeding results were found because of previous errors."
@@ -297,7 +297,7 @@ and FplJustificationItemByInf(positions: Positions, parent: FplGenericNode) =
                     // since a candidate was found, the justification inference succeeded and we set its value to true to flag this
                     let v = new FplIntrinsicTrue((this.StartPos, this.EndPos), this)
                     this.SetValue v
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 
 and FplJustificationItemByRefArgument(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericJustificationItem(positions, parent)
@@ -399,9 +399,9 @@ and FplJustification(positions: Positions, parent: FplGenericNode) =
 
     override this.Run() = 
         // TODO implement Run
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         this.SetDefaultValue()
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 
 
     member this.GetOrderedJustificationItems =
@@ -471,7 +471,7 @@ and FplArgument(positions: Positions, parent: FplGenericNode, runOrder) =
             proof.Scope.Add(this.FplId, this)
 
     override this.Run() =
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         // the argument has two elements, the justification and an argument inference
         let justificationOpt = this.Justification
         let argInferenceOpt = this.ArgumentInference
@@ -545,7 +545,7 @@ and FplArgument(positions: Positions, parent: FplGenericNode, runOrder) =
                 c) whether or not the justification is a rule of inference
                 d) whether or not the justification is a by definition
         *)
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 
     override this.RunOrder = Some _runOrder
 
@@ -582,13 +582,13 @@ and FplArgInferenceAssume(positions: Positions, parent: FplGenericNode) =
         ret
 
     override this.Run() = 
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         if heap.ValidStmtStore.RegisterExpression this then
             let v = new FplIntrinsicTrue((this.StartPos, this.EndPos), this)
             this.SetValue v
         else
             this.SetDefaultValue()
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 
     member this.ParentArgument = this.Parent.Value :?> FplArgument
 
@@ -669,13 +669,13 @@ and FplArgInferenceRevoke(positions: Positions, parent: FplGenericNode) =
 
 
     override this.Run() = 
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         if this.IsRevokable() && heap.ValidStmtStore.RegisterExpression this then
             let v = new FplIntrinsicTrue((this.StartPos, this.EndPos), this)
             this.SetValue v
         else
             this.SetDefaultValue()
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 
     member this.ParentArgument = this.Parent.Value :?> FplArgument
 
@@ -691,10 +691,10 @@ and FplArgInferenceTrivial(positions: Positions, parent: FplGenericNode) =
         ret
 
     override this.Run() = 
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         let v = new FplIntrinsicTrue((this.StartPos, this.EndPos), this)
         this.SetValue v
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 
     override this.ProceedingExprCandidates 
         // identify the expression contained in the theorem-like statement belonging to the proof,
@@ -726,7 +726,7 @@ and FplArgInferenceDerived(positions: Positions, parent: FplGenericNode) =
         ret
 
     override this.Run() = 
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         let arg = this.ArgList[0]
         let refType, isRefPred = isArgPred arg
         if isRefPred then
@@ -742,7 +742,7 @@ and FplArgInferenceDerived(positions: Positions, parent: FplGenericNode) =
             let refName = arg.Type SignatureType.Name
             this.ErrorOccurred <- emitLG001Diagnostics refType refName this.Name arg.StartPos arg.StartPos
 
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 
     member this.ParentArgument = this.Parent.Value :?> FplArgument
 
@@ -789,7 +789,7 @@ and FplProof(positions: Positions, parent: FplGenericNode, runOrder) =
     member this.HasArgument argumentId = this.Scope.ContainsKey(argumentId)
 
     override this.Run() = 
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         // tell the parent theorem-like statement that it has a proof
         let parent = this.Parent.Value 
         match box parent with 
@@ -816,7 +816,7 @@ and FplProof(positions: Positions, parent: FplGenericNode, runOrder) =
         else
             let v = new FplIntrinsicTrue((this.SignStartPos, this.SignEndPos), this)
             this.SetValue v
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 
     /// Tries to find a theorem-like statement for a proof
     /// and returns different cases of ScopeSearchResult, depending on different semantical error situations.

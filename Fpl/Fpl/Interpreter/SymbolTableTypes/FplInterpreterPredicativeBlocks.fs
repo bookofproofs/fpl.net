@@ -110,7 +110,7 @@ type FplAxiom(positions: Positions, parent: FplGenericNode, runOrder) =
         tryAddToParentUsingFplId this
 
     override this.Run() = 
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         if not _isReady then
             runArgumentsOfGenericPredicateWithExpression this 
             _isReady <- true
@@ -132,7 +132,7 @@ type FplAxiom(positions: Positions, parent: FplGenericNode, runOrder) =
                 let v = FplIntrinsicTrue((this.StartPos, this.EndPos), this)
                 this.SetValue v
 
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 
     override this.RunOrder = Some _runOrder
 
@@ -178,7 +178,7 @@ type FplGenericTheoremLikeStmt(positions: Positions, parent: FplGenericNode, run
         tryAddToParentUsingFplId this 
 
     override this.Run() = 
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         if not _isReady then
             runArgumentsOfGenericPredicateWithExpression this 
             _isReady <- true
@@ -196,7 +196,7 @@ type FplGenericTheoremLikeStmt(positions: Positions, parent: FplGenericNode, run
 
         if not _hasProof then 
            this.ErrorOccurred <- emitPR007Diagnostics (this.Type(SignatureType.Name)) this.Name this.SignStartPos this.SignEndPos
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 
     override this.RunOrder = Some _runOrder
 
@@ -280,7 +280,7 @@ type FplConjecture(positions: Positions, parent: FplGenericNode, runOrder) =
         tryAddToParentUsingFplId this 
 
     override this.Run() = 
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         if not _isReady then
             runArgumentsOfGenericPredicateWithExpression this 
             _isReady <- true
@@ -293,7 +293,7 @@ type FplConjecture(positions: Positions, parent: FplGenericNode, runOrder) =
             |> Seq.iter (fun fv -> 
                 fv.Run()
             )
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 
 
     override this.RunOrder = Some _runOrder

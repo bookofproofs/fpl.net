@@ -91,10 +91,10 @@ type FplGenericQuantor(positions: Positions, parent: FplGenericNode) =
         addExpressionToParentArgList this
     
     override this.Run() = 
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         this.ArgList[0].Run()
         this.SetDefaultValue()
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 
 type FplQuantorAll(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericQuantor(positions, parent)

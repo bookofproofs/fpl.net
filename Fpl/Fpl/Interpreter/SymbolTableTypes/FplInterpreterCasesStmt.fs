@@ -52,10 +52,10 @@ type FplCaseSingle(positions: Positions, parent: FplGenericNode) as this =
         addExpressionToParentArgList this
 
     override this.Run() = 
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         this.StmtsAfterCondition()
         |> Seq.iter (fun stmt -> stmt.Run())
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 
 type FplCaseElse(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericStmt(positions, parent)
@@ -73,10 +73,10 @@ type FplCaseElse(positions: Positions, parent: FplGenericNode) as this =
         getFplHead this signatureType
 
     override this.Run() = 
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         this.ArgList 
         |> Seq.iter (fun stmt -> stmt.Run())
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 
 type FplCases(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericStmt(positions, parent)
@@ -127,7 +127,7 @@ type FplCases(positions: Positions, parent: FplGenericNode) as this =
         addExpressionToParentArgList this
 
     override this.Run() = 
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         let resultLst = this.GetConditionResultList()
         let elseStmt = this.GetElseStmt()
         let firstCaseWithTrueConditionOpt = 
@@ -142,4 +142,4 @@ type FplCases(positions: Positions, parent: FplGenericNode) as this =
             firstCaseWithTrueCondition.Run()
         | None -> 
             elseStmt.Run()
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)

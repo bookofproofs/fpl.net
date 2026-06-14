@@ -60,12 +60,12 @@ type FplLocalization(positions: Positions, parent: FplGenericNode, runOrder) =
     override this.IsBlock() = true
 
     override this.Run() = 
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         _currentLanguage <- heap.Helper.CurrentLanguage // remember current language for Represent()
         if not (this.Scope.ContainsKey(_currentLanguage)) then
             let expression = this.ArgList[0]
             this.ErrorOccurred <- emitST004diagnostics _currentLanguage expression.StartPos expression.EndPos
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 
     override this.RunOrder = Some _runOrder
 

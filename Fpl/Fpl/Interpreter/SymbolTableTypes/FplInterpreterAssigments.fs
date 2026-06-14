@@ -155,7 +155,7 @@ type FplAssignment(positions: Positions, parent: FplGenericNode) as this =
         | _ -> ()
 
     override this.Run() =
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
 
         match this.ErrorOccurred, this.ArgList[1], this.AssignedValue with 
         | Some _, _, _ ->
@@ -171,5 +171,5 @@ type FplAssignment(positions: Positions, parent: FplGenericNode) as this =
             this.SetAssignee ref
         | _ -> ()
 
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 

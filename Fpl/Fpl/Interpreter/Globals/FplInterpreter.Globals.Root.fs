@@ -61,11 +61,11 @@ type FplTheory(theoryName, parent: FplGenericNode, filePath: string, runOrder) a
         |> Seq.toList
 
     override this.Run() = 
-        debug this Debug.Start 
+        StaticDebug.Debug(this,Debug.Start) 
         let blocks = this.OrderedBlocksRunningByThemselves
         blocks
         |> Seq.iter (fun block -> block.Run())        
-        debug this Debug.Stop 
+        StaticDebug.Debug(this,Debug.Stop) 
 
 type FplRoot() =
     inherit FplGenericNode((Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
@@ -91,10 +91,10 @@ type FplRoot() =
     override this.RunOrder = None
 
     override this.Run() = 
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         this.OrderedTheories
         |> Seq.iter (fun theory -> theory.Run())        
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 
     member this.Clear() =
         this.ArgList.Clear()

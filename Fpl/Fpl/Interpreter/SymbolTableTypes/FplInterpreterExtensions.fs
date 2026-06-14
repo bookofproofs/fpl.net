@@ -160,7 +160,7 @@ type FplReturn(positions: Positions, parent: FplGenericNode) as this =
     override this.RunOrder = None
 
     override this.Run() =
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         let returnedReference = this.ArgList[0]
         let blockOpt = this.NextBlockNode
         match blockOpt with 
@@ -196,7 +196,7 @@ type FplReturn(positions: Positions, parent: FplGenericNode) as this =
             // then a functional term
             // in this case return default value
             this.SetDefaultValue()
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 
 
 type FplExtension(positions: Positions, parent: FplGenericNode, runOrder) =
@@ -254,7 +254,7 @@ type FplExtension(positions: Positions, parent: FplGenericNode, runOrder) =
         last :?> FplReturn
 
     override this.Run() = 
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         // run only if the extension variable was initialized
         _callCounter <- _callCounter + 1
         if _callCounter > maxRecursion then
@@ -268,7 +268,7 @@ type FplExtension(positions: Positions, parent: FplGenericNode, runOrder) =
             else
                 runArgsAndSetWithLastValue this
         _callCounter <- _callCounter - 1
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 
     override this.CheckConsistency () = 
         checkSIG11Diagnostics this

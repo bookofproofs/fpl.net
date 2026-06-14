@@ -70,7 +70,7 @@ type FplEquality(name, positions: Positions, parent: FplGenericNode) as this =
         addExpressionToReference this
 
     override this.Run() = 
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         match this.ErrorOccurred with 
         | Some err ->
             this.SetDefaultValue()
@@ -114,7 +114,7 @@ type FplEquality(name, positions: Positions, parent: FplGenericNode) as this =
                                 this.SetValue (new FplIntrinsicTrue((heap.Helper.CallerStartPos, heap.Helper.CallerEndPos), this.Parent.Value))
                             | _ -> 
                                 this.SetValue (new FplIntrinsicFalse((heap.Helper.CallerStartPos, heap.Helper.CallerEndPos), this.Parent.Value))
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 
 /// Implements the semantics of an FPL decrement delegate.
 type FplDecrement(name, positions: Positions, parent: FplGenericNode) as this =
@@ -159,7 +159,7 @@ type FplDecrement(name, positions: Positions, parent: FplGenericNode) as this =
         addExpressionToReference this
 
     override this.Run() = 
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         match this.ErrorOccurred with
         | Some err ->
             this.SetDefaultValue()
@@ -188,6 +188,6 @@ type FplDecrement(name, positions: Positions, parent: FplGenericNode) as this =
             else
                 newValue.FplId <- string n'
                 this.SetValue newValue
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 
 

@@ -74,7 +74,7 @@ type FplForInStmt(positions: Positions, parent: FplGenericNode) as this =
             (FplForEnumeratorType.Error, [])
             
     override this.Run() = 
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         match this.Entity, this.GetEnumerator() with
         | Some (:? FplGenericHasValue as entity), (FplForEnumeratorType.ArrayElements, lst) ->
             lst
@@ -87,7 +87,7 @@ type FplForInStmt(positions: Positions, parent: FplGenericNode) as this =
                 )
             )
         | _, _ -> ()
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 
 type FplForInStmtEntity(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericStmt(positions, parent)
@@ -111,8 +111,8 @@ type FplForInStmtEntity(positions: Positions, parent: FplGenericNode) as this =
 
     override this.Run() = 
         // TODO implement run
-        debug this Debug.Start
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Start)
+        StaticDebug.Debug(this,Debug.Stop)
 
 type FplForInStmtDomain(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericStmt(positions, parent)
@@ -135,5 +135,5 @@ type FplForInStmtDomain(positions: Positions, parent: FplGenericNode) as this =
 
     override this.Run() = 
         // TODO implement run
-        debug this Debug.Start
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Start)
+        StaticDebug.Debug(this,Debug.Stop)

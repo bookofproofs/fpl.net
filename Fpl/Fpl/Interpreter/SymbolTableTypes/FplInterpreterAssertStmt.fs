@@ -49,9 +49,9 @@ type FplAssertion(positions: Positions, parent: FplGenericNode) =
         ret
 
     override this.Run() = 
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         heap.ValidStmtStore.RegisterExpression this |> ignore
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 
     override this.RunOrder = None
 

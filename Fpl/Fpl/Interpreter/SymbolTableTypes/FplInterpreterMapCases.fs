@@ -53,11 +53,11 @@ type FplMapCaseSingle(positions: Positions, parent: FplGenericNode) as this =
     override this.RunOrder = None
 
     override this.Run() = 
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         let result = this.GetResult()
         result.Run()
         this.SetValueOf result
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 
 type FplMapCaseElse(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericHasValue(positions, parent)
@@ -83,12 +83,12 @@ type FplMapCaseElse(positions: Positions, parent: FplGenericNode) as this =
     override this.RunOrder = None
 
     override this.Run() = 
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         let first = this.ArgList |> Seq.head
         let contentOfElsResult = first :?> FplGenericHasValue
         contentOfElsResult.Run()
         this.SetValueOf contentOfElsResult
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 
 type FplMapCases(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericHasValue(positions, parent)
@@ -169,7 +169,7 @@ type FplMapCases(positions: Positions, parent: FplGenericNode) as this =
     override this.RunOrder = None
 
     override this.Run() = 
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         let resultLst = this.GetConditionResultList()
         let mapElse = this.GetMapElse()
         let firstMapCaseWithTrueConditionOpt = 
@@ -187,4 +187,4 @@ type FplMapCases(positions: Positions, parent: FplGenericNode) as this =
         | None -> 
             mapElse.Run()
             this.SetValueOf mapElse
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)

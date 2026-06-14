@@ -110,7 +110,7 @@ type FplGenericReference(positions: Positions, parent: FplGenericNode) =
             this.SetValue extensionObj
 
     override this.Run() =
-        debug this Debug.Start
+        StaticDebug.Debug(this,Debug.Start)
         let calledOpt = referencedNodeOpt this
         match calledOpt with 
         | Some (:? FplGenericHasValue as called) when isCallableWithParams called ->
@@ -142,7 +142,7 @@ type FplGenericReference(positions: Positions, parent: FplGenericNode) =
                 this.SetValueOf arg1
             | _ -> ()
         | _ -> ()
-        debug this Debug.Stop
+        StaticDebug.Debug(this,Debug.Stop)
 
     override this.RunOrder = None
 
