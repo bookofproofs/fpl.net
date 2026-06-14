@@ -16,7 +16,7 @@ open System
 open System.Text
 open Fpl.Primitives
 open Fpl.Interpreter.BasicTypes
-open FplInterpreter.Globals.Root
+open Fpl.Interpreter.SymbolTable.TopLevel
 
 type SymbolTable() =
     let mutable _mainTheory = ""

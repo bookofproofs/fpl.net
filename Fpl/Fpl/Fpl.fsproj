@@ -26,7 +26,7 @@
         <Compile Include="Interpreter\Helpers\Checks.fs" />
         <Compile Include="Interpreter\Helpers\Basic.fs" />
         <Compile Include="Interpreter\Helpers\Debug.fs" />
-        <Compile Include="Interpreter\Globals\FplInterpreter.Globals.Root.fs" />
+        <Compile Include="Interpreter\SymbolTable\TopLevel.fs" />
         <Compile Include="Interpreter\Globals\FplInterpreter.Globals.ST.fs" />
         <Compile Include="Interpreter\Globals\FplInterpreter.Globals.STEval.fs" />
         <Compile Include="Interpreter\Globals\FplInterpreter.Globals.State.fs" />

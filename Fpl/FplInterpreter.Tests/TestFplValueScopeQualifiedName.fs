@@ -3,7 +3,7 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Primitives
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Checks
-open FplInterpreter.Globals.Root
+open Fpl.Interpreter.SymbolTable.TopLevel
 open FplInterpreter.Globals.Heap
 open CommonTestHelpers
 

@@ -5,7 +5,7 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open FParsec
 open Fpl.Primitives
 open Fpl.Interpreter.BasicTypes
-open FplInterpreter.Globals.Root
+open Fpl.Interpreter.SymbolTable.TopLevel
 open FplInterpreter.Globals.Heap
 open FplInterpreterReferences
 open FplInterpreterIntrinsicTypes

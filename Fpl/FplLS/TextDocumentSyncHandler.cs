@@ -1,3 +1,5 @@
+// Ignore Spelling: uri
+
 using System.Text;
 using OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;

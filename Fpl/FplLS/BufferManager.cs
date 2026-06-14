@@ -1,3 +1,5 @@
+// Ignore Spelling: uri
+
 using System.Text;
 using System.Collections.Concurrent;
 using static Fpl.Errors.Diagnostics;

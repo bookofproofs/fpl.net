@@ -22,7 +22,7 @@ open Fpl.Parser.Types
 open Fpl.Errors.Emitter
 open FplInterpreterAstPreprocessing
 open Fpl.Interpreter.BasicTypes
-open FplInterpreter.Globals.Root
+open Fpl.Interpreter.SymbolTable.TopLevel
 open Fpl.Interpreter.Helpers.Basic
 open FplInterpreter.Globals.Heap
 open FplInterpreter.Globals.HelpersComplex
