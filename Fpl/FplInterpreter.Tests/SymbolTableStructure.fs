@@ -4,7 +4,7 @@ open System.Collections.Generic
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open FParsec
 open Fpl.Primitives
-open FplInterpreterBasicTypes
+open Fpl.Interpreter.BasicTypes
 open FplInterpreter.Globals.Root
 open FplInterpreter.Globals.Heap
 open FplInterpreterReferences

@@ -16,7 +16,7 @@ module FplInterpreterForStmt
 open Fpl.Primitives
 open Fpl.Parser.Types
 open Fpl.Errors.Emitter
-open FplInterpreterBasicTypes
+open Fpl.Interpreter.BasicTypes
 open FplInterpreter.Globals.Debug
 open FplInterpreter.Globals.HelpersBasic
 open FplInterpreterReferences

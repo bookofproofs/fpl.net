@@ -2,7 +2,7 @@ namespace FplInterpreter.Tests
 
 open FParsec
 open CommonTestHelpers
-open FplInterpreterBasicTypes
+open Fpl.Interpreter.BasicTypes
 open FplInterpreter.Globals.Root
 open FplInterpreter.Globals.Heap
 open FplInterpreterVariables

@@ -18,7 +18,7 @@ open System.Collections.Generic
 open Fpl.Errors.Emitter
 open Fpl.Primitives
 open Fpl.Errors.Messages
-open FplInterpreterBasicTypes
+open Fpl.Interpreter.BasicTypes
 open FplInterpreterChecks
 open FplInterpreterReferences
 open FplInterpreterVariables

@@ -16,7 +16,7 @@ module FplInterpreter.Globals.Debug
 open System
 open System.IO
 open TestSharedConfig
-open FplInterpreterBasicTypes
+open Fpl.Interpreter.BasicTypes
 
 
 type Recursion() =

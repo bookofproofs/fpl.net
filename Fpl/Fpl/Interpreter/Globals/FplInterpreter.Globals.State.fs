@@ -17,7 +17,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 module FplInterpreter.Globals.State
 open System.Collections.Generic
 open Fpl.Primitives
-open FplInterpreterBasicTypes
+open Fpl.Interpreter.BasicTypes
 
 type private StateDict() = 
     let _vars = Dictionary<string,FplGenericNode option>()

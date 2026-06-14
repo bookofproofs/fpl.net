@@ -15,7 +15,7 @@ module FplInterpreter.Globals.Heap
 open System
 open System.Text
 open Fpl.Errors.Diagnostics
-open FplInterpreterBasicTypes
+open Fpl.Interpreter.BasicTypes
 open FplInterpreterAstPreprocessing
 open FplInterpreter.Globals.HelpersBasic
 open FplInterpreter.Globals.ST

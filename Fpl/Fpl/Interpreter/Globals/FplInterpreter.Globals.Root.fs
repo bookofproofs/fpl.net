@@ -16,7 +16,7 @@ module FplInterpreter.Globals.Root
 open System
 open FParsec
 open Fpl.Primitives
-open FplInterpreterBasicTypes
+open Fpl.Interpreter.BasicTypes
 open FplInterpreter.Globals.Debug
 
 type FplTheory(theoryName, parent: FplGenericNode, filePath: string, runOrder) as this =

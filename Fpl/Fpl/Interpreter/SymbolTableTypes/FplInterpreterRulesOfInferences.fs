@@ -16,7 +16,7 @@ module FplInterpreterRulesOfInferences
 open FParsec
 open Fpl.Primitives
 open Fpl.Parser.Types
-open FplInterpreterBasicTypes
+open Fpl.Interpreter.BasicTypes
 open FplInterpreter.Globals.Debug
 open FplInterpreter.Globals.HelpersBasic
 open FplInterpreter.Globals.HelpersComplex

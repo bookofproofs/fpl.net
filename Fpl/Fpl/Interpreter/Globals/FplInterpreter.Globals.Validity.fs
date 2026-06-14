@@ -15,7 +15,7 @@ module FplInterpreter.Globals.Validity
 open System.Collections.Generic
 open System.Text.Json
 open Fpl.Primitives
-open FplInterpreterBasicTypes
+open Fpl.Interpreter.BasicTypes
 
 type ValidStmtStore() =
     let _theoremStore = Dictionary<string, ValidStatement>()

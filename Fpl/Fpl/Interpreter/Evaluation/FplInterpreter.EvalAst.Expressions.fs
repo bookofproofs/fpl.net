@@ -20,7 +20,7 @@ open Fpl.Parser.Types
 open FplInterpreter.Globals.Heap
 open FplInterpreter.Globals.HelpersBasic
 open FplInterpreter.Globals.HelpersComplex
-open FplInterpreterBasicTypes
+open Fpl.Interpreter.BasicTypes
 open FplInterpreterReferences
 open FplInterpreterDefinitions
 open FplInterpreterDefinitionProperties

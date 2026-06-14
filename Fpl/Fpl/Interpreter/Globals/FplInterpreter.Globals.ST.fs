@@ -15,7 +15,7 @@ open TestSharedConfig
 open System
 open System.Text
 open Fpl.Primitives
-open FplInterpreterBasicTypes
+open Fpl.Interpreter.BasicTypes
 open FplInterpreter.Globals.Root
 
 type SymbolTable() =

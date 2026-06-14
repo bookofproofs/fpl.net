@@ -1,1 +1,1 @@
-def pred T() { .(.¬∃ x:obj {.x is N} ∨ (.true ⇔ false)) ∧ .(.∃ x:obj {.x is N} ∨ ¬.true ⇔ false) } ;
+def cl N thm T {true} prf T$1 { 1: ex x:obj {is(x,N)} 2. 1 |- ∃ x:obj {x is N}} thm T1 {true} prf T1$1 { 1. T$1:1 |- false }

@@ -19,7 +19,7 @@ open System.Text
 open FParsec
 open Fpl.Primitives
 open Fpl.Errors.Emitter
-open FplInterpreterBasicTypes
+open Fpl.Interpreter.BasicTypes
 open FplInterpreterChecks
 
 /// A type with helper variables storing some context during the creation process of the symbol table

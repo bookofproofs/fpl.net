@@ -22,7 +22,7 @@
         <Compile Include="Parser\Formatting.fs" />
         <Compile Include="Parser\Main.fs" />
         <None Include="Interpreter\DocuSymbolTable.md" />
-        <Compile Include="Interpreter\Helpers\FplInterpreterBasicTypes.fs" />
+        <Compile Include="Interpreter\Helpers\BasicTypes.fs" />
         <Compile Include="Interpreter\Helpers\FplInterpreterChecks.fs" />
         <Compile Include="Interpreter\Helpers\FplInterpreter.Globals.HelpersBasic.fs" />
         <Compile Include="Interpreter\Helpers\FplInterpreter.Globals.Debug.fs" />

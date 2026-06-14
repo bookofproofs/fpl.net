@@ -16,7 +16,7 @@ module FplInterpreter.Globals.HelpersComplex
 open System.Collections.Generic
 open Fpl.Primitives
 open Fpl.Errors.Emitter
-open FplInterpreterBasicTypes
+open Fpl.Interpreter.BasicTypes
 open FplInterpreter.Globals.Heap
 open FplInterpreterChecks
 

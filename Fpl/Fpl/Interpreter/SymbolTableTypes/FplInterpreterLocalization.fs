@@ -16,7 +16,7 @@ open System.Collections.Generic
 open Fpl.Primitives
 open Fpl.Parser.Types
 open Fpl.Errors.Emitter
-open FplInterpreterBasicTypes
+open Fpl.Interpreter.BasicTypes
 open FplInterpreterChecks
 open FplInterpreter.Globals.Debug
 open FplInterpreter.Globals.HelpersBasic
