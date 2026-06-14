@@ -15,7 +15,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 module FplInterpreter.Globals.Root
 open System
 open FParsec
-open FplPrimitives
+open Fpl.Primitives
 open FplInterpreterBasicTypes
 open FplInterpreter.Globals.Debug
 

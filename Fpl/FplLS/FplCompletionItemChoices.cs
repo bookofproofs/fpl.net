@@ -1,5 +1,5 @@
-﻿using OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities;
-using static FplPrimitives;
+using OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities;
+using static Fpl.Primitives;
 
 namespace FplLS
 {

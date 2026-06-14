@@ -2,7 +2,7 @@
 module FplInterpreterDiagnosticsEmitter
 
 open FParsec
-open FplPrimitives
+open Fpl.Primitives
 open ErrDiagnostics
 (* MIT License
 

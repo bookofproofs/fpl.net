@@ -16,7 +16,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 module FplInterpreter.Globals.State
 open System.Collections.Generic
-open FplPrimitives
+open Fpl.Primitives
 open FplInterpreterBasicTypes
 
 type private StateDict() = 

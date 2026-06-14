@@ -1,7 +1,7 @@
 namespace FplInterpreter.Tests.Proofs
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open FplInterpreterBasicTypes
-open FplPrimitives
+open Fpl.Primitives
 open FplInterpreterProofs
 open FplInterpreter.Globals.Heap
 open FplInterpreter.Globals.HelpersComplex

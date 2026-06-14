@@ -1,6 +1,6 @@
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using System.Data;
-using static FplPrimitives;
+using static Fpl.Primitives;
 using static FplParsing.Main;
 namespace FplLSTests
 {

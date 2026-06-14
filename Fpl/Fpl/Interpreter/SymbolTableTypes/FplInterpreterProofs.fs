@@ -16,7 +16,7 @@ module FplInterpreterProofs
 open System
 open System.Collections.Generic
 open ErrMessages
-open FplPrimitives
+open Fpl.Primitives
 open FplGrammarTypes
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterBasicTypes

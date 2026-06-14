@@ -1,5 +1,5 @@
 module FplInterpreterReferencesSelfParent
-open FplPrimitives
+open Fpl.Primitives
 open FplGrammarTypes
 open ErrDiagnostics
 open FplInterpreterDiagnosticsEmitter

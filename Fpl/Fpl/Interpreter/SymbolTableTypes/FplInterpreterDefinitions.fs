@@ -16,7 +16,7 @@ module FplInterpreterDefinitions
 open System.Collections.Generic
 open FParsec
 open FplGrammarTypes
-open FplPrimitives
+open Fpl.Primitives
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterBasicTypes
 open FplInterpreter.Globals.Debug

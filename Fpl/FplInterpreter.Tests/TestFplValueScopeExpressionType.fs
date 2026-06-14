@@ -5,7 +5,7 @@ open FplInterpreterBasicTypes
 open FplInterpreter.Globals.Root
 open FplInterpreter.Globals.Heap
 open CommonTestHelpers
-open FplPrimitives
+open Fpl.Primitives
 
 [<TestClass>]
 type TestFplValueScopeExpressionType() =

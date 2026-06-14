@@ -13,7 +13,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 module FplInterpreterAssertStmt
-open FplPrimitives
+open Fpl.Primitives
 open FplGrammarTypes
 open FplInterpreterBasicTypes
 open FplInterpreter.Globals.Debug

@@ -14,7 +14,7 @@ module FplInterpreter.Globals.ST
 open TestSharedConfig
 open System
 open System.Text
-open FplPrimitives
+open Fpl.Primitives
 open FplInterpreterBasicTypes
 open FplInterpreter.Globals.Root
 

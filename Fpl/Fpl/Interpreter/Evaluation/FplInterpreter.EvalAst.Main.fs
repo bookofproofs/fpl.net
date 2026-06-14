@@ -17,7 +17,7 @@ module FplInterpreter.EvalAst.Main
 open System
 open System.Collections.Generic
 open ErrDiagnostics
-open FplPrimitives
+open Fpl.Primitives
 open FplGrammarTypes
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterAstPreprocessing

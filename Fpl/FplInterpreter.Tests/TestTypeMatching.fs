@@ -5,7 +5,7 @@ open FplInterpreterBasicTypes
 open FplInterpreterFplTypeMatching
 open FplInterpreterProofs
 open CommonTestHelpers
-open FplPrimitives
+open Fpl.Primitives
 
 
 [<TestClass>]

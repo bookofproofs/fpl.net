@@ -16,7 +16,7 @@ module FplInterpreterExpressionMatching
 open System
 open System.Collections.Generic
 open ErrDiagnostics
-open FplPrimitives
+open Fpl.Primitives
 open FplGrammarTypes
 open ErrMessages
 open FplInterpreterDiagnosticsEmitter

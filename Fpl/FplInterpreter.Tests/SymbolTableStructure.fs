@@ -3,7 +3,7 @@ open System
 open System.Collections.Generic
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open FParsec
-open FplPrimitives
+open Fpl.Primitives
 open FplInterpreterBasicTypes
 open FplInterpreter.Globals.Root
 open FplInterpreter.Globals.Heap

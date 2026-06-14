@@ -15,7 +15,7 @@ module FplInterpreterExtensions
 open System
 open System.Text.RegularExpressions
 open FParsec
-open FplPrimitives
+open Fpl.Primitives
 open FplGrammarTypes
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterBasicTypes

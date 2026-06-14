@@ -1,4 +1,4 @@
-module FplPrimitives
+module Fpl.Primitives
 
 open System.Collections.Generic
 

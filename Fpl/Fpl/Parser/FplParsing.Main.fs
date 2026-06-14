@@ -5,7 +5,7 @@ open System
 open System.Collections.Generic
 open System.Text
 open System.Text.RegularExpressions
-open FplPrimitives
+open Fpl.Primitives
 open FplGrammarTypes
 open ErrDiagnostics
 open FParsec

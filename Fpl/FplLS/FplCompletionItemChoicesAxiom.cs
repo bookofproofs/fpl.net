@@ -1,5 +1,5 @@
-﻿using OmniSharp.Extensions.LanguageServer.Protocol.Models;
-using static FplPrimitives;
+using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using static Fpl.Primitives;
 namespace FplLS
 {
     public class FplCompletionItemChoicesAxiom: FplCompletionItemChoices

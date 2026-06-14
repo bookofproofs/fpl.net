@@ -1,6 +1,6 @@
 namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
-open FplPrimitives
+open Fpl.Primitives
 open ErrDiagnostics
 open FplInterpreterBasicTypes
 open FplInterpreter.Globals.Root

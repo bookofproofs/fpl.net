@@ -14,7 +14,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 module FplInterpreter.Globals.Validity
 open System.Collections.Generic
 open System.Text.Json
-open FplPrimitives
+open Fpl.Primitives
 open FplInterpreterBasicTypes
 
 type ValidStmtStore() =

@@ -3,7 +3,7 @@ module FplParsing.Combinators
 
 open FParsec
 open FplParsing.Basic
-open FplPrimitives
+open Fpl.Primitives
 open FplGrammarTypes
 open FplParsing.Debug
 

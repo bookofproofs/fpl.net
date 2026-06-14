@@ -15,7 +15,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 module FplInterpreter.EvalAst.Expressions
 open System
-open FplPrimitives
+open Fpl.Primitives
 open FplGrammarTypes
 open FplInterpreter.Globals.Heap
 open FplInterpreter.Globals.HelpersBasic

@@ -17,7 +17,7 @@ open System.Collections.Generic
 open System
 open System.Text
 open FParsec
-open FplPrimitives
+open Fpl.Primitives
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterBasicTypes
 open FplInterpreterChecks

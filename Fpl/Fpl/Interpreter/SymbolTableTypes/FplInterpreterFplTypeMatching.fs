@@ -16,7 +16,7 @@ module FplInterpreterFplTypeMatching
 open System
 open System.Collections.Generic
 open FplInterpreterDiagnosticsEmitter
-open FplPrimitives
+open Fpl.Primitives
 open ErrMessages
 open FplInterpreterBasicTypes
 open FplInterpreterChecks
