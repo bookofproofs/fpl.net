@@ -18,9 +18,10 @@ open Fpl.Parser.Types
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Basic
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreterReferences
-open FplInterpreterIntrinsicTypes
+open Fpl.Interpreter.SymbolTable.Types.Intrinsic
+open Fpl.Interpreter.SymbolTable.Types.References
 open FplInterpreterFplTypeMatching
+
 
 
 /// Implements the semantics of the FPL is operator.

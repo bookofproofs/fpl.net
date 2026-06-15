@@ -12,7 +12,7 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
 
 *)
-module FplInterpreterReferences
+module Fpl.Interpreter.SymbolTable.Types.References
 open System
 open Fpl.Parser.Types
 open Fpl.Primitives
@@ -22,7 +22,7 @@ open Fpl.Interpreter.Helpers.Checks
 open Fpl.Interpreter.Helpers.Basic
 open Fpl.Interpreter.Helpers.Debug
 open Fpl.Interpreter.SymbolTable.Storage.Heap
-open FplInterpreterVariables
+open Fpl.Interpreter.SymbolTable.Types.Variables
 
 /// Searches for a references in node symbol table. 
 /// Will work properly only for nodes types that use their scope like FplReference, FplSelf, FplParent, FplForInStmtDomain, FplForInStmtEntity, FplVariable

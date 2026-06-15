@@ -19,9 +19,9 @@ open Fpl.Errors.Emitter
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Basic
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreterReferences
-open FplInterpreterVariables
-open FplInterpreterIntrinsicTypes
+open Fpl.Interpreter.SymbolTable.Types.Intrinsic
+open Fpl.Interpreter.SymbolTable.Types.Variables
+open Fpl.Interpreter.SymbolTable.Types.References
 
 type FplForEnumeratorType = 
     | ArrayElements

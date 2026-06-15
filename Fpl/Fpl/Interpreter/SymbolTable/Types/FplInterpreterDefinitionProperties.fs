@@ -22,7 +22,7 @@ open Fpl.Interpreter.Helpers.Checks
 open Fpl.Interpreter.Helpers.Basic
 open Fpl.Interpreter.Helpers.Debug
 open Fpl.Interpreter.SymbolTable.Storage.Heap
-open FplInterpreterVariables
+open Fpl.Interpreter.SymbolTable.Types.Variables
 open FplInterpreterDefinitions
 open FplInterpreterPredicativeBlocks
 

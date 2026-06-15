@@ -5,8 +5,8 @@ open CommonTestHelpers
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.SymbolTable.MainTypes.TopLevel
 open Fpl.Interpreter.SymbolTable.Storage.Heap
-open FplInterpreterVariables
-open FplInterpreterIntrinsicTypes
+open Fpl.Interpreter.SymbolTable.Types.Intrinsic
+open Fpl.Interpreter.SymbolTable.Types.Variables
 
 
 type CommonFplValueTestCases =

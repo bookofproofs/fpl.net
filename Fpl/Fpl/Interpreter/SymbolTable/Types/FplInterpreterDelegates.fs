@@ -20,9 +20,9 @@ open Fpl.Interpreter.Helpers.Checks
 open Fpl.Interpreter.Helpers.Basic
 open Fpl.Interpreter.Helpers.Debug
 open Fpl.Interpreter.SymbolTable.Storage.Heap
-open FplInterpreterReferences
-open FplInterpreterIntrinsicTypes
-open FplInterpreterVariables
+open Fpl.Interpreter.SymbolTable.Types.Intrinsic
+open Fpl.Interpreter.SymbolTable.Types.Variables
+open Fpl.Interpreter.SymbolTable.Types.References
 open FplInterpreterExtensions
 
 [<AbstractClass>]

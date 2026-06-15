@@ -24,9 +24,9 @@ open Fpl.Interpreter.Helpers.Basic
 open Fpl.Interpreter.Helpers.Debug
 open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.SymbolTable.Storage.Util
-open FplInterpreterReferences
-open FplInterpreterIntrinsicTypes
-open FplInterpreterVariables
+open Fpl.Interpreter.SymbolTable.Types.Intrinsic
+open Fpl.Interpreter.SymbolTable.Types.Variables
+open Fpl.Interpreter.SymbolTable.Types.References
 open FplInterpreterDefinitions
 open FplInterpreterFplTypeMatching
 open FplInterpreterMapCases

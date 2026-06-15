@@ -22,14 +22,14 @@ open Fpl.Parser.Types
 open Fpl.Errors.Emitter
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Basic
+open Fpl.Interpreter.Helpers.Checks
 open Fpl.Interpreter.SymbolTable.MainTypes.TopLevel
 open Fpl.Interpreter.SymbolTable.Storage.Asts
 open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.SymbolTable.Storage.Util
-open Fpl.Interpreter.Helpers.Checks
-open FplInterpreterIntrinsicTypes
-open FplInterpreterVariables
-open FplInterpreterReferences
+open Fpl.Interpreter.SymbolTable.Types.Intrinsic
+open Fpl.Interpreter.SymbolTable.Types.Variables
+open Fpl.Interpreter.SymbolTable.Types.References
 open FplInterpreterDefinitions
 open FplInterpreterFplTypeMatching
 open FplInterpreterExpressionMatching
@@ -38,7 +38,7 @@ open FplInterpreterDefinitionProperties
 open FplInterpreterProofs
 open FplInterpreterQuantors
 open FplInterpreterRulesOfInferences
-open FplInterpreterCompoundPredicates
+open Fpl.Interpreter.SymbolTable.Types.CompoundPredicates
 open FplInterpreterExtensions
 open FplInterpreterDelegates
 open FplInterpreterMapCases

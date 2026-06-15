@@ -13,14 +13,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 
-module FplInterpreterCompoundPredicates
+module Fpl.Interpreter.SymbolTable.Types.CompoundPredicates
 open Fpl.Primitives
 open Fpl.Parser.Types
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Checks
 open Fpl.Interpreter.Helpers.Basic
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreterIntrinsicTypes
+open Fpl.Interpreter.SymbolTable.Types.Intrinsic
 
 
 /// Implements the semantics of an FPL conjunction compound predicate.

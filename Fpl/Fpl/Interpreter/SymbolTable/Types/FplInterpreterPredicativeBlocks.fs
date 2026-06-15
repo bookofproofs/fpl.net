@@ -23,8 +23,8 @@ open Fpl.Interpreter.Helpers.Basic
 open Fpl.Interpreter.Helpers.Debug
 open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.SymbolTable.Storage.Util
-open FplInterpreterIntrinsicTypes
-open FplInterpreterVariables
+open Fpl.Interpreter.SymbolTable.Types.Intrinsic
+open Fpl.Interpreter.SymbolTable.Types.Variables
 
 let runArgumentsOfGenericPredicateWithExpression (fv:FplGenericHasValue) = 
     fv.ArgList

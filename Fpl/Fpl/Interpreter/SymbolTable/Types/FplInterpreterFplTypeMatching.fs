@@ -20,8 +20,8 @@ open Fpl.Primitives
 open Fpl.Errors.Messages
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Checks
-open FplInterpreterReferences
-open FplInterpreterVariables
+open Fpl.Interpreter.SymbolTable.Types.Variables
+open Fpl.Interpreter.SymbolTable.Types.References
 open FplInterpreterDefinitions
 
 

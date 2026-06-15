@@ -33,9 +33,9 @@
         <Compile Include="Interpreter\SymbolTable\Storage\ValidStmts.fs" />
         <Compile Include="Interpreter\SymbolTable\Storage\Heap.fs" />
         <Compile Include="Interpreter\SymbolTable\Storage\Util.fs" />
-        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterIntrinsicTypes.fs" />
-        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterCompoundPredicates.fs" />
-        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterVariables.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types\Intrinsic.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types\CompoundPredicates.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types\Variables.fs" />
         <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterReferences.fs" />
         <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterDefinitions.fs" />
         <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterFplTypeMatching.fs" />

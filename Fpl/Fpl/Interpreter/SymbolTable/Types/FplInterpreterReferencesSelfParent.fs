@@ -5,7 +5,7 @@ open Fpl.Errors.Diagnostics
 open Fpl.Errors.Emitter
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Basic
-open FplInterpreterReferences
+open Fpl.Interpreter.SymbolTable.Types.References
 open FplInterpreterDefinitions
 open FplInterpreterFplTypeMatching
 
