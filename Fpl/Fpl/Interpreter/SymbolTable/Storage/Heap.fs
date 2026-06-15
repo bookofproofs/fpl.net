@@ -18,7 +18,7 @@ open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.SymbolTable.Storage.Asts
 open Fpl.Interpreter.Helpers.Basic
-open Fpl.Interpreter.SymbolTable.MainTypes.TopLevel
+open Fpl.Interpreter.SymbolTable.Types1.TopLevel
 open Fpl.Interpreter.SymbolTable.Storage.Eval
 open Fpl.Interpreter.SymbolTable.Storage.RunState
 open Fpl.Interpreter.SymbolTable.Storage.ValidStmts

@@ -22,8 +22,8 @@ open Fpl.Interpreter.Helpers.Basic
 open Fpl.Interpreter.Helpers.Checks
 open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.SymbolTable.Storage.Util
-open Fpl.Interpreter.SymbolTable.Types.References
-open FplInterpreterDefinitions
+open Fpl.Interpreter.SymbolTable.Types2.References
+open Fpl.Interpreter.SymbolTable.Types2.Definitions
 open FplInterpreterDefinitionProperties
 open FplInterpreterFplTypeMatching
 open FplInterpreter.EvalAst.Forward

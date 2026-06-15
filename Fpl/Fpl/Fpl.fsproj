@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
@@ -7,6 +7,11 @@
         <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
         <PublishSingleFile>true</PublishSingleFile>
     </PropertyGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="Interpreter\TypeMatching\**" />
+      <EmbeddedResource Remove="Interpreter\Types3\**" />
+    </ItemGroup>
 
     <ItemGroup>
         <Compile Include="Primitives\Privimitives.fs" />
@@ -26,35 +31,35 @@
         <Compile Include="Interpreter\Helpers\Checks.fs" />
         <Compile Include="Interpreter\Helpers\Basic.fs" />
         <Compile Include="Interpreter\Helpers\Debug.fs" />
-        <Compile Include="Interpreter\SymbolTable\MainTypes\TopLevel.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types1\TopLevel.fs" />
         <Compile Include="Interpreter\SymbolTable\Storage\Asts.fs" />
         <Compile Include="Interpreter\SymbolTable\Storage\Eval.fs" />
         <Compile Include="Interpreter\SymbolTable\Storage\RunState.fs" />
         <Compile Include="Interpreter\SymbolTable\Storage\ValidStmts.fs" />
         <Compile Include="Interpreter\SymbolTable\Storage\Heap.fs" />
         <Compile Include="Interpreter\SymbolTable\Storage\Util.fs" />
-        <Compile Include="Interpreter\SymbolTable\Types\Intrinsic.fs" />
-        <Compile Include="Interpreter\SymbolTable\Types\CompoundPredicates.fs" />
-        <Compile Include="Interpreter\SymbolTable\Types\Variables.fs" />
-        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterReferences.fs" />
-        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterDefinitions.fs" />
-        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterFplTypeMatching.fs" />
-        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterReferencesSelfParent.fs" />
-        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterPredicativeBlocks.fs" />
-        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterDefinitionProperties.fs" />
-        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterQuantors.fs" />
-        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterExpressionMatching.fs" />
-        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterRulesOfInferences.fs" />
-        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterProofs.fs" />
-        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterMapCases.fs" />
-        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterExtensions.fs" />
-        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterDelegates.fs" />
-        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterLocalization.fs" />
-        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterAssertStmt.fs" />
-        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterCasesStmt.fs" />
-        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterAssigments.fs" />
-        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterIsOperator.fs" />
-        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterForStmt.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types2\Intrinsic.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types2\CompoundPredicates.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types2\Variables.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types2\References.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types2\Definitions.fs" />
+        <Compile Include="Interpreter\SymbolTable\TypeMatching\FplInterpreterFplTypeMatching.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types3\FplInterpreterReferencesSelfParent.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types3\FplInterpreterPredicativeBlocks.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types3\FplInterpreterDefinitionProperties.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types3\FplInterpreterQuantors.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types3\FplInterpreterExpressionMatching.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types3\FplInterpreterRulesOfInferences.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types3\FplInterpreterProofs.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types3\FplInterpreterMapCases.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types3\FplInterpreterExtensions.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types3\FplInterpreterDelegates.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types3\FplInterpreterLocalization.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types3\FplInterpreterAssertStmt.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types3\FplInterpreterCasesStmt.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types3\FplInterpreterAssigments.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types3\FplInterpreterIsOperator.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types3\FplInterpreterForStmt.fs" />
         <Compile Include="Interpreter\Evaluation\FplInterpreterUsesClause.fs" />
         <Compile Include="Interpreter\Evaluation\FplInterpreter.EvalAst.Forward.fs" />
         <Compile Include="Interpreter\Evaluation\FplInterpreter.EvalAst.Expressions.fs" />

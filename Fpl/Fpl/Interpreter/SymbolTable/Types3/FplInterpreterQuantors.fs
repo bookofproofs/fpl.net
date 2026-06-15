@@ -20,8 +20,8 @@ open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Checks
 open Fpl.Interpreter.Helpers.Basic
 open Fpl.Interpreter.Helpers.Debug
-open Fpl.Interpreter.SymbolTable.Types.Intrinsic
-open Fpl.Interpreter.SymbolTable.Types.Variables
+open Fpl.Interpreter.SymbolTable.Types2.Intrinsic
+open Fpl.Interpreter.SymbolTable.Types2.Variables
 
 
 [<AbstractClass>]

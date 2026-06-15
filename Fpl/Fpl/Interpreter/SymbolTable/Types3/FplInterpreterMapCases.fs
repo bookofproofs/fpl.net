@@ -21,7 +21,7 @@ open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Checks
 open Fpl.Interpreter.Helpers.Basic
 open Fpl.Interpreter.Helpers.Debug
-open Fpl.Interpreter.SymbolTable.Types.Intrinsic
+open Fpl.Interpreter.SymbolTable.Types2.Intrinsic
 
 type FplMapCaseSingle(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericHasValue(positions, parent)

@@ -3,10 +3,10 @@ namespace FplInterpreter.Tests
 open FParsec
 open CommonTestHelpers
 open Fpl.Interpreter.BasicTypes
-open Fpl.Interpreter.SymbolTable.MainTypes.TopLevel
+open Fpl.Interpreter.SymbolTable.Types1.TopLevel
 open Fpl.Interpreter.SymbolTable.Storage.Heap
-open Fpl.Interpreter.SymbolTable.Types.Intrinsic
-open Fpl.Interpreter.SymbolTable.Types.Variables
+open Fpl.Interpreter.SymbolTable.Types2.Intrinsic
+open Fpl.Interpreter.SymbolTable.Types2.Variables
 
 
 type CommonFplValueTestCases =

@@ -18,7 +18,7 @@ open Fpl.Parser.Types
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Debug
 open Fpl.Interpreter.SymbolTable.Storage.Heap
-open Fpl.Interpreter.SymbolTable.Types.Intrinsic
+open Fpl.Interpreter.SymbolTable.Types2.Intrinsic
 
 
 type FplAssertion(positions: Positions, parent: FplGenericNode) =

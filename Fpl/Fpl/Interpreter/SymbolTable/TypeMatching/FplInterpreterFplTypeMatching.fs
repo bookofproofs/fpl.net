@@ -20,9 +20,9 @@ open Fpl.Primitives
 open Fpl.Errors.Messages
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Checks
-open Fpl.Interpreter.SymbolTable.Types.Variables
-open Fpl.Interpreter.SymbolTable.Types.References
-open FplInterpreterDefinitions
+open Fpl.Interpreter.SymbolTable.Types2.Variables
+open Fpl.Interpreter.SymbolTable.Types2.References
+open Fpl.Interpreter.SymbolTable.Types2.Definitions
 
 
 /// Gets the list of parameters of an FplValue if any

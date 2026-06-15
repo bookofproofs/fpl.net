@@ -25,8 +25,8 @@ open Fpl.Interpreter.Helpers.Basic
 open Fpl.Interpreter.Helpers.Debug
 open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.SymbolTable.Storage.Util
-open Fpl.Interpreter.SymbolTable.Types.Intrinsic
-open Fpl.Interpreter.SymbolTable.Types.CompoundPredicates
+open Fpl.Interpreter.SymbolTable.Types2.Intrinsic
+open Fpl.Interpreter.SymbolTable.Types2.CompoundPredicates
 open FplInterpreterPredicativeBlocks
 open FplInterpreterExpressionMatching
 open FplInterpreterRulesOfInferences
