@@ -20,12 +20,12 @@ open Fpl.Errors.Diagnostics
 open Fpl.Primitives
 open Fpl.Parser.Types
 open Fpl.Errors.Emitter
-open FplInterpreterAstPreprocessing
 open Fpl.Interpreter.BasicTypes
-open Fpl.Interpreter.SymbolTable.TopLevel
 open Fpl.Interpreter.Helpers.Basic
-open FplInterpreter.Globals.Heap
-open FplInterpreter.Globals.HelpersComplex
+open Fpl.Interpreter.SymbolTable.MainTypes.TopLevel
+open Fpl.Interpreter.SymbolTable.Storage.Asts
+open Fpl.Interpreter.SymbolTable.Storage.Heap
+open Fpl.Interpreter.SymbolTable.Storage.Util
 open Fpl.Interpreter.Helpers.Checks
 open FplInterpreterIntrinsicTypes
 open FplInterpreterVariables

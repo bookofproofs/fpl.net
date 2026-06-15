@@ -4,7 +4,7 @@ open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Globals.Heap
+open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Newtonsoft.Json
 open Newtonsoft.Json.Linq
 open CommonTestHelpers
@@ -140,7 +140,7 @@ type SymbolTableNavigation() =
 
             // do the test - now, open a specific file in the repo subdirectory
             loadFplFile (Path.Combine(currentPathRepo,"Fpl.Commons.fpl")) 
-            // and test if the corrent number of asts in symbol table
+            // and test if the current number of asts in symbol table
 
             // initial counts of parsed ast and theories in root
             Assert.AreEqual<int>(1, heap.ParsedAsts.Count)
@@ -152,7 +152,7 @@ type SymbolTableNavigation() =
             let fplCode = File.ReadAllText(uri.AbsolutePath)
             fplInterpreter fplCode uri fplLibUrl
 
-            // and test if the corrent number of asts in symbol table
+            // and test the current number of asts in symbol table
             Assert.AreEqual<int>(2, heap.ParsedAsts.Count)
 
             // now, open the grand parent file
@@ -160,7 +160,7 @@ type SymbolTableNavigation() =
             let fplCode = File.ReadAllText(uri.AbsolutePath)
             fplInterpreter fplCode uri fplLibUrl
 
-            // and test if the corrent number of asts in symbol table
+            // and test the current number of asts in symbol table
             Assert.AreEqual<int>(3, heap.ParsedAsts.Count)
         
             // remove the test file
@@ -187,7 +187,7 @@ type SymbolTableNavigation() =
 
             // do the test - now, open a specific file in the repo subdirectory
             loadFplFile (Path.Combine(currentPathRepo,"Fpl.Commons.fpl")) 
-            // and test if the corrent number of asts in symbol table
+            // and test the current number of asts in symbol table
  
             // initial counts of parsed ast and theories in root
             Assert.AreEqual<int>(1, heap.ParsedAsts.Count)
@@ -198,7 +198,7 @@ type SymbolTableNavigation() =
             let fplCode = File.ReadAllText(uri.AbsolutePath)
             fplInterpreter fplCode uri fplLibUrl
 
-            // and test if the corrent number of asts in symbol table
+            // and test the current number of asts in symbol table
             Assert.AreEqual<int>(3, heap.ParsedAsts.Count)
         
             // remove the test file

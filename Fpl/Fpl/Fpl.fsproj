@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
@@ -26,35 +26,35 @@
         <Compile Include="Interpreter\Helpers\Checks.fs" />
         <Compile Include="Interpreter\Helpers\Basic.fs" />
         <Compile Include="Interpreter\Helpers\Debug.fs" />
-        <Compile Include="Interpreter\SymbolTable\TopLevel.fs" />
-        <Compile Include="Interpreter\Globals\FplInterpreter.Globals.STEval.fs" />
-        <Compile Include="Interpreter\Globals\FplInterpreter.Globals.State.fs" />
-        <Compile Include="Interpreter\Globals\FplInterpreter.Globals.Validity.fs" />
-        <Compile Include="Interpreter\Globals\FplInterpreterAstPreprocessing.fs" />
-        <Compile Include="Interpreter\Globals\FplInterpreter.Globals.Heap.fs" />
-        <Compile Include="Interpreter\Globals\FplInterpreter.Globals.HelpersComplex.fs" />
-        <Compile Include="Interpreter\SymbolTableTypes\FplInterpreterIntrinsicTypes.fs" />
-        <Compile Include="Interpreter\SymbolTableTypes\FplInterpreterCompoundPredicates.fs" />
-        <Compile Include="Interpreter\SymbolTableTypes\FplInterpreterVariables.fs" />
-        <Compile Include="Interpreter\SymbolTableTypes\FplInterpreterReferences.fs" />
-        <Compile Include="Interpreter\SymbolTableTypes\FplInterpreterDefinitions.fs" />
-        <Compile Include="Interpreter\SymbolTableTypes\FplInterpreterFplTypeMatching.fs" />
-        <Compile Include="Interpreter\SymbolTableTypes\FplInterpreterReferencesSelfParent.fs" />
-        <Compile Include="Interpreter\SymbolTableTypes\FplInterpreterPredicativeBlocks.fs" />
-        <Compile Include="Interpreter\SymbolTableTypes\FplInterpreterDefinitionProperties.fs" />
-        <Compile Include="Interpreter\SymbolTableTypes\FplInterpreterQuantors.fs" />
-        <Compile Include="Interpreter\SymbolTableTypes\FplInterpreterExpressionMatching.fs" />
-        <Compile Include="Interpreter\SymbolTableTypes\FplInterpreterRulesOfInferences.fs" />
-        <Compile Include="Interpreter\SymbolTableTypes\FplInterpreterProofs.fs" />
-        <Compile Include="Interpreter\SymbolTableTypes\FplInterpreterMapCases.fs" />
-        <Compile Include="Interpreter\SymbolTableTypes\FplInterpreterExtensions.fs" />
-        <Compile Include="Interpreter\SymbolTableTypes\FplInterpreterDelegates.fs" />
-        <Compile Include="Interpreter\SymbolTableTypes\FplInterpreterLocalization.fs" />
-        <Compile Include="Interpreter\SymbolTableTypes\FplInterpreterAssertStmt.fs" />
-        <Compile Include="Interpreter\SymbolTableTypes\FplInterpreterCasesStmt.fs" />
-        <Compile Include="Interpreter\SymbolTableTypes\FplInterpreterAssigments.fs" />
-        <Compile Include="Interpreter\SymbolTableTypes\FplInterpreterIsOperator.fs" />
-        <Compile Include="Interpreter\SymbolTableTypes\FplInterpreterForStmt.fs" />
+        <Compile Include="Interpreter\SymbolTable\MainTypes\TopLevel.fs" />
+        <Compile Include="Interpreter\SymbolTable\Storage\Asts.fs" />
+        <Compile Include="Interpreter\SymbolTable\Storage\Eval.fs" />
+        <Compile Include="Interpreter\SymbolTable\Storage\RunState.fs" />
+        <Compile Include="Interpreter\SymbolTable\Storage\ValidStmts.fs" />
+        <Compile Include="Interpreter\SymbolTable\Storage\Heap.fs" />
+        <Compile Include="Interpreter\SymbolTable\Storage\Util.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterIntrinsicTypes.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterCompoundPredicates.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterVariables.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterReferences.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterDefinitions.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterFplTypeMatching.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterReferencesSelfParent.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterPredicativeBlocks.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterDefinitionProperties.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterQuantors.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterExpressionMatching.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterRulesOfInferences.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterProofs.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterMapCases.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterExtensions.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterDelegates.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterLocalization.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterAssertStmt.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterCasesStmt.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterAssigments.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterIsOperator.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types\FplInterpreterForStmt.fs" />
         <Compile Include="Interpreter\Evaluation\FplInterpreterUsesClause.fs" />
         <Compile Include="Interpreter\Evaluation\FplInterpreter.EvalAst.Forward.fs" />
         <Compile Include="Interpreter\Evaluation\FplInterpreter.EvalAst.Expressions.fs" />
@@ -74,6 +74,10 @@
 
     <ItemGroup>
         <PackageReference Update="FSharp.Core" Version="9.0.303" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Interpreter\SymbolTable\Util\" />
     </ItemGroup>
 
 </Project>

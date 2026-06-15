@@ -21,7 +21,7 @@ open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Checks
 open Fpl.Interpreter.Helpers.Basic
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Globals.Heap
+open Fpl.Interpreter.SymbolTable.Storage.Heap
 open FplInterpreterVariables
 
 /// Searches for a references in node symbol table. 

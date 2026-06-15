@@ -11,17 +11,17 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
 
 *)
-module FplInterpreter.Globals.Heap
+module Fpl.Interpreter.SymbolTable.Storage.Heap
 open System
 open System.Text
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.BasicTypes
-open FplInterpreterAstPreprocessing
+open Fpl.Interpreter.SymbolTable.Storage.Asts
 open Fpl.Interpreter.Helpers.Basic
-open Fpl.Interpreter.SymbolTable.TopLevel
-open FplInterpreter.Globals.STEval
-open FplInterpreter.Globals.State
-open FplInterpreter.Globals.Validity
+open Fpl.Interpreter.SymbolTable.MainTypes.TopLevel
+open Fpl.Interpreter.SymbolTable.Storage.Eval
+open Fpl.Interpreter.SymbolTable.Storage.RunState
+open Fpl.Interpreter.SymbolTable.Storage.ValidStmts
 
 type HeapMemory() = 
     let _validStmtStore = ValidStmtStore()
@@ -57,7 +57,7 @@ type HeapMemory() =
         with get () = _isEvaluating
         and set (value) = _isEvaluating <- value
 
-    // Clears the heap's working memory, including memory needed for rsymbol table evaluation and running nodes
+    // Clears the heap's working memory, including memory needed for symbol table evaluation and running nodes
     member this.ClearWorkingMemory() = 
         _evalStack.Clear()
         _state.Clear()

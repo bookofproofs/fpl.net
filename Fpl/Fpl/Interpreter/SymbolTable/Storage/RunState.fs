@@ -1,4 +1,4 @@
-/// This module contains types modelling the storage memory
+/// This module contains types modeling the storage memory
 /// to separate the scope of called FPL nodes like functions, constructors, predicates, etc.
 
 
@@ -14,7 +14,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 
-module FplInterpreter.Globals.State
+module Fpl.Interpreter.SymbolTable.Storage.RunState
 open System.Collections.Generic
 open Fpl.Primitives
 open Fpl.Interpreter.BasicTypes

@@ -17,7 +17,7 @@ open Fpl.Primitives
 open Fpl.Parser.Types
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Globals.Heap
+open Fpl.Interpreter.SymbolTable.Storage.Heap
 open FplInterpreterIntrinsicTypes
 
 

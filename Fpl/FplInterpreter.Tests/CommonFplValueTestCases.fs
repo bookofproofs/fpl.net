@@ -3,8 +3,8 @@ namespace FplInterpreter.Tests
 open FParsec
 open CommonTestHelpers
 open Fpl.Interpreter.BasicTypes
-open Fpl.Interpreter.SymbolTable.TopLevel
-open FplInterpreter.Globals.Heap
+open Fpl.Interpreter.SymbolTable.MainTypes.TopLevel
+open Fpl.Interpreter.SymbolTable.Storage.Heap
 open FplInterpreterVariables
 open FplInterpreterIntrinsicTypes
 

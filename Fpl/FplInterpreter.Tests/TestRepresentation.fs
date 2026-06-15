@@ -2,9 +2,9 @@ namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Primitives
 open Fpl.Interpreter.BasicTypes
-open FplInterpreter.Globals.Heap
-open CommonTestHelpers
 open Fpl.Interpreter.Helpers.Debug
+open Fpl.Interpreter.SymbolTable.Storage.Heap
+open CommonTestHelpers
 
 [<TestClass>]
 type TestRepresentation() =

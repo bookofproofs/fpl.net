@@ -12,7 +12,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 
-module FplInterpreterAstPreprocessing
+module Fpl.Interpreter.SymbolTable.Storage.Asts
 
 open System
 open System.Text.RegularExpressions

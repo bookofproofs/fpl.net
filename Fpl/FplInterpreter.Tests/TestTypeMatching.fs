@@ -1,6 +1,6 @@
 namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
-open FplInterpreter.Globals.Heap
+open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.BasicTypes
 open FplInterpreterFplTypeMatching
 open FplInterpreterProofs

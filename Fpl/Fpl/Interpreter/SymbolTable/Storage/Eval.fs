@@ -13,7 +13,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 
-module FplInterpreter.Globals.STEval
+module Fpl.Interpreter.SymbolTable.Storage.Eval
 open System.Collections.Generic
 open Fpl.Primitives
 open Fpl.Interpreter.BasicTypes

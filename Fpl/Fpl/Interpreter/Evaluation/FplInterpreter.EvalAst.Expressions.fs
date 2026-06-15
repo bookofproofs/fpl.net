@@ -17,9 +17,9 @@ module FplInterpreter.EvalAst.Expressions
 open System
 open Fpl.Primitives
 open Fpl.Parser.Types
-open FplInterpreter.Globals.Heap
+open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.Helpers.Basic
-open FplInterpreter.Globals.HelpersComplex
+open Fpl.Interpreter.SymbolTable.Storage.Util
 open Fpl.Interpreter.BasicTypes
 open FplInterpreterReferences
 open FplInterpreterDefinitions

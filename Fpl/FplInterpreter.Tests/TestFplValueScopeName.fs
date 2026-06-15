@@ -2,9 +2,9 @@ namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Primitives
 open Fpl.Interpreter.BasicTypes
-open Fpl.Interpreter.SymbolTable.TopLevel
-open FplInterpreter.Globals.Heap
-open FplInterpreter.Globals.HelpersComplex
+open Fpl.Interpreter.SymbolTable.MainTypes.TopLevel
+open Fpl.Interpreter.SymbolTable.Storage.Heap
+open Fpl.Interpreter.SymbolTable.Storage.Util
 open CommonTestHelpers
 open FplInterpreterProofs
 

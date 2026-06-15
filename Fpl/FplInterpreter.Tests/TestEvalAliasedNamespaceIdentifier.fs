@@ -4,10 +4,10 @@ open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open FParsec
 open Fpl.Errors.Diagnostics
-open FplInterpreterAstPreprocessing
 open Fpl.Interpreter.Helpers.Debug
-open Fpl.Interpreter.SymbolTable.TopLevel
-open FplInterpreter.Globals.Heap
+open Fpl.Interpreter.SymbolTable.MainTypes.TopLevel
+open Fpl.Interpreter.SymbolTable.Storage.Asts
+open Fpl.Interpreter.SymbolTable.Storage.Heap
 open FplInterpreter.Main
 open FplInterpreterUsesClause
 open CommonTestHelpers

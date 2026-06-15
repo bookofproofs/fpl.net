@@ -22,8 +22,8 @@ open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Checks
 open Fpl.Interpreter.Helpers.Basic
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Globals.Heap
-open FplInterpreter.Globals.HelpersComplex
+open Fpl.Interpreter.SymbolTable.Storage.Heap
+open Fpl.Interpreter.SymbolTable.Storage.Util
 open FplInterpreterIntrinsicTypes
 open FplInterpreterVariables
 

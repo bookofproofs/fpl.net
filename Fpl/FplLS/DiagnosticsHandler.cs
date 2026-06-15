@@ -4,7 +4,7 @@ using OmniSharp.Extensions.LanguageServer.Protocol.Document;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
 using System.Text;
 using static Fpl.Errors.Diagnostics;
-using static FplInterpreter.Globals.Heap;
+using static Fpl.Interpreter.SymbolTable.Storage.Heap;
 using static FplInterpreter.Main;
 using Model = OmniSharp.Extensions.LanguageServer.Protocol.Models;
 

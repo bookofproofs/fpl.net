@@ -9,9 +9,9 @@ open System
 open FParsec
 open Fpl.Parser.Types
 open Fpl.Errors.Emitter
-open FplInterpreterAstPreprocessing
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Globals.Heap
+open Fpl.Interpreter.SymbolTable.Storage.Heap
+open Fpl.Interpreter.SymbolTable.Storage.Asts
 open Fpl.Errors.Diagnostics
 
 (* MIT License
