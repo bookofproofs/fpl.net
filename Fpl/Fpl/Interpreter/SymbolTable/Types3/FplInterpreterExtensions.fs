@@ -28,7 +28,7 @@ open Fpl.Interpreter.SymbolTable.Types2.Intrinsic
 open Fpl.Interpreter.SymbolTable.Types2.Variables
 open Fpl.Interpreter.SymbolTable.Types2.References
 open Fpl.Interpreter.SymbolTable.Types2.Definitions
-open FplInterpreterFplTypeMatching
+open Fpl.Interpreter.SymbolTable.TypeMatching
 open FplInterpreterMapCases
 
 

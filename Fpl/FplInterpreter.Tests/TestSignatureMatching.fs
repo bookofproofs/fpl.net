@@ -4,8 +4,8 @@ open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Debug
 open Fpl.Interpreter.SymbolTable.Storage.Heap
-open FplInterpreterFplTypeMatching
-open FplInterpreterReferencesSelfParent
+open Fpl.Interpreter.SymbolTable.TypeMatching
+open Fpl.Interpreter.SymbolTable.Types3.SelfParent
 open CommonTestHelpers
 
 [<TestClass>]

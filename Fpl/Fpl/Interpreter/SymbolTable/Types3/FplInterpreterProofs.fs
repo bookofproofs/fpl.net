@@ -27,7 +27,7 @@ open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.SymbolTable.Storage.Util
 open Fpl.Interpreter.SymbolTable.Types2.Intrinsic
 open Fpl.Interpreter.SymbolTable.Types2.CompoundPredicates
-open FplInterpreterPredicativeBlocks
+open Fpl.Interpreter.SymbolTable.Types3.PredicativeBlocks
 open FplInterpreterExpressionMatching
 open FplInterpreterRulesOfInferences
 

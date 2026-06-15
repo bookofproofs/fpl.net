@@ -9,8 +9,9 @@ open Fpl.Interpreter.SymbolTable.Types2.Variables
 open Fpl.Interpreter.SymbolTable.Types2.CompoundPredicates
 open Fpl.Interpreter.SymbolTable.Types2.References
 open Fpl.Interpreter.SymbolTable.Types2.Definitions
-open FplInterpreterPredicativeBlocks
-open FplInterpreterDefinitionProperties
+open Fpl.Interpreter.SymbolTable.Types3.SelfParent
+open Fpl.Interpreter.SymbolTable.Types3.PredicativeBlocks
+open Fpl.Interpreter.SymbolTable.Types3.DefinitionProperties
 open FplInterpreterProofs
 open FplInterpreterQuantors
 open FplInterpreterRulesOfInferences
@@ -18,7 +19,6 @@ open FplInterpreterExtensions
 open FplInterpreterDelegates
 open FplInterpreterMapCases
 open FplInterpreterLocalization
-open FplInterpreterReferencesSelfParent
 open FplInterpreterIsOperator
 open CommonTestHelpers
 

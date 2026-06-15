@@ -5,8 +5,8 @@ open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.SymbolTable.Types1.TopLevel
 open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.SymbolTable.Types2.Definitions
-open FplInterpreterPredicativeBlocks
-open FplInterpreterDefinitionProperties
+open Fpl.Interpreter.SymbolTable.Types3.PredicativeBlocks
+open Fpl.Interpreter.SymbolTable.Types3.DefinitionProperties
 open FplInterpreterProofs
 open FplInterpreterRulesOfInferences
 open CommonTestHelpers

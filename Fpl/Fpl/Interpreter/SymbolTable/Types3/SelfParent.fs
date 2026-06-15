@@ -1,4 +1,4 @@
-module FplInterpreterReferencesSelfParent
+module Fpl.Interpreter.SymbolTable.Types3.SelfParent
 open Fpl.Primitives
 open Fpl.Parser.Types
 open Fpl.Errors.Diagnostics
@@ -7,7 +7,7 @@ open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Basic
 open Fpl.Interpreter.SymbolTable.Types2.References
 open Fpl.Interpreter.SymbolTable.Types2.Definitions
-open FplInterpreterFplTypeMatching
+open Fpl.Interpreter.SymbolTable.TypeMatching
 
 type FplBaseConstructorCall(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericReference(positions, parent)

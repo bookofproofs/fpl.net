@@ -24,8 +24,8 @@ open Fpl.Interpreter.Helpers.Debug
 open Fpl.Interpreter.SymbolTable.Types2.Intrinsic
 open Fpl.Interpreter.SymbolTable.Types2.Variables
 open Fpl.Interpreter.SymbolTable.Types2.References
-open FplInterpreterFplTypeMatching
-open FplInterpreterReferencesSelfParent
+open Fpl.Interpreter.SymbolTable.TypeMatching
+open Fpl.Interpreter.SymbolTable.Types3.SelfParent
 
 /// Implements the assignment statement in FPL.
 type FplAssignment(positions: Positions, parent: FplGenericNode) as this =

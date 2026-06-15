@@ -43,10 +43,10 @@
         <Compile Include="Interpreter\SymbolTable\Types2\Variables.fs" />
         <Compile Include="Interpreter\SymbolTable\Types2\References.fs" />
         <Compile Include="Interpreter\SymbolTable\Types2\Definitions.fs" />
-        <Compile Include="Interpreter\SymbolTable\TypeMatching\FplInterpreterFplTypeMatching.fs" />
-        <Compile Include="Interpreter\SymbolTable\Types3\FplInterpreterReferencesSelfParent.fs" />
-        <Compile Include="Interpreter\SymbolTable\Types3\FplInterpreterPredicativeBlocks.fs" />
-        <Compile Include="Interpreter\SymbolTable\Types3\FplInterpreterDefinitionProperties.fs" />
+        <Compile Include="Interpreter\SymbolTable\TypeMatching\TypeMatching.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types3\SelfParent.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types3\PredicativeBlocks.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types3\DefinitionProperties.fs" />
         <Compile Include="Interpreter\SymbolTable\Types3\FplInterpreterQuantors.fs" />
         <Compile Include="Interpreter\SymbolTable\Types3\FplInterpreterExpressionMatching.fs" />
         <Compile Include="Interpreter\SymbolTable\Types3\FplInterpreterRulesOfInferences.fs" />
