@@ -13,13 +13,13 @@ open Fpl.Interpreter.SymbolTable.Types3.SelfParent
 open Fpl.Interpreter.SymbolTable.Types3.PredicativeBlocks
 open Fpl.Interpreter.SymbolTable.Types3.DefinitionProperties
 open Fpl.Interpreter.SymbolTable.Types3.Quantors
-open FplInterpreterProofs
-open FplInterpreterRulesOfInferences
-open FplInterpreterExtensions
-open FplInterpreterDelegates
-open FplInterpreterMapCases
-open FplInterpreterLocalization
-open FplInterpreterIsOperator
+open Fpl.Interpreter.SymbolTable.Types3.RulesOfInferences
+open Fpl.Interpreter.SymbolTable.Types3.Extensions
+open Fpl.Interpreter.SymbolTable.Types3.Delegates
+open Fpl.Interpreter.SymbolTable.Types3.MapCases
+open Fpl.Interpreter.SymbolTable.Types3.Localization
+open Fpl.Interpreter.SymbolTable.Types3.IsOperator
+open Fpl.Interpreter.SymbolTable.Types4.Proofs
 open CommonTestHelpers
 
 

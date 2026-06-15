@@ -5,7 +5,7 @@ open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.SymbolTable.Types1.TopLevel
 open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.SymbolTable.Types2.Variables
-open FplInterpreterAssignments
+open Fpl.Interpreter.SymbolTable.Types3.Assignments
 open CommonTestHelpers
 
 [<TestClass>]

@@ -5,8 +5,8 @@ open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.SymbolTable.Types1.TopLevel
 open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.SymbolTable.Storage.Util
+open Fpl.Interpreter.SymbolTable.Types4.Proofs
 open CommonTestHelpers
-open FplInterpreterProofs
 
 [<TestClass>]
 type TestFplValueScopeName() =

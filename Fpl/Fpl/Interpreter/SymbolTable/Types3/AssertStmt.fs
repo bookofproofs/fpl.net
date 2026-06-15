@@ -1,5 +1,5 @@
 /// This module contains all symbol table nodes used by the FplInterpreter
-/// to model the is operator.
+/// to model the assert statement.
 
 (* MIT License
 
@@ -12,53 +12,46 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
 
 *)
-module FplInterpreterIsOperator
+module Fpl.Interpreter.SymbolTable.Types3.AssertStmt
 open Fpl.Primitives
 open Fpl.Parser.Types
 open Fpl.Interpreter.BasicTypes
-open Fpl.Interpreter.Helpers.Basic
 open Fpl.Interpreter.Helpers.Debug
+open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.SymbolTable.Types2.Intrinsic
-open Fpl.Interpreter.SymbolTable.Types2.References
-open Fpl.Interpreter.SymbolTable.TypeMatching
 
 
+type FplAssertion(positions: Positions, parent: FplGenericNode) =
+    inherit FplGenericStmt(positions, parent)
 
-/// Implements the semantics of the FPL is operator.
-type FplIsOperator(positions: Positions, parent: FplGenericNode) as this =
-    inherit FplGenericPredicate(positions, parent)
+    override this.Name = PrimAssertion
+    override this.ShortName = LiteralAss
 
-    do 
-        this.FplId <- LiteralIs
+    member this.InferrableExpression =
+        let validityReason = 
+            let exprOpt = this.ArgList |> Seq.tryLast
+            match exprOpt with
+            | Some expr -> ValidityReason.IsAxiomAssertion (expr.Type SignatureType.Name)
+            | _ -> ValidityReason.Error // fallback if axiom node is empty
 
-    override this.Name = PrimIsOperator
-    override this.ShortName = LiteralIs
+        {
+            ValidStatement.Node = this
+            ValidStatement.ValidityReason = validityReason
+        }
+
+    interface IInferrable with
+        member this.InferrableExpression
+            with get () = this.InferrableExpression
 
     override this.Clone () =
-        let ret = new FplIsOperator((this.StartPos, this.EndPos), this.Parent.Value)
+        let ret = new FplAssertion((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
 
-    override this.Type signatureType = getNotationTwoArgs this "is" signatureType LiteralPred
-        
     override this.Run() = 
         StaticDebug.Debug(this,Debug.Start)
-        let operand = this.ArgList[0]
-        let typeOfOperand = this.ArgList[1]
-        // FPL truth-table
-        match operand with 
-        | :? FplReference as op ->
-            match FplTypeMatcher.MatchPwA [operand] [typeOfOperand] with
-            | Some errMsg -> 
-                let newValue =  new FplIntrinsicFalse((this.StartPos, this.EndPos), this)
-                this.SetValue newValue
-            | None -> 
-                let newValue =  new FplIntrinsicTrue((this.StartPos, this.EndPos), this)
-                this.SetValue newValue
-        | _ -> 
-            let newValue =  new FplIntrinsicFalse((this.StartPos, this.EndPos), this)
-            this.SetValue newValue
-        
+        heap.ValidStmtStore.RegisterExpression this |> ignore
         StaticDebug.Debug(this,Debug.Stop)
 
-    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
+    override this.RunOrder = None
+

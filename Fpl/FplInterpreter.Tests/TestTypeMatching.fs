@@ -1,11 +1,11 @@
 namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
-open Fpl.Interpreter.SymbolTable.Storage.Heap
-open Fpl.Interpreter.BasicTypes
-open Fpl.Interpreter.SymbolTable.TypeMatching
-open FplInterpreterProofs
-open CommonTestHelpers
 open Fpl.Primitives
+open Fpl.Interpreter.BasicTypes
+open Fpl.Interpreter.SymbolTable.Storage.Heap
+open Fpl.Interpreter.SymbolTable.TypeMatching
+open Fpl.Interpreter.SymbolTable.Types4.Proofs
+open CommonTestHelpers
 
 
 [<TestClass>]

@@ -7,8 +7,8 @@ open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.SymbolTable.Types2.Definitions
 open Fpl.Interpreter.SymbolTable.Types3.PredicativeBlocks
 open Fpl.Interpreter.SymbolTable.Types3.DefinitionProperties
-open FplInterpreterProofs
-open FplInterpreterRulesOfInferences
+open Fpl.Interpreter.SymbolTable.Types3.RulesOfInferences
+open Fpl.Interpreter.SymbolTable.Types4.Proofs
 open CommonTestHelpers
 
 [<TestClass>]
