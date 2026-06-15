@@ -13,9 +13,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 
-module FplInterpreter.EvalAst.Expressions
+module Fpl.Interpreter.SymbolTable.Creation.Expressions
 open System
 open Fpl.Primitives
+open Fpl.Errors.Emitter
 open Fpl.Parser.Types
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Basic
@@ -26,8 +27,7 @@ open Fpl.Interpreter.SymbolTable.Types2.References
 open Fpl.Interpreter.SymbolTable.Types2.Definitions
 open Fpl.Interpreter.SymbolTable.Types3.DefinitionProperties
 open Fpl.Interpreter.SymbolTable.TypeMatching
-open FplInterpreter.EvalAst.Forward
-open Fpl.Errors.Emitter
+open Fpl.Interpreter.SymbolTable.Creation.Forward
 
 /// Simplify trivially nested expressions by removing from the stack FplValue nodes that were created due to too long parsing tree and replacing them by their sub nodes 
 let rec private simplifyTriviallyNestedExpressions (rb1:FplGenericNode) = 

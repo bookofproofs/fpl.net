@@ -1,5 +1,5 @@
 /// This module provides a globally accessible reference to the AST evaluator.
-/// The real evaluator is assigned only at the end, in FplInterpreter.EvalAst.Main module.
+/// The real evaluator is assigned only at the end, in Fpl.Interpreter.SymbolTable.Creation.Main module.
 /// Specialized evaluator modules can call the main evaluator via evalRef.Value
 
 (* MIT License
@@ -15,7 +15,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 *)
 
 
-module FplInterpreter.EvalAst.Forward
+module Fpl.Interpreter.SymbolTable.Creation.Forward
 
 open Fpl.Parser.Types
 

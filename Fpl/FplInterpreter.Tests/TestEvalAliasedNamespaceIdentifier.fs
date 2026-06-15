@@ -9,7 +9,7 @@ open Fpl.Interpreter.SymbolTable.Types1.TopLevel
 open Fpl.Interpreter.SymbolTable.Storage.Asts
 open Fpl.Interpreter.SymbolTable.Storage.Heap
 open FplInterpreter.Main
-open FplInterpreterUsesClause
+open Fpl.Interpreter.SymbolTable.Creation.UsesClauses
 open CommonTestHelpers
 open TestSharedConfig
 

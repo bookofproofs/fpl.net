@@ -12,7 +12,7 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
 
 *)
-module FplInterpreter.EvalAst.Main
+module Fpl.Interpreter.SymbolTable.Creation.Main
 
 open System
 open System.Collections.Generic
@@ -49,8 +49,8 @@ open Fpl.Interpreter.SymbolTable.Types3.CasesStmt
 open Fpl.Interpreter.SymbolTable.Types3.ForStmt
 open Fpl.Interpreter.SymbolTable.ExpressionMatching
 open Fpl.Interpreter.SymbolTable.Types4.Proofs
-open FplInterpreter.EvalAst.Forward
-open FplInterpreter.EvalAst.Expressions
+open Fpl.Interpreter.SymbolTable.Creation.Forward
+open Fpl.Interpreter.SymbolTable.Creation.Expressions
 
 let setKeywordType keywordType pos1 pos2 = 
     let fv = heap.Eval.PeekEvalStack()

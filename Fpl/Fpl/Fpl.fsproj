@@ -59,12 +59,12 @@
         <Compile Include="Interpreter\SymbolTable\Types3\CasesStmt.fs" />
         <Compile Include="Interpreter\SymbolTable\Types3\Assigments.fs" />
         <Compile Include="Interpreter\SymbolTable\ExpressionMatching\ExpressionMatching.fs" />
-        <Compile Include="Interpreter\SymbolTable\Types4\FplInterpreterProofs.fs" />
-        <Compile Include="Interpreter\Evaluation\FplInterpreterUsesClause.fs" />
-        <Compile Include="Interpreter\Evaluation\FplInterpreter.EvalAst.Forward.fs" />
-        <Compile Include="Interpreter\Evaluation\FplInterpreter.EvalAst.Expressions.fs" />
-        <Compile Include="Interpreter\Evaluation\FplInterpreter.EvalAst.Main.fs" />
-        <Compile Include="Interpreter\Evaluation\FplInterpreter.Main.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types4\Proofs.fs" />
+        <Compile Include="Interpreter\SymbolTable\Creation\UsesClause.fs" />
+        <Compile Include="Interpreter\SymbolTable\Creation\Forward.fs" />
+        <Compile Include="Interpreter\SymbolTable\Creation\Expressions.fs" />
+        <Compile Include="Interpreter\SymbolTable\Creation\Main.fs" />
+        <Compile Include="Interpreter\Main.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>
 
@@ -79,10 +79,6 @@
 
     <ItemGroup>
         <PackageReference Update="FSharp.Core" Version="9.0.303" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Interpreter\SymbolTable\Util\" />
     </ItemGroup>
 
 </Project>

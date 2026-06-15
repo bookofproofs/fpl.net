@@ -17,10 +17,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 module FplInterpreter.Main
 open System
 open Fpl.Errors.Diagnostics
-open Fpl.Interpreter.SymbolTable.Storage.Heap
-open FplInterpreterUsesClause
-open FplInterpreter.EvalAst.Main
 open Fpl.Errors.Emitter
+open Fpl.Interpreter.SymbolTable.Storage.Heap
+open Fpl.Interpreter.SymbolTable.Creation.UsesClauses
+open Fpl.Interpreter.SymbolTable.Creation.Main
 
 let fplInterpreter input (uri:PathEquivalentUri) fplLibUrl = 
     if input = "~testGEN00~" then

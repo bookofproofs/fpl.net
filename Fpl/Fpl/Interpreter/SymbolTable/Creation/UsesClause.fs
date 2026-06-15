@@ -1,6 +1,6 @@
-/// This module handles the the interpretation of uses clauses and implements big parts of self-containment of FPL. 
+/// This module handles the interpretation of uses clauses and implements big parts of self-containment of FPL. 
 
-module FplInterpreterUsesClause
+module Fpl.Interpreter.SymbolTable.Creation.UsesClauses
 open System.Text.RegularExpressions
 open System.Net.Http
 open System.IO
@@ -171,7 +171,7 @@ let private addOrUpdateParsedAst fileContent (uri:PathEquivalentUri) (parsedAsts
         if pa.Parsing.Reset fileContent uri then
             // if there ist a Parsed Ast with the same Name as the eani.Name 
             // and its checksum differs from the previous checksum 
-            // then replace the ast, checksum, location, sourcecode, the 
+            // then replace the ast, checksum, location, source code, the 
             pa.Sorting.Reset()
             pa.FplBlocks.Reset()
             pa.Status <- ParsedAstStatus.Loaded
