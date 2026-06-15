@@ -34,11 +34,11 @@ open Fpl.Interpreter.SymbolTable.Types2.Definitions
 open Fpl.Interpreter.SymbolTable.Types2.CompoundPredicates
 open Fpl.Interpreter.SymbolTable.TypeMatching
 open Fpl.Interpreter.SymbolTable.Types3.SelfParent
-open FplInterpreterExpressionMatching
 open Fpl.Interpreter.SymbolTable.Types3.PredicativeBlocks
 open Fpl.Interpreter.SymbolTable.Types3.DefinitionProperties
+open Fpl.Interpreter.SymbolTable.Types3.Quantors
+open Fpl.Interpreter.SymbolTable.ExpressionMatching
 open FplInterpreterProofs
-open FplInterpreterQuantors
 open FplInterpreterRulesOfInferences
 open FplInterpreterExtensions
 open FplInterpreterDelegates
