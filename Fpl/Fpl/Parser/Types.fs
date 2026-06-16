@@ -20,10 +20,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 /// parsing was done
 type Positions = Position * Position 
 
-
-// PredicateWithQualification _ | Ast.PredicateWithOptSpecification _ | Ast.InfixOp _ | Ast.PrefixOp _ | Ast.PostfixOp _ | Ast.Parens _
-
-
 type Ast = 
     // Lexical / Leaf tokens
     | Alias of Positions * string
@@ -40,7 +36,40 @@ type Ast =
     | BaseClassName of Positions * string
     | PredicateIdentifier of Positions * string
 
+    // Types & type related constructs
+    | IndexType of Positions * unit
+    | FunctionalTermType of Positions * unit
+    | ObjectType of Positions * unit
+    | PredicateType of Positions * unit
+    | TemplateType of Positions * string
+    | ArrayType of Positions * (Ast * Ast list)
+    | SimpleVariableType of Positions * Ast 
+    | IndexAllowedType of Positions * Ast 
+    | InheritedType of Positions * string 
+    | InheritedTypeList of Ast list
+    | CompoundPredicateType of Positions * (Ast * Ast option)
+    | CompoundFunctionalTermType of Positions * (Ast * (Ast * Ast) option)
+
+    // Expressions
+    | PredicateWithQualification of (Ast * Ast)
+    | PredicateWithOptSpecification of Positions * (Ast * Ast option)
+    | PrefixOp of Ast * Ast // operator * operand
+    | PostfixOp of Ast * Ast // operator * operand
+    | InfixOp of Positions * ((Ast * Ast option) list) // (operand * operator option) list
+    | Parens of Positions * Ast // (a)
+
+    // TopLevel
+    | AST of Positions * Ast
+    | Namespace of Ast list
+    | BuildingBlock of Positions * Ast
+    | ErrorSyntax of Positions * string 
+    | ErrorSyntaxBacktracking of Positions * string 
+    | ErrorSyntaxChain of (Positions * Position) * (string * string)
+
+
+
     // Identifiers
+    | ClassIdentifier of Positions * Ast
     | Extension of Positions * string
     | NamespaceIdentifier of Positions * Ast list
     | AliasedNamespaceIdentifier of Positions * (Ast * Ast option)
@@ -60,20 +89,6 @@ type Ast =
     | ReferencingIdentifier of Positions * (Ast * Ast list)
 
 
-    // Types
-    | TemplateType of Positions * string
-    | ObjectType of Positions * unit
-    | ClassIdentifier of Positions * Ast
-    | PredicateType of Positions * unit
-    | FunctionalTermType of Positions * unit
-    | IndexType of Positions * unit
-    | SimpleVariableType of Positions * Ast 
-    | IndexAllowedType of Positions * Ast 
-    | ArrayType of Positions * (Ast * Ast list)
-    | InheritedType of Positions * string 
-    | InheritedTypeList of Ast list
-    | CompoundPredicateType of Positions * (Ast * Ast option)
-    | CompoundFunctionalTermType of Positions * (Ast * (Ast * Ast) option)
     // Variables
     | Var of Positions * string
 
@@ -197,20 +212,3 @@ type Ast =
 
 
 
-    // Expressions
-    | PredicateWithQualification of (Ast * Ast)
-    | PredicateWithOptSpecification of Positions * (Ast * Ast option)
-    | PrefixOp of Ast * Ast // operator * operand
-    | PostfixOp of Ast * Ast // operator * operand
-    | InfixOp of Positions * ((Ast * Ast option) list) // (operand * operator option) list
-    | Parens of Positions * Ast // (a)
-
-
-
-    // TopLevel
-    | AST of Positions * Ast
-    | Namespace of Ast list
-    | BuildingBlock of Positions * Ast
-    | ErrorSyntax of Positions * string 
-    | ErrorSyntaxBacktracking of Positions * string 
-    | ErrorSyntaxChain of (Positions * Position) * (string * string)

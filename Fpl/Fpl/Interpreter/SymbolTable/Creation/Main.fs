@@ -47,20 +47,12 @@ open Fpl.Interpreter.SymbolTable.Types3.AssertStmt
 open Fpl.Interpreter.SymbolTable.Types3.Assignments
 open Fpl.Interpreter.SymbolTable.Types3.CasesStmt
 open Fpl.Interpreter.SymbolTable.Types3.ForStmt
-open Fpl.Interpreter.SymbolTable.ExpressionMatching
 open Fpl.Interpreter.SymbolTable.Types4.Proofs
 open Fpl.Interpreter.SymbolTable.Creation.Forward
 open Fpl.Interpreter.SymbolTable.Creation.LeafTokens
+open Fpl.Interpreter.SymbolTable.Creation.TypeConstructs
 open Fpl.Interpreter.SymbolTable.Creation.Expressions
 open Fpl.Interpreter.SymbolTable.Creation.TopLevel
-
-
-let setKeywordType keywordType pos1 pos2 = 
-    let fv = heap.Eval.PeekEvalStack()
-    match fv with
-    | :? FplVariableArray as arr -> arr.SetType keywordType None pos1 pos2 
-    | :? FplMapping as map -> map.SetType keywordType None pos1 pos2
-    | _ ->  fv.TypeId <- keywordType
 
 /// A recursive function evaluating an AST and returning a list of EvalAliasedNamespaceIdentifier records
 /// for each occurrence of the uses clause in the FPL code.
@@ -121,6 +113,35 @@ let rec eval ast =
         ->
         evalLeafTokens ast
 
+    // Types & type constructs
+    | Ast.IndexType _
+    | Ast.FunctionalTermType _
+    | Ast.ObjectType _
+    | Ast.PredicateType _
+    | Ast.TemplateType _
+    | Ast.ArrayType _
+    | Ast.SimpleVariableType _
+    | Ast.IndexAllowedType _
+    | Ast.InheritedType _
+    | Ast.InheritedTypeList _
+    | Ast.CompoundPredicateType _
+    | Ast.CompoundFunctionalTermType _
+        ->
+        evalTypeConstructs ast
+
+    // Expressions
+    | Ast.PredicateWithQualification _
+    | Ast.PredicateWithOptSpecification _
+    | Ast.InfixOp _
+    | Ast.PrefixOp _
+    | Ast.PostfixOp _
+    | Ast.Parens _
+        ->
+        evalExpressions ast
+
+
+
+
     // Top level nodes
     | Ast.AST _
     | Ast.Namespace _
@@ -132,38 +153,8 @@ let rec eval ast =
         evalTopLevel ast
 
 
-    // types and type-related constructs
-    | Ast.IndexType((pos1, pos2),()) -> 
-        setKeywordType LiteralInd pos1 pos2
-    | Ast.FunctionalTermType((pos1, pos2),()) -> 
-        setKeywordType LiteralFunc pos1 pos2
-    | Ast.ObjectType((pos1, pos2),()) -> 
-        setKeywordType LiteralObj pos1 pos2
-    | Ast.PredicateType((pos1, pos2),()) -> 
-        setKeywordType LiteralPred pos1 pos2
-    | Ast.TemplateType((pos1, pos2), s) -> 
-        let fv = heap.Eval.PeekEvalStack()
-        setKeywordType s pos1 pos2
-        let templateNode = new FplIntrinsicTpl(s, (pos1, pos2), fv)
-        match fv with 
-        | :? FplGenericVariable as var -> 
-            // attach template type to declared variable 
-            var.RefersTo <- Some templateNode
-        | _ -> () // RefersTo's semantics in other FplValues is different, do not interfere with it
-        heap.Eval.PushEvalStack(templateNode)
-        heap.Eval.PopEvalStack()
 
-    | Ast.ArrayType((pos1, pos2), (mainTypeAst,  indexAllowedTypeListAst)) ->
-        let fv = heap.Eval.PeekEvalStack()
-        match fv with 
-        | :? FplMapping as mapping -> mapping.SetIsArray()
-        | _ -> ()
-        eval mainTypeAst
-        indexAllowedTypeListAst |> List.map eval |> ignore
-    | Ast.SimpleVariableType((pos1, pos2), simpleVariableTypeAst) ->
-        eval simpleVariableTypeAst
-    | Ast.IndexAllowedType((pos1, pos2), indexAllowedTypeAst) ->
-        eval indexAllowedTypeAst
+    // types and type-related constructs
 
 
     | Ast.Intrinsic((pos1, pos2),()) -> 
@@ -537,18 +528,7 @@ let rec eval ast =
         evalArgumentTuple next predicateListAst pos1 pos2
     | Ast.QualificationList((pos1, pos2), asts) ->
         asts |> List.map eval |> ignore
-    | Ast.CompoundFunctionalTermType((pos1, pos2), (ast1, astTupleOption)) ->
-        eval ast1
-        match astTupleOption with 
-        | Some (ast2, _) -> eval ast2 |> ignore
-        | _ -> ()
-        match astTupleOption with 
-        | Some (_, ast3) -> eval ast3 |> ignore
-        | _ -> ()
     | Ast.AliasedNamespaceIdentifier((pos1, pos2), (ast1, optAst)) ->
-        eval ast1
-        optAst |> Option.map eval |> ignore
-    | Ast.CompoundPredicateType((pos1, pos2), (ast1, optAst)) ->
         eval ast1
         optAst |> Option.map eval |> ignore
     | Ast.ReferenceToProofOrCorollary((pos1, pos2), (referencingIdentifierAst)) ->
@@ -564,66 +544,6 @@ let rec eval ast =
         eval langCode
         eval ebnfAst
         heap.Eval.PopEvalStack() // remove language
-    | Ast.InheritedType ((pos1, pos2), identifier) -> 
-        let fv = heap.Eval.PeekEvalStack()
-        fv.FplId <- identifier
-        fv.TypeId <- identifier
-        let candidates = findCandidatesByName identifier false true
-        if candidates.Length = 0 then 
-            fv.ErrorOccurred <- emitID010Diagnostics identifier pos1 pos2
-    | Ast.InheritedTypeList inheritedTypeAsts -> 
-        let beingCreatedNode = heap.Eval.PeekEvalStack()
-        let addVariablesAndPropertiesOfBaseNode (bNode:FplGenericNode) = 
-            match box beingCreatedNode with
-            | :? FplGenericInheriting as inheritingNode -> 
-                inheritingNode.InheritVariables bNode
-                inheritingNode.InheritProperties bNode
-            | _ -> ()
-
-        inheritedTypeAsts
-        |> List.iter (fun inheritedType ->
-            match inheritedType with
-            | Ast.InheritedType((pos1, pos2), _) ->
-                // retrieve the name of the class and the class (if it exists)
-                let baseNode = new FplBase((pos1, pos2), beingCreatedNode)
-                heap.Eval.PushEvalStack(baseNode)            
-                eval inheritedType
-                heap.Eval.PopEvalStack() |> ignore
-                let candidates = findCandidatesByName baseNode.FplId false true
-                if candidates.Length > 0 then 
-                    let foundBase = candidates.Head
-                    match beingCreatedNode, foundBase with
-                    | :? FplPredicate, :? FplPredicate 
-                    | :? FplFunctionalTerm, :? FplFunctionalTerm ->
-                        let nodeType = beingCreatedNode.Type SignatureType.Type
-                        let baseType = foundBase.Type SignatureType.Type
-                        if nodeType <> baseType then 
-                            baseNode.ErrorOccurred <- emitID007diagnostics beingCreatedNode.Name nodeType foundBase.Name baseType pos1 pos2
-                        else 
-                            baseNode.RefersTo <- Some foundBase // add found base class to base
-                            addVariablesAndPropertiesOfBaseNode foundBase
-                    | :? FplClass, :? FplClass -> 
-                        baseNode.RefersTo <- Some foundBase // add found base class to base
-                        addVariablesAndPropertiesOfBaseNode foundBase
-                    | :? FplPredicate, _
-                    | :? FplFunctionalTerm, _
-                    | :? FplClass, _ ->
-                        let nodeType = beingCreatedNode.Type SignatureType.Type
-                        let baseType = foundBase.Type SignatureType.Type
-                        baseNode.ErrorOccurred <- emitID007diagnostics beingCreatedNode.Name nodeType foundBase.Name baseType pos1 pos2
-                    | _ -> () // does not occur, since syntax of inherited base is not supported from non-classes, non-functional terms, and non-predicates
-                else
-                    baseNode.ErrorOccurred <- emitID010Diagnostics baseNode.FplId pos1 pos2
-                if baseNode.FplId = beingCreatedNode.FplId then 
-                    baseNode.ErrorOccurred <- emitID009Diagnostics baseNode.FplId pos1 pos2
-            | _ -> ()
-        )
-        let classInheritanceChains = findInheritanceChains beingCreatedNode 
-        classInheritanceChains
-        |> Seq.filter (fun kvp -> kvp.Value <> "ok")
-        |> Seq.iter (fun kvp -> 
-            beingCreatedNode.ErrorOccurred <- emitID011Diagnostics kvp.Key kvp.Value beingCreatedNode.StartPos beingCreatedNode.EndPos
-        )
     | Ast.ExtensionAssignment((pos1, pos2), (varAst, extensionRegexAst)) ->
         heap.Helper.InSignatureEvaluation <- true
         eval varAst
@@ -799,8 +719,6 @@ let rec eval ast =
         ()
         // empty since the pattern will be matched in DefinitionFunctionalTerm 
         // we list it her to remove FS0025 incomplete pattern warnings
-    | Ast.PredicateWithQualification _ | Ast.PredicateWithOptSpecification _ | Ast.InfixOp _ | Ast.PrefixOp _ | Ast.PostfixOp _ | Ast.Parens _ ->
-        evalExpressions ast
     | Ast.Cases((pos1, pos2), (caseSingleListAsts, caseElseAst)) ->
         let parent = heap.Eval.PeekEvalStack()
         let casesStmt = new FplCases((pos1, pos2), parent)
