@@ -20,32 +20,37 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 /// parsing was done
 type Positions = Position * Position 
 
+
+// PredicateWithQualification _ | Ast.PredicateWithOptSpecification _ | Ast.InfixOp _ | Ast.PrefixOp _ | Ast.PostfixOp _ | Ast.Parens _
+
+
 type Ast = 
-    // Literals
-    | Star of Positions * unit
+    // Lexical / Leaf tokens
+    | Alias of Positions * string
     | Dot of unit
-    // Identifiers
+    | Star of Positions * unit
     | Digits of string
-    | Extension of Positions * string
-    | DollarDigits of Positions * uint
     | Exists1 of unit
+    | DollarDigits of Positions * uint
+    | ExtensionRegex of string
+    | ExtensionName of Positions * string
+    | LanguageCode of Positions * string
+    | LocalizationString of Positions * string
     | PascalCaseId of Positions * string
+    | BaseClassName of Positions * string
+    | PredicateIdentifier of Positions * string
+
+    // Identifiers
+    | Extension of Positions * string
     | NamespaceIdentifier of Positions * Ast list
     | AliasedNamespaceIdentifier of Positions * (Ast * Ast option)
-    | PredicateIdentifier of Positions * string
-    | LanguageCode of Positions * string
-    | Alias of Positions * string
     | SelfOrParent of Positions * Ast
     | Self of Positions * unit
     | Parent of Positions * unit
-    | LocalizationString of Positions * string
     | TranslationTerm of Positions * Ast list
     | TranslationTermList of Positions * Ast list
     | Language of Positions * (Ast * Ast)
-    | ExtensionName of Positions * string
     | DelegateName of Positions * string
-    | BaseClassName of Positions * string
-    | ExtensionRegex of string
     | ExtensionAssignment of Positions * (Ast * Ast) 
     | ExtensionSignature of Positions * (Ast * Ast)
     | DefinitionExtension of Positions * ((Ast * Ast) * Ast)
@@ -90,17 +95,14 @@ type Ast =
     | IsOperator of Positions * (Ast * Ast)
     | Delegate of Ast * Ast
     | ArgumentTuple of Positions * Ast list 
-    | PredicateWithOptSpecification of Positions * (Ast * Ast option)
     | DottedPredicate of Positions * Ast 
     | QualificationList of Positions * Ast list
-    | PredicateWithQualification of (Ast * Ast)
+
         
-    // Expressions
     | ObjectSymbolWithPos of Positions * string
     | InfixSymbolWithPos of Positions * string
     | PostFixSymbolWithPos of Positions * string
     | PrefixSymbolWithPos of Positions * string
-    | Parens of Positions * Ast // (a)
 
     // Statements
     | Assertion of Positions * Ast
@@ -165,9 +167,6 @@ type Ast =
 
     | DefinitionClass of Positions * (((Ast * Ast option) * Ast option) * Ast) 
     | Precedence of Positions * int
-    | PrefixOp of Ast * Ast // operator * operand
-    | PostfixOp of Ast * Ast // operator * operand
-    | InfixOp of Positions * ((Ast * Ast option) list) // (operarand * operator option) list
 
     | InfixDeclWithPrecedence of Positions * (string * Ast) // infix symbol with precedence
     | PrefixDecl of Positions * string
@@ -196,9 +195,21 @@ type Ast =
     | ProofSignature of Positions * (Ast * Ast list)
     | Proof of Positions * (Ast * Ast)
 
-    | Namespace of Ast list
 
+
+    // Expressions
+    | PredicateWithQualification of (Ast * Ast)
+    | PredicateWithOptSpecification of Positions * (Ast * Ast option)
+    | PrefixOp of Ast * Ast // operator * operand
+    | PostfixOp of Ast * Ast // operator * operand
+    | InfixOp of Positions * ((Ast * Ast option) list) // (operand * operator option) list
+    | Parens of Positions * Ast // (a)
+
+
+
+    // TopLevel
     | AST of Positions * Ast
+    | Namespace of Ast list
     | BuildingBlock of Positions * Ast
     | ErrorSyntax of Positions * string 
     | ErrorSyntaxBacktracking of Positions * string 

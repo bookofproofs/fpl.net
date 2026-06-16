@@ -62,7 +62,9 @@
         <Compile Include="Interpreter\SymbolTable\Types4\Proofs.fs" />
         <Compile Include="Interpreter\SymbolTable\Creation\UsesClause.fs" />
         <Compile Include="Interpreter\SymbolTable\Creation\Forward.fs" />
+        <Compile Include="Interpreter\SymbolTable\Creation\LeafTokens.fs" />
         <Compile Include="Interpreter\SymbolTable\Creation\Expressions.fs" />
+        <Compile Include="Interpreter\SymbolTable\Creation\TopLevel.fs" />
         <Compile Include="Interpreter\SymbolTable\Creation\Main.fs" />
         <Compile Include="Interpreter\Main.fs" />
         <Compile Include="Program.fs" />

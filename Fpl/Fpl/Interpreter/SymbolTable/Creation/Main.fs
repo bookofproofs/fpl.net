@@ -50,7 +50,10 @@ open Fpl.Interpreter.SymbolTable.Types3.ForStmt
 open Fpl.Interpreter.SymbolTable.ExpressionMatching
 open Fpl.Interpreter.SymbolTable.Types4.Proofs
 open Fpl.Interpreter.SymbolTable.Creation.Forward
+open Fpl.Interpreter.SymbolTable.Creation.LeafTokens
 open Fpl.Interpreter.SymbolTable.Creation.Expressions
+open Fpl.Interpreter.SymbolTable.Creation.TopLevel
+
 
 let setKeywordType keywordType pos1 pos2 = 
     let fv = heap.Eval.PeekEvalStack()
@@ -102,163 +105,32 @@ let rec eval ast =
 
     match ast with
     // lexical / leaf tokens
-    | Ast.Alias((_, _), _) -> ()
-    | Ast.Dot() -> ()
-    | Ast.Star((_, _),()) -> ()
-    | Ast.BuildingBlock((_, _),buidlingBlockAst) ->
-        eval buidlingBlockAst
-    | Ast.ErrorSyntax((pos1, pos2), errMsg) ->
-        emitSY000diagnostics errMsg pos1 pos2 
-    | Ast.ErrorSyntaxBacktracking((pos1, pos2), errMsg) ->
-        emitSY001diagnostics errMsg pos1 pos2 
-    | Ast.ErrorSyntaxChain(((pos1, pos2),_), (errMsg, chain)) ->
-        emitSY002diagnostics errMsg chain pos1 pos2 
-    | Ast.Digits s -> 
-        let fv = heap.Eval.PeekEvalStack()
-        fv.FplId <- s
-        fv.TypeId <- s
-    | Ast.Exists1() ->
-        let fv = heap.Eval.PeekEvalStack()
-        fv.FplId <- fv.FplId + "$1"
-    | Ast.DollarDigits((pos1, pos2), s) -> 
-        let fv = heap.Eval.PeekEvalStack()
-        let sid = $"${s.ToString()}"
-        match fv with 
-        | :? FplReference when fv.FplId = String.Empty && not heap.Helper.InReferenceToProofOrCorollary ->
-            let value = new FplIntrinsicInd((pos1, pos2), fv)
-            value.FplId <- sid
-            heap.Eval.PushEvalStack(value)
-            heap.Eval.PopEvalStack()
-        | :? FplQuantorExistsN ->
-            match (int)s with
-            | 0 ->
-                fv.ErrorOccurred <- emitSY011diagnostics pos1 pos2
-            | 1 ->
-                fv.ErrorOccurred <- emitSY012diagnostics pos1 pos2
-            | _ -> ()
-            fv.FplId <- fv.FplId + sid
-        | _  ->
-            fv.FplId <- fv.FplId + sid
-            match fv.TypeId with 
-            | "" when not heap.Helper.InReferenceToProofOrCorollary -> fv.TypeId <- LiteralInd
-            | LiteralPred -> ()
-            | _ -> fv.TypeId <- fv.TypeId + sid
+    | Ast.Alias _
+    | Ast.Dot _
+    | Ast.Star _
+    | Ast.Digits _
+    | Ast.Exists1 _
+    | Ast.DollarDigits _
+    | Ast.ExtensionRegex _
+    | Ast.ExtensionName _
+    | Ast.LanguageCode _
+    | Ast.LocalizationString _
+    | Ast.PascalCaseId _
+    | Ast.BaseClassName _
+    | Ast.PredicateIdentifier _
+        ->
+        evalLeafTokens ast
 
-    | Ast.ExtensionRegex s -> 
-        let fv = heap.Eval.PeekEvalStack()
-        fv.TypeId <- s
-    | Ast.ExtensionName((pos1, pos2), extensionName) ->
-        let fv = heap.Eval.PeekEvalStack()
-        match fv with 
-        | :? FplExtension ->
-            fv.FplId <- extensionName
-            fv.TypeId <- extensionName
-        | _ -> ()
-    | Ast.LanguageCode((pos1, pos2), s) -> 
-        let fv = heap.Eval.PeekEvalStack()
-        fv.FplId <- s
-        fv.TypeId <- s
-        fv.StartPos <- pos1
-        fv.EndPos <- pos2
-    | Ast.LocalizationString((pos1, pos2), s) -> 
-        let fv = heap.Eval.PeekEvalStack()
-        fv.FplId <- s
-        fv.TypeId <- s
+    // Top level nodes
+    | Ast.AST _
+    | Ast.Namespace _
+    | Ast.BuildingBlock _
+    | Ast.ErrorSyntax _
+    | Ast.ErrorSyntaxBacktracking _
+    | Ast.ErrorSyntaxChain _
+        ->
+        evalTopLevel ast
 
-    | Ast.PascalCaseId ((pos1, pos2), pascalCaseId) ->
-        let fv = heap.Eval.PeekEvalStack()
-        match fv.Name with
-        | LiteralAxL
-        | LiteralThmL
-        | LiteralPropL
-        | LiteralLemL
-        | LiteralConjL
-        | LiteralCorL
-        | PrimFunctionalTermL
-        | PrimPredicateL
-        | LiteralPrfL
-        | PrimMandatoryFunctionalTermL
-        | PrimMandatoryPredicateL
-        | PrimPredicateL
-        | PrimFunctionalTermL
-        | PrimRuleOfInference -> 
-            fv.FplId <- pascalCaseId
-        | LiteralCtorL ->
-            fv.FplId <- pascalCaseId
-            fv.TypeId <- pascalCaseId
-            fv.ErrorOccurred <- emitID008Diagnostics pascalCaseId fv.Parent.Value.FplId pos1 pos2
-        | PrimClassL ->
-            fv.FplId <- pascalCaseId
-            fv.TypeId <- pascalCaseId
-        | _ -> ()
-
-    | Ast.BaseClassName((pos1, pos2), identifier) ->
-        let fv = heap.Eval.PeekEvalStack()
-        fv.FplId <- identifier
-        fv.TypeId <- identifier
-        let candidates = findCandidatesByName identifier false true
-        if candidates.Length = 0 then 
-            fv.ErrorOccurred <- emitID010Diagnostics identifier pos1 pos2
-    | Ast.PredicateIdentifier((pos1, pos2), identifier) ->
-        let fv = heap.Eval.PeekEvalStack()
-        let searchIdentifier = 
-            if heap.Helper.InReferenceToProofOrCorollary then 
-                $"{identifier}{fv.FplId}"
-            else
-                identifier
-            
-        let candidatesFromTheory = findCandidatesByName searchIdentifier false heap.Helper.InReferenceToProofOrCorollary
-        let candidatesLocal = findPropertyCandidatesByNameInBlock fv searchIdentifier
-        let candidatesOfMapping = findCandidateOfExtensionMapping fv searchIdentifier
-        let candidates, candidatesNames =  filterCandidates (candidatesFromTheory @ candidatesLocal @ candidatesOfMapping) searchIdentifier true
-        let correctIds (fv1:FplGenericNode) = 
-            match fv with 
-            | :? FplForInStmtDomain -> 
-                fv1.FplId <- searchIdentifier
-                fv1.TypeId <- searchIdentifier
-            | :? FplReference -> 
-                fv1.FplId <- searchIdentifier
-                fv1.TypeId <- searchIdentifier
-            | :? FplGenericJustificationItem as fvJi -> 
-                fvJi.FplId <- searchIdentifier
-            | _ -> ()
-
-        match candidates.Length with
-        | 0 -> 
-            match fv.Parent with
-            | Some (:? FplReference as parent) when parent.DottedChild.IsSome && Object.ReferenceEquals(fv, parent.DottedChild.Value) ->
-                // do not emit ID010 diagnostics, if fv is a dotted child, whose identifier we are still being evaluated
-                // only with this identifier, it will be possible in AST.PredicateWithOptSpecification to search for correct candidates 
-                () 
-            | _ -> 
-                // otherwise, issue ID010 diagnostics
-                fv.ErrorOccurred <- emitID010Diagnostics identifier pos1 pos2
-            match fv with 
-            | :? FplVariableArray as arr -> arr.SetType identifier None pos1 pos2
-            | :? FplMapping as map -> map.SetType identifier None pos1 pos2
-            | :? FplVariable ->
-                let fvWithValue = fv :?> FplGenericHasValue
-                fvWithValue.TypeId <- identifier
-                fvWithValue.SetDefaultValue()
-            | _ -> correctIds fv 
-        | 1 ->
-            let candidate = candidates.Head
-            match fv with 
-            | :? FplVariableArray as arr ->  arr.SetType identifier (Some candidate) pos1 pos2
-            | :? FplMapping as map -> 
-                let candidate = candidates.Head
-                // mappings can point to classes 
-                map.SetType identifier (Some candidate) pos1 pos2
-            | :? FplVariable -> 
-                fv.TypeId <- identifier
-                fv.RefersTo <- Some candidate
-            | _ -> correctIds fv
-        | _ ->
-            match fv with 
-            | :? FplMapping 
-            | :? FplVariable -> 
-                fv.ErrorOccurred <- emitID017Diagnostics identifier candidatesNames pos1 pos2
-            | _ -> correctIds fv
 
     // types and type-related constructs
     | Ast.IndexType((pos1, pos2),()) -> 
@@ -570,8 +442,6 @@ let rec eval ast =
         heap.Eval.PushEvalStack(fvJi)
         eval variableAst
         heap.Eval.PopEvalStack()
-    | Ast.AST((pos1, pos2), ast1) ->
-        eval ast1
     | Ast.ParamTuple namedVariableDeclarationListAsts ->
         let fv = heap.Eval.PeekEvalStack()
         fv.ArgType <- ArgType.Parentheses
@@ -667,8 +537,6 @@ let rec eval ast =
         evalArgumentTuple next predicateListAst pos1 pos2
     | Ast.QualificationList((pos1, pos2), asts) ->
         asts |> List.map eval |> ignore
-    | Ast.Namespace(theoryAst) ->
-        theoryAst |> List.map eval |> ignore
     | Ast.CompoundFunctionalTermType((pos1, pos2), (ast1, astTupleOption)) ->
         eval ast1
         match astTupleOption with 
