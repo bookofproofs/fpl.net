@@ -88,99 +88,46 @@ let evalLeafTokens ast =
         fv.FplId <- s
         fv.TypeId <- s
 
-    | Ast.PascalCaseId ((pos1, pos2), pascalCaseId) ->
+    | Ast.PrefixDecl((pos1, pos2), symbol) -> 
         let fv = heap.Eval.PeekEvalStack()
-        match fv.Name with
-        | LiteralAxL
-        | LiteralThmL
-        | LiteralPropL
-        | LiteralLemL
-        | LiteralConjL
-        | LiteralCorL
-        | PrimFunctionalTermL
-        | PrimPredicateL
-        | LiteralPrfL
-        | PrimMandatoryFunctionalTermL
-        | PrimMandatoryPredicateL
-        | PrimPredicateL
-        | PrimFunctionalTermL
-        | PrimRuleOfInference -> 
-            fv.FplId <- pascalCaseId
-        | LiteralCtorL ->
-            fv.FplId <- pascalCaseId
-            fv.TypeId <- pascalCaseId
-            fv.ErrorOccurred <- emitID008Diagnostics pascalCaseId fv.Parent.Value.FplId pos1 pos2
-        | PrimClassL ->
-            fv.FplId <- pascalCaseId
-            fv.TypeId <- pascalCaseId
-        | _ -> ()
+        fv.ExpressionType <- FixType.Prefix symbol
+    | Ast.PostfixDecl((pos1, pos2), symbol) -> 
+        let fv = heap.Eval.PeekEvalStack()
+        fv.ExpressionType <- FixType.Postfix symbol
+    | Ast.SymbolDecl((pos1, pos2), symbol) -> 
+        let fv = heap.Eval.PeekEvalStack()
+        fv.ExpressionType <- FixType.Symbol symbol
+    | Ast.ObjectSymbolWithPos((pos1, pos2), symbol) -> 
+        let fv = heap.Eval.PeekEvalStack()
+        fv.FplId <- symbol
+        fv.TypeId <- symbol
+        fv.StartPos <- pos1
+        fv.EndPos <- pos2
+        checkSIG01Diagnostics fv
+    | Ast.InfixSymbolWithPos((pos1, pos2), symbol) -> 
+        let fv = heap.Eval.PeekEvalStack()
+        fv.FplId <- symbol
+        fv.TypeId <- symbol
+        fv.StartPos <- pos1
+        fv.EndPos <- pos2
+        fv.ExpressionType <- FixType.Infix(symbol,-1)
+        checkSIG01Diagnostics fv
+    | Ast.PostFixSymbolWithPos((pos1, pos2), symbol) -> 
+        let fv = heap.Eval.PeekEvalStack()
+        fv.FplId <- symbol
+        fv.TypeId <- symbol
+        fv.StartPos <- pos1
+        fv.EndPos <- pos2
+        fv.ExpressionType <- FixType.Postfix symbol
+        checkSIG01Diagnostics fv
+    | Ast.PrefixSymbolWithPos((pos1, pos2), symbol) -> 
+        let fv = heap.Eval.PeekEvalStack()
+        fv.FplId <- symbol
+        fv.TypeId <- symbol
+        fv.StartPos <- pos1
+        fv.EndPos <- pos2
+        fv.ExpressionType <- FixType.Prefix symbol
+        checkSIG01Diagnostics fv
 
-    | Ast.BaseClassName((pos1, pos2), identifier) ->
-        let fv = heap.Eval.PeekEvalStack()
-        fv.FplId <- identifier
-        fv.TypeId <- identifier
-        let candidates = findCandidatesByName identifier false true
-        if candidates.Length = 0 then 
-            fv.ErrorOccurred <- emitID010Diagnostics identifier pos1 pos2
-    | Ast.PredicateIdentifier((pos1, pos2), identifier) ->
-        let fv = heap.Eval.PeekEvalStack()
-        let searchIdentifier = 
-            if heap.Helper.InReferenceToProofOrCorollary then 
-                $"{identifier}{fv.FplId}"
-            else
-                identifier
-            
-        let candidatesFromTheory = findCandidatesByName searchIdentifier false heap.Helper.InReferenceToProofOrCorollary
-        let candidatesLocal = findPropertyCandidatesByNameInBlock fv searchIdentifier
-        let candidatesOfMapping = findCandidateOfExtensionMapping fv searchIdentifier
-        let candidates, candidatesNames =  filterCandidates (candidatesFromTheory @ candidatesLocal @ candidatesOfMapping) searchIdentifier true
-        let correctIds (fv1:FplGenericNode) = 
-            match fv with 
-            | :? FplForInStmtDomain -> 
-                fv1.FplId <- searchIdentifier
-                fv1.TypeId <- searchIdentifier
-            | :? FplReference -> 
-                fv1.FplId <- searchIdentifier
-                fv1.TypeId <- searchIdentifier
-            | :? FplGenericJustificationItem as fvJi -> 
-                fvJi.FplId <- searchIdentifier
-            | _ -> ()
-
-        match candidates.Length with
-        | 0 -> 
-            match fv.Parent with
-            | Some (:? FplReference as parent) when parent.DottedChild.IsSome && Object.ReferenceEquals(fv, parent.DottedChild.Value) ->
-                // do not emit ID010 diagnostics, if fv is a dotted child, whose identifier we are still being evaluated
-                // only with this identifier, it will be possible in AST.PredicateWithOptSpecification to search for correct candidates 
-                () 
-            | _ -> 
-                // otherwise, issue ID010 diagnostics
-                fv.ErrorOccurred <- emitID010Diagnostics identifier pos1 pos2
-            match fv with 
-            | :? FplVariableArray as arr -> arr.SetType identifier None pos1 pos2
-            | :? FplMapping as map -> map.SetType identifier None pos1 pos2
-            | :? FplVariable ->
-                let fvWithValue = fv :?> FplGenericHasValue
-                fvWithValue.TypeId <- identifier
-                fvWithValue.SetDefaultValue()
-            | _ -> correctIds fv 
-        | 1 ->
-            let candidate = candidates.Head
-            match fv with 
-            | :? FplVariableArray as arr ->  arr.SetType identifier (Some candidate) pos1 pos2
-            | :? FplMapping as map -> 
-                let candidate = candidates.Head
-                // mappings can point to classes 
-                map.SetType identifier (Some candidate) pos1 pos2
-            | :? FplVariable -> 
-                fv.TypeId <- identifier
-                fv.RefersTo <- Some candidate
-            | _ -> correctIds fv
-        | _ ->
-            match fv with 
-            | :? FplMapping 
-            | :? FplVariable -> 
-                fv.ErrorOccurred <- emitID017Diagnostics identifier candidatesNames pos1 pos2
-            | _ -> correctIds fv
     | _ ->
         failwith (sprintf "{%O} is not a leaf token" ast) 

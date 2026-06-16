@@ -32,9 +32,23 @@ type Ast =
     | ExtensionName of Positions * string
     | LanguageCode of Positions * string
     | LocalizationString of Positions * string
+    | ObjectSymbolWithPos of Positions * string
+    | InfixSymbolWithPos of Positions * string
+    | PostFixSymbolWithPos of Positions * string
+    | PrefixSymbolWithPos of Positions * string
+
+    | PrefixDecl of Positions * string
+    | PostfixDecl of Positions * string
+    | SymbolDecl of Positions * string
+
+    // Identifiers & identifier dispatchers
     | PascalCaseId of Positions * string
     | BaseClassName of Positions * string
     | PredicateIdentifier of Positions * string
+    | NamespaceIdentifier of Positions * Ast list
+    | ClassIdentifier of Positions * Ast
+    | AliasedNamespaceIdentifier of Positions * (Ast * Ast option)
+
 
     // Types & type related constructs
     | IndexType of Positions * unit
@@ -69,10 +83,7 @@ type Ast =
 
 
     // Identifiers
-    | ClassIdentifier of Positions * Ast
     | Extension of Positions * string
-    | NamespaceIdentifier of Positions * Ast list
-    | AliasedNamespaceIdentifier of Positions * (Ast * Ast option)
     | SelfOrParent of Positions * Ast
     | Self of Positions * unit
     | Parent of Positions * unit
@@ -113,11 +124,9 @@ type Ast =
     | DottedPredicate of Positions * Ast 
     | QualificationList of Positions * Ast list
 
-        
-    | ObjectSymbolWithPos of Positions * string
-    | InfixSymbolWithPos of Positions * string
-    | PostFixSymbolWithPos of Positions * string
-    | PrefixSymbolWithPos of Positions * string
+    
+    | InfixDeclWithPrecedence of Positions * (string * Ast) // infix symbol with precedence
+
 
     // Statements
     | Assertion of Positions * Ast
@@ -183,10 +192,6 @@ type Ast =
     | DefinitionClass of Positions * (((Ast * Ast option) * Ast option) * Ast) 
     | Precedence of Positions * int
 
-    | InfixDeclWithPrecedence of Positions * (string * Ast) // infix symbol with precedence
-    | PrefixDecl of Positions * string
-    | PostfixDecl of Positions * string
-    | SymbolDecl of Positions * string
 
     // Proofs
     | ArgumentIdentifier of Positions * string

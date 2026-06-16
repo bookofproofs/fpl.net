@@ -50,6 +50,7 @@ open Fpl.Interpreter.SymbolTable.Types3.ForStmt
 open Fpl.Interpreter.SymbolTable.Types4.Proofs
 open Fpl.Interpreter.SymbolTable.Creation.Forward
 open Fpl.Interpreter.SymbolTable.Creation.LeafTokens
+open Fpl.Interpreter.SymbolTable.Creation.Identifiers
 open Fpl.Interpreter.SymbolTable.Creation.TypeConstructs
 open Fpl.Interpreter.SymbolTable.Creation.Expressions
 open Fpl.Interpreter.SymbolTable.Creation.TopLevel
@@ -96,7 +97,7 @@ let rec eval ast =
             | _ -> ()
 
     match ast with
-    // lexical / leaf tokens
+    // Lexical / leaf tokens
     | Ast.Alias _
     | Ast.Dot _
     | Ast.Star _
@@ -107,13 +108,27 @@ let rec eval ast =
     | Ast.ExtensionName _
     | Ast.LanguageCode _
     | Ast.LocalizationString _
-    | Ast.PascalCaseId _
-    | Ast.BaseClassName _
-    | Ast.PredicateIdentifier _
+    | Ast.PrefixDecl _
+    | Ast.PostfixDecl _
+    | Ast.SymbolDecl _
+    | Ast.ObjectSymbolWithPos _
+    | Ast.InfixSymbolWithPos _
+    | Ast.PostFixSymbolWithPos _
+    | Ast.PrefixSymbolWithPos _
         ->
         evalLeafTokens ast
 
-    // Types & type constructs
+    // Identifiers & Identifier dispatchers
+    | Ast.PascalCaseId _
+    | Ast.BaseClassName _
+    | Ast.PredicateIdentifier _
+    | Ast.NamespaceIdentifier _
+    | Ast.ClassIdentifier _
+    | Ast.AliasedNamespaceIdentifier _
+        ->
+        evalIdentifiers ast
+
+    // Types and type-related constructs
     | Ast.IndexType _
     | Ast.FunctionalTermType _
     | Ast.ObjectType _
@@ -139,9 +154,6 @@ let rec eval ast =
         ->
         evalExpressions ast
 
-
-
-
     // Top level nodes
     | Ast.AST _
     | Ast.Namespace _
@@ -154,7 +166,6 @@ let rec eval ast =
 
 
 
-    // types and type-related constructs
 
 
     | Ast.Intrinsic((pos1, pos2),()) -> 
@@ -239,13 +250,6 @@ let rec eval ast =
                 variable.Parent <- Some loc
         | _ -> ()
 
-    | Ast.ObjectSymbolWithPos((pos1, pos2), symbol) -> 
-        let fv = heap.Eval.PeekEvalStack()
-        fv.FplId <- symbol
-        fv.TypeId <- symbol
-        fv.StartPos <- pos1
-        fv.EndPos <- pos2
-        checkSIG01Diagnostics fv
     | Ast.ArgumentIdentifier((pos1, pos2), argumentId) -> 
         let testNode = heap.Eval.PeekEvalStack()
         match testNode with
@@ -274,43 +278,10 @@ let rec eval ast =
             heap.Eval.PushEvalStack(fvAi)
             heap.Eval.PopEvalStack()
         | _ -> ()
-    | Ast.PrefixDecl((pos1, pos2), symbol) -> 
-        let fv = heap.Eval.PeekEvalStack()
-        fv.ExpressionType <- FixType.Prefix symbol
     | Ast.InfixDeclWithPrecedence((pos1, pos2), (symbol, precedenceAsts)) -> 
         let fv = heap.Eval.PeekEvalStack()
         eval precedenceAsts
         fv.ExpressionType <- FixType.Infix (symbol, fv.AuxiliaryInfo)
-    | Ast.PostfixDecl((pos1, pos2), symbol) -> 
-        let fv = heap.Eval.PeekEvalStack()
-        fv.ExpressionType <- FixType.Postfix symbol
-    | Ast.SymbolDecl((pos1, pos2), symbol) -> 
-        let fv = heap.Eval.PeekEvalStack()
-        fv.ExpressionType <- FixType.Symbol symbol
-    | Ast.InfixSymbolWithPos((pos1, pos2), symbol) -> 
-        let fv = heap.Eval.PeekEvalStack()
-        fv.FplId <- symbol
-        fv.TypeId <- symbol
-        fv.StartPos <- pos1
-        fv.EndPos <- pos2
-        fv.ExpressionType <- FixType.Infix(symbol,-1)
-        checkSIG01Diagnostics fv
-    | Ast.PostFixSymbolWithPos((pos1, pos2), symbol) -> 
-        let fv = heap.Eval.PeekEvalStack()
-        fv.FplId <- symbol
-        fv.TypeId <- symbol
-        fv.StartPos <- pos1
-        fv.EndPos <- pos2
-        fv.ExpressionType <- FixType.Postfix symbol
-        checkSIG01Diagnostics fv
-    | Ast.PrefixSymbolWithPos((pos1, pos2), symbol) -> 
-        let fv = heap.Eval.PeekEvalStack()
-        fv.FplId <- symbol
-        fv.TypeId <- symbol
-        fv.StartPos <- pos1
-        fv.EndPos <- pos2
-        fv.ExpressionType <- FixType.Prefix symbol
-        checkSIG01Diagnostics fv
     | Ast.Self((pos1, pos2), _) -> 
         let parent = heap.Eval.PeekEvalStack()
         let fv = new FplSelf((pos1, pos2), parent)
@@ -369,10 +340,6 @@ let rec eval ast =
         heap.Eval.PushEvalStack(map)
         eval variableTypeAst
         heap.Eval.PopEvalStack()
-    | Ast.ClassIdentifier((pos1, pos2), ast1) ->
-        eval ast1
-        let fv = heap.Eval.PeekEvalStack()
-        fv.EndPos <- pos2
     | Ast.Extension((pos1, pos2), extensionString) ->
         let fv = heap.Eval.PeekEvalStack()
         let fplNew = new FplExtensionObj((pos1,pos2), fv)
@@ -442,8 +409,6 @@ let rec eval ast =
             | _ -> ()
             eval child
         ) |> ignore
-    | Ast.NamespaceIdentifier((pos1, pos2), asts) ->
-        asts |> List.map eval |> ignore
     | Ast.TranslationTerm((pos1, pos2), asts) ->
         let fv = heap.Eval.PeekEvalStack()
         asts |> List.map (fun ebnfTerm ->
@@ -528,9 +493,6 @@ let rec eval ast =
         evalArgumentTuple next predicateListAst pos1 pos2
     | Ast.QualificationList((pos1, pos2), asts) ->
         asts |> List.map eval |> ignore
-    | Ast.AliasedNamespaceIdentifier((pos1, pos2), (ast1, optAst)) ->
-        eval ast1
-        optAst |> Option.map eval |> ignore
     | Ast.ReferenceToProofOrCorollary((pos1, pos2), (referencingIdentifierAst)) ->
         heap.Helper.InReferenceToProofOrCorollary <- true
         eval referencingIdentifierAst
