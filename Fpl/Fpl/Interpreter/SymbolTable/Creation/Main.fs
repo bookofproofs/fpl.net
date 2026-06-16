@@ -31,13 +31,9 @@ open Fpl.Interpreter.SymbolTable.Types2.Intrinsic
 open Fpl.Interpreter.SymbolTable.Types2.Variables
 open Fpl.Interpreter.SymbolTable.Types2.References
 open Fpl.Interpreter.SymbolTable.Types2.Definitions
-open Fpl.Interpreter.SymbolTable.Types2.CompoundPredicates
-open Fpl.Interpreter.SymbolTable.Types3.IsOperator
-open Fpl.Interpreter.SymbolTable.TypeMatching
 open Fpl.Interpreter.SymbolTable.Types3.SelfParent
 open Fpl.Interpreter.SymbolTable.Types3.PredicativeBlocks
 open Fpl.Interpreter.SymbolTable.Types3.DefinitionProperties
-open Fpl.Interpreter.SymbolTable.Types3.Quantors
 open Fpl.Interpreter.SymbolTable.Types3.RulesOfInferences
 open Fpl.Interpreter.SymbolTable.Types3.Extensions
 open Fpl.Interpreter.SymbolTable.Types3.Delegates
@@ -52,6 +48,7 @@ open Fpl.Interpreter.SymbolTable.Creation.Forward
 open Fpl.Interpreter.SymbolTable.Creation.LeafTokens
 open Fpl.Interpreter.SymbolTable.Creation.Identifiers
 open Fpl.Interpreter.SymbolTable.Creation.TypeConstructs
+open Fpl.Interpreter.SymbolTable.Creation.Predicates
 open Fpl.Interpreter.SymbolTable.Creation.Expressions
 open Fpl.Interpreter.SymbolTable.Creation.TopLevel
 
@@ -102,10 +99,8 @@ let rec eval ast =
     | Ast.Dot _
     | Ast.Star _
     | Ast.Digits _
-    | Ast.Exists1 _
     | Ast.DollarDigits _
     | Ast.ExtensionRegex _
-    | Ast.ExtensionName _
     | Ast.LanguageCode _
     | Ast.LocalizationString _
     | Ast.PrefixDecl _
@@ -125,6 +120,11 @@ let rec eval ast =
     | Ast.NamespaceIdentifier _
     | Ast.ClassIdentifier _
     | Ast.AliasedNamespaceIdentifier _
+    | Ast.ArgumentIdentifier _
+    | Ast.RefArgumentIdentifier _
+    | Ast.DelegateName _
+    | Ast.ExtensionName _
+    | Ast.ReferencingIdentifier _
         ->
         evalIdentifiers ast
 
@@ -143,6 +143,22 @@ let rec eval ast =
     | Ast.CompoundFunctionalTermType _
         ->
         evalTypeConstructs ast
+
+    | Ast.True _
+    | Ast.False _
+    | Ast.And _
+    | Ast.Or _
+    | Ast.Xor _
+    | Ast.Impl _
+    | Ast.Iif _
+    | Ast.Not _
+    | Ast.All _
+    | Ast.Exists _
+    | Ast.Exists1 _
+    | Ast.ExistsN _
+    | Ast.IsOperator _
+        ->
+        evalPredicates ast
 
     // Expressions
     | Ast.PredicateWithQualification _
@@ -166,6 +182,11 @@ let rec eval ast =
 
 
 
+    | Ast.Undefined((pos1, pos2), _) -> 
+        let fv = heap.Eval.PeekEvalStack()
+        let fvNew = new FplIntrinsicUndef((pos1, pos2), fv)
+        heap.Eval.PushEvalStack(fvNew)
+        heap.Eval.PopEvalStack()
 
 
     | Ast.Intrinsic((pos1, pos2),()) -> 
@@ -250,34 +271,6 @@ let rec eval ast =
                 variable.Parent <- Some loc
         | _ -> ()
 
-    | Ast.ArgumentIdentifier((pos1, pos2), argumentId) -> 
-        let testNode = heap.Eval.PeekEvalStack()
-        match testNode with
-        | :? FplJustification as justification ->
-            match justification.Parent with
-            | Some argument -> argument.FplId <- argumentId.Substring(0,argumentId.Length-1) // argument id without the "." at the end
-            | _ -> ()
-        | :? FplArgument as argument ->
-            argument.FplId <- argumentId.Substring(0,argumentId.Length-1)
-        | _ -> ()
-    | Ast.RefArgumentIdentifier((pos1, pos2), argumentId) -> 
-        let fv = heap.Eval.PeekEvalStack()
-        match fv.Name with 
-        | PrimJIByProofArgument -> fv.FplId <- $"{fv.FplId}:{argumentId}"
-        | PrimArgInfRevoke -> fv.FplId <- argumentId
-        | PrimJustificationL -> 
-            let fvAi = new FplJustificationItemByRefArgument((pos1, pos2), fv)
-            fvAi.FplId <- argumentId
-            let just = fvAi.ParentJustification
-            let arg = just.ParentArgument
-            let proof = arg.ParentProof
-            if not (proof.HasArgument argumentId) then
-                fvAi.ErrorOccurred <- emitPR005Diagnostics argumentId pos1 pos2
-            else
-                fvAi.RefersTo <- Some proof.Scope[argumentId]
-            heap.Eval.PushEvalStack(fvAi)
-            heap.Eval.PopEvalStack()
-        | _ -> ()
     | Ast.InfixDeclWithPrecedence((pos1, pos2), (symbol, precedenceAsts)) -> 
         let fv = heap.Eval.PeekEvalStack()
         eval precedenceAsts
@@ -299,22 +292,6 @@ let rec eval ast =
             fv.RefersTo <- Some block
         | _ -> ()
         heap.Eval.PushEvalStack(fv)
-        heap.Eval.PopEvalStack()
-    | Ast.True((pos1, pos2), _) -> 
-        let fv = heap.Eval.PeekEvalStack()
-        let value = new FplIntrinsicTrue((pos1, pos2), fv)
-        heap.Eval.PushEvalStack(value)
-        heap.Eval.PopEvalStack()
-    | Ast.False((pos1, pos2), _) -> 
-        let fv = heap.Eval.PeekEvalStack()
-        let value = new FplIntrinsicFalse((pos1, pos2), fv)
-        value.TypeId <- LiteralPred
-        heap.Eval.PushEvalStack(value)
-        heap.Eval.PopEvalStack()
-    | Ast.Undefined((pos1, pos2), _) -> 
-        let fv = heap.Eval.PeekEvalStack()
-        let fvNew = new FplIntrinsicUndef((pos1, pos2), fv)
-        heap.Eval.PushEvalStack(fvNew)
         heap.Eval.PopEvalStack()
     | Ast.Trivial((pos1, pos2), _) -> 
         let fv = heap.Eval.PeekEvalStack()
@@ -348,12 +325,6 @@ let rec eval ast =
         heap.Eval.PopEvalStack()
     | Ast.UsesClause((pos1, pos2), ast1) ->
         eval ast1
-    | Ast.Not((pos1, pos2), predicateAst) ->
-        let fv = heap.Eval.PeekEvalStack()
-        let fvNew = new FplNegation((pos1, pos2), fv)
-        heap.Eval.PushEvalStack(fvNew)
-        eval predicateAst
-        heap.Eval.PopEvalStack()
     | Ast.InEntity((pos1, pos2), inDomainAst) ->
         let forStmt = heap.Eval.PeekEvalStack()
         let inDomain = new FplForInStmtDomain((pos1,pos2), forStmt)
@@ -438,27 +409,6 @@ let rec eval ast =
                     heap.Eval.PopEvalStack()
                 ) 
         | _ -> ()
-    | Ast.And((pos1, pos2), (predicateAst1, predicateAst2)) ->
-        let fv = heap.Eval.PeekEvalStack()
-        let fvNew = new FplConjunction((pos1, pos2), fv)
-        heap.Eval.PushEvalStack(fvNew)
-        eval predicateAst1
-        eval predicateAst2
-        heap.Eval.PopEvalStack()
-    | Ast.Or((pos1, pos2), (predicateAst1, predicateAst2)) ->
-        let fv = heap.Eval.PeekEvalStack()
-        let fvNew = new FplDisjunction((pos1, pos2), fv)
-        heap.Eval.PushEvalStack(fvNew)
-        eval predicateAst1
-        eval predicateAst2
-        heap.Eval.PopEvalStack()
-    | Ast.Xor((pos1, pos2), (predicateAst1, predicateAst2)) ->
-        let fv = heap.Eval.PeekEvalStack()
-        let fvNew = new FplExclusiveOr((pos1, pos2), fv)
-        heap.Eval.PushEvalStack(fvNew)
-        eval predicateAst1
-        eval predicateAst2
-        heap.Eval.PopEvalStack()
     | Ast.VarDeclBlock varDeclOrStmtAstList ->
         varDeclOrStmtAstList |> Option.map (List.map eval >> ignore) |> Option.defaultValue ()
     | Ast.StatementList((pos1, pos2), asts) ->
@@ -522,73 +472,14 @@ let rec eval ast =
         eval extensionSignatureAst
         eval extensionTermAst
         heap.Eval.PopEvalStack()
-    | Ast.Impl((pos1, pos2), (predicateAst1, predicateAst2)) ->
-        let fv = heap.Eval.PeekEvalStack()
-        let fvNew = new FplImplication((pos1, pos2), fv)
-        heap.Eval.PushEvalStack(fvNew)
-        eval predicateAst1
-        eval predicateAst2
-        heap.Eval.PopEvalStack()
-        
-    | Ast.Iif((pos1, pos2), (predicateAst1, predicateAst2)) ->
-        let fv = heap.Eval.PeekEvalStack()
-        let fvNew = new FplEquivalence((pos1, pos2), fv)
-        heap.Eval.PushEvalStack(fvNew)
-        eval predicateAst1
-        eval predicateAst2
-        heap.Eval.PopEvalStack()
-    | Ast.IsOperator((pos1, pos2), (isOpArgAst, variableTypeAst)) ->
-        let fv = heap.Eval.PeekEvalStack()
-        let fvNew = new FplIsOperator((pos1, pos2), fv)
-        heap.Eval.PushEvalStack(fvNew)
-        let operand = new FplReference((pos1, pos2), fvNew) 
-        heap.Eval.PushEvalStack(operand)
-        eval isOpArgAst
-        heap.Eval.PopEvalStack()
-        fvNew.ArgList |> Seq.iter checkSY010 
-        let typeOfOperand = new FplMapping((pos1, pos2), fvNew) 
-        heap.Eval.PushEvalStack(typeOfOperand)
-        eval variableTypeAst
-        heap.Eval.PopEvalStack()
-        heap.Eval.PopEvalStack()
     | Ast.Delegate(delegateNameAst, argumentTupleAst) ->
         eval delegateNameAst
         eval argumentTupleAst
         heap.Eval.PopEvalStack()
-    | Ast.DelegateName((pos1, pos2), delegateId) ->
-        let fv = heap.Eval.PeekEvalStack()
-        match delegateId with 
-        | PrimDelegateEqualL -> 
-            let deleg = new FplEquality(delegateId, (pos1, pos2), fv)
-            heap.Eval.PushEvalStack(deleg)
-        | PrimDelegateDecrementL -> 
-            let deleg = new FplDecrement(delegateId, (pos1, pos2), fv)
-            heap.Eval.PushEvalStack(deleg)
-        | _ -> 
-            let deleg = new FplReference((pos1, pos2), fv)
-            deleg.FplId <- delegateId
-            deleg.TypeId <- delegateId
-            heap.Eval.PushEvalStack(deleg)
-            deleg.ErrorOccurred <- emitID013Diagnostics $"Unknown delegate `{delegateId}`" pos1 pos2
     | Ast.PredicateSignature(((pos1, pos2), ((simpleSignatureAst, inhPredicateTypeListAstsOpt), paramTupleAst)), optUserDefinedSymbolAst) -> 
         ()
         // empty since the pattern will be matched in DefinitionPredicagte 
         // we list it her to remove FS0025 incomplete pattern warnings
-    | Ast.ReferencingIdentifier((pos1, pos2), (predicateIdentifierAst, dollarDigitListAsts)) ->
-        dollarDigitListAsts |> List.map eval |> ignore
-        eval predicateIdentifierAst
-        let fv = heap.Eval.PeekEvalStack()
-        match fv with 
-        | :? FplReference ->
-            let candidates = findCandidatesByName fv.FplId false true
-            if candidates.Length > 0 then 
-                let candidate = candidates.Head
-                fv.RefersTo <- Some candidate
-                match fv.UltimateBlockNode with
-                | Some block ->
-                    fv.ErrorOccurred <- checkID025Diagnostics (qualifiedName candidate false) block.Name fv.StartPos fv.EndPos
-                | _ -> ()
-        | _ -> ()
     | ProofSignature((pos1, pos2), (simpleSignatureAst, dollarDigitListAsts)) ->
         heap.Helper.InSignatureEvaluation <- true
         eval simpleSignatureAst
@@ -641,42 +532,6 @@ let rec eval ast =
             eval functionalTermInstanceBlockAst
         | None -> fvNew.IsIntrinsic <- true
         heap.Eval.PopEvalStack()
-    | Ast.All((pos1, pos2), (namedVarDeclAstList, predicateAst)) ->
-        let parent = heap.Eval.PeekEvalStack()
-        let fv = new FplQuantorAll((pos1, pos2), parent)
-        heap.Eval.PushEvalStack(fv) // add all quantor
-        fv.Arity <- fv.Arity + (namedVarDeclAstList |> List.length)
-        namedVarDeclAstList
-        |> List.map (fun namedVarDeclAst ->
-            eval namedVarDeclAst
-        )
-        |> ignore
-        eval predicateAst
-        heap.Eval.PopEvalStack() // remove all quantor
-    | Ast.Exists((pos1, pos2), (namedVarDeclAstList, predicateAst)) ->
-        let parent = heap.Eval.PeekEvalStack()
-        let fv = new FplQuantorExists((pos1, pos2), parent)
-        heap.Eval.PushEvalStack(fv) // add exists quantor
-        fv.Arity <- fv.Arity + (namedVarDeclAstList |> List.length)
-        namedVarDeclAstList
-        |> List.map (fun namedVarDeclAst ->
-            eval namedVarDeclAst
-        )
-        |> ignore
-        eval predicateAst
-        heap.Eval.PopEvalStack() // remove exists quantor
-    | Ast.ExistsN((pos1, pos2), ((dollarDigitsAst, namedVarDeclListAst), predicateAst)) ->
-        let parent = heap.Eval.PeekEvalStack()
-        let fv = new FplQuantorExistsN((pos1, pos2), parent)
-        heap.Eval.PushEvalStack(fv) // add exists n quantor
-        eval dollarDigitsAst
-        namedVarDeclListAst
-        |> List.map (fun namedVarDeclAst ->
-            eval namedVarDeclAst
-        )
-        |> ignore
-        eval predicateAst
-        heap.Eval.PopEvalStack() // remove exists n quantor
     | Ast.FunctionalTermSignature(((pos1, pos2), (((simpleSignatureAst, inhFunctionalTypeListAstsOpt), paramTupleAst), mappingAst)), optUserDefinedSymbolAst) -> 
         ()
         // empty since the pattern will be matched in DefinitionFunctionalTerm 

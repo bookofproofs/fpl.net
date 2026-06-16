@@ -19,17 +19,12 @@ open Fpl.Primitives
 open Fpl.Parser.Types
 open Fpl.Errors.Emitter
 open Fpl.Interpreter.BasicTypes
-open Fpl.Interpreter.Helpers.Basic
 open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.SymbolTable.Storage.Util
 open Fpl.Interpreter.SymbolTable.Types2.Intrinsic
-open Fpl.Interpreter.SymbolTable.Types2.Variables
 open Fpl.Interpreter.SymbolTable.Types2.References
-open Fpl.Interpreter.SymbolTable.Types3.DefinitionProperties
 open Fpl.Interpreter.SymbolTable.Types3.Quantors
-open Fpl.Interpreter.SymbolTable.Types3.Extensions
-open Fpl.Interpreter.SymbolTable.Types3.ForStmt
-open Fpl.Interpreter.SymbolTable.ExpressionMatching
+
 
 let evalLeafTokens ast =
     match ast with
@@ -40,9 +35,6 @@ let evalLeafTokens ast =
         let fv = heap.Eval.PeekEvalStack()
         fv.FplId <- s
         fv.TypeId <- s
-    | Ast.Exists1() ->
-        let fv = heap.Eval.PeekEvalStack()
-        fv.FplId <- fv.FplId + "$1"
     | Ast.DollarDigits((pos1, pos2), s) -> 
         let fv = heap.Eval.PeekEvalStack()
         let sid = $"${s.ToString()}"
@@ -70,13 +62,6 @@ let evalLeafTokens ast =
     | Ast.ExtensionRegex s -> 
         let fv = heap.Eval.PeekEvalStack()
         fv.TypeId <- s
-    | Ast.ExtensionName((pos1, pos2), extensionName) ->
-        let fv = heap.Eval.PeekEvalStack()
-        match fv with 
-        | :? FplExtension ->
-            fv.FplId <- extensionName
-            fv.TypeId <- extensionName
-        | _ -> ()
     | Ast.LanguageCode((pos1, pos2), s) -> 
         let fv = heap.Eval.PeekEvalStack()
         fv.FplId <- s

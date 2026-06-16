@@ -26,20 +26,18 @@ type Ast =
     | Dot of unit
     | Star of Positions * unit
     | Digits of string
-    | Exists1 of unit
     | DollarDigits of Positions * uint
     | ExtensionRegex of string
     | ExtensionName of Positions * string
     | LanguageCode of Positions * string
     | LocalizationString of Positions * string
+    | PrefixDecl of Positions * string
+    | PostfixDecl of Positions * string
+    | SymbolDecl of Positions * string
     | ObjectSymbolWithPos of Positions * string
     | InfixSymbolWithPos of Positions * string
     | PostFixSymbolWithPos of Positions * string
     | PrefixSymbolWithPos of Positions * string
-
-    | PrefixDecl of Positions * string
-    | PostfixDecl of Positions * string
-    | SymbolDecl of Positions * string
 
     // Identifiers & identifier dispatchers
     | PascalCaseId of Positions * string
@@ -48,7 +46,10 @@ type Ast =
     | NamespaceIdentifier of Positions * Ast list
     | ClassIdentifier of Positions * Ast
     | AliasedNamespaceIdentifier of Positions * (Ast * Ast option)
-
+    | ArgumentIdentifier of Positions * string
+    | RefArgumentIdentifier of Positions * string
+    | DelegateName of Positions * string
+    | ReferencingIdentifier of Positions * (Ast * Ast list)
 
     // Types & type related constructs
     | IndexType of Positions * unit
@@ -63,6 +64,21 @@ type Ast =
     | InheritedTypeList of Ast list
     | CompoundPredicateType of Positions * (Ast * Ast option)
     | CompoundFunctionalTermType of Positions * (Ast * (Ast * Ast) option)
+
+    // Predicates
+    | True of Positions * unit
+    | False of Positions * unit 
+    | And of Positions * (Ast * Ast)
+    | Or of Positions * (Ast * Ast)
+    | Xor of Positions * (Ast * Ast)
+    | Impl of Positions * (Ast * Ast)
+    | Iif of Positions * (Ast * Ast)
+    | Not of Positions * Ast
+    | All of Positions * (Ast list * Ast) 
+    | Exists of Positions * (Ast list * Ast) 
+    | Exists1 of unit
+    | ExistsN of Positions * ((Ast * Ast list) * Ast)
+    | IsOperator of Positions * (Ast * Ast)
 
     // Expressions
     | PredicateWithQualification of (Ast * Ast)
@@ -81,8 +97,11 @@ type Ast =
     | ErrorSyntaxChain of (Positions * Position) * (string * string)
 
 
+    | UsesClause of Positions * Ast
+    | BrackedCoordList of Positions * Ast list
 
-    // Identifiers
+    | Undefined of Positions * unit
+    | InEntity of Positions * Ast
     | Extension of Positions * string
     | SelfOrParent of Positions * Ast
     | Self of Positions * unit
@@ -90,35 +109,14 @@ type Ast =
     | TranslationTerm of Positions * Ast list
     | TranslationTermList of Positions * Ast list
     | Language of Positions * (Ast * Ast)
-    | DelegateName of Positions * string
     | ExtensionAssignment of Positions * (Ast * Ast) 
     | ExtensionSignature of Positions * (Ast * Ast)
     | DefinitionExtension of Positions * ((Ast * Ast) * Ast)
 
-    | UsesClause of Positions * Ast
-    | BrackedCoordList of Positions * Ast list
-    | ReferencingIdentifier of Positions * (Ast * Ast list)
-
-
     // Variables
     | Var of Positions * string
 
-    // Predicates
-    | True of Positions * unit
-    | False of Positions * unit 
-    | Undefined of Positions * unit
-    | And of Positions * (Ast * Ast)
-    | Or of Positions * (Ast * Ast)
-    | Xor of Positions * (Ast * Ast)
-    | Impl of Positions * (Ast * Ast)
-    | Iif of Positions * (Ast * Ast)
-    | Not of Positions * Ast
-    | InEntity of Positions * Ast
-    | All of Positions * (Ast list * Ast) 
-    | Exists of Positions * (Ast list * Ast) 
-    | ExistsN of Positions * ((Ast * Ast list) * Ast)
 
-    | IsOperator of Positions * (Ast * Ast)
     | Delegate of Ast * Ast
     | ArgumentTuple of Positions * Ast list 
     | DottedPredicate of Positions * Ast 
@@ -194,8 +192,6 @@ type Ast =
 
 
     // Proofs
-    | ArgumentIdentifier of Positions * string
-    | RefArgumentIdentifier of Positions * string
     | ReferenceToProofOrCorollary of Positions * Ast
     | JustificationItem of Positions * Ast 
     | StartArgument of Ast 

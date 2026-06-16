@@ -19,6 +19,7 @@ open Fpl.Primitives
 open Fpl.Parser.Types
 open Fpl.Errors.Emitter
 open Fpl.Interpreter.BasicTypes
+open Fpl.Interpreter.Helpers.Checks
 open Fpl.Interpreter.Helpers.Basic
 open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.SymbolTable.Storage.Util
@@ -26,8 +27,10 @@ open Fpl.Interpreter.SymbolTable.Types2.Variables
 open Fpl.Interpreter.SymbolTable.Types2.References
 open Fpl.Interpreter.SymbolTable.Types3.DefinitionProperties
 open Fpl.Interpreter.SymbolTable.Types3.Extensions
+open Fpl.Interpreter.SymbolTable.Types3.Delegates
 open Fpl.Interpreter.SymbolTable.Types3.ForStmt
 open Fpl.Interpreter.SymbolTable.ExpressionMatching
+open Fpl.Interpreter.SymbolTable.Types4.Proofs
 open Fpl.Interpreter.SymbolTable.Creation.Forward
 
 let evalIdentifiers ast =
@@ -135,5 +138,70 @@ let evalIdentifiers ast =
     | Ast.AliasedNamespaceIdentifier((pos1, pos2), (ast1, optAst)) ->
         evalRef.Value ast1
         optAst |> Option.map evalRef.Value |> ignore
+    | Ast.ArgumentIdentifier((pos1, pos2), argumentId) -> 
+        let testNode = heap.Eval.PeekEvalStack()
+        match testNode with
+        | :? FplJustification as justification ->
+            match justification.Parent with
+            | Some argument -> argument.FplId <- argumentId.Substring(0,argumentId.Length-1) // argument id without the "." at the end
+            | _ -> ()
+        | :? FplArgument as argument ->
+            argument.FplId <- argumentId.Substring(0,argumentId.Length-1)
+        | _ -> ()
+    | Ast.RefArgumentIdentifier((pos1, pos2), argumentId) -> 
+        let fv = heap.Eval.PeekEvalStack()
+        match fv.Name with 
+        | PrimJIByProofArgument -> fv.FplId <- $"{fv.FplId}:{argumentId}"
+        | PrimArgInfRevoke -> fv.FplId <- argumentId
+        | PrimJustificationL -> 
+            let fvAi = new FplJustificationItemByRefArgument((pos1, pos2), fv)
+            fvAi.FplId <- argumentId
+            let just = fvAi.ParentJustification
+            let arg = just.ParentArgument
+            let proof = arg.ParentProof
+            if not (proof.HasArgument argumentId) then
+                fvAi.ErrorOccurred <- emitPR005Diagnostics argumentId pos1 pos2
+            else
+                fvAi.RefersTo <- Some proof.Scope[argumentId]
+            heap.Eval.PushEvalStack(fvAi)
+            heap.Eval.PopEvalStack()
+        | _ -> ()
+    | Ast.DelegateName((pos1, pos2), delegateId) ->
+        let fv = heap.Eval.PeekEvalStack()
+        match delegateId with 
+        | PrimDelegateEqualL -> 
+            let deleg = new FplEquality(delegateId, (pos1, pos2), fv)
+            heap.Eval.PushEvalStack(deleg)
+        | PrimDelegateDecrementL -> 
+            let deleg = new FplDecrement(delegateId, (pos1, pos2), fv)
+            heap.Eval.PushEvalStack(deleg)
+        | _ -> 
+            let deleg = new FplReference((pos1, pos2), fv)
+            deleg.FplId <- delegateId
+            deleg.TypeId <- delegateId
+            heap.Eval.PushEvalStack(deleg)
+            deleg.ErrorOccurred <- emitID013Diagnostics $"Unknown delegate `{delegateId}`" pos1 pos2
+    | Ast.ExtensionName((pos1, pos2), extensionName) ->
+        let fv = heap.Eval.PeekEvalStack()
+        match fv with 
+        | :? FplExtension ->
+            fv.FplId <- extensionName
+            fv.TypeId <- extensionName
+        | _ -> ()
+    | Ast.ReferencingIdentifier((pos1, pos2), (predicateIdentifierAst, dollarDigitListAsts)) ->
+        dollarDigitListAsts |> List.map evalRef.Value |> ignore
+        evalRef.Value predicateIdentifierAst
+        let fv = heap.Eval.PeekEvalStack()
+        match fv with 
+        | :? FplReference ->
+            let candidates = findCandidatesByName fv.FplId false true
+            if candidates.Length > 0 then 
+                let candidate = candidates.Head
+                fv.RefersTo <- Some candidate
+                match fv.UltimateBlockNode with
+                | Some block ->
+                    fv.ErrorOccurred <- checkID025Diagnostics (qualifiedName candidate false) block.Name fv.StartPos fv.EndPos
+                | _ -> ()
+        | _ -> ()
     | _ ->
         failwith (sprintf "{%O} is not an identifier or identifier dispatcher" ast) 

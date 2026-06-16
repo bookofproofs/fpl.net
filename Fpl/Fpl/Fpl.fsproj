@@ -65,6 +65,7 @@
         <Compile Include="Interpreter\SymbolTable\Creation\LeafTokens.fs" />
         <Compile Include="Interpreter\SymbolTable\Creation\Identifiers.fs" />
         <Compile Include="Interpreter\SymbolTable\Creation\TypeConstructs.fs" />
+        <Compile Include="Interpreter\SymbolTable\Creation\Predicates.fs" />
         <Compile Include="Interpreter\SymbolTable\Creation\Expressions.fs" />
         <Compile Include="Interpreter\SymbolTable\Creation\TopLevel.fs" />
         <Compile Include="Interpreter\SymbolTable\Creation\Main.fs" />
