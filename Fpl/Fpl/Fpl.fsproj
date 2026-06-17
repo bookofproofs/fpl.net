@@ -67,6 +67,7 @@
         <Compile Include="Interpreter\SymbolTable\Creation\TypeConstructs.fs" />
         <Compile Include="Interpreter\SymbolTable\Creation\Predicates.fs" />
         <Compile Include="Interpreter\SymbolTable\Creation\Expressions.fs" />
+        <Compile Include="Interpreter\SymbolTable\Creation\Definitions.fs" />
         <Compile Include="Interpreter\SymbolTable\Creation\TopLevel.fs" />
         <Compile Include="Interpreter\SymbolTable\Creation\Main.fs" />
         <Compile Include="Interpreter\Main.fs" />

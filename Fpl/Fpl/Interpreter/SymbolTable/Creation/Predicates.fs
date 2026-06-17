@@ -1,4 +1,4 @@
-/// This module provides specialized evaluators for the AST nodes related to FPL namespace and top level blocks.
+/// This module provides specialized evaluators for the AST nodes related to FPL compound and prime predicates.
 
 
 (* MIT License

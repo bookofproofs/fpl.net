@@ -88,6 +88,36 @@ type Ast =
     | InfixOp of Positions * ((Ast * Ast option) list) // (operand * operator option) list
     | Parens of Positions * Ast // (a)
 
+    // Definitions
+    | DefinitionClass of Positions * (((Ast * Ast option) * Ast option) * Ast) 
+    | ClassSignature of Positions * Ast
+    | ClassDefinitionBlock of Positions * (Ast * Ast list option) option
+    | DefClassCompleteContent of Ast * Ast list
+    | Constructor of Positions * (Ast * Ast) 
+    | ConstructorSignature of Positions * (Ast * Ast)
+    | ConstructorBlock of Ast
+    | BaseConstructorCall of Positions * (Ast * Ast)
+
+    | DefinitionPredicate of Positions * (Ast * (Ast * Ast list option) option)
+    | PredicateSignature of (Positions * ((Ast * Ast option) * Ast)) * Ast option
+    | DefPredicateContent of Ast * Ast
+
+    | DefinitionFunctionalTerm of Positions * (Ast * Ast)
+    | FunctionalTermSignature of (Positions * (((Ast * Ast option) * Ast) * Ast)) * Ast option
+    | Mapping of Positions * Ast
+    | FunctionalTermDefinitionBlock of Positions * (Ast * Ast list option) option
+    | DefFunctionContent of Ast * Ast
+
+    | PredicateInstance of Positions * (Ast * Ast option)
+    | PredicateInstanceSignature of Positions * (Ast * Ast)
+    | FunctionalTermInstance of Positions * (Ast * Ast option)
+    | FunctionalTermInstanceSignature of Positions * ((Ast * Ast) * Ast)
+
+    | DefinitionExtension of Positions * ((Ast * Ast) * Ast)
+    | ExtensionSignature of Positions * (Ast * Ast)
+    | ExtensionAssignment of Positions * (Ast * Ast) 
+
+
     // TopLevel
     | AST of Positions * Ast
     | Namespace of Ast list
@@ -97,21 +127,19 @@ type Ast =
     | ErrorSyntaxChain of (Positions * Position) * (string * string)
 
 
+    | Precedence of Positions * int
     | UsesClause of Positions * Ast
     | BrackedCoordList of Positions * Ast list
 
     | Undefined of Positions * unit
     | InEntity of Positions * Ast
-    | Extension of Positions * string
     | SelfOrParent of Positions * Ast
     | Self of Positions * unit
     | Parent of Positions * unit
     | TranslationTerm of Positions * Ast list
     | TranslationTermList of Positions * Ast list
     | Language of Positions * (Ast * Ast)
-    | ExtensionAssignment of Positions * (Ast * Ast) 
-    | ExtensionSignature of Positions * (Ast * Ast)
-    | DefinitionExtension of Positions * ((Ast * Ast) * Ast)
+    | Extension of Positions * string
 
     // Variables
     | Var of Positions * string
@@ -163,32 +191,8 @@ type Ast =
     | NamedVarDecl of Positions * (Ast list * Ast)
     | ParamTuple of Ast list 
 
-    | Mapping of Positions * Ast
     | AxiomSignature of Positions * Ast
     | Axiom of Positions * (Ast * (Ast * Ast))
-    | BaseConstructorCall of Positions * (Ast * Ast)
-    | ConstructorSignature of Positions * (Ast * Ast)
-    | PredicateInstanceSignature of Positions * (Ast * Ast)
-    | FunctionalTermInstanceSignature of Positions * ((Ast * Ast) * Ast)
-    | ConstructorBlock of Ast
-    | Constructor of Positions * (Ast * Ast) 
-    | PredicateInstance of Positions * (Ast * Ast option)
-    | FunctionalTermInstance of Positions * (Ast * Ast option)
-    | DefPredicateContent of Ast * Ast
-    | DefinitionPredicate of Positions * (Ast * (Ast * Ast list option) option)
-
-    | DefFunctionContent of Ast * Ast
-    | PredicateSignature of (Positions * ((Ast * Ast option) * Ast)) * Ast option
-    | ClassSignature of Positions * Ast
-    | FunctionalTermSignature of (Positions * (((Ast * Ast option) * Ast) * Ast)) * Ast option
-    | FunctionalTermDefinitionBlock of Positions * (Ast * Ast list option) option
-
-    | DefinitionFunctionalTerm of Positions * (Ast * Ast)
-    | DefClassCompleteContent of Ast * Ast list
-    | ClassDefinitionBlock of Positions * (Ast * Ast list option) option
-
-    | DefinitionClass of Positions * (((Ast * Ast option) * Ast option) * Ast) 
-    | Precedence of Positions * int
 
 
     // Proofs

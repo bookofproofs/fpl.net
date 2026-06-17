@@ -13,7 +13,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 module Fpl.Interpreter.SymbolTable.Creation.Main
-
 open System
 open System.Collections.Generic
 open Fpl.Errors.Diagnostics
@@ -50,6 +49,7 @@ open Fpl.Interpreter.SymbolTable.Creation.Identifiers
 open Fpl.Interpreter.SymbolTable.Creation.TypeConstructs
 open Fpl.Interpreter.SymbolTable.Creation.Predicates
 open Fpl.Interpreter.SymbolTable.Creation.Expressions
+open Fpl.Interpreter.SymbolTable.Creation.Definitions
 open Fpl.Interpreter.SymbolTable.Creation.TopLevel
 
 /// A recursive function evaluating an AST and returning a list of EvalAliasedNamespaceIdentifier records
@@ -58,15 +58,6 @@ let rec eval ast =
     let evalCommonStepsVarDeclPredicate varDeclBlock predicateAst =
         eval varDeclBlock
         eval predicateAst
-
-    let setSignaturePositions pos1 pos2 = 
-        let fv = heap.Eval.PeekEvalStack()
-        match box fv with 
-        | :? IHasSignature as withSignature -> 
-            withSignature.SignStartPos <- pos1  
-            withSignature.SignEndPos <- pos2
-        | _ -> ()
-
 
     let evalArgumentTuple (next:FplGenericNode) (predicateListAst:Ast list) pos1 pos2 =
         let consumeArgumentsWithParent (parent:FplGenericNode) =
@@ -144,6 +135,7 @@ let rec eval ast =
         ->
         evalTypeConstructs ast
 
+    // Prime and compound predicates
     | Ast.True _
     | Ast.False _
     | Ast.And _
@@ -169,6 +161,33 @@ let rec eval ast =
     | Ast.Parens _
         ->
         evalExpressions ast
+
+    // Definitions
+    | Ast.DefinitionClass _
+    | Ast.ClassSignature _
+    | Ast.ClassDefinitionBlock _
+    | Ast.DefClassCompleteContent _
+    | Ast.Constructor _
+    | Ast.ConstructorSignature _
+    | Ast.ConstructorBlock _
+    | Ast.BaseConstructorCall _
+    | Ast.DefinitionPredicate _
+    | Ast.PredicateSignature _
+    | Ast.DefPredicateContent _
+    | Ast.DefinitionFunctionalTerm _
+    | Ast.FunctionalTermSignature _
+    | Ast.Mapping _
+    | Ast.FunctionalTermDefinitionBlock _
+    | Ast.DefFunctionContent _
+    | Ast.PredicateInstance _
+    | Ast.PredicateInstanceSignature _
+    | Ast.FunctionalTermInstance _
+    | Ast.FunctionalTermInstanceSignature _
+    | Ast.DefinitionExtension _
+    | Ast.ExtensionSignature _
+    | Ast.ExtensionAssignment _ 
+        ->
+        evalDefinitions ast
 
     // Top level nodes
     | Ast.AST _
@@ -311,12 +330,6 @@ let rec eval ast =
         eval signatureAst
         eval premiseConclusionBlockAst
         heap.Eval.PopEvalStack() 
-    | Ast.Mapping((pos1, pos2), variableTypeAst) ->
-        let fv = heap.Eval.PeekEvalStack()
-        let map = new FplMapping((pos1, pos2), fv)
-        heap.Eval.PushEvalStack(map)
-        eval variableTypeAst
-        heap.Eval.PopEvalStack()
     | Ast.Extension((pos1, pos2), extensionString) ->
         let fv = heap.Eval.PeekEvalStack()
         let fplNew = new FplExtensionObj((pos1,pos2), fv)
@@ -456,30 +469,10 @@ let rec eval ast =
         eval langCode
         eval ebnfAst
         heap.Eval.PopEvalStack() // remove language
-    | Ast.ExtensionAssignment((pos1, pos2), (varAst, extensionRegexAst)) ->
-        heap.Helper.InSignatureEvaluation <- true
-        eval varAst
-        eval extensionRegexAst
-        heap.Helper.InSignatureEvaluation <- false
-    | Ast.ExtensionSignature((pos1, pos2), (extensionAssignmentAst, extensionMappingAst)) ->
-        eval extensionAssignmentAst
-        eval extensionMappingAst
-    | Ast.DefinitionExtension((pos1, pos2), ((extensionNameAst, extensionSignatureAst), extensionTermAst)) ->
-        let parent = heap.Eval.PeekEvalStack()
-        let fv = new FplExtension((pos1,pos2), parent, heap.Helper.GetNextAvailableFplBlockRunOrder)
-        heap.Eval.PushEvalStack(fv)
-        eval extensionNameAst
-        eval extensionSignatureAst
-        eval extensionTermAst
-        heap.Eval.PopEvalStack()
     | Ast.Delegate(delegateNameAst, argumentTupleAst) ->
         eval delegateNameAst
         eval argumentTupleAst
         heap.Eval.PopEvalStack()
-    | Ast.PredicateSignature(((pos1, pos2), ((simpleSignatureAst, inhPredicateTypeListAstsOpt), paramTupleAst)), optUserDefinedSymbolAst) -> 
-        ()
-        // empty since the pattern will be matched in DefinitionPredicagte 
-        // we list it her to remove FS0025 incomplete pattern warnings
     | ProofSignature((pos1, pos2), (simpleSignatureAst, dollarDigitListAsts)) ->
         heap.Helper.InSignatureEvaluation <- true
         eval simpleSignatureAst
@@ -522,20 +515,6 @@ let rec eval ast =
         |> Seq.iter (fun kvp -> 
             fv.ErrorOccurred <- emitVAR04diagnostics kvp.Key (fst kvp.Value) (snd kvp.Value)
         )
-    | Ast.FunctionalTermInstance((pos1, pos2), (functionalTermInstanceSignatureAst, functionalTermInstanceBlockOptAst)) ->
-        let parent = heap.Eval.PeekEvalStack()
-        let fvNew = new FplMandatoryFunctionalTerm((pos1, pos2), parent)
-        heap.Eval.PushEvalStack(fvNew)
-        eval functionalTermInstanceSignatureAst
-        match functionalTermInstanceBlockOptAst with 
-        | Some functionalTermInstanceBlockAst ->
-            eval functionalTermInstanceBlockAst
-        | None -> fvNew.IsIntrinsic <- true
-        heap.Eval.PopEvalStack()
-    | Ast.FunctionalTermSignature(((pos1, pos2), (((simpleSignatureAst, inhFunctionalTypeListAstsOpt), paramTupleAst), mappingAst)), optUserDefinedSymbolAst) -> 
-        ()
-        // empty since the pattern will be matched in DefinitionFunctionalTerm 
-        // we list it her to remove FS0025 incomplete pattern warnings
     | Ast.Cases((pos1, pos2), (caseSingleListAsts, caseElseAst)) ->
         let parent = heap.Eval.PeekEvalStack()
         let casesStmt = new FplCases((pos1, pos2), parent)
@@ -576,25 +555,6 @@ let rec eval ast =
         heap.Eval.PushEvalStack(elseCase) // add mcases else
         eval predicateAst 
         heap.Eval.PopEvalStack() // remove mcases else
-    | Ast.FunctionalTermInstanceSignature((pos1, pos2), ((simpleSignatureAst, paramTupleAst), mappingAst)) ->
-        heap.Helper.InSignatureEvaluation <- true
-        eval simpleSignatureAst
-        eval paramTupleAst
-        heap.Helper.InSignatureEvaluation <- false
-        eval mappingAst
-        setSignaturePositions pos1 pos2
-    | Ast.PredicateInstanceSignature((pos1, pos2), (simpleSignatureAst, paramTupleAst)) ->
-        heap.Helper.InSignatureEvaluation <- true
-        eval simpleSignatureAst
-        eval paramTupleAst
-        setSignaturePositions pos1 pos2
-        heap.Helper.InSignatureEvaluation <- false
-    | Ast.ConstructorSignature((pos1, pos2), (simpleSignatureAst, paramTupleAst)) ->
-        heap.Helper.InSignatureEvaluation <- true
-        eval simpleSignatureAst
-        eval paramTupleAst
-        setSignaturePositions pos1 pos2
-        heap.Helper.InSignatureEvaluation <- false
     | Ast.Assignment((pos1, pos2), (predicateWithQualificationAst, predicateAst)) ->
         let parent = heap.Eval.PeekEvalStack()
         let fvNew = new FplAssignment((pos1, pos2), parent)
@@ -615,23 +575,6 @@ let rec eval ast =
         heap.Eval.PopEvalStack() // remove assignee
         eval predicateAst
         heap.Eval.PopEvalStack() // remove Assignment
-    | Ast.PredicateInstance((pos1, pos2), (signatureAst, predInstanceBlockAstOpt)) ->
-        let parent = heap.Eval.PeekEvalStack()
-        let fvNew = new FplMandatoryPredicate((pos1, pos2), parent)
-        heap.Eval.PushEvalStack(fvNew)
-        eval signatureAst
-        match predInstanceBlockAstOpt with 
-        | Some predInstanceBlockAst ->
-            eval predInstanceBlockAst
-        | None -> fvNew.IsIntrinsic <- true
-        heap.Eval.PopEvalStack()
-    | Ast.BaseConstructorCall((pos1, pos2), (inheritedClassTypeAst, argumentTupleAst)) ->
-        let parent = heap.Eval.PeekEvalStack()
-        let fvNew = new FplBaseConstructorCall((pos1, pos2), parent) 
-        heap.Eval.PushEvalStack(fvNew)
-        eval inheritedClassTypeAst
-        eval argumentTupleAst
-        heap.Eval.PopEvalStack()
     | Ast.JustArgInf((pos1, pos2), (justificationAst, argumentInferenceAst)) ->
         eval justificationAst
         eval argumentInferenceAst
@@ -763,104 +706,6 @@ let rec eval ast =
                 | _ -> ()
             | _ -> ()
         ) |> ignore 
-    | Ast.ConstructorBlock varDeclBlock ->
-        let parent = heap.Eval.PeekEvalStack()
-        // evaluate the construction block 
-        eval varDeclBlock
-        if parent.ArgList.Count = 0 then
-            parent.ErrorOccurred <- emitST002diagnostics parent.Name parent.StartPos parent.EndPos
-    | Ast.Constructor((pos1, pos2), (signatureAst, constructorBlockAst)) ->
-        let parent = heap.Eval.PeekEvalStack()
-        let fv = new FplConstructor((pos1, pos2), parent)
-        heap.Eval.PushEvalStack(fv)
-        eval signatureAst
-        eval constructorBlockAst
-        heap.Eval.PopEvalStack()
-    | Ast.DefPredicateContent(varDeclBlock, predicateAst) ->
-        eval varDeclBlock
-        eval predicateAst
-    | Ast.DefFunctionContent(varDeclBlock, retStmtAst) ->
-        eval varDeclBlock
-        eval retStmtAst
-    | Ast.DefClassCompleteContent(varDeclBlock, constructorListAsts) ->
-        eval varDeclBlock 
-        constructorListAsts |> List.map eval |> ignore
-    | Ast.DefinitionPredicate((pos1, pos2), (predicateSignatureAst, optDefBlock)) ->
-        let parent = heap.Eval.PeekEvalStack()
-        let fv = new FplPredicate((pos1, pos2), parent, heap.Helper.GetNextAvailableFplBlockRunOrder)
-        heap.Eval.PushEvalStack(fv)
-        match predicateSignatureAst with
-        | Ast.PredicateSignature(((pos1, pos2), ((simpleSignatureAst, inhPredicateTypeListAstsOpt), paramTupleAst)), optUserDefinedSymbolAst) ->
-            heap.Helper.InSignatureEvaluation <- true
-            eval simpleSignatureAst
-            eval paramTupleAst
-            heap.Helper.InSignatureEvaluation <- false
-            optUserDefinedSymbolAst |> Option.map eval |> Option.defaultValue () |> ignore
-            match optDefBlock with 
-            | Some (predicateContentAst, optPropertyListAsts) ->
-                eval predicateContentAst
-                optPropertyListAsts |> Option.map (List.map eval >> ignore) |> Option.defaultValue ()
-            | None -> fv.IsIntrinsic <- true
-            inhPredicateTypeListAstsOpt |> Option.map eval |> Option.defaultValue ()
-            setSignaturePositions pos1 pos2
-        | _ -> ()
-        heap.Eval.PopEvalStack()
-    | Ast.FunctionalTermDefinitionBlock((pos1, pos2), optDefBlock) ->
-        let functionaTermBlock = heap.Eval.PeekEvalStack()
-        match optDefBlock with 
-        | Some (funcContentAst, optPropertyListAsts) ->
-            eval funcContentAst
-            optPropertyListAsts |> Option.map (List.map eval >> ignore) |> Option.defaultValue ()
-            let properties = functionaTermBlock.GetProperties()
-            if properties.IsEmpty && functionaTermBlock.ArgList.Count = 1 then
-                functionaTermBlock.ErrorOccurred <- emitST001diagnostics functionaTermBlock.Name pos1 pos2
-        | None -> functionaTermBlock.IsIntrinsic <- true
-    | Ast.DefinitionFunctionalTerm((pos1, pos2), (functionalTermSignatureAst, functionalTermDefBlockAst)) ->
-        let parent = heap.Eval.PeekEvalStack()
-        let fv = new FplFunctionalTerm((pos1, pos2), parent, heap.Helper.GetNextAvailableFplBlockRunOrder)
-        heap.Eval.PushEvalStack(fv)
-        match functionalTermSignatureAst with
-        | Ast.FunctionalTermSignature(((pos1, pos2), (((simpleSignatureAst, inhFunctionalTypeListAstsOpt), paramTupleAst), mappingAst)), optUserDefinedSymbolAst) -> 
-            eval mappingAst
-            heap.Helper.InSignatureEvaluation <- true
-            eval simpleSignatureAst
-            eval paramTupleAst
-            heap.Helper.InSignatureEvaluation <- false
-            optUserDefinedSymbolAst |> Option.map eval |> Option.defaultValue () 
-            eval functionalTermDefBlockAst
-            inhFunctionalTypeListAstsOpt |> Option.map eval |> Option.defaultValue () 
-            setSignaturePositions pos1 pos2
-        | _ -> ()
-        heap.Eval.PopEvalStack()
-    | Ast.ClassSignature((pos1, pos2), simpleSignatureAst) ->
-        heap.Helper.InSignatureEvaluation <- true
-        eval simpleSignatureAst
-        setSignaturePositions pos1 pos2
-        heap.Helper.InSignatureEvaluation <- false
-    | Ast.ClassDefinitionBlock((pos1, pos2), optDefBlock) ->
-        let classBlock = heap.Eval.PeekEvalStack()
-        let cl = classBlock :?> FplClass
-        match optDefBlock with 
-        | Some (classContentAst, optPropertyListAsts) ->
-            eval classContentAst
-            optPropertyListAsts |> Option.map (List.map eval >> ignore) |> Option.defaultValue ()
-            let properties = cl.GetProperties()
-            let constructors = cl.GetConstructors()
-            let classContent =  cl.ArgList |> Seq.filter (fun node -> node.Name <> LiteralBase) |> Seq.toList
-            if properties.IsEmpty && classContent.Length = 0 && constructors.IsEmpty then
-                classBlock.ErrorOccurred <- emitST001diagnostics classBlock.Name pos1 pos2
-        | None -> 
-            cl.IsIntrinsic <- true
-            cl.AddDefaultConstructor()
-    | Ast.DefinitionClass((pos1, pos2),(((classSignatureAst, optInheritedClassTypeListAst), optUserDefinedObjSymAst), classBlockAst)) ->
-        let parent = heap.Eval.PeekEvalStack()
-        let fv = new FplClass((pos1, pos2), parent, heap.Helper.GetNextAvailableFplBlockRunOrder)
-        heap.Eval.PushEvalStack(fv)
-        eval classSignatureAst
-        optInheritedClassTypeListAst |> Option.map eval |> Option.defaultValue ()
-        optUserDefinedObjSymAst |> Option.map eval |> Option.defaultValue ()
-        eval classBlockAst
-        heap.Eval.PopEvalStack()
     | Ast.DerivedPredicate ((pos1, pos2),predicateAst) -> 
         let fv = heap.Eval.PeekEvalStack()
         let argInf = new FplArgInferenceDerived((pos1, pos2), fv) 
