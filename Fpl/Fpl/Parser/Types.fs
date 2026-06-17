@@ -131,6 +131,18 @@ type Ast =
     | Corollary of Positions * (Ast * (Ast * Ast))
     | CorollarySignature of Positions * (Ast * Ast list)
 
+    // Actions 
+    | Delegate of Ast * Ast
+    | Assertion of Positions * Ast
+    | Cases of Positions * (Ast list * Ast)
+    | CaseSingle of Positions * (Ast * Ast list)
+    | CaseElse of Positions * Ast list 
+    | MapCases of Positions * (Ast list * Ast)
+    | MapCaseSingle of Positions * (Ast * Ast)
+    | MapCaseElse of Positions * Ast  
+    | Assignment of Positions * (Ast * Ast)
+    | ForIn of Positions * ((Ast * Ast) * Ast list)
+    | Return of Positions * Ast
 
     // TopLevel
     | AST of Positions * Ast
@@ -141,9 +153,9 @@ type Ast =
     | ErrorSyntaxChain of (Positions * Position) * (string * string)
 
 
+    | InfixDeclWithPrecedence of Positions * (string * Ast) // infix symbol with precedence
     | Precedence of Positions * int
     | UsesClause of Positions * Ast
-    | BrackedCoordList of Positions * Ast list
 
     | Undefined of Positions * unit
     | InEntity of Positions * Ast
@@ -159,32 +171,18 @@ type Ast =
     | Var of Positions * string
 
 
-    | Delegate of Ast * Ast
+    | BrackedCoordList of Positions * Ast list
     | ArgumentTuple of Positions * Ast list 
     | DottedPredicate of Positions * Ast 
     | QualificationList of Positions * Ast list
 
     
-    | InfixDeclWithPrecedence of Positions * (string * Ast) // infix symbol with precedence
 
 
-    // Statements
-    | Assertion of Positions * Ast
-    | Cases of Positions * (Ast list * Ast)
-    | CaseSingle of Positions * (Ast * Ast list)
-    | CaseElse of Positions * Ast list 
-    | MapCases of Positions * (Ast list * Ast)
-    | MapCaseSingle of Positions * (Ast * Ast)
-    | MapCaseElse of Positions * Ast  
-    | Assignment of Positions * (Ast * Ast)
-    | ForIn of Positions * ((Ast * Ast) * Ast list)
-
-    | Return of Positions * Ast
 
     // FPL Blocks
     | Intrinsic of Positions * unit
     | VarDeclBlock of Ast list option
-    | StatementList of Positions * Ast list
     | PremiseList of Positions * Ast list
     | PremiseConclusionBlock of Ast * (Ast * Ast)
 

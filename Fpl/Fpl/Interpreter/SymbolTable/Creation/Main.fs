@@ -31,14 +31,9 @@ open Fpl.Interpreter.SymbolTable.Types2.Variables
 open Fpl.Interpreter.SymbolTable.Types2.References
 open Fpl.Interpreter.SymbolTable.Types2.Definitions
 open Fpl.Interpreter.SymbolTable.Types3.SelfParent
-open Fpl.Interpreter.SymbolTable.Types3.PredicativeBlocks
 open Fpl.Interpreter.SymbolTable.Types3.RulesOfInferences
 open Fpl.Interpreter.SymbolTable.Types3.Extensions
-open Fpl.Interpreter.SymbolTable.Types3.MapCases
 open Fpl.Interpreter.SymbolTable.Types3.Localization
-open Fpl.Interpreter.SymbolTable.Types3.AssertStmt
-open Fpl.Interpreter.SymbolTable.Types3.Assignments
-open Fpl.Interpreter.SymbolTable.Types3.CasesStmt
 open Fpl.Interpreter.SymbolTable.Types3.ForStmt
 open Fpl.Interpreter.SymbolTable.Types4.Proofs
 open Fpl.Interpreter.SymbolTable.Creation.Forward
@@ -47,6 +42,7 @@ open Fpl.Interpreter.SymbolTable.Creation.Identifiers
 open Fpl.Interpreter.SymbolTable.Creation.TypeConstructs
 open Fpl.Interpreter.SymbolTable.Creation.Predicates
 open Fpl.Interpreter.SymbolTable.Creation.Expressions
+open Fpl.Interpreter.SymbolTable.Creation.Commands
 open Fpl.Interpreter.SymbolTable.Creation.Definitions
 open Fpl.Interpreter.SymbolTable.Creation.TheoremLikeStmts
 open Fpl.Interpreter.SymbolTable.Creation.TopLevel
@@ -133,6 +129,21 @@ let rec eval ast =
     | Ast.Parens _
         ->
         evalExpressions ast
+
+    // Commands & other actions
+    | Delegate _
+    | Assertion _
+    | Cases _
+    | CaseSingle _
+    | CaseElse _ 
+    | MapCases _
+    | MapCaseSingle _
+    | MapCaseElse _
+    | Assignment _
+    | ForIn _
+    | Return _
+        ->
+        evalCommands ast
 
     // Definitions
     | Ast.DefinitionClass _
@@ -332,12 +343,6 @@ let rec eval ast =
         heap.Eval.PushEvalStack(inDomain) // add ForInStmtDomain
         eval inDomainAst
         heap.Eval.PopEvalStack() // remove ForInStmtDomain
-    | Ast.Assertion((pos1, pos2), predicateAst) ->
-        let fv = heap.Eval.PeekEvalStack()
-        let fvNew = new FplAssertion((pos1, pos2), fv)
-        heap.Eval.PushEvalStack(fvNew)
-        eval predicateAst
-        heap.Eval.PopEvalStack()
     | Ast.DottedPredicate((pos1, pos2), predicateWithOptSpecificationAst) ->
         let fv = heap.Eval.PeekEvalStack()
         let refBlock = new FplReference((pos1, pos2), fv) 
@@ -348,12 +353,6 @@ let rec eval ast =
         heap.Eval.PushEvalStack(refBlock)
         eval predicateWithOptSpecificationAst
         heap.Eval.PopEvalStack()
-    | Ast.Return((pos1, pos2), returneeAst) ->
-        let fv = heap.Eval.PeekEvalStack()
-        let stmt = new FplReturn((pos1,pos2), fv)
-        heap.Eval.PushEvalStack(stmt)
-        eval returneeAst
-        heap.Eval.PopEvalStack() 
     | Ast.AssumeArgument((pos1, pos2), predicateAst) ->
         let fv = heap.Eval.PeekEvalStack()
         let fvNew = new FplArgInferenceAssume((pos1, pos2), fv) 
@@ -412,8 +411,6 @@ let rec eval ast =
         | _ -> ()
     | Ast.VarDeclBlock varDeclOrStmtAstList ->
         varDeclOrStmtAstList |> Option.map (List.map eval >> ignore) |> Option.defaultValue ()
-    | Ast.StatementList((pos1, pos2), asts) ->
-        asts |> List.map eval |> ignore
     | Ast.PremiseList((pos1, pos2), predicateListAsts) ->
         let parent = heap.Eval.PeekEvalStack()
         let fv = new FplPredicateList((pos1, pos2), parent, heap.Helper.GetNextAvailableFplBlockRunOrder) 
@@ -457,10 +454,6 @@ let rec eval ast =
         eval langCode
         eval ebnfAst
         heap.Eval.PopEvalStack() // remove language
-    | Ast.Delegate(delegateNameAst, argumentTupleAst) ->
-        eval delegateNameAst
-        eval argumentTupleAst
-        heap.Eval.PopEvalStack()
     | ProofSignature((pos1, pos2), (simpleSignatureAst, dollarDigitListAsts)) ->
         heap.Helper.InSignatureEvaluation <- true
         eval simpleSignatureAst
@@ -503,66 +496,6 @@ let rec eval ast =
         |> Seq.iter (fun kvp -> 
             fv.ErrorOccurred <- emitVAR04diagnostics kvp.Key (fst kvp.Value) (snd kvp.Value)
         )
-    | Ast.Cases((pos1, pos2), (caseSingleListAsts, caseElseAst)) ->
-        let parent = heap.Eval.PeekEvalStack()
-        let casesStmt = new FplCases((pos1, pos2), parent)
-        heap.Eval.PushEvalStack(casesStmt) // add cases 
-        caseSingleListAsts |> List.map (fun caseAst -> eval caseAst) |> ignore
-        eval caseElseAst
-        heap.Eval.PopEvalStack() // remove cases
-    | Ast.CaseSingle((pos1, pos2), (predicateAst, statementListAsts)) ->
-        let parent = heap.Eval.PeekEvalStack()
-        let singleCase = new FplCaseSingle((pos1,pos2), parent)
-        heap.Eval.PushEvalStack(singleCase) // add single case
-        eval predicateAst
-        statementListAsts |> List.map eval |> ignore
-        heap.Eval.PopEvalStack() // remove single case 
-    | Ast.CaseElse((pos1, pos2), statementListAsts) ->
-        let parent = heap.Eval.PeekEvalStack()
-        let elseCase = new FplCaseElse((pos1,pos2), parent)
-        heap.Eval.PushEvalStack(elseCase) // add else 
-        statementListAsts |> List.map eval |> ignore
-        heap.Eval.PopEvalStack() // remove else 
-    | Ast.MapCases((pos1, pos2), (mapCaseSingleAstList, elseStatementAst)) ->
-        let parent = heap.Eval.PeekEvalStack()
-        let fvNew = new FplMapCases((pos1, pos2), parent)
-        heap.Eval.PushEvalStack(fvNew) // add mcases
-        mapCaseSingleAstList |> List.map (fun caseAst -> eval caseAst) |> ignore
-        eval elseStatementAst
-        heap.Eval.PopEvalStack() // remove mcases
-    | Ast.MapCaseSingle((pos1, pos2), (predicateFirstAst, predicateSecondAst)) ->
-        let parent = heap.Eval.PeekEvalStack()
-        let mapCaseSingle = new FplMapCaseSingle((pos1,pos2), parent)
-        heap.Eval.PushEvalStack(mapCaseSingle) // add mcases single
-        eval predicateFirstAst
-        eval predicateSecondAst 
-        heap.Eval.PopEvalStack() // remove mcases single
-    | Ast.MapCaseElse((pos1, pos2), predicateAst) ->
-        let parent = heap.Eval.PeekEvalStack()
-        let elseCase = new FplMapCaseElse((pos1,pos2), parent)
-        heap.Eval.PushEvalStack(elseCase) // add mcases else
-        eval predicateAst 
-        heap.Eval.PopEvalStack() // remove mcases else
-    | Ast.Assignment((pos1, pos2), (predicateWithQualificationAst, predicateAst)) ->
-        let parent = heap.Eval.PeekEvalStack()
-        let fvNew = new FplAssignment((pos1, pos2), parent)
-        heap.Eval.PushEvalStack(fvNew) // add assignment
-        let assigneeReference = 
-            match predicateWithQualificationAst with 
-            | Ast.PredicateWithQualification(predicateWithOptSpecificationAst, _) ->
-                match predicateWithOptSpecificationAst with 
-                | Ast.PredicateWithOptSpecification ((assigneePos1,assigneePos2),(_,_)) ->
-                    // create assigneeReference with correct positioning of the assignee (to improve related diagnostics positions)
-                    new FplReference((assigneePos1,assigneePos2), fvNew)
-                | _ ->
-                    new FplReference((pos1,pos2), fvNew)
-            | _ ->
-                new FplReference((pos1,pos2), fvNew)
-        heap.Eval.PushEvalStack(assigneeReference) // add assignee
-        eval predicateWithQualificationAst
-        heap.Eval.PopEvalStack() // remove assignee
-        eval predicateAst
-        heap.Eval.PopEvalStack() // remove Assignment
     | Ast.JustArgInf((pos1, pos2), (justificationAst, argumentInferenceAst)) ->
         eval justificationAst
         eval argumentInferenceAst
@@ -572,17 +505,6 @@ let rec eval ast =
         heap.Eval.PushEvalStack(arg)
         eval justifiedArgumentAst
         heap.Eval.PopEvalStack()
-    | Ast.ForIn((pos1, pos2), (((entityAst, inDomainAst), statementListAst))) ->
-        let parent = heap.Eval.PeekEvalStack()
-        let forStmt = new FplForInStmt((pos1, pos2), parent)
-        heap.Eval.PushEvalStack(forStmt) // add ForInStmt
-        let entity = new FplForInStmtEntity((pos1,pos2), forStmt)
-        heap.Eval.PushEvalStack(entity) // add ForInStmtEntity
-        eval entityAst
-        heap.Eval.PopEvalStack() // remove ForInStmtEntity
-        eval inDomainAst
-        statementListAst |> List.map (fun stmtAst -> eval stmtAst) |> ignore
-        heap.Eval.PopEvalStack() // remove ForInStmt
     | Ast.PremiseConclusionBlock (varDeclBlock, (premiseAst, conclusionAst)) ->
         eval varDeclBlock 
         eval premiseAst
