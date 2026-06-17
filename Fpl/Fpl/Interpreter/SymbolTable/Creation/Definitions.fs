@@ -14,46 +14,17 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 *)
 
 module Fpl.Interpreter.SymbolTable.Creation.Definitions
-open System
-open System.Collections.Generic
-open Fpl.Errors.Diagnostics
 open Fpl.Primitives
 open Fpl.Parser.Types
 open Fpl.Errors.Emitter
-open Fpl.Interpreter.BasicTypes
-open Fpl.Interpreter.Helpers.Basic
-open Fpl.Interpreter.Helpers.Checks
-open Fpl.Interpreter.SymbolTable.Types1.TopLevel
-open Fpl.Interpreter.SymbolTable.Storage.Asts
 open Fpl.Interpreter.SymbolTable.Storage.Heap
-open Fpl.Interpreter.SymbolTable.Storage.Util
-open Fpl.Interpreter.SymbolTable.Types2.Intrinsic
 open Fpl.Interpreter.SymbolTable.Types2.Variables
-open Fpl.Interpreter.SymbolTable.Types2.References
 open Fpl.Interpreter.SymbolTable.Types2.Definitions
 open Fpl.Interpreter.SymbolTable.Types3.SelfParent
-open Fpl.Interpreter.SymbolTable.Types3.PredicativeBlocks
 open Fpl.Interpreter.SymbolTable.Types3.DefinitionProperties
-open Fpl.Interpreter.SymbolTable.Types3.RulesOfInferences
 open Fpl.Interpreter.SymbolTable.Types3.Extensions
-open Fpl.Interpreter.SymbolTable.Types3.Delegates
-open Fpl.Interpreter.SymbolTable.Types3.MapCases
-open Fpl.Interpreter.SymbolTable.Types3.Localization
-open Fpl.Interpreter.SymbolTable.Types3.AssertStmt
-open Fpl.Interpreter.SymbolTable.Types3.Assignments
-open Fpl.Interpreter.SymbolTable.Types3.CasesStmt
-open Fpl.Interpreter.SymbolTable.Types3.ForStmt
-open Fpl.Interpreter.SymbolTable.Types4.Proofs
 open Fpl.Interpreter.SymbolTable.Creation.Forward
 
-
-let setSignaturePositions pos1 pos2 = 
-    let fv = heap.Eval.PeekEvalStack()
-    match box fv with 
-    | :? IHasSignature as withSignature -> 
-        withSignature.SignStartPos <- pos1  
-        withSignature.SignEndPos <- pos2
-    | _ -> ()
 
 let evalDefinitions ast =
     match ast with

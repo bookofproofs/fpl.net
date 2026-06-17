@@ -32,10 +32,8 @@ open Fpl.Interpreter.SymbolTable.Types2.References
 open Fpl.Interpreter.SymbolTable.Types2.Definitions
 open Fpl.Interpreter.SymbolTable.Types3.SelfParent
 open Fpl.Interpreter.SymbolTable.Types3.PredicativeBlocks
-open Fpl.Interpreter.SymbolTable.Types3.DefinitionProperties
 open Fpl.Interpreter.SymbolTable.Types3.RulesOfInferences
 open Fpl.Interpreter.SymbolTable.Types3.Extensions
-open Fpl.Interpreter.SymbolTable.Types3.Delegates
 open Fpl.Interpreter.SymbolTable.Types3.MapCases
 open Fpl.Interpreter.SymbolTable.Types3.Localization
 open Fpl.Interpreter.SymbolTable.Types3.AssertStmt
@@ -50,39 +48,13 @@ open Fpl.Interpreter.SymbolTable.Creation.TypeConstructs
 open Fpl.Interpreter.SymbolTable.Creation.Predicates
 open Fpl.Interpreter.SymbolTable.Creation.Expressions
 open Fpl.Interpreter.SymbolTable.Creation.Definitions
+open Fpl.Interpreter.SymbolTable.Creation.TheoremLikeStmts
 open Fpl.Interpreter.SymbolTable.Creation.TopLevel
 
 /// A recursive function evaluating an AST and returning a list of EvalAliasedNamespaceIdentifier records
 /// for each occurrence of the uses clause in the FPL code.
 let rec eval ast =
-    let evalCommonStepsVarDeclPredicate varDeclBlock predicateAst =
-        eval varDeclBlock
-        eval predicateAst
 
-    let evalArgumentTuple (next:FplGenericNode) (predicateListAst:Ast list) pos1 pos2 =
-        let consumeArgumentsWithParent (parent:FplGenericNode) =
-            if predicateListAst.Length > 0 then 
-                predicateListAst 
-                |> List.iter (fun pred -> 
-                    let ref = new FplReference((pos1, pos2), parent)
-                    heap.Eval.PushEvalStack(ref)
-                    eval pred
-                    heap.Eval.PopEvalStack()
-                )
-        
-        let getProceedingReference = heap.Eval.GetProceedingReference()
-            
-        match next with 
-        | :? FplEquality 
-        | :? FplDecrement
-        | :? FplBaseConstructorCall -> 
-            consumeArgumentsWithParent next
-        | _ -> 
-            match getProceedingReference with 
-            | Some ref ->
-                ref.ArgType <- ArgType.Parentheses
-                consumeArgumentsWithParent ref
-            | _ -> ()
 
     match ast with
     // Lexical / leaf tokens
@@ -188,6 +160,22 @@ let rec eval ast =
     | Ast.ExtensionAssignment _ 
         ->
         evalDefinitions ast
+
+    // Theorem-like statements
+    | Axiom _
+    | AxiomSignature _
+    | Conjecture _
+    | ConjectureSignature _
+    | Theorem _
+    | TheoremSignature _
+    | Lemma _
+    | LemmaSignature _
+    | Proposition _
+    | PropositionSignature _
+    | Corollary _
+    | CorollarySignature _
+        ->
+        evalStatements ast
 
     // Top level nodes
     | Ast.AST _
@@ -599,83 +587,6 @@ let rec eval ast =
         eval varDeclBlock 
         eval premiseAst
         eval conclusionAst
-    | Ast.TheoremSignature((pos1, pos2), simpleSignatureAst) ->
-        heap.Helper.InSignatureEvaluation <- true
-        eval simpleSignatureAst
-        setSignaturePositions pos1 pos2
-        heap.Helper.InSignatureEvaluation <- false
-    | Ast.Theorem((pos1, pos2), (signatureAst, (optVarDeclOrSpecList, predicateAst))) ->
-        let parent = heap.Eval.PeekEvalStack()
-        let fv = new FplTheorem((pos1, pos2), parent, heap.Helper.GetNextAvailableFplBlockRunOrder)
-        heap.Eval.PushEvalStack(fv)
-        eval signatureAst
-        evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
-        heap.Eval.PopEvalStack()
-    | Ast.LemmaSignature((pos1, pos2), simpleSignatureAst) ->
-        heap.Helper.InSignatureEvaluation <- true
-        eval simpleSignatureAst
-        setSignaturePositions pos1 pos2
-        heap.Helper.InSignatureEvaluation <- false
-    | Ast.Lemma((pos1, pos2), (signatureAst, (optVarDeclOrSpecList, predicateAst))) ->
-        let parent = heap.Eval.PeekEvalStack()
-        let fv = new FplLemma((pos1, pos2), parent, heap.Helper.GetNextAvailableFplBlockRunOrder)
-        heap.Eval.PushEvalStack(fv)
-        eval signatureAst
-        evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
-        heap.Eval.PopEvalStack()
-    | Ast.PropositionSignature((pos1, pos2), simpleSignatureAst) ->
-        heap.Helper.InSignatureEvaluation <- true
-        eval simpleSignatureAst
-        setSignaturePositions pos1 pos2
-        heap.Helper.InSignatureEvaluation <- false
-    | Ast.Proposition((pos1, pos2), (signatureAst, ((optVarDeclOrSpecList, predicateAst)))) ->
-        let parent = heap.Eval.PeekEvalStack()
-        let fv = new FplProposition((pos1, pos2), parent, heap.Helper.GetNextAvailableFplBlockRunOrder)
-        heap.Eval.PushEvalStack(fv)
-        eval signatureAst
-        evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
-        heap.Eval.PopEvalStack()
-    | Ast.ConjectureSignature((pos1, pos2), simpleSignatureAst) ->
-        heap.Helper.InSignatureEvaluation <- true
-        eval simpleSignatureAst
-        setSignaturePositions pos1 pos2
-        heap.Helper.InSignatureEvaluation <- false
-    | Ast.Conjecture((pos1, pos2), (signatureAst, (optVarDeclOrSpecList, predicateAst))) ->
-        let parent = heap.Eval.PeekEvalStack()
-        let fv = new FplConjecture((pos1, pos2), parent, heap.Helper.GetNextAvailableFplBlockRunOrder)
-        heap.Eval.PushEvalStack(fv)
-        eval signatureAst
-        evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
-        heap.Eval.PopEvalStack()
-    | Ast.AxiomSignature((pos1, pos2), simpleSignatureAst) ->
-        heap.Helper.InSignatureEvaluation <- true
-        eval simpleSignatureAst
-        setSignaturePositions pos1 pos2
-        heap.Helper.InSignatureEvaluation <- false
-    | Ast.Axiom((pos1, pos2), (signatureAst, (optVarDeclOrSpecList, predicateAst))) ->
-        let parent = heap.Eval.PeekEvalStack()
-        let fv = new FplAxiom((pos1, pos2), parent, heap.Helper.GetNextAvailableFplBlockRunOrder)
-        heap.Eval.PushEvalStack(fv)
-        eval signatureAst
-        evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
-        heap.Eval.PopEvalStack()
-    | Ast.CorollarySignature((pos1, pos2), (simpleSignatureAst, dollarDigitListAsts)) ->
-        heap.Helper.InSignatureEvaluation <- true
-        eval simpleSignatureAst
-        dollarDigitListAsts |> List.map eval |> ignore
-        setSignaturePositions pos1 pos2
-        heap.Helper.InSignatureEvaluation <- false
-    | Ast.Corollary ((pos1, pos2), (corollarySignatureAst, (optVarDeclOrSpecList, predicateAst))) ->
-        let parent = heap.Eval.PeekEvalStack()
-        let fv = new FplCorollary((pos1, pos2), parent, heap.Helper.GetNextAvailableFplBlockRunOrder)
-        heap.Eval.PushEvalStack(fv)
-        eval corollarySignatureAst
-        heap.Eval.PopEvalStack() // add to parent theorem (if any) 
-        heap.Eval.PushEvalStack(fv) // push again to have the current corollary on stack
-        evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
-        // now, we are ready to emit VAR04 diagnostics for all variables declared in the signature of the corollary.
-        fv.CheckConsistency()
-        heap.Eval.Pop() |> ignore // pop 
     | Ast.NamedVarDecl((pos1, pos2), (variableListAst, variableTypeAst)) ->
         let parent = heap.Eval.PeekEvalStack()
         parent.AuxiliaryInfo <- variableListAst |> List.length // remember how many variables to create

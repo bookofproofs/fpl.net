@@ -117,6 +117,20 @@ type Ast =
     | ExtensionSignature of Positions * (Ast * Ast)
     | ExtensionAssignment of Positions * (Ast * Ast) 
 
+    // Theorem-like statements
+    | Axiom of Positions * (Ast * (Ast * Ast))
+    | AxiomSignature of Positions * Ast
+    | Conjecture of Positions * (Ast * (Ast * Ast))
+    | ConjectureSignature of Positions * Ast
+    | Theorem of Positions * (Ast * (Ast * Ast))
+    | TheoremSignature of Positions * Ast
+    | Lemma of Positions * (Ast * (Ast * Ast))
+    | LemmaSignature of Positions * Ast
+    | Proposition of Positions * (Ast * (Ast * Ast))
+    | PropositionSignature of Positions * Ast
+    | Corollary of Positions * (Ast * (Ast * Ast))
+    | CorollarySignature of Positions * (Ast * Ast list)
+
 
     // TopLevel
     | AST of Positions * Ast
@@ -177,22 +191,10 @@ type Ast =
     | RuleOfInferenceSignature of Positions * Ast
     | RuleOfInference of Positions * (Ast * Ast)
     | Localization of (Positions * Ast) * Ast list
-    | TheoremSignature of Positions * Ast
-    | Theorem of Positions * (Ast * (Ast * Ast))
 
-    | LemmaSignature of Positions * Ast
-    | Lemma of Positions * (Ast * (Ast * Ast))
-    | PropositionSignature of Positions * Ast
-    | Proposition of Positions * (Ast * (Ast * Ast))
-    | Corollary of Positions * (Ast * (Ast * Ast))
-    | CorollarySignature of Positions * (Ast * Ast list)
-    | ConjectureSignature of Positions * Ast
-    | Conjecture of Positions * (Ast * (Ast * Ast))
     | NamedVarDecl of Positions * (Ast list * Ast)
     | ParamTuple of Ast list 
 
-    | AxiomSignature of Positions * Ast
-    | Axiom of Positions * (Ast * (Ast * Ast))
 
 
     // Proofs

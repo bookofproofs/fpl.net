@@ -1,7 +1,7 @@
-/// This module provides a globally accessible reference to the AST evaluator.
+/// This module provides a globally accessible reference to the AST evaluator evalRef.
 /// The real evaluator is assigned only at the end, in Fpl.Interpreter.SymbolTable.Creation.Main module.
 /// Specialized evaluator modules can call the main evaluator via evalRef.Value
-
+/// Moreover, the module provides some helper functions that are needed in modules dependent from that module.
 (* MIT License
 
 Copyright (c) 2026+ bookofproofs
@@ -16,8 +16,47 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 
 module Fpl.Interpreter.SymbolTable.Creation.Forward
-
 open Fpl.Parser.Types
+open Fpl.Interpreter.BasicTypes
+open Fpl.Interpreter.SymbolTable.Storage.Heap
+open Fpl.Interpreter.SymbolTable.Types2.References
+open Fpl.Interpreter.SymbolTable.Types3.SelfParent
+open Fpl.Interpreter.SymbolTable.Types3.Delegates
 
 let evalRef : (Ast -> unit) ref = ref (fun _ ->
     failwith "evalRef not initialized")
+
+let setSignaturePositions pos1 pos2 = 
+    let fv = heap.Eval.PeekEvalStack()
+    match box fv with 
+    | :? IHasSignature as withSignature -> 
+        withSignature.SignStartPos <- pos1  
+        withSignature.SignEndPos <- pos2
+    | _ -> ()
+
+let evalCommonStepsVarDeclPredicate varDeclBlock predicateAst =
+    evalRef.Value varDeclBlock
+    evalRef.Value predicateAst
+
+let evalArgumentTuple (next:FplGenericNode) (predicateListAst:Ast list) pos1 pos2 =
+    let consumeArgumentsWithParent (parent:FplGenericNode) =
+        if predicateListAst.Length > 0 then 
+            predicateListAst 
+            |> List.iter (fun pred -> 
+                let ref = new FplReference((pos1, pos2), parent)
+                heap.Eval.PushEvalStack(ref)
+                evalRef.Value pred
+                heap.Eval.PopEvalStack()
+            )
+        
+    match next with 
+    | :? FplEquality 
+    | :? FplDecrement
+    | :? FplBaseConstructorCall -> 
+        consumeArgumentsWithParent next
+    | _ -> 
+        match heap.Eval.GetProceedingReference() with 
+        | Some ref ->
+            ref.ArgType <- ArgType.Parentheses
+            consumeArgumentsWithParent ref
+        | _ -> ()
