@@ -185,6 +185,14 @@ type Ast =
     | RevokeArgument of Positions * Ast
     | Qed of Positions * unit
 
+    // Special references
+    | Intrinsic of Positions * unit
+    | Undefined of Positions * unit
+    | SelfOrParent of Positions * Ast
+    | Self of Positions * unit
+    | Parent of Positions * unit
+    | Extension of Positions * string
+
     // Localizations
     | Localization of (Positions * Ast) * Ast list
     | TranslationTermList of Positions * Ast list
@@ -201,15 +209,6 @@ type Ast =
     | ErrorSyntax of Positions * string 
     | ErrorSyntaxBacktracking of Positions * string 
     | ErrorSyntaxChain of (Positions * Position) * (string * string)
-
-
-
-    | Intrinsic of Positions * unit
-    | Undefined of Positions * unit
-    | SelfOrParent of Positions * Ast
-    | Self of Positions * unit
-    | Parent of Positions * unit
-    | Extension of Positions * string
 
 
 

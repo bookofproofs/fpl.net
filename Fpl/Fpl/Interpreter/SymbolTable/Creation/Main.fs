@@ -13,24 +13,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 module Fpl.Interpreter.SymbolTable.Creation.Main
-open System
-open System.Collections.Generic
 open Fpl.Errors.Diagnostics
-open Fpl.Primitives
 open Fpl.Parser.Types
-open Fpl.Errors.Emitter
-open Fpl.Interpreter.BasicTypes
-open Fpl.Interpreter.Helpers.Basic
-open Fpl.Interpreter.Helpers.Checks
 open Fpl.Interpreter.SymbolTable.Types1.TopLevel
 open Fpl.Interpreter.SymbolTable.Storage.Asts
 open Fpl.Interpreter.SymbolTable.Storage.Heap
-open Fpl.Interpreter.SymbolTable.Types2.Intrinsic
-open Fpl.Interpreter.SymbolTable.Types2.Variables
-open Fpl.Interpreter.SymbolTable.Types2.Definitions
-open Fpl.Interpreter.SymbolTable.Types3.SelfParent
-open Fpl.Interpreter.SymbolTable.Types3.Extensions
-open Fpl.Interpreter.SymbolTable.Types3.Localization
 open Fpl.Interpreter.SymbolTable.Creation.Forward
 open Fpl.Interpreter.SymbolTable.Creation.LeafTokens
 open Fpl.Interpreter.SymbolTable.Creation.Identifiers
@@ -45,14 +32,13 @@ open Fpl.Interpreter.SymbolTable.Creation.Definitions
 open Fpl.Interpreter.SymbolTable.Creation.RulesOfInferences
 open Fpl.Interpreter.SymbolTable.Creation.StatementBlocks
 open Fpl.Interpreter.SymbolTable.Creation.Proofs
+open Fpl.Interpreter.SymbolTable.Creation.SpecialReferences
 open Fpl.Interpreter.SymbolTable.Creation.Localizations
 open Fpl.Interpreter.SymbolTable.Creation.TopLevel
 
 /// A recursive function evaluating an AST and returning a list of EvalAliasedNamespaceIdentifier records
 /// for each occurrence of the uses clause in the FPL code.
 let rec eval ast =
-
-
     match ast with
     // Lexical / leaf tokens
     | Ast.Alias _
@@ -239,6 +225,16 @@ let rec eval ast =
         ->
         evalProofs ast
 
+    // Special references
+    | Intrinsic _
+    | Undefined _
+    | SelfOrParent _
+    | Self _
+    | Parent _
+    | Extension _
+        ->
+        evalSpecRef ast
+
     // Localizations
     | Ast.Localization _
     | Ast.TranslationTermList _
@@ -259,51 +255,6 @@ let rec eval ast =
     | Ast.ErrorSyntaxChain _
         ->
         evalTopLevel ast
-
-    | Ast.Undefined((pos1, pos2), _) -> 
-        let fv = heap.Eval.PeekEvalStack()
-        let fvNew = new FplIntrinsicUndef((pos1, pos2), fv)
-        heap.Eval.PushEvalStack(fvNew)
-        heap.Eval.PopEvalStack()
-
-    | Ast.Intrinsic((pos1, pos2),()) -> 
-        let fv = heap.Eval.PeekEvalStack()
-        fv.IsIntrinsic <- true // flag that this block is intrinsic
-        match fv.Name with 
-        | PrimClassL ->
-            let cl = fv :?> FplClass
-            cl.AddDefaultConstructor()
-        | _ -> ()
-
-
-    | Ast.Self((pos1, pos2), _) -> 
-        let parent = heap.Eval.PeekEvalStack()
-        let fv = new FplSelf((pos1, pos2), parent)
-        match fv.SelfBlock with
-        | ScopeSearchResult.Found block ->
-            fv.RefersTo <- Some block
-        | _ -> ()
-        heap.Eval.PushEvalStack(fv)
-        heap.Eval.PopEvalStack()
-    | Ast.Parent((pos1, pos2), _) -> 
-        let parent = heap.Eval.PeekEvalStack()
-        let fv = new FplParent((pos1, pos2), parent)
-        match fv.ParentBlock with
-        | ScopeSearchResult.Found block ->
-            fv.RefersTo <- Some block
-        | _ -> ()
-        heap.Eval.PushEvalStack(fv)
-        heap.Eval.PopEvalStack()
-    | Ast.Extension((pos1, pos2), extensionString) ->
-        let fv = heap.Eval.PeekEvalStack()
-        let fplNew = new FplExtensionObj((pos1,pos2), fv)
-        heap.Eval.PushEvalStack(fplNew)
-        fplNew.FplId <- extensionString
-        heap.Eval.PopEvalStack()
-    | Ast.SelfOrParent((pos1, pos2), selforParentAst) -> 
-        eval selforParentAst
-
-
 
 
 let createSymbolTable () =

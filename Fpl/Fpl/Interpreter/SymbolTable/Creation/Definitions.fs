@@ -22,7 +22,6 @@ open Fpl.Interpreter.SymbolTable.Types2.Variables
 open Fpl.Interpreter.SymbolTable.Types2.Definitions
 open Fpl.Interpreter.SymbolTable.Types3.SelfParent
 open Fpl.Interpreter.SymbolTable.Types3.DefinitionProperties
-open Fpl.Interpreter.SymbolTable.Types3.Extensions
 open Fpl.Interpreter.SymbolTable.Creation.Forward
 
 
