@@ -27,11 +27,6 @@ type Ast =
     | Star of Positions * unit
     | Digits of string
     | DollarDigits of Positions * uint
-    | ExtensionRegex of string
-    | ExtensionName of Positions * string
-    | PrefixDecl of Positions * string
-    | PostfixDecl of Positions * string
-    | SymbolDecl of Positions * string
     | ObjectSymbolWithPos of Positions * string
     | InfixSymbolWithPos of Positions * string
     | PostFixSymbolWithPos of Positions * string
@@ -112,6 +107,18 @@ type Ast =
     | InEntity of Positions * Ast
     | Return of Positions * Ast
 
+    // Symbol extensions
+    | SymbolDecl of Positions * string
+    | PrefixDecl of Positions * string
+    | PostfixDecl of Positions * string
+    | InfixDeclWithPrecedence of Positions * (string * Ast) // infix symbol with precedence
+    | Precedence of Positions * int
+    | DefinitionExtension of Positions * ((Ast * Ast) * Ast)
+    | ExtensionSignature of Positions * (Ast * Ast)
+    | ExtensionAssignment of Positions * (Ast * Ast) 
+    | ExtensionRegex of string
+    | ExtensionName of Positions * string
+
     // Definitions
     | DefinitionClass of Positions * (((Ast * Ast option) * Ast option) * Ast) 
     | ClassSignature of Positions * Ast
@@ -137,9 +144,6 @@ type Ast =
     | FunctionalTermInstance of Positions * (Ast * Ast option)
     | FunctionalTermInstanceSignature of Positions * ((Ast * Ast) * Ast)
 
-    | DefinitionExtension of Positions * ((Ast * Ast) * Ast)
-    | ExtensionSignature of Positions * (Ast * Ast)
-    | ExtensionAssignment of Positions * (Ast * Ast) 
 
     // Rules of inferences
     | RuleOfInference of Positions * (Ast * Ast)
@@ -199,8 +203,6 @@ type Ast =
     | ErrorSyntaxChain of (Positions * Position) * (string * string)
 
 
-    | InfixDeclWithPrecedence of Positions * (string * Ast) // infix symbol with precedence
-    | Precedence of Positions * int
 
     | Intrinsic of Positions * unit
     | Undefined of Positions * unit

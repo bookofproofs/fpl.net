@@ -40,6 +40,7 @@ open Fpl.Interpreter.SymbolTable.Creation.Predicates
 open Fpl.Interpreter.SymbolTable.Creation.Expressions
 open Fpl.Interpreter.SymbolTable.Creation.Tuples
 open Fpl.Interpreter.SymbolTable.Creation.Commands
+open Fpl.Interpreter.SymbolTable.Creation.SymbolExtensions
 open Fpl.Interpreter.SymbolTable.Creation.Definitions
 open Fpl.Interpreter.SymbolTable.Creation.RulesOfInferences
 open Fpl.Interpreter.SymbolTable.Creation.StatementBlocks
@@ -59,10 +60,6 @@ let rec eval ast =
     | Ast.Star _
     | Ast.Digits _
     | Ast.DollarDigits _
-    | Ast.ExtensionRegex _
-    | Ast.PrefixDecl _
-    | Ast.PostfixDecl _
-    | Ast.SymbolDecl _
     | Ast.ObjectSymbolWithPos _
     | Ast.InfixSymbolWithPos _
     | Ast.PostFixSymbolWithPos _
@@ -101,8 +98,7 @@ let rec eval ast =
         ->
         evalTypeConstructs ast
 
-    // Variables and declarations
-    // Variables
+    // Variables and variable declarations
     | Ast.VarDeclBlock _
     | Ast.NamedVarDecl _
     | Ast.Var _
@@ -161,6 +157,19 @@ let rec eval ast =
         ->
         evalCommands ast
 
+    // Symbol extensions
+    | Ast.SymbolDecl _
+    | Ast.PrefixDecl _
+    | Ast.PostfixDecl _
+    | Ast.InfixDeclWithPrecedence _
+    | Ast.Precedence _
+    | Ast.DefinitionExtension _
+    | Ast.ExtensionSignature _
+    | Ast.ExtensionRegex _
+    | Ast.ExtensionAssignment _ 
+        ->
+        evalExtendSymbols ast
+
     // Definitions
     | Ast.DefinitionClass _
     | Ast.ClassSignature _
@@ -182,9 +191,6 @@ let rec eval ast =
     | Ast.PredicateInstanceSignature _
     | Ast.FunctionalTermInstance _
     | Ast.FunctionalTermInstanceSignature _
-    | Ast.DefinitionExtension _
-    | Ast.ExtensionSignature _
-    | Ast.ExtensionAssignment _ 
         ->
         evalDefinitions ast
 
@@ -270,10 +276,6 @@ let rec eval ast =
         | _ -> ()
 
 
-    | Ast.InfixDeclWithPrecedence((pos1, pos2), (symbol, precedenceAsts)) -> 
-        let fv = heap.Eval.PeekEvalStack()
-        eval precedenceAsts
-        fv.ExpressionType <- FixType.Infix (symbol, fv.AuxiliaryInfo)
     | Ast.Self((pos1, pos2), _) -> 
         let parent = heap.Eval.PeekEvalStack()
         let fv = new FplSelf((pos1, pos2), parent)
@@ -301,9 +303,6 @@ let rec eval ast =
     | Ast.SelfOrParent((pos1, pos2), selforParentAst) -> 
         eval selforParentAst
 
-    | Ast.Precedence((pos1, pos2), precedence) ->
-        let fv = heap.Eval.PeekEvalStack()
-        fv.AuxiliaryInfo <- precedence
 
 
 

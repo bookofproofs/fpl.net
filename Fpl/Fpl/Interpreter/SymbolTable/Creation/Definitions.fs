@@ -28,7 +28,7 @@ open Fpl.Interpreter.SymbolTable.Creation.Forward
 
 let evalDefinitions ast =
     match ast with
-    /// Definitions of classes
+    // Definitions of classes
     | Ast.DefinitionClass((pos1, pos2),(((classSignatureAst, optInheritedClassTypeListAst), optUserDefinedObjSymAst), classBlockAst)) ->
         let parent = heap.Eval.PeekEvalStack()
         let fv = new FplClass((pos1, pos2), parent, heap.Helper.GetNextAvailableFplBlockRunOrder)
@@ -88,7 +88,7 @@ let evalDefinitions ast =
         evalRef.Value argumentTupleAst
         heap.Eval.PopEvalStack()
 
-    /// Definitions of predicates
+    // Definitions of predicates
     | Ast.DefinitionPredicate((pos1, pos2), (predicateSignatureAst, optDefBlock)) ->
         let parent = heap.Eval.PeekEvalStack()
         let fv = new FplPredicate((pos1, pos2), parent, heap.Helper.GetNextAvailableFplBlockRunOrder)
@@ -201,22 +201,5 @@ let evalDefinitions ast =
         evalRef.Value mappingAst
         setSignaturePositions pos1 pos2
 
-    // Definitions of extensions
-    | Ast.DefinitionExtension((pos1, pos2), ((extensionNameAst, extensionSignatureAst), extensionTermAst)) ->
-        let parent = heap.Eval.PeekEvalStack()
-        let fv = new FplExtension((pos1,pos2), parent, heap.Helper.GetNextAvailableFplBlockRunOrder)
-        heap.Eval.PushEvalStack(fv)
-        evalRef.Value extensionNameAst
-        evalRef.Value extensionSignatureAst
-        evalRef.Value extensionTermAst
-        heap.Eval.PopEvalStack()
-    | Ast.ExtensionSignature((pos1, pos2), (extensionAssignmentAst, extensionMappingAst)) ->
-        evalRef.Value extensionAssignmentAst
-        evalRef.Value extensionMappingAst
-    | Ast.ExtensionAssignment((pos1, pos2), (varAst, extensionRegexAst)) ->
-        heap.Helper.InSignatureEvaluation <- true
-        evalRef.Value varAst
-        evalRef.Value extensionRegexAst
-        heap.Helper.InSignatureEvaluation <- false
     | _ ->
         failwith (sprintf "{%O} is not a top definition or related node" ast) 

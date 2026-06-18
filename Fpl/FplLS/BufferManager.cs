@@ -48,13 +48,9 @@ namespace FplLS
             return _buffers.TryGetValue(uri, out var buffer) ? buffer : null;
         }
 
-        public class DocumentUpdatedEventArgs : EventArgs
+        public class DocumentUpdatedEventArgs(Fpl.Errors.Diagnostics.PathEquivalentUri uri) : EventArgs
         {
-            public PathEquivalentUri Uri { get; }
-            public DocumentUpdatedEventArgs(PathEquivalentUri uri)
-            {
-                Uri = uri;
-            }
+            public PathEquivalentUri Uri { get; } = uri;
         }
     }
 }
