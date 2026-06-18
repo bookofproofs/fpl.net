@@ -131,6 +131,12 @@ type Ast =
     | ExtensionSignature of Positions * (Ast * Ast)
     | ExtensionAssignment of Positions * (Ast * Ast) 
 
+    // Rules of inferences
+    | RuleOfInference of Positions * (Ast * Ast)
+    | RuleOfInferenceSignature of Positions * Ast
+    | PremiseConclusionBlock of Ast * (Ast * Ast)
+    | PremiseList of Positions * Ast list
+
     // Statements
     | Axiom of Positions * (Ast * (Ast * Ast))
     | AxiomSignature of Positions * Ast
@@ -204,10 +210,6 @@ type Ast =
     | ParamTuple of Ast list 
 
     
-    | RuleOfInference of Positions * (Ast * Ast)
-    | RuleOfInferenceSignature of Positions * Ast
-    | PremiseConclusionBlock of Ast * (Ast * Ast)
-    | PremiseList of Positions * Ast list
 
 
 

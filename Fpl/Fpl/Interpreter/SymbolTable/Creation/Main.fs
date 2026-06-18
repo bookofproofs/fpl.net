@@ -25,13 +25,11 @@ open Fpl.Interpreter.Helpers.Checks
 open Fpl.Interpreter.SymbolTable.Types1.TopLevel
 open Fpl.Interpreter.SymbolTable.Storage.Asts
 open Fpl.Interpreter.SymbolTable.Storage.Heap
-open Fpl.Interpreter.SymbolTable.Storage.Util
 open Fpl.Interpreter.SymbolTable.Types2.Intrinsic
 open Fpl.Interpreter.SymbolTable.Types2.Variables
 open Fpl.Interpreter.SymbolTable.Types2.References
 open Fpl.Interpreter.SymbolTable.Types2.Definitions
 open Fpl.Interpreter.SymbolTable.Types3.SelfParent
-open Fpl.Interpreter.SymbolTable.Types3.RulesOfInferences
 open Fpl.Interpreter.SymbolTable.Types3.Extensions
 open Fpl.Interpreter.SymbolTable.Types3.Localization
 open Fpl.Interpreter.SymbolTable.Creation.Forward
@@ -42,6 +40,7 @@ open Fpl.Interpreter.SymbolTable.Creation.Predicates
 open Fpl.Interpreter.SymbolTable.Creation.Expressions
 open Fpl.Interpreter.SymbolTable.Creation.Commands
 open Fpl.Interpreter.SymbolTable.Creation.Definitions
+open Fpl.Interpreter.SymbolTable.Creation.RulesOfInferences
 open Fpl.Interpreter.SymbolTable.Creation.StatementBlocks
 open Fpl.Interpreter.SymbolTable.Creation.Proofs
 open Fpl.Interpreter.SymbolTable.Creation.TopLevel
@@ -172,6 +171,14 @@ let rec eval ast =
         ->
         evalDefinitions ast
 
+    // Rules of inferences
+    | Ast.RuleOfInference _
+    | Ast.RuleOfInferenceSignature _
+    | Ast.PremiseConclusionBlock _
+    | Ast.PremiseList _
+        ->
+        evalRulesOfInferences ast
+
     // Axioms, conjectures and other theorem-like statements
     | Ast.Axiom _
     | Ast.AxiomSignature _
@@ -208,7 +215,6 @@ let rec eval ast =
     | Ast.Qed _
         ->
         evalProofs ast
-
 
     // Top level nodes
     | Ast.AST _
@@ -333,18 +339,6 @@ let rec eval ast =
         | _ -> ()
         heap.Eval.PushEvalStack(fv)
         heap.Eval.PopEvalStack()
-    | Ast.RuleOfInferenceSignature((pos1, pos2), simpleSignatureAst) ->
-        heap.Helper.InSignatureEvaluation <- true
-        eval simpleSignatureAst
-        setSignaturePositions pos1 pos2
-        heap.Helper.InSignatureEvaluation <- false
-    | Ast.RuleOfInference((pos1, pos2), (signatureAst, premiseConclusionBlockAst)) ->
-        let parent = heap.Eval.PeekEvalStack()
-        let fv = new FplRuleOfInference((pos1, pos2), parent, heap.Helper.GetNextAvailableFplBlockRunOrder)
-        heap.Eval.PushEvalStack(fv)
-        eval signatureAst
-        eval premiseConclusionBlockAst
-        heap.Eval.PopEvalStack() 
     | Ast.Extension((pos1, pos2), extensionString) ->
         let fv = heap.Eval.PeekEvalStack()
         let fplNew = new FplExtensionObj((pos1,pos2), fv)
@@ -403,12 +397,6 @@ let rec eval ast =
         | _ -> ()
     | Ast.VarDeclBlock varDeclOrStmtAstList ->
         varDeclOrStmtAstList |> Option.map (List.map eval >> ignore) |> Option.defaultValue ()
-    | Ast.PremiseList((pos1, pos2), predicateListAsts) ->
-        let parent = heap.Eval.PeekEvalStack()
-        let fv = new FplPredicateList((pos1, pos2), parent, heap.Helper.GetNextAvailableFplBlockRunOrder) 
-        heap.Eval.PushEvalStack(fv)
-        predicateListAsts |> List.map eval |> ignore
-        heap.Eval.PopEvalStack()
     | Ast.ArgumentTuple((pos1, pos2), predicateListAst) ->
         let next = heap.Eval.PeekEvalStack()
         evalArgumentTuple next predicateListAst pos1 pos2
@@ -459,10 +447,6 @@ let rec eval ast =
         |> Seq.iter (fun kvp -> 
             fv.ErrorOccurred <- emitVAR04diagnostics kvp.Key (fst kvp.Value) (snd kvp.Value)
         )
-    | Ast.PremiseConclusionBlock (varDeclBlock, (premiseAst, conclusionAst)) ->
-        eval varDeclBlock 
-        eval premiseAst
-        eval conclusionAst
     | Ast.NamedVarDecl((pos1, pos2), (variableListAst, variableTypeAst)) ->
         let parent = heap.Eval.PeekEvalStack()
         parent.AuxiliaryInfo <- variableListAst |> List.length // remember how many variables to create
