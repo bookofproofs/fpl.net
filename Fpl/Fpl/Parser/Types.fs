@@ -63,6 +63,11 @@ type Ast =
     | CompoundPredicateType of Positions * (Ast * Ast option)
     | CompoundFunctionalTermType of Positions * (Ast * (Ast * Ast) option)
 
+    // Variables
+    | VarDeclBlock of Ast list option
+    | NamedVarDecl of Positions * (Ast list * Ast)
+    | Var of Positions * string
+
     // Predicates
     | True of Positions * unit
     | False of Positions * unit 
@@ -204,10 +209,6 @@ type Ast =
     | Parent of Positions * unit
     | Extension of Positions * string
 
-    // Variables
-    | Var of Positions * string
-    | VarDeclBlock of Ast list option
-    | NamedVarDecl of Positions * (Ast list * Ast)
 
 
     

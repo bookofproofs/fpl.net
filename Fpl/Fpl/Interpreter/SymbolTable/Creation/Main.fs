@@ -35,6 +35,7 @@ open Fpl.Interpreter.SymbolTable.Creation.Forward
 open Fpl.Interpreter.SymbolTable.Creation.LeafTokens
 open Fpl.Interpreter.SymbolTable.Creation.Identifiers
 open Fpl.Interpreter.SymbolTable.Creation.TypeConstructs
+open Fpl.Interpreter.SymbolTable.Creation.Variables
 open Fpl.Interpreter.SymbolTable.Creation.Predicates
 open Fpl.Interpreter.SymbolTable.Creation.Expressions
 open Fpl.Interpreter.SymbolTable.Creation.Tuples
@@ -99,6 +100,14 @@ let rec eval ast =
     | Ast.CompoundFunctionalTermType _
         ->
         evalTypeConstructs ast
+
+    // Variables and declarations
+    // Variables
+    | Ast.VarDeclBlock _
+    | Ast.NamedVarDecl _
+    | Ast.Var _
+        ->
+        evalVariables ast
 
     // Prime and compound predicates
     | Ast.True _
@@ -260,77 +269,6 @@ let rec eval ast =
             cl.AddDefaultConstructor()
         | _ -> ()
 
-    | Ast.Var((pos1, pos2), name) ->
-        let searchVarByName (fv:FplGenericNode) = 
-            match (searchInUpperScopeByName fv name) with
-            | ScopeSearchResult.Found foundVar -> 
-                // variable was declared in the scope
-                match fv.Name with 
-                | PrimJIByDefVar 
-                | PrimRefL 
-                | PrimForInStmtEntityL 
-                | PrimForInStmtDomainL ->
-                    fv.FplId <- name
-                    fv.RefersTo <- Some foundVar
-                | PrimTranslationL ->
-                    // for translations, use the name of the variable
-                    fv.FplId <- foundVar.FplId
-                    fv.TypeId <- foundVar.TypeId 
-                | _ -> ()
-                match foundVar with
-                | :? FplGenericVariable as var -> var .SetIsUsed()
-                | _ -> ()
-            | _ ->
-                match fv.UltimateBlockNode with 
-                | Some (:? FplLocalization as loc) when heap.Helper.InSignatureEvaluation -> 
-                    () // localizations during 
-                | _ ->
-                    // otherwise emit variable not declared 
-                    fv.ErrorOccurred <- emitVAR01diagnostics name pos1 pos2
-                
-                // if no variable in scope was found, spawn an undefined variable
-                let undefVar = new FplVariable(name, (pos1, pos2), fv)
-                undefVar.TypeId <- LiteralUndef
-                undefVar.SetDefaultValue()
-                heap.Eval.PushEvalStack(undefVar)
-                heap.Eval.PopEvalStack()
-            
-        let fv = heap.Eval.PeekEvalStack()
-        let parentFv = fv.Parent.Value
-        match fv.Name with 
-        | PrimVariableL
-        | PrimVariableArrayL -> 
-            // in the context of variable declarations, we set the name and positions of the variables
-            fv.FplId <- name
-            fv.TypeId <- LiteralUndef 
-            fv.StartPos <- pos1
-            fv.EndPos <- pos2
-        | PrimExtensionL -> 
-            let newVar = new FplVariable(name, (pos1, pos2), fv)
-            newVar.TypeId <- fv.FplId
-            newVar.IsSignatureVariable <- heap.Helper.InSignatureEvaluation
-            heap.Eval.PushEvalStack(newVar)
-            heap.Eval.PopEvalStack()
-        | PrimRefL ->
-            match box parentFv with 
-            | :? IHasDotted as dotted when dotted.DottedChild.IsSome ->
-                fv.FplId <- name
-                fv.TypeId <- LiteralUndef
-            | _ -> searchVarByName fv
-        | _ -> 
-            // in all other contexts, check by name, if this variable was declared in some scope
-            searchVarByName fv
-
-        match fv.UltimateBlockNode with 
-        | Some (:? FplLocalization as loc) when loc.ArgList.Count = 0 && fv.RefersTo.IsSome -> 
-            let variable = fv.RefersTo.Value
-            if loc.Scope.ContainsKey(name) then 
-                let other = loc.Scope[name]
-                variable.ErrorOccurred <- emitVAR11diagnostics name other.QualifiedStartPos pos1 pos2 
-            else 
-                loc.Scope.Add(name, variable)
-                variable.Parent <- Some loc
-        | _ -> ()
 
     | Ast.InfixDeclWithPrecedence((pos1, pos2), (symbol, precedenceAsts)) -> 
         let fv = heap.Eval.PeekEvalStack()
@@ -360,40 +298,8 @@ let rec eval ast =
         heap.Eval.PushEvalStack(fplNew)
         fplNew.FplId <- extensionString
         heap.Eval.PopEvalStack()
-    | Ast.VarDeclBlock varDeclOrStmtAstList ->
-        varDeclOrStmtAstList |> Option.map (List.map eval >> ignore) |> Option.defaultValue ()
     | Ast.SelfOrParent((pos1, pos2), selforParentAst) -> 
         eval selforParentAst
-    | Ast.NamedVarDecl((pos1, pos2), (variableListAst, variableTypeAst)) ->
-        let parent = heap.Eval.PeekEvalStack()
-        parent.AuxiliaryInfo <- variableListAst |> List.length // remember how many variables to create
-        // create all variables of the named variable declaration in the current scope
-        variableListAst |> List.iter (fun varAst ->
-            match variableTypeAst with 
-            | Ast.ArrayType((posMan1, posMan2),(mainTypeAst,  indexAllowedTypeListAst)) ->
-                let numberOfVariadicVars = parent.AuxiliaryInfo
-                if numberOfVariadicVars > 1 then
-                    parent.ErrorOccurred <- emitVAR00Diagnostics posMan1 posMan2        
-                match varAst with 
-                | Ast.Var((varPos1, varPos2), varName) ->
-                    let newVar = new FplVariableArray(varName, (varPos1, varPos2), parent)
-                    newVar.IsSignatureVariable <- (heap.Helper.InSignatureEvaluation && hasSignature parent)
-                    heap.Eval.PushEvalStack(newVar)
-                    eval mainTypeAst
-                    indexAllowedTypeListAst |> List.map eval |> ignore
-                    heap.Eval.PopEvalStack()
-                | _ -> ()
-            | Ast.SimpleVariableType((_, _),simplVariableTypeAst) ->
-                match varAst with 
-                | Ast.Var((varPos1, varPos2), varName) ->
-                    let newVar = new FplVariable(varName, (varPos1, varPos2), parent)
-                    newVar.IsSignatureVariable <- (heap.Helper.InSignatureEvaluation && hasSignature parent)
-                    heap.Eval.PushEvalStack(newVar)
-                    eval simplVariableTypeAst
-                    heap.Eval.PopEvalStack()
-                | _ -> ()
-            | _ -> ()
-        ) |> ignore 
 
     | Ast.Precedence((pos1, pos2), precedence) ->
         let fv = heap.Eval.PeekEvalStack()
