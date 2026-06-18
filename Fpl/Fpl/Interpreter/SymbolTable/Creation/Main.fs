@@ -34,8 +34,6 @@ open Fpl.Interpreter.SymbolTable.Types3.SelfParent
 open Fpl.Interpreter.SymbolTable.Types3.RulesOfInferences
 open Fpl.Interpreter.SymbolTable.Types3.Extensions
 open Fpl.Interpreter.SymbolTable.Types3.Localization
-open Fpl.Interpreter.SymbolTable.Types3.ForStmt
-open Fpl.Interpreter.SymbolTable.Types4.Proofs
 open Fpl.Interpreter.SymbolTable.Creation.Forward
 open Fpl.Interpreter.SymbolTable.Creation.LeafTokens
 open Fpl.Interpreter.SymbolTable.Creation.Identifiers
@@ -44,7 +42,8 @@ open Fpl.Interpreter.SymbolTable.Creation.Predicates
 open Fpl.Interpreter.SymbolTable.Creation.Expressions
 open Fpl.Interpreter.SymbolTable.Creation.Commands
 open Fpl.Interpreter.SymbolTable.Creation.Definitions
-open Fpl.Interpreter.SymbolTable.Creation.TheoremLikeStmts
+open Fpl.Interpreter.SymbolTable.Creation.StatementBlocks
+open Fpl.Interpreter.SymbolTable.Creation.Proofs
 open Fpl.Interpreter.SymbolTable.Creation.TopLevel
 
 /// A recursive function evaluating an AST and returning a list of EvalAliasedNamespaceIdentifier records
@@ -131,17 +130,18 @@ let rec eval ast =
         evalExpressions ast
 
     // Commands & other actions
-    | Delegate _
-    | Assertion _
-    | Cases _
-    | CaseSingle _
-    | CaseElse _ 
-    | MapCases _
-    | MapCaseSingle _
-    | MapCaseElse _
-    | Assignment _
-    | ForIn _
-    | Return _
+    | Ast.Delegate _
+    | Ast.Assertion _
+    | Ast.Cases _
+    | Ast.CaseSingle _
+    | Ast.CaseElse _ 
+    | Ast.MapCases _
+    | Ast.MapCaseSingle _
+    | Ast.MapCaseElse _
+    | Ast.Assignment _
+    | Ast.ForIn _
+    | Ast.InEntity _
+    | Ast.Return _
         ->
         evalCommands ast
 
@@ -172,21 +172,43 @@ let rec eval ast =
         ->
         evalDefinitions ast
 
-    // Theorem-like statements
-    | Axiom _
-    | AxiomSignature _
-    | Conjecture _
-    | ConjectureSignature _
-    | Theorem _
-    | TheoremSignature _
-    | Lemma _
-    | LemmaSignature _
-    | Proposition _
-    | PropositionSignature _
-    | Corollary _
-    | CorollarySignature _
+    // Axioms, conjectures and other theorem-like statements
+    | Ast.Axiom _
+    | Ast.AxiomSignature _
+    | Ast.Conjecture _
+    | Ast.ConjectureSignature _
+    | Ast.Theorem _
+    | Ast.TheoremSignature _
+    | Ast.Lemma _
+    | Ast.LemmaSignature _
+    | Ast.Proposition _
+    | Ast.PropositionSignature _
+    | Ast.Corollary _
+    | Ast.CorollarySignature _
         ->
-        evalStatements ast
+        evalStatementBlocks ast
+
+    | Ast.Proof _
+    | Ast.ProofSignature _
+    | Ast.ProofBlock _
+    | Ast.ProofContent _
+    | Ast.Argument _
+    | Ast.JustArgInf _
+    | Ast.StartArgument _
+    | Ast.StartArgumentStictly _
+    | Ast.Justification _
+    | Ast.JustificationItem _
+    | Ast.ReferenceToProofOrCorollary _
+    | Ast.ByDef _
+    | Ast.JustificationIdentifier _ 
+    | Ast.TrivialArgument _
+    | Ast.DeriveArgument _
+    | Ast.AssumeArgument _
+    | Ast.RevokeArgument _
+    | Ast.Qed _
+        ->
+        evalProofs ast
+
 
     // Top level nodes
     | Ast.AST _
@@ -311,12 +333,6 @@ let rec eval ast =
         | _ -> ()
         heap.Eval.PushEvalStack(fv)
         heap.Eval.PopEvalStack()
-    | Ast.Trivial((pos1, pos2), _) -> 
-        let fv = heap.Eval.PeekEvalStack()
-        let refBlock = new FplArgInferenceTrivial((pos1, pos2), fv) 
-        heap.Eval.PushEvalStack(refBlock)
-        heap.Eval.PopEvalStack()
-    | Ast.Qed((pos1, pos2), _) -> ()
     | Ast.RuleOfInferenceSignature((pos1, pos2), simpleSignatureAst) ->
         heap.Helper.InSignatureEvaluation <- true
         eval simpleSignatureAst
@@ -337,12 +353,6 @@ let rec eval ast =
         heap.Eval.PopEvalStack()
     | Ast.UsesClause((pos1, pos2), ast1) ->
         eval ast1
-    | Ast.InEntity((pos1, pos2), inDomainAst) ->
-        let forStmt = heap.Eval.PeekEvalStack()
-        let inDomain = new FplForInStmtDomain((pos1,pos2), forStmt)
-        heap.Eval.PushEvalStack(inDomain) // add ForInStmtDomain
-        eval inDomainAst
-        heap.Eval.PopEvalStack() // remove ForInStmtDomain
     | Ast.DottedPredicate((pos1, pos2), predicateWithOptSpecificationAst) ->
         let fv = heap.Eval.PeekEvalStack()
         let refBlock = new FplReference((pos1, pos2), fv) 
@@ -352,24 +362,6 @@ let rec eval ast =
         | _ -> ()
         heap.Eval.PushEvalStack(refBlock)
         eval predicateWithOptSpecificationAst
-        heap.Eval.PopEvalStack()
-    | Ast.AssumeArgument((pos1, pos2), predicateAst) ->
-        let fv = heap.Eval.PeekEvalStack()
-        let fvNew = new FplArgInferenceAssume((pos1, pos2), fv) 
-        heap.Eval.PushEvalStack(fvNew)
-        eval predicateAst
-        heap.Eval.PopEvalStack()
-    | Ast.RevokeArgument((pos1, pos2), predicateAst) ->
-        let fv = heap.Eval.PeekEvalStack()
-        let argInf = new FplArgInferenceRevoke((pos1, pos2), fv) 
-        heap.Eval.PushEvalStack(argInf)
-        eval predicateAst
-        heap.Eval.PopEvalStack()
-    | Ast.ByDef((pos1, pos2), variableAst) ->
-        let parent = heap.Eval.PeekEvalStack()
-        let fvJi = new FplJustificationItemByDefVar((pos1, pos2), parent)
-        heap.Eval.PushEvalStack(fvJi)
-        eval variableAst
         heap.Eval.PopEvalStack()
     | Ast.ParamTuple namedVariableDeclarationListAsts ->
         let fv = heap.Eval.PeekEvalStack()
@@ -417,34 +409,11 @@ let rec eval ast =
         heap.Eval.PushEvalStack(fv)
         predicateListAsts |> List.map eval |> ignore
         heap.Eval.PopEvalStack()
-    | Ast.JustificationItem((pos1, pos2), justificationReferenceAst) ->
-        eval justificationReferenceAst 
-    | Ast.StartArgument argumentIdentifier ->
-        eval argumentIdentifier
-    | Ast.StartArgumentStictly (argumentIdentifier, justificationItemListAsts) ->
-        eval argumentIdentifier
-        justificationItemListAsts |> List.map eval |> ignore
-    | Ast.Justification((pos1, pos2), justificationItemAst) ->
-        match justificationItemAst with
-        | Ast.StartArgument _ ->
-            eval justificationItemAst // symbol table will be missing justification because it was omitted in FPL code
-        | Ast.StartArgumentStictly _ 
-        | _ ->
-            // otherwise, we create a justification node
-            let fv = heap.Eval.PeekEvalStack()
-            let just = new FplJustification((pos1, pos2), fv)
-            heap.Eval.PushEvalStack(just)
-            eval justificationItemAst
-            heap.Eval.PopEvalStack()
     | Ast.ArgumentTuple((pos1, pos2), predicateListAst) ->
         let next = heap.Eval.PeekEvalStack()
         evalArgumentTuple next predicateListAst pos1 pos2
     | Ast.QualificationList((pos1, pos2), asts) ->
         asts |> List.map eval |> ignore
-    | Ast.ReferenceToProofOrCorollary((pos1, pos2), (referencingIdentifierAst)) ->
-        heap.Helper.InReferenceToProofOrCorollary <- true
-        eval referencingIdentifierAst
-        heap.Helper.InReferenceToProofOrCorollary <- false
     | Ast.SelfOrParent((pos1, pos2), selforParentAst) -> 
         eval selforParentAst
     | Ast.Language((pos1, pos2),(langCode, ebnfAst)) ->
@@ -454,12 +423,6 @@ let rec eval ast =
         eval langCode
         eval ebnfAst
         heap.Eval.PopEvalStack() // remove language
-    | ProofSignature((pos1, pos2), (simpleSignatureAst, dollarDigitListAsts)) ->
-        heap.Helper.InSignatureEvaluation <- true
-        eval simpleSignatureAst
-        dollarDigitListAsts |> List.map eval |> ignore
-        setSignaturePositions pos1 pos2
-        heap.Helper.InSignatureEvaluation <- false
     | Ast.Localization(((pos1, pos2), predicateAst), translationListAsts) ->
         let parent = heap.Eval.PeekEvalStack()
         let fv = new FplLocalization((pos1, pos2), parent, heap.Helper.GetNextAvailableFplBlockRunOrder)
@@ -496,15 +459,6 @@ let rec eval ast =
         |> Seq.iter (fun kvp -> 
             fv.ErrorOccurred <- emitVAR04diagnostics kvp.Key (fst kvp.Value) (snd kvp.Value)
         )
-    | Ast.JustArgInf((pos1, pos2), (justificationAst, argumentInferenceAst)) ->
-        eval justificationAst
-        eval argumentInferenceAst
-    | Ast.Argument((pos1, pos2), (justifiedArgumentAst)) ->
-        let fv = heap.Eval.PeekEvalStack()
-        let arg = new FplArgument((pos1, pos2), fv, heap.Helper.GetNextAvailableFplBlockRunOrder) 
-        heap.Eval.PushEvalStack(arg)
-        eval justifiedArgumentAst
-        heap.Eval.PopEvalStack()
     | Ast.PremiseConclusionBlock (varDeclBlock, (premiseAst, conclusionAst)) ->
         eval varDeclBlock 
         eval premiseAst
@@ -539,199 +493,10 @@ let rec eval ast =
                 | _ -> ()
             | _ -> ()
         ) |> ignore 
-    | Ast.DerivedPredicate ((pos1, pos2),predicateAst) -> 
-        let fv = heap.Eval.PeekEvalStack()
-        let argInf = new FplArgInferenceDerived((pos1, pos2), fv) 
-        heap.Eval.PushEvalStack(argInf)
-        eval predicateAst
-        heap.Eval.PopEvalStack()
 
-    | Ast.ProofContent ((varDeclBlock, proofArgumentListAst), optQedAst) ->
-        eval varDeclBlock
-        proofArgumentListAst |> List.map eval |> ignore
-        optQedAst |> Option.map eval |> Option.defaultValue ()
-    | Ast.ProofBlock proofContent ->
-        eval proofContent
-    | Ast.Proof((pos1, pos2), (proofSignatureAst, proofBlockAst)) ->
-        let parent = heap.Eval.PeekEvalStack()
-        let fv = new FplProof((pos1, pos2), parent, heap.Helper.GetNextAvailableFplBlockRunOrder)
-        heap.Eval.PushEvalStack(fv)
-        eval proofSignatureAst
-        heap.Eval.PopEvalStack() // add to parent theorem (if any)
-        heap.Eval.PushEvalStack(fv) // push again
-        eval proofBlockAst
-        fv.CheckConsistency()
-        heap.Eval.Pop() |> ignore // pop without embedding in theorem (already done)
     | Ast.Precedence((pos1, pos2), precedence) ->
         let fv = heap.Eval.PeekEvalStack()
         fv.AuxiliaryInfo <- precedence
-    | Ast.JustificationIdentifier((pos1, pos2), (((byModifierOption, predicateIdentifierAst), dollarDigitListAsts), refArgumentIdentifierAst)) ->
-        let parent = heap.Eval.PeekEvalStack()
-
-        let checkPR001_PR006Diagnostics (fvJi:FplGenericNode) candidates = 
-            match tryFindAssociatedBlockForJustificationItem fvJi candidates with
-            | ScopeSearchResult.FoundAssociate potentialCandidate ->
-                match fvJi with 
-                | :? FplJustificationItemByProofArgument as fvJi1 ->
-                    let split = fvJi.FplId.Split(":")
-                    if split.Length > 1 then 
-                        // here, argName is the argument identifier of the other proof
-                        let proofName = $"{split.[0]}"
-                        let argName = $"{split.[1]}"
-                        fvJi.RefersTo <- Some potentialCandidate // first stage - set the potential other proof to refers to 
-                        match getArgumentInProof fvJi1 argName with
-                        | Some argument ->
-                            fvJi.RefersTo <- Some argument // second stage - refine the found argument 
-                        | _ ->
-                            fvJi.ErrorOccurred <- emitPR006Diagnostics proofName argName fvJi.StartPos fvJi.EndPos
-                            // remove the first stage, since the no argument was found in other proof
-                            fvJi.RefersTo <- None
-                | _ -> fvJi.RefersTo <- Some potentialCandidate
-            | ScopeSearchResult.FoundIncorrectBlock otherBlock ->
-                let alternative = 
-                    match fvJi.Name with 
-                    | PrimJIByAx ->
-                        "Expected a reference to an axiom."
-                    | PrimJIByConj ->
-                        "Expected a reference to a conjecture."
-                    | PrimJIByCor ->
-                        "Expected a reference to a corollary."
-                    | PrimJIByDef ->
-                        "Expected a reference to a definition (of a class, a predicate, or a functional term)."
-                    | PrimJIByDefVar ->
-                        "Expected a reference to a variable."
-                    | PrimJIByInf ->
-                        "Expected a reference to a rule of inference."
-                    | PrimJIByProofArgument ->
-                        "Expected a reference to an argument in another proof."
-                    | PrimJIByRefArgument ->
-                        "Expected a reference to a previous argument in this proof."
-                    | PrimJIByTheoremLikeStmt ->
-                        "Expected a reference to a theorem, a lemma, or a proposition."
-                    | _ -> "Expected another reference."
-                fvJi.ErrorOccurred <- emitPR001Diagnostics (qualifiedName otherBlock false) fvJi.Name fvJi.StartPos fvJi.EndPos alternative
-            | ScopeSearchResult.FoundMultiple listOfKandidates ->
-                fvJi.ErrorOccurred <- emitID023Diagnostics listOfKandidates fvJi.StartPos fvJi.EndPos
-            | _ -> ()
-
-
-        match byModifierOption, dollarDigitListAsts, refArgumentIdentifierAst with
-        | Some LiteralByAx, Some _, None -> 
-            // byax justification cannot be used together with a proof or corollary reference
-            parent.ErrorOccurred <- emitPR010Diagnostics LiteralByAx LiteralAxL pos1 pos2 
-        | Some LiteralByAx, Some _, Some _ -> 
-            // byax justification cannot be used together with a proof argument reference 
-            parent.ErrorOccurred <- emitPR011Diagnostics LiteralByAx LiteralAxL pos1 pos2 
-        | Some LiteralByAx, None, None -> 
-            let fvJi = new FplJustificationItemByAx((pos1, pos2), parent)
-            heap.Eval.PushEvalStack(fvJi)
-            eval predicateIdentifierAst
-            // check, if indeed the predicateId points to an axiom, if not issue diagnostics
-            let candidates = findCandidatesByName fvJi.FplId false false
-            checkPR001_PR006Diagnostics fvJi candidates
-            heap.Eval.PopEvalStack()
-        | Some LiteralByConj, Some _, None -> 
-            // byconj justification cannot be used together with a proof reference
-            parent.ErrorOccurred <- emitPR010Diagnostics LiteralByConj LiteralConjL pos1 pos2 
-        | Some LiteralByConj, Some _, Some _ -> 
-            // byconj justification cannot be used together with a proof argument reference 
-            parent.ErrorOccurred <- emitPR011Diagnostics LiteralByConj LiteralConjL pos1 pos2 
-        | Some LiteralByConj, None, None -> 
-            let fvJi = new FplJustificationItemByConj((pos1, pos2), parent)
-            heap.Eval.PushEvalStack(fvJi)
-            eval predicateIdentifierAst
-            // check, if indeed the predicateId points to a conjecture, if not issue diagnostics
-            let candidates = findCandidatesByName fvJi.FplId false false
-            checkPR001_PR006Diagnostics fvJi candidates
-            heap.Eval.PopEvalStack()
-        | Some LiteralByCor, Some _, _ -> 
-            let fvJi = new FplJustificationItemByCor((pos1, pos2), parent)
-            heap.Eval.PushEvalStack(fvJi)
-            eval predicateIdentifierAst
-            dollarDigitListAsts.Value |> List.map eval |> ignore
-            let candidatesPre = findCandidatesByName fvJi.FplId false true
-            let candidates =
-                if candidatesPre.Length > 1 then 
-                    candidatesPre |> List.filter (fun fv -> fv.FplId = fvJi.FplId)
-                else
-                    candidatesPre
-            // check, if indeed the predicateId points to a corollary, if not issue diagnostics
-            checkPR001_PR006Diagnostics fvJi candidates
-            heap.Eval.PopEvalStack()
-        | Some LiteralByCor, None, _ -> 
-            // byCor justification a reference to a corollary
-            parent.ErrorOccurred <- emitPR012Diagnostics pos1 pos2 
-        | Some LiteralByDef, Some _, None -> 
-            // byDef justification cannot be used together with a proof reference
-            parent.ErrorOccurred <- emitPR010Diagnostics LiteralByDef LiteralDefL pos1 pos2 
-        | Some LiteralByDef, Some _, Some _ -> 
-            // byDef justification cannot be used together with a proof argument reference 
-            parent.ErrorOccurred <- emitPR011Diagnostics LiteralByDef LiteralDefL pos1 pos2 
-        | Some LiteralByDef, None, None -> 
-            let fvJi = new FplJustificationItemByDef((pos1, pos2), parent)
-            heap.Eval.PushEvalStack(fvJi)
-            eval predicateIdentifierAst
-            // check, if indeed the predicateId points to a definition, if not issue diagnostics
-            let candidates = findCandidatesByName fvJi.FplId false false
-            checkPR001_PR006Diagnostics fvJi candidates
-            heap.Eval.PopEvalStack()
-        | Some LiteralByInf, Some _, None -> 
-            // byInf justification cannot be used together with a proof reference
-            parent.ErrorOccurred <- emitPR010Diagnostics LiteralByInf PrimRuleOfInference pos1 pos2 
-        | Some LiteralByInf, Some _, Some _ -> 
-            // byInf justification cannot be used together with a proof argument reference 
-            parent.ErrorOccurred <- emitPR011Diagnostics LiteralByInf PrimRuleOfInference pos1 pos2 
-        | Some LiteralByInf, None, None -> 
-            let fvJi = new FplJustificationItemByInf((pos1, pos2), parent)
-            heap.Eval.PushEvalStack(fvJi)
-            eval predicateIdentifierAst
-            // check, if indeed the predicateId points to a rule of inference, if not issue diagnostics
-            let candidates = findCandidatesByName fvJi.FplId false false
-            checkPR001_PR006Diagnostics fvJi candidates
-            heap.Eval.PopEvalStack()
-        | Some _, _, _ -> () // does not occur, because the parser byModifier choices between only two keywords LiteralByAx or LiteralByDef
-        | None, Some _, None -> 
-            let fvJi = new FplJustificationItemByCor((pos1, pos2), parent)
-            heap.Eval.PushEvalStack(fvJi)
-            eval predicateIdentifierAst
-            dollarDigitListAsts.Value |> List.map eval |> ignore
-            let candidates = findCandidatesByName fvJi.FplId false true
-            // check, if indeed the predicateId points to a corollary, if not issue diagnostics
-            checkPR001_PR006Diagnostics fvJi candidates
-            // issue info diagnostics that references to a corollary need the keyword byCor to increase readability
-            parent.ErrorOccurred <- emitPR013Diagnostics pos1 pos2
-            heap.Eval.PopEvalStack()
-        | None, Some _, Some _ -> 
-            let fvJi = new FplJustificationItemByProofArgument((pos1, pos2), parent)
-            heap.Eval.PushEvalStack(fvJi)
-            eval predicateIdentifierAst
-            dollarDigitListAsts.Value |> List.map eval |> ignore
-            eval refArgumentIdentifierAst.Value 
-            let splitOffAnyArgumentId (input: string) =
-                let parts = input.Split(':')
-                if parts.Length > 0 then parts.[0] else ""
-            let name = splitOffAnyArgumentId fvJi.FplId
-            let candidates = findCandidatesByName name false true 
-            let candidatesFiltered = 
-                if candidates.Length > 1 then 
-                    candidates |> List.filter (fun fv -> fv.FplId = name)
-                else
-                    candidates
-            // check, if indeed the predicateId points to another proof, if not issue diagnostics, 
-            // also check if arg exists, if not issue diagnostics
-            checkPR001_PR006Diagnostics fvJi candidatesFiltered
-            heap.Eval.PopEvalStack()
-        | None, None, Some _ ->  
-            // issue diagnostics a theorem-like statement justification cannot be used together with a proof argument reference 
-            parent.ErrorOccurred <- emitPR014Diagnostics pos1 pos2 
-        | None, None, None -> 
-            let fvJi = new FplJustificationItemByTheoremLikeStmt((pos1, pos2), parent)
-            heap.Eval.PushEvalStack(fvJi)
-            eval predicateIdentifierAst
-            let candidates = findCandidatesByName fvJi.FplId false false
-            // check if indeed the predicateId points to a theorem-like statement except a corollary, if not issue diagnostics
-            checkPR001_PR006Diagnostics fvJi candidates
-            heap.Eval.PopEvalStack()
 
 let tryFindParsedAstUsesClausesEvaluated (parsedAsts: List<ParsedAst>) =
     if parsedAsts.Exists(fun pa -> pa.Status = ParsedAstStatus.UsesClausesEvaluated) then

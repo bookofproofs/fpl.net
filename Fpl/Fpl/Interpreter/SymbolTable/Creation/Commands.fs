@@ -109,6 +109,12 @@ let evalCommands ast =
         evalRef.Value inDomainAst
         statementListAst |> List.map (fun stmtAst -> evalRef.Value stmtAst) |> ignore
         heap.Eval.PopEvalStack() // remove ForInStmt
+    | Ast.InEntity((pos1, pos2), inDomainAst) ->
+        let forStmt = heap.Eval.PeekEvalStack()
+        let inDomain = new FplForInStmtDomain((pos1,pos2), forStmt)
+        heap.Eval.PushEvalStack(inDomain) // add ForInStmtDomain
+        evalRef.Value inDomainAst
+        heap.Eval.PopEvalStack() // remove ForInStmtDomain
     | Ast.Return((pos1, pos2), returneeAst) ->
         let fv = heap.Eval.PeekEvalStack()
         let stmt = new FplReturn((pos1,pos2), fv)

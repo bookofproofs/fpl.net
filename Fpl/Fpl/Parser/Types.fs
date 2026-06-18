@@ -88,6 +88,20 @@ type Ast =
     | InfixOp of Positions * ((Ast * Ast option) list) // (operand * operator option) list
     | Parens of Positions * Ast // (a)
 
+    // Commands 
+    | Delegate of Ast * Ast
+    | Assertion of Positions * Ast
+    | Cases of Positions * (Ast list * Ast)
+    | CaseSingle of Positions * (Ast * Ast list)
+    | CaseElse of Positions * Ast list 
+    | MapCases of Positions * (Ast list * Ast)
+    | MapCaseSingle of Positions * (Ast * Ast)
+    | MapCaseElse of Positions * Ast  
+    | Assignment of Positions * (Ast * Ast)
+    | ForIn of Positions * ((Ast * Ast) * Ast list)
+    | InEntity of Positions * Ast
+    | Return of Positions * Ast
+
     // Definitions
     | DefinitionClass of Positions * (((Ast * Ast option) * Ast option) * Ast) 
     | ClassSignature of Positions * Ast
@@ -117,7 +131,7 @@ type Ast =
     | ExtensionSignature of Positions * (Ast * Ast)
     | ExtensionAssignment of Positions * (Ast * Ast) 
 
-    // Theorem-like statements
+    // Statements
     | Axiom of Positions * (Ast * (Ast * Ast))
     | AxiomSignature of Positions * Ast
     | Conjecture of Positions * (Ast * (Ast * Ast))
@@ -131,18 +145,25 @@ type Ast =
     | Corollary of Positions * (Ast * (Ast * Ast))
     | CorollarySignature of Positions * (Ast * Ast list)
 
-    // Actions 
-    | Delegate of Ast * Ast
-    | Assertion of Positions * Ast
-    | Cases of Positions * (Ast list * Ast)
-    | CaseSingle of Positions * (Ast * Ast list)
-    | CaseElse of Positions * Ast list 
-    | MapCases of Positions * (Ast list * Ast)
-    | MapCaseSingle of Positions * (Ast * Ast)
-    | MapCaseElse of Positions * Ast  
-    | Assignment of Positions * (Ast * Ast)
-    | ForIn of Positions * ((Ast * Ast) * Ast list)
-    | Return of Positions * Ast
+    // Proofs
+    | Proof of Positions * (Ast * Ast)
+    | ProofSignature of Positions * (Ast * Ast list)
+    | ProofBlock of Ast
+    | ProofContent of (Ast * Ast list) * Ast option
+    | Argument of Positions * Ast
+    | JustArgInf of Positions * (Ast * Ast)
+    | StartArgument of Ast 
+    | StartArgumentStictly of Ast * Ast list
+    | Justification of Positions * Ast
+    | JustificationItem of Positions * Ast 
+    | ReferenceToProofOrCorollary of Positions * Ast
+    | ByDef of Positions * Ast 
+    | JustificationIdentifier of Positions * (((string option * Ast) * Ast list option) * Ast option) 
+    | TrivialArgument of Positions * unit
+    | DeriveArgument of Positions * Ast
+    | AssumeArgument of Positions * Ast
+    | RevokeArgument of Positions * Ast
+    | Qed of Positions * unit
 
     // TopLevel
     | AST of Positions * Ast
@@ -157,63 +178,40 @@ type Ast =
     | Precedence of Positions * int
     | UsesClause of Positions * Ast
 
+    | Intrinsic of Positions * unit
     | Undefined of Positions * unit
-    | InEntity of Positions * Ast
     | SelfOrParent of Positions * Ast
     | Self of Positions * unit
     | Parent of Positions * unit
-    | TranslationTerm of Positions * Ast list
-    | TranslationTermList of Positions * Ast list
-    | Language of Positions * (Ast * Ast)
     | Extension of Positions * string
+
+    | Localization of (Positions * Ast) * Ast list
+    | TranslationTermList of Positions * Ast list
+    | TranslationTerm of Positions * Ast list
+    | Language of Positions * (Ast * Ast)
+
 
     // Variables
     | Var of Positions * string
+    | VarDeclBlock of Ast list option
+    | NamedVarDecl of Positions * (Ast list * Ast)
 
 
     | BrackedCoordList of Positions * Ast list
     | ArgumentTuple of Positions * Ast list 
     | DottedPredicate of Positions * Ast 
     | QualificationList of Positions * Ast list
-
-    
-
-
-
-    // FPL Blocks
-    | Intrinsic of Positions * unit
-    | VarDeclBlock of Ast list option
-    | PremiseList of Positions * Ast list
-    | PremiseConclusionBlock of Ast * (Ast * Ast)
-
-    | RuleOfInferenceSignature of Positions * Ast
-    | RuleOfInference of Positions * (Ast * Ast)
-    | Localization of (Positions * Ast) * Ast list
-
-    | NamedVarDecl of Positions * (Ast list * Ast)
     | ParamTuple of Ast list 
 
+    
+    | RuleOfInference of Positions * (Ast * Ast)
+    | RuleOfInferenceSignature of Positions * Ast
+    | PremiseConclusionBlock of Ast * (Ast * Ast)
+    | PremiseList of Positions * Ast list
 
 
-    // Proofs
-    | ReferenceToProofOrCorollary of Positions * Ast
-    | JustificationItem of Positions * Ast 
-    | StartArgument of Ast 
-    | StartArgumentStictly of Ast * Ast list
-    | Justification of Positions * Ast
-    | ByDef of Positions * Ast 
-    | JustificationIdentifier of Positions * (((string option * Ast) * Ast list option) * Ast option) 
-    | Trivial of Positions * unit
-    | Qed of Positions * unit
-    | DerivedPredicate of Positions * Ast
-    | AssumeArgument of Positions * Ast
-    | RevokeArgument of Positions * Ast
-    | JustArgInf of Positions * (Ast * Ast)
-    | Argument of Positions * Ast
-    | ProofContent of (Ast * Ast list) * Ast option
-    | ProofBlock of Ast
-    | ProofSignature of Positions * (Ast * Ast list)
-    | Proof of Positions * (Ast * Ast)
+
+
 
 
 

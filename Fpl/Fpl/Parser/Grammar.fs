@@ -540,9 +540,9 @@ let revokeArgument = positions (keywordRevoke >>. refArgumentIdentifier) |>> Ast
     
 let keywordAssume = skipString LiteralAssL <|> skipString LiteralAss .>> SW 
 let assumeArgument = positions (keywordAssume >>. predicate) |>> Ast.AssumeArgument <!> "AssumeArgument"
-let keywordTrivial  = positions (skipString LiteralTrivial) .>> IW |>> Ast.Trivial <!> "Trivial"
+let keywordTrivial  = positions (skipString LiteralTrivial) .>> IW |>> Ast.TrivialArgument <!> "Trivial"
 let keywordQed  = positions (skipString LiteralQed) .>> IW |>> Ast.Qed <!> "Qed"
-let derivedPredicate = positions predicate |>> Ast.DerivedPredicate <!> "DerivedPredicate"
+let derivedPredicate = positions predicate |>> Ast.DeriveArgument <!> "DeriveArgument"
 let derivedArgument = choice [
     keywordTrivial 
     derivedPredicate

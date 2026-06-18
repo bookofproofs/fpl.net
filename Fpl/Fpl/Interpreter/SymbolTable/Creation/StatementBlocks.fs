@@ -12,7 +12,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 
-module Fpl.Interpreter.SymbolTable.Creation.TheoremLikeStmts
+module Fpl.Interpreter.SymbolTable.Creation.StatementBlocks
 open Fpl.Parser.Types
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.SymbolTable.Storage.Heap
@@ -26,7 +26,7 @@ let private commonEvalStatement signatureAst optVarDeclOrSpecList predicateAst (
     evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
     heap.Eval.PopEvalStack()
 
-let evalStatements ast =
+let evalStatementBlocks ast =
     match ast with
     | Ast.Axiom((pos1, pos2), (signatureAst, (optVarDeclOrSpecList, predicateAst))) ->
         let parent = heap.Eval.PeekEvalStack()
