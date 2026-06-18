@@ -14,9 +14,18 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 *)
 
 module Fpl.Interpreter.SymbolTable.Creation.TopLevel
+open System.Collections.Generic
 open Fpl.Parser.Types
 open Fpl.Errors.Emitter
+open Fpl.Interpreter.SymbolTable.Storage.Asts
 open Fpl.Interpreter.SymbolTable.Creation.Forward
+
+
+let tryFindParsedAstUsesClausesEvaluated (parsedAsts: List<ParsedAst>) =
+    if parsedAsts.Exists(fun pa -> pa.Status = ParsedAstStatus.UsesClausesEvaluated) then
+        Some(parsedAsts.Find(fun pa -> pa.Status = ParsedAstStatus.UsesClausesEvaluated))
+    else
+        None
 
 let evalTopLevel ast =
     match ast with
@@ -24,6 +33,8 @@ let evalTopLevel ast =
         evalRef.Value ast1
     | Ast.Namespace(theoryAst) ->
         theoryAst |> List.map evalRef.Value |> ignore
+    | Ast.UsesClause((pos1, pos2), ast1) ->
+        evalRef.Value ast1
     | Ast.BuildingBlock((_, _),buidlingBlockAst) ->
         evalRef.Value buidlingBlockAst
     | Ast.ErrorSyntax((pos1, pos2), errMsg) ->

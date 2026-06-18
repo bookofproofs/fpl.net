@@ -88,6 +88,13 @@ type Ast =
     | InfixOp of Positions * ((Ast * Ast option) list) // (operand * operator option) list
     | Parens of Positions * Ast // (a)
 
+    // Tuple-like constructs and qualifies
+    | BrackedCoordList of Positions * Ast list
+    | ArgumentTuple of Positions * Ast list 
+    | DottedPredicate of Positions * Ast 
+    | QualificationList of Positions * Ast list
+    | ParamTuple of Ast list 
+
     // Commands 
     | Delegate of Ast * Ast
     | Assertion of Positions * Ast
@@ -174,6 +181,7 @@ type Ast =
     // TopLevel
     | AST of Positions * Ast
     | Namespace of Ast list
+    | UsesClause of Positions * Ast
     | BuildingBlock of Positions * Ast
     | ErrorSyntax of Positions * string 
     | ErrorSyntaxBacktracking of Positions * string 
@@ -182,7 +190,6 @@ type Ast =
 
     | InfixDeclWithPrecedence of Positions * (string * Ast) // infix symbol with precedence
     | Precedence of Positions * int
-    | UsesClause of Positions * Ast
 
     | Intrinsic of Positions * unit
     | Undefined of Positions * unit
@@ -202,12 +209,6 @@ type Ast =
     | VarDeclBlock of Ast list option
     | NamedVarDecl of Positions * (Ast list * Ast)
 
-
-    | BrackedCoordList of Positions * Ast list
-    | ArgumentTuple of Positions * Ast list 
-    | DottedPredicate of Positions * Ast 
-    | QualificationList of Positions * Ast list
-    | ParamTuple of Ast list 
 
     
 

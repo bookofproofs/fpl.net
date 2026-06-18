@@ -27,7 +27,6 @@ open Fpl.Interpreter.SymbolTable.Storage.Asts
 open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.SymbolTable.Types2.Intrinsic
 open Fpl.Interpreter.SymbolTable.Types2.Variables
-open Fpl.Interpreter.SymbolTable.Types2.References
 open Fpl.Interpreter.SymbolTable.Types2.Definitions
 open Fpl.Interpreter.SymbolTable.Types3.SelfParent
 open Fpl.Interpreter.SymbolTable.Types3.Extensions
@@ -38,6 +37,7 @@ open Fpl.Interpreter.SymbolTable.Creation.Identifiers
 open Fpl.Interpreter.SymbolTable.Creation.TypeConstructs
 open Fpl.Interpreter.SymbolTable.Creation.Predicates
 open Fpl.Interpreter.SymbolTable.Creation.Expressions
+open Fpl.Interpreter.SymbolTable.Creation.Tuples
 open Fpl.Interpreter.SymbolTable.Creation.Commands
 open Fpl.Interpreter.SymbolTable.Creation.Definitions
 open Fpl.Interpreter.SymbolTable.Creation.RulesOfInferences
@@ -127,6 +127,15 @@ let rec eval ast =
     | Ast.Parens _
         ->
         evalExpressions ast
+
+    // Tuple-like constructs and qualifies
+    | BrackedCoordList _
+    | ArgumentTuple _
+    | DottedPredicate _
+    | QualificationList _
+    | ParamTuple _
+        ->
+        evalTuples ast
 
     // Commands & other actions
     | Ast.Delegate _
@@ -219,6 +228,7 @@ let rec eval ast =
     // Top level nodes
     | Ast.AST _
     | Ast.Namespace _
+    | Ast.UsesClause _
     | Ast.BuildingBlock _
     | Ast.ErrorSyntax _
     | Ast.ErrorSyntaxBacktracking _
@@ -226,14 +236,11 @@ let rec eval ast =
         ->
         evalTopLevel ast
 
-
-
     | Ast.Undefined((pos1, pos2), _) -> 
         let fv = heap.Eval.PeekEvalStack()
         let fvNew = new FplIntrinsicUndef((pos1, pos2), fv)
         heap.Eval.PushEvalStack(fvNew)
         heap.Eval.PopEvalStack()
-
 
     | Ast.Intrinsic((pos1, pos2),()) -> 
         let fv = heap.Eval.PeekEvalStack()
@@ -243,7 +250,6 @@ let rec eval ast =
             let cl = fv :?> FplClass
             cl.AddDefaultConstructor()
         | _ -> ()
-
 
     | Ast.Var((pos1, pos2), name) ->
         let searchVarByName (fv:FplGenericNode) = 
@@ -345,27 +351,6 @@ let rec eval ast =
         heap.Eval.PushEvalStack(fplNew)
         fplNew.FplId <- extensionString
         heap.Eval.PopEvalStack()
-    | Ast.UsesClause((pos1, pos2), ast1) ->
-        eval ast1
-    | Ast.DottedPredicate((pos1, pos2), predicateWithOptSpecificationAst) ->
-        let fv = heap.Eval.PeekEvalStack()
-        let refBlock = new FplReference((pos1, pos2), fv) 
-        match fv with 
-        | :? FplReference as ref ->
-            ref.DottedChild <- Some refBlock
-        | _ -> ()
-        heap.Eval.PushEvalStack(refBlock)
-        eval predicateWithOptSpecificationAst
-        heap.Eval.PopEvalStack()
-    | Ast.ParamTuple namedVariableDeclarationListAsts ->
-        let fv = heap.Eval.PeekEvalStack()
-        fv.ArgType <- ArgType.Parentheses
-        namedVariableDeclarationListAsts |> List.map (fun child ->
-            match child with 
-            | Ast.NamedVarDecl(_,(varList,_)) -> fv.Arity <- fv.Arity + varList.Length
-            | _ -> ()
-            eval child
-        ) |> ignore
     | Ast.TranslationTerm((pos1, pos2), asts) ->
         let fv = heap.Eval.PeekEvalStack()
         asts |> List.map (fun ebnfTerm ->
@@ -380,28 +365,8 @@ let rec eval ast =
             let index = rnd.Next(lst.Length)
             lst.[index]
         eval (chooseRandomMember ebnfTermAsts)
-    | Ast.BrackedCoordList((pos1, pos2), coordListAst) ->
-        let getProceedingReference = heap.Eval.GetProceedingReference()
-
-        match getProceedingReference with 
-        | Some ref -> 
-            ref.ArgType <- ArgType.Brackets
-            if coordListAst.Length > 0 then 
-                coordListAst 
-                |> List.iter (fun pred -> 
-                    let ref = new FplReference((pos1, pos2), ref)
-                    heap.Eval.PushEvalStack(ref)
-                    eval pred
-                    heap.Eval.PopEvalStack()
-                ) 
-        | _ -> ()
     | Ast.VarDeclBlock varDeclOrStmtAstList ->
         varDeclOrStmtAstList |> Option.map (List.map eval >> ignore) |> Option.defaultValue ()
-    | Ast.ArgumentTuple((pos1, pos2), predicateListAst) ->
-        let next = heap.Eval.PeekEvalStack()
-        evalArgumentTuple next predicateListAst pos1 pos2
-    | Ast.QualificationList((pos1, pos2), asts) ->
-        asts |> List.map eval |> ignore
     | Ast.SelfOrParent((pos1, pos2), selforParentAst) -> 
         eval selforParentAst
     | Ast.Language((pos1, pos2),(langCode, ebnfAst)) ->
@@ -482,13 +447,9 @@ let rec eval ast =
         let fv = heap.Eval.PeekEvalStack()
         fv.AuxiliaryInfo <- precedence
 
-let tryFindParsedAstUsesClausesEvaluated (parsedAsts: List<ParsedAst>) =
-    if parsedAsts.Exists(fun pa -> pa.Status = ParsedAstStatus.UsesClausesEvaluated) then
-        Some(parsedAsts.Find(fun pa -> pa.Status = ParsedAstStatus.UsesClausesEvaluated))
-    else
-        None
 
-let evaluateSymbolTable () =
+
+let createSymbolTable () =
     heap.ParsedAsts.OrderAsts()
 
     let mutable found = true
