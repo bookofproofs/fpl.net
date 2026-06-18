@@ -43,6 +43,7 @@ open Fpl.Interpreter.SymbolTable.Creation.Definitions
 open Fpl.Interpreter.SymbolTable.Creation.RulesOfInferences
 open Fpl.Interpreter.SymbolTable.Creation.StatementBlocks
 open Fpl.Interpreter.SymbolTable.Creation.Proofs
+open Fpl.Interpreter.SymbolTable.Creation.Localizations
 open Fpl.Interpreter.SymbolTable.Creation.TopLevel
 
 /// A recursive function evaluating an AST and returning a list of EvalAliasedNamespaceIdentifier records
@@ -58,8 +59,6 @@ let rec eval ast =
     | Ast.Digits _
     | Ast.DollarDigits _
     | Ast.ExtensionRegex _
-    | Ast.LanguageCode _
-    | Ast.LocalizationString _
     | Ast.PrefixDecl _
     | Ast.PostfixDecl _
     | Ast.SymbolDecl _
@@ -225,6 +224,16 @@ let rec eval ast =
         ->
         evalProofs ast
 
+    // Localizations
+    | Ast.Localization _
+    | Ast.TranslationTermList _
+    | Ast.TranslationTerm _
+    | Ast.Language _
+    | Ast.LanguageCode _
+    | Ast.LocalizationString _
+        ->
+        evalLocalizations ast
+
     // Top level nodes
     | Ast.AST _
     | Ast.Namespace _
@@ -351,67 +360,10 @@ let rec eval ast =
         heap.Eval.PushEvalStack(fplNew)
         fplNew.FplId <- extensionString
         heap.Eval.PopEvalStack()
-    | Ast.TranslationTerm((pos1, pos2), asts) ->
-        let fv = heap.Eval.PeekEvalStack()
-        asts |> List.map (fun ebnfTerm ->
-            let trsl = new FplTranslation((pos1, pos2), fv)
-            heap.Eval.PushEvalStack(trsl)
-            eval ebnfTerm
-            heap.Eval.PopEvalStack()
-        ) |> ignore
-    | Ast.TranslationTermList((pos1, pos2), ebnfTermAsts) ->
-        let chooseRandomMember (lst: Ast list) =
-            let rnd = Random()
-            let index = rnd.Next(lst.Length)
-            lst.[index]
-        eval (chooseRandomMember ebnfTermAsts)
     | Ast.VarDeclBlock varDeclOrStmtAstList ->
         varDeclOrStmtAstList |> Option.map (List.map eval >> ignore) |> Option.defaultValue ()
     | Ast.SelfOrParent((pos1, pos2), selforParentAst) -> 
         eval selforParentAst
-    | Ast.Language((pos1, pos2),(langCode, ebnfAst)) ->
-        let fv = heap.Eval.PeekEvalStack()
-        let lang = new FplLanguage((pos1, pos2), fv) 
-        heap.Eval.PushEvalStack(lang)
-        eval langCode
-        eval ebnfAst
-        heap.Eval.PopEvalStack() // remove language
-    | Ast.Localization(((pos1, pos2), predicateAst), translationListAsts) ->
-        let parent = heap.Eval.PeekEvalStack()
-        let fv = new FplLocalization((pos1, pos2), parent, heap.Helper.GetNextAvailableFplBlockRunOrder)
-        let var04List = List<KeyValuePair<string, Positions>>()
-        heap.Eval.PushEvalStack(fv)
-        heap.Helper.InSignatureEvaluation <- true
-        eval predicateAst
-        heap.Helper.InSignatureEvaluation <- false
-        translationListAsts |> List.map (fun subAst -> 
-            eval subAst
-            let vars = fv.GetVariables()
-            vars
-            |> List.map (fun var -> var :?> FplGenericVariable)
-            |> List.filter (fun var -> not var.IsUsed)
-            |> List.map (fun var ->
-                let loc = heap.Eval.PeekEvalStack()
-                let languageList = 
-                    loc.Scope 
-                    |> Seq.filter (fun kvp -> isLanguage kvp.Value) 
-                    |> Seq.map (fun kvp -> kvp.Value) 
-                    |> Seq.toList 
-                    |> List.rev
-                if not languageList.IsEmpty then
-                    let lan = languageList.Head
-                    let kvp = KeyValuePair(var.FplId,(lan.StartPos, lan.EndPos))
-                    var04List.Add kvp
-            )
-        ) |> ignore
-        let identifier = fv.ArgList |> Seq.map (fun arg -> arg.FplId) |> String.concat ""
-        fv.FplId <- identifier
-        fv.TypeId <- identifier
-        heap.Eval.PopEvalStack()
-        var04List
-        |> Seq.iter (fun kvp -> 
-            fv.ErrorOccurred <- emitVAR04diagnostics kvp.Key (fst kvp.Value) (snd kvp.Value)
-        )
     | Ast.NamedVarDecl((pos1, pos2), (variableListAst, variableTypeAst)) ->
         let parent = heap.Eval.PeekEvalStack()
         parent.AuxiliaryInfo <- variableListAst |> List.length // remember how many variables to create

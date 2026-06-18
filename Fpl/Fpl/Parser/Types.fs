@@ -29,8 +29,6 @@ type Ast =
     | DollarDigits of Positions * uint
     | ExtensionRegex of string
     | ExtensionName of Positions * string
-    | LanguageCode of Positions * string
-    | LocalizationString of Positions * string
     | PrefixDecl of Positions * string
     | PostfixDecl of Positions * string
     | SymbolDecl of Positions * string
@@ -178,6 +176,14 @@ type Ast =
     | RevokeArgument of Positions * Ast
     | Qed of Positions * unit
 
+    // Localizations
+    | Localization of (Positions * Ast) * Ast list
+    | TranslationTermList of Positions * Ast list
+    | TranslationTerm of Positions * Ast list
+    | Language of Positions * (Ast * Ast)
+    | LanguageCode of Positions * string
+    | LocalizationString of Positions * string
+
     // TopLevel
     | AST of Positions * Ast
     | Namespace of Ast list
@@ -197,12 +203,6 @@ type Ast =
     | Self of Positions * unit
     | Parent of Positions * unit
     | Extension of Positions * string
-
-    | Localization of (Positions * Ast) * Ast list
-    | TranslationTermList of Positions * Ast list
-    | TranslationTerm of Positions * Ast list
-    | Language of Positions * (Ast * Ast)
-
 
     // Variables
     | Var of Positions * string

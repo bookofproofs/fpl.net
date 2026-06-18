@@ -62,17 +62,6 @@ let evalLeafTokens ast =
     | Ast.ExtensionRegex s -> 
         let fv = heap.Eval.PeekEvalStack()
         fv.TypeId <- s
-    | Ast.LanguageCode((pos1, pos2), s) -> 
-        let fv = heap.Eval.PeekEvalStack()
-        fv.FplId <- s
-        fv.TypeId <- s
-        fv.StartPos <- pos1
-        fv.EndPos <- pos2
-    | Ast.LocalizationString((pos1, pos2), s) -> 
-        let fv = heap.Eval.PeekEvalStack()
-        fv.FplId <- s
-        fv.TypeId <- s
-
     | Ast.PrefixDecl((pos1, pos2), symbol) -> 
         let fv = heap.Eval.PeekEvalStack()
         fv.ExpressionType <- FixType.Prefix symbol

@@ -73,6 +73,7 @@
         <Compile Include="Interpreter\SymbolTable\Creation\RulesOfInferences.fs" />
         <Compile Include="Interpreter\SymbolTable\Creation\StatementBlocks.fs" />
         <Compile Include="Interpreter\SymbolTable\Creation\Proofs.fs" />
+        <Compile Include="Interpreter\SymbolTable\Creation\Localizations.fs" />
         <Compile Include="Interpreter\SymbolTable\Creation\TopLevel.fs" />
         <Compile Include="Interpreter\SymbolTable\Creation\Main.fs" />
         <Compile Include="Interpreter\Main.fs" />
