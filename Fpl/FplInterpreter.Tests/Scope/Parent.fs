@@ -7,7 +7,7 @@ open Fpl.Interpreter.SymbolTable.Storage.Heap
 open CommonTestHelpers
 
 [<TestClass>]
-type TestFplValueScopeParent() =
+type Parent() =
 
     [<DataRow("r")>]
     [<DataRow(PrimTheoryL)>]
@@ -137,7 +137,7 @@ type TestFplValueScopeParent() =
     [<DataRow("corAxi1")>]
     [<TestMethod>]
     member this.TestProofsAndCorollaries(var) =
-        let res = CommonFplValueTestCases.ScopeProofsAndCorollaries("Parent") 
+        let res = CommonFplValueTestCases.ScopeProofsAndCorollaries("Parent")  
         match res with
         | Some (r,theory,thm1,proofThm1,lem1,proofLem1,prp1,proofPrp1,cor1,proofCor1,thm2,
                                 corThm2,lem2,corLem2,prp2,corPrp2,cor2,corCor2,con1,corCon1,

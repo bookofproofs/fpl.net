@@ -8,7 +8,7 @@ open Fpl.Interpreter.SymbolTable.Storage.Heap
 open CommonTestHelpers
 
 [<TestClass>]
-type TestFplValueScopeQualifiedName() =
+type QualifiedName() =
 
     [<DataRow("r")>]
     [<DataRow(PrimTheoryL)>]

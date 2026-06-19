@@ -7,7 +7,7 @@ open Fpl.Interpreter.SymbolTable.Storage.Heap
 open CommonTestHelpers
 
 [<TestClass>]
-type TestFplValueScopeTypeSignature() =
+type TypeSignature() =
 
     [<DataRow("r")>]
     [<DataRow(PrimTheoryL)>]

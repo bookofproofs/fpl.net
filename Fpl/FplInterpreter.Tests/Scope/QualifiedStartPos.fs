@@ -7,7 +7,7 @@ open Fpl.Interpreter.SymbolTable.Storage.Heap
 open CommonTestHelpers
 
 [<TestClass>]
-type TestFplValueScopeQualifiedStartPos() =
+type QualifiedStartPos() =
 
     [<DataRow("r")>]
     [<DataRow(PrimTheoryL)>]

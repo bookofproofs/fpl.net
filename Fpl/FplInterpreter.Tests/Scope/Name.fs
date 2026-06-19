@@ -9,7 +9,7 @@ open Fpl.Interpreter.SymbolTable.Types4.Proofs
 open CommonTestHelpers
 
 [<TestClass>]
-type TestFplValueScopeName() =
+type Name() =
 
     [<DataRow("r")>]
     [<DataRow(PrimTheoryL)>]

@@ -2,7 +2,7 @@ namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
 [<TestClass>]
-type TestFplValueScopeCompleteness() =
+type Completeness() =
 
     [<TestMethod>]
     member this.TestBlocks() =

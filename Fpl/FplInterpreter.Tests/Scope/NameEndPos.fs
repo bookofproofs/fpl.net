@@ -12,7 +12,7 @@ open Fpl.Interpreter.SymbolTable.Types4.Proofs
 open CommonTestHelpers
 
 [<TestClass>]
-type TestFplValueScopeNameEndPos() =
+type NameEndPos() =
 
     [<DataRow("r")>]
     [<DataRow(PrimTheoryL)>]

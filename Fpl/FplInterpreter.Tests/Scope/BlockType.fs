@@ -24,7 +24,7 @@ open CommonTestHelpers
 
 
 [<TestClass>]
-type TestFplValueScopeBlockType() =
+type BlockType() =
 
     [<DataRow("r")>]
     [<DataRow(PrimTheoryL)>]
