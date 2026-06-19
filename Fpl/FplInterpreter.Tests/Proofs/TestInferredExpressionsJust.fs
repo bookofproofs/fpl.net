@@ -8,7 +8,7 @@ open Fpl.Interpreter.SymbolTable.Types4.Proofs
 open CommonTestHelpers
 
 [<TestClass>]
-type TestProceedingExpressionsJust() =
+type TestInferredExpressionsJust() =
 
     [<DataRow("00", """ax A {true} thm T {true} prf T$1 { 1. byax A |- true }""", "true", 1)>]
     [<DataRow("01", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" ax A {all n,m:Nat { impl( ( Succ(n) = Succ(m) ), ( n = m ) ) }} thm T {true} prf T$1 { 1. byax A |- true }""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 1)>]
@@ -17,9 +17,9 @@ type TestProceedingExpressionsJust() =
     [<DataRow("04", """ax A {∃! x:obj{true}} thm T {true} prf T$1 { 1. byax A |- true }""", "∃! x:obj {true}", 1)>]
     [<DataRow("03", """ax A {∃!3 x:obj{true}} thm T {true} prf T$1 { 1. byax A |- true }""", "∃!3 x:obj {true}", 1)>]
     [<TestMethod>]
-    member this.TestProceedingExpressionJustByAx(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
+    member this.TestInferredExpressionJustByAx(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
         
-        let filename = "TestProceedingExpressionJustByAx"
+        let filename = "TestInferredExpressionJustByAx"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
 
@@ -29,7 +29,7 @@ type TestProceedingExpressionsJust() =
 
         match fvJiOpt with
         | Some (:? FplJustificationItemByAx as fvJi) ->
-            let result = fvJi.ProceedingExprCandidates
+            let result = fvJi.InferredExprCandidates
             Assert.AreEqual<int>(expectedNumbExpr, result.Length)
             Assert.AreEqual<string>(expectedExpr, result.Head.Type SignatureType.Name)
         | Some ref ->
@@ -43,9 +43,9 @@ type TestProceedingExpressionsJust() =
     [<DataRow("01", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" conj A {all n,m:Nat { impl( ( Succ(n) = Succ(m) ), ( n = m ) ) }} thm T {true} prf T$1 { 1. byconj A |- true }""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 1)>]
     [<DataRow("02", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" conj A {all n,m:Nat { impl( ( n' = m' ), ( n = m ) ) }} thm T {true} prf T$1 { 1. byconj A |- true }""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 1)>]
     [<TestMethod>]
-    member this.TestProceedingExpressionJustByConj(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
+    member this.TestInferredExpressionJustByConj(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
         
-        let filename = "TestProceedingExpressionJustByConj"
+        let filename = "TestInferredExpressionJustByConj"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
 
@@ -56,7 +56,7 @@ type TestProceedingExpressionsJust() =
 
         match fvJiOpt with
         | Some (:? FplJustificationItemByConj as fvJi) ->
-            let result = fvJi.ProceedingExprCandidates
+            let result = fvJi.InferredExprCandidates
             Assert.AreEqual<int>(expectedNumbExpr, result.Length)
             Assert.AreEqual<string>(expectedExpr, result.Head.Type SignatureType.Name)
         | Some ref ->
@@ -77,9 +77,9 @@ type TestProceedingExpressionsJust() =
     [<DataRow("01prop", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" prop A {all n,m:Nat { impl( ( Succ(n) = Succ(m) ), ( n = m ) ) }} thm T {true} prf T$1 { 1. A |- true }""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 1)>]
     [<DataRow("02prop", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" prop A {all n,m:Nat { impl( ( n' = m' ), ( n = m ) ) }} thm T {true} prf T$1 { 1. A |- true }""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 1)>]
     [<TestMethod>]
-    member this.TestProceedingExpressionJustByTheoremLikeStmt(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
+    member this.TestInferredExpressionJustByTheoremLikeStmt(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
         
-        let filename = "TestProceedingExpressionJustByTheoremLikeStmt"
+        let filename = "TestInferredExpressionJustByTheoremLikeStmt"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
 
@@ -90,7 +90,7 @@ type TestProceedingExpressionsJust() =
 
         match fvJiOpt with
         | Some (:? FplJustificationItemByTheoremLikeStmt as fvJi) ->
-            let result = fvJi.ProceedingExprCandidates
+            let result = fvJi.InferredExprCandidates
             Assert.AreEqual<int>(expectedNumbExpr, result.Length)
             Assert.AreEqual<string>(expectedExpr, result.Head.Type SignatureType.Name)
         | Some ref ->
@@ -115,9 +115,9 @@ type TestProceedingExpressionsJust() =
     [<DataRow("00corconj", """conj A {true} cor A$1 {true} thm T {true} prf T$1 { 1. bycor A$1 |- true }""", "true", 1)>]
     [<DataRow("02corconj", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" conj A {true} cor A$1 {all n,m:Nat { impl( ( n' = m' ), ( n = m ) ) }} prop T {true} prf T$1 { 1. bycor A$1 |- true }""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 1)>]
     [<TestMethod>]
-    member this.TestProceedingExpressionJustByCor(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
+    member this.TestInferredExpressionJustByCor(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
         
-        let filename = "TestProceedingExpressionJustByCor"
+        let filename = "TestInferredExpressionJustByCor"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
 
@@ -128,7 +128,7 @@ type TestProceedingExpressionsJust() =
 
         match fvJiOpt with
         | Some (:? FplJustificationItemByCor as fvJi) ->
-            let result = fvJi.ProceedingExprCandidates
+            let result = fvJi.InferredExprCandidates
             Assert.AreEqual<int>(expectedNumbExpr, result.Length)
             Assert.AreEqual<string>(expectedExpr, result.Head.Type SignatureType.Name)
         | Some ref ->
@@ -153,9 +153,9 @@ type TestProceedingExpressionsJust() =
     [<DataRow("00fu2", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" def cl A1 def func A()->obj { dec assert is(self, A1) assert all n,m:Nat { impl( ( n' = m' ), ( n = m ) ) }; ret $1 } thm T {true} prf T$1 { 1. bydef A |- true }""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 2)>] // two assertions 
     [<DataRow("00fu3", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" def cl A1 def func A()->obj { dec assert is(self, A1) assert all n,m:Nat { impl( ( n' = m' ), ( n = m ) ) }; ret $1 prty pred J() {ex x:obj {is(x,Nat)}} } thm T {true} prf T$1 { 1. bydef A |- true }""", "∃ x:obj {x is Nat}", 3)>] // two assertions + predicative property
     [<TestMethod>]
-    member this.TestProceedingExpressionJustByDef(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
+    member this.TestInferredExpressionJustByDef(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
         
-        let filename = "TestProceedingExpressionJustByDef"
+        let filename = "TestInferredExpressionJustByDef"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
 
@@ -166,7 +166,7 @@ type TestProceedingExpressionsJust() =
 
         match fvJiOpt with
         | Some (:? FplJustificationItemByDef as fvJi) ->
-            let result = fvJi.ProceedingExprCandidates
+            let result = fvJi.InferredExprCandidates
             Assert.AreEqual<int>(expectedNumbExpr, result.Length)
             let expr = result |> List.rev |> List.head
             Assert.AreEqual<string>(expectedExpr, expr.Type SignatureType.Name)
@@ -192,9 +192,9 @@ type TestProceedingExpressionsJust() =
     [<DataRow("00fu2", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" def cl A1 def func A()->obj { dec assert is(self, A1) assert all n,m:Nat { impl( ( n' = m' ), ( n = m ) ) }; ret $1 } thm T {dec v:A; true} prf T$1 { 1. bydef v |- true }""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 2)>] // two assertions 
     [<DataRow("00fu3", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" def cl A1 def func A()->obj { dec assert is(self, A1) assert all n,m:Nat { impl( ( n' = m' ), ( n = m ) ) }; ret $1 prty pred J() {ex x:obj {is(x,Nat)}} } thm T {dec v:A; true} prf T$1 { 1. bydef v |- true }""", "∃ x:obj {x is Nat}", 3)>] // two assertions + predicative property
     [<TestMethod>]
-    member this.TestProceedingExpressionJustByDefVar(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
+    member this.TestInferredExpressionJustByDefVar(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
         
-        let filename = "TestProceedingExpressionJustByDefVar"
+        let filename = "TestInferredExpressionJustByDefVar"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
 
@@ -205,7 +205,7 @@ type TestProceedingExpressionsJust() =
 
         match fvJiOpt with
         | Some (:? FplJustificationItemByDefVar as fvJi) ->
-            let result = fvJi.ProceedingExprCandidates
+            let result = fvJi.InferredExprCandidates
             Assert.AreEqual<int>(expectedNumbExpr, result.Length)
             let expr = result |> List.rev |> List.head
             Assert.AreEqual<string>(expectedExpr, expr.Type SignatureType.Name)
@@ -219,9 +219,9 @@ type TestProceedingExpressionsJust() =
     [<DataRow("00", """def cl N thm T {true} prf T$1 { 1: ex x:obj {is(x,N)} 2. 1 |- trivial}""", "∃ x:obj {x is N}", 1)>]
     [<DataRow("01", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" ax A {true} thm T {true} prf T$1 { 1. byax A |- all x,y:Set {impl ( is(x, N), ( x = y ))} 2. 1 |- true }""", "∀ x, y:Set {(x is N) ⇒ (x = y)}", 1)>]
     [<TestMethod>]
-    member this.TestProceedingExpressionJustByArgRef(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
+    member this.TestInferredExpressionJustByArgRef(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
         
-        let filename = "TestProceedingExpressionJustByArgRef"
+        let filename = "TestInferredExpressionJustByArgRef"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
 
@@ -231,7 +231,7 @@ type TestProceedingExpressionsJust() =
 
         match fvJiOpt with
         | Some (:? FplJustificationItemByRefArgument as fvJi) ->
-            let result = fvJi.ProceedingExprCandidates
+            let result = fvJi.InferredExprCandidates
             Assert.AreEqual<int>(expectedNumbExpr, result.Length)
             Assert.AreEqual<string>(expectedExpr, result.Head.Type SignatureType.Name)
         | Some ref ->
@@ -244,9 +244,9 @@ type TestProceedingExpressionsJust() =
     [<DataRow("00", """def cl N thm T {true} prf T$1 { 1: ex x:obj {is(x,N)} 2. 1 |- trivial} thm T1 {true} prf T1$1 { 1. T$1:1 |- trivial }""", "∃ x:obj {x is N}", 1)>]
     [<DataRow("01", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" ax A {true} thm T {true} prf T$1 { 1. byax A |- all x,y:Set {impl ( is(x, N), ( x = y ))} 2. 1 |- true } thm T1 {true} proof T1$1 {1. T$1:1 |- true}""", "∀ x, y:Set {(x is N) ⇒ (x = y)}", 1)>]
     [<TestMethod>]
-    member this.TestProceedingExpressionJustByProofArgument(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
+    member this.TestInferredExpressionJustByProofArgument(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
         
-        let filename = "TestProceedingExpressionJustByProofArgument"
+        let filename = "TestInferredExpressionJustByProofArgument"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
 
@@ -257,7 +257,7 @@ type TestProceedingExpressionsJust() =
 
         match fvJiOpt with
         | Some (:? FplJustificationItemByProofArgument as fvJi) ->
-            let result = fvJi.ProceedingExprCandidates
+            let result = fvJi.InferredExprCandidates
             Assert.AreEqual<int>(expectedNumbExpr, result.Length)
             let actualExpr = result.Head.Type SignatureType.Name
             Assert.AreEqual<string>(expectedExpr, actualExpr)
@@ -668,9 +668,9 @@ type TestProceedingExpressionsJust() =
     [<DataRow("XorUnpack2Or_02", "inf XorUnpack2Or{dec p,q:pred; pre:xor(p,q) con:or(and(not p,q),and(p,not q))} thm T {true} proof T$1 {1: xor(not iif(true, false), and(true, false)) 2. 1, byinf XorUnpack2Or |- true}", "(¬¬(true ⇔ false) ∧ (true ∧ false)) ∨ (¬(true ⇔ false) ∧ ¬(true ∧ false))", 1)>]
     [<DataRow("XorUnpack2Or_03", "inf XorUnpack2Or{dec p,q:pred; pre:xor(p,q) con:or(and(not p,q),and(p,not q))} thm T {true} proof T$1 {1: xor(iif(true, false), xor(true, false)) 2. 1, byinf XorUnpack2Or |- true}", "(¬(true ⇔ false) ∧ (true ⩡ false)) ∨ ((true ⇔ false) ∧ ¬(true ⩡ false))", 1)>]
     [<TestMethod>]
-    member this.TestProceedingExpressionJustByInf(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
+    member this.TestInferredExpressionJustByInf(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
         
-        let filename = "TestProceedingExpressionJustByInf"
+        let filename = "TestInferredExpressionJustByInf"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
 
@@ -680,7 +680,7 @@ type TestProceedingExpressionsJust() =
         let fvJiOpt = tryFindJustification prf PrimJIByInf
         match fvJiOpt with
         | Some (:? FplJustificationItemByInf as fvJi) ->
-            let result = fvJi.ProceedingExprCandidates
+            let result = fvJi.InferredExprCandidates
             Assert.AreEqual<int>(expectedNumbExpr, result.Length)
             let actualExpr = result.Head.Type SignatureType.Name
             //if actExprWithoutParens <> expExprWithoutParens then

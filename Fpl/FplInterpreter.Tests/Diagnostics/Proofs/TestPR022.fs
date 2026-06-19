@@ -6,7 +6,7 @@ open Fpl.Interpreter.Helpers.Debug
 open CommonTestHelpers
 
 (*
-The PR022 diagnostic indicates that a justification item cannot collect proceeding results to involve them
+The PR022 diagnostic indicates that a justification item cannot collect inferred results to involve them
 in the argument inference process. A reason for this can be that it refers to a non-existing item in the FPL code
 or that the referred FPL code item has no predicative expressions that can be extracted from it
 (like in the case of bydef A justifications where A is an intrinsic definition).

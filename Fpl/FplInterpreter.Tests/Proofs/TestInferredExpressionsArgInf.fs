@@ -8,15 +8,15 @@ open Fpl.Interpreter.SymbolTable.Types4.Proofs
 open CommonTestHelpers
 
 [<TestClass>]
-type TestProceedingExpressionsArgInf() =
+type TestInferredExpressionsArgInf() =
 
     [<DataRow("00", """thm T {true} proof T$1 {1: trivial }""", "true", 1)>]
     [<DataRow("01", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" thm T {all n,m:Nat { impl( ( Succ(n) = Succ(m) ), ( n = m ) ) }} thm T {true} prf T$1 { 1: trivial }""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 1)>]
     [<DataRow("02", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" thm T {all n,m:Nat { impl( ( n' = m' ), ( n = m ) ) }} thm T {true} prf T$1 { 1: trivial }""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 1)>]
     [<TestMethod>]
-    member this.TestProceedingExpressionArgInfTrivial(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
+    member this.TestInferredExpressionArgInfTrivial(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
         
-        let filename = "TestProceedingExpressionArgInfTrivial"
+        let filename = "TestInferredExpressionArgInfTrivial"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
 
@@ -26,7 +26,7 @@ type TestProceedingExpressionsArgInf() =
 
         match fvJiOpt with
         | Some (:? FplArgInferenceTrivial as infTrivial) ->
-            let result = infTrivial.ProceedingExprCandidates
+            let result = infTrivial.InferredExprCandidates
             Assert.AreEqual<int>(expectedNumbExpr, result.Length)
             Assert.AreEqual<string>(expectedExpr, result.Head.Type SignatureType.Name)
         | Some ref ->
@@ -51,9 +51,9 @@ type TestProceedingExpressionsArgInf() =
     [<DataRow("06", "thm T {true} proof T$1 {1: all x:obj {not iif(is(x,N), true)} 2. 1, byinf AllNot2ExNot |- ¬∃ x:obj {(x is N) ⇔ true}}", "¬∃ x:obj {(x is N) ⇔ true}", 1)>]
     [<DataRow("06f", "thm T {true} proof T$1 {1: all x:obj {not iif(is(x,N), true)} }", "∀ x:obj {¬((x is N) ⇔ true)}", 1)>]
     [<TestMethod>]
-    member this.TestProceedingExpressionArgInfDerived(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
+    member this.TestInferredExpressionArgInfDerived(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
         
-        let filename = "TestProceedingExpressionArgInfDerived"
+        let filename = "TestInferredExpressionArgInfDerived"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
 
@@ -63,7 +63,7 @@ type TestProceedingExpressionsArgInf() =
 
         match fvJiOpt with
         | Some (:? FplArgInferenceDerived as argInf) ->
-            let result = argInf.ProceedingExprCandidates
+            let result = argInf.InferredExprCandidates
             Assert.AreEqual<int>(expectedNumbExpr, result.Length)
             Assert.AreEqual<string>(expectedExpr, result.Head.Type SignatureType.Name)
         | Some ref ->
@@ -79,9 +79,9 @@ type TestProceedingExpressionsArgInf() =
     [<DataRow("03", "thm T {true} proof T$1 {1: assume not true}", "¬true", 1)>]
     [<DataRow("04", "thm T {true} proof T$1 {1: assume ∀ x:obj {¬((x is N) ⇔ false)}}", "∀ x:obj {¬((x is N) ⇔ false)}", 1)>]
     [<TestMethod>]
-    member this.TestProceedingExpressionArgInferenceAssume(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
+    member this.TestInferredExpressionArgInferenceAssume(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
         
-        let filename = "TestProceedingExpressionArgInferenceAssume"
+        let filename = "TestInferredExpressionArgInferenceAssume"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
 
@@ -91,7 +91,7 @@ type TestProceedingExpressionsArgInf() =
 
         match fvJiOpt with
         | Some (:? FplArgInferenceAssume as argInf) ->
-            let result = argInf.ProceedingExprCandidates
+            let result = argInf.InferredExprCandidates
             Assert.AreEqual<int>(expectedNumbExpr, result.Length)
             Assert.AreEqual<string>(expectedExpr, result.Head.Type SignatureType.Name)
         | Some ref ->
@@ -107,9 +107,9 @@ type TestProceedingExpressionsArgInf() =
     [<DataRow("03", "thm T {true} proof T$1 {1: assume not true 2: revoke 1}", "¬¬true", 1)>]
     [<DataRow("04", "thm T {true} proof T$1 {1: assume ∀ x:obj {¬((x is N) ⇔ false)} 2: revoke 1}", "¬∀ x:obj {¬((x is N) ⇔ false)}", 1)>]
     [<TestMethod>]
-    member this.TestProceedingExpressionArgInferenceRevoke(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
+    member this.TestInferredExpressionArgInferenceRevoke(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
         
-        let filename = "TestProceedingExpressionArgInferenceRevoke"
+        let filename = "TestInferredExpressionArgInferenceRevoke"
         prepareFplCode(filename + ".fpl", fplCode, false) 
         let r = heap.Root
 
@@ -119,7 +119,7 @@ type TestProceedingExpressionsArgInf() =
 
         match fvJiOpt with
         | Some (:? FplArgInferenceRevoke as argInf) ->
-            let result = argInf.ProceedingExprCandidates
+            let result = argInf.InferredExprCandidates
             Assert.AreEqual<int>(expectedNumbExpr, result.Length)
             Assert.AreEqual<string>(expectedExpr, result.Head.Type SignatureType.Name)
         | Some ref ->

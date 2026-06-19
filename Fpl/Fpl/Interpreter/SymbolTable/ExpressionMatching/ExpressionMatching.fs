@@ -268,15 +268,15 @@ let issuePR022SpecialReasonAndSetDefault (fv:FplGenericHasValue) reason =
 
 
 [<AbstractClass>]
-type FplGenericWithProceedingExpression(positions: Positions, parent: FplGenericNode) =
+type FplGenericInfering(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericPredicate(positions, parent)
 
-    abstract member ProceedingExprCandidates: FplGenericNode list with get
+    abstract member InferredExprCandidates: FplGenericNode list with get
 
 
 [<AbstractClass>]
 type FplGenericJustificationItem(positions: Positions, parent: FplGenericNode) =
-    inherit FplGenericWithProceedingExpression(positions, parent)
+    inherit FplGenericInfering(positions, parent)
 
     override this.ShortName = PrimJustification
 
@@ -312,7 +312,7 @@ type FplGenericJustificationItem(positions: Positions, parent: FplGenericNode) =
 
 [<AbstractClass>]
 type FplGenericArgInference(positions: Positions, parent: FplGenericNode) =
-    inherit FplGenericWithProceedingExpression(positions, parent)
+    inherit FplGenericInfering(positions, parent)
 
     override this.Type signatureType =
         let head = getFplHead this signatureType
@@ -322,15 +322,15 @@ type FplGenericArgInference(positions: Positions, parent: FplGenericNode) =
 
 
 
-let matchJustItemsExpressionsAgainstPremiseList (tuplesJustItemWithProceedingExpressionsList:(FplGenericJustificationItem * FplGenericNode list) list) (premiseList:FplGenericNode list) (byInferenceNode:FplGenericNode) =
+let matchJustItemsExpressionsAgainstPremiseList (tuplesJustItemWithInferredExpressionsList:(FplGenericJustificationItem * FplGenericNode list) list) (premiseList:FplGenericNode list) (byInferenceNode:FplGenericNode) =
     let varUsageDict = Dictionary<string, FplGenericNode>()
     let result = List<(FplGenericNode * Dictionary<string, FplGenericNode>) list>()
     let rec matchJustItemsExpressionsAgainstPremiseListRec (iJeLists:(FplGenericJustificationItem * FplGenericNode list) list) (preList:FplGenericNode list) =
         match iJeLists, preList with
         | iJel::iJels, pre::pres ->
             let just = fst iJel
-            let proceedingExpressionsOfJust = snd iJel
-            match matchPremiseWithSomeExpressions proceedingExpressionsOfJust pre varUsageDict with
+            let inferredExpressionsOfJust = snd iJel
+            match matchPremiseWithSomeExpressions inferredExpressionsOfJust pre varUsageDict with
             | [], errList ->
                 // emit diagnostics at just's position that there was no matching candidate for a premise, listing all tried-out candidates (contained in errList)
                 let premisesPre =
@@ -352,7 +352,7 @@ let matchJustItemsExpressionsAgainstPremiseList (tuplesJustItemWithProceedingExp
             byInferenceNode.ErrorOccurred <- emitPR020Diagnostics (preList.Length + 1) (iJeLists.Length + 1) byInferenceNode.StartPos byInferenceNode.EndPos
         | [], [] -> ()
             
-    matchJustItemsExpressionsAgainstPremiseListRec tuplesJustItemWithProceedingExpressionsList premiseList
+    matchJustItemsExpressionsAgainstPremiseListRec tuplesJustItemWithInferredExpressionsList premiseList
     let res = result |> List.concat
     res
 

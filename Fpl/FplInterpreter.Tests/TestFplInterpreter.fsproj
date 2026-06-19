@@ -51,8 +51,8 @@
         <Compile Include="Diagnostics\SyntaxRelated\TestSY012.fs" />
         <Compile Include="Diagnostics\SyntaxRelated\TestSY013.fs" />
         <Compile Include="Diagnostics\SyntaxRelated\TestSY014.fs" />
-        <Compile Include="Proofs\TestProceedingExpressionsJust.fs" />
-        <Compile Include="Proofs\TestProceedingExpressionsArgInf.fs" />
+        <Compile Include="Proofs\TestInferredExpressionsJust.fs" />
+        <Compile Include="Proofs\TestInferredExpressionsArgInf.fs" />
     </ItemGroup>
 
     <ItemGroup>

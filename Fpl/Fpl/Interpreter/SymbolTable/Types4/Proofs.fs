@@ -43,7 +43,7 @@ type FplJustificationItemByAx(positions: Positions, parent: FplGenericNode) =
 
     member this.ParentJustification = this.Parent.Value :?> FplJustification
 
-    override this.ProceedingExprCandidates
+    override this.InferredExprCandidates
         // identify the expression contained in the axiom
         // referred by this "byax" justification in a proof
         with get (): FplGenericNode list =
@@ -70,7 +70,7 @@ and FplJustificationItemByDef(positions: Positions, parent: FplGenericNode) =
 
     member this.ParentJustification = this.Parent.Value :?> FplJustification
 
-    override this.ProceedingExprCandidates
+    override this.InferredExprCandidates
         // identify the expressions contained in the definition
         with get (): FplGenericNode list =
             match this.RefersTo with
@@ -101,7 +101,7 @@ and FplJustificationItemByDefVar(positions: Positions, parent: FplGenericNode) =
 
     member this.ParentJustification = this.Parent.Value :?> FplJustification
 
-    override this.ProceedingExprCandidates 
+    override this.InferredExprCandidates 
         // identify the expressions contained in the variable definition
         with get (): FplGenericNode list =
             match this.RefersTo with
@@ -137,7 +137,7 @@ and FplJustificationItemByConj(positions: Positions, parent: FplGenericNode) =
 
     member this.ParentJustification = this.Parent.Value :?> FplJustification
 
-    override this.ProceedingExprCandidates
+    override this.InferredExprCandidates
         // identify the expression contained in the conjecture
         // referred by this "byconj" justification in a proof
         with get (): FplGenericNode list =
@@ -164,7 +164,7 @@ and FplJustificationItemByCor(positions: Positions, parent: FplGenericNode) =
 
     member this.ParentJustification = this.Parent.Value :?> FplJustification
 
-    override this.ProceedingExprCandidates
+    override this.InferredExprCandidates
         // identify the expression contained in the corollary
         // referred by this "bycor" justification in a proof
         with get (): FplGenericNode list =
@@ -242,7 +242,7 @@ and FplJustificationItemByInf(positions: Positions, parent: FplGenericNode) =
             // we recursively replace all variables by matched expressions
             replaceVarsByUsages conclusionExpression
 
-    override this.ProceedingExprCandidates
+    override this.InferredExprCandidates
         with get (): FplGenericNode list =
             match this.RefersTo, this.Parent with
             | Some (:? FplRuleOfInference as ruleOfInference), Some (:? FplJustification as just) ->
@@ -251,15 +251,15 @@ and FplJustificationItemByInf(positions: Positions, parent: FplGenericNode) =
                     let premisePredicateList = premisePredicateListNode.ArgList |> Seq.toList
                     // (all justification items but the first one, which is the "byinf" one)
                     let (proceedingJustificationItems: FplGenericNode list) = allBefore this just.GetOrderedJustificationItems
-                    let (proceedingExpressionLists : (FplGenericJustificationItem * FplGenericNode list) list) = 
+                    let (inferredExpressionLists : (FplGenericJustificationItem * FplGenericNode list) list) = 
                         proceedingJustificationItems
                         |> List.filter (fun fv -> fv :? FplGenericJustificationItem)
                         |> List.map (fun fv -> fv :?> FplGenericJustificationItem)
-                        |> List.map (fun fv -> fv, fv.ProceedingExprCandidates)
-                    // Here, we have for each element of premisePredicateList a whole list of proceeding expressions.
+                        |> List.map (fun fv -> fv, fv.InferredExprCandidates)
+                    // Here, we have for each element of premisePredicateList a whole list of inferred expressions.
                     // We have to pair each premise (from the list of premises of the rule of inference) with the expressions that match it (if any).
                     // The resulting data structure is a dictionary of key-Value pairs where key = premise expression, value = list of expressions that matched the premise expression.
-                    let listOfPairs = matchJustItemsExpressionsAgainstPremiseList proceedingExpressionLists premisePredicateList this
+                    let listOfPairs = matchJustItemsExpressionsAgainstPremiseList inferredExpressionLists premisePredicateList this
                     match this.ErrorOccurred with
                     | Some _ ->
                         // error occurred while matching input justificationItems with premise list
@@ -271,7 +271,7 @@ and FplJustificationItemByInf(positions: Positions, parent: FplGenericNode) =
                             let expr = conclusion.Clone()
                             [this.ReplaceVarsByVarUsages expr varUsageDict]
                         else
-                            issuePR022SpecialReasonAndSetDefault this "No proceeding results were found while matching input justificationItems with premise list."
+                            issuePR022SpecialReasonAndSetDefault this "No expressions could be inferred while matching input justificationItems with premise list."
                             []
                 | _ ->
                     issuePR022AndSetDefault this (Some ruleOfInference) None 
@@ -284,14 +284,14 @@ and FplJustificationItemByInf(positions: Positions, parent: FplGenericNode) =
         StaticDebug.Debug(this,Debug.Start)
         match this.ErrorOccurred with
         | Some _ ->
-            issuePR022SpecialReasonAndSetDefault this "No proceeding results were found because of previous errors."
+            issuePR022SpecialReasonAndSetDefault this "No expressions could be inferred because of previous errors."
         | None ->
-            let proceedingResults = this.ProceedingExprCandidates
-            if this.ProceedingExprCandidates.Length > 1 then
-                let candidates = numbered (proceedingResults |> List.map (fun fv -> fv.Type SignatureType.Name))
+            let inferredResults = this.InferredExprCandidates
+            if this.InferredExprCandidates.Length > 1 then
+                let candidates = numbered (inferredResults |> List.map (fun fv -> fv.Type SignatureType.Name))
                 issuePR022SpecialReasonAndSetDefault this $"The {this.Name} was expected to have in a single result but returned more candidates:{candidates}."
             else
-                match this.ProceedingExprCandidates.Head with
+                match this.InferredExprCandidates.Head with
                 | :? FplUndetermined -> ()
                 | candidate ->
                     // since a candidate was found, the justification inference succeeded and we set its value to true to flag this
@@ -311,7 +311,7 @@ and FplJustificationItemByRefArgument(positions: Positions, parent: FplGenericNo
 
     member this.ParentJustification = this.Parent.Value :?> FplJustification
 
-    override this.ProceedingExprCandidates 
+    override this.InferredExprCandidates 
         // identify the expression referred by this "argument reference" justification in a proof
         with get (): FplGenericNode list =
             match this.RefersTo with
@@ -319,7 +319,7 @@ and FplJustificationItemByRefArgument(positions: Positions, parent: FplGenericNo
                 match argument.ArgumentInference with
                 | Some (argInference: FplGenericArgInference) ->
                     // delegate to the argInference of the referenced argument
-                    argInference.ProceedingExprCandidates
+                    argInference.InferredExprCandidates
                 | _ ->
                     issuePR022AndSetDefault this (Some argument) None 
                     [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
@@ -339,7 +339,7 @@ and FplJustificationItemByProofArgument(positions: Positions, parent: FplGeneric
 
     member this.ParentJustification = this.Parent.Value :?> FplJustification
 
-    override this.ProceedingExprCandidates 
+    override this.InferredExprCandidates 
         // identify the expression referred by this "argument reference" justification in a proof
         with get (): FplGenericNode list =
             match this.RefersTo with
@@ -347,7 +347,7 @@ and FplJustificationItemByProofArgument(positions: Positions, parent: FplGeneric
                 match argument.ArgumentInference with
                 | Some argInference ->
                     // delegate to the argInference of the referenced argument
-                    argInference.ProceedingExprCandidates
+                    argInference.InferredExprCandidates
                 | _ ->
                     issuePR022AndSetDefault this (Some argument) None 
                     [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
@@ -367,7 +367,7 @@ and FplJustificationItemByTheoremLikeStmt(positions: Positions, parent: FplGener
 
     member this.ParentJustification = this.Parent.Value :?> FplJustification
 
-    override this.ProceedingExprCandidates
+    override this.InferredExprCandidates
         // identify the expression contained in the theorem-like stmt
         // referred by this justification in a proof
         with get (): FplGenericNode list =
@@ -491,20 +491,20 @@ and FplArgument(positions: Positions, parent: FplGenericNode, runOrder) =
                 this.SetDefaultValue()
             else
                 // at this point, all justification items of the justification evaluate to true.
-                let inferredFormulaOpt = argInference.ProceedingExprCandidates |> List.tryHead
+                let inferredFormulaOpt = argInference.InferredExprCandidates |> List.tryHead
                 let lastJustificationOfArgumentOpt = orderedListJustifications |> List.tryLast
 
                 match inferredFormulaOpt, lastJustificationOfArgumentOpt with
                 | Some inferredFormula, Some (:? FplGenericJustificationItem as lastJustificationOfArgument) ->
                     let inferredExpr = inferredFormula.Type SignatureType.Name
-                    let proceedingCandidates = lastJustificationOfArgument.ProceedingExprCandidates |> List.map (fun expr -> expr.Type SignatureType.Name)
-                    let derivedInferenceIsCorrect = proceedingCandidates |> List.contains inferredExpr
+                    let inferredExpressionCandidates = lastJustificationOfArgument.InferredExprCandidates |> List.map (fun expr -> expr.Type SignatureType.Name)
+                    let derivedInferenceIsCorrect = inferredExpressionCandidates |> List.contains inferredExpr
 
                     if derivedInferenceIsCorrect then 
                         let v = new FplIntrinsicTrue((this.StartPos, this.StartPos), this)
                         this.SetValue v
                     else
-                        let mismatchingCandidates = numbered proceedingCandidates
+                        let mismatchingCandidates = numbered inferredExpressionCandidates
                         let prettyJustificationName =
                             let justNames = lastJustificationOfArgument.FplId.Split(':')
                             if justNames.Length = 2 then 
@@ -573,7 +573,7 @@ and FplArgInferenceAssume(positions: Positions, parent: FplGenericNode) =
         member this.ValidExpression
             with get () = this.ValidExpression
 
-    override this.ProceedingExprCandidates 
+    override this.InferredExprCandidates 
         with get (): FplGenericNode list =
             let exprOpt = this.ArgList |> Seq.tryHead
             match exprOpt with
@@ -611,7 +611,7 @@ and FplArgInferenceRevoke(positions: Positions, parent: FplGenericNode) as this 
         | Some (:? FplArgInferenceAssume as assumption) -> 
             let assumptionId = assumption.Type SignatureType.Mixed
             // and replace it with its negated version
-            match assumption.ProceedingExprCandidates with
+            match assumption.InferredExprCandidates with
             | assumedExpression::[] ->
                 _negatedAssuption.ArgList.Add assumedExpression
                 let revokedExpr = _negatedAssuption.Type SignatureType.Name
@@ -678,7 +678,7 @@ and FplArgInferenceRevoke(positions: Positions, parent: FplGenericNode) as this 
             this.ErrorOccurred <- emitPR005Diagnostics argumentId this.StartPos this.EndPos
             false
 
-    override this.ProceedingExprCandidates
+    override this.InferredExprCandidates
         with get (): FplGenericNode list =
             let exprOpt = _negatedAssuption.ArgList |> Seq.tryHead
             match exprOpt with
@@ -717,7 +717,7 @@ and FplArgInferenceTrivial(positions: Positions, parent: FplGenericNode) =
         this.SetValue v
         StaticDebug.Debug(this,Debug.Stop)
 
-    override this.ProceedingExprCandidates 
+    override this.InferredExprCandidates 
         // identify the expression contained in the theorem-like statement belonging to the proof,
         // in which this "trivial" argument reference occurs
         with get (): FplGenericNode list =
@@ -767,10 +767,10 @@ and FplArgInferenceDerived(positions: Positions, parent: FplGenericNode) =
 
     member this.ParentArgument = this.Parent.Value :?> FplArgument
 
-    /// As a list of proceeding expressions candidates of a derived argument reference a list with a single
+    /// As a list of inferred expression candidates of a derived argument reference a list with a single
     /// element is produced that corresponds to the very expression that is contained in the FPL code
     /// of proof argument. As a fallback (syntax errors something else), a list with an undetermined predicate is produced.
-    override this.ProceedingExprCandidates
+    override this.InferredExprCandidates
         with get (): FplGenericNode list =
             let exprOpt = this.ArgList |> Seq.tryHead
             match exprOpt with
