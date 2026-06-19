@@ -591,5 +591,5 @@ type ValidStatement =
     }
 
 /// Implement this interface for various nodes of the symbol table to find the right expression and validity reason. 
-type IInferrable =
-    abstract member InferrableExpression : ValidStatement with get
+type IValid =
+    abstract member ValidExpression : ValidStatement with get

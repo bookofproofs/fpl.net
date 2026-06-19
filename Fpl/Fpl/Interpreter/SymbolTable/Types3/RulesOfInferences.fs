@@ -82,7 +82,7 @@ type FplRuleOfInference(positions: Positions, parent: FplGenericNode, runOrder) 
     member this.Conclusion =
         this.ArgList |> Seq.tryLast 
 
-    member this.InferrableExpression =
+    member this.ValidExpression =
         let validityReason =
             match this.Premise, this.Conclusion with
             | Some pre, Some con ->
@@ -96,9 +96,9 @@ type FplRuleOfInference(positions: Positions, parent: FplGenericNode, runOrder) 
             ValidStatement.ValidityReason = validityReason
         }
 
-    interface IInferrable with
-        member this.InferrableExpression
-            with get () = this.InferrableExpression
+    interface IValid with
+        member this.ValidExpression
+            with get () = this.ValidExpression
 
 
     override this.Name = PrimRuleOfInference

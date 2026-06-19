@@ -557,7 +557,7 @@ and FplArgInferenceAssume(positions: Positions, parent: FplGenericNode) =
     override this.Name = PrimArgInfAssume
     override this.ShortName = PrimArgInf
 
-    member this.InferrableExpression =
+    member this.ValidExpression =
         let validityReason = 
             let exprOpt = this.ArgList |> Seq.tryLast
             match exprOpt with
@@ -569,9 +569,9 @@ and FplArgInferenceAssume(positions: Positions, parent: FplGenericNode) =
             ValidStatement.ValidityReason = validityReason
         }
 
-    interface IInferrable with
-        member this.InferrableExpression
-            with get () = this.InferrableExpression
+    interface IValid with
+        member this.ValidExpression
+            with get () = this.ValidExpression
 
     override this.ProceedingExprCandidates 
         with get (): FplGenericNode list =
@@ -606,7 +606,7 @@ and FplArgInferenceRevoke(positions: Positions, parent: FplGenericNode) as this 
     override this.Name = PrimArgInfRevoke
     override this.ShortName = PrimArgInf
 
-    member this.InferrableExpression =
+    member this.ValidExpression =
         match heap.ValidStmtStore.LastAssumedArgument with
         | Some (:? FplArgInferenceAssume as assumption) -> 
             let assumptionId = assumption.Type SignatureType.Mixed
@@ -631,9 +631,9 @@ and FplArgInferenceRevoke(positions: Positions, parent: FplGenericNode) as this 
             }
 
 
-    interface IInferrable with
-        member this.InferrableExpression
-            with get () = this.InferrableExpression
+    interface IValid with
+        member this.ValidExpression
+            with get () = this.ValidExpression
 
 
 

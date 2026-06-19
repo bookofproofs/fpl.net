@@ -24,8 +24,8 @@ type ValidStmtStore() =
     /// Registers an expression in the theorem store
     member this.RegisterExpression (st:FplGenericNode) =
         match box st with
-        | :? IInferrable as infer ->
-            let validStmt = infer.InferrableExpression
+        | :? IValid as infer ->
+            let validStmt = infer.ValidExpression
             match validStmt.ValidityReason with
             | ValidityReason.Error -> false // do nothing if error was flagged
             | ValidityReason.IsRuleOfInference(pre, con) ->

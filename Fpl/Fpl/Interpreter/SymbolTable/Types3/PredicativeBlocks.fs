@@ -80,7 +80,7 @@ type FplAxiom(positions: Positions, parent: FplGenericNode, runOrder) =
     override this.Name = LiteralAxL
     override this.ShortName = LiteralAx
 
-    member this.InferrableExpression =
+    member this.ValidExpression =
         let validityReason = 
             let exprOpt = this.ArgList |> Seq.tryLast
             match exprOpt with
@@ -92,9 +92,9 @@ type FplAxiom(positions: Positions, parent: FplGenericNode, runOrder) =
             ValidStatement.ValidityReason = validityReason
         }
 
-    interface IInferrable with
-        member this.InferrableExpression
-            with get () = this.InferrableExpression
+    interface IValid with
+        member this.ValidExpression
+            with get () = this.ValidExpression
 
 
     override this.Clone () =
@@ -154,7 +154,7 @@ type FplGenericTheoremLikeStmt(positions: Positions, parent: FplGenericNode, run
             with get (): bool = _hasProof
             and set (value) = _hasProof <- value
 
-    member this.InferrableExpression =
+    member this.ValidExpression =
         let validityReason = 
             let exprOpt = this.ArgList |> Seq.tryLast
             match exprOpt with
@@ -166,9 +166,9 @@ type FplGenericTheoremLikeStmt(positions: Positions, parent: FplGenericNode, run
             ValidStatement.ValidityReason = validityReason
         }
 
-    interface IInferrable with
-        member this.InferrableExpression
-            with get () = this.InferrableExpression
+    interface IValid with
+        member this.ValidExpression
+            with get () = this.ValidExpression
 
     override this.IsFplBlock () = true
     override this.IsBlock () = true

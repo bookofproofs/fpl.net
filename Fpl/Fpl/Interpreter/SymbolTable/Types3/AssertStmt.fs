@@ -27,7 +27,7 @@ type FplAssertion(positions: Positions, parent: FplGenericNode) =
     override this.Name = PrimAssertion
     override this.ShortName = LiteralAss
 
-    member this.InferrableExpression =
+    member this.ValidExpression =
         let validityReason = 
             let exprOpt = this.ArgList |> Seq.tryLast
             match exprOpt with
@@ -39,9 +39,9 @@ type FplAssertion(positions: Positions, parent: FplGenericNode) =
             ValidStatement.ValidityReason = validityReason
         }
 
-    interface IInferrable with
-        member this.InferrableExpression
-            with get () = this.InferrableExpression
+    interface IValid with
+        member this.ValidExpression
+            with get () = this.ValidExpression
 
     override this.Clone () =
         let ret = new FplAssertion((this.StartPos, this.EndPos), this.Parent.Value)
