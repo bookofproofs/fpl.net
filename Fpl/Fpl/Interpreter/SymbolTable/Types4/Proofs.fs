@@ -573,8 +573,15 @@ and FplArgInferenceAssume(positions: Positions, parent: FplGenericNode) =
         member this.InferrableExpression
             with get () = this.InferrableExpression
 
-    override this.ProceedingExprCandidates =
-        raise (NotImplementedException())
+    override this.ProceedingExprCandidates 
+        with get (): FplGenericNode list =
+            let exprOpt = this.ArgList |> Seq.tryHead
+            match exprOpt with
+            | Some expr ->
+                [expr]
+            | _ ->
+                issuePR022SpecialReasonAndSetDefault this $"The {this.Name} does not specify a predicative expression that could be used in the proof."
+                [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
 
     override this.Clone () =
         let ret = new FplArgInferenceAssume((this.StartPos, this.EndPos), this.Parent.Value)
@@ -592,24 +599,31 @@ and FplArgInferenceAssume(positions: Positions, parent: FplGenericNode) =
 
     member this.ParentArgument = this.Parent.Value :?> FplArgument
 
-and FplArgInferenceRevoke(positions: Positions, parent: FplGenericNode) =
+and FplArgInferenceRevoke(positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericArgInference(positions, parent)
+    let mutable _negatedAssuption = new FplNegation((this.StartPos, this.EndPos), this.Parent.Value)
 
     override this.Name = PrimArgInfRevoke
     override this.ShortName = PrimArgInf
 
     member this.InferrableExpression =
         match heap.ValidStmtStore.LastAssumedArgument with
-        | Some assumption -> 
+        | Some (:? FplArgInferenceAssume as assumption) -> 
             let assumptionId = assumption.Type SignatureType.Mixed
             // and replace it with its negated version
-            let negatedAssumption = new FplNegation((this.StartPos, this.EndPos), this.Parent.Value)
-            negatedAssumption.ArgList.Add assumption
-            let revokedExpr = negatedAssumption.Type SignatureType.Name
-            {
-                ValidStatement.Node = this
-                ValidStatement.ValidityReason = ValidityReason.IsDerivedRevoke(assumptionId, revokedExpr)
-            }
+            match assumption.ProceedingExprCandidates with
+            | assumedExpression::[] ->
+                _negatedAssuption.ArgList.Add assumedExpression
+                let revokedExpr = _negatedAssuption.Type SignatureType.Name
+                {
+                    ValidStatement.Node = this
+                    ValidStatement.ValidityReason = ValidityReason.IsDerivedRevoke(assumptionId, revokedExpr)
+                }
+            | _ ->
+                {
+                    ValidStatement.Node = this
+                    ValidStatement.ValidityReason = ValidityReason.Error
+                }
         | _ ->
             {
                 ValidStatement.Node = this
@@ -664,8 +678,15 @@ and FplArgInferenceRevoke(positions: Positions, parent: FplGenericNode) =
             this.ErrorOccurred <- emitPR005Diagnostics argumentId this.StartPos this.EndPos
             false
 
-    override this.ProceedingExprCandidates =
-        raise (NotImplementedException())
+    override this.ProceedingExprCandidates
+        with get (): FplGenericNode list =
+            let exprOpt = _negatedAssuption.ArgList |> Seq.tryHead
+            match exprOpt with
+            | Some _ ->
+                [_negatedAssuption]
+            | _ ->
+                issuePR022SpecialReasonAndSetDefault this $"The {this.Name} does not specify a predicative expression that could be used in the proof."
+                [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
 
 
     override this.Run() = 

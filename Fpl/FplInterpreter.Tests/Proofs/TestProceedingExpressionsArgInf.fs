@@ -74,7 +74,7 @@ type TestProceedingExpressionsArgInf() =
         prepareFplCode(filename, "", false) |> ignore
 
 
-    [<DataRow("01", "thm T {true} proof T$1 {1: assume and(true,false)", "false ∧ true", 1)>]
+    [<DataRow("01", "thm T {true} proof T$1 {1: assume and(true,false)}", "true ∧ false", 1)>]
     [<DataRow("02", "thm T {true} proof T$1 {1: assume ¬(¬(true ⇒ false) ⇒ ¬∀ z:obj {z is K})}", "¬(¬(true ⇒ false) ⇒ ¬∀ z:obj {z is K})", 1)>]
     [<DataRow("03", "thm T {true} proof T$1 {1: assume not true}", "¬true", 1)>]
     [<DataRow("04", "thm T {true} proof T$1 {1: assume ∀ x:obj {¬((x is N) ⇔ false)}}", "∀ x:obj {¬((x is N) ⇔ false)}", 1)>]
@@ -102,10 +102,10 @@ type TestProceedingExpressionsArgInf() =
         prepareFplCode(filename, "", false) |> ignore
 
 
-    [<DataRow("01", "thm T {true} proof T$1 {1: assume and(true,false) 2: revoke 1", "false ∧ true", 1)>]
-    [<DataRow("02", "thm T {true} proof T$1 {1: assume ¬(¬(true ⇒ false) ⇒ ¬∀ z:obj {z is K})} 2: revoke 1", "¬(¬(true ⇒ false) ⇒ ¬∀ z:obj {z is K})", 1)>]
-    [<DataRow("03", "thm T {true} proof T$1 {1: assume not true} 2: revoke 1", "¬true", 1)>]
-    [<DataRow("04", "thm T {true} proof T$1 {1: assume ∀ x:obj {¬((x is N) ⇔ false)}} 2: revoke 1", "∀ x:obj {¬((x is N) ⇔ false)}", 1)>]
+    [<DataRow("01", "thm T {true} proof T$1 {1: assume and(true,false) 2: revoke 1}", "¬(true ∧ false)", 1)>]
+    [<DataRow("02", "thm T {true} proof T$1 {1: assume ¬(¬(true ⇒ false) ⇒ ¬∀ z:obj {z is K}) 2: revoke 1}", "¬¬(¬(true ⇒ false) ⇒ ¬∀ z:obj {z is K})", 1)>]
+    [<DataRow("03", "thm T {true} proof T$1 {1: assume not true 2: revoke 1}", "¬¬true", 1)>]
+    [<DataRow("04", "thm T {true} proof T$1 {1: assume ∀ x:obj {¬((x is N) ⇔ false)} 2: revoke 1}", "¬∀ x:obj {¬((x is N) ⇔ false)}", 1)>]
     [<TestMethod>]
     member this.TestProceedingExpressionArgInferenceRevoke(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
         
