@@ -9,20 +9,7 @@
 
     <ItemGroup>
         <Compile Include="Helpers\Common.fs" />
-        <Compile Include="TestTypeMatching.fs" />
-        <Compile Include="TestDecrementWrapper.fs" />
-        <Compile Include="TestExpressionEvaluationVariables.fs" />
-        <Compile Include="TestDecrement.fs" />
-        <Compile Include="TestArity.fs" />
-        <Compile Include="TestValidStmtStore.fs" />
-        <Compile Include="TestSignatureMatching.fs" />
-        <Compile Include="TestPrecedence.fs" />
-        <Compile Include="TestInfixOperations.fs" />
-        <Compile Include="TestFplValueNesting.fs" />
-        <Compile Include="TestReferencesTypeOfSignature.fs" />
-        <Compile Include="TestFplValue.fs" />
-        <Compile Include="TestFixTypeExpressionNames.fs" />
-        <Compile Include="TestValidity.fs" />
+        <Compile Include="Scope\TypeOfSignatureReferences.fs" />
         <Compile Include="Scope\CommonTestCases.fs" />
         <Compile Include="Scope\FplRepresentation.fs" />
         <Compile Include="Scope\FplId.fs" />
@@ -35,11 +22,23 @@
         <Compile Include="Scope\QualifiedStartPos.fs" />
         <Compile Include="Scope\Parent.fs" />
         <Compile Include="Scope\Completeness.fs" />
+        <Compile Include="Types\Matching.fs" />
+        <Compile Include="Types\SignatureMatching.fs" />
+        <Compile Include="Types\Signatures.fs" />
         <Compile Include="SymbolTable\EvalAliasedNamespaceIdentifier.fs" />
         <Compile Include="SymbolTable\Structure.fs" />
         <Compile Include="SymbolTable\Navigation.fs" />
+        <Compile Include="FixOps\FixTypeExpressionNames.fs" />
+        <Compile Include="FixOps\InfixOperations.fs" />
+        <Compile Include="FixOps\Arity.fs" />
+        <Compile Include="FixOps\Precedence.fs" />
+        <Compile Include="Closure\DecrementWrapper.fs" />
+        <Compile Include="Closure\ExpressionEvaluationVariables.fs" />
+        <Compile Include="Closure\Decrement.fs" />
         <Compile Include="Closure\ExpressionEvaluation.fs" />
         <Compile Include="Closure\Representation.fs" />
+        <Compile Include="Validity\ValidStmtStore.fs" />
+        <Compile Include="Validity\Validity.fs" />
         <Compile Include="Diagnostics\TestInterpreterErrors.fs" />
         <Compile Include="Diagnostics\Proofs\TestPR001.fs" />
         <Compile Include="Diagnostics\Proofs\TestPR021.fs" />

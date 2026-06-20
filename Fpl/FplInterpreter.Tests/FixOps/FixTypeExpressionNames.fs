@@ -1,11 +1,11 @@
-namespace FplInterpreter.Tests
+namespace FixOps
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.SymbolTable.Storage.Heap
 open TestFplInterpreter.Helpers.Common
 
 [<TestClass>]
-type TestFixTypeExpressionNames() =
+type FixTypeExpressionNames() =
 
 
     [<DataRow("01", """def pred T() {x ∧ y}""", "x ∧ y")>]

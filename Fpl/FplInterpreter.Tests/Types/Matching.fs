@@ -1,4 +1,4 @@
-namespace FplInterpreter.Tests
+namespace Types
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Primitives
 open Fpl.Interpreter.BasicTypes

@@ -1,4 +1,4 @@
-namespace FplInterpreter.Tests
+namespace Closure
 
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Primitives

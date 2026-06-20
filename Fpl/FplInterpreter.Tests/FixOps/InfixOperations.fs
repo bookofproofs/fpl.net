@@ -1,4 +1,4 @@
-namespace FplInterpreter.Tests
+namespace FixOps
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Primitives
 open Fpl.Interpreter.Helpers.Debug
@@ -6,7 +6,7 @@ open Fpl.Interpreter.SymbolTable.Storage.Heap
 open TestFplInterpreter.Helpers.Common
 
 [<TestClass>]
-type TestInfixOperations() =
+type InfixOperations() =
 
     [<DataRow("""def pred T1() { dec x,y:obj; (x = y) }""", LiteralUndet)>]
     [<DataRow("""ext T x@/\d+/->T {ret x} def pred T1() { (@1 = @2) }""", LiteralFalse)>]

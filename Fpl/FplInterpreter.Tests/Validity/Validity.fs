@@ -1,10 +1,10 @@
-namespace FplInterpreter.Tests
+namespace Validity
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Interpreter.SymbolTable.Storage.Heap
 open TestFplInterpreter.Helpers.Common
 
 [<TestClass>]
-type TestValidity() =
+type Validity() =
 
 
     // nodes to be stored in the theorem store

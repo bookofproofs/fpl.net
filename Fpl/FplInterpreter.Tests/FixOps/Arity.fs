@@ -1,4 +1,4 @@
-namespace FplInterpreter.Tests
+namespace FixOps
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.SymbolTable.Storage.Heap
@@ -7,7 +7,7 @@ open Fpl.Interpreter.SymbolTable.Types4.Proofs
 open TestFplInterpreter.Helpers.Common
 
 [<TestClass>]
-type TestArity() =
+type Arity() =
 
 
     [<DataRow("theorem T {true}", 0)>]

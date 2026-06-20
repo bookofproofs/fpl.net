@@ -1,4 +1,4 @@
-namespace FplInterpreter.Tests
+namespace Scope
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Primitives
 open Fpl.Interpreter.BasicTypes
@@ -6,7 +6,7 @@ open Fpl.Interpreter.SymbolTable.Storage.Heap
 open TestFplInterpreter.Helpers.Common
 
 [<TestClass>]
-type TestReferencesTypeOfSignature() =
+type TypeOfSignatureReferences() =
 
 
     [<DataRow("base1", LiteralTrue)>]
