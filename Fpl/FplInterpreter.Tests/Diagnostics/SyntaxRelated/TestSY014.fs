@@ -1,4 +1,5 @@
-namespace FplInterpreter.Tests.Diagnostics.SyntaxRelated
+namespace Diagnostics.SyntaxRelated
+
 
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics

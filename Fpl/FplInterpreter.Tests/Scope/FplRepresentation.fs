@@ -801,7 +801,7 @@ type TestFplValueScopeFplRepresentation() =
 
     [<DataRow("o", """def pred T() {dec o:obj; true}""", LiteralUndet)>]    // without anything
     [<DataRow("a", """def cl A def pred T() {dec a:A; true}""", LiteralUndet)>]    // without constructor, without inheritance, without instantiation
-    // direct assignment of a class without a constructor, will issue ID004 diagnostics, var remains as declared
+    // direct assignment of a class without a constructor, will issue diagnostics, var remains as declared
     [<DataRow("aI1", """def cl A def pred T() {dec aI1:A aI1:=A; true}""", LiteralUndet)>]  
     [<DataRow("c", """def cl A def cl B: A def cl C {ctor C() {}} def pred T() {dec c:C; true}""", LiteralUndet)>]
     [<DataRow("bI1", """def cl A def cl B: A def pred T() {dec bI1:B bI1:=B; true}""", LiteralUndet)>]  
