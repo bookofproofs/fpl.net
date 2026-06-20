@@ -70,10 +70,51 @@
         <Compile Include="Diagnostics\IdentifierRelated\TestID024.fs" />
         <Compile Include="Diagnostics\IdentifierRelated\TestID025.fs" />
         <Compile Include="Diagnostics\IdentifierRelated\TestID027.fs" />
-        <Compile Include="Diagnostics\TestInterpreterErrors.fs" />
+        <Compile Include="Diagnostics\LogicRelated\TestLG001.fs" />
+        <Compile Include="Diagnostics\LogicRelated\TestLG002.fs" />
+        <Compile Include="Diagnostics\LogicRelated\TestLG003.fs" />
+        <Compile Include="Diagnostics\LogicRelated\TestLG004.fs" />
+        <Compile Include="Diagnostics\LogicRelated\TestLG005.fs" />
         <Compile Include="Diagnostics\ProofRelated\TestPR001.fs" />
+        <Compile Include="Diagnostics\ProofRelated\TestPR003.fs" />
+        <Compile Include="Diagnostics\ProofRelated\TestPR004.fs" />
+        <Compile Include="Diagnostics\ProofRelated\TestPR005.fs" />
+        <Compile Include="Diagnostics\ProofRelated\TestPR006.fs" />
+        <Compile Include="Diagnostics\ProofRelated\TestPR007.fs" />
+        <Compile Include="Diagnostics\ProofRelated\TestPR008.fs" />
+        <Compile Include="Diagnostics\ProofRelated\TestPR009.fs" />
+        <Compile Include="Diagnostics\ProofRelated\TestPR010.fs" />
+        <Compile Include="Diagnostics\ProofRelated\TestPR011.fs" />
+        <Compile Include="Diagnostics\ProofRelated\TestPR012.fs" />
+        <Compile Include="Diagnostics\ProofRelated\TestPR013.fs" />
+        <Compile Include="Diagnostics\ProofRelated\TestPR014.fs" />
+        <Compile Include="Diagnostics\ProofRelated\TestPR015.fs" />
+        <Compile Include="Diagnostics\ProofRelated\TestPR016.fs" />
+        <Compile Include="Diagnostics\ProofRelated\TestPR017.fs" />
+        <Compile Include="Diagnostics\ProofRelated\TestPR018.fs" />
+        <Compile Include="Diagnostics\ProofRelated\TestPR019.fs" />
+        <Compile Include="Diagnostics\ProofRelated\TestPR020.fs" />
         <Compile Include="Diagnostics\ProofRelated\TestPR021.fs" />
         <Compile Include="Diagnostics\ProofRelated\TestPR022.fs" />
+        <Compile Include="Diagnostics\SignatureRelated\TestSIG00.fs" />
+        <Compile Include="Diagnostics\SignatureRelated\TestSIG01.fs" />
+        <Compile Include="Diagnostics\SignatureRelated\TestSIG02.fs" />
+        <Compile Include="Diagnostics\SignatureRelated\TestSIG03.fs" />
+        <Compile Include="Diagnostics\SignatureRelated\TestSIG04.fs" />
+        <Compile Include="Diagnostics\SignatureRelated\TestSIG05.fs" />
+        <Compile Include="Diagnostics\SignatureRelated\TestSIG06.fs" />
+        <Compile Include="Diagnostics\SignatureRelated\TestSIG07.fs" />
+        <Compile Include="Diagnostics\SignatureRelated\TestSIG08.fs" />
+        <Compile Include="Diagnostics\SignatureRelated\TestSIG09.fs" />
+        <Compile Include="Diagnostics\SignatureRelated\TestSIG10.fs" />
+        <Compile Include="Diagnostics\SignatureRelated\TestSIG11.fs" />
+        <Compile Include="Diagnostics\SignatureRelated\TestSIG12.fs" />
+        <Compile Include="Diagnostics\SignatureRelated\TestSIG13.fs" />
+        <Compile Include="Diagnostics\SignatureRelated\TestSIG14.fs" />
+        <Compile Include="Diagnostics\StructureRelated\TestST001.fs" />
+        <Compile Include="Diagnostics\StructureRelated\TestST002.fs" />
+        <Compile Include="Diagnostics\StructureRelated\TestST004.fs" />
+        <Compile Include="Diagnostics\StructureRelated\TestST005.fs" />
         <Compile Include="Diagnostics\SyntaxRelated\TestSY000.fs" />
         <Compile Include="Diagnostics\SyntaxRelated\TestSY002.fs" />
         <Compile Include="Diagnostics\SyntaxRelated\TestSY010.fs" />
@@ -81,6 +122,18 @@
         <Compile Include="Diagnostics\SyntaxRelated\TestSY012.fs" />
         <Compile Include="Diagnostics\SyntaxRelated\TestSY013.fs" />
         <Compile Include="Diagnostics\SyntaxRelated\TestSY014.fs" />
+        <Compile Include="Diagnostics\VariableRelated\TestVAR00.fs" />
+        <Compile Include="Diagnostics\VariableRelated\TestVAR01.fs" />
+        <Compile Include="Diagnostics\VariableRelated\TestVAR02.fs" />
+        <Compile Include="Diagnostics\VariableRelated\TestVAR03.fs" />
+        <Compile Include="Diagnostics\VariableRelated\TestVAR04.fs" />
+        <Compile Include="Diagnostics\VariableRelated\TestVAR05.fs" />
+        <Compile Include="Diagnostics\VariableRelated\TestVAR06.fs" />
+        <Compile Include="Diagnostics\VariableRelated\TestVAR07.fs" />
+        <Compile Include="Diagnostics\VariableRelated\TestVAR08.fs" />
+        <Compile Include="Diagnostics\VariableRelated\TestVAR09.fs" />
+        <Compile Include="Diagnostics\VariableRelated\TestVAR10.fs" />
+        <Compile Include="Diagnostics\VariableRelated\TestVAR11.fs" />
         <Compile Include="Proofs\TestInferredExpressionsJust.fs" />
         <Compile Include="Proofs\TestInferredExpressionsArgInf.fs" />
     </ItemGroup>
@@ -98,13 +151,6 @@
 
     <ItemGroup>
         <PackageReference Update="FSharp.Core" Version="9.0.303" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Diagnostics\LogicRelated\" />
-      <Folder Include="Diagnostics\VariableRelated\" />
-      <Folder Include="Diagnostics\StructureRelated\" />
-      <Folder Include="Diagnostics\SignatureRelated\" />
     </ItemGroup>
 
 </Project>
