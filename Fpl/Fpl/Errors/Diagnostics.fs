@@ -272,8 +272,9 @@ type DiagnosticCode =
             | VAR11 _ -> "VAR11"
     member this.Message = 
         match this with
-            // interpreter error messages
+            // general fallback messages
             | GEN00 message -> errGEN00 message
+            // namespace error messages
             | NSP00 fileNamePattern -> errNSP00 fileNamePattern
             | NSP01 (fileName, innerErrMsg) -> errNSP01 fileName innerErrMsg
             | NSP02 (url, innerErrMsg) -> errNSP02 url innerErrMsg

@@ -40,40 +40,40 @@
         <Compile Include="Validity\ValidStmtStore.fs" />
         <Compile Include="Validity\Validity.fs" />
         <Compile Include="Diagnostics\General\TestGEN00.fs" />
-        <Compile Include="Diagnostics\Namepaces\TestNSP00.fs" />
-        <Compile Include="Diagnostics\Namepaces\TestNSP01.fs" />
-        <Compile Include="Diagnostics\Namepaces\TestNSP02.fs" />
-        <Compile Include="Diagnostics\Namepaces\TestNSP03.fs" />
-        <Compile Include="Diagnostics\Namepaces\TestNSP04.fs" />
-        <Compile Include="Diagnostics\Namepaces\TestNSP05.fs" />
-        <Compile Include="Diagnostics\Identifiers\TestID001.fs" />
-        <Compile Include="Diagnostics\Identifiers\TestID002.fs" />
-        <Compile Include="Diagnostics\Identifiers\TestID003.fs" />
-        <Compile Include="Diagnostics\Identifiers\TestID005.fs" />
-        <Compile Include="Diagnostics\Identifiers\TestID006.fs" />
-        <Compile Include="Diagnostics\Identifiers\TestID007.fs" />
-        <Compile Include="Diagnostics\Identifiers\TestID008.fs" />
-        <Compile Include="Diagnostics\Identifiers\TestID009.fs" />
-        <Compile Include="Diagnostics\Identifiers\TestID010.fs" />
-        <Compile Include="Diagnostics\Identifiers\TestID011.fs" />
-        <Compile Include="Diagnostics\Identifiers\TestID012.fs" />
-        <Compile Include="Diagnostics\Identifiers\TestID013.fs" />
-        <Compile Include="Diagnostics\Identifiers\TestID014.fs" />
-        <Compile Include="Diagnostics\Identifiers\TestID015.fs" />
-        <Compile Include="Diagnostics\Identifiers\TestID016.fs" />
-        <Compile Include="Diagnostics\Identifiers\TestID017.fs" />
-        <Compile Include="Diagnostics\Identifiers\TestID018.fs" />
-        <Compile Include="Diagnostics\Identifiers\TestID020.fs" />
-        <Compile Include="Diagnostics\Identifiers\TestID021.fs" />
-        <Compile Include="Diagnostics\Identifiers\TestID022.fs" />
-        <Compile Include="Diagnostics\Identifiers\TestID023.fs" />
-        <Compile Include="Diagnostics\Identifiers\TestID024.fs" />
-        <Compile Include="Diagnostics\Identifiers\TestID025.fs" />
-        <Compile Include="Diagnostics\Identifiers\TestID027.fs" />
+        <Compile Include="Diagnostics\NamepaceRelated\TestNSP00.fs" />
+        <Compile Include="Diagnostics\NamepaceRelated\TestNSP01.fs" />
+        <Compile Include="Diagnostics\NamepaceRelated\TestNSP02.fs" />
+        <Compile Include="Diagnostics\NamepaceRelated\TestNSP03.fs" />
+        <Compile Include="Diagnostics\NamepaceRelated\TestNSP04.fs" />
+        <Compile Include="Diagnostics\NamepaceRelated\TestNSP05.fs" />
+        <Compile Include="Diagnostics\IdentifierRelated\TestID001.fs" />
+        <Compile Include="Diagnostics\IdentifierRelated\TestID002.fs" />
+        <Compile Include="Diagnostics\IdentifierRelated\TestID003.fs" />
+        <Compile Include="Diagnostics\IdentifierRelated\TestID005.fs" />
+        <Compile Include="Diagnostics\IdentifierRelated\TestID006.fs" />
+        <Compile Include="Diagnostics\IdentifierRelated\TestID007.fs" />
+        <Compile Include="Diagnostics\IdentifierRelated\TestID008.fs" />
+        <Compile Include="Diagnostics\IdentifierRelated\TestID009.fs" />
+        <Compile Include="Diagnostics\IdentifierRelated\TestID010.fs" />
+        <Compile Include="Diagnostics\IdentifierRelated\TestID011.fs" />
+        <Compile Include="Diagnostics\IdentifierRelated\TestID012.fs" />
+        <Compile Include="Diagnostics\IdentifierRelated\TestID013.fs" />
+        <Compile Include="Diagnostics\IdentifierRelated\TestID014.fs" />
+        <Compile Include="Diagnostics\IdentifierRelated\TestID015.fs" />
+        <Compile Include="Diagnostics\IdentifierRelated\TestID016.fs" />
+        <Compile Include="Diagnostics\IdentifierRelated\TestID017.fs" />
+        <Compile Include="Diagnostics\IdentifierRelated\TestID018.fs" />
+        <Compile Include="Diagnostics\IdentifierRelated\TestID020.fs" />
+        <Compile Include="Diagnostics\IdentifierRelated\TestID021.fs" />
+        <Compile Include="Diagnostics\IdentifierRelated\TestID022.fs" />
+        <Compile Include="Diagnostics\IdentifierRelated\TestID023.fs" />
+        <Compile Include="Diagnostics\IdentifierRelated\TestID024.fs" />
+        <Compile Include="Diagnostics\IdentifierRelated\TestID025.fs" />
+        <Compile Include="Diagnostics\IdentifierRelated\TestID027.fs" />
         <Compile Include="Diagnostics\TestInterpreterErrors.fs" />
-        <Compile Include="Diagnostics\Proofs\TestPR001.fs" />
-        <Compile Include="Diagnostics\Proofs\TestPR021.fs" />
-        <Compile Include="Diagnostics\Proofs\TestPR022.fs" />
+        <Compile Include="Diagnostics\ProofRelated\TestPR001.fs" />
+        <Compile Include="Diagnostics\ProofRelated\TestPR021.fs" />
+        <Compile Include="Diagnostics\ProofRelated\TestPR022.fs" />
         <Compile Include="Diagnostics\SyntaxRelated\TestSY000.fs" />
         <Compile Include="Diagnostics\SyntaxRelated\TestSY002.fs" />
         <Compile Include="Diagnostics\SyntaxRelated\TestSY010.fs" />
@@ -98,6 +98,13 @@
 
     <ItemGroup>
         <PackageReference Update="FSharp.Core" Version="9.0.303" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Diagnostics\LogicRelated\" />
+      <Folder Include="Diagnostics\VariableRelated\" />
+      <Folder Include="Diagnostics\StructureRelated\" />
+      <Folder Include="Diagnostics\SignatureRelated\" />
     </ItemGroup>
 
 </Project>
