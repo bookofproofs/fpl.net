@@ -1,4 +1,4 @@
-namespace TestFplInterpreter.Scope
+namespace Scope
 
 open FParsec
 open TestFplInterpreter.Helpers.Common

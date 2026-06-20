@@ -1,4 +1,4 @@
-namespace FplInterpreter.Tests
+namespace SymbolTable
 
 open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
@@ -11,7 +11,7 @@ open TestFplInterpreter.Helpers.Common
 open FplInterpreter.Main
 
 [<TestClass>]
-type SymbolTableNavigation() =
+type Navigation() =
 
     [<TestMethod>]
     member this.UsesClauseCausesDownloads() =

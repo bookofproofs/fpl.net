@@ -1,4 +1,4 @@
-namespace FplInterpreter.Tests
+namespace SymbolTable
 
 open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
@@ -14,7 +14,7 @@ open TestFplInterpreter.Helpers.Common
 open TestSharedConfig
 
 [<TestClass>]
-type TestEvalAliasedNamespaceIdentifier() =
+type EvalAliasedNamespaceIdentifier() =
 
     [<DataRow("*", "Test1", "Test1*.fpl")>]
     [<DataRow("*", "Test1.Test2", "Test1.Test2*.fpl")>]

@@ -1,4 +1,5 @@
-namespace FplInterpreter.Tests
+namespace SymbolTable
+
 open System
 open System.Collections.Generic
 open Microsoft.VisualStudio.TestTools.UnitTesting
@@ -30,7 +31,7 @@ open Fpl.Interpreter.SymbolTable.Types4.Proofs
 open TestFplInterpreter.Helpers.Common
 
 [<TestClass>]
-type SymbolTableStructure() =
+type Structure() =
     let positions = (Position("",0,0,0), Position("",0,0,0))
     let parent = new FplRoot()
 

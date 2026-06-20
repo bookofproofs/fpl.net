@@ -1,4 +1,4 @@
-namespace FplInterpreter.Tests
+namespace Closure
 
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Primitives
@@ -7,7 +7,7 @@ open Fpl.Interpreter.SymbolTable.Storage.Heap
 open TestFplInterpreter.Helpers.Common
 
 [<TestClass>]
-type TestExpressionEvaluation() =
+type ExpressionEvaluation() =
     let evalTreeFplId (fplValue: FplGenericNode) = fplValue.Type(SignatureType.Name)
     let evalTreeFplRepresentation (fplValue: FplGenericNode) = fplValue.Represent()
 
@@ -16,9 +16,9 @@ type TestExpressionEvaluation() =
     [<DataRow("def pred T() { undef }", LiteralUndef)>]
     [<DataRow("def pred T() { intr }", "T()")>]
     [<TestMethod>]
-    member this.TestExpressionEvaluationConstants(fplCode, expected: string) =
+    member this.Constants(fplCode, expected: string) =
         
-        let filename = "TestExpressionEvaluationConstants"
+        let filename = "Constants"
         prepareFplCode (filename + ".fpl", fplCode, false)
         let r = heap.Root
         let theory = r.Scope[filename]
@@ -45,9 +45,9 @@ type TestExpressionEvaluation() =
     [<DataRow("def pred T() { and(false,true) }", LiteralFalse)>]
     [<DataRow("def pred T() { and(false,false) }", LiteralFalse)>]
     [<TestMethod>]
-    member this.TestExpressionEvaluationConjunction(fplCode, expected: string) =
+    member this.Conjunction(fplCode, expected: string) =
         
-        let filename = "TestExpressionEvaluationConjunction"
+        let filename = "Conjunction"
         prepareFplCode (filename + ".fpl", fplCode, false)
 
         let r = heap.Root
@@ -70,9 +70,9 @@ type TestExpressionEvaluation() =
     [<DataRow("def pred T() { not (false) }", LiteralTrue)>]
     [<DataRow("def pred T() { not ((false)) }", LiteralTrue)>]
     [<TestMethod>]
-    member this.TestExpressionEvaluationNegation(fplCode, expected: string) =
+    member this.Negation(fplCode, expected: string) =
         
-        let filename = "TestExpressionEvaluationNegation"
+        let filename = "Negation"
         prepareFplCode (filename + ".fpl", fplCode, false)
 
         let r = heap.Root
@@ -101,9 +101,9 @@ type TestExpressionEvaluation() =
     [<DataRow("def pred T() { or(false,true) }", LiteralTrue)>]
     [<DataRow("def pred T() { or(false,false) }", LiteralFalse)>]
     [<TestMethod>]
-    member this.TestExpressionEvaluationDisjunction(fplCode, expected: string) =
+    member this.Disjunction(fplCode, expected: string) =
         
-        let filename = "TestExpressionEvaluationDisjunction"
+        let filename = "Disjunction"
         prepareFplCode (filename + ".fpl", fplCode, false)
 
         let r = heap.Root
@@ -134,9 +134,9 @@ type TestExpressionEvaluation() =
     [<DataRow("def pred T() { xor(false,true) }", LiteralTrue)>]
     [<DataRow("def pred T() { xor(false,false) }", LiteralFalse)>]
     [<TestMethod>]
-    member this.TestExpressionEvaluationExclusiveOr(fplCode, expected: string) =
+    member this.ExclusiveOr(fplCode, expected: string) =
         
-        let filename = "TestExpressionEvaluationExclusiveOr"
+        let filename = "ExclusiveOr"
         prepareFplCode (filename + ".fpl", fplCode, false)
         let r = heap.Root
         let theory = r.Scope[filename]
@@ -161,9 +161,9 @@ type TestExpressionEvaluation() =
     [<DataRow("def pred T() { impl(x,true) }", LiteralUndet)>]
     [<DataRow("def pred T() { impl(true,x) }", LiteralUndet)>]
     [<TestMethod>]
-    member this.TestExpressionEvaluationImplication(fplCode, expected: string) =
+    member this.Implication(fplCode, expected: string) =
         
-        let filename = "TestExpressionEvaluationImplication"
+        let filename = "Implication"
         prepareFplCode (filename + ".fpl", fplCode, false)
 
         let r = heap.Root
@@ -189,9 +189,9 @@ type TestExpressionEvaluation() =
     [<DataRow("def pred T() { iif(x,true) }", LiteralUndet)>]
     [<DataRow("def pred T() { iif(true,x) }", LiteralUndet)>]
     [<TestMethod>]
-    member this.TestExpressionEvaluationEquivalence(fplCode, expected: string) =
+    member this.Equivalence(fplCode, expected: string) =
         
-        let filename = "TestExpressionEvaluationEquivalence"
+        let filename = "Equivalence"
         prepareFplCode (filename + ".fpl", fplCode, false)
 
         let r = heap.Root
@@ -237,9 +237,9 @@ type TestExpressionEvaluation() =
     [<DataRow("18", "def pred T() { dec x:pred(y:func(z:obj)->Nat); is(x,pred(y:func(z:obj)->Nat)) }", LiteralTrue)>]
     [<DataRow("19", "def pred T() { dec x:pred(y:func(z:obj)->Nat); is(x,pred(a:func(b:obj)->Nat)) }", LiteralTrue)>]
     [<TestMethod>]
-    member this.TestExpressionEvaluationIsOperand(no:string, fplCode, expected: string) =
+    member this.IsOperand(no:string, fplCode, expected: string) =
         
-        let filename = "TestExpressionEvaluationIsOperand"
+        let filename = "IsOperand"
         prepareFplCode (filename + ".fpl", fplCode, false)
 
         let r = heap.Root
@@ -707,9 +707,9 @@ type TestExpressionEvaluation() =
     [<DataRow("MS4s7", "def func A()->obj {intr prty func X(x:obj)->ind } def pred Test() {dec a:obj; is(A.X(a), func)}", LiteralFalse)>] // false: func does not match by value A.X(obj) 
 
     [<TestMethod>]
-    member this.TestExpressionEvaluationIsOperandEvenMore(no:string, fplCode, expected: string) =
+    member this.IsOperandEvenMore(no:string, fplCode, expected: string) =
         
-        let filename = "TestExpressionEvaluationIsOperand"
+        let filename = "IsOperandEvenMore"
         prepareFplCode (filename + ".fpl", fplCode, false)
 
         let r = heap.Root
@@ -766,9 +766,9 @@ type TestExpressionEvaluation() =
     [<DataRow("MS4d", "def func A(z:ind)->func(a:obj)->ind def pred Test() {is(undef, A)}", LiteralTrue)>] // true: undef matches signature signature A(ind)->func(obj)->ind
 
     [<TestMethod>]
-    member this.TestExpressionEvaluationIsOperandUndef(no:string, fplCode, expected: string) =
+    member this.IsOperandUndef(no:string, fplCode, expected: string) =
         
-        let filename = "TestExpressionEvaluationIsOperand"
+        let filename = "IsOperandUndef"
         prepareFplCode (filename + ".fpl", fplCode, false)
 
         let r = heap.Root
@@ -784,9 +784,9 @@ type TestExpressionEvaluation() =
     [<DataRow("def pred T() { dec x:pred(y:func()->obj); is(x,pred(y:func(z:obj)->obj)) }", "pred(func(obj) -> obj)")>]
     [<DataRow("def pred T() { dec x:pred(y:func()->obj); is(x,pred(y:func()->ind)) }", "pred(func() -> ind)")>]
     [<TestMethod>]
-    member this.TestExpressionEvaluationIsOperandRepr(fplCode, expected: string) =
+    member this.IsOperandRepr(fplCode, expected: string) =
         
-        let filename = "TestExpressionEvaluationIsOperand"
+        let filename = "IsOperandRepr"
         prepareFplCode (filename + ".fpl", fplCode, false)
 
         let r = heap.Root
