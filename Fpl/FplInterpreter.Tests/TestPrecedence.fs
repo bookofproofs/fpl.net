@@ -2,7 +2,7 @@ namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.SymbolTable.Storage.Heap
-open CommonTestHelpers
+open TestFplInterpreter.Helpers.Common
 
 [<TestClass>]
 type TestPrecedence() =

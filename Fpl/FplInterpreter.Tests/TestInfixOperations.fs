@@ -3,7 +3,7 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Primitives
 open Fpl.Interpreter.Helpers.Debug
 open Fpl.Interpreter.SymbolTable.Storage.Heap
-open CommonTestHelpers
+open TestFplInterpreter.Helpers.Common
 
 [<TestClass>]
 type TestInfixOperations() =

@@ -3,7 +3,7 @@ namespace FplInterpreter.Tests.Diagnostics.SyntaxRelated
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open CommonTestHelpers
+open TestFplInterpreter.Helpers.Common
 
 (*
 The SY012 diagnostic indicates superfluous number 1 given in the exists quantor that can

@@ -9,7 +9,8 @@ open Fpl.Interpreter.SymbolTable.Types3.PredicativeBlocks
 open Fpl.Interpreter.SymbolTable.Types3.DefinitionProperties
 open Fpl.Interpreter.SymbolTable.Types3.RulesOfInferences
 open Fpl.Interpreter.SymbolTable.Types4.Proofs
-open CommonTestHelpers
+open TestFplInterpreter.Helpers.Common
+open TestFplInterpreter.Helpers.CommonCases
 
 [<TestClass>]
 type NameEndPos() =
@@ -51,7 +52,7 @@ type NameEndPos() =
     [<DataRow("loc2")>]
     [<TestMethod>]
     member this.TestBlocks(var) =
-        let res = CommonFplValueTestCases.ScopeBlocks("NameEndPos") 
+        let res = TestCases.ScopeBlocks("NameEndPos") 
         match res with
         | Some (r:FplRoot,theory:FplGenericNode,inf1:FplGenericNode,inf2:FplGenericNode,axi1:FplGenericNode,axi2:FplGenericNode,pst1:FplGenericNode,pst2:FplGenericNode,thm1:FplGenericNode,thm2:FplGenericNode,pro1:FplGenericNode,pro2:FplGenericNode,lem1:FplGenericNode,lem2:FplGenericNode,cor1:FplGenericNode,cor2:FplGenericNode,con1:FplGenericNode,con2:FplGenericNode,cla1:FplGenericNode,cla2:FplGenericNode,pre1:FplGenericNode,pre2:FplGenericNode,fun1:FplGenericNode,fun2:FplGenericNode,fun3:FplGenericNode,fun4:FplGenericNode,fun5:FplGenericNode,fun6:FplGenericNode,fun7:FplGenericNode,fun8:FplGenericNode,fun9:FplGenericNode,prf1:FplGenericNode,prf2:FplGenericNode,loc1:FplGenericNode,loc2:FplGenericNode) -> 
             match var with 
@@ -168,7 +169,7 @@ type NameEndPos() =
     [<DataRow("t4")>]
     [<TestMethod>]
     member this.TestConstructors(var) =
-        let res = CommonFplValueTestCases.ScopeConstructors("NameEndPos") 
+        let res = TestCases.ScopeConstructors("NameEndPos") 
         match res with
         | Some (r,theory,block:FplGenericNode,t1:FplGenericNode,t2:FplGenericNode,t3:FplGenericNode,t4:FplGenericNode) -> 
             match var with 
@@ -217,7 +218,7 @@ type NameEndPos() =
     [<DataRow("corAxi1")>]
     [<TestMethod>]
     member this.TestProofsAndCorollaries(var) =
-        let res = CommonFplValueTestCases.ScopeProofsAndCorollaries("NameEndPos") 
+        let res = TestCases.ScopeProofsAndCorollaries("NameEndPos") 
         match res with
         | Some (r,theory,thm1,proofThm1,lem1,proofLem1,prp1,proofPrp1,cor1,proofCor1,thm2,
                                 corThm2,lem2,corLem2,prp2,corPrp2,cor2,corCor2,con1,corCon1,
@@ -302,7 +303,7 @@ type NameEndPos() =
     [<DataRow("t13")>]
     [<TestMethod>]
     member this.TestProperties(var) =
-        let res = CommonFplValueTestCases.ScopeProperties("NameEndPos") 
+        let res = TestCases.ScopeProperties("NameEndPos") 
         match res with
         | Some (r:FplRoot,theory:FplGenericNode,block:FplGenericNode,t1:FplGenericNode,t3:FplGenericNode,t5:FplGenericNode,t7:FplGenericNode,t9:FplGenericNode,t11:FplGenericNode,t13:FplGenericNode) -> 
             match var with 
@@ -368,7 +369,7 @@ type NameEndPos() =
     [<DataRow("ywc")>]
     [<TestMethod>]
     member this.TestVariablesInBlock(var) =
-        let result = CommonFplValueTestCases.ScopeVariablesInBlock("NameEndPos")
+        let result = TestCases.ScopeVariablesInBlock("NameEndPos")
         match result with
         | Some (r,theory,block,x,y,s,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
@@ -437,7 +438,7 @@ type NameEndPos() =
     [<DataRow("ywc")>]
     [<TestMethod>]
     member this.TestVariablesInBlockVariadic(var) =
-        let result = CommonFplValueTestCases.ScopeVariablesInBlockVariadic("NameEndPos")
+        let result = TestCases.ScopeVariablesInBlockVariadic("NameEndPos")
         match result with
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
@@ -505,7 +506,7 @@ type NameEndPos() =
     [<DataRow("ywc")>]
     [<TestMethod>]
     member this.TestVariablesInSignature(var) =
-        let result = CommonFplValueTestCases.ScopeVariablesInSignature("NameEndPos")
+        let result = TestCases.ScopeVariablesInSignature("NameEndPos")
         match result with
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
@@ -574,7 +575,7 @@ type NameEndPos() =
     [<DataRow("ywc")>]
     [<TestMethod>]
     member this.TestVariablesInSignatureVariadic(var) =
-        let result = CommonFplValueTestCases.ScopeVariablesInSignatureVariadic("NameEndPos")
+        let result = TestCases.ScopeVariablesInSignatureVariadic("NameEndPos")
         match result with
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with

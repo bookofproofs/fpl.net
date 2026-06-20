@@ -1,10 +1,9 @@
 namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
-open Fpl.Errors.Diagnostics
 open Fpl.Primitives
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.SymbolTable.Storage.Heap
-open CommonTestHelpers
+open TestFplInterpreter.Helpers.Common
 
 [<TestClass>]
 type TestDecrementWrapper() =

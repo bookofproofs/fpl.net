@@ -3,7 +3,7 @@ namespace FplInterpreter.Tests.Diagnostics.Proofs
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open CommonTestHelpers
+open TestFplInterpreter.Helpers.Common
 
 (*
 The PR022 diagnostic indicates that a justification item cannot collect inferred results to involve them

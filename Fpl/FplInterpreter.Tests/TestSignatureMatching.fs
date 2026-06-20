@@ -6,7 +6,7 @@ open Fpl.Interpreter.Helpers.Debug
 open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.SymbolTable.TypeMatching
 open Fpl.Interpreter.SymbolTable.Types3.SelfParent
-open CommonTestHelpers
+open TestFplInterpreter.Helpers.Common
 
 [<TestClass>]
 type TestSignatureMatching() =

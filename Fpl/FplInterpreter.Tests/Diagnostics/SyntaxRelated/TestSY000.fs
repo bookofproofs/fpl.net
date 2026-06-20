@@ -3,7 +3,7 @@ namespace FplInterpreter.Tests.Diagnostics.SyntaxRelated
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open CommonTestHelpers
+open TestFplInterpreter.Helpers.Common
 
 (*
 The SY000 diagnostic indicates a syntax errors issued by FplParser, if the error does not involve

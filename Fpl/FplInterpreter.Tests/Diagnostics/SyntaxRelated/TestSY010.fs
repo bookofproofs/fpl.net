@@ -3,7 +3,7 @@ namespace FplInterpreter.Tests.Diagnostics.SyntaxRelated
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open CommonTestHelpers
+open TestFplInterpreter.Helpers.Common
 
 (*
 The SY010 diagnostic indicates superfluous parentheses that can

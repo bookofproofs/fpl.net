@@ -5,7 +5,7 @@ open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.SymbolTable.Storage.Util
 open Fpl.Interpreter.SymbolTable.Types4.Proofs
-open CommonTestHelpers
+open TestFplInterpreter.Helpers.Common
 
 [<TestClass>]
 type TestInferredExpressionsArgInf() =
@@ -101,6 +101,33 @@ type TestInferredExpressionsArgInf() =
 
         prepareFplCode(filename, "", false) |> ignore
 
+
+    [<DataRow("01", "thm T {true} proof T$1 {dec x:pred x:=and(true,false) ; 1: assume x}", "true ∧ false", 1)>]
+    [<DataRow("02", "thm T {true} proof T$1 {dec x:pred x:=¬(¬(true ⇒ false) ⇒ ¬∀ z:obj {z is K})} ;1: assume x", "¬(¬(true ⇒ false) ⇒ ¬∀ z:obj {z is K})", 1)>]
+    [<DataRow("03", "thm T {true} proof T$1 {dec x:pred x:=not true ;1: assume x}", "¬true", 1)>]
+    [<DataRow("04", "thm T {true} proof T$1 {dec x:pred x:=∀ x:obj {¬((x is N) ⇔ false)} ;1: assume x}", "∀ x:obj {¬((x is N) ⇔ false)}", 1)>]
+    [<TestMethod>]
+    member this.TestInferredExpressionArgInferenceAssumeVar(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
+        
+        let filename = "TestInferredExpressionArgInferenceAssumeVar"
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+
+        let candidates = findCandidatesByName "T" false true
+        let prf = candidates |> List.filter (fun fv -> fv.FplId = "T$1") |> List.map (fun fv -> fv :?> FplProof) |> List.head
+        let fvJiOpt = tryFindLastInference (prf:FplProof) PrimArgInfAssume 
+
+        match fvJiOpt with
+        | Some (:? FplArgInferenceAssume as argInf) ->
+            let result = argInf.InferredExprCandidates
+            Assert.AreEqual<int>(expectedNumbExpr, result.Length)
+            Assert.AreEqual<string>(expectedExpr, result.Head.Type SignatureType.Name)
+        | Some ref ->
+            Assert.IsInstanceOfType<FplArgInferenceAssume>(ref)
+        | None ->
+            failwith $"expected FplArgInferenceAssume, found none"
+
+        prepareFplCode(filename, "", false) |> ignore
 
     [<DataRow("01", "thm T {true} proof T$1 {1: assume and(true,false) 2: revoke 1}", "¬(true ∧ false)", 1)>]
     [<DataRow("02", "thm T {true} proof T$1 {1: assume ¬(¬(true ⇒ false) ⇒ ¬∀ z:obj {z is K}) 2: revoke 1}", "¬¬(¬(true ⇒ false) ⇒ ¬∀ z:obj {z is K})", 1)>]

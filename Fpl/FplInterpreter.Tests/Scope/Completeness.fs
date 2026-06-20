@@ -1,40 +1,41 @@
 namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
+open TestFplInterpreter.Helpers.CommonCases
 
 [<TestClass>]
 type Completeness() =
 
     [<TestMethod>]
     member this.TestBlocks() =
-        CommonFplValueTestCases.ScopeBlocks("") |> ignore
+        TestCases.ScopeBlocks("") |> ignore
 
     [<TestMethod>]
     member this.TestConstructors() =
-        CommonFplValueTestCases.ScopeConstructors("") |> ignore
+        TestCases.ScopeConstructors("") |> ignore
 
     [<TestMethod>]
     member this.TestProofsAndCorollaries() =
-        CommonFplValueTestCases.ScopeProofsAndCorollaries("") |> ignore
+        TestCases.ScopeProofsAndCorollaries("") |> ignore
 
     [<TestMethod>]
     member this.TestProperties() =
-        CommonFplValueTestCases.ScopeProperties("") |> ignore
+        TestCases.ScopeProperties("") |> ignore
 
     [<TestMethod>]
     member this.TestVariablesInBlock() =
-        CommonFplValueTestCases.ScopeVariablesInBlock("") |> ignore
+        TestCases.ScopeVariablesInBlock("") |> ignore
 
     [<TestMethod>]
     member this.TestVariablesInBlockWithVariadic() =
-        CommonFplValueTestCases.ScopeVariablesInBlockVariadic("") |> ignore
+        TestCases.ScopeVariablesInBlockVariadic("") |> ignore
 
     [<TestMethod>]
     member this.TestVariablesInSignature() =
-        CommonFplValueTestCases.ScopeVariablesInSignature("") |> ignore
+        TestCases.ScopeVariablesInSignature("") |> ignore
 
     [<TestMethod>]
     member this.TestVariablesInSignatureWithVariadic() =
-        CommonFplValueTestCases.ScopeVariablesInSignatureVariadic("") |> ignore
+        TestCases.ScopeVariablesInSignatureVariadic("") |> ignore
 
 
 

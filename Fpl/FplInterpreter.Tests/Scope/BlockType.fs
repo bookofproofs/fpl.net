@@ -20,8 +20,8 @@ open Fpl.Interpreter.SymbolTable.Types3.MapCases
 open Fpl.Interpreter.SymbolTable.Types3.Localization
 open Fpl.Interpreter.SymbolTable.Types3.IsOperator
 open Fpl.Interpreter.SymbolTable.Types4.Proofs
-open CommonTestHelpers
-
+open TestFplInterpreter.Helpers.Common
+open TestFplInterpreter.Helpers.CommonCases
 
 [<TestClass>]
 type BlockType() =
@@ -63,7 +63,7 @@ type BlockType() =
     [<DataRow("loc2")>]
     [<TestMethod>]
     member this.TestBlocks(var) =
-        let res = CommonFplValueTestCases.ScopeBlocks("BlockType") 
+        let res = TestCases.ScopeBlocks("BlockType") 
         match res with
         | Some (r:FplRoot,theory:FplGenericNode,inf1:FplGenericNode,inf2:FplGenericNode,axi1:FplGenericNode,axi2:FplGenericNode,pst1:FplGenericNode,pst2:FplGenericNode,thm1:FplGenericNode,thm2:FplGenericNode,pro1:FplGenericNode,pro2:FplGenericNode,lem1:FplGenericNode,lem2:FplGenericNode,cor1:FplGenericNode,cor2:FplGenericNode,con1:FplGenericNode,con2:FplGenericNode,cla1:FplGenericNode,cla2:FplGenericNode,pre1:FplGenericNode,pre2:FplGenericNode,fun1:FplGenericNode,fun2:FplGenericNode,fun3:FplGenericNode,fun4:FplGenericNode,fun5:FplGenericNode,fun6:FplGenericNode,fun7:FplGenericNode,fun8:FplGenericNode,fun9:FplGenericNode,prf1:FplGenericNode,prf2:FplGenericNode,loc1:FplGenericNode,loc2:FplGenericNode) -> 
             match var with 
@@ -116,7 +116,7 @@ type BlockType() =
     [<DataRow("t4")>]
     [<TestMethod>]
     member this.TestConstructors(var) =
-        let res = CommonFplValueTestCases.ScopeConstructors("BlockType") 
+        let res = TestCases.ScopeConstructors("BlockType") 
         match res with
         | Some (r,theory,block:FplGenericNode,t1:FplGenericNode,t2:FplGenericNode,t3:FplGenericNode,t4:FplGenericNode) -> 
             match var with 
@@ -155,7 +155,7 @@ type BlockType() =
     [<DataRow("corAxi1")>]
     [<TestMethod>]
     member this.TestProofsAndCorollaries(var) =
-        let res = CommonFplValueTestCases.ScopeProofsAndCorollaries("BlockType") 
+        let res = TestCases.ScopeProofsAndCorollaries("BlockType") 
         match res with
         | Some (r,theory,thm1,proofThm1,lem1,proofLem1,prp1,proofPrp1,cor1,proofCor1,thm2,
                                 corThm2,lem2,corLem2,prp2,corPrp2,cor2,corCor2,con1,corCon1,
@@ -200,7 +200,7 @@ type BlockType() =
     [<DataRow("t13")>]
     [<TestMethod>]
     member this.TestProperties(var) =
-        let res = CommonFplValueTestCases.ScopeProperties("BlockType") 
+        let res = TestCases.ScopeProperties("BlockType") 
         match res with
         | Some (r:FplRoot,theory:FplGenericNode,block:FplGenericNode,t1:FplGenericNode,t3:FplGenericNode,t5:FplGenericNode,t7:FplGenericNode,t9:FplGenericNode,t11:FplGenericNode,t13:FplGenericNode) -> 
             match var with 
@@ -251,7 +251,7 @@ type BlockType() =
     [<DataRow("ywc")>]
     [<TestMethod>]
     member this.TestVariablesInBlock(var) =
-        let result = CommonFplValueTestCases.ScopeVariablesInBlock("BlockType")
+        let result = TestCases.ScopeVariablesInBlock("BlockType")
         match result with
         | Some (r,theory,block,x,y,s,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
@@ -320,7 +320,7 @@ type BlockType() =
     [<DataRow("ywc")>]
     [<TestMethod>]
     member this.TestVariablesInBlockVariadic(var) =
-        let result = CommonFplValueTestCases.ScopeVariablesInBlockVariadic("BlockType")
+        let result = TestCases.ScopeVariablesInBlockVariadic("BlockType")
         match result with
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
@@ -389,7 +389,7 @@ type BlockType() =
     [<DataRow("ywc")>]
     [<TestMethod>]
     member this.TestVariablesInSignature(var) =
-        let result = CommonFplValueTestCases.ScopeVariablesInSignature("BlockType")
+        let result = TestCases.ScopeVariablesInSignature("BlockType")
         match result with
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
@@ -457,7 +457,7 @@ type BlockType() =
     [<DataRow("ywc")>]
     [<TestMethod>]
     member this.TestVariablesInSignatureVariadic(var) =
-        let result = CommonFplValueTestCases.ScopeVariablesInSignatureVariadic("BlockType")
+        let result = TestCases.ScopeVariablesInSignatureVariadic("BlockType")
         match result with
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with

@@ -8,8 +8,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="CommonTestHelpers.fs" />
-        <Compile Include="CommonFplValueTestCases.fs" />
+        <Compile Include="Helpers\Common.fs" />
+        <Compile Include="Helpers\CommonFplValueTestCases.fs" />
         <Compile Include="TestTypeMatching.fs" />
         <Compile Include="TestDecrementWrapper.fs" />
         <Compile Include="TestExpressionEvaluationVariables.fs" />

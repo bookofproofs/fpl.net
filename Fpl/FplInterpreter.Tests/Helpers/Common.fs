@@ -1,4 +1,4 @@
-module CommonTestHelpers
+module TestFplInterpreter.Helpers.Common
 
 open System
 open System.IO

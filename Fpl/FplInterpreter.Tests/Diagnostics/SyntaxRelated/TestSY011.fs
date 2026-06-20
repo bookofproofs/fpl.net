@@ -3,7 +3,7 @@ namespace FplInterpreter.Tests.Diagnostics.SyntaxRelated
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open CommonTestHelpers
+open TestFplInterpreter.Helpers.Common
 
 (*
 The SY011 diagnostic indicates that the quantor "exists exactly 0" should be replaced by

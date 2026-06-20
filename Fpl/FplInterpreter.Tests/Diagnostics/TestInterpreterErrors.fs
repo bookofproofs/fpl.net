@@ -5,7 +5,7 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
 open FplInterpreter.Main
-open CommonTestHelpers
+open TestFplInterpreter.Helpers.Common
 open TestSharedConfig
 
 [<TestClass>]

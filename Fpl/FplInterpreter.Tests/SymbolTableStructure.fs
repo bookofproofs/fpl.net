@@ -27,7 +27,7 @@ open Fpl.Interpreter.SymbolTable.Types3.Assignments
 open Fpl.Interpreter.SymbolTable.Types3.ForStmt
 open Fpl.Interpreter.SymbolTable.Types3.CasesStmt
 open Fpl.Interpreter.SymbolTable.Types4.Proofs
-open CommonTestHelpers
+open TestFplInterpreter.Helpers.Common
 
 [<TestClass>]
 type SymbolTableStructure() =

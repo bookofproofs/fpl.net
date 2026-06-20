@@ -3,7 +3,7 @@ namespace FplInterpreter.Tests.Diagnostics.Proofs
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open CommonTestHelpers
+open TestFplInterpreter.Helpers.Common
 
 
 [<TestClass>]

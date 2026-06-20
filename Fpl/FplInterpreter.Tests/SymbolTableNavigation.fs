@@ -7,7 +7,7 @@ open Fpl.Interpreter.Helpers.Debug
 open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Newtonsoft.Json
 open Newtonsoft.Json.Linq
-open CommonTestHelpers
+open TestFplInterpreter.Helpers.Common
 open FplInterpreter.Main
 
 [<TestClass>]
