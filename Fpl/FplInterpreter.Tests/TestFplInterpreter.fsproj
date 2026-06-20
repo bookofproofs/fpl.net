@@ -9,7 +9,6 @@
 
     <ItemGroup>
         <Compile Include="Helpers\Common.fs" />
-        <Compile Include="Helpers\CommonFplValueTestCases.fs" />
         <Compile Include="TestTypeMatching.fs" />
         <Compile Include="TestDecrementWrapper.fs" />
         <Compile Include="TestExpressionEvaluationVariables.fs" />
@@ -23,15 +22,16 @@
         <Compile Include="SymbolTableNavigation.fs" />
         <Compile Include="SymbolTableStructure.fs" />
         <Compile Include="TestFplValueNesting.fs" />
-        <Compile Include="TestFplValueScopeExpressionType.fs" />
         <Compile Include="TestExpressionEvaluation.fs" />
-        <Compile Include="TestFplValueScopeFplRepresentation.fs" />
-        <Compile Include="TestFplValueScopeFplId.fs" />
         <Compile Include="TestReferencesTypeOfSignature.fs" />
         <Compile Include="TestFplValue.fs" />
         <Compile Include="TestEvalAliasedNamespaceIdentifier.fs" />
         <Compile Include="TestFixTypeExpressionNames.fs" />
         <Compile Include="TestValidity.fs" />
+        <Compile Include="Scope\CommonTestCases.fs" />
+        <Compile Include="Scope\FplRepresentation.fs" />
+        <Compile Include="Scope\FplId.fs" />
+        <Compile Include="Scope\ExpressionType.fs" />
         <Compile Include="Scope\TypeSignature.fs" />
         <Compile Include="Scope\NameEndPos.fs" />
         <Compile Include="Scope\QualifiedName.fs" />

@@ -1,4 +1,5 @@
-namespace FplInterpreter.Tests
+namespace TestFplInterpreter.Scope
+
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Primitives
 open Fpl.Interpreter.BasicTypes
@@ -10,7 +11,7 @@ open Fpl.Interpreter.SymbolTable.Types3.DefinitionProperties
 open Fpl.Interpreter.SymbolTable.Types3.RulesOfInferences
 open Fpl.Interpreter.SymbolTable.Types4.Proofs
 open TestFplInterpreter.Helpers.Common
-open TestFplInterpreter.Helpers.CommonCases
+
 
 [<TestClass>]
 type NameEndPos() =

@@ -1,4 +1,5 @@
-namespace FplInterpreter.Tests
+namespace TestFplInterpreter.Scope
+
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Primitives
 open Fpl.Interpreter.BasicTypes
@@ -7,7 +8,7 @@ open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.SymbolTable.Storage.Util
 open Fpl.Interpreter.SymbolTable.Types4.Proofs
 open TestFplInterpreter.Helpers.Common
-open TestFplInterpreter.Helpers.CommonCases
+
 
 [<TestClass>]
 type Name() =

@@ -1,6 +1,6 @@
-namespace FplInterpreter.Tests
+namespace TestFplInterpreter.Scope
+
 open Microsoft.VisualStudio.TestTools.UnitTesting
-open TestFplInterpreter.Helpers.CommonCases
 
 [<TestClass>]
 type Completeness() =

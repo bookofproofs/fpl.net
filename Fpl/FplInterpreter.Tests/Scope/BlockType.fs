@@ -1,4 +1,5 @@
-namespace FplInterpreter.Tests
+namespace TestFplInterpreter.Scope
+
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Primitives
 open Fpl.Interpreter.BasicTypes
@@ -21,7 +22,6 @@ open Fpl.Interpreter.SymbolTable.Types3.Localization
 open Fpl.Interpreter.SymbolTable.Types3.IsOperator
 open Fpl.Interpreter.SymbolTable.Types4.Proofs
 open TestFplInterpreter.Helpers.Common
-open TestFplInterpreter.Helpers.CommonCases
 
 [<TestClass>]
 type BlockType() =

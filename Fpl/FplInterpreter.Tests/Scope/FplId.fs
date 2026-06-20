@@ -1,4 +1,5 @@
-namespace FplInterpreter.Tests
+namespace TestFplInterpreter.Scope
+
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Primitives
 open Fpl.Errors.Diagnostics
@@ -6,7 +7,6 @@ open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.SymbolTable.Types1.TopLevel
 open Fpl.Interpreter.SymbolTable.Storage.Heap
 open TestFplInterpreter.Helpers.Common
-open TestFplInterpreter.Helpers.CommonCases
 
 [<TestClass>]
 type TestFplValueScopeFplId() =
