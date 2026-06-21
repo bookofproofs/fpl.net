@@ -6,11 +6,13 @@ open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
 open TestFplInterpreter.Helpers.Common
 
-(*
-The SY012 diagnostic indicates superfluous number 1 given in the exists quantor that can
-be safely removed without changing the semantics of the FPL code. ("exists only one")
 
-*)
+(* SY012 diagnostic
+   Purpose: SY012 highlights a redundant numeric detail in a uniqueness quantifier that can be removed without changing semantics.
+   What it indicates: the explicit numeric annotation in the quantifier is unnecessary and the formula can be expressed more simply.
+   Benefit: applying the suggestion improves readability and keeps formulas idiomatic by removing superfluous notation.
+   Treat SY012 as a non-fatal, readability-oriented hint to simplify quantifier syntax while preserving the original meaning. *)
+
 
 [<TestClass>]
 type TestSY012() =

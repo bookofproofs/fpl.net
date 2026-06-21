@@ -1,13 +1,15 @@
 namespace Diagnostics.SignatureRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* SIG05
+   Purpose: Signal that an assignment cannot be executed because of a semantic mismatch or other assignment-related failure.
+   What it indicates: The right-hand side (argument) does not match the left-hand side (parameter/assignee) or an assignment precondition failed (type/signature mismatch, missing mapping, incompatible call-by-value/reference shape, etc.). The diagnostic message supplies the concrete reason.
+   Use: Surface concrete assignment failures so the author can see the precise cause (as produced by the embedded error message) and the location that triggered it.
+   Action / Treat: Fix the assignment by making the RHS compatible with the LHS (adjust types, supply/declare a mapping, change call-by-value vs. reference usage, or restructure the expression), or change the assignee to an appropriate target. Treat SIG05 as an error that prevents a valid assignment and must be corrected. *)
 
 [<TestClass>]
 type TestSIG05() =

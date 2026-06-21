@@ -6,12 +6,12 @@ open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
 open TestFplInterpreter.Helpers.Common
 
-(*
-The SY010 diagnostic indicates superfluous parentheses that can
-be safely removed without changing the semantics of the FPL code.
-
-(See also SY013 diagnostics)
-*)
+(* SY010
+   Purpose: Warn about superfluous parentheses that can be removed without changing the code's meaning.
+   What it indicates: A subexpression is wrapped in unnecessary grouping, producing visual clutter or redundant syntax.
+   Use: Help authors simplify expressions and improve readability by locating removable parentheses.
+   Action / Treat: Remove the redundant parentheses or refactor the expression for clarity; treat SY010 as a non-fatal warning recommending simplification. 
+   See also: SY013 diagnostics *)
 
 [<TestClass>]
 type TestSY010() =

@@ -1,13 +1,16 @@
 namespace Diagnostics.VariableRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* VAR01 diagnostic
+   Purpose: VAR01 flags references to identifiers that have no binding in the current scope.
+   What it indicates: an identifier used in an expression cannot be resolved to any declared variable, so evaluation will rely on a missing or implicit binding.
+   Use: follow VAR01 to find missing declarations, incorrect imports/uses, or simple typos in variable names.
+   Action: fix by declaring the identifier in the appropriate scope, adjusting the surrounding scope, or correcting the name so it resolves unambiguously.
+   Treat VAR01 as a name-resolution error that prevents the code from being correctly evaluated until resolved. *)
 
 [<TestClass>]
 type TestVAR01() =

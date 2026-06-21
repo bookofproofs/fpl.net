@@ -6,17 +6,13 @@ open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
 open TestFplInterpreter.Helpers.Common
 
-(*
-The SY002 diagnostic indicates a syntax error issued by FplParser that involve
-the backtracking mechanism of the FParsec library, the FplParser is based on.
-Each of the backtracked FParsec error will be wrapped into a separate SY002 diagnostic with
-its own position in the faulty FPL code.
 
-Because there is always more than one diagnostic (because there is at least a main FParsec syntax
-error and a backtracked one), the diagnostics will be numbered.
-The diagnostics numbered use the pattern XXX.Y where XXX is the global number of the SY002 main syntax error
-and Y is the consecutive number 1,2,... of the backtracked error inside the main error.
-*)
+(* SY002
+   Purpose: Report parser syntax failures that include FParsec backtracked alternatives as a grouped error chain.
+   What it indicates: The parser could not successfully parse the input and produced one or more backtracked errors; each backtracked failure is wrapped into the SY002 chain.
+   Use: Inspect the numbered entries in the SY002 chain to identify the primary parse error and the contributing backtracked diagnostics that help pinpoint the faulty syntax.
+   Action / Treat: Correct the offending syntax (or adjust the source to match the grammar); treat SY002 as a blocking parse error that must be resolved for successful interpretation. *)
+
 
 [<TestClass>]
 type TestSY002() =

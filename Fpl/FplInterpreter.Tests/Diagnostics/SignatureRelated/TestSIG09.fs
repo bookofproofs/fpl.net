@@ -1,13 +1,16 @@
 namespace Diagnostics.SignatureRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+
+(* SIG09
+   Purpose: Report missing indices when an array is accessed with fewer indices than its declared dimensionality.
+   What it indicates: An expression indexes an array with too few indices (or a nested index expression yields too few dimensions), so one or more trailing dimensions of the array are not addressed.
+   Use: Pinpoint incorrect array accesses and nested/index-expression mismatches so the author can supply the required indices or adjust the array’s declared dimensions.
+   Action / Treat: Provide the missing index expressions, change the array declaration to the intended number of dimensions, or restructure nested/index expressions to match the array; treat SIG09 as a signature/arity error that must be corrected to avoid invalid indexing. *)
 
 [<TestClass>]
 type TestSIG09() =

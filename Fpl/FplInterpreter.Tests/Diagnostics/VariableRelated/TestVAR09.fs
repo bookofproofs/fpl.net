@@ -1,13 +1,16 @@
 namespace Diagnostics.VariableRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+
+(* VAR09
+   Purpose: Flag free variables used in contexts that require bound or declared names.
+   What it indicates: One or more identifiers appear without a binding in the current evaluation scope, preventing correct evaluation.
+   Use: Help locate missing declarations, incorrect scoping, or typos that leave variables unbound.
+   Action / Treat: Declare or bind the identifier in the appropriate scope, pass it as a parameter, or correct the name; treat VAR09 as an evaluation-blocking error. *)
 
 [<TestClass>]
 type TestVAR09() =

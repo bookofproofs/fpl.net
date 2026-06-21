@@ -1,13 +1,15 @@
 namespace Diagnostics.StructureRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* ST005
+   Purpose: Indicate that the interpreter could not establish a valid enumerator for a `for ... in` domain.
+   What it indicates: The domain expression (e.g., the second part of `for x in DOMAIN`) is not an array/iterable form the interpreter knows how to enumerate, so the loop cannot be executed as written.
+   Use: Helps locate invalid or unsupported iteration domains (missing array, non-enumerable type, or malformed domain reference) when authoring loops.
+   Action / Treat: Supply an enumerable domain (e.g., an array variable or a proper range/collection), change the loop to a supported iteration form, or implement a custom enumerator; treat ST005 as an informational/structure diagnostic that requires correcting the domain so the loop can be evaluated. *)
 
 [<TestClass>]
 type TestST005() =

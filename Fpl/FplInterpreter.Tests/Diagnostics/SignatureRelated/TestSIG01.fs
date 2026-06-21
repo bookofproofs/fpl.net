@@ -1,13 +1,15 @@
 namespace Diagnostics.SignatureRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* SIG01
+   Purpose: Report references to an operator/symbol that has not been declared.
+   What it indicates: A reference expression uses a symbol (prefix/infix/postfix) which could not be resolved to any declared functional term, predicate, extension or class in the loaded theories.
+   Use: Helps locate undefined or misspelled operator usages so they can be declared or corrected.
+   Action / Treat: Declare the operator (functional term/predicate/class) with the given symbol or correct the reference; SIG01 is an error that blocks proper interpretation of the expression. *)
 
 [<TestClass>]
 type TestSIG01() =

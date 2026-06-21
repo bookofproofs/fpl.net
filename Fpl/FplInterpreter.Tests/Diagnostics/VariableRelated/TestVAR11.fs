@@ -1,14 +1,17 @@
 namespace Diagnostics.VariableRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* VAR11
+   Purpose: Detect duplicate variable identifiers declared inside a localization (`loc`) block.
+   What it indicates: Two localization variables share the same name, causing ambiguity in translation/localization scope.
+   Use: Help find name collisions in localization blocks so translations map to distinct variables.
+   Action / Treat: Rename the conflicting localization identifier so every `loc` variable is unique; treat VAR11 as an error that must be fixed. *)
 
+   
 [<TestClass>]
 type TestVAR11() =
 

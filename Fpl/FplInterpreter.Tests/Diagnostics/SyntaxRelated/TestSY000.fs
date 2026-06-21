@@ -5,11 +5,11 @@ open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
 open TestFplInterpreter.Helpers.Common
 
-(*
-The SY000 diagnostic indicates a syntax errors issued by FplParser, if the error does not involve
-the backtracking mechanism of the FParsec library, the FplParser is based on.
-For the backtracking syntax errors see SY001 and SY002.
-*)
+(* SY000
+   Purpose: Report a primary syntax error produced by the parser when the failure is not related to FParsec backtracking.
+   What it indicates: The input does not conform to the grammar at the reported location and the parser could not recover with alternative branches.
+   Use: Inspect the provided error message and position to correct the offending token or structure so it matches the language grammar.
+   Action / Treat: Fix the syntax (token, punctuation, or structure); treat SY000 as a blocking parser error that must be resolved for successful interpretation. *)
 
 [<TestClass>]
 type TestSY000() =

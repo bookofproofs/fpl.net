@@ -1,13 +1,15 @@
 namespace Diagnostics.SignatureRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* SIG14
+   Purpose: Warn about case branches that can never be reached because an earlier branch already matches the same condition signature.
+   What it indicates: Two or more case conditions in the same `cases`/`mcases` construct produce identical condition signatures, so later branches are shadowed by earlier ones and will never execute.
+   Use: Locate duplicated or shadowed case conditions (including equivalent predicates or identical signatures) so the author can correct ordering or make conditions more specific.
+   Action / Treat: Remove or reorder the redundant branch, or refine the condition so each case is distinct; treat SIG14 as a correctness/readability warning that points to unreachable case branches. *)
 
 [<TestClass>]
 type TestSIG14() =

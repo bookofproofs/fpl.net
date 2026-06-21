@@ -1,13 +1,15 @@
 namespace Diagnostics.SignatureRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* SIG10
+   Purpose: Report an indexing arity mismatch where more indices were supplied than the array's declared dimensions.
+   What it indicates: An array value (or an expression producing array-like indices) was indexed with too many indices; the nth index does not exist for the array's declared dimensionality.
+   Use: Helps locate incorrect array indexing or assignment sites (e.g., `arr[i,j,k]` when `arr` is declared as a 1D array) and nested-indexing errors produced by composed index expressions.
+   Action / Treat: Fix by supplying the correct number of indices, adjust the array declaration to the intended dimensionality, or restructure nested/index expressions so they match the array's dimensions; treat SIG10 as a type/arity error that must be corrected to avoid runtime indexing failures. *)
 
 [<TestClass>]
 type TestSIG10() =

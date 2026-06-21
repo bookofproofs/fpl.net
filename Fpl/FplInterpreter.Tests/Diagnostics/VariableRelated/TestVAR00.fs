@@ -1,13 +1,15 @@
 namespace Diagnostics.VariableRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* VAR00 diagnostic
+   Purpose: VAR00 warns when multiple variadic/array-style variables are declared together, which can create ambiguous or unclear bindings.
+   What it indicates: the declaration may produce indexing or scope ambiguities that make symbol-table construction and later evaluation nondeterministic or hard to reason about.
+   Action suggested: separate variadic declarations or use explicit mapping/array types so each variable's intended shape and binding are unambiguous.
+   Treat VAR00 as a prompt to rewrite the declaration for clarity and deterministic symbol resolution. *)
 
 [<TestClass>]
 type TestVAR00() =

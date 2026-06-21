@@ -1,13 +1,15 @@
 namespace Diagnostics.SignatureRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* SIG03
+   Purpose: Report that a returned expression does not match the expected mapping/signature of the enclosing functional term.
+   What it indicates: The `return` expression's type or signature failed the type/signature matcher (the matcher produced a concrete error message which is forwarded as the diagnostic text).
+   Use: Pinpoint return statements whose value or form is incompatible with the function's declared/mapped result type (wrong arity, wrong argument/value shape, or mismatched mapping target).
+   Action / Treat: Fix the return so it matches the function's declared or mapped signature (adjust the returned expression, change the function/mapping signature, or provide a compatible mapping). Treat SIG03 as an error that must be resolved for correct function/mapping semantics. *)
 
 [<TestClass>]
 type TestSIG03() =

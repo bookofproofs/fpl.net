@@ -865,7 +865,7 @@ let emitSIG05Diagnostics errMsg pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitSIG06iagnostic name oldFromNode newFromNode typeName pos1 pos2  = 
+let emitSIG06diagnostic name oldFromNode newFromNode typeName pos1 pos2  = 
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -879,7 +879,7 @@ let emitSIG06iagnostic name oldFromNode newFromNode typeName pos1 pos2  =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitSIG07iagnostic assigneeName assigneeType nodeType pos1 pos2  = 
+let emitSIG07diagnostic assigneeName assigneeType nodeType pos1 pos2  = 
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -1000,7 +1000,7 @@ let emitST001diagnostics name pos1 pos2 =
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ST001 name
-            Diagnostic.Alternatives = Some "Simplify the code by the block." 
+            Diagnostic.Alternatives = Some "Simplify the code by removing the block." 
         }
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)

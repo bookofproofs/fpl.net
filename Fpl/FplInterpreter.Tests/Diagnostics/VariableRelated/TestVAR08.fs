@@ -1,13 +1,15 @@
 namespace Diagnostics.VariableRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* VAR08
+   Purpose: Warn when a variadic (array-like) variable is attempted to be bound by a quantifier.
+   What it indicates: Quantifiers cannot correctly bind variadic/array variables and the binding is unsupported or ambiguous.
+   Use: Point authors to incorrect quantification of variadic variables so the expression can be restructured.
+   Action / Treat: Replace the variadic variable with a non-variadic form, change the quantification strategy, or make the intended binding explicit; treat VAR08 as an error requiring correction. *)
 
 [<TestClass>]
 type TestVAR08() =

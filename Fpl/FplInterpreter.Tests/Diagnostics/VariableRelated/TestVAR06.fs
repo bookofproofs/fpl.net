@@ -1,13 +1,15 @@
 namespace Diagnostics.VariableRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* VAR06
+   Purpose: Flag variables in an inner/derived scope that overshadow inherited variables.
+   What it indicates: A variable declared in a derived or inner scope has the same name as one inherited from a base scope, causing shadowing.
+   Use: Make authors aware of possible unintended behavior changes introduced by overriding names from a base definition.
+   Action / Treat: Verify whether shadowing is intentional; if not, rename or refactor to preserve the original binding. Treat VAR06 as a warning to avoid accidental name collisions across inheritance. *)
 
 [<TestClass>]
 type TestVAR06() =

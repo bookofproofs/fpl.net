@@ -8,6 +8,11 @@ open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
 open TestSharedConfig
 
+(* SIG02
+   Purpose: Report that a symbol/operator was declared with an already-used precedence in the same context.
+   What it indicates: Two infix declarations use the same symbol and the same precedence causing a precedence conflict/ambiguity for that symbol in the given scope.
+   Use: Helps locate duplicate operator/signature precedence declarations so authors can avoid ambiguous operator parsing or surprising resolution.
+   Action / Treat: Disambiguate the declarations by choosing different precedences, remove the duplicate declaration, or consolidate the declarations into a single, intended definition. SIG02 is informational (suggests adjusting precedence to avoid unexpected results). *)
 
 [<TestClass>]
 type TestSIG02() =

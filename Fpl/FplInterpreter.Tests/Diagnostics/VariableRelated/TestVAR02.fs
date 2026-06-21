@@ -1,13 +1,15 @@
 namespace Diagnostics.VariableRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* VAR02
+   Purpose: Detect when a quantifier binds the same identifier more than once.
+   What it indicates: A quantifier declaration contains duplicate identifiers, producing ambiguous or invalid bindings.
+   Use: Help locate and correct duplicate names inside quantifier headers so each bound name is distinct.
+   Action / Treat: Rename or split the bindings so the quantifier binds unique identifiers; treat VAR02 as a correctness error that must be resolved. *)
 
 [<TestClass>]
 type TestVAR02() =

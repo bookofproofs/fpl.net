@@ -1,13 +1,15 @@
 namespace Diagnostics.SignatureRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* SIG06
+   Purpose: Warn when an inherited property is overridden by a property declared in a derived type.
+   What it indicates: A property with the same signature/name exists in a base type and is re-declared in the current type, causing the base property to be shadowed or overridden.
+   Use: Help authors find accidental or intentional property name collisions introduced by inheritance so they can decide whether to keep, rename, or refactor the redeclaration.
+   Action / Treat: Rename or remove the conflicting property, or explicitly document/intentionalize the override; treat SIG06 as a warning that highlights potential maintenance and correctness issues caused by property shadowing. *)
 
 [<TestClass>]
 type TestSIG06() =

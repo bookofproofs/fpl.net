@@ -1,13 +1,15 @@
 namespace Diagnostics.SignatureRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* SIG13
+   Purpose: Enforce that all branches of a map/case-style statement return values of the same type.
+   What it indicates: A branch returns a value whose type differs from the type established by the first (reference) branch, or the first branch was `undef` which forces other branches to also be `undef`.
+   Use: Detect type-inconsistencies across `mcases`/`mapcases` (and similar) branches so the author can make branch results uniform.
+   Action / Treat: Make all branch results produce the same type (or use `undef` consistently), or change the first branch so it reflects the intended common result type; treat SIG13 as a type-consistency diagnostic that must be resolved to guarantee well-typed branch result aggregation. *)
 
 [<TestClass>]
 type TestSIG13() =

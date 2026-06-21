@@ -1,13 +1,15 @@
 namespace Diagnostics.SignatureRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* SIG04
+   Purpose: Report that no overload or signature matches a requested usage (call/application/reference).
+   What it indicates: The argument(s) or value provided do not match any declared signature for the target (function, predicate, property, constructor, mapping, etc.). The diagnostic includes the attempted signature and the candidate signatures that were tried.
+   Use: Help authors locate mismatches between a use-site and available declarations (wrong argument types/arity, calling a non-callable node, or missing overload).
+   Action / Treat: Correct the call site (adjust argument types/arity), declare a matching overload/signature, or change the target to one with a compatible signature; treat SIG04 as a signature-resolution error that must be resolved for successful type matching and invocation. *)
 
 [<TestClass>]
 type TestSIG04() =

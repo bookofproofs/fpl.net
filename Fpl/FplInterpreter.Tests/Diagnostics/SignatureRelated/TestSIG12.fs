@@ -1,13 +1,15 @@
 namespace Diagnostics.SignatureRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* SIG12
+   Purpose: Detect inconsistent usages of a template where the same template is instantiated with different types within the same scope.
+   What it indicates: A template was first used with one concrete type and later used with a different concrete type (or vice versa), so template instantiation is not uniform; the diagnostic includes the first usage position to help locate the original binding.
+   Use: Locate and fix inconsistent template instantiations (for example, template parameters used with differing types across branches or declarations) so the template has a single, coherent usage in the given scope.
+   Action / Treat: Make all template usages consistent (use the same concrete type everywhere in the affected scope), rename/refactor the template or restrict its scope, or adjust the earlier usage to match the intended type; treat SIG12 as a type-consistency error that should be resolved. *)
 
 [<TestClass>]
 type TestSIG12() =

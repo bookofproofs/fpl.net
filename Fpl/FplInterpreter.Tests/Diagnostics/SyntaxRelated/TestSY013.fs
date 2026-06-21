@@ -7,17 +7,12 @@ open Fpl.Interpreter.Helpers.Debug
 open TestFplInterpreter.Helpers.Common
 
 
-(*
-The SY013 diagnostic indicates superfluous parentheses enclosing an infix operation with some
-symbol, e.g. "*", can be safely removed without changing the semantics of the FPL code,
-because another infix operation in the same infix sequence uses another symbol, e.g. "+",
-and the reason for the safe removal is that the precedence of the first symbol is higher than
-the precedence of the second symbol.
+(* SY013 diagnostic
+   Purpose: SY013 warns when parentheses around an infix sub-expression are unnecessary because the inner operator has strictly higher precedence than the surrounding operator.
+   What it indicates: the enclosed parentheses can be removed without changing the expression's meaning, so the code can be simplified.
+   This diagnostic is a readability suggestion that helps reduce visual clutter and produce more idiomatic infix expressions.
+   Treat SY013 as a non-fatal warning recommending removal of redundant grouping to make operator precedence explicit and code easier to read. *)
 
-Both symbols have to define different precedences.
-
-For non-precedence-based parenthesis diagnostics: see SY010 diagnostic.
-*)
 
 [<TestClass>]
 type TestSY013() =

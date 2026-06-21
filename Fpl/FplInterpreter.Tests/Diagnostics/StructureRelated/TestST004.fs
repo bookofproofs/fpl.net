@@ -1,13 +1,15 @@
 namespace Diagnostics.StructureRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* ST004
+   Purpose: Indicate that a requested language variant is not available in a localization block.
+   What it indicates: The localization does not provide an entry for the current language code, so a representation for that language cannot be produced.
+   Use: Helps authors find missing translations/localizations for a language used by the environment or by callers.
+   Action / Treat: Add the missing language entry to the `loc` block or supply a fallback; treat ST004 as a warning signaling incomplete localization data that should be completed for correct language-specific rendering. *)
 
 [<TestClass>]
 type TestST004() =

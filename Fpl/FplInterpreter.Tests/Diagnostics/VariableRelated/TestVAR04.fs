@@ -1,13 +1,15 @@
 namespace Diagnostics.VariableRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* VAR04
+   Purpose: Warn about variables declared but never used in their scope.
+   What it indicates: A declared variable does not appear in the scope where it was introduced, suggesting a dead or accidental declaration.
+   Use: Point authors to unused bindings that reduce clarity or indicate a missed reference.
+   Action / Treat: Remove the unused declaration, use the variable, or document why it remains; treat VAR04 as a readability/maintainability warning. *)
 
 [<TestClass>]
 type TestVAR04() =

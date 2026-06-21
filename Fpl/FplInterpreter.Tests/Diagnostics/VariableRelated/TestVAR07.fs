@@ -1,13 +1,15 @@
 namespace Diagnostics.VariableRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* VAR07
+   Purpose: Detect use of a uniqueness quantifier form that accepts only a single bound variable with multiple identifiers.
+   What it indicates: The quantifier form was used with more than one identifier, violating its expected arity.
+   Use: Identify arity mismatches so the author can choose an appropriate quantifier or split the bindings.
+   Action / Treat: Use a quantifier that matches the intended number of variables or rewrite the declaration; treat VAR07 as an error that must be fixed. *)
 
 [<TestClass>]
 type TestVAR07() =

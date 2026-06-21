@@ -1,13 +1,16 @@
 namespace Diagnostics.SignatureRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+
+(* SIG07
+   Purpose: Flag assignments whose left-hand side is not a valid assignable target.
+   What it indicates: The assignee provided cannot accept an assignment — for example it is an expression with parentheses, a raw value, an undefined reference, `self`/`parent` with an already determined target, or otherwise a non-assignable node/type.
+   Use: Help authors find incorrect assignment targets so they can replace them with a proper variable, array cell, or a valid l-value that matches the assignment semantics.
+   Action / Treat: Change the assignee to a proper assignable entity (variable, array index, or an initialized class instance), ensure the RHS type matches the assignee, initialize or resolve references, or adjust use of `self`/`parent`; treat SIG07 as an error that prevents a meaningful assignment and must be corrected. *)
 
 [<TestClass>]
 type TestSIG07() =

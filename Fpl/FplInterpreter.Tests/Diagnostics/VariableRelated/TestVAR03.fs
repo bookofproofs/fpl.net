@@ -1,13 +1,15 @@
 namespace Diagnostics.VariableRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* VAR03
+   Purpose: Detect duplicate variable declarations inside the same scope.
+   What it indicates: The same identifier is declared multiple times in one scope, creating ambiguity about which declaration is referenced.
+   Use: Surface naming collisions so the author can decide which declaration is intended or rename one occurrence.
+   Action / Treat: Remove or rename the redundant declaration to ensure a single clear binding; treat VAR03 as an error that prevents unambiguous name resolution. *)
 
 [<TestClass>]
 type TestVAR03() =

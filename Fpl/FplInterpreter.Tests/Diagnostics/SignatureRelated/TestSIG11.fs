@@ -4,10 +4,13 @@ open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* SIG11
+   Purpose: Flag mappings that delegate to another mapping types (like definitions of functional terms or extensions that have an own mapping) instead of mapping directly to a concrete class/type.
+   What it indicates: A mapping refers to a candidate that is not a valid direct mapping target, so the mapping is indirect or invalid.
+   Use: Help authors find mapping declarations whose target is wrong or unintentionally delegated so they can correct the mapping target or the extension definition.
+   Action / Treat: Change the mapping to point directly to the intended type, or adjust the extension so it maps to itself; treat SIG11 as an error that must be fixed to make the mapping explicit and valid. *)
 
 [<TestClass>]
 type TestSIG11() =

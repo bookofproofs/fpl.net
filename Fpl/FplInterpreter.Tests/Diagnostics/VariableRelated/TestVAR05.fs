@@ -1,12 +1,15 @@
 namespace Diagnostics.VariableRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
+
+(* VAR05
+   Purpose: Detect quantifier-bound variables that are never referenced in the quantifier body.
+   What it indicates: A bound variable is redundant and likely represents a forgotten use or an unnecessary binding.
+   Use: Help authors find and eliminate dead bindings that confuse readers or signal logic errors.
+   Action / Treat: Remove the unused bound variable or update the body to use it; treat VAR05 as an error (or strong hint) to correct the quantification. *)
 
 
 [<TestClass>]

@@ -6,11 +6,11 @@ open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
 open TestFplInterpreter.Helpers.Common
 
-
-(*
-The SY014 diagnostic indicates that two infix operations have the same precedence and the
-expression might be ambiguous because either no parentheses are used or the assigned precedences are not deferent.
-*)
+(* SY014 diagnostic
+   Purpose: SY014 flags ambiguous infix expressions where two different binary operators participate with equal or undefined precedence.
+   What it indicates: the expression's grouping is unclear and evaluation may be ambiguous or dependent on implicit rules.
+   Action: disambiguate the expression by adding explicit parentheses or by assigning distinct precedences to the involved operators.
+   Treat SY014 as a syntax-level ambiguity warning that helps prevent surprising or non-portable parse/evaluation results. *)
 
 [<TestClass>]
 type TestSY014() =

@@ -1,13 +1,15 @@
 namespace Diagnostics.VariableRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* VAR10
+   Purpose: Detect duplicate bindings of the same variable identifier inside a formula.
+   What it indicates: A bound identifier occurs more than once in the same formula, risking name capture or ambiguity.
+   Use: Alert authors to potential scoping conflicts so they can rename bound occurrences to preserve intended semantics.
+   Action / Treat: Rename one of the bound occurrences or otherwise refactor the formula to avoid duplicate bindings; treat VAR10 as an error that should be resolved. *)
 
 [<TestClass>]
 type TestVAR10() =

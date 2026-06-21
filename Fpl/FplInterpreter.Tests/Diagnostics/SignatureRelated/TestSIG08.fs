@@ -1,13 +1,15 @@
 namespace Diagnostics.SignatureRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* SIG08
+   Purpose: Report a type mismatch in a specific array dimension when indexing or assigning to an array.
+   What it indicates: The index expression supplied for the array's nth dimension does not have the expected type (for example, providing an object where an index of type `ind` is required).
+   Use: Pinpoint incorrect index expressions, wrong array declarations, or nested-indexing errors so the author can correct either the index or the array's declared dimension types.
+   Action / Treat: Fix by supplying an index expression with the expected type, adjust the array's declared dimension type to match intended usage, or convert the index expression appropriately; treat SIG08 as a signature/type error that must be resolved to ensure valid array indexing. *)
 
 [<TestClass>]
 type TestSIG08() =
