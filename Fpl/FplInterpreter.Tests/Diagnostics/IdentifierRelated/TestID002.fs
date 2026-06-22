@@ -1,13 +1,15 @@
 namespace Diagnostics.IdentifierRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* ID002
+   Purpose: Report a proof block associated with an incompatible block type.
+   What it indicates: A `proof` block was found but the signature it targets is not a theorem‑like statement (the associated block is of the wrong kind).
+   Use: Emitted when a proof cannot be attached to an appropriate enclosing declaration so callers can locate the misplaced proof.
+   Action / Treat: Attach the proof to a proper theorem‑like declaration or change the declaration so it accepts a proof; ID002 is an error that must be resolved for correct proof association. *)
 
 [<TestClass>]
 type TestID002() =

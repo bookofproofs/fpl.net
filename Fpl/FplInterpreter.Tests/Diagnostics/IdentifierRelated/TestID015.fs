@@ -1,13 +1,15 @@
 namespace Diagnostics.IdentifierRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* ID015
+   Purpose: Report illegal uses of the special identifier `parent` from contexts that do not expose it.
+   What it indicates: A `parent` reference was encountered in a declaration or scope where no parent instance is available (for example in a static/signature context or otherwise invalid location).
+   Use: Emitted during symbol-table validation to locate and highlight invalid `parent` references so the author can correct their placement or intent.
+   Action / Treat: Move the `parent` reference into an appropriate instance context, remove it, or refactor the declaration so a parent is available. Treat ID015 as an error that must be resolved for correct embedding and resolution. *)
 
 [<TestClass>]
 type TestID015() =

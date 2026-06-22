@@ -1,13 +1,15 @@
 namespace Diagnostics.IdentifierRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* ID005
+   Purpose: Report corollary declarations that cannot be associated with an appropriate parent block.
+   What it indicates: A `corollary` was declared but no compatible enclosing theorem‑like statement was found (or the target found is of an incompatible kind, or the placement is not permitted, e.g. corollaries of proofs).
+   Use: Emitted when embedding/associating corollaries to point authors to corollary nodes that lack a valid parent or are placed in the wrong scope.
+   Action / Treat: Attach the corollary to a valid theorem‑like parent, move it into the correct scope, or change the declaration so it no longer requires association. ID005 is an error that must be resolved for correct association and further processing. *)
 
 [<TestClass>]
 type TestID005() =

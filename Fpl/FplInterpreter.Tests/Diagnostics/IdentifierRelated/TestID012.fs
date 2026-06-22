@@ -1,13 +1,15 @@
 namespace Diagnostics.IdentifierRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* ID012
+   Purpose: Report that a referenced property or variable is not defined on the target type or value.
+   What it indicates: An expression attempted to access a member (property/variable) that the referenced type or value does not declare in the current scope.
+   Use: Emitted during expression interpretation and resolution to locate invalid member accesses so the author can correct the reference or the declaration.
+   Action / Treat: Declare the missing member on the target type, correct the accessed identifier, or adjust the expression to use an available member; ID012 is an error that must be resolved for successful embedding and evaluation. *)
 
 [<TestClass>]
 type TestID012() =

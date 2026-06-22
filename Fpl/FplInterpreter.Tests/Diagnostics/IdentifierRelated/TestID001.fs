@@ -1,13 +1,15 @@
 namespace Diagnostics.IdentifierRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* ID001
+   Purpose: Report a duplicate signature declaration.
+   What it indicates: A symbol/signature was declared more than once in the same scope, producing a naming collision.
+   Use: Helps locate duplicate declarations so authors can remove or disambiguate conflicting signatures.
+   Action / Treat: Rename or remove the duplicate declaration (or consolidate declarations) so each signature is unique; ID001 is an error that must be resolved for successful embedding and resolution. *)
 
 [<TestClass>]
 type TestID001() =

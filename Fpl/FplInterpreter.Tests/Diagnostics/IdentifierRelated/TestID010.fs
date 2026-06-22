@@ -1,13 +1,15 @@
 namespace Diagnostics.IdentifierRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* ID010
+   Purpose: Report that a referenced type could not be resolved in the current scope.
+   What it indicates: During embedding or type resolution a name used as a type was not found (commonly due to a missing `uses` clause or a misspelled/undeclared type).
+   Use: Emitted while creating identifiers and validating type constructs to point authors to unresolved type names that block embedding.
+   Action / Treat: Ensure the referenced type is declared and visible (add or fix a `uses` clause, correct the qualifier or spelling, or declare the type). ID010 is an error that must be resolved for successful symbol-table embedding and type checking. *)
 
 [<TestClass>]
 type TestID010() =

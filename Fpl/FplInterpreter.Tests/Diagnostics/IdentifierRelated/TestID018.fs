@@ -1,12 +1,15 @@
 namespace Diagnostics.IdentifierRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
+
+(* ID018
+   Purpose: Report when an extension pattern cannot be matched to any declared extension.
+   What it indicates: Code attempted to use or resolve an extension defined by a pattern, but no declared extension fits that pattern in the current scope.
+   Use: Helps locate unresolved extension usages so the author can add the appropriate extension declaration or correct the pattern/reference.
+   Action / Treat: Declare an extension that matches the required pattern or adjust the reference/pattern so it matches an existing extension; treat ID018 as an error that must be resolved for extension resolution to succeed. *)
 
 
 [<TestClass>]

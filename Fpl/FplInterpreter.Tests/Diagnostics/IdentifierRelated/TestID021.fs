@@ -1,13 +1,15 @@
 namespace Diagnostics.IdentifierRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* ID021
+   Purpose: Report a duplicate invocation of a base constructor from a derived class.
+   What it indicates: A derived class constructor forwards to the base constructor more than once, producing a redundant/illegal duplicate base constructor call during embedding.
+   Use: Emitted when validating class construction chains to point to constructors that incorrectly call the same base constructor multiple times.
+   Action / Treat: Remove the redundant base constructor invocation so the base is called exactly once (or refactor the construction pattern); treat ID021 as an error that must be fixed for correct class initialization. *)
 
 [<TestClass>]
 type TestID021() =

@@ -1,12 +1,15 @@
 namespace Diagnostics.IdentifierRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
+
+(* ID016
+   Purpose: Flag illegal uses of `self` from an inappropriate declaration context.
+   What it indicates: Code attempted to reference the special identifier `self` from a scope where such a reference is not permitted (for example, from a signature or static context that does not expose `self`).
+   Use: Emitted during symbol-table validation to point authors to places where `self` was referenced incorrectly so the offending reference can be corrected.
+   Action / Treat: Remove or relocate the `self` reference into a context where an instance is available, or adjust the declaration to not rely on `self`. ID016 is an error that must be resolved for correct embedding and resolution. *)
 
 [<TestClass>]
 type TestID016() =

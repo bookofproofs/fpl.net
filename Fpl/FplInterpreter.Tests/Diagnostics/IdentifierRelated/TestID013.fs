@@ -8,6 +8,11 @@ open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
 open TestSharedConfig
 
+(* ID013
+   Purpose: Report problems related to delegate usage during embedding and checks.
+   What it indicates: Delegate invocation or resolution failed (unknown delegate, argument-type mismatch, or other delegate-specific validation error reported by the delegate handler).
+   Use: Emitted when delegate lookups or delegate-driven checks cannot be satisfied so callers can locate incorrect delegate calls or mismatched argument types.
+   Action / Treat: Ensure the delegate is declared and visible, and that passed arguments match the delegate's expected types/signature; fix or declare the delegate as appropriate. ID013 diagnostics carry the delegate-provided diagnostic text to explain the specific delegate failure. *)
 
 [<TestClass>]
 type TestID013() =

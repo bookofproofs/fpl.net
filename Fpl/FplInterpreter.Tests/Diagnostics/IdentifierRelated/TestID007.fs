@@ -1,13 +1,15 @@
 namespace Diagnostics.IdentifierRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* ID007
+   Purpose: Report invalid inheritance where a declaration attempts to inherit from an incompatible base.
+   What it indicates: A type (class, function-like, predicate-like, etc.) declared an inheritance from another entity that is not an appropriate base for that kind of type.
+   Use: Emitted during type embedding and inheritance validation to point to declarations whose specified base is of an incompatible kind.
+   Action / Treat: Correct the inheritance so the derived type inherits only from compatible base kinds (or change the base declaration to the appropriate kind). ID007 is an error that must be resolved for successful embedding and correct type semantics. *)
 
 [<TestClass>]
 type TestID007() =

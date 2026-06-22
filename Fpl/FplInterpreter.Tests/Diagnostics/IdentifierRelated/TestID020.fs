@@ -1,12 +1,15 @@
 namespace Diagnostics.IdentifierRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
+
+(* ID020
+   Purpose: Report a missing invocation of the base class constructor from a derived class.
+   What it indicates: A derived class constructor did not call its base class constructor where such a call is required for correct initialization.
+   Use: Emitted during class embedding/validation to ensure proper constructor chaining and initialization order in inheritance hierarchies.
+   Action / Treat: Add the appropriate call to the base constructor or refactor the constructors so the base is initialized exactly once. Treat ID020 as an error that must be fixed for correct class construction and embedding. *)
 
 [<TestClass>]
 type TestID020() =

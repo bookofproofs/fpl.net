@@ -1,13 +1,15 @@
 namespace Diagnostics.IdentifierRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* ID011
+   Purpose: Report problems with an inheritance chain during type resolution.
+   What it indicates: The derived type's inheritance chain contains an error (for example, an unresolved base, inconsistent chain, or other issue reported by the chain validation), preventing successful embedding of the derived type.
+   Use: Emitted while validating type constructs to point authors to problematic inheritance configurations that block embedding or type resolution.
+   Action / Treat: Fix the inheritance chain — ensure all bases are declared and compatible, correct qualifiers, or resolve the underlying error indicated by the chain diagnostics. ID011 is an error that must be resolved for successful type embedding. *)
 
 [<TestClass>]
 type TestID011() =

@@ -1,13 +1,15 @@
 namespace Diagnostics.IdentifierRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* ID017
+   Purpose: Report that a type or identifier could not be resolved for the call site.
+   What it indicates: The system failed to determine the type or declaration for a referenced name in the current context (for example, a base/member reference or a type name used in a signature could not be resolved to a declared entity).
+   Use: Emitted during inheritance/constructor validation to highlight unresolved type/identifier references so the author can locate the source of the missing declaration.
+   Action / Treat: Ensure the referenced type/identifier is declared and visible from the current scope (add the declaration, correct the qualifier, or fix the signature), or adjust the code to avoid referencing undeclared names. ID017 is an error that must be resolved for successful type resolution. *)
 
 [<TestClass>]
 type TestID017() =
