@@ -67,10 +67,10 @@ type FplForInStmt(positions: Positions, parent: FplGenericNode) as this =
         | Some (:? FplVariableArray as domain) ->
             (FplForEnumeratorType.ArrayElements, domain.ValueList |> Seq.toList)
         | Some domain ->
-            this.ErrorOccurred <- emitST005diagnostics (domain.Type SignatureType.Name) domain.Name this.ArgList[1].StartPos this.ArgList[1].EndPos
+            this.ErrorOccurred <- emitST005Diagnostics (domain.Type SignatureType.Name) domain.Name this.ArgList[1].StartPos this.ArgList[1].EndPos
             (FplForEnumeratorType.Error, [])
         | _ ->
-            this.ErrorOccurred <- emitST005diagnostics "missing" PrimNone this.StartPos this.StartPos
+            this.ErrorOccurred <- emitST005Diagnostics "missing" PrimNone this.StartPos this.StartPos
             (FplForEnumeratorType.Error, [])
             
     override this.Run() = 

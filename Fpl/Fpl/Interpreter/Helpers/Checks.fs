@@ -231,10 +231,10 @@ let checkSIG11Diagnostics (fv:FplGenericNode) =
                 // and, instead, points to itself
                     ()
                 | _ ->
-                    map.ErrorOccurred <- emitSIG11diagnostics (qualifiedName ref false) map.StartPos map.EndPos
+                    map.ErrorOccurred <- emitSIG11Diagnostics (qualifiedName ref false) map.StartPos map.EndPos
             | _ ->
                 // otherwise issue SIG11
-                map.ErrorOccurred <- emitSIG11diagnostics (qualifiedName ref false) map.StartPos map.EndPos       
+                map.ErrorOccurred <- emitSIG11Diagnostics (qualifiedName ref false) map.StartPos map.EndPos       
         | _ -> ()
     | _ -> ()
 
@@ -244,7 +244,7 @@ let checkLG003Diagnostics (fv:FplGenericNode) =
     | :? IHasSignature as hasSignature ->
         let nodeRepr = fv.Represent()
         if nodeRepr = LiteralFalse then
-            fv.ErrorOccurred <- emitLG003diagnostics (fv.Type(SignatureType.Name)) fv.Name nodeRepr hasSignature.SignStartPos hasSignature.SignEndPos
+            fv.ErrorOccurred <- emitLG003Diagnostics (fv.Type(SignatureType.Name)) fv.Name nodeRepr hasSignature.SignStartPos hasSignature.SignEndPos
     | _ -> ()
 
 /// Issue VAR10, if the formula in an FplValue uses 
@@ -328,7 +328,7 @@ let checkCleanedUpFormula (fv:FplGenericNode) =
             )
             |> Option.map (fun uncleanedUpVariableInFormula ->
                 let quantorVar = quantor.Scope[uncleanedUpVariableInFormula.FplId]
-                fv.ErrorOccurred <- emitVAR10diagnostics uncleanedUpVariableInFormula.FplId formulaName quantorVar.StartPos quantorVar.EndPos
+                fv.ErrorOccurred <- emitVAR10Diagnostics uncleanedUpVariableInFormula.FplId formulaName quantorVar.StartPos quantorVar.EndPos
             )
         )
         |> ignore
@@ -432,7 +432,7 @@ let rec checkFreeAndNotSignatureVar (arg:FplGenericNode) =
     | Some ref ->
         match box ref, ref.UltimateBlockNode with 
         | :? IVariable as var, Some node when node.Name <> PrimRuleOfInference && node.Name <> LiteralLocL && not var.IsBound && not var.IsSignatureVariable ->
-            ref.ErrorOccurred <- emitVAR09diagnostics ref.FplId ref.TypeId ref.StartPos ref.EndPos
+            ref.ErrorOccurred <- emitVAR09Diagnostics ref.FplId ref.TypeId ref.StartPos ref.EndPos
         | _ -> ()
     | None when arg.ExpressionType.IsParen ->
         // delegate parenthesized (arg) to a
@@ -492,4 +492,4 @@ let findTwoDifferentNames (items:FplGenericNode list) =
 
 let checkSY010 (arg:FplGenericNode) =
     if arg.ExpressionType.IsParen then
-        arg.ErrorOccurred <- emitSY010diagnostics arg.StartPos arg.EndPos
+        arg.ErrorOccurred <- emitSY010Diagnostics arg.StartPos arg.EndPos

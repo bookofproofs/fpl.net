@@ -81,7 +81,7 @@ type FplGenericQuantor(positions: Positions, parent: FplGenericNode) =
         |> List.map(fun var -> var :?> FplGenericVariable)
         |> List.filter(fun var -> not var.IsUsed)
         |> List.iter (fun var -> 
-            var.ErrorOccurred <- emitVAR05diagnostics var.FplId var.StartPos var.EndPos
+            var.ErrorOccurred <- emitVAR05Diagnostics var.FplId var.StartPos var.EndPos
         )
         checkArgPred this (this.ArgList[0])
         checkCleanedUpFormula this

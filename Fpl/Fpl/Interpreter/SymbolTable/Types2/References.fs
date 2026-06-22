@@ -286,7 +286,7 @@ type FplReference(positions: Positions, parent: FplGenericNode) =
 
     override this.Represent() = // done
         if _callCounter > maxRecursion then
-            this.ErrorOccurred <- emitLG002diagnostics (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
+            this.ErrorOccurred <- emitLG002Diagnostics (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
             LiteralUndet // fallback to undefined after infinite recursion (if any)
         else
             _callCounter <- _callCounter + 1

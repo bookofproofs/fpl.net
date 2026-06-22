@@ -114,7 +114,7 @@ type FplCases(positions: Positions, parent: FplGenericNode) as this =
                 () // signature added
             else
                 // signature was already added
-                this.ErrorOccurred <- emitSIG14diagnostics condition.StartPos condition.EndPos
+                this.ErrorOccurred <- emitSIG14Diagnostics condition.StartPos condition.EndPos
                 
         )
 

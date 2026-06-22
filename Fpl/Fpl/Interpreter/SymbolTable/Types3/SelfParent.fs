@@ -117,7 +117,7 @@ type FplParent(positions: Positions, parent: FplGenericNode) as this =
         match this.RefersTo with 
         | Some ref -> 
             if _callCounter > maxRecursion then
-                this.ErrorOccurred <- emitLG002diagnostics (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
+                this.ErrorOccurred <- emitLG002Diagnostics (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
                 LiteralUndet
             else
                 _callCounter <- _callCounter + 1
@@ -150,7 +150,7 @@ type FplParent(positions: Positions, parent: FplGenericNode) as this =
     override this.CheckConsistency (): unit =
         match this.ParentBlock with
         | ScopeSearchResult.FoundIncorrectBlock block ->
-            this.ErrorOccurred <- emitID015diagnostics $"{getEnglishName block.Name true} '{block.Type(SignatureType.Name)}'" this.StartPos this.EndPos
+            this.ErrorOccurred <- emitID015Diagnostics $"{getEnglishName block.Name true} '{block.Type(SignatureType.Name)}'" this.StartPos this.EndPos
         | _ -> ()
         base.CheckConsistency()
 
@@ -186,7 +186,7 @@ type FplSelf(positions: Positions, parent: FplGenericNode) as this =
         match this.RefersTo with 
         | Some ref -> 
             if _callCounter > maxRecursion then
-                this.ErrorOccurred <- emitLG002diagnostics (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
+                this.ErrorOccurred <- emitLG002Diagnostics (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
                 LiteralUndet
             else
                 _callCounter <- _callCounter + 1
@@ -215,7 +215,7 @@ type FplSelf(positions: Positions, parent: FplGenericNode) as this =
     override this.CheckConsistency () =
         match this.SelfBlock with
         | ScopeSearchResult.FoundIncorrectBlock block ->
-            this.ErrorOccurred <- emitID016diagnostics $"{getEnglishName block.Name true} '{block.Type(SignatureType.Name)}'" this.StartPos this.EndPos
+            this.ErrorOccurred <- emitID016Diagnostics $"{getEnglishName block.Name true} '{block.Type(SignatureType.Name)}'" this.StartPos this.EndPos
         | _ -> ()
         base.CheckConsistency()
 

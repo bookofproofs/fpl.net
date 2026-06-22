@@ -53,7 +53,7 @@ let evalDefinitions ast =
             let constructors = cl.GetConstructors()
             let classContent =  cl.ArgList |> Seq.filter (fun node -> node.Name <> LiteralBase) |> Seq.toList
             if properties.IsEmpty && classContent.Length = 0 && constructors.IsEmpty then
-                classBlock.ErrorOccurred <- emitST001diagnostics classBlock.Name pos1 pos2
+                classBlock.ErrorOccurred <- emitST001Diagnostics classBlock.Name pos1 pos2
         | None -> 
             cl.IsIntrinsic <- true
             cl.AddDefaultConstructor()
@@ -78,7 +78,7 @@ let evalDefinitions ast =
         // evaluate the construction block 
         evalRef.Value varDeclBlock
         if parent.ArgList.Count = 0 then
-            parent.ErrorOccurred <- emitST002diagnostics parent.Name parent.StartPos parent.EndPos
+            parent.ErrorOccurred <- emitST002Diagnostics parent.Name parent.StartPos parent.EndPos
     | Ast.BaseConstructorCall((pos1, pos2), (inheritedClassTypeAst, argumentTupleAst)) ->
         let parent = heap.Eval.PeekEvalStack()
         let fvNew = new FplBaseConstructorCall((pos1, pos2), parent) 
@@ -159,7 +159,7 @@ let evalDefinitions ast =
             optPropertyListAsts |> Option.map (List.map evalRef.Value >> ignore) |> Option.defaultValue ()
             let properties = functionaTermBlock.GetProperties()
             if properties.IsEmpty && functionaTermBlock.ArgList.Count = 1 then
-                functionaTermBlock.ErrorOccurred <- emitST001diagnostics functionaTermBlock.Name pos1 pos2
+                functionaTermBlock.ErrorOccurred <- emitST001Diagnostics functionaTermBlock.Name pos1 pos2
         | None -> functionaTermBlock.IsIntrinsic <- true
     | Ast.DefFunctionContent(varDeclBlock, retStmtAst) ->
         evalRef.Value varDeclBlock

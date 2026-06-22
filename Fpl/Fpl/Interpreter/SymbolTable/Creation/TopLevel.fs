@@ -38,10 +38,10 @@ let evalTopLevel ast =
     | Ast.BuildingBlock((_, _),buidlingBlockAst) ->
         evalRef.Value buidlingBlockAst
     | Ast.ErrorSyntax((pos1, pos2), errMsg) ->
-        emitSY000diagnostics errMsg pos1 pos2 
+        emitSY000Diagnostics errMsg pos1 pos2 
     | Ast.ErrorSyntaxBacktracking((pos1, pos2), errMsg) ->
-        emitSY001diagnostics errMsg pos1 pos2 
+        emitSY001Diagnostics errMsg pos1 pos2 
     | Ast.ErrorSyntaxChain(((pos1, pos2),_), (errMsg, chain)) ->
-        emitSY002diagnostics errMsg chain pos1 pos2 
+        emitSY002Diagnostics errMsg chain pos1 pos2 
     | _ ->
         failwith (sprintf "{%O} is not a top level node" ast) 

@@ -85,7 +85,7 @@ let evalVariables ast =
                     () // localizations during 
                 | _ ->
                     // otherwise emit variable not declared 
-                    fv.ErrorOccurred <- emitVAR01diagnostics name pos1 pos2
+                    fv.ErrorOccurred <- emitVAR01Diagnostics name pos1 pos2
                 
                 // if no variable in scope was found, spawn an undefined variable
                 let undefVar = new FplVariable(name, (pos1, pos2), fv)
@@ -125,7 +125,7 @@ let evalVariables ast =
             let variable = fv.RefersTo.Value
             if loc.Scope.ContainsKey(name) then 
                 let other = loc.Scope[name]
-                variable.ErrorOccurred <- emitVAR11diagnostics name other.QualifiedStartPos pos1 pos2 
+                variable.ErrorOccurred <- emitVAR11Diagnostics name other.QualifiedStartPos pos1 pos2 
             else 
                 loc.Scope.Add(name, variable)
                 variable.Parent <- Some loc

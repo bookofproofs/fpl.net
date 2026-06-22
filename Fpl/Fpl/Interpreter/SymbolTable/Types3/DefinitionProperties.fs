@@ -68,7 +68,7 @@ type FplMandatoryPredicate(positions: Positions, parent: FplGenericNode) =
             _callCounter <- _callCounter + 1
             if _callCounter > maxRecursion then
                 this.SetDefaultValue()
-                this.ErrorOccurred <- emitLG002diagnostics (this.Type(SignatureType.Name)) _callCounter heap.Helper.CallerStartPos heap.Helper.CallerEndPos
+                this.ErrorOccurred <- emitLG002Diagnostics (this.Type(SignatureType.Name)) _callCounter heap.Helper.CallerStartPos heap.Helper.CallerEndPos
             else
                 if this.IsIntrinsic then 
                     runIntrinsicPredicate this
@@ -139,7 +139,7 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplGenericNode) as
 
     override this.Represent() = // done
         if _callCounter > maxRecursion then
-            this.ErrorOccurred <- emitLG002diagnostics (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
+            this.ErrorOccurred <- emitLG002Diagnostics (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
             LiteralUndet
         else
             _callCounter <- _callCounter + 1
@@ -166,7 +166,7 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplGenericNode) as
             if _callCounter > maxRecursion then
                 let instance = getDefaultValueOfFunction this
                 this.SetValue instance
-                this.ErrorOccurred <- emitLG002diagnostics (this.Type(SignatureType.Name)) _callCounter heap.Helper.CallerStartPos heap.Helper.CallerEndPos
+                this.ErrorOccurred <- emitLG002Diagnostics (this.Type(SignatureType.Name)) _callCounter heap.Helper.CallerStartPos heap.Helper.CallerEndPos
             else
                 if this.IsIntrinsic then 
                     runIntrinsicFunction this 

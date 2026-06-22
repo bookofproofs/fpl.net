@@ -65,7 +65,7 @@ let evalLocalizations ast =
         heap.Eval.PopEvalStack()
         var04List
         |> Seq.iter (fun kvp -> 
-            fv.ErrorOccurred <- emitVAR04diagnostics kvp.Key (fst kvp.Value) (snd kvp.Value)
+            fv.ErrorOccurred <- emitVAR04Diagnostics kvp.Key (fst kvp.Value) (snd kvp.Value)
         )
     | Ast.TranslationTerm((pos1, pos2), asts) ->
         let fv = heap.Eval.PeekEvalStack()

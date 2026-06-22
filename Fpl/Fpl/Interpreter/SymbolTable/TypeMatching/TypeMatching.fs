@@ -785,16 +785,16 @@ let checkSIG08_SIG10Diagnostics (referenceToArray:FplGenericNode) =
                     match FplTypeMatcher.MatchPwA [i] [d] with
                     | Some errMsg ->
                         // type mismatch between dimension and index
-                        refToArray.ErrorOccurred <- emitSIG08diagnostics varArray.FplId i.FplId (i.Type SignatureType.Type) (d.Type SignatureType.Type) dimNumber i.StartPos i.EndPos 
+                        refToArray.ErrorOccurred <- emitSIG08Diagnostics varArray.FplId i.FplId (i.Type SignatureType.Type) (d.Type SignatureType.Type) dimNumber i.StartPos i.EndPos 
                         matchAllIndexes ixs dms (dimNumber + 1) 
                     | _ -> matchAllIndexes ixs dms (dimNumber + 1) 
                 | [], d::dms -> 
                     // missing index for dimension dimOrdinal
-                    refToArray.ErrorOccurred <- emitSIG09diagnostics varArray.FplId (d.Type SignatureType.Type) dimNumber d.StartPos d.EndPos
+                    refToArray.ErrorOccurred <- emitSIG09Diagnostics varArray.FplId (d.Type SignatureType.Type) dimNumber d.StartPos d.EndPos
                     matchAllIndexes [] dms (dimNumber + 1) 
                 | i::ixs, [] -> 
                     // array has less dimensions, index at dimOrdinal not supported
-                    refToArray.ErrorOccurred <- emitSIG10diagnostics varArray.FplId (i.FplId) dimNumber i.StartPos i.EndPos
+                    refToArray.ErrorOccurred <- emitSIG10Diagnostics varArray.FplId (i.FplId) dimNumber i.StartPos i.EndPos
                     matchAllIndexes ixs [] (dimNumber + 1)  
                 | [], [] -> ()
 

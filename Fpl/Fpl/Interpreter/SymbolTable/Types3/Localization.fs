@@ -64,7 +64,7 @@ type FplLocalization(positions: Positions, parent: FplGenericNode, runOrder) =
         _currentLanguage <- heap.Helper.CurrentLanguage // remember current language for Represent()
         if not (this.Scope.ContainsKey(_currentLanguage)) then
             let expression = this.ArgList[0]
-            this.ErrorOccurred <- emitST004diagnostics _currentLanguage expression.StartPos expression.EndPos
+            this.ErrorOccurred <- emitST004Diagnostics _currentLanguage expression.StartPos expression.EndPos
         StaticDebug.Debug(this,Debug.Stop)
 
     override this.RunOrder = Some _runOrder

@@ -83,7 +83,7 @@ let private checkSY013ForOperand (operand:FplGenericNode) (outerInfixOperator:Fp
         | FixType.Paren ->
             match getArgumentsSymbolWithPrecedence(operand) with 
             | Some (innerInfixSymbol, innerPrecedence) when innerPrecedence > outerPrecedence ->
-                operand.ErrorOccurred <- emitSY013diagnostics innerInfixSymbol innerPrecedence outerInfixSymbol outerPrecedence operand.StartPos operand.EndPos
+                operand.ErrorOccurred <- emitSY013Diagnostics innerInfixSymbol innerPrecedence outerInfixSymbol outerPrecedence operand.StartPos operand.EndPos
             | _ -> ()
         | _ -> ()
     | _ -> ()
@@ -106,7 +106,7 @@ let private checkSY014ForOperand (operatorIndices:(int * (string * int)) list) (
     match tryPickConflictingSymbols with
     | Some (i, firstSymbol, secondSymbol, precedence) ->
         let operand = operandOperatorList[i]
-        operand.ErrorOccurred <- emitSY014diagnostics firstSymbol secondSymbol precedence operand.StartPos operand.EndPos
+        operand.ErrorOccurred <- emitSY014Diagnostics firstSymbol secondSymbol precedence operand.StartPos operand.EndPos
     | None -> ()
 
 // This function will transform a list of [operand; op; operand; ...; op ; operand] 
@@ -192,7 +192,7 @@ let evalExpressions ast =
             // if an InfixOp is inside the Parens and it contains only one element
             // (i.e. the infix Operation is actually not an infix operation having at least two operands but a single one).
             // then flag that the parentheses can be safely removed.
-            refBlock.ErrorOccurred <- emitSY010diagnostics pos1 pos2
+            refBlock.ErrorOccurred <- emitSY010Diagnostics pos1 pos2
         | _ -> ()
         evalRef.Value expressionAst
         heap.Eval.PopEvalStack()

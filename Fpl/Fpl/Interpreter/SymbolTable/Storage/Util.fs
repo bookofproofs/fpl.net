@@ -91,7 +91,7 @@ let tryAddToParentUsingTypedSignature (fplValue:FplGenericNode) =
         |> Seq.toList
 
     if conflicts.Length > 0 then 
-        fplValue.ErrorOccurred <- emitID024diagnostics identifier (conflicts.Head.QualifiedStartPos) fplValue.StartPos fplValue.EndPos
+        fplValue.ErrorOccurred <- emitID024Diagnostics identifier (conflicts.Head.QualifiedStartPos) fplValue.StartPos fplValue.EndPos
     else
         let parent = fplValue.Parent.Value
         parent.Scope.Add(identifier, fplValue)

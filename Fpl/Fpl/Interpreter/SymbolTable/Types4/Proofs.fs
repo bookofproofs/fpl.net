@@ -923,7 +923,7 @@ and FplProof(positions: Positions, parent: FplGenericNode, runOrder) =
         | ScopeSearchResult.FoundIncorrectBlock incorrectBlock ->
             this.ErrorOccurred <- emitID002Diagnostics this.FplId (qualifiedName incorrectBlock false) this.StartPos this.EndPos
         | ScopeSearchResult.NotFound ->
-            this.ErrorOccurred <- emitID003diagnostics this.FplId this.SignStartPos this.SignEndPos
+            this.ErrorOccurred <- emitID003Diagnostics this.FplId this.SignStartPos this.SignEndPos
         | _ -> ()
         this.CheckTrivialArguments()
         base.CheckConsistency()

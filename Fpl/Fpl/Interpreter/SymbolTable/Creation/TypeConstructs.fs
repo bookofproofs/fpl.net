@@ -100,7 +100,7 @@ let evalTypeConstructs ast =
                         let nodeType = beingCreatedNode.Type SignatureType.Type
                         let baseType = foundBase.Type SignatureType.Type
                         if nodeType <> baseType then 
-                            baseNode.ErrorOccurred <- emitID007diagnostics beingCreatedNode.Name nodeType foundBase.Name baseType pos1 pos2
+                            baseNode.ErrorOccurred <- emitID007Diagnostics beingCreatedNode.Name nodeType foundBase.Name baseType pos1 pos2
                         else 
                             baseNode.RefersTo <- Some foundBase // add found base class to base
                             addVariablesAndPropertiesOfBaseNode foundBase
@@ -112,7 +112,7 @@ let evalTypeConstructs ast =
                     | :? FplClass, _ ->
                         let nodeType = beingCreatedNode.Type SignatureType.Type
                         let baseType = foundBase.Type SignatureType.Type
-                        baseNode.ErrorOccurred <- emitID007diagnostics beingCreatedNode.Name nodeType foundBase.Name baseType pos1 pos2
+                        baseNode.ErrorOccurred <- emitID007Diagnostics beingCreatedNode.Name nodeType foundBase.Name baseType pos1 pos2
                     | _ -> () // does not occur, since syntax of inherited base is not supported from non-classes, non-functional terms, and non-predicates
                 else
                     baseNode.ErrorOccurred <- emitID010Diagnostics baseNode.FplId pos1 pos2

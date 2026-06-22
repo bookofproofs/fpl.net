@@ -35,7 +35,7 @@ let runArgumentsOfGenericPredicateWithExpression (fv:FplGenericHasValue) =
             fv.SetValueOf fv1WithValue
         | _ ->
             // warning stmt inside predicate might cause side-effects
-            fv.ErrorOccurred <- emitLG004diagnostics fv.Name fv1.StartPos fv1.EndPos
+            fv.ErrorOccurred <- emitLG004Diagnostics fv.Name fv1.StartPos fv1.EndPos
             
     )
 
@@ -250,9 +250,9 @@ type FplCorollary(positions: Positions, parent: FplGenericNode, runOrder) =
             // everything is OK, change the parent of the provable from theory to the found parent 
             this.Parent <- Some potentialParent
         | ScopeSearchResult.FoundIncorrectBlock incorrectBlock ->
-            this.ErrorOccurred <- emitID005diagnostics this.FplId (qualifiedName incorrectBlock false) this.StartPos this.EndPos
+            this.ErrorOccurred <- emitID005Diagnostics this.FplId (qualifiedName incorrectBlock false) this.StartPos this.EndPos
         | ScopeSearchResult.NotFound ->
-            this.ErrorOccurred <- emitID006diagnostics this.FplId this.SignStartPos this.SignEndPos
+            this.ErrorOccurred <- emitID006Diagnostics this.FplId this.SignStartPos this.SignEndPos
         | _ -> ()
         tryAddToParentUsingFplId this
 

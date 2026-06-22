@@ -47,9 +47,9 @@ let evalLeafTokens ast =
         | :? FplQuantorExistsN ->
             match (int)s with
             | 0 ->
-                fv.ErrorOccurred <- emitSY011diagnostics pos1 pos2
+                fv.ErrorOccurred <- emitSY011Diagnostics pos1 pos2
             | 1 ->
-                fv.ErrorOccurred <- emitSY012diagnostics pos1 pos2
+                fv.ErrorOccurred <- emitSY012Diagnostics pos1 pos2
             | _ -> ()
             fv.FplId <- fv.FplId + sid
         | _  ->

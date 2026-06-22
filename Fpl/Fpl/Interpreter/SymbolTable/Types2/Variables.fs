@@ -89,30 +89,30 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplGenericNode) as 
         this.CheckConsistency()
         let addToRuleOfInference (block:FplGenericNode) = 
             if block.Scope.ContainsKey(this.FplId) then
-                this.ErrorOccurred <- emitVAR03diagnostics this.FplId block.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos
+                this.ErrorOccurred <- emitVAR03Diagnostics this.FplId block.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos
             else
                 block.Scope.Add(this.FplId, this)
 
         let addToSimpleFplBlocksScope (block:FplGenericNode) = 
             if block.Scope.ContainsKey(this.FplId) then
-                this.ErrorOccurred <- emitVAR03diagnostics this.FplId block.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos
+                this.ErrorOccurred <- emitVAR03Diagnostics this.FplId block.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos
             else
                 block.Scope.Add(this.FplId, this)
         
         let addToPropertyOrConstructor (property:FplGenericNode) = 
             let parentOfProperty = property.Parent.Value
             if property.Scope.ContainsKey(this.FplId) then
-                this.ErrorOccurred <- emitVAR03diagnostics this.FplId property.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos
+                this.ErrorOccurred <- emitVAR03Diagnostics this.FplId property.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos
             elif parentOfProperty.Scope.ContainsKey(this.FplId) then
                 // check also the scope of the property's parent block
-                this.ErrorOccurred <- emitVAR03diagnostics this.FplId parentOfProperty.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos
+                this.ErrorOccurred <- emitVAR03Diagnostics this.FplId parentOfProperty.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos
             else
                 property.Scope.Add(this.FplId, this)
 
         let addToProofOrCorolllary (proofOrCorollary:FplGenericNode) = 
             let rec conflictInScope (node:FplGenericNode) formulaConflict =
                 if node.Scope.ContainsKey(this.FplId) then
-                    this.ErrorOccurred <- emitVAR03diagnostics this.FplId node.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos
+                    this.ErrorOccurred <- emitVAR03Diagnostics this.FplId node.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos
                     true
                 else 
                     let parent = node.Parent.Value
@@ -134,7 +134,7 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplGenericNode) as 
             // in the scope the quantor is placed in.
             let rec checkConfictInScope (node:FplGenericNode) =
                 if node.Scope.ContainsKey(this.FplId) then
-                    this.ErrorOccurred <- emitVAR03diagnostics this.FplId node.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos
+                    this.ErrorOccurred <- emitVAR03Diagnostics this.FplId node.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos
                 else 
                     let parent = node.Parent.Value
                     match parent.Name with
@@ -149,7 +149,7 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplGenericNode) as 
         let addToVariableOrMapping (variableOrMapping:FplGenericNode) =
             let rec conflictInScope (node:FplGenericNode) =
                 if node.Scope.ContainsKey(this.FplId) then
-                    this.ErrorOccurred <- emitVAR03diagnostics this.FplId node.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos 
+                    this.ErrorOccurred <- emitVAR03Diagnostics this.FplId node.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos 
                     true
                 else 
                     let parent = node.Parent.Value
@@ -203,11 +203,11 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplGenericNode) as 
         | Some next when next.Name = PrimQuantorAll || next.Name = PrimQuantorExists || next.Name = PrimQuantorExistsN ->  
             this.SetIsBound() // quantor-Variables are bound
             if next.Scope.ContainsKey(this.FplId) then
-                this.ErrorOccurred <- emitVAR02diagnostics this.FplId this.StartPos this.EndPos
+                this.ErrorOccurred <- emitVAR02Diagnostics this.FplId this.StartPos this.EndPos
             elif next.Name = PrimQuantorExistsN && next.Scope.Count>0 then 
-                this.ErrorOccurred <- emitVAR07diagnostics this.FplId this.StartPos this.EndPos
+                this.ErrorOccurred <- emitVAR07Diagnostics this.FplId this.StartPos this.EndPos
             elif this.Name = PrimVariableArrayL then 
-                this.ErrorOccurred <- emitVAR08diagnostics this.StartPos this.EndPos
+                this.ErrorOccurred <- emitVAR08Diagnostics this.StartPos this.EndPos
             else
                 addToQuantor next
                 
@@ -265,7 +265,7 @@ let checkVAR04Diagnostics (fv:FplGenericNode) =
     |> List.map (fun var -> var :?> FplGenericVariable)
     |> List.filter(fun var -> not var.IsUsed)
     |> List.iter (fun var -> 
-        var.ErrorOccurred <- emitVAR04diagnostics var.FplId var.StartPos var.EndPos
+        var.ErrorOccurred <- emitVAR04Diagnostics var.FplId var.StartPos var.EndPos
     )
 
 type FplVariable(fplId, positions: Positions, parent: FplGenericNode) =

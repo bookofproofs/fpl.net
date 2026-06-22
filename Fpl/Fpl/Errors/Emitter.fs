@@ -57,7 +57,7 @@ let emitID002Diagnostics nodeTypeName incorrectBlockType pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitID003diagnostics name pos1 pos2 =
+let emitID003Diagnostics name pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -72,7 +72,7 @@ let emitID003diagnostics name pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitID005diagnostics name incorrectBlockType pos1 pos2 =
+let emitID005Diagnostics name incorrectBlockType pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -87,7 +87,7 @@ let emitID005diagnostics name incorrectBlockType pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitID006diagnostics name pos1 pos2 =
+let emitID006Diagnostics name pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -102,7 +102,7 @@ let emitID006diagnostics name pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitID007diagnostics nodeType signatureNode baseType signatureBase pos1 pos2 =
+let emitID007Diagnostics nodeType signatureNode baseType signatureBase pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -219,7 +219,7 @@ let emitID014Diagnostics alreadyDeclaredMixedStr qualifiedStartPosConflictStr po
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitID015diagnostics name pos1 pos2 =
+let emitID015Diagnostics name pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -233,7 +233,7 @@ let emitID015diagnostics name pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitID016diagnostics name pos1 pos2  =
+let emitID016Diagnostics name pos1 pos2  =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -337,7 +337,7 @@ let emitID023Diagnostics multipleCandidates pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitID024diagnostics alreadyLocalizedExpr qualifiedStartPosConflictStr pos1 pos2 =
+let emitID024Diagnostics alreadyLocalizedExpr qualifiedStartPosConflictStr pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -407,7 +407,7 @@ let emitLG001Diagnostics argType argName typeOfPredicate pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitLG002diagnostics nodeTypeName times pos1 pos2 = 
+let emitLG002Diagnostics nodeTypeName times pos1 pos2 = 
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -421,7 +421,7 @@ let emitLG002diagnostics nodeTypeName times pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitLG003diagnostics nodeTypeName nodeName nodeRepr pos1 pos2 = 
+let emitLG003Diagnostics nodeTypeName nodeName nodeRepr pos1 pos2 = 
     if nodeRepr = LiteralFalse then
         let diagnostic =
             { 
@@ -438,7 +438,7 @@ let emitLG003diagnostics nodeTypeName nodeName nodeRepr pos1 pos2 =
     else
         None
 
-let emitLG004diagnostics nodeName pos1 pos2 = 
+let emitLG004Diagnostics nodeName pos1 pos2 = 
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -893,7 +893,7 @@ let emitSIG07diagnostic assigneeName assigneeType nodeType pos1 pos2  =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitSIG08diagnostics arrName indexVarName indexVarType dimType dimNumber pos1 pos2 =
+let emitSIG08Diagnostics arrName indexVarName indexVarType dimType dimNumber pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -907,7 +907,7 @@ let emitSIG08diagnostics arrName indexVarName indexVarType dimType dimNumber pos
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitSIG09diagnostics arrName dimType dimNumber pos1 pos2 =
+let emitSIG09Diagnostics arrName dimType dimNumber pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -921,7 +921,7 @@ let emitSIG09diagnostics arrName dimType dimNumber pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitSIG10diagnostics arrName indexVarName indexNumber pos1 pos2 =
+let emitSIG10Diagnostics arrName indexVarName indexNumber pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -935,7 +935,7 @@ let emitSIG10diagnostics arrName indexVarName indexNumber pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitSIG11diagnostics qualifiedWrongCandidate pos1 pos2 =
+let emitSIG11Diagnostics qualifiedWrongCandidate pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -949,7 +949,7 @@ let emitSIG11diagnostics qualifiedWrongCandidate pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitSIG12diagnostics templateName secondUsage firstUsage firstUsagePos pos1 pos2 =
+let emitSIG12Diagnostics templateName secondUsage firstUsage firstUsagePos pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -963,7 +963,7 @@ let emitSIG12diagnostics templateName secondUsage firstUsage firstUsagePos pos1 
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitSIG13diagnostics stmtName secondUsage firstUsage firstUsagePos pos1 pos2 =
+let emitSIG13Diagnostics stmtName secondUsage firstUsage firstUsagePos pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -977,7 +977,7 @@ let emitSIG13diagnostics stmtName secondUsage firstUsage firstUsagePos pos1 pos2
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitSIG14diagnostics pos1 pos2 =
+let emitSIG14Diagnostics pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -991,7 +991,7 @@ let emitSIG14diagnostics pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitST001diagnostics name pos1 pos2 =
+let emitST001Diagnostics name pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -1005,7 +1005,7 @@ let emitST001diagnostics name pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitST002diagnostics name pos1 pos2 =
+let emitST002Diagnostics name pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -1019,7 +1019,7 @@ let emitST002diagnostics name pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitST004diagnostics languageCode pos1 pos2 =
+let emitST004Diagnostics languageCode pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -1033,7 +1033,7 @@ let emitST004diagnostics languageCode pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitST005diagnostics domain nodeType pos1 pos2 =
+let emitST005Diagnostics domain nodeType pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -1047,7 +1047,7 @@ let emitST005diagnostics domain nodeType pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitSY000diagnostics errMsg pos1 pos2 =
+let emitSY000Diagnostics errMsg pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -1060,7 +1060,7 @@ let emitSY000diagnostics errMsg pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
 
-let emitSY001diagnostics errMsg pos1 pos2 =
+let emitSY001Diagnostics errMsg pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -1073,7 +1073,7 @@ let emitSY001diagnostics errMsg pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
 
-let emitSY002diagnostics errMsg chain pos1 pos2 =
+let emitSY002Diagnostics errMsg chain pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -1086,7 +1086,7 @@ let emitSY002diagnostics errMsg chain pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
 
-let emitSY010diagnostics pos1 pos2 =
+let emitSY010Diagnostics pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -1100,7 +1100,7 @@ let emitSY010diagnostics pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitSY011diagnostics pos1 pos2 =
+let emitSY011Diagnostics pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -1114,7 +1114,7 @@ let emitSY011diagnostics pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitSY012diagnostics pos1 pos2 =
+let emitSY012Diagnostics pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -1128,7 +1128,7 @@ let emitSY012diagnostics pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitSY013diagnostics innerInfixSymbol innerPrecedence outerInfixSymbol outerPrecedence pos1 pos2 = 
+let emitSY013Diagnostics innerInfixSymbol innerPrecedence outerInfixSymbol outerPrecedence pos1 pos2 = 
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -1142,7 +1142,7 @@ let emitSY013diagnostics innerInfixSymbol innerPrecedence outerInfixSymbol outer
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitSY014diagnostics infixSymbol1 infixSymbol2 precedence pos1 pos2 = 
+let emitSY014Diagnostics infixSymbol1 infixSymbol2 precedence pos1 pos2 = 
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -1170,7 +1170,7 @@ let emitVAR00Diagnostics startPos endPos =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitVAR01diagnostics name pos1 pos2 =
+let emitVAR01Diagnostics name pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -1184,7 +1184,7 @@ let emitVAR01diagnostics name pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitVAR02diagnostics name pos1 pos2 =
+let emitVAR02Diagnostics name pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -1198,7 +1198,7 @@ let emitVAR02diagnostics name pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitVAR03diagnostics varName conflictStartPos pos1 pos2 =
+let emitVAR03Diagnostics varName conflictStartPos pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -1213,7 +1213,7 @@ let emitVAR03diagnostics varName conflictStartPos pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitVAR04diagnostics name pos1 pos2 = 
+let emitVAR04Diagnostics name pos1 pos2 = 
     let diagnostic = { 
         Diagnostic.Uri = ad.CurrentUri
         Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
@@ -1226,7 +1226,7 @@ let emitVAR04diagnostics name pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitVAR05diagnostics name pos1 pos2 = 
+let emitVAR05Diagnostics name pos1 pos2 = 
     let diagnostic = { 
         Diagnostic.Uri = ad.CurrentUri
         Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
@@ -1253,7 +1253,7 @@ let emitVAR06iagnostic name oldFromNode newFromNode typeName pos1 pos2  =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitVAR07diagnostics name pos1 pos2 =
+let emitVAR07Diagnostics name pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -1267,7 +1267,7 @@ let emitVAR07diagnostics name pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitVAR08diagnostics pos1 pos2 =
+let emitVAR08Diagnostics pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -1281,7 +1281,7 @@ let emitVAR08diagnostics pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitVAR09diagnostics varName varType pos1 pos2 =
+let emitVAR09Diagnostics varName varType pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -1295,7 +1295,7 @@ let emitVAR09diagnostics varName varType pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitVAR10diagnostics varName formulaName pos1 pos2 =
+let emitVAR10Diagnostics varName formulaName pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -1310,7 +1310,7 @@ let emitVAR10diagnostics varName formulaName pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitVAR11diagnostics varName conflictStartPos pos1 pos2 =
+let emitVAR11Diagnostics varName conflictStartPos pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
