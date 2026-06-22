@@ -1,13 +1,16 @@
 namespace Diagnostics.ProofRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+
+(* PR020
+   Purpose: Report that a `byinf` justification requires a specific number of proceeding justification items but received a different number.
+   What it indicates: The rule-of-inference premise list expects N proceeding expressions, however the justification supplied M proceeding items (too few or too many), so argument inference cannot proceed.
+   Use: Pinpoint failing `byinf` justification steps where the number of preceding justification items does not match the rule's premises.
+   Action / Treat: Fix the proof by providing the required number of proceeding justification items, adjust the rule-of-inference premises, or restructure the justification sequence. PR020 is an error that prevents successful argument inference and must be resolved. *)
 
 [<TestClass>]
 type TestPR020() =

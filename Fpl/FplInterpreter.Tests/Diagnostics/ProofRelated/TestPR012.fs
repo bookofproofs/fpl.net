@@ -1,13 +1,15 @@
 namespace Diagnostics.ProofRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* PR012
+   Purpose: Enforce that the `bycor` justification targets a corollary.
+   What it indicates: A `bycor` justification was given a reference that is not a corollary (for example, `bycor A` instead of `bycor A$1`). The justification form `bycor` specifically expects a corollary identifier.
+   Use: Pinpoint incorrect uses of `bycor` so authors can reference the correct corollary or switch to a proper justification keyword.
+   Action / Treat: Change the reference to an actual corollary (e.g., `bycor A$1`) or use the appropriate justification for the referenced item. Treat PR012 as an error that must be corrected for the justification to be valid. *)
 
 [<TestClass>]
 type TestPR012() =

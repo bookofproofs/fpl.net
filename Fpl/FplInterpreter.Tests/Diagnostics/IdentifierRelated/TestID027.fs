@@ -1,13 +1,15 @@
 namespace Diagnostics.IdentifierRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* ID027
+   Purpose: Report illegal self-recursive use of an entity as the domain of a `for` statement.
+   What it indicates: A `for` statement attempted to iterate over an entity that is (directly or indirectly) the same entity being defined or processed, producing an illegal recursion in the loop domain.
+   Use: Emitted during semantic checks to point to `for` statements whose domain expression refers back to the entity currently being defined, which would cause a recursion or nonsensical domain.
+   Action / Treat: Change the `for` domain so it does not depend on the entity being defined (use a separate collection/value or reorder definitions), or rewrite the logic to avoid self-reference. Treat ID027 as an error that must be resolved. *)
 
 [<TestClass>]
 type TestID027() =

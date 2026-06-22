@@ -337,7 +337,7 @@ let emitID023Diagnostics multipleCandidates pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitID024Diagnostics alreadyLocalizedExpr qualifiedStartPosConflictStr pos1 pos2 =
+let emitID024diagnostics alreadyLocalizedExpr qualifiedStartPosConflictStr pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -407,7 +407,7 @@ let emitLG001Diagnostics argType argName typeOfPredicate pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitLG002diagnostic nodeTypeName times pos1 pos2 = 
+let emitLG002diagnostics nodeTypeName times pos1 pos2 = 
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -421,7 +421,7 @@ let emitLG002diagnostic nodeTypeName times pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitLG003diagnostic nodeTypeName nodeName nodeRepr pos1 pos2 = 
+let emitLG003diagnostics nodeTypeName nodeName nodeRepr pos1 pos2 = 
     if nodeRepr = LiteralFalse then
         let diagnostic =
             { 
@@ -438,7 +438,7 @@ let emitLG003diagnostic nodeTypeName nodeName nodeRepr pos1 pos2 =
     else
         None
 
-let emitLG004diagnostic nodeName pos1 pos2 = 
+let emitLG004diagnostics nodeName pos1 pos2 = 
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri

@@ -1,13 +1,15 @@
 namespace Diagnostics.ProofRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* PR015
+   Purpose: Report an invalid revocation reference inside a proof.
+   What it indicates: A `revoke` step referenced an argument identifier that was not previously assumed in the current proof (or was already revoked). The emitted message is: `Cannot revoke the argument `{argId}` because it wasn't assumed.` 
+   Use: Helps locate incorrect `revoke` uses so the proof author can ensure revocations follow actual prior `assume` steps.
+   Action / Treat: Ensure the argument was assumed earlier and not already revoked, or correct the referenced identifier; PR015 is an error that must be fixed for the proof to be valid. *)
 
 [<TestClass>]
 type TestPR015() =

@@ -8,6 +8,12 @@ open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
 open TestSharedConfig
 
+(* PR006
+   Purpose: Report a reference to a non‑existing proof argument identifier.
+   What it indicates: A proof reference targeted an argument identifier that does not exist in the referenced proof (for example referencing `T$1`'s argument `x` when no such argument was declared).
+   Use: Helps locate broken argument references so authors can correct the identifier or the target proof.
+   Action / Treat: Fix the reference to point to an existing argument identifier in the referenced proof or correct the referenced proof signature. 
+   Treat PR006 as an error that must be resolved for correct justification/argument referencing. *)
 
 [<TestClass>]
 type TestPR006() =

@@ -260,7 +260,7 @@ type FplExtension(positions: Positions, parent: FplGenericNode, runOrder) =
         if _callCounter > maxRecursion then
             let instance = getDefaultValueOfFunction this
             this.SetValue instance
-            this.ErrorOccurred <- emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter heap.Helper.CallerStartPos heap.Helper.CallerEndPos
+            this.ErrorOccurred <- emitLG002diagnostics (this.Type(SignatureType.Name)) _callCounter heap.Helper.CallerStartPos heap.Helper.CallerEndPos
         else
             if this.ArgList.Count = 0 then 
                 let instance = getDefaultValueOfFunction this

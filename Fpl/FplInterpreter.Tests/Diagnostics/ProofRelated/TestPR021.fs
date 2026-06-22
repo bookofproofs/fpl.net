@@ -5,10 +5,13 @@ open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
 open TestFplInterpreter.Helpers.Common
 
-(*
-The PR021 diagnostic indicates that the given argument inference (part of code after the argument justification)
-is different from the derived one (i.e., was inferred by the justification).
-*)
+
+(* PR021
+   Purpose: Report that an argument required by argument‑inference could not be produced from the proceeding justification items.
+   What it indicates: The justification attempted to infer a specific argument expression, but matching against the proceeding results yielded no suitable candidate(s) (or produced only mismatching candidates). The diagnostic message contains the target argument identifier, the justification name that performed the inference, and the candidate list tried.
+   Use: Pinpoint proof steps where argument inference failed so authors can correct the justification, provide an appropriate source, or adjust the proof structure.
+   Action / Treat: Correct the justification reference or the preceding justification items so they supply inferable predicative expressions (or change the argument inference strategy). PR021 is an error that prevents successful argument inference and should be resolved for the affected proof step. *)
+
 
 [<TestClass>]
 type TestPR021() =

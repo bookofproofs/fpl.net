@@ -1,13 +1,15 @@
 namespace Diagnostics.ProofRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* PR011
+   Purpose: Report misuse of a justification that references an argument of a proof instead of the expected block.
+   What it indicates: A justification keyword (e.g. `byax`, `byconj`, `bydef`, `byinf`, ...) was given a reference that points to an argument inside a proof (such as `A$1:3`) rather than the enclosing theorem/axiom/conjecture/corollary that the justification form expects.
+   Use: Pinpoint justification sites that target the wrong granularity so the author can reference the correct statement or use an appropriate justification form that accepts argument-level references.
+   Action / Treat: Change the justification to reference the enclosing theorem-like statement (for example use `byax A` or `bycor A$1` as appropriate) or choose a justification that accepts an argument reference. Treat PR011 as an error that must be corrected for the justification to be valid. *)
 
 [<TestClass>]
 type TestPR011() =

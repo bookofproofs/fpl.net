@@ -1,13 +1,15 @@
 namespace Diagnostics.ProofRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* PR005
+   Purpose: Report references to argument identifiers that are not defined in the current context.
+   What it indicates: A code site attempted to refer to an argument identifier that does not exist (for example an argument reference that is not declared in the referenced signature or scope).
+   Use: Helps locate broken argument references so authors can correct the identifier or the target declaration.
+   Action / Treat: Fix the reference to point to an existing argument identifier or correct the target declaration; PR005 is an error that must be resolved for correct referencing. *)
 
 [<TestClass>]
 type TestPR005() =

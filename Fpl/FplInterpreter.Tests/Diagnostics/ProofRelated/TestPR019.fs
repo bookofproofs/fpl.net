@@ -1,13 +1,15 @@
 namespace Diagnostics.ProofRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* PR019
+   Purpose: Report an unsupported mix of different justification types inside a single proof argument.
+   What it indicates: A proof argument collected proceeding justification items that use incompatible justification kinds (for example `byax` mixed with `byconj`, `byax` mixed with a direct theorem reference, etc.). Such mixtures are not allowed and prevent deterministic argument inference.
+   Use: Highlights proof steps where the sequence of justification items for one argument contains heterogeneous justification kinds that the inference engine does not accept. Tests exercise many pairwise combinations; note that some workflows (e.g. a trailing `byinf`) may intentionally allow mixing — consult the test suite for allowed exceptions.
+   Action / Treat: Rework the justification for the argument so it uses a single justification kind (or an allowed pattern such as a final `byinf` where applicable), or split the argument into separate steps. Treat PR019 as an error that must be fixed for the proof's argument inference to succeed. *)
 
 [<TestClass>]
 type TestPR019() =

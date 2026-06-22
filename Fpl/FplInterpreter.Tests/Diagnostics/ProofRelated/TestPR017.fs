@@ -1,13 +1,15 @@
 namespace Diagnostics.ProofRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* PR017
+   Purpose: Reject the use of `trivial` in a proof argument unless it is the last argument in the proof.
+   What it indicates: The proof contains an argument with the `{trivial}` justification that is not positioned as the final argument; such usage is unsupported and leads to ambiguous or invalid justification sequencing.
+   Use: Locate proof steps where `{trivial}` was placed earlier than the final argument so the author can reorder or remove it.
+   Action / Treat: Place `{trivial}` only as the last argument for a proof or remove/replace it with an appropriate justification; treat PR017 as an error that must be fixed for the proof to be valid. *)
 
 [<TestClass>]
 type TestPR017() =

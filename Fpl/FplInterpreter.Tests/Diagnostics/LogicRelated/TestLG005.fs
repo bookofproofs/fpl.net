@@ -1,13 +1,15 @@
 namespace Diagnostics.LogicRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* LG005
+   Purpose: Warn when an assignment is redundant and will be ignored.
+   What it indicates: The code contains an assignment to an identifier that has no effect (the assignment will be implicitly ignored by the interpreter).
+   Use: Helps authors find and remove or adjust redundant assignments to avoid confusion or unintended behavior.
+   Action / Treat: Remove or correct the unnecessary assignment so the code's intent is explicit; LG005 is emitted as a warning. *)
 
 [<TestClass>]
 type TestLG005() =

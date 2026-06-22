@@ -1,13 +1,16 @@
 namespace Diagnostics.ProofRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* PR010
+   Purpose: Enforce that a justification keyword references the correct kind of entity.
+   What it indicates: A justification (for example `byax`, `bydef`, `byconj`, `byinf`, etc.) was given a reference that points to a proof or a corollary when the justification form expects a reference to a different kind of block (e.g., an axiom, definition, conjecture, theorem-like statement, or an argument reference).
+   Message: `Justification `{keyword}` expects a reference to {expectedRef}, not to a proof or corollary.`
+   Use: Pinpoint justification sites that reference a proof or corollary incorrectly so the author can change the target to the expected block kind.
+   Action / Treat: Use the appropriate reference (point to the theorem/axiom/definition/etc.) or select a justification form that accepts proof/corollary references. Treat PR010 as an error that must be corrected for the justification to be valid. *)
 
 [<TestClass>]
 type TestPR010() =

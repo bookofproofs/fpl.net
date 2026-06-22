@@ -69,7 +69,7 @@ let errID020 name = $"Missing call of base constructor `{name}`."
 let errID021 name = $"Duplicate call of base constructor `{name}`."
 let errID022 name = $"`{name}` is intrinsic, it has no parameterized constructors. This call uses parameters."
 let errID023 candidates  = $"Cannot associate a justification with a single block. Found more candidate(s):{Environment.NewLine}{candidates}." 
-let errID024 signature conflict = sprintf "Expression `%s` was already localized at %s." signature conflict
+let errID024 signature conflict = sprintf "Expression `%s` was already localized for the same language at %s." signature conflict
 let errID025 candidate nodeType  = $"Cannot reference to `{candidate}` inside {nodeType}." 
 let errID027 name = $"Illegal recursion in for statement. The entity `{name}` cannot be used as its own domain." 
 // logic-related error codes

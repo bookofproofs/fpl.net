@@ -5,6 +5,11 @@ open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
 open TestFplInterpreter.Helpers.Common
 
+(* PR001
+   Purpose: Report that a justification item of an expected kind was not found at the referenced location.
+   What it indicates: A justification referenced a block but the actual block present is of a different, incompatible type.
+   Use: Helps locate incorrect justification targets so the author can reference the correct block kind or adjust the justification form.
+   Action / Treat: Fix the justification to point to the appropriate block type or change the target block to the expected kind. PR001 is an error that must be resolved for correct justification processing. *)
 
 [<TestClass>]
 type TestPR001() =

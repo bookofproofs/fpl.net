@@ -1,13 +1,15 @@
 namespace Diagnostics.LogicRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* LG003
+   Purpose: Report that a predicate ist not satisfiable and therefore the node cannot be treated as valid for the intended role.
+   What it indicates: A predicate or validation expression associated with a node produced a false result during evaluation (the node's representation was `false`), preventing the node from being accepted for its expected purpose.
+   Use: Emitted when a validity check fails so callers can locate the offending node and its predicate that produced the failure.
+   Action / Treat: Inspect and correct the predicate or the node's definition so the validity check succeeds; LG003 is emitted as an error and must be resolved for normal processing to continue. *)
 
 [<TestClass>]
 type TestLG003() =

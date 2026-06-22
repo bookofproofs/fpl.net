@@ -8,6 +8,11 @@ open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
 open TestSharedConfig
 
+(* PR003
+   Purpose: Report a duplicate argument identifier declared inside the same proof.
+   What it indicates: Two or more arguments within a single proof used the same identifier, creating a naming collision inside that proof's scope.
+   Use: Helps authors find and fix redeclared argument identifiers so each argument in a proof has a unique name.
+   Action / Treat: Rename or remove the conflicting argument so identifiers are unique within the proof; PR003 is an error that must be resolved for the proof to be valid. *)
 
 [<TestClass>]
 type TestPR003() =

@@ -5,12 +5,12 @@ open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
 open TestFplInterpreter.Helpers.Common
 
-(*
-The PR022 diagnostic indicates that a justification item cannot collect inferred results to involve them
-in the argument inference process. A reason for this can be that it refers to a non-existing item in the FPL code
-or that the referred FPL code item has no predicative expressions that can be extracted from it
-(like in the case of bydef A justifications where A is an intrinsic definition).
-*)
+
+(* PR022
+   Purpose: Report that argument inference for a justification item was prevented.
+   What it indicates: A justification item attempted to collect inferred results to contribute to argument inference but failed. Typical reasons: the justification refers to a non-existing item, the referred item contains no predicative expressions to extract (e.g. an intrinsic definition or a class with no predicates), or the referenced item cannot provide the needed inferred formulas.
+   Use: Point authors to failing justification steps so they can correct references or supply a source that actually yields inferable predicative expressions.
+   Action / Treat: Fix the justification reference (correct the identifier or proof/corollary reference), ensure the referenced block exposes predicative expressions or assertions, or change the justification strategy. Treat PR022 as an error that prevents inference and must be resolved for the affected proof step. *)
 
 
 [<TestClass>]

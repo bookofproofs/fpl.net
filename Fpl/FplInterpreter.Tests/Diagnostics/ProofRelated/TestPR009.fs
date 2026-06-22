@@ -1,13 +1,16 @@
 namespace Diagnostics.ProofRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+
+(* PR009
+   Purpose: Warn that not all arguments of a proof could be verified.
+   What it indicates: During proof checking some proof arguments failed verification (their justifications did not validate or could not be resolved), so the proof contains unverified arguments.
+   Use: Pinpoint proof steps with missing/invalid justifications or argument verification failures so the author can correct or complete them.
+   Action / Treat: Inspect the problematic arguments and their justifications (references, inferred expressions, preceding steps); fix incorrect references, supply missing justification items, or correct inference errors. PR009 is emitted as a warning to inform the author that verification is incomplete. *)
 
 [<TestClass>]
 type TestPR00() =

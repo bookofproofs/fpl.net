@@ -1,13 +1,15 @@
 namespace Diagnostics.LogicRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* LG004
+   Purpose: Warn about potential side effects caused by statements placed inside predicate expressions.
+   What it indicates: A non-expression statement was encountered inside a predicate context where side effects are unexpected or unsafe.
+   Use: Draws attention to places where imperative or effectful code appears inside predicates so authors can review intent.
+   Action / Treat: Replace the statement with a pure expression where appropriate, or move side-effecting code out of the predicate. LG004 is emitted as a warning to encourage safer, side-effect-free predicate definitions. *)
 
 [<TestClass>]
 type TestLG004() =

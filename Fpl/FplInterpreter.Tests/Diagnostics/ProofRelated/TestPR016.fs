@@ -1,13 +1,16 @@
 namespace Diagnostics.ProofRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+
+(* PR016
+   Purpose: Report invalid revocation of a previously assumed argument when it is not the most recently assumed one.
+   What it indicates: A `revoke` step referenced an argument identifier that was not the last assumed argument in the current proof sequence. Revocation must follow LIFO order: only the most recently assumed argument can be revoked.
+   Use: Helps locate proof steps with incorrect revoke ordering so authors can reorder assumptions/revocations or adjust proof structure.
+   Action / Treat: Revoke only the last assumed argument (or reorder/remove assumptions so the intended argument becomes last). Treat PR016 as an error that must be fixed for the proof to be valid. *)
 
 [<TestClass>]
 type TestPR016() =

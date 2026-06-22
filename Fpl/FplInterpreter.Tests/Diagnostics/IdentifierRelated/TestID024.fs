@@ -1,13 +1,15 @@
 namespace Diagnostics.IdentifierRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* ID024
+   Purpose: Report that an expression was already localized for the same language at the same localization context.
+   What it indicates: A localization contains a language localization more than once, producing a conflict.
+   Use: Helps locate duplicate localizations so authors can remove or consolidate redundant expression localizations and avoid ambiguity.
+   Action / Treat: Remove or rename the redundant localization, or adjust the embedding order so only a single localization remains. Treat ID024 as an error that must be resolved to maintain unique expression localization within the scope. *)
 
 [<TestClass>]
 type TestID024() =

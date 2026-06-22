@@ -1,13 +1,15 @@
 namespace Diagnostics.IdentifierRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* ID023
+   Purpose: Report an ambiguous association when more than one candidate matches a justification target.
+   What it indicates: The attempt to bind a justification to a single block found multiple candidates in the current scope, so the association is ambiguous.
+   Use: Pinpoints ambiguous references so the author can disambiguate the intended target.
+   Action / Treat: Disambiguate the reference (rename, qualify, or remove competing candidates, or change the justification) so exactly one candidate remains; treat ID023 as an error that must be resolved. *)
 
 [<TestClass>]
 type TestID023() =

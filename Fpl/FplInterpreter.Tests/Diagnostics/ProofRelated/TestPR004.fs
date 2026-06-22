@@ -1,13 +1,15 @@
 namespace Diagnostics.ProofRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* PR004
+   Purpose: Flag a justification item that duplicates an already-declared justification in the same argument scope.
+   What it indicates: Two justification items with the same signature were embedded into the same argument list, producing a signature collision for justification entries.
+   Use: Helps locate and remove or rename duplicate justification items so each justification in an argument is unique.
+   Action / Treat: Remove the duplicate or change its signature so it does not collide with the existing justification; PR004 is an error that must be resolved to maintain unambiguous justification references. *)
 
 [<TestClass>]
 type TestPR004() =

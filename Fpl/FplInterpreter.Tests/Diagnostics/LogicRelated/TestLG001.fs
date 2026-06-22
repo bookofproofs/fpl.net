@@ -1,13 +1,15 @@
 namespace Diagnostics.LogicRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* LG001
+   Purpose: Report failure when a predicate-valued check cannot be evaluated due to an argument that itself could not be treated as a predicate.
+   What it indicates: A predicate evaluation failed because one of its arguments did not evaluate to a predicate‑like value (type/shape mismatch or an undetermined expression).
+   Use: Emitted during predicate and validation checks to pinpoint expressions that block logical evaluation, allowing authors to identify the offending argument and its context.
+   Action / Treat: Correct the argument so it evaluates to a predicate (fix its expression or type), or adjust the predicate usage. Treat LG001 as an error requiring correction before the enclosing check can succeed. *)
 
 [<TestClass>]
 type TestLG001() =

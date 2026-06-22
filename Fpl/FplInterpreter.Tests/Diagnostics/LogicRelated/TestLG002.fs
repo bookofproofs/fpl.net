@@ -8,6 +8,11 @@ open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
 open TestSharedConfig
 
+(* LG002
+   Purpose: Detect and report excessive recursive calls for a node.
+   What it indicates: The interpreter detected that a node (function, predicate, or similar construct) was invoked more times than the configured safety threshold, suggesting a possible infinite recursion or runaway recursion scenario.
+   Use: Emitted during runtime/validation checks to highlight recursion-depth violations so maintainers can inspect the call chain and the node's implementation.
+   Action / Treat: Inspect the recursive logic and ensure a terminating condition exists, refactor to iterative or bounded recursion, or adjust the recursion-limit if the deeper recursion is intentional and safe. Treat LG002 as an error requiring attention to avoid non-terminating evaluations. *)
 
 [<TestClass>]
 type TestLG002() =

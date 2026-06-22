@@ -244,7 +244,7 @@ let checkLG003Diagnostics (fv:FplGenericNode) =
     | :? IHasSignature as hasSignature ->
         let nodeRepr = fv.Represent()
         if nodeRepr = LiteralFalse then
-            fv.ErrorOccurred <- emitLG003diagnostic (fv.Type(SignatureType.Name)) fv.Name nodeRepr hasSignature.SignStartPos hasSignature.SignEndPos
+            fv.ErrorOccurred <- emitLG003diagnostics (fv.Type(SignatureType.Name)) fv.Name nodeRepr hasSignature.SignStartPos hasSignature.SignEndPos
     | _ -> ()
 
 /// Issue VAR10, if the formula in an FplValue uses 

@@ -1,12 +1,16 @@
 namespace Diagnostics.IdentifierRelated
 
-open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
 open Fpl.Interpreter.Helpers.Debug
-open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
+
+
+(* ID025
+   Purpose: Report an illegal reference to an entity inside a given call site.
+   What it indicates: A code site attempted to reference an entity from within a context where such references are disallowed or meaningless.
+   Use: Emitted during symbol-table creation and expression embedding to point authors to references that violate scope/granularity rules.
+   Action / Treat: Move or change the reference so it targets an allowed entity (or change the declaration context), or restructure the code so the referenced entity is accessible from the node's scope. ID025 is an error that must be corrected for correct symbol resolution. *)
 
 [<TestClass>]
 type TestID025() =

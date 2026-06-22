@@ -8,6 +8,11 @@ open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
 open TestSharedConfig
 
+(* PR008
+   Purpose: Report that a `byinf` justification does not match the expected premise structure of the referenced rule of inference.
+   What it indicates: The subsequent step expects a specific number/shape of premises, but the provided justification items (or their inferred expressions) do not match that structure. The diagnostic text enumerates the candidate expressions that were tried.
+   Use: Pinpoint failing `byinf` justification steps and show which candidate expressions were attempted so the author can see why matching failed (wrong arity, wrong connective/structure, mismatched quantifier shape, or incompatible subformulas).
+   Action / Treat: Adjust the proceeding justification items so they produce expressions matching the rule's premises (or choose a different rule), or correct the rule's expected premise signature. PR008 is an error blocking the inference step and must be fixed for the `byinf` justification to succeed. *)
 
 [<TestClass>]
 type TestPR008() =

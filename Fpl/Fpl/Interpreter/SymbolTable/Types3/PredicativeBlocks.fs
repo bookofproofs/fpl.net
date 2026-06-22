@@ -35,7 +35,7 @@ let runArgumentsOfGenericPredicateWithExpression (fv:FplGenericHasValue) =
             fv.SetValueOf fv1WithValue
         | _ ->
             // warning stmt inside predicate might cause side-effects
-            fv.ErrorOccurred <- emitLG004diagnostic fv.Name fv1.StartPos fv1.EndPos
+            fv.ErrorOccurred <- emitLG004diagnostics fv.Name fv1.StartPos fv1.EndPos
             
     )
 
@@ -184,7 +184,7 @@ type FplGenericTheoremLikeStmt(positions: Positions, parent: FplGenericNode, run
             _isReady <- true
             checkLG003Diagnostics this
 
-            // register the theorem-like stmtmt in the valid statement store
+            // register the theorem-like statement in the valid statement store
             if heap.ValidStmtStore.RegisterExpression this then
             // evaluate all corollaries and proofs of the theorem-like statement
                 this.Scope.Values
