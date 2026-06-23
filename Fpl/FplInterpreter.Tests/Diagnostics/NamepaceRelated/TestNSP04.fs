@@ -3,11 +3,14 @@ namespace Diagnostics.NamespaceRelated
 open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
-open Fpl.Interpreter.Helpers.Debug
 open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
-open TestSharedConfig
 
+(* NSP04
+   Purpose: Report a circular theory reference discovered while resolving `uses` clauses.
+   What it indicates: The requested theory import chain contains a cycle (a theory directly or indirectly references itself), making resolution ambiguous or non‑terminating.
+   Use: Emitted during `uses`-clause processing to point to cycles in the theory dependency graph so authors can identify and break the loop.
+   Action / Treat: Remove or refactor `uses` relationships to eliminate the cycle (rearrange imports, merge modules, or introduce an explicit dependency direction). Treat NSP04 as an error that must be resolved to successfully load the affected theories. *)
 
 [<TestClass>]
 type TestNSP04() =

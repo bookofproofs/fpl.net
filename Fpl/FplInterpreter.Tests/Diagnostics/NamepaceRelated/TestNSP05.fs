@@ -3,10 +3,15 @@ namespace Diagnostics.NamespaceRelated
 open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Fpl.Errors.Diagnostics
-open Fpl.Interpreter.Helpers.Debug
 open FplInterpreter.Main
 open TestFplInterpreter.Helpers.Common
 open TestSharedConfig
+
+(* NSP05
+   Purpose: Report ambiguous sources when the same theory is found in multiple locations.
+   What it indicates: A `uses` resolution discovered more than one possible source for the requested theory; the interpreter selected one source but the choice may be unintended.
+   Use: Draws attention to duplicate or conflicting theory providers so the author can disambiguate `uses` clauses or remove duplicate sources.
+   Action / Treat: Make the desired source unambiguous (remove or rename duplicate theories, qualify the `uses` clause, or adjust repository/namespace configuration). NSP05 should be addressed to avoid inadvertently depending on the wrong theory implementation. *)
 
 [<TestClass>]
 type TestNSP05() =
