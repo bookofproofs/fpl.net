@@ -74,50 +74,37 @@ let rec eval_uses_clause debugMode = function
         | _ -> []
     | _ -> []
 
-
-    
-
-let private downloadFile url (e:EvalAliasedNamespaceIdentifier) =
+let downloadFile url (e:EvalAliasedNamespaceIdentifier) =
     if not (e.DebugMode) then
-        let client = new HttpClient()
+        use client = new HttpClient()
         try
-            async {
-                let! data = client.GetStringAsync(PathEquivalentUri(url)) |> Async.AwaitTask
-                return data
-            } |> Async.RunSynchronously
+            let response =
+                client.GetAsync(PathEquivalentUri(url))
+                |> Async.AwaitTask
+                |> Async.RunSynchronously
+
+            if not response.IsSuccessStatusCode then
+                let reason = sprintf "%d %s" (int response.StatusCode) response.ReasonPhrase
+                emitNSP02Diagnostics url reason e.StartPos e.EndPos
+                ""
+            else
+                response.Content.ReadAsStringAsync()
+                |> Async.AwaitTask
+                |> Async.RunSynchronously
         with
-        | ex -> 
-            let diagnostic =
-                { 
-                    Diagnostic.Uri = ad.CurrentUri
-                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
-                    Diagnostic.Severity = DiagnosticSeverity.Error
-                    Diagnostic.StartPos = e.StartPos
-                    Diagnostic.EndPos = e.EndPos
-                    Diagnostic.Code = NSP02 (url, ex.Message)
-                    Diagnostic.Alternatives = None 
-                }
-            ad.AddDiagnostic diagnostic 
+        | ex ->
+            emitNSP02Diagnostics url ex.Message e.StartPos e.EndPos
             ""
-    else 
+    else
         ""
 
-let private loadFile fileName (e:EvalAliasedNamespaceIdentifier) =
+
+let loadFile filename (e:EvalAliasedNamespaceIdentifier) =
     try
-        File.ReadAllText fileName
+        File.ReadAllText filename
     with
-    | ex -> 
-        let diagnostic =
-            { 
-                Diagnostic.Uri = ad.CurrentUri
-                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
-                Diagnostic.Severity = DiagnosticSeverity.Error
-                Diagnostic.StartPos = e.StartPos
-                Diagnostic.EndPos = e.EndPos
-                Diagnostic.Code = NSP01 (fileName, ex.Message)
-                Diagnostic.Alternatives = None
-            }
-        ad.AddDiagnostic diagnostic
+    | ex ->
+        emitNSP01Diagnostics filename ex.Message e.StartPos e.EndPos
         ""
 
 let createSubfolder (uri: PathEquivalentUri) subFolder =
@@ -204,17 +191,7 @@ let private findDuplicateAliases (eaniList: EvalAliasedNamespaceIdentifier list)
     |> List.filter (fun alias -> alias.AliasOrStar <> "*" && alias.AliasOrStar <> "")
     |> List.map (fun alias ->
         if uniqueAliases.Contains alias.AliasOrStar then
-            let diagnostic =
-                { 
-                    Diagnostic.Uri = ad.CurrentUri
-                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
-                    Diagnostic.Severity = DiagnosticSeverity.Error
-                    Diagnostic.StartPos = alias.StartPos
-                    Diagnostic.EndPos = alias.EndPos
-                    Diagnostic.Code = NSP03 alias.AliasOrStar
-                    Diagnostic.Alternatives = None
-                }
-            ad.AddDiagnostic diagnostic        
+            emitNSP03Diagnostics alias.AliasOrStar alias.StartPos alias.EndPos
         else    
             uniqueAliases.Add(alias.AliasOrStar) |> ignore
     )
@@ -224,17 +201,7 @@ let private emitDiagnosticsForDuplicateFiles (availableSources:FplSources) (eani
     availableSources.GroupedWithPreferedSource
     |> List.iter (fun (fileName, path, chosenPathType, pathTypes, theoryName) ->
         if pathTypes.Length > 1 then 
-            let diagnostic =
-                { 
-                    Diagnostic.Uri = ad.CurrentUri
-                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
-                    Diagnostic.Severity = DiagnosticSeverity.Error
-                    Diagnostic.StartPos = eani.StartPos
-                    Diagnostic.EndPos = eani.EndPos
-                    Diagnostic.Code = NSP05 (pathTypes, theoryName, chosenPathType)
-                    Diagnostic.Alternatives = None
-                }
-            ad.AddDiagnostic diagnostic
+            emitNSP05Diagnostics pathTypes theoryName chosenPathType eani.StartPos eani.EndPos
     )
     |> ignore
 
@@ -254,18 +221,8 @@ let private chainParsedAsts (alreadyLoaded:ParsedAstList) parsedAst (eaniName:st
 let getParsedAstsMatchingAliasedNamespaceIdentifier (sources:FplSources) (parsedAsts:ParsedAstList) (eani:EvalAliasedNamespaceIdentifier) (currenParsedAst: ParsedAst)=
     let filtered = sources.FindWithPattern eani.FileNamePattern
     if filtered.IsEmpty then
-        // Emits diagnostics if there are no files for the pattern 
-        let diagnostic =
-            { 
-                Diagnostic.Uri = ad.CurrentUri
-                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
-                Diagnostic.Severity = DiagnosticSeverity.Error
-                Diagnostic.StartPos = eani.StartPos
-                Diagnostic.EndPos = eani.EndPos
-                Diagnostic.Code = NSP00 eani.FileNamePattern
-                Diagnostic.Alternatives = None
-            }
-        ad.AddDiagnostic diagnostic
+        // Emits diagnostics if there are no files for the pattern
+        emitNSP00Diagnostics eani.FileNamePattern eani.StartPos eani.EndPos
     else
         filtered
         |> Seq.map (fun (_, uri, _, _, theoryName) ->

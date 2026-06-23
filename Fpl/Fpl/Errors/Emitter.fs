@@ -466,6 +466,58 @@ let emitLG005Diagnostics name pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
+let emitNSP00Diagnostics fileNamePattern pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = NSP00 fileNamePattern
+            Diagnostic.Alternatives = None
+        }
+    ad.AddDiagnostic diagnostic
+
+let emitNSP01Diagnostics filename message pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = NSP01 (filename, message)
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic 
+
+let emitNSP02Diagnostics url message pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = NSP02 (url, message)
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic 
+
+let emitNSP03Diagnostics aliasOrStar pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = NSP03 aliasOrStar
+            Diagnostic.Alternatives = None
+        }
+    ad.AddDiagnostic diagnostic
+
 let emitNSP04Diagnostics path pos1 pos2 =
     let diagnostic =
         { 
@@ -479,6 +531,19 @@ let emitNSP04Diagnostics path pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
 
+
+let emitNSP05Diagnostics pathTypes theoryName chosenPathType pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = NSP05 (pathTypes, theoryName, chosenPathType)
+            Diagnostic.Alternatives = None
+        }
+    ad.AddDiagnostic diagnostic
 
 let emitPR001Diagnostics incorrectBlockType justificationItemName pos1 pos2 alternative =
     let diagnostic =
