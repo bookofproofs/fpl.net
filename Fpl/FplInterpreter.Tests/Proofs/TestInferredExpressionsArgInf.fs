@@ -103,7 +103,7 @@ type TestInferredExpressionsArgInf() =
 
 
     [<DataRow("01", "thm T {true} proof T$1 {dec x:pred x:=and(true,false) ; 1: assume x}", "true ∧ false", 1)>]
-    [<DataRow("02", "thm T {true} proof T$1 {dec x:pred x:=¬(¬(true ⇒ false) ⇒ ¬∀ z:obj {z is K})} ;1: assume x", "¬(¬(true ⇒ false) ⇒ ¬∀ z:obj {z is K})", 1)>]
+    [<DataRow("02", "thm T {true} proof T$1 {dec x:pred x:=¬(¬(true ⇒ false) ⇒ ¬∀ z:obj {z is K}) ;1: assume x}", "¬(¬(true ⇒ false) ⇒ ¬∀ z:obj {z is K})", 1)>]
     [<DataRow("03", "thm T {true} proof T$1 {dec x:pred x:=not true ;1: assume x}", "¬true", 1)>]
     [<DataRow("04", "thm T {true} proof T$1 {dec x:pred x:=∀ x:obj {¬((x is N) ⇔ false)} ;1: assume x}", "∀ x:obj {¬((x is N) ⇔ false)}", 1)>]
     [<TestMethod>]

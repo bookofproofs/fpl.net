@@ -142,10 +142,15 @@ type FplAssignment(positions: Positions, parent: FplGenericNode) as this =
         this.CheckConsistency()
         addExpressionToParentArgList this
 
-    member private this.SetAssignee (fv:FplGenericNode) = 
+    member private this.SetAssignee (fv:FplGenericNode) assignedExpression = 
         match this.Assignee with
         | Some (:? FplVariable as assignee) ->
             assignee.SetValue fv
+            match assignee.RefersTo with
+            | None ->
+                assignee.RefersTo <- Some assignedExpression
+                assignee.IsExpressionAssigned <- true
+            | _ -> ()
         | Some (:? FplVariableArray as assignee) ->
             match assignee.RefersTo with 
             | Some (:? FplIntrinsicTpl as tpl) -> tpl.TrySetTemplateUsage fv (SIG12("", "", "", "").Code)
@@ -159,16 +164,16 @@ type FplAssignment(positions: Positions, parent: FplGenericNode) as this =
 
         match this.ErrorOccurred, this.ArgList[1], this.AssignedValue with 
         | Some _, _, _ ->
-            () // skip assignment, if any proceeding errors occured
+            () // skip assignment, if any proceeding errors occurred
         | None, (:? FplGenericHasValue as ref), Some (:? FplVariableArray as assignedValue) ->
-            this.SetAssignee assignedValue
+            this.SetAssignee assignedValue assignedValue
         | None, (:? FplGenericHasValue as ref), Some (:? FplGenericIsValue as assignedValue) ->
-            this.SetAssignee assignedValue
-        | None, (:? FplGenericHasValue as ref), _ ->
+            this.SetAssignee assignedValue assignedValue
+        | None, (:? FplGenericHasValue as ref), Some assignedValue ->
             ref.Run()
-            this.SetAssignee (ref.Value.Value)
-        | None, (:? FplGenericIsValue as ref), _ ->
-            this.SetAssignee ref
+            this.SetAssignee (ref.Value.Value) assignedValue
+        | None, (:? FplGenericIsValue as ref), Some assignedValue ->
+            this.SetAssignee ref assignedValue
         | _ -> ()
 
         StaticDebug.Debug(this,Debug.Stop)

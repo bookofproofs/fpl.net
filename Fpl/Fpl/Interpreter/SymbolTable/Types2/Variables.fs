@@ -270,10 +270,19 @@ let checkVAR04Diagnostics (fv:FplGenericNode) =
 
 type FplVariable(fplId, positions: Positions, parent: FplGenericNode) =
     inherit FplGenericVariable(fplId, positions, parent)
+    let mutable _isExpressionAssigned = false
 
     override this.Name = PrimVariableL
 
     override this.ShortName = PrimVariable
+
+
+    /// Indicates if this variable has been assigned an expression.
+    /// In this case, RefersTo points to this expression in the symbol table.
+    member this.IsExpressionAssigned
+        with get () = _isExpressionAssigned
+        and set (value) = 
+            _isExpressionAssigned <- value
 
     override this.Clone () =
         let ret = new FplVariable(this.FplId, (this.StartPos, this.EndPos), this.Parent.Value)

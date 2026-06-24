@@ -27,6 +27,7 @@ open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.SymbolTable.Storage.Util
 open Fpl.Interpreter.SymbolTable.Types2.Intrinsic
 open Fpl.Interpreter.SymbolTable.Types2.CompoundPredicates
+open Fpl.Interpreter.SymbolTable.Types2.Variables
 open Fpl.Interpreter.SymbolTable.Types3.PredicativeBlocks
 open Fpl.Interpreter.SymbolTable.Types3.RulesOfInferences
 open Fpl.Interpreter.SymbolTable.ExpressionMatching
@@ -578,7 +579,11 @@ and FplArgInferenceAssume(positions: Positions, parent: FplGenericNode) =
             let exprOpt = this.ArgList |> Seq.tryHead
             match exprOpt with
             | Some expr ->
-                [expr]
+                match expr.RefersTo with
+                | Some (:? FplVariable as var) when var.IsExpressionAssigned ->
+                    [var.RefersTo.Value]
+                | _ ->
+                    [expr]
             | _ ->
                 issuePR022SpecialReasonAndSetDefault this $"The {this.Name} does not specify a predicative expression that could be used in the proof."
                 [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
@@ -817,6 +822,9 @@ and FplProof(positions: Positions, parent: FplGenericNode, runOrder) =
         | :? IHasProof as parentWithProof ->
             parentWithProof.HasProof <- true
         | _ -> ()
+
+        // evaluate the proof's actions
+        this.ArgList |> Seq.iter (fun fv -> fv.Run())
         // evaluate the proof by evaluating all arguments according to their order in the FPL code
         let orderedProofArguments = this.OrderedArguments 
         let allEvaluateToTrue =
