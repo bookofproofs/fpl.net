@@ -7,9 +7,9 @@ uses Fpl.Examples.Algebra.Structures
 def class FieldPowerN: Set
 {
     dec
-        ~myField: Field  
-        ~addInField: BinOp 
-        ~mulInField: BinOp 
+        myField: Field  
+        addInField: BinOp 
+        mulInField: BinOp 
     ;
 
     ctor FieldPowerN
@@ -26,14 +26,12 @@ def class FieldPowerN: Set
             self:=SetBuilder( myField[1 , n], true)
             base.Set()
         ;
-        self
-
     }
 
-    property func VecAdd(v,w: tplFieldElem[from , to:Nat])   -> tplFieldElem[from , to:Nat]
+    property func VecAdd(v,w:*tplFieldElem[Nat,Nat])   -> tplFieldElem[Nat,Nat]
     {
         dec
-            ~result: tplFieldElem[from , to:Nat] 
+            result: tplFieldElem[from , to:Nat] 
             result := addInField(v[from , to],w[from , to])
         ;
         return result
@@ -42,15 +40,15 @@ def class FieldPowerN: Set
 }
 
 
-lemma VecAddIsCommutative()
+lemma VecAddIsCommutative
 {
     dec
-        ~x,y: tplFieldElem[from,to:Nat]
-        ~fieldPowerN: FieldPowerN(
+        x,y:*tplFieldElem[Nat,Nat]
+        fieldPowerN: FieldPowerN(
             field: Field(f: tplFieldSet, opAdd, opMul: BinOp(a,b: tplFieldElem)),
             n:Nat
             )
-        ~vecAdd: VecAdd(v,w: tplFieldElem[from,to:Nat])
+        vecAdd: VecAdd(v,w: tplFieldElem[from,to:Nat])
     ;
     impl
     (
@@ -65,15 +63,12 @@ def class ZeroVectorN: Tuple
     ctor ZeroVectorN(n: Nat, field: Field)
     {
         dec
-            ~i: Nat 
+            i: Nat 
             for i in Range(1,n) 
             {
                 self[i]:=field.AdditiveGroup().NeutralElement()
             }
             base.Tuple()
         ;
-        self
-    }
+            }
 }
-    
-;

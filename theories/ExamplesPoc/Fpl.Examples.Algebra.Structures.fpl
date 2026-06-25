@@ -11,22 +11,22 @@ def func BinOp(x,y: tplSetElem) -> tplSetElem
     intr
     property pred  IsAssociative()
     {
-        all a,b,c: tplSetElem {  (parent(a,parent(b,c)) = parent(parent(a,b),c))  }
+        all a,b,c: tplSetElem {  parent(a,parent(b,c)) = parent(parent(a,b),c)  }
     }
 
     property pred  IsCommutative()
     {
-        all a,b: tplSetElem { (parent(a,b) = parent(b,a)) }
+        all a,b: tplSetElem { parent(a,b) = parent(b,a) }
     }
 
     property pred  IsLeftNeutralElement(e: tplSetElem)
     {
-        all x: tplSetElem { (parent(e,x) = x) }
+        all x: tplSetElem { parent(e,x) = x }
     }
 
     property pred  IsRightNeutralElement(e: tplSetElem)
     {
-        all x: tplSetElem { (parent(x,e) = x) }
+        all x: tplSetElem { parent(x,e) = x }
     }
 
     property pred  IsNeutralElement(e: tplSetElem)
@@ -52,7 +52,7 @@ def func BinOp(x,y: tplSetElem) -> tplSetElem
     property func  LeftNeutralElement() -> tplSetElem
     {
         dec 
-            ~result:tplSetElem 
+            result:tplSetElem 
             assert IsLeftNeutralElement(result);
         return result
     }
@@ -60,7 +60,7 @@ def func BinOp(x,y: tplSetElem) -> tplSetElem
     property func RightNeutralElement() -> tplSetElem
     {
         dec 
-            ~result:tplSetElem 
+            result:tplSetElem 
             assert IsRightNeutralElement(result);
         return result
     }
@@ -68,14 +68,14 @@ def func BinOp(x,y: tplSetElem) -> tplSetElem
     property func  NeutralElement() -> tplSetElem
     {
         dec 
-            ~result:tplSetElem 
+            result:tplSetElem 
             assert IsNeutralElement(result);
         return result
     }
 
 }
 
-def func Composition(operands:* tplSetElem) -> tplSetElem
+def func Composition(operands:* tplSetElem[ind]) -> tplSetElem
 {
     intrinsic
 }
@@ -88,14 +88,14 @@ def class AlgebraicStructure
 {
 
     dec
-        ~myCarrierSet: tplSet
-        ~myOps:+ func(myElem:* tplSetElem) -> tplSetElem
+        myCarrierSet: tplSet
+        myOps: func(myElem:*tplSetElem[ind]) -> tplSetElem
     ;
 
-    ctor AlgebraicStructure(x: tplSet, ops:+ Composition)
+    ctor AlgebraicStructure(x: tplSet, ops:*Composition[ind])
     {
         dec
-            ~arg: index
+            arg: index
             myOps := ops
             myCarrierSet := x
 
@@ -167,7 +167,7 @@ def class Semigroup: Magma
 // Note how we use "full-qualified" parameters to ensure that the type "tpl" will be of exactly the  same ty
 def class Monoid: Semigroup
 {
-    dec ~myOp: func(a,b: tplSetElem) -> tplSetElem;
+    dec myOp: func(a,b: tplSetElem) -> tplSetElem;
 
     ctor Monoid(x: tplSet, op: BinOp)
     {
@@ -195,7 +195,7 @@ def func Exp
     ) -> tplSetElem
 {
     dec 
-        ~result:tplSetElem 
+        result:tplSetElem 
         assert In(y,x)
         cases
         (
@@ -214,7 +214,7 @@ def func Exp
 // a group is a monoid, in which an inverse element exists for all elements
 def class Group: Monoid
 {
-    dec ~myOp: func(a,b: tplSetElem)->tplSetElem;
+    dec myOp: func(a,b: tplSetElem)->tplSetElem;
 
     ctor Group(x: tplSet, op: BinOp)
     {
@@ -241,7 +241,7 @@ def class Group: Monoid
     property func InverseOf(x: tplSetElem) -> tplSetElem
     {
         dec
-                ~val: tplSetElem
+                val: tplSetElem
             assert
                 and
                 (
@@ -268,8 +268,8 @@ def class CommutativeGroup: Group
 def class Ring: AlgebraicStructure
 {
     dec 
-        ~myX : tpl
-        ~myAdd,myMul : BinOp
+        myX : tpl
+        myAdd,myMul : BinOp
     ;
 
     ctor Ring (
@@ -427,12 +427,12 @@ def func ScalarMul(x: tplFieldElem, y: tplVector) -> tplVector
 def class VectorSpaceOverField 
 {
     dec
-        ~mySpace: NonemptySet
-        ~myFieldAdd, myFieldMul: BinOp
-        ~myFieldSet: tplFieldSet
-        ~myScalarMul: ScalarMul 
-        ~myVecAdd: AddVec 
-        ~myField: Field
+        mySpace: NonemptySet
+        myFieldAdd, myFieldMul: BinOp
+        myFieldSet: tplFieldSet
+        myScalarMul: ScalarMul 
+        myVecAdd: AddVec 
+        myField: Field
     ;
     ctor VectorSpaceOverField
         (
@@ -471,7 +471,7 @@ def class VectorSpaceOverField
     {
         all u,w: tplVector, a:  tplFieldElement
         {
-            ( myScalarMul(myVecAdd(u,w),a) = myVecAdd(myScalarMul(u,a),myScalarMul(w,a)) )
+            myScalarMul(myVecAdd(u,w),a) = myVecAdd(myScalarMul(u,a),myScalarMul(w,a))
         }
     }
 
@@ -479,7 +479,7 @@ def class VectorSpaceOverField
     {
         all u,w:  tplVector, a:  tplFieldElement
         {
-            ( myScalarMul(a,myVecAdd(u,w)) = myVecAdd(myScalarMul(a,u),myScalarMul(a,w)) )
+            myScalarMul(a,myVecAdd(u,w)) = myVecAdd(myScalarMul(a,u),myScalarMul(a,w))
         }
     }
 
@@ -487,21 +487,20 @@ def class VectorSpaceOverField
     {
         all a,b:  tplFieldElement, u:  tplVector
         {
-            ( myScalarMul(myFieldMul(a,b),u) = myScalarMul(a,myScalarMul(b,u)) )
+             myScalarMul(myFieldMul(a,b),u) = myScalarMul(a,myScalarMul(b,u)) 
         }
     }
 
     property pred ScalarMulNorm()
     {
         dec
-            ~one: tplFieldElement
+            one: tplFieldElement
             one := myField.MultiplicativeGroup().NeutralElement()
         ;
         all u:  tplVector
         {
-            ( myScalarMul(one,u) =  u )
+            myScalarMul(one,u) =  u 
         }
     }
 }
 
-;
