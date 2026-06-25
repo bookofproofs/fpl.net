@@ -1,4 +1,4 @@
-namespace FplParser.Tests
+namespace TestFplParser.Classes
 
 open FParsec
 open Fpl.Parser.Grammar

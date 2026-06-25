@@ -16,9 +16,7 @@
         <Compile Include="TestUsesClause.fs" />
         <Compile Include="TestAxioms.fs" />
         <Compile Include="TestClassInheritanceTypes.fs" />
-        <Compile Include="TestConstructors.fs" />
         <Compile Include="TestCoordPossibilities.fs" />
-        <Compile Include="TestDefinitionClasses.fs" />
         <Compile Include="TestDefinitionFunctionalTerms.fs" />
         <Compile Include="TestDefinitionPredicates.fs" />
         <Compile Include="TestErrDiagnosticsLowLevel.fs" />
@@ -46,7 +44,9 @@
         <Compile Include="TestTheoremLikeStatements.fs" />
         <Compile Include="TestVariableTypes.fs" />
         <Compile Include="TestJUserFriendlyExpressions.fs" />
-        <Compile Include="ErrRecovery\TestJUserFriendlyExpressions.fs" />
+        <Compile Include="Classes\TestConstructors.fs" />
+        <Compile Include="Classes\TestDefinitionClasses.fs" />
+        <Compile Include="ErrRecovery\TestRecovery.fs" />
     </ItemGroup>
 
     <ItemGroup>
