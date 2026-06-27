@@ -11,9 +11,9 @@ namespace FplLS
         {
             var ret = new List<FplCompletionItem>();
             // snippets
-            ret.Add(BuildDefinition(defaultCi, "Class", false).WithLabel(defaultCi.Label + " ..."));
-            ret.Add(BuildDefinition(defaultCi, "Predicate", false).WithLabel(defaultCi.Label + " ..."));
-            ret.Add(BuildDefinition(defaultCi, "Function", false).WithLabel(defaultCi.Label + " ..."));
+            ret.Add(BuildDefinition(defaultCi, "Class", false));
+            ret.Add(BuildDefinition(defaultCi, "Predicate", false));
+            ret.Add(BuildDefinition(defaultCi, "Function", false));
 
             // keyword variants
             ret.Add(BuildDefinition(defaultCi.WithKind(CompletionItemKind.Keyword), "Class", true).WithKeyword());
