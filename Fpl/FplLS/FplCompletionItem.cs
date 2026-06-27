@@ -536,7 +536,7 @@ namespace FplLS
             else
             {
                 // previous behavior: when insertText wasn't supplied the item was treated as a keyword
-                Kind = CompletionItemKind.Keyword;
+                // keep the original Kind (do not force Keyword) but mark sort-order for keywords
                 Detail = $"keyword '{word}'";
                 SortText = "zzz" + SortText;
             }
@@ -555,7 +555,7 @@ namespace FplLS
             var finalSort = sortText ?? this.SortText;
             var finalIsShort = isShort ?? this.IsShort;
 
-            var copy = new FplCompletionItem(this.Word)
+            var copy = new FplCompletionItem(this.Word, insertText: insertText ?? this.InsertText)
             {
                 AdditionalTextEdits = this.AdditionalTextEdits,
                 Command = this.Command,
