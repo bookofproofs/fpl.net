@@ -3,17 +3,19 @@ using static Fpl.Primitives;
 
 namespace FplLS
 {
-    public class FplCompletionItemChoicesVariable: FplCompletionItemChoices
+    public class FplCompletionItemChoicesVariable : FplCompletionItemChoices
     {
-        public override List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi) 
+        public override List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi)
         {
             var ret = new List<FplCompletionItem>();
-            defaultCi.Detail = PrimVariableL;
-            defaultCi.SortText = PrimVariableL;
-            defaultCi.InsertText = "someVar ";
-            defaultCi.Label = TokenPrefix + defaultCi.InsertText;
-            defaultCi.Kind = CompletionItemKind.Variable;
-            ret.Add(defaultCi);
+            var insert = "someVar ";
+            var label = TokenPrefix + insert;
+            var ci = defaultCi.WithDetail(PrimVariableL)
+                              .WithSortText(PrimVariableL)
+                              .WithInsertText(insert)
+                              .WithLabel(label)
+                              .WithKind(CompletionItemKind.Variable);
+            ret.Add(ci);
             return ret;
 
         }

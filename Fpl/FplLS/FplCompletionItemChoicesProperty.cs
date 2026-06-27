@@ -10,53 +10,59 @@ namespace FplLS
         {
             var ret = new List<FplCompletionItem>();
             // snippets
-            var ci1 = defaultCi.Clone(); SetBody(ci1, "Predicate", false); ret.Add(ci1);
-            var ci2 = defaultCi.Clone(); SetBody(ci2, "Function", false); ret.Add(ci2);
+            ret.Add(BuildProperty(defaultCi, "Predicate", false));
+            ret.Add(BuildProperty(defaultCi, "Function", false));
 
-            // keyword
-            var ciK1 = defaultCi.Clone(); SetBody(ciK1, "Predicate", true); ret.Add(ciK1);
-            var ciK2 = defaultCi.Clone(); SetBody(ciK2, "Function", true); ret.Add(ciK2);
+            // keyword variants
+            ret.Add(BuildProperty(defaultCi.WithKind(CompletionItemKind.Keyword), "Predicate", true));
+            ret.Add(BuildProperty(defaultCi.WithKind(CompletionItemKind.Keyword), "Function", true));
             return ret;
         }
 
-        private void SetBody(FplCompletionItem ci, string propertyType, bool isKeyword)
+        private FplCompletionItem BuildProperty(FplCompletionItem baseCi, string propertyType, bool isKeyword)
         {
-            SetSortText(ci,propertyType);
-            if (ci.IsShort)
+            // compute base sort text
+            var baseSort = propertyType == "Function" ? "property03" : "property02";
+            if (baseCi.IsShort)
+            {
+                baseSort = "z" + baseSort;
+            }
+
+            if (baseCi.IsShort)
             {
                 TokenIntrinsic = LiteralIntr;
                 TokenFunction = LiteralFunc;
                 TokenPredicate = LiteralPred;
                 if (isKeyword)
                 {
-                    ci.Label = GetLabelKeyword(ci, propertyType);
-                    ci.Detail = $"keywords '{ci.Label.Substring(TokenPrefix.Length)}'";
-                    ci.SortText = "zzz" + ci.SortText;
-                    ci.InsertText = ci.Label.Substring(TokenPrefix.Length);
-                    ci.Kind = CompletionItemKind.Keyword;
+                    var label = GetLabelKeyword(baseCi, propertyType);
+                    var insert = label.Substring(TokenPrefix.Length);
+                    var detail = $"keywords '{insert}'";
+                    return baseCi.WithLabel(label).WithDetail(detail).WithSortText("zzz" + baseSort).WithInsertText(insert).WithKind(CompletionItemKind.Keyword);
                 }
                 else
                 {
-                    ci.Label = GetLabelKeyword(ci, propertyType) + " ...";
-                    ci.Detail = $"{propertyType.ToLower()} property (short)";
-                    ci.InsertText = GetInsertText(ci, propertyType);
+                    var label = GetLabelKeyword(baseCi, propertyType) + " ...";
+                    var insert = GetInsertText(baseCi, propertyType);
+                    var detail = $"{propertyType.ToLower()} property (short)";
+                    return baseCi.WithLabel(label).WithDetail(detail).WithInsertText(insert).WithSortText(baseSort);
                 }
             }
             else
             {
                 if (isKeyword)
                 {
-                    ci.Label = GetLabelKeyword(ci, propertyType);
-                    ci.Detail = $"keywords '{ci.Label.Substring(TokenPrefix.Length)}'";
-                    ci.SortText = "zzz" + ci.SortText;
-                    ci.InsertText = ci.Label.Substring(TokenPrefix.Length);
-                    ci.Kind = CompletionItemKind.Keyword;
+                    var label = GetLabelKeyword(baseCi, propertyType);
+                    var insert = label.Substring(TokenPrefix.Length);
+                    var detail = $"keywords '{insert}'";
+                    return baseCi.WithLabel(label).WithDetail(detail).WithSortText("zzz" + baseSort).WithInsertText(insert).WithKind(CompletionItemKind.Keyword);
                 }
                 else
                 {
-                    ci.Label = GetLabelKeyword(ci, propertyType) + " ...";
-                    ci.Detail = $"{propertyType.ToLower()} property";
-                    ci.InsertText = GetInsertText(ci, propertyType);
+                    var label = GetLabelKeyword(baseCi, propertyType) + " ...";
+                    var insert = GetInsertText(baseCi, propertyType);
+                    var detail = $"{propertyType.ToLower()} property";
+                    return baseCi.WithLabel(label).WithDetail(detail).WithInsertText(insert).WithSortText(baseSort);
                 }
             }
         }
@@ -85,7 +91,7 @@ namespace FplLS
             switch (propertyType)
             {
                 case "Function":
-                    ret = $"{GetLabelKeyword(ci, propertyType).Replace("_ ","")} SomeFpl{propertyType}Property() -> {TokenObject}{Environment.NewLine}";
+                    ret = $"{GetLabelKeyword(ci, propertyType).Replace("_ ", "")} SomeFpl{propertyType}Property() -> {TokenObject}{Environment.NewLine}";
                     break;
                 case "Predicate":
                 default:
@@ -97,28 +103,6 @@ namespace FplLS
                 $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\t{TokenIntrinsic}{Environment.NewLine}" +
                 $"{TokenRightBrace}{Environment.NewLine}";
-        }
-
-        private void SetSortText(FplCompletionItem ci, string propertyType)
-        {
-
-            switch (propertyType)
-            {
-                case "Function":
-                    ci.SortText = "property03";
-                    break;
-                case "Predicate":
-                default:
-                    ci.SortText = "property02";
-                    break;
-
-            }
-
-            if (ci.IsShort)
-            {
-                ci.SortText = "z" + ci.SortText;
-            }
-
         }
 
     }

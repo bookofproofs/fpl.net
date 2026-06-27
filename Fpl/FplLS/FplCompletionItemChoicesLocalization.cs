@@ -1,21 +1,20 @@
-﻿using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 
 namespace FplLS
 {
-    public class FplCompletionItemChoicesLocalization: FplCompletionItemChoices
+    public class FplCompletionItemChoicesLocalization : FplCompletionItemChoices
     {
-        public override List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi) 
+        public override List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi)
         {
             var ret = new List<FplCompletionItem>();
-            // snippets
-            var ci = defaultCi.Clone();
-            ci.InsertText = $"""{ci.Word} iif(x,y) :={Environment.NewLine}!tex: x "\\Leftrightarrow" y{Environment.NewLine}!eng: x " if and only if " y{Environment.NewLine}!ger: x " dann und nur dann " y{Environment.NewLine};""" + Environment.NewLine;
-            ci.Label += " ...";
+            // snippet
+            var insert =
+                $"""{defaultCi.Word} iif(x,y) :={Environment.NewLine}!tex: x "\\Leftrightarrow" y{Environment.NewLine}!eng: x " if and only if " y{Environment.NewLine}!ger: x " dann und nur dann " y{Environment.NewLine};""" + Environment.NewLine;
+            var ci = defaultCi.WithInsertText(insert)
+                              .WithLabel(defaultCi.Label + " ...");
             ret.Add(ci);
-            // keywords
-            defaultCi.Kind = CompletionItemKind.Keyword;
-            defaultCi.AdjustToKeyword();
-            ret.Add(defaultCi);
+            // keywords (immutable)
+            ret.Add(defaultCi.WithKind(CompletionItemKind.Keyword).WithKeyword());
             return ret;
 
         }

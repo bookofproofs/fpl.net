@@ -9,27 +9,18 @@ namespace FplLS
         public override List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi)
         {
             var ret = new List<FplCompletionItem>();
-            // snippets
-            var ci = defaultCi.Clone(); SetBody(ci); ret.Add(ci);
+            // snippet
+            var ci = defaultCi.WithInsertText(FplCompletionItemChoicesAxiom.GetBody(defaultCi.Word, "Theorem$1"))
+                              .WithLabel(defaultCi.Label + " ...");
+            if (defaultCi.IsShort)
+            {
+                ci = ci.WithDetail("corollary (short)").WithSortText("z" + defaultCi.SortText);
+            }
+            ret.Add(ci);
 
-            // keywords
-            defaultCi.Kind = CompletionItemKind.Keyword;
-            defaultCi.AdjustToKeyword();
-            ret.Add(defaultCi);
+            // keywords (immutable)
+            ret.Add(defaultCi.WithKind(CompletionItemKind.Keyword).WithKeyword());
             return ret;
         }
-
-        private void SetBody(FplCompletionItem ci)
-        {
-            if (ci.IsShort)
-            {
-                TokenAssume = LiteralAss;
-                ci.Detail = "corollary (short)";
-                ci.SortText = "z" + ci.SortText;
-            }
-            ci.InsertText = FplCompletionItemChoicesAxiom.GetBody(ci.Word, "Theorem$1");
-            ci.Label += " ...";
-        }
-
     }
 }
