@@ -19,7 +19,8 @@ namespace FplLS
             ret.Add(ci);
 
             // keywords
-            ret.Add(defaultCi.WithKind(CompletionItemKind.Keyword).WithKeyword());
+            // ensure keyword variant uses the short-form sort marker when the base is short
+            ret.Add(defaultCi.WithIsShort(defaultCi.IsShort).WithKind(CompletionItemKind.Keyword).WithKeyword());
             return ret;
         }
 

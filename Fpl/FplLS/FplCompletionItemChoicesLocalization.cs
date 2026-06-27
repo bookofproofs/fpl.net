@@ -13,8 +13,8 @@ namespace FplLS
             var ci = defaultCi.WithInsertText(insert)
                               .WithLabel(defaultCi.Label + " ...");
             ret.Add(ci);
-            // keywords (immutable)
-            ret.Add(defaultCi.WithKind(CompletionItemKind.Keyword).WithKeyword());
+            // keywords (immutable) — preserve short-marker so keyword sort-texts match expectations
+            ret.Add(defaultCi.WithIsShort(defaultCi.IsShort).WithKind(CompletionItemKind.Keyword).WithKeyword());
             return ret;
 
         }

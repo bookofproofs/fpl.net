@@ -36,7 +36,11 @@ namespace FplLS
                 if (forKeyword)
                 {
                     var label = GetLabelKeyword(definitionType, baseCi);
-                    return baseCi.WithLabel(label).WithSortText("definition0"); // will be overwritten below with correct value
+                    // For short forms we want the base sort to already include the 'z' short-marker
+                    // so that later .WithKeyword() will add the keyword prefix ("zzz") producing
+                    // the expected final sort (e.g. "zzzzdefinition01" for short+keyword Class).
+                    var baseSort = "z" + (definitionType == "Class" ? "definition01" : definitionType == "Function" ? "definition03" : "definition02");
+                    return baseCi.WithLabel(label).WithSortText(baseSort);
                 }
                 else
                 {

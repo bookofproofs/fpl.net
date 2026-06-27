@@ -9,8 +9,8 @@ namespace FplLS
             var ret = new List<FplCompletionItem>();
             // snippets
             ret.Add(BuildConstructorSnippet(defaultCi));
-            // keywords
-            ret.Add(defaultCi.WithKind(CompletionItemKind.Keyword).WithKeyword());
+            // keywords - preserve short-marker when base is short so final sort-text is correct
+            ret.Add(defaultCi.WithIsShort(defaultCi.IsShort).WithKind(CompletionItemKind.Keyword).WithKeyword());
             return ret;
 
         }
