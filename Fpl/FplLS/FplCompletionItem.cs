@@ -599,7 +599,7 @@ namespace FplLS
             return Copy(insertText: insert, detail: detail, sortText: newSort, kind: CompletionItemKind.Keyword);
         }
 
-        public FplCompletionItem Clone() => Copy();
+        public FplCompletionItem Duplicate() => Copy();
 
         public FplCompletionItem WithShortAdjusted()
         {
@@ -649,7 +649,7 @@ namespace FplLS
             };
         }
 
-        private static string StripQuotesOrBrackets(string str)
+        public static string StripQuotesOrBrackets(string str)
         {
             if (str.StartsWith('\'') && str.EndsWith('\'') || str.StartsWith('<') && str.EndsWith('>'))
             {

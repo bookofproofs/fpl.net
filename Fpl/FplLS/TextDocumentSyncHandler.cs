@@ -37,113 +37,112 @@ namespace FplLS
     SOFTWARE.  
     */
 
-    public class TextDocumentSyncHandler(ILanguageServer router, BufferManager bufferManager) : ITextDocumentSyncHandler
+    public class TextDocumentSyncHandler : ITextDocumentSyncHandler
     {
-        private readonly ILanguageServer _languageServer = router;
-        private readonly BufferManager _bufferManager = bufferManager;
+        private readonly ILanguageServer _languageServer;
+        private readonly BufferManager _bufferManager;
 
         private readonly DocumentSelector _documentSelector = new(
-            new DocumentFilter()
-            {
-                Pattern = "**/*.fpl"
-            }
+            new DocumentFilter { Pattern = "**/*.fpl" }
         );
+
         private SynchronizationCapability? _capability;
 
-        public TextDocumentSyncKind Change { get; } = TextDocumentSyncKind.Full;
-
-        public TextDocumentChangeRegistrationOptions GetRegistrationOptions()
+        public TextDocumentSyncHandler(ILanguageServer router, BufferManager bufferManager)
         {
-            return new TextDocumentChangeRegistrationOptions()
-            {
-                DocumentSelector = _documentSelector,
-                SyncKind = Change
-            };
+            _languageServer = router;
+            _bufferManager = bufferManager;
         }
 
-        public TextDocumentAttributes GetTextDocumentAttributes(Uri uri)
+        public TextDocumentSyncKind Change => TextDocumentSyncKind.Full;
+
+        // ---------------------------
+        // EXPLICIT IMPLEMENTATIONS
+        // ---------------------------
+
+        TextDocumentOpenRegistrationOptions
+            IRegistration<TextDocumentOpenRegistrationOptions, SynchronizationCapability>
+            .GetRegistrationOptions(SynchronizationCapability capability, ClientCapabilities clientCapabilities)
         {
-            FplLsTraceLogger.LogMsg(_languageServer, $"{uri.AbsolutePath}", "GetTextDocumentAttributes.GetTextDocumentAttributes");
-            return new TextDocumentAttributes(uri, "fpl");
-        }
-
-        public Task<Unit> Handle(DidChangeTextDocumentParams request, CancellationToken cancellationToken)
-        {
-
-            FplLsTraceLogger.LogMsg(_languageServer, $"{cancellationToken}", "GetTextDocumentAttributes.Handle");
-            try
-            {
-                var uri = PathEquivalentUri.EscapedUri(request.TextDocument.Uri.GetFileSystemPath());
-                var text = request.ContentChanges.FirstOrDefault()?.Text;
-
-                FplLsTraceLogger.LogMsg(_languageServer, $"updating buffer", $"GetTextDocumentAttributes.Handle {uri}");
-                _bufferManager.UpdateBuffer(uri, new StringBuilder(text));
-                FplLsTraceLogger.LogMsg(_languageServer, $"buffer updated", "GetTextDocumentAttributes.Handle");
-            }
-            catch (Exception ex)
-            {
-                FplLsTraceLogger.LogException(_languageServer, ex, "GetTextDocumentAttributes.Handle (DidChangeTextDocumentParams)");
-            }
-
-
-            return Unit.Task;
-        }
-
-        public Task<Unit> Handle(DidOpenTextDocumentParams request, CancellationToken cancellationToken)
-        {
-            FplLsTraceLogger.LogMsg(_languageServer, "x(DidOpenTextDocumentParams)", "GetTextDocumentAttributes.Handle");
-            try
-            {
-                var uri = PathEquivalentUri.EscapedUri(request.TextDocument.Uri.GetFileSystemPath());
-                FplLsTraceLogger.LogMsg(_languageServer, $"updating buffer (DidOpenTextDocumentParams)", $"GetTextDocumentAttributes.Handle {uri}");
-                _bufferManager.UpdateBuffer(uri, new StringBuilder(request.TextDocument.Text));
-                FplLsTraceLogger.LogMsg(_languageServer, $"buffer updated (DidOpenTextDocumentParams)", "GetTextDocumentAttributes.Handle");
-            }
-            catch (Exception ex)
-            {
-                FplLsTraceLogger.LogException(_languageServer, ex, "GetTextDocumentAttributes.Handle (DidOpenTextDocumentParams)");
-            }
-            return Unit.Task;
-        }
-
-        public Task<Unit> Handle(DidCloseTextDocumentParams request, CancellationToken cancellationToken)
-        {
-            FplLsTraceLogger.LogMsg(_languageServer, $"y(DidCloseTextDocumentParams)", "GetTextDocumentAttributes.Handle");
-            return Unit.Task;
-        }
-
-        public Task<Unit> Handle(DidSaveTextDocumentParams request, CancellationToken cancellationToken)
-        {
-            FplLsTraceLogger.LogMsg(_languageServer, $"z(DidSaveTextDocumentParams)", "GetTextDocumentAttributes.Handle");
-            return Unit.Task;
-        }
-
-        public void SetCapability(SynchronizationCapability capability)
-        {
-            FplLsTraceLogger.LogMsg(_languageServer, $"", "GetTextDocumentAttributes.SetCapability");
-            _capability = capability;
-        }
-
-        TextDocumentRegistrationOptions IRegistration<TextDocumentRegistrationOptions>.GetRegistrationOptions()
-        {
-            return new TextDocumentChangeRegistrationOptions()
-            {
-                DocumentSelector = _documentSelector,
-                SyncKind = Change
-            };
-        }
-
-        TextDocumentSaveRegistrationOptions IRegistration<TextDocumentSaveRegistrationOptions>.GetRegistrationOptions()
-        {
-            return new TextDocumentSaveRegistrationOptions()
+            return new TextDocumentOpenRegistrationOptions
             {
                 DocumentSelector = _documentSelector
             };
         }
 
-        TextDocumentAttributes ITextDocumentIdentifier.GetTextDocumentAttributes(DocumentUri uri)
+        TextDocumentChangeRegistrationOptions
+            IRegistration<TextDocumentChangeRegistrationOptions, SynchronizationCapability>
+            .GetRegistrationOptions(SynchronizationCapability capability, ClientCapabilities clientCapabilities)
+        {
+            return new TextDocumentChangeRegistrationOptions
+            {
+                DocumentSelector = _documentSelector,
+                SyncKind = Change
+            };
+        }
+
+        TextDocumentCloseRegistrationOptions
+            IRegistration<TextDocumentCloseRegistrationOptions, SynchronizationCapability>
+            .GetRegistrationOptions(SynchronizationCapability capability, ClientCapabilities clientCapabilities)
+        {
+            return new TextDocumentCloseRegistrationOptions
+            {
+                DocumentSelector = _documentSelector
+            };
+        }
+
+        TextDocumentSaveRegistrationOptions
+            IRegistration<TextDocumentSaveRegistrationOptions, SynchronizationCapability>
+            .GetRegistrationOptions(SynchronizationCapability capability, ClientCapabilities clientCapabilities)
+        {
+            return new TextDocumentSaveRegistrationOptions
+            {
+                DocumentSelector = _documentSelector
+            };
+        }
+
+        // ---------------------------
+        // CAPABILITY + ATTRIBUTES
+        // ---------------------------
+
+        public void SetCapability(SynchronizationCapability capability)
+        {
+            _capability = capability;
+        }
+
+        public TextDocumentAttributes GetTextDocumentAttributes(DocumentUri uri)
         {
             return new TextDocumentAttributes(uri, "fpl");
         }
+
+        // ---------------------------
+        // HANDLERS
+        // ---------------------------
+
+        public Task<Unit> Handle(DidOpenTextDocumentParams request, CancellationToken cancellationToken)
+        {
+            var uri = PathEquivalentUri.EscapedUri(request.TextDocument.Uri.GetFileSystemPath());
+            _bufferManager.UpdateBuffer(uri, new StringBuilder(request.TextDocument.Text));
+            return Unit.Task;
+        }
+
+        public Task<Unit> Handle(DidChangeTextDocumentParams request, CancellationToken cancellationToken)
+        {
+            var uri = PathEquivalentUri.EscapedUri(request.TextDocument.Uri.GetFileSystemPath());
+            var text = request.ContentChanges.FirstOrDefault()?.Text;
+            _bufferManager.UpdateBuffer(uri, new StringBuilder(text));
+            return Unit.Task;
+        }
+
+        public Task<Unit> Handle(DidCloseTextDocumentParams request, CancellationToken cancellationToken)
+        {
+            return Unit.Task;
+        }
+
+        public Task<Unit> Handle(DidSaveTextDocumentParams request, CancellationToken cancellationToken)
+        {
+            return Unit.Task;
+        }
     }
+
 }

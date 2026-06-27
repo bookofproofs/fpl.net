@@ -1,30 +1,35 @@
-﻿using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using static Fpl.Primitives;
 
 namespace FplLS
 {
-    public class FplCompletionItemChoicesDigits: FplCompletionItemChoices
+    public class FplCompletionItemChoicesDigits : FplCompletionItemChoices
     {
-        public override List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi) 
+        public override List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi)
         {
             var ret = new List<FplCompletionItem>();
 
+            FplCompletionItem ci;
             if (defaultCi.Word.Contains("dollar"))
             {
-                defaultCi.Detail = "$digits";
-                defaultCi.InsertText = "$123";
-                defaultCi.SortText = "$123";
-                defaultCi.Label = TokenPrefix + defaultCi.InsertText;
-                defaultCi.Kind = CompletionItemKind.Text;
+                ci = defaultCi
+                    .WithDetail("$digits")
+                    .WithInsertText("$123")
+                    .WithSortText("$123")
+                    .WithLabel(TokenPrefix + "$123")
+                    .WithKind(CompletionItemKind.Text);
             }
             else
             {
-                defaultCi.Detail = "digits";
-                defaultCi.InsertText = "123";
-                defaultCi.SortText = "123";
-                defaultCi.Label = TokenPrefix + defaultCi.InsertText;
-                defaultCi.Kind = CompletionItemKind.Text;
+                ci = defaultCi
+                    .WithDetail("digits")
+                    .WithInsertText("123")
+                    .WithSortText("123")
+                    .WithLabel(TokenPrefix + "123")
+                    .WithKind(CompletionItemKind.Text);
             }
-            ret.Add(defaultCi);
+
+            ret.Add(ci);
             return ret;
 
         }

@@ -1,13 +1,13 @@
-using OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities;
+
 using static Fpl.Primitives;
 
 namespace FplLS
 {
     public abstract class FplCompletionItemChoices
     {
-        public string TokenPrefix = "_ ";
-        public string TokenLeftBrace = "{";
-        public string TokenRightBrace = "}";
+        public const string TokenPrefix = "_ ";
+        public const string TokenLeftBrace = "{";
+        public const string TokenRightBrace = "}";
         public string TokenAssume { get; set; }
         public string TokenClass { get; set; }
         public string TokenConclusion { get; set; }

@@ -3,9 +3,9 @@ using static Fpl.Primitives;
 
 namespace FplLS
 {
-    public class FplCompletionItemChoicesIso639: FplCompletionItemChoices
+    public class FplCompletionItemChoicesIso639 : FplCompletionItemChoices
     {
-        public override List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi) 
+        public override List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi)
         {
             var ret = new List<FplCompletionItem>();
             var iso632_2 = new Dictionary<string, string>()
@@ -501,15 +501,16 @@ namespace FplLS
                 ,{ "zun","Zuni" }
                 ,{ "zza","Zaza; Dimili; Dimli; Kirdki; Kirmanjki; Zazaki" }
             };
-            foreach (var kvp in iso632_2)
 
+            foreach (var kvp in iso632_2)
             {
-                var ci = new FplCompletionItem(kvp.Key);
-                ci.InsertText = kvp.Key + ": ";
-                ci.Label = TokenPrefix + kvp.Value + " ...";
-                ci.SortText = null;
-                ci.Detail = kvp.Value;
-                ci.Kind = CompletionItemKind.Value;
+                var baseCi = new FplCompletionItem(kvp.Key);
+                var ci = baseCi
+                    .WithInsertText(kvp.Key + ": ")
+                    .WithLabel(TokenPrefix + kvp.Value + " ...")
+                    .WithDetail(kvp.Value)
+                    .WithKind(CompletionItemKind.Value);
+
                 ret.Add(ci);
             }
 

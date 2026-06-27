@@ -3,14 +3,13 @@ using static Fpl.Primitives;
 
 namespace FplLS
 {
-
     public class FplCompletionItemChoicesPredicate : FplCompletionItemChoices
     {
 
         public override List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi)
         {
             var ret = new List<FplCompletionItem>();
-            // snippets
+            // snippets / keywords (create new instances instead of mutating)
             switch (defaultCi.Word)
             {
                 case LiteralTrue:
@@ -18,63 +17,58 @@ namespace FplLS
                 case LiteralUndef:
                 case LiteralUndefL:
                     // keyword
-                    var ciK = defaultCi.Clone(); ciK.Kind = CompletionItemKind.Keyword; ciK.AdjustToKeyword(); ret.Add(ciK);
+                    ret.Add(defaultCi.WithKeyword());
                     break;
                 case LiteralNot:
                     // snippet
-                    var ci = defaultCi.Clone(); SetBody(ci, 1); ret.Add(ci);
+                    ret.Add(CreateWithBody(defaultCi, 1));
                     // keyword
-                    var ci1 = defaultCi.Clone(); ci1.Kind = CompletionItemKind.Keyword; ci1.AdjustToKeyword(); ret.Add(ci1);
+                    ret.Add(defaultCi.WithKeyword());
                     break;
                 case LiteralIif:
                 case LiteralImpl:
                     // snippet
-                    var ci2 = defaultCi.Clone(); SetBody(ci2, 2); ret.Add(ci2);
+                    ret.Add(CreateWithBody(defaultCi, 2));
                     // keyword
-                    var ci2K = defaultCi.Clone(); ci2K.Kind = CompletionItemKind.Keyword; ci2K.AdjustToKeyword(); ret.Add(ci2K);
+                    ret.Add(defaultCi.WithKeyword());
                     break;
                 case "(":
                     // snippet for equality
-                    var ciEquals = defaultCi.Clone(); SetBodyEquality(ciEquals); ret.Add(ciEquals);
+                    ret.Add(CreateEquality(defaultCi));
                     break;
                 case LiteralAnd:
                 case LiteralOr:
                 case LiteralXor:
-                    var ci3 = defaultCi.Clone(); SetBody(ci3, 3); ret.Add(ci3);
-                    var ci3K = defaultCi.Clone(); ci3K.Kind = CompletionItemKind.Keyword; ci3K.AdjustToKeyword(); ret.Add(ci3K);
+                    ret.Add(CreateWithBody(defaultCi, 3));
+                    ret.Add(defaultCi.WithKeyword());
                     break;
             }
             return ret;
         }
 
-        public void SetBody(FplCompletionItem ci, int numbOfArgs)
+        private static FplCompletionItem CreateWithBody(FplCompletionItem baseCi, int numbOfArgs)
         {
-            switch (numbOfArgs)
+            string insert = numbOfArgs switch
             {
-                case 0:
-                    // no snippets for null-ary predicates (treat them as keywords only - see below)
-                    break;
-                case 1:
-                    ci.InsertText = $"{ci.Word} true ";
-                    break;
-                case 2:
-                    ci.InsertText = $"{ci.Word} ( false, true ) ";
-                    break;
-                default:
-                    ci.InsertText = $"{ci.Word} ( true, false ) ";
-                    break;
-            }
-            ci.Label += " ...";
-
+                0 => baseCi.Word + " ",
+                1 => $"{baseCi.Word} true ",
+                2 => $"{baseCi.Word} ( false, true ) ",
+                _ => $"{baseCi.Word} ( true, false ) ",
+            };
+            return baseCi
+                .WithInsertText(insert)
+                .WithLabel(baseCi.Label + " ...");
         }
 
-        public void SetBodyEquality(FplCompletionItem ci)
+        private static FplCompletionItem CreateEquality(FplCompletionItem baseCi)
         {
-            ci.InsertText = $"( x = y ) ";
-            ci.Label = TokenPrefix + ci.InsertText + "...";
-            ci.Detail = PrimDelegateEqual;
-            ci.SortText = "(";
-            ci.Kind = CompletionItemKind.Operator;
+            var insert = $" x = y ";
+            return baseCi
+                .WithInsertText(insert)
+                .WithLabel(TokenPrefix + insert + "...")
+                .WithDetail(PrimDelegateEqual)
+                .WithSortText("(")
+                .WithKind(CompletionItemKind.Operator);
         }
 
     }

@@ -7,29 +7,31 @@ namespace FplLS
     {
         public override List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi)
         {
-            var ret = new List<FplCompletionItem>();
-            // create each snippet as a new instance (do not mutate defaultCi)
-            ret.Add(BuildProof(defaultCi, "01", "direct proof", BuildDirectProofBody));
-            ret.Add(BuildProof(defaultCi, "02", "contrapositive proof", BuildContrapositiveProofBody));
-            ret.Add(BuildProof(defaultCi, "03", "proof by contradiction (1)", BuildContradictionProofBody));
-            ret.Add(BuildProof(defaultCi, "04", "proof by contradiction (2)", BuildContradictionProof2Body));
-            ret.Add(BuildProof(defaultCi, "05", "equivalence proof", BuildEquivalenceProofBody));
-            ret.Add(BuildProof(defaultCi, "06", "disjunct. premise proof", BuildDisjPremiseProofBody));
-            ret.Add(BuildProof(defaultCi, "07", "conjunctive premise proof", BuildConjPremiseProofBody));
-            ret.Add(BuildProof(defaultCi, "08", "disjunctive conclusion proof", BuildDisjunctiveConclusionProofBody));
-            ret.Add(BuildProof(defaultCi, "09", "conjunctive conclusion proof", BuildConjunctiveConclusionProofBody));
-            ret.Add(BuildProof(defaultCi, "10", "counterexample all", BuildCounterexampleAllBody));
-            ret.Add(BuildProof(defaultCi, "11", "counterexample ex", BuildCounterexampleExBody));
-            ret.Add(BuildProof(defaultCi, "12", "by induction", BuildByInductionBody));
-            ret.Add(BuildProof(defaultCi, "13", "by strong induction", BuildByStrongInductionBody));
-            ret.Add(BuildProof(defaultCi, "14", "smallest counterexample", BuildSmallestCounterexampleBody));
+            var ret = new List<FplCompletionItem>
+            {
+                // create each snippet as a new instance (do not mutate defaultCi)
+                BuildProof(defaultCi, "01", "direct proof", BuildDirectProofBody),
+                BuildProof(defaultCi, "02", "contrapositive proof", BuildContrapositiveProofBody),
+                BuildProof(defaultCi, "03", "proof by contradiction (1)", BuildContradictionProofBody),
+                BuildProof(defaultCi, "04", "proof by contradiction (2)", BuildContradictionProof2Body),
+                BuildProof(defaultCi, "05", "equivalence proof", BuildEquivalenceProofBody),
+                BuildProof(defaultCi, "06", "disjunct. premise proof", BuildDisjPremiseProofBody),
+                BuildProof(defaultCi, "07", "conjunctive premise proof", BuildConjPremiseProofBody),
+                BuildProof(defaultCi, "08", "disjunctive conclusion proof", BuildDisjunctiveConclusionProofBody),
+                BuildProof(defaultCi, "09", "conjunctive conclusion proof", BuildConjunctiveConclusionProofBody),
+                BuildProof(defaultCi, "10", "counterexample all", BuildCounterexampleAllBody),
+                BuildProof(defaultCi, "11", "counterexample ex", BuildCounterexampleExBody),
+                BuildProof(defaultCi, "12", "by induction", BuildByInductionBody),
+                BuildProof(defaultCi, "13", "by strong induction", BuildByStrongInductionBody),
+                BuildProof(defaultCi, "14", "smallest counterexample", BuildSmallestCounterexampleBody),
 
-            // keywords
-            ret.Add(defaultCi.WithKind(CompletionItemKind.Keyword).WithKeyword());
+                // keywords
+                defaultCi.WithKind(CompletionItemKind.Keyword).WithKeyword()
+            };
             return ret;
         }
 
-        private FplCompletionItem BuildProof(FplCompletionItem baseCi, string suffix, string detailPrefix, Func<FplCompletionItem, string> bodyProvider)
+        private static FplCompletionItem BuildProof(FplCompletionItem baseCi, string suffix, string detailPrefix, Func<FplCompletionItem, string> bodyProvider)
         {
             var newSort = baseCi.SortText + suffix;
             var detail = detailPrefix;

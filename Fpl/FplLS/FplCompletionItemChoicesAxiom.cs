@@ -1,29 +1,31 @@
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using static Fpl.Primitives;
+
 namespace FplLS
 {
-    public class FplCompletionItemChoicesAxiom: FplCompletionItemChoices
+    public class FplCompletionItemChoicesAxiom : FplCompletionItemChoices
     {
-        public override List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi) 
+        public override List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi)
         {
             var ret = new List<FplCompletionItem>();
             // snippets
-            var ci = defaultCi.Clone();
+            var ci = defaultCi;
             if (ci.Word.StartsWith(LiteralAx))
             {
-                ci.InsertText = GetBody(ci.Word, "Axiom");
-                ci.Label += " ...";
+                ci = defaultCi
+                    .WithInsertText(GetBody(ci.Word, "Axiom"))
+                    .WithLabel(defaultCi.Label + " ...");
             }
             else
             {
-                ci.InsertText = GetBody(ci.Word, "Postulate");
-                ci.Label += " ...";
+                ci = defaultCi
+                    .WithInsertText(GetBody(ci.Word, "Postulate"))
+                    .WithLabel(defaultCi.Label + " ...");
             }
             ret.Add(ci);
             // keywords
-            defaultCi.Kind = CompletionItemKind.Keyword;
-            defaultCi.AdjustToKeyword();
-            ret.Add(defaultCi);
+            var keyword = defaultCi.WithKeyword();
+            ret.Add(keyword);
             return ret;
 
         }
