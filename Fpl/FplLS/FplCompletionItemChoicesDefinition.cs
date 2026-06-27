@@ -16,9 +16,9 @@ namespace FplLS
             ret.Add(BuildDefinition(defaultCi, "Function", false).WithLabel(defaultCi.Label + " ..."));
 
             // keyword variants
-            ret.Add(BuildDefinition(defaultCi.WithKind(CompletionItemKind.Keyword), "Class", true));
-            ret.Add(BuildDefinition(defaultCi.WithKind(CompletionItemKind.Keyword), "Predicate", true));
-            ret.Add(BuildDefinition(defaultCi.WithKind(CompletionItemKind.Keyword), "Function", true));
+            ret.Add(BuildDefinition(defaultCi.WithKind(CompletionItemKind.Keyword), "Class", true).WithKeyword());
+            ret.Add(BuildDefinition(defaultCi.WithKind(CompletionItemKind.Keyword), "Predicate", true).WithKeyword());
+            ret.Add(BuildDefinition(defaultCi.WithKind(CompletionItemKind.Keyword), "Function", true).WithKeyword());
             return ret;
         }
 
