@@ -20,8 +20,8 @@ namespace FplLS
             insert += $"\t{TokenRightBrace}{Environment.NewLine}";
             var ci = defaultCi.WithInsertText(insert).WithLabel(defaultCi.Label + " ...");
             ret.Add(ci);
-            // keywords (don't mutate default)
-            ret.Add(defaultCi.WithKind(CompletionItemKind.Keyword).WithKeyword());
+            // keywords (don't mutate default) — preserve short-marker for correct keyword sort-texts
+            ret.Add(defaultCi.WithIsShort(defaultCi.IsShort).WithKind(CompletionItemKind.Keyword).WithKeyword());
             return ret;
 
         }

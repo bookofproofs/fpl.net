@@ -329,7 +329,7 @@ namespace FplLS
                     IsShort = true;
                     break;
                 case LiteralObjL:
-                    Detail = LiteralObjL;
+                    Detail = "type (object)";
                     SortText = "object01";
                     Kind = CompletionItemKind.TypeParameter;
                     IsShort = false;

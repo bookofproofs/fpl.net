@@ -33,35 +33,38 @@ namespace FplLS
                 TokenPredicate = LiteralPred;
                 TokenClass = LiteralCl;
 
+                // compute the base sort for each subtype (short forms include leading 'z')
+                var baseSort = "z" + (definitionType == "Class" ? "definition01" : definitionType == "Function" ? "definition03" : "definition02");
+
                 if (forKeyword)
                 {
                     var label = GetLabelKeyword(definitionType, baseCi);
-                    // For short forms we want the base sort to already include the 'z' short-marker
-                    // so that later .WithKeyword() will add the keyword prefix ("zzz") producing
-                    // the expected final sort (e.g. "zzzzdefinition01" for short+keyword Class).
-                    var baseSort = "z" + (definitionType == "Class" ? "definition01" : definitionType == "Function" ? "definition03" : "definition02");
+                    // ensure keyword variant receives the proper short-marked base sort
                     return baseCi.WithLabel(label).WithSortText(baseSort);
                 }
                 else
                 {
                     var label = GetLabelKeyword(definitionType, baseCi) + " ...";
                     var detail = $"{definitionType.ToLower()} definition (short)";
-                    var sort = "z" + (definitionType == "Class" ? "definition01" : definitionType == "Function" ? "definition03" : "definition02");
-                    return baseCi.WithLabel(label).WithDetail(detail).WithSortText(sort).WithInsertText(GetBody(definitionType, baseCi));
+                    return baseCi.WithLabel(label).WithDetail(detail).WithSortText(baseSort).WithInsertText(GetBody(definitionType, baseCi));
                 }
             }
             else
             {
+                // non-short / long forms: compute base sort WITHOUT 'z'
+                var baseSort = definitionType == "Class" ? "definition01" : definitionType == "Function" ? "definition03" : "definition02";
+
                 if (forKeyword)
                 {
                     var label = GetLabelKeyword(definitionType, baseCi);
-                    return baseCi.WithLabel(label);
+                    // ensure keyword variant has correct base sort so .WithKeyword() prefixes "zzz" correctly
+                    return baseCi.WithLabel(label).WithSortText(baseSort);
                 }
                 else
                 {
                     var label = GetLabelKeyword(definitionType, baseCi) + " ...";
                     var detail = $"{definitionType.ToLower()} definition";
-                    return baseCi.WithLabel(label).WithDetail(detail).WithInsertText(GetBody(definitionType, baseCi));
+                    return baseCi.WithLabel(label).WithDetail(detail).WithSortText(baseSort).WithInsertText(GetBody(definitionType, baseCi));
                 }
             }
         }

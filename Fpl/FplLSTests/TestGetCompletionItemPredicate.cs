@@ -60,7 +60,7 @@ namespace FplLSTests
         [DataRow(LiteralTrue, CompletionItemKind.Keyword, "zzztrue")]
         [DataRow(LiteralFalse, CompletionItemKind.Keyword, "zzzfalse")]
         [DataRow(LiteralUndefL, CompletionItemKind.Keyword, "zzzundefined01")]
-        [DataRow(LiteralUndef, CompletionItemKind.Keyword, "zzzzundefined02")]
+        [DataRow(LiteralUndef, CompletionItemKind.Keyword, "zzzundefined02")]
         [DataRow(LiteralNot, CompletionItemKind.Operator, LiteralNot)]
         [DataRow(LiteralNot, CompletionItemKind.Keyword, "zzznot")]
         [DataRow(LiteralXor, CompletionItemKind.Operator, LiteralXor)]

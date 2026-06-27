@@ -25,8 +25,8 @@ namespace FplLS
                 BuildProof(defaultCi, "13", "by strong induction", BuildByStrongInductionBody),
                 BuildProof(defaultCi, "14", "smallest counterexample", BuildSmallestCounterexampleBody),
 
-                // keywords
-                defaultCi.WithKind(CompletionItemKind.Keyword).WithKeyword()
+                // keywords - preserve short-marker so keyword sort-texts match expectations
+                defaultCi.WithIsShort(defaultCi.IsShort).WithKind(CompletionItemKind.Keyword).WithKeyword()
             };
             return ret;
         }

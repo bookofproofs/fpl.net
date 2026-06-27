@@ -12,8 +12,9 @@ namespace FplLS
             ret.Add(BuildForSnippet(defaultCi, 1));
             ret.Add(BuildForSnippet(defaultCi, 2));
 
-            // keywords -> do not mutate defaultCi
-            ret.Add(defaultCi.WithSortText("for03").WithKind(CompletionItemKind.Keyword).WithKeyword());
+            // keywords -> do not mutate default; preserve short-marker and ensure base sort respects short form
+            var baseSort = defaultCi.IsShort ? "zfor03" : "for03";
+            ret.Add(defaultCi.WithSortText(baseSort).WithIsShort(defaultCi.IsShort).WithKind(CompletionItemKind.Keyword).WithKeyword());
             return ret;
 
         }

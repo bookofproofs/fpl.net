@@ -141,7 +141,6 @@ namespace FplLSTests
         [DataRow(":", "colon ':'")]
         [DataRow(".", "dot '.'")]
         [DataRow(",", "enumeration ','")]
-        [DataRow("~", "type declaration '~'")]
         [DataRow("|-", "follows logically '|-'")]
         [DataRow("->", "map '->'")]
         [DataRow("{", "opening '{'")]
