@@ -10,12 +10,16 @@ open TestFplInterpreter.Helpers.Common
 [<TestClass>]
 type TestInferredExpressionsJust() =
 
+    // identical expressions derived from axioms
     [<DataRow("00", """ax A {true} thm T {true} prf T$1 { 1. byax A |- true }""", "true", 1)>]
     [<DataRow("01", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" ax A {all n,m:Nat { impl( ( Succ(n) = Succ(m) ), ( n = m ) ) }} thm T {true} prf T$1 { 1. byax A |- true }""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 1)>]
     [<DataRow("02", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" ax A {all n,m:Nat { impl( ( n' = m' ), ( n = m ) ) }} thm T {true} prf T$1 { 1. byax A |- true }""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 1)>]
     [<DataRow("03", """ax A {∃!1 x:obj{true}} thm T {true} prf T$1 { 1. byax A |- true }""", "∃! x:obj {true}", 1)>]
     [<DataRow("04", """ax A {∃! x:obj{true}} thm T {true} prf T$1 { 1. byax A |- true }""", "∃! x:obj {true}", 1)>]
-    [<DataRow("03", """ax A {∃!3 x:obj{true}} thm T {true} prf T$1 { 1. byax A |- true }""", "∃!3 x:obj {true}", 1)>]
+    [<DataRow("05", """ax A {∃!3 x:obj{true}} thm T {true} prf T$1 { 1. byax A |- true }""", "∃!3 x:obj {true}", 1)>]
+    // formula-compatible expressions derived from axioms
+    [<DataRow("50", """ax A1 {dec f, g: pred; impl(f, impl(g, f))} thm T {dec a:pred; impl (a, a)} prf T$1 { 1. byax A1 |- impl(a, impl(impl(a, a),  a)) }""", "a ⇒ ((a ⇒ a) ⇒ a)", 1)>]
+    
     [<TestMethod>]
     member this.TestInferredExpressionJustByAx(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
         
