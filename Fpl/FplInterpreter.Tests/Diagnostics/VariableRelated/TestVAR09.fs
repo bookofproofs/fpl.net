@@ -57,7 +57,7 @@ type TestVAR09() =
     [<DataRow("20", """def pred T() { xor(xor(true,true),true) }""", 0)>]
     [<DataRow("21", """def pred T() { all x,y:pred { xor(xor(y,x),true) } }""", 0)>]
     [<DataRow("22", """def pred T() { all i:Nat {true} }""", 0)>]
-    [<DataRow("23", """theorem Example1 { dec a:pred; impl (a, a) }""", 0)>]
+    [<DataRow("23", """theorem Example1 { dec a:pred; impl (a, a) }""", 0)>] 
     
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
