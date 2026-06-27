@@ -535,7 +535,13 @@ namespace FplLS
             }
             else
             {
-                Detail = $"keyword '{word}'";
+                // previous behavior: when insertText wasn't supplied the item was treated as a keyword
+                // Only override Detail for items which remained the default Text kind (i.e. unrecognized keywords).
+                // Do NOT mutate SortText here — keyword ordering is handled by explicit helpers (WithKeyword / AdjustToKeyword).
+                if (Kind == CompletionItemKind.Text)
+                {
+                    Detail = $"keyword '{word}'";
+                }
             }
         }
 
