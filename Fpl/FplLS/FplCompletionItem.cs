@@ -535,10 +535,7 @@ namespace FplLS
             }
             else
             {
-                // previous behavior: when insertText wasn't supplied the item was treated as a keyword
-                // keep the original Kind (do not force Keyword) but mark sort-order for keywords
                 Detail = $"keyword '{word}'";
-                SortText = "zzz" + SortText;
             }
         }
 
