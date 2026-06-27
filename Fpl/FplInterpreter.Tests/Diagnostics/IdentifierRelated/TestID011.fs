@@ -1,0 +1,42 @@
+namespace Diagnostics.IdentifierRelated
+
+open Microsoft.VisualStudio.TestTools.UnitTesting
+open Fpl.Errors.Diagnostics
+open Fpl.Interpreter.Helpers.Debug
+open TestFplInterpreter.Helpers.Common
+
+(* ID011
+   Purpose: Report problems with an inheritance chain during type resolution.
+   What it indicates: The derived type's inheritance chain contains an error (for example, an unresolved base, inconsistent chain, or other issue reported by the chain validation), preventing successful embedding of the derived type.
+   Use: Emitted while validating type constructs to point authors to problematic inheritance configurations that block embedding or type resolution.
+   Action / Treat: Fix the inheritance chain — ensure all bases are declared and compatible, correct qualifiers, or resolve the underlying error indicated by the chain diagnostics. ID011 is an error that must be resolved for successful type embedding. *)
+
+[<TestClass>]
+type TestID011() =
+
+    [<DataRow("00", "def cl A {intr}", 0)>]
+    [<DataRow("01", "def cl A {intr} def cl B:A {intr}", 0)>]
+    [<DataRow("02", "def cl A {intr} def cl B:A {intr} def cl C:B,A {intr}", 1)>]
+    [<DataRow("03", "uses Fpl.SetTheory def cl Test:EmptySet,Set {intr}", 1)>]
+    [<DataRow("04", "uses Fpl.SetTheory def cl Test:Set, EmptySet {intr}", 1)>]
+    [<DataRow("05", "def cl A {intr} def cl B:A {intr} def cl C:A,B {intr}", 1)>]
+    [<DataRow("06", "def cl A {intr} def cl B:A {intr} def cl C:B {intr}", 0)>]
+    [<DataRow("07", "uses Fpl.SetTheory def cl Test:EmptySet {intr}", 0)>]
+    [<DataRow("08", "uses Fpl.SetTheory def cl Test:Set {intr}", 0)>]
+    [<DataRow("09", "uses Fpl.Commons uses Fpl.SetTheory def cl Test:Set {intr}", 0)>]
+    [<DataRow("10", "def cl A {intr} def cl B:A {intr} def cl C:A {intr}", 0)>]
+    [<DataRow("11", "def cl A {intr} def cl B:A {intr} def cl C:A,A {intr}", 1)>]
+    [<DataRow("12", "def cl A {intr} def cl B:A {intr} def cl C {intr}", 0)>]
+    [<DataRow("13", "def cl A {intr} def cl B:A {intr} def cl C:D,E {intr}", 0)>]
+    [<DataRow("14", "uses Fpl.SetTheory def cl Test:Set {intr}", 0)>]
+    [<DataRow("15", "uses Fpl.SetTheory def cl Test:EmptySet {intr}", 0)>]
+    [<DataRow("16", "uses Fpl.SetTheory def cl Test:Set {intr}", 0)>]
+    [<DataRow("17", "uses Fpl.SetTheory def cl Test:EmptySet {intr}", 0)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
+    [<TestMethod>]
+    member this.TestID011(no:string, fplCode:string, expected) =
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = ID011 ("","")
+            runTestHelper "TestID011.fpl" fplCode code expected

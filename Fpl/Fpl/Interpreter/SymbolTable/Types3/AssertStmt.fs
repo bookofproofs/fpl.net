@@ -1,0 +1,57 @@
+/// This module contains all symbol table nodes used by the FplInterpreter
+/// to model the assert statement.
+
+(* MIT License
+
+Copyright (c) 2024+ bookofproofs
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
+
+*)
+module Fpl.Interpreter.SymbolTable.Types3.AssertStmt
+open Fpl.Primitives
+open Fpl.Parser.Types
+open Fpl.Interpreter.BasicTypes
+open Fpl.Interpreter.Helpers.Debug
+open Fpl.Interpreter.SymbolTable.Storage.Heap
+open Fpl.Interpreter.SymbolTable.Types2.Intrinsic
+
+
+type FplAssertion(positions: Positions, parent: FplGenericNode) =
+    inherit FplGenericStmt(positions, parent)
+
+    override this.Name = PrimAssertion
+    override this.ShortName = LiteralAss
+
+    member this.ValidExpression =
+        let validityReason = 
+            let exprOpt = this.ArgList |> Seq.tryLast
+            match exprOpt with
+            | Some expr -> ValidityReason.IsAxiomAssertion (expr.Type SignatureType.Name)
+            | _ -> ValidityReason.Error // fallback if axiom node is empty
+
+        {
+            ValidStatement.Node = this
+            ValidStatement.ValidityReason = validityReason
+        }
+
+    interface IValid with
+        member this.ValidExpression
+            with get () = this.ValidExpression
+
+    override this.Clone () =
+        let ret = new FplAssertion((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Run() = 
+        StaticDebug.Debug(this,Debug.Start)
+        heap.ValidStmtStore.RegisterExpression this |> ignore
+        StaticDebug.Debug(this,Debug.Stop)
+
+    override this.RunOrder = None
+

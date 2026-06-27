@@ -1,3 +1,5 @@
+// Ignore Spelling: uri
+
 using System.Text;
 using OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
@@ -6,7 +8,7 @@ using OmniSharp.Extensions.LanguageServer.Protocol.Server;
 using OmniSharp.Extensions.LanguageServer.Protocol.Document;
 using OmniSharp.Extensions.LanguageServer.Protocol;
 using MediatR;
-using static ErrDiagnostics;
+using static Fpl.Errors.Diagnostics;
 
 
 namespace FplLS

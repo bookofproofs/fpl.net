@@ -1,8 +1,10 @@
+// Ignore Spelling: Uri
+
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.IO;
-using static ErrDiagnostics;
+using static Fpl.Errors.Diagnostics;
 
 namespace FplLSTests
 {

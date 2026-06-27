@@ -1,0 +1,358 @@
+/// This module contains all functions needed by the FplInterpreter
+/// to match expressions for proof arguments by rules of inferences.
+
+(* MIT License
+
+Copyright (c) 2024+ bookofproofs
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
+
+*)
+module Fpl.Interpreter.SymbolTable.ExpressionMatching
+open System
+open System.Collections.Generic
+open Fpl.Primitives
+open Fpl.Parser.Types
+open Fpl.Errors.Messages
+open Fpl.Errors.Emitter
+open Fpl.Interpreter.BasicTypes
+open Fpl.Interpreter.Helpers.Checks
+open Fpl.Interpreter.Helpers.Basic
+open Fpl.Interpreter.Helpers.Debug
+open Fpl.Interpreter.SymbolTable.Types2.Intrinsic
+open Fpl.Interpreter.SymbolTable.Types2.Variables
+open Fpl.Interpreter.SymbolTable.TypeMatching
+
+
+let private errExprMismatchQuantorVariableTypesWrapper (a:FplGenericNode) (p:FplGenericNode) (x:FplGenericNode) (y:FplGenericNode) index =
+    let xName = $"{x.FplId}:{x.Type SignatureType.Type}"
+    let yName = $"{y.FplId}:{y.Type SignatureType.Type}"
+    let aName = a.Type SignatureType.Name
+    let pName = p.Type SignatureType.Name
+    errExprMismatchQuantorVariableTypes aName pName xName yName index  
+
+let private compareQuantorVariables (a:FplGenericNode) (p:FplGenericNode) (dictParameterUsage:Dictionary<string, FplGenericNode>) =
+    let pVars = p.GetVariables()
+    let aVars = a.GetVariables()
+    let rec loop l1 l2 index =
+        match l1, l2 with
+        | [], [] ->
+            match a.Name with
+            | PrimQuantorExistsN when a.Name = p.Name && a.FplId <> p.FplId ->
+                errExprMismatchExistsN a.FplId (a.Type SignatureType.Name) p.FplId (p.Type SignatureType.Name)
+            | _ ->
+                errExprMismatchOK   // no mismatches
+        | (x:FplGenericNode)::xs, (y:FplGenericNode)::ys ->
+            match FplTypeMatcher.MatchPwA [x] [y] with
+            | Some _ ->
+                errExprMismatchQuantorVariableTypesWrapper a p x y index
+            | _ ->
+                // remember corresponding quantor variables of the matched quantors 
+                dictParameterUsage.TryAdd (y.FplId, x) |> ignore 
+                loop xs ys (index + 1)
+        | _ ->
+            // Should not happen if lengths are equal, but included for safety
+            errExprMismatchQuantorVariableCounts (a.Type SignatureType.Name) (p.Type SignatureType.Name) aVars.Length pVars.Length
+    loop aVars pVars 0
+
+/// Creates a string representation of a quantor formula in which its bound variables are replaced by
+/// placeholders numbered according to the order of the bound variables
+let private getNameOfQuantorFormulaModuloBoundVarNames (fv:FplGenericNode) =
+    let originalNames = HashSet<string>()
+    fv.Scope
+    |> Seq.filter (fun kvp ->
+        match kvp.Value with
+        | :? FplVariable as var when var.IsBound -> true
+        | _ -> false
+    )
+    |> Seq.iteri (fun i kvp ->
+        let dummyVarname = $"[{i}]" // a numbered placeholder of the bound variable
+        originalNames.Add kvp.Key |> ignore
+        kvp.Value.FplId <- dummyVarname
+    )
+    let result = fv.Type SignatureType.Name // create a formula representation with the placeholders
+    // restore the original names of the bound variables to prevent side effects
+    originalNames
+    |> Seq.iter(fun originalVarName ->
+        let var = fv.Scope[originalVarName] 
+        var.FplId <- originalVarName // restore original
+    )
+    result
+
+let private checkMismatchingUsageOfVars varName (a:FplGenericNode) (dictParameterUsage:Dictionary<string, FplGenericNode>) = 
+    if dictParameterUsage.TryAdd (varName, a) then
+        errExprMismatchOK
+    else
+        let previouslyMatchedFormula = dictParameterUsage[varName]
+        if a.Name = previouslyMatchedFormula.Name && isQuantor a && isQuantor previouslyMatchedFormula then
+            let expectedExprModVarNames = getNameOfQuantorFormulaModuloBoundVarNames previouslyMatchedFormula
+            let actualExprModVarNames = getNameOfQuantorFormulaModuloBoundVarNames a
+            if expectedExprModVarNames<>actualExprModVarNames then
+                let expectedExpr = previouslyMatchedFormula.Type SignatureType.Name
+                let actualExpr = (a.Type SignatureType.Name)
+                errExprMismatchVarMatchedDifferentlyQuantor varName expectedExpr actualExpr
+            else
+                errExprMismatchOK
+        else
+            let expectedExpr = previouslyMatchedFormula.Type SignatureType.Name
+            let actualExpr = (a.Type SignatureType.Name)
+            if expectedExpr<>actualExpr then
+                errExprMismatchVarMatchedDifferently varName expectedExpr actualExpr
+            else
+                errExprMismatchOK
+
+let private checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) (dictParameterUsage: Dictionary<string, FplGenericNode>) =
+
+    // When a reference refQ refers to a variable q and the variable q has parameter variables q(a,b,...), we need to mark which parameter variables are bound and which are not
+    // The information is in the arguments x,y, of the original refQ(x,y, ...)
+    // The best way to do replace q by a cloned version of q and replace its declared parameters with used ones.
+    let mockVariableWithParams (refQ:FplGenericNode) (q:FplGenericNode) =
+        if refQ.Name = PrimRefL && q.Name = PrimVariableL then
+            let qMocked = q.Clone()
+            let pars = getParameters q
+            let args = getArguments refQ
+            qMocked.Scope.Clear()
+            Seq.zip pars args
+            |> Seq.map (fun (p, a) -> (p, a.RefersTo))
+            |> Seq.iteri (fun i (p, aRefOpt) ->
+                match aRefOpt, p with
+                | Some (:? FplVariable as aVar), (:? FplVariable as pVar) when aVar.IsBound ->
+                    pVar.SetIsBound() // set cloned parameter variable bound if the argument variable is bound
+                    // for better mismatch error reporting, replace declared parameter names/types with used parameter names/types 
+                    pVar.FplId <- aVar.FplId 
+                    pVar.TypeId <- aVar.TypeId 
+                    qMocked.Scope.Add(i.ToString(), pVar)
+                | _ -> ()
+            )
+            qMocked // replace var q(...) with ... being set to 
+        else
+            // in all other cases leave q unchanged
+            q
+
+    // When p is a variable, the dict stores the variable names and their usage in a first matched a.
+    // The dictionary is used to check the consistency of the usage of the same variable p in the whole formula
+    // during the matching process. Moreover, the dict is used generate the
+    // conclusion of the rule of inference after all variables declared in its premise were used.
+    let rec checkExpr (a:FplGenericNode) (p:FplGenericNode) =
+        let rec checkExpressions (args:FplGenericNode list) (pars:FplGenericNode list) =
+            match args, pars with
+            | a::ars, p::prs ->
+                let msgOpt = checkExpr a p 
+                match msgOpt with
+                | None -> checkExpressions ars prs
+                | Some msg -> Some msg
+            | a::_, [] ->
+                errExprMismatchExpectedEndOfFormula (a.Type SignatureType.Name)
+            | [], p::_ ->
+                errExprMismatchFoundEndOfFormula (p.Type SignatureType.Name)
+            | [], [] ->
+                errExprMismatchOK
+
+        match a.Name, p.Name with
+        | PrimConjunction, PrimConjunction
+        | PrimDisjunction, PrimDisjunction
+        | PrimImplication, PrimImplication
+        | PrimEquivalence, PrimEquivalence
+        | PrimExclusiveOr, PrimExclusiveOr
+        | PrimNegation, PrimNegation -> checkExpressions (a.ArgList |> Seq.toList) (p.ArgList |> Seq.toList) 
+        | PrimQuantorAll, PrimQuantorAll 
+        | PrimQuantorExists, PrimQuantorExists 
+        | PrimQuantorExistsN, PrimQuantorExistsN ->
+        // match number of quantor variables
+            match compareQuantorVariables a p dictParameterUsage with
+            | None ->
+                // and now check the expressions inside the quantors
+                checkExpressions (a.ArgList |> Seq.toList) (p.ArgList |> Seq.toList) 
+            | Some err -> Some err
+        | PrimFalse, PrimFalse 
+        | PrimTrue, PrimTrue ->
+            errExprMismatchOK
+        | PrimRefL, PrimRefL ->
+            match a.RefersTo, p.RefersTo with
+            | Some aRef, Some pRef ->
+                checkExpr (mockVariableWithParams a aRef) (mockVariableWithParams p pRef)
+            | Some aRef, None when p.ArgList.Count > 0 && not p.ExpressionType.IsParen ->
+                checkExpr (mockVariableWithParams a aRef) p
+            | None, Some pRef when a.ArgList.Count > 0 && not a.ExpressionType.IsParen ->
+                checkExpr a (mockVariableWithParams p pRef)
+            | None, Some pRef when a.ExpressionType.IsParen ->
+                // delegate parenthesized (a) to a
+                checkExpr a.ArgList[0] p
+            | Some aRef, None when p.ExpressionType.IsParen ->
+                // delegate parenthesized (p) to p
+                checkExpr a p.ArgList[0]
+            | None, None when a.ExpressionType.IsParen && p.ExpressionType.IsParen ->
+                // delegate parenthesized (a) (p) to a p
+                checkExpr a.ArgList[0] p.ArgList[0]
+            | None, None when a.ExpressionType.IsParen && not p.ExpressionType.IsParen ->
+                errExprMismatchMsgParensOnlyLeft (a.Type SignatureType.Name) (p.Type SignatureType.Name)
+            | None, None when not a.ExpressionType.IsParen && p.ExpressionType.IsParen ->
+                errExprMismatchMsgParensOnlyRight (a.Type SignatureType.Name) (p.Type SignatureType.Name)
+            | _, _ ->
+                errExprMismatchOK
+        | _, PrimRefL when p.RefersTo.IsSome && p.RefersTo.Value.Name = PrimVariableL ->
+            let (errMsgOpt,_) = FplTypeMatcher.ComparisonBasedOnOpenFormulas a p
+            match errMsgOpt, p.RefersTo with
+            | None, Some var when var.Name = PrimVariableL ->
+                let firstResult = checkMismatchingUsageOfVars p.FplId a dictParameterUsage
+                match firstResult with
+                | Some errMsg -> Some errMsg
+                | None when var.Scope.Count > 0 ->
+                    let pPars = getArguments p
+                    let aPars = getDistinctVarsOfExpression a
+                    if aPars.Length <> pPars.Length then
+                        let aVars = aPars |> List.map (fun v -> $"{v.FplId}") |> String.concat ", "
+                        let pName = p.Type SignatureType.Name
+                        errExprMismatchVarNumbDifferent aPars.Length aVars pPars.Length pName
+                    else
+                        let lstOfErrMessages =
+                            List.zip pPars aPars
+                            |> List.map (fun (pArg, aArg) ->
+                                checkMismatchingUsageOfVars pArg.FplId aArg dictParameterUsage
+                            ) 
+                        let secondResult = lstOfErrMessages |> List.tryPick (fun errMsgOpt -> errMsgOpt)
+                        secondResult
+                | _ -> errExprMismatchOK
+            | Some errMsg, _ -> Some errMsg
+            | _,_ ->
+                errExprMismatchOK
+        | _, PrimVariableL ->
+            match FplTypeMatcher.MatchArgumentsWithParameters a p with
+            | Some err -> Some err
+            | None -> checkMismatchingUsageOfVars p.FplId a dictParameterUsage
+        | _, _ ->
+            errExprMismatchMsgStandard (a.Type SignatureType.Name) (p.Type SignatureType.Name)
+    checkExpr a p
+
+/// Tries to match a premise with expressions from a list and returns 
+/// a list of matched expressions and a string of concatenated failed candidate expressions
+let private matchPremiseWithSomeExpressions (exprList:FplGenericNode list) (pre:FplGenericNode) (dictParameterUsage:Dictionary<string, FplGenericNode>)=
+
+    let result = List<FplGenericNode * Dictionary<string, FplGenericNode>>()
+    let failedCandidates = List<string>()
+
+    exprList
+    |> List.iter (fun expr ->
+        let errOpt = checkExprWrapper expr pre dictParameterUsage
+        match errOpt with
+        | None -> result.Add (expr, dictParameterUsage)
+        | Some err -> failedCandidates.Add ($"`{expr.Type SignatureType.Name}`{Environment.NewLine}  ⚡{err}")
+    )
+    result |> Seq.toList, (numbered failedCandidates)
+
+/// Flag that a proof justification or inference cannot collect proceeding results
+let issuePR022AndSetDefault (fv:FplGenericHasValue) (nodeOpt:FplGenericNode option) (varOpt:FplGenericNode option) =
+    match nodeOpt, varOpt with
+    | Some node, Some var ->
+        let reason = $"The {var.Name} `{var.FplId}` was found and its {node.Name} `{node.Type SignatureType.Name}' was also found. However, the definition does not contain any predicative expressions on which this argument inference could be based on."
+        fv.ErrorOccurred <- emitPR022Diagnostics reason fv.StartPos fv.EndPos
+    | None, Some var ->
+        let reason = $"The {var.Name} `{var.FplId}` was found but no definition block was found that would contain some predicative expressions on which this argument inference could be based on."
+        fv.ErrorOccurred <- emitPR022Diagnostics reason fv.StartPos fv.EndPos
+    | Some node, None ->
+        let reason = $"The {node.Name} `{node.Type SignatureType.Name}' was found but its declaration does not contain any predicative expressions on which this argument inference could be based on."
+        fv.ErrorOccurred <- emitPR022Diagnostics reason fv.StartPos fv.EndPos
+    | None, None ->
+        let reason = $"No reference for `{fv.FplId}' was found that would contain some predicative expressions on which this argument inference could be based on."
+        fv.ErrorOccurred <- emitPR022Diagnostics reason fv.StartPos fv.EndPos
+    fv.SetDefaultValue()
+
+/// Flag that a proof justification or inference cannot collect proceeding results with a special reason
+let issuePR022SpecialReasonAndSetDefault (fv:FplGenericHasValue) reason =
+    fv.ErrorOccurred <- emitPR022Diagnostics reason fv.StartPos fv.EndPos
+    fv.SetDefaultValue()
+
+
+[<AbstractClass>]
+type FplGenericInfering(positions: Positions, parent: FplGenericNode) =
+    inherit FplGenericPredicate(positions, parent)
+
+    abstract member InferredExprCandidates: FplGenericNode list with get
+
+
+[<AbstractClass>]
+type FplGenericJustificationItem(positions: Positions, parent: FplGenericNode) =
+    inherit FplGenericInfering(positions, parent)
+
+    override this.ShortName = PrimJustification
+
+    override this.Type signatureType =
+        let head = getFplHead this signatureType
+        head
+
+    override this.EmbedInSymbolTable _ = 
+        let thisJustificationItemId = this.Type(SignatureType.Mixed)
+
+        let alreadyAddedIdOpt = 
+            this.Parent.Value.ArgList
+            |> Seq.map (fun argJi -> argJi.Type(SignatureType.Mixed))
+            |> Seq.tryFind (fun otherId -> otherId = thisJustificationItemId)
+        match alreadyAddedIdOpt with
+        | Some otherId ->
+            this.ErrorOccurred <- emitPR004Diagnostics thisJustificationItemId otherId this.StartPos this.EndPos 
+        | _ -> ()
+        addExpressionToParentArgList this
+
+    override this.Run() = 
+        StaticDebug.Debug(this,Debug.Start)
+        match this.RefersTo with 
+        | Some _ ->
+            // a justification item is to be evaluated to "true" if
+            // its RefersTo node was assigned successfully (it refers to something that
+            // could be successfully referred to in the remaining Fpl Code)
+            let v = new FplIntrinsicTrue((this.StartPos, this.EndPos), this)
+            this.SetValue v 
+        | _ ->
+            issuePR022AndSetDefault this None None
+        StaticDebug.Debug(this,Debug.Stop)
+
+[<AbstractClass>]
+type FplGenericArgInference(positions: Positions, parent: FplGenericNode) =
+    inherit FplGenericInfering(positions, parent)
+
+    override this.Type signatureType =
+        let head = getFplHead this signatureType
+        head
+
+    override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
+
+
+
+let matchJustItemsExpressionsAgainstPremiseList (tuplesJustItemWithInferredExpressionsList:(FplGenericJustificationItem * FplGenericNode list) list) (premiseList:FplGenericNode list) (byInferenceNode:FplGenericNode) =
+    let varUsageDict = Dictionary<string, FplGenericNode>()
+    let result = List<(FplGenericNode * Dictionary<string, FplGenericNode>) list>()
+    let rec matchJustItemsExpressionsAgainstPremiseListRec (iJeLists:(FplGenericJustificationItem * FplGenericNode list) list) (preList:FplGenericNode list) =
+        match iJeLists, preList with
+        | iJel::iJels, pre::pres ->
+            let just = fst iJel
+            let inferredExpressionsOfJust = snd iJel
+            match matchPremiseWithSomeExpressions inferredExpressionsOfJust pre varUsageDict with
+            | [], errList ->
+                // emit diagnostics at just's position that there was no matching candidate for a premise, listing all tried-out candidates (contained in errList)
+                let premisesPre =
+                    premiseList
+                    |> List.map (fun prem -> prem.Type SignatureType.Name)
+                let premises =
+                    if premiseList.Length > 1 then
+                        premisesPre |> numbered
+                    else
+                        premisesPre |> String.concat ""
+                just.ErrorOccurred <- emitPR008Diagnostics (byInferenceNode.Type SignatureType.Name) premiseList.Length premises errList just.StartPos just.EndPos
+                matchJustItemsExpressionsAgainstPremiseListRec iJels pres 
+            | matchedExprList, _ ->
+                result.Add matchedExprList
+                matchJustItemsExpressionsAgainstPremiseListRec iJels pres 
+        | [], _::_ ->
+            byInferenceNode.ErrorOccurred <- emitPR020Diagnostics (preList.Length + 1) (iJeLists.Length + 1) byInferenceNode.StartPos byInferenceNode.EndPos
+        | _::_, [] ->
+            byInferenceNode.ErrorOccurred <- emitPR020Diagnostics (preList.Length + 1) (iJeLists.Length + 1) byInferenceNode.StartPos byInferenceNode.EndPos
+        | [], [] -> ()
+            
+    matchJustItemsExpressionsAgainstPremiseListRec tuplesJustItemWithInferredExpressionsList premiseList
+    let res = result |> List.concat
+    res
+

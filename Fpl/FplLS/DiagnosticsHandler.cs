@@ -1,8 +1,10 @@
+// Ignore Spelling: Uri
+
 using OmniSharp.Extensions.LanguageServer.Protocol.Document;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
 using System.Text;
-using static ErrDiagnostics;
-using static FplInterpreter.Globals.Heap;
+using static Fpl.Errors.Diagnostics;
+using static Fpl.Interpreter.SymbolTable.Storage.Heap;
 using static FplInterpreter.Main;
 using Model = OmniSharp.Extensions.LanguageServer.Protocol.Models;
 
@@ -120,7 +122,7 @@ namespace FplLS
             var uriTotextPositionsDict = GetTextPositionsByUri();
             FplLsTraceLogger.LogMsg(_languageServer, ad.DiagnosticsToString, "~~~~~Diagnostics Count Orig");
             FplLsTraceLogger.LogMsg(_languageServer, string.Join(", ", uriTotextPositionsDict.Keys.Select(k => k.AbsoluteUri)), $"~~~~~{uriTotextPositionsDict.Keys.Count} source code keys");
-            foreach (ErrDiagnostics.Diagnostic diagnostic in ad.Collection)
+            foreach (Fpl.Errors.Diagnostics.Diagnostic diagnostic in ad.Collection)
             {
                 var key = PathEquivalentUri.EscapedUri(diagnostic.Uri.AbsoluteUri);
                 FplLsTraceLogger.LogMsg(_languageServer, key.AbsoluteUri, "~~~~~new key");
@@ -152,7 +154,7 @@ namespace FplLS
         /// <param name="diagnostic">Input diagnostic</param>
         /// <param name="tp">TextPositions object to handle ranges in the input stream</param>
         /// <returns>Casted diagnostic</returns>
-        public static Model.Diagnostic CastDiagnostic(ErrDiagnostics.Diagnostic diagnostic, TextPositions tp)
+        public static Model.Diagnostic CastDiagnostic(Fpl.Errors.Diagnostics.Diagnostic diagnostic, TextPositions tp)
         {
             var castedDiagnostic = new Model.Diagnostic
             {
@@ -170,7 +172,7 @@ namespace FplLS
         /// </summary>
         /// <param name="diagnostic">Input diagnostic</param>
         /// <returns>A custom diagnostic message.</returns>
-        private static string CastMessage(ErrDiagnostics.Diagnostic diagnostic)
+        private static string CastMessage(Fpl.Errors.Diagnostics.Diagnostic diagnostic)
         {
             return CastDiagnosticCodeMessage(diagnostic);
         }
@@ -180,7 +182,7 @@ namespace FplLS
         /// <param name="diagnostic">Input diagnostic</param>
         /// <returns>"semantics " if emitter was Interpreter, "syntax " if emitter was Parser</returns>
         /// <exception cref="NotImplementedException"></exception>
-        private static string CastDiagnosticCodeMessage(ErrDiagnostics.Diagnostic diagnostic)
+        private static string CastDiagnosticCodeMessage(Fpl.Errors.Diagnostics.Diagnostic diagnostic)
         {
             return diagnostic.Message;
         }
@@ -189,7 +191,7 @@ namespace FplLS
         /// </summary>
         /// <param name="severity">Input severity</param>
         /// <returns>Casted severity</returns>
-        private static Model.DiagnosticSeverity CastSeverity(ErrDiagnostics.DiagnosticSeverity severity)
+        private static Model.DiagnosticSeverity CastSeverity(Fpl.Errors.Diagnostics.DiagnosticSeverity severity)
         {
             Model.DiagnosticSeverity castedSeverity;
             if (severity.IsError)

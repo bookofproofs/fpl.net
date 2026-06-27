@@ -2,7 +2,8 @@ namespace TestSharedConfig
 
 module TestConfig =
     let IsOffline = true
-    let DebugMode = false
+    let DebugModeParser = false
+    let DebugModeInterpreter = false
 
 
     /// Sets or gets the current OfflineMode.

@@ -3,14 +3,14 @@
 // weakening rule
 axiom A1
 {
-    dec ~f, g: pred;
+    dec f, g: pred;
     impl(f, impl(g, f))
 }
 
 // impl distributive
 axiom A2 
 {
-    dec ~f, g, h: pred;
+    dec f, g, h: pred;
     impl(
         impl(f, impl(g, h))
         , impl( impl(f, g), impl (f, h) )  
@@ -21,7 +21,7 @@ axiom A2
 // contraposition
 axiom A3 
 {
-    dec ~f, g: pred;
+    dec f, g: pred;
     impl(
         impl(not f, not g)
         , impl(g, f)  
@@ -31,7 +31,7 @@ axiom A3
 
 inf ModusPonens
 {
-    dec ~f, g: pred;
+    dec f, g: pred;
     premise:
         f, impl(f, g) 
     conclusion:
@@ -40,7 +40,7 @@ inf ModusPonens
 
 theorem Example1
 {
-    dec ~a:pred;
+    dec a:pred;
     impl (a, a)
 }
 
@@ -58,4 +58,3 @@ proof Example1$1
 }
 
 
-;

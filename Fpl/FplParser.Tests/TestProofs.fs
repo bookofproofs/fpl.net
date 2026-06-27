@@ -1,8 +1,8 @@
 namespace FplParser.Tests
 
 open FParsec
-open FplPrimitives
-open FplParsing.Combinators
+open Fpl.Primitives
+open Fpl.Parser.Grammar
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
 
@@ -171,6 +171,8 @@ type TestProofs () =
 
     [<DataRow("""proof Example4$1 {1. GreaterAB |- Greater(a,b) qed}""")>]
     [<DataRow("""prf AddIsUnique$1 {1: assume and(x,b) 2: trivial qed}""")>]
+    [<DataRow("""proof T$1 {1: false ∧ true}""")>]
+    [<DataRow("""proof T$1 {1. 2 |- false ∧ true}""")>]
     [<TestMethod>]
     member this.TestProofSuccess (test:string) =
         let result = run (proof .>> eof) test

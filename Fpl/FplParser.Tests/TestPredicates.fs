@@ -1,8 +1,8 @@
 namespace FplParser.Tests
 
 open FParsec
-open FplParsing.Combinators
-open FplPrimitives
+open Fpl.Parser.Grammar
+open Fpl.Primitives
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
 
@@ -211,6 +211,13 @@ type TestPredicates () =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<DataRow("00", """ProceedingResults1(x,y)""")>]
+    [<DataRow("01", """x + y""")>]
+    [<DataRow("02", """(x) + y""")>]
+    [<DataRow("03", """(x) + (ProceedingResults1(x,y))""")>]
+    [<DataRow("04", """z * (x) + y""")>]
+    [<DataRow("04", """z * (x + y)""")>]
+    [<DataRow("05", """z / (x) + y""")>]
+    [<DataRow("06", """z / (x - x) + y""")>]
     [<TestMethod>]
     member this.TestPredicateSuccess (no:string, fplCode:string) =
         let result = run (predicate .>> eof) fplCode
@@ -219,6 +226,7 @@ type TestPredicates () =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<DataRow("00", """ProceedingResults$1(x,y)""")>]
+    [<DataRow("01", "undet")>]
     [<TestMethod>]
     member this.TestPredicateFailure (no:string, fplCode:string) =
         let result = run (predicate .>> eof) fplCode

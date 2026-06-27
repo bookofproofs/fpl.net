@@ -1,0 +1,220 @@
+namespace TestFplParser.Classes
+
+open FParsec
+open Fpl.Parser.Grammar
+open Microsoft.VisualStudio.TestTools.UnitTesting
+
+[<TestClass>]
+type TestConstructors () =
+
+    [<TestMethod>]
+    member this.TestConstructor00 () =
+        // empty constructors not allowed
+        let result = run (constructor .>> eof) """ctor Magma(x: tplSet, op: BinOp)
+            {
+                
+            }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestConstructor00a () =
+        // constructors are not allowed to be empty and only contain declarations
+        let result = run (constructor .>> eof) """ctor Magma(x: tplSet, op: BinOp)
+            {
+                
+                dec: x: obj ;
+            }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
+
+    [<TestMethod>]
+    member this.TestConstructor00b () =
+        // constructors are not allowed to be empty and only contain specifications
+        let result = run (constructor .>> eof) """ctor Magma(x: tplSet, op: BinOp)
+            {
+                
+                dec x:= 1 ;
+            }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestConstructor01 () =
+        // constructors are not allowed to be intrinsic
+        let result = run (constructor .>> eof) """ctor Magma(x: tplSet, op: BinOp)
+            {
+                
+                intr
+            }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
+
+    [<TestMethod>]
+    member this.TestConstructor01a () =
+        // constructors are not allowed to be intrinsic
+        let result = run (constructor .>> eof) """ctor Magma(x: tplSet, op: BinOp)
+            {
+                
+                dec:;
+                intr
+            }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
+
+    [<TestMethod>]
+    member this.TestConstructor01b () =
+        // constructors are not allowed to be intrinsic
+        let result = run (constructor .>> eof) """ctor Magma(x: tplSet, op: BinOp)
+            {
+                
+                dec a:obj ;
+                intr
+            }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
+
+    [<TestMethod>]
+    member this.TestConstructor01c () =
+        // constructors are not allowed to be intrinsic
+        let result = run (constructor .>> eof) """ctor Magma(x: tplSet, op: BinOp)
+            {
+                
+                dec a:obj ;
+                intr
+            }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
+
+    [<TestMethod>]
+    member this.TestConstructor02 () =
+        // constructors must contain the call(s) of the parent constructors
+        // of all parent classes of the class; the call's syntax starts
+       
+        let result = run (constructor .>> eof) """ctor Magma(x: tplSet, op: BinOp)
+            {
+                dec a:obj  base.AlgebraicStructure(x,op);
+            }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestConstructor03 () =
+        // constructors must contain the call(s) of the parent constructors
+        // of all parent classes of the class; the call's syntax starts
+       
+        let result = run (constructor .>> eof) """constructor Magma(x: tplSet, op: BinOp)
+            {
+                dec a:obj
+                    base.AlgebraicStructure(x,op)
+                ;
+                
+            }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestConstructor03a () =
+        let result = run (constructor .>> eof) """ctor Magma(x: tplSet, op: BinOp)
+            {
+                dec a:obj ;
+            
+            }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestConstructor03b () =
+        // incomplete (syntax error)
+        let result = run (constructor .>> eof) """ctor Magma(x: tplSet, op: BinOp)
+            {
+                dec a:obj 
+                    base. 
+                ;
+            }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
+
+    [<TestMethod>]
+    member this.TestConstructor04 () =
+        // incomplete ( self missing)
+        let result = run (constructor .>> eof) """ctor Magma(x: tplSet, op: BinOp)
+            {
+                dec a:obj
+                base.Obj()
+                ;
+                
+            }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestConstructor05 () =
+        // calls to multiple parental constructors possible (multi-inheritance)
+        // incomplete ( self missing)
+        let result = run (constructor .>> eof) """Magma(x: tplSet, op: BinOp)
+            {
+                
+                dec 
+                    a:obj
+                    base.obj () 
+                    base.T1(x) 
+                    base.T2(op) 
+                ;
+                
+            }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
+
+    [<TestMethod>]
+    member this.TestConstructor06 () =
+        let result = run (constructor .>> eof) """ctor FieldPowerN
+            (
+                field: Field,
+                n: Nat
+            )
+            {
+    			dec a:obj
+                    myField := field
+                    addInField := myField.AddOp()
+                    mulInField := myField.MulOp()
+                    assert NotEqual(n, Zero())
+    				base.SetBuilder( myField[@1 , n], true) 
+                ;
+                
+            }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestConstructor07 () =
+        let result = run (constructor .>> eof) """ctor A(a:T1, b:func, c:ind, d:pred) 
+                {
+                    dec
+                    base.B()
+                    base.C(a,b,c,d)
+                    base.D(self,b,c)
+                    base.B(In(x))
+                    base.C(Test1(a),Test2(b,c,d))
+                    base.D(self,b,c)
+                    base.E(true, undef)
+                    ;
+                    
+                }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))

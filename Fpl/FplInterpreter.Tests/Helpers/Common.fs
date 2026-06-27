@@ -1,0 +1,178 @@
+module TestFplInterpreter.Helpers.Common
+
+open System
+open System.IO
+open Microsoft.VisualStudio.TestTools.UnitTesting
+open Fpl.Errors.Diagnostics
+open Fpl.Interpreter.Helpers.Debug
+open Fpl.Interpreter.SymbolTable.Types4.Proofs
+open FplInterpreter.Main
+
+
+let rec deleteDirectory path =
+    if Directory.Exists(path) then
+        // Delete all files in the directory
+        Directory.GetFiles(path)
+        |> Array.iter (fun f ->
+            File.SetAttributes(f, FileAttributes.Normal)
+            File.Delete f)
+ 
+        // Recursively delete all subdirectories
+        Directory.GetDirectories(path) |> Array.iter deleteDirectory
+
+        // Finally, delete the directory itself
+        Directory.Delete(path)
+
+let isDirectoryEmpty path =
+    Directory.EnumerateFileSystemEntries(path) |> Seq.isEmpty
+
+let deleteFiles dir fileName =
+    if Directory.Exists(dir) then
+        Directory.GetFiles(dir, fileName) 
+        |> Array.iter (fun f ->
+            File.SetAttributes(f, FileAttributes.Normal)
+            File.Delete f)
+    else
+        printfn "Directory %s does not exist." dir
+
+let deleteFilesWithExtension dir extension =
+    if Directory.Exists(dir) then
+        Directory.GetFiles(dir, "*." + extension) |> Array.iter (fun f ->
+            File.SetAttributes(f, FileAttributes.Normal)
+            File.Delete f)
+    else
+        printfn "Directory %s does not exist." dir
+
+let filterByErrorCode (input: Diagnostics) errCode =
+    input.Collection |> List.filter (fun d -> d.Code.Code = errCode)
+
+let fplCodeNeedsOnline (fplCode:string) = fplCode.Contains("uses Fpl")
+
+let prepareFplCode (filename: string, fplCode: string, delete: bool) =
+    let currDir = Directory.GetCurrentDirectory()
+
+    printf "\n"
+    if fplCode <> "" then 
+        File.WriteAllText(Path.Combine(currDir, filename), fplCode)
+    let uri = PathEquivalentUri(Path.Combine(currDir, filename))
+
+    let fplLibUrl =
+        "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+
+    if delete then
+        deleteFiles currDir "*.fpl"
+        if not (offlineWatcher.OfflineMode) then
+            deleteDirectory (Path.Combine(currDir,"lib"))
+            deleteDirectory (Path.Combine(currDir,"repo"))
+    else
+        offlineWatcher.OfflineMode <- not (fplCodeNeedsOnline fplCode)
+        fplInterpreter fplCode uri fplLibUrl |> ignore
+
+        offlineWatcher.OfflineMode <- false
+
+let checkForUnexpectedErrors (filename:string) fplCode =
+    let errors =
+        ad.Collection
+        |> List.filter (fun d -> d.Code.Code = "SY000" || d.Code.Code = "SY001" || d.Code.Code = "SY002" || d.Code.Code = "GEN00")
+
+    let currDir = Path.GetDirectoryName(filename)
+    if errors.Length > 0 then 
+        File.AppendAllText(Path.Combine(currDir, "SyntaxErrorsLog.txt"), $"Syntax errors detected in test {filename}{Environment.NewLine}{fplCode}{Environment.NewLine}------{Environment.NewLine}") 
+        failwith "Syntax error found." |> ignore
+
+
+    let contextErrors =
+        ad.Collection
+        |> List.filter (fun d -> d.Emitter = DiagnosticEmitter.FplInterpreter && d.Code.Code = "GEN01")
+
+    if contextErrors.Length > 0 then
+        failwithf $"Context errors detected. {contextErrors.Head}"
+
+let runTestHelperWithoutSyntaxChecking filename fplCode (code: Fpl.Errors.Diagnostics.DiagnosticCode) (expected: int) =
+    printf "Trying %s" code.Message
+    prepareFplCode (filename, fplCode, false) |> ignore
+
+    let result = filterByErrorCode ad code.Code
+    Assert.AreEqual<int>(expected, result.Length)
+    prepareFplCode (filename, "", true) |> ignore
+
+let runTestHelperWithoutSyntaxCheckingGetResult filename fplCode (code: Fpl.Errors.Diagnostics.DiagnosticCode) (expected: int) =
+    printf "Trying %s" code.Message
+    prepareFplCode (filename, fplCode, false) |> ignore
+
+    let result = filterByErrorCode ad code.Code
+    Assert.AreEqual<int>(expected, result.Length)
+    prepareFplCode (filename, "", true) |> ignore
+    result 
+
+let runTestHelper filename fplCode (code: Fpl.Errors.Diagnostics.DiagnosticCode) (expected: int) =
+    printf "Trying %s" code.Message
+    prepareFplCode (filename, fplCode, false) |> ignore
+
+    checkForUnexpectedErrors filename fplCode
+
+    let result = filterByErrorCode ad code.Code
+    Assert.AreEqual<int>(expected, result.Length)
+    prepareFplCode (filename, "", true) |> ignore
+
+let runTestHelperWithText filename fplCode (code: Fpl.Errors.Diagnostics.DiagnosticCode) expected =
+    printf "Trying %s" code.Message
+    prepareFplCode (filename, fplCode, false) |> ignore
+
+    checkForUnexpectedErrors filename fplCode
+
+    let result = filterByErrorCode ad code.Code
+    if result.Length <> expected then 
+        printfn "%i errors found (%i expected)" result.Length expected
+    else
+        printfn "%i errors found" result.Length
+    prepareFplCode (filename, "", true) |> ignore
+
+    if result.Length > 0 then
+        result.Head.Message
+    else
+        "missing error message"
+
+
+let loadFplFile (path: string) =
+    let uri = PathEquivalentUri(path)
+
+    let fplLibUrl =
+        "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+
+    let fplCode = File.ReadAllText(path)
+    fplInterpreter fplCode uri fplLibUrl
+
+
+let loadFplFileWithTheSameSymbolTable (path: string) =
+    let uri = PathEquivalentUri(path)
+
+    let fplLibUrl =
+        "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+
+    let fplCode = File.ReadAllText(path)
+    fplInterpreter fplCode uri fplLibUrl
+
+let tryFindInference (prf:FplProof) infType = 
+    prf.OrderedArguments
+    |> List.map (fun fv -> fv.ArgumentInference)
+    |> List.filter (fun fv -> fv.IsSome)
+    |> List.map (fun fv -> fv.Value)
+    |> List.tryFind (fun fv -> fv.Name = infType)
+
+let tryFindLastInference (prf:FplProof) infType = 
+    prf.OrderedArguments
+    |> List.map (fun fv -> fv.ArgumentInference)
+    |> List.filter (fun fv -> fv.IsSome)
+    |> List.map (fun fv -> fv.Value)
+    |> List.tryLast 
+
+let tryFindJustification (prf:FplProof) justType = 
+    prf.OrderedArguments
+    |> List.map (fun fv -> fv.Justification)
+    |> List.filter (fun fv -> fv.IsSome)
+    |> List.map (fun fv -> fv.Value)
+    |> List.map (fun fv -> fv :?> FplJustification)
+    |> List.map (fun fv -> fv.GetOrderedJustificationItems)
+    |> List.concat 
+    |> List.tryFind (fun fv -> fv.Name = justType)

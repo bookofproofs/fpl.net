@@ -1,0 +1,39 @@
+namespace FixOps
+open Microsoft.VisualStudio.TestTools.UnitTesting
+open Fpl.Interpreter.BasicTypes
+open Fpl.Interpreter.SymbolTable.Storage.Heap
+open TestFplInterpreter.Helpers.Common
+
+[<TestClass>]
+type TestPrecedence() =
+
+    [<DataRow("b01","x + y * z = 1")>]
+    [<DataRow("b02","x * y + z = 1")>]
+    [<DataRow("b03","x + y = z * 1")>]
+    [<DataRow("b04","x * y = z + 1")>]
+    [<DataRow("b05","x = y + z * 1")>]
+    [<DataRow("b06","x = y * z + 1")>]
+    [<TestMethod>]
+    member this.TestPrecedenceInfix(var, varVal) =
+        
+        let fplCode = sprintf """ 
+                 def pred Mul(x,y: obj) infix "*" 2 {intr} // higher precedence
+                 def pred Add(x,y: obj) infix "+" 1  {intr} // lower precedence
+                 def pred Eq(x,y: obj) infix "=" -100 {intr} // lowest precedence
+                 def pred T1() { %s }""" varVal
+        let filename = "TestPrecedenceInfix.fpl"
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pr1 = theory.Scope["T1()"] 
+        let base1 = pr1.ArgList[0]
+        match var with
+        | "b01" -> Assert.AreEqual<string>("(x + (y * z)) = 1", base1.Type(SignatureType.Name))
+        | "b02" -> Assert.AreEqual<string>("((x * y) + z) = 1", base1.Type(SignatureType.Name))
+        | "b03" -> Assert.AreEqual<string>("(x + y) = (z * 1)", base1.Type(SignatureType.Name))
+        | "b04" -> Assert.AreEqual<string>("(x * y) = (z + 1)", base1.Type(SignatureType.Name))
+        | "b05" -> Assert.AreEqual<string>("x = (y + (z * 1))", base1.Type(SignatureType.Name))
+        | "b06" -> Assert.AreEqual<string>("x = ((y * z) + 1)", base1.Type(SignatureType.Name))
+        | _ -> Assert.IsTrue(false)
+        prepareFplCode(filename, "", false) |> ignore
+

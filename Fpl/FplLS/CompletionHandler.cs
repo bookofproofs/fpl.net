@@ -3,8 +3,8 @@ using OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities;
 using OmniSharp.Extensions.LanguageServer.Protocol.Document;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
-using static ErrDiagnostics;
-using static FplInterpreter.Globals.ST;
+using static Fpl.Errors.Diagnostics;
+using static Fpl.Interpreter.SymbolTable.Types1.TopLevel;
 
 /*
 MIT License
@@ -30,12 +30,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.  
 */
 
-class CompletionHandler : ICompletionHandler
+class CompletionHandler(ILanguageServer languageServer, BufferManager bufferManager, FplAutoCompleteService fplAutoCompletionService) : ICompletionHandler
 {
 
-    private readonly ILanguageServer _languageServer;
-    private readonly BufferManager _bufferManager;
-    private readonly FplAutoCompleteService _fplAutoComplService;
+    private readonly ILanguageServer _languageServer = languageServer;
+    private readonly BufferManager _bufferManager = bufferManager;
+    private readonly FplAutoCompleteService _fplAutoComplService = fplAutoCompletionService;
 
     private readonly DocumentSelector _documentSelector = new(
         new DocumentFilter()
@@ -44,15 +44,9 @@ class CompletionHandler : ICompletionHandler
         }
     );
 
-    private CompletionCapability _capability;
+    private CompletionCapability _capability = new();
 
-    public CompletionHandler(ILanguageServer languageServer, BufferManager bufferManager, FplAutoCompleteService fplAutoCompletionService)
-    {
-        _languageServer = languageServer;
-        _bufferManager = bufferManager;
-        _fplAutoComplService = fplAutoCompletionService;
-        _capability = new CompletionCapability();
-    }
+    public CompletionCapability Capability { get => _capability; set => _capability = value; }
 
     public CompletionRegistrationOptions GetRegistrationOptions()
     {
@@ -94,6 +88,6 @@ class CompletionHandler : ICompletionHandler
 
     public void SetCapability(CompletionCapability capability)
     {
-        _capability = capability;
+        Capability = capability;
     }
 }

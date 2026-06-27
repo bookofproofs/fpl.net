@@ -2,8 +2,8 @@
 // It is not really needed because the necessary FPL modules are run 
 // as an FPL Language Server (see FplLS C# Project in the same solution).
 open FParsec
-open FplParsing.Basic
-open FplParsing.Combinators
+open Fpl.Parser.Basic
+open Fpl.Parser.Grammar
 
 
 let par = attempt ((predicateWithQualification .>> SW .>> keywordIs) .>>. (SW >>. variableType))

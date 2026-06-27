@@ -1,0 +1,150 @@
+namespace Closure
+open Microsoft.VisualStudio.TestTools.UnitTesting
+open Fpl.Primitives
+open Fpl.Interpreter.BasicTypes
+open Fpl.Interpreter.SymbolTable.Storage.Heap
+open TestFplInterpreter.Helpers.Common
+
+[<TestClass>]
+type TestDecrement() =
+
+
+    [<DataRow("@0", LiteralUndet)>]
+    [<DataRow("@1", "0")>]
+    [<DataRow("@2", "1")>]
+    [<DataRow("@3", "2")>]
+    [<DataRow("@4", "3")>]
+    [<DataRow("@100", "99")>]
+    [<DataRow("@42", "41")>]
+    [<TestMethod>]
+    member this.TestDecrementRepresent(varVal, expected:string) =
+        
+        let fplCode = sprintf """ext Digits x@/\d+/ -> Digits {ret x} def pred T() { del.Decrement(%s) }""" varVal
+        let filename = "TestDecrementRepresent.fpl"
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pr = theory.Scope["T()"] 
+        let predicateValue = pr.ArgList |> Seq.toList |> List.rev |> List.head
+        Assert.AreEqual<string>(expected, predicateValue.Represent())
+        prepareFplCode(filename, "", false) |> ignore
+
+    [<DataRow("@0", LiteralUndet)>]
+    [<DataRow("@1", LiteralUndet)>]
+    [<DataRow("@2", LiteralUndet)>]
+    [<DataRow("@3", LiteralUndet)>]
+    [<DataRow("@4", LiteralUndet)>]
+    [<DataRow("@100", LiteralUndet)>]
+    [<DataRow("@42", LiteralUndet)>]
+    [<TestMethod>]
+    member this.TestDecrementRepresentWrongType(varVal, expected:string) =
+        
+        let fplCode = sprintf """ext Digits x@/\d+/ -> ind {ret $100} def pred T() { del.Decrement(%s) }""" varVal
+        let filename = "TestDecrementRepresent.fpl"
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pr = theory.Scope["T()"] 
+        let predicateValue = pr.ArgList |> Seq.toList |> List.rev |> List.head
+        Assert.AreEqual<string>(expected, predicateValue.Represent())
+        prepareFplCode(filename, "", false) |> ignore
+
+    [<DataRow("@0", PrimDigits)>]
+    [<DataRow("@1", PrimDigits)>]
+    [<DataRow("@2", PrimDigits)>]
+    [<DataRow("@3", PrimDigits)>]
+    [<DataRow("@4", PrimDigits)>]
+    [<DataRow("@100", PrimDigits)>]
+    [<DataRow("@42", PrimDigits)>]
+    [<TestMethod>]
+    member this.TestDecrementType(varVal, expected:string) =
+        
+        let fplCode = sprintf """def pred T() { del.Decrement(%s) }""" varVal
+        let filename = "TestDecrementType.fpl"
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pr = theory.Scope["T()"] 
+        let predicateValue = pr.ArgList |> Seq.toList |> List.rev |> List.head
+        Assert.AreEqual<string>(expected, predicateValue.Type SignatureType.Type)
+        prepareFplCode(filename, "", false) |> ignore
+
+    [<DataRow("@0", "Decrement(obj)")>]
+    [<DataRow("@1", "Decrement(obj)")>]
+    [<DataRow("@2", "Decrement(obj)")>]
+    [<DataRow("@3", "Decrement(obj)")>]
+    [<DataRow("@4", "Decrement(obj)")>]
+    [<DataRow("@100", "Decrement(obj)")>]
+    [<DataRow("@42", "Decrement(obj)")>]
+    [<TestMethod>]
+    member this.TestDecrementMixed(varVal, expected:string) =
+        
+        let fplCode = sprintf """def pred T() { del.Decrement(%s) }""" varVal
+        let filename = "TestDecrementMixed"
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pr = theory.Scope["T()"] 
+        let predicateValue = pr.ArgList |> Seq.toList |> List.rev |> List.head
+        Assert.AreEqual<string>(expected, predicateValue.Type SignatureType.Mixed)
+        prepareFplCode(filename, "", false) |> ignore
+
+    [<DataRow("@0", "Decrement(Nat)")>]
+    [<DataRow("@1", "Decrement(Nat)")>]
+    [<DataRow("@2", "Decrement(Nat)")>]
+    [<DataRow("@3", "Decrement(Nat)")>]
+    [<DataRow("@4", "Decrement(Nat)")>]
+    [<DataRow("@100", "Decrement(Nat)")>]
+    [<DataRow("@42", "Decrement(Nat)")>]
+    [<TestMethod>]
+    member this.TestDecrementMixedWithExtensionNat(varVal, expected:string) =
+        
+        let fplCode = sprintf """ext Digits x@/\d+/ -> Nat {return x} def pred T() { del.Decrement(%s) }""" varVal
+        let filename = "TestDecrementMixedWithExtensionNat.fpl"
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pr = theory.Scope["T()"] 
+        let predicateValue = pr.ArgList |> Seq.toList |> List.rev |> List.head
+        Assert.AreEqual<string>(expected, predicateValue.Type SignatureType.Mixed)
+        prepareFplCode(filename, "", false) |> ignore
+
+    [<DataRow("@0", "Decrement(Digits)")>]
+    [<DataRow("@1", "Decrement(Digits)")>]
+    [<DataRow("@2", "Decrement(Digits)")>]
+    [<DataRow("@3", "Decrement(Digits)")>]
+    [<DataRow("@4", "Decrement(Digits)")>]
+    [<DataRow("@100", "Decrement(Digits)")>]
+    [<DataRow("@42", "Decrement(Digits)")>]
+    [<TestMethod>]
+    member this.TestDecrementMixedWithExtensionDigits(varVal, expected:string) =
+        
+        let fplCode = sprintf """ext Digits x@/\d+/ -> Digits {return x} def pred T() { del.Decrement(%s) }""" varVal
+        let filename = "TestDecrementMixedWithExtensionDigits.fpl"
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pr = theory.Scope["T()"] 
+        let predicateValue = pr.ArgList |> Seq.toList |> List.rev |> List.head
+        Assert.AreEqual<string>(expected, predicateValue.Type SignatureType.Mixed)
+        prepareFplCode(filename, "", false) |> ignore
+
+    [<DataRow("@0", "Decrement(0)")>]
+    [<DataRow("@1", "Decrement(1)")>]
+    [<DataRow("@2", "Decrement(2)")>]
+    [<DataRow("@3", "Decrement(3)")>]
+    [<DataRow("@4", "Decrement(4)")>]
+    [<DataRow("@100", "Decrement(100)")>]
+    [<DataRow("@42", "Decrement(42)")>]
+    [<TestMethod>]
+    member this.TestDecrementName(varVal, expected:string) =
+        
+        let fplCode = sprintf """def pred T() { del.Decrement(%s) }""" varVal
+        let filename = "TestDecrementName.fpl"
+        prepareFplCode(filename + ".fpl", fplCode, false) 
+        let r = heap.Root
+        let theory = r.Scope[filename]
+        let pr = theory.Scope["T()"] 
+        let predicateValue = pr.ArgList |> Seq.toList |> List.rev |> List.head
+        Assert.AreEqual<string>(expected, predicateValue.Type SignatureType.Name)
+        prepareFplCode(filename, "", false) |> ignore

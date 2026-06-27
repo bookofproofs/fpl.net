@@ -1,6 +1,6 @@
 namespace FplParser.Tests.UserFriendly
 open FParsec
-open FplParsing.Combinators
+open Fpl.Parser.Grammar
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
 
@@ -358,7 +358,6 @@ type TestUserFriendlyExpressions() =
     [<DataRow("8d", "true ⇔ ¬false")>]
     [<DataRow("8e", "true ⇔ false")>]
     [<DataRow("8f", "true")>]
-    [<DataRow("90", "undet")>]
     [<TestMethod>]
     member this.TestExprMixed(no:string, fplCode) =
         let result = run (predicate .>> eof) fplCode

@@ -1,0 +1,546 @@
+namespace SymbolTable
+
+open System.IO
+open Microsoft.VisualStudio.TestTools.UnitTesting
+open Fpl.Errors.Diagnostics
+open Fpl.Interpreter.Helpers.Debug
+open Fpl.Interpreter.SymbolTable.Storage.Heap
+open Newtonsoft.Json
+open Newtonsoft.Json.Linq
+open TestFplInterpreter.Helpers.Common
+open FplInterpreter.Main
+
+[<TestClass>]
+type Navigation() =
+
+    [<TestMethod>]
+    member this.UsesClauseCausesDownloads() =
+        if not offlineWatcher.OfflineMode then 
+            // first delete lib and repo subdirectories (if any)
+            let currentPath = Directory.GetCurrentDirectory()
+            let currentPathLib = Path.Combine(currentPath,"lib")
+            let currentPathRepo = Path.Combine(currentPath,"repo")
+            deleteDirectory currentPathLib
+            deleteDirectory currentPathRepo
+
+            let fplCode = """
+                uses Fpl.SetTheory
+            """
+            let filename = "UsesClauseCausesDownloads"  
+            prepareFplCode(filename + ".fpl", fplCode, false) 
+            Assert.AreEqual<int>(3, heap.ParsedAsts.Count)
+
+            // remove the test file
+            prepareFplCode(filename, "", true) |> ignore
+
+    [<TestMethod>]
+    member this.UsesClauseCreatesSubdirectoriesLibAndRepo() =
+        if not offlineWatcher.OfflineMode then 
+            // prepare test, making sure there is an empty 
+            // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
+            // first delete lib and repo subdirectories (if any)
+            let currentPath = Directory.GetCurrentDirectory()
+            let currentPathLib = Path.Combine(currentPath,"lib")
+            let currentPathRepo = Path.Combine(currentPath,"repo")
+            deleteDirectory currentPathLib
+            deleteDirectory currentPathRepo
+
+            let fplCode = """
+                uses Fpl.SetTheory
+            """
+            let filename = "UsesClauseCreatesSubdirectoriesLibAndRepo"  
+            // file processing creates the subdirectories
+            let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+
+            // do the test - check if the subdirectories exist and contain the files 
+            Assert.IsTrue(Directory.Exists(currentPathLib))
+            Assert.IsTrue(Directory.Exists(currentPathRepo))
+            Assert.IsTrue(isDirectoryEmpty currentPathLib)
+            Assert.IsTrue(File.Exists(Path.Combine(currentPathRepo,"Fpl.SetTheory.fpl")))
+            Assert.IsTrue(File.Exists(Path.Combine(currentPathRepo,"Fpl.Commons.fpl")))
+
+            // remove the test file
+            prepareFplCode(filename + ".fpl", fplCode, true) |> ignore
+
+    [<TestMethod>]
+    member this.OpeningFileInRepoDoesNotCreateYetOtherSubdirsLibAndRepo() =
+        if not offlineWatcher.OfflineMode then 
+            // prepare test, making sure there is an empty 
+            // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
+            // first delete lib and repo subdirectories (if any)
+            let currentPath = Directory.GetCurrentDirectory()
+            let currentPathLib = Path.Combine(currentPath,"lib")
+            let currentPathRepo = Path.Combine(currentPath,"repo")
+            deleteDirectory currentPathLib
+            deleteDirectory currentPathRepo
+
+            let fplCode = """
+                uses Fpl.SetTheory
+            """
+            let filename = "OpeningFileInRepoDoesNotCreateYetOtherSubdirsLibAndRepo"  
+            // file processing creates the subdirectories
+            prepareFplCode(filename + ".fpl", fplCode, false) |> ignore
+
+            // do the test - now, open a file in the repo subdirectory
+            loadFplFile (Path.Combine(currentPathRepo,"Fpl.Commons.fpl")) |> ignore
+            let currentPathRepoLib = Path.Combine(currentPathRepo,"lib")
+            let currentPathRepoRepo = Path.Combine(currentPathRepo,"repo")
+            Assert.IsFalse(Directory.Exists(currentPathRepoLib))
+            Assert.IsFalse(Directory.Exists(currentPathRepoRepo))
+
+            // remove the test file
+            prepareFplCode(filename, "", true) |> ignore
+
+    [<TestMethod>]
+    member this.OpeningFileInRepoDoesNotRaiseRuntimeErrors() =
+        if not offlineWatcher.OfflineMode then 
+            // prepare test, making sure there is an empty 
+            // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
+            // first delete lib and repo subdirectories (if any)
+            let currentPath = Directory.GetCurrentDirectory()
+            let currentPathLib = Path.Combine(currentPath,"lib")
+            let currentPathRepo = Path.Combine(currentPath,"repo")
+            deleteDirectory currentPathLib
+            deleteDirectory currentPathRepo
+
+            let fplCode = """
+                uses Fpl.SetTheory
+            """
+            let filename = "OpeningFileInRepoDoesNotRaiseRuntimeErrors"  
+            // file processing creates the subdirectories
+            prepareFplCode(filename + ".fpl", fplCode, false) |> ignore
+
+            // do the test - now, open a file in the repo subdirectory
+            loadFplFile (Path.Combine(currentPathRepo,"Fpl.Commons.fpl")) |> ignore
+            // and test if there was a runtime error (e.g. subpath not found due to messed-up folder logic)
+            let result = filterByErrorCode ad (GEN00 "").Code
+            Assert.AreEqual<int>(0, result.Length)
+
+            // remove the test file
+            prepareFplCode(filename, "", true) |> ignore
+
+    [<TestMethod>]
+    member this.OpeningParentFileTheoryEnhancesSymbolTableCorrectly() =
+        if not offlineWatcher.OfflineMode then 
+            // prepare test, making sure there is an empty 
+            // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
+            // first delete lib and repo subdirectories (if any)
+            let currentPath = Directory.GetCurrentDirectory()
+            let currentPathLib = Path.Combine(currentPath,"lib")
+            let currentPathRepo = Path.Combine(currentPath,"repo")
+            deleteDirectory currentPathLib
+            deleteDirectory currentPathRepo
+
+            let fplCode = """
+                uses Fpl.SetTheory
+            """
+            let filename = "OpeningParentFileTheoryEnhancesSymbolTableCorrectly"  
+            // file processing creates the subdirectories
+            prepareFplCode(filename + ".fpl", fplCode, false) |> ignore
+
+            // do the test - now, open a specific file in the repo subdirectory
+            loadFplFile (Path.Combine(currentPathRepo,"Fpl.Commons.fpl")) 
+            // and test if the current number of asts in symbol table
+
+            // initial counts of parsed ast and theories in root
+            Assert.AreEqual<int>(1, heap.ParsedAsts.Count)
+
+        
+            // now, conserve the symbol table for the test's next step and open the parent file
+            let uri = PathEquivalentUri(Path.Combine(currentPathRepo,"Fpl.SetTheory.fpl"))
+            let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+            let fplCode = File.ReadAllText(uri.AbsolutePath)
+            fplInterpreter fplCode uri fplLibUrl
+
+            // and test the current number of asts in symbol table
+            Assert.AreEqual<int>(2, heap.ParsedAsts.Count)
+
+            // now, open the grand parent file
+            let uri = PathEquivalentUri(Path.Combine(currentPath,filename + ".fpl"))
+            let fplCode = File.ReadAllText(uri.AbsolutePath)
+            fplInterpreter fplCode uri fplLibUrl
+
+            // and test the current number of asts in symbol table
+            Assert.AreEqual<int>(3, heap.ParsedAsts.Count)
+        
+            // remove the test file
+            prepareFplCode(filename, "", true) |> ignore
+
+    [<TestMethod>]
+    member this.OpeningGrandParentFileTheoryEnhancesSymbolTableCorrectly() =
+        if not offlineWatcher.OfflineMode then 
+            // prepare test, making sure there is an empty 
+            // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
+            // first delete lib and repo subdirectories (if any)
+            let currentPath = Directory.GetCurrentDirectory()
+            let currentPathLib = Path.Combine(currentPath,"lib")
+            let currentPathRepo = Path.Combine(currentPath,"repo")
+            deleteDirectory currentPathLib
+            deleteDirectory currentPathRepo
+
+            let fplCode = """
+                uses Fpl.SetTheory
+            """
+            let filename = "OpeningGrandParentFileTheoryEnhancesSymbolTableCorrectly"  
+            // file processing creates the subdirectories
+            prepareFplCode(filename + ".fpl", fplCode, false) |> ignore
+
+            // do the test - now, open a specific file in the repo subdirectory
+            loadFplFile (Path.Combine(currentPathRepo,"Fpl.Commons.fpl")) 
+            // and test the current number of asts in symbol table
+ 
+            // initial counts of parsed ast and theories in root
+            Assert.AreEqual<int>(1, heap.ParsedAsts.Count)
+
+            // now, conserve the symbol table for the test's next step and open the grand parent file
+            let uri = PathEquivalentUri(Path.Combine(currentPath,filename + ".fpl"))
+            let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+            let fplCode = File.ReadAllText(uri.AbsolutePath)
+            fplInterpreter fplCode uri fplLibUrl
+
+            // and test the current number of asts in symbol table
+            Assert.AreEqual<int>(3, heap.ParsedAsts.Count)
+        
+            // remove the test file
+            prepareFplCode(filename, "", true) |> ignore
+
+    [<TestMethod>]
+    member this.OpeningFileInLibAsCopyOfFileInRepoDoesRaiseNSP05Error() =
+        if not offlineWatcher.OfflineMode then 
+            // prepare test, making sure there is an empty 
+            // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
+            // first delete lib and repo subdirectories (if any)
+            let currentPath = Directory.GetCurrentDirectory()
+            let currentPathLib = Path.Combine(currentPath,"lib")
+            let currentPathRepo = Path.Combine(currentPath,"repo")
+            deleteDirectory currentPathLib
+            deleteDirectory currentPathRepo
+            deleteFiles currentPath "*.fpl"
+
+            let fplCode = """
+                uses Fpl.SetTheory
+            """
+            let filename = "OpeningFileInLibAsCopyOfFileInRepoDoesRaiseNSP05Error"  
+            // file processing creates the subdirectories lib and repo
+            prepareFplCode(filename + ".fpl", fplCode, false) |> ignore
+            // test if the test's preparation didn't mess up. There should be no NSP05 error at all
+            let result = filterByErrorCode ad (NSP05 ([],"","")).Code
+            Assert.AreEqual<int>(0, result.Length)
+
+            // the repo files are supposed to be in the repository (https source)
+            // we now copy the repo file to the lib file and pretend to have the same file 
+            // in our lib subfolder
+            File.Copy(Path.Combine(currentPathRepo,"Fpl.Commons.fpl"),Path.Combine(currentPathLib,"Fpl.Commons.fpl"))
+
+            // do the test - now, open a file in the lib subdirectory
+            loadFplFile (Path.Combine(currentPathLib,"Fpl.Commons.fpl")) |> ignore
+            // now, we should have an NSP05 error
+            let result = filterByErrorCode ad (NSP05 ([],"","")).Code
+            Assert.AreEqual<int>(1, result.Length)
+
+            // remove the test file
+            prepareFplCode(filename, "", true) |> ignore
+            // remove the test file from lib
+            deleteFiles currentPathLib "Fpl.Commons.fpl"
+
+    [<TestMethod>]
+    member this.OpeningFileInMainAsCopyOfFileInRepoDoesRaiseNSP05Error() =
+        if not offlineWatcher.OfflineMode then 
+            // prepare test, making sure there is an empty 
+            // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
+            // first delete lib and repo subdirectories (if any)
+            let currentPath = Directory.GetCurrentDirectory()
+            let currentPathLib = Path.Combine(currentPath,"lib")
+            let currentPathRepo = Path.Combine(currentPath,"repo")
+            deleteDirectory currentPathLib
+            deleteDirectory currentPathRepo
+            deleteFiles currentPath "Fpl.Commons.fpl"
+            deleteFiles currentPath "Fpl.SetTheory.fpl"
+
+            let fplCode = """
+                uses Fpl.SetTheory
+            """
+            let filename = "OpeningFileInMainAsCopyOfFileInRepoDoesRaiseNSP05Error"  
+            // file processing creates the subdirectories lib and repo
+            prepareFplCode(filename + ".fpl", fplCode, false) |> ignore
+            // test if the test's preparation didn't mess up. There should be no NSP05 error at all
+            let result = filterByErrorCode ad (NSP05 ([],"","")).Code
+            Assert.AreEqual<int>(0, result.Length)
+
+            // the repo files are supposed to be in the repository (https source)
+            // we now copy the repo file to the lib subfolder
+            File.Copy(Path.Combine(currentPathRepo,"Fpl.Commons.fpl"),Path.Combine(currentPath,"Fpl.Commons.fpl"))
+
+            // do the test - now, open a file in the lib subdirectory
+            loadFplFile (Path.Combine(currentPath,"Fpl.Commons.fpl")) |> ignore
+            // now, we should have an NSP05 error
+            let result = filterByErrorCode ad (NSP05 ([],"","")).Code
+            Assert.AreEqual<int>(1, result.Length)
+
+            // remove the test file
+            prepareFplCode(filename, "", true) |> ignore
+
+            // remove the test file from Main
+            deleteFiles currentPath "Fpl.Commons.fpl"
+
+    [<TestMethod>]
+    member this.HavingRepoFileInLibDoesPreventItToBeDownloadedInRepo() =
+        if not offlineWatcher.OfflineMode then 
+            // prepare test, making sure there is an empty 
+            // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
+            // first delete lib and repo subdirectories (if any)
+            let currentPath = Directory.GetCurrentDirectory()
+            let currentPathLib = Path.Combine(currentPath,"lib")
+            let currentPathRepo = Path.Combine(currentPath,"repo")
+            deleteDirectory currentPathLib
+            deleteDirectory currentPathRepo
+            deleteFiles currentPath "Fpl.Commons.fpl"
+            deleteFiles currentPath "Fpl.SetTheory.fpl"
+
+            let fplCode = """
+                uses Fpl.SetTheory
+            """
+            let filename = "HavingRepoFileInLibDoesNotPreventItToBeDownloadedInRepo"  
+            // file processing creates the subdirectories lib and repo
+            prepareFplCode(filename + ".fpl", fplCode, false) |> ignore
+
+            // the repo files are supposed to be in the repository (https source)
+            // we now copy the repo file to the lib subfolder
+            File.Copy(Path.Combine(currentPathRepo,"Fpl.Commons.fpl"),Path.Combine(currentPathLib,"Fpl.Commons.fpl"))
+
+            // and delete it from the repo subfolder
+            deleteFiles currentPathRepo "Fpl.Commons.fpl"
+
+            // now, process the main file again. This should complement the repo folder again
+            prepareFplCode(filename + ".fpl", fplCode, false) |> ignore
+
+            // do the test - check, if the repo file was downloaded again although it exists in lib subfolder
+            Assert.IsFalse(File.Exists(Path.Combine(currentPathRepo,"Fpl.Commons.fpl")))
+            Assert.IsTrue(File.Exists(Path.Combine(currentPathLib,"Fpl.Commons.fpl")))
+
+            // remove the test file
+            prepareFplCode(filename, "", true) |> ignore
+            // remove the test file from lib
+            deleteFiles currentPathLib "Fpl.Commons.fpl"
+
+    [<TestMethod>]
+    member this.HavingRepoFileInMainDoesPreventItToBeDownloadedInRepo() =
+        if not offlineWatcher.OfflineMode then 
+            // prepare test, making sure there is an empty 
+            // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
+            // first delete lib and repo subdirectories (if any)
+            let currentPath = Directory.GetCurrentDirectory()
+            let currentPathLib = Path.Combine(currentPath,"lib")
+            let currentPathRepo = Path.Combine(currentPath,"repo")
+            deleteDirectory currentPathLib
+            deleteDirectory currentPathRepo
+            deleteFiles currentPath "Fpl.Commons.fpl"
+            deleteFiles currentPath "Fpl.SetTheory.fpl"
+
+            let fplCode = """
+                uses Fpl.SetTheory
+            """
+            let filename = "HavingRepoFileInMainDoesPreventItToBeDownloadedInRepo"  
+            // file processing creates the subdirectories lib and repo
+            prepareFplCode(filename + ".fpl", fplCode, false) |> ignore
+
+            // the repo files are supposed to be in the repository (https source)
+            // we now copy the repo file to main folder 
+            File.Copy(Path.Combine(currentPathRepo,"Fpl.Commons.fpl"),Path.Combine(currentPath,"Fpl.Commons.fpl"))
+
+            // and delete it from the repo subfolder
+            deleteFiles currentPathRepo "Fpl.Commons.fpl"
+
+            // now, process the main file again. This should complement the repo folder again
+            prepareFplCode(filename + ".fpl", fplCode, false) |> ignore
+
+            // do the test - check, if the repo file was downloaded again although it exists in lib subfolder
+            Assert.IsFalse(File.Exists(Path.Combine(currentPathRepo,"Fpl.Commons.fpl")))
+            Assert.IsTrue(File.Exists(Path.Combine(currentPath,"Fpl.Commons.fpl")))
+
+            // remove the test file
+            prepareFplCode(filename, "", true) |> ignore
+            // remove the test file from lib
+            deleteFiles currentPath "Fpl.Commons.fpl"
+
+    [<TestMethod>]
+    member this.OpeningFileInRepoAndChangingItChangesAlsoTheDiagnosticsOfThisFile() =
+        if not offlineWatcher.OfflineMode then 
+            // prepare test, making sure there is an empty 
+            // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
+            // first delete lib and repo subdirectories (if any)
+            let currentPath = Directory.GetCurrentDirectory()
+            let currentPathLib = Path.Combine(currentPath,"lib")
+            let currentPathRepo = Path.Combine(currentPath,"repo")
+            deleteDirectory currentPathLib
+            deleteDirectory currentPathRepo
+            deleteFiles currentPath "Fpl.Commons.fpl"
+            deleteFiles currentPath "Fpl.SetTheory.fpl"
+
+            let fplCode = """
+                uses Fpl.SetTheory
+            """
+            let filename = "OpeningFileInRepoDoesNotCreateYetOtherSubdirsLibAndRepo"  
+            // file processing creates the subdirectories
+            prepareFplCode(filename + ".fpl", fplCode, false) 
+            // initial counts of parsed ast and theories in root
+            Assert.AreEqual<int>(3, heap.ParsedAsts.Count)
+
+            let pathToTestFile = Path.Combine(currentPathRepo,"Fpl.Commons.fpl")
+            let diagnosticsOfFile = ad.GetStreamDiagnostics(PathEquivalentUri(pathToTestFile))
+            let rememberDiagnosticsOfOriginalFile = diagnosticsOfFile.Count
+            // now manipulate the file and reprocess it
+        
+            // now, conserve the symbol table for the test's next step and reprocess the manipulated file
+            let uri = PathEquivalentUri(pathToTestFile)
+            let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+            let fplCodeOriginal = File.ReadAllText(pathToTestFile)
+            let fplCodeManipulated = fplCodeOriginal.Substring(0,fplCodeOriginal.Length-1) + "def pred Bla() { Bla1() }"
+            fplInterpreter fplCodeManipulated uri fplLibUrl
+
+            // do the test - check, if the diagnostics changed
+            let diagnosticsOfManipulatedFile = ad.GetStreamDiagnostics(PathEquivalentUri(pathToTestFile))
+            Assert.IsTrue(diagnosticsOfManipulatedFile.Count > rememberDiagnosticsOfOriginalFile)
+
+            // remove the test file
+            prepareFplCode(filename, "", true) |> ignore
+
+    [<TestMethod>]
+    member this.OpeningFileInRepoAndChangingDoesNotCauseDuplicateSignatureDeclarations() =
+        if not offlineWatcher.OfflineMode then 
+            // prepare test, making sure there is an empty 
+            // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
+            // first delete lib and repo subdirectories (if any)
+            let currentPath = Directory.GetCurrentDirectory()
+            let currentPathLib = Path.Combine(currentPath,"lib")
+            let currentPathRepo = Path.Combine(currentPath,"repo")
+            deleteDirectory currentPathLib
+            deleteDirectory currentPathRepo
+            deleteFiles currentPath "Fpl.Commons.fpl"
+            deleteFiles currentPath "Fpl.SetTheory.fpl"
+
+            let fplCode = """
+                uses Fpl.SetTheory
+            """
+            let filename = "OpeningFileInRepoDoesNotCreateYetOtherSubdirsLibAndRepo"  
+            // file processing creates the subdirectories
+            prepareFplCode(filename + ".fpl", fplCode, false) 
+            // initial counts of parsed ast and theories in root
+            Assert.AreEqual<int>(3, heap.ParsedAsts.Count)
+            let pathToTestFile = Path.Combine(currentPathRepo,"Fpl.Commons.fpl")
+            let diagnosticsOfFile = ad.GetStreamDiagnostics(PathEquivalentUri(pathToTestFile))
+            let countID001 = diagnosticsOfFile |> Seq.filter (fun kvp -> kvp.Value.Code.Code = "ID001") |> Seq.toList
+            Assert.AreEqual<int>(0,countID001.Length)
+            // now manipulate the file and reprocess it
+        
+            // now, conserve the symbol table for the test's next step and reprocess the manipulated file
+            let uri = PathEquivalentUri(pathToTestFile)
+            let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+            let fplCodeOriginal = File.ReadAllText(pathToTestFile)
+            let fplCodeManipulated = fplCodeOriginal.Substring(0,fplCodeOriginal.Length-1) + "def pred Bla() { Bla1() }"
+            fplInterpreter fplCodeManipulated uri fplLibUrl
+
+            // do the test - check, if the diagnostics changed
+            let diagnosticsOfManipulatedFile = ad.GetStreamDiagnostics(PathEquivalentUri(pathToTestFile))
+            let countID001 = diagnosticsOfManipulatedFile |> Seq.filter (fun kvp -> kvp.Value.Code.Code = "ID001") |> Seq.toList
+            Assert.AreEqual<int>(0,countID001.Length)
+
+            // remove the test file
+            prepareFplCode(filename, "", true) |> ignore
+
+
+    [<TestMethod>]
+    member this.OpeningFileInMainAndUpdatingReferencesCorrectlyRaisesID010Errors() =
+        heap.ClearAll()
+        if not offlineWatcher.OfflineMode then 
+            // prepare test, making sure there is an empty 
+            // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
+            // first delete lib and repo subdirectories (if any)
+            let currentPath = Directory.GetCurrentDirectory()
+            let currentPathLib = Path.Combine(currentPath,"lib")
+            let currentPathRepo = Path.Combine(currentPath,"repo")
+            deleteDirectory currentPathLib
+            deleteDirectory currentPathRepo
+            deleteFiles currentPath "*.fpl"
+
+            let fplCode = """
+                def cl Natural
+
+
+                axiom Axiom1
+                {
+                    is(1,Natural)
+                }
+            """
+
+            let filename = "OpeningFileInMainAndUpdatingReferencesCorrectlyRaisesID010Errors"  
+            ad.Clear()
+            // process the file
+            prepareFplCode(filename + ".fpl", fplCode, false) 
+            // test if there is no ID010 error
+            let result = filterByErrorCode ad (ID010 "").Code
+            Assert.AreEqual<int>(0, result.Length)
+
+
+            // do the test - now, modify the file with a typo to provoke ID010 diagnostics
+            let fplCode = """
+                def cl Natural
+
+
+                axiom Axiom1
+                {
+                    is(1,NaturalTypo)
+                }
+            """
+            let pathToFile = Path.Combine(currentPath,filename)
+            File.WriteAllText(pathToFile,fplCode)
+            // reprocess file with the same symbol table
+            loadFplFileWithTheSameSymbolTable pathToFile |> ignore
+
+            // test if there is a SIG04 error (there should be 1)
+            let result = filterByErrorCode ad (ID010 "").Code
+            Assert.AreEqual<int>(1, result.Length)
+
+            // now, correct the typo to make SIG04 diagnostics disappear
+            let fplCode = """
+                def cl Natural
+
+
+                axiom Axiom1
+                {
+                    is(1,Natural)
+                }
+            """
+            File.WriteAllText(pathToFile,fplCode)
+            // reprocess file with the same symbol table
+            loadFplFileWithTheSameSymbolTable pathToFile |> ignore
+
+            // test if there is a SIG04 error (there should be 0)
+            let result = filterByErrorCode ad (SIG04 ("", "")).Code
+            Assert.AreEqual<int>(0, result.Length)
+
+            // remove the test file
+            prepareFplCode(filename, "", true) |> ignore
+
+    [<DataRow("uses Fpl.Commons.Structures ")>]
+    [<TestMethod>]
+    member this.TestJson(fplCode:string) =
+        if offlineWatcher.OfflineMode && fplCodeNeedsOnline fplCode then 
+            ()
+        else
+            prepareFplCode ("TestJson.fpl", "", false) |> ignore
+
+            prepareFplCode ("TestJson.fpl", fplCode, false)
+            try
+                use sr = new StringReader(heap.SymbolTable.ToJson())
+                use jr = new JsonTextReader(sr)
+                // disable the MaxDepth limit (nullable with no value)
+                jr.MaxDepth <- System.Nullable<int>()
+                JToken.ReadFrom(jr) |> ignore
+            with
+            | :? JsonReaderException as ex -> 
+                let currDir = Directory.GetCurrentDirectory()
+                File.WriteAllText(Path.Combine(currDir, "TestJson.json"), heap.SymbolTable.ToJson())
+                Assert.IsTrue (false, ex.Message)
+            | _ -> Assert.IsTrue (false, "Other exception occurred")
+                

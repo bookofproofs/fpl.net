@@ -1,7 +1,7 @@
 inference ModusPonens
 {
     dec
-        ~p,q: pred
+        p,q: pred
     ;
     premise:
         and (p, impl (p,q) )
@@ -13,7 +13,7 @@ inference ModusPonens
 inference ExistsByExample
 {
     dec
-        ~p: pred(c: obj, other:* obj)
+        p: pred(c: obj, other:*obj[ind])
     ;
     premise:
         p(c, other)
@@ -32,67 +32,65 @@ def pred Greater(x,y: obj) infix ">" 5
 axiom GreaterAB
 {
     dec
-        ~a: A
-        ~b: B
+        a: A
+        b: B
     ;
-    (a > b)
+    a > b
 }
 
 axiom GreaterBC
 {
     dec
-        ~b: B
-        ~c: C
+        b: B
+        c: C
     ;
-    (b > c)
+    b > c
 }
 
 axiom GreaterTransitive
 {
     dec
-        ~x,y,z: obj
+        x,y,z: obj
     ;
     impl
     (
         and
         (
-            (x > y), (y > z)
+            x > y, y > z
         ),
-        (x > z)
+        x > z
     )
 }
 
 lemma Example4
 {
     dec
-        ~y,z: obj
+        y,z: obj
     ;
     ex x: obj 
     { 
-        and ((x > y), (x > z)) 
+        and (x > y, x > z) 
     }
 }
 
 proof Example4$1
 {
     dec
-        ~a:A
-        ~b:B
-        ~c:C
+        a:A
+        b:B
+        c:C
 
     ;
-    1. GreaterAB |- (a > b) 
-    2. GreaterBC |- (b > c) 
-    3. 1, 2 |- and ((a > b), (b > c)) 
-    4. 3, GreaterTransitive |- impl ( and ((a > b), (b > c)), (a > c) ) 
-    5. 4, ModusPonens |- (a > c)
-    6. 5, 1 |- and ((a > c), (a > b)) 
+    1. byax GreaterAB |- (a > b) 
+    2. byax GreaterBC |- (b > c) 
+    3. 1, 2 |- and (a > b, b > c) 
+    4. byax GreaterTransitive |- impl ( and (a > b, b > c), a > c ) 
+    5. 4, byinf ModusPonens |- a > c
+    6. 5, 1 |- and (a > c, a > b) 
     7. 6, ExistsByExample |- 
         ex x:obj 
         { 
-            and ((x > y), (x > z)) 
+            and (x > y, x > z) 
         }
     qed
 }
-
-;
