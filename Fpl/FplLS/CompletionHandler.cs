@@ -1,11 +1,3 @@
-using FplLS;
-using OmniSharp.Extensions.LanguageServer.Protocol;
-using OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities;
-using OmniSharp.Extensions.LanguageServer.Protocol.Document;
-using OmniSharp.Extensions.LanguageServer.Protocol.Models;
-using OmniSharp.Extensions.LanguageServer.Protocol.Server;
-using static Fpl.Errors.Diagnostics;
-
 /*
 MIT License
 
@@ -30,14 +22,23 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.  
 */
 
+using FplLS;
+using OmniSharp.Extensions.LanguageServer.Protocol;
+using OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities;
+using OmniSharp.Extensions.LanguageServer.Protocol.Document;
+using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using OmniSharp.Extensions.LanguageServer.Protocol.Server;
+using static Fpl.Errors.Diagnostics;
+
 public class CompletionHandler : ICompletionHandler
 {
     private readonly ILanguageServer _languageServer;
     private readonly BufferManager _bufferManager;
     private readonly FplAutoCompleteService _fplAutoComplService;
 
-    private readonly DocumentSelector _documentSelector = new(
-        new DocumentFilter { Pattern = "**/*.fpl" }
+    // Updated for OmniSharp 19.9
+    private readonly TextDocumentSelector _documentSelector = new(
+        new TextDocumentFilter { Pattern = "**/*.fpl" }
     );
 
     private CompletionCapability _capability = new();
@@ -59,7 +60,7 @@ public class CompletionHandler : ICompletionHandler
     }
 
     // ---------------------------------------------------------
-    // EXPLICIT INTERFACE IMPLEMENTATION (required in OmniSharp 19)
+    // EXPLICIT INTERFACE IMPLEMENTATION (required in OmniSharp 19.9)
     // ---------------------------------------------------------
     CompletionRegistrationOptions
         IRegistration<CompletionRegistrationOptions, CompletionCapability>
@@ -112,3 +113,4 @@ public class CompletionHandler : ICompletionHandler
         return pos + col;
     }
 }
+

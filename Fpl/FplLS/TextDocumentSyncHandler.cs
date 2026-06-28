@@ -1,13 +1,13 @@
 // Ignore Spelling: uri
 
 using System.Text;
+using MediatR;
+using OmniSharp.Extensions.LanguageServer.Protocol;
+using OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities;
 using OmniSharp.Extensions.LanguageServer.Protocol.Document;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
-using OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities;
-using OmniSharp.Extensions.LanguageServer.Protocol.Server.Capabilities;
-using OmniSharp.Extensions.LanguageServer.Protocol;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
-using MediatR;
+using OmniSharp.Extensions.LanguageServer.Protocol.Server.Capabilities;
 using static Fpl.Errors.Diagnostics;
 
 
@@ -37,15 +37,22 @@ namespace FplLS
     SOFTWARE.  
     */
 
-
+    using System.Text;
+    using MediatR;
+    using OmniSharp.Extensions.LanguageServer.Protocol;
+    using OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities;
+    using OmniSharp.Extensions.LanguageServer.Protocol.Document;
+    using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+    using OmniSharp.Extensions.LanguageServer.Protocol.Server;
+    using OmniSharp.Extensions.LanguageServer.Protocol.Server.Capabilities;
 
     public class TextDocumentSyncHandler : ITextDocumentSyncHandler
     {
         private readonly ILanguageServer _languageServer;
         private readonly BufferManager _bufferManager;
 
-        private readonly DocumentSelector _documentSelector = new(
-            new DocumentFilter { Pattern = "**/*.fpl" }
+        private readonly TextDocumentSelector _documentSelector = new(
+            new TextDocumentFilter { Pattern = "**/*.fpl" }
         );
 
         private TextSynchronizationCapability? _capability;
