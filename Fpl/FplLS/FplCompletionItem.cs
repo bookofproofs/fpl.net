@@ -433,7 +433,7 @@ namespace FplLS
                 case LiteralQed:
                     Detail = "(quod erat demonstrandum)";
                     SortText = LiteralQed;
-                    Kind = CompletionItemKind.Text;
+                    Kind = CompletionItemKind.Constant;
                     IsShort = false;
                     break;
                 case LiteralRet:
@@ -493,7 +493,7 @@ namespace FplLS
                 case LiteralTrivial:
                     Detail = "argument (trivial)";
                     SortText = LiteralTrivial;
-                    Kind = CompletionItemKind.Text;
+                    Kind = CompletionItemKind.Constant;
                     IsShort = false;
                     break;
                 case LiteralUndef:

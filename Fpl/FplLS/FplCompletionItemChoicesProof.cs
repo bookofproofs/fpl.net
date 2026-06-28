@@ -15,15 +15,15 @@ namespace FplLS
                 BuildProof(defaultCi, "03", "proof by contradiction (1)", BuildContradictionProofBody),
                 BuildProof(defaultCi, "04", "proof by contradiction (2)", BuildContradictionProof2Body),
                 BuildProof(defaultCi, "05", "equivalence proof", BuildEquivalenceProofBody),
-                BuildProof(defaultCi, "06", "disjunct. premise proof", BuildDisjPremiseProofBody),
+                BuildProof(defaultCi, "06", "disjunctive premise proof", BuildDisjPremiseProofBody),
                 BuildProof(defaultCi, "07", "conjunctive premise proof", BuildConjPremiseProofBody),
                 BuildProof(defaultCi, "08", "disjunctive conclusion proof", BuildDisjunctiveConclusionProofBody),
                 BuildProof(defaultCi, "09", "conjunctive conclusion proof", BuildConjunctiveConclusionProofBody),
-                BuildProof(defaultCi, "10", "counterexample all", BuildCounterexampleAllBody),
-                BuildProof(defaultCi, "11", "counterexample ex", BuildCounterexampleExBody),
-                BuildProof(defaultCi, "12", "by induction", BuildByInductionBody),
-                BuildProof(defaultCi, "13", "by strong induction", BuildByStrongInductionBody),
-                BuildProof(defaultCi, "14", "smallest counterexample", BuildSmallestCounterexampleBody),
+                BuildProof(defaultCi, "10", "proof by counterexample (all)", BuildCounterexampleAllBody),
+                BuildProof(defaultCi, "11", "proof by counterexample (exists)", BuildCounterexampleExBody),
+                BuildProof(defaultCi, "12", "proof by induction", BuildByInductionBody),
+                BuildProof(defaultCi, "13", "proof by strong induction", BuildByStrongInductionBody),
+                BuildProof(defaultCi, "14", "proof by smallest counterexample", BuildSmallestCounterexampleBody),
 
                 // keywords - preserve short-marker so keyword sort-texts match expectations
                 defaultCi.WithIsShort(defaultCi.IsShort).WithKind(CompletionItemKind.Keyword).WithKeyword()

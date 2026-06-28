@@ -79,7 +79,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow(LiteralPrf, LiteralPrf)]
+        [DataRow(LiteralPrf, LiteralPrfL)]
         [DataRow(LiteralPrfL, LiteralPrfL)]
         [TestMethod]
         public void TestAddProofChoicesDetail(string choice, string l)

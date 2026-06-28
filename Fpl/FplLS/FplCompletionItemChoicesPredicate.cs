@@ -48,13 +48,23 @@ namespace FplLS
 
         private static FplCompletionItem CreateWithBody(FplCompletionItem baseCi, int numbOfArgs)
         {
-            string insert = numbOfArgs switch
+            string insert;
+            switch (numbOfArgs)
             {
-                0 => baseCi.Word + " ",
-                1 => $"{baseCi.Word} true ",
-                2 => $"{baseCi.Word} ( false, true ) ",
-                _ => $"{baseCi.Word} ( true, false ) ",
-            };
+                case 0:
+                    insert = baseCi.Word + " ";
+                    break;
+                case 1:
+                    insert = $"{baseCi.Word} true ";
+                    break;
+                case 2:
+                    insert = $"{baseCi.Word} ( false, true ) ";
+                    break;
+                default:
+                    insert = $"{baseCi.Word} ( true, false ) ";
+                    break;
+            }
+
             return baseCi
                 .WithInsertText(insert)
                 .WithLabel(baseCi.Label + " ...");
@@ -62,7 +72,7 @@ namespace FplLS
 
         private static FplCompletionItem CreateEquality(FplCompletionItem baseCi)
         {
-            var insert = $" x = y ";
+            var insert = $" (x = y) ";
             return baseCi
                 .WithInsertText(insert)
                 .WithLabel(TokenPrefix + insert + "...")
