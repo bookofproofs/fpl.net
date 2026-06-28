@@ -3,7 +3,7 @@ using static Fpl.Primitives;
 
 namespace FplLS
 {
-    public record FplCompletionItem : CompletionItem
+    public class FplCompletionItem : CompletionItem
     {
         private readonly string _prefix = "_ ";
 

@@ -22,49 +22,33 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.  
 */
 
+
 using FplLS;
-using OmniSharp.Extensions.LanguageServer.Protocol;
 using OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities;
 using OmniSharp.Extensions.LanguageServer.Protocol.Document;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
 using static Fpl.Errors.Diagnostics;
 
-public class CompletionHandler : ICompletionHandler
+class CompletionHandler(ILanguageServer languageServer, BufferManager bufferManager, FplAutoCompleteService fplAutoCompletionService) : ICompletionHandler
 {
-    private readonly ILanguageServer _languageServer;
-    private readonly BufferManager _bufferManager;
-    private readonly FplAutoCompleteService _fplAutoComplService;
 
-    // Updated for OmniSharp 19.9
-    private readonly TextDocumentSelector _documentSelector = new(
-        new TextDocumentFilter { Pattern = "**/*.fpl" }
+    private readonly ILanguageServer _languageServer = languageServer;
+    private readonly BufferManager _bufferManager = bufferManager;
+    private readonly FplAutoCompleteService _fplAutoComplService = fplAutoCompletionService;
+
+    private readonly DocumentSelector _documentSelector = new(
+        new DocumentFilter()
+        {
+            Pattern = "**/*.fpl"
+        }
     );
 
     private CompletionCapability _capability = new();
 
-    public CompletionHandler(
-        ILanguageServer languageServer,
-        BufferManager bufferManager,
-        FplAutoCompleteService fplAutoCompletionService)
-    {
-        _languageServer = languageServer;
-        _bufferManager = bufferManager;
-        _fplAutoComplService = fplAutoCompletionService;
-    }
+    public CompletionCapability Capability { get => _capability; set => _capability = value; }
 
-    public CompletionCapability Capability
-    {
-        get => _capability;
-        set => _capability = value;
-    }
-
-    // ---------------------------------------------------------
-    // EXPLICIT INTERFACE IMPLEMENTATION (required in OmniSharp 19.9)
-    // ---------------------------------------------------------
-    CompletionRegistrationOptions
-        IRegistration<CompletionRegistrationOptions, CompletionCapability>
-        .GetRegistrationOptions(CompletionCapability capability, ClientCapabilities clientCapabilities)
+    public CompletionRegistrationOptions GetRegistrationOptions()
     {
         return new CompletionRegistrationOptions
         {
@@ -73,44 +57,37 @@ public class CompletionHandler : ICompletionHandler
         };
     }
 
-    // ---------------------------------------------------------
-    // CAPABILITY
-    // ---------------------------------------------------------
-    public void SetCapability(CompletionCapability capability)
-    {
-        Capability = capability;
-    }
-
-    // ---------------------------------------------------------
-    // COMPLETION HANDLER
-    // ---------------------------------------------------------
     public async Task<CompletionList> Handle(CompletionParams request, CancellationToken cancellationToken)
     {
+        FplLsTraceLogger.LogMsg(_languageServer, "Task<CompletionList>", "CompletionHandler.Handle");
         var uri = PathEquivalentUri.EscapedUri(request.TextDocument.Uri.GetFileSystemPath());
         var buffer = _bufferManager.GetBuffer(uri);
-
         if (buffer == null)
         {
             return new CompletionList();
         }
+        var position = GetPosition(buffer.ToString()[..buffer.Length],
+        (int)request.Position.Line,
+        (int)request.Position.Character);
 
-        var position = GetPosition(
-            buffer.ToString()[..buffer.Length],
-            (int)request.Position.Line,
-            (int)request.Position.Character
-        );
+        var complList = await FplAutoCompleteService.GetParserChoices(buffer, position, _languageServer);
 
-        return await FplAutoCompleteService.GetParserChoices(buffer, position, _languageServer);
+        return complList;
+
     }
 
     private static int GetPosition(string buffer, int line, int col)
     {
-        var pos = 0;
+        var position = 0;
         for (var i = 0; i < line; i++)
         {
-            pos = buffer.IndexOf('\n', pos) + 1;
+            position = buffer.IndexOf('\n', position) + 1;
         }
-        return pos + col;
+        return position + col;
+    }
+
+    public void SetCapability(CompletionCapability capability)
+    {
+        Capability = capability;
     }
 }
-
