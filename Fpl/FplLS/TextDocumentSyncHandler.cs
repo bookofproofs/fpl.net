@@ -1,12 +1,12 @@
 // Ignore Spelling: uri
 
 using System.Text;
-using OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities;
-using OmniSharp.Extensions.LanguageServer.Protocol.Models;
-using OmniSharp.Extensions.LanguageServer.Protocol.Server.Capabilities;
-using OmniSharp.Extensions.LanguageServer.Protocol.Server;
 using OmniSharp.Extensions.LanguageServer.Protocol.Document;
+using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities;
+using OmniSharp.Extensions.LanguageServer.Protocol.Server.Capabilities;
 using OmniSharp.Extensions.LanguageServer.Protocol;
+using OmniSharp.Extensions.LanguageServer.Protocol.Server;
 using MediatR;
 using static Fpl.Errors.Diagnostics;
 
@@ -37,6 +37,8 @@ namespace FplLS
     SOFTWARE.  
     */
 
+
+
     public class TextDocumentSyncHandler : ITextDocumentSyncHandler
     {
         private readonly ILanguageServer _languageServer;
@@ -46,23 +48,22 @@ namespace FplLS
             new DocumentFilter { Pattern = "**/*.fpl" }
         );
 
-        private SynchronizationCapability? _capability;
+        private TextSynchronizationCapability? _capability;
 
-        public TextDocumentSyncHandler(ILanguageServer router, BufferManager bufferManager)
+        public TextDocumentSyncHandler(
+            ILanguageServer languageServer,
+            BufferManager bufferManager)
         {
-            _languageServer = router;
+            _languageServer = languageServer;
             _bufferManager = bufferManager;
         }
 
         public TextDocumentSyncKind Change => TextDocumentSyncKind.Full;
 
-        // ---------------------------
-        // EXPLICIT IMPLEMENTATIONS
-        // ---------------------------
-
+        // OPEN
         TextDocumentOpenRegistrationOptions
-            IRegistration<TextDocumentOpenRegistrationOptions, SynchronizationCapability>
-            .GetRegistrationOptions(SynchronizationCapability capability, ClientCapabilities clientCapabilities)
+            IRegistration<TextDocumentOpenRegistrationOptions, TextSynchronizationCapability>
+            .GetRegistrationOptions(TextSynchronizationCapability capability, ClientCapabilities clientCapabilities)
         {
             return new TextDocumentOpenRegistrationOptions
             {
@@ -70,9 +71,10 @@ namespace FplLS
             };
         }
 
+        // CHANGE
         TextDocumentChangeRegistrationOptions
-            IRegistration<TextDocumentChangeRegistrationOptions, SynchronizationCapability>
-            .GetRegistrationOptions(SynchronizationCapability capability, ClientCapabilities clientCapabilities)
+            IRegistration<TextDocumentChangeRegistrationOptions, TextSynchronizationCapability>
+            .GetRegistrationOptions(TextSynchronizationCapability capability, ClientCapabilities clientCapabilities)
         {
             return new TextDocumentChangeRegistrationOptions
             {
@@ -81,9 +83,10 @@ namespace FplLS
             };
         }
 
+        // CLOSE
         TextDocumentCloseRegistrationOptions
-            IRegistration<TextDocumentCloseRegistrationOptions, SynchronizationCapability>
-            .GetRegistrationOptions(SynchronizationCapability capability, ClientCapabilities clientCapabilities)
+            IRegistration<TextDocumentCloseRegistrationOptions, TextSynchronizationCapability>
+            .GetRegistrationOptions(TextSynchronizationCapability capability, ClientCapabilities clientCapabilities)
         {
             return new TextDocumentCloseRegistrationOptions
             {
@@ -91,9 +94,10 @@ namespace FplLS
             };
         }
 
+        // SAVE
         TextDocumentSaveRegistrationOptions
-            IRegistration<TextDocumentSaveRegistrationOptions, SynchronizationCapability>
-            .GetRegistrationOptions(SynchronizationCapability capability, ClientCapabilities clientCapabilities)
+            IRegistration<TextDocumentSaveRegistrationOptions, TextSynchronizationCapability>
+            .GetRegistrationOptions(TextSynchronizationCapability capability, ClientCapabilities clientCapabilities)
         {
             return new TextDocumentSaveRegistrationOptions
             {
@@ -101,11 +105,7 @@ namespace FplLS
             };
         }
 
-        // ---------------------------
-        // CAPABILITY + ATTRIBUTES
-        // ---------------------------
-
-        public void SetCapability(SynchronizationCapability capability)
+        public void SetCapability(TextSynchronizationCapability capability)
         {
             _capability = capability;
         }
@@ -114,10 +114,6 @@ namespace FplLS
         {
             return new TextDocumentAttributes(uri, "fpl");
         }
-
-        // ---------------------------
-        // HANDLERS
-        // ---------------------------
 
         public Task<Unit> Handle(DidOpenTextDocumentParams request, CancellationToken cancellationToken)
         {
