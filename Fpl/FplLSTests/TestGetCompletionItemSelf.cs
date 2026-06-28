@@ -61,7 +61,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesSelf().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                if (item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice) && choice!=LiteralBase)
+                if (!string.IsNullOrEmpty(item.InsertText) && item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice) && choice!=LiteralBase)
                 {
                     Assert.IsTrue(item.InsertText.EndsWith(' '));
                 }
@@ -107,7 +107,7 @@ namespace FplLSTests
             var counterSnippets = 0;
             foreach (var item in actual)
             {
-                if (item.InsertText.Contains(choice)) { counterSnippets++; }
+                if (!string.IsNullOrEmpty(item.InsertText) && item.InsertText.Contains(choice)) { counterSnippets++; }
             }
             Assert.AreEqual<int>(actual.Count, counterSnippets);
         }

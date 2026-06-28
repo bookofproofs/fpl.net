@@ -52,7 +52,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesWord().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                if (item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice) && !choice.EndsWith("!"))
+                if (item.Kind != CompletionItemKind.Keyword && !string.IsNullOrEmpty(item.InsertText) && item.InsertText.Contains(choice) && !choice.EndsWith("!"))
                 {
                     Assert.IsTrue(item.InsertText.EndsWith(' '));
                 }

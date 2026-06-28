@@ -61,7 +61,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesString().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.Detail.Contains(choice));
+                Assert.IsTrue(!string.IsNullOrEmpty(item.Detail) && item.Detail.Contains(choice));
             }
         }
 

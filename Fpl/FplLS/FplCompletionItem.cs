@@ -558,7 +558,7 @@ namespace FplLS
             var finalSort = sortText ?? this.SortText;
             var finalIsShort = isShort ?? this.IsShort;
 
-            var copy = new FplCompletionItem(this.Word, insertText: insertText ?? this.InsertText)
+            var copy = new FplCompletionItem(this.Word, insertText: insertText ?? this.InsertText ?? string.Empty)
             {
                 AdditionalTextEdits = this.AdditionalTextEdits,
                 Command = this.Command,

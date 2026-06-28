@@ -41,7 +41,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesMapCases().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.SortText.Contains(LiteralCases));
+                Assert.Contains(LiteralCases, item.SortText ?? string.Empty);
             }
         }
 
@@ -65,7 +65,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesMapCases().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.Detail.Contains(choice));
+                Assert.Contains(choice, item.Detail ?? string.Empty);
             }
         }
 
@@ -78,8 +78,8 @@ namespace FplLSTests
             var counterSnippets = 0;
             foreach (var item in actual)
             {
-                if (item.InsertText.Contains(choice)) { counterSnippets++; }
-                if (item.InsertText.Contains(' '))
+                if (!string.IsNullOrEmpty(item.InsertText) && item.InsertText.Contains(choice)) { counterSnippets++; }
+                if (!string.IsNullOrEmpty(item.InsertText) && item.InsertText.Contains(' '))
                 {
                     var res = testParser(LiteralMapCases, item.InsertText);
                     if (!res.StartsWith("Success:"))

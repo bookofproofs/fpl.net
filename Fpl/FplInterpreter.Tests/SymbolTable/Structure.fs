@@ -409,7 +409,7 @@ type Structure() =
             (parent, node)
         | Some (node:FplGenericNode) ->
             if node.Name = PrimRoot then 
-                Assert.IsInstanceOfType<FplRoot>(node)
+                Assert.IsInstanceOfType(node, typeof<FplRoot>)
                 Assert.AreEqual<int>(0, node.ArgList.Count)
                 Assert.AreEqual<int>(1, node.Scope.Count)
                 prepareFplCode(filename, "", false) |> ignore
@@ -1867,17 +1867,17 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplArgInferenceAssume", "00" -> 
-            Assert.IsInstanceOfType<FplArgument>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplArgument>)
             Assert.AreEqual<int>(1, parent.ArgList.Count) // no justification (therefore 1)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplArgInferenceAssume>(node)
+            Assert.IsInstanceOfType(node, typeof<FplArgInferenceAssume>)
             Assert.AreEqual<int>(1, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplArgInferenceAssume", "01" -> 
-            Assert.IsInstanceOfType<FplArgument>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplArgument>)
             Assert.AreEqual<int>(1, parent.ArgList.Count) // no justification (therefore 1)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplArgInferenceAssume>(node)
+            Assert.IsInstanceOfType(node, typeof<FplArgInferenceAssume>)
             Assert.AreEqual<int>(1, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -1893,17 +1893,17 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplArgInferenceDerived", "00" -> 
-            Assert.IsInstanceOfType<FplArgument>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplArgument>)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplArgInferenceDerived>(node)
+            Assert.IsInstanceOfType(node, typeof<FplArgInferenceDerived>)
             Assert.AreEqual<int>(1, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplArgInferenceDerived", "01" -> 
-            Assert.IsInstanceOfType<FplArgument>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplArgument>)
             Assert.AreEqual<int>(1, parent.ArgList.Count) // no justification (therefore 1)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplArgInferenceDerived>(node)
+            Assert.IsInstanceOfType(node, typeof<FplArgInferenceDerived>)
             Assert.AreEqual<int>(1, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -1916,10 +1916,10 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplArgInferenceRevoke", "00" -> 
-            Assert.IsInstanceOfType<FplArgument>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplArgument>)
             Assert.AreEqual<int>(1, parent.ArgList.Count) // no justification (therefore 1)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplArgInferenceRevoke>(node)
+            Assert.IsInstanceOfType(node, typeof<FplArgInferenceRevoke>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -1932,10 +1932,10 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplArgInferenceTrivial", "00" ->
-            Assert.IsInstanceOfType<FplArgument>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplArgument>)
             Assert.AreEqual<int>(1, parent.ArgList.Count) // justification / arg inference pair
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplArgInferenceTrivial>(node)
+            Assert.IsInstanceOfType(node, typeof<FplArgInferenceTrivial>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -1957,10 +1957,10 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplArgument", "00" ->
-            Assert.IsInstanceOfType<FplProof>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplProof>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplArgument>(node)
+            Assert.IsInstanceOfType(node, typeof<FplArgument>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // no justification
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplArgument", "01" 
@@ -1973,10 +1973,10 @@ type Structure() =
         | "FplArgument", "08" 
         | "FplArgument", "09" 
             ->
-            Assert.IsInstanceOfType<FplProof>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplProof>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplArgument>(node)
+            Assert.IsInstanceOfType(node, typeof<FplArgument>)
             Assert.AreEqual<int>(2, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -1992,10 +1992,10 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplAssertion", "00" ->
-            Assert.IsInstanceOfType<FplConstructor>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplConstructor>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplAssertion>(node)
+            Assert.IsInstanceOfType(node, typeof<FplAssertion>)
             Assert.AreEqual<int>(1, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -2008,15 +2008,15 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplAssignment", "00" -> 
-            Assert.IsInstanceOfType<FplPredicate>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplPredicate>)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplAssignment>(node)
+            Assert.IsInstanceOfType(node, typeof<FplAssignment>)
             Assert.AreEqual<int>(2, node.ArgList.Count) // reference to variable := reference to false
             Assert.AreEqual<int>(0, node.Scope.Count)
             let assignment = node :?> FplAssignment
-            Assert.IsInstanceOfType<FplVariable>(assignment.Assignee.Value)
-            Assert.IsInstanceOfType<FplIntrinsicFalse>(assignment.AssignedValue.Value)
+            Assert.IsInstanceOfType(assignment.Assignee.Value, typeof<FplVariable>)
+            Assert.IsInstanceOfType(assignment.AssignedValue.Value, typeof<FplIntrinsicFalse>)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
 
@@ -2029,10 +2029,10 @@ type Structure() =
         match nodeType, varVal with
 
         | "FplAxiom", "00" -> 
-            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplAxiom>(node)
+            Assert.IsInstanceOfType(node, typeof<FplAxiom>)
             Assert.AreEqual<int>(1, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -2047,27 +2047,27 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplBase", "00" ->
-            Assert.IsInstanceOfType<FplClass>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplClass>)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplBase>(node)
+            Assert.IsInstanceOfType(node, typeof<FplBase>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             Assert.IsTrue(node.RefersTo.IsNone)
         | "FplBase", "01" ->
-            Assert.IsInstanceOfType<FplClass>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplClass>)
             Assert.AreEqual<int>(3, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplBase>(node)
+            Assert.IsInstanceOfType(node, typeof<FplBase>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             Assert.IsTrue(node.RefersTo.IsSome)
-            Assert.IsInstanceOfType<FplClass>(node.RefersTo.Value)
+            Assert.IsInstanceOfType(node.RefersTo.Value, typeof<FplClass>)
         | "FplBase", "02" ->
-            Assert.IsInstanceOfType<FplClass>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplClass>)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplBase>(node)
+            Assert.IsInstanceOfType(node, typeof<FplBase>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             Assert.IsTrue(node.RefersTo.IsNone)
@@ -2081,10 +2081,10 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplBaseConstructorCall", "00" -> 
-            Assert.IsInstanceOfType<FplConstructor>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplConstructor>)
             Assert.AreEqual<int>(1, parent.ArgList.Count) // constructor
             Assert.AreEqual<int>(0, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplBaseConstructorCall>(node)
+            Assert.IsInstanceOfType(node, typeof<FplBaseConstructorCall>)
             Assert.AreEqual<int>(0, node.ArgList.Count) // call to base.Obj()
             Assert.AreEqual<int>(0, node.Scope.Count) 
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -2099,24 +2099,24 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplCaseElse", "00" ->
-            Assert.IsInstanceOfType<FplCases>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplCases>)
             Assert.AreEqual<int>(4, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplCaseElse>(node)
+            Assert.IsInstanceOfType(node, typeof<FplCaseElse>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // 1 stmt in else
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplCaseElse", "01" ->
-            Assert.IsInstanceOfType<FplCases>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplCases>)
             Assert.AreEqual<int>(4, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplCaseElse>(node)
+            Assert.IsInstanceOfType(node, typeof<FplCaseElse>)
             Assert.AreEqual<int>(2, node.ArgList.Count) // 2 stmts in else
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplCaseElse", "02" ->
-            Assert.IsInstanceOfType<FplCases>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplCases>)
             Assert.AreEqual<int>(4, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplCaseElse>(node)
+            Assert.IsInstanceOfType(node, typeof<FplCaseElse>)
             Assert.AreEqual<int>(3, node.ArgList.Count) // 3 stmts in else
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -2129,10 +2129,10 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplCases", "00" ->
-            Assert.IsInstanceOfType<FplPredicate>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplPredicate>)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(2, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplCases>(node)
+            Assert.IsInstanceOfType(node, typeof<FplCases>)
             Assert.AreEqual<int>(4, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -2148,24 +2148,24 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplCaseSingle", "00" ->
-            Assert.IsInstanceOfType<FplCases>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplCases>)
             Assert.AreEqual<int>(4, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplCaseSingle>(node)
+            Assert.IsInstanceOfType(node, typeof<FplCaseSingle>)
             Assert.AreEqual<int>(2, node.ArgList.Count) // 1 condition + 1 statement
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplCaseSingle", "01" ->
-            Assert.IsInstanceOfType<FplCases>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplCases>)
             Assert.AreEqual<int>(4, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplCaseSingle>(node)
+            Assert.IsInstanceOfType(node, typeof<FplCaseSingle>)
             Assert.AreEqual<int>(4, node.ArgList.Count) // 1 condition + 3 statements
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplCaseSingle", "02" ->
-            Assert.IsInstanceOfType<FplCases>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplCases>)
             Assert.AreEqual<int>(4, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplCaseSingle>(node)
+            Assert.IsInstanceOfType(node, typeof<FplCaseSingle>)
             Assert.AreEqual<int>(3, node.ArgList.Count) // 1 condition + 2 statements
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -2193,59 +2193,59 @@ type Structure() =
         match nodeType, varVal with
 
         | "FplClass", "00" -> 
-            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplClass>(node)
+            Assert.IsInstanceOfType(node, typeof<FplClass>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(1, node.Scope.Count)
         | "FplClass", "00a" -> 
-            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplClass>(node)
+            Assert.IsInstanceOfType(node, typeof<FplClass>)
             Assert.AreEqual<int>(2, node.ArgList.Count) // base classes are added only if they were previously declared
             Assert.AreEqual<int>(1, node.Scope.Count) // 1 default constructor
         | "FplClass", "01" -> 
-            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(4, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplClass>(node)
+            Assert.IsInstanceOfType(node, typeof<FplClass>)
             Assert.AreEqual<int>(3, node.ArgList.Count) // three base classes 
             Assert.AreEqual<int>(1, node.Scope.Count) // 1 default constructor
         | "FplClass", "02" -> 
-            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplClass>(node)
+            Assert.IsInstanceOfType(node, typeof<FplClass>)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(1, node.Scope.Count) // constructor
         | "FplClass", "02a" -> 
-            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplClass>(node)
+            Assert.IsInstanceOfType(node, typeof<FplClass>)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(2, node.Scope.Count) // 2 constructors
         | "FplClass", "03" -> 
-            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplClass>(node)
+            Assert.IsInstanceOfType(node, typeof<FplClass>)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(5, node.Scope.Count) // 4 properties + 1 default constructor
         | "FplClass", "04" -> 
-            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplClass>(node)
+            Assert.IsInstanceOfType(node, typeof<FplClass>)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(5, node.Scope.Count) // 1 constructor + 4 properties
         | "FplClass", "05" -> 
-            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplClass>(node)
+            Assert.IsInstanceOfType(node, typeof<FplClass>)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(7, node.Scope.Count) // 2 variables + 1 constructor + 4 properties
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -2260,10 +2260,10 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplConjecture", "00" -> 
-            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplConjecture>(node)
+            Assert.IsInstanceOfType(node, typeof<FplConjecture>)
             Assert.AreEqual<int>(1, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -2277,10 +2277,10 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplConjunction", "00" ->
-            Assert.IsInstanceOfType<FplPredicate>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplPredicate>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplConjunction>(node)
+            Assert.IsInstanceOfType(node, typeof<FplConjunction>)
             Assert.AreEqual<int>(2, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -2304,45 +2304,45 @@ type Structure() =
         match nodeType, varVal with
         // TODO: issue diagnostics if the constructor does nothing
         | "FplConstructor", "00" -> 
-            Assert.IsInstanceOfType<FplClass>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplClass>)
             Assert.AreEqual<int>(0, parent.ArgList.Count) // no base 
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplConstructor>(node)
+            Assert.IsInstanceOfType(node, typeof<FplConstructor>)
             Assert.AreEqual<int>(0, node.ArgList.Count) // nothing in constructor
             Assert.AreEqual<int>(0, node.Scope.Count) 
         | "FplConstructor", "00a" -> 
-            Assert.IsInstanceOfType<FplClass>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplClass>)
             Assert.AreEqual<int>(1, parent.ArgList.Count) // one base 
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplConstructor>(node)
+            Assert.IsInstanceOfType(node, typeof<FplConstructor>)
             Assert.AreEqual<int>(0, node.ArgList.Count) // nothing in constructor
             Assert.AreEqual<int>(0, node.Scope.Count) 
         | "FplConstructor", "00b" -> 
-            Assert.IsInstanceOfType<FplClass>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplClass>)
             Assert.AreEqual<int>(2, parent.ArgList.Count) // two bases
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplConstructor>(node)
+            Assert.IsInstanceOfType(node, typeof<FplConstructor>)
             Assert.AreEqual<int>(0, node.ArgList.Count) // nothing in constructor
             Assert.AreEqual<int>(0, node.Scope.Count) 
         | "FplConstructor", "01" -> 
-            Assert.IsInstanceOfType<FplClass>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplClass>)
             Assert.AreEqual<int>(0, parent.ArgList.Count) // no base
             Assert.AreEqual<int>(2, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplConstructor>(node)
+            Assert.IsInstanceOfType(node, typeof<FplConstructor>)
             Assert.AreEqual<int>(0, node.ArgList.Count) // nothing in constructor
             Assert.AreEqual<int>(3, node.Scope.Count) // three variables
         | "FplConstructor", "02" -> 
-            Assert.IsInstanceOfType<FplClass>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplClass>)
             Assert.AreEqual<int>(0, parent.ArgList.Count) // no base
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplConstructor>(node)
+            Assert.IsInstanceOfType(node, typeof<FplConstructor>)
             Assert.AreEqual<int>(0, node.ArgList.Count) // nothing in constructor
             Assert.AreEqual<int>(2, node.Scope.Count) // two variables
         | "FplConstructor", "03" -> 
-            Assert.IsInstanceOfType<FplClass>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplClass>)
             Assert.AreEqual<int>(0, parent.ArgList.Count) // no base
             Assert.AreEqual<int>(3, parent.Scope.Count) // two variables
-            Assert.IsInstanceOfType<FplConstructor>(node)
+            Assert.IsInstanceOfType(node, typeof<FplConstructor>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // assignment
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -2377,10 +2377,10 @@ type Structure() =
         match nodeType, varVal with
         // corollary without parent
         | "FplCorollary", "00a" ->
-            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplCorollary>(node) 
+            Assert.IsInstanceOfType(node, typeof<FplCorollary>) 
             Assert.AreEqual<int>(1, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         // corollary with wrong parent
@@ -2392,52 +2392,52 @@ type Structure() =
         | "FplCorollary", "00g" 
         | "FplCorollary", "00h" 
         | "FplCorollary", "00i" -> 
-            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(2, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplCorollary>(node) 
+            Assert.IsInstanceOfType(node, typeof<FplCorollary>) 
             Assert.AreEqual<int>(1, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplCorollary", "01a" ->
-            Assert.IsInstanceOfType<FplConjecture>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplConjecture>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplCorollary>(node)  
+            Assert.IsInstanceOfType(node, typeof<FplCorollary>)  
             Assert.AreEqual<int>(1, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplCorollary", "01b" ->
-            Assert.IsInstanceOfType<FplAxiom>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplAxiom>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplCorollary>(node)  
+            Assert.IsInstanceOfType(node, typeof<FplCorollary>)  
             Assert.AreEqual<int>(1, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplCorollary", "01c" -> 
-            Assert.IsInstanceOfType<FplTheorem>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheorem>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplCorollary>(node)  
+            Assert.IsInstanceOfType(node, typeof<FplCorollary>)  
             Assert.AreEqual<int>(1, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplCorollary", "01d" -> 
-            Assert.IsInstanceOfType<FplLemma>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplLemma>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplCorollary>(node)  
+            Assert.IsInstanceOfType(node, typeof<FplCorollary>)  
             Assert.AreEqual<int>(1, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplCorollary", "01e" -> 
-            Assert.IsInstanceOfType<FplProposition>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplProposition>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplCorollary>(node)  
+            Assert.IsInstanceOfType(node, typeof<FplCorollary>)  
             Assert.AreEqual<int>(1, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplCorollary", "01f" -> 
-            Assert.IsInstanceOfType<FplCorollary>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplCorollary>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplCorollary>(node)  
+            Assert.IsInstanceOfType(node, typeof<FplCorollary>)  
             Assert.AreEqual<int>(1, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -2451,12 +2451,12 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplDecrement", "01" ->
-            Assert.IsInstanceOfType<FplReference>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplReference>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsTrue(parent.RefersTo.IsSome)
             Assert.IsTrue(Object.ReferenceEquals(parent.RefersTo.Value, node))
-            Assert.IsInstanceOfType<FplDecrement>(node)
+            Assert.IsInstanceOfType(node, typeof<FplDecrement>)
             Assert.AreEqual<int>(1, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -2471,19 +2471,19 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplDefaultConstructor", "00" ->
-            Assert.IsInstanceOfType<FplClass>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplClass>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplDefaultConstructor>(node)
+            Assert.IsInstanceOfType(node, typeof<FplDefaultConstructor>)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(0, node.Scope.Count)
             let nodeWithValue = node :?> FplGenericHasValue
             Assert.IsTrue(nodeWithValue.Value.IsSome) // instance
         | "FplDefaultConstructor", "01" ->
-            Assert.IsInstanceOfType<FplClass>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplClass>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplDefaultConstructor>(node)
+            Assert.IsInstanceOfType(node, typeof<FplDefaultConstructor>)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(0, node.Scope.Count)
             let nodeWithValue = node :?> FplGenericHasValue
@@ -2498,10 +2498,10 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplDisjunction", "00" ->
-            Assert.IsInstanceOfType<FplPredicate>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplPredicate>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplDisjunction>(node)
+            Assert.IsInstanceOfType(node, typeof<FplDisjunction>)
             Assert.AreEqual<int>(2, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -2516,12 +2516,12 @@ type Structure() =
         match nodeType, varVal with
         | "FplEquality", "01" 
         | "FplEquality", "02" ->
-            Assert.IsInstanceOfType<FplReference>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplReference>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsTrue(parent.RefersTo.IsSome)
             Assert.IsTrue(Object.ReferenceEquals(parent.RefersTo.Value, node))
-            Assert.IsInstanceOfType<FplEquality>(node)
+            Assert.IsInstanceOfType(node, typeof<FplEquality>)
             Assert.AreEqual<int>(2, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -2534,10 +2534,10 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplEquivalence", "00" ->
-            Assert.IsInstanceOfType<FplPredicate>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplPredicate>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplEquivalence>(node)
+            Assert.IsInstanceOfType(node, typeof<FplEquivalence>)
             Assert.AreEqual<int>(2, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -2550,10 +2550,10 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplExclusiveOr", "00" ->
-            Assert.IsInstanceOfType<FplPredicate>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplPredicate>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplExclusiveOr>(node)
+            Assert.IsInstanceOfType(node, typeof<FplExclusiveOr>)
             Assert.AreEqual<int>(2, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -2568,19 +2568,19 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplExtension", "00" -> 
-            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplExtension>(node)
+            Assert.IsInstanceOfType(node, typeof<FplExtension>)
             Assert.AreEqual<int>(2, node.ArgList.Count)
             Assert.AreEqual<int>(1, node.Scope.Count)
             let signatureVars = node.GetVariables() |> List.map (fun var -> var :?> FplGenericVariable) |> List.filter (fun var -> var.IsSignatureVariable) 
             Assert.AreEqual<int>(1, signatureVars.Length)
         | "FplExtension", "01" -> 
-            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplExtension>(node)
+            Assert.IsInstanceOfType(node, typeof<FplExtension>)
             Assert.AreEqual<int>(2, node.ArgList.Count)
             Assert.AreEqual<int>(2, node.Scope.Count)
             let signatureVars = node.GetVariables() |> List.map (fun var -> var :?> FplGenericVariable) |> List.filter (fun var -> var.IsSignatureVariable) 
@@ -2599,52 +2599,52 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplExtensionObj", "00" ->
-            Assert.IsInstanceOfType<FplReference>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplReference>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsTrue(parent.RefersTo.IsSome)
             Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
-            Assert.IsInstanceOfType<FplExtensionObj>(node)
+            Assert.IsInstanceOfType(node, typeof<FplExtensionObj>)
             Assert.AreEqual<string>("obj", node.TypeId)
             Assert.IsTrue(node.RefersTo.IsNone)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplExtensionObj", "00a" ->
-            Assert.IsInstanceOfType<FplReference>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplReference>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsTrue(parent.RefersTo.IsSome)
             Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
-            Assert.IsInstanceOfType<FplExtensionObj>(node)
+            Assert.IsInstanceOfType(node, typeof<FplExtensionObj>)
             Assert.AreEqual<string>("Nat", node.TypeId)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.IsTrue(node.RefersTo.IsSome)
         | "FplExtensionObj", "00b" ->
-            Assert.IsInstanceOfType<FplReference>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplReference>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsTrue(parent.RefersTo.IsSome)
             Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
-            Assert.IsInstanceOfType<FplExtensionObj>(node)
+            Assert.IsInstanceOfType(node, typeof<FplExtensionObj>)
             Assert.AreEqual<string>("Nat", node.TypeId)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.IsTrue(node.RefersTo.IsSome)
         | "FplExtensionObj", "00c" ->
-            Assert.IsInstanceOfType<FplReference>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplReference>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsTrue(parent.RefersTo.IsSome)
             Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
-            Assert.IsInstanceOfType<FplExtensionObj>(node)
+            Assert.IsInstanceOfType(node, typeof<FplExtensionObj>)
             Assert.AreEqual<string>("Nat", node.TypeId)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.IsTrue(node.RefersTo.IsSome)
         | "FplExtensionObj", "00d" ->
-            Assert.IsInstanceOfType<FplReference>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplReference>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsTrue(parent.RefersTo.IsSome)
             Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
-            Assert.IsInstanceOfType<FplExtensionObj>(node)
+            Assert.IsInstanceOfType(node, typeof<FplExtensionObj>)
             Assert.AreEqual<string>("obj", node.TypeId)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.IsTrue(node.RefersTo.IsNone)
@@ -2661,37 +2661,37 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplForInStmt", "01" ->
-            Assert.IsInstanceOfType<FplFunctionalTerm>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplFunctionalTerm>)
             Assert.AreEqual<int>(4, parent.ArgList.Count)
             Assert.AreEqual<int>(4, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplForInStmt>(node)
+            Assert.IsInstanceOfType(node, typeof<FplForInStmt>)
             Assert.AreEqual<int>(3, node.ArgList.Count) // entity, domain, for body consisting of 1 stmt
             Assert.AreEqual<string>("addend", node.ArgList[0].Type SignatureType.Name)
             Assert.AreEqual<string>("list", node.ArgList[1].Type SignatureType.Name)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplForInStmt", "02" ->
-            Assert.IsInstanceOfType<FplFunctionalTerm>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplFunctionalTerm>)
             Assert.AreEqual<int>(4, parent.ArgList.Count)
             Assert.AreEqual<int>(6, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplForInStmt>(node)
+            Assert.IsInstanceOfType(node, typeof<FplForInStmt>)
             Assert.AreEqual<int>(3, node.ArgList.Count) // entity, domain, for body consisting of 1 stmt
             Assert.AreEqual<string>("i", node.ArgList[0].Type SignatureType.Name)
             Assert.AreEqual<string>("ClosedRange(from, to)", node.ArgList[1].Type SignatureType.Name)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplForInStmt", "03" ->
-            Assert.IsInstanceOfType<FplFunctionalTerm>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplFunctionalTerm>)
             Assert.AreEqual<int>(4, parent.ArgList.Count)
             Assert.AreEqual<int>(2, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplForInStmt>(node)
+            Assert.IsInstanceOfType(node, typeof<FplForInStmt>)
             Assert.AreEqual<int>(3, node.ArgList.Count) // entity, domain, for body consisting of 1 stmt
             Assert.AreEqual<string>("addend", node.ArgList[0].Type SignatureType.Name)
             Assert.AreEqual<string>("Nat", node.ArgList[1].Type SignatureType.Name)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplForInStmt", "04" ->
-            Assert.IsInstanceOfType<FplFunctionalTerm>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplFunctionalTerm>)
             Assert.AreEqual<int>(3, parent.ArgList.Count) // mapping / for stmt, return
             Assert.AreEqual<int>(2, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplForInStmt>(node)
+            Assert.IsInstanceOfType(node, typeof<FplForInStmt>)
             Assert.AreEqual<int>(3, node.ArgList.Count) // entity, domain, for body consisting of 1 stmt
             Assert.AreEqual<string>("addend", node.ArgList[0].Type SignatureType.Name)
             Assert.AreEqual<string>("Nat()", node.ArgList[1].Type SignatureType.Name)
@@ -2709,41 +2709,41 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplForInStmtDomain", "01" ->
-            Assert.IsInstanceOfType<FplForInStmt>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplForInStmt>)
             Assert.AreEqual<int>(3, parent.ArgList.Count) // entity, domain, assignment
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplForInStmtDomain>(node)
+            Assert.IsInstanceOfType(node, typeof<FplForInStmtDomain>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             Assert.IsTrue(node.RefersTo.IsSome)
-            Assert.IsInstanceOfType<FplVariableArray>(node.RefersTo.Value)
+            Assert.IsInstanceOfType(node.RefersTo.Value, typeof<FplVariableArray>)
         | "FplForInStmtDomain", "02" ->
-            Assert.IsInstanceOfType<FplForInStmt>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplForInStmt>)
             Assert.AreEqual<int>(3, parent.ArgList.Count) // entity, domain, assignment
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplForInStmtDomain>(node)
+            Assert.IsInstanceOfType(node, typeof<FplForInStmtDomain>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             Assert.IsTrue(node.RefersTo.IsSome)
-            Assert.IsInstanceOfType<FplReference>(node.RefersTo.Value)
+            Assert.IsInstanceOfType(node.RefersTo.Value, typeof<FplReference>)
         | "FplForInStmtDomain", "03" ->
-            Assert.IsInstanceOfType<FplForInStmt>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplForInStmt>)
             Assert.AreEqual<int>(3, parent.ArgList.Count) // entity, domain, assignment
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplForInStmtDomain>(node)
+            Assert.IsInstanceOfType(node, typeof<FplForInStmtDomain>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             Assert.IsTrue(node.RefersTo.IsSome)
-            Assert.IsInstanceOfType<FplClass>(node.RefersTo.Value)
+            Assert.IsInstanceOfType(node.RefersTo.Value, typeof<FplClass>)
         | "FplForInStmtDomain", "04" ->
-            Assert.IsInstanceOfType<FplForInStmt>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplForInStmt>)
             Assert.AreEqual<int>(3, parent.ArgList.Count) // entity, domain, assignment
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplForInStmtDomain>(node)
+            Assert.IsInstanceOfType(node, typeof<FplForInStmtDomain>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             Assert.IsTrue(node.RefersTo.IsSome)
-            Assert.IsInstanceOfType<FplReference>(node.RefersTo.Value)
+            Assert.IsInstanceOfType(node.RefersTo.Value, typeof<FplReference>)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     [<DataRow("FplForInStmtEntity", "01", """def cl Nat def func Sum(list:* Nat[ind])->Nat { dec a:obj result, addend: Nat result:=Zero() for addend in list { result:=Add(result,addend) }; return result }""", "")>]
@@ -2760,14 +2760,14 @@ type Structure() =
         | "FplForInStmtEntity", "03" 
         | "FplForInStmtEntity", "02" 
         | "FplForInStmtEntity", "01" ->
-            Assert.IsInstanceOfType<FplForInStmt>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplForInStmt>)
             Assert.AreEqual<int>(3, parent.ArgList.Count) // entity, domain, assignment
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplForInStmtEntity>(node)
+            Assert.IsInstanceOfType(node, typeof<FplForInStmtEntity>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             Assert.IsTrue(node.RefersTo.IsSome)
-            Assert.IsInstanceOfType<FplVariable>(node.RefersTo.Value)
+            Assert.IsInstanceOfType(node.RefersTo.Value, typeof<FplVariable>)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     
@@ -2791,59 +2791,59 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplFunctionalTerm", "00" -> 
-            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplFunctionalTerm>(node)
+            Assert.IsInstanceOfType(node, typeof<FplFunctionalTerm>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // intrinsic with mapping 
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplFunctionalTerm", "00a" -> 
-            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplFunctionalTerm>(node)
+            Assert.IsInstanceOfType(node, typeof<FplFunctionalTerm>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // intrinsic with mapping 
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplFunctionalTerm", "00b" -> 
-            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplFunctionalTerm>(node)
+            Assert.IsInstanceOfType(node, typeof<FplFunctionalTerm>)
             Assert.AreEqual<int>(2, node.ArgList.Count) // intrinsic with mapping and 1 base
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplFunctionalTerm", "00c" -> 
-            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplFunctionalTerm>(node)
+            Assert.IsInstanceOfType(node, typeof<FplFunctionalTerm>)
             Assert.AreEqual<int>(4, node.ArgList.Count) // intrinsic with mapping and 3 bases
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplFunctionalTerm", "01" -> 
-            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplFunctionalTerm>(node)
+            Assert.IsInstanceOfType(node, typeof<FplFunctionalTerm>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // intrinsic with mapping 
             Assert.AreEqual<int>(2, node.Scope.Count) // two variables
         | "FplFunctionalTerm", "02" -> 
-            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplFunctionalTerm>(node)
+            Assert.IsInstanceOfType(node, typeof<FplFunctionalTerm>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // intrinsic with mapping 
             Assert.AreEqual<int>(6, node.Scope.Count) // 2 variables, 4 properties
         | "FplFunctionalTerm", "03" -> 
-            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplFunctionalTerm>(node)
+            Assert.IsInstanceOfType(node, typeof<FplFunctionalTerm>)
             Assert.AreEqual<int>(2, node.ArgList.Count) // non-intrinsic with mapping and return statement
             Assert.AreEqual<int>(7, node.Scope.Count) // 3 variables, 4 properties
         | "FplFunctionalTerm", "04" -> 
-            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplFunctionalTerm>(node)
+            Assert.IsInstanceOfType(node, typeof<FplFunctionalTerm>)
             Assert.AreEqual<int>(4, node.ArgList.Count) // non-intrinsic with mapping, 2 statements, and return statement
             Assert.AreEqual<int>(3, node.Scope.Count) // 3 variables                
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -2864,10 +2864,10 @@ type Structure() =
         match nodeType, varVal with
         | "FplFunctionalTerm", "MF1" -> 
             // intrinsic constant
-            Assert.IsInstanceOfType<FplTheory>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>) 
             Assert.AreEqual<int>(0, parent.ArgList.Count) 
             Assert.AreEqual<int>(1, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplFunctionalTerm>(node) 
+            Assert.IsInstanceOfType(node, typeof<FplFunctionalTerm>) 
             Assert.AreEqual<int>(1, node.ArgList.Count)  // mapping
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = (getMapping node).Value :?> FplMapping 
@@ -2881,10 +2881,10 @@ type Structure() =
             Assert.AreEqual<string>("T()", fn.ConstantName) // only for intrinsic set
         | "FplFunctionalTerm", "MF2" -> 
             // non-intrinsic constant
-            Assert.IsInstanceOfType<FplTheory>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>) 
             Assert.AreEqual<int>(0, parent.ArgList.Count) 
             Assert.AreEqual<int>(1, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplFunctionalTerm>(node) 
+            Assert.IsInstanceOfType(node, typeof<FplFunctionalTerm>) 
             Assert.AreEqual<int>(2, node.ArgList.Count)  // mapping + return
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = (getMapping node).Value :?> FplMapping 
@@ -2898,10 +2898,10 @@ type Structure() =
             Assert.AreEqual<string>("", fn.ConstantName) // missing, since non-intrinsic
         | "FplFunctionalTerm", "MF3" -> 
             // intrinsic constant array
-            Assert.IsInstanceOfType<FplTheory>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>) 
             Assert.AreEqual<int>(0, parent.ArgList.Count) 
             Assert.AreEqual<int>(1, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplFunctionalTerm>(node) 
+            Assert.IsInstanceOfType(node, typeof<FplFunctionalTerm>) 
             Assert.AreEqual<int>(1, node.ArgList.Count)  // mapping 
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = (getMapping node).Value :?> FplMapping 
@@ -2915,10 +2915,10 @@ type Structure() =
             Assert.AreEqual<string>("T()", fn.ConstantName) // only for intrinsic set
         | "FplFunctionalTerm", "MF4" -> 
             // non-intrinsic constant array
-            Assert.IsInstanceOfType<FplTheory>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>) 
             Assert.AreEqual<int>(0, parent.ArgList.Count) 
             Assert.AreEqual<int>(1, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplFunctionalTerm>(node) 
+            Assert.IsInstanceOfType(node, typeof<FplFunctionalTerm>) 
             Assert.AreEqual<int>(4, node.ArgList.Count)  // mapping + stmts + return
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
             let map = (getMapping node).Value :?> FplMapping 
@@ -2948,10 +2948,10 @@ type Structure() =
         match nodeType, varVal with
         | "FplFunctionalTerm", "MF1" -> 
             // intrinsic constant
-            Assert.IsInstanceOfType<FplTheory>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>) 
             Assert.AreEqual<int>(0, parent.ArgList.Count) 
             Assert.AreEqual<int>(1, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplFunctionalTerm>(node) 
+            Assert.IsInstanceOfType(node, typeof<FplFunctionalTerm>) 
             Assert.AreEqual<int>(1, node.ArgList.Count)  // mapping
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = (getMapping node).Value :?> FplMapping 
@@ -2965,10 +2965,10 @@ type Structure() =
             Assert.AreEqual<string>("T()", fn.ConstantName) // only for intrinsic set
         | "FplFunctionalTerm", "MF2" -> 
             // non-intrinsic constant
-            Assert.IsInstanceOfType<FplTheory>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>) 
             Assert.AreEqual<int>(0, parent.ArgList.Count) 
             Assert.AreEqual<int>(2, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplFunctionalTerm>(node) 
+            Assert.IsInstanceOfType(node, typeof<FplFunctionalTerm>) 
             Assert.AreEqual<int>(2, node.ArgList.Count)  // mapping + return
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = (getMapping node).Value :?> FplMapping 
@@ -2982,10 +2982,10 @@ type Structure() =
             Assert.AreEqual<string>("", fn.ConstantName) // missing, since non-intrinsic
         | "FplFunctionalTerm", "MF3" -> 
             // intrinsic constant array
-            Assert.IsInstanceOfType<FplTheory>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>) 
             Assert.AreEqual<int>(0, parent.ArgList.Count) 
             Assert.AreEqual<int>(1, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplFunctionalTerm>(node) 
+            Assert.IsInstanceOfType(node, typeof<FplFunctionalTerm>) 
             Assert.AreEqual<int>(1, node.ArgList.Count)  // mapping 
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = (getMapping node).Value :?> FplMapping 
@@ -2999,10 +2999,10 @@ type Structure() =
             Assert.AreEqual<string>("T()", fn.ConstantName) // only for intrinsic set
         | "FplFunctionalTerm", "MF4" -> 
             // non-intrinsic constant array
-            Assert.IsInstanceOfType<FplTheory>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>) 
             Assert.AreEqual<int>(0, parent.ArgList.Count) 
             Assert.AreEqual<int>(3, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplFunctionalTerm>(node) 
+            Assert.IsInstanceOfType(node, typeof<FplFunctionalTerm>) 
             Assert.AreEqual<int>(4, node.ArgList.Count)  // mapping + stmts + return
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
             let map = (getMapping node).Value :?> FplMapping 
@@ -3032,10 +3032,10 @@ type Structure() =
         match nodeType, varVal with
         | "FplFunctionalTerm", "MF1" -> 
             // intrinsic constant
-            Assert.IsInstanceOfType<FplTheory>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>) 
             Assert.AreEqual<int>(0, parent.ArgList.Count) 
             Assert.AreEqual<int>(1, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplFunctionalTerm>(node) 
+            Assert.IsInstanceOfType(node, typeof<FplFunctionalTerm>) 
             Assert.AreEqual<int>(1, node.ArgList.Count)  // mapping
             Assert.AreEqual<int>(1, node.Scope.Count) // template
             let map = (getMapping node).Value :?> FplMapping 
@@ -3049,10 +3049,10 @@ type Structure() =
             Assert.AreEqual<string>("T()", fn.ConstantName) // only for intrinsic set
         | "FplFunctionalTerm", "MF2" -> 
             // non-intrinsic constant
-            Assert.IsInstanceOfType<FplTheory>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>) 
             Assert.AreEqual<int>(0, parent.ArgList.Count) 
             Assert.AreEqual<int>(2, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplFunctionalTerm>(node) 
+            Assert.IsInstanceOfType(node, typeof<FplFunctionalTerm>) 
             Assert.AreEqual<int>(2, node.ArgList.Count)  // mapping + return
             Assert.AreEqual<int>(1, node.Scope.Count) // template
             let map = (getMapping node).Value :?> FplMapping 
@@ -3066,10 +3066,10 @@ type Structure() =
             Assert.AreEqual<string>("", fn.ConstantName) // missing, since non-intrinsic
         | "FplFunctionalTerm", "MF3" -> 
             // intrinsic constant array
-            Assert.IsInstanceOfType<FplTheory>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>) 
             Assert.AreEqual<int>(0, parent.ArgList.Count) 
             Assert.AreEqual<int>(1, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplFunctionalTerm>(node) 
+            Assert.IsInstanceOfType(node, typeof<FplFunctionalTerm>) 
             Assert.AreEqual<int>(1, node.ArgList.Count)  // mapping 
             Assert.AreEqual<int>(1, node.Scope.Count) // template
             let map = (getMapping node).Value :?> FplMapping 
@@ -3083,10 +3083,10 @@ type Structure() =
             Assert.AreEqual<string>("T()", fn.ConstantName) // only for intrinsic set
         | "FplFunctionalTerm", "MF4" -> 
             // non-intrinsic constant array
-            Assert.IsInstanceOfType<FplTheory>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>) 
             Assert.AreEqual<int>(0, parent.ArgList.Count) 
             Assert.AreEqual<int>(3, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplFunctionalTerm>(node) 
+            Assert.IsInstanceOfType(node, typeof<FplFunctionalTerm>) 
             Assert.AreEqual<int>(5, node.ArgList.Count)  // mapping + stmts + return
             Assert.AreEqual<int>(2, node.Scope.Count) // one variable, one template
             let map = (getMapping node).Value :?> FplMapping 
@@ -3120,10 +3120,10 @@ type Structure() =
         match nodeType, varVal with
         | "FplFunctionalTerm", "MF1" -> 
             // intrinsic constant
-            Assert.IsInstanceOfType<FplTheory>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>) 
             Assert.AreEqual<int>(0, parent.ArgList.Count) 
             Assert.AreEqual<int>(1, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplFunctionalTerm>(node) 
+            Assert.IsInstanceOfType(node, typeof<FplFunctionalTerm>) 
             Assert.AreEqual<int>(1, node.ArgList.Count)  // mapping
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = (getMapping node).Value :?> FplMapping 
@@ -3137,10 +3137,10 @@ type Structure() =
             Assert.AreEqual<string>("T()", fn.ConstantName) // only for intrinsic set
         | "FplFunctionalTerm", "MF1a" -> 
             // intrinsic constant
-            Assert.IsInstanceOfType<FplTheory>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>) 
             Assert.AreEqual<int>(0, parent.ArgList.Count) 
             Assert.AreEqual<int>(1, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplFunctionalTerm>(node) 
+            Assert.IsInstanceOfType(node, typeof<FplFunctionalTerm>) 
             Assert.AreEqual<int>(1, node.ArgList.Count)  // mapping
             Assert.AreEqual<int>(1, node.Scope.Count) 
             let map = (getMapping node).Value :?> FplMapping 
@@ -3154,10 +3154,10 @@ type Structure() =
             Assert.AreEqual<string>("T()", fn.ConstantName) // only for intrinsic set
         | "FplFunctionalTerm", "MF2" -> 
             // non-intrinsic constant
-            Assert.IsInstanceOfType<FplTheory>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>) 
             Assert.AreEqual<int>(0, parent.ArgList.Count) 
             Assert.AreEqual<int>(1, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplFunctionalTerm>(node) 
+            Assert.IsInstanceOfType(node, typeof<FplFunctionalTerm>) 
             Assert.AreEqual<int>(2, node.ArgList.Count)  // mapping + return
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = (getMapping node).Value :?> FplMapping 
@@ -3171,10 +3171,10 @@ type Structure() =
             Assert.AreEqual<string>("", fn.ConstantName) // missing, since non-intrinsic
         | "FplFunctionalTerm", "MF2a" -> 
             // non-intrinsic constant
-            Assert.IsInstanceOfType<FplTheory>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>) 
             Assert.AreEqual<int>(0, parent.ArgList.Count) 
             Assert.AreEqual<int>(1, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplFunctionalTerm>(node) 
+            Assert.IsInstanceOfType(node, typeof<FplFunctionalTerm>) 
             Assert.AreEqual<int>(2, node.ArgList.Count)  // mapping + return
             Assert.AreEqual<int>(3, node.Scope.Count) // 3 variables
             let map = (getMapping node).Value :?> FplMapping 
@@ -3188,10 +3188,10 @@ type Structure() =
             Assert.AreEqual<string>("", fn.ConstantName) // missing, since non-intrinsic
         | "FplFunctionalTerm", "MF2b" -> 
             // still an intrinsic constant since the non-intrinsic constant does not match the expected return type
-            Assert.IsInstanceOfType<FplTheory>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>) 
             Assert.AreEqual<int>(0, parent.ArgList.Count) 
             Assert.AreEqual<int>(2, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplFunctionalTerm>(node) 
+            Assert.IsInstanceOfType(node, typeof<FplFunctionalTerm>) 
             Assert.AreEqual<int>(2, node.ArgList.Count)  // mapping + return 
             Assert.AreEqual<int>(1, node.Scope.Count) // 1 variables
             let map = (getMapping node).Value :?> FplMapping 
@@ -3205,10 +3205,10 @@ type Structure() =
             Assert.AreEqual<string>("", fn.ConstantName) // missing, since non-intrinsic
         | "FplFunctionalTerm", "MF2c" -> 
             // non-intrinsic constant
-            Assert.IsInstanceOfType<FplTheory>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>) 
             Assert.AreEqual<int>(0, parent.ArgList.Count) 
             Assert.AreEqual<int>(2, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplFunctionalTerm>(node) 
+            Assert.IsInstanceOfType(node, typeof<FplFunctionalTerm>) 
             Assert.AreEqual<int>(2, node.ArgList.Count)  // mapping + return 
             Assert.AreEqual<int>(1, node.Scope.Count) // 1 variables
             let map = (getMapping node).Value :?> FplMapping 
@@ -3222,10 +3222,10 @@ type Structure() =
             Assert.AreEqual<string>("", fn.ConstantName) // missing, since non-intrinsic
         | "FplFunctionalTerm", "MF3" -> 
             // intrinsic constant array
-            Assert.IsInstanceOfType<FplTheory>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>) 
             Assert.AreEqual<int>(0, parent.ArgList.Count) 
             Assert.AreEqual<int>(1, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplFunctionalTerm>(node) 
+            Assert.IsInstanceOfType(node, typeof<FplFunctionalTerm>) 
             Assert.AreEqual<int>(1, node.ArgList.Count)  // mapping 
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = (getMapping node).Value :?> FplMapping 
@@ -3239,10 +3239,10 @@ type Structure() =
             Assert.AreEqual<string>("T()", fn.ConstantName) // only for intrinsic set
         | "FplFunctionalTerm", "MF4" -> 
             // non-intrinsic constant array
-            Assert.IsInstanceOfType<FplTheory>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>) 
             Assert.AreEqual<int>(0, parent.ArgList.Count) 
             Assert.AreEqual<int>(1, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplFunctionalTerm>(node) 
+            Assert.IsInstanceOfType(node, typeof<FplFunctionalTerm>) 
             Assert.AreEqual<int>(5, node.ArgList.Count)  // mapping + stmts + return
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
             let map = (getMapping node).Value :?> FplMapping 
@@ -3264,10 +3264,10 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplImplication", "00" ->
-            Assert.IsInstanceOfType<FplPredicate>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplPredicate>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplImplication>(node)
+            Assert.IsInstanceOfType(node, typeof<FplImplication>)
             Assert.AreEqual<int>(2, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -3280,10 +3280,10 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplInstance", "00" ->
-            Assert.IsInstanceOfType<FplAssignment>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplAssignment>)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplInstance>(node)
+            Assert.IsInstanceOfType(node, typeof<FplInstance>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             Assert.AreEqual<string>("""A()""", node.Represent())
@@ -3297,12 +3297,12 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplIntrinsicInd", "00" ->
-            Assert.IsInstanceOfType<FplReference>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplReference>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsTrue(parent.RefersTo.IsSome)
             Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
-            Assert.IsInstanceOfType<FplIntrinsicInd>(node)
+            Assert.IsInstanceOfType(node, typeof<FplIntrinsicInd>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -3318,30 +3318,30 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplIntrinsicFalse", "01" ->
-            Assert.IsInstanceOfType<FplReference>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplReference>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsTrue(parent.RefersTo.IsSome)
             Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
-            Assert.IsInstanceOfType<FplIntrinsicFalse>(node)
+            Assert.IsInstanceOfType(node, typeof<FplIntrinsicFalse>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplIntrinsicFalse", "03c" ->
-            Assert.IsInstanceOfType<FplReference>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplReference>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsTrue(parent.RefersTo.IsSome)
             Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
-            Assert.IsInstanceOfType<FplIntrinsicFalse>(node)
+            Assert.IsInstanceOfType(node, typeof<FplIntrinsicFalse>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplIntrinsicFalse", "03d" ->
-            Assert.IsInstanceOfType<FplReference>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplReference>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsTrue(parent.RefersTo.IsSome)
             Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
-            Assert.IsInstanceOfType<FplIntrinsicFalse>(node)
+            Assert.IsInstanceOfType(node, typeof<FplIntrinsicFalse>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -3357,30 +3357,30 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplIntrinsicTrue", "00" ->
-            Assert.IsInstanceOfType<FplReference>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplReference>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsTrue(parent.RefersTo.IsSome)
             Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
-            Assert.IsInstanceOfType<FplIntrinsicTrue>(node)
+            Assert.IsInstanceOfType(node, typeof<FplIntrinsicTrue>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplIntrinsicTrue", "03a" ->
-            Assert.IsInstanceOfType<FplReference>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplReference>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsTrue(parent.RefersTo.IsSome)
             Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
-            Assert.IsInstanceOfType<FplIntrinsicTrue>(node)
+            Assert.IsInstanceOfType(node, typeof<FplIntrinsicTrue>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplIntrinsicTrue", "03b" ->
-            Assert.IsInstanceOfType<FplReference>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplReference>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsTrue(parent.RefersTo.IsSome)
             Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
-            Assert.IsInstanceOfType<FplIntrinsicTrue>(node)
+            Assert.IsInstanceOfType(node, typeof<FplIntrinsicTrue>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -3399,45 +3399,45 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplIntrinsicTpl", "00" ->
-            Assert.IsInstanceOfType<FplPredicate>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplPredicate>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(2, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplIntrinsicTpl>(node)
+            Assert.IsInstanceOfType(node, typeof<FplIntrinsicTpl>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplIntrinsicTpl", "01" ->
-            Assert.IsInstanceOfType<FplFunctionalTerm>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplFunctionalTerm>)
             Assert.AreEqual<int>(1, parent.ArgList.Count) // mapping
             Assert.AreEqual<int>(1, parent.Scope.Count) // template
-            Assert.IsInstanceOfType<FplIntrinsicTpl>(node)
+            Assert.IsInstanceOfType(node, typeof<FplIntrinsicTpl>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplIntrinsicTpl", "02" ->
-            Assert.IsInstanceOfType<FplFunctionalTerm>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplFunctionalTerm>)
             Assert.AreEqual<int>(1, parent.ArgList.Count) // mapping
             Assert.AreEqual<int>(1, parent.Scope.Count) // template
-            Assert.IsInstanceOfType<FplIntrinsicTpl>(node)
+            Assert.IsInstanceOfType(node, typeof<FplIntrinsicTpl>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplIntrinsicTpl", "03" ->
-            Assert.IsInstanceOfType<FplClass>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplClass>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(2, parent.Scope.Count) // constructor + template
-            Assert.IsInstanceOfType<FplIntrinsicTpl>(node)
+            Assert.IsInstanceOfType(node, typeof<FplIntrinsicTpl>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplIntrinsicTpl", "04" ->
-            Assert.IsInstanceOfType<FplPredicate>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplPredicate>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(3, parent.Scope.Count) // 2 vars, 1 template
-            Assert.IsInstanceOfType<FplIntrinsicTpl>(node)
+            Assert.IsInstanceOfType(node, typeof<FplIntrinsicTpl>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplIntrinsicTpl", "05" ->
-            Assert.IsInstanceOfType<FplPredicate>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplPredicate>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(6, parent.Scope.Count) // 4 vars, 2 templates
-            Assert.IsInstanceOfType<FplIntrinsicTpl>(node)
+            Assert.IsInstanceOfType(node, typeof<FplIntrinsicTpl>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -3450,12 +3450,12 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplIntrinsicUndef", "00" ->
-            Assert.IsInstanceOfType<FplReference>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplReference>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsTrue(parent.RefersTo.IsSome)
             Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
-            Assert.IsInstanceOfType<FplIntrinsicUndef>(node)
+            Assert.IsInstanceOfType(node, typeof<FplIntrinsicUndef>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -3468,10 +3468,10 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplIsOperator", "00" ->
-            Assert.IsInstanceOfType<FplPredicate>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplPredicate>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplIsOperator>(node)
+            Assert.IsInstanceOfType(node, typeof<FplIsOperator>)
             Assert.AreEqual<int>(2, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -3508,17 +3508,17 @@ type Structure() =
         | "FplJustification", "06" 
         | "FplJustification", "07" 
         | "FplJustification", "08" ->
-            Assert.IsInstanceOfType<FplArgument>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplArgument>)
             Assert.AreEqual<int>(2, parent.ArgList.Count) 
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplJustification>(node)
+            Assert.IsInstanceOfType(node, typeof<FplJustification>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // contains only a single type of FplJustificationItem
             Assert.AreEqual<int>(0, node.Scope.Count) 
         | "FplJustification", "09" ->
-            Assert.IsInstanceOfType<FplArgument>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplArgument>)
             Assert.AreEqual<int>(2, parent.ArgList.Count) 
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplJustification>(node)
+            Assert.IsInstanceOfType(node, typeof<FplJustification>)
             Assert.AreEqual<int>(8, node.ArgList.Count)  // contains all possible types of FplJustificationItem
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -3545,21 +3545,21 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplJustificationItemByAx", "00" ->
-            Assert.IsInstanceOfType<FplJustification>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplJustification>)
             Assert.AreEqual<int>(1, parent.ArgList.Count) 
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplJustificationItemByAx>(node)
+            Assert.IsInstanceOfType(node, typeof<FplJustificationItemByAx>)
             Assert.AreEqual<int>(0, node.ArgList.Count)  
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplJustificationItemByAx", "00a" ->
-            Assert.IsInstanceOfType<FplJustification>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplJustification>)
             Assert.AreEqual<int>(1, parent.ArgList.Count) 
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplJustificationItemByAx>(node)
+            Assert.IsInstanceOfType(node, typeof<FplJustificationItemByAx>)
             Assert.AreEqual<int>(0, node.ArgList.Count)  
             Assert.AreEqual<int>(0, node.Scope.Count) 
             Assert.IsTrue(node.RefersTo.IsSome) 
-            Assert.IsInstanceOfType<FplAxiom>(node.RefersTo.Value) // referenced axiom
+            Assert.IsInstanceOfType(node.RefersTo.Value, typeof<FplAxiom>) // referenced axiom
         | "FplJustificationItemByAx", "00b" 
         | "FplJustificationItemByAx", "00c" 
         | "FplJustificationItemByAx", "00d" 
@@ -3569,10 +3569,10 @@ type Structure() =
         | "FplJustificationItemByAx", "00h" 
         | "FplJustificationItemByAx", "00i" 
         | "FplJustificationItemByAx", "00j" ->
-            Assert.IsInstanceOfType<FplJustification>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplJustification>)
             Assert.AreEqual<int>(1, parent.ArgList.Count) 
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplJustificationItemByAx>(node)
+            Assert.IsInstanceOfType(node, typeof<FplJustificationItemByAx>)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(0, node.Scope.Count) // referenced to a wrong block with matching name
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -3594,13 +3594,13 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplJustificationItemByConj", "00a" ->
-            Assert.IsInstanceOfType<FplJustification>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplJustification>)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplJustificationItemByConj>(node)
+            Assert.IsInstanceOfType(node, typeof<FplJustificationItemByConj>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.IsTrue(node.RefersTo.IsSome)
-            Assert.IsInstanceOfType<FplConjecture>(node.RefersTo.Value)
+            Assert.IsInstanceOfType(node.RefersTo.Value, typeof<FplConjecture>)
         | "FplJustificationItemByConj", "00b" 
         | "FplJustificationItemByConj", "00c" 
         | "FplJustificationItemByConj", "00d" 
@@ -3609,10 +3609,10 @@ type Structure() =
         | "FplJustificationItemByConj", "00g"
         | "FplJustificationItemByConj", "00h"
         | "FplJustificationItemByConj", "00i" ->
-            Assert.IsInstanceOfType<FplJustification>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplJustification>)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplJustificationItemByConj>(node)
+            Assert.IsInstanceOfType(node, typeof<FplJustificationItemByConj>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             Assert.IsTrue(node.RefersTo.IsNone)
@@ -3628,19 +3628,19 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplJustificationItemByCor", "00" ->
-            Assert.IsInstanceOfType<FplJustification>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplJustification>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplJustificationItemByCor>(node)
+            Assert.IsInstanceOfType(node, typeof<FplJustificationItemByCor>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             Assert.IsTrue(node.RefersTo.IsSome)
-            Assert.IsInstanceOfType<FplCorollary>(node.RefersTo.Value)
+            Assert.IsInstanceOfType(node.RefersTo.Value, typeof<FplCorollary>)
         | "FplJustificationItemByCor", "01" ->
-            Assert.IsInstanceOfType<FplJustification>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplJustification>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplJustificationItemByCor>(node)
+            Assert.IsInstanceOfType(node, typeof<FplJustificationItemByCor>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             Assert.IsTrue(node.RefersTo.IsNone)
@@ -3667,40 +3667,40 @@ type Structure() =
         | "FplJustificationItemByDef", "00d" 
         | "FplJustificationItemByDef", "00e" 
         | "FplJustificationItemByDef", "00f" ->
-            Assert.IsInstanceOfType<FplJustification>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplJustification>)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplJustificationItemByDef>(node)
+            Assert.IsInstanceOfType(node, typeof<FplJustificationItemByDef>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             Assert.IsTrue(node.RefersTo.IsNone)
         | "FplJustificationItemByDef", "00g" ->
-            Assert.IsInstanceOfType<FplJustification>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplJustification>)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplJustificationItemByDef>(node)
+            Assert.IsInstanceOfType(node, typeof<FplJustificationItemByDef>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             Assert.IsTrue(node.RefersTo.IsSome)
-            Assert.IsInstanceOfType<FplClass>(node.RefersTo.Value)
+            Assert.IsInstanceOfType(node.RefersTo.Value, typeof<FplClass>)
         | "FplJustificationItemByDef", "00h" ->
-            Assert.IsInstanceOfType<FplJustification>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplJustification>)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplJustificationItemByDef>(node)
+            Assert.IsInstanceOfType(node, typeof<FplJustificationItemByDef>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             Assert.IsTrue(node.RefersTo.IsSome)
-            Assert.IsInstanceOfType<FplPredicate>(node.RefersTo.Value)
+            Assert.IsInstanceOfType(node.RefersTo.Value, typeof<FplPredicate>)
         | "FplJustificationItemByDef", "00i" ->
-            Assert.IsInstanceOfType<FplJustification>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplJustification>)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplJustificationItemByDef>(node)
+            Assert.IsInstanceOfType(node, typeof<FplJustificationItemByDef>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             Assert.IsTrue(node.RefersTo.IsSome)
-            Assert.IsInstanceOfType<FplFunctionalTerm>(node.RefersTo.Value)
+            Assert.IsInstanceOfType(node.RefersTo.Value, typeof<FplFunctionalTerm>)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     [<DataRow("FplJustificationItemByDefVar", "00", """def cl A thm T {dec x:A; true} proof T$1 { 100. bydef x |- is(x, A) }""", "")>]
@@ -3713,14 +3713,14 @@ type Structure() =
         match nodeType, varVal with
         | "FplJustificationItemByDefVar", "00" 
         | "FplJustificationItemByDefVar", "01" ->
-            Assert.IsInstanceOfType<FplJustification>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplJustification>)
             Assert.AreEqual<int>(1, parent.ArgList.Count) // bydef x
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplJustificationItemByDefVar>(node)
+            Assert.IsInstanceOfType(node, typeof<FplJustificationItemByDefVar>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             Assert.IsTrue(node.RefersTo.IsSome)
-            Assert.IsInstanceOfType<FplVariable>(node.RefersTo.Value)
+            Assert.IsInstanceOfType(node.RefersTo.Value, typeof<FplVariable>)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
     [<DataRow("FplJustificationItemByInf", "00a", """inf A {pre:true con:true} proof T$1 { 100. byinf A, 1 |- false }""", "")>]
@@ -3736,23 +3736,23 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplJustificationItemByInf", "00a" ->
-            Assert.IsInstanceOfType<FplJustification>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplJustification>)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplJustificationItemByInf>(node)
+            Assert.IsInstanceOfType(node, typeof<FplJustificationItemByInf>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             Assert.IsTrue(node.RefersTo.IsSome)
-            Assert.IsInstanceOfType<FplRuleOfInference>(node.RefersTo.Value)
+            Assert.IsInstanceOfType(node.RefersTo.Value, typeof<FplRuleOfInference>)
         | "FplJustificationItemByInf", "00b" 
         | "FplJustificationItemByInf", "00c" 
         | "FplJustificationItemByInf", "00d" 
         | "FplJustificationItemByInf", "00e" 
         | "FplJustificationItemByInf", "00f" ->
-            Assert.IsInstanceOfType<FplJustification>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplJustification>)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplJustificationItemByInf>(node)
+            Assert.IsInstanceOfType(node, typeof<FplJustificationItemByInf>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             Assert.IsTrue(node.RefersTo.IsNone)
@@ -3767,18 +3767,18 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplJustificationItemByProofArgument", "00" ->
-            Assert.IsInstanceOfType<FplJustification>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplJustification>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplJustificationItemByProofArgument>(node)
+            Assert.IsInstanceOfType(node, typeof<FplJustificationItemByProofArgument>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             Assert.IsTrue(node.RefersTo.IsSome) // the referenced proof argument exists
         | "FplJustificationItemByProofArgument", "01" ->
-            Assert.IsInstanceOfType<FplJustification>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplJustification>)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplJustificationItemByProofArgument>(node)
+            Assert.IsInstanceOfType(node, typeof<FplJustificationItemByProofArgument>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             Assert.IsTrue(node.RefersTo.IsNone) // the referenced proof argument does not exist
@@ -3793,18 +3793,18 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplJustificationItemByRefArgument", "00" ->
-            Assert.IsInstanceOfType<FplJustification>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplJustification>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplJustificationItemByRefArgument>(node)
+            Assert.IsInstanceOfType(node, typeof<FplJustificationItemByRefArgument>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             Assert.IsTrue(node.RefersTo.IsSome) // the referred argument is not missing
         | "FplJustificationItemByRefArgument", "01" ->
-            Assert.IsInstanceOfType<FplJustification>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplJustification>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplJustificationItemByRefArgument>(node)
+            Assert.IsInstanceOfType(node, typeof<FplJustificationItemByRefArgument>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             Assert.IsTrue(node.RefersTo.IsNone) // the referred argument is missing
@@ -3823,37 +3823,37 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplJustificationItemByTheoremLikeStmt", "00a" ->
-            Assert.IsInstanceOfType<FplJustification>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplJustification>)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplJustificationItemByTheoremLikeStmt>(node)
+            Assert.IsInstanceOfType(node, typeof<FplJustificationItemByTheoremLikeStmt>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             Assert.IsTrue(node.RefersTo.IsSome)
-            Assert.IsInstanceOfType<FplTheorem>(node.RefersTo.Value)
+            Assert.IsInstanceOfType(node.RefersTo.Value, typeof<FplTheorem>)
         | "FplJustificationItemByTheoremLikeStmt", "00b" ->
-            Assert.IsInstanceOfType<FplJustification>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplJustification>)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplJustificationItemByTheoremLikeStmt>(node)
+            Assert.IsInstanceOfType(node, typeof<FplJustificationItemByTheoremLikeStmt>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.IsTrue(node.RefersTo.IsSome)
-            Assert.IsInstanceOfType<FplProposition>(node.RefersTo.Value)
+            Assert.IsInstanceOfType(node.RefersTo.Value, typeof<FplProposition>)
         | "FplJustificationItemByTheoremLikeStmt", "00c" ->
-            Assert.IsInstanceOfType<FplJustification>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplJustification>)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplJustificationItemByTheoremLikeStmt>(node)
+            Assert.IsInstanceOfType(node, typeof<FplJustificationItemByTheoremLikeStmt>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.IsTrue(node.RefersTo.IsSome)
-            Assert.IsInstanceOfType<FplLemma>(node.RefersTo.Value)
+            Assert.IsInstanceOfType(node.RefersTo.Value, typeof<FplLemma>)
         | "FplJustificationItemByTheoremLikeStmt", "00d" 
         | "FplJustificationItemByTheoremLikeStmt", "00e" 
         | "FplJustificationItemByTheoremLikeStmt", "00f" ->
-            Assert.IsInstanceOfType<FplJustification>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplJustification>)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplJustificationItemByTheoremLikeStmt>(node)
+            Assert.IsInstanceOfType(node, typeof<FplJustificationItemByTheoremLikeStmt>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             Assert.IsTrue(node.RefersTo.IsNone)
@@ -3868,17 +3868,17 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplLanguage", "01" ->
-            Assert.IsInstanceOfType<FplLocalization>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplLocalization>)
             Assert.AreEqual<int>(1, parent.ArgList.Count) // not x
             Assert.AreEqual<int>(4, parent.Scope.Count) // one variable and three translations
-            Assert.IsInstanceOfType<FplLanguage>(node) // first tex language
+            Assert.IsInstanceOfType(node, typeof<FplLanguage>) // first tex language
             Assert.AreEqual<int>(3, node.ArgList.Count) // three translations
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplLanguage", "02" ->
-            Assert.IsInstanceOfType<FplLocalization>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplLocalization>)
             Assert.AreEqual<int>(1, parent.ArgList.Count) // and x y
             Assert.AreEqual<int>(4, parent.Scope.Count) // two variables and two translations
-            Assert.IsInstanceOfType<FplLanguage>(node) // ger translation
+            Assert.IsInstanceOfType(node, typeof<FplLanguage>) // ger translation
             Assert.AreEqual<int>(3, node.ArgList.Count) // three translations
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -3894,17 +3894,17 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplLemma", "00" -> 
-            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplLemma>(node)
+            Assert.IsInstanceOfType(node, typeof<FplLemma>)
             Assert.AreEqual<int>(1, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplLemma", "01" -> 
-            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplLemma>(node)
+            Assert.IsInstanceOfType(node, typeof<FplLemma>)
             Assert.AreEqual<int>(1, node.ArgList.Count)
             Assert.AreEqual<int>(2, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -3920,31 +3920,31 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplLocalization", "01" ->
-            Assert.IsInstanceOfType<FplTheory>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>) 
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplLocalization>(node)
+            Assert.IsInstanceOfType(node, typeof<FplLocalization>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // one expression
             Assert.AreEqual<int>(4, node.Scope.Count) // a variable + 3 languages
         | "FplLocalization", "02" ->
-            Assert.IsInstanceOfType<FplTheory>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>) 
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplLocalization>(node)
+            Assert.IsInstanceOfType(node, typeof<FplLocalization>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // one expression
             Assert.AreEqual<int>(4, node.Scope.Count) // a variable + 3 languages
         | "FplLocalization", "03" ->
-            Assert.IsInstanceOfType<FplTheory>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>) 
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplLocalization>(node)
+            Assert.IsInstanceOfType(node, typeof<FplLocalization>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // one expression
             Assert.AreEqual<int>(7, node.Scope.Count) // 2 variables + 5 languages
         | "FplLocalization", "04" ->
-            Assert.IsInstanceOfType<FplTheory>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>) 
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplLocalization>(node)
+            Assert.IsInstanceOfType(node, typeof<FplLocalization>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // one expression
             Assert.AreEqual<int>(5, node.Scope.Count) // 2 variables + 3 languages
 
@@ -3976,66 +3976,66 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplMandatoryFunctionalTerm", "00" -> 
-            Assert.IsInstanceOfType<FplPredicate>(parent) // predicate parent
+            Assert.IsInstanceOfType(parent, typeof<FplPredicate>) // predicate parent
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(node)
+            Assert.IsInstanceOfType(node, typeof<FplMandatoryFunctionalTerm>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // intrinsic with mapping 
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
         | "FplMandatoryFunctionalTerm", "01" -> 
-            Assert.IsInstanceOfType<FplFunctionalTerm>(parent) // functional term parent
+            Assert.IsInstanceOfType(parent, typeof<FplFunctionalTerm>) // functional term parent
             Assert.AreEqual<int>(1, parent.ArgList.Count) // parent's mapping
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(node)
+            Assert.IsInstanceOfType(node, typeof<FplMandatoryFunctionalTerm>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // intrinsic with mapping 
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
         | "FplMandatoryFunctionalTerm", "02" -> 
-            Assert.IsInstanceOfType<FplClass>(parent) // class parent
+            Assert.IsInstanceOfType(parent, typeof<FplClass>) // class parent
             Assert.AreEqual<int>(0, parent.ArgList.Count) 
             Assert.AreEqual<int>(2, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(node)
+            Assert.IsInstanceOfType(node, typeof<FplMandatoryFunctionalTerm>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // intrinsic with mapping 
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
         | "FplMandatoryFunctionalTerm", "03" -> 
-            Assert.IsInstanceOfType<FplPredicate>(parent) // predicate parent
+            Assert.IsInstanceOfType(parent, typeof<FplPredicate>) // predicate parent
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(node)
+            Assert.IsInstanceOfType(node, typeof<FplMandatoryFunctionalTerm>)
             Assert.AreEqual<int>(2, node.ArgList.Count) // non-intrinsic with mapping and return stmt 
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
         | "FplMandatoryFunctionalTerm", "04" -> 
-            Assert.IsInstanceOfType<FplFunctionalTerm>(parent) // functional term parent
+            Assert.IsInstanceOfType(parent, typeof<FplFunctionalTerm>) // functional term parent
             Assert.AreEqual<int>(1, parent.ArgList.Count) // parent's mapping
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(node)
+            Assert.IsInstanceOfType(node, typeof<FplMandatoryFunctionalTerm>)
             Assert.AreEqual<int>(2, node.ArgList.Count) // non-intrinsic with mapping and return stmt 
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
         | "FplMandatoryFunctionalTerm", "05" -> 
-            Assert.IsInstanceOfType<FplClass>(parent) // class parent
+            Assert.IsInstanceOfType(parent, typeof<FplClass>) // class parent
             Assert.AreEqual<int>(0, parent.ArgList.Count) // class's base class
             Assert.AreEqual<int>(2, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(node)
+            Assert.IsInstanceOfType(node, typeof<FplMandatoryFunctionalTerm>)
             Assert.AreEqual<int>(2, node.ArgList.Count) // non-intrinsic with mapping and return stmt
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
         | "FplMandatoryFunctionalTerm", "06" -> 
-            Assert.IsInstanceOfType<FplPredicate>(parent) // predicate parent
+            Assert.IsInstanceOfType(parent, typeof<FplPredicate>) // predicate parent
             Assert.AreEqual<int>(1, parent.ArgList.Count) // predicate's value
             Assert.AreEqual<int>(2, parent.Scope.Count) // variable and property
-            Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(node)
+            Assert.IsInstanceOfType(node, typeof<FplMandatoryFunctionalTerm>)
             Assert.AreEqual<int>(3, node.ArgList.Count) // non-intrinsic with mapping, assignment, and return stmt 
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
         | "FplMandatoryFunctionalTerm", "07" -> 
-            Assert.IsInstanceOfType<FplFunctionalTerm>(parent) // functional term parent
+            Assert.IsInstanceOfType(parent, typeof<FplFunctionalTerm>) // functional term parent
             Assert.AreEqual<int>(2, parent.ArgList.Count) // parent's mapping, return stmt
             Assert.AreEqual<int>(2, parent.Scope.Count) // variable and property
-            Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(node)
+            Assert.IsInstanceOfType(node, typeof<FplMandatoryFunctionalTerm>)
             Assert.AreEqual<int>(3, node.ArgList.Count) // non-intrinsic with mapping, assignment, and return stmt 
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
         | "FplMandatoryFunctionalTerm", "08" -> 
-            Assert.IsInstanceOfType<FplClass>(parent) // class parent
+            Assert.IsInstanceOfType(parent, typeof<FplClass>) // class parent
             Assert.AreEqual<int>(0, parent.ArgList.Count) // class's base class
             Assert.AreEqual<int>(3, parent.Scope.Count) // variable, property and constructor
-            Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(node)
+            Assert.IsInstanceOfType(node, typeof<FplMandatoryFunctionalTerm>)
             Assert.AreEqual<int>(3, node.ArgList.Count) // non-intrinsic with mapping, assignment, and return stmt
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -4066,66 +4066,66 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplMandatoryPredicate", "00" -> 
-            Assert.IsInstanceOfType<FplPredicate>(parent) // predicate parent
+            Assert.IsInstanceOfType(parent, typeof<FplPredicate>) // predicate parent
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplMandatoryPredicate>(node)
+            Assert.IsInstanceOfType(node, typeof<FplMandatoryPredicate>)
             Assert.AreEqual<int>(0, node.ArgList.Count) // intrinsic  
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
         | "FplMandatoryPredicate", "01" -> 
-            Assert.IsInstanceOfType<FplFunctionalTerm>(parent) // functional term parent
+            Assert.IsInstanceOfType(parent, typeof<FplFunctionalTerm>) // functional term parent
             Assert.AreEqual<int>(1, parent.ArgList.Count) // parent's mapping
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplMandatoryPredicate>(node)
+            Assert.IsInstanceOfType(node, typeof<FplMandatoryPredicate>)
             Assert.AreEqual<int>(0, node.ArgList.Count) // intrinsic 
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
         | "FplMandatoryPredicate", "02" -> 
-            Assert.IsInstanceOfType<FplClass>(parent) // class parent
+            Assert.IsInstanceOfType(parent, typeof<FplClass>) // class parent
             Assert.AreEqual<int>(0, parent.ArgList.Count) // class's base class
             Assert.AreEqual<int>(2, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplMandatoryPredicate>(node)
+            Assert.IsInstanceOfType(node, typeof<FplMandatoryPredicate>)
             Assert.AreEqual<int>(0, node.ArgList.Count) // intrinsic
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
         | "FplMandatoryPredicate", "03" -> 
-            Assert.IsInstanceOfType<FplPredicate>(parent) // predicate parent
+            Assert.IsInstanceOfType(parent, typeof<FplPredicate>) // predicate parent
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplMandatoryPredicate>(node)
+            Assert.IsInstanceOfType(node, typeof<FplMandatoryPredicate>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // non-intrinsic  
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
         | "FplMandatoryPredicate", "04" -> 
-            Assert.IsInstanceOfType<FplFunctionalTerm>(parent) // functional term parent
+            Assert.IsInstanceOfType(parent, typeof<FplFunctionalTerm>) // functional term parent
             Assert.AreEqual<int>(1, parent.ArgList.Count) // parent's mapping
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplMandatoryPredicate>(node)
+            Assert.IsInstanceOfType(node, typeof<FplMandatoryPredicate>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // non-intrinsic
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
         | "FplMandatoryPredicate", "05" -> 
-            Assert.IsInstanceOfType<FplClass>(parent) // class parent
+            Assert.IsInstanceOfType(parent, typeof<FplClass>) // class parent
             Assert.AreEqual<int>(0, parent.ArgList.Count) // class's base class
             Assert.AreEqual<int>(2, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplMandatoryPredicate>(node)
+            Assert.IsInstanceOfType(node, typeof<FplMandatoryPredicate>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // non-intrinsic 
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
         | "FplMandatoryPredicate", "06" -> 
-            Assert.IsInstanceOfType<FplPredicate>(parent) // predicate parent
+            Assert.IsInstanceOfType(parent, typeof<FplPredicate>) // predicate parent
             Assert.AreEqual<int>(1, parent.ArgList.Count) // predicate's value
             Assert.AreEqual<int>(2, parent.Scope.Count) // variable and property
-            Assert.IsInstanceOfType<FplMandatoryPredicate>(node)
+            Assert.IsInstanceOfType(node, typeof<FplMandatoryPredicate>)
             Assert.AreEqual<int>(2, node.ArgList.Count) // non-intrinsic with assignment 
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
         | "FplMandatoryPredicate", "07" -> 
-            Assert.IsInstanceOfType<FplFunctionalTerm>(parent) // functional term parent
+            Assert.IsInstanceOfType(parent, typeof<FplFunctionalTerm>) // functional term parent
             Assert.AreEqual<int>(2, parent.ArgList.Count) // parent's mapping, return stmt
             Assert.AreEqual<int>(2, parent.Scope.Count) // variable and property
-            Assert.IsInstanceOfType<FplMandatoryPredicate>(node)
+            Assert.IsInstanceOfType(node, typeof<FplMandatoryPredicate>)
             Assert.AreEqual<int>(2, node.ArgList.Count) // non-intrinsic assignment
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
         | "FplMandatoryPredicate", "08" -> 
-            Assert.IsInstanceOfType<FplClass>(parent) // class parent
+            Assert.IsInstanceOfType(parent, typeof<FplClass>) // class parent
             Assert.AreEqual<int>(0, parent.ArgList.Count) // class's base class
             Assert.AreEqual<int>(3, parent.Scope.Count) // variable, property and constructor
-            Assert.IsInstanceOfType<FplMandatoryPredicate>(node)
+            Assert.IsInstanceOfType(node, typeof<FplMandatoryPredicate>)
             Assert.AreEqual<int>(2, node.ArgList.Count) // non-intrinsic with assignment
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -4141,24 +4141,24 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplMapCaseElse", "00" ->
-            Assert.IsInstanceOfType<FplMapCases>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplMapCases>)
             Assert.AreEqual<int>(4, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplMapCaseElse>(node)
+            Assert.IsInstanceOfType(node, typeof<FplMapCaseElse>)
             Assert.AreEqual<int>(1, node.ArgList.Count) 
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplMapCaseElse", "01" ->
-            Assert.IsInstanceOfType<FplMapCases>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplMapCases>)
             Assert.AreEqual<int>(3, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplMapCaseElse>(node)
+            Assert.IsInstanceOfType(node, typeof<FplMapCaseElse>)
             Assert.AreEqual<int>(1, node.ArgList.Count) 
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplMapCaseElse", "02" ->
-            Assert.IsInstanceOfType<FplMapCases>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplMapCases>)
             Assert.AreEqual<int>(3, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplMapCaseElse>(node)
+            Assert.IsInstanceOfType(node, typeof<FplMapCaseElse>)
             Assert.AreEqual<int>(1, node.ArgList.Count) 
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -4173,24 +4173,24 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplMapCases", "00" ->
-            Assert.IsInstanceOfType<FplAssignment>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplAssignment>)
             Assert.AreEqual<int>(2, parent.ArgList.Count) // n := mcases
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplMapCases>(node)
+            Assert.IsInstanceOfType(node, typeof<FplMapCases>)
             Assert.AreEqual<int>(4, node.ArgList.Count) // 3 cases + 1 else
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplMapCases", "01" ->
-            Assert.IsInstanceOfType<FplPredicate>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplPredicate>)
             Assert.AreEqual<int>(1, parent.ArgList.Count) 
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplMapCases>(node)
+            Assert.IsInstanceOfType(node, typeof<FplMapCases>)
             Assert.AreEqual<int>(3, node.ArgList.Count) // 2 cases + 1 else
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplMapCases", "02" ->
-            Assert.IsInstanceOfType<FplReturn>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplReturn>)
             Assert.AreEqual<int>(1, parent.ArgList.Count) 
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplMapCases>(node)
+            Assert.IsInstanceOfType(node, typeof<FplMapCases>)
             Assert.AreEqual<int>(3, node.ArgList.Count) // 2 cases + 1 else
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -4205,24 +4205,24 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplMapCaseSingle", "00" ->
-            Assert.IsInstanceOfType<FplMapCases>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplMapCases>)
             Assert.AreEqual<int>(4, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplMapCaseSingle>(node)
+            Assert.IsInstanceOfType(node, typeof<FplMapCaseSingle>)
             Assert.AreEqual<int>(2, node.ArgList.Count) 
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplMapCaseSingle", "01" ->
-            Assert.IsInstanceOfType<FplMapCases>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplMapCases>)
             Assert.AreEqual<int>(3, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplMapCaseSingle>(node)
+            Assert.IsInstanceOfType(node, typeof<FplMapCaseSingle>)
             Assert.AreEqual<int>(2, node.ArgList.Count) 
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplMapCaseSingle", "02" ->
-            Assert.IsInstanceOfType<FplMapCases>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplMapCases>)
             Assert.AreEqual<int>(3, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplMapCaseSingle>(node)
+            Assert.IsInstanceOfType(node, typeof<FplMapCaseSingle>)
             Assert.AreEqual<int>(2, node.ArgList.Count) 
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -4270,84 +4270,84 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplMapping", "00a" -> 
-            Assert.IsInstanceOfType<FplFunctionalTerm>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplFunctionalTerm>) 
             Assert.AreEqual<int>(1, parent.ArgList.Count) // mapping
             Assert.AreEqual<int>(1, parent.Scope.Count) // mapping's variable(s) in node's scope
-            Assert.IsInstanceOfType<FplMapping>(node)
+            Assert.IsInstanceOfType(node, typeof<FplMapping>)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(1, node.Scope.Count) 
         | "FplMapping", "00b" -> 
-            Assert.IsInstanceOfType<FplFunctionalTerm>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplFunctionalTerm>) 
             Assert.AreEqual<int>(1, parent.ArgList.Count) // mapping
             Assert.AreEqual<int>(2, parent.Scope.Count) // mapping's variable(s) in node's scope
-            Assert.IsInstanceOfType<FplMapping>(node)
+            Assert.IsInstanceOfType(node, typeof<FplMapping>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // nested mapping
             Assert.AreEqual<int>(0, node.Scope.Count) // 0 variables
         | "FplMapping", "00c" 
         | "FplMapping", "01c"  
         | "FplMapping", "02c"  
         | "FplMapping", "03c" -> 
-            Assert.IsInstanceOfType<FplMapping>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplMapping>) 
             Assert.AreEqual<int>(1, parent.ArgList.Count) // nested mapping 
             Assert.AreEqual<int>(0, parent.Scope.Count) // 0 variables
-            Assert.IsInstanceOfType<FplMapping>(node)
+            Assert.IsInstanceOfType(node, typeof<FplMapping>)
             Assert.AreEqual<int>(0, node.ArgList.Count) // no nested mapping
             Assert.AreEqual<int>(2, node.Scope.Count) // 2 variables
         | "FplMapping", "00d" -> 
-            Assert.IsInstanceOfType<FplFunctionalTerm>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplFunctionalTerm>) 
             Assert.AreEqual<int>(1, parent.ArgList.Count) // mapping
             Assert.AreEqual<int>(3, parent.Scope.Count) // mapping's variable(s) in node's scope
-            Assert.IsInstanceOfType<FplMapping>(node) 
+            Assert.IsInstanceOfType(node, typeof<FplMapping>) 
             Assert.AreEqual<int>(1, node.ArgList.Count) // nested mapping
             Assert.AreEqual<int>(3, node.Scope.Count) // 3 variables
         | "FplMapping", "01a" -> 
-            Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplMandatoryFunctionalTerm>) 
             Assert.AreEqual<int>(1, parent.ArgList.Count) // mapping
             Assert.AreEqual<int>(0, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplMapping>(node)
+            Assert.IsInstanceOfType(node, typeof<FplMapping>)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(1, node.Scope.Count) 
         | "FplMapping", "01b" -> 
-            Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplMandatoryFunctionalTerm>) 
             Assert.AreEqual<int>(1, parent.ArgList.Count) // mapping
             Assert.AreEqual<int>(0, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplMapping>(node)
+            Assert.IsInstanceOfType(node, typeof<FplMapping>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // nested mapping
             Assert.AreEqual<int>(0, node.Scope.Count) // 0 variables
         | "FplMapping", "01d" -> 
-            Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplMandatoryFunctionalTerm>) 
             Assert.AreEqual<int>(1, parent.ArgList.Count) // mapping
             Assert.AreEqual<int>(0, parent.Scope.Count) // 0 variables
-            Assert.IsInstanceOfType<FplMapping>(node) 
+            Assert.IsInstanceOfType(node, typeof<FplMapping>) 
             Assert.AreEqual<int>(1, node.ArgList.Count) // nested mapping
             Assert.AreEqual<int>(3, node.Scope.Count) // 3 variables
         | "FplMapping", "03a" -> 
-            Assert.IsInstanceOfType<FplExtension>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplExtension>) 
             Assert.AreEqual<int>(2, parent.ArgList.Count) // mapping + return 
             Assert.AreEqual<int>(2, parent.Scope.Count) // mapping's variable(s) in node's scope
-            Assert.IsInstanceOfType<FplMapping>(node)
+            Assert.IsInstanceOfType(node, typeof<FplMapping>)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(1, node.Scope.Count) 
         | "FplMapping", "03b" -> 
-            Assert.IsInstanceOfType<FplExtension>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplExtension>) 
             Assert.AreEqual<int>(2, parent.ArgList.Count) // mapping + return
             Assert.AreEqual<int>(3, parent.Scope.Count) // mapping's variable(s) in node's scope
-            Assert.IsInstanceOfType<FplMapping>(node)
+            Assert.IsInstanceOfType(node, typeof<FplMapping>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // nested mapping
             Assert.AreEqual<int>(0, node.Scope.Count) // 0 variables
         | "FplMapping", "03d" -> 
-            Assert.IsInstanceOfType<FplExtension>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplExtension>) 
             Assert.AreEqual<int>(2, parent.ArgList.Count) // mapping + return
             Assert.AreEqual<int>(4, parent.Scope.Count) // mapping's variable(s) in node's scope
-            Assert.IsInstanceOfType<FplMapping>(node) 
+            Assert.IsInstanceOfType(node, typeof<FplMapping>) 
             Assert.AreEqual<int>(1, node.ArgList.Count) // nested mapping
             Assert.AreEqual<int>(3, node.Scope.Count) // 3 variables
         // mapping of with and without references types
         | "FplMapping", "MF1" ->
-            Assert.IsInstanceOfType<FplFunctionalTerm>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplFunctionalTerm>) 
             Assert.AreEqual<int>(1, parent.ArgList.Count) // mapping 
             Assert.AreEqual<int>(0, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplMapping>(node) 
+            Assert.IsInstanceOfType(node, typeof<FplMapping>) 
             Assert.AreEqual<int>(0, node.ArgList.Count)  
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = node :?> FplMapping
@@ -4360,10 +4360,10 @@ type Structure() =
             Assert.AreEqual<string>("""A""", node.Type SignatureType.Type)  
 
         | "FplMapping", "MF2" -> 
-            Assert.IsInstanceOfType<FplFunctionalTerm>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplFunctionalTerm>) 
             Assert.AreEqual<int>(1, parent.ArgList.Count) // mapping 
             Assert.AreEqual<int>(0, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplMapping>(node) 
+            Assert.IsInstanceOfType(node, typeof<FplMapping>) 
             Assert.AreEqual<int>(0, node.ArgList.Count)  
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = node :?> FplMapping
@@ -4380,10 +4380,10 @@ type Structure() =
         | "FplMapping", "MF4a"  
         | "FplMapping", "MF5" 
         | "FplMapping", "MF5a" -> 
-            Assert.IsInstanceOfType<FplFunctionalTerm>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplFunctionalTerm>) 
             Assert.AreEqual<int>(1, parent.ArgList.Count) // mapping 
             Assert.AreEqual<int>(0, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplMapping>(node) 
+            Assert.IsInstanceOfType(node, typeof<FplMapping>) 
             Assert.AreEqual<int>(0, node.ArgList.Count)  
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = node :?> FplMapping
@@ -4425,10 +4425,10 @@ type Structure() =
                 Assert.IsTrue(false, $"Unknown case {varVal}")          
         | "FplMapping", "MF6" 
         | "FplMapping", "MF6a" -> 
-            Assert.IsInstanceOfType<FplFunctionalTerm>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplFunctionalTerm>) 
             Assert.AreEqual<int>(1, parent.ArgList.Count) // mapping 
             Assert.AreEqual<int>(1, parent.Scope.Count) // template
-            Assert.IsInstanceOfType<FplMapping>(node) 
+            Assert.IsInstanceOfType(node, typeof<FplMapping>) 
             Assert.AreEqual<int>(0, node.ArgList.Count)  
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = node :?> FplMapping
@@ -4450,10 +4450,10 @@ type Structure() =
                 Assert.IsTrue(false, $"Unknown case {varVal}")   
         | "FplMapping", "MF4b"  
         | "FplMapping", "MF4c" ->  
-            Assert.IsInstanceOfType<FplFunctionalTerm>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplFunctionalTerm>) 
             Assert.AreEqual<int>(1, parent.ArgList.Count) // mapping 
             Assert.AreEqual<int>(1, parent.Scope.Count) // one mapping variable
-            Assert.IsInstanceOfType<FplMapping>(node) 
+            Assert.IsInstanceOfType(node, typeof<FplMapping>) 
             Assert.AreEqual<int>(0, node.ArgList.Count)  
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
             let map = node :?> FplMapping
@@ -4475,10 +4475,10 @@ type Structure() =
                 Assert.IsTrue(false, $"Unknown case {varVal}")   
         | "FplMapping", "MF5b"  
         | "FplMapping", "MF5c" ->
-            Assert.IsInstanceOfType<FplFunctionalTerm>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplFunctionalTerm>) 
             Assert.AreEqual<int>(1, parent.ArgList.Count) // mapping 
             Assert.AreEqual<int>(1, parent.Scope.Count) // one mapping variable
-            Assert.IsInstanceOfType<FplMapping>(node) 
+            Assert.IsInstanceOfType(node, typeof<FplMapping>) 
             Assert.AreEqual<int>(1, node.ArgList.Count)  // nested mapping 
             Assert.AreEqual<int>(1, node.Scope.Count) // one variable
             let map = node :?> FplMapping
@@ -4501,10 +4501,10 @@ type Structure() =
 
         | "FplMapping", "ME1" 
         | "FplMapping", "ME2" -> 
-            Assert.IsInstanceOfType<FplExtension>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplExtension>) 
             Assert.AreEqual<int>(2, parent.ArgList.Count) // mapping + return
             Assert.AreEqual<int>(1, parent.Scope.Count)  // 1 variable
-            Assert.IsInstanceOfType<FplMapping>(node) 
+            Assert.IsInstanceOfType(node, typeof<FplMapping>) 
             Assert.AreEqual<int>(0, node.ArgList.Count)  
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = node :?> FplMapping
@@ -4513,10 +4513,10 @@ type Structure() =
             | None -> Assert.IsTrue(false, "The is no to be returned class")
         | "FplMapping", "ME1a" 
         | "FplMapping", "ME2a" -> 
-            Assert.IsInstanceOfType<FplExtension>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplExtension>) 
             Assert.AreEqual<int>(2, parent.ArgList.Count) // mapping 
             Assert.AreEqual<int>(1, parent.Scope.Count) // 1 variable
-            Assert.IsInstanceOfType<FplMapping>(node) 
+            Assert.IsInstanceOfType(node, typeof<FplMapping>) 
             Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(0, node.Scope.Count) 
             let map = node :?> FplMapping
@@ -4534,10 +4534,10 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplNegation", "00" ->
-            Assert.IsInstanceOfType<FplPredicate>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplPredicate>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplNegation>(node)
+            Assert.IsInstanceOfType(node, typeof<FplNegation>)
             Assert.AreEqual<int>(1, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -4585,12 +4585,12 @@ type Structure() =
             | "FplParent", "00_2"
             | "FplParent", "00_5"
                 ->
-                Assert.IsInstanceOfType<FplReference>(parent)
+                Assert.IsInstanceOfType(parent, typeof<FplReference>)
                 Assert.AreEqual<int>(1, parent.ArgList.Count)
                 Assert.AreEqual<int>(0, parent.Scope.Count)
                 Assert.IsTrue(parent.RefersTo.IsSome)
                 Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
-                Assert.IsInstanceOfType<FplParent>(node)
+                Assert.IsInstanceOfType(node, typeof<FplParent>)
                 Assert.AreEqual<int>(0, node.ArgList.Count)
                 Assert.IsTrue(node.RefersTo.IsSome)
             // nodes that can be referenced as parent 
@@ -4612,12 +4612,12 @@ type Structure() =
             | "FplParent", "02d"
             | "FplParent", "02e"
                 ->
-                Assert.IsInstanceOfType<FplReference>(parent)
+                Assert.IsInstanceOfType(parent, typeof<FplReference>)
                 Assert.AreEqual<int>(0, parent.ArgList.Count)
                 Assert.AreEqual<int>(0, parent.Scope.Count)
                 Assert.IsTrue(parent.RefersTo.IsSome)
                 Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
-                Assert.IsInstanceOfType<FplParent>(node)
+                Assert.IsInstanceOfType(node, typeof<FplParent>)
                 Assert.AreEqual<int>(0, node.ArgList.Count)
                 Assert.IsTrue(node.RefersTo.IsSome)
             // nodes that cannot be referenced as parent 
@@ -4636,12 +4636,12 @@ type Structure() =
             | "FplParent",  "13"
             | "FplParent",  "14"
                 ->
-                Assert.IsInstanceOfType<FplReference>(parent)
+                Assert.IsInstanceOfType(parent, typeof<FplReference>)
                 Assert.AreEqual<int>(0, parent.ArgList.Count)
                 Assert.AreEqual<int>(0, parent.Scope.Count)
                 Assert.IsTrue(parent.RefersTo.IsSome)
                 Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
-                Assert.IsInstanceOfType<FplParent>(node)
+                Assert.IsInstanceOfType(node, typeof<FplParent>)
                 Assert.AreEqual<int>(0, node.ArgList.Count)
                 Assert.IsTrue(node.RefersTo.IsNone)
             | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -4664,42 +4664,42 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplPredicate", "00" -> 
-            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplPredicate>(node)
+            Assert.IsInstanceOfType(node, typeof<FplPredicate>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             Assert.AreEqual<string>("T()", node.Represent())
         | "FplPredicate", "01" -> 
-            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplPredicate>(node)
+            Assert.IsInstanceOfType(node, typeof<FplPredicate>)
             Assert.AreEqual<int>(0, node.ArgList.Count) // intrinsic
             Assert.AreEqual<int>(2, node.Scope.Count) // two variables
             Assert.AreEqual<string>("T(undet, undet)", node.Represent())
         | "FplPredicate", "02" -> 
-            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplPredicate>(node)
+            Assert.IsInstanceOfType(node, typeof<FplPredicate>)
             Assert.AreEqual<int>(0, node.ArgList.Count) // intrinsic
             Assert.AreEqual<int>(6, node.Scope.Count) // 2 variables, 4 properties
             Assert.AreEqual<string>("T(undet, undet)", node.Represent())
         | "FplPredicate", "03" -> 
-            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplPredicate>(node)
+            Assert.IsInstanceOfType(node, typeof<FplPredicate>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // non-intrinsic
             Assert.AreEqual<int>(7, node.Scope.Count) // 3 variables, 4 properties
             Assert.AreEqual<string>(LiteralTrue, node.Represent())
         | "FplPredicate", "04" -> 
-            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplPredicate>(node)
+            Assert.IsInstanceOfType(node, typeof<FplPredicate>)
             Assert.AreEqual<int>(3, node.ArgList.Count) // non-intrinsic with 2 statements
             Assert.AreEqual<int>(3, node.Scope.Count) // 3 variables
             Assert.AreEqual<string>(LiteralFalse, node.Represent())
@@ -4715,17 +4715,17 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplPredicateList", "00" -> 
-            Assert.IsInstanceOfType<FplRuleOfInference>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplRuleOfInference>)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplPredicateList>(node)
+            Assert.IsInstanceOfType(node, typeof<FplPredicateList>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // one predicate
             Assert.AreEqual<int>(0, node.Scope.Count) 
         | "FplPredicateList", "01" -> 
-            Assert.IsInstanceOfType<FplRuleOfInference>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplRuleOfInference>)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplPredicateList>(node)
+            Assert.IsInstanceOfType(node, typeof<FplPredicateList>)
             Assert.AreEqual<int>(3, node.ArgList.Count) // three predicates
             Assert.AreEqual<int>(0, node.Scope.Count) 
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -4761,17 +4761,17 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplProof", "00" -> 
-            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count) // single proof
-            Assert.IsInstanceOfType<FplProof>(node)
+            Assert.IsInstanceOfType(node, typeof<FplProof>)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(1, node.Scope.Count)
         | "FplProof", "00x" -> 
-            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count) // single proof with qed
-            Assert.IsInstanceOfType<FplProof>(node)
+            Assert.IsInstanceOfType(node, typeof<FplProof>)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(1, node.Scope.Count)
         | "FplProof", "00a" 
@@ -4783,45 +4783,45 @@ type Structure() =
         | "FplProof", "00g" 
         | "FplProof", "00h" 
         | "FplProof", "00i" -> 
-            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(2, parent.Scope.Count) // proof with wrong parent (e.g. axiom or conjecture)
-            Assert.IsInstanceOfType<FplProof>(node) 
+            Assert.IsInstanceOfType(node, typeof<FplProof>) 
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(1, node.Scope.Count)
         | "FplProof", "01a" ->
-            Assert.IsInstanceOfType<FplTheorem>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheorem>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count) // proof with theorem
-            Assert.IsInstanceOfType<FplProof>(node)  
+            Assert.IsInstanceOfType(node, typeof<FplProof>)  
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(1, node.Scope.Count)
         | "FplProof", "01b" ->
-            Assert.IsInstanceOfType<FplLemma>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplLemma>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count) // proof with lemma
-            Assert.IsInstanceOfType<FplProof>(node)  
+            Assert.IsInstanceOfType(node, typeof<FplProof>)  
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(1, node.Scope.Count)
         | "FplProof", "01c" -> 
-            Assert.IsInstanceOfType<FplProposition>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplProposition>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count) // proof with proposition
-            Assert.IsInstanceOfType<FplProof>(node)  
+            Assert.IsInstanceOfType(node, typeof<FplProof>)  
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(1, node.Scope.Count)
         | "FplProof", "02" -> 
-            Assert.IsInstanceOfType<FplCorollary>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplCorollary>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count) // proof with proposition
-            Assert.IsInstanceOfType<FplProof>(node)  
+            Assert.IsInstanceOfType(node, typeof<FplProof>)  
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(1, node.Scope.Count)
         | "FplProof", "03" -> 
-            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count) // proof with proposition
-            Assert.IsInstanceOfType<FplProof>(node)  
+            Assert.IsInstanceOfType(node, typeof<FplProof>)  
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(2, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -4834,10 +4834,10 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplProposition", "00" -> 
-            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplProposition>(node)
+            Assert.IsInstanceOfType(node, typeof<FplProposition>)
             Assert.AreEqual<int>(1, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -4851,17 +4851,17 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplQuantorAll", "00" -> 
-            Assert.IsInstanceOfType<FplRuleOfInference>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplRuleOfInference>)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count) // bound variable does not have to be in scope inf
-            Assert.IsInstanceOfType<FplQuantorAll>(node)
+            Assert.IsInstanceOfType(node, typeof<FplQuantorAll>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // conjunction
             Assert.AreEqual<int>(1, node.Scope.Count) // x variable
         | "FplQuantorAll", "01" -> 
-            Assert.IsInstanceOfType<FplRuleOfInference>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplRuleOfInference>)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(2, parent.Scope.Count) // variable p, c (x is bound by quantor, does not have to)
-            Assert.IsInstanceOfType<FplQuantorAll>(node)
+            Assert.IsInstanceOfType(node, typeof<FplQuantorAll>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // reference to p
             Assert.AreEqual<int>(1, node.Scope.Count) // x variable
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -4877,24 +4877,24 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplQuantorExists", "00" -> 
-            Assert.IsInstanceOfType<FplPredicateList>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplPredicateList>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplQuantorExists>(node)
+            Assert.IsInstanceOfType(node, typeof<FplQuantorExists>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // disjunction
             Assert.AreEqual<int>(1, node.Scope.Count) // x variable
         | "FplQuantorExists", "01" -> 
-            Assert.IsInstanceOfType<FplPredicateList>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplPredicateList>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count) // variable p
-            Assert.IsInstanceOfType<FplQuantorExists>(node)
+            Assert.IsInstanceOfType(node, typeof<FplQuantorExists>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // reference to p
             Assert.AreEqual<int>(1, node.Scope.Count) // x variable
         | "FplQuantorExists", "02" -> 
-            Assert.IsInstanceOfType<FplPredicateList>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplPredicateList>)
             Assert.AreEqual<int>(2, parent.ArgList.Count) // two predicates in list
             Assert.AreEqual<int>(0, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplQuantorExists>(node)
+            Assert.IsInstanceOfType(node, typeof<FplQuantorExists>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // conjunction
             Assert.AreEqual<int>(2, node.Scope.Count) // 2 variables
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -4910,24 +4910,24 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplQuantorExistsN", "00" -> 
-            Assert.IsInstanceOfType<FplAxiom>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplAxiom>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count) // 1 template (bound variable x does not have to)
-            Assert.IsInstanceOfType<FplQuantorExistsN>(node)
+            Assert.IsInstanceOfType(node, typeof<FplQuantorExistsN>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // conjunction
             Assert.AreEqual<int>(1, node.Scope.Count) // 1 variable
         | "FplQuantorExistsN", "01" -> 
-            Assert.IsInstanceOfType<FplConjecture>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplConjecture>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(4, parent.Scope.Count) // 3 variables, 1 template, (bound variable x does not have to)
-            Assert.IsInstanceOfType<FplQuantorExistsN>(node)
+            Assert.IsInstanceOfType(node, typeof<FplQuantorExistsN>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // reference to p
             Assert.AreEqual<int>(1, node.Scope.Count) // 1 variable
         | "FplQuantorExistsN", "02" -> 
-            Assert.IsInstanceOfType<FplLemma>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplLemma>)
             Assert.AreEqual<int>(1, parent.ArgList.Count) // inner predicate
             Assert.AreEqual<int>(0, parent.Scope.Count) // (bound variable x does not have to)
-            Assert.IsInstanceOfType<FplQuantorExistsN>(node)
+            Assert.IsInstanceOfType(node, typeof<FplQuantorExistsN>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // reference to p
             Assert.AreEqual<int>(1, node.Scope.Count) // 1 variable
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -4964,200 +4964,200 @@ type Structure() =
         match nodeType, varVal with
         // references to variables
         | "FplReference", "00a" ->
-            Assert.IsInstanceOfType<FplAxiom>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplAxiom>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplReference>(node)
+            Assert.IsInstanceOfType(node, typeof<FplReference>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
-            Assert.IsInstanceOfType<FplVariable>(node.RefersTo.Value)
+            Assert.IsInstanceOfType(node.RefersTo.Value, typeof<FplVariable>)
             Assert.AreEqual<string>("x", node.FplId) // name of the referenced element
         | "FplReference", "00b" ->
-            Assert.IsInstanceOfType<FplAxiom>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplAxiom>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplReference>(node)
+            Assert.IsInstanceOfType(node, typeof<FplReference>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             Assert.IsTrue(node.RefersTo.IsSome)
-            Assert.IsInstanceOfType<FplVariable>(node.RefersTo.Value)
+            Assert.IsInstanceOfType(node.RefersTo.Value, typeof<FplVariable>)
             Assert.AreEqual<string>("x", node.FplId) // name of the referenced element
         // references to predicates
         | "FplReference", "01a" ->
-            Assert.IsInstanceOfType<FplAxiom>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplAxiom>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(2, parent.Scope.Count) // 2 variables
-            Assert.IsInstanceOfType<FplReference>(node)
+            Assert.IsInstanceOfType(node, typeof<FplReference>)
             Assert.AreEqual<int>(2, node.ArgList.Count) // 2 arguments
             Assert.AreEqual<int>(0, node.Scope.Count) // no referenced element
             Assert.AreEqual<string>("A", node.FplId) // name of the referenced element
         | "FplReference", "01b" ->
-            Assert.IsInstanceOfType<FplAxiom>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplAxiom>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(2, parent.Scope.Count) // 2 variables
-            Assert.IsInstanceOfType<FplReference>(node)
+            Assert.IsInstanceOfType(node, typeof<FplReference>)
             Assert.AreEqual<int>(2, node.ArgList.Count) // 2 arguments
             Assert.AreEqual<int>(0, node.Scope.Count) 
             Assert.IsTrue(node.RefersTo.IsSome) // one referenced element
             Assert.AreEqual<string>("A", node.FplId) // name of the referenced element
-            Assert.IsInstanceOfType<FplPredicate>(node.RefersTo.Value) // type of the referenced element
+            Assert.IsInstanceOfType(node.RefersTo.Value, typeof<FplPredicate>) // type of the referenced element
         | "FplReference", "01c" ->
-            Assert.IsInstanceOfType<FplAxiom>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplAxiom>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(2, parent.Scope.Count) // 2 variables
-            Assert.IsInstanceOfType<FplReference>(node)
+            Assert.IsInstanceOfType(node, typeof<FplReference>)
             Assert.AreEqual<int>(2, node.ArgList.Count) // 2 arguments
             Assert.AreEqual<int>(0, node.Scope.Count) 
             Assert.IsTrue(node.RefersTo.IsSome) // one referenced element
             Assert.AreEqual<string>("A", node.FplId) // name of the referenced element
-            Assert.IsInstanceOfType<FplFunctionalTerm>(node.RefersTo.Value) // type of the referenced element
+            Assert.IsInstanceOfType(node.RefersTo.Value, typeof<FplFunctionalTerm>) // type of the referenced element
         | "FplReference", "01d" ->
-            Assert.IsInstanceOfType<FplAxiom>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplAxiom>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplReference>(node)
+            Assert.IsInstanceOfType(node, typeof<FplReference>)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(0, node.Scope.Count) // no referenced element
             Assert.AreEqual<string>("A", node.FplId) // name of the referenced element
         | "FplReference", "01e" ->
-            Assert.IsInstanceOfType<FplAxiom>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplAxiom>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplReference>(node)
+            Assert.IsInstanceOfType(node, typeof<FplReference>)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(0, node.Scope.Count) 
             Assert.IsTrue(node.RefersTo.IsSome) // one referenced element
             Assert.AreEqual<string>("A", node.FplId) // name of the referenced element
-            Assert.IsInstanceOfType<FplClass>(node.RefersTo.Value) // type of the referenced element
+            Assert.IsInstanceOfType(node.RefersTo.Value, typeof<FplClass>) // type of the referenced element
         | "FplReference", "01f" ->
-            Assert.IsInstanceOfType<FplAxiom>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplAxiom>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplReference>(node)
+            Assert.IsInstanceOfType(node, typeof<FplReference>)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(0, node.Scope.Count) 
             Assert.IsTrue(node.RefersTo.IsSome) // referenced element
             Assert.AreEqual<string>("A", node.FplId) // name of the referenced element
-            Assert.IsInstanceOfType<FplRuleOfInference>(node.RefersTo.Value) // type of the referenced element
+            Assert.IsInstanceOfType(node.RefersTo.Value, typeof<FplRuleOfInference>) // type of the referenced element
         | "FplReference", "01g" ->
-            Assert.IsInstanceOfType<FplAxiom>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplAxiom>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplReference>(node)
+            Assert.IsInstanceOfType(node, typeof<FplReference>)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(0, node.Scope.Count) 
             Assert.IsTrue(node.RefersTo.IsSome) // referenced element
             Assert.AreEqual<string>("A", node.FplId) // name of the referenced element
-            Assert.IsInstanceOfType<FplAxiom>(node.RefersTo.Value) // type of the referenced element
+            Assert.IsInstanceOfType(node.RefersTo.Value, typeof<FplAxiom>) // type of the referenced element
         | "FplReference", "01h" ->
-            Assert.IsInstanceOfType<FplAxiom>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplAxiom>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplReference>(node)
+            Assert.IsInstanceOfType(node, typeof<FplReference>)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(0, node.Scope.Count) 
             Assert.IsTrue(node.RefersTo.IsSome) // referenced element
             Assert.AreEqual<string>("A", node.FplId) // name of the referenced element
-            Assert.IsInstanceOfType<FplTheorem>(node.RefersTo.Value) // type of the referenced element
+            Assert.IsInstanceOfType(node.RefersTo.Value, typeof<FplTheorem>) // type of the referenced element
         | "FplReference", "01i" ->
-            Assert.IsInstanceOfType<FplAxiom>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplAxiom>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplReference>(node)
+            Assert.IsInstanceOfType(node, typeof<FplReference>)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(0, node.Scope.Count) 
             Assert.IsTrue(node.RefersTo.IsSome) // referenced element
             Assert.AreEqual<string>("A", node.FplId) // name of the referenced element
-            Assert.IsInstanceOfType<FplLemma>(node.RefersTo.Value) // type of the referenced element
+            Assert.IsInstanceOfType(node.RefersTo.Value, typeof<FplLemma>) // type of the referenced element
         | "FplReference", "01j" ->
-            Assert.IsInstanceOfType<FplAxiom>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplAxiom>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplReference>(node)
+            Assert.IsInstanceOfType(node, typeof<FplReference>)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(0, node.Scope.Count) 
             Assert.IsTrue(node.RefersTo.IsSome) // referenced element
             Assert.AreEqual<string>("A", node.FplId) // name of the referenced element
-            Assert.IsInstanceOfType<FplProposition>(node.RefersTo.Value) // type of the referenced element
+            Assert.IsInstanceOfType(node.RefersTo.Value, typeof<FplProposition>) // type of the referenced element
         | "FplReference", "01k" ->
-            Assert.IsInstanceOfType<FplAxiom>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplAxiom>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplReference>(node)
+            Assert.IsInstanceOfType(node, typeof<FplReference>)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(0, node.Scope.Count) 
             Assert.IsTrue(node.RefersTo.IsSome) // referenced element
             Assert.AreEqual<string>("A", node.FplId) // name of the referenced element
-            Assert.IsInstanceOfType<FplConjecture>(node.RefersTo.Value) // type of the referenced element
+            Assert.IsInstanceOfType(node.RefersTo.Value, typeof<FplConjecture>) // type of the referenced element
         | "FplReference", "01l" ->
-            Assert.IsInstanceOfType<FplAxiom>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplAxiom>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplReference>(node)
+            Assert.IsInstanceOfType(node, typeof<FplReference>)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(0, node.Scope.Count) 
             Assert.IsTrue(node.RefersTo.IsSome) // referenced element
             Assert.AreEqual<string>("A$1", node.FplId) // name of the referenced element
-            Assert.IsInstanceOfType<FplCorollary>(node.RefersTo.Value) 
+            Assert.IsInstanceOfType(node.RefersTo.Value, typeof<FplCorollary>) 
         | "FplReference", "01m" ->
-            Assert.IsInstanceOfType<FplAxiom>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplAxiom>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplReference>(node)
+            Assert.IsInstanceOfType(node, typeof<FplReference>)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(0, node.Scope.Count) 
             Assert.IsTrue(node.RefersTo.IsSome) // referenced element
             Assert.AreEqual<string>("A$1", node.FplId) // name of the referenced element
-            Assert.IsInstanceOfType<FplProof>(node.RefersTo.Value)         
+            Assert.IsInstanceOfType(node.RefersTo.Value, typeof<FplProof>)         
         | "FplReference", "01n" ->
-            Assert.IsInstanceOfType<FplAxiom>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplAxiom>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplReference>(node)
+            Assert.IsInstanceOfType(node, typeof<FplReference>)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(0, node.Scope.Count) 
             Assert.IsTrue(node.RefersTo.IsSome) // referenced element
             Assert.AreEqual<string>("A", node.FplId) // name of the referenced element
-            Assert.IsInstanceOfType<FplExtension>(node.RefersTo.Value) // type of the referenced element
+            Assert.IsInstanceOfType(node.RefersTo.Value, typeof<FplExtension>) // type of the referenced element
         | "FplReference", "01o" ->
-            Assert.IsInstanceOfType<FplLocalization>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplLocalization>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplReference>(node)
+            Assert.IsInstanceOfType(node, typeof<FplReference>)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(0, node.Scope.Count) 
         
         // return reference
         | "FplReference", "02a" ->
-            Assert.IsInstanceOfType<FplReturn>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplReturn>)
             Assert.AreEqual<int>(1, parent.ArgList.Count) // reference
             Assert.AreEqual<int>(0, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplReference>(node)
+            Assert.IsInstanceOfType(node, typeof<FplReference>)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(0, node.Scope.Count)
             Assert.IsTrue(node.RefersTo.IsSome)
-            Assert.IsInstanceOfType<FplVariable>(node.RefersTo.Value)
+            Assert.IsInstanceOfType(node.RefersTo.Value, typeof<FplVariable>)
             Assert.AreEqual<string>("x", node.FplId) // name of the referenced element
 
         // reference to named predicate
         | "FplReference", "04a" ->
-            Assert.IsInstanceOfType<FplPredicate>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplPredicate>)
             Assert.AreEqual<int>(1, parent.ArgList.Count) 
             Assert.AreEqual<int>(0, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplReference>(node)
+            Assert.IsInstanceOfType(node, typeof<FplReference>)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(0, node.Scope.Count) 
             Assert.AreEqual<string>("D", node.FplId) // name of the referenced element
         | "FplReference", "04b" ->
-            Assert.IsInstanceOfType<FplPredicate>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplPredicate>)
             Assert.AreEqual<int>(1, parent.ArgList.Count) 
             Assert.AreEqual<int>(0, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplReference>(node)
+            Assert.IsInstanceOfType(node, typeof<FplReference>)
             Assert.AreEqual<int>(0, node.ArgList.Count) 
             Assert.AreEqual<int>(0, node.Scope.Count) 
             Assert.IsTrue(node.RefersTo.IsSome) // one referenced element
             Assert.AreEqual<string>("D", node.FplId) // name of the referenced element
-            Assert.IsInstanceOfType<FplPredicate>(node.RefersTo.Value) // type of the referenced element
+            Assert.IsInstanceOfType(node.RefersTo.Value, typeof<FplPredicate>) // type of the referenced element
 
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
@@ -5179,73 +5179,73 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplReturn", "00" ->
-            Assert.IsInstanceOfType<FplFunctionalTerm>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplFunctionalTerm>)
             Assert.AreEqual<int>(2, parent.ArgList.Count) // mapping + return 
             Assert.AreEqual<int>(1, parent.Scope.Count) // variable
-            Assert.IsInstanceOfType<FplReturn>(node)
+            Assert.IsInstanceOfType(node, typeof<FplReturn>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // reference
             Assert.AreEqual<int>(0, node.Scope.Count) 
         | "FplReturn", "00a" ->
-            Assert.IsInstanceOfType<FplFunctionalTerm>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplFunctionalTerm>)
             Assert.AreEqual<int>(3, parent.ArgList.Count) // mapping + assignment + return 
             Assert.AreEqual<int>(1, parent.Scope.Count) // variable
-            Assert.IsInstanceOfType<FplReturn>(node)
+            Assert.IsInstanceOfType(node, typeof<FplReturn>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // reference
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplReturn", "00b" ->
-            Assert.IsInstanceOfType<FplFunctionalTerm>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplFunctionalTerm>)
             Assert.AreEqual<int>(3, parent.ArgList.Count) // mapping + assignment + return 
             Assert.AreEqual<int>(2, parent.Scope.Count) // variable + template
-            Assert.IsInstanceOfType<FplReturn>(node)
+            Assert.IsInstanceOfType(node, typeof<FplReturn>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // reference
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplReturn", "00c" ->
-            Assert.IsInstanceOfType<FplFunctionalTerm>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplFunctionalTerm>)
             Assert.AreEqual<int>(2, parent.ArgList.Count) // mapping + return 
             Assert.AreEqual<int>(1, parent.Scope.Count) // variable
-            Assert.IsInstanceOfType<FplReturn>(node)
+            Assert.IsInstanceOfType(node, typeof<FplReturn>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // reference
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplReturn", "00d" ->
-            Assert.IsInstanceOfType<FplFunctionalTerm>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplFunctionalTerm>)
             Assert.AreEqual<int>(3, parent.ArgList.Count) // mapping + assignment + return 
             Assert.AreEqual<int>(1, parent.Scope.Count) // variable
-            Assert.IsInstanceOfType<FplReturn>(node)
+            Assert.IsInstanceOfType(node, typeof<FplReturn>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // reference
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplReturn", "00e" ->
-            Assert.IsInstanceOfType<FplFunctionalTerm>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplFunctionalTerm>)
             Assert.AreEqual<int>(3, parent.ArgList.Count) // mapping + return 
             Assert.AreEqual<int>(1, parent.Scope.Count) // variable
-            Assert.IsInstanceOfType<FplReturn>(node)
+            Assert.IsInstanceOfType(node, typeof<FplReturn>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // reference
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplReturn", "00f" ->
-            Assert.IsInstanceOfType<FplFunctionalTerm>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplFunctionalTerm>)
             Assert.AreEqual<int>(2, parent.ArgList.Count) // mapping + return 
             Assert.AreEqual<int>(0, parent.Scope.Count) 
-            Assert.IsInstanceOfType<FplReturn>(node)
+            Assert.IsInstanceOfType(node, typeof<FplReturn>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // intrinsic index
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplReturn", "00g" ->
-            Assert.IsInstanceOfType<FplFunctionalTerm>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplFunctionalTerm>)
             Assert.AreEqual<int>(3, parent.ArgList.Count) // mapping + assignment + return 
             Assert.AreEqual<int>(1, parent.Scope.Count) // variable
-            Assert.IsInstanceOfType<FplReturn>(node)
+            Assert.IsInstanceOfType(node, typeof<FplReturn>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // reference
             Assert.AreEqual<int>(0, node.Scope.Count) 
         | "FplReturn", "01" ->
-            Assert.IsInstanceOfType<FplExtension>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplExtension>)
             Assert.AreEqual<int>(2, parent.ArgList.Count) // mapping + return 
             Assert.AreEqual<int>(1, parent.Scope.Count) // variable
-            Assert.IsInstanceOfType<FplReturn>(node)
+            Assert.IsInstanceOfType(node, typeof<FplReturn>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // reference
             Assert.AreEqual<int>(0, node.Scope.Count) 
         | "FplReturn", "02" ->
-            Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplMandatoryFunctionalTerm>)
             Assert.AreEqual<int>(2, parent.ArgList.Count) // mapping + return 
             Assert.AreEqual<int>(1, parent.Scope.Count) // variable
-            Assert.IsInstanceOfType<FplReturn>(node)
+            Assert.IsInstanceOfType(node, typeof<FplReturn>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // reference
             Assert.AreEqual<int>(0, node.Scope.Count) 
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -5271,17 +5271,17 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplRuleOfInference", "00" -> 
-            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplRuleOfInference>(node)
+            Assert.IsInstanceOfType(node, typeof<FplRuleOfInference>)
             Assert.AreEqual<int>(2, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplRuleOfInference", "01" -> 
-            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplRuleOfInference>(node)
+            Assert.IsInstanceOfType(node, typeof<FplRuleOfInference>)
             Assert.AreEqual<int>(2, node.ArgList.Count) // still 2, because we have FplPremiseList object 
             Assert.AreEqual<int>(0, node.Scope.Count)
 
@@ -5327,12 +5327,12 @@ type Structure() =
         // nodes that can be referred to as 'self'
         | "FplSelf", "00_2" 
             ->
-            Assert.IsInstanceOfType<FplReference>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplReference>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsTrue(parent.RefersTo.IsSome)
             Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
-            Assert.IsInstanceOfType<FplSelf>(node)
+            Assert.IsInstanceOfType(node, typeof<FplSelf>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.IsTrue(node.RefersTo.IsSome)
         // nodes that can be referred to as 'self'
@@ -5355,12 +5355,12 @@ type Structure() =
         | "FplSelf", "02e"
         | "FplSelf", "14"
             ->
-            Assert.IsInstanceOfType<FplReference>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplReference>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsTrue(parent.RefersTo.IsSome)
             Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
-            Assert.IsInstanceOfType<FplSelf>(node)
+            Assert.IsInstanceOfType(node, typeof<FplSelf>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.IsTrue(node.RefersTo.IsSome)
         // nodes that cannot be referred to as 'self'
@@ -5376,12 +5376,12 @@ type Structure() =
         | "FplSelf", "12"
         | "FplSelf", "13"
             ->
-            Assert.IsInstanceOfType<FplReference>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplReference>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
             Assert.IsTrue(parent.RefersTo.IsSome)
             Assert.IsTrue(Object.ReferenceEquals(node, (parent.RefersTo.Value)))
-            Assert.IsInstanceOfType<FplSelf>(node)
+            Assert.IsInstanceOfType(node, typeof<FplSelf>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.IsTrue(node.RefersTo.IsNone)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -5394,10 +5394,10 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplTheorem", "00" -> 
-            Assert.IsInstanceOfType<FplTheory>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheory>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplTheorem>(node)
+            Assert.IsInstanceOfType(node, typeof<FplTheorem>)
             Assert.AreEqual<int>(1, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
 
@@ -5411,10 +5411,10 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplTheory", "00" ->
-            Assert.IsInstanceOfType<FplRoot>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplRoot>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplTheory>(node)
+            Assert.IsInstanceOfType(node, typeof<FplTheory>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
 
@@ -5431,31 +5431,31 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplTranslation", "01" ->
-            Assert.IsInstanceOfType<FplLanguage>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplLanguage>) 
             Assert.AreEqual<int>(3, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplTranslation>(node)
+            Assert.IsInstanceOfType(node, typeof<FplTranslation>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplTranslation", "02" ->
-            Assert.IsInstanceOfType<FplLanguage>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplLanguage>) 
             Assert.AreEqual<int>(3, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplTranslation>(node)
+            Assert.IsInstanceOfType(node, typeof<FplTranslation>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplTranslation", "03" ->
-            Assert.IsInstanceOfType<FplLanguage>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplLanguage>) 
             Assert.AreEqual<int>(3, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplTranslation>(node)
+            Assert.IsInstanceOfType(node, typeof<FplTranslation>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | "FplTranslation", "04" ->
-            Assert.IsInstanceOfType<FplLanguage>(parent) 
+            Assert.IsInstanceOfType(parent, typeof<FplLanguage>) 
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplTranslation>(node)
+            Assert.IsInstanceOfType(node, typeof<FplTranslation>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
@@ -5512,150 +5512,150 @@ type Structure() =
         match nodeType, varVal with
         // Variables, simple blocks
         | "FplVariable", "00a" ->
-            Assert.IsInstanceOfType<FplAxiom>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplAxiom>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplVariable>(node)
+            Assert.IsInstanceOfType(node, typeof<FplVariable>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
             Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "00b" ->
-            Assert.IsInstanceOfType<FplTheorem>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTheorem>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplVariable>(node)
+            Assert.IsInstanceOfType(node, typeof<FplVariable>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
             Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "00c" ->
-            Assert.IsInstanceOfType<FplLemma>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplLemma>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplVariable>(node)
+            Assert.IsInstanceOfType(node, typeof<FplVariable>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
             Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "00d" ->
-            Assert.IsInstanceOfType<FplProposition>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplProposition>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplVariable>(node)
+            Assert.IsInstanceOfType(node, typeof<FplVariable>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
             Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "00e" ->
-            Assert.IsInstanceOfType<FplConjecture>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplConjecture>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplVariable>(node)
+            Assert.IsInstanceOfType(node, typeof<FplVariable>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
             Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "00f" ->
-            Assert.IsInstanceOfType<FplClass>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplClass>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(2, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplVariable>(node)
+            Assert.IsInstanceOfType(node, typeof<FplVariable>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
             Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "00g" ->
-            Assert.IsInstanceOfType<FplPredicate>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplPredicate>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplVariable>(node)
+            Assert.IsInstanceOfType(node, typeof<FplVariable>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
             Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "00h" ->
-            Assert.IsInstanceOfType<FplPredicate>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplPredicate>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplVariable>(node)
+            Assert.IsInstanceOfType(node, typeof<FplVariable>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
             Assert.IsFalse(x.IsInitialized)
             Assert.IsTrue(x.IsSignatureVariable)
         | "FplVariable", "00i" ->
-            Assert.IsInstanceOfType<FplFunctionalTerm>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplFunctionalTerm>)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplVariable>(node)
+            Assert.IsInstanceOfType(node, typeof<FplVariable>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
             Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "00j" ->
-            Assert.IsInstanceOfType<FplFunctionalTerm>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplFunctionalTerm>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplVariable>(node)
+            Assert.IsInstanceOfType(node, typeof<FplVariable>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
             Assert.IsFalse(x.IsInitialized)
             Assert.IsTrue(x.IsSignatureVariable)
         | "FplVariable", "00k" ->
-            Assert.IsInstanceOfType<FplRuleOfInference>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplRuleOfInference>)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplVariable>(node)
+            Assert.IsInstanceOfType(node, typeof<FplVariable>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
             Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "00l" ->
-            Assert.IsInstanceOfType<FplExtension>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplExtension>)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplVariable>(node)
+            Assert.IsInstanceOfType(node, typeof<FplVariable>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
             Assert.IsFalse(x.IsInitialized)
             Assert.IsTrue(x.IsSignatureVariable)
         | "FplVariable", "00m" ->
-            Assert.IsInstanceOfType<FplCorollary>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplCorollary>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplVariable>(node)
+            Assert.IsInstanceOfType(node, typeof<FplVariable>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
             Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "00n" ->
-            Assert.IsInstanceOfType<FplProof>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplProof>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(2, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplVariable>(node)
+            Assert.IsInstanceOfType(node, typeof<FplVariable>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
             Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "00o" ->
-            Assert.IsInstanceOfType<FplLocalization>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplLocalization>)
             Assert.AreEqual<int>(1, parent.ArgList.Count) // negation
             Assert.AreEqual<int>(2, parent.Scope.Count) // var + language
-            Assert.IsInstanceOfType<FplVariable>(node)
+            Assert.IsInstanceOfType(node, typeof<FplVariable>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
@@ -5664,60 +5664,60 @@ type Structure() =
 
         // Variables, sub blocks
         | "FplVariable", "01a" ->
-            Assert.IsInstanceOfType<FplConstructor>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplConstructor>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplVariable>(node)
+            Assert.IsInstanceOfType(node, typeof<FplVariable>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
             Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "01b" ->
-            Assert.IsInstanceOfType<FplConstructor>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplConstructor>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplVariable>(node)
+            Assert.IsInstanceOfType(node, typeof<FplVariable>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
             Assert.IsFalse(x.IsInitialized)
             Assert.IsTrue(x.IsSignatureVariable)
         | "FplVariable", "01c" ->
-            Assert.IsInstanceOfType<FplMandatoryPredicate>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplMandatoryPredicate>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplVariable>(node)
+            Assert.IsInstanceOfType(node, typeof<FplVariable>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
             Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "01d" ->
-            Assert.IsInstanceOfType<FplMandatoryPredicate>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplMandatoryPredicate>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplVariable>(node)
+            Assert.IsInstanceOfType(node, typeof<FplVariable>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
             Assert.IsFalse(x.IsInitialized)
             Assert.IsTrue(x.IsSignatureVariable)
         | "FplVariable", "01g" ->
-            Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplMandatoryFunctionalTerm>)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplVariable>(node)
+            Assert.IsInstanceOfType(node, typeof<FplVariable>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
             Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "01h" ->
-            Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplMandatoryFunctionalTerm>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplVariable>(node)
+            Assert.IsInstanceOfType(node, typeof<FplVariable>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
@@ -5725,26 +5725,26 @@ type Structure() =
             Assert.IsTrue(x.IsSignatureVariable)
         // variable to variable
         | "FplVariable", "02a" ->
-            Assert.IsInstanceOfType<FplVariable>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplVariable>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
             let p = (parent:?>FplGenericVariable)
             Assert.IsFalse(p.IsInitialized)
             Assert.IsFalse(p.IsSignatureVariable)                    
-            Assert.IsInstanceOfType<FplVariable>(node)
+            Assert.IsInstanceOfType(node, typeof<FplVariable>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
             Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "02b" ->
-            Assert.IsInstanceOfType<FplVariable>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplVariable>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
             let p = (parent:?>FplGenericVariable)
             Assert.IsFalse(p.IsInitialized)
             Assert.IsTrue(p.IsSignatureVariable)
-            Assert.IsInstanceOfType<FplVariable>(node)
+            Assert.IsInstanceOfType(node, typeof<FplVariable>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
@@ -5752,26 +5752,26 @@ type Structure() =
             Assert.IsFalse(x.IsSignatureVariable)
         // variable to variable
         | "FplVariable", "02c" ->
-            Assert.IsInstanceOfType<FplVariableArray>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplVariableArray>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
             let p = (parent:?>FplGenericVariable)
             Assert.IsFalse(p.IsInitialized)
             Assert.IsFalse(p.IsSignatureVariable)                    
-            Assert.IsInstanceOfType<FplVariable>(node)
+            Assert.IsInstanceOfType(node, typeof<FplVariable>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
             Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "02d" ->
-            Assert.IsInstanceOfType<FplVariableArray>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplVariableArray>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
             let p = (parent:?>FplGenericVariable)
             Assert.IsFalse(p.IsInitialized)
             Assert.IsTrue(p.IsSignatureVariable)
-            Assert.IsInstanceOfType<FplVariable>(node)
+            Assert.IsInstanceOfType(node, typeof<FplVariable>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
@@ -5779,26 +5779,26 @@ type Structure() =
             Assert.IsFalse(x.IsSignatureVariable)
         // variable to variable
         | "FplVariable", "02e" ->
-            Assert.IsInstanceOfType<FplVariableArray>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplVariableArray>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
             let p = (parent:?>FplGenericVariable)
             Assert.IsFalse(p.IsInitialized)
             Assert.IsFalse(p.IsSignatureVariable)                    
-            Assert.IsInstanceOfType<FplVariable>(node)
+            Assert.IsInstanceOfType(node, typeof<FplVariable>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
             Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "02f" ->
-            Assert.IsInstanceOfType<FplVariableArray>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplVariableArray>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
             let p = (parent:?>FplGenericVariable)
             Assert.IsFalse(p.IsInitialized)
             Assert.IsTrue(p.IsSignatureVariable)
-            Assert.IsInstanceOfType<FplVariable>(node)
+            Assert.IsInstanceOfType(node, typeof<FplVariable>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
@@ -5806,30 +5806,30 @@ type Structure() =
             Assert.IsFalse(x.IsSignatureVariable)
         // variable to mapping
         | "FplVariable", "03a" ->
-            Assert.IsInstanceOfType<FplMapping>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplMapping>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplVariable>(node)
+            Assert.IsInstanceOfType(node, typeof<FplVariable>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
             Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "03b" ->
-            Assert.IsInstanceOfType<FplMapping>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplMapping>)
             Assert.AreEqual<int>(0, parent.ArgList.Count)
             Assert.AreEqual<int>(2, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplVariable>(node)
+            Assert.IsInstanceOfType(node, typeof<FplVariable>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
             Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "03c" ->
-            Assert.IsInstanceOfType<FplMapping>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplMapping>)
             Assert.AreEqual<int>(1, parent.ArgList.Count) // nested mapping
             Assert.AreEqual<int>(3, parent.Scope.Count) // 3 variables
-            Assert.IsInstanceOfType<FplVariable>(node)
+            Assert.IsInstanceOfType(node, typeof<FplVariable>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
@@ -5839,30 +5839,30 @@ type Structure() =
         // localizations 
         | "FplVariable", "04a" 
         | "FplVariable", "04b" ->
-            Assert.IsInstanceOfType<FplLocalization>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplLocalization>)
             Assert.AreEqual<int>(1, parent.ArgList.Count) 
             Assert.AreEqual<int>(4, parent.Scope.Count) // a variable and 3 languages
-            Assert.IsInstanceOfType<FplVariable>(node)
+            Assert.IsInstanceOfType(node, typeof<FplVariable>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
             Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "04c" ->
-            Assert.IsInstanceOfType<FplLocalization>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplLocalization>)
             Assert.AreEqual<int>(1, parent.ArgList.Count) 
             Assert.AreEqual<int>(7, parent.Scope.Count) // two variables and 5 languages
-            Assert.IsInstanceOfType<FplVariable>(node)
+            Assert.IsInstanceOfType(node, typeof<FplVariable>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
             Assert.IsFalse(x.IsInitialized)
             Assert.IsFalse(x.IsSignatureVariable)
         | "FplVariable", "04d" ->
-            Assert.IsInstanceOfType<FplLocalization>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplLocalization>)
             Assert.AreEqual<int>(1, parent.ArgList.Count) 
             Assert.AreEqual<int>(5, parent.Scope.Count) // two variables and 3 languages
-            Assert.IsInstanceOfType<FplVariable>(node)
+            Assert.IsInstanceOfType(node, typeof<FplVariable>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
@@ -5871,10 +5871,10 @@ type Structure() =
 
         // translations 
         | "FplVariable", "05a" ->
-            Assert.IsInstanceOfType<FplTranslation>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplTranslation>)
             Assert.AreEqual<int>(0, parent.ArgList.Count) 
             Assert.AreEqual<int>(1, parent.Scope.Count) // a variable 
-            Assert.IsInstanceOfType<FplVariable>(node)
+            Assert.IsInstanceOfType(node, typeof<FplVariable>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let x = (node:?>FplGenericVariable)
@@ -5893,10 +5893,10 @@ type Structure() =
         
         match nodeType, varVal with
         | "FplVariableArray", "00" ->
-            Assert.IsInstanceOfType<FplPredicate>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplPredicate>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplVariableArray>(node)
+            Assert.IsInstanceOfType(node, typeof<FplVariableArray>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let arr = node :?> FplVariableArray
@@ -5904,20 +5904,20 @@ type Structure() =
             Assert.AreEqual<int>(1, arr.DimensionTypes.Count)
             Assert.AreEqual<string>("*pred[ind]",arr.Type SignatureType.Type)
         | "FplVariableArray", "00a" ->
-            Assert.IsInstanceOfType<FplPredicate>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplPredicate>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplVariableArray>(node)
+            Assert.IsInstanceOfType(node, typeof<FplVariableArray>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(0, node.Scope.Count)
             let arr = node :?> FplVariableArray
             Assert.AreEqual<int>(2, arr.Dimensionality)
             Assert.AreEqual<string>("*pred[ind,obj]",arr.Type SignatureType.Type)
         | "FplVariableArray", "01" ->
-            Assert.IsInstanceOfType<FplPredicate>(parent)
+            Assert.IsInstanceOfType(parent, typeof<FplPredicate>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(7, parent.Scope.Count)
-            Assert.IsInstanceOfType<FplVariableArray>(node)
+            Assert.IsInstanceOfType(node, typeof<FplVariableArray>)
             Assert.AreEqual<int>(0, node.ArgList.Count)
             Assert.AreEqual<int>(3, node.Scope.Count) // u,v,w sub variables 
             let arr = node :?> FplVariableArray

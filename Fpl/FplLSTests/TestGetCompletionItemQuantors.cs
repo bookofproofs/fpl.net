@@ -77,7 +77,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesQuantor().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                if (item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice))
+                if (!string.IsNullOrEmpty(item.InsertText) && item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice))
                 {
                     Assert.IsTrue(item.InsertText.EndsWith(' '));
                 }
@@ -111,7 +111,7 @@ namespace FplLSTests
             {
                 if (item.Kind != CompletionItemKind.Keyword)
                 {
-                    Assert.IsTrue(item.Detail.Contains(s));
+                    Assert.Contains(s, item.Detail ?? string.Empty);
                 }
             }
         }
@@ -127,7 +127,7 @@ namespace FplLSTests
 
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.InsertText.Contains(choice));
+                Assert.IsTrue(!string.IsNullOrEmpty(item.InsertText) && item.InsertText.Contains(choice));
                 if (item.InsertText.Contains('{'))
                 {
                     var res = testParser(PrimQuantor, item.InsertText);

@@ -60,7 +60,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesDeclaration().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                if (item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice))
+                if (!string.IsNullOrEmpty(item.InsertText) && item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice))
                 {
                     Assert.IsTrue(item.InsertText.EndsWith(Environment.NewLine));
                 }
@@ -89,7 +89,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesDeclaration().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.Detail.Contains(choice));
+                Assert.Contains(choice, item.Detail ?? string.Empty);
             }
         }
 
@@ -103,8 +103,8 @@ namespace FplLSTests
             var counterSnippets = 0;
             foreach (var item in actual)
             {
-                if (item.InsertText.Contains(choice)) { counterSnippets++; }
-                if (item.InsertText.Contains(' '))
+                if (!string.IsNullOrEmpty(item.InsertText) && item.InsertText.Contains(choice)) { counterSnippets++; }
+                if (!string.IsNullOrEmpty(item.InsertText) && item.InsertText.Contains(' '))
                 {
                     var res = testParser(LiteralDec, item.InsertText);
                     if (!res.StartsWith("Success:"))

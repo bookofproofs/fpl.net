@@ -14,7 +14,7 @@ namespace FplLSTests
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesProof().GetChoices(detailCi);
-            Assert.AreEqual<int>(15, actual.Count);
+            Assert.HasCount(15, actual);
         }
 
         [DataRow(LiteralPrf)]
@@ -59,7 +59,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesProof().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                if (item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice))
+                if (!string.IsNullOrEmpty(item.InsertText) && item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice))
                 {
                     Assert.IsTrue(item.InsertText.EndsWith(Environment.NewLine));
                 }
@@ -90,7 +90,7 @@ namespace FplLSTests
             {
                 if (item.Kind != CompletionItemKind.Keyword)
                 {
-                    Assert.IsTrue(item.Detail.Contains(l));
+                    Assert.IsTrue(!string.IsNullOrEmpty(item.InsertText) && !string.IsNullOrEmpty(item.Detail) && item.Detail.Contains(l));
                     if (item.IsShort)
                     {
                         Assert.IsTrue(item.Detail.Contains("(short)"));
@@ -109,8 +109,8 @@ namespace FplLSTests
             var counterSnippets = 0;
             foreach (var item in actual)
             {
-                if (item.InsertText.Contains(choice)) { counterSnippets++; }
-                if (item.InsertText.Contains(' '))
+                if (!string.IsNullOrEmpty(item.InsertText) && item.InsertText.Contains(choice)) { counterSnippets++; }
+                if (!string.IsNullOrEmpty(item.InsertText) && item.InsertText.Contains(' '))
                 {
                     var res = testParser(LiteralPrf, item.InsertText);
                     if (!res.StartsWith("Success:"))

@@ -364,7 +364,7 @@ namespace FplLSTests
         {
             var actual = new FplCompletionItem(input);
             Console.WriteLine(input);
-            Assert.AreEqual<string>(expected, actual.SortText.Replace("zzz", ""));
+            Assert.AreEqual<string>(expected, actual.SortText?.Replace("zzz", ""));
         }
 
         [TestMethod]

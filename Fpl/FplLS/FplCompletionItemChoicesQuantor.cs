@@ -39,7 +39,7 @@ namespace FplLS
                 LiteralExN => $"exists n-times quantor (in type)",
                 _ => baseCi.Detail
             };
-            return baseCi.WithSortText(sortText).WithLabel(label).WithInsertText(insert).WithDetail(detail);
+            return baseCi.WithSortText(sortText).WithLabel(label).WithInsertText(insert).WithDetail(detail ?? string.Empty);
         }
 
         private string GetBody()

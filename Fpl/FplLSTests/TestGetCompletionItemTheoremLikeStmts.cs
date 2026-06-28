@@ -101,7 +101,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesTheoremLikeStmt(l).GetChoices(detailCi);
             foreach (var item in actual)
             {
-                if (item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice))
+                if (!string.IsNullOrEmpty(item.InsertText) && item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice))
                 {
                     Assert.IsTrue(item.InsertText.EndsWith(Environment.NewLine));
                 }
@@ -148,11 +148,11 @@ namespace FplLSTests
             {
                 if (item.Kind == CompletionItemKind.Keyword)
                 {
-                    Assert.IsTrue(item.Detail.Contains(choice));
+                    Assert.IsTrue(!string.IsNullOrEmpty(item.InsertText) && !string.IsNullOrEmpty(item.Detail) && item.Detail.Contains(choice));
                 }
                 else
                 {
-                    Assert.IsTrue(item.Detail.Contains(l, StringComparison.CurrentCultureIgnoreCase));
+                    Assert.IsTrue(!string.IsNullOrEmpty(item.Detail) && item.Detail.Contains(l, StringComparison.CurrentCultureIgnoreCase));
                 }
             }
         }
@@ -175,8 +175,8 @@ namespace FplLSTests
             var counterSnippets = 0;
             foreach (var item in actual)
             {
-                if (item.InsertText.Contains(choice)) { counterSnippets++; }
-                if (item.InsertText.Contains('{'))
+                if (!string.IsNullOrEmpty(item.InsertText) && item.InsertText.Contains(choice)) { counterSnippets++; }
+                if (!string.IsNullOrEmpty(item.InsertText) && item.InsertText.Contains('{'))
                 {
                     var res = testParser(PrimTheoremLike, item.InsertText);
                     if (!res.StartsWith("Success:"))

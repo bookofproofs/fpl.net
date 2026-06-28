@@ -37,7 +37,7 @@ type TestInferredExpressionsJust() =
             Assert.AreEqual<int>(expectedNumbExpr, result.Length)
             Assert.AreEqual<string>(expectedExpr, result.Head.Type SignatureType.Name)
         | Some ref ->
-            Assert.IsInstanceOfType<FplJustificationItemByAx>(ref)
+            Assert.IsInstanceOfType(ref, typeof<FplJustificationItemByAx>)
         | None ->
             failwith $"expected FplJustificationItemByAx, found none"
 
@@ -64,7 +64,7 @@ type TestInferredExpressionsJust() =
             Assert.AreEqual<int>(expectedNumbExpr, result.Length)
             Assert.AreEqual<string>(expectedExpr, result.Head.Type SignatureType.Name)
         | Some ref ->
-            Assert.IsInstanceOfType<FplJustificationItemByConj>(ref)
+            Assert.IsInstanceOfType(ref, typeof<FplJustificationItemByConj>)
         | None ->
             failwith $"expected FplJustificationItemByConj, found none"
 
@@ -98,7 +98,7 @@ type TestInferredExpressionsJust() =
             Assert.AreEqual<int>(expectedNumbExpr, result.Length)
             Assert.AreEqual<string>(expectedExpr, result.Head.Type SignatureType.Name)
         | Some ref ->
-            Assert.IsInstanceOfType<FplJustificationItemByTheoremLikeStmt>(ref)
+            Assert.IsInstanceOfType(ref, typeof<FplJustificationItemByTheoremLikeStmt>)
         | None ->
             failwith $"expected FplJustificationItemByTheoremLikeStmt, found none"
 
@@ -136,7 +136,7 @@ type TestInferredExpressionsJust() =
             Assert.AreEqual<int>(expectedNumbExpr, result.Length)
             Assert.AreEqual<string>(expectedExpr, result.Head.Type SignatureType.Name)
         | Some ref ->
-            Assert.IsInstanceOfType<FplJustificationItemByCor>(ref)
+            Assert.IsInstanceOfType(ref, typeof<FplJustificationItemByCor>)
         | None ->
             failwith $"expected FplJustificationItemByCor, found none"
 
@@ -175,7 +175,7 @@ type TestInferredExpressionsJust() =
             let expr = result |> List.rev |> List.head
             Assert.AreEqual<string>(expectedExpr, expr.Type SignatureType.Name)
         | Some ref ->
-            Assert.IsInstanceOfType<FplJustificationItemByDef>(ref)
+            Assert.IsInstanceOfType(ref, typeof<FplJustificationItemByDef>)
         | None ->
             failwith $"expected FplJustificationItemByDef, found none"
 
@@ -214,7 +214,7 @@ type TestInferredExpressionsJust() =
             let expr = result |> List.rev |> List.head
             Assert.AreEqual<string>(expectedExpr, expr.Type SignatureType.Name)
         | Some ref ->
-            Assert.IsInstanceOfType<FplJustificationItemByDefVar>(ref)
+            Assert.IsInstanceOfType(ref, typeof<FplJustificationItemByDefVar>)
         | None ->
             failwith $"expected FplJustificationItemByDefVar, found none"
 
@@ -239,7 +239,7 @@ type TestInferredExpressionsJust() =
             Assert.AreEqual<int>(expectedNumbExpr, result.Length)
             Assert.AreEqual<string>(expectedExpr, result.Head.Type SignatureType.Name)
         | Some ref ->
-            Assert.IsInstanceOfType<FplJustificationItemByRefArgument>(ref)
+            Assert.IsInstanceOfType(ref, typeof<FplJustificationItemByRefArgument>)
         | None ->
             failwith $"expected FplJustificationItemByRefArgument, found none"
 
@@ -266,7 +266,7 @@ type TestInferredExpressionsJust() =
             let actualExpr = result.Head.Type SignatureType.Name
             Assert.AreEqual<string>(expectedExpr, actualExpr)
         | Some ref ->
-            Assert.IsInstanceOfType<FplJustificationItemByProofArgument>(ref)
+            Assert.IsInstanceOfType(ref, typeof<FplJustificationItemByProofArgument>)
         | None ->
             failwith $"expected FplJustificationItemByProofArgument, found none"
 
@@ -691,7 +691,7 @@ type TestInferredExpressionsJust() =
             //    File.AppendAllText("log.txt", $"{no}\t{fplCode}\t{expectedExpr}\t{expectedNumbExpr}{Environment.NewLine}")
             Assert.AreEqual<string>(expectedExpr, actualExpr)
         | Some ref ->
-            Assert.IsInstanceOfType<FplJustificationItemByInf>(ref)
+            Assert.IsInstanceOfType(ref, typeof<FplJustificationItemByInf>)
         | None ->
             failwith $"expected FplJustificationItemByInf, found none"
 

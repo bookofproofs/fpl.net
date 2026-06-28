@@ -17,7 +17,7 @@ namespace FplLSTests
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesProperty().GetChoices(detailCi);
-            Assert.AreEqual<int>(4, actual.Count);
+            Assert.HasCount(4, actual);
         }
 
         [DataRow(LiteralPrty)]
@@ -69,7 +69,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesProperty().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                if (item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice) && item.InsertText.Contains(l))
+                if (!string.IsNullOrEmpty(item.InsertText) && item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice) && item.InsertText.Contains(l))
                 {
                     Assert.IsTrue(item.InsertText.EndsWith(Environment.NewLine));
                 }
@@ -117,7 +117,7 @@ namespace FplLSTests
             {
                 if (item.Kind == CompletionItemKind.Keyword)
                 {
-                    Assert.IsTrue(item.Detail.Contains(l));
+                    Assert.IsTrue(!string.IsNullOrEmpty(item.Detail) && !string.IsNullOrEmpty(item.InsertText) && item.Detail.Contains(l));
                     if (item.Detail.Contains(LiteralPred)) countPredicative++;
                     if (item.Detail.Contains(LiteralFunc)) countFunctional++;
                 }
@@ -140,7 +140,7 @@ namespace FplLSTests
             {
                 if (item.Kind != CompletionItemKind.Keyword)
                 {
-                    Assert.IsTrue(item.Detail.Contains(l));
+                    Assert.IsTrue(!string.IsNullOrEmpty(item.InsertText) && !string.IsNullOrEmpty(item.Detail) && item.Detail.Contains(l));
                     if (item.Detail.Contains(LiteralPred)) countPredicative++;
                     if (item.Detail.Contains(LiteralFunc)) countFunctional++;
                 }
@@ -162,8 +162,8 @@ namespace FplLSTests
             var counterSnippets = 0;
             foreach (var item in actual)
             {
-                if (item.InsertText.Contains(choice) && item.InsertText.Contains(subType)) { counterSnippets++; }
-                if (item.InsertText.Contains('{'))
+                if (!string.IsNullOrEmpty(item.InsertText) && item.InsertText.Contains(choice) && item.InsertText.Contains(subType)) { counterSnippets++; }
+                if (!string.IsNullOrEmpty(item.InsertText) && item.InsertText.Contains('{'))
                 {
                     var res = testParser(LiteralPrty, item.InsertText);
                     if (!res.StartsWith("Success:"))

@@ -30,7 +30,7 @@ type TestInferredExpressionsArgInf() =
             Assert.AreEqual<int>(expectedNumbExpr, result.Length)
             Assert.AreEqual<string>(expectedExpr, result.Head.Type SignatureType.Name)
         | Some ref ->
-            Assert.IsInstanceOfType<FplArgInferenceTrivial>(ref)
+            Assert.IsInstanceOfType(ref, typeof<FplArgInferenceTrivial>)
         | None ->
             failwith $"expected FplArgInferenceTrivial, found none"
 
@@ -67,7 +67,7 @@ type TestInferredExpressionsArgInf() =
             Assert.AreEqual<int>(expectedNumbExpr, result.Length)
             Assert.AreEqual<string>(expectedExpr, result.Head.Type SignatureType.Name)
         | Some ref ->
-            Assert.IsInstanceOfType<FplArgInferenceDerived>(ref)
+            Assert.IsInstanceOfType(ref, typeof<FplArgInferenceDerived>)
         | None ->
             failwith $"expected FplArgInferenceDerived, found none"
 
@@ -95,7 +95,7 @@ type TestInferredExpressionsArgInf() =
             Assert.AreEqual<int>(expectedNumbExpr, result.Length)
             Assert.AreEqual<string>(expectedExpr, result.Head.Type SignatureType.Name)
         | Some ref ->
-            Assert.IsInstanceOfType<FplArgInferenceAssume>(ref)
+            Assert.IsInstanceOfType(ref, typeof<FplArgInferenceAssume>)
         | None ->
             failwith $"expected FplArgInferenceAssume, found none"
 
@@ -123,7 +123,7 @@ type TestInferredExpressionsArgInf() =
             Assert.AreEqual<int>(expectedNumbExpr, result.Length)
             Assert.AreEqual<string>(expectedExpr, result.Head.Type SignatureType.Name)
         | Some ref ->
-            Assert.IsInstanceOfType<FplArgInferenceAssume>(ref)
+            Assert.IsInstanceOfType(ref, typeof<FplArgInferenceAssume>)
         | None ->
             failwith $"expected FplArgInferenceAssume, found none"
 
@@ -150,7 +150,7 @@ type TestInferredExpressionsArgInf() =
             Assert.AreEqual<int>(expectedNumbExpr, result.Length)
             Assert.AreEqual<string>(expectedExpr, result.Head.Type SignatureType.Name)
         | Some ref ->
-            Assert.IsInstanceOfType<FplArgInferenceRevoke>(ref)
+            Assert.IsInstanceOfType(ref, typeof<FplArgInferenceRevoke>)
         | None ->
             failwith $"expected FplArgInferenceRevoke, found none"
 

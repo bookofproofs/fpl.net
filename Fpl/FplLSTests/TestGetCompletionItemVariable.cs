@@ -14,7 +14,7 @@ namespace FplLSTests
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesVariable().GetChoices(detailCi);
-            Assert.AreEqual<int>(1, actual.Count);
+            Assert.HasCount(1, actual);
         }
 
         [DataRow(PrimVariableL)]
@@ -57,9 +57,9 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesVariable().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                if (item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice))
+                if (item.Kind != CompletionItemKind.Keyword && !string.IsNullOrEmpty(item.InsertText) && item.InsertText.Contains(choice))
                 {
-                    Assert.IsTrue(item.InsertText.EndsWith(' '));
+                    Assert.EndsWith(" ", item.InsertText);
                 }
             }
         }
@@ -88,7 +88,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesVariable().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.Detail.Contains(PrimVariableL));
+                Assert.IsTrue(!string.IsNullOrEmpty(item.InsertText) && !string.IsNullOrEmpty(item.Detail) && item.Detail.Contains(PrimVariableL));
             }
         }
 

@@ -23,7 +23,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesDigits().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.SortText.Contains("123"));
+                Assert.Contains("123", item.SortText ?? string.Empty);
             }
         }
 
@@ -47,7 +47,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesDigits().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.Detail.Contains(choice));
+                Assert.Contains(choice, item.Detail ?? string.Empty);
             }
         }
 
