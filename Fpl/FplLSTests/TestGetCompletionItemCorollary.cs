@@ -2,7 +2,7 @@ using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using static Fpl.Primitives;
 using static Fpl.Parser.Main;
 
-namespace FplLSTests
+namespace TestFplLS
 {
     [TestClass]
     public class TestGetCompletionItemCorollary
@@ -15,7 +15,7 @@ namespace FplLSTests
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesCorollary().GetChoices(detailCi);
-            Assert.AreEqual<int>(2, actual.Count);
+            Assert.HasCount(2, actual);
         }
 
         [DataRow(LiteralCorL)]
@@ -60,9 +60,9 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesCorollary().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                if (item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice))
+                if (!string.IsNullOrEmpty(item.InsertText) && item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice))
                 {
-                    Assert.IsTrue(item.InsertText.EndsWith(Environment.NewLine));
+                    Assert.EndsWith(Environment.NewLine, item.InsertText);
                 }
             }
         }
@@ -89,7 +89,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesCorollary().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.Detail.Contains(choice));
+                Assert.IsTrue(!string.IsNullOrEmpty(item.InsertText) && !string.IsNullOrEmpty(item.Detail) && item.Detail.Contains(choice));
             }
         }
 
@@ -103,8 +103,8 @@ namespace FplLSTests
             var counterSnippets = 0;
             foreach (var item in actual)
             {
-                if (item.InsertText.Contains(choice)) { counterSnippets++; }
-                if (item.InsertText.Contains(' '))
+                if (!string.IsNullOrEmpty(item.InsertText) && item.InsertText.Contains(choice)) { counterSnippets++; }
+                if (!string.IsNullOrEmpty(item.InsertText) && item.InsertText.Contains(' '))
                 {
                     var res = testParser(LiteralCor, item.InsertText);
                     if (!res.StartsWith("Success:"))

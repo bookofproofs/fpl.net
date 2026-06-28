@@ -1,6 +1,6 @@
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 
-namespace FplLSTests
+namespace TestFplLS
 {
     [TestClass]
     public class TestGetCompletionItemString
@@ -12,7 +12,7 @@ namespace FplLSTests
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesString().GetChoices(detailCi);
-            Assert.AreEqual<int>(1, actual.Count);
+            Assert.HasCount(1, actual);
         }
 
         [DataRow("language-specific string")]
@@ -61,7 +61,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesString().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.Detail.Contains(choice));
+                Assert.IsTrue(!string.IsNullOrEmpty(item.Detail) && item.Detail.Contains(choice));
             }
         }
 

@@ -3,7 +3,7 @@
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using static Fpl.Primitives;
 
-namespace FplLSTests
+namespace TestFplLS
 {
     [TestClass]
     public class TestGetCompletionItemKeyword
@@ -43,7 +43,7 @@ namespace FplLSTests
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesKeyword().GetChoices(detailCi);
-            Assert.AreEqual<int>(1, actual.Count);
+            Assert.HasCount(1, actual);
         }
 
         [DataRow(LiteralAlias)]
@@ -128,7 +128,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesKeyword().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.SortText.Contains(choice));
+                Assert.Contains(choice, item.SortText ?? string.Empty);
             }
         }
 
@@ -212,7 +212,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesKeyword().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.Detail.Contains(choice));
+                Assert.Contains(choice, item.Detail ?? string.Empty);
             }
         }
 
@@ -255,7 +255,7 @@ namespace FplLSTests
             var counterSnippets = 0;
             foreach (var item in actual)
             {
-                if (item.InsertText.Contains(choice)) { counterSnippets++; }
+                if (!string.IsNullOrEmpty(item.InsertText) && item.InsertText.Contains(choice)) { counterSnippets++; }
             }
             Assert.AreEqual<int>(actual.Count, counterSnippets);
         }

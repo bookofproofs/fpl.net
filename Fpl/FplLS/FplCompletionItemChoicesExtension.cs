@@ -1,31 +1,27 @@
-using FParsec;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 
 namespace FplLS
 {
-    public class FplCompletionItemChoicesExtension: FplCompletionItemChoices
+    public class FplCompletionItemChoicesExtension : FplCompletionItemChoices
     {
-        public override List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi) 
+        public override List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi)
         {
             var ret = new List<FplCompletionItem>();
             // snippets
-            var ci = defaultCi.Clone();
-            ci.InsertText = $"{ci.Word} Digits x@/\\d+/ -> SomeType";
-            ci.InsertText += $"\t{TokenLeftBrace}{Environment.NewLine}";
-            ci.InsertText += $"\t\tmcases{Environment.NewLine}";
-            ci.InsertText += $"\t\t({Environment.NewLine}";
-            ci.InsertText += $"\t\t\t| (x = @0): Zero{Environment.NewLine}";
-            ci.InsertText += $"\t\t\t| (x = @1): One{Environment.NewLine}";
-            ci.InsertText += $"\t\t\t| (x = @2): Two{Environment.NewLine}";
-            ci.InsertText += $"\t\t\t? undef{Environment.NewLine}";
-            ci.InsertText += $"\t\t){Environment.NewLine}";
-            ci.InsertText += $"\t{TokenRightBrace}{Environment.NewLine}";
-            ci.Label += " ...";
+            var insert = $"{defaultCi.Word} Digits x@/\\d+/ -> SomeType";
+            insert += $"\t{TokenLeftBrace}{Environment.NewLine}";
+            insert += $"\t\tmcases{Environment.NewLine}";
+            insert += $"\t\t({Environment.NewLine}";
+            insert += $"\t\t\t| (x = @0): Zero{Environment.NewLine}";
+            insert += $"\t\t\t| (x = @1): One{Environment.NewLine}";
+            insert += $"\t\t\t| (x = @2): Two{Environment.NewLine}";
+            insert += $"\t\t\t? undef{Environment.NewLine}";
+            insert += $"\t\t){Environment.NewLine}";
+            insert += $"\t{TokenRightBrace}{Environment.NewLine}";
+            var ci = defaultCi.WithInsertText(insert).WithLabel(defaultCi.Label + " ...");
             ret.Add(ci);
-            // keywords
-            defaultCi.Kind = CompletionItemKind.Keyword;
-            defaultCi.AdjustToKeyword();
-            ret.Add(defaultCi);
+            // keywords (don't mutate default) — preserve short-marker for correct keyword sort-texts
+            ret.Add(defaultCi.WithIsShort(defaultCi.IsShort).WithKind(CompletionItemKind.Keyword).WithKeyword());
             return ret;
 
         }

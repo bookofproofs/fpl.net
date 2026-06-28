@@ -1,11 +1,9 @@
 // Ignore Spelling: Fpl
 
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
-using FplLS;
-using static Fpl.Parser.Types;
 using static Fpl.Primitives;
 
-namespace FplLSTests
+namespace TestFplLS
 {
     [TestClass]
     public class TestFplCompletionItem
@@ -263,11 +261,11 @@ namespace FplLSTests
         [DataRow(LiteralOr, CompletionItemKind.Operator)]
         [DataRow(LiteralPostFix, CompletionItemKind.Operator)]
         [DataRow(LiteralPrefix, CompletionItemKind.Operator)]
-        [DataRow(LiteralQed, CompletionItemKind.Text)]
+        [DataRow(LiteralQed, CompletionItemKind.Constant)]
         [DataRow(LiteralSelf, CompletionItemKind.Reference)]
         [DataRow(LiteralParent, CompletionItemKind.Reference)]
         [DataRow(LiteralSymbol, CompletionItemKind.TypeParameter)]
-        [DataRow(LiteralTrivial, CompletionItemKind.Text)]
+        [DataRow(LiteralTrivial, CompletionItemKind.Constant)]
         [DataRow(LiteralTrue, CompletionItemKind.Constant)]
         [DataRow(LiteralUses, CompletionItemKind.Module)]
         [DataRow(LiteralXor, CompletionItemKind.Operator)]
@@ -366,7 +364,7 @@ namespace FplLSTests
         {
             var actual = new FplCompletionItem(input);
             Console.WriteLine(input);
-            Assert.AreEqual<string>(expected, actual.SortText.Replace("zzz", ""));
+            Assert.AreEqual<string>(expected, actual.SortText?.Replace("zzz", ""));
         }
 
         [TestMethod]

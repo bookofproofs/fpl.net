@@ -1,7 +1,7 @@
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using static Fpl.Primitives;
 
-namespace FplLSTests
+namespace TestFplLS
 {
     [TestClass]
     public class TestGetCompletionItemDefault
@@ -32,7 +32,7 @@ namespace FplLSTests
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesDefault().GetChoices(detailCi);
-            Assert.AreEqual<int>(1, actual.Count);
+            Assert.HasCount(1, actual);
         }
 
         [DataRow("?")]
@@ -97,7 +97,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesDefault().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.SortText.Contains(choice));
+                Assert.Contains(choice, item.SortText ?? string.Empty);
             }
         }
 
@@ -141,7 +141,6 @@ namespace FplLSTests
         [DataRow(":", "colon ':'")]
         [DataRow(".", "dot '.'")]
         [DataRow(",", "enumeration ','")]
-        [DataRow("~", "type declaration '~'")]
         [DataRow("|-", "follows logically '|-'")]
         [DataRow("->", "map '->'")]
         [DataRow("{", "opening '{'")]
@@ -188,7 +187,7 @@ namespace FplLSTests
             var counterSnippets = 0;
             foreach (var item in actual)
             {
-                if (item.InsertText.Contains(choice)) { counterSnippets++; }
+                if (!string.IsNullOrEmpty(item.InsertText) && item.InsertText.Contains(choice)) { counterSnippets++; }
             }
             Assert.AreEqual<int>(actual.Count, counterSnippets);
         }

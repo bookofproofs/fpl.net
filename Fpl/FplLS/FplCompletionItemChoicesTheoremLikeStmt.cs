@@ -1,11 +1,11 @@
-﻿using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 
 namespace FplLS
 {
 
     public class FplCompletionItemChoicesTheoremLikeStmt : FplCompletionItemChoices
     {
-        private string _statementType;
+        private readonly string _statementType;
         public FplCompletionItemChoicesTheoremLikeStmt(string statementType)
         {
             _statementType = statementType.Trim();
@@ -14,24 +14,25 @@ namespace FplLS
         public override List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi)
         {
             var ret = new List<FplCompletionItem>();
-            // snippets
-            var ci = defaultCi.Clone(); SetBody(ci); ret.Add(ci);
+            // snippet
+            var ci = BuildBody(defaultCi);
+            ret.Add(ci);
 
             // keywords
-            defaultCi.Kind = CompletionItemKind.Keyword;
-            defaultCi.AdjustToKeyword();
-            ret.Add(defaultCi);
+            // ensure keyword variant uses the short-form sort marker when the base is short
+            ret.Add(defaultCi.WithIsShort(defaultCi.IsShort).WithKind(CompletionItemKind.Keyword).WithKeyword());
             return ret;
         }
 
-        private void SetBody(FplCompletionItem ci)
+        private FplCompletionItem BuildBody(FplCompletionItem baseCi)
         {
-            if (ci.IsShort)
+            var ci = baseCi.WithLabel(baseCi.Label + " ...")
+                           .WithInsertText(FplCompletionItemChoicesAxiom.GetBody(baseCi.Word, _statementType));
+            if (baseCi.IsShort)
             {
-                ci.Detail = $"{_statementType.ToLower()} (short)";
+                ci = ci.WithDetail($"{_statementType.ToLower()} (short)");
             }
-            ci.Label += " ...";
-            ci.InsertText = FplCompletionItemChoicesAxiom.GetBody(ci.Word, _statementType);
+            return ci;
         }
 
     }

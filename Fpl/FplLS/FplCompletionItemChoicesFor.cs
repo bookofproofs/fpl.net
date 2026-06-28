@@ -1,53 +1,65 @@
-﻿using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 
 namespace FplLS
 {
-    public class FplCompletionItemChoicesFor: FplCompletionItemChoices
+    public class FplCompletionItemChoicesFor : FplCompletionItemChoices
     {
-        public override List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi) 
+        public override List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi)
         {
-            var ret = new List<FplCompletionItem>();
-            // snippets
-            var ci = defaultCi.Clone(); SetForStatement(ci, 0); ret.Add(ci);
-            var ci1 = defaultCi.Clone(); SetForStatement(ci1, 1); ret.Add(ci1);
-            var ci2 = defaultCi.Clone(); SetForStatement(ci2, 2); ret.Add(ci2);
-            // keywords
-            defaultCi.SortText = "for03";
-            defaultCi.Kind = CompletionItemKind.Keyword;
-            defaultCi.AdjustToKeyword();
-            ret.Add(defaultCi);
+            var ret = new List<FplCompletionItem>
+            {
+                // snippets
+                BuildForSnippet(defaultCi, 0),
+                BuildForSnippet(defaultCi, 1),
+                BuildForSnippet(defaultCi, 2)
+            };
+
+            // keywords -> do not mutate default; preserve short-marker and ensure base sort respects short form
+            var baseSort = defaultCi.IsShort ? "zfor03" : "for03";
+            ret.Add(defaultCi.WithSortText(baseSort).WithIsShort(defaultCi.IsShort).WithKind(CompletionItemKind.Keyword).WithKeyword());
             return ret;
 
         }
 
-        private void SetForStatement(FplCompletionItem ci, int subType)
+        private static FplCompletionItem BuildForSnippet(FplCompletionItem baseCi, int subType)
         {
             string firstLine;
+            string detail;
+            string label;
+            string sortText;
             if (subType == 0)
             {
                 firstLine = $"for i in Range(){Environment.NewLine}";
-                ci.SortText = "for01";
-                ci.Detail = $"for statement (range)";
-                ci.Label = $"{TokenPrefix}for ... []";
+                sortText = "for01";
+                detail = $"for statement (range)";
+                label = $"{TokenPrefix}for ... []";
             }
             else if (subType == 1)
             {
                 firstLine = $"for i in someList{Environment.NewLine}";
-                ci.SortText = "for02";
-                ci.Detail = $"for statement (list)";
-                ci.Label = $"{TokenPrefix}for ... list";
+                sortText = "for02";
+                detail = $"for statement (list)";
+                label = $"{TokenPrefix}for ... list";
             }
-            else 
+            else
             {
                 firstLine = $"for i in SomeFplType{Environment.NewLine}";
-                ci.SortText = "for03";
-                ci.Detail = $"for statement (type)";
-                ci.Label = $"{TokenPrefix}for ... type";
+                sortText = "for03";
+                detail = $"for statement (type)";
+                label = $"{TokenPrefix}for ... type";
             }
-            ci.InsertText = firstLine +
+
+            if (baseCi.IsShort)
+            {
+                sortText = "z" + sortText;
+            }
+
+            var insert = firstLine +
                 $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\tx[i] := 1{Environment.NewLine}" +
                 $"{TokenRightBrace}{Environment.NewLine}";
+
+            return baseCi.WithSortText(sortText).WithDetail(detail).WithLabel(label).WithInsertText(insert);
         }
     }
 }

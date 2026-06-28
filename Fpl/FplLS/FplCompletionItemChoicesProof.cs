@@ -7,38 +7,46 @@ namespace FplLS
     {
         public override List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi)
         {
-            var ret = new List<FplCompletionItem>();
-            // snippets
-            var ci = defaultCi.Clone(); SetDirectProof(ci); ret.Add(ci);
-            var ci1 = defaultCi.Clone(); SetEquivalenceProof(ci1); ret.Add(ci1);
-            var ci2 = defaultCi.Clone(); SetContrapositiveProof(ci2); ret.Add(ci2);
-            var ci3 = defaultCi.Clone(); SetContradictionProof(ci3); ret.Add(ci3);
-            var ci3a = defaultCi.Clone(); SetContradictionProof2(ci3a); ret.Add(ci3a);
-            var ci4 = defaultCi.Clone(); SetDisjunktivePremiseProof(ci4); ret.Add(ci4);
-            var ci4a = defaultCi.Clone(); SetConjunctivePremiseProof(ci4a); ret.Add(ci4a);
-            var ci5 = defaultCi.Clone(); SetDisjunktiveConclusionProof(ci5); ret.Add(ci5);
-            var ci5a = defaultCi.Clone(); SetConjunctiveConclusionProof(ci5a); ret.Add(ci5a);
-            var ci6 = defaultCi.Clone(); SetCounterexampleAllProof(ci6); ret.Add(ci6);
-            var ci7 = defaultCi.Clone(); SetCounterexampleExProof(ci7); ret.Add(ci7);
-            var ci8 = defaultCi.Clone(); SetByInductionProof(ci8); ret.Add(ci8);
-            var ci8a = defaultCi.Clone(); SetByStrongInductionProof(ci8a); ret.Add(ci8a);
-            var ci8b = defaultCi.Clone(); SetBySmallestCounterexample(ci8b); ret.Add(ci8b);
+            var ret = new List<FplCompletionItem>
+            {
+                // create each snippet as a new instance (do not mutate defaultCi)
+                BuildProof(defaultCi, "01", "direct proof", BuildDirectProofBody),
+                BuildProof(defaultCi, "02", "contrapositive proof", BuildContrapositiveProofBody),
+                BuildProof(defaultCi, "03", "proof by contradiction (1)", BuildContradictionProofBody),
+                BuildProof(defaultCi, "04", "proof by contradiction (2)", BuildContradictionProof2Body),
+                BuildProof(defaultCi, "05", "equivalence proof", BuildEquivalenceProofBody),
+                BuildProof(defaultCi, "06", "disjunctive premise proof", BuildDisjPremiseProofBody),
+                BuildProof(defaultCi, "07", "conjunctive premise proof", BuildConjPremiseProofBody),
+                BuildProof(defaultCi, "08", "disjunctive conclusion proof", BuildDisjunctiveConclusionProofBody),
+                BuildProof(defaultCi, "09", "conjunctive conclusion proof", BuildConjunctiveConclusionProofBody),
+                BuildProof(defaultCi, "10", "proof by counterexample (all)", BuildCounterexampleAllBody),
+                BuildProof(defaultCi, "11", "proof by counterexample (exists)", BuildCounterexampleExBody),
+                BuildProof(defaultCi, "12", "proof by induction", BuildByInductionBody),
+                BuildProof(defaultCi, "13", "proof by strong induction", BuildByStrongInductionBody),
+                BuildProof(defaultCi, "14", "proof by smallest counterexample", BuildSmallestCounterexampleBody),
 
-            // keywords
-            defaultCi.Kind = CompletionItemKind.Keyword;
-            defaultCi.AdjustToKeyword();
-            ret.Add(defaultCi);
+                // keywords - preserve short-marker so keyword sort-texts match expectations
+                defaultCi.WithIsShort(defaultCi.IsShort).WithKind(CompletionItemKind.Keyword).WithKeyword()
+            };
             return ret;
         }
 
-        private void SetDirectProof(FplCompletionItem ci)
+        private static FplCompletionItem BuildProof(FplCompletionItem baseCi, string suffix, string detailPrefix, Func<FplCompletionItem, string> bodyProvider)
         {
-            ci.SortText += "01";
-            ci.Detail = "direct proof";
-            AdjShort(ci);
-            ci.InsertText =
-                $"{ci.Word} SomeFplTheorem$1{Environment.NewLine}" +
-                $"{TokenLeftBrace}{Environment.NewLine}" +
+            var newSort = baseCi.SortText + suffix;
+            var detail = detailPrefix;
+            if (baseCi.IsShort)
+            {
+                detail += " (short)";
+                newSort = "z" + newSort;
+            }
+            var insert = $"{baseCi.Word} SomeFplTheorem$1{Environment.NewLine}" + bodyProvider(baseCi) + $"{TokenRightBrace}{Environment.NewLine}";
+            return baseCi.WithSortText(newSort).WithDetail(detail).WithInsertText(insert).WithLabel(baseCi.Label + " ...");
+        }
+
+        private string BuildDirectProofBody(FplCompletionItem ci)
+        {
+            return $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\t// Direct Proof{Environment.NewLine}" +
                 $"\t// Strategy: Assume that the premise is true, then prove that the conclusion also must be true.{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
@@ -47,18 +55,12 @@ namespace FplLS
                 $"\t300: true{Environment.NewLine}" +
                 $"\t400: someConclusion{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
-                $"\tqed{Environment.NewLine}" +
-                $"{TokenRightBrace}{Environment.NewLine}";
+                $"\tqed{Environment.NewLine}";
         }
 
-        private void SetContrapositiveProof(FplCompletionItem ci)
+        private string BuildContrapositiveProofBody(FplCompletionItem ci)
         {
-            ci.SortText += "02";
-            ci.Detail = "contrapositive proof";
-            AdjShort(ci);
-            ci.InsertText =
-                $"{ci.Word} SomeFplTheorem$1{Environment.NewLine}" +
-                $"{TokenLeftBrace}{Environment.NewLine}" +
+            return $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\t// Contrapositive Proof{Environment.NewLine}" +
                 $"\t// Strategy: Assume that the conclusion is false, then prove that the premise also must be false.{Environment.NewLine}" +
                 $"\t// By an contrapositive argument, the conclusion then follows from the premise.{Environment.NewLine}" +
@@ -70,19 +72,12 @@ namespace FplLS
                 $"\t500: impl(not someConclusion, not somePremise){Environment.NewLine}" +
                 $"\t600: impl(somePremise, someConclusion){Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
-                $"\tqed{Environment.NewLine}" +
-                $"{TokenRightBrace}{Environment.NewLine}";
-            ci.Label += " (contrapositive) ...";
+                $"\tqed{Environment.NewLine}";
         }
 
-        private void SetContradictionProof(FplCompletionItem ci)
+        private string BuildContradictionProofBody(FplCompletionItem ci)
         {
-            ci.SortText += "03";
-            ci.Detail = "proof by contradiction (1)";
-            AdjShort(ci);
-            ci.InsertText =
-                $"{ci.Word} SomeFplTheorem$1{Environment.NewLine}" +
-                $"{TokenLeftBrace}{Environment.NewLine}" +
+            return $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\t// Proof by Contradiction (Type 1){Environment.NewLine}" +
                 $"\t// Strategy: Assume that the premise is false, then derive a contradiction.{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
@@ -92,19 +87,12 @@ namespace FplLS
                 $"\t400: false{Environment.NewLine}" +
                 $"\t500: {TokenRevoke} 100{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
-                $"\tqed{Environment.NewLine}" +
-                $"{TokenRightBrace}{Environment.NewLine}";
-            ci.Label += " (by contradict. 1) ...";
+                $"\tqed{Environment.NewLine}";
         }
 
-        private void SetContradictionProof2(FplCompletionItem ci)
+        private string BuildContradictionProof2Body(FplCompletionItem ci)
         {
-            ci.SortText += "04";
-            ci.Detail = "proof by contradiction (2)";
-            AdjShort(ci);
-            ci.InsertText =
-                $"{ci.Word} SomeFplTheorem$1{Environment.NewLine}" +
-                $"{TokenLeftBrace}{Environment.NewLine}" +
+            return $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\t// Proof by Contradiction (Type 2){Environment.NewLine}" +
                 $"\t// Strategy: Assume that the premise is true and the conclusion is false.{Environment.NewLine}" +
                 $"\t// Then derive a contradiction.{Environment.NewLine}" +
@@ -117,19 +105,12 @@ namespace FplLS
                 $"\t600: or (not somePremise, someConclusion){Environment.NewLine}" +
                 $"\t700: impl (somePremise, someConclusion){Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
-                $"\tqed{Environment.NewLine}" +
-                $"{TokenRightBrace}{Environment.NewLine}";
-            ci.Label += " (by contradict. 2) ...";
+                $"\tqed{Environment.NewLine}";
         }
 
-        private void SetEquivalenceProof(FplCompletionItem ci)
+        private string BuildEquivalenceProofBody(FplCompletionItem ci)
         {
-            ci.SortText += "05";
-            ci.Detail = "equivalence proof";
-            AdjShort(ci);
-            ci.InsertText =
-                $"{ci.Word} SomeFplTheorem$1{Environment.NewLine}" +
-                $"{TokenLeftBrace}{Environment.NewLine}" +
+            return $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\t// Proof of Equivalence{Environment.NewLine}" +
                 $"\t// Strategy: Show both directions separately.{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
@@ -146,19 +127,12 @@ namespace FplLS
                 $"\t800: p{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\t900: iif (p,q){Environment.NewLine}" +
-                $"\tqed{Environment.NewLine}" +
-                $"{TokenRightBrace}{Environment.NewLine}";
-            ci.Label += " (equivalence) ...";
+                $"\tqed{Environment.NewLine}";
         }
 
-        private void SetDisjunktivePremiseProof(FplCompletionItem ci)
+        private string BuildDisjPremiseProofBody(FplCompletionItem ci)
         {
-            ci.SortText += "06";
-            ci.Detail = "disjunctive premise proof";
-            AdjShort(ci);
-            ci.InsertText =
-                $"{ci.Word} SomeFplTheorem$1{Environment.NewLine}" +
-                $"{TokenLeftBrace}{Environment.NewLine}" +
+            return $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\t// Proof (Premise is a Disjunction: or(p,q) ){Environment.NewLine}" +
                 $"\t// Strategy: Given the premise or(p,q), show first impl(p, conclusion), then show impl(q, conclusion).{Environment.NewLine}" +
                 $"\t100: {TokenAssume} somePremise{Environment.NewLine}" +
@@ -179,19 +153,12 @@ namespace FplLS
                 $"\t400: impl ( or(p,q), someConclusion ){Environment.NewLine}" +
                 $"\t500: impl ( somePremise, someConclusion ){Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
-                $"\tqed{Environment.NewLine}" +
-                $"{TokenRightBrace}{Environment.NewLine}";
-            ci.Label += " ('or' premise) ...";
+                $"\tqed{Environment.NewLine}";
         }
 
-        private void SetConjunctivePremiseProof(FplCompletionItem ci)
+        private string BuildConjPremiseProofBody(FplCompletionItem ci)
         {
-            ci.SortText += "07";
-            ci.Detail = "conjunctive premise proof";
-            AdjShort(ci);
-            ci.InsertText =
-                $"{ci.Word} SomeFplTheorem$1{Environment.NewLine}" +
-                $"{TokenLeftBrace}{Environment.NewLine}" +
+            return $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\t// Proof (Premise is a Conjunction: and(p,q) ){Environment.NewLine}" +
                 $"\t// Strategy: Try a direct proof, or consider a contrapositive.{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
@@ -203,19 +170,12 @@ namespace FplLS
                 $"\t600. 100, 500, byinf ProceedingResults |- impl(not someConclusion, not somePremise){Environment.NewLine}" +
                 $"\t700: impl(somePremise, someConclusion){Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
-                $"\tqed{Environment.NewLine}" +
-                $"{TokenRightBrace}{Environment.NewLine}";
-            ci.Label += " ('and' premise) ...";
+                $"\tqed{Environment.NewLine}";
         }
 
-        private void SetDisjunktiveConclusionProof(FplCompletionItem ci)
+        private string BuildDisjunctiveConclusionProofBody(FplCompletionItem ci)
         {
-            ci.SortText += "08";
-            ci.Detail = "disjunctive conclusion proof";
-            AdjShort(ci);
-            ci.InsertText =
-                $"{ci.Word} SomeFplTheorem$1{Environment.NewLine}" +
-                $"{TokenLeftBrace}{Environment.NewLine}" +
+            return $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\t// Proof (Conclusion is a Disjunction: or(p,q) ){Environment.NewLine}" +
                 $"\t// Strategy: Assume the truth of both, the premise and the negation of one of p or q.{Environment.NewLine}" +
                 $"\t// Then try to prove that the other one is true.{Environment.NewLine}" +
@@ -226,19 +186,12 @@ namespace FplLS
                 $"\t400: q{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\t500: impl(somePremise, or (p,q)){Environment.NewLine}" +
-                $"\tqed{Environment.NewLine}" +
-                $"{TokenRightBrace}{Environment.NewLine}";
-            ci.Label += " ('or' conclusion) ...";
+                $"\tqed{Environment.NewLine}";
         }
 
-        private void SetConjunctiveConclusionProof(FplCompletionItem ci)
+        private string BuildConjunctiveConclusionProofBody(FplCompletionItem ci)
         {
-            ci.SortText += "09";
-            ci.Detail = "conjunctive conclusion proof";
-            AdjShort(ci);
-            ci.InsertText =
-                $"{ci.Word} SomeFplTheorem$1{Environment.NewLine}" +
-                $"{TokenLeftBrace}{Environment.NewLine}" +
+            return $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\t// Proof (Conclusion is a Conjunction: and(p,q) ){Environment.NewLine}" +
                 $"\t// Strategy: Proof both implications separately.{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
@@ -255,19 +208,12 @@ namespace FplLS
                 $"\t800: q{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\t900: impl (somePremise, and(p,q)){Environment.NewLine}" +
-                $"\tqed{Environment.NewLine}" +
-                $"{TokenRightBrace}{Environment.NewLine}";
-            ci.Label += " ('and' conclusion) ...";
+                $"\tqed{Environment.NewLine}";
         }
 
-        private void SetCounterexampleAllProof(FplCompletionItem ci)
+        private string BuildCounterexampleAllBody(FplCompletionItem ci)
         {
-            ci.SortText += "10";
-            ci.Detail = "proof by counterexample (all quantor)";
-            AdjShort(ci);
-            ci.InsertText =
-                $"{ci.Word} SomeFplTheorem$1{Environment.NewLine}" +
-                $"{TokenLeftBrace}{Environment.NewLine}" +
+            return $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\t// Proof by Counterexample of `not all x:tpl {TokenLeftBrace} p(x) {TokenRightBrace}`){Environment.NewLine}" +
                 $"\t// Strategy: Assume `all x:tpl {TokenLeftBrace} p(x) {TokenRightBrace}`, then produce an example of x for which p(x) is false.{Environment.NewLine}" +
                 $"\t// Revoking the assumption proves the argument.{Environment.NewLine}" +
@@ -282,19 +228,12 @@ namespace FplLS
                 $"\t400. 300, byinf ExistsByExample |- false{Environment.NewLine}" +
                 $"\t500: {TokenRevoke} 100{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
-                $"\tqed{Environment.NewLine}" +
-                $"{TokenRightBrace}{Environment.NewLine}";
-            ci.Label += " (by counterex. all) ...";
+                $"\tqed{Environment.NewLine}";
         }
 
-        private void SetCounterexampleExProof(FplCompletionItem ci)
+        private string BuildCounterexampleExBody(FplCompletionItem ci)
         {
-            ci.SortText += "11";
-            ci.Detail = "proof by counterexample (exists quantor)";
-            AdjShort(ci);
-            ci.InsertText =
-                $"{ci.Word} SomeFplTheorem$1{Environment.NewLine}" +
-                $"{TokenLeftBrace}{Environment.NewLine}" +
+            return $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\t// Proof by Counterexample of `not ex x:tpl {TokenLeftBrace} p(x) {TokenRightBrace}`){Environment.NewLine}" +
                 $"\t// Strategy: Prove that for `all x:tpl {TokenLeftBrace} not p(x) {TokenRightBrace}` is true.{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
@@ -305,19 +244,12 @@ namespace FplLS
                 $"\t600: not ex x:tpl {TokenLeftBrace} p(x) {TokenRightBrace}{Environment.NewLine}" +
                 $"\t700: someConclusion{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
-                $"\tqed{Environment.NewLine}" +
-                $"{TokenRightBrace}{Environment.NewLine}";
-            ci.Label += " (by counterex. ex) ...";
+                $"\tqed{Environment.NewLine}";
         }
 
-        private void SetByInductionProof(FplCompletionItem ci)
+        private string BuildByInductionBody(FplCompletionItem ci)
         {
-            ci.SortText += "12";
-            ci.Detail = "proof by induction";
-            AdjShort(ci);
-            ci.InsertText =
-                $"{ci.Word} SomeFplTheorem$1{Environment.NewLine}" +
-                $"{TokenLeftBrace}{Environment.NewLine}" +
+            return $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\t// Proof by Induction (to prove: `all n:N {TokenLeftBrace} p(n) {TokenRightBrace}`){Environment.NewLine}" +
                 $"\t// Strategy: Prove the \"base case\": p(1){Environment.NewLine}" +
                 $"\t// Then do the \"inductive step\": Prove that if `p(n)` is true, then also `p( (n + 1) )` is true.{Environment.NewLine}" +
@@ -327,31 +259,26 @@ namespace FplLS
                 $"\t200: p(1){Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\t// \"inductive step\" {Environment.NewLine}" +
-                $"\t300. 200 |- {TokenAssume} ex n:N {TokenLeftBrace} p(n) {TokenRightBrace}{Environment.NewLine}" +
+                $"\t300. 200 |- {TokenAssume} ex n:N {TokenLeftBrace} all m:N {TokenLeftBrace} impl((m <= n), p(m)) {TokenRightBrace}{TokenRightBrace}{Environment.NewLine}" +
                 $"\t400: true{Environment.NewLine}" +
                 $"\t500: true{Environment.NewLine}" +
                 $"\t600: p( (n + 1) ){Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
-                $"\t700: all n:N {TokenLeftBrace} p(n) {TokenRightBrace}{Environment.NewLine}" +
-                $"\tqed{Environment.NewLine}" +
-                $"{TokenRightBrace}{Environment.NewLine}";
-            ci.Label += " (by induction) ...";
+                $"\t700: all n:N {TokenLeftBrace} p(n) {TokenRightBrace}{Environment.NewLine}";
         }
 
-        private void SetByStrongInductionProof(FplCompletionItem ci)
+        private string BuildByStrongInductionBody(FplCompletionItem ci)
         {
-            ci.SortText += "13";
-            ci.Detail = "proof by strong induction";
-            AdjShort(ci);
-            ci.InsertText =
-                $"{ci.Word} SomeFplTheorem$1{Environment.NewLine}" +
-                $"{TokenLeftBrace}{Environment.NewLine}" +
+            return $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\t// Proof by Strong Induction (to prove: `all n:N {TokenLeftBrace} p(n) {TokenRightBrace}`){Environment.NewLine}" +
                 $"\t// Strategy: Prove the \"base cases\": `p(1)`,..., `p(m)`{Environment.NewLine}" +
                 $"\t// Then do the \"inductive step\": Prove that if exists n for which `p(m)` is true is for all `m <= n`, then also `p( (n + 1) )` is true.{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\tdec {Environment.NewLine}" +
                 $"\t\t n, m: N{Environment.NewLine}" +
+                $"\t\t kFails, p: {TokenPredicate}{Environment.NewLine}" +
+                $"\t\t // p(n) := ... // set to your predicate about n here and uncomment the line{Environment.NewLine}" +
+                $"\t\t pFailsFor_k := ex k:N {TokenLeftBrace} not p(k) {TokenRightBrace}{Environment.NewLine}" +
                 $"\t;{Environment.NewLine}" +
                 $"\t// \"base cases\" {Environment.NewLine}" +
                 $"\t100: true{Environment.NewLine}" +
@@ -365,20 +292,12 @@ namespace FplLS
                 $"\t500: true{Environment.NewLine}" +
                 $"\t600: p( (n + 1) ){Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
-                $"\t700: all n:N {TokenLeftBrace} p(n) {TokenRightBrace}{Environment.NewLine}" +
-                $"\tqed{Environment.NewLine}" +
-                $"{TokenRightBrace}{Environment.NewLine}";
-            ci.Label += " (by strong induction) ...";
+                $"\t700: all n:N {TokenLeftBrace} p(n) {TokenRightBrace}{Environment.NewLine}";
         }
 
-        private void SetBySmallestCounterexample(FplCompletionItem ci)
+        private string BuildSmallestCounterexampleBody(FplCompletionItem ci)
         {
-            ci.SortText += "14";
-            ci.Detail = "proof by smallest counterexample";
-            AdjShort(ci);
-            ci.InsertText =
-                $"{ci.Word} SomeFplTheorem$1{Environment.NewLine}" +
-                $"{TokenLeftBrace}{Environment.NewLine}" +
+            return $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\t// Proof by Induction With Smallest CounterExample (to prove: `all n:N {TokenLeftBrace} p(n) {TokenRightBrace}`){Environment.NewLine}" +
                 $"\t// Strategy: Prove the \"base case\": `p(1)`{Environment.NewLine}" +
                 $"\t// Then assume that it is not true that for `all n:N {TokenLeftBrace} p(n) {TokenRightBrace}`.{Environment.NewLine}" +
@@ -406,20 +325,7 @@ namespace FplLS
                 $"\t600: false{Environment.NewLine}" +
                 $"\t650: {TokenRevoke} 350{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
-                $"\t700: all n:N {TokenLeftBrace} p(n) {TokenRightBrace}{Environment.NewLine}" +
-                $"\tqed{Environment.NewLine}" +
-                $"{TokenRightBrace}{Environment.NewLine}";
-            ci.Label += " (smallest counterex.) ...";
-        }
-
-        private void AdjShort(FplCompletionItem ci)
-        {
-            if (ci.IsShort)
-            {
-                ci.Detail += " (short)";
-                AdjustToShort();
-                ci.AdjustToShort();
-            }
+                $"\t700: all n:N {TokenLeftBrace} p(n) {TokenRightBrace}{Environment.NewLine}";
         }
     }
 }

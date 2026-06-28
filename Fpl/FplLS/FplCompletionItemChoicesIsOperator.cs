@@ -1,22 +1,19 @@
-﻿using OmniSharp.Extensions.LanguageServer.Protocol.Models;
-
 namespace FplLS
 {
-    public class FplCompletionItemChoicesIsOperator: FplCompletionItemChoices
+    public class FplCompletionItemChoicesIsOperator : FplCompletionItemChoices
     {
-        public override List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi) 
+        public override List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi)
         {
             var ret = new List<FplCompletionItem>();
-            // snipped
-            var ci = defaultCi.Clone();
-            ci.InsertText = $"is (x, SomeFplType)";
-            ci.Label = TokenPrefix + defaultCi.InsertText + " ...";
+            // snippet
+            var ci = defaultCi
+                .WithInsertText($"is (x, SomeFplType)")
+                .WithLabel(TokenPrefix + defaultCi.InsertText + " ...");
             ret.Add(ci);
 
             // keywords
-            defaultCi.Kind = CompletionItemKind.Keyword;
-            defaultCi.AdjustToKeyword();
-            ret.Add(defaultCi);
+            var keyword = defaultCi.WithKeyword();
+            ret.Add(keyword);
             return ret;
         }
 

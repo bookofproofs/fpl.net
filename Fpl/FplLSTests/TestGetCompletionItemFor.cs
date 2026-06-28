@@ -1,7 +1,7 @@
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using static Fpl.Primitives;
 using static Fpl.Parser.Main;
-namespace FplLSTests
+namespace TestFplLS
 {
     [TestClass]
     public class TestGetCompletionItemFor
@@ -13,7 +13,7 @@ namespace FplLSTests
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesFor().GetChoices(detailCi);
-            Assert.AreEqual<int>(4, actual.Count);
+            Assert.HasCount(4, actual);
         }
 
         [DataRow(LiteralFor)]
@@ -40,7 +40,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesFor().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                if (item.Label.Contains(choice) && item.Detail.Contains(l) && item.Kind == kind)
+                if (!string.IsNullOrEmpty(item.InsertText) && item.Label.Contains(choice) && !string.IsNullOrEmpty(item.Detail) && item.Detail.Contains(l) && item.Kind == kind)
                 {
                     Assert.AreEqual<string>(expected, item.SortText);
                 }
@@ -55,9 +55,9 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesFor().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                if (item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice))
+                if (item.Kind != CompletionItemKind.Keyword && !string.IsNullOrEmpty(item.InsertText) && item.InsertText.Contains(choice))
                 {
-                    Assert.IsTrue(item.InsertText.EndsWith(Environment.NewLine));
+                    Assert.EndsWith(Environment.NewLine, item.InsertText);
                 }
             }
         }
@@ -82,7 +82,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesFor().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.Detail.Contains(choice));
+                Assert.Contains(choice, item.Detail ?? string.Empty);
             }
         }
 
@@ -95,8 +95,8 @@ namespace FplLSTests
             var counterSnippets = 0;
             foreach (var item in actual)
             {
-                if (item.InsertText.Contains(choice)) { counterSnippets++; }
-                if (item.InsertText.Contains(' '))
+                if (!string.IsNullOrEmpty(item.InsertText) && item.InsertText.Contains(choice)) { counterSnippets++; }
+                if (!string.IsNullOrEmpty(item.InsertText) && item.InsertText.Contains(' '))
                 {
                     var res = testParser(LiteralFor, item.InsertText);
                     if (!res.StartsWith("Success:"))

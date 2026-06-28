@@ -4,7 +4,7 @@ using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using static Fpl.Primitives;
 using static Fpl.Parser.Main;
 
-namespace FplLSTests
+namespace TestFplLS
 {
     [TestClass]
     public class TestGetCompletionItemMapCases
@@ -16,7 +16,7 @@ namespace FplLSTests
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesMapCases().GetChoices(detailCi);
-            Assert.AreEqual<int>(2, actual.Count);
+            Assert.HasCount(2, actual);
         }
 
         [DataRow(LiteralMapCases)]
@@ -41,7 +41,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesMapCases().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.SortText.Contains(LiteralCases));
+                Assert.Contains(LiteralCases, item.SortText ?? string.Empty);
             }
         }
 
@@ -65,7 +65,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesMapCases().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.Detail.Contains(choice));
+                Assert.Contains(choice, item.Detail ?? string.Empty);
             }
         }
 
@@ -78,8 +78,8 @@ namespace FplLSTests
             var counterSnippets = 0;
             foreach (var item in actual)
             {
-                if (item.InsertText.Contains(choice)) { counterSnippets++; }
-                if (item.InsertText.Contains(' '))
+                if (!string.IsNullOrEmpty(item.InsertText) && item.InsertText.Contains(choice)) { counterSnippets++; }
+                if (!string.IsNullOrEmpty(item.InsertText) && item.InsertText.Contains(' '))
                 {
                     var res = testParser(LiteralMapCases, item.InsertText);
                     if (!res.StartsWith("Success:"))

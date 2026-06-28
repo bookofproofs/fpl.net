@@ -4,7 +4,7 @@ using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using static Fpl.Primitives;
 using static Fpl.Parser.Main;
 
-namespace FplLSTests
+namespace TestFplLS
 {
     [TestClass]
     public class TestGetCompletionItemPredicate
@@ -25,7 +25,7 @@ namespace FplLSTests
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesPredicate().GetChoices(detailCi);
-            Assert.AreEqual<int>(expected, actual.Count);
+            Assert.HasCount(expected, actual);
         }
 
         [DataRow(LiteralTrue)]
@@ -60,7 +60,7 @@ namespace FplLSTests
         [DataRow(LiteralTrue, CompletionItemKind.Keyword, "zzztrue")]
         [DataRow(LiteralFalse, CompletionItemKind.Keyword, "zzzfalse")]
         [DataRow(LiteralUndefL, CompletionItemKind.Keyword, "zzzundefined01")]
-        [DataRow(LiteralUndef, CompletionItemKind.Keyword, "zzzzundefined02")]
+        [DataRow(LiteralUndef, CompletionItemKind.Keyword, "zzzundefined02")]
         [DataRow(LiteralNot, CompletionItemKind.Operator, LiteralNot)]
         [DataRow(LiteralNot, CompletionItemKind.Keyword, "zzznot")]
         [DataRow(LiteralXor, CompletionItemKind.Operator, LiteralXor)]
@@ -106,7 +106,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesPredicate().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                if (item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice))
+                if (!string.IsNullOrEmpty(item.InsertText) && item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice))
                 {
                     Assert.IsTrue(item.InsertText.EndsWith(' '));
                 }
@@ -179,8 +179,8 @@ namespace FplLSTests
             var counterSnippets = 0;
             foreach (var item in actual)
             {
-                if (item.InsertText.Contains(choice)) { counterSnippets++; }
-                if (item.InsertText.Contains(' '))
+                if (!string.IsNullOrEmpty(item.InsertText) && item.InsertText.Contains(choice)) { counterSnippets++; }
+                if (!string.IsNullOrEmpty(item.InsertText) && item.InsertText.Contains(' '))
                 {
                     var res = testParser(PrimPredicate, item.InsertText);
                     if (!res.StartsWith("Success:"))

@@ -2,31 +2,32 @@ using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 
 namespace FplLS
 {
-    public class FplCompletionItemChoicesDeclaration: FplCompletionItemChoices
+    public class FplCompletionItemChoicesDeclaration : FplCompletionItemChoices
     {
-        public override List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi) 
+        public override List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi)
         {
-            var ret = new List<FplCompletionItem>();
-            // snippets
-            var ci = defaultCi.Clone(); SetDeclarationSnippet(ci); ret.Add(ci);
-            // keywords
-            defaultCi.Kind = CompletionItemKind.Keyword;
-            defaultCi.AdjustToKeyword();
-            ret.Add(defaultCi);
+            var ret = new List<FplCompletionItem>
+            {
+                // snippet
+                BuildDeclarationSnippet(defaultCi),
+                // keywords - preserve short-marker so keyword sort-texts match expectations
+                defaultCi.WithIsShort(defaultCi.IsShort).WithKind(CompletionItemKind.Keyword).WithKeyword()
+            };
             return ret;
 
         }
 
-        private void SetDeclarationSnippet(FplCompletionItem ci)
+        private FplCompletionItem BuildDeclarationSnippet(FplCompletionItem baseCi)
         {
-            ci.Label += " ...";
-            ci.InsertText =
-                $"{ci.Word}{Environment.NewLine}" +
+            var label = baseCi.Label + " ...";
+            var insert =
+                $"{baseCi.Word}{Environment.NewLine}" +
                 $"\tx: {TokenObject}{Environment.NewLine}" +
                 $"\ty: {TokenObject}{Environment.NewLine}" +
                 $"\tx := 0{Environment.NewLine}" +
                 $"\ty := 1{Environment.NewLine}" +
                 $";{Environment.NewLine}";
+            return baseCi.WithLabel(label).WithInsertText(insert);
         }
 
     }

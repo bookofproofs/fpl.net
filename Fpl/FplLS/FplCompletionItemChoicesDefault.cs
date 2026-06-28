@@ -8,8 +8,7 @@ namespace FplLS
         public override List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi)
         {
             var ret = new List<FplCompletionItem>();
-            var ci = defaultCi.Clone();
-            ci.Detail = defaultCi.Word switch
+            var detail = defaultCi.Word switch
             {
                 "?" => "else case '?'",
                 "|" => "new case '|'",
@@ -19,7 +18,6 @@ namespace FplLS
                 ":" => "colon ':'",
                 "." => "dot '.'",
                 "," => "enumeration ','",
-                "~" => "type declaration '~'",
                 "|-" => "follows logically '|-'",
                 "->" => "map '->'",
                 "{" => "opening '{'",
@@ -30,7 +28,7 @@ namespace FplLS
                 "]" => "closing ']'",
                 _ => "unknown",
             };
-            ci.Kind = CompletionItemKind.Text;
+            var ci = defaultCi.WithDetail(detail).WithKind(CompletionItemKind.Text);
             ret.Add(ci);
             return ret;
 

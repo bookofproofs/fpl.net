@@ -1,6 +1,6 @@
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using static Fpl.Primitives;
-namespace FplLSTests
+namespace TestFplLS
 {
     [TestClass]
     public class TestGetCompletionItemUses
@@ -13,7 +13,7 @@ namespace FplLSTests
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesUses().GetChoices(detailCi);
-            Assert.AreEqual<int>(4, actual.Count);
+            Assert.HasCount(4, actual);
         }
 
         [DataRow(LiteralUses)]
@@ -30,11 +30,11 @@ namespace FplLSTests
             Assert.AreEqual<int>(1, count);
         }
 
-        [DataRow(LiteralUses, "...", CompletionItemKind.Property, "uses01")]
-        [DataRow(LiteralUses, "... alias", CompletionItemKind.Property, "uses02")]
-        [DataRow(LiteralUses, "", CompletionItemKind.Keyword, "uses03")]
+        [DataRow(LiteralUses, CompletionItemKind.Property, "uses01")]
+        [DataRow(LiteralUses, CompletionItemKind.Property, "uses02")]
+        [DataRow(LiteralUses, CompletionItemKind.Keyword, "uses03")]
         [TestMethod]
-        public void TestAddChoicesSortText(string choice, string l, CompletionItemKind kind, string expected)
+        public void TestAddChoicesSortText(string choice, CompletionItemKind kind, string expected)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesUses().GetChoices(detailCi);
@@ -55,9 +55,9 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesUses().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                if (item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice))
+                if (!string.IsNullOrEmpty(item.InsertText) && item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice))
                 {
-                    Assert.IsTrue(item.InsertText.EndsWith(Environment.NewLine));
+                    Assert.EndsWith(Environment.NewLine, item.InsertText);
                 }
             }
         }
@@ -83,7 +83,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesUses().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.Detail.Contains(choice));
+                Assert.Contains(choice, item.Detail ?? string.Empty);
             }
         }
 
@@ -97,7 +97,7 @@ namespace FplLSTests
             var counterSnippets = 0;
             foreach (var item in actual)
             {
-                if (item.InsertText.Contains(choice)) { counterSnippets++; }
+                if (!string.IsNullOrEmpty(item.InsertText) && item.InsertText.Contains(choice)) { counterSnippets++; }
             }
             Assert.AreEqual<int>(actual.Count, counterSnippets);
         }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.IO;
 using static Fpl.Errors.Diagnostics;
 
-namespace FplLSTests
+namespace TestFplLS
 {
     [TestClass]
     public class TestPathEquivalentUri

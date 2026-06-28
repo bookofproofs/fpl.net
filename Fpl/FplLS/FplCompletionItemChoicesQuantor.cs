@@ -15,35 +15,34 @@ namespace FplLS
             {
                 postfix = "$1";
             }
-            // snippets
-            var ci = defaultCi.Clone(); SetBody(ci, postfix); ret.Add(ci);
+            // snippet
+            var ci = BuildQuantorSnippet(defaultCi, postfix);
+            ret.Add(ci);
             // keyword
-            defaultCi.Kind = CompletionItemKind.Keyword;
-            defaultCi.AdjustToKeyword();
-            ret.Add(defaultCi);
+            ret.Add(defaultCi.WithKind(CompletionItemKind.Keyword).WithKeyword());
             return ret;
         }
 
-
-        private void SetBody(FplCompletionItem ci, string postfix)
+        private static FplCompletionItem BuildQuantorSnippet(FplCompletionItem baseCi, string postfix)
         {
-            ci.SortText = $"{ci.Word}02";
-            ci.Label = $"{TokenPrefix}{ci.Word}{postfix} of type ...";
-            ci.InsertText = $"{ci.Word}{postfix} x:FplType" + GetBody();
-            switch (ci.Word)
+            var sortText = $"{baseCi.Word}02";
+            var label = $"{TokenPrefix}{baseCi.Word}{postfix} of type ...";
+            var insert = $"{baseCi.Word}{postfix} x:FplType" + GetBody();
+            if (baseCi.IsShort)
             {
-                case LiteralAll:
-                    ci.Detail = $"all quantor (in type)";
-                    break;
-                case LiteralEx:
-                    ci.Detail = $"exists quantor (in type)";
-                    break;
-                case LiteralExN:
-                    ci.Detail = $"exists n-times quantor (in type)";
-                    break;
+                sortText = "z" + sortText;
             }
+            var detail = baseCi.Word switch
+            {
+                LiteralAll => $"all quantor (in type)",
+                LiteralEx => $"exists quantor (in type)",
+                LiteralExN => $"exists n-times quantor (in type)",
+                _ => baseCi.Detail
+            };
+            return baseCi.WithSortText(sortText).WithLabel(label).WithInsertText(insert).WithDetail(detail ?? string.Empty);
         }
-        private string GetBody()
+
+        private static string GetBody()
         {
             return " { p(x) } ";
         }

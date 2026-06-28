@@ -1,32 +1,30 @@
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using static Fpl.Primitives;
 
 namespace FplLS
 {
-    public class FplCompletionItemChoicesMapCases: FplCompletionItemChoices
+    public class FplCompletionItemChoicesMapCases : FplCompletionItemChoices
     {
-        public override List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi) 
+        public override List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi)
         {
             var ret = new List<FplCompletionItem>();
             // snippets
-            var ci = defaultCi.Clone(); SetMapCasesStatement(ci); ret.Add(ci);
-            // keywords
-            defaultCi.Kind = CompletionItemKind.Keyword;
-            defaultCi.AdjustToKeyword();
-            ret.Add(defaultCi);
-            return ret;
-
-        }
-
-        private static void SetMapCasesStatement(FplCompletionItem ci)
-        {
-            ci.Label += " ...";
-            ci.InsertText =
+            var insert =
                 $"mcases{Environment.NewLine}" +
                 $"({Environment.NewLine}" +
                 $"\t| p(x): a{Environment.NewLine}" +
                 $"\t| q(x): b{Environment.NewLine}" +
                 $"\t? c{Environment.NewLine}" +
                 $"){Environment.NewLine}";
+            var ci = defaultCi
+                .WithInsertText(insert)
+                .WithLabel(defaultCi.Label + " ...");
+            ret.Add(ci);
+            // keywords
+            var keyword = defaultCi.WithKeyword();
+            ret.Add(keyword);
+            return ret;
+
         }
     }
 }
