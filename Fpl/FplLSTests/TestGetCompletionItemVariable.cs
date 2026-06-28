@@ -1,7 +1,7 @@
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using static Fpl.Primitives;
 
-namespace FplLSTests
+namespace TestFplLS
 {
     [TestClass]
     public class TestGetCompletionItemVariable
@@ -33,11 +33,11 @@ namespace FplLSTests
             Assert.AreEqual<int>(1, count);
         }
 
-        [DataRow(PrimVariableL, CompletionItemKind.Reference, PrimVariableL)]
-        [DataRow("variable (got keyword)", CompletionItemKind.Reference, PrimVariableL)]
-        [DataRow("variable (got template)", CompletionItemKind.Reference, PrimVariableL)]
+        [DataRow(PrimVariableL, PrimVariableL)]
+        [DataRow("variable (got keyword)", PrimVariableL)]
+        [DataRow("variable (got template)", PrimVariableL)]
         [TestMethod]
-        public void TestAddChoicesSortText(string choice, CompletionItemKind kind, string expected)
+        public void TestAddChoicesSortText(string choice, string expected)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesVariable().GetChoices(detailCi);

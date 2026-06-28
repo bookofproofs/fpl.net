@@ -1,6 +1,6 @@
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 
-namespace FplLSTests
+namespace TestFplLS
 {
     [TestClass]
     public class TestGetCompletionItemRegex
@@ -52,7 +52,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesRegex().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                if (!string.IsNullOrEmpty(item.InsertText) && item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice) && !choice.EndsWith("!"))
+                if (!string.IsNullOrEmpty(item.InsertText) && item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice) && !choice.EndsWith('!'))
                 {
                     Assert.EndsWith(" ", item.InsertText);
                 }

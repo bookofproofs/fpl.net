@@ -9,16 +9,18 @@ namespace FplLS
 
         public override List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi)
         {
-            var ret = new List<FplCompletionItem>();
-            // snippets
-            ret.Add(BuildDefinition(defaultCi, "Class", false));
-            ret.Add(BuildDefinition(defaultCi, "Predicate", false));
-            ret.Add(BuildDefinition(defaultCi, "Function", false));
+            var ret = new List<FplCompletionItem>
+            {
+                // snippets
+                BuildDefinition(defaultCi, "Class", false),
+                BuildDefinition(defaultCi, "Predicate", false),
+                BuildDefinition(defaultCi, "Function", false),
 
-            // keyword variants
-            ret.Add(BuildDefinition(defaultCi.WithKind(CompletionItemKind.Keyword), "Class", true).WithKeyword());
-            ret.Add(BuildDefinition(defaultCi.WithKind(CompletionItemKind.Keyword), "Predicate", true).WithKeyword());
-            ret.Add(BuildDefinition(defaultCi.WithKind(CompletionItemKind.Keyword), "Function", true).WithKeyword());
+                // keyword variants
+                BuildDefinition(defaultCi.WithKind(CompletionItemKind.Keyword), "Class", true).WithKeyword(),
+                BuildDefinition(defaultCi.WithKind(CompletionItemKind.Keyword), "Predicate", true).WithKeyword(),
+                BuildDefinition(defaultCi.WithKind(CompletionItemKind.Keyword), "Function", true).WithKeyword()
+            };
             return ret;
         }
 
@@ -81,21 +83,12 @@ namespace FplLS
 
         public string GetBody(string definitionType, FplCompletionItem ci)
         {
-            string ret;
-            switch (definitionType)
+            string ret = definitionType switch
             {
-                case "Class":
-                    ret = $"{GetLabelKeyword(definitionType, ci).Substring(TokenPrefix.Length)} SomeFpl{definitionType}: {TokenObject}";
-                    break;
-                case "Function":
-                    ret = $"{GetLabelKeyword(definitionType, ci).Substring(TokenPrefix.Length)} SomeFpl{definitionType}() -> {TokenObject}";
-                    break;
-                case "Predicate":
-                default:
-                    ret = $"{GetLabelKeyword(definitionType, ci).Substring(TokenPrefix.Length)} SomeFpl{definitionType}()";
-                    break;
-
-            }
+                "Class" => $"{GetLabelKeyword(definitionType, ci)[TokenPrefix.Length..]} SomeFpl{definitionType}: {TokenObject}",
+                "Function" => $"{GetLabelKeyword(definitionType, ci)[TokenPrefix.Length..]} SomeFpl{definitionType}() -> {TokenObject}",
+                _ => $"{GetLabelKeyword(definitionType, ci)[TokenPrefix.Length..]} SomeFpl{definitionType}()",
+            };
             return ret + Environment.NewLine;
         }
 

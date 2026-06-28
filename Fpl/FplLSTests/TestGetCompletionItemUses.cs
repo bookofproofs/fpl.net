@@ -1,6 +1,6 @@
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using static Fpl.Primitives;
-namespace FplLSTests
+namespace TestFplLS
 {
     [TestClass]
     public class TestGetCompletionItemUses
@@ -30,11 +30,11 @@ namespace FplLSTests
             Assert.AreEqual<int>(1, count);
         }
 
-        [DataRow(LiteralUses, "...", CompletionItemKind.Property, "uses01")]
-        [DataRow(LiteralUses, "... alias", CompletionItemKind.Property, "uses02")]
-        [DataRow(LiteralUses, "", CompletionItemKind.Keyword, "uses03")]
+        [DataRow(LiteralUses, CompletionItemKind.Property, "uses01")]
+        [DataRow(LiteralUses, CompletionItemKind.Property, "uses02")]
+        [DataRow(LiteralUses, CompletionItemKind.Keyword, "uses03")]
         [TestMethod]
-        public void TestAddChoicesSortText(string choice, string l, CompletionItemKind kind, string expected)
+        public void TestAddChoicesSortText(string choice, CompletionItemKind kind, string expected)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesUses().GetChoices(detailCi);
@@ -57,7 +57,7 @@ namespace FplLSTests
             {
                 if (!string.IsNullOrEmpty(item.InsertText) && item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice))
                 {
-                    Assert.IsTrue(item.InsertText.EndsWith(Environment.NewLine));
+                    Assert.EndsWith(Environment.NewLine, item.InsertText);
                 }
             }
         }

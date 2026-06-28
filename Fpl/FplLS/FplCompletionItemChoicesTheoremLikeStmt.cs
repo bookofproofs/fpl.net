@@ -5,7 +5,7 @@ namespace FplLS
 
     public class FplCompletionItemChoicesTheoremLikeStmt : FplCompletionItemChoices
     {
-        private string _statementType;
+        private readonly string _statementType;
         public FplCompletionItemChoicesTheoremLikeStmt(string statementType)
         {
             _statementType = statementType.Trim();

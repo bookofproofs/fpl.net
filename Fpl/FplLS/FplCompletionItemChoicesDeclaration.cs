@@ -6,11 +6,13 @@ namespace FplLS
     {
         public override List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi)
         {
-            var ret = new List<FplCompletionItem>();
-            // snippet
-            ret.Add(BuildDeclarationSnippet(defaultCi));
-            // keywords - preserve short-marker so keyword sort-texts match expectations
-            ret.Add(defaultCi.WithIsShort(defaultCi.IsShort).WithKind(CompletionItemKind.Keyword).WithKeyword());
+            var ret = new List<FplCompletionItem>
+            {
+                // snippet
+                BuildDeclarationSnippet(defaultCi),
+                // keywords - preserve short-marker so keyword sort-texts match expectations
+                defaultCi.WithIsShort(defaultCi.IsShort).WithKind(CompletionItemKind.Keyword).WithKeyword()
+            };
             return ret;
 
         }

@@ -1,6 +1,6 @@
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 
-namespace FplLSTests
+namespace TestFplLS
 {
     [TestClass]
     public class TestGetCompletionItemIso639
@@ -12,7 +12,7 @@ namespace FplLSTests
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesIso639().GetChoices(detailCi);
-            Assert.AreEqual<int>(490, actual.Count);
+            Assert.HasCount(490, actual);
         }
 
         [DataRow("ISO 639 language code")]
@@ -37,7 +37,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesIso639().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.Label.StartsWith("_ "));
+                Assert.StartsWith("_ ", item.Label);
             }
         }
 

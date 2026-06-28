@@ -2,7 +2,7 @@ using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using System.Data;
 using static Fpl.Primitives;
 using static Fpl.Parser.Main;
-namespace FplLSTests
+namespace TestFplLS
 {
     [TestClass]
     public class TestGetCompletionItemDeclaration
@@ -15,7 +15,7 @@ namespace FplLSTests
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesDeclaration().GetChoices(detailCi);
-            Assert.AreEqual<int>(2, actual.Count);
+            Assert.HasCount(2, actual);
         }
 
         [DataRow(LiteralDec)]
@@ -62,7 +62,7 @@ namespace FplLSTests
             {
                 if (!string.IsNullOrEmpty(item.InsertText) && item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice))
                 {
-                    Assert.IsTrue(item.InsertText.EndsWith(Environment.NewLine));
+                    Assert.EndsWith(Environment.NewLine, item.InsertText);
                 }
             }
         }

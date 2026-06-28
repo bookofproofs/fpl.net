@@ -65,7 +65,7 @@ namespace FplLS
             _bufferManager = bufferManager;
         }
 
-        public TextDocumentSyncKind Change => TextDocumentSyncKind.Full;
+        public static TextDocumentSyncKind Change => TextDocumentSyncKind.Full;
 
         // OPEN
         TextDocumentOpenRegistrationOptions

@@ -1,7 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using static Fpl.Interpreter.Helpers.Debug;
 
-namespace FplLSTests
+namespace TestFplLS
 {
     [TestClass]
     public class TestDotNetDownload

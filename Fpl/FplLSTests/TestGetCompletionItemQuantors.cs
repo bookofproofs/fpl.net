@@ -2,7 +2,7 @@ using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using static Fpl.Primitives;
 using static Fpl.Parser.Main;
 
-namespace FplLSTests
+namespace TestFplLS
 {
     [TestClass]
     public class TestGetCompletionItemQuantors
@@ -16,7 +16,7 @@ namespace FplLSTests
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesQuantor().GetChoices(detailCi);
-            Assert.AreEqual<int>(number, actual.Count);
+            Assert.HasCount(number, actual);
         }
 
         [DataRow(LiteralAll, 1)]
@@ -95,7 +95,7 @@ namespace FplLSTests
 
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.Label.Contains(choice));
+                Assert.Contains(choice, item.Label);
             }
         }
 

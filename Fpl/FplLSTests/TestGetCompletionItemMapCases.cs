@@ -4,7 +4,7 @@ using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using static Fpl.Primitives;
 using static Fpl.Parser.Main;
 
-namespace FplLSTests
+namespace TestFplLS
 {
     [TestClass]
     public class TestGetCompletionItemMapCases
@@ -16,7 +16,7 @@ namespace FplLSTests
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesMapCases().GetChoices(detailCi);
-            Assert.AreEqual<int>(2, actual.Count);
+            Assert.HasCount(2, actual);
         }
 
         [DataRow(LiteralMapCases)]

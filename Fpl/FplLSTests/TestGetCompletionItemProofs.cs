@@ -1,7 +1,7 @@
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using static Fpl.Primitives;
 using static Fpl.Parser.Main;
-namespace FplLSTests
+namespace TestFplLS
 {
     [TestClass]
     public class TestGetCompletionItemProofs
@@ -61,7 +61,7 @@ namespace FplLSTests
             {
                 if (!string.IsNullOrEmpty(item.InsertText) && item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice))
                 {
-                    Assert.IsTrue(item.InsertText.EndsWith(Environment.NewLine));
+                    Assert.EndsWith(Environment.NewLine, item.InsertText);
                 }
             }
         }
@@ -93,7 +93,7 @@ namespace FplLSTests
                     Assert.IsTrue(!string.IsNullOrEmpty(item.InsertText) && !string.IsNullOrEmpty(item.Detail) && item.Detail.Contains(l));
                     if (item.IsShort)
                     {
-                        Assert.IsTrue(item.Detail.Contains("(short)"));
+                        Assert.Contains("(short)", item.Detail);
                     }
                 }
             }

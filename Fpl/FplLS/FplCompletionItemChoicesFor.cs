@@ -6,11 +6,13 @@ namespace FplLS
     {
         public override List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi)
         {
-            var ret = new List<FplCompletionItem>();
-            // snippets
-            ret.Add(BuildForSnippet(defaultCi, 0));
-            ret.Add(BuildForSnippet(defaultCi, 1));
-            ret.Add(BuildForSnippet(defaultCi, 2));
+            var ret = new List<FplCompletionItem>
+            {
+                // snippets
+                BuildForSnippet(defaultCi, 0),
+                BuildForSnippet(defaultCi, 1),
+                BuildForSnippet(defaultCi, 2)
+            };
 
             // keywords -> do not mutate default; preserve short-marker and ensure base sort respects short form
             var baseSort = defaultCi.IsShort ? "zfor03" : "for03";
@@ -19,7 +21,7 @@ namespace FplLS
 
         }
 
-        private FplCompletionItem BuildForSnippet(FplCompletionItem baseCi, int subType)
+        private static FplCompletionItem BuildForSnippet(FplCompletionItem baseCi, int subType)
         {
             string firstLine;
             string detail;

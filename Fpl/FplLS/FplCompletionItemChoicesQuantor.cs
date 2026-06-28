@@ -23,7 +23,7 @@ namespace FplLS
             return ret;
         }
 
-        private FplCompletionItem BuildQuantorSnippet(FplCompletionItem baseCi, string postfix)
+        private static FplCompletionItem BuildQuantorSnippet(FplCompletionItem baseCi, string postfix)
         {
             var sortText = $"{baseCi.Word}02";
             var label = $"{TokenPrefix}{baseCi.Word}{postfix} of type ...";
@@ -42,7 +42,7 @@ namespace FplLS
             return baseCi.WithSortText(sortText).WithLabel(label).WithInsertText(insert).WithDetail(detail ?? string.Empty);
         }
 
-        private string GetBody()
+        private static string GetBody()
         {
             return " { p(x) } ";
         }
