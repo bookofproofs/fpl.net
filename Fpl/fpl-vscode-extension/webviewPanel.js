@@ -1,16 +1,31 @@
-// Manages the custom FPL Webview panel lifecycle and data binding
+// Manages the custom FPL Webview panel lifecycle, data binding and layout persistence
 
 'use strict';
 
 const vscode = require('vscode');
 const utils = require('./utils');
 
+const STATE_KEY = 'fplWebviewLayout';
 let currentPanel = undefined;
 
+function loadLayout(context) {
+    return context.workspaceState.get(STATE_KEY, { column: vscode.ViewColumn.Two, isOpen: false });
+}
+
+function saveLayout(context, column, isOpen) {
+    const current = loadLayout(context);
+    context.workspaceState.update(STATE_KEY, {
+        column: column != null ? column : current.column,
+        isOpen
+    });
+}
+
 function createOrShowWebviewPanel(context, client) {
-    const column = vscode.window.activeTextEditor
-        ? vscode.window.activeTextEditor.viewColumn
-        : vscode.ViewColumn.One;
+    const layout = loadLayout(context);
+    const column = layout.column
+        || (vscode.window.activeTextEditor
+            ? vscode.window.activeTextEditor.viewColumn
+            : vscode.ViewColumn.Two);
 
     if (currentPanel) {
         currentPanel.reveal(column);
@@ -30,6 +45,8 @@ function createOrShowWebviewPanel(context, client) {
 
     currentPanel.webview.html = getWebviewContent();
 
+    saveLayout(context, column, true);
+
     refreshWebviewData(client);
 
     currentPanel.webview.onDidReceiveMessage(
@@ -42,11 +59,34 @@ function createOrShowWebviewPanel(context, client) {
         context.subscriptions
     );
 
-    currentPanel.onDidDispose(
-        () => { currentPanel = undefined; },
+    // Track column changes when the user drags the panel to a different position
+    currentPanel.onDidChangeViewState(
+        e => {
+            if (e.webviewPanel.viewColumn != null) {
+                saveLayout(context, e.webviewPanel.viewColumn, true);
+            }
+        },
         null,
         context.subscriptions
     );
+
+    // Only fires when the user explicitly closes the panel via the X button
+    currentPanel.onDidDispose(
+        () => {
+            saveLayout(context, null, false);
+            currentPanel = undefined;
+        },
+        null,
+        context.subscriptions
+    );
+}
+
+function restoreWebviewPanel(context, client) {
+    const layout = loadLayout(context);
+    utils.log2Console('Restoring webview layout: ' + JSON.stringify(layout), false);
+    if (layout.isOpen) {
+        createOrShowWebviewPanel(context, client);
+    }
 }
 
 function refreshWebviewData(client) {
@@ -133,4 +173,4 @@ function getWebviewContent() {
 </html>`;
 }
 
-module.exports = { createOrShowWebviewPanel };
+module.exports = { createOrShowWebviewPanel, restoreWebviewPanel };

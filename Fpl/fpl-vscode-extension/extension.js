@@ -6,7 +6,7 @@ const vscode = require('vscode');
 const { LanguageClient } = require('vscode-languageclient');
 const utils = require('./utils');
 const { createFplTheoriesProvider, createValidStmtsProvider } = require('./providers');
-const { createOrShowWebviewPanel } = require('./webviewPanel');
+const { createOrShowWebviewPanel, restoreWebviewPanel } = require('./webviewPanel');
 
 let client;
 
@@ -92,6 +92,8 @@ function activate(context) {
             const disposableWebview = vscode.commands.registerCommand('fpl-vscode-extension.showWebview', () => {
                 createOrShowWebviewPanel(context, client);
             });
+
+            restoreWebviewPanel(context, client);
 
             context.subscriptions.push(disposableClient);
             context.subscriptions.push(disposableCommand);
