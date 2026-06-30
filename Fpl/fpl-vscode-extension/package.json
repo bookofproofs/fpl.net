@@ -68,7 +68,13 @@
             },
             {
                 "command": "fpl-vscode-extension.showWebview",
-                "title": "FPL: Valid Statements"
+                "title": "Show Valid Statements"
+            }
+        ],
+        "submenus": [
+            {
+                "id": "fpl-vscode-extension.fplMenu",
+                "label": "FPL"
             }
         ],
         "views": {
@@ -104,6 +110,19 @@
             }
         },
         "menus": {
+            "editor/context": [
+                {
+                    "submenu": "fpl-vscode-extension.fplMenu",
+                    "when": "resourceExtname == .fpl",
+                    "group": "navigation"
+                }
+            ],
+            "fpl-vscode-extension.fplMenu": [
+                {
+                    "command": "fpl-vscode-extension.showWebview",
+                    "group": "navigation"
+                }
+            ],
             "editor/title": [
                 {
                     "command": "fpl-vscode-extension.showWebview",
