@@ -35,7 +35,7 @@ function createOrShowWebviewPanel(context, client) {
 
     currentPanel = vscode.window.createWebviewPanel(
         'fplDataView',
-        'FPL Data View',
+        'Valid Statements Overview',
         column,
         {
             enableScripts: true,

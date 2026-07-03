@@ -128,6 +128,56 @@ type ValidStmtStore() =
 
         JsonSerializer.Serialize(groups)
 
+    /// Produces a JSON string as a single merged array of all stored valid statements,
+    /// combining Axioms, Inference Rules, and Derived Arguments without section grouping.
+    member this.ToJson2() =
+        let all = ResizeArray<Dictionary<string,string>>()
+
+        let getReason reason =
+            match reason with
+            | ValidityReason.IsAxiom _ -> LiteralAxL
+            | ValidityReason.IsAxiomAssertion _ -> PrimAssertion
+            | ValidityReason.IsRuleOfInference _ -> PrimRuleOfInference
+            | ValidityReason.IsTheorem _ -> PrimTitleTheorems
+            | ValidityReason.IsDerived _ -> PrimArgInfDerive
+            | ValidityReason.IsDerivedAssumed _ -> PrimArgInfAssume
+            | ValidityReason.IsDerivedRevoke _ -> PrimArgInfRevoke
+            | ValidityReason.Error -> "Error"
+
+        let getExpr reason =
+            match reason with
+            | ValidityReason.IsAxiom expr 
+            | ValidityReason.IsAxiomAssertion expr
+            | ValidityReason.IsTheorem expr
+            | ValidityReason.IsDerived expr
+            | ValidityReason.IsDerivedAssumed expr -> expr
+            | ValidityReason.IsRuleOfInference (preExpr,conExpr) -> $"{preExpr}/{conExpr}"
+            | ValidityReason.IsDerivedRevoke (_,revokedExpr) -> revokedExpr
+            | ValidityReason.Error -> "Error"
+
+        for kvp in _theoremStore do
+            let stmt = kvp.Value
+            let obj = Dictionary<string,string>()
+            obj.Add("statementExpression", getExpr stmt.ValidityReason)
+            obj.Add("reason", getReason stmt.ValidityReason)
+            let ultimateNodeOpt = stmt.Node.UltimateBlockNode
+            match ultimateNodeOpt with
+            | Some ultimateNode when ultimateNode.Parent.IsSome ->
+                match ultimateNode.Parent with
+                | Some theory ->
+                    obj.Add("nodeName", $"**{ultimateNode.Type SignatureType.Mixed}** (in {theory.FplId})")
+                    match theory.FilePath with
+                    | Some filePath ->
+                        obj.Add("FilePath", filePath)
+                        obj.Add("Line", $"{stmt.Node.StartPos.Line}")
+                        obj.Add("Column", $"{stmt.Node.StartPos.Column}")
+                    | _ -> ()
+                | _ -> ()
+            | _ -> ()
+            all.Add(obj)
+
+        JsonSerializer.Serialize(all)
+
     member this.ClearValidityStore() =
         _theoremStore.Clear() 
         _assumedArguments.Clear()

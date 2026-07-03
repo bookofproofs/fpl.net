@@ -60,7 +60,7 @@ namespace FplLS
                     .OnRequest<JToken, string>("getWebviewData", (request, cancellationToken) =>
                     {
                         while (heap.IsEvaluating) { }
-                        return Task.FromResult(heap.ValidStmtStore.ToJson());
+                        return Task.FromResult(heap.ValidStmtStore.ToJson2());
                     })
                     .OnInitialize((s, _, _) =>
                     {
