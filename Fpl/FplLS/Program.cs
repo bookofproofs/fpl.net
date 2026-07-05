@@ -52,11 +52,6 @@ namespace FplLS
                         while (heap.IsEvaluating) { }
                         return Task.FromResult(heap.SymbolTable.ToJson());
                     })
-                    .OnRequest<JToken, string>("getValidStmts", (request, cancellationToken) =>
-                    {
-                        while (heap.IsEvaluating) { }
-                        return Task.FromResult(heap.ValidStmtStore.ToJson());
-                    })
                     .OnRequest<JToken, string>("getWebviewData", (request, cancellationToken) =>
                     {
                         while (heap.IsEvaluating) { }

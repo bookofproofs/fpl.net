@@ -160,36 +160,7 @@ function makeTooltip(statement) {
 
 }
 
-class ValidStmtItem extends vscode.TreeItem {
-    
-    constructor(label, collapsibleState, children = [], rawObj = null) {
-        super(label, collapsibleState);
-        this.children = children;
-        if (rawObj && typeof rawObj === 'object') {
-            const markdownTooltip = new vscode.MarkdownString();
-            markdownTooltip.isTrusted = true;
-            markdownTooltip.supportHtml = true;
-            if (typeof rawObj.nodeName === 'string') {
-                markdownTooltip.appendMarkdown(`📜 ${rawObj.nodeName}\n\n`);
-            }
-            if (typeof rawObj.reason === 'string') {
-                markdownTooltip.appendMarkdown(`🧩 ${rawObj.reason}\n\n`);
-            }
-            if (typeof rawObj.statementExpression === 'string') {
-                markdownTooltip.appendMarkdown(`${makeTooltip(rawObj.statementExpression)}\n\n`);
-            }
-            if (!markdownTooltip.value || markdownTooltip.value.trim() === '') {
-                markdownTooltip.appendMarkdown('```\n' + JSON.stringify(rawObj, null, 2) + '\n```\n');
-            }
-            this.tooltip = markdownTooltip;
-        } else {
-            this.tooltip = label;
-        }
-    }
-}
-
 module.exports = {
     typeToIconMap,
-    MyTreeItem,
-    ValidStmtItem
+    MyTreeItem
 };

@@ -82,10 +82,6 @@
                 {
                     "id": "fplTheories",
                     "name": "FPL Theories"
-                },
-                {
-                    "id": "fplValidStmts",
-                    "name": "FPL Valid Statements"
                 }
             ]
         },
