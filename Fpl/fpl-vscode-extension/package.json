@@ -138,8 +138,9 @@
         "test": "node ./test/runTest.js"
     },
     "dependencies": {
-        "tar": "latest",
         "adm-zip": "latest",
+        "katex": "^0.17.0",
+        "tar": "latest",
         "vscode-languageclient": "latest"
     }
 }
