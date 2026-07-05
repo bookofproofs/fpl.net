@@ -111,6 +111,7 @@ function getWebviewContent() {
     <style>
         body {
             font-family: var(--vscode-font-family);
+            font-size: var(--vscode-font-size);
             color: var(--vscode-foreground);
             background-color: var(--vscode-editor-background);
             padding: 12px;
@@ -143,13 +144,60 @@ function getWebviewContent() {
     <h2>Valid Statements Overview</h2>
     <button onclick="refresh()">&#x27F3; Refresh</button>
     <p id="status">Loading&hellip;</p>
-    <pre id="content"></pre>
+    <div id="content"></div>
     <script>
         const vscode = acquireVsCodeApi();
+        const COLUMNS = ['statementExpression', 'reason', 'nodeName', 'FilePath', 'Line', 'Column'];
+
+        let _rows = [];
+        let _sortCol = null;
+        let _sortAsc = true;
 
         function refresh() {
             document.getElementById('status').textContent = 'Loading\u2026';
             vscode.postMessage({ command: 'refresh' });
+        }
+
+        function buildTable(rows) {
+            if (!rows || rows.length === 0) {
+                return '<p class="empty">No valid statements found.</p>';
+            }
+
+            const esc = s => String(s ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+
+            const headers = COLUMNS.map(col => {
+                let cls = '';
+                if (_sortCol === col) cls = _sortAsc ? ' class="sort-asc"' : ' class="sort-desc"';
+                return \`<th\${cls} onclick="sortBy('\${col}')">\${esc(col)}</th>\`;
+            }).join('');
+
+            const bodyRows = rows.map(row =>
+                '<tr>' + COLUMNS.map(col => \`<td>\${esc(row[col])}</td>\`).join('') + '</tr>'
+            ).join('');
+
+            return \`<table><thead><tr>\${headers}</tr></thead><tbody>\${bodyRows}</tbody></table>\`;
+        }
+
+        function sortBy(col) {
+            if (_sortCol === col) {
+                _sortAsc = !_sortAsc;
+            } else {
+                _sortCol = col;
+                _sortAsc = true;
+            }
+
+            const sorted = [..._rows].sort((a, b) => {
+                const av = String(a[col] ?? '').toLowerCase();
+                const bv = String(b[col] ?? '').toLowerCase();
+                if (av < bv) return _sortAsc ? -1 : 1;
+                if (av > bv) return _sortAsc ? 1 : -1;
+                return 0;
+            });
+
+            document.getElementById('content').innerHTML = buildTable(sorted);
         }
 
         window.addEventListener('message', event => {
@@ -158,11 +206,13 @@ function getWebviewContent() {
                 document.getElementById('status').textContent =
                     'Last updated: ' + new Date().toLocaleTimeString();
                 try {
-                    const parsed = JSON.parse(message.data);
-                    document.getElementById('content').textContent =
-                        JSON.stringify(parsed, null, 2);
+                    _rows = JSON.parse(message.data);
+                    _sortCol = null;
+                    _sortAsc = true;
+                    document.getElementById('content').innerHTML = buildTable(_rows);
                 } catch (_) {
-                    document.getElementById('content').textContent = message.data;
+                    document.getElementById('content').innerHTML =
+                        '<p class="empty">Failed to parse data.</p>';
                 }
             } else if (message.command === 'error') {
                 document.getElementById('status').textContent = 'Error: ' + message.message;
