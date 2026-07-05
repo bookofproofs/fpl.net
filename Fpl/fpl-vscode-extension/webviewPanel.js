@@ -39,11 +39,18 @@ function createOrShowWebviewPanel(context, client) {
         column,
         {
             enableScripts: true,
-            retainContextWhenHidden: true
+            retainContextWhenHidden: true,
+            localResourceRoots: [
+                vscode.Uri.joinPath(context.extensionUri, 'node_modules', 'katex', 'dist')
+            ]
         }
     );
 
-    currentPanel.webview.html = getWebviewContent();
+    const katexBase = vscode.Uri.joinPath(context.extensionUri, 'node_modules', 'katex', 'dist');
+    const katexJs  = currentPanel.webview.asWebviewUri(vscode.Uri.joinPath(katexBase, 'katex.min.js'));
+    const katexCss = currentPanel.webview.asWebviewUri(vscode.Uri.joinPath(katexBase, 'katex.min.css'));
+
+    currentPanel.webview.html = getWebviewContent(katexJs, katexCss);
 
     saveLayout(context, column, true);
 
@@ -101,13 +108,14 @@ function refreshWebviewData(client) {
     });
 }
 
-function getWebviewContent() {
+function getWebviewContent(katexJs, katexCss) {
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FPL Valid Statements Overview</title>
+    <link rel="stylesheet" href="${katexCss}">
     <style>
         body {
             font-family: var(--vscode-font-family);
@@ -131,13 +139,51 @@ function getWebviewContent() {
             font-style: italic;
             margin: 8px 0;
         }
-        pre {
-            background: var(--vscode-textBlockQuote-background);
-            padding: 10px;
-            overflow: auto;
-            white-space: pre-wrap;
-            word-break: break-all;
+        #content {
+            overflow-x: auto;
         }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 600px;
+        }
+        thead tr {
+            background-color: var(--vscode-editor-lineHighlightBackground);
+        }
+        th {
+            padding: 6px 10px;
+            text-align: left;
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+            border-bottom: 2px solid var(--vscode-panel-border);
+            position: relative;
+        }
+        th:hover {
+            background-color: var(--vscode-list-hoverBackground);
+        }
+        th.sort-asc::after  { content: ' \\25B2'; font-size: 0.75em; }
+        th.sort-desc::after { content: ' \\25BC'; font-size: 0.75em; }
+        td {
+            padding: 5px 10px;
+            border-bottom: 1px solid var(--vscode-panel-border);
+            vertical-align: middle;
+            word-break: break-word;
+            max-width: 320px;
+        }
+        td.expr-cell {
+            white-space: nowrap;
+        }
+        tbody tr:hover {
+            background-color: var(--vscode-list-hoverBackground);
+        }
+        .empty {
+            color: var(--vscode-descriptionForeground);
+            font-style: italic;
+            padding: 8px 0;
+        }
+        /* KaTeX colour inherits from the VSCode theme foreground */
+        .katex { color: var(--vscode-foreground); }
     </style>
 </head>
 <body>
@@ -145,6 +191,7 @@ function getWebviewContent() {
     <button onclick="refresh()">&#x27F3; Refresh</button>
     <p id="status">Loading&hellip;</p>
     <div id="content"></div>
+    <script src="${katexJs}"></script>
     <script>
         const vscode = acquireVsCodeApi();
         const COLUMNS = ['statementExpression', 'reason', 'nodeName', 'FilePath', 'Line', 'Column'];
@@ -153,9 +200,80 @@ function getWebviewContent() {
         let _sortCol = null;
         let _sortAsc = true;
 
-        function refresh() {
-            document.getElementById('status').textContent = 'Loading\u2026';
-            vscode.postMessage({ command: 'refresh' });
+        // ── Unicode → LaTeX conversion ────────────────────────────────────────
+        // Maps every FPL Unicode symbol to its KaTeX equivalent.
+        const UNICODE_TO_LATEX = [
+            // logical connectives
+            ['⇒',  '\\\\Rightarrow'],
+            ['⇔',  '\\\\Leftrightarrow'],
+            ['¬',  '\\\\neg '],
+            ['∧',  '\\\\land'],
+            ['∨',  '\\\\lor'],
+            // quantifiers  (order matters: ∃! before ∃)
+            ['∃!', '\\\\exists!'],
+            ['∃',  '\\\\exists'],
+            ['∀',  '\\\\forall'],
+            // equality / membership
+            ['≠',  '\\\\neq'],
+            ['∈',  '\\\\in'],
+            ['∉',  '\\\\notin'],
+            ['⊆',  '\\\\subseteq'],
+            ['⊂',  '\\\\subset'],
+        ];
+
+        /**
+         * Converts a FPL Unicode expression string to a KaTeX-renderable LaTeX string.
+         * Inference rules use "/" as numerator/denominator separator and are rendered
+         * as a fraction: \dfrac{premises}{conclusion}.
+         *
+         * @param {string} expr - the raw statementExpression value from ToJson2()
+         * @returns {string}    - a LaTeX string suitable for katex.renderToString()
+         */
+        function fplToLatex(expr) {
+            const slashIdx = expr.indexOf('/');
+            if (slashIdx !== -1) {
+                // Inference rule: "premise1, premise2 / conclusion"
+                const num = expr.slice(0, slashIdx).trim();
+                const den = expr.slice(slashIdx + 1).trim();
+                return \`\\\\dfrac{\${applySymbols(num)}}{\${applySymbols(den)}}\`;
+            }
+            return applySymbols(expr);
+        }
+
+        function applySymbols(str) {
+            let result = str;
+            for (const [unicode, latex] of UNICODE_TO_LATEX) {
+                result = result.split(unicode).join(latex);
+            }
+            return result;
+        }
+
+        /**
+         * Renders a FPL expression as HTML using KaTeX.
+         * Falls back to the raw escaped string if KaTeX throws.
+         *
+         * @param {string} expr
+         * @returns {string} - HTML string
+         */
+        function renderExpr(expr) {
+            if (!expr) { return ''; }
+            try {
+                return katex.renderToString(fplToLatex(expr), {
+                    throwOnError: false,
+                    displayMode: false,
+                    output: 'html'
+                });
+            } catch (_) {
+                return esc(expr);
+            }
+        }
+
+        // ── General helpers ───────────────────────────────────────────────────
+        function esc(s) {
+            return String(s ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
         }
 
         function buildTable(rows) {
@@ -163,20 +281,21 @@ function getWebviewContent() {
                 return '<p class="empty">No valid statements found.</p>';
             }
 
-            const esc = s => String(s ?? '')
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;');
-
             const headers = COLUMNS.map(col => {
                 let cls = '';
-                if (_sortCol === col) cls = _sortAsc ? ' class="sort-asc"' : ' class="sort-desc"';
+                if (_sortCol === col) { cls = _sortAsc ? ' class="sort-asc"' : ' class="sort-desc"'; }
                 return \`<th\${cls} onclick="sortBy('\${col}')">\${esc(col)}</th>\`;
             }).join('');
 
-            const bodyRows = rows.map(row =>
-                '<tr>' + COLUMNS.map(col => \`<td>\${esc(row[col])}</td>\`).join('') + '</tr>'
-            ).join('');
+            const bodyRows = rows.map(row => {
+                const cells = COLUMNS.map(col => {
+                    if (col === 'statementExpression') {
+                        return \`<td class="expr-cell">\${renderExpr(row[col])}</td>\`;
+                    }
+                    return \`<td>\${esc(row[col])}</td>\`;
+                }).join('');
+                return \`<tr>\${cells}</tr>\`;
+            }).join('');
 
             return \`<table><thead><tr>\${headers}</tr></thead><tbody>\${bodyRows}</tbody></table>\`;
         }
@@ -198,6 +317,11 @@ function getWebviewContent() {
             });
 
             document.getElementById('content').innerHTML = buildTable(sorted);
+        }
+
+        function refresh() {
+            document.getElementById('status').textContent = 'Loading\u2026';
+            vscode.postMessage({ command: 'refresh' });
         }
 
         window.addEventListener('message', event => {
