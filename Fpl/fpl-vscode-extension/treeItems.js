@@ -102,64 +102,6 @@ class MyTreeItem extends vscode.TreeItem {
     }
 }
 
-function centerRelativeToLine(text, width) {
-    const pad = Math.floor((width - text.length) / 2);
-    return " ".repeat(pad) + text;
-}
-
-const bracketPairs = [
-    ["(", ")"],
-    ["⟮", "⟯"],
-    ["⟦", "⟧"],
-    ["⟪", "⟫"],
-    ["〔", "〕"]
-];
-
-function colorizeParentheses(expr) {
-    let level = 0;
-    let out = "";
-
-    for (const ch of expr) {
-        if (ch === "(") {
-            const [open] = bracketPairs[level % bracketPairs.length];
-            out += open;
-            level++;
-        } else if (ch === ")") {
-            level--;
-            const [, close] = bracketPairs[level % bracketPairs.length];
-            out += close;
-        } else {
-            out += ch;
-        }
-    }
-
-    return out;
-}
-
-function makeTooltip(statement) {
-    const indent = " ".repeat(4);
-
-    const [num, den] = statement.split("/");
-    
-    if (!den) {
-        // insert new lines for quantor expressions
-        const readableStmt = statement.replace(/∃/g, "\n" + indent + "∃");
-        const readableStmt1 = readableStmt.replace(/∀/g, "\n" + indent + "∀").trim();
-        const readableStmt2 = readableStmt1.replace(/⇒/g, "\n" + indent + "⇒").trim();
-        const readableStmt3 = readableStmt2.replace(/⇔/g, "\n" + indent + "⇔").trim();
-        return `\n\`\`\`\n${indent}${colorizeParentheses(readableStmt3)}\n\`\`\``;   
-    }
-    const width = Math.max(num.length, den.length);
-    const line = "─".repeat(width);
-
-
-    const numCentered = centerRelativeToLine(num, width);
-    const denCentered = centerRelativeToLine(den, width);
-
-    return `\n\`\`\`\n${indent}${colorizeParentheses(numCentered)}\n${indent}${line}\n${indent}${colorizeParentheses(denCentered)}\n\`\`\``;
-
-}
-
 module.exports = {
     typeToIconMap,
     MyTreeItem
