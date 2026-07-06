@@ -69,6 +69,11 @@
             {
                 "command": "fpl-vscode-extension.showWebview",
                 "title": "Show Valid Statements"
+            },
+            {
+                "command": "fpl-vscode-extension.refreshTheories",
+                "title": "Refresh FPL Theories",
+                "icon": "$(refresh)"
             }
         ],
         "submenus": [
@@ -123,6 +128,13 @@
                 {
                     "command": "fpl-vscode-extension.showWebview",
                     "when": "resourceExtname == .fpl",
+                    "group": "navigation"
+                }
+            ],
+            "view/title": [
+                {
+                    "command": "fpl-vscode-extension.refreshTheories",
+                    "when": "view == fplTheories",
                     "group": "navigation"
                 }
             ]
