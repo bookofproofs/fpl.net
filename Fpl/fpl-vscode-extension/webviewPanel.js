@@ -60,6 +60,22 @@ function createOrShowWebviewPanel(context, client) {
         message => {
             if (message.command === 'refresh') {
                 refreshWebviewData(client);
+            } else if (message.command === 'navigate') {
+                const uri = vscode.Uri.file(message.filePath);
+                vscode.workspace.openTextDocument(uri).then(doc => {
+                    vscode.window.showTextDocument(doc, vscode.ViewColumn.One).then(editor => {
+                        // FParsec positions are 1-based; VSCode Position is 0-based
+                        const pos = new vscode.Position(
+                            Math.max(0, message.line - 1),
+                            Math.max(0, message.column - 1)
+                        );
+                        editor.selection = new vscode.Selection(pos, pos);
+                        editor.revealRange(
+                            new vscode.Range(pos, pos),
+                            vscode.TextEditorRevealType.InCenterIfOutsideViewport
+                        );
+                    });
+                });
             }
         },
         undefined,
@@ -177,6 +193,9 @@ function getWebviewContent(katexJs, katexCss) {
         td.expr-cell {
             white-space: nowrap;
             text-align: center;
+        }
+        tbody tr {
+            cursor: pointer;
         }
         tbody tr:hover {
             background-color: var(--vscode-list-hoverBackground);
@@ -306,7 +325,7 @@ function getWebviewContent(katexJs, katexCss) {
                     }
                     return \`<td>\${esc(row[col.key])}</td>\`;
                 }).join('');
-                return \`<tr>\${cells}</tr>\`;
+                return \`<tr data-filepath="\${esc(row['FilePath'])}" data-line="\${row['Line']}" data-column="\${row['Column']}">\${cells}</tr>\`;
             }).join('');
 
             return \`<table><thead><tr>\${headers}</tr></thead><tbody>\${bodyRows}</tbody></table>\`;
@@ -353,6 +372,18 @@ function getWebviewContent(katexJs, katexCss) {
             } else if (message.command === 'error') {
                 document.getElementById('status').textContent = 'Error: ' + message.message;
             }
+        });
+
+        // ── Row double-click → navigate in editor ─────────────────────────────
+        document.getElementById('content').addEventListener('dblclick', e => {
+            const tr = e.target.closest('tr[data-filepath]');
+            if (!tr) { return; }
+            vscode.postMessage({
+                command: 'navigate',
+                filePath: tr.dataset.filepath,
+                line: parseInt(tr.dataset.line, 10),
+                column: parseInt(tr.dataset.column, 10)
+            });
         });
     </script>
 </body>
