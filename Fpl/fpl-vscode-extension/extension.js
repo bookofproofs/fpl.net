@@ -5,7 +5,8 @@
 const vscode = require('vscode');
 const { LanguageClient } = require('vscode-languageclient');
 const utils = require('./utils');
-const { createFplTheoriesProvider, createValidStmtsProvider } = require('./providers');
+const { createFplTheoriesProvider } = require('./providers');
+const { createOrShowWebviewPanel, restoreWebviewPanel } = require('./webviewPanel');
 
 let client;
 
@@ -36,23 +37,19 @@ function activate(context) {
             client = new LanguageClient('fpl-vscode-extension', 'FPL Language Server', serverOptions, clientOptions);
 
             const fplTheoriesProvider = createFplTheoriesProvider(client);
-            const fplValidStmtsProvider = createValidStmtsProvider(client);
 
             vscode.window.registerTreeDataProvider('fplTheories', fplTheoriesProvider);
-            vscode.window.registerTreeDataProvider('fplValidStmts', fplValidStmtsProvider);
 
             vscode.window.onDidChangeActiveTextEditor((editor) => {
                 utils.log2Console('onDidChangeActiveTextEditor', false);
                 if (editor && editor.document.languageId === 'fpl') {
                     fplTheoriesProvider.refresh();
-                    fplValidStmtsProvider.refresh();
                 }
             });
 
             vscode.workspace.onDidChangeTextDocument((event) => {
                 if (event.document.languageId === 'fpl') {
                     fplTheoriesProvider.refresh();
-                    fplValidStmtsProvider.refresh();
                 }
             });
 
@@ -73,7 +70,6 @@ function activate(context) {
             if (vscode.window.activeTextEditor && vscode.window.activeTextEditor.document.languageId === 'fpl') {
                 utils.log2Console('initial treeview refresh', false);
                 fplTheoriesProvider.refresh();
-                fplValidStmtsProvider.refresh();
             }
 
             const disposableCommand2 = vscode.commands.registerCommand('extension.openFileAtPosition', (filePath, lineNumber, columnNumber) => {
@@ -88,9 +84,16 @@ function activate(context) {
                 });
             });
 
+            const disposableWebview = vscode.commands.registerCommand('fpl-vscode-extension.showWebview', () => {
+                createOrShowWebviewPanel(context, client);
+            });
+
+            restoreWebviewPanel(context, client);
+
             context.subscriptions.push(disposableClient);
             context.subscriptions.push(disposableCommand);
             context.subscriptions.push(disposableCommand2);
+            context.subscriptions.push(disposableWebview);
 
             utils.log2Console('Launching "Formal Proving Language", enjoy!', false);
         });

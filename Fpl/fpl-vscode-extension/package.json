@@ -1,106 +1,142 @@
 {
-  "name": "fpl-vscode-extension",
-  "displayName": "FPL (Formal Proving Language)",
-  "description": "Write mathematics independently of natural languages.",
-  "icon": "images/logo.png",
-  "version": "1.7.0",
-  "repository": "https://github.com/bookofproofs/fpl.net",
-  "publisher": "bookofproofs",
-  "license": "MIT",
-  "engines": {
-    "vscode": "^1.81.0"
-  },
-  "categories": [
-    "Programming Languages",
-    "Education",
-    "Other"
-  ],
-  "keywords": [
-    "mathematics",
-    "logic",
-    "formal",
-    "language",
-    "proving"
-  ],
-  "activationEvents": [
-    "workspaceContains:**/*.fpl",
-    "onCommand:extension.openFileAtLine"
-  ],
-  "main": "./extension.js",
-  "contributes": {
-    "languages": [
-      {
-        "id": "fpl",
-        "aliases": [
-          "Formal Proving Language",
-          "fpl",
-          "FPL"
-        ],
-        "extensions": [
-          ".fpl"
-        ],
-        "configuration": "./language-configuration.json"
-      }
-    ],
-    "grammars": [
-      {
-        "language": "fpl",
-        "scopeName": "source.fpl",
-        "path": "./syntaxes/fpl.tmLanguage.json"
-      }
-    ],
-    "themes": [
-      {
-        "label": "dark",
-        "uiTheme": "vs-dark",
-        "path": "./themes/d-color-theme.json"
-      }
-    ],
-    "commands": [
-      { "command": "fpl-vscode-extension.helloWorld", "title": "Hello World" },
-      { "command": "extension.openFileAtPosition", "title": "Open File at Position" }
-    ],
-    "views": {
-      "explorer": [
-        {
-          "id": "fplTheories",
-          "name": "FPL Theories"
-        },
-        {
-          "id": "fplValidStmts",
-          "name": "FPL Valid Statements"
-        }
-      ]
+    "name": "fpl-vscode-extension",
+    "displayName": "FPL (Formal Proving Language)",
+    "description": "Write mathematics independently of natural languages.",
+    "icon": "images/logo.png",
+    "version": "1.7.0",
+    "repository": "https://github.com/bookofproofs/fpl.net",
+    "publisher": "bookofproofs",
+    "license": "MIT",
+    "engines": {
+        "vscode": "^1.81.0"
     },
-    "configuration": {
-      "title": "FPL",
-      "properties": {
-        "fplExtension.entryPoint": {
-            "type": "string",
-            "default": "MyFplTheory.fpl",
-            "description": "The fpl file containing the top entry point of your mathematical theory."
+    "categories": [
+        "Programming Languages",
+        "Education",
+        "Other"
+    ],
+    "keywords": [
+        "mathematics",
+        "logic",
+        "formal",
+        "language",
+        "proving"
+    ],
+    "activationEvents": [
+        "workspaceContains:**/*.fpl",
+        "onCommand:extension.openFileAtLine",
+        "onCommand:fpl-vscode-extension.showWebview"
+    ],
+    "main": "./extension.js",
+    "contributes": {
+        "languages": [
+            {
+                "id": "fpl",
+                "aliases": [
+                    "Formal Proving Language",
+                    "fpl",
+                    "FPL"
+                ],
+                "extensions": [
+                    ".fpl"
+                ],
+                "configuration": "./language-configuration.json"
+            }
+        ],
+        "grammars": [
+            {
+                "language": "fpl",
+                "scopeName": "source.fpl",
+                "path": "./syntaxes/fpl.tmLanguage.json"
+            }
+        ],
+        "themes": [
+            {
+                "label": "dark",
+                "uiTheme": "vs-dark",
+                "path": "./themes/d-color-theme.json"
+            }
+        ],
+        "commands": [
+            {
+                "command": "fpl-vscode-extension.helloWorld",
+                "title": "Hello World"
+            },
+            {
+                "command": "extension.openFileAtPosition",
+                "title": "Open File at Position"
+            },
+            {
+                "command": "fpl-vscode-extension.showWebview",
+                "title": "Show Valid Statements"
+            }
+        ],
+        "submenus": [
+            {
+                "id": "fpl-vscode-extension.fplMenu",
+                "label": "FPL"
+            }
+        ],
+        "views": {
+            "explorer": [
+                {
+                    "id": "fplTheories",
+                    "name": "FPL Theories"
+                }
+            ]
         },
-        "fplExtension.textEditor.setting1": {
-            "type": "number",
-            "default": 1,
-            "description": "Test number."
+        "configuration": {
+            "title": "FPL",
+            "properties": {
+                "fplExtension.entryPoint": {
+                    "type": "string",
+                    "default": "MyFplTheory.fpl",
+                    "description": "The fpl file containing the top entry point of your mathematical theory."
+                },
+                "fplExtension.textEditor.setting1": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "Test number."
+                },
+                "fplExtension.textEditor.setting2": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Test boolean."
+                }
+            }
         },
-        "fplExtension.textEditor.setting2": {
-          "type": "boolean",
-          "default": true,
-          "description": "Test boolean."
+        "menus": {
+            "editor/context": [
+                {
+                    "submenu": "fpl-vscode-extension.fplMenu",
+                    "when": "resourceExtname == .fpl",
+                    "group": "navigation"
+                }
+            ],
+            "fpl-vscode-extension.fplMenu": [
+                {
+                    "command": "fpl-vscode-extension.showWebview",
+                    "group": "navigation"
+                }
+            ],
+            "editor/title": [
+                {
+                    "command": "fpl-vscode-extension.showWebview",
+                    "when": "resourceExtname == .fpl",
+                    "group": "navigation"
+                }
+            ]
         }
-      }
+    },
+    "scripts": {
+        "lint": "eslint .",
+        "pretest": "npm run lint",
+        "test": "node ./test/runTest.js"
+    },
+    "dependencies": {
+        "adm-zip": "latest",
+        "katex": "^0.17.0",
+        "tar": "latest",
+        "vscode-languageclient": "latest"
     }
-  },
-  "scripts": {
-    "lint": "eslint .",
-    "pretest": "npm run lint",
-    "test": "node ./test/runTest.js"
-  },
-  "dependencies": {
-    "tar": "latest",
-    "adm-zip": "latest",
-    "vscode-languageclient": "latest"
-  }
 }

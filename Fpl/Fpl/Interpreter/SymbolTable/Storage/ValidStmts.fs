@@ -55,23 +55,11 @@ type ValidStmtStore() =
         else 
             None
 
-    /// Produces a JSON string grouping stored valid statements by their ValidityReason.
-    /// Each group's value is an array of JSON objects. Objects may contain multiple key/value pairs.
-    member this.ToJson() =
-        // group statements by human-friendly category label
-        let groups = Dictionary<string, ResizeArray<Dictionary<string,string>>>()
+    /// Produces a JSON string as a single merged array of all stored valid statements,
+    /// combining Axioms, Inference Rules, and Derived Arguments without section grouping.
+    member this.ToJson2() =
+        let all = ResizeArray<Dictionary<string,string>>()
 
-        let getKey reason =
-            match reason with
-            | ValidityReason.IsAxiom _ -> PrimTitleAxioms
-            | ValidityReason.IsAxiomAssertion _ -> PrimTitleAxioms
-            | ValidityReason.IsRuleOfInference _ -> PrimTitleRuleOfInference
-            | ValidityReason.IsTheorem _ -> PrimTitleTheorems
-            | ValidityReason.IsDerived _ -> PrimTitleDerived
-            | ValidityReason.IsDerivedAssumed _ -> PrimTitleDerived
-            | ValidityReason.IsDerivedRevoke _ -> PrimTitleDerived
-            | ValidityReason.Error -> "Error"
-         
         let getReason reason =
             match reason with
             | ValidityReason.IsAxiom _ -> LiteralAxL
@@ -94,18 +82,8 @@ type ValidStmtStore() =
             | ValidityReason.IsDerivedRevoke (_,revokedExpr) -> revokedExpr
             | ValidityReason.Error -> "Error"
 
-        // Build the groups storing per-statement object dictionaries
         for kvp in _theoremStore do
             let stmt = kvp.Value
-            let key = getKey stmt.ValidityReason
-            let list =
-                match groups.TryGetValue key with
-                | true, v -> v
-                | _ ->
-                    let v = ResizeArray<Dictionary<string,string>>()
-                    groups.Add(key, v)
-                    v
-            // create a small object for the statement; first pair is statementExpression
             let obj = Dictionary<string,string>()
             obj.Add("statementExpression", getExpr stmt.ValidityReason)
             obj.Add("reason", getReason stmt.ValidityReason)
@@ -114,7 +92,8 @@ type ValidStmtStore() =
             | Some ultimateNode when ultimateNode.Parent.IsSome ->
                 match ultimateNode.Parent with
                 | Some theory ->
-                    obj.Add("nodeName", $"**{ultimateNode.Type SignatureType.Mixed}** (in {theory.FplId})")
+                    obj.Add("blockName", ultimateNode.Type SignatureType.Mixed)
+                    obj.Add("theoryName", theory.FplId)
                     match theory.FilePath with
                     | Some filePath ->
                         obj.Add("FilePath", filePath)
@@ -123,10 +102,9 @@ type ValidStmtStore() =
                     | _ -> ()
                 | _ -> ()
             | _ -> ()
-            // additional key/value pairs can be added to `obj` here in future
-            list.Add(obj)
+            all.Add(obj)
 
-        JsonSerializer.Serialize(groups)
+        JsonSerializer.Serialize(all)
 
     member this.ClearValidityStore() =
         _theoremStore.Clear() 
