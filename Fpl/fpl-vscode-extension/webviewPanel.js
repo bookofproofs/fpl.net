@@ -222,9 +222,9 @@ function getWebviewContent(katexJs, katexCss) {
             { key: 'reason',              label: 'Source'             },
             { key: 'blockName',           label: 'Block'              },
             { key: 'theoryName',          label: 'Theory'             },
-            { key: 'FilePath',            label: 'Path'               },
-            { key: 'Line',                label: 'Line'               },
-            { key: 'Column',              label: 'Column'             },
+            { key: 'FilePath',            label: 'Path',   hidden: true },
+            { key: 'Line',                label: 'Line',   hidden: true },
+            { key: 'Column',              label: 'Column', hidden: true },
         ];
         
         let _rows = [];
@@ -312,14 +312,16 @@ function getWebviewContent(katexJs, katexCss) {
                 return '<p class="empty">No valid statements found.</p>';
             }
 
-            const headers = COLUMNS.map(col => {
+            const visibleCols = COLUMNS.filter(col => !col.hidden);
+
+            const headers = visibleCols.map(col => {
                 let cls = '';
                 if (_sortCol === col.key) { cls = _sortAsc ? ' class="sort-asc"' : ' class="sort-desc"'; }
                 return \`<th\${cls} onclick="sortBy('\${col.key}')">\${esc(col.label)}</th>\`;
             }).join('');
 
             const bodyRows = rows.map(row => {
-                const cells = COLUMNS.map(col => {
+                const cells = visibleCols.map(col => {
                     if (col.key === 'statementExpression') {
                         return \`<td class="expr-cell">\${renderExpr(row[col.key])}</td>\`;
                     }
