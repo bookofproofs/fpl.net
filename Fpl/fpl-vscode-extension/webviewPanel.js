@@ -161,6 +161,9 @@ function getWebviewContent(katexJs, katexCss) {
         }
         th:hover {
             background-color: var(--vscode-list-hoverBackground);
+        }   
+        thead th:first-child {
+            text-align: center;
         }
         th.sort-asc::after  { content: ' \\25B2'; font-size: 0.75em; }
         th.sort-desc::after { content: ' \\25BC'; font-size: 0.75em; }
@@ -173,6 +176,7 @@ function getWebviewContent(katexJs, katexCss) {
         }
         td.expr-cell {
             white-space: nowrap;
+            text-align: center;
         }
         tbody tr:hover {
             background-color: var(--vscode-list-hoverBackground);
