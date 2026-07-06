@@ -92,7 +92,8 @@ type ValidStmtStore() =
             | Some ultimateNode when ultimateNode.Parent.IsSome ->
                 match ultimateNode.Parent with
                 | Some theory ->
-                    obj.Add("nodeName", $"**{ultimateNode.Type SignatureType.Mixed}** (in {theory.FplId})")
+                    obj.Add("blockName", ultimateNode.Type SignatureType.Mixed)
+                    obj.Add("theoryName", theory.FplId)
                     match theory.FilePath with
                     | Some filePath ->
                         obj.Add("FilePath", filePath)

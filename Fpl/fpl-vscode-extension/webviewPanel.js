@@ -201,7 +201,8 @@ function getWebviewContent(katexJs, katexCss) {
         const COLUMNS = [
             { key: 'statementExpression', label: 'Logical Expression' },
             { key: 'reason',              label: 'Source'             },
-            { key: 'nodeName',            label: 'Name'               },
+            { key: 'blockName',           label: 'Block'              },
+            { key: 'theoryName',          label: 'Theory'             },
             { key: 'FilePath',            label: 'Path'               },
             { key: 'Line',                label: 'Line'               },
             { key: 'Column',              label: 'Column'             },
