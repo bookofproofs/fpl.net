@@ -74,7 +74,7 @@ class MyTreeItem extends vscode.TreeItem {
 
         // Stable id used by the collapse-state manager; composed from
         // fields that identify the same logical node across reloads.
-        this.id = `${filePath}|${typ}|${label}|${lineNumber}`;
+        this.id = `${filePath}|${typ}|${label}`;
 
         this.isVirtual = false;
         const markdownTooltip = new vscode.MarkdownString();
