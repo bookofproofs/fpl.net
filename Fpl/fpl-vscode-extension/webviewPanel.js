@@ -194,8 +194,15 @@ function getWebviewContent(katexJs, katexCss) {
     <script src="${katexJs}"></script>
     <script>
         const vscode = acquireVsCodeApi();
-        const COLUMNS = ['statementExpression', 'reason', 'nodeName', 'FilePath', 'Line', 'Column'];
-
+        const COLUMNS = [
+            { key: 'statementExpression', label: 'Logical Expression' },
+            { key: 'reason',              label: 'Source'             },
+            { key: 'nodeName',            label: 'Name'               },
+            { key: 'FilePath',            label: 'Path'               },
+            { key: 'Line',                label: 'Line'               },
+            { key: 'Column',              label: 'Column'             },
+        ];
+        
         let _rows = [];
         let _sortCol = null;
         let _sortAsc = true;
@@ -283,16 +290,16 @@ function getWebviewContent(katexJs, katexCss) {
 
             const headers = COLUMNS.map(col => {
                 let cls = '';
-                if (_sortCol === col) { cls = _sortAsc ? ' class="sort-asc"' : ' class="sort-desc"'; }
-                return \`<th\${cls} onclick="sortBy('\${col}')">\${esc(col)}</th>\`;
+                if (_sortCol === col.key) { cls = _sortAsc ? ' class="sort-asc"' : ' class="sort-desc"'; }
+                return \`<th\${cls} onclick="sortBy('\${col.key}')">\${esc(col.label)}</th>\`;
             }).join('');
 
             const bodyRows = rows.map(row => {
                 const cells = COLUMNS.map(col => {
-                    if (col === 'statementExpression') {
-                        return \`<td class="expr-cell">\${renderExpr(row[col])}</td>\`;
+                    if (col.key === 'statementExpression') {
+                        return \`<td class="expr-cell">\${renderExpr(row[col.key])}</td>\`;
                     }
-                    return \`<td>\${esc(row[col])}</td>\`;
+                    return \`<td>\${esc(row[col.key])}</td>\`;
                 }).join('');
                 return \`<tr>\${cells}</tr>\`;
             }).join('');
