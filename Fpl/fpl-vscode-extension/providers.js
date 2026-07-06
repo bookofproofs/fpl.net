@@ -76,11 +76,19 @@ function createFplTheoriesProvider(client) {
         }
 
         parseScope(scope) {
-            return scope.map(item => new MyTreeItem(item.Type, 1, item.Name, item.Line, item.Column, item.FilePath, item.FplValueType, item.FplValueRepr, item.FplRefersTo, item.Scope, item.ArgList));
+            return scope.map(item => {
+                const treeItem = new MyTreeItem(item.Type, 1, item.Name, item.Line, item.Column, item.FilePath, item.FplValueType, item.FplValueRepr, item.FplRefersTo, item.Scope, item.ArgList);
+                this._applyExpandState(treeItem);
+                return treeItem;
+            });
         }
 
         parseArgList(arglist) {
-            return arglist.map(item => new MyTreeItem(item.Type, 2, item.Name, item.Line, item.Column, item.FilePath, item.FplValueType, item.FplValueRepr, item.FplRefersTo, item.Scope, item.ArgList));
+            return arglist.map(item => {
+                const treeItem = new MyTreeItem(item.Type, 2, item.Name, item.Line, item.Column, item.FilePath, item.FplValueType, item.FplValueRepr, item.FplRefersTo, item.Scope, item.ArgList);
+                this._applyExpandState(treeItem);
+                return treeItem;
+            });
         }
     }
 

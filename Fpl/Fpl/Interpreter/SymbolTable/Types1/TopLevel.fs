@@ -144,7 +144,7 @@ type SymbolTable() =
                                                             .Replace("\"", "\\\"")   // then escape double quotes
 
             if name = this.MainTheory then
-                sb.AppendLine($"{indent}\"Name\": \"(Main) {name}:{_evalCounter}\",") |> ignore
+                sb.AppendLine($"{indent}\"Name\": \"(Main) {name}\",") |> ignore
             else
                 sb.AppendLine($"{indent}\"Name\": \"{name}\",") |> ignore
 
