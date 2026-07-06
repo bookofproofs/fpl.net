@@ -38,20 +38,27 @@ function activate(context) {
 
             const fplTheoriesProvider = createFplTheoriesProvider(client);
 
-            vscode.window.registerTreeDataProvider('fplTheories', fplTheoriesProvider);
-
-            vscode.window.onDidChangeActiveTextEditor((editor) => {
-                utils.log2Console('onDidChangeActiveTextEditor', false);
-                if (editor && editor.document.languageId === 'fpl') {
-                    fplTheoriesProvider.refresh();
-                }
+            // createTreeView instead of registerTreeDataProvider gives access to
+            // onDidExpandElement / onDidCollapseElement for collapse-state memory.
+            const treeView = vscode.window.createTreeView('fplTheories', {
+                treeDataProvider: fplTheoriesProvider,
+                showCollapseAll: true
             });
 
-            vscode.workspace.onDidChangeTextDocument((event) => {
-                if (event.document.languageId === 'fpl') {
-                    fplTheoriesProvider.refresh();
-                }
-            });
+            // Track expand/collapse so the state survives a manual refresh.
+            context.subscriptions.push(
+                treeView.onDidExpandElement(event => {
+                    fplTheoriesProvider.markExpanded(event.element.id);
+                })
+            );
+
+            context.subscriptions.push(
+                treeView.onDidCollapseElement(event => {
+                    fplTheoriesProvider.markCollapsed(event.element.id);
+                })
+            );
+
+            context.subscriptions.push(treeView);
 
             const config = vscode.workspace.getConfiguration('fplExtension');
             const configJson = JSON.stringify(config, null, 2);
@@ -67,10 +74,11 @@ function activate(context) {
                 vscode.window.showInformationMessage('Hello World from "Formal Proving Language"!');
             });
 
-            if (vscode.window.activeTextEditor && vscode.window.activeTextEditor.document.languageId === 'fpl') {
-                utils.log2Console('initial treeview refresh', false);
+            // Explicit on-demand refresh command — wired to the ⟳ button in
+            // the view title bar via package.json menus/view/title.
+            const disposableRefresh = vscode.commands.registerCommand('fpl-vscode-extension.refreshTheories', () => {
                 fplTheoriesProvider.refresh();
-            }
+            });
 
             const disposableCommand2 = vscode.commands.registerCommand('extension.openFileAtPosition', (filePath, lineNumber, columnNumber) => {
                 const openPath = vscode.Uri.file(filePath);
@@ -90,9 +98,16 @@ function activate(context) {
 
             restoreWebviewPanel(context, client);
 
+            // Populate the tree once on activation if an FPL file is already open.
+            if (vscode.window.activeTextEditor && vscode.window.activeTextEditor.document.languageId === 'fpl') {
+                utils.log2Console('initial treeview refresh', false);
+                fplTheoriesProvider.refresh();
+            }
+
             context.subscriptions.push(disposableClient);
             context.subscriptions.push(disposableCommand);
             context.subscriptions.push(disposableCommand2);
+            context.subscriptions.push(disposableRefresh);
             context.subscriptions.push(disposableWebview);
 
             utils.log2Console('Launching "Formal Proving Language", enjoy!', false);
