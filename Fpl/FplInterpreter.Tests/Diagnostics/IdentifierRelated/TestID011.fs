@@ -32,6 +32,8 @@ type TestID011() =
     [<DataRow("15", "uses Fpl.SetTheory def cl Test:EmptySet {intr}", 0)>]
     [<DataRow("16", "uses Fpl.SetTheory def cl Test:Set {intr}", 0)>]
     [<DataRow("17", "uses Fpl.SetTheory def cl Test:EmptySet {intr}", 0)>]
+    [<DataRow("18", "def class A {intr} def class B:A {intr}", 0)>]
+    [<DataRow("19", "def class A {intr} def class B:A {intr} def class C:B,A {intr}", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestID011(no:string, fplCode:string, expected) =

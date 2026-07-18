@@ -53,7 +53,7 @@ let errID007 nodeType signatureNode baseType signatureBase = $"{nodeType} `{sign
 let errID008 constructorId classId  = $"Misspelled constructor name `{constructorId}`; expected `{classId}`."  
 let errID009 name = $"Circular base-type dependency detected involving `{name}`." 
 let errID010 name = $"The type `{name}` could not be found. Are you missing a uses clause?" 
-let errID011 chain errorMsg = $"The inheritance chain `{chain}` causes the following error: {errorMsg}."  
+let errID011 chain errorMsg = $"The inheritance chain `{chain}` is invalid: {errorMsg}"  
 let errID012 prtyName varName varType candidates = 
     if candidates = String.Empty then 
         $"The {varName} `{varType}` does not define the variable or property `{prtyName}`. No candidates found."  
@@ -189,7 +189,7 @@ let errTypeMismatchReturnType aIsCallByReference aName aType pType blockName =
     else 
         Some $"The returned application `{aName}` typed `{aType}` doesn't match the type `{pType}` this {blockName} returns."
 let errTypeMismatchInheritanceCycle = "cycle detected"
-let errTypeMismatchInheritanceCrossing currName crossName = $"cross-inheritance not supported, `{currName}` is base for `{crossName}`."
+let errTypeMismatchInheritanceCrossing currName crossName = $"cross-inheritance is not supported. `{currName}` is already a base type of `{crossName}`."
 let errTypeMismatchInheritanceDuplicate duplicate = $"duplicate inheritance from `{duplicate}` detected."
 let errTypeMismatchInheritanceFromNonDefinition blockName = $"Expecting a class, a functional term, or a predicate node, got {blockName}"
 let errTypeMismatchInheritanceWrongBase aIsCallByReference aName aType pName pType = 
