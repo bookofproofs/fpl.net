@@ -1,1 +1,1 @@
-theorem TestTypo {true} proof Test$1 {1: trivial}
+ext A x@/\d+/ -> obj {ret x} def pred T:A()

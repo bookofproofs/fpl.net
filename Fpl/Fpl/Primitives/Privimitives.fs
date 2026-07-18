@@ -340,7 +340,7 @@ let PrimCaseSingleL = "single case statement"
 [<Literal>]
 let PrimClass = "def cl"
 [<Literal>]
-let PrimClassL = "class definition"
+let PrimClassL = "class"
 [<Literal>]
 let PrimConjunction = "conjunction"
 [<Literal>]
@@ -364,7 +364,7 @@ let PrimExclusiveOr = "exclusive disjunction"
 [<Literal>]
 let PrimExtension = "def ext"
 [<Literal>]
-let PrimExtensionL = "extension definition"
+let PrimExtensionL = "extension"
 [<Literal>]
 let PrimExtensionObj = "extension object"
 [<Literal>]
@@ -382,7 +382,7 @@ let PrimForInStmtEntityL = "for in statement's entity"
 [<Literal>]
 let PrimFunctionalTerm = "def func"
 [<Literal>]
-let PrimFunctionalTermL = "functional term definition"
+let PrimFunctionalTermL = "functional term"
 [<Literal>]
 let PrimInstance = "inst" 
 [<Literal>]
@@ -454,7 +454,7 @@ let PrimPascalCaseId = "PascalCaseId"
 [<Literal>]
 let PrimPredicate = "def pred"
 [<Literal>]
-let PrimPredicateL = "predicate definition"
+let PrimPredicateL = "predicate"
 [<Literal>]
 let PrimQuantor = "qtr"
 [<Literal>]

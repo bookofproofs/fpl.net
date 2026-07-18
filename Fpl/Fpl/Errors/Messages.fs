@@ -29,6 +29,10 @@ let numbered inputLst =
     |> Seq.mapi (fun i cand -> sprintf "%s%d) %s" Environment.NewLine (i + 1) cand)
     |> String.concat ", "
 
+let capitalize (word: string) =
+    if String.IsNullOrEmpty word then word
+    else word.[0].ToString().ToUpper() + word.Substring(1)
+
 // Diagnostics related-errors
 // -----------------------------------------------------------------
 // interpreter error messages
@@ -44,8 +48,8 @@ let errID001 signature conflict = $"Signature `{signature}` was already declared
 let errID002 signature incorrectBlockType = $"No compatible block found for proof `{signature}`; found a similar name of {incorrectBlockType}."  
 let errID003 signature = $"Proof `{signature}` has no associated block."  
 let errID005 signature incorrectBlockType = $"No compatible block found for corollary `{signature}`; found a similar name of {incorrectBlockType}."  
-let errID006 signature = $"The corollary `{signature}` is missing a block to be associated with."  
-let errID007 nodeType signatureNode baseType signatureBase = $"The {nodeType} `{signatureNode}` cannot inherit from {baseType} `{signatureBase}`."  
+let errID006 signature = $"Corollary `{signature}` has no associated block."  
+let errID007 nodeType signatureNode baseType signatureBase = $"{nodeType} `{signatureNode}` cannot inherit from incompatible base `{signatureBase}` ({baseType})."  
 let errID008 constructorId classId  = $"Misspelled constructor name `{constructorId}`, expecting `{classId}`."  
 let errID009 name = $"Circular base type dependency involving `{name}`." 
 let errID010 name = $"The type `{name}` could not be found. Are you missing a uses clause?" 

@@ -3,6 +3,7 @@ module Fpl.Errors.Emitter
 
 open FParsec
 open Fpl.Primitives
+open Fpl.Errors.Messages
 open Fpl.Errors.Diagnostics
 (* MIT License
 
@@ -97,12 +98,13 @@ let emitID006Diagnostics name pos1 pos2 =
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ID006 name
             Diagnostic.Alternatives =
-                Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary), a conjecture, or an axiom." 
+                Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary), an axiom, or a conjecture." 
         }
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 let emitID007Diagnostics nodeType signatureNode baseType signatureBase pos1 pos2 =
+
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -110,7 +112,7 @@ let emitID007Diagnostics nodeType signatureNode baseType signatureBase pos1 pos2
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = ID007 (nodeType, signatureNode, baseType, signatureBase)
+            Diagnostic.Code = ID007 (capitalize nodeType, signatureNode, baseType, signatureBase)
             Diagnostic.Alternatives = None
         }
     ad.AddDiagnostic diagnostic
