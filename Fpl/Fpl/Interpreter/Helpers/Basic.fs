@@ -243,6 +243,7 @@ let tryFindAssociatedBlockForCorollary (fplValue: FplGenericNode) =
             let potentialBlockName = stripLastDollarDigit (fplValue.Type(SignatureType.Mixed))
 
             flattenedScopes
+            |> Seq.filter (fun fv -> fv.Name <> PrimRoot && fv.Name <> PrimTheoryL && fv.Name <> PrimDefaultConstructor)
             |> Seq.filter (fun fv -> fv.FplId = potentialBlockName)
             |> Seq.toList
 

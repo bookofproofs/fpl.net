@@ -82,7 +82,7 @@ let emitID005Diagnostics name incorrectBlockType pos1 pos2 =
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ID005(name, incorrectBlockType)
             Diagnostic.Alternatives =
-                Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary), a conjecture, or an axiom." 
+                Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary), an axiom, or a conjecture." 
          }
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)

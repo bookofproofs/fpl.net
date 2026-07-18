@@ -864,7 +864,7 @@ and FplProof(positions: Positions, parent: FplGenericNode, runOrder) =
                 // concatenated type signature of the name of the proof
                 // without the last dollar digit
                 flattenedScopes
-                |> List.filter (fun fv -> fv.Name <> PrimRoot && fv.Name <> PrimTheoryL)
+                |> List.filter (fun fv -> fv.Name <> PrimRoot && fv.Name <> PrimTheoryL && fv.Name <> PrimDefaultConstructor)
                 |> List.filter (fun fv -> fv.FplId = potentialProvableName)
 
             let provableBlocklist =
