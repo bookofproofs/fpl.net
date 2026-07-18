@@ -1,1 +1,1 @@
-theorem SomeTheorem {true} theorem SomeTheorem {true} 
+theorem TestTypo {true} proof Test$1 {1: trivial}

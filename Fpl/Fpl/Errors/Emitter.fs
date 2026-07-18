@@ -52,7 +52,7 @@ let emitID002Diagnostics nodeTypeName incorrectBlockType pos1 pos2 =
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ID002(nodeTypeName, incorrectBlockType)
-            Diagnostic.Alternatives = Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary)." 
+            Diagnostic.Alternatives = Some "A theorem‑like statement (theorem, lemma, proposition, corollary) is required." 
         }
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)

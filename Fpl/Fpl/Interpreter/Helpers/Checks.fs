@@ -200,8 +200,10 @@ let qualifiedName (fplValue:FplGenericNode) determined =
             if first then
                 if fv.Parent.Value.Name = PrimRoot then
                     getFullName fv.Parent.Value false + fplValueType
-                else if (isVar fv) && not (isVar fv.Parent.Value) then
+                elif (isVar fv) && not (isVar fv.Parent.Value) then
                     fplValueType
+                elif fplValueType = String.Empty then
+                    getFullName fv.Parent.Value false
                 else
                     getFullName fv.Parent.Value false + "." + fplValueType
             elif fv.Parent.Value.Name = PrimRoot then
@@ -211,7 +213,7 @@ let qualifiedName (fplValue:FplGenericNode) determined =
             else
                 getFullName fv.Parent.Value false + "." + fplValueType
 
-    $"{getEnglishName fplValue.Name determined} {getFullName fplValue true}"
+    $"{getEnglishName fplValue.Name determined} `{getFullName fplValue true}`"
 
 let checkSIG11Diagnostics (fv:FplGenericNode) =
     let mapOpt = getMapping fv
