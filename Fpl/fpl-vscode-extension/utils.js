@@ -4,7 +4,6 @@
 
 const fs = require('fs');
 const https = require('https');
-const urlModule = require('url');
 const path = require('path');
 const tar = require('tar');
 const AdmZip = require('adm-zip');
@@ -51,9 +50,10 @@ function removeDirectorySync(p) {
 
 function makeDirectory(p) {
     return new Promise((resolve, reject) => {
-        fs.mkdir(p, (err) => {
-            if (err) { reject(err.message); }
-            else {
+        fs.mkdir(p, err => {
+            if (err) {
+                reject(err.message);
+            } else {
                 log2Console('Directory ' + p + ' created successfully', false);
                 resolve('directory created');
             }
@@ -62,8 +62,10 @@ function makeDirectory(p) {
 }
 
 function deleteFile(pathToFile) {
-    fs.unlink(pathToFile, (err) => {
-        if (err) { throw err; }
+    fs.unlink(pathToFile, err => {
+        if (err) {
+            throw err;
+        }
     });
     log2Console('File ' + pathToFile + ' deleted successfully', false);
 }
@@ -72,14 +74,14 @@ function downloadFile(url, dest, maxRedirects = 5) {
     return new Promise((resolve, reject) => {
         const doRequest = (reqUrl, redirectsLeft) => {
             const file = fs.createWriteStream(dest);
-            https.get(reqUrl, (response) => {
+            https.get(reqUrl, response => {
                 if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
                     if (redirectsLeft === 0) {
                         reject(new Error('Too many redirects'));
                         return;
                     }
                     file.close(() => {});
-                    const redirectUrl = urlModule.resolve(reqUrl, response.headers.location);
+                    const redirectUrl = new URL(response.headers.location, reqUrl).toString();
                     doRequest(redirectUrl, redirectsLeft - 1);
                     return;
                 }
@@ -90,10 +92,10 @@ function downloadFile(url, dest, maxRedirects = 5) {
                 }
                 response.pipe(file);
                 file.on('finish', () => file.close(resolve));
-            }).on('error', (err) => {
+            }).on('error', err => {
                 fs.unlink(dest, () => reject(err));
             });
-            file.on('error', (err) => {
+            file.on('error', err => {
                 fs.unlink(dest, () => reject(err));
             });
         };
