@@ -180,7 +180,7 @@ let evalIdentifiers ast =
             deleg.FplId <- delegateId
             deleg.TypeId <- delegateId
             heap.Eval.PushEvalStack(deleg)
-            deleg.ErrorOccurred <- emitID013Diagnostics $"Unknown delegate `{delegateId}`" pos1 pos2
+            deleg.ErrorOccurred <- emitID013Diagnostics $"Unknown delegate `{delegateId}`." pos1 pos2
     | Ast.ExtensionName((pos1, pos2), extensionName) ->
         let fv = heap.Eval.PeekEvalStack()
         match fv with 

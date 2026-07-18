@@ -9,7 +9,7 @@ open TestFplInterpreter.Helpers.Common
 open TestSharedConfig
 
 (* ID013
-   Purpose: Report problems related to delegate usage during embedding and checks.
+   Purpose: Report problems related to delegate usage.
    What it indicates: Delegate invocation or resolution failed (unknown delegate, argument-type mismatch, or other delegate-specific validation error reported by the delegate handler).
    Use: Emitted when delegate lookups or delegate-driven checks cannot be satisfied so callers can locate incorrect delegate calls or mismatched argument types.
    Action / Treat: Ensure the delegate is declared and visible, and that passed arguments match the delegate's expected types/signature; fix or declare the delegate as appropriate. ID013 diagnostics carry the delegate-provided diagnostic text to explain the specific delegate failure. *)
@@ -17,10 +17,10 @@ open TestSharedConfig
 [<TestClass>]
 type TestID013() =
 
-    [<DataRow("00", "def pred T() {del.Test()}", 1, "Unknown delegate `Test`")>]
-    [<DataRow("01", "def pred T() {del.Test1(x,y)}", 1, "Unknown delegate `Test1`")>]
-    [<DataRow("02", "def pred T() {del.Equal(x,y)}", 1, "Predicate `=` cannot be evaluated because the left argument is undefined.")>]
-    [<DataRow("03", "def pred T(x:pred) {del.Equal(x,y)}", 1, "Predicate `=` cannot be evaluated because the right argument is undefined.")>]
+    [<DataRow("00", "def pred T() {del.Test()}", 1, "Unknown delegate `Test`.")>]
+    [<DataRow("01", "def pred T() {del.Test1(x,y)}", 1, "Unknown delegate `Test1`.")>]
+    [<DataRow("02", "def pred T(y:pred) {del.Equal(x,y)}", 1, "Predicate `=` cannot be evaluated: left argument is undefined.")>]
+    [<DataRow("03", "def pred T(x:pred) {del.Equal(x,y)}", 1, "Predicate `=` cannot be evaluated: right argument is undefined.")>]
     [<DataRow("04", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)}""", 0, "missing error message")>]
     [<DataRow("04a", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def pred NotEqual(x,y: tpl) infix "<>" 60 {not (x = y)} """, 0, "missing error message")>] 
     [<DataRow("04", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)}""", 0, "missing error message")>]
@@ -38,6 +38,8 @@ type TestID013() =
     [<DataRow("11", """def func Add()->obj {intr} prop AddIsSomething {dec anotherAdd: Add; all n,m:obj { (anotherAdd(n,@0) = n) } }""", 0, "missing error message")>]
     [<DataRow("12", """def pred T(x,y:tpl) infix "=" 50 {del.Equal(x,y)} ext Digits x@/\d+/ -> ind {dec n:ind cases (| (x = @0): n := $1 ? n := $2); ret n }""", 0, "missing error message")>]
     [<DataRow("13", """def pred Equal(x,y: tpl) infix "=" 50 { del.Equal(x,y)} ext Digits x@/\d+/ -> pred {ret mcases ( | (x = @0): true ? false ) }""", 0, "missing error message")>]
+    [<DataRow("14", "def cl Nat def pred T(x,y:Nat) { del.Decrement(x,y) }", 1, "Decrement expects 1 argument but received 2.")>] 
+    [<DataRow("15", "def cl Nat def pred T(x,y:Nat) { del.Decrement() }", 1, "Decrement expects 1 argument but received 0.")>] 
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0, "missing error message")>]
     [<TestMethod>]
     member this.TestID013(no:string, fplCode:string, expected, expectedErrMsg:string) =
@@ -50,6 +52,8 @@ type TestID013() =
 
     // the delegate Decrement should accept only "Digits" as type
     [<DataRow("00", "ext Digits x@/\d+/ -> Digits {ret x} def pred T(x:Digits) { del.Decrement(x) }", 0)>] 
+    [<DataRow("00a", "ext Digits x@/\d+/ -> Digits {ret x} def pred T() { del.Decrement() }", 1)>]
+    [<DataRow("00b", "ext Digits x@/\d+/ -> Digits {ret x} def pred T(x:Digits) { del.Decrement(x, x) }", 1)>]
     [<DataRow("01", "ext Digits x@/\d+/ -> pred {ret true} def pred T(x:Digits) { del.Decrement(x) }", 0)>] // does not issue ID013 since x is Digits, as required
     [<DataRow("01a", "ext Digits x@/\d+/ -> ind {ret $42} def pred T(x:Digits) { del.Decrement(x) }", 0)>]  // does not issue ID013 since x is Digits, as required
     [<DataRow("02", "def pred T(x:pred) { del.Decrement(x) }", 1)>] 
