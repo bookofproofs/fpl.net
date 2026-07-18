@@ -18,6 +18,7 @@ open System
 open System.Text
 open FParsec
 open Fpl.Primitives
+open Fpl.Errors.Messages
 open Fpl.Errors.Emitter
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Checks
@@ -289,13 +290,7 @@ let filterCandidates (candidatesPre:FplGenericNode list) identifier qualified =
             else
                 $"`{fv.Type SignatureType.Mixed}`"
         )
-        |> Seq.mapi (fun i s -> 
-            if candidatesPre.Length > 1 then 
-                sprintf "%d) %s" (i + 1) s
-            else
-                sprintf "%s" s
-        )
-        |> String.concat ", "
+        |> numbered
     (candidates, candidatesNames)
 
 

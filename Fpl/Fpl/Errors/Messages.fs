@@ -26,7 +26,7 @@ let englishOrdinal dimNumber =
 
 let numbered inputLst =
     inputLst
-    |> Seq.mapi (fun i cand -> sprintf "%s%d) %s" Environment.NewLine (i + 1) cand)
+    |> Seq.mapi (fun i cand -> sprintf "%s  %d) %s" Environment.NewLine (i + 1) cand)
     |> String.concat ", "
 
 let capitalize (word: string) =
@@ -54,20 +54,20 @@ let errID008 constructorId classId  = $"Misspelled constructor name `{constructo
 let errID009 name = $"Circular base-type dependency detected involving `{name}`." 
 let errID010 name = $"The type `{name}` could not be found. Are you missing a uses clause?" 
 let errID011 chain errorMsg = $"The inheritance chain `{chain}` is invalid: {errorMsg}"  
-let errID012 prtyName varName varType candidates = 
+let errID012 prtyName varName varType candidates =
     if candidates = String.Empty then 
-        $"The {varName} `{varType}` does not define the variable or property `{prtyName}`. No candidates found."  
+        $"{capitalize varName} `{varType}` does not define `{prtyName}`. No candidates found."  
     else
-        $"The {varName} `{varType}` does not define the variable or property `{prtyName}`. Candidate(s) tried:{Environment.NewLine}{candidates}."  
+        $"{capitalize varName} `{varType}` does not define `{prtyName}`. Candidate(s) considered:{candidates}."  
 let errID013 delegateDiagnostic = sprintf "%s" delegateDiagnostic // just emit the delegate's diagnostic
 let errID014 signature conflict = sprintf "Language code `%s` was already declared at %s." signature conflict
 let errID015 signature = $"`parent` cannot be referenced from {signature}." 
 let errID016 signature = $"`self` cannot be referenced from {signature}." 
 let errID017 name (candidates:string) = 
-    if candidates.Length > 0 then
-        $"The type `{name}` could not be determined. Candidate(s) tried:{Environment.NewLine}{candidates}."  
-    else
+    if candidates = String.Empty then
         $"The type `{name}` not found, no candidates found."  
+    else
+        $"The type `{name}` could not be determined. Candidate(s) considered:{candidates}."  
 let errID018 name = sprintf "The extension `%s` could not be matched. Declare an extension with this pattern." name
 let errID020 name = $"Missing call of base constructor `{name}`." 
 let errID021 name = $"Duplicate call of base constructor `{name}`."
@@ -95,9 +95,9 @@ let errPR006 proofName argumentName =  $"A proof {proofName} was found, but it h
 let errPR007 nodeTypeName nodeName =  $"{nodeTypeName} is {nodeName} and is missing a proof."
 let errPR008 byInfName numbPrem expectedPremise mismatchingCandidates =
     if numbPrem = 1 then 
-        $"The subsequent `{LiteralByInf} {byInfName}` step requires a premise of the form `{expectedPremise}`. The provided justification does not match this structure. Candidate(s) tried:{mismatchingCandidates}."
+        $"The subsequent `{LiteralByInf} {byInfName}` step requires a premise of the form `{expectedPremise}`. The provided justification does not match this structure. Candidate(s) considered:{mismatchingCandidates}."
     else
-        $"The subsequent `{LiteralByInf} {byInfName}` step requires {numbPrem} premises of the form `{expectedPremise}`.{Environment.NewLine}The provided justification does not match this structure. Candidate(s) tried:{mismatchingCandidates}."
+        $"The subsequent `{LiteralByInf} {byInfName}` step requires {numbPrem} premises of the form `{expectedPremise}`.{Environment.NewLine}The provided justification does not match this structure. Candidate(s) considered:{mismatchingCandidates}."
 
 let errPR009 = "Not all arguments of the proof could be verified."
 let errPR010 keyword expectedRef = $"Justification `{keyword}` expects a reference to {expectedRef}, not to a proof or corollary."
@@ -119,7 +119,7 @@ let errSIG00 fixType arity = sprintf $"Illegal arity `{arity}` using `{fixType}`
 let errSIG01 symbol = $"The symbol `{symbol}` was not declared." 
 let errSIG02 symbol precedence conflict = $"The symbol `{symbol}` was declared with the same precedence of `{precedence}` in {conflict}." 
 let errSIG03 errMsg = errMsg // Returned type is mismatching the mapping type
-let errSIG04 signature candidates = $"No overload matching `{signature}`. Candidate(s) tried:{Environment.NewLine}{candidates}." 
+let errSIG04 signature candidates = $"No overload matching `{signature}`. Candidate(s) considered:{Environment.NewLine}{candidates}." 
 let errSIG05 errMsg = $"Cannot execute assignment; {errMsg}"
 let errSIG06 name oldFromNode newFromNode typeName = 
     match typeName with 
