@@ -40,7 +40,7 @@ let errNSP03 alias = sprintf "Alias `%s` appeared previously in this namespace" 
 let errNSP04 path = sprintf "Circular theory reference detected: `%s`" path
 let errNSP05 pathTypes theory chosenSource = sprintf "Multiple sources %A for theory %s detected (%s was chosen)." pathTypes theory chosenSource
     // identifier-related error codes 
-let errID001 signature conflict = $"Signature `{signature}` was already declared at {conflict}."  
+let errID001 signature conflict = $"Signature `{signature}` was already declared in {conflict}."  
 let errID002 signature incorrectBlockType = $"Cannot find a block to be associated with the proof `{signature}`, found only {incorrectBlockType}."  
 let errID003 signature = $"The proof `{signature}` is missing a block to be associated with."  
 let errID005 signature incorrectBlockType = $"Cannot find a block to be associated with the corollary `{signature}`, found only {incorrectBlockType}."  

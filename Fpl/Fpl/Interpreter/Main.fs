@@ -24,7 +24,9 @@ open Fpl.Interpreter.SymbolTable.Creation.Main
 
 let fplInterpreter input (uri:PathEquivalentUri) fplLibUrl = 
     if input = "~testGEN00~" then
-        emitUnexpectedErrorDiagnostics ("~testGEN00~ error generated")
+        // since GEN00 is a diagnostics for any unexpected errors, this specific input is used to 
+        // mock GEN00 for testing purposes
+        emitUnexpectedErrorDiagnostics ("mocked GEN00 error")
     else
         try
             heap.ClearAll()
