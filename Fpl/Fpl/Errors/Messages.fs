@@ -41,7 +41,7 @@ let errNSP04 path = sprintf "Circular theory reference detected: `%s`" path
 let errNSP05 pathTypes theory chosenSource = sprintf "Multiple sources %A for theory %s detected (%s was chosen)." pathTypes theory chosenSource
     // identifier-related error codes 
 let errID001 signature conflict = $"Signature `{signature}` was already declared in {conflict}."  
-let errID002 signature incorrectBlockType = $"Cannot find a block to be associated with the proof `{signature}`, found only {incorrectBlockType}."  
+let errID002 signature incorrectBlockType = $"No compatible block found for proof `{signature}`; only an axiom with a similar name `{incorrectBlockType}` is present. A theorem‑like statement (theorem, lemma, proposition, corollary) is required."  
 let errID003 signature = $"The proof `{signature}` is missing a block to be associated with."  
 let errID005 signature incorrectBlockType = $"Cannot find a block to be associated with the corollary `{signature}`, found only {incorrectBlockType}."  
 let errID006 signature = $"The corollary `{signature}` is missing a block to be associated with."  

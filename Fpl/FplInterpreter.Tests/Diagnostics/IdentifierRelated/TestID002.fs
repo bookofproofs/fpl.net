@@ -27,6 +27,17 @@ type TestID002() =
     [<DataRow("corollary Test$1 {true} proof Test$1$1 {1: trivial}", 0)>]
     [<DataRow("inf T { pre: true con: true } proof T$1 {1: trivial}", 1)>]
     [<DataRow("ext T x@/\d+/ -> obj {ret x} proof T$1 {1: trivial}", 1)>]
+    [<DataRow("ax Test {true} proof Test$1 {1: trivial}", 1)>]
+    [<DataRow("post Test {true} proof Test$1 {1: trivial}", 1)>]
+
+    [<DataRow("thm Test {true} proof Test$1 {1: trivial}", 0)>]
+    [<DataRow("lem Test {true} proof Test$1 {1: trivial}", 0)>]
+    [<DataRow("prop Test {true} proof Test$1 {1: trivial}", 0)>]
+    [<DataRow("conj Test {true} proof Test$1 {1: trivial}", 1)>]
+    [<DataRow("cor Test$1 {true} proof Test$1$1 {1: trivial}", 0)>]
+
+    [<DataRow("prf Test$1 {1: trivial}prf Test$1$1 {1: trivial}", 1)>]
+
     [<DataRow("uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestID002(fplCode:string, expected) =
