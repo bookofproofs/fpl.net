@@ -249,7 +249,7 @@ let emitID016Diagnostics name pos1 pos2  =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitID017Diagnostics name candidatesNames pos1 pos2 =
+let emitID017Diagnostics name candidatesNames incompatible pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -257,7 +257,7 @@ let emitID017Diagnostics name candidatesNames pos1 pos2 =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = ID017(name, candidatesNames) 
+            Diagnostic.Code = ID017(name, candidatesNames, incompatible) 
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic

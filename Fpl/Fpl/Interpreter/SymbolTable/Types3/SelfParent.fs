@@ -5,6 +5,8 @@ open Fpl.Errors.Messages
 open Fpl.Errors.Emitter
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Basic
+open Fpl.Interpreter.Helpers.Checks
+open Fpl.Interpreter.SymbolTable.Storage.Util
 open Fpl.Interpreter.SymbolTable.Types2.References
 open Fpl.Interpreter.SymbolTable.Types2.Definitions
 open Fpl.Interpreter.SymbolTable.TypeMatching
@@ -50,6 +52,14 @@ type FplBaseConstructorCall(positions: Positions, parent: FplGenericNode) as thi
                 |> Seq.tryHead
                 |> Option.map (fun (pc:FplGenericNode) -> pc :?> FplBase)
 
+            let classCandidates =
+                outerClass.ArgList
+                |> Seq.map (fun fv ->
+                    match fv.RefersTo with
+                    | Some cl -> qualifiedNameSimple cl
+                    | None -> $"unknown class `{fv.FplId}`")
+                |> Seq.sort |> numbered
+
             match baseClassObjectOpt with 
             | Some baseClassObject ->
                 match baseClassObject.RefersTo with
@@ -78,10 +88,11 @@ type FplBaseConstructorCall(positions: Positions, parent: FplGenericNode) as thi
                         registerParentConstructor()
                 | None ->
                     // the base constructor call's id is not among the base classes this class is derived from
-                    let candidates = outerClass.ArgList |> Seq.map (fun fv -> fv.FplId) |> Seq.sort |> numbered
-                    this.ErrorOccurred <- emitID017Diagnostics this.FplId candidates this.StartPos this.EndPos
+                    // therefore, the candidates are those of the outer class
+                    this.ErrorOccurred <- emitID017Diagnostics this.FplId classCandidates true this.StartPos this.EndPos
             | _ ->
-                    this.ErrorOccurred <- emitID017Diagnostics this.FplId "" this.StartPos this.EndPos
+                    // therefore, the candidates are those of the outer class
+                    this.ErrorOccurred <- emitID017Diagnostics this.FplId classCandidates true this.StartPos this.EndPos
                     registerParentConstructor()
         | _ ->
             // this case never happens, 

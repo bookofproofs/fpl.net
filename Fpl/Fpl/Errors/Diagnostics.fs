@@ -84,7 +84,7 @@ type DiagnosticCode =
     | ID014 of string * string
     | ID015 of string 
     | ID016 of string 
-    | ID017 of string * string 
+    | ID017 of string * string * bool
     | ID018 of string 
     | ID020 of string 
     | ID021 of string 
@@ -297,7 +297,7 @@ type DiagnosticCode =
             | ID014 (signature, conflict) -> errID014 signature conflict
             | ID015 signature -> errID015 signature
             | ID016 signature -> errID016 signature
-            | ID017 (name, candidates) -> errID017 name candidates
+            | ID017 (name, candidates, incompatible) -> errID017 name candidates incompatible
             | ID018 name -> errID018 name
             | ID020 name -> errID020 name 
             | ID021 name -> errID021 name

@@ -18,6 +18,7 @@ open System
 open Fpl.Primitives
 open Fpl.Parser.Types
 open Fpl.Errors.Emitter
+open Fpl.Errors.Messages
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Checks
 open Fpl.Interpreter.Helpers.Basic
@@ -126,8 +127,18 @@ let evalIdentifiers ast =
         | _ ->
             match fv with 
             | :? FplMapping 
-            | :? FplVariable -> 
-                fv.ErrorOccurred <- emitID017Diagnostics identifier candidatesNames pos1 pos2
+            | :? FplVariable ->
+                let candidatesNames =
+                    candidates
+                    |> List.map (fun fv ->
+                        if isDefinition fv then
+                            qualifiedNameSimple fv
+                        else
+                            $"{qualifiedNameSimple fv} (incompatible: not a type)"
+                    )
+                    |> List.sort
+                    |> numbered
+                fv.ErrorOccurred <- emitID017Diagnostics identifier candidatesNames false pos1 pos2
             | _ -> correctIds fv
     | Ast.NamespaceIdentifier((pos1, pos2), asts) ->
         asts |> List.map evalRef.Value |> ignore
