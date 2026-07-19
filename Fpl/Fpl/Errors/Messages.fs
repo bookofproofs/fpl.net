@@ -60,9 +60,9 @@ let errID012 prtyName varName varType candidates =
     else
         $"{capitalize varName} `{varType}` does not define `{prtyName}`. Candidate(s) considered:{candidates}."  
 let errID013 delegateDiagnostic = sprintf "%s" delegateDiagnostic // just emit the delegate's diagnostic
-let errID014 signature conflict = sprintf "Language code `%s` was already declared at %s." signature conflict
-let errID015 signature = $"`parent` cannot be referenced from {signature}." 
-let errID016 signature = $"`self` cannot be referenced from {signature}." 
+let errID014 signature conflict = sprintf "Language code `%s` was already declared in %s." signature conflict
+let errID015 signature = $"`parent` cannot be referenced in {signature}." 
+let errID016 signature = $"`self` cannot be referenced in {signature}." 
 let errID017 name (candidates:string) = 
     if candidates = String.Empty then
         $"The type `{name}` not found, no candidates found."  

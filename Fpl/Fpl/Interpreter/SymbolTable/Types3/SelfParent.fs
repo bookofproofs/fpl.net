@@ -150,7 +150,7 @@ type FplParent(positions: Positions, parent: FplGenericNode) as this =
     override this.CheckConsistency (): unit =
         match this.ParentBlock with
         | ScopeSearchResult.FoundIncorrectBlock block ->
-            this.ErrorOccurred <- emitID015Diagnostics $"{getEnglishName block.Name true} '{block.Type(SignatureType.Name)}'" this.StartPos this.EndPos
+            this.ErrorOccurred <- emitID015Diagnostics $"{block.Name} `{block.Type(SignatureType.Name)}`" this.StartPos this.EndPos
         | _ -> ()
         base.CheckConsistency()
 
@@ -215,7 +215,7 @@ type FplSelf(positions: Positions, parent: FplGenericNode) as this =
     override this.CheckConsistency () =
         match this.SelfBlock with
         | ScopeSearchResult.FoundIncorrectBlock block ->
-            this.ErrorOccurred <- emitID016Diagnostics $"{getEnglishName block.Name true} '{block.Type(SignatureType.Name)}'" this.StartPos this.EndPos
+            this.ErrorOccurred <- emitID016Diagnostics $"{block.Name} `{block.Type(SignatureType.Name)}`" this.StartPos this.EndPos
         | _ -> ()
         base.CheckConsistency()
 
