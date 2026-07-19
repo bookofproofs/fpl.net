@@ -1,7 +1,7 @@
 module Fpl.Interpreter.SymbolTable.Types3.SelfParent
 open Fpl.Primitives
 open Fpl.Parser.Types
-open Fpl.Errors.Diagnostics
+open Fpl.Errors.Messages
 open Fpl.Errors.Emitter
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Basic
@@ -78,7 +78,7 @@ type FplBaseConstructorCall(positions: Positions, parent: FplGenericNode) as thi
                         registerParentConstructor()
                 | None ->
                     // the base constructor call's id is not among the base classes this class is derived from
-                    let candidates = outerClass.ArgList |> Seq.map (fun fv -> fv.FplId) |> Seq.sort |> String.concat ", "
+                    let candidates = outerClass.ArgList |> Seq.map (fun fv -> fv.FplId) |> Seq.sort |> numbered
                     this.ErrorOccurred <- emitID017Diagnostics this.FplId candidates this.StartPos this.EndPos
             | _ ->
                     this.ErrorOccurred <- emitID017Diagnostics this.FplId "" this.StartPos this.EndPos

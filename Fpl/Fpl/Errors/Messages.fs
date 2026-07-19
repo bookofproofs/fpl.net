@@ -58,16 +58,16 @@ let errID012 prtyName varName varType candidates =
     if candidates = String.Empty then 
         $"{capitalize varName} `{varType}` does not define `{prtyName}`. No candidates found."  
     else
-        $"{capitalize varName} `{varType}` does not define `{prtyName}`. Candidate(s) considered:{candidates}."  
+        $"{capitalize varName} `{varType}` does not define `{prtyName}`. Possible candidates:{candidates}."  
 let errID013 delegateDiagnostic = sprintf "%s" delegateDiagnostic // just emit the delegate's diagnostic
 let errID014 signature conflict = sprintf "Language code `%s` was already declared in %s." signature conflict
 let errID015 signature = $"`parent` cannot be referenced in {signature}." 
 let errID016 signature = $"`self` cannot be referenced in {signature}." 
 let errID017 name (candidates:string) = 
     if candidates = String.Empty then
-        $"The type `{name}` not found, no candidates found."  
+        $"The type `{name}` was not found, no candidates found."  
     else
-        $"The type `{name}` could not be determined. Candidate(s) considered:{candidates}."  
+        $"The type `{name}` could not be determined. Possible candidates:{candidates}."  
 let errID018 name = sprintf "The extension `%s` could not be matched. Declare an extension with this pattern." name
 let errID020 name = $"Missing call of base constructor `{name}`." 
 let errID021 name = $"Duplicate call of base constructor `{name}`."
@@ -95,9 +95,9 @@ let errPR006 proofName argumentName =  $"A proof {proofName} was found, but it h
 let errPR007 nodeTypeName nodeName =  $"{nodeTypeName} is {nodeName} and is missing a proof."
 let errPR008 byInfName numbPrem expectedPremise mismatchingCandidates =
     if numbPrem = 1 then 
-        $"The subsequent `{LiteralByInf} {byInfName}` step requires a premise of the form `{expectedPremise}`. The provided justification does not match this structure. Candidate(s) considered:{mismatchingCandidates}."
+        $"The subsequent `{LiteralByInf} {byInfName}` step requires a premise of the form `{expectedPremise}`. The provided justification does not match this structure. Possible candidates:{mismatchingCandidates}."
     else
-        $"The subsequent `{LiteralByInf} {byInfName}` step requires {numbPrem} premises of the form `{expectedPremise}`.{Environment.NewLine}The provided justification does not match this structure. Candidate(s) considered:{mismatchingCandidates}."
+        $"The subsequent `{LiteralByInf} {byInfName}` step requires {numbPrem} premises of the form `{expectedPremise}`.{Environment.NewLine}The provided justification does not match this structure. Possible candidates:{mismatchingCandidates}."
 
 let errPR009 = "Not all arguments of the proof could be verified."
 let errPR010 keyword expectedRef = $"Justification `{keyword}` expects a reference to {expectedRef}, not to a proof or corollary."
@@ -119,7 +119,7 @@ let errSIG00 fixType arity = sprintf $"Illegal arity `{arity}` using `{fixType}`
 let errSIG01 symbol = $"The symbol `{symbol}` was not declared." 
 let errSIG02 symbol precedence conflict = $"The symbol `{symbol}` was declared with the same precedence of `{precedence}` in {conflict}." 
 let errSIG03 errMsg = errMsg // Returned type is mismatching the mapping type
-let errSIG04 signature candidates = $"No overload matching `{signature}`. Candidate(s) considered:{Environment.NewLine}{candidates}." 
+let errSIG04 signature candidates = $"No overload matching `{signature}`. Possible candidates:{Environment.NewLine}{candidates}." 
 let errSIG05 errMsg = $"Cannot execute assignment; {errMsg}"
 let errSIG06 name oldFromNode newFromNode typeName = 
     match typeName with 

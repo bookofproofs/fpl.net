@@ -1,1 +1,3 @@
-ext A x@/\d+/ -> obj {ret x} def pred T:A()
+thm A {true} def cl A def cl B:A {ctor B() {dec base.A(); } }
+uses Fpl.SetTheory def cl Test:Set {ctor Test() {dec base.Obj(); } }
+def pred A() {true} def func A()->obj {intr} def pred T(x:A) {intr}
