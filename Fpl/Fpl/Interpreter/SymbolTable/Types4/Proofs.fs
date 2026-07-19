@@ -847,50 +847,6 @@ and FplProof(positions: Positions, parent: FplGenericNode, runOrder) =
             this.SetValue v
         StaticDebug.Debug(this,Debug.Stop)
 
-    /// Tries to find a theorem-like statement for a proof
-    /// and returns different cases of ScopeSearchResult, depending on different semantical error situations.
-    member private this.TryFindAssociatedBlockForProof (fplValue: FplGenericNode) =
-        match fplValue.Parent with
-        | Some theory ->
-
-            let flattenedScopes = flattenScopes theory.Parent.Value
-
-            let potentialProvableName = stripLastDollarDigit (fplValue.FplId)
-
-            // The parent node of the proof is the theory. In its scope
-            // we should find the theorem we are looking for.
-            let buildingBlocksMatchingDollarDigitNameList =
-                // the potential block name of the proof is the
-                // concatenated type signature of the name of the proof
-                // without the last dollar digit
-                flattenedScopes
-                |> List.filter (fun fv -> fv.Name <> PrimRoot && fv.Name <> PrimTheoryL && fv.Name <> PrimDefaultConstructor)
-                |> List.filter (fun fv -> fv.FplId = potentialProvableName)
-
-            let provableBlocklist =
-                buildingBlocksMatchingDollarDigitNameList
-                |> List.filter (fun fv -> isProvable fv)
-
-            let notProvableBlocklist =
-                buildingBlocksMatchingDollarDigitNameList
-                |> List.filter (fun fv -> not (isProvable fv ))
-
-            if provableBlocklist.Length > 1 then
-                ScopeSearchResult.FoundMultiple(
-                    provableBlocklist
-                    |> List.map (fun fv -> sprintf "'%s' %s" fv.Name (fv.Type(SignatureType.Mixed)))
-                    |> String.concat ", "
-                )
-            elif provableBlocklist.Length > 0 then
-                let potentialTheorem = provableBlocklist.Head
-                ScopeSearchResult.FoundAssociate potentialTheorem
-            elif notProvableBlocklist.Length > 0 then
-                let potentialOther = notProvableBlocklist.Head
-                ScopeSearchResult.FoundIncorrectBlock potentialOther
-            else
-                ScopeSearchResult.NotFound
-        | None -> ScopeSearchResult.NotApplicable
-
     /// Issue PR017 for all "trivial" arguments that are not the last one in the proof 
     member private this.CheckTrivialArgumentsPR017 (trivialArgs:FplArgument list) lastArg =
         trivialArgs
@@ -926,7 +882,7 @@ and FplProof(positions: Positions, parent: FplGenericNode, runOrder) =
             this.CheckTrivialArgumentsPR018 trivialArgs
 
     override this.CheckConsistency () = 
-        match this.TryFindAssociatedBlockForProof this with
+        match tryFindAssociatedBlockForProof this with
         | ScopeSearchResult.FoundAssociate potentialParent -> 
             // everything is OK, change the parent of the provable from theory to the found parent 
             this.Parent <- Some potentialParent

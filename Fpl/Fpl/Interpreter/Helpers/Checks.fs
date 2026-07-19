@@ -162,58 +162,64 @@ let isExtension (fv:FplGenericNode) =
     | PrimExtensionL -> true
     | _ -> false
 
-/// Qualified name of this FplValue
-let qualifiedName (fplValue:FplGenericNode) determined =
-    let rec getFullName (fv: FplGenericNode) (first: bool) =
-        let fplValueType =
-            match fv.Name with
-            | LiteralLocL
-            | PrimExclusiveOr 
-            | PrimConjunction
-            | PrimDisjunction 
-            | PrimNegation
-            | PrimImplication
-            | PrimEquivalence 
-            | PrimIsOperator 
-            | PrimExtensionObj 
-            | PrimDelegateEqualL 
-            | PrimDelegateDecrementL 
-            | PrimRefL -> fv.Type(SignatureType.Name)
-            | LiteralCtorL
-            | PrimBaseConstructorCall
-            | PrimDefaultConstructor
-            | PrimQuantorAll
-            | PrimQuantorExists
-            | PrimQuantorExistsN
-            | PrimClassL
-            | PrimPredicateL
-            | PrimFunctionalTermL
-            | PrimMandatoryPredicateL
-            | PrimMandatoryFunctionalTermL -> fv.Type(SignatureType.Mixed)
-            | _ -> fv.FplId
-
+/// Qualified name of this FplGenericNode
+let rec getFullName (fv: FplGenericNode) (first: bool) =
+    let fplValueType =
         match fv.Name with
-        | PrimRoot -> ""
-        | _ -> 
+        | LiteralLocL
+        | PrimExclusiveOr 
+        | PrimConjunction
+        | PrimDisjunction 
+        | PrimNegation
+        | PrimImplication
+        | PrimEquivalence 
+        | PrimIsOperator 
+        | PrimExtensionObj 
+        | PrimDelegateEqualL 
+        | PrimDelegateDecrementL 
+        | PrimRefL -> fv.Type(SignatureType.Name)
+        | LiteralCtorL
+        | PrimBaseConstructorCall
+        | PrimDefaultConstructor
+        | PrimQuantorAll
+        | PrimQuantorExists
+        | PrimQuantorExistsN
+        | PrimClassL
+        | PrimPredicateL
+        | PrimFunctionalTermL
+        | PrimMandatoryPredicateL
+        | PrimMandatoryFunctionalTermL -> fv.Type(SignatureType.Mixed)
+        | _ -> fv.FplId
+
+    match fv.Name with
+    | PrimRoot -> ""
+    | _ -> 
 
 
-            if first then
-                if fv.Parent.Value.Name = PrimRoot then
-                    getFullName fv.Parent.Value false + fplValueType
-                elif (isVar fv) && not (isVar fv.Parent.Value) then
-                    fplValueType
-                elif fplValueType = String.Empty then
-                    getFullName fv.Parent.Value false
-                else
-                    getFullName fv.Parent.Value false + "." + fplValueType
-            elif fv.Parent.Value.Name = PrimRoot then
+        if first then
+            if fv.Parent.Value.Name = PrimRoot then
                 getFullName fv.Parent.Value false + fplValueType
             elif (isVar fv) && not (isVar fv.Parent.Value) then
                 fplValueType
+            elif fplValueType = String.Empty then
+                getFullName fv.Parent.Value false
             else
                 getFullName fv.Parent.Value false + "." + fplValueType
+        elif fv.Parent.Value.Name = PrimRoot then
+            getFullName fv.Parent.Value false + fplValueType
+        elif (isVar fv) && not (isVar fv.Parent.Value) then
+            fplValueType
+        else
+            getFullName fv.Parent.Value false + "." + fplValueType
 
+/// Qualified name of this FplGenericNode
+let qualifiedName (fplValue:FplGenericNode) determined =
     $"{getEnglishName fplValue.Name determined} `{getFullName fplValue true}`"
+
+
+/// Qualified name without English article of this FplGenericNode
+let qualifiedNameSimple (fplValue:FplGenericNode) =
+    $"{fplValue.Name} `{getFullName fplValue true}`"
 
 let checkSIG11Diagnostics (fv:FplGenericNode) =
     let mapOpt = getMapping fv
