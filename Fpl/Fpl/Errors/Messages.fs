@@ -76,7 +76,7 @@ let errID020 name = $"Base constructor `{name}` was not invoked."
 let errID021 name = $"Base constructor `{name}` was invoked more than once."
 let errID022 name = $"`{name}` is intrinsic and has no parameterized constructors. This call supplies parameters."
 let errID023 candidates  = $"Cannot associate the justification with a single block due to ambiguity. Candidates considered:{candidates}." 
-let errID024 signature conflict = sprintf "Expression `%s` was already localized for the same language at %s." signature conflict
+let errID024 signature conflict = sprintf "Expression `%s` was already localized in %s." signature conflict
 let errID025 candidate nodeType  = $"Cannot reference to `{candidate}` inside {nodeType}." 
 let errID027 name = $"Illegal recursion in for statement. The entity `{name}` cannot be used as its own domain." 
 // logic-related error codes
@@ -91,8 +91,8 @@ let errLG004 nodeType = $"`Statement inside {nodeType} might cause side effects.
 let errLG005 name = $"Unnecessary assignment of `{name}` detected (will be implicitly ignored)."
 // proof-related error codes
 let errPR001 incorrectBlockType justificatinItemName = $"Cannot find a `{justificatinItemName}`, found {incorrectBlockType} instead."
-let errPR003 name conflict = $"Argument identifier `{name}` was already declared at {conflict}."  
-let errPR004 name conflict  = $"Justification `{name}` was already declared at {conflict}." 
+let errPR003 name conflict = $"Argument identifier `{name}` was already declared in {conflict}."  
+let errPR004 name conflict  = $"Justification `{name}` was already declared in {conflict}." 
 let errPR005 name =  $"Argument identifier `{name}` not declared in this proof."
 let errPR006 proofName argumentName =  $"A proof {proofName} was found, but it has no argument with the identifier `{argumentName}`."
 let errPR007 nodeTypeName nodeName =  $"{nodeTypeName} is {nodeName} and is missing a proof."
@@ -134,8 +134,8 @@ let errSIG08 arrName indexVarName indexVarType dimType dimNumber = $"Type mismat
 let errSIG09 arrName dimType dimNumber = $"Missing index for array's `{arrName}` {englishOrdinal dimNumber} dimension `{dimType}`"
 let errSIG10 arrName indexVarName indexNumber = $"Array `{arrName}` has less dimensions, {englishOrdinal indexNumber} index `{indexVarName}` not supported"
 let errSIG11 qualifiedWrongCandidate = $"Mapping to {qualifiedWrongCandidate} delegates the map to another type. Map to the other type directly, instead."
-let errSIG12 templateName secondUsage firstUsage firstUsagePos = $"The template `{templateName}` was inconsistently used with `{secondUsage}`, expecting `{firstUsage}` as it was used at `{firstUsagePos}`."
-let errSIG13 stmtName secondUsage firstUsage firstUsagePos = $"Every branch of the {stmtName} must return a value with a type of the first case at `{firstUsagePos}`, which was `{firstUsage}`. This branch returns `{secondUsage}`."
+let errSIG12 templateName secondUsage firstUsage firstUsagePos = $"The template `{templateName}` was inconsistently used with `{secondUsage}`, expecting `{firstUsage}` as it was used in `{firstUsagePos}`."
+let errSIG13 stmtName secondUsage firstUsage firstUsagePos = $"Every branch of the {stmtName} must return a value with a type of the first case in `{firstUsagePos}`, which was `{firstUsage}`. This branch returns `{secondUsage}`."
 let errSIG14 = $"This case will never be matched."
 // structure-related error codes
 let errST001 nodeName = $"The {nodeName} does nothing."
@@ -161,7 +161,7 @@ let errSY014 infixSymbol1 infixSymbol2 precedence =
 let errVAR00 =  "Declaring multiple arrays at once may cause ambiguities."
 let errVAR01 name = $"Variable `{name}` not declared in this scope."
 let errVAR02 name = $"Variable `{name}` was already bound in this quantor."
-let errVAR03 identifier conflict = $"Variable `{identifier}` was already declared at {conflict}."  
+let errVAR03 identifier conflict = $"Variable `{identifier}` was already declared in {conflict}."  
 let errVAR04 name = $"Declared variable `{name}` not used in this scope."
 let errVAR05 name = $"Bound variable `{name}` was not used in this quantor."
 let errVAR06 name oldFromNode newFromNode typeName = 
@@ -173,7 +173,7 @@ let errVAR07 name = $"The {PrimQuantorExistsN} accepts only one bound variable `
 let errVAR08 = "Variadic variables cannot be bound in a quantor."
 let errVAR09 varName varType = $"The variable {varName}:{varType} is free and cannot be used to evaluate this expression."
 let errVAR10 identifier formulaName = $"The variable `{identifier}` is bound more than once in the formula `{formulaName}`."  
-let errVAR11 identifier conflict = $"All variables in a {LiteralLocL} have to be different. The `{identifier}` was used at {conflict}."
+let errVAR11 identifier conflict = $"All variables in a {LiteralLocL} have to be different. The `{identifier}` was used in {conflict}."
 
 // type matching-related errors
 // -----------------------------------------------------------------
