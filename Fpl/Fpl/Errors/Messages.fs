@@ -71,7 +71,7 @@ let errID017 name (candidates:string) incompatible =
         $"The type `{name}` is not a base type of this class. Candidates considered:{candidates}."  
     else
         $"The type `{name}` could not be resolved due to ambiguity or incompatibility. Candidates considered:{candidates}."  
-let errID018 name = sprintf "The extension `%s` could not be matched. Declare an extension with this pattern." name
+let errID018 name = $"No declared extension matches `{name}`. Declare an extension with this pattern." 
 let errID020 name = $"Missing call of base constructor `{name}`." 
 let errID021 name = $"Duplicate call of base constructor `{name}`."
 let errID022 name = $"`{name}` is intrinsic, it has no parameterized constructors. This call uses parameters."
