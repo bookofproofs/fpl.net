@@ -306,12 +306,6 @@ let emitID021Diagnostics identifier pos1 pos2 =
     Some (diagnostic.Code.Code)
 
 let emitID022Diagnostics name pos1 pos2 =
-    let alternative = 
-        if name = LiteralObjL || name = LiteralObj then 
-            "Remove the paramaters."
-        else 
-            $"Either remove the parameters or add an appropriate constructor to the class `{name}`."
-
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -320,7 +314,7 @@ let emitID022Diagnostics name pos1 pos2 =
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ID022 name
-            Diagnostic.Alternatives = Some alternative
+            Diagnostic.Alternatives = Some $"Remove the parameters or add an appropriate constructor to class `{name}`."
         }
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)

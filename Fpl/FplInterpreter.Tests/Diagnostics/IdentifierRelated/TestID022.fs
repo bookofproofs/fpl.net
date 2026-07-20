@@ -20,6 +20,8 @@ type TestID022() =
     [<DataRow("00", "def pred T() {intr}", 0)>]
     [<DataRow("00a", "def pred T() {intr property pred Surjective() {RightTotal()}}", 0)>]
     [<DataRow("01", "def cl T def cl D:T {ctor D() {dec x:ind base.T(x);}}", 1)>]
+    [<DataRow("01a", "def cl T {intr} def cl D:T {ctor D() {dec base.Obj(); } }", 0)>]
+    [<DataRow("01b", "def cl T {ctor T(x:ind) {}} def cl D:T {ctor D(x:ind) {dec base.T(x); } }", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestID022(no:string, fplCode:string, expected) =
