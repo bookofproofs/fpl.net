@@ -223,8 +223,8 @@ let tryFindAssociatedBlockForJustificationItem (fvJi: FplGenericNode) (candidate
         // multiple candidates found
         ScopeSearchResult.FoundMultiple(
             candidates
-            |> List.map (fun fv -> sprintf "'%s' %s" fv.Name (fv.Type(SignatureType.Mixed)))
-            |> String.concat ", "
+            |> List.map (fun fv -> $"`{fv.Name}` {fv.Type SignatureType.Mixed}")
+            |> numbered
         )
 
 /// Tries to find a theorem-like statement, a conjecture, or an axiom for a corollary
