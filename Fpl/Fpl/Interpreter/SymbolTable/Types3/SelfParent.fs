@@ -39,7 +39,7 @@ type FplBaseConstructorCall(positions: Positions, parent: FplGenericNode) as thi
             | Some (:? FplConstructor as ctor) ->
                 if ctor.ParentConstructorCalls.Contains(this.FplId) then 
                     // issue duplicate constructor call diagnostics
-                    this.ErrorOccurred <- emitID021Diagnostics this.FplId this.StartPos
+                    this.ErrorOccurred <- emitID021Diagnostics this.FplId this.StartPos this.EndPos
                 else
                     ctor.ParentConstructorCalls.Add this.FplId |> ignore
             | _ -> ()

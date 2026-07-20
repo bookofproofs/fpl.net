@@ -73,7 +73,7 @@ let errID017 name (candidates:string) incompatible =
         $"The type `{name}` could not be resolved due to ambiguity or incompatibility. Candidates considered:{candidates}."  
 let errID018 name = $"No declared extension matches `{name}`. Declare an extension with this pattern." 
 let errID020 name = $"Base constructor `{name}` was not invoked." 
-let errID021 name = $"Duplicate call of base constructor `{name}`."
+let errID021 name = $"Base constructor `{name}` was invoked more than once."
 let errID022 name = $"`{name}` is intrinsic, it has no parameterized constructors. This call uses parameters."
 let errID023 candidates  = $"Cannot associate a justification with a single block. Found more candidate(s):{Environment.NewLine}{candidates}." 
 let errID024 signature conflict = sprintf "Expression `%s` was already localized for the same language at %s." signature conflict

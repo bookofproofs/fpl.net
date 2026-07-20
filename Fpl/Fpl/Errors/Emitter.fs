@@ -291,14 +291,14 @@ let emitID020Diagnostics identifier pos1 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitID021Diagnostics identifier pos1 =
+let emitID021Diagnostics identifier pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
-            Diagnostic.EndPos = pos1
+            Diagnostic.EndPos = pos2
             Diagnostic.Code = ID021 identifier
             Diagnostic.Alternatives = None 
         }

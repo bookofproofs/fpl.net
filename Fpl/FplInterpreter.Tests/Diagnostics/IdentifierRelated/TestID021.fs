@@ -15,7 +15,10 @@ open TestFplInterpreter.Helpers.Common
 type TestID021() =
 
     [<DataRow("01", "def cl A {intr} def cl B:A {ctor B() {dec base.A(); } }", 0)>]
-    [<DataRow("01a", "def cl A {intr} def cl B:A {ctor B() {dec base.A() base.A(); } }", 1)>]
+    [<DataRow("01b", "def cl A {intr} def cl B {intr} def cl C:A,B {ctor C() {dec base.A() base.A(); } }", 1)>]
+    [<DataRow("01b_", "def cl A {intr} def cl B {intr} def cl C:A,B {ctor C() {dec base.B() base.B(); } }", 1)>]
+    [<DataRow("01c", "def cl A {intr} def cl B {intr} def cl C:A,B {ctor C() {dec base.A() base.B(); } }", 0)>]
+    [<DataRow("01d", "def cl A {intr} def cl B {intr} def cl C:A,B {ctor C() {dec base.B() base.A(); } }", 0)>]
     [<DataRow("02", "def cl A { ctor A() {dec base.Obj(); } }", 0)>]
     [<DataRow("02a", "def cl A { ctor A() {dec base.Obj() base.Obj(); } }", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
