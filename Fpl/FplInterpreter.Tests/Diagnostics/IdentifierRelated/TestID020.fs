@@ -30,7 +30,8 @@ type TestID020() =
     [<DataRow("03b", "def cl A {intr} def cl B:A {intr} def cl C:B { ctor C() {dec base.Obj(); } }", 1)>]
     [<DataRow("04", "uses Fpl.SetTheory def cl Test:Set {ctor Test() {dec base.Obj(); } }", 1)>]
     [<DataRow("04a", "uses Fpl.SetTheory def cl Test:Set {ctor Test() {dec base.Set(); } }", 0)>]
-    [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
+    [<DataRow("05", "def cl A2:B2 { ctor A2() {dec base.B2(); } }", 0)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures", 0)>]
     [<TestMethod>]
     member this.TestID020(no:string, fplCode:string, expected) =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 

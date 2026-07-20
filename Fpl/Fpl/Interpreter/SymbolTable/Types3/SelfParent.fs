@@ -87,11 +87,11 @@ type FplBaseConstructorCall(positions: Positions, parent: FplGenericNode) as thi
                         | None -> ()
                         registerParentConstructor()
                 | None ->
-                    // the base constructor call's id is not among the base classes this class is derived from
-                    // therefore, the candidates are those of the outer class
+                    // The base class is syntactically present, but the declaration is unresolved.
+                    // Still count the constructor invocation so ID020 is not raised incorrectly.
+                    registerParentConstructor()
                     this.ErrorOccurred <- emitID017Diagnostics this.FplId classCandidates true this.StartPos this.EndPos
             | _ ->
-                    // therefore, the candidates are those of the outer class
                     this.ErrorOccurred <- emitID017Diagnostics this.FplId classCandidates true this.StartPos this.EndPos
                     registerParentConstructor()
         | _ ->
