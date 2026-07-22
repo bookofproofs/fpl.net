@@ -1,8 +1,7 @@
 /*
 This theory is experimental and for test purposes only.
-*/ 
+*/
 
-uses Fpl.Commons
 uses Fpl.SetTheory
 
 // definition of a new mathematical object (natural number)

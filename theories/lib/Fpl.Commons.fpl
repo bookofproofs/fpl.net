@@ -783,7 +783,7 @@ def pred Or(x,y: pred) infix "∨" 10
 {
     or(x,y)
 }
-
+ 
 def pred Xor(x,y: pred) infix "⩡" 20 
 {
     xor(x,y)

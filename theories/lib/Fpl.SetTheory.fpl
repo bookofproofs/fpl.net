@@ -133,7 +133,6 @@ axiom SchemaSeparation
 }
 
 
-
 // For any two sets $x,y$ there exists a set $z$ containing them as elements.
 axiom Pairing
 {
