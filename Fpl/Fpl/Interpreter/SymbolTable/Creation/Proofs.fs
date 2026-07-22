@@ -113,25 +113,25 @@ let evalProofs ast =
                 let alternative = 
                     match fvJi.Name with 
                     | PrimJIByAx ->
-                        "Expected a reference to an axiom."
+                        "A reference to an axiom was required."
                     | PrimJIByConj ->
-                        "Expected a reference to a conjecture."
+                        "A reference to a conjecture was required."
                     | PrimJIByCor ->
-                        "Expected a reference to a corollary."
+                        "A reference to a corollary was required."
                     | PrimJIByDef ->
-                        "Expected a reference to a definition (of a class, a predicate, or a functional term)."
+                        "A reference to a definition (of a class, a predicate, or a functional term) was required."
                     | PrimJIByDefVar ->
-                        "Expected a reference to a variable."
+                        "A reference to a variable was required."
                     | PrimJIByInf ->
-                        "Expected a reference to a rule of inference."
+                        "A reference to a rule of inference was required."
                     | PrimJIByProofArgument ->
-                        "Expected a reference to an argument in another proof."
+                        "A reference to an argument in another proof was required."
                     | PrimJIByRefArgument ->
-                        "Expected a reference to a previous argument in this proof."
+                        "A reference to a previous argument in this proof was required."
                     | PrimJIByTheoremLikeStmt ->
-                        "Expected a reference to a theorem, a lemma, or a proposition."
+                        "A reference to a theorem, a lemma, or a proposition was required."
                     | _ -> "Expected another reference."
-                fvJi.ErrorOccurred <- emitPR001Diagnostics (qualifiedName otherBlock false) fvJi.Name fvJi.StartPos fvJi.EndPos alternative
+                fvJi.ErrorOccurred <- emitPR001Diagnostics (qualifiedNameSimple otherBlock) fvJi.Name fvJi.StartPos fvJi.EndPos alternative
             | ScopeSearchResult.FoundMultiple listOfKandidates ->
                 fvJi.ErrorOccurred <- emitID023Diagnostics listOfKandidates fvJi.StartPos fvJi.EndPos
             | _ -> ()

@@ -90,7 +90,7 @@ let errLG003 nodeTypeName nodeName = $"Evaluation of `{nodeTypeName}` produced `
 let errLG004 nodeType = $"A statement within {nodeType} may introduce side effects."
 let errLG005 name = $"Unnecessary assignment to `{name}` detected; the statement will be ignored."
 // proof-related error codes
-let errPR001 incorrectBlockType justificatinItemName = $"Cannot find a `{justificatinItemName}`, found {incorrectBlockType} instead."
+let errPR001 incorrectBlockType justificatinItemName = $"Expected a {justificatinItemName}, but {incorrectBlockType} was found instead."
 let errPR003 name conflict = $"Argument identifier `{name}` was already declared in {conflict}."  
 let errPR004 name conflict  = $"Justification `{name}` was already declared in {conflict}." 
 let errPR005 name =  $"Argument identifier `{name}` not declared in this proof."

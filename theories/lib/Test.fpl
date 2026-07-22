@@ -1,1 +1,138 @@
-def cl N thm T {true} prf T$1 { 1: ex x:obj {is(x,N)} 2. 1 |- ∃ x:obj {x is N}} thm T1 {true} prf T1$1 { 1. T$1:1 |- false } 
+
+thm A {true} thm T {true} proof T$1 {1. bydef A |- trivial }
+prop A {true} thm T {true} proof T$1 {1. bydef A |- trivial }
+lem A {true} thm T {true} proof T$1 {1. bydef A |- trivial }
+cor A$1 {true} thm T {true} proof T$1 {1. bydef A |- trivial }
+proof A$1 {1: trivial}thm T {true} proof T$1 {1. bydef A |- trivial }
+ax A {true} thm T {true} proof T$1 {1. bydef A |- trivial }
+inf A {pre:true con:true} thm T {true} proof T$1 {1. bydef A |- trivial }
+loc A := !tex: ""; thm T {true} proof T$1 {1. bydef A |- trivial }
+ext A x@/\d+/ -> obj {ret x} thm T {true} proof T$1 {1. bydef A |- trivial }
+cor A$1 {true} thm T {true} proof T$1 {1. bydef A |- trivial }
+proof A$1 {1: trivial}thm T {true} proof T$1 {1. bydef A |- trivial }
+def pred A() {intr} thm T {true} proof T$1 {1. A |- trivial }
+def pred A() {intr} thm T {true} proof T$1 {1. byax A |- trivial }
+def pred A() {intr} thm T {true} proof T$1 {1. byconj A |- trivial }
+def pred A() {intr} thm T {true} proof T$1 {1. byinf A |- trivial }
+def func A()->obj {intr} thm T {true} proof T$1 {1. A |- trivial }
+def func A()->obj {intr} thm T {true} proof T$1 {1. byax A |- trivial }
+def func A()->obj {intr} thm T {true} proof T$1 {1. byconj A |- trivial }
+def func A()->obj {intr} thm T {true} proof T$1 {1. byinf A |- trivial }
+ax A {true} thm T {true} proof T$1 {1. A |- trivial }
+ax A {true} thm T {true} proof T$1 {1. byconj A |- trivial }
+ax A {true} thm T {true} proof T$1 {1. byinf A |- trivial }
+ax A {true} thm T {true} proof T$1 {1. bydef A |- trivial }
+thm A {true} thm T {true} proof T$1 {1. byax A |- trivial }
+prop A {true} thm T {true} proof T$1 {1. byax A |- trivial }
+lem A {true} thm T {true} proof T$1 {1. byax A |- trivial }
+cor A$1 {true} thm T {true} proof T$1 {1. byax A |- trivial }
+proof A$1 {1: trivial}thm T {true} proof T$1 {1. byax A |- trivial }
+def pred A() {true} thm T {true} proof T$1 {1. byax A |- trivial }
+def func A()->obj {intr} thm T {true} proof T$1 {1. byax A |- trivial }
+def cl A {intr} thm T {true} proof T$1 {1. byax A |- trivial }
+conj A {true} thm T {true} proof T$1 {1. byax A |- trivial }
+inf A {pre:true con:true} thm T {true} proof T$1 {1. byax A |- trivial }
+""loc A := !tex: ""; thm T {true} proof T$1 {1. byax A |- trivial }
+ext A x@/\d+/ -> obj {ret x} thm T {true} proof T$1 {1. byax A |- trivial }
+conj A {true} thm T {true} proof T$1 {1. A |- trivial }
+conj A {true} thm T {true} proof T$1 {1. byax A |- trivial }
+conj A {true} thm T {true} proof T$1 {1. byinf A |- trivial }
+conj A {true} thm T {true} proof T$1 {1. bydef A |- trivial }
+thm A {true} thm T {true} proof T$1 {1. byconj A |- trivial }
+prop A {true} thm T {true} proof T$1 {1. byconj A |- trivial }
+lem A {true} thm T {true} proof T$1 {1. byconj A |- trivial }
+cor A$1 {true} thm T {true} proof T$1 {1. byconj A |- trivial }
+proof A$1 {1: trivial}thm T {true} proof T$1 {1. byconj A |- trivial }
+def pred A() {true} thm T {true} proof T$1 {1. byconj A |- trivial }
+def func A()->obj {intr} thm T {true} proof T$1 {1. byconj A |- trivial }
+def cl A {intr} thm T {true} proof T$1 {1. byconj A |- trivial }
+ax A {true} thm T {true} proof T$1 {1. byconj A |- trivial }
+inf A {pre:true con:true} thm T {true} proof T$1 {1. byconj A |- trivial }
+loc A := !tex: ""; thm T {true} proof T$1 {1. byconj A |- trivial }
+ext A x@/\d+/ -> obj {ret x} thm T {true} proof T$1 {1. byconj A |- trivial }
+thm A {true} thm T {true} proof T$1 {1. bydef A |- trivial }
+thm A {true} thm T {true} proof T$1 {1. byinf A |- trivial }
+thm A {true} thm T {true} proof T$1 {1. byconj A |- trivial }
+cor A$1 {true} thm T {true} proof T$1 {1. A |- trivial }
+proof A$1 {1: trivial}thm T {true} proof T$1 {1. A |- trivial }
+def pred A() {true} thm T {true} proof T$1 {1. A |- trivial }
+def func A()->obj {intr} thm T {true} proof T$1 {1. A |- trivial }
+def cl A {intr} thm T {true} proof T$1 {1. A |- trivial }
+conj A {true} thm T {true} proof T$1 {1. A |- trivial }
+inf A {pre:true con:true} thm T {true} proof T$1 {1. A |- trivial }
+loc A := !tex: ""; thm T {true} proof T$1 {1. A |- trivial }
+ext A x@/\d+/ -> obj {ret x} thm T {true} proof T$1 {1. A |- trivial }
+lem A {true} thm T {true} proof T$1 {1. bydef A |- trivial }
+lem A {true} thm T {true} proof T$1 {1. byinf A |- trivial }
+lem A {true} thm T {true} proof T$1 {1. byconj A |- trivial }
+prop A {true} thm T {true} proof T$1 {1. bydef A |- trivial }
+prop A {true} thm T {true} proof T$1 {1. byinf A |- trivial }
+prop A {true} thm T {true} proof T$1 {1. byconj A |- trivial }
+inf A {pre: true con: true} thm T {true} proof T$1 {1. A |- trivial }
+inf A {pre: true con: true} thm T {true} proof T$1 {1. byax A |- trivial }
+inf A {pre: true con: true} thm T {true} proof T$1 {1. bydef A |- trivial }
+thm A {true} thm T {true} proof T$1 {1. byinf A |- trivial }
+prop A {true} thm T {true} proof T$1 {1. byinf A |- trivial }
+lem A {true} thm T {true} proof T$1 {1. byinf A |- trivial }
+cor A$1 {true} thm T {true} proof T$1 {1. byinf A |- trivial }
+proof A$1 {1: trivial}thm T {true} proof T$1 {1. byinf A |- trivial }
+def pred A() {true} thm T {true} proof T$1 {1. byinf A |- trivial }
+def func A()->obj {intr} thm T {true} proof T$1 {1. byinf A |- trivial }
+def cl A {intr} thm T {true} proof T$1 {1. byinf A |- trivial }
+ax A {true} thm T {true} proof T$1 {1. byinf A |- trivial }
+loc A := !tex: ""; thm T {true} proof T$1 {1. byinf A |- trivial }""
+ext A x@/\d+/ -> obj {ret x} thm T {true} proof T$1 {1. byinf A |- trivial }
+cor A$1 {true} thm T {true} proof T$1 {1. A$1:1 |- trivial }
+thm A {true} thm T {true} proof T$1 {1. A$1:1 |- trivial }
+inf A {pre: true con: true} thm T {true} proof T$1 {1. A$1:1 |- trivial }
+prop A {true} thm T {true} proof T$1 {1. A$1:1 |- trivial }
+lem A {true} thm T {true} proof T$1 {1. A$1:1 |- trivial }
+cor A$1 {true} thm T {true} proof T$1 {1. A$1:1 |- trivial }
+def pred A() {true} thm T {true} proof T$1 {1. A$1:1 |- trivial }
+def func A()->obj {intr} thm T {true} proof T$1 {1. A$1:1 |- trivial }
+def cl A {intr} thm T {true} proof T$1 {1. A$1:1 |- trivial }
+ax A {true} thm T {true} proof T$1 {1. A$1:1 |- trivial }
+loc A := !tex: ""; thm T {true} proof T$1 {1. A$1:1 |- trivial }
+ext A x@/\d+/ -> obj {ret x} thm T {true} proof T$1 {1. A$1:1 |- trivial }
+proof A$1 {1: trivial}thm T {true} proof T$1 {1. bycor A$1 |- trivial }
+thm A {true} thm T {true} proof T$1 {1. bycor A$1 |- trivial }
+thm A {true} proof A$1 {1: trivial}thm T {true} proof T$1 {1. bycor A$1 |- trivial }
+thm A {true} cor A$1 {true} thm T {true} proof T$1 {1. bycor A$1 |- trivial }
+inf A {pre: true con: true} thm T {true} proof T$1 {1. bycor A$1 |- trivial }
+prop A {true} thm T {true} proof T$1 {1. bycor A$1 |- trivial }
+lem A {true} thm T {true} proof T$1 {1. bycor A$1 |- trivial }
+proof A$1 {1: trivial}thm T {true} proof T$1 {1. bycor A$1 |- trivial }
+def pred A() {true} thm T {true} proof T$1 {1. bycor A$1 |- trivial }
+def func A()->obj {intr} thm T {true} proof T$1 {1. bycor A$1 |- trivial }
+def cl A {intr} thm T {true} proof T$1 {1. bycor A$1 |- trivial }
+ax A {true} thm T {true} proof T$1 {1. bycor A$1 |- trivial }
+loc A := !tex: ""; thm T {true} proof T$1 {1. bycor A$1 |- trivial }
+ext A x@/\d+/ -> obj {ret x} thm T {true} proof T$1 {1. bycor A$1 |-    trivial }
+ax A {true} thm T {true} proof T$1 {1. bydef A |- trivial }
+conj A {true} thm T {true} proof T$1 {1. bydef A |- trivial }
+thm A {true} thm T {true} proof T$1 {1. bydef A |- trivial }
+lem A {true} thm T {true} proof T$1 {1. bydef A |- trivial }
+inf A {pre: true con: true} thm T {true} proof T$1 {1. bydef A |- trivial }
+def cl A {intr} thm T {true} proof T$1 {1. A$1:1 |- trivial }
+def pred A() {intr} thm T {true} proof T$1 {1. A$1:1 |- trivial }
+def func A()->obj {intr} thm T {true} proof T$1 {1. A$1:1 |- trivial }
+ax A {true} thm T {true} proof T$1 {1. A$1:1 |- trivial }
+conj A {true} thm T {true} proof T$1 {1. A$1:1 |- trivial }
+thm A {true} thm T {true} proof T$1 {1. A$1:1 |- trivial }
+lem A {true} thm T {true} proof T$1 {1. A$1:1 |- trivial }
+prop A {true} thm T {true} proof T$1 {1. A$1:1 |- trivial }
+cor A$1 {true} thm T {true} proof T$1 {1. A$1:1 |- trivial }
+thm A {true} cor A$1 {true} thm T {true} proof T$1 {1. A$1:1 |- trivial }
+inf A {pre: true con: true} thm T {true} proof T$1 {1. A$1:1 |- trivial }
+cor A$1 {true} thm T {true} proof T$1 {1. A |- trivial }
+proof A$1 {1: trivial}thm T {true} proof T$1 {1. A$1 |- trivial }
+proof A$1 {1: trivial}thm T {true} proof T$1 {1. A |- trivial }
+def cl A {intr} thm T {true} proof T$1 {1. A$1 |- trivial }
+def pred A() {intr} thm T {true} proof T$1 {1. A$1 |- trivial }
+def func A()->obj {intr} thm T {true} proof T$1 {1. A$1 |- trivial }
+ax A {true} thm T {true} proof T$1 {1. A$1 |- trivial }
+conj A {true} thm T {true} proof T$1 {1. A$1 |- trivial }
+thm A {true} thm T {true} proof T$1 {1. A$1 |- trivial }
+lem A {true} thm T {true} proof T$1 {1. A$1 |- trivial }
+prop A {true} thm T {true} proof T$1 {1. A$1 |- trivial }
+inf A {pre: true con: true} thm T {true} proof T$1 {1. A$1 |- trivial }
