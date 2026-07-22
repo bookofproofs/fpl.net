@@ -40,9 +40,9 @@ let errGEN00 message = $"Unexpected error occurred: {message}"
 let errNSP00 fileNamePattern = $"The theory `{fileNamePattern}` was not found." 
 let errNSP01 fileName innerErrMsg = $"The theory `{fileName}` was found but could not be loaded: {innerErrMsg}"  
 let errNSP02 url innerErrMsg = $"The theory `{url}` was found but could not be downloaded: {innerErrMsg}" 
-let errNSP03 alias = sprintf "Alias `%s` appeared previously in this namespace" alias
-let errNSP04 path = sprintf "Circular theory reference detected: `%s`" path
-let errNSP05 pathTypes theory chosenSource = sprintf "Multiple sources %A for theory %s detected (%s was chosen)." pathTypes theory chosenSource
+let errNSP03 alias = $"Alias `{alias}` was already declared in this namespace." 
+let errNSP04 path = $"Circular theory reference detected: `{path}`." 
+let errNSP05 pathTypes theory chosenSource = $"Multiple sources {pathTypes} for theory `{theory}` were detected (`{chosenSource}` was selected)."
     // identifier-related error codes 
 let errID001 signature conflict = $"Signature `{signature}` was already declared in {conflict}."  
 let errID002 signature incorrectBlockType = $"No compatible block found for proof `{signature}`; found a similar name of {incorrectBlockType}."  
