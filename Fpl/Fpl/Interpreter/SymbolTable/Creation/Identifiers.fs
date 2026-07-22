@@ -211,7 +211,7 @@ let evalIdentifiers ast =
                 fv.RefersTo <- Some candidate
                 match fv.UltimateBlockNode with
                 | Some block ->
-                    fv.ErrorOccurred <- checkID025Diagnostics (qualifiedName candidate false) block.Name fv.StartPos fv.EndPos
+                    fv.ErrorOccurred <- checkID025Diagnostics (qualifiedNameSimple candidate) block.Name fv.StartPos fv.EndPos
                 | _ -> ()
         | _ -> ()
     | _ ->

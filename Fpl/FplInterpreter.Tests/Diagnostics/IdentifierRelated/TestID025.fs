@@ -27,6 +27,11 @@ type TestID025() =
     [<DataRow("01m", """proof A$1 {1: trivial}ax T { A$1 }""", 1)>]
     [<DataRow("01n", """ext A x@/\d+/ -> obj {ret x} ax T { A }""", 1)>]
     [<DataRow("01o", """loc A := !tex: "\alpha" ; ax T { A }""", 1)>]
+    [<DataRow("01p", """def cl A {intr} thm T { A }""", 1)>]
+    [<DataRow("01q", """def cl A {intr} lem T { A }""", 1)>]
+    [<DataRow("01r", """def cl A {intr} prop T { A }""", 1)>]
+    [<DataRow("01s", """def cl A {intr} conj T { A }""", 1)>]
+    [<DataRow("01t", """def cl A {intr} cor T$1 { A }""", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestID025(no:string, fplCode:string, expected) =
