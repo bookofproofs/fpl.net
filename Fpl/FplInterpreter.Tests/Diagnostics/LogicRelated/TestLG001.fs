@@ -116,13 +116,13 @@ type TestLG001() =
             let result = filterByErrorCode ad code.Code
             Assert.AreEqual<int64>(expected, result.Head.StartPos.Column)
         
-    [<DataRow("00", """axiom A {dec x,y:obj; impl(x,y)}""", "Cannot evaluate `implication` because its argument `x` typed `obj` could not be evaluated as a predicate. This issue might be subsequent to other errors to be resolved first.")>]
-    [<DataRow("01", """def cl T {intr} axiom A {impl(T,true)}""", "Cannot evaluate `implication` because its argument `T` could not be evaluated as a predicate. This issue might be subsequent to other errors to be resolved first.")>]
-    [<DataRow("02", """axiom A {dec x,y:ind; impl(x,y)}""", "Cannot evaluate `implication` because its argument `x` typed `ind` could not be evaluated as a predicate. This issue might be subsequent to other errors to be resolved first.")>]
-    [<DataRow("03", """axiom A {dec x,y:func; impl(x,y)}""", "Cannot evaluate `implication` because its argument `x` typed `func` could not be evaluated as a predicate. This issue might be subsequent to other errors to be resolved first.")>]
-    [<DataRow("04", """axiom A {impl(x,y)}""", "Cannot evaluate `implication` because its argument `x` typed `undef` could not be evaluated as a predicate. This issue might be subsequent to other errors to be resolved first.")>]
-    [<DataRow("05", """axiom A {impl(T(),true)}""", "Cannot evaluate `implication` because its argument `T()` typed `T` could not be evaluated as a predicate. This issue might be subsequent to other errors to be resolved first.")>]
-    [<DataRow("06", """axiom A {impl(T,true)}""", "Cannot evaluate `implication` because its argument `T` could not be evaluated as a predicate. This issue might be subsequent to other errors to be resolved first.")>]
+    [<DataRow("00", """axiom A {dec x,y:obj; impl(x,y)}""", "Cannot evaluate `implication` because its argument `x` of type `obj` could not be evaluated as a predicate. This issue may be caused by earlier errors.")>]
+    [<DataRow("01", """def cl T {intr} axiom A {impl(T,true)}""", "Cannot evaluate `implication` because its argument `T` could not be evaluated as a predicate. This issue may be caused by earlier errors.")>]
+    [<DataRow("02", """axiom A {dec x,y:ind; impl(x,y)}""", "Cannot evaluate `implication` because its argument `x` of type `ind` could not be evaluated as a predicate. This issue may be caused by earlier errors.")>]
+    [<DataRow("03", """axiom A {dec x,y:func; impl(x,y)}""", "Cannot evaluate `implication` because its argument `x` of type `func` could not be evaluated as a predicate. This issue may be caused by earlier errors.")>]
+    [<DataRow("04", """axiom A {impl(x,y)}""", "Cannot evaluate `implication` because its argument `x` of type `undef` could not be evaluated as a predicate. This issue may be caused by earlier errors.")>]
+    [<DataRow("05", """axiom A {impl(T(),true)}""", "Cannot evaluate `implication` because its argument `T()` of type `T` could not be evaluated as a predicate. This issue may be caused by earlier errors.")>]
+    [<DataRow("06", """axiom A {impl(T,true)}""", "Cannot evaluate `implication` because its argument `T` could not be evaluated as a predicate. This issue may be caused by earlier errors.")>]
     [<TestMethod>]
     member this.TestLG001MsgSpecificity(no:string, fplCode:string, (expected:string)) =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 

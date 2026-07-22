@@ -84,8 +84,8 @@ let errLG001 typeOfPredicate argument typeOfExpression =
     if argument = typeOfExpression then 
         $"Cannot evaluate `{typeOfPredicate}` because its argument `{argument}` could not be evaluated as a predicate."
     else
-        $"Cannot evaluate `{typeOfPredicate}` because its argument `{argument}` typed `{typeOfExpression}` could not be evaluated as a predicate."
-let errLG002 nodeTypeName times = $"Possible infinite recursion detected, `{nodeTypeName}` was called for more than {times} times.`."
+        $"Cannot evaluate `{typeOfPredicate}` because its argument `{argument}` of type `{typeOfExpression}` could not be evaluated as a predicate."
+let errLG002 nodeTypeName times = $"Possible infinite recursion detected, `{nodeTypeName}` was called more than {times} times.`."
 let errLG003 nodeTypeName nodeName = $"`{nodeTypeName}` evaluates to `false` and cannot be {nodeName}."
 let errLG004 nodeType = $"`Statement inside {nodeType} might cause side effects."
 let errLG005 name = $"Unnecessary assignment of `{name}` detected (will be implicitly ignored)."
@@ -179,27 +179,27 @@ let errVAR11 identifier conflict = $"All variables in a {LiteralLocL} have to be
 // -----------------------------------------------------------------
 let errTypeMismatchStandard aIsCallByReference aName aType pName pType = 
     if aIsCallByReference then 
-        Some $"The expression `{aName}` typed `{aType}` doesn't match the parameter `{pName}` typed `{pType}`"
+        Some $"The expression `{aName}` of type `{aType}` doesn't match the parameter `{pName}` of type `{pType}`"
     else
-        Some $"The application `{aName}` typed `{aType}` doesn't match the parameter `{pName}` typed `{pType}`"
+        Some $"The application `{aName}` of type `{aType}` doesn't match the parameter `{pName}` of type `{pType}`"
 
-let errTypeMismatchMissingArgument pName pType = Some $"Missing argument for the parameter `{pName}` typed `{pType}`"
-let errTypeMismatchMissingParameter aName aType = Some $"No matching parameter for the argument `{aName}` typed `{aType}`"
+let errTypeMismatchMissingArgument pName pType = Some $"Missing argument for the parameter `{pName}` of type `{pType}`"
+let errTypeMismatchMissingParameter aName aType = Some $"No matching parameter for the argument `{aName}` of type `{aType}`"
 let errTypeMismatchClassValueNotAllowed actualClassType = Some $"A class `{actualClassType}` cannot be passed directly as a value. Use a class constructor `{actualClassType}(...)` instead"
 let errTypeMismatchReturnType aIsCallByReference aName aType pType blockName =
     if aIsCallByReference then 
-        Some $"The returned expression `{aName}` typed `{aType}` doesn't match the type `{pType}` this {blockName} returns."
+        Some $"The returned expression `{aName}` of type `{aType}` doesn't match the type `{pType}` this {blockName} returns."
     else 
-        Some $"The returned application `{aName}` typed `{aType}` doesn't match the type `{pType}` this {blockName} returns."
+        Some $"The returned application `{aName}` of type `{aType}` doesn't match the type `{pType}` this {blockName} returns."
 let errTypeMismatchInheritanceCycle = "cycle detected"
 let errTypeMismatchInheritanceCrossing currName crossName = $"cross-inheritance is not supported. `{currName}` is already a base type of `{crossName}`."
 let errTypeMismatchInheritanceDuplicate duplicate = $"duplicate inheritance from `{duplicate}` detected."
 let errTypeMismatchInheritanceFromNonDefinition blockName = $"Expecting a class, a functional term, or a predicate node, got {blockName}"
 let errTypeMismatchInheritanceWrongBase aIsCallByReference aName aType pName pType = 
     if aIsCallByReference then 
-        Some $"The expression `{aName}` to the class `{aType}` neither matches the parameter `{pName}` typed `{pType}` nor the base classes of this type."
+        Some $"The expression `{aName}` to the class `{aType}` neither matches the parameter `{pName}` of type `{pType}` nor the base classes of this type."
     else
-        Some $"The application `{aName}` instantiating the class `{aType}` neither matches the parameter `{pName}` typed `{pType}` nor the base classes of this type."
+        Some $"The application `{aName}` instantiating the class `{aType}` neither matches the parameter `{pName}` of type `{pType}` nor the base classes of this type."
 let errTypeMismatchInheritanceUndetermined aIsCallByReference aName aType pName pType = 
     if aIsCallByReference then 
         Some $"The type `{aType}` of the expression `{aName}` could not be determined. The parameter `{pName}` requires the type `{pType}` or any type derived from it"
@@ -211,7 +211,7 @@ let errTypeMismatchUndefined aIsCallByReference aName pName pType =
     else
         Some $"The type of application `{aName}` could not be determined. The parameter `{pName}` requires the type `{pType}"
 let errTypeMismatchVariadic aName aType pName pType pTypeId = 
-    Some $"Variadic enumeration of `{aName}` typed `{aType}` doesn't match the parameter `{pName}` typed `{pType}`, try `{aName}:{pType}` as argument or use `{pName}:{pTypeId}[{LiteralInd}]` as parameter type"
+    Some $"Variadic enumeration of `{aName}` of type `{aType}` doesn't match the parameter `{pName}` of type `{pType}`, try `{aName}:{pType}` as argument or use `{pName}:{pTypeId}[{LiteralInd}]` as parameter type"
 
 // expression-matching-related errors
 // -----------------------------------------------------------------
@@ -222,7 +222,7 @@ let errExprMismatchQuantorVariableTypes aName pName xName yName index = Some $"f
 
 let errExprMismatchQuantorVariableCounts aName pName aVarsCount pVarsCount = Some $"found {aVarsCount} quantor variables in `{aName}`, expected {pVarsCount} in `{pName}`" 
 
-let errExprMismatchOpenFormulas aName aVarsOpenClosedStr aOpenFormulaType pName pVarsOpenClosedStr pOpenFormulaType = Some $"found expression `{aName}` ({aVarsOpenClosedStr} typed `{aOpenFormulaType}`), expected `{pName}` which is {pVarsOpenClosedStr} typed `{pOpenFormulaType}`"
+let errExprMismatchOpenFormulas aName aVarsOpenClosedStr aOpenFormulaType pName pVarsOpenClosedStr pOpenFormulaType = Some $"found expression `{aName}` ({aVarsOpenClosedStr} of type `{aOpenFormulaType}`), expected `{pName}` which is {pVarsOpenClosedStr} of type `{pOpenFormulaType}`"
 
 let errExprMismatchExpectedEndOfFormula (aName) = Some $"`found {aName}`, expected end of formula"
 let errExprMismatchFoundEndOfFormula pName = Some $"found end of formula, expected `{pName}`"

@@ -398,7 +398,7 @@ let emitLG001Diagnostics argType argName typeOfPredicate pos1 pos2 =
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = LG001(typeOfPredicate, argName, argType)
-            Diagnostic.Alternatives = Some "This issue might be subsequent to other errors to be resolved first." 
+            Diagnostic.Alternatives = Some "This issue may be caused by earlier errors." 
         }
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
