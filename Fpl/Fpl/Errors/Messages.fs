@@ -78,7 +78,7 @@ let errID022 name = $"`{name}` is intrinsic and has no parameterized constructor
 let errID023 candidates  = $"Cannot associate the justification with a single block due to ambiguity. Candidates considered:{candidates}." 
 let errID024 signature conflict = sprintf "Expression `%s` was already localized in %s." signature conflict
 let errID025 candidate nodeType  = $"Cannot reference to {candidate} inside {nodeType}." 
-let errID027 name = $"Illegal recursion in for statement. The entity `{name}` cannot be used as its own domain." 
+let errID027 name = $"Illegal recursion detected in `for` statement. The entity `{name}` cannot serve as its own iteration domain." 
 // logic-related error codes
 let errLG001 typeOfPredicate argument typeOfExpression = 
     if argument = typeOfExpression then 
