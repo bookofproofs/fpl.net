@@ -86,7 +86,7 @@ let errLG001 typeOfPredicate argument typeOfExpression =
     else
         $"Cannot evaluate `{typeOfPredicate}` because its argument `{argument}` of type `{typeOfExpression}` could not be evaluated as a predicate."
 let errLG002 nodeTypeName times = $"Possible infinite recursion detected, `{nodeTypeName}` was called more than {times} times.`."
-let errLG003 nodeTypeName nodeName = $"`{nodeTypeName}` evaluates to `false` and cannot be {nodeName}."
+let errLG003 nodeTypeName nodeName = $"Evaluation of `{nodeTypeName}` produced `false`; the node cannot be accepted as {nodeName}."
 let errLG004 nodeType = $"`Statement inside {nodeType} might cause side effects."
 let errLG005 name = $"Unnecessary assignment of `{name}` detected (will be implicitly ignored)."
 // proof-related error codes
