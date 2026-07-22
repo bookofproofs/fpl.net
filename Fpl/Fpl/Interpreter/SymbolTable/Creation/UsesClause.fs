@@ -198,9 +198,9 @@ let private findDuplicateAliases (eaniList: EvalAliasedNamespaceIdentifier list)
 
 /// Emits diagnostics if the same FPL theory can be found in multiple sources.
 let private emitDiagnosticsForDuplicateFiles (availableSources:FplSources) (eani:EvalAliasedNamespaceIdentifier) =
-    availableSources.GroupedWithPreferedSource
-    |> List.iter (fun (fileName, path, chosenPathType, pathTypes, theoryName) ->
-        if pathTypes.Length > 1 then 
+    availableSources.FindWithPattern eani.FileNamePattern
+    |> List.iter (fun (_, _, chosenPathType, pathTypes, theoryName) ->
+        if pathTypes.Length > 1 then
             emitNSP05Diagnostics pathTypes theoryName chosenPathType eani.StartPos eani.EndPos
     )
     |> ignore
