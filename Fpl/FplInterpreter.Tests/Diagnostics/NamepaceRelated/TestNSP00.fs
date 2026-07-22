@@ -15,16 +15,42 @@ open TestFplInterpreter.Helpers.Common
 [<TestClass>]
 type TestNSP00() =
 
+    [<TestInitialize>]
+    member _.Initialize() =
+        ad.Clear()
+
     [<TestMethod>]
     member this.TestNSP00() =
         let code = NSP00 "Bla.fpl"
         printf "Trying %s" code.Message
         let input = """
-        uses Bla 
+        uses Bla
         """
         let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         let uri = PathEquivalentUri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
         fplInterpreter input uri fplLibUrl |> ignore
         let result = filterByErrorCode ad code.Code
         Assert.AreEqual<int>(1, result.Length)
+
+    [<TestMethod>]
+    member this.TestNSP00NoDiagnosticWhenTheoryExists() =
+        let currDir = Directory.GetCurrentDirectory()
+        let theoryFileName = "Nsp00Existing.fpl"
+        let theoryPath = Path.Combine(currDir, theoryFileName)
+        let code = NSP00 theoryFileName
+        let input = """
+        uses Nsp00Existing
+        """
+        let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+        let uri = PathEquivalentUri(Path.Combine(currDir, "TestNSP00NoDiagnosticWhenTheoryExists.fpl"))
+
+        File.WriteAllText(theoryPath, """def pred Nsp00Existing() { true }""")
+
+        try
+            fplInterpreter input uri fplLibUrl |> ignore
+            let result = filterByErrorCode ad code.Code
+            Assert.AreEqual<int>(0, result.Length)
+        finally
+            if File.Exists(theoryPath) then
+                File.Delete(theoryPath)
 
