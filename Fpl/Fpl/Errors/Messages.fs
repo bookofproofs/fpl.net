@@ -93,8 +93,8 @@ let errLG005 name = $"Unnecessary assignment to `{name}` detected; the statement
 let errPR001 incorrectBlockType justificatinItemName = $"Expected a {justificatinItemName}, but {incorrectBlockType} was found instead."
 let errPR003 name conflict = $"Argument identifier `{name}` was previously declared in {conflict}."  
 let errPR004 name = $"The justification item `{name}` is a duplicate. It was first declared earlier in the same argument scope." 
-let errPR005 name =  $"Argument identifier `{name}` not declared in this proof."
-let errPR006 proofName argumentName =  $"A proof {proofName} was found, but it has no argument with the identifier `{argumentName}`."
+let errPR005 name =  $"Argument identifier `{name}` is not declared in this proof."
+let errPR006 proofName argumentName =  $"Proof {proofName} exists, but it declares no argument with the identifier `{argumentName}`."
 let errPR007 nodeTypeName nodeName =  $"{nodeTypeName} is {nodeName} and is missing a proof."
 let errPR008 byInfName numbPrem expectedPremise mismatchingCandidates =
     if numbPrem = 1 then 
@@ -235,4 +235,6 @@ let errExprMismatchVarNumbDifferent numA varsA numP pName =
     let plural = if numA > 1 then "variables" else "variable"
     Some $"found {numA} {plural} ({varsA}), expected {numP} in {pName}"
 let (errExprMismatchOK:string option) = None
+
+
 
