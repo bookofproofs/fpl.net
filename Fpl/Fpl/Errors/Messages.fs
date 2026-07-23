@@ -91,8 +91,8 @@ let errLG004 nodeType = $"A statement within {nodeType} may introduce side effec
 let errLG005 name = $"Unnecessary assignment to `{name}` detected; the statement will be ignored."
 // proof-related error codes
 let errPR001 incorrectBlockType justificatinItemName = $"Expected a {justificatinItemName}, but {incorrectBlockType} was found instead."
-let errPR003 name conflict = $"Argument identifier `{name}` was already declared in {conflict}."  
-let errPR004 name conflict  = $"Justification `{name}` was already declared in {conflict}." 
+let errPR003 name conflict = $"Argument identifier `{name}` was previously declared in {conflict}."  
+let errPR004 name = $"The justification item `{name}` is a duplicate. It was first declared earlier in the same argument scope." 
 let errPR005 name =  $"Argument identifier `{name}` not declared in this proof."
 let errPR006 proofName argumentName =  $"A proof {proofName} was found, but it has no argument with the identifier `{argumentName}`."
 let errPR007 nodeTypeName nodeName =  $"{nodeTypeName} is {nodeName} and is missing a proof."

@@ -102,7 +102,7 @@ type DiagnosticCode =
     // proof-related error codes
     | PR001 of string * string 
     | PR003 of string * string
-    | PR004 of string * string
+    | PR004 of string 
     | PR005 of string
     | PR006 of string * string
     | PR007 of string * string
@@ -315,7 +315,7 @@ type DiagnosticCode =
             // proof-related error codes
             | PR001 (incorrectBlockType, justificatinItemName) -> errPR001 incorrectBlockType justificatinItemName
             | PR003 (name, conflict) -> errPR003 name conflict
-            | PR004 (name, conflict)  -> errPR004 name conflict
+            | PR004 name  -> errPR004 name 
             | PR005 name ->  errPR005 name
             | PR006 (proofName, argumentName) -> errPR006 proofName argumentName
             | PR007 (nodeTypeName, nodeName) -> errPR007 nodeTypeName nodeName

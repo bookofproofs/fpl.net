@@ -19,11 +19,12 @@ type TestPR004() =
     [<DataRow("""proof T$1 { 1. 1, 1 |- trivial qed}""", 1)>]
     [<DataRow("""proof T$1 { 1. 1, 1, 1 |- trivial qed}""", 2)>]
     [<DataRow("""proof T$1 { 1. 1, 2, 1 |- trivial qed}""", 1)>]
+    [<DataRow("""proof T$1 { 1. 1, 1 |- trivial 2. 1, 1 |- trivial qed}""", 2)>]
     [<DataRow("uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestPR004(fplCode:string, expected:int) =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = PR004 ("", "")
+            let code = PR004 ""
             runTestHelper "TestPR004.fpl" fplCode code expected

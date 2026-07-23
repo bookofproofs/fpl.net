@@ -292,8 +292,8 @@ type FplGenericJustificationItem(positions: Positions, parent: FplGenericNode) =
             |> Seq.map (fun argJi -> argJi.Type(SignatureType.Mixed))
             |> Seq.tryFind (fun otherId -> otherId = thisJustificationItemId)
         match alreadyAddedIdOpt with
-        | Some otherId ->
-            this.ErrorOccurred <- emitPR004Diagnostics thisJustificationItemId otherId this.StartPos this.EndPos 
+        | Some _ ->
+            this.ErrorOccurred <- emitPR004Diagnostics thisJustificationItemId this.StartPos this.EndPos 
         | _ -> ()
         addExpressionToParentArgList this
 

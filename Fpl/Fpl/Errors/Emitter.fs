@@ -569,7 +569,7 @@ let emitPR003Diagnostics alreadyDeclaredMixedStr qualifiedStartPosConflictStr po
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitPR004Diagnostics alreadyDeclaredTypeStr qualifiedStartPosConflictStr pos1 pos2 =
+let emitPR004Diagnostics alreadyDeclaredTypeStr pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -577,7 +577,7 @@ let emitPR004Diagnostics alreadyDeclaredTypeStr qualifiedStartPosConflictStr pos
             Diagnostic.Severity = DiagnosticSeverity.Warning
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = PR004(alreadyDeclaredTypeStr, qualifiedStartPosConflictStr)
+            Diagnostic.Code = PR004 alreadyDeclaredTypeStr 
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
@@ -892,7 +892,7 @@ let emitSIG03Diagnostics errMsg pos1 pos2 =
     Some (diagnostic.Code.Code)
 
 
-/// Occures in the following cases:
+/// Occurs in the following cases:
 /// 1: A variable type declaration uses a non-existing type reference.
 /// 2: A mapping type declaration uses a non-existing type reference.
 /// 3: A dotted reference uses a signature for call-by-value that doesn't match. 
