@@ -611,7 +611,7 @@ let emitPR006Diagnostics proofName argumentName pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitPR007Diagnostics nodeTypeName nodeName pos1 pos2 = 
+let emitPR007Diagnostics nodeName nodeTypeName pos1 pos2 = 
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -619,7 +619,7 @@ let emitPR007Diagnostics nodeTypeName nodeName pos1 pos2 =
             Diagnostic.Severity = DiagnosticSeverity.Warning
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = PR007 (nodeTypeName, getEnglishName nodeName false)
+            Diagnostic.Code = PR007 (nodeName, capitalize nodeTypeName)
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic

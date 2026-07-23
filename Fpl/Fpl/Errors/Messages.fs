@@ -95,7 +95,7 @@ let errPR003 name conflict = $"Argument identifier `{name}` was previously decla
 let errPR004 name = $"The justification item `{name}` is a duplicate. It was first declared earlier in the same argument scope." 
 let errPR005 name =  $"Argument identifier `{name}` is not declared in this proof."
 let errPR006 proofName argumentName =  $"Proof {proofName} exists, but it declares no argument with the identifier `{argumentName}`."
-let errPR007 nodeTypeName nodeName =  $"{nodeTypeName} is {nodeName} and is missing a proof."
+let errPR007 nodeName nodeTypeName =  $"{nodeTypeName} `{nodeName}` requires a proof, but none was provided."
 let errPR008 byInfName numbPrem expectedPremise mismatchingCandidates =
     if numbPrem = 1 then 
         $"The subsequent `{LiteralByInf} {byInfName}` step requires a premise of the form `{expectedPremise}`. The provided justification does not match this structure. Candidates considered:{mismatchingCandidates}."
