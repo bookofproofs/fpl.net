@@ -110,7 +110,7 @@ type DiagnosticCode =
     | PR009 
     | PR010 of string * string 
     | PR011 of string * string
-    | PR012 
+    | PR012 of string
     | PR013
     | PR014
     | PR015 of string
@@ -216,7 +216,7 @@ type DiagnosticCode =
             | PR009 -> "PR009"
             | PR010 _ -> "PR010"
             | PR011 _ -> "PR011"
-            | PR012 -> "PR012"
+            | PR012 _ -> "PR012"
             | PR013 -> "PR013"
             | PR014 -> "PR014"
             | PR015 _ -> "PR015"
@@ -323,7 +323,7 @@ type DiagnosticCode =
             | PR009 -> errPR009 
             | PR010 (keyword, expectedRef) -> errPR010 keyword expectedRef
             | PR011 (keyword, expectedRef) -> errPR011 keyword expectedRef
-            | PR012 -> errPR012
+            | PR012 providedIdentifer -> errPR012 providedIdentifer
             | PR013 -> errPR013
             | PR014 -> errPR014
             | PR015 argId -> errPR015 argId

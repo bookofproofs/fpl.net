@@ -16,6 +16,7 @@ type TestPR014() =
 
     [<DataRow("00", "proof T$1 {1. A |- trivial}", 0)>]
     [<DataRow("01", "proof T$1 {1. A:2 |- trivial}", 1)>]
+    [<DataRow("02", "thm A {true} proof A$1 {1: trivial} thm T {true} proof T$1 {1. A |- trivial }", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestPR014(no:string, fplCode:string, expected) =

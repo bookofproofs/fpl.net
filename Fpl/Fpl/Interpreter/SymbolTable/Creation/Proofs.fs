@@ -182,7 +182,10 @@ let evalProofs ast =
             heap.Eval.PopEvalStack()
         | Some LiteralByCor, None, _ -> 
             // byCor justification a reference to a corollary
-            parent.ErrorOccurred <- emitPR012Diagnostics pos1 pos2 
+            match predicateIdentifierAst with
+            | Ast.PredicateIdentifier(_, providedIdentifier) ->
+                parent.ErrorOccurred <- emitPR012Diagnostics providedIdentifier pos1 pos2
+            | _ -> ()
         | Some LiteralByDef, Some _, None -> 
             // byDef justification cannot be used together with a proof reference
             parent.ErrorOccurred <- emitPR010Diagnostics LiteralByDef LiteralDefL pos1 pos2 

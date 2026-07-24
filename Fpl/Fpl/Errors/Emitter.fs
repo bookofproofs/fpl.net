@@ -681,7 +681,7 @@ let emitPR011Diagnostics keyword exptectedRef pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitPR012Diagnostics pos1 pos2 =
+let emitPR012Diagnostics providedIdentifier pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -689,7 +689,7 @@ let emitPR012Diagnostics pos1 pos2 =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = PR012 
+            Diagnostic.Code = PR012 providedIdentifier
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
