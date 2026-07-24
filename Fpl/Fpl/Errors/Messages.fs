@@ -98,13 +98,13 @@ let errPR006 proofName argumentName =  $"Proof {proofName} exists, but it declar
 let errPR007 nodeName nodeTypeName =  $"{nodeTypeName} `{nodeName}` requires a proof, but none was provided."
 let errPR008 byInfName numbPrem expectedPremise mismatchingCandidates =
     if numbPrem = 1 then 
-        $"The subsequent `{LiteralByInf} {byInfName}` step requires a premise of the form `{expectedPremise}`. The provided justification does not match this structure. Candidates considered:{mismatchingCandidates}."
+        $"The subsequent `{LiteralByInf} {byInfName}` step requires a premise pattern `{expectedPremise}`. The provided justification does not match it. Candidates considered:{mismatchingCandidates}."
     else
-        $"The subsequent `{LiteralByInf} {byInfName}` step requires {numbPrem} premises of the form `{expectedPremise}`.{Environment.NewLine}The provided justification does not match this structure. Candidates considered:{mismatchingCandidates}."
+        $"The subsequent `{LiteralByInf} {byInfName}` step requires {numbPrem} premise patterns `{expectedPremise}`.{Environment.NewLine}The provided justification does not match them. Candidates considered:{mismatchingCandidates}."
 
 let errPR009 = "Not all arguments of the proof could be verified."
-let errPR010 keyword expectedRef = $"Justification `{keyword}` expects a reference to {expectedRef}, not to a proof or corollary."
-let errPR011 keyword expectedRef = $"Justification `{keyword}` expects a reference to {expectedRef}, not to an argument in some proof."
+let errPR010 keyword expectedRef = $"Justification `{keyword}` expects a reference to {expectedRef}, but the provided reference points to a proof or a corollary."
+let errPR011 keyword expectedRef = $"Justification `{keyword}` expects a reference to {expectedRef}, but the provided reference points to an argument in some proof."
 let errPR012 = $"Justification `{LiteralByCor}` expects a reference to a corollary."
 let errPR013 = $"Add the keyword `{LiteralByCor}` when referencing to corollaries to increase readability."
 let errPR014 = "Justification expects a reference to a theorem-like statement without any more specific references."
@@ -215,19 +215,19 @@ let errTypeMismatchVariadic aName aType pName pType pTypeId =
 
 // expression-matching-related errors
 // -----------------------------------------------------------------
-let errExprMismatchExistsN aFplId aName pFplId pName = Some $"found mismatching exists `{aFplId}` in `{aName}`, expecting type `{pFplId}` in `{pName}`"
+let errExprMismatchExistsN aFplId aName pFplId pName = Some $"type mismatch in exists quantor: `{aFplId}` was provided in `{aName}`, but type `{pFplId}` was required in `{pName}`"
 
 
-let errExprMismatchQuantorVariableTypes aName pName xName yName index = Some $"found mismatching type `{xName}` at {englishOrdinal index} quantor variable in `{aName}`, expecting type `{yName}` in `{pName}`"
+let errExprMismatchQuantorVariableTypes aName pName xName yName index = Some $"type mismatch: `{xName}` was provided in the {englishOrdinal index} bound variable in `{aName}`, but `{yName}` was required in `{pName}`"
 
-let errExprMismatchQuantorVariableCounts aName pName aVarsCount pVarsCount = Some $"found {aVarsCount} quantor variables in `{aName}`, expected {pVarsCount} in `{pName}`" 
+let errExprMismatchQuantorVariableCounts aName pName aVarsCount pVarsCount = Some $"found {aVarsCount} bound variables in `{aName}`, expected {pVarsCount} in `{pName}`" 
 
 let errExprMismatchOpenFormulas aName aVarsOpenClosedStr aOpenFormulaType pName pVarsOpenClosedStr pOpenFormulaType = Some $"found expression `{aName}` ({aVarsOpenClosedStr} of type `{aOpenFormulaType}`), expected `{pName}` which is {pVarsOpenClosedStr} of type `{pOpenFormulaType}`"
 
 let errExprMismatchExpectedEndOfFormula (aName) = Some $"`found {aName}`, expected end of formula"
 let errExprMismatchFoundEndOfFormula pName = Some $"found end of formula, expected `{pName}`"
-let errExprMismatchVarMatchedDifferently varName expectedExpr actualExpr = Some $"variable `{varName}` matched with different formulas `{expectedExpr}` and `{actualExpr}`"
-let errExprMismatchVarMatchedDifferentlyQuantor varName expectedExpr actualExpr = Some $"variable `{varName}` matched with different quantor formulas `{expectedExpr}` and `{actualExpr}`.{Environment.NewLine}Both formulas were different even using placeholders for bound variables."
+let errExprMismatchVarMatchedDifferently varName expectedExpr actualExpr = Some $"variable `{varName}` was matched with different formulas `{expectedExpr}` and `{actualExpr}`"
+let errExprMismatchVarMatchedDifferentlyQuantor varName expectedExpr actualExpr = Some $"variable `{varName}` was matched with different quantor formulas `{expectedExpr}` and `{actualExpr}`.{Environment.NewLine}Both formulas were different even using placeholders for bound variables."
 let errExprMismatchMsgStandard aName pName = Some $"found `{aName}`, expected `{pName}`"
 let errExprMismatchMsgParensOnlyLeft aName pName = Some $"found `{aName}` in parens, expected `{pName}` without parens"
 let errExprMismatchMsgParensOnlyRight aName pName = Some $"found `{aName}` without parens, expected `{pName}` in parens"
