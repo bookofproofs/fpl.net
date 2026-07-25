@@ -111,7 +111,6 @@ let errPR014 = "The justification must reference the top‑level theorem‑like 
 let errPR015 argId = $"Cannot revoke argument `{argId}` because it was not assumed in this proof."
 let errPR016 argId = $"Cannot revoke argument `{argId}` because revocation follows LIFO order."
 let errPR017 = $"The `{LiteralTrivial}` justification may only be used on the final argument of a proof."
-let errPR018 = $"A `{LiteralTrivial}` argument is missing exactly one justification."
 let errPR019 justificationType1 justificationType2 = $"Unsupported mix of justifications in a single argument (`{justificationType1}` with `{justificationType2}`)."
 let errPR020 expectedNum actualNum = $"This {PrimJIByInf} requires {expectedNum} proceeding expressions, got {actualNum}."
 let errPR021 mismatchingCandidates inferredFormula justificationName = $"The argument `{inferredFormula}` cannot be inferred from the proceeding results. {justificationName} found following candidate(s):{mismatchingCandidates}."

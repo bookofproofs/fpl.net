@@ -91,7 +91,6 @@
         <Compile Include="Diagnostics\ProofRelated\TestPR015.fs" />
         <Compile Include="Diagnostics\ProofRelated\TestPR016.fs" />
         <Compile Include="Diagnostics\ProofRelated\TestPR017.fs" />
-        <Compile Include="Diagnostics\ProofRelated\TestPR018.fs" />
         <Compile Include="Diagnostics\ProofRelated\TestPR019.fs" />
         <Compile Include="Diagnostics\ProofRelated\TestPR020.fs" />
         <Compile Include="Diagnostics\ProofRelated\TestPR021.fs" />

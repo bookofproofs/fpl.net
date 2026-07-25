@@ -855,16 +855,6 @@ and FplProof(positions: Positions, parent: FplGenericNode, runOrder) =
             this.ErrorOccurred <- emitPR017Diagnostics trivialArg.StartPos trivialArg.EndPos
         )
 
-    /// Issue PR018 for all "trivial" arguments that have not exactly one justification
-    member private this.CheckTrivialArgumentsPR018 (trivialArgs:FplArgument list) =
-        trivialArgs
-        |> List.filter (fun trivialArg -> trivialArg.Justification.IsSome)
-        |> List.map (fun trivialArg -> trivialArg.Justification.Value)
-        |> List.filter (fun justification -> justification.ArgList.Count <> 1)
-        |> List.iter (fun justification ->
-            this.ErrorOccurred <- emitPR018Diagnostics justification.StartPos justification.EndPos
-        )
-
     member private this.CheckTrivialArguments() =
         let orderedArgs = this.OrderedArguments
         if orderedArgs.Length > 0 then
@@ -879,7 +869,7 @@ and FplProof(positions: Positions, parent: FplGenericNode, runOrder) =
                 |> List.map (fun arg -> arg :?> FplArgument)
 
             this.CheckTrivialArgumentsPR017 trivialArgs lastArg
-            this.CheckTrivialArgumentsPR018 trivialArgs
+
 
     override this.CheckConsistency () = 
         match tryFindAssociatedBlockForProof this with

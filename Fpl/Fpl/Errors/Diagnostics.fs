@@ -116,7 +116,6 @@ type DiagnosticCode =
     | PR015 of string
     | PR016 of string
     | PR017
-    | PR018
     | PR019 of string * string
     | PR020 of int * int
     | PR021 of string * string * string 
@@ -222,7 +221,6 @@ type DiagnosticCode =
             | PR015 _ -> "PR015"
             | PR016 _ -> "PR016"
             | PR017 -> "PR017"
-            | PR018 -> "PR018"
             | PR019 _ -> "PR019"
             | PR020 _ -> "PR020"
             | PR021 _ -> "PR021"
@@ -329,7 +327,6 @@ type DiagnosticCode =
             | PR015 argId -> errPR015 argId
             | PR016 argId -> errPR016 argId
             | PR017 -> errPR017
-            | PR018 -> errPR018
             | PR019 (justificationType1, justificationType2) -> errPR019 justificationType1 justificationType2
             | PR020 (expectedNum, actualNum) -> errPR020 expectedNum actualNum
             | PR021 (mismatchingCandidates, inferredFormula, justificationName) -> errPR021 mismatchingCandidates inferredFormula justificationName
