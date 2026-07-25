@@ -746,7 +746,7 @@ let emitPR016Diagnostics argumentID lastAssumedArgumentId pos1 pos2 =
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = PR016 argumentID
-            Diagnostic.Alternatives = Some $"Did you mean `{lastAssumedArgumentId}`?" 
+            Diagnostic.Alternatives = Some $"The most recent assumption is `{lastAssumedArgumentId}`." 
         }
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)

@@ -7,7 +7,7 @@ open TestFplInterpreter.Helpers.Common
 
 (* PR014
    Purpose: Report that a justification refers to a more specific sub-item instead of a theorem‑like statement.
-   What it indicates: A justification was given a reference that targets a subcomponent (argument index, corollary/proof argument reference, etc.) rather than the top‑level theorem/lemma/proposition/conjecture it must reference. Example: using `A:2` where `A` (the theorem) is expected.
+   What it indicates: A justification was given a reference that targets a subcomponent (argument index, corollary/proof argument reference, etc.) rather than the top‑level theorem/lemma/proposition/conjecture it must reference. 
    Use: Helps locate justification steps that reference the wrong granularity of a block so authors can point the justification to the correct theorem‑like statement.
    Action / Treat: Change the justification to reference the enclosing theorem‑like statement (e.g., `A` or `bycor A$1`) or use the appropriate justification form that accepts sub‑references. Treat PR014 as an error that must be fixed for the justification to be valid. *)
 
