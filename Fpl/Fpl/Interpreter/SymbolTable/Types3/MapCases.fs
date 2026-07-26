@@ -130,7 +130,7 @@ type FplMapCases(positions: Positions, parent: FplGenericNode) as this =
         _consistentCaseType.TrySetTemplateUsage (this.GetMapElse()) (SIG13("", "", "", "").Code)
         match _consistentCaseType.ErrorOccurred with
         | Some errMsg -> 
-            // Since there were proceeding errors regarding inconsistent Type Ids of some branches
+            // Since there were preceding errors regarding inconsistent Type Ids of some branches
             // set the TypeId of this FplMapCases to undefined
             this.TypeId <- LiteralUndef  
          | _ ->

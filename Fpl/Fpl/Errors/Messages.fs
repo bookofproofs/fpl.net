@@ -113,7 +113,7 @@ let errPR016 argId = $"Cannot revoke argument `{argId}` because revocation follo
 let errPR017 = $"The `{LiteralTrivial}` justification may only be used on the final argument of a proof."
 let errPR019 justificationType1 justificationType2 = $"Mixed justification types in a single argument are not supported (`{justificationType1}` with `{justificationType2}`)."
 let errPR020 expectedNum actualNum = $"Justification `{PrimJIByInf}` requires {expectedNum} premise expressions, but it received {actualNum}."
-let errPR021 mismatchingCandidates inferredFormula justificationName = $"The argument `{inferredFormula}` cannot be inferred from the proceeding results. {justificationName} found following candidate(s):{mismatchingCandidates}."
+let errPR021 mismatchingCandidates inferredFormula justificationName = $"The argument `{inferredFormula}` cannot be inferred from the preceding results. {justificationName} found the following candidates:{mismatchingCandidates}."
 let errPR022 reason = $"The argument inference was prevented. Reason: {reason}."
 
 // signature-related error codes

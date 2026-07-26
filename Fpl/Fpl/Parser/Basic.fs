@@ -81,7 +81,7 @@ let IW : Parser<unit,unit> =
 let attemptSW = SW <|> (IW .>> attempt (lookAhead (choice [skipChar '('; skipChar ')'; skipChar '{'; skipChar ','; skipChar ';'; skipChar '[' ]))) <!> "atemptSW"
 
 // Prevents parsers like skipChar ')', skipChar '}', skipChar ']', or definitionProperty
-// that can be proceeded by whitespaces to interfer with infix operators in a way
+// that can be proceeded by whitespaces to interfere with infix operators in a way
 // that would break FParsec backtracking error reporting needed for improved FPL diagnostics.
 let safeProceedingSpace p =
     lookAhead (IW >>. p)

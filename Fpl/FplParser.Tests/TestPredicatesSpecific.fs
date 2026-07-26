@@ -256,7 +256,7 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestPredicateWithArgs3a () =
-        let result = run (predicateWithQualification .>> eof) """x[ProceedingResults(x,y)]"""
+        let result = run (predicateWithQualification .>> eof) """x[PrecedingResults(x,y)]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

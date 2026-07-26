@@ -43,6 +43,6 @@ type EvalStack() =
 
     member this.Clear() = _valueStack.Clear()
 
-    member this.GetProceedingReference() =
+    member this.GetPrecedingReference() =
         _valueStack
         |> Seq.tryFind (fun fv -> fv.Name = PrimRefL)

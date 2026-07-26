@@ -535,8 +535,8 @@ type TestSIG04() =
     [<DataRow("69", """ext Digits x@/\d+/ -> Digits {ret x} def cl A {dec myX:Digits; ctor A(x:Digits) {dec myX:=x;}} def cl B:A { ctor B(x:Digits) {dec base.A(del.Decrement(x)); } } def pred T() { dec v:B v:=B(@2); false}""", 0)>]
     [<DataRow("70", """def cl Nat def func Succ(n: Nat) -> Nat ext Digits x@/\d+/ -> Nat {ret mcases (| true: Nat() ? Succ(self(delegate.Decrement(x))) ) }""", 0)>]    
     [<DataRow("71", """def pred Equal(x,y: tpl) infix "=" 50 { del.Equal(x,y) } def cl Nat def cl Zero:Nat def func Succ(n:Nat)->Nat def pred T() {all x,y:Nat {(x = Succ(y))}}""", 0)>]    
-    [<DataRow("72", "def pred S() {dec parent():=true; true}", 0)>] // SIG04 won't be issued due to proceeding errors (ID015)
-    [<DataRow("72a", "thm S {dec self():=true; true}", 0)>] // SIG04 won't be issued due to proceeding errors (ID015)
+    [<DataRow("72", "def pred S() {dec parent():=true; true}", 0)>] // SIG04 won't be issued due to preceding errors (ID015)
+    [<DataRow("72a", "thm S {dec self():=true; true}", 0)>] // SIG04 won't be issued due to preceding errors (ID015)
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestSIG04(no:string, fplCode:string, expected) =

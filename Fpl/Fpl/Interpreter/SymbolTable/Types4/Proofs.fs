@@ -251,9 +251,9 @@ and FplJustificationItemByInf(positions: Positions, parent: FplGenericNode) =
                 | Some premisePredicateListNode, Some conclusion ->
                     let premisePredicateList = premisePredicateListNode.ArgList |> Seq.toList
                     // (all justification items but the first one, which is the "byinf" one)
-                    let (proceedingJustificationItems: FplGenericNode list) = allBefore this just.GetOrderedJustificationItems
+                    let (precedingJustificationItems: FplGenericNode list) = allBefore this just.GetOrderedJustificationItems
                     let (inferredExpressionLists : (FplGenericJustificationItem * FplGenericNode list) list) = 
-                        proceedingJustificationItems
+                        precedingJustificationItems
                         |> List.filter (fun fv -> fv :? FplGenericJustificationItem)
                         |> List.map (fun fv -> fv :?> FplGenericJustificationItem)
                         |> List.map (fun fv -> fv, fv.InferredExprCandidates)
@@ -412,7 +412,7 @@ and FplJustification(positions: Positions, parent: FplGenericNode) =
         let justItems = (this.ArgList |> Seq.toList)
         match justItems |> List.tryLast with
         | Some lastJustItem when lastJustItem.Name = PrimJIByInf ->
-            () // only when the last justification item in a row is a "byinf" item, users can match different justification types proceeding it
+            () // only when the last justification item in a row is a "byinf" item, users can match different justification types preceding it
         | _ ->
             // else (i.e. last just item is different from a "byinf" item)
             match findTwoDifferentNames justItems with
@@ -509,7 +509,7 @@ and FplArgument(positions: Positions, parent: FplGenericNode, runOrder) =
                             if justNames.Length = 2 then 
                                 $"The justification by argument `{justNames[1]}` in another proof `{justNames[0]}`"
                             else
-                                $"The {lastJustificationOfArgument.Name}` `{lastJustificationOfArgument.Type SignatureType.Name}`"
+                                $"The justification `{lastJustificationOfArgument.Name}` `{lastJustificationOfArgument.Type SignatureType.Name}`"
                         this.ErrorOccurred <- emitPR021Diagnostics mismatchingCandidates inferredExpr prettyJustificationName argInference.StartPos argInference.EndPos
                         this.SetDefaultValue()
                 | _, _ ->

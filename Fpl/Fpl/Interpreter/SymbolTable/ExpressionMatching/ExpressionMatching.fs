@@ -244,7 +244,7 @@ let private matchPremiseWithSomeExpressions (exprList:FplGenericNode list) (pre:
     )
     result |> Seq.toList, (numbered failedCandidates)
 
-/// Flag that a proof justification or inference cannot collect proceeding results
+/// Flag that a proof justification or inference cannot collect preceding results
 let issuePR022AndSetDefault (fv:FplGenericHasValue) (nodeOpt:FplGenericNode option) (varOpt:FplGenericNode option) =
     match nodeOpt, varOpt with
     | Some node, Some var ->
@@ -261,7 +261,7 @@ let issuePR022AndSetDefault (fv:FplGenericHasValue) (nodeOpt:FplGenericNode opti
         fv.ErrorOccurred <- emitPR022Diagnostics reason fv.StartPos fv.EndPos
     fv.SetDefaultValue()
 
-/// Flag that a proof justification or inference cannot collect proceeding results with a special reason
+/// Flag that a proof justification or inference cannot collect preceding results with a special reason
 let issuePR022SpecialReasonAndSetDefault (fv:FplGenericHasValue) reason =
     fv.ErrorOccurred <- emitPR022Diagnostics reason fv.StartPos fv.EndPos
     fv.SetDefaultValue()

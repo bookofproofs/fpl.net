@@ -106,7 +106,7 @@ type FplAssignment(positions: Positions, parent: FplGenericNode) as this =
             // something has been assigned to itself
             this.ErrorOccurred <- emitLG005Diagnostics nameAssignedValue this.ArgList[1].StartPos this.ArgList[1].EndPos
 
-        // remember proceeding errors of references used in the assignment (if any)
+        // remember preceding errors of references used in the assignment (if any)
         checkErrorOccuredInReference this.ArgList[0]
         checkErrorOccuredInReference this.ArgList[1]
         match this.ErrorOccurred, this.Assignee, this.AssignedValue with
@@ -164,7 +164,7 @@ type FplAssignment(positions: Positions, parent: FplGenericNode) as this =
 
         match this.ErrorOccurred, this.ArgList[1], this.AssignedValue with 
         | Some _, _, _ ->
-            () // skip assignment, if any proceeding errors occurred
+            () // skip assignment, if any preceding errors occurred
         | None, (:? FplGenericHasValue as ref), Some (:? FplVariableArray as assignedValue) ->
             this.SetAssignee assignedValue assignedValue
         | None, (:? FplGenericHasValue as ref), Some (:? FplGenericIsValue as assignedValue) ->

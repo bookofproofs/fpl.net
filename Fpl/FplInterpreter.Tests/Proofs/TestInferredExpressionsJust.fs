@@ -636,15 +636,15 @@ type TestInferredExpressionsJust() =
     [<DataRow("PrenexUnpackXorEx_02", "inf PrenexUnpackXorEx{dec p:pred q:pred(z:tpl); pre:xor(p,ex x:tpl{q(x)}) con:ex x:tpl{xor(p,q(x))}} thm T {true} proof T$1 {1: xor(all y:obj {is(y,M)}, ex z:obj {xor(is(z,K), true)}) 2. 1, byinf PrenexUnpackXorEx |- true}", "∃ z:obj {∀ y:obj {y is M} ⩡ ((z is K) ⩡ true)}", 1)>]
     [<DataRow("PrenexUnpackXorEx_03", "inf PrenexUnpackXorEx{dec p:pred q:pred(z:tpl); pre:xor(p,ex x:tpl{q(x)}) con:ex x:tpl{xor(p,q(x))}} thm T {true} proof T$1 {1: xor(not (xor(true,false)), ex x:obj {impl(is(x,N), false)}) 2. 1, byinf PrenexUnpackXorEx |- true}", "∃ x:obj {¬(true ⩡ false) ⩡ ((x is N) ⇒ false)}", 1)>]
 
-    // Proceeding2Results: pre: p, q
-    [<DataRow("Proceeding2Results_01", "inf Proceeding2Results{dec p,q:pred; pre:p,q con:and(p,q)} thm T {true} proof T$1 {1: all x:obj {is(x, N)} 2: ex y:obj {is(y, M)} 3. 1, 2, byinf Proceeding2Results |- true}", "∀ x:obj {x is N} ∧ ∃ y:obj {y is M}", 1)>]
-    [<DataRow("Proceeding2Results_02", "inf Proceeding2Results{dec p,q:pred; pre:p,q con:and(p,q)} thm T {true} proof T$1 {1: iif(true, false) 2: not (xor(true, false)) 3. 1, 2, byinf Proceeding2Results |- true}", "(true ⇔ false) ∧ ¬(true ⩡ false)", 1)>]
-    [<DataRow("Proceeding2Results_03", "inf Proceeding2Results{dec p,q:pred; pre:p,q con:and(p,q)} thm T {true} proof T$1 {1: and(true, false) 2: impl(true, false) 3. 1, 2, byinf Proceeding2Results |- true}", "(true ∧ false) ∧ (true ⇒ false)", 1)>]
+    // Preceding2Results: pre: p, q
+    [<DataRow("Preceding2Results_01", "inf Preceding2Results{dec p,q:pred; pre:p,q con:and(p,q)} thm T {true} proof T$1 {1: all x:obj {is(x, N)} 2: ex y:obj {is(y, M)} 3. 1, 2, byinf Preceding2Results |- true}", "∀ x:obj {x is N} ∧ ∃ y:obj {y is M}", 1)>]
+    [<DataRow("Preceding2Results_02", "inf Preceding2Results{dec p,q:pred; pre:p,q con:and(p,q)} thm T {true} proof T$1 {1: iif(true, false) 2: not (xor(true, false)) 3. 1, 2, byinf Preceding2Results |- true}", "(true ⇔ false) ∧ ¬(true ⩡ false)", 1)>]
+    [<DataRow("Preceding2Results_03", "inf Preceding2Results{dec p,q:pred; pre:p,q con:and(p,q)} thm T {true} proof T$1 {1: and(true, false) 2: impl(true, false) 3. 1, 2, byinf Preceding2Results |- true}", "(true ∧ false) ∧ (true ⇒ false)", 1)>]
 
-    // Proceeding3Results: pre: p, q, s
-    [<DataRow("Proceeding3Results_01", "inf Proceeding3Results{dec p,q,s:pred; pre:p,q,s con:and(and(p,q),s)} thm T {true} proof T$1 {1: all x:obj {is(x, N)} 2: ex y:obj {is(y, M)} 3: iif(true, false) 4. 1, 2, 3, byinf Proceeding3Results |- true}", "(∀ x:obj {x is N} ∧ ∃ y:obj {y is M}) ∧ (true ⇔ false)", 1)>]
-    [<DataRow("Proceeding3Results_02", "inf Proceeding3Results{dec p,q,s:pred; pre:p,q,s con:and(and(p,q),s)} thm T {true} proof T$1 {1: and(true, not false) 2: xor(true, false) 3: all z:obj {is(z, K)} 4. 1, 2, 3, byinf Proceeding3Results |- true}", "((true ∧ ¬false) ∧ (true ⩡ false)) ∧ ∀ z:obj {z is K}", 1)>]
-    [<DataRow("Proceeding3Results_03", "inf Proceeding3Results{dec p,q,s:pred; pre:p,q,s con:and(and(p,q),s)} thm T {true} proof T$1 {1: not (xor(true, false)) 2: impl(true, false) 3: exn$1 u:obj {is(u, L)} 4. 1, 2, 3, byinf Proceeding3Results |- true}", "(¬(true ⩡ false) ∧ (true ⇒ false)) ∧ ∃! u:obj {u is L}", 1)>]
+    // Preceding3Results: pre: p, q, s
+    [<DataRow("Preceding3Results_01", "inf Preceding3Results{dec p,q,s:pred; pre:p,q,s con:and(and(p,q),s)} thm T {true} proof T$1 {1: all x:obj {is(x, N)} 2: ex y:obj {is(y, M)} 3: iif(true, false) 4. 1, 2, 3, byinf Preceding3Results |- true}", "(∀ x:obj {x is N} ∧ ∃ y:obj {y is M}) ∧ (true ⇔ false)", 1)>]
+    [<DataRow("Preceding3Results_02", "inf Preceding3Results{dec p,q,s:pred; pre:p,q,s con:and(and(p,q),s)} thm T {true} proof T$1 {1: and(true, not false) 2: xor(true, false) 3: all z:obj {is(z, K)} 4. 1, 2, 3, byinf Preceding3Results |- true}", "((true ∧ ¬false) ∧ (true ⩡ false)) ∧ ∀ z:obj {z is K}", 1)>]
+    [<DataRow("Preceding3Results_03", "inf Preceding3Results{dec p,q,s:pred; pre:p,q,s con:and(and(p,q),s)} thm T {true} proof T$1 {1: not (xor(true, false)) 2: impl(true, false) 3: exn$1 u:obj {is(u, L)} 4. 1, 2, 3, byinf Preceding3Results |- true}", "(¬(true ⩡ false) ∧ (true ⇒ false)) ∧ ∃! u:obj {u is L}", 1)>]
 
     // TrueOrAbsorbing or(true,p)
     [<DataRow("TOrAbs_01", "inf TrueOrAbsorbing{dec p:pred; pre:or(true,p) con:true} thm T {true} proof T$1 {1: or(true,false) 2. 1, byinf TrueOrAbsorbing |- true}", "true", 1)>]

@@ -23,9 +23,9 @@ open Fpl.Interpreter.SymbolTable.Creation.Forward
 let evalTuples ast =
     match ast with
     | Ast.BrackedCoordList((pos1, pos2), coordListAst) ->
-        let getProceedingReference = heap.Eval.GetProceedingReference()
+        let getPrecedingReference = heap.Eval.GetPrecedingReference()
 
-        match getProceedingReference with 
+        match getPrecedingReference with 
         | Some ref -> 
             ref.ArgType <- ArgType.Brackets
             if coordListAst.Length > 0 then 

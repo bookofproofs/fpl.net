@@ -270,7 +270,7 @@ type TestDefinitionFunctionalTerms01 () =
     member this.TestDefinitionFunctionalTerm11 () =
         let result = run (definitionFunctionalTerm .>> eof) """func T() -> obj
         {
-            // a functional term cannot be intrinsic with some proceeding spec or dec
+            // a functional term cannot be intrinsic with some preceding spec or dec
             dec a:obj ;
             intrinsic
         }"""
@@ -282,7 +282,7 @@ type TestDefinitionFunctionalTerms01 () =
     member this.TestDefinitionFunctionalTerm11a () =
         let result = run (definitionFunctionalTerm .>> eof) """func T() -> obj
         {
-            // a functional term cannot be intrinsic with some proceeding spec or dec
+            // a functional term cannot be intrinsic with some preceding spec or dec
             dec:;
             intrinsic
         }"""
@@ -294,7 +294,7 @@ type TestDefinitionFunctionalTerms01 () =
     member this.TestDefinitionFunctionalTerm11b () =
         let result = run (definitionFunctionalTerm .>> eof) """func T() -> obj
         {
-            // a functional term cannot be intrinsic with some proceeding spec or dec
+            // a functional term cannot be intrinsic with some preceding spec or dec
             dec a:obj ;
             intrinsic
         }"""
@@ -394,7 +394,7 @@ type TestDefinitionFunctionalTerms01 () =
                 return x
 	        } 
 
-            // a functional term cannot be intrinsic with some proceeding properties 
+            // a functional term cannot be intrinsic with some preceding properties 
             intrinsic
 
 
@@ -411,7 +411,7 @@ type TestDefinitionFunctionalTerms01 () =
 
     [<TestMethod>]
     member this.TestDefinitionFunctionalTerm15 () =
-        // a functional term with some proceeding declarations or specifications
+        // a functional term with some preceding declarations or specifications
         let result = run (definitionFunctionalTerm .>> eof) """func T() -> obj
         {
             dec a:obj ;
@@ -423,7 +423,7 @@ type TestDefinitionFunctionalTerms01 () =
 
     [<TestMethod>]
     member this.TestDefinitionFunctionalTerm16 () =
-        // a functional term with some proceeding declarations or specifications
+        // a functional term with some preceding declarations or specifications
         let result = run (definitionFunctionalTerm .>> eof) """func T() -> obj
         {
             dec a:obj ;
@@ -435,7 +435,7 @@ type TestDefinitionFunctionalTerms01 () =
 
     [<TestMethod>]
     member this.TestDefinitionFunctionalTerm17 () =
-        // a functional term with some proceeding declarations or specifications
+        // a functional term with some preceding declarations or specifications
         let result = run (definitionFunctionalTerm .>> eof) """func T() -> obj
         {
             dec a:obj ;

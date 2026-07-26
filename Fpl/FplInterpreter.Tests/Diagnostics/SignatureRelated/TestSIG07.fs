@@ -16,7 +16,7 @@ open TestFplInterpreter.Helpers.Common
 type TestSIG07() =
 
     [<DataRow("00a", "def pred S(x:pred) {dec T:=true; true}", 1)>] 
-    [<DataRow("00a_", "def cl T def pred S(x:pred) {dec T:=true; true}", 1)>] // SIG07 won't be issued due to proceeding ID010 error (T unknown)
+    [<DataRow("00a_", "def cl T def pred S(x:pred) {dec T:=true; true}", 1)>] // SIG07 won't be issued due to preceding ID010 error (T unknown)
     [<DataRow("00b", "ax T {true} def pred S(x:pred) {dec T:=true; true}", 1)>]
     [<DataRow("00c", "thm T {true} def pred S(x:pred) {dec T:=true; true}", 1)>]
     [<DataRow("00d", "lem T {true} def pred S(x:pred) {dec T:=true; true}", 1)>]
@@ -34,7 +34,7 @@ type TestSIG07() =
     [<DataRow("01c", "def pred T(a:ind) {intr} def pred S(x:pred) {dec T(a):=true; true}", 1)>]
     [<DataRow("01d", "def func T(a:ind)->obj {intr} def pred S(x:pred) {dec T(a):=true; true}", 1)>]
     [<DataRow("02a", "def pred S() {dec self:=true; true}", 1)>]
-    [<DataRow("02b", "def pred S() {dec parent:=true; true}", 0)>] // SIG07 won't be issued due to proceeding errors (ID015)
+    [<DataRow("02b", "def pred S() {dec parent:=true; true}", 0)>] // SIG07 won't be issued due to preceding errors (ID015)
     [<DataRow("02c", "def pred S() {dec self():=true; true}", 1)>]
     [<DataRow("02d", "def pred S() {dec parent():=true; true}", 1)>] 
     [<DataRow("02e", "def pred S() {dec self(a):=true; true}", 1)>]

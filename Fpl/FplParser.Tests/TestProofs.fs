@@ -15,7 +15,7 @@ type TestProofs () =
             |> String.concat ""
 
     [<DataRow("""1. GreaterAB |-""")>]
-    [<DataRow("""1. ProceedingResults, 1 |-""")>]    
+    [<DataRow("""1. PrecedingResults, 1 |-""")>]    
     [<DataRow("""1. 3, GreaterTransitive  |-""")>]
     [<DataRow("""1. 4, byinf ModusPonens |- """)>]
     [<DataRow("""1. 1,2,  3 |- """)>]
@@ -30,7 +30,7 @@ type TestProofs () =
     [<DataRow("""3, GreaterTransitive  |-""")>]
     [<DataRow("""4, byinf ModusPonens |- """)>]
     [<DataRow("""1,2,  3 |- """)>]
-    [<DataRow("""ProceedingResults, 1 |-""")>]    
+    [<DataRow("""PrecedingResults, 1 |-""")>]    
     [<DataRow("""GreaterAB""")>]
     [<DataRow("""|-""")>]
     [<DataRow(""" |- """)>]

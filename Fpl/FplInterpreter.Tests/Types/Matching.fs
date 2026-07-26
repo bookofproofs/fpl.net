@@ -327,15 +327,15 @@ type TestTypeMatching() =
     [<DataRow("OrPack2Xor_02", "inf OrPack2Xor{dec p,q:pred; pre:or(and(not p,q),and(p,not q)) con:xor(p,q)} thm T {true} proof T$1 {1: or(and(not iif(true, false), xor(true, false)), and(iif(true, false), not xor(true, false))) 2. 1, byinf OrPack2Xor |- true }")>]
     [<DataRow("OrPack2Xor_03", "inf OrPack2Xor{dec p,q:pred; pre:or(and(not p,q),and(p,not q)) con:xor(p,q)} thm T {true} proof T$1 {1: or(and(not (impl(true, false)), and(true, false)), and(impl(true, false), not and(true, false))) 2. 1, byinf OrPack2Xor |- true }")>]
 
-    // Proceeding2Results: pre: p, q
-    [<DataRow("Proceeding2Results_01", "inf Proceeding2Results{dec p,q:pred; pre:p,q con:and(p,q)} thm T {true} proof T$1 {1: all x:obj { is(x, N) } 2: ex y:obj { is(y, M) } 3. 1, 2, byinf Proceeding2Results |- true }")>]
-    [<DataRow("Proceeding2Results_02", "inf Proceeding2Results{dec p,q:pred; pre:p,q con:and(p,q)} thm T {true} proof T$1 {1: iif(true, false) 2: not (xor(true, false)) 3. 1, 2, byinf Proceeding2Results |- true }")>]
-    [<DataRow("Proceeding2Results_03", "inf Proceeding2Results{dec p,q:pred; pre:p,q con:and(p,q)} thm T {true} proof T$1 {1: and(true, false) 2: impl(true, false) 3. 1, 2, byinf Proceeding2Results |- true }")>]
+    // Preceding2Results: pre: p, q
+    [<DataRow("Preceding2Results_01", "inf Preceding2Results{dec p,q:pred; pre:p,q con:and(p,q)} thm T {true} proof T$1 {1: all x:obj { is(x, N) } 2: ex y:obj { is(y, M) } 3. 1, 2, byinf Preceding2Results |- true }")>]
+    [<DataRow("Preceding2Results_02", "inf Preceding2Results{dec p,q:pred; pre:p,q con:and(p,q)} thm T {true} proof T$1 {1: iif(true, false) 2: not (xor(true, false)) 3. 1, 2, byinf Preceding2Results |- true }")>]
+    [<DataRow("Preceding2Results_03", "inf Preceding2Results{dec p,q:pred; pre:p,q con:and(p,q)} thm T {true} proof T$1 {1: and(true, false) 2: impl(true, false) 3. 1, 2, byinf Preceding2Results |- true }")>]
 
-    // Proceeding3Results: pre: p, q, s
-    [<DataRow("Proceeding3Results_01", "inf Proceeding3Results{dec p,q,s:pred; pre:p,q,s con:and(and(p,q),s)} thm T {true} proof T$1 {1: all x:obj { is(x, N) } 2: ex y:obj { is(y, M) } 3: iif(true, false) 4. 1, 2, 3, byinf Proceeding3Results |- true }")>]
-    [<DataRow("Proceeding3Results_02", "inf Proceeding3Results{dec p,q,s:pred; pre:p,q,s con:and(and(p,q),s)} thm T {true} proof T$1 {1: and(true, not(false)) 2: xor(true, false) 3: all z:obj { is(z, K) } 4. 1, 2, 3, byinf Proceeding3Results |- true }")>]
-    [<DataRow("Proceeding3Results_03", "inf Proceeding3Results{dec p,q,s:pred; pre:p,q,s con:and(and(p,q),s)} thm T {true} proof T$1 {1: not (xor(true, false)) 2: impl(true, false) 3: exn$1 u:obj { is(u, L) } 4. 1, 2, 3, byinf Proceeding3Results |- true }")>]
+    // Preceding3Results: pre: p, q, s
+    [<DataRow("Preceding3Results_01", "inf Preceding3Results{dec p,q,s:pred; pre:p,q,s con:and(and(p,q),s)} thm T {true} proof T$1 {1: all x:obj { is(x, N) } 2: ex y:obj { is(y, M) } 3: iif(true, false) 4. 1, 2, 3, byinf Preceding3Results |- true }")>]
+    [<DataRow("Preceding3Results_02", "inf Preceding3Results{dec p,q,s:pred; pre:p,q,s con:and(and(p,q),s)} thm T {true} proof T$1 {1: and(true, not(false)) 2: xor(true, false) 3: all z:obj { is(z, K) } 4. 1, 2, 3, byinf Preceding3Results |- true }")>]
+    [<DataRow("Preceding3Results_03", "inf Preceding3Results{dec p,q,s:pred; pre:p,q,s con:and(and(p,q),s)} thm T {true} proof T$1 {1: not (xor(true, false)) 2: impl(true, false) 3: exn$1 u:obj { is(u, L) } 4. 1, 2, 3, byinf Preceding3Results |- true }")>]
 
     // AndUnpack2NotOr: pre: and(p, q)
     [<DataRow("AndUnpack2NotOr_01", "inf AndUnpack2NotOr{dec p,q:pred; pre:and(p,q) con:not (or(not p,not q))} thm T {true} proof T$1 {1: and(all x:obj { is(x, N) }, ex y:obj { is(y, M) }) 2. 1, byinf AndUnpack2NotOr |- true }")>]
