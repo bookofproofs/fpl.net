@@ -398,23 +398,23 @@ let PrimIsOperator = "is operator"
 [<Literal>]
 let PrimImplication = "implication"
 [<Literal>]
-let PrimJIByAx = "justification by an axiom"
+let PrimJIByAx = "by an axiom"
 [<Literal>]
-let PrimJIByConj = "justification by a conjecture"
+let PrimJIByConj = "by a conjecture"
 [<Literal>]
-let PrimJIByCor = "justification by a corollary"
+let PrimJIByCor = "by a corollary"
 [<Literal>]
-let PrimJIByDef = "justification by a definition"
+let PrimJIByDef = "by a definition"
 [<Literal>]
-let PrimJIByDefVar = "justification by a variable definition"
+let PrimJIByDefVar = "by a variable definition"
 [<Literal>]
-let PrimJIByInf = "justification by a rule of inference"
+let PrimJIByInf = "by a rule of inference"
 [<Literal>]
-let PrimJIByProofArgument = "justification by an argument in another proof"
+let PrimJIByProofArgument = "by an argument in another proof"
 [<Literal>]
-let PrimJIByRefArgument = "justification by an argument reference"
+let PrimJIByRefArgument = "by an argument reference"
 [<Literal>]
-let PrimJIByTheoremLikeStmt = "justification by a theorem-like statement"
+let PrimJIByTheoremLikeStmt = "by a theorem-like statement"
 [<Literal>]
 let PrimJustification = "just"
 [<Literal>]

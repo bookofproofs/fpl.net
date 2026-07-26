@@ -774,7 +774,7 @@ let emitPR019Diagnostics justificationType1 justificationType2 pos1 pos2 =
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = PR019 (justificationType1, justificationType2)
-            Diagnostic.Alternatives = Some "Split the argument into different arguments using only one justification type per argument."
+            Diagnostic.Alternatives = Some "Split the argument so each one uses only a single justification type."
         }
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
