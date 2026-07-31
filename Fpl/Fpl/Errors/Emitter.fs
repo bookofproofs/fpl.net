@@ -830,7 +830,7 @@ let emitSIG00Diagnostics exprType expectedArity actualArity pos1 pos2 =
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = SIG00(exprType, actualArity)
-            Diagnostic.Alternatives = Some $"Arity of {expectedArity} expected." 
+            Diagnostic.Alternatives = Some $"Expected arity: {expectedArity}." 
         }
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)

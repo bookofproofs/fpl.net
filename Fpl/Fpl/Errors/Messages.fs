@@ -117,7 +117,7 @@ let errPR021 mismatchingCandidates inferredFormula justificationName = $"The arg
 let errPR022 reason = $"The argument inference was prevented. Reason: {reason}"
 
 // signature-related error codes
-let errSIG00 fixType arity = sprintf $"Illegal arity `{arity}` using `{fixType}` notation."
+let errSIG00 fixType arity = sprintf $"Illegal arity {arity} when using {fixType} notation."
 let errSIG01 symbol = $"The symbol `{symbol}` was not declared." 
 let errSIG02 symbol precedence conflict = $"The symbol `{symbol}` was declared with the same precedence of `{precedence}` in {conflict}." 
 let errSIG03 errMsg = errMsg // Returned type is mismatching the mapping type
