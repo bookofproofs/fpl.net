@@ -13,7 +13,7 @@ open TestFplInterpreter.Helpers.Common
    Action / Treat: Inspect the problematic arguments and their justifications (references, inferred expressions, preceding steps); fix incorrect references, supply missing justification items, or correct inference errors. PR009 is emitted as a warning to inform the author that verification is incomplete. *)
 
 [<TestClass>]
-type TestPR09() =
+type TestPR009() =
 
     [<DataRow("01", """thm T { true } proof T$1 {1: trivial}""", 0)>]
     [<DataRow("02a", """thm T { true } proof T$1 {1: true}""", 0)>]

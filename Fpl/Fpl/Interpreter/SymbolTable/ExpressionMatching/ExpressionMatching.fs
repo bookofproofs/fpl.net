@@ -248,16 +248,16 @@ let private matchPremiseWithSomeExpressions (exprList:FplGenericNode list) (pre:
 let issuePR022AndSetDefault (fv:FplGenericHasValue) (nodeOpt:FplGenericNode option) (varOpt:FplGenericNode option) =
     match nodeOpt, varOpt with
     | Some node, Some var ->
-        let reason = $"The {var.Name} `{var.FplId}` was found and its {node.Name} `{node.Type SignatureType.Name}' was also found. However, the definition does not contain any predicative expressions on which this argument inference could be based on."
+        let reason = $"The {var.Name} `{var.FplId}` and its {node.Name} `{node.Type SignatureType.Name}` were found, but the {node.Name} definition does not contain any predicative expressions that support argument inference."
         fv.ErrorOccurred <- emitPR022Diagnostics reason fv.StartPos fv.EndPos
     | None, Some var ->
-        let reason = $"The {var.Name} `{var.FplId}` was found but no definition block was found that would contain some predicative expressions on which this argument inference could be based on."
+        let reason = $"The {var.Name} `{var.FplId}` was found, but its pre‑defined type contains no predicative expressions that support argument inference."
         fv.ErrorOccurred <- emitPR022Diagnostics reason fv.StartPos fv.EndPos
     | Some node, None ->
-        let reason = $"The {node.Name} `{node.Type SignatureType.Name}' was found but its declaration does not contain any predicative expressions on which this argument inference could be based on."
+        let reason = $"The {node.Name} `{node.Type SignatureType.Name}` was found, but its definition does not contain any predicative expressions that support argument inference."
         fv.ErrorOccurred <- emitPR022Diagnostics reason fv.StartPos fv.EndPos
     | None, None ->
-        let reason = $"No reference for `{fv.FplId}' was found that would contain some predicative expressions on which this argument inference could be based on."
+        let reason = $"No reference for `{fv.FplId}` was found that contains any predicative expressions that support argument inference."
         fv.ErrorOccurred <- emitPR022Diagnostics reason fv.StartPos fv.EndPos
     fv.SetDefaultValue()
 

@@ -102,7 +102,7 @@ let errPR008 byInfName numbPrem expectedPremise mismatchingCandidates =
     else
         $"The subsequent `{LiteralByInf} {byInfName}` step requires {numbPrem} premise patterns `{expectedPremise}`.{Environment.NewLine}The provided justification does not match them. Candidates considered:{mismatchingCandidates}."
 
-let errPR009 = "Not all arguments of the proof could be verified."
+let errPR009 = "Not all arguments in the proof could be verified."
 let errPR010 keyword expectedRef = $"Justification `{keyword}` expects a reference to {expectedRef}, but the provided reference points to a proof or a corollary."
 let errPR011 keyword expectedRef = $"Justification `{keyword}` expects a reference to {expectedRef}, but the provided reference points to an argument in some proof."
 let errPR012 providedIdentifer = $"Justification `{LiteralByCor}` expects a reference to a corollary, but `{providedIdentifer}` is not one."
@@ -114,7 +114,7 @@ let errPR017 = $"The `{LiteralTrivial}` justification may only be used on the fi
 let errPR019 justificationType1 justificationType2 = $"Mixed justification types in a single argument are not supported (`{justificationType1}` with `{justificationType2}`)."
 let errPR020 expectedNum actualNum = $"Justification `{PrimJIByInf}` requires {expectedNum} premise expressions, but it received {actualNum}."
 let errPR021 mismatchingCandidates inferredFormula justificationName = $"The argument `{inferredFormula}` cannot be inferred from the preceding results. {justificationName} found the following candidates:{mismatchingCandidates}."
-let errPR022 reason = $"The argument inference was prevented. Reason: {reason}."
+let errPR022 reason = $"The argument inference was prevented. Reason: {reason}"
 
 // signature-related error codes
 let errSIG00 fixType arity = sprintf $"Illegal arity `{arity}` using `{fixType}` notation."
