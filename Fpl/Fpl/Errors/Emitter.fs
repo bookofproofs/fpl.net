@@ -844,7 +844,7 @@ let emitSIG01Diagnostics expressionId pos1 pos2 =
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = SIG01 expressionId
-            Diagnostic.Alternatives = Some "Declare a functional term, predicate, or class with this symbol." 
+            Diagnostic.Alternatives = Some "Declare a functional term, predicate, or class using this symbol." 
         }
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
@@ -858,7 +858,7 @@ let emitSIG02Diagnostics symbol precedence conflict pos1 pos2 =
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = SIG02(symbol, precedence, conflict)
-            Diagnostic.Alternatives = Some "Consider disambiguating the precedence to avoid unexpected results." 
+            Diagnostic.Alternatives = Some "Consider choosing a different precedence to avoid ambiguity." 
         }
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
