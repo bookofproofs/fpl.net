@@ -176,41 +176,19 @@ let errVAR11 identifier conflict = $"All variables in a {LiteralLocL} have to be
 
 // type matching-related errors
 // -----------------------------------------------------------------
-let errTypeMismatchStandard aIsCallByReference aName aType pName pType = 
-    if aIsCallByReference then 
-        Some $"The expression `{aName}` of type `{aType}` doesn't match the parameter `{pName}` of type `{pType}`"
-    else
-        Some $"The application `{aName}` of type `{aType}` doesn't match the parameter `{pName}` of type `{pType}`"
-
-let errTypeMismatchMissingArgument pName pType = Some $"Missing argument for the parameter `{pName}` of type `{pType}`"
-let errTypeMismatchMissingParameter aName aType = Some $"No matching parameter for the argument `{aName}` of type `{aType}`"
-let errTypeMismatchClassValueNotAllowed actualClassType = Some $"A class `{actualClassType}` cannot be passed directly as a value. Use a class constructor `{actualClassType}(...)` instead"
-let errTypeMismatchReturnType aIsCallByReference aName aType pType blockName =
-    if aIsCallByReference then 
-        Some $"The returned expression `{aName}` of type `{aType}` doesn't match the type `{pType}` this {blockName} returns."
-    else 
-        Some $"The returned application `{aName}` of type `{aType}` doesn't match the type `{pType}` this {blockName} returns."
-let errTypeMismatchInheritanceCycle = "cycle detected"
-let errTypeMismatchInheritanceCrossing currName crossName = $"cross-inheritance is not supported. `{currName}` is already a base type of `{crossName}`."
-let errTypeMismatchInheritanceDuplicate duplicate = $"duplicate inheritance from `{duplicate}` detected."
-let errTypeMismatchInheritanceFromNonDefinition blockName = $"Expecting a class, a functional term, or a predicate node, got {blockName}"
-let errTypeMismatchInheritanceWrongBase aIsCallByReference aName aType pName pType = 
-    if aIsCallByReference then 
-        Some $"The expression `{aName}` to the class `{aType}` neither matches the parameter `{pName}` of type `{pType}` nor the base classes of this type."
-    else
-        Some $"The application `{aName}` instantiating the class `{aType}` neither matches the parameter `{pName}` of type `{pType}` nor the base classes of this type."
-let errTypeMismatchInheritanceUndetermined aIsCallByReference aName aType pName pType = 
-    if aIsCallByReference then 
-        Some $"The type `{aType}` of the expression `{aName}` could not be determined. The parameter `{pName}` requires the type `{pType}` or any type derived from it"
-    else
-        Some $"The type `{aType}` of the application `{aName}` could not be determined. The parameter `{pName}` requires the type `{pType}` or any type derived from it"
-let errTypeMismatchUndefined aIsCallByReference aName pName pType = 
-    if aIsCallByReference then 
-        Some $"The type of the expression `{aName}` could not be determined. The parameter `{pName}` requires the type `{pType}"
-    else
-        Some $"The type of application `{aName}` could not be determined. The parameter `{pName}` requires the type `{pType}"
-let errTypeMismatchVariadic aName aType pName pType pTypeId = 
-    Some $"Variadic enumeration of `{aName}` of type `{aType}` doesn't match the parameter `{pName}` of type `{pType}`, try `{aName}:{pType}` as argument or use `{pName}:{pTypeId}[{LiteralInd}]` as parameter type"
+let errTypeMismatchStandard aName aType pName pType = Some $"The expression `{aName}` has type `{aType}`, which does not match the expected type `{pType}` for the parameter `{pName}`."
+let errTypeMismatchMissingArgument pName pType = Some $"Missing argument for the parameter `{pName}` of type `{pType}`."
+let errTypeMismatchMissingParameter aName aType = Some $"No parameter matches the argument `{aName}` of type `{aType}`."
+let errTypeMismatchClassValueNotAllowed actualClassType = Some $"A class `{actualClassType}` cannot be used as a value. Use the class constructor `{actualClassType}(...)` instead."
+let errTypeMismatchReturnType aName aType pType blockName = Some $"The return expression `{aName}` has type `{aType}`, which does not match the expected return type `{pType}` of this {blockName}."
+let errTypeMismatchInheritanceCycle = "Cycle detected."
+let errTypeMismatchInheritanceCrossing currName crossName = $"Cross-inheritance is not supported. `{currName}` is already a base type of `{crossName}`."
+let errTypeMismatchInheritanceDuplicate duplicate = $"Duplicate inheritance from `{duplicate}` detected."
+let errTypeMismatchInheritanceFromNonDefinition blockName = $"Expected a class, functional term, or predicate node, got {blockName}."
+let errTypeMismatchInheritanceWrongBase aName aType pName pType = Some $"The expression `{aName}` of type `{aType}` matches neither the parameter `{pName}` of type `{pType}` nor any base class of this type."
+let errTypeMismatchInheritanceUndetermined aName aType pName pType = Some $"The type `{aType}` of the expression `{aName}` could not be determined. The parameter `{pName}` requires type `{pType}` or a type derived from it."
+let errTypeMismatchUndefined aName pName pType = Some $"The type of the expression `{aName}` could not be determined. The parameter `{pName}` requires type `{pType}."
+let errTypeMismatchVariadic aName aType pName pType pTypeId = Some $"Variadic enumeration of `{aName}` of type `{aType}` does not match the parameter `{pName}` of type `{pType}`. Try `{aName}:{pType}` as an argument, or use `{pName}:{pTypeId}[{LiteralInd}]` as parameter type."
 
 // expression-matching-related errors
 // -----------------------------------------------------------------
