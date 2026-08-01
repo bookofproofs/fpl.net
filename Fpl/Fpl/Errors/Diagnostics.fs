@@ -128,7 +128,7 @@ type DiagnosticCode =
     | SIG04 of string * string
     | SIG05 of string 
     | SIG06 of string * string * string
-    | SIG07 of string * string * string 
+    | SIG07 of string * string  
     | SIG08 of string * string * string * string * int
     | SIG09 of string * string * int
     | SIG10 of string * string * int 
@@ -339,7 +339,7 @@ type DiagnosticCode =
             | SIG04 (signature, candidates) -> errSIG04 signature candidates
             | SIG05 errMsg -> errSIG05 errMsg
             | SIG06 (name, oldFromNode, newFromNode) -> errSIG06 name oldFromNode newFromNode
-            | SIG07 (assigneeName, assigneeType, nodeType) -> errSIG07 assigneeName assigneeType nodeType
+            | SIG07 (assigneeName, assigneeType) -> errSIG07 assigneeName assigneeType
             | SIG08 (arrName, indexVarName, indexVarType, dimType, dimNumber) -> errSIG08 arrName indexVarName indexVarType dimType dimNumber
             | SIG09 (arrName, dimType, dimNumber) -> errSIG09 arrName dimType dimNumber
             | SIG10 (arrName, indexVarName, indexNumber) -> errSIG10 arrName indexVarName indexNumber

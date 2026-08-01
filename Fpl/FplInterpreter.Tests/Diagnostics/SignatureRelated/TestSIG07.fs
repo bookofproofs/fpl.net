@@ -58,11 +58,13 @@ type TestSIG07() =
     [<DataRow("10c", "def pred S(x:*pred[ind]) {dec x[$1]:=true; true}", 0)>]
     [<DataRow("10d", "def pred S(x:*pred[obj]) {dec x[@1]:=true; true}", 0)>]
     [<DataRow("10e", "def pred S(x:*pred[Nat]) {dec a:Nat x[a]:=true; true}", 0)>]
+    [<DataRow("02g", "def cl A { intr prty pred S() {dec self:=true; true} }", 1)>]
+    [<DataRow("02h", "def cl A def cl B:A { intr prty pred S() {dec parent:=true; true} }", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestSIG07(no:string, fplCode:string, expected) =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = SIG07 ("", "", "")
+            let code = SIG07 ("", "")
             runTestHelper "TestSIG07.fpl" fplCode code expected

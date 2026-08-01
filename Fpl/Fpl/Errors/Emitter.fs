@@ -926,7 +926,7 @@ let emitSIG06diagnostic name oldFromNode newFromNode pos1 pos2  =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitSIG07diagnostic assigneeName assigneeType nodeType pos1 pos2  = 
+let emitSIG07diagnostic assigneeName assigneeType pos1 pos2  = 
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -934,7 +934,7 @@ let emitSIG07diagnostic assigneeName assigneeType nodeType pos1 pos2  =
             Diagnostic.Severity = DiagnosticSeverity.Warning
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = SIG07(assigneeName, assigneeType, getEnglishName nodeType false)
+            Diagnostic.Code = SIG07(assigneeName, assigneeType)
             Diagnostic.Alternatives = Some "Expected a variable or an array." 
         }
     ad.AddDiagnostic diagnostic
