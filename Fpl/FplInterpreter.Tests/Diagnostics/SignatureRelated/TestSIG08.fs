@@ -85,6 +85,10 @@ type TestSIG08() =
     [<DataRow("M09", "def cl A def func F()->A def pred T() {dec arr:*ind[obj] arr[F()]:=undef; true}", 0)>] // arr indexed by obj accepts class A -> valid
     [<DataRow("M10", "def cl A def cl B:A def func F()->A def pred T() {dec arr:*ind[B] arr[F()]:=undef; true}", 1)>] // F() -> A, arr expects B (derived) -> invalid
 
+
+    [<DataRow("N09", "def pred T() {dec i:ind j:obj arr:*ind[ind,ind] arr[i,j]:=undef; true}", 1)>] // 2nd dimension mismatch
+    [<DataRow("N10", "def pred T() {dec i:obj j:obj arr:*ind[ind,ind] arr[i,j]:=undef; true}", 2)>] // both dimensions mismatch
+
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestSIG08(no:string, fplCode:string, expected) =
