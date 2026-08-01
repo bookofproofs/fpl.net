@@ -239,10 +239,10 @@ let checkSIG11Diagnostics (fv:FplGenericNode) =
                 // and, instead, points to itself
                     ()
                 | _ ->
-                    map.ErrorOccurred <- emitSIG11Diagnostics (qualifiedName ref false) map.StartPos map.EndPos
+                    map.ErrorOccurred <- emitSIG11Diagnostics (getFullName ref true) ref.Name map.StartPos map.EndPos
             | _ ->
                 // otherwise issue SIG11
-                map.ErrorOccurred <- emitSIG11Diagnostics (qualifiedName ref false) map.StartPos map.EndPos       
+                map.ErrorOccurred <- emitSIG11Diagnostics (getFullName ref true) ref.Name map.StartPos map.EndPos       
         | _ -> ()
     | _ -> ()
 

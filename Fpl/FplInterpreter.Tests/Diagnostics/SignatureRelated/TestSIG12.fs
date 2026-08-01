@@ -24,6 +24,7 @@ type TestSIG12() =
     [<DataRow("02a", "def cl A def pred T() {dec x:*tpl[ind] x[$1]:=true x[$2]:=A(); true}", 1)>] // a template not accepting assigning different types
     [<DataRow("03", """def pred Equal(x,y: tpl) infix "=" 50 { del.Equal(x,y)} ext Digits x@/\d+/ -> pred {ret mcases ( | (x = @0): true ? false ) }""", 0)>]
     [<DataRow("04", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} ext Digits x@/\d+/ -> pred {ret mcases (| (x = @0): true ? false)} def pred T(m:obj) { (m = @0) }""", 0)>]
+    [<DataRow("00b", "def pred T(x:tpl) {dec x:=$1 x:=undef; x}", 0)>] // undef is accepted and must not trigger SIG12
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestSIG12(no:string, fplCode:string, expected) =

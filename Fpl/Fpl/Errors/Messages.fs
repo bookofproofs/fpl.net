@@ -127,9 +127,13 @@ let errSIG06 name oldFromNode newFromNode = $"Property `{name}` inherited from `
 let errSIG07 assigneeName assigneeType = $"`{assigneeName}` is not an assignable expression ({assigneeType})."
 let errSIG08 arrName indexVarName indexVarType dimType dimNumber = $"Type mismatch in the {englishOrdinal dimNumber} dimension of array `{arrName}`; expected `{dimType}`, got `{indexVarName}:{indexVarType}`."
 let errSIG09 arrName dimType dimNumber = $"Missing index for the {englishOrdinal dimNumber} dimension of array `{arrName}`; expected type `{dimType}`."
-let errSIG10 arrName indexVarName indexNumber = $"Array `{arrName}` has less dimensions, {englishOrdinal indexNumber} index `{indexVarName}` not supported."
-let errSIG11 qualifiedWrongCandidate = $"Mapping to {qualifiedWrongCandidate} delegates the map to another type. Map to the other type directly, instead."
-let errSIG12 templateName secondUsage firstUsage firstUsagePos = $"The template `{templateName}` was inconsistently used with `{secondUsage}`, expecting `{firstUsage}` as it was used in `{firstUsagePos}`."
+let errSIG10 arrName indexVarName indexNumber = $"Array `{arrName}` has fewer dimensions, the {englishOrdinal indexNumber} index `{indexVarName}` is not supported."
+let errSIG11 qualifiedWrongCandidate typeOfCandidate =
+    if typeOfCandidate = PrimFunctionalTermL || typeOfCandidate = PrimExtensionL then 
+        $"Mapping to {typeOfCandidate} `{qualifiedWrongCandidate}` delegates the mapping to another type. Map directly to that type instead."
+    else
+        $"Illegal mapping to {typeOfCandidate} `{qualifiedWrongCandidate}`. Only class types or predefined types (`{LiteralObj}`, `{LiteralInd}`, `{LiteralPred}`, `{LiteralFunc}`) may be used as mapping targets."
+let errSIG12 templateName secondUsage firstUsage firstUsagePos = $"The template `{templateName}` was used with type `{secondUsage}` inconsistently; expected type `{firstUsage}`, as used in `{firstUsagePos}`."
 let errSIG13 stmtName secondUsage firstUsage firstUsagePos = $"Every branch of the {stmtName} must return a value with a type of the first case in `{firstUsagePos}`, which was `{firstUsage}`. This branch returns `{secondUsage}`."
 let errSIG14 = $"This case will never be matched."
 // structure-related error codes

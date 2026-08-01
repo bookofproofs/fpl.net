@@ -982,7 +982,7 @@ let emitSIG10Diagnostics arrName indexVarName indexNumber pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitSIG11Diagnostics qualifiedWrongCandidate pos1 pos2 =
+let emitSIG11Diagnostics qualifiedWrongCandidate typeOfCandidate pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -990,7 +990,7 @@ let emitSIG11Diagnostics qualifiedWrongCandidate pos1 pos2 =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = SIG11 qualifiedWrongCandidate
+            Diagnostic.Code = SIG11 (qualifiedWrongCandidate, typeOfCandidate)
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic

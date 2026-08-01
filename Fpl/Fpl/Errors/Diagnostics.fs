@@ -132,7 +132,7 @@ type DiagnosticCode =
     | SIG08 of string * string * string * string * int
     | SIG09 of string * string * int
     | SIG10 of string * string * int 
-    | SIG11 of string 
+    | SIG11 of string * string
     | SIG12 of string * string * string * string
     | SIG13 of string * string * string * string 
     | SIG14 
@@ -343,7 +343,7 @@ type DiagnosticCode =
             | SIG08 (arrName, indexVarName, indexVarType, dimType, dimNumber) -> errSIG08 arrName indexVarName indexVarType dimType dimNumber
             | SIG09 (arrName, dimType, dimNumber) -> errSIG09 arrName dimType dimNumber
             | SIG10 (arrName, indexVarName, indexNumber) -> errSIG10 arrName indexVarName indexNumber
-            | SIG11 qualifiedWrongCandidate -> errSIG11 qualifiedWrongCandidate
+            | SIG11 (qualifiedWrongCandidate, typeOfCandidate) -> errSIG11 qualifiedWrongCandidate typeOfCandidate
             | SIG12 (templateName, secondUsage, firstUsage, firstUsagePos) -> errSIG12 templateName secondUsage firstUsage firstUsagePos
             | SIG13 (stmtName, secondUsage, firstUsage, firstUsagePos) -> errSIG13 stmtName secondUsage firstUsage firstUsagePos
             | SIG14 -> errSIG14
