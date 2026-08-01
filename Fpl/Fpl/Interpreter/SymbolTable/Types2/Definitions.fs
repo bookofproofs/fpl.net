@@ -73,8 +73,8 @@ type FplGenericInheriting(positions: Positions, parent: FplGenericNode) =
         |> List.iter (fun prty ->
             let prtyName = prty.Type SignatureType.Mixed
             match this.OverrideInheritedObject prtyName _inheritedProperties prty fromBaseNode true with
-            | (Some typeName, Some oldFromNode, Some newFromNode) ->
-                fromBaseNode.ErrorOccurred <- emitSIG06diagnostic prtyName oldFromNode newFromNode typeName fromBaseNode.StartPos fromBaseNode.EndPos
+            | (Some _, Some oldFromNode, Some newFromNode) ->
+                fromBaseNode.ErrorOccurred <- emitSIG06diagnostic prtyName oldFromNode newFromNode fromBaseNode.StartPos fromBaseNode.EndPos
             | _ ->
                 ()
         )
@@ -105,14 +105,13 @@ type FplGenericInheriting(positions: Positions, parent: FplGenericNode) =
                 let oldFrom = _inheritedProperties[prtyName][1]
                 let oldFromNode = oldFrom.Type SignatureType.Mixed
                 let newFromNode = this.Type SignatureType.Mixed
-                let typeName = oldFrom.Name
                 // override the old node
                 let tuple = List<FplGenericNode>()
                 tuple.Add prty // own scope property
                 tuple.Add this // the property is from this
                 _inheritedProperties[prtyName] <- tuple
                 // emit SIG06, since the inner property overrides some inherited property
-                prty.ErrorOccurred <- emitSIG06diagnostic prtyName oldFromNode newFromNode typeName prty.StartPos prty.EndPos
+                prty.ErrorOccurred <- emitSIG06diagnostic prtyName oldFromNode newFromNode prty.StartPos prty.EndPos
         )
         // add inherited variables, if they still do not exist in scope
         _inheritedVariables

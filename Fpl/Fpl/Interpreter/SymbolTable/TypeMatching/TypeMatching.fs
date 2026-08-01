@@ -404,7 +404,7 @@ type FplTypeMatcher() =
         // or the recursive arguments-vs-parameters match.
         let baseResult = 
             if aHasBracketsOrParentheses <> pHasBracketsOrParentheses && arguments.Length = 0 && parameters.Length = 0 then 
-                Some $"The calling node `{fva.Type SignatureType.Name}` and the called node `{fvp.Type SignatureType.Name}` use parentheses inconsistently."
+                Some $"The calling node `{fva.Type SignatureType.Name}` and the called node `{fvp.Type SignatureType.Name}` use parenthesized parameters inconsistently."
             else
                 FplTypeMatcher.MatchPwA arguments parameters 
 

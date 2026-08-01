@@ -122,12 +122,8 @@ let errSIG01 symbol = $"The symbol `{symbol}` was not declared."
 let errSIG02 symbol precedence conflict = $"The symbol `{symbol}` was declared with the same precedence `{precedence}` in {conflict}." 
 let errSIG03 errMsg = errMsg // Returned type is mismatching the mapping type
 let errSIG04 signature candidates = $"No overload matching `{signature}`. Candidates considered:{Environment.NewLine}{candidates}." 
-let errSIG05 errMsg = $"Cannot execute assignment; {errMsg}"
-let errSIG06 name oldFromNode newFromNode typeName = 
-    match typeName with 
-    | PrimClassL -> $"Property `{name}` of base class `{oldFromNode} will be overshadowed by `{newFromNode}`."
-    | PrimFunctionalTermL -> $"Property `{name}` of base functional term `{oldFromNode} will be overshadowed by `{newFromNode}`."
-    | _ -> $"Property `{name}` of (unknown type) `{oldFromNode} will be overshadowed by `{newFromNode}`."
+let errSIG05 errMsg = $"Cannot execute assignment. {errMsg}"
+let errSIG06 name oldFromNode newFromNode = $"Property `{name}` inherited from `{oldFromNode}` is overshadowed by the declaration in `{newFromNode}`."
 let errSIG07 assigneeName assigneeType nodeType = $"`{assigneeName}` is {nodeType} ({assigneeType}) and is not assignable."
 let errSIG08 arrName indexVarName indexVarType dimType dimNumber = $"Type mismatch in array's `{arrName}` {englishOrdinal dimNumber} dimension; expected `{dimType}`, got `{indexVarName}:{indexVarType}`."
 let errSIG09 arrName dimType dimNumber = $"Missing index for array's `{arrName}` {englishOrdinal dimNumber} dimension `{dimType}`"
@@ -192,25 +188,20 @@ let errTypeMismatchVariadic aName aType pName pType pTypeId = Some $"Variadic en
 
 // expression-matching-related errors
 // -----------------------------------------------------------------
-let errExprMismatchExistsN aFplId aName pFplId pName = Some $"type mismatch in exists quantor: `{aFplId}` was provided in `{aName}`, but type `{pFplId}` was required in `{pName}`"
-
-
-let errExprMismatchQuantorVariableTypes aName pName xName yName index = Some $"type mismatch: `{xName}` was provided in the {englishOrdinal index} bound variable in `{aName}`, but `{yName}` was required in `{pName}`"
-
-let errExprMismatchQuantorVariableCounts aName pName aVarsCount pVarsCount = Some $"found {aVarsCount} bound variables in `{aName}`, expected {pVarsCount} in `{pName}`" 
-
-let errExprMismatchOpenFormulas aName aVarsOpenClosedStr aOpenFormulaType pName pVarsOpenClosedStr pOpenFormulaType = Some $"found expression `{aName}` ({aVarsOpenClosedStr} of type `{aOpenFormulaType}`), expected `{pName}` which is {pVarsOpenClosedStr} of type `{pOpenFormulaType}`"
-
-let errExprMismatchExpectedEndOfFormula (aName) = Some $"`found {aName}`, expected end of formula"
-let errExprMismatchFoundEndOfFormula pName = Some $"found end of formula, expected `{pName}`"
-let errExprMismatchVarMatchedDifferently varName expectedExpr actualExpr = Some $"variable `{varName}` was matched with different formulas `{expectedExpr}` and `{actualExpr}`"
-let errExprMismatchVarMatchedDifferentlyQuantor varName expectedExpr actualExpr = Some $"variable `{varName}` was matched with different quantor formulas `{expectedExpr}` and `{actualExpr}`.{Environment.NewLine}Both formulas were different even using placeholders for bound variables."
-let errExprMismatchMsgStandard aName pName = Some $"found `{aName}`, expected `{pName}`"
-let errExprMismatchMsgParensOnlyLeft aName pName = Some $"found `{aName}` in parens, expected `{pName}` without parens"
-let errExprMismatchMsgParensOnlyRight aName pName = Some $"found `{aName}` without parens, expected `{pName}` in parens"
+let errExprMismatchExistsN aFplId aName pFplId pName = Some $"Type mismatch in ∃‑quantor: `{aFplId}` was provided in `{aName}`, but type `{pFplId}` was required in `{pName}`."
+let errExprMismatchQuantorVariableTypes aName pName xName yName index = Some $"Type mismatch: `{xName}` was used as the {englishOrdinal index} bound variable in `{aName}`, but `{yName}` was required in `{pName}`."
+let errExprMismatchQuantorVariableCounts aName pName aVarsCount pVarsCount = Some $"Found {aVarsCount} bound variables in `{aName}`, expected {pVarsCount} in `{pName}`." 
+let errExprMismatchOpenFormulas aName aVarsOpenClosedStr aOpenFormulaType pName pVarsOpenClosedStr pOpenFormulaType = Some $"Found expression `{aName}` ({aVarsOpenClosedStr}, type `{aOpenFormulaType}`), expected `{pName}` ({pVarsOpenClosedStr}, type `{pOpenFormulaType}`)."
+let errExprMismatchExpectedEndOfFormula (aName) = Some $"Found {aName}`, expected end of formula."
+let errExprMismatchFoundEndOfFormula pName = Some $"Found end of formula, expected `{pName}`."
+let errExprMismatchVarMatchedDifferently varName expectedExpr actualExpr = Some $"Variable `{varName}` was matched with different quantor formulas `{expectedExpr}` and `{actualExpr}`."
+let errExprMismatchVarMatchedDifferentlyQuantor varName expectedExpr actualExpr = Some $"Variable `{varName}` was matched with different quantor formulas `{expectedExpr}` and `{actualExpr}`.{Environment.NewLine}Both formulas differed even when using placeholders for bound variables."
+let errExprMismatchMsgStandard aName pName = Some $"Found `{aName}`, expected `{pName}`."
+let errExprMismatchMsgParensOnlyLeft aName pName = Some $"Found `{aName}` in parentheses, expected `{pName}` without parentheses."
+let errExprMismatchMsgParensOnlyRight aName pName = Some $"Found `{aName}` without parentheses, expected `{pName}` in parentheses."
 let errExprMismatchVarNumbDifferent numA varsA numP pName =
     let plural = if numA > 1 then "variables" else "variable"
-    Some $"found {numA} {plural} ({varsA}), expected {numP} in {pName}"
+    Some $"Found {numA} {plural} ({varsA}), expected {numP} in {pName}."
 let (errExprMismatchOK:string option) = None
 
 

@@ -912,7 +912,7 @@ let emitSIG05Diagnostics errMsg pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitSIG06diagnostic name oldFromNode newFromNode typeName pos1 pos2  = 
+let emitSIG06diagnostic name oldFromNode newFromNode pos1 pos2  = 
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -920,8 +920,8 @@ let emitSIG06diagnostic name oldFromNode newFromNode typeName pos1 pos2  =
             Diagnostic.Severity = DiagnosticSeverity.Warning
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = SIG06(name, oldFromNode, newFromNode, typeName)
-            Diagnostic.Alternatives = Some "Consider renaming the properties to avoid name conflicts." 
+            Diagnostic.Code = SIG06(name, oldFromNode, newFromNode)
+            Diagnostic.Alternatives = Some "Consider renaming to avoid name conflicts." 
         }
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
