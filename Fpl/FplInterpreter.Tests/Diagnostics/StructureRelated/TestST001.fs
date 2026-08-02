@@ -31,6 +31,7 @@ type TestST001() =
     [<DataRow("01c", "def func A:B()->obj {intr property pred T() {true} } ", 0)>]
     [<DataRow("01d", "def func A:B()->obj {dec x:obj; return x}", 0)>]
     [<DataRow("01e", "def func A()->obj", 0)>]
+    [<DataRow("01f", "def func A()->obj {intr property pred T() {true} } ", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestST001(no:string, fplCode:string, expected) =

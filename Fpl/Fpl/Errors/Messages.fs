@@ -135,12 +135,12 @@ let errSIG11 qualifiedWrongCandidate typeOfCandidate =
         $"Illegal mapping to {typeOfCandidate} `{qualifiedWrongCandidate}`. Only class types or predefined types (`{LiteralObj}`, `{LiteralInd}`, `{LiteralPred}`, `{LiteralFunc}`) may be used as mapping targets."
 let errSIG12 templateName secondUsage firstUsage firstUsagePos = $"The template `{templateName}` was used with type `{secondUsage}` inconsistently; expected type `{firstUsage}`, as used in `{firstUsagePos}`."
 let errSIG13 stmtName secondUsage firstUsage firstUsagePos = $"Every branch of the {stmtName} must return a value with the same type as the first case in `{firstUsagePos}`, whose type was `{firstUsage}`. This branch returns `{secondUsage}`."
-let errSIG14 = $"This case will never be matched."
+let errSIG14 = $"This case cannot be matched because an earlier case has the same condition signature."
 // structure-related error codes
-let errST001 nodeName = $"The {nodeName} does nothing."
-let errST002 nodeName = $"The {nodeName} does nothing."
-let errST004 langCode = $"The language `{langCode}` not implemented."
-let errST005 domain nodeType = $"An enumerator for the domain `{domain}` being {nodeType} could not be established."
+let errST001 nodeName = $"The {nodeName} contains no executable or structural elements. Consider removing the block."
+let errST002 nodeName = $"The {nodeName} contains no executable or structural elements. Consider removing the block."
+let errST004 langCode = $"The localization block does not provide an entry for language `{langCode}`." 
+let errST005 domain nodeType = $"An enumerator for the domain `{domain}`, which is {nodeType}, could not be established."
 // interpreter syntax-related error codes for error-tolerant parser
 let errSY000 errMsg = $"Syntax error: {errMsg}"
 let errSY001 errMsg = $"Syntax error (backtracked): {errMsg}"

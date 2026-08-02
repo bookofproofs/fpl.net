@@ -1088,7 +1088,7 @@ let emitST005Diagnostics domain nodeType pos1 pos2 =
             Diagnostic.Severity = DiagnosticSeverity.Information
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = ST005 (domain, nodeType)
+            Diagnostic.Code = ST005 (domain, getEnglishName nodeType false)
             Diagnostic.Alternatives = None
         }
     ad.AddDiagnostic diagnostic
