@@ -1254,7 +1254,7 @@ let emitVAR03Diagnostics varName conflictStartPos pos1 pos2 =
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = VAR03(varName, conflictStartPos)
-            Diagnostic.Alternatives = Some "Remove this variable declaration or rename the variable."
+            Diagnostic.Alternatives = Some "Remove this declaration or rename the variable."
         }
 
     ad.AddDiagnostic diagnostic

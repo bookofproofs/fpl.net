@@ -205,6 +205,7 @@ type TestVAR03() =
     [<DataRow("15", "axiom T {dec p:pred(n:obj); all n:Nat{p(n)} }", 1)>]
     [<DataRow("15a", "axiom T {dec p:pred(n:obj); all n1:Nat{p(n1)} }", 0)>]
     [<DataRow("16", "prop T { all x:obj {true} } proof T$1 { 1: all x:obj {true} }", 0)>]
+    [<DataRow("00e", "def pred Test() { dec x:obj; dec x:pred; true }", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestVAR03(no: string, fplCode:string, expected) =
