@@ -75,7 +75,7 @@ type FplEquality(name, positions: Positions, parent: FplGenericNode) as this =
         | Some err ->
             this.SetDefaultValue()
         | _ ->
-            if isInQuantor this then 
+            if isInQuantifier this then 
                 this.SetDefaultValue()
             else
 

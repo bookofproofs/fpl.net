@@ -23,7 +23,7 @@ open Fpl.Interpreter.SymbolTable.Types2.Variables
 open Fpl.Interpreter.SymbolTable.Types2.References
 open Fpl.Interpreter.SymbolTable.Types2.CompoundPredicates
 open Fpl.Interpreter.SymbolTable.Types3.IsOperator
-open Fpl.Interpreter.SymbolTable.Types3.Quantors
+open Fpl.Interpreter.SymbolTable.Types3.Quantifiers
 open Fpl.Interpreter.SymbolTable.Creation.Forward
 
 
@@ -84,8 +84,8 @@ let evalPredicates ast =
         heap.Eval.PopEvalStack()
     | Ast.All((pos1, pos2), (namedVarDeclAstList, predicateAst)) ->
         let parent = heap.Eval.PeekEvalStack()
-        let fv = new FplQuantorAll((pos1, pos2), parent)
-        heap.Eval.PushEvalStack(fv) // add all quantor
+        let fv = new FplQuantifierAll((pos1, pos2), parent)
+        heap.Eval.PushEvalStack(fv) // add all quantifier
         fv.Arity <- fv.Arity + (namedVarDeclAstList |> List.length)
         namedVarDeclAstList
         |> List.map (fun namedVarDeclAst ->
@@ -93,11 +93,11 @@ let evalPredicates ast =
         )
         |> ignore
         evalRef.Value predicateAst
-        heap.Eval.PopEvalStack() // remove all quantor
+        heap.Eval.PopEvalStack() // remove all quantifier
     | Ast.Exists((pos1, pos2), (namedVarDeclAstList, predicateAst)) ->
         let parent = heap.Eval.PeekEvalStack()
-        let fv = new FplQuantorExists((pos1, pos2), parent)
-        heap.Eval.PushEvalStack(fv) // add exists quantor
+        let fv = new FplQuantifierExists((pos1, pos2), parent)
+        heap.Eval.PushEvalStack(fv) // add exists quantifier
         fv.Arity <- fv.Arity + (namedVarDeclAstList |> List.length)
         namedVarDeclAstList
         |> List.map (fun namedVarDeclAst ->
@@ -105,14 +105,14 @@ let evalPredicates ast =
         )
         |> ignore
         evalRef.Value predicateAst
-        heap.Eval.PopEvalStack() // remove exists quantor
+        heap.Eval.PopEvalStack() // remove exists quantifier
     | Ast.Exists1() ->
         let fv = heap.Eval.PeekEvalStack()
         fv.FplId <- fv.FplId + "$1"
     | Ast.ExistsN((pos1, pos2), ((dollarDigitsAst, namedVarDeclListAst), predicateAst)) ->
         let parent = heap.Eval.PeekEvalStack()
-        let fv = new FplQuantorExistsN((pos1, pos2), parent)
-        heap.Eval.PushEvalStack(fv) // add exists n quantor
+        let fv = new FplQuantifierExistsN((pos1, pos2), parent)
+        heap.Eval.PushEvalStack(fv) // add exists n quantifier
         evalRef.Value dollarDigitsAst
         namedVarDeclListAst
         |> List.map (fun namedVarDeclAst ->
@@ -120,7 +120,7 @@ let evalPredicates ast =
         )
         |> ignore
         evalRef.Value predicateAst
-        heap.Eval.PopEvalStack() // remove exists n quantor
+        heap.Eval.PopEvalStack() // remove exists n quantifier
     | Ast.IsOperator((pos1, pos2), (isOpArgAst, variableTypeAst)) ->
         let fv = heap.Eval.PeekEvalStack()
         let fvNew = new FplIsOperator((pos1, pos2), fv)

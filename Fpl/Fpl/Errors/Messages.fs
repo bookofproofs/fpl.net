@@ -147,7 +147,7 @@ let errSY001 errMsg = $"Syntax error (backtracked): {errMsg}"
 let errSY002 errMsg chain = $"Syntax error chain {chain}: {errMsg}"
 
 let errSY010 = $"These parentheses can be safely removed."
-let errSY011 = $"Replace `∃!0` by `¬∃` quantor."
+let errSY011 = $"Replace `∃!0` by `¬∃` quantifier."
 let errSY012 = $"Expression `∃!1` can be simplified with `∃!`."
 let errSY013 innerInfixSymbol innerPrecedence outerInfixSymbol outerPrecedence = $"These parentheses can be safely removed because the symbol's `{innerInfixSymbol}` precedence {innerPrecedence} is higher than the symbol's `{outerInfixSymbol}` precedence {outerPrecedence}."
 let errSY014 infixSymbol1 infixSymbol2 precedence =
@@ -157,19 +157,19 @@ let errSY014 infixSymbol1 infixSymbol2 precedence =
     | _ -> 
         $"This expression is ambiguous. The infix operators `{infixSymbol1}` and `{infixSymbol2}` have the same precedence {precedence}. To resolve the ambiguity, either use parentheses to indicate the intended grouping or assign different precedences to the symbols."
 // variable-related error codes
-let errVAR00 =  "Declaring multiple arrays at once may cause ambiguities."
-let errVAR01 name = $"Variable `{name}` not declared in this scope."
-let errVAR02 name = $"Variable `{name}` was already bound in this quantor."
+let errVAR00 =  "Declaring multiple variadic variables together may cause ambiguous bindings."
+let errVAR01 name = $"Variable `{name}` is not declared in the current scope."
+let errVAR02 name = $"Variable `{name}` is already bound in this quantifier."
 let errVAR03 identifier conflict = $"Variable `{identifier}` was already declared in {conflict}."  
 let errVAR04 name = $"Declared variable `{name}` not used in this scope."
-let errVAR05 name = $"Bound variable `{name}` was not used in this quantor."
+let errVAR05 name = $"Bound variable `{name}` was not used in this quantifier."
 let errVAR06 name oldFromNode newFromNode typeName = 
     match typeName with 
     | PrimClassL -> $"Variable `{name}` of base class `{oldFromNode} will be overshadowed by `{newFromNode}`."
     | PrimFunctionalTermL -> $"Variable `{name}` of base functional term `{oldFromNode} will be overshadowed by `{newFromNode}`."
     | _ -> $"Variable `{name}` of (unknown type) `{oldFromNode} will be overshadowed by `{newFromNode}`."
-let errVAR07 name = $"The {PrimQuantorExistsN} accepts only one bound variable `{name}`."
-let errVAR08 = "Variadic variables cannot be bound in a quantor."
+let errVAR07 name = $"The {PrimQuantifierExistsN} accepts only one bound variable `{name}`."
+let errVAR08 = "Variadic variables cannot be bound in a quantifier."
 let errVAR09 varName varType = $"The variable {varName}:{varType} is free and cannot be used to evaluate this expression."
 let errVAR10 identifier formulaName = $"The variable `{identifier}` is bound more than once in the formula `{formulaName}`."  
 let errVAR11 identifier conflict = $"All variables in a {LiteralLocL} have to be different. The `{identifier}` was used in {conflict}."
@@ -192,14 +192,14 @@ let errTypeMismatchVariadic aName aType pName pType pTypeId = Some $"Variadic en
 
 // expression-matching-related errors
 // -----------------------------------------------------------------
-let errExprMismatchExistsN aFplId aName pFplId pName = Some $"Type mismatch in ∃‑quantor: `{aFplId}` was provided in `{aName}`, but type `{pFplId}` was required in `{pName}`."
-let errExprMismatchQuantorVariableTypes aName pName xName yName index = Some $"Type mismatch: `{xName}` was used as the {englishOrdinal index} bound variable in `{aName}`, but `{yName}` was required in `{pName}`."
-let errExprMismatchQuantorVariableCounts aName pName aVarsCount pVarsCount = Some $"Found {aVarsCount} bound variables in `{aName}`, expected {pVarsCount} in `{pName}`." 
+let errExprMismatchExistsN aFplId aName pFplId pName = Some $"Type mismatch in ∃‑quantifier: `{aFplId}` was provided in `{aName}`, but type `{pFplId}` was required in `{pName}`."
+let errExprMismatchQuantifierVariableTypes aName pName xName yName index = Some $"Type mismatch: `{xName}` was used as the {englishOrdinal index} bound variable in `{aName}`, but `{yName}` was required in `{pName}`."
+let errExprMismatchQuantifierVariableCounts aName pName aVarsCount pVarsCount = Some $"Found {aVarsCount} bound variables in `{aName}`, expected {pVarsCount} in `{pName}`." 
 let errExprMismatchOpenFormulas aName aVarsOpenClosedStr aOpenFormulaType pName pVarsOpenClosedStr pOpenFormulaType = Some $"Found expression `{aName}` ({aVarsOpenClosedStr}, type `{aOpenFormulaType}`), expected `{pName}` ({pVarsOpenClosedStr}, type `{pOpenFormulaType}`)."
 let errExprMismatchExpectedEndOfFormula (aName) = Some $"Found {aName}`, expected end of formula."
 let errExprMismatchFoundEndOfFormula pName = Some $"Found end of formula, expected `{pName}`."
-let errExprMismatchVarMatchedDifferently varName expectedExpr actualExpr = Some $"Variable `{varName}` was matched with different quantor formulas `{expectedExpr}` and `{actualExpr}`."
-let errExprMismatchVarMatchedDifferentlyQuantor varName expectedExpr actualExpr = Some $"Variable `{varName}` was matched with different quantor formulas `{expectedExpr}` and `{actualExpr}`.{Environment.NewLine}Both formulas differed even when using placeholders for bound variables."
+let errExprMismatchVarMatchedDifferently varName expectedExpr actualExpr = Some $"Variable `{varName}` was matched with different quantifier formulas `{expectedExpr}` and `{actualExpr}`."
+let errExprMismatchVarMatchedDifferentlyQuantfier varName expectedExpr actualExpr = Some $"Variable `{varName}` was matched with different quantifier formulas `{expectedExpr}` and `{actualExpr}`.{Environment.NewLine}Both formulas differed even when using placeholders for bound variables."
 let errExprMismatchMsgStandard aName pName = Some $"Found `{aName}`, expected `{pName}`."
 let errExprMismatchMsgParensOnlyLeft aName pName = Some $"Found `{aName}` in parentheses, expected `{pName}` without parentheses."
 let errExprMismatchMsgParensOnlyRight aName pName = Some $"Found `{aName}` without parentheses, expected `{pName}` in parentheses."

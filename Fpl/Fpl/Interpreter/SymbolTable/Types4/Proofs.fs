@@ -218,7 +218,7 @@ and FplJustificationItemByInf(positions: Positions, parent: FplGenericNode) =
             exprVarList
             |> Seq.iter (fun var ->
                 if varUsageDict.ContainsKey(var.FplId) then
-                    // correct the TypeId and FplId of any cloned conclusion variables (like those of cloned quantors in the conclusion of the rule of reference)
+                    // correct the TypeId and FplId of any cloned conclusion variables (like those of cloned quantifiers in the conclusion of the rule of reference)
                     // to the TypeId of the matched variable of the matched premise of the rule of reference
                     var.TypeId <- varUsageDict[var.FplId].TypeId
                     // Note: The corrected FplId stems from the matched premise of the rule of reference, while the original FplId stems from its cloned conclusion

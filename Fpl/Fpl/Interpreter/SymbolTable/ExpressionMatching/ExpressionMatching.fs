@@ -28,40 +28,40 @@ open Fpl.Interpreter.SymbolTable.Types2.Variables
 open Fpl.Interpreter.SymbolTable.TypeMatching
 
 
-let private errExprMismatchQuantorVariableTypesWrapper (a:FplGenericNode) (p:FplGenericNode) (x:FplGenericNode) (y:FplGenericNode) index =
+let private errExprMismatchQuantifierVariableTypesWrapper (a:FplGenericNode) (p:FplGenericNode) (x:FplGenericNode) (y:FplGenericNode) index =
     let xName = $"{x.FplId}:{x.Type SignatureType.Type}"
     let yName = $"{y.FplId}:{y.Type SignatureType.Type}"
     let aName = a.Type SignatureType.Name
     let pName = p.Type SignatureType.Name
-    errExprMismatchQuantorVariableTypes aName pName xName yName index  
+    errExprMismatchQuantifierVariableTypes aName pName xName yName index  
 
-let private compareQuantorVariables (a:FplGenericNode) (p:FplGenericNode) (dictParameterUsage:Dictionary<string, FplGenericNode>) =
+let private compareQuantifierVariables (a:FplGenericNode) (p:FplGenericNode) (dictParameterUsage:Dictionary<string, FplGenericNode>) =
     let pVars = p.GetVariables()
     let aVars = a.GetVariables()
     let rec loop l1 l2 index =
         match l1, l2 with
         | [], [] ->
             match a.Name with
-            | PrimQuantorExistsN when a.Name = p.Name && a.FplId <> p.FplId ->
+            | PrimQuantifierExistsN when a.Name = p.Name && a.FplId <> p.FplId ->
                 errExprMismatchExistsN a.FplId (a.Type SignatureType.Name) p.FplId (p.Type SignatureType.Name)
             | _ ->
                 errExprMismatchOK   // no mismatches
         | (x:FplGenericNode)::xs, (y:FplGenericNode)::ys ->
             match FplTypeMatcher.MatchPwA [x] [y] with
             | Some _ ->
-                errExprMismatchQuantorVariableTypesWrapper a p x y index
+                errExprMismatchQuantifierVariableTypesWrapper a p x y index
             | _ ->
-                // remember corresponding quantor variables of the matched quantors 
+                // remember corresponding quantifier variables of the matched quantifiers 
                 dictParameterUsage.TryAdd (y.FplId, x) |> ignore 
                 loop xs ys (index + 1)
         | _ ->
             // Should not happen if lengths are equal, but included for safety
-            errExprMismatchQuantorVariableCounts (a.Type SignatureType.Name) (p.Type SignatureType.Name) aVars.Length pVars.Length
+            errExprMismatchQuantifierVariableCounts (a.Type SignatureType.Name) (p.Type SignatureType.Name) aVars.Length pVars.Length
     loop aVars pVars 0
 
-/// Creates a string representation of a quantor formula in which its bound variables are replaced by
+/// Creates a string representation of a quantifier formula in which its bound variables are replaced by
 /// placeholders numbered according to the order of the bound variables
-let private getNameOfQuantorFormulaModuloBoundVarNames (fv:FplGenericNode) =
+let private getNameOfQuantifierFormulaModuloBoundVarNames (fv:FplGenericNode) =
     let originalNames = HashSet<string>()
     fv.Scope
     |> Seq.filter (fun kvp ->
@@ -88,13 +88,13 @@ let private checkMismatchingUsageOfVars varName (a:FplGenericNode) (dictParamete
         errExprMismatchOK
     else
         let previouslyMatchedFormula = dictParameterUsage[varName]
-        if a.Name = previouslyMatchedFormula.Name && isQuantor a && isQuantor previouslyMatchedFormula then
-            let expectedExprModVarNames = getNameOfQuantorFormulaModuloBoundVarNames previouslyMatchedFormula
-            let actualExprModVarNames = getNameOfQuantorFormulaModuloBoundVarNames a
+        if a.Name = previouslyMatchedFormula.Name && isQuantifier a && isQuantifier previouslyMatchedFormula then
+            let expectedExprModVarNames = getNameOfQuantifierFormulaModuloBoundVarNames previouslyMatchedFormula
+            let actualExprModVarNames = getNameOfQuantifierFormulaModuloBoundVarNames a
             if expectedExprModVarNames<>actualExprModVarNames then
                 let expectedExpr = previouslyMatchedFormula.Type SignatureType.Name
                 let actualExpr = (a.Type SignatureType.Name)
-                errExprMismatchVarMatchedDifferentlyQuantor varName expectedExpr actualExpr
+                errExprMismatchVarMatchedDifferentlyQuantfier varName expectedExpr actualExpr
             else
                 errExprMismatchOK
         else
@@ -159,13 +159,13 @@ let private checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) (dictParamete
         | PrimEquivalence, PrimEquivalence
         | PrimExclusiveOr, PrimExclusiveOr
         | PrimNegation, PrimNegation -> checkExpressions (a.ArgList |> Seq.toList) (p.ArgList |> Seq.toList) 
-        | PrimQuantorAll, PrimQuantorAll 
-        | PrimQuantorExists, PrimQuantorExists 
-        | PrimQuantorExistsN, PrimQuantorExistsN ->
-        // match number of quantor variables
-            match compareQuantorVariables a p dictParameterUsage with
+        | PrimQuantifierAll, PrimQuantifierAll 
+        | PrimQuantifierExists, PrimQuantifierExists 
+        | PrimQuantifierExistsN, PrimQuantifierExistsN ->
+        // match number of quantifier variables
+            match compareQuantifierVariables a p dictParameterUsage with
             | None ->
-                // and now check the expressions inside the quantors
+                // and now check the expressions inside the quantifiers
                 checkExpressions (a.ArgList |> Seq.toList) (p.ArgList |> Seq.toList) 
             | Some err -> Some err
         | PrimFalse, PrimFalse 

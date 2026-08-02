@@ -4,7 +4,7 @@ using static Fpl.Primitives;
 namespace FplLS
 {
 
-    public class FplCompletionItemChoicesQuantor : FplCompletionItemChoices
+    public class FplCompletionItemChoicesQuantifier : FplCompletionItemChoices
     {
 
         public override List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi)
@@ -16,14 +16,14 @@ namespace FplLS
                 postfix = "$1";
             }
             // snippet
-            var ci = BuildQuantorSnippet(defaultCi, postfix);
+            var ci = BuildQuantifierSnippet(defaultCi, postfix);
             ret.Add(ci);
             // keyword
             ret.Add(defaultCi.WithKind(CompletionItemKind.Keyword).WithKeyword());
             return ret;
         }
 
-        private static FplCompletionItem BuildQuantorSnippet(FplCompletionItem baseCi, string postfix)
+        private static FplCompletionItem BuildQuantifierSnippet(FplCompletionItem baseCi, string postfix)
         {
             var sortText = $"{baseCi.Word}02";
             var label = $"{TokenPrefix}{baseCi.Word}{postfix} of type ...";
@@ -34,9 +34,9 @@ namespace FplLS
             }
             var detail = baseCi.Word switch
             {
-                LiteralAll => $"all quantor (in type)",
-                LiteralEx => $"exists quantor (in type)",
-                LiteralExN => $"exists n-times quantor (in type)",
+                LiteralAll => $"all quantifier (in type)",
+                LiteralEx => $"exists quantifier (in type)",
+                LiteralExN => $"exists n-times quantifier (in type)",
                 _ => baseCi.Detail
             };
             return baseCi.WithSortText(sortText).WithLabel(label).WithInsertText(insert).WithDetail(detail ?? string.Empty);

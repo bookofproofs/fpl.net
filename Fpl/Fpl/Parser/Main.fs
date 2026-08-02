@@ -231,7 +231,7 @@ let testParser (parserType:string) (input:string) =
     | LiteralPrty ->
         let result = run (definitionProperty .>> eof) trimmed 
         sprintf "%O" result
-    | PrimQuantor ->
+    | PrimQuantifier ->
         let result = run (compoundPredicate .>> eof) trimmed 
         sprintf "%O" result
     | PrimTheoremLike ->

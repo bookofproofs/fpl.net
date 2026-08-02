@@ -49,7 +49,7 @@
         <Compile Include="Interpreter\SymbolTable\Types3\SelfParent.fs" />
         <Compile Include="Interpreter\SymbolTable\Types3\PredicativeBlocks.fs" />
         <Compile Include="Interpreter\SymbolTable\Types3\DefinitionProperties.fs" />
-        <Compile Include="Interpreter\SymbolTable\Types3\Quantors.fs" />
+        <Compile Include="Interpreter\SymbolTable\Types3\Quantifiers.fs" />
         <Compile Include="Interpreter\SymbolTable\Types3\RulesOfInferences.fs" />
         <Compile Include="Interpreter\SymbolTable\Types3\MapCases.fs" />
         <Compile Include="Interpreter\SymbolTable\Types3\Extensions.fs" />

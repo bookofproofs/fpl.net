@@ -17,7 +17,7 @@ open Fpl.Interpreter.SymbolTable.Types3.SelfParent
 open Fpl.Interpreter.SymbolTable.Types3.IsOperator
 open Fpl.Interpreter.SymbolTable.Types3.PredicativeBlocks
 open Fpl.Interpreter.SymbolTable.Types3.DefinitionProperties
-open Fpl.Interpreter.SymbolTable.Types3.Quantors
+open Fpl.Interpreter.SymbolTable.Types3.Quantifiers
 open Fpl.Interpreter.SymbolTable.Types3.RulesOfInferences
 open Fpl.Interpreter.SymbolTable.Types3.Extensions
 open Fpl.Interpreter.SymbolTable.Types3.Delegates
@@ -344,16 +344,16 @@ type Structure() =
             let x = new FplProposition(positions, parent, 0)
             mockSymbolTableEvaluationPredicate x 1
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
-        | "FplQuantorAll" ->
-            let x = new FplQuantorAll(positions, parent)
+        | "FplQuantifierAll" ->
+            let x = new FplQuantifierAll(positions, parent)
             mockSymbolTableEvaluationPredicate x 1
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
-        | "FplQuantorExists" ->
-            let x = new FplQuantorExists(positions, parent)
+        | "FplQuantifierExists" ->
+            let x = new FplQuantifierExists(positions, parent)
             mockSymbolTableEvaluationPredicate x 1
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
-        | "FplQuantorExistsN" ->
-            let x = new FplQuantorExistsN(positions, parent)
+        | "FplQuantifierExistsN" ->
+            let x = new FplQuantifierExistsN(positions, parent)
             mockSymbolTableEvaluationPredicate x 1
             [x.Name; x.ShortName; x.FplId; x.TypeId; $"""{match x.RunOrder with Some _ -> "Some" | None -> PrimNone}"""; x.Represent(); x.Type SignatureType.Mixed]
         | "FplReference" ->
@@ -484,9 +484,9 @@ type Structure() =
     [<DataRow("FplPredicateList")>]
     [<DataRow("FplProof")>]
     [<DataRow("FplProposition")>]
-    [<DataRow("FplQuantorAll")>]
-    [<DataRow("FplQuantorExists")>]
-    [<DataRow("FplQuantorExistsN")>]
+    [<DataRow("FplQuantifierAll")>]
+    [<DataRow("FplQuantifierExists")>]
+    [<DataRow("FplQuantifierExistsN")>]
     [<DataRow("FplReference")>]
     [<DataRow("FplReturn")>]
     [<DataRow("FplRoot")>]
@@ -628,12 +628,12 @@ type Structure() =
             Assert.AreEqual<string>(LiteralPrfL, (getName var).[index])
         | "FplProposition" ->
             Assert.AreEqual<string>(LiteralPropL, (getName var).[index])
-        | "FplQuantorAll" ->
-            Assert.AreEqual<string>(PrimQuantorAll, (getName var).[index])
-        | "FplQuantorExists" ->
-            Assert.AreEqual<string>(PrimQuantorExists, (getName var).[index])
-        | "FplQuantorExistsN" ->
-            Assert.AreEqual<string>(PrimQuantorExistsN, (getName var).[index])
+        | "FplQuantifierAll" ->
+            Assert.AreEqual<string>(PrimQuantifierAll, (getName var).[index])
+        | "FplQuantifierExists" ->
+            Assert.AreEqual<string>(PrimQuantifierExists, (getName var).[index])
+        | "FplQuantifierExistsN" ->
+            Assert.AreEqual<string>(PrimQuantifierExistsN, (getName var).[index])
         | "FplReference" ->
             Assert.AreEqual<string>(PrimRefL, (getName var).[index])
         | "FplReturn" ->
@@ -723,9 +723,9 @@ type Structure() =
     [<DataRow("FplPredicateList")>]
     [<DataRow("FplProof")>]
     [<DataRow("FplProposition")>]
-    [<DataRow("FplQuantorAll")>]
-    [<DataRow("FplQuantorExists")>]
-    [<DataRow("FplQuantorExistsN")>]
+    [<DataRow("FplQuantifierAll")>]
+    [<DataRow("FplQuantifierExists")>]
+    [<DataRow("FplQuantifierExistsN")>]
     [<DataRow("FplReference")>]
     [<DataRow("FplReturn")>]
     [<DataRow("FplRoot")>]
@@ -867,12 +867,12 @@ type Structure() =
             Assert.AreEqual<string>(LiteralPrf, (getName var).[index])
         | "FplProposition" ->
             Assert.AreEqual<string>(LiteralProp, (getName var).[index])
-        | "FplQuantorAll" ->
-            Assert.AreEqual<string>(PrimQuantor, (getName var).[index])
-        | "FplQuantorExists" ->
-            Assert.AreEqual<string>(PrimQuantor, (getName var).[index])
-        | "FplQuantorExistsN" ->
-            Assert.AreEqual<string>(PrimQuantor, (getName var).[index])
+        | "FplQuantifierAll" ->
+            Assert.AreEqual<string>(PrimQuantifier, (getName var).[index])
+        | "FplQuantifierExists" ->
+            Assert.AreEqual<string>(PrimQuantifier, (getName var).[index])
+        | "FplQuantifierExistsN" ->
+            Assert.AreEqual<string>(PrimQuantifier, (getName var).[index])
         | "FplReference" ->
             Assert.AreEqual<string>(PrimRef, (getName var).[index])
         | "FplReturn" ->
@@ -961,9 +961,9 @@ type Structure() =
     [<DataRow("FplPredicateList")>]
     [<DataRow("FplProof")>]
     [<DataRow("FplProposition")>]
-    [<DataRow("FplQuantorAll")>]
-    [<DataRow("FplQuantorExists")>]
-    [<DataRow("FplQuantorExistsN")>]
+    [<DataRow("FplQuantifierAll")>]
+    [<DataRow("FplQuantifierExists")>]
+    [<DataRow("FplQuantifierExistsN")>]
     [<DataRow("FplReference")>]
     [<DataRow("FplReturn")>]
     [<DataRow("FplRoot")>]
@@ -1105,11 +1105,11 @@ type Structure() =
             Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplProposition" ->
             Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
-        | "FplQuantorAll" ->
+        | "FplQuantifierAll" ->
             Assert.AreEqual<string>(LiteralAll, (getName var).[index])
-        | "FplQuantorExists" ->
+        | "FplQuantifierExists" ->
             Assert.AreEqual<string>(LiteralEx, (getName var).[index])
-        | "FplQuantorExistsN" ->
+        | "FplQuantifierExistsN" ->
             Assert.AreEqual<string>(LiteralExN, (getName var).[index])
         | "FplReference" ->
             Assert.AreEqual<string>("", (getName var).[index])
@@ -1200,9 +1200,9 @@ type Structure() =
     [<DataRow("FplPredicateList")>]
     [<DataRow("FplProof")>]
     [<DataRow("FplProposition")>]
-    [<DataRow("FplQuantorAll")>]
-    [<DataRow("FplQuantorExists")>]
-    [<DataRow("FplQuantorExistsN")>]
+    [<DataRow("FplQuantifierAll")>]
+    [<DataRow("FplQuantifierExists")>]
+    [<DataRow("FplQuantifierExistsN")>]
     [<DataRow("FplReference")>]
     [<DataRow("FplReturn")>]
     [<DataRow("FplRoot")>]
@@ -1344,11 +1344,11 @@ type Structure() =
             Assert.AreEqual<string>(LiteralPred, (getName var).[index])
         | "FplProposition" ->
             Assert.AreEqual<string>(LiteralPred, (getName var).[index])
-        | "FplQuantorAll" ->
+        | "FplQuantifierAll" ->
             Assert.AreEqual<string>(LiteralPred, (getName var).[index])
-        | "FplQuantorExists" ->
+        | "FplQuantifierExists" ->
             Assert.AreEqual<string>(LiteralPred, (getName var).[index])
-        | "FplQuantorExistsN" ->
+        | "FplQuantifierExistsN" ->
             Assert.AreEqual<string>(LiteralPred, (getName var).[index])
         | "FplReference" ->
             Assert.AreEqual<string>("", (getName var).[index])
@@ -1438,9 +1438,9 @@ type Structure() =
     [<DataRow("FplPredicateList")>]
     [<DataRow("FplProof")>]
     [<DataRow("FplProposition")>]
-    [<DataRow("FplQuantorAll")>]
-    [<DataRow("FplQuantorExists")>]
-    [<DataRow("FplQuantorExistsN")>]
+    [<DataRow("FplQuantifierAll")>]
+    [<DataRow("FplQuantifierExists")>]
+    [<DataRow("FplQuantifierExistsN")>]
     [<DataRow("FplReference")>]
     [<DataRow("FplReturn")>]
     [<DataRow("FplRoot")>]
@@ -1582,11 +1582,11 @@ type Structure() =
             Assert.AreEqual<string>("Some", (getName var).[index])
         | "FplProposition" ->
             Assert.AreEqual<string>("Some", (getName var).[index])
-        | "FplQuantorAll" ->
+        | "FplQuantifierAll" ->
             Assert.AreEqual<string>(PrimNone, (getName var).[index])
-        | "FplQuantorExists" ->
+        | "FplQuantifierExists" ->
             Assert.AreEqual<string>(PrimNone, (getName var).[index])
-        | "FplQuantorExistsN" ->
+        | "FplQuantifierExistsN" ->
             Assert.AreEqual<string>(PrimNone, (getName var).[index])
         | "FplReference" ->
             Assert.AreEqual<string>(PrimNone, (getName var).[index])
@@ -1677,9 +1677,9 @@ type Structure() =
     [<DataRow("FplPredicateList")>]
     [<DataRow("FplProof")>]
     [<DataRow("FplProposition")>]
-    [<DataRow("FplQuantorAll")>]
-    [<DataRow("FplQuantorExists")>]
-    [<DataRow("FplQuantorExistsN")>]
+    [<DataRow("FplQuantifierAll")>]
+    [<DataRow("FplQuantifierExists")>]
+    [<DataRow("FplQuantifierExistsN")>]
     [<DataRow("FplReference")>]
     [<DataRow("FplReturn")>]
     [<DataRow("FplRoot")>]
@@ -1822,11 +1822,11 @@ type Structure() =
             Assert.AreEqual<string>(LiteralTrue, (getName var).[index])
         | "FplProposition" ->
             Assert.AreEqual<string>(LiteralUndet, (getName var).[index])
-        | "FplQuantorAll" ->
+        | "FplQuantifierAll" ->
             Assert.AreEqual<string>(LiteralUndet, (getName var).[index])
-        | "FplQuantorExists" ->
+        | "FplQuantifierExists" ->
             Assert.AreEqual<string>(LiteralUndet, (getName var).[index])
-        | "FplQuantorExistsN" ->
+        | "FplQuantifierExistsN" ->
             Assert.AreEqual<string>(LiteralUndet, (getName var).[index])
         | "FplReference" ->
             Assert.AreEqual<string>("", (getName var).[index])
@@ -4842,92 +4842,92 @@ type Structure() =
             Assert.AreEqual<int>(0, node.Scope.Count)
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
-    [<DataRow("FplQuantorAll", "00", """inf T {pre: true con: all x:pred {and (x,x)}}""", "")>]
-    [<DataRow("FplQuantorAll", "01", """inf T {dec p: pred(c: obj); pre: p(c) con: all x:obj {p(x)}}""", "")>]
+    [<DataRow("FplQuantifierAll", "00", """inf T {pre: true con: all x:pred {and (x,x)}}""", "")>]
+    [<DataRow("FplQuantifierAll", "01", """inf T {dec p: pred(c: obj); pre: p(c) con: all x:obj {p(x)}}""", "")>]
     [<TestMethod>]
-    member this.TestStructureFplQuantorAll(nodeType, varVal, fplCode, identifier) =
-        let filename = "TestStructureFplQuantorAll.fpl"
+    member this.TestStructureFplQuantifierAll(nodeType, varVal, fplCode, identifier) =
+        let filename = "TestStructureFplQuantifierAll.fpl"
         let parent, node = testSkeleton nodeType filename fplCode identifier
         
         match nodeType, varVal with
-        | "FplQuantorAll", "00" -> 
+        | "FplQuantifierAll", "00" -> 
             Assert.IsInstanceOfType(parent, typeof<FplRuleOfInference>)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count) // bound variable does not have to be in scope inf
-            Assert.IsInstanceOfType(node, typeof<FplQuantorAll>)
+            Assert.IsInstanceOfType(node, typeof<FplQuantifierAll>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // conjunction
             Assert.AreEqual<int>(1, node.Scope.Count) // x variable
-        | "FplQuantorAll", "01" -> 
+        | "FplQuantifierAll", "01" -> 
             Assert.IsInstanceOfType(parent, typeof<FplRuleOfInference>)
             Assert.AreEqual<int>(2, parent.ArgList.Count)
-            Assert.AreEqual<int>(2, parent.Scope.Count) // variable p, c (x is bound by quantor, does not have to)
-            Assert.IsInstanceOfType(node, typeof<FplQuantorAll>)
+            Assert.AreEqual<int>(2, parent.Scope.Count) // variable p, c (x is bound by Quantifier, does not have to)
+            Assert.IsInstanceOfType(node, typeof<FplQuantifierAll>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // reference to p
             Assert.AreEqual<int>(1, node.Scope.Count) // x variable
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
 
-    [<DataRow("FplQuantorExists", "00", """inf T {pre: ex x:tpl {or(p, q(x))} con: true}""", "")>]
-    [<DataRow("FplQuantorExists", "01", """inf T {dec p: pred q:pred(z:tpl); pre: ex x:pred { p(z) } con: true}""", "")>]
-    [<DataRow("FplQuantorExists", "02", """inf T {pre: ex x,y:pred { and(x,y) }, true con: true}""", "")>]
+    [<DataRow("FplQuantifierExists", "00", """inf T {pre: ex x:tpl {or(p, q(x))} con: true}""", "")>]
+    [<DataRow("FplQuantifierExists", "01", """inf T {dec p: pred q:pred(z:tpl); pre: ex x:pred { p(z) } con: true}""", "")>]
+    [<DataRow("FplQuantifierExists", "02", """inf T {pre: ex x,y:pred { and(x,y) }, true con: true}""", "")>]
     [<TestMethod>]
-    member this.TestStructureFplQuantorExists(nodeType, varVal, fplCode, identifier) =
-        let filename = "TestStructureFplQuantorExists.fpl"
+    member this.TestStructureFplQuantifierExists(nodeType, varVal, fplCode, identifier) =
+        let filename = "TestStructureFplQuantifierExists.fpl"
         let parent, node = testSkeleton nodeType filename fplCode identifier
         
         match nodeType, varVal with
-        | "FplQuantorExists", "00" -> 
+        | "FplQuantifierExists", "00" -> 
             Assert.IsInstanceOfType(parent, typeof<FplPredicateList>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count)
-            Assert.IsInstanceOfType(node, typeof<FplQuantorExists>)
+            Assert.IsInstanceOfType(node, typeof<FplQuantifierExists>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // disjunction
             Assert.AreEqual<int>(1, node.Scope.Count) // x variable
-        | "FplQuantorExists", "01" -> 
+        | "FplQuantifierExists", "01" -> 
             Assert.IsInstanceOfType(parent, typeof<FplPredicateList>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(0, parent.Scope.Count) // variable p
-            Assert.IsInstanceOfType(node, typeof<FplQuantorExists>)
+            Assert.IsInstanceOfType(node, typeof<FplQuantifierExists>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // reference to p
             Assert.AreEqual<int>(1, node.Scope.Count) // x variable
-        | "FplQuantorExists", "02" -> 
+        | "FplQuantifierExists", "02" -> 
             Assert.IsInstanceOfType(parent, typeof<FplPredicateList>)
             Assert.AreEqual<int>(2, parent.ArgList.Count) // two predicates in list
             Assert.AreEqual<int>(0, parent.Scope.Count) 
-            Assert.IsInstanceOfType(node, typeof<FplQuantorExists>)
+            Assert.IsInstanceOfType(node, typeof<FplQuantifierExists>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // conjunction
             Assert.AreEqual<int>(2, node.Scope.Count) // 2 variables
         | _ -> failwith($"unmatched test {nodeType} {varVal}")
 
 
-    [<DataRow("FplQuantorExistsN", "00", """ax T {exn$1 x:tpl {and(p, q(x))} }""", "")>]
-    [<DataRow("FplQuantorExistsN", "01", """conj T {dec p: pred q:pred(z:tpl); exn$1 x:pred { p(z) } }""", "")>]
-    [<DataRow("FplQuantorExistsN", "02", """lem T {exn$1 x:pred { x } }""", "")>]
+    [<DataRow("FplQuantifierExistsN", "00", """ax T {exn$1 x:tpl {and(p, q(x))} }""", "")>]
+    [<DataRow("FplQuantifierExistsN", "01", """conj T {dec p: pred q:pred(z:tpl); exn$1 x:pred { p(z) } }""", "")>]
+    [<DataRow("FplQuantifierExistsN", "02", """lem T {exn$1 x:pred { x } }""", "")>]
     [<TestMethod>]
-    member this.TestStructureFplQuantorExistsN(nodeType, varVal, fplCode, identifier) =
-        let filename = "TestStructureFplQuantorExistsN.fpl"
+    member this.TestStructureFplQuantifierExistsN(nodeType, varVal, fplCode, identifier) =
+        let filename = "TestStructureFplQuantifierExistsN.fpl"
         let parent, node = testSkeleton nodeType filename fplCode identifier
         
         match nodeType, varVal with
-        | "FplQuantorExistsN", "00" -> 
+        | "FplQuantifierExistsN", "00" -> 
             Assert.IsInstanceOfType(parent, typeof<FplAxiom>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(1, parent.Scope.Count) // 1 template (bound variable x does not have to)
-            Assert.IsInstanceOfType(node, typeof<FplQuantorExistsN>)
+            Assert.IsInstanceOfType(node, typeof<FplQuantifierExistsN>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // conjunction
             Assert.AreEqual<int>(1, node.Scope.Count) // 1 variable
-        | "FplQuantorExistsN", "01" -> 
+        | "FplQuantifierExistsN", "01" -> 
             Assert.IsInstanceOfType(parent, typeof<FplConjecture>)
             Assert.AreEqual<int>(1, parent.ArgList.Count)
             Assert.AreEqual<int>(4, parent.Scope.Count) // 3 variables, 1 template, (bound variable x does not have to)
-            Assert.IsInstanceOfType(node, typeof<FplQuantorExistsN>)
+            Assert.IsInstanceOfType(node, typeof<FplQuantifierExistsN>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // reference to p
             Assert.AreEqual<int>(1, node.Scope.Count) // 1 variable
-        | "FplQuantorExistsN", "02" -> 
+        | "FplQuantifierExistsN", "02" -> 
             Assert.IsInstanceOfType(parent, typeof<FplLemma>)
             Assert.AreEqual<int>(1, parent.ArgList.Count) // inner predicate
             Assert.AreEqual<int>(0, parent.Scope.Count) // (bound variable x does not have to)
-            Assert.IsInstanceOfType(node, typeof<FplQuantorExistsN>)
+            Assert.IsInstanceOfType(node, typeof<FplQuantifierExistsN>)
             Assert.AreEqual<int>(1, node.ArgList.Count) // reference to p
             Assert.AreEqual<int>(1, node.Scope.Count) // 1 variable
         | _ -> failwith($"unmatched test {nodeType} {varVal}")

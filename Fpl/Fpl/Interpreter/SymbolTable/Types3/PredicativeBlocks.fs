@@ -322,19 +322,19 @@ type FplConjecture(positions: Positions, parent: FplGenericNode, runOrder) =
              conserves the tautology property: If each predicate in a list is a tautology, so is the conclusion (see D.Hoffmann, "Theoretische Informatik", p. 104)
     TODO: 5) ensure cleaned-up expressions by renaming variable with the same names in independent parts of the same formula expression.
              (see D.H. "Theoretische Informatik", 3rd. p. 119) 
-             Implementation idea: This can be accomplished by moving the scope of variables declared in quantors to the containing FPL block, forcing renaming the variables by the end-user at coding-time of the formula. 
+             Implementation idea: This can be accomplished by moving the scope of variables declared in quantifiers to the containing FPL block, forcing renaming the variables by the end-user at coding-time of the formula. 
     TODO: 6) issue error if arity-0 predicates are intrinsically defined, enforcing true or false (see D.H. "Theoretische Informatik", 3rd. p. 120) 
     TODO: 7) write functions for normalizing predicative formulas (see D.H. "Th. Inf", 3rd. p. 122-123):
                 NormalizeNeg - (uses cleaned-up expressions - see 5) replace impl, iif, xor, by and/or/not and move all negations from the beginning of non-atomic formula to its atomic sub formulas 
-                NormalizePrenex - (uses the output of NormalizeNeg): move quantors from all sub formulas the most outer quantor using fixed rules (see figure 3.35, p. 122)
-                NormalizeSkolem - (uses the output of NormalizePrenex): eliminated all exists-quantors from the formula
+                NormalizePrenex - (uses the output of NormalizeNeg): move quantifiers from all sub formulas the most outer quantifier using fixed rules (see figure 3.35, p. 122)
+                NormalizeSkolem - (uses the output of NormalizePrenex): eliminated all exists-quantifiers from the formula
                     there are two use cases: 
-                        exists quantor is not proceeded by all quantors: - then just remove the ex quantor by replacing x <- u() with some intrinsic 0-ary function u()->tpl {intr} (some constant u fulfilling p)
+                        exists quantifier is not proceeded by all quantifiers: - then just remove the ex quantifier by replacing x <- u() with some intrinsic 0-ary function u()->tpl {intr} (some constant u fulfilling p)
                             for instance, 
                                 ex x:tpl { p(x) } 
                             will be transformed to 
                                 p(u())
-                        exists quantor is proceeded by some all quantors: then remove the ex quantor by replacing x<-g_p(x1,x2) with some intrinsic n-ary function g(tpl1,tpl2)->tpl {intr} (some function fulfilling p, depending on preceding variables bound by all quantors) 
+                        exists quantifier is proceeded by some all quantifiers: then remove the ex quantifier by replacing x<-g_p(x1,x2) with some intrinsic n-ary function g(tpl1,tpl2)->tpl {intr} (some function fulfilling p, depending on preceding variables bound by all quantifiers) 
                             for instance, 
                                 all x1:tpl1, x2:tpl2, x:tpl {p(x1,x2,x)} 
                             will be transformed to  

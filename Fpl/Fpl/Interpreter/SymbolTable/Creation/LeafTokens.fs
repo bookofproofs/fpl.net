@@ -23,7 +23,7 @@ open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.SymbolTable.Storage.Util
 open Fpl.Interpreter.SymbolTable.Types2.Intrinsic
 open Fpl.Interpreter.SymbolTable.Types2.References
-open Fpl.Interpreter.SymbolTable.Types3.Quantors
+open Fpl.Interpreter.SymbolTable.Types3.Quantifiers
 
 
 let evalLeafTokens ast =
@@ -44,7 +44,7 @@ let evalLeafTokens ast =
             value.FplId <- sid
             heap.Eval.PushEvalStack(value)
             heap.Eval.PopEvalStack()
-        | :? FplQuantorExistsN ->
+        | :? FplQuantifierExistsN ->
             match (int)s with
             | 0 ->
                 fv.ErrorOccurred <- emitSY011Diagnostics pos1 pos2

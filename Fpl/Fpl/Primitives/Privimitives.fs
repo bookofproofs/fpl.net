@@ -456,13 +456,13 @@ let PrimPredicate = "def pred"
 [<Literal>]
 let PrimPredicateL = "predicate"
 [<Literal>]
-let PrimQuantor = "qtr"
+let PrimQuantifier = "qtr"
 [<Literal>]
-let PrimQuantorAll = "all quantor"
+let PrimQuantifierAll = "all quantifier"
 [<Literal>]
-let PrimQuantorExists = "exists quantor"
+let PrimQuantifierExists = "exists quantifier"
 [<Literal>]
-let PrimQuantorExistsN = "exists n times quantor"
+let PrimQuantifierExistsN = "exists n times quantifier"
 [<Literal>]
 let PrimReturn = "return statement"
 [<Literal>]

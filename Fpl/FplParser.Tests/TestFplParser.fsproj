@@ -11,7 +11,7 @@
     <ItemGroup>
         <Compile Include="TestDifferse.fs" />
         <Compile Include="TestExtensions.fs" />
-        <Compile Include="TestQuantors.fs" />
+        <Compile Include="TestQuantifiers.fs" />
         <Compile Include="TestExpressions.fs" />
         <Compile Include="TestUsesClause.fs" />
         <Compile Include="TestAxioms.fs" />
