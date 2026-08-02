@@ -21,6 +21,7 @@ type TestSIG13() =
     [<DataRow("04", """def pred T() {dec x:obj; mcases (| true: undef | false: $42 | false: true ? false) }""", 3)>] // undef as first branch forces all other branches also to return undef
     [<DataRow("05", """def pred T() {dec x:obj; mcases (| true: true | false: undef | false: true ? true) }""", 0)>] // undef in the middle is allowed
     [<DataRow("06", """def cl Nat def func Succ(n: Nat) -> Nat ext Digits x@/\d+/ -> Nat {ret mcases (| true: Nat() ? Succ(self(delegate.Decrement(x))) ) }""", 0)>]  
+    [<DataRow("07", """def pred T() { mcases (| true: undef | false: undef ? undef) }""", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestSIG13(no:string, fplCode:string, expected) =

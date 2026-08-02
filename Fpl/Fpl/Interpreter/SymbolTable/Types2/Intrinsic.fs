@@ -84,7 +84,7 @@ type FplIntrinsicTpl(name, positions: Positions, parent: FplGenericNode) as this
 
                     match diagnostic with 
                     | "SIG12" -> this.ErrorOccurred <- emitSIG12Diagnostics this.FplId currentUsage firstUsage (templateUsage.Parent.Value.QualifiedStartPos) (fst diagnosticPosition) (snd diagnosticPosition)
-                    | "SIG13" -> this.ErrorOccurred <- emitSIG13Diagnostics this.FplId currentUsage firstUsage (templateUsage.Parent.Value.QualifiedStartPos) (fst diagnosticPosition) (snd diagnosticPosition)
+                    | "SIG13" -> this.ErrorOccurred <- emitSIG13Diagnostics PrimMapCasesL currentUsage firstUsage (templateUsage.Parent.Value.QualifiedStartPos) (fst diagnosticPosition) (snd diagnosticPosition)
                     | _ -> emitUnexpectedErrorDiagnostics $"Unhandled diagnostic `{diagnostic}` in FplIntrinsicTpl.TrySetTemplateUsage."
                 | _ -> () // equal usage is accepted
             | _, _ -> () // equal usage is accepted

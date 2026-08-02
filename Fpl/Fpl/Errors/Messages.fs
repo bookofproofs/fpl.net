@@ -134,7 +134,7 @@ let errSIG11 qualifiedWrongCandidate typeOfCandidate =
     else
         $"Illegal mapping to {typeOfCandidate} `{qualifiedWrongCandidate}`. Only class types or predefined types (`{LiteralObj}`, `{LiteralInd}`, `{LiteralPred}`, `{LiteralFunc}`) may be used as mapping targets."
 let errSIG12 templateName secondUsage firstUsage firstUsagePos = $"The template `{templateName}` was used with type `{secondUsage}` inconsistently; expected type `{firstUsage}`, as used in `{firstUsagePos}`."
-let errSIG13 stmtName secondUsage firstUsage firstUsagePos = $"Every branch of the {stmtName} must return a value with a type of the first case in `{firstUsagePos}`, which was `{firstUsage}`. This branch returns `{secondUsage}`."
+let errSIG13 stmtName secondUsage firstUsage firstUsagePos = $"Every branch of the {stmtName} must return a value with the same type as the first case in `{firstUsagePos}`, whose type was `{firstUsage}`. This branch returns `{secondUsage}`."
 let errSIG14 = $"This case will never be matched."
 // structure-related error codes
 let errST001 nodeName = $"The {nodeName} does nothing."
