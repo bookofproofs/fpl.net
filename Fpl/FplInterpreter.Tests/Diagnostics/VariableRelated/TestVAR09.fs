@@ -58,6 +58,7 @@ type TestVAR09() =
     [<DataRow("21", """def pred T() { all x,y:pred { xor(xor(y,x),true) } }""", 0)>]
     [<DataRow("22", """def pred T() { all i:Nat {true} }""", 0)>]
     [<DataRow("23", """theorem Example1 { dec a:pred; impl (a, a) }""", 0)>] 
+    [<DataRow("24", """loc iif(x, y) := !tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""", 0)>]
     
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
@@ -65,5 +66,5 @@ type TestVAR09() =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = VAR09 ("","")
+            let code = VAR09 ""
             runTestHelper "TestVAR09.fpl" fplCode code expected

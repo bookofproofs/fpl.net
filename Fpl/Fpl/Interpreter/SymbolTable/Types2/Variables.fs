@@ -207,7 +207,7 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplGenericNode) as 
             elif next.Name = PrimQuantifierExistsN && next.Scope.Count>0 then 
                 this.ErrorOccurred <- emitVAR07Diagnostics this.FplId this.StartPos this.EndPos
             elif this.Name = PrimVariableArrayL then 
-                this.ErrorOccurred <- emitVAR08Diagnostics this.StartPos this.EndPos
+                this.ErrorOccurred <- emitVAR08Diagnostics this.FplId this.StartPos this.EndPos
             else
                 addToQuantifier next
                 

@@ -23,11 +23,12 @@ type TestVAR08() =
     [<DataRow("02", "axiom T {exn$1 n:pred { n } }", 0)>]
     [<DataRow("02a", "axiom T {exn$1 n:*pred[ind] { n } }", 1)>]
     [<DataRow("02a", "axiom T {exn$1 n:*pred[obj] { n } }", 1)>]
+    [<DataRow("03", "axiom T {all n:pred, m:*pred[ind] { n } }", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestVAR08(no:string, fplCode:string, expected) =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = VAR08
+            let code = VAR08 ""
             runTestHelper "TestVAR08.fpl" fplCode code expected

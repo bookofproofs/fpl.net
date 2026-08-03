@@ -318,7 +318,7 @@ let checkCleanedUpFormula (fv:FplGenericNode) =
             let quantifierCEnd = quantifier.EndPos.Column
             (
                (quantifierLStart < varLStart && quantifierLEnd > varLEnd) // lines(quantifier) contain lines(variable)
-            || (quantifierLStart = varLStart && quantifierLEnd > varLEnd && quantifierCStart <= varCStart ) // if start line(q) = start line line(v) && end line(q) > end line(v), compare starting columns
+            || (quantifierLStart = varLStart && quantifierLEnd > varLEnd && quantifierCStart <= varCStart ) // if start line(q) = start line (v) && end line(q) > end line(v), compare starting columns
             || (quantifierLStart = varLStart && quantifierLEnd = varLEnd && quantifierCStart <= varCStart && quantifierCEnd >= varCEnd) // if line(q) = line(v) for start and end, compare starting and ending columns
             )
 
@@ -433,14 +433,14 @@ let variableInBlockScopeByName (fplValue: FplGenericNode) name withNestedVariabl
 
     firstBlockParent fplValue
 
-/// Checks if an argument points to a free variable that is not in the signature of the predicagte,
+/// Checks if an argument points to a free variable that is not in the signature of the predicate,
 /// and if so, issues VAR09 diagnostics.
 let rec checkFreeAndNotSignatureVar (arg:FplGenericNode) = 
     match arg.RefersTo with 
     | Some ref ->
         match box ref, ref.UltimateBlockNode with 
-        | :? IVariable as var, Some node when node.Name <> PrimRuleOfInference && node.Name <> LiteralLocL && not var.IsBound && not var.IsSignatureVariable ->
-            ref.ErrorOccurred <- emitVAR09Diagnostics ref.FplId ref.TypeId ref.StartPos ref.EndPos
+        | :? IVariable as var, Some node when not (isProvable node || isAxiomOrConnjecture node) && node.Name <> PrimRuleOfInference && node.Name <> LiteralLocL && not var.IsBound && not var.IsSignatureVariable ->
+            ref.ErrorOccurred <- emitVAR09Diagnostics ref.FplId ref.StartPos ref.EndPos
         | _ -> ()
     | None when arg.ExpressionType.IsParen ->
         // delegate parenthesized (arg) to a

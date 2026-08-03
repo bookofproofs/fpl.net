@@ -50,7 +50,7 @@ let startsWithAny (prefixes:string list) (input:string) =
 
 /// A helper function adding an English article to a string 
 let getEnglishName someString determined = 
-    let isEnglishAn = startsWithAny ["a"; "e"; "i"; "o"; "u"] someString
+    let isEnglishAn = startsWithAny ["a"; "e"; "i"; "o"; "u"; "`a"; "`e"; "`i"; "`o"; "`u"] someString
     if determined then 
         $"the {someString}"
     elif isEnglishAn then 
@@ -159,8 +159,8 @@ type DiagnosticCode =
     | VAR05 of string 
     | VAR06 of string * string * string * string
     | VAR07 of string 
-    | VAR08 
-    | VAR09 of string * string 
+    | VAR08 of string
+    | VAR09 of string  
     | VAR10 of string * string
     | VAR11 of string * string
     member this.Code = 
@@ -264,7 +264,7 @@ type DiagnosticCode =
             | VAR05 _  -> "VAR05"
             | VAR06 _  -> "VAR06"
             | VAR07 _  -> "VAR07"
-            | VAR08 -> "VAR08"
+            | VAR08 _ -> "VAR08"
             | VAR09 _ -> "VAR09"
             | VAR10 _ -> "VAR10"
             | VAR11 _ -> "VAR11"
@@ -370,8 +370,8 @@ type DiagnosticCode =
             | VAR05 name -> errVAR05 name
             | VAR06 (name, oldFromNode, newFromNode, typeName) -> errVAR06 name oldFromNode newFromNode typeName
             | VAR07 name -> errVAR07 name
-            | VAR08 -> errVAR08
-            | VAR09 (varName,varType) -> errVAR09 varName varType
+            | VAR08 varName -> errVAR08 varName
+            | VAR09 varName -> errVAR09 varName 
             | VAR10 (identifier, formulaName) -> errVAR10 identifier formulaName
             | VAR11 (identifier, conflict) -> errVAR11 identifier conflict
 

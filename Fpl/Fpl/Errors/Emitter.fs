@@ -1314,7 +1314,7 @@ let emitVAR07Diagnostics name pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitVAR08Diagnostics pos1 pos2 =
+let emitVAR08Diagnostics varName pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -1322,13 +1322,13 @@ let emitVAR08Diagnostics pos1 pos2 =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = VAR08
+            Diagnostic.Code = VAR08 varName
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitVAR09Diagnostics varName varType pos1 pos2 =
+let emitVAR09Diagnostics varName pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -1336,7 +1336,7 @@ let emitVAR09Diagnostics varName varType pos1 pos2 =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = VAR09(varName, varType)
+            Diagnostic.Code = VAR09 varName
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic

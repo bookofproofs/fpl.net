@@ -165,8 +165,8 @@ let errVAR04 name = $"Variable `{name}` is declared but not used in the current 
 let errVAR05 name = $"Variable `{name}` is bound but never referenced in this quantifier."
 let errVAR06 name oldFromNode newFromNode typeName = $"Variable `{name}` inherited from {typeName} `{oldFromNode}` is overshadowed by the declaration in `{newFromNode}`."
 let errVAR07 name = $"The {PrimQuantifierExistsN} accepts only one bound variable; extra variable `{name}` was supplied."
-let errVAR08 = "Variadic variables cannot be bound in a quantifier."
-let errVAR09 varName varType = $"The variable {varName}:{varType} is free and cannot be used to evaluate this expression."
+let errVAR08 varName = $"The variadic variable `{varName}` cannot be bound in a quantifier."
+let errVAR09 varName = $"The variable `{varName}` is free in this context and cannot be used to evaluate the expression."
 let errVAR10 identifier formulaName = $"The variable `{identifier}` is bound more than once in the formula `{formulaName}`."  
 let errVAR11 identifier conflict = $"All variables in a {LiteralLocL} have to be different. The `{identifier}` was used in {conflict}."
 
