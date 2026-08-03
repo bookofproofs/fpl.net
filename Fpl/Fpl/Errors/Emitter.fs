@@ -912,7 +912,7 @@ let emitSIG05Diagnostics errMsg pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitSIG06diagnostic name oldFromNode newFromNode typeName pos1 pos2  = 
+let emitSIG06Diagnostics name oldFromNode newFromNode typeName pos1 pos2  = 
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -926,7 +926,7 @@ let emitSIG06diagnostic name oldFromNode newFromNode typeName pos1 pos2  =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitSIG07diagnostic assigneeName assigneeType pos1 pos2  = 
+let emitSIG07diagnostics assigneeName assigneeType pos1 pos2  = 
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
