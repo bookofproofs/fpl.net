@@ -458,13 +458,13 @@ let PrimPredicateL = "predicate"
 [<Literal>]
 let PrimQuantifier = "qtr"
 [<Literal>]
-let PrimQuantifierAll = "all quantifier"
+let PrimQuantifierAll = "`all` quantifier"
 [<Literal>]
-let PrimQuantifierExists = "exists quantifier"
+let PrimQuantifierExists = "`exists` quantifier"
 [<Literal>]
-let PrimQuantifierExistsN = "exists n times quantifier"
+let PrimQuantifierExistsN = "`exists n times` quantifier"
 [<Literal>]
-let PrimReturn = "return statement"
+let PrimReturn = "`return` statement"
 [<Literal>]
 let PrimRef = "ref"
 [<Literal>]
