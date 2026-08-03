@@ -161,8 +161,8 @@ let errVAR00 =  "Declaring multiple variadic variables together may cause ambigu
 let errVAR01 name = $"Variable `{name}` is not declared in the current scope."
 let errVAR02 name = $"Variable `{name}` is already bound in this quantifier."
 let errVAR03 identifier conflict = $"Variable `{identifier}` is already declared in {conflict}."  
-let errVAR04 name = $"Declared variable `{name}` not used in this scope."
-let errVAR05 name = $"Bound variable `{name}` was not used in this quantifier."
+let errVAR04 name = $"Variable `{name}` is declared but not used in the current scope."
+let errVAR05 name = $"Variable `{name}` is bound but never referenced in this quantifier."
 let errVAR06 name oldFromNode newFromNode typeName = 
     match typeName with 
     | PrimClassL -> $"Variable `{name}` of base class `{oldFromNode} will be overshadowed by `{newFromNode}`."
