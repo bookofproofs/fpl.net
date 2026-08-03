@@ -1,1 +1,1 @@
-def pred T() {dec i:ind arr:*obj[ind,ind] arr[i]:=undef; true}
+def cl A { intr prty pred T() {intr} } def cl B { intr prty pred T() {intr} } def cl C:A,B 

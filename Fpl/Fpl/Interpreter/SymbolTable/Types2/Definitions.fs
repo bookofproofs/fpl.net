@@ -74,7 +74,7 @@ type FplGenericInheriting(positions: Positions, parent: FplGenericNode) =
             let prtyName = prty.Type SignatureType.Mixed
             match this.OverrideInheritedObject prtyName _inheritedProperties prty fromBaseNode true with
             | (Some _, Some oldFromNode, Some newFromNode) ->
-                fromBaseNode.ErrorOccurred <- emitSIG06diagnostic prtyName oldFromNode newFromNode fromBaseNode.StartPos fromBaseNode.EndPos
+                fromBaseNode.ErrorOccurred <- emitSIG06diagnostic prtyName oldFromNode newFromNode fromBaseNode.Name fromBaseNode.StartPos fromBaseNode.EndPos
             | _ ->
                 ()
         )
@@ -111,7 +111,7 @@ type FplGenericInheriting(positions: Positions, parent: FplGenericNode) =
                 tuple.Add this // the property is from this
                 _inheritedProperties[prtyName] <- tuple
                 // emit SIG06, since the inner property overrides some inherited property
-                prty.ErrorOccurred <- emitSIG06diagnostic prtyName oldFromNode newFromNode prty.StartPos prty.EndPos
+                prty.ErrorOccurred <- emitSIG06diagnostic prtyName oldFromNode newFromNode oldFrom.Name prty.StartPos prty.EndPos
         )
         // add inherited variables, if they still do not exist in scope
         _inheritedVariables

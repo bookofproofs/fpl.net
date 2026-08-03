@@ -912,7 +912,7 @@ let emitSIG05Diagnostics errMsg pos1 pos2 =
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
-let emitSIG06diagnostic name oldFromNode newFromNode pos1 pos2  = 
+let emitSIG06diagnostic name oldFromNode newFromNode typeName pos1 pos2  = 
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -920,8 +920,8 @@ let emitSIG06diagnostic name oldFromNode newFromNode pos1 pos2  =
             Diagnostic.Severity = DiagnosticSeverity.Warning
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = SIG06(name, oldFromNode, newFromNode)
-            Diagnostic.Alternatives = Some "Consider renaming to avoid name conflicts." 
+            Diagnostic.Code = SIG06(name, oldFromNode, newFromNode, typeName)
+            Diagnostic.Alternatives = Some "Consider renaming one of the properties to avoid name conflicts." 
         }
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
@@ -1047,7 +1047,7 @@ let emitST001Diagnostics name pos1 pos2 =
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ST001 name
-            Diagnostic.Alternatives = Some "Simplify the code by removing the block." 
+            Diagnostic.Alternatives = Some "Consider removing the block." 
         }
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
@@ -1061,7 +1061,7 @@ let emitST002Diagnostics name pos1 pos2 =
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ST002 name
-            Diagnostic.Alternatives = Some "Simplify the code by removing it entirely." 
+            Diagnostic.Alternatives = Some "Consider removing the block." 
         }
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
@@ -1295,7 +1295,7 @@ let emitVAR06iagnostic name oldFromNode newFromNode typeName pos1 pos2  =
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = VAR06(name, oldFromNode, newFromNode, typeName)
-            Diagnostic.Alternatives = Some "Consider renaming the original variables to avoid name conflicts." 
+            Diagnostic.Alternatives = Some "Consider renaming one of the variables to avoid name conflicts." 
         }
     ad.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)

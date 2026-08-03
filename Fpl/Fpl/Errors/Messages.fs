@@ -123,7 +123,7 @@ let errSIG02 symbol precedence conflict = $"The symbol `{symbol}` was declared w
 let errSIG03 errMsg = errMsg // Returned type is mismatching the mapping type
 let errSIG04 signature candidates = $"No overload matching `{signature}`. Candidates considered:{Environment.NewLine}{candidates}." 
 let errSIG05 errMsg = $"Cannot execute assignment. {errMsg}"
-let errSIG06 name oldFromNode newFromNode = $"Property `{name}` inherited from `{oldFromNode}` is overshadowed by the declaration in `{newFromNode}`."
+let errSIG06 name oldFromNode newFromNode typeName = $"Property `{name}` inherited from {typeName} `{oldFromNode}` is overshadowed by the declaration in `{newFromNode}`."
 let errSIG07 assigneeName assigneeType = $"`{assigneeName}` is not an assignable expression ({assigneeType})."
 let errSIG08 arrName indexVarName indexVarType dimType dimNumber = $"Type mismatch in the {englishOrdinal dimNumber} dimension of array `{arrName}`; expected `{dimType}`, got `{indexVarName}:{indexVarType}`."
 let errSIG09 arrName dimType dimNumber = $"Missing index for the {englishOrdinal dimNumber} dimension of array `{arrName}`; expected type `{dimType}`."
@@ -137,8 +137,8 @@ let errSIG12 templateName secondUsage firstUsage firstUsagePos = $"The template 
 let errSIG13 stmtName secondUsage firstUsage firstUsagePos = $"Every branch of the {stmtName} must return a value with the same type as the first case in `{firstUsagePos}`, whose type was `{firstUsage}`. This branch returns `{secondUsage}`."
 let errSIG14 = $"This case cannot be matched because an earlier case has the same condition signature."
 // structure-related error codes
-let errST001 nodeName = $"The {nodeName} contains no executable or structural elements. Consider removing the block."
-let errST002 nodeName = $"The {nodeName} contains no executable or structural elements. Consider removing the block."
+let errST001 nodeName = $"The {nodeName} contains no executable or structural elements."
+let errST002 nodeName = $"The {nodeName} contains no executable or structural elements."
 let errST004 langCode = $"The localization block does not provide an entry for language `{langCode}`." 
 let errST005 domain nodeType = $"An enumerator for the domain `{domain}`, which is {nodeType}, could not be established."
 // interpreter syntax-related error codes for error-tolerant parser
@@ -163,11 +163,7 @@ let errVAR02 name = $"Variable `{name}` is already bound in this quantifier."
 let errVAR03 identifier conflict = $"Variable `{identifier}` is already declared in {conflict}."  
 let errVAR04 name = $"Variable `{name}` is declared but not used in the current scope."
 let errVAR05 name = $"Variable `{name}` is bound but never referenced in this quantifier."
-let errVAR06 name oldFromNode newFromNode typeName = 
-    match typeName with 
-    | PrimClassL -> $"Variable `{name}` of base class `{oldFromNode} will be overshadowed by `{newFromNode}`."
-    | PrimFunctionalTermL -> $"Variable `{name}` of base functional term `{oldFromNode} will be overshadowed by `{newFromNode}`."
-    | _ -> $"Variable `{name}` of (unknown type) `{oldFromNode} will be overshadowed by `{newFromNode}`."
+let errVAR06 name oldFromNode newFromNode typeName = $"Variable `{name}` inherited from {typeName} `{oldFromNode}` is overshadowed by the declaration in `{newFromNode}`."
 let errVAR07 name = $"The {PrimQuantifierExistsN} accepts only one bound variable `{name}`."
 let errVAR08 = "Variadic variables cannot be bound in a quantifier."
 let errVAR09 varName varType = $"The variable {varName}:{varType} is free and cannot be used to evaluate this expression."
