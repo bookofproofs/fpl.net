@@ -14,7 +14,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 *)
 module Fpl.Interpreter.Helpers.Checks
 open System
-open Fpl.Errors.Diagnostics
+open Fpl.Errors.Messages
 open Fpl.Errors.Emitter
 open Fpl.Primitives
 open Fpl.Interpreter.BasicTypes

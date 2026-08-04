@@ -46,5 +46,5 @@ type TestSIG00() =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = SIG00 ("",0)
+            let code = SIG00 ("", 0, 0)
             runTestHelper "TestSIG00.fpl" fplCode code expected

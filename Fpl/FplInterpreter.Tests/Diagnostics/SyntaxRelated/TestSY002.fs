@@ -38,8 +38,8 @@ type TestSY002() =
         else
             let code = SY002 ("","")
             let result = runTestHelperWithoutSyntaxCheckingGetResult "TestSY002ErrorChain.fpl" fplCode code expectedErrors
-            let firstChain = result.Head.Message.Substring(19, 5)
-            let lastChain = (result |> List.rev |> List.head).Message.Substring(19, 5)
+            let firstChain = result.Head.Message.Substring(20, 5)
+            let lastChain = (result |> List.rev |> List.head).Message.Substring(20, 5)
             let chainActual = $"{firstChain}~{lastChain}"
             Assert.AreEqual<string>(chain, chainActual)
 

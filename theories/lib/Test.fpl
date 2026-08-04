@@ -1,1 +1,1 @@
-def cl A { intr prty pred T() {intr} } def cl B { intr prty pred T() {intr} } def cl C:A,B 
+def cl T {ctor T() {dec base. (); }}
