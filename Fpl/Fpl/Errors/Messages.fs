@@ -144,12 +144,12 @@ let errST005 domain nodeType = $"An enumerator for the domain `{domain}`, which 
 // interpreter syntax-related error codes for error-tolerant parser
 let errSY000 errMsg = $"Syntax error: {errMsg}"
 let errSY001 errMsg = $"Syntax error (backtracked): {errMsg}"
-let errSY002 errMsg chain = $"Syntax error chain {chain}: {errMsg}"
+let errSY002 errMsg chain = $"Syntax error (chain {chain}): {errMsg}"
 
 let errSY010 = $"These parentheses can be safely removed."
-let errSY011 = $"Replace `∃!0` by `¬∃` quantifier."
-let errSY012 = $"Expression `∃!1` can be simplified with `∃!`."
-let errSY013 innerInfixSymbol innerPrecedence outerInfixSymbol outerPrecedence = $"These parentheses can be safely removed because the symbol's `{innerInfixSymbol}` precedence {innerPrecedence} is higher than the symbol's `{outerInfixSymbol}` precedence {outerPrecedence}."
+let errSY011 = $"Replace `∃!0` with the quantifier `¬∃`."
+let errSY012 = $"The expression `∃!1` can be simplified using the `∃!` quantifier."
+let errSY013 innerInfixSymbol innerPrecedence outerInfixSymbol outerPrecedence = $"These parentheses can be safely removed because `{innerInfixSymbol}` has higher precedence ({innerPrecedence}) than `{outerInfixSymbol}` ({outerPrecedence})."
 let errSY014 infixSymbol1 infixSymbol2 precedence =
     match precedence with
     | -1 -> 
