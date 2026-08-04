@@ -36,9 +36,9 @@ type TestSIG12() =
             runTestHelper "TestSIG12.fpl" fplCode code expected
 
     [<TestMethod>]
-    [<DataRow("00a", """def pred T(x:tpl) {dec x:=$1 x:=true; x}""", "The template `tpl` was used with type `pred` inconsistently; expected type `ind`, as used in `TestSIG12(Ln: 1, Col: 27)`.")>]
-    [<DataRow("01a", """def pred Equal(x,y: tpl) { del.Equal(x,y) } def pred T() {dec x:ind y:pred x:=$1 y:=true; Equal(x,y)}""", "The template `tpl` was used with type `pred` inconsistently; expected type `ind`, as used in `TestSIG12(Ln: 1, Col: 79)`.")>]
-    [<DataRow("02a", """def cl A def pred T() {dec x:*tpl[ind] x[$1]:=true x[$2]:=A(); true}""", "The template `tpl` was used with type `A` inconsistently; expected type `pred`, as used in `TestSIG12(Ln: 1, Col: 47)`.")>]
+    [<DataRow("00a", """def pred T(x:tpl) {dec x:=$1 x:=true; x}""", "The template `tpl` was used inconsistently: type `pred` was provided, but type `ind` was previously used in `TestSIG12(Ln: 1, Col: 27)`.")>]
+    [<DataRow("01a", """def pred Equal(x,y: tpl) { del.Equal(x,y) } def pred T() {dec x:ind y:pred x:=$1 y:=true; Equal(x,y)}""", "The template `tpl` was used inconsistently: type `pred` was provided, but type `ind` was previously used in `TestSIG12(Ln: 1, Col: 79)`.")>]
+    [<DataRow("02a", """def cl A def pred T() {dec x:*tpl[ind] x[$1]:=true x[$2]:=A(); true}""", "The template `tpl` was used inconsistently: type `A` was provided, but type `pred` was previously used in `TestSIG12(Ln: 1, Col: 47)`.")>]
     member this.TestSIG12MessageSpecificity(no:string, fplCode:string, expected:string) =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then
             ()

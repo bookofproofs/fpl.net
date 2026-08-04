@@ -38,9 +38,9 @@ type TestLG003() =
             let code = LG003 ("", "")
             runTestHelper "TestLG003.fpl" fplCode code expected
 
-    [<DataRow("""axiom A { false }""", "produced `false`")>]
+    [<DataRow("""axiom A { false }""", "Evaluation of `A` returned `false`; the node cannot be accepted as an axiom.")>]
     [<TestMethod>]
-    member this.TestLG003MsgSpecificity(fplCode: string, expectedSubstring: string) =
+    member this.TestLG003MsgSpecificity(fplCode: string, expected: string) =
         let code = LG003 ("", "")
         let filename = "TestLG003MsgSpecificity.fpl"
         prepareFplCode (filename, fplCode, false) |> ignore
@@ -48,4 +48,4 @@ type TestLG003() =
 
         let result = filterByErrorCode ad code.Code
         Assert.AreEqual<int>(1, result.Length)
-        Assert.IsTrue(result.Head.Message.Contains(expectedSubstring), result.Head.Message)
+        Assert.AreEqual<string>(expected, result.Head.Message)
