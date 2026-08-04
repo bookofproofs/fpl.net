@@ -168,7 +168,7 @@ let errVAR07 name = $"The {PrimQuantifierExistsN} accepts only one bound variabl
 let errVAR08 varName = $"The variadic variable `{varName}` cannot be bound in a quantifier."
 let errVAR09 varName = $"The variable `{varName}` is free in this context and cannot be used to evaluate the expression."
 let errVAR10 identifier formulaName = $"The variable `{identifier}` is bound more than once in the formula `{formulaName}`."  
-let errVAR11 identifier conflict = $"All variables in a {LiteralLocL} have to be different. The `{identifier}` was used in {conflict}."
+let errVAR11 identifier conflict = $"Variable `{identifier}` is already declared in this localization block at {conflict}. Localization variables must have distinct names."
 
 // type matching-related errors
 // -----------------------------------------------------------------

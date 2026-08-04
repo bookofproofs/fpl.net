@@ -122,11 +122,11 @@ let evalVariables ast =
 
         match fv.UltimateBlockNode with 
         | Some (:? FplLocalization as loc) when loc.ArgList.Count = 0 && fv.RefersTo.IsSome -> 
-            let variable = fv.RefersTo.Value
-            if loc.Scope.ContainsKey(name) then 
+            let variable = fv.RefersTo.Value :?> FplVariable
+            if loc.Scope.ContainsKey(name) && not variable.IsBound then 
                 let other = loc.Scope[name]
                 variable.ErrorOccurred <- emitVAR11Diagnostics name other.QualifiedStartPos pos1 pos2 
-            else 
+            elif not variable.IsBound then
                 loc.Scope.Add(name, variable)
                 variable.Parent <- Some loc
         | _ -> ()
