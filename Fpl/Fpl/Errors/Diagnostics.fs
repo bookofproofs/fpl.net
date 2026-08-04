@@ -44,20 +44,6 @@ type PathEquivalentUri(uriString: string) =
 
     member this.TheoryName = Path.GetFileNameWithoutExtension(this.AbsolutePath)
 
-/// A helper function for checking if a string starts with any of some string prefixes.
-let startsWithAny (prefixes:string list) (input:string) = 
-    prefixes |> List.exists input.StartsWith
-
-/// A helper function adding an English article to a string 
-let getEnglishName someString determined = 
-    let isEnglishAn = startsWithAny ["a"; "e"; "i"; "o"; "u"; "`a"; "`e"; "`i"; "`o"; "`u"] someString
-    if determined then 
-        $"the {someString}"
-    elif isEnglishAn then 
-        $"an {someString}"
-    else
-        $"a {someString}"
-
 type DiagnosticCode = 
     // interpreter error codes
     | GEN00 of string
@@ -100,7 +86,7 @@ type DiagnosticCode =
     | LG004 of string
     | LG005 of string
     // proof-related error codes
-    | PR001 of string * string 
+    | PR001 of string * string * string 
     | PR003 of string * string
     | PR004 of string 
     | PR005 of string
@@ -114,14 +100,14 @@ type DiagnosticCode =
     | PR013
     | PR014
     | PR015 of string
-    | PR016 of string
+    | PR016 of string * string
     | PR017
     | PR019 of string * string
     | PR020 of int * int
     | PR021 of string * string * string 
     | PR022 of string 
     // signature-related error codes
-    | SIG00 of string * int
+    | SIG00 of string * int * int
     | SIG01 of string 
     | SIG02 of string * int * string
     | SIG03 of string 
@@ -311,7 +297,7 @@ type DiagnosticCode =
             | LG004 nodeType -> errLG004 nodeType 
             | LG005 name -> errLG005 name
             // proof-related error codes
-            | PR001 (incorrectBlockType, justificatinItemName) -> errPR001 incorrectBlockType justificatinItemName
+            | PR001 (incorrectBlockType, justificatinItemName, alternative) -> errPR001 incorrectBlockType justificatinItemName alternative
             | PR003 (name, conflict) -> errPR003 name conflict
             | PR004 name  -> errPR004 name 
             | PR005 name ->  errPR005 name
@@ -325,14 +311,14 @@ type DiagnosticCode =
             | PR013 -> errPR013
             | PR014 -> errPR014
             | PR015 argId -> errPR015 argId
-            | PR016 argId -> errPR016 argId
+            | PR016 (argId, lastAssumedArgumentId) -> errPR016 argId lastAssumedArgumentId
             | PR017 -> errPR017
             | PR019 (justificationType1, justificationType2) -> errPR019 justificationType1 justificationType2
             | PR020 (expectedNum, actualNum) -> errPR020 expectedNum actualNum
             | PR021 (mismatchingCandidates, inferredFormula, justificationName) -> errPR021 mismatchingCandidates inferredFormula justificationName
             | PR022 reason -> errPR022 reason
             // signature-related error codes
-            | SIG00 (fixType, arity) -> errSIG00 fixType arity
+            | SIG00 (fixType, arity, expectedArity) -> errSIG00 fixType arity expectedArity
             | SIG01 symbol -> errSIG01 symbol
             | SIG02 (symbol, precedence, conflict) -> errSIG02 symbol precedence conflict
             | SIG03 errMsg -> errSIG03 errMsg
@@ -401,19 +387,8 @@ type Diagnostic =
         Severity: DiagnosticSeverity
         StartPos: Position
         EndPos: Position
-        Alternatives: string option
     }
-    member this.Message = 
-        let alternatives = 
-            match this.Alternatives with
-            | Some s ->
-                s
-            | None -> 
-                ""
-        if alternatives = "" then   
-            this.Code.Message
-        else
-            this.Code.Message + " " + alternatives 
+    member this.Message = this.Code.Message
 
     member this.DiagnosticID = 
         computeMD5Checksum (sprintf "%07d" this.StartPos.Index + this.Emitter.ToString() + this.Code.Code + this.Message)
