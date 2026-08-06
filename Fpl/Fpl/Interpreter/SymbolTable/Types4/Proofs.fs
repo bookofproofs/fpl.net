@@ -192,57 +192,6 @@ and FplJustificationItemByInf(positions: Positions, parent: FplGenericNode) =
 
     member this.ParentJustification = this.Parent.Value :?> FplJustification
 
-    /// Replaces the variables in the conclusion of the rule of inference
-    /// by expressions matched to these variables from the premise of the rule of inference
-    /// when it was structurally matched to some expression.
-    member private this.ReplaceVarsByVarUsages (conclusionExpression:FplGenericNode) (varUsageDict:Dictionary<string, FplGenericNode>) =
-        let isVariableWithMatchedExpression (arg:FplGenericNode) =
-            match arg.Name with
-            | PrimRefL when arg.RefersTo.IsSome ->
-                match arg.RefersTo with
-                | Some var when var.Name = PrimVariableL ->
-                    varUsageDict.ContainsKey(var.FplId) 
-                | _ ->  false
-            | _ ->  false
-
-        let rec replaceVarsByUsages (expr:FplGenericNode) =
-            let newArgList = List<FplGenericNode>()
-            expr.ArgList
-            |> Seq.iter (fun arg ->
-                if isVariableWithMatchedExpression arg then
-                    newArgList.Add varUsageDict[arg.FplId]
-                else 
-                    newArgList.Add (replaceVarsByUsages arg)
-            )
-            let exprVarList = expr.GetVariables()
-            exprVarList
-            |> Seq.iter (fun var ->
-                if varUsageDict.ContainsKey(var.FplId) then
-                    // correct the TypeId and FplId of any cloned conclusion variables (like those of cloned quantifiers in the conclusion of the rule of reference)
-                    // to the TypeId of the matched variable of the matched premise of the rule of reference
-                    var.TypeId <- varUsageDict[var.FplId].TypeId
-                    // Note: The corrected FplId stems from the matched premise of the rule of reference, while the original FplId stems from its cloned conclusion
-                    // The corrected FplId might, therefore, differ from the cloned Key (being the original FplId), where this variable resides in expr.Scope dictionary
-                    // This difference is OK, since we only need the dictionaries value of the variable. This is used here a dummy for expression matching based on expression syntax (.Type SignatureType.Name)
-                    // of the expression. The correct Key-Value correspondence was only needed when embedding the variable into the SymbolTable
-                    // which at this point is only the input, not the output of the FplInterpreter.
-                    var.FplId <- varUsageDict[var.FplId].FplId 
-            )
-            
-            // replace expression arguments by new expressions where variables were replaced by their usages
-            newArgList
-            |> Seq.iteri (fun i arg -> expr.ArgList[i] <- arg)
-            expr
-        if isVariableWithMatchedExpression conclusionExpression then
-            // If the conclusion of the rule of reference is a single variable
-            // and this variable was matched with some expression,
-            // we replace the whole conclusion with this matched expression
-            varUsageDict[conclusionExpression.FplId]
-        else
-            // otherwise we replace it with the conclusionExpression in which
-            // we recursively replace all variables by matched expressions
-            replaceVarsByUsages conclusionExpression
-
     override this.InferredExprCandidates
         with get (): FplGenericNode list =
             match this.RefersTo, this.Parent with
@@ -270,7 +219,7 @@ and FplJustificationItemByInf(positions: Positions, parent: FplGenericNode) =
                         if listOfPairs.Length > 0 then
                             let varUsageDict = snd listOfPairs.Head
                             let expr = conclusion.Clone()
-                            [this.ReplaceVarsByVarUsages expr varUsageDict]
+                            [instantiateExpressionByVarUsages expr varUsageDict]
                         else
                             issuePR022SpecialReasonAndSetDefault this "No expressions could be inferred while matching input justificationItems with premise list."
                             []

@@ -105,7 +105,7 @@ let private checkMismatchingUsageOfVars varName (a:FplGenericNode) (dictParamete
             else
                 errExprMismatchOK
 
-let private checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) (dictParameterUsage: Dictionary<string, FplGenericNode>) =
+let matchExpressionAgainstPattern (candidate:FplGenericNode) (pattern:FplGenericNode) (dictParameterUsage: Dictionary<string, FplGenericNode>) =
 
     // When a reference refQ refers to a variable q and the variable q has parameter variables q(a,b,...), we need to mark which parameter variables are bound and which are not
     // The information is in the arguments x,y, of the original refQ(x,y, ...)
@@ -226,7 +226,7 @@ let private checkExprWrapper (a:FplGenericNode) (p:FplGenericNode) (dictParamete
             | None -> checkMismatchingUsageOfVars p.FplId a dictParameterUsage
         | _, _ ->
             errExprMismatchMsgStandard (a.Type SignatureType.Name) (p.Type SignatureType.Name)
-    checkExpr a p
+    checkExpr candidate pattern
 
 /// Tries to match a premise with expressions from a list and returns 
 /// a list of matched expressions and a string of concatenated failed candidate expressions
@@ -237,7 +237,7 @@ let private matchPremiseWithSomeExpressions (exprList:FplGenericNode list) (pre:
 
     exprList
     |> List.iter (fun expr ->
-        let errOpt = checkExprWrapper expr pre dictParameterUsage
+        let errOpt = matchExpressionAgainstPattern expr pre dictParameterUsage
         match errOpt with
         | None -> result.Add (expr, dictParameterUsage)
         | Some err -> failedCandidates.Add ($"`{expr.Type SignatureType.Name}`{Environment.NewLine}  ⚡{err}")
@@ -356,3 +356,50 @@ let matchJustItemsExpressionsAgainstPremiseList (tuplesJustItemWithInferredExpre
     let res = result |> List.concat
     res
 
+/// Instantiates an expression by replacing variable references with the
+/// expressions recorded in the variable-usage dictionary.
+let instantiateExpressionByVarUsages (expression: FplGenericNode) (varUsageDict: Dictionary<string, FplGenericNode>) : FplGenericNode =
+    let isVariableWithMatchedExpression (arg:FplGenericNode) =
+        match arg.Name with
+        | PrimRefL when arg.RefersTo.IsSome ->
+            match arg.RefersTo with
+            | Some var when var.Name = PrimVariableL ->
+                varUsageDict.ContainsKey(var.FplId) 
+            | _ ->  false
+        | _ ->  false
+
+    let rec replaceVarsByUsages (expr:FplGenericNode) =
+        let newArgList = List<FplGenericNode>()
+        expr.ArgList
+        |> Seq.iter (fun arg ->
+            if isVariableWithMatchedExpression arg then
+                newArgList.Add varUsageDict[arg.FplId]
+            else 
+                newArgList.Add (replaceVarsByUsages arg)
+        )
+        let exprVarList = expr.GetVariables()
+        exprVarList
+        |> Seq.iter (fun var ->
+            // Replace each variable reference with its matched expression.
+            // Nested expressions are processed recursively so that substitutions
+            // are applied consistently throughout the whole formula.
+            if varUsageDict.ContainsKey(var.FplId) then
+                var.TypeId <- varUsageDict[var.FplId].TypeId
+                var.FplId <- varUsageDict[var.FplId].FplId 
+        )
+            
+        // replace expression arguments by new expressions where variables were replaced by their usages
+        newArgList
+        |> Seq.iteri (fun i arg -> expr.ArgList[i] <- arg)
+        expr
+    // Propagate the recorded substitutions into the variable scope of the cloned
+    // expression so the resulting expression reflects the matched instantiation.
+    if isVariableWithMatchedExpression expression then
+        // If the expression is a single variable
+        // and this variable was matched with some expression,
+        // we replace the whole expression with this matched expression
+        varUsageDict[expression.FplId]
+    else
+        // otherwise we replace it with the expression in which
+        // we recursively replace all variables by matched expressions
+        replaceVarsByUsages expression
