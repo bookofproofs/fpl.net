@@ -51,7 +51,7 @@ type FplTheory(theoryName, parent: FplGenericNode, filePath: string, runOrder) a
 
     /// Returns all Fpl Building Blocks that run on their own in this theory ordered by their RunOrder ascending.
     /// Only some of the building block run on their own in the theory, including axioms, theorems, lemmas, propositions, and conjectures.
-    /// All other building blocks (e.g. rules of inferences, definitions of classes, etc.) are run when called by the first type of blocks.
+    /// All other building blocks (e.g. rules of inference, definitions of classes, etc.) are run when called by the first type of blocks.
     /// The RunOrder is set when creating the FplTheory during the parsing of the AST.
     member private this.OrderedBlocksRunningByThemselves =
         this.Scope.Values

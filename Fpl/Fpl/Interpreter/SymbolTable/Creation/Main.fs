@@ -180,7 +180,7 @@ let rec eval ast =
         ->
         evalDefinitions ast
 
-    // Rules of inferences
+    // Rules of inference
     | Ast.RuleOfInference _
     | Ast.RuleOfInferenceSignature _
     | Ast.PremiseConclusionBlock _

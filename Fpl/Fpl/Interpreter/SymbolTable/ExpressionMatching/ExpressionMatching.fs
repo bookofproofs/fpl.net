@@ -1,5 +1,4 @@
-/// This module contains all functions needed by the FplInterpreter
-/// to match expressions for proof arguments by rules of inferences.
+/// This module contains functions for matching and instantiating expressions during proof inference.
 
 (* MIT License
 
@@ -105,11 +104,13 @@ let private checkMismatchingUsageOfVars varName (a:FplGenericNode) (dictParamete
             else
                 errExprMismatchOK
 
+/// Matches a candidate expression against a pattern expression while recording
+/// a consistent variable-usage map for later substitution.
 let matchExpressionAgainstPattern (candidate:FplGenericNode) (pattern:FplGenericNode) (dictParameterUsage: Dictionary<string, FplGenericNode>) =
 
-    // When a reference refQ refers to a variable q and the variable q has parameter variables q(a,b,...), we need to mark which parameter variables are bound and which are not
-    // The information is in the arguments x,y, of the original refQ(x,y, ...)
-    // The best way to do replace q by a cloned version of q and replace its declared parameters with used ones.
+    // If the pattern is a parameterized variable reference, clone the variable and
+    // project the referenced arguments onto the cloned parameters so matching can
+    // account for bound variables consistently.
     let mockVariableWithParams (refQ:FplGenericNode) (q:FplGenericNode) =
         if refQ.Name = PrimRefL && q.Name = PrimVariableL then
             let qMocked = q.Clone()
@@ -133,10 +134,9 @@ let matchExpressionAgainstPattern (candidate:FplGenericNode) (pattern:FplGeneric
             // in all other cases leave q unchanged
             q
 
-    // When p is a variable, the dict stores the variable names and their usage in a first matched a.
-    // The dictionary is used to check the consistency of the usage of the same variable p in the whole formula
-    // during the matching process. Moreover, the dict is used generate the
-    // conclusion of the rule of inference after all variables declared in its premise were used.
+    // The usage dictionary records the first expression matched to each pattern
+    // variable and enforces that every later occurrence matches the same expression.
+    // It is also reused to instantiate the final matched expression.
     let rec checkExpr (a:FplGenericNode) (p:FplGenericNode) =
         let rec checkExpressions (args:FplGenericNode list) (pars:FplGenericNode list) =
             match args, pars with
@@ -356,8 +356,8 @@ let matchJustItemsExpressionsAgainstPremiseList (tuplesJustItemWithInferredExpre
     let res = result |> List.concat
     res
 
-/// Instantiates an expression by replacing variable references with the
-/// expressions recorded in the variable-usage dictionary.
+/// Instantiates an expression by replacing variables with the expressions
+/// recorded in the variable-usage dictionary.
 let instantiateExpressionByVarUsages (expression: FplGenericNode) (varUsageDict: Dictionary<string, FplGenericNode>) : FplGenericNode =
     let isVariableWithMatchedExpression (arg:FplGenericNode) =
         match arg.Name with
@@ -368,6 +368,7 @@ let instantiateExpressionByVarUsages (expression: FplGenericNode) (varUsageDict:
             | _ ->  false
         | _ ->  false
 
+    // Replace matched variables recursively throughout the cloned expression.
     let rec replaceVarsByUsages (expr:FplGenericNode) =
         let newArgList = List<FplGenericNode>()
         expr.ArgList
@@ -380,9 +381,8 @@ let instantiateExpressionByVarUsages (expression: FplGenericNode) (varUsageDict:
         let exprVarList = expr.GetVariables()
         exprVarList
         |> Seq.iter (fun var ->
-            // Replace each variable reference with its matched expression.
-            // Nested expressions are processed recursively so that substitutions
-            // are applied consistently throughout the whole formula.
+            // Update variable metadata in the cloned expression so its structure and
+            // printed representation reflect the instantiation consistently.
             if varUsageDict.ContainsKey(var.FplId) then
                 var.TypeId <- varUsageDict[var.FplId].TypeId
                 var.FplId <- varUsageDict[var.FplId].FplId 
