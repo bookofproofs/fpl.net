@@ -45,18 +45,40 @@ type FplJustificationItemByAx(positions: Positions, parent: FplGenericNode) =
     member this.ParentJustification = this.Parent.Value :?> FplJustification
 
     override this.InferredExprCandidates
-        // identify the expression contained in the axiom
-        // referred by this "byax" justification in a proof
+        // prepare candidate expressions that may be used for proof argument inference
         with get (): FplGenericNode list =
             match this.RefersTo with
             | Some ax ->
                 if ax.ArgList.Count > 0 then
-                    [ax.ArgList |> Seq.last]
+                    let axiomFormula = ax.ArgList |> Seq.last
+                    let candidates = ResizeArray<FplGenericNode>()
+                    
+                    match this.Parent.Value.Parent with
+                    | Some (:? FplArgument as argument) ->
+                        match argument.ArgumentInference with
+                        | Some (argInference: FplGenericArgInference) ->
+                            match argInference.InferredExprCandidates |> List.tryHead with
+                            | Some inferredFormula ->
+                                let dictParameterUsage = Dictionary<string, FplGenericNode>()
+                                match matchExpressionAgainstPattern inferredFormula axiomFormula dictParameterUsage with
+                                | None ->
+                                    let expr = axiomFormula.Clone()
+                                    candidates.Add(instantiateExpressionByVarUsages expr dictParameterUsage)
+                                | Some _ ->
+                                    candidates.Add(axiomFormula.Clone())
+                            | None ->
+                                ()
+                        | None ->
+                            ()
+                    | _ ->
+                        ()
+
+                    candidates |> Seq.toList
                 else
-                    issuePR022AndSetDefault this (Some ax) None 
+                    issuePR022AndSetDefault this (Some ax) None
                     [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
             | None ->
-                issuePR022AndSetDefault this None None 
+                issuePR022AndSetDefault this None None
                 [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
 
 and FplJustificationItemByDef(positions: Positions, parent: FplGenericNode) =
