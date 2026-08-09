@@ -340,7 +340,7 @@ let PrimCaseSingleL = "single case statement"
 [<Literal>]
 let PrimClass = "def cl"
 [<Literal>]
-let PrimClassL = "class definition"
+let PrimClassL = "class"
 [<Literal>]
 let PrimConjunction = "conjunction"
 [<Literal>]
@@ -364,7 +364,7 @@ let PrimExclusiveOr = "exclusive disjunction"
 [<Literal>]
 let PrimExtension = "def ext"
 [<Literal>]
-let PrimExtensionL = "extension definition"
+let PrimExtensionL = "extension"
 [<Literal>]
 let PrimExtensionObj = "extension object"
 [<Literal>]
@@ -382,7 +382,7 @@ let PrimForInStmtEntityL = "for in statement's entity"
 [<Literal>]
 let PrimFunctionalTerm = "def func"
 [<Literal>]
-let PrimFunctionalTermL = "functional term definition"
+let PrimFunctionalTermL = "functional term"
 [<Literal>]
 let PrimInstance = "inst" 
 [<Literal>]
@@ -398,23 +398,23 @@ let PrimIsOperator = "is operator"
 [<Literal>]
 let PrimImplication = "implication"
 [<Literal>]
-let PrimJIByAx = "justification by axiom"
+let PrimJIByAx = "by an axiom"
 [<Literal>]
-let PrimJIByConj = "justification by conjecture"
+let PrimJIByConj = "by a conjecture"
 [<Literal>]
-let PrimJIByCor = "justification by corollary"
+let PrimJIByCor = "by a corollary"
 [<Literal>]
-let PrimJIByDef = "justification by definition"
+let PrimJIByDef = "by a definition"
 [<Literal>]
-let PrimJIByDefVar = "justification by variable definition"
+let PrimJIByDefVar = "by a variable definition"
 [<Literal>]
-let PrimJIByInf = "justification by rule of inference"
+let PrimJIByInf = "by a rule of inference"
 [<Literal>]
-let PrimJIByProofArgument = "justification by argument in another proof"
+let PrimJIByProofArgument = "by an argument in another proof"
 [<Literal>]
-let PrimJIByRefArgument = "justification by argument reference"
+let PrimJIByRefArgument = "by an argument reference"
 [<Literal>]
-let PrimJIByTheoremLikeStmt = "justification by theorem-like statement"
+let PrimJIByTheoremLikeStmt = "by a theorem-like statement"
 [<Literal>]
 let PrimJustification = "just"
 [<Literal>]
@@ -454,17 +454,17 @@ let PrimPascalCaseId = "PascalCaseId"
 [<Literal>]
 let PrimPredicate = "def pred"
 [<Literal>]
-let PrimPredicateL = "predicate definition"
+let PrimPredicateL = "predicate"
 [<Literal>]
-let PrimQuantor = "qtr"
+let PrimQuantifier = "qtr"
 [<Literal>]
-let PrimQuantorAll = "all quantor"
+let PrimQuantifierAll = "`all` quantifier"
 [<Literal>]
-let PrimQuantorExists = "exists quantor"
+let PrimQuantifierExists = "`exists` quantifier"
 [<Literal>]
-let PrimQuantorExistsN = "exists n times quantor"
+let PrimQuantifierExistsN = "`exists n times` quantifier"
 [<Literal>]
-let PrimReturn = "return statement"
+let PrimReturn = "`return` statement"
 [<Literal>]
 let PrimRef = "ref"
 [<Literal>]

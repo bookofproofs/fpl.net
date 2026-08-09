@@ -28,6 +28,7 @@ type TestLG003() =
     [<DataRow("11", """conjecture T { false }""", 1)>]
     [<DataRow("12", """postulate T { true }""", 0)>]
     [<DataRow("13", """postulate T { false }""", 1)>]
+    [<DataRow("13a", """postulate T { not true }""", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestLG003(no:string, fplCode:string, expected) =
@@ -36,3 +37,15 @@ type TestLG003() =
         else
             let code = LG003 ("", "")
             runTestHelper "TestLG003.fpl" fplCode code expected
+
+    [<DataRow("""axiom A { false }""", "Evaluation of `A` returned `false`; the node cannot be accepted as an axiom.")>]
+    [<TestMethod>]
+    member this.TestLG003MsgSpecificity(fplCode: string, expected: string) =
+        let code = LG003 ("", "")
+        let filename = "TestLG003MsgSpecificity.fpl"
+        prepareFplCode (filename, fplCode, false) |> ignore
+        checkForUnexpectedErrors filename fplCode
+
+        let result = filterByErrorCode ad code.Code
+        Assert.AreEqual<int>(1, result.Length)
+        Assert.AreEqual<string>(expected, result.Head.Message)

@@ -182,7 +182,7 @@ type TestDefinitionPredicates () =
     member this.TestDefinitionPredicate11 () =
         let result = run (definitionPredicate .>> eof) """pred T()
         {
-            // a predicate cannot be intrinsic with some proceeding spec or dec
+            // a predicate cannot be intrinsic with some preceding spec or dec
             dec a:obj ;
             intrinsic
         }"""
@@ -194,7 +194,7 @@ type TestDefinitionPredicates () =
     member this.TestDefinitionPredicate11a () =
         let result = run (definitionPredicate .>> eof) """pred T()
         {
-            // a predicate cannot be intrinsic with some proceeding spec or dec
+            // a predicate cannot be intrinsic with some preceding spec or dec
             dec:;
             intrinsic
         }"""
@@ -206,7 +206,7 @@ type TestDefinitionPredicates () =
     member this.TestDefinitionPredicate11b () =
         let result = run (definitionPredicate .>> eof) """pred T()
         {
-            // a predicate cannot be intrinsic with some proceeding spec or dec
+            // a predicate cannot be intrinsic with some preceding spec or dec
             dec a:obj ;
             intrinsic
         }"""
@@ -305,7 +305,7 @@ type TestDefinitionPredicates () =
                 return x
 	        } 
 
-            // a predicate cannot be intrinsic with some proceeding properties 
+            // a predicate cannot be intrinsic with some preceding properties 
             intrinsic
 
 
@@ -322,7 +322,7 @@ type TestDefinitionPredicates () =
 
     [<TestMethod>]
     member this.TestDefinitionPredicate15 () =
-        // a predicate with some proceeding declarations or specifications
+        // a predicate with some preceding declarations or specifications
         let result = run (definitionPredicate .>> eof) """pred T()
         {
             dec a:obj ;
@@ -336,7 +336,7 @@ type TestDefinitionPredicates () =
     member this.TestDefinitionPredicate16 () =
         let result = run (definitionPredicate .>> eof) """pred T()
         {
-            // a predicate with some proceeding declarations or specifications
+            // a predicate with some preceding declarations or specifications
             dec a:obj  ;
             true
         }"""
@@ -346,7 +346,7 @@ type TestDefinitionPredicates () =
 
     [<TestMethod>]
     member this.TestDefinitionPredicate17 () =
-        // a predicate with some proceeding declarations or specifications
+        // a predicate with some preceding declarations or specifications
         let result = run (definitionPredicate .>> eof) """pred T()
         {
             dec a:obj ;

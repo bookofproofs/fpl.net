@@ -93,11 +93,11 @@ type FplAssignment(positions: Positions, parent: FplGenericNode) as this =
 
         match this.ArgList[0], this.Assignee with
         | :? FplReference as ref, Some assignee when ref.ArgType = ArgType.Parentheses ->
-            this.ErrorOccurred <- emitSIG07diagnostic (ref.Type SignatureType.Name) "an expression" assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
+            this.ErrorOccurred <- emitSIG07diagnostics (ref.Type SignatureType.Name) assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
         | :? FplReference as ref, Some (:? FplGenericIsValue as assignee) ->
-            this.ErrorOccurred <- emitSIG07diagnostic (ref.Type SignatureType.Name) "a value" assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
+            this.ErrorOccurred <- emitSIG07diagnostics (ref.Type SignatureType.Name) assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
         | :? FplReference as ref, Some (:? FplReference as assignee) when assignee.RefersTo.IsNone ->
-            this.ErrorOccurred <- emitSIG07diagnostic (ref.Type SignatureType.Name) "undefined" assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
+            this.ErrorOccurred <- emitSIG07diagnostics (ref.Type SignatureType.Name) assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
         | _ -> ()
 
         let nameAssignee = this.ArgList[0].Type SignatureType.Name
@@ -106,7 +106,7 @@ type FplAssignment(positions: Positions, parent: FplGenericNode) as this =
             // something has been assigned to itself
             this.ErrorOccurred <- emitLG005Diagnostics nameAssignedValue this.ArgList[1].StartPos this.ArgList[1].EndPos
 
-        // remember proceeding errors of references used in the assignment (if any)
+        // remember preceding errors of references used in the assignment (if any)
         checkErrorOccuredInReference this.ArgList[0]
         checkErrorOccuredInReference this.ArgList[1]
         match this.ErrorOccurred, this.Assignee, this.AssignedValue with
@@ -123,19 +123,11 @@ type FplAssignment(positions: Positions, parent: FplGenericNode) as this =
         | None, Some (:? FplVariableArray as assignee), Some assignedValue ->
            checkTypes this.ArgList[0] this.ArgList[1] 
         | None, Some (:? FplSelf as assignee), _ ->
-            match assignee.RefersTo with 
-            | Some ref -> 
-                this.ErrorOccurred <- emitSIG07diagnostic (assignee.Type SignatureType.Name) (getEnglishName ref.Name false) assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
-            | None ->
-                this.ErrorOccurred <- emitSIG07diagnostic (assignee.Type SignatureType.Name) "the type of self could not be determined" assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
+            this.ErrorOccurred <- emitSIG07diagnostics (assignee.Type SignatureType.Name) assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
         | None, Some (:? FplParent as assignee), _ ->
-            match assignee.RefersTo with 
-            | Some ref -> 
-                this.ErrorOccurred <- emitSIG07diagnostic (assignee.Type SignatureType.Name) (getEnglishName ref.Name false) assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
-            | None ->
-                this.ErrorOccurred <- emitSIG07diagnostic (assignee.Type SignatureType.Name) "the type of parent could not be determined" assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
-        | None, Some (assignee), Some assignedValue ->
-            this.ErrorOccurred <- emitSIG07diagnostic (assignee.Type SignatureType.Name) $"type `{assignee.Type SignatureType.Type}`" assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
+            this.ErrorOccurred <- emitSIG07diagnostics (assignee.Type SignatureType.Name) assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
+        | None, Some (assignee), _ ->
+            this.ErrorOccurred <- emitSIG07diagnostics (assignee.Type SignatureType.Name) assignee.Name (this.ArgList[0].StartPos) (this.ArgList[0].EndPos)
         | _ -> ()
 
     override this.EmbedInSymbolTable _ = 
@@ -164,7 +156,7 @@ type FplAssignment(positions: Positions, parent: FplGenericNode) as this =
 
         match this.ErrorOccurred, this.ArgList[1], this.AssignedValue with 
         | Some _, _, _ ->
-            () // skip assignment, if any proceeding errors occurred
+            () // skip assignment, if any preceding errors occurred
         | None, (:? FplGenericHasValue as ref), Some (:? FplVariableArray as assignedValue) ->
             this.SetAssignee assignedValue assignedValue
         | None, (:? FplGenericHasValue as ref), Some (:? FplGenericIsValue as assignedValue) ->

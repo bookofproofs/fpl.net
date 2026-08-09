@@ -23,6 +23,7 @@ type TestVAR02() =
     [<DataRow("02", "axiom T {exn$1 n:pred { n } }", 0)>]
     [<DataRow("02a", "axiom T {exn$1 n, n:pred { n } }", 1)>]
     [<DataRow("02a", "axiom T {exn$1 n:pred, n:pred { n } }", 1)>]
+    [<DataRow("02b", "axiom T {all n, n, n:pred { n } }", 2)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestVAR02(no: string, fplCode:string, expected) =

@@ -11,7 +11,7 @@
     <ItemGroup>
         <Compile Include="TestDifferse.fs" />
         <Compile Include="TestExtensions.fs" />
-        <Compile Include="TestQuantors.fs" />
+        <Compile Include="TestQuantifiers.fs" />
         <Compile Include="TestExpressions.fs" />
         <Compile Include="TestUsesClause.fs" />
         <Compile Include="TestAxioms.fs" />
@@ -51,8 +51,8 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.7.0" />
-        <PackageReference Include="MSTest.TestAdapter" Version="4.2.3" />
-        <PackageReference Include="MSTest.TestFramework" Version="4.2.3" />
+        <PackageReference Include="MSTest.TestAdapter" Version="4.3.3" />
+        <PackageReference Include="MSTest.TestFramework" Version="4.3.3" />
     </ItemGroup>
 
     <ItemGroup>

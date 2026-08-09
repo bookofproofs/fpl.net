@@ -47,3 +47,28 @@ type TestNSP02() =
 
         let result = filterByErrorCode ad code.Code
         Assert.AreEqual<int>(expected, result.Length) 
+
+    [<TestMethod>]
+    member this.TestNSP02DebugModeNoDiagnostic() =
+        let code = NSP02 ("", "")
+        let pos = Position("", 0, 1, 1)
+        let evalAlias =
+            {
+                EvalAlias.StartPos = pos
+                EvalAlias.EndPos = pos
+                EvalAlias.AliasOrStar = ""
+            }
+
+        let eval =
+            {
+                EvalAliasedNamespaceIdentifier.StartPos = pos
+                EvalAliasedNamespaceIdentifier.EndPos = pos
+                EvalAliasedNamespaceIdentifier.EvalAlias = evalAlias
+                EvalAliasedNamespaceIdentifier.PascalCaseIdList = []
+                EvalAliasedNamespaceIdentifier.DebugMode = true
+            }
+
+        downloadFile "https://nonexistent.invalid" (eval : EvalAliasedNamespaceIdentifier) |> ignore
+
+        let result = filterByErrorCode ad code.Code
+        Assert.AreEqual<int>(0, result.Length)

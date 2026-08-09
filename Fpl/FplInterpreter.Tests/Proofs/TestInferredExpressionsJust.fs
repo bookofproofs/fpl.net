@@ -10,16 +10,57 @@ open TestFplInterpreter.Helpers.Common
 [<TestClass>]
 type TestInferredExpressionsJust() =
 
-    // identical expressions derived from axioms
+    // derive identical expressions 
     [<DataRow("00", """ax A {true} thm T {true} prf T$1 { 1. byax A |- true }""", "true", 1)>]
     [<DataRow("01", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" ax A {all n,m:Nat { impl( ( Succ(n) = Succ(m) ), ( n = m ) ) }} thm T {true} prf T$1 { 1. byax A |- true }""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 1)>]
     [<DataRow("02", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" ax A {all n,m:Nat { impl( ( n' = m' ), ( n = m ) ) }} thm T {true} prf T$1 { 1. byax A |- true }""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 1)>]
     [<DataRow("03", """ax A {∃!1 x:obj{true}} thm T {true} prf T$1 { 1. byax A |- true }""", "∃! x:obj {true}", 1)>]
     [<DataRow("04", """ax A {∃! x:obj{true}} thm T {true} prf T$1 { 1. byax A |- true }""", "∃! x:obj {true}", 1)>]
     [<DataRow("05", """ax A {∃!3 x:obj{true}} thm T {true} prf T$1 { 1. byax A |- true }""", "∃!3 x:obj {true}", 1)>]
-    // formula-compatible expressions derived from axioms
+    // derived formula-compatible expressions with deep substitution
     [<DataRow("50", """ax A1 {dec f, g: pred; impl(f, impl(g, f))} thm T {dec a:pred; impl (a, a)} prf T$1 { 1. byax A1 |- impl(a, impl(impl(a, a),  a)) }""", "a ⇒ ((a ⇒ a) ⇒ a)", 1)>]
-    
+    [<DataRow("51", """ax A1 {dec f, g: pred; impl(f, impl(g, f))} thm T {dec a,b:pred; impl(a, impl(b, a))} prf T$1 { 1. byax A1 |- impl(a, impl(b, a)) }""", "a ⇒ (b ⇒ a)", 1)>]
+    [<DataRow("52", """ax A1 {dec f, g: pred; impl(f, impl(g, f))} thm T {dec a,b,c:pred; impl(a, impl(impl(b, c), a))} prf T$1 { 1. byax A1 |- impl(a, impl(impl(b, c), a)) }""", "a ⇒ ((b ⇒ c) ⇒ a)", 1)>]
+    [<DataRow("53", """ax A1 {dec f, g: pred; impl(f, impl(g, f))} thm T {dec a,b,c,d:pred; impl(a, impl(impl(b, impl(c, d)), a))} prf T$1 { 1. byax A1 |- impl(a, impl(impl(b, impl(c, d)), a)) }""", "a ⇒ ((b ⇒ (c ⇒ d)) ⇒ a)", 1)>]
+    [<DataRow("54", """ax A1 {dec f, g: pred; impl(f, impl(g, f))} thm T {dec a,b,c,d:pred; impl(a, impl(impl(impl(b, c), d), a))} prf T$1 { 1. byax A1 |- impl(a, impl(impl(impl(b, c), d), a)) }""", "a ⇒ (((b ⇒ c) ⇒ d) ⇒ a)", 1)>]
+    [<DataRow("55", """ax A1 {dec f, g: pred; impl(f, impl(g, f))} thm T {dec a,b,c,d,e:pred; impl(a, impl(impl(impl(b, c), impl(d, e)), a))} prf T$1 { 1. byax A1 |- impl(a, impl(impl(impl(b, c), impl(d, e)), a)) }""", "a ⇒ (((b ⇒ c) ⇒ (d ⇒ e)) ⇒ a)", 1)>]
+    [<DataRow("56", """ax A1 {dec f, g: pred; impl(f, impl(g, f))} thm T {dec a,b,c,d,e:pred; impl(a, impl(impl(b, impl(c, impl(d, e))), a))} prf T$1 { 1. byax A1 |- impl(a, impl(impl(b, impl(c, impl(d, e))), a)) }""", "a ⇒ ((b ⇒ (c ⇒ (d ⇒ e))) ⇒ a)", 1)>]
+    [<DataRow("57", """ax A1 {dec f, g: pred; impl(f, impl(g, f))} thm T {dec a,b,c,d,e:pred; impl(a, impl(impl(impl(b, impl(c, d)), e), a))} prf T$1 { 1. byax A1 |- impl(a, impl(impl(impl(b, impl(c, d)), e), a)) }""", "a ⇒ (((b ⇒ (c ⇒ d)) ⇒ e) ⇒ a)", 1)>]
+    [<DataRow("58", """ax A1 {dec f, g: pred; impl(f, impl(g, f))} thm T {dec a,b,c,d,e:pred; impl(a, impl(impl(impl(impl(b, c), d), e), a))} prf T$1 { 1. byax A1 |- impl(a, impl(impl(impl(impl(b, c), d), e), a)) }""", "a ⇒ ((((b ⇒ c) ⇒ d) ⇒ e) ⇒ a)", 1)>]
+    [<DataRow("59", """ax A1 {dec f, g: pred; impl(f, impl(g, f))} thm T {dec a,b,c,d,e,f:pred; impl(a, impl(impl(b, impl(impl(c, d), impl(e, f))), a))} prf T$1 { 1. byax A1 |- impl(a, impl(impl(b, impl(impl(c, d), impl(e, f))), a)) }""", "a ⇒ ((b ⇒ ((c ⇒ d) ⇒ (e ⇒ f))) ⇒ a)", 1)>]
+    [<DataRow("60", """ax A1 {dec f, g: pred; impl(f, impl(g, f))} thm T {dec a,b,c,d,e,f:pred; impl(a, impl(impl(impl(b, c), impl(impl(d, e), f)), a))} prf T$1 { 1. byax A1 |- impl(a, impl(impl(impl(b, c), impl(impl(d, e), f)), a)) }""", "a ⇒ (((b ⇒ c) ⇒ ((d ⇒ e) ⇒ f)) ⇒ a)", 1)>]
+    [<DataRow("61", """ax A1 {dec f, g: pred; impl(f, impl(g, f))} thm T {dec a,b,c,d,e,f:pred; impl(a, impl(impl(impl(impl(b, c), d), impl(e, f)), a))} prf T$1 { 1. byax A1 |- impl(a, impl(impl(impl(impl(b, c), d), impl(e, f)), a)) }""", "a ⇒ ((((b ⇒ c) ⇒ d) ⇒ (e ⇒ f)) ⇒ a)", 1)>]
+    [<DataRow("62", """ax A1 {dec f, g: pred; impl(f, impl(g, f))} thm T {dec a,b,c,d,e,f:pred; impl(a, impl(impl(b, impl(c, impl(impl(d, e), f))), a))} prf T$1 { 1. byax A1 |- impl(a, impl(impl(b, impl(c, impl(impl(d, e), f))), a)) }""", "a ⇒ ((b ⇒ (c ⇒ ((d ⇒ e) ⇒ f))) ⇒ a)", 1)>]
+    [<DataRow("63", """ax A1 {dec f, g: pred; impl(f, impl(g, f))} thm T {dec a,b,c,d,e,f:pred; impl(a, impl(impl(impl(b, impl(c, d)), impl(e, f)), a))} prf T$1 { 1. byax A1 |- impl(a, impl(impl(impl(b, impl(c, d)), impl(e, f)), a)) }""", "a ⇒ (((b ⇒ (c ⇒ d)) ⇒ (e ⇒ f)) ⇒ a)", 1)>]
+    [<DataRow("64", """ax A1 {dec f, g: pred; impl(f, impl(g, f))} thm T {dec a,b,c,d,e,f:pred; impl(a, impl(impl(impl(impl(b, c), impl(d, e)), f), a))} prf T$1 { 1. byax A1 |- impl(a, impl(impl(impl(impl(b, c), impl(d, e)), f), a)) }""", "a ⇒ ((((b ⇒ c) ⇒ (d ⇒ e)) ⇒ f) ⇒ a)", 1)>]
+    [<DataRow("65", """ax A1 {dec f, g: pred; impl(f, impl(g, f))} thm T {dec a,b,c,d,e,f:pred; impl(a, impl(impl(b, impl(c, impl(d, impl(e, f)))), a))} prf T$1 { 1. byax A1 |- impl(a, impl(impl(b, impl(c, impl(d, impl(e, f)))), a)) }""", "a ⇒ ((b ⇒ (c ⇒ (d ⇒ (e ⇒ f)))) ⇒ a)", 1)>]
+    [<DataRow("66", """ax A1 {dec f, g: pred; impl(f, impl(g, f))} thm T {dec a,b,c,d,e,f:pred; impl(a, impl(impl(impl(b, c), impl(d, impl(e, f))), a))} prf T$1 { 1. byax A1 |- impl(a, impl(impl(impl(b, c), impl(d, impl(e, f))), a)) }""", "a ⇒ (((b ⇒ c) ⇒ (d ⇒ (e ⇒ f))) ⇒ a)", 1)>]
+    [<DataRow("67", """ax A1 {dec f, g: pred; impl(f, impl(g, f))} thm T {dec a,b,c,d,e,f,h:pred; impl(a, impl(impl(impl(impl(b, c), d), impl(impl(e, f), h)), a))} prf T$1 { 1. byax A1 |- impl(a, impl(impl(impl(impl(b, c), d), impl(impl(e, f), h)), a)) }""", "a ⇒ ((((b ⇒ c) ⇒ d) ⇒ ((e ⇒ f) ⇒ h)) ⇒ a)", 1)>]
+    [<DataRow("68", """ax A1 {dec f, g: pred; impl(f, impl(g, f))} thm T {dec a,b,c,d,e,f,h:pred; impl(a, impl(impl(b, impl(impl(c, d), impl(impl(e, f), h))), a))} prf T$1 { 1. byax A1 |- impl(a, impl(impl(b, impl(impl(c, d), impl(impl(e, f), h))), a)) }""", "a ⇒ ((b ⇒ ((c ⇒ d) ⇒ ((e ⇒ f) ⇒ h))) ⇒ a)", 1)>]
+    [<DataRow("69", """ax A1 {dec f, g: pred; impl(f, impl(g, f))} thm T {dec a,b,c,d,e,f,h:pred; impl(a, impl(impl(impl(b, c), impl(impl(d, e), impl(f, h))), a))} prf T$1 { 1. byax A1 |- impl(a, impl(impl(impl(b, c), impl(impl(d, e), impl(f, h))), a)) }""", "a ⇒ (((b ⇒ c) ⇒ ((d ⇒ e) ⇒ (f ⇒ h))) ⇒ a)", 1)>]
+    [<DataRow("70", """ax A1 {dec f, g: pred; impl(f, impl(g, f))} thm T {dec a,b,c,d,e,f,h:pred; impl(a, impl(impl(impl(impl(b, c), impl(d, e)), impl(f, h)), a))} prf T$1 { 1. byax A1 |- impl(a, impl(impl(impl(impl(b, c), impl(d, e)), impl(f, h)), a)) }""", "a ⇒ ((((b ⇒ c) ⇒ (d ⇒ e)) ⇒ (f ⇒ h)) ⇒ a)", 1)>]    
+    // derived formula-compatible expressions with broad substitution
+    [<DataRow("71", """def cl N def cl M def cl K ax A1 {dec p,q:pred; iif(p, not q)} thm T {iif(and(all x:obj {is(x,N)}, ex y:obj {is(y,M)}), not xor(true, false))} prf T$1 { 1. byax A1 |- iif(and(all x:obj {is(x,N)}, ex y:obj {is(y,M)}), not xor(true, false)) }""", "(∀ x:obj {x is N} ∧ ∃ y:obj {y is M}) ⇔ ¬(true ⩡ false)", 1)>]
+    [<DataRow("72", """def cl N def cl M def cl K ax A1 {dec p,q,r:pred; and(p, or(q, r))} thm T {and(not ex x:obj {is(x,N)}, or(iif(true, false), all y:obj {is(y,M)}))} prf T$1 { 1. byax A1 |- and(not ex x:obj {is(x,N)}, or(iif(true, false), all y:obj {is(y,M)})) }""", "¬∃ x:obj {x is N} ∧ ((true ⇔ false) ∨ ∀ y:obj {y is M})", 1)>]
+    [<DataRow("73", """def cl N def cl M def cl K ax A1 {dec p,q,r:pred; or(not p, xor(q, r))} thm T {or(not all x:obj {is(x,N)}, xor(ex y:obj {is(y,M)}, iif(true, false)))} prf T$1 { 1. byax A1 |- or(not all x:obj {is(x,N)}, xor(ex y:obj {is(y,M)}, iif(true, false))) }""", "¬∀ x:obj {x is N} ∨ (∃ y:obj {y is M} ⩡ (true ⇔ false))", 1)>]
+    [<DataRow("74", """def cl N def cl M def cl K ax A1 {dec p,q,r:pred; xor(iif(p, q), and(r, not p))} thm T {xor(iif(all x:obj {is(x,N)}, ex y:obj {is(y,M)}), and(or(true, false), not all z:obj {is(z,M)}))} prf T$1 { 1. byax A1 |- xor(iif(all x:obj {is(x,N)}, ex y:obj {is(y,M)}), and(or(true, false), not all z:obj {is(z,N)})) }""", "(∀ x:obj {x is N} ⇔ ∃ y:obj {y is M}) ⩡ ((true ∨ false) ∧ ¬∀ z:obj {z is N})", 1)>]
+    [<DataRow("75", """def cl N def cl M def cl K ax A1 {dec p,q:pred; not(and(p, q))} thm T {not(and(iif(true, false), ex x:obj {is(x,N)}))} prf T$1 { 1. byax A1 |- not(and(iif(true, false), ex x:obj {is(x,N)})) }""", "¬((true ⇔ false) ∧ ∃ x:obj {x is N})", 1)>]
+    [<DataRow("76", """def cl N def cl M def cl K ax A1 {dec p,q:pred; all x:obj {iif(p, q)}} thm T {all x:obj {iif(and(is(x,N), not ex y:obj {is(y,M)}), xor(true, false))}} prf T$1 { 1. byax A1 |- all x:obj {iif(and(is(x,N), not ex y:obj {is(y,M)}), xor(true, false))} }""", "∀ x:obj {((x is N) ∧ ¬∃ y:obj {y is M}) ⇔ (true ⩡ false)}", 1)>]
+    [<DataRow("77", """def cl N def cl M def cl K ax A1 {dec p,q:pred; ex x:obj {and(p, not q)}} thm T {ex x:obj {and(or(true, false), not all y:obj {is(y,M)})}} prf T$1 { 1. byax A1 |- ex x:obj {and(or(true, false), not all y:obj {is(y,M)})} }""", "∃ x:obj {(true ∨ false) ∧ ¬∀ y:obj {y is M}}", 1)>]
+    [<DataRow("78", """def cl N def cl M def cl K ax A1 {dec p,q,r:pred; all x:obj {or(p, xor(q, r))}} thm T {all x:obj {or(and(is(x,N), true), xor(ex y:obj {is(y,M)}, not all z:obj {is(z,K)}))}} prf T$1 { 1. byax A1 |- all x:obj {or(and(is(x,N), true), xor(ex y:obj {is(y,M)}, not all z:obj {is(z,K)}))} }""", "∀ x:obj {((x is N) ∧ true) ∨ (∃ y:obj {y is M} ⩡ ¬∀ z:obj {z is K})}", 1)>]
+    [<DataRow("79", """def cl N def cl M def cl K ax A1 {dec p,q,r,s:pred; ex x:obj {iif(and(p, q), or(r, s))}} thm T {ex x:obj {iif(and(all y:obj {is(y,N)}, not ex z:obj {is(z,M)}), or(true, xor(false, true)))}} prf T$1 { 1. byax A1 |- ex x:obj {iif(and(all y:obj {is(y,N)}, not ex z:obj {is(z,M)}), or(true, xor(false, true)))} }""", "∃ x:obj {(∀ y:obj {y is N} ∧ ¬∃ z:obj {z is M}) ⇔ (true ∨ (false ⩡ true))}", 1)>]
+    [<DataRow("60", """def cl N def cl M def cl K ax A1 {dec p,q:pred; not iif(p, q)} thm T {not iif(ex x:obj {is(x,N)}, and(true, false))} prf T$1 { 1. byax A1 |- not iif(ex x:obj {is(x,N)}, and(true, false)) }""", "¬(∃ x:obj {x is N} ⇔ (true ∧ false))", 1)>]
+    [<DataRow("81", """def cl N def cl M def cl K ax A1 {dec p,q,r,s:pred; and(iif(p,q), xor(r,s))} thm T {and(iif(all x:obj {is(x,N)}, ex y:obj {is(y,M)}), xor(not ex z:obj {is(z,K)}, or(true, false)))} prf T$1 { 1. byax A1 |- and(iif(all x:obj {is(x,N)}, ex y:obj {is(y,M)}), xor(not ex z:obj {is(z,K)}, or(true, false))) }""", "(∀ x:obj {x is N} ⇔ ∃ y:obj {y is M}) ∧ (¬∃ z:obj {z is K} ⩡ (true ∨ false))", 1)>]
+    [<DataRow("82", """def cl N def cl M def cl K ax A1 {dec p,q,r,s:pred; or(and(p, not q), iif(r,s))} thm T {or(and(ex x:obj {is(x,N)}, not all y:obj {is(y,M)}), iif(true, xor(false, true)))} prf T$1 { 1. byax A1 |- or(and(ex x:obj {is(x,N)}, not all y:obj {is(y,M)}), iif(true, xor(false, true))) }""", "(∃ x:obj {x is N} ∧ ¬∀ y:obj {y is M}) ∨ (true ⇔ (false ⩡ true))", 1)>]
+    [<DataRow("83", """def cl N def cl M def cl K ax A1 {dec p,q,r:pred; xor(not p, or(q, r))} thm T {xor(not all x:obj {is(x,N)}, or(ex y:obj {is(y,M)}, iif(true, false)))} prf T$1 { 1. byax A1 |- xor(not all x:obj {is(x,N)}, or(ex y:obj {is(y,M)}, iif(true, false))) }""", "¬∀ x:obj {x is N} ⩡ (∃ y:obj {y is M} ∨ (true ⇔ false))", 1)>]
+    [<DataRow("84", """def cl N def cl M def cl K ax A1 {dec p,q:pred; iif(all x:obj {p}, ex y:obj {q})} thm T {iif(all x:obj {and(is(x,N), not ex z:obj {is(z,K)})}, ex y:obj {or(true, false)})} prf T$1 { 1. byax A1 |- iif(all x:obj {and(is(x,N), not ex z:obj {is(z,K)})}, ex y:obj {or(true, false)}) }""", "∀ x:obj {(x is N) ∧ ¬∃ z:obj {z is K}} ⇔ ∃ y:obj {true ∨ false}", 1)>]
+    [<DataRow("85", """def cl N def cl M def cl K ax A1 {dec p,q:pred; and(all x:obj {p}, not ex y:obj {q})} thm T {and(all x:obj {and(is(x,N), true)}, not ex y:obj {and(is(y,M), xor(true, false))})} prf T$1 { 1. byax A1 |- and(all x:obj {and(is(x,N), true)}, not ex y:obj {and(is(y,M), xor(true, false))}) }""", "∀ x:obj {(x is N) ∧ true} ∧ ¬∃ y:obj {(y is M) ∧ (true ⩡ false)}", 1)>]
+    [<DataRow("86", """def cl N def cl M def cl K ax A1 {dec p,q:pred; or(ex x:obj {p}, all y:obj {q})} thm T {or(ex x:obj {and(is(x,N), not ex z:obj {is(z,K)})}, all y:obj {iif(is(y,M), true)})} prf T$1 { 1. byax A1 |- or(ex x:obj {and(is(x,N), not ex z:obj {is(z,K)})}, all y:obj {iif(is(y,M), true)}) }""", "∃ x:obj {(x is N) ∧ ¬∃ z:obj {z is K}} ∨ ∀ y:obj {(y is M) ⇔ true}", 1)>]
+    [<DataRow("87", """def cl N def cl M def cl K ax A1 {dec p,q:pred; not(or(all x:obj {p}, ex y:obj {q}))} thm T {not(or(all x:obj {and(is(x,N), true)}, ex y:obj {not all z:obj {is(z,M)}}))} prf T$1 { 1. byax A1 |- not(or(all x:obj {and(is(x,N), true)}, ex y:obj {not all z:obj {is(z,M)}})) }""", "¬(∀ x:obj {(x is N) ∧ true} ∨ ∃ y:obj {¬∀ z:obj {z is M}})", 1)>]
+    [<DataRow("88", """def cl N def cl M def cl K ax A1 {dec p,q:pred; xor(ex x:obj {p}, not all y:obj {q})} thm T {xor(ex x:obj {iif(is(x,N), false)}, not all y:obj {or(is(y,M), true)})} prf T$1 { 1. byax A1 |- xor(ex x:obj {iif(is(x,N), false)}, not all y:obj {or(is(y,M), true)}) }""", "∃ x:obj {(x is N) ⇔ false} ⩡ ¬∀ y:obj {(y is M) ∨ true}", 1)>]
+    [<DataRow("89", """def cl N def cl M def cl K ax A1 {dec p,q,r:pred; iif(not all x:obj {p}, xor(ex y:obj {q}, r))} thm T {iif(not all x:obj {is(x,N)}, xor(ex y:obj {and(is(y,M), true)}, iif(true, false)))} prf T$1 { 1. byax A1 |- iif(not all x:obj {is(x,N)}, xor(ex y:obj {and(is(y,M), true)}, iif(true, false))) }""", "¬∀ x:obj {x is N} ⇔ (∃ y:obj {(y is M) ∧ true} ⩡ (true ⇔ false))", 1)>]
+    [<DataRow("90", """def cl N def cl M def cl K ax A1 {dec p,q,r,s:pred; and(or(p, q), not xor(r, s))} thm T {and(or(all x:obj {is(x,N)}, ex y:obj {is(y,M)}), not xor(iif(true, false), and(true, true)))} prf T$1 { 1. byax A1 |- and(or(all x:obj {is(x,N)}, ex y:obj {is(y,M)}), not xor(iif(true, false), and(true, true))) }""", "(∀ x:obj {x is N} ∨ ∃ y:obj {y is M}) ∧ ¬((true ⇔ false) ⩡ (true ∧ true))", 1)>]
+    [<DataRow("aa", """def pred Impl(f, g: pred) infix "⇒" 0 {impl(f,g)} axiom A2 {dec f, g, h: pred; (f ⇒ (g ⇒ h)) ⇒ ((f ⇒ g) ⇒ (f ⇒ h))} thm T {dec a:pred; a ⇒ a} prf T$1 {1. byax A2 |- (a ⇒ ((a ⇒ a) ⇒ a)) ⇒ ((a ⇒ a) ⇒ (a ⇒ a))}""", "(f ⇒ (g ⇒ h)) ⇒ ((f ⇒ g) ⇒ (f ⇒ h))", 1)>]
     [<TestMethod>]
     member this.TestInferredExpressionJustByAx(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
         
@@ -35,7 +76,8 @@ type TestInferredExpressionsJust() =
         | Some (:? FplJustificationItemByAx as fvJi) ->
             let result = fvJi.InferredExprCandidates
             Assert.AreEqual<int>(expectedNumbExpr, result.Length)
-            Assert.AreEqual<string>(expectedExpr, result.Head.Type SignatureType.Name)
+            let actualExpr = result.Head.Type SignatureType.Name
+            Assert.AreEqual<string>(expectedExpr, actualExpr)
         | Some ref ->
             Assert.IsInstanceOfType(ref, typeof<FplJustificationItemByAx>)
         | None ->
@@ -636,15 +678,15 @@ type TestInferredExpressionsJust() =
     [<DataRow("PrenexUnpackXorEx_02", "inf PrenexUnpackXorEx{dec p:pred q:pred(z:tpl); pre:xor(p,ex x:tpl{q(x)}) con:ex x:tpl{xor(p,q(x))}} thm T {true} proof T$1 {1: xor(all y:obj {is(y,M)}, ex z:obj {xor(is(z,K), true)}) 2. 1, byinf PrenexUnpackXorEx |- true}", "∃ z:obj {∀ y:obj {y is M} ⩡ ((z is K) ⩡ true)}", 1)>]
     [<DataRow("PrenexUnpackXorEx_03", "inf PrenexUnpackXorEx{dec p:pred q:pred(z:tpl); pre:xor(p,ex x:tpl{q(x)}) con:ex x:tpl{xor(p,q(x))}} thm T {true} proof T$1 {1: xor(not (xor(true,false)), ex x:obj {impl(is(x,N), false)}) 2. 1, byinf PrenexUnpackXorEx |- true}", "∃ x:obj {¬(true ⩡ false) ⩡ ((x is N) ⇒ false)}", 1)>]
 
-    // Proceeding2Results: pre: p, q
-    [<DataRow("Proceeding2Results_01", "inf Proceeding2Results{dec p,q:pred; pre:p,q con:and(p,q)} thm T {true} proof T$1 {1: all x:obj {is(x, N)} 2: ex y:obj {is(y, M)} 3. 1, 2, byinf Proceeding2Results |- true}", "∀ x:obj {x is N} ∧ ∃ y:obj {y is M}", 1)>]
-    [<DataRow("Proceeding2Results_02", "inf Proceeding2Results{dec p,q:pred; pre:p,q con:and(p,q)} thm T {true} proof T$1 {1: iif(true, false) 2: not (xor(true, false)) 3. 1, 2, byinf Proceeding2Results |- true}", "(true ⇔ false) ∧ ¬(true ⩡ false)", 1)>]
-    [<DataRow("Proceeding2Results_03", "inf Proceeding2Results{dec p,q:pred; pre:p,q con:and(p,q)} thm T {true} proof T$1 {1: and(true, false) 2: impl(true, false) 3. 1, 2, byinf Proceeding2Results |- true}", "(true ∧ false) ∧ (true ⇒ false)", 1)>]
+    // Preceding2Results: pre: p, q
+    [<DataRow("Preceding2Results_01", "inf Preceding2Results{dec p,q:pred; pre:p,q con:and(p,q)} thm T {true} proof T$1 {1: all x:obj {is(x, N)} 2: ex y:obj {is(y, M)} 3. 1, 2, byinf Preceding2Results |- true}", "∀ x:obj {x is N} ∧ ∃ y:obj {y is M}", 1)>]
+    [<DataRow("Preceding2Results_02", "inf Preceding2Results{dec p,q:pred; pre:p,q con:and(p,q)} thm T {true} proof T$1 {1: iif(true, false) 2: not (xor(true, false)) 3. 1, 2, byinf Preceding2Results |- true}", "(true ⇔ false) ∧ ¬(true ⩡ false)", 1)>]
+    [<DataRow("Preceding2Results_03", "inf Preceding2Results{dec p,q:pred; pre:p,q con:and(p,q)} thm T {true} proof T$1 {1: and(true, false) 2: impl(true, false) 3. 1, 2, byinf Preceding2Results |- true}", "(true ∧ false) ∧ (true ⇒ false)", 1)>]
 
-    // Proceeding3Results: pre: p, q, s
-    [<DataRow("Proceeding3Results_01", "inf Proceeding3Results{dec p,q,s:pred; pre:p,q,s con:and(and(p,q),s)} thm T {true} proof T$1 {1: all x:obj {is(x, N)} 2: ex y:obj {is(y, M)} 3: iif(true, false) 4. 1, 2, 3, byinf Proceeding3Results |- true}", "(∀ x:obj {x is N} ∧ ∃ y:obj {y is M}) ∧ (true ⇔ false)", 1)>]
-    [<DataRow("Proceeding3Results_02", "inf Proceeding3Results{dec p,q,s:pred; pre:p,q,s con:and(and(p,q),s)} thm T {true} proof T$1 {1: and(true, not false) 2: xor(true, false) 3: all z:obj {is(z, K)} 4. 1, 2, 3, byinf Proceeding3Results |- true}", "((true ∧ ¬false) ∧ (true ⩡ false)) ∧ ∀ z:obj {z is K}", 1)>]
-    [<DataRow("Proceeding3Results_03", "inf Proceeding3Results{dec p,q,s:pred; pre:p,q,s con:and(and(p,q),s)} thm T {true} proof T$1 {1: not (xor(true, false)) 2: impl(true, false) 3: exn$1 u:obj {is(u, L)} 4. 1, 2, 3, byinf Proceeding3Results |- true}", "(¬(true ⩡ false) ∧ (true ⇒ false)) ∧ ∃! u:obj {u is L}", 1)>]
+    // Preceding3Results: pre: p, q, s
+    [<DataRow("Preceding3Results_01", "inf Preceding3Results{dec p,q,s:pred; pre:p,q,s con:and(and(p,q),s)} thm T {true} proof T$1 {1: all x:obj {is(x, N)} 2: ex y:obj {is(y, M)} 3: iif(true, false) 4. 1, 2, 3, byinf Preceding3Results |- true}", "(∀ x:obj {x is N} ∧ ∃ y:obj {y is M}) ∧ (true ⇔ false)", 1)>]
+    [<DataRow("Preceding3Results_02", "inf Preceding3Results{dec p,q,s:pred; pre:p,q,s con:and(and(p,q),s)} thm T {true} proof T$1 {1: and(true, not false) 2: xor(true, false) 3: all z:obj {is(z, K)} 4. 1, 2, 3, byinf Preceding3Results |- true}", "((true ∧ ¬false) ∧ (true ⩡ false)) ∧ ∀ z:obj {z is K}", 1)>]
+    [<DataRow("Preceding3Results_03", "inf Preceding3Results{dec p,q,s:pred; pre:p,q,s con:and(and(p,q),s)} thm T {true} proof T$1 {1: not (xor(true, false)) 2: impl(true, false) 3: exn$1 u:obj {is(u, L)} 4. 1, 2, 3, byinf Preceding3Results |- true}", "(¬(true ⩡ false) ∧ (true ⇒ false)) ∧ ∃! u:obj {u is L}", 1)>]
 
     // TrueOrAbsorbing or(true,p)
     [<DataRow("TOrAbs_01", "inf TrueOrAbsorbing{dec p:pred; pre:or(true,p) con:true} thm T {true} proof T$1 {1: or(true,false) 2. 1, byinf TrueOrAbsorbing |- true}", "true", 1)>]
@@ -696,6 +738,5 @@ type TestInferredExpressionsJust() =
             failwith $"expected FplJustificationItemByInf, found none"
 
         prepareFplCode(filename, "", false) |> ignore
-
 
 

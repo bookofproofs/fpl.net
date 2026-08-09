@@ -21,6 +21,7 @@ type TestID017() =
     [<DataRow("03", "def cl A { ctor A() {dec base.Obj(); } }", 1)>]
     [<DataRow("04", "def cl A { ctor A() {dec base.B(); } }", 1)>]
     [<DataRow("05", "def cl A:C { ctor A() {dec base.Obj(); } }", 1)>]
+    [<DataRow("05a", "def cl A:B { ctor A() {dec base.B(); } }", 1)>]
     [<DataRow("07", "uses Fpl.SetTheory def cl Test:Set {ctor Test() {dec base.Obj(); } }", 1)>]
     [<DataRow("08", "uses Fpl.SetTheory def cl Test:Set {ctor Test() {dec base.Set(); } }", 0)>]
     [<DataRow("50", "def pred A() {true} def pred A(x:obj) {true} def pred T(x:A) {intr}", 1)>]
@@ -30,11 +31,13 @@ type TestID017() =
     [<DataRow("54", "def func A(x:obj)->obj {intr} def pred T(x:A) {intr}", 0)>]
     [<DataRow("55", "def pred B() {true} def func A()->obj {intr} def pred T(x:A) {intr}", 0)>]
     [<DataRow("56", "def cl Set def cl SetRoster:Set def pred T(x:Set) {intr}", 0)>]
+    [<DataRow("57", "thm A {true} def cl A1 def cl B:A1 {ctor B() {dec base.A(); } }", 1)>]
+    
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestID017(no:string, fplCode:string, expected) =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = ID017 ("","")
+            let code = ID017 ("","", false)
             runTestHelper "TestID017.fpl" fplCode code expected

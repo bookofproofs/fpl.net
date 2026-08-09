@@ -14,9 +14,9 @@ type TestStatements () =
 
     [<TestMethod>]
     member this.TestFor01 () =
-        let result = run (forStatement .>> eof) """for proceedingResult in    p
+        let result = run (forStatement .>> eof) """for precedingResult in    p
                 {
-                    assert proceedingResult
+                    assert precedingResult
                     a:=1
                     b:=1
                 }"""

@@ -145,7 +145,7 @@ type Ast =
     | FunctionalTermInstanceSignature of Positions * ((Ast * Ast) * Ast)
 
 
-    // Rules of inferences
+    // Rules of inference
     | RuleOfInference of Positions * (Ast * Ast)
     | RuleOfInferenceSignature of Positions * Ast
     | PremiseConclusionBlock of Ast * (Ast * Ast)

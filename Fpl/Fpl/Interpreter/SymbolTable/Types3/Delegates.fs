@@ -75,7 +75,7 @@ type FplEquality(name, positions: Positions, parent: FplGenericNode) as this =
         | Some err ->
             this.SetDefaultValue()
         | _ ->
-            if isInQuantor this then 
+            if isInQuantifier this then 
                 this.SetDefaultValue()
             else
 
@@ -88,12 +88,12 @@ type FplEquality(name, positions: Positions, parent: FplGenericNode) as this =
 
                 match aRepr with
                 | LiteralUndef -> 
-                    this.ErrorOccurred <- emitID013Diagnostics "Predicate `=` cannot be evaluated because the left argument is undefined." heap.Helper.CallerStartPos heap.Helper.CallerEndPos 
+                    this.ErrorOccurred <- emitID013Diagnostics "Predicate `=` cannot be evaluated: left argument is undefined." heap.Helper.CallerStartPos heap.Helper.CallerEndPos 
                     this.SetDefaultValue()
                 | _ -> 
                     match bRepr with
                     | LiteralUndef -> 
-                        this.ErrorOccurred <- emitID013Diagnostics "Predicate `=` cannot be evaluated because the right argument is undefined." heap.Helper.CallerStartPos heap.Helper.CallerEndPos 
+                        this.ErrorOccurred <- emitID013Diagnostics "Predicate `=` cannot be evaluated: right argument is undefined." heap.Helper.CallerStartPos heap.Helper.CallerEndPos 
                         this.SetDefaultValue()
                     | _ when aType<>bType -> 
                         // if the compared arguments have different types, then unequal
@@ -103,12 +103,12 @@ type FplEquality(name, positions: Positions, parent: FplGenericNode) as this =
                     | _ -> 
                         match aRepr with
                         | LiteralUndet -> 
-                            this.ErrorOccurred <- emitID013Diagnostics "Predicate `=` cannot be evaluated because the left argument is undetermined." heap.Helper.CallerStartPos heap.Helper.CallerEndPos 
+                            this.ErrorOccurred <- emitID013Diagnostics "Predicate `=` cannot be evaluated: left argument is undetermined." heap.Helper.CallerStartPos heap.Helper.CallerEndPos 
                             this.SetDefaultValue()
                         | _ -> 
                             match bRepr with
                             | LiteralUndet -> 
-                                this.ErrorOccurred <- emitID013Diagnostics "Predicate `=` cannot be evaluated because the right argument is undetermined." heap.Helper.CallerStartPos heap.Helper.CallerEndPos 
+                                this.ErrorOccurred <- emitID013Diagnostics "Predicate `=` cannot be evaluated: right argument is undetermined." heap.Helper.CallerStartPos heap.Helper.CallerEndPos 
                                 this.SetDefaultValue()
                             | _ when aRepr = bRepr -> 
                                 this.SetValue (new FplIntrinsicTrue((heap.Helper.CallerStartPos, heap.Helper.CallerEndPos), this.Parent.Value))
@@ -146,12 +146,12 @@ type FplDecrement(name, positions: Positions, parent: FplGenericNode) as this =
 
     override this.CheckConsistency() =
         if this.ArgList.Count <> 1 then 
-            this.ErrorOccurred <- emitID013Diagnostics $"Decrement takes 1 arguments, got {this.ArgList.Count}." this.StartPos this.EndPos
+            this.ErrorOccurred <- emitID013Diagnostics $"Decrement expects 1 argument but received {this.ArgList.Count}." this.StartPos this.EndPos
         else
             let arg = this.ArgList[0]
             let argType = arg.Type SignatureType.Type 
             if argType <> PrimDigits then 
-                this.ErrorOccurred <- emitID013Diagnostics $"Decrement's argument requires type `{PrimDigits}`, got `{argType}`." arg.StartPos arg.EndPos
+                this.ErrorOccurred <- emitID013Diagnostics $"Decrement requires an argument of type `{PrimDigits}`; got `{argType}`." arg.StartPos arg.EndPos
         base.CheckConsistency()
     
     override this.EmbedInSymbolTable _ = 

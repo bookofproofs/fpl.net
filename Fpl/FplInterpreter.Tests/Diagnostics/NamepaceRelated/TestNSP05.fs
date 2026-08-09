@@ -91,3 +91,63 @@ type TestNSP05() =
         this.PrepareTestNSP05CrossCheck(false) |> ignore
         Assert.AreEqual<int>(0, ad.CountDiagnostics)
         this.PrepareTestNSP05CrossCheck(true) |> ignore
+
+    [<TestInitialize>]
+    member _.Initialize() =
+        ad.Clear()
+
+    member private _.RunNSP05Test
+        (
+            rootFileName: string,
+            input: string,
+            duplicateTheoryFiles: (string * string) list,
+            expected: int
+        ) =
+        let currDir = Directory.GetCurrentDirectory()
+        let libDir = Path.Combine(currDir, "lib")
+        let rootPath = Path.Combine(currDir, rootFileName)
+        let fplLibUrl =
+            "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+
+        Directory.CreateDirectory(libDir) |> ignore
+
+        try
+            File.WriteAllText(rootPath, input)
+
+            duplicateTheoryFiles
+            |> List.iter (fun (fileName, fileContent) ->
+                File.WriteAllText(Path.Combine(currDir, fileName), fileContent)
+                File.WriteAllText(Path.Combine(libDir, fileName), fileContent))
+
+            let uri = PathEquivalentUri(rootPath)
+            fplInterpreter input uri fplLibUrl |> ignore
+
+            let result = filterByErrorCode ad "NSP05"
+            Assert.AreEqual<int>(expected, result.Length)
+        finally
+            let cleanupPaths =
+                rootPath
+                :: (duplicateTheoryFiles
+                    |> List.collect (fun (fileName, _) ->
+                        [ Path.Combine(currDir, fileName)
+                          Path.Combine(libDir, fileName) ]))
+
+            cleanupPaths
+            |> List.iter (fun path ->
+                if File.Exists(path) then
+                    File.Delete(path))
+
+    [<TestMethod>]
+    member this.TestNSP05MultipleAmbiguousTheories() =
+        let input = """
+        uses NSP05Coverage_TheoryA
+        uses NSP05Coverage_TheoryB
+        """
+        this.RunNSP05Test(
+            "NSP05Coverage_Root.fpl",
+            input,
+            [
+                ("NSP05Coverage_TheoryA.fpl", " ")
+                ("NSP05Coverage_TheoryB.fpl", " ")
+            ],
+            2)

@@ -1,10 +1,12 @@
 module Fpl.Interpreter.SymbolTable.Types3.SelfParent
 open Fpl.Primitives
 open Fpl.Parser.Types
-open Fpl.Errors.Diagnostics
+open Fpl.Errors.Messages
 open Fpl.Errors.Emitter
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Basic
+open Fpl.Interpreter.Helpers.Checks
+open Fpl.Interpreter.SymbolTable.Storage.Util
 open Fpl.Interpreter.SymbolTable.Types2.References
 open Fpl.Interpreter.SymbolTable.Types2.Definitions
 open Fpl.Interpreter.SymbolTable.TypeMatching
@@ -37,7 +39,7 @@ type FplBaseConstructorCall(positions: Positions, parent: FplGenericNode) as thi
             | Some (:? FplConstructor as ctor) ->
                 if ctor.ParentConstructorCalls.Contains(this.FplId) then 
                     // issue duplicate constructor call diagnostics
-                    this.ErrorOccurred <- emitID021Diagnostics this.FplId this.StartPos
+                    this.ErrorOccurred <- emitID021Diagnostics this.FplId this.StartPos this.EndPos
                 else
                     ctor.ParentConstructorCalls.Add this.FplId |> ignore
             | _ -> ()
@@ -49,6 +51,14 @@ type FplBaseConstructorCall(positions: Positions, parent: FplGenericNode) as thi
                 |> Seq.filter (fun pc -> pc.FplId = this.FplId)
                 |> Seq.tryHead
                 |> Option.map (fun (pc:FplGenericNode) -> pc :?> FplBase)
+
+            let classCandidates =
+                outerClass.ArgList
+                |> Seq.map (fun fv ->
+                    match fv.RefersTo with
+                    | Some cl -> qualifiedNameSimple cl
+                    | None -> $"unknown class `{fv.FplId}`")
+                |> Seq.sort |> numbered
 
             match baseClassObjectOpt with 
             | Some baseClassObject ->
@@ -77,11 +87,12 @@ type FplBaseConstructorCall(positions: Positions, parent: FplGenericNode) as thi
                         | None -> ()
                         registerParentConstructor()
                 | None ->
-                    // the base constructor call's id is not among the base classes this class is derived from
-                    let candidates = outerClass.ArgList |> Seq.map (fun fv -> fv.FplId) |> Seq.sort |> String.concat ", "
-                    this.ErrorOccurred <- emitID017Diagnostics this.FplId candidates this.StartPos this.EndPos
+                    // The base class is syntactically present, but the declaration is unresolved.
+                    // Still count the constructor invocation so ID020 is not raised incorrectly.
+                    registerParentConstructor()
+                    this.ErrorOccurred <- emitID017Diagnostics this.FplId classCandidates true this.StartPos this.EndPos
             | _ ->
-                    this.ErrorOccurred <- emitID017Diagnostics this.FplId "" this.StartPos this.EndPos
+                    this.ErrorOccurred <- emitID017Diagnostics this.FplId classCandidates true this.StartPos this.EndPos
                     registerParentConstructor()
         | _ ->
             // this case never happens, 
@@ -150,7 +161,7 @@ type FplParent(positions: Positions, parent: FplGenericNode) as this =
     override this.CheckConsistency (): unit =
         match this.ParentBlock with
         | ScopeSearchResult.FoundIncorrectBlock block ->
-            this.ErrorOccurred <- emitID015Diagnostics $"{getEnglishName block.Name true} '{block.Type(SignatureType.Name)}'" this.StartPos this.EndPos
+            this.ErrorOccurred <- emitID015Diagnostics $"{block.Name} `{block.Type(SignatureType.Name)}`" this.StartPos this.EndPos
         | _ -> ()
         base.CheckConsistency()
 
@@ -215,7 +226,7 @@ type FplSelf(positions: Positions, parent: FplGenericNode) as this =
     override this.CheckConsistency () =
         match this.SelfBlock with
         | ScopeSearchResult.FoundIncorrectBlock block ->
-            this.ErrorOccurred <- emitID016Diagnostics $"{getEnglishName block.Name true} '{block.Type(SignatureType.Name)}'" this.StartPos this.EndPos
+            this.ErrorOccurred <- emitID016Diagnostics $"{block.Name} `{block.Type(SignatureType.Name)}`" this.StartPos this.EndPos
         | _ -> ()
         base.CheckConsistency()
 

@@ -12,13 +12,13 @@ open TestFplInterpreter.Helpers.Common
 type SignatureMatching() =
 
     [<DataRow("00", """def pred T (x,y:obj) {true} def pred Caller() {dec a,b:obj c:ind; T(a,b,c)} """,
-        "No matching parameter for the argument `c` typed `ind` in the predicate definition ReferencesPlain.T(obj, obj)")>]
+        "No parameter matches the argument `c` of type `ind`. Location: predicate `ReferencesPlain.T(obj, obj)`")>]
     [<DataRow("01", """def pred T (x,y:obj) {true} def pred Caller() {dec a,b:obj; T(a,b)} """,
         "")>]
     [<DataRow("02", """def pred T (x,y:Nat) {true} def pred Caller() {dec a,b:obj; T(a,b)} """,
-        "The expression `a` typed `obj` doesn't match the parameter `x` typed `Nat` in the predicate definition ReferencesPlain.T(Nat, Nat)")>]
+        "The expression `a` has type `obj`, which does not match the expected type `Nat` for the parameter `x`. Location: predicate `ReferencesPlain.T(Nat, Nat)`")>]
     [<DataRow("03", """def pred T (x,y:obj) {true} def pred Caller() {dec a,b:Nat; T(a,b)} """,
-        "The type `Nat` of the expression `a` could not be determined. The parameter `x` requires the type `obj` or any type derived from it in the predicate definition ReferencesPlain.T(obj, obj)")>]
+        "The type `Nat` of the expression `a` could not be determined. The parameter `x` requires type `obj` or a type derived from it. Location: predicate `ReferencesPlain.T(obj, obj)`")>]
     [<DataRow("04", """def pred T () {true} def pred Caller() {T()} """,
         "")>]
     [<TestMethod>]
@@ -39,13 +39,13 @@ type SignatureMatching() =
         prepareFplCode(filename, "", false) |> ignore
 
     [<DataRow("01", """def pred T (x,y:pred) {true} def pred Caller() {dec a,b:pred c:ind; T(a,b,c)} """,
-        "No matching parameter for the argument `c` typed `ind` in the predicate definition ReferencesPred.T(pred, pred)")>]
+        "No parameter matches the argument `c` of type `ind`. Location: predicate `ReferencesPred.T(pred, pred)`")>]
     [<DataRow("02", """def pred T (x,y:pred) {true} def pred Caller() {dec a,b:pred; T(a,b)} """,
         "")>]
     [<DataRow("03", """def pred T (x,y:Nat) {true} def pred Caller() {dec a,b:pred; T(a,b)} """,
-        "The expression `a` typed `pred` doesn't match the parameter `x` typed `Nat` in the predicate definition ReferencesPred.T(Nat, Nat)")>]
+        "The expression `a` has type `pred`, which does not match the expected type `Nat` for the parameter `x`. Location: predicate `ReferencesPred.T(Nat, Nat)`")>]
     [<DataRow("04", """def pred T (x,y:pred) {true} def pred Caller() {dec a,b:Nat; T(a,b)} """,
-        "The expression `a` typed `Nat` doesn't match the parameter `x` typed `pred` in the predicate definition ReferencesPred.T(pred, pred)")>]
+        "The expression `a` has type `Nat`, which does not match the expected type `pred` for the parameter `x`. Location: predicate `ReferencesPred.T(pred, pred)`")>]
     [<TestMethod>]
     member this.ReferencesPred(no:string, varVal, var:string) =
         
@@ -66,7 +66,7 @@ type SignatureMatching() =
     [<DataRow("00", """def pred T(f:func()->obj) {intr} def pred Caller() {dec x:func()->obj; T(x)} """,
         "")>]
     [<DataRow("01", """def pred T(f:func()->Nat) {intr} def pred Caller() {dec x:func()->obj; T(x)} """,
-        "The expression `x` typed `func() -> obj` doesn't match the parameter `f` typed `func() -> Nat` in the predicate definition ReferencesFunc.T(func() -> Nat)")>]
+        "The expression `x` has type `func() -> obj`, which does not match the expected type `func() -> Nat` for the parameter `f`. Location: predicate `ReferencesFunc.T(func() -> Nat)`")>]
     [<TestMethod>]
     member this.ReferencesFunc(no:string, varVal, var:string) =
         
@@ -109,9 +109,9 @@ type SignatureMatching() =
     [<DataRow("01", """def func T(y:obj)->obj { return y } def func Caller()->obj {dec x:obj; return T(x)} """,
         "")>]
     [<DataRow("02", """def func T(y:obj)->obj { intr } def func Caller()->obj {return T(x)} """,
-        "`x:undef` doesn't match `y:obj` in the functional term definition ReferencesFuncReturn.T(obj) -> obj")>]
+        "`x:undef` does not match `y:obj`. Location: functional term ReferencesFuncReturn.T(obj) -> obj")>]
     [<DataRow("03", """def func T(y:obj)->obj { return y } def func Caller()->obj {return T(x)} """,
-        "`x:undef` doesn't match `y:obj` in the functional term definition ReferencesFuncReturn.T(obj) -> obj")>]
+        "`x:undef` does not match `y:obj`. Location: functional term ReferencesFuncReturn.T(obj) -> obj")>]
     [<DataRow("04", """def func T(y:obj)->obj { return y } def func Caller(x:obj)->obj {return T(x)}""",
         "")>]
     [<TestMethod>]
@@ -154,19 +154,19 @@ type SignatureMatching() =
         prepareFplCode(filename, "", false) |> ignore
 
     [<DataRow("""def pred T (x,y:obj) {true} def pred Caller() {dec a,b:obj c:ind; T(a,b,c)} """,
-        "No matching parameter for the argument `c` typed `ind` in the predicate definition ReferencesClasses.T(obj, obj)")>]
+        "No parameter matches the argument `c` of type `ind`. Location: predicate `ReferencesClasses.T(obj, obj)`")>]
     [<DataRow("""def pred T (x,y:obj) {true} def pred Caller() {dec a,b:obj; T(a,b)} """,
         "")>]
     [<DataRow("""def pred T (x,y:Nat) {true} def pred Caller() {dec a,b:obj; T(a,b)} """,
-        "The expression `a` typed `obj` doesn't match the parameter `x` typed `Nat` in the predicate definition ReferencesClasses.T(Nat, Nat)")>]
+        "The expression `a` has type `obj`, which does not match the expected type `Nat` for the parameter `x`. Location: predicate `ReferencesClasses.T(Nat, Nat)`")>]
     [<DataRow("""def pred T (x,y:obj) {true} def pred Caller() {dec a,b:Nat; T(a,b)} """,
-        "The type `Nat` of the expression `a` could not be determined. The parameter `x` requires the type `obj` or any type derived from it in the predicate definition ReferencesClasses.T(obj, obj)")>]
+        "The type `Nat` of the expression `a` could not be determined. The parameter `x` requires type `obj` or a type derived from it. Location: predicate `ReferencesClasses.T(obj, obj)`")>]
     [<DataRow("""def cl Nat {intr} def pred T (x,y:obj) {true} def pred Caller() {dec a,b:Nat; T(a,b)} """,
         "")>]
     [<DataRow("""def pred T (x,y:tpl) {true} def pred Caller() {dec a,b:obj; T(a,b)} """,
         "")>]
     [<DataRow("""def cl A:B {intr} def pred T (x,y:obj) {true} def pred Caller() {dec a,b:NatTypo; T(a,b)} """,
-        "The type `NatTypo` of the expression `a` could not be determined. The parameter `x` requires the type `obj` or any type derived from it in the predicate definition ReferencesClasses.T(obj, obj)")>]
+        "The type `NatTypo` of the expression `a` could not be determined. The parameter `x` requires type `obj` or a type derived from it. Location: predicate `ReferencesClasses.T(obj, obj)`")>]
         
     [<TestMethod>]
     member this.ReferencesClasses(varVal, var:string) =
@@ -188,11 +188,11 @@ type SignatureMatching() =
     [<DataRow("00", """def cl A {ctor A(){}} 
                  def cl B:A {ctor B(x:obj){dec base.A(); }} 
                  def cl C:B {ctor C(){dec base.B(true); }}""",
-        "No matching parameter for `true:pred` in the class definition TestSignatureMatchingReferencesConstructors.B")>]
+        "No parameter matches `true:pred`. Location: class TestSignatureMatchingReferencesConstructors.B")>]
     [<DataRow("01", """def cl A {ctor A(){}} 
                  def cl B:A {ctor B(x:obj){dec base.A(); }} 
                  def cl C:B {ctor C(){dec x:ind base.B(x); }}""",
-        "`x:ind` doesn't match `x:obj` in TestSignatureMatchingReferencesConstructors.B.B(obj)")>]
+        "`x:ind` does not match `x:obj`. Location: TestSignatureMatchingReferencesConstructors.B.B(obj)")>]
     [<DataRow("02", """def cl A {ctor A(){}} 
                  def cl B:A {ctor B(x:obj){dec base.A(); }} 
                  def cl C:B {ctor C(){dec x:obj base.B(x); }}""",
@@ -200,7 +200,7 @@ type SignatureMatching() =
     [<DataRow("03", """def cl A {ctor A(){}} 
                  def cl B:A {ctor B(x:A){dec base.A(); }} 
                  def cl C:B {ctor C(){dec x:obj base.B(x); }}""",
-        "`x:obj` doesn't match `x:A` in TestSignatureMatchingReferencesConstructors.B.B(A)")>]
+        "`x:obj` does not match `x:A`. Location: TestSignatureMatchingReferencesConstructors.B.B(A)")>]
     [<DataRow("04", """def cl A {ctor A(){}} 
                  def cl B:A {ctor B(x:A){dec base.A(); }} 
                  def cl C:B {ctor C(){dec x:A base.B(x); }}""",
@@ -232,13 +232,13 @@ type SignatureMatching() =
     [<DataRow("02", """def pred T (x:*obj[ind]) {true} def pred Caller() {T()} """,
         "")>]
     [<DataRow("03", """def pred T (x:*obj[obj]) {true} def pred Caller() {dec a,b:obj; T(a,b)} """,
-        "Variadic enumeration of `a` typed `obj` doesn't match the parameter `x` typed `*obj[obj]`, try `a:*obj[obj]` as argument or use `x:*obj[ind]` as parameter type in the predicate definition ReferencesVariadicObj.T(*obj[obj])")>]
+        "Variadic enumeration of `a` of type `obj` does not match the parameter `x` of type `*obj[obj]`. Try `a:*obj[obj]` as an argument, or use `x:*obj[ind]` as parameter type. Location: predicate `ReferencesVariadicObj.T(*obj[obj])`")>]
     [<DataRow("04", """def pred T (x:*obj[obj]) {true} def pred Caller() {dec a:obj; T(a)} """,
-        "Variadic enumeration of `a` typed `obj` doesn't match the parameter `x` typed `*obj[obj]`, try `a:*obj[obj]` as argument or use `x:*obj[ind]` as parameter type in the predicate definition ReferencesVariadicObj.T(*obj[obj])")>]
+        "Variadic enumeration of `a` of type `obj` does not match the parameter `x` of type `*obj[obj]`. Try `a:*obj[obj]` as an argument, or use `x:*obj[ind]` as parameter type. Location: predicate `ReferencesVariadicObj.T(*obj[obj])`")>]
     [<DataRow("05", """def pred T (x:*obj[obj]) {true} def pred Caller() {T()} """,
-        "Missing argument for `x:*obj[ind]` in the predicate definition ReferencesVariadicObj.T(+obj[ind])")>]
+        "Missing argument for `x:*obj[ind]`. Location: predicate `ReferencesVariadicObj.T(+obj[ind])`")>]
     [<DataRow("06", """def pred T (x:*obj[ind]) {true} def pred Caller() {dec a,b:*obj[ind]; T(a,b)} """,
-        "No matching parameter for the argument `b` typed `*obj[ind]` in the predicate definition ReferencesVariadicObj.T(*obj[ind])")>]
+        "No parameter matches the argument `b` of type `*obj[ind]`. Location: predicate `ReferencesVariadicObj.T(*obj[ind])`")>]
     [<DataRow("07", """def pred T (x:*obj[ind]) {true} def pred Caller() {dec a:*obj[ind]; T(a)} """,
         "")>]
     [<TestMethod>]
@@ -284,13 +284,13 @@ type SignatureMatching() =
     [<DataRow("02", """def pred T (x:*pred[ind]) {true} def pred Caller() {T()} """,
         "")>]
     [<DataRow("03", """def pred T (x:*pred[obj]) {true} def pred Caller() {dec a,b:pred; T(a,b)} """,
-        "Variadic enumeration of `a` typed `pred` doesn't match the parameter `x` typed `*pred[obj]`, try `a:*pred[obj]` as argument or use `x:*pred[ind]` as parameter type in the predicate definition ReferencesVariadicPred.T(*pred[obj])")>]
+        "Variadic enumeration of `a` of type `pred` does not match the parameter `x` of type `*pred[obj]`. Try `a:*pred[obj]` as an argument, or use `x:*pred[ind]` as parameter type. Location: predicate `ReferencesVariadicPred.T(*pred[obj])`")>]
     [<DataRow("04", """def pred T (x:*pred[obj]) {true} def pred Caller() {dec a:pred; T(a)} """,
-        "Variadic enumeration of `a` typed `pred` doesn't match the parameter `x` typed `*pred[obj]`, try `a:*pred[obj]` as argument or use `x:*pred[ind]` as parameter type in the predicate definition ReferencesVariadicPred.T(*pred[obj])")>]
+        "Variadic enumeration of `a` of type `pred` does not match the parameter `x` of type `*pred[obj]`. Try `a:*pred[obj]` as an argument, or use `x:*pred[ind]` as parameter type. Location: predicate `ReferencesVariadicPred.T(*pred[obj])`")>]
     [<DataRow("05", """def pred T (x:*pred[obj]) {true} def pred Caller() {T()} """,
-        "Missing argument for `x:*pred[ind]` in the predicate definition ReferencesVariadicPred.T(+pred)")>]
+        "Missing argument for `x:*pred[ind]`. Location: predicate `ReferencesVariadicPred.T(+pred)`")>]
     [<DataRow("06", """def pred T (x:*pred[obj]) {true} def pred Caller() {dec a,b:*pred[ind]; T(a,b)} """,
-        "The expression `a` typed `*pred[ind]` doesn't match the parameter `x` typed `*pred[obj]` in the predicate definition ReferencesVariadicPred.T(*pred[obj])")>]
+        "The expression `a` has type `*pred[ind]`, which does not match the expected type `*pred[obj]` for the parameter `x`. Location: predicate `ReferencesVariadicPred.T(*pred[obj])`")>]
     [<DataRow("07", """def pred T (x:*pred[ind]) {true} def pred Caller() {dec a:*pred[ind]; T(a)} """,
         "")>]
     [<TestMethod>]
@@ -317,13 +317,13 @@ type SignatureMatching() =
     [<DataRow("02", """def pred T (x:*func[ind]) {true} def pred Caller() {T()} """,
         "")>]
     [<DataRow("03", """def pred T (x:*func[obj]) {true} def pred Caller() {dec a,b:func; T(a,b)} """,
-        "Variadic enumeration of `a` typed `func` doesn't match the parameter `x` typed `*func[obj]`, try `a:*func[obj]` as argument or use `x:*func[ind]` as parameter type in the predicate definition ReferencesVariadicFunc.T(*func[obj])")>]
+        "Variadic enumeration of `a` of type `func` does not match the parameter `x` of type `*func[obj]`. Try `a:*func[obj]` as an argument, or use `x:*func[ind]` as parameter type. Location: predicate `ReferencesVariadicFunc.T(*func[obj])`")>]
     [<DataRow("04", """def pred T (x:*func[obj]) {true} def pred Caller() {dec a:func; T(a)} """,
-        "Variadic enumeration of `a` typed `func` doesn't match the parameter `x` typed `*func[obj]`, try `a:*func[obj]` as argument or use `x:*func[ind]` as parameter type in the predicate definition ReferencesVariadicFunc.T(*func[obj])")>]
+        "Variadic enumeration of `a` of type `func` does not match the parameter `x` of type `*func[obj]`. Try `a:*func[obj]` as an argument, or use `x:*func[ind]` as parameter type. Location: predicate `ReferencesVariadicFunc.T(*func[obj])`")>]
     [<DataRow("05", """def pred T (x:*func[obj]) {true} def pred Caller() {T()} """,
-        "Missing argument for `x:*func` in the predicate definition ReferencesVariadicFunc.T(+func)")>]
+        "Missing argument for `x:*func`. Location: predicate `ReferencesVariadicFunc.T(+func)`")>]
     [<DataRow("06", """def pred T (x:*func[obj]) {true} def pred Caller() {dec a,b:*func[ind]; T(a,b)} """,
-        "The expression `a` typed `*func[ind]` doesn't match the parameter `x` typed `*func[obj]` in the predicate definition ReferencesVariadicFunc.T(*func[obj])")>]
+        "The expression `a` has type `*func[ind]`, which does not match the expected type `*func[obj]` for the parameter `x`. Location: predicate `ReferencesVariadicFunc.T(*func[obj])`")>]
     [<DataRow("07", """def pred T (x:*func[ind]) {true} def pred Caller() {dec a:*func[ind]; T(a)} """,
         "")>]
     [<TestMethod>]
@@ -350,13 +350,13 @@ type SignatureMatching() =
     [<DataRow("02", """def pred T (x:*ind[ind]) {true} def pred Caller() {T()} """,
         "")>]
     [<DataRow("03", """def pred T (x:*ind[obj]) {true} def pred Caller() {dec a,b:ind; T(a,b)} """,
-        "Variadic enumeration of `a` typed `ind` doesn't match the parameter `x` typed `*ind[obj]`, try `a:*ind[obj]` as argument or use `x:*ind[ind]` as parameter type in the predicate definition ReferencesVariadicInd.T(*ind[obj])")>]
+        "Variadic enumeration of `a` of type `ind` does not match the parameter `x` of type `*ind[obj]`. Try `a:*ind[obj]` as an argument, or use `x:*ind[ind]` as parameter type. Location: predicate `ReferencesVariadicInd.T(*ind[obj])`")>]
     [<DataRow("04", """def pred T (x:*ind[obj]) {true} def pred Caller() {dec a:ind; T(a)} """,
-        "Variadic enumeration of `a` typed `ind` doesn't match the parameter `x` typed `*ind[obj]`, try `a:*ind[obj]` as argument or use `x:*ind[ind]` as parameter type in the predicate definition ReferencesVariadicInd.T(*ind[obj])")>]
+        "Variadic enumeration of `a` of type `ind` does not match the parameter `x` of type `*ind[obj]`. Try `a:*ind[obj]` as an argument, or use `x:*ind[ind]` as parameter type. Location: predicate `ReferencesVariadicInd.T(*ind[obj])`")>]
     [<DataRow("05", """def pred T (x:*ind[obj]) {true} def pred Caller() {T()} """,
-        "Missing argument for `x:*ind[ind]` in the predicate definition ReferencesVariadicInd.T(*ind[ind])")>]
+        "Missing argument for `x:*ind[ind]`. Location: predicate `ReferencesVariadicInd.T(*ind[ind]`)")>]
     [<DataRow("06", """def pred T (x:*ind[obj]) {true} def pred Caller() {dec a,b:*ind[ind]; T(a,b)} """,
-        "The expression `a` typed `*ind[ind]` doesn't match the parameter `x` typed `*ind[obj]` in the predicate definition ReferencesVariadicInd.T(*ind[obj])")>]
+        "The expression `a` has type `*ind[ind]`, which does not match the expected type `*ind[obj]` for the parameter `x`. Location: predicate `ReferencesVariadicInd.T(*ind[obj])`")>]
     [<DataRow("07", """def pred T (x:*ind[ind]) {true} def pred Caller() {dec a:*ind[ind]; T(a)} """,
         "")>]
     [<TestMethod>]
@@ -383,13 +383,13 @@ type SignatureMatching() =
     [<DataRow("02", """def pred T (x:*Nat[ind]) {true} def pred Caller() {T()} """,
         "")>]
     [<DataRow("03", """def pred T (x:*Nat[obj]) {true} def pred Caller() {dec a,b:Nat; T(a,b)} """,
-        "Variadic enumeration of `a` typed `Nat` doesn't match the parameter `x` typed `*Nat[obj]`, try `a:*Nat[obj]` as argument or use `x:*Nat[ind]` as parameter type in the predicate definition ReferencesVariadicNat.T(*Nat[obj])")>]
+        "Variadic enumeration of `a` of type `Nat` does not match the parameter `x` of type `*Nat[obj]`. Try `a:*Nat[obj]` as an argument, or use `x:*Nat[ind]` as parameter type. Location: predicate `ReferencesVariadicNat.T(*Nat[obj])`")>]
     [<DataRow("04", """def pred T (x:*Nat[obj]) {true} def pred Caller() {dec a:Nat; T(a)} """,
-        "Variadic enumeration of `a` typed `Nat` doesn't match the parameter `x` typed `*Nat[obj]`, try `a:*Nat[obj]` as argument or use `x:*Nat[ind]` as parameter type in the predicate definition ReferencesVariadicNat.T(*Nat[obj])")>]
+        "Variadic enumeration of `a` of type `Nat` does not match the parameter `x` of type `*Nat[obj]`. Try `a:*Nat[obj]` as an argument, or use `x:*Nat[ind]` as parameter type. Location: predicate `ReferencesVariadicNat.T(*Nat[obj])`")>]
     [<DataRow("05", """def pred T (x:*Nat[obj]) {true} def pred Caller() {T()} """,
-        "Missing argument for `x:*Nat[ind]` in the predicate definition ReferencesVariadicNat.T(+Nat)")>]
+        "Missing argument for `x:*Nat[ind]`. Location: predicate `ReferencesVariadicNat.T(+Nat)`")>]
     [<DataRow("06", """def pred T (x:*Nat[obj]) {true} def pred Caller() {dec a,b:*Nat[ind]; T(a,b)} """,
-        "The expression `a` typed `*Nat[ind]` doesn't match the parameter `x` typed `*Nat[obj]` in the predicate definition ReferencesVariadicNat.T(*Nat[obj])")>]
+        "The expression `a` has type `*Nat[ind]`, which does not match the expected type `*Nat[obj]` for the parameter `x`. Location: predicate `ReferencesVariadicNat.T(*Nat[obj])`")>]
     [<DataRow("07", """def pred T (x:*Nat[ind]) {true} def pred Caller() {dec a:*Nat[ind]; T(a)} """,
         "")>]
     [<TestMethod>]
@@ -419,19 +419,19 @@ type SignatureMatching() =
     [<DataRow("07", "def cl T { ctor A() {} }", "T", "ok")>]
     [<DataRow("08", "def cl T { ctor A() {dec base.B(); } }", "T", "ok")>]
     [<DataRow("09", "def cl T:C { ctor A() {} }", "T:C", "ok")>]
-    [<DataRow("12", "def cl A {intr} def cl B:A {intr} def cl T:B,A {intr}", "T:B:A, T:A", "ok|cross-inheritance not supported, `A` is base for `B` and `T`.")>]
+    [<DataRow("12", "def cl A {intr} def cl B:A {intr} def cl T:B,A {intr}", "T:B:A, T:A", "ok|Cross-inheritance is not supported. `A` is already a base type of `B` and `T`.")>]
     [<DataRow("13b", "def cl Set def cl EmptySet:Set def cl T:EmptySet", "T:EmptySet:Set", "ok")>]
-    [<DataRow("15", "def cl A {intr} def cl B:A {intr} def cl T:A,B {intr}", "T:A, T:B:A", "ok|cross-inheritance not supported, `A` is base for `T` and `B`.")>]
+    [<DataRow("15", "def cl A {intr} def cl B:A {intr} def cl T:A,B {intr}", "T:A, T:B:A", "ok|Cross-inheritance is not supported. `A` is already a base type of `T` and `B`.")>]
     [<DataRow("16", "def cl A {intr} def cl B:A {intr} def cl T:B {intr}", "T:B:A", "ok")>]
     [<DataRow("20", "def cl A {intr} def cl B:A {intr} def cl T:A {intr}", "T:A", "ok")>]
-    [<DataRow("21", "def cl A {intr} def cl B:A {intr} def cl T:A,A {intr}", "T:A", "duplicate inheritance from `A` detected.")>]
-    [<DataRow("21a", "def cl A {intr} def cl B:A {intr} def cl T:A,C,A {intr}", "T:A, T:C", "duplicate inheritance from `A` detected.|ok")>]
+    [<DataRow("21", "def cl A {intr} def cl B:A {intr} def cl T:A,A {intr}", "T:A", "Duplicate inheritance from `A` detected.")>]
+    [<DataRow("21a", "def cl A {intr} def cl B:A {intr} def cl T:A,C,A {intr}", "T:A, T:C", "Duplicate inheritance from `A` detected.|ok")>]
     [<DataRow("22", "def cl A {intr} def cl B:A {intr} def cl T {intr}", "T", "ok")>]
     [<DataRow("23", "def cl A {intr} def cl B:A {intr} def cl T:D,E {intr}", "T:D, T:E", "ok|ok")>]
     [<DataRow("29a", "def cl A:B def cl B:A def cl T:A", "T:A:B", "ok")>]
-    [<DataRow("29b", "def cl A:B def cl B:A def cl T:B", "T:B:A:B", "cross-inheritance not supported, `B` is base for `T` and `A`.")>]
-    [<DataRow("29c", "def cl A:B def cl B:A def cl T:A,B", "T:A:B, T:B", "ok|cross-inheritance not supported, `B` is base for `A` and `T`.")>]
-    [<DataRow("29d", "def cl A:B def cl B:A def cl T:B,A", "T:B:A:B, T:A", "cross-inheritance not supported, `B` is base for `T` and `A`.|cross-inheritance not supported, `A` is base for `B` and `T`.")>]
+    [<DataRow("29b", "def cl A:B def cl B:A def cl T:B", "T:B:A:B", "Cross-inheritance is not supported. `B` is already a base type of `T` and `A`.")>]
+    [<DataRow("29c", "def cl A:B def cl B:A def cl T:A,B", "T:A:B, T:B", "ok|Cross-inheritance is not supported. `B` is already a base type of `A` and `T`.")>]
+    [<DataRow("29d", "def cl A:B def cl B:A def cl T:B,A", "T:B:A:B, T:A", "Cross-inheritance is not supported. `B` is already a base type of `T` and `A`.|Cross-inheritance is not supported. `A` is already a base type of `B` and `T`.")>]
     [<TestMethod>]
     member this.BaseClassPath(no:string, varVal:string, expectedPaths:string, expectedMessages:string) =
         
@@ -457,8 +457,8 @@ type SignatureMatching() =
     [<DataRow("10", "uses Fpl.SetTheory def cl T:Set {ctor Test() {} }", "T:Set", "ok")>]
     [<DataRow("11", "uses Fpl.SetTheory def cl T:Set {ctor Test() {dec base.Set(); } }", "T:Set", "ok")>]
     [<DataRow("13a", "uses Fpl.SetTheory def cl T:EmptySet", "T:EmptySet:Set", "ok")>]
-    [<DataRow("13", "uses Fpl.SetTheory def cl T:EmptySet,Set {intr}", "T:EmptySet:Set, T:Set", "ok|cross-inheritance not supported, `Set` is base for `EmptySet` and `T`.")>]
-    [<DataRow("14", "uses Fpl.SetTheory def cl T:Set, EmptySet {intr}", "T:Set, T:EmptySet:Set", "ok|cross-inheritance not supported, `Set` is base for `T` and `EmptySet`.")>]
+    [<DataRow("13", "uses Fpl.SetTheory def cl T:EmptySet,Set {intr}", "T:EmptySet:Set, T:Set", "ok|Cross-inheritance is not supported. `Set` is already a base type of `EmptySet` and `T`.")>]
+    [<DataRow("14", "uses Fpl.SetTheory def cl T:Set, EmptySet {intr}", "T:Set, T:EmptySet:Set", "ok|Cross-inheritance is not supported. `Set` is already a base type of `T` and `EmptySet`.")>]
     [<DataRow("17", "uses Fpl.SetTheory def cl T:EmptySet {intr}", "T:EmptySet:Set", "ok")>]
     [<DataRow("18", "uses Fpl.SetTheory def cl T:Set {intr}", "T:Set", "ok")>]
     [<DataRow("19", "uses Fpl.Commons uses Fpl.SetTheory def cl T:Set {intr}", "T:Set", "ok")>]
@@ -499,19 +499,19 @@ type SignatureMatching() =
     [<DataRow("07", "def func T(a:pred)->obj ", "T", "ok")>]
     [<DataRow("08", "def func T(x,y:ind)->obj ", "T", "ok")>]
     [<DataRow("09", "def func T:C(a,b,c:func)->pred(x,y:obj)", "T:C", "ok")>]
-    [<DataRow("10", "def func A()->obj {intr} def func B:A ()->obj {intr} def func T:B,A()->obj {intr}", "T:B:A, T:A", "ok|cross-inheritance not supported, `A` is base for `B` and `T`.")>]
+    [<DataRow("10", "def func A()->obj {intr} def func B:A ()->obj {intr} def func T:B,A()->obj {intr}", "T:B:A, T:A", "ok|Cross-inheritance is not supported. `A` is already a base type of `B` and `T`.")>]
     [<DataRow("11", "def func Set()->obj def func EmptySet:Set()->obj def func T:EmptySet()->obj", "T:EmptySet:Set", "ok")>]
-    [<DataRow("12", "def func A()->obj {intr} def func B:A()->obj {intr} def func T:A,B()->obj {intr}", "T:A, T:B:A", "ok|cross-inheritance not supported, `A` is base for `T` and `B`.")>]
+    [<DataRow("12", "def func A()->obj {intr} def func B:A()->obj {intr} def func T:A,B()->obj {intr}", "T:A, T:B:A", "ok|Cross-inheritance is not supported. `A` is already a base type of `T` and `B`.")>]
     [<DataRow("13", "def func A()->obj {intr} def func B:A()->obj {intr} def func T:B()->obj {intr}", "T:B:A", "ok")>]
     [<DataRow("14", "def func A()->obj {intr} def func B:A()->obj {intr} def func T:A()->obj {intr}", "T:A", "ok")>]
-    [<DataRow("15", "def func A()->obj {intr} def func B:A()->obj {intr} def func T:A,A()->obj {intr}", "T:A", "duplicate inheritance from `A` detected.")>]
-    [<DataRow("16", "def func A()->obj {intr} def func B:A()->obj {intr} def func T:A,C,A()->obj {intr}", "T:A, T:C", "duplicate inheritance from `A` detected.|ok")>]
+    [<DataRow("15", "def func A()->obj {intr} def func B:A()->obj {intr} def func T:A,A()->obj {intr}", "T:A", "Duplicate inheritance from `A` detected.")>]
+    [<DataRow("16", "def func A()->obj {intr} def func B:A()->obj {intr} def func T:A,C,A()->obj {intr}", "T:A, T:C", "Duplicate inheritance from `A` detected.|ok")>]
     [<DataRow("17", "def func A()->obj {intr} def func B:A()->obj {intr} def func T()->obj {intr}", "T", "ok")>]
     [<DataRow("18", "def func A()->obj {intr} def func B:A()->obj {intr} def func T:D,E()->obj {intr}", "T:D, T:E", "ok|ok")>]
     [<DataRow("19", "def func A:B()->obj def func B:A()->obj def func T:A()->obj", "T:A:B", "ok")>]
-    [<DataRow("20a", "def func A:B()->obj def func B:A()->obj def func T:B()->obj", "T:B:A:B", "cross-inheritance not supported, `B` is base for `T` and `A`.")>]
-    [<DataRow("20b", "def func A:B()->obj def func B:A()->obj def func T:A,B()->obj", "T:A:B, T:B", "ok|cross-inheritance not supported, `B` is base for `A` and `T`.")>]
-    [<DataRow("20c", "def func A:B()->obj def func B:A()->obj def func T:B,A()->obj", "T:B:A:B, T:A", "cross-inheritance not supported, `B` is base for `T` and `A`.|cross-inheritance not supported, `A` is base for `B` and `T`.")>]
+    [<DataRow("20a", "def func A:B()->obj def func B:A()->obj def func T:B()->obj", "T:B:A:B", "Cross-inheritance is not supported. `B` is already a base type of `T` and `A`.")>]
+    [<DataRow("20b", "def func A:B()->obj def func B:A()->obj def func T:A,B()->obj", "T:A:B, T:B", "ok|Cross-inheritance is not supported. `B` is already a base type of `A` and `T`.")>]
+    [<DataRow("20c", "def func A:B()->obj def func B:A()->obj def func T:B,A()->obj", "T:B:A:B, T:A", "Cross-inheritance is not supported. `B` is already a base type of `T` and `A`.|Cross-inheritance is not supported. `A` is already a base type of `B` and `T`.")>]
     [<TestMethod>]
     member this.TestBaseFunctionalTermPath(no:string, varVal:string, expectedPaths:string, expectedMessages:string) =
         
@@ -544,19 +544,19 @@ type SignatureMatching() =
     [<DataRow("07", "def pred T(a:pred) ", "T", "ok")>]
     [<DataRow("08", "def pred T(x,y:ind) ", "T", "ok")>]
     [<DataRow("09", "def pred T:C(a,b,c:pred)", "T:C", "ok")>]
-    [<DataRow("10", "def pred A() {intr} def pred B:A () {intr} def pred T:B,A() {intr}", "T:B:A, T:A", "ok|cross-inheritance not supported, `A` is base for `B` and `T`.")>]
+    [<DataRow("10", "def pred A() {intr} def pred B:A () {intr} def pred T:B,A() {intr}", "T:B:A, T:A", "ok|Cross-inheritance is not supported. `A` is already a base type of `B` and `T`.")>]
     [<DataRow("11", "def pred Set() def pred EmptySet:Set() def pred T:EmptySet()", "T:EmptySet:Set", "ok")>]
-    [<DataRow("12", "def pred A() {intr} def pred B:A() {intr} def pred T:A,B() {intr}", "T:A, T:B:A", "ok|cross-inheritance not supported, `A` is base for `T` and `B`.")>]
+    [<DataRow("12", "def pred A() {intr} def pred B:A() {intr} def pred T:A,B() {intr}", "T:A, T:B:A", "ok|Cross-inheritance is not supported. `A` is already a base type of `T` and `B`.")>]
     [<DataRow("13", "def pred A() {intr} def pred B:A() {intr} def pred T:B() {intr}", "T:B:A", "ok")>]
     [<DataRow("14", "def pred A() {intr} def pred B:A() {intr} def pred T:A() {intr}", "T:A", "ok")>]
-    [<DataRow("15", "def pred A() {intr} def pred B:A() {intr} def pred T:A,A() {intr}", "T:A", "duplicate inheritance from `A` detected.")>]
-    [<DataRow("16", "def pred A() {intr} def pred B:A() {intr} def pred T:A,C,A() {intr}", "T:A, T:C", "duplicate inheritance from `A` detected.|ok")>]
+    [<DataRow("15", "def pred A() {intr} def pred B:A() {intr} def pred T:A,A() {intr}", "T:A", "Duplicate inheritance from `A` detected.")>]
+    [<DataRow("16", "def pred A() {intr} def pred B:A() {intr} def pred T:A,C,A() {intr}", "T:A, T:C", "Duplicate inheritance from `A` detected.|ok")>]
     [<DataRow("17", "def pred A() {intr} def pred B:A() {intr} def pred T() {intr}", "T", "ok")>]
     [<DataRow("18", "def pred A() {intr} def pred B:A() {intr} def pred T:D,E() {intr}", "T:D, T:E", "ok|ok")>]
     [<DataRow("19", "def pred A:B() def pred B:A() def pred T:A()", "T:A:B", "ok")>]
-    [<DataRow("20a", "def pred A:B() def pred B:A() def pred T:B()", "T:B:A:B", "cross-inheritance not supported, `B` is base for `T` and `A`.")>]
-    [<DataRow("20b", "def pred A:B() def pred B:A() def pred T:A,B()", "T:A:B, T:B", "ok|cross-inheritance not supported, `B` is base for `A` and `T`.")>]
-    [<DataRow("20c", "def pred A:B() def pred B:A() def pred T:B,A()", "T:B:A:B, T:A", "cross-inheritance not supported, `B` is base for `T` and `A`.|cross-inheritance not supported, `A` is base for `B` and `T`.")>]
+    [<DataRow("20a", "def pred A:B() def pred B:A() def pred T:B()", "T:B:A:B", "Cross-inheritance is not supported. `B` is already a base type of `T` and `A`.")>]
+    [<DataRow("20b", "def pred A:B() def pred B:A() def pred T:A,B()", "T:A:B, T:B", "ok|Cross-inheritance is not supported. `B` is already a base type of `A` and `T`.")>]
+    [<DataRow("20c", "def pred A:B() def pred B:A() def pred T:B,A()", "T:B:A:B, T:A", "Cross-inheritance is not supported. `B` is already a base type of `T` and `A`.|Cross-inheritance is not supported. `A` is already a base type of `B` and `T`.")>]
     [<TestMethod>]
     member this.BasePredicatePath(no:string, varVal:string, expectedPaths:string, expectedMessages:string) =
         
@@ -589,7 +589,7 @@ type SignatureMatching() =
 
     // Test if a reference of the assigned value gets the correct candidate 
     // depending on its signature and the available constructor candidates in the referenced class
-    // regardless of the order in which the constructors in the referenced class are declared.
+    // regardless of the order in which the constructors referenced class are declared.
     member this.AssignmentsOfConstructorsCorrectCandidates(no:string, varVal:string, expectedCandidateSignature:string) =
         
         let fplCode = sprintf """%s""" varVal
@@ -606,7 +606,7 @@ type SignatureMatching() =
         prepareFplCode(filename, "", false) |> ignore
 
     [<DataRow("""def pred Eq(x,y: obj) infix "=" 1000 axiom A {dec x:ind y:obj; (x = y) }""", 
-        "No overload matching `x = y`. Candidate(s) tried:\r\nThe expression `x` typed `ind` doesn't match the parameter `x` typed `obj` in the predicate definition TestSIG04MsgSpecificity.Eq(obj, obj).")>]
+        "No overload matches `x = y`. Candidates considered:\r\nThe expression `x` has type `ind`, which does not match the expected type `obj` for the parameter `x`. Location: predicate `TestSIG04MsgSpecificity.Eq(obj, obj)`.")>]
     [<TestMethod>]
     member this.SIG04MsgSpecificity(fplCode:string, (expected:string)) =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 

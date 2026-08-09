@@ -76,6 +76,38 @@ type TestID001() =
 
     [<DataRow("def func Sum(list:* Nat[ind])->Nat {dec result: Nat; return result} def func Sum2(list:* Nat[ind])->Nat {dec result: Nat; return result}", 0)>]
     [<DataRow("""def cl B {intr} def cl A {dec x:obj; ctor A(y:B) {} }""", 0)>]
+    [<DataRow("thm SomeTheorem {true} thm SomeTheorem {true} ", 1)>]
+    [<DataRow("thm SomeTheorem {true} ", 0)>]
+
+    [<DataRow("lem SomeLemma {true} lem SomeLemma {true} ", 1)>]
+    [<DataRow("lem SomeLemma {true} ", 0)>]
+
+    [<DataRow("proposition SomeProp {true} proposition SomeProp {true} ", 1)>]
+    [<DataRow("proposition SomeProp {true} ", 0)>]
+
+    [<DataRow("conjecture SomeConj {true} conjecture SomeConj {true} ", 1)>]
+    [<DataRow("conjecture SomeConj {true} ", 0)>]
+
+    [<DataRow("cor SomeCor$1 {true} cor SomeCor$1 {true} ", 1)>]
+    [<DataRow("cor SomeCor$1 {true} ", 0)>]
+
+    [<DataRow("ax SomeAx {true} ax SomeAx {true} ", 1)>]
+    [<DataRow("ax SomeAx {true} ", 0)>]
+
+    [<DataRow("post SomePostulate {true} post SomePostulate {true} ", 1)>]
+    [<DataRow("post SomePostulate {true} ", 0)>]
+
+    [<DataRow("prf TestId$1 {1: trivial}prf TestId$1 {1: trivial}", 1)>]
+    [<DataRow("prf TestId$1 {1: trivial}", 0)>]
+
+    [<DataRow("inference SomeRuleOfInference {pre: true con: true} inference SomeRuleOfInference {pre: true con: true}", 1)>]
+    [<DataRow("inference SomeRuleOfInference {pre: true con: true} ", 0)>]
+
+    [<DataRow("def pred SomePredicate() {intrinsic} def pred SomePredicate() {intrinsic} ", 1)>]
+    [<DataRow("def pred SomePredicate() {intrinsic} ", 0)>]
+
+    [<DataRow("def cl SomeClass def cl SomeClass ", 1)>]
+    [<DataRow("def cl SomeClass ", 0)>]
     [<DataRow("uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestID001(fplCode:string, expected:int) =

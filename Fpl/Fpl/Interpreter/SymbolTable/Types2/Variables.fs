@@ -48,7 +48,7 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplGenericNode) as 
         _isUsed <- true
         setIsUsed this        
 
-    /// Getter if this variable is bound (by a quantor of otherwise).
+    /// Getter if this variable is bound (by a quantifier of otherwise).
     member this.IsBound
         with get () = _isBound
 
@@ -129,9 +129,9 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplGenericNode) as 
             if not (conflictInScope proofOrCorollary false) then
                 proofOrCorollary.Scope.Add(this.FplId, this)
 
-        let addToQuantor (quantor:FplGenericNode) =
-            // issue VAR03, if the variable to be bound by the quantor was declared 
-            // in the scope the quantor is placed in.
+        let addToQuantifier (quantifier:FplGenericNode) =
+            // issue VAR03, if the variable to be bound by the quantifier was declared 
+            // in the scope the quantifier is placed in.
             let rec checkConfictInScope (node:FplGenericNode) =
                 if node.Scope.ContainsKey(this.FplId) then
                     this.ErrorOccurred <- emitVAR03Diagnostics this.FplId node.Scope[this.FplId].QualifiedStartPos this.StartPos this.EndPos
@@ -143,8 +143,8 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplGenericNode) as 
                     | _ ->
                         checkConfictInScope parent 
 
-            checkConfictInScope quantor
-            quantor.Scope.TryAdd(this.FplId, this) |> ignore        
+            checkConfictInScope quantifier
+            quantifier.Scope.TryAdd(this.FplId, this) |> ignore        
         
         let addToVariableOrMapping (variableOrMapping:FplGenericNode) =
             let rec conflictInScope (node:FplGenericNode) =
@@ -200,16 +200,16 @@ type FplGenericVariable(fplId, positions: Positions, parent: FplGenericNode) as 
         | Some next when next.Name = PrimMappingL ->
             this.SetIsBound() // mapping-Variables are bound
             addToVariableOrMapping next
-        | Some next when next.Name = PrimQuantorAll || next.Name = PrimQuantorExists || next.Name = PrimQuantorExistsN ->  
-            this.SetIsBound() // quantor-Variables are bound
+        | Some next when next.Name = PrimQuantifierAll || next.Name = PrimQuantifierExists || next.Name = PrimQuantifierExistsN ->  
+            this.SetIsBound() // quantifier variables are bound
             if next.Scope.ContainsKey(this.FplId) then
                 this.ErrorOccurred <- emitVAR02Diagnostics this.FplId this.StartPos this.EndPos
-            elif next.Name = PrimQuantorExistsN && next.Scope.Count>0 then 
+            elif next.Name = PrimQuantifierExistsN && next.Scope.Count>0 then 
                 this.ErrorOccurred <- emitVAR07Diagnostics this.FplId this.StartPos this.EndPos
             elif this.Name = PrimVariableArrayL then 
-                this.ErrorOccurred <- emitVAR08Diagnostics this.StartPos this.EndPos
+                this.ErrorOccurred <- emitVAR08Diagnostics this.FplId this.StartPos this.EndPos
             else
-                addToQuantor next
+                addToQuantifier next
                 
         | _ -> addExpressionToParentArgList this
 

@@ -1,5 +1,5 @@
 /// This module contains all nodes of the symbol table used by the FplInterpreter
-/// to interpret quantors
+/// to interpret quantifiers
 
 (* MIT License
 
@@ -12,7 +12,7 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
 
 *)
-module Fpl.Interpreter.SymbolTable.Types3.Quantors
+module Fpl.Interpreter.SymbolTable.Types3.Quantifiers
 open Fpl.Primitives
 open Fpl.Parser.Types
 open Fpl.Errors.Emitter
@@ -25,10 +25,10 @@ open Fpl.Interpreter.SymbolTable.Types2.Variables
 
 
 [<AbstractClass>]
-type FplGenericQuantor(positions: Positions, parent: FplGenericNode) =
+type FplGenericQuantifier(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericPredicate(positions, parent)
 
-    override this.ShortName = PrimQuantor
+    override this.ShortName = PrimQuantifier
 
     override this.Type signatureType =
         match signatureType with
@@ -48,9 +48,9 @@ type FplGenericQuantor(positions: Positions, parent: FplGenericNode) =
         | _ ->
             let head =
                 match this.Name with
-                | PrimQuantorAll -> "∀"
-                | PrimQuantorExists -> "∃"
-                | PrimQuantorExistsN -> $"{this.FplId}".Replace("exn$1","∃!").Replace("exn$","∃!")
+                | PrimQuantifierAll -> "∀"
+                | PrimQuantifierExists -> "∃"
+                | PrimQuantifierExistsN -> $"{this.FplId}".Replace("exn$1","∃!").Replace("exn$","∃!")
                 | _ -> ""
             let boundVars =
                 this.GetVariables()
@@ -96,44 +96,44 @@ type FplGenericQuantor(positions: Positions, parent: FplGenericNode) =
         this.SetDefaultValue()
         StaticDebug.Debug(this,Debug.Stop)
 
-type FplQuantorAll(positions: Positions, parent: FplGenericNode) as this =
-    inherit FplGenericQuantor(positions, parent)
+type FplQuantifierAll(positions: Positions, parent: FplGenericNode) as this =
+    inherit FplGenericQuantifier(positions, parent)
 
     do 
         this.FplId <- LiteralAll
 
-    override this.Name = PrimQuantorAll
+    override this.Name = PrimQuantifierAll
 
     override this.Clone () =
-            let ret = new FplQuantorAll((this.StartPos, this.EndPos), this.Parent.Value)
+            let ret = new FplQuantifierAll((this.StartPos, this.EndPos), this.Parent.Value)
             this.AssignParts(ret)
             ret
 
-type FplQuantorExists(positions: Positions, parent: FplGenericNode) as this =
-    inherit FplGenericQuantor(positions, parent)
+type FplQuantifierExists(positions: Positions, parent: FplGenericNode) as this =
+    inherit FplGenericQuantifier(positions, parent)
 
     do 
         this.FplId <- LiteralEx
 
-    override this.Name = PrimQuantorExists
+    override this.Name = PrimQuantifierExists
 
     override this.Clone () =
-            let ret = new FplQuantorExists((this.StartPos, this.EndPos), this.Parent.Value)
+            let ret = new FplQuantifierExists((this.StartPos, this.EndPos), this.Parent.Value)
             this.AssignParts(ret)
             ret
 
-type FplQuantorExistsN(positions: Positions, parent: FplGenericNode) as this =
-    inherit FplGenericQuantor(positions, parent)
+type FplQuantifierExistsN(positions: Positions, parent: FplGenericNode) as this =
+    inherit FplGenericQuantifier(positions, parent)
 
     do 
         this.FplId <- LiteralExN
         this.Arity <- 1
 
 
-    override this.Name = PrimQuantorExistsN
+    override this.Name = PrimQuantifierExistsN
 
     override this.Clone () =
-            let ret = new FplQuantorExistsN((this.StartPos, this.EndPos), this.Parent.Value)
+            let ret = new FplQuantifierExistsN((this.StartPos, this.EndPos), this.Parent.Value)
             this.AssignParts(ret)
             ret
 

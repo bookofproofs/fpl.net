@@ -210,10 +210,10 @@ type TestPredicates () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<DataRow("00", """ProceedingResults1(x,y)""")>]
+    [<DataRow("00", """PrecedingResults1(x,y)""")>]
     [<DataRow("01", """x + y""")>]
     [<DataRow("02", """(x) + y""")>]
-    [<DataRow("03", """(x) + (ProceedingResults1(x,y))""")>]
+    [<DataRow("03", """(x) + (PrecedingResults1(x,y))""")>]
     [<DataRow("04", """z * (x) + y""")>]
     [<DataRow("04", """z * (x + y)""")>]
     [<DataRow("05", """z / (x) + y""")>]
@@ -225,7 +225,7 @@ type TestPredicates () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<DataRow("00", """ProceedingResults$1(x,y)""")>]
+    [<DataRow("00", """PrecedingResults$1(x,y)""")>]
     [<DataRow("01", "undet")>]
     [<TestMethod>]
     member this.TestPredicateFailure (no:string, fplCode:string) =

@@ -91,7 +91,6 @@
         <Compile Include="Diagnostics\ProofRelated\TestPR015.fs" />
         <Compile Include="Diagnostics\ProofRelated\TestPR016.fs" />
         <Compile Include="Diagnostics\ProofRelated\TestPR017.fs" />
-        <Compile Include="Diagnostics\ProofRelated\TestPR018.fs" />
         <Compile Include="Diagnostics\ProofRelated\TestPR019.fs" />
         <Compile Include="Diagnostics\ProofRelated\TestPR020.fs" />
         <Compile Include="Diagnostics\ProofRelated\TestPR021.fs" />
@@ -140,8 +139,8 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.7.0" />
-        <PackageReference Include="MSTest.TestAdapter" Version="4.2.3" />
-        <PackageReference Include="MSTest.TestFramework" Version="4.2.3" />
+        <PackageReference Include="MSTest.TestAdapter" Version="4.3.3" />
+        <PackageReference Include="MSTest.TestFramework" Version="4.3.3" />
     </ItemGroup>
 
     <ItemGroup>

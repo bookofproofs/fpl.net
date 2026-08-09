@@ -45,18 +45,40 @@ type FplJustificationItemByAx(positions: Positions, parent: FplGenericNode) =
     member this.ParentJustification = this.Parent.Value :?> FplJustification
 
     override this.InferredExprCandidates
-        // identify the expression contained in the axiom
-        // referred by this "byax" justification in a proof
+        // prepare candidate expressions that may be used for proof argument inference
         with get (): FplGenericNode list =
             match this.RefersTo with
             | Some ax ->
                 if ax.ArgList.Count > 0 then
-                    [ax.ArgList |> Seq.last]
+                    let axiomFormula = ax.ArgList |> Seq.last
+                    let candidates = ResizeArray<FplGenericNode>()
+                    
+                    match this.Parent.Value.Parent with
+                    | Some (:? FplArgument as argument) ->
+                        match argument.ArgumentInference with
+                        | Some (argInference: FplGenericArgInference) ->
+                            match argInference.InferredExprCandidates |> List.tryHead with
+                            | Some inferredFormula ->
+                                let dictParameterUsage = Dictionary<string, FplGenericNode>()
+                                match matchExpressionAgainstPattern inferredFormula axiomFormula dictParameterUsage with
+                                | None -> // SUCCESS: match succeeded, now instantiate
+                                    let expr = axiomFormula.Clone()
+                                    candidates.Add(instantiateExpressionByVarUsages expr dictParameterUsage)
+                                | Some err -> // FAILURE: match failed
+                                    candidates.Add(axiomFormula.Clone())
+                            | None ->
+                                ()
+                        | None ->
+                            ()
+                    | _ ->
+                        ()
+
+                    candidates |> Seq.toList
                 else
-                    issuePR022AndSetDefault this (Some ax) None 
+                    issuePR022AndSetDefault this (Some ax) None
                     [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
             | None ->
-                issuePR022AndSetDefault this None None 
+                issuePR022AndSetDefault this None None
                 [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
 
 and FplJustificationItemByDef(positions: Positions, parent: FplGenericNode) =
@@ -192,57 +214,6 @@ and FplJustificationItemByInf(positions: Positions, parent: FplGenericNode) =
 
     member this.ParentJustification = this.Parent.Value :?> FplJustification
 
-    /// Replaces the variables in the conclusion of the rule of inference
-    /// by expressions matched to these variables from the premise of the rule of inference
-    /// when it was structurally matched to some expression.
-    member private this.ReplaceVarsByVarUsages (conclusionExpression:FplGenericNode) (varUsageDict:Dictionary<string, FplGenericNode>) =
-        let isVariableWithMatchedExpression (arg:FplGenericNode) =
-            match arg.Name with
-            | PrimRefL when arg.RefersTo.IsSome ->
-                match arg.RefersTo with
-                | Some var when var.Name = PrimVariableL ->
-                    varUsageDict.ContainsKey(var.FplId) 
-                | _ ->  false
-            | _ ->  false
-
-        let rec replaceVarsByUsages (expr:FplGenericNode) =
-            let newArgList = List<FplGenericNode>()
-            expr.ArgList
-            |> Seq.iter (fun arg ->
-                if isVariableWithMatchedExpression arg then
-                    newArgList.Add varUsageDict[arg.FplId]
-                else 
-                    newArgList.Add (replaceVarsByUsages arg)
-            )
-            let exprVarList = expr.GetVariables()
-            exprVarList
-            |> Seq.iter (fun var ->
-                if varUsageDict.ContainsKey(var.FplId) then
-                    // correct the TypeId and FplId of any cloned conclusion variables (like those of cloned quantors in the conclusion of the rule of reference)
-                    // to the TypeId of the matched variable of the matched premise of the rule of reference
-                    var.TypeId <- varUsageDict[var.FplId].TypeId
-                    // Note: The corrected FplId stems from the matched premise of the rule of reference, while the original FplId stems from its cloned conclusion
-                    // The corrected FplId might, therefore, differ from the cloned Key (being the original FplId), where this variable resides in expr.Scope dictionary
-                    // This difference is OK, since we only need the dictionaries value of the variable. This is used here a dummy for expression matching based on expression syntax (.Type SignatureType.Name)
-                    // of the expression. The correct Key-Value correspondence was only needed when embedding the variable into the SymbolTable
-                    // which at this point is only the input, not the output of the FplInterpreter.
-                    var.FplId <- varUsageDict[var.FplId].FplId 
-            )
-            
-            // replace expression arguments by new expressions where variables were replaced by their usages
-            newArgList
-            |> Seq.iteri (fun i arg -> expr.ArgList[i] <- arg)
-            expr
-        if isVariableWithMatchedExpression conclusionExpression then
-            // If the conclusion of the rule of reference is a single variable
-            // and this variable was matched with some expression,
-            // we replace the whole conclusion with this matched expression
-            varUsageDict[conclusionExpression.FplId]
-        else
-            // otherwise we replace it with the conclusionExpression in which
-            // we recursively replace all variables by matched expressions
-            replaceVarsByUsages conclusionExpression
-
     override this.InferredExprCandidates
         with get (): FplGenericNode list =
             match this.RefersTo, this.Parent with
@@ -251,9 +222,9 @@ and FplJustificationItemByInf(positions: Positions, parent: FplGenericNode) =
                 | Some premisePredicateListNode, Some conclusion ->
                     let premisePredicateList = premisePredicateListNode.ArgList |> Seq.toList
                     // (all justification items but the first one, which is the "byinf" one)
-                    let (proceedingJustificationItems: FplGenericNode list) = allBefore this just.GetOrderedJustificationItems
+                    let (precedingJustificationItems: FplGenericNode list) = allBefore this just.GetOrderedJustificationItems
                     let (inferredExpressionLists : (FplGenericJustificationItem * FplGenericNode list) list) = 
-                        proceedingJustificationItems
+                        precedingJustificationItems
                         |> List.filter (fun fv -> fv :? FplGenericJustificationItem)
                         |> List.map (fun fv -> fv :?> FplGenericJustificationItem)
                         |> List.map (fun fv -> fv, fv.InferredExprCandidates)
@@ -270,7 +241,7 @@ and FplJustificationItemByInf(positions: Positions, parent: FplGenericNode) =
                         if listOfPairs.Length > 0 then
                             let varUsageDict = snd listOfPairs.Head
                             let expr = conclusion.Clone()
-                            [this.ReplaceVarsByVarUsages expr varUsageDict]
+                            [instantiateExpressionByVarUsages expr varUsageDict]
                         else
                             issuePR022SpecialReasonAndSetDefault this "No expressions could be inferred while matching input justificationItems with premise list."
                             []
@@ -412,17 +383,15 @@ and FplJustification(positions: Positions, parent: FplGenericNode) =
         let justItems = (this.ArgList |> Seq.toList)
         match justItems |> List.tryLast with
         | Some lastJustItem when lastJustItem.Name = PrimJIByInf ->
-            () // only when the last justification item in a row is a "byinf" item, users can match different justification types proceeding it
+            () // only when the last justification item in a row is a "byinf" item, users can match different justification types preceding it
         | _ ->
             // else (i.e. last just item is different from a "byinf" item)
             match findTwoDifferentNames justItems with
             | Choice1Of2 _ -> ()
                 // all justification item types are identical → OK
             | Choice2Of2 (justificationType1Pre, justificationType2Pre) ->
-                let justificationType1 = justificationType1Pre.Replace("justification ", "")
-                let justificationType2 = justificationType2Pre.Replace("justification ", "")
                 // issue diagnostics if ordered justification items mix types of justification items
-                this.ErrorOccurred <- emitPR019Diagnostics justificationType1 justificationType2 this.StartPos this.EndPos
+                this.ErrorOccurred <- emitPR019Diagnostics justificationType1Pre justificationType2Pre this.StartPos this.EndPos
         base.CheckConsistency()
 
     override this.EmbedInSymbolTable _ =
@@ -511,7 +480,7 @@ and FplArgument(positions: Positions, parent: FplGenericNode, runOrder) =
                             if justNames.Length = 2 then 
                                 $"The justification by argument `{justNames[1]}` in another proof `{justNames[0]}`"
                             else
-                                $"The {lastJustificationOfArgument.Name}` `{lastJustificationOfArgument.Type SignatureType.Name}`"
+                                $"The justification `{lastJustificationOfArgument.Name}` `{lastJustificationOfArgument.Type SignatureType.Name}`"
                         this.ErrorOccurred <- emitPR021Diagnostics mismatchingCandidates inferredExpr prettyJustificationName argInference.StartPos argInference.EndPos
                         this.SetDefaultValue()
                 | _, _ ->
@@ -847,64 +816,12 @@ and FplProof(positions: Positions, parent: FplGenericNode, runOrder) =
             this.SetValue v
         StaticDebug.Debug(this,Debug.Stop)
 
-    /// Tries to find a theorem-like statement for a proof
-    /// and returns different cases of ScopeSearchResult, depending on different semantical error situations.
-    member private this.TryFindAssociatedBlockForProof (fplValue: FplGenericNode) =
-        match fplValue.Parent with
-        | Some theory ->
-
-            let flattenedScopes = flattenScopes theory.Parent.Value
-
-            let potentialProvableName = stripLastDollarDigit (fplValue.FplId)
-
-            // The parent node of the proof is the theory. In its scope
-            // we should find the theorem we are looking for.
-            let buildingBlocksMatchingDollarDigitNameList =
-                // the potential block name of the proof is the
-                // concatenated type signature of the name of the proof
-                // without the last dollar digit
-                flattenedScopes |> List.filter (fun fv -> fv.FplId = potentialProvableName)
-
-            let provableBlocklist =
-                buildingBlocksMatchingDollarDigitNameList
-                |> List.filter (fun fv -> isProvable fv)
-
-            let notProvableBlocklist =
-                buildingBlocksMatchingDollarDigitNameList
-                |> List.filter (fun fv -> not (isProvable fv ))
-
-            if provableBlocklist.Length > 1 then
-                ScopeSearchResult.FoundMultiple(
-                    provableBlocklist
-                    |> List.map (fun fv -> sprintf "'%s' %s" fv.Name (fv.Type(SignatureType.Mixed)))
-                    |> String.concat ", "
-                )
-            elif provableBlocklist.Length > 0 then
-                let potentialTheorem = provableBlocklist.Head
-                ScopeSearchResult.FoundAssociate potentialTheorem
-            elif notProvableBlocklist.Length > 0 then
-                let potentialOther = notProvableBlocklist.Head
-                ScopeSearchResult.FoundIncorrectBlock potentialOther
-            else
-                ScopeSearchResult.NotFound
-        | None -> ScopeSearchResult.NotApplicable
-
     /// Issue PR017 for all "trivial" arguments that are not the last one in the proof 
     member private this.CheckTrivialArgumentsPR017 (trivialArgs:FplArgument list) lastArg =
         trivialArgs
         |> List.filter (fun trivialArg -> not (Object.ReferenceEquals(trivialArg, lastArg)))
         |> List.iter (fun trivialArg ->
             this.ErrorOccurred <- emitPR017Diagnostics trivialArg.StartPos trivialArg.EndPos
-        )
-
-    /// Issue PR018 for all "trivial" arguments that have not exactly one justification
-    member private this.CheckTrivialArgumentsPR018 (trivialArgs:FplArgument list) =
-        trivialArgs
-        |> List.filter (fun trivialArg -> trivialArg.Justification.IsSome)
-        |> List.map (fun trivialArg -> trivialArg.Justification.Value)
-        |> List.filter (fun justification -> justification.ArgList.Count <> 1)
-        |> List.iter (fun justification ->
-            this.ErrorOccurred <- emitPR018Diagnostics justification.StartPos justification.EndPos
         )
 
     member private this.CheckTrivialArguments() =
@@ -921,10 +838,10 @@ and FplProof(positions: Positions, parent: FplGenericNode, runOrder) =
                 |> List.map (fun arg -> arg :?> FplArgument)
 
             this.CheckTrivialArgumentsPR017 trivialArgs lastArg
-            this.CheckTrivialArgumentsPR018 trivialArgs
+
 
     override this.CheckConsistency () = 
-        match this.TryFindAssociatedBlockForProof this with
+        match tryFindAssociatedBlockForProof this with
         | ScopeSearchResult.FoundAssociate potentialParent -> 
             // everything is OK, change the parent of the provable from theory to the found parent 
             this.Parent <- Some potentialParent

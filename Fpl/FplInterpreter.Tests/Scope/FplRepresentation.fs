@@ -1004,7 +1004,7 @@ type TestFplValueScopeFplRepresentation() =
 
     [<DataRow("ass00", """def cl Nat def func A()->Nat def pred P(x:Nat) {dec x:=A(); true}""", """A()""")>] // declared constant used
     [<DataRow("ass00a", """def cl Nat def pred P(x:Nat) {dec x:=Nat(); true}""", """Nat()""")>] // declared constant used
-    [<DataRow("ass01", """def pred P(x:obj) {dec x:=@43; true}""", LiteralUndet)>] // x is undetermined, since proceeding extension not determined error ID018
+    [<DataRow("ass01", """def pred P(x:obj) {dec x:=@43; true}""", LiteralUndet)>] // x is undetermined, since preceding extension not determined error ID018
     [<DataRow("ass01a", """ext T x@/\d+/->obj {ret x} def pred P(x:obj) {dec x:=@43; true}""", """43""")>] 
     [<DataRow("ass02a", """def pred P(x:ind) {dec x:=$43; true}""", """$43""")>] 
     [<DataRow("ass02b", """def func A()->ind def pred P(x:ind) {dec x:=A(); true}""", """A()""")>] // declared constant used

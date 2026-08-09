@@ -44,20 +44,6 @@ type PathEquivalentUri(uriString: string) =
 
     member this.TheoryName = Path.GetFileNameWithoutExtension(this.AbsolutePath)
 
-/// A helper function for checking if a string starts with any of some string prefixes.
-let startsWithAny (prefixes:string list) (input:string) = 
-    prefixes |> List.exists input.StartsWith
-
-/// A helper function adding an English article to a string 
-let getEnglishName someString determined = 
-    let isEnglishAn = startsWithAny ["a"; "e"; "i"; "o"; "u"] someString
-    if determined then 
-        $"the {someString}"
-    elif isEnglishAn then 
-        $"an {someString}"
-    else
-        $"a {someString}"
-
 type DiagnosticCode = 
     // interpreter error codes
     | GEN00 of string
@@ -84,7 +70,7 @@ type DiagnosticCode =
     | ID014 of string * string
     | ID015 of string 
     | ID016 of string 
-    | ID017 of string * string 
+    | ID017 of string * string * bool
     | ID018 of string 
     | ID020 of string 
     | ID021 of string 
@@ -100,9 +86,9 @@ type DiagnosticCode =
     | LG004 of string
     | LG005 of string
     // proof-related error codes
-    | PR001 of string * string 
+    | PR001 of string * string * string 
     | PR003 of string * string
-    | PR004 of string * string
+    | PR004 of string 
     | PR005 of string
     | PR006 of string * string
     | PR007 of string * string
@@ -110,30 +96,29 @@ type DiagnosticCode =
     | PR009 
     | PR010 of string * string 
     | PR011 of string * string
-    | PR012 
+    | PR012 of string
     | PR013
     | PR014
     | PR015 of string
-    | PR016 of string
+    | PR016 of string * string
     | PR017
-    | PR018
     | PR019 of string * string
     | PR020 of int * int
     | PR021 of string * string * string 
     | PR022 of string 
     // signature-related error codes
-    | SIG00 of string * int
+    | SIG00 of string * int * int
     | SIG01 of string 
     | SIG02 of string * int * string
     | SIG03 of string 
     | SIG04 of string * string
     | SIG05 of string 
     | SIG06 of string * string * string * string
-    | SIG07 of string * string * string 
+    | SIG07 of string * string  
     | SIG08 of string * string * string * string * int
     | SIG09 of string * string * int
     | SIG10 of string * string * int 
-    | SIG11 of string 
+    | SIG11 of string * string
     | SIG12 of string * string * string * string
     | SIG13 of string * string * string * string 
     | SIG14 
@@ -160,8 +145,8 @@ type DiagnosticCode =
     | VAR05 of string 
     | VAR06 of string * string * string * string
     | VAR07 of string 
-    | VAR08 
-    | VAR09 of string * string 
+    | VAR08 of string
+    | VAR09 of string  
     | VAR10 of string * string
     | VAR11 of string * string
     member this.Code = 
@@ -216,13 +201,12 @@ type DiagnosticCode =
             | PR009 -> "PR009"
             | PR010 _ -> "PR010"
             | PR011 _ -> "PR011"
-            | PR012 -> "PR012"
+            | PR012 _ -> "PR012"
             | PR013 -> "PR013"
             | PR014 -> "PR014"
             | PR015 _ -> "PR015"
             | PR016 _ -> "PR016"
             | PR017 -> "PR017"
-            | PR018 -> "PR018"
             | PR019 _ -> "PR019"
             | PR020 _ -> "PR020"
             | PR021 _ -> "PR021"
@@ -266,7 +250,7 @@ type DiagnosticCode =
             | VAR05 _  -> "VAR05"
             | VAR06 _  -> "VAR06"
             | VAR07 _  -> "VAR07"
-            | VAR08 -> "VAR08"
+            | VAR08 _ -> "VAR08"
             | VAR09 _ -> "VAR09"
             | VAR10 _ -> "VAR10"
             | VAR11 _ -> "VAR11"
@@ -297,7 +281,7 @@ type DiagnosticCode =
             | ID014 (signature, conflict) -> errID014 signature conflict
             | ID015 signature -> errID015 signature
             | ID016 signature -> errID016 signature
-            | ID017 (name, candidates) -> errID017 name candidates
+            | ID017 (name, candidates, incompatible) -> errID017 name candidates incompatible
             | ID018 name -> errID018 name
             | ID020 name -> errID020 name 
             | ID021 name -> errID021 name
@@ -313,9 +297,9 @@ type DiagnosticCode =
             | LG004 nodeType -> errLG004 nodeType 
             | LG005 name -> errLG005 name
             // proof-related error codes
-            | PR001 (incorrectBlockType, justificatinItemName) -> errPR001 incorrectBlockType justificatinItemName
+            | PR001 (incorrectBlockType, justificatinItemName, alternative) -> errPR001 incorrectBlockType justificatinItemName alternative
             | PR003 (name, conflict) -> errPR003 name conflict
-            | PR004 (name, conflict)  -> errPR004 name conflict
+            | PR004 name  -> errPR004 name 
             | PR005 name ->  errPR005 name
             | PR006 (proofName, argumentName) -> errPR006 proofName argumentName
             | PR007 (nodeTypeName, nodeName) -> errPR007 nodeTypeName nodeName
@@ -323,30 +307,29 @@ type DiagnosticCode =
             | PR009 -> errPR009 
             | PR010 (keyword, expectedRef) -> errPR010 keyword expectedRef
             | PR011 (keyword, expectedRef) -> errPR011 keyword expectedRef
-            | PR012 -> errPR012
+            | PR012 providedIdentifer -> errPR012 providedIdentifer
             | PR013 -> errPR013
             | PR014 -> errPR014
             | PR015 argId -> errPR015 argId
-            | PR016 argId -> errPR016 argId
+            | PR016 (argId, lastAssumedArgumentId) -> errPR016 argId lastAssumedArgumentId
             | PR017 -> errPR017
-            | PR018 -> errPR018
             | PR019 (justificationType1, justificationType2) -> errPR019 justificationType1 justificationType2
             | PR020 (expectedNum, actualNum) -> errPR020 expectedNum actualNum
             | PR021 (mismatchingCandidates, inferredFormula, justificationName) -> errPR021 mismatchingCandidates inferredFormula justificationName
             | PR022 reason -> errPR022 reason
             // signature-related error codes
-            | SIG00 (fixType, arity) -> errSIG00 fixType arity
+            | SIG00 (fixType, arity, expectedArity) -> errSIG00 fixType arity expectedArity
             | SIG01 symbol -> errSIG01 symbol
             | SIG02 (symbol, precedence, conflict) -> errSIG02 symbol precedence conflict
             | SIG03 errMsg -> errSIG03 errMsg
             | SIG04 (signature, candidates) -> errSIG04 signature candidates
             | SIG05 errMsg -> errSIG05 errMsg
             | SIG06 (name, oldFromNode, newFromNode, typeName) -> errSIG06 name oldFromNode newFromNode typeName
-            | SIG07 (assigneeName, assigneeType, nodeType) -> errSIG07 assigneeName assigneeType nodeType
+            | SIG07 (assigneeName, assigneeType) -> errSIG07 assigneeName assigneeType
             | SIG08 (arrName, indexVarName, indexVarType, dimType, dimNumber) -> errSIG08 arrName indexVarName indexVarType dimType dimNumber
             | SIG09 (arrName, dimType, dimNumber) -> errSIG09 arrName dimType dimNumber
             | SIG10 (arrName, indexVarName, indexNumber) -> errSIG10 arrName indexVarName indexNumber
-            | SIG11 qualifiedWrongCandidate -> errSIG11 qualifiedWrongCandidate
+            | SIG11 (qualifiedWrongCandidate, typeOfCandidate) -> errSIG11 qualifiedWrongCandidate typeOfCandidate
             | SIG12 (templateName, secondUsage, firstUsage, firstUsagePos) -> errSIG12 templateName secondUsage firstUsage firstUsagePos
             | SIG13 (stmtName, secondUsage, firstUsage, firstUsagePos) -> errSIG13 stmtName secondUsage firstUsage firstUsagePos
             | SIG14 -> errSIG14
@@ -373,8 +356,8 @@ type DiagnosticCode =
             | VAR05 name -> errVAR05 name
             | VAR06 (name, oldFromNode, newFromNode, typeName) -> errVAR06 name oldFromNode newFromNode typeName
             | VAR07 name -> errVAR07 name
-            | VAR08 -> errVAR08
-            | VAR09 (varName,varType) -> errVAR09 varName varType
+            | VAR08 varName -> errVAR08 varName
+            | VAR09 varName -> errVAR09 varName 
             | VAR10 (identifier, formulaName) -> errVAR10 identifier formulaName
             | VAR11 (identifier, conflict) -> errVAR11 identifier conflict
 
@@ -404,19 +387,8 @@ type Diagnostic =
         Severity: DiagnosticSeverity
         StartPos: Position
         EndPos: Position
-        Alternatives: string option
     }
-    member this.Message = 
-        let alternatives = 
-            match this.Alternatives with
-            | Some s ->
-                s
-            | None -> 
-                ""
-        if alternatives = "" then   
-            this.Code.Message
-        else
-            this.Code.Message + " " + alternatives 
+    member this.Message = this.Code.Message
 
     member this.DiagnosticID = 
         computeMD5Checksum (sprintf "%07d" this.StartPos.Index + this.Emitter.ToString() + this.Code.Code + this.Message)

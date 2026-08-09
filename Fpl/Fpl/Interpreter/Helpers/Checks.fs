@@ -14,7 +14,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 *)
 module Fpl.Interpreter.Helpers.Checks
 open System
-open Fpl.Errors.Diagnostics
+open Fpl.Errors.Messages
 open Fpl.Errors.Emitter
 open Fpl.Primitives
 open Fpl.Interpreter.BasicTypes
@@ -36,11 +36,11 @@ let checkArgPred (fv:FplGenericNode) (arg:FplGenericNode)  =
             let argName = arg.Type SignatureType.Name
             fv.ErrorOccurred <- emitLG001Diagnostics argType argName fv.Name arg.StartPos arg.StartPos
 
-let isQuantor (arg:FplGenericNode) =
+let isQuantifier (arg:FplGenericNode) =
     match arg.Name with 
-    | PrimQuantorAll
-    | PrimQuantorExists
-    | PrimQuantorExistsN -> true
+    | PrimQuantifierAll
+    | PrimQuantifierExists
+    | PrimQuantifierExistsN -> true
     | _ -> false
 
 let isCompoundPredicate (arg:FplGenericNode) =
@@ -51,9 +51,9 @@ let isCompoundPredicate (arg:FplGenericNode) =
     | PrimImplication
     | PrimEquivalence
     | PrimConjunction
-    | PrimQuantorAll
-    | PrimQuantorExists
-    | PrimQuantorExistsN
+    | PrimQuantifierAll
+    | PrimQuantifierExists
+    | PrimQuantifierExistsN
     | PrimIsOperator -> true
     | _ -> false
 
@@ -162,56 +162,64 @@ let isExtension (fv:FplGenericNode) =
     | PrimExtensionL -> true
     | _ -> false
 
-/// Qualified name of this FplValue
-let qualifiedName (fplValue:FplGenericNode) determined =
-    let rec getFullName (fv: FplGenericNode) (first: bool) =
-        let fplValueType =
-            match fv.Name with
-            | LiteralLocL
-            | PrimExclusiveOr 
-            | PrimConjunction
-            | PrimDisjunction 
-            | PrimNegation
-            | PrimImplication
-            | PrimEquivalence 
-            | PrimIsOperator 
-            | PrimExtensionObj 
-            | PrimDelegateEqualL 
-            | PrimDelegateDecrementL 
-            | PrimRefL -> fv.Type(SignatureType.Name)
-            | LiteralCtorL
-            | PrimBaseConstructorCall
-            | PrimDefaultConstructor
-            | PrimQuantorAll
-            | PrimQuantorExists
-            | PrimQuantorExistsN
-            | PrimClassL
-            | PrimPredicateL
-            | PrimFunctionalTermL
-            | PrimMandatoryPredicateL
-            | PrimMandatoryFunctionalTermL -> fv.Type(SignatureType.Mixed)
-            | _ -> fv.FplId
-
+/// Qualified name of this FplGenericNode
+let rec getFullName (fv: FplGenericNode) (first: bool) =
+    let fplValueType =
         match fv.Name with
-        | PrimRoot -> ""
-        | _ -> 
+        | LiteralLocL
+        | PrimExclusiveOr 
+        | PrimConjunction
+        | PrimDisjunction 
+        | PrimNegation
+        | PrimImplication
+        | PrimEquivalence 
+        | PrimIsOperator 
+        | PrimExtensionObj 
+        | PrimDelegateEqualL 
+        | PrimDelegateDecrementL 
+        | PrimRefL -> fv.Type(SignatureType.Name)
+        | LiteralCtorL
+        | PrimBaseConstructorCall
+        | PrimDefaultConstructor
+        | PrimQuantifierAll
+        | PrimQuantifierExists
+        | PrimQuantifierExistsN
+        | PrimClassL
+        | PrimPredicateL
+        | PrimFunctionalTermL
+        | PrimMandatoryPredicateL
+        | PrimMandatoryFunctionalTermL -> fv.Type(SignatureType.Mixed)
+        | _ -> fv.FplId
+
+    match fv.Name with
+    | PrimRoot -> ""
+    | _ -> 
 
 
-            if first then
-                if fv.Parent.Value.Name = PrimRoot then
-                    getFullName fv.Parent.Value false + fplValueType
-                else if (isVar fv) && not (isVar fv.Parent.Value) then
-                    fplValueType
-                else
-                    getFullName fv.Parent.Value false + "." + fplValueType
-            elif fv.Parent.Value.Name = PrimRoot then
+        if first then
+            if fv.Parent.Value.Name = PrimRoot then
                 getFullName fv.Parent.Value false + fplValueType
             elif (isVar fv) && not (isVar fv.Parent.Value) then
                 fplValueType
+            elif fplValueType = String.Empty then
+                getFullName fv.Parent.Value false
             else
                 getFullName fv.Parent.Value false + "." + fplValueType
+        elif fv.Parent.Value.Name = PrimRoot then
+            getFullName fv.Parent.Value false + fplValueType
+        elif (isVar fv) && not (isVar fv.Parent.Value) then
+            fplValueType
+        else
+            getFullName fv.Parent.Value false + "." + fplValueType
 
-    $"{getEnglishName fplValue.Name determined} {getFullName fplValue true}"
+/// Qualified name of this FplGenericNode
+let qualifiedName (fplValue:FplGenericNode) determined =
+    $"{getEnglishName fplValue.Name determined} `{getFullName fplValue true}`"
+
+
+/// Qualified name without English article of this FplGenericNode
+let qualifiedNameSimple (fplValue:FplGenericNode) =
+    $"{fplValue.Name} `{getFullName fplValue true}`"
 
 let checkSIG11Diagnostics (fv:FplGenericNode) =
     let mapOpt = getMapping fv
@@ -231,10 +239,10 @@ let checkSIG11Diagnostics (fv:FplGenericNode) =
                 // and, instead, points to itself
                     ()
                 | _ ->
-                    map.ErrorOccurred <- emitSIG11Diagnostics (qualifiedName ref false) map.StartPos map.EndPos
+                    map.ErrorOccurred <- emitSIG11Diagnostics (getFullName ref true) ref.Name map.StartPos map.EndPos
             | _ ->
                 // otherwise issue SIG11
-                map.ErrorOccurred <- emitSIG11Diagnostics (qualifiedName ref false) map.StartPos map.EndPos       
+                map.ErrorOccurred <- emitSIG11Diagnostics (getFullName ref true) ref.Name map.StartPos map.EndPos       
         | _ -> ()
     | _ -> ()
 
@@ -248,7 +256,7 @@ let checkLG003Diagnostics (fv:FplGenericNode) =
     | _ -> ()
 
 /// Issue VAR10, if the formula in an FplValue uses 
-/// quantor(s) and the variables bound by these quantor(s) are used elsewhere in the same formula
+/// quantifier(s) and the variables bound by these quantifier(s) are used elsewhere in the same formula
 /// VAR10 => formula should be cleaned up by renaming the bound variables
 let checkCleanedUpFormula (fv:FplGenericNode) =
     let formulaCreationInSymbolTableCompleted (formula:FplGenericNode) =
@@ -261,9 +269,9 @@ let checkCleanedUpFormula (fv:FplGenericNode) =
             | PrimEquivalence
             | PrimExclusiveOr
             | PrimNegation
-            | PrimQuantorAll
-            | PrimQuantorExists
-            | PrimQuantorExistsN
+            | PrimQuantifierAll
+            | PrimQuantifierExists
+            | PrimQuantifierExistsN
             | PrimIsOperator
             | PrimRefL -> false
             | _ -> true
@@ -281,70 +289,70 @@ let checkCleanedUpFormula (fv:FplGenericNode) =
             | None when checkStartsWithLowerCase formula.FplId -> 
                 [formula]  
             | _ -> extractFromSubFormula formula 
-        | PrimQuantorAll
-        | PrimQuantorExists
-        | PrimQuantorExistsN -> (formula.Scope.Values |> Seq.toList) @ extractFromSubFormula formula.ArgList[0]  
+        | PrimQuantifierAll
+        | PrimQuantifierExists
+        | PrimQuantifierExistsN -> (formula.Scope.Values |> Seq.toList) @ extractFromSubFormula formula.ArgList[0]  
         | _ ->
             extractFromSubFormula formula 
 
-    let rec extractQuantors (formula:FplGenericNode) =
+    let rec extractQuantifiers (formula:FplGenericNode) =
         let extractFromSubFormula (subFormula:FplGenericNode) =
-            (subFormula.ArgList |> Seq.map (fun subF -> extractQuantors subF) |> List.concat)
+            (subFormula.ArgList |> Seq.map (fun subF -> extractQuantifiers subF) |> List.concat)
         match formula.Name with 
-        | PrimQuantorAll
-        | PrimQuantorExists
-        | PrimQuantorExistsN -> 
+        | PrimQuantifierAll
+        | PrimQuantifierExists
+        | PrimQuantifierExistsN -> 
             [formula] @ extractFromSubFormula formula
         | _ -> 
             extractFromSubFormula formula
 
-    let rec checkQuantors (formula:FplGenericNode) =
-        let varUsedInQuantor (varInFormula:FplGenericNode) (quantor:FplGenericNode) =
+    let rec checkQuantifiers (formula:FplGenericNode) =
+        let varUsedInQuantifier (varInFormula:FplGenericNode) (quantifier:FplGenericNode) =
             let varLStart = varInFormula.StartPos.Line
             let varCStart = varInFormula.StartPos.Column
             let varLEnd = varInFormula.EndPos.Line
             let varCEnd = varInFormula.EndPos.Column
-            let quantorLStart = quantor.StartPos.Line
-            let quantorCStart = quantor.StartPos.Column
-            let quantorLEnd = quantor.EndPos.Line
-            let quantorCEnd = quantor.EndPos.Column
+            let quantifierLStart = quantifier.StartPos.Line
+            let quantifierCStart = quantifier.StartPos.Column
+            let quantifierLEnd = quantifier.EndPos.Line
+            let quantifierCEnd = quantifier.EndPos.Column
             (
-               (quantorLStart < varLStart && quantorLEnd > varLEnd) // lines(quantor) contain lines(variable)
-            || (quantorLStart = varLStart && quantorLEnd > varLEnd && quantorCStart <= varCStart ) // if start line(q) = start line line(v) && end line(q) > end line(v), compare starting columns
-            || (quantorLStart = varLStart && quantorLEnd = varLEnd && quantorCStart <= varCStart && quantorCEnd >= varCEnd) // if line(q) = line(v) for start and end, compare starting and ending columns
+               (quantifierLStart < varLStart && quantifierLEnd > varLEnd) // lines(quantifier) contain lines(variable)
+            || (quantifierLStart = varLStart && quantifierLEnd > varLEnd && quantifierCStart <= varCStart ) // if start line(q) = start line (v) && end line(q) > end line(v), compare starting columns
+            || (quantifierLStart = varLStart && quantifierLEnd = varLEnd && quantifierCStart <= varCStart && quantifierCEnd >= varCEnd) // if line(q) = line(v) for start and end, compare starting and ending columns
             )
 
-        let varIsBoundByQuantor (varInFormula:FplGenericNode) (quantor:FplGenericNode) =
-            quantor.Scope.ContainsKey(varInFormula.FplId)
+        let varIsBoundByQuantifier (varInFormula:FplGenericNode) (quantifier:FplGenericNode) =
+            quantifier.Scope.ContainsKey(varInFormula.FplId)
 
-        let quantors = extractQuantors formula
+        let quantifiers = extractQuantifiers formula
         let formulaName = formula.Type SignatureType.Name
         let usedVariables = usedVariablesInFormula formula
-        quantors 
-        |> List.map (fun quantor ->
+        quantifiers 
+        |> List.map (fun quantifier ->
             usedVariables
             |> List.tryFind (fun varInFormula ->
-                varIsBoundByQuantor varInFormula quantor && not (varUsedInQuantor varInFormula quantor)
+                varIsBoundByQuantifier varInFormula quantifier && not (varUsedInQuantifier varInFormula quantifier)
             )
             |> Option.map (fun uncleanedUpVariableInFormula ->
-                let quantorVar = quantor.Scope[uncleanedUpVariableInFormula.FplId]
-                fv.ErrorOccurred <- emitVAR10Diagnostics uncleanedUpVariableInFormula.FplId formulaName quantorVar.StartPos quantorVar.EndPos
+                let quantifierVar = quantifier.Scope[uncleanedUpVariableInFormula.FplId]
+                fv.ErrorOccurred <- emitVAR10Diagnostics uncleanedUpVariableInFormula.FplId formulaName quantifierVar.StartPos quantifierVar.EndPos
             )
         )
         |> ignore
             
     if formulaCreationInSymbolTableCompleted fv then
         // here, this reference points to a formula, which is final in the symbol table
-        checkQuantors fv
+        checkQuantifiers fv
 
-let rec isInQuantor (fv:FplGenericNode) =
+let rec isInQuantifier (fv:FplGenericNode) =
     match fv.Name with 
-    | PrimQuantorAll
-    | PrimQuantorExists
-    | PrimQuantorExistsN -> true
+    | PrimQuantifierAll
+    | PrimQuantifierExists
+    | PrimQuantifierExistsN -> true
     | _ ->
         match fv.Parent with 
-        | Some parent -> isInQuantor parent
+        | Some parent -> isInQuantifier parent
         | _ -> false
 
 /// Checks if a variable is defined in the scope of block, if any
@@ -397,9 +405,9 @@ let variableInBlockScopeByName (fplValue: FplGenericNode) name withNestedVariabl
                 match fv.Name with
                 | LiteralCtorL
                 | LiteralLocL
-                | PrimQuantorAll
-                | PrimQuantorExists
-                | PrimQuantorExistsN
+                | PrimQuantifierAll
+                | PrimQuantifierExists
+                | PrimQuantifierExistsN
                 | PrimMandatoryFunctionalTermL
                 | PrimMandatoryPredicateL
                 | LiteralPrfL
@@ -425,14 +433,14 @@ let variableInBlockScopeByName (fplValue: FplGenericNode) name withNestedVariabl
 
     firstBlockParent fplValue
 
-/// Checks if an argument points to a free variable that is not in the signature of the predicagte,
+/// Checks if an argument points to a free variable that is not in the signature of the predicate,
 /// and if so, issues VAR09 diagnostics.
 let rec checkFreeAndNotSignatureVar (arg:FplGenericNode) = 
     match arg.RefersTo with 
     | Some ref ->
         match box ref, ref.UltimateBlockNode with 
-        | :? IVariable as var, Some node when node.Name <> PrimRuleOfInference && node.Name <> LiteralLocL && not var.IsBound && not var.IsSignatureVariable ->
-            ref.ErrorOccurred <- emitVAR09Diagnostics ref.FplId ref.TypeId ref.StartPos ref.EndPos
+        | :? IVariable as var, Some node when not (isProvable node || isAxiomOrConnjecture node) && node.Name <> PrimRuleOfInference && node.Name <> LiteralLocL && not var.IsBound && not var.IsSignatureVariable ->
+            ref.ErrorOccurred <- emitVAR09Diagnostics ref.FplId ref.StartPos ref.EndPos
         | _ -> ()
     | None when arg.ExpressionType.IsParen ->
         // delegate parenthesized (arg) to a
@@ -445,9 +453,9 @@ let rec isSimpleExpression (fv:FplGenericNode) =
     | PrimExtensionObj
     | PrimVariableL
     | PrimVariableArrayL
-    | PrimQuantorAll
-    | PrimQuantorExists
-    | PrimQuantorExistsN
+    | PrimQuantifierAll
+    | PrimQuantifierExists
+    | PrimQuantifierExistsN
     | PrimNegation
     | PrimClassL 
     | PrimIntrinsicInd

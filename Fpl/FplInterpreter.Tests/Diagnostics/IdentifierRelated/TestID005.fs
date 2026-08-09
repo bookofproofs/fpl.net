@@ -26,6 +26,13 @@ type TestID005() =
     [<DataRow("conjecture Test {true} corollary Test$1 {true}", 0)>] // corollaries of conjectures are not allowed
     [<DataRow("corollary Test$1 {true} corollary Test$1$1 {true}", 0)>] // corollaries of corollaries are allowed
     [<DataRow("uses Fpl.Commons.Structures ", 0)>]
+    [<DataRow("thm Test {true} cor Test$1 {true}", 0)>]
+    [<DataRow("lem Test {true} cor Test$1 {true}", 0)>]
+    [<DataRow("prop Test {true} cor Test$1 {true}", 0)>]
+    [<DataRow("conj Test {true} cor Test$1 {true}", 0)>]
+    [<DataRow("cor Test$1 {true} cor Test$1$1 {true}", 0)>]
+    [<DataRow("ax Test {true} cor Test$1 {true}", 0)>]
+    [<DataRow("post Test {true} cor Test$1 {true}", 0)>]
     [<TestMethod>]
     member this.TestID005(fplCode:string, expected) =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 

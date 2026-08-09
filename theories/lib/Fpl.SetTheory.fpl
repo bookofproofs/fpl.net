@@ -72,7 +72,7 @@ axiom Extensionality
                 IsSubset(x,y),
                 IsSubset(y,x)
             ),
-            ( x = y )
+            x = y
         )
     }
 }
@@ -127,11 +127,10 @@ axiom SchemaSeparation
     {
         ex y:Set
         {
-            ( y = SetBuilder(x,p) )
+            y = SetBuilder(x,p)
         }
     }
 }
-
 
 
 // For any two sets $x,y$ there exists a set $z$ containing them as elements.
@@ -148,8 +147,8 @@ axiom Pairing
                     In(w,z),
                     or
                     (
-                        ( w = x ),
-                        ( w = y )
+                        w = x,
+                        w = y
                     )
                 )
             }

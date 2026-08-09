@@ -167,7 +167,7 @@ namespace FplLS
                 $"\t300: true{Environment.NewLine}" +
                 $"\t400: or (not p, not q){Environment.NewLine}" +
                 $"\t500: not somePremise{Environment.NewLine}" +
-                $"\t600. 100, 500, byinf ProceedingResults |- impl(not someConclusion, not somePremise){Environment.NewLine}" +
+                $"\t600. 100, 500, byinf PrecedingResults |- impl(not someConclusion, not somePremise){Environment.NewLine}" +
                 $"\t700: impl(somePremise, someConclusion){Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\tqed{Environment.NewLine}";
@@ -287,7 +287,7 @@ namespace FplLS
                 $"\t250: p(2){Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\t// \"inductive step\" {Environment.NewLine}" +
-                $"\t300. 150, 250, byinf ProceedingResults |- {TokenAssume} ex n:N {TokenLeftBrace} all m:N {TokenLeftBrace} impl((m <= n), p(m)) {TokenRightBrace}{TokenRightBrace}{Environment.NewLine}" +
+                $"\t300. 150, 250, byinf PrecedingResults |- {TokenAssume} ex n:N {TokenLeftBrace} all m:N {TokenLeftBrace} impl((m <= n), p(m)) {TokenRightBrace}{TokenRightBrace}{Environment.NewLine}" +
                 $"\t400: true{Environment.NewLine}" +
                 $"\t500: true{Environment.NewLine}" +
                 $"\t600: p( (n + 1) ){Environment.NewLine}" +

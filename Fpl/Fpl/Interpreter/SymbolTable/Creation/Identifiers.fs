@@ -18,6 +18,7 @@ open System
 open Fpl.Primitives
 open Fpl.Parser.Types
 open Fpl.Errors.Emitter
+open Fpl.Errors.Messages
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Checks
 open Fpl.Interpreter.Helpers.Basic
@@ -126,8 +127,18 @@ let evalIdentifiers ast =
         | _ ->
             match fv with 
             | :? FplMapping 
-            | :? FplVariable -> 
-                fv.ErrorOccurred <- emitID017Diagnostics identifier candidatesNames pos1 pos2
+            | :? FplVariable ->
+                let candidatesNames =
+                    candidates
+                    |> List.map (fun fv ->
+                        if isDefinition fv then
+                            qualifiedNameSimple fv
+                        else
+                            $"{qualifiedNameSimple fv} (incompatible: not a type)"
+                    )
+                    |> List.sort
+                    |> numbered
+                fv.ErrorOccurred <- emitID017Diagnostics identifier candidatesNames false pos1 pos2
             | _ -> correctIds fv
     | Ast.NamespaceIdentifier((pos1, pos2), asts) ->
         asts |> List.map evalRef.Value |> ignore
@@ -180,7 +191,7 @@ let evalIdentifiers ast =
             deleg.FplId <- delegateId
             deleg.TypeId <- delegateId
             heap.Eval.PushEvalStack(deleg)
-            deleg.ErrorOccurred <- emitID013Diagnostics $"Unknown delegate `{delegateId}`" pos1 pos2
+            deleg.ErrorOccurred <- emitID013Diagnostics $"Unknown delegate `{delegateId}`." pos1 pos2
     | Ast.ExtensionName((pos1, pos2), extensionName) ->
         let fv = heap.Eval.PeekEvalStack()
         match fv with 
@@ -200,7 +211,7 @@ let evalIdentifiers ast =
                 fv.RefersTo <- Some candidate
                 match fv.UltimateBlockNode with
                 | Some block ->
-                    fv.ErrorOccurred <- checkID025Diagnostics (qualifiedName candidate false) block.Name fv.StartPos fv.EndPos
+                    fv.ErrorOccurred <- checkID025Diagnostics (qualifiedNameSimple candidate) block.Name fv.StartPos fv.EndPos
                 | _ -> ()
         | _ -> ()
     | _ ->

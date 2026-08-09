@@ -18,6 +18,7 @@ type TestST005() =
     [<DataRow("02", """def cl Nat def func Sum(from, to: Nat, arr:*Nat[Nat]) -> Nat { dec a:obj i, result: Nat result:=Zero() for i in ClosedRange(from,to) { result:=Add(result,arr[i]) }; return result }""", 1)>]
     [<DataRow("03", """def cl Nat def func Sum() -> Nat { dec addend, result: Nat result:=Zero() for addend in Nat { result:=Add(result,addend) }; return result }""", 1)>]
     [<DataRow("04", """def cl Nat def func Add(x,y:Nat)->Nat def func Sum()->Nat {dec addend, result: Nat for addend in Nat() { result:=Add(result,addend) }; ret result }""", 1)>]
+        [<DataRow("05", """def func Sum()->Nat { dec addend, result: Nat for addend in missing { result:=Add(result,addend) }; return result }""", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestST005(no:string, fplCode:string, expected) =

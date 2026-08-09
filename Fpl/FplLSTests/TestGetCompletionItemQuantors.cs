@@ -5,17 +5,17 @@ using static Fpl.Parser.Main;
 namespace TestFplLS
 {
     [TestClass]
-    public class TestGetCompletionItemQuantors
+    public class TestGetCompletionItemQuantifiers
     {
 
         [DataRow(LiteralAll, 2)]
         [DataRow(LiteralEx, 2)]
         [DataRow(LiteralExN, 2)]
         [TestMethod]
-        public void TestAddQuantorChoicesNumber(string choice, int number)
+        public void TestAddQuantifierChoicesNumber(string choice, int number)
         {
             var detailCi = new FplCompletionItem(choice);
-            var actual = new FplCompletionItemChoicesQuantor().GetChoices(detailCi);
+            var actual = new FplCompletionItemChoicesQuantifier().GetChoices(detailCi);
             Assert.HasCount(number, actual);
         }
 
@@ -23,10 +23,10 @@ namespace TestFplLS
         [DataRow(LiteralEx, 1)]
         [DataRow(LiteralExN, 1)]
         [TestMethod]
-        public void TestAddQuantorKeywordCounts(string choice, int number)
+        public void TestAddQuantifierKeywordCounts(string choice, int number)
         {
             var detailCi = new FplCompletionItem(choice);
-            var actual = new FplCompletionItemChoicesQuantor().GetChoices(detailCi);
+            var actual = new FplCompletionItemChoicesQuantifier().GetChoices(detailCi);
 
             var count = 0;
             foreach (var item in actual)
@@ -57,7 +57,7 @@ namespace TestFplLS
         public void TestAddChoicesSortText(string choice, string subType, CompletionItemKind isKeyword, string expected)
         {
             var detailCi = new FplCompletionItem(choice);
-            var actual = new FplCompletionItemChoicesQuantor().GetChoices(detailCi);
+            var actual = new FplCompletionItemChoicesQuantifier().GetChoices(detailCi);
             foreach (var item in actual)
             {
                 if (item.Label.Contains(choice) && item.Label.Contains(subType) && item.Kind == isKeyword)
@@ -74,7 +74,7 @@ namespace TestFplLS
         public void TestInsertTextEndsWithSpace(string choice)
         {
             var detailCi = new FplCompletionItem(choice);
-            var actual = new FplCompletionItemChoicesQuantor().GetChoices(detailCi);
+            var actual = new FplCompletionItemChoicesQuantifier().GetChoices(detailCi);
             foreach (var item in actual)
             {
                 if (!string.IsNullOrEmpty(item.InsertText) && item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice))
@@ -88,10 +88,10 @@ namespace TestFplLS
         [DataRow(LiteralEx)]
         [DataRow(LiteralExN)]
         [TestMethod]
-        public void TestAddQuantorChoicesLabel(string choice)
+        public void TestAddQuantifierChoicesLabel(string choice)
         {
             var detailCi = new FplCompletionItem(choice);
-            var actual = new FplCompletionItemChoicesQuantor().GetChoices(detailCi);
+            var actual = new FplCompletionItemChoicesQuantifier().GetChoices(detailCi);
 
             foreach (var item in actual)
             {
@@ -103,10 +103,10 @@ namespace TestFplLS
         [DataRow(LiteralEx, "exists")]
         [DataRow(LiteralExN, "n-times")]
         [TestMethod]
-        public void TestAddQuantorChoicesDetail(string choice, string s)
+        public void TestAddQuantifierChoicesDetail(string choice, string s)
         {
             var detailCi = new FplCompletionItem(choice);
-            var actual = new FplCompletionItemChoicesQuantor().GetChoices(detailCi);
+            var actual = new FplCompletionItemChoicesQuantifier().GetChoices(detailCi);
             foreach (var item in actual)
             {
                 if (item.Kind != CompletionItemKind.Keyword)
@@ -120,17 +120,17 @@ namespace TestFplLS
         [DataRow(LiteralEx)]
         [DataRow(LiteralExN)]
         [TestMethod]
-        public void TestAddQuantorChoicesInsertText(string choice)
+        public void TestAddQuantifierChoicesInsertText(string choice)
         {
             var detailCi = new FplCompletionItem(choice);
-            var actual = new FplCompletionItemChoicesQuantor().GetChoices(detailCi);
+            var actual = new FplCompletionItemChoicesQuantifier().GetChoices(detailCi);
 
             foreach (var item in actual)
             {
                 Assert.IsTrue(!string.IsNullOrEmpty(item.InsertText) && item.InsertText.Contains(choice));
                 if (item.InsertText.Contains('{'))
                 {
-                    var res = testParser(PrimQuantor, item.InsertText);
+                    var res = testParser(PrimQuantifier, item.InsertText);
                     if (!res.StartsWith("Success:"))
                     {
                         Assert.Fail(res);

@@ -2,7 +2,6 @@
 This theory is experimental and for test purposes only.
 */
 
-uses Fpl.Commons
 uses Fpl.SetTheory
 
 // definition of a new mathematical object (natural number)
@@ -44,7 +43,7 @@ axiom SuccessorExistsAndIsUnique
             and
             (
                 NotEqual(successor,n),
-                (successor = Succ(n))
+                successor = Succ(n)
             )
         }
     }
@@ -52,7 +51,7 @@ axiom SuccessorExistsAndIsUnique
 
 axiom ZeroIsNotSuccessor
 {
-    ∀ n:Nat { (n' ≠ @0) }
+    ∀ n:Nat { n' ≠ @0 }
 }
 
 axiom SuccessorIsInjective
@@ -61,8 +60,8 @@ axiom SuccessorIsInjective
     {
         impl
         (
-            ( n' = m' ),
-            ( n = m )
+             n' = m' ,
+             n = m 
         )
     }
 }
@@ -111,7 +110,7 @@ def func Add(n,m: Nat)->Nat infix "+" 30
 
 def pred IsGreaterOrEqual(n,m: Nat)
 {
-    ex k: Nat { (n = Add(m,k)) }
+    ex k: Nat { n = Add(m,k) }
 }
 
 prop AddIsUnique
@@ -124,15 +123,15 @@ prop AddIsUnique
         all n, m:Nat
         {
             and (and (
-                and (( Add(n,@0) = n ), ( anotherAdd(n,@0) = n )),
-                ( Add(n,Succ(m)) = Succ(Add(n,m)) )
+                and ( Add(n,@0) = n ,  anotherAdd(n,@0) = n ),
+                 Add(n,Succ(m)) = Succ(Add(n,m) )
             ) , 
-            ( anotherAdd(n,Succ(m)) = Succ(anotherAdd(n,m)) ))
+             anotherAdd(n,Succ(m)) = Succ(anotherAdd(n,m) ))
         }
         ,
         all n1, m1:Nat
         {
-            ( Add(n1,m1) = anotherAdd(n1,m1) )
+             Add(n1,m1) = anotherAdd(n1,m1) 
         }
     )
     
@@ -144,15 +143,15 @@ proof AddIsUnique$1
         all n, m:Nat
         {
             and (and (
-                and (( Add(n,@0) = n ), ( anotherAdd(n,@0) = n )),
-                ( Add(n,Succ(m)) = Succ(Add(n,m)) )
+                and ( Add(n,@0) = n ,  anotherAdd(n,@0) = n ),
+                Add(n,Succ(m)) = Succ(Add(n,m))
             ) , 
-            ( anotherAdd(n,Succ(m)) = Succ(anotherAdd(n,m)) ))
+            anotherAdd(n,Succ(m)) = Succ(anotherAdd(n,m)) )
             
         }
     2: all n, m:Nat
             {
-                ( Add(n,m) = anotherAdd(n,m) )
+                Add(n,m) = anotherAdd(n,m) 
             }
 }
 
@@ -203,17 +202,17 @@ def pred Range(from, to:Nat)
 
 def pred LowerEqual(x,y:Nat) infix "<=" 71 
 {
-    ex a:Nat {(x + a = y)}
+    ex a:Nat {x + a = y}
 }
 
 def pred GreaterEqual(x,y:Nat) infix ">=" 72
 {
-    ex a:Nat {(x = y + a)}
+    ex a:Nat {x = y + a}
 }
 
 def pred IsGreater(x,y:Nat) infix ">" 73
 {
-    and ((x >= y), (x ≠ y))
+    and (x >= y, x ≠ y)
 }
 /*
 def func Sum(from,to:Nat, addend: Addend) -> Nat

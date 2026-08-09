@@ -18,6 +18,7 @@ type TestID009() =
     [<DataRow("def cl Test:Test {intr}", 1)>]
     [<DataRow("def cl Test:Test1, Test2, Test3 {intr}", 0)>]
     [<DataRow("def cl Test:Test1, Test2, Test3, Test {intr}", 1)>]
+    [<DataRow("def class Test:Test {intr}", 1)>]
     [<DataRow("uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestID009(fplCode:string, expected) =

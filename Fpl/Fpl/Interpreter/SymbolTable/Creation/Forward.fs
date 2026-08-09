@@ -55,7 +55,7 @@ let evalArgumentTuple (next:FplGenericNode) (predicateListAst:Ast list) pos1 pos
     | :? FplBaseConstructorCall -> 
         consumeArgumentsWithParent next
     | _ -> 
-        match heap.Eval.GetProceedingReference() with 
+        match heap.Eval.GetPrecedingReference() with 
         | Some ref ->
             ref.ArgType <- ArgType.Parentheses
             consumeArgumentsWithParent ref

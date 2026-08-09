@@ -6,8 +6,8 @@ open Fpl.Interpreter.Helpers.Debug
 open TestFplInterpreter.Helpers.Common
 
 (* ID024
-   Purpose: Report that an expression was already localized for the same language at the same localization context.
-   What it indicates: A localization contains a language localization more than once, producing a conflict.
+   Purpose: Report that a localization was already declared for an expression in the same context.
+   What it indicates: An expression was given more than one localization, producing a conflict.
    Use: Helps locate duplicate localizations so authors can remove or consolidate redundant expression localizations and avoid ambiguity.
    Action / Treat: Remove or rename the redundant localization, or adjust the embedding order so only a single localization remains. Treat ID024 as an error that must be resolved to maintain unique expression localization within the scope. *)
 

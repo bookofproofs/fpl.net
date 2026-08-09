@@ -12,7 +12,7 @@ open TestSharedConfig
    Purpose: Report that a `byinf` justification does not match the expected premise structure of the referenced rule of inference.
    What it indicates: The subsequent step expects a specific number/shape of premises, but the provided justification items (or their inferred expressions) do not match that structure. The diagnostic text enumerates the candidate expressions that were tried.
    Use: Pinpoint failing `byinf` justification steps and show which candidate expressions were attempted so the author can see why matching failed (wrong arity, wrong connective/structure, mismatched quantifier shape, or incompatible subformulas).
-   Action / Treat: Adjust the proceeding justification items so they produce expressions matching the rule's premises (or choose a different rule), or correct the rule's expected premise signature. PR008 is an error blocking the inference step and must be fixed for the `byinf` justification to succeed. *)
+   Action / Treat: Adjust the preceding justification items so they produce expressions matching the rule's premises (or choose a different rule), or correct the rule's expected premise signature. PR008 is an error blocking the inference step and must be fixed for the `byinf` justification to succeed. *)
 
 [<TestClass>]
 type TestPR008() =
@@ -221,15 +221,15 @@ type TestPR008() =
     [<DataRow("OrPack2Xor_02", "inf OrPack2Xor{dec p,q:pred; pre:or(and(not p,q),and(p,not q)) con:xor(p,q)} thm T {true} proof T$1 {1: or(and(not iif(true, false), xor(true, false)), and(iif(true, false), not xor(true, false))) 2. 1, byinf OrPack2Xor |- true }", 0)>]
     [<DataRow("OrPack2Xor_03", "inf OrPack2Xor{dec p,q:pred; pre:or(and(not p,q),and(p,not q)) con:xor(p,q)} thm T {true} proof T$1 {1: or(and(not (impl(true, false)), and(true, false)), and(impl(true, false), not and(true, false))) 2. 1, byinf OrPack2Xor |- true }", 0)>]
 
-    // Proceeding2Results: pre: p, q
-    [<DataRow("Proceeding2Results_01", "inf Proceeding2Results{dec p,q:pred; pre:p,q con:and(p,q)} thm T {true} proof T$1 {1: all x:obj { is(x, N) } 2: ex y:obj { is(y, M) } 3. 1, 2, byinf Proceeding2Results |- true }", 0)>]
-    [<DataRow("Proceeding2Results_02", "inf Proceeding2Results{dec p,q:pred; pre:p,q con:and(p,q)} thm T {true} proof T$1 {1: iif(true, false) 2: not (xor(true, false)) 3. 1, 2, byinf Proceeding2Results |- true }", 0)>]
-    [<DataRow("Proceeding2Results_03", "inf Proceeding2Results{dec p,q:pred; pre:p,q con:and(p,q)} thm T {true} proof T$1 {1: and(true, false) 2: impl(true, false) 3. 1, 2, byinf Proceeding2Results |- true }", 0)>]
+    // Preceding2Results: pre: p, q
+    [<DataRow("Preceding2Results_01", "inf Preceeding2Results{dec p,q:pred; pre:p,q con:and(p,q)} thm T {true} proof T$1 {1: all x:obj { is(x, N) } 2: ex y:obj { is(y, M) } 3. 1, 2, byinf Preceeding2Results |- true }", 0)>]
+    [<DataRow("Preceding2Results_02", "inf Preceeding2Results{dec p,q:pred; pre:p,q con:and(p,q)} thm T {true} proof T$1 {1: iif(true, false) 2: not (xor(true, false)) 3. 1, 2, byinf Preceeding2Results |- true }", 0)>]
+    [<DataRow("Preceding2Results_03", "inf Preceeding2Results{dec p,q:pred; pre:p,q con:and(p,q)} thm T {true} proof T$1 {1: and(true, false) 2: impl(true, false) 3. 1, 2, byinf Preceeding2Results |- true }", 0)>]
 
-    // Proceeding3Results: pre: p, q, s
-    [<DataRow("Proceeding3Results_01", "inf Proceeding3Results{dec p,q,s:pred; pre:p,q,s con:and(and(p,q),s)} thm T {true} proof T$1 {1: all x:obj { is(x, N) } 2: ex y:obj { is(y, M) } 3: iif(true, false) 4. 1, 2, 3, byinf Proceeding3Results |- true }", 0)>]
-    [<DataRow("Proceeding3Results_02", "inf Proceeding3Results{dec p,q,s:pred; pre:p,q,s con:and(and(p,q),s)} thm T {true} proof T$1 {1: and(true, not(false)) 2: xor(true, false) 3: all z:obj { is(z, K) } 4. 1, 2, 3, byinf Proceeding3Results |- true }", 0)>]
-    [<DataRow("Proceeding3Results_03", "inf Proceeding3Results{dec p,q,s:pred; pre:p,q,s con:and(and(p,q),s)} thm T {true} proof T$1 {1: not (xor(true, false)) 2: impl(true, false) 3: exn$1 u:obj { is(u, L) } 4. 1, 2, 3, byinf Proceeding3Results |- true }", 0)>]
+    // Preceeding3Results: pre: p, q, s
+    [<DataRow("Preceeding3Results_01", "inf Preceeding3Results{dec p,q,s:pred; pre:p,q,s con:and(and(p,q),s)} thm T {true} proof T$1 {1: all x:obj { is(x, N) } 2: ex y:obj { is(y, M) } 3: iif(true, false) 4. 1, 2, 3, byinf Preceeding3Results |- true }", 0)>]
+    [<DataRow("Preceeding3Results_02", "inf Preceeding3Results{dec p,q,s:pred; pre:p,q,s con:and(and(p,q),s)} thm T {true} proof T$1 {1: and(true, not(false)) 2: xor(true, false) 3: all z:obj { is(z, K) } 4. 1, 2, 3, byinf Preceeding3Results |- true }", 0)>]
+    [<DataRow("Preceeding3Results_03", "inf Preceeding3Results{dec p,q,s:pred; pre:p,q,s con:and(and(p,q),s)} thm T {true} proof T$1 {1: not (xor(true, false)) 2: impl(true, false) 3: exn$1 u:obj { is(u, L) } 4. 1, 2, 3, byinf Preceeding3Results |- true }", 0)>]
 
     // AndUnpack2NotOr: pre: and(p, q)
     [<DataRow("AndUnpack2NotOr_01", "inf AndUnpack2NotOr{dec p,q:pred; pre:and(p,q) con:not (or(not p,not q))} thm T {true} proof T$1 {1: and(all x:obj { is(x, N) }, ex y:obj { is(y, M) }) 2. 1, byinf AndUnpack2NotOr |- true }", 0)>]
@@ -449,7 +449,7 @@ type TestPR008() =
     [<DataRow("PrenexUnpackXorAll_02", "inf PrenexUnpackXorAll{dec p:pred q:pred(z:tpl); pre:xor(p,all x:tpl{q(x)}) con:all x:tpl{xor(p,q(x))}} thm T {true} proof T$1 {1: xor(all y:obj { is(y,M) }, all z:obj { xor(is(z,K), true) }) 2. 1, byinf PrenexUnpackXorAll |- true }", 0)>]
     [<DataRow("PrenexUnpackXorAll_03", "inf PrenexUnpackXorAll{dec p:pred q:pred(z:tpl); pre:xor(p,all x:tpl{q(x)}) con:all x:tpl{xor(p,q(x))}} thm T {true} proof T$1 {1: xor(not (xor(true,false)), all x:obj { impl(is(x,N), false) }) 2. 1, byinf PrenexUnpackXorAll |- true }", 0)>]
 
-    // correct matching of the number of quantor variables
+    // correct matching of the number of quantifier variables
     [<DataRow("numb_ex_2_2", "inf X { pre:ex x,y:pred { false } con:false } thm T {true} proof T$1 {1: ex a,b:pred { false } 2. 1, byinf X |- true }", 0)>] 
     [<DataRow("numb_ex_2_1", "inf X { pre:ex x,y:pred { false } con:false } thm T {true} proof T$1 {1: ex a:pred { false } 2. 1, byinf X |- true }", 1)>] 
     [<DataRow("numb_ex_2_3", "inf X { pre:ex x,y:pred { false } con:false } thm T {true} proof T$1 {1: ex a,b,c:pred { false } 2. 1, byinf X |- true }", 1)>] 
@@ -460,7 +460,7 @@ type TestPR008() =
     [<DataRow("numb_exn_2_1", "inf X { pre:exn$2 x:pred { false } con:false } thm T {true} proof T$1 {1: exn$1 a:pred { false } 2. 1, byinf X |- true }", 1)>] 
     [<DataRow("numb_exn_2_3", "inf X { pre:exn$2 x:pred { false } con:false } thm T {true} proof T$1 {1: exn$3 a:pred { false } 2. 1, byinf X |- true }", 1)>] 
 
-    // correct matching of the types of quantor variables
+    // correct matching of the types of quantifier variables
     [<DataRow("type_ex_2_2", "inf X { pre:ex x,y:pred { false } con:false } thm T {true} proof T$1 {1: ex a,b:pred { false } 2. 1, byinf X |- true }", 0)>] 
     [<DataRow("type_ex_2_1", "inf X { pre:ex x,y:pred { false } con:false } thm T {true} proof T$1 {1: ex a:A,b:pred { false } 2. 1, byinf X |- true }", 1)>] 
     [<DataRow("type_ex_2_3", "inf X { pre:ex x,y:pred { false } con:false } thm T {true} proof T$1 {1: ex a:pred,b:ind { false } 2. 1, byinf X |- true }", 1)>] 

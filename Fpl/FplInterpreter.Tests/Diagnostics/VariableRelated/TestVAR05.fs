@@ -21,6 +21,7 @@ type TestVAR05() =
     [<DataRow("def pred T() { ex x:obj {x}}", 0)>]
     [<DataRow("def pred T() { exn$1 x:obj {true}}", 1)>]
     [<DataRow("def pred T() { exn$1 x:obj {x}}", 0)>]
+    [<DataRow("def pred T() { all x,y:obj {x}}", 1)>]
     [<DataRow("uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestVAR05(fplCode:string, expected) =

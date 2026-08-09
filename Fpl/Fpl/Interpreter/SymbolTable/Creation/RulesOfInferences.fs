@@ -1,4 +1,4 @@
-/// This module provides specialized evaluators for the AST nodes related to FPL rules of inferences.
+/// This module provides specialized evaluators for the AST nodes related to FPL rules of inference.
 
 
 (* MIT License

@@ -20,6 +20,16 @@ type TestID006() =
     [<DataRow("theorem Test {true} corollary Test$1 {true}", 0)>]
     [<DataRow("theorem TestTypo {true} corollary Test$1 {true}", 1)>]
     [<DataRow("theorem Test {true} corollary Test$1 {true} corollary Test$1$1 {true}", 0)>]
+
+    [<DataRow("thm Test {true} cor Test$1 {true}", 0)>]
+    [<DataRow("lem Test {true} cor Test$1 {true}", 0)>]
+    [<DataRow("prop Test {true} cor Test$1 {true}", 0)>]
+    [<DataRow("conj Test {true} cor Test$1 {true}", 0)>]
+    [<DataRow("ax Test {true} cor Test$1 {true}", 0)>]
+
+    [<DataRow("thm TestTypo {true} cor Test$1 {true}", 1)>]
+    [<DataRow("thm Test {true} cor Test$1 {true} cor Test$1$1 {true}", 0)>]
+
     [<DataRow("uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestID006(fplCode:string, expected) =

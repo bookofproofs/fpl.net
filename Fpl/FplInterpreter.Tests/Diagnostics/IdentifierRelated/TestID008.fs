@@ -18,6 +18,9 @@ type TestID008() =
     [<DataRow("def cl Test {ctor TestTypo1() {}}", 1)>]
     [<DataRow("def cl Test {ctor Test() {}}", 0)>]
     [<DataRow("def cl Test {dec x:obj x := 0; ctor Test() {dec base.Obj(); }}", 0)>]
+    [<DataRow("def cl Test {dec x:obj x := 0; constructor Test() {dec base.Obj(); }}", 0)>]
+    [<DataRow("def cl Base {intr} def cl Test:Base {constructor Test() {dec base.Base(); }}", 0)>]
+    [<DataRow("def cl Base {intr} def cl Test:Base {constructor TestTypo() {dec base.Base(); }}", 1)>]
     [<DataRow("uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestID008(fplCode:string, expected) =

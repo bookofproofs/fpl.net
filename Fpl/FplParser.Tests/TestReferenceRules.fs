@@ -71,7 +71,7 @@ type TestReferenceRules() =
 
     [<TestMethod>]
     member this.TestReferenceRule05 () =
-        let result = run (ruleOfInference .>> eof) """inf ProceedingResults2
+        let result = run (ruleOfInference .>> eof) """inf PrecedingResults2
         {
             dec a,b: pred;
             premise: a, b
@@ -83,7 +83,7 @@ type TestReferenceRules() =
 
     [<TestMethod>]
     member this.TestReferenceRule05a () =
-        let result = run (ruleOfInference .>> eof) """inference ProceedingResults3
+        let result = run (ruleOfInference .>> eof) """inference PrecedingResults3
         {
             dec a,b,c: pred;
             premise: a,b,c
@@ -127,7 +127,7 @@ type TestReferenceRules() =
 
     [<TestMethod>]
     member this.TestReferenceRule08() =
-        let result = run (ruleOfInference .>> eof) """inf ProceedingResults {dec a,b: pred; pre: a, b con: and(a,b)}"""
+        let result = run (ruleOfInference .>> eof) """inf PrecedingResults {dec a,b: pred; pre: a, b con: and(a,b)}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

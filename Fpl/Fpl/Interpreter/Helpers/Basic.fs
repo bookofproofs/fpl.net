@@ -18,6 +18,7 @@ open System
 open System.Text
 open FParsec
 open Fpl.Primitives
+open Fpl.Errors.Messages
 open Fpl.Errors.Emitter
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Checks
@@ -222,8 +223,8 @@ let tryFindAssociatedBlockForJustificationItem (fvJi: FplGenericNode) (candidate
         // multiple candidates found
         ScopeSearchResult.FoundMultiple(
             candidates
-            |> List.map (fun fv -> sprintf "'%s' %s" fv.Name (fv.Type(SignatureType.Mixed)))
-            |> String.concat ", "
+            |> List.map (fun fv -> $"`{fv.Name}` {fv.Type SignatureType.Mixed}")
+            |> numbered
         )
 
 /// Tries to find a theorem-like statement, a conjecture, or an axiom for a corollary
@@ -243,6 +244,7 @@ let tryFindAssociatedBlockForCorollary (fplValue: FplGenericNode) =
             let potentialBlockName = stripLastDollarDigit (fplValue.Type(SignatureType.Mixed))
 
             flattenedScopes
+            |> Seq.filter (fun fv -> fv.Name <> PrimRoot && fv.Name <> PrimTheoryL && fv.Name <> PrimDefaultConstructor)
             |> Seq.filter (fun fv -> fv.FplId = potentialBlockName)
             |> Seq.toList
 
@@ -273,6 +275,51 @@ let tryFindAssociatedBlockForCorollary (fplValue: FplGenericNode) =
             ScopeSearchResult.NotFound
     | None -> ScopeSearchResult.NotApplicable
 
+/// Tries to find a theorem-like statement for a proof
+/// and returns different cases of ScopeSearchResult, depending on different semantical error situations.
+let tryFindAssociatedBlockForProof (fplValue: FplGenericNode) =
+    match fplValue.Parent with
+    | Some theory ->
+
+        let flattenedScopes = flattenScopes theory.Parent.Value
+
+        let potentialProvableName = stripLastDollarDigit (fplValue.FplId)
+
+        // The parent node of the proof is the theory. In its scope
+        // we should find the theorem we are looking for.
+        let buildingBlocksMatchingDollarDigitNameList =
+            // the potential block name of the proof is the
+            // concatenated type signature of the name of the proof
+            // without the last dollar digit
+            flattenedScopes
+            |> List.filter (fun fv -> fv.Name <> PrimRoot && fv.Name <> PrimTheoryL && fv.Name <> PrimDefaultConstructor)
+            |> List.filter (fun fv -> fv.FplId = potentialProvableName)
+
+        let provableBlocklist =
+            buildingBlocksMatchingDollarDigitNameList
+            |> List.filter (fun fv -> isProvable fv)
+
+        let notProvableBlocklist =
+            buildingBlocksMatchingDollarDigitNameList
+            |> List.filter (fun fv -> not (isProvable fv ))
+
+        if provableBlocklist.Length > 1 then
+            ScopeSearchResult.FoundMultiple(
+                provableBlocklist
+                |> List.map (fun fv -> sprintf "'%s' %s" fv.Name (fv.Type(SignatureType.Mixed)))
+                |> String.concat ", "
+            )
+        elif provableBlocklist.Length > 0 then
+            let potentialTheorem = provableBlocklist.Head
+            ScopeSearchResult.FoundAssociate potentialTheorem
+        elif notProvableBlocklist.Length > 0 then
+            let potentialOther = notProvableBlocklist.Head
+            ScopeSearchResult.FoundIncorrectBlock potentialOther
+        else
+            ScopeSearchResult.NotFound
+    | None -> ScopeSearchResult.NotApplicable
+
+
 
 let filterCandidates (candidatesPre:FplGenericNode list) identifier qualified =
     let candidates =
@@ -284,17 +331,11 @@ let filterCandidates (candidatesPre:FplGenericNode list) identifier qualified =
         |> Seq.sortBy (fun fv -> $"{fv.Name}:{fv.FplId}")
         |> Seq.map (fun fv -> 
             if qualified then 
-                qualifiedName fv false
+                qualifiedNameSimple fv 
             else
                 $"`{fv.Type SignatureType.Mixed}`"
         )
-        |> Seq.mapi (fun i s -> 
-            if candidatesPre.Length > 1 then 
-                sprintf "%d) %s" (i + 1) s
-            else
-                sprintf "%s" s
-        )
-        |> String.concat ", "
+        |> numbered
     (candidates, candidatesNames)
 
 

@@ -26,6 +26,7 @@ type TestLG005() =
     [<DataRow("arr3", """def pred T() { dec i,j:ind x:*pred[ind,ind] x[i,j]:=x[j , i]; true }""", 0)>]
     [<DataRow("arr4", """def pred T() { dec i:ind j:obj x:*pred[ind,obj] x[i,j]:=x[j , i]; true }""", 0)>]
     [<DataRow("arr5", """def pred T() { dec i:ind j:obj x:*pred[ind,obj] x[i,j]:=x[ i ,j]; true }""", 1)>]
+    [<DataRow("func0", """def func T()->obj { dec x:obj x:=x; ret x }""", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestLG005(no:string, fplCode:string, expected) =

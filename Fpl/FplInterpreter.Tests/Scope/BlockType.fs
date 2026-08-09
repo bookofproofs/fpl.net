@@ -13,7 +13,7 @@ open Fpl.Interpreter.SymbolTable.Types2.Definitions
 open Fpl.Interpreter.SymbolTable.Types3.SelfParent
 open Fpl.Interpreter.SymbolTable.Types3.PredicativeBlocks
 open Fpl.Interpreter.SymbolTable.Types3.DefinitionProperties
-open Fpl.Interpreter.SymbolTable.Types3.Quantors
+open Fpl.Interpreter.SymbolTable.Types3.Quantifiers
 open Fpl.Interpreter.SymbolTable.Types3.RulesOfInferences
 open Fpl.Interpreter.SymbolTable.Types3.Extensions
 open Fpl.Interpreter.SymbolTable.Types3.Delegates
@@ -608,9 +608,9 @@ type BlockType() =
         | "base15b" -> Assert.IsInstanceOfType(base1, typeof<FplReference>)
         | "base16" -> Assert.IsInstanceOfType(base1, typeof<FplReference>)
         | "base17" -> Assert.IsInstanceOfType(base1, typeof<FplReference>)
-        | "base18" -> Assert.IsInstanceOfType(base1, typeof<FplGenericQuantor>) 
-        | "base19" -> Assert.IsInstanceOfType(base1, typeof<FplGenericQuantor>)  
-        | "base20" -> Assert.IsInstanceOfType(base1, typeof<FplGenericQuantor>) 
+        | "base18" -> Assert.IsInstanceOfType(base1, typeof<FplGenericQuantifier>) 
+        | "base19" -> Assert.IsInstanceOfType(base1, typeof<FplGenericQuantifier>)  
+        | "base20" -> Assert.IsInstanceOfType(base1, typeof<FplGenericQuantifier>) 
         | "base21" -> Assert.IsInstanceOfType(base1, typeof<FplConjunction>)
         | "base21a" -> Assert.IsInstanceOfType(base1, typeof<FplNegation>)
         | "base21b" -> Assert.IsInstanceOfType(base1, typeof<FplNegation>)

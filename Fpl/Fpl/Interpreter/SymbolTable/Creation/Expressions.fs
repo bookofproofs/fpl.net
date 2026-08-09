@@ -347,13 +347,13 @@ let evalExpressions ast =
                 // add the class (intrinsic case, no constructors at all)
                 let candidate = classes.Head
                 fv.RefersTo <- Some candidate
-                fv.ErrorOccurred <- checkID025Diagnostics (qualifiedName candidate false) node.Name fv.StartPos fv.EndPos
+                fv.ErrorOccurred <- checkID025Diagnostics (qualifiedNameSimple candidate) node.Name fv.StartPos fv.EndPos
             elif candidates.Length > 0 then
                 // not a class was referred, add the candidate (e.g., referenced variable)
                 let candidate = candidates.Head
                 fv.FplId <- candidate.FplId 
                 fv.RefersTo <- Some candidate
-                fv.ErrorOccurred <- checkID025Diagnostics (qualifiedName candidate false) node.Name fv.StartPos fv.EndPos
+                fv.ErrorOccurred <- checkID025Diagnostics (qualifiedNameSimple candidate) node.Name fv.StartPos fv.EndPos
             else
                 ()
         simplifyTriviallyNestedExpressions fv

@@ -29,7 +29,7 @@ namespace FplLS
                     IsShort = false;
                     break;
                 case LiteralAll:
-                    Detail = "predicate (all quantor)";
+                    Detail = "predicate (all quantifier)";
                     SortText = LiteralAll;
                     Kind = CompletionItemKind.Operator;
                     IsShort = false;
@@ -173,19 +173,19 @@ namespace FplLS
                     IsShort = false;
                     break;
                 case LiteralEx:
-                    Detail = "predicate (exists quantor)";
+                    Detail = "predicate (exists quantifier)";
                     SortText = LiteralEx;
                     Kind = CompletionItemKind.Operator;
                     IsShort = false;
                     break;
                 case LiteralExN:
-                    Detail = "predicate (exists n-times quantor)";
+                    Detail = "predicate (exists n-times quantifier)";
                     SortText = LiteralExN;
                     Kind = CompletionItemKind.Operator;
                     IsShort = false;
                     break;
                 case "exn!":
-                    Detail = "predicate (exists n-times quantor)";
+                    Detail = "predicate (exists n-times quantifier)";
                     SortText = "exn!";
                     Kind = CompletionItemKind.Operator;
                     IsShort = false;
@@ -630,7 +630,7 @@ namespace FplLS
                 LiteralIs => new FplCompletionItemChoicesIsOperator().GetChoices(this),
                 LiteralAlias or LiteralAssL or LiteralAss or LiteralAssert or LiteralByDef or LiteralCl or LiteralClL or LiteralCon or LiteralConL or LiteralExt or LiteralExtL or LiteralFunc or LiteralFuncL or LiteralInd or LiteralIndL or LiteralIntr or LiteralIntrL or LiteralIn or LiteralObj or LiteralObjL or LiteralPred or LiteralPredL or LiteralPre or LiteralPreL or LiteralQed or LiteralRet or LiteralRetL or LiteralRev or LiteralRevL or LiteralTrivial => new FplCompletionItemChoicesKeyword().GetChoices(this),
                 LiteralSelf or LiteralBase or LiteralParent => new FplCompletionItemChoicesSelf().GetChoices(this),
-                LiteralAll or LiteralEx or LiteralExN => new FplCompletionItemChoicesQuantor().GetChoices(this),
+                LiteralAll or LiteralEx or LiteralExN => new FplCompletionItemChoicesQuantifier().GetChoices(this),
                 LiteralTrue or LiteralFalse or LiteralUndef or LiteralUndefL or LiteralNot or LiteralXor or LiteralIif or LiteralImpl or LiteralAnd or LiteralOr or "(" => new FplCompletionItemChoicesPredicate().GetChoices(this),
                 LiteralCtor or LiteralCtorL => new FplCompletionItemChoicesConstructor().GetChoices(this),
                 LiteralDec or LiteralDecL => new FplCompletionItemChoicesDeclaration().GetChoices(this),

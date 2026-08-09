@@ -26,7 +26,7 @@ type TestSIG06() =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = SIG06 ("","","","")
+            let code = SIG06 ("","","", "")
             runTestHelper "TestSIG06Classes.fpl" fplCode code expected
 
     [<DataRow("00a", "def func A()->obj { intr prty pred T() {intr} } def func B()->obj { intr prty pred T() {intr} } def func C:A,B()->obj ", 1)>]
@@ -44,5 +44,5 @@ type TestSIG06() =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = SIG06 ("","","","")
+            let code = SIG06 ("","","", "")
             runTestHelper "TestSIG06FunctionalTerms.fpl" fplCode code expected

@@ -13,6 +13,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 *)
 module Fpl.Interpreter.SymbolTable.Types2.Intrinsic
 open System
+open FParsec
 open Fpl.Parser.Types
 open Fpl.Primitives
 open Fpl.Errors.Emitter
@@ -20,9 +21,10 @@ open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.Helpers.Basic
 open Fpl.Interpreter.Helpers.Debug
 
+
 type FplIntrinsicTpl(name, positions: Positions, parent: FplGenericNode) as this =
     inherit FplGenericIsValue(positions, parent)
-
+    
     do
         this.TypeId <- name
         this.FplId <- name
@@ -54,13 +56,14 @@ type FplIntrinsicTpl(name, positions: Positions, parent: FplGenericNode) as this
     /// GEN00 diagnostic will be issued as default.
     member this.TrySetTemplateUsage (fv:FplGenericNode) diagnostic = 
         match this.RefersTo with 
-        | None -> 
-            this.RefersTo <- Some fv // if this template was not used, use it
+        | None ->
+            // if this template was not used, use it
+            this.RefersTo <- Some fv 
         | Some templateUsage ->
             match templateUsage.UltimateBlockNode, fv.UltimateBlockNode with
             | Some block1, Some block2 when Object.ReferenceEquals(block1, block2) ->
                 // test only usages within the scope of the same UltimateBlockNode
-                // (since all other usages are not usages are out ouf scope)
+                // (since all other usages are not usages are out of scope)
                 // otherwise calculate the type signatures of the very first usage  
                 let firstUsage = templateUsage.Type SignatureType.Type
                 // and the current one
@@ -70,9 +73,18 @@ type FplIntrinsicTpl(name, positions: Positions, parent: FplGenericNode) as this
                 | LiteralUndef -> () // Usage "undef" is always accepted
                 | _  when firstUsage <> currentUsage ->
                     // issue diagnostics, if inconsistent usage
+                    let diagnosticPosition =
+                        match fv.Parent with
+                        | Some par when par.Name = PrimAssignmentL ->
+                            (par.ArgList[1].StartPos, par.ArgList[1].EndPos)
+                        | Some par ->
+                            (par.StartPos, par.EndPos)
+                        | _ -> // never happens since Parent is set in all those cases
+                            (Position("",0,0,0), Position("",0,0,0))
+
                     match diagnostic with 
-                    | "SIG12" -> this.ErrorOccurred <- emitSIG12Diagnostics this.FplId firstUsage currentUsage (fv.QualifiedStartPos) templateUsage.StartPos templateUsage.EndPos
-                    | "SIG13" -> this.ErrorOccurred <- emitSIG13Diagnostics this.FplId currentUsage firstUsage (templateUsage.QualifiedStartPos) fv.StartPos fv.EndPos
+                    | "SIG12" -> this.ErrorOccurred <- emitSIG12Diagnostics this.FplId currentUsage firstUsage (templateUsage.Parent.Value.QualifiedStartPos) (fst diagnosticPosition) (snd diagnosticPosition)
+                    | "SIG13" -> this.ErrorOccurred <- emitSIG13Diagnostics PrimMapCasesL currentUsage firstUsage (templateUsage.Parent.Value.QualifiedStartPos) (fst diagnosticPosition) (snd diagnosticPosition)
                     | _ -> emitUnexpectedErrorDiagnostics $"Unhandled diagnostic `{diagnostic}` in FplIntrinsicTpl.TrySetTemplateUsage."
                 | _ -> () // equal usage is accepted
             | _, _ -> () // equal usage is accepted

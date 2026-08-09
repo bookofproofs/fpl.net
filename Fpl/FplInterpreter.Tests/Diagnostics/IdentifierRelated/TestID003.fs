@@ -16,8 +16,22 @@ type TestID003() =
 
     [<DataRow("theorem Test {true} proof Test$1 {1: trivial}", 0)>]
     [<DataRow("theorem TestTypo {true} proof Test$1 {1: trivial}", 1)>]
+    [<DataRow("theorem TestTypo {true} proof TestID003$1 {1: trivial}", 1)>]
     [<DataRow("corollary Test$1 {true} proof Test$1$1 {1: trivial}", 0)>]
     [<DataRow("theorem Test {true} corollary Test$1 {true} proof Test$1$1 {1: trivial}", 0)>]
+    [<DataRow("thm Test {true} proof Test$1 {1: trivial}", 0)>]
+    [<DataRow("lem Test {true} proof Test$1 {1: trivial}", 0)>]
+    [<DataRow("prop Test {true} proof Test$1 {1: trivial}", 0)>]
+    [<DataRow("cor Test$1 {true} proof Test$1$1 {1: trivial}", 0)>]
+
+    [<DataRow("theorem Test {true} prf Test$1 {1: trivial}", 0)>]
+    [<DataRow("thm Test {true} prf Test$1 {1: trivial}", 0)>]
+    [<DataRow("lem Test {true} prf Test$1 {1: trivial}", 0)>]
+    [<DataRow("prop Test {true} prf Test$1 {1: trivial}", 0)>]
+    [<DataRow("cor Test$1 {true} prf Test$1$1 {1: trivial}", 0)>]
+
+    [<DataRow("proof Test$1 {1: trivial}", 1)>]
+    [<DataRow("prf Test$1 {1: trivial}", 1)>]
     [<DataRow("uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestID003(fplCode:string, expected) =

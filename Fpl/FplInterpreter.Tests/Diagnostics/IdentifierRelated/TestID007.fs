@@ -20,6 +20,7 @@ type TestID007() =
     [<DataRow("00c", "thm A {true} def cl T:A", 1)>]
     [<DataRow("00d", "lem A {true} def cl T:A", 1)>]
     [<DataRow("00e", "prop A {true} def cl T:A", 1)>]
+    [<DataRow("00e_", "conj A {true} def cl T:A", 1)>]
     [<DataRow("00f", "cor A$1 {true} def cl T:A", 1)>]
     [<DataRow("00g", "proof A$1 {1: true} def cl T:A", 1)>]
     [<DataRow("00h", "inf A {pre:true con:true} def cl T:A", 1)>]
@@ -45,6 +46,7 @@ type TestID007() =
     // inheritance pred from pred
     [<DataRow("02a", "def cl A def pred T:A()", 1)>]
     [<DataRow("02b", "ax A {true} def pred T:A()", 1)>]
+    [<DataRow("02b_", "post A {true} def cl T:A", 1)>]
     [<DataRow("02c", "thm A {true} def pred T:A()", 1)>]
     [<DataRow("02d", "lem A {true} def pred T:A()", 1)>]
     [<DataRow("02e", "prop A {true} def pred T:A()", 1)>]

@@ -83,7 +83,7 @@ type TestFplBlockComponentes () =
 
     [<TestMethod>]
     member this.TestSignature11 () =
-        let result = run (ruleOfInferenceSignature .>> eof) """inference ProceedingResults"""
+        let result = run (ruleOfInferenceSignature .>> eof) """inference PrecedingResults"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
