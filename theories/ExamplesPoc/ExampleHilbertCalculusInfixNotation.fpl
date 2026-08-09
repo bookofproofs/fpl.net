@@ -1,10 +1,17 @@
 // Example from D. Hoffmann, "Theoretische Informatik", 3rd. ed. p. 99
 
+// auxiliary definitions
+def pred Impl(f, g: pred) infix "⇒" 0
+{
+    impl(f,g)
+}
+
+
 // weakening rule
 axiom A1
 {
     dec f, g: pred;
-    impl(f, impl(g, f))
+    f ⇒ (g ⇒ f)
 }
 
 // impl distributive
@@ -24,16 +31,16 @@ axiom A3
 inf ModusPonens
 {
     dec f, g: pred;
-    premise:
-        f, impl(f, g) 
-    conclusion:
+    pre:
+        f, f ⇒ g 
+    con:
         g
 }
 
 theorem Example1
 {
     dec a:pred;
-    impl (a, a)
+    a ⇒ a
 }
 
 proof Example1$1
@@ -42,19 +49,20 @@ proof Example1$1
     // Strategy: Assume that the premise is true, then prove that the conclusion also must be true.
     
     1. byax A2 
-    |- impl(impl(a, impl(impl(a, a), a)), impl(impl(a, impl(a, a)), impl(a, a)))
-    
+    |- (a ⇒ ((a ⇒ a) ⇒ a)) ⇒ ((a ⇒ (a ⇒ a)) ⇒ (a ⇒ a))
+
     2. byax A1 
-    |- impl(a, impl(impl(a, a), a)) 
-    
+    |- (a ⇒ ((a ⇒ a) ⇒  a))
+
     3. 1, 2, byinf ModusPonens 
-    |- impl(impl(a, impl(a, a)), impl(a, a))
-    
+    |- (a ⇒ (a ⇒ a)) ⇒ (a ⇒ a)
+
     4. byax A1 
-    |- impl(a, impl(a, a))
-    
+    |- a ⇒ (a ⇒ a)
+
     5. 3, 4, byinf ModusPonens 
-    |- impl(a, a)
+    |- a ⇒ a
+
     qed
 }
 
