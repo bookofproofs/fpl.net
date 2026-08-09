@@ -29,25 +29,6 @@ open Fpl.Interpreter.SymbolTable.Types3.DefinitionProperties
 open Fpl.Interpreter.SymbolTable.TypeMatching
 open Fpl.Interpreter.SymbolTable.Creation.Forward
 
-/// Simplify trivially nested expressions by removing from the stack FplValue nodes that were created due to too long parsing tree and replacing them by their sub nodes 
-let rec private simplifyTriviallyNestedExpressions (rb1:FplGenericNode) = 
-    match rb1 with 
-    | :? FplReference as rb when rb.ArgList.Count = 1 && rb.FplId = "" && not rb.ExpressionType.IsParen ->
-        // removable reference blocks are those with only a single argument and unset FplId 
-        let subNode = rb.ArgList[0] 
-        heap.Eval.Pop() |> ignore // pop the removable reference block and ignored it
-        heap.Eval.PushEvalStack(subNode) // push its subNode instead
-        // adjust subNode's Parent, EndPos, Scope
-        subNode.Parent <- rb.Parent 
-        subNode.EndPos <- rb.EndPos
-        // prevent recursive loops
-        rb.ArgList.Clear() 
-        rb.Value <- None
-        rb.Scope.Clear()
-        simplifyTriviallyNestedExpressions subNode
-    | _ -> ()
-
-
 /// Returns the precedence of fv1 if its ExpressionType is Infix
 /// or Int32.MinValue otherwise
 let private getSymbolWithPrecedence (fv1:FplGenericNode) =

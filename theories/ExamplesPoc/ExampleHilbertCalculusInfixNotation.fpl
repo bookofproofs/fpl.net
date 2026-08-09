@@ -18,14 +18,14 @@ axiom A1
 axiom A2 
 {
     dec f, g, h: pred;
-    impl(impl(f, impl(g, h)), impl(impl(f, g), impl(f, h)))
+    (f ⇒ (g ⇒ h)) ⇒ ((f ⇒ g) ⇒ (f ⇒ h))
 }
 
 // contraposition
 axiom A3 
 {
     dec f, g: pred;
-    impl(impl(not f, not g), impl(g, f))
+    (¬f ⇒ ¬g) ⇒ (g ⇒ f)
 }
 
 inf ModusPonens

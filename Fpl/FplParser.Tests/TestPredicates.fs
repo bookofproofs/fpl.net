@@ -218,6 +218,16 @@ type TestPredicates () =
     [<DataRow("04", """z * (x + y)""")>]
     [<DataRow("05", """z / (x) + y""")>]
     [<DataRow("06", """z / (x - x) + y""")>]
+    [<DataRow("07", """¬f ⇒ ¬g""")>]
+    [<DataRow("07a", """(¬f ⇒ ¬g)""")>]
+    [<DataRow("07b", """(¬f) ⇒ (¬g)""")>]
+    [<DataRow("07c", """¬f ⇒ a""")>]
+    [<DataRow("07d", """f ⇒ a""")>]
+    [<DataRow("07e", """¬(f ⇒ a)""")>]
+    [<DataRow("08", """all x:obj {not x}""")>]
+    [<DataRow("09", """not x""")>]
+    [<DataRow("09a", """¬ x""")>]
+    
     [<TestMethod>]
     member this.TestPredicateSuccess (no:string, fplCode:string) =
         let result = run (predicate .>> eof) fplCode
