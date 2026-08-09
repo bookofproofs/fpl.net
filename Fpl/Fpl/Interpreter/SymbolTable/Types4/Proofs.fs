@@ -61,10 +61,10 @@ type FplJustificationItemByAx(positions: Positions, parent: FplGenericNode) =
                             | Some inferredFormula ->
                                 let dictParameterUsage = Dictionary<string, FplGenericNode>()
                                 match matchExpressionAgainstPattern inferredFormula axiomFormula dictParameterUsage with
-                                | None ->
+                                | None -> // SUCCESS: match succeeded, now instantiate
                                     let expr = axiomFormula.Clone()
                                     candidates.Add(instantiateExpressionByVarUsages expr dictParameterUsage)
-                                | Some _ ->
+                                | Some err -> // FAILURE: match failed
                                     candidates.Add(axiomFormula.Clone())
                             | None ->
                                 ()
