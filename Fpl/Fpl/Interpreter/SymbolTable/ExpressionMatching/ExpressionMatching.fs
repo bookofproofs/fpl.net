@@ -182,6 +182,11 @@ let matchExpressionAgainstPattern (candidate:FplGenericNode) (pattern:FplGeneric
         | PrimFalse, PrimFalse 
         | PrimTrue, PrimTrue ->
             errExprMismatchOK
+
+        | PrimRefL, _ when a.ExpressionType.IsParen ->
+            checkExpr a.ArgList[0] p
+        | _, PrimRefL when p.ExpressionType.IsParen ->
+            checkExpr a p.ArgList[0]
         | _, PrimRefL when tryGetTransparentReferenceOperator p = Some a.Name ->
             checkExpressions (a.ArgList |> Seq.toList) (p.ArgList |> Seq.toList)
         | PrimRefL, _ when tryGetTransparentReferenceOperator a = Some p.Name ->
