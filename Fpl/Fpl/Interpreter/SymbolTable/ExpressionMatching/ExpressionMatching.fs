@@ -134,6 +134,17 @@ let matchExpressionAgainstPattern (candidate:FplGenericNode) (pattern:FplGeneric
             // in all other cases leave q unchanged
             q
 
+    let tryGetTransparentReferenceOperator (reference: FplGenericNode) =
+        match reference.RefersTo with
+        | Some (:? FplGenericHasValue as definition) when definition.ArgList.Count > 0 ->
+            Some definition.ArgList[0].Name
+        | _ -> None
+
+    let haveSameTransparentReferenceOperator (a: FplGenericNode) (p: FplGenericNode) =
+        match tryGetTransparentReferenceOperator a, tryGetTransparentReferenceOperator p with
+        | Some aOperator, Some pOperator -> aOperator = pOperator
+        | _ -> false
+
     // The usage dictionary records the first expression matched to each pattern
     // variable and enforces that every later occurrence matches the same expression.
     // It is also reused to instantiate the final matched expression.
@@ -171,6 +182,12 @@ let matchExpressionAgainstPattern (candidate:FplGenericNode) (pattern:FplGeneric
         | PrimFalse, PrimFalse 
         | PrimTrue, PrimTrue ->
             errExprMismatchOK
+        | _, PrimRefL when tryGetTransparentReferenceOperator p = Some a.Name ->
+            checkExpressions (a.ArgList |> Seq.toList) (p.ArgList |> Seq.toList)
+        | PrimRefL, _ when tryGetTransparentReferenceOperator a = Some p.Name ->
+            checkExpressions (a.ArgList |> Seq.toList) (p.ArgList |> Seq.toList)
+        | PrimRefL, PrimRefL when haveSameTransparentReferenceOperator a p ->
+            checkExpressions (a.ArgList |> Seq.toList) (p.ArgList |> Seq.toList)
         | PrimRefL, PrimRefL ->
             match a.RefersTo, p.RefersTo with
             | Some aRef, Some pRef ->
