@@ -134,11 +134,22 @@ let matchExpressionAgainstPattern (candidate:FplGenericNode) (pattern:FplGeneric
             // in all other cases leave q unchanged
             q
 
+    let getNormalizedExpressionForMatching (expression: FplGenericNode) =
+        match expression.Name, expression.RefersTo with
+        | PrimRefL, Some referenced
+            when expression.ArgList.Count = 0 && referenced.Name = PrimDelegateEqualL ->
+            referenced
+        | _ ->
+            expression
+
     let tryGetTransparentReferenceOperator (reference: FplGenericNode) =
         match reference.RefersTo with
         | Some (:? FplGenericHasValue as definition) when definition.ArgList.Count > 0 ->
-            Some definition.ArgList[0].Name
-        | _ -> None
+            definition.ArgList[0]
+            |> getNormalizedExpressionForMatching
+            |> fun expression -> Some expression.Name
+        | _ ->
+            None
 
     let haveSameTransparentReferenceOperator (a: FplGenericNode) (p: FplGenericNode) =
         match tryGetTransparentReferenceOperator a, tryGetTransparentReferenceOperator p with
@@ -149,6 +160,9 @@ let matchExpressionAgainstPattern (candidate:FplGenericNode) (pattern:FplGeneric
     // variable and enforces that every later occurrence matches the same expression.
     // It is also reused to instantiate the final matched expression.
     let rec checkExpr (a:FplGenericNode) (p:FplGenericNode) =
+        let a = getNormalizedExpressionForMatching a
+        let p = getNormalizedExpressionForMatching p
+
         let rec checkExpressions (args:FplGenericNode list) (pars:FplGenericNode list) =
             match args, pars with
             | a::ars, p::prs ->
@@ -182,7 +196,8 @@ let matchExpressionAgainstPattern (candidate:FplGenericNode) (pattern:FplGeneric
         | PrimFalse, PrimFalse 
         | PrimTrue, PrimTrue ->
             errExprMismatchOK
-
+        | PrimDelegateEqualL, PrimDelegateEqualL ->
+            checkExpressions (a.ArgList |> Seq.toList) (p.ArgList |> Seq.toList)
         | PrimRefL, _ when a.ExpressionType.IsParen ->
             checkExpr a.ArgList[0] p
         | _, PrimRefL when p.ExpressionType.IsParen ->
