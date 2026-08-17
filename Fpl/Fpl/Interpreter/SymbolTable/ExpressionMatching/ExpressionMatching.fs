@@ -136,8 +136,7 @@ let matchExpressionAgainstPattern (candidate:FplGenericNode) (pattern:FplGeneric
 
     let getNormalizedExpressionForMatching (expression: FplGenericNode) =
         match expression.Name, expression.RefersTo with
-        | PrimRefL, Some referenced
-            when expression.ArgList.Count = 0 && referenced.Name = PrimDelegateEqualL ->
+        | PrimRefL, Some referenced when referenced.Name = PrimDelegateEqualL ->
             referenced
         | _ ->
             expression
@@ -202,8 +201,6 @@ let matchExpressionAgainstPattern (candidate:FplGenericNode) (pattern:FplGeneric
             checkExpr cand.ArgList[0] pat
         | _, PrimRefL when pat.ExpressionType.IsParen ->
             checkExpr cand pat.ArgList[0]
-        | PrimRefL, PrimRefL when cand.ExpressionType.IsParen && pat.ExpressionType.IsParen ->
-             checkExpr cand.ArgList[0] pat.ArgList[0]
         | _, PrimRefL when tryGetTransparentReferenceOperator pat = Some cand.Name ->
             checkExpressions (cand.ArgList |> Seq.toList) (pat.ArgList |> Seq.toList)
         | PrimRefL, _ when tryGetTransparentReferenceOperator cand = Some pat.Name ->
