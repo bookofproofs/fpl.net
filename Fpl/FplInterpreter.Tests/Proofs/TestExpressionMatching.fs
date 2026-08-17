@@ -324,13 +324,13 @@ type TestExpressionMatching() =
     [<DataRow("01e", """def pred C() {dec x,y:obj; x ≠ y} def pred P() {dec a,b:obj; ¬del.Equal(a,b)}""", "C()", "P()")>]
     [<DataRow("01f", """def pred C() {dec x,y:obj; x ≠ y} def pred P() {dec a,b:obj; a ≠ b}""", "C()", "P()")>]
 
-    [<DataRow("02",  """def pred C() {dec x,y,z:obj; ¬del.Equal(del.Equal(x, y), z)} def pred P() {dec a,b,c:obj; ¬del.Equal(¬del.Equal(a, b), c)}""", "C()", "P()")>]
+    [<DataRow("02",  """def pred C() {dec x,y,z:obj; ¬del.Equal(¬del.Equal(x, y), z)} def pred P() {dec a,b,c:obj; ¬del.Equal(¬del.Equal(a, b), c)}""", "C()", "P()")>]
     [<DataRow("02b", """def pred C() {dec x,y,z:obj; (x ≠ y) ≠ z} def pred P() {dec a,b,c:obj; ¬del.Equal(¬del.Equal(a, b), c)}""", "C()", "P()")>]
     [<DataRow("02d", """def pred C() {dec x,y,z:obj; ¬del.Equal(¬del.Equal(x, y), z)} def pred P() {dec a,b,c:obj; (a ≠ b) ≠ c}""", "C()", "P()")>]
     [<DataRow("02h", """def pred C() {dec x,y,z:obj; (x ≠ y) ≠ z} def pred P() {dec a,b,c:obj; (a ≠ b) ≠ c}""", "C()", "P()")>]
 
     [<DataRow("03",  """def pred C() {dec x,y,z:obj; ¬del.Equal(x, ¬del.Equal(y, z))} def pred P() {dec a,b,c:obj; ¬del.Equal(a, ¬del.Equal(b, c))}""", "C()", "P()")>]
-    [<DataRow("03b", """def pred C() {dec x,y,z:obj; x ≠ (y ≠ z)} def pred P() {dec a,b,c:obj; del.Equal(a, del.Equal(b, c))}""", "C()", "P()")>]
+    [<DataRow("03b", """def pred C() {dec x,y,z:obj; x ≠ (y ≠ z)} def pred P() {dec a,b,c:obj; ¬del.Equal(a, ¬del.Equal(b, c))}""", "C()", "P()")>]
     [<DataRow("03d", """def pred C() {dec x,y,z:obj; ¬del.Equal(x, ¬del.Equal(y, z))} def pred P() {dec a,b,c:obj; a ≠ (b ≠ c)}""", "C()", "P()")>]
     [<DataRow("03h", """def pred C() {dec x,y,z:obj; x ≠ (y ≠ z)} def pred P() {dec a,b,c:obj; a ≠ (b ≠ c)}""", "C()", "P()")>]
 
@@ -340,7 +340,7 @@ type TestExpressionMatching() =
     [<DataRow("04h", """def pred C() {dec x,y,z,w:obj; (x ≠ y) ≠ (z ≠ w)} def pred P() {dec a,b,c,d:obj; (a ≠ b) ≠ (c ≠ d)}""", "C()", "P()")>]
     [<TestMethod>]
     member this.TestExpressionInfixNotEquality(no: string, fplCode: string, candidateBlockName: string, patternBlockName: string) =
-        assertExpressionMatchesPattern no $"{infixEqual} {fplCode}" candidateBlockName patternBlockName
+        assertExpressionMatchesPattern no $"{infixEqual} {infixNotEqual} {fplCode}" candidateBlockName patternBlockName
 
 
     [<DataRow("01", """def pred C() {dec x,y:obj; Greater(x,y)} def pred P() {dec a,b:obj; Greater(a,b)}""", "C()", "P()")>]
