@@ -504,8 +504,8 @@ type TestExpressionMatching() =
 
     [<DataRow("02",  """def pred C() {dec x:obj; Fact(Fact(x))} def pred P() {dec a:obj; Fact(Fact(a))}""", "C()", "P()")>]
     [<DataRow("02b", """def pred C() {dec x:obj; x!!} def pred P() {dec a:obj; Fact(Fact(a))}""", "C()", "P()")>]
-    [<DataRow("02d", """def pred C() {dec x:obj; Fact(Fact(x))} def pred P() {dec a:obj; a!!}""", "C()", "P()")>]
-    [<DataRow("02h", """def pred C() {dec x:obj; x} def pred P() {dec a:obj; a!!}""", "C()", "P()")>]
+    [<DataRow("02d", """def pred C() {dec x:obj; Fact(Fact(x))} def pred P() {dec a:obj; a! !}""", "C()", "P()")>]
+    [<DataRow("02h", """def pred C() {dec x:obj; x} def pred P() {dec a:obj; a! !}""", "C()", "P()")>]
 
     [<DataRow("03",  """def pred C() {dec x:obj; Fact((Fact(y)))} def pred P() {dec a:obj; Fact((Fact(a)))}""", "C()", "P()")>]
     [<DataRow("03b", """def pred C() {dec x:obj; (x!)!} def pred P() {dec a:obj; Fact((Fact(a)))}""", "C()", "P()")>]

@@ -159,9 +159,9 @@ let matchExpressionAgainstPattern (candidate:FplGenericNode) (pattern:FplGeneric
     // The usage dictionary records the first expression matched to each pattern
     // variable and enforces that every later occurrence matches the same expression.
     // It is also reused to instantiate the final matched expression.
-    let rec checkExpr (a:FplGenericNode) (p:FplGenericNode) =
-        let a = getNormalizedExpressionForMatching a
-        let p = getNormalizedExpressionForMatching p
+    let rec checkExpr (cand:FplGenericNode) (pat:FplGenericNode) =
+        let cand = getNormalizedExpressionForMatching cand
+        let pat = getNormalizedExpressionForMatching pat
 
         let rec checkExpressions (args:FplGenericNode list) (pars:FplGenericNode list) =
             match args, pars with
@@ -177,73 +177,66 @@ let matchExpressionAgainstPattern (candidate:FplGenericNode) (pattern:FplGeneric
             | [], [] ->
                 errExprMismatchOK
 
-        match a.Name, p.Name with
+        match cand.Name, pat.Name with
         | PrimConjunction, PrimConjunction
         | PrimDisjunction, PrimDisjunction
         | PrimImplication, PrimImplication
         | PrimEquivalence, PrimEquivalence
         | PrimExclusiveOr, PrimExclusiveOr
-        | PrimNegation, PrimNegation -> checkExpressions (a.ArgList |> Seq.toList) (p.ArgList |> Seq.toList) 
+        | PrimNegation, PrimNegation -> checkExpressions (cand.ArgList |> Seq.toList) (pat.ArgList |> Seq.toList) 
         | PrimQuantifierAll, PrimQuantifierAll 
         | PrimQuantifierExists, PrimQuantifierExists 
         | PrimQuantifierExistsN, PrimQuantifierExistsN ->
         // match number of quantifier variables
-            match compareQuantifierVariables a p dictParameterUsage with
+            match compareQuantifierVariables cand pat dictParameterUsage with
             | None ->
                 // and now check the expressions inside the quantifiers
-                checkExpressions (a.ArgList |> Seq.toList) (p.ArgList |> Seq.toList) 
+                checkExpressions (cand.ArgList |> Seq.toList) (pat.ArgList |> Seq.toList) 
             | Some err -> Some err
         | PrimFalse, PrimFalse 
         | PrimTrue, PrimTrue ->
             errExprMismatchOK
         | PrimDelegateEqualL, PrimDelegateEqualL ->
-            checkExpressions (a.ArgList |> Seq.toList) (p.ArgList |> Seq.toList)
-        | PrimRefL, _ when a.ExpressionType.IsParen ->
-            checkExpr a.ArgList[0] p
-        | _, PrimRefL when p.ExpressionType.IsParen ->
-            checkExpr a p.ArgList[0]
-        | _, PrimRefL when tryGetTransparentReferenceOperator p = Some a.Name ->
-            checkExpressions (a.ArgList |> Seq.toList) (p.ArgList |> Seq.toList)
-        | PrimRefL, _ when tryGetTransparentReferenceOperator a = Some p.Name ->
-            checkExpressions (a.ArgList |> Seq.toList) (p.ArgList |> Seq.toList)
-        | PrimRefL, PrimRefL when haveSameTransparentReferenceOperator a p ->
-            checkExpressions (a.ArgList |> Seq.toList) (p.ArgList |> Seq.toList)
+            checkExpressions (cand.ArgList |> Seq.toList) (pat.ArgList |> Seq.toList)
+        | PrimRefL, _ when cand.ExpressionType.IsParen ->
+            checkExpr cand.ArgList[0] pat
+        | _, PrimRefL when pat.ExpressionType.IsParen ->
+            checkExpr cand pat.ArgList[0]
+        | PrimRefL, PrimRefL when cand.ExpressionType.IsParen && pat.ExpressionType.IsParen ->
+             checkExpr cand.ArgList[0] pat.ArgList[0]
+        | _, PrimRefL when tryGetTransparentReferenceOperator pat = Some cand.Name ->
+            checkExpressions (cand.ArgList |> Seq.toList) (pat.ArgList |> Seq.toList)
+        | PrimRefL, _ when tryGetTransparentReferenceOperator cand = Some pat.Name ->
+            checkExpressions (cand.ArgList |> Seq.toList) (pat.ArgList |> Seq.toList)
+        | PrimRefL, PrimRefL when haveSameTransparentReferenceOperator cand pat ->
+            checkExpressions (cand.ArgList |> Seq.toList) (pat.ArgList |> Seq.toList)
         | PrimRefL, PrimRefL ->
-            match a.RefersTo, p.RefersTo with
+            match cand.RefersTo, pat.RefersTo with
             | Some aRef, Some pRef ->
-                checkExpr (mockVariableWithParams a aRef) (mockVariableWithParams p pRef)
-            | Some aRef, None when p.ArgList.Count > 0 && not p.ExpressionType.IsParen ->
-                checkExpr (mockVariableWithParams a aRef) p
-            | None, Some pRef when a.ArgList.Count > 0 && not a.ExpressionType.IsParen ->
-                checkExpr a (mockVariableWithParams p pRef)
-            | None, Some pRef when a.ExpressionType.IsParen ->
-                // delegate parenthesized (a) to a
-                checkExpr a.ArgList[0] p
-            | Some aRef, None when p.ExpressionType.IsParen ->
-                // delegate parenthesized (p) to p
-                checkExpr a p.ArgList[0]
-            | None, None when a.ExpressionType.IsParen && p.ExpressionType.IsParen ->
-                // delegate parenthesized (a) (p) to a p
-                checkExpr a.ArgList[0] p.ArgList[0]
-            | None, None when a.ExpressionType.IsParen && not p.ExpressionType.IsParen ->
-                errExprMismatchMsgParensOnlyLeft (a.Type SignatureType.Name) (p.Type SignatureType.Name)
-            | None, None when not a.ExpressionType.IsParen && p.ExpressionType.IsParen ->
-                errExprMismatchMsgParensOnlyRight (a.Type SignatureType.Name) (p.Type SignatureType.Name)
+                checkExpr (mockVariableWithParams cand aRef) (mockVariableWithParams pat pRef)
+            | Some aRef, None when pat.ArgList.Count > 0 && not pat.ExpressionType.IsParen ->
+                checkExpr (mockVariableWithParams cand aRef) pat
+            | None, Some pRef when cand.ArgList.Count > 0 && not cand.ExpressionType.IsParen ->
+                checkExpr cand (mockVariableWithParams pat pRef)
+            | None, None when cand.ExpressionType.IsParen && not pat.ExpressionType.IsParen ->
+                errExprMismatchMsgParensOnlyLeft (cand.Type SignatureType.Name) (pat.Type SignatureType.Name)
+            | None, None when not cand.ExpressionType.IsParen && pat.ExpressionType.IsParen ->
+                errExprMismatchMsgParensOnlyRight (cand.Type SignatureType.Name) (pat.Type SignatureType.Name)
             | _, _ ->
                 errExprMismatchOK
-        | _, PrimRefL when p.RefersTo.IsSome && p.RefersTo.Value.Name = PrimVariableL ->
-            let (errMsgOpt,_) = FplTypeMatcher.ComparisonBasedOnOpenFormulas a p
-            match errMsgOpt, p.RefersTo with
+        | _, PrimRefL when pat.RefersTo.IsSome && pat.RefersTo.Value.Name = PrimVariableL ->
+            let (errMsgOpt,_) = FplTypeMatcher.ComparisonBasedOnOpenFormulas cand pat
+            match errMsgOpt, pat.RefersTo with
             | None, Some var when var.Name = PrimVariableL ->
-                let firstResult = checkMismatchingUsageOfVars p.FplId a dictParameterUsage
+                let firstResult = checkMismatchingUsageOfVars pat.FplId cand dictParameterUsage
                 match firstResult with
                 | Some errMsg -> Some errMsg
                 | None when var.Scope.Count > 0 ->
-                    let pPars = getArguments p
-                    let aPars = getDistinctVarsOfExpression a
+                    let pPars = getArguments pat
+                    let aPars = getDistinctVarsOfExpression cand
                     if aPars.Length <> pPars.Length then
                         let aVars = aPars |> List.map (fun v -> $"{v.FplId}") |> String.concat ", "
-                        let pName = p.Type SignatureType.Name
+                        let pName = pat.Type SignatureType.Name
                         errExprMismatchVarNumbDifferent aPars.Length aVars pPars.Length pName
                     else
                         let lstOfErrMessages =
@@ -258,11 +251,11 @@ let matchExpressionAgainstPattern (candidate:FplGenericNode) (pattern:FplGeneric
             | _,_ ->
                 errExprMismatchOK
         | _, PrimVariableL ->
-            match FplTypeMatcher.MatchArgumentsWithParameters a p with
+            match FplTypeMatcher.MatchArgumentsWithParameters cand pat with
             | Some err -> Some err
-            | None -> checkMismatchingUsageOfVars p.FplId a dictParameterUsage
+            | None -> checkMismatchingUsageOfVars pat.FplId cand dictParameterUsage
         | _, _ ->
-            errExprMismatchMsgStandard (a.Type SignatureType.Name) (p.Type SignatureType.Name)
+            errExprMismatchMsgStandard (cand.Type SignatureType.Name) (pat.Type SignatureType.Name)
     checkExpr candidate pattern
 
 /// Tries to match a premise with expressions from a list and returns 
