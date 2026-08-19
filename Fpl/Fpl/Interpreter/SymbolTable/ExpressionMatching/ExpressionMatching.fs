@@ -159,8 +159,6 @@ let matchExpressionAgainstPattern (candidate:FplGenericNode) (pattern:FplGeneric
     // variable and enforces that every later occurrence matches the same expression.
     // It is also reused to instantiate the final matched expression.
     let rec checkExpr (cand:FplGenericNode) (pat:FplGenericNode) =
-        let cand = getNormalizedExpressionForMatching cand
-        let pat = getNormalizedExpressionForMatching pat
 
         let rec checkExpressions (args:FplGenericNode list) (pars:FplGenericNode list) =
             match args, pars with
@@ -197,10 +195,16 @@ let matchExpressionAgainstPattern (candidate:FplGenericNode) (pattern:FplGeneric
             errExprMismatchOK
         | PrimDelegateEqualL, PrimDelegateEqualL ->
             checkExpressions (cand.ArgList |> Seq.toList) (pat.ArgList |> Seq.toList)
+        // match parentheses
         | PrimRefL, _ when cand.ExpressionType.IsParen ->
             checkExpr cand.ArgList[0] pat
         | _, PrimRefL when pat.ExpressionType.IsParen ->
             checkExpr cand pat.ArgList[0]
+
+        | PrimRefL, _ when cand.RefersTo.IsSome && cand.RefersTo.Value.Name = PrimDelegateEqualL ->
+            checkExpr cand.RefersTo.Value pat
+        | _, PrimRefL when pat.RefersTo.IsSome && pat.RefersTo.Value.Name = PrimDelegateEqualL ->
+            checkExpr cand pat.RefersTo.Value
         | _, PrimRefL when tryGetTransparentReferenceOperator pat = Some cand.Name ->
             checkExpressions (cand.ArgList |> Seq.toList) (pat.ArgList |> Seq.toList)
         | PrimRefL, _ when tryGetTransparentReferenceOperator cand = Some pat.Name ->
