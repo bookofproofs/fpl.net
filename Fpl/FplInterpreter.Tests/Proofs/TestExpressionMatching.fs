@@ -28,10 +28,10 @@ type TestExpressionMatching() =
             let matchResult =
                 matchExpressionAgainstPattern candidateExpr patternExpr dictParameterUsage
 
-            Assert.IsTrue(
-                Option.isNone matchResult,
-                $"Unexpected mismatch between `{candidateBlockName}` and `{patternBlockName}`: {matchResult |> Option.defaultValue}"
-            )
+            match matchResult with
+            | Some err ->
+                Assert.Fail($"Unexpected mismatch between `{candidateBlockName}` and `{patternBlockName}`: {err}")
+            | None -> ()
         finally
             prepareFplCode(filename, "", true) |> ignore
 
@@ -504,11 +504,12 @@ type TestExpressionMatching() =
 
     [<DataRow("02",  """def pred C() {dec x:obj; Fact(Fact(x))} def pred P() {dec a:obj; Fact(Fact(a))}""", "C()", "P()")>]
     [<DataRow("02b", """def pred C() {dec x:obj; x!!} def pred P() {dec a:obj; Fact(Fact(a))}""", "C()", "P()")>]
-    [<DataRow("02d", """def pred C() {dec x:obj; Fact(Fact(x))} def pred P() {dec a:obj; a! !}""", "C()", "P()")>]
-    [<DataRow("02h", """def pred C() {dec x:obj; x} def pred P() {dec a:obj; a! !}""", "C()", "P()")>]
+    [<DataRow("02d", """def pred C() {dec x:obj; Fact(Fact(x))} def pred P() {dec a:obj; a!!}""", "C()", "P()")>]
+    [<DataRow("02h", """def pred C() {dec x:obj; x!!} def pred P() {dec a:obj; a!!}""", "C()", "P()")>]
 
     [<DataRow("03",  """def pred C() {dec x:obj; Fact((Fact(y)))} def pred P() {dec a:obj; Fact((Fact(a)))}""", "C()", "P()")>]
     [<DataRow("03b", """def pred C() {dec x:obj; (x!)!} def pred P() {dec a:obj; Fact((Fact(a)))}""", "C()", "P()")>]
+    [<DataRow("03b_", """def pred C() {dec x:obj; (x!)} def pred P() {dec a:obj; (Fact(a))}""", "C()", "P()")>]
     [<DataRow("03d", """def pred C() {dec x:obj; Fact((Fact(y)))} def pred P() {dec a:obj; (a!)!}""", "C()", "P()")>]
     [<DataRow("03h", """def pred C() {dec x:obj; (x!)!} def pred P() {dec a:obj; (a!)!}""", "C()", "P()")>]
 

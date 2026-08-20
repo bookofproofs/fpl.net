@@ -227,6 +227,14 @@ type TestPredicates () =
     [<DataRow("08", """all x:obj {not x}""")>]
     [<DataRow("09", """not x""")>]
     [<DataRow("09a", """¬ x""")>]
+    [<DataRow("10a", """x!""")>]
+    [<DataRow("10b", """x!!""")>]
+    [<DataRow("10c", """(x!)!""")>]
+    [<DataRow("11a", """~x""")>]
+    [<DataRow("11b", """~~x""")>]
+    [<DataRow("11c", """~(~x)""")>]
+    [<DataRow("12", """Fact((Fact(a)))""")>]
+    
     
     [<TestMethod>]
     member this.TestPredicateSuccess (no:string, fplCode:string) =
@@ -237,6 +245,8 @@ type TestPredicates () =
 
     [<DataRow("00", """PrecedingResults$1(x,y)""")>]
     [<DataRow("01", "undet")>]
+    [<DataRow("02", """x! !""")>]
+    [<DataRow("03", """~ ~x""")>]
     [<TestMethod>]
     member this.TestPredicateFailure (no:string, fplCode:string) =
         let result = run (predicate .>> eof) fplCode

@@ -196,11 +196,12 @@ let matchExpressionAgainstPattern (candidate:FplGenericNode) (pattern:FplGeneric
         | PrimDelegateEqualL, PrimDelegateEqualL ->
             checkExpressions (cand.ArgList |> Seq.toList) (pat.ArgList |> Seq.toList)
         // match parentheses
+        | PrimRefL, PrimRefL when cand.ExpressionType.IsParen && pat.ExpressionType.IsParen ->
+            checkExpr cand.ArgList[0] pat.ArgList[0]
         | PrimRefL, _ when cand.ExpressionType.IsParen ->
             checkExpr cand.ArgList[0] pat
         | _, PrimRefL when pat.ExpressionType.IsParen ->
             checkExpr cand pat.ArgList[0]
-
         | PrimRefL, _ when cand.RefersTo.IsSome && cand.RefersTo.Value.Name = PrimDelegateEqualL ->
             checkExpr cand.RefersTo.Value pat
         | _, PrimRefL when pat.RefersTo.IsSome && pat.RefersTo.Value.Name = PrimDelegateEqualL ->
