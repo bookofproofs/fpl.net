@@ -13,203 +13,6 @@ type TestPredicates () =
         input.Split(whiteSpaceChars)
             |> String.concat ""
 
-
-    [<TestMethod>]
-    member this.TestPredicate01 () =
-        let result = run (predicate .>> eof) LiteralTrue
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestPredicate01a () =
-        let result = run (primePredicate .>> eof) LiteralTrue
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestPredicate02 () =
-        let result = run (predicate .>> eof) LiteralFalse
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestPredicate03 () =
-        let result = run (predicate .>> eof) LiteralUndef
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestPredicate04 () =
-        let result = run (predicate .>> eof) LiteralUndefL
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestPredicate05 () =
-        let result = run (predicate .>> eof) """and(true,false)"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestPredicate06 () =
-        let result = run (predicate .>> eof) """and ( true, true )"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestPredicate07 () =
-        let result = run (predicate .>> eof) """and ( true, and( true, false))"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestPredicate08 () =
-        let result = run (predicate .>> eof) """and ( and ( true, and( true, false)), true )"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-        
-    [<TestMethod>]
-    member this.TestPredicate09 () =
-        let result = run (predicate .>> eof) """or(true,false)"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestPredicate10 () =
-        let result = run (predicate .>> eof) """or ( true, true )"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestPredicate11 () =
-        let result = run (predicate .>> eof) """or ( true, or( true, false))"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestPredicate12 () =
-        let result = run (predicate .>> eof) """or ( or ( true, or( true, false)), true )"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestPredicate13 () =
-        let result = run (predicate .>> eof) """or(x.z,y)"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestPredicate14 () =
-        let result = run (predicate .>> eof) """impl(true,false)"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestPredicate15 () =
-        let result = run (predicate .>> eof) """impl ( true, true )"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestPredicate16 () =
-        let result = run (predicate .>> eof) """impl ( true, impl( true, false))"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestPredicate17 () =
-        let result = run (predicate .>> eof) """impl ( impl ( true, impl( true, false)), true )"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestPredicate18 () =
-        let result = run (predicate .>> eof) """iif(true,false)"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestPredicate19 () =
-        let result = run (predicate .>> eof) """iif ( true, true )"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestPredicate20 () =
-        let result = run (predicate .>> eof) """iif ( true, iif( true, false))"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestPredicate21 () =
-        let result = run (predicate .>> eof) """iif ( iif ( true, iif( true, false)), true )"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestPredicate22 () =
-        let result = run (predicate .>> eof) """xor(true,false)"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestPredicate23 () =
-        let result = run (predicate .>> eof) """xor ( true, true )"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestPredicate23a () =
-        let result = run (predicate .>> eof) """xor ( true, xor( true, false))"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestPredicate24 () =
-        let result = run (predicate .>> eof) """xor ( xor ( true, xor( true, false)), true )"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestPredicate25 () =
-        let result = run (predicate .>> eof) """Zero()"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"));
-
-    [<TestMethod>]
-    member this.TestPredicate26 () =
-        let result = run (predicate .>> eof) """self(i)"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
     [<DataRow("00", """PrecedingResults1(x,y)""")>]
     [<DataRow("01", """x + y""")>]
     [<DataRow("02", """(x) + y""")>]
@@ -234,7 +37,31 @@ type TestPredicates () =
     [<DataRow("11b", """~~x""")>]
     [<DataRow("11c", """~(~x)""")>]
     [<DataRow("12", """Fact((Fact(a)))""")>]
-    
+    [<DataRow("13", """Zero()""")>]
+    [<DataRow("14", """self(i)""")>]
+    [<DataRow("15", """xor ( xor ( true, xor( true, false)), true )""")>]
+    [<DataRow("16", """xor ( true, xor( true, false))""")>]
+    [<DataRow("17", """xor ( true, true )""")>]
+    [<DataRow("18", """iif ( iif ( true, iif( true, false)), true )""")>]
+    [<DataRow("19", """iif ( true, iif( true, false))""")>]
+    [<DataRow("20", """iif ( true, true )""")>]
+    [<DataRow("21", """iif(true,false)""")>]
+    [<DataRow("22", """impl ( impl ( true, impl( true, false)), true )""")>]
+    [<DataRow("23", """impl ( true, impl( true, false))""")>]
+    [<DataRow("24", """impl ( true, true )""")>]
+    [<DataRow("25", """impl(true,false)""")>]
+    [<DataRow("26", """or(x.z,y)""")>]
+    [<DataRow("27", """or ( or ( true, or( true, false)), true )""")>]
+    [<DataRow("28", """or ( true, or( true, false))""")>]
+    [<DataRow("29", """or ( true, true )""")>]
+    [<DataRow("30", """or(true,false)""")>]
+    [<DataRow("31", """and ( and ( true, and( true, false)), true )""")>]
+    [<DataRow("32", """and ( true, and( true, false))""")>]
+    [<DataRow("33", """and ( true, true )""")>]
+    [<DataRow("34", """and(true,false)""")>]
+    [<DataRow("35", LiteralUndef)>]
+    [<DataRow("36", LiteralFalse)>]
+    [<DataRow("37", LiteralTrue)>]
     
     [<TestMethod>]
     member this.TestPredicateSuccess (no:string, fplCode:string) =

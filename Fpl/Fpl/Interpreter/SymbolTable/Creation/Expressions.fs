@@ -160,6 +160,7 @@ let evalExpressions ast =
         let operand = new FplReference((operator.StartPos, operator.EndPos), operator) 
         heap.Eval.PushEvalStack(operand)
         evalRef.Value operandAst
+        simplifyTriviallyNestedExpressions operand
         heap.Eval.PopEvalStack()
         heap.Eval.PopEvalStack()
         simplifyTriviallyNestedExpressions fv
