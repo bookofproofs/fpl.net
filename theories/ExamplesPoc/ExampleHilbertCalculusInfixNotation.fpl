@@ -1,4 +1,5 @@
 // Example from D. Hoffmann, "Theoretische Informatik", 3rd. ed. p. 99
+// also from D.Hoffmann, "Grenzen der Mathematik", 1st. ed. pp. 93
 
 // auxiliary definitions
 def pred Impl(f, g: pred) infix "⇒" 0
@@ -18,14 +19,14 @@ axiom A1
 axiom A2 
 {
     dec f, g, h: pred;
-    impl(impl(f, impl(g, h)), impl(impl(f, g), impl(f, h)))
+    (f ⇒ (g ⇒ h)) ⇒ ((f ⇒ g) ⇒ (f ⇒ h))
 }
 
 // contraposition
 axiom A3 
 {
     dec f, g: pred;
-    impl(impl(not f, not g), impl(g, f))
+    (¬f ⇒ ¬g) ⇒ (g ⇒ f)
 }
 
 inf ModusPonens
@@ -37,33 +38,122 @@ inf ModusPonens
         g
 }
 
-theorem Example1
+theorem T1
 {
-    dec a:pred;
-    a ⇒ a
+    dec f:pred;
+    f ⇒ f
 }
 
-proof Example1$1
+proof T1$1
 {
     // Direct Proof
     // Strategy: Assume that the premise is true, then prove that the conclusion also must be true.
     
-    1. byax A2 
-    |- (a ⇒ ((a ⇒ a) ⇒ a)) ⇒ ((a ⇒ (a ⇒ a)) ⇒ (a ⇒ a))
-
-    2. byax A1 
-    |- (a ⇒ ((a ⇒ a) ⇒  a))
-
-    3. 1, 2, byinf ModusPonens 
-    |- (a ⇒ (a ⇒ a)) ⇒ (a ⇒ a)
-
-    4. byax A1 
-    |- a ⇒ (a ⇒ a)
-
-    5. 3, 4, byinf ModusPonens 
-    |- a ⇒ a
-
+    1. byax A2 |- 
+    (f ⇒ ((f ⇒ f) ⇒ f)) ⇒ ((f ⇒ (f ⇒ f)) ⇒ (f ⇒ f))
+    2. byax A1 |- 
+    (f ⇒ ((f ⇒ f) ⇒  f))
+    3. 1, 2, byinf ModusPonens |- 
+    (f ⇒ (f ⇒ f)) ⇒ (f ⇒ f)
+    4. byax A1 |- 
+    f ⇒ (f ⇒ f)
+    5. 3, 4, byinf ModusPonens |- 
+    f ⇒ f
     qed
 }
 
+thm T2 
+{
+    dec f,g,h:pred;
+    (f ⇒ g) ⇒ ((g ⇒ h) ⇒ (f ⇒ h)) 
+}
 
+prf T2$1 
+{
+    1: ass f
+    2: ass f ⇒ g
+    3. 1,2, byinf ModusPonens |- g
+    4: ass g ⇒ h
+    5. 3,4, byinf ModusPonens |- h
+    6. 2,4 |- f ⇒ h
+    7. 2 |- (g ⇒ h) ⇒ (f ⇒ h)
+    8. 6 |- (f ⇒ g) ⇒ ((g ⇒ h) ⇒ (f ⇒ h)) 
+}
+
+thm T3
+{
+    dec f,g:pred;
+    f ⇒ ((f ⇒ g) ⇒ g) 
+}
+
+thm T4
+{
+    dec f:pred;
+    ¬¬f ⇒ f
+}
+
+thm T5
+{
+    dec f:pred;
+    f ⇒ ¬¬f
+}
+
+thm T6
+{
+    dec f,g :pred;
+    (f ⇒ g) ⇒ (¬g ⇒ ¬f) 
+}
+
+thm T7
+{
+    dec f,g :pred;
+    f ⇒ (¬g ⇒ ¬(f ⇒ g)) 
+}
+
+thm T8
+{
+    dec f,g :pred;
+    ¬f ⇒ (f ⇒ g) 
+}
+
+thm T9
+{
+    dec f,g :pred;
+    f ⇒ (g ⇒ (f ⇒ g)) 
+}
+
+thm T10
+{
+    dec f,g :pred;
+    ¬(f ⇒ g) ⇒ f 
+}
+
+thm T11
+{
+    dec f,g :pred;
+    ¬(f ⇒ g) ⇒ ¬g 
+}
+
+thm T12
+{
+    dec f :pred;
+    (f ⇒ ¬f) ⇒ ¬f
+}
+
+thm T13
+{
+    dec f :pred;
+    (¬f ⇒ f) ⇒ f
+}
+
+thm T14
+{
+    dec f,g :pred;
+    (f ⇒ g) ⇒ ((¬f ⇒ g) ⇒ g)
+}
+
+thm T15
+{
+    dec f,g :pred;
+    ¬(f ⇒ f) ⇒ g
+}

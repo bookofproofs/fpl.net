@@ -133,6 +133,7 @@
         <Compile Include="Diagnostics\VariableRelated\TestVAR09.fs" />
         <Compile Include="Diagnostics\VariableRelated\TestVAR10.fs" />
         <Compile Include="Diagnostics\VariableRelated\TestVAR11.fs" />
+        <Compile Include="Proofs\TestExpressionMatching.fs" />
         <Compile Include="Proofs\TestInferredExpressionsJust.fs" />
         <Compile Include="Proofs\TestInferredExpressionsArgInf.fs" />
     </ItemGroup>

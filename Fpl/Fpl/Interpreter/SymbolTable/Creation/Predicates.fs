@@ -80,7 +80,11 @@ let evalPredicates ast =
         let fv = heap.Eval.PeekEvalStack()
         let fvNew = new FplNegation((pos1, pos2), fv)
         heap.Eval.PushEvalStack(fvNew)
+        let operand = new FplReference((pos1, pos2), fvNew)
+        heap.Eval.PushEvalStack(operand)
         evalRef.Value predicateAst
+        simplifyTriviallyNestedExpressions operand
+        heap.Eval.PopEvalStack()
         heap.Eval.PopEvalStack()
     | Ast.All((pos1, pos2), (namedVarDeclAstList, predicateAst)) ->
         let parent = heap.Eval.PeekEvalStack()

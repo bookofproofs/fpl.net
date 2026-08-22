@@ -335,7 +335,12 @@ let disjunction = positions (chooseBinaryOp keywordOr) |>> Ast.Or <!> "Or"
 let exclusiveOr = positions (chooseBinaryOp keywordXor) |>> Ast.Xor <!> "Xor"
 let implication = positions (chooseBinaryOp keywordImpl) |>> Ast.Impl <!> "Impl"
 let equivalence = positions (chooseBinaryOp keywordIif) |>> Ast.Iif <!> "Iif"
-let negation = positions (keywordNot >>. predicate) |>> Ast.Not <!> "Not"
+
+// Forward declaration is required because negation must bind to a prefix expression,
+// while pPrefixExpr is defined after pAtom and pPostfixExpr.
+let pPrefixExpr, pPrefixExprRef = createParserForwardedToRef()
+
+let negation = positions (keywordNot >>. pPrefixExpr) |>> Ast.Not <!> "Not"
 
 let all = positions ((keywordAll >>. namedVariableDeclarationList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.All <!> "All"
 let exists = positions ((keywordEx >>. namedVariableDeclarationList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.Exists <!> "Exists"
@@ -398,7 +403,7 @@ let pPostfixExpr : Parser<Ast,unit> =
             List.fold (fun acc op -> Ast.PostfixOp(op, acc)) expr postfixes
         ) <!> "pPostfixExpr"
 
-let pPrefixExpr : Parser<Ast,unit> =
+pPrefixExprRef.Value <-
     pipe2
         (many (attempt (prefixSymbolWithPos .>> NW)) <?> "<prefix symbol>")
         pPostfixExpr

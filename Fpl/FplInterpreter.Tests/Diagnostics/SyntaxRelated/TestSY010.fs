@@ -45,7 +45,7 @@ type TestSY010() =
     [<DataRow("02", "def pred T() { not ((x)) } ", 2)>] 
     // parens top level in compound predicates
     [<DataRow("03", "def pred T() { is(x,obj) } ", 0)>] 
-    [<DataRow("03a", "def pred T() { is((x),obj) } ", 1)>] 
+    [<DataRow("03a", "def pred T() { is((x),obj) } ", 1)>]
     [<DataRow("04", "def pred T() { not x } ", 0)>] 
     [<DataRow("04a", "def pred T() { not (x) } ", 1)>] 
     [<DataRow("05", "def pred T() { and (x,y) } ", 0)>] 
@@ -64,6 +64,7 @@ type TestSY010() =
     [<DataRow("11a", "def pred T() { ex x:obj {(x)}  } ", 1)>] 
     [<DataRow("12", "def pred T() { exn$2 x:obj {x} } ", 0)>] 
     [<DataRow("12a", "def pred T() { exn$2 x:obj {(x)}  } ", 1)>] 
+    [<DataRow("13", "def pred T() { dec f,g:pred; (¬f ⇒ ¬g) ⇒ (g ⇒ f) } ", 0)>]
 
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
