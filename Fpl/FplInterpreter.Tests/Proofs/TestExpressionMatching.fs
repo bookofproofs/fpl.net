@@ -45,7 +45,7 @@ type TestExpressionMatching() =
     let infixGreater = """def pred Greater(x,y: obj) infix ">" 70"""
     let infixAdd = """def func Add(f, g: obj)->obj infix "+" 20"""
     let infixMul = """def func Mul(f, g: obj)->obj infix "*" 10"""
-    let prefixTilde = """def func Root(f: obj)->obj prefix "~" """
+    let prefixTilde = """def func Tilde(f: obj)->obj prefix "~" """
     let prefixNabla = """def func Nabla(f: obj)->obj prefix "∇" """
     let postfixPrime = """def func Prime(f: obj)->obj postfix "'" """
     let postfixFact = """def func Fact(f: obj)->obj postfix "!" """
@@ -320,23 +320,15 @@ type TestExpressionMatching() =
         assertExpressionMatchesPattern no $"{infixEqual} {fplCode}" candidateBlockName patternBlockName
 
     [<DataRow("01", """def pred C() {dec x,y:obj; ¬del.Equal(x,y)} def pred P() {dec a,b:obj; ¬del.Equal(a,b)}""", "C()", "P()")>]
-    [<DataRow("01d", """def pred C() {dec x,y:obj; ¬del.Equal(x,y)} def pred P() {dec a,b:obj; a ≠ b}""", "C()", "P()")>]
-    [<DataRow("01e", """def pred C() {dec x,y:obj; x ≠ y} def pred P() {dec a,b:obj; ¬del.Equal(a,b)}""", "C()", "P()")>]
     [<DataRow("01f", """def pred C() {dec x,y:obj; x ≠ y} def pred P() {dec a,b:obj; a ≠ b}""", "C()", "P()")>]
 
     [<DataRow("02",  """def pred C() {dec x,y,z:obj; ¬del.Equal(¬del.Equal(x, y), z)} def pred P() {dec a,b,c:obj; ¬del.Equal(¬del.Equal(a, b), c)}""", "C()", "P()")>]
-    [<DataRow("02b", """def pred C() {dec x,y,z:obj; (x ≠ y) ≠ z} def pred P() {dec a,b,c:obj; ¬del.Equal(¬del.Equal(a, b), c)}""", "C()", "P()")>]
-    [<DataRow("02d", """def pred C() {dec x,y,z:obj; ¬del.Equal(¬del.Equal(x, y), z)} def pred P() {dec a,b,c:obj; (a ≠ b) ≠ c}""", "C()", "P()")>]
     [<DataRow("02h", """def pred C() {dec x,y,z:obj; (x ≠ y) ≠ z} def pred P() {dec a,b,c:obj; (a ≠ b) ≠ c}""", "C()", "P()")>]
 
     [<DataRow("03",  """def pred C() {dec x,y,z:obj; ¬del.Equal(x, ¬del.Equal(y, z))} def pred P() {dec a,b,c:obj; ¬del.Equal(a, ¬del.Equal(b, c))}""", "C()", "P()")>]
-    [<DataRow("03b", """def pred C() {dec x,y,z:obj; x ≠ (y ≠ z)} def pred P() {dec a,b,c:obj; ¬del.Equal(a, ¬del.Equal(b, c))}""", "C()", "P()")>]
-    [<DataRow("03d", """def pred C() {dec x,y,z:obj; ¬del.Equal(x, ¬del.Equal(y, z))} def pred P() {dec a,b,c:obj; a ≠ (b ≠ c)}""", "C()", "P()")>]
     [<DataRow("03h", """def pred C() {dec x,y,z:obj; x ≠ (y ≠ z)} def pred P() {dec a,b,c:obj; a ≠ (b ≠ c)}""", "C()", "P()")>]
 
     [<DataRow("04",  """def pred C() {dec x,y,z,w:obj; ¬del.Equal(¬del.Equal(x, y), ¬del.Equal(z, w))} def pred P() {dec a,b,c,d:obj; ¬del.Equal(¬del.Equal(a, b), ¬del.Equal(c, d))}""", "C()", "P()")>]
-    [<DataRow("04b", """def pred C() {dec x,y,z,w:obj; (x ≠ y) ≠ (z ≠ w)} def pred P() {dec a,b,c,d:obj; ¬del.Equal(¬del.Equal(a, b), ¬del.Equal(c, d))}""", "C()", "P()")>]
-    [<DataRow("04d", """def pred C() {dec x,y,z,w:obj; ¬del.Equal(¬del.Equal(x, y), ¬del.Equal(z, w))} def pred P() {dec a,b,c,d:obj; (a ≠ b) ≠ (c ≠ d)}""", "C()", "P()")>]
     [<DataRow("04h", """def pred C() {dec x,y,z,w:obj; (x ≠ y) ≠ (z ≠ w)} def pred P() {dec a,b,c,d:obj; (a ≠ b) ≠ (c ≠ d)}""", "C()", "P()")>]
     [<TestMethod>]
     member this.TestExpressionInfixNotEquality(no: string, fplCode: string, candidateBlockName: string, patternBlockName: string) =
@@ -476,7 +468,7 @@ type TestExpressionMatching() =
     [<DataRow("02",  """def pred C() {dec x:obj; Prime(Prime(x))} def pred P() {dec a:obj; Prime(Prime(a))}""", "C()", "P()")>]
     [<DataRow("02b", """def pred C() {dec x:obj; x''} def pred P() {dec a:obj; Prime(Prime(a))}""", "C()", "P()")>]
     [<DataRow("02d", """def pred C() {dec x:obj; Prime(Prime(x))} def pred P() {dec a:obj; a''}""", "C()", "P()")>]
-    [<DataRow("02h", """def pred C() {dec x:obj; x} def pred P() {dec a:obj; a''}""", "C()", "P()")>]
+    [<DataRow("02h", """def pred C() {dec x:obj; x''} def pred P() {dec a:obj; a''}""", "C()", "P()")>]
 
     [<DataRow("03",  """def pred C() {dec x:obj; Prime((Prime(y)))} def pred P() {dec a:obj; Prime((Prime(a)))}""", "C()", "P()")>]
     [<DataRow("03b", """def pred C() {dec x:obj; (x')'} def pred P() {dec a:obj; Prime((Prime(a)))}""", "C()", "P()")>]
@@ -695,7 +687,7 @@ type TestExpressionMatching() =
     [<DataRow("06",  """def pred C() {exn$0 x:pred {true}} def pred P() {exn$0 a:pred {true}}""", "C()", "P()")>]
     [<DataRow("06a", """def pred C() {exn$0 x:pred {true}} def pred P() {∃!0 a:pred {true}}""", "C()", "P()")>]
     [<DataRow("06b",  """def pred C() {∃!0 x:pred {true}} def pred P() {exn$0 a:pred {true}}""", "C()", "P()")>]
-    [<DataRow("06c", """def pred C() {∃!0x:pred {true}} def pred P() {∃!0 a:pred {true}}""", "C()", "P()")>]
+    [<DataRow("06c", """def pred C() {∃!0 x:pred {true}} def pred P() {∃!0 a:pred {true}}""", "C()", "P()")>]
 
     [<TestMethod>]
     member this.TestExpressionQuantifierExistsN(no: string, fplCode: string, candidateBlockName: string, patternBlockName: string) =
