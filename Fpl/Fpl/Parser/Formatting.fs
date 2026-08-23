@@ -5,6 +5,7 @@ module Fpl.Parser.Formatting
 open System
 open System.Text.RegularExpressions
 open Fpl.Parser.Types
+open Fpl.Errors.Messages
 open Fpl.Errors.Diagnostics
 open FParsec
 
@@ -21,6 +22,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 *)
 
 //------------
+
+
+
 
 /// Replaces in the `input` all regex pattern matches by spaces while preserving the new lines
 let replaceLinesWithSpaces (input: string) (pattern: string) =
@@ -174,13 +178,7 @@ let private insertLightning (input: string) =
                 let prev = List.head acc
                 let prevLen = prev.Length
 
-                let updatedPrev =
-                    if caretCol < prevLen then
-                        // insert ⚡ at caretCol
-                        prev.[0..caretCol-1] + "⚡" + prev.[caretCol..]
-                    else
-                        // previous line too short → append ⚡
-                        prev + "⚡"
+                let updatedPrev = insertLightningAtCol prev caretCol prevLen
 
                 // replace previous line, skip caret-line
                 loop (updatedPrev :: (List.tail acc)) rest

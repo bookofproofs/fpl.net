@@ -15,7 +15,6 @@ module Fpl.Errors.Messages
 open System
 open Fpl.Primitives
 
-
 /// Transforms a whole number into English ordinal
 let englishOrdinal dimNumber =
     match dimNumber with
@@ -41,7 +40,43 @@ let getEnglishName someString determined =
 
 let numbered inputLst =
     inputLst
-    |> Seq.mapi (fun i cand -> sprintf "%s  %d) %s" Environment.NewLine (i + 1) cand)
+    |> Seq.mapi (fun i cand -> $"{Environment.NewLine}  {i + 1}) {cand}")
+    |> String.concat ", "
+
+let insertLightningAtCol (input:string) (col:int) (prevLen:int) =
+    if col < prevLen then
+        // insert ⚡ at caretCol
+        input.[0..col-1] + "⚡" + input.[col..]
+    else
+        // previous line too short → append ⚡
+        input + "⚡"
+
+let findMismatchPosition (str1: string) (str2: string) =
+    let minLength = min str1.Length str2.Length
+    let indexMatch = 
+        [0 .. minLength - 1] 
+        |> Seq.tryFind (fun i -> str1.[i] <> str2.[i])
+
+    match indexMatch with
+    | Some idx -> 
+        Some idx // Mismatch found within the overlapping part
+    | None -> 
+        if str1.Length <> str2.Length then
+            Some minLength // Mismatch pos is the start of the extra characters
+        else
+            None // no mismatch
+
+let numberedWithMismatchedPattern inputLst pattern =
+    inputLst
+    |> Seq.mapi (fun i cand ->
+        match findMismatchPosition cand pattern with
+        | Some idx ->
+            $"{Environment.NewLine}  {i + 1}) `{insertLightningAtCol cand idx cand.Length}`" 
+        | _ ->
+            // should never 
+            $"{Environment.NewLine}  {i + 1}) `{cand}`" 
+            
+    )
     |> String.concat ", "
 
 let capitalize (word: string) =
@@ -132,7 +167,7 @@ let errPR016 argId lastAssumedArgumentId = $"Cannot revoke argument `{argId}` be
 let errPR017 = $"The `{LiteralTrivial}` justification may only be used on the final argument of a proof."
 let errPR019 justificationType1 justificationType2 = $"Mixed justification types in a single argument are not supported (`{justificationType1}` with `{justificationType2}`). Split the argument so each one uses only a single justification type."
 let errPR020 expectedNum actualNum = $"Justification `{PrimJIByInf}` requires {expectedNum} premise expressions, but it received {actualNum}."
-let errPR021 mismatchingCandidates inferredFormula justificationName = $"The argument `{inferredFormula}` cannot be inferred from the preceding results. {justificationName} found the following candidates:{mismatchingCandidates}."
+let errPR021 mismatchingCandidates inferredFormula justificationName = $"The argument{Environment.NewLine}     `{inferredFormula}`{Environment.NewLine}cannot be inferred from the preceding results. {justificationName} found the following candidates:{mismatchingCandidates}."
 let errPR022 reason = $"The argument inference was prevented. Reason: {reason}"
 
 // signature-related error codes

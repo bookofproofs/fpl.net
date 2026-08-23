@@ -37,7 +37,7 @@ type TestExpressionMatching() =
 
     let infixAnd = """def pred And(f, g: pred) infix "∧" 2 {and(f,g)}"""
     let infixOr = """def pred Or(f, g: pred) infix "∨" 3 {or(f,g)}"""
-    let infixor = """def pred Xor(f, g: pred) infix "⩡" 3 {xor(f,g)}"""
+    let infixor = """def pred Xor(f, g: pred) infix "⩡" 4 {xor(f,g)}"""
     let infixImpl = """def pred Impl(f, g: pred) infix "⇒" 0 {impl(f,g)}"""
     let infixIif = """def pred Iif(f, g: pred) infix "⇔" 1 {iif(f,g)}"""
     let infixEqual = """def pred Equal(x,y: obj) infix "=" 50 {del.Equal(x,y)}"""
@@ -693,4 +693,9 @@ type TestExpressionMatching() =
     member this.TestExpressionQuantifierExistsN(no: string, fplCode: string, candidateBlockName: string, patternBlockName: string) =
         assertExpressionMatchesPattern no fplCode candidateBlockName patternBlockName
 
+    [<DataRow("00", """def cl N def cl M def cl K def pred C() {xor(iif(all x:obj {is(x,N)}, ex y:obj {is(y,M)}), and(or(true, false), not all z:obj {is(z,N)})) } def pred P() {(∀ x:obj {x is N} ⇔ ∃ y:obj {y is M}) ⩡ ((true ∨ false) ∧ ¬∀ z:obj {z is N})}""", "C()", "P()")>]
+    [<DataRow("01", """def pred C() {dec f:pred; (f ⇒ ((f ⇒ f) ⇒ f)) ⇒ ((f ⇒ (f ⇒ f)) ⇒ (f ⇒ f))} def pred P() {dec f, g, h: pred; (f ⇒ (g ⇒ h)) ⇒ ((f ⇒ g) ⇒ (f ⇒ h))}""", "C()", "P()")>]
+    [<TestMethod>]
+    member this.TestExpressionMixed(no: string, fplCode: string, candidateBlockName: string, patternBlockName: string) =
+        assertExpressionMatchesPattern no $"{allOperators} {fplCode}" candidateBlockName patternBlockName
 

@@ -474,13 +474,13 @@ and FplArgument(positions: Positions, parent: FplGenericNode, runOrder) =
                         let v = new FplIntrinsicTrue((this.StartPos, this.StartPos), this)
                         this.SetValue v
                     else
-                        let mismatchingCandidates = numbered inferredExpressionCandidates
+                        let mismatchingCandidates = numberedWithMismatchedPattern inferredExpressionCandidates inferredExpr
                         let prettyJustificationName =
                             let justNames = lastJustificationOfArgument.FplId.Split(':')
                             if justNames.Length = 2 then 
-                                $"The justification by argument `{justNames[1]}` in another proof `{justNames[0]}`"
+                                $"The {PrimJIByRefArgument} justification `{justNames[1]}` in another proof `{justNames[0]}`"
                             else
-                                $"The justification `{lastJustificationOfArgument.Name}` `{lastJustificationOfArgument.Type SignatureType.Name}`"
+                                $"The {lastJustificationOfArgument.Name} justification `{lastJustificationOfArgument.Type SignatureType.Name}`"
                         this.ErrorOccurred <- emitPR021Diagnostics mismatchingCandidates inferredExpr prettyJustificationName argInference.StartPos argInference.EndPos
                         this.SetDefaultValue()
                 | _, _ ->
