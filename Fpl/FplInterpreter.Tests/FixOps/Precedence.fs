@@ -17,9 +17,9 @@ type TestPrecedence() =
     member this.TestPrecedenceInfix(var, varVal) =
         
         let fplCode = sprintf """ 
-                 def pred Mul(x,y: obj) infix "*" 2 {intr} // higher precedence
-                 def pred Add(x,y: obj) infix "+" 1  {intr} // lower precedence
-                 def pred Eq(x,y: obj) infix "=" -100 {intr} // lowest precedence
+                 def pred Mul(x,y: obj) infix "*" 2 {intr} // higher precedence (most binding)
+                 def pred Add(x,y: obj) infix "+" 1  {intr} // lower precedence (less binding)
+                 def pred Eq(x,y: obj) infix "=" -100 {intr} // lowest precedence (least binding)
                  def pred T1() { %s }""" varVal
         let filename = "TestPrecedenceInfix.fpl"
         prepareFplCode(filename + ".fpl", fplCode, false) 

@@ -1,1 +1,26 @@
-axiom T {dec x:obj x:=x; true }
+// lowest precedence for equality (1-19 is reserved for user-defined)
+def pred Equal(x,y: obj) infix "=" 0 {del.Equal(x,y)}
+// non-equality higher than equality
+def pred NotEqual(x,y: obj) infix "≠" 20 { ¬(x = y) }
+// comparison higher than non-equality
+def pred Greater(x,y: obj) infix ">" 25
+// equivalence is weaker than implication
+def pred Iif(f, g: pred) infix "⇔" 100 {iif(f,g)}
+// implication has structural precedence
+def pred Impl(f, g: pred) infix "⇒" 110 {impl(f,g)}
+// XOR is between implication and OR
+def pred Xor(f, g: pred) infix "⩡" 120 {xor(f,g)}
+// OR is weaker than AND
+def pred Or(f, g: pred) infix "∨" 130 {or(f,g)}
+// AND is the most binging among all logic symbols
+def pred And(f, g: pred) infix "∧" 140 {and(f,g)}
+// Arithmetic + has higher precedence than logical AND
+def func Add(f, g: obj)->obj infix "+" 150 
+// Arithmetic * has higher precedence than arithmetic + 
+def func Mul(f, g: obj)->obj infix "*" 160
+
+def cl N def cl M def cl K 
+
+
+
+def cl N def cl M def cl K ax A1 {dec p,q,r:pred; xor(iif(p, q), and(r, not p))} thm T {xor(iif(all x:obj {is(x,N)}, ex y:obj {is(y,M)}), and(or(true, false), not all z:obj {is(z,M)}))} prf T$1 { 1. byax A1 |- xor(iif(all x:obj {is(x,N)}, ex y:obj {is(y,M)}), and(or(true, false), not all z:obj {is(z,N)})) }

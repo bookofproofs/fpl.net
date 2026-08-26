@@ -35,16 +35,28 @@ type TestExpressionMatching() =
         finally
             prepareFplCode(filename, "", true) |> ignore
 
-    let infixAnd = """def pred And(f, g: pred) infix "∧" 2 {and(f,g)}"""
-    let infixOr = """def pred Or(f, g: pred) infix "∨" 3 {or(f,g)}"""
-    let infixor = """def pred Xor(f, g: pred) infix "⩡" 4 {xor(f,g)}"""
-    let infixImpl = """def pred Impl(f, g: pred) infix "⇒" 0 {impl(f,g)}"""
-    let infixIif = """def pred Iif(f, g: pred) infix "⇔" 1 {iif(f,g)}"""
-    let infixEqual = """def pred Equal(x,y: obj) infix "=" 50 {del.Equal(x,y)}"""
-    let infixNotEqual = """def pred NotEqual(x,y: obj) infix "≠" 60 { ¬(x = y) }"""
-    let infixGreater = """def pred Greater(x,y: obj) infix ">" 70"""
-    let infixAdd = """def func Add(f, g: obj)->obj infix "+" 20"""
-    let infixMul = """def func Mul(f, g: obj)->obj infix "*" 10"""
+    // The following precedences are copying those defined in the Fpl.Commons library for test purposes.
+    // lowest precedence for equality (1-19 is reserved for user-defined)
+    let infixEqual = """def pred Equal(x,y: obj) infix "=" 0 {del.Equal(x,y)}"""
+    // non-equality higher than equality
+    let infixNotEqual = """def pred NotEqual(x,y: obj) infix "≠" 20 { ¬(x = y) }"""
+    // comparison higher than non-equality
+    let infixGreater = """def pred Greater(x,y: obj) infix ">" 25"""
+    // equivalence is weaker than implication
+    let infixIif = """def pred Iif(f, g: pred) infix "⇔" 100 {iif(f,g)}"""
+    // implication has structural precedence
+    let infixImpl = """def pred Impl(f, g: pred) infix "⇒" 110 {impl(f,g)}"""
+    // XOR is between implication and OR
+    let infixor = """def pred Xor(f, g: pred) infix "⩡" 120 {xor(f,g)}"""
+    // OR is weaker than AND
+    let infixOr = """def pred Or(f, g: pred) infix "∨" 130 {or(f,g)}"""
+    // AND is the most binging among all logic symbols
+    let infixAnd = """def pred And(f, g: pred) infix "∧" 140 {and(f,g)}"""
+    // Arithmetic + has higher precedence than logical AND
+    let infixAdd = """def func Add(f, g: obj)->obj infix "+" 150 """
+    // Arithmetic * has higher precedence than arithmetic + 
+    let infixMul = """def func Mul(f, g: obj)->obj infix "*" 160"""
+
     let prefixTilde = """def func Tilde(f: obj)->obj prefix "~" """
     let prefixNabla = """def func Nabla(f: obj)->obj prefix "∇" """
     let postfixPrime = """def func Prime(f: obj)->obj postfix "'" """
@@ -694,6 +706,8 @@ type TestExpressionMatching() =
         assertExpressionMatchesPattern no fplCode candidateBlockName patternBlockName
 
     [<DataRow("00", """def cl N def cl M def cl K def pred C() {xor(iif(all x:obj {is(x,N)}, ex y:obj {is(y,M)}), and(or(true, false), not all z:obj {is(z,N)})) } def pred P() {(∀ x:obj {x is N} ⇔ ∃ y:obj {y is M}) ⩡ ((true ∨ false) ∧ ¬∀ z:obj {z is N})}""", "C()", "P()")>]
+    [<DataRow("00a", """def cl N def cl M def cl K def pred C() {(∀ x:obj {x is N} ⇔ ∃ y:obj {y is M}) ⩡ ((true ∨ false) ∧ ¬∀ x:obj {x is N})} def pred P() {(∀ x:obj {x is N} ⇔ ∃ y:obj {y is M}) ⩡ ((true ∨ false) ∧ ¬∀ z:obj {z is N})}""", "C()", "P()")>]
+    [<DataRow("00b", """def cl N def cl M def cl K def pred C() {(∀ x:obj {x is N} ⇔ ∃ y:obj {y is M}) ⩡ ((true ∨ false) ∧ ¬∀ x:obj {x is N})} def pred P() {(∀ x:obj {x is N} ⇔ ∃ y:obj {y is M}) ⩡ ((true ∨ false) ∧ ¬∀ x:obj {x is N})}""", "C()", "P()")>]
     [<DataRow("01", """def pred C() {dec f:pred; (f ⇒ ((f ⇒ f) ⇒ f)) ⇒ ((f ⇒ (f ⇒ f)) ⇒ (f ⇒ f))} def pred P() {dec f, g, h: pred; (f ⇒ (g ⇒ h)) ⇒ ((f ⇒ g) ⇒ (f ⇒ h))}""", "C()", "P()")>]
     [<TestMethod>]
     member this.TestExpressionMixed(no: string, fplCode: string, candidateBlockName: string, patternBlockName: string) =
