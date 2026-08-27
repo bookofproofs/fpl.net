@@ -34,30 +34,6 @@ let private errExprMismatchQuantifierVariableTypesWrapper (a:FplGenericNode) (p:
     let pName = p.Type SignatureType.Name
     errExprMismatchQuantifierVariableTypes aName pName xName yName index  
 
-let private compareQuantifierVariables (a:FplGenericNode) (p:FplGenericNode) (dictParameterUsage:Dictionary<string, FplGenericNode>) =
-    let pVars = p.GetVariables()
-    let aVars = a.GetVariables()
-    let rec loop l1 l2 index =
-        match l1, l2 with
-        | [], [] ->
-            match a.Name with
-            | PrimQuantifierExistsN when a.Name = p.Name && a.FplId <> p.FplId ->
-                errExprMismatchExistsN a.FplId (a.Type SignatureType.Name) p.FplId (p.Type SignatureType.Name)
-            | _ ->
-                errExprMismatchOK   // no mismatches
-        | (x:FplGenericNode)::xs, (y:FplGenericNode)::ys ->
-            match FplTypeMatcher.MatchPwA [x] [y] with
-            | Some _ ->
-                errExprMismatchQuantifierVariableTypesWrapper a p x y index
-            | _ ->
-                // remember corresponding quantifier variables of the matched quantifiers 
-                dictParameterUsage.TryAdd (y.FplId, x) |> ignore 
-                loop xs ys (index + 1)
-        | _ ->
-            // Should not happen if lengths are equal, but included for safety
-            errExprMismatchQuantifierVariableCounts (a.Type SignatureType.Name) (p.Type SignatureType.Name) aVars.Length pVars.Length
-    loop aVars pVars 0
-
 /// Creates a string representation of a quantifier formula in which its bound variables are replaced by
 /// placeholders numbered according to the order of the bound variables
 let private getNameOfQuantifierFormulaModuloBoundVarNames (fv:FplGenericNode) =
@@ -107,6 +83,34 @@ let private checkMismatchingUsageOfVars varName (a:FplGenericNode) (dictParamete
 /// Matches a candidate expression against a pattern expression while recording
 /// a consistent variable-usage map for later substitution.
 let matchExpressionAgainstPattern (candidate:FplGenericNode) (pattern:FplGenericNode) (dictParameterUsage: Dictionary<string, FplGenericNode>) =
+
+    // Tracks bound-variable correspondences established by quantifier matching.
+    // Keyed by the pattern variable node (reference equality), not its string name,
+    // so that identically-named bound variables in different quantifier scopes never collide.
+    let boundVarMap = Dictionary<FplGenericNode, FplGenericNode>()
+
+    let compareQuantifierVariables (a:FplGenericNode) (p:FplGenericNode) =
+        let pVars = p.GetVariables()
+        let aVars = a.GetVariables()
+        let rec loop l1 l2 index =
+            match l1, l2 with
+            | [], [] ->
+                match a.Name with
+                | PrimQuantifierExistsN when a.Name = p.Name && a.FplId <> p.FplId ->
+                    errExprMismatchExistsN a.FplId (a.Type SignatureType.Name) p.FplId (p.Type SignatureType.Name)
+                | _ ->
+                    errExprMismatchOK
+            | (x:FplGenericNode)::xs, (y:FplGenericNode)::ys ->
+                match FplTypeMatcher.MatchPwA [x] [y] with
+                | Some _ ->
+                    errExprMismatchQuantifierVariableTypesWrapper a p x y index
+                | _ ->
+                    boundVarMap[y] <- x
+                    dictParameterUsage.TryAdd(y.FplId, x) |> ignore
+                    loop xs ys (index + 1)
+            | _ ->
+                errExprMismatchQuantifierVariableCounts (a.Type SignatureType.Name) (p.Type SignatureType.Name) aVars.Length pVars.Length
+        loop aVars pVars 0
 
     // If the pattern is a parameterized variable reference, clone the variable and
     // project the referenced arguments onto the cloned parameters so matching can
@@ -181,11 +185,27 @@ let matchExpressionAgainstPattern (candidate:FplGenericNode) (pattern:FplGeneric
         | PrimEquivalence, PrimEquivalence
         | PrimExclusiveOr, PrimExclusiveOr
         | PrimNegation, PrimNegation -> checkExpressions (cand.ArgList |> Seq.toList) (pat.ArgList |> Seq.toList) 
+        | PrimIsOperator, PrimIsOperator ->
+            // first argument: the value expression (recurse normally)
+            match checkExpr (cand.ArgList[0]) (pat.ArgList[0]) with
+            | Some err -> Some err
+            | None ->
+                // second argument: the type of is operator — match only by referred definition identity
+                let candType = cand.ArgList[1]
+                let patType = pat.ArgList[1]
+                match candType.RefersTo, patType.RefersTo with
+                | Some candRef, Some patRef when Object.ReferenceEquals(candRef, patRef) ->
+                    errExprMismatchOK
+                | _ when candType.FplId = patType.FplId ->
+                    // fallback: same built-in type name (obj, ind, pred, func)
+                    errExprMismatchOK
+                | _ ->
+                    errExprMismatchMsgStandard (cand.Type SignatureType.Name) (pat.Type SignatureType.Name)
         | PrimQuantifierAll, PrimQuantifierAll 
         | PrimQuantifierExists, PrimQuantifierExists 
         | PrimQuantifierExistsN, PrimQuantifierExistsN ->
         // match number of quantifier variables
-            match compareQuantifierVariables cand pat dictParameterUsage with
+            match compareQuantifierVariables cand pat with
             | None ->
                 // and now check the expressions inside the quantifiers
                 checkExpressions (cand.ArgList |> Seq.toList) (pat.ArgList |> Seq.toList) 
@@ -212,8 +232,17 @@ let matchExpressionAgainstPattern (candidate:FplGenericNode) (pattern:FplGeneric
             checkExpressions (cand.ArgList |> Seq.toList) (pat.ArgList |> Seq.toList)
         | PrimRefL, PrimRefL when haveSameTransparentReferenceOperator cand pat ->
             checkExpressions (cand.ArgList |> Seq.toList) (pat.ArgList |> Seq.toList)
+        | _, PrimRefL when pat.RefersTo.IsSome && boundVarMap.ContainsKey(pat.RefersTo.Value) ->
+            let expectedCandidateVar = boundVarMap[pat.RefersTo.Value]
+            match cand.RefersTo with
+            | Some actualCandidateVar when Object.ReferenceEquals(actualCandidateVar, expectedCandidateVar) ->
+                errExprMismatchOK
+            | _ ->
+                errExprMismatchMsgStandard (cand.Type SignatureType.Name) (pat.Type SignatureType.Name)
         | PrimRefL, PrimRefL ->
             match cand.RefersTo, pat.RefersTo with
+            | Some aRef, Some pRef when Object.ReferenceEquals(aRef, pRef) ->
+                checkExpressions (getArguments cand) (getArguments pat)
             | Some aRef, Some pRef ->
                 checkExpr (mockVariableWithParams cand aRef) (mockVariableWithParams pat pRef)
             | Some aRef, None when pat.ArgList.Count > 0 && not pat.ExpressionType.IsParen ->
