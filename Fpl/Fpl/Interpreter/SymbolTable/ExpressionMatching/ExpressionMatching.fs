@@ -106,7 +106,10 @@ let matchExpressionAgainstPattern (candidate:FplGenericNode) (pattern:FplGeneric
                     errExprMismatchQuantifierVariableTypesWrapper a p x y index
                 | _ ->
                     boundVarMap[y] <- x
-                    dictParameterUsage.TryAdd(y.FplId, x) |> ignore
+                    if dictParameterUsage.ContainsKey(y.FplId) then
+                        dictParameterUsage[y.FplId] <- x
+                    else
+                        dictParameterUsage.TryAdd(y.FplId, x) |> ignore
                     loop xs ys (index + 1)
             | _ ->
                 errExprMismatchQuantifierVariableCounts (a.Type SignatureType.Name) (p.Type SignatureType.Name) aVars.Length pVars.Length

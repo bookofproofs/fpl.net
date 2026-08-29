@@ -489,7 +489,7 @@ and FplArgument(positions: Positions, parent: FplGenericNode, runOrder) =
                                     $"{Environment.NewLine}     Substitutions:" +       
                                     (
                                         dictParameterUsage
-                                        |> Seq.map (fun kvp -> $"{Environment.NewLine}       {kvp.Key} := {kvp.Value.Type SignatureType.Name}")
+                                        |> Seq.map (fun kvp -> $"{Environment.NewLine}       `{kvp.Key} := {kvp.Value.Type SignatureType.Name}`")
                                         |> String.concat ", "
                                     )
                                     
