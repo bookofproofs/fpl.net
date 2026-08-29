@@ -66,19 +66,6 @@ let findMismatchPosition (str1: string) (str2: string) =
         else
             None // no mismatch
 
-let numberedWithMismatchedPattern inputLst pattern =
-    inputLst
-    |> Seq.mapi (fun i cand ->
-        match findMismatchPosition cand pattern with
-        | Some idx ->
-            $"{Environment.NewLine}  {i + 1}) `{insertLightningAtCol cand idx cand.Length}`" 
-        | _ ->
-            // should never 
-            $"{Environment.NewLine}  {i + 1}) `{cand}`" 
-            
-    )
-    |> String.concat ", "
-
 let capitalize (word: string) =
     if String.IsNullOrEmpty word then word
     else word.[0].ToString().ToUpper() + word.Substring(1)

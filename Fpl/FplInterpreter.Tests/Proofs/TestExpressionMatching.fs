@@ -709,6 +709,10 @@ type TestExpressionMatching() =
     [<DataRow("00a", """def cl N def cl M def cl K def pred C() {(∀ x:obj {x is N} ⇔ ∃ y:obj {y is M}) ⩡ ((true ∨ false) ∧ ¬∀ x:obj {x is N})} def pred P() {(∀ x:obj {x is N} ⇔ ∃ y:obj {y is M}) ⩡ ((true ∨ false) ∧ ¬∀ z:obj {z is N})}""", "C()", "P()")>]
     [<DataRow("00b", """def cl N def cl M def cl K def pred C() {(∀ x:obj {x is N} ⇔ ∃ y:obj {y is M}) ⩡ ((true ∨ false) ∧ ¬∀ x:obj {x is N})} def pred P() {(∀ x:obj {x is N} ⇔ ∃ y:obj {y is M}) ⩡ ((true ∨ false) ∧ ¬∀ x:obj {x is N})}""", "C()", "P()")>]
     [<DataRow("01", """def pred C() {dec f:pred; (f ⇒ ((f ⇒ f) ⇒ f)) ⇒ ((f ⇒ (f ⇒ f)) ⇒ (f ⇒ f))} def pred P() {dec f, g, h: pred; (f ⇒ (g ⇒ h)) ⇒ ((f ⇒ g) ⇒ (f ⇒ h))}""", "C()", "P()")>]
+    [<DataRow("02",  """def pred C() {(∀ x:obj {x is N} ⇔ ∃ y:obj {y is M}) ⩡ (true ∨ false) ∧ ¬∀ z:obj {z is N}} def pred P() {dec p, q, r: pred; (p ⇔ q) ⩡ r ∨ ¬p}""", "C()", "P()")>]
+    [<DataRow("02a", """def pred C() {(∀ x:obj {x is N} ⇔ ∃ y:obj {y is M}) ⩡ true ∧ ¬∀ z:obj {z is N}} def pred P() {dec p, q, r: pred; (p ⇔ q) ⩡ r ∨ ¬p}""", "C()", "P()")>]
+    [<DataRow("02b", """def pred C() {(false ⇔ ∃ y:obj {y is M}) ⩡ true ∧ ¬false} def pred P() {dec p, q, r: pred; (p ⇔ q) ⩡ r ∨ ¬p}""", "C()", "P()")>]
+    [<DataRow("02c", """def pred C() {(false ⇔ false) ⩡ true ∧ ¬false} def pred P() {dec p, q, r: pred; (p ⇔ q) ⩡ r ∨ ¬p}""", "C()", "P()")>]
     [<TestMethod>]
     member this.TestExpressionMixed(no: string, fplCode: string, candidateBlockName: string, patternBlockName: string) =
         assertExpressionMatchesPattern no $"{allOperators} {fplCode}" candidateBlockName patternBlockName
