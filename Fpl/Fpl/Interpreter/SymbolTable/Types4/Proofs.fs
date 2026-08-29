@@ -484,11 +484,20 @@ and FplArgument(positions: Positions, parent: FplGenericNode, runOrder) =
                             lastJustificationOfArgument.InferredExprCandidates
                             |> List.mapi (fun i justificationCandidate ->
                                 let dictParameterUsage = Dictionary<string, FplGenericNode>()
-                                match matchExpressionAgainstPattern argumentInferredFormula justificationCandidate dictParameterUsage with
+                                let matchResult = matchExpressionAgainstPattern argumentInferredFormula justificationCandidate dictParameterUsage
+                                let substitutions =
+                                    $"{Environment.NewLine}     Substitutions:" +       
+                                    (
+                                        dictParameterUsage
+                                        |> Seq.map (fun kvp -> $"{Environment.NewLine}       {kvp.Key} := {kvp.Value.Type SignatureType.Name}")
+                                        |> String.concat ", "
+                                    )
+                                    
+                                match matchResult with
                                 | Some errorMsg ->
-                                    $"{Environment.NewLine}  {i + 1}) `{justificationCandidate.Type SignatureType.Name}`   ⚡{errorMsg}" 
+                                    $"{Environment.NewLine}  {i + 1}) `{justificationCandidate.Type SignatureType.Name}`{Environment.NewLine}     {errorMsg}{substitutions}"
                                 | None -> 
-                                    $"{Environment.NewLine}  {i + 1}) `{justificationCandidate.Type SignatureType.Name}`" 
+                                    $"{Environment.NewLine}  {i + 1}) `{justificationCandidate.Type SignatureType.Name}`{substitutions}" 
                             )
                             |> String.concat ", "
 

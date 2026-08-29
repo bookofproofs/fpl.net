@@ -23,4 +23,6 @@ def cl N def cl M def cl K
 
 
 
-ax A1 {dec p,q,r:pred; xor(iif(p, q), or(r, not p))} thm T { (∀ x:obj {x is N} ⇔ ∃ y:obj {y is M}) ⩡ (true ∨ false) ∧ ¬∀ z:obj {z is N} } prf T$1 { 1. byax A1 |- (∀ x:obj {x is N} ⇔ ∃ y:obj {y is M}) ⩡ (true ∨ false) ∧ ¬∀ z:obj {z is N} }
+// ax A1 {dec p,q,r:pred; xor(iif(p, q), and(r, not p))} thm T { (∀ x:obj {x is N} ⇔ ∃ y:obj {y is M}) ⩡ (true ∨ false) ∧ ¬∀ z:obj {z is N} } prf T$1 { 1. byax A1 |- (∀ x:obj {x is N} ⇔ ∃ y:obj {y is M}) ⩡ (true ∨ false) ∧ ¬∀ z:obj {z is N} }
+ax A1 {dec p,q,r:pred; xor(iif(p, q), and(r, not p))} thm T {xor(iif(all x:obj {is(x,N)}, ex y:obj {is(y,M)}), and(or(true, false), not all z:obj {is(z,M)}))} prf T$1 { 1. byax A1 |- xor(iif(all x:obj {is(x,N)}, ex y:obj {is(y,M)}), and(or(true, false), not all z:obj {is(z,N)})) }
+// ax A1 {dec p,q,r:pred; xor(iif(p, q), and(r, not p))} thm T { (∀ x:obj {x is N} ⇔ ∃ y:obj {y is M}) ⩡ (true ∨ false) ∧ ¬∀ z:obj {z is N} } prf T$1 { 1. byax A1 |- (∀ x:obj {x is N} ⇔ ∃ y:obj {y is M}) ⩡ (true ∨ false) ∧ ¬∀ z:obj {z is N} }
