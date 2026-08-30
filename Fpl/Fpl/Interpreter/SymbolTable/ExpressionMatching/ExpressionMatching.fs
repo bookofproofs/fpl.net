@@ -162,6 +162,34 @@ let matchExpressionAgainstPattern (candidate:FplGenericNode) (pattern:FplGeneric
         | Some aOperator, Some pOperator -> aOperator = pOperator
         | _ -> false
 
+    let checkCandidateAgainstVarReference (cand:FplGenericNode) (variableReference:FplGenericNode) =
+        let (errMsgOpt,_) = FplTypeMatcher.ComparisonBasedOnOpenFormulas cand variableReference
+        match errMsgOpt, variableReference.RefersTo with
+        | None, Some var when var.Name = PrimVariableL ->
+            let mismatchUsageVarOpt = checkMismatchingUsageOfVars variableReference.FplId cand dictParameterUsage
+            match mismatchUsageVarOpt with
+            | Some errMsg -> Some errMsg
+            | None when var.Scope.Count > 0 ->
+                let pPars = getArguments variableReference
+                let aPars = getDistinctVarsOfExpression cand
+                if aPars.Length <> pPars.Length then
+                    let aVars = aPars |> List.map (fun v -> $"{v.FplId}") |> String.concat ", "
+                    let pName = variableReference.Type SignatureType.Name
+                    errExprMismatchVarNumbDifferent aPars.Length aVars pPars.Length pName
+                else
+                    let lstOfErrMessages =
+                        List.zip pPars aPars
+                        |> List.map (fun (pArg, aArg) ->
+                            checkMismatchingUsageOfVars pArg.FplId aArg dictParameterUsage
+                        ) 
+                    let secondResult = lstOfErrMessages |> List.tryPick (fun errMsgOpt -> errMsgOpt)
+                    secondResult
+            | _ -> errExprMismatchOK
+        | Some errMsg, _ -> Some errMsg
+        | _,_ ->
+            errExprMismatchOK
+
+
     // The usage dictionary records the first expression matched to each pattern
     // variable and enforces that every later occurrence matches the same expression.
     // It is also reused to instantiate the final matched expression.
@@ -244,6 +272,8 @@ let matchExpressionAgainstPattern (candidate:FplGenericNode) (pattern:FplGeneric
                 errExprMismatchMsgStandard (cand.Type SignatureType.Name) (pat.Type SignatureType.Name)
         | PrimRefL, PrimRefL ->
             match cand.RefersTo, pat.RefersTo with
+            | Some aRef, Some pRef when aRef.Name <> PrimVariableL && pRef.Name = PrimVariableL ->
+                checkCandidateAgainstVarReference cand pat
             | Some aRef, Some pRef when Object.ReferenceEquals(aRef, pRef) ->
                 checkExpressions (getArguments cand) (getArguments pat)
             | Some aRef, Some pRef ->
@@ -259,31 +289,7 @@ let matchExpressionAgainstPattern (candidate:FplGenericNode) (pattern:FplGeneric
             | _, _ ->
                 errExprMismatchOK
         | _, PrimRefL when pat.RefersTo.IsSome && pat.RefersTo.Value.Name = PrimVariableL ->
-            let (errMsgOpt,_) = FplTypeMatcher.ComparisonBasedOnOpenFormulas cand pat
-            match errMsgOpt, pat.RefersTo with
-            | None, Some var when var.Name = PrimVariableL ->
-                let firstResult = checkMismatchingUsageOfVars pat.FplId cand dictParameterUsage
-                match firstResult with
-                | Some errMsg -> Some errMsg
-                | None when var.Scope.Count > 0 ->
-                    let pPars = getArguments pat
-                    let aPars = getDistinctVarsOfExpression cand
-                    if aPars.Length <> pPars.Length then
-                        let aVars = aPars |> List.map (fun v -> $"{v.FplId}") |> String.concat ", "
-                        let pName = pat.Type SignatureType.Name
-                        errExprMismatchVarNumbDifferent aPars.Length aVars pPars.Length pName
-                    else
-                        let lstOfErrMessages =
-                            List.zip pPars aPars
-                            |> List.map (fun (pArg, aArg) ->
-                                checkMismatchingUsageOfVars pArg.FplId aArg dictParameterUsage
-                            ) 
-                        let secondResult = lstOfErrMessages |> List.tryPick (fun errMsgOpt -> errMsgOpt)
-                        secondResult
-                | _ -> errExprMismatchOK
-            | Some errMsg, _ -> Some errMsg
-            | _,_ ->
-                errExprMismatchOK
+            checkCandidateAgainstVarReference cand pat
         | _, PrimVariableL ->
             match FplTypeMatcher.MatchArgumentsWithParameters cand pat with
             | Some err -> Some err
