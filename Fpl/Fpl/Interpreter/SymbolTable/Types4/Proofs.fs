@@ -496,12 +496,15 @@ and FplArgument(positions: Positions, parent: FplGenericNode, runOrder) =
                                 let dictParameterUsage = Dictionary<string, FplGenericNode>()
                                 let matchResult = matchExpressionAgainstPattern argumentInferredFormula justificationCandidate dictParameterUsage
                                 let substitutions =
-                                    $"{Environment.NewLine}     Substitutions:" +       
-                                    (
-                                        dictParameterUsage
-                                        |> Seq.map (fun kvp -> $"{Environment.NewLine}       `{kvp.Key} := {kvp.Value.Type SignatureType.Name}`")
-                                        |> String.concat ", "
-                                    )
+                                    if dictParameterUsage.Count > 0 then 
+                                        $"{Environment.NewLine}     Substitutions:" +       
+                                        (
+                                            dictParameterUsage
+                                            |> Seq.map (fun kvp -> $"{Environment.NewLine}       `{kvp.Key} := {kvp.Value.Type SignatureType.Name}`")
+                                            |> String.concat ", "
+                                        )
+                                    else
+                                        $"{Environment.NewLine}     No substitutions found" 
                                     
                                 match matchResult with
                                 | Some errorMsg ->
