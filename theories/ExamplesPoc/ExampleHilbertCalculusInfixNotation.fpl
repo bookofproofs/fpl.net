@@ -7,7 +7,7 @@ def pred Impl(f, g: pred) infix "⇒" 0
     impl(f,g)
 }
 
-
+ 
 // weakening rule
 axiom A1
 {
@@ -52,7 +52,7 @@ proof T1$1
     1. byax A2 |- 
     (f ⇒ ((f ⇒ f) ⇒ f)) ⇒ ((f ⇒ (f ⇒ f)) ⇒ (f ⇒ f))
     2. byax A1 |- 
-    (f ⇒ ((f ⇒ f) ⇒  f))
+    f ⇒ ((f ⇒ f) ⇒  f)
     3. 1, 2, byinf ModusPonens |- 
     (f ⇒ (f ⇒ f)) ⇒ (f ⇒ f)
     4. byax A1 |- 

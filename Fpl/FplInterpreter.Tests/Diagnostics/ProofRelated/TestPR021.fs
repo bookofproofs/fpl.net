@@ -29,6 +29,8 @@ type TestPR021() =
     [<DataRow("04a", """ax A {∃! x:obj{true}} thm T {true} prf T$1 { 1. byax A |- true }""", 1)>]
     [<DataRow("05", """ax A {∃!3 x:obj{true}} thm T {true} prf T$1 { 1. byax A |- ∃!3 x:obj {true} }""", 0)>]
     [<DataRow("05a", """ax A {∃!3 x:obj{true}} thm T {true} prf T$1 { 1. byax A |- true }""", 1)>]
+    [<DataRow("06", """ax A {dec r:pred; and(r,r)} thm T {true} prf T$1 { 1. byax A |- and(∀ x:obj {true}, ∀ z:obj {true}) }""", 0)>]
+
     [<TestMethod>]
     member this.TestPR021InferenceByAx(no:string, fplCode:string, expected) =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
