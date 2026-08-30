@@ -444,7 +444,7 @@ let instantiateExpressionByVarUsages (expression: FplGenericNode) (varUsageDict:
         expr.ArgList
         |> Seq.iter (fun arg ->
             if isVariableWithMatchedExpression arg then
-                newArgList.Add varUsageDict[arg.FplId]
+                newArgList.Add (varUsageDict[arg.FplId].Clone())  // clone to avoid sharing
             else 
                 newArgList.Add (replaceVarsByUsages arg)
         )
@@ -455,7 +455,7 @@ let instantiateExpressionByVarUsages (expression: FplGenericNode) (varUsageDict:
             // printed representation reflect the instantiation consistently.
             if varUsageDict.ContainsKey(var.FplId) then
                 var.TypeId <- varUsageDict[var.FplId].TypeId
-                var.FplId <- varUsageDict[var.FplId].FplId 
+                var.FplId <- varUsageDict[var.FplId].FplId
         )
             
         // replace expression arguments by new expressions where variables were replaced by their usages

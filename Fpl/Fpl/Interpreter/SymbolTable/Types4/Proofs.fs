@@ -73,7 +73,7 @@ type FplJustificationItemByAx(positions: Positions, parent: FplGenericNode) =
                                     let formulaFromMatcherStr = candidates[0].Type SignatureType.Name
                                     let fomulaFromArgumentStr = fomulaFromArgument.Type SignatureType.Name 
                                     if fomulaFromArgumentStr <> formulaFromMatcherStr then
-                                        candidates.Add(fomulaFromArgument)
+                                        candidates.Add(fomulaFromArgument.Clone())  // clone to avoid sharing
                                 | Some err -> // FAILURE: match failed
                                     candidates.Add(axiomFormula.Clone())
                             | None ->
