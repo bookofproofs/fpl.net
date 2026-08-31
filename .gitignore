@@ -46,3 +46,4 @@
 /Fpl/TestSharedConfig/bin/Release/net8.0
 /Fpl/TestResults
 /theories/lib/Debug.txt
+*.user
