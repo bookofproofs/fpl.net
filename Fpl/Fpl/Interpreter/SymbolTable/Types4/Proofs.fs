@@ -478,8 +478,18 @@ and FplArgument(positions: Positions, parent: FplGenericNode, runOrder) =
                 | Some argumentInferredFormula, Some (:? FplGenericJustificationItem as lastJustificationOfArgument) ->
                     let inferredExpr = argumentInferredFormula.Type SignatureType.Name
                     let inferredExpressionCandidates = lastJustificationOfArgument.InferredExprCandidates |> List.map (fun expr -> expr.Type SignatureType.Name)
-                    let derivedInferenceIsCorrect = inferredExpressionCandidates |> List.contains inferredExpr
-
+                    let derivedInferenceIsCorrect =
+                        // Fast path: direct string equality.
+                        inferredExpressionCandidates |> List.contains inferredExpr
+                        // Slow path: treat each justification candidate as a schema and try to
+                        // match the inferred expression against it. This covers the case where
+                        // the candidate contains schema variables (e.g. `g ⇒ h`) that can be
+                        // instantiated to the inferred expression (e.g. `f ⇒ h` with `g := f`).
+                        || lastJustificationOfArgument.InferredExprCandidates
+                           |> List.exists (fun candidate ->
+                               let dictParameterUsage = Dictionary<string, FplGenericNode>()
+                               matchExpressionAgainstPattern argumentInferredFormula candidate dictParameterUsage |> Option.isNone
+                           )
                     if derivedInferenceIsCorrect then 
                         let v = new FplIntrinsicTrue((this.StartPos, this.StartPos), this)
                         this.SetValue v
