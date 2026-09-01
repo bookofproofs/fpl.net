@@ -50,40 +50,44 @@ type FplJustificationItemByAx(positions: Positions, parent: FplGenericNode) =
             match this.RefersTo with
             | Some ax ->
                 if ax.ArgList.Count > 0 then
-                    let axiomFormula = ax.ArgList |> Seq.last
-                    let candidates = ResizeArray<FplGenericNode>()
-                    
-                    match this.Parent.Value.Parent with
-                    | Some (:? FplArgument as argument) ->
-                        match argument.ArgumentInference with
-                        | Some (argInference: FplGenericArgInference) ->
-                            match argInference.InferredExprCandidates |> List.tryHead with
-                            | Some fomulaFromArgument ->
-                                let dictParameterUsage = Dictionary<string, FplGenericNode>()
-                                match matchExpressionAgainstPattern fomulaFromArgument axiomFormula dictParameterUsage with
-                                | None -> // SUCCESS: match succeeded, now instantiate
-                                    let expr = axiomFormula.Clone()
-                                    candidates.Add(instantiateExpressionByVarUsages expr dictParameterUsage)
-                                    // Also add the inferred formula itself as a candidate.
-                                    // The match above already confirmed it is a valid instantiation of the
-                                    // axiom schema, so it is always accepted. This covers "cleaned-up"
-                                    // expressions where repeated schema variables (e.g. and(r,r)) are
-                                    // satisfied by two structurally equal but alpha-distinct sub-formulas
-                                    // (e.g. ∀ x:obj {true} ∧ ∀ z:obj {true}).
-                                    let formulaFromMatcherStr = candidates[0].Type SignatureType.Name
-                                    let fomulaFromArgumentStr = fomulaFromArgument.Type SignatureType.Name 
-                                    if fomulaFromArgumentStr <> formulaFromMatcherStr then
-                                        candidates.Add(fomulaFromArgument.Clone())  // clone to avoid sharing
-                                | Some err -> // FAILURE: match failed
-                                    candidates.Add(axiomFormula.Clone())
-                            | None ->
-                                ()
-                        | None ->
-                            ()
-                    | _ ->
-                        ()
+                    [ax.ArgList |> Seq.last]
 
-                    candidates |> Seq.toList
+
+
+                    //let axiomFormula = ax.ArgList |> Seq.last
+                    //let candidates = ResizeArray<FplGenericNode>()
+                    
+                    //match this.Parent.Value.Parent with
+                    //| Some (:? FplArgument as argument) ->
+                    //    match argument.ArgumentInference with
+                    //    | Some (argInference: FplGenericArgInference) ->
+                    //        match argInference.InferredExprCandidates |> List.tryHead with
+                    //        | Some fomulaFromArgument ->
+                    //            let dictParameterUsage = Dictionary<string, FplGenericNode>()
+                    //            match matchExpressionAgainstPattern fomulaFromArgument axiomFormula dictParameterUsage with
+                    //            | None -> // SUCCESS: match succeeded, now instantiate
+                    //                let expr = axiomFormula.Clone()
+                    //                candidates.Add(instantiateExpressionByVarUsages expr dictParameterUsage)
+                    //                // Also add the inferred formula itself as a candidate.
+                    //                // The match above already confirmed it is a valid instantiation of the
+                    //                // axiom schema, so it is always accepted. This covers "cleaned-up"
+                    //                // expressions where repeated schema variables (e.g. and(r,r)) are
+                    //                // satisfied by two structurally equal but alpha-distinct sub-formulas
+                    //                // (e.g. ∀ x:obj {true} ∧ ∀ z:obj {true}).
+                    //                let formulaFromMatcherStr = candidates[0].Type SignatureType.Name
+                    //                let fomulaFromArgumentStr = fomulaFromArgument.Type SignatureType.Name 
+                    //                if fomulaFromArgumentStr <> formulaFromMatcherStr then
+                    //                    candidates.Add(fomulaFromArgument.Clone())  // clone to avoid sharing
+                    //            | Some err -> // FAILURE: match failed
+                    //                candidates.Add(axiomFormula.Clone())
+                    //        | None ->
+                    //            ()
+                    //    | None ->
+                    //        ()
+                    //| _ ->
+                    //    ()
+
+                    //candidates |> Seq.toList
                 else
                     issuePR022AndSetDefault this (Some ax) None
                     [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
@@ -249,9 +253,9 @@ and FplJustificationItemByInf(positions: Positions, parent: FplGenericNode) =
                         [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
                     | None ->
                         if listOfPairs.Length > 0 then
-                            let varUsageDict = snd listOfPairs.Head
+                            let dictParameterUsage = snd listOfPairs.Head
                             let expr = conclusion.Clone()
-                            [instantiateExpressionByVarUsages expr varUsageDict]
+                            [instantiateExpressionByVarUsages expr dictParameterUsage]
                         else
                             issuePR022SpecialReasonAndSetDefault this "No expressions could be inferred while matching input justificationItems with premise list."
                             []

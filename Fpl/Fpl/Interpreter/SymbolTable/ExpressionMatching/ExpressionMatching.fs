@@ -34,6 +34,55 @@ let private errExprMismatchQuantifierVariableTypesWrapper (a:FplGenericNode) (p:
     let pName = p.Type SignatureType.Name
     errExprMismatchQuantifierVariableTypes aName pName xName yName index  
 
+/// Instantiates an expression by replacing variables with the expressions
+/// recorded in the variable-usage dictionary.
+let instantiateExpressionByVarUsages (expression: FplGenericNode) (dictParameterUsage: Dictionary<string, FplGenericNode>) : FplGenericNode =
+    let isVariableWithMatchedExpression (arg:FplGenericNode) =
+        match arg.Name with
+        | PrimRefL when arg.RefersTo.IsSome ->
+            match arg.RefersTo with
+            | Some var when var.Name = PrimVariableL ->
+                dictParameterUsage.ContainsKey(var.FplId) 
+            | _ ->  false
+        | _ ->  false
+
+    // Replace matched variables recursively throughout the cloned expression.
+    let rec replaceVarsByUsages (expr:FplGenericNode) =
+        let newArgList = List<FplGenericNode>()
+        expr.ArgList
+        |> Seq.iter (fun arg ->
+            if isVariableWithMatchedExpression arg then
+                newArgList.Add (dictParameterUsage[arg.FplId].Clone())  // clone to avoid sharing
+            else 
+                newArgList.Add (replaceVarsByUsages arg)
+        )
+        let exprVarList = expr.GetVariables()
+        exprVarList
+        |> Seq.iter (fun var ->
+            // Update variable metadata in the cloned expression so its structure and
+            // printed representation reflect the instantiation consistently.
+            if dictParameterUsage.ContainsKey(var.FplId) then
+                var.TypeId <- dictParameterUsage[var.FplId].TypeId
+                var.FplId <- dictParameterUsage[var.FplId].FplId
+        )
+            
+        // replace expression arguments by new expressions where variables were replaced by their usages
+        newArgList
+        |> Seq.iteri (fun i arg -> expr.ArgList[i] <- arg)
+        expr
+    // Propagate the recorded substitutions into the variable scope of the cloned
+    // expression so the resulting expression reflects the matched instantiation.
+    if isVariableWithMatchedExpression expression then
+        // If the expression is a single variable
+        // and this variable was matched with some expression,
+        // we replace the whole expression with this matched expression
+        dictParameterUsage[expression.FplId]
+    else
+        // otherwise we replace it with the expression in which
+        // we recursively replace all variables by matched expressions
+        replaceVarsByUsages expression
+
+
 /// Creates a string representation of a quantifier formula in which its bound variables are replaced by
 /// placeholders numbered according to the order of the bound variables
 let private getNameOfQuantifierFormulaModuloBoundVarNames (fv:FplGenericNode) =
@@ -426,50 +475,3 @@ let matchJustItemsExpressionsAgainstPremiseList (tuplesJustItemWithInferredExpre
     let res = result |> List.concat
     res
 
-/// Instantiates an expression by replacing variables with the expressions
-/// recorded in the variable-usage dictionary.
-let instantiateExpressionByVarUsages (expression: FplGenericNode) (varUsageDict: Dictionary<string, FplGenericNode>) : FplGenericNode =
-    let isVariableWithMatchedExpression (arg:FplGenericNode) =
-        match arg.Name with
-        | PrimRefL when arg.RefersTo.IsSome ->
-            match arg.RefersTo with
-            | Some var when var.Name = PrimVariableL ->
-                varUsageDict.ContainsKey(var.FplId) 
-            | _ ->  false
-        | _ ->  false
-
-    // Replace matched variables recursively throughout the cloned expression.
-    let rec replaceVarsByUsages (expr:FplGenericNode) =
-        let newArgList = List<FplGenericNode>()
-        expr.ArgList
-        |> Seq.iter (fun arg ->
-            if isVariableWithMatchedExpression arg then
-                newArgList.Add (varUsageDict[arg.FplId].Clone())  // clone to avoid sharing
-            else 
-                newArgList.Add (replaceVarsByUsages arg)
-        )
-        let exprVarList = expr.GetVariables()
-        exprVarList
-        |> Seq.iter (fun var ->
-            // Update variable metadata in the cloned expression so its structure and
-            // printed representation reflect the instantiation consistently.
-            if varUsageDict.ContainsKey(var.FplId) then
-                var.TypeId <- varUsageDict[var.FplId].TypeId
-                var.FplId <- varUsageDict[var.FplId].FplId
-        )
-            
-        // replace expression arguments by new expressions where variables were replaced by their usages
-        newArgList
-        |> Seq.iteri (fun i arg -> expr.ArgList[i] <- arg)
-        expr
-    // Propagate the recorded substitutions into the variable scope of the cloned
-    // expression so the resulting expression reflects the matched instantiation.
-    if isVariableWithMatchedExpression expression then
-        // If the expression is a single variable
-        // and this variable was matched with some expression,
-        // we replace the whole expression with this matched expression
-        varUsageDict[expression.FplId]
-    else
-        // otherwise we replace it with the expression in which
-        // we recursively replace all variables by matched expressions
-        replaceVarsByUsages expression
