@@ -1,14 +1,57 @@
 namespace FplInterpreter.Tests.Proofs
 open Microsoft.VisualStudio.TestTools.UnitTesting
+open System
+open System.Collections.Generic
 open Fpl.Primitives
 open Fpl.Interpreter.BasicTypes
 open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.SymbolTable.Storage.Util
 open Fpl.Interpreter.SymbolTable.Types4.Proofs
+open Fpl.Interpreter.SymbolTable.ExpressionMatching
 open TestFplInterpreter.Helpers.Common
 
 [<TestClass>]
 type TestInferredExpressionsJust() =
+
+    member private this.PerformExpressionCheck (fvJi:FplGenericNode) (result:FplGenericNode list) (expectedExpr:string) =
+        let argumentInferredFormula = fvJi.Parent.Value.Parent.Value.ArgList[1].ArgList[0]
+        let matchResults =
+            result
+            |> List.map (fun candidate ->
+                let dictParameterUsage = Dictionary<string, FplGenericNode>()
+                let mismatchMessageOpt = matchExpressionAgainstPattern argumentInferredFormula candidate dictParameterUsage
+                candidate, mismatchMessageOpt, dictParameterUsage
+            )
+
+        let oneCandidateMatches = 
+            matchResults
+            |> List.exists (fun (cand, mismatchMessageOpt, _) ->
+                let candExpr = cand.Type SignatureType.Name 
+                candExpr = expectedExpr || mismatchMessageOpt.IsNone)
+
+        let candidates =
+            matchResults
+            |> List.map (fun (cand, mismatchMessageOpt, dictParameterUsage)  ->
+                let msg =
+                    match mismatchMessageOpt with
+                    | Some err -> $" /// {err}"
+                    | None -> " ... ok"
+
+                let substitutions =
+                    if dictParameterUsage.Count > 0 then 
+                        $"{Environment.NewLine}     Substitutions:" +       
+                        (
+                            dictParameterUsage
+                            |> Seq.map (fun kvp -> $"{Environment.NewLine}       `{kvp.Key} := {kvp.Value.Type SignatureType.Name}`")
+                            |> String.concat ", "
+                        )
+                    else
+                        $"{Environment.NewLine}     No substitutions found" 
+                        
+                $"{Environment.NewLine}`{cand.Type SignatureType.Name}` {msg}{substitutions}"
+            )
+            |> String.concat ", "
+        oneCandidateMatches, candidates
 
     // derive identical expressions 
     [<DataRow("00", """ax A {true} thm T {true} prf T$1 { 1. byax A |- true }""", "true", 1)>]
@@ -43,9 +86,9 @@ type TestInferredExpressionsJust() =
     [<DataRow("71", """def cl N def cl M def cl K ax A1 {dec p,q:pred; iif(p, not q)} thm T {iif(and(all x:obj {is(x,N)}, ex y:obj {is(y,M)}), not xor(true, false))} prf T$1 { 1. byax A1 |- iif(and(all x:obj {is(x,N)}, ex y:obj {is(y,M)}), not xor(true, false)) }""", "(∀ x:obj {x is N} ∧ ∃ y:obj {y is M}) ⇔ ¬(true ⩡ false)", 1)>]
     [<DataRow("72", """def cl N def cl M def cl K ax A1 {dec p,q,r:pred; and(p, or(q, r))} thm T {and(not ex x:obj {is(x,N)}, or(iif(true, false), all y:obj {is(y,M)}))} prf T$1 { 1. byax A1 |- and(not ex x:obj {is(x,N)}, or(iif(true, false), all y:obj {is(y,M)})) }""", "¬∃ x:obj {x is N} ∧ ((true ⇔ false) ∨ ∀ y:obj {y is M})", 1)>]
     [<DataRow("73", """def cl N def cl M def cl K ax A1 {dec p,q,r:pred; or(not p, xor(q, r))} thm T {or(not all x:obj {is(x,N)}, xor(ex y:obj {is(y,M)}, iif(true, false)))} prf T$1 { 1. byax A1 |- or(not all x:obj {is(x,N)}, xor(ex y:obj {is(y,M)}, iif(true, false))) }""", "¬∀ x:obj {x is N} ∨ (∃ y:obj {y is M} ⩡ (true ⇔ false))", 1)>]
-    [<DataRow("74", """def cl N def cl M def cl K ax A1 {dec p,q,r:pred; xor(iif(p, q), and(r, not p))} thm T {xor(iif(all x:obj {is(x,N)}, ex y:obj {is(y,M)}), and(or(true, false), not all z:obj {is(z,M)}))} prf T$1 { 1. byax A1 |- xor(iif(all x:obj {is(x,N)}, ex y:obj {is(y,M)}), and(or(true, false), not all z:obj {is(z,N)})) }""", "(∀ x:obj {x is N} ⇔ ∃ y:obj {y is M}) ⩡ ((true ∨ false) ∧ ¬∀ z:obj {z is N})", 2)>]
-    [<DataRow("74a", """def cl N def cl M def cl K ax A1 {dec p,q,r:pred; xor(iif(p, q), and(r, not p))} thm T { (∀ x:obj {x is N} ⇔ ∃ y:obj {y is M}) ⩡ (true ∨ false) ∧ ¬∀ z:obj {z is N} } prf T$1 { 1. byax A1 |- xor(iif(∀ x:obj {x is N} , ∃ y:obj {y is M}) , and(or(true , false) , ¬∀ z:obj {z is N})) }""", "(∀ x:obj {x is N} ⇔ ∃ y:obj {y is M}) ⩡ ((true ∨ false) ∧ ¬∀ z:obj {z is N})", 2)>]
-    [<DataRow("74b", """def cl N def cl M def cl K ax A1 {dec p,q,r:pred; (p ⇔ q) ⩡ r ∧ ¬p} thm T { (∀ x:obj {x is N} ⇔ ∃ y:obj {y is M}) ⩡ (true ∨ false) ∧ ¬∀ z:obj {z is N} } prf T$1 { 1. byax A1 |- (∀ x:obj {x is N} ⇔ ∃ y:obj {y is M}) ⩡ (true ∨ false) ∧ ¬∀ z:obj {z is N} }""", "(∀ x:obj {x is N} ⇔ ∃ y:obj {y is M}) ⩡ (true ∨ false) ∧ ¬∀ z:obj {z is N}", 2)>]
+    [<DataRow("74", """def cl N def cl M def cl K ax A1 {dec p,q,r:pred; xor(iif(p, q), and(r, not p))} thm T {xor(iif(all x:obj {is(x,N)}, ex y:obj {is(y,M)}), and(or(true, false), not all z:obj {is(z,M)}))} prf T$1 { 1. byax A1 |- xor(iif(all x:obj {is(x,N)}, ex y:obj {is(y,M)}), and(or(true, false), not all z:obj {is(z,N)})) }""", "(∀ x:obj {x is N} ⇔ ∃ y:obj {y is M}) ⩡ ((true ∨ false) ∧ ¬∀ z:obj {z is N})", 1)>]
+    [<DataRow("74a", """def cl N def cl M def cl K ax A1 {dec p,q,r:pred; xor(iif(p, q), and(r, not p))} thm T { (∀ x:obj {x is N} ⇔ ∃ y:obj {y is M}) ⩡ (true ∨ false) ∧ ¬∀ z:obj {z is N} } prf T$1 { 1. byax A1 |- xor(iif(∀ x:obj {x is N} , ∃ y:obj {y is M}) , and(or(true , false) , ¬∀ z:obj {z is N})) }""", "(∀ x:obj {x is N} ⇔ ∃ y:obj {y is M}) ⩡ ((true ∨ false) ∧ ¬∀ z:obj {z is N})", 1)>]
+    [<DataRow("74b", """def cl N def cl M def cl K ax A1 {dec p,q,r:pred; (p ⇔ q) ⩡ r ∧ ¬p} thm T { (∀ x:obj {x is N} ⇔ ∃ y:obj {y is M}) ⩡ (true ∨ false) ∧ ¬∀ z:obj {z is N} } prf T$1 { 1. byax A1 |- (∀ x:obj {x is N} ⇔ ∃ y:obj {y is M}) ⩡ (true ∨ false) ∧ ¬∀ z:obj {z is N} }""", "(∀ x:obj {x is N} ⇔ ∃ y:obj {y is M}) ⩡ (true ∨ false) ∧ ¬∀ z:obj {z is N}", 1)>]
     [<DataRow("75", """def cl N def cl M def cl K ax A1 {dec p,q:pred; not(and(p, q))} thm T {not(and(iif(true, false), ex x:obj {is(x,N)}))} prf T$1 { 1. byax A1 |- not(and(iif(true, false), ex x:obj {is(x,N)})) }""", "¬((true ⇔ false) ∧ ∃ x:obj {x is N})", 1)>]
     [<DataRow("76", """def cl N def cl M def cl K ax A1 {dec p,q:pred; all x:obj {iif(p, q)}} thm T {all x:obj {iif(and(is(x,N), not ex y:obj {is(y,M)}), xor(true, false))}} prf T$1 { 1. byax A1 |- all x:obj {iif(and(is(x,N), not ex y:obj {is(y,M)}), xor(true, false))} }""", "∀ x:obj {((x is N) ∧ ¬∃ y:obj {y is M}) ⇔ (true ⩡ false)}", 1)>]
     [<DataRow("77", """def cl N def cl M def cl K ax A1 {dec p,q:pred; ex x:obj {and(p, not q)}} thm T {ex x:obj {and(or(true, false), not all y:obj {is(y,M)})}} prf T$1 { 1. byax A1 |- ex x:obj {and(or(true, false), not all y:obj {is(y,M)})} }""", "∃ x:obj {(true ∨ false) ∧ ¬∀ y:obj {y is M}}", 1)>]
@@ -77,13 +120,9 @@ type TestInferredExpressionsJust() =
         match fvJiOpt with
         | Some (:? FplJustificationItemByAx as fvJi) ->
             let result = fvJi.InferredExprCandidates
+            let oneCandidateMatches, candidates = this.PerformExpressionCheck fvJi result expectedExpr
+
             Assert.AreEqual<int>(expectedNumbExpr, result.Length)
-            let oneCandidateMatches = 
-                result
-                |> List.exists (fun cand ->
-                    let candExpr = cand.Type SignatureType.Name 
-                    candExpr = expectedExpr)
-            let candidates = result |> List.map (fun cand -> $"`{cand.Type SignatureType.Name}`") |> String.concat ", "
             Assert.IsTrue(oneCandidateMatches, $"Did not find expected `{expectedExpr}` among {candidates}")
         | Some ref ->
             Assert.IsInstanceOfType(ref, typeof<FplJustificationItemByAx>)
@@ -145,7 +184,6 @@ type TestInferredExpressionsJust() =
         let filename = "TestInferredExpressionJustByAxWithPrecedence"
         let allPrefix = $"""{classes} {iEqual} {iNotEqual} {l_iif} {l_impl} {l_xor} {l_or} {l_and} """
         prepareFplCode(filename + ".fpl", $"""{allPrefix} {fplCode}""", false) 
-        let r = heap.Root
 
         let candidates = findCandidatesByName "T" false true
         let prf = candidates |> List.filter (fun fv -> fv.FplId = "T$1") |> List.map (fun fv -> fv :?> FplProof) |> List.head
@@ -154,14 +192,7 @@ type TestInferredExpressionsJust() =
         match fvJiOpt with
         | Some (:? FplJustificationItemByAx as fvJi) ->
             let result = fvJi.InferredExprCandidates
-            Assert.AreEqual<int>(expectedNumbExpr, result.Length)
-
-            let oneCandidateMatches = 
-                result
-                |> List.exists (fun cand ->
-                    let candExpr = cand.Type SignatureType.Name 
-                    candExpr = expectedExpr)
-            let candidates = result |> List.map (fun cand -> $"`{cand.Type SignatureType.Name}`") |> String.concat ", "
+            let oneCandidateMatches, candidates = this.PerformExpressionCheck fvJi result expectedExpr
             Assert.IsTrue(oneCandidateMatches, $"Did not find expected `{expectedExpr}` among {candidates}")
 
         | Some ref ->
