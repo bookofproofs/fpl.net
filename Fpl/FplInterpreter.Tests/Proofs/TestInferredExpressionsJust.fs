@@ -120,9 +120,8 @@ type TestInferredExpressionsJust() =
         match fvJiOpt with
         | Some (:? FplJustificationItemByAx as fvJi) ->
             let result = fvJi.InferredExprCandidates
-            let oneCandidateMatches, candidates = this.PerformExpressionCheck fvJi result expectedExpr
-
             Assert.AreEqual<int>(expectedNumbExpr, result.Length)
+            let oneCandidateMatches, candidates = this.PerformExpressionCheck fvJi result expectedExpr
             Assert.IsTrue(oneCandidateMatches, $"Did not find expected `{expectedExpr}` among {candidates}")
         | Some ref ->
             Assert.IsInstanceOfType(ref, typeof<FplJustificationItemByAx>)
@@ -195,7 +194,6 @@ type TestInferredExpressionsJust() =
             Assert.AreEqual<int>(expectedNumbExpr, result.Length)
             let oneCandidateMatches, candidates = this.PerformExpressionCheck fvJi result expectedExpr
             Assert.IsTrue(oneCandidateMatches, $"Did not find expected `{expectedExpr}` among {candidates}")
-
         | Some ref ->
             Assert.IsInstanceOfType(ref, typeof<FplJustificationItemByAx>)
         | None ->
@@ -271,8 +269,8 @@ type TestInferredExpressionsJust() =
         match fvJiOpt with
         | Some (:? FplJustificationItemByConj as fvJi) ->
             let result = fvJi.InferredExprCandidates
-            let oneCandidateMatches, candidates = this.PerformExpressionCheck fvJi result expectedExpr
             Assert.AreEqual<int>(expectedNumbExpr, result.Length)
+            let oneCandidateMatches, candidates = this.PerformExpressionCheck fvJi result expectedExpr
             Assert.IsTrue(oneCandidateMatches, $"Did not find expected `{expectedExpr}` among {candidates}")
         | Some ref ->
             Assert.IsInstanceOfType(ref, typeof<FplJustificationItemByConj>)
@@ -1086,8 +1084,8 @@ type TestInferredExpressionsJust() =
         | Some (:? FplJustificationItemByDef as fvJi) ->
             let result = fvJi.InferredExprCandidates
             Assert.AreEqual<int>(expectedNumbExpr, result.Length)
-            let expr = result |> List.rev |> List.head
-            Assert.AreEqual<string>(expectedExpr, expr.Type SignatureType.Name)
+            let oneCandidateMatches, candidates = this.PerformExpressionCheck fvJi result expectedExpr
+            Assert.IsTrue(oneCandidateMatches, $"Did not find expected `{expectedExpr}` among {candidates}")
         | Some ref ->
             Assert.IsInstanceOfType(ref, typeof<FplJustificationItemByDef>)
         | None ->
@@ -1125,8 +1123,8 @@ type TestInferredExpressionsJust() =
         | Some (:? FplJustificationItemByDefVar as fvJi) ->
             let result = fvJi.InferredExprCandidates
             Assert.AreEqual<int>(expectedNumbExpr, result.Length)
-            let expr = result |> List.rev |> List.head
-            Assert.AreEqual<string>(expectedExpr, expr.Type SignatureType.Name)
+            let oneCandidateMatches, candidates = this.PerformExpressionCheck fvJi result expectedExpr
+            Assert.IsTrue(oneCandidateMatches, $"Did not find expected `{expectedExpr}` among {candidates}")
         | Some ref ->
             Assert.IsInstanceOfType(ref, typeof<FplJustificationItemByDefVar>)
         | None ->
@@ -1134,7 +1132,7 @@ type TestInferredExpressionsJust() =
 
         prepareFplCode(filename, "", false) |> ignore
 
-    [<DataRow("00", """def cl N thm T {true} prf T$1 { 1: ex x:obj {is(x,N)} 2. 1 |- trivial}""", "∃ x:obj {x is N}", 1)>]
+    [<DataRow("00", """def cl N thm T {true} prf T$1 { 1: ex x:obj {is(x,N)} 2. 1 |- ex x:obj {is(x,N)}}""", "∃ x:obj {x is N}", 1)>]
     [<DataRow("01", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" ax A {true} thm T {true} prf T$1 { 1. byax A |- all x,y:Set {impl ( is(x, N), ( x = y ))} 2. 1 |- true }""", "∀ x, y:Set {(x is N) ⇒ (x = y)}", 1)>]
     [<TestMethod>]
     member this.TestInferredExpressionJustByArgRef(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
@@ -1151,7 +1149,8 @@ type TestInferredExpressionsJust() =
         | Some (:? FplJustificationItemByRefArgument as fvJi) ->
             let result = fvJi.InferredExprCandidates
             Assert.AreEqual<int>(expectedNumbExpr, result.Length)
-            Assert.AreEqual<string>(expectedExpr, result.Head.Type SignatureType.Name)
+            let oneCandidateMatches, candidates = this.PerformExpressionCheck fvJi result expectedExpr
+            Assert.IsTrue(oneCandidateMatches, $"Did not find expected `{expectedExpr}` among {candidates}")
         | Some ref ->
             Assert.IsInstanceOfType(ref, typeof<FplJustificationItemByRefArgument>)
         | None ->
@@ -1159,7 +1158,7 @@ type TestInferredExpressionsJust() =
 
         prepareFplCode(filename, "", false) |> ignore
 
-    [<DataRow("00", """def cl N thm T {true} prf T$1 { 1: ex x:obj {is(x,N)} 2. 1 |- trivial} thm T1 {true} prf T1$1 { 1. T$1:1 |- trivial }""", "∃ x:obj {x is N}", 1)>]
+    [<DataRow("00", """def cl N thm T {true} prf T$1 { 1: ex x:obj {is(x,N)} 2. 1 |- trivial} thm T1 {true} prf T1$1 { 1. T$1:1 |- ex x:obj {is(x,N)} }""", "∃ x:obj {x is N}", 1)>]
     [<DataRow("01", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" ax A {true} thm T {true} prf T$1 { 1. byax A |- all x,y:Set {impl ( is(x, N), ( x = y ))} 2. 1 |- true } thm T1 {true} proof T1$1 {1. T$1:1 |- true}""", "∀ x, y:Set {(x is N) ⇒ (x = y)}", 1)>]
     [<TestMethod>]
     member this.TestInferredExpressionJustByProofArgument(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
@@ -1177,8 +1176,8 @@ type TestInferredExpressionsJust() =
         | Some (:? FplJustificationItemByProofArgument as fvJi) ->
             let result = fvJi.InferredExprCandidates
             Assert.AreEqual<int>(expectedNumbExpr, result.Length)
-            let actualExpr = result.Head.Type SignatureType.Name
-            Assert.AreEqual<string>(expectedExpr, actualExpr)
+            let oneCandidateMatches, candidates = this.PerformExpressionCheck fvJi result expectedExpr
+            Assert.IsTrue(oneCandidateMatches, $"Did not find expected `{expectedExpr}` among {candidates}")
         | Some ref ->
             Assert.IsInstanceOfType(ref, typeof<FplJustificationItemByProofArgument>)
         | None ->
@@ -1600,10 +1599,8 @@ type TestInferredExpressionsJust() =
         | Some (:? FplJustificationItemByInf as fvJi) ->
             let result = fvJi.InferredExprCandidates
             Assert.AreEqual<int>(expectedNumbExpr, result.Length)
-            let actualExpr = result.Head.Type SignatureType.Name
-            //if actExprWithoutParens <> expExprWithoutParens then
-            //    File.AppendAllText("log.txt", $"{no}\t{fplCode}\t{expectedExpr}\t{expectedNumbExpr}{Environment.NewLine}")
-            Assert.AreEqual<string>(expectedExpr, actualExpr)
+            let oneCandidateMatches, candidates = this.PerformExpressionCheck fvJi result expectedExpr
+            Assert.IsTrue(oneCandidateMatches, $"Did not find expected `{expectedExpr}` among {candidates}")
         | Some ref ->
             Assert.IsInstanceOfType(ref, typeof<FplJustificationItemByInf>)
         | None ->
