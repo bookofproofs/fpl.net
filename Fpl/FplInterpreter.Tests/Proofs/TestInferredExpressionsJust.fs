@@ -53,6 +53,36 @@ type TestInferredExpressionsJust() =
             |> String.concat ", "
         oneCandidateMatches, candidates
 
+    member private this.PerformJustificationCheck (filename:string) (justClass:System.Type) (justPrim:string) (fplCode:string) (expectedExpr:string) (expectedNumbExpr:int) =
+        // prepare environment
+        prepareFplCode(filename + ".fpl", fplCode, false)
+        let candidates = findCandidatesByName "T" false true
+        let prf = candidates |> List.filter (fun fv -> fv.FplId = "T$1") |> List.map (fun fv -> fv :?> FplProof) |> List.head
+
+        // find the requested justification item
+        let fvJiOpt = tryFindJustification prf justPrim
+
+        match fvJiOpt with
+        | Some (:? FplGenericJustificationItem as ji) ->
+            // ensure runtime type matches expected class
+            if ji.GetType() = justClass || justClass.IsAssignableFrom(ji.GetType()) then
+                let result = ji.InferredExprCandidates
+                Assert.AreEqual<int>(expectedNumbExpr, result.Length)
+                let oneCandidateMatches, candidates = this.PerformExpressionCheck (ji :> FplGenericNode) result expectedExpr
+                Assert.IsTrue(oneCandidateMatches, $"Did not find expected `{expectedExpr}` among {candidates}")
+            else
+                // keep the original behavior for unexpected concrete type
+                Assert.IsInstanceOfType(ji, justClass)
+        | Some ref ->
+            // found something, but it wasn't an FplGenericJustificationItem
+            Assert.IsInstanceOfType(ref, justClass)
+        | None ->
+            failwith $"expected {justClass.Name}, found none"
+
+        // cleanup
+        prepareFplCode(filename, "", false) |> ignore
+
+
     // derive identical expressions 
     [<DataRow("00", """ax A {true} thm T {true} prf T$1 { 1. byax A |- true }""", "true", 1)>]
     [<DataRow("01", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" ax A {all n,m:Nat { impl( ( Succ(n) = Succ(m) ), ( n = m ) ) }} thm T {true} prf T$1 { 1. byax A |- true }""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 1)>]
@@ -108,28 +138,7 @@ type TestInferredExpressionsJust() =
     [<DataRow("aa", """def pred Impl(f, g: pred) infix "⇒" 0 {impl(f,g)} axiom A2 {dec f, g, h: pred; (f ⇒ (g ⇒ h)) ⇒ ((f ⇒ g) ⇒ (f ⇒ h))} thm T {dec a:pred; a ⇒ a} prf T$1 {1. byax A2 |- (a ⇒ ((a ⇒ a) ⇒ a)) ⇒ ((a ⇒ a) ⇒ (a ⇒ a))}""", "(f ⇒ (g ⇒ h)) ⇒ ((f ⇒ g) ⇒ (f ⇒ h))", 1)>]
     [<TestMethod>]
     member this.TestInferredExpressionJustByAx(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
-        
-        let filename = "TestInferredExpressionJustByAx"
-        prepareFplCode(filename + ".fpl", fplCode, false) 
-        let r = heap.Root
-
-        let candidates = findCandidatesByName "T" false true
-        let prf = candidates |> List.filter (fun fv -> fv.FplId = "T$1") |> List.map (fun fv -> fv :?> FplProof) |> List.head
-        let fvJiOpt = tryFindJustification prf PrimJIByAx
-
-        match fvJiOpt with
-        | Some (:? FplJustificationItemByAx as fvJi) ->
-            let result = fvJi.InferredExprCandidates
-            Assert.AreEqual<int>(expectedNumbExpr, result.Length)
-            let oneCandidateMatches, candidates = this.PerformExpressionCheck fvJi result expectedExpr
-            Assert.IsTrue(oneCandidateMatches, $"Did not find expected `{expectedExpr}` among {candidates}")
-        | Some ref ->
-            Assert.IsInstanceOfType(ref, typeof<FplJustificationItemByAx>)
-        | None ->
-            failwith $"expected FplJustificationItemByAx, found none"
-
-        prepareFplCode(filename, "", false) |> ignore
-
+        this.PerformJustificationCheck "TestInferredExpressionJustByAx" typeof<FplJustificationItemByAx> PrimJIByAx fplCode expectedExpr expectedNumbExpr
 
     [<DataRow("71", """ax A1 {dec p,q:pred; iif(p, not q)} thm T {iif(and(all x:obj {is(x,N)}, ex y:obj {is(y,M)}), not xor(true, false))} prf T$1 { 1. byax A1 |- iif(and(all x:obj {is(x,N)}, ex y:obj {is(y,M)}), not xor(true, false)) }""", "(∀ x:obj {x is N} ∧ ∃ y:obj {y is M}) ⇔ ¬(true ⩡ false)", 1)>]
     [<DataRow("72", """ax A1 {dec p,q,r:pred; and(p, or(q, r))} thm T {and(not ex x:obj {is(x,N)}, or(iif(true, false), all y:obj {is(y,M)}))} prf T$1 { 1. byax A1 |- and(not ex x:obj {is(x,N)}, or(iif(true, false), all y:obj {is(y,M)})) }""", "¬∃ x:obj {x is N} ∧ ((true ⇔ false) ∨ ∀ y:obj {y is M})", 1)>]
@@ -180,27 +189,9 @@ type TestInferredExpressionsJust() =
         // AND is the most binging among all logic symbols
         let l_and = """def pred And(f, g: pred) infix "∧" 140 {and(f,g)}"""
 
-        let filename = "TestInferredExpressionJustByAxWithPrecedence"
         let allPrefix = $"""{classes} {iEqual} {iNotEqual} {l_iif} {l_impl} {l_xor} {l_or} {l_and} """
-        prepareFplCode(filename + ".fpl", $"""{allPrefix} {fplCode}""", false) 
-
-        let candidates = findCandidatesByName "T" false true
-        let prf = candidates |> List.filter (fun fv -> fv.FplId = "T$1") |> List.map (fun fv -> fv :?> FplProof) |> List.head
-        let fvJiOpt = tryFindJustification prf PrimJIByAx
-
-        match fvJiOpt with
-        | Some (:? FplJustificationItemByAx as fvJi) ->
-            let result = fvJi.InferredExprCandidates
-            Assert.AreEqual<int>(expectedNumbExpr, result.Length)
-            let oneCandidateMatches, candidates = this.PerformExpressionCheck fvJi result expectedExpr
-            Assert.IsTrue(oneCandidateMatches, $"Did not find expected `{expectedExpr}` among {candidates}")
-        | Some ref ->
-            Assert.IsInstanceOfType(ref, typeof<FplJustificationItemByAx>)
-        | None ->
-            failwith $"expected FplJustificationItemByAx, found none"
-
-        prepareFplCode(filename, "", false) |> ignore
-
+        this.PerformJustificationCheck "TestInferredExpressionJustByAxWithPrecedence" typeof<FplJustificationItemByAx> PrimJIByAx $"""{allPrefix} {fplCode}""" expectedExpr expectedNumbExpr
+        
 
     [<DataRow("00", """conj A {true} thm T {true} prf T$1 { 1. byconj A |- true }""", "true", 1)>]
     [<DataRow("01", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" conj A {all n,m:Nat { impl( ( Succ(n) = Succ(m) ), ( n = m ) ) }} thm T {true} prf T$1 { 1. byconj A |- true }""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 1)>]
@@ -256,29 +247,7 @@ type TestInferredExpressionsJust() =
     [<DataRow("aa", """def pred Impl(f, g: pred) infix "⇒" 0 {impl(f,g)} conj A2 {dec f, g, h: pred; (f ⇒ (g ⇒ h)) ⇒ ((f ⇒ g) ⇒ (f ⇒ h))} thm T {dec a:pred; a ⇒ a} prf T$1 {1. byconj A2 |- (a ⇒ ((a ⇒ a) ⇒ a)) ⇒ ((a ⇒ a) ⇒ (a ⇒ a))}""", "(f ⇒ (g ⇒ h)) ⇒ ((f ⇒ g) ⇒ (f ⇒ h))", 1)>]
     [<TestMethod>]
     member this.TestInferredExpressionJustByConj(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
-        
-        let filename = "TestInferredExpressionJustByConj"
-        prepareFplCode(filename + ".fpl", fplCode, false) 
-        let r = heap.Root
-
-        let candidates = findCandidatesByName "T" false true
-        let prf = candidates |> List.filter (fun fv -> fv.FplId = "T$1") |> List.map (fun fv -> fv :?> FplProof) |> List.head
-
-        let fvJiOpt = tryFindJustification prf PrimJIByConj
-
-        match fvJiOpt with
-        | Some (:? FplJustificationItemByConj as fvJi) ->
-            let result = fvJi.InferredExprCandidates
-            Assert.AreEqual<int>(expectedNumbExpr, result.Length)
-            let oneCandidateMatches, candidates = this.PerformExpressionCheck fvJi result expectedExpr
-            Assert.IsTrue(oneCandidateMatches, $"Did not find expected `{expectedExpr}` among {candidates}")
-        | Some ref ->
-            Assert.IsInstanceOfType(ref, typeof<FplJustificationItemByConj>)
-        | None ->
-            failwith $"expected FplJustificationItemByConj, found none"
-
-        prepareFplCode(filename, "", false) |> ignore
-
+        this.PerformJustificationCheck "TestInferredExpressionJustByConj" typeof<FplJustificationItemByConj> PrimJIByConj fplCode expectedExpr expectedNumbExpr
 
     [<DataRow("00", """thm A {true} thm T {true} prf T$1 { 1. A |- true }""", "true", 1)>]
     [<DataRow("01", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" thm A {all n,m:Nat { impl( ( Succ(n) = Succ(m) ), ( n = m ) ) }} thm T {true} prf T$1 { 1. A |- true }""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 1)>]
@@ -334,28 +303,7 @@ type TestInferredExpressionsJust() =
     [<DataRow("aa", """def pred Impl(f, g: pred) infix "⇒" 0 {impl(f,g)} thm A2 {dec f, g, h: pred; (f ⇒ (g ⇒ h)) ⇒ ((f ⇒ g) ⇒ (f ⇒ h))} thm T {dec a:pred; a ⇒ a} prf T$1 {1. A2 |- (a ⇒ ((a ⇒ a) ⇒ a)) ⇒ ((a ⇒ a) ⇒ (a ⇒ a))}""", "(f ⇒ (g ⇒ h)) ⇒ ((f ⇒ g) ⇒ (f ⇒ h))", 1)>]
     [<TestMethod>]
     member this.TestInferredExpressionJustByTheorems(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
-        
-        let filename = "TestInferredExpressionJustByTheoremLikeStmt"
-        prepareFplCode(filename + ".fpl", fplCode, false) 
-        let r = heap.Root
-
-        let candidates = findCandidatesByName "T" false true
-        let prf = candidates |> List.filter (fun fv -> fv.FplId = "T$1") |> List.map (fun fv -> fv :?> FplProof) |> List.head
-
-        let fvJiOpt = tryFindJustification prf PrimJIByTheoremLikeStmt
-
-        match fvJiOpt with
-        | Some (:? FplJustificationItemByTheoremLikeStmt as fvJi) ->
-            let result = fvJi.InferredExprCandidates
-            Assert.AreEqual<int>(expectedNumbExpr, result.Length)
-            let oneCandidateMatches, candidates = this.PerformExpressionCheck fvJi result expectedExpr
-            Assert.IsTrue(oneCandidateMatches, $"Did not find expected `{expectedExpr}` among {candidates}")
-        | Some ref ->
-            Assert.IsInstanceOfType(ref, typeof<FplJustificationItemByTheoremLikeStmt>)
-        | None ->
-            failwith $"expected FplJustificationItemByTheoremLikeStmt, found none"
-
-        prepareFplCode(filename, "", false) |> ignore
+        this.PerformJustificationCheck "TestInferredExpressionJustByTheorems" typeof<FplJustificationItemByTheoremLikeStmt> PrimJIByTheoremLikeStmt fplCode expectedExpr expectedNumbExpr
 
     [<DataRow("00", """lem A {true} lem T {true} prf T$1 { 1. A |- true }""", "true", 1)>]
     [<DataRow("01", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" lem A {all n,m:Nat { impl( ( Succ(n) = Succ(m) ), ( n = m ) ) }} lem T {true} prf T$1 { 1. A |- true }""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 1)>]
@@ -411,28 +359,7 @@ type TestInferredExpressionsJust() =
     [<DataRow("aa", """def pred Impl(f, g: pred) infix "⇒" 0 {impl(f,g)} lem A2 {dec f, g, h: pred; (f ⇒ (g ⇒ h)) ⇒ ((f ⇒ g) ⇒ (f ⇒ h))} lem T {dec a:pred; a ⇒ a} prf T$1 {1. A2 |- (a ⇒ ((a ⇒ a) ⇒ a)) ⇒ ((a ⇒ a) ⇒ (a ⇒ a))}""", "(f ⇒ (g ⇒ h)) ⇒ ((f ⇒ g) ⇒ (f ⇒ h))", 1)>]
     [<TestMethod>]
     member this.TestInferredExpressionJustByLemmas(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
-        
-        let filename = "TestInferredExpressionJustByLemmas"
-        prepareFplCode(filename + ".fpl", fplCode, false) 
-        let r = heap.Root
-
-        let candidates = findCandidatesByName "T" false true
-        let prf = candidates |> List.filter (fun fv -> fv.FplId = "T$1") |> List.map (fun fv -> fv :?> FplProof) |> List.head
-
-        let fvJiOpt = tryFindJustification prf PrimJIByTheoremLikeStmt
-
-        match fvJiOpt with
-        | Some (:? FplJustificationItemByTheoremLikeStmt as fvJi) ->
-            let result = fvJi.InferredExprCandidates
-            Assert.AreEqual<int>(expectedNumbExpr, result.Length)
-            let oneCandidateMatches, candidates = this.PerformExpressionCheck fvJi result expectedExpr
-            Assert.IsTrue(oneCandidateMatches, $"Did not find expected `{expectedExpr}` among {candidates}")
-        | Some ref ->
-            Assert.IsInstanceOfType(ref, typeof<FplJustificationItemByTheoremLikeStmt>)
-        | None ->
-            failwith $"expected FplJustificationItemByTheoremLikeStmt, found none"
-
-        prepareFplCode(filename, "", false) |> ignore
+        this.PerformJustificationCheck "TestInferredExpressionJustByLemmas" typeof<FplJustificationItemByTheoremLikeStmt> PrimJIByTheoremLikeStmt fplCode expectedExpr expectedNumbExpr
 
     [<DataRow("00", """prop A {true} prop T {true} prf T$1 { 1. A |- true }""", "true", 1)>]
     [<DataRow("01", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" prop A {all n,m:Nat { impl( ( Succ(n) = Succ(m) ), ( n = m ) ) }} prop T {true} prf T$1 { 1. A |- true }""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 1)>]
@@ -488,29 +415,8 @@ type TestInferredExpressionsJust() =
     [<DataRow("aa", """def pred Impl(f, g: pred) infix "⇒" 0 {impl(f,g)} prop A2 {dec f, g, h: pred; (f ⇒ (g ⇒ h)) ⇒ ((f ⇒ g) ⇒ (f ⇒ h))} prop T {dec a:pred; a ⇒ a} prf T$1 {1. A2 |- (a ⇒ ((a ⇒ a) ⇒ a)) ⇒ ((a ⇒ a) ⇒ (a ⇒ a))}""", "(f ⇒ (g ⇒ h)) ⇒ ((f ⇒ g) ⇒ (f ⇒ h))", 1)>]
     [<TestMethod>]
     member this.TestInferredExpressionJustByPropositions(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
+        this.PerformJustificationCheck "TestInferredExpressionJustByPropositions" typeof<FplJustificationItemByTheoremLikeStmt> PrimJIByTheoremLikeStmt fplCode expectedExpr expectedNumbExpr
         
-        let filename = "TestInferredExpressionJustByPropositions"
-        prepareFplCode(filename + ".fpl", fplCode, false) 
-        let r = heap.Root
-
-        let candidates = findCandidatesByName "T" false true
-        let prf = candidates |> List.filter (fun fv -> fv.FplId = "T$1") |> List.map (fun fv -> fv :?> FplProof) |> List.head
-
-        let fvJiOpt = tryFindJustification prf PrimJIByTheoremLikeStmt
-
-        match fvJiOpt with
-        | Some (:? FplJustificationItemByTheoremLikeStmt as fvJi) ->
-            let result = fvJi.InferredExprCandidates
-            Assert.AreEqual<int>(expectedNumbExpr, result.Length)
-            let oneCandidateMatches, candidates = this.PerformExpressionCheck fvJi result expectedExpr
-            Assert.IsTrue(oneCandidateMatches, $"Did not find expected `{expectedExpr}` among {candidates}")
-        | Some ref ->
-            Assert.IsInstanceOfType(ref, typeof<FplJustificationItemByTheoremLikeStmt>)
-        | None ->
-            failwith $"expected FplJustificationItemByTheoremLikeStmt, found none"
-
-        prepareFplCode(filename, "", false) |> ignore
-
     [<DataRow("00", """cor A$1 {true} prop T {true} prf T$1 { 1. bycor A$1 |- true }""", "true", 1)>]
     [<DataRow("01", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" cor A$1 {all n,m:Nat { impl( ( Succ(n) = Succ(m) ), ( n = m ) ) }} prop T {true} prf T$1 { 1. bycor A$1 |- true }""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 1)>]
     [<DataRow("02", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" cor A$1 {all n,m:Nat { impl( ( n' = m' ), ( n = m ) ) }} prop T {true} prf T$1 { 1. bycor A$1 |- true }""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 1)>]
@@ -565,29 +471,8 @@ type TestInferredExpressionsJust() =
     [<DataRow("aa", """def pred Impl(f, g: pred) infix "⇒" 0 {impl(f,g)} cor A$1 {dec f, g, h: pred; (f ⇒ (g ⇒ h)) ⇒ ((f ⇒ g) ⇒ (f ⇒ h))} prop T {dec a:pred; a ⇒ a} prf T$1 {1. bycor A$1 |- (a ⇒ ((a ⇒ a) ⇒ a)) ⇒ ((a ⇒ a) ⇒ (a ⇒ a))}""", "(f ⇒ (g ⇒ h)) ⇒ ((f ⇒ g) ⇒ (f ⇒ h))", 1)>]
     [<TestMethod>]
     member this.TestInferredExpressionJustByCorollaries(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
+        this.PerformJustificationCheck "TestInferredExpressionJustByCorollaries" typeof<FplJustificationItemByCor> PrimJIByCor fplCode expectedExpr expectedNumbExpr
         
-        let filename = "TestInferredExpressionJustByCorollaries"
-        prepareFplCode(filename + ".fpl", fplCode, false) 
-        let r = heap.Root
-
-        let candidates = findCandidatesByName "T" false true
-        let prf = candidates |> List.filter (fun fv -> fv.FplId = "T$1") |> List.map (fun fv -> fv :?> FplProof) |> List.head
-
-        let fvJiOpt = tryFindJustification prf PrimJIByCor
-
-        match fvJiOpt with
-        | Some (:? FplJustificationItemByCor as fvJi) ->
-            let result = fvJi.InferredExprCandidates
-            Assert.AreEqual<int>(expectedNumbExpr, result.Length)
-            let oneCandidateMatches, candidates = this.PerformExpressionCheck fvJi result expectedExpr
-            Assert.IsTrue(oneCandidateMatches, $"Did not find expected `{expectedExpr}` among {candidates}")
-        | Some ref ->
-            Assert.IsInstanceOfType(ref, typeof<FplJustificationItemByCor>)
-        | None ->
-            failwith $"expected FplJustificationItemByCor, found none"
-
-        prepareFplCode(filename, "", false) |> ignore
-
     [<DataRow("00", """thm A {true} cor A$1 {true} prop T {true} prf T$1 { 1. bycor A$1 |- true }""", "true", 1)>]
     [<DataRow("01", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" thm A {true} cor A$1 {all n,m:Nat { impl( ( Succ(n) = Succ(m) ), ( n = m ) ) }} prop T {true} prf T$1 { 1. bycor A$1 |- true }""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 1)>]
     [<DataRow("02", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" thm A {true} cor A$1 {all n,m:Nat { impl( ( n' = m' ), ( n = m ) ) }} prop T {true} prf T$1 { 1. bycor A$1 |- true }""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 1)>]
@@ -642,28 +527,7 @@ type TestInferredExpressionsJust() =
     [<DataRow("aa", """def pred Impl(f, g: pred) infix "⇒" 0 {impl(f,g)} thm A {true} cor A$1 {dec f, g, h: pred; (f ⇒ (g ⇒ h)) ⇒ ((f ⇒ g) ⇒ (f ⇒ h))} prop T {dec a:pred; a ⇒ a} prf T$1 {1. bycor A$1 |- (a ⇒ ((a ⇒ a) ⇒ a)) ⇒ ((a ⇒ a) ⇒ (a ⇒ a))}""", "(f ⇒ (g ⇒ h)) ⇒ ((f ⇒ g) ⇒ (f ⇒ h))", 1)>]
     [<TestMethod>]
     member this.TestInferredExpressionJustByCorollariesOfTheorems(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
-        
-        let filename = "TestInferredExpressionJustByCorollariesOfTheorems"
-        prepareFplCode(filename + ".fpl", fplCode, false) 
-        let r = heap.Root
-
-        let candidates = findCandidatesByName "T" false true
-        let prf = candidates |> List.filter (fun fv -> fv.FplId = "T$1") |> List.map (fun fv -> fv :?> FplProof) |> List.head
-
-        let fvJiOpt = tryFindJustification prf PrimJIByCor
-
-        match fvJiOpt with
-        | Some (:? FplJustificationItemByCor as fvJi) ->
-            let result = fvJi.InferredExprCandidates
-            Assert.AreEqual<int>(expectedNumbExpr, result.Length)
-            let oneCandidateMatches, candidates = this.PerformExpressionCheck fvJi result expectedExpr
-            Assert.IsTrue(oneCandidateMatches, $"Did not find expected `{expectedExpr}` among {candidates}")
-        | Some ref ->
-            Assert.IsInstanceOfType(ref, typeof<FplJustificationItemByCor>)
-        | None ->
-            failwith $"expected FplJustificationItemByCor, found none"
-
-        prepareFplCode(filename, "", false) |> ignore
+        this.PerformJustificationCheck "TestInferredExpressionJustByCorollariesOfTheorems" typeof<FplJustificationItemByCor> PrimJIByCor fplCode expectedExpr expectedNumbExpr
 
     [<DataRow("00", """lem A {true} cor A$1 {true} prop T {true} prf T$1 { 1. bycor A$1 |- true }""", "true", 1)>]
     [<DataRow("01", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" lem A {true} cor A$1 {all n,m:Nat { impl( ( Succ(n) = Succ(m) ), ( n = m ) ) }} prop T {true} prf T$1 { 1. bycor A$1 |- true }""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 1)>]
@@ -719,29 +583,7 @@ type TestInferredExpressionsJust() =
     [<DataRow("aa", """def pred Impl(f, g: pred) infix "⇒" 0 {impl(f,g)} lem A {true} cor A$1 {dec f, g, h: pred; (f ⇒ (g ⇒ h)) ⇒ ((f ⇒ g) ⇒ (f ⇒ h))} prop T {dec a:pred; a ⇒ a} prf T$1 {1. bycor A$1 |- (a ⇒ ((a ⇒ a) ⇒ a)) ⇒ ((a ⇒ a) ⇒ (a ⇒ a))}""", "(f ⇒ (g ⇒ h)) ⇒ ((f ⇒ g) ⇒ (f ⇒ h))", 1)>]
     [<TestMethod>]
     member this.TestInferredExpressionJustByCorollariesOfLemmas(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
-        
-        let filename = "TestInferredExpressionJustByCorollariesOfLemmas"
-        prepareFplCode(filename + ".fpl", fplCode, false) 
-        let r = heap.Root
-
-        let candidates = findCandidatesByName "T" false true
-        let prf = candidates |> List.filter (fun fv -> fv.FplId = "T$1") |> List.map (fun fv -> fv :?> FplProof) |> List.head
-
-        let fvJiOpt = tryFindJustification prf PrimJIByCor
-
-        match fvJiOpt with
-        | Some (:? FplJustificationItemByCor as fvJi) ->
-            let result = fvJi.InferredExprCandidates
-            Assert.AreEqual<int>(expectedNumbExpr, result.Length)
-            let oneCandidateMatches, candidates = this.PerformExpressionCheck fvJi result expectedExpr
-            Assert.IsTrue(oneCandidateMatches, $"Did not find expected `{expectedExpr}` among {candidates}")
-        | Some ref ->
-            Assert.IsInstanceOfType(ref, typeof<FplJustificationItemByCor>)
-        | None ->
-            failwith $"expected FplJustificationItemByCor, found none"
-
-        prepareFplCode(filename, "", false) |> ignore
-
+        this.PerformJustificationCheck "TestInferredExpressionJustByCorollariesOfLemmas" typeof<FplJustificationItemByCor> PrimJIByCor fplCode expectedExpr expectedNumbExpr
 
     [<DataRow("00", """prop A {true} cor A$1 {true} prop T {true} prf T$1 { 1. bycor A$1 |- true }""", "true", 1)>]
     [<DataRow("01", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" prop A {true} cor A$1 {all n,m:Nat { impl( ( Succ(n) = Succ(m) ), ( n = m ) ) }} prop T {true} prf T$1 { 1. bycor A$1 |- true }""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 1)>]
@@ -797,29 +639,7 @@ type TestInferredExpressionsJust() =
     [<DataRow("aa", """def pred Impl(f, g: pred) infix "⇒" 0 {impl(f,g)} prop A {true} cor A$1 {dec f, g, h: pred; (f ⇒ (g ⇒ h)) ⇒ ((f ⇒ g) ⇒ (f ⇒ h))} prop T {dec a:pred; a ⇒ a} prf T$1 {1. bycor A$1 |- (a ⇒ ((a ⇒ a) ⇒ a)) ⇒ ((a ⇒ a) ⇒ (a ⇒ a))}""", "(f ⇒ (g ⇒ h)) ⇒ ((f ⇒ g) ⇒ (f ⇒ h))", 1)>]
     [<TestMethod>]
     member this.TestInferredExpressionJustByCorollariesOfPropositions(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
-        
-        let filename = "TestInferredExpressionJustByCorollariesOfPropositions"
-        prepareFplCode(filename + ".fpl", fplCode, false) 
-        let r = heap.Root
-
-        let candidates = findCandidatesByName "T" false true
-        let prf = candidates |> List.filter (fun fv -> fv.FplId = "T$1") |> List.map (fun fv -> fv :?> FplProof) |> List.head
-
-        let fvJiOpt = tryFindJustification prf PrimJIByCor
-
-        match fvJiOpt with
-        | Some (:? FplJustificationItemByCor as fvJi) ->
-            let result = fvJi.InferredExprCandidates
-            Assert.AreEqual<int>(expectedNumbExpr, result.Length)
-            let oneCandidateMatches, candidates = this.PerformExpressionCheck fvJi result expectedExpr
-            Assert.IsTrue(oneCandidateMatches, $"Did not find expected `{expectedExpr}` among {candidates}")
-        | Some ref ->
-            Assert.IsInstanceOfType(ref, typeof<FplJustificationItemByCor>)
-        | None ->
-            failwith $"expected FplJustificationItemByCor, found none"
-
-        prepareFplCode(filename, "", false) |> ignore
-
+        this.PerformJustificationCheck "TestInferredExpressionJustByCorollariesOfPropositions" typeof<FplJustificationItemByCor> PrimJIByCor fplCode expectedExpr expectedNumbExpr
 
     [<DataRow("00", """ax A {true} cor A$1 {true} prop T {true} prf T$1 { 1. bycor A$1 |- true }""", "true", 1)>]
     [<DataRow("01", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" ax A {true} cor A$1 {all n,m:Nat { impl( ( Succ(n) = Succ(m) ), ( n = m ) ) }} prop T {true} prf T$1 { 1. bycor A$1 |- true }""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 1)>]
@@ -875,28 +695,7 @@ type TestInferredExpressionsJust() =
     [<DataRow("aa", """def pred Impl(f, g: pred) infix "⇒" 0 {impl(f,g)} ax A {true} cor A$1 {dec f, g, h: pred; (f ⇒ (g ⇒ h)) ⇒ ((f ⇒ g) ⇒ (f ⇒ h))} prop T {dec a:pred; a ⇒ a} prf T$1 {1. bycor A$1 |- (a ⇒ ((a ⇒ a) ⇒ a)) ⇒ ((a ⇒ a) ⇒ (a ⇒ a))}""", "(f ⇒ (g ⇒ h)) ⇒ ((f ⇒ g) ⇒ (f ⇒ h))", 1)>]
     [<TestMethod>]
     member this.TestInferredExpressionJustByCorollariesOfAxioms(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
-        
-        let filename = "TestInferredExpressionJustByCorollariesOfAxioms"
-        prepareFplCode(filename + ".fpl", fplCode, false) 
-        let r = heap.Root
-
-        let candidates = findCandidatesByName "T" false true
-        let prf = candidates |> List.filter (fun fv -> fv.FplId = "T$1") |> List.map (fun fv -> fv :?> FplProof) |> List.head
-
-        let fvJiOpt = tryFindJustification prf PrimJIByCor
-
-        match fvJiOpt with
-        | Some (:? FplJustificationItemByCor as fvJi) ->
-            let result = fvJi.InferredExprCandidates
-            Assert.AreEqual<int>(expectedNumbExpr, result.Length)
-            let oneCandidateMatches, candidates = this.PerformExpressionCheck fvJi result expectedExpr
-            Assert.IsTrue(oneCandidateMatches, $"Did not find expected `{expectedExpr}` among {candidates}")
-        | Some ref ->
-            Assert.IsInstanceOfType(ref, typeof<FplJustificationItemByCor>)
-        | None ->
-            failwith $"expected FplJustificationItemByCor, found none"
-
-        prepareFplCode(filename, "", false) |> ignore
+        this.PerformJustificationCheck "TestInferredExpressionJustByCorollariesOfAxioms" typeof<FplJustificationItemByCor> PrimJIByCor fplCode expectedExpr expectedNumbExpr
 
     [<DataRow("00", """conj A {true} cor A$1 {true} prop T {true} prf T$1 { 1. bycor A$1 |- true }""", "true", 1)>]
     [<DataRow("01", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" conj A {true} cor A$1 {all n,m:Nat { impl( ( Succ(n) = Succ(m) ), ( n = m ) ) }} prop T {true} prf T$1 { 1. bycor A$1 |- true }""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 1)>]
@@ -952,28 +751,7 @@ type TestInferredExpressionsJust() =
     [<DataRow("aa", """def pred Impl(f, g: pred) infix "⇒" 0 {impl(f,g)} conj A {true} cor A$1 {dec f, g, h: pred; (f ⇒ (g ⇒ h)) ⇒ ((f ⇒ g) ⇒ (f ⇒ h))} prop T {dec a:pred; a ⇒ a} prf T$1 {1. bycor A$1 |- (a ⇒ ((a ⇒ a) ⇒ a)) ⇒ ((a ⇒ a) ⇒ (a ⇒ a))}""", "(f ⇒ (g ⇒ h)) ⇒ ((f ⇒ g) ⇒ (f ⇒ h))", 1)>]
     [<TestMethod>]
     member this.TestInferredExpressionJustByCorollariesOfConjectures(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
-        
-        let filename = "TestInferredExpressionJustByCorollariesOfConjectures"
-        prepareFplCode(filename + ".fpl", fplCode, false) 
-        let r = heap.Root
-
-        let candidates = findCandidatesByName "T" false true
-        let prf = candidates |> List.filter (fun fv -> fv.FplId = "T$1") |> List.map (fun fv -> fv :?> FplProof) |> List.head
-
-        let fvJiOpt = tryFindJustification prf PrimJIByCor
-
-        match fvJiOpt with
-        | Some (:? FplJustificationItemByCor as fvJi) ->
-            let result = fvJi.InferredExprCandidates
-            Assert.AreEqual<int>(expectedNumbExpr, result.Length)
-            let oneCandidateMatches, candidates = this.PerformExpressionCheck fvJi result expectedExpr
-            Assert.IsTrue(oneCandidateMatches, $"Did not find expected `{expectedExpr}` among {candidates}")
-        | Some ref ->
-            Assert.IsInstanceOfType(ref, typeof<FplJustificationItemByCor>)
-        | None ->
-            failwith $"expected FplJustificationItemByCor, found none"
-
-        prepareFplCode(filename, "", false) |> ignore
+        this.PerformJustificationCheck "TestInferredExpressionJustByCorollariesOfConjectures" typeof<FplJustificationItemByCor> PrimJIByCor fplCode expectedExpr expectedNumbExpr
 
     [<DataRow("00", """conj A {true} cor A$1 {true} cor A$1$1 {true} prop T {true} prf T$1 { 1. bycor A$1$1 |- true }""", "true", 1)>]
     [<DataRow("01", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" conj A {true} cor A$1 {true} cor A$1$1 {all n,m:Nat { impl( ( Succ(n) = Succ(m) ), ( n = m ) ) }} prop T {true} prf T$1 { 1. bycor A$1$1 |- true }""", "∀ m, n:Nat {((n') = (m')) ⇒ (n = m)}", 1)>]
@@ -1029,30 +807,7 @@ type TestInferredExpressionsJust() =
     [<DataRow("aa", """def pred Impl(f, g: pred) infix "⇒" 0 {impl(f,g)} conj A {true} cor A$1 {true} cor A$1$1 {dec f, g, h: pred; (f ⇒ (g ⇒ h)) ⇒ ((f ⇒ g) ⇒ (f ⇒ h))} prop T {dec a:pred; a ⇒ a} prf T$1 {1. bycor A$1$1 |- (a ⇒ ((a ⇒ a) ⇒ a)) ⇒ ((a ⇒ a) ⇒ (a ⇒ a))}""", "(f ⇒ (g ⇒ h)) ⇒ ((f ⇒ g) ⇒ (f ⇒ h))", 1)>]
     [<TestMethod>]
     member this.TestInferredExpressionJustByCorollariesOfCorollaries(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
-        
-        let filename = "TestInferredExpressionJustByCorollariesOfCorollaries"
-        prepareFplCode(filename + ".fpl", fplCode, false) 
-        let r = heap.Root
-
-        let candidates = findCandidatesByName "T" false true
-        let prf = candidates |> List.filter (fun fv -> fv.FplId = "T$1") |> List.map (fun fv -> fv :?> FplProof) |> List.head
-
-        let fvJiOpt = tryFindJustification prf PrimJIByCor
-
-        match fvJiOpt with
-        | Some (:? FplJustificationItemByCor as fvJi) ->
-            let result = fvJi.InferredExprCandidates
-            Assert.AreEqual<int>(expectedNumbExpr, result.Length)
-            let oneCandidateMatches, candidates = this.PerformExpressionCheck fvJi result expectedExpr
-            Assert.IsTrue(oneCandidateMatches, $"Did not find expected `{expectedExpr}` among {candidates}")
-        | Some ref ->
-            Assert.IsInstanceOfType(ref, typeof<FplJustificationItemByCor>)
-        | None ->
-            failwith $"expected FplJustificationItemByCor, found none"
-
-        prepareFplCode(filename, "", false) |> ignore
-
-
+        this.PerformJustificationCheck "TestInferredExpressionJustByCorollariesOfCorollaries" typeof<FplJustificationItemByCor> PrimJIByCor fplCode expectedExpr expectedNumbExpr
 
     [<DataRow("00cl0", """def cl A thm T {true} prf T$1 { 1. bydef A |- true }""", "undet", 1)>]
     [<DataRow("00cl1", """def cl A1 def cl A { dec assert is(self, A1); ctor A() {} } thm T {true} prf T$1 { 1. bydef A |- true }""", "A is A1", 1)>] // one assertion
@@ -1070,28 +825,7 @@ type TestInferredExpressionsJust() =
     [<DataRow("00fu3", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" def cl A1 def func A()->obj { dec assert is(self, A1) assert all n,m:Nat { impl( ( n' = m' ), ( n = m ) ) }; ret $1 prty pred J() {ex x:obj {is(x,Nat)}} } thm T {true} prf T$1 { 1. bydef A |- true }""", "∃ x:obj {x is Nat}", 3)>] // two assertions + predicative property
     [<TestMethod>]
     member this.TestInferredExpressionJustByDef(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
-        
-        let filename = "TestInferredExpressionJustByDef"
-        prepareFplCode(filename + ".fpl", fplCode, false) 
-        let r = heap.Root
-
-        let candidates = findCandidatesByName "T" false true
-        let prf = candidates |> List.filter (fun fv -> fv.FplId = "T$1") |> List.map (fun fv -> fv :?> FplProof) |> List.head
-
-        let fvJiOpt = tryFindJustification prf PrimJIByDef
-
-        match fvJiOpt with
-        | Some (:? FplJustificationItemByDef as fvJi) ->
-            let result = fvJi.InferredExprCandidates
-            Assert.AreEqual<int>(expectedNumbExpr, result.Length)
-            let oneCandidateMatches, candidates = this.PerformExpressionCheck fvJi result expectedExpr
-            Assert.IsTrue(oneCandidateMatches, $"Did not find expected `{expectedExpr}` among {candidates}")
-        | Some ref ->
-            Assert.IsInstanceOfType(ref, typeof<FplJustificationItemByDef>)
-        | None ->
-            failwith $"expected FplJustificationItemByDef, found none"
-
-        prepareFplCode(filename, "", false) |> ignore
+        this.PerformJustificationCheck "TestInferredExpressionJustByDef" typeof<FplJustificationItemByDef> PrimJIByDef fplCode expectedExpr expectedNumbExpr
 
     [<DataRow("00cl0", """def cl A thm T {dec v:A; true} prf T$1 { 1. bydef v |- true }""", "undet", 1)>]
     [<DataRow("00cl1", """def cl A1 def cl A { dec assert is(self, A1); ctor A() {} } thm T {dec v:A; true} prf T$1 { 1. bydef v |- true }""", "A is A1", 1)>] // one assertion
@@ -1109,82 +843,19 @@ type TestInferredExpressionsJust() =
     [<DataRow("00fu3", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" def cl A1 def func A()->obj { dec assert is(self, A1) assert all n,m:Nat { impl( ( n' = m' ), ( n = m ) ) }; ret $1 prty pred J() {ex x:obj {is(x,Nat)}} } thm T {dec v:A; true} prf T$1 { 1. bydef v |- true }""", "∃ x:obj {x is Nat}", 3)>] // two assertions + predicative property
     [<TestMethod>]
     member this.TestInferredExpressionJustByDefVar(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
-        
-        let filename = "TestInferredExpressionJustByDefVar"
-        prepareFplCode(filename + ".fpl", fplCode, false) 
-        let r = heap.Root
-
-        let candidates = findCandidatesByName "T" false true
-        let prf = candidates |> List.filter (fun fv -> fv.FplId = "T$1") |> List.map (fun fv -> fv :?> FplProof) |> List.head
-
-        let fvJiOpt = tryFindJustification prf PrimJIByDefVar
-
-        match fvJiOpt with
-        | Some (:? FplJustificationItemByDefVar as fvJi) ->
-            let result = fvJi.InferredExprCandidates
-            Assert.AreEqual<int>(expectedNumbExpr, result.Length)
-            let oneCandidateMatches, candidates = this.PerformExpressionCheck fvJi result expectedExpr
-            Assert.IsTrue(oneCandidateMatches, $"Did not find expected `{expectedExpr}` among {candidates}")
-        | Some ref ->
-            Assert.IsInstanceOfType(ref, typeof<FplJustificationItemByDefVar>)
-        | None ->
-            failwith $"expected FplJustificationItemByDefVar, found none"
-
-        prepareFplCode(filename, "", false) |> ignore
+        this.PerformJustificationCheck "TestInferredExpressionJustByDefVar" typeof<FplJustificationItemByDefVar> PrimJIByDefVar fplCode expectedExpr expectedNumbExpr
 
     [<DataRow("00", """def cl N thm T {true} prf T$1 { 1: ex x:obj {is(x,N)} 2. 1 |- ex x:obj {is(x,N)}}""", "∃ x:obj {x is N}", 1)>]
     [<DataRow("01", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" ax A {true} thm T {true} prf T$1 { 1. byax A |- all x,y:Set {impl ( is(x, N), ( x = y ))} 2. 1 |- true }""", "∀ x, y:Set {(x is N) ⇒ (x = y)}", 1)>]
     [<TestMethod>]
     member this.TestInferredExpressionJustByArgRef(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
-        
-        let filename = "TestInferredExpressionJustByArgRef"
-        prepareFplCode(filename + ".fpl", fplCode, false) 
-        let r = heap.Root
+        this.PerformJustificationCheck "TestInferredExpressionJustByArgRef" typeof<FplJustificationItemByRefArgument> PrimJIByRefArgument fplCode expectedExpr expectedNumbExpr
 
-        let candidates = findCandidatesByName "T" false true
-        let prf = candidates |> List.filter (fun fv -> fv.FplId = "T$1") |> List.map (fun fv -> fv :?> FplProof) |> List.head
-        let fvJiOpt = tryFindJustification prf PrimJIByRefArgument
-
-        match fvJiOpt with
-        | Some (:? FplJustificationItemByRefArgument as fvJi) ->
-            let result = fvJi.InferredExprCandidates
-            Assert.AreEqual<int>(expectedNumbExpr, result.Length)
-            let oneCandidateMatches, candidates = this.PerformExpressionCheck fvJi result expectedExpr
-            Assert.IsTrue(oneCandidateMatches, $"Did not find expected `{expectedExpr}` among {candidates}")
-        | Some ref ->
-            Assert.IsInstanceOfType(ref, typeof<FplJustificationItemByRefArgument>)
-        | None ->
-            failwith $"expected FplJustificationItemByRefArgument, found none"
-
-        prepareFplCode(filename, "", false) |> ignore
-
-    [<DataRow("00", """def cl N thm T {true} prf T$1 { 1: ex x:obj {is(x,N)} 2. 1 |- trivial} thm T1 {true} prf T1$1 { 1. T$1:1 |- ex x:obj {is(x,N)} }""", "∃ x:obj {x is N}", 1)>]
-    [<DataRow("01", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" ax A {true} thm T {true} prf T$1 { 1. byax A |- all x,y:Set {impl ( is(x, N), ( x = y ))} 2. 1 |- true } thm T1 {true} proof T1$1 {1. T$1:1 |- true}""", "∀ x, y:Set {(x is N) ⇒ (x = y)}", 1)>]
+    [<DataRow("00", """def cl N thm T1 {true} prf T1$1 { 1: ex x:obj {is(x,N)} 2. 1 |- trivial} thm T {true} prf T$1 { 1. T1$1:1 |- ex x:obj {is(x,N)} }""", "∃ x:obj {x is N}", 1)>]
+    [<DataRow("01", """def pred Equal(x,y: tpl) infix "=" 50 {del.Equal(x,y)} def cl Nat def func Succ(n: Nat) -> Nat postfix "'" ax A {true} thm T1 {true} prf T1$1 { 1. byax A |- all x,y:Set {impl ( is(x, N), ( x = y ))} 2. 1 |- true } thm T {true} proof T$1 {1. T1$1:1 |- true}""", "∀ x, y:Set {(x is N) ⇒ (x = y)}", 1)>]
     [<TestMethod>]
     member this.TestInferredExpressionJustByProofArgument(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
-        
-        let filename = "TestInferredExpressionJustByProofArgument"
-        prepareFplCode(filename + ".fpl", fplCode, false) 
-        let r = heap.Root
-
-        let candidates = findCandidatesByName "T1" false true
-        let prf = candidates |> List.filter (fun fv -> fv.FplId = "T1$1") |> List.map (fun fv -> fv :?> FplProof) |> List.head
-
-        let fvJiOpt = tryFindJustification prf PrimJIByProofArgument
-
-        match fvJiOpt with
-        | Some (:? FplJustificationItemByProofArgument as fvJi) ->
-            let result = fvJi.InferredExprCandidates
-            Assert.AreEqual<int>(expectedNumbExpr, result.Length)
-            let oneCandidateMatches, candidates = this.PerformExpressionCheck fvJi result expectedExpr
-            Assert.IsTrue(oneCandidateMatches, $"Did not find expected `{expectedExpr}` among {candidates}")
-        | Some ref ->
-            Assert.IsInstanceOfType(ref, typeof<FplJustificationItemByProofArgument>)
-        | None ->
-            failwith $"expected FplJustificationItemByProofArgument, found none"
-
-        prepareFplCode(filename, "", false) |> ignore
-
+        this.PerformJustificationCheck "TestInferredExpressionJustByProofArgument" typeof<FplJustificationItemByProofArgument> PrimJIByProofArgument fplCode expectedExpr expectedNumbExpr
 
     // AndCummutative and(p,q) 
     [<DataRow("AndC_01", "inf AndCummutative{dec p,q:pred; pre:and(p,q) con:and(q,p)} thm T {true} proof T$1 {1: and(true,false) 2. 1, byinf AndCummutative |- and(false,true)}", "false ∧ true", 1)>]
@@ -1586,26 +1257,4 @@ type TestInferredExpressionsJust() =
     [<DataRow("XorUnpack2Or_03", "inf XorUnpack2Or{dec p,q:pred; pre:xor(p,q) con:or(and(not p,q),and(p,not q))} thm T {true} proof T$1 {1: xor(iif(true, false), xor(true, false)) 2. 1, byinf XorUnpack2Or |- true}", "(¬(true ⇔ false) ∧ (true ⩡ false)) ∨ ((true ⇔ false) ∧ ¬(true ⩡ false))", 1)>]
     [<TestMethod>]
     member this.TestInferredExpressionJustByInf(no:string, fplCode, expectedExpr:string, expectedNumbExpr:int) =
-        
-        let filename = "TestInferredExpressionJustByInf"
-        prepareFplCode(filename + ".fpl", fplCode, false) 
-        let r = heap.Root
-
-        let candidates = findCandidatesByName "T" false true
-        let prf = candidates |> List.filter (fun fv -> fv.FplId = "T$1") |> List.map (fun fv -> fv :?> FplProof) |> List.head
-
-        let fvJiOpt = tryFindJustification prf PrimJIByInf
-        match fvJiOpt with
-        | Some (:? FplJustificationItemByInf as fvJi) ->
-            let result = fvJi.InferredExprCandidates
-            Assert.AreEqual<int>(expectedNumbExpr, result.Length)
-            let oneCandidateMatches, candidates = this.PerformExpressionCheck fvJi result expectedExpr
-            Assert.IsTrue(oneCandidateMatches, $"Did not find expected `{expectedExpr}` among {candidates}")
-        | Some ref ->
-            Assert.IsInstanceOfType(ref, typeof<FplJustificationItemByInf>)
-        | None ->
-            failwith $"expected FplJustificationItemByInf, found none"
-
-        prepareFplCode(filename, "", false) |> ignore
-
-
+        this.PerformJustificationCheck "TestInferredExpressionJustByInf" typeof<FplJustificationItemByInf> PrimJIByInf fplCode expectedExpr expectedNumbExpr
