@@ -120,10 +120,12 @@ type FplGenericReference(positions: Positions, parent: FplGenericNode) =
             this.SetValueOf called
         | Some (:? FplGenericHasValue as called) ->
             match called.Name with
-            | PrimVariableL
+            | PrimVariableL ->
+                called.Run()
+                this.SetValueOf called
             | PrimDelegateEqualL
             | PrimDelegateDecrementL ->
-                called.Run()
+                this.RunWithVariableReplacement called
                 this.SetValueOf called
             | PrimVariableArrayL ->
                 this.SetValue called

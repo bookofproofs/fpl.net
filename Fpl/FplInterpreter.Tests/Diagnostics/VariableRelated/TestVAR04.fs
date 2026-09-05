@@ -96,7 +96,9 @@ type TestVAR04() =
     [<DataRow("24a", "def cl A {dec myX:obj; ctor A(x:obj) {dec myX:=x;}}", 0)>]    
     [<DataRow("24b", "def cl A {dec myX:obj; ctor A(x:obj) {dec myX:=x;}} def cl B:A { ctor B() {dec base.A(@1); } }", 0)>]
     [<DataRow("25", "def func Sum(list:*Nat[ind])->Nat {dec result, addend: Nat result:=Zero() for addend in list { result:=Add(result,addend) } ; return result}", 0)>]
-    [<DataRow("26", "thm T {dec a: pred; true} prf T$1 {1: a}", 0)>]
+    [<DataRow("26", "thm T {dec a: pred; true} prf T$1 {1: a}", 1)>]
+    [<DataRow("26a", "thm T {true} prf T$1 {dec a: pred; 1: a}", 0)>]
+    [<DataRow("26b", "thm T {true} prf T$1 {dec a: pred; 1: trivial}", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ", 0)>]
     [<TestMethod>]
     member this.TestVAR04(no:string, fplCode:string, expected) =
