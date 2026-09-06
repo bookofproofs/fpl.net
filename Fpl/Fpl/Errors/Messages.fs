@@ -241,6 +241,7 @@ let errExprMismatchFoundEndOfFormula pName = Some $"Found end of formula, expect
 let errExprMismatchVarMatchedDifferently varName expectedExpr actualExpr = Some $"Variable `{varName}` was matched with different formulas `{expectedExpr}` and `{actualExpr}`."
 let errExprMismatchVarMatchedDifferentlyQuantfier varName expectedExpr actualExpr = Some $"Variable `{varName}` was matched with different quantifier formulas `{expectedExpr}` and `{actualExpr}`.{Environment.NewLine}Both formulas differed even when using placeholders for bound variables."
 let errExprMismatchMsgStandard aName pName = Some $"Found `{aName}`, expected `{pName}`."
+let errExprMismatchMsgNotAnInstanceOfPremise aName pName = Some $"Found `{aName}`, expected an instance of the premise `{pName}`."
 let errExprMismatchMsgParensOnlyLeft aName pName = Some $"Found `{aName}` in parentheses, expected `{pName}` without parentheses."
 let errExprMismatchMsgParensOnlyRight aName pName = Some $"Found `{aName}` without parentheses, expected `{pName}` in parentheses."
 let errExprMismatchVarNumbDifferent numA varsA numP pName =

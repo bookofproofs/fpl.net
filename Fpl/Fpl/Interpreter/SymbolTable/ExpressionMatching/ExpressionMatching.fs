@@ -323,6 +323,13 @@ let matchExpressionAgainstPattern (candidate:FplGenericNode) (pattern:FplGeneric
             match cand.RefersTo, pat.RefersTo with
             | Some aRef, Some pRef when aRef.Name <> PrimVariableL && pRef.Name = PrimVariableL ->
                 checkCandidateAgainstVarReference cand pat
+            | Some aRef, Some pRef when aRef.Name = PrimVariableL && pRef.Name <> PrimVariableL ->
+                // The candidate is a plain variable reference (e.g. `x`), but the pattern refers to a
+                // fixed operator/predicate application (e.g. `p ⇒ q` referring to `Impl(f, g)`).
+                // Report the mismatch at the premise's own printed form instead of recursing into
+                // the referenced definition's internals, which would produce a confusing, overly
+                // deep error message anchored to the definition rather than to the premise pattern.
+                errExprMismatchMsgNotAnInstanceOfPremise (cand.Type SignatureType.Name) (pat.Type SignatureType.Name)
             | Some aRef, Some pRef when Object.ReferenceEquals(aRef, pRef) ->
                 checkExpressions (getArguments cand) (getArguments pat)
             | Some aRef, Some pRef ->
