@@ -489,6 +489,20 @@ type FplGenericArgInference(positions: Positions, parent: FplGenericNode) =
 let matchJustItemsExpressionsAgainstPremiseList (tuplesJustItemWithInferredExpressionsList:(FplGenericJustificationItem * FplGenericNode list) list) (premiseList:FplGenericNode list) (byInferenceNode:FplGenericNode) =
     let varUsageDict = Dictionary<string, FplGenericNode>()
     let result = List<(FplGenericNode * Dictionary<string, FplGenericNode>) list>()
+
+    /// Builds a text entry for a single premise pattern, annotated with the justification
+    /// argument that was matched against it and the (first) expression it inferred, so the
+    /// enumeration reflects both, the premise order in the rule of inference and the order
+    /// in which arguments were listed in the proof step.
+    let describePremiseUsage ((justItem, inferredExprs): FplGenericJustificationItem * FplGenericNode list) (premisePattern:FplGenericNode) =
+        let premiseText = premisePattern.Type SignatureType.Name
+        let argId = justItem.FplId
+        match inferredExprs with
+        | [] ->
+            $"{premiseText}{Environment.NewLine}     ... pattern for argument `{argId}`"
+        | expr :: _ ->
+            $"{premiseText}{Environment.NewLine}     ... pattern for argument `{argId}` ...{Environment.NewLine}     `{expr.Type SignatureType.Name}`"
+
     let rec matchJustItemsExpressionsAgainstPremiseListRec (iJeLists:(FplGenericJustificationItem * FplGenericNode list) list) (preList:FplGenericNode list) =
         match iJeLists, preList with
         | iJel::iJels, pre::pres ->
@@ -498,8 +512,8 @@ let matchJustItemsExpressionsAgainstPremiseList (tuplesJustItemWithInferredExpre
             | [], errList ->
                 // emit diagnostics at just's position that there was no matching candidate for a premise, listing all tried-out candidates (contained in errList)
                 let premisesPre =
-                    premiseList
-                    |> List.map (fun prem -> prem.Type SignatureType.Name)
+                    List.zip tuplesJustItemWithInferredExpressionsList premiseList
+                    |> List.map (fun (iJe, prem) -> describePremiseUsage iJe prem)
                 let premises =
                     if premiseList.Length > 1 then
                         premisesPre |> numbered
@@ -519,4 +533,3 @@ let matchJustItemsExpressionsAgainstPremiseList (tuplesJustItemWithInferredExpre
     matchJustItemsExpressionsAgainstPremiseListRec tuplesJustItemWithInferredExpressionsList premiseList
     let res = result |> List.concat
     res
-

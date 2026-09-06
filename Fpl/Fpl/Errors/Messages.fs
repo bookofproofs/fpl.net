@@ -141,7 +141,7 @@ let errPR008 byInfName numbPrem expectedPremise mismatchingCandidates =
     if numbPrem = 1 then
         $"The subsequent `{LiteralByInf} {byInfName}` step requires a premise pattern `{expectedPremise}`. The provided justification does not match it. Candidates considered:{mismatchingCandidates}"
     else
-        $"The subsequent `{LiteralByInf} {byInfName}` step requires {numbPrem} premise patterns `{expectedPremise}`.{Environment.NewLine}The provided justification does not match them. Candidates considered:{mismatchingCandidates}"
+        $"The subsequent `{LiteralByInf} {byInfName}` step requires {numbPrem} premise patterns {expectedPremise}.{Environment.NewLine}The provided justification does not match them. Candidates considered:{mismatchingCandidates}"
 
 let errPR009 = "Not all proof arguments could be verified."
 let errPR010 keyword expectedRef = $"Justification `{keyword}` expects a reference to {expectedRef}, but the provided reference points to a proof or a corollary."
