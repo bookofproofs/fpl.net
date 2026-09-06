@@ -495,13 +495,13 @@ let matchJustItemsExpressionsAgainstPremiseList (tuplesJustItemWithInferredExpre
     /// enumeration reflects both, the premise order in the rule of inference and the order
     /// in which arguments were listed in the proof step.
     let describePremiseUsage ((justItem, inferredExprs): FplGenericJustificationItem * FplGenericNode list) (premisePattern:FplGenericNode) =
-        let premiseText = premisePattern.Type SignatureType.Name
+        let premiseExpression = premisePattern.Type SignatureType.Name
         let argId = justItem.FplId
         match inferredExprs with
         | [] ->
-            $"{premiseText}{Environment.NewLine}     ... pattern for argument `{argId}`"
+            $"`{premiseExpression}`{Environment.NewLine}     ... pattern for argument `{argId}`"
         | expr :: _ ->
-            $"{premiseText}{Environment.NewLine}     ... pattern for argument `{argId}` ...{Environment.NewLine}     `{expr.Type SignatureType.Name}`"
+            $"`{premiseExpression}`{Environment.NewLine}     ... pattern for argument `{argId}` ...{Environment.NewLine}     `{expr.Type SignatureType.Name}`"
 
     let rec matchJustItemsExpressionsAgainstPremiseListRec (iJeLists:(FplGenericJustificationItem * FplGenericNode list) list) (preList:FplGenericNode list) =
         match iJeLists, preList with
