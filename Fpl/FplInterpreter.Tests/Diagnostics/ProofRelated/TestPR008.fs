@@ -36,7 +36,7 @@ type TestPR008() =
     [<DataRow("MP_01n", """inf M { dec p,q: pred; pre: and (p, impl (p,q) ) con: q } thm T {true} proof T$1 {1: and(is(A,N), impl(is(N,A), false)) 2. 1, byinf M |- false }""", 1)>]
     [<DataRow("MP_02", """def pred Impl(f, g: pred) infix "⇒" 0 {impl(f,g)} inf MP { dec p,q: pred; pre: p, p ⇒ q con: q } thm T {dec f:pred; true} proof T$1 {1: f ⇒ ((f ⇒ f) ⇒ f) ⇒ ((f ⇒ (f ⇒ f)) ⇒ (f ⇒ f)) 2: f ⇒ ((f ⇒ f) ⇒ f) 3. 2,1, byinf MP |- (f ⇒ (f ⇒ f)) ⇒ (f ⇒ f) }""", 0)>]
     [<DataRow("MP_02a", """def pred Impl(f, g: pred) infix "⇒" 0 {impl(f,g)} inf MP { dec p,q: pred; pre: p, p ⇒ q con: q } proof T$1 {dec f,x:pred; 1: x 2: x ⇒ (f ⇒ f) 3. 2,1, byinf MP |- (f ⇒ f) }""", 1)>]
-    [<DataRow("MP_02b", """def pred Impl(f, g: pred) infix "⇒" 0 {impl(f,g)} inf MP { dec p,q: pred; pre: p, p ⇒ q con: q } proof T$1 {dec f,x:pred; 1: x 2: x ⇒ (f ⇒ f) 3. 2,1, byinf MP |- (f ⇒ f) }""", 0)>]
+    [<DataRow("MP_02b", """def pred Impl(f, g: pred) infix "⇒" 0 {impl(f,g)} inf MP { dec p,q: pred; pre: p, p ⇒ q con: q } proof T$1 {dec f,x:pred; 1: x 2: x ⇒ (f ⇒ f) 3. 1,2, byinf MP |- (f ⇒ f) }""", 0)>]
     [<DataRow("MP_03", """def pred Impl(f, g: pred) infix "⇒" 0 {impl(f,g)} inf MP { dec p,q: pred; pre: p, p ⇒ q con: q } proof T$1 {dec f,x:pred; 1: x 2: x ⇒ (f ⇒ f) 3. 1,2, byinf MP |- (f ⇒ f) }""", 0)>]
     [<TestMethod>]
     member this.TestPR008ModusPonens(no:string, fplCode:string, expected) =
