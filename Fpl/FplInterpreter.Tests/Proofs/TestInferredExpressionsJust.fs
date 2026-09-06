@@ -15,13 +15,7 @@ type TestInferredExpressionsJust() =
 
     member private this.PerformExpressionCheck (fvJi:FplGenericNode) (result:FplGenericNode list) (expectedExpr:string) =
         let argumentInferredFormula = fvJi.Parent.Value.Parent.Value.ArgList[1].ArgList[0]
-        let matchResults =
-            result
-            |> List.map (fun candidate ->
-                let dictParameterUsage = Dictionary<string, FplGenericNode>()
-                let mismatchMessageOpt = matchExpressionAgainstPattern argumentInferredFormula candidate dictParameterUsage
-                candidate, mismatchMessageOpt, dictParameterUsage
-            )
+        let matchResults = collectMatchResultsForExpressionPatternCandidates argumentInferredFormula result 
 
         let oneCandidateMatches = 
             matchResults
@@ -29,28 +23,7 @@ type TestInferredExpressionsJust() =
                 let candExpr = cand.Type SignatureType.Name 
                 candExpr = expectedExpr || mismatchMessageOpt.IsNone)
 
-        let candidates =
-            matchResults
-            |> List.map (fun (cand, mismatchMessageOpt, dictParameterUsage)  ->
-                let msg =
-                    match mismatchMessageOpt with
-                    | Some err -> $" /// {err}"
-                    | None -> " ... ok"
-
-                let substitutions =
-                    if dictParameterUsage.Count > 0 then 
-                        $"{Environment.NewLine}     Substitutions:" +       
-                        (
-                            dictParameterUsage
-                            |> Seq.map (fun kvp -> $"{Environment.NewLine}       `{kvp.Key} := {kvp.Value.Type SignatureType.Name}`")
-                            |> String.concat ", "
-                        )
-                    else
-                        $"{Environment.NewLine}     No substitutions found" 
-                        
-                $"{Environment.NewLine}`{cand.Type SignatureType.Name}` {msg}{substitutions}"
-            )
-            |> String.concat ", "
+        let candidates = prettifyMismatchErrors matchResults
         oneCandidateMatches, candidates
 
     member private this.PerformJustificationCheck (filename:string) (justClass:System.Type) (justPrim:string) (fplCode:string) (expectedExpr:string) (expectedNumbExpr:int) =
