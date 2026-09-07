@@ -27,6 +27,16 @@ open Fpl.Interpreter.SymbolTable.Types2.Variables
 open Fpl.Interpreter.SymbolTable.TypeMatching
 
 
+/// <summary>
+/// Helper wrapper to produce a standardized mismatch error when two quantifier-bound
+/// variables have incompatible types during pattern matching.
+/// </summary>
+/// <param name="a">The candidate expression node containing the quantifier.</param>
+/// <param name="p">The pattern expression node containing the quantifier.</param>
+/// <param name="x">The candidate bound-variable node.</param>
+/// <param name="y">The pattern bound-variable node.</param>
+/// <param name="index">Index of the bound variable in the quantifier's variable list.</param>
+/// <returns>Optional mismatch message string.</returns>
 let private errExprMismatchQuantifierVariableTypesWrapper (a:FplGenericNode) (p:FplGenericNode) (x:FplGenericNode) (y:FplGenericNode) index =
     let xName = $"{x.FplId}:{x.Type SignatureType.Type}"
     let yName = $"{y.FplId}:{y.Type SignatureType.Type}"
@@ -34,8 +44,13 @@ let private errExprMismatchQuantifierVariableTypesWrapper (a:FplGenericNode) (p:
     let pName = p.Type SignatureType.Name
     errExprMismatchQuantifierVariableTypes aName pName xName yName index  
 
-/// Instantiates an expression by replacing variables with the expressions
-/// recorded in the variable-usage dictionary.
+/// <summary>
+/// Instantiates an expression by replacing pattern variables with the expressions
+/// recorded in the provided variable-usage dictionary.
+/// </summary>
+/// <param name="expression">Expression in which variables should be replaced.</param>
+/// <param name="dictParameterUsage">Dictionary mapping pattern variable ids to matched expressions.</param>
+/// <returns>The instantiated expression.</returns>
 let instantiateExpressionByVarUsages (expression: FplGenericNode) (dictParameterUsage: Dictionary<string, FplGenericNode>) : FplGenericNode =
     let isVariableWithMatchedExpression (arg:FplGenericNode) =
         match arg.Name with
@@ -70,6 +85,7 @@ let instantiateExpressionByVarUsages (expression: FplGenericNode) (dictParameter
         newArgList
         |> Seq.iteri (fun i arg -> expr.ArgList[i] <- arg)
         expr
+
     // Propagate the recorded substitutions into the variable scope of the cloned
     // expression so the resulting expression reflects the matched instantiation.
     if isVariableWithMatchedExpression expression then
@@ -83,8 +99,13 @@ let instantiateExpressionByVarUsages (expression: FplGenericNode) (dictParameter
         replaceVarsByUsages expression
 
 
-/// Creates a string representation of a quantifier formula in which its bound variables are replaced by
-/// placeholders numbered according to the order of the bound variables
+/// <summary>
+/// Produces a string representation of a quantifier formula where bound-variable names
+/// are replaced by numbered placeholders in the order of the bound variables. Used to compare quantifier bodies modulo
+/// bound variable renaming.
+/// </summary>
+/// <param name="fv">The quantifier formula node.</param>
+/// <returns>String representation of the formula modulo bound variable names.</returns>
 let private getNameOfQuantifierFormulaModuloBoundVarNames (fv:FplGenericNode) =
     let originalNames = HashSet<string>()
     fv.Scope
@@ -107,6 +128,14 @@ let private getNameOfQuantifierFormulaModuloBoundVarNames (fv:FplGenericNode) =
     )
     result
 
+/// <summary>
+/// Records the first usage of a pattern variable mapping and checks for mismatches
+/// on subsequent occurrences. Returns an optional mismatch message.
+/// </summary>
+/// <param name="varName">Pattern variable identifier.</param>
+/// <param name="a">Candidate expression matched to the variable.</param>
+/// <param name="dictParameterUsage">Dictionary holding established substitutions.</param>
+/// <returns>Optional mismatch message string; None on success.</returns>
 let private checkMismatchingUsageOfVars varName (a:FplGenericNode) (dictParameterUsage:Dictionary<string, FplGenericNode>) = 
     if dictParameterUsage.TryAdd (varName, a) then
         errExprMismatchOK
@@ -129,8 +158,14 @@ let private checkMismatchingUsageOfVars varName (a:FplGenericNode) (dictParamete
             else
                 errExprMismatchOK
 
-/// Matches a candidate expression against a pattern expression while recording
-/// a consistent variable-usage map for later substitution.
+/// <summary>
+/// Attempts to match a candidate expression against a pattern expression while
+/// recording a consistent variable-usage dictionary for later instantiation.
+/// </summary>
+/// <param name="candidate">The candidate expression node to match.</param>
+/// <param name="pattern">The pattern expression node to match against.</param>
+/// <param name="dictParameterUsage">Dictionary that will be populated with substitutions from pattern variables to matched expressions.</param>
+/// <returns>Optional mismatch message string; None if the match succeeds.</returns>
 let matchExpressionAgainstPattern (candidate:FplGenericNode) (pattern:FplGenericNode) (dictParameterUsage: Dictionary<string, FplGenericNode>) =
 
     // Tracks bound-variable correspondences established by quantifier matching.
@@ -138,6 +173,19 @@ let matchExpressionAgainstPattern (candidate:FplGenericNode) (pattern:FplGeneric
     // so that identically-named bound variables in different quantifier scopes never collide.
     let boundVarMap = Dictionary<FplGenericNode, FplGenericNode>()
 
+    /// <summary>
+    /// Compares the bound variables of two quantifier expressions and establishes a correspondence
+    /// between pattern-bound variables and candidate-bound variables. Records correspondences in
+    /// the local bound-variable map and propagates matched correspondences into the substitution
+    /// dictionary. Performs arity and type checks for bound variables and reports appropriate
+    /// mismatch messages when they differ.
+    /// </summary>
+    /// <param name="a">The candidate quantifier expression node.</param>
+    /// <param name="p">The pattern quantifier expression node.</param>
+    /// <returns>
+    /// An optional mismatch message string: None when the quantifier-variable lists are compatible
+    /// and correspondences were recorded; Some error message when a mismatch was detected.
+    /// </returns>
     let compareQuantifierVariables (a:FplGenericNode) (p:FplGenericNode) =
         let pVars = p.GetVariables()
         let aVars = a.GetVariables()
@@ -164,9 +212,14 @@ let matchExpressionAgainstPattern (candidate:FplGenericNode) (pattern:FplGeneric
                 errExprMismatchQuantifierVariableCounts (a.Type SignatureType.Name) (p.Type SignatureType.Name) aVars.Length pVars.Length
         loop aVars pVars 0
 
-    // If the pattern is a parameterized variable reference, clone the variable and
-    // project the referenced arguments onto the cloned parameters so matching can
-    // account for bound variables consistently.
+    /// <summary>
+    /// (Inner helper) Produces a mocked clone of a parameterized variable definition where
+    /// cloned parameters are projected from a given reference's arguments. Used so matching
+    /// can treat parameterized variables consistently with bound variables.
+    /// </summary>
+    /// <param name="refQ">The reference expression containing actual arguments.</param>
+    /// <param name="q">The parameterized variable definition to clone and adjust.</param>
+    /// <returns>A cloned and adjusted variable node for matching.</returns>
     let mockVariableWithParams (refQ:FplGenericNode) (q:FplGenericNode) =
         if refQ.Name = PrimRefL && q.Name = PrimVariableL then
             let qMocked = q.Clone()
@@ -190,6 +243,12 @@ let matchExpressionAgainstPattern (candidate:FplGenericNode) (pattern:FplGeneric
             // in all other cases leave q unchanged
             q
 
+    /// <summary>
+    /// (Inner helper) Normalizes expressions for matching, e.g., unwraps transparent
+    /// delegate-equality references to the actual represented expression.
+    /// </summary>
+    /// <param name="expression">Expression to normalize.</param>
+    /// <returns>The normalized expression used for matching comparisons.</returns>
     let getNormalizedExpressionForMatching (expression: FplGenericNode) =
         match expression.Name, expression.RefersTo with
         | PrimRefL, Some referenced when referenced.Name = PrimDelegateEqualL ->
@@ -197,6 +256,12 @@ let matchExpressionAgainstPattern (candidate:FplGenericNode) (pattern:FplGeneric
         | _ ->
             expression
 
+    /// <summary>
+    /// (Inner helper) Attempts to extract the "transparent" operator name referenced by a
+    /// reference node. Returns Some operator name if a transparent operator exists.
+    /// </summary>
+    /// <param name="reference">Reference expression to inspect.</param>
+    /// <returns>Optional operator name used for transparent comparisons.</returns>
     let tryGetTransparentReferenceOperator (reference: FplGenericNode) =
         match reference.RefersTo with
         | Some (:? FplGenericHasValue as definition) when definition.ArgList.Count > 0 ->
@@ -206,11 +271,24 @@ let matchExpressionAgainstPattern (candidate:FplGenericNode) (pattern:FplGeneric
         | _ ->
             None
 
+    /// <summary>
+    /// (Inner helper) Checks whether two expressions expose the same transparent reference operator.
+    /// </summary>
+    /// <param name="a">First expression to compare.</param>
+    /// <param name="p">Second expression to compare.</param>
+    /// <returns>True if both expose the same transparent operator; otherwise false.</returns>
     let haveSameTransparentReferenceOperator (a: FplGenericNode) (p: FplGenericNode) =
         match tryGetTransparentReferenceOperator a, tryGetTransparentReferenceOperator p with
         | Some aOperator, Some pOperator -> aOperator = pOperator
         | _ -> false
 
+    /// <summary>
+    /// (Inner helper) Checks whether a concrete candidate expression is compatible with a
+    /// pattern variable reference. Validates types and parameter arity and records variable usages.
+    /// </summary>
+    /// <param name="cand">Candidate expression to be checked.</param>
+    /// <param name="variableReference">Pattern variable reference node.</param>
+    /// <returns>Optional mismatch message string; None on success.</returns>
     let checkCandidateAgainstVarReference (cand:FplGenericNode) (variableReference:FplGenericNode) =
         let (errMsgOpt,_) = FplTypeMatcher.ComparisonBasedOnOpenFormulas cand variableReference
         match errMsgOpt, variableReference.RefersTo with
@@ -238,10 +316,15 @@ let matchExpressionAgainstPattern (candidate:FplGenericNode) (pattern:FplGeneric
         | _,_ ->
             errExprMismatchOK
 
-
-    // The usage dictionary records the first expression matched to each pattern
-    // variable and enforces that every later occurrence matches the same expression.
-    // It is also reused to instantiate the final matched expression.
+    /// <summary>
+    /// (Inner recursive helper) Core recursive routine that checks whether a candidate expression
+    /// matches a pattern expression. May update the provided substitutions dictionary.
+    /// </summary>
+    /// <param name="cand">Candidate expression node.</param>
+    /// <param name="pat">Pattern expression node.</param>
+    /// <returns>Optional mismatch message string; None if the match succeeds.</returns>
+    /// <remarks>This function contains nested recursion and calls additional inner helpers.
+    /// It is intentionally recursive to traverse expression trees.</remarks>
     let rec checkExpr (cand:FplGenericNode) (pat:FplGenericNode) =
 
         let rec checkExpressions (args:FplGenericNode list) (pars:FplGenericNode list) =
@@ -355,8 +438,15 @@ let matchExpressionAgainstPattern (candidate:FplGenericNode) (pattern:FplGeneric
     checkExpr candidate pattern
 
 
-/// Computes all match results of argumentInferredFormula against a list of expression pattern candidates at once producing a list of tuple
-/// (a,b,c) with a=pattern candidate to be matched, b=optional mismatch message, c= a dictionary of how pattern variables have been substituted during the match)
+/// <summary>
+/// Computes match results of an expression against multiple pattern candidates.
+/// </summary>
+/// <param name="argumentInferredFormula">The candidate expression to match.</param>
+/// <param name="patternCandidates">List of pattern expressions to try.</param>
+/// <returns>
+/// A list where each entry is a tuple: (patternCandidate, optionalMismatchMessage, substitutionDictionary).
+/// The substitution dictionary records how pattern variables were instantiated for each attempt.
+/// </returns>
 let collectMatchResultsForExpressionPatternCandidates (argumentInferredFormula:FplGenericNode) (patternCandidates:FplGenericNode list) =
     patternCandidates
     |> List.map (fun patternCandidate ->
@@ -365,9 +455,13 @@ let collectMatchResultsForExpressionPatternCandidates (argumentInferredFormula:F
         patternCandidate, mismatchMessageOpt, dictParameterUsage
     )
 
-/// Takes the output of collectMatchResultsForExpressionPatternCandidates as input and produces a string
-/// for an error message listing each justification candidate with the actual errorMsg
-/// generated by the expression matcher algorithm that caused any problem.
+/// <summary>
+/// Formats a list of match attempts into a readable diagnostic string. Each attempted
+/// pattern candidate is annotated with its optional mismatch message and any substitutions.
+/// </summary>
+/// <param name="matchResults">List of tuples produced by match attempts:
+/// (candidatePattern, optionalMismatchMessage, substitutionDictionary).</param>
+/// <returns>Concatenated formatted diagnostic string for all attempts.</returns>
 let prettifyMismatchErrors (matchResults:(FplGenericNode * string option * Dictionary<string, FplGenericNode>) list) =
     matchResults
     |> List.mapi (fun i (justificationCandidate, mismatchMessageOpt, dictParameterUsage) ->
@@ -417,7 +511,13 @@ let matchPremiseWithSomeExpressions (exprList:FplGenericNode list) (pre:FplGener
     )
     result |> Seq.toList, (prettifyMismatchErrors (failedMatchResults |> Seq.toList))
 
-/// Flag that a proof justification or inference cannot collect preceding results
+/// <summary>
+/// Emits PR022 diagnostics indicating that a justification or inference cannot collect preceding results,
+/// sets an appropriate error state on the provided node, and assigns a default value.
+/// </summary>
+/// <param name="fv">Node that will receive the error and default value.</param>
+/// <param name="nodeOpt">Optional referenced node involved in the failure.</param>
+/// <param name="varOpt">Optional referenced variable involved in the failure.</param>
 let issuePR022AndSetDefault (fv:FplGenericHasValue) (nodeOpt:FplGenericNode option) (varOpt:FplGenericNode option) =
     match nodeOpt, varOpt with
     | Some node, Some var ->
@@ -434,12 +534,20 @@ let issuePR022AndSetDefault (fv:FplGenericHasValue) (nodeOpt:FplGenericNode opti
         fv.ErrorOccurred <- emitPR022Diagnostics reason fv.StartPos fv.EndPos
     fv.SetDefaultValue()
 
-/// Flag that a proof justification or inference cannot collect preceding results with a special reason
+/// <summary>
+/// Emits diagnostics with a custom reason indicating that a justification or inference cannot
+/// collect preceding results and sets a default value on the provided node.
+/// </summary>
+/// <param name="fv">Node to mark with an error and default value.</param>
+/// <param name="reason">Custom textual reason for the diagnostic.</param>
 let issuePR022SpecialReasonAndSetDefault (fv:FplGenericHasValue) reason =
     fv.ErrorOccurred <- emitPR022Diagnostics reason fv.StartPos fv.EndPos
     fv.SetDefaultValue()
 
 
+/// <summary>
+/// Abstract base class representing an infering construct that can yield inferred expression candidates.
+/// </summary>
 [<AbstractClass>]
 type FplGenericInfering(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericPredicate(positions, parent)
@@ -447,6 +555,10 @@ type FplGenericInfering(positions: Positions, parent: FplGenericNode) =
     abstract member InferredExprCandidates: FplGenericNode list with get
 
 
+/// <summary>
+/// Abstract base class for justification items used in proof steps. Provides embedding and evaluation behavior
+/// common to justification items.
+/// </summary>
 [<AbstractClass>]
 type FplGenericJustificationItem(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericInfering(positions, parent)
@@ -483,6 +595,9 @@ type FplGenericJustificationItem(positions: Positions, parent: FplGenericNode) =
             issuePR022AndSetDefault this None None
         StaticDebug.Debug(this,Debug.Stop)
 
+/// <summary>
+/// Abstract base class representing an argument-inference construct inside a justification/inference.
+/// </summary>
 [<AbstractClass>]
 type FplGenericArgInference(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericInfering(positions, parent)
@@ -493,14 +608,25 @@ type FplGenericArgInference(positions: Positions, parent: FplGenericNode) =
 
     override this.EmbedInSymbolTable _ = addExpressionToParentArgList this
 
+/// <summary>
+/// Matches the expressions inferred by justification items against a list of premise patterns
+/// for a given inference node. Returns the flattened list of matched expression/substitution pairs.
+/// </summary>
+/// <param name="tuplesJustItemWithInferredExpressionsList">List of pairs: (justification item, its inferred expressions).</param>
+/// <param name="premiseList">List of premise pattern nodes to match against.</param>
+/// <param name="byInferenceNode">The inference node that requested the matching (used for diagnostics).</param>
+/// <returns>List of matched (expression * substitutionDictionary) pairs corresponding to premises.</returns>
 let matchJustItemsExpressionsAgainstPremiseList (tuplesJustItemWithInferredExpressionsList:(FplGenericJustificationItem * FplGenericNode list) list) (premiseList:FplGenericNode list) (byInferenceNode:FplGenericNode) =
     let varUsageDict = Dictionary<string, FplGenericNode>()
     let result = List<(FplGenericNode * Dictionary<string, FplGenericNode>) list>()
 
-    /// Builds a text entry for a single premise pattern, annotated with the justification
-    /// argument that was matched against it and the (first) expression it inferred, so the
-    /// enumeration reflects both, the premise order in the rule of inference and the order
-    /// in which arguments were listed in the proof step.
+    /// <summary>
+    /// (Inner helper) Produces a short textual description of how a justification item was used
+    /// to satisfy a particular premise pattern. Includes the justification id and the first inferred expression if any.
+    /// </summary>
+    /// <param name="justItemWithExprs">Tuple of justification item and its inferred expression list.</param>
+    /// <param name="premisePattern">Premise pattern node being described.</param>
+    /// <returns>Multi-line string describing the premise usage for diagnostics.</returns>
     let describePremiseUsage ((justItem, inferredExprs): FplGenericJustificationItem * FplGenericNode list) (premisePattern:FplGenericNode) =
         let premiseExpression = premisePattern.Type SignatureType.Name
         let argId = justItem.FplId
@@ -510,6 +636,12 @@ let matchJustItemsExpressionsAgainstPremiseList (tuplesJustItemWithInferredExpre
         | expr :: _ ->
             $"`{premiseExpression}`{Environment.NewLine}     ... pattern for argument `{argId}` ...{Environment.NewLine}     `{expr.Type SignatureType.Name}`"
 
+    /// <summary>
+    /// (Inner recursive helper) Walks the lists of justification items with inferred expressions and
+    /// premise patterns to perform the matching and emit diagnostics on mismatches.
+    /// </summary>
+    /// <param name="iJeLists">Remaining justification-item-with-exprs pairs to process.</param>
+    /// <param name="preList">Remaining premise patterns to match.</param>
     let rec matchJustItemsExpressionsAgainstPremiseListRec (iJeLists:(FplGenericJustificationItem * FplGenericNode list) list) (preList:FplGenericNode list) =
         match iJeLists, preList with
         | iJel::iJels, pre::pres ->
