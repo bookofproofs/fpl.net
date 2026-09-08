@@ -98,7 +98,7 @@ type FplEquality(name, positions: Positions, parent: FplGenericNode) as this =
                     | _ when aType<>bType -> 
                         // if the compared arguments have different types, then unequal
                         this.SetValue (new FplIntrinsicFalse((heap.Helper.CallerStartPos, heap.Helper.CallerEndPos), this.Parent.Value))
-                    | _ when aType = "tpl" && bType = "tpl" && aRepr = LiteralUndet && bRepr = LiteralUndet -> 
+                    | _ when aType = bType && aRepr = LiteralUndet && bRepr = LiteralUndet -> 
                         this.SetDefaultValue()
                     | _ -> 
                         match aRepr with

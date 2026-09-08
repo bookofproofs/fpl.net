@@ -29,6 +29,8 @@ type TestPR021() =
     [<DataRow("04a", """ax A {∃! x:obj{true}} thm T {true} prf T$1 { 1. byax A |- true }""", 1)>]
     [<DataRow("05", """ax A {∃!3 x:obj{true}} thm T {true} prf T$1 { 1. byax A |- ∃!3 x:obj {true} }""", 0)>]
     [<DataRow("05a", """ax A {∃!3 x:obj{true}} thm T {true} prf T$1 { 1. byax A |- true }""", 1)>]
+    [<DataRow("06", """ax A {dec r:pred; and(r,r)} thm T {true} prf T$1 { 1. byax A |- and(∀ x:obj {true}, ∀ z:obj {true}) }""", 0)>]
+    [<DataRow("07", """def cl N def cl M def cl K ax A1 {dec p,q,r:pred; xor(iif(p, q), and(r, not p))}  thm T {true} prf T$1 { 1. byax A1 |- xor(iif(∀ x:obj {x is N} , ∃ y:obj {y is M}) , and(or(true , false) , ¬∀ z:obj {z is N})) }""", 0)>]
     [<TestMethod>]
     member this.TestPR021InferenceByAx(no:string, fplCode:string, expected) =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
@@ -223,6 +225,8 @@ type TestPR021() =
     [<DataRow("c0a", """def cl N thm T {true} prf T$1 { 1: ex x:obj {is(x,N)} 2. 1 |- ∃ x:obj {x is N}} thm T1 {true} prf T1$1 { 1. T$1:1 |- false }""", 1)>]
     [<DataRow("c1", """ax A {not false} thm T {true} prf T$1 { 1. byax A |- not false 2. 1 |- not false } thm T1 {true} proof T1$1 {1. T$1:1 |- not false }""", 0)>]
     [<DataRow("c1a", """ax A {not false} thm T {true} prf T$1 { 1. byax A |- not false 2. 1 |- not false } thm T1 {true} proof T1$1 {1. T$1:1 |- false}""", 1)>]
+    [<DataRow("02", """def pred Impl(f, g: pred) infix "⇒" 110 {impl(f,g)} thm T {dec f,g,h:pred; f ⇒ g ⇒ h}  prf T$1 { 1: f ⇒ g 2: g ⇒ h 3. 1,2 |- f ⇒ h}""", 0)>]
+    
     [<TestMethod>]
     member this.TestPR021InferenceByProofArgument(no:string, fplCode:string, expected) =
         if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 

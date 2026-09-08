@@ -744,50 +744,42 @@ inf PrenexPackAllXor
         xor(p, all x:tpl { q(x)} )
 }
 
-def pred Equal(x,y: tpl) infix "=" 50 
+def pred Equal(x,y: tpl) infix "=" 0 // lowest precedence for equality (1-19 is reserved for user-defined)
 {
     del.Equal(x,y)
 }
 
-def pred NotEqual(x,y: tpl) infix "≠" 60 
+def pred NotEqual(x,y: tpl) infix "≠" 20 // non-equality higher than equality (weak binding range 21 to 99 is reserved for other user-defined comparison symbols like < >)
 {
     not x = y
 }
 
-def pred Implies(x,y: pred) infix "⇒" 70 
+def pred Iif(x,y: pred) infix "⇔" 100 // equivalence is weaker than implication (range 101 to 109 reserved for user-defined logic-symbols)
 {
-    impl
-    (
-        x
-        ,
-        y
-    )
+    iif(x,y)
 }
 
-def pred IfAndOnlyIf(x,y: pred) infix "⇔" 80
+def pred Impl(x,y: pred) infix "⇒" 110 // implication has structural precedence (range 111 to 119 reserved for user-defined logic-symbols)
 {
-    iif
-    (
-        x
-        ,
-        y
-    )
+    impl(x,y)
 }
 
-def pred And(x,y: pred) infix "∧" 7 
+def pred Xor(x,y: pred) infix "⩡" 120 // XOR is between implication and OR (range 121 to 129 reserved for user-defined logic-symbols)
+{
+    xor(x,y)
+}
+
+def pred Or(x,y: pred) infix "∨" 130 // OR is weaker than AND (range 131 to 139 reserved for user-defined logic-symbols)
+{
+    or(x,y)
+}
+
+def pred And(x,y: pred) infix "∧" 140 // AND is most binding among all logic symbols (range 141+ reserved for user-defined other symbols like arithmetics)
 {
     and(x,y)
 }
 
-def pred Or(x,y: pred) infix "∨" 10 
-{
-    or(x,y)
-}
  
-def pred Xor(x,y: pred) infix "⩡" 20 
-{
-    xor(x,y)
-}
   
 localization iif(x,y) :=
     !tex: x "\Leftrightarrow" y

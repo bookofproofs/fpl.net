@@ -17,6 +17,7 @@ open TestSharedConfig
 [<TestClass>]
 type TestPR008() =
 
+
     // ModusPonens and (p, impl (p,q) )
     [<DataRow("MP_01", """inf M { dec p,q: pred; pre: and (p, impl (p,q) ) con: q } thm T {true} proof T$1 {1: and(true, impl(true, false)) 2. 1, byinf M |- false }""", 0)>]
     [<DataRow("MP_01a", """inf M { dec p,q: pred; pre: and (p, impl (p,q) ) con: q } thm T {true} proof T$1 {1: or(true, impl(true, false)) 2. 1, byinf M |- false }""", 1)>]
@@ -33,6 +34,17 @@ type TestPR008() =
     [<DataRow("MP_01l", """inf M { dec p,q: pred; pre: and (p, impl (p,q) ) con: q } thm T {true} proof T$1 {1: and(ex x:obj {is(x,N)}, impl(all x:obj {is(x,N)}, false)) 2. 1, byinf M |- false }""", 1)>]
     [<DataRow("MP_01m", """inf M { dec p,q: pred; pre: and (p, impl (p,q) ) con: q } thm T {true} proof T$1 {1: and(is(A,N), impl(is(A,N), false)) 2. 1, byinf M |- false }""", 0)>]
     [<DataRow("MP_01n", """inf M { dec p,q: pred; pre: and (p, impl (p,q) ) con: q } thm T {true} proof T$1 {1: and(is(A,N), impl(is(N,A), false)) 2. 1, byinf M |- false }""", 1)>]
+    [<DataRow("MP_02", """def pred Impl(f, g: pred) infix "⇒" 0 {impl(f,g)} inf MP { dec p,q: pred; pre: p, p ⇒ q con: q } thm T {dec f:pred; true} proof T$1 {1: f ⇒ ((f ⇒ f) ⇒ f) ⇒ ((f ⇒ (f ⇒ f)) ⇒ (f ⇒ f)) 2: f ⇒ ((f ⇒ f) ⇒ f) 3. 2,1, byinf MP |- (f ⇒ (f ⇒ f)) ⇒ (f ⇒ f) }""", 0)>]
+    [<DataRow("MP_02a", """def pred Impl(f, g: pred) infix "⇒" 0 {impl(f,g)} inf MP { dec p,q: pred; pre: p, p ⇒ q con: q } proof T$1 {dec f,x:pred; 1: x 2: x ⇒ (f ⇒ f) 3. 2,1, byinf MP |- (f ⇒ f) }""", 1)>]
+    [<DataRow("MP_02b", """def pred Impl(f, g: pred) infix "⇒" 0 {impl(f,g)} inf MP { dec p,q: pred; pre: p, p ⇒ q con: q } proof T$1 {dec f,x:pred; 1: x 2: x ⇒ (f ⇒ f) 3. 1,2, byinf MP |- (f ⇒ f) }""", 0)>]
+    [<DataRow("MP_03", """def pred Impl(f, g: pred) infix "⇒" 0 {impl(f,g)} inf MP { dec p,q: pred; pre: p, p ⇒ q con: q } proof T$1 {dec f,x:pred; 1: x 2: x ⇒ (f ⇒ f) 3. 1,2, byinf MP |- (f ⇒ f) }""", 0)>]
+    [<TestMethod>]
+    member this.TestPR008ModusPonens(no:string, fplCode:string, expected) =
+        if offlineWatcher.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = PR008 ("", 0, "", "") 
+            runTestHelper "TestPR008ModusPonens.fpl" fplCode code expected
 
     // AndCummutative and(p,q) 
     [<DataRow("AndC_01", """inf AndCummutative{dec p,q:pred; pre:and(p,q) con:and(q,p)} thm T {true} proof T$1 {1: and(true,false) 2. 1, byinf AndCummutative |- and(false,true) }""", 0)>]
@@ -480,3 +492,4 @@ type TestPR008() =
         else
             let code = PR008 ("", 0, "", "") 
             runTestHelper "TestPR008.fpl" fplCode code expected
+

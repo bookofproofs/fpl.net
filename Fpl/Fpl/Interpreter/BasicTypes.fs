@@ -110,50 +110,51 @@ type FplGenericNode(positions: Positions, parent: FplGenericNode option) =
     let _scope = Dictionary<string, FplGenericNode>()
     let _argList = List<FplGenericNode>()
 
-    /// A scope of this FplValue
+    /// A scope of this FplGenericNode
     member this.Scope = _scope
 
-    /// An argument list of this FplValue
+    /// An argument list of this FplGenericNode
     member this.ArgList = _argList
 
     abstract member Clone: unit -> FplGenericNode
     abstract member Copy : FplGenericNode -> unit
     abstract member AssignParts: FplGenericNode -> unit
+    /// <summary>Short name used when printing this FplGenericNode (e.g. in error messages).</summary>
     abstract member ShortName: string
     abstract member Name: string
     abstract member Represent: unit -> string
 
-    /// An optional order in which this FplValue ist to be run after the symbol table is completely created.
-    /// None means that it is not running but itself but called to be run from other FplValues.
+    /// An optional order in which this FplGenericNode ist to be run after the symbol table is completely created.
+    /// None means that it is not running but itself but called to be run from other FplGenericNodes.
     /// Some int means that it is running by itself after the creation of the symbol table. 
-    /// Only theories in root, and axioms, theorems, lemmas, propositions, conjectures, and definitions of predicates and functional terms in theories run by themselves and call all other types of FplValue to run.
+    /// Only theories in root, and axioms, theorems, lemmas, propositions, conjectures, and definitions of predicates and functional terms in theories run by themselves and call all other types of FplGenericNode to run.
     abstract member RunOrder: int option
 
-    /// Generates a type string identifier or type-specific naming convention of this FplValue.
+    /// <summary>Resolves and returns the type identifier representing this FplGenericNode.</summary>
     abstract member Type: SignatureType -> string
 
-    /// Embeds this FplValue in the SymbolTable by adding it to the Scope or as an argument of its predecessor in the SymbolTable.
+    /// Embeds this FplGenericNode in the SymbolTable by adding it to the Scope or as an argument of its predecessor in the SymbolTable.
     abstract member EmbedInSymbolTable: FplGenericNode option -> unit
 
-    /// Abstract member for running this FplValue. 
+    /// Abstract member for running this FplGenericNode. 
     abstract member Run: unit -> unit
 
-    /// Indicates if this FplValue is an FPL building block.
+    /// Indicates if this FplGenericNode is an FPL building block.
     abstract member IsFplBlock: unit -> bool
 
-    /// Indicates if this FplValue is an FPL building block, a property, or a constructor.
+    /// Indicates if this FplGenericNode is an FPL building block, a property, or a constructor.
     abstract member IsBlock: unit -> bool
 
-    /// Indicates if this FplValue is a class.
+    /// Indicates if this FplGenericNode is a class.
     abstract member IsClass: unit -> bool
 
-    /// Indicates if this FplValue is a proof.
+    /// Indicates if this FplGenericNode is a proof.
     abstract member IsProof: unit -> bool
 
-    /// Indicates if this FplValue is a mapping.
+    /// Indicates if this FplGenericNode is a mapping.
     abstract member IsMapping: unit -> bool
 
-    /// A method used to issue diagnostics related to this FplValue and its structure retrieved during the FPL interpreter.
+    /// A method used to issue diagnostics related to this FplGenericNode and its structure retrieved during the FPL interpreter.
     abstract member CheckConsistency: unit -> unit
 
     (* Default implementations = everything is false, only the trues are overridden in derived classes *)
@@ -161,7 +162,7 @@ type FplGenericNode(positions: Positions, parent: FplGenericNode option) =
 
     abstract member GetVariables: unit -> FplGenericNode list
 
-    /// Create a (possibly empty) list of all variables in the scope of this FplValue.
+    /// Create a (possibly empty) list of all variables in the scope of this FplGenericNode.
     default this.GetVariables() =
         this.Scope.Values
         |> Seq.filter (fun fv -> 
@@ -199,22 +200,22 @@ type FplGenericNode(positions: Positions, parent: FplGenericNode option) =
             let value = fv1.Clone()
             ret.ArgList.Add(value))
 
-    /// TypeId of the FplValue.
+    /// TypeId of the FplGenericNode.
     member this.TypeId
         with get () = _typeId
         and set (value) = _typeId <- value
 
-    /// The optional node this FplValue refers to 
+    /// The optional node this FplGenericNode refers to 
     member this.RefersTo 
         with get () = _refersTo
         and set (value) = _refersTo <- value
 
-    /// FplId of the FplValue.
+    /// FplId of the FplGenericNode.
     member this.FplId
         with get () = _fplId
         and set (value) = _fplId <- value
 
-    /// FilePath of the FplValue.
+    /// FilePath of the FplGenericNode.
     member this.FilePath
         with get () = _filePath
         and set (value) = _filePath <- value
@@ -224,18 +225,18 @@ type FplGenericNode(positions: Positions, parent: FplGenericNode option) =
         with get () = _expressionType
         and set (value) = _expressionType <- value
 
-    /// Indicates if this FplValue has bracketed arguments or parameters, 
+    /// Indicates if this FplGenericNode has bracketed arguments or parameters, 
     /// parenthesized arguments or parameters, or no arguments or parameters
     member this.ArgType
         with get () = _argType
         and set (value) = _argType <- value
 
-    /// Starting position of this FplValue
+    /// Starting position of this FplGenericNode
     member this.StartPos
         with get () = _startPos
         and set (value) = _startPos <- value
 
-    /// This FplValue's name's end position that can be different from its ending position
+    /// This FplGenericNode's name's end position that can be different from its ending position
     member this.EndPos
         with get () = _endPos
         and set (value) = _endPos <- value
@@ -245,17 +246,17 @@ type FplGenericNode(positions: Positions, parent: FplGenericNode option) =
         with get () = _auxiliaryInfo
         and set (value) = _auxiliaryInfo <- value
 
-    /// An arity of this FplValue
+    /// An arity of this FplGenericNode
     member this.Arity
         with get () = _arity
         and set (value) = _arity <- value
 
-    /// Parent FplValue of this FplValue
+    /// Parent FplGenericNode of this FplGenericNode
     member this.Parent
         with get () = _parent
         and set (value) = _parent <- value
 
-    /// Indicates if this FplValue is an intrinsically defined block
+    /// Indicates if this FplGenericNode is an intrinsically defined block
     member this.IsIntrinsic
         with get () = _isIntrinsic
         and set (value) = _isIntrinsic <- value
@@ -278,7 +279,7 @@ type FplGenericNode(positions: Positions, parent: FplGenericNode option) =
     override this.Represent() = // done
         PrimNone
 
-    /// Create a (possibly empty) list of all properties in the scope of this FplValue.
+    /// Create a (possibly empty) list of all properties in the scope of this FplGenericNode.
     member this.GetProperties() =
         this.Scope.Values
         |> Seq.filter (fun fv -> 
@@ -287,7 +288,7 @@ type FplGenericNode(positions: Positions, parent: FplGenericNode option) =
         )
         |> Seq.toList
 
-    /// Copies other FplValue to this one without changing its reference pointer.
+    /// Copies other FplGenericNode to this one without changing its reference pointer.
     default this.Copy(other: FplGenericNode) =
         this.FplId <- other.FplId
         this.TypeId <- other.TypeId
@@ -306,7 +307,7 @@ type FplGenericNode(positions: Positions, parent: FplGenericNode option) =
 
         this.RefersTo <- other.RefersTo
 
-    /// Qualified starting position of this FplValue
+    /// Qualified starting position of this FplGenericNode
     member this.QualifiedStartPos =
         let rec getFullName (fv: FplGenericNode) (first: bool) =
             let fvType = fv.Type(SignatureType.Mixed)
@@ -332,8 +333,8 @@ type FplGenericNode(positions: Positions, parent: FplGenericNode option) =
 
         getFullName this true
 
-    /// Calculates this FplValue's ultimate block node (if such exists).
-    /// The ultimate block node is the FPL building block's FplValue enclosing this FplValue (if such exists)
+    /// Calculates this FplGenericNode's ultimate block node (if such exists).
+    /// The ultimate block node is the FPL building block's FplGenericNode enclosing this FplGenericNode (if such exists)
     member this.UltimateBlockNode = 
         let rec ultimateBlockNode (node:FplGenericNode) =
             match node.Parent with
@@ -346,9 +347,9 @@ type FplGenericNode(positions: Positions, parent: FplGenericNode option) =
             | None -> None
         ultimateBlockNode this
 
-    /// Calculates this FplValue's ultimate block node (if such exists).
+    /// Calculates this FplGenericNode's ultimate block node (if such exists).
     /// The next block node is either an FPL property (if such exists) 
-    /// or the Fpl building block's FplValue enclosing this FplValue (if such exists).
+    /// or the Fpl building block's FplGenericNode enclosing this FplGenericNode (if such exists).
     member this.NextBlockNode = 
         let rec nextBlockNode (node:FplGenericNode) =
             match node.Name with 
@@ -367,7 +368,7 @@ type FplGenericNode(positions: Positions, parent: FplGenericNode option) =
                 | None -> None
         nextBlockNode this
 
-    /// Checks if a block named name is in the scope of the fplValue' parent.
+    /// Checks if a block named name is in the scope of the FplGenericNode' parent.
     member this.InScopeOfParent name =
         let conflictInSiblingTheory (parent: FplGenericNode) =
             // if the parent is a theory, look also for its sibling theories
@@ -404,13 +405,13 @@ type FplGenericNode(positions: Positions, parent: FplGenericNode option) =
                 ScopeSearchResult.NotFound
         | None -> ScopeSearchResult.NotApplicable
 
-/// a type wrapping the argument type of the FplValue 
+/// a type wrapping the argument type of the FplGenericNode 
 and ArgType = 
     | Parentheses
     | Brackets
     | Nothing
 
-/// A discriminated union type for wrapping search results in the Scope of an FplValue.
+/// A discriminated union type for wrapping search results in the Scope of an FplGenericNode.
 and ScopeSearchResult =
     | FoundAssociate of FplGenericNode
     | FoundMultiple of string
@@ -437,7 +438,7 @@ type FplGenericIsAction(positions: Positions, parent: FplGenericNode) =
 
 
 /// Implements the semantics of a default undetermined value 
-/// that has the required type of the consumer FplValue. If this the value of this consumer cannot be determined during the interpretation, 
+/// that has the required type of the consumer FplGenericNode. If this the value of this consumer cannot be determined during the interpretation, 
 /// its value will be set to this undermined value compatible with the consumer type.
 /// FplUndetermined is not to be confused with FplIntrinsicUndef that is used for declaring partial mappings in FPL.
 type FplUndetermined(typeId:string, positions: Positions, parent: FplGenericNode) as this =
@@ -479,7 +480,7 @@ type FplGenericHasValue(positions: Positions, parent: FplGenericNode) =
     inherit FplGenericNode(positions, Some parent)
     let mutable (_value:FplGenericNode option) = None
 
-    /// Value of this FplValue
+    /// Value of this FplGenericNode
     member this.Value
         with get () = _value
         and set (value) = _value <- value
@@ -521,7 +522,7 @@ type FplGenericHasValue(positions: Positions, parent: FplGenericNode) =
         | Some v -> v.Represent() 
         | _ -> PrimNone // If there is no value, return string "None"
 
-// Create an FplValue list containing all Scopes of an FplNode
+// Create an FplGenericNode list containing all Scopes of an FplNode
 let rec flattenScopes (root: FplGenericNode) =
     let rec helper (node: FplGenericNode) (acc: FplGenericNode list) =
         let newAcc = node :: acc
@@ -540,13 +541,13 @@ let propagateSignatureType (signatureType:SignatureType) =
     | SignatureType.Mixed -> SignatureType.Type
     | _ -> signatureType 
 
-/// Creates a concatenated string representation based on a sequence of FplValues.
+/// Creates a concatenated string representation based on a sequence of FplGenericNodes.
 let signatureSep sep (coordinates:FplGenericNode seq) signatureType =
     coordinates
     |> Seq.map (fun fv -> fv.Type signatureType)
     |> String.concat sep
 
-/// Tries to find a mapping of an FplValue
+/// Tries to find a mapping of an FplGenericNode
 let rec getMapping (fv:FplGenericNode) =
     match fv.Name with
     | LiteralParent 
@@ -562,14 +563,14 @@ let rec getMapping (fv:FplGenericNode) =
     | _ ->
         fv.ArgList |> Seq.tryFind (fun fv -> fv.Name = PrimMappingL)
 
-/// Creates a concatenated string representation based on a sequence of FplValues.
+/// Creates a concatenated string representation based on a sequence of FplGenericNodes.
 let representationSep sep (coordinates:FplGenericNode seq) =
     coordinates 
     |> Seq.map (fun fv -> fv.Represent())
     |> String.concat sep
 
-/// A string representation of an FplValue
-let toString (fplValue:FplGenericNode) = $"{fplValue.ShortName} {fplValue.Type(SignatureType.Name)}"
+/// A string representation of an FplGenericNode
+let toString (FplGenericNode:FplGenericNode) = $"{FplGenericNode.ShortName} {FplGenericNode.Type(SignatureType.Name)}"
 
 type IHasDotted = 
     abstract member DottedChild : FplGenericNode option with get, set

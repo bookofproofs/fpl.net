@@ -50,30 +50,7 @@ type FplJustificationItemByAx(positions: Positions, parent: FplGenericNode) =
             match this.RefersTo with
             | Some ax ->
                 if ax.ArgList.Count > 0 then
-                    let axiomFormula = ax.ArgList |> Seq.last
-                    let candidates = ResizeArray<FplGenericNode>()
-                    
-                    match this.Parent.Value.Parent with
-                    | Some (:? FplArgument as argument) ->
-                        match argument.ArgumentInference with
-                        | Some (argInference: FplGenericArgInference) ->
-                            match argInference.InferredExprCandidates |> List.tryHead with
-                            | Some inferredFormula ->
-                                let dictParameterUsage = Dictionary<string, FplGenericNode>()
-                                match matchExpressionAgainstPattern inferredFormula axiomFormula dictParameterUsage with
-                                | None -> // SUCCESS: match succeeded, now instantiate
-                                    let expr = axiomFormula.Clone()
-                                    candidates.Add(instantiateExpressionByVarUsages expr dictParameterUsage)
-                                | Some err -> // FAILURE: match failed
-                                    candidates.Add(axiomFormula.Clone())
-                            | None ->
-                                ()
-                        | None ->
-                            ()
-                    | _ ->
-                        ()
-
-                    candidates |> Seq.toList
+                    [ax.ArgList |> Seq.last]
                 else
                     issuePR022AndSetDefault this (Some ax) None
                     [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
@@ -239,9 +216,9 @@ and FplJustificationItemByInf(positions: Positions, parent: FplGenericNode) =
                         [FplUndetermined(LiteralPred, (this.StartPos, this.EndPos), this)]
                     | None ->
                         if listOfPairs.Length > 0 then
-                            let varUsageDict = snd listOfPairs.Head
+                            let dictParameterUsage = snd listOfPairs.Head
                             let expr = conclusion.Clone()
-                            [instantiateExpressionByVarUsages expr varUsageDict]
+                            [instantiateExpressionByVarUsages expr dictParameterUsage]
                         else
                             issuePR022SpecialReasonAndSetDefault this "No expressions could be inferred while matching input justificationItems with premise list."
                             []
@@ -461,26 +438,44 @@ and FplArgument(positions: Positions, parent: FplGenericNode, runOrder) =
                 this.SetDefaultValue()
             else
                 // at this point, all justification items of the justification evaluate to true.
-                let inferredFormulaOpt = argInference.InferredExprCandidates |> List.tryHead
+                let argumentInferredFormulaOpt = argInference.InferredExprCandidates |> List.tryHead
                 let lastJustificationOfArgumentOpt = orderedListJustifications |> List.tryLast
 
-                match inferredFormulaOpt, lastJustificationOfArgumentOpt with
-                | Some inferredFormula, Some (:? FplGenericJustificationItem as lastJustificationOfArgument) ->
-                    let inferredExpr = inferredFormula.Type SignatureType.Name
+                match argumentInferredFormulaOpt, lastJustificationOfArgumentOpt with
+                | Some argumentInferredFormula, Some (:? FplGenericJustificationItem as lastJustificationOfArgument) ->
+                    let inferredExpr = argumentInferredFormula.Type SignatureType.Name
                     let inferredExpressionCandidates = lastJustificationOfArgument.InferredExprCandidates |> List.map (fun expr -> expr.Type SignatureType.Name)
-                    let derivedInferenceIsCorrect = inferredExpressionCandidates |> List.contains inferredExpr
 
+                    // Compute all match results once: reused for both the correctness check
+                    // and, when the check fails, for building the PR021 diagnostic string.
+                    let matchResults = collectMatchResultsForExpressionPatternCandidates argumentInferredFormula lastJustificationOfArgument.InferredExprCandidates
+
+                    let derivedInferenceIsCorrect =
+                        // Fast path: direct string equality.
+                        inferredExpressionCandidates |> List.contains inferredExpr
+                        // Slow path: treat each justification candidate as a schema and try to
+                        // match the inferred expression against it. This covers the case where
+                        // the candidate contains schema variables (e.g. `g ⇒ h`) that can be
+                        // instantiated to the inferred expression (e.g. `f ⇒ h` with `g := f`).
+                        || matchResults |> List.exists (fun (_, mismatchMessageOpt, _) -> mismatchMessageOpt.IsNone )
                     if derivedInferenceIsCorrect then 
                         let v = new FplIntrinsicTrue((this.StartPos, this.StartPos), this)
                         this.SetValue v
                     else
-                        let mismatchingCandidates = numbered inferredExpressionCandidates
+                        // Improve PR021 diagnostics specificity by trying to match again the proposed candidates 
+                        // from lastJustificationOfArgument.InferredExprCandidates with the expression found at
+                        // argInference.InferredExprCandidates.Head (that already know has failed to match and was added 
+                        // to argInference.InferredExprCandidates just to provide some fallback expression that was available).
+                        // This way, each fallback justification candidate will be listed with the actual errorMsg
+                        // generated by the expression matcher algorithm that caused the PR021 problem.
+                        let mismatchingCandidates = prettifyMismatchErrors matchResults
+
                         let prettyJustificationName =
                             let justNames = lastJustificationOfArgument.FplId.Split(':')
                             if justNames.Length = 2 then 
-                                $"The justification by argument `{justNames[1]}` in another proof `{justNames[0]}`"
+                                $"The {PrimJIByRefArgument} justification `{justNames[1]}` in another proof `{justNames[0]}`"
                             else
-                                $"The justification `{lastJustificationOfArgument.Name}` `{lastJustificationOfArgument.Type SignatureType.Name}`"
+                                $"The {lastJustificationOfArgument.Name} justification `{lastJustificationOfArgument.Type SignatureType.Name}`"
                         this.ErrorOccurred <- emitPR021Diagnostics mismatchingCandidates inferredExpr prettyJustificationName argInference.StartPos argInference.EndPos
                         this.SetDefaultValue()
                 | _, _ ->

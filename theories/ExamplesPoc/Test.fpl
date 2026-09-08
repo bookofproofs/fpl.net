@@ -1,1 +1,4 @@
-axiom T {dec x:obj x:=x; true }
+def pred Impl(f, g: pred) infix "⇒" 0 {impl(f,g)} 
+inf MP { dec p,q: pred; pre: p, p ⇒ q con: q } 
+
+proof T$1 {dec f,x:pred; 1: x 2: x ⇒ (f ⇒ f) 3. 2,1, byinf MP |- (f ⇒ f) }
