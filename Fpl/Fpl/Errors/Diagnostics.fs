@@ -22,6 +22,10 @@ open System.Text
 open FParsec
 open Fpl.Errors.Messages
 
+/// <summary>
+/// URI wrapper that normalizes path separators and exposes a stable comparison semantics
+/// for file/stream identifiers used as keys in diagnostics collections.
+/// </summary>
 type PathEquivalentUri(uriString: string) =
     inherit Uri(PathEquivalentUri.UnescapeDataString(uriString.Replace("\\","/")))
 
@@ -37,13 +41,22 @@ type PathEquivalentUri(uriString: string) =
     override this.GetHashCode() =
         this.AbsoluteUri.GetHashCode()
 
-    /// An auxiliary static method for changing windows-like Uris with "\" into "/" formatted ones.
+    /// <summary>
+    /// Create a PathEquivalentUri ensuring backslashes are converted to forward slashes.
+    /// </summary>
     static member EscapedUri(path:string) = 
         let pathNew = PathEquivalentUri.UnescapeDataString(path.Replace("\\","/"))
         PathEquivalentUri($"{pathNew}")
 
+    /// <summary>
+    /// Returns the theory (file) name without extension for the represented URI.
+    /// </summary>
     member this.TheoryName = Path.GetFileNameWithoutExtension(this.AbsolutePath)
 
+/// <summary>
+/// Discriminated union enumerating all diagnostic codes used by the parser and interpreter.
+/// Each case carries the parameters required to format the final diagnostic message.
+/// </summary>
 type DiagnosticCode = 
     // interpreter error codes
     | GEN00 of string
@@ -149,6 +162,10 @@ type DiagnosticCode =
     | VAR09 of string  
     | VAR10 of string * string
     | VAR11 of string * string
+
+    /// <summary>
+    /// Returns the short diagnostic code identifier (e.g. "PR008").
+    /// </summary>
     member this.Code = 
         match this with
             // interpreter error messages
@@ -254,6 +271,11 @@ type DiagnosticCode =
             | VAR09 _ -> "VAR09"
             | VAR10 _ -> "VAR10"
             | VAR11 _ -> "VAR11"
+
+    /// <summary>
+    /// Produces a fully formatted diagnostic message string for the code using the
+    /// module's message formatting helpers.
+    /// </summary>
     member this.Message = 
         match this with
             // general fallback messages
@@ -361,24 +383,36 @@ type DiagnosticCode =
             | VAR10 (identifier, formulaName) -> errVAR10 identifier formulaName
             | VAR11 (identifier, conflict) -> errVAR11 identifier conflict
 
-/// Computes an MD5 checksum of a string
+/// <summary>
+/// Compute an MD5 checksum of the given input string and return it as a hex string.
+/// Used to derive stable diagnostic identifiers.
+/// </summary>
 let computeMD5Checksum (input: string) =
     let md5 = MD5.Create()
     let inputBytes = Encoding.ASCII.GetBytes(input)
     let hash = md5.ComputeHash(inputBytes)
     hash |> Array.map (fun b -> b.ToString("x2")) |> String.concat ""
 
+/// <summary>
+/// Emitter source for diagnostics: either the parser or the interpreter.
+/// </summary>
 type DiagnosticEmitter =
     // replace your language-specific emitters here
     | FplParser
     | FplInterpreter
 
+/// <summary>
+/// Categorization of diagnostic severity levels.
+/// </summary>
 type DiagnosticSeverity =
     | Error
     | Warning
     | Hint
     | Information
 
+/// <summary>
+/// Detailed diagnostic instance with location, code and emitter metadata.
+/// </summary>
 type Diagnostic =
     {
         Uri: PathEquivalentUri
@@ -388,20 +422,46 @@ type Diagnostic =
         StartPos: Position
         EndPos: Position
     }
+
+    /// <summary>
+    /// The human-readable message associated with this diagnostic (delegates to Code.Message).
+    /// </summary>
     member this.Message = this.Code.Message
 
+    /// <summary>
+    /// Deterministic id for the diagnostic used to avoid duplicates.
+    /// </summary>
     member this.DiagnosticID = 
         computeMD5Checksum (sprintf "%07d" this.StartPos.Index + this.Emitter.ToString() + this.Code.Code + this.Message)
 
+    /// <summary>
+    /// Short single-line representation consisting of emitter, code and message (used for debugging purposes only).
+    /// </summary>
     member this.ShortForm = 
         this.Emitter.ToString() + ":" +
         this.Code.Code + ":" +
         this.Message
 
+/// <summary>
+/// A container and helper for collecting diagnostics per URI. Provides stream semantics
+/// and utilities for printing, clearing and enumerating stored diagnostics.
+/// </summary>
 type Diagnostics() =
+    /// <summary>
+    /// Increasing counter used to assign chain identifiers for grouped diagnostics.
+    /// </summary>
     let mutable _errorChainId = 0
+    /// <summary>
+    /// Current stream/uri diagnostics are being collected for.
+    /// </summary>
     let mutable _currentUri = new PathEquivalentUri("about:blank")
+    /// <summary>
+    /// Internal storage mapping Uri -> DiagnosticId -> Diagnostic
+    /// </summary>
     let _diagnosticStorageTotal = new Dictionary<PathEquivalentUri,Dictionary<string, Diagnostic>>()
+    /// <summary>
+    /// Flattened list of all diagnostics across all streams, sorted by URI.
+    /// </summary>
     member this.Collection = 
         _diagnosticStorageTotal
         |> Seq.map (fun kvp -> (kvp.Key, kvp.Value))
@@ -411,15 +471,24 @@ type Diagnostics() =
         |> Seq.map (fun kvp -> kvp.Value)
         |> Seq.toList
 
+    /// <summary>
+    /// Current URI used by Add/Reset operations.
+    /// </summary>
     member this.CurrentUri 
         with get() = _currentUri
         and set (value) = _currentUri <- value
 
+    /// <summary>
+    /// Returns a new incremented chain id on each access.
+    /// </summary>
     member this.NextChainId 
         with get() =
             _errorChainId <- _errorChainId + 1
             _errorChainId
 
+    /// <summary>
+    /// Add a diagnostic to internal storage. Duplicates (by DiagnosticID) are ignored.
+    /// </summary>
     member this.AddDiagnostic (d:Diagnostic) =
         let keyOfd = d.DiagnosticID
         if not (_diagnosticStorageTotal.ContainsKey(d.Uri)) then
@@ -427,9 +496,15 @@ type Diagnostics() =
         if not (_diagnosticStorageTotal[d.Uri].ContainsKey(keyOfd)) then
             _diagnosticStorageTotal[d.Uri].Add(keyOfd, d) |> ignore
 
+    /// <summary>
+    /// Returns the number of collected diagnostics across all streams.
+    /// </summary>
     member this.CountDiagnostics  =
         this.Collection.Length
 
+    /// <summary>
+    /// Creates a textual representation of all stored diagnostics suitable for console output.
+    /// </summary>
     member this.DiagnosticsToString = 
         _diagnosticStorageTotal
         |> Seq.collect (fun kvpOuter ->
@@ -441,32 +516,50 @@ type Diagnostics() =
         )
         |> String.concat ""
 
+    /// <summary>
+    /// Prints all diagnostics to stdout (convenience wrapper around DiagnosticsToString) - used for debugging purposes only
+    /// </summary>
     member this.PrintDiagnostics =
         printfn "%s" this.DiagnosticsToString
         printfn "%s" "\n^------------------------^\n"
 
+    /// <summary>
+    /// Reset the current stream to the provided URI, clear that stream's diagnostics and reset chain counter.
+    /// </summary>
     member this.ResetStream(uri:PathEquivalentUri) =
         this.CurrentUri <- uri
         if (_diagnosticStorageTotal.ContainsKey(uri)) then
             _diagnosticStorageTotal[uri].Clear() |> ignore
         _errorChainId <- 0
 
+    /// <summary>
+    /// Clears all stored diagnostics and resets internal counters.
+    /// </summary>
     member this.Clear() = 
         _diagnosticStorageTotal.Values
         |> Seq.iter (fun dict -> dict.Clear())
         _diagnosticStorageTotal.Clear()
         _errorChainId <- 0
 
+    /// <summary>
+    /// Returns the diagnostics storage dictionary for a given stream URI.
+    /// If no diagnostics exist for the URI, returns an empty dictionary.
+    /// </summary>
     member this.GetStreamDiagnostics(uri:PathEquivalentUri) =
         if (_diagnosticStorageTotal.ContainsKey(uri)) then
             _diagnosticStorageTotal[uri]
         else
             Dictionary<string, Diagnostic>()
 
+/// <summary>
+/// Global diagnostics instance used by the rest of the system.
+/// </summary>
 let ad = Diagnostics()
 
-/// A helper replacing the FParsec error string by a string that can be better displayed in the VSCode problem window
-/// For other IDEs, a change of this function might be required
+/// <summary>
+/// Convert a raw FParsec error message into a condensed representation more suitable
+/// for display in VS Code problems: highlight the failing token and list expected choices.
+/// </summary>
 let replaceFParsecErrMsgForFplParser (errMsg: string) (choices:string) (pos: Position)=
     let lines = errMsg.Split(Environment.NewLine)
     let firstLine = lines.[1]
@@ -489,8 +582,20 @@ let replaceFParsecErrMsgForFplParser (errMsg: string) (choices:string) (pos: Pos
     else
         errMsg
 
-let split = [|" or "; "or" + Environment.NewLine ; "or\r" ; "or "; " Other error"; Environment.NewLine + "Other error"; ", "; "," + Environment.NewLine; Environment.NewLine + Environment.NewLine; Environment.NewLine|]
-let groupRegex = "(?<=Expecting: )(.+?)(?=(Expecting|(\n.+)+|$))"
+/// <summary>
+/// Split patterns used when extracting choices from parser messages.
+/// </summary>
+let private split = [|" or "; "or" + Environment.NewLine ; "or\r" ; "or "; " Other error"; Environment.NewLine + "Other error"; ", "; "," + Environment.NewLine; Environment.NewLine + Environment.NewLine; Environment.NewLine|]
+
+/// <summary>
+/// Regular expression used to extract the "Expecting: ..." groups from an FParsec message.
+/// </summary>
+let private groupRegex = "(?<=Expecting: )(.+?)(?=(Expecting|(\n.+)+|$))"
+
+/// <summary>
+/// Extract parser 'Expecting:' choices from an FParsec error message.
+/// Returns a sorted list of unique quoted or angle-bracketed choices.
+/// </summary>
 let retrieveExpectedParserChoices (errMsg:string) =
     // replace accidental new lines injected by FParsec into FPL parser labels that start by "<" and end by ">"
     // to avoid them from being split apart later
@@ -521,7 +626,9 @@ let retrieveExpectedParserChoices (errMsg:string) =
         |> List.sort
     choices
 
-
+/// <summary>
+/// Compute the character offset from the start of the input for a given 1-based line number.
+/// </summary>
 let private getLineOffset (input: string) (line:int)=
     let lines = input.Split(Environment.NewLine)
     let lengthLineSep = Environment.NewLine.Length
@@ -531,6 +638,9 @@ let private getLineOffset (input: string) (line:int)=
             offset <- offset + lines.[i].Length + lengthLineSep
     offset
 
+/// <summary>
+/// Try to parse a specific "Error in Ln: X Col: Y" pattern and return the parsed line and column.
+/// </summary>
 let private getLineAndColumn (input: string) =
     let regex = System.Text.RegularExpressions.Regex("Error in Ln: (\\d+) Col: (\\d+)")
     let m = regex.Match(input)
@@ -541,6 +651,9 @@ let private getLineAndColumn (input: string) =
     else
         None
 
+/// <summary>
+/// Return the last substring after a separator string. Used to extract backtracking details.
+/// </summary>
 let private getLastSubstringAfterSeparator (input:string) (sep:string) =
     let substrings = input.Split(sep)
     if substrings.Length > 0 then
@@ -548,10 +661,12 @@ let private getLastSubstringAfterSeparator (input:string) (sep:string) =
     else
         ""
 
-/// If the parser's error message contains a FParsec backtracking message, this function will 
-/// correct the error position of the error to that of the backtracking error and also extract the 
-/// backtracking error message, ignoring the more global FParsec's error message.
-/// We need this function to make the error diagnostics more intuitive.
+
+/// <summary>
+/// If the parsed error contains a backtracking message, extract a more intuitive error message
+/// and compute the corresponding Position inside the original input. Returns the adjusted
+/// error message and position pair.
+/// </summary>
 let private extractBacktrackingFreeErrMsgAndPos (input: string) (errMsg: string) (pos:Position) =
     let backtrackingFreeErrMsg = getLastSubstringAfterSeparator errMsg "backtracked after:"
     let lineColumn = getLineAndColumn backtrackingFreeErrMsg
@@ -563,9 +678,10 @@ let private extractBacktrackingFreeErrMsgAndPos (input: string) (errMsg: string)
     | None ->
         (errMsg, pos)
 
-/// A low-level error recovery function mapping error messages to tuples
-/// consisting of some parser choices, a pick from this choices and a replace
-/// error message that is formatted suitable for the VS Code Problems window.
+/// <summary>
+/// Map a raw parser error and position to a tuple (formattedMessage, choices) that can be
+/// presented to the user and used for lightweight suggestions VS Code Problems window.
+/// </summary>
 let mapErrMsgToRecText (input: string) (errMsg: string) (pos:Position) =
     // extract from errMsg only this part that is contained in the last 
     // part of the FParsec error message after any before FParsec started any 
