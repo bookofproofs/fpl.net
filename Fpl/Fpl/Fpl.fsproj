@@ -81,6 +81,7 @@
         <Compile Include="Interpreter\SymbolTable\Creation\TopLevel.fs" />
         <Compile Include="Interpreter\SymbolTable\Creation\Main.fs" />
         <Compile Include="Interpreter\Main.fs" />
+        <Compile Include="Tools.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>
 

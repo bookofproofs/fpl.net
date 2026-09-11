@@ -1,5 +1,8 @@
+
+/// <summary>
 /// This module contains the final FPL parser including error recovery
-// producing an abstract syntax tree out of a given FPL code 
+/// producing an abstract syntax tree out of a given FPL code.
+/// </summary>
 module Fpl.Parser.Main
 open System
 open System.Collections.Generic
@@ -24,27 +27,69 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 *)
 
 //------------
-/// Regex used for the error recovery of FPL blocks using their keywords to be matched as whole words (\b option), followed by space (\s+ option)
+/// <summary>
+/// Regex used for the error recovery of FPL blocks. Matches FPL block keywords as whole words
+/// followed by whitespace.
+/// </summary>
+/// <remarks>
+/// Pattern is composed from literals defined in grammar and intended for chunking the input
+/// during error-tolerant parsing.
+/// </remarks>
 let errRecoveryBlocks = $"\\b({LiteralDefL}|{LiteralDef}|{LiteralAxL}|{LiteralAx}|{LiteralPostL}|{LiteralPost}|{LiteralThmL}|{LiteralThm}|{LiteralPropL}|{LiteralProp}|{LiteralLemL}|{LiteralLem}|{LiteralCorL}|{LiteralCor}|{LiteralConjL}|{LiteralConj}|{LiteralPrfL}|{LiteralPrf}|{LiteralInfL}|{LiteralInf}|{LiteralLocL}|{LiteralLoc}|{LiteralExtL}|{LiteralExt}|{LiteralUses})\\s+"
 
+/// <summary>
+/// Return all matches for the given regular expression pattern against the provided input.
+/// </summary>
+/// <param name="pattern">Regular expression pattern to search for.</param>
+/// <param name="input">Input text to search within.</param>
+/// <returns>List of <see cref="System.Text.RegularExpressions.Match"/> instances found in the input.</returns>
+/// <remarks>
+/// Uses <see cref="System.Text.RegularExpressions.Regex.Matches"/> and casts the returned
+/// collection to a list for convenience.
+/// </remarks>
+/// <exceptions>
+/// <exception cref="System.ArgumentException">Thrown when <paramref name="pattern"/> is not a valid regular expression.</exception>
+/// </exceptions>
 let private getMatches (pattern: string) (input: string) =
     Regex.Matches(input, pattern)
     |> Seq.cast<Match>
     |> Seq.toList
 
-/// Run the full AST parser on the remainder to produce diagnostics for the chunk
+/// <summary>
+/// Run the full AST parser on the provided remainder and collect diagnostics for that chunk.
+/// </summary>
+/// <param name="input">Text representing the remainder to parse.</param>
+/// <param name="errorList">Mutable list to which discovered error AST nodes will be appended.</param>
+/// <param name="origLines">Original input split into lines (used to compute positions).</param>
+/// <param name="origLength">Original input length (used for position computations).</param>
+/// <returns>Unit. Diagnostics are appended to <paramref name="errorList"/>.</returns>
+/// <remarks>
+/// This function executes the standard parser and converts parser failures into error AST nodes
+/// using the project's diagnostic helpers.
+/// </remarks>
 let private collectErrorsIfAny input (errorList:List<Ast list>) origLines origLength =
     match run (stdParser .>> eof) (input) with
     | Failure(errorMsg, _, _) ->
         errorList.Add (getErrorNodes errorMsg origLines origLength)
     | _ -> ()
 
-/// Tries to parse all chunks of input of FPL building blocks. If a chunk produces a syntax error,
-/// a diagnosics will be issued and the chunk will (at least at its faulty end) be replaced by a masked chunk, where
-/// all non-whitespace characters will be replaced with spaces while preserving line breaks and line lengths.
-/// Preserving line sizes is necessary to keep other diagnostics well-positioned.
-/// The syntax errors are generated using an input starting with the chunk, so syntax error messages
-/// realistically reflect the remaining code after the chunk.
+/// <summary>
+/// Produce a parseable variant of the original input by chunking on FPL block keywords and masking
+/// syntactically invalid regions. Also collect syntactic error AST nodes extracted from failed chunks.
+/// </summary>
+/// <param name="input">Original FPL source with comments removed.</param>
+/// <param name="origLines">Original input split into lines (used for computing diagnostics positions).</param>
+/// <param name="origLength">Length of the original input string.</param>
+/// <returns>
+/// A tuple containing:
+/// - The transformed input string where unrecoverable regions are masked but line lengths preserved.
+/// - A list of syntax error AST nodes extracted from the problematic chunks.
+/// </returns>
+/// <remarks>
+/// The function performs a two-stage attempt per chunk: a strict parse that must consume the whole
+/// chunk, and a lenient parse (without EOF) to preserve any successfully parsed prefix. Masking
+/// preserves layout so other diagnostics remain correctly positioned.
+/// </remarks>
 let private getParseableInputAndErrorNodes input origLines origLength =
     let matches = getMatches errRecoveryBlocks input
     let parseAbleInput = StringBuilder()
@@ -130,6 +175,14 @@ let private getParseableInputAndErrorNodes input origLines origLength =
 
     parseAbleInput.ToString(), errorList |> Seq.toList |> List.concat
 
+/// <summary>
+/// Extract the list of building-block ASTs from a top-level AST node (namespace/AST wrapper).
+/// </summary>
+/// <param name="topAst">Top-level AST produced by the standard parser.</param>
+/// <returns>List of building-block AST nodes contained in the provided top-level AST.</returns>
+/// <remarks>
+/// Recursively descends wrapper AST nodes to return the contained building block sequence.
+/// </remarks>
 let private getBuildingBlockAsts (topAst:Ast) =
     let rec getBlocks (subAst:Ast) = 
         match subAst with 
@@ -140,6 +193,19 @@ let private getBuildingBlockAsts (topAst:Ast) =
         | _ -> []
     getBlocks topAst
 
+/// <summary>
+/// Full FPL parser entry point that returns building-block ASTs and a success flag.
+/// </summary>
+/// <param name="fplCode">Raw FPL source code to parse.</param>
+/// <returns>
+/// A tuple containing:
+/// - A list of AST nodes representing building blocks or syntax-error placeholders.
+/// - A boolean indicating whether the parse completed without syntax recovery (true if no recovery was needed).
+/// </returns>
+/// <remarks>
+/// On an initial parse failure the function attempts error-tolerant chunking and masking to recover
+/// as many building blocks as possible while producing diagnostics for faulty regions.
+/// </remarks>
 let fplParser fplCode =
     let input = fplCode |> removeFplComments
     match run (stdParser .>> eof) input with
@@ -166,9 +232,20 @@ let fplParser fplCode =
         | Failure(errorMsg, _, _) ->
             getErrorNodes errorMsg origLines origLength, false
 
-let parserDiagnostics = ad
-
-/// Returns the parser choices at position (if any).
+/// <summary>
+/// Return parser choice suggestions for a given input position.
+/// </summary>
+/// <param name="input">Full FPL input (comments will be removed internally).</param>
+/// <param name="index">Position index (character offset) within the input to query choices for.</param>
+/// <returns>
+/// A tuple containing:
+/// - A list of textual parser choices (possibly empty) describing expected tokens at the position.
+/// - The parser position index used as reference for the choices.
+/// </returns>
+/// <remarks>
+/// Attempts to parse the input prefix up to <paramref name="index"/> and, on failure, maps the raw
+/// parser error into a human-friendly choices list and an adjusted position.
+/// </remarks>
 let getParserChoicesAtPosition (input:string) index =
     let newInput = input |> removeFplComments
     match run (stdParser .>> eof) (newInput.Substring(0, index))  with
@@ -179,7 +256,16 @@ let getParserChoicesAtPosition (input:string) index =
         let newErrMsg, choices = mapErrMsgToRecText input errorMsg restInput.Position
         choices, restInput.Position.Index
 
-/// Used only to test FplLS CompletionItems correct syntax, which is written in C# and requires this module to run
+/// <summary>
+/// Test harness that runs a specific parser production on the given input and returns the raw result.
+/// </summary>
+/// <param name="parserType">Name of the parser production to test (one of the known literal names).</param>
+/// <param name="input">Input text for the selected parser production.</param>
+/// <returns>A string representation of the parser result (Success/Failure) for diagnostics/testing.</returns>
+/// <remarks>
+/// Used by the language-service test code to validate individual parser productions from external code.
+/// Unknown <paramref name="parserType"/> values return a short not-implemented message.
+/// </remarks>
 let testParser (parserType:string) (input:string) =
     let trimmed = (input.Trim()) |> removeFplComments
     match parserType with 

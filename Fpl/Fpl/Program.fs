@@ -5,8 +5,10 @@ open FParsec
 open Fpl.Parser.Basic
 open Fpl.Parser.Grammar
 
-
-let par = attempt ((predicateWithQualification .>> SW .>> keywordIs) .>>. (SW >>. variableType))
+open Fpl.Tools
+//let par = attempt ((predicateWithQualification .>> SW .>> keywordIs) .>>. (SW >>. variableType))
         
-let result = run (par .>> eof) "y is M"
-printfn "%O" result
+//let result = run (par .>> eof) "y is M"
+//printfn "%O" result
+
+GrammarToGml.processGrammarFile @"C:\Dev\fpl.net\Fpl\Fpl\Parser\Grammar.fs" @"C:\tmp\grammar.gml" (Some [ "opt" ])
