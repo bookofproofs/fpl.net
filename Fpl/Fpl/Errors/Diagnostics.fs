@@ -552,9 +552,13 @@ type Diagnostics() =
             Dictionary<string, Diagnostic>()
 
 /// <summary>
-/// Global diagnostics instance used by the rest of the system.
+/// Global diagnostics instance exposed for collecting parser and interpreter diagnostics.
 /// </summary>
-let ad = Diagnostics()
+/// <returns>Instance of the project's <c>Diagnostics</c> collector used by the parser.</returns>
+/// <remarks>
+/// This alias points to the shared diagnostics container used across the system.
+/// </remarks>
+let diagnosticsContainer = Diagnostics()
 
 /// <summary>
 /// Convert a raw FParsec error message into a condensed representation more suitable

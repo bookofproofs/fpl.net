@@ -20,7 +20,7 @@ type TestNSP02() =
     [<TestInitialize>]
     member this.Initialize () =
         // ensure no diagnostics from previous tests remain
-        ad.Clear()
+        diagnosticsContainer.Clear()
     
     [<DataRow("01", "https://google.com", 0)>]
     [<DataRow("02", "https://nonexistent.invalid", 1)>]
@@ -45,7 +45,7 @@ type TestNSP02() =
         downloadFile url (eval:EvalAliasedNamespaceIdentifier) |> ignore
 
 
-        let result = filterByErrorCode ad code.Code
+        let result = filterByErrorCode diagnosticsContainer code.Code
         Assert.AreEqual<int>(expected, result.Length) 
 
     [<TestMethod>]
@@ -70,5 +70,5 @@ type TestNSP02() =
 
         downloadFile "https://nonexistent.invalid" (eval : EvalAliasedNamespaceIdentifier) |> ignore
 
-        let result = filterByErrorCode ad code.Code
+        let result = filterByErrorCode diagnosticsContainer code.Code
         Assert.AreEqual<int>(0, result.Length)

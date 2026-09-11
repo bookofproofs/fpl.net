@@ -277,7 +277,7 @@ let createSymbolTable () =
             else
                 heap.Root.Scope[pa.Id] <- theoryValue
             heap.Eval.PushEvalStack(theoryValue)
-            ad.CurrentUri <- pa.Parsing.Uri
+            diagnosticsContainer.CurrentUri <- pa.Parsing.Uri
             pa.Parsing.BuildingBlockAsts
             |> List.map (fun buildinBlockAst -> evalRef.Value buildinBlockAst) |> ignore
             pa.Status <- ParsedAstStatus.Evaluated

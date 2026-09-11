@@ -113,7 +113,7 @@ type Navigation() =
             // do the test - now, open a file in the repo subdirectory
             loadFplFile (Path.Combine(currentPathRepo,"Fpl.Commons.fpl")) |> ignore
             // and test if there was a runtime error (e.g. subpath not found due to messed-up folder logic)
-            let result = filterByErrorCode ad (GEN00 "").Code
+            let result = filterByErrorCode diagnosticsContainer (GEN00 "").Code
             Assert.AreEqual<int>(0, result.Length)
 
             // remove the test file
@@ -224,7 +224,7 @@ type Navigation() =
             // file processing creates the subdirectories lib and repo
             prepareFplCode(filename + ".fpl", fplCode, false) |> ignore
             // test if the test's preparation didn't mess up. There should be no NSP05 error at all
-            let result = filterByErrorCode ad (NSP05 ([],"","")).Code
+            let result = filterByErrorCode diagnosticsContainer (NSP05 ([],"","")).Code
             Assert.AreEqual<int>(0, result.Length)
 
             // the repo files are supposed to be in the repository (https source)
@@ -235,7 +235,7 @@ type Navigation() =
             // do the test - now, open a file in the lib subdirectory
             loadFplFile (Path.Combine(currentPathLib,"Fpl.Commons.fpl")) |> ignore
             // now, we should have an NSP05 error
-            let result = filterByErrorCode ad (NSP05 ([],"","")).Code
+            let result = filterByErrorCode diagnosticsContainer (NSP05 ([],"","")).Code
             Assert.AreEqual<int>(1, result.Length)
 
             // remove the test file
@@ -264,7 +264,7 @@ type Navigation() =
             // file processing creates the subdirectories lib and repo
             prepareFplCode(filename + ".fpl", fplCode, false) |> ignore
             // test if the test's preparation didn't mess up. There should be no NSP05 error at all
-            let result = filterByErrorCode ad (NSP05 ([],"","")).Code
+            let result = filterByErrorCode diagnosticsContainer (NSP05 ([],"","")).Code
             Assert.AreEqual<int>(0, result.Length)
 
             // the repo files are supposed to be in the repository (https source)
@@ -274,7 +274,7 @@ type Navigation() =
             // do the test - now, open a file in the lib subdirectory
             loadFplFile (Path.Combine(currentPath,"Fpl.Commons.fpl")) |> ignore
             // now, we should have an NSP05 error
-            let result = filterByErrorCode ad (NSP05 ([],"","")).Code
+            let result = filterByErrorCode diagnosticsContainer (NSP05 ([],"","")).Code
             Assert.AreEqual<int>(1, result.Length)
 
             // remove the test file
@@ -387,7 +387,7 @@ type Navigation() =
             Assert.AreEqual<int>(3, heap.ParsedAsts.Count)
 
             let pathToTestFile = Path.Combine(currentPathRepo,"Fpl.Commons.fpl")
-            let diagnosticsOfFile = ad.GetStreamDiagnostics(PathEquivalentUri(pathToTestFile))
+            let diagnosticsOfFile = diagnosticsContainer.GetStreamDiagnostics(PathEquivalentUri(pathToTestFile))
             let rememberDiagnosticsOfOriginalFile = diagnosticsOfFile.Count
             // now manipulate the file and reprocess it
         
@@ -399,7 +399,7 @@ type Navigation() =
             fplInterpreter fplCodeManipulated uri fplLibUrl
 
             // do the test - check, if the diagnostics changed
-            let diagnosticsOfManipulatedFile = ad.GetStreamDiagnostics(PathEquivalentUri(pathToTestFile))
+            let diagnosticsOfManipulatedFile = diagnosticsContainer.GetStreamDiagnostics(PathEquivalentUri(pathToTestFile))
             Assert.IsTrue(diagnosticsOfManipulatedFile.Count > rememberDiagnosticsOfOriginalFile)
 
             // remove the test file
@@ -428,7 +428,7 @@ type Navigation() =
             // initial counts of parsed ast and theories in root
             Assert.AreEqual<int>(3, heap.ParsedAsts.Count)
             let pathToTestFile = Path.Combine(currentPathRepo,"Fpl.Commons.fpl")
-            let diagnosticsOfFile = ad.GetStreamDiagnostics(PathEquivalentUri(pathToTestFile))
+            let diagnosticsOfFile = diagnosticsContainer.GetStreamDiagnostics(PathEquivalentUri(pathToTestFile))
             let countID001 = diagnosticsOfFile |> Seq.filter (fun kvp -> kvp.Value.Code.Code = "ID001") |> Seq.toList
             Assert.AreEqual<int>(0,countID001.Length)
             // now manipulate the file and reprocess it
@@ -441,7 +441,7 @@ type Navigation() =
             fplInterpreter fplCodeManipulated uri fplLibUrl
 
             // do the test - check, if the diagnostics changed
-            let diagnosticsOfManipulatedFile = ad.GetStreamDiagnostics(PathEquivalentUri(pathToTestFile))
+            let diagnosticsOfManipulatedFile = diagnosticsContainer.GetStreamDiagnostics(PathEquivalentUri(pathToTestFile))
             let countID001 = diagnosticsOfManipulatedFile |> Seq.filter (fun kvp -> kvp.Value.Code.Code = "ID001") |> Seq.toList
             Assert.AreEqual<int>(0,countID001.Length)
 
@@ -474,11 +474,11 @@ type Navigation() =
             """
 
             let filename = "OpeningFileInMainAndUpdatingReferencesCorrectlyRaisesID010Errors"  
-            ad.Clear()
+            diagnosticsContainer.Clear()
             // process the file
             prepareFplCode(filename + ".fpl", fplCode, false) 
             // test if there is no ID010 error
-            let result = filterByErrorCode ad (ID010 "").Code
+            let result = filterByErrorCode diagnosticsContainer (ID010 "").Code
             Assert.AreEqual<int>(0, result.Length)
 
 
@@ -498,7 +498,7 @@ type Navigation() =
             loadFplFileWithTheSameSymbolTable pathToFile |> ignore
 
             // test if there is a SIG04 error (there should be 1)
-            let result = filterByErrorCode ad (ID010 "").Code
+            let result = filterByErrorCode diagnosticsContainer (ID010 "").Code
             Assert.AreEqual<int>(1, result.Length)
 
             // now, correct the typo to make SIG04 diagnostics disappear
@@ -516,7 +516,7 @@ type Navigation() =
             loadFplFileWithTheSameSymbolTable pathToFile |> ignore
 
             // test if there is a SIG04 error (there should be 0)
-            let result = filterByErrorCode ad (SIG04 ("", "")).Code
+            let result = filterByErrorCode diagnosticsContainer (SIG04 ("", "")).Code
             Assert.AreEqual<int>(0, result.Length)
 
             // remove the test file

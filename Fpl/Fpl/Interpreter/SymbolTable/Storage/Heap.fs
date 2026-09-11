@@ -73,7 +73,7 @@ type HeapMemory() =
     member this.ClearAll() = 
         this.ClearWorkingMemory()
         this.ClearResultMemory()
-        ad.Clear()
+        diagnosticsContainer.Clear()
 
     /// Returns the uses dependencies of this symbol table needed e.g. for debugging purposes in the FPL language server.
     member this.UsesDependencies() =

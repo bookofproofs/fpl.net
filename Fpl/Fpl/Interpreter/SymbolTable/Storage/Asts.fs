@@ -235,7 +235,7 @@ type ParsingProperties =
             // and its checksum differs from the previous checksum
             // then replace the ast, checksum, location, source code, the
             this.Uri <- uri
-            ad.ResetStream(uri)
+            diagnosticsContainer.ResetStream(uri)
             let buildingBlocks, success = fplParser fplCode
             this.BuildingBlockAsts <- buildingBlocks
             this.FplSourceCode <- fplCode
@@ -245,7 +245,7 @@ type ParsingProperties =
             false
 
     static member Create (fplCode: string) (uri: PathEquivalentUri) =
-        ad.ResetStream(uri)
+        diagnosticsContainer.ResetStream(uri)
         let buildingBlockAsts, success = fplParser fplCode
         { ParsingProperties.Uri = uri
           ParsingProperties.FplSourceCode = fplCode
@@ -314,7 +314,7 @@ type ParsedAstList() =
 
         this
         |> Seq.iter (fun pa ->
-            let paDiagnostics = ad.GetStreamDiagnostics(pa.Parsing.Uri)
+            let paDiagnostics = diagnosticsContainer.GetStreamDiagnostics(pa.Parsing.Uri)
 
             let statsDiags =
                 paDiagnostics.Values

@@ -72,7 +72,7 @@ let prepareFplCode (filename: string, fplCode: string, delete: bool) =
 
 let checkForUnexpectedErrors (filename:string) fplCode =
     let errors =
-        ad.Collection
+        diagnosticsContainer.Collection
         |> List.filter (fun d -> d.Code.Code = "SY000" || d.Code.Code = "SY001" || d.Code.Code = "SY002" || d.Code.Code = "GEN00")
 
     let currDir = Path.GetDirectoryName(filename)
@@ -82,7 +82,7 @@ let checkForUnexpectedErrors (filename:string) fplCode =
 
 
     let contextErrors =
-        ad.Collection
+        diagnosticsContainer.Collection
         |> List.filter (fun d -> d.Emitter = DiagnosticEmitter.FplInterpreter && d.Code.Code = "GEN01")
 
     if contextErrors.Length > 0 then
@@ -92,7 +92,7 @@ let runTestHelperWithoutSyntaxChecking filename fplCode (code: Fpl.Errors.Diagno
     printf "Trying %s" code.Message
     prepareFplCode (filename, fplCode, false) |> ignore
 
-    let result = filterByErrorCode ad code.Code
+    let result = filterByErrorCode diagnosticsContainer code.Code
     Assert.AreEqual<int>(expected, result.Length)
     prepareFplCode (filename, "", true) |> ignore
 
@@ -100,7 +100,7 @@ let runTestHelperWithoutSyntaxCheckingGetResult filename fplCode (code: Fpl.Erro
     printf "Trying %s" code.Message
     prepareFplCode (filename, fplCode, false) |> ignore
 
-    let result = filterByErrorCode ad code.Code
+    let result = filterByErrorCode diagnosticsContainer code.Code
     Assert.AreEqual<int>(expected, result.Length)
     prepareFplCode (filename, "", true) |> ignore
     result 
@@ -111,7 +111,7 @@ let runTestHelper filename fplCode (code: Fpl.Errors.Diagnostics.DiagnosticCode)
 
     checkForUnexpectedErrors filename fplCode
 
-    let result = filterByErrorCode ad code.Code
+    let result = filterByErrorCode diagnosticsContainer code.Code
     Assert.AreEqual<int>(expected, result.Length)
     prepareFplCode (filename, "", true) |> ignore
 
@@ -121,7 +121,7 @@ let runTestHelperWithText filename fplCode (code: Fpl.Errors.Diagnostics.Diagnos
 
     checkForUnexpectedErrors filename fplCode
 
-    let result = filterByErrorCode ad code.Code
+    let result = filterByErrorCode diagnosticsContainer code.Code
     if result.Length <> expected then 
         printfn "%i errors found (%i expected)" result.Length expected
     else

@@ -17,7 +17,7 @@ type TestNSP03() =
 
     [<TestInitialize>]
     member _.Initialize() =
-        ad.Clear()
+        diagnosticsContainer.Clear()
 
     member private _.RunNSP03Test(input: string) =
         let currDir = Directory.GetCurrentDirectory()
@@ -36,7 +36,7 @@ type TestNSP03() =
 
         try
             fplInterpreter input uri fplLibUrl |> ignore
-            filterByErrorCode ad "NSP03"
+            filterByErrorCode diagnosticsContainer "NSP03"
         finally
             deleteFiles currDir "NSP03Coverage_*.fpl"
 

@@ -17,7 +17,7 @@ type TestNSP00() =
 
     [<TestInitialize>]
     member _.Initialize() =
-        ad.Clear()
+        diagnosticsContainer.Clear()
 
     [<TestMethod>]
     member this.TestNSP00() =
@@ -29,7 +29,7 @@ type TestNSP00() =
         let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         let uri = PathEquivalentUri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
         fplInterpreter input uri fplLibUrl |> ignore
-        let result = filterByErrorCode ad code.Code
+        let result = filterByErrorCode diagnosticsContainer code.Code
         Assert.AreEqual<int>(1, result.Length)
 
     [<TestMethod>]
@@ -48,7 +48,7 @@ type TestNSP00() =
 
         try
             fplInterpreter input uri fplLibUrl |> ignore
-            let result = filterByErrorCode ad code.Code
+            let result = filterByErrorCode diagnosticsContainer code.Code
             Assert.AreEqual<int>(0, result.Length)
         finally
             if File.Exists(theoryPath) then

@@ -24,14 +24,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 let emitUnexpectedErrorDiagnostics errMsg =
     let diagnostic =
         {
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = Position("", 0, 1, 1)
             Diagnostic.EndPos = Position("", 0, 1, 1)
             Diagnostic.Code = GEN00 errMsg
         }
-    ad.AddDiagnostic(diagnostic)
+    diagnosticsContainer.AddDiagnostic(diagnostic)
     // do not aggregate GEN00 and return unit instead of Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -45,14 +45,14 @@ let emitUnexpectedErrorDiagnostics errMsg =
 let emitID001Diagnostics alreadyDeclaredTypeStr qualifiedStartPosConflictStr pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ID001(alreadyDeclaredTypeStr, qualifiedStartPosConflictStr)
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -66,14 +66,14 @@ let emitID001Diagnostics alreadyDeclaredTypeStr qualifiedStartPosConflictStr pos
 let emitID002Diagnostics nodeTypeName incorrectBlockType pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ID002(nodeTypeName, incorrectBlockType)
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -86,14 +86,14 @@ let emitID002Diagnostics nodeTypeName incorrectBlockType pos1 pos2 =
 let emitID003Diagnostics name pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ID003 name
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -107,14 +107,14 @@ let emitID003Diagnostics name pos1 pos2 =
 let emitID005Diagnostics name incorrectBlockType pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ID005(name, incorrectBlockType)
          }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -127,14 +127,14 @@ let emitID005Diagnostics name incorrectBlockType pos1 pos2 =
 let emitID006Diagnostics name pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ID006 name
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -151,14 +151,14 @@ let emitID007Diagnostics nodeType signatureNode baseType signatureBase pos1 pos2
 
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ID007 (capitalize nodeType, signatureNode, baseType, signatureBase)
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -173,14 +173,14 @@ let emitID008Diagnostics constructorId classId pos1 pos2 =
     if constructorId <> classId then
         let diagnostic =
             { 
-                Diagnostic.Uri = ad.CurrentUri
+                Diagnostic.Uri = diagnosticsContainer.CurrentUri
                 Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
                 Diagnostic.Severity = DiagnosticSeverity.Error
                 Diagnostic.StartPos = pos1
                 Diagnostic.EndPos = pos2
                 Diagnostic.Code = ID008(constructorId, classId) // misspelled constructor name
             }
-        ad.AddDiagnostic diagnostic
+        diagnosticsContainer.AddDiagnostic diagnostic
         Some (diagnostic.Code.Code)
     else
         None
@@ -195,14 +195,14 @@ let emitID008Diagnostics constructorId classId pos1 pos2 =
 let emitID009Diagnostics name pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ID009 name // circular base dependency
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 
@@ -216,14 +216,14 @@ let emitID009Diagnostics name pos1 pos2 =
 let emitID010Diagnostics identifier pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ID010 identifier // identifier not found
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 
@@ -238,14 +238,14 @@ let emitID010Diagnostics identifier pos1 pos2 =
 let emitID011Diagnostics chain errorMsg pos1 pos2 = 
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ID011(chain, errorMsg) // inheritance chain-related error
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -261,14 +261,14 @@ let emitID011Diagnostics chain errorMsg pos1 pos2 =
 let emitID012Diagnostics prtyName varName varType candidates pos1 pos2 = 
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ID012 (prtyName, varName, varType, candidates)
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -281,14 +281,14 @@ let emitID012Diagnostics prtyName varName varType candidates pos1 pos2 =
 let emitID013Diagnostics message pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ID013 message
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -302,14 +302,14 @@ let emitID013Diagnostics message pos1 pos2 =
 let emitID014Diagnostics alreadyDeclaredMixedStr qualifiedStartPosConflictStr pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ID014(alreadyDeclaredMixedStr, qualifiedStartPosConflictStr)
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -322,14 +322,14 @@ let emitID014Diagnostics alreadyDeclaredMixedStr qualifiedStartPosConflictStr po
 let emitID015Diagnostics name pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ID015 name
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -342,14 +342,14 @@ let emitID015Diagnostics name pos1 pos2 =
 let emitID016Diagnostics name pos1 pos2  =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ID016 name
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -364,14 +364,14 @@ let emitID016Diagnostics name pos1 pos2  =
 let emitID017Diagnostics name candidatesNames incompatible pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ID017(name, candidatesNames, incompatible) 
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -384,14 +384,14 @@ let emitID017Diagnostics name candidatesNames incompatible pos1 pos2 =
 let emitID018Diagnostics identifier pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ID018 identifier
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -403,14 +403,14 @@ let emitID018Diagnostics identifier pos1 pos2 =
 let emitID020Diagnostics identifier pos1 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos1
             Diagnostic.Code = ID020 identifier
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -423,14 +423,14 @@ let emitID020Diagnostics identifier pos1 =
 let emitID021Diagnostics identifier pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ID021 identifier
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -443,14 +443,14 @@ let emitID021Diagnostics identifier pos1 pos2 =
 let emitID022Diagnostics name pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ID022 name
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -463,14 +463,14 @@ let emitID022Diagnostics name pos1 pos2 =
 let emitID023Diagnostics multipleCandidates pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ID023 multipleCandidates
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -484,14 +484,14 @@ let emitID023Diagnostics multipleCandidates pos1 pos2 =
 let emitID024Diagnostics alreadyLocalizedExpr qualifiedStartPosConflictStr pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ID024(alreadyLocalizedExpr, qualifiedStartPosConflictStr)
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -516,14 +516,14 @@ let checkID025Diagnostics qualifiedNameCandidate blockName pos1 pos2 =
         let blockEnglishName = getEnglishName blockName false
         let diagnostic =
             { 
-                Diagnostic.Uri = ad.CurrentUri
+                Diagnostic.Uri = diagnosticsContainer.CurrentUri
                 Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
                 Diagnostic.Severity = DiagnosticSeverity.Error
                 Diagnostic.StartPos = pos1
                 Diagnostic.EndPos = pos2
                 Diagnostic.Code = ID025(qualifiedNameCandidate, blockEnglishName)
             }
-        ad.AddDiagnostic diagnostic
+        diagnosticsContainer.AddDiagnostic diagnostic
         Some (diagnostic.Code.Code)
     | _ -> None
 
@@ -538,14 +538,14 @@ let checkID025Diagnostics qualifiedNameCandidate blockName pos1 pos2 =
 let emitID027Diagnostics name pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ID027 name
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -560,14 +560,14 @@ let emitID027Diagnostics name pos1 pos2 =
 let emitLG001Diagnostics argType argName typeOfPredicate pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = LG001(typeOfPredicate, argName, argType)
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -581,14 +581,14 @@ let emitLG001Diagnostics argType argName typeOfPredicate pos1 pos2 =
 let emitLG002Diagnostics nodeTypeName times pos1 pos2 = 
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = LG002(nodeTypeName,times)
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -604,14 +604,14 @@ let emitLG003Diagnostics nodeTypeName nodeName nodeRepr pos1 pos2 =
     if nodeRepr = LiteralFalse then
         let diagnostic =
             { 
-                Diagnostic.Uri = ad.CurrentUri
+                Diagnostic.Uri = diagnosticsContainer.CurrentUri
                 Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
                 Diagnostic.Severity = DiagnosticSeverity.Error
                 Diagnostic.StartPos = pos1
                 Diagnostic.EndPos = pos2
                 Diagnostic.Code = LG003(nodeTypeName, getEnglishName nodeName false)
             }
-        ad.AddDiagnostic diagnostic
+        diagnosticsContainer.AddDiagnostic diagnostic
         Some (diagnostic.Code.Code)
     else
         None
@@ -626,14 +626,14 @@ let emitLG003Diagnostics nodeTypeName nodeName nodeRepr pos1 pos2 =
 let emitLG004Diagnostics nodeName pos1 pos2 = 
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Warning
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = LG004 (getEnglishName nodeName false)
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -646,14 +646,14 @@ let emitLG004Diagnostics nodeName pos1 pos2 =
 let emitLG005Diagnostics name pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Warning
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = LG005 name
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -666,14 +666,14 @@ let emitLG005Diagnostics name pos1 pos2 =
 let emitNSP00Diagnostics fileNamePattern pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = NSP00 fileNamePattern
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
 
 /// <summary>
 /// Emit NSP01 diagnostic for namespace resolution errors with an inner message.
@@ -686,14 +686,14 @@ let emitNSP00Diagnostics fileNamePattern pos1 pos2 =
 let emitNSP01Diagnostics filename message pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = NSP01 (filename, message)
         }
-    ad.AddDiagnostic diagnostic 
+    diagnosticsContainer.AddDiagnostic diagnostic 
 
 /// <summary>
 /// Emit NSP02 diagnostic for remote URL import errors.
@@ -706,14 +706,14 @@ let emitNSP01Diagnostics filename message pos1 pos2 =
 let emitNSP02Diagnostics url message pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = NSP02 (url, message)
         }
-    ad.AddDiagnostic diagnostic 
+    diagnosticsContainer.AddDiagnostic diagnostic 
 
 /// <summary>
 /// Emit NSP03 diagnostic when an unrecognised alias or wildcard import is used.
@@ -725,14 +725,14 @@ let emitNSP02Diagnostics url message pos1 pos2 =
 let emitNSP03Diagnostics aliasOrStar pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = NSP03 aliasOrStar
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
 
 /// <summary>
 /// Emit NSP04 diagnostic when a problematic path is encountered.
@@ -744,14 +744,14 @@ let emitNSP03Diagnostics aliasOrStar pos1 pos2 =
 let emitNSP04Diagnostics path pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = NSP04 path
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
 
 /// <summary>
 /// Emit NSP05 diagnostic describing chosen path resolution from a list of candidates.
@@ -765,14 +765,14 @@ let emitNSP04Diagnostics path pos1 pos2 =
 let emitNSP05Diagnostics pathTypes theoryName chosenPathType pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = NSP05 (pathTypes, theoryName, chosenPathType)
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
 
 /// <summary>
 /// Emit PR001 diagnostic used by proof-related validation.
@@ -786,14 +786,14 @@ let emitNSP05Diagnostics pathTypes theoryName chosenPathType pos1 pos2 =
 let emitPR001Diagnostics incorrectBlockType justificationItemName pos1 pos2 alternative =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = PR001 (incorrectBlockType, justificationItemName, alternative)
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -807,14 +807,14 @@ let emitPR001Diagnostics incorrectBlockType justificationItemName pos1 pos2 alte
 let emitPR003Diagnostics alreadyDeclaredMixedStr qualifiedStartPosConflictStr pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = PR003(alreadyDeclaredMixedStr, qualifiedStartPosConflictStr)
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -827,14 +827,14 @@ let emitPR003Diagnostics alreadyDeclaredMixedStr qualifiedStartPosConflictStr po
 let emitPR004Diagnostics alreadyDeclaredTypeStr pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Warning
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = PR004 alreadyDeclaredTypeStr 
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -847,14 +847,14 @@ let emitPR004Diagnostics alreadyDeclaredTypeStr pos1 pos2 =
 let emitPR005Diagnostics argumentName pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = PR005 argumentName // argument reference not defined
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -868,14 +868,14 @@ let emitPR005Diagnostics argumentName pos1 pos2 =
 let emitPR006Diagnostics proofName argumentName pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = PR006 (proofName, argumentName) // argument in proof not defined
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -889,14 +889,14 @@ let emitPR006Diagnostics proofName argumentName pos1 pos2 =
 let emitPR007Diagnostics nodeName nodeTypeName pos1 pos2 = 
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Warning
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = PR007 (nodeName, capitalize nodeTypeName)
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -912,14 +912,14 @@ let emitPR007Diagnostics nodeName nodeTypeName pos1 pos2 =
 let emitPR008Diagnostics byInfName numbPrem expectedPremise mismatchingCandidates pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = PR008 (byInfName, numbPrem, expectedPremise, mismatchingCandidates)
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -931,14 +931,14 @@ let emitPR008Diagnostics byInfName numbPrem expectedPremise mismatchingCandidate
 let emitPR009Diagnostics pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Warning
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = PR009 // not all arguments verifiable
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
     
 /// <summary>
@@ -952,14 +952,14 @@ let emitPR009Diagnostics pos1 pos2 =
 let emitPR010Diagnostics keyword exptectedRef pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = PR010 (keyword, getEnglishName exptectedRef false)
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -973,14 +973,14 @@ let emitPR010Diagnostics keyword exptectedRef pos1 pos2 =
 let emitPR011Diagnostics keyword exptectedRef pos1 pos2 =            
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = PR011 (keyword, getEnglishName exptectedRef false)
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -993,14 +993,14 @@ let emitPR011Diagnostics keyword exptectedRef pos1 pos2 =
 let emitPR012Diagnostics providedIdentifier pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = PR012 providedIdentifier
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1012,14 +1012,14 @@ let emitPR012Diagnostics providedIdentifier pos1 pos2 =
 let emitPR013Diagnostics pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Information
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = PR013 
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1031,14 +1031,14 @@ let emitPR013Diagnostics pos1 pos2 =
 let emitPR014Diagnostics pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = PR014 
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1051,14 +1051,14 @@ let emitPR014Diagnostics pos1 pos2 =
 let emitPR015Diagnostics argumentID pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = PR015 argumentID
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1072,14 +1072,14 @@ let emitPR015Diagnostics argumentID pos1 pos2 =
 let emitPR016Diagnostics argumentID lastAssumedArgumentId pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = PR016(argumentID, lastAssumedArgumentId)
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1091,14 +1091,14 @@ let emitPR016Diagnostics argumentID lastAssumedArgumentId pos1 pos2 =
 let emitPR017Diagnostics pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = PR017 
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1112,14 +1112,14 @@ let emitPR017Diagnostics pos1 pos2 =
 let emitPR019Diagnostics justificationType1 justificationType2 pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = PR019 (justificationType1, justificationType2)
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1133,14 +1133,14 @@ let emitPR019Diagnostics justificationType1 justificationType2 pos1 pos2 =
 let emitPR020Diagnostics expectedNum actualNum pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = PR020 (expectedNum, actualNum)
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1155,14 +1155,14 @@ let emitPR020Diagnostics expectedNum actualNum pos1 pos2 =
 let emitPR021Diagnostics mismatchingCandidates inferredFormula justificationName pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = PR021 (mismatchingCandidates, inferredFormula, justificationName)
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1175,14 +1175,14 @@ let emitPR021Diagnostics mismatchingCandidates inferredFormula justificationName
 let emitPR022Diagnostics reason pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = PR022 reason
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1197,14 +1197,14 @@ let emitPR022Diagnostics reason pos1 pos2 =
 let emitSIG00Diagnostics exprType expectedArity actualArity pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = SIG00(exprType, actualArity, expectedArity)
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1217,14 +1217,14 @@ let emitSIG00Diagnostics exprType expectedArity actualArity pos1 pos2 =
 let emitSIG01Diagnostics expressionId pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = SIG01 expressionId
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1239,14 +1239,14 @@ let emitSIG01Diagnostics expressionId pos1 pos2 =
 let emitSIG02Diagnostics symbol precedence conflict pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Information
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = SIG02(symbol, precedence, conflict)
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1259,14 +1259,14 @@ let emitSIG02Diagnostics symbol precedence conflict pos1 pos2 =
 let emitSIG03Diagnostics errMsg pos1 pos2 = 
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = SIG03 errMsg
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 
@@ -1281,14 +1281,14 @@ let emitSIG03Diagnostics errMsg pos1 pos2 =
 let emitSIG04Diagnostics mixedName errList pos1 pos2 = 
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = SIG04(mixedName, errList)
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1301,14 +1301,14 @@ let emitSIG04Diagnostics mixedName errList pos1 pos2 =
 let emitSIG05Diagnostics errMsg pos1 pos2 = 
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = SIG05 errMsg
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1324,14 +1324,14 @@ let emitSIG05Diagnostics errMsg pos1 pos2 =
 let emitSIG06Diagnostics name oldFromNode newFromNode typeName pos1 pos2  = 
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Warning
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = SIG06(name, oldFromNode, newFromNode, typeName)
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1345,14 +1345,14 @@ let emitSIG06Diagnostics name oldFromNode newFromNode typeName pos1 pos2  =
 let emitSIG07diagnostics assigneeName assigneeType pos1 pos2  = 
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Warning
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = SIG07(assigneeName, assigneeType)
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1369,14 +1369,14 @@ let emitSIG07diagnostics assigneeName assigneeType pos1 pos2  =
 let emitSIG08Diagnostics arrName indexVarName indexVarType dimType dimNumber pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = SIG08(arrName, indexVarName, indexVarType, dimType, dimNumber)
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1391,14 +1391,14 @@ let emitSIG08Diagnostics arrName indexVarName indexVarType dimType dimNumber pos
 let emitSIG09Diagnostics arrName dimType dimNumber pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = SIG09(arrName, dimType, dimNumber)
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1413,14 +1413,14 @@ let emitSIG09Diagnostics arrName dimType dimNumber pos1 pos2 =
 let emitSIG10Diagnostics arrName indexVarName indexNumber pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = SIG10(arrName, indexVarName, indexNumber)
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1434,14 +1434,14 @@ let emitSIG10Diagnostics arrName indexVarName indexNumber pos1 pos2 =
 let emitSIG11Diagnostics qualifiedWrongCandidate typeOfCandidate pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = SIG11 (qualifiedWrongCandidate, typeOfCandidate)
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1457,14 +1457,14 @@ let emitSIG11Diagnostics qualifiedWrongCandidate typeOfCandidate pos1 pos2 =
 let emitSIG12Diagnostics templateName secondUsage firstUsage firstUsagePos pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Warning
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = SIG12 (templateName, secondUsage, firstUsage, firstUsagePos)
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1480,14 +1480,14 @@ let emitSIG12Diagnostics templateName secondUsage firstUsage firstUsagePos pos1 
 let emitSIG13Diagnostics stmtName secondUsage firstUsage firstUsagePos pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = SIG13 (stmtName, secondUsage, firstUsage, firstUsagePos)
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1499,14 +1499,14 @@ let emitSIG13Diagnostics stmtName secondUsage firstUsage firstUsagePos pos1 pos2
 let emitSIG14Diagnostics pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Warning
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = SIG14
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1519,14 +1519,14 @@ let emitSIG14Diagnostics pos1 pos2 =
 let emitST001Diagnostics name pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Information
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ST001 name
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1539,14 +1539,14 @@ let emitST001Diagnostics name pos1 pos2 =
 let emitST002Diagnostics name pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Information
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ST002 name
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1559,14 +1559,14 @@ let emitST002Diagnostics name pos1 pos2 =
 let emitST004Diagnostics languageCode pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Warning
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ST004 languageCode
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1580,14 +1580,14 @@ let emitST004Diagnostics languageCode pos1 pos2 =
 let emitST005Diagnostics domain nodeType pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Information
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ST005 (domain, getEnglishName nodeType false)
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1600,14 +1600,14 @@ let emitST005Diagnostics domain nodeType pos1 pos2 =
 let emitSY000Diagnostics errMsg pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplParser
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = SY000 errMsg
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
 
 /// <summary>
 /// Emit SY001 parser diagnostic (error) with a raw parser message.
@@ -1619,14 +1619,14 @@ let emitSY000Diagnostics errMsg pos1 pos2 =
 let emitSY001Diagnostics errMsg pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplParser
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = SY001 errMsg
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
 
 /// <summary>
 /// Emit SY002 parser diagnostic that includes a backtracking chain string.
@@ -1639,14 +1639,14 @@ let emitSY001Diagnostics errMsg pos1 pos2 =
 let emitSY002Diagnostics errMsg chain pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplParser
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = SY002(errMsg, chain)
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
 
 /// <summary>
 /// Emit SY010 warning diagnostic produced by the interpreter for syntax-tolerant productions.
@@ -1657,14 +1657,14 @@ let emitSY002Diagnostics errMsg chain pos1 pos2 =
 let emitSY010Diagnostics pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Warning
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = SY010
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1676,14 +1676,14 @@ let emitSY010Diagnostics pos1 pos2 =
 let emitSY011Diagnostics pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = SY011
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1695,14 +1695,14 @@ let emitSY011Diagnostics pos1 pos2 =
 let emitSY012Diagnostics pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Warning
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = SY012
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1718,14 +1718,14 @@ let emitSY012Diagnostics pos1 pos2 =
 let emitSY013Diagnostics innerInfixSymbol innerPrecedence outerInfixSymbol outerPrecedence pos1 pos2 = 
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Warning
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = SY013 (innerInfixSymbol, innerPrecedence, outerInfixSymbol, outerPrecedence)
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1740,14 +1740,14 @@ let emitSY013Diagnostics innerInfixSymbol innerPrecedence outerInfixSymbol outer
 let emitSY014Diagnostics infixSymbol1 infixSymbol2 precedence pos1 pos2 = 
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Warning
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = SY014 (infixSymbol1, infixSymbol2, precedence)
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1759,14 +1759,14 @@ let emitSY014Diagnostics infixSymbol1 infixSymbol2 precedence pos1 pos2 =
 let emitVAR00Diagnostics startPos endPos =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = startPos
             Diagnostic.EndPos = endPos
             Diagnostic.Code = VAR00
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1779,14 +1779,14 @@ let emitVAR00Diagnostics startPos endPos =
 let emitVAR01Diagnostics name pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = VAR01 name
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1799,14 +1799,14 @@ let emitVAR01Diagnostics name pos1 pos2 =
 let emitVAR02Diagnostics name pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = VAR02 name
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1820,7 +1820,7 @@ let emitVAR02Diagnostics name pos1 pos2 =
 let emitVAR03Diagnostics varName conflictStartPos pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
@@ -1828,7 +1828,7 @@ let emitVAR03Diagnostics varName conflictStartPos pos1 pos2 =
             Diagnostic.Code = VAR03(varName, conflictStartPos)
         }
 
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1840,14 +1840,14 @@ let emitVAR03Diagnostics varName conflictStartPos pos1 pos2 =
 /// <returns>Some diagnostic code string when emitted.</returns>
 let emitVAR04Diagnostics name pos1 pos2 = 
     let diagnostic = { 
-        Diagnostic.Uri = ad.CurrentUri
+        Diagnostic.Uri = diagnosticsContainer.CurrentUri
         Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
         Diagnostic.Severity = DiagnosticSeverity.Warning
         Diagnostic.StartPos = pos1
         Diagnostic.EndPos = pos2
         Diagnostic.Code = VAR04 name
     }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1859,14 +1859,14 @@ let emitVAR04Diagnostics name pos1 pos2 =
 /// <returns>Some diagnostic code string when emitted.</returns>
 let emitVAR05Diagnostics name pos1 pos2 = 
     let diagnostic = { 
-        Diagnostic.Uri = ad.CurrentUri
+        Diagnostic.Uri = diagnosticsContainer.CurrentUri
         Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
         Diagnostic.Severity = DiagnosticSeverity.Error
         Diagnostic.StartPos = pos1
         Diagnostic.EndPos = pos2
         Diagnostic.Code = VAR05 name
     }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1882,14 +1882,14 @@ let emitVAR05Diagnostics name pos1 pos2 =
 let emitVAR06iagnostic name oldFromNode newFromNode typeName pos1 pos2  = 
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Warning
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = VAR06(name, oldFromNode, newFromNode, typeName)
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1902,14 +1902,14 @@ let emitVAR06iagnostic name oldFromNode newFromNode typeName pos1 pos2  =
 let emitVAR07Diagnostics name pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = VAR07 name
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1922,14 +1922,14 @@ let emitVAR07Diagnostics name pos1 pos2 =
 let emitVAR08Diagnostics varName pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = VAR08 varName
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1942,14 +1942,14 @@ let emitVAR08Diagnostics varName pos1 pos2 =
 let emitVAR09Diagnostics varName pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = VAR09 varName
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1963,14 +1963,14 @@ let emitVAR09Diagnostics varName pos1 pos2 =
 let emitVAR10Diagnostics varName formulaName pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = VAR10(varName, formulaName)
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)
 
 /// <summary>
@@ -1984,7 +1984,7 @@ let emitVAR10Diagnostics varName formulaName pos1 pos2 =
 let emitVAR11Diagnostics varName conflictStartPos pos1 pos2 =
     let diagnostic =
         { 
-            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Uri = diagnosticsContainer.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
@@ -1992,5 +1992,5 @@ let emitVAR11Diagnostics varName conflictStartPos pos1 pos2 =
             Diagnostic.Code = VAR11(varName, conflictStartPos)
                     
         }
-    ad.AddDiagnostic diagnostic
+    diagnosticsContainer.AddDiagnostic diagnostic
     Some (diagnostic.Code.Code)

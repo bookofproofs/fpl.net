@@ -102,7 +102,7 @@ namespace FplLS
             sourceCode = bufferSourceCode;
 
             var fplLibUri = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib";
-            ad.CurrentUri = uri;
+            diagnosticsContainer.CurrentUri = uri;
 
             fplInterpreter(sourceCode, uri, fplLibUri);
             var diagnostics = CastDiagnostics();
@@ -120,9 +120,9 @@ namespace FplLS
         {
             var castedListDiagnostics = new UriDiagnostics();
             var uriTotextPositionsDict = GetTextPositionsByUri();
-            FplLsTraceLogger.LogMsg(_languageServer, ad.DiagnosticsToString, "~~~~~Diagnostics Count Orig");
+            FplLsTraceLogger.LogMsg(_languageServer, diagnosticsContainer.DiagnosticsToString, "~~~~~Diagnostics Count Orig");
             FplLsTraceLogger.LogMsg(_languageServer, string.Join(", ", uriTotextPositionsDict.Keys.Select(k => k.AbsoluteUri)), $"~~~~~{uriTotextPositionsDict.Keys.Count} source code keys");
-            foreach (Fpl.Errors.Diagnostics.Diagnostic diagnostic in ad.Collection)
+            foreach (Diagnostic diagnostic in diagnosticsContainer.Collection)
             {
                 var key = PathEquivalentUri.EscapedUri(diagnostic.Uri.AbsoluteUri);
                 FplLsTraceLogger.LogMsg(_languageServer, key.AbsoluteUri, "~~~~~new key");
@@ -132,7 +132,7 @@ namespace FplLS
                 var tpByUri = uriTotextPositionsDict[diagnostic.Uri];
                 castedListDiagnostics.AddDiagnostics(diagnostic.Uri, CastDiagnostic(diagnostic, tpByUri));
             }
-            FplLsTraceLogger.LogMsg(_languageServer, ad.Collection.Length.ToString(), "~~~~~Diagnostics Count Orig");
+            FplLsTraceLogger.LogMsg(_languageServer, diagnosticsContainer.Collection.Length.ToString(), "~~~~~Diagnostics Count Orig");
             FplLsTraceLogger.LogMsg(_languageServer, heap.ParsedAsts.TraceStatistics, "~~~~~Statistics");
             foreach (var kvp in castedListDiagnostics.Enumerator())
             {
@@ -154,7 +154,7 @@ namespace FplLS
         /// <param name="diagnostic">Input diagnostic</param>
         /// <param name="tp">TextPositions object to handle ranges in the input stream</param>
         /// <returns>Casted diagnostic</returns>
-        public static Model.Diagnostic CastDiagnostic(Fpl.Errors.Diagnostics.Diagnostic diagnostic, TextPositions tp)
+        public static Model.Diagnostic CastDiagnostic(Diagnostic diagnostic, TextPositions tp)
         {
             var castedDiagnostic = new Model.Diagnostic
             {
@@ -172,7 +172,7 @@ namespace FplLS
         /// </summary>
         /// <param name="diagnostic">Input diagnostic</param>
         /// <returns>A custom diagnostic message.</returns>
-        private static string CastMessage(Fpl.Errors.Diagnostics.Diagnostic diagnostic)
+        private static string CastMessage(Diagnostic diagnostic)
         {
             return CastDiagnosticCodeMessage(diagnostic);
         }
@@ -182,7 +182,7 @@ namespace FplLS
         /// <param name="diagnostic">Input diagnostic</param>
         /// <returns>"semantics " if emitter was Interpreter, "syntax " if emitter was Parser</returns>
         /// <exception cref="NotImplementedException"></exception>
-        private static string CastDiagnosticCodeMessage(Fpl.Errors.Diagnostics.Diagnostic diagnostic)
+        private static string CastDiagnosticCodeMessage(Diagnostic diagnostic)
         {
             return diagnostic.Message;
         }

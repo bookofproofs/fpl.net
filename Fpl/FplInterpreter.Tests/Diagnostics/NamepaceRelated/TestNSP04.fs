@@ -21,7 +21,7 @@ type TestNSP04() =
 
     [<TestInitialize>]
     member _.Initialize() =
-        ad.Clear()
+        diagnosticsContainer.Clear()
 
     member private _.RunNSP04Test
         (
@@ -46,7 +46,7 @@ type TestNSP04() =
             let uri = PathEquivalentUri(rootPath)
             fplInterpreter rootInput uri fplLibUrl |> ignore
 
-            let result = filterByErrorCode ad "NSP04"
+            let result = filterByErrorCode diagnosticsContainer "NSP04"
             Assert.AreEqual<int>(expected, result.Length)
         finally
             allPaths

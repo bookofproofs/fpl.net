@@ -347,7 +347,7 @@ let garbageCollector (uriToBeReset:PathEquivalentUri) =
         |> List.map (fun theoryName ->
             match heap.ParsedAsts.TryFindAstById theoryName with
             | Some pa ->
-                ad.ResetStream(pa.Parsing.Uri)
+                diagnosticsContainer.ResetStream(pa.Parsing.Uri)
                 if heap.Root.Scope.ContainsKey(theoryName) then
                     heap.Root.Scope.Remove theoryName |> ignore
                 heap.ParsedAsts.RemoveAll (fun pAst -> pAst.Id = theoryName) |> ignore
@@ -367,7 +367,7 @@ let garbageCollector (uriToBeReset:PathEquivalentUri) =
 /// each of them was loaded. If a referenced namespace contains even more uses clauses,
 /// their namespaces will also be loaded. The result is a list of ParsedAst objects.
 let loadAllUsesClauses input (uri:PathEquivalentUri) fplLibUrl = 
-    ad.CurrentUri <- uri
+    diagnosticsContainer.CurrentUri <- uri
     let sources = acquireSources uri fplLibUrl offlineWatcher.OfflineMode
     let currentName = addOrUpdateParsedAst input uri heap.ParsedAsts
     emitDiagnosticsForDuplicateFiles sources (EvalAliasedNamespaceIdentifier.CreateEani(uri, offlineWatcher.OfflineMode))
