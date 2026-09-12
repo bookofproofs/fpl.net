@@ -1,4 +1,11 @@
-/// This module contains functions to embed nodes into the symbol table.
+/// <summary>
+/// Utility functions to embed and resolve nodes into the interpreter symbol table.
+/// </summary>
+/// <remarks>
+/// Functions in this module perform signature checks, conflict diagnostics, candidate
+/// lookups and extraction of assertion/predicate expressions from definition nodes.
+/// They operate on the global `heap` and raise or mark diagnostics via the emitter helpers.
+/// </remarks>
 
 (* MIT License
 
@@ -20,7 +27,11 @@ open Fpl.Interpreter.Helpers.Checks
 open Fpl.Interpreter.SymbolTable.Storage.Heap
 
 
-/// Checks if a reference to a Symbol, Prefix, PostFix, or Infix exists
+/// <summary>
+/// Checks whether a reference to a symbol, prefix, postfix or infix operator exists in any loaded theory.
+/// </summary>
+/// <param name="fv">The reference node to resolve.</param>
+/// <returns>Unit; attaches SIG01 diagnostic flag to the node when resolution fails.</returns>
 let checkSIG01Diagnostics (fv: FplGenericNode) =
     match fv.Name with
     | PrimRefL ->
@@ -56,6 +67,15 @@ let checkSIG01Diagnostics (fv: FplGenericNode) =
             fv.ErrorOccurred <- emitSIG01Diagnostics expressionId fv.StartPos fv.EndPos
     | _ -> ()
 
+/// <summary>
+/// Validates that an infix operator precedence does not conflict with other declared precedences.
+/// </summary>
+/// <param name="fv">The node being checked (used for diagnostic attachment).</param>
+/// <param name="symbol">Symbol string of the infix operator.</param>
+/// <param name="precedence">Numeric precedence value to check.</param>
+/// <param name="pos1">Qualified start position of the conflicting declaration.</param>
+/// <param name="pos2">Qualified end position of the conflicting declaration.</param>
+/// <returns>Unit; attaches SIG02 diagnostics to the conflicting node when necessary.</returns>
 let checkSIG02Diagnostics (fv:FplGenericNode) symbol precedence pos1 pos2 = 
     let precedences = Dictionary<int, FplGenericNode>()
     let precedenceWasAlreadyThere precedence fv =
@@ -77,7 +97,13 @@ let checkSIG02Diagnostics (fv:FplGenericNode) symbol precedence pos1 pos2 =
         let conflict = precedences[precedence].QualifiedStartPos
         precedences[precedence].ErrorOccurred <- emitSIG02Diagnostics symbol precedence conflict pos1 pos2
 
-// Tries to add an FPL block to its parent's scope using its typed signature, or issues ID001 diagnostics if a conflict occurs
+/// <summary>
+/// Attempts to add an FPL block to its parent's scope using the block's typed signature.
+/// </summary>
+/// <param name="fplValue">Node to add to its parent's scope.</param>
+/// <remarks>
+/// On conflict, emits ID024 diagnostics and marks the node as erroneous instead of adding it.
+/// </remarks>
 let tryAddToParentUsingTypedSignature (fplValue:FplGenericNode) =
     let identifier = fplValue.Type SignatureType.Type
     let conflicts = 
@@ -95,7 +121,13 @@ let tryAddToParentUsingTypedSignature (fplValue:FplGenericNode) =
         let parent = fplValue.Parent.Value
         parent.Scope.Add(identifier, fplValue)
 
-// Tries to add an FPL block to its parent's scope using its mixed signature, or issues ID001 diagnostics if a conflict occurs
+/// <summary>
+/// Attempts to add an FPL block to its parent's scope using its mixed signature.
+/// </summary>
+/// <param name="fplValue">Node to add to its parent's scope.</param>
+/// <remarks>
+/// On conflict, emits ID001 diagnostics and marks the node as erroneous instead of adding it.
+/// </remarks>
 let tryAddToParentUsingMixedSignature (fplValue:FplGenericNode) =
     let identifier = fplValue.Type SignatureType.Mixed
     let conflicts = 
@@ -118,7 +150,13 @@ let tryAddToParentUsingMixedSignature (fplValue:FplGenericNode) =
         let parent = fplValue.Parent.Value
         parent.Scope.Add(identifier, fplValue)
 
-/// Looks for all declared building blocks with a specific name.
+/// <summary>
+/// Finds all declared building blocks that match a specific name.
+/// </summary>
+/// <param name="name">FPL identifier or reference to search for.</param>
+/// <param name="withClassConstructors">If true, include class constructors from matching classes.</param>
+/// <param name="withCorollariesOrProofs">If true, include corollaries and proof nodes related to matches.</param>
+/// <returns>List of matching <see cref="FplGenericNode"/> candidates (may be empty).</returns>
 let findCandidatesByName (name: string) withClassConstructors withCorollariesOrProofs =
     let pm = List<FplGenericNode>()
 
@@ -175,7 +213,14 @@ let findCandidatesByName (name: string) withClassConstructors withCorollariesOrP
     |> Seq.toList
 
 
-// Tries to add an FPL block to its parent's scope using its FplId, or issues ID001 diagnostics if a conflict occurs
+/// <summary>
+/// Attempts to add an FPL block to its parent's scope using its `FplId`.
+/// </summary>
+/// <param name="fplValue">Node to add to its parent's scope.</param>
+/// <remarks>
+/// On conflict emits ID001 diagnostics and marks the node as erroneous instead of adding it.
+/// The check considers both global conflicts and those already present in the parent scope.
+/// </remarks>
 let tryAddToParentUsingFplId (fplValue:FplGenericNode) =
     let identifier = fplValue.FplId
     let conflictsPre =
@@ -199,8 +244,11 @@ let tryAddToParentUsingFplId (fplValue:FplGenericNode) =
     else
         parent.Scope.Add(identifier, fplValue)
 
-/// Extracts a list of all assertions made in a definition.
-/// Otherwise, an empty list is returned.
+/// <summary>
+/// Extracts all assertion expressions declared inside a definition node.
+/// </summary>
+/// <param name="def">Definition node to inspect.</param>
+/// <returns>List of assertion expression nodes; empty if none present.</returns>
 let extractAssertionExpressions (def:FplGenericNode) =
     def.ArgList
     |> Seq.filter (fun fv -> fv.Name = PrimAssertion) // extract assertions
@@ -209,8 +257,11 @@ let extractAssertionExpressions (def:FplGenericNode) =
     |> Seq.map (fun fv -> fv.Value)
     |> Seq.toList // returns list of expressions of assertions in the definition
 
-/// Extracts a list of all expressions of all predicative properties in a definition.
-/// Otherwise, an empty list is returned.
+/// <summary>
+/// Extracts expressions of all predicative properties from a definition node.
+/// </summary>
+/// <param name="def">Definition node to inspect.</param>
+/// <returns>List of predicative property expression nodes; empty if none present.</returns>
 let extractPredicativePropertiesExpressions (def:FplGenericNode) =
     def.Scope.Values
     |> Seq.filter (fun fv -> fv.Name = PrimMandatoryPredicateL) // extract predicative property
@@ -219,8 +270,14 @@ let extractPredicativePropertiesExpressions (def:FplGenericNode) =
     |> Seq.map (fun fv -> fv.Value)
     |> Seq.toList // returns list of expressions of predicative properties in the definition
 
-/// Extracts the expression of the predicate definition and returns it in a list with one element.
-/// Otherwise, an empty list is returned.
+/// <summary>
+/// Extracts the predicate expression from a predicate definition as a single-element list.
+/// </summary>
+/// <param name="def">The node representing a predicate definition.</param>
+/// <returns>
+/// A single-element list containing the predicate expression when the node is a predicate definition;
+/// otherwise an empty list.
+/// </returns>
 let extractPredicateDefinitionExpressions (def:FplGenericNode) =
     match def.Name with
     | PrimPredicateL ->

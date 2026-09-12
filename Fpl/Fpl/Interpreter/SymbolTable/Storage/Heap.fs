@@ -1,5 +1,12 @@
 
-/// This module contains a type used as a heap memory in the Fpl.Interpreter namespace.
+/// <summary>
+/// Module providing a process-wide heap memory used by the interpreter to hold
+/// evaluation state, parsed ASTs, the symbol table and auxiliary stores.
+/// </summary>
+/// <remarks>
+/// The heap aggregates several stores and helpers used during AST-to-symbol-table
+/// evaluation and runtime execution. The singleton instance `heap` exposes the shared state.
+/// </remarks>
 
 (* MIT License
 
@@ -24,6 +31,10 @@ open Fpl.Interpreter.SymbolTable.Storage.Eval
 open Fpl.Interpreter.SymbolTable.Storage.RunState
 open Fpl.Interpreter.SymbolTable.Storage.ValidStmts
 
+/// <summary>
+/// Aggregates interpreter-wide working memory and result stores used during evaluation
+/// and symbol-table construction.
+/// </summary>
 type HeapMemory() = 
     let _validStmtStore = ValidStmtStore()
     let _evalStack = EvalStack()
@@ -33,50 +44,84 @@ type HeapMemory() =
     let _symbolTable = SymbolTable()
     let mutable _isEvaluating = false
 
-    /// A stack memory storing potential new nodes of the symbol table during its evaluation process
+    /// <summary>
+    /// Evaluation stack used while creating and embedding symbol-table nodes.
+    /// </summary>
     member this.Eval = _evalStack
 
-    /// A handle for helper variables storing some context during the creation process of the symbol table
+    /// <summary>
+    /// Helper utilities and temporary context used during symbol-table construction.
+    /// </summary>
     member this.Helper = _helper
 
-    /// A handle for the store with valid statements verified by the FPL interpreter
+    /// <summary>
+    /// Store of validated statements (axioms, theorems, inference rules, derived arguments).
+    /// </summary>
     member this.ValidStmtStore = _validStmtStore
 
-    /// A handle for the state store used as a memory separating the scope of called FPL nodes like functions or predicates
+    /// <summary>
+    /// State store separating variable scopes for called FPL nodes (functions, predicates, etc.).
+    /// </summary>
     member this.State = _state
 
-    /// A handle for the parsed asts (by theory) from the FPL parser
+    /// <summary>
+    /// Parsed ASTs indexed by their identifiers/theory; used as input to the evaluation pipeline.
+    /// </summary>
     member this.ParsedAsts = _parsedAsts
 
-    /// A handle for the symbol table from the FPL interpreter
+    /// <summary>
+    /// The interpreter symbol table containing all created FPL nodes and theories.
+    /// </summary>
     member this.SymbolTable = _symbolTable
 
+    /// <summary>
+    /// A convenience shortcut to the root node of the internal symbol table.
+    /// </summary>
     member this.Root = _symbolTable.Root
 
-    /// Flag that indicates an ongoing evaluation (set by the interpreter)
+    /// <summary>
+    /// Flag indicating whether the interpreter is currently performing an evaluation.
+    /// </summary>
+    /// <remarks>
+    /// This flag is set by the interpreter to avoid re-entrance or conflicting operations
+    /// while evaluation is in progress.
+    /// </remarks>
     member this.IsEvaluating
         with get () = _isEvaluating
         and set (value) = _isEvaluating <- value
 
-    // Clears the heap's working memory, including memory needed for symbol table evaluation and running nodes
+    /// <summary>
+    /// Clears working-memory structures used during evaluation (evaluation stack and call-state).
+    /// </summary>
+    /// <returns>Unit.</returns>
     member this.ClearWorkingMemory() = 
         _evalStack.Clear()
         _state.Clear()
 
-    // Clears the heap's result memory, including asts, symbol table, and valid statement store.
+    /// <summary>
+    /// Clears result-memory structures including parsed ASTs, the symbol table and the validity store.
+    /// </summary>
+    /// <returns>Unit.</returns>
     member this.ClearResultMemory() = 
         _parsedAsts.Clear()
         _symbolTable.Clear()
         _validStmtStore.ClearValidityStore()
 
-
-    // Clears the heap except parsed asts.
+    /// <summary>
+    /// Clears the entire heap (working and result memory) and the diagnostics container.
+    /// </summary>
+    /// <remarks>
+    /// Use with care: this resets most interpreter global state.
+    /// </remarks>
     member this.ClearAll() = 
         this.ClearWorkingMemory()
         this.ClearResultMemory()
         diagnosticsContainer.Clear()
 
-    /// Returns the uses dependencies of this symbol table needed e.g. for debugging purposes in the FPL language server.
+    /// <summary>
+    /// Produces a human-readable representation of uses/dependency information for debugging.
+    /// </summary>
+    /// <returns>A string describing symbol-table theories and parsed-AST dependencies.</returns>
     member this.UsesDependencies() =
         let sb = StringBuilder()
         sb.AppendLine() |> ignore
@@ -94,7 +139,9 @@ type HeapMemory() =
 
         sb.ToString()
 
-
+/// <summary>
+/// The global heap instance used by the FPL interpreter.
+/// </summary>
 let heap = HeapMemory()
 
 
