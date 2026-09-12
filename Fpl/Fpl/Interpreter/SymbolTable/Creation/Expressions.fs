@@ -1,6 +1,3 @@
-/// This module provides specialized evaluators for the AST nodes related to FPL expressions.
-
-
 (* MIT License
 
 Copyright (c) 2024+ bookofproofs
@@ -13,6 +10,16 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 
+/// <summary>
+/// Evaluators and helpers for AST nodes that represent expressions (infix, prefix/postfix, parentheses,
+/// qualified predicates and more).
+/// </summary>
+/// <remarks>
+/// The module provides private helpers to inspect operator precedence, to transform flat operand/operator
+/// sequences into a binary op tree ordered by precedence, and the public entry point <c>evalExpressions</c>
+/// which interprets expression AST nodes by mutating the interpreter evaluation stack (<c>heap.Eval</c>).
+/// Diagnostics (SY010..SY014, SIG04 etc.) are emitted where parentheses or operator usage can be improved or are invalid.
+/// </remarks>
 module Fpl.Interpreter.SymbolTable.Creation.Expressions
 open System
 open Fpl.Primitives
@@ -29,8 +36,16 @@ open Fpl.Interpreter.SymbolTable.Types3.DefinitionProperties
 open Fpl.Interpreter.SymbolTable.TypeMatching
 open Fpl.Interpreter.SymbolTable.Creation.Forward
 
-/// Returns the precedence of fv1 if its ExpressionType is Infix
-/// or Int32.MinValue otherwise
+/// <summary>
+/// Return the infix symbol and its precedence for the supplied node, if available.
+/// </summary>
+/// <param name="fv1">The node to inspect. The function checks both the node itself and any referenced definition.</param>
+/// <returns>
+/// Tuple of (<c>symbol</c>, <c>precedence</c>) when node represents an infix operator; otherwise <c>("", Int32.MinValue)</c>.
+/// </returns>
+/// <remarks>
+/// This helper centralizes precedence lookup: it first prefers <c>RefersTo</c> target's expression type, then the node's own type.
+/// </remarks>
 let private getSymbolWithPrecedence (fv1:FplGenericNode) =
     match fv1.RefersTo with
     | None ->
@@ -42,8 +57,16 @@ let private getSymbolWithPrecedence (fv1:FplGenericNode) =
         | FixType.Infix (symb, prec) -> (symb, prec)
         | _ -> ("", Int32.MinValue)
 
-/// If node has an argument, and it is an infix operation, the function will return the argument's symbol with precedence
-/// and None otherwise
+/// <summary>
+/// If the supplied node has an argument and that argument is an infix operation, return the inner infix symbol and precedence.
+/// </summary>
+/// <param name="node">The node whose first argument (if any) will be inspected.</param>
+/// <returns>
+/// <c>Some (symbol, precedence)</c> when the first argument is an infix operation; otherwise <c>None</c>.
+/// </returns>
+/// <remarks>
+/// Used to detect redundant parentheses when an inner infix with higher precedence is parenthesized.
+/// </remarks>
 let private getArgumentsSymbolWithPrecedence (node:FplGenericNode) =
     match (node.ArgList |> Seq.tryHead) with
     | Some arg ->
@@ -54,9 +77,16 @@ let private getArgumentsSymbolWithPrecedence (node:FplGenericNode) =
             Some (infixSymbol, precedence)
     | _ -> None
 
-/// Checks if the operand of some outerInfixOperator is itself an parenthesized infix operator and, if so, compares the precedences
-/// of both infix operations with each other. If the inner precedence is higher than the outer,
-/// a diagnostics will be issued that the parentheses of the inner infix operation can be omitted.
+/// <summary>
+/// Issue diagnostics if a parenthesized operand contains an infix with strictly higher precedence than an outer operator.
+/// </summary>
+/// <param name="operand">The operand to inspect (possibly a parenthesized infix).</param>
+/// <param name="outerInfixOperator">The outer infix operator node.</param>
+/// <returns>Unit. Emits SY013 diagnostics when applicable.</returns>
+/// <remarks>
+/// This improves feedback about unnecessary parentheses: when inner precedence > outer precedence,
+/// the inner parentheses can be omitted safely and a suggestion diagnostic is emitted.
+/// </remarks>
 let private checkSY013ForOperand (operand:FplGenericNode) (outerInfixOperator:FplGenericNode) =
     match outerInfixOperator.ExpressionType with
     | FixType.Infix(outerInfixSymbol, outerPrecedence) ->
@@ -69,7 +99,16 @@ let private checkSY013ForOperand (operand:FplGenericNode) (outerInfixOperator:Fp
         | _ -> ()
     | _ -> ()
 
-/// Checks if two infix operations with the same precedence are involved and issues a diagnostic.
+/// <summary>
+/// Detect conflicting infix symbols sharing the same precedence and emit a diagnostic for the operand where conflict occurs.
+/// </summary>
+/// <param name="operatorIndices">List of (index, (symbol, precedence)) pairs for operator positions in the operand/operator list.</param>
+/// <param name="operandOperatorList">Original flat operand/operator list used to locate the offending operand node.</param>
+/// <returns>Unit. Emits SY014 diagnostics when two different symbols share the same precedence in a single expression.</returns>
+/// <remarks>
+/// The helper finds the first precedence group containing at least two different symbols and emits a single diagnostic
+/// to avoid overwhelming the user with redundant messages.
+/// </remarks>
 let private checkSY014ForOperand (operatorIndices:(int * (string * int)) list) (operandOperatorList: FplGenericNode list) =
     /// detect two different symbols that share the same precedence
     let tryPickConflictingSymbols =
@@ -90,9 +129,23 @@ let private checkSY014ForOperand (operatorIndices:(int * (string * int)) list) (
         operand.ErrorOccurred <- emitSY014Diagnostics firstSymbol secondSymbol precedence operand.StartPos operand.EndPos
     | None -> ()
 
-// This function will transform a list of [operand; op; operand; ...; op ; operand] 
-// by grouping them into binary operations op(operand, operand)
-// and sort all ops according to their precedence, starting with the highest and ending with the lowest
+/// <summary>
+/// Reduce a flat list of alternating operands and operators into a binary operation tree ordered by operator precedence.
+/// </summary>
+/// <param name="operandOperatorList">A list of <c>FplGenericNode</c> representing an alternating sequence:
+/// [operand; operator; operand; operator; operand; ...].</param>
+/// <returns>
+/// A (smaller) list where operator nodes have their <c>ArgList</c> populated with their left and right operands.
+/// The result typically collapses to a single node representing the full infix expression.
+/// </returns>
+/// <remarks>
+/// The algorithm:
+/// - collects operator precedences,
+/// - issues SY014 diagnostics for conflicting precedence definitions,
+/// - selects the operator with maximal precedence, attaches its left and right operands,
+/// - repeats until the list is fully reduced.
+/// Side effects: operator nodes receive their argument children via mutation of <c>ArgList</c>.
+/// </remarks>
 let rec private reduce (operandOperatorList: FplGenericNode list) =
     match operandOperatorList with
     | []
@@ -125,6 +178,21 @@ let rec private reduce (operandOperatorList: FplGenericNode list) =
         let newItems = before @ [op] @ after
         reduce newItems
 
+/// <summary>
+/// Evaluate each (operand, optional-operator) pair in an infix expression and push the corresponding
+/// operand and operator reference nodes into the parent's argument list.
+/// </summary>
+/// <param name="operandOperatorOptList">List of tuples (<c>operandAst</c>, <c>opAstOpt</c>) describing the infix expression elements.</param>
+/// <param name="fv">The parent <c>FplGenericNode</c> that will receive built operand/operator nodes in its <c>ArgList</c>.</param>
+/// <param name="pos1">Start position used to create temporary reference nodes.</param>
+/// <param name="pos2">End position used to create temporary reference nodes.</param>
+/// <returns>Unit. The function mutates the global evaluation stack and appends created nodes to <c>fv.ArgList</c>.</returns>
+/// <remarks>
+/// For each operand the function:
+/// - creates a temporary <c>FplReference</c>, pushes it, evaluates the operand AST via <c>evalRef.Value</c>,
+///   simplifies trivial nesting and pops the resulting node into <c>fv.ArgList</c>.
+/// - if an operator AST exists, evaluates it into another temporary reference and appends it as well.
+/// </remarks>
 let private gatherOperandOperatorListFromInfixExpression operandOperatorOptList (fv:FplGenericNode) pos1 pos2 =
     operandOperatorOptList
     |> List.map (fun (predAst, opAstOpt) ->
@@ -149,6 +217,22 @@ let private gatherOperandOperatorListFromInfixExpression operandOperatorOptList 
     |> ignore
 
 
+/// <summary>
+/// Evaluate an expression AST node and apply its semantics to the interpreter evaluation stack.
+/// </summary>
+/// <param name="ast">AST node expected to represent an expression (prefix/postfix operators, parentheses, infix, qualified predicates, etc.).</param>
+/// <returns>Unit. The function mutates <c>heap.Eval</c> and constructs appropriate <c>FplGenericNode</c> instances.</returns>
+/// <remarks>
+/// The implementation covers:
+/// - prefix/postfix operator evaluation and operand handling,
+/// - parentheses handling including SY010 diagnostics for redundant parens,
+/// - infix expression flattening, precedence-based reduction and simplification,
+/// - predicate qualification and signature-based candidate resolution for referenced identifiers.
+/// The function delegates nested AST evaluation to the global evaluator via <c>evalRef.Value</c>.
+/// </remarks>
+/// <exception cref="System.Exception">
+/// Thrown via <c>failwith</c> when <paramref name="ast"/> is not a recognized expression node.
+/// </exception>
 let evalExpressions ast =
     match ast with
     | Ast.PrefixOp(operatorAst, operandAst) 

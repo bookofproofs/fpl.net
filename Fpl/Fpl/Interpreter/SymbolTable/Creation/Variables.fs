@@ -1,6 +1,3 @@
-/// This module provides specialized evaluators for the AST nodes related to FPL variables and their declarations.
-
-
 (* MIT License
 
 Copyright (c) 2024+ bookofproofs
@@ -13,6 +10,16 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 
+/// <summary>
+/// Specialized evaluators for AST nodes that represent FPL variables and variable declarations.
+/// </summary>
+/// <remarks>
+/// This module updates the interpreter evaluation context (the top of the evaluation stack) when
+/// encountering variable declaration constructs and variable uses. It creates variable nodes,
+/// sets types and default values, resolves variables by name in enclosing scopes, and emits
+/// diagnostics on missing or invalid variable usages via the project's diagnostic emitters.
+/// The evaluator has side effects on the global <c>heap</c> (evaluation stack, parsed symbol table, scopes).
+/// </remarks>
 module Fpl.Interpreter.SymbolTable.Creation.Variables
 open Fpl.Primitives
 open Fpl.Parser.Types
@@ -25,6 +32,26 @@ open Fpl.Interpreter.SymbolTable.Types2.Variables
 open Fpl.Interpreter.SymbolTable.Types3.Localization
 open Fpl.Interpreter.SymbolTable.Creation.Forward
 
+/// <summary>
+/// Evaluate an AST node that represents variables or variable declarations and apply its semantics
+/// to the current evaluation context.
+/// </summary>
+/// <param name="ast">An AST node expected to be a variable declaration or variable usage (for example
+/// <c>VarDeclBlock</c>, <c>NamedVarDecl</c>, <c>Var</c>).</param>
+/// <returns>Unit. The function mutates the global interpreter <c>heap</c> (evaluation stack, node properties, scopes).</returns>
+/// <remarks>
+/// Main behaviors:
+/// - For <c>VarDeclBlock</c> it evaluates contained variable declarations (delegating to the global evaluator).
+/// - For <c>NamedVarDecl</c> it creates the declared variables (regular, array, mapping) in the current scope,
+///   sets type information and checks for variadic/array declaration errors (emitting <c>VAR00</c> diagnostics).
+/// - For <c>Var</c> occurrences it resolves variables in upper scopes, spawns an undefined variable when not found
+///   (emitting <c>VAR01</c> diagnostics) and handles context-specific behaviors (extensions, references, translations).
+/// - Localization scopes are updated for newly bound variables and shadowing diagnostics (<c>VAR11</c>) are emitted as needed.
+/// The function calls into <c>evalRef.Value</c> to evaluate nested ASTs for types and substructures.
+/// </remarks>
+/// <exception cref="System.Exception">
+/// Thrown via <c>failwith</c> if the supplied <paramref name="ast"/> is not a recognized variable node or declaration node.
+/// </exception>
 let evalVariables ast =
     match ast with
     | Ast.VarDeclBlock varDeclOrStmtAstList ->

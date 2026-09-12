@@ -1,6 +1,3 @@
-/// This module provides specialized evaluators for the AST nodes related to symbol extensions of the FPL language.
-
-
 (* MIT License
 
 Copyright (c) 2024+ bookofproofs
@@ -13,6 +10,17 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 
+/// <summary>
+/// Provides specialized evaluators for AST nodes related to symbol extensions of the FPL
+/// language. Evaluators update interpreter state on the shared <c>heap</c>, set expression
+/// and auxiliary information on evaluation frames, and create extension blocks when needed.
+/// </summary>
+/// <remarks>
+/// This module handles parser-produced AST nodes that declare or define symbol-related
+/// constructs such as prefix/postfix/infix operators, precedences, and definition extensions.
+/// The primary side effects are performed on <c>heap.Eval</c> (evaluation stack frames)
+/// and <c>heap.Helper</c> (helper flags and run-order allocation).
+/// </remarks>
 module Fpl.Interpreter.SymbolTable.Creation.SymbolExtensions
 open Fpl.Parser.Types
 open Fpl.Interpreter.BasicTypes
@@ -20,6 +28,38 @@ open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.SymbolTable.Types3.Extensions
 open Fpl.Interpreter.SymbolTable.Creation.Forward
 
+/// <summary>
+/// Evaluate an AST node that pertains to symbol extension declarations or definitions.
+/// </summary>
+/// <param name="ast">AST node to evaluate. Expected node shapes include:
+/// <c>Ast.SymbolDecl</c>, <c>Ast.PrefixDecl</c>, <c>Ast.PostfixDecl</c>,
+/// <c>Ast.InfixDeclWithPrecedence</c>, <c>Ast.Precedence</c>,
+/// <c>Ast.DefinitionExtension</c>, <c>Ast.ExtensionSignature</c>,
+/// <c>Ast.ExtensionRegex</c>, and <c>Ast.ExtensionAssignment</c>.</param>
+/// <returns>Unit. The function performs side effects on interpreter state (heap and evaluation frames).</returns>
+/// <remarks>
+/// Behavior by AST shape:
+/// - <c>Ast.SymbolDecl</c>, <c>Ast.PrefixDecl</c>, <c>Ast.PostfixDecl</c>:
+///   Set the <c>ExpressionType</c> of the current evaluation frame to the corresponding <c>FixType</c>.
+/// - <c>Ast.InfixDeclWithPrecedence</c>:
+///   Evaluates the precedence AST child(s), then stores the symbol and evaluated auxiliary
+///   precedence information as <c>FixType.Infix</c> on the current frame.
+/// - <c>Ast.Precedence</c>:
+///   Stores precedence information in the current frame's <c>AuxiliaryInfo</c>.
+/// - <c>Ast.DefinitionExtension</c>:
+///   Creates a new <c>FplExtension</c> block with the current parent frame, pushes it onto the
+///   eval stack, evaluates name, signature and term children, and then pops the block.
+///   The block receives a run-order id from <c>heap.Helper.GetNextAvailableFplBlockRunOrder</c>.
+/// - <c>Ast.ExtensionSignature</c>, <c>Ast.ExtensionAssignment</c>:
+///   Evaluate signature and assignment children. During <c>ExtensionAssignment</c> evaluation,
+///   <c>heap.Helper.InSignatureEvaluation</c> is toggled to true to signal signature-context evaluation.
+/// - <c>Ast.ExtensionRegex</c>:
+///   Stores the regex string into the current frame's <c>TypeId</c>.
+/// </remarks>
+/// <exception cref="System.Exception">
+/// Raised via <c>failwith</c> when <paramref name="ast"/> is not recognized as a node relevant
+/// to symbol extensions.
+/// </exception>
 let evalExtendSymbols ast =
     match ast with
     | Ast.SymbolDecl((pos1, pos2), symbol) -> 
@@ -59,4 +99,4 @@ let evalExtendSymbols ast =
         evalRef.Value extensionRegexAst
         heap.Helper.InSignatureEvaluation <- false
     | _ ->
-        failwith (sprintf "{%O} is not a node needed for symbol extensions" ast) 
+        failwith (sprintf "{%O} is not a node needed for symbol extensions" ast)

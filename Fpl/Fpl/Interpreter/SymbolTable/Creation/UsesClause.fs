@@ -1,4 +1,24 @@
-/// This module handles the interpretation of uses clauses and implements big parts of self-containment of FPL. 
+(* MIT License
+
+Copyright (c) 2024+ bookofproofs
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
+
+*)
+
+/// <summary>
+/// Utilities to evaluate and resolve FPL <c>uses</c> clauses, download or load referenced sources,
+/// update the parsed AST registry and emit diagnostics for ambiguous or invalid references.
+/// </summary>
+/// <remarks>
+/// This module implements the bulk of self-containment and dependency resolution for FPL sources:
+/// it evaluates ASTs to extract aliased namespace identifiers, finds matching source files locally or
+/// remotely, populates the parsed AST list and checks for cycles in the uses graph.
+/// </remarks>
 
 module Fpl.Interpreter.SymbolTable.Creation.UsesClauses
 open System.Text.RegularExpressions
@@ -14,20 +34,13 @@ open Fpl.Interpreter.SymbolTable.Storage.Heap
 open Fpl.Interpreter.SymbolTable.Storage.Asts
 open Fpl.Errors.Diagnostics
 
-(* MIT License
-
-Copyright (c) 2024+ bookofproofs
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
-
-*)
-
-/// A recursive function evaluating an AST and returning a list of EvalAliasedNamespaceIdentifier records
-/// for each occurrence of the uses clause in the FPL code.
+/// <summary>
+/// Recursively evaluate an AST tree and collect <c>EvalAliasedNamespaceIdentifier</c> records
+/// representing every <c>uses</c> clause occurrence.
+/// </summary>
+/// <param name="debugMode">When true, remote downloads are avoided to support offline debugging.</param>
+/// <param name="ast">The AST node to evaluate.</param>
+/// <returns>List of <c>EvalAliasedNamespaceIdentifier</c> records extracted from the AST node.</returns>
 let rec eval_uses_clause debugMode = function 
     | Ast.AST ((pos1, pos2), ast) -> 
         eval_uses_clause debugMode ast
@@ -74,6 +87,18 @@ let rec eval_uses_clause debugMode = function
         | _ -> []
     | _ -> []
 
+/// <summary>
+/// Download the content at the specified URL as a string.
+/// </summary>
+/// <param name="url">The HTTP(S) URL to download.</param>
+/// <param name="e">Contextual evaluation record used for diagnostics and debug mode.</param>
+/// <returns>
+/// The downloaded content as a string on success; the empty string on failure or when debug mode is enabled.
+/// </returns>
+/// <remarks>
+/// Uses <see cref="HttpClient"/> and performs synchronous blocking of the async task for simplicity.
+/// Emits NSP02 diagnostics on HTTP failures or exceptions.
+/// </remarks>
 let downloadFile url (e:EvalAliasedNamespaceIdentifier) =
     if not (e.DebugMode) then
         use client = new HttpClient()
@@ -98,7 +123,18 @@ let downloadFile url (e:EvalAliasedNamespaceIdentifier) =
     else
         ""
 
-
+/// <summary>
+/// Load the contents of a local file into a string.
+/// </summary>
+/// <param name="filename">Absolute path to the file to read.</param>
+/// <param name="e">Contextual evaluation record used for diagnostics.</param>
+/// <returns>The file content as a string, or empty string if reading fails.</returns>
+/// <exceptions>
+/// <exception>
+/// <paramref name="filename"/> may not exist or be inaccessible; such exceptions are caught and translated
+/// into NSP01 diagnostics, and the function returns an empty string.
+/// </exception>
+/// </exceptions>
 let loadFile filename (e:EvalAliasedNamespaceIdentifier) =
     try
         File.ReadAllText filename
@@ -107,6 +143,21 @@ let loadFile filename (e:EvalAliasedNamespaceIdentifier) =
         emitNSP01Diagnostics filename ex.Message e.StartPos e.EndPos
         ""
 
+/// <summary>
+/// Create or locate the requested subfolder relative to a provided URI and return the
+/// parent directory and the created subdirectory path.
+/// </summary>
+/// <param name="uri">A <c>PathEquivalentUri</c> representing the current file or location.</param>
+/// <param name="subFolder">Name of the subfolder to locate or create (for example "lib" or "repo").</param>
+/// <returns>
+/// Tuple of (<c>directoryPath</c>, <c>subDirectoryPath</c>), where <c>directoryPath</c> is the directory
+/// containing the source and <c>subDirectoryPath</c> is the requested subfolder path.
+/// </returns>
+/// <remarks>
+/// Handles Windows drive-root ambiguity by unescaping and stripping a leading separator when necessary.
+/// If the source directory itself is already named "lib" or "repo", the function returns the parent directory
+/// and the sibling subfolder path instead.
+/// </remarks>
 let createSubfolder (uri: PathEquivalentUri) subFolder =
     let unescapedPath = 
         let p = Uri.UnescapeDataString(uri.LocalPath)
@@ -126,15 +177,33 @@ let createSubfolder (uri: PathEquivalentUri) subFolder =
             Directory.CreateDirectory(subDirectoryPath) |> ignore
         (directoryPath, subDirectoryPath)
 
-
+/// <summary>
+/// Download the library map (libmap.txt) from the web repository.
+/// </summary>
+/// <param name="uri">A <c>PathEquivalentUri</c> representing the current file or location.</param>
+/// <param name="currentWebRepo">Base URL of the web repository (no trailing slash expected).</param>
+/// <param name="debugMode">Pass-through to control download behaviour for diagnostics.</param>
+/// <returns>The raw content of <c>libmap.txt</c> or an empty string on failure.</returns>
 let downloadLibMap (uri:PathEquivalentUri) (currentWebRepo: string) debugMode =
     let pos = Position("", 0, 1, 1)
     let libMap = downloadFile (currentWebRepo + "/libmap.txt") (EvalAliasedNamespaceIdentifier.CreateEani("","", pos, pos, debugMode))
     libMap    
 
-/// Acquires FPL sources that can be found with a single uses clause.
-/// They are searched for in the current directory of the file, in the lib subfolder
-/// as well as in the web resource 
+/// <summary>
+/// Acquire available FPL source URIs for resolution of a single uses clause.
+/// </summary>
+/// <param name="uri">The URI of the currently processed file.</param>
+/// <param name="fplLibUrl">Base URL of the remote FPL lib repository.</param>
+/// <param name="debugMode">If true, remote downloads are avoided where possible.</param>
+/// <returns>
+/// An <c>FplSources</c> record containing:
+/// - A list of local and remote source URIs to consider
+/// - A local registry directory path for caching downloaded files.
+/// </returns>
+/// <remarks>
+/// Searches the current directory, the <c>lib</c> subfolder and the remote repository listed in libmap.txt.
+/// Remote entries are represented as escaped URIs and cached under the <c>repo</c> subfolder when downloaded.
+/// </remarks>
 let acquireSources (uri: PathEquivalentUri) (fplLibUrl: string) debugMode =
 
     let (_,libDirectoryPath) = createSubfolder uri "lib"
@@ -150,6 +219,18 @@ let acquireSources (uri: PathEquivalentUri) (fplLibUrl: string) debugMode =
                            |> Seq.toList
     FplSources(fileNamesInCurrDir @ fileNamesInLibSubDir @ filesToDownload, repoDirectoryPath)
     
+/// <summary>
+/// Add a new ParsedAst to the collection or update an existing one when the source content changed.
+/// </summary>
+/// <param name="fileContent">Source code content for the AST.</param>
+/// <param name="uri">The source file URI used to derive the parsed AST identifier.</param>
+/// <param name="parsedAsts">The global <c>ParsedAstList</c> repository to update.</param>
+/// <returns>The <c>TheoryName</c> (identifier) associated with the added or updated ParsedAst.</returns>
+/// <remarks>
+/// If an existing parsed AST with the same Id is found, the function checks the parsing checksum via
+/// <c>pa.Parsing.Reset</c> and updates only when necessary. Otherwise a new <c>ParsedAst</c> is created
+/// with default sorting and block properties.
+/// </remarks>
 let private addOrUpdateParsedAst fileContent (uri:PathEquivalentUri) (parsedAsts:ParsedAstList) = 
     let name = uri.TheoryName
     let idAlreadyFound = parsedAsts.TryFindAstById name
@@ -183,6 +264,14 @@ let private addOrUpdateParsedAst fileContent (uri:PathEquivalentUri) (parsedAsts
         parsedAsts.Add(pa)
     name
 
+/// <summary>
+/// Detect duplicate alias names among a list of <c>EvalAliasedNamespaceIdentifier</c> entries and emit diagnostics.
+/// </summary>
+/// <param name="eaniList">List of aliased namespace identifiers to inspect.</param>
+/// <remarks>
+/// Aliases that are "*" or empty are ignored. When the same alias is used multiple times,
+/// this function emits NSP03 diagnostics referencing the duplicate alias and its positions.
+/// </remarks>
 let private findDuplicateAliases (eaniList: EvalAliasedNamespaceIdentifier list) =
     let uniqueAliases = HashSet<string>()
     eaniList
@@ -196,7 +285,15 @@ let private findDuplicateAliases (eaniList: EvalAliasedNamespaceIdentifier list)
             uniqueAliases.Add(alias.AliasOrStar) |> ignore
     )
 
-/// Emits diagnostics if the same FPL theory can be found in multiple sources.
+/// <summary>
+/// Emit diagnostics when the same theory name can be found in multiple source locations.
+/// </summary>
+/// <param name="availableSources">The <c>FplSources</c> collection to query.</param>
+/// <param name="eani">The evaluated aliased namespace identifier used to derive the filename pattern.</param>
+/// <remarks>
+/// For each match of the requested pattern the function inspects the returned path types and will emit
+/// NSP05 diagnostics if multiple path types exist for the same theory.
+/// </remarks>
 let private emitDiagnosticsForDuplicateFiles (availableSources:FplSources) (eani:EvalAliasedNamespaceIdentifier) =
     availableSources.FindWithPattern eani.FileNamePattern
     |> List.iter (fun (_, _, chosenPathType, pathTypes, theoryName) ->
@@ -205,6 +302,16 @@ let private emitDiagnosticsForDuplicateFiles (availableSources:FplSources) (eani
     )
     |> ignore
 
+/// <summary>
+/// Update sorting relationships between a parsed AST and a referenced parsed AST.
+/// </summary>
+/// <param name="alreadyLoaded">The global parsed AST registry.</param>
+/// <param name="parsedAst">The parsed AST that references <paramref name="eaniName"/>.</param>
+/// <param name="eaniName">The identifier of the referenced parsed AST.</param>
+/// <remarks>
+/// Ensures that <c>parsedAst</c> lists <c>eaniName</c> among its referenced ASTs and
+/// that the referenced AST lists <c>parsedAst.Id</c> among its referencing ASTs.
+/// </remarks>
 let private chainParsedAsts (alreadyLoaded:ParsedAstList) parsedAst (eaniName:string) = 
     // complement referenced asts 
     if not (List.contains eaniName parsedAst.Sorting.ReferencedAsts) then 
@@ -217,7 +324,18 @@ let private chainParsedAsts (alreadyLoaded:ParsedAstList) parsedAst (eaniName:st
             pa.Sorting.ReferencingAsts <- pa.Sorting.ReferencingAsts @ [parsedAst.Id]
     | None -> ()
 
-
+/// <summary>
+/// For a given <c>EvalAliasedNamespaceIdentifier</c>, find matching parsed ASTs from available sources,
+/// load or download their contents, add or update parsed ASTs and chain references.
+/// </summary>
+/// <param name="sources">The <c>FplSources</c> repository that can locate candidates by filename pattern.</param>
+/// <param name="parsedAsts">Global parsed AST registry to add/update entries.</param>
+/// <param name="eani">The evaluated aliased namespace identifier to resolve.</param>
+/// <param name="currenParsedAst">The currently processed parsed AST that references <paramref name="eani"/>.</param>
+/// <remarks>
+/// If a matching source is remote it will be downloaded and cached into the local repo folder.
+/// Diagnostics NSP00 is emitted when no files match the pattern.
+/// </remarks>
 let getParsedAstsMatchingAliasedNamespaceIdentifier (sources:FplSources) (parsedAsts:ParsedAstList) (eani:EvalAliasedNamespaceIdentifier) (currenParsedAst: ParsedAst)=
     let filtered = sources.FindWithPattern eani.FileNamePattern
     if filtered.IsEmpty then
@@ -251,11 +369,17 @@ let getParsedAstsMatchingAliasedNamespaceIdentifier (sources:FplSources) (parsed
             | _ -> ()
         )
     
-/// Calculates the ParsedAst.TopologicalSorting property of the all ParsedAsts 
-/// unless the resulting directed graph is circular. If the function returns false, 
-/// there is a valid topological sorting. If true is returned, there is no 
-/// valid topological sorting and there is a cycle caused by the uses clauses in the
-/// ParsedAsts.
+/// <summary>
+/// Compute whether the directed graph of parsed AST dependencies contains a cycle.
+/// </summary>
+/// <param name="parsedAsts">Global parsed AST registry.</param>
+/// <returns>
+/// <c>true</c> if the graph contains a cycle; otherwise <c>false</c>. Note: the function mutates
+/// <c>ParsedAst.Sorting.TopologicalSorting</c> for nodes that are processed.
+/// </returns>
+/// <remarks>
+/// Implements Kahn's algorithm for topological sorting; returns true when a cycle prevents completion.
+/// </remarks>
 let private isCircular (parsedAsts:ParsedAstList) = 
     let l0 = Stack<ParsedAst>()
     let igrad = Dictionary<string,int>()
@@ -283,6 +407,13 @@ let private isCircular (parsedAsts:ParsedAstList) =
             )
     hasCycle
 
+/// <summary>
+/// Attempt to find a cycle in the provided parsed AST list and return the path that composes it.
+/// </summary>
+/// <param name="parsedAsts">List of parsed ASTs to inspect for cycles.</param>
+/// <returns>
+/// <c>Some</c> list of theory identifiers representing a cycle path if a cycle is found; otherwise <c>None</c>.
+/// </returns>
 let private findCycle (parsedAsts:List<ParsedAst>) =  
     let rec dfs visited path node =
         if List.contains node.Id path then
@@ -298,11 +429,26 @@ let private findCycle (parsedAsts:List<ParsedAst>) =
             |> List.tryPick (dfs visited path)
     parsedAsts |> Seq.toList |> List.tryPick (dfs Set.empty [])
 
+/// <summary>
+/// Reorder a list so that the supplied element becomes the first element; the remainder keeps order circularly.
+/// </summary>
+/// <param name="element">Element which should become the head of the returned list.</param>
+/// <param name="list">The source list to rearrange.</param>
+/// <returns>The rearranged list starting at the first occurrence of <paramref name="element"/>.</returns>
 let private rearrangeList element list =
     let afterElement = list |> List.skipWhile ((<>) element)
     let beforeElement = list |> List.takeWhile ((<>) element)
     afterElement @ beforeElement
 
+/// <summary>
+/// Garbage-collect parsed AST entries and symbol table entries that are no longer reachable from the main theory.
+/// </summary>
+/// <param name="uriToBeReset">The URI corresponding to the parsed AST that triggered the reset.</param>
+/// <remarks>
+/// Removes parsed ASTs that are not reachable from <c>heap.SymbolTable.MainTheory</c> and
+/// resets status for the parsed AST that was re-evaluated. Diagnostics streams for removed
+/// parsed ASTs are reset as part of the cleanup.
+/// </remarks>
 let garbageCollector (uriToBeReset:PathEquivalentUri) = 
     let referencedAstsOfCurrentTheory currTheory = 
         match heap.ParsedAsts.TryFindAstById(currTheory) with
@@ -363,9 +509,21 @@ let garbageCollector (uriToBeReset:PathEquivalentUri) =
 
 
 
-/// Parses the input at Uri and loads all referenced namespaces until
-/// each of them was loaded. If a referenced namespace contains even more uses clauses,
-/// their namespaces will also be loaded. The result is a list of ParsedAst objects.
+/// <summary>
+/// Parse and load all referenced namespaces reachable via <c>uses</c> clauses from the provided input.
+/// </summary>
+/// <param name="input">Source content of the current file to parse and register.</param>
+/// <param name="uri">URI for the current source; used to derive the theory name and cache locations.</param>
+/// <param name="fplLibUrl">Base URL of the remote FPL library repository to consult for remote sources.</param>
+/// <returns>Unit. The function populates the global <c>heap.ParsedAsts</c> registry and emits diagnostics as needed.</returns>
+/// <remarks>
+/// This function:
+/// - ensures the input AST is added or updated in the parsed AST registry,
+/// - iteratively resolves all uses clauses (including nested references),
+/// - detects duplicate aliases and duplicate files,
+/// - performs garbage collection of unreachable parsed ASTs,
+/// - and detects cycles in the resulting dependency graph emitting NSP04 diagnostics when found.
+/// </remarks>
 let loadAllUsesClauses input (uri:PathEquivalentUri) fplLibUrl = 
     diagnosticsContainer.CurrentUri <- uri
     let sources = acquireSources uri fplLibUrl offlineWatcher.OfflineMode

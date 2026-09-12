@@ -1,5 +1,3 @@
-/// This module provides specialized evaluators for the AST nodes related to commands and actions.
-
 
 (* MIT License
 
@@ -13,6 +11,21 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 
+/// <summary>
+/// Provides specialized evaluators for AST nodes related to FPL commands and actions.
+/// The evaluators update interpreter state on the shared heap, manipulate the evaluation
+/// stack and create or mutate statement/reference nodes (for example <c>FplAssertion</c>,
+/// <c>FplAssignment</c>, <c>FplCases</c>, <c>FplForInStmt</c>, etc.) used by the symbol table.
+/// </summary>
+/// <remarks>
+/// This module matches on AST nodes produced by the parser and performs side-effecting
+/// operations on <c>heap.Eval</c>. Each matched AST branch typically:
+/// - Peeks or pops the current evaluation stack entry as the parent context.
+/// - Constructs a new domain-specific object (e.g. a case, assignment or return node).
+/// - Pushes the new node to the eval stack, evaluates nested AST nodes via <c>evalRef.Value</c>,
+///   and then pops the node once its children have been processed.
+/// The function <c>evalCommands</c> is the primary entry point for interpreting command/action AST nodes.
+/// </remarks>
 module Fpl.Interpreter.SymbolTable.Creation.Commands
 open Fpl.Parser.Types
 open Fpl.Interpreter.SymbolTable.Storage.Heap
@@ -26,6 +39,24 @@ open Fpl.Interpreter.SymbolTable.Types3.ForStmt
 open Fpl.Interpreter.SymbolTable.Creation.Forward
 
 
+/// <summary>
+/// Evaluate an AST node representing a command or action and update the symbol-table
+/// evaluation state accordingly.
+/// </summary>
+/// <param name="ast">The AST node to evaluate. Expected forms include:
+/// <c>Ast.Delegate</c>, <c>Ast.Assertion</c>, <c>Ast.Cases</c>, <c>Ast.CaseSingle</c>,
+/// <c>Ast.CaseElse</c>, <c>Ast.MapCases</c>, <c>Ast.MapCaseSingle</c>, <c>Ast.MapCaseElse</c>,
+/// <c>Ast.Assignment</c>, <c>Ast.ForIn</c>, <c>Ast.InEntity</c>, and <c>Ast.Return</c>.</param>
+/// <returns>Unit. The function performs side effects on the interpreter heap and evaluation stack.</returns>
+/// <remarks>
+/// The function uses <c>heap.Eval</c> operations (<c>PeekEvalStack</c>, <c>PushEvalStack</c>, <c>PopEvalStack</c>)
+/// and delegates nested node processing to <c>evalRef.Value</c> and other creation helpers such as
+/// <c>evalArgumentTuple</c>. Position tuples (pos1,pos2) are propagated to newly created objects
+/// to improve diagnostics and source mapping.
+/// </remarks>
+/// <exception cref="System.Exception">
+/// Thrown via <c>failwith</c> when <paramref name="ast"/> is not recognized as an action/command.
+/// </exception>
 let evalCommands ast =
     match ast with
     | Ast.Delegate(delegateNameAst, argumentTupleAst) ->
@@ -122,4 +153,4 @@ let evalCommands ast =
         evalRef.Value returneeAst
         heap.Eval.PopEvalStack() 
     | _ ->
-        failwith (sprintf "{%O} is not an action" ast) 
+        failwith (sprintf "{%O} is not an action" ast)

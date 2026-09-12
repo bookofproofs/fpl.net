@@ -1,6 +1,3 @@
-/// This module provides specialized evaluators for the AST nodes related to FPL identifiers and identifier dispatchers.
-
-
 (* MIT License
 
 Copyright (c) 2024+ bookofproofs
@@ -13,6 +10,17 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 
+/// <summary>
+/// Specialized evaluators for AST nodes that represent identifiers and identifier dispatchers.
+/// </summary>
+/// <remarks>
+/// This module inspects identifier-related AST nodes and updates the interpreter evaluation
+/// stack and nodes (top of stack) accordingly. It resolves candidates for predicates and types,
+/// sets identifier and type information on the relevant evaluation nodes, and emits project
+/// diagnostics (IDxxx, PRxxx) through the emitter helpers when ambiguities or errors are detected.
+/// The function performs side-effects on the global interpreter <c>heap</c> and may call other
+/// evaluator modules via <c>evalRef.Value</c>.
+/// </remarks>
 module Fpl.Interpreter.SymbolTable.Creation.Identifiers
 open System
 open Fpl.Primitives
@@ -34,6 +42,23 @@ open Fpl.Interpreter.SymbolTable.ExpressionMatching
 open Fpl.Interpreter.SymbolTable.Types4.Proofs
 open Fpl.Interpreter.SymbolTable.Creation.Forward
 
+/// <summary>
+/// Evaluate an identifier or identifier-dispatcher AST node and apply its semantics to the current evaluation context.
+/// </summary>
+/// <param name="ast">An AST node expected to represent an identifier or identifier dispatcher (for example
+/// <c>PascalCaseId</c>, <c>PredicateIdentifier</c>, <c>ArgumentIdentifier</c>, etc.).</param>
+/// <returns>Unit. The function updates the top evaluation node on the interpreter stack and performs side effects
+/// such as setting <c>FplId</c>, <c>TypeId</c>, linking references, or pushing auxiliary nodes.</returns>
+/// <remarks>
+/// - The evaluator mutates global interpreter state via <c>heap</c> and uses diagnostic emitters such as
+///   <c>emitID008Diagnostics</c>, <c>emitID010Diagnostics</c>, <c>emitID017Diagnostics</c>, <c>emitPR005Diagnostics</c>.
+/// - Candidate resolution uses helpers like <c>findCandidatesByName</c>, <c>findPropertyCandidatesByNameInBlock</c>
+///   and <c>filterCandidates</c>. For ambiguous or missing candidates appropriate diagnostics are emitted.
+/// - Some AST cases call into the main evaluator via <c>evalRef.Value</c> for nested AST evaluation.
+/// </remarks>
+/// <exception cref="System.Exception">
+/// Thrown via <c>failwith</c> when the supplied <paramref name="ast"/> is not recognized as an identifier node.
+/// </exception>
 let evalIdentifiers ast =
     match ast with
     | Ast.PascalCaseId ((pos1, pos2), pascalCaseId) ->

@@ -1,6 +1,3 @@
-/// This module provides specialized evaluators for the AST nodes related to FPL compound and prime predicates.
-
-
 (* MIT License
 
 Copyright (c) 2024+ bookofproofs
@@ -13,6 +10,16 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 
+/// <summary>
+/// Specialized evaluators for AST nodes that represent compound and primitive predicates in FPL.
+/// </summary>
+/// <remarks>
+/// This module constructs appropriate interpreter nodes for logical connectives, quantifiers, boolean
+/// literals and other predicate-related constructs. It pushes temporary nodes onto the evaluation stack,
+/// delegates nested AST evaluation to the global evaluator via <c>evalRef.Value</c>, performs
+/// simplification of trivially nested expressions and emits diagnostics using project emitters.
+/// All operations are performed via side effects on the global <c>heap</c>.
+/// </remarks>
 module Fpl.Interpreter.SymbolTable.Creation.Predicates
 open Fpl.Primitives
 open Fpl.Parser.Types
@@ -27,6 +34,22 @@ open Fpl.Interpreter.SymbolTable.Types3.Quantifiers
 open Fpl.Interpreter.SymbolTable.Creation.Forward
 
 
+/// <summary>
+/// Evaluate a predicate AST node and apply its semantics to the current evaluation context.
+/// </summary>
+/// <param name="ast">AST node expected to represent a predicate expression (literals, connectives, quantifiers, is-operator, etc.).</param>
+/// <returns>Unit. The function mutates the interpreter evaluation stack and nodes (top of stack) to represent the evaluated predicate.</returns>
+/// <remarks>
+/// The evaluator:
+/// - creates appropriate FPL nodes for each construct (for example <c>FplConjunction</c>, <c>FplQuantifierAll</c>, <c>FplIsOperator</c>),
+/// - pushes and pops nodes on the global evaluation stack,
+/// - delegates nested AST evaluation to <c>evalRef.Value</c>,
+/// - performs simplification where appropriate via <c>simplifyTriviallyNestedExpressions</c>,
+/// - and sets type or diagnostic information using helpers like <c>checkSY010</c>.
+/// </remarks>
+/// <exception cref="System.Exception">
+/// Thrown (via <c>failwith</c>) when <paramref name="ast"/> is not recognized as a predicate AST node.
+/// </exception>
 let evalPredicates ast =
     match ast with
     | Ast.True((pos1, pos2), _) -> 

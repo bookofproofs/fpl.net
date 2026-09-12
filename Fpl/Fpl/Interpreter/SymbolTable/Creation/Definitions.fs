@@ -1,6 +1,3 @@
-/// This module provides specialized evaluators for the AST nodes related to FPL mathematical definitions and related blocks.
-
-
 (* MIT License
 
 Copyright (c) 2024+ bookofproofs
@@ -13,6 +10,23 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 
+/// <summary>
+/// Provides specialized evaluators for AST nodes related to FPL definitions and definition-related
+/// blocks (classes, predicates, functional terms, instances, constructors, mappings and properties).
+/// The evaluator updates interpreter state on the shared <c>heap</c>, manipulates the evaluation
+/// stack and creates or mutates domain-specific symbol-table nodes (for example <c>FplClass</c>,
+/// <c>FplPredicate</c>, <c>FplFunctionalTerm</c>, <c>FplConstructor</c>, etc.).
+/// </summary>
+/// <remarks>
+/// The module contains a single entry point <c>evalDefinitions</c> which matches on parser-produced
+/// AST nodes and performs side-effecting operations on <c>heap.Eval</c> and <c>heap.Helper</c>.
+/// Each matched branch typically:
+/// - Peeks the current evaluation frame as the parent context,
+/// - Constructs a new block/object when needed and pushes it onto the eval stack,
+/// - Invokes <c>evalRef.Value</c> to evaluate nested AST children,
+/// - Pops the constructed block when processing is complete.
+/// Position tuples (pos1,pos2) are propagated to newly created objects to improve diagnostics.
+/// </remarks>
 module Fpl.Interpreter.SymbolTable.Creation.Definitions
 open Fpl.Primitives
 open Fpl.Parser.Types
@@ -25,6 +39,40 @@ open Fpl.Interpreter.SymbolTable.Types3.DefinitionProperties
 open Fpl.Interpreter.SymbolTable.Creation.Forward
 
 
+/// <summary>
+/// Evaluate an AST node that represents a top-level definition or a definition-related node.
+/// </summary>
+/// <param name="ast">AST node to evaluate. Expected node forms include class definitions and
+/// related class members, predicate and functional-term definitions and instances, constructors,
+/// mappings and definition properties as produced by the parser (<c>Ast.DefinitionClass</c>,
+/// <c>Ast.DefinitionPredicate</c>, <c>Ast.DefinitionFunctionalTerm</c>, <c>Ast.PredicateInstance</c>,
+/// <c>Ast.FunctionalTermInstance</c>, <c>Ast.Constructor</c>, <c>Ast.Mapping</c>, etc.).</param>
+/// <returns>Unit. This function performs side-effecting updates to the interpreter heap and evaluation stack.</returns>
+/// <remarks>
+/// Behavior highlights by AST shape:
+/// - Class-related nodes:
+///   - <c>Ast.DefinitionClass</c>: creates an <c>FplClass</c> block, evaluates signature, inheritance,
+///     object symbol and class block content, then pops the block.
+///   - <c>Ast.ClassSignature</c>, <c>Ast.ConstructorSignature</c>: evaluate signature nodes inside
+///     signature-evaluation mode (<c>heap.Helper.InSignatureEvaluation</c>) and set signature positions.
+///   - <c>Ast.ClassDefinitionBlock</c>: evaluates class content and property lists, flags intrinsic classes,
+///     and emits diagnostics if the class is empty.
+/// - Predicate-related nodes:
+///   - <c>Ast.DefinitionPredicate</c>: creates an <c>FplPredicate</c>, evaluates signature and optional body,
+///     handles intrinsic predicates and inherited predicate types, and sets signature positions.
+///   - <c>Ast.DefPredicateContent</c>: evaluates local variable declarations and predicate body.
+/// - Functional-term nodes:
+///   - <c>Ast.DefinitionFunctionalTerm</c>: creates an <c>FplFunctionalTerm</c>, evaluates mapping,
+///     signature and body in the correct order, sets signature positions and intrinsic flags.
+/// - Constructors, base constructor calls and mapping nodes create corresponding frames and evaluate children.
+/// - Instance declarations for predicates and functional terms create mandatory-instance frames and evaluate
+///   signatures and optional bodies.
+/// All nested nodes are evaluated by calling <c>evalRef.Value</c>. Newly created blocks obtain run-order
+/// ids via <c>heap.Helper.GetNextAvailableFplBlockRunOrder</c> when applicable.
+/// </remarks>
+/// <exception cref="System.Exception">
+/// Thrown via <c>failwith</c> when <paramref name="ast"/> is not recognized as a top definition or related node.
+/// </exception>
 let evalDefinitions ast =
     match ast with
     // Definitions of classes
@@ -58,6 +106,8 @@ let evalDefinitions ast =
             cl.IsIntrinsic <- true
             cl.AddDefaultConstructor()
     | Ast.DefClassCompleteContent(varDeclBlock, constructorListAsts) ->
+
+
         evalRef.Value varDeclBlock 
         constructorListAsts |> List.map evalRef.Value |> ignore
     | Ast.Constructor((pos1, pos2), (signatureAst, constructorBlockAst)) ->
@@ -89,6 +139,8 @@ let evalDefinitions ast =
 
     // Definitions of predicates
     | Ast.DefinitionPredicate((pos1, pos2), (predicateSignatureAst, optDefBlock)) ->
+
+
         let parent = heap.Eval.PeekEvalStack()
         let fv = new FplPredicate((pos1, pos2), parent, heap.Helper.GetNextAvailableFplBlockRunOrder)
         heap.Eval.PushEvalStack(fv)
@@ -121,6 +173,8 @@ let evalDefinitions ast =
 
     // Definitions of functional terms
     | Ast.DefinitionFunctionalTerm((pos1, pos2), (functionalTermSignatureAst, functionalTermDefBlockAst)) ->
+
+
         let parent = heap.Eval.PeekEvalStack()
         let fv = new FplFunctionalTerm((pos1, pos2), parent, heap.Helper.GetNextAvailableFplBlockRunOrder)
         heap.Eval.PushEvalStack(fv)
@@ -201,4 +255,4 @@ let evalDefinitions ast =
         setSignaturePositions pos1 pos2
 
     | _ ->
-        failwith (sprintf "{%O} is not a top definition or related node" ast) 
+        failwith (sprintf "{%O} is not a top definition or related node" ast)
